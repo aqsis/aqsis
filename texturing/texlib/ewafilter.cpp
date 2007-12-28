@@ -71,13 +71,13 @@ inline void clampEccentricity(SqMatrix2D& covariance,
 	// check one inequality here.
 	if(maxAspectRatio*maxAspectRatio*eig2 < eig1)
 	{
-		Aqsis::log() << "aspect ratio = " << eig2/eig1 << "\n";
+		//Aqsis::log() << "aspect ratio = " << eig2/eig1 << "\n";
 		// Need to perform eccentricity clamping
 		SqMatrix2D R = covariance.orthogDiagonalize(eig1, eig2);
 		// By construction, covariance = R^T * D * R, where D = SqMatrix2D(eig1, eig2);
 		// here we modify the diagonal matrix D to replace eig2 with something larger.
-		covariance = R.transpose() * SqMatrix2D(eig1,
-				eig1/(maxAspectRatio*maxAspectRatio)) * R;
+		covariance = R * SqMatrix2D(eig1,
+				eig1/(maxAspectRatio*maxAspectRatio)) * R.transpose();
 	}
 }
 
@@ -104,7 +104,7 @@ SqMatrix2D CqEwaFilterWeights::getQuadForm(const SqSampleQuad& sQuad,
 	const TqFloat reconsVar = 1.3/(2*M_PI);
 	// "Prefilter" variance - this is the variance of the antialiasing filter
 	// which is used immediately before resampling onto the discrete grid.
-	const TqFloat prefilterVar = 1.3/(2*M_PI);
+	const TqFloat prefilterVar = 2.0/(2*M_PI);
 	// Construct the covariance matrix, coVar.
 	//
 	// Note: This looks slightly different from Heckbert's thesis, since
