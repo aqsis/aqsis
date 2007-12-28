@@ -101,9 +101,9 @@ struct SqMatrix2D
 	inline void eigenvalues(TqFloat& l1, TqFloat& l2) const;
 	/** \brief Attempt to get a matrix which orthogonally diagonalizes this matrix.
 	 *
-	 * That is, find a matrix R such that (calling this matrix A),
+	 * That is, find a matrix R such that if A is the matrix to diagonalize,
 	 *
-	 *   A = R^T * D * R
+	 *   A = R * D * R^T
 	 *
 	 * where R is an orthogonal matrix, and D is the diagonal matrix, diag(l1,l2).
 	 *
@@ -147,7 +147,7 @@ inline SqMatrix2D SqMatrix2D::operator+(const SqMatrix2D& rhs) const
 }
 inline SqMatrix2D SqMatrix2D::operator+(TqFloat f) const
 {
-	return SqMatrix2D(a+f, b+f, c+f, d+f);
+	return SqMatrix2D(a+f, b, c, d+f);
 }
 inline SqMatrix2D operator+(TqFloat f, const SqMatrix2D& mat)
 {
@@ -185,7 +185,10 @@ inline SqMatrix2D SqMatrix2D::inv() const
 	// There's a simple formula for the inverse of a 2D matrix.  We use this here.
 	TqFloat D = det();
 	assert(D != 0);
-	return SqMatrix2D(d/D, -b/D, -c/D, a/D);
+	if(D != 0)
+		return SqMatrix2D(d/D, -b/D, -c/D, a/D);
+	else
+		return SqMatrix2D(1);
 }
 inline TqFloat SqMatrix2D::det() const
 {
@@ -205,7 +208,7 @@ inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
 	//
 	// for l.
 	TqFloat firstTerm = (a+d)*0.5;
-	TqFloat secondTerm = (a-d)*(a-d) + c*b;
+	TqFloat secondTerm = (a-d)*(a-d) + 4*c*b;
 	assert(secondTerm >= 0);
 	// For robustness, set secondTerm = 0 if it's negative.  This will get the
 	// real part of the result.
@@ -229,28 +232,27 @@ inline SqMatrix2D SqMatrix2D::orthogDiagonalize(TqFloat l1, TqFloat l2) const
 		return SqMatrix2D(1, 0,
 						  0, 1);
 	}
-	// First eigenvector
+	// Calculate first eigenvector.  [u1, u2] and [v1,v2] are two alternatives
+	// for the eigenvector - we take the one with the larger length for
+	// maximum numerical stability.
 	TqFloat u1 = b;
 	TqFloat u2 = l1-a;
-	if(u1 == 0 && u2 == 0)
+	TqFloat uLen2 = u1*u1 + u2*u2;
+	TqFloat v1 = l1-d;
+	TqFloat v2 = c;
+	TqFloat vLen2 = v1*v1 + v2*v2;
+	if(vLen2 > uLen2)
 	{
-		u1 = l1-d;
-		u2 = c;
+		u1 = v1;
+		u2 = v2;
+		uLen2 = vLen2;
 	}
-	TqFloat invLenU = 1/std::sqrt(u1*u1 + u2*u2);
-	// Second eigenvector
-	TqFloat v1 = b;
-	TqFloat v2 = l2-a;
-	if(v1 == 0 && v2 == 0)
-	{
-		v1 = l2-d;
-		v2 = c;
-	}
-	TqFloat invLenV = 1/std::sqrt(v1*v1 + v2*v2);
-	return SqMatrix2D(u1*invLenU, v1*invLenV,
-					  u2*invLenU, v2*invLenV);
+	TqFloat invLenU = 1/std::sqrt(uLen2);
+	u1 *= invLenU;
+	u2 *= invLenU;
+	return SqMatrix2D(u1, -u2,
+					  u2, u1);
 }
-
 
 inline std::ostream& operator<<(std::ostream& out, const SqMatrix2D& mat)
 {
@@ -258,7 +260,6 @@ inline std::ostream& operator<<(std::ostream& out, const SqMatrix2D& mat)
 		<< mat.c << ", " << mat.d << "]";
 	return out;
 }
-
 
 } // namespace Aqsis
 
