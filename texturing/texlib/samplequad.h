@@ -27,7 +27,10 @@
 #ifndef SAMPLEQUAD_H_INCLUDED
 #define SAMPLEQUAD_H_INCLUDED
 
+#include <cmath>
+
 #include "vector2d.h"
+#include "aqsismath.h"
 
 namespace Aqsis {
 
@@ -61,6 +64,14 @@ struct SqSampleQuad
 
 	/// Get the center point of the quadrilateral by averaging the vertices.
 	inline CqVector2D center() const;
+
+	/** Remap the sample quad by translation to lie in the box [0,1] x [0,1]
+	 *
+	 * Specifically, after remapping,
+	 *   (s, t) = (min(s1,s2,s3,s4), min(t1,t2,t3,t4))
+	 * is guarenteed to lie in the box [0,1]x[0,1]
+	 */
+	inline void remapPeriodic(bool xPeriodic, bool yPeriodic);
 };
 
 
@@ -87,6 +98,23 @@ inline SqSampleQuad::SqSampleQuad(CqVector2D v1, CqVector2D v2,
 inline CqVector2D SqSampleQuad::center() const
 {
 	return 0.25*(v1+v2+v3+v4);
+}
+
+inline void SqSampleQuad::remapPeriodic(bool xPeriodic, bool yPeriodic)
+{
+	if(xPeriodic || yPeriodic)
+	{
+		TqFloat x = xPeriodic ? min(min(min(v1.x(), v2.x()), v3.x()), v4.x()) : 0;
+		TqFloat y = yPeriodic ? min(min(min(v1.y(), v2.y()), v3.y()), v4.y()) : 0;
+		if(x < 0 || y < 0 || x >= 1 || y >= 1)
+		{
+			CqVector2D v(std::floor(x),std::floor(y));
+			v1 -= v;
+			v2 -= v;
+			v3 -= v;
+			v4 -= v;
+		}
+	}
 }
 
 } // namespace Aqsis

@@ -38,6 +38,7 @@
 #include "samplevector.h"
 #include "channellist.h"
 #include "filtersupport.h"
+#include "texturesampleoptions.h" // For texture wrap modes
 
 namespace Aqsis {
 
@@ -298,6 +299,17 @@ inline const TqUchar* CqTextureBuffer<T>::rawData() const
 	return reinterpret_cast<const TqUchar*>(m_pixelData.get());
 }
 
+inline void renormalizeBuffer(TqFloat* buf, TqInt numChans, TqFloat totWeight)
+{
+	assert(totWeight != 0);
+	if(std::fabs(totWeight-1) > 10*std::numeric_limits<TqFloat>::epsilon())
+	{
+		TqFloat invWeight = 1/totWeight;
+		for(TqInt chan = 0; chan < numChans; ++chan, ++buf)
+			(*buf) *= invWeight;
+	}
+}
+
 template<typename T>
 template<typename FilterKernelT>
 void CqTextureBuffer<T>::applyFilter(const FilterKernelT& filterKer,
@@ -311,33 +323,28 @@ void CqTextureBuffer<T>::applyFilter(const FilterKernelT& filterKer,
 	if( support.inRange(0, m_width, 0, m_height) )
 	{
 		// The bounds for the filter support are all inside the texture; do
-		// simple and efficient filtering without remapping the support.
+		// simple and efficient filtering.
 		applyFilterInternal(filterKer, support, resultBuf);
 	}
 	else
 	{
-		// If we get here, the filter support falls (possibly partially)
-		// outside the texture range.
-		if( !support.sx.remap(xWrapMode, m_width)
-			|| !support.sy.remap(yWrapMode, m_height) )
+		// If we get here, the filter support falls at least partially outside
+		// the texture range.
+		if(xWrapMode == WrapMode_Black)
 		{
-			// Return without further calculation when the support is empty
-			// after being remapped.
-			return;
+			support.sx.truncate(0, m_width);
+			if(support.sx.isEmpty())
+				return;
 		}
-		// The filter support may still be in the 
-		if( support.inRange(0, m_width, 0, m_height) )
+		if(yWrapMode == WrapMode_Black)
 		{
-			// The bounds for the filter support are now inside the texture...
-			applyFilterInternal(filterKer, support, resultBuf);
+			support.sy.truncate(0, m_height);
+			if(support.sy.isEmpty())
+				return;
 		}
-		else
-		{
-			// The bounds for the filter support cross the boundary of the
-			// texture; we must use a version without any boundary checking.
-			applyFilterBoundary(filterKer, support, resultBuf,
-					xWrapMode, yWrapMode);
-		}
+		// Apply a filter using careful boundary checking.
+		applyFilterBoundary(filterKer, support, resultBuf,
+				xWrapMode, yWrapMode);
 	}
 }
 
@@ -346,6 +353,7 @@ template<typename FilterKernelT>
 void CqTextureBuffer<T>::applyFilterInternal(const FilterKernelT& filterKer,
 		const SqFilterSupport& support, TqFloat* resultBuf) const
 {
+	TqFloat totWeight = 0;
 	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
 	{
 		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
@@ -356,12 +364,14 @@ void CqTextureBuffer<T>::applyFilterInternal(const FilterKernelT& filterKer,
 			// filtering.
 			if(weight != 0)
 			{
+				totWeight += weight;
 				const CqSampleVector<T> samples = (*this)(x,y);
 				for(TqInt chan = 0; chan < m_numChannels; ++chan)
 					resultBuf[chan] += weight * samples[chan];
 			}
 		}
 	}
+	renormalizeBuffer(resultBuf, m_numChannels, totWeight);
 }
 
 inline bool wrapCoord(TqInt& x, TqInt width, EqWrapMode wrapMode)
@@ -388,6 +398,7 @@ void CqTextureBuffer<T>::applyFilterBoundary(const FilterKernelT& filterKer,
 		const SqFilterSupport& support, TqFloat* resultBuf,
 		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
 {
+	TqFloat totWeight = 0;
 	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
 	{
 		TqInt yRemap = y;
@@ -404,6 +415,7 @@ void CqTextureBuffer<T>::applyFilterBoundary(const FilterKernelT& filterKer,
 			// filtering.
 			if(weight != 0)
 			{
+				totWeight += weight;
 				// Remap filter coordinates if they're outside the bounds
 				const CqSampleVector<T> samples = (*this)(xRemap,yRemap);
 				for(TqInt chan = 0; chan < m_numChannels; ++chan)
@@ -411,6 +423,7 @@ void CqTextureBuffer<T>::applyFilterBoundary(const FilterKernelT& filterKer,
 			}
 		}
 	}
+	renormalizeBuffer(resultBuf, m_numChannels, totWeight);
 }
 
 template<typename T>

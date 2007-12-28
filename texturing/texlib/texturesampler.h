@@ -29,10 +29,6 @@
 
 #include "aqsis.h"
 
-//#include <cmath>
-//
-//#include "aqsismath.h"
-//#include "random.h"
 #include "samplequad.h"
 #include "texturesampleoptions.h"
 #include "itexturesampler.h"
@@ -131,8 +127,8 @@ template<typename ArrayT>
 inline CqTextureSampler<ArrayT>::CqTextureSampler(
 		const boost::shared_ptr<ArrayT>& texData)
 	: m_texData(texData),
-	m_sMult(texData->width()-1),
-	m_tMult(texData->height()-1),
+	m_sMult(texData->width()),
+	m_tMult(texData->height()),
 	m_sOffset(0),
 	m_tOffset(0)
 { }
@@ -140,17 +136,20 @@ inline CqTextureSampler<ArrayT>::CqTextureSampler(
 template<typename ArrayT>
 void CqTextureSampler<ArrayT>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
+	SqSampleQuad sampleQuadRemap(sampleQuad);
+	sampleQuadRemap.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
+			sampleOpts.tWrapMode() == WrapMode_Periodic);
 	switch(sampleOpts.filterType())
 	{
 		case TextureFilter_Box:
-			filterMC(sampleQuad, sampleOpts, outSamps);
+			filterMC(sampleQuadRemap, sampleOpts, outSamps);
 			break;
 		case TextureFilter_None:
-			filterSimple(sampleQuad, sampleOpts, outSamps);
+			filterSimple(sampleQuadRemap, sampleOpts, outSamps);
 			break;
 		case TextureFilter_Gaussian:
 		default:
-			filterEWA(sampleQuad, sampleOpts, outSamps);
+			filterEWA(sampleQuadRemap, sampleOpts, outSamps);
 			break;
 	}
 }
@@ -196,36 +195,10 @@ template<typename ArrayT>
 void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	// Zero the samples
-	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
-		outSamps[i] = 0;
 	CqEwaFilterWeights weights(sQuad, m_sMult, m_tMult,
 			sampleOpts.sBlur(), sampleOpts.tBlur());
-	// Starting and finishing texture coordinates for the filter support
-	TqInt sStart = 0;
-	TqInt tStart = 0;
-	TqInt sEnd = 0;
-	TqInt tEnd = 0;
-	weights.filterExtent(sStart, tStart, sEnd, tEnd);
-	TqFloat totWeight = 0;
-	for(TqInt s = sStart; s <= sEnd; ++s)
-	{
-		for(TqInt t = tStart; t <= tEnd; ++t)
-		{
-			// Get filter weight
-			TqFloat w = weights(s,t);
-			if(w > 0)
-			{
-				for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
-					outSamps[i] += w*dummyGridTex(s,t,i);
-				totWeight += w;
-			}
-		}
-	}
-	// Renormalize the samples
-	TqFloat renormalizer = 1/totWeight;
-	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
-		outSamps[i] *= renormalizer;
+	m_texData->applyFilter(weights, outSamps, sampleOpts.sWrapMode(),
+			sampleOpts.tWrapMode());
 }
 
 template<typename ArrayT>

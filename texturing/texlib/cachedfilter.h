@@ -150,8 +150,8 @@ inline TqInt CqCachedFilter::height() const
 
 inline SqFilterSupport CqCachedFilter::support() const
 {
-	return SqFilterSupport(m_topLeftX, m_topLeftY,
-			m_topLeftX+m_width, m_topLeftY+m_height);
+	return SqFilterSupport(m_topLeftX, m_topLeftX+m_width,
+			m_topLeftY, m_topLeftY+m_height);
 }
 
 inline void CqCachedFilter::setSupportTopLeft(TqInt x, TqInt y)

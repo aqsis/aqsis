@@ -31,7 +31,6 @@
 #include "aqsis.h"
 
 #include "aqsismath.h"
-#include "texturesampleoptions.h" // for EqWrapMode; factor this out somehow?
 
 namespace Aqsis
 {
@@ -54,23 +53,6 @@ struct SqFilterSupport1D
 	inline bool intersectsRange(TqInt rangeStart, TqInt rangeEnd);
 	/// Return true if the support is wholly inside the given range.
 	inline bool inRange(TqInt rangeStart, TqInt rangeEnd);
-	/** \brief Remap the support to the range [0, length-1]
-	 *
-	 * After the remapping, the start coordinate of the support is guarenteed
-	 * to lie in the interval [0, length-1].  "end" is offset by the same
-	 * amount, so may lie outside the right hand end of the range.
-	 */
-	inline void remapPeriodic(TqInt length);
-
-	/** \brief Remap the support depending on a wrap mode constant.
-	 *
-	 * For WrapMode_Black call truncate(); for WrapMode_Periodic call
-	 * remapPeriodic().  Other wrapmodes are ignored.
-	 *
-	 * \return false if the resulting support is empty due to truncation, true
-	 * otherwise.
-	 */
-	inline bool remap(EqWrapMode wrapMode, TqInt length);
 };
 
 
@@ -84,7 +66,7 @@ struct SqFilterSupport
 	SqFilterSupport1D sx; ///< support in x-direction
 	SqFilterSupport1D sy; ///< support in y-direction
 	/// Trivial constructor.
-	inline SqFilterSupport(TqInt startX = 0, TqInt startY = 0, TqInt endX = 0, TqInt endY = 0);
+	inline SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
 	/// Return true if the support is an empty set.
 	inline bool isEmpty();
 	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY);
@@ -125,48 +107,12 @@ inline bool SqFilterSupport1D::inRange(TqInt rangeStart, TqInt rangeEnd)
 	return start >= rangeStart && end <= rangeEnd;
 }
 
-inline void SqFilterSupport1D::remapPeriodic(TqInt length)
-{
-	TqInt offset = 0;
-	if(start < 0)
-		offset = (-start/length + 1)*length;
-	else
-		offset = -(start/length)*length;
-	if(offset != 0)
-	{
-		start += offset;
-		end += offset;
-	}
-}
-
-inline bool SqFilterSupport1D::remap(EqWrapMode wrapMode, TqInt length)
-{
-	switch(wrapMode)
-	{
-		case WrapMode_Black:
-			truncate(0, length);
-			if(isEmpty())
-			{
-				// Return false when truncation leaves an empty support.
-				return false;
-			}
-			break;
-		case WrapMode_Periodic:
-			remapPeriodic(length);
-			break;
-		default:
-			// In other cases we do nothing here.
-			break;
-	}
-	return true;
-}
-
 
 //------------------------------------------------------------------------------
 // SqFilterSupport
 
-inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt startY,
-		TqInt endX, TqInt endY)
+inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt endX,
+		TqInt startY, TqInt endY)
 	: sx(startX, endX),
 	sy(startY, endY)
 { }

@@ -104,7 +104,7 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 	opts.setStartChannel(0);
 	opts.setNumChannels(SamplesPerPixel());
 	opts.setNumSamples(4);
-	opts.setWrapMode(WrapMode_Black);
+	opts.setWrapMode(WrapMode_Periodic);
 	if(paramMap.size() != 0)
 	{
 		std::map<std::string, IqShaderData*>::const_iterator i;

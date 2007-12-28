@@ -34,6 +34,7 @@
 #include "samplequad.h"
 #include "aqsismath.h"
 #include "matrix2d.h"
+#include "filtersupport.h"
 
 namespace Aqsis {
 
@@ -144,16 +145,8 @@ class CqEwaFilterWeights
 		 */
 		inline TqFloat operator()(TqFloat x, TqFloat y) const;
 
-		/** \brief Get the extent of the filter in integer raster coordinates.
-		 *
-		 * \param minS
-		 * \param minT - minimum raster coordinates of filter support region (output)
-		 * \param maxS
-		 * \param maxT - maximum raster coordinates of filter support region (output).
-		 *               Note that these are *inclusive* coordinates.
-		 */
-		inline void filterExtent(TqInt& minS, TqInt& minT,
-				TqInt& maxS, TqInt& maxT) const;
+		/// Get the extent of the filter in integer raster coordinates.
+		inline SqFilterSupport support() const;
 	private:
 		/** \brief Get the quadratic form defining the gaussian filter for EWA.
 		 *
@@ -210,19 +203,18 @@ inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
 	return 0;
 }
 
-inline void CqEwaFilterWeights::filterExtent(TqInt& minS, TqInt& minT,
-		TqInt& maxS, TqInt& maxT) const
+inline SqFilterSupport CqEwaFilterWeights::support() const
 {
 	TqFloat detQ = m_quadForm.det();
 	// Compute filter radii
 	TqFloat sRad = std::sqrt(m_quadForm.d*m_logEdgeWeight/detQ);
 	TqFloat tRad = std::sqrt(m_quadForm.a*m_logEdgeWeight/detQ);
-	// Starting and finishing texture coordinates for the filter support are
-	// simple.
-	minS = lceil(m_filterCenter.x()-sRad);
-	minT = lceil(m_filterCenter.y()-tRad);
-	maxS = lfloor(m_filterCenter.x()+sRad);
-	maxT = lfloor(m_filterCenter.y()+tRad);
+	return SqFilterSupport(
+			lceil(m_filterCenter.x()-sRad),     // startX
+			lfloor(m_filterCenter.x()+sRad)+1,  // endX
+			lceil(m_filterCenter.y()-tRad),     // startY
+			lfloor(m_filterCenter.y()+tRad)+1   // endY
+		);
 }
 
 } // namespace Aqsis

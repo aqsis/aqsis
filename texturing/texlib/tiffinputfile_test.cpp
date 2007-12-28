@@ -36,7 +36,7 @@
 
 // note: header stuff is tested elsewhere, in tiffdirhandle_test.
 
-BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_test)
+BOOST_AUTO_TEST_CASE(CqTiffInputFile_readPixels_test)
 {
 	std::istringstream inStream(stripTiffString);
 	Aqsis::CqTiffInputFile inFile(inStream);
@@ -63,7 +63,7 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_test)
 
 // Check that the second sub-image of the tiff data from stripTiffString
 // contains the expected data.
-BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_secondSubImage_test)
+BOOST_AUTO_TEST_CASE(CqTiffInputFile_readPixels_secondSubImage_test)
 {
 	std::istringstream inStream(stripTiffString);
 	Aqsis::CqTiffInputFile inFile(inStream);
@@ -88,7 +88,7 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_secondSubImage_test)
 	BOOST_CHECK_CLOSE(buffer(0,2)[2], 0.0f, 1e-5);
 }
 
-BOOST_AUTO_UNIT_TEST(CqTiffInputFile_imageIndex_test)
+BOOST_AUTO_TEST_CASE(CqTiffInputFile_imageIndex_test)
 {
 	std::istringstream inStream(stripTiffString);
 	Aqsis::CqTiffInputFile inFile(inStream);

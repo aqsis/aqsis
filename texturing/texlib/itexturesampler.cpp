@@ -28,6 +28,7 @@
 
 #include "texturesampler.h"
 #include "tilearray.h"
+#include "texturebuffer.h"
 
 #include "itexinputfile.h"
 

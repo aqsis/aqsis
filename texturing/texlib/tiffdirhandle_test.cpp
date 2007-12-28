@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_tiffTagValue_test)
 	// There is no ARTIST TAG in the created tiffs - hence an exception
 	BOOST_CHECK_THROW(dirHandle.tiffTagValue<char*>(TIFFTAG_ARTIST), Aqsis::XqInternal);
 
-	char* artistDefault = "blah";
-	BOOST_CHECK_EQUAL(dirHandle.tiffTagValue<char*>(TIFFTAG_ARTIST, artistDefault), artistDefault);
+	const char* artistDefault = "blah";
+	BOOST_CHECK_EQUAL(dirHandle.tiffTagValue<const char*>(TIFFTAG_ARTIST, artistDefault), artistDefault);
 }
 
 BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
