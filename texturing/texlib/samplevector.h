@@ -33,8 +33,6 @@
 #include <limits>
 #include <boost/intrusive_ptr.hpp>
 
-#include "smartptr.h"
-
 namespace Aqsis {
 
 //------------------------------------------------------------------------------

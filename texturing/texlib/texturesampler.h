@@ -36,6 +36,7 @@
 #include "matrix2d.h"
 #include "logging.h"
 #include "ewafilter.h"
+#include "sampleaccum.h"
 
 namespace Aqsis {
 
@@ -197,8 +198,10 @@ void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 {
 	CqEwaFilterWeights weights(sQuad, m_sMult, m_tMult,
 			sampleOpts.sBlur(), sampleOpts.tBlur());
-	m_texData->applyFilter(weights, outSamps, sampleOpts.sWrapMode(),
-			sampleOpts.tWrapMode());
+	CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
+			sampleOpts.startChannel(), sampleOpts.numChannels(), outSamps);
+	m_texData->applyFilter(accumulator, weights.support(),
+			sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
 }
 
 template<typename ArrayT>

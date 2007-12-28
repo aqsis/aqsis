@@ -48,11 +48,11 @@ struct SqFilterSupport1D
 	 */
 	inline void truncate(TqInt rangeStart, TqInt rangeEnd);
 	/// Return true if the support is empty.
-	inline bool isEmpty();
+	inline bool isEmpty() const;
 	/// Return true if the support covers part of the given range.
-	inline bool intersectsRange(TqInt rangeStart, TqInt rangeEnd);
+	inline bool intersectsRange(TqInt rangeStart, TqInt rangeEnd) const;
 	/// Return true if the support is wholly inside the given range.
-	inline bool inRange(TqInt rangeStart, TqInt rangeEnd);
+	inline bool inRange(TqInt rangeStart, TqInt rangeEnd) const;
 };
 
 
@@ -68,8 +68,8 @@ struct SqFilterSupport
 	/// Trivial constructor.
 	inline SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
 	/// Return true if the support is an empty set.
-	inline bool isEmpty();
-	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY);
+	inline bool isEmpty() const;
+	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY) const;
 };
 
 
@@ -91,18 +91,18 @@ inline void SqFilterSupport1D::truncate(TqInt rangeStart, TqInt rangeEnd)
 		end = rangeEnd;
 }
 
-inline bool SqFilterSupport1D::isEmpty()
+inline bool SqFilterSupport1D::isEmpty() const
 {
 	return start >= end;
 }
 
 inline bool SqFilterSupport1D::intersectsRange(
-		TqInt rangeStart, TqInt rangeEnd)
+		TqInt rangeStart, TqInt rangeEnd) const
 {
 	return end > rangeStart && start < rangeEnd;
 }
 
-inline bool SqFilterSupport1D::inRange(TqInt rangeStart, TqInt rangeEnd)
+inline bool SqFilterSupport1D::inRange(TqInt rangeStart, TqInt rangeEnd) const
 {
 	return start >= rangeStart && end <= rangeEnd;
 }
@@ -117,13 +117,13 @@ inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt endX,
 	sy(startY, endY)
 { }
 
-inline bool SqFilterSupport::isEmpty()
+inline bool SqFilterSupport::isEmpty() const
 {
 	return sx.isEmpty() || sy.isEmpty();
 }
 
 inline bool SqFilterSupport::inRange(
-		TqInt startX, TqInt endX, TqInt startY, TqInt endY)
+		TqInt startX, TqInt endX, TqInt startY, TqInt endY) const
 {
 	return sx.inRange(startX, endX) && sy.inRange(startY, endY);
 }

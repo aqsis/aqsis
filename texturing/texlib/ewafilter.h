@@ -145,6 +145,9 @@ class CqEwaFilterWeights
 		 */
 		inline TqFloat operator()(TqFloat x, TqFloat y) const;
 
+		/// We can't pre-normalize EWA filters; return false.
+		inline static bool isNormalized() { return false; }
+
 		/// Get the extent of the filter in integer raster coordinates.
 		inline SqFilterSupport support() const;
 	private:

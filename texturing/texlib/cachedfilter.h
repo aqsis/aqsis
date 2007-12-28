@@ -72,6 +72,9 @@ class CqCachedFilter
 		 */
 		inline TqFloat operator()(TqInt x, TqInt y) const;
 
+		/// Cached filters are normalized on construction; return true.
+		inline static bool isNormalized() { return true; }
+
 		/** \brief Get the number of points in the x-direction for the discrete
 		 * filter kernel.
 		 *
@@ -93,7 +96,7 @@ class CqCachedFilter
 		 * nonzero coefficients.
 		 */
 		inline SqFilterSupport support() const;
-		/// \brief Set the top left point in the filter support
+		/// Set the top left point in the filter support
 		inline void setSupportTopLeft(TqInt x, TqInt y);
 	private:
 		/** \brief Cache the given filter functor at the lattice points.

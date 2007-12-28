@@ -35,6 +35,7 @@
 #include "texturebuffer.h"
 #include "texturesampleoptions.h"
 #include "cachedfilter.h"
+#include "sampleaccum.h"
 
 #include "logging.h" /// \todo debug: remove later
 
@@ -112,7 +113,7 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 			new CqTextureBuffer<ChannelT>(newWidth, newHeight, numChannels) );
 	TqInt filterOffsetX = (filterWeights.width()-1) / 2;
 	TqInt filterOffsetY = (filterWeights.height()-1) / 2;
-	std::vector<TqFloat> accum(numChannels);
+	std::vector<TqFloat> accumBuf(numChannels);
 	// Loop over pixels in the output image.
 	for(TqInt y = 0; y < newHeight; ++y)
 	{
@@ -120,11 +121,10 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 		{
 			// Filter the source buffer to get the channels for a single pixel
 			// in the destination buffer.
-			accum.assign(numChannels, 0);
 			filterWeights.setSupportTopLeft(2*x-filterOffsetX, 2*y-filterOffsetY);
-			srcBuf.applyFilter(filterWeights, &accum[0],
-					sWrapMode, tWrapMode);
-			destBuf->setPixel(x, y, &accum[0]);
+			CqSampleAccum<CqCachedFilter> accumulator(filterWeights, 0, numChannels, &accumBuf[0]);
+			srcBuf.applyFilter(accumulator, filterWeights.support(), sWrapMode, tWrapMode);
+			destBuf->setPixel(x, y, &accumBuf[0]);
 		}
 	}
 	return destBuf;
