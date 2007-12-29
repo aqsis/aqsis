@@ -148,23 +148,29 @@ class CqEwaFilterWeights
 		/// We can't pre-normalize EWA filters; return false.
 		inline static bool isNormalized() { return false; }
 
+		/// Get the width of the filter along the minor axis of the ellipse
+		inline TqFloat minorAxisWidth();
+
 		/// Get the extent of the filter in integer raster coordinates.
 		inline SqFilterSupport support() const;
 	private:
-		/** \brief Get the quadratic form defining the gaussian filter for EWA.
+		/** \brief Compute and cache EWA filter coefficients
 		 *
-		 * This function returns the appropriate matrix for the quadratic form,
+		 * This function initializes the appropriate matrix for the quadratic
+		 * form,
 		 *   Q = [a b]
 		 *       [c d]
-		 * which represents the EWA filter over the quadrilateral given by sampleQuad.
+		 * which represents the EWA filter over the quadrilateral given by
+		 * sampleQuad.  Q is cached in m_quadForm.  The minimum width along
+		 * the minor axis of the filter is cached in m_minorAxisWidth.
 		 *
-		 * \param sampleQuad - quadrilateral to sample over in texture coordinates.
+		 * For parameters, see the corresponding ones in the
+		 * CqEwaFilterWeights constructor.
 		 *
-		 * \return quadratic form matrix defining the EWA filter.
 		 */
-		static SqMatrix2D getQuadForm(const SqSampleQuad& sQuad,
-			TqFloat baseResS, TqFloat baseResT,
-			TqFloat sBlur, TqFloat tBlur, TqFloat maxAspectRatio);
+		void computeFilter(const SqSampleQuad& sQuad, TqFloat
+				baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
+				TqFloat maxAspectRatio);
 
 		/// Quadratic form matrix
 		SqMatrix2D m_quadForm;
@@ -172,6 +178,8 @@ class CqEwaFilterWeights
 		CqVector2D m_filterCenter;
 		/// The log of the filter weight at the edge cutoff.
 		TqFloat m_logEdgeWeight;
+		/// Width of the semi-minor axis of the elliptical filter
+		TqFloat m_minorAxisWidth;
 };
 
 
@@ -182,14 +190,16 @@ class CqEwaFilterWeights
 inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad, 
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat logEdgeWeight, TqFloat maxAspectRatio)
-	: m_quadForm(getQuadForm(sQuad, baseResS, baseResT, sBlur, tBlur,
-				maxAspectRatio)),
+	: m_quadForm(0),
 	m_filterCenter(sQuad.center()),
-	m_logEdgeWeight(logEdgeWeight)
+	m_logEdgeWeight(logEdgeWeight),
+	m_minorAxisWidth(0)
 {
 	// Scale the filterCenter up to the dimensions of the base texture.
 	m_filterCenter.x(m_filterCenter.x()*baseResS);
 	m_filterCenter.y(m_filterCenter.y()*baseResT);
+	// compute and cache the filter
+	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
 }
 
 inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
@@ -204,6 +214,11 @@ inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
 		return exp(-q);
 	/// \todo: Possible optimization: lookup table for exp?
 	return 0;
+}
+
+inline TqFloat CqEwaFilterWeights::minorAxisWidth()
+{
+	return m_minorAxisWidth;
 }
 
 inline SqFilterSupport CqEwaFilterWeights::support() const

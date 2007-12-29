@@ -57,10 +57,12 @@ inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 /* \brief Clamp the filter anisotropy to a maximum value.
  *
  * \param covariance - Covariance matrix for a gaussian filter
+ * \param minorAxisWidth - 
  * \param maxAspectRatio - maximum allowable aspect ratio for the filter.
+ * \param logEdgeWeight - 
  */
-inline void clampEccentricity(SqMatrix2D& covariance,
-		TqFloat maxAspectRatio)
+inline void clampEccentricity(SqMatrix2D& covariance, TqFloat& minorAxisWidth,
+		TqFloat maxAspectRatio, TqFloat logEdgeWeight)
 {
 	TqFloat eig1 = 1;
 	TqFloat eig2 = 1;
@@ -74,14 +76,18 @@ inline void clampEccentricity(SqMatrix2D& covariance,
 		//Aqsis::log() << "aspect ratio = " << eig2/eig1 << "\n";
 		// Need to perform eccentricity clamping
 		SqMatrix2D R = covariance.orthogDiagonalize(eig1, eig2);
-		// By construction, covariance = R^T * D * R, where D = SqMatrix2D(eig1, eig2);
-		// here we modify the diagonal matrix D to replace eig2 with something larger.
-		covariance = R * SqMatrix2D(eig1,
-				eig1/(maxAspectRatio*maxAspectRatio)) * R.transpose();
+		// By construction, covariance = R^T * D * R, where
+		// D = SqMatrix2D(eig1, eig2)
+		//
+		// We modify the diagonal matrix D to replace eig2 with something
+		// larger - the clamped value.
+		eig2 = eig1/(maxAspectRatio*maxAspectRatio);
+		covariance = R * SqMatrix2D(eig1, eig2) * R.transpose();
 	}
+	minorAxisWidth = std::sqrt(-8*eig2*logEdgeWeight);
 }
 
-SqMatrix2D CqEwaFilterWeights::getQuadForm(const SqSampleQuad& sQuad,
+void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat maxAspectRatio)
 {
@@ -127,9 +133,9 @@ SqMatrix2D CqEwaFilterWeights::getQuadForm(const SqSampleQuad& sQuad,
 		coVar += reconsVar;
 	}
 	// Clamp the eccentricity of the filter.
-	clampEccentricity(coVar, maxAspectRatio);
+	clampEccentricity(coVar, m_minorAxisWidth, maxAspectRatio, m_logEdgeWeight);
 	// Get the quadratic form
-	return 0.5*coVar.inv();
+	m_quadForm = 0.5*coVar.inv();
 }
 
 } // namespace Aqsis
