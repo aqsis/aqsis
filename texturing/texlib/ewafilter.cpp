@@ -73,7 +73,6 @@ inline void clampEccentricity(SqMatrix2D& covariance, TqFloat& minorAxisWidth,
 	// check one inequality here.
 	if(maxAspectRatio*maxAspectRatio*eig2 < eig1)
 	{
-		//Aqsis::log() << "aspect ratio = " << eig2/eig1 << "\n";
 		// Need to perform eccentricity clamping
 		SqMatrix2D R = covariance.orthogDiagonalize(eig1, eig2);
 		// By construction, covariance = R^T * D * R, where
@@ -84,7 +83,7 @@ inline void clampEccentricity(SqMatrix2D& covariance, TqFloat& minorAxisWidth,
 		eig2 = eig1/(maxAspectRatio*maxAspectRatio);
 		covariance = R * SqMatrix2D(eig1, eig2) * R.transpose();
 	}
-	minorAxisWidth = std::sqrt(-8*eig2*logEdgeWeight);
+	minorAxisWidth = std::sqrt(8*eig2*logEdgeWeight);
 }
 
 void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,

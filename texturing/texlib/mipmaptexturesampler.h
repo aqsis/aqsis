@@ -30,9 +30,14 @@
 #include "aqsis.h"
 
 #include <boost/shared_ptr.hpp>
+#include <cmath>
 
 #include "itexturesampler.h"
 #include "levelsamplercache.h"
+#include "ewafilter.h"
+#include "texturebuffer.h" // remove when using tiled textures.
+#include "sampleaccum.h"
+#include "aqsismath.h"
 
 namespace Aqsis {
 
@@ -47,18 +52,79 @@ namespace Aqsis {
  *
  * \todo: Investigate optimal mipmap level selection.
  */
+template<typename T>
 class CqMipmapTextureSampler : public IqTextureSampler
 {
+	private:
+		typedef CqLevelSamplerCache<CqTextureBuffer<T> > TqCacheType;
 	public:
-		CqMipmapTextureSampler(const boost::shared_ptr<CqLevelSamplerCache>& levels);
+		CqMipmapTextureSampler(const boost::shared_ptr<TqCacheType>& levels);
 
 		// from IqTextureSampler
 		virtual void filter(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
-		boost::shared_ptr<CqLevelSamplerCache> m_levels;
+		boost::shared_ptr<TqCacheType> m_levels;
 };
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+template<typename T>
+CqMipmapTextureSampler<T>::CqMipmapTextureSampler(
+		const boost::shared_ptr<TqCacheType>& levels)
+	: m_levels(levels)
+{ }
+
+template<typename T>
+void CqMipmapTextureSampler<T>::filter(const SqSampleQuad& sampleQuad,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	SqSampleQuad quad = sampleQuad;
+	sampleOpts.adjustSampleQuad(quad);
+	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
+			sampleOpts.tWrapMode() == WrapMode_Periodic);
+
+	const CqTextureBuffer<T>& baseBuf = m_levels->level(0);
+	// Construct weights
+	CqEwaFilterWeights weights(quad, baseBuf.width(),
+			baseBuf.height(), sampleOpts.sBlur(), sampleOpts.tBlur());
+	// Select mipmap level to use
+	const TqFloat minFilterWidth = 2;
+	TqInt level = lfloor(log2(weights.minorAxisWidth()/minFilterWidth));
+	level = clamp(level, 0, m_levels->numLevels());
+
+	// filter the texture.
+	CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
+			sampleOpts.startChannel(), sampleOpts.numChannels(), outSamps);
+
+	if(level > 0)
+	{
+		const CqTextureBuffer<T>& sampleBuf = m_levels->level(level);
+		weights.adjustTextureScale(
+				static_cast<TqFloat>(sampleBuf.width())/baseBuf.width(),
+				static_cast<TqFloat>(sampleBuf.height())/baseBuf.height() );
+		sampleBuf.applyFilter(accumulator, weights.support(),
+				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+	}
+	else
+	{
+		baseBuf.applyFilter(accumulator, weights.support(),
+				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+	}
+
+	// Debug: insert an indicator of the mipmap level...
+	//outSamps[level%3] += 0.5;
+}
+
+template<typename T>
+const CqTextureSampleOptions& CqMipmapTextureSampler<T>::defaultSampleOptions() const
+{
+	return m_levels->defaultSampleOptions();
+}
 
 } // namespace Aqsis
 

@@ -162,20 +162,13 @@ class CqTextureSampleOptions
 		//@}
 
 		//--------------------------------------------------
-		/** \brief Adjust a sample quad to take into account the current blur
-		 * and width parameters.
+		/** \brief Adjust a sample quad to take into account the width
+		 * parameter.
 		 *
 		 * The width parameter effects the quad in a simple way:  All the
 		 * vertices are contracted toward or exapanded away from the quad
 		 * center point by multiplying by the width in the appropriate
 		 * direction.  
-		 *
-		 * The effect which blur *should* have on the quad is less certian,
-		 * and perhaps it shouldn't effect it at all for ultimate quality.
-		 * Here we take the approch that the quad is expanded by an additional
-		 * amount equal to the blur parameters.  This effectively causes blur
-		 * by sampling with a coarser mipmap level.  Experiments are required
-		 * to determine whether the resulting quality will be sufficient.
 		 *
 		 * \param quad - sample quadrilateral to adjust.
 		 */

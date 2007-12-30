@@ -153,9 +153,8 @@ template<typename FilterWeightT>
 inline CqSampleAccum<FilterWeightT>::~CqSampleAccum()
 {
 	// Renormalize by the total weight if necessary.
-	if(!m_filterWeights.isNormalized())
+	if(!m_filterWeights.isNormalized() && m_totWeight != 0)
 	{
-		assert(m_totWeight != 0);
 		TqFloat renorm = 1/m_totWeight;
 		for(TqInt i = 0; i < m_numChans; ++i)
 			m_resultBuf[i] *= renorm;

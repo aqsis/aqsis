@@ -53,7 +53,7 @@ void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad) const
 {
 	if(m_sWidth != 1 || m_tWidth != 1)
 	{
-		CqVector2D center = 0.25*(quad.v1 + quad.v2 + quad.v3 + quad.v4);
+		CqVector2D center = quad.center();
 		TqFloat csWeighted = (1-m_sWidth)*center.x();
 		TqFloat ctWeighted = (1-m_tWidth)*center.y();
 		// Expand v1...v4 away from the quad center by multiplying the x

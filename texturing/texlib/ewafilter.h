@@ -132,7 +132,7 @@ class CqEwaFilterWeights
 		 *
 		 * This is useful for adjusting mipmapping where you'd like to 
 		 */
-		//adjustTextureScale(TqInt xMult, TqInt yMult);
+		void adjustTextureScale(TqFloat xScale, TqFloat yScale);
 
 		/** \brief Evaluate the filter at the given point in image space.
 		 *
@@ -200,6 +200,14 @@ inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad,
 	m_filterCenter.y(m_filterCenter.y()*baseResT);
 	// compute and cache the filter
 	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
+}
+
+inline void CqEwaFilterWeights::adjustTextureScale(TqFloat xScale, TqFloat yScale)
+{
+	m_filterCenter.x(m_filterCenter.x()*xScale);
+	m_filterCenter.y(m_filterCenter.y()*yScale);
+	SqMatrix2D scaleMatrix(1/xScale, 1/yScale);
+	m_quadForm = scaleMatrix*m_quadForm*scaleMatrix;
 }
 
 inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const

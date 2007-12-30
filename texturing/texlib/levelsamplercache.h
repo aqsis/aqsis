@@ -24,8 +24,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef MIPMAPLEVELS_H_INCLUDED
-#define MIPMAPLEVELS_H_INCLUDED
+#ifndef LEVELSAMPLERCACHE_H_INCLUDED
+#define LEVELSAMPLERCACHE_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -34,30 +34,25 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "itexinputfile.h"
 #include "texturesampleoptions.h"
 
 namespace Aqsis
 {
 
-class IqTextureSampler;
-class IqTiledTexInputFile;
-
 //------------------------------------------------------------------------------
-/** \brief Cache for a set of associated texture samplers
+/** \brief Cache for a set of associated texture buffers
  *
- * This class holds texture samplers for a set of associated 2D textures, such
- * as mipmap levels.  The class is independent of any of any details of the
- * sampling procedure.
+ * This class holds a set of associated 2D textures, such as mipmap levels,
+ * independently of any of any details of the sampling procedure.
  *
- * Samplers for textures in the cache are constructed only on-demand.
+ * Samplers for textures in the cache are constructed on-demand.
  * 
- * CqLevelSamplerCache is the class which will be held in the high-level
- * texture cache (yes, caches within caches).
- *
  * In addition to holding a set of samplers, this class also caches the default
  * sampling options, as determined from attributes of the texture file.  When
  * these aren't present, we attempt to choose sensible defaults.
  */
+template<typename TextureBufferT>
 class CqLevelSamplerCache
 {
 	public:
@@ -70,12 +65,12 @@ class CqLevelSamplerCache
 		 *
 		 * \param file - read texture data from here.
 		 */
-		CqLevelSamplerCache(const boost::shared_ptr<IqTiledTexInputFile>& file);
+		CqLevelSamplerCache(const boost::shared_ptr<IqMultiTexInputFile>& file);
 		/** \brief Get the texture sampler for a given level.
 		 *
 		 * \param levelNum - mipmap level to grab
 		 */
-		const IqTextureSampler& level(TqInt levelNum);
+		const TextureBufferT& level(TqInt levelNum);
 		/** \brief Get the number of levels in this mipmap.
 		 *
 		 */
@@ -93,24 +88,68 @@ class CqLevelSamplerCache
 		/** \brief List of samplers for mipmap levels.  The pointers to these
 		 * may be NULL since they are created only on demand.
 		 */
-		mutable std::vector<boost::shared_ptr<IqTextureSampler> > m_levels;
-		boost::shared_ptr<IqTiledTexInputFile> m_texFile;
+		mutable std::vector<boost::shared_ptr<TextureBufferT> > m_levels;
+		boost::shared_ptr<IqMultiTexInputFile> m_texFile;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline TqInt CqLevelSamplerCache::numLevels() const
+// CqLevelSamplerCache
+template<typename TextureBufferT>
+CqLevelSamplerCache<TextureBufferT>::CqLevelSamplerCache(
+			const boost::shared_ptr<IqMultiTexInputFile>& file)
+	: m_defaultSampleOptions(),
+	m_levels(),
+	m_texFile(file)
+{
+	if(m_texFile)
+	{
+		/// \todo verify that we do indeed have a mipmap.
+		//
+		m_levels.resize(m_texFile->numSubImages());
+		/// \todo Defer the texture loading below to read-time.
+		for(TqInt i = 0; i < static_cast<TqInt>(m_levels.size()); ++i)
+		{
+			m_texFile->setImageIndex(i);
+			m_levels[i].reset(new TextureBufferT());
+			m_texFile->readPixels(*m_levels[i]);
+		}
+		/// \todo: Init default sampling opts from texture file
+	}
+	else
+	{
+		m_levels.resize(1);
+		// A dummy texture; 1x1 with 1 channel.
+		m_levels[0].reset(new TextureBufferT(1,1,1));
+	}
+}
+
+template<typename TextureBufferT>
+inline TqInt CqLevelSamplerCache<TextureBufferT>::numLevels() const
 {
 	return m_levels.size();
 }
 
-inline const CqTextureSampleOptions& CqLevelSamplerCache::defaultSampleOptions()
+template<typename TextureBufferT>
+inline const CqTextureSampleOptions& CqLevelSamplerCache<TextureBufferT>::defaultSampleOptions()
 {
 	return m_defaultSampleOptions;
 }
 
+template<typename TextureBufferT>
+const TextureBufferT& CqLevelSamplerCache<TextureBufferT>::level(TqInt levelNum)
+{
+	TextureBufferT* sampler = m_levels.at(levelNum).get();
+//	if(!sampler)
+//	{
+//		m_levels[levelNum] = TextureBufferT::create(m_texFile);
+//		sampler = m_levels[levelNum].get();
+//	}
+	return *sampler;
+}
+
 } // namespace Aqsis
 
-#endif // MIPMAPLEVELS_H_INCLUDED
+#endif // LEVELSAMPLERCACHE_H_INCLUDED

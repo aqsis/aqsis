@@ -42,6 +42,8 @@ namespace Aqsis
 {
 
 class IqTextureSampler;
+
+template<typename TextureBufferT>
 class CqLevelSamplerCache;
 
 //------------------------------------------------------------------------------
