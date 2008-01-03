@@ -78,7 +78,7 @@ namespace Attr {
  * instance of this class blocks access to the underlying tiff file until its
  * destructor is called.
  */
-class CqTiffDirHandle : boost::noncopyable
+class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff directory handle from a tiff file handle
@@ -228,7 +228,7 @@ class CqTiffDirHandle : boost::noncopyable
  * track of the current directory.  Do *not* use TIFFOpen, TIFFClose,
  * or TIFFSetDirectory outside this class.
  */
-class CqTiffFileHandle : boost::noncopyable
+class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff file handle

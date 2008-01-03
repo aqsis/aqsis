@@ -39,7 +39,7 @@ START_NAMESPACE( Aqsis )
  * A quasi-random number generator class.
  */
 
-class CqLowDiscrepancy
+class COMMON_SHARE CqLowDiscrepancy
 {
 	public:
 		/// Constructor

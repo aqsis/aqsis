@@ -72,7 +72,7 @@ enum EqTexFormat
  *   * (minor complaint) It uses TqUint when TqInt would be sufficient and safer.
  */
 
-struct IqTextureMap
+struct AQSISTEX_SHARE IqTextureMap
 {
 	virtual	~IqTextureMap()
 	{}

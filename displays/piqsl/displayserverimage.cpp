@@ -38,6 +38,7 @@
 #include	"displayserverimage.h"
 #include	"aqsismath.h"
 #include 	"logging.h"
+#include	"smartptr.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -51,10 +52,6 @@ void CqDisplayServerImage::close()
 
 
 //----------------------------------------------------------------------
-
-/// Do-nothing deleter for holding non-reference counted data in a boost::shared_ptr/array.
-void nullDeleter(const void*)
-{ }
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {

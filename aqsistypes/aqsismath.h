@@ -28,6 +28,10 @@
 
 #include "aqsis.h"
 
+#ifndef M_PI
+#define M_PI        3.14159265358979323846
+#endif
+
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
 // which reside in aqsis_types.h

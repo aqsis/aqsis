@@ -85,7 +85,7 @@ EqTextureFilter texFilterTypeFromString(const char* filterName);
  * texture() and environment() RSL calls.  Note that blur and width are left
  * out; the more specific sBlur,tBlur, etc are used instead.
  */
-class CqTextureSampleOptions
+class AQSISTEX_SHARE CqTextureSampleOptions
 {
 	public:
 		/// Trivial constructor.

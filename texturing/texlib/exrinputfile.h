@@ -55,7 +55,7 @@ namespace Attr {
 }
 
 //------------------------------------------------------------------------------
-COMMON_SHARE class CqExrInputFile : public IqTexInputFile
+class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 {
 	public:
 		CqExrInputFile(const std::string& fileName);

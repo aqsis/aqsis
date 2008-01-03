@@ -94,7 +94,8 @@ void CqMipmapTextureSampler<T>::filter(const SqSampleQuad& sampleQuad,
 			baseBuf.height(), sampleOpts.sBlur(), sampleOpts.tBlur());
 	// Select mipmap level to use
 	const TqFloat minFilterWidth = 2;
-	TqInt level = lfloor(log2(weights.minorAxisWidth()/minFilterWidth));
+	// log2(x) = log(x)/log(2) = log(x) * 1.4426950408889633...
+	TqInt level = lfloor(std::log(weights.minorAxisWidth()/minFilterWidth)*1.4426950408889633);
 	level = clamp(level, 0, m_levels->numLevels());
 
 	// filter the texture.

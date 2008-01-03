@@ -54,7 +54,7 @@ namespace Aqsis {
  * deallocations.
  */
 template<typename T>
-class CqTextureBuffer // : public CqIntrusivePtrCounted
+class AQSISTEX_SHARE CqTextureBuffer // : public CqIntrusivePtrCounted
 {
 	public:
 		/** \brief The pointer type for use with texture tiles.

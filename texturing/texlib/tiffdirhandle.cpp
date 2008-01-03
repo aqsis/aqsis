@@ -42,7 +42,7 @@ const char* tiffFileTypeString = "tiff";
 //------------------------------------------------------------------------------
 /** \brief An exception 
  */
-class COMMON_SHARE XqUnknownTiffFormat : public XqInternal
+class XqUnknownTiffFormat : public XqInternal
 {
 	public:
 		XqUnknownTiffFormat (const std::string& reason, const std::string& detail,

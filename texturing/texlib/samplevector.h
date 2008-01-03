@@ -46,7 +46,7 @@ namespace Aqsis {
  * thread.
  */
 template<typename T>
-class CqSampleVector
+class AQSISTEX_SHARE CqSampleVector
 {
 	public:
 		/** \brief Construct a sample vector.

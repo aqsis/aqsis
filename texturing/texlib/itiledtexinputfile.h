@@ -37,7 +37,7 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-COMMON_SHARE class IqTiledTexInputFile
+class AQSISTEX_SHARE IqTiledTexInputFile
 {
 	public:
 		virtual ~IqTiledTexInputFile() {};

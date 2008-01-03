@@ -45,7 +45,7 @@ namespace Aqsis {
 /** \brief Implementation of texture buffer samplers
  */
 template<typename ArrayT>
-class CqTextureSampler : public IqTextureSampler
+class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 {
 	public:
 		CqTextureSampler(const boost::shared_ptr<ArrayT>& texData);

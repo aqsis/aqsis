@@ -48,7 +48,7 @@ class IqTexInputFile;
  * CqTexutureSampleOptions, passed to the filter() interface function.
  *
  */
-class IqTextureSampler
+class AQSISTEX_SHARE IqTextureSampler
 {
 	public:
 		/** \brief Sample the texture with the provided sample options.

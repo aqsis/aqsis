@@ -36,7 +36,7 @@ namespace Aqsis {
 class CqTiffFileHandle;
 
 //------------------------------------------------------------------------------
-COMMON_SHARE class CqTiffOutputFile : public IqTexOutputFile
+class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 {
 	public:
 		/** \brief Construct a tiff output file with the given file name.

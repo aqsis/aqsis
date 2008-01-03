@@ -47,11 +47,11 @@ namespace Aqsis {
 /** \brief Convert a dspy format type into the enum EqChannelType equivilant.
  * \return the equivilant EqChannelType type for the given PkDspy* constant
  */
-COMMON_SHARE EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
+AQSISTEX_SHARE EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
 
 /** \brief Convert a EqChannelType to the PkDspy equivilant
  */
-COMMON_SHARE TqInt pkDspyFromChanFormat(EqChannelType format);
+AQSISTEX_SHARE TqInt pkDspyFromChanFormat(EqChannelType format);
 
 //------------------------------------------------------------------------------
 /** \brief Floating point type used to do conversions between different image
@@ -65,7 +65,7 @@ typedef TqFloat TqFloatConv;
 
 
 //------------------------------------------------------------------------------
-class IqImageChannelSource
+class AQSISTEX_SHARE IqImageChannelSource
 {
 	public:
 		/** \brief Require that the buffer return the given size with
@@ -109,7 +109,7 @@ class IqImageChannelSource
  *
  * Image channel "sinks" are able to gather 
  */
-class IqImageChannelSink
+class AQSISTEX_SHARE IqImageChannelSink
 {
 	public:
 		/** \brief Copy data from the source channel, replacing the data in the
@@ -135,7 +135,7 @@ class IqImageChannelSink
 
 //------------------------------------------------------------------------------
 /// Inherit everything from the source and sink interfaces.
-class IqImageChannel : public IqImageChannelSource, IqImageChannelSink
+class AQSISTEX_SHARE IqImageChannel : public IqImageChannelSource, IqImageChannelSink
 {
 	public:
 		inline virtual ~IqImageChannel() = 0;
@@ -145,7 +145,7 @@ class IqImageChannel : public IqImageChannelSource, IqImageChannelSink
 //------------------------------------------------------------------------------
 /** \brief A constant-valued image channel source
  */
-COMMON_SHARE class CqImageChannelConstant : public IqImageChannelSource
+class AQSISTEX_SHARE CqImageChannelConstant : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a constant image channel
@@ -167,7 +167,7 @@ COMMON_SHARE class CqImageChannelConstant : public IqImageChannelSource
  * The checker pattern is suitable for use as a base image to show alpha in
  * other images.
  */
-COMMON_SHARE class CqImageChannelCheckered : public IqImageChannelSource
+class AQSISTEX_SHARE CqImageChannelCheckered : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a checker channel
@@ -187,7 +187,7 @@ COMMON_SHARE class CqImageChannelCheckered : public IqImageChannelSource
 //------------------------------------------------------------------------------
 /** \brief A rescaling image channel
  */
-COMMON_SHARE class CqImageChannelZoom : public IqImageChannelSource
+class AQSISTEX_SHARE CqImageChannelZoom : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a checker channel
@@ -234,7 +234,7 @@ COMMON_SHARE class CqImageChannelZoom : public IqImageChannelSource
  * Operations which need access to the type of the channel data (eg,
  * conversions) are performed in the subclass CqImageChannelTyped
  */
-COMMON_SHARE class CqImageChannel : public IqImageChannel
+class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
 {
 	public:
 		/** \brief Construct an image channel.

@@ -51,7 +51,7 @@ class CqLevelSamplerCache;
  *
  * \todo Rename this to CqTextureMap after the old CqTextureMap is removed.
  */
-class CqTextureMap2
+class AQSISTEX_SHARE CqTextureMap2
 {
 	public:
 		CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler);
@@ -93,7 +93,7 @@ class CqTextureMap2
  *
  * \todo Remove when the new IqTextureMap interface is in place.
  */
-class CqTextureMap2Wrapper : public IqTextureMap
+class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMap
 {
 	public:
 		CqTextureMap2Wrapper(const std::string& texName);

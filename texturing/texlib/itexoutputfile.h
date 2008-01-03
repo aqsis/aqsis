@@ -39,7 +39,7 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-COMMON_SHARE class IqTexOutputFile
+class AQSISTEX_SHARE IqTexOutputFile
 {
 	public:
 		virtual ~IqTexOutputFile() {};

@@ -43,7 +43,7 @@ namespace Aqsis {
  * This class describes the structure of a pixel in hetrogenous images (ie,
  * images made up of possibly different types for each channel inside a pixel).
  */
-COMMON_SHARE class CqChannelList
+class AQSISTEX_SHARE CqChannelList
 {
 	private:
 		/// The underlying container type holding the SqChannelInfo.
@@ -183,7 +183,7 @@ COMMON_SHARE class CqChannelList
  * \param out - stream to write to
  * \param channelList - channels to output.
  */
-COMMON_SHARE std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList);
+AQSISTEX_SHARE std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList);
 
 //==============================================================================
 // Implementation of inline functions and templates

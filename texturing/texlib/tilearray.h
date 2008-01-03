@@ -66,7 +66,7 @@ struct TileKey;
  * where two threads could contend for the same texture.
  */
 template<typename T>
-class CqTileArray : public CqMemoryMonitored
+class AQSISTEX_SHARE CqTileArray : public CqMemoryMonitored
 {
 	public:
 		/** \brief Construct a tiled texture array connected to a file

@@ -40,7 +40,7 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-COMMON_SHARE class CqTiledTiffInputFile
+class AQSISTEX_SHARE CqTiledTiffInputFile
 {
 	public:
 		CqTiledTiffInputFile(const std::string& fileName);

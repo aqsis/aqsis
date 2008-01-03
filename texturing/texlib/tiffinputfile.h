@@ -49,7 +49,7 @@ namespace Aqsis {
  * For cases of unusual internal formats, the class falls back on the generic
  * RGBA image handling built into libTIFF.
  */
-COMMON_SHARE class CqTiffInputFile : public IqMultiTexInputFile
+class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 {
 	public:
 		CqTiffInputFile(const std::string& fileName);

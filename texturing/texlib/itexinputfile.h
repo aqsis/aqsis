@@ -49,7 +49,7 @@ namespace Aqsis {
  * A file-type-aware open() function is provided for type-agnostic loading of
  * image files.
  */
-COMMON_SHARE class IqTexInputFile
+class AQSISTEX_SHARE IqTexInputFile
 {
 	public:
 		virtual ~IqTexInputFile() {};
@@ -121,7 +121,7 @@ COMMON_SHARE class IqTexInputFile
  * multi-image file.  This class provides support for such files, in addition
  * to the operations supported by the IqTexInputFile interface.
  */
-COMMON_SHARE class IqMultiTexInputFile : public IqTexInputFile
+class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 {
 	public:
 		/** Set the image index in a multi-image file.

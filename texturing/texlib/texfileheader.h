@@ -58,7 +58,7 @@ namespace Aqsis {
  * which will automatically know it should return a TqInt as the appropriate
  * type.
  */
-COMMON_SHARE class CqTexFileHeader
+class AQSISTEX_SHARE CqTexFileHeader
 {
 	private:
 		class CqTypeInfoHolder;
@@ -158,7 +158,7 @@ inline SqImageRegion::SqImageRegion(TqInt width, TqInt height,
  *
  * Hold onto a reference to std::type_info, and provide operator<
  */
-class CqTexFileHeader::CqTypeInfoHolder
+class AQSISTEX_SHARE CqTexFileHeader::CqTypeInfoHolder
 {
 	private:
 		const std::type_info& m_typeInfo;
