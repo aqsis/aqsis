@@ -27,11 +27,12 @@
 #ifndef STATS_H_INCLUDED
 #define STATS_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include  <time.h>
 #include  <iostream>
-#include	"ri.h"
 
-#include	"aqsis.h"
+#include	"ri.h"
 
 START_NAMESPACE( Aqsis )
 
