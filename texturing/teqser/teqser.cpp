@@ -23,7 +23,9 @@ tiff files.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<stdio.h>
+#include	<cstdlib>
+#include	<cstring>
+#include	<memory>
 
 
 #ifdef	AQSIS_SYSTEM_WIN32

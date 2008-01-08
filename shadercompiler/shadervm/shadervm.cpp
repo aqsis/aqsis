@@ -32,6 +32,7 @@
 #include	<sstream>
 #include	<ctype.h>
 #include	<stddef.h>
+#include	<cstring>
 
 #include	"shadervm.h"
 #include	"iparameter.h"

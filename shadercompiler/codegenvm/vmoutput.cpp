@@ -33,6 +33,7 @@
 #include	<string>
 #include	<map>
 #include	<numeric>
+#include	<cstdlib>
 
 #include	"version.h"
 #include	"vmoutput.h"

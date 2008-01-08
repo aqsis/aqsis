@@ -25,7 +25,7 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
+#include	<cstring>
 #include	<iostream>
 #include	<fstream>
 

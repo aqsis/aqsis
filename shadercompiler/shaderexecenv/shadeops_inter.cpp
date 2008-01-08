@@ -25,11 +25,10 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
-#include	<stdio.h>
+#include	<cstring>
 
 #if defined(REGEXP)
 #include        <regex.h>

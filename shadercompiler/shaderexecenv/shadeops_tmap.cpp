@@ -29,11 +29,10 @@
 #include	<io.h>
 #endif
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
-#include	<stdio.h>
+#include	<cstring>
 
 #include	"shaderexecenv.h"
 #include	"shadervm.h"

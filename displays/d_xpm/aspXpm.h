@@ -1,12 +1,12 @@
+#ifndef aspXpm_H
+#define aspXpm_H
+
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <iosfwd>
 #include <vector>
-
-#ifndef aspXpm_H
-#define aspXpm_H
 
 struct aspRGB
 {

@@ -23,7 +23,7 @@
 
 #include <iomanip>
 #include <iostream>
-#include <math.h>
+#include <cstring>
 #include <string>
 
 #include "multitimer.h"

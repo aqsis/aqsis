@@ -43,6 +43,7 @@ using namespace Aqsis;
 #include <algorithm>
 #include <float.h>
 #include <time.h>
+#include <cstring>
 
 #include "ndspy.h"
 

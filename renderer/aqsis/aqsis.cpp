@@ -46,6 +46,8 @@
 #include <vector>
 #include <cstdio>
 #include <ctime>
+#include <cstdlib>
+#include <memory>
 
 #ifdef AQSIS_SYSTEM_WIN32
   #include <windows.h>

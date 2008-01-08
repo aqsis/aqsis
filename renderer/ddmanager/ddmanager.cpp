@@ -40,6 +40,8 @@
 #include	"version.h"
 #include	"debugdd.h"
 
+#include	<cstring>
+
 START_NAMESPACE( Aqsis )
 
 

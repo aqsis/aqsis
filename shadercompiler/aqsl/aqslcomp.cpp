@@ -31,7 +31,8 @@
 #include	<iostream>
 #include	<fstream>
 #include	<sstream>
-#include	<stdio.h>
+#include	<cstdlib>
+#include	<cstring>
 #include	<boost/scoped_ptr.hpp>
 
 #ifdef	AQSIS_SYSTEM_WIN32
