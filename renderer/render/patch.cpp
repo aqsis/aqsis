@@ -166,7 +166,7 @@ void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* 
 /** Get the boundary extents in camera space of the surface patch
  */
 
-void CqSurfacePatchBicubic::Bound(IqBound* bound) const
+void CqSurfacePatchBicubic::Bound(CqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -662,7 +662,7 @@ CqSurface* CqSurfacePatchBilinear::Clone() const
 /** Return the boundary extents in camera space of the surface patch
  */
 
-void CqSurfacePatchBilinear::Bound(IqBound* bound) const
+void CqSurfacePatchBilinear::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -907,7 +907,7 @@ CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-void CqSurfacePatchMeshBicubic::Bound(IqBound* bound) const
+void CqSurfacePatchMeshBicubic::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -1138,7 +1138,7 @@ CqSurface* CqSurfacePatchMeshBilinear::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-void CqSurfacePatchMeshBilinear::Bound(IqBound* bound) const
+void CqSurfacePatchMeshBilinear::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 

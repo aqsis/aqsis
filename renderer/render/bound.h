@@ -32,7 +32,6 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"plane.h"
-#include	"ibound.h"
 
 #include <vector>
 
@@ -43,7 +42,7 @@ START_NAMESPACE( Aqsis )
  * Class specifying a 3D geometric bound.
  */
 
-class CqBound : public IqBound
+class CqBound
 {
 	public:
 		CqBound( const TqFloat* pBounds )
@@ -117,11 +116,11 @@ class CqBound : public IqBound
 		CqBound&	operator=( const CqBound& From );
 
 		void		Transform( const CqMatrix&	matTransform );
-		void		Encapsulate( const IqBound* const bound );
+		void		Encapsulate( const CqBound* const bound );
 		void		Encapsulate( const CqVector3D& v );
 		void		Encapsulate( const CqVector2D& v );
 
-		bool	Contains2D( const IqBound* const b ) const
+		bool	Contains2D( const CqBound* const b ) const
 		{
 			if ( ( b->vecMin().x() >= vecMin().x() && b->vecMax().x() <= vecMax().x() ) &&
 			        ( b->vecMin().y() >= vecMin().y() && b->vecMax().y() <= vecMax().y() ) )

@@ -115,7 +115,7 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
  *
  * @return CqBound object containing the bounds.
  */
-void CqCurve::Bound(IqBound* bound) const
+void CqCurve::Bound(CqBound* bound) const
 {
 
 	// Get the boundary in camera space.
