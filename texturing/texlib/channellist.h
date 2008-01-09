@@ -101,8 +101,6 @@ class AQSISTEX_SHARE CqChannelList
 		/// Get the number of channels in the list
 		inline TqInt numChannels() const;
 		/** \brief Get the channel at a given index.
-		 *
-		 * This function is range-checked.
 		 */
 		inline const SqChannelInfo& operator[](TqInt index) const;
 		//@}
@@ -221,7 +219,9 @@ inline TqInt CqChannelList::numChannels() const
 
 inline const SqChannelInfo& CqChannelList::operator[](TqInt index) const
 {
-	return m_channels.at(index);
+	assert(index >= 0);
+	assert(index < static_cast<TqInt>(m_channels.size()));
+	return m_channels[index];
 }
 
 inline TqInt CqChannelList::findChannelIndex(const std::string& name) const
@@ -239,7 +239,9 @@ inline bool CqChannelList::hasChannel(const std::string& name) const
 
 inline TqInt CqChannelList::channelByteOffset(TqInt index) const
 {
-	return m_offsets.at(index);
+	assert(index >= 0);
+	assert(index < static_cast<TqInt>(m_offsets.size()));
+	return m_offsets[index];
 }
 
 inline TqInt CqChannelList::bytesPerPixel() const

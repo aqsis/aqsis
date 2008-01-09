@@ -38,7 +38,7 @@
 #include "samplevector.h"
 #include "channellist.h"
 #include "filtersupport.h"
-#include "texturesampleoptions.h" // For texture wrap modes
+#include "wrapmode.h"
 
 namespace Aqsis {
 
@@ -68,8 +68,6 @@ class AQSISTEX_SHARE CqTextureBuffer // : public CqIntrusivePtrCounted
 		CqTextureBuffer();
 
 		/** \brief Construct a texture tile
-		 *
-		 * \todo Investigate the use of an allocator or such for the TIFF data.
 		 *
 		 * \param width - tile width
 		 * \param height - tile height
@@ -313,23 +311,23 @@ void CqTextureBuffer<T>::applyFilter(SampleAccumT& sampleAccum,
 	}
 	else
 	{
-		SqFilterSupport supportTrunc(support);
+		SqFilterSupport modifiedSupport(support);
 		// If we get here, the filter support falls at least partially outside
 		// the texture range.
 		if(xWrapMode == WrapMode_Black)
 		{
-			supportTrunc.sx.truncate(0, m_width);
-			if(supportTrunc.sx.isEmpty())
+			modifiedSupport.sx.truncate(0, m_width);
+			if(modifiedSupport.sx.isEmpty())
 				return;
 		}
 		if(yWrapMode == WrapMode_Black)
 		{
-			supportTrunc.sy.truncate(0, m_height);
-			if(supportTrunc.sy.isEmpty())
+			modifiedSupport.sy.truncate(0, m_height);
+			if(modifiedSupport.sy.isEmpty())
 				return;
 		}
 		// Apply a filter using careful boundary checking.
-		applyFilterBoundary(sampleAccum, supportTrunc, xWrapMode, yWrapMode);
+		applyFilterBoundary(sampleAccum, modifiedSupport, xWrapMode, yWrapMode);
 	}
 }
 
@@ -352,7 +350,10 @@ inline TqInt wrapCoord(TqInt x, TqInt width, EqWrapMode wrapMode)
 		case WrapMode_Black:
 			break;
 		case WrapMode_Periodic:
-			return (x + width) % width;
+			// the factor of 100 is a bit of a hack to try to make sure the
+			// returned x is always positive.  As long as we restrict to filter
+			// widths less than 100, this should do the trick...
+			return (x + 100*width) % width;
 		case WrapMode_Clamp:
 			return clamp(x, 0, width-1);
 	}

@@ -30,21 +30,10 @@
 #include "aqsis.h"
 
 #include "samplequad.h"
+#include "wrapmode.h"
 
 namespace Aqsis
 {
-
-//----------------------------------------------------------------------
-/** \brief Defines the various modes of handling texture access outside of the
- * normal range.
- */
-enum EqWrapMode
-{
-    WrapMode_Black,		///< Return black.
-    WrapMode_Periodic,	///< Wrap around to the opposite side.
-    WrapMode_Clamp,		///< Clamp to the edge of the range.
-};
-
 
 //----------------------------------------------------------------------
 /** \brief Texture filter types

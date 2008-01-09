@@ -96,7 +96,7 @@ void CqMipmapTextureSampler<T>::filter(const SqSampleQuad& sampleQuad,
 	const TqFloat minFilterWidth = 2;
 	// log2(x) = log(x)/log(2) = log(x) * 1.4426950408889633...
 	TqInt level = lfloor(std::log(weights.minorAxisWidth()/minFilterWidth)*1.4426950408889633);
-	level = clamp(level, 0, m_levels->numLevels());
+	level = clamp(level, 0, m_levels->numLevels()-1);
 
 	// filter the texture.
 	CqSampleAccum<CqEwaFilterWeights> accumulator(weights,

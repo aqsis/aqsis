@@ -141,7 +141,9 @@ inline const CqTextureSampleOptions& CqLevelSamplerCache<TextureBufferT>::defaul
 template<typename TextureBufferT>
 const TextureBufferT& CqLevelSamplerCache<TextureBufferT>::level(TqInt levelNum)
 {
-	TextureBufferT* sampler = m_levels.at(levelNum).get();
+	assert(levelNum < static_cast<TqInt>(m_levels.size()));
+	assert(levelNum >= 0);
+	TextureBufferT* sampler = m_levels[levelNum].get();
 //	if(!sampler)
 //	{
 //		m_levels[levelNum] = TextureBufferT::create(m_texFile);

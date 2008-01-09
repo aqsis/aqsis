@@ -33,7 +33,7 @@
 
 #include "aqsismath.h"
 #include "texturebuffer.h"
-#include "texturesampleoptions.h"
+#include "wrapmode.h"
 #include "cachedfilter.h"
 #include "sampleaccum.h"
 

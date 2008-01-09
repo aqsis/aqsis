@@ -41,8 +41,7 @@ struct SqFilterSupport1D
 	TqInt end;
 	/// Trivial constructor
 	inline SqFilterSupport1D(TqInt start, TqInt end);
-	/** \brief Truncate the support so that start is >= 0 and end is <=
-	 * length.
+	/** \brief Truncate the support into the closed interval [rangeStart, rangeEnd]
 	 *
 	 * Note that this may result in empty supports.
 	 */
