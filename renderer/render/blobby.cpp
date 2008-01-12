@@ -28,7 +28,7 @@
 *          K-3D
 *
 */
-#include <stdio.h>
+#include <cstring>
 #include <math.h>
 #include <vector>
 #include <list>

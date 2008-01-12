@@ -31,6 +31,7 @@
 #include	"renderer.h"
 #include	"logging.h"
 
+#include	<cstring>
 
 START_NAMESPACE( Aqsis )
 

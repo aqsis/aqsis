@@ -32,6 +32,8 @@
 #include	"ri.h"
 #include	"renderer.h"
 
+#include	<cstring>
+
 START_NAMESPACE( Aqsis )
 
 

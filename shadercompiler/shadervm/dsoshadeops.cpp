@@ -19,6 +19,7 @@
 */
 
 #include <sys/stat.h>
+#include <cstring>
 
 #include	"aqsis.h"
 #include	"sstring.h"

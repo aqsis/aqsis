@@ -46,7 +46,8 @@
 #include <string>
 #include <vector>
 
-#include <stdio.h>
+#include <cstdlib>
+#include <cstring>
 
 
 namespace Aqsis

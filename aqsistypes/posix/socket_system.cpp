@@ -32,6 +32,7 @@
 #include	<errno.h>
 #include 	<netdb.h>
 #include	<signal.h>
+#include	<cstring>
 
 #include	"logging.h"
 

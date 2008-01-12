@@ -29,7 +29,7 @@
 #ifdef WIN32
 #include    <windows.h>
 #endif
-#include	<math.h>
+#include	<cstring>
 
 #include	"surface.h"
 #include	"imagepixel.h"

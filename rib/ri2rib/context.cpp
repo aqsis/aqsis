@@ -31,6 +31,8 @@
 #include "binary.h"
 #include "error.h"
 
+#include <cstring>
+
 USING_NAMESPACE( libri2rib )
 
 

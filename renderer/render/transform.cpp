@@ -34,7 +34,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(false)
+CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(false), m_Handedness(false)
 {}
 
 
@@ -171,6 +171,7 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
+	ct.m_Handedness = !flip;
 
 	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{

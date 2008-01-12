@@ -26,7 +26,7 @@
 #include	"aqsis.h"
 #include	"multitimer.h"
 
-#include	<math.h>
+#include	<cstring>
 #include	<iostream>
 #include	<fstream>
 #include	<boost/shared_array.hpp>

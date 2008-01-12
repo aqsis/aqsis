@@ -30,6 +30,7 @@ using namespace librib;
 #include <string>
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 #ifdef	_DEBUG
 #define	YYDEBUG	1

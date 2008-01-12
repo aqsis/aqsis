@@ -33,6 +33,8 @@
 
 #include "stddef.h"
 
+#include <cstring>
+
 USING_NAMESPACE( libri2rib );
 
 #define PR(x,y)  printRequest(x,y)
