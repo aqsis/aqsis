@@ -52,7 +52,7 @@ class CqTexFileHeader;
  * Direct access to attributes of the underlying texture file is provided via
  * the fileAttributes() method.
  *
- * \todo Rename this to IqTextureMap after the old IqTextureMap2 is removed.
+ * \todo Rename this to IqTextureMapOld after the old IqTextureMap2 is removed.
  */
 class AQSISTEX_SHARE IqTextureMap2
 {

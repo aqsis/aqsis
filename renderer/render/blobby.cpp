@@ -39,7 +39,7 @@
 #include "vector4d.h"
 #include "matrix.h"
 #include "blobby.h"
-#include "itexturemap.h"
+#include "itexturemap_old.h"
 #include "marchingcubes.h"
 #include "plugins.h"
 
@@ -639,7 +639,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;
@@ -825,7 +825,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;

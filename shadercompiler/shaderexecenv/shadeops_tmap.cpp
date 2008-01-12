@@ -37,7 +37,7 @@
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
-#include	"itexturemap.h"
+#include	"itexturemap_old.h"
 #include	"version.h"
 #include	"logging.h"
 
@@ -67,7 +67,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -162,7 +162,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -256,7 +256,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 
 
 
@@ -340,7 +340,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -434,7 +434,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -527,7 +527,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 
 
 
@@ -613,7 +613,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 
 	// Try with LatLong map file
 	if ( pTMap == 0 )
@@ -709,7 +709,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
@@ -789,7 +789,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
@@ -885,7 +885,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
+	IqTextureMapOld* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
@@ -1061,7 +1061,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
+	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 	// Get values for deltas along surface directions
 	TqFloat fdu = 0.0f;
@@ -1181,7 +1181,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
+	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 
 	__fVarying = true;
@@ -1590,7 +1590,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 	(N)->GetNormal(_aq_N,__iGrid);
 	TqFloat _aq_samples;
 	(samples)->GetFloat(_aq_samples,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_occlmap );
+	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_occlmap );
 
 	CqVector3D L(0,0,-1);
 
@@ -1675,10 +1675,10 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		return ;
 
 	TqFloat Ret = 0.0f;
-	IqTextureMap* pMap = NULL;
-	IqTextureMap *pSMap = NULL;
-	IqTextureMap *pEMap = NULL;
-	IqTextureMap *pTMap = NULL;
+	IqTextureMapOld* pMap = NULL;
+	IqTextureMapOld *pSMap = NULL;
+	IqTextureMapOld *pEMap = NULL;
+	IqTextureMapOld *pTMap = NULL;
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -1829,7 +1829,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
 		        ( pV->Type() == type_matrix ) )
 		{
-			IqTextureMap* pTmp = NULL;
+			IqTextureMapOld* pTmp = NULL;
 			if (pTMap) pTmp = pTMap;
 			if (pSMap) pTmp = pSMap;
 			if ( pTmp )   // && pTmp->Type() == MapType_Shadow)
@@ -1875,7 +1875,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		        ( pV->Type() == type_matrix ) )
 		{
 			// init the matrix in case of wrong sl logic
-			IqTextureMap* pTmp = NULL;
+			IqTextureMapOld* pTmp = NULL;
 			if (pTMap) pTmp = pTMap;
 			if (pSMap) pTmp = pSMap;
 			if ( pTmp )    // && pTmp->Type() == MapType_Shadow)

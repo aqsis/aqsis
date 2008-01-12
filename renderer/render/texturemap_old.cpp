@@ -33,7 +33,7 @@
 #include	<fstream>
 #include	<algorithm>
 
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"rifile.h"
 #include	"exception.h"
 #include	"irenderer.h"
@@ -110,8 +110,8 @@ static TqFloat sides[6][2]    =  {
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
-std::vector<IqTextureMap*> CqTextureMap::m_TextureMap_Cache;
-std::vector<CqString*> CqTextureMap::m_ConvertString_Cache;
+std::vector<IqTextureMapOld*> CqTextureMapOld::m_TextureMap_Cache;
+std::vector<CqString*> CqTextureMapOld::m_ConvertString_Cache;
 
 #ifdef ALLOCSEGMENTSTATUS
 static TqInt alloc_cnt = 0;
@@ -313,12 +313,12 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
 
 
 //----------------------------------------------------------------------
-// Implementation of CqTextureMap
+// Implementation of CqTextureMapOld
 //----------------------------------------------------------------------
 
 /** Support for plugins mainly converter from any bitmap format to .tif file.
  */
-TqInt CqTextureMap::Convert( CqString &strName )
+TqInt CqTextureMapOld::Convert( CqString &strName )
 {
 	// Suspicious if this does not have an extension.
 	if (strName.rfind(".") == std::string::npos)
@@ -380,11 +380,11 @@ TqInt CqTextureMap::Convert( CqString &strName )
 /** this is used for remove any memory exceed the command Option "limits" "texturememory"
   * directive
   *   
-  * It zaps the m_apFlat for this TextureMap object completely.
+  * It zaps the m_apFlat for this TextureMapOld object completely.
   * The idea here is to erase any "GetBuffer()" memory to respect the directive
   * It looks into the big m_TextureMap_Cache release every things
   **/
-void CqTextureMap::CriticalMeasure()
+void CqTextureMapOld::CriticalMeasure()
 {
 	TqInt now; 
 	//TqInt current;
@@ -484,7 +484,7 @@ void CqTextureMap::CriticalMeasure()
 //---------------------------------------------------------------------
 /** If properly opened, close the TIFF file.
  */
-void CqTextureMap::Close()
+void CqTextureMapOld::Close()
 {
 
 	if ( m_pImage != 0 )
@@ -496,7 +496,7 @@ void CqTextureMap::Close()
 //---------------------------------------------------------------------
 /** Create a mipmap usable for the texturemapping.
  */
-bool CqTextureMap::CreateMIPMAP(bool fProtectBuffers)
+bool CqTextureMapOld::CreateMIPMAP(bool fProtectBuffers)
 {
 	if ( m_pImage != 0 )
 	{
@@ -527,7 +527,7 @@ bool CqTextureMap::CreateMIPMAP(bool fProtectBuffers)
 //---------------------------------------------------------------------
 /** Destructor.
  */
-CqTextureMap::~CqTextureMap()
+CqTextureMapOld::~CqTextureMapOld()
 {
 	// Close the file.
 	Close();
@@ -610,7 +610,7 @@ CqTextureMap::~CqTextureMap()
  * \param directory TIFF directory index.
  * \param fProt A boolean value, true if the buffer should be protected from removal by the cache management system.
  */
-CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, bool fProt )
+CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt directory, bool fProt )
 {
         //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
@@ -711,7 +711,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 * \param interp will receive the contribution of level versus level+1
 * \param umapsize, vmapsize the width, height at level.
 */
-void CqTextureMap::CalculateLevel(TqFloat ds, TqFloat dt)
+void CqTextureMapOld::CalculateLevel(TqFloat ds, TqFloat dt)
 {
 	// Calculate the appropriate mipmap level from the area subtended by the sample.
 
@@ -779,7 +779,7 @@ void CqTextureMap::CalculateLevel(TqFloat ds, TqFloat dt)
  * \param id     the directory in the tiff 0...n
  * \param param m_color the result will be stored in m_color.
  */
-bool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
+bool CqTextureMapOld::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
                               TqInt id, std::valarray<TqFloat >	&m_color)
 {
 	TqUint umapsize1 = umapsize-1;
@@ -849,13 +849,13 @@ bool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize
 }
 
 //----------------------------------------------------------------------
-/* CqTextureMap::GetSampleWithoutBlur( ) is the lastest incarnation it
+/* CqTextureMapOld::GetSampleWithoutBlur( ) is the lastest incarnation it
  * supports, filter func on the fly, multiple samples, without blur.
  * \param u1,v2 is top/right bottom/left of sample positions.
  * \param v1,v2.
  * \param val the result will be stored.
  */
-void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
+void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
 	register TqInt c;
 
@@ -934,7 +934,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 }
 
 //----------------------------------------------------------------------
-/* CqTextureMap::GetSampleWithBlur( ) is
+/* CqTextureMapOld::GetSampleWithBlur( ) is
  * This is the implementation based on classical pyramid integration for mipmap ;
  * I found it the equivalent in multiple litterature about mipmaps; specially it is
  * implemanted very similar to pixie but without any Random to 
@@ -949,7 +949,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
  * \param v1,v2.
  * \param val the result will be stored.
  */
-void CqTextureMap::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
+void CqTextureMapOld::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
 	register TqInt c;
 
@@ -1006,10 +1006,10 @@ void CqTextureMap::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloa
 }
 
 //----------------------------------------------------------------------
-/* CqTextureMap::GetSample( ) is calling either GetSampleArea() or
+/* CqTextureMapOld::GetSample( ) is calling either GetSampleArea() or
  * GetSampleSgle() depending of the level of blur 
  */
-void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val)
+void CqTextureMapOld::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val)
 {
 	// Work out the width and height
 	TqFloat uu1, uu2, vv1, vv2;
@@ -1034,14 +1034,14 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 /** Check if a texture map exists in the cache, return a pointer to it if so, else
  * load it if possible..
  */
-IqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
+IqTextureMapOld* CqTextureMapOld::GetTextureMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
 	// TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if( (*i)->getName() == strName )
 		{
@@ -1084,7 +1084,7 @@ IqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
  *  RiMakeTextureV() for downsampling/filter the tif file
  *
  **/
-void CqTextureMap::Interpreted( TqPchar mode )
+void CqTextureMapOld::Interpreted( TqPchar mode )
 {
 	const char* filter = "", *smode = "", *tmode = "";
 	const char* sep = ", \t";
@@ -1147,7 +1147,7 @@ void CqTextureMap::Interpreted( TqPchar mode )
 //---------------------------------------------------------------------
 /** Open a named texture map.
  */
-void CqTextureMap::Open()
+void CqTextureMapOld::Open()
 {
 	TqInt wasconverted = 0;
 
@@ -1182,7 +1182,7 @@ void CqTextureMap::Open()
 
 	if ( m_pImage )
 	{
-		Aqsis::log() << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
+		Aqsis::log() << info << "TextureMapOld: \"" << strRealName.c_str() << "\" is open" << std::endl;
 		TqPchar pFormat = 0;
 		TqPchar pModes = 0;
 
@@ -1276,7 +1276,7 @@ void CqTextureMap::Open()
  *  m_sblur = m_tblur = 0.0, m_pswidth = m_ptwidth = 1.0 and m_samples = 16.0 (for shadow) 
  *  by default.
  */
-void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
+void CqTextureMapOld::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
 {
 	m_sblur = 0.0f;   // TurnOff the blur per texture(), environment() or shadow() by default
 	m_tblur = 0.0f;
@@ -1353,7 +1353,7 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
  *  m_sblur = m_tblur = 0.0, m_pswidth = m_ptwidth = 1.0 and m_samples = 16 
  *  by default.
  */
-void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val)
+void CqTextureMapOld::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val)
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -1433,7 +1433,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 /** Retrieve a sample from the MIP MAP over the area specified by the four vertices
  */
 
-void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
+void CqTextureMapOld::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
                               std::valarray<TqFloat>& val)
 {
 	val.resize( m_SamplesPerPixel );
@@ -1457,7 +1457,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 /** Write an image to an open TIFF file in the current directory as straight storage.
  * as unsigned char values
  */
-void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1493,7 +1493,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
 /** Write an image to an open TIFF file in the current directory as straight storage.
  * as TqFloat values
  */
-void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1531,7 +1531,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 /** Write an image to an open TIFF file in the current directory as straight storage.
  * as 16 bit int values
  */
-void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1569,7 +1569,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUl
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * determine the size and type from the buffer.
  */
-void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality )
 {
 	switch ( pBuffer->BufferType() )
 	{
@@ -1597,7 +1597,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt co
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * determine the size and type from the buffer.
  */
-void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality )
 {
 	switch ( pBuffer->BufferType() )
 	{
@@ -1626,7 +1626,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * as TqFloat values
  */
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1693,7 +1693,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * as 16 bit int values
  */
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1757,7 +1757,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * as unsigned char values
  */
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
@@ -1853,7 +1853,7 @@ CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterF
 
 
 //----------------------------------------------------------------------
-CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, bool protectBuffer)
+CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMapOld& texMap, TqInt directory, bool protectBuffer)
 {
 	TqInt imWidth = inBuf->Width();
 	TqInt imHeight = inBuf->Height();
@@ -1958,7 +1958,7 @@ void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtF
 
 
 //---------------------------------------------------------------------
-// Implementation of CqEnvironmentMap
+// Implementation of CqEnvironmentMapOld
 //---------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -1969,7 +1969,7 @@ void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtF
 #define COMP_Y 1
 #define COMP_Z 2
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1,
+void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
                                   CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
                                   std::valarray<TqFloat>& val, TqInt index,
                                   TqFloat* average_depth, TqFloat* shadow_depth )

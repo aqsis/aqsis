@@ -17,7 +17,7 @@
 
 START_NAMESPACE( Aqsis )
 
-struct IqTextureMap;
+struct IqTextureMapOld;
 class CqObjectInstance;
 
 struct IqRenderer
@@ -59,10 +59,10 @@ struct IqRenderer
 
 	/** Get a pointer to a loaded texturemap ready for processing.
 	 */
-	virtual	IqTextureMap* GetTextureMap( const CqString& strFileName ) = 0;
-	virtual	IqTextureMap* GetEnvironmentMap( const CqString& strName ) = 0;
-	virtual	IqTextureMap* GetShadowMap( const CqString& strName ) = 0;
-	virtual	IqTextureMap* GetLatLongMap( const CqString& strName ) = 0;
+	virtual	IqTextureMapOld* GetTextureMap( const CqString& strFileName ) = 0;
+	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strName ) = 0;
+	virtual	IqTextureMapOld* GetShadowMap( const CqString& strName ) = 0;
+	virtual	IqTextureMapOld* GetLatLongMap( const CqString& strName ) = 0;
 
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;

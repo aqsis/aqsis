@@ -34,7 +34,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexturemap.h"
+#include "itexturemap_old.h"
 #include "itexturemap2.h"
 #include "itexturesampler.h"
 #include "sstring.h"
@@ -46,7 +46,7 @@ namespace Aqsis
 //------------------------------------------------------------------------------
 /* \brief A multi-resolution filtering texture sampler
  *
- * \todo Rename this to CqTextureMap after the old CqTextureMap is removed.
+ * \todo Rename this to CqTextureMapOld after the old CqTextureMapOld is removed.
  */
 class AQSISTEX_SHARE CqTextureMap2 : public IqTextureMap2
 {
@@ -84,16 +84,16 @@ class AQSISTEX_SHARE CqTextureMap2 : public IqTextureMap2
 };
 
 /** Temporary wrapper class for CqTextureMap2 to squash it into the shape of
- * the old IqTextureMap interface.
+ * the old IqTextureMapOld interface.
  *
- * \todo Remove when the new IqTextureMap interface is in place.
+ * \todo Remove when the new IqTextureMapOld interface is in place.
  */
-class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMap
+class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMapOld
 {
 	public:
 		CqTextureMap2Wrapper(const std::string& texName);
 
-		// The following are overridden from IqTextureMap.  It's rather a fat
+		// The following are overridden from IqTextureMapOld.  It's rather a fat
 		// interface and badly needs to be slimmed down.
 		virtual TqUint XRes() const;
 		virtual TqUint YRes() const;

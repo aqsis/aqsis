@@ -29,7 +29,7 @@
 #include	<iostream>
 #include	<fstream>
 
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"random.h"
 #include	"version.h"
 #include	"renderer.h"
@@ -47,14 +47,14 @@ START_NAMESPACE( Aqsis )
  * load it if possible..
  */
 
-IqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
+IqTextureMapOld* CqTextureMapOld::GetLatLongMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
 
 	//TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( (*i) ->getName() == strName )
 		{
@@ -72,7 +72,7 @@ IqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap* pNew = new CqLatLongMap( strName );
+	CqTextureMapOld* pNew = new CqLatLongMapOld( strName );
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
@@ -100,14 +100,14 @@ IqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
  * load it if possible..
  */
 
-IqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
+IqTextureMapOld* CqTextureMapOld::GetEnvironmentMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 1 );
 
 	//TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) ->getName() == strName )
 		{
@@ -125,7 +125,7 @@ IqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap* pNew = new CqEnvironmentMap( strName );
+	CqTextureMapOld* pNew = new CqEnvironmentMapOld( strName );
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
@@ -151,9 +151,9 @@ IqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	{
 		TqFloat fov;
 		if (TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_FOVCOT, &fov) == 1)
-			((CqEnvironmentMap *)pNew)->SetFov(fov);
+			((CqEnvironmentMapOld *)pNew)->SetFov(fov);
 		else
-			((CqEnvironmentMap *)pNew)->SetFov(1.0);
+			((CqEnvironmentMapOld *)pNew)->SetFov(1.0);
 	}
 
 	// remove from the list a LatLong env. map since in shadeops.cpp we will cope with it.
@@ -172,7 +172,7 @@ IqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
  * Filtering is done using swidth, twidth and nsamples.
  */
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1,
+void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
                                   CqVector3D& swidth, CqVector3D& twidth,
                                   std::valarray<TqFloat>& val, TqInt index,
                                   TqFloat* average_depth, TqFloat* shadow_depth )
@@ -202,7 +202,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			ss1 = ss1 + 0.5; // remaps to 0 -> 1
 			TqFloat tt1 = acos( V.z() ) / RI_PI;
 
-			CqTextureMap::SampleMap( ss1, tt1, sswidth/RI_PI, stwidth/RI_PI, val );
+			CqTextureMapOld::SampleMap( ss1, tt1, sswidth/RI_PI, stwidth/RI_PI, val );
 		}
 	}
 }

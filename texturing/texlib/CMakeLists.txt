@@ -41,7 +41,7 @@ SET(AQSISTEX_HDRS
 	imagechannel.h
 	itexinputfile.h
 	itexoutputfile.h
-	itexturemap.h
+	itexturemap_old.h
 	itexturesampler.h
 	itiledtexinputfile.h
 	levelsamplercache.h

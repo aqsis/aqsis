@@ -39,7 +39,7 @@
 #include	"sstring.h"
 #include	"color.h"
 #include	"matrix.h"
-#include	"itexturemap.h"
+#include	"itexturemap_old.h"
 #include	"ri.h"
 #include	"ishaderexecenv.h"
 #include	"lowdiscrep.h"
@@ -449,14 +449,14 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 
 
 //----------------------------------------------------------------------
-/** \class CqTextureMap
+/** \class CqTextureMapOld
  * Base class from which all texture maps are derived.
  */
 
-class CqTextureMap : public IqTextureMap
+class CqTextureMapOld : public IqTextureMapOld
 {
 	public:
-		CqTextureMap( const CqString& strName ) :
+		CqTextureMapOld( const CqString& strName ) :
 				m_Compression( COMPRESSION_NONE ),
 				m_Quality( 70 ),
 				m_MinZ( RI_FLOATMAX ),
@@ -487,7 +487,7 @@ class CqTextureMap : public IqTextureMap
 			m_accum_color.resize( m_SamplesPerPixel );
 			m_hash = CqString::hash(strName.c_str());
 		}
-		virtual	~CqTextureMap();
+		virtual	~CqTextureMapOld();
 
 		/** Get/Set the mininum depth this texture (for any surfaces using it)
 		 */
@@ -639,10 +639,10 @@ class CqTextureMap : public IqTextureMap
 			return(1);
 		}
 
-		static	IqTextureMap* GetTextureMap( const CqString& strName );
-		static	IqTextureMap* GetEnvironmentMap( const CqString& strName );
-		static	IqTextureMap* GetShadowMap( const CqString& strName );
-		static	IqTextureMap* GetLatLongMap( const CqString& strName );
+		static	IqTextureMapOld* GetTextureMap( const CqString& strName );
+		static	IqTextureMapOld* GetEnvironmentMap( const CqString& strName );
+		static	IqTextureMapOld* GetShadowMap( const CqString& strName );
+		static	IqTextureMapOld* GetLatLongMap( const CqString& strName );
 
 		//void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
 
@@ -652,7 +652,7 @@ class CqTextureMap : public IqTextureMap
 		 */
 		static	void	FlushCache()
 		{
-			for(std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin();
+			for(std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin();
 					i != m_TextureMap_Cache.end(); ++i)
 				delete(*i);
 
@@ -684,7 +684,7 @@ class CqTextureMap : public IqTextureMap
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
-		static std::vector<IqTextureMap*> m_TextureMap_Cache;	///< Static array of loaded textures.
+		static std::vector<IqTextureMapOld*> m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
 		TqInt m_Compression;            ///< TIFF Compression model
@@ -760,7 +760,7 @@ class CqImageDownsampler
 
 		/** \brief Downsample an image by a factor of two.
 		 */
-		CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, bool protectBuffer);
+		CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMapOld& texMap, TqInt directory, bool protectBuffer);
 	private:
 		/** \brief Compute and cache filter kernel values for the given filter function.
 		 */
@@ -785,18 +785,18 @@ class CqImageDownsampler
 
 
 //----------------------------------------------------------------------
-/** \class CqEnvironmentMap
+/** \class CqEnvironmentMapOld
  * Environment map, derives from texture map and handles converting reflection
  * vector to s,t coordinates.
  */
 
-class CqEnvironmentMap : public CqTextureMap
+class CqEnvironmentMapOld : public CqTextureMapOld
 {
 	public:
-		CqEnvironmentMap( const CqString& strName ) :
-				CqTextureMap( strName )
+		CqEnvironmentMapOld( const CqString& strName ) :
+				CqTextureMapOld( strName )
 		{}
-		virtual	~CqEnvironmentMap()
+		virtual	~CqEnvironmentMapOld()
 		{}
 
 		virtual	EqMapType	Type() const
@@ -829,18 +829,18 @@ class CqEnvironmentMap : public CqTextureMap
 ;
 
 //----------------------------------------------------------------------
-/** \class CqLatLongMap
+/** \class CqLatLongMapOld
  * Environment map, derives from texture map and handles converting reflection
  * vector to s,t coordinates.
  */
 
-class CqLatLongMap : public CqEnvironmentMap
+class CqLatLongMapOld : public CqEnvironmentMapOld
 {
 	public:
-		CqLatLongMap( const CqString& strName ) :
-				CqEnvironmentMap( strName )
+		CqLatLongMapOld( const CqString& strName ) :
+				CqEnvironmentMapOld( strName )
 		{}
-		virtual	~CqLatLongMap()
+		virtual	~CqLatLongMapOld()
 		{}
 
 		virtual	EqMapType	Type() const
@@ -853,15 +853,15 @@ class CqLatLongMap : public CqEnvironmentMap
 
 
 //----------------------------------------------------------------------
-/** \class CqShadowMap
+/** \class CqShadowMapOld
  * Shadow map, derives from texture map.
  */
 
-class CqShadowMap : public CqTextureMap
+class CqShadowMapOld : public CqTextureMapOld
 {
 	public:
-		CqShadowMap( const CqString& strName );
-		virtual	~CqShadowMap()
+		CqShadowMapOld( const CqString& strName );
+		virtual	~CqShadowMapOld()
 		{}
 
 		virtual	EqMapType	Type() const
@@ -890,7 +890,7 @@ class CqShadowMap : public CqTextureMap
 		TqFloat	Sample( const CqVector3D&	vecPoint );
 		void	SaveZFile();
 		void	LoadZFile();
-		void	SaveShadowMap( const CqString& strShadowName, bool append = false );
+		void	SaveShadowMapOld( const CqString& strShadowName, bool append = false );
 		void	ReadMatrices();
 		TqInt   PseudoMipMaps( TqUlong s, TqInt index );
 

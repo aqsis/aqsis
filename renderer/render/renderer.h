@@ -201,10 +201,10 @@ class CqRenderer : public IqRenderer
 			std::cout << str;
 		}
 
-		virtual	IqTextureMap* GetTextureMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetEnvironmentMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetShadowMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetLatLongMap( const CqString& strFileName );
+		virtual	IqTextureMapOld* GetTextureMap( const CqString& strFileName );
+		virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strFileName );
+		virtual	IqTextureMapOld* GetShadowMap( const CqString& strFileName );
+		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 

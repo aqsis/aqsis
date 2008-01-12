@@ -31,7 +31,7 @@
 #include	<fstream>
 #include	<boost/shared_array.hpp>
 
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"random.h"
 #include	"version.h"
 #include	"renderer.h"
@@ -59,8 +59,8 @@ static CqRandom random( 42 );
 /** Constructor.
  */
 
-CqShadowMap::CqShadowMap( const CqString& strName ) :
-		CqTextureMap( strName )
+CqShadowMapOld::CqShadowMapOld( const CqString& strName ) :
+		CqTextureMapOld( strName )
 {
 
 	// Initialise the random table the first time it is needed.
@@ -83,7 +83,7 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 /** Return an index based on the spatial layer 32x32 in case of regular
  *  shadowmap to make the search for GetBuffer() more efficient.
  */
-TqInt CqShadowMap::PseudoMipMaps( TqUlong s, TqInt index )
+TqInt CqShadowMapOld::PseudoMipMaps( TqUlong s, TqInt index )
 {
 	TqInt idx = index;
 	if (NumPages() == 1)
@@ -97,7 +97,7 @@ TqInt CqShadowMap::PseudoMipMaps( TqUlong s, TqInt index )
 /** Allocate the memory required by the depthmap.
  */
 
-void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
+void CqShadowMapOld::AllocateMap( TqInt XRes, TqInt YRes )
 {
 	std::list<CqTextureMapBuffer*>::iterator s;
 	for ( s = m_apFlat.begin(); s != m_apFlat.end(); s++ )
@@ -115,14 +115,14 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
  * load it if possible..
  */
 
-IqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
+IqTextureMapOld* CqTextureMapOld::GetShadowMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
 
 	//TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( (*i)->getName() == strName )
 		{
@@ -140,7 +140,7 @@ IqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 3 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqShadowMap* pNew = new CqShadowMap( strName );
+	CqShadowMapOld* pNew = new CqShadowMapOld( strName );
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
@@ -169,7 +169,7 @@ IqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 /** Load the shadowmap data.
  */
 
-void CqShadowMap::LoadZFile()
+void CqShadowMapOld::LoadZFile()
 {
 	// Load the shadowmap from a binary file.
 	if ( m_strName != "" )
@@ -230,7 +230,7 @@ void CqShadowMap::LoadZFile()
 /** Read the matrices out of the tiff file.
  */
 
-void CqShadowMap::ReadMatrices()
+void CqShadowMapOld::ReadMatrices()
 {
 	// Read the transform matrices.
 	TqFloat*	WToC;
@@ -293,9 +293,9 @@ void CqShadowMap::ReadMatrices()
 }
 
 
-void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
+void CqShadowMapOld::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
 {
-	CqTextureMap::PrepareSampleOptions( paramMap );
+	CqTextureMapOld::PrepareSampleOptions( paramMap );
 
 	// Extend the shadow() call to accept bias, if set, override global bias
 	m_minBias = 0.0f;
@@ -332,7 +332,7 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
+void CqShadowMapOld::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	if ( m_pImage != 0 )
 	{
@@ -350,7 +350,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 /** Sample the shadow map data using R1, R2, R3, R4.
  */
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
+void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	if (index == 0)
@@ -657,7 +657,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 /** Save the shadowmap data in system specifirc image format.
  */
 
-void CqShadowMap::SaveShadowMap( const CqString& strShadowName, bool append )
+void CqShadowMapOld::SaveShadowMapOld( const CqString& strShadowName, bool append )
 {
 	const char* mode = (append)? "a" : "w";
 
@@ -703,7 +703,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, bool append )
 /** Save the shadowmap data in system specifirc image format.
  */
 
-void CqShadowMap::SaveZFile()
+void CqShadowMapOld::SaveZFile()
 {
 	// Save the shadowmap to a binary file.
 	if ( m_strName != "" )

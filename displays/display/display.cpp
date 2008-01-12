@@ -81,11 +81,11 @@ static time_t start;
 static CqString description;
 
 //----------------------------------------------------------------------
-/** SaveAsShadowMap() Save as a tiff an shadowmap
+/** SaveAsShadowMapOld() Save as a tiff an shadowmap
 *
 */
 
-void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char *mydescription)
+void SaveAsShadowMapOld(const std::string& filename, SqDisplayInstance* image, char *mydescription)
 {
 	TqChar version[ 80 ];
 	TqUint twidth = 32;
@@ -233,7 +233,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	// If in "shadowmap" mode, write as a shadowmap.
 	if( image->m_imageType == Type_Shadowmap )
 	{
-		SaveAsShadowMap(filename, image, mydescription);
+		SaveAsShadowMapOld(filename, image, mydescription);
 		return;
 	}
 	else if( image->m_imageType == Type_ZFile )

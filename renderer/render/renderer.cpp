@@ -37,7 +37,7 @@
 #include	"render.h"
 #include	"transform.h"
 #include	"rifile.h"
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"shadervm.h"
 #include	"inlineparse.h"
 #include	"tiffio.h"
@@ -809,7 +809,7 @@ void CqRenderer::RenderAutoShadows()
 				delete(m_pDDManager);
 				m_pDDManager = realDDManager;
 
-				CqTextureMap::FlushCache();
+				CqTextureMapOld::FlushCache();
 				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
@@ -1645,24 +1645,24 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-IqTextureMap* CqRenderer::GetTextureMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetTextureMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetTextureMap( strFileName ) );
+	return ( CqTextureMapOld::GetTextureMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetEnvironmentMap( strFileName ) );
+	return ( CqTextureMapOld::GetEnvironmentMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetShadowMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetShadowMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetShadowMap( strFileName ) );
+	return ( CqTextureMapOld::GetShadowMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetLatLongMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetLatLongMap( strFileName ) );
+	return ( CqTextureMapOld::GetLatLongMap( strFileName ) );
 }
 
 

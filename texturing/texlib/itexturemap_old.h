@@ -56,7 +56,7 @@ enum EqTexFormat
 
 
 //----------------------------------------------------------------------
-/** \struct IqTextureMap
+/** \struct IqTextureMapOld
  * Interface for access to texture map objects.
  *
  * \todo <b>Code Review</b>: This interface is distasteful in a number of ways:
@@ -72,9 +72,9 @@ enum EqTexFormat
  *   * (minor complaint) It uses TqUint when TqInt would be sufficient and safer.
  */
 
-struct AQSISTEX_SHARE IqTextureMap
+struct AQSISTEX_SHARE IqTextureMapOld
 {
-	virtual	~IqTextureMap()
+	virtual	~IqTextureMapOld()
 	{}
 
 	/** Get the horizontal resolution of this image.
