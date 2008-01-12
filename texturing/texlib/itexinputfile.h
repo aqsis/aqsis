@@ -144,6 +144,18 @@ class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 		 * \return The number of images
 		 */
 		virtual TqInt numSubImages() const = 0;
+
+		/** \brief Open an input image file in any format supporting multiple sub-images.
+		 *
+		 * Uses magic numbers to determine the file format of the file given by
+		 * fileName.  If the format is unknown or the file cannot be opened for
+		 * some other reason, throw an exception.
+		 *
+		 * \param fileName - file to open.  Must be a format capable of holding
+		 * multiple sub-images.
+		 * \return The newly opened input file
+		 */
+		static boost::shared_ptr<IqMultiTexInputFile> open(const std::string& fileName);
 };
 
 

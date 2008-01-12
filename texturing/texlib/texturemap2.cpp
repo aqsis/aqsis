@@ -74,19 +74,7 @@ CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& texName)
 boost::shared_ptr<IqTextureSampler> CqTextureMap2Wrapper::newWrappedTexture(const char* texName)
 {
 	Aqsis::log() << texName << "\n";
-	/*
-	boost::shared_ptr<IqTexInputFile> file = IqTexInputFile::open(texName);
-	return IqTextureSampler::create(file);
-	*/
-	/// \todo Yuck.  remove this cast!
-	boost::shared_ptr<IqMultiTexInputFile> file =
-		boost::dynamic_pointer_cast<IqMultiTexInputFile,IqTexInputFile>(
-				IqTexInputFile::open(texName));
-	boost::shared_ptr<CqLevelSamplerCache<CqTextureBuffer<TqUchar> > > levels(
-			new CqLevelSamplerCache<CqTextureBuffer<TqUchar> >(file));
-	boost::shared_ptr<IqTextureSampler> sampler(
-			new CqMipmapTextureSampler<TqUchar>(levels));
-	return sampler;
+	return IqTextureSampler::create(texName);
 }
 
 void CqTextureMap2Wrapper::Open()

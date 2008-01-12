@@ -35,23 +35,20 @@
 #include <boost/shared_ptr.hpp>
 
 #include "itexturemap.h"
+#include "itexturemap2.h"
+#include "itexturesampler.h"
 #include "sstring.h"
 #include "texfileheader.h"
 
 namespace Aqsis
 {
 
-class IqTextureSampler;
-
-template<typename TextureBufferT>
-class CqLevelSamplerCache;
-
 //------------------------------------------------------------------------------
 /* \brief A multi-resolution filtering texture sampler
  *
  * \todo Rename this to CqTextureMap after the old CqTextureMap is removed.
  */
-class AQSISTEX_SHARE CqTextureMap2
+class AQSISTEX_SHARE CqTextureMap2 : public IqTextureMap2
 {
 	public:
 		CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler);
@@ -63,7 +60,7 @@ class AQSISTEX_SHARE CqTextureMap2
 		 * \return Underlying file attributes, or 0 if there isn't an
 		 * underlying file.
 		 */
-		virtual inline const CqTexFileHeader* attributes() const;
+		virtual inline const CqTexFileHeader* fileAttributes() const;
 		/// \todo Decide if these two methods are actually needed.
 		virtual TqInt numSamples() const;
 
@@ -81,8 +78,6 @@ class AQSISTEX_SHARE CqTextureMap2
 		/** \brief Get the current sample options (const version)
 		 */
 		virtual inline const CqTextureSampleOptions& sampleOptions() const;
-
-		virtual ~CqTextureMap2() {}
 	private:
 		boost::shared_ptr<IqTextureSampler> m_sampler; ///< Underlying sampler to use.
 		CqTextureSampleOptions m_sampleOptions;  ///< sampler options
@@ -136,10 +131,9 @@ class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMap
 // Implementation details
 //==============================================================================
 
-inline const CqTexFileHeader* CqTextureMap2::attributes() const
+inline const CqTexFileHeader* CqTextureMap2::fileAttributes() const
 {
-	/// \todo implementation
-	return 0;
+	return m_sampler->fileAttributes();
 }
 
 inline CqTextureSampleOptions& CqTextureMap2::sampleOptions()

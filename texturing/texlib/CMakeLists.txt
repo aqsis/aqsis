@@ -25,6 +25,7 @@ SET(AQSISTEX_SRCS
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
+	texturecache.cpp
 	texturemap2.cpp
 	texturesampleoptions.cpp
 	imagechannel.cpp

@@ -38,6 +38,7 @@ namespace Aqsis {
 class CqTextureSampleOptions;
 class IqTiledTexInputFile;
 class IqTexInputFile;
+class CqTexFileHeader;
 
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling texture buffers.
@@ -72,6 +73,12 @@ class AQSISTEX_SHARE IqTextureSampler
 		 */
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 
+		/** \brief Get the file attribute header associated with the texture.
+		 *
+		 * \return The file attributes, or NULL if there is no underlying file.
+		 */
+		virtual const CqTexFileHeader* fileAttributes() const;
+
 		/** \brief Create and return a IqTextureSampler derived class
 		 *
 		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
@@ -83,6 +90,8 @@ class AQSISTEX_SHARE IqTextureSampler
 				const boost::shared_ptr<IqTiledTexInputFile>& file);
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqTexInputFile>& file);
+		static boost::shared_ptr<IqTextureSampler> create(const char* fileName);
+
 		virtual ~IqTextureSampler() {}
 };
 

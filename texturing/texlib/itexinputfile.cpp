@@ -34,28 +34,72 @@
 
 namespace Aqsis {
 
+namespace {
+
+// Helper functions
+
+// Open multi-image input file
+boost::shared_ptr<IqMultiTexInputFile> openMultiInputFile(
+		const TqMagicNumber& magicNum, const std::string& fileName)
+{
+	boost::shared_ptr<IqMultiTexInputFile> file;
+	if(isTiffMagicNumber(magicNum))
+		file.reset(new CqTiffInputFile(fileName));
+	// else if(Add new formats here!)
+	return file;
+}
+
+// Open a simple input file
+boost::shared_ptr<IqTexInputFile> openInputFile(
+		const TqMagicNumber& magicNum, const std::string& fileName)
+{
+	boost::shared_ptr<IqTexInputFile> file = openMultiInputFile(magicNum, fileName);
+	if(!file)
+	{
+		if(isOpenExrMagicNumber(magicNum))
+		{
+#		ifdef USE_OPENEXR
+			file.reset(new CqExrInputFile(fileName));
+#		else
+			throw XqInvalidFile("Aqsis was compiled without OpenEXR support", __FILE__, __LINE__);
+#		endif
+		}
+		// else if(Add new formats here!)
+	}
+	return file;
+}
+
+} // unnamed namespace 
+
 //------------------------------------------------------------------------------
 // IqTexInputFile
-//------------------------------------------------------------------------------
 
 boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
 {
 	boost::shared_ptr<IqTexInputFile> newFile;
-
 	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
-	if(isTiffMagicNumber(*magicNum))
-		newFile.reset(new CqTiffInputFile(fileName));
-	else if(isOpenExrMagicNumber(*magicNum))
-	{
-#		ifdef USE_OPENEXR
-		newFile.reset(new CqExrInputFile(fileName));
-#		else
-		throw XqInternal("Aqsis was compiled without OpenEXR support", __FILE__, __LINE__);
-#		endif
-	}
-	// else if(Add new formats here!)
+	boost::shared_ptr<IqTexInputFile> file = openInputFile(*magicNum, fileName);
+	if(file)
+		return file;
 	else
-		throw XqInternal("Unknown file type", __FILE__, __LINE__);
+		throw XqInvalidFile("Unknown file type", __FILE__, __LINE__);
+
+	return newFile;
+}
+
+//------------------------------------------------------------------------------
+// IqMultiTexInputFile
+
+boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::string& fileName)
+{
+	boost::shared_ptr<IqMultiTexInputFile> newFile;
+	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
+
+	boost::shared_ptr<IqMultiTexInputFile> file = openMultiInputFile(*magicNum, fileName);
+	if(file)
+		return file;
+	else
+		throw XqInvalidFile("Unknown file type", __FILE__, __LINE__);
 
 	return newFile;
 }

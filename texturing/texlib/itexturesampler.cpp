@@ -29,6 +29,7 @@
 #include "texturesampler.h"
 #include "tilearray.h"
 #include "texturebuffer.h"
+#include "mipmaptexturesampler.h"
 
 #include "itexinputfile.h"
 
@@ -77,11 +78,46 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 			new CqTextureSampler<CqTextureBuffer<TqUchar> >(boost::shared_ptr<CqTextureBuffer<TqUchar> >()));
 }
 
+boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(const char* fileName)
+{
+	boost::shared_ptr<IqMultiTexInputFile> file = IqMultiTexInputFile::open(fileName);
+	switch(file->header().channelList().sharedChannelType())
+	{
+		case Channel_Float32:
+		case Channel_Unsigned32:
+		case Channel_Signed32:
+			break;
+		case Channel_Float16:
+		case Channel_Unsigned16:
+		case Channel_Signed16:
+			break;
+		case Channel_Unsigned8:
+			{
+				boost::shared_ptr<CqLevelSamplerCache<CqTextureBuffer<TqUchar> > >
+					levels(new CqLevelSamplerCache<CqTextureBuffer<TqUchar> >(file));
+				boost::shared_ptr<IqTextureSampler>
+					sampler(new CqMipmapTextureSampler<TqUchar>(levels));
+				return sampler;
+			}
+		case Channel_Signed8:
+		case Channel_TypeUnknown:
+			break;
+	}
+	// shut up compiler warnings - return a null texture
+	assert(0);
+	return boost::shared_ptr<IqTextureSampler>();
+}
 
 const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const
 {
 	static const CqTextureSampleOptions defaultOptions;
 	return defaultOptions;
+}
+
+const CqTexFileHeader* IqTextureSampler::fileAttributes() const
+{
+	// Default implementation - return null.
+	return 0;
 }
 
 } // namespace Aqsis
