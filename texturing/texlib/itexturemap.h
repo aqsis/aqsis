@@ -52,9 +52,8 @@ class CqTexFileHeader;
  * Direct access to attributes of the underlying texture file is provided via
  * the fileAttributes() method.
  *
- * \todo Rename this to IqTextureMapOld after the old IqTextureMap2 is removed.
  */
-class AQSISTEX_SHARE IqTextureMap2
+class AQSISTEX_SHARE IqTextureMap
 {
 	public:
 		/** \brief Get the texture attributes of the underlying file.
@@ -82,7 +81,7 @@ class AQSISTEX_SHARE IqTextureMap2
 		 */
 		virtual inline const CqTextureSampleOptions& sampleOptions() const = 0;
 
-		virtual ~IqTextureMap2() {}
+		virtual ~IqTextureMap() {}
 };
 
 } // namespace Aqsis

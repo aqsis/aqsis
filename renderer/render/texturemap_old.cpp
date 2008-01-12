@@ -41,7 +41,7 @@
 #include	"renderer.h"
 #include	"converter.h"
 #include	"logging.h"
-#include	"texturemap2.h"
+#include	"texturemap.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -389,7 +389,7 @@ void CqTextureMapOld::CriticalMeasure()
 	TqInt now; 
 	//TqInt current;
 	static TqInt limit = -1;
-	std::vector<CqTextureMap2Wrapper*>::iterator j;
+	std::vector<CqTextureMapWrapper*>::iterator j;
 	std::list<CqTextureMapBuffer*>::iterator i;
 	std::list<CqTextureMapBuffer*>::iterator e;
 
@@ -406,7 +406,7 @@ void CqTextureMapOld::CriticalMeasure()
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
 // The following is commented out, as the old cache mechanism will be obsolete
-// with CqTextureMap2.
+// with CqTextureMap.
 #if 0
 	bool getout = true;
 
@@ -532,11 +532,11 @@ CqTextureMapOld::~CqTextureMapOld()
 	// Close the file.
 	Close();
 
-// Commented out: old cache mechanism is obsolete for CqTextureMap2 (but needs
+// Commented out: old cache mechanism is obsolete for CqTextureMap (but needs
 // to be replaced)
 #if 0
 	// Search for it in the cache and remove the reference.
-	std::vector<CqTextureMap2Wrapper*>::iterator i;
+	std::vector<CqTextureMapWrapper*>::iterator i;
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
@@ -1059,11 +1059,11 @@ IqTextureMapOld* CqTextureMapOld::GetTextureMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap2Wrapper* pNew = new CqTextureMap2Wrapper( strName );
+	CqTextureMapWrapper* pNew = new CqTextureMapWrapper( strName );
 	pNew->Open();
 
 	// Ensure that it is in the correct format
-// Commented out for transition to CqTextureMap2
+// Commented out for transition to CqTextureMap
 #if 0
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{

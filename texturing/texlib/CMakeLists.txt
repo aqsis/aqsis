@@ -26,7 +26,7 @@ SET(AQSISTEX_SRCS
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
 	texturecache.cpp
-	texturemap2.cpp
+	texturemap.cpp
 	texturesampleoptions.cpp
 	imagechannel.cpp
 	mixedimagebuffer.cpp
@@ -54,7 +54,7 @@ SET(AQSISTEX_HDRS
 	texfileattributes.h
 	texfileheader.h
 	texturebuffer.h
-	texturemap2.h
+	texturemap.h
 	texturesampleoptions.h
 	texturesampler.h
 	tiffdirhandle.h

@@ -27,7 +27,7 @@
 #include "texturecache.h"
 
 #include "exception.h"
-#include "texturemap2.h"
+#include "texturemap.h"
 #include "logging.h"
 
 namespace Aqsis {
@@ -40,15 +40,15 @@ inline CqTextureCache::CqTextureCache()
 	: m_cache()//, m_searchPaths(searchPaths)
 { }
 
-inline boost::shared_ptr<IqTextureMap2> CqTextureCache::findTexture(
+inline boost::shared_ptr<IqTextureMap> CqTextureCache::findTexture(
 		const std::string& name)
 {
 	TqUlong hash = CqString::hash(name.c_str());
 	TqCacheMap::const_iterator texIter = m_cache.find(hash);
 	if(texIter != m_cache.end())
-		return boost::shared_ptr<IqTextureMap2>(new CqTextureMap2(texIter->second));
+		return boost::shared_ptr<IqTextureMap>(new CqTextureMap(texIter->second));
 	else
-		return boost::shared_ptr<IqTextureMap2>(new CqTextureMap2(addTexture(name)));
+		return boost::shared_ptr<IqTextureMap>(new CqTextureMap(addTexture(name)));
 }
 
 boost::shared_ptr<IqTextureSampler> CqTextureCache::addTexture(

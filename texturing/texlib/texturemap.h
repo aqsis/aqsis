@@ -35,7 +35,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "itexturemap_old.h"
-#include "itexturemap2.h"
+#include "itexturemap.h"
 #include "itexturesampler.h"
 #include "sstring.h"
 #include "texfileheader.h"
@@ -46,12 +46,11 @@ namespace Aqsis
 //------------------------------------------------------------------------------
 /* \brief A multi-resolution filtering texture sampler
  *
- * \todo Rename this to CqTextureMapOld after the old CqTextureMapOld is removed.
  */
-class AQSISTEX_SHARE CqTextureMap2 : public IqTextureMap2
+class AQSISTEX_SHARE CqTextureMap : public IqTextureMap
 {
 	public:
-		CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler);
+		CqTextureMap(const boost::shared_ptr<IqTextureSampler>& sampler);
 		/** \brief Get the texture attributes of the underlying file.
 		 *
 		 * This function allows access to the texture file attributes such as
@@ -83,15 +82,15 @@ class AQSISTEX_SHARE CqTextureMap2 : public IqTextureMap2
 		CqTextureSampleOptions m_sampleOptions;  ///< sampler options
 };
 
-/** Temporary wrapper class for CqTextureMap2 to squash it into the shape of
+/** Temporary wrapper class for CqTextureMap to squash it into the shape of
  * the old IqTextureMapOld interface.
  *
  * \todo Remove when the new IqTextureMapOld interface is in place.
  */
-class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMapOld
+class AQSISTEX_SHARE CqTextureMapWrapper : public IqTextureMapOld
 {
 	public:
-		CqTextureMap2Wrapper(const std::string& texName);
+		CqTextureMapWrapper(const std::string& texName);
 
 		// The following are overridden from IqTextureMapOld.  It's rather a fat
 		// interface and badly needs to be slimmed down.
@@ -123,7 +122,7 @@ class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMapOld
 	private:
 		static boost::shared_ptr<IqTextureSampler> newWrappedTexture(const char* texName);
 		mutable CqString m_texName;
-		CqTextureMap2 m_realMap;
+		CqTextureMap m_realMap;
 };
 
 
@@ -131,82 +130,82 @@ class AQSISTEX_SHARE CqTextureMap2Wrapper : public IqTextureMapOld
 // Implementation details
 //==============================================================================
 
-inline const CqTexFileHeader* CqTextureMap2::fileAttributes() const
+inline const CqTexFileHeader* CqTextureMap::fileAttributes() const
 {
 	return m_sampler->fileAttributes();
 }
 
-inline CqTextureSampleOptions& CqTextureMap2::sampleOptions()
+inline CqTextureSampleOptions& CqTextureMap::sampleOptions()
 {
 	return m_sampleOptions;
 }
 
-inline const CqTextureSampleOptions& CqTextureMap2::sampleOptions() const
+inline const CqTextureSampleOptions& CqTextureMap::sampleOptions() const
 {
 	return m_sampleOptions;
 }
 
 
 //------------------------------------------------------------------------------
-// CqTextureMap2Wrapper implementation
+// CqTextureMapWrapper implementation
 
-inline TqUint CqTextureMap2Wrapper::XRes() const
+inline TqUint CqTextureMapWrapper::XRes() const
 {
 	// \todo implementation
 	assert(0);
 	return 512;
 }
 
-inline TqUint CqTextureMap2Wrapper::YRes() const
+inline TqUint CqTextureMapWrapper::YRes() const
 {
 	// \todo implementation
 	assert(0);
 	return 512;
 }
 
-inline TqInt CqTextureMap2Wrapper::SamplesPerPixel() const
+inline TqInt CqTextureMapWrapper::SamplesPerPixel() const
 {
 	// \todo implementation
 	return m_realMap.numSamples();
 }
 
-inline EqTexFormat CqTextureMap2Wrapper::Format() const
+inline EqTexFormat CqTextureMapWrapper::Format() const
 {
 	// \todo implementation
 	return TexFormat_MIPMAP;
 }
 
-inline EqMapType CqTextureMap2Wrapper::Type() const
+inline EqMapType CqTextureMapWrapper::Type() const
 {
 	return MapType_Texture;
 }
 
-inline const CqString& CqTextureMap2Wrapper::getName() const
+inline const CqString& CqTextureMapWrapper::getName() const
 {
 	return m_texName;
 }
 
-inline bool CqTextureMap2Wrapper::IsValid() const
+inline bool CqTextureMapWrapper::IsValid() const
 {
 	// \todo implementation
 	return true;
 }
 
-inline void CqTextureMap2Wrapper::SampleMap(CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+inline void CqTextureMapWrapper::SampleMap(CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
 		std::valarray<TqFloat>& val, TqInt index,
 		TqFloat* average_depth, TqFloat* shadow_depth)
 {
 	assert(false);
 }
 
-inline void CqTextureMap2Wrapper::SampleMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3,
+inline void CqTextureMapWrapper::SampleMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3,
 		CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index,
 		TqFloat* average_depth, TqFloat* shadow_depth)
 {
 	assert(false);
 }
 
-inline TqInt CqTextureMap2Wrapper::NumPages() const
+inline TqInt CqTextureMapWrapper::NumPages() const
 {
 	return 1;
 }
