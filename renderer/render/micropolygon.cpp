@@ -512,7 +512,6 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now shade the grid.
-	//theStats.SurfaceTimer().Start();
 	if ( pshadSurface )
 	{
 		TIME_SCOPE("Surface shading")
@@ -520,14 +519,18 @@ void CqMicroPolyGrid::Shade()
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
 		pshadSurface->Evaluate( m_pShaderExecEnv );
 	}
-	//theStats.SurfaceTimer().Stop();
 
-	// Now try and cull any true transparent MPs (assigned by the shader code
+	// Perform atmosphere shading
+	if ( pshadAtmosphere )
+	{
+		TIME_SCOPE("Atmosphere shading")
+		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
+	}
 
+	// Now try to cull any true transparent MPs (assigned by the shader code
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
-		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion culling")
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -539,7 +542,6 @@ void CqMicroPolyGrid::Shade()
 			else
 				break;
 		}
-		//theStats.OcclusionCullTimer().Stop();
 
 		if ( cCulled == gs )
 		{
@@ -548,14 +550,6 @@ void CqMicroPolyGrid::Shade()
 			DeleteVariables( true );
 			return ;
 		}
-	}
-	// Now perform atmosphere shading
-	if ( pshadAtmosphere )
-	{
-		TIME_SCOPE("Atmosphere shading")
-		//theStats.AtmosphereTimer().Start();
-		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
-		//theStats.AtmosphereTimer().Stop();
 	}
 
 	DeleteVariables( false );
