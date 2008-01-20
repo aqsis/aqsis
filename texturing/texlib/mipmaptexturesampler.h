@@ -61,7 +61,7 @@ class CqMipmapTextureSampler : public IqTextureSampler
 		CqMipmapTextureSampler(const boost::shared_ptr<TqCacheType>& levels);
 
 		// from IqTextureSampler
-		virtual void filter(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
@@ -80,7 +80,7 @@ CqMipmapTextureSampler<T>::CqMipmapTextureSampler(
 { }
 
 template<typename T>
-void CqMipmapTextureSampler<T>::filter(const SqSampleQuad& sampleQuad,
+void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	SqSampleQuad quad = sampleQuad;

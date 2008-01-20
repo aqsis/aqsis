@@ -46,7 +46,7 @@ class CqTexFileHeader;
  * This intent of this interface is to provide texture sampling facilities
  * independently of the sampling options.  Classes which implement the
  * interface should attempt to use the sampling method as specified by a
- * CqTexutureSampleOptions, passed to the filter() interface function.
+ * CqTexutureSampleOptions, passed to the sample() interface function.
  *
  */
 class AQSISTEX_SHARE IqTextureSampler
@@ -58,7 +58,7 @@ class AQSISTEX_SHARE IqTextureSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		virtual void filter(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.
@@ -72,12 +72,6 @@ class AQSISTEX_SHARE IqTextureSampler
 		 * texutre wrap mode).
 		 */
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
-
-		/** \brief Get the file attribute header associated with the texture.
-		 *
-		 * \return The file attributes, or NULL if there is no underlying file.
-		 */
-		virtual const CqTexFileHeader* fileAttributes() const;
 
 		/** \brief Create and return a IqTextureSampler derived class
 		 *

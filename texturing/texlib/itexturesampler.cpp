@@ -114,10 +114,4 @@ const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const
 	return defaultOptions;
 }
 
-const CqTexFileHeader* IqTextureSampler::fileAttributes() const
-{
-	// Default implementation - return null.
-	return 0;
-}
-
 } // namespace Aqsis

@@ -50,7 +50,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 	public:
 		CqTextureSampler(const boost::shared_ptr<ArrayT>& texData);
 		// from IqTextureSampler
-		virtual void filter(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 	private:
 		inline TqFloat wrapCoord(TqFloat pos, EqWrapMode mode) const;
@@ -135,7 +135,7 @@ inline CqTextureSampler<ArrayT>::CqTextureSampler(
 { }
 
 template<typename ArrayT>
-void CqTextureSampler<ArrayT>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+void CqTextureSampler<ArrayT>::sample(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	SqSampleQuad sampleQuadRemap(sampleQuad);
 	sampleQuadRemap.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,

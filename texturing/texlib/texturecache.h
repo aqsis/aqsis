@@ -34,7 +34,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexturemap.h"
+#include "itexturesampler.h"
 
 namespace Aqsis {
 
@@ -52,7 +52,7 @@ class CqTextureCache
 		 *
 		 * \param name - the texture name.
 		 */
-		inline boost::shared_ptr<IqTextureMap> findTexture(const std::string& name);
+		inline IqTextureSampler& findTexture(const std::string& name);
 	private:
 		typedef std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > TqCacheMap;
 
@@ -61,7 +61,7 @@ class CqTextureCache
 		 * If the file isn't found, we issue a warning, and a dummy texture is
 		 * created instead so that the render can continue.
 		 */
-		boost::shared_ptr<IqTextureSampler> addTexture(const std::string& name);
+		IqTextureSampler& addTexture(const std::string& name);
 
 		/// Cached textures live in here
 		TqCacheMap m_cache;

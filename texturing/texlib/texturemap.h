@@ -35,7 +35,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "itexturemap_old.h"
-#include "itexturemap.h"
 #include "itexturesampler.h"
 #include "sstring.h"
 #include "texfileheader.h"
@@ -43,47 +42,8 @@
 namespace Aqsis
 {
 
-//------------------------------------------------------------------------------
-/* \brief A multi-resolution filtering texture sampler
- *
- */
-class AQSISTEX_SHARE CqTextureMap : public IqTextureMap
-{
-	public:
-		CqTextureMap(const boost::shared_ptr<IqTextureSampler>& sampler);
-		/** \brief Get the texture attributes of the underlying file.
-		 *
-		 * This function allows access to the texture file attributes such as
-		 * transformation matrices, image resolution etc.
-		 *
-		 * \return Underlying file attributes, or 0 if there isn't an
-		 * underlying file.
-		 */
-		virtual inline const CqTexFileHeader* fileAttributes() const;
-		/// \todo Decide if these two methods are actually needed.
-		virtual TqInt numSamples() const;
-
-		/** \brief Sample the texture map.
-		 *
-		 * \param sampleQuad - quadrilateral region to sample over
-		 * \param outSamples - the output samples will be placed here.
-		 */
-		virtual inline void sampleMap(const SqSampleQuad& sampleQuad,
-				TqFloat* outSamples) const;
-
-		/** \brief Get the current sample options
-		 */
-		virtual inline CqTextureSampleOptions& sampleOptions();
-		/** \brief Get the current sample options (const version)
-		 */
-		virtual inline const CqTextureSampleOptions& sampleOptions() const;
-	private:
-		boost::shared_ptr<IqTextureSampler> m_sampler; ///< Underlying sampler to use.
-		CqTextureSampleOptions m_sampleOptions;  ///< sampler options
-};
-
-/** Temporary wrapper class for CqTextureMap to squash it into the shape of
- * the old IqTextureMapOld interface.
+/** Temporary wrapper class for IqTextureSampler to squash it into the shape of
+ * the IqTextureMapOld interface.
  *
  * \todo Remove when the new IqTextureMapOld interface is in place.
  */
@@ -120,33 +80,15 @@ class AQSISTEX_SHARE CqTextureMapWrapper : public IqTextureMapOld
 
 		virtual TqInt NumPages() const;
 	private:
-		static boost::shared_ptr<IqTextureSampler> newWrappedTexture(const char* texName);
 		mutable CqString m_texName;
-		CqTextureMap m_realMap;
+		boost::shared_ptr<IqTextureSampler> m_realMap;
+		CqTextureSampleOptions m_sampleOpts;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-inline const CqTexFileHeader* CqTextureMap::fileAttributes() const
-{
-	return m_sampler->fileAttributes();
-}
-
-inline CqTextureSampleOptions& CqTextureMap::sampleOptions()
-{
-	return m_sampleOptions;
-}
-
-inline const CqTextureSampleOptions& CqTextureMap::sampleOptions() const
-{
-	return m_sampleOptions;
-}
-
-
-//------------------------------------------------------------------------------
 // CqTextureMapWrapper implementation
 
 inline TqUint CqTextureMapWrapper::XRes() const
@@ -166,7 +108,7 @@ inline TqUint CqTextureMapWrapper::YRes() const
 inline TqInt CqTextureMapWrapper::SamplesPerPixel() const
 {
 	// \todo implementation
-	return m_realMap.numSamples();
+	return 3;
 }
 
 inline EqTexFormat CqTextureMapWrapper::Format() const

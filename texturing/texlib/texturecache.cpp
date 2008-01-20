@@ -40,18 +40,17 @@ inline CqTextureCache::CqTextureCache()
 	: m_cache()//, m_searchPaths(searchPaths)
 { }
 
-inline boost::shared_ptr<IqTextureMap> CqTextureCache::findTexture(
-		const std::string& name)
+inline IqTextureSampler& CqTextureCache::findTexture(const std::string& name)
 {
 	TqUlong hash = CqString::hash(name.c_str());
 	TqCacheMap::const_iterator texIter = m_cache.find(hash);
 	if(texIter != m_cache.end())
-		return boost::shared_ptr<IqTextureMap>(new CqTextureMap(texIter->second));
+		return *(texIter->second);
 	else
-		return boost::shared_ptr<IqTextureMap>(new CqTextureMap(addTexture(name)));
+		return addTexture(name);
 }
 
-boost::shared_ptr<IqTextureSampler> CqTextureCache::addTexture(
+IqTextureSampler& CqTextureCache::addTexture(
 		const std::string& name)
 {
 	boost::shared_ptr<IqTextureSampler> newTex;
@@ -69,7 +68,7 @@ boost::shared_ptr<IqTextureSampler> CqTextureCache::addTexture(
 		assert(0);
 	}
 	m_cache[CqString::hash(name.c_str())] = newTex;
-	return newTex;
+	return *newTex;
 }
 
 
