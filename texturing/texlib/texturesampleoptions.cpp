@@ -26,9 +26,11 @@
  */
 
 #include "texturesampleoptions.h"
+
 #include <string.h>
 
 #include "logging.h"
+#include "texfileheader.h"
 
 namespace Aqsis
 {
@@ -48,6 +50,11 @@ EqTextureFilter texFilterTypeFromString(const char* filterName)
 
 //------------------------------------------------------------------------------
 // CqTextureSampleOptions implementation
+
+void CqTextureSampleOptions::fillFromFileHeader(CqTexFileHeader& header)
+{
+	/// \todo implementation
+}
 
 void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad) const
 {

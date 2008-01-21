@@ -73,6 +73,9 @@ class AQSISTEX_SHARE IqTextureSampler
 		 */
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 
+		//--------------------------------------------------
+		/// \name Factory functions
+		//@{
 		/** \brief Create and return a IqTextureSampler derived class
 		 *
 		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
@@ -85,6 +88,7 @@ class AQSISTEX_SHARE IqTextureSampler
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqTexInputFile>& file);
 		static boost::shared_ptr<IqTextureSampler> create(const char* fileName);
+		//@}
 
 		virtual ~IqTextureSampler() {}
 };

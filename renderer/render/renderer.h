@@ -45,6 +45,7 @@
 #include	"irenderer.h"
 #include	"iraytrace.h"
 #include	"iraytrace.h"
+#include	"texturecache.h"
 
 #include	"clippingvolume.h"
 
@@ -201,7 +202,7 @@ class CqRenderer : public IqRenderer
 			std::cout << str;
 		}
 
-		virtual	IqTextureMapOld* GetTextureMap( const CqString& strFileName );
+		virtual	const IqTextureSampler& GetTextureMap(const char* fileName);
 		virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strFileName );
 		virtual	IqTextureMapOld* GetShadowMap( const CqString& strFileName );
 		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
@@ -513,6 +514,10 @@ class CqRenderer : public IqRenderer
 		EqRenderMode	m_Mode;
 		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
+
+		// Texture caches
+		CqTextureCache m_textureCache; ///< Cache for plain textures
+		 
 
 		bool	m_fSaveGPrims;
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.

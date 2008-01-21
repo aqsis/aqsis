@@ -11,13 +11,13 @@
 #ifndef	___irenderer_Loaded___
 #define	___irenderer_Loaded___
 
-#include	"matrix.h"
-//#include	"symbols.h"
-#include 	"itransform.h"
+#include "matrix.h"
+#include "itransform.h"
 
 START_NAMESPACE( Aqsis )
 
 struct IqTextureMapOld;
+class IqTextureSampler;
 class CqObjectInstance;
 
 struct IqRenderer
@@ -57,12 +57,18 @@ struct IqRenderer
 	 *  Access to the texture map handling component
 	 */
 
-	/** Get a pointer to a loaded texturemap ready for processing.
+	/** \brief Get a reference to a texture sampler.
+	 *
+	 * Failure to load the texture from a file will result in a dummy texture
+	 * sampler object being returned.
+	 *
+	 * \param fileName - File name to search for in the texture resource path.
+	 * \return the texture sampler (always valid).
 	 */
-	virtual	IqTextureMapOld* GetTextureMap( const CqString& strFileName ) = 0;
-	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strName ) = 0;
-	virtual	IqTextureMapOld* GetShadowMap( const CqString& strName ) = 0;
-	virtual	IqTextureMapOld* GetLatLongMap( const CqString& strName ) = 0;
+	virtual	const IqTextureSampler& GetTextureMap(const char* fileName) = 0;
+	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
+	virtual	IqTextureMapOld* GetShadowMap( const CqString& fileName ) = 0;
+	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
 
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;

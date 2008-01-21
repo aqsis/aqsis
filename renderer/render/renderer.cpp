@@ -74,6 +74,7 @@ static CqMatrix oldresult[2];
 CqRenderer::CqRenderer() :
 		m_pImageBuffer( 0 ),
 		m_Mode( RenderMode_Image ),
+		m_textureCache(),
 		m_fSaveGPrims( false ),
 		m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 		m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
@@ -1645,9 +1646,9 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-IqTextureMapOld* CqRenderer::GetTextureMap( const CqString& strFileName )
+const IqTextureSampler& CqRenderer::GetTextureMap(const char* fileName)
 {
-	return ( CqTextureMapOld::GetTextureMap( strFileName ) );
+	return m_textureCache.findTexture(fileName);
 }
 
 IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )

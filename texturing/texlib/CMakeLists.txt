@@ -54,6 +54,7 @@ SET(AQSISTEX_HDRS
 	texfileattributes.h
 	texfileheader.h
 	texturebuffer.h
+	texturecache.h
 	texturemap.h
 	texturesampleoptions.h
 	texturesampler.h

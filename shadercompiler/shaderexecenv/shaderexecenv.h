@@ -137,8 +137,6 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 
 #define	GET_FILTER_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f; \
 							GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
-#define	GET_TEXTURE_PARAMS	std::map<std::string, IqShaderData*> paramMap; \
-							GetTexParams(cParams, apParams, paramMap);
 
 
 //----------------------------------------------------------------------
@@ -385,20 +383,6 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 					_pswidth = f;
 				else if ( strParam.compare( "twidth" ) == 0 )
 					_ptwidth = f;
-				i += 2;
-				cParams -= 2;
-			}
-		}
-		/** Internal function to extract additional named texture control parameters from an array of stack entries.
-		 */
-		void	GetTexParams( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
-		{
-			CqString strParam;
-			TqInt i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				map[ strParam ] = apParams[ i + 1 ];
 				i += 2;
 				cParams -= 2;
 			}

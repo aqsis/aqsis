@@ -35,6 +35,8 @@
 namespace Aqsis
 {
 
+class CqTexFileHeader;
+
 //----------------------------------------------------------------------
 /** \brief Texture filter types
  *
@@ -83,11 +85,11 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 				TqInt startChannel, TqInt numChannels,
 				TqInt numSamples, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
 		/** Default constructor
-		*
-		* Set all numerical quantities to 0 except for numSamples and numChannels
-		* which are set to 1.  The filter is set to gaussian, and wrap modes to
-		* black.
-		*/
+		 *
+		 * Set all numerical quantities to 0 except for sWidth, tWidth,
+		 * numSamples and numChannels which are set to 1.  The filter is set to
+		 * gaussian, and wrap modes to black.
+		 */
 		inline CqTextureSampleOptions();
 
 		//--------------------------------------------------
@@ -149,6 +151,16 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		/// Set the wrap mode in the t-direction
 		inline void setTWrapMode(EqWrapMode tWrapMode);
 		//@}
+
+		/** \brief Extract sample options from a texture file header.
+		 *
+		 * As many relevant texture file attributes are extracted from the
+		 * header as possible and used to fill the fields of the sample options
+		 * object.
+		 *
+		 * \param header - extract options from here.
+		 */
+		void fillFromFileHeader(CqTexFileHeader& header);
 
 		//--------------------------------------------------
 		/** \brief Adjust a sample quad to take into account the width
@@ -232,8 +244,8 @@ inline CqTextureSampleOptions::CqTextureSampleOptions( TqFloat sBlur, TqFloat tB
 inline CqTextureSampleOptions::CqTextureSampleOptions()
 	: m_sBlur(0),
 	m_tBlur(0),
-	m_sWidth(0),
-	m_tWidth(0),
+	m_sWidth(1),
+	m_tWidth(1),
 	m_filterType(TextureFilter_Gaussian),
 	m_fill(0),
 	m_startChannel(0),

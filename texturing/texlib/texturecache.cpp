@@ -27,22 +27,23 @@
 #include "texturecache.h"
 
 #include "exception.h"
-#include "texturemap.h"
 #include "logging.h"
+#include "sstring.h"
+#include "itexturesampler.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqTextureCache
 
-inline CqTextureCache::CqTextureCache()
+CqTextureCache::CqTextureCache()
 		//const boost::shared_ptr<CqFilePathList>& searchPaths)
 	: m_cache()//, m_searchPaths(searchPaths)
 { }
 
-inline IqTextureSampler& CqTextureCache::findTexture(const std::string& name)
+IqTextureSampler& CqTextureCache::findTexture(const char* name)
 {
-	TqUlong hash = CqString::hash(name.c_str());
+	TqUlong hash = CqString::hash(name);
 	TqCacheMap::const_iterator texIter = m_cache.find(hash);
 	if(texIter != m_cache.end())
 		return *(texIter->second);
@@ -50,14 +51,13 @@ inline IqTextureSampler& CqTextureCache::findTexture(const std::string& name)
 		return addTexture(name);
 }
 
-IqTextureSampler& CqTextureCache::addTexture(
-		const std::string& name)
+IqTextureSampler& CqTextureCache::addTexture(const char* name)
 {
 	boost::shared_ptr<IqTextureSampler> newTex;
 	try
 	{
 		//newTex.reset(new IqTextureSampler(m_searchPaths->findFile()));
-		newTex = IqTextureSampler::create(name.c_str());
+		newTex = IqTextureSampler::create(name);
 	}
 	catch(XqInvalidFile& e)
 	{
@@ -67,7 +67,7 @@ IqTextureSampler& CqTextureCache::addTexture(
 		// in here.
 		assert(0);
 	}
-	m_cache[CqString::hash(name.c_str())] = newTex;
+	m_cache[CqString::hash(name)] = newTex;
 	return *newTex;
 }
 
