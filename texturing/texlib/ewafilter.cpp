@@ -109,7 +109,9 @@ void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 	const TqFloat reconsVar = 1.3/(2*M_PI);
 	// "Prefilter" variance - this is the variance of the antialiasing filter
 	// which is used immediately before resampling onto the discrete grid.
-	const TqFloat prefilterVar = 2.0/(2*M_PI);
+	//
+	/// \todo Make sure the prefilter variance is optimized for a good tradeoff between sharpness and aliasing.
+	const TqFloat prefilterVar = 1.3/(2*M_PI);
 	// Construct the covariance matrix, coVar.
 	//
 	// Note: This looks slightly different from Heckbert's thesis, since
