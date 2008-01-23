@@ -303,6 +303,7 @@ void CqTextureBuffer<T>::applyFilter(SampleAccumT& sampleAccum,
 		const SqFilterSupport& support,
 		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
 {
+	sampleAccum.setSampleVectorLength(m_numChannels);
 	if( support.inRange(0, m_width, 0, m_height) )
 	{
 		// The bounds for the filter support are all inside the texture; do

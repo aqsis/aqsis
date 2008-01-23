@@ -141,7 +141,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		/// Set the start channel index where channels will be read from.
 		inline void setStartChannel(TqInt startChannel);
 		/// Set the number of channels to sample
-		inline void setNumChannels(TqInt numChannels);
+		inline void setNumChannels(TqInt numChans);
 		/// Set the number of samples used by stochastic sampling methods.
 		inline void setNumSamples(TqInt numSamples);
 		/// Set the wrap mode in both directions
@@ -160,7 +160,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		 *
 		 * \param header - extract options from here.
 		 */
-		void fillFromFileHeader(CqTexFileHeader& header);
+		void fillFromFileHeader(const CqTexFileHeader& header);
 
 		//--------------------------------------------------
 		/** \brief Adjust a sample quad to take into account the width
@@ -198,8 +198,6 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		TqInt m_startChannel;
 		/// Number of channels to sample from the texture.
 		TqInt m_numChannels;
-		/// Limit on the number of channels in the associated texture file.
-		//TqInt m_numChannelsLimit;
 		/// Number of samples to take when using a stochastic sampler
 		TqInt m_numSamples;
 		/// Wrap modes specifying what the sampler should do with (s,t) coordinates
@@ -368,10 +366,10 @@ inline void CqTextureSampleOptions::setStartChannel(TqInt startChannel)
 	m_startChannel = startChannel;
 }
 
-inline void CqTextureSampleOptions::setNumChannels(TqInt numChannels)
+inline void CqTextureSampleOptions::setNumChannels(TqInt numChans)
 {
-	assert(numChannels >= 0);
-	m_numChannels = numChannels;
+	assert(numChans >= 0);
+	m_numChannels = numChans;
 }
 
 inline void CqTextureSampleOptions::setNumSamples(TqInt numSamples)

@@ -100,7 +100,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 
 	// filter the texture.
 	CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
-			sampleOpts.startChannel(), sampleOpts.numChannels(), outSamps);
+			sampleOpts.startChannel(), sampleOpts.numChannels(),
+			outSamps, sampleOpts.fill());
 
 	if(level > 0)
 	{

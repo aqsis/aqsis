@@ -116,7 +116,7 @@ CqLevelSamplerCache<TextureBufferT>::CqLevelSamplerCache(
 			m_levels[i].reset(new TextureBufferT());
 			m_texFile->readPixels(*m_levels[i]);
 		}
-		/// \todo: Init default sampling opts from texture file
+		m_defaultSampleOptions.fillFromFileHeader(m_texFile->header());
 	}
 	else
 	{

@@ -51,9 +51,10 @@ EqTextureFilter texFilterTypeFromString(const char* filterName)
 //------------------------------------------------------------------------------
 // CqTextureSampleOptions implementation
 
-void CqTextureSampleOptions::fillFromFileHeader(CqTexFileHeader& header)
+void CqTextureSampleOptions::fillFromFileHeader(const CqTexFileHeader& header)
 {
-	/// \todo implementation
+	/// \todo Find a way to store & retrieve the downsampling filter?
+	/// \todo Retreive texture wrap modes
 }
 
 void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad) const

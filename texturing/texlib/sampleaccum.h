@@ -54,7 +54,7 @@ namespace Aqsis {
  *   a.accumulate(x, y, s(x,y))
  * end
  *
- * This example illustrates the single method which classes conforming to
+ * This example illustrates the one of the methods which classes conforming to
  * SampleAccumulatorConcept must implement:
  *
  * template<typename SampleVectorT>
@@ -62,6 +62,12 @@ namespace Aqsis {
  *
  * SampleVectorT is assumed to be some type which has an indexing operator[]
  * which returns floating point values.
+ *
+ * A further method should also be implemented for the SampleAccumulatorConcept:
+ * the accumulator needs an efficient way to determine the length of the
+ * samples, this is provided by the method:
+ *
+ * void setSampleVectorLength(TqInt sampleVectorLength);
  */
 
 /** \brief A class to accumulate weighted sample data during filtering.
@@ -87,9 +93,22 @@ class CqSampleAccum
 		 *                    accumulated sample vectors
 		 * \param numChans - number of channels in the result
 		 * \param resultBuf - float buffer to place the filtered result into.
+		 * \param fill - value to fill nonexistant channels with.
 		 */
 		inline CqSampleAccum(const FilterWeightT& filterWeights,
-				TqInt startChan, TqInt numChans, TqFloat* resultBuf);
+				TqInt startChan, TqInt numChans, TqFloat* resultBuf,
+				TqFloat fill = 0);
+
+		/** \brief Set length for sample vectors passed to accumulate().
+		 *
+		 * In principle, this information could be a part of the inSamples
+		 * parameter to accumulate(), but it's wasteful to have to check such
+		 * information at each invocation of accumulate() when all the sample
+		 * vectors should be the same length.
+		 *
+		 * \param length - the length of the sample vectors passed to accumulate.
+		 */
+		inline void setSampleVectorLength(TqInt sampleVectorLength);
 
 		/** \brief Accumulate a sample into the output buffer at the given position.
 		 *
@@ -106,7 +125,9 @@ class CqSampleAccum
 		const FilterWeightT& m_filterWeights;
 		TqInt m_startChan;
 		TqInt m_numChans;
+		TqInt m_numChansFill;
 		TqFloat* m_resultBuf;
+		TqFloat m_fill;
 		TqFloat m_totWeight;
 };
 
@@ -119,16 +140,43 @@ class CqSampleAccum
 template<typename FilterWeightT>
 inline CqSampleAccum<FilterWeightT>::CqSampleAccum(
 		const FilterWeightT& filterWeights, TqInt startChan, TqInt numChans,
-		TqFloat* resultBuf)
+		TqFloat* resultBuf, TqFloat fill)
 	: m_filterWeights(filterWeights),
 	m_startChan(startChan),
 	m_numChans(numChans),
+	m_numChansFill(0),
 	m_resultBuf(resultBuf),
+	m_fill(fill),
 	m_totWeight(0)
 {
 	// Zero the output channel on construction
 	for(TqInt i = 0; i < m_numChans; ++i)
 		m_resultBuf[i] = 0;
+}
+
+template<typename FilterWeightT>
+inline void CqSampleAccum<FilterWeightT>::setSampleVectorLength(TqInt sampleVectorLength)
+{
+	assert(sampleVectorLength > 0);
+	TqInt totNumChans = m_numChans + m_numChansFill;
+	if(m_startChan + totNumChans <= sampleVectorLength)
+	{
+		// All channels should be filled with sample data
+		m_numChans = totNumChans;
+		m_numChansFill = 0;
+	}
+	else if(m_startChan >= sampleVectorLength)
+	{
+		// All channels should be filled with the "fill" value
+		m_numChans = 0;
+		m_numChansFill = totNumChans;
+	}
+	else
+	{
+		// Some channels get sample data; some get fill values.
+		m_numChans = sampleVectorLength - m_startChan;
+		m_numChansFill = totNumChans - m_numChans;
+	}
 }
 
 template<typename FilterWeightT>
@@ -159,6 +207,9 @@ inline CqSampleAccum<FilterWeightT>::~CqSampleAccum()
 		for(TqInt i = 0; i < m_numChans; ++i)
 			m_resultBuf[i] *= renorm;
 	}
+	// Fill extra non-sampled channels with the "fill" value.
+	for(TqInt i = 0; i < m_numChansFill; ++i)
+		m_resultBuf[i+m_numChans] = m_fill;
 }
 
 } // namespace Aqsis
