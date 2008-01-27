@@ -186,7 +186,6 @@ class CqEwaFilterWeights
 //==============================================================================
 // Implementation details
 //==============================================================================
-
 inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad, 
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat logEdgeWeight, TqFloat maxAspectRatio)

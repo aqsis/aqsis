@@ -32,45 +32,29 @@
 #include "aqsis.h"
 
 #include <boost/shared_array.hpp>
-#include <boost/intrusive_ptr.hpp>
 
-#include "smartptr.h"
 #include "samplevector.h"
 #include "channellist.h"
-#include "filtersupport.h"
-#include "wrapmode.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief A class to hold the data from a single texture tile.
+/** \brief Holds homogeneous texture data in a flat buffer.
  *
- * This class is a container for tiles of texture data for which each pixel
- * holds the same number of channels as every other pixel.
- *
- * WARNING: Never allocate this class on the stack, especially without calling
- * intrusive_ptr_add_ref() on it immediately afterward.  Doing so and using the
- * indexing operator() which returns a CqSampleVector will result in multiple
- * deallocations.
+ * This class holds a flat buffer of texture data, in which the channel types
+ * are all the same.
  */
 template<typename T>
-class AQSISTEX_SHARE CqTextureBuffer // : public CqIntrusivePtrCounted
+class AQSISTEX_SHARE CqTextureBuffer
 {
 	public:
-		/** \brief The pointer type for use with texture tiles.
-		 *
-		 * We use intrusive_ptr here rather than shared_ptr since it's lightweight for
-		 * the construction of CqSampleVector objects.
-		 */
-		typedef boost::intrusive_ptr<CqTextureBuffer<T> > TqPtr;
-
-		/// Construct a texture tile with width = height = 0
+		/// Construct a texture buffer with width = height = 0
 		CqTextureBuffer();
 
-		/** \brief Construct a texture tile
+		/** \brief Construct a texture buffer
 		 *
-		 * \param width - tile width
-		 * \param height - tile height
+		 * \param width - buffer width
+		 * \param height - buffer height
 		 * \param numChannels - number of channels of type T per pixel.
 		 */
 		CqTextureBuffer(const TqInt width, const TqInt height,
@@ -87,18 +71,7 @@ class AQSISTEX_SHARE CqTextureBuffer // : public CqIntrusivePtrCounted
 		 */
 		void resize(TqInt width, TqInt height, const CqChannelList& channelList);
 
-		/** \brief Get the list of channels for the buffer.
-		 *
-		 * \return a (synthetic) list of channels with the correct type and
-		 * number for the buffer.
-		 */
-		CqChannelList channelList() const;
-
-		/// Get a pointer to the underlying raw data
-		inline TqUchar* rawData();
-		/// Get a pointer to the underlying raw data (const version)
-		inline const TqUchar* rawData() const;
-
+		//--------------------------------------------------
 		/// \name Indexing operations
 		//@{
 		/** \brief 2D Indexing operator - floating point pixel interface.
@@ -136,55 +109,37 @@ class AQSISTEX_SHARE CqTextureBuffer // : public CqIntrusivePtrCounted
 		inline const T* value(const TqInt x, const TqInt y) const;
 		//@}
 
-		/** \brief Filter kernel to apply 
+		//--------------------------------------------------
+		/// \name Access to buffer dimensions & metadata
+		//@{
+		/** \brief Get the list of channels for the buffer.
 		 *
-		 * \param sampleAccum - accumulator for sample data.  Must implement
-		 *                      SampleAccumulatorConcept
-		 * \param support - support region to iterate over
-		 * \param xWrapMode - wrap behaviour at the x-boundaries of the buffer
-		 * \param yWrapMode - wrap behaviour at the y-boundaries of the buffer
+		 * \return a (synthetic) list of channels with the correct type and
+		 * number for the buffer.
 		 */
-		template<typename SampleAccumT>
-		void applyFilter(SampleAccumT& sampleAccum,
-				const SqFilterSupport& support,
-				EqWrapMode xWrapMode, EqWrapMode yWrapMode) const;
-
+		CqChannelList channelList() const;
 		/// Get the buffer width
 		inline TqInt width() const;
-
 		/// Get the buffer height
 		inline TqInt height() const;
-
 		/// Get the number of channels per pixel
 		inline TqInt numChannels() const;
-	private:
-		/** \brief Apply a filter on the internal part of the buffer
-		 *
-		 * \param sampleAccum - accumulator for samples in the support
-		 * \param support - support for the filter; assumed to be fully
-		 *                  contained withing the image!
-		 */
-		template<typename SampleAccumT>
-		void applyFilterInternal(SampleAccumT& sampleAccum,
-				const SqFilterSupport& support) const;
-		/** \brief Apply a filter to the buffer near the edge
-		 *
-		 * \param sampleAccum - accumulator for samples in the support
-		 * \param support - support for the filter; may lie (partially)
-		 *                  outside the texture boundaries.
-		 * \param xWrapMode
-		 * \param yWrapMode - wrap modes for texture coordinates off the image
-		 *                    edge.
-		 */
-		template<typename SampleAccumT>
-		void applyFilterBoundary(SampleAccumT& sampleAccum,
-				const SqFilterSupport& support,
-				EqWrapMode xWrapMode, EqWrapMode yWrapMode) const;
+		//@}
 
+		//--------------------------------------------------
+		/// \name Access to raw pixel data
+		//@{
+		/// Get a pointer to the underlying raw data
+		inline TqUchar* rawData();
+		/// Get a pointer to the underlying raw data (const version)
+		inline const TqUchar* rawData() const;
+		//@}
+
+	private:
 		boost::shared_array<T> m_pixelData;	///< Pointer to the underlying pixel data.
 		TqInt m_width;				///< Width of the buffer
 		TqInt m_height;				///< Height of the buffer
-		TqInt m_numChannels;	///< Number of channels per pixel
+		TqInt m_numChannels;		///< Number of channels per pixel
 };
 
 
@@ -215,9 +170,6 @@ template<typename T>
 inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
 {
 	return CqSampleVector<T>(value(x,y));
-	/// \todo Have to think about how to do the below for the multi-threaded case...
-//	return CqSampleVector<T>(value(x,y),
-//			boost::intrusive_ptr<const CqIntrusivePtrCounted>(this));
 }
 
 template<typename T>
@@ -295,87 +247,6 @@ template<typename T>
 inline const TqUchar* CqTextureBuffer<T>::rawData() const
 {
 	return reinterpret_cast<const TqUchar*>(m_pixelData.get());
-}
-
-template<typename T>
-template<typename SampleAccumT>
-void CqTextureBuffer<T>::applyFilter(SampleAccumT& sampleAccum,
-		const SqFilterSupport& support,
-		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
-{
-	sampleAccum.setSampleVectorLength(m_numChannels);
-	if( support.inRange(0, m_width, 0, m_height) )
-	{
-		// The bounds for the filter support are all inside the texture; do
-		// simple and efficient filtering.
-		applyFilterInternal(sampleAccum, support);
-	}
-	else
-	{
-		SqFilterSupport modifiedSupport(support);
-		// If we get here, the filter support falls at least partially outside
-		// the texture range.
-		if(xWrapMode == WrapMode_Black)
-		{
-			modifiedSupport.sx.truncate(0, m_width);
-			if(modifiedSupport.sx.isEmpty())
-				return;
-		}
-		if(yWrapMode == WrapMode_Black)
-		{
-			modifiedSupport.sy.truncate(0, m_height);
-			if(modifiedSupport.sy.isEmpty())
-				return;
-		}
-		// Apply a filter using careful boundary checking.
-		applyFilterBoundary(sampleAccum, modifiedSupport, xWrapMode, yWrapMode);
-	}
-}
-
-template<typename T>
-template<typename SampleAccumT>
-void CqTextureBuffer<T>::applyFilterInternal(SampleAccumT& sampleAccum,
-		const SqFilterSupport& support) const
-{
-	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
-	{
-		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
-			sampleAccum.accumulate(x, y, (*this)(x,y));
-	}
-}
-
-inline TqInt wrapCoord(TqInt x, TqInt width, EqWrapMode wrapMode)
-{
-	switch(wrapMode)
-	{
-		case WrapMode_Black:
-			break;
-		case WrapMode_Periodic:
-			// the factor of 100 is a bit of a hack to try to make sure the
-			// returned x is always positive.  As long as we restrict to filter
-			// widths less than 100, this should do the trick...
-			return (x + 100*width) % width;
-		case WrapMode_Clamp:
-			return clamp(x, 0, width-1);
-	}
-	return x;
-}
-
-template<typename T>
-template<typename SampleAccumT>
-void CqTextureBuffer<T>::applyFilterBoundary(SampleAccumT& sampleAccum,
-		const SqFilterSupport& support,
-		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
-{
-	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
-	{
-		TqInt yWrap = wrapCoord(y, m_height, yWrapMode);
-		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
-		{
-			TqInt xWrap = wrapCoord(x, m_width, xWrapMode);
-			sampleAccum.accumulate(x, y, (*this)(xWrap, yWrap) );
-		}
-	}
 }
 
 template<typename T>

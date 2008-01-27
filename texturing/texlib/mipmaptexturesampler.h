@@ -35,6 +35,7 @@
 #include "itexturesampler.h"
 #include "levelsamplercache.h"
 #include "ewafilter.h"
+#include "texbufsampler.h" // remove when using tiled textures.
 #include "texturebuffer.h" // remove when using tiled textures.
 #include "sampleaccum.h"
 #include "aqsismath.h"
@@ -109,13 +110,13 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		weights.adjustTextureScale(
 				static_cast<TqFloat>(sampleBuf.width())/baseBuf.width(),
 				static_cast<TqFloat>(sampleBuf.height())/baseBuf.height() );
-		sampleBuf.applyFilter(accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		CqTexBufSampler<CqTextureBuffer<T> >(sampleBuf).applyFilter(accumulator,
+				weights.support(), sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
 	}
 	else
 	{
-		baseBuf.applyFilter(accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		CqTexBufSampler<CqTextureBuffer<T> >(baseBuf).applyFilter(accumulator,
+				weights.support(), sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
 	}
 
 	// Debug: insert an indicator of the mipmap level...

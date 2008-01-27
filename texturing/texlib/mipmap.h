@@ -32,7 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "aqsismath.h"
-#include "texturebuffer.h"
+#include "texbufsampler.h"
 #include "wrapmode.h"
 #include "cachedfilter.h"
 #include "sampleaccum.h"
@@ -109,6 +109,7 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 	TqInt newWidth = lceil(TqFloat(srcBuf.width())/mipmapRatio);
 	TqInt newHeight = lceil(TqFloat(srcBuf.height())/mipmapRatio);
 	TqInt numChannels = srcBuf.numChannels();
+	CqTexBufSampler<ChannelT> srcBufSampler(srcBuf);
 	boost::shared_ptr<CqTextureBuffer<ChannelT> > destBuf(
 			new CqTextureBuffer<ChannelT>(newWidth, newHeight, numChannels) );
 	TqInt filterOffsetX = (filterWeights.width()-1) / 2;
@@ -123,7 +124,7 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 			// in the destination buffer.
 			filterWeights.setSupportTopLeft(2*x-filterOffsetX, 2*y-filterOffsetY);
 			CqSampleAccum<CqCachedFilter> accumulator(filterWeights, 0, numChannels, &accumBuf[0]);
-			srcBuf.applyFilter(accumulator, filterWeights.support(), sWrapMode, tWrapMode);
+			srcBufSampler.applyFilter(accumulator, filterWeights.support(), sWrapMode, tWrapMode);
 			destBuf->setPixel(x, y, &accumBuf[0]);
 		}
 	}

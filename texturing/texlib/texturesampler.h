@@ -37,6 +37,7 @@
 #include "logging.h"
 #include "ewafilter.h"
 #include "sampleaccum.h"
+#include "texbufsampler.h"
 
 namespace Aqsis {
 
@@ -200,7 +201,7 @@ void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 			sampleOpts.sBlur(), sampleOpts.tBlur());
 	CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
 			sampleOpts.startChannel(), sampleOpts.numChannels(), outSamps);
-	m_texData->applyFilter(accumulator, weights.support(),
+	CqTexBufSampler<ArrayT>(*m_texData).applyFilter(accumulator, weights.support(),
 			sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
 }
 

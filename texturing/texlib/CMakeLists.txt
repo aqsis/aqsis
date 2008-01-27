@@ -51,6 +51,7 @@ SET(AQSISTEX_HDRS
 	mixedimagebuffer.h
 	samplequad.h
 	samplevector.h
+	texbufsampler.h
 	texfileattributes.h
 	texfileheader.h
 	texturebuffer.h
