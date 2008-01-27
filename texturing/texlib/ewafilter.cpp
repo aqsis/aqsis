@@ -103,10 +103,11 @@ void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 	// recommend using 1 for these variances, but this results in excess
 	// blurring.
 	//
-	// Default reconstruction filter variance - this is the variance of the
-	// filter used to reconstruct a continuous image from the underlying
-	// discrete samples.
-	const TqFloat reconsVar = 1.3/(2*M_PI);
+	// Default standard deviation for reconstruction filter - this is the
+	// stddev (=sqrt(variance)) of the filter used to reconstruct a continuous
+	// image from the underlying discrete samples.
+	const TqFloat reconsStdDev = 0.454864184147; // std::sqrt(1.3/(2*M_PI))
+	const TqFloat reconsVar = reconsStdDev*reconsStdDev;
 	// "Prefilter" variance - this is the variance of the antialiasing filter
 	// which is used immediately before resampling onto the discrete grid.
 	//
@@ -121,13 +122,28 @@ void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 	if(sBlur > 0 || tBlur > 0)
 	{
 		// The reconstruction variance matrix provides a very nice way of
-		// incorporating extra filter blurring if desired.  Here we do this by
-		// adding the extra blur to the reconstruction variance matrix.
-		TqFloat sVariance = sBlur*baseResS;
-		sVariance = sVariance*sVariance + reconsVar;
-		TqFloat tVariance = tBlur*baseResT;
-		tVariance = tVariance*tVariance + reconsVar;
-		coVar += SqMatrix2D(sVariance, tVariance);
+		// incorporating extra filter blurring if desired, without distorting
+		// the filter region in a weird manner.  We do this by adding the
+		// standard deviations of the base reconstruction filter with a scaled
+		// blur in the s and t directions.
+		//
+		// The RI spec (version 3.2, page 149) says that blur is "an additional
+		// area to be added to the texture area filtered in both the s and t
+		// directions, expressed in units of texture coordinates".  From their
+		// example it seems like they meant length rather than area...
+		//
+		// Since we're working in raster units, we scale the blur by the base
+		// texture resolution.  This gives the blur in units of number of
+		// pixel widths to add to the filter in the two directions.  To turn
+		// this into a standard devation for a gaussian filter, we scale by
+		// 1/sqrt(12) which is the standard deviation of a box filter of width
+		// 1.  (If we don't do this, the blur is much larger than desired,
+		// since the support of a gaussian of standard deviation 1 occupies
+		// much more than a pixel.)
+		const TqFloat oneOnSqrt12 = 0.288675134595;
+		TqFloat sStdDev = sBlur*baseResS*oneOnSqrt12 + reconsStdDev;
+		TqFloat tStdDev = tBlur*baseResT*oneOnSqrt12 + reconsStdDev;
+		coVar += SqMatrix2D(sStdDev*sStdDev, tStdDev*tStdDev);
 	}
 	else
 	{

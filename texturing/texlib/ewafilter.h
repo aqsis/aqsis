@@ -124,7 +124,7 @@ class CqEwaFilterWeights
 		 */
 		inline CqEwaFilterWeights(const SqSampleQuad& sQuad, 
 				TqFloat baseResS, TqFloat baseResT,
-				TqFloat sBlur = -1, TqFloat tBlur = -1,
+				TqFloat sBlur = 0, TqFloat tBlur = 0,
 				TqFloat logEdgeWeight = 4, 
 				TqFloat maxAspectRatio = 20);
 
