@@ -30,6 +30,7 @@
 
 #include "wrapmode.h"
 #include "filtersupport.h"
+#include "boost/scoped_array.hpp"
 
 namespace Aqsis {
 
@@ -130,13 +131,13 @@ void CqTexBufSampler<ArrayT>::applyFilter(SampleAccumT& sampleAccum,
 		SqFilterSupport modifiedSupport(support);
 		// If we get here, the filter support falls at least partially outside
 		// the texture range.
-		if(xWrapMode == WrapMode_Black)
+		if(xWrapMode == WrapMode_Trunc)
 		{
 			modifiedSupport.sx.truncate(0, m_pixelBuf.width());
 			if(modifiedSupport.sx.isEmpty())
 				return;
 		}
-		if(yWrapMode == WrapMode_Black)
+		if(yWrapMode == WrapMode_Trunc)
 		{
 			modifiedSupport.sy.truncate(0, m_pixelBuf.height());
 			if(modifiedSupport.sy.isEmpty())
@@ -167,6 +168,8 @@ inline TqInt wrapCoord(TqInt x, TqInt width, EqWrapMode wrapMode)
 	switch(wrapMode)
 	{
 		case WrapMode_Black:
+			if(x < 0 || x >= width)
+				return -1;
 			break;
 		case WrapMode_Periodic:
 			// the factor of 100 is a bit of a hack to try to make sure the
@@ -175,6 +178,8 @@ inline TqInt wrapCoord(TqInt x, TqInt width, EqWrapMode wrapMode)
 			return (x + 100*width) % width;
 		case WrapMode_Clamp:
 			return clamp(x, 0, width-1);
+		default:
+			break;
 	}
 	return x;
 }
@@ -188,13 +193,24 @@ void CqTexBufSampler<ArrayT>::applyFilterBoundary(SampleAccumT& sampleAccum,
 		const SqFilterSupport& support,
 		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
 {
+	boost::scoped_array<float> blackBuf;
+	bool haveBlackWrapMode = (xWrapMode == WrapMode_Black | yWrapMode == WrapMode_Black);
+	if(haveBlackWrapMode)
+	{
+		blackBuf.reset(new float[m_pixelBuf.numChannels()]);
+		for(int i = 0; i < m_pixelBuf.numChannels(); ++i)
+			blackBuf[i] = 0;
+	}
 	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
 	{
 		TqInt yWrap = detail::wrapCoord(y, m_pixelBuf.height(), yWrapMode);
 		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
 		{
 			TqInt xWrap = detail::wrapCoord(x, m_pixelBuf.width(), xWrapMode);
-			sampleAccum.accumulate(x, y, m_pixelBuf(xWrap, yWrap) );
+			if(haveBlackWrapMode && (yWrap == -1 || xWrap == -1))
+				sampleAccum.accumulate(x, y, blackBuf);
+			else
+				sampleAccum.accumulate(x, y, m_pixelBuf(xWrap, yWrap));
 		}
 	}
 }

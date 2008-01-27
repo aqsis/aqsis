@@ -38,9 +38,10 @@ namespace Aqsis
  */
 enum EqWrapMode
 {
-    WrapMode_Black,		///< Return black.
-    WrapMode_Periodic,	///< Wrap around to the opposite side.
-    WrapMode_Clamp,		///< Clamp to the edge of the range.
+	WrapMode_Black,		///< Return black.
+	WrapMode_Periodic,	///< Wrap around to the opposite side.
+	WrapMode_Clamp,		///< Clamp to the edge of the range.
+	WrapMode_Trunc		///< Truncate the support (ignores weights)
 };
 
 } // namespace Aqsis
