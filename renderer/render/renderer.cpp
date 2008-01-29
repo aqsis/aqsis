@@ -810,7 +810,6 @@ void CqRenderer::RenderAutoShadows()
 				m_pDDManager = realDDManager;
 
 				CqTextureMap::FlushCache();
-				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
 		}
