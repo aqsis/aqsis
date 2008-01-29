@@ -667,6 +667,7 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			RELEASEREF( ( pMpg ) );
 		}
 		CurrentBucket().aMPGs().clear();
+		CqOcclusionBox::RefreshDepthMap();
 	}
 
 	// Split any grids in this bucket waiting to be processed.
@@ -694,6 +695,7 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 				RELEASEREF( ( pMpg ) );
 			}
 			CurrentBucket().aMPGs().clear();
+			CqOcclusionBox::RefreshDepthMap();
 		}
 		CurrentBucket().aGrids().clear();
 	}
@@ -1334,7 +1336,9 @@ void CqImageBuffer::RenderImage()
 		}
 
 
-		RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
+//		if( !bIsEmpty )	
+			RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
+
 		if ( m_fQuit )
 		{
 			m_fDone = true;

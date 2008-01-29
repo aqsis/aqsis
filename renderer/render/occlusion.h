@@ -98,27 +98,14 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		void ConstructTree();
 		void OutputTree(const char* name);
 
-		void PropagateChanges();
-
 		void InitialiseBounds();
 		void UpdateBounds();
 
-		bool CanCull( CqBound* bound );
 		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, SqGridInfo& gridInfo);
 
 		TqInt NumSamples() const
 		{
 			return(m_SampleIndices.size());
-		}
-
-		TqFloat MaxOpaqueZ() const
-		{
-			return(m_MaxOpaqueZ);
-		}
-
-		void SetMaxOpaqueZ(TqFloat z)
-		{
-			m_MaxOpaqueZ = z;
 		}
 
 		const CqVector2D& MinSamplePoint() const
@@ -145,7 +132,6 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		CqVector2D	m_MaxSamplePoint;
 		TqFloat		m_MinTime;
 		TqFloat		m_MaxTime;
-		TqFloat		m_MaxOpaqueZ;
 		TqInt		m_MinDofBoundIndex;
 		TqInt		m_MaxDofBoundIndex;
 		TqFloat		m_MinDetailLevel;
@@ -171,12 +157,25 @@ class CqOcclusionBox
 			return(m_KDTree);
 		}
 
+		struct SqOcclusionNode
+		{
+			SqOcclusionNode(TqFloat D) : depth(D)	{}
+			TqFloat depth;
+			std::vector<SqSampleData*>	samples;
+		};
+
+		// New system
+		static void RefreshDepthMap();
+		static TqFloat propagateDepths(std::vector<CqOcclusionBox::SqOcclusionNode>::size_type index);
+
 	protected:
 		CqOcclusionBox();
 		~CqOcclusionBox();
 
 		static CqBucket* m_Bucket;
 		static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
+		static std::vector<SqOcclusionNode>	m_depthTree;
+		static TqLong m_firstTerminalNode;				///< The index in the depth tree of the first terminal node.
 };
 
 

@@ -95,6 +95,14 @@ class CqBucket : public IqBucket
 		{
 			return ( m_YOrigin );
 		}
+		virtual	TqInt	realXOrigin() const
+		{
+			return ( m_realXOrigin );
+		}
+		virtual	TqInt	realYOrigin() const
+		{
+			return ( m_realYOrigin );
+		}
 		static	TqInt	PixelXSamples()
 		{
 			return m_PixelXSamples;
@@ -266,6 +274,8 @@ class CqBucket : public IqBucket
 	private:
 		static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
 		static	TqInt	m_YOrigin;		///< Origin in discrete coordinates of this bucket.
+		static	TqInt	m_realXOrigin;		
+		static	TqInt	m_realYOrigin;		
 		static	TqInt	m_XSize;		///< Size of the rendered area of this bucket in discrete coordinates.
 		static	TqInt	m_YSize;		///< Size of the rendered area of this bucket in discrete coordinates.
 		static	TqInt	m_RealWidth;	///< Actual size of the data for this bucket including filter overlap.
