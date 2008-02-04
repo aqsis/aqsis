@@ -2112,10 +2112,11 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 
 	DEBUG_RIILLUMINATE
 
-	CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
-
 	// Check if we are turning the light on or off.
 	if ( light == NULL ) return ;
+
+	CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
+
 	if ( onoff )
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
 	else
