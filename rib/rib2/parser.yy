@@ -441,6 +441,8 @@ complete_request
 			}
 	|	clipping float float
 			{ ParseCallbackInterface->RiClipping($2, $3); }
+	|	depthoffield
+			{ ParseCallbackInterface->RiDepthOfField(FLT_MAX, FLT_MAX, FLT_MAX); }
 	|	depthoffield float float float
 			{ ParseCallbackInterface->RiDepthOfField($2, $3, $4); }
 	|	shutter float float
