@@ -117,10 +117,12 @@ class CqCurve : public CqSurface
 				//m_splitDecision = Split_Patch;
 
 
-				     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
-				                                    "camera", "raster",
-								NULL, NULL,
-								QGetRenderContextI()->Time()
+				    CqMatrix matCtoR;
+					QGetRenderContext() ->matSpaceToSpace(
+												"camera", "raster",
+												NULL, NULL,
+												QGetRenderContextI()->Time(),
+												matCtoR
 				                                );
 				     CqVector2D hull[ 2 ];     // control hull
 				     hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];

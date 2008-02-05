@@ -128,7 +128,8 @@ void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 
 	if( keyframeTimes.size() > 1 )
 	{
-		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), keyframeTimes.begin()->second );
+		CqMatrix matCameraToObject0;
+		QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), keyframeTimes.begin()->second, matCameraToObject0 );
 		CqBound B0;
 		B0.vecMin() = B->vecMin();
 		B0.vecMax() = B->vecMax();
@@ -138,7 +139,8 @@ void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 		for( keyFrame = keyframeTimes.begin(); keyFrame != keyframeTimes.end(); keyFrame++)
 		{
 			CqBound Btx( B0 );
-			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), keyFrame->second );
+			CqMatrix matObjectToCameraT;
+			QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), keyFrame->second, matObjectToCameraT );
 			Btx.Transform( matObjectToCameraT );
 			B->Encapsulate( &Btx );
 		}

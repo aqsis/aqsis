@@ -1023,7 +1023,8 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 
 	paLaths = &m_apLaths;
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pPoints()->pTransform().get(), pPoints()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pPoints()->pTransform().get(), pPoints()->pTransform()->Time(0), matCameraToObject0 );
 
 	for(TqUint i = 0; i < paLaths->size(); i++)
 	{
@@ -1711,7 +1712,8 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];

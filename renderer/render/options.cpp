@@ -211,14 +211,16 @@ void CqOptions::InitialiseCamera()
 				break;
 			}
 	}
-	CqMatrix matWorldToCamera( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix matWorldToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time(), matWorldToCamera );
 	QGetRenderContext() ->SetmatScreen( matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatNDC( matScreenToNDC * matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatRaster( matNDCToRaster * matScreenToNDC * matCameraToScreen * matWorldToCamera );
 
 	CqMatrix matWorldToScreen = matCameraToScreen * matWorldToCamera;
 
-	CqMatrix dofm = QGetRenderContext() ->matVSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix dofm;
+	QGetRenderContext() ->matVSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), dofm );
 
 	CqVector3D	dofe( 1, 1, -1 );
 	CqVector3D	dofc( 0, 0, -1 );

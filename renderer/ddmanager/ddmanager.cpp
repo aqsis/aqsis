@@ -862,12 +862,14 @@ void CqDisplayRequest::PrepareSystemParameters()
 	UserParameter parameter;
 
 	// "NP"
-	CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", NULL, NULL, QGetRenderContextI()->Time() );
+	CqMatrix matWorldToScreen;
+	QGetRenderContext() ->matSpaceToSpace( "world", "screen", NULL, NULL, QGetRenderContextI()->Time(), matWorldToScreen );
 	ConstructMatrixParameter("NP", &matWorldToScreen, 1, parameter);
 	m_customParams.push_back(parameter);
 
 	// "Nl"
-	CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContextI()->Time() );
+	CqMatrix matWorldToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContextI()->Time(), matWorldToCamera );
 	ConstructMatrixParameter("Nl", &matWorldToCamera, 1, parameter);
 	m_customParams.push_back(parameter);
 

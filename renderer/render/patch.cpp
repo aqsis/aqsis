@@ -288,7 +288,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 16 ];
@@ -720,7 +721,8 @@ bool	CqSurfacePatchBilinear::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];

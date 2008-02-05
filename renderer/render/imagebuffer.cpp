@@ -253,7 +253,9 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 
 	// Convert the bounds to raster space.
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix mat;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), mat );
+	Bound.Transform( mat );
 
 	// Take into account depth-of-field
 	if ( QGetRenderContext() ->UsingDepthOfField() )
@@ -326,7 +328,9 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			transShaderToWorld = pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) ->getTransform();
 		else if ( pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
 			transShaderToWorld = pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) ->getTransform();
-		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time() ) * vecDB;
+		CqMatrix mat;
+		QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time(), mat );
+		vecDB = mat * vecDB;
 		db = vecDB.Magnitude();
 
 		Bound.vecMax() += db;

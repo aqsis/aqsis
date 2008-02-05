@@ -663,8 +663,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	TqInt cv = vGridRes();
 
 	TIMER_START("Project points")
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface() ->pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface() ->pTransform().get(), QGetRenderContext()->Time(), matCameraToObject0 );
 
 	// Transform the whole grid to hybrid camera/raster space
 	CqVector3D* pP;
@@ -698,7 +700,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	std::map<TqFloat, TqInt>::iterator keyFrame;
 	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first );
+		matObjectToCameraT;
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first, matObjectToCameraT );
 		aaPtimes[ keyFrame->second ].resize( gsmin1 + 1 );
 
 		for ( i = gsmin1; i >= 0; i-- )
@@ -970,7 +973,8 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	TqInt iTime;
 
 	TIMER_START("Project points")
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
 
 	ADDREF( pGridA );
 
@@ -986,7 +990,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 	for ( iTime = 0; iTime < tTime; iTime++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime) );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime), matObjectToCameraT  );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
 		// Transform the whole grid to hybrid camera/raster space

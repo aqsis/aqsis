@@ -1563,7 +1563,7 @@ void CqShaderVM::InitialiseParameters( )
 		CqMatrix matTrans;
 
 		if (getTransform())
-			matTrans = m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time() );
+			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), matTrans );
 
 		while ( count-- > 0 )
 		{
