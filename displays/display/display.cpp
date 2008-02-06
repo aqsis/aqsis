@@ -661,6 +661,14 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
+	// If the image is not cropped, then the origin shouldn't be used.
+	if(pImage->m_OriginalSize[0] == pImage->m_width && pImage->m_OriginalSize[1] == pImage->m_height)
+	{
+		pImage->m_origin[0] = 0;
+		pImage->m_origin[1] = 0;
+	}
+		
+
 	TqInt xmin__ = MAX((xmin-pImage->m_origin[0]), 0);
 	TqInt ymin__ = MAX((ymin-pImage->m_origin[1]), 0);
 	TqInt xmaxplus1__ = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
