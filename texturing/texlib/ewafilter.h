@@ -30,6 +30,7 @@
 #include "aqsis.h"
 
 #include <cmath>
+#include <vector>
 
 #include "samplequad.h"
 #include "aqsismath.h"
@@ -225,6 +226,59 @@ inline void CqEwaFilterWeights::adjustTextureScale(TqFloat xScale, TqFloat xOff,
 	m_quadForm = scaleMatrix*m_quadForm*scaleMatrix;
 }
 
+namespace detail {
+
+/** A lookup table for std::exp(-x).
+ *
+ * The lookup is via operator() which does linear interpolation between
+ * tabulated values.
+ */
+class CqNegExpTable
+{
+	private:
+		std::vector<TqFloat> m_values;
+		TqFloat m_invRes;
+		TqFloat m_rangeMax;
+	public:
+		/** \brief Construct the lookup table
+		 * \param numPoints - number of points in the table.
+		 * \param rangeMax - maximum value of the input variable that the table
+		 *                   should be computed for.  Inputs larger than or
+		 *                   equal to this will return 0.
+		 */
+		CqNegExpTable(TqInt numPoints, TqFloat rangeMax)
+			: m_values(),
+			m_invRes((numPoints-1)/rangeMax),
+			m_rangeMax(rangeMax)
+		{
+			TqFloat res = 1/m_invRes;
+			m_values.resize(numPoints);
+			for(int i = 0; i < numPoints; ++i)
+			{
+				m_values[i] = exp(-i*res);
+			}
+		}
+
+		/** \brief Look up an approximate exp(-x) for x > 0
+		 *
+		 * This does linear interpolation between x values.
+		 * \param x - 
+		 */
+		TqFloat operator()(TqFloat x) const
+		{
+			if(x >= m_rangeMax)
+				return 0;
+			TqFloat xRescaled = x*m_invRes;
+			TqInt index = lfloor(xRescaled);
+			assert(index >= 0);
+			TqFloat interp = xRescaled - index;
+			return (1-interp)*m_values[index] + interp*m_values[index+1];
+		}
+};
+extern CqNegExpTable negExpTable;
+
+} // namespace detail
+
 inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
 {
 	x -= m_filterCenter.x();
@@ -232,10 +286,12 @@ inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
 	// evaluate quadratic form
 	TqFloat q = m_quadForm.a*x*x + (m_quadForm.b+m_quadForm.c)*x*y
 		+ m_quadForm.d*y*y;
-	// check whether we're inside the filter cutoff.
+	// Check whether we're inside the filter cutoff; if so use a lookup table
+	// to get the filter weight.  Using a lookup table rather than directly
+	// using std::exp() results in very large speedups, since the filter
+	// weights are needed inside the inner loop
 	if(q < m_logEdgeWeight)
-		return exp(-q);
-	/// \todo: Possible optimization: lookup table for exp?
+		return detail::negExpTable(q);
 	return 0;
 }
 

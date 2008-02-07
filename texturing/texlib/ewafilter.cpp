@@ -29,6 +29,8 @@
 
 namespace Aqsis {
 
+namespace {
+
 /** \brief Estimate the inverse Jacobian of the mapping defined by a sampling quad
  *
  * The four corners of the sampling quad are assumed to point to four corners
@@ -84,6 +86,14 @@ inline void clampEccentricity(SqMatrix2D& covariance, TqFloat& minorAxisWidth,
 		covariance = R * SqMatrix2D(eig1, eig2) * R.transpose();
 	}
 	minorAxisWidth = std::sqrt(8*eig2*logEdgeWeight);
+}
+
+} // unnamed namespace
+
+namespace detail {
+// Lookup-table for exp(-x) for filter weighting.  20 Data points is probably
+// about right, though it's possible to use even less.  Using 10
+CqNegExpTable negExpTable(20, 6);
 }
 
 void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
