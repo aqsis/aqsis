@@ -28,6 +28,7 @@
 #include "texturesampleoptions.h"
 
 #include <string.h>
+#include <sstream>
 
 #include "logging.h"
 #include "texfileheader.h"
@@ -55,6 +56,16 @@ void CqTextureSampleOptions::fillFromFileHeader(const CqTexFileHeader& header)
 {
 	/// \todo Find a way to store & retrieve the downsampling filter?
 	/// \todo Retreive texture wrap modes
+	const std::string* wrapModes = header.findPtr<Attr::WrapModes>();
+	if(wrapModes)
+	{
+		std::istringstream iss(*wrapModes);
+		std::string wrapMode;
+		iss >> wrapMode;
+		m_sWrapMode = wrapModeFromString(wrapMode);
+		iss >> wrapMode;
+		m_tWrapMode = wrapModeFromString(wrapMode);
+	}
 }
 
 void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad) const

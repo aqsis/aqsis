@@ -346,6 +346,9 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 	addAttributeToHeader<Attr::Description,char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
 	addAttributeToHeader<Attr::DateTime,char*>(TIFFTAG_DATETIME, header, *this);
 
+	// Add texturemap-specific strings to the header if they exist.
+	addAttributeToHeader<Attr::WrapModes,char*>(TIFFTAG_PIXAR_WRAPMODES, header, *this);
+
 	// Add some matrix attributes
 	/// \todo: Check that these are constructed correctly!
 	addAttributeToHeader<Attr::WorldToScreenMatrix,float*>(

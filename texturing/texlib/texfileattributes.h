@@ -124,6 +124,8 @@ namespace Attr
 	AQSIS_IMAGE_ATTR_TAG(Description, std::string);
 	// date and time of creation
 	AQSIS_IMAGE_ATTR_TAG(DateTime, std::string);
+	// texture wrap modes
+	AQSIS_IMAGE_ATTR_TAG(WrapModes, std::string);
 
 	//--------------------------------------------------
 	/// Transformation matrices

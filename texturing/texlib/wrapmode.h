@@ -44,6 +44,32 @@ enum EqWrapMode
 	WrapMode_Trunc		///< Truncate the support (ignores weights)
 };
 
+/** \brief Get a wrap mode code from a string.
+ *
+ * If the mode string represents an unknown wrap mode, return WrapMode_Black.
+ */
+EqWrapMode wrapModeFromString(const std::string& modeString);
+
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline EqWrapMode wrapModeFromString(const std::string& modeString)
+{
+	if(modeString == "black")
+		return WrapMode_Black;
+	else if(modeString == "periodic")
+		return WrapMode_Periodic;
+	else if(modeString == "clamp")
+		return WrapMode_Clamp;
+	else
+		// Default: return black... maybe we should have an "unknown" wrap mode
+		// to signal errors...
+		return WrapMode_Black;
+}
+
 } // namespace Aqsis
 
 #endif // WRAPMODE_H_INCLUDED
