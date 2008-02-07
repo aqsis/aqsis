@@ -122,12 +122,21 @@ class CqSampleAccum
 		/// Cleanup; renormalize the accumulated data if necessary.
 		inline ~CqSampleAccum();
 	private:
+		/// 2D Filter weight function.
 		const FilterWeightT& m_filterWeights;
+		/// Start channel in the source data
 		TqInt m_startChan;
+		/// Number of channels in dest buffer
 		TqInt m_numChans;
+		/** Number of channels at the end of dest buffer which get the fill
+		 * value rather than data from the source buffer.
+		 */
 		TqInt m_numChansFill;
+		/// Array to fill with accumulated data
 		TqFloat* m_resultBuf;
+		/// Fill value for filling extra source data channels.
 		TqFloat m_fill;
+		/// Total accumulated weight used to renormalize the samples.
 		TqFloat m_totWeight;
 };
 

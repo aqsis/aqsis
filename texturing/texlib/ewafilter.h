@@ -130,9 +130,23 @@ class CqEwaFilterWeights
 
 		/** \brief Adjust the filter to use a texture of a different resolution
 		 *
-		 * This is useful for adjusting mipmapping where you'd like to 
+		 * This is useful for adjusting mipmapping where you'd like to create
+		 * the filter for the base texture, but adjust it for use with the
+		 * raster coordinate system of a higher mipmap level where necessary.
+		 *
+		 * The new raster coordinate system relates to the old one via a scale
+		 * factor and offset.  For example, the new raster x-coordinates are
+		 * given by:
+		 *
+		 *   xNew = xScale*(xOld + xOff).
+		 *
+		 * \param xScale - scale factor for old -> new coords
+		 * \param xOff - offset for old -> new coords
+		 * \param yScale - see xScale
+		 * \param yOff - see xOff
 		 */
-		void adjustTextureScale(TqFloat xScale, TqFloat yScale);
+		void adjustTextureScale(TqFloat xScale, TqFloat xOff,
+				TqFloat yScale, TqFloat yOff);
 
 		/** \brief Evaluate the filter at the given point in image space.
 		 *
@@ -201,10 +215,12 @@ inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad,
 	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
 }
 
-inline void CqEwaFilterWeights::adjustTextureScale(TqFloat xScale, TqFloat yScale)
+inline void CqEwaFilterWeights::adjustTextureScale(TqFloat xScale, TqFloat xOff,
+		TqFloat yScale, TqFloat yOff)
 {
-	m_filterCenter.x(m_filterCenter.x()*xScale);
-	m_filterCenter.y(m_filterCenter.y()*yScale);
+	m_filterCenter.x( xScale*(m_filterCenter.x() + xOff) );
+	m_filterCenter.y( yScale*(m_filterCenter.y() + yOff) );
+	// this matrix multiplication could be rewritten to be mostly optimized away...
 	SqMatrix2D scaleMatrix(1/xScale, 1/yScale);
 	m_quadForm = scaleMatrix*m_quadForm*scaleMatrix;
 }

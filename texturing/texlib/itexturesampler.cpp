@@ -93,8 +93,8 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(const char* fileNam
 			break;
 		case Channel_Unsigned8:
 			{
-				boost::shared_ptr<CqLevelSamplerCache<CqTextureBuffer<TqUchar> > >
-					levels(new CqLevelSamplerCache<CqTextureBuffer<TqUchar> >(file));
+				boost::shared_ptr<CqMipmapLevelCache<CqTextureBuffer<TqUchar> > >
+					levels(new CqMipmapLevelCache<CqTextureBuffer<TqUchar> >(file));
 				boost::shared_ptr<IqTextureSampler>
 					sampler(new CqMipmapTextureSampler<TqUchar>(levels));
 				return sampler;
