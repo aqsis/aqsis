@@ -224,7 +224,7 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 	{
 		Aqsis::log() << warning << "Texture \"" << m_texFile->fileName() << "\" "
 			<< "has less than the expected number of mipmap levels. "
-			<< "(smallest level: " << levelWidth << "x" << levelHeight << ")";
+			<< "(smallest level: " << levelWidth << "x" << levelHeight << ")\n";
 	}
 }
 

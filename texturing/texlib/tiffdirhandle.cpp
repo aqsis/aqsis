@@ -541,7 +541,8 @@ void safeTiffClose(TIFF* tif)
 }
 
 CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
-	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
+	: m_fileName(fileName),
+	m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
 	m_isInputFile(openMode[0] == 'r'),
 	m_currDir(0)
 {

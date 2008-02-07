@@ -33,7 +33,7 @@
 #include <cmath>
 
 #include "itexturesampler.h"
-#include "levelsamplercache.h"
+#include "mipmaplevelcache.h"
 #include "ewafilter.h"
 #include "texbufsampler.h" // remove when using tiled textures.
 #include "texturebuffer.h" // remove when using tiled textures.

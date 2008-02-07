@@ -44,7 +44,7 @@ SET(AQSISTEX_HDRS
 	itexturemap_old.h
 	itexturesampler.h
 	itiledtexinputfile.h
-	levelsamplercache.h
+	mipmaplevelcache.h
 	magicnumber.h
 	mipmap.h
 	mipmaptexturesampler.h
