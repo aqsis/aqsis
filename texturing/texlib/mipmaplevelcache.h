@@ -175,10 +175,8 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 	m_texFile->setImageIndex(0);
 	m_texFile->readPixels(baseBuf);
 	// Level sizes
-	const TqInt baseWidth = baseBuf.width();
-	const TqInt baseHeight = baseBuf.height();
-	TqInt levelWidth = baseWidth;
-	TqInt levelHeight = baseHeight;
+	TqInt levelWidth = baseBuf.width();
+	TqInt levelHeight = baseBuf.height();
 	// level offsets (in base-texture raster coordinates)
 	TqFloat xOffset = 0;
 	TqFloat yOffset = 0;
@@ -215,9 +213,10 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 			throw XqBadTexture("Mipmap level has incorrect size", __FILE__, __LINE__);
 		}
 		// set up scaling and offset transformation for this level.
+		TqFloat levelScale = 1.0/(1 << i);
 		m_levelTransforms.push_back( SqLevelTrans(
-				static_cast<TqFloat>(levelWidth)/baseWidth, -xOffset,
-				static_cast<TqFloat>(levelHeight)/baseHeight, -yOffset) );
+				levelScale, -xOffset,
+				levelScale, -yOffset) );
 	}
 	// Check that we have the expected number of mipmap levels.
 	if(levelWidth != 1 || levelHeight != 1)
