@@ -30,6 +30,7 @@
 #include <cmath>
 
 #include "vector2d.h"
+#include "vector3d.h"
 #include "aqsismath.h"
 
 namespace Aqsis {
@@ -50,69 +51,74 @@ namespace Aqsis {
  *
  * \endverbatim
  */
+template<typename VecT>
 struct SqSampleQuad
 {
-	CqVector2D v1;
-	CqVector2D v2;
-	CqVector2D v3;
-	CqVector2D v4;
+	VecT v1;
+	VecT v2;
+	VecT v3;
+	VecT v4;
 
-	/// Construct from explicit texture coordinates
-	inline SqSampleQuad(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
-			TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4);
-	inline SqSampleQuad(CqVector2D v1, CqVector2D v2, CqVector2D v3, CqVector2D v4);
+	/// Trivial constructor
+	SqSampleQuad(const VecT& v1, const VecT& v2, const VecT& v3, const VecT& v4);
 
 	/// Get the center point of the quadrilateral by averaging the vertices.
-	inline CqVector2D center() const;
-
-	/** Remap the sample quad by translation to lie in the box [0,1] x [0,1]
-	 *
-	 * Specifically, after remapping,
-	 *   (s, t) = (min(s1,s2,s3,s4), min(t1,t2,t3,t4))
-	 * is guarenteed to lie in the box [0,1]x[0,1]
-	 */
-	inline void remapPeriodic(bool xPeriodic, bool yPeriodic);
+	VecT center() const;
 };
 
+/// Sample quad for indexing textures with 2D coordinates (for plain texture maps)
+typedef SqSampleQuad<CqVector2D> Tq2DSampleQuad;
+/// Sample quad for indexing textures with 3D coordinates (for shadows & env maps)
+typedef SqSampleQuad<CqVector3D> Tq3DSampleQuad;
+
+/** Remap a sample quad by translation to lie in the box [0,1] x [0,1]
+ *
+ * Specifically, after remapping,
+ *   (s, t) = (min(s1,s2,s3,s4), min(t1,t2,t3,t4))
+ * is guarenteed to lie in the box [0,1]x[0,1]
+ */
+void remapPeriodic(Tq2DSampleQuad& quad, bool xPeriodic, bool yPeriodic);
 
 //==============================================================================
 // Implementation details
 //==============================================================================
 
-inline SqSampleQuad::SqSampleQuad(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
-		TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4)
-	: v1(s1, t1),
-	v2(s2, t2),
-	v3(s3, t3),
-	v4(s4, t4)
-{ }
-
-inline SqSampleQuad::SqSampleQuad(CqVector2D v1, CqVector2D v2,
-		CqVector2D v3, CqVector2D v4)
+// SqSampleQuad implementation
+template<typename VecT>
+inline SqSampleQuad<VecT>::SqSampleQuad(const VecT& v1, const VecT& v2,
+		const VecT& v3, const VecT& v4)
 	: v1(v1),
 	v2(v2),
 	v3(v3),
 	v4(v4)
 { }
 
-inline CqVector2D SqSampleQuad::center() const
+template<typename VecT>
+inline VecT SqSampleQuad<VecT>::center() const
 {
 	return 0.25*(v1+v2+v3+v4);
 }
 
-inline void SqSampleQuad::remapPeriodic(bool xPeriodic, bool yPeriodic)
+
+//------------------------------------------------------------------------------
+// Implementation of functions
+inline void remapPeriodic(Tq2DSampleQuad& quad, bool xPeriodic, bool yPeriodic)
 {
 	if(xPeriodic || yPeriodic)
 	{
-		TqFloat x = xPeriodic ? min(min(min(v1.x(), v2.x()), v3.x()), v4.x()) : 0;
-		TqFloat y = yPeriodic ? min(min(min(v1.y(), v2.y()), v3.y()), v4.y()) : 0;
+		TqFloat x = xPeriodic
+			? min(min(min(quad.v1.x(), quad.v2.x()), quad.v3.x()), quad.v4.x())
+			: 0;
+		TqFloat y = yPeriodic
+			? min(min(min(quad.v1.y(), quad.v2.y()), quad.v3.y()), quad.v4.y())
+			: 0;
 		if(x < 0 || y < 0 || x >= 1 || y >= 1)
 		{
 			CqVector2D v(std::floor(x),std::floor(y));
-			v1 -= v;
-			v2 -= v;
-			v3 -= v;
-			v4 -= v;
+			quad.v1 -= v;
+			quad.v2 -= v;
+			quad.v3 -= v;
+			quad.v4 -= v;
 		}
 	}
 }

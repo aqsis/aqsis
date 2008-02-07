@@ -237,11 +237,11 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
 			// Compute the sample quadrilateral box.
-			SqSampleQuad sampleQuad(
-				ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2,
-				ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2,
-				ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2,
-				ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2);
+			Tq2DSampleQuad sampleQuad(
+				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
+				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
+				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
+				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
 			// length-1 "array" where filtered results will be placed.
 			TqFloat texSample = 0;
 			texSampler.sample(sampleQuad, sampleOpts, &texSample);
@@ -297,7 +297,8 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
 			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
 			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
-			SqSampleQuad sampleQuad(s1Val, t1Val, s2Val, t2Val, s3Val, t3Val, s4Val, t4Val);
+			Tq2DSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+						CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
 
 			// length-1 "array" where filtered results will be placed.
 			TqFloat texSample = 0;
@@ -375,11 +376,11 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
 			// Compute the sample quadrilateral box.
-			SqSampleQuad sampleQuad(
-				ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2,
-				ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2,
-				ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2,
-				ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2);
+			Tq2DSampleQuad sampleQuad(
+				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
+				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
+				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
+				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
 			// array where filtered results will be placed.
 			TqFloat texSample[3] = {0,0,0};
 			texSampler.sample(sampleQuad, sampleOpts, texSample);
@@ -436,7 +437,8 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
 			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
 			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
-			SqSampleQuad sampleQuad(s1Val, t1Val, s2Val, t2Val, s3Val, t3Val, s4Val, t4Val);
+			Tq2DSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+					CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
 			// array where filtered results will be placed.
 			TqFloat texSample[3] = {0,0,0};
 			texSampler.sample(sampleQuad, sampleOpts, texSample);

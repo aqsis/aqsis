@@ -35,7 +35,7 @@
 
 BOOST_AUTO_TEST_CASE(CqTextureSampleOptions_adjustSampleQuad_test)
 {
-	Aqsis::SqSampleQuad quad(
+	Aqsis::Tq2DSampleQuad quad(
 			Aqsis::CqVector2D(0,0),
 			Aqsis::CqVector2D(0,1), 
 			Aqsis::CqVector2D(1,0),

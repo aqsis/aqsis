@@ -173,7 +173,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		 *
 		 * \param quad - sample quadrilateral to adjust.
 		 */
-		void adjustSampleQuad(SqSampleQuad& quad) const;
+		void adjustSampleQuad(Tq2DSampleQuad& quad) const;
 
 	protected:
 		/** \brief Check that the blur and filter settings are compatible.
@@ -207,12 +207,51 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 };
 
 
-struct SqShadowSampleOptions : private CqTextureSampleOptions
+class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 {
-	/// \todo: Flesh this out when we eventually get around to redoing the shadow maps.
-	// (The inherited functions need to be pulled in with "using")
-	TqFloat m_biasLow;
-	TqFloat m_biasHigh;
+	public:
+		// Accessors from CqTextureSampleOptions
+		CqTextureSampleOptions::sBlur;
+		CqTextureSampleOptions::tBlur;
+		CqTextureSampleOptions::sWidth;
+		CqTextureSampleOptions::tWidth;
+		CqTextureSampleOptions::filterType;
+		CqTextureSampleOptions::fill;
+		CqTextureSampleOptions::startChannel;
+		CqTextureSampleOptions::numChannels;
+		CqTextureSampleOptions::numSamples;
+		CqTextureSampleOptions::sWrapMode;
+		CqTextureSampleOptions::tWrapMode;
+
+		CqTextureSampleOptions::setBlur;
+		CqTextureSampleOptions::setSBlur;
+		CqTextureSampleOptions::setTBlur;
+		CqTextureSampleOptions::setWidth;
+		CqTextureSampleOptions::setSWidth;
+		CqTextureSampleOptions::setTWidth;
+		CqTextureSampleOptions::setFilterType;
+		CqTextureSampleOptions::setFill;
+		CqTextureSampleOptions::setStartChannel;
+		CqTextureSampleOptions::setNumChannels;
+		CqTextureSampleOptions::setNumSamples;
+		CqTextureSampleOptions::setWrapMode;
+		CqTextureSampleOptions::setSWrapMode;
+		CqTextureSampleOptions::setTWrapMode;
+
+		//--------------------------------------------------
+		// Shadow-specific sample options
+		/// Get the low shadow bias
+		TqFloat biasLow() const;
+		/// Get the high shadow bias
+		TqFloat biasHigh() const;
+
+		/// Set the shadow bias
+		void setBias(TqFloat bias);
+		/// Set the low and high shadow biases
+		void setBias(TqFloat biasLow, TqFloat biasHigh);
+	protected:
+		TqFloat m_biasLow;
+		TqFloat m_biasHigh;
 };
 
 

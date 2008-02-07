@@ -167,7 +167,8 @@ void CqTextureMapWrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat 
 		std::valarray<TqFloat>& val )
 {
 	val.resize(SamplesPerPixel());
-	const SqSampleQuad sQuad(s1,t1, s2,t2, s3,t3, s4,t4);
+	const Tq2DSampleQuad sQuad(CqVector2D(s1,t1), CqVector2D(s2,t2),
+			CqVector2D(s3,t3), CqVector2D(s4,t4));
 	m_realMap->sample(sQuad, m_sampleOpts, &val[0]);
 }
 
