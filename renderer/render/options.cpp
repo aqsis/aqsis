@@ -135,9 +135,9 @@ void CqOptions::InitialiseCamera()
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( false );
 				matCameraToScreen.SetElement( 0, 0, ( 2.0f * n ) / ( r - l ) );
-				matCameraToScreen.SetElement( 2, 0, ( r + l ) / ( r - l ) );
+				matCameraToScreen.SetElement( 2, 0, (-( r + l )) / ( r - l ) );
 				matCameraToScreen.SetElement( 1, 1, ( 2.0f * n ) / ( t - b ) );
-				matCameraToScreen.SetElement( 2, 1, ( t + b ) / ( t - b ) );
+				matCameraToScreen.SetElement( 2, 1, (-( t + b )) / ( t - b ) );
 				TqFloat a = f / ( f - n );
 				//			matCameraToScreen.SetElement(2,2,-((f+n)/(f-n)));
 				matCameraToScreen.SetElement( 2, 2, a );
