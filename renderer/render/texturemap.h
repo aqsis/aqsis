@@ -430,8 +430,8 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 						TqInt iu = x * m_Samples;
 						TqFloat val = reinterpret_cast<TqFloat*>(m_pBufferData)[ iv + iu + sample];
 						
-						minz = MIN(val, minz);
-						maxz = MAX(val, maxz);
+						minz = min(val, minz);
+						maxz = max(val, maxz);
 					}
 				m_computed = true;
 				m_minz = minz;

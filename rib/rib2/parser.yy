@@ -22,6 +22,7 @@ using namespace librib;
 
 #include "libribtypes.h"
 #include "logging.h"
+#include "aqsismath.h"
 
 #include <algorithm>
 #include <iostream>
@@ -2102,10 +2103,10 @@ int AppendFrames(const char* frames)
 				{
 					n += endptr - nptr;
 					// Store the range between f1 and f2;
-					if(FrameList.size() <= MAX(f1, f2))
-						FrameList.resize(MAX(f1, f2)+1, 0);
-					TqUint start = MIN(f1, f2);
-					TqUint end = MAX(f1, f2);
+					if(FrameList.size() <= Aqsis::max(f1, f2))
+						FrameList.resize(Aqsis::max(f1, f2)+1, 0);
+					TqUint start = Aqsis::min(f1, f2);
+					TqUint end = Aqsis::max(f1, f2);
 					TqUint i;
 					for(i = start; i <= end; i++)
 						FrameList[i] = 1;

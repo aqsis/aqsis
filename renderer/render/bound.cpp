@@ -102,13 +102,13 @@ void CqBound::Transform( const CqMatrix& matTransform )
 
 void CqBound::Encapsulate( const IqBound* const bound )
 {
-	m_vecMax.x( MAX( m_vecMax.x(), bound->vecMax().x() ) );
-	m_vecMax.y( MAX( m_vecMax.y(), bound->vecMax().y() ) );
-	m_vecMax.z( MAX( m_vecMax.z(), bound->vecMax().z() ) );
+	m_vecMax.x( max( m_vecMax.x(), bound->vecMax().x() ) );
+	m_vecMax.y( max( m_vecMax.y(), bound->vecMax().y() ) );
+	m_vecMax.z( max( m_vecMax.z(), bound->vecMax().z() ) );
 
-	m_vecMin.x( MIN( m_vecMin.x(), bound->vecMin().x() ) );
-	m_vecMin.y( MIN( m_vecMin.y(), bound->vecMin().y() ) );
-	m_vecMin.z( MIN( m_vecMin.z(), bound->vecMin().z() ) );
+	m_vecMin.x( min( m_vecMin.x(), bound->vecMin().x() ) );
+	m_vecMin.y( min( m_vecMin.y(), bound->vecMin().y() ) );
+	m_vecMin.z( min( m_vecMin.z(), bound->vecMin().z() ) );
 }
 
 
@@ -119,13 +119,13 @@ void CqBound::Encapsulate( const IqBound* const bound )
 
 void CqBound::Encapsulate( const CqVector3D& v )
 {
-	m_vecMax.x( MAX( m_vecMax.x(), v.x() ) );
-	m_vecMax.y( MAX( m_vecMax.y(), v.y() ) );
-	m_vecMax.z( MAX( m_vecMax.z(), v.z() ) );
+	m_vecMax.x( max( m_vecMax.x(), v.x() ) );
+	m_vecMax.y( max( m_vecMax.y(), v.y() ) );
+	m_vecMax.z( max( m_vecMax.z(), v.z() ) );
 
-	m_vecMin.x( MIN( m_vecMin.x(), v.x() ) );
-	m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
-	m_vecMin.z( MIN( m_vecMin.z(), v.z() ) );
+	m_vecMin.x( min( m_vecMin.x(), v.x() ) );
+	m_vecMin.y( min( m_vecMin.y(), v.y() ) );
+	m_vecMin.z( min( m_vecMin.z(), v.z() ) );
 }
 
 
@@ -136,11 +136,11 @@ void CqBound::Encapsulate( const CqVector3D& v )
 
 void CqBound::Encapsulate( const CqVector2D& v )
 {
-	m_vecMax.x( MAX( m_vecMax.x(), v.x() ) );
-	m_vecMax.y( MAX( m_vecMax.y(), v.y() ) );
+	m_vecMax.x( max( m_vecMax.x(), v.x() ) );
+	m_vecMax.y( max( m_vecMax.y(), v.y() ) );
 
-	m_vecMin.x( MIN( m_vecMin.x(), v.x() ) );
-	m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
+	m_vecMin.x( min( m_vecMin.x(), v.x() ) );
+	m_vecMin.y( min( m_vecMin.y(), v.y() ) );
 }
 
 //----------------------------------------------------------------------

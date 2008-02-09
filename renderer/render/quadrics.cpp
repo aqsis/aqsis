@@ -332,8 +332,8 @@ TqUlong CqQuadric::EstimateGridSize()
 				vdist = ( pvm1[ u - 1 ].x() - pum1.x() ) * ( pvm1[ u - 1 ].x() - pum1.x() ) +
 				        ( pvm1[ u - 1 ].y() - pum1.y() ) * ( pvm1[ u - 1 ].y() - pum1.y() );
 
-				maxusize = MAX( maxusize, udist );
-				maxvsize = MAX( maxvsize, vdist );
+				maxusize = max( maxusize, udist );
+				maxvsize = max( maxvsize, vdist );
 			}
 			if ( u >= 1 )
 				pvm1[ u - 1 ] = pum1;
@@ -1001,8 +1001,8 @@ CqSurface*	CqParaboloid::Clone() const
 void	CqParaboloid::Bound(IqBound* bound) const
 {
 	/*	TqFloat xminang,yminang,xmaxang,ymaxang;
-		xminang=yminang=MIN(m_ThetaMin,m_ThetaMax);
-		xmaxang=ymaxang=MAX(m_ThetaMin,m_ThetaMax);
+		xminang=yminang=min(m_ThetaMin,m_ThetaMax);
+		xmaxang=ymaxang=max(m_ThetaMin,m_ThetaMax);
 	 
 	 
 		// If start and end in same segement, just use the points.
@@ -1018,8 +1018,8 @@ void	CqParaboloid::Bound(IqBound* bound) const
 	TqFloat y1 = m_RMax * sin( degToRad( 90 ) );
 	TqFloat y2 = m_RMax * sin( degToRad( 270 ) );
 
-	CqVector3D vecMin( MIN( x1, x2 ), MIN( y1, y2 ), MIN( m_ZMin, m_ZMax ) );
-	CqVector3D vecMax( MAX( x1, x2 ), MAX( y1, y2 ), MAX( m_ZMin, m_ZMax ) );
+	CqVector3D vecMin( min( x1, x2 ), min( y1, y2 ), min( m_ZMin, m_ZMax ) );
+	CqVector3D vecMax( max( x1, x2 ), max( y1, y2 ), max( m_ZMin, m_ZMax ) );
 
 	bound->vecMin() = vecMin;
 	bound->vecMax() = vecMax;

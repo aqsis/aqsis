@@ -490,7 +490,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			        {"b", widestFormat},
 			        {"a", widestFormat},
 			    };
-			PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+			PtDspyError err = DspyReorderFormatting(iFormatCount, format, min(iFormatCount,4), outFormat);
 			if( err != PkDspyErrorNone )
 			{
 				return(err);
@@ -670,18 +670,18 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 	}
 		
 
-	TqInt xmin__ = MAX((xmin-pImage->m_origin[0]), 0);
-	TqInt ymin__ = MAX((ymin-pImage->m_origin[1]), 0);
-	TqInt xmaxplus1__ = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
-	TqInt ymaxplus1__ = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
+	TqInt xmin__ = max((xmin-pImage->m_origin[0]), 0);
+	TqInt ymin__ = max((ymin-pImage->m_origin[1]), 0);
+	TqInt xmaxplus1__ = min((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
+	TqInt ymaxplus1__ = min((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 	TqInt copylinelen = entrysize * (xmaxplus1__ - xmin__);
 
 	pImage->m_pixelsReceived += (xmaxplus1__-xmin__)*(ymaxplus1__-ymin__);
 
 	// Calculate where in the bucket we are starting from if the window is cropped.
-	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
-	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
+	TqInt row = max(pImage->m_origin[1] - ymin, 0);
+	TqInt col = max(pImage->m_origin[0] - xmin, 0);
 	const TqUchar* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
@@ -900,8 +900,8 @@ extern "C" PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 					        [i] >= FLT_MAX )
 						continue;
 
-					mindepth = MIN( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
-					maxdepth = MAX( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+					mindepth = min( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+					maxdepth = max( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
 
 					totaldepth += reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ];
 					samples++;

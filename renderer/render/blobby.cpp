@@ -991,7 +991,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
 					{
-						result = MIN(result, stack.top());
+						result = min(result, stack.top());
 						stack.pop();
 					}
 					stack.push(result);
@@ -1004,7 +1004,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
 					{
-						result = MAX(result, stack.top());
+						result = max(result, stack.top());
 						stack.pop();
 					}
 					stack.push(result);

@@ -382,7 +382,7 @@ class CqImagePixel
 			if( r == 0.0 )
 				return;
 
-			TqFloat adj = MAX(fabs(pos.x()), fabs(pos.y())) / r;
+			TqFloat adj = max(fabs(pos.x()), fabs(pos.y())) / r;
 			pos.x(pos.x() * adj);
 			pos.y(pos.y() * adj);
 		}

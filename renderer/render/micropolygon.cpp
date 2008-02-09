@@ -1620,8 +1620,8 @@ void CqMicroPolygon::CalculateTotalBound()
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 
 		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
 		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
@@ -1669,7 +1669,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
 	TqUint timeRanges = CqBucket::NumTimeRanges();
-	TqUint divisions = MIN(d, timeRanges);
+	TqUint divisions = min(d, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;
 	TqInt startKey = 0;
@@ -1905,20 +1905,20 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 		return m_Bound;
 
 	// Calculate the boundary, and store the indexes in the cache.
-	m_Bound.vecMin().x( MIN( m_Point0.x(), MIN( m_Point1.x(), MIN( m_Point2.x(), m_Point3.x() ) ) ) );
-	m_Bound.vecMin().y( MIN( m_Point0.y(), MIN( m_Point1.y(), MIN( m_Point2.y(), m_Point3.y() ) ) ) );
-	m_Bound.vecMin().z( MIN( m_Point0.z(), MIN( m_Point1.z(), MIN( m_Point2.z(), m_Point3.z() ) ) ) );
-	m_Bound.vecMax().x( MAX( m_Point0.x(), MAX( m_Point1.x(), MAX( m_Point2.x(), m_Point3.x() ) ) ) );
-	m_Bound.vecMax().y( MAX( m_Point0.y(), MAX( m_Point1.y(), MAX( m_Point2.y(), m_Point3.y() ) ) ) );
-	m_Bound.vecMax().z( MAX( m_Point0.z(), MAX( m_Point1.z(), MAX( m_Point2.z(), m_Point3.z() ) ) ) );
+	m_Bound.vecMin().x( min( m_Point0.x(), min( m_Point1.x(), min( m_Point2.x(), m_Point3.x() ) ) ) );
+	m_Bound.vecMin().y( min( m_Point0.y(), min( m_Point1.y(), min( m_Point2.y(), m_Point3.y() ) ) ) );
+	m_Bound.vecMin().z( min( m_Point0.z(), min( m_Point1.z(), min( m_Point2.z(), m_Point3.z() ) ) ) );
+	m_Bound.vecMax().x( max( m_Point0.x(), max( m_Point1.x(), max( m_Point2.x(), m_Point3.x() ) ) ) );
+	m_Bound.vecMax().y( max( m_Point0.y(), max( m_Point1.y(), max( m_Point2.y(), m_Point3.y() ) ) ) );
+	m_Bound.vecMax().z( max( m_Point0.z(), max( m_Point1.z(), max( m_Point2.z(), m_Point3.z() ) ) ) );
 
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 
 		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
 		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );

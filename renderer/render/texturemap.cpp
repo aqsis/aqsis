@@ -727,12 +727,12 @@ void CqTextureMap::CalculateLevel(TqFloat ds, TqFloat dt)
 		UVArea *= -1.0f;
 
 	TqFloat l = (TqFloat) fastlog2(UVArea) / 2.0f;
-	l = MAX(l, 0.0);
+	l = max(l, 0.0f);
 
 	TqInt id = lfloor(l);
 
 	m_interp =  l - id;
-	m_interp = MIN(m_interp, 1.0);
+	m_interp = min(m_interp, 1.0f);
 
 
 	if (m_Directory && m_Directory < id)
@@ -1003,10 +1003,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	// Work out the width and height
 	TqFloat uu1, uu2, vv1, vv2;
 
-	uu1 = MIN( u1, u2);
-	vv1 = MIN( v1, v2);
-	uu2 = MAX( u1, u2);
-	vv2 = MAX( v1, v2);
+	uu1 = min( u1, u2);
+	vv1 = min( v1, v2);
+	uu2 = max( u1, u2);
+	vv2 = max( v1, v2);
 
 	if ( m_sblur || m_tblur)
 	{
@@ -1216,8 +1216,8 @@ void CqTextureMap::Open()
 		bMipMap &= TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsx );
 
 		/* Second test; is it containing enough directories for us */
-		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
+		TqInt minRes = min(m_XRes, m_YRes );
+		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (minRes)));
 		if (TIFFSetDirectory(m_pImage, directory - 1) == false)
 		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
@@ -1405,11 +1405,11 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	*/
 	TqFloat tmp;
 	tmp = ss1;
-	ss1 = MIN(ss1, ss2);
-	ss2 = MAX(tmp, ss2);
+	ss1 = min(ss1, ss2);
+	ss2 = max(tmp, ss2);
 	tmp = tt1;
-	tt1 = MIN(tt1, tt2);
-	tt2 = MAX(tmp, tt2);
+	tt1 = min(tt1, tt2);
+	tt2 = max(tmp, tt2);
 
 	GetSample( ss1, tt1, ss2, tt2, val);
 }
@@ -1427,10 +1427,10 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 
 	// Work out the width and height
 	TqFloat ss1, tt1, ss2, tt2;
-	ss1 = MIN( MIN( MIN( s1, s2 ), s3 ), s4 );
-	tt1 = MIN( MIN( MIN( t1, t2 ), t3 ), t4 );
-	ss2 = MAX( MAX( MAX( s1, s2 ), s3 ), s4 );
-	tt2 = MAX( MAX( MAX( t1, t2 ), t3 ), t4 );
+	ss1 = min( min( min( s1, s2 ), s3 ), s4 );
+	tt1 = min( min( min( t1, t2 ), t3 ), t4 );
+	ss2 = max( max( max( s1, s2 ), s3 ), s4 );
+	tt2 = max( max( max( t1, t2 ), t3 ), t4 );
 
 	// By definition the area sampling is requested.
 	// Primary used by shadow() calls

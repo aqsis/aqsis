@@ -96,7 +96,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
 	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
 
-	m_NumTimeRanges = MAX(4, m_PixelXSamples * m_PixelYSamples);
+	m_NumTimeRanges = max(4, m_PixelXSamples * m_PixelYSamples);
 
         TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
         TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];

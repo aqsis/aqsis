@@ -1127,7 +1127,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	assert( pTopology()->pPoints() );
 	assert( pFace() );
 
-	TqInt dicesize = MIN(MAX(m_uDiceSize, m_vDiceSize), 16);
+	TqInt dicesize = min(max(m_uDiceSize, m_vDiceSize), 16);
 
 	TqInt sdcount = aDiceSizes[ dicesize ];
 	dicesize = 1 << sdcount;

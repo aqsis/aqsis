@@ -260,8 +260,8 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( minz );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( maxz );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 		Bound.vecMin().x( Bound.vecMin().x() - cocX );
 		Bound.vecMin().y( Bound.vecMin().y() - cocY );
 		Bound.vecMax().x( Bound.vecMax().x() + cocX );
@@ -407,7 +407,7 @@ bool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pS
 		nextBucket = CurrentBucketRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
-		nextBucketX = MAX( nextBucketX, 0 );
+		nextBucketX = max( nextBucketX, 0 );
 		pos = BucketPosition( nextBucketX, nextBucket );
 
 		if ( ( nextBucketX < cXBuckets() ) &&
@@ -820,8 +820,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
-			maxCocX = MAX( minZCoc.x(), maxZCoc.x() );
-			maxCocY = MAX( minZCoc.y(), maxZCoc.y() );
+			maxCocX = max( minZCoc.x(), maxZCoc.x() );
+			maxCocY = max( minZCoc.y(), maxZCoc.y() );
 
 			mpgbminx = Bound.vecMin().x() + maxCocX;
 			mpgbmaxx = Bound.vecMax().x() - maxCocX;

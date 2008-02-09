@@ -43,9 +43,4 @@ typedef	unsigned short	TqUshort;
 typedef	float	TqFloat;
 typedef	double	TqDouble;
 
-/// Determine the minimum of the two values given.
-#define	MIN(a,b)			(((a)<(b))?(a):(b))
-/// Determine the maximum of the two values given.
-#define	MAX(a,b)			(((a)<(b))?(b):(a))
-
 #endif	// AQSIS_TYPES_INCLUDED

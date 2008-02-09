@@ -430,7 +430,7 @@ void CqPoints::InitialiseMaxWidth()
 		CqVector3D Point1 = matObjectToCamera * CqVector3D(radius,0,0);
 		radius = (Point1-Point0).Magnitude();
 
-		m_MaxWidth = MAX(m_MaxWidth, radius );
+		m_MaxWidth = max(m_MaxWidth, radius );
 	}
 }
 

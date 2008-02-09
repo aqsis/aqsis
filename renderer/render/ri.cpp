@@ -335,14 +335,6 @@ RtInt	RiLastError = 0;
 static float filter_width = FILTER_WIDTH;
 static int filter_size = FILTER_TBL_SIZE;
 
-#ifndef MAX
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
 /*
  * similar to reversed strstr() but more strict
  */
@@ -3441,7 +3433,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	TqInt  pixels_h = static_cast<TqInt> ( Bound.vecCross().y() );
 
 	// Adjust to shading rate
-	TqInt shading_rate = MAX(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
+	TqInt shading_rate = max(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
 	pixels_w /= shading_rate;
 	pixels_h /= shading_rate;
 
@@ -3512,7 +3504,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		}
 	}
 
-	pieces = MIN(8, pieces);
+	pieces = min(8, pieces);
 	TqInt m;
 
 	if (Cs)
@@ -3793,7 +3785,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		sumnVerts += nverts[ poly ];
 		for ( v = 0; v < nverts[ poly ]; ++v )
 		{
-			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+			cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -3875,7 +3867,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			}
 			for ( v = 0; v < nverts[ igloop ]; ++v )
 			{
-				cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+				cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 				pVerts++;
 			}
 		}
@@ -3915,8 +3907,8 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			iminindex = 0;
 			for ( iloop = 0; iloop < (TqUint) nloops[ ipoly ]; ++iloop, ++igloop )
 			{
-				iminindex = MIN( iminindex, (TqUint) verts[ igvert ] );
-				imaxindex = MAX( imaxindex, (TqUint) verts[ igvert ] );
+				iminindex = min( iminindex, (TqUint) verts[ igvert ] );
+				imaxindex = max( imaxindex, (TqUint) verts[ igvert ] );
 
 				CqPolygonGeneral2D polya;
 				polya.SetpVertices( pPointsClass );
@@ -5257,7 +5249,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
 		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMap class.
-		int log2 = MIN(Source.XRes(), Source.YRes());
+		int log2 = min(Source.XRes(), Source.YRes());
 		log2 = static_cast<int> ( ceil(log(static_cast<float>(log2))/log(2.0)) ) + 1;
 
 
@@ -5397,7 +5389,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
 		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = MIN( Source.XRes(), Source.YRes() );
+		int log2 = min( Source.XRes(), Source.YRes() );
 		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
@@ -5510,7 +5502,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 		TqInt numsamples = tpx.SamplesPerPixel();
 		// Number of mip map levels.
-		int log2 = MIN( xRes, yRes );
+		int log2 = min( xRes, yRes );
 		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 		for ( ii = 0; ii < log2; ++ii )
@@ -5756,7 +5748,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		sumnVerts += nvertices[ face ];
 		for ( v = 0; v < nvertices[ face ]; ++v )
 		{
-			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+			cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -6732,8 +6724,8 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 	}
 
 	/* Try to adjust with the final resolution of mipmap */
-	/* filter_size = MAX((int) log((double)bake)/log(2.0) + 2, (int) FILTER_TBL_SIZE);
-	 * filter_size = (int) ceil(log((double)MIN((int) ( (maxs - mins) * bake), (int) ((maxt -mint ) * bake)))/log(2.0));
+	/* filter_size = max((int) log((double)bake)/log(2.0) + 2, (int) FILTER_TBL_SIZE);
+	 * filter_size = (int) ceil(log((double)min((int) ( (maxs - mins) * bake), (int) ((maxt -mint ) * bake)))/log(2.0));
 	     */
 	invWidth = 1.0f/filter_width;
 	invSize = 1.0f/filter_size;
@@ -6819,10 +6811,10 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 		y0 = (TqInt) ceil(dImageY - filter_width);
 		y1 = (TqInt) floor(dImageY + filter_width);
 
-		x0 = MAX(x0, 0);
-		x1 = MIN(x1, bake -1);
-		y0 = MAX(y0, 0);
-		y1 = MIN(y1, bake -1);
+		x0 = max(x0, 0);
+		x1 = min(x1, bake -1);
+		y0 = max(y0, 0);
+		y1 = min(y1, bake -1);
 
 		if ( ( (x1-x0)<0) || ((y1-y0)<0 )) continue;
 
@@ -6831,13 +6823,13 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 		for (x = x0; x <= x1; ++x)
 		{
 			TqFloat fx = fabsf(x -dImageX) * invWidth * filter_size;
-			ifx[x-x0] = MIN((int) floor(fx), filter_size - 1);
+			ifx[x-x0] = min((int) floor(fx), filter_size - 1);
 		}
 		ify = (TqInt*)calloc(y1-y0+1, sizeof(TqInt));
 		for (y = y0; y <= y1; ++y)
 		{
 			TqFloat fy = fabsf(y -dImageY) * invWidth * filter_size;
-			ify[y-y0] = MIN((int) floor(fy), filter_size - 1);
+			ify[y-y0] = min((int) floor(fy), filter_size - 1);
 		}
 
 		/* Fill all the right pixels now */

@@ -498,7 +498,7 @@ void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			(a)->GetFloat(_aq_a,__iGrid);
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
-			TqFloat fRes = MIN( _aq_a, _aq_b );
+			TqFloat fRes = min( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				TqFloat fn;
@@ -530,7 +530,7 @@ void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			(a)->GetFloat(_aq_a,__iGrid);
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
-			TqFloat fRes = MAX( _aq_a, _aq_b );
+			TqFloat fRes = max( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				TqFloat fn;

@@ -429,10 +429,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	if ( lu >= m_XRes || hu < 0 || lv >= m_YRes || hv < 0 )
 		return ;
 
-	lu = MAX(0,lu);
-	lv = MAX(0,lv);
-	hu = MIN(m_XRes - 1,hu);
-	hv = MIN(m_YRes - 1,hv);
+	lu = max<TqUint>(0,lu);
+	lv = max<TqUint>(0,lv);
+	hu = min(m_XRes - 1,hu);
+	hv = min(m_YRes - 1,hv);
 
 	TqFloat sres = (1.0 + m_pswidth/2.0) * (hu - lu);
 	TqFloat tres = (1.0 + m_ptwidth/2.0) * (hv - lv);
@@ -505,9 +505,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		TqInt samples = lfloor(sqrt(m_samples));
 		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
 		occl = lceil(sqrt(static_cast<TqFloat>(occl)));
-		occl = MAX(2, occl);
+		occl = max(2, occl);
 		// Samples could overwrite after all the magic number!!
-		occl = MAX(samples, occl); 
+		occl = max(samples, occl); 
 		ns = nt = occl;
 	}
 
@@ -693,7 +693,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, bool append )
 			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apFlat.front() ->pVoidBufferData() );
 			for (TqUint y =0; y < YRes(); y++)
 				for (TqUint x = 0; x < XRes(); x++)
-					minz = MIN(minz, (TqDouble)depths[y*XRes() + x]);
+					minz = min(minz, (TqDouble)depths[y*XRes() + x]);
 			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );

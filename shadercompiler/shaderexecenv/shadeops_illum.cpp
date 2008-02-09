@@ -593,7 +593,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 					(roughness)->GetFloat(_aq_roughness,__iGrid);
 					CqColor colCl;
 					Cl() ->GetColor( colCl, __iGrid );
-					(Result)->SetColor(_aq_Result + colCl * pow( MAX( 0.0f, _aq_N * H ), 1.0f / ( _aq_roughness / 8.0f ) ),__iGrid);
+					(Result)->SetColor(_aq_Result + colCl * pow( max( 0.0f, _aq_N * H ), 1.0f / ( _aq_roughness / 8.0f ) ),__iGrid);
 
 				}
 			}
@@ -694,7 +694,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 					(size)->GetFloat(_aq_size,__iGrid);
 					CqColor colCl;
 					Cl() ->GetColor( colCl, __iGrid );
-					(Result)->SetColor(_aq_Result + colCl * pow( MAX( 0.0f, vecR * Ln ), _aq_size ),__iGrid);
+					(Result)->SetColor(_aq_Result + colCl * pow( max( 0.0f, vecR * Ln ), _aq_size ),__iGrid);
 
 				}
 			}
@@ -1041,7 +1041,7 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 			(rough)->GetFloat(_aq_rough,__iGrid);
 			CqColor colCl;
 			Cl() ->GetColor( colCl, __iGrid );
-			(Result)->SetColor(colCl * pow( MAX( 0.0f, _aq_N * H ), 1.0f / ( _aq_rough / 8.0f ) ),__iGrid);
+			(Result)->SetColor(colCl * pow( max( 0.0f, _aq_N * H ), 1.0f / ( _aq_rough / 8.0f ) ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
