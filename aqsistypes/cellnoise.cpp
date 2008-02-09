@@ -44,7 +44,7 @@ START_NAMESPACE( Aqsis )
 namespace {
 
 // Given a float, return an index into the permutation table
-TqUint permTableIndex(TqFloat x)
+inline TqUint permTableIndex(TqFloat x)
 {
 	return static_cast<TqUint>(static_cast<TqInt>(x)) & 0x7ff;
 }
