@@ -39,6 +39,19 @@
 START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
+// Utility functions
+
+namespace {
+
+// Given a float, return an index into the permutation table
+TqUint permTableIndex(TqFloat x)
+{
+	return static_cast<TqUint>(static_cast<TqInt>(x)) & 0x7ff;
+}
+
+} // unnamed namespace
+
+//---------------------------------------------------------------------
 /** 1D float cell noise.
  */
 
@@ -46,7 +59,7 @@ TqFloat CqCellNoise::FCellNoise1( TqFloat u )
 {
 	if ( u < 0.0 )
 		u -= 1;
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(u)];
 
 	return ( m_RandomTable[ i ] );
 }
@@ -63,8 +76,8 @@ TqFloat CqCellNoise::FCellNoise2( TqFloat u, TqFloat v )
 	if ( v < 0.0 )
 		v -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(u)];
+	i = m_PermuteTable[i + permTableIndex(v)];
 
 	return ( m_RandomTable[ i ] );
 }
@@ -87,9 +100,9 @@ TqFloat CqCellNoise::FCellNoise3( const CqVector3D& P )
 	if ( z < 0.0 )
 		z -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(x)];
+	i = m_PermuteTable[i + permTableIndex(y)];
+	i = m_PermuteTable[i + permTableIndex(z)];
 
 	return ( m_RandomTable[ i ] );
 }
@@ -114,10 +127,10 @@ TqFloat CqCellNoise::FCellNoise4( const CqVector3D& P, TqFloat v )
 	if ( v < 0.0 )
 		v -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(x)];
+	i = m_PermuteTable[i + permTableIndex(y)];
+	i = m_PermuteTable[i + permTableIndex(z)];
+	i = m_PermuteTable[i + permTableIndex(v)];
 
 	return ( m_RandomTable[ i ] );
 }
@@ -134,7 +147,7 @@ CqVector3D CqCellNoise::PCellNoise1( TqFloat u )
 	if ( u < 0.0 )
 		u -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(u)];
 
 	result.x( m_RandomTable[ i ] );
 	i = m_PermuteTable[ i ];
@@ -159,8 +172,8 @@ CqVector3D CqCellNoise::PCellNoise2( TqFloat u, TqFloat v )
 	if ( v < 0.0 )
 		v -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(u)];
+	i = m_PermuteTable[i + permTableIndex(v)];
 
 	result.x( m_RandomTable[ i ] );
 	i = m_PermuteTable[ i ];
@@ -191,9 +204,9 @@ CqVector3D CqCellNoise::PCellNoise3( const CqVector3D& P )
 	if ( z < 0.0 )
 		z -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(x)];
+	i = m_PermuteTable[i + permTableIndex(y)];
+	i = m_PermuteTable[i + permTableIndex(z)];
 
 	result.x( m_RandomTable[ i ] );
 	i = m_PermuteTable[ i ];
@@ -226,10 +239,10 @@ CqVector3D CqCellNoise::PCellNoise4( const CqVector3D& P, TqFloat v )
 	if ( v < 0.0 )
 		v -= 1;
 
-	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
-	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
+	TqInt i = m_PermuteTable[permTableIndex(x)];
+	i = m_PermuteTable[i + permTableIndex(y)];
+	i = m_PermuteTable[i + permTableIndex(z)];
+	i = m_PermuteTable[i + permTableIndex(v)];
 
 	result.x( m_RandomTable[ i ] );
 	i = m_PermuteTable[ i ];
