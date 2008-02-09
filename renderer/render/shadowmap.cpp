@@ -31,6 +31,7 @@
 #include	<fstream>
 #include	<boost/shared_array.hpp>
 
+#include	"aqsismath.h"
 #include	"texturemap.h"
 #include	"random.h"
 #include	"version.h"
@@ -420,10 +421,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat tmax = ( t1 > t2 ) ? t1 : ( t2 > t3 ) ? t2 : ( t3 > t4 ) ? t3 : t4;
 
 	// Cull if outside bounding box.
-	TqUint lu = static_cast<TqInt>( FLOOR( smin - sbo2 ) );
-	TqUint hu = static_cast<TqInt>( CEIL ( smax + sbo2 ) );
-	TqUint lv = static_cast<TqInt>( FLOOR( tmin - tbo2 ) );
-	TqUint hv = static_cast<TqInt>( CEIL ( tmax + tbo2 ) );
+	TqUint lu = lfloor(smin - sbo2);
+	TqUint hu = lceil(smax + sbo2);
+	TqUint lv = lfloor(tmin - tbo2);
+	TqUint hv = lceil(tmax + tbo2);
 
 	if ( lu >= m_XRes || hu < 0 || lv >= m_YRes || hv < 0 )
 		return ;
@@ -453,7 +454,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	if ( m_samples > 0 )
 	{
 
-		nt = ns =  3 * static_cast<TqInt>( CEIL( sqrt(  m_samples ) ) );
+		nt = ns =  3 * lceil(sqrt(m_samples));
 	}
 	else
 	{
@@ -501,9 +502,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// 2) Bigger the shadowmaps than smaller ns, nt;
 
 	if (NumPages() > 1) {
-		TqInt samples = FLOOR(sqrt(m_samples));
+		TqInt samples = lfloor(sqrt(m_samples));
 		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
-		occl = CEIL(sqrt(static_cast<TqFloat>(occl)));
+		occl = lceil(sqrt(static_cast<TqFloat>(occl)));
 		occl = MAX(2, occl);
 		// Samples could overwrite after all the magic number!!
 		occl = MAX(samples, occl); 

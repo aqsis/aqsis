@@ -32,6 +32,7 @@
 #include "renderer.h"
 #include "stats.h"
 #include "transform.h"
+#include "aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -471,7 +472,7 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat to
 	}
 	// Round the time if it's more than 5sec
 	if ( t > 5.0 )
-		t = fmod( t, 1 ) < 0.5 ? FLOOR( t ) : CEIL( t );
+		t = round(t);
 	TqInt h = static_cast<TqInt>( t / ( 60 * 60 ) );
 	TqInt m = static_cast<TqInt>( ( t / 60 ) - ( h * 60 ) );
 	TqFloat s = ( t ) - ( h * 60 * 60 ) - ( m * 60 );

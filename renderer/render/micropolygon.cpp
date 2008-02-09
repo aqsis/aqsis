@@ -123,7 +123,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
 	TqInt size = numMicroPolygons(cu, cv);
 
-	STATS_INC( GRD_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+	STATS_INC( GRD_size_4 + clamp<TqInt>(CqStats::stats_log2(size) - 2, 0, 7) );
 }
 
 //---------------------------------------------------------------------
@@ -556,7 +556,7 @@ void CqMicroPolyGrid::Shade()
 
 	TqInt	size = m_pShaderExecEnv->shadingPointCount();
 
-	STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+	STATS_INC( GRD_shd_size_4 + clamp<TqInt>( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
@@ -700,7 +700,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	std::map<TqFloat, TqInt>::iterator keyFrame;
 	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 	{
-		matObjectToCameraT;
 		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first, matObjectToCameraT );
 		aaPtimes[ keyFrame->second ].resize( gsmin1 + 1 );
 

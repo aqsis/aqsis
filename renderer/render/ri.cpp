@@ -2669,7 +2669,7 @@ RtVoid	RiPerspective( RtFloat fov )
 		return ;
 	}
 
-	fov = tan( RAD( fov / 2 ) );
+	fov = tan( degToRad( fov / 2 ) );
 
 	// This matches PRMan 3.9 in testing, but not BMRT 2.6's rgl and rendrib.
 	CqMatrix	matP( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, fov, fov, 0, 0, -fov, 0 );
@@ -2729,7 +2729,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
 	DEBUG_RIROTATE
 
-	CqMatrix	matRot( RAD( angle ), CqVector4D( dx, dy, dz ) );
+	CqMatrix	matRot( degToRad( angle ), CqVector4D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 	//        QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
@@ -2784,7 +2784,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 
 	DEBUG_RISKEW
 
-	CqMatrix	matSkew( RAD( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
+	CqMatrix	matSkew( degToRad( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
 
 	// This transformation can not change orientation.
 
@@ -5540,7 +5540,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 			TIFFCreateDirectory( ptex );
 			TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 			TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
-			TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(RAD(fov)/2.0) );
+			TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(degToRad(fov)/2.0) );
 			tpx.WriteTileImage( ptex, pLevelBuffer, 64, 64, tpx.Compression(), tpx.Quality() );
 			xRes /= 2;
 			yRes /= 2;

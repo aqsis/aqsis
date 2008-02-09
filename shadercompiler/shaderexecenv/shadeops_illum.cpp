@@ -25,12 +25,12 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
 #include	<stdio.h>
 
+#include	"aqsismath.h"
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
@@ -443,7 +443,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	Result->SetColor( gColBlack );
 
@@ -531,7 +531,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	Result->SetColor( gColBlack );
 	__fVarying = true;
@@ -657,7 +657,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	// Initialise the return value
 	Result->SetColor( gColBlack );
@@ -831,12 +831,12 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 					CqVector3D vecAxis( 0, 1, 0 );
 					if ( NULL != Axis )
 						Axis->GetVector( vecAxis, __iGrid );
-					TqFloat fAngle = PI;
+					TqFloat fAngle = M_PI;
 					if ( NULL != Angle )
 						Angle->GetFloat( fAngle, __iGrid );
 
 					TqFloat cosangle = Ln * vecAxis;
-					cosangle = CLAMP( cosangle, -1, 1 );
+					cosangle = clamp(cosangle, -1.0f, 1.0f);
 					if ( acos( cosangle ) > fAngle )
 						m_CurrentState.SetValue( __iGrid, false );
 					else
@@ -890,11 +890,11 @@ void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShad
 				CqVector3D vecAxis( 0.0f, 1.0f, 0.0f );
 				if ( NULL != Axis )
 					Axis->GetVector( vecAxis, __iGrid );
-				TqFloat fAngle = PI;
+				TqFloat fAngle = M_PI;
 				if ( NULL != Angle )
 					Angle->GetFloat( fAngle, __iGrid );
 				TqFloat cosangle = Ln * vecAxis;
-				cosangle = CLAMP( cosangle, -1, 1 );
+				cosangle = clamp(cosangle, -1.0f, 1.0f);
 				if ( acos( cosangle ) > fAngle )
 				{
 					// Make sure we set the light color to zero in the areas that won't be lit.

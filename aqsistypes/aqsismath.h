@@ -27,6 +27,7 @@
 #define AQSISMATH_H_INCLUDED
 
 #include "aqsis.h"
+#include <cmath>
 
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
@@ -62,6 +63,16 @@ template<typename T>
 inline TqLong lround(const T x)
 {
 	return lfloor(x - 0.5) + 1;
+}
+
+/** \brief Round the given floating point number to the nearest integer
+ *
+ * Something like function this is part of the C99 standard.
+ */
+template<typename T>
+inline T round(const T x)
+{
+	return std::floor(x - 0.5) + 1;
 }
 
 /** \brief Linearly interpolate between two values
@@ -109,17 +120,15 @@ inline T max(const T a, const T b)
 // more appropriate places.
 
 /// Convert the given angle in degrees to radians.
-template<typename T>
-inline T rad(const T a)
+inline TqFloat degToRad(const TqFloat a)
 {
-	return a/180.0f*PI;
+	return a/180.0*M_PI;
 }
 
 /// Convert the given angle in radians to degrees.
-template<typename T>
-inline T deg(const T a)
+inline TqFloat radToDeg(const TqFloat a)
 {
-	return a/PI*180.0f;
+	return a/M_PI*180.0;
 }
 
 /** \brief Return a number with only the lowest bit of the input set.

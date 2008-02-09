@@ -1740,8 +1740,8 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
-	uLen = MAX( ROUND( uLen ), 1 );
-	vLen = MAX( ROUND( vLen ), 1 );
+	uLen = max<TqInt>(lround(uLen), 1);
+	vLen = max<TqInt>(lround(vLen), 1);
 
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );

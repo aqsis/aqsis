@@ -124,7 +124,7 @@ void CqOptions::InitialiseCamera()
 
 			case	ProjectionPerspective:
 			{
-				TqFloat fov = GetFloatOption( "System", "Clipping" ) [ 0 ] * ( tan( RAD( GetFloatOption( "System", "FOV" ) [ 0 ] / 2.0f ) ) );
+				TqFloat fov = GetFloatOption( "System", "Clipping" ) [ 0 ] * ( tan( degToRad( GetFloatOption( "System", "FOV" ) [ 0 ] / 2.0f ) ) );
 				TqFloat l = GetFloatOption( "System", "ScreenWindow" ) [ 0 ] * fov;
 				TqFloat r = GetFloatOption( "System", "ScreenWindow" ) [ 1 ] * fov;
 				TqFloat t = GetFloatOption( "System", "ScreenWindow" ) [ 2 ] * fov;

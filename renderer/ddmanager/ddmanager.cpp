@@ -420,10 +420,10 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		// Call the DspyImageOpen method on the display to initialise things.
 		TqInt xres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
 		TqInt yres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-		TqInt xmin = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres ) );
-		TqInt xmax = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres ) );
-		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
-		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
+		TqInt xmin = clamp<TqInt>(lceil( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres);
+		TqInt xmax = clamp<TqInt>(lceil( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres);
+		TqInt ymin = clamp<TqInt>(lceil( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres);
+		TqInt ymax = clamp<TqInt>(lceil( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres);
 		PtDspyError err = (*m_OpenMethod)(&m_imageHandle,
 		                                  m_type.c_str(), m_name.c_str(),
 		                                  xmax-xmin,
@@ -892,8 +892,8 @@ void CqDisplayRequest::PrepareSystemParameters()
 
 	// "origin"
 	TqInt origin[2];
-	origin[0] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0] ) );
-	origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[1] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
+	origin[0] = clamp<TqInt>(lceil( OriginalSize[0] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0]);
+	origin[1] = clamp<TqInt>(lceil( OriginalSize[1] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1]);
 	ConstructIntsParameter("origin", origin, 2, parameter);
 	m_customParams.push_back(parameter);
 

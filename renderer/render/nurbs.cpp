@@ -1698,8 +1698,8 @@ bool	CqSurfaceNURBS::Diceable()
 
 	MaxuLen /= ShadingRateSqrt;
 	MaxvLen /= ShadingRateSqrt;
-	m_uDiceSize = static_cast<TqUint>( MAX( ROUND( MaxuLen ), 1 ) );
-	m_vDiceSize = static_cast<TqUint>( MAX( ROUND( MaxvLen ), 1 ) );
+	m_uDiceSize = max<TqInt>(lround(MaxuLen), 1);
+	m_vDiceSize = max<TqInt>(lround(MaxvLen), 1);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );

@@ -24,14 +24,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<math.h>
-
-#include	"aqsis.h"
 #include	"quadrics.h"
-#include	"micropolygon.h"
+
+#include	"aqsismath.h"
 #include	"imagebuffer.h"
 #include	"nurbs.h"
-#include	"aqsismath.h"
 
 #include	"ri.h"
 
@@ -348,8 +345,8 @@ TqUlong CqQuadric::EstimateGridSize()
 
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
-	m_uDiceSize = CEIL( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
-	m_vDiceSize = CEIL( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
+	m_uDiceSize = lceil( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
+	m_vDiceSize = lceil( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -411,11 +408,11 @@ void	CqSphere::Bound(IqBound* bound) const
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
 	Circle( vA, vB, vC, m_Radius, m_PhiMin, m_PhiMax, curve );
 
-	CqMatrix matRot( RAD ( m_ThetaMin ), vC );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vC );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
 
-	CqBound	B( RevolveForBound( curve, vA, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vA, vC, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -484,7 +481,7 @@ CqVector3D CqSphere::DicePoint( TqInt u, TqInt v )
 	TqFloat phi = m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize;
 
 	TqFloat cosphi = cos( phi );
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	return ( CqVector3D( ( m_Radius * cos( theta ) * cosphi ), ( m_Radius * sin( theta ) * cosphi ), ( m_Radius * sin( phi ) ) ) );
 }
@@ -552,10 +549,10 @@ void	CqCone::Bound(IqBound* bound) const
 	CqVector3D vA( m_Radius, 0, zmin ), vB( 0, 0, zmax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
-	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vD );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
-	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vC, vD, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -620,7 +617,7 @@ TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	TqFloat zmin = m_vMin * m_Height;
 	TqFloat zmax = m_vMax * m_Height;
@@ -641,7 +638,7 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	TqFloat zmin = m_vMin * m_Height;
 	TqFloat zmax = m_vMax * m_Height;
@@ -704,10 +701,10 @@ void	CqCylinder::Bound(IqBound* bound) const
 	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( m_Radius, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
-	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vD );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
-	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vC, vD, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -770,7 +767,7 @@ TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSpl
 
 CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
 
 	TqFloat vz = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
 	return ( CqVector3D( m_Radius * cos( theta ), m_Radius * sin( theta ), vz ) );
@@ -846,10 +843,10 @@ void	CqHyperboloid::Bound(IqBound* bound) const
 	curve.push_back( m_Point1 );
 	curve.push_back( m_Point2 );
 	CqVector3D vA( 0, 0, 0 ), vB( 0, 0, 1 );
-	CqMatrix matRot( RAD ( m_ThetaMin ), vB );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vB );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
-	CqBound	B( RevolveForBound( curve, vA, vB, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vA, vB, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -911,7 +908,7 @@ TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& a
 
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	CqVector3D p;
 	TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
@@ -931,7 +928,7 @@ CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
 
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 	TqFloat sin_theta = sin( theta );
 	TqFloat cos_theta = cos( theta );
 
@@ -1016,10 +1013,10 @@ void	CqParaboloid::Bound(IqBound* bound) const
 			if(xminang<180 && xmaxang>180)	xmaxang=180;
 		}*/
 
-	TqFloat x1 = m_RMax * cos( RAD( 0 ) );
-	TqFloat x2 = m_RMax * cos( RAD( 180 ) );
-	TqFloat y1 = m_RMax * sin( RAD( 90 ) );
-	TqFloat y2 = m_RMax * sin( RAD( 270 ) );
+	TqFloat x1 = m_RMax * cos( degToRad( 0 ) );
+	TqFloat x2 = m_RMax * cos( degToRad( 180 ) );
+	TqFloat y1 = m_RMax * sin( degToRad( 90 ) );
+	TqFloat y2 = m_RMax * sin( degToRad( 270 ) );
 
 	CqVector3D vecMin( MIN( x1, x2 ), MIN( y1, y2 ), MIN( m_ZMin, m_ZMax ) );
 	CqVector3D vecMax( MAX( x1, x2 ), MAX( y1, y2 ), MAX( m_ZMin, m_ZMax ) );
@@ -1089,7 +1086,7 @@ TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aS
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
 
 	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
 	TqFloat r = m_RMax * sqrt( z / m_ZMax );
@@ -1106,7 +1103,7 @@ CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
 	TqFloat sin_theta = sin( theta );
 	TqFloat cos_theta = cos( theta );
 
@@ -1114,7 +1111,7 @@ CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 	TqFloat r = m_RMax * sqrt( z / m_ZMax );
 
 	TqFloat dzdr = r * 2.0 * m_ZMax / ( m_RMax * m_RMax );
-	TqFloat normalAngle = PI / 2.0 - atan( dzdr );
+	TqFloat normalAngle = M_PI_2 - atan( dzdr );
 	Normal.x( cos_theta * cos( normalAngle ) );
 	Normal.y( sin_theta * cos( normalAngle ) );
 	Normal.z( -sin( normalAngle ) );
@@ -1165,11 +1162,11 @@ void	CqTorus::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
-	Circle( vA, vB, vC, m_MinorRadius, RAD( m_PhiMin ), RAD( m_PhiMax ), curve );
-	CqMatrix matRot( RAD ( m_ThetaMin ), vC );
+	Circle( vA, vB, vC, m_MinorRadius, degToRad( m_PhiMin ), degToRad( m_PhiMax ), curve );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vC );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
-	CqBound	B( RevolveForBound( curve, vD, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vD, vC, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -1233,8 +1230,8 @@ TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat phi = RAD( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat phi = degToRad( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
 
 	TqFloat r = m_MinorRadius * cos( phi );
 	TqFloat z = m_MinorRadius * sin( phi );
@@ -1251,8 +1248,8 @@ CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat phi = RAD( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat phi = degToRad( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
 
 	TqFloat r = m_MinorRadius * cos( phi );
 	TqFloat z = m_MinorRadius * sin( phi );
@@ -1307,10 +1304,10 @@ void	CqDisk::Bound(IqBound* bound) const
 	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( m_MinorRadius, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
-	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
+	CqMatrix matRot( degToRad ( m_ThetaMin ), vD );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
-	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqBound	B( RevolveForBound( curve, vC, vD, degToRad( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 	bound->vecMin() = B.vecMin();
 	bound->vecMax() = B.vecMax();
@@ -1373,7 +1370,7 @@ TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 
 CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 	TqFloat vv = m_MajorRadius - ( ( TqFloat ) v * ( m_MajorRadius - m_MinorRadius ) ) / m_vDiceSize;
 	return ( CqVector3D( vv * cos( theta ), vv * sin( theta ), m_Height ) );
 }

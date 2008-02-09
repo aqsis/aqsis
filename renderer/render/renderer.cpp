@@ -1530,13 +1530,13 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if( rangeAttr[1] == rangeAttr[0] )
 			minImportance = ruler < rangeAttr[1] ? 1.0f : 0.0f;
 		else
-			minImportance = CLAMP( ( rangeAttr[1] - ruler ) / ( rangeAttr[1] - rangeAttr[0] ), 0, 1 );
+			minImportance = clamp(( rangeAttr[1] - ruler ) / ( rangeAttr[1] - rangeAttr[0] ), 0.0f, 1.0f);
 
 		TqFloat maxImportance;
 		if ( rangeAttr[2] == rangeAttr[3] )
 			maxImportance = ruler < rangeAttr[2] ? 1.0f : 0.0f;
 		else
-			maxImportance = CLAMP( ( rangeAttr[3] - ruler ) / ( rangeAttr[3] - rangeAttr[2] ), 0, 1 );
+			maxImportance = clamp((rangeAttr[3] - ruler)/(rangeAttr[3] - rangeAttr[2]), 0.0f, 1.0f);
 
 		if ( minImportance >= maxImportance )
 			// Geomtry must be culled.

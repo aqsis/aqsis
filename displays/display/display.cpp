@@ -31,8 +31,6 @@
 
 #include <tiffio.h>
 
-using namespace Aqsis;
-
 #include <iomanip>
 #include <ios>
 #include <iostream>
@@ -46,7 +44,9 @@ using namespace Aqsis;
 #include <cstring>
 
 #include "ndspy.h"
+#include "aqsismath.h"
 
+using namespace Aqsis;
 
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #define	SHADOWMAP_HEADER	"Shadow"
@@ -69,9 +69,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 START_NAMESPACE( Aqsis )
 
@@ -396,14 +393,18 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &B, 
 		    TqUchar alpha )
 { 
+#	define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+#	define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 	TqInt t;
 	// C’ = INT_PRELERP( A’, B’, b, t )
 	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
 	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
 	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
-	R = CLAMP( R1, 0, 255 );
-	G = CLAMP( G1, 0, 255 );
-	B = CLAMP( B1, 0, 255 );
+	R = clamp<TqUchar>(R1, 0, 255);
+	G = clamp<TqUchar>(G1, 0, 255);
+	B = clamp<TqUchar>(B1, 0, 255);
+#	undef INT_MULT
+#	undef INT_PRELERP
 }
 
 
@@ -834,7 +835,7 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 		Fl::check();
 		TqFloat percent = pImage->m_pixelsReceived / (TqFloat) (pImage->m_width * pImage->m_height);
 		percent *= 100.0f;
-		percent = CLAMP(percent, 0.0f, 100.0f);
+		percent = clamp(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
 			strTitle << pImage->m_filename << ": " << std::fixed << std::setprecision(1) << std::setw(5) << percent << "% complete" << std::ends;

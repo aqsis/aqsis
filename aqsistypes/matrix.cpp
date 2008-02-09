@@ -23,9 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<math.h>
-#include	"matrix.h"
+#include "matrix.h"
+
 #include <iomanip>
+
+#include "aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -109,7 +111,6 @@ CqMatrix::CqMatrix( const TqFloat Angle, const CqVector3D Axis )
  * For now base this on what Larry Gritz posted a while back.
  * There are some more optimizations that can be done.
  */
-#define	PI		3.14159265359f
 CqMatrix::CqMatrix( const TqFloat angle,
                     const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
                     const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 )
@@ -123,7 +124,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
 
 	TqFloat d1d2dot = d1 * d2;
 	TqFloat axisangle = static_cast<TqFloat>(acos( d1d2dot ));
-	if ( angle >= axisangle || angle <= ( axisangle - PI ) )
+	if ( angle >= axisangle || angle <= ( axisangle - M_PI ) )
 	{
 		// Skewed past the axes -- issue error, then just use identity matrix.
 		// No access to CqBasicError from here, so this will have to be down

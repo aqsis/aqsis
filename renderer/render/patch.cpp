@@ -393,8 +393,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen *= 3;
 	vLen *= 3;
-	m_uDiceSize = static_cast<TqInt>( MAX( ROUND( uLen ), 1 ) );
-	m_vDiceSize = static_cast<TqInt>( MAX( ROUND( vLen ), 1 ) );
+	m_uDiceSize = max<TqInt>(lround( uLen ), 1);
+	m_vDiceSize = max<TqInt>(lround( vLen ), 1);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -750,8 +750,8 @@ bool	CqSurfacePatchBilinear::Diceable()
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
 	// TODO: Should ensure powers of half to prevent cracking.
-	uLen = MAX( ROUND( uLen ), 1 );
-	vLen = MAX( ROUND( vLen ), 1 );
+	uLen = max<TqInt>(lround(uLen), 1);
+	vLen = max<TqInt>(lround(vLen), 1);
 
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );
