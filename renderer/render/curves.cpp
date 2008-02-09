@@ -195,11 +195,7 @@ TqFloat CqCurve::GetGridLength() const
 	        "limits", "gridsize"
 	    );
 	if ( poptGridSize != NULL )
-	{
-		micropolysPerGrid =
-		    static_cast<TqFloat>( poptGridSize[ 0 ] ) *
-		    static_cast<TqFloat>( poptGridSize[ 1 ] );
-	}
+		micropolysPerGrid = poptGridSize[0];
 
 	// find the shading rate
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute(
