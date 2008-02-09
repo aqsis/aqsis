@@ -150,6 +150,16 @@ class CqImageBuffer
 		{
 			return ( m_iYRes );
 		}
+		/// Return the width of the cropped image in pixels
+		TqInt xResCrop() const
+		{
+			return m_CropWindowXMax - m_CropWindowXMin;
+		}
+		/// Return the height of the cropped image in pixels
+		TqInt yResCrop() const
+		{
+			return m_CropWindowYMax - m_CropWindowYMin;
+		}
 		/** Get the minimum horizontal pixel to render.
 		 * \return Integer minimum pixel index.
 		 */

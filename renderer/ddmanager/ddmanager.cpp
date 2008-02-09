@@ -150,16 +150,16 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 	if ( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
-	TqUint	xmin = pBucket->XOrigin();
-	TqUint	ymin = pBucket->YOrigin();
-	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();
+	TqInt xmin = pBucket->XOrigin();
+	TqInt ymin = pBucket->YOrigin();
+	TqInt xmaxplus1 = xmin + pBucket->Width();
+	TqInt ymaxplus1 = ymin + pBucket->Height();
 
 	// If completely outside the crop rectangle, don't bother sending.
-	if ( xmaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowXMin() ||
-	        ymaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowYMin() ||
-	        xmin > (TqUint) QGetRenderContext()->pImage()->CropWindowXMax() ||
-	        ymin > (TqUint) QGetRenderContext()->pImage()->CropWindowYMax() )
+	if ( xmaxplus1 <= QGetRenderContext()->pImage()->CropWindowXMin() ||
+	        ymaxplus1 <= QGetRenderContext()->pImage()->CropWindowYMin() ||
+	        xmin > QGetRenderContext()->pImage()->CropWindowXMax() ||
+	        ymin > QGetRenderContext()->pImage()->CropWindowYMax() )
 		return(0);
 
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
@@ -418,16 +418,12 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		PrepareSystemParameters();
 
 		// Call the DspyImageOpen method on the display to initialise things.
-		TqInt xres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-		TqInt yres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-		TqInt xmin = clamp<TqInt>(lceil( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres);
-		TqInt xmax = clamp<TqInt>(lceil( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres);
-		TqInt ymin = clamp<TqInt>(lceil( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres);
-		TqInt ymax = clamp<TqInt>(lceil( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres);
+		TqInt width = QGetRenderContext()->pImage()->xResCrop();
+		TqInt height = QGetRenderContext()->pImage()->yResCrop();
 		PtDspyError err = (*m_OpenMethod)(&m_imageHandle,
 		                                  m_type.c_str(), m_name.c_str(),
-		                                  xmax-xmin,
-		                                  ymax-ymin,
+		                                  width,
+		                                  height,
 		                                  m_customParams.size(),
 		                                  &m_customParams[0],
 		                                  m_formats.size(), &m_formats[0],
@@ -885,15 +881,15 @@ void CqDisplayRequest::PrepareSystemParameters()
 
 	// "OriginalSize"
 	TqInt OriginalSize[2];
-	OriginalSize[0] = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	OriginalSize[1] = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	OriginalSize[0] = QGetRenderContext()->pImage()->iXRes();
+	OriginalSize[1] = QGetRenderContext()->pImage()->iYRes();
 	ConstructIntsParameter("OriginalSize", OriginalSize, 2, parameter);
 	m_customParams.push_back(parameter);
 
 	// "origin"
 	TqInt origin[2];
-	origin[0] = clamp<TqInt>(lceil( OriginalSize[0] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0]);
-	origin[1] = clamp<TqInt>(lceil( OriginalSize[1] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1]);
+	origin[0] = QGetRenderContext()->pImage()->CropWindowXMin();
+	origin[1] = QGetRenderContext()->pImage()->CropWindowYMin();
 	ConstructIntsParameter("origin", origin, 2, parameter);
 	m_customParams.push_back(parameter);
 
@@ -977,7 +973,7 @@ void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 		m_DataBucket = new unsigned char[m_elementSize * pBucket->Width() * pBucket->Height()];
 	if ((m_flags.flags & PkDspyFlagsWantsScanLineOrder) && m_DataRow == 0)
 	{
-		TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
+		TqUint width = QGetRenderContext()->pImage()->xResCrop();
 		TqUint height = pBucket->Height();
 		m_DataRow = new unsigned char[m_elementSize * width * height];
 	}
@@ -1075,7 +1071,7 @@ bool CqDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint	xmaxplus1 = xmin + pBucket->Width();
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
-	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
+	TqUint width = QGetRenderContext()->pImage()->xResCrop();
 	TqUint x, y;
 
 	//Aqsis::log() << debug << "xmin: " << xmin << " ymin: " << ymin << " xmaxplus1: " << xmaxplus1 << " ymaxplus1: " << ymaxplus1 << " width: " << width <<//std::endl;
@@ -1109,7 +1105,7 @@ void CqDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
 	TqUint y;
 	PtDspyError err;
 	unsigned char* pdata = m_DataRow;
-	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
+	TqUint width = QGetRenderContext()->pImage()->xResCrop();
 
 	// send to the display one line at a time
 	for (y = ymin; y < ymaxplus1; y++)
