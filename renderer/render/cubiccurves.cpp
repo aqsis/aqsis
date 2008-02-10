@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "aqsis.h"
+
 #include "imagebuffer.h"
 #include "micropolygon.h"
 #include "renderer.h"
@@ -34,6 +34,7 @@
 #include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -372,34 +373,66 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 
 }
 
+namespace {
+
+// Helper function for CalculateTangent
+
+/** \brief Choose out of the three possible endpoint tangents for a bezier curve.
+ *
+ * This function tries to make sure curves with degenerate endpoints are
+ * treated properly - it first estimates the overall size of the curve, then
+ * measures the length of the provided tangents against this size to make sure
+ * that they're not degenerate.
+ *
+ * This function is probably of comparable cost to computing the tangent using
+ * a numerical derivative instead, hopefully it's a little more accurate...
+ *
+ * tangent1 is considered first, followed by tangent2 and finally tangent3.
+ */
+CqVector3D chooseEndpointTangent(const CqVector3D& tangent1, const CqVector3D& tangent2,
+		const CqVector3D& tangent3)
+{
+	// Determine the "too small" length scale for the curve.
+	TqFloat len1Sqd = tangent1.Magnitude2();
+	TqFloat len2Sqd = tangent2.Magnitude2();
+	TqFloat len3Sqd = tangent3.Magnitude2();
+	// If tangents are shorter than a given small multiple of the overall curve size,
+	// we will call them degenerate, and pass on to the next candidate tangent.
+	TqFloat tooSmallLen = 1e-6 * max(max(len1Sqd, len2Sqd), len3Sqd);
+
+	// Select a nondegenerate tangent.
+	if(len1Sqd > tooSmallLen)
+		return tangent1;
+	else if(len2Sqd > tooSmallLen)
+		return tangent2;
+	else
+		return tangent3;
+}
+
+} // unnamed namespace
 
 CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
 {
-	int i;
-	std::vector<CqVector4D> pg(4), pg0(4);
-	for(i=0; i <= 3; i++)
-		pg[i] = pg0[i] =*P()->pValue( i );
+	// Read 3D vertices into the array pg.
+	CqVector3D pg[4];
+	for(TqInt i=0; i <= 3; i++)
+		pg[i] = *P()->pValue(i);
+
 	if(u == 0.0f)
-	{
-		int i1 = 1;
-		while(i1 < 3 && pg[0] == pg[i1]) ++i1;
-		return(3*(pg[i1] - pg[0]));
-	}
+		return chooseEndpointTangent(pg[1] - pg[0], pg[2] - pg[0], pg[3] - pg[0]);
 	else if(u == 1.0f)
+		return chooseEndpointTangent(pg[3] - pg[2], pg[3] - pg[1], pg[3] - pg[0]);
+	else
 	{
-		int i1 = 2;
-		while(i1 > 0 && pg[3] == pg[i1]) --i1;
-		return(3*(pg[3]-pg[i1]));
+		// Generic case - may be derived by taking the derivative of the
+		// parametric form of a bezier curve.  We leave off a factor of 3,
+		// since we're interested in the direction, not the magnitude.
+		// (Magnitude is dependent on the parametrization, not an intrinsic
+		// property of the curve.)
+		TqFloat u2 = u*u;
+		return (-u2 + 2*u - 1)*pg[0] + (3*u2 - 4*u + 1)*pg[1]
+			+ (-3*u2 + 2*u)*pg[2] + u2*pg[3];
 	}
-	for(int j=1; j <= 3; j++)
-	{
-		for(int i=0; i <= 3-j; i++)
-		{
-			pg0[i]=pg[i];
-			pg[i]=pg[i]*(1-u)+pg[i+1]*u;
-		}
-	}
-	return(3*(pg[1]-pg0[0]));
 }
 
 
@@ -415,7 +448,6 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
-
 	// first, we find the following vectors:
 	//  direction     - from the first point to the second along the line
 	//                      segment
@@ -426,10 +458,6 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	//  widthOffset1  - offset to account for the width of the patch at
 	//                      the second point
 
-	// \note: Not really happy about this, but by shifting the calculation value
-	// slightly along the curve for tangent calculation of endpoints, we avoid
-	// problems with curves that have duplicated points at one or other ends.
-	// See bug #1102605
 	CqVector3D direction0 = CalculateTangent(0.00);
 	CqVector3D direction3 = CalculateTangent(1.00);
 
@@ -442,29 +470,20 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	normal1 = ( ( normal3 - normal0 ) / 3.0f ) + normal0;
 	normal2 = ( ( ( normal3 - normal0 ) / 3.0f ) * 2.0f ) + normal0;
 
-	normal0.Unit();
-	normal1.Unit();
-	normal2.Unit();
-	normal3.Unit();
-
-	CqVector3D widthOffset02 = normal0 % direction0;
-	CqVector3D widthOffset12 = normal1 % direction1;
-	CqVector3D widthOffset22 = normal2 % direction2;
-	CqVector3D widthOffset32 = normal3 % direction3;
+	CqVector3D widthOffset02 = (normal0 % direction0).Unit();
+	CqVector3D widthOffset12 = (normal1 % direction1).Unit();
+	CqVector3D widthOffset22 = (normal2 % direction2).Unit();
+	CqVector3D widthOffset32 = (normal3 % direction3).Unit();
 
 	TqFloat width0 = width()->pValue( 0 )[0];
 	TqFloat width3 = width()->pValue( 1 )[0];
 	TqFloat width1 = ( ( width3 - width0 ) / 3.0f ) + width0;
 	TqFloat width2 = ( ( ( width3 - width0 ) / 3.0f ) * 2.0f ) + width0;
 
-	widthOffset02 *=
-	    width0 / widthOffset02.Magnitude() / 6.0;
-	widthOffset12 *=
-	    width1 / widthOffset12.Magnitude() / 6.0;
-	widthOffset22 *=
-	    width2 / widthOffset22.Magnitude() / 6.0;
-	widthOffset32 *=
-	    width3 / widthOffset32.Magnitude() / 6.0;
+	widthOffset02 *= width0 / 6.0;
+	widthOffset12 *= width1 / 6.0;
+	widthOffset22 *= width2 / 6.0;
+	widthOffset32 *= width3 / 6.0;
 
 	CqVector3D widthOffset0 = widthOffset02 * 3;
 	CqVector3D widthOffset1 = widthOffset12 * 3;

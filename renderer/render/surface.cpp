@@ -152,16 +152,23 @@ void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 /** Default constructor
  */
 
-CqSurface::CqSurface() : m_fDiceable( true ), m_fDiscard( false ), m_EyeSplitCount( 0 ),
-		m_pAttributes( 0 ), m_SplitDir( SplitDir_U )
+CqSurface::CqSurface()
+	: m_fDiceable(true),
+	m_fDiscard(false),
+	m_EyeSplitCount(0),
+	m_aUserParams(),
+	m_pAttributes(0),
+	m_pTransform(QGetRenderContext()->ptransCurrent()),
+	m_uDiceSize(1),
+	m_vDiceSize(1),
+	m_SplitDir(SplitDir_U),
+	m_CachedBound(false),
+	m_Bound(),
+	m_pCSGNode()
 {
 	// Set a refernce with the current attributes.
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	ADDREF( m_pAttributes );
-
-	m_pTransform = QGetRenderContext() ->ptransCurrent();
-
-	m_CachedBound = false;
 
 	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
 	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
@@ -180,7 +187,6 @@ CqSurface::CqSurface() : m_fDiceable( true ), m_fDiscard( false ), m_EyeSplitCou
 			Aqsis::log() << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
 		}
 	}
-
 
 	// Nullify the standard primitive variables index table.
 	TqInt i;
