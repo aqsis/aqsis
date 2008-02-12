@@ -260,6 +260,43 @@ void CqMicroPolyGrid::CalcSurfaceDerivatives()
 	}
 }
 
+
+//---------------------------------------------------------------------
+void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
+{
+	// Anti grid-crack hack!  We expand the grid by pushing the outer verts
+	// along the vectors connecting themselves to the next layer of verts in:
+	//
+	//        ^  ^  ^
+	//        |  |  |
+	//
+	//  <--   x--x--x ...
+	//        |  |  |
+	//  <--   x--x--x ...
+	//        |  |  .
+	//  <--   x--x.
+	//        .
+	//
+	CqVector3D* pPmod;
+	pVar(EnvVars_P)->GetPointPtr(pPmod);
+
+	const TqInt numVertsU = uGridRes() + 1;
+	const TqInt totVerts = numVertsU*(vGridRes() + 1);
+	// Expand first u-row in -v direction.
+	for(TqInt iu = 0; iu < numVertsU; ++iu)
+		pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu+numVertsU];
+	// Expand last u-row in +v direction.
+	for(TqInt iu = totVerts-numVertsU; iu < totVerts; ++iu)
+		pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu-numVertsU];
+	// Expand first v-row in -u direction.
+	for(TqInt iv = 0; iv < totVerts; iv += numVertsU)
+		pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv+1];
+	// Expand last v-row in +u direction.
+	for(TqInt iv = numVertsU-1; iv < totVerts; iv += numVertsU)
+		pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv-1];
+}
+
+
 //---------------------------------------------------------------------
 /** Shade the grid using the surface parameters of the surface passed and store the color values for each micropolygon.
  */
@@ -318,6 +355,10 @@ void CqMicroPolyGrid::Shade()
     
     TqInt buRes = uRes;
     TqInt bvRes = vRes;
+
+	const TqFloat* gridExpand = pAttributes()->GetFloatAttribute("aqsis", "expandgrids");
+	if(gridExpand && *gridExpand > 0)
+		ExpandGridBoundaries(*gridExpand);
 
     // Make sure uRes and vRes are at least equal to 4
     // Otherwise spline interpolation will be off

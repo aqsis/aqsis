@@ -177,6 +177,18 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 		void	CalcNormals();
 		void	CalcSurfaceDerivatives();
+		/** \brief Expand the boundary micropolygons to cover grid cracks.
+		 *
+		 * This function expands the boundary of a grid by moving the boundary
+		 * vertices outward along the vectors which connect them to the
+		 * interior vertices of the grid.  This is a computationally cheap and
+		 * easy way to cover cracks between adjacent grids which result from
+		 * differing dicing rates.
+		 *
+		 * \param amount - fraction of a micropolygon to expand the boundary
+		 *                 outward by.
+		 */
+		void ExpandGridBoundaries(TqFloat amount);
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
