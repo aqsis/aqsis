@@ -364,8 +364,8 @@ void CqMicroPolyGrid::Shade()
     // Otherwise spline interpolation will be off
     if (uRes < 4) buRes = 4;
     if (vRes < 4) bvRes = 4;
-    CqCubicSpline<CqVector4D> sp_u(SplineBasis_CatmullRom, buRes);
-    CqCubicSpline<CqVector4D> sp_v(SplineBasis_CatmullRom, bvRes);
+    CqCubicSpline<TqFloat> sp_u(SplineBasis_CatmullRom, buRes);
+    CqCubicSpline<TqFloat> sp_v(SplineBasis_CatmullRom, bvRes);
 
     for ( i = gsmin1; i >= 0; i-- )
     {
@@ -382,7 +382,7 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_u) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_du) ->SetFloat(dv, i );
-                sp_u.pushBack(CqVector4D(dv, 0, 0, 0));
+                sp_u.pushBack(dv);
                  } else {
                    // Make sure uRes at least equal to 4
                    if (uRes < 4) {
@@ -391,9 +391,9 @@ void CqMicroPolyGrid::Shade()
                       }
                    }
              
-                   CqVector4D res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
+                   TqFloat res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
              
-                   pVar(EnvVars_du) ->SetFloat( res.x(), i );
+                   pVar(EnvVars_du) ->SetFloat(res, i );
                 }
           }
           if ( USES( lUses, EnvVars_dv ) ){
@@ -405,7 +405,7 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_v) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_dv) ->SetFloat( dv, i );
-                sp_v.pushBack(CqVector4D(dv, 0, 0, 0));
+                sp_v.pushBack(dv);
              } else {
                 // Make sure vRes at least equal to 4
                 if (vRes < 4) {
@@ -413,8 +413,8 @@ void CqMicroPolyGrid::Shade()
                       sp_v.pushBack(sp_v[vRes-1]);
                    }
                 }
-                CqVector4D res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
-                pVar(EnvVars_dv) ->SetFloat( res.x(), i );
+                TqFloat res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
+                pVar(EnvVars_dv) ->SetFloat(res, i );
              }
           }
        } else {
