@@ -75,7 +75,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
-		virtual	void	Shade() = 0;
+		virtual	void	Shade(bool canCullGrid = true ) = 0;
 		virtual	void	TransferOutputVariables() = 0;
 		/*
 		 * Delete all the variables per grid 
@@ -235,7 +235,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 
 		/** Get a pointer to the surface which this grid belongs.
@@ -340,7 +340,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 		
 		/**

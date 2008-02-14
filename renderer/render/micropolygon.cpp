@@ -301,7 +301,7 @@ void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
 /** Shade the grid using the surface parameters of the surface passed and store the color values for each micropolygon.
  */
 
-void CqMicroPolyGrid::Shade()
+void CqMicroPolyGrid::Shade( bool canCullGrid )
 {
 	register TqInt i;
 
@@ -470,7 +470,7 @@ void CqMicroPolyGrid::Shade()
 			}
 		}
 
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -499,7 +499,7 @@ void CqMicroPolyGrid::Shade()
 		}
 		//theStats.OcclusionCullTimer().Stop();
 
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -543,7 +543,7 @@ void CqMicroPolyGrid::Shade()
 		}
 
 		// If the whole grid is culled don't bother going any further.
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -584,13 +584,13 @@ void CqMicroPolyGrid::Shade()
 				break;
 		}
 
-		if ( cCulled == gs )
-		{
-			m_fCulled = true;
-			STATS_INC( GRD_culled );
-			DeleteVariables( true );
-			return ;
-		}
+//		if ( cCulled == gs )
+//		{
+//			m_fCulled = true;
+//			STATS_INC( GRD_culled );
+//			DeleteVariables( true );
+//			return ;
+//		}
 	}
 
 	DeleteVariables( false );
@@ -673,8 +673,8 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
 	if ( all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )
-		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )			// \note: Needed by backface culling.
+//		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) || all )
@@ -977,10 +977,10 @@ CqMotionMicroPolyGrid::~CqMotionMicroPolyGrid()
 /** Shade the primary grid.
  */
 
-void CqMotionMicroPolyGrid::Shade()
+void CqMotionMicroPolyGrid::Shade( bool canCullGrid )
 {
 	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
-	pGrid->Shade();
+	pGrid->Shade(false);
 }
 
 
@@ -1015,18 +1015,25 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	TIMER_START("Project points")
 	CqMatrix matCameraToRaster;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
+	// Check to see if this surface is single sided, if so, we can do backface culling.
+	bool canBeBFCulled = ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !pGridA->usesCSG();
 
 	ADDREF( pGridA );
 
 	// Get an array of P's for all time positions.
 	std::vector<std::vector<CqVector3D> > aaPtimes;
 	aaPtimes.resize( cTimes() );
-
+	
 	TqInt tTime = cTimes();
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
 	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
+
+	// Store a count of backface culling for each MP, if it equals the number of timeslots, then
+	// the MP can be culled.
+	std::vector<TqInt> totalBFCulled;
+	totalBFCulled.assign( gsmin1 + 1, 0 );
 
 	for ( iTime = 0; iTime < tTime; iTime++ )
 	{
@@ -1037,6 +1044,8 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		CqVector3D* pP;
 		pg->pVar(EnvVars_P) ->GetPointPtr( pP );
+		CqVector3D* pNg;
+		pg->pVar(EnvVars_Ng) ->GetPointPtr( pNg );
 
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -1047,6 +1056,14 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
 			aaPtimes[ iTime ][ i ].z( zdepth );
 			pP[ i ] = aaPtimes[ iTime ][ i ];
+
+			// Now try and cull any hidden MPs if Sides==1
+			if ( canBeBFCulled )
+			{
+				TIME_SCOPE("Backface culling")
+				if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+					totalBFCulled[i]++;
+			}
 		}
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
@@ -1080,6 +1097,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	bool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
 
 	TqInt iv;
+	TqInt totalTimes = cTimes();
 	for ( iv = 0; iv < cv; iv++ )
 	{
 		TqInt iu;
@@ -1088,9 +1106,9 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
 			// If culled don't bother.
-			if ( pGridA->CulledPolys().Value( iIndex ) )
+			if ( totalBFCulled[iIndex] == totalTimes )
 			{
-				//theStats.IncCulledMPGs();
+				STATS_INC( MPG_culled );
 				continue;
 			}
 
