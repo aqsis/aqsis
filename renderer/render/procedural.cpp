@@ -367,6 +367,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	};
 
 	FILE *fileout = (it->second)->out;
+	if(!fileout)
+	{
+		errno_t err;
+		_get_errno( &err );
+		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  err << std::endl;
+		return;
+	}
 	// Write out detail and data to the process
 	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
 	fflush( fileout );
@@ -379,6 +386,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	//potential blocking.
 	CqRibBinaryDecoder *decoder;
 	FILE *filein = (it->second)->in;
+	if(!filein)
+	{
+		errno_t err;
+		_get_errno( &err );
+		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
+		return;
+	}
 	decoder = new CqRibBinaryDecoder( filein, 1);
 
 	// Parse the resulting block of RIB.
@@ -495,6 +509,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 	int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
 	FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
+	if(!fileout)
+	{
+		errno_t err;
+		_get_errno( &err );
+		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  err << std::endl;
+		return;
+	}
 	// Write out detail and data to the process
 	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
 	fflush( fileout );
@@ -502,6 +523,14 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	CqRibBinaryDecoder *decoder;
 	int fd_hChildStdoutRdDup = _open_osfhandle((long)(it->second)->hChildStdoutRdDup, O_RDONLY);
 	FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
+
+	if(!filein)
+	{
+		errno_t err;
+		_get_errno( &err );
+		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
+		return;
+	}
 	decoder = new CqRibBinaryDecoder( filein, 1);
 
 	// Parse the resulting block of RIB.
