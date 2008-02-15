@@ -100,7 +100,13 @@ void CqASCII::printInteger( const RtInt i )
 
 void CqASCII::printFloat( const RtFloat f )
 {
-	OUT << f;
+	if (f == RI_INFINITY)
+	{
+		OUT << "1e38";
+	} else
+	{
+		OUT << f;
+	}
 }
 
 void CqASCII::printString( std::string &str )
