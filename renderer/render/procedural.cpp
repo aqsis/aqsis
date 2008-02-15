@@ -50,6 +50,7 @@
 #include <io.h>
 #else
 #include <unistd.h>
+#include <errno.h>
 #endif
 
 
@@ -369,9 +370,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	FILE *fileout = (it->second)->out;
 	if(!fileout)
 	{
-		errno_t err;
-		_get_errno( &err );
-		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  err << std::endl;
+		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  errno << std::endl;
 		return;
 	}
 	// Write out detail and data to the process
@@ -388,9 +387,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	FILE *filein = (it->second)->in;
 	if(!filein)
 	{
-		errno_t err;
-		_get_errno( &err );
-		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
+		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  errno << std::endl;
 		return;
 	}
 	decoder = new CqRibBinaryDecoder( filein, 1);
