@@ -70,7 +70,8 @@ namespace Aqsis {
  * void setSampleVectorLength(TqInt sampleVectorLength);
  */
 
-/** \brief A class to accumulate weighted sample data during filtering.
+//------------------------------------------------------------------------------
+/** \brief Accumulator for a weighted average of filtered sample data.
  *
  * This class implements the SampleAccumulatorConcept, representing a weighted
  * filtering operation over some filter support region.  The weights arise from
@@ -141,6 +142,77 @@ class CqSampleAccum
 };
 
 
+//------------------------------------------------------------------------------
+/** \brief Sample accumulator for percentage closer filtering.
+ *
+ * At its simplest, percentage closer filtering determines the percentage of
+ * points inside some filter radius which are closer to the light than the
+ * value recorded in the shadow map.  It can also be combined with an arbitrary
+ * weight function to perform weighted averaging of the function
+ *
+ * \verbatim
+ *
+ *   closer(x,y) = / 1  whenever filter_region_depth(x,y) < map_depth(x,y)
+ *                 \ 0  elsewhere.
+ * \endverbatim
+ *
+ * This combined approach is the one we take here:
+ *
+ * FilterWeightT is a functor which specifies the weight to be applied to given
+ * (x,y) coordinates (an elliptical filter for example)
+ *
+ * DepthFuncT is a functor which determines the filter_region_depth at (x,y) to
+ * be compared against the value of the raster map sample.
+ */
+template<typename FilterWeightT, typename DepthFuncT>
+class CqPcfAccum
+{
+	public:
+		/** \brief Construct a filter sample accumulator
+		 *
+		 * \param filterWeights - functor returning filter weights
+		 * \param 
+		 * \param startChan - channel index to begin extracting data from the
+		 *                    accumulated sample vectors
+		 * \param resultBuf - float buffer to place the filtered result into.
+		 */
+		CqPcfAccum(const FilterWeightT& filterWeights,
+				const DepthFuncT& depthFunc,
+				TqInt startChan, TqFloat* resultBuf);
+
+		/** \brief Set length for sample vectors passed to accumulate().
+		 *
+		 * For simple PCF on a single channel, it doesn't make sense for this
+		 * function 
+		 *
+		 * \param length - the length of the sample vectors passed to accumulate.
+		 */
+		void setSampleVectorLength(TqInt sampleVectorLength);
+
+		/** \brief Accumulate a sample into the output buffer at the given position.
+		 *
+		 * \param x
+		 * \param y - position of the sample in the image plane.
+		 * \param inSamples - input sample data to be accumulated
+		 */
+		template<typename SampleVectorT>
+		void accumulate(TqInt x, TqInt y, const SampleVectorT& inSamples);
+
+		/// Cleanup; renormalize the accumulated data if necessary.
+		~CqPcfAccum();
+	private:
+		/// 2D Filter weight function.
+		const FilterWeightT& m_filterWeights;
+		/// Functor determining the depth at a given (x,y) position.
+		const DepthFuncT& m_depthFunc;
+		/// Start channel in the source data
+		TqInt m_startChan;
+		/// Array to fill with accumulated data
+		TqFloat* m_resultBuf;
+		/// Total accumulated weight used to renormalize the samples.
+		TqFloat m_totWeight;
+};
+
 
 //==============================================================================
 // Implementation details
@@ -199,7 +271,7 @@ inline void CqSampleAccum<FilterWeightT>::accumulate(TqInt x, TqInt y,
 	// check that the weight is nonzero before doing any filtering.
 	if(weight != 0)
 	{
-		if(!m_filterWeights.isNormalized())
+		if(!m_filterWeights.isNormalized()) // check should be optimized away
 			m_totWeight += weight;
 		for(TqInt i = 0; i < m_numChans; ++i)
 			m_resultBuf[i] += weight*inSamples[i + m_startChan];
@@ -219,6 +291,54 @@ inline CqSampleAccum<FilterWeightT>::~CqSampleAccum()
 	// Fill extra non-sampled channels with the "fill" value.
 	for(TqInt i = 0; i < m_numChansFill; ++i)
 		m_resultBuf[i+m_numChans] = m_fill;
+}
+
+//------------------------------------------------------------------------------
+// CqPcfAccum implementation
+template<typename FilterWeightT, typename DepthFuncT>
+inline CqPcfAccum<FilterWeightT, DepthFuncT>::CqPcfAccum(
+		const FilterWeightT& filterWeights, const DepthFuncT& depthFunc,
+		TqInt startChan, TqFloat* resultBuf)
+	: m_filterWeights(filterWeights),
+	m_depthFunc(depthFunc),
+	m_startChan(startChan),
+	m_resultBuf(resultBuf),
+	m_totWeight(0)
+{
+	// Zero the accumulated output channel
+	m_resultBuf[0] = 0;
+}
+
+template<typename FilterWeightT, typename DepthFuncT>
+inline void CqPcfAccum<FilterWeightT, DepthFuncT>::setSampleVectorLength(TqInt sampleVectorLength)
+{
+	assert(sampleVectorLength > 0);
+	/// \todo Deal with overflowing sample vector lengths somehow...
+	assert(m_startChan < sampleVectorLength);
+}
+
+template<typename FilterWeightT, typename DepthFuncT>
+template<typename SampleVectorT>
+inline void CqPcfAccum<FilterWeightT, DepthFuncT>::accumulate(TqInt x, TqInt y, const SampleVectorT& inSamples)
+{
+	TqFloat weight = m_filterWeights(x,y);
+	if(weight != 0)
+	{
+		if(!m_filterWeights.isNormalized()) // check should be optimized away
+			m_totWeight += weight;
+		TqFloat z = m_depthFunc(x,y);
+		m_resultBuf[0] += weight*(z > inSamples[m_startChan]);
+	}
+}
+
+template<typename FilterWeightT, typename DepthFuncT>
+inline CqPcfAccum<FilterWeightT, DepthFuncT>::~CqPcfAccum()
+{
+	// Renormalize by the total weight if necessary.
+	if(!m_filterWeights.isNormalized() && m_totWeight != 0)
+	{
+		m_resultBuf[0] /= m_totWeight;
+	}
 }
 
 } // namespace Aqsis

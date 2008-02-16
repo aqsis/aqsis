@@ -58,7 +58,7 @@ class AQSISTEX_SHARE IqTextureSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		virtual void sample(const Tq2DSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.
@@ -78,10 +78,7 @@ class AQSISTEX_SHARE IqTextureSampler
 		//@{
 		/** \brief Create and return a IqTextureSampler derived class
 		 *
-		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
-		 * appropriate to the pixel type held in the file.
-		 *
-		 * \param file - tiled texture file which the sampler should be connected to.
+		 * \param file - texture file which the sampler should be connected to.
 		 */
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqTiledTexInputFile>& file);

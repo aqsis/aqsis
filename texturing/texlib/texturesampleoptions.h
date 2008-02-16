@@ -80,7 +80,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 {
 	public:
 		/// Trivial constructor.
-		inline CqTextureSampleOptions(TqFloat sBlur, TqFloat tBlur, TqFloat sWidth,
+		CqTextureSampleOptions(TqFloat sBlur, TqFloat tBlur, TqFloat sWidth,
 				TqFloat tWidth, EqTextureFilter filterType, TqFloat fill,
 				TqInt startChannel, TqInt numChannels,
 				TqInt numSamples, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
@@ -90,66 +90,66 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		 * numSamples and numChannels which are set to 1.  The filter is set to
 		 * gaussian, and wrap modes to black.
 		 */
-		inline CqTextureSampleOptions();
+		CqTextureSampleOptions();
 
 		//--------------------------------------------------
 		/// \name Accessors for relevant texture sample options.
 		//@{
 		/// Get the blur in the s-direction
-		inline TqFloat sBlur() const;
+		TqFloat sBlur() const;
 		/// Get the blur in the t-direction
-		inline TqFloat tBlur() const;
+		TqFloat tBlur() const;
 		/// Get the width multiplier in the s-direction
-		inline TqFloat sWidth() const;
+		TqFloat sWidth() const;
 		/// Get the width multiplier in the t-direction
-		inline TqFloat tWidth() const;
+		TqFloat tWidth() const;
 		/// Get the filter type
-		inline EqTextureFilter filterType() const;
+		EqTextureFilter filterType() const;
 		/// Get the fill value for texture channels indices outside the available range
-		inline TqFloat fill() const;
+		TqFloat fill() const;
 		/// Get the start channel index where channels will be read from.
-		inline TqInt startChannel() const;
+		TqInt startChannel() const;
 		/// Get the number of channels to sample
-		inline TqInt numChannels() const;
+		TqInt numChannels() const;
 		/// Get the number of samples used by stochastic sampling methods.
-		inline TqInt numSamples() const;
+		TqInt numSamples() const;
 		/// Get the wrap mode in the s-direction
-		inline EqWrapMode sWrapMode() const;
+		EqWrapMode sWrapMode() const;
 		/// Get the wrap mode in the t-direction
-		inline EqWrapMode tWrapMode() const;
+		EqWrapMode tWrapMode() const;
 		//@}
 
 		//--------------------------------------------------
 		/// \name Modifiers for texture sampling options.
 		//@{
 		/// Set the blur in both directions
-		inline void setBlur(TqFloat blur);
+		void setBlur(TqFloat blur);
 		/// Set the blur in the s-direction
-		inline void setSBlur(TqFloat sBlur);
+		void setSBlur(TqFloat sBlur);
 		/// Set the blur in the t-direction
-		inline void setTBlur(TqFloat tBlur);
+		void setTBlur(TqFloat tBlur);
 		/// Set the width multiplier in all directions.
-		inline void setWidth(TqFloat width);
+		void setWidth(TqFloat width);
 		/// Set the width multiplier in the s-direction
-		inline void setSWidth(TqFloat sWidth);
+		void setSWidth(TqFloat sWidth);
 		/// Set the width multiplier in the t-direction
-		inline void setTWidth(TqFloat tWidth);
+		void setTWidth(TqFloat tWidth);
 		/// Set the filter type
-		inline void setFilterType(EqTextureFilter type);
+		void setFilterType(EqTextureFilter type);
 		/// Set the fill value for texture channels indices outside the available range
-		inline void setFill(TqFloat fill);
+		void setFill(TqFloat fill);
 		/// Set the start channel index where channels will be read from.
-		inline void setStartChannel(TqInt startChannel);
+		void setStartChannel(TqInt startChannel);
 		/// Set the number of channels to sample
-		inline void setNumChannels(TqInt numChans);
+		void setNumChannels(TqInt numChans);
 		/// Set the number of samples used by stochastic sampling methods.
-		inline void setNumSamples(TqInt numSamples);
+		void setNumSamples(TqInt numSamples);
 		/// Set the wrap mode in both directions
-		inline void setWrapMode(EqWrapMode wrapMode);
+		void setWrapMode(EqWrapMode wrapMode);
 		/// Set the wrap mode in the s-direction
-		inline void setSWrapMode(EqWrapMode sWrapMode);
+		void setSWrapMode(EqWrapMode sWrapMode);
 		/// Set the wrap mode in the t-direction
-		inline void setTWrapMode(EqWrapMode tWrapMode);
+		void setTWrapMode(EqWrapMode tWrapMode);
 		//@}
 
 		/** \brief Extract sample options from a texture file header.
@@ -173,7 +173,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		 *
 		 * \param quad - sample quadrilateral to adjust.
 		 */
-		void adjustSampleQuad(Tq2DSampleQuad& quad) const;
+		void adjustSampleQuad(SqSampleQuad& quad) const;
 
 	protected:
 		/** \brief Check that the blur and filter settings are compatible.
@@ -223,6 +223,7 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		CqTextureSampleOptions::sWrapMode;
 		CqTextureSampleOptions::tWrapMode;
 
+		// Modifiers from CqTextureSampleOptions
 		CqTextureSampleOptions::setBlur;
 		CqTextureSampleOptions::setSBlur;
 		CqTextureSampleOptions::setTBlur;
@@ -238,6 +239,10 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		CqTextureSampleOptions::setSWrapMode;
 		CqTextureSampleOptions::setTWrapMode;
 
+		// Other stuff from CqTextureSampleOptions
+		CqTextureSampleOptions::fillFromFileHeader;
+		CqTextureSampleOptions::adjustSampleQuad;
+
 		//--------------------------------------------------
 		// Shadow-specific sample options
 		/// Get the low shadow bias
@@ -248,7 +253,7 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		/// Set the shadow bias
 		void setBias(TqFloat bias);
 		/// Set the low and high shadow biases
-		void setBias(TqFloat biasLow, TqFloat biasHigh);
+		void setBias(TqFloat bias0, TqFloat bias1);
 	protected:
 		TqFloat m_biasLow;
 		TqFloat m_biasHigh;
@@ -431,6 +436,39 @@ inline void CqTextureSampleOptions::setSWrapMode(EqWrapMode sWrapMode)
 inline void CqTextureSampleOptions::setTWrapMode(EqWrapMode tWrapMode)
 {
 	m_tWrapMode = tWrapMode;
+}
+
+//------------------------------------------------------------------------------
+// CqShadowSampleOptions implementation
+
+inline TqFloat CqShadowSampleOptions::biasLow() const
+{
+	return m_biasLow;
+}
+
+inline TqFloat CqShadowSampleOptions::biasHigh() const
+{
+	return m_biasHigh;
+}
+
+inline void CqShadowSampleOptions::setBias(TqFloat bias)
+{
+	m_biasLow = bias;
+	m_biasHigh = bias;
+}
+
+inline void CqShadowSampleOptions::setBias(TqFloat bias0, TqFloat bias1)
+{
+	if(bias0 <= bias1)
+	{
+		m_biasLow = bias0;
+		m_biasHigh = bias1;
+	}
+	else
+	{
+		m_biasLow = bias1;
+		m_biasHigh = bias0;
+	}
 }
 
 } // namespace Aqsis

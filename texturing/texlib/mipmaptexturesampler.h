@@ -63,7 +63,7 @@ class CqMipmapTextureSampler : public IqTextureSampler
 		CqMipmapTextureSampler(const boost::shared_ptr<TqCacheType>& levels);
 
 		// from IqTextureSampler
-		virtual void sample(const Tq2DSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
@@ -124,12 +124,12 @@ CqMipmapTextureSampler<T>::CqMipmapTextureSampler(
 { }
 
 template<typename T>
-void CqMipmapTextureSampler<T>::sample(const Tq2DSampleQuad& sampleQuad,
+void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	Tq2DSampleQuad quad = sampleQuad;
+	SqSampleQuad quad = sampleQuad;
 	sampleOpts.adjustSampleQuad(quad);
-	remapPeriodic(quad, sampleOpts.sWrapMode() == WrapMode_Periodic,
+	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 
 	const CqTextureBuffer<T>& baseBuf = m_levels->level(0);

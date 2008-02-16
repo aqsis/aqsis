@@ -27,9 +27,11 @@
 #include "texturecache.h"
 
 #include "exception.h"
+#include "texexception.h"
 #include "logging.h"
 #include "sstring.h"
 #include "itexturesampler.h"
+#include "ishadowsampler.h"
 
 namespace Aqsis {
 
@@ -38,38 +40,91 @@ namespace Aqsis {
 
 CqTextureCache::CqTextureCache()
 		//const boost::shared_ptr<CqFilePathList>& searchPaths)
-	: m_cache()//, m_searchPaths(searchPaths)
+	: m_textureCache(),
+	m_shadowCache(),
+	m_camToWorld()
+	//, m_searchPaths(searchPaths)
 { }
 
-IqTextureSampler& CqTextureCache::findTexture(const char* name)
+IqTextureSampler& CqTextureCache::findTextureSampler(const char* name)
+{
+	return findSampler(m_textureCache, name);
+}
+
+IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
+{
+	return findSampler(m_shadowCache, name);
+}
+
+CqTexFileHeader* textureInfo(const char* texName)
+{
+	/// \todo Return something sensible here.
+	assert(0);
+	return 0;
+}
+
+//--------------------------------------------------
+// Private methods
+template<typename SamplerT>
+SamplerT& CqTextureCache::findSampler(
+		std::map<TqUlong, boost::shared_ptr<SamplerT> >& samplerMap,
+		const char* name)
 {
 	TqUlong hash = CqString::hash(name);
-	TqCacheMap::const_iterator texIter = m_cache.find(hash);
-	if(texIter != m_cache.end())
+	typename std::map<TqUlong, boost::shared_ptr<SamplerT> >::const_iterator
+		texIter = samplerMap.find(hash);
+	if(texIter != samplerMap.end())
+	{
+		// The desired texture sampler is already created - return it.
 		return *(texIter->second);
+	}
 	else
-		return addTexture(name);
+	{
+		// Couldn't find in the currently open texture samplers - create a new
+		// instance.
+		boost::shared_ptr<SamplerT> newTex;
+		try
+		{
+			newTex = newSamplerFromFile<SamplerT>(name);
+		}
+		catch(XqInvalidFile& e)
+		{
+			Aqsis::log() << warning
+				<< "Could not open file: \"" << name << "\": " << e.what() << "\n";
+			/// \todo Use newDummySampler() here.
+			throw e;
+		}
+		catch(XqBadTexture& e)
+		{
+			Aqsis::log() << warning
+				<< "Bad texture file: \"" << name << "\": " << e.what() << "\n";
+			throw e;
+		}
+		samplerMap[CqString::hash(name)] = newTex;
+		return *newTex;
+	}
 }
 
-IqTextureSampler& CqTextureCache::addTexture(const char* name)
+template<typename SamplerT>
+boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
+		const char* name)
 {
-	boost::shared_ptr<IqTextureSampler> newTex;
-	try
-	{
-		//newTex.reset(new IqTextureSampler(m_searchPaths->findFile()));
-		newTex = IqTextureSampler::create(name);
-	}
-	catch(XqInvalidFile& e)
-	{
-        Aqsis::log() << warning
-            << "Could not open file: \"" << name << "\": " << e.what() << "\n";
-		/// \todo Put some kind of dummy implementation of IqTextureSampler to
-		// in here.
-		assert(0);
-	}
-	m_cache[CqString::hash(name)] = newTex;
-	return *newTex;
+	return SamplerT::create(name);
 }
 
+// Special case of newSamplerFromFile() for shadow maps - they need access to
+// the camera->world transformation matrix.
+template<>
+boost::shared_ptr<IqShadowSampler>
+CqTextureCache::newSamplerFromFile(const char* name)
+{
+	return IqShadowSampler::create(name, m_camToWorld);
+}
+
+template<typename SamplerT>
+boost::shared_ptr<SamplerT> newDummySampler()
+{
+	return boost::shared_ptr<SamplerT>();
+};
 
 } // namespace Aqsis

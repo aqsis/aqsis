@@ -24,8 +24,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef ITEXTURESAMPLER_H_INCLUDED
-#define ITEXTURESAMPLER_H_INCLUDED
+#ifndef ISHADOWSAMPLER_H_INCLUDED
+#define ISHADOWSAMPLER_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -38,15 +38,15 @@ namespace Aqsis {
 class CqShadowSampleOptions;
 class IqTiledTexInputFile;
 class IqTexInputFile;
-class CqTexFileHeader;
+class CqMatrix;
 
 //------------------------------------------------------------------------------
-/** \brief An interface for sampling texture buffers.
+/** \brief An interface for sampling shadow texture buffers.
  *
- * This intent of this interface is to provide texture sampling facilities
- * independently of the sampling options.  Classes which implement the
- * interface should attempt to use the sampling method as specified by a
- * CqTexutureSampleOptions, passed to the sample() interface function.
+ * This interface provides shadow sampling facilities independently of the
+ * sampling options.  Classes which implement the interface should attempt to
+ * use the sampling method as specified by a CqShadowSampleOptions, passed to
+ * the sample() interface function.
  *
  */
 class AQSISTEX_SHARE IqShadowSampler
@@ -58,7 +58,7 @@ class AQSISTEX_SHARE IqShadowSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		virtual void sample(const Tq3DSampleQuad& sampleQuad,
+		virtual void sample(const Sq3DSampleQuad& sampleQuad,
 				const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.
@@ -78,16 +78,14 @@ class AQSISTEX_SHARE IqShadowSampler
 		//@{
 		/** \brief Create and return a IqShadowSampler derived class
 		 *
-		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
-		 * appropriate to the pixel type held in the file.
-		 *
-		 * \param file - tiled texture file which the sampler should be connected to.
+		 * \param file - texture file which the sampler should be connected
+		 *               with.
 		 */
 		static boost::shared_ptr<IqShadowSampler> create(
-				const boost::shared_ptr<IqTiledTexInputFile>& file);
-		static boost::shared_ptr<IqShadowSampler> create(
-				const boost::shared_ptr<IqTexInputFile>& file);
-		static boost::shared_ptr<IqShadowSampler> create(const char* fileName);
+				const boost::shared_ptr<IqTexInputFile>& file,
+				const CqMatrix& camToWorld);
+		static boost::shared_ptr<IqShadowSampler> create(const char* fileName,
+				const CqMatrix& camToWorld);
 		//@}
 
 		virtual ~IqShadowSampler() {}
@@ -95,4 +93,4 @@ class AQSISTEX_SHARE IqShadowSampler
 
 } // namespace Aqsis
 
-#endif // ITEXTURESAMPLER_H_INCLUDED
+#endif // ISHADOWSAMPLER_H_INCLUDED

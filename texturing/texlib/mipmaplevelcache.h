@@ -38,14 +38,10 @@
 #include "texturesampleoptions.h"
 #include "exception.h"
 #include "logging.h"
+#include "texexception.h"
 
 namespace Aqsis
 {
-
-/** \class XqBadTexture
- * \brief An exception indicating broken textures.
- */
-AQSIS_DECLARE_EXCEPTION(XqBadTexture, XqInternal);
 
 //------------------------------------------------------------------------------
 /** \brief Raster coordinate transformation coefficients
@@ -112,6 +108,7 @@ class CqMipmapLevelCache
 	private:
 		/// Initialize all mipmap levels
 		void initLevels();
+
 		/// Texture file to retrieve all data from
 		boost::shared_ptr<IqMultiTexInputFile> m_texFile;
 		/** \brief List of samplers for mipmap levels.  The pointers to these

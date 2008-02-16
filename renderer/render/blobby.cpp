@@ -639,7 +639,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMapOld* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					/** \todo Fix to use the new-style texture maps.  Using
+					 * GetOcclusionMap happens to access the old texture
+					 * sampling machinary through GetShadowMap()
+					 */
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetOcclusionMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;
@@ -825,7 +829,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMapOld* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					/** \todo Fix to use the new-style texture maps.  Using
+					 * GetOcclusionMap happens to access the old texture
+					 * sampling machinary through GetShadowMap()
+					 */
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetOcclusionMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;

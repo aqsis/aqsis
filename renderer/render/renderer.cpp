@@ -1648,7 +1648,7 @@ IqRenderer* QGetRenderContextI()
 
 const IqTextureSampler& CqRenderer::GetTextureMap(const char* fileName)
 {
-	return m_textureCache.findTexture(fileName);
+	return m_textureCache.findTextureSampler(fileName);
 }
 
 IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
@@ -1656,7 +1656,12 @@ IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 	return ( CqTextureMapOld::GetEnvironmentMap( strFileName ) );
 }
 
-IqTextureMapOld* CqRenderer::GetShadowMap( const CqString& strFileName )
+const IqShadowSampler& CqRenderer::GetShadowMap(const char* fileName)
+{
+	return m_textureCache.findShadowSampler(fileName);
+}
+
+IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
 {
 	return ( CqTextureMapOld::GetShadowMap( strFileName ) );
 }

@@ -39,7 +39,7 @@ namespace {
  * The averaging in computing the derivatives may be slightly unnecessary, but
  * makes sense for user-supplied 
  */
-inline SqMatrix2D estimateJacobianInverse(const Tq2DSampleQuad& sQuad)
+inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 {
 	// Computes the Jacobian of the inverse texture warp - the warp which takes
 	// the destination image to the source image.
@@ -96,7 +96,7 @@ namespace detail {
 CqNegExpTable negExpTable(20, 6);
 }
 
-void CqEwaFilterWeights::computeFilter(const Tq2DSampleQuad& sQuad,
+void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat maxAspectRatio)
 {

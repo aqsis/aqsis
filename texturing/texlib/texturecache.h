@@ -33,11 +33,17 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "matrix.h"
+
 namespace Aqsis {
 
 class CqFilePathList;
 class IqTextureSampler;
+class IqShadowSampler;
+class CqTexFileHeader;
 
+/** \brief A cache managing the various types of texture samplers.
+ */
 class AQSISTEX_SHARE CqTextureCache
 {
 	public:
@@ -45,31 +51,87 @@ class AQSISTEX_SHARE CqTextureCache
 		 */
 		CqTextureCache();
 
-		/** \brief Find a texture in the cache or load from file if not found.
+		//--------------------------------------------------
+		// \name Sampler access
+		//@{
+		/** \brief Find a texture sampler in the cache or load from file if not found.
+		 *
+		 * If any problems are encountered in opening the texture, issue a
+		 * warning to Aqsis::log(), and return a dummy sampler.
 		 *
 		 * \param name - the texture name.
 		 */
-		IqTextureSampler& findTexture(const char* name);
-	private:
-		typedef std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > TqCacheMap;
-
-		/** \brief Load a texture from the file with the given name.
+		IqTextureSampler& findTextureSampler(const char* texName);
+		/** \brief Find a shadow sampler in the cache or load from file if not found.
 		 *
-		 * If the file isn't found, we issue a warning, and a dummy texture is
-		 * created instead so that the render can continue.
+		 * If any problems are encountered in opening the shadow texture, issue
+		 * a warning to Aqsis::log(), and return a dummy sampler.
+		 *
+		 * \param name - the texture name.
 		 */
-		IqTextureSampler& addTexture(const char* name);
+		IqShadowSampler& findShadowSampler(const char* texName);
+		//@}
+
+		//--------------------------------------------------
+		/** \brief Return the texture file attributes for the named file.
+		 *
+		 * If the file is not found or is otherwise invalid, return 0.
+		 *
+		 * \param texName - file name 
+		 */
+		CqTexFileHeader* textureInfo(const char* texName);
+
+		/** \brief Set the camera -> world transformation
+		 *
+		 * This transformation is used by shadow samplers in order to transform
+		 * the provided shading (camera) coordinates into the coordinate system
+		 * of the shadowed light.
+		 *
+		 * \param camToWorld - camera -> world transformation.
+		 */
+		void setCamToWorldMatrix(const CqMatrix& camToWorld);
+
+	private:
+		/** \brief Find a sampler in the given map, or create one from file if needed.
+		 *
+		 * If the file isn't found, we issue a warning, and a dummy sampler
+		 * should be created instead so that the render can continue.
+		 *
+		 * \param samplerMap - std::map to find the sampler in.
+		 * \param name - name of the texture.
+		 */
+		template<typename SamplerT>
+		SamplerT& findSampler(std::map<TqUlong, boost::shared_ptr<SamplerT> >&
+				samplerMap, const char* name);
+		/** \brief Create a sampler of the given type from a file.
+		 *
+		 * SamplerT - is a sampler type to instantiate.
+		 *
+		 * \param name - absolute path to file
+		 */
+		template<typename SamplerT>
+		boost::shared_ptr<SamplerT> newSamplerFromFile(const char* name);
+		/** \brief Create a dummy sampler of the given type.
+		 *
+		 * This is used when a texture sampler cannot be created from the
+		 * requested file name.  A dummy sampler enables the renderer to
+		 * continue with a fake texture.
+		 *
+		 * SamplerT - base sampler type.
+		 */
+		template<typename SamplerT>
+		boost::shared_ptr<SamplerT> newDummySampler();
 
 		/// Cached textures live in here
-		TqCacheMap m_cache;
+		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
+		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
+		/// Camera -> world transformation - used for creating shadow maps.
+		CqMatrix m_camToWorld;
 		/// Search path
+		/// \todo Get search path working!
 		//boost::shared_ptr<CqFilePathList> m_searchPaths;
 };
 
-
-//==============================================================================
-// Implementation details.
-//==============================================================================
 
 } // namespace Aqsis
 

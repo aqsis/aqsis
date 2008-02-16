@@ -68,7 +68,7 @@ void CqTextureSampleOptions::fillFromFileHeader(const CqTexFileHeader& header)
 	}
 }
 
-void CqTextureSampleOptions::adjustSampleQuad(Tq2DSampleQuad& quad) const
+void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad) const
 {
 	if(m_sWidth != 1 || m_tWidth != 1)
 	{

@@ -123,7 +123,7 @@ class CqEwaFilterWeights
 		 * \param maxAspectRatio - maximum anisotropy at which the filter will
 		 *          be clamped.
 		 */
-		inline CqEwaFilterWeights(const Tq2DSampleQuad& sQuad, 
+		inline CqEwaFilterWeights(const SqSampleQuad& sQuad, 
 				TqFloat baseResS, TqFloat baseResT,
 				TqFloat sBlur = 0, TqFloat tBlur = 0,
 				TqFloat logEdgeWeight = 4, 
@@ -183,7 +183,7 @@ class CqEwaFilterWeights
 		 * CqEwaFilterWeights constructor.
 		 *
 		 */
-		void computeFilter(const Tq2DSampleQuad& sQuad, TqFloat
+		void computeFilter(const SqSampleQuad& sQuad, TqFloat
 				baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 				TqFloat maxAspectRatio);
 
@@ -201,7 +201,7 @@ class CqEwaFilterWeights
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline CqEwaFilterWeights::CqEwaFilterWeights(const Tq2DSampleQuad& sQuad, 
+inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad, 
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat logEdgeWeight, TqFloat maxAspectRatio)
 	: m_quadForm(0),

@@ -51,7 +51,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 	public:
 		CqTextureSampler(const boost::shared_ptr<ArrayT>& texData);
 		// from IqTextureSampler
-		virtual void sample(const Tq2DSampleQuad& sampleQuad,
+		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 	private:
 		inline TqFloat wrapCoord(TqFloat pos, EqWrapMode mode) const;
@@ -65,7 +65,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		void filterSimple(const Tq2DSampleQuad& sampleQuad,
+		void filterSimple(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 
 		//--------------------------------------------------
@@ -75,7 +75,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		void filterEWA(const Tq2DSampleQuad& sampleQuad,
+		void filterEWA(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 
 		//--------------------------------------------------
@@ -103,7 +103,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		void filterMC(const Tq2DSampleQuad& sampleQuad,
+		void filterMC(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		//@}
 
@@ -136,10 +136,10 @@ inline CqTextureSampler<ArrayT>::CqTextureSampler(
 { }
 
 template<typename ArrayT>
-void CqTextureSampler<ArrayT>::sample(const Tq2DSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+void CqTextureSampler<ArrayT>::sample(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	Tq2DSampleQuad sampleQuadRemap(sampleQuad);
-	remapPeriodic(sampleQuadRemap, sampleOpts.sWrapMode() == WrapMode_Periodic,
+	SqSampleQuad sampleQuadRemap(sampleQuad);
+	sampleQuadRemap.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 	switch(sampleOpts.filterType())
 	{
@@ -185,7 +185,7 @@ inline CqVector2D CqTextureSampler<ArrayT>::texToRasterCoords(
 }
 
 template<typename ArrayT>
-void CqTextureSampler<ArrayT>::filterSimple( const Tq2DSampleQuad& sQuad,
+void CqTextureSampler<ArrayT>::filterSimple( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	assert(0);
@@ -194,7 +194,7 @@ void CqTextureSampler<ArrayT>::filterSimple( const Tq2DSampleQuad& sQuad,
 }
 
 template<typename ArrayT>
-void CqTextureSampler<ArrayT>::filterEWA( const Tq2DSampleQuad& sQuad,
+void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	CqEwaFilterWeights weights(sQuad, m_sMult, m_tMult,
@@ -231,7 +231,7 @@ inline void CqTextureSampler<ArrayT>::sampleBilinear(const CqVector2D& st,
 }
 
 template<typename ArrayT>
-void CqTextureSampler<ArrayT>::filterMC(const Tq2DSampleQuad& sampleQuad,
+void CqTextureSampler<ArrayT>::filterMC(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	assert(0);

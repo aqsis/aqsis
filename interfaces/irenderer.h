@@ -18,6 +18,7 @@ START_NAMESPACE( Aqsis )
 
 struct IqTextureMapOld;
 class IqTextureSampler;
+class IqShadowSampler;
 class CqObjectInstance;
 
 struct IqRenderer
@@ -67,7 +68,8 @@ struct IqRenderer
 	 */
 	virtual	const IqTextureSampler& GetTextureMap(const char* fileName) = 0;
 	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
-	virtual	IqTextureMapOld* GetShadowMap( const CqString& fileName ) = 0;
+	virtual	const IqShadowSampler& GetShadowMap(const char* fileName) = 0;
+	virtual	IqTextureMapOld* GetOcclusionMap( const CqString& fileName ) = 0;
 	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
 
 

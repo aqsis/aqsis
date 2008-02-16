@@ -39,6 +39,7 @@
 #include	"irenderer.h"
 #include	"itexturemap_old.h" /// \todo remove after migration to new interface
 #include	"itexturesampler.h"
+#include	"ishadowsampler.h"
 #include	"version.h"
 #include	"logging.h"
 
@@ -237,7 +238,7 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
 			// Compute the sample quadrilateral box.
-			Tq2DSampleQuad sampleQuad(
+			SqSampleQuad sampleQuad(
 				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
 				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
 				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
@@ -297,7 +298,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
 			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
 			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
-			Tq2DSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+			SqSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
 						CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
 
 			// length-1 "array" where filtered results will be placed.
@@ -376,7 +377,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
 			// Compute the sample quadrilateral box.
-			Tq2DSampleQuad sampleQuad(
+			SqSampleQuad sampleQuad(
 				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
 				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
 				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
@@ -437,7 +438,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
 			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
 			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
-			Tq2DSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+			SqSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
 					CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
 			// array where filtered results will be placed.
 			TqFloat texSample[3] = {0,0,0};
@@ -869,6 +870,78 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, 
 // shadow(S,P)
 void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
+	/*
+	TqInt gridIdx = 0;
+
+	if(!getRenderContext())
+	{
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
+	}
+
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqShadowSampler& shadSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams);
+
+	// Get the differential elements du and dv.
+	TqFloat fdu = 1.0f, fdv = 1.0f;
+	if ( m_pAttributes )
+	{
+		// \todo Understand how m_pAttributes could possibly be NULL.
+		du() ->GetFloat( fdu );
+		dv() ->GetFloat( fdv );
+		// fdu and fdv should never be zero here.
+		assert(fdu != 0.0f);
+		assert(fdv != 0.0f);
+	}
+
+	CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
+	{
+		if(RS.Value(gridIdx))
+		{
+			optExtractor.extract(gridIdx, sampleOpts);
+			/// \todo this can be improved apon by not using fdu & fdv at all.
+			// What we need here is really want a difference operator,
+			// *not* the derivative.
+			TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, gridIdx, this, 0.0f);
+			TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, gridIdx, this, 0.0f);
+			TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, gridIdx, this, 0.0f);
+			TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, gridIdx, this, 0.0f);
+			// Centre of the texture region to be filtered.
+			TqFloat ss = 0;
+			TqFloat tt = 0;
+			s->GetFloat(ss,gridIdx);
+			t->GetFloat(tt,gridIdx);
+			// Compute the sample quadrilateral box.
+			SqSampleQuad sampleQuad(
+				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
+				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
+				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
+				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
+			// length-1 "array" where filtered results will be placed.
+			TqFloat texSample = 0;
+			shadSampler.sample(sampleQuad, sampleOpts, &texSample);
+			Result->SetFloat(texSample, gridIdx);
+		}
+	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
+	*/
+}
+#if 0
 	IqShaderData* pDefBias = NULL;
 	IqShaderData* pDefBias0 = NULL;
 	IqShaderData* pDefBias1 = NULL;
@@ -981,14 +1054,14 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 		pShader->DeleteTemporaryStorage( pDefBias0 );
 	if(NULL != pDefBias1)
 		pShader->DeleteTemporaryStorage( pDefBias1 );
-		
-}
+#endif		
 
 //----------------------------------------------------------------------
 // shadow(S,P,P,P,P)
 
 void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
+#if 0
 	IqShaderData* pDefBias = NULL;
 	IqShaderData* pDefBias0 = NULL;
 	IqShaderData* pDefBias1 = NULL;
@@ -1090,6 +1163,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel
 		pShader->DeleteTemporaryStorage( pDefBias0 );
 	if(NULL != pDefBias1)
 		pShader->DeleteTemporaryStorage( pDefBias1 );
+#endif
 }
 
 // SIGGRAPH 2002; Larry G. Bake functions
@@ -1451,7 +1525,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* startCh
 	(N)->GetNormal(_aq_N,__iGrid);
 	TqFloat _aq_samples;
 	(samples)->GetFloat(_aq_samples,__iGrid);
-	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_occlmap );
+	IqTextureMapOld* pMap = getRenderContext() ->GetOcclusionMap( _aq_occlmap );
 
 	CqVector3D L(0,0,-1);
 
@@ -1564,7 +1638,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 	}
 	if ( !pMap )
 	{
-		pSMap = getRenderContext() ->GetShadowMap( _aq_name );
+		//pSMap = getRenderContext() ->GetShadowMap( _aq_name );
 		if ( pSMap && ( pSMap->Type() == MapType_Shadow ) )
 		{
 			pMap = pSMap;

@@ -17,10 +17,13 @@ SET(AQSISTEX_SRCS
 	channellist.cpp
 	ewafilter.cpp
 	cachedfilter.cpp
+	ishadowsampler.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
 	magicnumber.cpp
+	samplequad.cpp
+	shadowsampler.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
@@ -39,6 +42,7 @@ SET(AQSISTEX_HDRS
 	exrinputfile.h
 	filtersupport.h
 	imagechannel.h
+	ishadowsampler.h
 	itexinputfile.h
 	itexoutputfile.h
 	itexturemap_old.h
@@ -51,6 +55,7 @@ SET(AQSISTEX_HDRS
 	mixedimagebuffer.h
 	samplequad.h
 	samplevector.h
+	shadowsampler.h
 	texbufsampler.h
 	texfileattributes.h
 	texfileheader.h

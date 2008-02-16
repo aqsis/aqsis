@@ -204,7 +204,8 @@ class CqRenderer : public IqRenderer
 
 		virtual	const IqTextureSampler& GetTextureMap(const char* fileName);
 		virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strFileName );
-		virtual	IqTextureMapOld* GetShadowMap( const CqString& strFileName );
+		virtual	const IqShadowSampler& GetShadowMap(const char* fileName);
+		virtual	IqTextureMapOld* GetOcclusionMap(const CqString& fileName);
 		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
