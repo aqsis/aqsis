@@ -331,12 +331,12 @@ CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D&
 	std::vector<std::vector<TqFloat> > Nu, Nv;
 	std::vector<CqVector4D> temp( q + 1 );
 
-	TqInt du = MIN( d, p );
+	TqInt du = min( d, p );
 	for ( k = p + 1; k <= d; k++ )
 		for ( l = 0; l <= d - k; l++ )
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
 
-	TqInt dv = MIN( d, q );
+	TqInt dv = min( d, q );
 	for ( l = q + 1; l <= d; l++ )
 		for ( k = 0; k <= d - l; k++ )
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -354,7 +354,7 @@ CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D&
 			for ( r = 0; r <= p; r++ )
 				temp[ s ] = temp[ s ] + Nu[ k ][ r ] * CP( uspan - p + r, vspan - q + s );
 		}
-		TqInt dd = MIN( d - k, dv );
+		TqInt dd = min( d - k, dv );
 		for ( l = 0; l <= dd; l++ )
 		{
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -1652,7 +1652,8 @@ bool	CqSurfaceNURBS::Diceable()
 
 	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
-	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
 		CqVector3D vT = P()->pValue( i )[0];
@@ -1697,8 +1698,8 @@ bool	CqSurfaceNURBS::Diceable()
 
 	MaxuLen /= ShadingRateSqrt;
 	MaxvLen /= ShadingRateSqrt;
-	m_uDiceSize = static_cast<TqUint>( MAX( ROUND( MaxuLen ), 1 ) );
-	m_vDiceSize = static_cast<TqUint>( MAX( ROUND( MaxvLen ), 1 ) );
+	m_uDiceSize = max<TqInt>(lround(MaxuLen), 1);
+	m_vDiceSize = max<TqInt>(lround(MaxvLen), 1);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -1738,7 +1739,8 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 	TqFloat Len = 0;
 	TqFloat MaxLen = 0;
 	TqInt cSegments = 0;
-	CqMatrix matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 
 	TqUint iTrimCurvePoint;
 	for ( iTrimCurvePoint = 0; iTrimCurvePoint < Curve.cVerts() - 1; iTrimCurvePoint++ )
@@ -1769,7 +1771,7 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 	MaxLen /= ShadingRateSqrt;
 
-	TqInt SplitCount = static_cast<TqUint>( MAX( MaxLen, 1 ) );
+	TqInt SplitCount = static_cast<TqUint>( max(MaxLen, 1.0f) );
 
 	return ( SplitCount * cSegments );
 }

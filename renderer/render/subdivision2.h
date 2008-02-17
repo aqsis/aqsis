@@ -156,7 +156,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 				TypeA R = TypeA(0.0f);
 				TqInt n;
 
-				if(pParam->Class() == class_vertex /*|| pParam->Class() == class_facevarying*/)
+				if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
 				{
 					// Get a pointer to the appropriate index accessor function on CqLath based on class.
 					TqInt (CqLath::*IndexFunction)() const;
@@ -193,7 +193,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 								// Only consider the boundary edges.
 								if( NULL == (*iE)->ec() )
 								{
-									if( (*iE)->VertexIndex() == (pVertex->*IndexFunction)() )
+									if( (*iE)->VertexIndex() == pVertex->VertexIndex() )
 										R += pParam->pValue( ((*iE)->ccf()->*IndexFunction)() )[arrayindex];
 									else
 										R += pParam->pValue( ((*iE)->*IndexFunction)() )[arrayindex];
@@ -358,7 +358,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 				TypeA B = TypeA(0.0f);
 				TypeA C = TypeA(0.0f);
 
-				if(pParam->Class() == class_vertex /*|| pParam->Class() == class_facevarying*/)
+				if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
 				{
 					// Get a pointer to the appropriate index accessor function on CqLath based on class.
 					TqInt (CqLath::*IndexFunction)() const;

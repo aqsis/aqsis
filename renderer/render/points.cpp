@@ -407,7 +407,8 @@ void CqPoints::InitialiseMaxWidth()
 {
 	TqInt cu = nVertices();	// Only need cu, as we know cv is 1.
 
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), QGetRenderContext()->Time(), matObjectToCamera );
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
 
 	CqVector3D Point0 = matObjectToCamera * CqVector3D(0,0,0);
@@ -429,7 +430,7 @@ void CqPoints::InitialiseMaxWidth()
 		CqVector3D Point1 = matObjectToCamera * CqVector3D(radius,0,0);
 		radius = (Point1-Point0).Magnitude();
 
-		m_MaxWidth = MAX(m_MaxWidth, radius );
+		m_MaxWidth = max(m_MaxWidth, radius );
 	}
 }
 
@@ -452,9 +453,12 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 	ADDREF( this );
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matCameraToObject0 );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matObjectToCamera );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0), matCameraToRaster );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
 
@@ -493,9 +497,10 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 		for( iTime = 0; iTime < tTime; iTime++ )
 		{
-			CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-			amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  pSurface()->pTransform()->Time( iTime ) );
-			amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
+			CqMatrix matCameraToObjectT;
+			QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matCameraToObjectT );
+			QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  pSurface()->pTransform()->Time( iTime ), amatObjectToCameraT[ iTime ] );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), amatNObjectToCameraT[ iTime ] );
 
 			aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
@@ -566,9 +571,12 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	else
 	{
 		iTime = 0;
-		CqMatrix matWorldToObjectT = QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-		CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-		CqMatrix matNObjectToCameraT = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
+		CqMatrix matWorldToObjectT;
+		QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matWorldToObjectT );
+		CqMatrix matObjectToCameraT;
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matObjectToCameraT );
+		CqMatrix matNObjectToCameraT;
+		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matNObjectToCameraT );
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
@@ -664,12 +672,17 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 
 	TqInt cu = pGridA->uGridRes();	// Only need cu, as we know cv is 1.
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matCameraToObject0 );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matObjectToCamera );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0), matCameraToRaster );
 
-	CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matITTx = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
+	CqMatrix matTx;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matTx );
+	CqMatrix matITTx;
+	QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matITTx );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
 
@@ -691,9 +704,10 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 
 	for( iTime = 0; iTime < NumTimes; iTime++ )
 	{
-		CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), Time( iTime ) );
-		amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  Time( iTime ) );
-		amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), Time( iTime ) );
+		CqMatrix matCameraToObjectT;
+		QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), Time( iTime ), matCameraToObjectT );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  Time( iTime ), amatObjectToCameraT[ iTime ] );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), Time( iTime ), amatNObjectToCameraT[ iTime ] );
 
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 

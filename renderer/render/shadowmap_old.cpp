@@ -240,7 +240,8 @@ void CqShadowMapOld::ReadMatrices()
 	// Set the number of shadow maps initially to 0.
 	m_NumberOfMaps = 0;
 
-	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world", NULL, NULL, QGetRenderContextI()->Time() );
+	CqMatrix matCToW;
+	QGetRenderContextI() ->matSpaceToSpace( "camera", "world", NULL, NULL, QGetRenderContextI()->Time(), matCToW );
 
 	TqDouble minz;
 
@@ -419,18 +420,18 @@ void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, 
 	TqFloat tmax = ( t1 > t2 ) ? t1 : ( t2 > t3 ) ? t2 : ( t3 > t4 ) ? t3 : t4;
 
 	// Cull if outside bounding box.
-	TqUint lu = static_cast<TqInt>( FLOOR( smin - sbo2 ) );
-	TqUint hu = static_cast<TqInt>( CEIL ( smax + sbo2 ) );
-	TqUint lv = static_cast<TqInt>( FLOOR( tmin - tbo2 ) );
-	TqUint hv = static_cast<TqInt>( CEIL ( tmax + tbo2 ) );
+	TqUint lu = lfloor(smin - sbo2);
+	TqUint hu = lceil(smax + sbo2);
+	TqUint lv = lfloor(tmin - tbo2);
+	TqUint hv = lceil(tmax + tbo2);
 
 	if ( lu >= m_XRes || hu < 0 || lv >= m_YRes || hv < 0 )
 		return ;
 
-	lu = MAX(0,lu);
-	lv = MAX(0,lv);
-	hu = MIN(m_XRes - 1,hu);
-	hv = MIN(m_YRes - 1,hv);
+	lu = max<TqUint>(0,lu);
+	lv = max<TqUint>(0,lv);
+	hu = min(m_XRes - 1,hu);
+	hv = min(m_YRes - 1,hv);
 
 	TqFloat sres = (1.0 + m_pswidth/2.0) * (hu - lu);
 	TqFloat tres = (1.0 + m_ptwidth/2.0) * (hv - lv);
@@ -452,7 +453,7 @@ void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, 
 	if ( m_samples > 0 )
 	{
 
-		nt = ns =  3 * static_cast<TqInt>( CEIL( sqrt(  m_samples ) ) );
+		nt = ns =  3 * lceil(sqrt(m_samples));
 	}
 	else
 	{
@@ -500,12 +501,12 @@ void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, 
 	// 2) Bigger the shadowmaps than smaller ns, nt;
 
 	if (NumPages() > 1) {
-		TqInt samples = FLOOR(sqrt(m_samples));
+		TqInt samples = lfloor(sqrt(m_samples));
 		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
-		occl = CEIL(sqrt(static_cast<TqFloat>(occl)));
-		occl = MAX(2, occl);
+		occl = lceil(sqrt(static_cast<TqFloat>(occl)));
+		occl = max(2, occl);
 		// Samples could overwrite after all the magic number!!
-		occl = MAX(samples, occl); 
+		occl = max(samples, occl); 
 		ns = nt = occl;
 	}
 
@@ -691,7 +692,7 @@ void CqShadowMapOld::SaveShadowMapOld( const CqString& strShadowName, bool appen
 			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apFlat.front() ->pVoidBufferData() );
 			for (TqUint y =0; y < YRes(); y++)
 				for (TqUint x = 0; x < XRes(); x++)
-					minz = MIN(minz, (TqDouble)depths[y*XRes() + x]);
+					minz = min(minz, (TqDouble)depths[y*XRes() + x]);
 			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );

@@ -122,7 +122,7 @@ void CqShaderVM::SO_pop()
 	TqInt iVar = ReadNext().m_iVariable;
 	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
+	TqUint ext = max( m_pEnv->shadingPointCount(), pV->Size() );
 	bool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -149,7 +149,7 @@ void CqShaderVM::SO_ipop()
 	POPV( A );
 	POPV( Val );
 	//TqInt ext=__fVarying?m_pEnv->shadingPointCount():1;
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
+	TqUint ext = max( m_pEnv->shadingPointCount(), pV->Size() );
 	bool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();

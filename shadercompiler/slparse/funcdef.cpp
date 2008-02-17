@@ -193,7 +193,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Float, "area", "area", "p", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Float, "area", "area", "h", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Point, "normalize", "normalize", "p" ),
-                                 CqFuncDef( Type_Point, "faceforward", "faceforward", "pp" ),
+                                 CqFuncDef( Type_Point, "faceforward", "faceforward", "pp", (1 << EnvVars_Ng) ),
                                  CqFuncDef( Type_Point, "faceforward", "faceforward2", "ppp" ),
                                  CqFuncDef( Type_Point, "reflect", "reflect", "pp" ),
                                  CqFuncDef( Type_Point, "refract", "refract", "ppf" ),

@@ -87,7 +87,11 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolyg
 
 	// Initialise the geometric parameters in the shader exec env.
 	if ( USES( Uses, EnvVars_P ) )
-		P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->getTransform(), NULL, QGetRenderContextI()->Time() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	{
+		CqMatrix mat;
+		QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->getTransform(), NULL, QGetRenderContextI()->Time(), mat );
+		P() ->SetPoint( mat * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	}
 	if ( USES( Uses, EnvVars_u ) )
 		u() ->SetFloat( 0.0f );
 	if ( USES( Uses, EnvVars_v ) )

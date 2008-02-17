@@ -738,12 +738,12 @@ void CqTextureMapOld::CalculateLevel(TqFloat ds, TqFloat dt)
 		UVArea *= -1.0f;
 
 	TqFloat l = (TqFloat) fastlog2(UVArea) / 2.0f;
-	l = MAX(l, 0.0);
+	l = max(l, 0.0f);
 
-	TqInt id = (TqInt) FLOOR(l);
+	TqInt id = lfloor(l);
 
 	m_interp =  l - id;
-	m_interp = MIN(m_interp, 1.0);
+	m_interp = min(m_interp, 1.0f);
 
 
 	if (m_Directory && m_Directory < id)
@@ -785,18 +785,18 @@ bool CqTextureMapOld::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmaps
 	TqUint umapsize1 = umapsize-1;
 	TqUint vmapsize1 = vmapsize-1;
 
-	TqUint iu = FLOOR( u * umapsize1);
+	TqUint iu = lfloor( u * umapsize1);
 	TqDouble ru = (u * umapsize1) - iu;
-	TqUint iu_n = FLOOR( (u * umapsize1) + 1.0);
+	TqUint iu_n = lfloor( (u * umapsize1) + 1.0);
 
-	TqUint iv = FLOOR( v * vmapsize1 );
+	TqUint iv = lfloor( v * vmapsize1 );
 	TqDouble rv = (v * vmapsize1) - iv;
-	TqUint iv_n = FLOOR( (v * vmapsize1) + 1.0);
+	TqUint iv_n = lfloor( (v * vmapsize1) + 1.0);
 
-	iu = CLAMP(iu, 0,umapsize1);
-	iu_n = CLAMP(iu_n, 0,umapsize1);
-	iv = CLAMP(iv, 0,vmapsize1);
-	iv_n = CLAMP(iv_n, 0,vmapsize1);
+	iu = clamp<TqInt>(iu, 0, umapsize1);
+	iu_n = clamp<TqInt>(iu_n, 0, umapsize1);
+	iv = clamp<TqInt>(iv, 0, vmapsize1);
+	iv_n = clamp<TqInt>(iv_n, 0, vmapsize1);
 
 	// Read in the relevant texture tiles.
 	register TqInt c;
@@ -842,7 +842,7 @@ bool CqTextureMapOld::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmaps
 		Val01 = pTMBb->GetValue( x2, y2, c );
 		Val10 = pTMBc->GetValue( x3, y3, c );
 		Val11 = pTMBd->GetValue( x4, y4, c );
-		m_color[c] = LERP(rv, LERP(ru, Val00, Val01), LERP(ru, Val10, Val11));
+		m_color[c] = lerp(rv, lerp(ru, Val00, Val01), lerp(ru, Val10, Val11));
 	}
 
 	return true;
@@ -904,8 +904,8 @@ void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, 
 		if (mul < m_pixelvariance)
 			continue;
 
-		u = LERP(dv, u1, LERP(du, u1, u2));
-		v = LERP(dv, v1, LERP(du, v1, v2));
+		u = lerp(dv, u1, lerp(du, u1, u2));
+		v = lerp(dv, v1, lerp(du, v1, v2));
 
 		BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
 		if (bLerp)
@@ -917,7 +917,7 @@ void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, 
 		{
 			for (c = 0; c < m_SamplesPerPixel; c++)
 			{
-				m_accum_color[c] += mul * LERP(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
+				m_accum_color[c] += mul * lerp(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
 
 			}
 		}
@@ -1014,10 +1014,10 @@ void CqTextureMapOld::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2,
 	// Work out the width and height
 	TqFloat uu1, uu2, vv1, vv2;
 
-	uu1 = MIN( u1, u2);
-	vv1 = MIN( v1, v2);
-	uu2 = MAX( u1, u2);
-	vv2 = MAX( v1, v2);
+	uu1 = min( u1, u2);
+	vv1 = min( v1, v2);
+	uu2 = max( u1, u2);
+	vv2 = max( v1, v2);
 
 	if ( m_sblur || m_tblur)
 	{
@@ -1230,8 +1230,8 @@ void CqTextureMapOld::Open()
 		bMipMap &= TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsx );
 
 		/* Second test; is it containing enough directories for us */
-		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
+		TqInt minRes = min(m_XRes, m_YRes );
+		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (minRes)));
 		if (TIFFSetDirectory(m_pImage, directory - 1) == false)
 		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
@@ -1398,32 +1398,32 @@ void CqTextureMapOld::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat
 
 	if ( m_smode == WrapMode_Clamp || Type() == MapType_Environment )
 	{
-		s1 = CLAMP( s1, 0.0f, 1.0f );
+		s1 = clamp( s1, 0.0f, 1.0f );
 	}
 	if ( m_tmode == WrapMode_Clamp || Type() == MapType_Environment )
 	{
-		t1 = CLAMP( t1, 0.0f, 1.0f );
+		t1 = clamp( t1, 0.0f, 1.0f );
 	}
 	ss1 = s1 - swidth - ( m_sblur * 0.5f );
 	tt1 = t1 - twidth - ( m_tblur * 0.5f );
-	ss1 = CLAMP(ss1, 0.0f, 1.0f);
-	tt1 = CLAMP(tt1, 0.0f, 1.0f );
+	ss1 = clamp(ss1, 0.0f, 1.0f);
+	tt1 = clamp(tt1, 0.0f, 1.0f );
 
 	ss2 = s1 + swidth + ( m_sblur * 0.5f );
 	tt2 = t1 + twidth + ( m_tblur * 0.5f );
-	ss2 = CLAMP(ss2, 0.0f, 1.0f);
-	tt2 = CLAMP(tt2, 0.0f, 1.0f );
+	ss2 = clamp(ss2, 0.0f, 1.0f);
+	tt2 = clamp(tt2, 0.0f, 1.0f );
 
 	/* make ss1 is always less or equal to ss2
 	* tt1 is always less or equal to tt2
 	*/
 	TqFloat tmp;
 	tmp = ss1;
-	ss1 = MIN(ss1, ss2);
-	ss2 = MAX(tmp, ss2);
+	ss1 = min(ss1, ss2);
+	ss2 = max(tmp, ss2);
 	tmp = tt1;
-	tt1 = MIN(tt1, tt2);
-	tt2 = MAX(tmp, tt2);
+	tt1 = min(tt1, tt2);
+	tt2 = max(tmp, tt2);
 
 	GetSample( ss1, tt1, ss2, tt2, val);
 }
@@ -1441,10 +1441,10 @@ void CqTextureMapOld::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
 
 	// Work out the width and height
 	TqFloat ss1, tt1, ss2, tt2;
-	ss1 = MIN( MIN( MIN( s1, s2 ), s3 ), s4 );
-	tt1 = MIN( MIN( MIN( t1, t2 ), t3 ), t4 );
-	ss2 = MAX( MAX( MAX( s1, s2 ), s3 ), s4 );
-	tt2 = MAX( MAX( MAX( t1, t2 ), t3 ), t4 );
+	ss1 = min( min( min( s1, s2 ), s3 ), s4 );
+	tt1 = min( min( min( t1, t2 ), t3 ), t4 );
+	ss2 = max( max( max( s1, s2 ), s3 ), s4 );
+	tt2 = max( max( max( t1, t2 ), t3 ), t4 );
 
 	// By definition the area sampling is requested.
 	// Primary used by shadow() calls
@@ -1825,14 +1825,12 @@ inline TqInt CqImageDownsampler::edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mo
 	switch(mode)
 	{
 		case WrapMode_Clamp:
-		return clamp(pos, 0, posMax-1);
-		break;
+			return clamp(pos, 0, posMax-1);
 		case WrapMode_Periodic:
-		return pos = (pos + posMax) % posMax;
-		break;
+			return pos = (pos + posMax) % posMax;
 		case WrapMode_Black:
 		default:
-		return pos;
+			return pos;
 	}
 }
 
@@ -1897,7 +1895,7 @@ CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, Cq
 				}
 			}
 			for(TqInt sample = 0; sample < samplesPerPixel; sample++)
-				outBuf->SetValue(x, y, sample, CLAMP(accum[sample], 0.0, 1.0));
+				outBuf->SetValue(x, y, sample, clamp(accum[sample], 0.0f, 1.0f));
 		}
 	}
 	return outBuf;
@@ -2017,7 +2015,7 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 		{
 			CalculateNoise(x, y, i);
 
-			D = LERP(y, LERP(x, R1, R2), LERP(x, R3, R4));
+			D = lerp(y, lerp(x, R1, R2), lerp(x, R3, R4));
 
 			mul = (*m_FilterFunc)(x-0.5, y-0.5, 1.0, 1.0);
 			if (mul < m_pixelvariance)
@@ -2112,13 +2110,13 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 			* position 
 			*/
 
-			u = CLAMP(u, dfovu, 1.0f );
-			v = CLAMP(v, dfovv, 1.0f );
+			u = clamp(u, dfovu, 1.0f );
+			v = clamp(v, dfovv, 1.0f );
 
 			u = side[0] + u*ONETHIRD;
 			v = side[1] + v*ONEHALF;
-			u = CLAMP(u, 0.0f, 1.0f);
-			v = CLAMP(v, 0.0f, 1.0f);
+			u = clamp(u, 0.0f, 1.0f);
+			v = clamp(v, 0.0f, 1.0f);
 			CalculateLevel(u, v);
 
 			BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
@@ -2130,7 +2128,7 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 			{
 				for (c = 0; c < m_SamplesPerPixel; c++)
 				{
-					m_accum_color[c] += mul * LERP(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
+					m_accum_color[c] += mul * lerp(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
 
 				}
 			}

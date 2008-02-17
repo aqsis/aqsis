@@ -289,7 +289,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $PATH_NT "1" "path_nt" "path_nt_end"
     path_nt:
     ReadRegStr $PATH HKCU "Environment" "PATH"
-    WriteRegStr HKCU "Environment" "PATH" "$PATH;$INSTDIR\bin"
+    WriteRegExpandStr HKCU "Environment" "PATH" "$INSTDIR\bin;$PATH"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     path_nt_end:
 
@@ -298,7 +298,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $PATH_NT_ALL "1" "path_nt_all" "path_nt_all_end"
     path_nt_all:
     ReadRegStr $PATH HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
-    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH;$INSTDIR\bin"
+    WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$INSTDIR\bin;$PATH"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     path_nt_all_end:
 
@@ -411,12 +411,12 @@ Section Uninstall
   RMDir /r "$INSTDIR"
 
   ReadRegStr $PATH_NT HKCU "Environment" "PATH"
-  ${un.WordReplace} "$PATH_NT" ";$INSTDIR\bin" "" "+" $PATH
-  WriteRegStr HKCU "Environment" "PATH" "$PATH"
+  ${un.WordReplace} "$PATH_NT" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegExpandStr HKCU "Environment" "PATH" "$PATH"
 
   ReadRegStr $PATH_NT_ALL HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
-  ${un.WordReplace} "$PATH_NT_ALL" ";$INSTDIR\bin" "" "+" $PATH
-  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH"
+  ${un.WordReplace} "$PATH_NT_ALL" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH"
 
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 

@@ -75,7 +75,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
-		virtual	void	Shade() = 0;
+		virtual	void	Shade(bool canCullGrid = true ) = 0;
 		virtual	void	TransferOutputVariables() = 0;
 		/*
 		 * Delete all the variables per grid 
@@ -177,6 +177,18 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 		void	CalcNormals();
 		void	CalcSurfaceDerivatives();
+		/** \brief Expand the boundary micropolygons to cover grid cracks.
+		 *
+		 * This function expands the boundary of a grid by moving the boundary
+		 * vertices outward along the vectors which connect them to the
+		 * interior vertices of the grid.  This is a computationally cheap and
+		 * easy way to cover cracks between adjacent grids which result from
+		 * differing dicing rates.
+		 *
+		 * \param amount - fraction of a micropolygon to expand the boundary
+		 *                 outward by.
+		 */
+		void ExpandGridBoundaries(TqFloat amount);
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
@@ -223,7 +235,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 
 		/** Get a pointer to the surface which this grid belongs.
@@ -328,7 +340,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 		
 		/**

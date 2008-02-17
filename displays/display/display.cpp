@@ -31,8 +31,6 @@
 
 #include <tiffio.h>
 
-using namespace Aqsis;
-
 #include <iomanip>
 #include <ios>
 #include <iostream>
@@ -46,7 +44,9 @@ using namespace Aqsis;
 #include <cstring>
 
 #include "ndspy.h"
+#include "aqsismath.h"
 
+using namespace Aqsis;
 
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #define	SHADOWMAP_HEADER	"Shadow"
@@ -69,9 +69,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 START_NAMESPACE( Aqsis )
 
@@ -396,14 +393,18 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &B, 
 		    TqUchar alpha )
 { 
+#	define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+#	define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 	TqInt t;
 	// C’ = INT_PRELERP( A’, B’, b, t )
 	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
 	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
 	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
-	R = CLAMP( R1, 0, 255 );
-	G = CLAMP( G1, 0, 255 );
-	B = CLAMP( B1, 0, 255 );
+	R = clamp<TqUchar>(R1, 0, 255);
+	G = clamp<TqUchar>(G1, 0, 255);
+	B = clamp<TqUchar>(B1, 0, 255);
+#	undef INT_MULT
+#	undef INT_PRELERP
 }
 
 
@@ -489,7 +490,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			        {"b", widestFormat},
 			        {"a", widestFormat},
 			    };
-			PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+			PtDspyError err = DspyReorderFormatting(iFormatCount, format, min(iFormatCount,4), outFormat);
 			if( err != PkDspyErrorNone )
 			{
 				return(err);
@@ -661,18 +662,26 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	TqInt xmin__ = MAX((xmin-pImage->m_origin[0]), 0);
-	TqInt ymin__ = MAX((ymin-pImage->m_origin[1]), 0);
-	TqInt xmaxplus1__ = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
-	TqInt ymaxplus1__ = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
+	// If the image is not cropped, then the origin shouldn't be used.
+	if(pImage->m_OriginalSize[0] == pImage->m_width && pImage->m_OriginalSize[1] == pImage->m_height)
+	{
+		pImage->m_origin[0] = 0;
+		pImage->m_origin[1] = 0;
+	}
+		
+
+	TqInt xmin__ = max((xmin-pImage->m_origin[0]), 0);
+	TqInt ymin__ = max((ymin-pImage->m_origin[1]), 0);
+	TqInt xmaxplus1__ = min((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
+	TqInt ymaxplus1__ = min((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 	TqInt copylinelen = entrysize * (xmaxplus1__ - xmin__);
 
 	pImage->m_pixelsReceived += (xmaxplus1__-xmin__)*(ymaxplus1__-ymin__);
 
 	// Calculate where in the bucket we are starting from if the window is cropped.
-	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
-	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
+	TqInt row = max(pImage->m_origin[1] - ymin, 0);
+	TqInt col = max(pImage->m_origin[0] - xmin, 0);
 	const TqUchar* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
@@ -826,7 +835,7 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 		Fl::check();
 		TqFloat percent = pImage->m_pixelsReceived / (TqFloat) (pImage->m_width * pImage->m_height);
 		percent *= 100.0f;
-		percent = CLAMP(percent, 0.0f, 100.0f);
+		percent = clamp(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
 			strTitle << pImage->m_filename << ": " << std::fixed << std::setprecision(1) << std::setw(5) << percent << "% complete" << std::ends;
@@ -891,8 +900,8 @@ extern "C" PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 					        [i] >= FLT_MAX )
 						continue;
 
-					mindepth = MIN( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
-					maxdepth = MAX( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+					mindepth = min( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+					maxdepth = max( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
 
 					totaldepth += reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ];
 					samples++;

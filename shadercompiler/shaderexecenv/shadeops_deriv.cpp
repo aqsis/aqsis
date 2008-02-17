@@ -1261,7 +1261,7 @@ void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqSha
 			TqFloat w = uwidth + vwidth;
 			w *= _pswidth;
 
-			(Result)->SetFloat(CLAMP( ( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0, 1 ),__iGrid);
+			(Result)->SetFloat(clamp(( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0.0f, 1.0f), __iGrid);
 
 			//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
 			//	SETFLOAT( Result, res );
@@ -1304,7 +1304,7 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 			(s2)->GetFloat(_aq_s2,__iGrid);
 			TqFloat w = _aq_s2 - _aq_s1;
 			w *= _pswidth;
-			(Result)->SetFloat(CLAMP( ( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0, 1 ),__iGrid);
+			(Result)->SetFloat(clamp( (_aq_s1 + w/2.0f - _aq_edge)/w, 0.0f, 1.0f), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);

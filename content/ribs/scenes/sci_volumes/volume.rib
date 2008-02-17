@@ -1,0 +1,85 @@
+version 3.03
+Hider "hidden" "string depthfilter" ["midpoint"]
+
+Option "searchpath" "shader" "src:&"
+
+FrameBegin 0
+Clipping 0.1 3
+PixelSamples 4 4
+Format 640 480 1
+#Format 480 360 1
+#Format 320 240 1
+#Format 120 96 1
+ShadingRate 1.0
+Display "volume.tif" "file" "rgb" # ChangeMe_FrameName
+Display "+render" "piqsl" "rgb"
+Projection "perspective" "fov" [45.0]
+Translate 0 0 2
+Rotate -20 1 0 0
+Rotate 35 0 1 0  # ChangeMe_Phi
+WorldBegin
+	Translate -0.5 -0.5 -0.5
+
+	CoordinateSystem "data_box"
+
+	# These linear RiCurves bound the cube containing the volume.
+	AttributeBegin
+		Translate 0.5 0.5 0.5
+		Scale 1.0001 1.0001 1.0001
+		Translate -0.5 -0.5 -0.5
+		Color [1 1 0.8]
+		Surface "boundingbox_shader"
+			"float numDashes" [15]
+		Curves "linear" [2 2 2 2  2 2 2 2  2 2 2 2] 
+			"nonperiodic"
+			"P" [
+				-0.05 0 0  1.05 0 0
+				-0.05 1 0  1.05 1 0
+				-0.05 1 1  1.05 1 1
+				-0.05 0 1  1.05 0 1
+
+				0 -0.05 0  0 1.05 0
+				1 -0.05 0  1 1.05 0
+				1 -0.05 1  1 1.05 1
+				0 -0.05 1  0 1.05 1
+
+				0 0 -0.05  0 0 1.05
+				1 0 -0.05  1 0 1.05
+				1 1 -0.05  1 1 1.05
+				0 1 -0.05  0 1 1.05
+				]
+			"constantwidth" [0.005]
+	AttributeEnd
+
+	# The atmosphere shader is specified here.
+	Atmosphere "boxed_volume_glow"
+		"color interiorColor" [0.6 0.4 1]
+		"color surfaceColor" [1.0 0.0 0.0]
+		"float surfaceDepth" [0.1]
+		"float intensity" [2]
+		"float attenuation" [1.0]
+		"float numSamples" [100]
+		"float isoScale" [0.2]
+
+	# Workaround: Aqsis 1.2 culls surfaces with zero opacity before atmosphere
+	# shaders are run.
+	Opacity 0.01 0.01 0.01
+	Surface "null"
+
+	# Make a cube around the volume to be shaded.  In renderman, volumes are
+	# only shaded with an atmosphere shader when they have explicit geometry
+	# behind them.
+	PointsPolygons
+		[4 4 4 4 4 4]
+		[0 1 2 3
+		0 4 5 1
+		0 3 7 4
+		7 6 5 4
+		6 7 3 2
+		6 2 1 5]
+		"P" [0 0 0  1 0 0  1 1 0  0 1 0
+			0 0 1  1 0 1  1 1 1  0 1 1]
+		"Cs" [1 0.5 0.5  1 1 1  1 1 1  1 1 1
+			1 1 1  1 1 1  0.5 0.5 1  1 1 1]
+WorldEnd
+FrameEnd

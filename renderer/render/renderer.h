@@ -181,9 +181,9 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetImage( CqImageBuffer* pImage );
 
 		// Handle various coordinate system transformation requirements.
-		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
+		virtual	bool	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
+		virtual	bool	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
+		virtual	bool	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
 
 		virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
 		virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
@@ -531,8 +531,8 @@ class CqRenderer : public IqRenderer
 		bool			m_UsingDepthOfField;
 		CqVector2D		m_DepthOfFieldScale;
 
-		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
-		void WhichMatToWorld(CqMatrix &b, TqUlong thash);
+		bool WhichMatWorldTo(CqMatrix &a, TqUlong thash);
+		bool WhichMatToWorld(CqMatrix &b, TqUlong thash);
 
 		std::map<std::string, SqOutputDataEntry>	m_OutputDataEntries;
 		TqInt	m_OutputDataOffset;

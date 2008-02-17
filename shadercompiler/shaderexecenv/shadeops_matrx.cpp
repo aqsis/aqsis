@@ -59,7 +59,8 @@ void CqShaderExecEnv::SO_transform( IqShaderData* fromspace, IqShaderData* tospa
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat; 
+		getRenderContext() ->matSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 
 
 		__iGrid = 0;
@@ -110,7 +111,8 @@ void CqShaderExecEnv::SO_transform( IqShaderData* tospace, IqShaderData* p, IqSh
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 
 
 		__iGrid = 0;
@@ -192,7 +194,8 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* fromspace, IqShaderData* tosp
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matVSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matVSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 
 
 		__iGrid = 0;
@@ -243,7 +246,8 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* tospace, IqShaderData* p, IqS
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matVSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matVSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 
 
 		__iGrid = 0;
@@ -325,7 +329,8 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* fromspace, IqShaderData* tosp
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -376,7 +381,8 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* tospace, IqShaderData* p, IqS
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -835,7 +841,8 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* fromspace, IqShaderData* tosp
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -886,7 +893,8 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqS
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
+		CqMatrix mat;
+		getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time(), mat );
 		__iGrid = 0;
 
 		__iGrid = 0;

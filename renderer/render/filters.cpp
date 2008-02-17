@@ -23,13 +23,13 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+#include	"aqsis.h"
 
 #include	<stdarg.h>
-#include	<math.h>
 #include	<list>
 
-#include	"aqsis.h"
 #include	"ri.h"
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -136,7 +136,7 @@ RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	 *       the following code to just return (1.0).
 	 *
 	 */
-	return MIN( ( fabs( x ) <= xwidth / 2.0 ? 1.0 : 0.0 ),
+	return Aqsis::min( ( fabs( x ) <= xwidth / 2.0 ? 1.0 : 0.0 ),
 	            ( fabs( y ) <= ywidth / 2.0 ? 1.0 : 0.0 ) );
 }
 
@@ -156,7 +156,7 @@ RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	/* This function can be simplified as well by not worrying about
 	 *    returning zero if the sample is beyond the filter window.
 	 */
-	return MIN( ( absx <= hxw ? ( hxw - absx ) / hxw : 0.0 ),
+	return Aqsis::min( ( absx <= hxw ? ( hxw - absx ) / hxw : 0.0 ),
 	            ( absy <= hyw ? ( hyw - absy ) / hyw : 0.0 ) );
 }
 

@@ -23,21 +23,19 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"multitimer.h"
-
-#include	"aqsis.h"
+#include	"imagebuffer.h"
 
 #ifdef WIN32
 #include    <windows.h>
 #endif
-#include	<math.h>
 
+#include	"multitimer.h"
+#include	"aqsismath.h"
 #include	"stats.h"
 #include	"options.h"
 #include	"renderer.h"
 #include	"surface.h"
 #include	"micropolygon.h"
-#include	"imagebuffer.h"
 #include	"occlusion.h"
 
 
@@ -146,10 +144,10 @@ void	CqImageBuffer::SetImage()
 
 	m_iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
 	m_iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes ) );
-	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes ) );
-	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes ) );
-	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes ) );
+	m_CropWindowXMin = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes);
+	m_CropWindowXMax = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes);
+	m_CropWindowYMin = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes);
+	m_CropWindowYMax = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes);
 	m_cXBuckets = ( ( m_iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
 	m_cYBuckets = ( ( m_iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
 	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
@@ -253,15 +251,17 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 
 	// Convert the bounds to raster space.
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix mat;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), mat );
+	Bound.Transform( mat );
 
 	// Take into account depth-of-field
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( minz );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( maxz );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 		Bound.vecMin().x( Bound.vecMin().x() - cocX );
 		Bound.vecMin().y( Bound.vecMin().y() - cocY );
 		Bound.vecMax().x( Bound.vecMax().x() + cocX );
@@ -326,7 +326,9 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			transShaderToWorld = pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) ->getTransform();
 		else if ( pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
 			transShaderToWorld = pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) ->getTransform();
-		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time() ) * vecDB;
+		CqMatrix mat;
+		QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time(), mat );
+		vecDB = mat * vecDB;
 		db = vecDB.Magnitude();
 
 		Bound.vecMax() += db;
@@ -358,8 +360,8 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
 			return;
 
-		XMinb = CLAMP( XMinb, 0, cXBuckets() );
-		YMinb = CLAMP( YMinb, 0, cYBuckets() );
+		XMinb = clamp( XMinb, 0, cXBuckets() );
+		YMinb = clamp( YMinb, 0, cYBuckets() );
 
 		if( Bucket(XMinb, YMinb).IsProcessed() )
 		{
@@ -405,7 +407,7 @@ bool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pS
 		nextBucket = CurrentBucketRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
-		nextBucketX = MAX( nextBucketX, 0 );
+		nextBucketX = max( nextBucketX, 0 );
 		pos = BucketPosition( nextBucketX, nextBucket );
 
 		if ( ( nextBucketX < cXBuckets() ) &&
@@ -818,8 +820,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
-			maxCocX = MAX( minZCoc.x(), maxZCoc.x() );
-			maxCocY = MAX( minZCoc.y(), maxZCoc.y() );
+			maxCocX = max( minZCoc.x(), maxZCoc.x() );
+			maxCocY = max( minZCoc.y(), maxZCoc.y() );
 
 			mpgbminx = Bound.vecMin().x() + maxCocX;
 			mpgbmaxx = Bound.vecMax().x() - maxCocX;
@@ -1237,7 +1239,7 @@ void CqImageBuffer::RenderImage()
 	// Render the surface at the front of the list.
 	m_fDone = false;
 
-	CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
+	CqVector2D bHalf = CqVector2D( std::floor(m_FilterXWidth / 2.0f), std::floor(m_FilterYWidth / 2.0f) );
 
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext()->pProgressHandler();
@@ -1406,8 +1408,8 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 			{
 				m_CurrentBucketCol = (TqInt) rg.RandomFloat(m_cXBuckets);
 				m_CurrentBucketRow = (TqInt) rg.RandomFloat(m_cYBuckets);
-				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
-				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+				m_CurrentBucketCol = clamp(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = clamp(m_CurrentBucketRow, 0, m_cYBuckets - 1);
 			}
 			while ( Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed() );
 
@@ -1448,8 +1450,8 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 				if (radius > r)
 					break;
 
-				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
-				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+				m_CurrentBucketCol = clamp(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = clamp(m_CurrentBucketRow, 0, m_cYBuckets - 1);
 			}
 			while (Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed());
 
