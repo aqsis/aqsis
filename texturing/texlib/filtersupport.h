@@ -40,18 +40,18 @@ struct SqFilterSupport1D
 	TqInt start;
 	TqInt end;
 	/// Trivial constructor
-	inline SqFilterSupport1D(TqInt start, TqInt end);
+	SqFilterSupport1D(TqInt start, TqInt end);
 	/** \brief Truncate the support into the closed interval [rangeStart, rangeEnd]
 	 *
 	 * Note that this may result in empty supports.
 	 */
-	inline void truncate(TqInt rangeStart, TqInt rangeEnd);
+	void truncate(TqInt rangeStart, TqInt rangeEnd);
 	/// Return true if the support is empty.
-	inline bool isEmpty() const;
+	bool isEmpty() const;
 	/// Return true if the support covers part of the given range.
-	inline bool intersectsRange(TqInt rangeStart, TqInt rangeEnd) const;
+	bool intersectsRange(TqInt rangeStart, TqInt rangeEnd) const;
 	/// Return true if the support is wholly inside the given range.
-	inline bool inRange(TqInt rangeStart, TqInt rangeEnd) const;
+	bool inRange(TqInt rangeStart, TqInt rangeEnd) const;
 };
 
 
@@ -65,10 +65,13 @@ struct SqFilterSupport
 	SqFilterSupport1D sx; ///< support in x-direction
 	SqFilterSupport1D sy; ///< support in y-direction
 	/// Trivial constructor.
-	inline SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
+	SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
 	/// Return true if the support is an empty set.
-	inline bool isEmpty() const;
-	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY) const;
+	bool isEmpty() const;
+	/// Return true if the support covers part of the given range.
+	bool intersectsRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY) const;
+	/// Return true if the support is wholly inside the given range.
+	bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY) const;
 };
 
 
@@ -98,7 +101,7 @@ inline bool SqFilterSupport1D::isEmpty() const
 inline bool SqFilterSupport1D::intersectsRange(
 		TqInt rangeStart, TqInt rangeEnd) const
 {
-	return end > rangeStart && start < rangeEnd;
+	return !isEmpty() && !(rangeStart >= end || rangeEnd <= start);
 }
 
 inline bool SqFilterSupport1D::inRange(TqInt rangeStart, TqInt rangeEnd) const
@@ -125,6 +128,12 @@ inline bool SqFilterSupport::inRange(
 		TqInt startX, TqInt endX, TqInt startY, TqInt endY) const
 {
 	return sx.inRange(startX, endX) && sy.inRange(startY, endY);
+}
+
+inline bool SqFilterSupport::intersectsRange(TqInt startX, TqInt endX,
+		TqInt startY, TqInt endY) const
+{
+	return sx.intersectsRange(startX, endX) && sy.intersectsRange(startY, endY);
 }
 
 } // namespace Aqsis

@@ -163,18 +163,28 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	CqEwaFilterWeights weights(texQuad, m_pixelBuf->width(),
 			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
-	// Construct an accumulator for the samples.
-	CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
-			weights, depthFunc, sampleOpts.startChannel(), outSamps);
+	SqFilterSupport support = weights.support();
+	if(support.intersectsRange(0, m_pixelBuf->width(), 0, m_pixelBuf->height()))
+	{
+		// Construct an accumulator for the samples.
+		CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
+				weights, depthFunc, sampleOpts.startChannel(), outSamps);
 
-	/** \todo Optimization opportunity: Cull the query if it's outside the
-	 * [min,max] depth range of the texture map (also would work on a per-tile
-	 * basis)
-	 */
+		/** \todo Optimization opportunity: Cull the query if it's outside the
+		 * [min,max] depth range of the texture map (also would work on a per-tile
+		 * basis)
+		 */
 
-	// Finally perform PCF filtering over the texture buffer.
-	CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf).applyFilter(
-			accumulator, weights.support(), WrapMode_Black, WrapMode_Black);
+		// Finally perform PCF filtering over the texture buffer.
+		CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf).applyFilter(
+				accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+	}
+	else
+	{
+		// If the filter support lies wholly outside the texture, return
+		// fully visible == 0.
+		*outSamps = 0;
+	}
 }
 
 const CqShadowSampleOptions& CqShadowSampler::defaultSampleOptions() const
