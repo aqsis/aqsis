@@ -103,6 +103,8 @@ struct Sq3DSampleQuad
 	CqVector3D v3;
 	CqVector3D v4;
 
+	/// Default constructor - set all corner vectors to 0.
+	Sq3DSampleQuad();
 	/// Trivial constructor
 	Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
 			const CqVector3D& v3, const CqVector3D& v4);
@@ -166,6 +168,13 @@ inline CqVector2D SqSampleQuad::center() const
 
 //------------------------------------------------------------------------------
 // Sq3DSampleQuad implementation
+inline Sq3DSampleQuad::Sq3DSampleQuad()
+	: v1(0,0,0),
+	v2(0,0,0),
+	v3(0,0,0),
+	v4(0,0,0)
+{ }
+
 inline Sq3DSampleQuad::Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
 		const CqVector3D& v3, const CqVector3D& v4)
 	: v1(v1),

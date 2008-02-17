@@ -1089,109 +1089,54 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 
 void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-#if 0
-	IqShaderData* pDefBias = NULL;
-	IqShaderData* pDefBias0 = NULL;
-	IqShaderData* pDefBias1 = NULL;
+	TqInt gridIdx = 0;
 
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParamsOld(cParams, apParams, paramMap);
-
-	// If the bias values haven't been specified in the arguments to the function, use those from the 
-	// Option stack.
-	if ( paramMap.find( "bias" ) == paramMap.end() )
+	if(!getRenderContext())
 	{
-		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			bias = poptBias[0];
-		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
-		pDefBias->SetFloat( bias );
-		paramMap["bias"] = pDefBias;
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	if ( paramMap.find( "bias0" ) == paramMap.end() )
+
+	// Get the shadow map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqShadowSampler& shadSampler = getRenderContext()->GetShadowMap(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	// Start and number of channels.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
+
+	// Initialize extraction of varargs texture options.
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
+		if(RS.Value(gridIdx))
 		{
-			TqFloat bias0 = poptBias[0];
-			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias0->SetFloat( bias0 );
-			paramMap["bias0"] = pDefBias0;
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+
+			// Get sampling quad, explicitly provided by user.
+			Sq3DSampleQuad sampleQuad;
+			P1->GetPoint(sampleQuad.v1, gridIdx);
+			P2->GetPoint(sampleQuad.v2, gridIdx);
+			P3->GetPoint(sampleQuad.v3, gridIdx);
+			P4->GetPoint(sampleQuad.v4, gridIdx);
+
+			// length-1 "array" where filtered results will be placed.
+			TqFloat shadSample = 0;
+			shadSampler.sample(sampleQuad, sampleOpts, &shadSample);
+			Result->SetFloat(shadSample, gridIdx);
 		}
 	}
-	if ( paramMap.find( "bias1" ) == paramMap.end() )
-	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-		{
-			TqFloat bias1 = poptBias[0];
-			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias1->SetFloat( bias1 );
-			paramMap["bias1"] = pDefBias1;
-		}
-	}
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(startChannel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_name );
-
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
-	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D _aq_P1;
-				(P1)->GetPoint(_aq_P1,__iGrid);
-				CqVector3D _aq_P2;
-				(P2)->GetPoint(_aq_P2,__iGrid);
-				CqVector3D _aq_P3;
-				(P3)->GetPoint(_aq_P3,__iGrid);
-				CqVector3D _aq_P4;
-				(P4)->GetPoint(_aq_P4,__iGrid);
-				pMap->SampleMap( _aq_P1, _aq_P2, _aq_P3, _aq_P4, fv, 0 );
-				(Result)->SetFloat(fv[ 0 ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	if(NULL != pDefBias)
-		pShader->DeleteTemporaryStorage( pDefBias );
-	if(NULL != pDefBias0)
-		pShader->DeleteTemporaryStorage( pDefBias0 );
-	if(NULL != pDefBias1)
-		pShader->DeleteTemporaryStorage( pDefBias1 );
-#endif
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 // SIGGRAPH 2002; Larry G. Bake functions
