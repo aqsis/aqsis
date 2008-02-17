@@ -188,6 +188,8 @@ class CqSampleOptionExtractorBase
 		}
 };
 
+
+//------------------------------------------------------------------------------
 /** \brief Extractor for plain texture options
  */
 class CqSampleOptionExtractor
@@ -223,6 +225,8 @@ class CqSampleOptionExtractor
 		CqSampleOptionExtractorBase<CqTextureSampleOptions>::extractVarying;
 };
 
+
+//------------------------------------------------------------------------------
 class CqShadowOptionExtractor
 	: private CqSampleOptionExtractorBase<CqShadowSampleOptions>
 {
@@ -270,9 +274,41 @@ class CqShadowOptionExtractor
 			extractUniformAndCacheVarying(paramList, numParams, opts);
 		}
 
-		CqSampleOptionExtractorBase<CqShadowSampleOptions>::extractVarying;
+		void extractVarying(TqInt gridIdx, CqShadowSampleOptions& opts)
+		{
+			if(m_biasLow)
+			{
+				TqFloat biasLow = 0;
+				TqFloat biasHigh = 0;
+				m_biasLow->GetFloat(biasLow, gridIdx);
+				m_biasHigh->GetFloat(biasHigh, gridIdx);
+				opts.setBias(biasLow, biasHigh);
+			}
+			CqSampleOptionExtractorBase<CqShadowSampleOptions>::extractVarying(gridIdx, opts);
+		}
 };
 
+
+//------------------------------------------------------------------------------
+/// Fill any shadow sampling options obtainable from the renderer context via RiOptions.
+void getRenderContextShadowOpts(const IqRenderer& context, CqShadowSampleOptions& sampleOpts)
+{
+	// Shadow biases
+	const TqFloat* biasPtr = context.GetFloatOption( "shadow", "bias" );
+	if(biasPtr)
+		sampleOpts.setBias(*biasPtr);
+	const TqFloat* biasLowPtr = context.GetFloatOption( "shadow", "bias0" );
+	const TqFloat* biasHighPtr = context.GetFloatOption( "shadow", "bias1" );
+	if(biasLowPtr && biasHighPtr)
+		sampleOpts.setBias(*biasLowPtr, *biasHighPtr);
+	else if(biasLowPtr)
+		sampleOpts.setBias(*biasLowPtr, sampleOpts.biasHigh());
+	else if(biasHighPtr)
+		sampleOpts.setBias(sampleOpts.biasLow(), *biasHighPtr);
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Extract additional named texture control parameters from an array of stack
  * entries.
@@ -1008,10 +1044,12 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
 	// Set some uniform sample options.
+	// Start and number of channels.
 	TqFloat startChannelIdx;
 	startChannel->GetFloat(startChannelIdx, gridIdx);
 	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
 
 	// Initialize extraction of varargs texture options.
 	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);

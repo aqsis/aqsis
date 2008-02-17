@@ -168,7 +168,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	{
 		// Construct an accumulator for the samples.
 		CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
-				weights, depthFunc, sampleOpts.startChannel(), outSamps);
+				weights, depthFunc, sampleOpts.startChannel(), sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
 
 		/** \todo Optimization opportunity: Cull the query if it's outside the
 		 * [min,max] depth range of the texture map (also would work on a per-tile

@@ -178,7 +178,8 @@ class CqPcfAccum
 		 */
 		CqPcfAccum(const FilterWeightT& filterWeights,
 				const DepthFuncT& depthFunc,
-				TqInt startChan, TqFloat* resultBuf);
+				TqInt startChan, TqFloat biasLow, TqFloat biasHigh,
+				TqFloat* resultBuf);
 
 		/** \brief Set length for sample vectors passed to accumulate().
 		 *
@@ -207,6 +208,10 @@ class CqPcfAccum
 		const DepthFuncT& m_depthFunc;
 		/// Start channel in the source data
 		TqInt m_startChan;
+		/// Low value for shadow bias
+		TqFloat m_biasLow;
+		/// High value for shadow bias
+		TqFloat m_biasHigh;
 		/// Array to fill with accumulated data
 		TqFloat* m_resultBuf;
 		/// Total accumulated weight used to renormalize the samples.
@@ -298,10 +303,12 @@ inline CqSampleAccum<FilterWeightT>::~CqSampleAccum()
 template<typename FilterWeightT, typename DepthFuncT>
 inline CqPcfAccum<FilterWeightT, DepthFuncT>::CqPcfAccum(
 		const FilterWeightT& filterWeights, const DepthFuncT& depthFunc,
-		TqInt startChan, TqFloat* resultBuf)
+		TqInt startChan, TqFloat biasLow, TqFloat biasHigh, TqFloat* resultBuf)
 	: m_filterWeights(filterWeights),
 	m_depthFunc(depthFunc),
 	m_startChan(startChan),
+	m_biasLow(biasLow),
+	m_biasHigh(biasHigh),
 	m_resultBuf(resultBuf),
 	m_totWeight(0)
 {
@@ -326,8 +333,37 @@ inline void CqPcfAccum<FilterWeightT, DepthFuncT>::accumulate(TqInt x, TqInt y, 
 	{
 		if(!m_filterWeights.isNormalized()) // check should be optimized away
 			m_totWeight += weight;
-		TqFloat z = m_depthFunc(x,y);
-		m_resultBuf[0] += weight*(z > inSamples[m_startChan]);
+		TqFloat surfaceDepth = m_depthFunc(x,y);
+		TqFloat shadDepth = inSamples[m_startChan];
+		/// \todo optimization opportunity? - we may make these decisions about
+		/// biases *before* running the integration loop.  This will require
+		/// several versions of CqPcfAccum.
+		if(m_biasHigh == 0 && m_biasLow == 0)
+		{
+			// No shadow bias.
+			m_resultBuf[0] += weight*(surfaceDepth > shadDepth);
+		}
+		else
+		{
+			if(m_biasHigh == m_biasLow)
+			{
+				m_resultBuf[0] += weight*(surfaceDepth > shadDepth + m_biasLow);
+			}
+			else
+			{
+				// handle biases; we interpolate from result == 0 when
+				// surfaceDepth <= shadDepth+m_biasLow, to result == 1 when
+				// surfaceDepth >= shadDepth+m_biasHigh.
+				TqFloat shadAmount = 0;
+				if(surfaceDepth >= shadDepth + m_biasHigh)
+					shadAmount = 1;
+				else if(surfaceDepth > shadDepth + m_biasLow)
+				{
+					shadAmount = (surfaceDepth - shadDepth - m_biasLow)/(m_biasHigh-m_biasLow);
+				}
+				m_resultBuf[0] += weight*shadAmount;
+			}
+		}
 	}
 }
 
