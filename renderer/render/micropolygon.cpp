@@ -282,18 +282,43 @@ void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
 
 	const TqInt numVertsU = uGridRes() + 1;
 	const TqInt totVerts = numVertsU*(vGridRes() + 1);
-	// Expand first u-row in -v direction.
-	for(TqInt iu = 0; iu < numVertsU; ++iu)
-		pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu+numVertsU];
-	// Expand last u-row in +v direction.
-	for(TqInt iu = totVerts-numVertsU; iu < totVerts; ++iu)
-		pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu-numVertsU];
-	// Expand first v-row in -u direction.
-	for(TqInt iv = 0; iv < totVerts; iv += numVertsU)
-		pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv+1];
-	// Expand last v-row in +u direction.
-	for(TqInt iv = numVertsU-1; iv < totVerts; iv += numVertsU)
-		pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv-1];
+
+	// Before expanding each edge, we perform a quick check to guess whether it
+	// is degenerate.  We avoid checking the vertices of a row against each
+	// other directly, since this will result in the usual sensitivity to
+	// floating point errors.  Instead, we check whether the length of the row
+	// is less than sqrt(degeneracyRatio) times the length of the following
+	// row.
+	const TqFloat degeneracyRatio = 1e-8;
+
+	if((pPmod[0] - pPmod[numVertsU-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[numVertsU] - pPmod[2*numVertsU-1]).Magnitude2())
+	{
+		// Expand first u-row in -v direction.
+		for(TqInt iu = 0; iu < numVertsU; ++iu)
+			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu+numVertsU];
+	}
+	if((pPmod[totVerts-numVertsU] - pPmod[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[totVerts-2*numVertsU] - pPmod[totVerts-numVertsU-1]).Magnitude2())
+	{
+		// Expand last u-row in +v direction.
+		for(TqInt iu = totVerts-numVertsU; iu < totVerts; ++iu)
+			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu-numVertsU];
+	}
+	if((pPmod[0] - pPmod[totVerts-numVertsU]).Magnitude2()
+			> degeneracyRatio*(pPmod[1] - pPmod[totVerts-numVertsU+1]).Magnitude2())
+	{
+		// Expand first v-column in -u direction.
+		for(TqInt iv = 0; iv < totVerts; iv += numVertsU)
+			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv+1];
+	}
+	if((pPmod[numVertsU-1] - pPmod[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[numVertsU-2] - pPmod[totVerts-2]).Magnitude2())
+	{
+		// Expand last v-column in +u direction.
+		for(TqInt iv = numVertsU-1; iv < totVerts; iv += numVertsU)
+			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv-1];
+	}
 }
 
 
