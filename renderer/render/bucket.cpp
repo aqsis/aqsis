@@ -81,7 +81,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter, bool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool empty )
 {
 	m_XOrigin = xorigin;
 	m_YOrigin = yorigin;
@@ -98,8 +98,12 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	m_NumTimeRanges = max(4, m_PixelXSamples * m_PixelYSamples);
 
-        TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-        TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+
+	bool useJitter = true;
+	if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->GetIntegerOption( "Hider", "jitter" ))
+		useJitter = static_cast<bool>(*useJitterPtr);
 
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
@@ -122,7 +126,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				//if(fJitter)
+				if(useJitter)
 					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
@@ -159,7 +163,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			if(!empty)
 				m_aieImage[which].Clear();
 
-			//if(fJitter)
+			if(useJitter)
 				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 

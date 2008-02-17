@@ -1287,7 +1287,7 @@ void CqImageBuffer::RenderImage()
 
 		{
 			TIME_SCOPE("Prepare bucket")
-			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
+			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), bIsEmpty );
 			CqBucket::InitialiseFilterValues();
 		}
 
