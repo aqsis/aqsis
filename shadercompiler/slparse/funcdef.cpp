@@ -214,7 +214,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Color, "phong", "phong", "ppf" ),
                                  CqFuncDef( Type_Color, "trace", "trace", "pp" ),
                                  CqFuncDef( Type_Float, "shadow", "shadow2", "sfpppp*" ),
-                                 CqFuncDef( Type_Float, "shadow", "shadow", "sfp*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_du ) ),
+                                 CqFuncDef( Type_Float, "shadow", "shadow", "sfp*" ),
                                  CqFuncDef( Type_Float, "texture", "ftexture3", "sfffffffff*" ),
                                  CqFuncDef( Type_Float, "texture", "ftexture2", "sfff*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Float, "texture", "ftexture1", "sf*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) ),

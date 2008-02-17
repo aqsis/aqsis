@@ -210,13 +210,19 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 {
 	public:
+		/** \brief Set all options to sensible default values
+		 *
+		 * The defaults from CqTextureSampleOptions are used, and in addition,
+		 * the shadow biases are set to 0.
+		 */
+		CqShadowSampleOptions();
+
 		// Accessors from CqTextureSampleOptions
 		CqTextureSampleOptions::sBlur;
 		CqTextureSampleOptions::tBlur;
 		CqTextureSampleOptions::sWidth;
 		CqTextureSampleOptions::tWidth;
 		CqTextureSampleOptions::filterType;
-		CqTextureSampleOptions::fill;
 		CqTextureSampleOptions::startChannel;
 		CqTextureSampleOptions::numChannels;
 		CqTextureSampleOptions::numSamples;
@@ -231,7 +237,6 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		CqTextureSampleOptions::setSWidth;
 		CqTextureSampleOptions::setTWidth;
 		CqTextureSampleOptions::setFilterType;
-		CqTextureSampleOptions::setFill;
 		CqTextureSampleOptions::setStartChannel;
 		CqTextureSampleOptions::setNumChannels;
 		CqTextureSampleOptions::setNumSamples;
@@ -440,6 +445,12 @@ inline void CqTextureSampleOptions::setTWrapMode(EqWrapMode tWrapMode)
 
 //------------------------------------------------------------------------------
 // CqShadowSampleOptions implementation
+
+inline CqShadowSampleOptions::CqShadowSampleOptions()
+	: CqTextureSampleOptions(),
+	m_biasLow(0),
+	m_biasHigh(0)
+{ }
 
 inline TqFloat CqShadowSampleOptions::biasLow() const
 {

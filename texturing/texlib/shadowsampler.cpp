@@ -39,7 +39,7 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 				const CqMatrix& camToWorld)
 	: m_camToLight(),
 	m_camToLightRaster(),
-	m_pixelBuf(),
+	m_pixelBuf(new CqTextureBuffer<TqFloat>()),
 	m_defaultSampleOptions()
 {
 	if(!file)
@@ -49,24 +49,31 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 	if(header.channelList().sharedChannelType() != Channel_Float32)
 		AQSIS_THROW(XqBadTexture, "Shadow maps must hold 32-bit floating point data");
 
-	// Get matrices which transform the sample points to raster coordinates
+	// Get matrix which transforms the sample points to the light camera coordinates.
 	const CqMatrix* worldToLight = header.findPtr<Attr::WorldToCameraMatrix>();
 	if(!worldToLight)
 	{
 		AQSIS_THROW(XqBadTexture, "No world -> camera matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLight = *worldToLight * camToWorld;
+	m_camToLight = (*worldToLight) * camToWorld;
+
+	// Read pixel data
+	file->readPixels(*m_pixelBuf);
+
+	// Get matrix which transforms the sample points to texture coordinates.
 	const CqMatrix* worldToLightRaster = header.findPtr<Attr::WorldToScreenMatrix>();
 	if(!worldToLightRaster)
 	{
 		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLight = *worldToLightRaster * camToWorld;
-
-	// Read pixel data
-	file->readPixels(*m_pixelBuf);
+	m_camToLightRaster = (*worldToLightRaster) * camToWorld;
+	// worldToLightRaster transforms world coordinates to NDC, ie, onto the 2D
+	// box [-1,1]x[-1,1].  We instead want texture coordinates, which
+	// correspond to the box [0,1]x[0,1].
+	m_camToLightRaster.Translate(CqVector3D(1,1,0));
+	m_camToLightRaster.Scale(0.5f, 0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
 }
@@ -156,6 +163,11 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	// Construct an accumulator for the samples.
 	CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
 			weights, depthFunc, sampleOpts.startChannel(), outSamps);
+
+	/** \todo Optimization opportunity: Cull the query if it's outside the
+	 * [min,max] depth range of the texture map (also would work on a per-tile
+	 * basis)
+	 */
 
 	// Finally perform PCF filtering over the texture buffer.
 	CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf).applyFilter(

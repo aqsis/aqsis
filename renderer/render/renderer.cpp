@@ -1658,6 +1658,8 @@ IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 
 const IqShadowSampler& CqRenderer::GetShadowMap(const char* fileName)
 {
+	m_textureCache.setCamToWorldMatrix(QGetRenderContextI()->matSpaceToSpace(
+				"camera", "world", NULL, NULL, QGetRenderContextI()->Time()) );
 	return m_textureCache.findShadowSampler(fileName);
 }
 

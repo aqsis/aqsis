@@ -56,11 +56,16 @@ IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
 	return findSampler(m_shadowCache, name);
 }
 
-CqTexFileHeader* textureInfo(const char* texName)
+CqTexFileHeader* CqTextureCache::textureInfo(const char* texName)
 {
 	/// \todo Return something sensible here.
 	assert(0);
 	return 0;
+}
+
+void CqTextureCache::setCamToWorldMatrix(const CqMatrix& camToWorld)
+{
+	m_camToWorld = camToWorld;
 }
 
 //--------------------------------------------------

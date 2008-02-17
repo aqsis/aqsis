@@ -51,42 +51,35 @@ namespace
 
 // helper functions and classes.
 
-/** \brief Extractor for sample options from RSL texture() varargs parameter
- * list
+/** \brief Basic extractor for sample options from RSL texture() varargs
+ * parameter list.
+ *
+ * Extracts options which are valid for all texture function types.
  */
-class CqSampleOptionExtractor
+template<typename SampleOptsT>
+class CqSampleOptionExtractorBase
 {
 	private:
 		/**
 		 * Possible texture sample options; these will be null if no sample
 		 * options are specified.
 		 *
-		 * \todo Optimizations are possible if we assume people will never want
-		 * some of these (eg, wrap modes) to vary across a grid.
-		 *
 		 * \todo Inspection of the parameter list would be better done at
 		 * shader load-time, assuming the parameter names are constant.
 		 */
 		IqShaderData* m_sBlur;
 		IqShaderData* m_tBlur;
-		IqShaderData* m_sWidth;
-		IqShaderData* m_tWidth;
-		IqShaderData* m_filterType;
-		IqShaderData* m_fill;
-	public:
-		/** \brief Cache texture sample options with known names for later use.
+
+	protected:
+		/** \brief Cache varying options, and extract uniform ones.
 		 *
 		 * \param paramList - list of additional parameters to an RSL texture()
 		 *                    call as (name,value) pairs.
 		 * \param numParams - length of paramList.
+		 * \param opts - sample options in which to place uniform options.
 		 */
-		CqSampleOptionExtractor(IqShaderData** paramList, TqInt numParams)
-			: m_sBlur(0),
-			m_tBlur(0),
-			m_sWidth(0),
-			m_tWidth(0),
-			m_filterType(0),
-			m_fill(0)
+		void extractUniformAndCacheVarying(IqShaderData** paramList, TqInt numParams,
+				SampleOptsT& opts)
 		{
 			CqString paramName;
 			for(TqInt i = 0; i < numParams; i+=2)
@@ -94,24 +87,91 @@ class CqSampleOptionExtractor
 				// Parameter name and data
 				paramList[i]->GetString(paramName, 0);
 				IqShaderData* param = paramList[i+1];
-				// Assign the parameter to the desired member variable.
-				if(paramName == "blur")			{ m_sBlur = param; m_tBlur = param; }
-				else if(paramName == "sblur")	m_sBlur = param;
-				else if(paramName == "tblur")	m_tBlur = param;
-				else if(paramName == "width")	{ m_sWidth = param; m_tWidth = param; }
-				else if(paramName == "swidth")	m_sWidth = param;
-				else if(paramName == "twidth")	m_tWidth = param;
-				else if(paramName == "filter")	m_filterType = param;
-				else if(paramName == "fill")	m_fill = param;
+				handleParam(paramName, param, opts);
 			}
 		}
+
+		/** \brief extract or cache a single parameter.
+		 *
+		 * Cache the parameter in the desired member variable if it's varying.
+		 * If it's uniform then set the appropriate field in the sample
+		 * options.
+		 *
+		 * \param name - parameter name
+		 * \param value - parameter shader data
+		 * \param opts - sample options into which uniform parameters should be placed.
+		 */
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				SampleOptsT& opts)
+		{
+			// The following are varying
+			if(name == "blur")
+			{
+				m_sBlur = value;
+				m_tBlur = value;
+			}
+			else if(name == "sblur")
+			{
+				m_sBlur = value;
+			}
+			else if(name == "tblur")
+			{
+				m_tBlur = value;
+			}
+			// The rest are uniform
+			else if(name == "width")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setSWidth(tmp);
+				opts.setTWidth(tmp);
+			}
+			else if(name == "swidth")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setSWidth(tmp);
+			}
+			else if(name == "twidth")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setTWidth(tmp);
+			}
+			else if(name == "filter")
+			{
+				CqString tmp;
+				value->GetString(tmp, 0);
+				opts.setFilterType(texFilterTypeFromString(tmp.c_str()));
+			}
+		}
+
+	public:
+		/** \brief Initialize option extractor: extract uniform options, and cache varying ones.
+		 *
+		 * Cache the parameter in the desired member variable if it's varying.
+		 * If it's uniform then set the appropriate field in the sample
+		 * options.  Whether things are uniform or varying is described by the
+		 * RISpec in the section dealing with the texture() shadeops.
+		 *
+		 * \param paramList - list of additional parameters to an RSL texture()
+		 *                    call as (name,value) pairs.
+		 * \param numParams - length of paramList.
+		 * \param opts - sample options container to extract options into.
+		 */
+		CqSampleOptionExtractorBase()
+			: m_sBlur(0),
+			m_tBlur(0)
+		{ }
+
+		/// Null destructor
+		virtual ~CqSampleOptionExtractorBase() {}
 
 		/** \brief Extract texture sample options from cached parameters
 		 *
 		 * \param gridIdx - index into varying shader parameter data.
-		 * \param opts - put the extracted texture sample options here.
 		 */
-		void extract(TqInt gridIdx, CqTextureSampleOptions& opts)
+		void extractVarying(TqInt gridIdx, SampleOptsT& opts)
 		{
 			if(m_sBlur)
 			{
@@ -125,31 +185,92 @@ class CqSampleOptionExtractor
 				m_tBlur->GetFloat(tmp, gridIdx);
 				opts.setTBlur(tmp);
 			}
-			if(m_sWidth)
+		}
+};
+
+/** \brief Extractor for plain texture options
+ */
+class CqSampleOptionExtractor
+	: private CqSampleOptionExtractorBase<CqTextureSampleOptions>
+{
+	protected:
+		// From CqSampleOptionExtractorBase.
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				CqTextureSampleOptions& opts)
+		{
+			if(name == "fill")
 			{
 				TqFloat tmp = 0;
-				m_sWidth->GetFloat(tmp, gridIdx);
-				opts.setSWidth(tmp);
-			}
-			if(m_tWidth)
-			{
-				TqFloat tmp = 0;
-				m_tWidth->GetFloat(tmp, gridIdx);
-				opts.setTWidth(tmp);
-			}
-			if(m_filterType)
-			{
-				CqString tmp;
-				m_filterType->GetString(tmp, gridIdx);
-				opts.setFilterType(texFilterTypeFromString(tmp.c_str()));
-			}
-			if(m_fill)
-			{
-				TqFloat tmp = 0;
-				m_fill->GetFloat(tmp, gridIdx);
+				value->GetFloat(tmp, 0);
 				opts.setFill(tmp);
 			}
+			else
+			{
+				// Else call through to the base class for the more basic
+				// texture sample options.
+				CqSampleOptionExtractorBase<CqTextureSampleOptions>
+					::handleParam(name, value, opts);
+			}
 		}
+	public:
+		CqSampleOptionExtractor(IqShaderData** paramList, TqInt numParams,
+				CqTextureSampleOptions& opts)
+			: CqSampleOptionExtractorBase<CqTextureSampleOptions>()
+		{
+			extractUniformAndCacheVarying(paramList, numParams, opts);
+		}
+
+		CqSampleOptionExtractorBase<CqTextureSampleOptions>::extractVarying;
+};
+
+class CqShadowOptionExtractor
+	: private CqSampleOptionExtractorBase<CqShadowSampleOptions>
+{
+	private:
+		/// Cached values for varying shadow bias.
+		IqShaderData* m_biasLow;
+		IqShaderData* m_biasHigh;
+	protected:
+		// From CqSampleOptionExtractor.
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				CqShadowSampleOptions& opts)
+		{
+			if(name == "bias")
+			{
+				m_biasLow = value;
+				m_biasHigh = value;
+			}
+			else if(name == "bias0")
+			{
+				m_biasLow = value;
+				if(!m_biasHigh)
+					m_biasHigh = value;
+			}
+			else if(name == "bias1")
+			{
+				m_biasHigh = value;
+				if(!m_biasLow)
+					m_biasLow = value;
+			}
+			else
+			{
+				// Else call through to the base class for the more basic
+				// texture sample options.
+				CqSampleOptionExtractorBase<CqShadowSampleOptions>
+					::handleParam(name, value, opts);
+			}
+		}
+	public:
+		CqShadowOptionExtractor(IqShaderData** paramList, TqInt numParams,
+				CqShadowSampleOptions& opts)
+			: CqSampleOptionExtractorBase<CqShadowSampleOptions>(),
+			m_biasLow(0),
+			m_biasHigh(0)
+		{
+			extractUniformAndCacheVarying(paramList, numParams, opts);
+		}
+
+		CqSampleOptionExtractorBase<CqShadowSampleOptions>::extractVarying;
 };
 
 /**
@@ -204,13 +325,13 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
-	CqSampleOptionExtractor optExtractor(apParams, cParams);
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
 	// Get the differential elements du and dv.
 	TqFloat fdu = 1.0f, fdv = 1.0f;
 	if ( m_pAttributes )
 	{
-		// \todo Understand how m_pAttributes could possibly be NULL.
+		/// \todo Understand how m_pAttributes could possibly be NULL.
 		du() ->GetFloat( fdu );
 		dv() ->GetFloat( fdv );
 		// fdu and fdv should never be zero here.
@@ -224,8 +345,9 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	{
 		if(RS.Value(gridIdx))
 		{
-			optExtractor.extract(gridIdx, sampleOpts);
+			optExtractor.extractVarying(gridIdx, sampleOpts);
 			/// \todo this can be improved apon by not using fdu & fdv at all.
+			/// \todo When fdu etc are removed, should also adjust the needed vars in funcdef.cpp
 			// What we need here is really want a difference operator,
 			// *not* the derivative.
 			TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, gridIdx, this, 0.0f);
@@ -278,7 +400,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
-	CqSampleOptionExtractor optExtractor(apParams, cParams);
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
 	CqBitVector& RS = RunningState();
 	gridIdx = 0;
@@ -286,7 +408,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 	{
 		if(RS.Value(gridIdx))
 		{
-			optExtractor.extract(gridIdx, sampleOpts);
+			optExtractor.extractVarying(gridIdx, sampleOpts);
 			// Compute the sample quadrilateral box.  Unfortunately we need all
 			// these temporaries because the shader data interface leaves a bit
 			// to be desired ;-)
@@ -343,7 +465,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
-	CqSampleOptionExtractor optExtractor(apParams, cParams);
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
 	// Get the differential elements du and dv.
 	TqFloat fdu = 1.0f, fdv = 1.0f;
@@ -363,7 +485,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	{
 		if(RS.Value(gridIdx))
 		{
-			optExtractor.extract(gridIdx, sampleOpts);
+			optExtractor.extractVarying(gridIdx, sampleOpts);
 			/// \todo this can be improved apon by not using fdu & fdv at all.
 			// What we need here is really want a difference operator,
 			// *not* the derivative.
@@ -418,7 +540,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
-	CqSampleOptionExtractor optExtractor(apParams, cParams);
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
 	CqBitVector& RS = RunningState();
 	gridIdx = 0;
@@ -426,7 +548,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 	{
 		if(RS.Value(gridIdx))
 		{
-			optExtractor.extract(gridIdx, sampleOpts);
+			optExtractor.extractVarying(gridIdx, sampleOpts);
 			// Compute the sample quadrilateral box.  Unfortunately we need all
 			// these temporaries because the shader data interface leaves a bit
 			// to be desired ;-)
@@ -870,7 +992,6 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, 
 // shadow(S,P)
 void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	/*
 	TqInt gridIdx = 0;
 
 	if(!getRenderContext())
@@ -879,10 +1000,10 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 		return;
 	}
 
-	// Get the texture map.
+	// Get the shadow map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqShadowSampler& shadSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+	const IqShadowSampler& shadSampler = getRenderContext()->GetShadowMap(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
@@ -893,19 +1014,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
-	CqSampleOptionExtractor optExtractor(apParams, cParams);
-
-	// Get the differential elements du and dv.
-	TqFloat fdu = 1.0f, fdv = 1.0f;
-	if ( m_pAttributes )
-	{
-		// \todo Understand how m_pAttributes could possibly be NULL.
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-		// fdu and fdv should never be zero here.
-		assert(fdu != 0.0f);
-		assert(fdv != 0.0f);
-	}
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
 	CqBitVector& RS = RunningState();
 	gridIdx = 0;
@@ -913,148 +1022,29 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	{
 		if(RS.Value(gridIdx))
 		{
-			optExtractor.extract(gridIdx, sampleOpts);
+			optExtractor.extractVarying(gridIdx, sampleOpts);
 			/// \todo this can be improved apon by not using fdu & fdv at all.
 			// What we need here is really want a difference operator,
 			// *not* the derivative.
-			TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, gridIdx, this, 0.0f);
-			TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, gridIdx, this, 0.0f);
+			CqVector3D dP_uOn2; //fdu*0.5*SO_DuType<CqVector3D>(P, gridIdx,
+					//this, CqVector3D());
+			CqVector3D dP_vOn2; //fdv*0.5*SO_DvType<CqVector3D>(P, gridIdx,
+					//this, CqVector3D());
 			// Centre of the texture region to be filtered.
-			TqFloat ss = 0;
-			TqFloat tt = 0;
-			s->GetFloat(ss,gridIdx);
-			t->GetFloat(tt,gridIdx);
+			CqVector3D centerP;
+			P->GetPoint(centerP, gridIdx);
 			// Compute the sample quadrilateral box.
-			SqSampleQuad sampleQuad(
-				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
-				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
-				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
-				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
+			Sq3DSampleQuad sampleQuad(
+				centerP - dP_uOn2 - dP_vOn2, centerP + dP_uOn2 - dP_vOn2, 
+				centerP - dP_uOn2 + dP_vOn2, centerP + dP_uOn2 + dP_vOn2);
 			// length-1 "array" where filtered results will be placed.
-			TqFloat texSample = 0;
-			shadSampler.sample(sampleQuad, sampleOpts, &texSample);
-			Result->SetFloat(texSample, gridIdx);
+			TqFloat shadSample = 0;
+			shadSampler.sample(sampleQuad, sampleOpts, &shadSample);
+			Result->SetFloat(shadSample, gridIdx);
 		}
 	}
 	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
-	*/
 }
-#if 0
-	IqShaderData* pDefBias = NULL;
-	IqShaderData* pDefBias0 = NULL;
-	IqShaderData* pDefBias1 = NULL;
-
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParamsOld(cParams, apParams, paramMap);
-
-	// If the bias values haven't been specified in the arguments to the function, use those from the 
-	// Option stack.
-	if ( paramMap.find( "bias" ) == paramMap.end() )
-	{
-		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			bias = poptBias[0];
-		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
-		pDefBias->SetFloat( bias );
-		paramMap["bias"] = pDefBias;
-	}
-	if ( paramMap.find( "bias0" ) == paramMap.end() )
-	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
-		{
-			TqFloat bias0 = poptBias[0];
-			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias0->SetFloat( bias0 );
-			paramMap["bias0"] = pDefBias0;
-		}
-	}
-	if ( paramMap.find( "bias1" ) == paramMap.end() )
-	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-		{
-			TqFloat bias1 = poptBias[0];
-			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias1->SetFloat( bias1 );
-			paramMap["bias1"] = pDefBias1;
-		}
-	}
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(startChannel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMapOld* pMap = getRenderContext() ->GetShadowMap( _aq_name );
-
-	// Get values for deltas along surface directions
-	TqFloat fdu = 0.0f;
-	TqFloat fdv = 0.0f;
-	if ( m_pAttributes )
-	{
-		du()->GetFloat(fdu);
-		dv()->GetFloat(fdv);
-	}
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
-	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqVector3D defaultDeriv(0,0,0);
-		CqBitVector& RS = RunningState();
-		do
-		{
-
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D p;
-				(P)->GetPoint(p,__iGrid);
-
-				CqVector3D dpuOn2 = fdu*0.5*SO_DuType<CqVector3D>(P, __iGrid, this, defaultDeriv);
-				CqVector3D dpvOn2 = fdv*0.5*SO_DvType<CqVector3D>(P, __iGrid, this, defaultDeriv);
-				CqVector3D p1 = p - dpuOn2 - dpvOn2;
-				CqVector3D p2 = p + dpuOn2 - dpvOn2;
-				CqVector3D p3 = p + dpuOn2 + dpvOn2;
-				CqVector3D p4 = p - dpuOn2 + dpvOn2;
-				pMap->SampleMap(p1, p2, p3, p4, fv, 0 );
-				(Result)->SetFloat(fv[ 0 ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	if(NULL != pDefBias)
-		pShader->DeleteTemporaryStorage( pDefBias );
-	if(NULL != pDefBias0)
-		pShader->DeleteTemporaryStorage( pDefBias0 );
-	if(NULL != pDefBias1)
-		pShader->DeleteTemporaryStorage( pDefBias1 );
-#endif		
 
 //----------------------------------------------------------------------
 // shadow(S,P,P,P,P)
