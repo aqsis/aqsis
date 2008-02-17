@@ -71,9 +71,12 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 	m_camToLightRaster = (*worldToLightRaster) * camToWorld;
 	// worldToLightRaster transforms world coordinates to NDC, ie, onto the 2D
 	// box [-1,1]x[-1,1].  We instead want texture coordinates, which
-	// correspond to the box [0,1]x[0,1].
-	m_camToLightRaster.Translate(CqVector3D(1,1,0));
-	m_camToLightRaster.Scale(0.5f, 0.5f, 1);
+	// correspond to the box [0,1]x[0,1].  In addition, the direction of
+	// increase of the y-axis should be swapped, since texture coordinates
+	// define the origin to be in the top left of the texture rather than the
+	// bottom right.
+	m_camToLightRaster.Translate(CqVector3D(1,-1,0));
+	m_camToLightRaster.Scale(0.5f, -0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
 }
