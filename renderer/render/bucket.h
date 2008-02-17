@@ -132,7 +132,7 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
+		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool empty = false );
 		static	void	CalculateDofBounds();
 		static	void	InitialiseFilterValues();
 		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
