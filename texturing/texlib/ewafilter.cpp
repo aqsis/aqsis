@@ -146,13 +146,12 @@ void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
 		// texture resolution.  This gives the blur in units of number of
 		// pixel widths to add to the filter in the two directions.  To turn
 		// this into a standard devation for a gaussian filter, we scale by
-		// 1/sqrt(12) which is the standard deviation of a box filter of width
-		// 1.  (If we don't do this, the blur is much larger than desired,
-		// since the support of a gaussian of standard deviation 1 occupies
-		// much more than a pixel.)
-		const TqFloat oneOnSqrt12 = 0.288675134595;
-		TqFloat sStdDev = sBlur*baseResS*oneOnSqrt12 + reconsStdDev;
-		TqFloat tStdDev = tBlur*baseResT*oneOnSqrt12 + reconsStdDev;
+		// "blurScale": this gives an amount of blur which is roughly
+		// consistent with that used by PRMan (and 3delight) for the same
+		// scenes.
+		const TqFloat blurScale = 0.5f;
+		TqFloat sStdDev = sBlur*baseResS*blurScale + reconsStdDev;
+		TqFloat tStdDev = tBlur*baseResT*blurScale + reconsStdDev;
 		coVar += SqMatrix2D(sStdDev*sStdDev, tStdDev*tStdDev);
 	}
 	else
