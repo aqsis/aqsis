@@ -19,11 +19,10 @@
 
 /** \file
  *
- * \brief Unit tests for texture sample options
+ * \brief Unit tests for sampling quad operations.
  * \author Chris Foster
  */
 
-#include "texturesampleoptions.h"
 #include "samplequad.h"
 
 #include <boost/test/auto_unit_test.hpp>
@@ -33,17 +32,15 @@
 //------------------------------------------------------------------------------
 // CqTextureSampleOptions unit tests
 
-BOOST_AUTO_TEST_CASE(CqTextureSampleOptions_adjustSampleQuad_test)
+BOOST_AUTO_TEST_CASE(SqSampleQuad_scaleWidth_test)
 {
 	Aqsis::SqSampleQuad quad(
 			Aqsis::CqVector2D(0,0),
 			Aqsis::CqVector2D(0,1), 
 			Aqsis::CqVector2D(1,0),
 			Aqsis::CqVector2D(1,1));
-	Aqsis::CqTextureSampleOptions opts;
-	opts.setSWidth(3);
-	opts.setTWidth(0.1);
-	opts.adjustSampleQuad(quad);
+	quad.scaleWidth(3, 0.1);
+
 	BOOST_CHECK_CLOSE(quad.v1.x(), -1.0f, 0.01f);
 	BOOST_CHECK_CLOSE(quad.v1.y(), 0.45f, 0.01f);
 

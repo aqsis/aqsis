@@ -128,7 +128,7 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	SqSampleQuad quad = sampleQuad;
-	sampleOpts.adjustSampleQuad(quad);
+	quad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 

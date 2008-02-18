@@ -38,7 +38,7 @@ namespace Aqsis {
 CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 				const CqMatrix& camToWorld)
 	: m_camToLight(),
-	m_camToLightRaster(),
+	m_camToLightTexCoords(),
 	m_pixelBuf(new CqTextureBuffer<TqFloat>()),
 	m_defaultSampleOptions()
 {
@@ -68,15 +68,15 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLightRaster = (*worldToLightRaster) * camToWorld;
+	m_camToLightTexCoords = (*worldToLightRaster) * camToWorld;
 	// worldToLightRaster transforms world coordinates to NDC, ie, onto the 2D
 	// box [-1,1]x[-1,1].  We instead want texture coordinates, which
 	// correspond to the box [0,1]x[0,1].  In addition, the direction of
 	// increase of the y-axis should be swapped, since texture coordinates
 	// define the origin to be in the top left of the texture rather than the
 	// bottom right.
-	m_camToLightRaster.Translate(CqVector3D(1,-1,0));
-	m_camToLightRaster.Scale(0.5f, -0.5f, 1);
+	m_camToLightTexCoords.Translate(CqVector3D(1,-1,0));
+	m_camToLightTexCoords.Scale(0.5f, -0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
 }
@@ -100,9 +100,17 @@ class CqSampleQuadDepthApprox
 		TqFloat m_yMult;
 		TqFloat m_z0;
 	public:
-		/// Calculate and store linear approximation coefficints for the given
-		/// sample quad.
-		CqSampleQuadDepthApprox(const Sq3DSampleQuad& sampleQuad)
+		/** Calculate and store linear approximation coefficints for the given
+		 * sample quad.
+		 *
+		 * \param sampleQuad - quadrilateral in texture space (x,y) and depth
+		 *    (z) over which to filter.
+		 * \param baseTexWidth
+		 * \param baseTexHeight - width and height of the base texture which
+		 *    the texture coordinates will be scaled by
+		 */
+		CqSampleQuadDepthApprox(const Sq3DSampleQuad& sampleQuad,
+				TqFloat baseTexWidth, TqFloat baseTexHeight)
 			: m_xMult(0),
 			m_yMult(0),
 			m_z0(0)
@@ -118,8 +126,8 @@ class CqSampleQuadDepthApprox
 			// approximation to the surface depth.
 			if(quadNormal.z() != 0)
 			{
-				m_xMult = -quadNormal.x()/quadNormal.z();
-				m_yMult = -quadNormal.y()/quadNormal.z();
+				m_xMult = -quadNormal.x()/(quadNormal.z()*baseTexWidth);
+				m_yMult = -quadNormal.y()/(quadNormal.z()*baseTexHeight);
 				m_z0 = quadNormal*quadCenter/quadNormal.z();
 			}
 			else
@@ -144,20 +152,11 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	quadLightCoord.transform(m_camToLight);
 
 	// Get texture coordinates of sample positions.
-	Sq3DSampleQuad rasterQuad = sampleQuad;
-	rasterQuad.transform(m_camToLightRaster);
-	// Copy into (x,y) coordinates of texQuad.
-	SqSampleQuad texQuad = rasterQuad;
-
-	// Set the raster coordinate sample quad z values to the depths in light
-	// coordinates.
-	rasterQuad.v1.z(quadLightCoord.v1.z());
-	rasterQuad.v2.z(quadLightCoord.v2.z());
-	rasterQuad.v3.z(quadLightCoord.v3.z());
-	rasterQuad.v4.z(quadLightCoord.v4.z());
-
-	// Get a functor to approximate the surface depth across the filter support.
-	CqSampleQuadDepthApprox depthFunc(rasterQuad);
+	Sq3DSampleQuad texQuad3D = sampleQuad;
+	texQuad3D.transform(m_camToLightTexCoords);
+	// Copy into (x,y) coordinates of texQuad and scale by the filter width.
+	SqSampleQuad texQuad = texQuad3D;
+	texQuad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 
 	// Get the EWA filter weight functor.
 	CqEwaFilterWeights weights(texQuad, m_pixelBuf->width(),
@@ -166,9 +165,15 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	SqFilterSupport support = weights.support();
 	if(support.intersectsRange(0, m_pixelBuf->width(), 0, m_pixelBuf->height()))
 	{
+		// Get a functor to approximate the surface depth across the filter support.
+		quadLightCoord.copy2DCoords(texQuad);
+		CqSampleQuadDepthApprox depthFunc(quadLightCoord, m_pixelBuf->width(),
+				m_pixelBuf->height());
+
 		// Construct an accumulator for the samples.
 		CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
-				weights, depthFunc, sampleOpts.startChannel(), sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
+				weights, depthFunc, sampleOpts.startChannel(),
+				sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
 
 		/** \todo Optimization opportunity: Cull the query if it's outside the
 		 * [min,max] depth range of the texture map (also would work on a per-tile

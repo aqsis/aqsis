@@ -40,6 +40,33 @@
 
 START_NAMESPACE( Aqsis )
 
+namespace {
+
+/// Extract additional named filter parameters from an array of stack entries.
+void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
+{
+	CqString strParam;
+	TqFloat f;
+
+	int i = 0;
+	while ( cParams > 0 )
+	{
+		apParams[ i ] ->GetString( strParam, 0 );
+		apParams[ i + 1 ] ->GetFloat( f, 0 );
+
+		if ( strParam.compare( "width" ) == 0 )
+			_pswidth = _ptwidth = f;
+		else if ( strParam.compare( "swidth" ) == 0 )
+			_pswidth = f;
+		else if ( strParam.compare( "twidth" ) == 0 )
+			_ptwidth = f;
+		i += 2;
+		cParams -= 2;
+	}
+}
+
+} // unnamed namespace
+
 
 void	CqShaderExecEnv::SO_step( IqShaderData* _min, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {

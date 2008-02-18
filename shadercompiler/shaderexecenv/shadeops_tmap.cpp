@@ -529,6 +529,10 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 			TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, gridIdx, this, 0.0f);
 			TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, gridIdx, this, 0.0f);
 			TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, gridIdx, this, 0.0f);
+//			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
+//			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
+//			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
+//			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
 			// Centre of the texture region to be filtered.
 			TqFloat ss = 0;
 			TqFloat tt = 0;
@@ -1061,13 +1065,9 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			/// \todo this can be improved apon by not using fdu & fdv at all.
-			// What we need here is really want a difference operator,
-			// *not* the derivative.
-			CqVector3D dP_uOn2; //fdu*0.5*SO_DuType<CqVector3D>(P, gridIdx,
-					//this, CqVector3D());
-			CqVector3D dP_vOn2; //fdv*0.5*SO_DvType<CqVector3D>(P, gridIdx,
-					//this, CqVector3D());
+			// Get first differences along U & V directions for the sample quad.
+			CqVector3D dP_uOn2 = 0.5f*diffU<CqVector3D>(P, gridIdx);
+			CqVector3D dP_vOn2 = 0.5f*diffV<CqVector3D>(P, gridIdx);
 			// Centre of the texture region to be filtered.
 			CqVector3D centerP;
 			P->GetPoint(centerP, gridIdx);

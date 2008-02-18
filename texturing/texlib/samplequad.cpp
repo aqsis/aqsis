@@ -29,6 +29,30 @@
 
 namespace Aqsis {
 
+// SqSampleQuad implementation
+void SqSampleQuad::scaleWidth(TqFloat xWidth, TqFloat yWidth)
+{
+	if(xWidth != 1 || yWidth != 1)
+	{
+		CqVector2D c = center();
+		TqFloat cxWeighted = (1 - xWidth)*c.x();
+		TqFloat cyWeighted = (1 - yWidth)*c.y();
+		// Expand v1...v4 away from the quad center by multiplying the x
+		// and y components of the vectors which point from the quad center to
+		// the vertices by the x and y widths respectively.
+		v1.x(xWidth*v1.x() + cxWeighted);
+		v1.y(yWidth*v1.y() + cyWeighted);
+		v2.x(xWidth*v2.x() + cxWeighted);
+		v2.y(yWidth*v2.y() + cyWeighted);
+		v3.x(xWidth*v3.x() + cxWeighted);
+		v3.y(yWidth*v3.y() + cyWeighted);
+		v4.x(xWidth*v4.x() + cxWeighted);
+		v4.y(yWidth*v4.y() + cyWeighted);
+	}
+}
+
+
+// Sq3DSampleQuad implementation
 void Sq3DSampleQuad::transform(const CqMatrix& mat)
 {
 	v1 = mat*v1;

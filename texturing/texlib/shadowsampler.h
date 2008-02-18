@@ -53,8 +53,8 @@ class CqShadowSampler : public IqShadowSampler
 	private:
 		/// transformation: camera -> light coordinates
 		CqMatrix m_camToLight;
-		/// transformation: camera -> shadow map raster coordinates
-		CqMatrix m_camToLightRaster;
+		/// transformation: camera -> shadow map texture coordinates ( [0,1]x[0,1] )
+		CqMatrix m_camToLightTexCoords;
 		/// Pixel data for shadow map.
 		boost::shared_ptr<CqTextureBuffer<TqFloat> > m_pixelBuf;
 		/// Default shadow sampling options.

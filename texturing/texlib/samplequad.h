@@ -82,6 +82,18 @@ struct SqSampleQuad
 	 */
 	void remapPeriodic(bool xPeriodic, bool yPeriodic);
 
+	/** \brief Scale the sample quad about its center point.
+	 *
+	 * The width parameters effects the quad in a simple way:  All the
+	 * vertices are contracted toward or exapanded away from the quad
+	 * center point by multiplying by the width in the appropriate
+	 * direction.
+	 *
+	 * \param xWidth - amount to expand sample quad in the x direction
+	 * \param yWidth - amount to expand sample quad in the y direction
+	 */
+	void scaleWidth(TqFloat xWidth, TqFloat yWidth);
+
 	/// Get the center point of the quadrilateral by averaging the vertices.
 	CqVector2D center() const;
 };
@@ -118,8 +130,15 @@ struct Sq3DSampleQuad
 	 * etc.
 	 */
 	void transform(const CqMatrix& mat);
+
 	/// Get the center point of the quadrilateral by averaging the vertices.
 	CqVector3D center() const;
+
+	/** \brief Assign the first two coordinates of a 2D sample quad to this quad.
+	 *
+	 * Leaves other coordinates unchanged.
+	 */
+	void copy2DCoords(const SqSampleQuad& toCopy);
 };
 
 
@@ -138,10 +157,10 @@ inline SqSampleQuad::SqSampleQuad(const CqVector2D& v1, const CqVector2D& v2,
 { }
 
 inline SqSampleQuad::SqSampleQuad(const Sq3DSampleQuad& srcQuad)
-	: v1(srcQuad.v1.x(), srcQuad.v1.y()),
-	v2(srcQuad.v2.x(), srcQuad.v2.y()),
-	v3(srcQuad.v3.x(), srcQuad.v3.y()),
-	v4(srcQuad.v4.x(), srcQuad.v4.y())
+	: v1(srcQuad.v1),
+	v2(srcQuad.v2),
+	v3(srcQuad.v3),
+	v4(srcQuad.v4)
 { }
 
 inline void SqSampleQuad::remapPeriodic(bool xPeriodic, bool yPeriodic)
@@ -186,6 +205,18 @@ inline Sq3DSampleQuad::Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2
 inline CqVector3D Sq3DSampleQuad::center() const
 {
 	return 0.25*(v1+v2+v3+v4);
+}
+
+inline void Sq3DSampleQuad::copy2DCoords(const SqSampleQuad& toCopy)
+{
+	v1.x(toCopy.v1.x());
+	v1.y(toCopy.v1.y());
+	v2.x(toCopy.v2.x());
+	v2.y(toCopy.v2.y());
+	v3.x(toCopy.v3.x());
+	v3.y(toCopy.v3.y());
+	v4.x(toCopy.v4.x());
+	v4.y(toCopy.v4.y());
 }
 
 //------------------------------------------------------------------------------

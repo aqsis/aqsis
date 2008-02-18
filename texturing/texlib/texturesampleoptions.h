@@ -162,19 +162,6 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		 */
 		void fillFromFileHeader(const CqTexFileHeader& header);
 
-		//--------------------------------------------------
-		/** \brief Adjust a sample quad to take into account the width
-		 * parameter.
-		 *
-		 * The width parameter effects the quad in a simple way:  All the
-		 * vertices are contracted toward or exapanded away from the quad
-		 * center point by multiplying by the width in the appropriate
-		 * direction.  
-		 *
-		 * \param quad - sample quadrilateral to adjust.
-		 */
-		void adjustSampleQuad(SqSampleQuad& quad) const;
-
 	protected:
 		/** \brief Check that the blur and filter settings are compatible.
 		 *
@@ -246,7 +233,6 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 
 		// Other stuff from CqTextureSampleOptions
 		CqTextureSampleOptions::fillFromFileHeader;
-		CqTextureSampleOptions::adjustSampleQuad;
 
 		//--------------------------------------------------
 		// Shadow-specific sample options
