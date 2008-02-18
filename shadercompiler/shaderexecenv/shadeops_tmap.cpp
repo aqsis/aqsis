@@ -363,18 +363,6 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	// Get the differential elements du and dv.
-	TqFloat fdu = 1.0f, fdv = 1.0f;
-	if ( m_pAttributes )
-	{
-		/// \todo Understand how m_pAttributes could possibly be NULL.
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-		// fdu and fdv should never be zero here.
-		assert(fdu != 0.0f);
-		assert(fdv != 0.0f);
-	}
-
 	CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
@@ -382,14 +370,10 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			/// \todo this can be improved apon by not using fdu & fdv at all.
-			/// \todo When fdu etc are removed, should also adjust the needed vars in funcdef.cpp
-			// What we need here is really want a difference operator,
-			// *not* the derivative.
-			TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, gridIdx, this, 0.0f);
-			TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, gridIdx, this, 0.0f);
+			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
+			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
+			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
+			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
 			// Centre of the texture region to be filtered.
 			TqFloat ss = 0;
 			TqFloat tt = 0;
@@ -503,18 +487,6 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	// Get the differential elements du and dv.
-	TqFloat fdu = 1.0f, fdv = 1.0f;
-	if ( m_pAttributes )
-	{
-		// \todo Understand how m_pAttributes could possibly be NULL.
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-		// fdu and fdv should never be zero here.
-		assert(fdu != 0.0f);
-		assert(fdv != 0.0f);
-	}
-
 	CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
@@ -522,17 +494,10 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			/// \todo this can be improved apon by not using fdu & fdv at all.
-			// What we need here is really want a difference operator,
-			// *not* the derivative.
-			TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, gridIdx, this, 0.0f);
-			TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, gridIdx, this, 0.0f);
-			TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, gridIdx, this, 0.0f);
-//			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
-//			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
-//			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
-//			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
+			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
+			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
+			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
+			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
 			// Centre of the texture region to be filtered.
 			TqFloat ss = 0;
 			TqFloat tt = 0;
