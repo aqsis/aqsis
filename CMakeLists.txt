@@ -101,7 +101,6 @@ GET_DIRECTORY_PROPERTY(AQSISTYPES_LIBRARY DIRECTORY aqsistypes DEFINITION AQSIST
 ADD_SUBDIRECTORY(shadercompiler/shadervm)
 ADD_SUBDIRECTORY(renderer/render)
 ADD_SUBDIRECTORY(renderer/aqsis)
-ADD_SUBDIRECTORY(shadercompiler/slpp)
 ADD_SUBDIRECTORY(shadercompiler/slparse)
 ADD_SUBDIRECTORY(shadercompiler/codegenvm)
 ADD_SUBDIRECTORY(shadercompiler/aqsl)
