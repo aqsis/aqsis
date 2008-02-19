@@ -17,8 +17,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#include <signal.h>
-
 #include "aqsis.h"
 #include "exception.h"
 #include "argparse.h"
@@ -45,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <csignal>
 #include <ctime>
 #include <cstdlib>
 #include <memory>
@@ -294,19 +293,36 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	std:: cout << std::flush;
 }
 
-/**
- * Signal event handler mostly to restore the color for the console 
- * while doint a Ctrl-C interruption.
+/** \brief Event handler to restore the color for the console when catching an
+ * asyncronous interruption.
+ *
+ * Writing this function *portably* is fraught with difficulty; it may be
+ * better to disable it all together and put up with messy colour on the
+ * terminal.  Various places on the web suggest that very few C-library
+ * functions can be called from this function with predictable results.
+ *
+ * (see for example the dinkumware docs for signal.h:
+ * http://www.dinkumware.com/manuals/?manual=compleat&page=signal.html )
+ *
+ * Here we attempt an intentionally minimal (though still formally undefined)
+ * handler, which nevertheless seems to work on posix (linux).
+ *
+ * To do the job completely portably, we'd need to declare a flag of type
+ * sig_atomic_t, and periodically check this during the render.  This would
+ * add extra unjustified complexity...
  */
-
-void int_signal( int sig)
+extern "C" void aqsisSignalHandler(int sig)
 {
-	if (sig == SIGINT)
-		Aqsis::log() << "Catch ^C" << std::endl; 
-	else if (sig == SIGABRT)
-		Aqsis::log() << "Aborting..." << std::endl; 
+	// Reset the state of the stderr output stream to no-colour (undefined
+	// behaviour :-/ ).
+	std::fputs("\033[0m", stderr);
 
-	exit(sig);
+	// Calling signal() is explicitly allowed by the standard.  We reset the
+	// handler to to the default before raising the signal once more.
+	std::signal(sig, SIG_DFL);
+	// Calling raise() is undefined, but is at least legal on POSIX according
+	// to the man pages.  Calling exit() is, OTOH not legal on POSIX.
+	std::raise(sig);
 }
 
 /** Function to setup specific options needed after options are complete but before the world is created.
@@ -530,8 +546,8 @@ static void SetPriority(int priority)
 
 int main( int argc, const char** argv )
 {
-	signal(SIGINT, int_signal);
-	signal(SIGABRT, int_signal);
+	std::signal(SIGINT, aqsisSignalHandler);
+	std::signal(SIGABRT, aqsisSignalHandler);
 	
 	StartMemoryDebugging();
 	{
