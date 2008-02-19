@@ -55,10 +55,7 @@ void CqTiffOutputFile::initialize()
 	CqChannelList& channelList = m_header.channelList();
 	// make all channels are the same type.
 	if(channelList.sharedChannelType() == Channel_TypeUnknown)
-	{
-		throw XqInternal("TIFF format can only deal with channels of the same type",
-				__FILE__, __LINE__);
-	}
+		AQSIS_THROW(XqInternal, "tiff cannot store multiple pixel types in the same image");
 	// reorder the channels for TIFF output...
 	channelList.reorderChannels();
 
@@ -77,8 +74,7 @@ void CqTiffOutputFile::initialize()
 void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
 	if(!buffer.channelList().channelTypesMatch(header().channelList()))
-		throw XqInternal("Buffer and file channels don't match",
-				__FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Buffer and file channels don't match");
 	CqTiffDirHandle dirHandle(m_fileHandle);
 	// Simplest possible implementation using scanline TIFF I/O.  Could use
 	// Strip-based IO if performance is ever a problem here.

@@ -228,7 +228,8 @@ inline TqInt CqChannelList::findChannelIndex(const std::string& name) const
 {
 	TqInt index = findChannelIndexImpl(name);
 	if(index < 0)
-		throw XqInternal("Cannot find channel with name \"" + name + "\"", __FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Cannot find image channel with name \""
+				<< name << "\"");
 	return static_cast<TqInt>(index);
 }
 

@@ -61,7 +61,8 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 #		ifdef USE_OPENEXR
 			file.reset(new CqExrInputFile(fileName));
 #		else
-			throw XqInvalidFile("Aqsis was compiled without OpenEXR support", __FILE__, __LINE__);
+			AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName
+					<< "\": Aqsis was compiled without OpenEXR support");
 #		endif
 		}
 		// else if(Add new formats here!)
@@ -82,7 +83,7 @@ boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileNa
 	if(file)
 		return file;
 	else
-		throw XqInvalidFile("Unknown file type", __FILE__, __LINE__);
+		AQSIS_THROW(XqInvalidFile, "Unknown file type for \"" << fileName << "\"");
 
 	return newFile;
 }
@@ -99,7 +100,7 @@ boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::stri
 	if(file)
 		return file;
 	else
-		throw XqInvalidFile("Unknown file type", __FILE__, __LINE__);
+		AQSIS_THROW(XqInvalidFile, "Unknown file type for \"" << fileName << "\"");
 
 	return newFile;
 }

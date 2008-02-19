@@ -36,6 +36,7 @@ namespace Aqsis {
 boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 		const boost::shared_ptr<IqTexInputFile>& file, const CqMatrix& camToWorld)
 {
+	assert(file);
 	switch(file->header().channelList().sharedChannelType())
 	{
 		case Channel_Float32:
@@ -51,10 +52,9 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 		case Channel_Signed16:
 		case Channel_Unsigned8:
 		case Channel_Signed8:
-			throw XqBadTexture("Attempt to use use non-floating point texture"
-					"as a shadowmap", __FILE__, __LINE__);
 		case Channel_TypeUnknown:
-			break;
+			AQSIS_THROW(XqBadTexture, "Cannot use non-float32 pixels in texture file \""
+					<< file->fileName() << "\" as a shadowmap");
 	}
 	// shut up compiler warnings - return a null texture
 	assert(0);

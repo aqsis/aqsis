@@ -63,7 +63,12 @@ namespace Attr
 	 * It's not certain that the name() function is necessary at this stage,
 	 * but it might prove useful for diagnostics
 	 */
-#	define AQSIS_IMAGE_ATTR_TAG(attrName, attrType) struct attrName { typedef attrType type; }
+#	define AQSIS_IMAGE_ATTR_TAG(attrName, attrType)                       \
+	struct attrName                                                       \
+	{                                                                     \
+		typedef attrType type;                                            \
+		static const char* name() { return #attrName; }                   \
+	}
 
 	//--------------------------------------------------
 	/** \name Image dimensions

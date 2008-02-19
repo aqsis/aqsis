@@ -36,6 +36,7 @@
 #include <Iex.h>
 
 #include "logging.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
@@ -54,7 +55,7 @@ EqChannelType channelTypeFromExr(Imf::PixelType exrType)
 		case Imf::HALF:
 			return Channel_Float16;
 		default:
-			throw XqInternal("Unknown OpenEXR type!", __FILE__, __LINE__);
+			AQSIS_THROW(XqInternal, "Unknown OpenEXR pixel type");
 	}
 }
 
@@ -69,7 +70,7 @@ Imf::PixelType exrChannelType(EqChannelType type)
 		case Channel_Float16:
 			return Imf::HALF;
 		default:
-			throw XqInternal("Unsupported type for OpenEXR", __FILE__, __LINE__);
+			AQSIS_THROW(XqInternal, "Unsupported output pixel type for OpenEXR");
 	}
 }
 
@@ -165,7 +166,7 @@ CqExrInputFile::CqExrInputFile(const std::string& fileName)
 	}
 	catch(Iex::BaseExc &e)
 	{
-		throw XqInternal(e.what(), __FILE__, __LINE__);
+		AQSIS_THROW(XqBadTexture, e.what());
 	}
 	convertHeader(m_exrFile->header(), m_header);
 }

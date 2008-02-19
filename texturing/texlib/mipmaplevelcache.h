@@ -151,11 +151,7 @@ CqMipmapLevelCache<TextureBufferT>::CqMipmapLevelCache(
 	m_levelTransforms(),
 	m_defaultSampleOptions()
 {
-	if(!m_texFile)
-	{
-		throw XqInternal("Cannot create mipmap cache from null file handle.",
-				__FILE__, __LINE__);
-	}
+	assert(m_texFile);
 	initLevels();
 	m_defaultSampleOptions.fillFromFileHeader(m_texFile->header());
 }

@@ -147,15 +147,28 @@ AQSIS_DECLARE_EXCEPTION(XqEnvironment, XqException);
 // Implementation note: weird usage of do { } while (0) is to allow the usual
 // if/else syntax to work as expected when the macro is treated syntatcitcally
 // as a function.  For details, see http://kernelnewbies.org/FAQ/DoWhile0
-#define AQSIS_THROW(ExceptionClass, message)                                     \
+#define AQSIS_THROW(ExceptionClass, message)                                  \
 	do {                                                                      \
 		std::ostringstream os;                                                \
 		os << message;                                                        \
-		throw ExceptionClass(os.str(), __FILE__, __LINE__);                    \
+		throw ExceptionClass(os.str(), __FILE__, __LINE__);                   \
 	} while(0)
 
-} // namespace Aqsis
+/** \brief Macro to ease formatting of exception messages with a "detail" field.
+ *
+ * \see AQSIS_THROW
+ */
+#define AQSIS_THROW_DETAIL(ExceptionClass, message, detail)                   \
+	do {                                                                      \
+		std::ostringstream os;                                                \
+		os << message;                                                        \
+		std::ostringstream os2;                                               \
+		os2 << detail;                                                        \
+		throw ExceptionClass(os.str(), os2.str(), __FILE__, __LINE__);        \
+	} while(0)
+
 
 //------------------------------------------------------------------------------
+} // namespace Aqsis
 
 #endif // EXCEPTION_H_INCLUDED

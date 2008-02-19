@@ -33,7 +33,6 @@
 
 #include <boost/utility.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/format.hpp>
 #include <tiffio.h>
 
 #include "exception.h"
@@ -304,9 +303,14 @@ T CqTiffDirHandle::tiffTagValue(const ttag_t tag) const
 {
 	T temp = 0;
 	if(TIFFGetField(tiffPtr(), tag, &temp))
+	{
 		return temp;
+	}
 	else
-		throw XqInternal((boost::format("Could not get tag with value %d") % tag).str().c_str(), __FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqInternal, "Could not get tiff tag " << tag
+				<< " from file \"" << m_fileHandle->fileName() << "\"");
+	}
 }
 
 template<typename T>
@@ -326,12 +330,16 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value,
 	
 	if(!TIFFSetField(tiffPtr(), tag, value))
 	{
-		const std::string errorStr = (boost::format("Could not set tiff tag = %d")
-				% tag).str();
 		if(throwOnError)
-			throw XqInternal(errorStr, __FILE__, __LINE__);
+		{
+			AQSIS_THROW(XqInternal, "Could not set tiff tag " << tag
+					<< " for file \"" << m_fileHandle->fileName() << "\"");
+		}
 		else
-			Aqsis::log() << warning << errorStr;
+		{
+			Aqsis::log() << warning << "Could not set tiff tag " << tag
+					<< " for file \"" << m_fileHandle->fileName() << "\"";
+		}
 	}
 }
 
@@ -352,8 +360,7 @@ boost::shared_array<T> tiffMalloc(const tsize_t size)
 {
 	boost::shared_array<T> buf(reinterpret_cast<T*>(_TIFFmalloc(size)), _TIFFfree);
 	if(!buf)
-		throw XqInternal("Could not allocate memory with _TIFFmalloc",
-				__FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Could not allocate memory with _TIFFmalloc");
 	return buf;
 }
 

@@ -175,8 +175,11 @@ void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 	// reasonable.
 	if(startLine < 0 || startLine >= imageHeight
 			|| startLine + numScanlines > imageHeight)
-		throw XqInternal("Attempt to read scanlines outside image boundaries",
-				__FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqInternal, "Attempt to read scanlines " << startLine
+				<< " to " << startLine + numScanlines - 1
+				<< " outside image boundaries for file \"" << fileName() << "\".");
+	}
 	// Resize the buffer to deal with the new data
 	buffer.resize(header().width(), numScanlines, header().channelList());
 	readPixelsImpl(buffer.rawData(), startLine, numScanlines);

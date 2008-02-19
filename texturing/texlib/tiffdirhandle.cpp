@@ -37,33 +37,8 @@ namespace Aqsis
 
 const char* tiffFileTypeString = "tiff";
 
-//------------------------------------------------------------------------------
-// XqUnknownTiffFormat
-//------------------------------------------------------------------------------
-/** \brief An exception 
- */
-class XqUnknownTiffFormat : public XqInternal
-{
-	public:
-		XqUnknownTiffFormat (const std::string& reason, const std::string& detail,
-			const std::string& file, const unsigned int line)
-			: XqInternal(reason, detail, file, line)
-		{ }
-
-		XqUnknownTiffFormat (const std::string& reason,	const std::string& file,
-			const unsigned int line)
-			: XqInternal(reason, file, line)
-		{ }
-
-		virtual const char* description () const
-		{
-			return "XqUnknownTiffFormat";
-		}
-
-		virtual ~XqUnknownTiffFormat () throw ()
-		{ }
-};
-
+/// An exception for internal usage by the tiff handling code.
+AQSIS_DECLARE_EXCEPTION(XqUnknownTiffFormat, XqInternal);
 
 //------------------------------------------------------------------------------
 // Helper functions and data for dealing with tiff compression
@@ -388,14 +363,12 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
 		if(planarConfig != PLANARCONFIG_CONTIG)
-			throw XqUnknownTiffFormat("non-interlaced channels detected",
-					__FILE__, __LINE__);
+			AQSIS_THROW(XqUnknownTiffFormat, "non-interlaced channels detected");
 		// Check that the origin is at the topleft of the image.
 		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
 				ORIENTATION_TOPLEFT);
 		if(orientation != ORIENTATION_TOPLEFT)
-			throw XqUnknownTiffFormat("orientation isn't top-left",
-					__FILE__, __LINE__);
+			AQSIS_THROW(XqUnknownTiffFormat, "orientation isn't top-left");
 	}
 	catch(XqUnknownTiffFormat& e)
 	{
@@ -479,7 +452,7 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 	channelList.clear();
 	EqChannelType chanType = guessChannelType();
 	if(chanType == Channel_TypeUnknown)
-		throw XqUnknownTiffFormat("Cannot determine channel type", __FILE__, __LINE__);
+		AQSIS_THROW(XqUnknownTiffFormat, "Cannot determine channel type");
 	else
 	{
 		// Determine the channel type held in the tiff
@@ -526,8 +499,7 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 			//case PHOTOMETRIC_LOGL:
 			//case PHOTOMETRIC_LOGLUV:
 			default:
-				throw XqUnknownTiffFormat("Unknown photometric type",
-						__FILE__, __LINE__);
+				AQSIS_THROW(XqUnknownTiffFormat, "Unknown photometric type");
 		}
 	}
 }
@@ -550,10 +522,7 @@ CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* open
 	m_currDir(0)
 {
 	if(!m_tiffPtr)
-	{
-		throw XqInternal( boost::str(boost::format("Could not open tiff file '%s'")
-					% fileName).c_str(), __FILE__, __LINE__);
-	}
+		AQSIS_THROW(XqInvalidFile, "Could not open tiff file \"" << fileName << "\"");
 }
 
 CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
@@ -563,7 +532,7 @@ CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 {
 	if(!m_tiffPtr)
 	{
-		throw XqInternal("Could not use input stream for tiff", __FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Could not use input stream for tiff");
 	}
 }
 
@@ -574,7 +543,7 @@ CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
 {
 	if(!m_tiffPtr)
 	{
-		throw XqInternal("Could not use output stream for tiff", __FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Could not use output stream for tiff");
 	}
 }
 
@@ -583,7 +552,11 @@ void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 	if(m_isInputFile && dirIdx != m_currDir)
 	{
 		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
-			throw XqInternal("Invalid Tiff directory", __FILE__, __LINE__);
+		{
+			AQSIS_THROW(XqInternal, "Requested tiff directory "
+					<< dirIdx << " out of range for file \""
+					<< m_fileName << "\"");
+		}
 		m_currDir = dirIdx;
 	}
 }

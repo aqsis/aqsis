@@ -40,8 +40,7 @@ TqMagicNumberPtr getMagicNumber(const std::string& fileName)
 {
 	std::ifstream inFile(fileName.c_str());
 	if(!inFile)
-		throw XqInvalidFile("Cannot open file for reading", fileName.c_str(),
-				__FILE__, __LINE__);
+		AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName << "\" for reading");
 	return getMagicNumber(inFile);
 }
 

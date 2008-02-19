@@ -58,8 +58,7 @@ const char* CqTiffInputFile::fileName() const
 void CqTiffInputFile::setImageIndex(TqInt newIndex)
 {
 	if(newIndex < 0)
-		throw XqInternal((boost::format("Received invalid image index %d")
-				% newIndex).str(), __FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Cannot set negative image index.");
 	setDirectory(newIndex);
 }
 
@@ -179,15 +178,17 @@ void CqTiffInputFile::readPixelsTiled(TqUchar* buffer, TqInt startLine,
 void CqTiffInputFile::readPixelsRGBA(TqUchar* buffer, TqInt startLine,
 		TqInt numScanlines) const
 {
-	throw XqInternal("readPixelsRGBA not implemented", __FILE__, __LINE__);
+	AQSIS_THROW(XqInternal, "readPixelsRGBA not implemented");
 }
 
 void CqTiffInputFile::setDirectory(tdir_t newDir)
 {
 	const tdir_t numDirs = numSubImages();
 	if(newDir >= numDirs)
-		throw XqInternal((boost::format("TIFF directory %d out of range [0,%d]")
-				% newDir % (numDirs-1)).str(), __FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqInternal, "TIFF directory " << newDir
+				<< " out of range [0," << numDirs-1 << "]");
+	}
 	m_imageIndex = newDir;
 
 	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);

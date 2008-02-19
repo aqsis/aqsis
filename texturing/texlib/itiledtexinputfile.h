@@ -103,6 +103,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 // Implementation of inline functions and templates
 //==============================================================================
 
+#if 0
 template<typename Array2DType>
 void IqTiledTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 		TqInt numScanlines) const
@@ -115,13 +116,17 @@ void IqTiledTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 	// reasonable.
 	if(startLine < 0 || startLine >= imageHeight
 			|| startLine + numScanlines > imageHeight)
-		throw XqInternal("Attempt to read scanlines outside image boundaries",
-				__FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqInternal, "Attempt to read scanlines " << startLine
+				<< " to " << startLine + numScanlines - 1
+				<< " outside image boundaries for file \"" << fileName() << "\".");
+	}
+		AQSIS_THROW(XqInternal, "Attempt to read scanlines outside image boundaries");
 	// Resize the buffer to deal with the new data
 	buffer.resize(header().width(), numScanlines, header().channelList());
 	readPixelsImpl(buffer.rawData(), startLine, numScanlines);
 }
-
+#endif
 
 } // namespace Aqsis
 

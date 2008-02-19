@@ -27,8 +27,6 @@
 
 #include "imagechannel.h"
 
-#include <boost/format.hpp>
-
 #include "exception.h"
 #include "ndspy.h"
 
@@ -54,7 +52,7 @@ EqChannelType chanFormatFromPkDspy(TqInt dspyFormat)
 		case PkDspySigned8:
 			return Channel_Signed8;
 		default:
-			throw XqInternal("Unknown PkDspy data format", __FILE__, __LINE__);
+			AQSIS_THROW(XqInternal, "Unknown PkDspy data format");
 	}
 }
 
@@ -180,10 +178,10 @@ void CqImageChannel::requireSize(TqInt width, TqInt height) const
 	// Normal image channels cannot change size; just check that the sizes match.
 	if(m_width != width || m_height != height)
 	{
-		throw XqInternal("Image channel cannot produce required size", 
-				(boost::format("required size = %dx%d;  actual size = %dx%d")
-				% width % height % m_width % m_height).str(),
-				__FILE__, __LINE__);
+		AQSIS_THROW_DETAIL(XqInternal,
+				"Image channel cannot produce required size", 
+				"required size = " << width << "x" << height 
+				<< "; actual size = " << m_width << "x" << m_height);
 	}
 }
 

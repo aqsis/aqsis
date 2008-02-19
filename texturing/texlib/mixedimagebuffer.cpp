@@ -28,8 +28,6 @@
 
 #include "mixedimagebuffer.h"
 
-#include <boost/format.hpp>
-
 #ifdef USE_OPENEXR
 #include <half.h>
 #endif
@@ -102,10 +100,11 @@ void CqMixedImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt d
 	copyWidth = min(destWidth, offset+srcWidth) - destOffset;
 }
 
-void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source, TqInt topLeftX, TqInt topLeftY)
+void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source,
+		TqInt topLeftX, TqInt topLeftY)
 {
 	if(source.m_channelList.numChannels() != m_channelList.numChannels())
-		throw XqInternal("Number of source and destination channels do not match", __FILE__, __LINE__);
+		AQSIS_THROW(XqInternal, "Number of source and destination channels do not match");
 
 	// compute size and top left coords of region to copy.
 	TqInt copyWidth = 0;
@@ -130,7 +129,8 @@ void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source, TqInt topLef
 	}
 }
 
-void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source, const TqChannelNameMap& nameMap,
+void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source,
+		const TqChannelNameMap& nameMap,
 		TqInt topLeftX, TqInt topLeftY)
 {
 	// compute size and top left coords of region to copy.

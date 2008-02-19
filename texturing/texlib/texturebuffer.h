@@ -217,8 +217,10 @@ template<typename T>
 void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& channelList)
 {
 	if(channelList.sharedChannelType() != getChannelTypeEnum<T>())
-		throw XqInternal("Channel type is incompatible with new channel info list",
-				__FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqInternal, "CqTextureBuffer channel type is"
+				"incompatible with new channel type requested");
+	}
 	TqInt numChannels = channelList.bytesPerPixel()/sizeof(T);
 	TqInt newSize = width * height * numChannels;
 	if(newSize != m_width * m_height * m_numChannels);
