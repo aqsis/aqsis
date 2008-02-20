@@ -44,7 +44,7 @@ namespace Aqsis
 
 CqTextureMapWrapper::CqTextureMapWrapper(const std::string& texName)
 	: m_texName(texName),
-	m_realMap(IqTextureSampler::create(texName.c_str()))
+	m_realMap(IqTextureSampler::create(IqMultiTexInputFile::open(texName)))
 { }
 
 void CqTextureMapWrapper::Open()

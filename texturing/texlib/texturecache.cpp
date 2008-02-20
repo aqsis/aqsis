@@ -32,6 +32,7 @@
 #include "sstring.h"
 #include "itexturesampler.h"
 #include "ishadowsampler.h"
+#include "itexinputfile.h"
 
 namespace Aqsis {
 
@@ -114,7 +115,7 @@ template<typename SamplerT>
 boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
 		const char* name)
 {
-	return SamplerT::create(name);
+	return SamplerT::create(IqMultiTexInputFile::open(name));
 }
 
 // Special case of newSamplerFromFile() for shadow maps - they need access to
@@ -123,7 +124,7 @@ template<>
 boost::shared_ptr<IqShadowSampler>
 CqTextureCache::newSamplerFromFile(const char* name)
 {
-	return IqShadowSampler::create(name, m_camToWorld);
+	return IqShadowSampler::create(IqTexInputFile::open(name), m_camToWorld);
 }
 
 template<typename SamplerT>

@@ -45,27 +45,14 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 					sampler(new CqShadowSampler(file, camToWorld));
 				return sampler;
 			}
-		case Channel_Unsigned32:
-		case Channel_Signed32:
-		case Channel_Float16:
-		case Channel_Unsigned16:
-		case Channel_Signed16:
-		case Channel_Unsigned8:
-		case Channel_Signed8:
-		case Channel_TypeUnknown:
+		case Channel_Float16: // float16 may be useful in future...
+		default:
 			AQSIS_THROW(XqBadTexture, "Cannot use non-float32 pixels in texture file \""
 					<< file->fileName() << "\" as a shadowmap");
 	}
 	// shut up compiler warnings - return a null texture
 	assert(0);
 	return boost::shared_ptr<IqShadowSampler>();
-}
-
-boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
-		const char* fileName, const CqMatrix& camToWorld)
-{
-	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(fileName);
-	return IqShadowSampler::create(inFile, camToWorld);
 }
 
 const CqShadowSampleOptions& IqShadowSampler::defaultSampleOptions() const

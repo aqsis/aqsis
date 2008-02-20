@@ -84,8 +84,6 @@ class AQSISTEX_SHARE IqShadowSampler
 		static boost::shared_ptr<IqShadowSampler> create(
 				const boost::shared_ptr<IqTexInputFile>& file,
 				const CqMatrix& camToWorld);
-		static boost::shared_ptr<IqShadowSampler> create(const char* fileName,
-				const CqMatrix& camToWorld);
 		//@}
 
 		virtual ~IqShadowSampler() {}

@@ -37,7 +37,7 @@ namespace Aqsis {
 
 class CqTextureSampleOptions;
 class IqTiledTexInputFile;
-class IqTexInputFile;
+class IqMultiTexInputFile;
 class CqTexFileHeader;
 
 //------------------------------------------------------------------------------
@@ -83,8 +83,7 @@ class AQSISTEX_SHARE IqTextureSampler
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqTiledTexInputFile>& file);
 		static boost::shared_ptr<IqTextureSampler> create(
-				const boost::shared_ptr<IqTexInputFile>& file);
-		static boost::shared_ptr<IqTextureSampler> create(const char* fileName);
+				const boost::shared_ptr<IqMultiTexInputFile>& file);
 		//@}
 
 		virtual ~IqTextureSampler() {}

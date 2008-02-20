@@ -26,85 +26,78 @@
 
 #include "itexturesampler.h"
 
-#include "texturesampler.h"
+#ifdef USE_OPENEXR
+#	include <half.h>
+#endif
+
 #include "tilearray.h"
 #include "texturebuffer.h"
 #include "mipmaptexturesampler.h"
-
 #include "itexinputfile.h"
 
 namespace Aqsis {
+
+//------------------------------------------------------------------------------
+namespace {
+
+// Helper functions.
+
+template<typename T>
+boost::shared_ptr<IqTextureSampler> createMipmapSampler(
+		const boost::shared_ptr<IqMultiTexInputFile>& file)
+{
+	boost::shared_ptr<CqMipmapLevelCache<CqTextureBuffer<T> > >
+		levels(new CqMipmapLevelCache<CqTextureBuffer<T> >(file));
+	boost::shared_ptr<IqTextureSampler>
+		sampler(new CqMipmapTextureSampler<T>(levels));
+	return sampler;
+}
+
+} // unnamed namespace
+
+
+//------------------------------------------------------------------------------
+// IqTextureSampler implementation
 
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
 	assert(0);
-	return boost::shared_ptr<IqTextureSampler>(
-			new CqTextureSampler<CqTextureBuffer<TqUchar> >(boost::shared_ptr<CqTextureBuffer<TqUchar> >()));
+	return boost::shared_ptr<IqTextureSampler>();
 }
 
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
-		const boost::shared_ptr<IqTexInputFile>& file)
+		const boost::shared_ptr<IqMultiTexInputFile>& file)
 {
-	if(file)
-	{
-		switch(file->header().channelList().sharedChannelType())
-		{
-			case Channel_Float32:
-			case Channel_Unsigned32:
-			case Channel_Signed32:
-				assert(0);
-				break;
-			case Channel_Float16:
-			case Channel_Unsigned16:
-			case Channel_Signed16:
-				assert(0);
-				break;
-			case Channel_Unsigned8:
-				{
-					boost::shared_ptr<CqTextureBuffer<TqUchar> > buffer(
-						new CqTextureBuffer<TqUchar>() );
-					file->readPixels(*buffer);
-					return boost::shared_ptr<IqTextureSampler>(
-							new CqTextureSampler<CqTextureBuffer<TqUchar> >(buffer) );
-				}
-			case Channel_Signed8:
-			case Channel_TypeUnknown:
-				assert(0);
-				break;
-		}
-	}
-	return boost::shared_ptr<IqTextureSampler>(
-			new CqTextureSampler<CqTextureBuffer<TqUchar> >(boost::shared_ptr<CqTextureBuffer<TqUchar> >()));
-}
-
-boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(const char* fileName)
-{
-	boost::shared_ptr<IqMultiTexInputFile> file = IqMultiTexInputFile::open(fileName);
+	if(!file)
+		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
+	/// \todo We really should use proper types of guarenteed bit-widths here.
 	switch(file->header().channelList().sharedChannelType())
 	{
 		case Channel_Float32:
+			return createMipmapSampler<TqFloat>(file);
 		case Channel_Unsigned32:
+			return createMipmapSampler<TqUint>(file);
 		case Channel_Signed32:
-			break;
+			return createMipmapSampler<TqInt>(file);
 		case Channel_Float16:
-		case Channel_Unsigned16:
-		case Channel_Signed16:
+#			ifdef USE_OPENEXR
+			return createMipmapSampler<half>(file);
+#			endif
 			break;
+		case Channel_Unsigned16:
+			return createMipmapSampler<TqUshort>(file);
+		case Channel_Signed16:
+			return createMipmapSampler<TqShort>(file);
 		case Channel_Unsigned8:
-			{
-				boost::shared_ptr<CqMipmapLevelCache<CqTextureBuffer<TqUchar> > >
-					levels(new CqMipmapLevelCache<CqTextureBuffer<TqUchar> >(file));
-				boost::shared_ptr<IqTextureSampler>
-					sampler(new CqMipmapTextureSampler<TqUchar>(levels));
-				return sampler;
-			}
+			return createMipmapSampler<TqUchar>(file);
 		case Channel_Signed8:
+			return createMipmapSampler<TqChar>(file);
 		case Channel_TypeUnknown:
 			break;
 	}
-	// shut up compiler warnings - return a null texture
-	assert(0);
+	AQSIS_THROW(XqBadTexture, "Could not create a texture sampler for file \"" 
+			<< file->fileName() << "\"");
 	return boost::shared_ptr<IqTextureSampler>();
 }
 
