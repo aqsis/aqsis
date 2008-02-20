@@ -497,7 +497,6 @@ complete_request
 			}
 	|	colorsamples scalar_array scalar_array
 			{
-				ColorSamples = $2->Count();
 				ParseCallbackInterface->RiColorSamples($2->Count(), &(*$2)[0], &(*$3)[0]);
 				DiscardArrayValue($2);
 				DiscardArrayValue($3);
