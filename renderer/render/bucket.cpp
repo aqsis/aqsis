@@ -41,8 +41,6 @@
 
 #include	"imagers.h"
 
-#include	"logging.h"
-
 
 
 START_NAMESPACE( Aqsis )
@@ -82,7 +80,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool bJitter, bool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter, bool empty )
 {
 	m_XOrigin = xorigin;
 	m_YOrigin = yorigin;
@@ -102,7 +100,6 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-	Aqsis::log() << debug << "bJitter is " << bJitter << std::endl;
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
 	{
@@ -124,7 +121,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				if(bJitter)
+				if(useJitter)
 					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
@@ -161,7 +158,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			if(!empty)
 				m_aieImage[which].Clear();
 
-			if(bJitter)
+			if(useJitter)
 				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
