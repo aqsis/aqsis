@@ -132,7 +132,7 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool empty = false );
+		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter = true, bool empty = false );
 		static	void	CalculateDofBounds();
 		static	void	InitialiseFilterValues();
 		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
@@ -140,11 +140,8 @@ class CqBucket : public IqBucket
 			iXPos -= m_XOrigin;
 			iYPos -= m_YOrigin;
 
-			// Check within renderable range
-			//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
-			//		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
-
 			TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
+			assert(i >= 0 && i < static_cast<TqInt>(m_aieImage.size()));
 			pie = &m_aieImage[ i ];
 		}
 		static CqImagePixel& ImageElement(TqInt index)

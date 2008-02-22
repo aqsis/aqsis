@@ -43,7 +43,6 @@
 
 
 
-
 START_NAMESPACE( Aqsis )
 
 
@@ -81,7 +80,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter, bool empty )
 {
 	m_XOrigin = xorigin;
 	m_YOrigin = yorigin;
@@ -100,10 +99,6 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-
-	bool useJitter = true;
-	if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->GetIntegerOption( "Hider", "jitter" ))
-		useJitter = static_cast<bool>(*useJitterPtr);
 
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())

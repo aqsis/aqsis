@@ -1268,6 +1268,10 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
+	bool bJitter = true;
+	if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->GetIntegerOption( "Hider", "jitter" ))
+		bJitter = static_cast<bool>(*useJitterPtr);
+
 	// Iterate over all buckets...
 	do
 	{
@@ -1287,7 +1291,7 @@ void CqImageBuffer::RenderImage()
 
 		{
 			TIME_SCOPE("Prepare bucket")
-			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), bIsEmpty );
+			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), bJitter, bIsEmpty );
 			CqBucket::InitialiseFilterValues();
 		}
 
