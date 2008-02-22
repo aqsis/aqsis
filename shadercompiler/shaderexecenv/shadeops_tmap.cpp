@@ -256,6 +256,12 @@ class CqShadowOptionExtractor
 				if(!m_biasLow)
 					m_biasLow = value;
 			}
+			else if(name == "samples")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setNumSamples(static_cast<TqInt>(tmp));
+			}
 			else
 			{
 				// Else call through to the base class for the more basic

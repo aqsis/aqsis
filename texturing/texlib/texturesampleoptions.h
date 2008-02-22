@@ -29,6 +29,7 @@
 
 #include "aqsis.h"
 
+#include "aqsismath.h"
 #include "samplequad.h"
 #include "wrapmode.h"
 
@@ -409,8 +410,7 @@ inline void CqTextureSampleOptions::setNumChannels(TqInt numChans)
 
 inline void CqTextureSampleOptions::setNumSamples(TqInt numSamples)
 {
-	assert(numSamples >= 0);
-	m_numSamples = numSamples;
+	m_numSamples = max(1, numSamples);
 }
 
 inline void CqTextureSampleOptions::setWrapMode(EqWrapMode wrapMode)
