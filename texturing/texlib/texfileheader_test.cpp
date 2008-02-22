@@ -28,8 +28,8 @@
 #include <boost/test/auto_unit_test.hpp>
 
 // tag types for header testing
-struct TestAttr { typedef TqInt type; };
-struct NotPresent { typedef TqInt type; };
+AQSIS_IMAGE_ATTR_TAG(TestAttr, TqInt);
+AQSIS_IMAGE_ATTR_TAG(NotPresent, TqInt);
 
 
 BOOST_AUTO_TEST_CASE(CqTexFileHeader_findPtr)

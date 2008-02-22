@@ -26,6 +26,7 @@
 #include	"aqsis.h"
 
 #include	<time.h>
+#include	<boost/bind.hpp>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -74,7 +75,7 @@ static CqMatrix oldresult[2];
 CqRenderer::CqRenderer() :
 		m_pImageBuffer( 0 ),
 		m_Mode( RenderMode_Image ),
-		m_textureCache(),
+		m_textureCache(boost::bind(&CqRenderer::textureSearchPath, this)),
 		m_fSaveGPrims( false ),
 		m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 		m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
@@ -1688,6 +1689,15 @@ IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
 IqTextureMapOld* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
 	return ( CqTextureMapOld::GetLatLongMap( strFileName ) );
+}
+
+const char* CqRenderer::textureSearchPath()
+{
+	const CqString* pathPtr = poptCurrent()->GetStringOption("searchpath", "texture");
+	if(pathPtr)
+		return pathPtr->c_str();
+	else
+		return "";
 }
 
 

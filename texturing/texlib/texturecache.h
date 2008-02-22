@@ -32,6 +32,8 @@
 #include <map>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
+#include <boost/utility.hpp>
 
 #include "matrix.h"
 
@@ -44,12 +46,15 @@ class CqTexFileHeader;
 
 /** \brief A cache managing the various types of texture samplers.
  */
-class AQSISTEX_SHARE CqTextureCache
+class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 {
 	public:
+		/// Type for holding a search-path callback.
+		typedef boost::function<const char* ()> TqSearchPathCallback;
+
 		/** \brief Construct an empty texture cache.
 		 */
-		CqTextureCache();
+		CqTextureCache(TqSearchPathCallback searchPathCallback);
 
 		//--------------------------------------------------
 		// \name Sampler access
@@ -127,9 +132,8 @@ class AQSISTEX_SHARE CqTextureCache
 		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
 		/// Camera -> world transformation - used for creating shadow maps.
 		CqMatrix m_camToWorld;
-		/// Search path
-		/// \todo Get search path working!
-		//boost::shared_ptr<CqFilePathList> m_searchPaths;
+		/// Callback function to obtain the current texture search path.
+		TqSearchPathCallback m_searchPathCallback;
 };
 
 

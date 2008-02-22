@@ -208,6 +208,13 @@ class CqRenderer : public IqRenderer
 		virtual	IqTextureMapOld* GetOcclusionMap(const CqString& fileName);
 		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
 
+		/** \brief Return the current texture search path.
+		 *
+		 * This is used as a callback function by the texture library to obtain
+		 * the texture search path when necessary.
+		 */
+		const char* textureSearchPath();
+
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
 
@@ -516,8 +523,7 @@ class CqRenderer : public IqRenderer
 		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
-		// Texture caches
-		CqTextureCache m_textureCache; ///< Cache for plain textures
+		CqTextureCache m_textureCache; ///< Cache for aqsistex texture access.
 		 
 
 		bool	m_fSaveGPrims;

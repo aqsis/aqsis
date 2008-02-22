@@ -43,6 +43,21 @@ START_NAMESPACE( Aqsis )
 #define DIRSEP "/"
 #endif
 
+//-----------------------------------------------------------------------
+/** \brief Find an absolute path to the given file name in the provided search path.
+ *
+ * This function should deprecate a common usage of CqFile simply to get the
+ * absolute file name in the search path.
+ *
+ * \param fileName - path-relative name of the file.
+ * \param searchPath - colon-separated string of directories in which to search
+ *                     for the given file name.
+ * \return Absolute file name; throws an XqInvalidFile if the file is not found.
+ */
+std::string findFileInPath(const std::string& fileName,
+		const std::string& searchPath);
+
+
 //----------------------------------------------------------------------
 /** \class CqFile
  *  \brief Standard handling of all file types utilising the searchpath options.
@@ -142,6 +157,7 @@ class COMMON_SHARE CqFile
 		bool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
 }
 ;
+
 
 //-----------------------------------------------------------------------
 

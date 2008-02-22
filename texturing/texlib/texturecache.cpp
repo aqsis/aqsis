@@ -27,24 +27,24 @@
 #include "texturecache.h"
 
 #include "exception.h"
-#include "texexception.h"
-#include "logging.h"
-#include "sstring.h"
-#include "itexturesampler.h"
+#include "file.h"
 #include "ishadowsampler.h"
 #include "itexinputfile.h"
+#include "itexturesampler.h"
+#include "logging.h"
+#include "sstring.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqTextureCache
 
-CqTextureCache::CqTextureCache()
-		//const boost::shared_ptr<CqFilePathList>& searchPaths)
+CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)
 	: m_textureCache(),
 	m_shadowCache(),
-	m_camToWorld()
-	//, m_searchPaths(searchPaths)
+	m_camToWorld(),
+	m_searchPathCallback(searchPathCallback)
 { }
 
 IqTextureSampler& CqTextureCache::findTextureSampler(const char* name)
@@ -91,7 +91,8 @@ SamplerT& CqTextureCache::findSampler(
 		boost::shared_ptr<SamplerT> newTex;
 		try
 		{
-			newTex = newSamplerFromFile<SamplerT>(name);
+			newTex = newSamplerFromFile<SamplerT>(
+					findFileInPath(name, m_searchPathCallback()).c_str() );
 		}
 		catch(XqInvalidFile& e)
 		{
