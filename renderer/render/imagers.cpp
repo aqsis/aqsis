@@ -120,9 +120,9 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv );
 
 
-	for ( j = 0; j < vGridRes; j++ )
+	for ( j = 0; j < vGridRes+1; j++ )
 	{
-		for ( i = 0; i < uGridRes; i++ )
+		for ( i = 0; i < uGridRes+1; i++ )
 		{
 			TqInt off = j * ( uGridRes + 1 ) + i;
 			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
