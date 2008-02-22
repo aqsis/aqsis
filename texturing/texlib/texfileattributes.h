@@ -130,7 +130,11 @@ namespace Attr
 	// date and time of creation
 	AQSIS_IMAGE_ATTR_TAG(DateTime, std::string);
 	// texture wrap modes
+	/// \todo Make this a special purpose type.
 	AQSIS_IMAGE_ATTR_TAG(WrapModes, std::string);
+	// texture format (one of "texture" "shadow" or "environment" ? )
+	/// \todo Decide on standard names for these.
+	AQSIS_IMAGE_ATTR_TAG(TextureFormat, std::string);
 
 	//--------------------------------------------------
 	/// Transformation matrices

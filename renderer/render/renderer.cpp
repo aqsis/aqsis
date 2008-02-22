@@ -1674,6 +1674,7 @@ IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 const IqShadowSampler& CqRenderer::GetShadowMap(const char* fileName)
 {
 	/// \todo Inefficient - correct this later.
+	/// \todo What is the correct coordinate system to use here? "shader"?
 	CqMatrix camToWorldMatrix;
 	QGetRenderContext() ->matSpaceToSpace("camera", "world", NULL, NULL, 0, camToWorldMatrix);
 	m_textureCache.setCamToWorldMatrix(camToWorldMatrix);
@@ -1689,6 +1690,11 @@ IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
 IqTextureMapOld* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
 	return ( CqTextureMapOld::GetLatLongMap( strFileName ) );
+}
+
+const CqTexFileHeader* CqRenderer::textureInfo(const char* fileName)
+{
+	return m_textureCache.textureInfo(fileName);
 }
 
 const char* CqRenderer::textureSearchPath()

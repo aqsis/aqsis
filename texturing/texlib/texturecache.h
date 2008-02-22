@@ -42,6 +42,7 @@ namespace Aqsis {
 class CqFilePathList;
 class IqTextureSampler;
 class IqShadowSampler;
+class IqMultiTexInputFile;
 class CqTexFileHeader;
 
 /** \brief A cache managing the various types of texture samplers.
@@ -66,7 +67,7 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 *
 		 * \param name - the texture name.
 		 */
-		IqTextureSampler& findTextureSampler(const char* texName);
+		IqTextureSampler& findTextureSampler(const char* name);
 		/** \brief Find a shadow sampler in the cache or load from file if not found.
 		 *
 		 * If any problems are encountered in opening the shadow texture, issue
@@ -74,7 +75,10 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 *
 		 * \param name - the texture name.
 		 */
-		IqShadowSampler& findShadowSampler(const char* texName);
+		IqShadowSampler& findShadowSampler(const char* name);
+		/** \brief Delete all textures from the cache
+		 */
+		void flush();
 		//@}
 
 		//--------------------------------------------------
@@ -82,9 +86,9 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 *
 		 * If the file is not found or is otherwise invalid, return 0.
 		 *
-		 * \param texName - file name 
+		 * \param name - file name 
 		 */
-		CqTexFileHeader* textureInfo(const char* texName);
+		const CqTexFileHeader* textureInfo(const char* name);
 
 		/** \brief Set the camera -> world transformation
 		 *
@@ -108,6 +112,15 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		template<typename SamplerT>
 		SamplerT& findSampler(std::map<TqUlong, boost::shared_ptr<SamplerT> >&
 				samplerMap, const char* name);
+		/** \brief Retrive a texture file from the cache, or open it from file.
+		 *
+		 * First search for the given file name in the cache.  If it's not
+		 * there, grab the file from disk (note that this may throw an
+		 * XqInvalidFile if it's not found).
+		 *
+		 * \param name - file name to open.
+		 */
+		boost::shared_ptr<IqMultiTexInputFile> getTextureFile(const char* name);
 		/** \brief Create a sampler of the given type from a file.
 		 *
 		 * SamplerT - is a sampler type to instantiate.
@@ -115,7 +128,8 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 * \param name - absolute path to file
 		 */
 		template<typename SamplerT>
-		boost::shared_ptr<SamplerT> newSamplerFromFile(const char* name);
+		boost::shared_ptr<SamplerT> newSamplerFromFile(
+				const boost::shared_ptr<IqMultiTexInputFile>& file);
 		/** \brief Create a dummy sampler of the given type.
 		 *
 		 * This is used when a texture sampler cannot be created from the
@@ -130,6 +144,8 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		/// Cached textures live in here
 		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
 		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
+		/// Cached texture files live in here:
+		std::map<TqUlong, boost::shared_ptr<IqMultiTexInputFile> > m_texFileCache;
 		/// Camera -> world transformation - used for creating shadow maps.
 		CqMatrix m_camToWorld;
 		/// Callback function to obtain the current texture search path.

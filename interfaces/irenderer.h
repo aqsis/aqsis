@@ -20,6 +20,7 @@ struct IqTextureMapOld;
 class IqTextureSampler;
 class IqShadowSampler;
 class CqObjectInstance;
+class CqTexFileHeader;
 
 struct IqRenderer
 {
@@ -54,10 +55,9 @@ struct IqRenderer
 	 */
 	virtual	void	PrintString( const char* str ) = 0;
 
-	/*
-	 *  Access to the texture map handling component
-	 */
-
+	//--------------------------------------------------
+	/// \name Texture map access
+	//@{
 	/** \brief Get a reference to a texture sampler.
 	 *
 	 * Failure to load the texture from a file will result in a dummy texture
@@ -68,9 +68,32 @@ struct IqRenderer
 	 */
 	virtual	const IqTextureSampler& GetTextureMap(const char* fileName) = 0;
 	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
+	/** \brief Get a reference to a shadow texture sampler.
+	 *
+	 * Failure to load the texture from a file will result in a dummy shadow
+	 * sampler object being returned.
+	 *
+	 * \param fileName - File name to search for in the texture resource path.
+	 * \return the texture sampler (always valid).
+	 */
 	virtual	const IqShadowSampler& GetShadowMap(const char* fileName) = 0;
 	virtual	IqTextureMapOld* GetOcclusionMap( const CqString& fileName ) = 0;
 	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
+
+	/** \brief Obtain texture file metadata for the given file name.
+	 *
+	 * \return Pointer to a texture file header, or 0 if the texture file
+	 * cannot be found in the current search path.
+	 */
+	virtual const CqTexFileHeader* textureInfo(const char* fileName) = 0;
+	//@}
+
+	/** \brief Return the current texture search path.
+	 *
+	 * This is used as a callback function by the texture library to obtain
+	 * the texture search path when necessary.
+	 */
+	virtual const char* textureSearchPath() = 0;
 
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;

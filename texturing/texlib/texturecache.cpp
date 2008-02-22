@@ -43,6 +43,7 @@ namespace Aqsis {
 CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)
 	: m_textureCache(),
 	m_shadowCache(),
+	m_texFileCache(),
 	m_camToWorld(),
 	m_searchPathCallback(searchPathCallback)
 { }
@@ -57,11 +58,25 @@ IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
 	return findSampler(m_shadowCache, name);
 }
 
-CqTexFileHeader* CqTextureCache::textureInfo(const char* texName)
+void CqTextureCache::flush()
 {
-	/// \todo Return something sensible here.
-	assert(0);
-	return 0;
+	m_textureCache.clear();
+	m_shadowCache.clear();
+	m_texFileCache.clear();
+}
+
+const CqTexFileHeader* CqTextureCache::textureInfo(const char* name)
+{
+	boost::shared_ptr<IqMultiTexInputFile> file;
+	try
+	{
+		file = getTextureFile(name);
+		return &(file->header());
+	}
+	catch(XqInvalidFile& e)
+	{
+		return 0;
+	}
 }
 
 void CqTextureCache::setCamToWorldMatrix(const CqMatrix& camToWorld)
@@ -91,8 +106,8 @@ SamplerT& CqTextureCache::findSampler(
 		boost::shared_ptr<SamplerT> newTex;
 		try
 		{
-			newTex = newSamplerFromFile<SamplerT>(
-					findFileInPath(name, m_searchPathCallback()).c_str() );
+			// Find the file in the current file cache.
+			newTex = newSamplerFromFile<SamplerT>(getTextureFile(name));
 		}
 		catch(XqInvalidFile& e)
 		{
@@ -112,20 +127,36 @@ SamplerT& CqTextureCache::findSampler(
 	}
 }
 
-template<typename SamplerT>
-boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
+boost::shared_ptr<IqMultiTexInputFile> CqTextureCache::getTextureFile(
 		const char* name)
 {
-	return SamplerT::create(IqMultiTexInputFile::open(name));
+	TqUlong hash = CqString::hash(name);
+	std::map<TqUlong, boost::shared_ptr<IqMultiTexInputFile> >::const_iterator
+		fileIter = m_texFileCache.find(hash);
+	if(fileIter != m_texFileCache.end())
+		// File exists in the cache; return it.
+		return fileIter->second;
+	// Else open the file and store it in the cache before returning it.
+	boost::shared_ptr<IqMultiTexInputFile> file = IqMultiTexInputFile::open(
+			findFileInPath(name, m_searchPathCallback()) );
+	m_texFileCache[hash] = file;
+	return file;
+}
+
+template<typename SamplerT>
+boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
+		const boost::shared_ptr<IqMultiTexInputFile>& file)
+{
+	return SamplerT::create(file);
 }
 
 // Special case of newSamplerFromFile() for shadow maps - they need access to
 // the camera->world transformation matrix.
 template<>
 boost::shared_ptr<IqShadowSampler>
-CqTextureCache::newSamplerFromFile(const char* name)
+CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqMultiTexInputFile>& file)
 {
-	return IqShadowSampler::create(IqTexInputFile::open(name), m_camToWorld);
+	return IqShadowSampler::create(file, m_camToWorld);
 }
 
 template<typename SamplerT>

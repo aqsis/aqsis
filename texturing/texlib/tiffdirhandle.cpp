@@ -320,6 +320,8 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 	addAttributeToHeader<Attr::HostName,char*>(TIFFTAG_HOSTCOMPUTER, header, *this);
 	addAttributeToHeader<Attr::Description,char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
 	addAttributeToHeader<Attr::DateTime,char*>(TIFFTAG_DATETIME, header, *this);
+	addAttributeToHeader<Attr::TextureFormat,char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
+
 
 	// Add texturemap-specific strings to the header if they exist.
 	addAttributeToHeader<Attr::WrapModes,char*>(TIFFTAG_PIXAR_WRAPMODES, header, *this);

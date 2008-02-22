@@ -207,13 +207,9 @@ class CqRenderer : public IqRenderer
 		virtual	const IqShadowSampler& GetShadowMap(const char* fileName);
 		virtual	IqTextureMapOld* GetOcclusionMap(const CqString& fileName);
 		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
+		virtual const CqTexFileHeader* textureInfo(const char* fileName);
 
-		/** \brief Return the current texture search path.
-		 *
-		 * This is used as a callback function by the texture library to obtain
-		 * the texture search path when necessary.
-		 */
-		const char* textureSearchPath();
+		virtual const char* textureSearchPath();
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 

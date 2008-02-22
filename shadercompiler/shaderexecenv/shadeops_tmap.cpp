@@ -40,6 +40,7 @@
 #include	"itexturemap_old.h" /// \todo remove after migration to new interface
 #include	"itexturesampler.h"
 #include	"ishadowsampler.h"
+#include	"texfileheader.h"
 #include	"version.h"
 #include	"logging.h"
 
@@ -1537,269 +1538,82 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* startCh
 }
 
 //----------------------------------------------------------------------
-// textureinfo
-// support resolution, type, channels, projectionmatrix(*) and viewingmatrix(*)
-// User has to provide an array of TqFloat (2) for resolution
-//                     an string for type
-//                     an integer for channels
-//                     an array of floats (16) for both projectionmatrix and viewingmatrix
-//                     (*) the name must be a shadow map
-//
-
-void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
+// textureinfo(texturename, dataname, output variable);
+void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataName, IqShaderData* pV, IqShaderData* result, IqShader* pShader )
 {
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	TqFloat Ret = 0.0f;
-	//IqTextureMapPtr pMap;
-	IqTextureMapOld* pMap = NULL;
-	IqTextureMapOld *pSMap = NULL;
-	IqTextureMapOld *pEMap = NULL;
-	IqTextureMapOld *pTMap = NULL;
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	CqString _aq_dataname;
-	(dataname)->GetString(_aq_dataname,__iGrid);
-
-	if ( !pMap && strstr( _aq_name.c_str(), ".tif" ) )
+	if(!getRenderContext())
 	{
-		/// \todo Fix to work with the new type returned from GetTextureMap
-		//pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
-		{
-			pMap = pTMap;
-		}
-		else if ( pTMap )
-		{
-			//delete pTMap;
-			pTMap = NULL;
-		}
-	}
-	if ( !pMap )
-	{
-		//pSMap = getRenderContext() ->GetShadowMap( _aq_name );
-		if ( pSMap && ( pSMap->Type() == MapType_Shadow ) )
-		{
-			pMap = pSMap;
-		}
-		else if ( pSMap )
-		{
-			//delete pSMap;
-			pSMap = NULL;
-		}
+		// \todo Is this check necessary?
+		return;
 	}
 
-	if ( !pMap )
+	// Name of the texture file.
+	CqString textureName;
+	name->GetString(textureName, 0);
+	const CqTexFileHeader* header = getRenderContext()->textureInfo(textureName.c_str());
+	if(!header)
 	{
-		pEMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-		if ( pEMap && ( pEMap->Type() == MapType_Environment ) )
-		{
-			pMap = pEMap;
-		}
-		else if ( pEMap )
-		{
-			//delete pEMap;
-			pEMap = NULL;
-		}
+		// Texture not found - return 0.
+		result->SetFloat(0);
+		return;
 	}
 
-	if ( !pMap )
+	// Name identifying the texture attribute desired.
+	CqString dataNameStr;
+	dataName->GetString(dataNameStr, 0);
+
+	TqFloat returnVal = 0;
+	if(dataNameStr == "exists" && pV->Type() == type_float)
 	{
-		/// \todo Fix to work with the new type returned from GetTextureMap
-		//pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
-		{
-			pMap = pTMap;
-		}
-		else if ( pTMap )
-		{
-			//delete pTMap;
-			pTMap = NULL;
-		}
+		pV->SetFloat(1);
+		returnVal = 1;
 	}
-
-
-	if ( pMap == 0 )
+	else if(dataNameStr == "resolution" && pV->Type() == type_float
+			&& pV->ArrayLength() == 2)
 	{
-		(Result)->SetFloat(Ret,__iGrid);
-		return ;
+		pV->ArrayEntry(0)->SetFloat(header->width());
+		pV->ArrayEntry(1)->SetFloat(header->height());
+		returnVal = 1;
 	}
-
-	if ( _aq_dataname.compare( "exists" ) == 0 )
+	else if(dataNameStr == "type" && pV->Type() == type_string)
 	{
-		if ( pV->Type() == type_float )
+		const std::string* texFormat = header->findPtr<Attr::TextureFormat>();
+		if(texFormat)
 		{
-			pV->SetFloat( 1.0f );
-			Ret = 1.0f;
+			pV->SetString(*texFormat);
+			returnVal = 1;
 		}
 	}
-
-	if ( _aq_dataname.compare( "resolution" ) == 0 )
+	else if(dataNameStr == "channels" && pV->Type() == type_float)
 	{
-		if ( pV->Type() == type_float &&
-		        pV->ArrayLength() > 0 )
+		pV->SetFloat(header->channelList().numChannels());
+		returnVal = 1;
+	}
+	else if(dataNameStr == "viewingmatrix" && pV->Type() == type_matrix)
+	{
+		const CqMatrix* worldToLight = header->findPtr<Attr::WorldToCameraMatrix>();
+		if(worldToLight)
 		{
-
-			if ( pV->ArrayLength() == 2 )
-			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( pMap->XRes() ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( pMap->YRes() ) );
-				Ret = 1.0f;
-
-			}
+			CqMatrix currToWorld;
+			getRenderContext()->matSpaceToSpace("current", "world",
+					NULL, NULL, 0, currToWorld);
+			pV->SetMatrix((*worldToLight)*currToWorld);
+			returnVal = 1;
 		}
 	}
-	if ( _aq_dataname.compare( "type" ) == 0 )
+	else if(dataNameStr == "projectionmatrix" && pV->Type() == type_matrix)
 	{
-		if ( pV->Type() == type_string )
+		const CqMatrix* worldToLightNdc = header->findPtr<Attr::WorldToScreenMatrix>();
+		if(worldToLightNdc)
 		{
-			if ( pMap->Type() == MapType_Texture )
-			{
-				pV->SetString( "texture" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_Bump )
-			{
-				pV->SetString( "bump" );
-				Ret = 1.0f;
-
-			}
-
-			if ( pMap->Type() == MapType_Shadow )
-			{
-				pV->SetString( "shadow" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_Environment )
-			{
-				pV->SetString( "environment" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_LatLong )
-			{
-				// both latlong/cube respond the same way according to BMRT
-				// It makes sense since both use environment() shader fct.
-				pV->SetString( "environment" );
-				Ret = 1.0f;
-
-			}
-
-
+			CqMatrix currToWorld;
+			getRenderContext()->matSpaceToSpace("current", "world",
+					NULL, NULL, 0, currToWorld);
+			pV->SetMatrix((*worldToLightNdc)*currToWorld);
+			returnVal = 1;
 		}
 	}
-
-	if ( _aq_dataname.compare( "channels" ) == 0 )
-	{
-		if ( pV->Type() == type_float )
-		{
-			pV->SetFloat( static_cast<TqFloat>( pMap->SamplesPerPixel() ) );
-			Ret = 1.0f;
-		}
-
-	}
-
-	if ( _aq_dataname.compare( "viewingmatrix" ) == 0 )
-	{
-		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
-		        ( pV->Type() == type_matrix ) )
-		{
-			IqTextureMapOld* pTmp = NULL;
-			if (pTMap) pTmp = pTMap;
-			if (pSMap) pTmp = pSMap;
-			if ( pTmp )   // && pTmp->Type() == MapType_Shadow)
-			{
-
-
-				CqMatrix m = pTmp->GetMatrix( 0 );  /* WorldToCamera */
-				if ( pV->ArrayLength() == 16 )
-				{
-
-					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
-					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
-					pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 2 ] ) );
-					pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 3 ] ) );
-					pV->ArrayEntry( 4 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 0 ] ) );
-					pV->ArrayEntry( 5 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 1 ] ) );
-					pV->ArrayEntry( 6 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 2 ] ) );
-					pV->ArrayEntry( 7 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 3 ] ) );
-					pV->ArrayEntry( 8 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 0 ] ) );
-					pV->ArrayEntry( 9 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 1 ] ) );
-					pV->ArrayEntry( 10 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 2 ] ) );
-					pV->ArrayEntry( 11 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 3 ] ) );
-					pV->ArrayEntry( 12 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 0 ] ) );
-					pV->ArrayEntry( 13 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 1 ] ) );
-					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
-					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
-
-				}
-				else
-				{
-					pV->SetMatrix( m, 0 );
-				}
-				Ret = 1.0f;
-
-			}
-
-		}
-	}
-
-	if ( _aq_dataname.compare( "projectionmatrix" ) == 0 )
-	{
-		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
-		        ( pV->Type() == type_matrix ) )
-		{
-			// init the matrix in case of wrong sl logic
-			IqTextureMapOld* pTmp = NULL;
-			if (pTMap) pTmp = pTMap;
-			if (pSMap) pTmp = pSMap;
-			if ( pTmp )    // && pTmp->Type() == MapType_Shadow)
-			{
-
-				CqMatrix m = pTmp->GetMatrix( 1 ); /* WorldToScreen */
-				if ( pV->ArrayLength() == 16 )
-				{
-					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
-					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
-					pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 2 ] ) );
-					pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 3 ] ) );
-					pV->ArrayEntry( 4 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 0 ] ) );
-					pV->ArrayEntry( 5 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 1 ] ) );
-					pV->ArrayEntry( 6 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 2 ] ) );
-					pV->ArrayEntry( 7 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 3 ] ) );
-					pV->ArrayEntry( 8 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 0 ] ) );
-					pV->ArrayEntry( 9 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 1 ] ) );
-					pV->ArrayEntry( 10 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 2 ] ) );
-					pV->ArrayEntry( 11 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 3 ] ) );
-					pV->ArrayEntry( 12 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 0 ] ) );
-					pV->ArrayEntry( 13 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 1 ] ) );
-					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
-					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
-
-
-				}
-				else
-				{
-					pV->SetMatrix( m, 0 );
-
-				}
-				Ret = 1.0f;
-			}
-
-		}
-	}
-
-	//delete pMap;
-
-	(Result)->SetFloat(Ret,__iGrid);
-
+	result->SetFloat(returnVal);
 }
 
 //---------------------------------------------------------------------
