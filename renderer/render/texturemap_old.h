@@ -650,15 +650,8 @@ class CqTextureMapOld : public IqTextureMapOld
 
 		/** Clear the cache of texture maps.
 		 */
-		static	void	FlushCache()
-		{
-			for(std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin();
-					i != m_TextureMap_Cache.end(); ++i)
-				delete(*i);
+		static void FlushCache();
 
-			m_TextureMap_Cache.clear();
-
-		}
 		void CriticalMeasure();
 
 		static void WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality );
@@ -684,7 +677,7 @@ class CqTextureMapOld : public IqTextureMapOld
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
-		static std::vector<IqTextureMapOld*> m_TextureMap_Cache;	///< Static array of loaded textures.
+		static std::vector<CqTextureMapOld*> m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
 		TqInt m_Compression;            ///< TIFF Compression model

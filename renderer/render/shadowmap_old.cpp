@@ -122,7 +122,7 @@ IqTextureMapOld* CqTextureMapOld::GetShadowMap( const CqString& strName )
 	//TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<CqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( (*i)->getName() == strName )
 		{

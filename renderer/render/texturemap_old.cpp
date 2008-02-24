@@ -110,7 +110,7 @@ static TqFloat sides[6][2]    =  {
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
-std::vector<IqTextureMapOld*> CqTextureMapOld::m_TextureMap_Cache;
+std::vector<CqTextureMapOld*> CqTextureMapOld::m_TextureMap_Cache;
 std::vector<CqString*> CqTextureMapOld::m_ConvertString_Cache;
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -387,9 +387,9 @@ TqInt CqTextureMapOld::Convert( CqString &strName )
 void CqTextureMapOld::CriticalMeasure()
 {
 	TqInt now; 
-	//TqInt current;
+	TqInt current;
 	static TqInt limit = -1;
-	std::vector<CqTextureMapWrapper*>::iterator j;
+	std::vector<CqTextureMapOld*>::iterator j;
 	std::list<CqTextureMapBuffer*>::iterator i;
 	std::list<CqTextureMapBuffer*>::iterator e;
 
@@ -405,9 +405,6 @@ void CqTextureMapOld::CriticalMeasure()
 
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
-// The following is commented out, as the old cache mechanism will be obsolete
-// with CqTextureMap.
-#if 0
 	bool getout = true;
 
 	if ( m_critical )
@@ -465,7 +462,6 @@ void CqTextureMapOld::CriticalMeasure()
 		}
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
-#endif
 
 	m_critical = false;
 
@@ -531,12 +527,8 @@ CqTextureMapOld::~CqTextureMapOld()
 {
 	// Close the file.
 	Close();
-
-// Commented out: old cache mechanism is obsolete for CqTextureMap (but needs
-// to be replaced)
-#if 0
 	// Search for it in the cache and remove the reference.
-	std::vector<CqTextureMapWrapper*>::iterator i;
+	std::vector<CqTextureMapOld*>::iterator i;
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
@@ -546,7 +538,6 @@ CqTextureMapOld::~CqTextureMapOld()
 			break;
 		}
 	}
-#endif
 
 	std::vector<CqString*>::iterator j;
 	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
@@ -1038,12 +1029,12 @@ IqTextureMapOld* CqTextureMapOld::GetTextureMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
-	// TqUlong hash = CqString::hash(strName.c_str());
+	TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<IqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<CqTextureMapOld*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if( (*i)->getName() == strName )
+		if ( ( *i ) ->m_hash == hash )
 		{
 			if ( ( *i ) ->Type() == MapType_Texture )
 			{
@@ -1059,19 +1050,16 @@ IqTextureMapOld* CqTextureMapOld::GetTextureMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMapWrapper* pNew = new CqTextureMapWrapper( strName );
+	CqTextureMapOld* pNew = new CqTextureMapOld( strName );
 	pNew->Open();
 
 	// Ensure that it is in the correct format
-// Commented out for transition to CqTextureMap
-#if 0
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
 		if( !pNew->CreateMIPMAP( true ) )
 			pNew->SetInvalid();
 		pNew->Close();
 	}
-#endif
 
 	m_TextureMap_Cache.push_back( pNew );
 	return ( pNew );
@@ -1143,6 +1131,20 @@ void CqTextureMapOld::Interpreted( TqPchar mode )
 
 	delete[](string);
 }
+
+void CqTextureMapOld::FlushCache()
+{
+	// Need this temporary cache, because CqTextureMapOld deletes itself from
+	// m_TextureMap_Cache automatically, modifying the vector and invalidating
+	// any iteration over it.
+	std::vector<CqTextureMapOld*> tmpCache = m_TextureMap_Cache;
+	for(std::vector<CqTextureMapOld*>::iterator i = tmpCache.begin();
+			i != tmpCache.end(); ++i)
+		delete *i;
+
+	m_TextureMap_Cache.clear();
+}
+
 
 //---------------------------------------------------------------------
 /** Open a named texture map.
@@ -1643,6 +1645,10 @@ void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
 	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
 	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+	if(samples == 1)
+		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+	else
+		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
@@ -1710,6 +1716,10 @@ void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong widt
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
 	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 16 );
 	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+	if(samples == 1)
+		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+	else
+		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
