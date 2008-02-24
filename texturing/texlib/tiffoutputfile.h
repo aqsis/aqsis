@@ -53,10 +53,10 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 
 		virtual ~CqTiffOutputFile() {};
 
-		virtual inline const char* fileName() const;
-		virtual inline const char* fileType();
-		virtual inline const CqTexFileHeader& header() const;
-		virtual inline TqInt currentLine() const;
+		virtual const char* fileName() const;
+		virtual EqImageFileType fileType();
+		virtual const CqTexFileHeader& header() const;
+		virtual TqInt currentLine() const;
 	private:
 		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer);
 
@@ -73,9 +73,9 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 // Implementation details
 //==============================================================================
 
-inline const char* CqTiffOutputFile::fileType()
+inline EqImageFileType CqTiffOutputFile::fileType()
 {
-	return "tiff";
+	return ImageFile_Tiff;
 }
 
 inline const CqTexFileHeader& CqTiffOutputFile::header() const
@@ -83,7 +83,7 @@ inline const CqTexFileHeader& CqTiffOutputFile::header() const
 	return m_header;
 }
 
-TqInt CqTiffOutputFile::currentLine() const
+inline TqInt CqTiffOutputFile::currentLine() const
 {
 	return m_currentLine;
 }

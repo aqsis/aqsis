@@ -244,7 +244,7 @@ void CqImage::saveToFile(const std::string& fileName) const
 
 	// Now create the image, and output the pixel data.
 	boost::shared_ptr<IqTexOutputFile> outFile
-		= IqTexOutputFile::open(fileName, "tiff", header);
+		= IqTexOutputFile::open(fileName, ImageFile_Tiff, header);
 
 	// Write all pixels out at once.
 	outFile->writePixels(*m_realData);

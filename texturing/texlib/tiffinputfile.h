@@ -61,11 +61,11 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 		CqTiffInputFile(std::istream& inStream);
 
 		virtual const char* fileName() const;
-		inline virtual const char* fileType() const;
-		inline virtual const CqTexFileHeader& header() const;
+		virtual EqImageFileType fileType() const;
+		virtual const CqTexFileHeader& header() const;
 
 		virtual void setImageIndex(TqInt newIndex);
-		inline virtual TqInt imageIndex() const;
+		virtual TqInt imageIndex() const;
 		virtual TqInt numSubImages() const;
 
 	private:
@@ -103,9 +103,9 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 // Implementation details
 //==============================================================================
 
-inline const char* CqTiffInputFile::fileType() const
+inline EqImageFileType CqTiffInputFile::fileType() const
 {
-	return "tiff";
+	return ImageFile_Tiff;
 }
 
 inline const CqTexFileHeader& CqTiffInputFile::header() const

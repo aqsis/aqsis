@@ -33,7 +33,7 @@ namespace Aqsis {
 
 //------------------------------------------------------------------------------
 boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
-		const std::string& fileName, const std::string& fileType,
+		const std::string& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
 {
 	// Check some of the header data to make sure it's minimally sane...
@@ -51,7 +51,7 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	// Create the new file object
 	boost::shared_ptr<IqTexOutputFile> newFile;
 
-	if(fileType == "tiff")
+	if(fileType == ImageFile_Tiff)
 	{
 		newFile.reset(new CqTiffOutputFile(fileName, header));
 	}
@@ -59,7 +59,8 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	else
 	{
 		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-				<< "\": Unknown file type \"" << fileType << "\"");
+				<< "\": Unknown file type \""
+				<< imageFileTypeToString(fileType) << "\"");
 	}
 
 	return newFile;

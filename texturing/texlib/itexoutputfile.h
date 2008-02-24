@@ -31,10 +31,11 @@
 
 #include <string>
 
-#include "texfileheader.h"
 #include "exception.h"
-#include "smartptr.h"
+#include "imagefiletype.h"
 #include "mixedimagebuffer.h"
+#include "smartptr.h"
+#include "texfileheader.h"
 
 namespace Aqsis {
 
@@ -47,8 +48,8 @@ class AQSISTEX_SHARE IqTexOutputFile
 		/// get the file name
 		virtual const char* fileName() const = 0;
 
-		/// get a string representing the file type
-		virtual const char* fileType() = 0;
+		/// get the file type
+		virtual EqImageFileType fileType() = 0;
 
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
@@ -95,11 +96,11 @@ class AQSISTEX_SHARE IqTexOutputFile
 		 *
 		 * \param fileName - file to open.  Can be in any of the formats
 		 * understood by aqsistex.
-		 * \param fileType - string describing the file type.
+		 * \param fileType - the file type.
 		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqTexOutputFile> open(const std::string& fileName,
-				const std::string& fileType, const CqTexFileHeader& header);
+				EqImageFileType fileType, const CqTexFileHeader& header);
 
 	protected:
 		/** \brief Low-level virtual implementation for writePixels().

@@ -32,6 +32,7 @@
 
 #include <string>
 
+#include "imagefiletype.h"
 #include "texfileheader.h"
 
 namespace Aqsis {
@@ -46,7 +47,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		virtual const char* fileName() const = 0;
 
 		/// get a string representing the file type
-		virtual const char* fileType() const = 0;
+		virtual EqImageFileType fileType() const = 0;
 
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
@@ -98,35 +99,6 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		virtual void readTileImpl(TqUchar* buffer, TqInt tileX, TqInt tileY);
 };
 
-
-//==============================================================================
-// Implementation of inline functions and templates
-//==============================================================================
-
-#if 0
-template<typename Array2DType>
-void IqTiledTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
-		TqInt numScanlines) const
-{
-	TqInt imageHeight = header().height();
-	// if numScanlines is negative, read until the last line
-	if(numScanlines <= 0)
-		numScanlines = imageHeight - startLine;
-	// check that startLine is in the image range & that the ending line is
-	// reasonable.
-	if(startLine < 0 || startLine >= imageHeight
-			|| startLine + numScanlines > imageHeight)
-	{
-		AQSIS_THROW(XqInternal, "Attempt to read scanlines " << startLine
-				<< " to " << startLine + numScanlines - 1
-				<< " outside image boundaries for file \"" << fileName() << "\".");
-	}
-		AQSIS_THROW(XqInternal, "Attempt to read scanlines outside image boundaries");
-	// Resize the buffer to deal with the new data
-	buffer.resize(header().width(), numScanlines, header().channelList());
-	readPixelsImpl(buffer.rawData(), startLine, numScanlines);
-}
-#endif
 
 } // namespace Aqsis
 

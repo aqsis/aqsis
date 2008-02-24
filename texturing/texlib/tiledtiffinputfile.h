@@ -47,8 +47,8 @@ class AQSISTEX_SHARE CqTiledTiffInputFile
 		/// Constructor which takes an input stream rather than a file name
 		CqTiffInputFile(std::istream& inStream);
 		virtual const char* fileName() const;
-		inline virtual const char* fileType() const;
-		inline virtual const CqTexFileHeader& header() const;
+		virtual EqImageFileType fileType() const;
+		virtual const CqTexFileHeader& header() const;
 	private:
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
@@ -65,9 +65,9 @@ class AQSISTEX_SHARE CqTiledTiffInputFile
 // Implementation details
 //==============================================================================
 
-inline const char* CqTiffInputFile::fileType() const
+inline EqImageFileType CqTiffInputFile::fileType() const
 {
-	return "tiff";
+	return ImageFile_Tiff;
 }
 
 inline const CqTexFileHeader& CqTiffInputFile::header() const

@@ -32,6 +32,7 @@
 
 #include <string>
 
+#include "imagefiletype.h"
 #include "texfileheader.h"
 
 namespace Aqsis {
@@ -61,7 +62,7 @@ class AQSISTEX_SHARE IqTexInputFile
 		virtual const char* fileName() const = 0;
 
 		/// get a string representing the file type
-		virtual const char* fileType() const = 0;
+		virtual EqImageFileType fileType() const = 0;
 
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;

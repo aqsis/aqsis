@@ -62,8 +62,8 @@ class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 		/// Constructor which takes an input stream rather than a file name
 		//CqExrInputFile(std::istream& inStream);
 		virtual const char* fileName() const;
-		inline virtual const char* fileType() const;
-		inline virtual const CqTexFileHeader& header() const;
+		virtual EqImageFileType fileType() const;
+		virtual const CqTexFileHeader& header() const;
 	private:
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
@@ -80,9 +80,9 @@ class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 // Implementation of inline functions and templates
 //==============================================================================
 
-inline const char* CqExrInputFile::fileType() const
+inline EqImageFileType CqExrInputFile::fileType() const
 {
-	return "OpenEXR";
+	return ImageFile_Exr;
 }
 
 inline const CqTexFileHeader& CqExrInputFile::header() const
