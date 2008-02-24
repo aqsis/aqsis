@@ -8,8 +8,8 @@
  *	Last change date:	$Date$
  */
 //------------------------------------------------------------------------------
-#ifndef	___irenderer_Loaded___
-#define	___irenderer_Loaded___
+#ifndef	IRENDERER_H_INCLUDED
+#define	IRENDERER_H_INCLUDED
 
 #include "matrix.h"
 #include "itransform.h"
@@ -17,10 +17,8 @@
 START_NAMESPACE( Aqsis )
 
 struct IqTextureMapOld;
-class IqTextureSampler;
-class IqShadowSampler;
+class CqTextureCache;
 class CqObjectInstance;
-class CqTexFileHeader;
 
 struct IqRenderer
 {
@@ -58,34 +56,19 @@ struct IqRenderer
 	//--------------------------------------------------
 	/// \name Texture map access
 	//@{
-	/** \brief Get a reference to a texture sampler.
-	 *
-	 * Failure to load the texture from a file will result in a dummy texture
-	 * sampler object being returned.
+	/** \brief Get a reference to the texture cache.
 	 *
 	 * \param fileName - File name to search for in the texture resource path.
 	 * \return the texture sampler (always valid).
 	 */
-	virtual	const IqTextureSampler& GetTextureMap(const char* fileName) = 0;
-	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
-	/** \brief Get a reference to a shadow texture sampler.
-	 *
-	 * Failure to load the texture from a file will result in a dummy shadow
-	 * sampler object being returned.
-	 *
-	 * \param fileName - File name to search for in the texture resource path.
-	 * \return the texture sampler (always valid).
-	 */
-	virtual	const IqShadowSampler& GetShadowMap(const char* fileName) = 0;
-	virtual	IqTextureMapOld* GetOcclusionMap( const CqString& fileName ) = 0;
-	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
+	virtual	CqTextureCache& textureCache() = 0;
 
-	/** \brief Obtain texture file metadata for the given file name.
-	 *
-	 * \return Pointer to a texture file header, or 0 if the texture file
-	 * cannot be found in the current search path.
-	 */
-	virtual const CqTexFileHeader* textureInfo(const char* fileName) = 0;
+	/// \deprecated
+	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
+	/// \deprecated
+	virtual	IqTextureMapOld* GetOcclusionMap( const CqString& fileName ) = 0;
+	/// \deprecated
+	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
 	//@}
 
 	/** \brief Return the current texture search path.
@@ -121,4 +104,4 @@ IqRenderer* QGetRenderContextI();
 
 END_NAMESPACE( Aqsis )
 
-#endif	//	___irenderer_Loaded___
+#endif //IRENDERER_H_INCLUDED

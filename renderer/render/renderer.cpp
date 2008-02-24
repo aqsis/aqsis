@@ -812,6 +812,7 @@ void CqRenderer::RenderAutoShadows()
 				m_pDDManager = realDDManager;
 
 				CqTextureMapOld::FlushCache();
+				m_textureCache.flush();
 				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
@@ -1661,25 +1662,14 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-const IqTextureSampler& CqRenderer::GetTextureMap(const char* fileName)
+CqTextureCache& CqRenderer::textureCache()
 {
-	return m_textureCache.findTextureSampler(fileName);
+	return m_textureCache;
 }
 
 IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 {
 	return ( CqTextureMapOld::GetEnvironmentMap( strFileName ) );
-}
-
-const IqShadowSampler& CqRenderer::GetShadowMap(const char* fileName)
-{
-	/// \todo Inefficient - correct this later.
-	/// \todo What is the correct coordinate system to use here? "shader"?
-	CqMatrix camToWorldMatrix;
-	QGetRenderContext() ->matSpaceToSpace("camera", "world", NULL, NULL, 0, camToWorldMatrix);
-	m_textureCache.setCamToWorldMatrix(camToWorldMatrix);
-
-	return m_textureCache.findShadowSampler(fileName);
 }
 
 IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
@@ -1690,11 +1680,6 @@ IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
 IqTextureMapOld* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
 	return ( CqTextureMapOld::GetLatLongMap( strFileName ) );
-}
-
-const CqTexFileHeader* CqRenderer::textureInfo(const char* fileName)
-{
-	return m_textureCache.textureInfo(fileName);
 }
 
 const char* CqRenderer::textureSearchPath()

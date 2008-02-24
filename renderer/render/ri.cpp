@@ -903,6 +903,12 @@ RtVoid	RiWorldBegin()
 	CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
 	QGetRenderContext() ->SetCameraTransform( current );
 	QGetRenderContext() ->BeginWorldModeBlock();
+	// Set the camera transformation for shadow maps in the sampler cache.
+	/// \todo What is the correct coordinate system to use here? "current"? "shader"?
+	CqMatrix currToWorldMat;
+	QGetRenderContext()->matSpaceToSpace("current", "world", NULL, NULL, 0, currToWorldMat);
+	QGetRenderContext()->textureCache().setCurrToWorldMatrix(currToWorldMat);
+
 	// Reset the current transformation to identity, this now represents the object-->world transform.
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
@@ -987,6 +993,9 @@ RtVoid	RiWorldEnd()
 		Aqsis::log() << error << strError.c_str() << std::endl;
 		fFailed = true;
 	}
+
+	// Remove all cached textures.
+	QGetRenderContext()->textureCache().flush();
 
 	// Delete the world context
 	QGetRenderContext() ->EndWorldModeBlock();

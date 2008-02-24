@@ -41,6 +41,7 @@
 #include	"itexturesampler.h"
 #include	"ishadowsampler.h"
 #include	"texfileheader.h"
+#include	"texturecache.h"
 #include	"version.h"
 #include	"logging.h"
 
@@ -357,7 +358,8 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	// Get the texture map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqTextureSampler& texSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
@@ -416,7 +418,8 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 	// Get the texture map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqTextureSampler& texSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
@@ -481,7 +484,8 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	// Get the texture map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqTextureSampler& texSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
@@ -541,7 +545,8 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 	// Get the texture map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqTextureSampler& texSampler = getRenderContext()->GetTextureMap(mapName.c_str());
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
@@ -1015,7 +1020,8 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	// Get the shadow map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqShadowSampler& shadSampler = getRenderContext()->GetShadowMap(mapName.c_str());
+	const IqShadowSampler& shadSampler
+		= getRenderContext()->textureCache().findShadowSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
@@ -1072,7 +1078,8 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel
 	// Get the shadow map.
 	CqString mapName;
 	name->GetString(mapName, gridIdx);
-	const IqShadowSampler& shadSampler = getRenderContext()->GetShadowMap(mapName.c_str());
+	const IqShadowSampler& shadSampler
+		= getRenderContext()->textureCache().findShadowSampler(mapName.c_str());
 
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
@@ -1550,7 +1557,8 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataName
 	// Name of the texture file.
 	CqString textureName;
 	name->GetString(textureName, 0);
-	const CqTexFileHeader* header = getRenderContext()->textureInfo(textureName.c_str());
+	const CqTexFileHeader* header
+		= getRenderContext()->textureCache().textureInfo(textureName.c_str());
 	if(!header)
 	{
 		// Texture not found - return 0.
