@@ -61,23 +61,17 @@ CqImagersource::~CqImagersource()
 }
 
 //---------------------------------------------------------------------
-/** Initialise the environment for the specified grid size
- *   and execute the shader on the complete grid.
- * \param uGridRes Integer grid resolution == 1.
- * \param vGridRes Integer grid resolution == 1.
- * \param x Integer Raster position.
- * \param y Integer Raster position.
- * \param color Initial value Ci.
- * \param opacity Initial value Oi.
- * \param depth Initial value depth (not required).
- * \param coverage Initial value "alpha"
- */
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
 	TIME_SCOPE("Imager shading")
 
-	TqInt uGridRes = pBucket->Width();
-	TqInt vGridRes = pBucket->Height();
+	// We use one less than the bucket width and height here, since these
+	// resolutions really represent one less than the number of shaded points
+	// in each direction.  (Usually they describe the number of micropolygons
+	// on a grid which is one less than the number of shaded vertices.  This
+	// concept has no real analogue in context of an imager shader.)
+	TqInt uGridRes = pBucket->Width()-1;
+	TqInt vGridRes = pBucket->Height()-1;
 	TqInt x = pBucket->XOrigin();
 	TqInt y = pBucket->YOrigin();
 
