@@ -286,11 +286,15 @@ class CqShadowOptionExtractor
 		{
 			if(m_biasLow)
 			{
-				TqFloat biasLow = 0;
-				TqFloat biasHigh = 0;
-				m_biasLow->GetFloat(biasLow, gridIdx);
-				m_biasHigh->GetFloat(biasHigh, gridIdx);
-				opts.setBias(biasLow, biasHigh);
+				TqFloat tmp = 0;
+				m_biasLow->GetFloat(tmp, gridIdx);
+				opts.setBiasLow(tmp);
+			}
+			if(m_biasHigh)
+			{
+				TqFloat tmp = 0;
+				m_biasHigh->GetFloat(tmp, gridIdx);
+				opts.setBiasHigh(tmp);
 			}
 			CqSampleOptionExtractorBase<CqShadowSampleOptions>::extractVarying(gridIdx, opts);
 		}
@@ -302,17 +306,12 @@ class CqShadowOptionExtractor
 void getRenderContextShadowOpts(const IqRenderer& context, CqShadowSampleOptions& sampleOpts)
 {
 	// Shadow biases
-	const TqFloat* biasPtr = context.GetFloatOption( "shadow", "bias" );
-	if(biasPtr)
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias"))
 		sampleOpts.setBias(*biasPtr);
-	const TqFloat* biasLowPtr = context.GetFloatOption( "shadow", "bias0" );
-	const TqFloat* biasHighPtr = context.GetFloatOption( "shadow", "bias1" );
-	if(biasLowPtr && biasHighPtr)
-		sampleOpts.setBias(*biasLowPtr, *biasHighPtr);
-	else if(biasLowPtr)
-		sampleOpts.setBias(*biasLowPtr, sampleOpts.biasHigh());
-	else if(biasHighPtr)
-		sampleOpts.setBias(sampleOpts.biasLow(), *biasHighPtr);
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias0"))
+		sampleOpts.setBiasLow(*biasPtr);
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias1"))
+		sampleOpts.setBiasHigh(*biasPtr);
 }
 
 //------------------------------------------------------------------------------

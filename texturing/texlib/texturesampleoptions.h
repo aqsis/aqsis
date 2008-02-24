@@ -245,7 +245,8 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		/// Set the shadow bias
 		void setBias(TqFloat bias);
 		/// Set the low and high shadow biases
-		void setBias(TqFloat bias0, TqFloat bias1);
+		void setBiasLow(TqFloat bias0);
+		void setBiasHigh(TqFloat bias1);
 	protected:
 		TqFloat m_biasLow;
 		TqFloat m_biasHigh;
@@ -454,18 +455,18 @@ inline void CqShadowSampleOptions::setBias(TqFloat bias)
 	m_biasHigh = bias;
 }
 
-inline void CqShadowSampleOptions::setBias(TqFloat bias0, TqFloat bias1)
+inline void CqShadowSampleOptions::setBiasLow(TqFloat bias0)
 {
-	if(bias0 <= bias1)
-	{
-		m_biasLow = bias0;
-		m_biasHigh = bias1;
-	}
-	else
-	{
-		m_biasLow = bias1;
+	if(bias0 > m_biasHigh)
 		m_biasHigh = bias0;
-	}
+	m_biasLow = bias0;
+}
+
+inline void CqShadowSampleOptions::setBiasHigh(TqFloat bias1)
+{
+	if(bias1 < m_biasLow)
+		m_biasLow = bias1;
+	m_biasHigh = bias1;
 }
 
 } // namespace Aqsis
