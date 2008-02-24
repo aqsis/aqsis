@@ -25,9 +25,11 @@
  */
 
 #include "ishadowsampler.h"
-#include "texexception.h"
-#include "shadowsampler.h"
+
+#include "dummyshadowsampler.h"
 #include "itexinputfile.h"
+#include "shadowsampler.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
@@ -53,6 +55,11 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 	// shut up compiler warnings - return a null texture
 	assert(0);
 	return boost::shared_ptr<IqShadowSampler>();
+}
+
+boost::shared_ptr<IqShadowSampler> IqShadowSampler::createDummy()
+{
+	return boost::shared_ptr<IqShadowSampler>(new CqDummyShadowSampler());
 }
 
 const CqShadowSampleOptions& IqShadowSampler::defaultSampleOptions() const

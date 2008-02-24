@@ -30,10 +30,11 @@
 #	include <half.h>
 #endif
 
-#include "tilearray.h"
-#include "texturebuffer.h"
-#include "mipmaptexturesampler.h"
+#include "dummytexturesampler.h"
 #include "itexinputfile.h"
+#include "mipmaptexturesampler.h"
+#include "texturebuffer.h"
+#include "tilearray.h"
 
 namespace Aqsis {
 
@@ -63,7 +64,7 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
 	assert(0);
-	return boost::shared_ptr<IqTextureSampler>();
+	return createDummy();
 }
 
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
@@ -98,7 +99,12 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 	}
 	AQSIS_THROW(XqBadTexture, "Could not create a texture sampler for file \"" 
 			<< file->fileName() << "\"");
-	return boost::shared_ptr<IqTextureSampler>();
+	return createDummy();
+}
+
+boost::shared_ptr<IqTextureSampler> IqTextureSampler::createDummy()
+{
+	return boost::shared_ptr<IqTextureSampler>(new CqDummyTextureSampler());
 }
 
 const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const

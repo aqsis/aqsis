@@ -32,10 +32,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "samplequad.h"
+#include "texturesampleoptions.h"
 
 namespace Aqsis {
 
-class CqTextureSampleOptions;
 class IqTiledTexInputFile;
 class IqMultiTexInputFile;
 class CqTexFileHeader;
@@ -84,6 +84,12 @@ class AQSISTEX_SHARE IqTextureSampler
 				const boost::shared_ptr<IqTiledTexInputFile>& file);
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqMultiTexInputFile>& file);
+		/** \brief Create a dummy texture sampler.
+		 *
+		 * Dummy samplers are useful when a texture file cannot be found but
+		 * the render should go on regardless.
+		 */
+		static boost::shared_ptr<IqTextureSampler> createDummy();
 		//@}
 
 		virtual ~IqTextureSampler() {}

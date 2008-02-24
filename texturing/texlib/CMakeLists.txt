@@ -15,6 +15,7 @@ INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 SET(AQSISTEX_SRCS
 	channelinfo.cpp
 	channellist.cpp
+	dummytexturesampler.cpp
 	ewafilter.cpp
 	cachedfilter.cpp
 	ishadowsampler.cpp
@@ -38,10 +39,13 @@ SET(AQSISTEX_SRCS
 SET(AQSISTEX_HDRS
 	channelinfo.h
 	channellist.h
+	dummyshadowsampler.h
+	dummytexturesampler.h
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
 	imagechannel.h
+	imagefiletype.h
 	ishadowsampler.h
 	itexinputfile.h
 	itexoutputfile.h

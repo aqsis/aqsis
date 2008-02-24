@@ -32,13 +32,13 @@
 #include <boost/shared_ptr.hpp>
 
 #include "samplequad.h"
+#include "matrix.h"
+#include "texturesampleoptions.h"
 
 namespace Aqsis {
 
-class CqShadowSampleOptions;
 class IqTiledTexInputFile;
 class IqTexInputFile;
-class CqMatrix;
 
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling shadow texture buffers.
@@ -84,6 +84,12 @@ class AQSISTEX_SHARE IqShadowSampler
 		static boost::shared_ptr<IqShadowSampler> create(
 				const boost::shared_ptr<IqTexInputFile>& file,
 				const CqMatrix& camToWorld);
+		/** \brief Create a dummy shadow texture sampler.
+		 *
+		 * Dummy samplers are useful when a texture file cannot be found but
+		 * the render should go on regardless.
+		 */
+		static boost::shared_ptr<IqShadowSampler> createDummy();
 		//@}
 
 		virtual ~IqShadowSampler() {}

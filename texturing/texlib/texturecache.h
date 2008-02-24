@@ -90,15 +90,15 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 */
 		const CqTexFileHeader* textureInfo(const char* name);
 
-		/** \brief Set the camera -> world transformation
+		/** \brief Set the current -> world transformation
 		 *
 		 * This transformation is used by shadow samplers in order to transform
-		 * the provided shading (camera) coordinates into the coordinate system
-		 * of the shadowed light.
+		 * the provided shading coordinates into the coordinate system of the
+		 * shadowed light.
 		 *
-		 * \param camToWorld - camera -> world transformation.
+		 * \param currToWorld - current -> world transformation.
 		 */
-		void setCamToWorldMatrix(const CqMatrix& camToWorld);
+		void setCurrToWorldMatrix(const CqMatrix& currToWorld);
 
 	private:
 		/** \brief Find a sampler in the given map, or create one from file if needed.
@@ -130,16 +130,6 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		template<typename SamplerT>
 		boost::shared_ptr<SamplerT> newSamplerFromFile(
 				const boost::shared_ptr<IqMultiTexInputFile>& file);
-		/** \brief Create a dummy sampler of the given type.
-		 *
-		 * This is used when a texture sampler cannot be created from the
-		 * requested file name.  A dummy sampler enables the renderer to
-		 * continue with a fake texture.
-		 *
-		 * SamplerT - base sampler type.
-		 */
-		template<typename SamplerT>
-		boost::shared_ptr<SamplerT> newDummySampler();
 
 		/// Cached textures live in here
 		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
@@ -147,7 +137,7 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		/// Cached texture files live in here:
 		std::map<TqUlong, boost::shared_ptr<IqMultiTexInputFile> > m_texFileCache;
 		/// Camera -> world transformation - used for creating shadow maps.
-		CqMatrix m_camToWorld;
+		CqMatrix m_currToWorld;
 		/// Callback function to obtain the current texture search path.
 		TqSearchPathCallback m_searchPathCallback;
 };

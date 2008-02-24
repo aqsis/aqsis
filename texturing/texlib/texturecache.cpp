@@ -44,7 +44,7 @@ CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)
 	: m_textureCache(),
 	m_shadowCache(),
 	m_texFileCache(),
-	m_camToWorld(),
+	m_currToWorld(),
 	m_searchPathCallback(searchPathCallback)
 { }
 
@@ -79,9 +79,9 @@ const CqTexFileHeader* CqTextureCache::textureInfo(const char* name)
 	}
 }
 
-void CqTextureCache::setCamToWorldMatrix(const CqMatrix& camToWorld)
+void CqTextureCache::setCurrToWorldMatrix(const CqMatrix& currToWorld)
 {
-	m_camToWorld = camToWorld;
+	m_currToWorld = currToWorld;
 }
 
 //--------------------------------------------------
@@ -111,16 +111,15 @@ SamplerT& CqTextureCache::findSampler(
 		}
 		catch(XqInvalidFile& e)
 		{
-			Aqsis::log() << warning
-				<< "Could not open file: \"" << name << "\": " << e.what() << "\n";
-			/// \todo Use newDummySampler() here.
-			throw e;
+			Aqsis::log() << error
+				<< "Invalid texture file - " << e.what() << "\n";
+			newTex = SamplerT::createDummy();
 		}
 		catch(XqBadTexture& e)
 		{
-			Aqsis::log() << warning
-				<< "Bad texture file: \"" << name << "\": " << e.what() << "\n";
-			throw e;
+			Aqsis::log() << error
+				<< "Bad texture file - " << e.what() << "\n";
+			newTex = SamplerT::createDummy();
 		}
 		samplerMap[CqString::hash(name)] = newTex;
 		return *newTex;
@@ -156,13 +155,7 @@ template<>
 boost::shared_ptr<IqShadowSampler>
 CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqMultiTexInputFile>& file)
 {
-	return IqShadowSampler::create(file, m_camToWorld);
+	return IqShadowSampler::create(file, m_currToWorld);
 }
-
-template<typename SamplerT>
-boost::shared_ptr<SamplerT> newDummySampler()
-{
-	return boost::shared_ptr<SamplerT>();
-};
 
 } // namespace Aqsis
