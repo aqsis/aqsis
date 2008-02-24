@@ -41,7 +41,6 @@
 #include	"renderer.h"
 #include	"converter.h"
 #include	"logging.h"
-#include	"texturemap.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
