@@ -26,6 +26,8 @@
 
 #include "tiffdirhandle.h"
 
+#include <sstream>
+
 #include <tiffio.hxx>
 
 #include "aqsismath.h"
@@ -303,15 +305,36 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	}
 }
 
-// Extract an attribute from dirHandle and add it to header, if present.
+namespace {
+
+/// Extract an attribute from dirHandle and add it to header, if present.
 template<typename Tattr, typename Ttiff>
-static void addAttributeToHeader(ttag_t tag,
-		CqTexFileHeader& header, const CqTiffDirHandle& dirHandle)
+void addAttributeToHeader(ttag_t tag, CqTexFileHeader& header,
+		const CqTiffDirHandle& dirHandle)
 {
 	Ttiff temp;
 	if(TIFFGetField(dirHandle.tiffPtr(), tag, &temp))
 		header.set<Tattr>(typename Tattr::type(temp));
 }
+
+/// Add texture wrap modes to the header if they can be found in the TIFF.
+void addWrapModesToHeader(CqTexFileHeader& header, const CqTiffDirHandle& dirHandle)
+{
+	char* wrapModesStr = 0;
+	if(TIFFGetField(dirHandle.tiffPtr(), TIFFTAG_PIXAR_WRAPMODES, &wrapModesStr))
+	{
+		SqWrapModes modes;
+		std::istringstream iss(wrapModesStr);
+		std::string wrapMode;
+		iss >> wrapMode;
+		modes.sWrap = wrapModeFromString(wrapMode);
+		iss >> wrapMode;
+		modes.tWrap = wrapModeFromString(wrapMode);
+		header.set<Attr::WrapModes>(modes);
+	}
+}
+
+} // unnamed namespace
 
 void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 {
@@ -322,12 +345,10 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 	addAttributeToHeader<Attr::DateTime,char*>(TIFFTAG_DATETIME, header, *this);
 	addAttributeToHeader<Attr::TextureFormat,char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
 
-
-	// Add texturemap-specific strings to the header if they exist.
-	addAttributeToHeader<Attr::WrapModes,char*>(TIFFTAG_PIXAR_WRAPMODES, header, *this);
+	// Add texturemap-specific stuff to the header if it exists.
+	addWrapModesToHeader(header, *this);
 
 	// Add some matrix attributes
-	/// \todo: Check that these are constructed correctly!
 	addAttributeToHeader<Attr::WorldToScreenMatrix,float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
 	addAttributeToHeader<Attr::WorldToCameraMatrix,float*>(

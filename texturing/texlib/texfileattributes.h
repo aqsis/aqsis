@@ -34,6 +34,7 @@
 
 #include "channellist.h"
 #include "matrix.h"
+#include "wrapmode.h"
 
 namespace Aqsis {
 
@@ -48,6 +49,13 @@ struct SqImageRegion
 	/// Trivial constructor
 	inline SqImageRegion(TqInt width = 0, TqInt height = 0,
 			TqInt topLeftX = 0, TqInt topLeftY = 0);
+};
+
+/// A pair of wrap modes to specify wrapping in the two texture coordinate directions.
+struct SqWrapModes
+{
+	EqWrapMode sWrap;
+	EqWrapMode tWrap;
 };
 
 //------------------------------------------------------------------------------
@@ -129,9 +137,11 @@ namespace Attr
 	AQSIS_IMAGE_ATTR_TAG(Description, std::string);
 	// date and time of creation
 	AQSIS_IMAGE_ATTR_TAG(DateTime, std::string);
+
+	//--------------------------------------------------
+	/// Texture map metadata
 	// texture wrap modes
-	/// \todo Make this a special purpose type.
-	AQSIS_IMAGE_ATTR_TAG(WrapModes, std::string);
+	AQSIS_IMAGE_ATTR_TAG(WrapModes, SqWrapModes);
 	// texture format (one of "texture" "shadow" or "environment" ? )
 	/// \todo Decide on standard names for these.
 	AQSIS_IMAGE_ATTR_TAG(TextureFormat, std::string);
