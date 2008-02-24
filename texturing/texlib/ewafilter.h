@@ -209,9 +209,11 @@ inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad,
 	m_logEdgeWeight(logEdgeWeight),
 	m_minorAxisWidth(0)
 {
-	// Scale the filterCenter up to the dimensions of the base texture.
-	m_filterCenter.x(m_filterCenter.x()*baseResS);
-	m_filterCenter.y(m_filterCenter.y()*baseResT);
+	// Scale the filterCenter up to the dimensions of the base texture, and
+	// adjust by -0.5 in both directions such that the base texture is
+	// *centered* on the unit square.
+	m_filterCenter.x(m_filterCenter.x()*baseResS - 0.5);
+	m_filterCenter.y(m_filterCenter.y()*baseResT - 0.5);
 	// compute and cache the filter
 	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
 }

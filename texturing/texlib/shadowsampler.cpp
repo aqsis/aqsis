@@ -118,8 +118,11 @@ class CqSampleQuadDepthApprox
 			// Compute an approximate normal for the sample quad
 			CqVector3D quadNormal = (sampleQuad.v4 - sampleQuad.v1)
 									% (sampleQuad.v3 - sampleQuad.v2);
-			// Center of the sample quad.
-			CqVector3D quadCenter = sampleQuad.center();
+			// Center of the sample quad.  We need the extra factor of 0.5
+			// divided by the base texture dimensions so that pixel sample
+			// positions are *centered* on the unit square.
+			CqVector3D quadCenter = sampleQuad.center()
+				+ CqVector3D(-0.5/baseTexWidth, -0.5/baseTexHeight, 0);
 
 			// A normal and a point define a plane; here we use this fact to
 			// compute the appropriate coefficients for the linear

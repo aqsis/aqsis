@@ -59,9 +59,9 @@ inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 /* \brief Clamp the filter anisotropy to a maximum value.
  *
  * \param covariance - Covariance matrix for a gaussian filter
- * \param minorAxisWidth - 
+ * \param minorAxisWidth - return the width of the minor ellipse axis in here.
  * \param maxAspectRatio - maximum allowable aspect ratio for the filter.
- * \param logEdgeWeight - 
+ * \param logEdgeWeight - log of the filter weight at the filter edge.
  */
 inline void clampEccentricity(SqMatrix2D& covariance, TqFloat& minorAxisWidth,
 		TqFloat maxAspectRatio, TqFloat logEdgeWeight)
