@@ -46,6 +46,8 @@ struct SqFilterSupport1D
 	 * Note that this may result in empty supports.
 	 */
 	void truncate(TqInt rangeStart, TqInt rangeEnd);
+	/// Return the number of points in the support.
+	TqInt range() const;
 	/// Return true if the support is empty.
 	bool isEmpty() const;
 	/// Return true if the support covers part of the given range.
@@ -91,6 +93,11 @@ inline void SqFilterSupport1D::truncate(TqInt rangeStart, TqInt rangeEnd)
 		start = rangeStart;
 	if(end > rangeEnd)
 		end = rangeEnd;
+}
+
+inline TqInt SqFilterSupport1D::range() const
+{
+	return end - start;
 }
 
 inline bool SqFilterSupport1D::isEmpty() const

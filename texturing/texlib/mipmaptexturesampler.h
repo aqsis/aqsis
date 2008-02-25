@@ -55,7 +55,7 @@ namespace Aqsis {
  * \todo: Investigate optimal mipmap level selection.
  */
 template<typename T>
-class CqMipmapTextureSampler : public IqTextureSampler
+class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 {
 	private:
 		typedef CqMipmapLevelCache<CqTextureBuffer<T> > TqCacheType;

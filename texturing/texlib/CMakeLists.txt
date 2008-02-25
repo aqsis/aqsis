@@ -25,6 +25,7 @@ SET(AQSISTEX_SRCS
 	magicnumber.cpp
 	samplequad.cpp
 	shadowsampler.cpp
+	stochasticsuppiter.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
@@ -59,6 +60,7 @@ SET(AQSISTEX_HDRS
 	samplequad.h
 	samplevector.h
 	shadowsampler.h
+	stochasticsuppiter.h
 	texbufsampler.h
 	texfileattributes.h
 	texfileheader.h

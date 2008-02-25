@@ -39,7 +39,7 @@ namespace Aqsis
 template<typename>
 class CqTextureBuffer;
 
-class CqShadowSampler : public IqShadowSampler
+class AQSISTEX_SHARE CqShadowSampler : public IqShadowSampler
 {
 	public:
 		CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,

@@ -39,7 +39,6 @@
 
 namespace Aqsis {
 
-class CqFilePathList;
 class IqTextureSampler;
 class IqShadowSampler;
 class IqMultiTexInputFile;

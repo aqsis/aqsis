@@ -26,12 +26,13 @@
 
 #include "shadowsampler.h"
 
-#include "itexinputfile.h"
-#include "texexception.h"
-#include "texbufsampler.h" // remove when using tiled textures.
-#include "texturebuffer.h" // remove when using tiled textures.
 #include "ewafilter.h"
+#include "itexinputfile.h"
+#include "texbufsampler.h" // remove when using tiled textures.
+#include "texexception.h"
+#include "texturebuffer.h" // remove when using tiled textures.
 #include "sampleaccum.h"
+#include "stochasticsuppiter.h"
 
 namespace Aqsis {
 
@@ -163,7 +164,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 
 	// Get the EWA filter weight functor.
 	CqEwaFilterWeights weights(texQuad, m_pixelBuf->width(),
-			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur());
+			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur(), 2);
 
 	SqFilterSupport support = weights.support();
 	if(support.intersectsRange(0, m_pixelBuf->width(), 0, m_pixelBuf->height()))
@@ -183,9 +184,16 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 		 * basis)
 		 */
 
+		/// \todo Decide when to use stochastic filtering and when to just
+		/// filter deterministically.
+
 		// Finally perform PCF filtering over the texture buffer.
-		CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf).applyFilter(
-				accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+		CqTexBufSampler<CqTextureBuffer<TqFloat>, CqStochasticSuppIter>(
+				*m_pixelBuf, CqStochasticSuppIter(sampleOpts.numSamples()) )
+			.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+
+//		CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf)
+//			.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
 	}
 	else
 	{
