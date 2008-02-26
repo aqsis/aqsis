@@ -63,16 +63,16 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 	file->readPixels(*m_pixelBuf);
 
 	// Get matrix which transforms the sample points to texture coordinates.
-	const CqMatrix* worldToLightRaster = header.findPtr<Attr::WorldToScreenMatrix>();
-	if(!worldToLightRaster)
+	const CqMatrix* worldToLightScreen = header.findPtr<Attr::WorldToScreenMatrix>();
+	if(!worldToLightScreen)
 	{
 		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLightTexCoords = (*worldToLightRaster) * camToWorld;
-	// worldToLightRaster transforms world coordinates to NDC, ie, onto the 2D
-	// box [-1,1]x[-1,1].  We instead want texture coordinates, which
-	// correspond to the box [0,1]x[0,1].  In addition, the direction of
+	m_camToLightTexCoords = (*worldToLightScreen) * camToWorld;
+	// worldToLightScreen transforms world coordinates to "screen" coordinates,
+	// ie, onto the 2D box [-1,1]x[-1,1].  We instead want texture coordinates,
+	// which correspond to the box [0,1]x[0,1].  In addition, the direction of
 	// increase of the y-axis should be swapped, since texture coordinates
 	// define the origin to be in the top left of the texture rather than the
 	// bottom right.
