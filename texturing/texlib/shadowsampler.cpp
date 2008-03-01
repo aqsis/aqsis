@@ -173,10 +173,9 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur(), 2);
 
 
-	/** \todo Optimization opportunity: Cull the query if it's outside the
-	 * [min,max] depth range of the support.  Being able to determine the
-	 * range from the tiles covered by the filter support will be a big
-	 * advantage.
+	/** \todo Optimization: Cull the query if it's outside the [min,max] depth
+	 * range of the support.  Being able to determine the range from the tiles
+	 * covered by the filter support will be a big advantage.
 	 */
 
 	SqFilterSupport support = ewaWeights.support();

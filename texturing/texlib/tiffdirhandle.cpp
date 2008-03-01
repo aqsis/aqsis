@@ -253,7 +253,6 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	addAttributeToTiff<Attr::DateTime,const char*>(TIFFTAG_DATETIME, header, *this);
 
 	// Add some matrix attributes
-	/// \todo: Check that these are converted correctly!
 	addAttributeToTiff<Attr::WorldToScreenMatrix,const float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
 	addAttributeToTiff<Attr::WorldToCameraMatrix,const float*>(

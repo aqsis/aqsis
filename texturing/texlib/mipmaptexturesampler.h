@@ -47,12 +47,9 @@ namespace Aqsis {
  *
  * This class uses a set of power-of-two downsampled images (a typical
  * mipmap) to make texture filtering efficient.  When filtering, a mipmap level
- * is chosen based on the extent of the filter quadrilateral.  Here we make a
- * choice which eliminates aliasing and blurring: we choose a mipmap level such
- * that the thinnest direction of the sampling quad falls across more than one
- * pixel.
- *
- * \todo: Investigate optimal mipmap level selection.
+ * is chosen based on the extent of the filter quadrilateral.  We choose the
+ * mipmap level to be as small as possible, subject to the filter falling
+ * across a sufficient number of pixels.
  */
 template<typename T>
 class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler

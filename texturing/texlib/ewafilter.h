@@ -268,7 +268,7 @@ class CqNegExpTable
 		 */
 		TqFloat operator()(TqFloat x) const
 		{
-			/// \todo Optimization opportunity: Remove some of the checks here...
+			/// \todo Optimization: Possibly may remove some of the checks here.
 			if(x >= m_rangeMax)
 				return 0;
 			TqFloat xRescaled = x*m_invRes;

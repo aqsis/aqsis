@@ -51,8 +51,10 @@ class CqCachedFilter
 	public:
 		/** \brief Create a zeroed filter on a regular grid.
 		 *
-		 * In the x-direction, the filter is cached on a regular lattice
-		 * \todo finish docs
+		 * The filter is cached on a regular lattice centered about (0,0).  If
+		 * the filter contains an odd number of points in the x or y
+		 * directions, the central filter value will be evaluated at (0,0).
+		 * Otherwise the central filter values will straddle the origin.
 		 *
 		 * \param width - filter width in the source image
 		 * \param height - filter height in the source image
@@ -207,7 +209,7 @@ void CqCachedFilter::cacheFilter(const FilterFuncT& filter, TqFloat scale)
 		TqFloat weight = *i/totWeight;
 		// If the weight is very small, set it to zero; this makes applying
 		// the filter more efficient when zero weights are explicitly skipped
-		// (see CqTextureBuffer<T>::applyFilter, for eg).
+		// (see the applyFilter() function used in sampling a texture buffer).
 		if(std::fabs(weight) < 1e-5)
 			weight = 0;
 		*i = weight;

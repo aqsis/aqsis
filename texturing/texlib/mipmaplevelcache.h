@@ -159,33 +159,26 @@ CqMipmapLevelCache<TextureBufferT>::CqMipmapLevelCache(
 template<typename TextureBufferT>
 void CqMipmapLevelCache<TextureBufferT>::initLevels()
 {
-	m_levels.resize(m_texFile->numSubImages());
+	TqInt numLevels = m_texFile->numSubImages();
+	m_levels.resize(numLevels);
 	m_levelTransforms.reserve(m_texFile->numSubImages());
 	m_levelTransforms.push_back(SqLevelTrans());
 	// Read in base texture buffer
-	m_levels[0].reset(new TextureBufferT());
-	TextureBufferT& baseBuf = *m_levels[0];
 	m_texFile->setImageIndex(0);
-	m_texFile->readPixels(baseBuf);
-	// Level sizes
-	TqInt levelWidth = baseBuf.width();
-	TqInt levelHeight = baseBuf.height();
+	// Calculated level sizes (init with base texture dimensions.)
+	TqInt levelWidth = m_texFile->header().width();
+	TqInt levelHeight = m_texFile->header().height();
 	// level offsets (in base-texture raster coordinates)
 	TqFloat xOffset = 0;
 	TqFloat yOffset = 0;
-	/// \todo Defer the texture loading to be on-demand.
-	for(TqInt i = 1; i < static_cast<TqInt>(m_levels.size()); ++i)
+	for(TqInt i = 1; i < numLevels; ++i)
 	{
 		if(levelWidth == 1 && levelHeight == 1)
 		{
 			m_levels.resize(i);
 			break;
 		}
-		// read in the new texture
 		m_texFile->setImageIndex(i);
-		m_levels[i].reset(new TextureBufferT());
-		TextureBufferT& currLevel = *m_levels[i];
-		m_texFile->readPixels(currLevel);
 		// Update offsets for the current level.
 		if(levelWidth % 2 == 0)
 		{
@@ -201,7 +194,8 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 		levelWidth = max((levelWidth+1)/2, 1);
 		levelHeight = max((levelHeight+1)/2, 1);
 		// check expected dimensions against actual dimensions.
-		if(levelWidth != currLevel.width() || levelHeight != currLevel.height())
+		if(levelWidth != m_texFile->header().width()
+				|| levelHeight != m_texFile->header().height())
 		{
 			throw XqBadTexture("Mipmap level has incorrect size", __FILE__, __LINE__);
 		}
@@ -237,13 +231,16 @@ const TextureBufferT& CqMipmapLevelCache<TextureBufferT>::level(TqInt levelNum)
 {
 	assert(levelNum < static_cast<TqInt>(m_levels.size()));
 	assert(levelNum >= 0);
-	TextureBufferT* sampler = m_levels[levelNum].get();
-//	if(!sampler)
-//	{
-//		m_levels[levelNum] = TextureBufferT::create(m_texFile);
-//		sampler = m_levels[levelNum].get();
-//	}
-	return *sampler;
+	if(!m_levels[levelNum])
+	{
+		Aqsis::log() << debug << "loaded subtexture " << levelNum
+			<< " from texture " << m_texFile->fileName() << "\n";
+		// read in requested level if it's not loaded yet.
+		m_levels[levelNum].reset(new TextureBufferT());
+		m_texFile->setImageIndex(levelNum);
+		m_texFile->readPixels(*m_levels[levelNum]);
+	}
+	return *m_levels[levelNum];
 }
 
 template<typename TextureBufferT>

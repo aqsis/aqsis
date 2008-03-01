@@ -276,7 +276,7 @@ inline void CqSampleAccum<FilterWeightT>::accumulate(TqInt x, TqInt y,
 	// check that the weight is nonzero before doing any filtering.
 	if(weight != 0)
 	{
-		if(!m_filterWeights.isNormalized()) // check should be optimized away
+		if(!m_filterWeights.isNormalized())
 			m_totWeight += weight;
 		for(TqInt i = 0; i < m_numChans; ++i)
 			m_resultBuf[i] += weight*inSamples[i + m_startChan];
@@ -331,13 +331,11 @@ inline void CqPcfAccum<FilterWeightT, DepthFuncT>::accumulate(TqInt x, TqInt y, 
 	TqFloat weight = m_filterWeights(x,y);
 	if(weight != 0)
 	{
-		if(!m_filterWeights.isNormalized()) // check should be optimized away
+		if(!m_filterWeights.isNormalized())
 			m_totWeight += weight;
 		TqFloat surfaceDepth = m_depthFunc(x,y);
 		TqFloat shadDepth = inSamples[m_startChan];
-		/// \todo optimization opportunity? - we may make these decisions about
-		/// biases *before* running the integration loop.  This will require
-		/// several versions of CqPcfAccum.
+		/// \todo Optimization (?): - we may make these decisions about biases *before* running the integration loop.  This will require several versions of CqPcfAccum.
 		if(m_biasHigh == 0 && m_biasLow == 0)
 		{
 			// No shadow bias.
