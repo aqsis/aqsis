@@ -214,7 +214,7 @@ void CqPiqslBase::loadConfiguration(const std::string& name)
 void CqPiqslBase::loadImageToCurrentBook(const std::string& name, const std::string& filename)
 {
 	boost::shared_ptr<CqImage> newImage(new CqImage(name));
-	newImage->loadFromTiff(filename);
+	newImage->loadFromFile(filename);
 	TqUlong id = addImageToCurrentBook(newImage);
 
 	setCurrentImage(id);

@@ -27,55 +27,53 @@
 
 #include "imagechannel.h"
 
-#include <boost/format.hpp>
-
 #include "exception.h"
 #include "ndspy.h"
 
 namespace Aqsis {
 //------------------------------------------------------------------------------
 
-EqChannelFormat chanFormatFromPkDspy(TqInt dspyFormat)
+EqChannelType chanFormatFromPkDspy(TqInt dspyFormat)
 {
 	switch(dspyFormat)
 	{
 		case PkDspyFloat32:
-			return Format_Float32;
+			return Channel_Float32;
 		case PkDspyUnsigned32:
-			return Format_Unsigned32;
+			return Channel_Unsigned32;
 		case PkDspySigned32:
-			return Format_Signed32;
+			return Channel_Signed32;
 		case PkDspyUnsigned16:
-			return Format_Unsigned16;
+			return Channel_Unsigned16;
 		case PkDspySigned16:
-			return Format_Signed16;
+			return Channel_Signed16;
 		case PkDspyUnsigned8:
-			return Format_Unsigned8;
+			return Channel_Unsigned8;
 		case PkDspySigned8:
-			return Format_Signed8;
+			return Channel_Signed8;
 		default:
-			throw XqInternal("Unknown PkDspy data format", __FILE__, __LINE__);
+			AQSIS_THROW(XqInternal, "Unknown PkDspy data format");
 	}
 }
 
-TqInt pkDspyFromChanFormat(EqChannelFormat format)
+TqInt pkDspyFromChanFormat(EqChannelType format)
 {
 	switch(format)
 	{
-		case Format_Float32:
+		case Channel_Float32:
 			return PkDspyFloat32;
-		case Format_Unsigned32:
+		case Channel_Unsigned32:
 			return PkDspyUnsigned32;
-		case Format_Signed32:
+		case Channel_Signed32:
 			return PkDspySigned32;
-		case Format_Unsigned16:
+		case Channel_Unsigned16:
 			return PkDspyUnsigned16;
-		case Format_Signed16:
+		case Channel_Signed16:
 			return PkDspySigned16;
-		case Format_Unsigned8:
+		case Channel_Unsigned8:
 			return PkDspyUnsigned8;
 		default:
-		case Format_Signed8:
+		case Channel_Signed8:
 			return PkDspySigned8;
 	}
 }
@@ -134,24 +132,31 @@ const TqFloatConv* CqImageChannelCheckered::getRow(TqInt row) const
 
 
 //------------------------------------------------------------------------------
-// SqChannelInfo implementation
-TqInt SqChannelInfo::bytesPerPixel() const
+// CqImageChannelZoom implementation
+CqImageChannelZoom::CqImageChannelZoom(const IqImageChannelSource& src,
+		TqInt zoomFactor)
+	: m_source(src),
+	m_zoomFactor(zoomFactor > 0 ? zoomFactor : 1),
+	m_rowBuf()
+{ }
+
+void CqImageChannelZoom::requireSize(TqInt width, TqInt height) const
 {
-	switch(type)
+	m_source.requireSize(width/m_zoomFactor, height/m_zoomFactor);
+	if(static_cast<TqInt>(m_rowBuf.size()) != width)
+		m_rowBuf.resize(width);
+}
+
+const TqFloatConv* CqImageChannelZoom::getRow(TqInt row) const
+{
+	const TqFloatConv* srcRow = m_source.getRow(row/m_zoomFactor);
+	TqInt srcSize = m_rowBuf.size()/m_zoomFactor;
+	for(TqInt i = 0; i < srcSize; ++i)
 	{
-		case Format_Unsigned32:
-		case Format_Signed32:
-		case Format_Float32:
-			return 4;
-			break;
-		case Format_Unsigned16:
-		case Format_Signed16:
-			return 2;
-		case Format_Signed8:
-		case Format_Unsigned8:
-		default:
-			return 1;
+		for(TqInt j = i*m_zoomFactor, jEnd = (i+1)*m_zoomFactor; j < jEnd; ++j)
+			m_rowBuf[j] = srcRow[i];
 	}
+	return &m_rowBuf[0];
 }
 
 
@@ -173,10 +178,10 @@ void CqImageChannel::requireSize(TqInt width, TqInt height) const
 	// Normal image channels cannot change size; just check that the sizes match.
 	if(m_width != width || m_height != height)
 	{
-		throw XqInternal("Image channel cannot produce required size", 
-				(boost::format("required size = %dx%d;  actual size = %dx%d")
-				% width % height % m_width % m_height).str(),
-				__FILE__, __LINE__);
+		AQSIS_THROW_DETAIL(XqInternal,
+				"Image channel cannot produce required size", 
+				"required size = " << width << "x" << height 
+				<< "; actual size = " << m_width << "x" << m_height);
 	}
 }
 

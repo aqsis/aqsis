@@ -135,11 +135,6 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
 #define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
-#define	GET_FILTER_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f; \
-							GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
-#define	GET_TEXTURE_PARAMS	std::map<std::string, IqShaderData*> paramMap; \
-							GetTexParams(cParams, apParams, paramMap);
-
 
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
@@ -366,43 +361,40 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		}
 
 	private:
-		/** Internal function to extract additional named filter parameters from an array of stack entries.
+		/** \brief Evaluate discrete difference of a shader variable in the u-direction
+		 *
+		 * This is the discrete analogue to differentiation: for a 1D grid, "Y",
+		 * the discrete first order difference is conceptually just the
+		 * difference between consecutive grid points:
+		 *
+		 *   diff(Y, i) = Y[i+1] - Y[i];
+		 *
+		 * Of course, this is the *forward* difference; for the purposes of
+		 * numerical stability and accuracy, it's probably preferable to use
+		 * the centered difference:
+		 *
+		 *   diff(Y, i) = (Y[i+1] - Y[i-1])/2;
+		 *
+		 * In practise a mixture of difference schemes are necessary to work
+		 * with grid boundaries, but the normalization is consistent with the
+		 * forward difference.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
-		{
-			CqString strParam;
-			TqFloat f;
-
-			int i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				apParams[ i + 1 ] ->GetFloat( f, 0 );
-
-				if ( strParam.compare( "width" ) == 0 )
-					_pswidth = _ptwidth = f;
-				else if ( strParam.compare( "swidth" ) == 0 )
-					_pswidth = f;
-				else if ( strParam.compare( "twidth" ) == 0 )
-					_ptwidth = f;
-				i += 2;
-				cParams -= 2;
-			}
-		}
-		/** Internal function to extract additional named texture control parameters from an array of stack entries.
+		template<typename T>
+		T diffU(IqShaderData* var, TqInt gridIdx);
+		/** \brief Evaluate discrete difference of a shader variable in the v-direction
+		 *
+		 * This is the discrete analogue to differentiation
+		 * \see diffU for more details.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetTexParams( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
-		{
-			CqString strParam;
-			TqInt i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				map[ strParam ] = apParams[ i + 1 ];
-				i += 2;
-				cParams -= 2;
-			}
-		}
+		template<typename T>
+		T diffV(IqShaderData* var, TqInt gridIdx);
+
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
@@ -637,7 +629,76 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 };
 
 
+//==============================================================================
+// Implementation details
+//==============================================================================
 
+template<typename T>
+T CqShaderExecEnv::diffU(IqShaderData* var, TqInt gridIdx)
+{
+	TqInt uSize = uGridRes()+1;
+	assert(gridIdx < uSize*(vGridRes() + 1));
+
+	T val0;
+	T val1;
+
+	TqInt iu = gridIdx % uSize;
+	if(iu == 0)
+	{
+		// Use forward difference for grid boundary start in u-direction
+		var->GetValue(val0, gridIdx);
+		var->GetValue(val1, gridIdx+1);
+		return val1 - val0;
+	}
+	else if(iu == uSize-1)
+	{
+		// Use backward difference for grid boundary end in u-direction
+		var->GetValue(val0, gridIdx-1);
+		var->GetValue(val1, gridIdx);
+		return val1 - val0;
+	}
+	else
+	{
+		// Use centered difference internally
+		var->GetValue(val0, gridIdx-1);
+		var->GetValue(val1, gridIdx+1);
+		return 0.5*(val1 - val0);
+	}
+}
+
+template<typename T>
+T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
+{
+	TqInt uSize = uGridRes()+1;
+	TqInt vSize = vGridRes()+1;
+	assert(gridIdx < uSize*vSize);
+
+	T val0;
+	T val1;
+
+	TqInt iv = gridIdx / uSize;
+	if(iv == 0)
+	{
+		// Use forward difference for grid boundary start in v-direction
+		var->GetValue(val0, gridIdx);
+		var->GetValue(val1, gridIdx+uSize);
+		return val1 - val0;
+	}
+	else if(iv == vSize-1)
+	{
+		// Use backward difference for grid boundary end in v-direction
+		var->GetValue(val0, gridIdx-uSize);
+		var->GetValue(val1, gridIdx);
+		return val1 - val0;
+	}
+	else
+	{
+		// Use centered difference internally
+		var->GetValue(val0, gridIdx-uSize);
+		var->GetValue(val1, gridIdx+uSize);
+		return 0.5*(val1 - val0);
+	}
+}
 
 //-----------------------------------------------------------------------
 

@@ -45,7 +45,7 @@
 #include	"teapot.h"
 #include	"bunny.h"
 #include	"shaders.h"
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"objectinstance.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
@@ -761,7 +761,7 @@ RtVoid	RiEnd()
 	QGetRenderContext() ->EndMainModeBlock();
 
 	// Flush the image cache.
-	CqTextureMap::FlushCache();
+	CqTextureMapOld::FlushCache();
 
 	// Clear the lightsources stack.
 	Lightsource_stack.clear();
@@ -903,6 +903,12 @@ RtVoid	RiWorldBegin()
 	CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
 	QGetRenderContext() ->SetCameraTransform( current );
 	QGetRenderContext() ->BeginWorldModeBlock();
+	// Set the camera transformation for shadow maps in the sampler cache.
+	/// \todo What is the correct coordinate system to use here? "current"? "shader"?
+	CqMatrix currToWorldMat;
+	QGetRenderContext()->matSpaceToSpace("current", "world", NULL, NULL, 0, currToWorldMat);
+	QGetRenderContext()->textureCache().setCurrToWorldMatrix(currToWorldMat);
+
 	// Reset the current transformation to identity, this now represents the object-->world transform.
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
@@ -987,6 +993,9 @@ RtVoid	RiWorldEnd()
 		Aqsis::log() << error << strError.c_str() << std::endl;
 		fFailed = true;
 	}
+
+	// Remove all cached textures.
+	QGetRenderContext()->textureCache().flush();
 
 	// Delete the world context
 	QGetRenderContext() ->EndWorldModeBlock();
@@ -5227,7 +5236,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		Aqsis::log() << debug << "Convert " << imagefile << std::endl;
 	}
 
-	CqTextureMap Source( imagefile );
+	CqTextureMapOld Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
 	ProcessCompression( &comp, &qual, count, tokens, values );
@@ -5236,7 +5245,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
-		// Hopefully CqTextureMap will take care of closing the tiff file after
+		// Hopefully CqTextureMapOld will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
 		Source.Interpreted( modes );
@@ -5248,7 +5257,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMap class.
+		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMapOld class.
 		int log2 = min(Source.XRes(), Source.YRes());
 		log2 = static_cast<int> ( ceil(log(static_cast<float>(log2))/log(2.0)) ) + 1;
 
@@ -5366,7 +5375,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 	}
 
 	// Now load the original image.
-	CqTextureMap Source( imagefile );
+	CqTextureMapOld Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
 	ProcessCompression( &comp, &qual, count, tokens, values );
@@ -5375,7 +5384,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
-		// Hopefully CqTextureMap will take care of closing the tiff file after
+		// Hopefully CqTextureMapOld will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
 		Source.Interpreted( modes );
@@ -5442,12 +5451,12 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 	        reflfile != 0 && filterfunc != 0 );
 
 	// Now load the original image.
-	CqTextureMap tpx( px );
-	CqTextureMap tnx( nx );
-	CqTextureMap tpy( py );
-	CqTextureMap tny( ny );
-	CqTextureMap tpz( pz );
-	CqTextureMap tnz( nz );
+	CqTextureMapOld tpx( px );
+	CqTextureMapOld tnx( nx );
+	CqTextureMapOld tpy( py );
+	CqTextureMapOld tny( ny );
+	CqTextureMapOld tpz( pz );
+	CqTextureMapOld tnz( nz );
 
 	tpx.Open();
 	tnx.Open();
@@ -5483,7 +5492,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 		}
 
 		// Now copy the images to the big map.
-		CqTextureMap* Images[ 6 ] =
+		CqTextureMapOld* Images[ 6 ] =
 		    {
 		        &tpx,
 		        &tpy,
@@ -5572,7 +5581,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	DEBUG_RIMAKESHADOW
 
 	TIME_SCOPE("Shadow Mapping")
-	CqShadowMap ZFile( picfile );
+	CqShadowMapOld ZFile( picfile );
 	ZFile.LoadZFile();
 
 	TqInt comp, qual;
@@ -5580,7 +5589,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	ZFile.SetCompression( comp );
 	ZFile.SetQuality( qual );
 
-	ZFile.SaveShadowMap( shadowfile );
+	ZFile.SaveShadowMapOld( shadowfile );
 	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
 	return ;
 }
@@ -5619,7 +5628,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
         unlink(shadowfile);
 	for( index = 0; index < npics; ++index )
 	{
-		CqShadowMap ZFile( picfiles[index] );
+		CqShadowMapOld ZFile( picfiles[index] );
 		ZFile.LoadZFile();
 
 		TqInt comp, qual;
@@ -5627,7 +5636,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 		ZFile.SetCompression( comp );
 		ZFile.SetQuality( qual );
 
-		ZFile.SaveShadowMap( shadowfile, true );
+		ZFile.SaveShadowMapOld( shadowfile, true );
 	}
 	EXCEPTION_CATCH_GUARD("RiMakeOcclusionV")
 	return ;

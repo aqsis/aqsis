@@ -13,14 +13,20 @@
 #ifndef	___itexturemap_Loaded___
 #define	___itexturemap_Loaded___
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<valarray>
-#include	<map>
+#include <valarray>
+#include <map>
+
+#include "texturesampleoptions.h"
+#include "samplequad.h"
 
 START_NAMESPACE( Aqsis )
 
 struct IqShaderData;
+class CqVector3D;
+class CqString;
+class CqMatrix;
 
 //----------------------------------------------------------------------
 /** \enum EqMapType
@@ -39,17 +45,6 @@ enum	EqMapType
 };
 
 
-/** \enum EqWrapMode
- * Enum defining the various modes of handling texture access outside of the normal range.
- */
-enum	EqWrapMode
-{
-    WrapMode_Black = 0,   		///< Return black.
-    WrapMode_Periodic,   		///< Wrap round to the opposite side.
-    WrapMode_Clamp,   			///< Clamp to in range.
-};
-
-
 /** \enum EqTexFormat
  * Enum defining the possible storage types for image maps.
  */
@@ -60,16 +55,26 @@ enum EqTexFormat
 };
 
 
-
-
 //----------------------------------------------------------------------
-/** \struct IqTextureMap
+/** \struct IqTextureMapOld
  * Interface for access to texture map objects.
+ *
+ * \todo <b>Code Review</b>: This interface is distasteful in a number of ways:
+ *   * It's a "fat" interface, providing many methods which are not meaningful
+ *     for most of the concrete classes which implement it.  For instance, the
+ *     varients of the SampleMap() functions taking CqVector3D are only
+ *     applicable to environment maps.
+ *   * It doesn't support RAII, though this might be fair enough.  Does it make
+ *     sense to acquire the underlying file resource at construction, rather
+ *     than having Open() and Close() methods?
+ *   * Use of CqString is deprecated.
+ *   * The SampleMap methods are conceptually const, but aren't declared as such.
+ *   * (minor complaint) It uses TqUint when TqInt would be sufficient and safer.
  */
 
-struct IqTextureMap
+struct AQSISTEX_SHARE IqTextureMapOld
 {
-	virtual	~IqTextureMap()
+	virtual	~IqTextureMapOld()
 	{}
 
 	/** Get the horizontal resolution of this image.
@@ -113,7 +118,6 @@ struct IqTextureMap
 
 	virtual	TqInt	NumPages() const = 0;
 };
-
 
 
 //-----------------------------------------------------------------------

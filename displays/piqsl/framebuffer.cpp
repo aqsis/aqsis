@@ -36,14 +36,14 @@ void Fl_FrameBuffer_Widget::draw()
 	fl_rectf(x(), y(), w(), h());
 	if(m_image)
 	{
-		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
+		boost::shared_ptr<const Aqsis::CqMixedImageBuffer> buf = m_image->displayBuffer();
 		if(buf)
 		{
-			fl_draw_image(buf->rawData().get(),
+			fl_draw_image(buf->rawData(),
 				x()+m_image->originX(), y()+m_image->originY(),
 				buf->width(), buf->height(),
-				buf->numChannels(),
-				buf->width()*buf->numChannels()); // draw image
+				buf->channelList().numChannels(),
+				0); // draw image
 		}
 	}
 	else
@@ -141,34 +141,72 @@ int CqFramebuffer::handle(int event)
 		case FL_UNFOCUS:
 			return 1;
 		case FL_KEYDOWN:
-			if (!m_keyHeld)
 			{
-				m_keyHeld = true;
-				//std::cout << "Key: " << Fl::event_key() << " down" << std::endl;
-				switch (Fl::event_key())
+				boost::shared_ptr<Aqsis::CqImage>& image
+					= m_uiImageWidget->image();
+				int key = Fl::event_key();
+				if(Fl::event_alt())
 				{
-					case 'r':
-						//std::cout << "Red channel toggle" << std::endl;
-						return 1;
-					case 'h':
-						// 'Home' widget back to center
-						centerImageWidget();
-						m_scroll->redraw();
-						return 1;
+					switch(key)
+					{
+						case 'n':
+							if(image)
+								image->loadNextSubImage();
+								m_scroll->redraw();
+								queueResize();
+							return 1;
+						case 'p':
+							if(image)
+								image->loadPrevSubImage();
+								m_scroll->redraw();
+								queueResize();
+							return 1;
+					}
+				}
+				else if(Fl::event_shift())
+				{
+					switch(key)
+					{
+						case 'r':
+							if(image)
+								image->reloadFromFile();
+							return 1;
+					}
+				}
+				else
+				{
+					switch(key)
+					{
+						case 'h':
+							// 'Home' widget back to center
+							centerImageWidget();
+							m_scroll->redraw();
+							return 1;
+						case FL_KP + '+':
+							if(image)
+							{
+								image->setZoom(image->zoom()+1);
+								m_scroll->redraw();
+								queueResize();
+							}
+							return 1;
+						case FL_KP + '-':
+							if(image)
+							{
+								TqInt newZoom = image->zoom()-1;
+								if(newZoom > 0)
+								{
+									image->setZoom(newZoom);
+									queueResize();
+								}
+							}
+							return 1;
+					}
 				}
 			}
 			break;
-
 		case FL_KEYUP:
-			m_keyHeld = false;
-			switch (Fl::event_key())
-			{
-				case 'r':
-					//std::cout << "R up" << std::endl;
-					return 1;
-			}
 			break;
-
 		case FL_PUSH:
 			switch (Fl::event_button())
 			{
@@ -177,7 +215,6 @@ int CqFramebuffer::handle(int event)
 					m_lastPos[0] = Fl::event_x();
 					m_lastPos[1] = Fl::event_y();
 					return 1;
-
 			}
 			break;
 		case FL_RELEASE:

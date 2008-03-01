@@ -23,16 +23,33 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<fstream>
-
-#include	<string.h>
-#include	<ctype.h>
-
-#include	"aqsis.h"
-
 #include	"file.h"
 
+#include	<ctype.h>
+#include	<fstream>
+#include	<string.h>
+
+#include	"exception.h"
+
 START_NAMESPACE( Aqsis )
+
+
+//---------------------------------------------------------------------
+std::string findFileInPath(const std::string& fileName, const std::string& searchPath)
+{
+	// Just call through to the CqFile search path handling.  It's better to
+	// encapsulate this messyness here for the time being than have it spread
+	// any further through the aqsis source.
+	CqFile searchFile;
+	searchFile.Open(fileName.c_str(), searchPath.c_str());
+	if(!searchFile.IsValid())
+	{
+		AQSIS_THROW_DETAIL(XqInvalidFile, "Could not find file \"" << fileName << "\"",
+				"full search path: \"" << searchPath << "\"");
+	}
+	return std::string(searchFile.strRealName().c_str());
+}
+
 
 //---------------------------------------------------------------------
 /** Constructor

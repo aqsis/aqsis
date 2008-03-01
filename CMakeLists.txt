@@ -98,6 +98,7 @@ ADD_SUBDIRECTORY(aqsistypes)
 # Get the value of AQSISTYPES_LIBRARY from the aqsistypes project, so that downstream projects
 # can use it.
 GET_DIRECTORY_PROPERTY(AQSISTYPES_LIBRARY DIRECTORY aqsistypes DEFINITION AQSISTYPES_LIBRARY)
+ADD_SUBDIRECTORY(texturing/texlib)
 ADD_SUBDIRECTORY(shadercompiler/shadervm)
 ADD_SUBDIRECTORY(renderer/render)
 ADD_SUBDIRECTORY(renderer/aqsis)

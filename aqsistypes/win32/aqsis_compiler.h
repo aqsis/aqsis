@@ -88,6 +88,7 @@
 #ifdef	AQSIS_STATIC_LINK
 
 #  define  COMMON_SHARE
+#  define  AQSISTEX_SHARE
 
 #else // !AQSIS_STATIC_LINK
 
@@ -95,6 +96,12 @@
 #      define COMMON_SHARE __declspec(dllexport)
 #    else
 #      define COMMON_SHARE __declspec(dllimport)
+#    endif
+
+#    ifdef AQSISTEX_EXPORTS
+#      define AQSISTEX_SHARE __declspec(dllexport)
+#    else
+#      define AQSISTEX_SHARE __declspec(dllimport)
 #    endif
 
 #endif	// AQSIS_STATIC_LINK

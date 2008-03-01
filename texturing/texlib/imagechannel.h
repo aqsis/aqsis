@@ -21,11 +21,7 @@
  *
  * \brief Define classes for manipulating image channels.
  *
- * Basic local manipulations on image channel data form the underpinnings of a
- * simple compositor, which is what these classes are designed for.
- *
  * \author Chris Foster  chris42f _at_ gmail.com
- *
  */
 
 #ifndef IMAGECHANNEL_H_INCLUDED
@@ -33,134 +29,30 @@
 
 #include "aqsis.h"
 
-#include <vector>
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "aqsismath.h"
-
+#include "channelinfo.h"
+#include "iimagechannel.h"
 
 namespace Aqsis {
-//------------------------------------------------------------------------------
-
-/** \brief A more C++ - like version of the PkDspy* macros from ndspy.h
- *
- * Using this enum allows us to explicitly state that functions take a
- * "EqChannelFormat" as an input, rather than just some unnamed integer.
- */
-enum EqChannelFormat
-{
-	Format_Float32,
-	Format_Unsigned32,
-	Format_Signed32,
-	Format_Unsigned16,
-	Format_Signed16,
-	Format_Unsigned8,
-	Format_Signed8
-};
-
-/** \brief Convert a dspy format type into the enum EqChannelFormat equivilant.
- * \return the equivilant EqChannelFormat type for the given PkDspy* constant
- */
-EqChannelFormat chanFormatFromPkDspy(TqInt dspyFormat);
-
-/** \brief Convert a EqChannelFormat to the PkDspy equivilant
- */
-TqInt pkDspyFromChanFormat(EqChannelFormat format);
 
 //------------------------------------------------------------------------------
-/** \brief Floating point type used to do conversions between different image
- * channel data types.
- *
- * We include this as it's slightly possible that 32bit floating point
- * formats won't be entirely ideal - they only inexactly represent
- * 32bit integers for example.
+/** \brief Convert a dspy format type into the enum EqChannelType equivilant.
+ * \return the equivilant EqChannelType type for the given PkDspy* constant
  */
-typedef TqFloat TqFloatConv;
+AQSISTEX_SHARE EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
 
-
-//------------------------------------------------------------------------------
-class IqImageChannelSource
-{
-	public:
-		/** \brief Require that the buffer return the given size with
-		 * subsequent getRow calls.
-		 *
-		 * If this call suceeds generator returns true, it is assumed that all
-		 * subsequent requests to getRow have the desired width.  And that the
-		 * "row" parameter to getRow() will be between 0 and height-1
-		 *
-		 * \param width - requested width of the channel in pixels
-		 * \param height - height of the channel in pixels
-		 */
-		virtual void requireSize(TqInt width, TqInt height) const = 0;
-		/** \brief Copy a row of data into the buffer provided
-		 *
-		 * Performing any necessary type conversions based on the type of this channel.
-		 *
-		 * \param row - image row to take data from
-		 * \return buffer filled with 
-		 */
-		virtual const TqFloatConv* getRow(TqInt row) const = 0;
-		/** \brief Get a "raw" row.  This allows some sort of access to the
-		 * underlying data held in the channel.
-		 *
-		 * Implement this one later if useful for efficiency...  It's intended
-		 * to replace the messy implementation of copyFromSameType() in
-		 * CqImageChannel.
-		 *
-		 * \param row - channel row number to take the data from
-		 * \param buf - output pointer to the beginning of the buffer
-		 * \param stride - stride for buf in bytes
-		 * \param format - desired format for the row
-		 */
-		//virtual void getRawRow(TqInt row, const TqUchar* &buf, TqInt& stride, EqChannelFormat format) = 0 const;
-		inline virtual ~IqImageChannelSource() = 0;
-};
-
-
-//------------------------------------------------------------------------------
-/** \brief Interface for channels which can accept data
- *
- * Image channel "sinks" are able to gather 
+/** \brief Convert a EqChannelType to the PkDspy equivilant
  */
-class IqImageChannelSink
-{
-	public:
-		/** \brief Copy data from the source channel, replacing the data in the
-		 * current channel.
-		 *
-		 * \param source - channel which the data should come from.
-		 */
-		virtual void copyFrom(const IqImageChannelSource& source) = 0;
-		/** \brief Composite data from the given source over the top of this
-		 * channel.
-		 *
-		 * I think renderman uses premultiplied alpha (though need to chech the
-		 * Display section in the RISpec carefully).
-		 *
-		 * \param source - source intensity data
-		 * \param alpha - alpha channel for the source.
-		 */
-		virtual void compositeOver(const IqImageChannelSource& source,
-				const IqImageChannelSource& sourceAlpha) = 0;
-		inline virtual ~IqImageChannelSink() = 0;
-};
-
-
-//------------------------------------------------------------------------------
-/// Inherit everything from the source and sink interfaces.
-class IqImageChannel : public IqImageChannelSource, IqImageChannelSink
-{
-	public:
-		inline virtual ~IqImageChannel() = 0;
-};
-
+AQSISTEX_SHARE TqInt pkDspyFromChanFormat(EqChannelType format);
 
 //------------------------------------------------------------------------------
 /** \brief A constant-valued image channel source
  */
-class CqImageChannelConstant : public IqImageChannelSource
+class AQSISTEX_SHARE CqImageChannelConstant : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a constant image channel
@@ -182,7 +74,7 @@ class CqImageChannelConstant : public IqImageChannelSource
  * The checker pattern is suitable for use as a base image to show alpha in
  * other images.
  */
-class CqImageChannelCheckered : public IqImageChannelSource
+class AQSISTEX_SHARE CqImageChannelCheckered : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a checker channel
@@ -200,24 +92,26 @@ class CqImageChannelCheckered : public IqImageChannelSource
 
 
 //------------------------------------------------------------------------------
-/** \brief Hold channel information; similar in purpose to PtDspyDevFormat from ndspy.h.
+/** \brief A rescaling image channel
  */
-struct SqChannelInfo
+class AQSISTEX_SHARE CqImageChannelZoom : public IqImageChannelSource
 {
-	std::string name;  ///< name of the channel (eg, "r", "g"...)
-	EqChannelFormat type;	///< channel format type
-	/// Trivial constructor
-	inline SqChannelInfo(const std::string& name, EqChannelFormat type);
-	/** \brief Get the number of bytes per pixel for this channel data.
-	 *
-	 * \return channel size in bytes
-	 */
-	TqInt bytesPerPixel() const;
+	public:
+		/** \brief Construct a checker channel
+		 *
+		 * \param tileSize - the size of the checkered tiles
+		 */
+		CqImageChannelZoom(const IqImageChannelSource& src, TqInt zoomFactor);
+		virtual void requireSize(TqInt width, TqInt height) const;
+		virtual const TqFloatConv* getRow(TqInt row) const;
+	private:
+		const IqImageChannelSource& m_source; ///< Place to get source data from.
+		TqInt m_zoomFactor; ///< The amount to zoom in by.
+		mutable std::vector<TqFloatConv> m_rowBuf; ///< mem buffer for rows.
 };
 
-
 //------------------------------------------------------------------------------
-/** \brief A thin wrapper around channel data held in a CqImageBuffer
+/** \brief A thin wrapper around channel data held in a CqMixedImageBuffer
  *
  * CqImageChannel wraps around a single channel of a subregion of a heterogenous
  * array:
@@ -247,7 +141,7 @@ struct SqChannelInfo
  * Operations which need access to the type of the channel data (eg,
  * conversions) are performed in the subclass CqImageChannelTyped
  */
-class CqImageChannel : public IqImageChannel
+class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
 {
 	public:
 		/** \brief Construct an image channel.
@@ -311,7 +205,7 @@ class CqImageChannel : public IqImageChannel
  * conversion capabilities.
  */
 template<typename T>
-class CqImageChannelTyped : public CqImageChannel
+class AQSISTEX_SHARE CqImageChannelTyped : public CqImageChannel
 {
 	public:
 		/** \brief Constructor
@@ -333,26 +227,10 @@ class CqImageChannelTyped : public CqImageChannel
 };
 
 
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-// Virtual destructors for interfaces
-inline IqImageChannelSource::~IqImageChannelSource()
-{ }
+//==============================================================================
+// Implementation details
+//==============================================================================
 
-inline IqImageChannelSink::~IqImageChannelSink()
-{ }
-
-inline IqImageChannel::~IqImageChannel()
-{ }
-
-//------------------------------------------------------------------------------
-// SqChannelInfo
-inline SqChannelInfo::SqChannelInfo(const std::string& name, EqChannelFormat type)
-	: name(name),
-	type(type)
-{ }
-
-//------------------------------------------------------------------------------
 // CqImageChannel implementation
 inline CqImageChannel::~CqImageChannel()
 { }
