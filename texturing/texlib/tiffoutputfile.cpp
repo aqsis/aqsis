@@ -24,8 +24,9 @@
  * \author Chris Foster
  */
 
-#include "tiffdirhandle.h"
 #include "tiffoutputfile.h"
+
+#include "tiffdirhandle.h"
 
 namespace Aqsis {
 
@@ -45,7 +46,7 @@ CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeade
 	initialize();
 }
 
-inline const char* CqTiffOutputFile::fileName() const
+const char* CqTiffOutputFile::fileName() const
 {
 	return m_fileHandle->fileName().c_str();
 }
@@ -63,6 +64,9 @@ void CqTiffOutputFile::initialize()
 	std::string& compressionStr = m_header.find<Attr::Compression>();
 	if(compressionStr == "unknown")
 		compressionStr = "lzw";
+
+	// Timestamp the file.
+	m_header.setTimestamp();
 
 	/// \todo more checking & validation of the header.
 

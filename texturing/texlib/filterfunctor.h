@@ -29,17 +29,47 @@
 
 #include "aqsis.h"
 
-#include <cmath>
-
 #include "aqsismath.h"
 
 namespace Aqsis
 {
 
-//------------------------------------------------------------------------------
-/** \brief A functor to encapsulate traditional RI filter functions
+/** \class FilterFunctorConcept
+ * \brief Concept representing a filter function object.
+ *
+ * The renderman API defines a type "RtFilterFunc" which is used for filtering
+ * images during downsampling, as well as geometry antialiasing etc.  These
+ * functions can have several attributes such as separability which cannot be
+ * stored together with the function pointer.  The FilterFunctorConcept ties
+ * all such attributes together, as well as allowing caching of precomputed
+ * data to make evaluations of the filter more efficient.
+ *
+ * Filter functors are assumed to have their support centred on the origin.
+ *
+ * A class implementing the FilterFunctorConcept must provide the following
+ * methods:
+ *
+ * \code
+ *
+ * // Determine whether the filter is seperable or not.  To be seperable means
+ * // that the filter function, f(x,y) can be written as the product of two
+ * // other functions:  f(x,y) = h(x)*g(y) for some functions h() and g().
+ * inline bool isSeparable();
+ *
+ * // Return the filter amplitude at the point (x,y).
+ * inline TqFloat operator()(TqFloat x, TqFloat y) const;
+ *
+ * \endcode
  */
 
+//------------------------------------------------------------------------------
+/** \brief A filter functor to encapsulate traditional RI filter functions
+ *
+ * It is possible to pass arbitrary filter function handles through the
+ * renderman interface using the C API.  This functor encapsulates such an
+ * "RtFilterFunc" function pointer inside an interface conforming to the
+ * FilterFunctorConcept.
+ */
 class CqFunctionFilter
 {
 	public:

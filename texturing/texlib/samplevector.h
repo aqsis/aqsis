@@ -20,7 +20,7 @@
 /**
  * \file
  *
- * \brief Declare a minimal interface to raw sample data.
+ * \brief Declare a minimal vector interface to raw sample data in a pixel.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  */
@@ -31,31 +31,20 @@
 #include "aqsis.h"
 
 #include <limits>
-#include <boost/intrusive_ptr.hpp>
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief A minimal vector interface to the colour channels held by another object.
+/** \brief A minimal vector interface to the pixel data held by another object.
  *
- * The object which holds 
- *
- * The idea of this class is to provide the absolute minimal interface to array
- * data managed by another object, but in a way which ensures that the data
- * which this class points to (but does not own) is not deallocated by another
- * thread.
+ * This vector converts the data from the underlying pixel format (of type T)
+ * into a float by applying scaling such that integer types are mapped onto the
+ * range [0,1].
  */
 template<typename T>
 class AQSISTEX_SHARE CqSampleVector
 {
 	public:
-		/** \brief Construct a sample vector.
-		 *
-		 * \param data - the raw vector sample data.
-		 * \param parentTile - the array tile which the sample data belongs to.
-		 */
-//		inline CqSampleVector(const T* sampleData,
-//				const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile);
 		/** \brief Construct a sample vector.
 		 *
 		 * \param data - the raw vector sample data.
@@ -74,10 +63,6 @@ class AQSISTEX_SHARE CqSampleVector
 	private:
 		/// Raw pointer to the data held by this vector
 		const T* m_sampleData;
-		/** A pointer to the parent tile; this is simply to protect the parent
-		 * data from deallocation in the multithreaded case.
-		 */
-		// const boost::intrusive_ptr<const CqIntrusivePtrCounted> m_parentTile;
 };
 
 
@@ -85,13 +70,6 @@ class AQSISTEX_SHARE CqSampleVector
 // Implementation details
 //==============================================================================
 // CqSampleVector implementation
-
-//template<typename T>
-//inline CqSampleVector<T>::CqSampleVector(const T* sampleData,
-//		const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile)
-//	: m_sampleData(sampleData),
-//	m_parentTile(parentTile)
-//{ }
 
 template<typename T>
 inline CqSampleVector<T>::CqSampleVector(const T* sampleData)

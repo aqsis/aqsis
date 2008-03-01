@@ -27,8 +27,8 @@
 
 #include "magicnumber.h"
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 #include "exception.h"
 

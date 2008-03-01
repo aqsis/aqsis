@@ -27,10 +27,10 @@
 
 #include "itexinputfile.h"
 
-#include "tiffinputfile.h"
 #include "exrinputfile.h"
-#include "magicnumber.h"
 #include "logging.h"
+#include "magicnumber.h"
+#include "tiffinputfile.h"
 
 namespace Aqsis {
 

@@ -36,6 +36,8 @@ namespace Aqsis {
 class CqTiffFileHandle;
 
 //------------------------------------------------------------------------------
+/** \brief Scanline-based output for the TIFF file format.
+ */
 class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 {
 	public:
@@ -51,20 +53,23 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 		 */
 		CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeader& header);
 
-		virtual ~CqTiffOutputFile() {};
-
+		// inherited
 		virtual const char* fileName() const;
 		virtual EqImageFileType fileType();
 		virtual const CqTexFileHeader& header() const;
 		virtual TqInt currentLine() const;
 	private:
+		// inherited
 		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer);
 
 		/// Perform shared initializations needed in construction.
 		void initialize();
 
+		/// File header
 		CqTexFileHeader m_header;
+		/// Scanline at which next output will be written to.
 		TqInt m_currentLine;
+		/// Handle to the underlying tiff file.
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
 };
 

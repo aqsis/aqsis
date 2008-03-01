@@ -38,7 +38,8 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \name SupportIteratorConcept
+/** \class SupportIteratorConcept
+ * \brief Iterator concept for the points in a filter support.
  *
  * In order to filter over some support region of a raster texture, we need to
  * generate points inside that region at which the texture will be sampled and

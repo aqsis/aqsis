@@ -39,6 +39,8 @@ enum EqImageFileType
 	ImageFile_Png
 };
 
+/** \brief Convert an image file type to a string.
+ */
 const char* imageFileTypeToString(EqImageFileType type);
 
 

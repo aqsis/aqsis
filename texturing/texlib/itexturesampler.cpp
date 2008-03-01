@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Texture buffer sampling machinery.
+ * \brief Interface to texture buffer sampling machinery.
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */

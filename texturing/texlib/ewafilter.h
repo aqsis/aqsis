@@ -29,13 +29,12 @@
 
 #include "aqsis.h"
 
-#include <cmath>
 #include <vector>
 
-#include "samplequad.h"
 #include "aqsismath.h"
-#include "matrix2d.h"
 #include "filtersupport.h"
+#include "matrix2d.h"
+#include "samplequad.h"
 
 namespace Aqsis {
 

@@ -26,30 +26,14 @@
 
 #include "texfileheader.h"
 
-#include <boost/format.hpp>
 #include <ctime>
+
+#include <boost/format.hpp>
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqTexFileHeader implementation
-
-/** \brief Get a date-time string in the format expected for TIFF files
- *
- * The tiff date-time format is the 19 characters: "YYYY:MM:DD hh:mm:ss"
- * In the absence (?) of another well-defined format, we use this.
- */
-std::string tiffDateTimeString()
-{
-	time_t long_time;
-	// Get time as long integer.
-	time( &long_time );
-	// Convert to local time.
-	struct tm* ct = localtime( &long_time );
-	return (boost::format("%04d:%02d:%02d %02d:%02d:%02d")
-			% (1900 + ct->tm_year) % (ct->tm_mon + 1) % ct->tm_mday
-			% ct->tm_hour % ct->tm_min % ct->tm_sec).str();
-}
 
 void CqTexFileHeader::addStandardAttributes()
 {
@@ -59,7 +43,20 @@ void CqTexFileHeader::addStandardAttributes()
 	set<Attr::Compression>("none");
 	set<Attr::ChannelList>(CqChannelList());
 	set<Attr::PixelAspectRatio>(1.0f);
-	set<Attr::DateTime>(tiffDateTimeString());
+}
+
+void CqTexFileHeader::setTimestamp()
+{
+	time_t long_time;
+	// Get time as long integer.
+	time( &long_time );
+	// Convert to local time.
+	struct tm* ct = localtime( &long_time );
+	set<Attr::DateTime>(
+			(boost::format("%04d:%02d:%02d %02d:%02d:%02d")
+			% (1900 + ct->tm_year) % (ct->tm_mon + 1) % ct->tm_mday
+			% ct->tm_hour % ct->tm_min % ct->tm_sec).str()
+		);
 }
 
 } // namespace Aqsis

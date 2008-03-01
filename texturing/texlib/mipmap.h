@@ -21,7 +21,7 @@
  *
  * \brief Classes and functions for creating mipmaps
  *
- * \author Chris Foster
+ * \author Chris Foster  [chris42f _at_ gmail.com]
  */
 
 #ifndef MIPMAP_H_INCLUDED
@@ -32,10 +32,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "aqsismath.h"
-#include "texbufsampler.h"
-#include "wrapmode.h"
 #include "cachedfilter.h"
 #include "sampleaccum.h"
+#include "texbufsampler.h"
+#include "wrapmode.h"
 
 #include "logging.h" /// \todo debug: remove later
 
@@ -51,6 +51,7 @@ namespace Aqsis
  * textures aren't perfect for mipmapping, though they do a fairly good job.
  *
  * \param
+ * \todo Documentation when this interface is finalized.
  */
 template<typename FilterFunctorT, typename ChannelT>
 boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(

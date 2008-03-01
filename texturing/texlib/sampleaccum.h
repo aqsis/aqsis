@@ -32,7 +32,8 @@
 
 namespace Aqsis {
 
-/** \name SampleAccumulatorConcept
+/** \class SampleAccumulatorConcept
+ * \brief Accumulator concept for texture samples during filtering.
  *
  * A sample accumulator serves as a place for accumulated sample data to be
  * stored.  During filtering, we iterate over some region in the source image.

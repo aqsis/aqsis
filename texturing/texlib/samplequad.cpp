@@ -25,10 +25,12 @@
  */
 
 #include "samplequad.h"
+
 #include "matrix.h"
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
 // SqSampleQuad implementation
 void SqSampleQuad::scaleWidth(TqFloat xWidth, TqFloat yWidth)
 {
@@ -52,6 +54,7 @@ void SqSampleQuad::scaleWidth(TqFloat xWidth, TqFloat yWidth)
 }
 
 
+//------------------------------------------------------------------------------
 // Sq3DSampleQuad implementation
 void Sq3DSampleQuad::transform(const CqMatrix& mat)
 {

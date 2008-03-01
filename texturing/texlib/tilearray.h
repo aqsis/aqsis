@@ -20,8 +20,7 @@
 /**
  * \file
  *
- * \brief Declare array class which holds data as tiles and competes with other
- * arrays for memory via a common cache.
+ * \brief Declare array class which holds data as tiles.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  */
@@ -45,7 +44,6 @@
 namespace Aqsis {
 
 class IqTiledTexInputFile;
-
 struct TileKey;
 
 //------------------------------------------------------------------------------
@@ -120,12 +118,12 @@ class AQSISTEX_SHARE CqTileArray : public CqMemoryMonitored
 		boost::intrusive_ptr<CqTextureBuffer<T> >& tileForIndex(const TqInt x, const TqInt y) const;
 
 		/// Get the number of samples per pixel
-		inline TqInt samplesPerPixel() const;
+		TqInt samplesPerPixel() const;
 
 		/// Get array width
-		inline TqInt width() const;
+		TqInt width() const;
 		/// Get array height
-		inline TqInt height() const;
+		TqInt height() const;
 
 		// Inherited from CqMemoryMonitored
 		virtual CqMemorySentry::TqMemorySize zapMemory();
@@ -178,7 +176,7 @@ struct TileKey
 	}
 };
 
-
+//------------------------------------------------------------------------------
 // CqTileArray Implementation
 template<typename T>
 CqTileArray<T>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,

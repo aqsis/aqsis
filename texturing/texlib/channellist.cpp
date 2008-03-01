@@ -26,8 +26,8 @@
 
 #include "channellist.h"
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include <boost/format.hpp>
 

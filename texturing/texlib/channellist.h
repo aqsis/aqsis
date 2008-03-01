@@ -29,8 +29,8 @@
 
 #include "aqsis.h"
 
-#include <vector>
 #include <iosfwd>
+#include <vector>
 
 #include "channelinfo.h"
 #include "exception.h"
@@ -129,7 +129,7 @@ class AQSISTEX_SHARE CqChannelList
 		inline TqInt channelByteOffset(TqInt index) const;
 		/// Number of bytes required to store all channels in a pixel
 		inline TqInt bytesPerPixel() const;
-		/** Get the shared channel type code if it exists.
+		/** \brief Get the shared channel type code if it exists.
 		 *
 		 * \return the channel type which is shared by all channels, or
 		 * Channel_TypeUnknown if the channels aren't all identical or there
@@ -149,7 +149,7 @@ class AQSISTEX_SHARE CqChannelList
 		void reorderChannels();
 		/// Remove all channels
 		inline void clear();
-		/** Add the specified number of "unnamed" channels
+		/** \brief Add the specified number of "unnamed" channels
 		 *
 		 * The channels will be named from "?01" up until "?nn" where nn is
 		 * numToAdd.

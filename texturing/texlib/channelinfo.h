@@ -30,8 +30,8 @@
 
 #include "aqsis.h"
 
-#include <string>
 #include <iosfwd>
+#include <string>
 
 #ifdef USE_OPENEXR
 #include <half.h>
@@ -67,7 +67,6 @@ AQSISTEX_SHARE TqInt bytesPerPixel(EqChannelType type);
  */
 template<typename T>
 inline EqChannelType getChannelTypeEnum();
-
 
 /** \brief Stream insertion operator for EqChannelType
  *
@@ -130,6 +129,7 @@ inline TqInt SqChannelInfo::bytesPerPixel() const
 //------------------------------------------------------------------------------
 // Free functions
 
+/// \todo Use int types of known width here.
 // getChannelTypeEnum - generic implementation
 template<typename T> inline EqChannelType getChannelTypeEnum() { return Channel_TypeUnknown; }
 

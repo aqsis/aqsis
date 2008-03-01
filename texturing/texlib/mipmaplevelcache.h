@@ -34,11 +34,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexinputfile.h"
-#include "texturesampleoptions.h"
 #include "exception.h"
+#include "itexinputfile.h"
 #include "logging.h"
 #include "texexception.h"
+#include "texturesampleoptions.h"
 
 namespace Aqsis
 {
@@ -97,14 +97,14 @@ class CqMipmapLevelCache
 		 */
 		const SqLevelTrans& levelTrans(TqInt levelNum);
 		/// Get the number of levels in this mipmap.
-		inline TqInt numLevels() const;
+		TqInt numLevels() const;
 		/** \brief Get the default sample options associated with the texture file.
 		 *
 		 * \return The default sample options - these include options which
 		 * were used when the texture was created (things like the texutre wrap
 		 * mode).
 		 */
-		inline const CqTextureSampleOptions& defaultSampleOptions();
+		const CqTextureSampleOptions& defaultSampleOptions();
 	private:
 		/// Initialize all mipmap levels
 		void initLevels();
@@ -142,6 +142,7 @@ inline SqLevelTrans::SqLevelTrans(TqFloat xScale, TqFloat xOffset,
 { }
 
 
+//------------------------------------------------------------------------------
 // CqMipmapLevelCache
 template<typename TextureBufferT>
 CqMipmapLevelCache<TextureBufferT>::CqMipmapLevelCache(

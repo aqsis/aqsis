@@ -38,6 +38,7 @@
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
 /// A box type specifying an image region.
 struct SqImageRegion
 {
@@ -51,6 +52,7 @@ struct SqImageRegion
 			TqInt topLeftX = 0, TqInt topLeftY = 0);
 };
 
+//------------------------------------------------------------------------------
 /// A pair of wrap modes to specify wrapping in the two texture coordinate directions.
 struct SqWrapModes
 {
@@ -90,6 +92,8 @@ namespace Attr
 	 * has top left coordinates of (0,0).  (So negative values of
 	 * topLeftX,topLeftY are valid).
 	 *
+	 * \verbatim
+	 *
 	 * (topLeftX, topLeftY)
 	 *  x---Display window-------------------+
 	 *  |                                    |
@@ -110,6 +114,7 @@ namespace Attr
 	 *  |                                    |
 	 *  +------------------------------------+
 	 *
+	 * \endverbatim
 	 */
 	AQSIS_IMAGE_ATTR_TAG(Width, TqInt);
 	AQSIS_IMAGE_ATTR_TAG(Height, TqInt);
@@ -136,6 +141,7 @@ namespace Attr
 	// description of image
 	AQSIS_IMAGE_ATTR_TAG(Description, std::string);
 	// date and time of creation
+	// (this could usefully be a struct rather than a string in future)
 	AQSIS_IMAGE_ATTR_TAG(DateTime, std::string);
 
 	//--------------------------------------------------

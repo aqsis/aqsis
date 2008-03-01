@@ -27,17 +27,16 @@
 #ifndef SAMPLEQUAD_H_INCLUDED
 #define SAMPLEQUAD_H_INCLUDED
 
-#include <cmath>
-
+#include "aqsismath.h"
 #include "vector2d.h"
 #include "vector3d.h"
-#include "aqsismath.h"
 
 namespace Aqsis {
 
 class CqMatrix;
 struct Sq3DSampleQuad;
 
+//------------------------------------------------------------------------------
 /** \brief 2D quadrilateral over which to sample a texture
  *
  * The vertices of the quad have the ordering such that v4 corresponds to the
@@ -56,6 +55,7 @@ struct Sq3DSampleQuad;
  */
 struct SqSampleQuad
 {
+	/// v1 to v4 are vectors defining the vertices of the quadrilateral.
 	CqVector2D v1;
 	CqVector2D v2;
 	CqVector2D v3;
@@ -99,6 +99,7 @@ struct SqSampleQuad
 };
 
 
+//------------------------------------------------------------------------------
 /** \brief 3D quadrilateral over which to sample a texture
  *
  * Some texture types such as shadow maps and environment maps need to be
@@ -110,6 +111,7 @@ struct SqSampleQuad
  */
 struct Sq3DSampleQuad
 {
+	/// v1 to v4 are vectors defining the vertices of the quadrilateral.
 	CqVector3D v1;
 	CqVector3D v2;
 	CqVector3D v3;

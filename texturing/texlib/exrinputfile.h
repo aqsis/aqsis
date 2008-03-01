@@ -30,8 +30,8 @@
 
 #include "aqsis.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 
@@ -55,6 +55,13 @@ namespace Attr {
 }
 
 //------------------------------------------------------------------------------
+/** \brief Scanline-oriented input of data from OpenEXR files.
+ *
+ * This class should be able to read most OpenEXR data which can be read by the
+ * Imf::InputFile class from the OpenEXR library.  There are a few exceptions,
+ * including data saved with subsampled colour channels, such as
+ * luminance-chroma data.
+ */
 class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 {
 	public:
@@ -71,7 +78,9 @@ class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 		/// Perform shared initializations needed in construction.
 		void initialize();
 
+		/// Header data from EXR file.
 		CqTexFileHeader m_header;
+		/// pointer to underlying OpenEXR file.
 		boost::shared_ptr<Imf::InputFile> m_exrFile;
 };
 

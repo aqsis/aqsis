@@ -40,19 +40,28 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+/** \brief Scanline-oriented image file output.
+ *
+ * This interface wraps around the various image file types, providing a
+ * uniform interface for placing image data into a file.  Metadata is handled
+ * via the CqTexFileHeader container, while pixel data may be written into the
+ * file one line at a time, or a whole set of lines at once.
+ */
 class AQSISTEX_SHARE IqTexOutputFile
 {
 	public:
 		virtual ~IqTexOutputFile() {};
 
+		//--------------------------------------------------
+		/// \name Metadata access
+		//@{
 		/// get the file name
 		virtual const char* fileName() const = 0;
-
 		/// get the file type
 		virtual EqImageFileType fileType() = 0;
-
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
+		//@}
 
 		/** Get the index for the current line
 		 *

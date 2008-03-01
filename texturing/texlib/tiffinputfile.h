@@ -60,6 +60,7 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 		 */
 		CqTiffInputFile(std::istream& inStream);
 
+		// inherited
 		virtual const char* fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header() const;
@@ -69,6 +70,7 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 		virtual TqInt numSubImages() const;
 
 	private:
+		// inherited
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 

@@ -76,7 +76,6 @@ SET(AQSISTEX_HDRS
 	tiffinputfile.h
 	tiffoutputfile.h
 	tilearray.h
-	tiledtiffinputfile.h
 	wrapmode.h
 	)
 IF(AQSIS_OPENEXR_FOUND)

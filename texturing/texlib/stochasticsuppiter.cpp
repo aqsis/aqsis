@@ -33,7 +33,6 @@ Cq2dQuasiRandomTable CqStochasticSuppIter::m_randTab;
 //------------------------------------------------------------------------------
 // Cq2dQuasiRandomTable implementation
 
-
 Cq2dQuasiRandomTable::Cq2dQuasiRandomTable()
 	: m_rand()
 {

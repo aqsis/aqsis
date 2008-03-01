@@ -125,6 +125,9 @@ class AQSISTEX_SHARE IqTexInputFile
 class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 {
 	public:
+		//--------------------------------------------------
+		/// \name Methods for sub-image access.
+		//@{
 		/** Set the image index in a multi-image file.
 		 *
 		 * In general, this function may be expected to modify the image header
@@ -133,18 +136,17 @@ class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 		 * \param newIndex - new index in the multi-image file.
 		 */
 		virtual void setImageIndex(TqInt newIndex) = 0;
-
 		/** Get the image index for a multi-image file.
 		 *
 		 * \return the current image index
 		 */
 		virtual TqInt imageIndex() const = 0;
-
 		/** Get the number of images in the multi-image file.
 		 *
 		 * \return The number of images
 		 */
 		virtual TqInt numSubImages() const = 0;
+		//@}
 
 		/** \brief Open an input image file in any format supporting multiple sub-images.
 		 *

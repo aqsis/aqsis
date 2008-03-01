@@ -39,22 +39,33 @@ namespace Aqsis
 template<typename>
 class CqTextureBuffer;
 
+//------------------------------------------------------------------------------
+/** \brief A sampler for shadow maps, implementing percentage closer filtering.
+ */
 class AQSISTEX_SHARE CqShadowSampler : public IqShadowSampler
 {
 	public:
+		/** \brief Construct a shadow sampler with data from the provided file.
+		 *
+		 * \param file - file to obtain the shadow map data from.
+		 * \param currToWorld - a matrix transforming the "current" coordinate
+		 *                      system to the world coordinate system.  Sample
+		 *                      quads are assumed to be passed to the sample()
+		 *                      function represented in the "current"
+		 *                      coordinate system.
+		 */
 		CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
-				const CqMatrix& camToWorld);
+				const CqMatrix& currToWorld);
 
-		// From IqShadowSampler
+		// inherited
 		virtual void sample(const Sq3DSampleQuad& sampleQuad,
 				const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const;
-
 		virtual const CqShadowSampleOptions& defaultSampleOptions() const;
 	private:
 		/// transformation: camera -> light coordinates
-		CqMatrix m_camToLight;
+		CqMatrix m_currToLight;
 		/// transformation: camera -> shadow map texture coordinates ( [0,1]x[0,1] )
-		CqMatrix m_camToLightTexCoords;
+		CqMatrix m_currToLightTexCoords;
 		/// Pixel data for shadow map.
 		boost::shared_ptr<CqTextureBuffer<TqFloat> > m_pixelBuf;
 		/// Default shadow sampling options.

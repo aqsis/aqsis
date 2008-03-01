@@ -30,9 +30,9 @@
  */
 
 #include <algorithm>
-#include <sstream>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include <tiffio.h>
 

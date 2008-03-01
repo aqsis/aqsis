@@ -31,8 +31,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "samplequad.h"
 #include "matrix.h"
+#include "samplequad.h"
 #include "texturesampleoptions.h"
 
 namespace Aqsis {

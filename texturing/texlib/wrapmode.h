@@ -51,6 +51,7 @@ enum EqWrapMode
 EqWrapMode wrapModeFromString(const std::string& modeString);
 
 
+
 //==============================================================================
 // Implementation details
 //==============================================================================

@@ -26,8 +26,8 @@
 
 #include "itexoutputfile.h"
 
-#include "tiffoutputfile.h"
 #include "exception.h"
+#include "tiffoutputfile.h"
 
 namespace Aqsis {
 

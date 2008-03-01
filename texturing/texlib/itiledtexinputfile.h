@@ -38,6 +38,17 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+/** \brief Image data input interface for tiled image files.
+ *
+ * Tiled images are broken up into a set of rectangular subregions called
+ * "tiles" which are all of the same size.  Tile coordinates are such that
+ * (0,0) is in the top left of the image, with (1,0) being the tile to the
+ * immediate right of (0,0), etc.
+ *
+ * This interface allows tiles to be read from file one at a time.
+ *
+ * \todo it should also handle multi-image files.
+ */
 class AQSISTEX_SHARE IqTiledTexInputFile
 {
 	public:
@@ -63,10 +74,6 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 *     given channel structure it should throw.
 		 *   - TqUchar* rawData()
 		 *     Gets a raw pointer to the data.
-		 *
-		 * Tiles are all of the same size.  Tile coordinates are such that
-		 * (0,0) is in the top left of the image with (1,0) the tile to the
-		 * immediate right of (0,0), etc.
 		 *
 		 * \param buffer - buffer to read the tile into
 		 * \tileX - horizontal tile coordinate, starting from 0 in the top left.

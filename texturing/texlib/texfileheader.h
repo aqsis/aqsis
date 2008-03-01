@@ -30,8 +30,8 @@
 
 #include "aqsis.h"
 
-#include <map>
 #include <iostream>
+#include <map>
 
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
@@ -67,34 +67,45 @@ class AQSISTEX_SHARE CqTexFileHeader
 		typedef TqAttributeMap::const_iterator const_iterator;
 	public:
 
-		/** Construct a header, empty except for required fields.
+		/** \brief Construct a header, empty except for required fields.
 		 */
-		inline CqTexFileHeader();
+		CqTexFileHeader();
 
 		//---------------------------------------------------------
+		/// \name Set image attribute values.
+		//@{
 		/** \brief Set the value of an attribute with the given tag type
 		 *
 		 * AttrTagType provides a typedef AttrTagType::type which is the
 		 * desired type for the corresponding attribute.
 		 */
 		template<typename AttrTagType>
-		inline void set(const typename AttrTagType::type& value);
+		void set(const typename AttrTagType::type& value);
+
+		/** \brief Timestamp the file.
+		 *
+		 * This adds the Attr::DateTime attribute to the header in the format
+		 * given by the tiff standard.  The tiff standard specifies 19
+		 * characters for the date and time: "YYYY:MM:DD hh:mm:ss".
+		 */
+		void setTimestamp();
+		//@}
 
 		//---------------------------------------------------------
-		/** \name Image attribute access
+		/** \name Image attribute accessors
 		 *
 		 * Convenience functions are provided for a few often-used attributes.
 		 * All other attributes are accessed via the find() functions.
 		 */
 		//@{
 		/// Get the image width
-		inline TqInt width() const;
+		TqInt width() const;
 		/// Get the image height
-		inline TqInt height() const;
+		TqInt height() const;
 		/// Get the image channel data
-		inline CqChannelList& channelList();
+		CqChannelList& channelList();
 		/// Get the image channel data
-		inline const CqChannelList& channelList() const;
+		const CqChannelList& channelList() const;
 
 		/** \brief Get a reference to an attribute
 		 *
@@ -106,10 +117,10 @@ class AQSISTEX_SHARE CqTexFileHeader
 		 * \return a reference to the desired attribute.
 		 */
 		template<typename AttrTagType>
-		inline typename AttrTagType::type& find();
+		typename AttrTagType::type& find();
 		/// Get a reference to an attribute (const version)
 		template<typename AttrTagType>
-		inline const typename AttrTagType::type& find() const;
+		const typename AttrTagType::type& find() const;
 
 		/** \brief Get a reference to an attribute
 		 *
@@ -121,7 +132,7 @@ class AQSISTEX_SHARE CqTexFileHeader
 		 * \return a reference to the desired attribute.
 		 */
 		template<typename AttrTagType>
-		inline const typename AttrTagType::type& find(const typename
+		const typename AttrTagType::type& find(const typename
 				AttrTagType::type& defaultVal) const;
 
 		/** \brief Get a pointer to an attribute
@@ -129,10 +140,10 @@ class AQSISTEX_SHARE CqTexFileHeader
 		 * \return a pointer to the desired attribute, or NULL if not present.
 		 */
 		template<typename AttrTagType>
-		inline typename AttrTagType::type* findPtr();
+		typename AttrTagType::type* findPtr();
 		/// Get a pointer to an attribute by name (const version)
 		template<typename AttrTagType>
-		inline const typename AttrTagType::type* findPtr() const;
+		const typename AttrTagType::type* findPtr() const;
 		//@}
 
 	private:

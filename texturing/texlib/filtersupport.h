@@ -35,13 +35,22 @@
 namespace Aqsis
 {
 
+//------------------------------------------------------------------------------
+/** \brief Represent a filter support region in integer raster coordinates.
+ *
+ * A support is represented by two integers, "start" and "end".  These specify
+ * the range [start,end) where the left end is *inclusive* and the right end
+ * *exclusive*.
+ */
 struct SqFilterSupport1D
 {
+	/// Start of the support, inclusive
 	TqInt start;
+	/// End of the support range, exclusive.
 	TqInt end;
 	/// Trivial constructor
 	SqFilterSupport1D(TqInt start, TqInt end);
-	/** \brief Truncate the support into the closed interval [rangeStart, rangeEnd]
+	/** \brief Truncate the support into the interval [rangeStart, rangeEnd)
 	 *
 	 * Note that this may result in empty supports.
 	 */
@@ -57,6 +66,7 @@ struct SqFilterSupport1D
 };
 
 
+//------------------------------------------------------------------------------
 /** \brief Hold filter support area.
  *
  * The end markers are *exclusive*, so the support of a filter is inside the

@@ -33,8 +33,8 @@
 
 #include <boost/shared_array.hpp>
 
-#include "samplevector.h"
 #include "channellist.h"
+#include "samplevector.h"
 
 namespace Aqsis {
 

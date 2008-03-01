@@ -30,18 +30,18 @@
 
 #include "aqsis.h"
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
 #include "aqsismath.h"
+#include "channellist.h"
 #include "exception.h"
 #include "imagechannel.h"
-#include "channellist.h"
 
 namespace Aqsis {
 
@@ -256,13 +256,11 @@ class AQSISTEX_SHARE CqMixedImageBuffer : boost::noncopyable
 };
 
 
-//------------------------------------------------------------------------------
+//==============================================================================
 // Implementation details
-//------------------------------------------------------------------------------
+//==============================================================================
 
-//------------------------------------------------------------------------------
 // CqMixedImageBuffer
-
 inline const CqChannelList& CqMixedImageBuffer::channelList() const
 {
 	return m_channelList;

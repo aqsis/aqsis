@@ -31,27 +31,24 @@
 
 #include <string>
 
-#include <boost/utility.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/utility.hpp>
 #include <tiffio.h>
 
-#include "exception.h"
 #include "channellist.h"
-#include "texfileheader.h"
+#include "exception.h"
 #include "logging.h"
+#include "texfileheader.h"
 
 namespace Aqsis
 {
 
 class CqTiffFileHandle;
 
-/// Type string for tiff files.
-
-extern const char* tiffFileTypeString;
-
+//------------------------------------------------------------------------------
 namespace Attr {
 	/**
-	 * Extra image attribute to record whether a TIFF file has pixels in a
+	 * Extra image attribute recording whether a TIFF file has pixels in a
 	 * format which are supported for reading natively by aqsistex.  If the
 	 * attribute is true, use the generic libtiff RGBA image reading facility
 	 * rather than handling the pixel format natively.
@@ -89,7 +86,7 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 				const tdir_t dirIdx = 0);
 
 		/// Obtain the underlying tiff file pointer
-		inline TIFF* tiffPtr() const;
+		TIFF* tiffPtr() const;
 		/// Obtain the index to this directory
 		tdir_t dirIndex() const;
 
@@ -289,10 +286,7 @@ boost::shared_array<T> tiffMalloc(const tsize_t size);
 // Implementation of inline functions and templates
 //==============================================================================
 
-//------------------------------------------------------------------------------
-// CqTiffDirHandle
-//------------------------------------------------------------------------------
-
+// CqTiffDirHandle implementation
 inline TIFF* CqTiffDirHandle::tiffPtr() const
 {
 	return m_fileHandle->m_tiffPtr.get();
@@ -344,8 +338,7 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value,
 }
 
 //------------------------------------------------------------------------------
-// CqTIffFileHandle
-//------------------------------------------------------------------------------
+// CqTIffFileHandle implementation
 inline const std::string& CqTiffFileHandle::fileName() const
 {
 	return m_fileName;
@@ -353,8 +346,6 @@ inline const std::string& CqTiffFileHandle::fileName() const
 
 //------------------------------------------------------------------------------
 // libtiff wrapper functions
-//------------------------------------------------------------------------------
-
 template<typename T>
 boost::shared_array<T> tiffMalloc(const tsize_t size)
 {

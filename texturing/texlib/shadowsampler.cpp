@@ -28,18 +28,21 @@
 
 #include "ewafilter.h"
 #include "itexinputfile.h"
+#include "sampleaccum.h"
+#include "stochasticsuppiter.h"
 #include "texbufsampler.h" // remove when using tiled textures.
 #include "texexception.h"
 #include "texturebuffer.h" // remove when using tiled textures.
-#include "sampleaccum.h"
-#include "stochasticsuppiter.h"
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
+// CqShadowSampler implementation
+
 CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
-				const CqMatrix& camToWorld)
-	: m_camToLight(),
-	m_camToLightTexCoords(),
+				const CqMatrix& currToWorld)
+	: m_currToLight(),
+	m_currToLightTexCoords(),
 	m_pixelBuf(new CqTextureBuffer<TqFloat>()),
 	m_defaultSampleOptions()
 {
@@ -57,7 +60,7 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 		AQSIS_THROW(XqBadTexture, "No world -> camera matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLight = (*worldToLight) * camToWorld;
+	m_currToLight = (*worldToLight) * currToWorld;
 
 	// Read pixel data
 	file->readPixels(*m_pixelBuf);
@@ -69,15 +72,15 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_camToLightTexCoords = (*worldToLightScreen) * camToWorld;
+	m_currToLightTexCoords = (*worldToLightScreen) * currToWorld;
 	// worldToLightScreen transforms world coordinates to "screen" coordinates,
 	// ie, onto the 2D box [-1,1]x[-1,1].  We instead want texture coordinates,
 	// which correspond to the box [0,1]x[0,1].  In addition, the direction of
 	// increase of the y-axis should be swapped, since texture coordinates
 	// define the origin to be in the top left of the texture rather than the
 	// bottom right.
-	m_camToLightTexCoords.Translate(CqVector3D(1,-1,0));
-	m_camToLightTexCoords.Scale(0.5f, -0.5f, 1);
+	m_currToLightTexCoords.Translate(CqVector3D(1,-1,0));
+	m_currToLightTexCoords.Scale(0.5f, -0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
 }
@@ -153,11 +156,11 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 {
 	// Get depths of sample positions.
 	Sq3DSampleQuad quadLightCoord = sampleQuad;
-	quadLightCoord.transform(m_camToLight);
+	quadLightCoord.transform(m_currToLight);
 
 	// Get texture coordinates of sample positions.
 	Sq3DSampleQuad texQuad3D = sampleQuad;
-	texQuad3D.transform(m_camToLightTexCoords);
+	texQuad3D.transform(m_currToLightTexCoords);
 	// Copy into (x,y) coordinates of texQuad and scale by the filter width.
 	SqSampleQuad texQuad = texQuad3D;
 	texQuad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());

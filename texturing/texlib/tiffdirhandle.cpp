@@ -37,8 +37,6 @@
 namespace Aqsis
 {
 
-const char* tiffFileTypeString = "tiff";
-
 /// An exception for internal usage by the tiff handling code.
 AQSIS_DECLARE_EXCEPTION(XqUnknownTiffFormat, XqInternal);
 

@@ -34,13 +34,13 @@
 #ifndef TIFFFILE_TEST_H_INCLUDED
 #define TIFFFILE_TEST_H_INCLUDED
 
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "boost/shared_ptr.hpp"
 
-#include "tiffdirhandle.h"
 #include "smartptr.h"
+#include "tiffdirhandle.h"
 
 //------------------------------------------------------------------------------
 // Fixtures which wrap up some binary tiff data.

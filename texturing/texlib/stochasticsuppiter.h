@@ -90,13 +90,21 @@ class AQSISTEX_SHARE Cq2dQuasiRandomTable
 class AQSISTEX_SHARE CqStochasticSuppIter
 {
 	public:
-		/** \brief Construct a support iterator pointing to the beginning of the support.
+		/** \brief Construct a support iterator pointing to the beginning of
+		 * the support.
 		 *
 		 * \param support - region to iterate over.
 		 */
 		CqStochasticSuppIter(TqInt numSamples = 200);
 
-		/// Reset the iterator to the beginning of the supplied support.
+		/** \brief Reset the iterator to the beginning of the supplied support.
+		 *
+		 * This also resets the random offset on the QMC points such that each
+		 * time reset() is called with the same support, the resulting
+		 * distribution of points is different.
+		 *
+		 * \param support - iterate over this.
+		 */
 		void reset(const SqFilterSupport& support);
 
 		/// Move to the next support position

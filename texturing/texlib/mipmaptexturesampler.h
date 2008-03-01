@@ -30,15 +30,14 @@
 #include "aqsis.h"
 
 #include <boost/shared_ptr.hpp>
-#include <cmath>
 
+#include "aqsismath.h"
+#include "ewafilter.h"
 #include "itexturesampler.h"
 #include "mipmaplevelcache.h"
-#include "ewafilter.h"
+#include "sampleaccum.h"
 #include "texbufsampler.h" // remove when using tiled textures.
 #include "texturebuffer.h" // remove when using tiled textures.
-#include "sampleaccum.h"
-#include "aqsismath.h"
 
 namespace Aqsis {
 
@@ -55,8 +54,11 @@ template<typename T>
 class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 {
 	private:
+		/// Type for the mipmap level cache that the sampler needs.
 		typedef CqMipmapLevelCache<CqTextureBuffer<T> > TqCacheType;
 	public:
+		/** \brief Construct a sampler from the provided set of mipmap levels.
+		 */
 		CqMipmapTextureSampler(const boost::shared_ptr<TqCacheType>& levels);
 
 		// from IqTextureSampler
@@ -66,6 +68,7 @@ class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 	private:
 		boost::shared_ptr<TqCacheType> m_levels;
 };
+
 
 //==============================================================================
 // Implementation details
@@ -156,7 +159,6 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		// dominant factor.
 		blurRatio = clamp(2*maxBlur/weights.minorAxisWidth(), 0.0f, 1.0f);
 		minFilterWidth += 2*blurRatio;
-		// std::cout << minFilterWidth << "\n";
 	}
 	// Note: log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
 	TqFloat levelCts = 1.4426950408889633
@@ -203,6 +205,7 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		// Adjust filter weight for the linear interpolation
 		scaledWeights.setWeightScale(levelInterp);
 		// Adjust weight coordinate system.
+		/// \todo This coordinate readjustment is nasty.  The EwaFilterWeights class probably needs a refactor...
 		const SqLevelTrans& trans1 = m_levels->levelTrans(level);
 		const SqLevelTrans& trans2 = m_levels->levelTrans(level+1);
 		weights.adjustTextureScale(

@@ -35,6 +35,8 @@
 namespace Aqsis
 {
 
+//------------------------------------------------------------------------------
+// free function implementations
 EqTextureFilter texFilterTypeFromString(const char* filterName)
 {
 	if(strcmp(filterName, "box") == 0)

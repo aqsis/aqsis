@@ -29,10 +29,10 @@
 
 #include "aqsis.h"
 
-#include <cmath>
-#include <vector>
 #include <iosfwd>
+#include <vector>
 
+#include "aqsismath.h"
 #include "filtersupport.h"
 
 namespace Aqsis

@@ -187,7 +187,13 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		EqWrapMode m_tWrapMode;
 };
 
-
+//------------------------------------------------------------------------------
+/** \brief Contain the standard renderman shadow sampling options
+ *
+ * The standard renderman shadow sampling options may be passed to calls to the
+ * shadow() builtin function in the RSL.  These include all the basic texture
+ * sampling options, as well as a few texture-specific things such as shadow bias.
+ */
 class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 {
 	public:
@@ -241,7 +247,9 @@ class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptions
 		void setBiasLow(TqFloat bias0);
 		void setBiasHigh(TqFloat bias1);
 	protected:
+		/// Low end of linear shadow bias ramp
 		TqFloat m_biasLow;
+		/// High end of linear shadow bias ramp
 		TqFloat m_biasHigh;
 };
 
