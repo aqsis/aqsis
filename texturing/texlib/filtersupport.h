@@ -68,6 +68,8 @@ struct SqFilterSupport
 	SqFilterSupport1D sy; ///< support in y-direction
 	/// Trivial constructor.
 	SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
+	/// Return area of the support in number of pixels.
+	TqInt area() const;
 	/// Return true if the support is an empty set.
 	bool isEmpty() const;
 	/// Return true if the support covers part of the given range.
@@ -125,6 +127,11 @@ inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt endX,
 	: sx(startX, endX),
 	sy(startY, endY)
 { }
+
+inline TqInt SqFilterSupport::area() const
+{
+	return sx.range()*sy.range();
+}
 
 inline bool SqFilterSupport::isEmpty() const
 {

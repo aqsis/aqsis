@@ -162,38 +162,59 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	SqSampleQuad texQuad = texQuad3D;
 	texQuad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 
-	// Get the EWA filter weight functor.
-	CqEwaFilterWeights weights(texQuad, m_pixelBuf->width(),
+	// Get the EWA filter weight functor.  We use a relatively low edge cutoff
+	// of 2, since we want to avoid taking samples which don't contribute much
+	// to the average.  This problem would be a relative non-issue if we did
+	// proper importance sampling.
+	//
+	/// \todo Investigate proper importance sampling to reduce the variance in
+	/// shadow sampling.
+	CqEwaFilterWeights ewaWeights(texQuad, m_pixelBuf->width(),
 			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur(), 2);
 
-	SqFilterSupport support = weights.support();
+
+	/** \todo Optimization opportunity: Cull the query if it's outside the
+	 * [min,max] depth range of the support.  Being able to determine the
+	 * range from the tiles covered by the filter support will be a big
+	 * advantage.
+	 */
+
+	SqFilterSupport support = ewaWeights.support();
 	if(support.intersectsRange(0, m_pixelBuf->width(), 0, m_pixelBuf->height()))
 	{
-		// Get a functor to approximate the surface depth across the filter support.
+		// Get a functor which approximates the surface depth across the filter
+		// support.  This deduced depth will be compared with the depths from
+		// the stored texture buffer.
 		quadLightCoord.copy2DCoords(texQuad);
 		CqSampleQuadDepthApprox depthFunc(quadLightCoord, m_pixelBuf->width(),
 				m_pixelBuf->height());
 
-		// Construct an accumulator for the samples.
+		// a PCF accumulator for the samples.
 		CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
-				weights, depthFunc, sampleOpts.startChannel(),
+				ewaWeights, depthFunc, sampleOpts.startChannel(),
 				sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
-
-		/** \todo Optimization opportunity: Cull the query if it's outside the
-		 * [min,max] depth range of the texture map (also would work on a per-tile
-		 * basis)
-		 */
-
-		/// \todo Decide when to use stochastic filtering and when to just
-		/// filter deterministically.
-
-		// Finally perform PCF filtering over the texture buffer.
-		CqTexBufSampler<CqTextureBuffer<TqFloat>, CqStochasticSuppIter>(
-				*m_pixelBuf, CqStochasticSuppIter(sampleOpts.numSamples()) )
-			.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
-
-//		CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf)
-//			.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+		// Finally, perform percentage closer filtering over the texture buffer.
+		if(support.area() <= sampleOpts.numSamples() || sampleOpts.numSamples() < 0)
+		{
+			// If the filter support is small enough compared to the requested
+			// number of samples, iterate over the whole support.  This results
+			// in a completely noise-free result.
+			//
+			// A negative number of samples is also used as a flag to trigger
+			// the deterministic integrator.
+			CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf)
+				.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+		}
+		else
+		{
+			// Otherwise use stochastic filtering (choose points randomly in
+			// the filter support).  This is absolutely necessary when the
+			// filter support is very large, as can occur with large blur
+			// factors.
+			CqTexBufSampler<CqTextureBuffer<TqFloat>, CqStochasticSuppIter>(
+					*m_pixelBuf, CqStochasticSuppIter(sampleOpts.numSamples()) )
+				.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+		}
 	}
 	else
 	{

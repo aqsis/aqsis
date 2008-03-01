@@ -56,11 +56,11 @@ namespace Aqsis {
  *
  * \code
  *
- * // Construct iterator ready to iterate over the given support.
- * SupportIteratorConcept(const SqFilterSupport&)
- *
- * // Go to next point.
+ * // Go to next point in the support.
  * SupportIteratorConcept& operator++()
+ *
+ * // Reset the iterator to the beginning of the supplied support.
+ * void reset(const SqFilterSupport& support);
  *
  * // Determine if the current point is still validly in the support.
  * bool inSupport() const

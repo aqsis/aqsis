@@ -63,13 +63,4 @@ void CqTextureSampleOptions::fillFromFileHeader(const CqTexFileHeader& header)
 	}
 }
 
-void CqTextureSampleOptions::checkBlurAndFilter()
-{
-	if( m_filterType != TextureFilter_Gaussian && (m_tBlur != 0 || m_sBlur != 0) )
-	{
-		Aqsis::log() << warning
-			<< "texture blur not supported with non-gaussian filters\n";
-	}
-}
-
 } // namespace Aqsis

@@ -43,18 +43,19 @@ class CqTexFileHeader;
  *
  * The texture filters define the weighting functions for texture filtering.
  *
- * EWA (Elliptical Weighted Average or gaussian) filtering is very high
- * quality, so it's expected that most people will want this.
+ * EWA (Elliptical Weighted Average) or gaussian filtering is a very high
+ * quality analytical filter, so it's expected that most people will want this.
  *
- * Other filter types are evaluated by Monte Carlo integration of a bilinearly
- * reconstructed texture over the filter support, while EWA is analytical, (so
- * has no sampling noise).
+ * It's not so easy to evaluate other filter types, except by Monte Carlo
+ * integration of a bilinearly reconstructed texture.  This leads to noise, in
+ * contrast to the EWA case, and is also worse for the cache in the naive
+ * implementation.
  */
 enum EqTextureFilter
 {
-	TextureFilter_Box,		///< box filtering (Monte Carlo)
-	TextureFilter_Gaussian, ///< implies EWA filtering
-	TextureFilter_None,		///< No filtering, only do bilinear interpolation.
+	TextureFilter_Box,		///< box filtering
+	TextureFilter_Gaussian, ///< gaussian filter (via EWA)
+	TextureFilter_None,		///< no filtering; nearest-neighbour reconstruction.
 	TextureFilter_Unknown	///< Unknown filter type.
 };
 
@@ -164,14 +165,6 @@ class AQSISTEX_SHARE CqTextureSampleOptions
 		void fillFromFileHeader(const CqTexFileHeader& header);
 
 	protected:
-		/** \brief Check that the blur and filter settings are compatible.
-		 *
-		 * This function checks that the filter is gaussian if we're attempting
-		 * to apply a nonzero blur to the texture.  If it's not gaussian, then
-		 * a warning is generated.
-		 */
-		void checkBlurAndFilter();
-
 		/// Texture blur amount in the s and t directions.  
 		TqFloat m_sBlur;
 		TqFloat m_tBlur;
@@ -357,14 +350,12 @@ inline void CqTextureSampleOptions::setSBlur(TqFloat sBlur)
 {
 	assert(sBlur >= 0);
 	m_sBlur = sBlur;
-	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setTBlur(TqFloat tBlur)
 {
 	assert(tBlur >= 0);
 	m_tBlur = tBlur;
-	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setWidth(TqFloat width)
@@ -389,7 +380,6 @@ inline void CqTextureSampleOptions::setFilterType(EqTextureFilter type)
 {
 	assert(type != TextureFilter_Unknown);
 	m_filterType = type;
-	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setFill(TqFloat fill)
@@ -411,7 +401,7 @@ inline void CqTextureSampleOptions::setNumChannels(TqInt numChans)
 
 inline void CqTextureSampleOptions::setNumSamples(TqInt numSamples)
 {
-	m_numSamples = max(1, numSamples);
+	m_numSamples = numSamples;
 }
 
 inline void CqTextureSampleOptions::setWrapMode(EqWrapMode wrapMode)

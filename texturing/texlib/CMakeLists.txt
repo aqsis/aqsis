@@ -39,11 +39,13 @@ SET(AQSISTEX_SRCS
 SET(AQSISTEX_HDRS
 	channelinfo.h
 	channellist.h
+	cachedfilter.h
 	dummyshadowsampler.h
 	dummytexturesampler.h
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
+	filterfunctor.h
 	imagechannel.h
 	imagefiletype.h
 	ishadowsampler.h
@@ -57,23 +59,25 @@ SET(AQSISTEX_HDRS
 	mipmap.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
+	sampleaccum.h
 	samplequad.h
 	samplevector.h
 	shadowsampler.h
 	stochasticsuppiter.h
 	texbufsampler.h
+	texexception.h
 	texfileattributes.h
 	texfileheader.h
 	texturebuffer.h
 	texturecache.h
 	texturesampleoptions.h
-	texturesampler.h
 	tiffdirhandle.h
 	tifffile_test.h
 	tiffinputfile.h
 	tiffoutputfile.h
 	tilearray.h
 	tiledtiffinputfile.h
+	wrapmode.h
 	)
 IF(AQSIS_OPENEXR_FOUND)
 	SET(AQSISTEX_SRCS
