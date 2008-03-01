@@ -435,7 +435,10 @@ inline CqShadowSampleOptions::CqShadowSampleOptions()
 	: CqTextureSampleOptions(),
 	m_biasLow(0),
 	m_biasHigh(0)
-{ }
+{
+	// Shadows are very poor with only one sample; make this a bit bigger.
+	m_numSamples = 32;
+}
 
 inline TqFloat CqShadowSampleOptions::biasLow() const
 {
