@@ -88,7 +88,7 @@ COMMON_SHARE std::ostream& operator<<(std::ostream& o, const XqException& e);
  * \param ExceptionBase - base class for the new exception
  */
 #define AQSIS_DECLARE_EXCEPTION(ExceptionName, ExceptionBase)                 \
-class COMMON_SHARE ExceptionName : public ExceptionBase                       \
+class ExceptionName : public ExceptionBase                                    \
 {                                                                             \
 	public:                                                                   \
 		ExceptionName (const std::string& reason, const std::string& detail,  \

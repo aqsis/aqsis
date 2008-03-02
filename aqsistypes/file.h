@@ -54,7 +54,7 @@ START_NAMESPACE( Aqsis )
  *                     for the given file name.
  * \return Absolute file name; throws an XqInvalidFile if the file is not found.
  */
-std::string findFileInPath(const std::string& fileName,
+COMMON_SHARE std::string findFileInPath(const std::string& fileName,
 		const std::string& searchPath);
 
 

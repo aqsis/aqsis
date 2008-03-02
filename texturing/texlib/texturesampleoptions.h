@@ -68,7 +68,7 @@ enum EqTextureFilter
  * \return The EqTextureFilter associated with a name string.  If the string
  * doesn't describe a known filter, return TextureFilter_Unknown.
  */
-EqTextureFilter texFilterTypeFromString(const char* filterName);
+AQSISTEX_SHARE EqTextureFilter texFilterTypeFromString(const char* filterName);
 
 
 //----------------------------------------------------------------------

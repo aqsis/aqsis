@@ -58,11 +58,11 @@ EqWrapMode wrapModeFromString(const std::string& modeString);
 
 inline EqWrapMode wrapModeFromString(const std::string& modeString)
 {
-	if(modeString == "black")
+	if(modeString.compare("black") == 0)
 		return WrapMode_Black;
-	else if(modeString == "periodic")
+	else if(modeString.compare("periodic") == 0)
 		return WrapMode_Periodic;
-	else if(modeString == "clamp")
+	else if(modeString.compare("clamp") == 0)
 		return WrapMode_Clamp;
 	else
 		// Default: return black... maybe we should have an "unknown" wrap mode

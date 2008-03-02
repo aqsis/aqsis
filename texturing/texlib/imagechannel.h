@@ -205,7 +205,7 @@ class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
  * conversion capabilities.
  */
 template<typename T>
-class AQSISTEX_SHARE CqImageChannelTyped : public CqImageChannel
+class CqImageChannelTyped : public CqImageChannel
 {
 	public:
 		/** \brief Constructor
