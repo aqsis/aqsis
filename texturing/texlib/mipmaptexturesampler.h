@@ -160,9 +160,7 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		blurRatio = clamp(2*maxBlur/weights.minorAxisWidth(), 0.0f, 1.0f);
 		minFilterWidth += 2*blurRatio;
 	}
-	// Note: log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
-	TqFloat levelCts = 1.4426950408889633
-		* std::log(weights.minorAxisWidth()/minFilterWidth);
+	TqFloat levelCts = log2(weights.minorAxisWidth()/minFilterWidth);
 	TqInt level = clamp<TqInt>(lfloor(levelCts), 0, m_levels->numLevels()-1);
 
 	if(level > 0)

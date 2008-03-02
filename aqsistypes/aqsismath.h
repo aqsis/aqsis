@@ -131,6 +131,28 @@ inline TqFloat radToDeg(const TqFloat a)
 	return a/M_PI*180.0;
 }
 
+/** \brief Calculate the next highest power of two above the given value
+ */
+inline TqUint ceilPow2(const TqUint x)
+{
+	TqUint y = x - 1;
+	for (TqUint i = 1; i; i <<= 1)
+		y |= y >> i;
+	// y is now the next highest power of two minus 1.
+	return y + 1;
+}
+
+/** \brief Calculate the base-2 logarithm of a number.
+ *
+ * In principle we could use log2() from math.h here.  However it's part of the
+ * C99 standard rather than C89, and won't be available on all platforms.
+ */
+inline TqFloat log2(TqFloat x)
+{
+	// log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
+	return 1.4426950408889633 * std::log(x);
+}
+
 /** \brief Return a number with only the lowest bit of the input set.
  *
  * Example:
@@ -156,17 +178,6 @@ inline TqFloat radToDeg(const TqFloat a)
 //		x |= x >> i;
 //	return x;
 //}
-
-/** \brief Calculate the next highest power of two above the given value
- */
-inline TqUint ceilPow2(const TqUint x)
-{
-	TqUint y = x - 1;
-	for (TqUint i = 1; i; i <<= 1)
-		y |= y >> i;
-	// y is now the next highest power of two minus 1.
-	return y + 1;
-}
 
 } // namespace Aqsis
 
