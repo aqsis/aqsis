@@ -388,7 +388,13 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
 				ORIENTATION_TOPLEFT);
 		if(orientation != ORIENTATION_TOPLEFT)
-			AQSIS_THROW(XqUnknownTiffFormat, "orientation isn't top-left");
+		{
+			Aqsis::log() << warning
+				<< "TIFF orientation for file \"" << m_fileHandle->fileName()
+				<< "\" is not top-left.  This may result in unexpected results\n";
+			/// \todo Decide whether to use generic TIFF loading facilities for this.
+			//AQSIS_THROW(XqUnknownTiffFormat, "orientation isn't top-left");
+		}
 	}
 	catch(XqUnknownTiffFormat& e)
 	{
