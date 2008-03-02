@@ -78,7 +78,7 @@ class AQSISTEX_SHARE IqTexOutputFile
 		 * Array2DType is a type modelling a 2D array interface.  It should
 		 * provide the following methods:
 		 *
-		 *   - TqUchar* Array2dType::rawData() returns a pointer to the raw
+		 *   - TqUint8* Array2dType::rawData() returns a pointer to the raw
 		 *     data.  The raw data is assumed at this stage to be contiguous -
 		 *     (ie, not a nontrivial slice).
 		 *
@@ -138,7 +138,7 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 				<< fileName() << "\": buffer has incorrect width.");
 	}
 	CqMixedImageBuffer newBuf(buffer.channelList(),
-			boost::shared_array<TqUchar>(const_cast<TqUchar*>(buffer.rawData()),
+			boost::shared_array<TqUint8>(const_cast<TqUint8*>(buffer.rawData()),
 				nullDeleter), buffer.width(), numScanlines);
 	writePixelsImpl(newBuf);
 }

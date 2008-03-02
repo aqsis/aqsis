@@ -82,12 +82,12 @@ void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 	CqTiffDirHandle dirHandle(m_fileHandle);
 	// Simplest possible implementation using scanline TIFF I/O.  Could use
 	// Strip-based IO if performance is ever a problem here.
-	const TqUchar* rawBuf = buffer.rawData();
+	const TqUint8* rawBuf = buffer.rawData();
 	const TqInt rowStride = buffer.channelList().bytesPerPixel()*buffer.width();
 	const TqInt endLine = m_currentLine + buffer.height();
 	for(TqInt line = m_currentLine; line < endLine; ++line)
 	{
-		TIFFWriteScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(const_cast<TqUchar*>(rawBuf)),
+		TIFFWriteScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(const_cast<TqUint8*>(rawBuf)),
 				static_cast<uint32>(line));
 		rawBuf += rowStride;
 	}

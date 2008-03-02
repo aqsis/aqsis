@@ -77,7 +77,7 @@ class AQSISTEX_SHARE IqTexInputFile
 		 *     the buffer.  channels describes the new desired channel
 		 *     structure for the buffer.  If the buffer cannot handle the
 		 *     given channel structure it should throw.
-		 *   - TqUchar* rawData()
+		 *   - TqUint8* rawData()
 		 *     Gets a raw pointer to the data.
 		 *
 		 * \param buffer - buffer to read scanlines into
@@ -110,7 +110,7 @@ class AQSISTEX_SHARE IqTexInputFile
 		 * Implementations of readPixelsImpl() can assume that startLine and
 		 * numScanlines specify a valid range.
 		 */
-		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
+		virtual void readPixelsImpl(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const = 0;
 };
 

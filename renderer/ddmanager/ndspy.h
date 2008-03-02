@@ -61,6 +61,7 @@ typedef float PtDspyFloat32;
 #define PkDspyByteOrderNative	PkDspyByteOrderLoHi
 #endif
 
+/// \todo Consider using TqUint32 etc from aqsis_types.h instead of the below.
 #if defined(__mips64) || defined(__alpha) || defined(__x86_64) || defined(_M_X64)
 typedef unsigned int PtDspyUnsigned32;
 typedef int PtDspySigned32;

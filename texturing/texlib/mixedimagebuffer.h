@@ -92,7 +92,7 @@ class AQSISTEX_SHARE CqMixedImageBuffer : boost::noncopyable
  		 * \param width - buffer width in pixels
  		 * \param height - buffer height in pixels
 		 */
-		CqMixedImageBuffer(const CqChannelList& channelList, boost::shared_array<TqUchar> data,
+		CqMixedImageBuffer(const CqChannelList& channelList, boost::shared_array<TqUint8> data,
 				TqInt width, TqInt height);
 
 		//------------------------------------------------------------
@@ -179,9 +179,9 @@ class AQSISTEX_SHARE CqMixedImageBuffer : boost::noncopyable
 		/// Get the height of the image buffer in pixels
 		inline TqInt height() const;
 		/// Get a const pointer to the underlying raw data.
-		inline const TqUchar* rawData() const;
+		inline const TqUint8* rawData() const;
 		/// Get a pointer to the underlying raw data.
-		inline TqUchar* rawData();
+		inline TqUint8* rawData();
 		//@}
 
 		//------------------------------------------------------------
@@ -252,7 +252,7 @@ class AQSISTEX_SHARE CqMixedImageBuffer : boost::noncopyable
 		CqChannelList m_channelList; ///< vector of channel information
 		TqInt m_width; ///< buffer width in pixels
 		TqInt m_height; ///< buffer height in pixels
-		boost::shared_array<TqUchar> m_data; ///< raw image data
+		boost::shared_array<TqUint8> m_data; ///< raw image data
 };
 
 
@@ -276,12 +276,12 @@ inline TqInt CqMixedImageBuffer::height() const
 	return m_height;
 }
 
-inline const TqUchar* CqMixedImageBuffer::rawData() const
+inline const TqUint8* CqMixedImageBuffer::rawData() const
 {
 	return m_data.get();
 }
 
-inline TqUchar* CqMixedImageBuffer::rawData()
+inline TqUint8* CqMixedImageBuffer::rawData()
 {
 	return m_data.get();
 }

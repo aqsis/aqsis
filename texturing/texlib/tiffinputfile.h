@@ -71,17 +71,17 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 
 	private:
 		// inherited
-		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
+		virtual void readPixelsImpl(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
 		/// Read pixels from a tiff file with data stored in strips.
-		void readPixelsStripped(TqUchar* buffer, TqInt startLine,
+		void readPixelsStripped(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 		/// Read pixels from a tiff file with data stored in tiles.
-		void readPixelsTiled(TqUchar* buffer, TqInt startLine,
+		void readPixelsTiled(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 		/// Read pixels in a strange formats using generic RGBA reading
-		void readPixelsRGBA(TqUchar* buffer, TqInt startLine,
+		void readPixelsRGBA(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
 		/** \brief Initializations for directory-specific data

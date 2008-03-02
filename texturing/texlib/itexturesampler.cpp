@@ -72,28 +72,27 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 {
 	if(!file)
 		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
-	/// \todo We really should use proper types of guarenteed bit-widths here.
 	switch(file->header().channelList().sharedChannelType())
 	{
 		case Channel_Float32:
 			return createMipmapSampler<TqFloat>(file);
 		case Channel_Unsigned32:
-			return createMipmapSampler<TqUint>(file);
+			return createMipmapSampler<TqUint32>(file);
 		case Channel_Signed32:
-			return createMipmapSampler<TqInt>(file);
+			return createMipmapSampler<TqInt32>(file);
 		case Channel_Float16:
 #			ifdef USE_OPENEXR
 			return createMipmapSampler<half>(file);
 #			endif
 			break;
 		case Channel_Unsigned16:
-			return createMipmapSampler<TqUshort>(file);
+			return createMipmapSampler<TqUint16>(file);
 		case Channel_Signed16:
-			return createMipmapSampler<TqShort>(file);
+			return createMipmapSampler<TqInt16>(file);
 		case Channel_Unsigned8:
-			return createMipmapSampler<TqUchar>(file);
+			return createMipmapSampler<TqUint8>(file);
 		case Channel_Signed8:
-			return createMipmapSampler<TqChar>(file);
+			return createMipmapSampler<TqInt8>(file);
 		case Channel_TypeUnknown:
 			break;
 	}

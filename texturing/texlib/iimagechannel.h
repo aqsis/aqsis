@@ -86,7 +86,7 @@ class AQSISTEX_SHARE IqImageChannelSource
 		 * \param stride - stride for buf in bytes
 		 * \param format - desired format for the row
 		 */
-		//virtual void getRawRow(TqInt row, const TqUchar* &buf, TqInt& stride, EqChannelType format) = 0 const;
+		//virtual void getRawRow(TqInt row, const TqUint8* &buf, TqInt& stride, EqChannelType format) = 0 const;
 		virtual ~IqImageChannelSource() {}
 };
 

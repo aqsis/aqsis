@@ -70,7 +70,7 @@ TqInt CqTiffInputFile::numSubImages() const
 			CqTiffDirHandle(m_fileHandle,m_imageIndex).tiffPtr());
 }
 
-void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
+void CqTiffInputFile::readPixelsImpl(TqUint8* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	if(m_header.find<Attr::TiffUseGenericRGBA>())
@@ -88,7 +88,7 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 	}
 }
 
-void CqTiffInputFile::readPixelsStripped(TqUchar* buffer, TqInt startLine,
+void CqTiffInputFile::readPixelsStripped(TqUint8* buffer, TqInt startLine,
 		TqInt numScanlines) const
 {
 	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
@@ -107,7 +107,7 @@ void CqTiffInputFile::readPixelsStripped(TqUchar* buffer, TqInt startLine,
 	}
 }
 
-void CqTiffInputFile::readPixelsTiled(TqUchar* buffer, TqInt startLine,
+void CqTiffInputFile::readPixelsTiled(TqUint8* buffer, TqInt startLine,
 		TqInt numScanlines) const
 {
 	// Load in relevant tiles; discard the excess.  At this stage, we don't do
@@ -135,8 +135,8 @@ void CqTiffInputFile::readPixelsTiled(TqUchar* buffer, TqInt startLine,
 	TqInt tileSize = tileLineSize*tileHeight;
 
 	// Buffer to hold tiles read using libtiff.
-	boost::shared_array<TqUchar> tempTileBuf(
-			static_cast<TqUchar*>(_TIFFmalloc(tileSize)),
+	boost::shared_array<TqUint8> tempTileBuf(
+			static_cast<TqUint8*>(_TIFFmalloc(tileSize)),
 			_TIFFfree);
 
 	for(TqInt y = startTileLine; y < endTileLine; y += tileHeight)
@@ -161,8 +161,8 @@ void CqTiffInputFile::readPixelsTiled(TqUchar* buffer, TqInt startLine,
 			// falls of the RHS of the image.
 			TqInt tileLineSizeOut = min(tileLineSize, bytesPerPixel*(width-x));
 			// Copy the tile into the output buffer.
-			TqUchar* lineBuf = buffer + x*bytesPerPixel;
-			TqUchar* tileLineBuf = static_cast<TqUchar*>(tempTileBuf.get())
+			TqUint8* lineBuf = buffer + x*bytesPerPixel;
+			TqUint8* tileLineBuf = static_cast<TqUint8*>(tempTileBuf.get())
 				+ outStripSkipStart*tileLineSize;
 			for(TqInt tileLine = 0; tileLine < stripHeightOut; ++tileLine)
 			{
@@ -175,7 +175,7 @@ void CqTiffInputFile::readPixelsTiled(TqUchar* buffer, TqInt startLine,
 	}
 }
 
-void CqTiffInputFile::readPixelsRGBA(TqUchar* buffer, TqInt startLine,
+void CqTiffInputFile::readPixelsRGBA(TqUint8* buffer, TqInt startLine,
 		TqInt numScanlines) const
 {
 	AQSIS_THROW(XqInternal, "readPixelsRGBA not implemented");

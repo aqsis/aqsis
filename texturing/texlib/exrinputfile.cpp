@@ -185,7 +185,7 @@ const char* CqExrInputFile::fileName() const
 	return m_exrFile->fileName();
 }
 
-void CqExrInputFile::readPixelsImpl(TqUchar* buffer,
+void CqExrInputFile::readPixelsImpl(TqUint8* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	// correct the start line for OpenEXR conventions

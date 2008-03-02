@@ -162,7 +162,7 @@ const TqFloatConv* CqImageChannelZoom::getRow(TqInt row) const
 
 //------------------------------------------------------------------------------
 // CqImageChannel implementation
-CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
+CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUint8* data,
 		TqInt width, TqInt height, TqInt stride, TqInt rowSkip)
 	: m_chanInfo(chanInfo),
 	m_data(data),

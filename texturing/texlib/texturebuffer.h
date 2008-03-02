@@ -130,9 +130,9 @@ class AQSISTEX_SHARE CqTextureBuffer
 		/// \name Access to raw pixel data
 		//@{
 		/// Get a pointer to the underlying raw data
-		inline TqUchar* rawData();
+		inline TqUint8* rawData();
 		/// Get a pointer to the underlying raw data (const version)
-		inline const TqUchar* rawData() const;
+		inline const TqUint8* rawData() const;
 		//@}
 
 	private:
@@ -240,15 +240,15 @@ CqChannelList CqTextureBuffer<T>::channelList() const
 }
 
 template<typename T>
-inline TqUchar* CqTextureBuffer<T>::rawData()
+inline TqUint8* CqTextureBuffer<T>::rawData()
 {
-	return reinterpret_cast<TqUchar*>(m_pixelData.get());
+	return reinterpret_cast<TqUint8*>(m_pixelData.get());
 }
 
 template<typename T>
-inline const TqUchar* CqTextureBuffer<T>::rawData() const
+inline const TqUint8* CqTextureBuffer<T>::rawData() const
 {
-	return reinterpret_cast<const TqUchar*>(m_pixelData.get());
+	return reinterpret_cast<const TqUint8*>(m_pixelData.get());
 }
 
 template<typename T>

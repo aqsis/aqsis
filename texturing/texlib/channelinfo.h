@@ -129,23 +129,22 @@ inline TqInt SqChannelInfo::bytesPerPixel() const
 //------------------------------------------------------------------------------
 // Free functions
 
-/// \todo Use int types of known width here.
 // getChannelTypeEnum - generic implementation
 template<typename T> inline EqChannelType getChannelTypeEnum() { return Channel_TypeUnknown; }
 
-// specializations for getChannelTypeEnum
+// float specializations
 template<> inline EqChannelType getChannelTypeEnum<TqFloat>() { return Channel_Float32; }
-template<> inline EqChannelType getChannelTypeEnum<TqUint>() { return Channel_Unsigned32; }
-template<> inline EqChannelType getChannelTypeEnum<TqInt>() { return Channel_Signed32; }
 #ifdef USE_OPENEXR
-// Need access to the half data type from OpenEXR here.
 template<> inline EqChannelType getChannelTypeEnum<half>() { return Channel_Float16; }
 #endif
-template<> inline EqChannelType getChannelTypeEnum<TqUshort>() { return Channel_Unsigned16; }
-template<> inline EqChannelType getChannelTypeEnum<TqShort>() { return Channel_Signed16; }
-template<> inline EqChannelType getChannelTypeEnum<TqUchar>() { return Channel_Unsigned8; }
-template<> inline EqChannelType getChannelTypeEnum<TqChar>() { return Channel_Signed8; }
-
+// signed integer specializations
+template<> inline EqChannelType getChannelTypeEnum<TqInt32>() { return Channel_Signed32; }
+template<> inline EqChannelType getChannelTypeEnum<TqInt16>() { return Channel_Signed16; }
+template<> inline EqChannelType getChannelTypeEnum<TqInt8>() { return Channel_Signed8; }
+// unsigned integer specializations
+template<> inline EqChannelType getChannelTypeEnum<TqUint32>() { return Channel_Unsigned32; }
+template<> inline EqChannelType getChannelTypeEnum<TqUint16>() { return Channel_Unsigned16; }
+template<> inline EqChannelType getChannelTypeEnum<TqUint8>() { return Channel_Unsigned8; }
 
 inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2)
 {

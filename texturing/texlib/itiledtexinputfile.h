@@ -72,7 +72,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 *     the buffer.  channels describes the new desired channel
 		 *     structure for the buffer.  If the buffer cannot handle the
 		 *     given channel structure it should throw.
-		 *   - TqUchar* rawData()
+		 *   - TqUint8* rawData()
 		 *     Gets a raw pointer to the data.
 		 *
 		 * \param buffer - buffer to read the tile into
@@ -103,7 +103,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * Implementations of readTileImpl() can assume that startLine and
 		 * numScanlines specify a valid range.
 		 */
-		virtual void readTileImpl(TqUchar* buffer, TqInt tileX, TqInt tileY);
+		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY);
 };
 
 

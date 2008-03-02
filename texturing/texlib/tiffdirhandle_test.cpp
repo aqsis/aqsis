@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 		header.set<Aqsis::Attr::DisplayWindow>( Aqsis::SqImageRegion(1,2,3,4) );
 
 		dirHandle.writeHeader(header);
-		TqUchar rubbishPixels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		TqUint8 rubbishPixels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		TIFFWriteScanline(dirHandle.tiffPtr(), rubbishPixels, 0);
 	}
 

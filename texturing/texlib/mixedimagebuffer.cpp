@@ -51,11 +51,11 @@ CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channelList, TqInt w
 	: m_channelList(channelList),
 	m_width(width),
 	m_height(height),
-	m_data(new TqUchar[width*height*channelList.bytesPerPixel()])
+	m_data(new TqUint8[width*height*channelList.bytesPerPixel()])
 { }
 
 CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channelList,
-		boost::shared_array<TqUchar> data, TqInt width, TqInt height)
+		boost::shared_array<TqUint8> data, TqInt width, TqInt height)
 	: m_channelList(channelList),
 	m_width(width),
 	m_height(height),
@@ -85,7 +85,7 @@ void CqMixedImageBuffer::resize(TqInt width, TqInt height,
 			!= m_width*m_height*m_channelList.bytesPerPixel())
 	{
 		// resize the buffer if the new buffer 
-		m_data.reset(new TqUchar[width*height*channelList.bytesPerPixel()]);
+		m_data.reset(new TqUint8[width*height*channelList.bytesPerPixel()]);
 	}
 	m_channelList = channelList;
 	m_width = width;
@@ -229,7 +229,7 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 	assert(topLeftY + height <= m_height);
 	TqInt stride = m_channelList.bytesPerPixel();
 	// Start offset for the channel
-	TqUchar* startPtr = m_data.get()
+	TqUint8* startPtr = m_data.get()
 			+ (topLeftY*m_width + topLeftX)*stride
 			+ m_channelList.channelByteOffset(index);
 	TqInt rowSkip = m_width - width;
@@ -237,15 +237,15 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 	{
 		case Channel_Float32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyFloat32>(m_channelList[index],
+					new CqImageChannelTyped<TqFloat>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Unsigned32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned32>(m_channelList[index],
+					new CqImageChannelTyped<TqUint32>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Signed32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned32>(m_channelList[index],
+					new CqImageChannelTyped<TqInt32>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 #		ifdef USE_OPENEXR
 		case Channel_Float16:
@@ -255,19 +255,19 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 #		endif
 		case Channel_Unsigned16:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned16>(m_channelList[index],
+					new CqImageChannelTyped<TqUint16>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Signed16:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned16>(m_channelList[index],
+					new CqImageChannelTyped<TqInt16>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Signed8:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned8>(m_channelList[index],
+					new CqImageChannelTyped<TqInt8>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Unsigned8:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned8>(m_channelList[index],
+					new CqImageChannelTyped<TqUint8>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		default:
 			throw XqInternal("Unknown channel type", __FILE__, __LINE__);

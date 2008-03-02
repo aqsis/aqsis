@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(CqTiffInputFile_readPixels_test)
 	Aqsis::CqTiffInputFile inFile(inStream);
 
 	// Read the whole tiff into a buffer
-	Aqsis::CqTextureBuffer<TqUchar> buffer;
+	Aqsis::CqTextureBuffer<TqUint8> buffer;
 	inFile.readPixels(buffer);
 
 	// Check that the buffer is the right size.
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(CqTiffInputFile_readPixels_secondSubImage_test)
 	inFile.setImageIndex(1);
 
 	// Read the whole tiff into a buffer
-	Aqsis::CqTextureBuffer<TqUchar> buffer;
+	Aqsis::CqTextureBuffer<TqUint8> buffer;
 	inFile.readPixels(buffer);
 
 	// Check that the buffer is the right size.

@@ -27,6 +27,8 @@
 #ifndef	AQSIS_TYPES_INCLUDED
 #define	AQSIS_TYPES_INCLUDED
 
+#include <boost/cstdint.hpp>
+
 typedef	char	TqChar;
 typedef	unsigned char	TqUchar;
 typedef	char*	TqPchar;
@@ -42,5 +44,16 @@ typedef	unsigned short	TqUshort;
 
 typedef	float	TqFloat;
 typedef	double	TqDouble;
+
+
+// Integer types with specific size.
+typedef boost::int8_t TqInt8;
+typedef boost::int16_t TqInt16;
+typedef boost::int32_t TqInt32;
+
+typedef boost::uint8_t TqUint8;
+typedef boost::uint16_t TqUint16;
+typedef boost::uint32_t TqUint32;
+
 
 #endif	// AQSIS_TYPES_INCLUDED

@@ -72,7 +72,7 @@ class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header() const;
 	private:
-		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
+		virtual void readPixelsImpl(TqUint8* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
 		/// Perform shared initializations needed in construction.

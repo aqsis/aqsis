@@ -154,7 +154,7 @@ class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
 		 * \param rowSkip - number of pixels which are skipped at the end of
 		 *                  each row (allows for support of rectangular subregions).
 		 */
-		CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
+		CqImageChannel(const SqChannelInfo& chanInfo, TqUint8* data,
 				TqInt width, TqInt height, TqInt stride, TqInt rowSkip = 0);
 		virtual inline ~CqImageChannel();
 		/** \brief Get descriptive information about the channel
@@ -191,7 +191,7 @@ class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
 				const TqFloatConv* srcAlpha) = 0;
 
 		SqChannelInfo m_chanInfo; ///< channel format information
-		TqUchar* m_data;    ///< raw data
+		TqUint8* m_data;    ///< raw data
 		TqInt m_width;      ///< width of raw data in pixels
 		TqInt m_height;     ///< height of raw data in pixels
 		TqInt m_stride;     ///< stride between one pixel and the next in bytes
@@ -211,7 +211,7 @@ class CqImageChannelTyped : public CqImageChannel
 		/** \brief Constructor
 		 * \see CqImageChannel::CqImageChannel
 		 */
-		inline CqImageChannelTyped(const SqChannelInfo& chanInfo, TqUchar* data,
+		inline CqImageChannelTyped(const SqChannelInfo& chanInfo, TqUint8* data,
 				TqInt width, TqInt height, TqInt stride, TqInt rowSkip = 0);
 	private:
 		// Inherited
@@ -245,14 +245,14 @@ inline const SqChannelInfo& CqImageChannel::channelInfo() const
 // CqImageChannelTyped implementation
 template<typename T>
 inline CqImageChannelTyped<T>::CqImageChannelTyped(const SqChannelInfo& chanInfo,
-		TqUchar* data, TqInt width, TqInt height, TqInt stride, TqInt rowSkip)
+		TqUint8* data, TqInt width, TqInt height, TqInt stride, TqInt rowSkip)
 	: CqImageChannel(chanInfo, data, width, height, stride, rowSkip)
 { }
 
 template<typename T>
 const TqFloatConv* CqImageChannelTyped<T>::getRow(TqInt row) const
 {
-	TqUchar* srcBuf = m_data + row*m_stride*(m_width + m_rowSkip);
+	TqUint8* srcBuf = m_data + row*m_stride*(m_width + m_rowSkip);
 	std::vector<TqFloatConv>::iterator destBuf = m_copyBuf.begin();
 	for(TqInt i = 0; i < m_width; ++i)
 	{
@@ -266,7 +266,7 @@ const TqFloatConv* CqImageChannelTyped<T>::getRow(TqInt row) const
 template<typename T>
 void CqImageChannelTyped<T>::replaceRow(TqInt row, const TqFloatConv* buf)
 {
-	TqUchar* destBuf = m_data + row*m_stride*(m_width + m_rowSkip);
+	TqUint8* destBuf = m_data + row*m_stride*(m_width + m_rowSkip);
 	for(TqInt i = 0; i < m_width; ++i)
 	{
 		*reinterpret_cast<T*>(destBuf) = convertFromFloat(*buf);
@@ -279,7 +279,7 @@ template<typename T>
 void CqImageChannelTyped<T>::compositeRow(TqInt row, const TqFloatConv* src,
 		const TqFloatConv* srcAlpha)
 {
-	TqUchar* destBuf = m_data + row*m_stride*(m_width + m_rowSkip);
+	TqUint8* destBuf = m_data + row*m_stride*(m_width + m_rowSkip);
 	for(TqInt i = 0; i < m_width; ++i)
 	{
 		TqFloatConv oldCol = convertToFloat(*reinterpret_cast<T*>(destBuf));
@@ -332,8 +332,8 @@ template<typename T>
 void CqImageChannelTyped<T>::copyFromSameType(const CqImageChannel& source)
 {
 	assert(m_chanInfo.type == source.m_chanInfo.type);
-	TqUchar* srcBuf = source.m_data;
-	TqUchar* destBuf = m_data;
+	TqUint8* srcBuf = source.m_data;
+	TqUint8* destBuf = m_data;
 	for(TqInt row = 0; row < m_height; ++row)
 	{
 		for(TqInt col = 0; col < m_width; ++col)
