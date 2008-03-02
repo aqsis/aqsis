@@ -127,6 +127,7 @@ template<typename T>
 void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
+	/// \todo Refactor this function - it's getting rather long and unweildly.
 	SqSampleQuad quad = sampleQuad;
 	quad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
@@ -144,7 +145,13 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 	TqFloat minFilterWidth = 2;
 	// Blur ratio ranges from 0 at no blur to 1 for a "lot" of blur.
 	TqFloat blurRatio = 0;
-	if(usingBlur)
+	if(sampleOpts.lerp() != Lerp_Auto)
+	{
+		// If we're not using automatic detection of when a lerp between mipmap
+		// levels is necessary, reset the filter support width.
+		minFilterWidth = 4;
+	}
+	else if(usingBlur)
 	{
 		// When using blur, the minimum filter width needs to be increased.
 		//
@@ -172,12 +179,18 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 				trans.yScale, trans.yOffset);
 	}
 
-	if(usingBlur && level < m_levels->numLevels()-1 && blurRatio > 0.2)
+	if( ( sampleOpts.lerp() == Lerp_Always
+		|| (sampleOpts.lerp() == Lerp_Auto && usingBlur && blurRatio > 0.2) )
+		&& level < m_levels->numLevels()-1 )
 	{
-		// Sample with blur: Use linear interpolation between the results of
-		// filtering on two different mipmap levels.  Experiments with large
-		// amounts of blurring show that some form of interpolation near level
-		// transitions is necessary to ensure that they're smooth and invisible.
+		// Use linear interpolation between the results of filtering on two
+		// different mipmap levels.  This should only be necessary if using
+		// filter blur, however the user can also turn it on explicitly using
+		// the "lerp" option.
+		//
+		// Experiments with large amounts of blurring show that some form of
+		// interpolation near level transitions is necessary to ensure that
+		// they're smooth and invisible.
 		//
 		// Such interpolation is only necessary when large regions of the
 		// output image arise from filtering over a small part of a high mipmap
@@ -203,7 +216,7 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		// Adjust filter weight for the linear interpolation
 		scaledWeights.setWeightScale(levelInterp);
 		// Adjust weight coordinate system.
-		/// \todo This coordinate readjustment is nasty.  The EwaFilterWeights class probably needs a refactor...
+		/// \todo This coordinate readjustment is nasty.  The EwaFilterWeights class probably needs a refactor.
 		const SqLevelTrans& trans1 = m_levels->levelTrans(level);
 		const SqLevelTrans& trans2 = m_levels->levelTrans(level+1);
 		weights.adjustTextureScale(
@@ -219,7 +232,7 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 	}
 	else
 	{
-		// Sample without blur
+		// Sample a single mipmap level without interpolation.
 		CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
 				sampleOpts.startChannel(), sampleOpts.numChannels(),
 				outSamps, sampleOpts.fill());

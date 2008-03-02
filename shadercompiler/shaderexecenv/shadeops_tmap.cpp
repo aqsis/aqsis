@@ -208,6 +208,14 @@ class CqSampleOptionExtractor
 				value->GetFloat(tmp, 0);
 				opts.setFill(tmp);
 			}
+			else if(name == "lerp")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				// Make sure lerp is one of the valid values.
+				opts.setLerp(static_cast<EqMipmapLerp>(
+							clamp<TqInt>(lround(tmp), 0, 2)));
+			}
 			else
 			{
 				// Else call through to the base class for the more basic

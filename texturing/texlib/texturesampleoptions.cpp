@@ -53,7 +53,7 @@ EqTextureFilter texFilterTypeFromString(const char* filterName)
 //------------------------------------------------------------------------------
 // CqTextureSampleOptions implementation
 
-void CqTextureSampleOptions::fillFromFileHeader(const CqTexFileHeader& header)
+void CqTextureSampleOptionsBase::fillFromFileHeader(const CqTexFileHeader& header)
 {
 	/// \todo Find a way to store & retrieve the downsampling filter?
 	const SqWrapModes* wrapModes = header.findPtr<Attr::WrapModes>();
