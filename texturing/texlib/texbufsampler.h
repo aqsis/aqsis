@@ -264,7 +264,8 @@ template<typename SampleAccumT>
 void CqTexBufSampler<ArrayT, SupportIterT>::applyFilter(SampleAccumT& sampleAccum,
 		const SqFilterSupport& support, EqWrapMode xWrapMode, EqWrapMode yWrapMode)
 {
-	sampleAccum.setSampleVectorLength(m_pixelBuf.numChannels());
+	if(!sampleAccum.setSampleVectorLength(m_pixelBuf.numChannels()))
+		return;
 	if( support.inRange(0, m_pixelBuf.width(), 0, m_pixelBuf.height()) )
 	{
 		// The bounds for the filter support are all inside the texture; do

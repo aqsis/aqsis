@@ -41,34 +41,52 @@ namespace Aqsis {
  * Typically, this sample data is then weighted by some filter weight before
  * being added to an accumulated output sample vector:
  *
- * out = 0;
- * for (x,y) in filter support:
- *   out += weight(x,y) * s(x,y)
- * end
+ * \verbatim
+ *
+ *   out = 0;
+ *   for (x,y) in filter support:
+ *     out += weight(x,y) * s(x,y)
+ *   end
+ *
+ * \endverbatim
+ *
  *
  * However, other strategies for accumulation are possible, including things
  * like percentage-closer filtering.  This motivates us to write the operation
  * more abstractly as
  *
- * accumulator a;
- * for (x,y) in filter support:
- *   a.accumulate(x, y, s(x,y))
- * end
+ * \verbatim
  *
- * This example illustrates the one of the methods which classes conforming to
- * SampleAccumulatorConcept must implement:
+ *   accumulator a;
+ *   for (x,y) in filter support:
+ *     a.accumulate(x, y, s(x,y))
+ *   end
  *
+ * \endverbatim
+ *
+ *
+ * This example illustrates one of the methods which classes conforming to
+ * SampleAccumulatorConcept must implement.  The full interface is as follows:
+ *
+ * \code
+ *
+ * // Accumulate samples from the vector "samples".
+ * // 
+ * // samples is of a type SampleVectorT is assumed to have an indexing operator[]
+ * // which returns floating point values.
  * template<typename SampleVectorT>
  * inline void accumulate(TqInt x, TqInt y, SampleVectorT samples);
  *
- * SampleVectorT is assumed to be some type which has an indexing operator[]
- * which returns floating point values.
+ * // The length of the "samples" vectors is provided to
+ * // SampleAccumulatorConcept via the the following method which is called
+ * // before the first call to accumulate() with the given vector lengths.
+ * // 
+ * // The return value from setSampleVectorLength is false if the accumulator
+ * // can't deal with the given number of samples, true otherwise.  This can be
+ * // used to shortcut sample accumulation when the sample vector is too short.
+ * bool setSampleVectorLength(TqInt sampleVectorLength);
  *
- * A further method should also be implemented for the SampleAccumulatorConcept:
- * the accumulator needs an efficient way to determine the length of the
- * samples, this is provided by the method:
- *
- * void setSampleVectorLength(TqInt sampleVectorLength);
+ * \endcode
  */
 
 //------------------------------------------------------------------------------
@@ -109,8 +127,11 @@ class CqSampleAccum
 		 * vectors should be the same length.
 		 *
 		 * \param length - the length of the sample vectors passed to accumulate.
+		 *
+		 * \return true if the length of the vector is long enough for samples
+		 * to be accumulated, false otherwise.
 		 */
-		inline void setSampleVectorLength(TqInt sampleVectorLength);
+		inline bool setSampleVectorLength(TqInt sampleVectorLength);
 
 		/** \brief Accumulate a sample into the output buffer at the given position.
 		 *
@@ -188,8 +209,10 @@ class CqPcfAccum
 		 * function 
 		 *
 		 * \param length - the length of the sample vectors passed to accumulate.
+		 *
+		 * \return false if the sample vector is too short to be usefully accumulated.
 		 */
-		void setSampleVectorLength(TqInt sampleVectorLength);
+		bool setSampleVectorLength(TqInt sampleVectorLength);
 
 		/** \brief Accumulate a sample into the output buffer at the given position.
 		 *
@@ -242,7 +265,7 @@ inline CqSampleAccum<FilterWeightT>::CqSampleAccum(
 }
 
 template<typename FilterWeightT>
-inline void CqSampleAccum<FilterWeightT>::setSampleVectorLength(TqInt sampleVectorLength)
+inline bool CqSampleAccum<FilterWeightT>::setSampleVectorLength(TqInt sampleVectorLength)
 {
 	assert(sampleVectorLength > 0);
 	TqInt totNumChans = m_numChans + m_numChansFill;
@@ -257,6 +280,7 @@ inline void CqSampleAccum<FilterWeightT>::setSampleVectorLength(TqInt sampleVect
 		// All channels should be filled with the "fill" value
 		m_numChans = 0;
 		m_numChansFill = totNumChans;
+		return false;
 	}
 	else
 	{
@@ -264,6 +288,7 @@ inline void CqSampleAccum<FilterWeightT>::setSampleVectorLength(TqInt sampleVect
 		m_numChans = sampleVectorLength - m_startChan;
 		m_numChansFill = totNumChans - m_numChans;
 	}
+	return true;
 }
 
 template<typename FilterWeightT>
@@ -318,11 +343,16 @@ inline CqPcfAccum<FilterWeightT, DepthFuncT>::CqPcfAccum(
 }
 
 template<typename FilterWeightT, typename DepthFuncT>
-inline void CqPcfAccum<FilterWeightT, DepthFuncT>::setSampleVectorLength(TqInt sampleVectorLength)
+inline bool CqPcfAccum<FilterWeightT, DepthFuncT>::setSampleVectorLength(TqInt sampleVectorLength)
 {
 	assert(sampleVectorLength > 0);
-	/// \todo Deal with overflowing sample vector lengths somehow...
-	assert(m_startChan < sampleVectorLength);
+	if(sampleVectorLength <= m_startChan)
+	{
+		// Provided sample vectors will be too short; return false to indicate
+		// that we don't want any calls to accumulate().
+		return false;
+	}
+	return true;
 }
 
 template<typename FilterWeightT, typename DepthFuncT>
