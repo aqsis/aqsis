@@ -205,7 +205,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			// A negative number of samples is also used as a flag to trigger
 			// the deterministic integrator.
 			CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf)
-				.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+				.applyFilter(accumulator, support, WrapMode_Trunc, WrapMode_Trunc);
 		}
 		else
 		{
@@ -215,7 +215,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			// factors.
 			CqTexBufSampler<CqTextureBuffer<TqFloat>, CqStochasticSuppIter>(
 					*m_pixelBuf, CqStochasticSuppIter(sampleOpts.numSamples()) )
-				.applyFilter(accumulator, support, WrapMode_Clamp, WrapMode_Clamp);
+				.applyFilter(accumulator, support, WrapMode_Trunc, WrapMode_Trunc);
 		}
 	}
 	else
