@@ -1,6 +1,6 @@
 SET(AQSIS_BOOST_FOUND 0)
 
-SET(AQSIS_BOOST_VERSION_SUFFIX -1_34_1)
+SET(AQSIS_BOOST_VERSION_SUFFIX "-1_34_1" CACHE STRING "Version suffix used on boost libraries (including '-' prefix).")
 
 SET(AQSIS_BOOST_LIBRARIES_DIR "" CACHE PATH "Location to look for boost libraries.")
 
