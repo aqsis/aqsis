@@ -14,4 +14,3 @@ cellnoisetest (float Ka = 1;
     Ci = Os * ( Ct * (Ka*ambient() + Kd*diffuse(Nf)) +
 		specularcolor * Ks*specular(Nf,-normalize(I),roughness));
 }
-
