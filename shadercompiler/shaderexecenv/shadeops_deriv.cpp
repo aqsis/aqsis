@@ -537,7 +537,7 @@ void	CqShaderExecEnv::SO_fDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetFloat(SO_DerivType<TqFloat>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetFloat(deriv<TqFloat>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -603,7 +603,7 @@ void	CqShaderExecEnv::SO_cDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetColor(SO_DerivType<CqColor>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetColor(deriv<CqColor>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -669,7 +669,7 @@ void	CqShaderExecEnv::SO_pDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetPoint(SO_DerivType<CqVector3D>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetPoint(deriv<CqVector3D>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);

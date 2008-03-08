@@ -33,6 +33,7 @@
 #include	<stack>
 #include	<map>
 
+#include	"aqsismath.h"
 #include	"bitvector.h"
 #include	"color.h"
 #include	"noise.h"
@@ -394,6 +395,20 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		 */
 		template<typename T>
 		T diffV(IqShaderData* var, TqInt gridIdx);
+		/** \brief Compute the differential dy/dx.
+		 *
+		 * Computes the derivative of a shader variable of type T with respect
+		 * to a given float variable.
+		 *
+		 * \param y - a variable of type T.
+		 * \param x - a float variable.
+		 * \param gridIdx - 1D index into the 2D grids of data.
+		 *
+		 * \return dy/dx if dx is nonzero.  If dx == 0, return a default
+		 * constructed value for T.
+		 */
+		template<typename T>
+		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
 
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
@@ -697,6 +712,49 @@ T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
 		var->GetValue(val0, gridIdx-uSize);
 		var->GetValue(val1, gridIdx+uSize);
 		return 0.5*(val1 - val0);
+	}
+}
+
+template<typename T>
+T CqShaderExecEnv::deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx)
+{
+	// At first sight this seems like a strange kind of derivative operation,
+	// since we may view both x and y as values which vary across the grid:
+	//
+	// x = x(u,v)
+	// y = y(u,v)
+	//
+	// However, if y is a function of x,  y = y(x(u,v)), we have:
+	//
+	// dy/du = dy/dx * dx/du
+	// dy/dv = dy/dx * dx/dv
+	//
+	// (all derivatives with respect to u and v are partial derivatives in
+	// these expressions.)
+	//
+	// This gives us two equivilant possibilities for calculating dy/dx:
+	//
+	// dy/dx = (dy/du) / (dx/du) = diffU(y) / diffU(x)
+	// dy/dx = (dy/dv) / (dx/dv) = diffV(y) / diffV(x)
+	//
+	// Either of these is fine, as long as dx/du and dx/dv are nonzero to
+	// within floating poing rounding error.  For numerical stability, we
+	// choose the direction u or v which has the maximum value for the value of
+	// dx.
+	//
+	TqFloat dxu = diffU<TqFloat>(x, gridIdx);
+	TqFloat dxv = diffV<TqFloat>(x, gridIdx);
+	TqFloat absDxu = std::fabs(dxu);
+	if(absDxu >= std::fabs(dxv))
+	{	
+		if(absDxu > 0) 
+			return diffU<T>(y, gridIdx) / dxu;
+		else
+			return T();
+	}
+	else
+	{
+		return diffV<T>(y, gridIdx) / dxv;
 	}
 }
 
