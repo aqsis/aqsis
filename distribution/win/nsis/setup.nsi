@@ -35,6 +35,7 @@
 !define PRODUCT_SHELLEXT_RIBGZ_INFO "RenderMan Geometry (Compressed)"
 !define PRODUCT_SHELLEXT_SL "Compile with Aqsis"
 !define PRODUCT_SHELLEXT_SL_INFO "RenderMan Shader"
+!define PRODUCT_SHELLEXT_SLX "Inspect with Aqsis"
 !define PRODUCT_SHELLEXT_SLX_INFO "Aqsis Shader"
 !define PRODUCT_WEB_SITE "http://www.aqsis.org"
 ;;!define PRODUCT_WEB_SUPPORT "http://support.aqsis.org"
@@ -351,7 +352,9 @@ Var /GLOBAL QUICKLAUCH_ICON
     
     WriteRegStr HKCR ".slx" "" "Aqsis.SLX"
     WriteRegStr HKCR "Aqsis.SLX" "" "${PRODUCT_SHELLEXT_SLX_INFO}"
-    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\aqsl.exe,1"
+    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\aqsltell.exe,1"
+    WriteRegStr HKCR "Aqsis.SLX\shell\open" "" "${PRODUCT_SHELLEXT_SLX}"
+    WriteRegStr HKCR "Aqsis.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
     file_end:
 SectionEnd
 
