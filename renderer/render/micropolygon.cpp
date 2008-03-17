@@ -1455,6 +1455,162 @@ void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector
 	CacheHitTestValues(cache, points);
 }
 
+void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	if(cache.smoothInterpolation)
+		CacheOutputInterpCoeffsSmooth(cache);
+	else
+		CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygon::InterpolateOutputs(const SqMpgSampleInfo& cache,
+	const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	if(cache.smoothInterpolation)
+	{
+		outCol = cache.color + cache.colorMultX*pos.x() + cache.colorMultY*pos.y();
+		outOpac = cache.opacity + cache.opacityMultX*pos.x() + cache.opacityMultY*pos.y();
+	}
+	else
+	{
+		outCol = cache.color;
+		outOpac = cache.opacity;
+	}
+}
+
+void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) const
+{
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
+	{
+		cache.color = *colColor();
+	}
+	else
+	{
+		cache.color = gColWhite;
+	}
+
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
+	{
+		cache.opacity = *colOpacity();
+		cache.occludes = cache.opacity >= gColWhite;
+	}
+	else
+	{
+		cache.opacity = gColWhite;
+		cache.occludes = true;
+	}
+}
+
+void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
+{
+	// Get 2D coordinates of verts in the (x,y) plane.
+	CqVector2D p1(PointA());
+	CqVector2D p2(PointB());
+	CqVector2D p3(PointC());
+	CqVector2D p4(PointD());
+
+	// 2D diagonal vectors for the micropolygon.  The order of the vertices
+	// (p1, p2, p3, p4) here winds around the micropoly, rather than taking the
+	// usual order expected from RiPatch.
+	CqVector2D d1 = p3 - p1;
+	CqVector2D d2 = p4 - p2;
+
+	// For each component of the colour, we compute a linear approximation to
+	// the component over the micropolygon.  This is done by computing a
+	// "normal" vector to a plane constructed such that the colour component
+	// takes the place of the depth, "z".
+	//
+	// This is essentially the same method used to compute the depth of a
+	// sample inside the fContains() function.
+
+	TqFloat Nz = d1.x()*d2.y() - d1.y()*d2.x();
+
+	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Ci" ))
+	{
+		const CqColor* pCi = NULL;
+		m_pGrid->pVar(EnvVars_Ci)->GetColorPtr(pCi);
+
+		const CqColor& c1 = pCi[GetCodedIndex(m_IndexCode, 0)];
+
+		if(Nz != 0)
+		{
+			const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
+			const CqColor& c3 = pCi[GetCodedIndex(m_IndexCode, 2)];
+			const CqColor& c4 = pCi[GetCodedIndex(m_IndexCode, 3)];
+
+			// Compute smooth shading coefficients for Ci.
+			CqColor c31 = c3 - c1;
+			CqColor c42 = c4 - c2;
+
+			CqColor Nx = d1.y()*c42 - c31*d2.y();
+			CqColor Ny = -d1.x()*c42 + c31*d2.x();
+
+			TqFloat NzInv = 1/Nz;
+			cache.color = (Nx*p1.x() + Ny*p1.y())*NzInv + c1;
+			cache.colorMultX = -Nx*NzInv;
+			cache.colorMultY = -Ny*NzInv;
+		}
+		else
+		{
+			// Degenerate to flat shading if the linear approx yields an
+			// infinitely steep plane.
+			cache.color = c1;
+			cache.colorMultX = gColBlack;
+			cache.colorMultY = gColBlack;
+		}
+	}
+	else
+	{
+		cache.color = gColWhite;
+		cache.colorMultX = gColBlack;
+		cache.colorMultY = gColBlack;
+	}
+
+	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Oi" ))
+	{
+		const CqColor* pOi = NULL;
+		m_pGrid->pVar(EnvVars_Oi)->GetColorPtr(pOi);
+
+		const CqColor& o1 = pOi[GetCodedIndex(m_IndexCode, 0)];
+
+		if(Nz != 0)
+		{
+			const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];
+			const CqColor& o3 = pOi[GetCodedIndex(m_IndexCode, 2)];
+			const CqColor& o4 = pOi[GetCodedIndex(m_IndexCode, 3)];
+
+			// Compute smooth shading coefficients for Oi.
+			CqColor o31 = o3 - o1;
+			CqColor o42 = o4 - o2;
+
+			CqColor Nx = d1.y()*o42 - o31*d2.y();
+			CqColor Ny = -d1.x()*o42 + o31*d2.x();
+
+			TqFloat NzInv = 1/Nz;
+			cache.opacity = (Nx*p1.x() + Ny*p1.y())*NzInv + o1;
+			cache.opacityMultX = -Nx*NzInv;
+			cache.opacityMultY = -Ny*NzInv;
+
+			// The micropoly occludes if the values on all vertices do.
+			cache.occludes = (o1 >= gColWhite) && (o2 >= gColWhite)
+				&& (o3 >= gColWhite) && (o4 >= gColWhite);
+		}
+		else
+		{
+			cache.opacity = o1;
+			cache.opacityMultX = gColBlack;
+			cache.opacityMultY = gColBlack;
+			cache.occludes = (o1 >= gColWhite);
+		}
+	}
+	else
+	{
+		cache.opacity = gColWhite;
+		cache.opacityMultX = gColBlack;
+		cache.opacityMultY = gColBlack;
+		cache.occludes = true;
+	}
+}
 
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {

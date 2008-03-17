@@ -387,6 +387,9 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
+		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
+		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
+				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 
 	private:
 		CqMicroPolygonPoints( const CqMicroPolygonPoints& From )
@@ -533,6 +536,9 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 			return true;
 		}
 		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
+		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
+				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 	private:
 		CqBound	m_Bound;					///< Stored bound.
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.

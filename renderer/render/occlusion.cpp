@@ -568,8 +568,8 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 
 		if ( SampleHit )
 		{
-			bool Occludes = MpgSampleInfo.m_Occludes;
-			bool opaque =  MpgSampleInfo.m_IsOpaque;
+			bool Occludes = MpgSampleInfo.occludes;
+			bool opaque =  MpgSampleInfo.isOpaque;
 
 			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
 			static SqImageSample localImageVal;
@@ -592,8 +592,10 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 			pMPG->MarkHit();
 
 			TqFloat* val = ImageVal.Data();
-			const CqColor& col = MpgSampleInfo.m_Colour;
-			const CqColor& opa = MpgSampleInfo.m_Opacity;
+			CqColor col;
+			CqColor opa;
+			pMPG->InterpolateOutputs(MpgSampleInfo, sample.m_Position, col, opa);
+
 			val[ 0 ] = col[0];
 			val[ 1 ] = col[1];
 			val[ 2 ] = col[2];

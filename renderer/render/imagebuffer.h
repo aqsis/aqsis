@@ -50,16 +50,6 @@
 START_NAMESPACE( Aqsis )
 
 
-// This struct is used to hold info about a mpg that is used when rendering the mpg.
-// It caches the info for use by multiple samples.
-struct SqMpgSampleInfo
-{
-	CqColor		m_Colour;
-	CqColor		m_Opacity;
-	bool		m_Occludes;		// whether the opacity is full.
-	bool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
-};
-
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
 {

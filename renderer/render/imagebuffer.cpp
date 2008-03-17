@@ -727,39 +727,30 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
 		return;
 	}
 
-	// fill in sample info for this mpg so we don't have to keep fetching it for each sample.
-	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
-	{
-		m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
-	}
-	else
-	{
-		m_CurrentMpgSampleInfo.m_Colour = gColWhite;
-	}
+	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
+	bool IsMoving = pMPG->IsMoving();
 
-	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
-	{
-		m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity()[0];
-		m_CurrentMpgSampleInfo.m_Occludes = m_CurrentMpgSampleInfo.m_Opacity >= gColWhite;
-	}
-	else
-	{
-		m_CurrentMpgSampleInfo.m_Opacity = gColWhite;
-		m_CurrentMpgSampleInfo.m_Occludes = true;
-	}
+	// Cache the shading interpolation type.  Ideally this should really be
+	// done by the CacheOutputInterpCoeffs(), or possibly once per grid...
+	const TqInt* interpType = pMPG->pGrid()->pAttributes()
+		->GetIntegerAttribute("System", "ShadingInterpolation");
+	// At this stage, only use smooth shading interpolation for stationary
+	// grids without DoF.
+	/// \todo Allow smooth shading with MB or DoF.
+	m_CurrentMpgSampleInfo.smoothInterpolation
+		= !(UsingDof || IsMoving) && (*interpType == ShadingInterp_Smooth);
+
+	// Cache output sample info for this mpg so we don't have to keep fetching
+	// it for each sample.
+	pMPG->CacheOutputInterpCoeffs(m_CurrentMpgSampleInfo);
 
 	// use the single imagesample rather than the list if possible.
 	// transparent, matte or csg samples, or if we need more than the first depth
 	// value have to use the (slower) list.
-	m_CurrentMpgSampleInfo.m_IsOpaque = m_CurrentMpgSampleInfo.m_Occludes &&
+	m_CurrentMpgSampleInfo.isOpaque = m_CurrentMpgSampleInfo.occludes &&
 	                                    !pMPG->pGrid()->pCSGNode() &&
 	                                    !( DisplayMode() & ModeZ ) &&
 	                                    !m_CurrentGridInfo.m_IsMatte;
-
-	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
-	bool IsMoving = pMPG->IsMoving();
 
 	if(IsMoving || UsingDof)
 	{

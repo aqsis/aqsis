@@ -649,6 +649,18 @@ bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFlo
 	return( false );
 }
 
+void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygonPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
+		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	outCol = cache.color;
+	outOpac = cache.opacity;
+}
+
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
@@ -882,6 +894,17 @@ bool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D,
 	return( fContains( vecSample, D, time ) );
 }
 
+void CqMicroPolygonMotionPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygonMotionPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
+		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	outCol = cache.color;
+	outOpac = cache.opacity;
+}
 
 //---------------------------------------------------------------------
 /** Store the vectors of the micropolygon at the specified shutter time.
