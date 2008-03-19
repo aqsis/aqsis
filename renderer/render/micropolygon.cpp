@@ -1514,6 +1514,8 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 	// usual order expected from RiPatch.
 	CqVector2D d1 = p3 - p1;
 	CqVector2D d2 = p4 - p2;
+	// Center point
+	CqVector2D pAvg = 0.25*(p1 + p2 + p3 + p4);
 
 	// For each component of the colour, we compute a linear approximation to
 	// the component over the micropolygon.  This is done by computing a
@@ -1531,13 +1533,13 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		m_pGrid->pVar(EnvVars_Ci)->GetColorPtr(pCi);
 
 		const CqColor& c1 = pCi[GetCodedIndex(m_IndexCode, 0)];
+		const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
+		const CqColor& c3 = pCi[GetCodedIndex(m_IndexCode, 2)];
+		const CqColor& c4 = pCi[GetCodedIndex(m_IndexCode, 3)];
+		const CqColor cAvg = 0.25*(c1 + c2 + c3 + c4);
 
 		if(Nz != 0)
 		{
-			const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
-			const CqColor& c3 = pCi[GetCodedIndex(m_IndexCode, 2)];
-			const CqColor& c4 = pCi[GetCodedIndex(m_IndexCode, 3)];
-
 			// Compute smooth shading coefficients for Ci.
 			CqColor c31 = c3 - c1;
 			CqColor c42 = c4 - c2;
@@ -1546,7 +1548,7 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 			CqColor Ny = -d1.x()*c42 + c31*d2.x();
 
 			TqFloat NzInv = 1/Nz;
-			cache.color = (Nx*p1.x() + Ny*p1.y())*NzInv + c1;
+			cache.color = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + cAvg;
 			cache.colorMultX = -Nx*NzInv;
 			cache.colorMultY = -Ny*NzInv;
 		}
@@ -1572,13 +1574,13 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		m_pGrid->pVar(EnvVars_Oi)->GetColorPtr(pOi);
 
 		const CqColor& o1 = pOi[GetCodedIndex(m_IndexCode, 0)];
+		const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];
+		const CqColor& o3 = pOi[GetCodedIndex(m_IndexCode, 2)];
+		const CqColor& o4 = pOi[GetCodedIndex(m_IndexCode, 3)];
+		const CqColor oAvg = 0.25*(o1 + o2 + o3 + o4);
 
 		if(Nz != 0)
 		{
-			const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];
-			const CqColor& o3 = pOi[GetCodedIndex(m_IndexCode, 2)];
-			const CqColor& o4 = pOi[GetCodedIndex(m_IndexCode, 3)];
-
 			// Compute smooth shading coefficients for Oi.
 			CqColor o31 = o3 - o1;
 			CqColor o42 = o4 - o2;
@@ -1587,7 +1589,7 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 			CqColor Ny = -d1.x()*o42 + o31*d2.x();
 
 			TqFloat NzInv = 1/Nz;
-			cache.opacity = (Nx*p1.x() + Ny*p1.y())*NzInv + o1;
+			cache.opacity = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + oAvg;
 			cache.opacityMultX = -Nx*NzInv;
 			cache.opacityMultY = -Ny*NzInv;
 
@@ -1597,10 +1599,10 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		}
 		else
 		{
-			cache.opacity = o1;
+			cache.opacity = oAvg;
 			cache.opacityMultX = gColBlack;
 			cache.opacityMultY = gColBlack;
-			cache.occludes = (o1 >= gColWhite);
+			cache.occludes = (cache.opacity >= gColWhite);
 		}
 	}
 	else
