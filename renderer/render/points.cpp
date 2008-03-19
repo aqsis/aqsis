@@ -236,66 +236,65 @@ CqMicroPolyGridBase* CqPoints::Dice()
 }
 
 
-void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
+namespace {
+
+/** \brief Implementation of dicing for points (helper function for CqPoints::NaturalDice)
+ *
+ * \param pParam - pointer to the parameter to take values from
+ * \param paramIdx - indices in the full parameter array (pParam) which
+ *                   correspond to the current gprim
+ * \param diceSize - number of points in the diced output
+ * \param pData - destination for diced shader data.
+ */
+template <class T, class SLT>
+void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
+		TqInt diceSize, IqShaderData* pData)
 {
-	switch ( pParameter->Type() )
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
+	for(TqInt i = 0; i < diceSize; i++ )
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
+		IqShaderData* arrayValue;
+		for(TqInt j = 0; j < pTParam->Count(); j++)
+		{
+			arrayValue = pData->ArrayEntry(j);
+			arrayValue->SetValue( static_cast<SLT>( pTParam->pValue() [ paramIdx[i] ] ), i );
+		}
+	}
+}
 
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
+} // unnamed namespace
 
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+void CqPoints::NaturalDice(CqParameter* pParam, TqInt uDiceSize, TqInt vDiceSize,
+		IqShaderData* pData )
+{
+	switch(pParam->Type())
+	{
+		case type_float:
+			pointsNaturalDice<TqFloat, TqFloat>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_integer:
+			pointsNaturalDice<TqInt, TqFloat>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			pointsNaturalDice<CqVector3D, CqVector3D>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_hpoint:
+			pointsNaturalDice<CqVector4D, CqVector3D>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_color:
+			pointsNaturalDice<CqColor, CqColor>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_string:
+			pointsNaturalDice<CqString, CqString>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_matrix:
+			pointsNaturalDice<CqMatrix, CqMatrix>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		default:
+			// left blank to avoid compiler warnings about unhandled types
+			break;
 	}
 }
 

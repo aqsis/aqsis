@@ -290,148 +290,144 @@ void CqSurface::SetDefaultPrimitiveVariables( bool bUseDef_st )
 }
 
 
+
+namespace {
+
+/** \brief Helper function for generic natural subdivision of surface parameters.
+ *
+ * Uses linear interpolation to split the parameters along either the u or v
+ * directions.
+ *
+ * \param pParam - pointer to source parameter data
+ * \param pResult1 - pointer to output parameter for first result curve
+ * \param pResult1 - pointer to output parameter for second result curve
+ * \param u - if true, split along the u-direction, otherwise split along v.
+ */
+template <class T, class SLT>
+void surfaceNaturalSubdivide(CqParameter* pParam, CqParameter* pResult1,
+		CqParameter* pResult2, bool u )
+{
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+	CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+	CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+	for(TqInt i = 0; i < pParam->Count(); i++)
+	{
+		if ( u )
+		{
+			pTResult2->pValue( 1 ) [ i ] = pTParam->pValue( 1 ) [ i ];
+			pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+			pTResult1->pValue( 1 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 1 ) [ i ] ) * 0.5 );
+			pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 2 ) [ i ] = static_cast<T>( ( pTParam->pValue( 2 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+		}
+		else
+		{
+			pTResult2->pValue( 2 ) [ i ] = pTParam->pValue( 2 ) [ i ];
+			pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+			pTResult1->pValue( 2 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 2 ) [ i ] ) * 0.5 );
+			pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 1 ) [ i ] = static_cast<T>( ( pTParam->pValue( 1 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+		}
+	}
+}
+
+} // unnamed namespace
+
 void CqSurface::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u )
 {
-	switch ( pParam->Type() )
+	switch(pParam->Type())
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			default:
-			{
-				// blank to avoid compiler warnings about unhandled cases
-				break;
-			}
+		case type_float:
+			surfaceNaturalSubdivide<TqFloat, TqFloat>(pParam, pParam1, pParam2, u);
+			break;
+		case type_integer:
+			surfaceNaturalSubdivide<TqInt, TqFloat>(pParam, pParam1, pParam2, u);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			surfaceNaturalSubdivide<CqVector3D, CqVector3D>(pParam, pParam1, pParam2, u);
+			break;
+		case type_hpoint:
+			surfaceNaturalSubdivide<CqVector4D, CqVector3D>(pParam, pParam1, pParam2, u);
+			break;
+		case type_color:
+			surfaceNaturalSubdivide<CqColor, CqColor>(pParam, pParam1, pParam2, u);
+			break;
+		case type_string:
+			surfaceNaturalSubdivide<CqString, CqString>(pParam, pParam1, pParam2, u);
+			break;
+		case type_matrix:
+			surfaceNaturalSubdivide<CqMatrix, CqMatrix>(pParam, pParam1, pParam2, u);
+			break;
+		default:
+			// blank to avoid compiler warnings about unhandled cases
+			break;
 	}
 }
 
 
-void CqSurface::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
+namespace {
+
+template <class T, class SLT>
+void surfaceNaturalDice(TqFloat uSize, TqFloat vSize, CqParameter* pParam,
+		IqShaderData* pData)
 {
-	switch ( pParameter->Type() )
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
+	TqInt iv, iu;
+	for ( iv = 0; iv <= vSize; iv++ )
 	{
-			case type_float:
+		TqFloat v = ( 1.0f / vSize ) * iv;
+		for ( iu = 0; iu <= uSize; iu++ )
+		{
+			TqFloat u = ( 1.0f / uSize ) * iu;
+			IqShaderData* arrayValue;
+			TqInt i;
+			for(i = 0; i<pTParam->Count(); i++)
 			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
+				arrayValue = pData->ArrayEntry(i);
+				T vec = BilinearEvaluate( pTParam->pValue(0) [ i ], pTParam->pValue(1) [ i ], pTParam->pValue(2) [ i ], pTParam->pValue(3) [ i ], u, v );
+				TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+				arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
 			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+		}
 	}
 }
 
+} // unnamed namespace
+
+void CqSurface::NaturalDice( CqParameter* pParam, TqInt uDiceSize,
+		TqInt vDiceSize, IqShaderData* pData )
+{
+	switch(pParam->Type())
+	{
+		case type_float:
+			surfaceNaturalDice<TqFloat, TqFloat>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_integer:
+			surfaceNaturalDice<TqInt, TqFloat>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			surfaceNaturalDice<CqVector3D, CqVector3D>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_hpoint:
+			surfaceNaturalDice<CqVector4D, CqVector3D>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_color:
+			surfaceNaturalDice<CqColor, CqColor>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_string:
+			surfaceNaturalDice<CqString, CqString>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_matrix:
+			surfaceNaturalDice<CqMatrix, CqMatrix>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		default:
+			// left blank to avoid compiler warnings about unhandled types
+			break;
+	}
+}
 
 
 //---------------------------------------------------------------------

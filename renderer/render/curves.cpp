@@ -53,20 +53,6 @@ CqCurve::CqCurve() : CqSurface()
 }
 
 
-
-/**
- * CqCurve copy constructor.
- */
-/* CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
- * {
- * 	( *this ) = from;
- * 
- * 	STATS_INC( GPR_crv );
- * }
- */
-
-
-
 /**
  * CqCurve destructor.
  */
@@ -100,7 +86,6 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
 	}
 
 }
-
 
 
 /**
@@ -251,6 +236,69 @@ void CqCurve::PopulateWidth()
 
 	// add the width array to the curve as a primitive variable
 	AddPrimitiveVariable( widthP );
+}
+
+
+bool CqCurve::Diceable()
+{
+	// OK, here the CqCubicCurveSegment line has two options:
+	//  1. split into two more lines
+	//  2. turn into a bilinear patch for rendering
+	// We don't want to go turning into a patch unless absolutely
+	// necessary, since patches cost more.  We only want to become a patch
+	// if the current curve is "best handled" as a patch.  For now, I'm
+	// choosing to define that the curve is best handled as a patch under
+	// one or more of the following two conditions:
+	//  1. If the maximum width is a significant fraction of the length of
+	//      the line (width greater than 0.75 x length; ignoring normals).
+	//  2. If the length of the line (ignoring the width; cos' it's
+	//      covered by point 1) is such that it's likely a bilinear
+	//      patch would be diced immediately if we created one (so that
+	//      patches don't have to get split!).
+	//  3. If the curve crosses the eye plane (m_fDiceable == false).
+
+	// find the length of the CqLinearCurveSegment line in raster space
+	if( m_splitDecision == Split_Undecided )
+	{
+		// AGG - 31/07/04
+		// well, if we follow the above statagy we end up splitting into
+		// far too many grids (with roughly 1 mpg per grid). so after
+		// profiling a few scenes, the fastest method seems to be just
+		// to convert to a patch immediatly.
+		// we really need a native dice for curves but until that time
+		// i reckon this is best.
+		//m_splitDecision = Split_Patch;
+
+		CqMatrix matCtoR;
+		QGetRenderContext() ->matSpaceToSpace(
+									"camera", "raster",
+									NULL, NULL,
+									QGetRenderContextI()->Time(),
+									matCtoR
+									);
+		CqVector2D hull[ 2 ];     // control hull
+		hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];
+		hull[ 1 ] = matCtoR * P()->pValue( 1 )[0];
+		CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
+		TqFloat lengthraster = lengthVector.Magnitude();
+
+		// find the approximate "length" of a diced patch in raster space
+		TqFloat gridlength = GetGridLength();
+
+		// decide whether to split into more curve segments or a patch
+		if(( lengthraster < gridlength ) || ( !m_fDiceable ))
+		{
+			// split into a patch
+			m_splitDecision = Split_Patch;
+		}
+		else
+		{
+			// split into smaller curves
+			m_splitDecision = Split_Curve;
+		}
+	}
+
+	return false;
 }
 
 

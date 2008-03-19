@@ -33,7 +33,6 @@
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"bilinear.h"
-#include	"forwarddiff.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -56,87 +55,6 @@ class CqSurfacePatchBicubic : public CqSurface
 			return CqString("CqSurfacePatchBicubic");
 		}
 #endif
-
-		template <class T, class SLT>
-		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-		{
-			CqForwardDiffBezier<T> vFD0( 1.0f / vSize );
-			CqForwardDiffBezier<T> vFD1( 1.0f / vSize );
-			CqForwardDiffBezier<T> vFD2( 1.0f / vSize );
-			CqForwardDiffBezier<T> vFD3( 1.0f / vSize );
-			CqForwardDiffBezier<T> uFD0( 1.0f / uSize );
-
-			IqShaderData* arrayValue;
-			TqInt i;
-			for(i = 0; i<pParam->Count(); i++)
-			{
-				vFD0.CalcForwardDiff( pParam->pValue(0) [ i ], pParam->pValue(4) [ i ], pParam->pValue(8) [ i ], pParam->pValue(12) [ i ] );
-				vFD1.CalcForwardDiff( pParam->pValue(1) [ i ], pParam->pValue(5) [ i ], pParam->pValue(9) [ i ], pParam->pValue(13) [ i ] );
-				vFD2.CalcForwardDiff( pParam->pValue(2) [ i ], pParam->pValue(6) [ i ], pParam->pValue(10) [ i ], pParam->pValue(14) [ i ] );
-				vFD3.CalcForwardDiff( pParam->pValue(3) [ i ], pParam->pValue(7) [ i ], pParam->pValue(11) [ i ], pParam->pValue(15) [ i ] );
-
-				TqInt iv, iu;
-				for ( iv = 0; iv <= vSize; iv++ )
-				{
-					T vA = vFD0.GetValue();
-					T vB = vFD1.GetValue();
-					T vC = vFD2.GetValue();
-					T vD = vFD3.GetValue();
-					uFD0.CalcForwardDiff( vA, vB, vC, vD );
-
-					for ( iu = 0; iu <= uSize; iu++ )
-					{
-						T vec = uFD0.GetValue();
-						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-						arrayValue = pData->ArrayEntry(i);
-						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
-					}
-				}
-			}
-		}
-
-		template <class T, class SLT>
-		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, bool u )
-		{
-			TqInt iu, iv;
-
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-			if ( u )
-			{
-				for ( iv = 0; iv < 4; iv++ )
-				{
-					TqUint ivo = ( iv * 4 );
-					pTResult1->pValue() [ ivo + 0 ] = pTParam->pValue() [ ivo + 0 ];
-					pTResult1->pValue() [ ivo + 1 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 0 ] + pTParam->pValue() [ ivo + 1 ] ) / 2.0f );
-					pTResult1->pValue() [ ivo + 2 ] = static_cast<T>( pTResult1->pValue() [ ivo + 1 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
-
-					pTResult2->pValue() [ ivo + 3 ] = pTParam->pValue() [ ivo + 3 ];
-					pTResult2->pValue() [ ivo + 2 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 2 ] + pTParam->pValue() [ ivo + 3 ] ) / 2.0f );
-					pTResult2->pValue() [ ivo + 1 ] = static_cast<T>( pTResult2->pValue() [ ivo + 2 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
-
-					pTResult1->pValue() [ ivo + 3 ] = static_cast<T>( ( pTResult1->pValue() [ ivo + 2 ] + pTResult2->pValue() [ ivo + 1 ] ) / 2.0f );
-					pTResult2->pValue() [ ivo + 0 ] = pTResult1->pValue() [ ivo + 3 ];
-				}
-			}
-			else
-			{
-				for ( iu = 0; iu < 4; iu++ )
-				{
-					pTResult1->pValue() [ 0 + iu ] = pTParam->pValue() [ 0 + iu ];
-					pTResult1->pValue() [ 4 + iu ] = static_cast<T>( ( pTParam->pValue() [ 0 + iu ] + pTParam->pValue() [ 4 + iu ] ) / 2.0f );
-					pTResult1->pValue() [ 8 + iu ] = static_cast<T>( pTResult1->pValue() [ 4 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
-
-					pTResult2->pValue() [ 12 + iu ] = pTParam->pValue() [ 12 + iu ];
-					pTResult2->pValue() [ 8 + iu ] = static_cast<T>( ( pTParam->pValue() [ 8 + iu ] + pTParam->pValue() [ 12 + iu ] ) / 2.0f );
-					pTResult2->pValue() [ 4 + iu ] = static_cast<T>( pTResult2->pValue() [ 8 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
-
-					pTResult1->pValue() [ 12 + iu ] = static_cast<T>( ( pTResult1->pValue() [ 8 + iu ] + pTResult2->pValue() [ 4 + iu ] ) / 2.0f );
-					pTResult2->pValue() [ 0 + iu ] = pTResult1->pValue() [ 12 + iu ];
-				}
-			}
-		}
 
 		/** Get a reference to the indexed control point.
 		 * \param iRow Integer row index.

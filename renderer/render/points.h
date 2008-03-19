@@ -276,23 +276,6 @@ class CqPoints : public CqSurface
 			return ( A );
 		}
 
-	protected:
-		template <class T, class SLT>
-		void	TypedNaturalDice( CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-		{
-			TqUint i;
-			for ( i = 0; i < nVertices(); i++ )
-			{
-				IqShaderData* arrayValue;
-				TqInt j;
-				for(j = 0; j<pParam->Count(); j++)
-				{
-					arrayValue = pData->ArrayEntry(j);
-					arrayValue->SetValue( static_cast<SLT>( pParam->pValue() [ m_KDTree.aLeaves()[ i ] ] ), i );
-				}
-			}
-		}
-
 	private:
 		boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
 		TqInt	m_nVertices;					///< Number of points this surfaces represents.
