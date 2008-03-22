@@ -156,12 +156,13 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 
 //------------------------------------------------------------------------------
 template<class TypeA, class TypeB>
-void CqSubdivision2::CreateVertex(CqParameterTyped<TypeA, TypeB>* pParam,
+void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
 		CqLath* pVertex, TqInt iIndex)
 {
-	TqInt arraysize = 0, arrayindex;
-	arraysize = pParam->Count();
-	for( arrayindex = 0; arrayindex < arraysize; arrayindex++ )
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
 	{
 		TypeA S = TypeA(0.0f);
 		TypeA Q = TypeA(0.0f);
@@ -405,66 +406,35 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 			else
 				continue;
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateVertex<TqFloat, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateVertex<CqColor, CqColor>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateVertex<CqString, CqString>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
-
 		}
 	}
 }
@@ -472,12 +442,13 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 
 //------------------------------------------------------------------------------
 template<class TypeA, class TypeB>
-void CqSubdivision2::CreateEdgeVertex(CqParameterTyped<TypeA, TypeB>* pParam,
+void CqSubdivision2::CreateEdgeVertex(CqParameter* pParamToModify,
 		CqLath* pEdge, TqInt iIndex)
 {
-	TqInt arraysize = 0, arrayindex;
-	arraysize = pParam->Count();
-	for( arrayindex = 0; arrayindex < arraysize; arrayindex++ )
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
 	{
 		TypeA A = TypeA(0.0f);
 		TypeA B = TypeA(0.0f);
@@ -589,63 +560,33 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 			else
 				continue;
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateEdgeVertex<TqFloat, TqFloat>( *iUP, pVertex, iIndex );
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateEdgeVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateEdgeVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateEdgeVertex<CqColor, CqColor>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateEdgeVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateEdgeVertex<CqString, CqString>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateEdgeVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
 		}
@@ -655,9 +596,11 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 
 //------------------------------------------------------------------------------
 template<class TypeA, class TypeB>
-void CqSubdivision2::CreateFaceVertex(CqParameterTyped<TypeA, TypeB>* pParam,
+void CqSubdivision2::CreateFaceVertex(CqParameter* pParamToModify,
 		CqLath* pFace, TqInt iIndex)
 {
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
 	// Get a pointer to the appropriate index accessor function on CqLath based on class.
 	TqInt (CqLath::*IndexFunction)() const;
 	if( pParam->Class() == class_vertex || pParam->Class() == class_varying)
@@ -667,9 +610,8 @@ void CqSubdivision2::CreateFaceVertex(CqParameterTyped<TypeA, TypeB>* pParam,
 	// Face point is just the average of the original faces vertices.
 	std::vector<CqLath*> aQfv;
 	pFace->Qfv(aQfv);
-	TqInt arraysize = 0, arrayindex;
-	arraysize = pParam->Count();
-	for( arrayindex = 0; arrayindex < arraysize; arrayindex++ )
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
 	{
 		std::vector<CqLath*>::iterator iV;
 		TypeA Val = TypeA(0.0f);
@@ -722,66 +664,35 @@ void CqSubdivision2::AddFaceVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 				iFVIndex = iIndex;
 			}
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateFaceVertex<TqFloat, TqFloat>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateFaceVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateFaceVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateFaceVertex<CqColor, CqColor>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateFaceVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateFaceVertex<CqString, CqString>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateFaceVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex );
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
-
 		}
 	}
 

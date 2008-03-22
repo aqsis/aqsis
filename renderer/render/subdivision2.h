@@ -168,13 +168,13 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 	private:
 		template<class TypeA, class TypeB>
-		void CreateVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pVertex,
+		void CreateVertex(CqParameter* pParamToModify, CqLath* pVertex,
 				TqInt iIndex);
 		template<class TypeA, class TypeB>
-		void CreateEdgeVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pEdge,
+		void CreateEdgeVertex(CqParameter* pParamToModify, CqLath* pEdge,
 				TqInt iIndex);
 		template<class TypeA, class TypeB>
-		void CreateFaceVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pFace,
+		void CreateFaceVertex(CqParameter* pParamToModify, CqLath* pFace,
 				TqInt iIndex);
 
 		/// Array of pointers to laths, one each representing each facet.

@@ -35,11 +35,25 @@ START_NAMESPACE( Aqsis )
 
 
 //------------------------------------------------------------------------------
-/**
- *	Individual topology element class.
- *	Holds information about mesh neighbourhoods allowing easy data aextraction about mesh topology.
+/** \brief A "Lath" holds topological information about mesh neighbourhoods.
+ *
+ * Linked structures of laths allow adjoining faces/vertices/edges to be
+ * represented, with neighbours accessible in O(1) time.
+ *
+ * For more information, see the article "Data Structures for Multiresolution
+ * Representation of Unstructured Meshes" by K. Joy, J. Legakis and R.
+ * MacCracken in "Hierarchical and Geometrical Methods in Scientific
+ * Visualization" (may be found on google books).
+ *
+ * The article lists several types of lath data structures.  The one we use
+ * here is a variation on the "corner lath", with extra pointers to reference
+ * data up and down the subdivision tree.  Geometrically, there is a corner
+ * lath for each corner of each face in the mesh.
+ *
+ * To manage parameters attached to the mesh, the lath keeps an index into the
+ * parameter arrays for both data stored on vertices (class vertex/varying) and
+ * per-face data stored on vertices (class facevertex/facevarying).
  */
-
 class CqLath
 {
 	public:
