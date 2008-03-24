@@ -155,6 +155,40 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 
 
 //------------------------------------------------------------------------------
+namespace {
+
+/** \brief Determine whether a facevertex parameter is discontinuous at the
+ * given vertex.
+ *
+ * Primitive variables of storage class "facevertex" cannot be sensibly
+ * interpolated by the usual vertex interpolation rules if the various values
+ * associated with a vertex are not the same.  This function notices such
+ * discontinuities.
+ *
+ * \param pParam - geometric parameter of class "facevertex" to test for discontinuitiy
+ * \param pVert - vertex in the topology data structure
+ * \param arrayIndex - array index for pParam.
+ */
+template<class TypeA, class TypeB>
+inline bool isDiscontinuousFaceVertex(const CqParameterTyped<TypeA, TypeB>* pParam,
+		CqLath* pVert, TqInt arrayIndex)
+{
+	TypeA currVertVal = pParam->pValue(pVert->FaceVertexIndex())[arrayIndex];
+	// Get the facets which share this vertex.
+	std::vector<CqLath*> aQvf;
+	pVert->Qvf(aQvf);
+	for(std::vector<CqLath*>::const_iterator iVf = aQvf.begin();
+			iVf != aQvf.end(); ++iVf)
+	{
+		if(!isClose(currVertVal, pParam->pValue((*iVf)->FaceVertexIndex())[arrayIndex]))
+			return true;
+	}
+	return false;
+}
+
+} // unnamed namespace
+
+//------------------------------------------------------------------------------
 template<class TypeA, class TypeB>
 void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
 		CqLath* pVertex, TqInt iIndex)
@@ -176,7 +210,27 @@ void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
 			if( pParam->Class() == class_vertex )
 				IndexFunction = &CqLath::VertexIndex;
 			else
+			{
 				IndexFunction = &CqLath::FaceVertexIndex;
+				// Perform a special check for whether all values at the vertex
+				// agree.  If they don't, we make the vertex a "hard" one.
+				//
+				// It's possible that this check should be extended to all the
+				// vertices which are connected by edges to this one, but it's
+				// tricky to say whether this is entirely necessary.  Initial
+				// results appear to look good without bothering to do this
+				// extra step.
+				//
+				// HOWEVER, this is a prime place to start looking if
+				// facevertex interpolation seems a little strange in the
+				// future.
+				if(isDiscontinuousFaceVertex(pParam, pVertex, arrayindex))
+				{
+					pParam->pValue(iIndex)[arrayindex]
+						= pParam->pValue((pVertex->*IndexFunction)())[arrayindex];
+					continue;
+				}
+			}
 
 			// Determine if we have a boundary vertex.
 			if( pVertex->isBoundaryVertex() )
@@ -456,14 +510,23 @@ void CqSubdivision2::CreateEdgeVertex(CqParameter* pParamToModify,
 
 		if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
 		{
+			bool disctsFaceVertex = false;
 			// Get a pointer to the appropriate index accessor function on CqLath based on class.
 			TqInt (CqLath::*IndexFunction)() const;
 			if( pParam->Class() == class_vertex )
 				IndexFunction = &CqLath::VertexIndex;
 			else
+			{
 				IndexFunction = &CqLath::FaceVertexIndex;
 
-			if( NULL != pEdge->ec() )
+				// If either of the adjoining vertices are discontinuous, this
+				// edge should also be - make sure to interpolate it as a fully
+				// hard edge.
+				disctsFaceVertex = isDiscontinuousFaceVertex(pParam, pEdge, arrayindex)
+					|| isDiscontinuousFaceVertex(pParam, pEdge->ccf(), arrayindex);
+			}
+
+			if( NULL != pEdge->ec() && !disctsFaceVertex)
 			{
 				// Edge point is the average of the centrepoint of the original edge and the
 				// average of the two new face points of the adjacent faces.
