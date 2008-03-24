@@ -1322,6 +1322,23 @@ bool  operator!=(const CqMatrix& A, const CqMatrix& B)
 	return(!(A==B));
 }
 
+bool isClose(const CqMatrix& m1, const CqMatrix& m2, TqFloat tol)
+{
+	TqFloat norm1 = 0;
+	TqFloat norm2 = 0;
+	TqFloat diffNorm = 0;
+	const TqFloat* m1Elts = m1.pElements();
+	const TqFloat* m2Elts = m2.pElements();
+	for(int i = 0; i < 16; ++i)
+	{
+		norm1 += m1Elts[i]*m1Elts[i];
+		norm2 += m2Elts[i]*m2Elts[i];
+		diffNorm += (m1Elts[i] - m2Elts[i])*(m1Elts[i] - m2Elts[i]);
+	}
+	TqFloat tol2 = tol*tol;
+	return diffNorm < tol2*norm1 || diffNorm < tol2*norm2;
+}
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

@@ -72,6 +72,26 @@ BOOST_AUTO_TEST_CASE(color_lerp)
 	BOOST_CHECK_EQUAL(Aqsis::lerp(1.0f, cMin, cMax), cMax);
 }
 
+BOOST_AUTO_TEST_CASE(color_isClose)
+{
+	const CqColor c1(1.5, 2.5, 3.5);
+	BOOST_CHECK(isClose(c1, c1));
+	BOOST_CHECK(isClose(c1, (c1*100.0)/100.0));
+
+	const CqColor cEps(0, 1e-4, 0);
+
+	BOOST_CHECK(!isClose(c1, c1 + cEps));
+	BOOST_CHECK(!isClose(c1, c1 + cEps, 1e-5));
+	BOOST_CHECK(isClose(c1, c1 + cEps, 1e-4));
+	BOOST_CHECK(isClose(c1, c1 - cEps, 1e-4));
+
+	const CqColor cEps2(1e-4, -1e-5, -1e-5);
+	BOOST_CHECK(!isClose(c1, c1 + cEps2));
+	BOOST_CHECK(!isClose(c1, c1 + cEps2, 1e-5));
+	BOOST_CHECK(isClose(c1, c1 + cEps2, 1e-4));
+	BOOST_CHECK(isClose(c1, c1 - cEps2, 1e-4));
+}
+
 //------------------------------------------------------------------------------
 #else // AQSIS_OPTIMIZATION_TEST
 

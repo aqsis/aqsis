@@ -39,10 +39,34 @@ START_NAMESPACE( Aqsis )
 class COMMON_SHARE CqVector3D;
 
 //----------------------------------------------------------------------
-/** \class CqVector4D
- * \brief Define class structure for 4D homogeneous vector.
+/** \brief A homogeneous length-4 vector.
+ *
+ * Homogenous coordinates have the property that any scaled version of a vector
+ * is considered equal to that vector.  That is, we have
+ *
+ *   v1 == a * v1
+ *
+ * for any number a.
+ *
+ * This equivilance relation seems a little odd at first sight, but is a
+ * convenient representation for certian types of splines, in particular NURBS.
+ * It's also a convenient when doing perspective transformations.
+ *
+ * A 3D vector can be extraced from a 4D homogenous vector by putting the
+ * 4-vector in a canonical form where the last componenet is equal to 1:
+ *
+ * (x,y,z,h)  -->  (x/h,y/h,z/h,1)
+ *
+ * By the equivilance relation, these two vectors are still considered "equal".
+ * The associated 3-vector is just the first three componenets.
+ *
+ * (Note that this and many other operations involve division by the last
+ * element, and will give rubbish if it is 0.)
+ *
+ * Note also that homogenous vectors have odd and slightly counterintuitive
+ * rules for addition, subtraction, scalar multiplication etc.  These are *not*
+ * the same as the rules for taking linear combinations on a normal vector.
  */
-
 class CqVector4D
 {
 	public:
@@ -241,11 +265,29 @@ class CqVector4D
 ;
 
 //-----------------------------------------------------------------------
+/** \brief Determine whether two vectors are equal to within some tolerance
+ *
+ * The closeness criterion for homogenous 4-vectors is based on the euclidian
+ * norm of the associated 3D vector.  That is, we take the homogenous
+ * difference between v1 and v2, and compare that to the length of v1 and v2
+ * scaled by the tolerance.  In symbols (remember that all operations are
+ * homogenous!)
+ *
+ * length(v1 - v2) < tol*max(length(v1), length(v2));
+ *
+ * \param v1, v2 - vectors to compare
+ * \param tolerance for comparison
+ */
+bool isClose(const CqVector4D& v1, const CqVector4D& v2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
-//---------------------------------------------------------------------
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
 /** Copy constructor from 3D Vector.
  */
-
 inline CqVector4D::CqVector4D( const CqVector3D &From )
 {
 	*this = From;
@@ -508,6 +550,14 @@ inline std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector 
 {
 	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
 	return ( Stream );
+}
+
+//------------------------------------------------------------------------------
+inline bool isClose(const CqVector4D& v1, const CqVector4D& v2, TqFloat tol)
+{
+	TqFloat diff2 = (v1 - v2).Magnitude2();
+	TqFloat tol2 = tol*tol;
+	return diff2 < tol2*v1.Magnitude2() || diff2 < tol2*v2.Magnitude2();
 }
 
 

@@ -112,3 +112,17 @@ BOOST_AUTO_TEST_CASE(ceilPow2_test)
 	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x110), TqUint(0x200));
 }
 
+BOOST_AUTO_TEST_CASE(isClose_test)
+{
+	const TqFloat f1 = 1.5;
+	BOOST_CHECK(Aqsis::isClose(f1, f1));
+	BOOST_CHECK(Aqsis::isClose(f1, (f1*100.0)/100.0));
+
+	const TqFloat eps = 1e-4;
+
+	BOOST_CHECK(!Aqsis::isClose(f1, f1 + eps));
+	BOOST_CHECK(!Aqsis::isClose(f1, f1 + eps, 1e-5));
+	BOOST_CHECK(Aqsis::isClose(f1, f1 + eps, 1e-4));
+	BOOST_CHECK(Aqsis::isClose(f1, f1 - eps, 1e-4));
+}
+

@@ -167,3 +167,30 @@ BOOST_AUTO_TEST_CASE(vector4d_operator_less_or_equal)
 	BOOST_CHECK(vec1 <= vec2);
 	BOOST_CHECK(vec1 >= vec3);
 }
+
+BOOST_AUTO_TEST_CASE(CqVector3D_isClose)
+{
+	// Remeber that these are homogenous vectors, hence the 1 always in the
+	// last place!
+	const CqVector4D v1(1.5, 2.5, 1.1, 1);
+	BOOST_CHECK(isClose(v1, v1));
+	BOOST_CHECK(isClose(v1, (v1*100.0)/100.0));
+
+	const CqVector4D eps(0, 1e-4, 0, 1);
+
+	BOOST_CHECK(!isClose(v1, v1 + eps));
+	BOOST_CHECK(!isClose(v1, v1 + eps, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps, 1e-4));
+
+	const CqVector4D eps2(1e-4, -1e-5, 1e-5, 1);
+	BOOST_CHECK(!isClose(v1, v1 + eps2));
+	BOOST_CHECK(!isClose(v1, v1 + eps2, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps2, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps2, 1e-4));
+
+	// Special check for homogenous vectors...
+	const CqVector4D v2(3.0, 5.0, 2.2, 2);
+	BOOST_CHECK(isClose(v1, v2));
+}
+

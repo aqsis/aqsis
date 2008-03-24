@@ -71,3 +71,23 @@ BOOST_AUTO_TEST_CASE(vector3d_lerp)
 	BOOST_CHECK_EQUAL(Aqsis::lerp(1.0f, vMin, vMax), vMax);
 }
 
+BOOST_AUTO_TEST_CASE(CqVector3D_isClose)
+{
+	const CqVector3D v1(1.5, 2.5, 1.1);
+	BOOST_CHECK(isClose(v1, v1));
+	BOOST_CHECK(isClose(v1, (v1*100.0)/100.0));
+
+	const CqVector3D eps(0, 1e-4, 0);
+
+	BOOST_CHECK(!isClose(v1, v1 + eps));
+	BOOST_CHECK(!isClose(v1, v1 + eps, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps, 1e-4));
+
+	const CqVector3D eps2(1e-4, -1e-5, 1e-5);
+	BOOST_CHECK(!isClose(v1, v1 + eps2));
+	BOOST_CHECK(!isClose(v1, v1 + eps2, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps2, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps2, 1e-4));
+}
+

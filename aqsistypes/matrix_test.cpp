@@ -40,16 +40,7 @@
 
 static bool equals(const Aqsis::CqMatrix& a, const Aqsis::CqMatrix& b)
 {
-	for (int i=0; i<4; ++i)
-	{
-		for (int j=0; j<4; ++j)
-		{
-			if (a.Element(i, j) > (b.Element(i, j) + 0.000001f)
-				|| a.Element(i, j) < (b.Element(i, j) - 0.000001f))
-				return false;
-		}
-	}
-	return true;
+	return isClose(a, b);
 }
 
 
@@ -399,3 +390,34 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Determinant_test)
 		
 	BOOST_CHECK_EQUAL(mat_a.Determinant(), -5.0f);
 }
+
+BOOST_AUTO_TEST_CASE(matrix_isClose)
+{
+	const Aqsis::CqMatrix m1(1.3, -2.4, 1.0, 1.02, 
+							 1.6, 1.1, 0.03, 1.0, 
+							 0.4, 2.0, 1.204, 1.5, 
+							 1.2, 1.4, 1.30, 0.8);
+	// matrix 2-norm of m1 above is approx 5.2.  Keep this in mind when testing
+	// closeness...
+	BOOST_CHECK(isClose(m1, m1));
+	BOOST_CHECK(isClose(m1, (m1*100.0) * (1/100.0)));
+
+	const Aqsis::CqMatrix mEps( 0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 1e-4);
+	BOOST_CHECK(!isClose(m1, m1 + mEps));
+	BOOST_CHECK(!isClose(m1, m1 + mEps, 1e-5));
+	BOOST_CHECK(isClose(m1, m1 + mEps, 1e-4));
+	BOOST_CHECK(isClose(m1, m1 - mEps, 1e-4));
+
+	const Aqsis::CqMatrix mEps2( 1e-6, 1e-6, 1e-6, 1e-6,
+								1e-6, 1e-6, 1e-6, 1e-6,
+								1e-6, 1e-6, 1e-4, 1e-6,
+								1e-6, 1e-6, 1e-6, 1e-6);
+	BOOST_CHECK(!isClose(m1, m1 + mEps2));
+	BOOST_CHECK(!isClose(m1, m1 + mEps2, 1e-5));
+	BOOST_CHECK(isClose(m1, m1 + mEps2, 1e-4));
+	BOOST_CHECK(isClose(m1, m1 - mEps2, 1e-4));
+}
+

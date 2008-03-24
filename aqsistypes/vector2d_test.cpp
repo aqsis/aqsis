@@ -163,3 +163,24 @@ BOOST_AUTO_TEST_CASE(vector2d_operator_division_vector_by_vector)
 		
 	BOOST_CHECK_PREDICATE(equals, (vec1 / vec2)(CqVector2D(2.0f, 0.5f)));
 }
+
+BOOST_AUTO_TEST_CASE(CqVector2D_isClose)
+{
+	const CqVector2D v1(1.5, 2.5);
+	BOOST_CHECK(isClose(v1, v1));
+	BOOST_CHECK(isClose(v1, (v1*100.0)/100.0));
+
+	const CqVector2D eps(0, 1e-4);
+
+	BOOST_CHECK(!isClose(v1, v1 + eps));
+	BOOST_CHECK(!isClose(v1, v1 + eps, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps, 1e-4));
+
+	const CqVector2D eps2(1e-4, -1e-5);
+	BOOST_CHECK(!isClose(v1, v1 + eps2));
+	BOOST_CHECK(!isClose(v1, v1 + eps2, 1e-5));
+	BOOST_CHECK(isClose(v1, v1 + eps2, 1e-4));
+	BOOST_CHECK(isClose(v1, v1 - eps2, 1e-4));
+}
+

@@ -28,6 +28,7 @@
 
 #include "aqsis.h"
 #include <cmath>
+#include <limits>
 
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
@@ -101,23 +102,25 @@ inline T clamp(const T x, const T min, const T max)
 	return x < min ? min : (x > max ? max : x);
 }
 
-/// Determine the minimum of the two values given.
+/** \brief Determine the minimum of the two values given.
+ *
+ * Note that there are specific versions of min() for other types like CqColor.
+ */
 template<typename T>
 inline T min(const T a, const T b)
 {
 	return (a < b) ? a : b;
 }
 
-/// Determine the maximum of the two values given.
+/** \brief Determine the maximum of the two values given.
+ *
+ * Note that there are specific versions of max() for other types like CqColor.
+ */
 template<typename T>
 inline T max(const T a, const T b)
 {
 	return (a < b) ? b : a;
 }
-
-// There were originally min, max and clamp macros for colors and vectors -
-// corresponding inline function have been moved to color.h and vector.h as
-// more appropriate places.
 
 /// Convert the given angle in degrees to radians.
 inline TqFloat degToRad(const TqFloat a)
@@ -152,6 +155,29 @@ inline TqFloat log2(TqFloat x)
 	// log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
 	return 1.4426950408889633 * std::log(x);
 }
+
+/** \brief Determine whether two numbers are equal to within a tolerance.
+ *
+ * Compare two numbers for closeness - we want the difference to be less than
+ * some desired fraction of the maximum of the two values.  By default the
+ * tolerance is close to the smallest representable TqFloat.
+ *
+ * This function is overloaded for several other aqsis types (eg
+ * vectors/colours) for ease of use in templates.
+ *
+ * \param x1, x2 - numbers to compare
+ * \param tol - tolerance for the comparison.
+ */
+inline bool isClose(TqFloat x1, TqFloat x2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon())
+{
+	// The relative efficiency of using of std::fabs() here vs multiplication
+	// appears to depend on architecture.  on amd64 multiplication seems to be
+	// faster, while on pentium4 it seems better to use std::fabs()...
+	TqFloat d = std::fabs(x1-x2);
+	return d < tol*std::fabs(x1) || d < tol*std::fabs(x2);
+}
+
 
 /** \brief Return a number with only the lowest bit of the input set.
  *

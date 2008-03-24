@@ -207,6 +207,24 @@ class COMMON_SHARE CqMatrix
 
 COMMON_SHARE CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix );
 
+//------------------------------------------------------------------------------
+/** \brief Determine whether two matrices are equal to within some tolerance
+ *
+ * The closeness criterion for the matrices is based on the euclidian norm -
+ * ie, the usual distance function between two vectors (sum of squares of the
+ * differences between m1 and m2)
+ *
+ * \param m1, m2 - matrices to compare
+ * \param tolerance for comparison
+ */
+bool isClose(const CqMatrix& m1, const CqMatrix& m2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
 END_NAMESPACE( Aqsis )
 
 #endif	// !MATRIX_H_INCLUDED
