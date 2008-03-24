@@ -43,6 +43,7 @@ static bool equals(const Aqsis::CqMatrix& a, const Aqsis::CqMatrix& b)
 	return isClose(a, b);
 }
 
+#define CHECK_MATRIX_CLOSE(m1, m2) BOOST_CHECK_PREDICATE(equals, (m1)(m2))
 
 BOOST_AUTO_TEST_CASE(CqMatrix_SetElement_test)
 {
@@ -73,7 +74,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Operator_addition_test)
 							 1.7f, -0.4f,  2.204f, 2.52f, 
 							 3.8f,  4.5f,  1.33f, 16.0f);
 
-	BOOST_CHECK_PREDICATE(equals, (mat_a + mat_b)(result));
+	CHECK_MATRIX_CLOSE(mat_a + mat_b, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Operator_substraction_test)
@@ -93,7 +94,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Operator_substraction_test)
 							-0.9f,  4.4f,  0.204f, 0.48f, 
 							-1.4f, -1.7f,  1.27f, -12.0f);
 		
-	BOOST_CHECK_PREDICATE(equals, (mat_a - mat_b)(result));
+	CHECK_MATRIX_CLOSE(mat_a - mat_b, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Operator_multiplication_test)
@@ -113,7 +114,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Operator_multiplication_test)
 							 6.0f, 11.0f, 7.0f, 12.0f, 
 							 9.0f, 14.0f, 9.0f, 16.0f);
 		
-	BOOST_CHECK_PREDICATE(equals, (mat_a * mat_b)(result));
+	CHECK_MATRIX_CLOSE(mat_a * mat_b, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Operator_premultiplication_test)
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Operator_premultiplication_test)
 							 5.0f,  7.0f, 3.0f,  6.0f, 
 							 6.0f, 11.0f, 3.0f,  6.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a.PreMultiply(mat_b))(result));
+	CHECK_MATRIX_CLOSE(mat_a.PreMultiply(mat_b), result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Equals_test)
@@ -193,7 +194,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Identity_test)
 	
 	mat_a.Identity();
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Scale_test)
@@ -210,7 +211,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Scale_test)
 	
 	mat_a.Scale(2.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Rotate_test)
@@ -227,7 +228,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Rotate_test)
 
 	mat_a.Rotate(90.0f, Aqsis::CqVector3D(1.0f, 0.0f, 0.0f));
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Translate_by_vectors_test)
@@ -244,7 +245,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Translate_by_vectors_test)
 	
 	mat_a.Translate(Aqsis::CqVector3D(2.0f, 1.0f, 3.0f));
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Translate_by_floats_test)
@@ -261,7 +262,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Translate_by_floats_test)
 	
 	mat_a.Translate(2.0f, 1.0f, 3.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_X_test)
@@ -278,7 +279,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_X_test)
 	
 	mat_a.ShearX(2.0f, 1.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_Y_test)
@@ -295,7 +296,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_Y_test)
 	
 	mat_a.ShearY(2.0f, 1.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_Z_test)
@@ -312,7 +313,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Shear_in_Z_test)
 	
 	mat_a.ShearZ(2.0f, 1.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Skew_test)
@@ -329,7 +330,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Skew_test)
 	
 	mat_a.Skew(25.0f, 2.0f, 1.0f, 3.0f, -1.0f, 2.0f, -1.0f);
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Normalise_test)
@@ -346,7 +347,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Normalise_test)
 	
 	mat_a.Normalise();
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Inverse_test)
@@ -363,7 +364,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Inverse_test)
 		
 	mat_a = mat_a.Inverse();
 
-	BOOST_CHECK_PREDICATE(equals, (mat_a)(result));
+	CHECK_MATRIX_CLOSE(mat_a, result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Transpose_test)
@@ -378,7 +379,7 @@ BOOST_AUTO_TEST_CASE(CqMatrix_Transpose_test)
 							1.0f, 0.0f, 0.0f, 1.0f, 
 							1.0f, 0.0f, 1.0f, 1.0f);	
 	
-	BOOST_CHECK_PREDICATE(equals, (mat_a.Transpose())(result));
+	CHECK_MATRIX_CLOSE(mat_a.Transpose(), result);
 }
 
 BOOST_AUTO_TEST_CASE(CqMatrix_Determinant_test)
@@ -419,5 +420,15 @@ BOOST_AUTO_TEST_CASE(matrix_isClose)
 	BOOST_CHECK(!isClose(m1, m1 + mEps2, 1e-5));
 	BOOST_CHECK(isClose(m1, m1 + mEps2, 1e-4));
 	BOOST_CHECK(isClose(m1, m1 - mEps2, 1e-4));
+
+	// Special case tests for matrices which are marked as the identity.
+	Aqsis::CqMatrix m2;
+	Aqsis::CqMatrix m3;
+	BOOST_CHECK(isClose(m2, m3));
+	m3.SetfIdentity(false);
+	BOOST_CHECK(isClose(m2, m3));
+
+	// Zero matrices should also be equal
+	BOOST_CHECK(isClose(Aqsis::CqMatrix(0.0f), Aqsis::CqMatrix(0.0f)));
 }
 

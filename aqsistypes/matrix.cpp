@@ -1324,6 +1324,26 @@ bool  operator!=(const CqMatrix& A, const CqMatrix& B)
 
 bool isClose(const CqMatrix& m1, const CqMatrix& m2, TqFloat tol)
 {
+	// if the matrices are at the same address, or both the identity, then
+	// they're equal.
+	if(&m1 == &m2 || (m1.fIdentity() && m2.fIdentity()))
+		return true;
+	// Check whether one matrix (but not the other) is marked as the identity.
+	// If so, create an identity matrix which is not marked as the identity to
+	// compare it with (in principle, the identity flag and the matrix elements
+	// may be out of sync I guess)
+	if(m1.fIdentity())
+	{
+		CqMatrix ident;
+		ident.SetfIdentity(false);
+		return isClose(m2, ident);
+	}
+	else if(m2.fIdentity())
+	{
+		CqMatrix ident;
+		ident.SetfIdentity(false);
+		return isClose(m1, ident);
+	}
 	TqFloat norm1 = 0;
 	TqFloat norm2 = 0;
 	TqFloat diffNorm = 0;
@@ -1336,7 +1356,7 @@ bool isClose(const CqMatrix& m1, const CqMatrix& m2, TqFloat tol)
 		diffNorm += (m1Elts[i] - m2Elts[i])*(m1Elts[i] - m2Elts[i]);
 	}
 	TqFloat tol2 = tol*tol;
-	return diffNorm < tol2*norm1 || diffNorm < tol2*norm2;
+	return diffNorm <= tol2*norm1 || diffNorm <= tol2*norm2;
 }
 
 //---------------------------------------------------------------------

@@ -34,42 +34,53 @@
 
 using Aqsis::CqColor;
 
+namespace {
+
+bool equal(const CqColor& c1, const CqColor& c2)
+{
+	return Aqsis::isClose(c1, c2);
+}
+
+}
+
+#define CHECK_COL_CLOSE(c1, c2) BOOST_CHECK_PREDICATE(equal, (c1)(c2))
+
 BOOST_AUTO_TEST_CASE(color_min)
 {
 	const CqColor cMin(0.3,0.4,0.5);
 	const CqColor cMax(0.4,0.5,0.6);
-	BOOST_CHECK_EQUAL(Aqsis::min(cMin, cMax), cMin);
-	BOOST_CHECK_EQUAL(Aqsis::min(cMax, cMin), cMin);
-	BOOST_CHECK_EQUAL(Aqsis::min(CqColor(1,0.5,0), CqColor(0.2,0.5,0.8)), CqColor(0.2,0.5,0));
+	CHECK_COL_CLOSE(Aqsis::min(cMin, cMax), cMin);
+	CHECK_COL_CLOSE(Aqsis::min(cMax, cMin), cMin);
+	CHECK_COL_CLOSE(Aqsis::min(CqColor(1,0.5,0), CqColor(0.2,0.5,0.8)), CqColor(0.2,0.5,0));
 }
 
 BOOST_AUTO_TEST_CASE(color_max)
 {
 	const CqColor cMin(0.3,0.4,0.5);
 	const CqColor cMax(0.4,0.5,0.6);
-	BOOST_CHECK_EQUAL(Aqsis::max(cMin, cMax), cMax);
-	BOOST_CHECK_EQUAL(Aqsis::max(cMax, cMin), cMax);
-	BOOST_CHECK_EQUAL(Aqsis::max(CqColor(1,0.5,0), CqColor(0.2,0.5,0.8)), CqColor(1,0.5,0.8));
+	CHECK_COL_CLOSE(Aqsis::max(cMin, cMax), cMax);
+	CHECK_COL_CLOSE(Aqsis::max(cMax, cMin), cMax);
+	CHECK_COL_CLOSE(Aqsis::max(CqColor(1,0.5,0), CqColor(0.2,0.5,0.8)), CqColor(1,0.5,0.8));
 }
 
 BOOST_AUTO_TEST_CASE(color_clamp)
 {
 	const CqColor cMin(0.3,0.4,0.5);
 	const CqColor cMax(0.4,0.5,0.6);
-	BOOST_CHECK_EQUAL(Aqsis::clamp(CqColor(0,0,0), cMin, cMax), cMin);
-	BOOST_CHECK_EQUAL(Aqsis::clamp(CqColor(1,1,1), cMin, cMax), cMax);
+	CHECK_COL_CLOSE(Aqsis::clamp(CqColor(0,0,0), cMin, cMax), cMin);
+	CHECK_COL_CLOSE(Aqsis::clamp(CqColor(1,1,1), cMin, cMax), cMax);
 	const CqColor cMiddle = (cMin+cMax)/2;
-	BOOST_CHECK_EQUAL(Aqsis::clamp(cMiddle, cMin, cMax), cMiddle);
-	BOOST_CHECK_EQUAL(Aqsis::clamp(CqColor(0.9, 0.45, 0.1), cMin, cMax), CqColor(0.4, 0.45, 0.5));
+	CHECK_COL_CLOSE(Aqsis::clamp(cMiddle, cMin, cMax), cMiddle);
+	CHECK_COL_CLOSE(Aqsis::clamp(CqColor(0.9, 0.45, 0.1), cMin, cMax), CqColor(0.4, 0.45, 0.5));
 }
 
 BOOST_AUTO_TEST_CASE(color_lerp)
 {
 	const CqColor cMin(0.1, 0.2, 0.3);
 	const CqColor cMax(0.1, 0.05, 1);
-	BOOST_CHECK_EQUAL(Aqsis::lerp(0.2f, cMin, cMax), 0.8f*cMin + 0.2f*cMax);
-	BOOST_CHECK_EQUAL(Aqsis::lerp(0.0f, cMin, cMax), cMin);
-	BOOST_CHECK_EQUAL(Aqsis::lerp(1.0f, cMin, cMax), cMax);
+	CHECK_COL_CLOSE(Aqsis::lerp(0.2f, cMin, cMax), 0.8f*cMin + 0.2f*cMax);
+	CHECK_COL_CLOSE(Aqsis::lerp(0.0f, cMin, cMax), cMin);
+	CHECK_COL_CLOSE(Aqsis::lerp(1.0f, cMin, cMax), cMax);
 }
 
 BOOST_AUTO_TEST_CASE(color_isClose)

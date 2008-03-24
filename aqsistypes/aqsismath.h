@@ -175,7 +175,7 @@ inline bool isClose(TqFloat x1, TqFloat x2,
 	// appears to depend on architecture.  on amd64 multiplication seems to be
 	// faster, while on pentium4 it seems better to use std::fabs()...
 	TqFloat d = std::fabs(x1-x2);
-	return d < tol*std::fabs(x1) || d < tol*std::fabs(x2);
+	return d <= tol*std::fabs(x1) || d <= tol*std::fabs(x2);
 }
 
 

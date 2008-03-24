@@ -557,7 +557,7 @@ inline bool isClose(const CqVector4D& v1, const CqVector4D& v2, TqFloat tol)
 {
 	TqFloat diff2 = (v1 - v2).Magnitude2();
 	TqFloat tol2 = tol*tol;
-	return diff2 < tol2*v1.Magnitude2() || diff2 < tol2*v2.Magnitude2();
+	return diff2 <= tol2*v1.Magnitude2() || diff2 <= tol2*v2.Magnitude2();
 }
 
 
