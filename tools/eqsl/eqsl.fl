@@ -2,14 +2,33 @@
 version 1.0107 
 header_name {.h} 
 code_name {.cxx}
-decl {\#include <iostream>} {selected public
+decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
+
+decl {\#include <cstdlib>} {public
+} 
+
+decl {\#include <string>} {public
+} 
+
+decl {using std::string;} {public
+} 
+
+decl {string renderEngine = "aqsis";} {} 
+
+decl {string renderEngineArg = "-progress";} {} 
+
+decl {string renderViewer = "piqsl";} {} 
+
+decl {string shaderCompiler = "aqsl";} {} 
+
+decl {string commandLine;} {} 
 
 Function {} {open
 } {
   Fl_Window m_window {
     label eqsl open
-    xywh {341 244 400 300} type Double visible
+    xywh {-32000 -32000 400 300} type Double hide
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -33,15 +52,67 @@ Function {} {open
       } {
         MenuItem m_menuToolsRender {
           label {&Render File}
+          callback {// Open and process FLTK 'File Selection' dialog
+Fl_File_Chooser fl_file_chooser(".", "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
+fl_file_chooser.show();
+
+while(fl_file_chooser.shown())
+	{
+	Fl::wait();
+	}
+
+if (fl_file_chooser.value() == NULL)
+	{
+	return;
+	}
+
+// Call relevant commandline
+commandLine = renderEngine + " " + renderEngineArg + " \\"" + fl_file_chooser.value() + "\\"";
+system(commandLine.c_str());
+
+// Log commandline event
+m_outputConsole->add(commandLine.c_str());}
           xywh {0 0 100 20} shortcut 0x40072
         }
         MenuItem m_menuToolsCompile {
           label {&Compile Shader}
+          callback {// Open and process FLTK 'File Selection' dialog
+Fl_File_Chooser fl_file_chooser(".", "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
+fl_file_chooser.show();
+
+while(fl_file_chooser.shown())
+	{
+	Fl::wait();
+	}
+
+if (fl_file_chooser.value() == NULL)
+	{
+	return;
+	}
+
+// Call relevant commandline
+commandLine = shaderCompiler + " \\"" + fl_file_chooser.value() + "\\"";
+system(commandLine.c_str());
+
+// Log commandline event
+m_outputConsole->add(commandLine.c_str());}
           xywh {0 0 100 20} shortcut 0x40063
         }
         MenuItem m_menuToolsFramebuffer {
           label {Open &Framebuffer}
-          xywh {0 0 100 20} shortcut 0x40066
+          callback {// Call relevant commandline
+commandLine = renderViewer;
+system(commandLine.c_str());
+
+// Log commandline event
+m_outputConsole->add(commandLine.c_str());}
+          xywh {0 0 100 20} shortcut 0x40066 divider
+        }
+        MenuItem m_menuToolsClean {
+          label {Clear &History}
+          callback {m_outputConsole->clear();
+m_outputConsole->add("Command History:");}
+          xywh {0 0 100 20} shortcut 0x40068
         }
       }
       Submenu m_menuHelp {
@@ -50,14 +121,16 @@ Function {} {open
       } {
         MenuItem m_menuHelpAbout {
           label {&About}
+          callback {string version = "eqsl version %s\\\\ncompiled %s %s";
+fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
           xywh {0 0 100 20} shortcut 0x40061
+          code0 {\#include "version.h"}
         }
       }
     }
-    Fl_Output m_outputConsole {
-      xywh {0 25 400 275} deactivate
-      code0 {\#include <FL/Fl_Multiline_Output.H>}
-      class Fl_Multiline_Output
+    Fl_Browser m_outputConsole {
+      xywh {0 25 400 275}
+      code0 {m_outputConsole->add("Command History:");}
     }
   }
 } 
