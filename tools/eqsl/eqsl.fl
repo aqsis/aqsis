@@ -124,7 +124,8 @@ m_outputConsole->add("Command History:");}
           callback {string version = "eqsl version %s\\\\ncompiled %s %s";
 fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
           xywh {0 0 100 20} shortcut 0x40061
-          code0 {\#include "version.h"}
+          code0 {\#include <FL/fl_ask.H>}
+          code1 {\#include "version.h"}
         }
       }
     }
