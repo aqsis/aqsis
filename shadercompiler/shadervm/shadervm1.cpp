@@ -103,7 +103,7 @@ void CqShaderVM::SO_ipushv()
 		{
 			TqFloat aVal;
 			A->GetFloat(aVal, i);
-			TqInt index = lround(aVal);
+			TqInt index = lfloor(aVal);
 			if(index >= 0 && index < arrayLen)
 			{
 				pResult->SetValueFromVariable(pVar->ArrayEntry(index), i);
@@ -154,7 +154,7 @@ void CqShaderVM::SO_ipop()
 		{
 			TqFloat fIndex;
 			A->GetFloat(fIndex, i);
-			TqInt index = lround(fIndex);
+			TqInt index = lfloor(fIndex);
 			if(index >= 0 && index < arrayLen)
 			{
 				pVar->ArrayEntry(index)->SetValueFromVariable(Val, i);
