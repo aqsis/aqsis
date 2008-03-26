@@ -2,6 +2,33 @@
 version 1.0107 
 header_name {.h} 
 code_name {.cxx}
+comment {// Aqsis
+// Copyright (C) 1997 - 2008, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.org
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+// \\file
+//
+// \\brief Central graphical interface allowing easy/fast access to commonly-used Aqsis tools
+//
+// \\author Leon Tony Atkinson [ latkinson (at) aqsis (dot) org ]
+//} {selected in_source in_header
+} 
+
 decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
@@ -71,7 +98,7 @@ commandLine = renderEngine + " " + renderEngineArg + " \\"" + fl_file_chooser.va
 system(commandLine.c_str());
 
 // Log commandline event
-m_outputConsole->add(commandLine.c_str());} selected
+m_outputConsole->add(commandLine.c_str());}
           xywh {0 0 100 20} shortcut 0x40072
         }
         MenuItem m_menuToolsCompile {
