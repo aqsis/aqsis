@@ -53,7 +53,7 @@ Function {} {open
         MenuItem m_menuToolsRender {
           label {&Render File}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser(".", "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser("", "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -71,13 +71,13 @@ commandLine = renderEngine + " " + renderEngineArg + " \\"" + fl_file_chooser.va
 system(commandLine.c_str());
 
 // Log commandline event
-m_outputConsole->add(commandLine.c_str());}
+m_outputConsole->add(commandLine.c_str());} selected
           xywh {0 0 100 20} shortcut 0x40072
         }
         MenuItem m_menuToolsCompile {
           label {&Compile Shader}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser(".", "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser("", "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -121,8 +121,8 @@ m_outputConsole->add("Command History:");}
       } {
         MenuItem m_menuHelpAbout {
           label {&About}
-          callback {string version = "eqsl version %s\\\\ncompiled %s %s";
-fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
+          callback {string version = "eqsl version %s\\ncompiled %s %s";
+fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
           xywh {0 0 100 20} shortcut 0x40061
           code0 {\#include <FL/fl_ask.H>}
           code1 {\#include "version.h"}
