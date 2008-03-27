@@ -17,6 +17,7 @@ INCLUDE(FindOpenEXR)
 INCLUDE(FindXsltproc)
 INCLUDE(FindFlexBison)
 INCLUDE(FindSVNVersion)
+INCLUDE(FindResource)
 
 IF(NOT AQSIS_FLTK_FOUND)
 	MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
