@@ -26,7 +26,7 @@ comment {// Aqsis
 // \\brief Central graphical interface allowing easy/fast access to commonly-used Aqsis tools
 //
 // \\author Leon Tony Atkinson [ latkinson (at) aqsis (dot) org ]
-//} {selected in_source in_header
+//} {in_source in_header
 } 
 
 decl {\#include <FL/Fl_File_Chooser.H>} {public
@@ -45,9 +45,13 @@ decl {string renderEngine = "aqsis";} {}
 
 decl {string renderEngineArg = "-progress";} {} 
 
+decl {string renderEngineFile = "";} {} 
+
 decl {string renderViewer = "piqsl";} {} 
 
 decl {string shaderCompiler = "aqsl";} {} 
+
+decl {string shaderCompilerFile = "";} {} 
 
 decl {string commandLine;} {} 
 
@@ -80,7 +84,7 @@ Function {} {open
         MenuItem m_menuToolsRender {
           label {&Render File}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser("", "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser(renderEngineFile.c_str(), "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -92,9 +96,13 @@ if (fl_file_chooser.value() == NULL)
 	{
 	return;
 	}
+else
+	{
+	renderEngineFile = fl_file_chooser.value();
+	}
 
 // Call relevant commandline
-commandLine = renderEngine + " " + renderEngineArg + " \\"" + fl_file_chooser.value() + "\\"";
+commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
@@ -104,7 +112,7 @@ m_outputConsole->add(commandLine.c_str());}
         MenuItem m_menuToolsCompile {
           label {&Compile Shader}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser("", "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser(shaderCompilerFile.c_str(), "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -116,9 +124,13 @@ if (fl_file_chooser.value() == NULL)
 	{
 	return;
 	}
+else
+	{
+	shaderCompilerFile = fl_file_chooser.value();
+	}
 
 // Call relevant commandline
-commandLine = shaderCompiler + " \\"" + fl_file_chooser.value() + "\\"";
+commandLine = shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
@@ -149,7 +161,7 @@ m_outputConsole->add("Command History:");}
         MenuItem m_menuHelpAbout {
           label {&About}
           callback {string version = "eqsl version %s\\ncompiled %s %s";
-fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
+fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
           xywh {0 0 100 20} shortcut 0x40061
           code0 {\#include <FL/fl_ask.H>}
           code1 {\#include "version.h"}
