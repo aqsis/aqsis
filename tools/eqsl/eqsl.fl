@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0108 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -41,11 +41,21 @@ decl {\#include <string>} {public
 decl {using std::string;} {public
 } 
 
+decl {string chooserTitleOpen = "Select File";} {} 
+
+decl {string commandLine = "";} {} 
+
+decl {string commandSeparator = ";";} {} 
+
+decl {string currentDirectory = ".";} {} 
+
 decl {string renderEngine = "aqsis";} {} 
 
 decl {string renderEngineArg = "-progress";} {} 
 
 decl {string renderEngineFile = "";} {} 
+
+decl {string renderEngineType = "RenderMan Geometry Files (*.{rib,ribz,rib.gz})";} {} 
 
 decl {string renderViewer = "piqsl";} {} 
 
@@ -53,10 +63,16 @@ decl {string shaderCompiler = "aqsl";} {}
 
 decl {string shaderCompilerFile = "";} {} 
 
-decl {string commandLine;} {} 
+decl {string shaderCompilerType = "RenderMan Shader Files (*.sl)";} {} 
+
+decl {string toolsHistoryTitle = "Command History:";} {} 
 
 Function {} {open
 } {
+  code {\#if defined(__WIN32__)
+	commandSeparator = "&";
+\#endif} {selected
+  }
   Fl_Window m_window {
     label eqsl open
     xywh {-32000 -32000 400 300} type Double hide
@@ -84,7 +100,7 @@ Function {} {open
         MenuItem m_menuToolsRender {
           label {&Render File}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser(renderEngineFile.c_str(), "RenderMan Geometry Files (*.{rib,ribz,rib.gz})", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser(renderEngineFile.c_str(), renderEngineType.c_str(), Fl_File_Chooser::SINGLE, chooserTitleOpen.c_str());
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -98,11 +114,12 @@ if (fl_file_chooser.value() == NULL)
 	}
 else
 	{
+	currentDirectory = fl_file_chooser.directory();
 	renderEngineFile = fl_file_chooser.value();
 	}
 
 // Call relevant commandline
-commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+commandLine = "cd \\"" + currentDirectory + "\\"" + commandSeparator + " " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
@@ -112,7 +129,7 @@ m_outputConsole->add(commandLine.c_str());}
         MenuItem m_menuToolsCompile {
           label {&Compile Shader}
           callback {// Open and process FLTK 'File Selection' dialog
-Fl_File_Chooser fl_file_chooser(shaderCompilerFile.c_str(), "RenderMan Shader Files (*.sl)", Fl_File_Chooser::SINGLE, "Select File");
+Fl_File_Chooser fl_file_chooser(shaderCompilerFile.c_str(), shaderCompilerType.c_str(), Fl_File_Chooser::SINGLE, chooserTitleOpen.c_str());
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
@@ -126,11 +143,12 @@ if (fl_file_chooser.value() == NULL)
 	}
 else
 	{
+	currentDirectory = fl_file_chooser.directory();
 	shaderCompilerFile = fl_file_chooser.value();
 	}
 
 // Call relevant commandline
-commandLine = shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
+commandLine = "cd \\"" + currentDirectory + "\\"" + commandSeparator + " " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
@@ -150,7 +168,7 @@ m_outputConsole->add(commandLine.c_str());}
         MenuItem m_menuToolsClean {
           label {Clear &History}
           callback {m_outputConsole->clear();
-m_outputConsole->add("Command History:");}
+m_outputConsole->add(toolsHistoryTitle.c_str());}
           xywh {0 0 100 20} shortcut 0x40068
         }
       }
@@ -161,7 +179,7 @@ m_outputConsole->add("Command History:");}
         MenuItem m_menuHelpAbout {
           label {&About}
           callback {string version = "eqsl version %s\\ncompiled %s %s";
-fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
+fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
           xywh {0 0 100 20} shortcut 0x40061
           code0 {\#include <FL/fl_ask.H>}
           code1 {\#include "version.h"}
@@ -170,7 +188,7 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);} selected
     }
     Fl_Browser m_outputConsole {
       xywh {0 25 400 275}
-      code0 {m_outputConsole->add("Command History:");}
+      code0 {m_outputConsole->add(toolsHistoryTitle.c_str());}
     }
   }
 } 
