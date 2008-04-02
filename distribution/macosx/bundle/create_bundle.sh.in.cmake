@@ -37,7 +37,7 @@ mkdir -p "$RESOURCES/include"
 echo "Creating bundle files ..."
 touch "$CONTENTS/PkgInfo"
 cp "Info.plist" "$CONTENTS/Info.plist" 
-cp "Aqsis.icns" "$RESOURCES/Aqsis.icns"
+cp "${CMAKE_SOURCE_DIR}/distribution/macosx/bundle/Aqsis.icns" "$RESOURCES/Aqsis.icns"
 
 
 ### Copy aqsis files
@@ -91,8 +91,9 @@ echo "Resolving external dependencies ..."
 for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | sed 's/\(.*\)//' | sed 's/://' ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v 'Aqsis.app'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v 'Aqsis.app' | sed s/\(.*\)// ); do
 			bn=`basename $dep`
+			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
 				#echo "Processing $bn"
 				cp -R $dep "$FRAMEWORKS"
@@ -173,7 +174,7 @@ SOURCE="${CMAKE_BINARY_DIR}/tools/AqsisConfig/Release/AqsisConfig.app/Contents/"
 
 ### Replace aqsisrc
 echo "Adding aqsisrc ..."
-cp "${CMAKE_CURRENT_SOURCE_DIR}/aqsisrc" "$RESOURCES/bin/aqsisrc"
+cp "aqsisrc" "$RESOURCES/bin/aqsisrc"
 
 
 # Get rid of those pesky .svn directories ...
