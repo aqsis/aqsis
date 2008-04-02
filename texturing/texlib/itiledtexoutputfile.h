@@ -19,13 +19,13 @@
 
 /** \file
  *
- * \brief A scanline-based output interface for texture files.
+ * \brief A tile-based output interface for texture files.
  *
  * \author Chris Foster
  */
 
-#ifndef ITEXOUTPUTFILE_H_INCLUDED
-#define ITEXOUTPUTFILE_H_INCLUDED
+#ifndef ITILEDTEXOUTPUTFILE_H_INCLUDED
+#define ITILEDTEXOUTPUTFILE_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -40,17 +40,12 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief Scanline-oriented image file output.
- *
- * This interface wraps around the various image file types, providing a
- * uniform interface for placing image data into a file.  Metadata is handled
- * via the CqTexFileHeader container, while pixel data may be written into the
- * file one line at a time, or a whole set of lines at once.
+/** \brief Tile-oriented image file output.
  */
-class AQSISTEX_SHARE IqTexOutputFile
+class AQSISTEX_SHARE IqTiledTexOutputFile
 {
 	public:
-		virtual ~IqTexOutputFile() {};
+		virtual ~IqTiledTexOutputFile() {};
 
 		//--------------------------------------------------
 		/// \name Metadata access
@@ -63,17 +58,11 @@ class AQSISTEX_SHARE IqTexOutputFile
 		virtual const CqTexFileHeader& header() const = 0;
 		//@}
 
-		/** Get the index for the current line
+		/** \brief Write the entire image at once.
 		 *
-		 * The "current line" is equal to number of scanlines written so far + 1
-		 * That is, the current line is the next line which will be written to
-		 * in a subsequent call of writePixels()
-		 *
-		 * \return the current scan line
-		 */
-		virtual TqInt currentLine() const = 0;
-
-		/** \brief Write a region of scanlines
+		 * The buffer should be written into the file as tiles; subsequent
+		 * calls to this function should write a new subimage into the
+		 * multimage file with each call.
 		 *
 		 * Array2DType is a type modelling a 2D array interface.  It should
 		 * provide the following methods:
@@ -87,11 +76,6 @@ class AQSISTEX_SHARE IqTexOutputFile
 		 *   - Array2DType::width() and
 		 *   - Array2DType::height() return the dimensions of the array.
 		 *
-		 * All the scanlines in buffer are read and written to the output file,
-		 * starting from the current write line as reported by currentLine().
-		 * If the buffer is higher than the specified image height, use only
-		 * the first few rows.
-		 *
 		 * \param buffer - buffer to read scanline data from.
 		 */
 		template<typename Array2DType>
@@ -104,7 +88,7 @@ class AQSISTEX_SHARE IqTexOutputFile
 		 * \param fileType - the file type.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqTexOutputFile> open(const std::string& fileName,
+		static boost::shared_ptr<IqTiledTexOutputFile> open(const std::string& fileName,
 				EqImageFileType fileType, const CqTexFileHeader& header);
 
 	protected:
@@ -121,24 +105,18 @@ class AQSISTEX_SHARE IqTexOutputFile
 
 
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
 
 template<typename Array2DType>
-void IqTexOutputFile::writePixels(const Array2DType& buffer)
+void IqTiledTexOutputFile::writePixels(const Array2DType& buffer)
 {
-	TqInt numScanlines = min(buffer.height(), header().height() - currentLine());
-	if(buffer.width() != header().width())
-	{
-		AQSIS_THROW(XqInternal, "Cannot put pixels from buffer into file \""
-				<< fileName() << "\": buffer has incorrect width.");
-	}
 	CqMixedImageBuffer newBuf(buffer.channelList(),
-			boost::shared_array<TqUint8>(const_cast<TqUint8*>(buffer.rawData()),
-				nullDeleter), buffer.width(), numScanlines);
+			boost::shared_array<TqUint8>(const_cast<TqUint8*>(buffer.rawData()), nullDeleter),
+			buffer.width(), buffer.height());
 	writePixelsImpl(newBuf);
 }
 
 } // namespace Aqsis
 
-#endif // ITEXOUTPUTFILE_H_INCLUDED
+#endif // ITILEDTEXOUTPUTFILE_H_INCLUDED

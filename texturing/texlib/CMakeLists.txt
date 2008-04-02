@@ -19,6 +19,7 @@ SET(AQSISTEX_SRCS
 	ewafilter.cpp
 	cachedfilter.cpp
 	ishadowsampler.cpp
+	itiledtexoutputfile.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
@@ -49,6 +50,7 @@ SET(AQSISTEX_HDRS
 	imagechannel.h
 	imagefiletype.h
 	ishadowsampler.h
+	itiledtexoutputfile.h
 	itexinputfile.h
 	itexoutputfile.h
 	itexturemap_old.h

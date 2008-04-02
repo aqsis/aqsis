@@ -24,17 +24,16 @@
  * \author Chris Foster
  */
 
-#include "itexoutputfile.h"
+#include "itiledtexoutputfile.h"
 
-#include "exception.h"
-#include "tiffoutputfile.h"
+//#include "tiledtiffoutputfile.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
-		const std::string& fileName, EqImageFileType fileType,
-		const CqTexFileHeader& header)
+boost::shared_ptr<IqTiledTexOutputFile>
+IqTiledTexOutputFile::open(const std::string& fileName,
+		EqImageFileType fileType, const CqTexFileHeader& header)
 {
 	// Check some of the header data to make sure it's minimally sane...
 	if(header.width() <= 0 || header.height() <= 0)
@@ -49,13 +48,13 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	}
 
 	// Create the new file object
-	boost::shared_ptr<IqTexOutputFile> newFile;
+	boost::shared_ptr<IqTiledTexOutputFile> newFile;
 
 	switch(fileType)
 	{
-		case ImageFile_Tiff:
-			newFile.reset(new CqTiffOutputFile(fileName, header));
-			break;
+//		case ImageFile_Tiff:
+//			newFile.reset(new CqTiledTiffOutputFile(fileName, header));
+//			break;
 		// case ...:  // Add new output formats here!
 		default:
 			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
