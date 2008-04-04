@@ -2,26 +2,27 @@
 
 APPLICATION_NAME="Aqsis"
 BUNDLE_NAME="$APPLICATION_NAME.app"
-BUNDLE="${BUNDLEDIR}/$BUNDLE_NAME"
+STAGING="${BUNDLEDIR}/staging"
+BUNDLE="$STAGING/$BUNDLE_NAME"
 CONTENTS="$BUNDLE/Contents"
 RESOURCES="$CONTENTS/Resources"
 FRAMEWORKS="$CONTENTS/Frameworks"
 MACOS="$CONTENTS/MacOS"
-SCRATCH="${BUNDLEDIR}/scratch"
 SHADERDIR="$RESOURCES/shaders"
 INCLUDEDIR="$RESOURCES/include"
 CONTENTDIR="${CMAKE_SOURCE_DIR}/content"
+SCRATCH="$STAGING/scratch"
 DISK_IMAGE="$APPLICATION_NAME-${MAJOR}.${MINOR}.${BUILD}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
+
 
 ### Purge files
 echo "Purging old files..."
-rm -rvf "${BUNDLEDIR}"
-rm -rvf "$SCRATCH"
-rm -vf "${CMAKE_BINARY_DIR}/$DISK_IMAGE"
+rm -rvf "$STAGING"
+rm -vf "${BUNDLEDIR}/$DISK_IMAGE"
 
 ### Create structure
 echo "Creating bundle structure..."
-mkdir -p "${BUNDLEDIR}"
+mkdir -p "$STAGING"
 mkdir -p "$SCRATCH"
 mkdir -p "$BUNDLE"
 mkdir -p "$CONTENTS"
@@ -35,28 +36,28 @@ mkdir -p "$INCLUDEDIR"
 echo "Copying bundle files..."
 touch "$CONTENTS/PkgInfo"
 cp "${BUNDLEDIR}/Info.plist" "$CONTENTS/"
-cp "${BUNDLEDIR}/*.icns" "$RESOURCES/"
+cp "${BUNDLEDIR}/"*.icns "$RESOURCES/"
 
 ### Copy aqsis files
 echo "Copying aqsis files..."
-cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}"
-CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
+/Developer/Tools/CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
 cp -r "${CMAKE_BINARY_DIR}/${LIBDIR}" "$RESOURCES/${LIBDIR}"
-cp "${CMAKE_BINARY_DIR}/$SHADERDIR/"*.slx "$SHADERDIR/"
-cp "${CMAKE_SOURCE_DIR}/$SHADERDIR/"*.sl "$SHADERDIR/"
+cp "${CMAKE_BINARY_DIR}/shaders/"*.slx "$SHADERDIR/"
+cp "${CMAKE_SOURCE_DIR}/shaders/"*.sl "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/aqsistypes"/*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager"/ndspy.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/rib/api"/ri.h "$INCLUDEDIR/"
 cp "${CMAKE_BINARY_DIR}/rib/api"/ri.inl "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm"/shadeop.h "$INCLUDEDIR/"
+cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}"
 
 ### Resolve external dependencies
 echo "Resolving external dependencies..."
 for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v '$BUNDLE_NAME'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v '$BUNDLE_NAME' | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
@@ -77,13 +78,11 @@ done
 echo "Updating lib names..."
 for m in $( ls $FRAMEWORKS | grep dylib ); do
 	#echo "Processing $m"
-	FRMWRKDIR=`echo $FRAMEWORKS | sed "s/${BUNDLEDIR}//" | sed s_/__`
 	install_name_tool -id @executable_path/../../Frameworks/$m $FRAMEWORKS/$m
 done
 
 for m in $( ls $RESOURCES/${LIBDIR} | grep dylib ); do
 	#echo "Processing $m"
-	RESRCDIR=`echo $RESOURCES/lib | sed "s/${BUNDLEDIR}//" | sed s_/__`
 	install_name_tool -id @executable_path/../lib/$m $RESOURCES/${LIBDIR}/$m
 done
 
@@ -100,10 +99,6 @@ for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\
 		done
 	done
 done
-
-### Strip binaries
-echo "Stripping the binaries..."
-strip "$RESOURCES/${BINDIR}/*"
 
 ### Purge redundant content
 echo "Purging redundant content..."
