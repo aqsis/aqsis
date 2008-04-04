@@ -20,8 +20,6 @@ SET(CONTENTDIR "content"
 	CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
-SET(BUNDLEDIR "bundle"
-	CACHE STRING "Install location for bundles (relative to CMAKE_INSTALL_PREFIX)")
 
 
 IF(AQSIS_USE_PLUGINS)

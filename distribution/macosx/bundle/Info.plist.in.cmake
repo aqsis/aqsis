@@ -5,28 +5,35 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>AqsisConfig</string>
+	<string>eqsl</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.apple.ASApplication</string>
+	<string>com.aqsis.Aqsis</string>
+	<key>CFBundleIconFile</key>
+	<string>Aqsis</string>	
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleIconFile</key>
-	<string>Aqsis.icns</string>	
 	<key>CFBundleName</key>
-	<string>Aqsis</string>
+	<string>Aqsis Renderer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>${MAJOR}.${MINOR}.${BUILD}${TYPE}</string>
+	<string>${MAJOR}.${MINOR}.${BUILD}</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>${MAJOR}.${MINOR}.${BUILD}${TYPE} (revision ${REVISION})</string>
+	<string>${REVISION}${TYPE}</string>
+	<key>LSEnvironment</key>
+	<dict>
+		<key>AQSISHOME</key>
+		<string>Aqsis.app/Contents/Resources</string>
+		<key>PATH</key>
+		<string>$AQSISHOME/bin:$PATH</string>
+	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.4.0</string>
+	<key>LSRequiresNativeExecution</key>
+	<string>YES</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
 </dict>
 </plist>

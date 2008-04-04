@@ -2,96 +2,61 @@
 
 APPLICATION_NAME="Aqsis"
 BUNDLE_NAME="$APPLICATION_NAME.app"
-BUNDLE="${STAGING}/$BUNDLE_NAME"
+BUNDLE="${BUNDLEDIR}/$BUNDLE_NAME"
 CONTENTS="$BUNDLE/Contents"
 RESOURCES="$CONTENTS/Resources"
 FRAMEWORKS="$CONTENTS/Frameworks"
 MACOS="$CONTENTS/MacOS"
-SCRATCH="${STAGING}/scratch"
-ARCH=`arch`
-DISK_IMAGE="$APPLICATION_NAME-${MAJOR}.${MINOR}.${BUILD}-$ARCH.dmg"
-AQSCONF="AqsisConfig"
-SHADERDIR="shaders"
+SCRATCH="${BUNDLEDIR}/scratch"
+SHADERDIR="$RESOURCES/shaders"
+INCLUDEDIR="$RESOURCES/include"
+CONTENTDIR="${CMAKE_SOURCE_DIR}/content"
+DISK_IMAGE="$APPLICATION_NAME-${MAJOR}.${MINOR}.${BUILD}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
 
-
-# Cleanup old files
-echo "Cleaning up old files ..."
-rm -rvf "${STAGING}"
-rm -rvf "$DISK_IMAGE"
+### Purge files
+echo "Purging old files..."
+rm -rvf "${BUNDLEDIR}"
 rm -rvf "$SCRATCH"
-
+rm -vf "${CMAKE_BINARY_DIR}/$DISK_IMAGE"
 
 ### Create structure
-echo "Creating structure ..."
-mkdir -p "${STAGING}"
+echo "Creating bundle structure..."
+mkdir -p "${BUNDLEDIR}"
 mkdir -p "$SCRATCH"
 mkdir -p "$BUNDLE"
 mkdir -p "$CONTENTS"
 mkdir -p "$RESOURCES"
 mkdir -p "$FRAMEWORKS"
 mkdir -p "$MACOS"
-mkdir -p "$RESOURCES/$SHADERDIR"
-mkdir -p "$RESOURCES/include"
+mkdir -p "$SHADERDIR"
+mkdir -p "$INCLUDEDIR"
 
-### Create bundle files
-echo "Creating bundle files ..."
+### Copy bundle files
+echo "Copying bundle files..."
 touch "$CONTENTS/PkgInfo"
-cp "Info.plist" "$CONTENTS/Info.plist" 
-cp "${CMAKE_SOURCE_DIR}/distribution/macosx/bundle/Aqsis.icns" "$RESOURCES/Aqsis.icns"
-
+cp "${BUNDLEDIR}/Info.plist" "$CONTENTS/"
+cp "${BUNDLEDIR}/*.icns" "$RESOURCES/"
 
 ### Copy aqsis files
-echo "Copying aqsis files ..."
-cp -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
+echo "Copying aqsis files..."
+cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}"
+CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
 cp -r "${CMAKE_BINARY_DIR}/${LIBDIR}" "$RESOURCES/${LIBDIR}"
-cp "${CMAKE_BINARY_DIR}/$SHADERDIR/"*.slx "${CMAKE_BINARY_DIR}/${BUNDLEDIR}/$RESOURCES/$SHADERDIR/"
-cp "${CMAKE_SOURCE_DIR}/$SHADERDIR/"*.sl "${CMAKE_BINARY_DIR}/${BUNDLEDIR}/$RESOURCES/$SHADERDIR/"
-
-### Copy includes
-TARGET="${CMAKE_BINARY_DIR}/${BUNDLEDIR}/$RESOURCES/include/"
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/aqsis_types.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/aqsis.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/aqsismath.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/bitvector.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/cellnoise.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/color.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/exception.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/file.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/list.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/logging_streambufs.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/logging.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/lowdiscrep.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/matrix.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/matrix2d.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/memorysentry.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/multitimer.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/noise.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/noise1234.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/plugins.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/pool.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/random.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/refcount.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/smartptr.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/socket.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/spline.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/sstring.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/vector2d.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/vector3d.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/vector4d.h 		$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/aqsis_compiler.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/multitimer_system.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/socket_system.h 	$TARGET
-cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager"/ndspy.h 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/rib/api"/ri.h 				$TARGET
-cp "${CMAKE_BINARY_DIR}/rib/api"/ri.inl 			$TARGET
-cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm"/shadeop.h 		$TARGET
+cp "${CMAKE_BINARY_DIR}/$SHADERDIR/"*.slx "$SHADERDIR/"
+cp "${CMAKE_SOURCE_DIR}/$SHADERDIR/"*.sl "$SHADERDIR/"
+cp "${CMAKE_SOURCE_DIR}/aqsistypes"/*.h "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/*.h "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager"/ndspy.h "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/rib/api"/ri.h "$INCLUDEDIR/"
+cp "${CMAKE_BINARY_DIR}/rib/api"/ri.inl "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm"/shadeop.h "$INCLUDEDIR/"
 
 ### Resolve external dependencies
-echo "Resolving external dependencies ..."
+echo "Resolving external dependencies..."
 for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v 'Aqsis.app'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v 'Aqsis.app' | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v '$BUNDLE_NAME'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v '$BUNDLE_NAME' | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
@@ -108,24 +73,22 @@ for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\
 	done
 done
 
-
 ### Update libs
-echo "Updating lib names ..."
+echo "Updating lib names..."
 for m in $( ls $FRAMEWORKS | grep dylib ); do
 	#echo "Processing $m"
-	FRMWRKDIR=`echo $FRAMEWORKS | sed "s/${STAGING}//" | sed s_/__`
+	FRMWRKDIR=`echo $FRAMEWORKS | sed "s/${BUNDLEDIR}//" | sed s_/__`
 	install_name_tool -id @executable_path/../../Frameworks/$m $FRAMEWORKS/$m
 done
 
-for m in $( ls $RESOURCES/lib | grep dylib ); do
+for m in $( ls $RESOURCES/${LIBDIR} | grep dylib ); do
 	#echo "Processing $m"
-	RESRCDIR=`echo $RESOURCES/lib | sed "s/${STAGING}//" | sed s_/__`
-	install_name_tool -id @executable_path/../lib/$m $RESOURCES/lib/$m
+	RESRCDIR=`echo $RESOURCES/lib | sed "s/${BUNDLEDIR}//" | sed s_/__`
+	install_name_tool -id @executable_path/../lib/$m $RESOURCES/${LIBDIR}/$m
 done
 
-
 ### Resolving internal dependencies
-echo "Resolving internal dependencies ..."
+echo "Resolving internal dependencies..."
 for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ); do
 	PWD=`pwd`
 	for file in $( ls $folder ); do
@@ -138,53 +101,17 @@ for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\
 	done
 done
 
+### Strip binaries
+echo "Stripping the binaries..."
+strip "$RESOURCES/${BINDIR}/*"
 
-### Strip the binaries
-echo "Stripping the binaries ..."
-strip "$RESOURCES/bin/piqsl"
-strip "$RESOURCES/bin/aqsis"
-strip "$RESOURCES/bin/aqsl"
-strip "$RESOURCES/bin/teqser"
-strip "$RESOURCES/bin/miqser"
-strip "$RESOURCES/bin/aqsltell"
-strip "$RESOURCES/bin/eqsl"
-
-
-### Update Piqsl and framebuffer
-echo "Updating fltk resources ..."
-#/Developer/Tools/CpMac "/opt/local/include/FL/mac.r" "${CMAKE_BINARY_DIR}/${BUNDLEDIR}/$FRAMEWORKS"
-for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ); do
-	for file in $( ls $folder ); do
-		if [ `otool -L $folder$file | grep dylib | grep fltk | sed 's/(.*)//'` ]; then
-			/Developer/Tools/Rez -t APPL -o "$folder$file" /opt/local/include/FL/mac.r
-		fi
-	done
-done
-/Developer/Tools/Rez -t APPL -o "$RESOURCES/bin/aqsis" /opt/local/include/FL/mac.r
-
-
-### Copy AqsisConfigurator
-echo "Copying AqsisConfigurator ..."
-TARGET="${CMAKE_BINARY_DIR}/${BUNDLEDIR}/$CONTENTS/"
-SOURCE="${CMAKE_BINARY_DIR}/tools/AqsisConfig/Release/AqsisConfig.app/Contents/"
-/Developer/Tools/CpMac -r "$SOURCE/Resources"/English.lproj 	"$TARGET/Resources/"
-/Developer/Tools/CpMac -r "$SOURCE/Resources"/Scripts 			"$TARGET/Resources/"
-/Developer/Tools/CpMac "$SOURCE/MacOS"/AqsisConfig 			"$TARGET/MacOS/AqsisConfig"
-
-
-### Replace aqsisrc
-echo "Adding aqsisrc ..."
-cp "aqsisrc" "$RESOURCES/bin/aqsisrc"
-
-
-# Get rid of those pesky .svn directories ...
-echo "Cleaning up directories ..."
+### Purge redundant content
+echo "Purging redundant content..."
 rm -rf $(find "$CONTENTS" -name ".svn")
 
-
-### Create a nice DMG
-echo "Creating disk image ..."
-SIZE=`expr 5 + \`du -s -k "$BUNDLE" | cut -f1\` + \`du -s -k "${CMAKE_SOURCE_DIR}/content" | cut -f1\` / 1000`
+### Create disk image (DMG)
+echo "Creating disk image..."
+SIZE=`expr 5 + \`du -s -k "$BUNDLE" | cut -f1\` + \`du -s -k "$CONTENTDIR" | cut -f1\` / 1000`
 
 hdiutil create "$SCRATCH/$DISK_IMAGE" -volname "$APPLICATION_NAME" -megabytes $SIZE -type SPARSE -fs HFS+ 2>/dev/null >/dev/null
 
@@ -193,7 +120,7 @@ hdid "$SCRATCH/$DISK_IMAGE.sparseimage" 2>/dev/null >/dev/null
 DEV=`mount | grep "Volumes/$APPLICATION_NAME" | cut -f1 -d" "`
 
 ditto -rsrc $BUNDLE "/Volumes/$APPLICATION_NAME/$BUNDLE_NAME" #2>/dev/null >/dev/null
-ditto -rsrc "${CMAKE_SOURCE_DIR}"/content "/Volumes/$APPLICATION_NAME/Examples" #2>/dev/null >/dev/null
+ditto -rsrc "$CONTENTDIR" "/Volumes/$APPLICATION_NAME/Examples" #2>/dev/null >/dev/null
 ditto -rsrc "${CMAKE_SOURCE_DIR}"/README "/Volumes/$APPLICATION_NAME/README" #2>/dev/null >/dev/null
 
 hdiutil detach "$DEV" 2>/dev/null >/dev/null
@@ -201,7 +128,7 @@ hdiutil detach "$DEV" 2>/dev/null >/dev/null
 hdiutil convert "$SCRATCH/$DISK_IMAGE.sparseimage" -format UDZO -o "$DISK_IMAGE" -imagekey zlib-devel=9 2>/dev/null >/dev/null
 
 if [ -e $DISK_IMAGE ]; then
-	echo "$DISK_IMAGE successfully created."
+	echo "$DISK_IMAGE successfully created!"
 	exit
 fi
-echo "An error occurred."
+echo "An error occurred!"
