@@ -1,28 +1,25 @@
 #!/bin/sh
 
-APPLICATION_NAME="Aqsis"
+APPLICATION_NAME="${CMAKE_PROJECT_NAME}-${MAJOR}.${MINOR}.${BUILD}"
 BUNDLE_NAME="$APPLICATION_NAME.app"
-STAGING="${BUNDLEDIR}/staging"
-BUNDLE="$STAGING/$BUNDLE_NAME"
+BUNDLE="${BUNDLEDIR}/$BUNDLE_NAME"
 CONTENTS="$BUNDLE/Contents"
 RESOURCES="$CONTENTS/Resources"
 FRAMEWORKS="$CONTENTS/Frameworks"
 MACOS="$CONTENTS/MacOS"
+SCRATCH="${BUNDLEDIR}/scratch"
 SHADERDIR="$RESOURCES/shaders"
 INCLUDEDIR="$RESOURCES/include"
 CONTENTDIR="${CMAKE_SOURCE_DIR}/content"
-SCRATCH="$STAGING/scratch"
-DISK_IMAGE="$APPLICATION_NAME-${MAJOR}.${MINOR}.${BUILD}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
-
+DISK_IMAGE="$APPLICATION_NAME-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
 
 ### Purge files
 echo "Purging old files..."
-rm -rvf "$STAGING"
-rm -vf "${BUNDLEDIR}/$DISK_IMAGE"
+rm -rvf "$BUNDLE/" "$SCRATCH/" "${CMAKE_BINARY_DIR}/$DISK_IMAGE"
 
 ### Create structure
 echo "Creating bundle structure..."
-mkdir -p "$STAGING"
+mkdir -p "${BUNDLEDIR}"
 mkdir -p "$SCRATCH"
 mkdir -p "$BUNDLE"
 mkdir -p "$CONTENTS"
@@ -37,27 +34,28 @@ echo "Copying bundle files..."
 touch "$CONTENTS/PkgInfo"
 cp "${BUNDLEDIR}/Info.plist" "$CONTENTS/"
 cp "${BUNDLEDIR}/"*.icns "$RESOURCES/"
+CpMac "${CMAKE_BINARY_DIR}/${BINDIR}/eqsl" "$MACOS/"
 
 ### Copy aqsis files
 echo "Copying aqsis files..."
-/Developer/Tools/CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
+CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
 cp -r "${CMAKE_BINARY_DIR}/${LIBDIR}" "$RESOURCES/${LIBDIR}"
+cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}/"
 cp "${CMAKE_BINARY_DIR}/shaders/"*.slx "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/shaders/"*.sl "$SHADERDIR/"
-cp "${CMAKE_SOURCE_DIR}/aqsistypes"/*.h "$INCLUDEDIR/"
-cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix"/*.h "$INCLUDEDIR/"
-cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager"/ndspy.h "$INCLUDEDIR/"
-cp "${CMAKE_SOURCE_DIR}/rib/api"/ri.h "$INCLUDEDIR/"
-cp "${CMAKE_BINARY_DIR}/rib/api"/ri.inl "$INCLUDEDIR/"
-cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm"/shadeop.h "$INCLUDEDIR/"
-cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}"
+cp "${CMAKE_SOURCE_DIR}/aqsistypes/"*.h "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix/"*.h "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager/ndspy.h" "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/rib/api/ri.h" "$INCLUDEDIR/"
+cp "${CMAKE_BINARY_DIR}/rib/api/ri.inl" "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm/shadeop.h" "$INCLUDEDIR/"
 
 ### Resolve external dependencies
 echo "Resolving external dependencies..."
-for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
+for folder in $( ls -R "$RESOURCES/" | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v '$BUNDLE_NAME'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v '$BUNDLE_NAME' | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
@@ -78,18 +76,20 @@ done
 echo "Updating lib names..."
 for m in $( ls $FRAMEWORKS | grep dylib ); do
 	#echo "Processing $m"
+	FRMWRKDIR=`echo $FRAMEWORKS | sed "s/${BUNDLEDIR}//" | sed s_/__`
 	install_name_tool -id @executable_path/../../Frameworks/$m $FRAMEWORKS/$m
 done
 
 for m in $( ls $RESOURCES/${LIBDIR} | grep dylib ); do
 	#echo "Processing $m"
+	RESRCDIR=`echo $RESOURCES/lib | sed "s/${BUNDLEDIR}//" | sed s_/__`
 	install_name_tool -id @executable_path/../lib/$m $RESOURCES/${LIBDIR}/$m
 done
 
 ### Resolving internal dependencies
 echo "Resolving internal dependencies..."
 for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ); do
-	PWD=`pwd`
+	PWD='pwd'
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
 		for dep in $( otool -L $folder$file | grep dylib | grep ${CMAKE_BINARY_DIR} | sed 's/(.*)//' ); do
@@ -124,6 +124,7 @@ hdiutil convert "$SCRATCH/$DISK_IMAGE.sparseimage" -format UDZO -o "$DISK_IMAGE"
 
 if [ -e $DISK_IMAGE ]; then
 	echo "$DISK_IMAGE successfully created!"
+	mv -f "${BUNDLEDIR}/$DISK_IMAGE" "${CMAKE_BINARY_DIR}/"
 	exit
 fi
 echo "An error occurred!"
