@@ -45,8 +45,6 @@ decl {string chooserTitleOpen = "Select File";} {}
 
 decl {string commandLine = "";} {} 
 
-decl {string commandSeparator = ";";} {} 
-
 decl {string currentDirectory = ".";} {} 
 
 decl {string renderEngine = "aqsis";} {} 
@@ -69,10 +67,6 @@ decl {string toolsHistoryTitle = "Command History:";} {}
 
 Function {} {open
 } {
-  code {\#if defined(__WIN32__)
-	commandSeparator = "&";
-\#endif} {selected
-  }
   Fl_Window m_window {
     label eqsl open
     xywh {-32000 -32000 400 300} type Double hide
@@ -89,7 +83,7 @@ Function {} {open
         MenuItem m_menuFileQuit {
           label {&Quit}
           callback {exit(0);}
-          xywh {0 0 100 20} shortcut 0x40071
+          xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'q');}
         }
       }
@@ -119,12 +113,13 @@ else
 	}
 
 // Call relevant commandline
-commandLine = "cd \\"" + currentDirectory + "\\"" + commandSeparator + " " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+commandLine = "cd \\"" + currentDirectory + "\\"; " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
 m_outputConsole->add(commandLine.c_str());}
-          xywh {0 0 100 20} shortcut 0x40072
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'R');}
         }
         MenuItem m_menuToolsCompile {
           label {&Compile Shader}
@@ -148,12 +143,13 @@ else
 	}
 
 // Call relevant commandline
-commandLine = "cd \\"" + currentDirectory + "\\"" + commandSeparator + " " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
+commandLine = "cd \\"" + currentDirectory + "\\"; " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
 system(commandLine.c_str());
 
 // Log commandline event
 m_outputConsole->add(commandLine.c_str());}
-          xywh {0 0 100 20} shortcut 0x40063
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'C');}
         }
         MenuItem m_menuToolsFramebuffer {
           label {Open &Framebuffer}
@@ -163,13 +159,15 @@ system(commandLine.c_str());
 
 // Log commandline event
 m_outputConsole->add(commandLine.c_str());}
-          xywh {0 0 100 20} shortcut 0x40066 divider
+          xywh {0 0 100 20} divider
+          code0 {o->shortcut(FL_COMMAND+'F');}
         }
         MenuItem m_menuToolsClean {
           label {Clear &History}
           callback {m_outputConsole->clear();
-m_outputConsole->add(toolsHistoryTitle.c_str());}
-          xywh {0 0 100 20} shortcut 0x40068
+m_outputConsole->add(toolsHistoryTitle.c_str());} selected
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'h');}
         }
       }
       Submenu m_menuHelp {
@@ -180,7 +178,7 @@ m_outputConsole->add(toolsHistoryTitle.c_str());}
           label {&About}
           callback {string version = "eqsl version %s\\ncompiled %s %s";
 fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
-          xywh {0 0 100 20} shortcut 0x40061
+          xywh {0 0 100 20}
           code0 {\#include <FL/fl_ask.H>}
           code1 {\#include "version.h"}
         }
