@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0108 
+version 1.0107 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -67,9 +67,19 @@ decl {string toolsHistoryTitle = "Command History:";} {}
 
 Function {} {open
 } {
+  code {\#ifdef __WINDOWS__
+	\#include <Windows.h>
+
+	STARUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	ZeroMemory( &pi, sizeof(pi) );
+\#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {-32000 -32000 400 300} type Double hide
+    xywh {387 252 400 300} type Double visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -113,11 +123,16 @@ else
 	}
 
 // Call relevant commandline
-commandLine = "cd \\"" + currentDirectory + "\\"; " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
-system(commandLine.c_str());
+\#ifdef __WINDOWS__
+	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, currentDirectory.c_str(), &si, &pi);
+\#else
+	commandLine = "cd \\"" + currentDirectory + "\\"; " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+	system(commandLine.c_str());
+\#endif
 
 // Log commandline event
-m_outputConsole->add(commandLine.c_str());}
+m_outputHistory->add(commandLine.c_str());}
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'R');}
         }
@@ -143,29 +158,39 @@ else
 	}
 
 // Call relevant commandline
-commandLine = "cd \\"" + currentDirectory + "\\"; " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
-system(commandLine.c_str());
+\#ifdef __WINDOWS__
+	commandLine = shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
+	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, currentDirectory.c_str(), &si, &pi);
+\#else
+	commandLine = "cd \\"" + currentDirectory + "\\"; " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
+	system(commandLine.c_str());
+\#endif
 
 // Log commandline event
-m_outputConsole->add(commandLine.c_str());}
+m_outputHistory->add(commandLine.c_str());}
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'C');}
         }
         MenuItem m_menuToolsFramebuffer {
           label {Open &Framebuffer}
           callback {// Call relevant commandline
-commandLine = renderViewer;
-system(commandLine.c_str());
+\#ifdef __WINDOWS__
+	commandLine = renderViewer;
+	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+\#else
+	commandLine = renderViewer;
+	system(commandLine.c_str());
+\#endif
 
 // Log commandline event
-m_outputConsole->add(commandLine.c_str());}
+m_outputHistory->add(commandLine.c_str());} selected
           xywh {0 0 100 20} divider
           code0 {o->shortcut(FL_COMMAND+'F');}
         }
         MenuItem m_menuToolsClean {
           label {Clear &History}
-          callback {m_outputConsole->clear();
-m_outputConsole->add(toolsHistoryTitle.c_str());} selected
+          callback {m_outputHistory->clear();
+m_outputHistory->add(toolsHistoryTitle.c_str());}
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'h');}
         }
@@ -184,9 +209,26 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Browser m_outputConsole {
+    Fl_Tabs m_tabs {open
       xywh {0 25 400 275}
-      code0 {m_outputConsole->add(toolsHistoryTitle.c_str());}
+    } {
+      Fl_Group m_tabHistory {
+        label History open
+        xywh {0 50 400 275}
+      } {
+        Fl_Browser m_outputHistory {
+          xywh {0 50 400 250}
+          code0 {m_outputHistory->add(toolsHistoryTitle.c_str());}
+        }
+      }
+      Fl_Group m_tabConsole {
+        label Console open
+        xywh {0 50 400 275} hide
+      } {
+        Fl_Browser m_outputConsole {
+          xywh {0 50 400 250}
+        }
+      }
     }
   }
 } 
