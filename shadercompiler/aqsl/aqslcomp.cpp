@@ -27,6 +27,7 @@
 #include	"aqsis.h"
 #include	"logging.h"
 #include	"logging_streambufs.h"
+#include	"file.h"
 
 #include	<iostream>
 #include	<fstream>
@@ -188,111 +189,133 @@ int main( int argc, const char** argv )
 	{
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
-			// current file position is saved for exception handling
-			boost::wave::util::file_position_type current_position;
+			//Expand filenames
+			std::list<CqString*> files = Aqsis::CqFile::cliGlob(*e);
+			std::list<CqString*>::iterator it;
+			for(it = files.begin(); it != files.end(); ++it){ 
+				// current file position is saved for exception handling
+				boost::wave::util::file_position_type current_position;
 
-			try
-			{
-				//  Open and read in the specified input file.
-				std::ifstream instream(e->c_str());
-				std::string instring;
-	
-				if (!instream.is_open()) 
+				try
 				{
-					std::cerr << "Could not open input file: " << e->c_str() << std::endl;
+					//  Open and read in the specified input file.
+					std::ifstream instream((*it)->c_str());
+					std::string instring;
+	
+					if (!instream.is_open()) 
+					{
+						std::cerr << "Could not open input file: " << (*it)->c_str() << std::endl;
+						continue;
+					}
+					instream.unsetf(std::ios::skipws);
+					instring = std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
+					    std::istreambuf_iterator<char>());
+	
+					typedef boost::wave::cpplexer::lex_token<> token_type;
+					typedef boost::wave::cpplexer::lex_iterator<token_type> lex_iterator_type;
+					typedef boost::wave::context<std::string::iterator, lex_iterator_type>
+					    context_type;
+					context_type ctx (instring.begin(), instring.end(), (*it)->c_str());
+
+					// Append the -i arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
+					{
+				                ctx.add_sysinclude_path( include->c_str() );
+				                ctx.add_include_path( include->c_str() );
+					}
+  
+					// Setup the default defines.
+			                ctx.add_macro_definition( "AQSIS" );
+			                ctx.add_macro_definition( "PI=3.141592654" );
+  
+					// Append the -d arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
+					{
+				                ctx.add_macro_definition( define->c_str() );
+					}
+  
+					// Append the -u arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
+  					{
+				                ctx.remove_macro_definition( undefine->c_str() );
+					}
+  
+					// analyze the input file
+					context_type::iterator_type first = ctx.begin();
+					context_type::iterator_type last = ctx.end();
+				
+					std::stringstream preprocessed(std::stringstream::in | std::stringstream::out);
+					std::ofstream dumpfile;
+					if( g_dumpsl )
+					{
+						std::string dumpfname((*it)->c_str());
+						dumpfname.append(".pp");
+						dumpfile.open(dumpfname.c_str());
+					};
+	
+					while (first != last) 
+					{
+						current_position = (*first).get_position();
+						preprocessed << (*first).get_value();
+						dumpfile << (*first).get_value();
+
+						try
+						{
+							++first	;
+						}
+						catch (boost::wave::preprocess_exception &e) 
+  						{
+							Aqsis::log() 
+							<< e.file_name() << "(" << e.line_no() << "): "
+							<< e.description() << std::endl;
+							if (e.get_errorcode() == ::boost::wave::preprocess_exception::last_line_not_terminated )
+							{
+								preprocessed << std::endl;
+								dumpfile << std::endl;
+								break;
+							};
+  						}
+						catch (...) 
+						{
+							throw &e;
+						}
+
+					};
+  
+					if( dumpfile.is_open() )
+						dumpfile.close();
+  
+					if ( Parse( preprocessed, e->c_str(), Aqsis::log() ) )
+						codeGenerator->OutputTree( GetParseTree(), g_stroutname );
+					else
+						error = true;
+				}
+				catch (boost::wave::cpp_exception &e) 
+				{
+					// some preprocessing error
+					Aqsis::log() 
+					<< e.file_name() << "(" << e.line_no() << "): "
+					<< e.description() << std::endl;
 					continue;
 				}
-				instream.unsetf(std::ios::skipws);
-				instring = std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
-				    std::istreambuf_iterator<char>());
-	
-				typedef boost::wave::cpplexer::lex_token<> token_type;
-				typedef boost::wave::cpplexer::lex_iterator<token_type> lex_iterator_type;
-				typedef boost::wave::context<std::string::iterator, lex_iterator_type>
-				    context_type;
-				context_type ctx (instring.begin(), instring.end(), e->c_str());
-//				context_type ctx (std::istreambuf_iterator<char>(instream),
-//					std::istreambuf_iterator<char>(), e->c_str());        
-	
-				// Append the -i arguments passed in to forward them to the preprocessor.
-				for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
+				catch (std::exception &e)
 				{
-			                ctx.add_sysinclude_path( include->c_str() );
-			                ctx.add_include_path( include->c_str() );
+					// use last recognized token to retrieve the error position
+					Aqsis::log() << current_position.get_file()
+				        << "(" << current_position.get_line() << "): "
+				        << "exception caught: " << e.what()
+				        << std::endl;
+					continue;
 				}
-  
-				// Setup the default defines.
-		                ctx.add_macro_definition( "AQSIS" );
-		                ctx.add_macro_definition( "PI=3.141592654" );
-  
-				// Append the -d arguments passed in to forward them to the preprocessor.
-				for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
-				{
-			                ctx.add_macro_definition( define->c_str() );
+				catch (...) {
+					// use last recognized token to retrieve the error position
+					Aqsis::log() << current_position.get_file()
+					<< "(" << current_position.get_line() << "): "
+					<< "unexpected exception caught." << std::endl;
+					continue;
 				}
-  
-				// Append the -u arguments passed in to forward them to the preprocessor.
-				for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
-  				{
-			                ctx.remove_macro_definition( undefine->c_str() );
-				}
-  
-				// analyze the input file
-				context_type::iterator_type first = ctx.begin();
-				context_type::iterator_type last = ctx.end();
-				
-				std::stringstream preprocessed(std::stringstream::in | std::stringstream::out);
-				std::ofstream dumpfile;
-				if( g_dumpsl )
-				{
-					std::string dumpfname = *e;
-					dumpfname.append(".pp");
-					dumpfile.open(dumpfname.c_str());
-				};
-	
-				while (first != last) 
-				{
-					current_position = (*first).get_position();
-					preprocessed << (*first).get_value();
-					if( dumpfile.is_open() )
-						dumpfile << (*first).get_value();
-					++first;
-				};
-  
-				if( dumpfile.is_open() )
-				{
-					dumpfile.close();
-				}
-  
-				if ( Parse( preprocessed, e->c_str(), Aqsis::log() ) )
-					codeGenerator->OutputTree( GetParseTree(), g_stroutname );
-				else
-					error = true;
 			}
-			catch (boost::wave::cpp_exception &e) 
-  			{
-			// some preprocessing error
-				Aqsis::log() 
-				<< e.file_name() << "(" << e.line_no() << "): "
-				<< e.description() << std::endl;
-				continue;
-  			}
-			catch (std::exception &e) {
-			// use last recognized token to retrieve the error position
-				Aqsis::log() << current_position.get_file()
-			        << "(" << current_position.get_line() << "): "
-			        << "exception caught: " << e.what()
-			        << std::endl;
-				continue;
-			}
-			catch (...) {
-			// use last recognized token to retrieve the error position
-				Aqsis::log() << current_position.get_file()
-				<< "(" << current_position.get_line() << "): "
-				<< "unexpected exception caught." << std::endl;
-				continue;
-			}
-		}
+		};
 	}
 
 	return error ? -1 : 0;

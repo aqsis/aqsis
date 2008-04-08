@@ -145,6 +145,7 @@ class COMMON_SHARE CqFile
 		CqString FixupPath(CqString& strPath);
 
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
+		static std::list<CqString*> cliGlob( const CqString& strFileGlob );
 		static std::string basePath( const CqString& strFilespec );
 		static std::string fileName( const CqString& strFilespec );
 		static std::string extension( const CqString& strFilespec );
