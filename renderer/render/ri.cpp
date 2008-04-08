@@ -1762,25 +1762,39 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 						CqString str_std = pOptStd[ 0 ];
 						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
 						// Build the string, checking for & and @ characters  and replace with old and default string, respectively.
-						unsigned int strt = 0;
-						unsigned int len = 0;
+						std::string::size_type strt = 0;
+						std::string::size_type match = 0;
+						std::string stringValue(ps[ j ]);
 						while ( 1 )
 						{
-							if ( ( len = strcspn( &ps[ j ][ strt ], "&@" ) ) < strlen( &ps[ j ][ strt ] ) )
+							if ( ( match = stringValue.find_first_of("&@%", strt ) ) != std::string::npos )
 							{
-								if( *(&ps[ j ][ strt + len ]) == '&' )
+								if( stringValue[match] == '&' )
 								{
-									str += CqString( ps[ j ] ).substr( strt, len );
+									str += stringValue.substr( strt, (match-strt) );
 									str += str_old;
-									strt += len + 1;
+									strt = match + 1;
 									continue;
 								}
-								if( *(&ps[ j ][ strt + len ]) == '@' )
+								if( stringValue[match] == '@' )
 								{
-									str += CqString( ps[ j ] ).substr( strt, len );
+									str += stringValue.substr( strt, (match-strt) );
 									str += str_std;
-									strt += len + 1;
+									strt = match + 1;
 									continue;
+								}
+								if( stringValue[match] == '%' )
+								{
+									str += stringValue.substr( strt, (match-strt) );
+									std::string::size_type envvarend = stringValue.find('%', match + 1);
+									if( envvarend != std::string::npos )
+									{
+										std::string strEnv = stringValue.substr(match + 1, (envvarend - (match + 1)));
+										std::string strVal = getenv(strEnv.c_str());
+										str += strVal;
+										strt = envvarend + 1;
+										continue;
+									}
 								}
 							}
 							else 
@@ -1789,6 +1803,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 								break;
 							}
 						}
+						Aqsis::log() << debug << "New searchpath = " << str.c_str() << std::endl;
 					}
 					else
 						str = CqString( ps[ j ] );
