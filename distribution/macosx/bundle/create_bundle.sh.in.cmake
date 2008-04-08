@@ -1,6 +1,7 @@
 #!/bin/sh
 
-APPLICATION_NAME="${CMAKE_PROJECT_NAME}-${MAJOR}.${MINOR}.${BUILD}"
+APPLICATION_NAME="${CMAKE_PROJECT_NAME}"
+VERSION="${MAJOR}.${MINOR}.${BUILD}"
 BUNDLE_NAME="$APPLICATION_NAME.app"
 BUNDLE="${BUNDLEDIR}/$BUNDLE_NAME"
 CONTENTS="$BUNDLE/Contents"
@@ -11,7 +12,7 @@ SCRATCH="${BUNDLEDIR}/scratch"
 SHADERDIR="$RESOURCES/shaders"
 INCLUDEDIR="$RESOURCES/include"
 CONTENTDIR="${CMAKE_SOURCE_DIR}/content"
-DISK_IMAGE="$APPLICATION_NAME-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
+DISK_IMAGE="$APPLICATION_NAME-$VERSION-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
 
 ### Purge files
 echo "Purging old files..."
@@ -34,13 +35,12 @@ echo "Copying bundle files..."
 touch "$CONTENTS/PkgInfo"
 cp "${BUNDLEDIR}/Info.plist" "$CONTENTS/"
 cp "${BUNDLEDIR}/"*.icns "$RESOURCES/"
-CpMac "${CMAKE_BINARY_DIR}/${BINDIR}/eqsl" "$MACOS/"
 
 ### Copy aqsis files
 echo "Copying aqsis files..."
-CpMac -r "${CMAKE_BINARY_DIR}/${BINDIR}" "$RESOURCES/${BINDIR}"
+/Developer/Tools/CpMac "${CMAKE_BINARY_DIR}/${BINDIR}/"* "$MACOS/"
 cp -r "${CMAKE_BINARY_DIR}/${LIBDIR}" "$RESOURCES/${LIBDIR}"
-cp "${BUNDLEDIR}/aqsisrc" "$RESOURCES/${BINDIR}/"
+cp "${BUNDLEDIR}/aqsisrc" "$MACOS/"
 cp "${CMAKE_BINARY_DIR}/shaders/"*.slx "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/shaders/"*.sl "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/aqsistypes/"*.h "$INCLUDEDIR/"
@@ -52,10 +52,10 @@ cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm/shadeop.h" "$INCLUDEDIR/"
 
 ### Resolve external dependencies
 echo "Resolving external dependencies..."
-for folder in $( ls -R "$RESOURCES/" | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
+for folder in "$MACOS/" $( ls -R "$RESOURCES/" | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v '$BUNDLE_NAME'| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v '$BUNDLE_NAME' | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v $BUNDLE_NAME| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
@@ -67,7 +67,7 @@ for folder in $( ls -R "$RESOURCES/" | egrep '.+:$' | sed 's/\/\//\//' | sed 's/
 				   	cp -R $deref "$FRAMEWORKS"
 				fi
 			fi
-			install_name_tool -change $dep @executable_path/../../Frameworks/$bn $folder$file
+			install_name_tool -change $dep @executable_path/../Frameworks/$bn $folder$file
 		done
 	done
 done
@@ -76,25 +76,23 @@ done
 echo "Updating lib names..."
 for m in $( ls $FRAMEWORKS | grep dylib ); do
 	#echo "Processing $m"
-	FRMWRKDIR=`echo $FRAMEWORKS | sed "s/${BUNDLEDIR}//" | sed s_/__`
-	install_name_tool -id @executable_path/../../Frameworks/$m $FRAMEWORKS/$m
+	install_name_tool -id @executable_path/../Frameworks/$m $FRAMEWORKS/$m
 done
 
 for m in $( ls $RESOURCES/${LIBDIR} | grep dylib ); do
 	#echo "Processing $m"
-	RESRCDIR=`echo $RESOURCES/lib | sed "s/${BUNDLEDIR}//" | sed s_/__`
-	install_name_tool -id @executable_path/../lib/$m $RESOURCES/${LIBDIR}/$m
+	install_name_tool -id @executable_path/../Resources/lib/$m $RESOURCES/${LIBDIR}/$m
 done
 
 ### Resolving internal dependencies
 echo "Resolving internal dependencies..."
-for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ); do
+for folder in $( ls -R $RESOURCES | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$MACOS/"; do
 	PWD='pwd'
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
 		for dep in $( otool -L $folder$file | grep dylib | grep ${CMAKE_BINARY_DIR} | sed 's/(.*)//' ); do
 			bn=`basename $dep`
-			install_name_tool -change $dep @executable_path/../lib/$bn $folder$file
+			install_name_tool -change $dep @executable_path/../Resources/lib/$bn $folder$file
 			#echo "$dep      $bn" 
 		done
 	done
