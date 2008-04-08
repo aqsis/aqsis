@@ -27,7 +27,7 @@
 		<key>AQSISHOME</key>
 		<string>Aqsis.app/Contents/Resources</string>
 		<key>PATH</key>
-		<string>$AQSISHOME:$PATH</string>
+		<string>$AQSISHOME/bin:$PATH</string>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
