@@ -32,9 +32,11 @@ mkdir -p "$INCLUDEDIR"
 
 ### Copy bundle files
 echo "Copying bundle files..."
-touch "$CONTENTS/PkgInfo"
+echo "APPLaplt" > "$CONTENTS/PkgInfo"
 cp "${BUNDLEDIR}/Info.plist" "$CONTENTS/"
 cp "${BUNDLEDIR}/"*.icns "$RESOURCES/"
+cp "${BUNDLEDIR}/bundle_config.app/Contents/MacOS/applet" "$MACOS/applet"
+cp -r "${BUNDLEDIR}/bundle_config.app/Contents/Resources/"* "$RESOURCES/"
 
 ### Copy aqsis files
 echo "Copying aqsis files..."

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>eqsl</string>
+	<string>applet</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.aqsis.Aqsis</string>
 	<key>CFBundleIconFile</key>
@@ -19,15 +19,15 @@
 	<key>CFBundleShortVersionString</key>
 	<string>${MAJOR}.${MINOR}.${BUILD}</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>aplt</string>
 	<key>CFBundleVersion</key>
 	<string>${REVISION}${TYPE}</string>
 	<key>LSEnvironment</key>
 	<dict>
 		<key>AQSISHOME</key>
-		<string>Aqsis.app/Contents/Resources</string>
+		<string>Aqsis.app</string>
 		<key>PATH</key>
-		<string>$AQSISHOME/bin:$PATH</string>
+		<string>$AQSISHOME/Contents/MacOS:$PATH</string>
 	</dict>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>

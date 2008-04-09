@@ -1,6 +1,4 @@
 SET(AQSIS_XCODEBUILD_SEARCHPATH)
-# If on win32, and the win32libs SVN module has been located, we can
-# use the one in there.
 IF(APPLE)
 	FIND_PROGRAM(AQSIS_XCODEBUILD_EXECUTABLE
 		xcodebuild

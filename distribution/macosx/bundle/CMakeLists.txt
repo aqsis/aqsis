@@ -15,10 +15,16 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/create_bundle.sh.in.cmake ${BUNDLEDIR
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in.cmake ${BUNDLEDIR}/Info.plist)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../application.icns ${BUNDLEDIR}/Aqsis.icns COPYONLY)
 
-
+ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bundle_config.app
+	COMMAND ${AQSIS_OSACOMPILE_EXECUTABLE} -o ${BUNDLEDIR}/bundle_config.app ${CMAKE_CURRENT_SOURCE_DIR}/bundle_config.applescript
+	)
+ADD_CUSTOM_TARGET(bundleconfig ALL echo
+	DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/bundle_config.app
+	)
+	
 ADD_CUSTOM_TARGET(osxbundle
 	WORKING_DIRECTORY ${BUNDLEDIR}
 	COMMAND sh ./create_bundle.sh
 	)
 
-ADD_DEPENDENCIES(osxbundle aqsis aqsl aqsltell eqsl miqser piqsl teqser display piqsldisplay shaders)
+ADD_DEPENDENCIES(osxbundle aqsis aqsl aqsltell eqsl miqser piqsl teqser display piqsldisplay shaders bundleconfig)
