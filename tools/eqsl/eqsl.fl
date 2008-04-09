@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0108 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -32,10 +32,19 @@ comment {// Aqsis
 decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
+decl {\#include <boost/thread.hpp>} {} 
+
 decl {\#include <cstdlib>} {public
 } 
 
 decl {\#include <string>} {public
+} 
+
+declblock {\#ifndef __WINDOWS__} {open after {\#endif}
+} {
+  decl {\#include <signal.h>} {}
+  decl {\#include <sys/wait.h>} {}
+  decl {\#include <sys/types.h>} {}
 } 
 
 decl {using std::string;} {public
@@ -79,7 +88,7 @@ Function {} {open
 \#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {387 252 400 300} type Double visible
+    xywh {458 795 400 300} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -108,28 +117,83 @@ Fl_File_Chooser fl_file_chooser(renderEngineFile.c_str(), renderEngineType.c_str
 fl_file_chooser.show();
 
 while(fl_file_chooser.shown())
-	{
+{
 	Fl::wait();
-	}
+}
 
 if (fl_file_chooser.value() == NULL)
-	{
+{
 	return;
-	}
+}
 else
-	{
+{
+	fl_file_chooser.hide();
 	currentDirectory = fl_file_chooser.directory();
 	renderEngineFile = fl_file_chooser.value();
-	}
+}
 
 // Call relevant commandline
 \#ifdef __WINDOWS__
 	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, currentDirectory.c_str(), &si, &pi);
 \#else
-	commandLine = "cd \\"" + currentDirectory + "\\"; " + renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
-	system(commandLine.c_str());
+	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+//	system(commandLine.c_str());
+	int fd_out[2];
+	int fd_in[2];
+	FILE* out;
+	FILE* in;
+	if(pipe(fd_in) || pipe(fd_out))
+	{
+		/// \\todo: Should except here.
+		return;	// Failure to open pipes for communication with child process.
+	}
+	pid_t pid = fork();
+	if (pid >= 0)
+	{
+		if (pid == 0)
+		{
+			// Child process
+			// Fix up the filehandles
+			close(fd_out[1]);
+			close(fd_in[0]);
+			close(STDIN_FILENO);
+			if(dup( fd_out[0] ) < 0)
+			{
+				/// \\todo: Should except here.
+				return;
+			}
+			close(STDOUT_FILENO);
+			if(dup( fd_in[1] ) < 0)
+			{
+				/// \\todo: Should except here.
+				return;
+			}
+			chdir(currentDirectory.c_str());
+			const char *argv[4] = {renderEngine.c_str(),renderEngineArg.c_str(),renderEngineFile.c_str(),NULL};
+			signal(SIGHUP, SIG_IGN);
+			execvp(renderEngine.c_str(),const_cast<char* const*>(argv));
+			nice(2);
+		}
+		else
+		{
+			// Main process
+			// Fix up the filehandles
+			close(fd_out[0]);
+			close(fd_in[1]);
+			//out = fdopen(dup(fd_out[1]), "wb");
+			//in = fdopen(dup(fd_in[0]), "rb");
+		}
+	}
+	else
+	{
+		/// \\todo: Should except here.
+		return;	// Failure to fork child process
+	} 
 \#endif
+
+boost::thread(CqRedirectHandler(fd_in[0], pid));
+
 
 // Log commandline event
 m_outputHistory->add(commandLine.c_str());}
@@ -183,7 +247,7 @@ m_outputHistory->add(commandLine.c_str());}
 \#endif
 
 // Log commandline event
-m_outputHistory->add(commandLine.c_str());} selected
+m_outputHistory->add(commandLine.c_str());}
           xywh {0 0 100 20} divider
           code0 {o->shortcut(FL_COMMAND+'F');}
         }
@@ -209,8 +273,9 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Tabs m_tabs {open
-      xywh {0 25 400 275}
+    Fl_Tabs m_tabs {open selected
+      xywh {0 25 400 275} resizable
+      code0 {o->resizable(m_outputConsole);}
     } {
       Fl_Group m_tabHistory {
         label History open
@@ -230,5 +295,29 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
+  }
+} 
+
+class CqRedirectHandler {open
+} {
+  Function {CqRedirectHandler(int fd_in, pid_t pid)} {open
+  } {
+    code {this->fd_in = fd_in;
+this->pid = pid;} {}
+  }
+  Function {operator()()} {open return_type void
+  } {
+    code {char input[101];
+
+while(!waitpid(pid,0,WNOHANG))
+{
+	input[read(fd_in,input, 100)] = 0;
+	if(strlen(input) > 0)
+		m_outputConsole->add(input);
+}} {}
+  }
+  decl {int fd_in;} {global
+  }
+  decl {pid_t pid;} {global
   }
 } 
