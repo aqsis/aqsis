@@ -110,8 +110,6 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 	// Check informational strings
 	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Description>(),
 			"Strip-allocated tiff for unit tests");
-
-	BOOST_CHECK(!header.find<Aqsis::Attr::IsTiled>());
 }
 
 BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)

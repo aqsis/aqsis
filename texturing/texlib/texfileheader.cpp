@@ -39,7 +39,6 @@ void CqTexFileHeader::addStandardAttributes()
 {
 	set<Attr::Width>(0);
 	set<Attr::Height>(0);
-	set<Attr::IsTiled>(false);
 	set<Attr::Compression>("none");
 	set<Attr::ChannelList>(CqChannelList());
 	set<Attr::PixelAspectRatio>(1.0f);

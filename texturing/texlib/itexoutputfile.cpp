@@ -32,6 +32,7 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+// IqTexOutputFile implementation
 boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 		const std::string& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
@@ -64,6 +65,17 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	}
 
 	return newFile;
+}
+
+
+//------------------------------------------------------------------------------
+// IqMultiTexOutputFile implementation
+boost::shared_ptr<IqMultiTexOutputFile> IqMultiTexOutputFile::open(
+		const std::string& fileName, EqImageFileType fileType,
+		const CqTexFileHeader& header)
+{
+	/// \todo Implementation
+	return boost::shared_ptr<IqMultiTexOutputFile>();
 }
 
 } // namespace Aqsis

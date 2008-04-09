@@ -126,8 +126,8 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 				displayBox.min.x - dataBox.min.x,
 				displayBox.min.y - dataBox.min.y) );
 
-	// tiling information
-	header.set<Attr::IsTiled>(exrHeader.hasTileDescription());
+	// Set tiling information ?
+
 	// Aspect ratio
 	header.set<Attr::PixelAspectRatio>(exrHeader.pixelAspectRatio());
 

@@ -57,8 +57,8 @@ void CqTiffOutputFile::initialize()
 	// make all channels are the same type.
 	if(channelList.sharedChannelType() == Channel_TypeUnknown)
 		AQSIS_THROW(XqInternal, "tiff cannot store multiple pixel types in the same image");
-	// reorder the channels for TIFF output...
-	channelList.reorderChannels();
+
+	// Maybe we should check here whether channels need reordering by name...
 
 	// Use lzw compression if the compression hasn't been specified.
 	std::string& compressionStr = m_header.find<Attr::Compression>();

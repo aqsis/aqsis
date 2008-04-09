@@ -84,10 +84,11 @@ const char* tiffCompressionNameFromTag(uint16 compressionType)
 // CqTiffDirHandle
 //------------------------------------------------------------------------------
 
-CqTiffDirHandle::CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle, const tdir_t dirIdx)
+CqTiffDirHandle::CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle, const TqInt dirIdx)
 	: m_fileHandle(fileHandle)
 {
-	fileHandle->setDirectory(dirIdx);
+	if(dirIdx > 0)
+		fileHandle->setDirectory(dirIdx);
 }
 
 tdir_t CqTiffDirHandle::dirIndex() const
@@ -277,11 +278,11 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	// pixel memory layout.
 	header.set<Attr::Width>(tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
 	header.set<Attr::Height>(tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
-	header.set<Attr::IsTiled>(TIFFIsTiled(tiffPtr()));
-	if(header.find<Attr::IsTiled>())
+	if(TIFFIsTiled(tiffPtr()))
 	{
-		header.set<Attr::TileWidth>(tiffTagValue<uint32>(TIFFTAG_TILEWIDTH));
-		header.set<Attr::TileHeight>(tiffTagValue<uint32>(TIFFTAG_TILELENGTH));
+		header.set<Attr::TileInfo>( SqTileInfo(
+					tiffTagValue<uint32>(TIFFTAG_TILEWIDTH),
+					tiffTagValue<uint32>(TIFFTAG_TILELENGTH)) );
 	}
 	// Get the compression type.
 	header.set<Attr::Compression>(

@@ -72,7 +72,7 @@ class AQSISTEX_SHARE CqTexFileHeader
 		CqTexFileHeader();
 
 		//---------------------------------------------------------
-		/// \name Set image attribute values.
+		/// \name Modify image attribute values.
 		//@{
 		/** \brief Set the value of an attribute with the given tag type
 		 *
@@ -81,6 +81,13 @@ class AQSISTEX_SHARE CqTexFileHeader
 		 */
 		template<typename AttrTagType>
 		void set(const typename AttrTagType::type& value);
+
+		/** \brief Erase an attribute from the header.
+		 *
+		 * AttrTagType specifies the attribute to erase.
+		 */
+		template<typename AttrTagType>
+		void erase();
 
 		/** \brief Timestamp the file.
 		 *
@@ -156,15 +163,6 @@ class AQSISTEX_SHARE CqTexFileHeader
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline SqImageRegion::SqImageRegion(TqInt width, TqInt height,
-		TqInt topLeftX, TqInt topLeftY)
-	: width(width),
-	height(height),
-	topLeftX(topLeftX),
-	topLeftY(topLeftY)
-{ }
-
-//------------------------------------------------------------------------------
 /** \brief Wrapper around std::type_info to allow usage as a key type in std::map.
  *
  * Hold onto a reference to std::type_info, and provide operator<
@@ -195,6 +193,12 @@ template<typename AttrTagType>
 inline void CqTexFileHeader::set(const typename AttrTagType::type& value)
 {
 	m_attributeMap[CqTypeInfoHolder(typeid(AttrTagType))] = value;
+}
+
+template<typename AttrTagType>
+void CqTexFileHeader::erase()
+{
+	m_attributeMap.erase(CqTypeInfoHolder(typeid(AttrTagType)));
 }
 
 inline TqInt CqTexFileHeader::width() const

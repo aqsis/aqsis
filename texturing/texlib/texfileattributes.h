@@ -48,7 +48,7 @@ struct SqImageRegion
 	TqInt topLeftY;  ///< y-position of the top left of the box.
 
 	/// Trivial constructor
-	inline SqImageRegion(TqInt width = 0, TqInt height = 0,
+	SqImageRegion(TqInt width = 0, TqInt height = 0,
 			TqInt topLeftX = 0, TqInt topLeftY = 0);
 };
 
@@ -58,6 +58,18 @@ struct SqWrapModes
 {
 	EqWrapMode sWrap;
 	EqWrapMode tWrap;
+};
+
+//------------------------------------------------------------------------------
+/// Hold information about texture tiles (width, height, ...)
+struct SqTileInfo
+{
+	TqInt width;
+	TqInt height;
+
+	/// Trivial constructor
+	SqTileInfo(TqInt width = 32, TqInt height = 32)
+		: width(width), height(height) {}
 };
 
 //------------------------------------------------------------------------------
@@ -128,9 +140,7 @@ namespace Attr
 
 	//--------------------------------------------------
 	/// Tile information
-	AQSIS_IMAGE_ATTR_TAG(IsTiled, bool);
-	AQSIS_IMAGE_ATTR_TAG(TileWidth, TqInt);
-	AQSIS_IMAGE_ATTR_TAG(TileHeight, TqInt);
+	AQSIS_IMAGE_ATTR_TAG(TileInfo, SqTileInfo);
 
 	//--------------------------------------------------
 	/// Information strings
@@ -165,6 +175,20 @@ namespace Attr
 	AQSIS_IMAGE_ATTR_TAG(CompressionQuality, TqInt);
 }
 
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline SqImageRegion::SqImageRegion(TqInt width, TqInt height,
+		TqInt topLeftX, TqInt topLeftY)
+	: width(width),
+	height(height),
+	topLeftX(topLeftX),
+	topLeftY(topLeftY)
+{ }
+
+//------------------------------------------------------------------------------
 } // namespace Aqsis
 
 #endif // TEXFILEATTRIBUTES_H_INCLUDED

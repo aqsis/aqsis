@@ -80,10 +80,11 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 		/** \brief Construct a tiff directory handle from a tiff file handle
 		 *
 		 * \param fileHandle - handle to the underlying tiff file
-		 * \param dirIdx - directory index
+		 * \param dirIdx - directory index.  If negative, use the current
+		 *                 subimage directory.
 		 */
 		CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle,
-				const tdir_t dirIdx = 0);
+				const TqInt dirIdx = 0);
 
 		/// Obtain the underlying tiff file pointer
 		TIFF* tiffPtr() const;

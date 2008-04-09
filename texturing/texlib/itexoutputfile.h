@@ -46,6 +46,11 @@ namespace Aqsis {
  * uniform interface for placing image data into a file.  Metadata is handled
  * via the CqTexFileHeader container, while pixel data may be written into the
  * file one line at a time, or a whole set of lines at once.
+ *
+ * Although the interface is scanline-oriented, output of tiled data is
+ * possible for those formats which support it.  The user signals the intent
+ * to produce tiled output data by setting the appropriate attributes in the
+ * file attribute header.
  */
 class AQSISTEX_SHARE IqTexOutputFile
 {
@@ -119,6 +124,31 @@ class AQSISTEX_SHARE IqTexOutputFile
 		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer) = 0;
 };
 
+
+//------------------------------------------------------------------------------
+/** \brief Texture output file interface supporting multiple sub-images
+ *
+ * Some file types, such as TIFF support storage of multiple sub-images inside
+ * a single file.  This interface supports such usage by allowing 
+ */
+class AQSISTEX_SHARE IqMultiTexOutputFile : public IqTexOutputFile
+{
+	public:
+		/** \brief Create a new subimage, finalizing the current one.
+		 */
+		virtual void newSubImage(TqInt width, TqInt height) = 0;
+
+		/** \brief Open an input image file in a given format
+		 *
+		 * \param fileName - file to open.  Can be in any of the formats
+		 * understood by aqsistex.
+		 * \param fileType - the file type.
+		 * \return The newly opened input file
+		 */
+		static boost::shared_ptr<IqMultiTexOutputFile> open(
+				const std::string& fileName, EqImageFileType fileType,
+				const CqTexFileHeader& header);
+};
 
 //==============================================================================
 // Implementation of inline functions and templates

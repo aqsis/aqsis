@@ -81,7 +81,7 @@ void CqTiffInputFile::readPixelsImpl(TqUint8* buffer,
 	else
 	{
 		// The usual case - use aqsistex native pixel input
-		if(m_header.find<Attr::IsTiled>())
+		if(m_header.findPtr<Attr::TileInfo>())
 			readPixelsTiled(buffer, startLine, numScanlines);
 		else
 			readPixelsStripped(buffer, startLine, numScanlines);
@@ -119,27 +119,26 @@ void CqTiffInputFile::readPixelsTiled(TqUint8* buffer, TqInt startLine,
 	// lines of interest will be startLine to endLine (exclusive)
 	TqInt endLine = startLine + numScanlines;
 
-	TqInt tileWidth = m_header.find<Attr::TileWidth>();
-	TqInt tileHeight = m_header.find<Attr::TileHeight>();
+	SqTileInfo tileInfo = m_header.find<Attr::TileInfo>();
 	// Compute the boundaries of the smallest tiled region containing the
 	// scanlines we're interested in.
-	TqInt startTileLine = (startLine/tileHeight) * tileHeight;
+	TqInt startTileLine = (startLine/tileInfo.height) * tileInfo.height;
 	// endTileLine is the start line of the row of tiles coming *after* the
 	// last row we want to load.
-	TqInt endTileLine = ((endLine-1)/tileHeight + 1) * tileHeight;
+	TqInt endTileLine = ((endLine-1)/tileInfo.height + 1) * tileInfo.height;
 
 	TqInt width = m_header.width();
 	TqInt bytesPerPixel = m_header.channelList().bytesPerPixel();
 	TqInt lineSize = bytesPerPixel*width;
-	TqInt tileLineSize = bytesPerPixel*tileWidth;
-	TqInt tileSize = tileLineSize*tileHeight;
+	TqInt tileLineSize = bytesPerPixel*tileInfo.width;
+	TqInt tileSize = tileLineSize*tileInfo.height;
 
 	// Buffer to hold tiles read using libtiff.
 	boost::shared_array<TqUint8> tempTileBuf(
 			static_cast<TqUint8*>(_TIFFmalloc(tileSize)),
 			_TIFFfree);
 
-	for(TqInt y = startTileLine; y < endTileLine; y += tileHeight)
+	for(TqInt y = startTileLine; y < endTileLine; y += tileInfo.height)
 	{
 		// Determine how much of the beginning and end of the current strip
 		// should be skipped due to the tiles falling off the range of
@@ -147,12 +146,12 @@ void CqTiffInputFile::readPixelsTiled(TqUint8* buffer, TqInt startLine,
 		TqInt outStripSkipStart =
 			(y == startTileLine) ? startLine - startTileLine : 0;
 		TqInt outStripSkipEnd =
-			(y + tileHeight == endTileLine) ? endTileLine - endLine : 0;
+			(y + tileInfo.height == endTileLine) ? endTileLine - endLine : 0;
 		// The output "Strip height" for the current line of tiles might be
 		// smaller than the tile height; take this into account here.
-		TqInt stripHeightOut = tileHeight - outStripSkipStart - outStripSkipEnd;
+		TqInt stripHeightOut = tileInfo.height - outStripSkipStart - outStripSkipEnd;
 
-		for(TqInt x = 0; x < width; x += tileWidth)
+		for(TqInt x = 0; x < width; x += tileInfo.width)
 		{
 			// Grab the tile using libtiff
 			TIFFReadTile(dirHandle.tiffPtr(),
