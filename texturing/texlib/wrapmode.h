@@ -51,6 +51,8 @@ enum EqWrapMode
 EqWrapMode wrapModeFromString(const std::string& modeString);
 
 
+/// Return a string representing the given wrap mode.
+const char* wrapModeToString(EqWrapMode mode);
 
 //==============================================================================
 // Implementation details
@@ -68,6 +70,24 @@ inline EqWrapMode wrapModeFromString(const std::string& modeString)
 		// Default: return black... maybe we should have an "unknown" wrap mode
 		// to signal errors...
 		return WrapMode_Black;
+}
+
+inline const char* wrapModeToString(EqWrapMode mode)
+{
+	switch(mode)
+	{
+		case WrapMode_Black:
+			return "black";
+		case WrapMode_Periodic:
+			return "periodic";
+		case WrapMode_Clamp:
+			return "clamp";
+		case WrapMode_Trunc:
+			return "trunc";
+		default:
+			assert(0);
+			return "unknown";
+	}
 }
 
 } // namespace Aqsis

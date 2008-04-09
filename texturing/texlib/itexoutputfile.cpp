@@ -32,6 +32,32 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+namespace {
+
+// Helper functions.
+
+/** Open a file with the IqMultiTexOutputFile interface
+ *
+ * \return an open file, or NULL if the file type is invalid.
+ */
+boost::shared_ptr<IqMultiTexOutputFile> openMultiOutputFile(
+		const std::string& fileName, EqImageFileType fileType,
+		const CqTexFileHeader& header)
+{
+	switch(fileType)
+	{
+		case ImageFile_Tiff:
+			return boost::shared_ptr<IqMultiTexOutputFile>(
+					new CqTiffOutputFile(fileName, header));
+		// case ...:  // Add new output formats here!
+		default:
+			return boost::shared_ptr<IqMultiTexOutputFile>();
+	}
+}
+
+}  // unnamed namespace
+
+//------------------------------------------------------------------------------
 // IqTexOutputFile implementation
 boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 		const std::string& fileName, EqImageFileType fileType,
@@ -41,26 +67,32 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	if(header.width() <= 0 || header.height() <= 0)
 	{
 		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-				<< "\": Image width and height cannot be negative or zero.");
+				<< "\" - image width and height cannot be negative or zero.");
 	}
 	if(header.channelList().numChannels() == 0)
 	{
 		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-				<< "\": No data channels present.");
+				<< "\" - no data channels present.");
 	}
 
 	// Create the new file object
-	boost::shared_ptr<IqTexOutputFile> newFile;
+	boost::shared_ptr<IqTexOutputFile> newFile
+		= openMultiOutputFile(fileName, fileType, header);
+	if(newFile)
+		return newFile;
 
 	switch(fileType)
 	{
-		case ImageFile_Tiff:
-			newFile.reset(new CqTiffOutputFile(fileName, header));
-			break;
 		// case ...:  // Add new output formats here!
+		case ImageFile_Exr:
+		case ImageFile_Jpg:
+		case ImageFile_Png:
+			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
+					<< "\" - unimplemented file type \""
+					<< imageFileTypeToString(fileType) << "\"");
 		default:
 			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-					<< "\": Unknown file type \""
+					<< "\" - unknown file type \""
 					<< imageFileTypeToString(fileType) << "\"");
 	}
 
@@ -74,8 +106,18 @@ boost::shared_ptr<IqMultiTexOutputFile> IqMultiTexOutputFile::open(
 		const std::string& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
 {
-	/// \todo Implementation
-	return boost::shared_ptr<IqMultiTexOutputFile>();
+	boost::shared_ptr<IqMultiTexOutputFile> newFile
+		= openMultiOutputFile(fileName, fileType, header);
+	if(newFile)
+	{
+		return newFile;
+	}
+	else
+	{
+		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
+				<< "\" - file type \"" << imageFileTypeToString(fileType) << "\""
+				<< " doesn't support multiple subimages");
+	}
 }
 
 } // namespace Aqsis

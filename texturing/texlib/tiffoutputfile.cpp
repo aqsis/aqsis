@@ -26,6 +26,11 @@
 
 #include "tiffoutputfile.h"
 
+#include <cstring>  // for memcpy.
+
+#include <boost/scoped_array.hpp>
+
+#include "aqsismath.h"
 #include "tiffdirhandle.h"
 
 namespace Aqsis {
@@ -51,14 +56,26 @@ const char* CqTiffOutputFile::fileName() const
 	return m_fileHandle->fileName().c_str();
 }
 
+EqImageFileType CqTiffOutputFile::fileType()
+{
+	return ImageFile_Tiff;
+}
+
+const CqTexFileHeader& CqTiffOutputFile::header() const
+{
+	return m_header;
+}
+
+TqInt CqTiffOutputFile::currentLine() const
+{
+	return m_currentLine;
+}
+
 void CqTiffOutputFile::initialize()
 {
-	CqChannelList& channelList = m_header.channelList();
-	// make all channels are the same type.
-	if(channelList.sharedChannelType() == Channel_TypeUnknown)
+	// make sure all channels are the same type.
+	if(m_header.channelList().sharedChannelType() == Channel_TypeUnknown)
 		AQSIS_THROW(XqInternal, "tiff cannot store multiple pixel types in the same image");
-
-	// Maybe we should check here whether channels need reordering by name...
 
 	// Use lzw compression if the compression hasn't been specified.
 	std::string& compressionStr = m_header.find<Attr::Compression>();
@@ -75,10 +92,21 @@ void CqTiffOutputFile::initialize()
 	dirHandle.writeHeader(m_header);
 }
 
-void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
+void CqTiffOutputFile::newSubImage(TqInt width, TqInt height)
 {
-	if(!buffer.channelList().channelTypesMatch(header().channelList()))
-		AQSIS_THROW(XqInternal, "Buffer and file channels don't match");
+	m_header.set<Attr::Width>(width);
+	m_header.set<Attr::Height>(height);
+
+	m_fileHandle->writeDirectory();
+
+	// Write header data to this directory.
+	/// \todo The header may be trimmed for directories after the first.
+	CqTiffDirHandle dirHandle(m_fileHandle);
+	dirHandle.writeHeader(m_header);
+}
+
+void CqTiffOutputFile::writeScanlinePixels(const CqMixedImageBuffer& buffer)
+{
 	CqTiffDirHandle dirHandle(m_fileHandle);
 	// Simplest possible implementation using scanline TIFF I/O.  Could use
 	// Strip-based IO if performance is ever a problem here.
@@ -87,11 +115,89 @@ void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 	const TqInt endLine = m_currentLine + buffer.height();
 	for(TqInt line = m_currentLine; line < endLine; ++line)
 	{
-		TIFFWriteScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(const_cast<TqUint8*>(rawBuf)),
-				static_cast<uint32>(line));
+		TIFFWriteScanline( dirHandle.tiffPtr(),
+				reinterpret_cast<tdata_t>(const_cast<TqUint8*>(rawBuf)),
+				static_cast<uint32>(line) );
 		rawBuf += rowStride;
 	}
 	m_currentLine = endLine;
+}
+
+
+namespace {
+
+/** Strided memory copy.
+ *
+ * Copies numElems data elements from src to dest.  Each data element (eg,
+ * contiguous group of pixels) has size given by elemSize bytes.  The stride
+ * between one data element and the next is given in bytes.
+ */
+void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcStride,
+		TqInt numElems, TqInt elemSize)
+{
+	for(TqInt i = 0; i < numElems; ++i)
+	{
+		memcpy(dest, src, elemSize);
+		dest += destStride;
+		src += srcStride;
+	}
+}
+
+} // unnamed namespace
+
+
+void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
+{
+	SqTileInfo tileInfo = m_header.find<Attr::TileInfo>();
+	// Check that the buffer has a height that is a multiple of the tile height.
+	if( buffer.height() % tileInfo.height != 0
+		&& m_currentLine + buffer.height() != m_header.height() )
+	{
+		AQSIS_THROW(XqInternal, "pixel buffer with height = " << buffer.height()
+				<< " must be a multiple of requested tile height (= " << tileInfo.height
+				<< ") or run exactly to the full image height (= " << m_header.height()
+				<< ").");
+	}
+
+	CqTiffDirHandle dirHandle(m_fileHandle);
+	const TqUint8* rawBuf = buffer.rawData();
+	const TqInt bytesPerPixel = buffer.channelList().bytesPerPixel();
+	boost::scoped_array<TqUint8> tileBuf(
+			new TqUint8[bytesPerPixel*tileInfo.width*tileInfo.height]);
+	const TqInt rowStride = bytesPerPixel*buffer.width();
+	const TqInt endLine = m_currentLine + buffer.height();
+	const TqInt tileCols = buffer.width()/tileInfo.width;
+	for(TqInt line = m_currentLine; line < endLine; line += tileInfo.height)
+	{
+		// srcBuf will point to the beginning of the memory region which will
+		// become the tile.
+		const TqUint8* srcBuf = rawBuf;
+		for(TqInt tileCol = 0; tileCol < tileCols; ++tileCol)
+		{
+			const TqInt tileRowStride = min(bytesPerPixel*tileInfo.width,
+					rowStride - tileCol*bytesPerPixel*tileInfo.width);
+			// Copy parts of the scanlines into the tile buffer.
+			stridedCopy(tileBuf.get(), tileRowStride, srcBuf, rowStride,
+					tileInfo.height, tileRowStride);
+
+			TIFFWriteTile(dirHandle.tiffPtr(),
+					reinterpret_cast<tdata_t>(const_cast<TqUint8*>(tileBuf.get())),
+					tileCol*tileInfo.width, line, 0, 0);
+			srcBuf += tileRowStride;
+		}
+		rawBuf += rowStride*tileInfo.height;
+	}
+	m_currentLine = endLine;
+}
+
+void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
+{
+	if(!buffer.channelList().channelTypesMatch(m_header.channelList()))
+		AQSIS_THROW(XqInternal, "Buffer and file channels don't match");
+	if(m_header.findPtr<Attr::TileInfo>())
+		writeTiledPixels(buffer);
+	else
+		writeScanlinePixels(buffer);
 }
 
 } // namespace Aqsis

@@ -163,10 +163,17 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 		AQSIS_THROW(XqInternal, "Cannot put pixels from buffer into file \""
 				<< fileName() << "\": buffer has incorrect width.");
 	}
-	CqMixedImageBuffer newBuf(buffer.channelList(),
-			boost::shared_array<TqUint8>(const_cast<TqUint8*>(buffer.rawData()),
-				nullDeleter), buffer.width(), numScanlines);
-	writePixelsImpl(newBuf);
+	if(numScanlines > 0)
+	{
+		CqMixedImageBuffer newBuf(buffer.channelList(),
+				boost::shared_array<TqUint8>(const_cast<TqUint8*>(buffer.rawData()),
+					nullDeleter), buffer.width(), numScanlines);
+		writePixelsImpl(newBuf);
+	}
+	else
+	{
+		AQSIS_THROW(XqInternal, "Attempt to write buffer off the end of an image");
+	}
 }
 
 } // namespace Aqsis

@@ -80,11 +80,11 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 		/** \brief Construct a tiff directory handle from a tiff file handle
 		 *
 		 * \param fileHandle - handle to the underlying tiff file
-		 * \param dirIdx - directory index.  If negative, use the current
-		 *                 subimage directory.
+		 * \param dirIdx - directory index which this handle will point to.
+		 *                 Only relevant if the underlying file is open for input.
 		 */
 		CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle,
-				const TqInt dirIdx = 0);
+				const tdir_t = 0);
 
 		/// Obtain the underlying tiff file pointer
 		TIFF* tiffPtr() const;
@@ -253,6 +253,14 @@ class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 
 		/// Return the file name
 		inline const std::string& fileName() const;
+
+		/** \brief Write the current directoy to file, and increment the
+		 * directory index.
+		 *
+		 * The tiff file must be open for output - calling this function for an
+		 * input file is an error.
+		 */
+		void writeDirectory();
 
 	private:
 		friend class CqTiffDirHandle;

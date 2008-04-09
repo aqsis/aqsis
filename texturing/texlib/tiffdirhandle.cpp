@@ -84,11 +84,10 @@ const char* tiffCompressionNameFromTag(uint16 compressionType)
 // CqTiffDirHandle
 //------------------------------------------------------------------------------
 
-CqTiffDirHandle::CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle, const TqInt dirIdx)
+CqTiffDirHandle::CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle, const tdir_t dirIdx)
 	: m_fileHandle(fileHandle)
 {
-	if(dirIdx > 0)
-		fileHandle->setDirectory(dirIdx);
+	fileHandle->setDirectory(dirIdx);
 }
 
 tdir_t CqTiffDirHandle::dirIndex() const
@@ -250,6 +249,7 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	addAttributeToTiff<Attr::HostName,const char*>(TIFFTAG_HOSTCOMPUTER, header, *this);
 	addAttributeToTiff<Attr::Description,const char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
 	addAttributeToTiff<Attr::DateTime,const char*>(TIFFTAG_DATETIME, header, *this);
+	addAttributeToTiff<Attr::TextureFormat,const char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
 
 	// Add some matrix attributes
 	addAttributeToTiff<Attr::WorldToScreenMatrix,const float*>(
@@ -258,10 +258,28 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
 
 	/** \todo Add the following optional attributes:
-	 *  - "textureFormat" TIFFTAG_PIXAR_TEXTUREFORMAT,
-	 *  - "textureWrapMode" TIFFTAG_PIXAR_WRAPMODES,
-	 *  - "fieldOfViewCotan" TIFFTAG_PIXAR_FOVCOT,
+	 *  - "FieldOfViewCotan" TIFFTAG_PIXAR_FOVCOT,
 	 */
+
+	// Set texture wrap mode string
+	const SqWrapModes* wrapModes = header.findPtr<Attr::WrapModes>();
+	if(wrapModes)
+	{
+		std::ostringstream oss;
+		oss << wrapModeToString(wrapModes->sWrap)
+			<< " " << wrapModeToString(wrapModes->tWrap);
+		setTiffTagValue<const char*>(TIFFTAG_PIXAR_WRAPMODES, oss.str().c_str());
+	}
+
+	// Set tile dimensions if present.
+	const SqTileInfo* tileInfo = header.findPtr<Attr::TileInfo>();
+	if(tileInfo)
+	{
+		setTiffTagValue<uint32>(TIFFTAG_TILEWIDTH, tileInfo->width);
+		setTiffTagValue<uint32>(TIFFTAG_TILELENGTH, tileInfo->height);
+	}
+
+	// Set size of display window if present
 	const SqImageRegion* displayWindow = header.findPtr<Attr::DisplayWindow>();
 	if(displayWindow)
 	{
@@ -572,6 +590,15 @@ CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
 	{
 		AQSIS_THROW(XqInternal, "Could not use output stream for tiff");
 	}
+}
+
+
+void CqTiffFileHandle::writeDirectory()
+{
+	assert(!m_isInputFile);
+	if(!TIFFWriteDirectory(m_tiffPtr.get()))
+		AQSIS_THROW(XqInternal, "Could not write tiff subimage to file");
+	++m_currDir;
 }
 
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)

@@ -38,7 +38,7 @@ class CqTiffFileHandle;
 //------------------------------------------------------------------------------
 /** \brief Scanline-based output for the TIFF file format.
  */
-class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
+class AQSISTEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
 {
 	public:
 		/** \brief Construct a tiff output file with the given file name.
@@ -58,7 +58,13 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 		virtual EqImageFileType fileType();
 		virtual const CqTexFileHeader& header() const;
 		virtual TqInt currentLine() const;
+		virtual void newSubImage(TqInt width, TqInt height);
+
 	private:
+		/// Write pixel buffer to file as scanlines
+		void writeScanlinePixels(const CqMixedImageBuffer& buffer);
+		/// Write pixel buffer to file in tiled format
+		void writeTiledPixels(const CqMixedImageBuffer& buffer);
 		// inherited
 		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer);
 
@@ -73,25 +79,6 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqTexOutputFile
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
 };
 
-
-//==============================================================================
-// Implementation details
-//==============================================================================
-
-inline EqImageFileType CqTiffOutputFile::fileType()
-{
-	return ImageFile_Tiff;
-}
-
-inline const CqTexFileHeader& CqTiffOutputFile::header() const
-{
-	return m_header;
-}
-
-inline TqInt CqTiffOutputFile::currentLine() const
-{
-	return m_currentLine;
-}
 
 } // namespace Aqsis
 

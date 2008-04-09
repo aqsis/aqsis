@@ -234,12 +234,14 @@ const TextureBufferT& CqMipmapLevelCache<TextureBufferT>::level(TqInt levelNum)
 	assert(levelNum >= 0);
 	if(!m_levels[levelNum])
 	{
-		Aqsis::log() << debug << "loaded subtexture " << levelNum
-			<< " from texture " << m_texFile->fileName() << "\n";
 		// read in requested level if it's not loaded yet.
 		m_levels[levelNum].reset(new TextureBufferT());
 		m_texFile->setImageIndex(levelNum);
 		m_texFile->readPixels(*m_levels[levelNum]);
+		Aqsis::log() << debug << "loaded subtexture " << levelNum
+			<< " [" << m_levels[levelNum]->width() << "x"
+			<< m_levels[levelNum]->width() << "] " 
+			<< "from texture " << m_texFile->fileName() << "\n";
 	}
 	return *m_levels[levelNum];
 }
