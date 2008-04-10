@@ -68,7 +68,11 @@ tell application "Finder"
 			do shell script export
 		end if
 		
-		do shell script aqsisPath & "/Contents/MacOS/" & "eqsl"
+		ignoring application responses
+			tell application "Finder"
+				do shell script aqsisPath & "/Contents/MacOS/" & "eqsl"
+			end tell
+		end ignoring
 		
 	else
 		display dialog "Aqsis could not be found. Please contact the Aqsis team."
