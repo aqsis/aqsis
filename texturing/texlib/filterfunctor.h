@@ -34,33 +34,42 @@
 namespace Aqsis
 {
 
-/** \class FilterFunctorConcept
- * \brief Concept representing a filter function object.
+//------------------------------------------------------------------------------
+/** \brief Interface representing a filter function object.
  *
  * The renderman API defines a type "RtFilterFunc" which is used for filtering
  * images during downsampling, as well as geometry antialiasing etc.  These
  * functions can have several attributes such as separability which cannot be
- * stored together with the function pointer.  The FilterFunctorConcept ties
- * all such attributes together, as well as allowing caching of precomputed
- * data to make evaluations of the filter more efficient.
+ * stored together with the function pointer.  The IqFilterFunctor interface
+ * ties all such attributes together, as well as allowing caching of
+ * precomputed data to make evaluations of the filter more efficient.
  *
  * Filter functors are assumed to have their support centred on the origin.
- *
- * A class implementing the FilterFunctorConcept must provide the following
- * methods:
- *
- * \code
- *
- * // Determine whether the filter is seperable or not.  To be seperable means
- * // that the filter function, f(x,y) can be written as the product of two
- * // other functions:  f(x,y) = h(x)*g(y) for some functions h() and g().
- * inline bool isSeparable();
- *
- * // Return the filter amplitude at the point (x,y).
- * inline TqFloat operator()(TqFloat x, TqFloat y) const;
- *
- * \endcode
  */
+class IqFilterFunctor
+{
+	public:
+		virtual ~IqFilterFunctor() {};
+
+		/** \brief Determine whether the filter is separable or not.
+		 *
+		 * To be separable means that the filter function, f(x,y) can be
+		 * written as the product of two other functions:  f(x,y) = h(x)*g(y)
+		 * for some functions h() and g().  Convolution of an image with a
+		 * 2D separable filters is equivilant to two successive 1D
+		 * convolutions - a worthwhile optimization for large filter widths.
+		 */
+		virtual bool isSeparable() { return false; }
+
+		/** \brief Evaluate the filter amplitude at the point (x,y)
+		 *
+		 * \param x
+		 * \param y - (x,y) is the point to evaluate the filter amplitude at.
+		 *
+		 * \return 
+		 */
+		virtual TqFloat operator()(TqFloat x, TqFloat y) const = 0;
+};
 
 //------------------------------------------------------------------------------
 /** \brief A filter functor to encapsulate traditional RI filter functions
@@ -70,7 +79,7 @@ namespace Aqsis
  * "RtFilterFunc" function pointer inside an interface conforming to the
  * FilterFunctorConcept.
  */
-class CqFunctionFilter
+class CqFunctionFilter : public IqFilterFunctor
 {
 	public:
 		/** \brief Wrap a filter function in a functor
@@ -80,12 +89,12 @@ class CqFunctionFilter
 		 * \param height - height of filter support
 		 * \param separable - use true if the filter is separable in x and y.
 		 */
-		inline CqFunctionFilter(TqFloat (*func)(TqFloat, TqFloat, TqFloat, TqFloat),
+		CqFunctionFilter(TqFloat (*func)(TqFloat, TqFloat, TqFloat, TqFloat),
 				TqFloat width, TqFloat height, bool separable = false);
 
-		inline bool isSeparable();
+		virtual bool isSeparable();
 
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
+		virtual TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
 		TqFloat (*m_func)(TqFloat, TqFloat, TqFloat, TqFloat);
 		TqFloat m_width;
@@ -94,26 +103,17 @@ class CqFunctionFilter
 };
 
 //------------------------------------------------------------------------------
-/** \brief A sinc filter functional.
- *
- * The width/height of this filter determine only the behaviour of the
- * windowing function (which is chosen to be the centeral lobe of a cosine).
- *
- * The wavelength of oscillations for the sinc function is taken to be 2.0
- * (meaning that the distance between consecutive zeros of the function is
- * 1.0).  This choice of frequency has the consequence that for large width and
- * height the filter represents an ideal lowpass filter, which keeps only
- * frequencies representable on a regular grid with spacing 1.
+/** \brief A box filter.
  */
-class CqBoxFilter
+class CqBoxFilter : public IqFilterFunctor
 {
 	public:
-		inline CqBoxFilter(TqFloat width, TqFloat height);
+		CqBoxFilter(TqFloat width, TqFloat height);
 
 		/// Box filters are separable
-		inline static bool isSeparable() { return true; }
+		virtual static bool isSeparable() { return true; }
 
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
+		virtual TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
 		TqFloat m_widthOn2;
 		TqFloat m_heightOn2;
@@ -131,15 +131,15 @@ class CqBoxFilter
  * height the filter represents an ideal lowpass filter, which keeps only
  * frequencies representable on a regular grid with spacing 1.
  */
-class CqSincFilter
+class CqSincFilter : public IqFilterFunctor
 {
 	public:
-		inline CqSincFilter(TqFloat width, TqFloat height);
+		CqSincFilter(TqFloat width, TqFloat height);
 
 		/// Sinc is a separable filter.
-		inline static bool isSeparable() { return true; }
+		virtual static bool isSeparable() { return true; }
 
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
+		virtual TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
 		inline TqFloat windowedSinc(TqFloat x, TqFloat invWidthOn2) const;
 		TqFloat m_invWidthOn2;
@@ -153,16 +153,16 @@ class CqSincFilter
  * height.  This is the same as given in renderman specification, though it
  * seems very small.
  */
-class CqGaussianFilter
+class CqGaussianFilter : public IqFilterFunctor
 {
 	public:
 		/// Construct a gaussian filter with the given width and height.
-		inline CqGaussianFilter(TqFloat width, TqFloat height);
+		CqGaussianFilter(TqFloat width, TqFloat height);
 
 		/// Gaussians are separable filters.
-		inline static bool isSeparable() { return true; }
+		virtual static bool isSeparable() { return true; }
 
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
+		virtual TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
 		TqFloat m_invWidth;
 		TqFloat m_invHeight;

@@ -137,7 +137,7 @@ void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcS
 {
 	for(TqInt i = 0; i < numElems; ++i)
 	{
-		memcpy(dest, src, elemSize);
+		std::memcpy(dest, src, elemSize);
 		dest += destStride;
 		src += srcStride;
 	}
