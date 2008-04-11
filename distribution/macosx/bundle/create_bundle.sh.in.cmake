@@ -116,6 +116,8 @@ DEV=`mount | grep "Volumes/$APPLICATION_NAME" | cut -f1 -d" "`
 
 ditto -rsrc $BUNDLE "/Volumes/$APPLICATION_NAME/$BUNDLE_NAME" #2>/dev/null >/dev/null
 ditto -rsrc "$CONTENTDIR" "/Volumes/$APPLICATION_NAME/Examples" #2>/dev/null >/dev/null
+ditto -rsrc "${CMAKE_SOURCE_DIR}"/AUTHORS "/Volumes/$APPLICATION_NAME/CREDIT" #2>/dev/null >/dev/null
+ditto -rsrc "${CMAKE_SOURCE_DIR}"/COPYING "/Volumes/$APPLICATION_NAME/LICENSE" #2>/dev/null >/dev/null
 ditto -rsrc "${CMAKE_SOURCE_DIR}"/README "/Volumes/$APPLICATION_NAME/README" #2>/dev/null >/dev/null
 
 hdiutil detach "$DEV" 2>/dev/null >/dev/null

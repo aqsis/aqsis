@@ -48,23 +48,23 @@ tell application "Finder"
 		end tell
 		
 		(*export $AQSISHOME path*)
-		set search to do shell script "/usr/bin/sed -n 's/^export AQSISHOME=.* # added by Aqsis$/&/p'  " & profile
+		set search to do shell script "/usr/bin/sed -n 's/^export AQSISHOME=.* # Entry managed by Aqsis Renderer$/&/p'  " & profile
 		if search is "" then
-			set export to "/bin/echo 'export AQSISHOME=" & aqsisPath & " # added by Aqsis' >> " & profile
+			set export to "/bin/echo 'export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer' >> " & profile
 			do shell script export
 		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export AQSISHOME=" & aqsisPath & " # added by Aqsis%' " & profile
+			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer%' " & profile
 			do shell script export
 		end if
 		
 		(*export $PATH*)
 		set systemPath to "$AQSISHOME/Contents/MacOS:$PATH"
-		set search to do shell script "/usr/bin/sed -n 's/^export PATH=.* # added by Aqsis$/&/p'  " & profile
+		set search to do shell script "/usr/bin/sed -n 's/^export PATH=.* # Entry managed by Aqsis Renderer$/&/p'  " & profile
 		if search is "" then
-			set export to "/bin/echo 'export PATH=" & systemPath & " # added by Aqsis' >> " & profile
+			set export to "/bin/echo 'export PATH=" & systemPath & " # Entry managed by Aqsis Renderer' >> " & profile
 			do shell script export
 		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export PATH=" & systemPath & " # added by Aqsis%' " & profile
+			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export PATH=" & systemPath & " # Entry managed by Aqsis Renderer%' " & profile
 			do shell script export
 		end if
 		
@@ -75,7 +75,7 @@ tell application "Finder"
 		end ignoring
 		
 	else
-		display dialog "Aqsis could not be found. Please contact the Aqsis team."
+		display dialog "Aqsis Renderer could not be found. Please visit our website for further assistance or to report this issue.\n\n http://www.aqsis.org"
 		quit me
 	end if
 end tell

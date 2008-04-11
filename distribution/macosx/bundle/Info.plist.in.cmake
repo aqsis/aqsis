@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>applet</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aqsis.Aqsis</string>
+	<string>org.aqsis.Aqsis</string>
 	<key>CFBundleIconFile</key>
 	<string>Aqsis</string>	
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -22,18 +22,13 @@
 	<string>aplt</string>
 	<key>CFBundleVersion</key>
 	<string>${REVISION}${TYPE}</string>
-	<key>LSEnvironment</key>
-	<dict>
-		<key>AQSISHOME</key>
-		<string>Aqsis.app</string>
-		<key>PATH</key>
-		<string>$AQSISHOME/Contents/MacOS:$PATH</string>
-	</dict>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
 	<key>LSRequiresNativeExecution</key>
 	<string>YES</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.</string>
 </dict>
 </plist>
