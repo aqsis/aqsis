@@ -34,18 +34,19 @@ namespace Aqsis
 
 //------------------------------------------------------------------------------
 // Implementation for CqIntWrapper
-//------------------------------------------------------------------------------
 CqIntWrapper::CqIntWrapper()
 	: m_data(new TqInt(-1))
 { }
 
-//------------------------------------------------------------------------------
 void CqIntWrapper::setData(TqInt data)
 {
 	// As documented in the interface, this class only holds values >= minValue
 	// Use exceptions to indicate failure conditions.
 	if (data < minValue)
-		throw XqException("data too small.", __FILE__, __LINE__);
+	{
+		AQSIS_THROW(XqException, "requested data = " << data
+				<< "smaller than minimum value = " << minValue);
+	}
 	// If runtime performance is critical (for example, in an inline function),
 	// consider using assert().  Assert signifies not only that an error
 	// condition shouldn't happen, but that we don't want to even attempt to
@@ -73,29 +74,10 @@ void CqIntWrapper::setData(TqInt data)
 
 		for(TqInt i = 0; i < maxInsults; ++i)
 			std::cout << "You idiot! You're overriding the answer.\n";
-
-		// Portability warning: "i" still defined in this scope under VC++6; see
-		// http://www.boost.org/more/microsoft_vcpp.html
-
-		// The recommended workaround if you want to declare i in another loop
-		// is to explicitly introduce an extra scope by wrapping the for loop
-		// in a { } block.
-		{
-			for(TqInt i = 0; i < maxInsults; ++i)
-				std::cout << "You idiot! You're overriding the answer.\n";
-		}
 	}
 	*m_data = data;
 }
 
-//------------------------------------------------------------------------------
-CqIntWrapper::~CqIntWrapper()
-{
-	// We don't have to do anything here, because the smart pointer will handle
-	// the correct freeing of the memory used by m_data.
-}
-
-//------------------------------------------------------------------------------
 std::string CqIntWrapper::inaneComment() const
 {
 	// Try not to use "magic numbers".  Define named constants if necessary.
