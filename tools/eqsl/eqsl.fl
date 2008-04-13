@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0108 
+version 1.0107 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -29,6 +29,10 @@ comment {// Aqsis
 //} {in_source in_header
 } 
 
+decl {\#include "aqsis.h"} {} 
+
+decl {\#include "execute.h"} {} 
+
 decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
@@ -40,7 +44,7 @@ decl {\#include <cstdlib>} {public
 decl {\#include <string>} {public
 } 
 
-declblock {\#ifndef __WINDOWS__} {open after {\#endif}
+declblock {\#ifndef AQSIS_SYSTEM_WIN32} {open after {\#endif}
 } {
   decl {\#include <signal.h>} {}
   decl {\#include <sys/wait.h>} {}
@@ -88,7 +92,7 @@ Function {} {open
 \#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {458 795 400 300} type Double resizable visible
+    xywh {458 660 400 300} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -133,9 +137,27 @@ else
 }
 
 // Call relevant commandline
-\#ifdef __WINDOWS__
+\#ifdef AQSIS_SYSTEM_WIN32
+	char acPath[256];
+	char root[256];
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
+	program.append(renderEngine);
+	std::vector<std::string> args;
+	args.push_back(renderEngineArg);
+	args.push_back(renderEngineFile);
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
 	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
-	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, currentDirectory.c_str(), &si, &pi);
 \#else
 	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 //	system(commandLine.c_str());
@@ -192,7 +214,6 @@ else
 	} 
 \#endif
 
-boost::thread(CqRedirectHandler(fd_in[0], pid));
 
 
 // Log commandline event
@@ -273,7 +294,7 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Tabs m_tabs {open selected
+    Fl_Tabs m_tabs {open
       xywh {0 25 400 275} resizable
       code0 {o->resizable(m_outputConsole);}
     } {
@@ -298,26 +319,10 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
   }
 } 
 
-class CqRedirectHandler {open
+Function {callback(const char* string)} {open return_type void
 } {
-  Function {CqRedirectHandler(int fd_in, pid_t pid)} {open
-  } {
-    code {this->fd_in = fd_in;
-this->pid = pid;} {}
-  }
-  Function {operator()()} {open return_type void
-  } {
-    code {char input[101];
-
-while(!waitpid(pid,0,WNOHANG))
-{
-	input[read(fd_in,input, 100)] = 0;
-	if(strlen(input) > 0)
-		m_outputConsole->add(input);
-}} {}
-  }
-  decl {int fd_in;} {global
-  }
-  decl {pid_t pid;} {global
+  code {Fl::lock();
+m_outputConsole->add(string);
+Fl::unlock();} {selected
   }
 } 
