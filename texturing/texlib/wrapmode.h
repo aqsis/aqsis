@@ -44,6 +44,15 @@ enum EqWrapMode
 	WrapMode_Trunc		///< Truncate the support (ignores weights)
 };
 
+/// A pair of wrap modes to specify wrapping in the two texture coordinate directions.
+struct SqWrapModes
+{
+	EqWrapMode sWrap;
+	EqWrapMode tWrap;
+	/// Trivial constructor
+	SqWrapModes(EqWrapMode sWrap = WrapMode_Black, EqWrapMode tWrap = WrapMode_Black);
+};
+
 /** \brief Get a wrap mode code from a string.
  *
  * If the mode string represents an unknown wrap mode, return WrapMode_Black.
@@ -57,6 +66,12 @@ const char* wrapModeToString(EqWrapMode mode);
 //==============================================================================
 // Implementation details
 //==============================================================================
+
+inline SqWrapModes::SqWrapModes(EqWrapMode sWrap, EqWrapMode tWrap)
+	: sWrap(sWrap),
+	tWrap(tWrap)
+{ }
+
 
 inline EqWrapMode wrapModeFromString(const std::string& modeString)
 {

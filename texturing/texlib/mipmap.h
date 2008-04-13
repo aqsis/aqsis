@@ -35,84 +35,93 @@
 #include "cachedfilter.h"
 #include "sampleaccum.h"
 #include "texbufsampler.h"
+#include "texturebuffer.h"
 #include "wrapmode.h"
-
-#include "logging.h" /// \todo debug: remove later
 
 namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
+/** \brief Create a mipmap from the given texture buffer
+ *
+ * To create each downsampled image level in the mipmap, mipmapDownsample() is
+ * called on the previous level to reduce the size by a factor of 2.  The
+ * process terminates when the final level has dimensions 1x1.
+ *
+ * BufferDestT is a type which must have a single function, accept() which
+ * accepts arrays of type ArrayT:
+ * \code
+ *   void accept(const ArrayT& buf)
+ * \endcode
+ * dest.accept() is called as each downsampled image is generated.
+ *
+ * \param srcBuf - input texture buffer.
+ * \param dest - destination for downsampled images.
+ * \param filterInfo - information about which filter type and size to use
+ * \param wrapModes - specifies how the texture will be wrapped at the edges.
+ */
+template<typename ArrayT, typename BufferDestT>
+void createMipmap(ArrayT& srcBuf, BufferDestT& dest,
+		const SqFilterInfo& filterInfo, const SqWrapModes wrapModes);
+
 /** \brief Downsample an image to the next smaller mipmap size.
  *
  * The size of the new image is ceil(width/2) x ceil(height/2).  This is one
  * possible choice, the other being to take the floor.  Neither of these is
  * obviously preferable; the essential problem is that non-power of two
  * textures aren't perfect for mipmapping, though they do a fairly good job.
+ * In particular, it's not easy to efficiently and accurately use non power of
+ * two textures with periodic wrapping.
  *
- * \param
- * \todo Documentation when this interface is finalized.
+ * \param srcBuf - input texture buffer.
+ * \param filterInfo - information about which filter type and size to use
+ * \param wrapModes - specifies how the texture will be wrapped at the edges.
  */
-template<typename FilterFunctorT, typename ChannelT>
-boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(
-		const CqTextureBuffer<ChannelT>& inputBuf,
-		TqFloat sWidth, TqFloat tWidth,
-		EqWrapMode sWrapMode, EqWrapMode tWrapMode);
-
-template<typename ChannelT>
-boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
-		const CqTextureBuffer<ChannelT>& srcBuf,
-		CqCachedFilter& filterWeights,
-		EqWrapMode sWrapMode, EqWrapMode tWrapMode);
-
-//template<typename FilterFunctorT, typename ChannelT>
-//boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleSeperable(
-//		const CqTextureBuffer<ChannelT>& srcBuf,
-//		const std::vector<TqFloat>& filterWeights,
-//		EqWrapMode sWrapMode, EqWrapMode tWrapMode);
-
+template<typename ArrayT>
+boost::shared_ptr<ArrayT> mipmapDownsample(const ArrayT& srcBuf,
+		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes);
 
 
 //==============================================================================
 // Implementation details
-
-template<typename FilterFunctorT, typename ChannelT>
-boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(
-		const CqTextureBuffer<ChannelT>& srcBuf,
-		TqFloat sWidth, TqFloat tWidth,
-		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
+//==============================================================================
+template<typename ArrayT, typename BufferDestT>
+void createMipmap(ArrayT& srcBuf, BufferDestT& dest,
+		const SqFilterInfo& filterInfo, const SqWrapModes wrapModes)
 {
-	// Amount to scale the image by.  Fixed at a factor of 2 for now.
-	TqFloat mipmapRatio = 2;
-	TqFloat scale = 1.0f/mipmapRatio;
+	boost::shared_ptr<ArrayT> buf(&srcBuf, nullDeleter);
 
-	/// \todo Optimize for seperable filters.  This should also give some idea
-	/// about how to optimize the analogous filtering operations in the core renderer.
-	//
-	// if(FilterFunctorT::isSeperable) ...
-
-	// General case: Non-seperable filter.
-	CqCachedFilter weights(FilterFunctorT(sWidth*scale, tWidth*scale),
-			sWidth, tWidth, srcBuf.width() % 2 != 0, srcBuf.height() % 2 != 0,
-			scale);
-	return mipmapDownsampleNonseperable(srcBuf, mipmapRatio, weights,
-			sWrapMode, tWrapMode);
+	dest.accept(*buf);
+	while(buf->width() > 1 || buf->height() > 1)
+	{
+		buf = mipmapDownsample(*buf, filterInfo, wrapModes);
+		dest.accept(*buf);
+	}
 }
 
-template<typename ChannelT>
-boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
-		const CqTextureBuffer<ChannelT>& srcBuf,
-		TqInt mipmapRatio,
-		CqCachedFilter& filterWeights,
-		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
+namespace detail {
+
+/** \brief Downsample a buffer for mipmapping via a nonseperable convolution.
+ *
+ * Nonseperable convolution is the most general way of forming a weighted
+ * average during filtering.  A seperable convolution should be faster, but is
+ * more complicated to implement.
+ *
+ * \param srcBuf - input texture buffer.
+ * \param mipmapRatio - scale factor for the new file (0.5 for normal mipmapping)
+ * \param filterWeights - precomputed kernel of filter weights
+ * \param wrapModes - specify how the texture will be wrapped at the edges.
+ */
+template<typename ArrayT>
+boost::shared_ptr<ArrayT> mipmapDownsampleNonseperable(
+		const ArrayT& srcBuf, TqInt mipmapRatio,
+		CqCachedFilter& filterWeights, const SqWrapModes& wrapModes)
 {
-	Aqsis::log() << filterWeights;
 	TqInt newWidth = lceil(TqFloat(srcBuf.width())/mipmapRatio);
 	TqInt newHeight = lceil(TqFloat(srcBuf.height())/mipmapRatio);
 	TqInt numChannels = srcBuf.numChannels();
-	CqTexBufSampler<ChannelT> srcBufSampler(srcBuf);
-	boost::shared_ptr<CqTextureBuffer<ChannelT> > destBuf(
-			new CqTextureBuffer<ChannelT>(newWidth, newHeight, numChannels) );
+	CqTexBufSampler<ArrayT> srcBufSampler(srcBuf);
+	boost::shared_ptr<ArrayT> destBuf(new ArrayT(newWidth, newHeight, numChannels));
 	TqInt filterOffsetX = (filterWeights.width()-1) / 2;
 	TqInt filterOffsetY = (filterWeights.height()-1) / 2;
 	std::vector<TqFloat> accumBuf(numChannels);
@@ -125,11 +134,35 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 			// in the destination buffer.
 			filterWeights.setSupportTopLeft(2*x-filterOffsetX, 2*y-filterOffsetY);
 			CqSampleAccum<CqCachedFilter> accumulator(filterWeights, 0, numChannels, &accumBuf[0]);
-			srcBufSampler.applyFilter(accumulator, filterWeights.support(), sWrapMode, tWrapMode);
+			srcBufSampler.applyFilter(accumulator, filterWeights.support(),
+					wrapModes.sWrap, wrapModes.tWrap );
 			destBuf->setPixel(x, y, &accumBuf[0]);
 		}
 	}
 	return destBuf;
+}
+
+} // namespace detail
+
+
+template<typename ArrayT>
+boost::shared_ptr<ArrayT> mipmapDownsample(const ArrayT& srcBuf,
+		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes)
+{
+	// Amount to scale the image by.  Fixed at a factor of 2 for now.
+	TqInt mipmapRatio = 2;
+	TqFloat scale = 1.0f/mipmapRatio;
+
+	/// \todo Optimize for seperable filters.  This should also give some idea
+	/// about how to optimize the analogous filtering operations in the core renderer.
+	//
+	// if(FilterFunctorT::isSeperable()) ...
+
+	// General case: Non-seperable filter.
+
+	CqCachedFilter weights(filterInfo, srcBuf.width() % 2 != 0,
+			srcBuf.height() % 2 != 0, scale);
+	return detail::mipmapDownsampleNonseperable(srcBuf, mipmapRatio, weights, wrapModes);
 }
 
 } // namespace Aqsis

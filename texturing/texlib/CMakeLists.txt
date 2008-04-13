@@ -13,6 +13,7 @@ INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 
 # Source files
 SET(AQSISTEX_SRCS
+	bake.cpp
 	channelinfo.cpp
 	channellist.cpp
 	dummytexturesampler.cpp
@@ -23,6 +24,7 @@ SET(AQSISTEX_SRCS
 	itexoutputfile.cpp
 	itexturesampler.cpp
 	magicnumber.cpp
+	maketexture.cpp
 	samplequad.cpp
 	shadowsampler.cpp
 	stochasticsuppiter.cpp
@@ -37,6 +39,7 @@ SET(AQSISTEX_SRCS
 	)
 # Header files
 SET(AQSISTEX_HDRS
+	bake.h
 	channelinfo.h
 	channellist.h
 	cachedfilter.h
@@ -45,7 +48,6 @@ SET(AQSISTEX_HDRS
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
-	filterfunctor.h
 	imagechannel.h
 	imagefiletype.h
 	ishadowsampler.h
@@ -56,6 +58,7 @@ SET(AQSISTEX_HDRS
 	itiledtexinputfile.h
 	mipmaplevelcache.h
 	magicnumber.h
+	maketexture.h
 	mipmap.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
@@ -125,8 +128,3 @@ SET(AQSISTEX_TEST_SRCS
 SET(TEST_LINKLIBS  aqsistex dl ${LINKLIBS})
 
 AQSIS_ADD_TESTS("${AQSISTEX_TEST_SRCS}" "${TEST_LINKLIBS}")
-
-#ADD_EXECUTABLE(mipmap mipmap_test.cpp)
-#TARGET_LINK_LIBRARIES(mipmap aqsistex dl ${LINKLIBS})
-#INSTALL(TARGETS mipmap RUNTIME DESTINATION ${BINDIR})
-#SET_TARGET_PROPERTIES(mipmap PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${RENDERENGINEDIR}")

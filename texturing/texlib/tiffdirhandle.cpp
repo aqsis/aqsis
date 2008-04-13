@@ -130,14 +130,30 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 	// Channel-related stuff
 	writeChannelAttrs(header);
 
-	// Write strip size - AFAICT libtiff uses the values of some other fields
-	// (compression) to choose a default, so do this last.
-	setTiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiffPtr(), 0));
+	const SqTileInfo* tileInfo = header.findPtr<Attr::TileInfo>();
+	if(tileInfo)
+	{
+		// Set tile dimensions if present.
+		setTiffTagValue<uint32>(TIFFTAG_TILEWIDTH, tileInfo->width);
+		setTiffTagValue<uint32>(TIFFTAG_TILELENGTH, tileInfo->height);
+	}
+	else
+	{
+		// Else write strip size - AFAICT libtiff uses the values of some other
+		// fields (compression) to choose a default, so do this last.
+		setTiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiffPtr(), 0));
+	}
 }
 
 void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 {
 	uint16 compression = tiffCompressionTagFromName( header.find<Attr::Compression>());
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << warning << "No TIFF codec found for compression scheme \""
+			<< header.find<Attr::Compression>() << "\"\n";
+		return;
+	}
 	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
 	if(compression != COMPRESSION_NONE
 			&& header.channelList().sharedChannelType() != Channel_Float32)
@@ -269,14 +285,6 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 		oss << wrapModeToString(wrapModes->sWrap)
 			<< " " << wrapModeToString(wrapModes->tWrap);
 		setTiffTagValue<const char*>(TIFFTAG_PIXAR_WRAPMODES, oss.str().c_str());
-	}
-
-	// Set tile dimensions if present.
-	const SqTileInfo* tileInfo = header.findPtr<Attr::TileInfo>();
-	if(tileInfo)
-	{
-		setTiffTagValue<uint32>(TIFFTAG_TILEWIDTH, tileInfo->width);
-		setTiffTagValue<uint32>(TIFFTAG_TILELENGTH, tileInfo->height);
 	}
 
 	// Set size of display window if present

@@ -53,14 +53,6 @@ struct SqImageRegion
 };
 
 //------------------------------------------------------------------------------
-/// A pair of wrap modes to specify wrapping in the two texture coordinate directions.
-struct SqWrapModes
-{
-	EqWrapMode sWrap;
-	EqWrapMode tWrap;
-};
-
-//------------------------------------------------------------------------------
 /// Hold information about texture tiles (width, height, ...)
 struct SqTileInfo
 {

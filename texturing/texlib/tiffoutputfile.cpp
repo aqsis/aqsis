@@ -98,6 +98,7 @@ void CqTiffOutputFile::newSubImage(TqInt width, TqInt height)
 	m_header.set<Attr::Height>(height);
 
 	m_fileHandle->writeDirectory();
+	m_currentLine = 0;
 
 	// Write header data to this directory.
 	/// \todo The header may be trimmed for directories after the first.
@@ -165,20 +166,22 @@ void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
 	boost::scoped_array<TqUint8> tileBuf(
 			new TqUint8[bytesPerPixel*tileInfo.width*tileInfo.height]);
 	const TqInt rowStride = bytesPerPixel*buffer.width();
+	const TqInt tileRowStride = bytesPerPixel*tileInfo.width;
 	const TqInt endLine = m_currentLine + buffer.height();
-	const TqInt tileCols = buffer.width()/tileInfo.width;
+	const TqInt numTileCols = (buffer.width()-1)/tileInfo.width + 1;
 	for(TqInt line = m_currentLine; line < endLine; line += tileInfo.height)
 	{
 		// srcBuf will point to the beginning of the memory region which will
 		// become the tile.
 		const TqUint8* srcBuf = rawBuf;
-		for(TqInt tileCol = 0; tileCol < tileCols; ++tileCol)
+		for(TqInt tileCol = 0; tileCol < numTileCols; ++tileCol)
 		{
-			const TqInt tileRowStride = min(bytesPerPixel*tileInfo.width,
-					rowStride - tileCol*bytesPerPixel*tileInfo.width);
+			const TqInt tileDataLen = min(tileRowStride,
+					rowStride - tileCol*tileRowStride);
+			const TqInt tileDataHeight = min(tileInfo.height, buffer.height() - line);
 			// Copy parts of the scanlines into the tile buffer.
 			stridedCopy(tileBuf.get(), tileRowStride, srcBuf, rowStride,
-					tileInfo.height, tileRowStride);
+					tileDataHeight, tileDataLen);
 
 			TIFFWriteTile(dirHandle.tiffPtr(),
 					reinterpret_cast<tdata_t>(const_cast<TqUint8*>(tileBuf.get())),
