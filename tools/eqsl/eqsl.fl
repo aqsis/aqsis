@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0108 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -137,87 +137,35 @@ else
 }
 
 // Call relevant commandline
-\#ifdef AQSIS_SYSTEM_WIN32
-	char acPath[256];
-	char root[256];
-	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
-	{
-		// guaranteed file name of at least one character after path
-		*( strrchr( acPath, '\\\\' ) ) = '\\0';
-		std::string      stracPath(acPath);
-		_fullpath(root,&stracPath[0],256);
-	}
-	std::string program = root;
-	program.append("\\\\");
-	program.append(renderEngine);
-	std::vector<std::string> args;
-	args.push_back(renderEngineArg);
-	args.push_back(renderEngineFile);
-	Aqsis::CqExecute tool(program, args, currentDirectory);
-	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
-	tool.setStdOutCallback(outputStdOut);
-	boost::thread thread(tool);
-	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+char acPath[256];
+char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+{
+	// guaranteed file name of at least one character after path
+	*( strrchr( acPath, '\\\\' ) ) = '\\0';
+	std::string      stracPath(acPath);
+	_fullpath(root,&stracPath[0],256);
+}
+std::string program = root;
+program.append("\\\\");
 \#else
-	commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
-//	system(commandLine.c_str());
-	int fd_out[2];
-	int fd_in[2];
-	FILE* out;
-	FILE* in;
-	if(pipe(fd_in) || pipe(fd_out))
-	{
-		/// \\todo: Should except here.
-		return;	// Failure to open pipes for communication with child process.
-	}
-	pid_t pid = fork();
-	if (pid >= 0)
-	{
-		if (pid == 0)
-		{
-			// Child process
-			// Fix up the filehandles
-			close(fd_out[1]);
-			close(fd_in[0]);
-			close(STDIN_FILENO);
-			if(dup( fd_out[0] ) < 0)
-			{
-				/// \\todo: Should except here.
-				return;
-			}
-			close(STDOUT_FILENO);
-			if(dup( fd_in[1] ) < 0)
-			{
-				/// \\todo: Should except here.
-				return;
-			}
-			chdir(currentDirectory.c_str());
-			const char *argv[4] = {renderEngine.c_str(),renderEngineArg.c_str(),renderEngineFile.c_str(),NULL};
-			signal(SIGHUP, SIG_IGN);
-			execvp(renderEngine.c_str(),const_cast<char* const*>(argv));
-			nice(2);
-		}
-		else
-		{
-			// Main process
-			// Fix up the filehandles
-			close(fd_out[0]);
-			close(fd_in[1]);
-			//out = fdopen(dup(fd_out[1]), "wb");
-			//in = fdopen(dup(fd_in[0]), "rb");
-		}
-	}
-	else
-	{
-		/// \\todo: Should except here.
-		return;	// Failure to fork child process
-	} 
+std::string program;
 \#endif
+program.append(renderEngine);
+std::vector<std::string> args;
+args.push_back(renderEngineArg);
+args.push_back(renderEngineFile);
+Aqsis::CqExecute tool(program, args, currentDirectory);
+Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+tool.setStdOutCallback(outputStdOut);
+boost::thread thread(tool);
+commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
 
 
 
 // Log commandline event
-m_outputHistory->add(commandLine.c_str());}
+m_outputHistory->add(commandLine.c_str());} selected
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'R');}
         }
@@ -323,6 +271,5 @@ Function {callback(const char* string)} {open return_type void
 } {
   code {Fl::lock();
 m_outputConsole->add(string);
-Fl::unlock();} {selected
-  }
+Fl::unlock();} {}
 } 

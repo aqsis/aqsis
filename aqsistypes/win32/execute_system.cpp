@@ -36,15 +36,6 @@
 
 namespace Aqsis {
 
-class CqRiProceduralRunProgram
-{
-	public:
-		HANDLE hChildStdinWrDup;
-		HANDLE hChildStdoutRdDup;
-		bool m_valid;
-};
-
-  HANDLE hChildProcess = NULL;
 //---------------------------------------------------------------------
 /** Default constructor.
  */
