@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 template <class T, TqInt CS=8>
 class /*COMMON_SHARE*/ CqObjectPool
@@ -124,6 +124,6 @@ class /*COMMON_SHARE*/ CqObjectPool
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !MICROPOLYGON_H_INCLUDED

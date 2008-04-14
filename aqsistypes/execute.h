@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqExecute
@@ -62,6 +62,6 @@ private:
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !EXECUTE_H_INCLUDED

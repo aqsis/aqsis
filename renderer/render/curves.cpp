@@ -34,7 +34,7 @@
 #include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 static TqUlong hwidth = CqString::hash("width");
@@ -378,4 +378,4 @@ void CqCurvesGroup::CloneData( CqCurvesGroup* clone ) const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

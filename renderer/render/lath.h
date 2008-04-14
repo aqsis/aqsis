@@ -31,7 +31,7 @@
 #include	"pool.h"
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
@@ -437,6 +437,6 @@ inline void CqLath::Qfv(std::vector<const CqLath*>& Result) const
 	Qfe(Result);
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	LATH_H_LOADED

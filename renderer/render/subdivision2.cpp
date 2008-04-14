@@ -29,7 +29,7 @@
 #include	<fstream>
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
@@ -2322,4 +2322,4 @@ CqSurface* CqSurfaceSubdivisionMesh::Clone() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

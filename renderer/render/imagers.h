@@ -41,7 +41,7 @@
 #include "imagebuffer.h"
 #include "version.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqImagersource
@@ -255,7 +255,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGERS_H_INCLUDED
 #endif

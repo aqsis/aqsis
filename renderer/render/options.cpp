@@ -32,7 +32,7 @@
 #include	"imagers.h"
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -781,4 +781,4 @@ CqColor CqOptions::GetOpacityImager( TqFloat x, TqFloat y )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

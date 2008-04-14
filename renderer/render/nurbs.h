@@ -37,7 +37,7 @@
 #include	"surface.h"
 #include	"trimcurve.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqSurfaceNURBS
@@ -390,6 +390,6 @@ class CqSurfaceNURBS : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !NURBS_H_INCLUDED

@@ -19,7 +19,7 @@
 #include	<boost/shared_ptr.hpp>
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -135,6 +135,6 @@ struct IqShader
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___ishader_Loaded___

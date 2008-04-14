@@ -47,7 +47,7 @@
 #include	"logging.h"
 #include	"stats.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -806,7 +806,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef SURFACE_H_INCLUDED
 #endif

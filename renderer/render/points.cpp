@@ -42,7 +42,7 @@
 #include	"multitimer.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
 CqObjectPool<CqMicroPolygonPoints>	CqMicroPolygonPoints::m_thePool;
@@ -984,7 +984,7 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 
 

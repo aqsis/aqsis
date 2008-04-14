@@ -30,7 +30,7 @@
 #include "aqsis.h"
 #include "ri.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 /// \todo Review: Replace this exception class with one rooted in the XqException heirarchy - it should be a subclass of XqValidationFailure.
 
@@ -61,5 +61,6 @@ class CqError
 		RtVoid manage();
 };
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
+
 #endif

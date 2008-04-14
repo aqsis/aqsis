@@ -34,7 +34,7 @@
 
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 extern void gStats_IncI( TqInt index );
 extern void gStats_DecI( TqInt index );
@@ -336,6 +336,6 @@ class CqStats
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !STATS_H_INCLUDED

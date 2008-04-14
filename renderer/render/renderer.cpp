@@ -45,7 +45,7 @@
 #include	"objectinstance.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 extern IqDDManager* CreateDisplayDriverManager();
 extern IqRaytrace* CreateRaytracer();
@@ -1938,5 +1938,5 @@ void	CqRenderer::SetImage( CqImageBuffer* pImage )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

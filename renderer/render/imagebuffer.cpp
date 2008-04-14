@@ -39,7 +39,7 @@
 #include	"occlusion.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
@@ -1538,7 +1538,7 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 

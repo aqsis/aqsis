@@ -32,7 +32,7 @@
 #include	"shadervm.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 DECLARE_SHADERSTACK_TEMPS
 
@@ -1194,5 +1194,5 @@ void CqShaderVM::SO_pow()
 	FUNC2( type_float, m_pEnv->SO_pow );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

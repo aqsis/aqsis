@@ -49,7 +49,7 @@
 
 #include	"clippingvolume.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqImageBuffer;
 class CqObjectInstance;
@@ -571,7 +571,7 @@ void	QSetRenderContext( CqRenderer* pRenderer );
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef RENDERER_H_INCLUDED
 #endif

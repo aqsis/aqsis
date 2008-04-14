@@ -28,7 +28,7 @@
 #include	"renderer.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -378,4 +378,4 @@ SqTransformation CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -32,7 +32,7 @@
 #include	"imagebuffer.h"
 #include	"lights.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 std::list<CqAttributes*>	Attribute_stack;
@@ -495,6 +495,6 @@ IqLightsource*	CqAttributes::pLight( TqInt index )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

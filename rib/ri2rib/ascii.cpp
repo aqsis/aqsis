@@ -30,7 +30,7 @@
 
 #define OUT (*out)
 
-USING_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 CqASCII::CqASCII(const char *name, const int fdesc,
 			const SqOptions::EqCompression comp,
@@ -178,3 +178,6 @@ void CqASCII::print( const char *c )
 {
 	OUT << c;
 }
+
+
+} // namespace libri2rib

@@ -33,7 +33,7 @@
 #include	"book.h"
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 boost::shared_ptr<CqBook> CqPiqslBase::addNewBook(std::string name)
@@ -222,4 +222,4 @@ void CqPiqslBase::loadImageToCurrentBook(const std::string& name, const std::str
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -32,7 +32,7 @@
 #include    <vector>
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqLowDiscrepancy
@@ -67,7 +67,7 @@ class COMMON_SHARE CqLowDiscrepancy
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif   // !LOWDISCREP_H_INCLUDED
 

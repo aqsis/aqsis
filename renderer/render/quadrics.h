@@ -32,7 +32,7 @@
 #include	"surface.h"
 #include	"micropolygon.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 #define	ESTIMATEGRIDSIZE    8
@@ -415,6 +415,6 @@ class CqDisk : public CqQuadric
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !QUADRICS_H_INCLUDED

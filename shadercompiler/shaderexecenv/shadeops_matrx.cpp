@@ -37,7 +37,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -1115,5 +1115,5 @@ void CqShaderExecEnv::SO_rotate( IqShaderData* Q, IqShaderData* angle, IqShaderD
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

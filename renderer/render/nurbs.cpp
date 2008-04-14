@@ -37,7 +37,7 @@
 #include	"attributes.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -2254,4 +2254,4 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 
 //-------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

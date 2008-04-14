@@ -28,7 +28,7 @@
 #include	"patch.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -564,5 +564,5 @@ CqSurface* CqSurfacePointsPolygons::Clone() const
 	return(clone);
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

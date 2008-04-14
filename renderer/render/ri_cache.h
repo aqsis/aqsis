@@ -34,7 +34,7 @@
 
 #include	<cstring>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class RiCacheBase
@@ -224,7 +224,7 @@ class RiCacheBase
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // RI_CACHE_H_INCLUDED
 

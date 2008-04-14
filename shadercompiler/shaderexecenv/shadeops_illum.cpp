@@ -38,7 +38,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 // init_illuminance()
@@ -1161,5 +1161,5 @@ void CqShaderExecEnv::SO_rayinfo( IqShaderData* dataname, IqShaderData* pV, IqSh
 	(Result)->SetFloat(Ret,__iGrid);
 }
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

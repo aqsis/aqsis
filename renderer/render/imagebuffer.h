@@ -47,7 +47,7 @@
 #include	"clippingvolume.h"
 #include	"mpdump.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
@@ -368,7 +368,7 @@ class CqImageBuffer
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGEBUFFER_H_INCLUDED
 #endif

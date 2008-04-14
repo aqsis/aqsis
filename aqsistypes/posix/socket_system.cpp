@@ -36,7 +36,7 @@
 
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 const TqSocketId INVALID_SOCKET = -1;
 
@@ -277,5 +277,5 @@ int	CqSocket::recvData(std::stringstream& buffer) const
 	return count;
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

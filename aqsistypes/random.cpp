@@ -37,7 +37,7 @@
 #include	"random.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This implementation is based on the MT19937 (Mersenne Twister)
 // generator by Takuji Nishimura and Makoto Matsumoto.  The original
@@ -221,5 +221,5 @@ void    CqRandom::NextState()
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

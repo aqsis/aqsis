@@ -43,7 +43,7 @@
 #include	"shadervariable.h"
 #include	"shadervm_common.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 #define DECLARE_SHADERSTACK_TEMPS \
 static TqFloat temp_float; \
@@ -940,6 +940,6 @@ inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, Iq
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADERSTACK_H_INCLUDED

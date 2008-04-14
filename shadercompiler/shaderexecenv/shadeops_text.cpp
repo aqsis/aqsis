@@ -36,7 +36,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -622,5 +622,5 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 }
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

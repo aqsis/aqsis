@@ -33,7 +33,7 @@
 #include        "vector4d.h"
 #include        "patch.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -486,5 +486,5 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 #endif

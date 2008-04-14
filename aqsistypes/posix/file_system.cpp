@@ -33,7 +33,7 @@
 
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Given a string representing a filename with wildcards, return a list
@@ -124,5 +124,5 @@ std::string CqFile::pathSep()
 	return("/");
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

@@ -55,7 +55,7 @@
 
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -551,5 +551,5 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 #endif
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

@@ -34,7 +34,7 @@
 
 #include	"sstring.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This should'nt really be in here, but for now it will do
 #ifdef AQSIS_SYSTEM_WIN32
@@ -162,6 +162,6 @@ class COMMON_SHARE CqFile
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !FILE_H_INCLUDED

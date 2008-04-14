@@ -29,7 +29,7 @@
 #include <list>
 #include "output.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 class CqBinary : public CqOutput
 {
@@ -66,5 +66,5 @@ class CqBinary : public CqOutput
 }
 ;
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

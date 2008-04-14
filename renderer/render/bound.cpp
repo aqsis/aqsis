@@ -27,7 +27,7 @@
 #include	"matrix.h"
 #include	"bound.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Copy constructor.
@@ -163,4 +163,4 @@ std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -34,7 +34,7 @@
 #include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 static TqUlong hp = CqString::hash("P");
@@ -651,4 +651,4 @@ void CqLinearCurvesGroup::Transform(
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

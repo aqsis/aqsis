@@ -28,7 +28,7 @@
 
 #include "output.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 class CqASCII : public CqOutput
 {
@@ -63,5 +63,5 @@ class CqASCII : public CqOutput
 }
 ;
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

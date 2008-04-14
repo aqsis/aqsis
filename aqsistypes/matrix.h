@@ -34,7 +34,7 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqMatrix
@@ -225,6 +225,6 @@ bool isClose(const CqMatrix& m1, const CqMatrix& m2,
 // Implementation details
 //==============================================================================
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !MATRIX_H_INCLUDED

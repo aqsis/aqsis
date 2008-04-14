@@ -30,7 +30,7 @@
 #include	"file.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -189,7 +189,7 @@ TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 

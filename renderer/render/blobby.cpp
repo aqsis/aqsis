@@ -50,7 +50,7 @@
 #include <windows.h>
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 #define ZCLAMP  1e-6
 #define OPTIMUM_GRID_SIZE 15
@@ -1238,7 +1238,7 @@ TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoint
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 
 

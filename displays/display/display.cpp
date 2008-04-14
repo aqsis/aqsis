@@ -70,7 +70,7 @@ extern "C"
 }
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 static char datetime[21];
@@ -408,7 +408,7 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,

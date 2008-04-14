@@ -36,7 +36,7 @@
 #include	"bitvector.h"
 //#include 	"shadeop.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqSurface;
 struct IqAttributes;
@@ -562,7 +562,7 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___ishadervariable_Loaded___

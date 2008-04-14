@@ -41,7 +41,7 @@
 #include	"unistd.h"
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // Local Constants
 
@@ -741,7 +741,7 @@ void CqShadowMapOld::SaveZFile()
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 

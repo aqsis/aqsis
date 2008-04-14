@@ -42,7 +42,7 @@
 
 #include	<cstring>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /// Required function that implements Class Factory design pattern for DDManager libraries
@@ -1146,5 +1146,5 @@ void CqDisplayRequest::ThisDisplayUses( TqInt& Uses )
 
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

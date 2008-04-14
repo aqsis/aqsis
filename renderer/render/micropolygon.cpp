@@ -38,7 +38,7 @@
 
 #include	"multitimer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
@@ -2173,5 +2173,5 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

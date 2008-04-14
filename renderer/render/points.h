@@ -41,7 +41,7 @@
 #include	<algorithm>
 #include	<functional>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -611,6 +611,6 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !POINTS_H_INCLUDED

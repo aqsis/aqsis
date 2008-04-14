@@ -33,7 +33,7 @@
 #include "sstring.h"
 #include "matrix.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 enum EqSplineBasis
 {
@@ -253,6 +253,6 @@ inline TqInt CqCubicSpline<T>::numControlPoints()
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SPLINE_H_INCLUDED

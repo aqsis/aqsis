@@ -35,7 +35,7 @@
 
 #include <cstring>
 
-USING_NAMESPACE( libri2rib );
+namespace libri2rib {
 
 #define PR(x,y)  printRequest(x,y)
 #ifdef	PI
@@ -2059,3 +2059,5 @@ RtVoid CqOutput::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken va
 	S;
 	printToken( variable2 );
 }
+
+} // namespace libri2rib

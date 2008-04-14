@@ -43,7 +43,7 @@
 
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -974,6 +974,6 @@ CqBucket::~CqBucket()
 {
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

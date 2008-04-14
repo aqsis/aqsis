@@ -14,7 +14,7 @@
 #include "matrix.h"
 #include "itransform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqTextureMapOld;
 class CqTextureCache;
@@ -102,6 +102,6 @@ IqRenderer* QGetRenderContextI();
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif //IRENDERER_H_INCLUDED

@@ -38,7 +38,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 namespace {
 
@@ -1336,5 +1336,5 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

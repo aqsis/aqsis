@@ -29,8 +29,8 @@
 #include	"vector3d.h"
 #include	"parameters.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

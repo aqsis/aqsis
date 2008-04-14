@@ -32,7 +32,7 @@
 #include	"sstring.h"
 #include	<list>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqPluginBase
@@ -104,6 +104,6 @@ class CqSimplePlugin : public CqPluginBase
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PLUGINS_H_INCLUDED

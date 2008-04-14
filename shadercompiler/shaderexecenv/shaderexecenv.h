@@ -71,7 +71,7 @@
 
 #endif // WIN32
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 SHADERCONTEXT_SHARE extern const char*	gVariableClassNames[];
@@ -760,6 +760,6 @@ T CqShaderExecEnv::deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx)
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADEREXECENV_H_INCLUDED

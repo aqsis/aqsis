@@ -40,7 +40,7 @@
 #include 	"logging.h"
 #include	"smartptr.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Close the socket this client is associated with.
@@ -156,4 +156,4 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	return(imageXML);
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

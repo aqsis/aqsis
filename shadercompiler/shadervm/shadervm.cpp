@@ -44,7 +44,7 @@
 #include	"shadervariable.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /*
  * Type, name and private hash key for the name
@@ -1774,5 +1774,5 @@ void CqShaderVM::ShutdownShaderEngine()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

@@ -33,7 +33,7 @@
 
 #include <cstring>
 
-USING_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 
 CqContext::CqContext() :
@@ -263,3 +263,5 @@ void CqContext::parseOption( const char *name, RtInt n, RtToken tokens[], RtPoin
 		               false );
 	}
 }
+
+} // namespace libri2rib

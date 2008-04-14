@@ -31,7 +31,7 @@
 #include	"ri.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // Mitchell Filter Declarations
 class CqMitchellFilter {
@@ -62,7 +62,7 @@ private:
    TqFloat invXWidth, invYWidth;
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //----------------------------------------------------------------------
 // RiGaussianFilter

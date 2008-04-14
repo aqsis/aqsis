@@ -35,7 +35,7 @@
 #include <deque>
 #include <fstream>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 TqInt CqOcclusionTree::m_Tab = 0;
 
@@ -704,5 +704,5 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 }
 */
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

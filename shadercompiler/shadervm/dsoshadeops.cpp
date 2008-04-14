@@ -29,7 +29,7 @@
 #include	"file.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** This does replicate effort from CqFile and at present doesnt handle NT either
@@ -315,5 +315,5 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

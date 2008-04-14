@@ -33,7 +33,7 @@
 
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -299,6 +299,6 @@ class CqMotionSpec
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // MOTION_H_INCLUDED

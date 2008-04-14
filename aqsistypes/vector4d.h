@@ -32,7 +32,7 @@
 #include	"aqsis.h"
 #include	"vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 
@@ -561,6 +561,6 @@ inline bool isClose(const CqVector4D& v1, const CqVector4D& v2, TqFloat tol)
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !VECTOR4D_H_INCLUDED

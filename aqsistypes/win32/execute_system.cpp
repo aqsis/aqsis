@@ -34,7 +34,7 @@
 #include <fcntl.h>
 #include <io.h>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqRiProceduralRunProgram
 {
@@ -265,4 +265,4 @@ void CqExecute::operator()()
 	}
 }
 
-}
+} // namespace Aqsis

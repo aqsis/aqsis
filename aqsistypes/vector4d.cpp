@@ -29,13 +29,13 @@
 #include	"vector4d.h"
 #include	"vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // All functions now inlined. see vector4d.h
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

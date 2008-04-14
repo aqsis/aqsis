@@ -32,7 +32,7 @@
 #include	"surface.h"
 #include	"vector4d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqPolygonBase
@@ -635,6 +635,6 @@ class CqSurfacePointsPolygons : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !POLYGON_H_INCLUDED

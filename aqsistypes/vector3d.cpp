@@ -30,7 +30,7 @@
 #include	"vector4d.h"
 #include	"color.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Copy constructor from 4D Vector.
@@ -131,4 +131,4 @@ std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

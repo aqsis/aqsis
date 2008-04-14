@@ -29,7 +29,7 @@
 #include "spline.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 TqSplineTypes splineTypes = 
 {
@@ -67,5 +67,5 @@ TqSplineTypes splineTypes =
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

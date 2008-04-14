@@ -34,7 +34,7 @@
 #include	"ivardef.h"
 #include	"ifuncdef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 #define	VM_SHADER_EXTENSION	".slx"
@@ -80,6 +80,6 @@ class IqCodeGen
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// ICODEGEN_H

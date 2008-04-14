@@ -50,7 +50,7 @@ extern "C"
 #include "logging.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -183,6 +183,6 @@ CqPluginBase::DLError( void )
 	return errorlog;
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 

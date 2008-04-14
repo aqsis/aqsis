@@ -39,7 +39,7 @@
 #include	"bucket.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 CqSampleDataPool	SqImageSample::m_theSamplePool;
 
@@ -585,4 +585,4 @@ SqSampleData& CqImagePixel::SampleData( TqInt index )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

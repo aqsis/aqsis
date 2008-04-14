@@ -33,7 +33,7 @@
 #include	"renderer.h"
 //#include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /**
    Dump micro polygons into a file for debugging.
@@ -143,7 +143,7 @@ class CqMPDump
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // MPDUMP_H
 

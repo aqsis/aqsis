@@ -39,7 +39,7 @@
 #include	"unistd.h"
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -207,5 +207,5 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 	}
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

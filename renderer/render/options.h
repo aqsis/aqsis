@@ -40,7 +40,7 @@
 #include	"ishader.h"
 #include	"ioptions.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqImagersource;
@@ -178,7 +178,7 @@ class CqOptions : public IqOptions
 ;
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //-----------------------------------------------------------------------
 //}  // End of #ifdef OPTIONS_H_INCLUDED

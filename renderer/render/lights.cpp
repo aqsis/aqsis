@@ -28,7 +28,7 @@
 #include	"file.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 std::deque<CqLightsourcePtr>	Lightsource_stack;
 
@@ -118,6 +118,6 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolyg
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

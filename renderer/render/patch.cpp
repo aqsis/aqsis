@@ -33,7 +33,7 @@
 #include	"vector2d.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor both u and vbasis matrices default to bezier.
@@ -1330,4 +1330,4 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 	return ( cSplits );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

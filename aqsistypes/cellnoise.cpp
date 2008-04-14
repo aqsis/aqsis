@@ -36,7 +36,7 @@
 
 #include "cellnoise.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 // Utility functions
@@ -1163,5 +1163,5 @@ TqFloat CqCellNoise::m_RandomTable[ 2048 ] =
         0.0008872407489, 0.3065434294, 0.6739282613,
     };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

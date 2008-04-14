@@ -21,7 +21,7 @@
 #include "texturesampleoptions.h"
 #include "samplequad.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqShaderData;
 class CqVector3D;
@@ -122,7 +122,7 @@ struct IqTextureMapOld
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___itexturemap_Loaded___

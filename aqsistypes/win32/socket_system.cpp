@@ -29,7 +29,7 @@
 
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -290,5 +290,5 @@ int	CqSocket::recvData(std::stringstream& buffer) const
 	return count;
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

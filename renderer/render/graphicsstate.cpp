@@ -30,7 +30,7 @@
 #include "renderer.h"
 #include "imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -363,4 +363,4 @@ void CqModeBlock::logInvalidNesting() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqParseNode;
 
@@ -248,6 +248,6 @@ struct IqVarDef
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !IVARDEF_H_INCLUDED

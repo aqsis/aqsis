@@ -21,7 +21,7 @@
 #include	"color.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 enum ShadingInterpolation
 {
@@ -170,6 +170,6 @@ struct IqAttributes
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___iattributes_Loaded___

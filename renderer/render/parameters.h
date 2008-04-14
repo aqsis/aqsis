@@ -37,7 +37,7 @@
 #include	"bilinear.h"
 #include	<boost/shared_ptr.hpp>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -1924,6 +1924,6 @@ extern CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* str
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PARAMETERS_H_INCLUDED

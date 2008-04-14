@@ -38,7 +38,7 @@
 #include	"ifuncdef.h"
 #include	"icodegen.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqCodeGenVM : public IqCodeGen
@@ -49,6 +49,6 @@ class CqCodeGenVM : public IqCodeGen
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !CODEGENVM_H_INCLUDED

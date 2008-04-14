@@ -30,7 +30,7 @@
 #include	"vector2d.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 TqFloat CqSurface::m_fGridSize = sqrt(256.0);
 
@@ -690,6 +690,6 @@ CqParameter* CqSurface::FindUserParam( const char* name ) const
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

@@ -32,7 +32,7 @@
 #include	"refcount.h"
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
@@ -102,6 +102,6 @@ class CqKDTree
 		TqInt				m_Dim;
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	KDTREE_H_LOADED

@@ -30,7 +30,7 @@
 #include	"shaders.h"
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -114,6 +114,6 @@ void CqLayeredShader::SetType( EqShaderType type)
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

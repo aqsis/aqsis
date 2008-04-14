@@ -44,7 +44,7 @@
 #include	"ishaderexecenv.h"
 #include	"lowdiscrep.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqShader;
 struct IqShaderData;
@@ -943,7 +943,7 @@ class CqShadowMapOld : public CqTextureMapOld
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !TEXTUREMAP_H_INCLUDED
 

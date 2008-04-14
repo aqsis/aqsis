@@ -56,21 +56,6 @@
 #define WIN32_LEAN_AND_MEAN
 
 ///----------------------------------------------------------------------
-///
-/// Namespace macros for those cases where they aren't supported
-/// by the host compiler. These can also be disabled by setting
-/// /D NO_NAMESPACES in the compiler options.
-
-#ifdef  NO_NAMESPACES
-#define START_NAMESPACE(x)	/* start disabled namespace x */
-#define END_NAMESPACE(x)	/* end disabled namespace x */
-#define USING_NAMESPACE(x)  /* using disabled namespace x */
-#else
-#define START_NAMESPACE(x)	namespace x {
-#define END_NAMESPACE(x)	}
-#define USING_NAMESPACE(x)  using namespace x;
-#endif
-
 
 #if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
 #pragma comment( compiler )

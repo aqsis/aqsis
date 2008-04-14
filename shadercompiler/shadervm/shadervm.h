@@ -53,7 +53,7 @@
 #include	"shadervm_common.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqShaderVM;
@@ -1251,6 +1251,6 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADERVM_H_INCLUDED

@@ -16,7 +16,7 @@
 #include	"aqsis.h"
 #include	"iraytrace.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 struct CqRaytrace : public IqRaytrace
@@ -38,6 +38,6 @@ struct CqRaytrace : public IqRaytrace
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___raytrace_Loaded___

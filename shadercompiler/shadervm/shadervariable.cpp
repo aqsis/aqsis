@@ -32,7 +32,7 @@
 #include	"irenderer.h"
 //#include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /*
@@ -76,5 +76,5 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableClass t )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

@@ -42,7 +42,7 @@
 #include "channellist.h"
 #include "mixedimagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqFramebuffer;
 
@@ -367,6 +367,6 @@ inline boost::mutex& CqImage::mutex() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// IMAGE_H_INCLUDED

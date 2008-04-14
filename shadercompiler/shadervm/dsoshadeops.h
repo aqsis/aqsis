@@ -43,7 +43,7 @@
 #include	"shadeop.h"
 #include	"shadervm_common.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /**   CqDSORepository: This class is responsible for searching for shader
@@ -163,6 +163,6 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*);
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// DSOSHADEOPS_H

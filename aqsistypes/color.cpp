@@ -30,7 +30,7 @@
 #include	"color.h"
 #include	"matrix.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /// Global white color
@@ -344,6 +344,6 @@ CqColor CqColor::YIQtorgb() const
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

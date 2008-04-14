@@ -34,7 +34,7 @@
 #include	"vector4d.h"
 #include	"bilinear.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -391,6 +391,6 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PATCH_H_INCLUDED

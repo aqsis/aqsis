@@ -56,7 +56,7 @@ void Fl_FrameBuffer_Widget::draw()
 
 extern CqPiqslMainWindow* window;
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 void piqsl_cb(Fl_Widget* w, void* v);
 
@@ -354,4 +354,4 @@ void CqFramebuffer::checkResize()
 		resize();
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

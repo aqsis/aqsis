@@ -63,7 +63,7 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 };
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** \class CqFramebuffer
@@ -193,7 +193,7 @@ inline boost::mutex& CqFramebuffer::mutex()
 	return(m_mutex);
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW,
 		int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : 

@@ -34,7 +34,7 @@
 #include "surface.h"
 #include "polygon.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /**
@@ -399,6 +399,6 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	SUBDIVISION2_H_LOADED

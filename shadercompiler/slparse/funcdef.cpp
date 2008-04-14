@@ -10,7 +10,7 @@
 #include	"parsenode.h"
 #include	"funcdef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// Global array of standard function definitions
@@ -528,5 +528,5 @@ IqFuncDef* IqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

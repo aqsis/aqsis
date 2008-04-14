@@ -44,7 +44,7 @@
 #include	"vector2d.h"
 #include    "imagepixel.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 /** Class holding data about a particular bucket.
@@ -309,7 +309,7 @@ class CqBucket : public IqBucket
 }
 ;
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef BUCKET_H_INCLUDED
 #endif

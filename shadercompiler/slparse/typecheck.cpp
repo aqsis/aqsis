@@ -12,7 +12,7 @@
 
 #include	<queue>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// CqParseNodeFunctionCall::TypeCheck
@@ -1023,5 +1023,5 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast,
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

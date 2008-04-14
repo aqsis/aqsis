@@ -18,7 +18,7 @@
 
 #include	"vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqSurface;
 
@@ -165,7 +165,7 @@ class CqTrimLoopArray
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___trimcurve_Loaded___

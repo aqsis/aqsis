@@ -27,7 +27,7 @@
 #include	"lath.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 CqObjectPool<CqLath>	CqLath::m_thePool;
 
@@ -702,4 +702,4 @@ TqInt CqLath::cQvf() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -33,7 +33,7 @@
 #include	"file.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqRiFile
@@ -95,6 +95,6 @@ class CqRiFile : public CqFile
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !RIFILE_H_INCLUDED

@@ -41,7 +41,7 @@
 #include	"color.h"
 #include	"vector2d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
@@ -403,7 +403,7 @@ class CqImagePixel
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGEPIXEL_H_INCLUDED
 #endif

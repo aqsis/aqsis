@@ -42,7 +42,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 static TqFloat match(const char *string, const char *pattern);
 
@@ -524,5 +524,5 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

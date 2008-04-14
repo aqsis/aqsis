@@ -45,7 +45,7 @@
 #include	"refcount.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqVector3D;
 class CqImageBuffer;
@@ -973,7 +973,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !MICROPOLYGON_H_INCLUDED
 

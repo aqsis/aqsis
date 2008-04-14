@@ -29,7 +29,7 @@
 
 #include "aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -1361,4 +1361,4 @@ bool isClose(const CqMatrix& m1, const CqMatrix& m2, TqFloat tol)
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

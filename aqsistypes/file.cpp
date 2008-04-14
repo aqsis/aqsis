@@ -31,7 +31,7 @@
 
 #include	"exception.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -135,5 +135,5 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

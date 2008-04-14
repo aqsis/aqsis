@@ -19,7 +19,7 @@
 #include	"sstring.h"
 #include	"ibound.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 struct IqAttributes;
@@ -114,7 +114,7 @@ struct IqSurface
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___isurface_Loaded___

@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Bilinearly evalute the four specified values at the specified intervals.
@@ -84,6 +84,6 @@ T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, T
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !BILINEAR_H_INCLUDED

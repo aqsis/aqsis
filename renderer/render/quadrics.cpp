@@ -32,7 +32,7 @@
 
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 static bool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
@@ -1588,5 +1588,5 @@ void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D
 	p += S;
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

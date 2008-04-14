@@ -33,7 +33,7 @@
 
 #include	<cstring>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // Logic relation
 static TqUlong RIH_eq = CqString::hash("==");
@@ -260,5 +260,5 @@ bool TestCondition(RtString condition, RtString where)
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

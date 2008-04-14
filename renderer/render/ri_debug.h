@@ -31,7 +31,7 @@
 #include	"symbols.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
@@ -132,7 +132,7 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // RI_DEBUG_H_INCLUDED
 

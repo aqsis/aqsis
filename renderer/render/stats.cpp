@@ -34,7 +34,7 @@
 #include "transform.h"
 #include "aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
@@ -558,4 +558,4 @@ void CqStats::PrintInfo() const
 	Aqsis::log() << info << "	PixelFilter: \"" << fName << "\" " << fX << " " << fY << std::endl;
 }
 //---------------------------------------------------------------------
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

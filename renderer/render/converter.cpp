@@ -31,7 +31,7 @@
 #include "converter.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -98,6 +98,6 @@ void CqConverter::Close()
 
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 

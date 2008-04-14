@@ -46,7 +46,7 @@
 #include	"ishaderdata.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -1851,7 +1851,7 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADERVARIABLE_H_INCLUDED
 

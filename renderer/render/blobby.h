@@ -39,7 +39,7 @@
 #include "ri.h"
 #include "vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // CqBlobby
 class CqBlobby : public CqSurface
@@ -193,6 +193,6 @@ class CqBlobby : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif  // !BLOBBY_H_INCLUDED

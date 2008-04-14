@@ -29,7 +29,7 @@
 #include  "noise1234.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This macro is slightly differently implemented as
 // FLOOR() in "aqsis_types.h". I could have used that version
@@ -375,5 +375,5 @@ CqColor	CqNoise::CGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

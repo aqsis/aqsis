@@ -37,7 +37,7 @@
 #include "outstream.h"
 
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 
 class CqOutput
@@ -371,5 +371,5 @@ class CqOutput
 };
 
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif
