@@ -79,8 +79,10 @@ extern const char* g_shadowTextureFormatStr;
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the mipmapping procedure.
  */
-void makeTexture(const std::string& inFileName, const std::string& outFileName,
-		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes,
+AQSISTEX_SHARE void makeTexture(const std::string& inFileName, 
+		const std::string& outFileName,
+		const SqFilterInfo& filterInfo, 
+		const SqWrapModes& wrapModes,
 		const CqRiParamList& paramList);
 
 
