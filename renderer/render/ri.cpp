@@ -5155,7 +5155,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	SqWrapModes wrapModes(wrapModeFromString(swrap), wrapModeFromString(twrap));
 	std::string inFileName = findFileInPath(imagefile,
 			QGetRenderContext()->textureSearchPath());
-	makeTexture(inFileName, texturefile, SqFilterInfo(filterfunc, swidth, twidth),
+	makeTexture(inFileName, std::string(texturefile), SqFilterInfo(filterfunc, swidth, twidth),
 			wrapModes, CqRiParamList(tokens, values, count));
 
 	EXCEPTION_CATCH_GUARD("RiMakeTextureV")
