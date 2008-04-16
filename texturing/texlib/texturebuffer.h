@@ -60,6 +60,44 @@ class AQSISTEX_SHARE CqTextureBuffer
 		CqTextureBuffer(const TqInt width, const TqInt height,
 				const TqInt numChannels);
 
+		/** \brief Copy constructor
+		 *
+		 * This constructor creates a copy of rhs, but possibly with a
+		 * different type of underlying pixel type.  The copying semantics is
+		 * defined by operator=().
+		 */
+		template<typename T2>
+		CqTextureBuffer(const CqTextureBuffer<T2>& rhs);
+
+		//--------------------------------------------------
+		/// \name Modifiers for pixel data
+		//@{
+		/** \brief Copy the given buffer onto this one.
+		 *
+		 * The copy operation resizes the current buffer to be the size of the
+		 * rhs buffer if necessary.  Conversion between the pixel data formats
+		 * is simply by calling setPixel(x, y, rhs(x, y)) for every pixel (x,y)
+		 * in the buffer.
+		 */
+		template<typename T2>
+		CqTextureBuffer<T>& operator=(const CqTextureBuffer<T2>& rhs);
+		/** \brief Set the value of a pixel in the underlying data
+		 *
+		 * This function converts floating point values to the underlying
+		 * channel type.  If the underlying type is an integral type, the
+		 * function first clamps the given values between 0 and 1, followed by
+		 * multiplication by the maximum value for the range.  If the
+		 * underlying type is floating point, a trivial conversion is
+		 * performed.
+		 *
+		 * \param x - pixel index in width direction (column index)
+		 * \param y - pixel index in height direction (row index)
+		 * \param pixelValue - vector type which may be indexed with operator[]
+		 *                     to obtain floating point values for the pixel
+		 *                     (may be TqFloat*)
+		 */
+		template<typename PixelVectorT>
+		void setPixel(const TqInt x, const TqInt y, const PixelVectorT& pixelValue);
 		/** \brief Resize the buffer
 		 *
 		 * \param width  - new width
@@ -70,6 +108,14 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 * which are incompatible with this texture buffer.
 		 */
 		void resize(TqInt width, TqInt height, const CqChannelList& channelList);
+		/** \brief Resize the buffer
+		 *
+		 * \param width - new width
+		 * \param height - new height
+		 * \param numChannels - new number of channels per pixel.
+		 */
+		void resize(TqInt width, TqInt height, TqInt numChannels);
+		//@}
 
 		//--------------------------------------------------
 		/// \name Indexing operations
@@ -83,30 +129,16 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 * \param y - pixel index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the channels data
 		 */
-		inline const CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
-		/** \brief Set the value of a pixel in the underlying data
-		 *
-		 * This function converts floating point values to the underlying
-		 * channel type.  If the underlying type is an integral type, the
-		 * function first clamps the given values between 0 and 1, followed by
-		 * multiplication by the maximum value for the range.  If the
-		 * underlying type is floating point, a trivial conversion is
-		 * performed.
-		 *
-		 * \param x - pixel index in width direction (column index)
-		 * \param y - pixel index in height direction (row index)
-		 * \param pixelValue - array of floating point values for the pixel.
-		 */
-		inline void setPixel(const TqInt x, const TqInt y, const TqFloat* pixelValue);
+		const CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
 		/** \brief 2D Indexing - access to the underlying typed channel data.
 		 *
 		 * \param x - pixel index in width direction (column index)
 		 * \param y - pixel index in height direction (row index)
 		 * \return a pointer to the channel data for the given pixel
 		 */
-		inline T* value(const TqInt x, const TqInt y);
+		T* value(const TqInt x, const TqInt y);
 		/// 2D indexing of typed channel data, const version.
-		inline const T* value(const TqInt x, const TqInt y) const;
+		const T* value(const TqInt x, const TqInt y) const;
 		//@}
 
 		//--------------------------------------------------
@@ -119,20 +151,20 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 */
 		CqChannelList channelList() const;
 		/// Get the buffer width
-		inline TqInt width() const;
+		TqInt width() const;
 		/// Get the buffer height
-		inline TqInt height() const;
+		TqInt height() const;
 		/// Get the number of channels per pixel
-		inline TqInt numChannels() const;
+		TqInt numChannels() const;
 		//@}
 
 		//--------------------------------------------------
 		/// \name Access to raw pixel data
 		//@{
 		/// Get a pointer to the underlying raw data
-		inline TqUint8* rawData();
+		TqUint8* rawData();
 		/// Get a pointer to the underlying raw data (const version)
-		inline const TqUint8* rawData() const;
+		const TqUint8* rawData() const;
 		//@}
 
 	private:
@@ -151,7 +183,7 @@ class AQSISTEX_SHARE CqTextureBuffer
 // Inline functions/templates for CqTextureBuffer
 
 template<typename T>
-CqTextureBuffer<T>::CqTextureBuffer()
+inline CqTextureBuffer<T>::CqTextureBuffer()
 	: m_pixelData(),
 	m_width(0),
 	m_height(0),
@@ -159,12 +191,23 @@ CqTextureBuffer<T>::CqTextureBuffer()
 { }
 
 template<typename T>
-CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt numChannels)
+inline CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt numChannels)
 	: m_pixelData(new T[width * height * numChannels]),
 	m_width(width),
 	m_height(height),
 	m_numChannels(numChannels)
 { }
+
+template<typename T>
+template<typename T2>
+CqTextureBuffer<T>::CqTextureBuffer(const CqTextureBuffer<T2>& rhs)
+	: m_pixelData(),
+	m_width(0),
+	m_height(0),
+	m_numChannels(0)
+{
+	*this = rhs;
+}
 
 template<typename T>
 inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
@@ -173,8 +216,8 @@ inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, con
 }
 
 template<typename T>
-inline void CqTextureBuffer<T>::setPixel(const TqInt x, const TqInt y,
-		const TqFloat* pixelValue)
+template<typename PixelVectorT>
+inline void CqTextureBuffer<T>::setPixel(const TqInt x, const TqInt y, const PixelVectorT& pixelValue)
 {
 	T* pixel = value(x,y);
 	if(std::numeric_limits<T>::is_integer)
@@ -221,7 +264,12 @@ void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& 
 		AQSIS_THROW(XqInternal, "CqTextureBuffer channel type is"
 				"incompatible with new channel type requested");
 	}
-	TqInt numChannels = channelList.bytesPerPixel()/sizeof(T);
+	resize(width, height, channelList.bytesPerPixel()/sizeof(T));
+}
+
+template<typename T>
+inline void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt numChannels)
+{
 	TqInt newSize = width * height * numChannels;
 	if(newSize != m_width * m_height * m_numChannels);
 		m_pixelData.reset(new T[newSize]);
@@ -232,7 +280,7 @@ void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& 
 }
 
 template<typename T>
-CqChannelList CqTextureBuffer<T>::channelList() const
+inline CqChannelList CqTextureBuffer<T>::channelList() const
 {
 	CqChannelList chanList;
 	chanList.addUnnamedChannels(getChannelTypeEnum<T>(), m_numChannels);
@@ -267,6 +315,21 @@ template<typename T>
 inline TqInt CqTextureBuffer<T>::numChannels() const
 {
 	return m_numChannels;
+}
+
+template<typename T>
+template<typename T2>
+CqTextureBuffer<T>& CqTextureBuffer<T>::operator=(const CqTextureBuffer<T2>& rhs)
+{
+	resize(rhs.width(), rhs.height(), rhs.numChannels());
+	for(TqInt y = 0; y < height(); ++y)
+	{
+		for(TqInt x = 0; x < width(); ++x)
+		{
+			setPixel(x, y, rhs(x,y));
+		}
+	}
+	return *this;
 }
 
 } // namespace Aqsis

@@ -53,7 +53,17 @@ class AQSISTEX_SHARE CqChannelList
 		typedef TqListType::const_iterator const_iterator;
 
 		/// Construct an empty channel list.
-		inline CqChannelList();
+		CqChannelList();
+
+		/** \brief Construct a channel list with the given number of unnamed channels
+		 *
+		 * \see addUnnamedChannels
+		 *
+		 * \param chanType - type for the new channels
+		 * \param numChans - number of channels in the constructed channel list.
+		 */
+		CqChannelList(EqChannelType chanType, TqInt numChans);
+
 		/// Factory function for standard 8bpp RGB display channel list
 		static CqChannelList displayChannels();
 		/// We use the default copy constructor,destructor and assignment operator.
@@ -68,12 +78,12 @@ class AQSISTEX_SHARE CqChannelList
 		 *
 		 * \return true if channels are equal
 		 */
-		inline bool operator==(const CqChannelList& other) const;
+		bool operator==(const CqChannelList& other) const;
 		/** \brief Inequality operator
 		 *
 		 * \return !(*this == other)
 		 */
-		inline bool operator!=(const CqChannelList& other) const;
+		bool operator!=(const CqChannelList& other) const;
 		/** \brief Determine whether the channel types of two channel lists
 		 * match.
 		 *
@@ -88,9 +98,9 @@ class AQSISTEX_SHARE CqChannelList
 		/// \name Standard iterator interface
 		//@{
 		/// Get an iterator to the start of the channel list.
-		inline const_iterator begin() const;
+		const_iterator begin() const;
 		/// Get an iterator to the end of the channel list.
-		inline const_iterator end() const;
+		const_iterator end() const;
 		//@}
 
 		//----------------------------------------------------------------------
@@ -99,10 +109,10 @@ class AQSISTEX_SHARE CqChannelList
 		/// Add a channel to the end of the list.
 		void addChannel(const SqChannelInfo& newChan);
 		/// Get the number of channels in the list
-		inline TqInt numChannels() const;
+		TqInt numChannels() const;
 		/** \brief Get the channel at a given index.
 		 */
-		inline const SqChannelInfo& operator[](TqInt index) const;
+		const SqChannelInfo& operator[](TqInt index) const;
 		//@}
 
 		//----------------------------------------------------------------------
@@ -112,9 +122,9 @@ class AQSISTEX_SHARE CqChannelList
 		 * \throw XqInternal if the channel name isn't in the list.
 		 * \return the index for the channel, if it exists.
 		 */
-		inline TqInt findChannelIndex(const std::string& name) const;
+		TqInt findChannelIndex(const std::string& name) const;
 		/// \brief Check whether the list of channels contains the given channel name
-		inline bool hasChannel(const std::string& name) const;
+		bool hasChannel(const std::string& name) const;
 		//@}
 
 		//----------------------------------------------------------------------
@@ -126,9 +136,9 @@ class AQSISTEX_SHARE CqChannelList
 		 * is the number of bytes the indexed channel is away from the position
 		 * of the first channel inside a pixel.
 		 */
-		inline TqInt channelByteOffset(TqInt index) const;
+		TqInt channelByteOffset(TqInt index) const;
 		/// Number of bytes required to store all channels in a pixel
-		inline TqInt bytesPerPixel() const;
+		TqInt bytesPerPixel() const;
 		/** \brief Get the shared channel type code if it exists.
 		 *
 		 * \return the channel type which is shared by all channels, or
@@ -148,7 +158,7 @@ class AQSISTEX_SHARE CqChannelList
 		 */
 		void reorderChannels();
 		/// Remove all channels
-		inline void clear();
+		void clear();
 		/** \brief Add the specified number of "unnamed" channels
 		 *
 		 * The channels will be named from "?01" up until "?nn" where nn is
@@ -191,6 +201,14 @@ inline CqChannelList::CqChannelList()
 	m_offsets(),
 	m_bytesPerPixel(0)
 { }
+
+inline CqChannelList::CqChannelList(EqChannelType chanType, TqInt numChans)
+	: m_channels(),
+	m_offsets(),
+	m_bytesPerPixel(0)
+{
+	addUnnamedChannels(chanType, numChans);
+}
 
 inline bool CqChannelList::operator==(const CqChannelList& other) const
 {

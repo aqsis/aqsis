@@ -30,69 +30,34 @@
 
 #include "aqsis.h"
 
-#include <istream>
-#include <string>
-#include <vector>
+#include <iosfwd>
 
-#include <boost/shared_ptr.hpp>
+#include "imagefiletype.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/// Magic number type
-typedef std::vector<char> TqMagicNumber;
-/// Pointer to magic number
-typedef boost::shared_ptr<TqMagicNumber> TqMagicNumberPtr;
-
-/// Maximum number of bytes to read for a magic number
-const TqInt magicNumberMaxBytes = 50;
-
-//------------------------------------------------------------------------------
-/// \name Functions to get magic numbers
-//@{
-/** \brief Get a magic number
+/** \brief Determine the type of a file using a "magic number"
  *
- * Attempt to read in the first few bytes of a file to serve as a "magic
- * number" which can be used for file type detection.
+ * Many file formats have a distinctive pattern in the first few bytes which
+ * can be matched to guess the file type.  This is rather more reliable than a
+ * file suffix naming convention, but can still become confused.
  *
- * \throw XqEnvironment if the file cannot be opened.
+ * \throw XqInvalidFile if the file cannot be opened.
  *
  * \param fileName - file name to read from.
- * \return a vector containing the magic number as a sequence of bytes.
+ * \return a guess at the file type based on the first few bytes.
  */
-TqMagicNumberPtr getMagicNumber(const std::string& fileName);
+AQSISTEX_SHARE EqImageFileType guessFileType(const std::string& fileName);
 
-/** \brief Get a magic number from a stream
+/** \brief Determine the type of an open file stream by using a "magic number"
  *
- * Attempt to read in the first few bytes of a stream to serve as a "magic
- * number" which can be used for file type detection.
+ * \see guessFileType(const std::string& fileName)
  *
- * \param inStream - stream to read from
- * \return a vector containing the magic number as a sequence of bytes.
+ * \param inStream - The first few bytes of this stream are read
  */
-TqMagicNumberPtr getMagicNumber(std::istream& inStream);
+AQSISTEX_SHARE EqImageFileType guessFileType(std::istream& inStream);
 
-//@}
-
-
-//------------------------------------------------------------------------------
-/// \name Functions to match magic numbers
-//@{
-/** Determine if the magic number indicates a tiff file.
- *
- * \return true if magicNum is a TIFF magic number.
- */
-bool isTiffMagicNumber(const TqMagicNumber& magicNum);
-
-/** Determine if the magic number indicates an OpenEXR file.
- *
- * \return true if magicNum is an OpenEXR magic number.
- */
-bool isOpenExrMagicNumber(const TqMagicNumber& magicNum);
-
-// --> Add further file type detection functions here <--
-
-//@}
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

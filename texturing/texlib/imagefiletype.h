@@ -36,7 +36,10 @@ enum EqImageFileType
 	ImageFile_Tiff,
 	ImageFile_Exr,
 	ImageFile_Jpg,
-	ImageFile_Png
+	ImageFile_Png,
+	ImageFile_AqsisBake,
+
+	ImageFile_Unknown
 };
 
 /** \brief Convert an image file type to a string.
@@ -60,8 +63,13 @@ inline const char* imageFileTypeToString(EqImageFileType type)
 			return "jpeg";
 		case ImageFile_Png:
 			return "png";
+		case ImageFile_AqsisBake:
+			return "bake";
+		case ImageFile_Unknown:
+			return "unknown";
 	}
-	return "unknown";
+	assert(0);
+	return "fixme!";
 }
 
 } // namespace Aqsis

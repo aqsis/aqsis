@@ -336,11 +336,13 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value,
 		if(throwOnError)
 		{
 			AQSIS_THROW(XqInternal, "Could not set tiff tag " << tag
+					<< " to value " << value
 					<< " for file \"" << m_fileHandle->fileName() << "\"");
 		}
 		else
 		{
 			Aqsis::log() << warning << "Could not set tiff tag " << tag
+					<< " to value " << value
 					<< " for file \"" << m_fileHandle->fileName() << "\"";
 		}
 	}

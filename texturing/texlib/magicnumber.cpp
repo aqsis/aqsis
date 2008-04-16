@@ -29,47 +29,71 @@
 
 #include <algorithm>
 #include <fstream>
+#include <vector>
 
 #include "exception.h"
 
 namespace Aqsis {
 
-//------------------------------------------------------------------------------
-// Functions to get magic numbers
-TqMagicNumberPtr getMagicNumber(const std::string& fileName)
-{
-	std::ifstream inFile(fileName.c_str());
-	if(!inFile)
-		AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName << "\" for reading");
-	return getMagicNumber(inFile);
-}
+namespace {
 
-TqMagicNumberPtr getMagicNumber(std::istream& inStream)
+/// Magic number type
+typedef std::vector<char> TqMagicNumber;
+
+/// Maximum number of bytes to read for a magic number
+const TqInt magicNumberMaxBytes = 50;
+
+TqMagicNumber getMagicNumber(std::istream& inStream)
 {
-	TqMagicNumberPtr magicNumber(new TqMagicNumber(magicNumberMaxBytes, 0) );
-	inStream.read(&(*magicNumber)[0], magicNumberMaxBytes);
+	TqMagicNumber magicNumber(magicNumberMaxBytes,0);
+	inStream.read(&magicNumber[0], magicNumberMaxBytes);
 	// make sure we actually got the the requested number of bytes.
 	TqInt numRead = inStream.gcount();
 	if(numRead < magicNumberMaxBytes)
-		magicNumber->resize(numRead);
+		magicNumber.resize(numRead);
 	return magicNumber;
 }
 
+} // unnamed namespace
 
-//------------------------------------------------------------------------------
-// Functions to match magic numbers
-bool isTiffMagicNumber(const TqMagicNumber& magicNum)
+
+EqImageFileType guessFileType(const std::string& fileName)
 {
-	// TIFF can have one of two possible magic numbers, depending on endianness.
-	return magicNum.size() >= 4
-		&& (std::equal(magicNum.begin(), magicNum.begin()+4, "II\x2A\x00")
-			|| std::equal(magicNum.begin(), magicNum.begin()+4, "MM\x00\x2A"));
+	std::ifstream inFile(fileName.c_str());
+	if(!inFile)
+	{
+		AQSIS_THROW(XqInvalidFile, "Cannot open file \""
+				<< fileName << "\" for reading");
+	}
+	return guessFileType(inFile);
 }
 
-bool isOpenExrMagicNumber(const TqMagicNumber& magicNum)
+EqImageFileType guessFileType(std::istream& inStream)
 {
-	return magicNum.size() >= 4
-		&& std::equal(magicNum.begin(), magicNum.begin()+4, "v/1\x01");
+	// load magic number
+	TqMagicNumber magicNum = getMagicNumber(inStream);
+	// Test magic number against various patterns to determine the file type.
+	if( magicNum.size() >= 4
+		&& (std::equal(magicNum.begin(), magicNum.begin()+4, "II\x2A\x00")
+			|| std::equal(magicNum.begin(), magicNum.begin()+4, "MM\x00\x2A")) )
+	{
+		return ImageFile_Tiff;
+	}
+	else if( magicNum.size() >= 4
+		&& std::equal(magicNum.begin(), magicNum.begin()+4, "v/1\x01") )
+	{
+		return ImageFile_Exr;
+	}
+	else if( magicNum.size() >= 16
+		&& std::equal(magicNum.begin(), magicNum.begin()+15, "Aqsis bake file") )
+	{
+		return ImageFile_AqsisBake;
+	}
+	// Add further magic number matches here
+	else
+	{
+		return ImageFile_Unknown;
+	}
 }
 
 } // namespace Aqsis

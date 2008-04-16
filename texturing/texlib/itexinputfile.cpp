@@ -40,32 +40,40 @@ namespace {
 
 // Open multi-image input file
 boost::shared_ptr<IqMultiTexInputFile> openMultiInputFile(
-		const TqMagicNumber& magicNum, const std::string& fileName)
+		EqImageFileType type, const std::string& fileName)
 {
 	boost::shared_ptr<IqMultiTexInputFile> file;
-	if(isTiffMagicNumber(magicNum))
-		file.reset(new CqTiffInputFile(fileName));
-	// else if(Add new formats here!)
+	switch(type)
+	{
+		case ImageFile_Tiff:
+			file.reset(new CqTiffInputFile(fileName));
+			break;
+		default:
+			break;
+	}
 	return file;
 }
 
 // Open a simple input file
 boost::shared_ptr<IqTexInputFile> openInputFile(
-		const TqMagicNumber& magicNum, const std::string& fileName)
+		EqImageFileType type, const std::string& fileName)
 {
-	boost::shared_ptr<IqTexInputFile> file = openMultiInputFile(magicNum, fileName);
+	boost::shared_ptr<IqTexInputFile> file = openMultiInputFile(type, fileName);
 	if(!file)
 	{
-		if(isOpenExrMagicNumber(magicNum))
+		switch(type)
 		{
-#		ifdef USE_OPENEXR
-			file.reset(new CqExrInputFile(fileName));
-#		else
-			AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName
-					<< "\": Aqsis was compiled without OpenEXR support");
-#		endif
+			case ImageFile_Exr:
+#				ifdef USE_OPENEXR
+				file.reset(new CqExrInputFile(fileName));
+#				else
+				AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName
+						<< "\": Aqsis was compiled without OpenEXR support");
+#				endif
+				break;
+			default:
+				break;
 		}
-		// else if(Add new formats here!)
 	}
 	return file;
 }
@@ -77,15 +85,14 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 
 boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
 {
-	boost::shared_ptr<IqTexInputFile> newFile;
-	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
-	boost::shared_ptr<IqTexInputFile> file = openInputFile(*magicNum, fileName);
+	boost::shared_ptr<IqTexInputFile> file = openInputFile(guessFileType(fileName), fileName);
 	if(file)
 		return file;
 	else
 		AQSIS_THROW(XqInvalidFile, "Unknown file type for \"" << fileName << "\"");
 
-	return newFile;
+	assert(0);
+	return boost::shared_ptr<IqTexInputFile>();
 }
 
 //------------------------------------------------------------------------------
@@ -93,16 +100,20 @@ boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileNa
 
 boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::string& fileName)
 {
-	boost::shared_ptr<IqMultiTexInputFile> newFile;
-	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
-
-	boost::shared_ptr<IqMultiTexInputFile> file = openMultiInputFile(*magicNum, fileName);
+	EqImageFileType type = guessFileType(fileName);
+	boost::shared_ptr<IqMultiTexInputFile> file
+		= openMultiInputFile(type, fileName);
 	if(file)
 		return file;
 	else
-		AQSIS_THROW(XqInvalidFile, "Unknown file type for \"" << fileName << "\"");
+	{
+		AQSIS_THROW(XqInvalidFile, "File \"" << fileName << "\" of type "
+				<< imageFileTypeToString(type)
+				<< " doesn't support multiple subimages.");
+	}
 
-	return newFile;
+	assert(0);
+	return boost::shared_ptr<IqMultiTexInputFile>();
 }
 
 } // namespace Aqsis

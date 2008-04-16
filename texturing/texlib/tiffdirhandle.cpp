@@ -215,6 +215,7 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
         case Channel_Unsigned8:
 			sampleFormat = SAMPLEFORMAT_UINT;
 		default:
+			AQSIS_THROW(XqInternal, "Cannot handle provided pixel sample format");
 			break;
     }
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
