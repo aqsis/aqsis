@@ -31,6 +31,7 @@
 #include "aqsis.h"
 
 #include <iosfwd>
+#include <string>
 
 #include "imagefiletype.h"
 
