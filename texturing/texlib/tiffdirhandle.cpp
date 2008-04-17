@@ -214,7 +214,8 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
         case Channel_Unsigned16:
         case Channel_Unsigned8:
 			sampleFormat = SAMPLEFORMAT_UINT;
-		default:
+			break;
+	default:
 			AQSIS_THROW(XqInternal, "Cannot handle provided pixel sample format");
 			break;
     }
