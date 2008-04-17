@@ -314,9 +314,7 @@ class SHADERVM_SHARE CqShaderStack
 		void	Drop()
 		{
 			bool f = false;
-			Pop( f );
-
-
+			Release(Pop(f));
 		}
 
 		/**
@@ -324,15 +322,12 @@ class SHADERVM_SHARE CqShaderStack
 		 */
 		static void Statistics();
 
-
 		/** set the more efficient number of samples per type of variable at run-time.
 		 */
 		static void	SetSamples(TqInt n)
 		{
 			m_samples = (TqUint) n;
 		}
-
-
 
 	protected:
 		std::vector<SqStackEntry>	m_Stack;
