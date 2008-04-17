@@ -33,6 +33,8 @@
 #include	<stack>
 #include	<map>
 
+#include <boost/noncopyable.hpp>
+
 #include	"aqsismath.h"
 #include	"bitvector.h"
 #include	"color.h"
@@ -142,7 +144,7 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
+class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
 {
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);

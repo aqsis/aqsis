@@ -471,6 +471,94 @@ static const TqUlong ehash = CqString::hash("external");
 static const TqUlong ohash = CqString::hash("output");
 
 
+CqShaderVM::CqShaderVM(IqRenderer* pRenderContext)
+	: CqShaderStack(),
+	m_Uses(0xFFFFFFFF),
+	m_strName(),
+	m_Type(Type_Surface),
+	m_LocalIndex(0),
+	m_pEnv(),
+	m_pTransform(),
+	m_LocalVars(),
+	m_StoredArguments(),
+	m_ProgramInit(),
+	m_Program(),
+	m_ProgramStrings(),
+	m_uGridRes(0),
+	m_vGridRes(0),
+	m_shadingPointCount(0),
+	m_PC(0),
+	m_PO(0),
+	m_PE(0),
+	m_fAmbient(true),
+	m_outsideWorld(false),
+	m_pRenderContext(pRenderContext)
+{
+	// Find out if this shader is being declared outside the world construct. If so
+	// if is effectively being defined in 'camera' space, which will affect the
+	// transformation of parameters. Should only affect lightsource shaders as these
+	// are the only ones valid outside the world.
+	if (NULL != m_pRenderContext)
+		m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+	else
+		m_outsideWorld = false;
+}
+
+CqShaderVM::CqShaderVM(const CqShaderVM& From)
+	: CqShaderStack(),
+	m_Uses(0),
+	m_strName(),
+	m_Type(Type_Surface),
+	m_LocalIndex(0),
+	m_pEnv(),
+	m_pTransform(),
+	m_LocalVars(),
+	m_StoredArguments(),
+	m_ProgramInit(),
+	m_Program(),
+	m_ProgramStrings(),
+	m_uGridRes(0),
+	m_vGridRes(0),
+	m_shadingPointCount(0),
+	m_PC(0),
+	m_PO(0),
+	m_PE(0),
+	m_fAmbient(true),
+	m_outsideWorld(false),
+	m_pRenderContext(0)
+{
+	*this = From;
+	// Find out if this shader is being declared outside the world construct. If so
+	// if is effectively being defined in 'camera' space, which will affect the
+	// transformation of parameters. Should only affect lightsource shaders as these
+	// are the only ones valid outside the world.
+	if (NULL != m_pRenderContext)
+		m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+	else
+		m_outsideWorld = false;
+}
+
+CqShaderVM::~CqShaderVM()
+{
+	// Delete the local variables.
+	for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
+	{
+		delete *i;
+	}
+	// Delete strings used by the program
+	for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin();
+			i != m_ProgramStrings.end(); i++ )
+	{
+		delete *i;
+	}
+	// Delete stored shader arguments
+	for(std::vector<SqArgumentRecord>::iterator i = m_StoredArguments.begin();
+			i != m_StoredArguments.end(); ++i)
+	{
+		delete i->m_Value;
+	}
+}
+
 //---------------------------------------------------------------------
 /**
  *  Function to create a local variable for a specific shader

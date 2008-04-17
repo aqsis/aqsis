@@ -152,6 +152,8 @@ class CqShaderVariableArray: public CqShaderVariable
 		}
 		virtual	~CqShaderVariableArray()
 		{
+			for ( TqUint i = 0; i < m_aVariables.size(); i++ )
+				delete m_aVariables[i];
 		}
 
 		// Overridden from IqShaderData.

@@ -670,39 +670,9 @@ union UsProgramElement
 class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( true ), m_pRenderContext(pRenderContext)
-		{
-			// Find out if this shader is being declared outside the world construct. If so
-			// if is effectively being defined in 'camera' space, which will affect the
-			// transformation of parameters. Should only affect lightsource shaders as these
-			// are the only ones valid outside the world.
-			if (NULL != m_pRenderContext)
-				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
-			else
-				m_outsideWorld = false;
-		}
-		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( true )
-		{
-			*this = From;
-			// Find out if this shader is being declared outside the world construct. If so
-			// if is effectively being defined in 'camera' space, which will affect the
-			// transformation of parameters. Should only affect lightsource shaders as these
-			// are the only ones valid outside the world.
-			if (NULL != m_pRenderContext)
-				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
-			else
-				m_outsideWorld = false;
-		}
-		virtual ~CqShaderVM()
-		{
-			// Delete the local variables.
-			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
-				if ( ( *i ) != NULL )
-					delete( *i );
-			for ( std::list<CqString*>::iterator j = m_ProgramStrings.begin(); j != m_ProgramStrings.end(); j++ )
-				delete *j;
-		}
-
+		CqShaderVM(IqRenderer* pRenderContext);
+		CqShaderVM(const CqShaderVM& From);
+		virtual ~CqShaderVM();
 
 		// Overidden from IqShader
 		virtual	const CqMatrix&	matCurrent()
