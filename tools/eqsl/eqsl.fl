@@ -38,6 +38,10 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 
 decl {\#include <boost/thread.hpp>} {} 
 
+decl {\#include <boost/regex.hpp>} {} 
+
+decl {\#include <boost/lexical_cast.hpp>} {} 
+
 decl {\#include <cstdlib>} {public
 } 
 
@@ -62,7 +66,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArg = "-progress";} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
 
 decl {string renderEngineFile = "";} {} 
 
@@ -78,6 +82,8 @@ decl {string shaderCompilerType = "RenderMan Shader Files (*.sl)";} {}
 
 decl {string toolsHistoryTitle = "Command History:";} {} 
 
+decl {boost::regex aqsisProgressExpression = boost::regex("^R90000[[:space:]]*([0-9.]*)%.*");} {} 
+
 Function {} {open
 } {
   code {\#ifdef __WINDOWS__
@@ -92,7 +98,8 @@ Function {} {open
 \#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {458 660 400 300} type Double resizable visible
+    xywh {661 463 400 326} type Double
+    code0 {o->resizable(m_tabs);} visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -137,30 +144,35 @@ else
 }
 
 // Call relevant commandline
-char acPath[256];
-char root[256];
+	char acPath[256];
+	char root[256];
 \#ifdef	AQSIS_SYSTEM_WIN32
-if( GetModuleFileName( NULL, acPath, 256 ) != 0)
-{
-	// guaranteed file name of at least one character after path
-	*( strrchr( acPath, '\\\\' ) ) = '\\0';
-	std::string      stracPath(acPath);
-	_fullpath(root,&stracPath[0],256);
-}
-std::string program = root;
-program.append("\\\\");
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	commandLine = renderEngine + " ";
+	program.append("\\\\");
 \#else
 std::string program;
 \#endif
-program.append(renderEngine);
-std::vector<std::string> args;
-args.push_back(renderEngineArg);
-args.push_back(renderEngineFile);
-Aqsis::CqExecute tool(program, args, currentDirectory);
-Aqsis::CqExecute::TqCallback outputStdOut(&callback);
-tool.setStdOutCallback(outputStdOut);
-boost::thread thread(tool);
-commandLine = renderEngine + " " + renderEngineArg + " \\"" + renderEngineFile + "\\"";
+	program.append(renderEngine);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); arg++)
+	{
+		args.push_back(renderEngineArgs[arg]);
+		commandLine += renderEngineArgs[arg] + " ";
+	}
+	args.push_back(renderEngineFile);
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
+	commandLine += " \\"" + renderEngineFile + "\\"";
 
 
 
@@ -242,13 +254,13 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Tabs m_tabs {open
-      xywh {0 25 400 275} resizable
+    Fl_Tabs m_tabs {
+      xywh {0 25 400 300}
       code0 {o->resizable(m_outputConsole);}
     } {
       Fl_Group m_tabHistory {
         label History open
-        xywh {0 50 400 275}
+        xywh {0 50 400 275} hide
       } {
         Fl_Browser m_outputHistory {
           xywh {0 50 400 250}
@@ -257,12 +269,17 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
       }
       Fl_Group m_tabConsole {
         label Console open
-        xywh {0 50 400 275} hide
+        xywh {0 50 400 275}
       } {
         Fl_Browser m_outputConsole {
           xywh {0 50 400 250}
         }
       }
+    }
+    Fl_Progress m_progress {selected
+      xywh {0 300 400 25} selection_color 60 labeltype NO_LABEL align 0
+      code0 {o->minimum(0);}
+      code1 {o->maximum(100);}
     }
   }
 } 
@@ -270,6 +287,24 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
 Function {callback(const char* string)} {open return_type void
 } {
   code {Fl::lock();
-m_outputConsole->add(string);
-Fl::unlock();} {}
+	boost::cmatch match;
+	if(boost::regex_match(string, match, aqsisProgressExpression))
+	{
+		std::string percentage;
+		percentage.assign(match[1].first, match[1].second);
+		try
+		{
+			float fp = boost::lexical_cast<float>(percentage);
+			m_progress->value(fp);
+			Fl::check();
+		}
+		catch(boost::bad_lexical_cast &)
+		{
+		}
+	}
+	else
+	{
+		m_outputConsole->add(string);
+	}
+	Fl::unlock();} {}
 } 
