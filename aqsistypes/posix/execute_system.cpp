@@ -116,6 +116,8 @@ void CqExecute::operator()()
 				Aqsis::log() << error << "Redirecting standard file handles" << std::endl;
 				return;
 			}
+			// Redirect stderr to stdout
+			dup2(1, 2);
 			boost::scoped_array<char*> args(new char*[m_args.size()+2]);
 			args[m_args.size()+1] = NULL;
 			boost::scoped_array<boost::scoped_array<char> > argStore(new boost::scoped_array<char>[m_args.size()+1]);

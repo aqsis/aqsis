@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0108 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -98,7 +98,7 @@ Function {} {open
 \#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {661 463 400 326} type Double resizable visible
+    xywh {661 463 400 325} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -266,11 +266,12 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
       Fl_Group m_tabConsole {
-        label Console open selected
-        xywh {0 50 400 275} resizable
+        label Console open
+        xywh {0 50 400 250} resizable
       } {
-        Fl_Browser m_outputConsole {
+        Fl_Text_Display m_outputConsole {selected
           xywh {0 50 400 250}
+          code0 {o->buffer(new Fl_Text_Buffer);}
         }
       }
     }
@@ -302,7 +303,7 @@ Function {callback(const char* string)} {open return_type void
 	}
 	else
 	{
-		m_outputConsole->add(string);
+		m_outputConsole->insert(string);
 	}
 	Fl::unlock();} {}
 } 
