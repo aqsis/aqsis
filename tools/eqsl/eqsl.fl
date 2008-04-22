@@ -254,11 +254,11 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
       }
     }
     Fl_Tabs m_tabs {open
-      xywh {0 25 400 300} resizable
+      xywh {0 25 400 275} resizable
     } {
       Fl_Group m_tabHistory {
         label History open
-        xywh {0 50 400 275} hide
+        xywh {0 50 400 250} hide
       } {
         Fl_Browser m_outputHistory {
           xywh {0 50 400 250}
@@ -275,7 +275,7 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Progress m_progress {
+    Fl_Progress m_progress {selected
       xywh {0 300 400 25} selection_color 60 labeltype NO_LABEL align 0
       code0 {o->minimum(0);}
       code1 {o->maximum(100);}

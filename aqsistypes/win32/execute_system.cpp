@@ -59,9 +59,10 @@ void ReadAndHandleOutput(HANDLE hPipeRead, CqExecute::TqCallback& callBack)
 	DWORD nBytesRead;
 	DWORD nCharsWritten;
 
+	lpBuffer[0] = '\0';
 	while(TRUE)
 	{
-		if (!ReadFile(hPipeRead,lpBuffer,sizeof(lpBuffer),
+		if (!ReadFile(hPipeRead,lpBuffer,sizeof(lpBuffer)-1,
 									  &nBytesRead,NULL) || !nBytesRead)
 		{
 			if (GetLastError() == ERROR_BROKEN_PIPE)
@@ -74,8 +75,10 @@ void ReadAndHandleOutput(HANDLE hPipeRead, CqExecute::TqCallback& callBack)
 //		if (!WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE),lpBuffer,
 //					   nBytesRead,&nCharsWritten,NULL))
 //				DisplayError("WriteConsole"); // Something bad happened.
+		lpBuffer[nBytesRead] = '\0';
 		if(!callBack.empty())
 			callBack(lpBuffer);
+		lpBuffer[0] = '\0';
 	}
 }
 
