@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0108 
+version 1.0107 
 header_name {.h} 
 code_name {.cxx}
 comment {// Aqsis
@@ -68,8 +68,7 @@ decl {string renderEngine = "aqsis";} {}
 
 decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
 
-decl {string shaderCompilerArgs[] = {"-nocolor"};} {selected
-} 
+decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
 decl {string renderViewerArgs[] = {};} {} 
 
@@ -91,16 +90,6 @@ decl {boost::regex aqsisProgressExpression = boost::regex("^R90000[[:space:]]*([
 
 Function {} {open
 } {
-  code {\#ifdef __WINDOWS__
-	\#include <Windows.h>
-
-	STARUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.cb = sizeof(si);
-	ZeroMemory( &pi, sizeof(pi) );
-\#endif} {}
   Fl_Window m_window {
     label eqsl open
     xywh {793 487 400 325} type Double resizable visible
@@ -278,12 +267,18 @@ m_outputHistory->add(commandLine.c_str());}
           xywh {0 0 100 20} divider
           code0 {o->shortcut(FL_COMMAND+'F');}
         }
-        MenuItem m_menuToolsClean {
+        MenuItem m_menuToolsHistoryClear {
           label {Clear &History}
           callback {m_outputHistory->clear();
 m_outputHistory->add(toolsHistoryTitle.c_str());}
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'h');}
+        }
+        MenuItem m_menuToolsConsoleClear {
+          label {Clear Conso&le}
+          callback {m_outputConsole->clear();}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'l');}
         }
       }
       Submenu m_menuHelp {
@@ -291,7 +286,7 @@ m_outputHistory->add(toolsHistoryTitle.c_str());}
         xywh {0 0 100 20}
       } {
         MenuItem m_menuHelpAbout {
-          label {&About}
+          label About
           callback {string version = "eqsl version %s\\ncompiled %s %s";
 fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
           xywh {0 0 100 20}
@@ -322,8 +317,8 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Progress m_progress {
-      xywh {0 300 400 25} selection_color 60 labeltype NO_LABEL align 0
+    Fl_Progress m_progress {selected
+      xywh {0 300 400 25} selection_color 246 labeltype NO_LABEL align 0
       code0 {o->minimum(0);}
       code1 {o->maximum(100);}
     }
