@@ -112,6 +112,7 @@ int main( int argc, const char** argv )
 				  "dot - make a graphviz visualization of the parse tree (useful for debugging only).", &g_backendName );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.argFlag( "d", "\adump sl data", &g_dumpsl );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 			   "\a0 = errors\n"

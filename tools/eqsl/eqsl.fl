@@ -68,6 +68,11 @@ decl {string renderEngine = "aqsis";} {}
 
 decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
 
+decl {string shaderCompilerArgs[] = {"-nocolor"};} {selected
+} 
+
+decl {string renderViewerArgs[] = {};} {} 
+
 decl {string renderEngineFile = "";} {} 
 
 decl {string renderEngineType = "RenderMan Geometry Files (*.{rib,ribz,rib.gz})";} {} 
@@ -98,7 +103,7 @@ Function {} {open
 \#endif} {}
   Fl_Window m_window {
     label eqsl open
-    xywh {661 463 400 325} type Double resizable visible
+    xywh {793 487 400 325} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -154,11 +159,11 @@ else
 		_fullpath(root,&stracPath[0],256);
 	}
 	std::string program = root;
-	commandLine = renderEngine + " ";
 	program.append("\\\\");
 \#else
-std::string program;
+	std::string program;
 \#endif
+	commandLine = renderEngine + " ";
 	program.append(renderEngine);
 	std::vector<std::string> args;
 	for(TqInt arg = 0; arg < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); arg++)
@@ -202,13 +207,35 @@ else
 	}
 
 // Call relevant commandline
-\#ifdef __WINDOWS__
-	commandLine = shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
-	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, currentDirectory.c_str(), &si, &pi);
+	char acPath[256];
+	char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
 \#else
-	commandLine = "cd \\"" + currentDirectory + "\\"; " + shaderCompiler + " \\"" + shaderCompilerFile + "\\"";
-	system(commandLine.c_str());
+	std::string program;
 \#endif
+	commandLine = shaderCompiler + " ";
+	program.append(shaderCompiler);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(shaderCompilerArgs)/sizeof(shaderCompilerArgs[0]); arg++)
+	{
+		args.push_back(shaderCompilerArgs[arg]);
+		commandLine += shaderCompilerArgs[arg] + " ";
+	}
+	args.push_back(shaderCompilerFile);
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
+	commandLine += " \\"" + shaderCompilerFile + "\\"";
 
 // Log commandline event
 m_outputHistory->add(commandLine.c_str());}
@@ -218,13 +245,33 @@ m_outputHistory->add(commandLine.c_str());}
         MenuItem m_menuToolsFramebuffer {
           label {Open &Framebuffer}
           callback {// Call relevant commandline
-\#ifdef __WINDOWS__
-	commandLine = renderViewer;
-	ProcessCreate(NULL, commandLine.c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	char acPath[256];
+	char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
 \#else
-	commandLine = renderViewer;
-	system(commandLine.c_str());
+	std::string program;
 \#endif
+	commandLine = renderViewer + " ";
+	program.append(renderViewer);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(renderViewerArgs)/sizeof(renderViewerArgs[0]); arg++)
+	{
+		args.push_back(renderViewerArgs[arg]);
+		commandLine += renderViewerArgs[arg] + " ";
+	}
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
 
 // Log commandline event
 m_outputHistory->add(commandLine.c_str());}
@@ -269,13 +316,13 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         label Console open
         xywh {0 50 400 250} resizable
       } {
-        Fl_Text_Display m_outputConsole {selected
+        Fl_Text_Display m_outputConsole {
           xywh {0 50 400 250}
           code0 {o->buffer(new Fl_Text_Buffer);}
         }
       }
     }
-    Fl_Progress m_progress {selected
+    Fl_Progress m_progress {
       xywh {0 300 400 25} selection_color 60 labeltype NO_LABEL align 0
       code0 {o->minimum(0);}
       code1 {o->maximum(100);}
