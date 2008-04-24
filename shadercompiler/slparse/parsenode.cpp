@@ -19,7 +19,7 @@
 	#define tolower(x) _tolower(x)
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 static const char* gVariableTypeNames[] =
     {
@@ -432,5 +432,5 @@ TqInt CqParseNodeMathOp::ResType() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

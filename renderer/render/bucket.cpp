@@ -29,8 +29,11 @@
 #ifdef WIN32
 #include    <windows.h>
 #endif
-#include	<math.h>
+#include	<cstring>
+#include	<algorithm>
+#include	<valarray>
 
+#include	"aqsismath.h"
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"bucket.h"
@@ -38,13 +41,9 @@
 
 #include	"imagers.h"
 
-#include	<algorithm>
-#include	<valarray>
 
 
-
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -81,7 +80,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter, bool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter, bool empty )
 {
 	m_XOrigin = xorigin;
 	m_YOrigin = yorigin;
@@ -91,15 +90,15 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	m_PixelYSamples = m_ImageBuffer->PixelYSamples();
 	m_FilterXWidth = m_ImageBuffer->FilterXWidth();
 	m_FilterYWidth = m_ImageBuffer->FilterYWidth();
-	m_DiscreteShiftX = FLOOR(m_FilterXWidth/2.0f);
-	m_DiscreteShiftY = FLOOR(m_FilterYWidth/2.0f);
+	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
+	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
 	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
 	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
 
-	m_NumTimeRanges = MAX(4, m_PixelXSamples * m_PixelYSamples);
+	m_NumTimeRanges = max(4, m_PixelXSamples * m_PixelYSamples);
 
-        TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-        TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
@@ -122,7 +121,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				//if(fJitter)
+				if(useJitter)
 					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
@@ -159,7 +158,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			if(!empty)
 				m_aieImage[which].Clear();
 
-			//if(fJitter)
+			if(useJitter)
 				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
@@ -244,7 +243,7 @@ void CqBucket::InitialiseFilterValues()
 	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
 	TqInt numperpixel = numsubpixels * numsubpixels;
 
-	TqUint numvalues = static_cast<TqUint>( ( ( CEIL(FilterXWidth()) + 1 ) * ( CEIL(FilterYWidth()) + 1 ) ) * ( numperpixel ) );
+	TqUint numvalues = static_cast<TqUint>( ( (lceil(FilterXWidth()) + 1) * (lceil(FilterYWidth()) + 1) ) * numperpixel );
 
 	m_aFilterValues.resize( numvalues );
 
@@ -257,9 +256,9 @@ void CqBucket::InitialiseFilterValues()
 
 	TqFloat xmax = m_DiscreteShiftX;
 	TqFloat ymax = m_DiscreteShiftY;
-	TqFloat xfwo2 = CEIL(FilterXWidth()) * 0.5f;
-	TqFloat yfwo2 = CEIL(FilterYWidth()) * 0.5f;
-	TqFloat xfw = CEIL(FilterXWidth());
+	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
+	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
+	TqFloat xfw = std::ceil(FilterXWidth());
 
 	TqFloat subcellwidth = 1.0f / numsubpixels;
 	TqFloat subcellcentre = subcellwidth * 0.5f;
@@ -297,7 +296,7 @@ void CqBucket::InitialiseFilterValues()
 							TqFloat fy = ( cy * subcellwidth ) + sfy + pfy + subcellcentre;
 							TqFloat w = 0.0f;
 							if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
-								w = ( *pFilter ) ( fx, fy, CEIL(FilterXWidth()), CEIL(FilterYWidth()) );
+								w = ( *pFilter ) ( fx, fy, std::ceil(FilterXWidth()), std::ceil(FilterYWidth()) );
 							m_aFilterValues[ cindex ] = w;
 						}
 					}
@@ -424,8 +423,8 @@ void CqBucket::FilterBucket(bool empty)
 
 	TqInt xmax = m_DiscreteShiftX;
 	TqInt ymax = m_DiscreteShiftY;
-	TqFloat xfwo2 = CEIL(FilterXWidth()) * 0.5f;
-	TqFloat yfwo2 = CEIL(FilterYWidth()) * 0.5f;
+	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
+	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
 	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
 
 	TqInt numperpixel = numsubpixels * numsubpixels;
@@ -486,7 +485,7 @@ void CqBucket::FilterBucket(bool empty)
 						CqImagePixel* pie2 = pie;
 						for ( TqInt fx = -xmax; fx <= xmax; fx++ )
 						{
-							TqInt index = ( ( ymax * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							TqInt index = ( ( ymax * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
 							// Now go over each subsample within the pixel
 							TqInt sampleIndex = sy * PixelXSamples();
 							TqInt sindex = index + ( sy * PixelXSamples() * numsubpixels );
@@ -542,7 +541,7 @@ void CqBucket::FilterBucket(bool empty)
 					{
 						CqImagePixel* pie2 = pie;
 
-						TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + xmax ) * numperpixel;
+						TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + xmax ) * numperpixel;
 						// Now go over each y subsample within the pixel
 						TqInt sx = PixelXSamples() / 2; // use the samples in the centre of the pixel.
 						TqInt sy = 0;
@@ -619,7 +618,7 @@ void CqBucket::FilterBucket(bool empty)
 						CqImagePixel* pie2 = pie;
 						for ( fx = -xmax; fx <= xmax; fx++ )
 						{
-							TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
 							// Now go over each subsample within the pixel
 							TqInt sx, sy;
 							TqInt sampleIndex = 0;
@@ -860,13 +859,13 @@ void CqBucket::QuantizeBucket()
 					_ob += 1;
 				if ( modf( one * alpha + ditheramplitude * s, &a ) > 0.5 )
 					a += 1;
-				r = CLAMP( r, min, max );
-				g = CLAMP( g, min, max );
-				b = CLAMP( b, min, max );
-				_or = CLAMP( _or, min, max );
-				_og = CLAMP( _og, min, max );
-				_ob = CLAMP( _ob, min, max );
-				a = CLAMP( a, min, max );
+				r = clamp<double>(r, min, max);
+				g = clamp<double>(g, min, max);
+				b = clamp<double>(b, min, max);
+				_or = clamp<double>(_or, min, max);
+				_og = clamp<double>(_og, min, max);
+				_ob = clamp<double>(_ob, min, max);
+				a = clamp<double>(a, min, max);
 				col.SetfRed ( r );
 				col.SetfGreen( g );
 				col.SetfBlue ( b );
@@ -903,7 +902,7 @@ void CqBucket::QuantizeBucket()
 				double d;
 				if ( modf( one * pie2->Depth() + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
 					d += 1;
-				d = CLAMP( d, min, max );
+				d = clamp<double>( d, min, max );
 				pie2->SetDepth( d );
 				pie2++;
 			}
@@ -940,7 +939,7 @@ void CqBucket::QuantizeBucket()
 						double d;
 						if ( modf( one * pie2->GetPixelSample().Data()[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
 							d += 1.0f;
-						d = CLAMP( d, min, max );
+						d = clamp<double>( d, min, max );
 						pie2->GetPixelSample().Data()[sampleindex] = d;
 					}
 					pie2++;
@@ -975,6 +974,6 @@ CqBucket::~CqBucket()
 {
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

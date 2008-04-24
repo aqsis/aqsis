@@ -16,7 +16,7 @@
 #include	"aqsis.h"
 #include	<boost/shared_ptr.hpp>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqSurface;
 
@@ -42,6 +42,6 @@ struct IqRaytrace
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___iraytrace_Loaded___

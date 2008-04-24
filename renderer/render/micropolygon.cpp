@@ -38,7 +38,7 @@
 
 #include	"multitimer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
@@ -123,7 +123,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
 	TqInt size = numMicroPolygons(cu, cv);
 
-	STATS_INC( GRD_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+	STATS_INC( GRD_size_4 + clamp<TqInt>(CqStats::stats_log2(size) - 2, 0, 7) );
 }
 
 //---------------------------------------------------------------------
@@ -260,11 +260,73 @@ void CqMicroPolyGrid::CalcSurfaceDerivatives()
 	}
 }
 
+
+//---------------------------------------------------------------------
+void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
+{
+	// Anti grid-crack hack!  We expand the grid by pushing the outer verts
+	// along the vectors connecting themselves to the next layer of verts in:
+	//
+	//        ^  ^  ^
+	//        |  |  |
+	//
+	//  <--   x--x--x ...
+	//        |  |  |
+	//  <--   x--x--x ...
+	//        |  |  .
+	//  <--   x--x.
+	//        .
+	//
+	CqVector3D* pPmod;
+	pVar(EnvVars_P)->GetPointPtr(pPmod);
+
+	const TqInt numVertsU = uGridRes() + 1;
+	const TqInt totVerts = numVertsU*(vGridRes() + 1);
+
+	// Before expanding each edge, we perform a quick check to guess whether it
+	// is degenerate.  We avoid checking the vertices of a row against each
+	// other directly, since this will result in the usual sensitivity to
+	// floating point errors.  Instead, we check whether the length of the row
+	// is less than sqrt(degeneracyRatio) times the length of the following
+	// row.
+	const TqFloat degeneracyRatio = 1e-8;
+
+	if((pPmod[0] - pPmod[numVertsU-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[numVertsU] - pPmod[2*numVertsU-1]).Magnitude2())
+	{
+		// Expand first u-row in -v direction.
+		for(TqInt iu = 0; iu < numVertsU; ++iu)
+			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu+numVertsU];
+	}
+	if((pPmod[totVerts-numVertsU] - pPmod[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[totVerts-2*numVertsU] - pPmod[totVerts-numVertsU-1]).Magnitude2())
+	{
+		// Expand last u-row in +v direction.
+		for(TqInt iu = totVerts-numVertsU; iu < totVerts; ++iu)
+			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu-numVertsU];
+	}
+	if((pPmod[0] - pPmod[totVerts-numVertsU]).Magnitude2()
+			> degeneracyRatio*(pPmod[1] - pPmod[totVerts-numVertsU+1]).Magnitude2())
+	{
+		// Expand first v-column in -u direction.
+		for(TqInt iv = 0; iv < totVerts; iv += numVertsU)
+			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv+1];
+	}
+	if((pPmod[numVertsU-1] - pPmod[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pPmod[numVertsU-2] - pPmod[totVerts-2]).Magnitude2())
+	{
+		// Expand last v-column in +u direction.
+		for(TqInt iv = numVertsU-1; iv < totVerts; iv += numVertsU)
+			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv-1];
+	}
+}
+
+
 //---------------------------------------------------------------------
 /** Shade the grid using the surface parameters of the surface passed and store the color values for each micropolygon.
  */
 
-void CqMicroPolyGrid::Shade()
+void CqMicroPolyGrid::Shade( bool canCullGrid )
 {
 	register TqInt i;
 
@@ -319,12 +381,16 @@ void CqMicroPolyGrid::Shade()
     TqInt buRes = uRes;
     TqInt bvRes = vRes;
 
+	const TqFloat* gridExpand = pAttributes()->GetFloatAttribute("aqsis", "expandgrids");
+	if(gridExpand && *gridExpand > 0)
+		ExpandGridBoundaries(*gridExpand);
+
     // Make sure uRes and vRes are at least equal to 4
     // Otherwise spline interpolation will be off
     if (uRes < 4) buRes = 4;
     if (vRes < 4) bvRes = 4;
-    CqCubicSpline<CqVector4D> sp_u(SplineBasis_CatmullRom, buRes);
-    CqCubicSpline<CqVector4D> sp_v(SplineBasis_CatmullRom, bvRes);
+    CqCubicSpline<TqFloat> sp_u(SplineBasis_CatmullRom, buRes);
+    CqCubicSpline<TqFloat> sp_v(SplineBasis_CatmullRom, bvRes);
 
     for ( i = gsmin1; i >= 0; i-- )
     {
@@ -341,7 +407,7 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_u) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_du) ->SetFloat(dv, i );
-                sp_u.pushBack(CqVector4D(dv, 0, 0, 0));
+                sp_u.pushBack(dv);
                  } else {
                    // Make sure uRes at least equal to 4
                    if (uRes < 4) {
@@ -350,9 +416,9 @@ void CqMicroPolyGrid::Shade()
                       }
                    }
              
-                   CqVector4D res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
+                   TqFloat res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
              
-                   pVar(EnvVars_du) ->SetFloat( res.x(), i );
+                   pVar(EnvVars_du) ->SetFloat(res, i );
                 }
           }
           if ( USES( lUses, EnvVars_dv ) ){
@@ -364,7 +430,7 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_v) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_dv) ->SetFloat( dv, i );
-                sp_v.pushBack(CqVector4D(dv, 0, 0, 0));
+                sp_v.pushBack(dv);
              } else {
                 // Make sure vRes at least equal to 4
                 if (vRes < 4) {
@@ -372,8 +438,8 @@ void CqMicroPolyGrid::Shade()
                       sp_v.pushBack(sp_v[vRes-1]);
                    }
                 }
-                CqVector4D res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
-                pVar(EnvVars_dv) ->SetFloat( res.x(), i );
+                TqFloat res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
+                pVar(EnvVars_dv) ->SetFloat(res, i );
              }
           }
        } else {
@@ -429,7 +495,7 @@ void CqMicroPolyGrid::Shade()
 			}
 		}
 
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -458,7 +524,7 @@ void CqMicroPolyGrid::Shade()
 		}
 		//theStats.OcclusionCullTimer().Stop();
 
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -502,7 +568,7 @@ void CqMicroPolyGrid::Shade()
 		}
 
 		// If the whole grid is culled don't bother going any further.
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );
@@ -512,7 +578,6 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now shade the grid.
-	//theStats.SurfaceTimer().Start();
 	if ( pshadSurface )
 	{
 		TIME_SCOPE("Surface shading")
@@ -520,14 +585,18 @@ void CqMicroPolyGrid::Shade()
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
 		pshadSurface->Evaluate( m_pShaderExecEnv );
 	}
-	//theStats.SurfaceTimer().Stop();
 
-	// Now try and cull any true transparent MPs (assigned by the shader code
+	// Perform atmosphere shading
+	if ( pshadAtmosphere )
+	{
+		TIME_SCOPE("Atmosphere shading")
+		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
+	}
 
+	// Now try to cull any true transparent MPs (assigned by the shader code
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
-		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion culling")
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -539,30 +608,21 @@ void CqMicroPolyGrid::Shade()
 			else
 				break;
 		}
-		//theStats.OcclusionCullTimer().Stop();
 
-		if ( cCulled == gs )
-		{
-			m_fCulled = true;
-			STATS_INC( GRD_culled );
-			DeleteVariables( true );
-			return ;
-		}
-	}
-	// Now perform atmosphere shading
-	if ( pshadAtmosphere )
-	{
-		TIME_SCOPE("Atmosphere shading")
-		//theStats.AtmosphereTimer().Start();
-		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
-		//theStats.AtmosphereTimer().Stop();
+//		if ( cCulled == gs )
+//		{
+//			m_fCulled = true;
+//			STATS_INC( GRD_culled );
+//			DeleteVariables( true );
+//			return ;
+//		}
 	}
 
 	DeleteVariables( false );
 
 	TqInt	size = m_pShaderExecEnv->shadingPointCount();
 
-	STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+	STATS_INC( GRD_shd_size_4 + clamp<TqInt>( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
@@ -638,8 +698,8 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
 	if ( all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )
-		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )			// \note: Needed by backface culling.
+//		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) || all )
@@ -669,8 +729,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	TqInt cv = vGridRes();
 
 	TIMER_START("Project points")
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface() ->pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface() ->pTransform().get(), QGetRenderContext()->Time(), matCameraToObject0 );
 
 	// Transform the whole grid to hybrid camera/raster space
 	CqVector3D* pP;
@@ -704,7 +766,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	std::map<TqFloat, TqInt>::iterator keyFrame;
 	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first, matObjectToCameraT );
 		aaPtimes[ keyFrame->second ].resize( gsmin1 + 1 );
 
 		for ( i = gsmin1; i >= 0; i-- )
@@ -940,10 +1002,10 @@ CqMotionMicroPolyGrid::~CqMotionMicroPolyGrid()
 /** Shade the primary grid.
  */
 
-void CqMotionMicroPolyGrid::Shade()
+void CqMotionMicroPolyGrid::Shade( bool canCullGrid )
 {
 	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
-	pGrid->Shade();
+	pGrid->Shade(false);
 }
 
 
@@ -976,29 +1038,39 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	TqInt iTime;
 
 	TIMER_START("Project points")
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
+	// Check to see if this surface is single sided, if so, we can do backface culling.
+	bool canBeBFCulled = ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !pGridA->usesCSG();
 
 	ADDREF( pGridA );
 
 	// Get an array of P's for all time positions.
 	std::vector<std::vector<CqVector3D> > aaPtimes;
 	aaPtimes.resize( cTimes() );
-
+	
 	TqInt tTime = cTimes();
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
 	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 
+	// Store a count of backface culling for each MP, if it equals the number of timeslots, then
+	// the MP can be culled.
+	std::vector<TqInt> totalBFCulled;
+	totalBFCulled.assign( gsmin1 + 1, 0 );
+
 	for ( iTime = 0; iTime < tTime; iTime++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime) );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime), matObjectToCameraT  );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
 		// Transform the whole grid to hybrid camera/raster space
 		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		CqVector3D* pP;
 		pg->pVar(EnvVars_P) ->GetPointPtr( pP );
+		CqVector3D* pNg;
+		pg->pVar(EnvVars_Ng) ->GetPointPtr( pNg );
 
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -1009,6 +1081,14 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
 			aaPtimes[ iTime ][ i ].z( zdepth );
 			pP[ i ] = aaPtimes[ iTime ][ i ];
+
+			// Now try and cull any hidden MPs if Sides==1
+			if ( canBeBFCulled )
+			{
+				TIME_SCOPE("Backface culling")
+				if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+					totalBFCulled[i]++;
+			}
 		}
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
@@ -1042,6 +1122,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	bool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
 
 	TqInt iv;
+	TqInt totalTimes = cTimes();
 	for ( iv = 0; iv < cv; iv++ )
 	{
 		TqInt iu;
@@ -1050,9 +1131,9 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
 			// If culled don't bother.
-			if ( pGridA->CulledPolys().Value( iIndex ) )
+			if ( totalBFCulled[iIndex] == totalTimes )
 			{
-				//theStats.IncCulledMPGs();
+				STATS_INC( MPG_culled );
 				continue;
 			}
 
@@ -1374,6 +1455,164 @@ void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector
 	CacheHitTestValues(cache, points);
 }
 
+void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	if(cache.smoothInterpolation)
+		CacheOutputInterpCoeffsSmooth(cache);
+	else
+		CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygon::InterpolateOutputs(const SqMpgSampleInfo& cache,
+	const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	if(cache.smoothInterpolation)
+	{
+		outCol = cache.color + cache.colorMultX*pos.x() + cache.colorMultY*pos.y();
+		outOpac = cache.opacity + cache.opacityMultX*pos.x() + cache.opacityMultY*pos.y();
+	}
+	else
+	{
+		outCol = cache.color;
+		outOpac = cache.opacity;
+	}
+}
+
+void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) const
+{
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
+	{
+		cache.color = *colColor();
+	}
+	else
+	{
+		cache.color = gColWhite;
+	}
+
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
+	{
+		cache.opacity = *colOpacity();
+		cache.occludes = cache.opacity >= gColWhite;
+	}
+	else
+	{
+		cache.opacity = gColWhite;
+		cache.occludes = true;
+	}
+}
+
+void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
+{
+	// Get 2D coordinates of verts in the (x,y) plane.
+	CqVector2D p1(PointA());
+	CqVector2D p2(PointB());
+	CqVector2D p3(PointC());
+	CqVector2D p4(PointD());
+
+	// 2D diagonal vectors for the micropolygon.  The order of the vertices
+	// (p1, p2, p3, p4) here winds around the micropoly, rather than taking the
+	// usual order expected from RiPatch.
+	CqVector2D d1 = p3 - p1;
+	CqVector2D d2 = p4 - p2;
+	// Center point
+	CqVector2D pAvg = 0.25*(p1 + p2 + p3 + p4);
+
+	// For each component of the colour, we compute a linear approximation to
+	// the component over the micropolygon.  This is done by computing a
+	// "normal" vector to a plane constructed such that the colour component
+	// takes the place of the depth, "z".
+	//
+	// This is essentially the same method used to compute the depth of a
+	// sample inside the fContains() function.
+
+	TqFloat Nz = d1.x()*d2.y() - d1.y()*d2.x();
+
+	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Ci" ))
+	{
+		const CqColor* pCi = NULL;
+		m_pGrid->pVar(EnvVars_Ci)->GetColorPtr(pCi);
+
+		const CqColor& c1 = pCi[GetCodedIndex(m_IndexCode, 0)];
+		const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
+		const CqColor& c3 = pCi[GetCodedIndex(m_IndexCode, 2)];
+		const CqColor& c4 = pCi[GetCodedIndex(m_IndexCode, 3)];
+		const CqColor cAvg = 0.25*(c1 + c2 + c3 + c4);
+
+		if(Nz != 0)
+		{
+			// Compute smooth shading coefficients for Ci.
+			CqColor c31 = c3 - c1;
+			CqColor c42 = c4 - c2;
+
+			CqColor Nx = d1.y()*c42 - c31*d2.y();
+			CqColor Ny = -d1.x()*c42 + c31*d2.x();
+
+			TqFloat NzInv = 1/Nz;
+			cache.color = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + cAvg;
+			cache.colorMultX = -Nx*NzInv;
+			cache.colorMultY = -Ny*NzInv;
+		}
+		else
+		{
+			// Degenerate to flat shading if the linear approx yields an
+			// infinitely steep plane.
+			cache.color = c1;
+			cache.colorMultX = gColBlack;
+			cache.colorMultY = gColBlack;
+		}
+	}
+	else
+	{
+		cache.color = gColWhite;
+		cache.colorMultX = gColBlack;
+		cache.colorMultY = gColBlack;
+	}
+
+	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Oi" ))
+	{
+		const CqColor* pOi = NULL;
+		m_pGrid->pVar(EnvVars_Oi)->GetColorPtr(pOi);
+
+		const CqColor& o1 = pOi[GetCodedIndex(m_IndexCode, 0)];
+		const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];
+		const CqColor& o3 = pOi[GetCodedIndex(m_IndexCode, 2)];
+		const CqColor& o4 = pOi[GetCodedIndex(m_IndexCode, 3)];
+		const CqColor oAvg = 0.25*(o1 + o2 + o3 + o4);
+
+		if(Nz != 0)
+		{
+			// Compute smooth shading coefficients for Oi.
+			CqColor o31 = o3 - o1;
+			CqColor o42 = o4 - o2;
+
+			CqColor Nx = d1.y()*o42 - o31*d2.y();
+			CqColor Ny = -d1.x()*o42 + o31*d2.x();
+
+			TqFloat NzInv = 1/Nz;
+			cache.opacity = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + oAvg;
+			cache.opacityMultX = -Nx*NzInv;
+			cache.opacityMultY = -Ny*NzInv;
+
+			// The micropoly occludes if the values on all vertices do.
+			cache.occludes = (o1 >= gColWhite) && (o2 >= gColWhite)
+				&& (o3 >= gColWhite) && (o4 >= gColWhite);
+		}
+		else
+		{
+			cache.opacity = oAvg;
+			cache.opacityMultX = gColBlack;
+			cache.opacityMultY = gColBlack;
+			cache.occludes = (cache.opacity >= gColWhite);
+		}
+	}
+	else
+	{
+		cache.opacity = gColWhite;
+		cache.opacityMultX = gColBlack;
+		cache.opacityMultY = gColBlack;
+		cache.occludes = true;
+	}
+}
 
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {
@@ -1623,8 +1862,8 @@ void CqMicroPolygon::CalculateTotalBound()
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 
 		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
 		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
@@ -1672,7 +1911,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
 	TqUint timeRanges = CqBucket::NumTimeRanges();
-	TqUint divisions = MIN(d, timeRanges);
+	TqUint divisions = min(d, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;
 	TqInt startKey = 0;
@@ -1908,20 +2147,20 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 		return m_Bound;
 
 	// Calculate the boundary, and store the indexes in the cache.
-	m_Bound.vecMin().x( MIN( m_Point0.x(), MIN( m_Point1.x(), MIN( m_Point2.x(), m_Point3.x() ) ) ) );
-	m_Bound.vecMin().y( MIN( m_Point0.y(), MIN( m_Point1.y(), MIN( m_Point2.y(), m_Point3.y() ) ) ) );
-	m_Bound.vecMin().z( MIN( m_Point0.z(), MIN( m_Point1.z(), MIN( m_Point2.z(), m_Point3.z() ) ) ) );
-	m_Bound.vecMax().x( MAX( m_Point0.x(), MAX( m_Point1.x(), MAX( m_Point2.x(), m_Point3.x() ) ) ) );
-	m_Bound.vecMax().y( MAX( m_Point0.y(), MAX( m_Point1.y(), MAX( m_Point2.y(), m_Point3.y() ) ) ) );
-	m_Bound.vecMax().z( MAX( m_Point0.z(), MAX( m_Point1.z(), MAX( m_Point2.z(), m_Point3.z() ) ) ) );
+	m_Bound.vecMin().x( min( m_Point0.x(), min( m_Point1.x(), min( m_Point2.x(), m_Point3.x() ) ) ) );
+	m_Bound.vecMin().y( min( m_Point0.y(), min( m_Point1.y(), min( m_Point2.y(), m_Point3.y() ) ) ) );
+	m_Bound.vecMin().z( min( m_Point0.z(), min( m_Point1.z(), min( m_Point2.z(), m_Point3.z() ) ) ) );
+	m_Bound.vecMax().x( max( m_Point0.x(), max( m_Point1.x(), max( m_Point2.x(), m_Point3.x() ) ) ) );
+	m_Bound.vecMax().y( max( m_Point0.y(), max( m_Point1.y(), max( m_Point2.y(), m_Point3.y() ) ) ) );
+	m_Bound.vecMax().z( max( m_Point0.z(), max( m_Point1.z(), max( m_Point2.z(), m_Point3.z() ) ) ) );
 
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 
 		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
 		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
@@ -1934,5 +2173,5 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

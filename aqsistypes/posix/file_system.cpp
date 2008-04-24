@@ -33,7 +33,7 @@
 
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Given a string representing a filename with wildcards, return a list
@@ -58,10 +58,20 @@ std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 	return result;
 }
 
+//---------------------------------------------------------------------
+/** Globbing for command line arguments. Under UNIX style systems the
+ * shell will take care of this for us.
+*/
+std::list<CqString*> CqFile::cliGlob ( const CqString& strFileGlob )
+{
+	std::list<CqString*> result;
+	result.push_front( new CqString( strFileGlob ));
+	return result;
+}
 
 CqString CqFile::FixupPath(CqString& strPath)
 {
-	return( strPath );
+	return strPath ;
 }
 
 std::string CqFile::basePath( const CqString& strFilespec )
@@ -114,5 +124,5 @@ std::string CqFile::pathSep()
 	return("/");
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

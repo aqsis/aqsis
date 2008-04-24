@@ -18,7 +18,7 @@
 #include	"ifuncdef.h"
 #include	"parsenode.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 ///----------------------------------------------------------------------
@@ -151,6 +151,6 @@ extern TqInt	gcVariableTypeIdentifiers;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !FUNCDEF_H_INCLUDED

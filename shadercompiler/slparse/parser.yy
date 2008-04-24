@@ -23,6 +23,7 @@ namespace std
 #include <string>
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 #include	"parsenode.h"
 #include	"logging.h"

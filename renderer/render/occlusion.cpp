@@ -35,7 +35,7 @@
 #include <deque>
 #include <fstream>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 TqInt CqOcclusionTree::m_Tab = 0;
 
@@ -93,12 +93,12 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	{
 		a->m_SampleIndices.push_back(m_SampleIndices[i]);
 		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
-		minTime = MIN(minTime, sample.m_Time);
-		maxTime = MAX(maxTime, sample.m_Time);
-		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
-		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
-		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
+		minTime = min(minTime, sample.m_Time);
+		maxTime = max(maxTime, sample.m_Time);
+		minDofIndex = min(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = max(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = min(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = max(maxDetailLevel, sample.m_DetailLevel);
 	}
 	a->m_MinTime = minTime;
 	a->m_MaxTime = maxTime;
@@ -114,12 +114,12 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	{
 		b->m_SampleIndices.push_back(m_SampleIndices[i]);
 		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
-		minTime = MIN(minTime, sample.m_Time);
-		maxTime = MAX(maxTime, sample.m_Time);
-		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
-		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
-		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
+		minTime = min(minTime, sample.m_Time);
+		maxTime = max(maxTime, sample.m_Time);
+		minDofIndex = min(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = max(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = min(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = max(maxDetailLevel, sample.m_DetailLevel);
 	}
 	b->m_MinTime = minTime;
 	b->m_MaxTime = maxTime;
@@ -220,16 +220,16 @@ void CqOcclusionTree::InitialiseBounds()
 	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
 	{
 		const SqSampleData& sample = CqBucket::ImageElement(i->first).SampleData(i->second);
-		minXVal = MIN(minXVal, sample.m_Position.x());
-		maxXVal = MAX(maxXVal, sample.m_Position.x());
-		minYVal = MIN(minYVal, sample.m_Position.y());
-		maxYVal = MAX(maxYVal, sample.m_Position.y());
-		minTime = MIN(minTime, sample.m_Time);
-		maxTime = MAX(maxTime, sample.m_Time);
-		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
-		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
-		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
+		minXVal = min(minXVal, sample.m_Position.x());
+		maxXVal = max(maxXVal, sample.m_Position.x());
+		minYVal = min(minYVal, sample.m_Position.y());
+		maxYVal = max(maxYVal, sample.m_Position.y());
+		minTime = min(minTime, sample.m_Time);
+		maxTime = max(maxTime, sample.m_Time);
+		minDofIndex = min(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = max(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = min(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = max(maxDetailLevel, sample.m_DetailLevel);
 	}
 	m_MinSamplePoint[0] = minXVal;
 	m_MaxSamplePoint[0] = maxXVal;
@@ -316,7 +316,7 @@ void CqOcclusionTree::PropagateChanges()
 			{
 				if (*child)
 				{
-					maxdepth = MAX((*child)->m_MaxOpaqueZ, maxdepth);
+					maxdepth = max((*child)->m_MaxOpaqueZ, maxdepth);
 				}
 			}
 			// Only if this has resulted in a change at this level, should we process the parent.
@@ -568,8 +568,8 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 
 		if ( SampleHit )
 		{
-			bool Occludes = MpgSampleInfo.m_Occludes;
-			bool opaque =  MpgSampleInfo.m_IsOpaque;
+			bool Occludes = MpgSampleInfo.occludes;
+			bool opaque =  MpgSampleInfo.isOpaque;
 
 			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
 			static SqImageSample localImageVal;
@@ -592,8 +592,10 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 			pMPG->MarkHit();
 
 			TqFloat* val = ImageVal.Data();
-			const CqColor& col = MpgSampleInfo.m_Colour;
-			const CqColor& opa = MpgSampleInfo.m_Opacity;
+			CqColor col;
+			CqColor opa;
+			pMPG->InterpolateOutputs(MpgSampleInfo, sample.m_Position, col, opa);
+
 			val[ 0 ] = col[0];
 			val[ 1 ] = col[1];
 			val[ 2 ] = col[2];
@@ -702,5 +704,5 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 }
 */
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

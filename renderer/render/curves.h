@@ -33,7 +33,7 @@
 #include        "vector4d.h"
 #include        "patch.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -83,73 +83,12 @@ class CqCurve : public CqSurface
 				return ( NULL );
 			}
 		}
-		/** Returns whether the curve is diceable - at the moment, no Curves
-		 * are directly diceable since they're converted to patches just prior
-		 * to rendering. */
-		virtual bool Diceable()
-		{
-			// OK, here the CqCubicCurveSegment line has two options:
-			//  1. split into two more lines
-			//  2. turn into a bilinear patch for rendering
-			// We don't want to go turning into a patch unless absolutely
-			// necessary, since patches cost more.  We only want to become a patch
-			// if the current curve is "best handled" as a patch.  For now, I'm
-			// choosing to define that the curve is best handled as a patch under
-			// one or more of the following two conditions:
-			//  1. If the maximum width is a significant fraction of the length of
-			//      the line (width greater than 0.75 x length; ignoring normals).
-			//  2. If the length of the line (ignoring the width; cos' it's
-			//      covered by point 1) is such that it's likely a bilinear
-			//      patch would be diced immediately if we created one (so that
-			//      patches don't have to get split!).
-			//  3. If the curve crosses the eye plane (m_fDiceable == false).
-
-			// find the length of the CqLinearCurveSegment line in raster space
-			if( m_splitDecision == Split_Undecided )
-			{
-				// AGG - 31/07/04
-				// well, if we follow the above statagy we end up splitting into
-				// far too many grids (with roughly 1 mpg per grid). so after
-				// profiling a few scenes, the fastest method seems to be just
-				// to convert to a patch immediatly.
-				// we really need a native dice for curves but until that time
-				// i reckon this is best.
-				//m_splitDecision = Split_Patch;
-
-
-				     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
-				                                    "camera", "raster",
-								NULL, NULL,
-								QGetRenderContextI()->Time()
-				                                );
-				     CqVector2D hull[ 2 ];     // control hull
-				     hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];
-				     hull[ 1 ] = matCtoR * P()->pValue( 1 )[0];
-				     CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
-				     TqFloat lengthraster = lengthVector.Magnitude();
-
-				     // find the approximate "length" of a diced patch in raster space
-				     TqFloat gridlength = GetGridLength();
-
-				     // decide whether to split into more curve segments or a patch
-				     if (
-					 ( lengthraster < gridlength ) ||
-				         ( !m_fDiceable )
-				     )
-				     {
-				         // split into a patch
-				         m_splitDecision = Split_Patch;
-				     }
-				     else
-				     {
-				         // split into smaller curves
-				         m_splitDecision = Split_Curve;
-				     }
-				
-			}
-
-			return false;
-		}
+		/** \brief Returns whether the curve is diceable
+		 *
+		 * At the moment, no Curves are directly diceable since they're
+		 * converted to patches just prior to rendering.
+		 */
+		virtual bool Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
@@ -232,7 +171,7 @@ class CqCurve : public CqSurface
 		    Split_Undecided = 0,
 		    Split_Curve,
 		    Split_Patch,
-	};
+		};
 		/** Stored decision about split to curves or patches.
 		 */
 		TqInt m_splitDecision;
@@ -251,6 +190,13 @@ class CqLinearCurveSegment : public CqCurve
 	public:
 		CqLinearCurveSegment();
 		virtual ~CqLinearCurveSegment();
+		/** \brief Natural subdivision for this curve segment.
+		 *
+		 * \param pParam - Original parameter.
+		 * \param pParam1 - First new parameter.
+		 * \param pParam2 - Second new parameter.
+		 * \param u - true if the split is along u (should always be false!)
+		 */
 		void NaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
@@ -293,26 +239,6 @@ class CqLinearCurveSegment : public CqCurve
 		{
 			return "CqLinearCurveSegment";
 		}
-		/** Typed natural subdivision for the surface. */
-		template <class T, class SLT>
-		void TypedNaturalSubdivide(
-		    CqParameterTyped<T, SLT>* pParam,
-		    CqParameterTyped<T, SLT>* pResult1,
-		    CqParameterTyped<T, SLT>* pResult2,
-		    bool u
-		)
-		{
-			// we can only split curves along v, so enforce this
-			assert( u == false );
-
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-
-			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
-			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
-			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
-		}
 		virtual CqSurface* Clone() const;
 };
 
@@ -329,11 +255,25 @@ class CqCubicCurveSegment : public CqCurve
 	public:
 		CqCubicCurveSegment();
 		virtual ~CqCubicCurveSegment();
+		/** \brief Natural subdivision of parameters on cubic curves
+		 *
+		 * \param pParam - Original parameter.
+		 * \param pParam1 - First new parameter.
+		 * \param pParam2 - Second new parameter.
+		 * \param u - true if the split is along u (should always be false!)
+		 */
 		void NaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
 		    bool u
 		);
+		/** \brief Natural subdivision for varying parameters on cubic curves
+		 *
+		 * \param pParam - Original parameter.
+		 * \param pParam1 - First new parameter.
+		 * \param pParam2 - Second new parameter.
+		 * \param u - true if the split is along u (should always be false!)
+		 */
 		void VaryingNaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
@@ -344,6 +284,18 @@ class CqCubicCurveSegment : public CqCurve
 		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		void ConvertToBezierBasis( CqMatrix& matBasis );
+
+		/** \brief Calculate the tangent at a given u along the curve
+		 *
+		 * The algorithm uses the analytical form for the tangent vector at
+		 * points inside the curve.  For the curve endpoints (u == 0 or u ==
+		 * 1), a numerically stable algorithm is used which works even in the
+		 * cases where some control points are repeated.
+		 *
+		 * \param u - curve parameter
+		 * \return the tangent vector at u.
+		 */
+		CqVector3D	CalculateTangent(TqFloat u);
 		//---------------------------------------------- Inlined Public Methods
 	public:
 #ifdef _DEBUG
@@ -378,57 +330,7 @@ class CqCubicCurveSegment : public CqCurve
 		{
 			return "CqCubicCurveSegment";
 		}
-		/** Calculate the tangent at a given u on the curve segment using de Casteljau */
-		CqVector3D	CalculateTangent(TqFloat u);
 
-		/** Typed natural subdivision for the surface. */
-		template <class T, class SLT>
-		void TypedNaturalSubdivide(
-		    CqParameterTyped<T, SLT>* pParam,
-		    CqParameterTyped<T, SLT>* pResult1,
-		    CqParameterTyped<T, SLT>* pResult2,
-		    bool u
-		)
-		{
-			// we can only split curves along v, so enforce this
-			assert( u == false );
-
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-
-			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
-			pTResult1->pValue() [ 1 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) / 2.0f );
-			pTResult1->pValue() [ 2 ] = static_cast<T>( pTResult1->pValue() [ 1 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
-
-			pTResult2->pValue() [ 3 ] = pTParam->pValue() [ 3 ];
-			pTResult2->pValue() [ 2 ] = static_cast<T>( ( pTParam->pValue() [ 2 ] + pTParam->pValue() [ 3 ] ) / 2.0f );
-			pTResult2->pValue() [ 1 ] = static_cast<T>( pTResult2->pValue() [ 2 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
-
-			pTResult1->pValue() [ 3 ] = static_cast<T>( ( pTResult1->pValue() [ 2 ] + pTResult2->pValue() [ 1 ] ) / 2.0f );
-			pTResult2->pValue() [ 0 ] = pTResult1->pValue() [ 3 ];
-		}
-
-		/** Typed natural subdivision for the surface. */
-		template <class T, class SLT>
-		void VaryingTypedNaturalSubdivide(
-		    CqParameterTyped<T, SLT>* pParam,
-		    CqParameterTyped<T, SLT>* pResult1,
-		    CqParameterTyped<T, SLT>* pResult2,
-		    bool u
-		)
-		{
-			// we can only split curves along v, so enforce this
-			assert( u == false );
-
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-
-			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
-			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
-			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
-		}
 		virtual CqSurface* Clone() const;
 };
 
@@ -584,5 +486,5 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 #endif

@@ -17,7 +17,7 @@
 #include	"sstring.h"
 #include	"ivardef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 struct IqParseNode;
@@ -145,6 +145,6 @@ extern CqVarDef	gStandardVars[];
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !VARDEF_H_INCLUDED

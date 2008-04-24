@@ -20,19 +20,21 @@
 		\brief Declares CqStats class for holding global renderer statistics information.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
-#include "multitimer.h"
 
-#include "aqsis.h"
+#include <iomanip>
+#include <iostream>
+#include <cstring>
+#include <string>
+
+#include "multitimer.h"
 #include "attributes.h"
 #include "imagebuffer.h"
 #include "renderer.h"
 #include "stats.h"
 #include "transform.h"
-#include <iomanip>
-#include <iostream>
-#include <math.h>
+#include "aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
@@ -470,7 +472,7 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat to
 	}
 	// Round the time if it's more than 5sec
 	if ( t > 5.0 )
-		t = fmod( t, 1 ) < 0.5 ? FLOOR( t ) : CEIL( t );
+		t = round(t);
 	TqInt h = static_cast<TqInt>( t / ( 60 * 60 ) );
 	TqInt m = static_cast<TqInt>( ( t / 60 ) - ( h * 60 ) );
 	TqFloat s = ( t ) - ( h * 60 * 60 ) - ( m * 60 );
@@ -486,11 +488,35 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat to
 		os << " (" << std::setprecision(2) << std::setw(6) << 100.0f * ticks / tot << "%)";
 	return os;
 }
+
+const char* filterFunctionName(RtFilterFunc func)
+{
+	if(func == RiGaussianFilter)
+		return "gaussian";
+	else if(func == RiMitchellFilter)
+		return "mitchell";
+	else if(func == RiBoxFilter)
+		return "box";
+	else if(func == RiTriangleFilter)
+		return "triangle";
+	else if(func == RiCatmullRomFilter)
+		return "catmull-rom";
+	else if(func == RiSincFilter)
+		return "sinc";
+	else if(func == RiDiskFilter)
+		return "disk";
+	else if(func == RiBesselFilter)
+		return "bessel";
+	else
+		return "user-defined";
+}
+
 void CqStats::PrintInfo() const
 {
 	TqInt psX, psY; //< Pixel Samples
 	TqInt resX, resY;	//< Image resolution
 	TqInt fX, fY;	//< Filter width
+	std::string fName; //< Filter name
 	TqFloat gain, gamma; //< Exposure, gain
 	TqFloat pratio; //< PixelAspectRatio
 	TqInt bX = 16, bY = 16; //< Bucket Size
@@ -501,6 +527,9 @@ void CqStats::PrintInfo() const
 	resY = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 	fX = (TqInt) QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
 	fY = (TqInt) QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
+
+	fName = filterFunctionName(QGetRenderContext()->poptCurrent()->funcFilter());
+
 	gain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
 	gamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
 	pratio = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
@@ -526,7 +555,7 @@ void CqStats::PrintInfo() const
 	Aqsis::log() << info << "	Gridsize: " << gs << std::endl;
 	Aqsis::log() << info << "Anti-aliasing settings: " << std::endl;
 	Aqsis::log() << info << "	PixelSamples: " << psX << " " << psY << std::endl;
-	Aqsis::log() << info << "	FilterWidth: " << fX << " " << fY << std::endl;
+	Aqsis::log() << info << "	PixelFilter: \"" << fName << "\" " << fX << " " << fY << std::endl;
 }
 //---------------------------------------------------------------------
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -25,11 +25,10 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
-#include	<stdio.h>
+#include	<cstring>
 
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
@@ -37,7 +36,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -623,5 +622,5 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 }
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

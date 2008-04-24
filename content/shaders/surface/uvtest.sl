@@ -24,4 +24,3 @@ uvtest (float Ka = 1;
     Ci = Os * ( c * (Ka*ambient() + Kd*diffuse(Nf)) +
 		specularcolor * Ks*specular(Nf,-normalize(I),roughness));
 }
-

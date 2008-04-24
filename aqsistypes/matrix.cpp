@@ -34,7 +34,6 @@ namespace Aqsis
 {
 
 //---------------------------------------------------------------------
-#define	PI		3.14159265359f
 
 CqMatrix::CqMatrix( const TqFloat angle,
                     const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
@@ -52,7 +51,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
 
 	TqFloat d1d2dot = d1 * d2;
 	TqFloat axisangle = static_cast<TqFloat>(acos( d1d2dot ));
-	if ( angle >= axisangle || angle <= ( axisangle - PI ) )
+	if ( angle >= axisangle || angle <= ( axisangle - M_PI ) )
 	{
 		// Skewed past the axes -- issue error, then just use identity matrix.
 		// No access to CqBasicError from here, so this will have to be down
@@ -485,6 +484,43 @@ std::ostream &operator<<( std::ostream &outStream, const CqMatrix &matrix )
 }
 
 
+bool isClose(const CqMatrix& m1, const CqMatrix& m2, TqFloat tol)
+{
+	// if the matrices are at the same address, or both the identity, then
+	// they're equal.
+	if(&m1 == &m2 || (m1.fIdentity() && m2.fIdentity()))
+		return true;
+	// Check whether one matrix (but not the other) is marked as the identity.
+	// If so, create an identity matrix which is not marked as the identity to
+	// compare it with (in principle, the identity flag and the matrix elements
+	// may be out of sync I guess)
+	if(m1.fIdentity())
+	{
+		CqMatrix ident;
+		ident.SetfIdentity(false);
+		return isClose(m2, ident);
+	}
+	else if(m2.fIdentity())
+	{
+		CqMatrix ident;
+		ident.SetfIdentity(false);
+		return isClose(m1, ident);
+	}
+	TqFloat norm1 = 0;
+	TqFloat norm2 = 0;
+	TqFloat diffNorm = 0;
+	const TqFloat* m1Elts = m1.pElements();
+	const TqFloat* m2Elts = m2.pElements();
+	for(int i = 0; i < 16; ++i)
+	{
+		norm1 += m1Elts[i]*m1Elts[i];
+		norm2 += m2Elts[i]*m2Elts[i];
+		diffNorm += (m1Elts[i] - m2Elts[i])*(m1Elts[i] - m2Elts[i]);
+	}
+	TqFloat tol2 = tol*tol;
+	return diffNorm <= tol2*norm1 || diffNorm <= tol2*norm2;
+}
+
 //---------------------------------------------------------------------
 
-} //namespace Aqsis
+} // namespace Aqsis

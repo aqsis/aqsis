@@ -111,4 +111,3 @@ color cdcolor(
 
 
 #endif /* CDDIFFRACT_H */
-

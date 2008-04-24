@@ -47,7 +47,7 @@
 #include	"logging.h"
 #include	"stats.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -597,56 +597,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		std::vector<CqParameter*>	m_aUserParams;			///< Storage for user defined paramter variables.
 		TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
 
-		template <class T, class SLT>
-		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-		{
-			TqInt iv, iu;
-			for ( iv = 0; iv <= vSize; iv++ )
-			{
-				TqFloat v = ( 1.0f / vSize ) * iv;
-				for ( iu = 0; iu <= uSize; iu++ )
-				{
-					TqFloat u = ( 1.0f / uSize ) * iu;
-					IqShaderData* arrayValue;
-					TqInt i;
-					for(i = 0; i<pParam->Count(); i++)
-					{
-						arrayValue = pData->ArrayEntry(i);
-						T vec = BilinearEvaluate( pParam->pValue(0) [ i ], pParam->pValue(1) [ i ], pParam->pValue(2) [ i ], pParam->pValue(3) [ i ], u, v );
-						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
-					}
-				}
-			}
-		}
-
-		template <class T, class SLT>
-		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, bool u )
-		{
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-
-			TqInt i;
-			for(i = 0; i<pParam->Count(); i++)
-			{
-				if ( u )
-				{
-					pTResult2->pValue( 1 ) [ i ] = pTParam->pValue( 1 ) [ i ];
-					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
-					pTResult1->pValue( 1 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 1 ) [ i ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 2 ) [ i ] = static_cast<T>( ( pTParam->pValue( 2 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
-				}
-				else
-				{
-					pTResult2->pValue( 2 ) [ i ] = pTParam->pValue( 2 ) [ i ];
-					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
-					pTResult1->pValue( 2 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 2 ) [ i ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 1 ) [ i ] = static_cast<T>( ( pTParam->pValue( 1 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
-				}
-			}
-		}
-
 		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
@@ -856,7 +806,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef SURFACE_H_INCLUDED
 #endif

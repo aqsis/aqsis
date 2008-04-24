@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "aqsis.h"
+
 #include "imagebuffer.h"
 #include "micropolygon.h"
 #include "renderer.h"
@@ -34,7 +34,8 @@
 #include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
-START_NAMESPACE( Aqsis )
+
+namespace Aqsis {
 
 
 static TqUlong hp = CqString::hash("P");
@@ -82,192 +83,133 @@ CqSurface* CqCubicCurveSegment::Clone() const
 }
 
 
+namespace {
 
-/**
- * Implements natural subdivision for this curve segment.
- *
- * @param pParam        Original parameter.
- * @param pParam1       First new parameter.
- * @param pParam2       Second new parameter.
- * @param u             true if the split is along u (should
- *                              always be false!)
+/** \brief Implementation of natural subdivision for cubic curves
  */
+template <class T, class SLT>
+void cubicCurveNatSubdiv(
+	CqParameter* pParam,
+	CqParameter* pResult1,
+	CqParameter* pResult2
+)
+{
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+	CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+	CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+	pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
+	pTResult1->pValue() [ 1 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) / 2.0f );
+	pTResult1->pValue() [ 2 ] = static_cast<T>( pTResult1->pValue() [ 1 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
+
+	pTResult2->pValue() [ 3 ] = pTParam->pValue() [ 3 ];
+	pTResult2->pValue() [ 2 ] = static_cast<T>( ( pTParam->pValue() [ 2 ] + pTParam->pValue() [ 3 ] ) / 2.0f );
+	pTResult2->pValue() [ 1 ] = static_cast<T>( pTResult2->pValue() [ 2 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
+
+	pTResult1->pValue() [ 3 ] = static_cast<T>( ( pTResult1->pValue() [ 2 ] + pTResult2->pValue() [ 1 ] ) / 2.0f );
+	pTResult2->pValue() [ 0 ] = pTResult1->pValue() [ 3 ];
+}
+
+} // unnamed namespace
+
 void CqCubicCurveSegment::NaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
     bool u
 )
 {
-
 	assert( u == false );
 	switch ( pParam->Type() )
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_matrix:
-			{
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				//			break;
-			}
-
-			default:
-			{
-				break;
-			}
+		case type_float:
+			cubicCurveNatSubdiv<TqFloat, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_integer:
+			cubicCurveNatSubdiv<TqInt, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			cubicCurveNatSubdiv<CqVector3D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_hpoint:
+			cubicCurveNatSubdiv<CqVector4D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_color:
+			cubicCurveNatSubdiv<CqColor, CqColor>(pParam, pParam1, pParam2);
+			break;
+		case type_string:
+			cubicCurveNatSubdiv<CqString, CqString>(pParam, pParam1, pParam2);
+			break;
+		case type_matrix:
+			/// \todo Why is this removed?
+			//cubicCurveNatSubdiv<CqMatrix>( pParam, pParam1, pParam2);
+			//break;
+		default:
+			break;
 	}
-
 }
 
 
-/**
- * Implements natural subdivision for this curve segment.
- *
- * @param pParam        Original parameter.
- * @param pParam1       First new parameter.
- * @param pParam2       Second new parameter.
- * @param u             true if the split is along u (should
- *                              always be false!)
+namespace {
+
+/** \brief Implementation of natural subdivision for varying parameters on
+ * cubic curves.
  */
+template <class T, class SLT>
+void cubicCurveVaryingNatSubdiv(
+	CqParameter* pParam,
+	CqParameter* pResult1,
+	CqParameter* pResult2
+)
+{
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+	CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+	CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+	pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
+	pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
+	pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
+}
+
+} // unnamed namespace
+
 void CqCubicCurveSegment::VaryingNaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
     bool u
 )
 {
-
 	assert( u == false );
 	switch ( pParam->Type() )
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_matrix:
-			{
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				//			break;
-			}
-
-			default:
-			{
-				break;
-			}
+		case type_float:
+			cubicCurveVaryingNatSubdiv<TqFloat, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_integer:
+			cubicCurveVaryingNatSubdiv<TqInt, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			cubicCurveVaryingNatSubdiv<CqVector3D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_hpoint:
+			cubicCurveVaryingNatSubdiv<CqVector4D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_color:
+			cubicCurveVaryingNatSubdiv<CqColor, CqColor>(pParam, pParam1, pParam2);
+			break;
+		case type_string:
+			cubicCurveVaryingNatSubdiv<CqString, CqString>(pParam, pParam1, pParam2);
+			break;
+		case type_matrix:
+			/// \todo Why is this removed?
+			//cubicCurveVaryingNatSubdiv<CqMatrix, CqMatrix>(pParam, pParam1, pParam2);
+			//break;
+		default:
+			break;
 	}
-
 }
 
 
@@ -372,34 +314,66 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 
 }
 
+namespace {
+
+// Helper function for CalculateTangent
+
+/** \brief Choose out of the three possible endpoint tangents for a bezier curve.
+ *
+ * This function tries to make sure curves with degenerate endpoints are
+ * treated properly - it first estimates the overall size of the curve, then
+ * measures the length of the provided tangents against this size to make sure
+ * that they're not degenerate.
+ *
+ * This function is probably of comparable cost to computing the tangent using
+ * a numerical derivative instead, hopefully it's a little more accurate...
+ *
+ * tangent1 is considered first, followed by tangent2 and finally tangent3.
+ */
+CqVector3D chooseEndpointTangent(const CqVector3D& tangent1, const CqVector3D& tangent2,
+		const CqVector3D& tangent3)
+{
+	// Determine the "too small" length scale for the curve.
+	TqFloat len1Sqd = tangent1.Magnitude2();
+	TqFloat len2Sqd = tangent2.Magnitude2();
+	TqFloat len3Sqd = tangent3.Magnitude2();
+	// If tangents are shorter than a given small multiple of the overall curve size,
+	// we will call them degenerate, and pass on to the next candidate tangent.
+	TqFloat tooSmallLen = 1e-6 * max(max(len1Sqd, len2Sqd), len3Sqd);
+
+	// Select a nondegenerate tangent.
+	if(len1Sqd > tooSmallLen)
+		return tangent1;
+	else if(len2Sqd > tooSmallLen)
+		return tangent2;
+	else
+		return tangent3;
+}
+
+} // unnamed namespace
 
 CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
 {
-	int i;
-	std::vector<CqVector4D> pg(4), pg0(4);
-	for(i=0; i <= 3; i++)
-		pg[i] = pg0[i] =*P()->pValue( i );
+	// Read 3D vertices into the array pg.
+	CqVector3D pg[4];
+	for(TqInt i=0; i <= 3; i++)
+		pg[i] = *P()->pValue(i);
+
 	if(u == 0.0f)
-	{
-		int i1 = 1;
-		while(i1 < 3 && pg[0] == pg[i1]) ++i1;
-		return(3*(pg[i1] - pg[0]));
-	}
+		return chooseEndpointTangent(pg[1] - pg[0], pg[2] - pg[0], pg[3] - pg[0]);
 	else if(u == 1.0f)
+		return chooseEndpointTangent(pg[3] - pg[2], pg[3] - pg[1], pg[3] - pg[0]);
+	else
 	{
-		int i1 = 2;
-		while(i1 > 0 && pg[3] == pg[i1]) --i1;
-		return(3*(pg[3]-pg[i1]));
+		// Generic case - may be derived by taking the derivative of the
+		// parametric form of a bezier curve.  We leave off a factor of 3,
+		// since we're interested in the direction, not the magnitude.
+		// (Magnitude is dependent on the parametrization, not an intrinsic
+		// property of the curve.)
+		TqFloat u2 = u*u;
+		return (-u2 + 2*u - 1)*pg[0] + (3*u2 - 4*u + 1)*pg[1]
+			+ (-3*u2 + 2*u)*pg[2] + u2*pg[3];
 	}
-	for(int j=1; j <= 3; j++)
-	{
-		for(int i=0; i <= 3-j; i++)
-		{
-			pg0[i]=pg[i];
-			pg[i]=pg[i]*(1-u)+pg[i+1]*u;
-		}
-	}
-	return(3*(pg[1]-pg0[0]));
 }
 
 
@@ -415,7 +389,6 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
-
 	// first, we find the following vectors:
 	//  direction     - from the first point to the second along the line
 	//                      segment
@@ -426,10 +399,6 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	//  widthOffset1  - offset to account for the width of the patch at
 	//                      the second point
 
-	// \note: Not really happy about this, but by shifting the calculation value
-	// slightly along the curve for tangent calculation of endpoints, we avoid
-	// problems with curves that have duplicated points at one or other ends.
-	// See bug #1102605
 	CqVector3D direction0 = CalculateTangent(0.00);
 	CqVector3D direction3 = CalculateTangent(1.00);
 
@@ -442,29 +411,20 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	normal1 = ( ( normal3 - normal0 ) / 3.0f ) + normal0;
 	normal2 = ( ( ( normal3 - normal0 ) / 3.0f ) * 2.0f ) + normal0;
 
-	normal0.Unit();
-	normal1.Unit();
-	normal2.Unit();
-	normal3.Unit();
-
-	CqVector3D widthOffset02 = normal0 % direction0;
-	CqVector3D widthOffset12 = normal1 % direction1;
-	CqVector3D widthOffset22 = normal2 % direction2;
-	CqVector3D widthOffset32 = normal3 % direction3;
+	CqVector3D widthOffset02 = (normal0 % direction0).Unit();
+	CqVector3D widthOffset12 = (normal1 % direction1).Unit();
+	CqVector3D widthOffset22 = (normal2 % direction2).Unit();
+	CqVector3D widthOffset32 = (normal3 % direction3).Unit();
 
 	TqFloat width0 = width()->pValue( 0 )[0];
 	TqFloat width3 = width()->pValue( 1 )[0];
 	TqFloat width1 = ( ( width3 - width0 ) / 3.0f ) + width0;
 	TqFloat width2 = ( ( ( width3 - width0 ) / 3.0f ) * 2.0f ) + width0;
 
-	widthOffset02 *=
-	    width0 / widthOffset02.Magnitude() / 6.0;
-	widthOffset12 *=
-	    width1 / widthOffset12.Magnitude() / 6.0;
-	widthOffset22 *=
-	    width2 / widthOffset22.Magnitude() / 6.0;
-	widthOffset32 *=
-	    width3 / widthOffset32.Magnitude() / 6.0;
+	widthOffset02 *= width0 / 6.0;
+	widthOffset12 *= width1 / 6.0;
+	widthOffset22 *= width2 / 6.0;
+	widthOffset32 *= width3 / 6.0;
 
 	CqVector3D widthOffset0 = widthOffset02 * 3;
 	CqVector3D widthOffset1 = widthOffset12 * 3;
@@ -1210,4 +1170,4 @@ void CqCubicCurvesGroup::Transform(
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

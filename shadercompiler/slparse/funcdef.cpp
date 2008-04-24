@@ -10,7 +10,7 @@
 #include	"parsenode.h"
 #include	"funcdef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// Global array of standard function definitions
@@ -141,22 +141,22 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Point, "spline", "svspline", "sfvvvv*" ),
                                  CqFuncDef( Type_Float, "Du", "fDu", "f", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Float, "Dv", "fDv", "f", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_Float, "Deriv", "fDeriv", "ff", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_Float, "Deriv", "fDeriv", "ff"),
                                  CqFuncDef( Type_Color, "Du", "cDu", "c", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Color, "Dv", "cDv", "c", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_Color, "Deriv", "cDeriv", "cf", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_Color, "Deriv", "cDeriv", "cf"),
                                  CqFuncDef( Type_Point, "Du", "pDu", "p", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Point, "Dv", "pDv", "p", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_Point, "Deriv", "pDeriv", "pf", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_Point, "Deriv", "pDeriv", "pf"),
                                  CqFuncDef( Type_hPoint, "Du", "hDu", "h", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_hPoint, "Dv", "hDv", "h", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_hPoint, "Deriv", "hDeriv", "hf", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_hPoint, "Deriv", "hDeriv", "hf"),
                                  CqFuncDef( Type_Normal, "Du", "nDu", "n", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Normal, "Dv", "nDv", "n", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_Normal, "Deriv", "nDeriv", "nf", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_Normal, "Deriv", "nDeriv", "nf"),
                                  CqFuncDef( Type_Vector, "Du", "vDu", "v", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Vector, "Dv", "vDv", "v", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
-                                 CqFuncDef( Type_Vector, "Deriv", "vDeriv", "vf", ( 1 << EnvVars_u ) | ( 1 << EnvVars_v ) ),
+                                 CqFuncDef( Type_Vector, "Deriv", "vDeriv", "vf"),
                                  CqFuncDef( Type_Float, "random", "frandom", "" ),
                                  CqFuncDef( Type_Color, "random", "crandom", "" ),
                                  CqFuncDef( Type_Point, "random", "prandom", "" ),
@@ -193,7 +193,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Float, "area", "area", "p", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Float, "area", "area", "h", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Point, "normalize", "normalize", "p" ),
-                                 CqFuncDef( Type_Point, "faceforward", "faceforward", "pp" ),
+                                 CqFuncDef( Type_Point, "faceforward", "faceforward", "pp", (1 << EnvVars_Ng) ),
                                  CqFuncDef( Type_Point, "faceforward", "faceforward2", "ppp" ),
                                  CqFuncDef( Type_Point, "reflect", "reflect", "pp" ),
                                  CqFuncDef( Type_Point, "refract", "refract", "ppf" ),
@@ -216,11 +216,11 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Float, "shadow", "shadow2", "sfpppp*" ),
                                  CqFuncDef( Type_Float, "shadow", "shadow", "sfp*" ),
                                  CqFuncDef( Type_Float, "texture", "ftexture3", "sfffffffff*" ),
-                                 CqFuncDef( Type_Float, "texture", "ftexture2", "sfff*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
-                                 CqFuncDef( Type_Float, "texture", "ftexture1", "sf*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) ),
+                                 CqFuncDef( Type_Float, "texture", "ftexture2", "sfff*"),
+                                 CqFuncDef( Type_Float, "texture", "ftexture1", "sf*", ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) ),
                                  CqFuncDef( Type_Color, "texture", "ctexture3", "sfffffffff*" ),
-                                 CqFuncDef( Type_Color, "texture", "ctexture2", "sfff*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
-                                 CqFuncDef( Type_Color, "texture", "ctexture1", "sf*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) ),
+                                 CqFuncDef( Type_Color, "texture", "ctexture2", "sfff*" ),
+                                 CqFuncDef( Type_Color, "texture", "ctexture1", "sf*", ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) ),
                                  CqFuncDef( Type_Float, "environment", "fenvironment3", "sfpppp*" ),
                                  CqFuncDef( Type_Float, "environment", "fenvironment2", "sfp*", ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) | ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) ),
                                  CqFuncDef( Type_Color, "environment", "cenvironment3", "sfpppp*" ),
@@ -528,5 +528,5 @@ IqFuncDef* IqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

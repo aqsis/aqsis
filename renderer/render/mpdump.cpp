@@ -22,7 +22,7 @@
 
 #if ENABLE_MPDUMP
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // Constructor
@@ -205,7 +205,7 @@ void CqMPDump::dumpCol(const CqColor& c)
 /// Global dump object
 CqMPDump mpdump;
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif
 

@@ -41,7 +41,7 @@
 #include "imagebuffer.h"
 #include "version.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqImagersource
@@ -70,7 +70,12 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			return ( m_pShader );
 		}
 
-		void	Initialise( IqBucket* pBucket );
+		/** \brief Initialise and execute the imager shader over the provided bucket.
+		 *
+		 * \param pBucket - Bucket from which to take the source shader data for the
+		 *                  imager shader.
+		 */
+		void Initialise(IqBucket* pBucket);
 
 
 		// Forwarding functions for IqShaderExecEnv
@@ -250,7 +255,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGERS_H_INCLUDED
 #endif

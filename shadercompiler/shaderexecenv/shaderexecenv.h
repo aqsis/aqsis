@@ -33,6 +33,9 @@
 #include	<stack>
 #include	<map>
 
+#include <boost/noncopyable.hpp>
+
+#include	"aqsismath.h"
 #include	"bitvector.h"
 #include	"color.h"
 #include	"noise.h"
@@ -70,7 +73,7 @@
 
 #endif // WIN32
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 SHADERCONTEXT_SHARE extern const char*	gVariableClassNames[];
@@ -135,18 +138,13 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
 #define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
-#define	GET_FILTER_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f; \
-							GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
-#define	GET_TEXTURE_PARAMS	std::map<std::string, IqShaderData*> paramMap; \
-							GetTexParams(cParams, apParams, paramMap);
-
 
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
+class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
 {
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);
@@ -366,43 +364,54 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		}
 
 	private:
-		/** Internal function to extract additional named filter parameters from an array of stack entries.
+		/** \brief Evaluate discrete difference of a shader variable in the u-direction
+		 *
+		 * This is the discrete analogue to differentiation: for a 1D grid, "Y",
+		 * the discrete first order difference is conceptually just the
+		 * difference between consecutive grid points:
+		 *
+		 *   diff(Y, i) = Y[i+1] - Y[i];
+		 *
+		 * Of course, this is the *forward* difference; for the purposes of
+		 * numerical stability and accuracy, it's probably preferable to use
+		 * the centered difference:
+		 *
+		 *   diff(Y, i) = (Y[i+1] - Y[i-1])/2;
+		 *
+		 * In practise a mixture of difference schemes are necessary to work
+		 * with grid boundaries, but the normalization is consistent with the
+		 * forward difference.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
-		{
-			CqString strParam;
-			TqFloat f;
-
-			int i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				apParams[ i + 1 ] ->GetFloat( f, 0 );
-
-				if ( strParam.compare( "width" ) == 0 )
-					_pswidth = _ptwidth = f;
-				else if ( strParam.compare( "swidth" ) == 0 )
-					_pswidth = f;
-				else if ( strParam.compare( "twidth" ) == 0 )
-					_ptwidth = f;
-				i += 2;
-				cParams -= 2;
-			}
-		}
-		/** Internal function to extract additional named texture control parameters from an array of stack entries.
+		template<typename T>
+		T diffU(IqShaderData* var, TqInt gridIdx);
+		/** \brief Evaluate discrete difference of a shader variable in the v-direction
+		 *
+		 * This is the discrete analogue to differentiation
+		 * \see diffU for more details.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetTexParams( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
-		{
-			CqString strParam;
-			TqInt i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				map[ strParam ] = apParams[ i + 1 ];
-				i += 2;
-				cParams -= 2;
-			}
-		}
+		template<typename T>
+		T diffV(IqShaderData* var, TqInt gridIdx);
+		/** \brief Compute the differential dy/dx.
+		 *
+		 * Computes the derivative of a shader variable of type T with respect
+		 * to a given float variable.
+		 *
+		 * \param y - a variable of type T.
+		 * \param x - a float variable.
+		 * \param gridIdx - 1D index into the 2D grids of data.
+		 *
+		 * \return dy/dx if dx is nonzero.  If dx == 0, return a default
+		 * constructed value for T.
+		 */
+		template<typename T>
+		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
+
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
@@ -637,10 +646,122 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 };
 
 
+//==============================================================================
+// Implementation details
+//==============================================================================
 
+template<typename T>
+T CqShaderExecEnv::diffU(IqShaderData* var, TqInt gridIdx)
+{
+	TqInt uSize = uGridRes()+1;
+	assert(gridIdx < uSize*(vGridRes() + 1));
+
+	T val0;
+	T val1;
+
+	TqInt iu = gridIdx % uSize;
+	if(iu == 0)
+	{
+		// Use forward difference for grid boundary start in u-direction
+		var->GetValue(val0, gridIdx);
+		var->GetValue(val1, gridIdx+1);
+		return val1 - val0;
+	}
+	else if(iu == uSize-1)
+	{
+		// Use backward difference for grid boundary end in u-direction
+		var->GetValue(val0, gridIdx-1);
+		var->GetValue(val1, gridIdx);
+		return val1 - val0;
+	}
+	else
+	{
+		// Use centered difference internally
+		var->GetValue(val0, gridIdx-1);
+		var->GetValue(val1, gridIdx+1);
+		return 0.5*(val1 - val0);
+	}
+}
+
+template<typename T>
+T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
+{
+	TqInt uSize = uGridRes()+1;
+	TqInt vSize = vGridRes()+1;
+	assert(gridIdx < uSize*vSize);
+
+	T val0;
+	T val1;
+
+	TqInt iv = gridIdx / uSize;
+	if(iv == 0)
+	{
+		// Use forward difference for grid boundary start in v-direction
+		var->GetValue(val0, gridIdx);
+		var->GetValue(val1, gridIdx+uSize);
+		return val1 - val0;
+	}
+	else if(iv == vSize-1)
+	{
+		// Use backward difference for grid boundary end in v-direction
+		var->GetValue(val0, gridIdx-uSize);
+		var->GetValue(val1, gridIdx);
+		return val1 - val0;
+	}
+	else
+	{
+		// Use centered difference internally
+		var->GetValue(val0, gridIdx-uSize);
+		var->GetValue(val1, gridIdx+uSize);
+		return 0.5*(val1 - val0);
+	}
+}
+
+template<typename T>
+T CqShaderExecEnv::deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx)
+{
+	// At first sight this seems like a strange kind of derivative operation,
+	// since we may view both x and y as values which vary across the grid:
+	//
+	// x = x(u,v)
+	// y = y(u,v)
+	//
+	// However, if y is a function of x,  y = y(x(u,v)), we have:
+	//
+	// dy/du = dy/dx * dx/du
+	// dy/dv = dy/dx * dx/dv
+	//
+	// (all derivatives with respect to u and v are partial derivatives in
+	// these expressions.)
+	//
+	// This gives us two equivilant possibilities for calculating dy/dx:
+	//
+	// dy/dx = (dy/du) / (dx/du) = diffU(y) / diffU(x)
+	// dy/dx = (dy/dv) / (dx/dv) = diffV(y) / diffV(x)
+	//
+	// Either of these is fine, as long as dx/du and dx/dv are nonzero to
+	// within floating poing rounding error.  For numerical stability, we
+	// choose the direction u or v which has the maximum value for the value of
+	// dx.
+	//
+	TqFloat dxu = diffU<TqFloat>(x, gridIdx);
+	TqFloat dxv = diffV<TqFloat>(x, gridIdx);
+	TqFloat absDxu = std::fabs(dxu);
+	if(absDxu >= std::fabs(dxv))
+	{	
+		if(absDxu > 0) 
+			return diffU<T>(y, gridIdx) / dxu;
+		else
+			return T();
+	}
+	else
+	{
+		return diffV<T>(y, gridIdx) / dxv;
+	}
+}
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADEREXECENV_H_INCLUDED

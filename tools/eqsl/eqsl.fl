@@ -1,0 +1,351 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0107 
+header_name {.h} 
+code_name {.cxx}
+comment {// Aqsis
+// Copyright (C) 1997 - 2008, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.org
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+// \\file
+//
+// \\brief Central graphical interface allowing easy/fast access to commonly-used Aqsis tools
+//
+// \\author Leon Tony Atkinson [ latkinson (at) aqsis (dot) org ]
+//} {in_source in_header
+} 
+
+decl {\#include "aqsis.h"} {} 
+
+decl {\#include "execute.h"} {} 
+
+decl {\#include <FL/Fl_File_Chooser.H>} {public
+} 
+
+decl {\#include <boost/thread.hpp>} {} 
+
+decl {\#include <boost/regex.hpp>} {} 
+
+decl {\#include <boost/lexical_cast.hpp>} {} 
+
+decl {\#include <cstdlib>} {public
+} 
+
+decl {\#include <string>} {public
+} 
+
+declblock {\#ifndef AQSIS_SYSTEM_WIN32} {open after {\#endif}
+} {
+  decl {\#include <signal.h>} {}
+  decl {\#include <sys/wait.h>} {}
+  decl {\#include <sys/types.h>} {}
+} 
+
+decl {using std::string;} {public
+} 
+
+decl {string chooserTitleOpen = "Select File";} {} 
+
+decl {string commandLine = "";} {} 
+
+decl {string currentDirectory = ".";} {} 
+
+decl {string renderEngine = "aqsis";} {} 
+
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
+
+decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
+
+decl {string renderViewerArgs[] = {};} {} 
+
+decl {string renderEngineFile = "";} {} 
+
+decl {string renderEngineType = "RenderMan Geometry Files (*.{rib,ribz,rib.gz})";} {} 
+
+decl {string renderViewer = "piqsl";} {} 
+
+decl {string shaderCompiler = "aqsl";} {} 
+
+decl {string shaderCompilerFile = "";} {} 
+
+decl {string shaderCompilerType = "RenderMan Shader Files (*.sl)";} {} 
+
+decl {string toolsHistoryTitle = "Command History:";} {} 
+
+decl {boost::regex aqsisProgressExpression = boost::regex("^R90000[[:space:]]*([0-9.]*)%.*");} {} 
+
+Function {} {open
+} {
+  Fl_Window m_window {
+    label eqsl open
+    xywh {793 487 400 325} type Double resizable visible
+  } {
+    Fl_Menu_Bar {} {open
+      xywh {0 0 400 25}
+      code0 {\#include <FL/Fl_Sys_Menu_Bar.H>}
+      class Fl_Sys_Menu_Bar
+    } {
+      Submenu m_menuFile {
+        label {&File} open
+        xywh {0 0 100 20}
+      } {
+        MenuItem m_menuFileQuit {
+          label {&Quit}
+          callback {exit(0);}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'q');}
+        }
+      }
+      Submenu m_menuTools {
+        label {&Tools} open
+        xywh {0 0 100 20}
+      } {
+        MenuItem m_menuToolsRender {
+          label {&Render File}
+          callback {// Open and process FLTK 'File Selection' dialog
+Fl_File_Chooser fl_file_chooser(renderEngineFile.c_str(), renderEngineType.c_str(), Fl_File_Chooser::SINGLE, chooserTitleOpen.c_str());
+fl_file_chooser.show();
+
+while(fl_file_chooser.shown())
+{
+	Fl::wait();
+}
+
+if (fl_file_chooser.value() == NULL)
+{
+	return;
+}
+else
+{
+	fl_file_chooser.hide();
+	currentDirectory = fl_file_chooser.directory();
+	renderEngineFile = fl_file_chooser.value();
+}
+
+// Call relevant commandline
+	char acPath[256];
+	char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
+\#else
+	std::string program;
+\#endif
+	commandLine = renderEngine + " ";
+	program.append(renderEngine);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); arg++)
+	{
+		args.push_back(renderEngineArgs[arg]);
+		commandLine += renderEngineArgs[arg] + " ";
+	}
+	args.push_back(renderEngineFile);
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
+	commandLine += " \\"" + renderEngineFile + "\\"";
+
+
+
+// Log commandline event
+m_outputHistory->add(commandLine.c_str());}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'R');}
+        }
+        MenuItem m_menuToolsCompile {
+          label {&Compile Shader}
+          callback {// Open and process FLTK 'File Selection' dialog
+Fl_File_Chooser fl_file_chooser(shaderCompilerFile.c_str(), shaderCompilerType.c_str(), Fl_File_Chooser::SINGLE, chooserTitleOpen.c_str());
+fl_file_chooser.show();
+
+while(fl_file_chooser.shown())
+	{
+	Fl::wait();
+	}
+
+if (fl_file_chooser.value() == NULL)
+	{
+	return;
+	}
+else
+	{
+	currentDirectory = fl_file_chooser.directory();
+	shaderCompilerFile = fl_file_chooser.value();
+	}
+
+// Call relevant commandline
+	char acPath[256];
+	char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
+\#else
+	std::string program;
+\#endif
+	commandLine = shaderCompiler + " ";
+	program.append(shaderCompiler);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(shaderCompilerArgs)/sizeof(shaderCompilerArgs[0]); arg++)
+	{
+		args.push_back(shaderCompilerArgs[arg]);
+		commandLine += shaderCompilerArgs[arg] + " ";
+	}
+	args.push_back(shaderCompilerFile);
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
+	commandLine += " \\"" + shaderCompilerFile + "\\"";
+
+// Log commandline event
+m_outputHistory->add(commandLine.c_str());}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'C');}
+        }
+        MenuItem m_menuToolsFramebuffer {
+          label {Open &Framebuffer}
+          callback {// Call relevant commandline
+	char acPath[256];
+	char root[256];
+\#ifdef	AQSIS_SYSTEM_WIN32
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\\\' ) ) = '\\0';
+		std::string      stracPath(acPath);
+		_fullpath(root,&stracPath[0],256);
+	}
+	std::string program = root;
+	program.append("\\\\");
+\#else
+	std::string program;
+\#endif
+	commandLine = renderViewer + " ";
+	program.append(renderViewer);
+	std::vector<std::string> args;
+	for(TqInt arg = 0; arg < sizeof(renderViewerArgs)/sizeof(renderViewerArgs[0]); arg++)
+	{
+		args.push_back(renderViewerArgs[arg]);
+		commandLine += renderViewerArgs[arg] + " ";
+	}
+	Aqsis::CqExecute tool(program, args, currentDirectory);
+	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
+	tool.setStdOutCallback(outputStdOut);
+	boost::thread thread(tool);
+
+// Log commandline event
+m_outputHistory->add(commandLine.c_str());}
+          xywh {0 0 100 20} divider
+          code0 {o->shortcut(FL_COMMAND+'F');}
+        }
+        MenuItem m_menuToolsHistoryClear {
+          label {Clear &History}
+          callback {m_outputHistory->clear();
+m_outputHistory->add(toolsHistoryTitle.c_str());}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'h');}
+        }
+        MenuItem m_menuToolsConsoleClear {
+          label {Clear Conso&le}
+          callback {m_outputConsole->clear();}
+          xywh {0 0 100 20}
+          code0 {o->shortcut(FL_COMMAND+'l');}
+        }
+      }
+      Submenu m_menuHelp {
+        label {&Help} open
+        xywh {0 0 100 20}
+      } {
+        MenuItem m_menuHelpAbout {
+          label About
+          callback {string version = "eqsl version %s\\ncompiled %s %s";
+fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
+          xywh {0 0 100 20}
+          code0 {\#include <FL/fl_ask.H>}
+          code1 {\#include "version.h"}
+        }
+      }
+    }
+    Fl_Tabs m_tabs {open
+      xywh {0 25 400 275} resizable
+    } {
+      Fl_Group m_tabHistory {
+        label History open
+        xywh {0 50 400 250} hide
+      } {
+        Fl_Browser m_outputHistory {
+          xywh {0 50 400 250}
+          code0 {m_outputHistory->add(toolsHistoryTitle.c_str());}
+        }
+      }
+      Fl_Group m_tabConsole {
+        label Console open
+        xywh {0 50 400 250} resizable
+      } {
+        Fl_Text_Display m_outputConsole {
+          xywh {0 50 400 250}
+          code0 {o->buffer(new Fl_Text_Buffer);}
+        }
+      }
+    }
+    Fl_Progress m_progress {selected
+      xywh {0 300 400 25} selection_color 246 labeltype NO_LABEL align 0
+      code0 {o->minimum(0);}
+      code1 {o->maximum(100);}
+    }
+  }
+} 
+
+Function {callback(const char* string)} {open return_type void
+} {
+  code {Fl::lock();
+	boost::cmatch match;
+	if(boost::regex_match(string, match, aqsisProgressExpression))
+	{
+		std::string percentage;
+		percentage.assign(match[1].first, match[1].second);
+		try
+		{
+			float fp = boost::lexical_cast<float>(percentage);
+			m_progress->value(fp);
+			Fl::check();
+		}
+		catch(boost::bad_lexical_cast &)
+		{
+		}
+	}
+	else
+	{
+		m_outputConsole->insert(string);
+	}
+	Fl::unlock();} {}
+} 

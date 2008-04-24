@@ -38,7 +38,34 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
+
+namespace {
+
+/// Extract additional named filter parameters from an array of stack entries.
+void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
+{
+	CqString strParam;
+	TqFloat f;
+
+	int i = 0;
+	while ( cParams > 0 )
+	{
+		apParams[ i ] ->GetString( strParam, 0 );
+		apParams[ i + 1 ] ->GetFloat( f, 0 );
+
+		if ( strParam.compare( "width" ) == 0 )
+			_pswidth = _ptwidth = f;
+		else if ( strParam.compare( "swidth" ) == 0 )
+			_pswidth = f;
+		else if ( strParam.compare( "twidth" ) == 0 )
+			_ptwidth = f;
+		i += 2;
+		cParams -= 2;
+	}
+}
+
+} // unnamed namespace
 
 
 void	CqShaderExecEnv::SO_step( IqShaderData* _min, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
@@ -510,7 +537,7 @@ void	CqShaderExecEnv::SO_fDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetFloat(SO_DerivType<TqFloat>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetFloat(deriv<TqFloat>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -576,7 +603,7 @@ void	CqShaderExecEnv::SO_cDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetColor(SO_DerivType<CqColor>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetColor(deriv<CqColor>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -642,7 +669,7 @@ void	CqShaderExecEnv::SO_pDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetPoint(SO_DerivType<CqVector3D>( p, den, __iGrid, this ),__iGrid);
+			(Result)->SetPoint(deriv<CqVector3D>(p, den, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -1261,7 +1288,7 @@ void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqSha
 			TqFloat w = uwidth + vwidth;
 			w *= _pswidth;
 
-			(Result)->SetFloat(CLAMP( ( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0, 1 ),__iGrid);
+			(Result)->SetFloat(clamp(( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0.0f, 1.0f), __iGrid);
 
 			//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
 			//	SETFLOAT( Result, res );
@@ -1304,10 +1331,10 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 			(s2)->GetFloat(_aq_s2,__iGrid);
 			TqFloat w = _aq_s2 - _aq_s1;
 			w *= _pswidth;
-			(Result)->SetFloat(CLAMP( ( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0, 1 ),__iGrid);
+			(Result)->SetFloat(clamp( (_aq_s1 + w/2.0f - _aq_edge)/w, 0.0f, 1.0f), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

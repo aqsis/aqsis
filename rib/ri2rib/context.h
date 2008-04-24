@@ -32,7 +32,7 @@
 #include "options.h"
 #include "output.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 
 class CqContext
@@ -65,5 +65,5 @@ class CqContext
 		void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
 };
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

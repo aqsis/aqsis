@@ -33,7 +33,7 @@
 #include	"sstring.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqParseNode;
 
@@ -44,6 +44,6 @@ void ResetParser();
 
 IqParseNode* GetParseTree();
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif //LIBSLPARSE_H_INCLUDED

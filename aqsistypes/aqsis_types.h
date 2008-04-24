@@ -27,6 +27,8 @@
 #ifndef	AQSIS_TYPES_INCLUDED
 #define	AQSIS_TYPES_INCLUDED
 
+#include <boost/cstdint.hpp>
+
 typedef	char	TqChar;
 typedef	unsigned char	TqUchar;
 typedef	char*	TqPchar;
@@ -43,33 +45,15 @@ typedef	unsigned short	TqUshort;
 typedef	float	TqFloat;
 typedef	double	TqDouble;
 
-/// Determine the largest integer value smaller than the given float.
-#define FLOOR(x) ((long)(x) - ((x) < 0 && (x) != (long)(x)))
-/// Determine the smallest integer value larger than the given float.
-#define CEIL(x) ((long)(x) + ((x) > 0 && (x) != (long)(x)))
-/// Determine the nearest integer value to the given float.
-#define	ROUND(x) (((x) - FLOOR((x))) < 0.5f)?FLOOR((x)):CEIL((x))
 
+// Integer types with specific size.
+typedef boost::int8_t TqInt8;
+typedef boost::int16_t TqInt16;
+typedef boost::int32_t TqInt32;
 
-/// Linearly interpolate between the two given values to the point t, 0>=t<=1.
-#define LERP(t,x0,x1)  ((1.0-t)*(x0) + (t*x1))
+typedef boost::uint8_t TqUint8;
+typedef boost::uint16_t TqUint16;
+typedef boost::uint32_t TqUint32;
 
-/// Clamp the given value a, to be with the extents of the given range.
-/// \deprecated use the template aqsis::clamp from aqsismath.h in future.
-#define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a)))
-/// Determine the minimum of the two values given.
-#define	MIN(a,b)			(((a)<(b))?(a):(b))
-/// Determine the maximum of the two values given.
-#define	MAX(a,b)			(((a)<(b))?(b):(a))
-
-/// Defines an approximation to PI.
-#define	PI			3.14159265359f
-/// Defines an approximation to PI divided by 2.
-#define	PIO2		PI/2
-
-/// Convert the given degrees value to radians.
-#define RAD(a)				((a)/(180.0f/PI))
-/// Convert the given radians value to degrees.
-#define DEG(a)				((a)/(PI/180.0f))
 
 #endif	// AQSIS_TYPES_INCLUDED

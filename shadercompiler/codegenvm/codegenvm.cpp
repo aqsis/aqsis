@@ -39,7 +39,7 @@
 #include	"parsenode.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 void CqCodeGenVM::OutputTree( IqParseNode* pNode, std::string strOutName )
 {
@@ -152,4 +152,4 @@ std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -33,6 +33,7 @@
 #include	<string>
 #include	<map>
 #include	<numeric>
+#include	<cstdlib>
 
 #include	"version.h"
 #include	"vmoutput.h"
@@ -41,7 +42,7 @@
 #include	"aqsismath.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std::string, std::string> >& Stack );
@@ -1054,4 +1055,4 @@ void CqCodeGenOutput::rsPop()
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -37,7 +37,7 @@
 #include "jules_bloomenthal.h"
 #include "logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // Number of iterations (convergence)
 const TqInt RES = 10;
@@ -637,6 +637,6 @@ void bloomenthal_polygonizer::Converge(const CqVector3D& p1, const CqVector3D& p
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 

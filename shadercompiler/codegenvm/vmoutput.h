@@ -39,7 +39,7 @@
 #include	"icodegen.h"
 #include	"vmdatagather.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 #define	VM_SHADER_EXTENSION	".slx"
@@ -117,6 +117,6 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !VMOUTPUT_H_INCLUDED

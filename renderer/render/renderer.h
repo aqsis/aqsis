@@ -45,10 +45,11 @@
 #include	"irenderer.h"
 #include	"iraytrace.h"
 #include	"iraytrace.h"
+#include	"texturecache.h"
 
 #include	"clippingvolume.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqImageBuffer;
 class CqObjectInstance;
@@ -180,9 +181,9 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetImage( CqImageBuffer* pImage );
 
 		// Handle various coordinate system transformation requirements.
-		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
+		virtual	bool	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
+		virtual	bool	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
+		virtual	bool	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
 
 		virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
 		virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
@@ -201,10 +202,12 @@ class CqRenderer : public IqRenderer
 			std::cout << str;
 		}
 
-		virtual	IqTextureMap* GetTextureMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetEnvironmentMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetShadowMap( const CqString& strFileName );
-		virtual	IqTextureMap* GetLatLongMap( const CqString& strFileName );
+		virtual	CqTextureCache& textureCache();
+		virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& strFileName );
+		virtual	IqTextureMapOld* GetOcclusionMap(const CqString& fileName);
+		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
+
+		virtual const char* textureSearchPath();
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
@@ -514,6 +517,9 @@ class CqRenderer : public IqRenderer
 		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
+		CqTextureCache m_textureCache; ///< Cache for aqsistex texture access.
+		 
+
 		bool	m_fSaveGPrims;
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.
 		CqTransformPtr	m_pTransDefObj;				///< The initial transformation for objects.
@@ -525,8 +531,8 @@ class CqRenderer : public IqRenderer
 		bool			m_UsingDepthOfField;
 		CqVector2D		m_DepthOfFieldScale;
 
-		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
-		void WhichMatToWorld(CqMatrix &b, TqUlong thash);
+		bool WhichMatWorldTo(CqMatrix &a, TqUlong thash);
+		bool WhichMatToWorld(CqMatrix &b, TqUlong thash);
 
 		std::map<std::string, SqOutputDataEntry>	m_OutputDataEntries;
 		TqInt	m_OutputDataOffset;
@@ -565,7 +571,7 @@ void	QSetRenderContext( CqRenderer* pRenderer );
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef RENDERER_H_INCLUDED
 #endif

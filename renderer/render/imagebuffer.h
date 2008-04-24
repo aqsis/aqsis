@@ -47,18 +47,8 @@
 #include	"clippingvolume.h"
 #include	"mpdump.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
-
-// This struct is used to hold info about a mpg that is used when rendering the mpg.
-// It caches the info for use by multiple samples.
-struct SqMpgSampleInfo
-{
-	CqColor		m_Colour;
-	CqColor		m_Opacity;
-	bool		m_Occludes;		// whether the opacity is full.
-	bool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
-};
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
@@ -149,6 +139,16 @@ class CqImageBuffer
 		TqInt	iYRes() const
 		{
 			return ( m_iYRes );
+		}
+		/// Return the width of the cropped image in pixels
+		TqInt xResCrop() const
+		{
+			return m_CropWindowXMax - m_CropWindowXMin;
+		}
+		/// Return the height of the cropped image in pixels
+		TqInt yResCrop() const
+		{
+			return m_CropWindowYMax - m_CropWindowYMin;
 		}
 		/** Get the minimum horizontal pixel to render.
 		 * \return Integer minimum pixel index.
@@ -368,7 +368,7 @@ class CqImageBuffer
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGEBUFFER_H_INCLUDED
 #endif

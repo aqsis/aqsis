@@ -20,7 +20,7 @@
 #include	"sstring.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -353,7 +353,7 @@ struct IqShaderData
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___ishadervariable_Loaded___

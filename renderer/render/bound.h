@@ -35,7 +35,7 @@
 
 #include <vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqBound
@@ -343,6 +343,6 @@ class CqBoundList
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // BOUND_H_INCLUDED

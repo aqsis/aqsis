@@ -28,7 +28,7 @@
 #include	"csgtree.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 bool CqCSGTreeNode::m_bCSGRequired = false;
 
@@ -350,4 +350,4 @@ bool CqCSGNodeDifference::EvaluateState( std::vector<bool>& abChildStates )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

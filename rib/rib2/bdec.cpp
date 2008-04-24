@@ -37,7 +37,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <stdio.h>
+#include <cstdlib>
 #include "bdec.h"
 
 #ifdef AQSIS_SYSTEM_WIN32

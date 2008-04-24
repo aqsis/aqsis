@@ -8,4 +8,3 @@ texmap (
         Cout = texture (texturename);
     }
 }
-

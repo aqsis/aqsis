@@ -26,6 +26,7 @@
 #include	"aqsis.h"
 
 #include	<time.h>
+#include	<boost/bind.hpp>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -37,14 +38,14 @@
 #include	"render.h"
 #include	"transform.h"
 #include	"rifile.h"
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"shadervm.h"
 #include	"inlineparse.h"
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 extern IqDDManager* CreateDisplayDriverManager();
 extern IqRaytrace* CreateRaytracer();
@@ -74,6 +75,7 @@ static CqMatrix oldresult[2];
 CqRenderer::CqRenderer() :
 		m_pImageBuffer( 0 ),
 		m_Mode( RenderMode_Image ),
+		m_textureCache(boost::bind(&CqRenderer::textureSearchPath, this)),
 		m_fSaveGPrims( false ),
 		m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 		m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
@@ -809,7 +811,8 @@ void CqRenderer::RenderAutoShadows()
 				delete(m_pDDManager);
 				m_pDDManager = realDDManager;
 
-				CqTextureMap::FlushCache();
+				CqTextureMapOld::FlushCache();
+				m_textureCache.flush();
 				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
@@ -858,9 +861,9 @@ void CqRenderer::Initialise()
  */
 
 
-CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
+bool	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result )
 {
-	CqMatrix	matResult, matA, matB;
+	CqMatrix	matA, matB;
 	TqUlong fhash, thash;
 
 	// Get the hash keys for From,To spaces
@@ -884,7 +887,8 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	}
 	else
 	{
-		WhichMatToWorld( matA, fhash );
+		if(!WhichMatToWorld( matA, fhash ))
+			return(false);
 	}
 
 
@@ -902,12 +906,13 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 			matB = m_pTransCamera->matObjectToWorld( time );
 	} else
 	{
-		WhichMatWorldTo( matB, thash );
+		if(!WhichMatWorldTo( matB, thash ))
+			return(false);
 	}
 
-	matResult = matB * matA;
+	result = matB * matA;
 
-	return ( matResult );
+	return ( true );
 }
 
 
@@ -916,9 +921,9 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 /** Get the matrix to convert vectors between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
+bool	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result )
 {
-	CqMatrix	matResult, matA, matB;
+	CqMatrix	matA, matB;
 
 	TqUlong fhash, thash;
 
@@ -942,7 +947,8 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
 	} else
 	{
-		WhichMatToWorld ( matA, fhash );
+		if(!WhichMatToWorld ( matA, fhash ))
+			return(false);
 	}
 
 	if ( thash == ohash )
@@ -960,26 +966,27 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 			matB = m_pTransCamera->matObjectToWorld( time );
 	} else
 	{
-		WhichMatWorldTo ( matB, thash );
+		if(!WhichMatWorldTo ( matB, thash ))
+			return(false);
 	}
 
-	matResult = matB * matA;
+	result = matB * matA;
 
 
 
-	if (memcmp((void *) oldkey[0].pElements(), (void *) matResult.pElements(), sizeof(TqFloat) * 16) != 0)
+	if (memcmp((void *) oldkey[0].pElements(), (void *) result.pElements(), sizeof(TqFloat) * 16) != 0)
 	{
-		oldkey[0] = matResult;
-		matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
-		matResult[ 3 ][ 3 ] = 1.0;
-		oldresult[0] = matResult;
+		oldkey[0] = result;
+		result[ 3 ][ 0 ] = result[ 3 ][ 1 ] = result[ 3 ][ 2 ] = result[ 0 ][ 3 ] = result[ 1 ][ 3 ] = result[ 2 ][ 3 ] = 0.0;
+		result[ 3 ][ 3 ] = 1.0;
+		oldresult[0] = result;
 
 	}
 	else
 	{
-		return oldresult[0];
+		result = oldresult[0];
 	}
-	return ( matResult );
+	return ( true );
 }
 
 
@@ -987,9 +994,9 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 /** Get the matrix to convert normals between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
+bool	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result )
 {
-	CqMatrix	matResult, matA, matB;
+	CqMatrix	matA, matB;
 
 	TqUlong fhash, thash;
 
@@ -1013,7 +1020,8 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
 	} else
 	{
-		WhichMatToWorld ( matA, fhash );
+		if(!WhichMatToWorld ( matA, fhash ))
+			return(false);
 	}
 
 	if ( thash == ohash )
@@ -1030,26 +1038,27 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 			matB = m_pTransCamera->matObjectToWorld( time );
 	} else
 	{
-		WhichMatWorldTo ( matB, thash );
+		if(!WhichMatWorldTo ( matB, thash ))
+			return(false);
 	}
 
 
-	matResult = matB * matA;
-	if (memcmp((void *) oldkey[1].pElements(), (void *) matResult.pElements(), sizeof(TqFloat) * 16) != 0)
+	result = matB * matA;
+	if (memcmp((void *) oldkey[1].pElements(), (void *) result.pElements(), sizeof(TqFloat) * 16) != 0)
 	{
-		oldkey[1] = matResult;
-		matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
-		matResult[ 3 ][ 3 ] = 1.0;
-		matResult = matResult.Inverse().Transpose();
-		oldresult[1] = matResult;
+		oldkey[1] = result;
+		result[ 3 ][ 0 ] = result[ 3 ][ 1 ] = result[ 3 ][ 2 ] = result[ 0 ][ 3 ] = result[ 1 ][ 3 ] = result[ 2 ][ 3 ] = 0.0;
+		result[ 3 ][ 3 ] = 1.0;
+		result = result.Inverse().Transpose();
+		oldresult[1] = result;
 
 	}
 	else
 	{
-		return oldresult[1];
+		result = oldresult[1];
 	}
 
-	return ( matResult );
+	return ( true );
 }
 
 
@@ -1452,9 +1461,11 @@ void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 		m_aWorld.push_back(pSurface);
 	else
 	{
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		CqMatrix matWtoC, matNWtoC, matVWtoC;
+		QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matWtoC );
+		QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matNWtoC );
+		QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matVWtoC );
+		pSurface->Transform( matWtoC, matNWtoC, matVWtoC);
 		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
@@ -1466,9 +1477,11 @@ void CqRenderer::PostWorld()
 	{
 		boost::shared_ptr<CqSurface> pSurface = m_aWorld.front();
 		
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		CqMatrix matWtoC, matNWtoC, matVWtoC;
+		QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matWtoC );
+		QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matNWtoC );
+		QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matVWtoC );
+		pSurface->Transform( matWtoC, matNWtoC, matVWtoC);
 		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 		m_aWorld.pop_front();
@@ -1482,9 +1495,11 @@ void CqRenderer::PostCloneOfWorld()
 	for(i=m_aWorld.begin(); i!=m_aWorld.end(); i++)
 	{
 		boost::shared_ptr<CqSurface> pSurface((*i)->Clone());
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		CqMatrix matWtoC, matNWtoC, matVWtoC;
+		QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matWtoC );
+		QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matNWtoC );
+		QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0, matVWtoC );
+		pSurface->Transform( matWtoC, matNWtoC, matVWtoC);
 		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
@@ -1500,7 +1515,9 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	CqBound bound(boundAttr);
 	if(bound.Volume2() > 0)
 	{
-		bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", NULL, pSurface->pTransform().get(), QGetRenderContext()->Time() ) );
+		CqMatrix mat;
+		QGetRenderContext() ->matSpaceToSpace( "object", "raster", NULL, pSurface->pTransform().get(), QGetRenderContext()->Time(), mat );
+		bound.Transform( mat );
 
 		TqFloat ruler = fabs( ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() ) );
 
@@ -1516,13 +1533,13 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if( rangeAttr[1] == rangeAttr[0] )
 			minImportance = ruler < rangeAttr[1] ? 1.0f : 0.0f;
 		else
-			minImportance = CLAMP( ( rangeAttr[1] - ruler ) / ( rangeAttr[1] - rangeAttr[0] ), 0, 1 );
+			minImportance = clamp(( rangeAttr[1] - ruler ) / ( rangeAttr[1] - rangeAttr[0] ), 0.0f, 1.0f);
 
 		TqFloat maxImportance;
 		if ( rangeAttr[2] == rangeAttr[3] )
 			maxImportance = ruler < rangeAttr[2] ? 1.0f : 0.0f;
 		else
-			maxImportance = CLAMP( ( rangeAttr[3] - ruler ) / ( rangeAttr[3] - rangeAttr[2] ), 0, 1 );
+			maxImportance = clamp((rangeAttr[3] - ruler)/(rangeAttr[3] - rangeAttr[2]), 0.0f, 1.0f);
 
 		if ( minImportance >= maxImportance )
 			// Geomtry must be culled.
@@ -1645,24 +1662,33 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-IqTextureMap* CqRenderer::GetTextureMap( const CqString& strFileName )
+CqTextureCache& CqRenderer::textureCache()
 {
-	return ( CqTextureMap::GetTextureMap( strFileName ) );
+	return m_textureCache;
 }
 
-IqTextureMap* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetEnvironmentMap( strFileName ) );
+	return ( CqTextureMapOld::GetEnvironmentMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetShadowMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetOcclusionMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetShadowMap( strFileName ) );
+	return ( CqTextureMapOld::GetShadowMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetLatLongMap( const CqString& strFileName )
+IqTextureMapOld* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
-	return ( CqTextureMap::GetLatLongMap( strFileName ) );
+	return ( CqTextureMapOld::GetLatLongMap( strFileName ) );
+}
+
+const char* CqRenderer::textureSearchPath()
+{
+	const CqString* pathPtr = poptCurrent()->GetStringOption("searchpath", "texture");
+	if(pathPtr)
+		return pathPtr->c_str();
+	else
+		return "";
 }
 
 
@@ -1681,7 +1707,7 @@ bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
 //---------------------------------------------------------------------
 /** Which matrix will be used in ToWorld
  */
-void CqRenderer::WhichMatToWorld( CqMatrix &matA, TqUlong thash )
+bool CqRenderer::WhichMatToWorld( CqMatrix &matA, TqUlong thash )
 {
 	static TqInt awhich = 0;
 	TqInt tmp = awhich;
@@ -1692,7 +1718,7 @@ void CqRenderer::WhichMatToWorld( CqMatrix &matA, TqUlong thash )
 		if ( m_aCoordSystems[ awhich ].m_hash == thash )
 		{
 			matA = m_aCoordSystems[ awhich ].m_matToWorld;
-			return ;
+			return(true);
 		}
 	}
 
@@ -1702,16 +1728,17 @@ void CqRenderer::WhichMatToWorld( CqMatrix &matA, TqUlong thash )
 		if ( m_aCoordSystems[ awhich ].m_hash == thash )
 		{
 			matA = m_aCoordSystems[ awhich ].m_matToWorld;
-			break;
+			return(true);
 		}
 	}
+	return(false);
 }
 
 //---------------------------------------------------------------------
 /** Which matrix will be used in WorldTo
  */
 
-void CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
+bool CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
 {
 	static TqInt bwhich = 0;
 	TqInt tmp = bwhich;
@@ -1722,7 +1749,7 @@ void CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
 		if ( m_aCoordSystems[ bwhich ].m_hash == thash )
 		{
 			matB = m_aCoordSystems[ bwhich ].m_matWorldTo;
-			return ;
+			return(true);
 		}
 	}
 
@@ -1732,9 +1759,10 @@ void CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
 		if ( m_aCoordSystems[ bwhich ].m_hash == thash )
 		{
 			matB = m_aCoordSystems[ bwhich ].m_matWorldTo;
-			break;
+			return(true);
 		}
 	}
+	return(false);
 }
 
 
@@ -1910,5 +1938,5 @@ void	CqRenderer::SetImage( CqImageBuffer* pImage )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

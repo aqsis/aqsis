@@ -34,7 +34,7 @@
 
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqObjectInstance
@@ -67,6 +67,6 @@ class CqObjectInstance
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // OBJECTINSTANCE_H_INCLUDED

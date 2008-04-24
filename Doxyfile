@@ -105,9 +105,9 @@ INPUT                  = ./aqsistypes \
                          ./shadercompiler/shaderexecenv \
                          ./shadercompiler/shadervm \
                          ./shadercompiler/slparse \
-                         ./shadercompiler/slpp \
                          ./shadercompiler/slxargs \
-                         ./texturing/teqser
+                         ./texturing/teqser \
+                         ./texturing/texlib
 FILE_PATTERNS          = *.h \
                          *.cpp \
                          *.c

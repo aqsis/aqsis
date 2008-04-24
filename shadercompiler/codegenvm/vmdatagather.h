@@ -38,7 +38,7 @@
 #include	"ifuncdef.h"
 #include	"icodegen.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqCodeGenDataGather : public IqParseNodeVisitor
@@ -93,6 +93,6 @@ class CqCodeGenDataGather : public IqParseNodeVisitor
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !VMDATAGATHER_H_INCLUDED

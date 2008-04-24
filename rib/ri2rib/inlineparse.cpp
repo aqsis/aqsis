@@ -23,7 +23,7 @@
  */
 #include "inlineparse.h"
 
-USING_NAMESPACE( libri2rib );
+namespace libri2rib {
 
 void CqInlineParse::check_syntax ()
 {
@@ -261,3 +261,5 @@ void CqInlineParse::lc( std::string &str )
 		str[ i ] = tolower( str[ i ] );
 	}
 }
+
+} // namespace libri2rib

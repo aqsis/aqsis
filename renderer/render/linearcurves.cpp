@@ -34,7 +34,7 @@
 #include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 static TqUlong hp = CqString::hash("P");
@@ -48,27 +48,11 @@ static TqUlong hv = CqString::hash("v");
 CqLinearCurveSegment::CqLinearCurveSegment() : CqCurve()
 { }
 
-
-
-/**
- * CqLinearCurveSegment copy constructor.
- */
-/* CqLinearCurveSegment::CqLinearCurveSegment( const CqLinearCurveSegment &from ) :
- * 		CqCurve()
- * {
- * 	( *this ) = from;
- * }
- */
-
-
-
 /**
  * CqLinearCurveSegment destructor.
  */
 CqLinearCurveSegment::~CqLinearCurveSegment()
 { }
-
-
 
 /**
  * Create a clone of this curve surface
@@ -82,101 +66,67 @@ CqSurface* CqLinearCurveSegment::Clone() const
 }
 
 
+namespace {
 
-
-/**
- * Implements natural subdivision for this curve segment.
+/** \brief Helper function for natural subdivision of linear curve parameters.
  *
- * @param pParam        Original parameter.
- * @param pParam1       First new parameter.
- * @param pParam2       Second new parameter.
- * @param u             true if the split is along u (should
- *                              always be false!)
+ * \param pParam - pointer to source parameter data
+ * \param pResult1 - pointer to output parameter for first result curve
+ * \param pResult1 - pointer to output parameter for second result curve
  */
+template <class T, class SLT>
+void linCurveNatSubdiv(CqParameter* pParam,
+		CqParameter* pResult1,
+		CqParameter* pResult2)
+{
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+	CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+	CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+	pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
+	pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
+	pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
+}
+
+} // unnamed namespace 
+
 void CqLinearCurveSegment::NaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
     bool u
 )
 {
-
 	assert( u == false );
-	switch ( pParam->Type() )
+	switch(pParam->Type())
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_matrix:
-			{
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				//			break;
-			}
-
-			default:
-			{
-				break;
-			}
+		case type_float:
+			linCurveNatSubdiv<TqFloat, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_integer:
+			linCurveNatSubdiv<TqInt, TqFloat>(pParam, pParam1, pParam2);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			linCurveNatSubdiv<CqVector3D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_hpoint:
+			linCurveNatSubdiv<CqVector4D, CqVector3D>(pParam, pParam1, pParam2);
+			break;
+		case type_color:
+			linCurveNatSubdiv<CqColor, CqColor>(pParam, pParam1, pParam2);
+			break;
+		case type_string:
+			linCurveNatSubdiv<CqString, CqString>( pParam, pParam1, pParam2);
+			break;
+		case type_matrix:
+			/// \todo Why is this removed?
+			//linCurveNatSubdiv<CqMatrix, CqMatrix>( pParam, pParam1, pParam2);
+			//break;
+		default:
+			break;
 	}
-
 }
-
 
 
 /**
@@ -220,7 +170,6 @@ TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& a
 }
 
 
-
 /**
  * Splits a linear curve segment into two smaller curves.
  *
@@ -232,7 +181,6 @@ TqInt CqLinearCurveSegment::SplitToCurves(
     std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
-
 	// split into more curves
 	//  This bit right here looks a lot like CqSurface::Split().
 	//  The difference is that we *don't* want the default splitter
@@ -703,4 +651,4 @@ void CqLinearCurvesGroup::Transform(
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

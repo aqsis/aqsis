@@ -34,7 +34,7 @@
 
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 static TqInt Faces01[] = {
  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -3831,7 +3831,7 @@ TqInt CqBunny::NFaces( )
 	return sizeof(Faces01) / sizeof(TqInt); 
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //---------------------------------------------------------------------
 

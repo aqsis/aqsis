@@ -50,7 +50,7 @@ long& log_level(std::ostream& Stream)
 
 } // namespace detail
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 
@@ -653,5 +653,5 @@ int ansi_buf::sync()
 #endif
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

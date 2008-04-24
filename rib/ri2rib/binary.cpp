@@ -38,7 +38,7 @@
 
 #define OUT (*out)
 
-USING_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 
 void CqBinary::intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 )
@@ -291,3 +291,5 @@ void CqBinary::print ( const char *c )
 	std::string str( c );
 	OUT << str;
 }
+
+} // namespace libri2rib

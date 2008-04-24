@@ -34,7 +34,7 @@
 
 #include	"vector2d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 
@@ -378,6 +378,20 @@ class COMMON_SHARE CqVector3D
 ;
 
 
+//------------------------------------------------------------------------------
+/** \brief Determine whether two vectors are equal to within some tolerance
+ *
+ * The closeness criterion for vectors is based on the euclidian norm - ie, the
+ * usual distance function between two vectors.  v1 and v2 are "close" if
+ *
+ * length(v1 - v2) < tol*max(length(v1), length(v2));
+ *
+ * \param v1, v2 - vectors to compare
+ * \param tolerance for comparison
+ */
+bool isClose(const CqVector3D& v1, const CqVector3D& v2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 // Inline function implementations.
@@ -407,8 +421,15 @@ inline CqVector3D lerp(const T t, const CqVector3D& v0, const CqVector3D& v1)
 			       (1-t)*v0.m_z + t*v1.m_z);
 }
 
+inline bool isClose(const CqVector3D& v1, const CqVector3D& v2, TqFloat tol)
+{
+	TqFloat diff2 = (v1 - v2).Magnitude2();
+	TqFloat tol2 = tol*tol;
+	return diff2 <= tol2*v1.Magnitude2() || diff2 <= tol2*v2.Magnitude2();
+}
+
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// VECTOR3D_H_INCLUDED

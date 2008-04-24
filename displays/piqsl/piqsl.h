@@ -38,10 +38,10 @@
 #include <map>
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	PIQSL_H_INCLUDED

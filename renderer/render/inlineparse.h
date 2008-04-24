@@ -34,7 +34,7 @@
 #include "ri.h"
 #include "symbols.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqInlineParse
 {
@@ -89,5 +89,5 @@ class CqInlineParse
 		}
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 #endif

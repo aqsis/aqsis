@@ -12,4 +12,3 @@ show_N(float useNg = 0;)
 	Ci = (color(Nt)+1)/2;
 	Oi = 1;
 }
-

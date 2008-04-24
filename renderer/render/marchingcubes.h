@@ -37,7 +37,7 @@
 #include "aqsis.h"
 #include "renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // types
 
@@ -319,7 +319,7 @@ protected :
 //_____________________________________________________________________________
 
 //---------------------------------------------------------------------
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // _MARCHINGCUBES_H_
 

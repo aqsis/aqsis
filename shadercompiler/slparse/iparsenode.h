@@ -34,7 +34,7 @@
 #include	"ivardef.h"
 #include	"sstring.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 enum EqMathOp
 {
@@ -671,6 +671,6 @@ struct IqParseNodeMessagePassingFunction
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !IPARSENODE_H_INCLUDED
