@@ -46,32 +46,32 @@ const char* g_shadowTextureFormatStr = "Shadow";
 //------------------------------------------------------------------------------
 namespace {
 
-/** \brief A destination class to accept mipmapped data as it is generated
+/** /brief Downsample the provided buffer into the given output file.
+ *
+ * \param buf - Pointer to source data.  This smart pointer is reset to save
+ *              memory during the mipmapping process, so make sure a copy of it
+ *              is kept elsewhere if desired.
+ * \param outFile - output file for the mipmapped data
+ * \param filterInfo - information about which filter type and size to use
+ * \param wrapModes - specifies how the texture will be wrapped at the edges.
  */
-class CqMipmapFileDest
+template<typename ChannelT>
+void downsampleToFile(boost::shared_ptr<CqTextureBuffer<ChannelT> >& buf,
+		IqMultiTexOutputFile& outFile, const SqFilterInfo& filterInfo,
+		const SqWrapModes wrapModes)
 {
-	private:
-		IqMultiTexOutputFile& m_outFile;
-		bool m_firstBuf;
-	public:
-		CqMipmapFileDest(IqMultiTexOutputFile& outFile)
-			: m_outFile(outFile),
-			m_firstBuf(true)
-		{ }
+	outFile.writePixels(*buf);
+	typedef CqDownsampleIterator<CqTextureBuffer<ChannelT> > TqDownsampleIter;
+	for(TqDownsampleIter i = ++TqDownsampleIter(buf, filterInfo, wrapModes),
+			end = TqDownsampleIter(); i != end; ++i)
+	{
+		buf = *i;
+		outFile.newSubImage(buf->width(), buf->height());
+		outFile.writePixels(*buf);
+	}
+}
 
-		/// Accept a buffer created during mipmapping and save to file.
-		template<typename ArrayT>
-		void accept(const ArrayT& buf)
-		{
-			if(!m_firstBuf)
-				m_outFile.newSubImage(buf.width(), buf.height());
-			else
-				m_firstBuf = false;
-			m_outFile.writePixels(buf);
-		}
-};
-
-/** Create a mipmapped file from 
+/** \brief Create a mipmapped file from the image found in the given input file.
  *
  * \param inFile - input file from which the data should be read
  * \param outFileName - name of output file for the mipmapped data
@@ -84,16 +84,21 @@ void createMipmapFile(IqTexInputFile& inFile, const std::string& outFileName,
 		const SqWrapModes wrapModes)
 {
 	// Read pixels into the input buffer.
-	CqTextureBuffer<ChannelT> buf;
-	inFile.readPixels(buf);
+	boost::shared_ptr<CqTextureBuffer<ChannelT> > buf(new CqTextureBuffer<ChannelT>());
+	inFile.readPixels(*buf);
 	// Create mipmap
 	boost::shared_ptr<IqMultiTexOutputFile> outFile
 		= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
-	CqMipmapFileDest mapDest(*outFile);
-	createMipmap(buf, mapDest, filterInfo, wrapModes);
+	downsampleToFile(buf, *outFile, filterInfo, wrapModes);
 }
 
-/// Create a mipmap from input data in the openEXR "half" data format.
+/** \brief Create a mipmap from input data in the openEXR "half" data format.
+ *
+ * This is a special case, since the "half" data needs to be converted into
+ * floating point data because TIFF files don't support half data.
+ *
+ * \see createMipmapFile, generic version.
+ */
 void createMipmapFileHalf(IqTexInputFile& inFile, const std::string& outFileName,
 		CqTexFileHeader& header, const SqFilterInfo& filterInfo,
 		const SqWrapModes wrapModes)
@@ -104,7 +109,8 @@ void createMipmapFileHalf(IqTexInputFile& inFile, const std::string& outFileName
 	inFile.readPixels(halfBuf);
 	// Convert to 32-bit floating point; we can't handle the half data
 	// type in TIFF.
-	CqTextureBuffer<TqFloat> floatBuf = halfBuf;
+	boost::shared_ptr<CqTextureBuffer<TqFloat> > buf(
+			new CqTextureBuffer<TqFloat>(halfBuf));
 	// Correct the channel list in the output file header so that it indicates
 	// float32 data.  We don't bother to preserve the channel names since they
 	// can't be stored natively by TIFF anyway.
@@ -113,8 +119,7 @@ void createMipmapFileHalf(IqTexInputFile& inFile, const std::string& outFileName
 	// Create mipmap
 	boost::shared_ptr<IqMultiTexOutputFile> outFile
 		= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
-	CqMipmapFileDest mapDest(*outFile);
-	createMipmap(floatBuf, mapDest, filterInfo, wrapModes);
+	downsampleToFile(buf, *outFile, filterInfo, wrapModes);
 #	else
 	assert(0);
 #	endif

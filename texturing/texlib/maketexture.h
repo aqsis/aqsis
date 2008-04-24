@@ -53,7 +53,7 @@ struct SqFilterInfo
 	//bool isSeparable;
 
 	/// trivial constructor
-	SqFilterInfo(TqFilterFunc filterFunc, TqFloat xWidth, TqFloat yWidth)
+	SqFilterInfo(TqFilterFunc filterFunc = 0, TqFloat xWidth = 1, TqFloat yWidth = 1)
 		: filterFunc(filterFunc), xWidth(xWidth), yWidth(yWidth)
 	{ }
 };

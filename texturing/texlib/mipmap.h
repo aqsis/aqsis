@@ -42,27 +42,50 @@ namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
-/** \brief Create a mipmap from the given texture buffer
+/** \brief Input iterator for creating a sequence of downsampled images for
+ * mipmapping.
  *
- * To create each downsampled image level in the mipmap, mipmapDownsample() is
- * called on the previous level to reduce the size by a factor of 2.  The
- * process terminates when the final level has dimensions 1x1.
- *
- * BufferDestT is a type which must have a single function, accept() which
- * accepts arrays of type ArrayT:
- * \code
- *   void accept(const ArrayT& buf)
- * \endcode
- * dest.accept() is called as each downsampled image is generated.
- *
- * \param srcBuf - input texture buffer.
- * \param dest - destination for downsampled images.
- * \param filterInfo - information about which filter type and size to use
- * \param wrapModes - specifies how the texture will be wrapped at the edges.
+ * To create each downsampled image level in the mipmap, downsample() is called
+ * on the previous image level to reduce the size by a factor of 2.  The buffer
+ * is set to null when the size of the previous buffer reaches 1x1.
  */
-template<typename ArrayT, typename BufferDestT>
-void createMipmap(ArrayT& srcBuf, BufferDestT& dest,
-		const SqFilterInfo& filterInfo, const SqWrapModes wrapModes);
+template<typename ArrayT>
+class CqDownsampleIterator
+{
+	public:
+		/** \brief Construct the null downsampler iterator
+		 *
+		 * The null downsampler iterator is to be used as the "end" iterator in
+		 * the sequence generated from any input image, after the last image of
+		 * dimensions 1x1.
+		 */
+		CqDownsampleIterator();
+		/** \brief Construct a downsampler iterator
+		 *
+		 * \param buf - source buffer to downsample
+		 * \param filterInfo - information about which filter type and size to use
+		 * \param wrapModes - specifies how the texture will be wrapped at the edges.
+		 */
+		CqDownsampleIterator(boost::shared_ptr<ArrayT> buf,
+				const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes);
+		/** \brief Advance to the next image in the sequence
+		 *
+		 * The current image is downsampled to obtain the next one.
+		 */
+		CqDownsampleIterator& operator++();
+		/// Return the current buffer.
+		const boost::shared_ptr<ArrayT>& operator*();
+		/** \brief Test if this iterator is equal to another.
+		 *
+		 * Useful for testing the ending condition.  A default-constructed
+		 * CqDownsampleIterator acts as the "end" iterator in a range.
+		 */
+		bool operator!=(const CqDownsampleIterator<ArrayT>& rhs);
+	private:
+		boost::shared_ptr<ArrayT> m_buf;
+		SqFilterInfo m_filterInfo;
+		SqWrapModes m_wrapModes;
+};
 
 /** \brief Downsample an image to the next smaller mipmap size.
  *
@@ -78,26 +101,57 @@ void createMipmap(ArrayT& srcBuf, BufferDestT& dest,
  * \param wrapModes - specifies how the texture will be wrapped at the edges.
  */
 template<typename ArrayT>
-boost::shared_ptr<ArrayT> mipmapDownsample(const ArrayT& srcBuf,
+boost::shared_ptr<ArrayT> downsample(const ArrayT& srcBuf,
 		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes);
+
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-template<typename ArrayT, typename BufferDestT>
-void createMipmap(ArrayT& srcBuf, BufferDestT& dest,
-		const SqFilterInfo& filterInfo, const SqWrapModes wrapModes)
-{
-	boost::shared_ptr<ArrayT> buf(&srcBuf, nullDeleter);
+// CqDownsampleIterator implementation
+template<typename ArrayT>
+CqDownsampleIterator<ArrayT>::CqDownsampleIterator()
+	: m_buf(),
+	m_filterInfo(),
+	m_wrapModes()
+{ }
 
-	dest.accept(*buf);
-	while(buf->width() > 1 || buf->height() > 1)
-	{
-		buf = mipmapDownsample(*buf, filterInfo, wrapModes);
-		dest.accept(*buf);
-	}
+template<typename ArrayT>
+CqDownsampleIterator<ArrayT>::CqDownsampleIterator(boost::shared_ptr<ArrayT> buf,
+		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes)
+	: m_buf(buf),
+	m_filterInfo(filterInfo),
+	m_wrapModes(wrapModes)
+{ }
+
+template<typename ArrayT>
+CqDownsampleIterator<ArrayT>& CqDownsampleIterator<ArrayT>::operator++()
+{
+	if(!m_buf)
+		return *this;
+	if(m_buf->width() > 1 || m_buf->height() > 1)
+		m_buf = downsample(*m_buf, m_filterInfo, m_wrapModes);
+	else
+		m_buf.reset();
+	return *this;
 }
+
+template<typename ArrayT>
+const boost::shared_ptr<ArrayT>& CqDownsampleIterator<ArrayT>::operator*()
+{
+	return m_buf;
+}
+
+template<typename ArrayT>
+bool CqDownsampleIterator<ArrayT>::operator!=(const CqDownsampleIterator<ArrayT>& rhs)
+{
+	return m_buf != rhs.m_buf;
+}
+
+
+//------------------------------------------------------------------------------
+// free functions implementation
 
 namespace detail {
 
@@ -113,7 +167,7 @@ namespace detail {
  * \param wrapModes - specify how the texture will be wrapped at the edges.
  */
 template<typename ArrayT>
-boost::shared_ptr<ArrayT> mipmapDownsampleNonseperable(
+boost::shared_ptr<ArrayT> downsampleNonseperable(
 		const ArrayT& srcBuf, TqInt mipmapRatio,
 		CqCachedFilter& filterWeights, const SqWrapModes& wrapModes)
 {
@@ -146,7 +200,7 @@ boost::shared_ptr<ArrayT> mipmapDownsampleNonseperable(
 
 
 template<typename ArrayT>
-boost::shared_ptr<ArrayT> mipmapDownsample(const ArrayT& srcBuf,
+boost::shared_ptr<ArrayT> downsample(const ArrayT& srcBuf,
 		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes)
 {
 	// Amount to scale the image by.  Fixed at a factor of 2 for now.
@@ -162,7 +216,7 @@ boost::shared_ptr<ArrayT> mipmapDownsample(const ArrayT& srcBuf,
 
 	CqCachedFilter weights(filterInfo, srcBuf.width() % 2 != 0,
 			srcBuf.height() % 2 != 0, scale);
-	return detail::mipmapDownsampleNonseperable(srcBuf, mipmapRatio, weights, wrapModes);
+	return detail::downsampleNonseperable(srcBuf, mipmapRatio, weights, wrapModes);
 }
 
 } // namespace Aqsis
