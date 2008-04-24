@@ -34,6 +34,7 @@
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"bucket.h"
+#include	"jitter.h"
 #include	"multitimer.h"
 
 #include	"imagers.h"
@@ -113,6 +114,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 		m_aieImage.resize( m_RealWidth * m_RealHeight );
 		m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
 		m_SamplePoints.resize( m_RealWidth * m_RealHeight * m_PixelXSamples * m_PixelYSamples );
+		CqJitter jitter;
+		jitter.jitterSamples(m_SamplePoints, m_RealWidth * m_PixelXSamples, m_RealHeight * m_PixelYSamples);
 		m_NextSamplePoint = 0;
 
 		CalculateDofBounds();

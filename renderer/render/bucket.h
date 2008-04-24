@@ -270,6 +270,7 @@ class CqBucket : public IqBucket
 			m_ImageBuffer = pBuffer;
 		}
 
+		typedef std::vector<SqSampleData>	TqSampleList;
 
 	private:
 		static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
@@ -290,7 +291,7 @@ class CqBucket : public IqBucket
 		static	TqInt	m_NumDofBounds;
 		static	std::vector<CqBound>		m_DofBounds;
 		static	std::vector<CqImagePixel>	m_aieImage;
-		static	std::vector<SqSampleData>	m_SamplePoints;
+		static	TqSampleList	m_SamplePoints;
 		static	TqInt	m_NextSamplePoint;
 		static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
