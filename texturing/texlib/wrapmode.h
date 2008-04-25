@@ -29,6 +29,8 @@
 
 #include "aqsis.h"
 
+#include <string>
+
 namespace Aqsis
 {
 
@@ -75,11 +77,11 @@ inline SqWrapModes::SqWrapModes(EqWrapMode sWrap, EqWrapMode tWrap)
 
 inline EqWrapMode wrapModeFromString(const std::string& modeString)
 {
-	if(modeString.compare("black") == 0)
+	if(modeString == "black")
 		return WrapMode_Black;
-	else if(modeString.compare("periodic") == 0)
+	else if(modeString == "periodic")
 		return WrapMode_Periodic;
-	else if(modeString.compare("clamp") == 0)
+	else if(modeString == "clamp")
 		return WrapMode_Clamp;
 	else
 		// Default: return black... maybe we should have an "unknown" wrap mode
