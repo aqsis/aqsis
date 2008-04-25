@@ -55,6 +55,11 @@ declblock {\#ifndef AQSIS_SYSTEM_WIN32} {open after {\#endif}
   decl {\#include <sys/types.h>} {}
 } 
 
+declblock {\#ifdef AQSIS_SYSTEM_MACOSX} {open after {\#endif}
+} {
+  decl {\#include <Carbon/Carbon.h>} {}
+} 
+
 decl {using std::string;} {public
 } 
 
@@ -92,7 +97,7 @@ Function {} {open
 } {
   Fl_Window m_window {
     label eqsl open
-    xywh {793 487 400 325} type Double resizable visible
+    xywh {618 370 400 325} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -149,6 +154,12 @@ else
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/Contents/MacOS/");
 \#else
 	std::string program;
 \#endif
@@ -208,6 +219,12 @@ else
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/Contents/MacOS/");
 \#else
 	std::string program;
 \#endif
@@ -246,6 +263,12 @@ m_outputHistory->add(commandLine.c_str());}
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/Contents/MacOS/");
 \#else
 	std::string program;
 \#endif
@@ -317,7 +340,7 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Progress m_progress {selected
+    Fl_Progress m_progress {
       xywh {0 300 400 25} selection_color 246 labeltype NO_LABEL align 0
       code0 {o->minimum(0);}
       code1 {o->maximum(100);}
@@ -347,5 +370,6 @@ Function {callback(const char* string)} {open return_type void
 	{
 		m_outputConsole->insert(string);
 	}
-	Fl::unlock();} {}
+	Fl::unlock();} {selected
+  }
 } 
