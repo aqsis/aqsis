@@ -360,7 +360,7 @@ Function {callback(const char* string)} {open return_type void
 		{
 			float fp = boost::lexical_cast<float>(percentage);
 			m_progress->value(fp);
-			Fl::check();
+			Fl::wait(0);
 		}
 		catch(boost::bad_lexical_cast &)
 		{
