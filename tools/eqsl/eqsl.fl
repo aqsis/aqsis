@@ -155,11 +155,11 @@ else
 	std::string program = root;
 	program.append("\\\\");
 \#elif defined(AQSIS_SYSTEM_MACOSX)
-	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
-	program.append("/Contents/MacOS/");
+	program.append("/");
 \#else
 	std::string program;
 \#endif
@@ -220,11 +220,11 @@ else
 	std::string program = root;
 	program.append("\\\\");
 \#elif defined(AQSIS_SYSTEM_MACOSX)
-	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
-	program.append("/Contents/MacOS/");
+	program.append("/");
 \#else
 	std::string program;
 \#endif
@@ -264,11 +264,11 @@ m_outputHistory->add(commandLine.c_str());}
 	std::string program = root;
 	program.append("\\\\");
 \#elif defined(AQSIS_SYSTEM_MACOSX)
-	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
-	program.append("/Contents/MacOS/");
+	program.append("/");
 \#else
 	std::string program;
 \#endif
