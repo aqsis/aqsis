@@ -1,0 +1,216 @@
+// Aqsis
+// Copyright (C) 1997 - 2001, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.org
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+/**
+ * \file
+ *
+ * \brief Facilities for applying filters to texture buffers.
+ *
+ * \author Chris Foster  chris42f _at_ gmail.com
+ */
+
+#ifndef FILTERTEXTURE_H_INCLUDED
+#define FILTERTEXTURE_H_INCLUDED
+
+#include "aqsis.h"
+
+#include "filtersupport.h"
+#include "wrapmode.h"
+
+namespace Aqsis {
+
+//------------------------------------------------------------------------------
+/** \brief Filter a texture buffer over the supplied region.
+ *
+ * This function filters a texture buffer by iterating over all pixels in the
+ * filter support region provided, and accumulating the pixel samples from that
+ * region into the sample accumulator.  Wrap modes must be provided to
+ * determine the behaviour for parts of the filter support which lie outside
+ * the bounds of the texture.  Parts of the buffer is remapped onto these
+ * regions when using the "periodic" or "clamp" wrap modes, while for the
+ * "black" wrap mode, a pixel of black is accumulated for each pixel location
+ * lying outside the filter support.
+ *
+ * SampleAccumT - A model of the SampleAccumulatorConcept.
+ * ArrayT - A texture buffer array type.  This needs to have a pixel iterator
+ *          of type ArrayT::CqIterator for filter support regions, accessible
+ *          via a begin() method.  It also needs width(), height() and
+ *          numChannels() methods.  See CqTextureBuffer for a model which
+ *          satisfies the requirements.
+ *
+ * \todo Properly document the array concept which ArrayT must satisfy.
+ *
+ * \param sampleAccum - pixel samples from the support are accumulated into here.
+ * \param buffer - texture buffer from which the samples will be obtained.
+ * \param support - rectangular filter support region from which to accumulate
+ *                  pixel samples.
+ * \param wrapModes - specify how regions outside the buffer should be wrapped
+ *                    back onto the valid region.
+ */
+template<typename SampleAccumT, typename ArrayT>
+void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support, const SqWrapModes wrapModes);
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+namespace detail {
+
+/** \brief Accumulate samples from a displaced buffer
+ *
+ * This function accumulates samples from a buffer which is displaced such that
+ * the top left pixel is located at coordinates (tlX, tlY).  For this case, we
+ * have to consider the texture wrap modes.
+ *
+ * \param sampleAccum - pixel samples from the support are accumulated into here.
+ * \param buffer - texture buffer from which the samples will be obtained.
+ * \param support - rectangular filter support region from which to accumulate
+ *                  pixel samples.
+ * \param wrapModes - specify how regions outside the buffer should be wrapped
+ *                    back onto the valid region.
+ * \param tlX - top left x-position of the buffer
+ * \param tlY - top left y-position of the buffer
+ */
+template<typename SampleAccumT, typename ArrayT>
+void filterWrappedBuffer(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support, const SqWrapModes wrapModes,
+		const TqInt tlX, const TqInt tlY)
+{
+	bool wrapX = tlX != 0;
+	bool wrapY = tlY != 0;
+	assert(wrapX || wrapY);
+	// Construct the support of the current buffer tile.
+	SqFilterSupport tileSupport = intersect(support, SqFilterSupport(
+				tlX, tlX + buffer.width(), tlY, tlY + buffer.height()));
+	// Select one of the possible wrap modes / wrapping combinations.
+	if((wrapModes.sWrap == WrapMode_Black && wrapX)
+			|| (wrapModes.tWrap == WrapMode_Black && wrapY))
+	{
+		// If the tile is in a black wrapmode region, accumulate black samples.
+		std::vector<TqFloat> blackSamp(buffer.numChannels(), 0);
+		for(TqInt ix = tileSupport.sx.start; ix < tileSupport.sx.end; ++ix)
+			for(TqInt iy = tileSupport.sy.start; iy < tileSupport.sy.end; ++iy)
+				sampleAccum.accumulate(ix, iy, &blackSamp[0]);
+	}
+	else if(wrapModes.sWrap == WrapMode_Clamp && wrapX)
+	{
+		if(wrapModes.tWrap == WrapMode_Clamp && wrapY)
+		{
+			// Both directions are clamped.  This requires accumulation of
+			// a single corner pixel over the support.
+			TqInt xClamp = clamp(tlX, 0, buffer.width()-1);
+			TqInt yClamp = clamp(tlY, 0, buffer.height()-1);
+			// sampVec is the samples for the corner pixel to be accumulated.
+			typename ArrayT::TqSampleVector sampVec = *buffer.begin(SqFilterSupport(
+						xClamp, xClamp+1, yClamp, yClamp+1));
+			for(TqInt ix = tileSupport.sx.start; ix < tileSupport.sx.end; ++ix)
+				for(TqInt iy = tileSupport.sy.start; iy < tileSupport.sy.end; ++iy)
+					sampleAccum.accumulate(ix, iy, sampVec);
+		}
+		else
+		{
+			// clamped in x direction, but not in y direction.
+			// Here we perform a normal iteration over y, but leave 
+			TqInt xClamp = clamp(tlX, 0, buffer.width()-1);
+			SqFilterSupport clampedSupport(SqFilterSupport1D(xClamp, xClamp+1), tileSupport.sy);
+			for(typename ArrayT::CqIterator i = buffer.begin(clampedSupport);
+					i.inSupport(); ++i)
+			{
+				for(TqInt ix = tileSupport.sx.start; ix < tileSupport.sx.end; ++ix)
+					sampleAccum.accumulate(ix, i.y(), *i);
+			}
+		}
+	}
+	else if(wrapModes.tWrap == WrapMode_Clamp && wrapY)
+	{
+		// clamped in y direction, but not in x direction.  This is just an
+		// inverted (and slightly duplicated :-/ ) version of the code above
+		TqInt yClamp = clamp(tlY, 0, buffer.height()-1);
+		SqFilterSupport clampedSupport(tileSupport.sx, SqFilterSupport1D(yClamp, yClamp+1));
+		for(typename ArrayT::CqIterator i = buffer.begin(clampedSupport);
+				i.inSupport(); ++i)
+		{
+			for(TqInt iy = tileSupport.sy.start; iy < tileSupport.sy.end; ++iy)
+				sampleAccum.accumulate(i.x(), iy, *i);
+		}
+	}
+	else
+	{
+		// The only cases left are periodic wrapping in at least one direction.
+		// We treat these cases together.
+		SqFilterSupport wrappedSupport(
+				tileSupport.sx.start - tlX, tileSupport.sx.end - tlX,
+				tileSupport.sy.start - tlY, tileSupport.sy.end - tlY);
+		for(typename ArrayT::CqIterator i = buffer.begin(wrappedSupport);
+				i.inSupport(); ++i)
+		{
+			sampleAccum.accumulate(i.x() + tlX, i.y() + tlY, *i);
+		}
+	}
+}
+
+} // namespace detail
+
+template<typename SampleAccumT, typename ArrayT>
+void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support, const SqWrapModes wrapModes)
+{
+	if(!sampleAccum.setSampleVectorLength(buffer.numChannels()))
+		return;
+	// First accumulate samples across the part of the support which lies
+	// inside the buffer.
+	for(typename ArrayT::CqIterator i = buffer.begin(support); i.inSupport(); ++i)
+		sampleAccum.accumulate(i.x(), i.y(), *i);
+
+	// Next, if the support isn't wholly inside the buffer, we need to consider
+	// the wrap modes.
+	if(!support.inRange(0, buffer.width(), 0, buffer.height()))
+	{
+		// The texture buffer tiles the plane; we iterate over the tiles which
+		// the filter support crosses and perform whatever wrapping operation
+		// is necessary for each tile we get to.
+		//
+		// The "tiling" discussed here is with respect to texture wrapping, and
+		// is unrelated to whether the underlying type (ArrayT) uses tiled
+		// storage.
+		TqInt x0 = lfloor(TqFloat(support.sx.start)/buffer.width()) * buffer.width();
+		TqInt y0 = lfloor(TqFloat(support.sy.start)/buffer.height()) * buffer.height();
+		// (tlX, tlY) is the top left corner of the translated buffer.
+		for(TqInt tlX = x0; tlX < support.sx.end; tlX += buffer.width())
+		{
+			for(TqInt tlY = y0; tlY < support.sy.end; tlY += buffer.height())
+			{
+				// The special case of the non-translated source buffer, where
+				// tlX = tlY == 0 is already dealt with in the first
+				// iteration above.
+				if(tlX == 0 && tlY == 0)
+					continue;
+
+				detail::filterWrappedBuffer(sampleAccum, buffer, support,
+						wrapModes, tlX, tlY);
+			}
+		}
+	}
+}
+
+} // namespace Aqsis
+
+#endif // FILTERTEXTURE_H_INCLUDED

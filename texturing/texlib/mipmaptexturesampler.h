@@ -36,7 +36,7 @@
 #include "itexturesampler.h"
 #include "mipmaplevelcache.h"
 #include "sampleaccum.h"
-#include "texbufsampler.h" // remove when using tiled textures.
+#include "filtertexture.h"
 #include "texturebuffer.h" // remove when using tiled textures.
 
 namespace Aqsis {
@@ -209,9 +209,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 				sampleOpts.startChannel(), sampleOpts.numChannels(),
 				outSamps, sampleOpts.fill());
 		// Filter first mipmap level
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level), weights.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 
 		// Adjust filter weight for the linear interpolation
 		scaledWeights.setWeightScale(levelInterp);
@@ -226,9 +225,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 				trans1.yScale*(trans2.yOffset - trans1.yOffset)
 				);
 		// Filter second mipmap level
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level+1)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level+1), weights.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 	}
 	else
 	{
@@ -236,9 +234,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
 				sampleOpts.startChannel(), sampleOpts.numChannels(),
 				outSamps, sampleOpts.fill());
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level), weights.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 	}
 }
 

@@ -40,14 +40,16 @@ SET(AQSISTEX_SRCS
 # Header files
 SET(AQSISTEX_HDRS
 	bake.h
+	cachedfilter.h
 	channelinfo.h
 	channellist.h
-	cachedfilter.h
 	dummyshadowsampler.h
 	dummytexturesampler.h
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
+	filtertexture.h
+	iimagechannel.h
 	imagechannel.h
 	imagefiletype.h
 	ishadowsampler.h
@@ -56,10 +58,10 @@ SET(AQSISTEX_HDRS
 	itexturemap_old.h
 	itexturesampler.h
 	itiledtexinputfile.h
-	mipmaplevelcache.h
 	magicnumber.h
 	maketexture.h
 	mipmap.h
+	mipmaplevelcache.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
 	sampleaccum.h
