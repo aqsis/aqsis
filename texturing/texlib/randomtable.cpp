@@ -19,16 +19,20 @@
 
 /** \file
  *
- * \brief Randomized (stochastic) iteration over a filter support
+ * \brief Implementation of a randomized quasi-random-number table
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "stochasticsuppiter.h"
+#include "randomtable.h"
 
 namespace Aqsis {
 
-Cq2dQuasiRandomTable CqStochasticSuppIter::m_randTab;
+namespace detail {
+
+Cq2dQuasiRandomTable g_randTab;
+
+}
 
 //------------------------------------------------------------------------------
 // Cq2dQuasiRandomTable implementation

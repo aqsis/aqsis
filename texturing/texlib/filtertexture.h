@@ -67,6 +67,44 @@ template<typename SampleAccumT, typename ArrayT>
 void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
 		const SqFilterSupport& support, const SqWrapModes wrapModes);
 
+/** \brief Filter a texture without wrapping at the edges.
+ *
+ * This function works just like filterTexture(), except that instead of
+ * wrapping the texture at the edges, the support is simply truncated to lie
+ * wholly within the provided texture buffer.
+ *
+ * \see filterTexture() for more details.
+ *
+ * \param sampleAccum - pixel samples from the support are accumulated into here.
+ * \param buffer - texture buffer from which the samples will be obtained.
+ * \param support - rectangular filter support region from which to accumulate
+ *                  pixel samples.
+ */
+template<typename SampleAccumT, typename ArrayT>
+void filterTextureNowrap(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support);
+
+/** \brief Filter a texture stochastically without wrapping.
+ *
+ * Stochastic filtering of a texture is like normal filtering, except that not
+ * all points inside filter support are considered.  Instead we choose a subset
+ * of the points randomly.  This allows the time required for large filter
+ * supports to be bounded by the time required to filter a fixed subset of the
+ * filter points.
+ *
+ * \see filterTexture() for more details.
+ *
+ * \param sampleAccum - pixel samples from the support are accumulated into here.
+ * \param buffer - texture buffer from which the samples will be obtained.
+ * \param support - rectangular filter support region from which to accumulate
+ *                  pixel samples.
+ * \param numSamples - number of samples across the support to use.
+ */
+template<typename SampleAccumT, typename ArrayT>
+void filterTextureNowrapStochastic(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support, TqInt numSamples);
+
+
 
 //==============================================================================
 // Implementation details
@@ -209,6 +247,33 @@ void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
 			}
 		}
 	}
+}
+
+template<typename SampleAccumT, typename ArrayT>
+void filterTextureNowrap(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support)
+{
+	if(!sampleAccum.setSampleVectorLength(buffer.numChannels()))
+		return;
+	// Accumulate samples across the part of the support which lies inside the
+	// buffer only.  No wrapping is performed, so parts of the support outside
+	// the buffer are simply truncated.
+	for(typename ArrayT::CqIterator i = buffer.begin(support); i.inSupport(); ++i)
+		sampleAccum.accumulate(i.x(), i.y(), *i);
+}
+
+template<typename SampleAccumT, typename ArrayT>
+void filterTextureNowrapStochastic(SampleAccumT& sampleAccum, const ArrayT& buffer,
+		const SqFilterSupport& support, TqInt numSamples)
+{
+	if(!sampleAccum.setSampleVectorLength(buffer.numChannels()))
+		return;
+	// Accumulate samples stochastically across the part of the support which
+	// lies inside the buffer only.  No wrapping is performed, so parts of the
+	// support outside the buffer are simply truncated.
+	for(typename ArrayT::CqStochasticIterator i = buffer.beginStochastic(support,
+				numSamples); i.inSupport(); ++i)
+		sampleAccum.accumulate(i.x(), i.y(), *i);
 }
 
 } // namespace Aqsis

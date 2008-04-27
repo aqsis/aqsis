@@ -29,8 +29,7 @@
 #include "ewafilter.h"
 #include "itexinputfile.h"
 #include "sampleaccum.h"
-#include "stochasticsuppiter.h"
-#include "texbufsampler.h" // remove when using tiled textures.
+#include "filtertexture.h"
 #include "texexception.h"
 #include "texturebuffer.h" // remove when using tiled textures.
 
@@ -204,8 +203,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			//
 			// A negative number of samples is also used as a flag to trigger
 			// the deterministic integrator.
-			CqTexBufSampler<CqTextureBuffer<TqFloat> >(*m_pixelBuf)
-				.applyFilter(accumulator, support, WrapMode_Trunc, WrapMode_Trunc);
+			filterTextureNowrap(accumulator, *m_pixelBuf, support);
 		}
 		else
 		{
@@ -213,9 +211,8 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			// the filter support).  This is absolutely necessary when the
 			// filter support is very large, as can occur with large blur
 			// factors.
-			CqTexBufSampler<CqTextureBuffer<TqFloat>, CqStochasticSuppIter>(
-					*m_pixelBuf, CqStochasticSuppIter(sampleOpts.numSamples()) )
-				.applyFilter(accumulator, support, WrapMode_Trunc, WrapMode_Trunc);
+			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
+					sampleOpts.numSamples());
 		}
 	}
 	else

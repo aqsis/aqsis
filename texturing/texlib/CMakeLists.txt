@@ -19,24 +19,25 @@ SET(AQSISTEX_SRCS
 	dummytexturesampler.cpp
 	ewafilter.cpp
 	cachedfilter.cpp
+	imagechannel.cpp
 	ishadowsampler.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
 	magicnumber.cpp
 	maketexture.cpp
+	randomtable.cpp
 	samplequad.cpp
 	shadowsampler.cpp
-	stochasticsuppiter.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
 	texturecache.cpp
 	texturesampleoptions.cpp
-	imagechannel.cpp
 	mixedimagebuffer.cpp
 	)
+
 # Header files
 SET(AQSISTEX_HDRS
 	bake.h
@@ -64,12 +65,11 @@ SET(AQSISTEX_HDRS
 	mipmaplevelcache.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
+	randomtable.h
 	sampleaccum.h
 	samplequad.h
 	samplevector.h
 	shadowsampler.h
-	stochasticsuppiter.h
-	texbufsampler.h
 	texexception.h
 	texfileattributes.h
 	texfileheader.h
