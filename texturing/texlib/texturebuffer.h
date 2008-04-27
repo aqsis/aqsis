@@ -152,10 +152,19 @@ class AQSISTEX_SHARE CqTextureBuffer
 		/** \brief Access to pixels through a pixel iterator
 		 *
 		 * The pixel iterator will iterate through all the pixels the provided
-		 * support.  See the iterator class for 
+		 * support.  See the iterator class for more detail.
+		 *
+		 * \param support - support to iterate over
 		 */
 		CqIterator begin(const SqFilterSupport& support) const;
-		/**
+		/** \brief Stochastic iterator access to pixels in the given support.
+		 *
+		 * A stochastic support iterator aims to choose a fixed number of
+		 * samples from the support randomly.  The randomness choices should
+		 * ideally be spread evenly over the support with minimal bunching.
+		 *
+		 * \param support - support to iterate over
+		 * \param numSamples - number of samples to choose in the support.
 		 */
 		CqStochasticIterator beginStochastic(const SqFilterSupport& support,
 				TqInt numSamples) const;
