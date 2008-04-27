@@ -97,7 +97,7 @@ namespace detail {
 CqNegExpTable negExpTable(20, 6);
 }
 
-void CqEwaFilterWeights::computeFilter(const SqSampleQuad& sQuad,
+void CqEwaFilterFactory::computeFilter(const SqSampleQuad& sQuad,
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat maxAspectRatio)
 {

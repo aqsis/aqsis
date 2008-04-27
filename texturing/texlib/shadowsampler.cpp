@@ -170,10 +170,10 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	// proper importance sampling.
 	//
 	/// \todo Investigate proper importance sampling to reduce the variance in
-	/// shadow sampling.
-	CqEwaFilterWeights ewaWeights(texQuad, m_pixelBuf->width(),
+	/// shadow sampling?
+	CqEwaFilterFactory ewaFactory(texQuad, m_pixelBuf->width(),
 			m_pixelBuf->height(), sampleOpts.sBlur(), sampleOpts.tBlur(), 2);
-
+	CqEwaFilter ewaWeights = ewaFactory.createFilter();
 
 	/** \todo Optimization: Cull the query if it's outside the [min,max] depth
 	 * range of the support.  Being able to determine the range from the tiles
@@ -191,7 +191,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 				m_pixelBuf->height());
 
 		// a PCF accumulator for the samples.
-		CqPcfAccum<CqEwaFilterWeights, CqSampleQuadDepthApprox> accumulator(
+		CqPcfAccum<CqEwaFilter, CqSampleQuadDepthApprox> accumulator(
 				ewaWeights, depthFunc, sampleOpts.startChannel(),
 				sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
 		// Finally, perform percentage closer filtering over the texture buffer.
