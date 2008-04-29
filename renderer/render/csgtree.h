@@ -39,7 +39,7 @@
 #include	"sstring.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct SqImageSample;
 
@@ -264,6 +264,6 @@ class CqCSGNodeDifference : public CqCSGTreeNode
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !CSGTREE_H_INCLUDED

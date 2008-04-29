@@ -31,7 +31,9 @@
 #include "binary.h"
 #include "error.h"
 
-USING_NAMESPACE( libri2rib )
+#include <cstring>
+
+namespace libri2rib {
 
 
 CqContext::CqContext() :
@@ -261,3 +263,5 @@ void CqContext::parseOption( const char *name, RtInt n, RtToken tokens[], RtPoin
 		               false );
 	}
 }
+
+} // namespace libri2rib

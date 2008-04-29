@@ -16,7 +16,7 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqShader;
 struct IqShaderData;
@@ -86,6 +86,6 @@ struct IqLightsource
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___ilightsource_Loaded___

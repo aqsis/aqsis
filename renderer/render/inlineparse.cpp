@@ -25,7 +25,7 @@
 #include "exception.h"
 #include "parameters.h"
 
-USING_NAMESPACE( Aqsis );
+namespace Aqsis {
 
 static TqUlong huniform = CqString::hash( "uniform" );
 static TqUlong hconstant = CqString::hash( "constant" );
@@ -306,3 +306,5 @@ void CqInlineParse::lc( std::string &str )
 		str[ i ] = tolower( str[ i ] );
 	}
 }
+
+} // namespace Aqsis

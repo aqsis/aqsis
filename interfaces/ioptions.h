@@ -39,7 +39,7 @@
 #include	"parameters.h"
 #include	"ishader.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqImagersource;
@@ -123,7 +123,7 @@ struct IqOptions
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //-----------------------------------------------------------------------
 //}  // End of #ifdef IOPTIONS_H_INCLUDED

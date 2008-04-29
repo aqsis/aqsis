@@ -42,7 +42,7 @@
 #include	"multitimer.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
 CqObjectPool<CqMicroPolygonPoints>	CqMicroPolygonPoints::m_thePool;
@@ -236,66 +236,65 @@ CqMicroPolyGridBase* CqPoints::Dice()
 }
 
 
-void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
+namespace {
+
+/** \brief Implementation of dicing for points (helper function for CqPoints::NaturalDice)
+ *
+ * \param pParam - pointer to the parameter to take values from
+ * \param paramIdx - indices in the full parameter array (pParam) which
+ *                   correspond to the current gprim
+ * \param diceSize - number of points in the diced output
+ * \param pData - destination for diced shader data.
+ */
+template <class T, class SLT>
+void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
+		TqInt diceSize, IqShaderData* pData)
 {
-	switch ( pParameter->Type() )
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
+	for(TqInt i = 0; i < diceSize; i++ )
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
+		IqShaderData* arrayValue;
+		for(TqInt j = 0; j < pTParam->Count(); j++)
+		{
+			arrayValue = pData->ArrayEntry(j);
+			arrayValue->SetValue( static_cast<SLT>( pTParam->pValue() [ paramIdx[i] ] ), i );
+		}
+	}
+}
 
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
+} // unnamed namespace
 
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-				TypedNaturalDice( pTParam, pData );
-				break;
-			}
-
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+void CqPoints::NaturalDice(CqParameter* pParam, TqInt uDiceSize, TqInt vDiceSize,
+		IqShaderData* pData )
+{
+	switch(pParam->Type())
+	{
+		case type_float:
+			pointsNaturalDice<TqFloat, TqFloat>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_integer:
+			pointsNaturalDice<TqInt, TqFloat>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			pointsNaturalDice<CqVector3D, CqVector3D>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_hpoint:
+			pointsNaturalDice<CqVector4D, CqVector3D>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_color:
+			pointsNaturalDice<CqColor, CqColor>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_string:
+			pointsNaturalDice<CqString, CqString>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		case type_matrix:
+			pointsNaturalDice<CqMatrix, CqMatrix>(pParam, m_KDTree.aLeaves(), uDiceSize, pData);
+			break;
+		default:
+			// left blank to avoid compiler warnings about unhandled types
+			break;
 	}
 }
 
@@ -407,7 +406,8 @@ void CqPoints::InitialiseMaxWidth()
 {
 	TqInt cu = nVertices();	// Only need cu, as we know cv is 1.
 
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), QGetRenderContext()->Time(), matObjectToCamera );
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
 
 	CqVector3D Point0 = matObjectToCamera * CqVector3D(0,0,0);
@@ -429,7 +429,7 @@ void CqPoints::InitialiseMaxWidth()
 		CqVector3D Point1 = matObjectToCamera * CqVector3D(radius,0,0);
 		radius = (Point1-Point0).Magnitude();
 
-		m_MaxWidth = MAX(m_MaxWidth, radius );
+		m_MaxWidth = max(m_MaxWidth, radius );
 	}
 }
 
@@ -452,9 +452,12 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 	ADDREF( this );
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matCameraToObject0 );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matObjectToCamera );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0), matCameraToRaster );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
 
@@ -493,9 +496,10 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 		for( iTime = 0; iTime < tTime; iTime++ )
 		{
-			CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-			amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  pSurface()->pTransform()->Time( iTime ) );
-			amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
+			CqMatrix matCameraToObjectT;
+			QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matCameraToObjectT );
+			QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  pSurface()->pTransform()->Time( iTime ), amatObjectToCameraT[ iTime ] );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), amatNObjectToCameraT[ iTime ] );
 
 			aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
@@ -566,9 +570,12 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	else
 	{
 		iTime = 0;
-		CqMatrix matWorldToObjectT = QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-		CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
-		CqMatrix matNObjectToCameraT = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ) );
+		CqMatrix matWorldToObjectT;
+		QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matWorldToObjectT );
+		CqMatrix matObjectToCameraT;
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matObjectToCameraT );
+		CqMatrix matNObjectToCameraT;
+		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matNObjectToCameraT );
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
@@ -641,6 +648,18 @@ bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFlo
 	return( false );
 }
 
+void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygonPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
+		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	outCol = cache.color;
+	outOpac = cache.opacity;
+}
+
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
@@ -664,12 +683,17 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 
 	TqInt cu = pGridA->uGridRes();	// Only need cu, as we know cv is 1.
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matCameraToObject0 );
+	CqMatrix matObjectToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matObjectToCamera );
+	CqMatrix matCameraToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0), matCameraToRaster );
 
-	CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
-	CqMatrix matITTx = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0) );
+	CqMatrix matTx;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matTx );
+	CqMatrix matITTx;
+	QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matITTx );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
 
@@ -691,9 +715,10 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 
 	for( iTime = 0; iTime < NumTimes; iTime++ )
 	{
-		CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), Time( iTime ) );
-		amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  Time( iTime ) );
-		amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), Time( iTime ) );
+		CqMatrix matCameraToObjectT;
+		QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), Time( iTime ), matCameraToObjectT );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  Time( iTime ), amatObjectToCameraT[ iTime ] );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), Time( iTime ), amatNObjectToCameraT[ iTime ] );
 
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
@@ -868,6 +893,17 @@ bool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D,
 	return( fContains( vecSample, D, time ) );
 }
 
+void CqMicroPolygonMotionPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
+{
+	CacheOutputInterpCoeffsConstant(cache);
+}
+
+void CqMicroPolygonMotionPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
+		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+{
+	outCol = cache.color;
+	outOpac = cache.opacity;
+}
 
 //---------------------------------------------------------------------
 /** Store the vectors of the micropolygon at the specified shutter time.
@@ -948,7 +984,7 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 
 

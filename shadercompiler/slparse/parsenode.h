@@ -21,7 +21,7 @@
 #include	"funcdef.h"
 #include	"list.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 extern const char* gShaderTypeNames[];
 extern TqInt gcShaderTypeNames;
@@ -2016,6 +2016,6 @@ class CqParseNodeDeclaration : public CqParseNode
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PARSENODE_H_INCLUDED

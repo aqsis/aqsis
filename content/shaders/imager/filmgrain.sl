@@ -38,4 +38,3 @@ imager filmgrain ()
     Oi = 1;
     alpha = 1;
 }
-

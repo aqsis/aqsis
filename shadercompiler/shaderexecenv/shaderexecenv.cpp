@@ -30,7 +30,7 @@
 
 #include	"shadervm.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 const char* gVariableTypeNames[] =
     {
@@ -338,5 +338,5 @@ const CqMatrix& CqShaderExecEnv::matObjectToWorld() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

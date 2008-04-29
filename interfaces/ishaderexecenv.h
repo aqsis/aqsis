@@ -36,7 +36,7 @@
 #include	"bitvector.h"
 //#include 	"shadeop.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqSurface;
 struct IqAttributes;
@@ -498,7 +498,7 @@ struct IqShaderExecEnv
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
  */
 template <class R>
-R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
@@ -530,7 +530,7 @@ R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
  */
 template <class R>
-R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
@@ -560,85 +560,9 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 }
 
 
-/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to a second stack entry.
- */
-template <class R>
-R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* ps )
-{
-	assert( NULL != Var );
-
-	R Retu, Retv;
-	TqInt uRes = ps->uGridRes();
-	TqInt vRes = ps->vGridRes();
-	TqInt GridX = i % ( uRes + 1 );
-	TqInt GridY = ( i / ( uRes + 1 ) );
-
-	R val1, val2;
-	TqFloat u1 = 1.0f, u2 = 0.0f, v1 = 1.0f, v2 = 0.0f;
-
-	// Calculate deriviative in u
-	if ( GridX < uRes )
-	{
-		Var->GetValue( val1, i + 1 );
-		Var->GetValue( val2, i );
-		if ( NULL != den )
-		{
-			den->GetValue( u1, i + 1 );
-			den->GetValue( u2, i );
-		}
-		Retu = val1 - val2;
-		if( u1 != u2 )
-			Retu /= ( u1 - u2 );
-	}
-	else
-	{
-		Var->GetValue( val1, i );
-		Var->GetValue( val2, i - 1 );
-		if ( NULL != den )
-		{
-			den->GetValue( u1, i );
-			den->GetValue( u2, i - 1 );
-		}
-		Retu = val2 - val1;
-		if( u1 != u2 )
-			Retu /= ( u2 - u1 );
-	}
-
-	// Calculate deriviative in v
-	if ( GridY < vRes )
-	{
-		Var->GetValue( val1, i + uRes + 1 );
-		Var->GetValue( val2, i );
-		if ( NULL != den )
-		{
-			den->GetValue( v1, i + uRes + 1 );
-			den->GetValue( v2, i );
-		}
-		Retv = val1 - val2;
-		if( v1 != v2 )
-			Retv /= ( v1 - v2 );
-	}
-	else
-	{
-		Var->GetValue( val1, i );
-		Var->GetValue( val2, i - ( uRes - 1 ) );
-		if ( NULL != den )
-		{
-			den->GetValue( v1, i );
-			den->GetValue( v2, i - ( uRes - 1 ) );
-		}
-		Retv = val2 - val1;
-		if( v1 != v2 )
-			Retv /=  ( v2 - v1 );
-	}
-
-	return ( Retu + Retv );
-}
-
-
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___ishadervariable_Loaded___

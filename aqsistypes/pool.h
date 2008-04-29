@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 template <class T, TqInt CS=8>
 class /*COMMON_SHARE*/ CqObjectPool
@@ -83,6 +83,26 @@ class /*COMMON_SHARE*/ CqObjectPool
 			}
 		}
 
+		// The following is a workaround for a bug which arises when using
+		// g++-3.4 (and possibly earlier versions).  The bug occasionaly allows
+		// code-reordering such that m_head is set to p->m_next *after* the
+		// memory which m_next resides in has been trashed by the constructer
+		// for the type T.  The results of a trashed m_head are immediate
+		// allocation of another chunk, which quickly uses up the entire
+		// available memory.
+		//
+		// It's not entirely clear whether this bug is our fault - caused by a
+		// combination of breaking the strict aliasing rules (ie, accessing the
+		// memory through incompatible pointers: SqLink* and T*), or whether
+		// it's the compiler's fault for doing code reordering around an
+		// inlined call to operator new() and the T constructor.
+		//
+		// In any case, I don't know a compiler-independent fix for this, short
+		// of placing alloc() in the cpp file, which would prevent inlining on
+		// all compilers.
+#		if AQSIS_COMPILER_GCC && __GNUC__ <= 3
+		__attribute__((noinline))
+#		endif
 		void* alloc()
 		{
 			if (m_head==0)
@@ -104,6 +124,6 @@ class /*COMMON_SHARE*/ CqObjectPool
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !MICROPOLYGON_H_INCLUDED

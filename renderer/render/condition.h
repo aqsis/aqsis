@@ -29,14 +29,14 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 bool TestCondition(RtString condition, RtString where);
 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // CONDITION_H_INCLUDED
 

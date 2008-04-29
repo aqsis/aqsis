@@ -34,7 +34,7 @@
 #include "aqsis.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 typedef std::string CqStringBase;
 
@@ -125,7 +125,7 @@ CqString ToString(const value_t& Value)
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SSTRING_H_INCLUDED
 

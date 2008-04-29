@@ -38,7 +38,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqNoise1234
 {
@@ -75,6 +75,6 @@ class CqNoise1234
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // NOISE1234_H_INCLUDED

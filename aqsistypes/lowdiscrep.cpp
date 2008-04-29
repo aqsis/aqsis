@@ -97,7 +97,7 @@ reverseRadical(TqUint p_n, TqUint p_base)
 } // Anonymous namespace
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // Constructor
@@ -147,6 +147,6 @@ CqLowDiscrepancy::Generate(TqUint p_axis, TqUint p_i)
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 // vim: ts=4:sts=4:expandtab

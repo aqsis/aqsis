@@ -37,7 +37,7 @@
 #include "imagepixel.h"
 #include "bucket.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqBound;
 class CqBucket;
@@ -74,7 +74,7 @@ class CqOcclusionBox
 
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif // OCCLUSION_H_INCLUDED

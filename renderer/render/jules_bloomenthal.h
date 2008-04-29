@@ -32,7 +32,7 @@
 #include "vector3d.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 // It is based on Jules Bloomenthal's work :
@@ -394,7 +394,7 @@ class bloomenthal_polygonizer
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // JULES_BLOOMENTHAL_H_INCLUDED
 

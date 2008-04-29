@@ -28,7 +28,7 @@
 *          K-3D
 *
 */
-#include <stdio.h>
+#include <cstring>
 #include <math.h>
 #include <vector>
 #include <list>
@@ -39,7 +39,7 @@
 #include "vector4d.h"
 #include "matrix.h"
 #include "blobby.h"
-#include "itexturemap.h"
+#include "itexturemap_old.h"
 #include "marchingcubes.h"
 #include "plugins.h"
 
@@ -50,7 +50,7 @@
 #include <windows.h>
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 #define ZCLAMP  1e-6
 #define OPTIMUM_GRID_SIZE 15
@@ -639,7 +639,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					/** \todo Fix to use the new-style texture maps.  Using
+					 * GetOcclusionMap happens to access the old texture
+					 * sampling machinary through GetShadowMap()
+					 */
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetOcclusionMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;
@@ -825,7 +829,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
-					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+					/** \todo Fix to use the new-style texture maps.  Using
+					 * GetOcclusionMap happens to access the old texture
+					 * sampling machinary through GetShadowMap()
+					 */
+					IqTextureMapOld* pMap = QGetRenderContextI() ->GetOcclusionMap( depthname );
 
 					TqFloat A, B, C, D;
 					std::valarray<TqFloat> fv;
@@ -991,7 +999,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
 					{
-						result = MIN(result, stack.top());
+						result = min(result, stack.top());
 						stack.pop();
 					}
 					stack.push(result);
@@ -1004,7 +1012,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
 					{
-						result = MAX(result, stack.top());
+						result = max(result, stack.top());
 						stack.pop();
 					}
 					stack.push(result);
@@ -1230,7 +1238,7 @@ TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoint
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 
 

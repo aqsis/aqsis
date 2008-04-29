@@ -29,7 +29,7 @@
 #include	<fstream>
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
@@ -155,6 +155,266 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 
 
 //------------------------------------------------------------------------------
+namespace {
+
+/** \brief Determine whether a facevertex parameter is discontinuous at the
+ * given vertex.
+ *
+ * Primitive variables of storage class "facevertex" cannot be sensibly
+ * interpolated by the usual vertex interpolation rules if the various values
+ * associated with a vertex are not the same.  This function notices such
+ * discontinuities.
+ *
+ * \param pParam - geometric parameter of class "facevertex" to test for discontinuitiy
+ * \param pVert - vertex in the topology data structure
+ * \param arrayIndex - array index for pParam.
+ */
+template<class TypeA, class TypeB>
+inline bool isDiscontinuousFaceVertex(const CqParameterTyped<TypeA, TypeB>* pParam,
+		CqLath* pVert, TqInt arrayIndex)
+{
+	TypeA currVertVal = pParam->pValue(pVert->FaceVertexIndex())[arrayIndex];
+	// Get the facets which share this vertex.
+	std::vector<CqLath*> aQvf;
+	pVert->Qvf(aQvf);
+	for(std::vector<CqLath*>::const_iterator iVf = aQvf.begin();
+			iVf != aQvf.end(); ++iVf)
+	{
+		if(!isClose(currVertVal, pParam->pValue((*iVf)->FaceVertexIndex())[arrayIndex]))
+			return true;
+	}
+	return false;
+}
+
+} // unnamed namespace
+
+//------------------------------------------------------------------------------
+template<class TypeA, class TypeB>
+void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
+		CqLath* pVertex, TqInt iIndex)
+{
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
+	{
+		TypeA S = TypeA(0.0f);
+		TypeA Q = TypeA(0.0f);
+		TypeA R = TypeA(0.0f);
+		TqInt n;
+
+		if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
+		{
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_vertex )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+			{
+				IndexFunction = &CqLath::FaceVertexIndex;
+				// Perform a special check for whether all values at the vertex
+				// agree.  If they don't, we make the vertex a "hard" one.
+				//
+				// It's possible that this check should be extended to all the
+				// vertices which are connected by edges to this one, but it's
+				// tricky to say whether this is entirely necessary.  Initial
+				// results appear to look good without bothering to do this
+				// extra step.
+				//
+				// HOWEVER, this is a prime place to start looking if
+				// facevertex interpolation seems a little strange in the
+				// future.
+				if(isDiscontinuousFaceVertex(pParam, pVertex, arrayindex))
+				{
+					pParam->pValue(iIndex)[arrayindex]
+						= pParam->pValue((pVertex->*IndexFunction)())[arrayindex];
+					continue;
+				}
+			}
+
+			// Determine if we have a boundary vertex.
+			if( pVertex->isBoundaryVertex() )
+			{
+				// The vertex is on a boundary.
+				/// \note If "interpolateboundary" is not specified, we will never see this as
+				/// the boundary facets aren't rendered. So we don't need to check for "interpolateboundary" here.
+				std::vector<CqLath*> apQve;
+				pVertex->Qve(apQve);
+				// Is the valence == 2 ?
+				if( apQve.size() == 2 )
+				{
+					// Yes, boundary with valence 2 is corner.
+					pParam->pValue( iIndex )[arrayindex] = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+				}
+				else
+				{
+					// No, boundary is average of two adjacent boundary edges, and original point.
+					// Get the midpoints of the adjacent boundary edges
+					std::vector<CqLath*> aQve;
+					pVertex->Qve( aQve );
+
+					TqInt cBoundaryEdges = 0;
+					std::vector<CqLath*>::iterator iE;
+					for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+					{
+						// Only consider the boundary edges.
+						if( NULL == (*iE)->ec() )
+						{
+							if( (*iE)->VertexIndex() == pVertex->VertexIndex() )
+								R += pParam->pValue( ((*iE)->ccf()->*IndexFunction)() )[arrayindex];
+							else
+								R += pParam->pValue( ((*iE)->*IndexFunction)() )[arrayindex];
+							cBoundaryEdges++;
+						}
+					}
+					assert( cBoundaryEdges == 2 );
+
+					// Get the current vertex;
+					S = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+					pParam->pValue( iIndex )[arrayindex] = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
+				}
+			}
+			else
+			{
+				// Check if a sharp corner vertex.
+				if( CornerSharpness( pVertex ) > 0.0f )
+				{
+					pParam->pValue( iIndex )[arrayindex] = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+				}
+				else
+				{
+					// Check if crease vertex.
+					std::vector<CqLath*> aQve;
+					pVertex->Qve( aQve );
+
+					CqLath* hardEdge1 = NULL;
+					CqLath* hardEdge2 = NULL;
+					CqLath* hardEdge3 = NULL;
+					TqInt se = 0;
+					std::vector<CqLath*>::iterator iEdge;
+					for( iEdge = aQve.begin(); iEdge != aQve.end(); iEdge++ )
+					{
+						float h = EdgeSharpness( (*iEdge) );
+						if( hardEdge1 == NULL || h > EdgeSharpness(hardEdge1) )
+						{
+							hardEdge3 = hardEdge2;
+							hardEdge2 = hardEdge1;
+							hardEdge1 = *iEdge;
+						}
+						else if( hardEdge2 == NULL || h > EdgeSharpness(hardEdge2) )
+						{
+							hardEdge3 = hardEdge2;
+							hardEdge2 = *iEdge;
+						}
+						else if( hardEdge3 == NULL || h > EdgeSharpness(hardEdge3) )
+						{
+							hardEdge3 = *iEdge;
+						}
+
+						if( h > 0.0f )
+						{
+							se++;
+							//		printf("h = %f\n", h);
+						}
+					}
+
+					TypeA softPos;
+					TypeA semiSharpPos;
+					TypeA sharpPos;
+					// Smooth
+					// Vertex point is...
+					//    Q     2R     S(n-3)
+					//   --- + ---- + --------
+					//    n      n        n
+					//
+					// Q = Average of face points surrounding old vertex
+					// R = average of midpoints of edges surrounding old vertex
+					// S = old vertex
+					// n = number of edges sharing the old vertex.
+
+					n = aQve.size();
+
+					// Get the face points of the surrounding faces
+					std::vector<CqLath*> aQvf;
+					pVertex->Qvf( aQvf );
+					std::vector<CqLath*>::iterator iF;
+					for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+					{
+						std::vector<CqLath*> aQfv;
+						(*iF)->Qfv(aQfv);
+						std::vector<CqLath*>::iterator iV;
+						TypeA Val = TypeA(0.0f);
+						for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+							Val += pParam->pValue( ((*iV)->*IndexFunction)() )[arrayindex];
+						Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
+						Q += Val;
+					}
+					Q /= aQvf.size();
+					Q /= n;
+
+					// Get the midpoints of the surrounding edges
+					TypeA A = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+					TypeA B = TypeA(0.0f);
+					std::vector<CqLath*>::iterator iE;
+					for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+					{
+						B = pParam->pValue( ((*iE)->ccf()->*IndexFunction)() )[arrayindex];
+						R += static_cast<TypeA>( (A+B)/2.0f );
+					}
+					R = static_cast<TypeA>( R * 2.0f );
+					R /= n;
+					R /= n;
+
+					// Get the current vertex;
+					S = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+					S = static_cast<TypeA>( S * static_cast<TqFloat>(n-3) );
+					S /= n;
+
+					semiSharpPos = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
+					//pParam->pValue( iIndex )[0] = Q+R+S;
+					softPos = Q+R+S;
+
+					if( se >= 2 )
+					{
+						// Crease
+						// Get the midpoints of the surrounding 2 hardest edges
+						R = pParam->pValue((hardEdge1->ccf()->*IndexFunction)() )[arrayindex];
+						R = R + pParam->pValue((hardEdge2->ccf()->*IndexFunction)() )[arrayindex];
+
+						// Get the current vertex;
+						S = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+						semiSharpPos = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
+					}
+
+					sharpPos = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+
+					// Blend the three values together weighted by the sharpness values.
+					TypeA Pos;
+					float h2 = hardEdge2 != NULL ? EdgeSharpness(hardEdge2) : 0.0f;
+					float h3 = hardEdge3 != NULL ? EdgeSharpness(hardEdge3) : 0.0f;
+					Pos = static_cast<TypeA>( (1.0f - h2)*softPos );
+					Pos = static_cast<TypeA>( Pos + (h2 - h3)*semiSharpPos );
+					Pos = static_cast<TypeA>( Pos + h3*sharpPos );
+					pParam->pValue( iIndex )[arrayindex] = Pos;
+				}
+			}
+		}
+		else
+		{
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_varying )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+				IndexFunction = &CqLath::FaceVertexIndex;
+
+			TypeA A = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+			pParam->pValue( iIndex )[arrayindex] = A;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 /**
  *	Add a completely new vertex to the list.
  *	Appends a new vertex to the end of the list, updating the referencing
@@ -200,70 +460,122 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 			else
 				continue;
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateVertex<TqFloat, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateVertex<CqColor, CqColor>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateVertex<CqString, CqString>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
-
 		}
 	}
 }
 
+
+//------------------------------------------------------------------------------
+template<class TypeA, class TypeB>
+void CqSubdivision2::CreateEdgeVertex(CqParameter* pParamToModify,
+		CqLath* pEdge, TqInt iIndex)
+{
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
+	{
+		TypeA A = TypeA(0.0f);
+		TypeA B = TypeA(0.0f);
+		TypeA C = TypeA(0.0f);
+
+		if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
+		{
+			bool disctsFaceVertex = false;
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_vertex )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+			{
+				IndexFunction = &CqLath::FaceVertexIndex;
+
+				// If either of the adjoining vertices are discontinuous, this
+				// edge should also be - make sure to interpolate it as a fully
+				// hard edge.
+				disctsFaceVertex = isDiscontinuousFaceVertex(pParam, pEdge, arrayindex)
+					|| isDiscontinuousFaceVertex(pParam, pEdge->ccf(), arrayindex);
+			}
+
+			if( NULL != pEdge->ec() && !disctsFaceVertex)
+			{
+				// Edge point is the average of the centrepoint of the original edge and the
+				// average of the two new face points of the adjacent faces.
+				std::vector<CqLath*> aQef;
+				pEdge->Qef( aQef );
+				std::vector<CqLath*>::iterator iF;
+				for( iF = aQef.begin(); iF != aQef.end(); iF++ )
+				{
+					std::vector<CqLath*> aQfv;
+					(*iF)->Qfv(aQfv);
+					std::vector<CqLath*>::iterator iV;
+					TypeA Val = TypeA(0.0f);
+					for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+						Val += pParam->pValue( ((*iV)->*IndexFunction)() )[arrayindex];
+					Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
+					C += Val;
+				}
+				C = static_cast<TypeA>( C / static_cast<TqFloat>(aQef.size()) );
+
+				A = pParam->pValue( (pEdge->*IndexFunction)() )[arrayindex];
+				B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[arrayindex];
+
+				float h = EdgeSharpness( pEdge );
+				A = static_cast<TypeA>( ((1.0f+h)*(A+B)) / 2.0f );
+				A = static_cast<TypeA>( (A + (1.0f-h)*C) / 2.0f );
+			}
+			else
+			{
+				A = pParam->pValue( (pEdge->*IndexFunction)() )[arrayindex];
+				B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[arrayindex];
+				A = static_cast<TypeA>( (A+B)/2.0f );
+			}
+		}
+		else
+		{
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_varying )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+				IndexFunction = &CqLath::FaceVertexIndex;
+
+			A = pParam->pValue( (pEdge->*IndexFunction)() )[arrayindex];
+			B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[arrayindex];
+			A = static_cast<TypeA>( (A+B)/2.0f );
+		}
+		pParam->pValue( iIndex )[arrayindex] = A;
+	}
+}
 
 //------------------------------------------------------------------------------
 /**
@@ -311,66 +623,69 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 			else
 				continue;
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateEdgeVertex<TqFloat, TqFloat>( *iUP, pVertex, iIndex );
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateEdgeVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateEdgeVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateEdgeVertex<CqColor, CqColor>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateEdgeVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateEdgeVertex<CqString, CqString>(*iUP, pVertex, iIndex);
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateEdgeVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateEdgeVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
 		}
+	}
+}
+
+
+//------------------------------------------------------------------------------
+template<class TypeA, class TypeB>
+void CqSubdivision2::CreateFaceVertex(CqParameter* pParamToModify,
+		CqLath* pFace, TqInt iIndex)
+{
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	// Get a pointer to the appropriate index accessor function on CqLath based on class.
+	TqInt (CqLath::*IndexFunction)() const;
+	if( pParam->Class() == class_vertex || pParam->Class() == class_varying)
+		IndexFunction = &CqLath::VertexIndex;
+	else
+		IndexFunction = &CqLath::FaceVertexIndex;
+	// Face point is just the average of the original faces vertices.
+	std::vector<CqLath*> aQfv;
+	pFace->Qfv(aQfv);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count();
+			arrayindex < arraysize; arrayindex++ )
+	{
+		std::vector<CqLath*>::iterator iV;
+		TypeA Val = TypeA(0.0f);
+		for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+		{
+			assert( ((*iV)->*IndexFunction)() >= 0 &&
+					((*iV)->*IndexFunction)() < static_cast<TqInt>(pParam->Size()) );
+			Val += pParam->pValue( ((*iV)->*IndexFunction)() )[arrayindex];
+		}
+		Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
+		pParam->pValue( iIndex )[arrayindex] = Val;
 	}
 }
 
@@ -412,66 +727,35 @@ void CqSubdivision2::AddFaceVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 				iFVIndex = iIndex;
 			}
 
-			switch ( ( *iUP )->Type() )
+			switch((*iUP)->Type())
 			{
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_float:
+					CreateFaceVertex<TqFloat, TqFloat>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_integer:
+					CreateFaceVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_point:
+				case type_normal:
+				case type_vector:
+					CreateFaceVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_color:
+					CreateFaceVertex<CqColor, CqColor>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-						CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_hpoint:
+					CreateFaceVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_string:
-					{
-						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-						//CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_string:
+					//CreateFaceVertex<CqString, CqString>(*iUP, pVertex, iIndex );
 					break;
-
-					case type_matrix:
-					{
-						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-						//CreateFaceVertex( pParam, pVertex, iIndex );
-					}
+				case type_matrix:
+					//CreateFaceVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex );
 					break;
-
-					default:
-					{
-						// left blank to avoid compiler warnings about unhandled types
-					}
+				default:
+					// left blank to avoid compiler warnings about unhandled types
 					break;
 			}
-
 		}
 	}
 
@@ -1023,22 +1307,23 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 
 	paLaths = &m_apLaths;
 
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pPoints()->pTransform().get(), pPoints()->pTransform()->Time(0) );
+	CqMatrix matCameraToObject0;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pPoints()->pTransform().get(), pPoints()->pTransform()->Time(0), matCameraToObject0 );
 
 	for(TqUint i = 0; i < paLaths->size(); i++)
 	{
 		CqLath* pL = (*paLaths)[i];
-		file << i << " - 0x" << pL << " - "	<<
+		file << i << " - " << pL << " - "	<<
 		pL->VertexIndex() << " - " <<
 		pL->FaceVertexIndex() << " - (cf) ";
 		if( pL->cf() )
-			file << "0x" << pL->cf();
+			file << pL->cf();
 		else
 			file << "***";
 		file << " - (cv) ";
 
 		if(pL->cv())
-			file << "0x" << pL->cv();
+			file << pL->cv();
 		else
 			file << "***";
 
@@ -1126,7 +1411,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	assert( pTopology()->pPoints() );
 	assert( pFace() );
 
-	TqInt dicesize = MIN(MAX(m_uDiceSize, m_vDiceSize), 16);
+	TqInt dicesize = min(max(m_uDiceSize, m_vDiceSize), 16);
 
 	TqInt sdcount = aDiceSizes[ dicesize ];
 	dicesize = 1 << sdcount;
@@ -1711,7 +1996,8 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];
@@ -1738,8 +2024,8 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
-	uLen = MAX( ROUND( uLen ), 1 );
-	vLen = MAX( ROUND( vLen ), 1 );
+	uLen = max<TqInt>(lround(uLen), 1);
+	vLen = max<TqInt>(lround(vLen), 1);
 
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );
@@ -2036,4 +2322,4 @@ CqSurface* CqSurfaceSubdivisionMesh::Clone() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

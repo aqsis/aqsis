@@ -40,7 +40,7 @@
 #include "irenderer.h"
 #include "itransform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /**
@@ -345,7 +345,7 @@ class CqLayeredShader : public IqShader
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef SHADERS_H_INCLUDED
 #endif

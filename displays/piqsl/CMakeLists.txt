@@ -4,8 +4,6 @@ SET(PIQSLAPP_SRCS
 	piqsl.cpp
 	piqslbase.cpp
 	image.cpp
-	imagebuffer.cpp
-	imagechannel.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
@@ -16,8 +14,6 @@ SET(PIQSLAPP_HDRS
 	piqsl.h
 	piqslbase.h
 	image.h
-	imagebuffer.h
-	imagechannel.h
 	book.h
 	framebuffer.h
 	bookbrowser.h
@@ -30,6 +26,7 @@ SET(PIQSLDISPLAY_SRCS
 ADD_DEFINITIONS(-DPIQSL_EXPORTS -DTIXML_USE_STL)
 
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
+INCLUDE(${AQSISTEX_SOURCE_DIR}/export.cmake)
 INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 INCLUDE(${TINYXML_SOURCE_DIR}/export.cmake)
 INCLUDE(${ARGPARSE_SOURCE_DIR}/export.cmake)
@@ -76,6 +73,7 @@ ADD_EXECUTABLE(piqsl ${piqsl_FLTK_UI_SRCS}
 
 SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES} ${AQSIS_ZLIB_LIBRARIES} ${AQSIS_FLTK_LIBRARIES} ${AQSIS_BOOST_THREAD_LIBRARY} ${AQSIS_PIQSL_SYSTEM_LINKLIBS})
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/link.cmake)
+INCLUDE(${AQSISTEX_SOURCE_DIR}/link.cmake)
 INCLUDE(${ARGPARSE_SOURCE_DIR}/link.cmake)
 
 TARGET_LINK_LIBRARIES(piqsl ${LINKLIBS})
@@ -85,3 +83,15 @@ INSTALL(TARGETS piqsl
 	RUNTIME DESTINATION ${BINDIR})
 
 SOURCE_GROUP("Header Files" FILES ${PIQSLAPP_HDRS})
+
+#
+# Add necessary resource fork to binaries linked against FLTK (OS X)
+#
+IF(AQSIS_RESOURCE_EXECUTABLE_FOUND)
+	ADD_CUSTOM_COMMAND(TARGET piqsl
+		POST_BUILD
+		COMMAND ${AQSIS_RESOURCE_EXECUTABLE}
+		ARGS -t APPL -o piqsl ${AQSIS_FLTK_INCLUDE_DIR}/FL/mac.r
+		WORKING_DIRECTORY ${BINDIR}
+	)
+ENDIF(AQSIS_RESOURCE_EXECUTABLE_FOUND)

@@ -38,7 +38,7 @@
 #include	"ndspy.h"
 #undef		DSPY_INTERNAL
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /** \brief Structure for packaging CqDDManager private static member variables
@@ -263,7 +263,7 @@ class CqDDManager : public IqDDManager
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// ___ddmanager_Loaded___
 

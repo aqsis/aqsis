@@ -46,7 +46,7 @@
 #include "attributes.h"
 #include "transform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqLightsource;
 typedef boost::shared_ptr<CqLightsource> CqLightsourcePtr;
@@ -278,7 +278,7 @@ extern std::deque<CqLightsourcePtr>	Lightsource_stack;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef LIGHTS_H_INCLUDED
 #endif

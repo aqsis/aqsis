@@ -15,4 +15,3 @@ displacement wavy(float amplitude=10.0; float freq=8)
 
   N=calculatenormal(P);
 }
-

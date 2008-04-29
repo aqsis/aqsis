@@ -35,7 +35,7 @@
 #include <deque>
 #include <fstream>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 // Static Variables
@@ -279,5 +279,5 @@ void CqOcclusionBox::RefreshDepthMap()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

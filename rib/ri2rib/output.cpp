@@ -33,7 +33,9 @@
 
 #include "stddef.h"
 
-USING_NAMESPACE( libri2rib );
+#include <cstring>
+
+namespace libri2rib {
 
 #define PR(x,y)  printRequest(x,y)
 #ifdef	PI
@@ -1562,6 +1564,11 @@ RtVoid CqOutput::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
                             RtInt n, RtToken tokens[], RtPointer parms[] )
 {
 	PR( "Blobby", Blobby );
+	std::ostringstream tmp;
+	tmp << nleaf;
+	std::string tmp2 (tmp.str());
+	S;
+	print(tmp2.c_str());
 	S;
 	printArray( ncode, code );
 	S;
@@ -2052,3 +2059,5 @@ RtVoid CqOutput::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken va
 	S;
 	printToken( variable2 );
 }
+
+} // namespace libri2rib

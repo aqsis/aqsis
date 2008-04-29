@@ -31,7 +31,7 @@
 #include        "matrix.h"
 #include        "surface.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -124,7 +124,7 @@ extern "C" RtVoid  RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
 extern "C" RtVoid  RiProcRunProgram( RtPointer data, RtFloat detail );
 extern "C" RtVoid  RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // PROCEDURAL_H_INCLUDED
 

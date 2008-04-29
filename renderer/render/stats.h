@@ -27,13 +27,14 @@
 #ifndef STATS_H_INCLUDED
 #define STATS_H_INCLUDED 1
 
-#include  <time.h>
-#include  <iostream>
-#include	"ri.h"
-
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+#include  <time.h>
+#include  <iostream>
+
+#include	"ri.h"
+
+namespace Aqsis {
 
 extern void gStats_IncI( TqInt index );
 extern void gStats_DecI( TqInt index );
@@ -335,6 +336,6 @@ class CqStats
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !STATS_H_INCLUDED

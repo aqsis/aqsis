@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \struct SqDisplayMapEntry
@@ -57,6 +57,6 @@ extern std::vector<SqDisplayMapEntry>	gaDisplayMap;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !_H_INCLUDED

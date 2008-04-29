@@ -33,7 +33,7 @@
 #include	"file.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqRiFile
@@ -65,10 +65,10 @@ class CqRiFile : public CqFile
 		{}
 
 
-		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in )
+		void	Open( const char* strFilename, const char* strSearchPathOption = 0, std::ios::openmode mode = std::ios::in )
 		{
 			CqString SearchPath( "" );
-			if ( strSearchPathOption != "" )
+			if ( strSearchPathOption )
 			{
 				// if not found there, search in the specified option searchpath.
 				const CqString * poptShader = QGetRenderContext() ->poptCurrent()->GetStringOption( "searchpath", strSearchPathOption );
@@ -95,6 +95,6 @@ class CqRiFile : public CqFile
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !RIFILE_H_INCLUDED

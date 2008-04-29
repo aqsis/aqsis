@@ -28,7 +28,7 @@
 
 #include "bitvector.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** Return a new bitvector which is the intersection of the current one and the one specified.
@@ -150,5 +150,5 @@ std::ostream &operator<<( std::ostream &Stream, CqBitVector &Vector )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

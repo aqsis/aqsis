@@ -31,7 +31,7 @@
 
 #include	"vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqCellNoise
@@ -66,6 +66,6 @@ class COMMON_SHARE CqCellNoise
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !CELLNOISE_H_INCLUDED

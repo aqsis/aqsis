@@ -31,7 +31,7 @@
 #include "aqsis.h"
 #include "ri.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING };
 enum EqTokenType { FLOAT, POINT, VECTOR, NORMAL, COLOR, STRING, MATRIX, HPOINT, INTEGER };
@@ -83,5 +83,5 @@ class CqDictionary
 };
 
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

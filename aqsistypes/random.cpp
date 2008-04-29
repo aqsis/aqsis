@@ -29,14 +29,15 @@
 
 //? Is random.h included already?
 
+#include	"aqsis.h"
+
 #include	<stdlib.h>
 #include	<stdio.h>
 
-#include	"aqsis.h"
 #include	"random.h"
+#include	"aqsismath.h"
 
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This implementation is based on the MT19937 (Mersenne Twister)
 // generator by Takuji Nishimura and Makoto Matsumoto.  The original
@@ -184,7 +185,7 @@ TqUint CqRandom::RandomInt()
 TqUint CqRandom::RandomInt( TqUint Range )
 {
 	TqDouble n = RandomFloat( Range );
-	return ( TqUint ) ROUND(n);
+	return lround(n);
 }
 
 /** Get a random float (0.0 <= value < 1.0).
@@ -220,5 +221,5 @@ void    CqRandom::NextState()
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 

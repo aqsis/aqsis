@@ -30,7 +30,7 @@
 #include "inlineparse.h"
 #include "error.h"
 
-USING_NAMESPACE( libri2rib );
+namespace libri2rib {
 
 #ifdef DEBUG
 using std::cout;
@@ -311,3 +311,5 @@ void CqDictionary::stats ()
 	cout << endl;
 }
 #endif
+
+} // namespace libri2rib

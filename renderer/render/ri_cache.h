@@ -32,7 +32,9 @@
 #include	"ri.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+#include	<cstring>
+
+namespace Aqsis {
 
 
 class RiCacheBase
@@ -222,7 +224,7 @@ class RiCacheBase
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // RI_CACHE_H_INCLUDED
 

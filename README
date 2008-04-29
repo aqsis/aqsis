@@ -32,10 +32,11 @@ http://wiki.aqsis.org
 Brief list of tools
 -------------------
 
-* Binary command line tools:
+* Binary command line tools and graphical interfaces:
 	aqsis		-	the renderer
 	aqsl		-	the shader compiler
 	aqsltell	-	the shader inspection tool
+	eqsl		-	the toolsuite user interface
 	teqser		-	the texture pre-processor
 	miqser		-	the RIB processor
 	piqsl		-	the advanced framebuffer

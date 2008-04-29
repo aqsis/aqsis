@@ -30,7 +30,7 @@
 #include	"aqsis.h"
 #include	"vector3d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqPlane
 {
@@ -77,6 +77,6 @@ class CqPlane
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PLANE_H_INCLUDED

@@ -3,6 +3,8 @@ using namespace librib;
 
 #include "ri.h"
 
+#include <cstring>
+
 namespace librib2ri
 {
 

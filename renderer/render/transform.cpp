@@ -28,7 +28,7 @@
 #include	"renderer.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -201,7 +201,8 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
 	bool flip = ( !matTrans.fIdentity() && det < 0 );
-	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera", NULL, NULL, QGetRenderContext()->Time());
+	CqMatrix matCtoW;
+	QGetRenderContext()->matSpaceToSpace("world", "camera", NULL, NULL, QGetRenderContext()->Time(), matCtoW);
 	TqFloat camdet = matCtoW.Determinant();
 	bool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
 
@@ -377,4 +378,4 @@ SqTransformation CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

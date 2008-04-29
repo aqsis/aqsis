@@ -26,7 +26,7 @@
 #ifndef RI2RIB_OPTIONS_H
 #define RI2RIB_OPTIONS_H 1
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 struct SqOptions
 {
@@ -35,5 +35,5 @@ struct SqOptions
 	enum EqIndentation { Indentation_None, Indentation_Space, Indentation_Tab };
 };
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

@@ -21,6 +21,7 @@
 #include <list>
 #include <functional>
 #include <sstream>
+#include <cstdlib>
 
 typedef std::list<ArgParse::apstring> StringList;
 

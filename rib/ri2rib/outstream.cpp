@@ -31,8 +31,8 @@
 #include "error.h"
 #include <unistd.h>
 
-USING_NAMESPACE( libri2rib );
 
+namespace libri2rib {
 
 void CqStreamGzip::error()
 {
@@ -181,3 +181,5 @@ void CqStreamFDesc::flushFile()
 	if ( fstr )
 		fflush( fstr );
 }
+
+} // namespace libri2rib

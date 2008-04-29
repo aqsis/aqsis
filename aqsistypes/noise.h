@@ -32,7 +32,7 @@
 #include	"vector3d.h"
 #include	"color.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqNoise
@@ -82,6 +82,6 @@ class COMMON_SHARE CqNoise
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !NOISE_H_INCLUDED

@@ -45,7 +45,7 @@
 #include	"trimcurve.h"
 #include	"iattributes.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 struct IqShader;
 class	CqLightsource;
 
@@ -502,7 +502,7 @@ extern std::list<CqAttributes*>	Attribute_stack;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef ATTRIBUTES_H_INCLUDED
 #endif

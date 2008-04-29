@@ -46,7 +46,7 @@
 #include	"ishaderdata.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -152,6 +152,8 @@ class CqShaderVariableArray: public CqShaderVariable
 		}
 		virtual	~CqShaderVariableArray()
 		{
+			for ( TqUint i = 0; i < m_aVariables.size(); i++ )
+				delete m_aVariables[i];
 		}
 
 		// Overridden from IqShaderData.
@@ -1851,7 +1853,7 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADERVARIABLE_H_INCLUDED
 

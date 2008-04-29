@@ -32,7 +32,7 @@
 #include	"shadervm.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 DECLARE_SHADERSTACK_TEMPS
 
@@ -1390,5 +1390,5 @@ void CqShaderVM::SO_rayinfo()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

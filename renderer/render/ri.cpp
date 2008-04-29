@@ -45,7 +45,7 @@
 #include	"teapot.h"
 #include	"bunny.h"
 #include	"shaders.h"
-#include	"texturemap.h"
+#include	"texturemap_old.h"
 #include	"objectinstance.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
@@ -61,6 +61,7 @@
 #include	"procedural.h"
 #include	"logging.h"
 #include	"logging_streambufs.h"
+#include	"maketexture.h"
 
 #include	"ri_cache.h"
 
@@ -101,13 +102,6 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
-static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values );
-static bool ProcessGamma( TqFloat * gamma, TqInt count, RtToken * tokens, RtPointer * values );
-static void bake2tif(TqChar *bakefile, TqChar *tifffile, TqInt bake);
-static void save_tiff( TqChar *filename, TqFloat *raster, TqInt width,
-                       TqInt length,
-                       TqInt samples,
-		       TqChar *description);
 
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
@@ -212,9 +206,9 @@ RtToken	RI_MATTE	= "matte";
 RtToken	RI_METAL	= "metal";
 RtToken	RI_PLASTIC	= "plastic";
 RtToken	RI_PAINTEDPLASTIC	= "paintedplastic";
-RtToken	RI_KA	= "ka";
-RtToken	RI_KD	= "kd";
-RtToken	RI_KS	= "ks";
+RtToken	RI_KA	= "Ka";
+RtToken	RI_KD	= "Kd";
+RtToken	RI_KS	= "Ks";
 RtToken	RI_ROUGHNESS	= "roughness";
 RtToken	RI_SPECULARCOLOR	= "specularcolor";
 RtToken	RI_DEPTHCUE	= "depthcue";
@@ -271,7 +265,7 @@ RtToken	RI_NDC	= "ndc";
 RtToken	RI_AMPLITUDE	=	"amplitude";
 RtToken	RI_COMMENT	=	"comment";
 RtToken	RI_CONSTANTWIDTH	=	"constantwidth";
-RtToken	RI_KR	=	"kr";
+RtToken	RI_KR	=	"Kr";
 RtToken	RI_SHINYMETAL	=	"shinymetal";
 RtToken	RI_STRUCTURE	=	"structure";
 RtToken	RI_TEXTURENAME	=	"texturename";
@@ -329,39 +323,6 @@ static TqUlong RIH_LIGHT = CqString::hash( "light" );
 static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
-
-#define FILTER_TBL_SIZE 16
-#define FILTER_WIDTH 8.0f
-static float filter_width = FILTER_WIDTH;
-static int filter_size = FILTER_TBL_SIZE;
-
-#ifndef MAX
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-/*
- * similar to reversed strstr() but more strict
- */
-static char *strict_strrstr(char *s1, char *sub)
-{
-	int s, t;
-	char *pt = NULL;
-
-	s = t = 0;
-	if (s1)
-		s = strlen(s1);
-	if (sub)
-		t = strlen(sub);
-
-	if ((pt = strstr(&s1[s - t], sub)) != NULL)
-		return pt;
-
-	return NULL;
-}
 
 //----------------------------------------------------------------------
 // CreateGPrim
@@ -769,7 +730,7 @@ RtVoid	RiEnd()
 	QGetRenderContext() ->EndMainModeBlock();
 
 	// Flush the image cache.
-	CqTextureMap::FlushCache();
+	CqTextureMapOld::FlushCache();
 
 	// Clear the lightsources stack.
 	Lightsource_stack.clear();
@@ -911,6 +872,12 @@ RtVoid	RiWorldBegin()
 	CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
 	QGetRenderContext() ->SetCameraTransform( current );
 	QGetRenderContext() ->BeginWorldModeBlock();
+	// Set the camera transformation for shadow maps in the sampler cache.
+	/// \todo What is the correct coordinate system to use here? "current"? "shader"?
+	CqMatrix currToWorldMat;
+	QGetRenderContext()->matSpaceToSpace("current", "world", NULL, NULL, 0, currToWorldMat);
+	QGetRenderContext()->textureCache().setCurrToWorldMatrix(currToWorldMat);
+
 	// Reset the current transformation to identity, this now represents the object-->world transform.
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
@@ -995,6 +962,9 @@ RtVoid	RiWorldEnd()
 		Aqsis::log() << error << strError.c_str() << std::endl;
 		fFailed = true;
 	}
+
+	// Remove all cached textures.
+	QGetRenderContext()->textureCache().flush();
 
 	// Delete the world context
 	QGetRenderContext() ->EndWorldModeBlock();
@@ -1761,25 +1731,39 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 						CqString str_std = pOptStd[ 0 ];
 						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
 						// Build the string, checking for & and @ characters  and replace with old and default string, respectively.
-						unsigned int strt = 0;
-						unsigned int len = 0;
+						std::string::size_type strt = 0;
+						std::string::size_type match = 0;
+						std::string stringValue(ps[ j ]);
 						while ( 1 )
 						{
-							if ( ( len = strcspn( &ps[ j ][ strt ], "&@" ) ) < strlen( &ps[ j ][ strt ] ) )
+							if ( ( match = stringValue.find_first_of("&@%", strt ) ) != std::string::npos )
 							{
-								if( *(&ps[ j ][ strt + len ]) == '&' )
+								if( stringValue[match] == '&' )
 								{
-									str += CqString( ps[ j ] ).substr( strt, len );
+									str += stringValue.substr( strt, (match-strt) );
 									str += str_old;
-									strt += len + 1;
+									strt = match + 1;
 									continue;
 								}
-								if( *(&ps[ j ][ strt + len ]) == '@' )
+								if( stringValue[match] == '@' )
 								{
-									str += CqString( ps[ j ] ).substr( strt, len );
+									str += stringValue.substr( strt, (match-strt) );
 									str += str_std;
-									strt += len + 1;
+									strt = match + 1;
 									continue;
+								}
+								if( stringValue[match] == '%' )
+								{
+									str += stringValue.substr( strt, (match-strt) );
+									std::string::size_type envvarend = stringValue.find('%', match + 1);
+									if( envvarend != std::string::npos )
+									{
+										std::string strEnv = stringValue.substr(match + 1, (envvarend - (match + 1)));
+										std::string strVal = getenv(strEnv.c_str());
+										str += strVal;
+										strt = envvarend + 1;
+										continue;
+									}
 								}
 							}
 							else 
@@ -1788,6 +1772,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 								break;
 							}
 						}
+						Aqsis::log() << debug << "New searchpath = " << str.c_str() << std::endl;
 					}
 					else
 						str = CqString( ps[ j ] );
@@ -2112,10 +2097,11 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 
 	DEBUG_RIILLUMINATE
 
-	CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
-
 	// Check if we are turning the light on or off.
 	if ( light == NULL ) return ;
+
+	CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
+
 	if ( onoff )
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
 	else
@@ -2336,10 +2322,10 @@ RtVoid	RiShadingInterpolation( RtToken type )
 	DEBUG_RISHADINGINTERPOLATION
 
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingConstant;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Constant;
 	else
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Smooth;
 		else
 			Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
@@ -2668,7 +2654,7 @@ RtVoid	RiPerspective( RtFloat fov )
 		return ;
 	}
 
-	fov = tan( RAD( fov / 2 ) );
+	fov = tan( degToRad( fov / 2 ) );
 
 	// This matches PRMan 3.9 in testing, but not BMRT 2.6's rgl and rendrib.
 	CqMatrix	matP( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, fov, fov, 0, 0, -fov, 0 );
@@ -2728,7 +2714,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
 	DEBUG_RIROTATE
 
-	CqMatrix	matRot( RAD( angle ), CqVector4D( dx, dy, dz ) );
+	CqMatrix	matRot( degToRad( angle ), CqVector4D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 	//        QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
@@ -2783,7 +2769,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 
 	DEBUG_RISKEW
 
-	CqMatrix	matSkew( RAD( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
+	CqMatrix	matSkew( degToRad( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
 
 	// This transformation can not change orientation.
 
@@ -2919,7 +2905,9 @@ RtVoid	RiCoordSysTransform( RtToken space )
 	DEBUG_RICOORDSYSTRANSFORM
 
 	// Insert the named coordinate system into the list help on the renderer.
-	QGetRenderContext() ->ptransSetTime( QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix matSpaceToWorld;
+	QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time(), matSpaceToWorld ); 
+	QGetRenderContext() ->ptransSetTime( matSpaceToWorld );
 	QGetRenderContext() ->AdvanceTime();
 
 	EXCEPTION_CATCH_GUARD("RiCoordSysTransform")
@@ -2939,25 +2927,25 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 
 	DEBUG_RITRANSFORMPOINTS
 
-	if (!IfOk)
-		return points;
-
-	CqMatrix matCToW = QGetRenderContext() ->matSpaceToSpace( fromspace,
-	                   tospace, NULL, NULL, QGetRenderContextI()->Time() );
-
-	if (matCToW.fIdentity() != true)
+	CqMatrix matCToW;
+	if(QGetRenderContext() ->matSpaceToSpace( fromspace,
+	                   tospace, NULL, NULL, QGetRenderContextI()->Time(), matCToW ))
 	{
-		for(TqInt i =0; i< npoints; i++)
+		if (matCToW.fIdentity() != true)
 		{
-			CqVector3D tmp = points[i];
-			tmp = tmp * matCToW;
-			points[i][0] = tmp.x();
-			points[i][1] = tmp.y();
-			points[i][2] = tmp.z();
+			for(TqInt i =0; i< npoints; i++)
+			{
+				CqVector3D tmp = points[i];
+				tmp = matCToW * tmp;
+				points[i][0] = tmp.x();
+				points[i][1] = tmp.y();
+				points[i][2] = tmp.z();
+			}
 		}
-	}
 
-	return ( points );
+		return ( points );
+	}
+	return(NULL);
 }
 
 
@@ -3202,9 +3190,11 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		{
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 			CreateGPrim( pSurface );
 		}
 		else
@@ -3412,7 +3402,9 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	blobby.Bound(&Bound);
 
 	// Transform the bounding box into camera coordinates
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, QGetRenderContext() ->ptransCurrent().get(), QGetRenderContext()->Time() ));
+	CqMatrix matOtoC;
+	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, QGetRenderContext() ->ptransCurrent().get(), QGetRenderContext()->Time(), matOtoC );
+	Bound.Transform( matOtoC );
 
 	// The bounding-box stops at camera's plane
 	TqFloat camera_z = QGetRenderContext() ->poptCurrent() ->GetFloatOption( "System", "Clipping" ) [ 0 ];
@@ -3425,14 +3417,16 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		Bound = CqBound(CqVector3D(Bound.vecMin().x(), Bound.vecMin().y(), camera_z), Bound.vecMax());
 
 	// Transform the bounding box into raster coordinates
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, QGetRenderContext() ->ptransCurrent().get(), QGetRenderContext()->Time() ));
+	CqMatrix matCamToRaster;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, QGetRenderContext() ->ptransCurrent().get(), QGetRenderContext()->Time(), matCamToRaster );
+	Bound.Transform( matCamToRaster );
 
 	// Get bounding-box size in pixels
 	TqInt  pixels_w = static_cast<TqInt> ( Bound.vecCross().x() );
 	TqInt  pixels_h = static_cast<TqInt> ( Bound.vecCross().y() );
 
 	// Adjust to shading rate
-	TqInt shading_rate = MAX(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
+	TqInt shading_rate = max(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
 	pixels_w /= shading_rate;
 	pixels_h /= shading_rate;
 
@@ -3503,7 +3497,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		}
 	}
 
-	pieces = MIN(8, pieces);
+	pieces = min(8, pieces);
 	TqInt m;
 
 	if (Cs)
@@ -3591,9 +3585,11 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 	{
 		// Transform the points into camera space for processing,
 		// This needs to be done before initialising the KDTree as the tree must be formulated in 'current' (camera) space.
-		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0) ),
-		                         QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0) ),
-		                         QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0) ) );
+		CqMatrix matOtoW, matNOtoW, matVOtoW;
+		QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0), matOtoW );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0), matNOtoW );
+		QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), pPointsClass->pTransform() ->Time(0), matVOtoW );
+		pPointsClass->Transform( matOtoW, matNOtoW, matVOtoW);
 
 		pSurface = boost::shared_ptr<CqPoints>( new CqPoints( npoints, pPointsClass ) );
 		// Initialise the KDTree for the points to contain all.
@@ -3704,9 +3700,11 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 			CreateGPrim( pSurface );
 		}
@@ -3723,9 +3721,11 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 			CreateGPrim( pSurface );
 		}
 	}
@@ -3778,7 +3778,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		sumnVerts += nverts[ poly ];
 		for ( v = 0; v < nverts[ poly ]; ++v )
 		{
-			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+			cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -3791,9 +3791,11 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		boost::shared_ptr<CqSurfacePointsPolygons> pPsPs( new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts ) );
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ),
-		                         QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ),
-		                         QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ) );
+		CqMatrix matOtoW, matNOtoW, matVOtoW;
+		QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matOtoW );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matNOtoW );
+		QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matVOtoW );
+		pPointsClass->Transform( matOtoW, matNOtoW, matVOtoW);
 		CreateGPrim(pPsPs);
 	}
 
@@ -3858,7 +3860,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			}
 			for ( v = 0; v < nverts[ igloop ]; ++v )
 			{
-				cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+				cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 				pVerts++;
 			}
 		}
@@ -3898,8 +3900,8 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			iminindex = 0;
 			for ( iloop = 0; iloop < (TqUint) nloops[ ipoly ]; ++iloop, ++igloop )
 			{
-				iminindex = MIN( iminindex, (TqUint) verts[ igvert ] );
-				imaxindex = MAX( imaxindex, (TqUint) verts[ igvert ] );
+				iminindex = min( iminindex, (TqUint) verts[ igvert ] );
+				imaxindex = max( imaxindex, (TqUint) verts[ igvert ] );
 
 				CqPolygonGeneral2D polya;
 				polya.SetpVertices( pPointsClass );
@@ -4168,9 +4170,11 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 			CreateGPrim( pSurface );
 		}
@@ -4186,9 +4190,11 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 			CreateGPrim( pSurface );
 		}
 	}
@@ -4259,9 +4265,11 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 				                                     () ) ->ConvertToBezierBasis( matuBasis, matvBasis );
 				TqFloat time = QGetRenderContext()->Time();
 				// Transform the points into camera space for processing,
-				(*iSS)->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-				                   QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-				                   QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+				CqMatrix matOtoW, matNOtoW, matVOtoW;
+				QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+				QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+				QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+				(*iSS)->Transform( matOtoW, matNOtoW, matVOtoW);
 				CreateGPrim( *iSS );
 			}
 		}
@@ -4280,9 +4288,11 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 			CreateGPrim( pSurface );
 		}
 	}
@@ -4351,9 +4361,11 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		pSurface->Clamp();
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-		                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+		CqMatrix matOtoW, matNOtoW, matVOtoW;
+		QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+		QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+		pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 		CreateGPrim( pSurface );
 	}
 
@@ -4465,9 +4477,11 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
 
 	EXCEPTION_CATCH_GUARD("RiSphereV")
@@ -4513,9 +4527,11 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
 
 	EXCEPTION_CATCH_GUARD("RiConeV")
@@ -4557,9 +4573,11 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
 
 	EXCEPTION_CATCH_GUARD("RiCylinderV")
@@ -4603,9 +4621,11 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
 
 	EXCEPTION_CATCH_GUARD("RiHyperboloidV")
@@ -4647,9 +4667,11 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
 
 	EXCEPTION_CATCH_GUARD("RiParaboloidV")
@@ -4691,9 +4713,11 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 	CreateGPrim( pSurface );
 
@@ -4740,9 +4764,11 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+	QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 	CreateGPrim( pSurface );
 
@@ -4775,9 +4801,11 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
 	boost::shared_ptr<CqProcedural> pProc( new CqProcedural(data, B, refineproc, freeproc ) );
 	TqFloat time = QGetRenderContext()->Time();
-	pProc->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time ),
-	                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time ),
-	                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time ) );
+	CqMatrix matOtoW, matNOtoW, matVOtoW;
+	QGetRenderContext()->matSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time, matOtoW );
+	QGetRenderContext()->matNSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time, matNOtoW );
+	QGetRenderContext()->matVSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time, matVOtoW );
+	pProc->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pProc );
 
 	EXCEPTION_CATCH_GUARD("RiProcedural")
@@ -4838,9 +4866,11 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pMesh->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-			                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pMesh->Transform( matOtoW, matNOtoW, matVOtoW);
 
 			CreateGPrim( boost::static_pointer_cast<CqSurface>( pMesh ) );
 		}
@@ -4854,9 +4884,11 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-		                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
-		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
+		CqMatrix matOtoW, matNOtoW, matVOtoW;
+		QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+		QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+		pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 		CreateGPrim( pSurface );
 	} else if ( strcmp( type, "bunny" ) == 0 )
@@ -5115,117 +5147,17 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 
 	DEBUG_RIMAKETEXTURE
 
-	char modes[ 1024 ];
-	assert( imagefile != 0 && texturefile != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
+	assert( imagefile != 0 && texturefile != 0
+			&& swrap != 0 && twrap != 0 && filterfunc != 0 );
 
 	TIME_SCOPE("Texture")
-	// Get the wrap modes first.
-	enum EqWrapMode smode = WrapMode_Black;
-	if ( strcmp( swrap, RI_PERIODIC ) == 0 )
-		smode = WrapMode_Periodic;
-	else if ( strcmp( swrap, RI_CLAMP ) == 0 )
-		smode = WrapMode_Clamp;
-	else if ( strcmp( swrap, RI_BLACK ) == 0 )
-		smode = WrapMode_Black;
 
-	enum EqWrapMode tmode = WrapMode_Black;
-	if ( strcmp( twrap, RI_PERIODIC ) == 0 )
-		tmode = WrapMode_Periodic;
-	else if ( strcmp( twrap, RI_CLAMP ) == 0 )
-		tmode = WrapMode_Clamp;
-	else if ( strcmp( twrap, RI_BLACK ) == 0 )
-		tmode = WrapMode_Black;
+	SqWrapModes wrapModes(wrapModeFromString(swrap), wrapModeFromString(twrap));
+	std::string inFileName = findFileInPath(imagefile,
+			QGetRenderContext()->textureSearchPath());
+	makeTexture(inFileName, std::string(texturefile), SqFilterInfo(filterfunc, swidth, twidth),
+			wrapModes, CqRiParamList(tokens, values, count));
 
-
-	sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-	if ( filterfunc == RiGaussianFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
-	if ( filterfunc == RiMitchellFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "mitchell", swidth, twidth );
-	if ( filterfunc == RiBoxFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-	if ( filterfunc == RiTriangleFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth );
-	if ( filterfunc == RiCatmullRomFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth );
-	if ( filterfunc == RiSincFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth );
-	if ( filterfunc == RiDiskFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth );
-	if ( filterfunc == RiBesselFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
-
-
-	// Now load the original image.
-	TqInt bake = 128;
-	ProcessBake( &bake, count, tokens, values ); 
-
-	TqFloat gamma = 2.2f;
-	if (ProcessGamma( &gamma, count, tokens, values ) == true)
-	{
-		static char tmpenv[80];
-        	sprintf(tmpenv, "GAMMA=%f", gamma);
-		putenv (tmpenv);
-		Aqsis::log() << debug << tmpenv << std::endl;
-	}
-
-	TqChar *result = NULL;
-	result = strict_strrstr(imagefile, ".bake");
-	if (result != NULL)
-	{
-		Aqsis::log() << debug << "bake2tif " << imagefile << " bake: " << bake << std::endl;
-
-		// Convert the bake to tiff
-		TqChar tiffname[1024];
-		strcpy(tiffname, imagefile);
-		result = strict_strrstr(tiffname, ".bake");
-		// Edit the extension and replace .bake by .tif
-		strcpy(result, ".tif");
-
-		bake2tif(imagefile, tiffname, bake);
-
-		strcpy(imagefile, tiffname);
-		Aqsis::log() << debug << "Convert " << imagefile << std::endl;
-	}
-
-	CqTextureMap Source( imagefile );
-	Source.Open();
-	TqInt comp, qual;
-	ProcessCompression( &comp, &qual, count, tokens, values );
-	Source.SetCompression( comp );
-	Source.SetQuality( qual );
-
-	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
-	{
-		// Hopefully CqTextureMap will take care of closing the tiff file after
-		// it has SAT mapped it so we can overwrite if needs be.
-		// Create a new image.
-		Source.Interpreted( modes );
-		Source.CreateMIPMAP();
-		TIFF* ptex = TIFFOpen( texturefile, "w" );
-
-		TIFFCreateDirectory( ptex );
-		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
-		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMap class.
-		int log2 = MIN(Source.XRes(), Source.YRes());
-		log2 = static_cast<int> ( ceil(log(static_cast<float>(log2))/log(2.0)) ) + 1;
-
-
-		for ( int i = 0; i < log2; ++i )
-		{
-			// Write the floating point image to the directory.
-			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
-			if ( !pBuffer )
-				break;
-			Source.WriteTileImage( ptex, pBuffer, 64, 64, Source.Compression(), Source.Quality() );
-		}
-		TIFFClose( ptex );
-	}
-
-	Source.Close();
 	EXCEPTION_CATCH_GUARD("RiMakeTextureV")
 }
 
@@ -5316,18 +5248,8 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 	if ( filterfunc == RiBesselFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
 
-
-	TqFloat gamma = 2.2f;
-	if (ProcessGamma( &gamma, count, tokens, values ) == true)
-	{
-		static char tmpenv[80];
-        	sprintf(tmpenv, "GAMMA=%f", gamma);
-		putenv (tmpenv);
-		Aqsis::log() << debug << tmpenv << std::endl;
-	}
-
 	// Now load the original image.
-	CqTextureMap Source( imagefile );
+	CqTextureMapOld Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
 	ProcessCompression( &comp, &qual, count, tokens, values );
@@ -5336,7 +5258,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
-		// Hopefully CqTextureMap will take care of closing the tiff file after
+		// Hopefully CqTextureMapOld will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
 		Source.Interpreted( modes );
@@ -5350,7 +5272,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
 		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = MIN( Source.XRes(), Source.YRes() );
+		int log2 = min( Source.XRes(), Source.YRes() );
 		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
@@ -5403,12 +5325,12 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 	        reflfile != 0 && filterfunc != 0 );
 
 	// Now load the original image.
-	CqTextureMap tpx( px );
-	CqTextureMap tnx( nx );
-	CqTextureMap tpy( py );
-	CqTextureMap tny( ny );
-	CqTextureMap tpz( pz );
-	CqTextureMap tnz( nz );
+	CqTextureMapOld tpx( px );
+	CqTextureMapOld tnx( nx );
+	CqTextureMapOld tpy( py );
+	CqTextureMapOld tny( ny );
+	CqTextureMapOld tpz( pz );
+	CqTextureMapOld tnz( nz );
 
 	tpx.Open();
 	tnx.Open();
@@ -5444,7 +5366,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 		}
 
 		// Now copy the images to the big map.
-		CqTextureMap* Images[ 6 ] =
+		CqTextureMapOld* Images[ 6 ] =
 		    {
 		        &tpx,
 		        &tpy,
@@ -5463,7 +5385,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 		TqInt numsamples = tpx.SamplesPerPixel();
 		// Number of mip map levels.
-		int log2 = MIN( xRes, yRes );
+		int log2 = min( xRes, yRes );
 		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 		for ( ii = 0; ii < log2; ++ii )
@@ -5493,7 +5415,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 			TIFFCreateDirectory( ptex );
 			TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 			TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
-			TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(RAD(fov)/2.0) );
+			TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(degToRad(fov)/2.0) );
 			tpx.WriteTileImage( ptex, pLevelBuffer, 64, 64, tpx.Compression(), tpx.Quality() );
 			xRes /= 2;
 			yRes /= 2;
@@ -5533,7 +5455,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	DEBUG_RIMAKESHADOW
 
 	TIME_SCOPE("Shadow Mapping")
-	CqShadowMap ZFile( picfile );
+	CqShadowMapOld ZFile( picfile );
 	ZFile.LoadZFile();
 
 	TqInt comp, qual;
@@ -5541,7 +5463,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	ZFile.SetCompression( comp );
 	ZFile.SetQuality( qual );
 
-	ZFile.SaveShadowMap( shadowfile );
+	ZFile.SaveShadowMapOld( shadowfile );
 	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
 	return ;
 }
@@ -5580,7 +5502,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
         unlink(shadowfile);
 	for( index = 0; index < npics; ++index )
 	{
-		CqShadowMap ZFile( picfiles[index] );
+		CqShadowMapOld ZFile( picfiles[index] );
 		ZFile.LoadZFile();
 
 		TqInt comp, qual;
@@ -5588,7 +5510,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 		ZFile.SetCompression( comp );
 		ZFile.SetQuality( qual );
 
-		ZFile.SaveShadowMap( shadowfile, true );
+		ZFile.SaveShadowMapOld( shadowfile, true );
 	}
 	EXCEPTION_CATCH_GUARD("RiMakeOcclusionV")
 	return ;
@@ -5709,7 +5631,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		sumnVerts += nvertices[ face ];
 		for ( v = 0; v < nvertices[ face ]; ++v )
 		{
-			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
+			cVerts = max( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -5726,9 +5648,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		{
 			// Transform the points into camera space for processing,
 			TqFloat time = QGetRenderContext()->Time();
-			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ),
-						 QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ),
-						 QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time ) );
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pPointsClass->pTransform().get(), time, matVOtoW );
+			pPointsClass->Transform( matOtoW, matNOtoW, matVOtoW);
 
 			boost::shared_ptr<CqSubdivision2> pSubd2( new CqSubdivision2( pPointsClass ) );
 			pSubd2->Prepare( cVerts );
@@ -6521,403 +6445,3 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 	}
 }
 
-static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values )
-{
-bool found = false;
-
-	for ( int i = 0; i < count; ++i )
-	{
-		RtToken	token = tokens[ i ];
-		RtString *value = ( RtString * ) values[ i ];
-
-		if ( strstr( token, "bake" ) != 0 )
-		{
-
-			*bake =  (int) * ( float * ) value;
-			found = true;
-			break;
-		}
-	}
-	return found;
-}
-
-static bool ProcessGamma( TqFloat * gamma, TqInt count, RtToken * tokens, RtPointer * values )
-{
-bool found = false;
-
-	for ( int i = 0; i < count; ++i )
-	{
-		RtToken	token = tokens[ i ];
-		RtString *value = ( RtString * ) values[ i ];
-
-		if ( strstr( token, "gamma" ) != 0 )
-		{
-
-			*gamma =  *( float * ) value;
-			found = true;
-			break;
-		}
-	}
-	return found;
-}
-
-
-
-/* Main function to convert any bake to tif format
- * It used the standard standard definition of bake file defined in bake() from
- * Siggraph 2001.
- *
- * It created texture file of only 64x64 pixels not a lot
- * but which some changes in teqser we should be able to
- * defined as much as the user needs via environment variable BAKE
- * Surprising 64x64 is good enough for small tests; I won't be surprised we
- * need more and agressive filtering (between subsamples s/t)
- */
-static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
-{
-	FILE * bakefile;
-
-	TqUshort h, w;
-	TqFloat s, t, r1, g1, b1;
-	TqFloat *pixels;
-	TqFloat *xpixels;
-	TqFloat *filter, *pf;
-	TqChar buffer[ 200 ];
-	TqInt i, k, n;
-	TqInt x, y;
-	TqFloat mins, mint, maxs, maxt;
-	bool normalized = true;
-	TqInt count, number;
-	TqFloat *temporary;
-	TqInt elmsize = 3;
-	TqFloat invWidth, invSize;
-	TqChar description[80];
-
-	count = 1024 * 1024;
-	number = 0;
-
-
-	h = w = bake;
-	pixels = ( TqFloat * ) calloc( 4, bake * bake * sizeof(TqFloat));
-	temporary = (TqFloat *) malloc(count *  5 * sizeof(TqFloat));
-
-	bakefile = fopen( in, "rb" );
-
-	/* Ignore the first line of text eg. Aqsis bake file */
-	fgets( buffer, 200, bakefile ) ;
-	/* Read the second line of text to configure how many floats
-	     * we expect to read
-	     */
-	fgets( buffer, 200, bakefile ) ;
-	sscanf(buffer, "%d", &elmsize);
-
-	while ( fgets( buffer, 200, bakefile ) != NULL )
-	{
-		k = number * 5;
-
-		switch (elmsize)
-		{
-			case 3:
-			{
-				sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 );
-			}
-			break;
-			case 2:
-			{
-				sscanf( buffer, "%f %f %f %f", &s, &t, &r1, &g1);
-				b1 = (r1 + g1) / 2.0;
-			}
-			break;
-			default:
-			case 1:
-			{
-				sscanf( buffer, "%f %f %f", &s, &t, &r1);
-				g1 = b1 = r1;
-			}
-			break;
-		}
-		temporary[k] = s;
-		temporary[k+1] = t;
-		temporary[k+2] = r1;
-		temporary[k+3] = g1;
-		temporary[k+4] = b1;
-
-		number++;
-		if (number >= (count - 1))
-		{
-			count += 1024;
-			temporary = (float *)  realloc((void *) temporary, count * 5 * sizeof(float));
-		}
-	}
-
-	/* printf("done\nFind the max, min of s,t.\n"); */
-	mins = maxs = temporary[0];
-	mint = maxt = temporary[1];
-
-	/* Find the min,max of s and t */
-	for (i=0; i < number; i++)
-	{
-		k = i * 5;
-
-		if (mins > temporary[k])
-			mins = temporary[k];
-		if (mint > temporary[k+1])
-			mint = temporary[k+1];
-		if (maxs < temporary[k])
-			maxs = temporary[k];
-		if (maxt < temporary[k+1])
-			maxt = temporary[k+1];
-	}
-
-
-	if ((mins >= 0.0 && maxs <= 1.0) &&
-	        (maxt >= 0.0 && maxt <= 1.0) )
-	{
-		normalized = false;
-	}
-
-	if (normalized == true)
-	{
-		Aqsis::log() << "bake2tif normalizes the keys (normally s,t)" << std::endl;
-		Aqsis::log() << "\t(min_s, max_s): (" << mins << ", " << maxs << "), (min_t, max_t): (" << mint << ", " << maxt << ")" << std::endl;
-	}
-
-	/* Try to adjust with the final resolution of mipmap */
-	/* filter_size = MAX((int) log((double)bake)/log(2.0) + 2, (int) FILTER_TBL_SIZE);
-	 * filter_size = (int) ceil(log((double)MIN((int) ( (maxs - mins) * bake), (int) ((maxt -mint ) * bake)))/log(2.0));
-	     */
-	invWidth = 1.0f/filter_width;
-	invSize = 1.0f/filter_size;
-
-	/* init the filter' table */
-	filter = (TqFloat *) calloc(filter_size*filter_size,sizeof(TqFloat));
-	pf = filter;
-	for (y=0; y < filter_size; ++y)
-	{
-		TqFloat fy = (TqFloat)( y+ 0.5f) * filter_width * invSize;
-		for (x=0; x < filter_size; ++x)
-		{
-			TqFloat fx = ((TqFloat) x+ 0.5f) * filter_width * invSize;
-			/* we will use a disk filter the point will dispose in
-			 * a circle around each point; more pleasant visually
-			 */
-			*pf++ = RiDiskFilter(fx,fy,filter_width, filter_width);
-		}
-	}
-
-
-	/* Now it is time to save s,t, r1, g1, b1 into pixels array (along with the sum/area filtering accumalor  */
-	for (i=0; i < number; i++)
-	{
-		TqInt x0, x1, y0, y1;
-		TqInt *ifx, *ify;
-		TqFloat dImageX;
-		TqFloat dImageY;
-
-		k = i * 5;
-
-
-		s = temporary[k];
-		t = temporary[k+1];
-		r1 = temporary[k+2];
-		g1 = temporary[k+3];
-		b1 = temporary[k+4];
-
-		/* printf("%d\n", number);  */
-
-		/* Normalize the s,t between 0..1.0  only if required
-		               */
-		if (normalized)
-		{
-			if ( (maxs - mins) != 0.0)
-			{
-				s = (s - mins) / (maxs - mins);
-			}
-			else
-			{
-				if (s < 0.0) s *= -1.0;
-				if (s > 1.0) s = 1.0;
-			}
-			if ((maxt - mint) != 0.0)
-			{
-				t = (t - mint) / (maxt - mint);
-			}
-			else
-			{
-				if (t < 0.0) t *= -1.0;
-				if (t > 1.0) t = 1.0;
-			}
-		}
-		/* When we have some collision ? What should be nice
-		 * to accumulate the RGB values instead ?
-		 */
-		x = (int)( s * ( bake - 1 ) );
-		y = (int)( t * ( bake - 1 ) );
-
-		/* printf("x %d y %d rgb %f %f %f\n", x, y, r1, g1, b1); */
-
-		/* each each pixels accumulated it in xpixels but
-		* make sure we use
-		* a filtering of 16x16 to garantee spreading of the
-		* values across x,y pixels.
-		*/
-
-		dImageX = x - 0.5f;
-		dImageY = y - 0.5f;
-
-		x0 = (TqInt) ceil(dImageX - filter_width);
-		x1 = (TqInt) floor(dImageX + filter_width);
-		y0 = (TqInt) ceil(dImageY - filter_width);
-		y1 = (TqInt) floor(dImageY + filter_width);
-
-		x0 = MAX(x0, 0);
-		x1 = MIN(x1, bake -1);
-		y0 = MAX(y0, 0);
-		y1 = MIN(y1, bake -1);
-
-		if ( ( (x1-x0)<0) || ((y1-y0)<0 )) continue;
-
-		/* filter delta indexes*/
-		ifx = (TqInt*)calloc(x1-x0+1, sizeof(TqInt));
-		for (x = x0; x <= x1; ++x)
-		{
-			TqFloat fx = fabsf(x -dImageX) * invWidth * filter_size;
-			ifx[x-x0] = MIN((int) floor(fx), filter_size - 1);
-		}
-		ify = (TqInt*)calloc(y1-y0+1, sizeof(TqInt));
-		for (y = y0; y <= y1; ++y)
-		{
-			TqFloat fy = fabsf(y -dImageY) * invWidth * filter_size;
-			ify[y-y0] = MIN((int) floor(fy), filter_size - 1);
-		}
-
-		/* Fill all the right pixels now */
-		for (y = y0; y < y1; ++y)
-		{
-			for (x = x0; x <= x1; ++x)
-			{
-				TqInt offset;
-				TqFloat filterWt;
-				offset = ify[y-y0]*filter_size + ifx[x-x0];
-				/* printf("offset %d ", offset); */
-				filterWt = filter[offset];
-
-				/* Remove the negative lob maybe ?
-				 * if (filterWt < 0.0) continue;
-				 */
-
-				/* printf("wt %f\n", filterWt); */
-				n = (y * bake + x);
-				n *= 4;
-				pixels[n] += (filterWt * r1);
-				pixels[n+1] += (filterWt * g1);
-				pixels[n+2] += (filterWt * b1);
-				pixels[n+3] += filterWt;
-				/* printf("x %d y %d rgb wt %f %f %f %f\n", x, y, pixels[n], pixels[n+1], pixels[n+2], pixels[n+3]); */
-			}
-		}
-
-
-		free(ifx);
-		free(ify);
-	}
-
-
-	/* Now it is time to unroll the filterWt and save into xpixels */
-
-	xpixels = ( TqFloat * ) calloc( 3, bake * bake * sizeof(TqFloat));
-
-	for (y=0; y < bake -1 ; ++y)
-	{
-		for (x=0; x < bake -1 ; ++x)
-		{
-			TqInt m;
-			n = (y * bake + x);
-			m = n;
-			m *= 3;
-			n *= 4;
-			if (pixels[n+3] > 0.0)
-			{
-				/* printf("unroll weightSum factor \n"); */
-				float area = 1.0/pixels[n+3];
-				xpixels[m] =  pixels[n] * area;
-				xpixels[m+1] =  pixels[n+1] * area;
-				xpixels[m+2] =  pixels[n+2] * area;
-			}
-		}
-	}
-
-
-	/* Should we do some filterings prior to save to tif file ? */
-	/* convert each scan line */
-	/* Write the some form of version */
-	strcpy( description, "bake2tif conversion for AQSIS");
-
-	save_tiff( tiffname, xpixels, w, h, 3, description );
-
-	free( pixels );
-	free( xpixels );
-	free( filter );
-	free(temporary);
-
-	fclose( bakefile );
-
-}
-
-
-/*
- * save to filename a tiff file
- */
-static void save_tiff( TqChar *filename,
-                       TqFloat *raster,
-                       TqInt width,
-                       TqInt length,
-                       TqInt samples,
-		       TqChar *description)
-{
-	/* save to a tiff file */
-	TqInt i;
-	TqUchar *pdata = (TqUchar *) raster;
-	TIFF* ptex = TIFFOpen( filename, "w" );
-	static TqChar datetime[20];
-	struct tm  *ct;
-	TqInt    year;
-	TqInt linewidth;
-
-	time_t long_time;
-
-	time( &long_time );           /* Get time as long integer. */
-	ct = localtime( &long_time ); /* Convert to local time. */
-
-
-	year=1900 + ct->tm_year;
-	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
-	        year, ct->tm_mon + 1, ct->tm_mday,
-	        ct->tm_hour, ct->tm_min, ct->tm_sec);
-
-
-	TIFFCreateDirectory( ptex );
-
-
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, description );
-	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
-	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
-	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
-	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
-	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
-	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
-	TIFFSetField( ptex, TIFFTAG_DATETIME, datetime);
-
-	linewidth = width * samples;
-	linewidth *= sizeof(TqFloat);
-	for ( i = 0; i < length; i++ )
-	{
-		TIFFWriteScanline( ptex, pdata, i, 0 );
-		pdata += linewidth;
-	}
-	TIFFClose( ptex );
-}

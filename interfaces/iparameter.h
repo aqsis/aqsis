@@ -30,7 +30,7 @@
 
 #include "sstring.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct IqSurface;
 
@@ -79,9 +79,11 @@ struct IqParameter
 	/** Get a reference to the parameter name.
 	 */
 	virtual const	CqString& strName() const = 0;
+
+	virtual ~IqParameter() {};
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //-----------------------------------------------------------------------
 //}  // End of #ifdef IPARAMETER_H_INCLUDED

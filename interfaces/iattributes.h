@@ -21,12 +21,12 @@
 #include	"color.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
-enum	ShadingInterpolation
+enum ShadingInterpolation
 {
-    ShadingConstant,    	///< use constant shading, i.e. one value per micropoly.
-    ShadingSmooth,    		///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
+	ShadingInterp_Constant,	///< use constant shading, i.e. one value per micropoly.
+	ShadingInterp_Smooth,	///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
 };
 
 
@@ -170,6 +170,6 @@ struct IqAttributes
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___iattributes_Loaded___

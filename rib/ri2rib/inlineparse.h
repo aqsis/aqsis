@@ -35,7 +35,7 @@
 #include "dictionary.h"
 #include "error.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 class CqInlineParse
 {
@@ -90,5 +90,5 @@ class CqInlineParse
 		}
 };
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

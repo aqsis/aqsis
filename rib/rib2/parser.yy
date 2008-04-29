@@ -22,6 +22,7 @@ using namespace librib;
 
 #include "libribtypes.h"
 #include "logging.h"
+#include "aqsismath.h"
 
 #include <algorithm>
 #include <iostream>
@@ -30,6 +31,7 @@ using namespace librib;
 #include <string>
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 #ifdef	_DEBUG
 #define	YYDEBUG	1
@@ -440,6 +442,8 @@ complete_request
 			}
 	|	clipping float float
 			{ ParseCallbackInterface->RiClipping($2, $3); }
+	|	depthoffield
+			{ ParseCallbackInterface->RiDepthOfField(FLT_MAX, FLT_MAX, FLT_MAX); }
 	|	depthoffield float float float
 			{ ParseCallbackInterface->RiDepthOfField($2, $3, $4); }
 	|	shutter float float
@@ -493,7 +497,6 @@ complete_request
 			}
 	|	colorsamples scalar_array scalar_array
 			{
-				ColorSamples = $2->Count();
 				ParseCallbackInterface->RiColorSamples($2->Count(), &(*$2)[0], &(*$3)[0]);
 				DiscardArrayValue($2);
 				DiscardArrayValue($3);
@@ -2099,10 +2102,10 @@ int AppendFrames(const char* frames)
 				{
 					n += endptr - nptr;
 					// Store the range between f1 and f2;
-					if(FrameList.size() <= MAX(f1, f2))
-						FrameList.resize(MAX(f1, f2)+1, 0);
-					TqUint start = MIN(f1, f2);
-					TqUint end = MAX(f1, f2);
+					if(FrameList.size() <= Aqsis::max(f1, f2))
+						FrameList.resize(Aqsis::max(f1, f2)+1, 0);
+					TqUint start = Aqsis::min(f1, f2);
+					TqUint end = Aqsis::max(f1, f2);
 					TqUint i;
 					for(i = start; i <= end; i++)
 						FrameList[i] = 1;

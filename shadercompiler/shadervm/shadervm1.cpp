@@ -32,7 +32,7 @@
 #include	"shadervm.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 DECLARE_SHADERSTACK_TEMPS
 
@@ -91,25 +91,29 @@ void CqShaderVM::SO_ipushv()
 	AUTOFUNC;
 	POPV( A );	// Index
 	IqShaderData* pVar = GetVar( ReadNext().m_iVariable );
-	if ( pVar->ArrayLength() == 0 )
-	{
-		// Report error.
-		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
-		return ;
-	}
-	//If either the value or the index is varying, so must the result be.
+	// If either the value or the index is varying, so must the result be.
 	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
 	TqInt ext = m_pEnv->shadingPointCount();
 	bool fVarying = ext > 1;
-	TqInt i;
+	TqInt arrayLen = pVar->ArrayLength();
 	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = 0; i < ext; i++ )
+	for(TqInt i = 0; i < ext; i++)
 	{
-		if(!fVarying || RS.Value( i ))
+		if(!fVarying || RS.Value(i))
 		{
-			TqFloat _aq_A;
-			A->GetFloat( _aq_A, i );
-			pResult->SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
+			TqFloat aVal;
+			A->GetFloat(aVal, i);
+			TqInt index = lfloor(aVal);
+			if(index >= 0 && index < arrayLen)
+			{
+				pResult->SetValueFromVariable(pVar->ArrayEntry(index), i);
+			}
+			else
+			{
+				Aqsis::log() << error
+					<< "indexing array out of bounds: " << pVar->strName()
+					<< "[" << A->strName() << "=" << index << "]\n";
+			}
 		}
 	}
 	Push( pResult );
@@ -122,7 +126,7 @@ void CqShaderVM::SO_pop()
 	TqInt iVar = ReadNext().m_iVariable;
 	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
+	TqUint ext = max( m_pEnv->shadingPointCount(), pV->Size() );
 	bool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -137,33 +141,30 @@ void CqShaderVM::SO_pop()
 void CqShaderVM::SO_ipop()
 {
 	AUTOFUNC;
-	UsProgramElement& el = ReadNext();
-	IqShaderData* pV = GetVar( el.m_iVariable );
-	CqShaderVariableArray* pVA = static_cast<CqShaderVariableArray*>( pV );
-	if ( pV->ArrayLength() == 0 )
-	{
-		// Report error.
-		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
-		return ;
-	}
+	IqShaderData* pVar = GetVar(ReadNext().m_iVariable);
 	POPV( A );
 	POPV( Val );
-	//TqInt ext=__fVarying?m_pEnv->shadingPointCount():1;
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
+	TqInt ext = max( m_pEnv->shadingPointCount(), pVar->Size() );
 	bool fVarying = ext > 1;
-	TqUint i;
+	TqInt arrayLen = pVar->ArrayLength();
 	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = 0; i < ext; i++ )
+	for(TqInt i = 0; i < ext; i++)
 	{
 		if ( !fVarying || RS.Value( i ) )
 		{
 			TqFloat fIndex;
-			A->GetFloat( fIndex, i );
-			TqInt index = static_cast<unsigned int>( fIndex );
-            		if (index < pVA->ArrayLength())
-            		{
-               			( *pVA ) [ index ] ->SetValueFromVariable( Val, i );
-            		}
+			A->GetFloat(fIndex, i);
+			TqInt index = lfloor(fIndex);
+			if(index >= 0 && index < arrayLen)
+			{
+				pVar->ArrayEntry(index)->SetValueFromVariable(Val, i);
+			}
+			else
+			{
+				Aqsis::log() << error
+					<< "indexing array out of bounds: " << pVar->strName()
+					<< "[" << A->strName() << "=" << index << "]\n";
+			}
 		}
 	}
 	RELEASE( Val );
@@ -1193,5 +1194,5 @@ void CqShaderVM::SO_pow()
 	FUNC2( type_float, m_pEnv->SO_pow );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

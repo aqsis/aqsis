@@ -40,7 +40,7 @@
 #include	"lights.h"
 #include	"csgtree.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqSurface;
 class CqDeformingSurface;
@@ -1042,6 +1042,6 @@ inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginResourceModeBlock()
 }
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif

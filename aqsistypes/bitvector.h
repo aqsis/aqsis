@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 typedef unsigned char	bit;
 
@@ -266,6 +266,6 @@ class COMMON_SHARE CqBitVector
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !BITVECTOR_H_INCLUDED

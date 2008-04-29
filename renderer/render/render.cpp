@@ -60,8 +60,8 @@ BOOL APIENTRY DllMain( HINSTANCE hModule,
 #endif // AQSIS_SYSTEM_WIN32
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -32,7 +32,8 @@
 
 #include	"bucket.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
+
 //-----------------------------------------------------------------------
 
 
@@ -45,10 +46,9 @@ class CqJitter
 		void jitterSamples(CqBucket::TqSampleList& samples, TqInt xres, TqInt yres);
 
 	private:
-		TqInt m_windowSize;
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef JITTER_H_INCLUDED
 #endif

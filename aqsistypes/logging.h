@@ -23,7 +23,7 @@
 
 #include "aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /// Returns an output stream to be used for all logging
 COMMON_SHARE std::ostream& log();
@@ -43,7 +43,7 @@ COMMON_SHARE std::ostream& notice(std::ostream&);
 COMMON_SHARE std::ostream& info(std::ostream&);
 COMMON_SHARE std::ostream& debug(std::ostream&);
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif //	___logging_Loaded___
 

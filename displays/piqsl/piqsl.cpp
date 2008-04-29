@@ -207,7 +207,7 @@ class CqDataHandler
 						}
 					}
 					child = root->FirstChildElement("Formats");
-					CqChannelInfoList channelList;
+					CqChannelList channelList;
 					if(child)
 					{
 						TiXmlElement* format = child->FirstChildElement("Format");
@@ -230,7 +230,7 @@ class CqDataHandler
 						TiXmlDocument doc("formats.xml");
 						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 						TiXmlElement* formatsXML = new TiXmlElement("Formats");
-						for(CqChannelInfoList::const_iterator ichan = channelList.begin();
+						for(CqChannelList::const_iterator ichan = channelList.begin();
 								ichan != channelList.end(); ++ichan)
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");
@@ -449,7 +449,7 @@ int main( int argc, char** argv )
 			{
 				// load one image
 				boost::shared_ptr<CqImage> newImage(new CqImage(name));
-				newImage->loadFromTiff(name);
+				newImage->loadFromFile(name);
 				window->addImageToCurrentBook(newImage);
 			}
 		}

@@ -20,4 +20,3 @@ face_plastic (float Ka = 1;
     Ci = Os * ( facecol * (Ka*ambient() + Kd*diffuse(Nf)) +
 		specularcolor * Ks*specular(Nf,-normalize(I),roughness));
 }
-

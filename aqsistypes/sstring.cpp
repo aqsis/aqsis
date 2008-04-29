@@ -30,7 +30,7 @@
 #include	"aqsis.h"
 #include	"sstring.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /**	Expands characters which require escape sequences.
@@ -420,4 +420,4 @@ std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

@@ -37,7 +37,7 @@
 #include	"bilinear.h"
 #include	<boost/shared_ptr.hpp>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -401,8 +401,8 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqUint i;
-			TqUint max = MAX( (TqUint)u * (TqUint)v, pResult->Size() );
-			for ( i = 0; i < max; i++ )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
 
@@ -415,8 +415,8 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
 
@@ -536,8 +536,8 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = MAX( (TqUint) u * (TqUint) v, pResult->Size() );
-			for ( i = 0; i < max ; i++ )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size ; i++ )
 				pResult->SetValue( m_Value, i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
@@ -547,8 +547,8 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max ; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size ; i++ )
 				pResult->SetValue( m_Value, i );
 		}
 
@@ -649,8 +649,8 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		{
 			assert( pResult->Type() == this->Type() );
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max ; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size ; i++ )
 				pResult->SetValue( this->pValue(i)[0], i );
 		}
 
@@ -981,8 +981,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			// initialised to the correct size prior to calling.
 			TqUint i; 
 			TqInt  j;
-			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; ++i )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size; ++i )
 				for( j = 0; j < this->Count(); ++j )
 					pResult->SetValue( pValue( 0 ) [ j ], i );
 		}
@@ -993,8 +993,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1006,8 +1006,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; i++ )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
 		}
 
@@ -1117,8 +1117,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			// initialised to the correct size prior to calling.
 			TqUint i; 
 			TqInt  j;
-			TqUint max = ( MAX( (TqUint) u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; ++i )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size; ++i )
 				for( j = 0; j < this->Count(); ++j )
 					pResult->SetValue( pValue( 0 ) [ j ], i );
 		}
@@ -1129,8 +1129,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1142,8 +1142,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = ( MAX( (TqUint) u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; i++ )
+			TqUint size = max<TqInt>(u*v, pResult->Size());
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
 		}
 
@@ -1240,8 +1240,8 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
-			TqUint max = pResult->Size();
-			for ( i = 0; i < max; i++ )
+			TqUint size = pResult->Size();
+			for ( i = 0; i < size; i++ )
 				pResult->SetValue( this->pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1924,6 +1924,6 @@ extern CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* str
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PARAMETERS_H_INCLUDED

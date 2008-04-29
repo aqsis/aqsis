@@ -33,7 +33,7 @@ extern int yyparse();
 extern int yydebug;
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -100,6 +100,6 @@ IqParseNode* GetParseTree()
 	return ( ParseTreePointer );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //-------------------------------------------------------------

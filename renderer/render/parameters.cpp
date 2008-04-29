@@ -33,7 +33,7 @@
 #include	"color.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /** Default constructor
@@ -322,5 +322,5 @@ CqNamedParameterList::CqNamedParameterList( const CqNamedParameterList& From ) :
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

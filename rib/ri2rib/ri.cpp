@@ -22,9 +22,9 @@
 #include "context.h"
 
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 static CqContext context;
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 
 using libri2rib::context;
 using libri2rib::CqPLStore;

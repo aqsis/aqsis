@@ -32,24 +32,17 @@
 #include	"irenderer.h"
 //#include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
+CqShaderVariable::CqShaderVariable()
+	: m_strName(),
+	m_fParameter(false)
+{}
 
-/*
- * FIXME: These are commented out as they introduce a dependency on libaqsis
- * via the extern pCurrRenderer in renderer.h
- */
-CqShaderVariable::CqShaderVariable() : m_fParameter( false )
-{
-
-
-}
-
-CqShaderVariable::CqShaderVariable( const char* strName, bool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
-{
-
-
-}
+CqShaderVariable::CqShaderVariable(const char* strName, bool fParameter)
+	: m_strName(strName),
+	m_fParameter(fParameter)
+{}
 
 CqShaderVariable::~CqShaderVariable()
 {}
@@ -76,5 +69,5 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableClass t )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

@@ -9,7 +9,7 @@
 #include	"aqsis.h"
 #include	"parsenode.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// CqParseNode::Optimise
@@ -117,5 +117,5 @@ bool CqParseNodeCast::Optimise()
 	return ( false );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
