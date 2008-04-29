@@ -81,18 +81,6 @@ void version( std::ostream& Stream )
 }
 
 
-const char* g_slppDefArgs[] =
-    {
-        "slpp",
-        "-d",
-        "PI=3.141592654",
-        "-d",
-        "AQSIS",
-        "-c6",
-    };
-int g_cslppDefArgs = sizeof( g_slppDefArgs ) / sizeof( g_slppDefArgs[0] );
-
-
 /** Process the sl file from stdin and produce an slx bytestream.
  */
 int main( int argc, const char** argv )
@@ -111,6 +99,7 @@ int main( int argc, const char** argv )
 			      "slx - produce a compiled shader (in the aqsis shader VM stack language)\a"
 				  "dot - make a graphviz visualization of the parse tree (useful for debugging only).", &g_backendName );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
+	ap.alias("help", "h");
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.argFlag( "d", "\adump sl data", &g_dumpsl );
@@ -178,7 +167,6 @@ int main( int argc, const char** argv )
 		codeGenerator.reset(new CqCodeGenVM());
 	}
 
-	// Pass the shader file through the slpp preprocessor first to generate a temporary file.
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
 		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
@@ -221,30 +209,30 @@ int main( int argc, const char** argv )
 					// Append the -i arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
 					{
-				                ctx.add_sysinclude_path( include->c_str() );
-				                ctx.add_include_path( include->c_str() );
+						ctx.add_sysinclude_path( include->c_str() );
+						ctx.add_include_path( include->c_str() );
 					}
   
 					// Setup the default defines.
-			                ctx.add_macro_definition( "AQSIS" );
-			                ctx.add_macro_definition( "PI=3.141592654" );
+					ctx.add_macro_definition( "AQSIS" );
+					ctx.add_macro_definition( "PI=3.141592654" );
   
 					// Append the -d arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
 					{
-				                ctx.add_macro_definition( define->c_str() );
+						ctx.add_macro_definition( define->c_str() );
 					}
   
 					// Append the -u arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
-  					{
-				                ctx.remove_macro_definition( undefine->c_str() );
+					{
+						ctx.remove_macro_definition( undefine->c_str() );
 					}
   
 					// analyze the input file
 					context_type::iterator_type first = ctx.begin();
 					context_type::iterator_type last = ctx.end();
-				
+
 					std::stringstream preprocessed(std::stringstream::in | std::stringstream::out);
 					std::ofstream dumpfile;
 					if( g_dumpsl )
@@ -253,7 +241,7 @@ int main( int argc, const char** argv )
 						dumpfname.append(".pp");
 						dumpfile.open(dumpfname.c_str());
 					};
-	
+
 					while (first != last) 
 					{
 						current_position = (*first).get_position();
