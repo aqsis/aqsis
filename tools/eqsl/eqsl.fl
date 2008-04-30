@@ -71,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 3"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
@@ -156,10 +156,16 @@ else
 	program.append("\\\\");
 \#elif defined(AQSIS_SYSTEM_MACOSX)
 	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+	CFURLRef contentRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, pluginRef);
+	CFURLRef resourceRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, contentRef, CFSTR("/Resources"), true);
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	CFStringRef resourcePath = CFURLCopyFileSystemPath(resourceRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	const char *resourcePtr = CFStringGetCStringPtr(resourcePath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
 	program.append("/");
+	std::vector<std::string> renderEngineArgsBundle = renderEngineArgs;
+	renderEngineArgsBundle.push_back("-displays=\"" + resourcePtr + "/lib\" -shaders=\"" + resourcePtr + "/shaders\"");
 \#else
 	std::string program;
 \#endif
