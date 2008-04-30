@@ -34,7 +34,7 @@
 #include "itexinputfile.h"
 #include "mipmaptexturesampler.h"
 #include "texturebuffer.h"
-#include "tilearray.h"
+//#include "tilearray.h"
 
 namespace Aqsis {
 

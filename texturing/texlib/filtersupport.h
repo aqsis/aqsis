@@ -65,6 +65,8 @@ struct SqFilterSupport1D
 	bool inRange(TqInt rangeStart, TqInt rangeEnd) const;
 };
 
+/// Return the intersection of two support regions.
+SqFilterSupport1D intersect(const SqFilterSupport1D s1, const SqFilterSupport1D s2);
 
 //------------------------------------------------------------------------------
 /** \brief Hold filter support area.
@@ -78,6 +80,8 @@ struct SqFilterSupport
 	SqFilterSupport1D sy; ///< support in y-direction
 	/// Trivial constructor.
 	SqFilterSupport(TqInt startX = 0, TqInt endX = 0, TqInt startY = 0, TqInt endY = 0);
+	/// Constructor from two 1D supports
+	SqFilterSupport(const SqFilterSupport1D s1, const SqFilterSupport1D s2);
 	/// Return area of the support in number of pixels.
 	TqInt area() const;
 	/// Return true if the support is an empty set.
@@ -88,7 +92,8 @@ struct SqFilterSupport
 	bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY) const;
 };
 
-
+/// Return the intersection of two supports
+SqFilterSupport intersect(const SqFilterSupport& s1, const SqFilterSupport& s2);
 
 //==============================================================================
 // Implementation details
@@ -129,6 +134,11 @@ inline bool SqFilterSupport1D::inRange(TqInt rangeStart, TqInt rangeEnd) const
 }
 
 
+inline SqFilterSupport1D intersect(const SqFilterSupport1D s1, const SqFilterSupport1D s2)
+{
+	return SqFilterSupport1D(max(s1.start, s2.start), min(s1.end, s2.end));
+}
+
 //------------------------------------------------------------------------------
 // SqFilterSupport
 
@@ -136,6 +146,12 @@ inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt endX,
 		TqInt startY, TqInt endY)
 	: sx(startX, endX),
 	sy(startY, endY)
+{ }
+
+inline SqFilterSupport::SqFilterSupport(const SqFilterSupport1D sx,
+		const SqFilterSupport1D sy)
+	: sx(sx),
+	sy(sy)
 { }
 
 inline TqInt SqFilterSupport::area() const
@@ -158,6 +174,11 @@ inline bool SqFilterSupport::intersectsRange(TqInt startX, TqInt endX,
 		TqInt startY, TqInt endY) const
 {
 	return sx.intersectsRange(startX, endX) && sy.intersectsRange(startY, endY);
+}
+
+inline SqFilterSupport intersect(const SqFilterSupport& s1, const SqFilterSupport& s2)
+{
+	return SqFilterSupport(intersect(s1.sx, s2.sx), intersect(s1.sy, s2.sy));
 }
 
 } // namespace Aqsis

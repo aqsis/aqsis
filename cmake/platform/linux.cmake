@@ -16,9 +16,9 @@ SET(SYSCONFDIR "etc/aqsis"
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "include/aqsis" 
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR "content" 
+SET(CONTENTDIR "share/aqsis/content" 
 	CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR "scripts" 
+SET(SCRIPTSDIR "share/aqsis/scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
 IF(FIRST_CMAKE_RUN)

@@ -377,9 +377,9 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 	xpixels = ( TqFloat * ) calloc( 3, bake * bake * sizeof(TqFloat));
 	//CqTextureBuffer<TqFloat> xpixels(bake, bake, 3);
 
-	for (y=0; y < bake -1 ; ++y)
+	for (y=0; y < bake; ++y)
 	{
-		for (x=0; x < bake -1 ; ++x)
+		for (x=0; x < bake; ++x)
 		{
 			TqInt m;
 			n = (y * bake + x);

@@ -35,6 +35,9 @@
 
 #include "channellist.h"
 #include "samplevector.h"
+#include "filtersupport.h"
+
+#include "randomtable.h"
 
 namespace Aqsis {
 
@@ -48,6 +51,13 @@ template<typename T>
 class AQSISTEX_SHARE CqTextureBuffer
 {
 	public:
+		/// Pixel iterator class
+		class CqIterator;
+		/// Stochastic pixel iterator class
+		class CqStochasticIterator;
+		/// Sample vector type returned by operator()
+		typedef CqSampleVector<T> TqSampleVector;
+
 		/// Construct a texture buffer with width = height = 0
 		CqTextureBuffer();
 
@@ -118,7 +128,7 @@ class AQSISTEX_SHARE CqTextureBuffer
 		//@}
 
 		//--------------------------------------------------
-		/// \name Indexing operations
+		/// \name Pixel access
 		//@{
 		/** \brief 2D Indexing operator - floating point pixel interface.
 		 *
@@ -129,7 +139,7 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 * \param y - pixel index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the channels data
 		 */
-		const CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
+		const TqSampleVector operator()(const TqInt x, const TqInt y) const;
 		/** \brief 2D Indexing - access to the underlying typed channel data.
 		 *
 		 * \param x - pixel index in width direction (column index)
@@ -139,6 +149,25 @@ class AQSISTEX_SHARE CqTextureBuffer
 		T* value(const TqInt x, const TqInt y);
 		/// 2D indexing of typed channel data, const version.
 		const T* value(const TqInt x, const TqInt y) const;
+		/** \brief Access to pixels through a pixel iterator
+		 *
+		 * The pixel iterator will iterate through all the pixels the provided
+		 * support.  See the iterator class for more detail.
+		 *
+		 * \param support - support to iterate over
+		 */
+		CqIterator begin(const SqFilterSupport& support) const;
+		/** \brief Stochastic iterator access to pixels in the given support.
+		 *
+		 * A stochastic support iterator aims to choose a fixed number of
+		 * samples from the support randomly.  The randomness choices should
+		 * ideally be spread evenly over the support with minimal bunching.
+		 *
+		 * \param support - support to iterate over
+		 * \param numSamples - number of samples to choose in the support.
+		 */
+		CqStochasticIterator beginStochastic(const SqFilterSupport& support,
+				TqInt numSamples) const;
 		//@}
 
 		//--------------------------------------------------
@@ -175,6 +204,109 @@ class AQSISTEX_SHARE CqTextureBuffer
 };
 
 
+/** \brief A simple pixel iterator for CqTextureBuffer
+ *
+ * A pixel iterator iterates over all pixels in some region, but abstracts away
+ * the order of iteration.  This means that arrays with non-scanline orderings
+ * can be supported easily (for example, tiled arrays).
+ */
+template<typename T>
+class CqTextureBuffer<T>::CqIterator
+{
+	public:
+		/// Go to the next pixel in the support
+		CqIterator& operator++();
+
+		/** \brief Test whether the iterator is still inside the support.
+		 *
+		 * The equivilant of inSupport() in the standard library is to test
+		 * against an ending iterator.  However, we ensue that convention here
+		 * for efficiency and convenience.
+		 */
+		bool inSupport() const;
+		/// Return the x-position of the currently pointed to pixel
+		TqInt x() const;
+		/// Return the y-position of the currently pointed to pixel
+		TqInt y() const;
+		/// Return the pixel sample data at the current location.
+		const typename CqTextureBuffer<T>::TqSampleVector operator*() const;
+
+		friend class CqTextureBuffer<T>;
+	private:
+		/** \brief Construct a pixel iterator for a given buffer and region.
+		 *
+		 * This is a private constructor, since we only want CqTextureBuffer to
+		 * be able to construct pixel iterators.
+		 *
+		 * \param buf - buffer to iterate over.
+		 * \param support - region of the buffer to iterate over.
+		 */
+		CqIterator(const CqTextureBuffer<T>& buf, const SqFilterSupport& support);
+
+		/// Reference to the underlying buffer.
+		const CqTextureBuffer<T>& m_buf;
+		/// Support region to iterate over
+		SqFilterSupport m_support;
+		/// current x-position
+		TqInt m_x;
+		/// current y-position
+		TqInt m_y;
+};
+
+/** \brief A stochastic pixel iterator for CqTextureBuffer
+ *
+ * This pixel iterator covers only a subset of pixels in a given filter
+ * support.  It selects those points using a randomized halton sequence as
+ * defined by Cq2dQuasiRandomTable.
+ */
+template<typename T>
+class CqTextureBuffer<T>::CqStochasticIterator
+{
+	public:
+		/// Go to the next pixel in the support
+		CqStochasticIterator& operator++();
+
+		/** \brief Test whether the iterator is still inside the support.
+		 *
+		 * The equivilant of inSupport() in the standard library is to test
+		 * against an ending iterator.  However, we ensue that convention here
+		 * for efficiency and convenience.
+		 */
+		bool inSupport();
+		/// Return the x-position of the currently pointed to pixel
+		TqInt x() const;
+		/// Return the y-position of the currently pointed to pixel
+		TqInt y() const;
+		/// Return the pixel sample data at the current location.
+		const typename CqTextureBuffer<T>::TqSampleVector operator*() const;
+
+		friend class CqTextureBuffer<T>;
+	private:
+		/** \brief Construct a pixel iterator for a given buffer and region.
+		 *
+		 * This is a private constructor, since we only want CqTextureBuffer to
+		 * be able to construct pixel iterators.
+		 *
+		 * \param buf - buffer to iterate over.
+		 * \param support - region of the buffer to iterate over.
+		 * \param numSamples - number of samples to take inside the support.
+		 */
+		CqStochasticIterator(const CqTextureBuffer<T>& buf,
+				const SqFilterSupport& support, TqInt numSamples);
+
+		/// Reference to the underlying buffer.
+		const CqTextureBuffer<T>& m_buf;
+		/// Support region to iterate over
+		SqFilterSupport m_support;
+		/// current x-position
+		TqInt m_x;
+		/// current y-position
+		TqInt m_y;
+		/// Total number of samples to take.
+		const TqInt m_numSamples;
+		/// Current sample number
+		TqInt m_sampleNum;
+};
 
 //==============================================================================
 // Implementation of inline functions and templates
@@ -210,19 +342,23 @@ CqTextureBuffer<T>::CqTextureBuffer(const CqTextureBuffer<T2>& rhs)
 }
 
 template<typename T>
-inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
+inline const typename CqTextureBuffer<T>::TqSampleVector
+CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
 {
-	return CqSampleVector<T>(value(x,y));
+	return TqSampleVector(value(x,y));
 }
 
 template<typename T>
 template<typename PixelVectorT>
-inline void CqTextureBuffer<T>::setPixel(const TqInt x, const TqInt y, const PixelVectorT& pixelValue)
+inline void CqTextureBuffer<T>::setPixel(const TqInt x, const TqInt y,
+		const PixelVectorT& pixelValue)
 {
 	T* pixel = value(x,y);
 	if(std::numeric_limits<T>::is_integer)
 	{
 		// T is an integral type; need to rescale channel...
+		//
+		/// \todo Need to think about how this should work for signed integer channels.
 		for(TqInt chan = 0; chan < m_numChannels; ++chan)
 		{
 			pixel[chan] = static_cast<T>(std::numeric_limits<T>::max()
@@ -254,6 +390,24 @@ inline const T* CqTextureBuffer<T>::value(const TqInt x, const TqInt y) const
 	assert(y >= 0);
 	assert(y < m_height);
 	return m_pixelData.get() + (y*m_width + x)*m_numChannels;
+}
+
+template<typename T>
+inline typename CqTextureBuffer<T>::CqIterator CqTextureBuffer<T>::begin(
+		const SqFilterSupport& support) const
+{
+	return CqIterator(*this, intersect(SqFilterSupport(0, m_width, 0, m_height),
+				support));
+}
+
+template<typename T>
+inline typename CqTextureBuffer<T>::CqStochasticIterator
+CqTextureBuffer<T>::beginStochastic(const SqFilterSupport& support,
+		TqInt numSamples) const
+{
+	return CqStochasticIterator(*this,
+			intersect(SqFilterSupport(0, m_width, 0, m_height), support),
+			numSamples);
 }
 
 template<typename T>
@@ -331,6 +485,116 @@ CqTextureBuffer<T>& CqTextureBuffer<T>::operator=(const CqTextureBuffer<T2>& rhs
 	}
 	return *this;
 }
+
+
+//------------------------------------------------------------------------------
+// CqTextureBuffer<T>::CqIterator implementation
+
+template<typename T>
+typename CqTextureBuffer<T>::CqIterator& CqTextureBuffer<T>::CqIterator::operator++()
+{
+	++m_x;
+	if(m_x >= m_support.sx.end)
+	{
+		m_x = m_support.sx.start;
+		++m_y;
+	}
+	return *this;
+}
+
+template<typename T>
+bool CqTextureBuffer<T>::CqIterator::inSupport() const
+{
+	return m_y < m_support.sy.end;
+}
+
+template<typename T>
+TqInt CqTextureBuffer<T>::CqIterator::x() const
+{
+	return m_x;
+}
+
+template<typename T>
+TqInt CqTextureBuffer<T>::CqIterator::y() const
+{
+	return m_y;
+}
+
+template<typename T>
+const typename CqTextureBuffer<T>::TqSampleVector
+CqTextureBuffer<T>::CqIterator::operator*() const
+{
+	return m_buf(m_x, m_y);
+}
+
+template<typename T>
+CqTextureBuffer<T>::CqIterator::CqIterator(const CqTextureBuffer<T>& buf,
+		const SqFilterSupport& support)
+	: m_buf(buf),
+	m_support(support),
+	m_x(m_support.sx.start),
+	m_y(m_support.sx.isEmpty() ? m_support.sy.end : m_support.sy.start)
+{ }
+
+//------------------------------------------------------------------------------
+// CqTextureBuffer<T>::CqStochasticIterator implementation
+
+template<typename T>
+typename CqTextureBuffer<T>::CqStochasticIterator&
+CqTextureBuffer<T>::CqStochasticIterator::operator++()
+{
+	++m_sampleNum;
+	m_x = m_support.sx.start
+		+ lfloor(m_support.sx.range()*detail::g_randTab.x(m_sampleNum));
+	m_y = m_support.sy.start
+		+ lfloor(m_support.sy.range()*detail::g_randTab.y(m_sampleNum));
+	return *this;
+}
+
+template<typename T>
+bool CqTextureBuffer<T>::CqStochasticIterator::inSupport()
+{
+	return m_sampleNum < m_numSamples;
+}
+
+template<typename T>
+const typename CqTextureBuffer<T>::TqSampleVector
+CqTextureBuffer<T>::CqStochasticIterator::operator*() const
+{
+	return m_buf(m_x, m_y);
+}
+
+template<typename T>
+TqInt CqTextureBuffer<T>::CqStochasticIterator::x() const
+{
+	return m_x;
+}
+
+template<typename T>
+TqInt CqTextureBuffer<T>::CqStochasticIterator::y() const
+{
+	return m_y;
+}
+
+template<typename T>
+CqTextureBuffer<T>::CqStochasticIterator::CqStochasticIterator(
+		const CqTextureBuffer<T>& buf, const SqFilterSupport& support,
+		TqInt numSamples)
+	: m_buf(buf),
+	m_support(support),
+	m_x(0),
+	m_y(0),
+	m_numSamples(numSamples),
+	m_sampleNum(-1)
+{
+	// Randomize the table for the next point.
+	detail::g_randTab.randomize();
+	// Call operator++ to generate valid initial sample positions.
+	++(*this);
+}
+
+
+//------------------------------------------------------------------------------
 
 } // namespace Aqsis
 

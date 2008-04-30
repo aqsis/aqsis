@@ -147,6 +147,7 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 
 void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 {
+	// Set the compression type.
 	uint16 compression = tiffCompressionTagFromName( header.find<Attr::Compression>());
 	if(!TIFFIsCODECConfigured(compression))
 	{
@@ -155,16 +156,28 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 		return;
 	}
 	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
-	if(compression != COMPRESSION_NONE
-			&& header.channelList().sharedChannelType() != Channel_Float32)
+
+	if(compression == COMPRESSION_LZW || compression == COMPRESSION_DEFLATE)
 	{
-		// Adding a predictor drastically increases the compression ratios for
-		// some types of compression.  Apparently it doesn't work well on
-		// floating point data (I didn't test this).
-		setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+		// Add a compression predictor if possible; this drastically increases
+		// the compression ratios.  Even though the online docs seem to suggest
+		// that predictors are independent of the compression codec, this is
+		// not the case for libtiff, which appears to give errors if predictors
+		// used with anything other than the lzw or deflate codecs.
+		//
+		// (the innards of libtiff suggest that TIFFPredictorInit() is only
+		// called by certian codecs)
+		//
+		// \todo Test whether PREDICTOR_FLOATINGPOINT is actually beneficial.
+		// (Some places on the web suggest not.)
+		if(header.channelList().sharedChannelType() == Channel_Float32)
+			setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+		else
+			setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
 	}
 	if(compression == COMPRESSION_JPEG)
 	{
+		// Set the jpeg compression quality level if necessary.
 		setTiffTagValue<int>(TIFFTAG_JPEGQUALITY,
 				header.find<Attr::CompressionQuality>(85));
 	}
@@ -610,6 +623,13 @@ void CqTiffFileHandle::writeDirectory()
 		AQSIS_THROW(XqInternal, "Could not write tiff subimage to file");
 	++m_currDir;
 }
+
+
+tdir_t CqTiffFileHandle::numDirectories()
+{
+	return TIFFNumberOfDirectories(m_tiffPtr.get());
+}
+
 
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 {

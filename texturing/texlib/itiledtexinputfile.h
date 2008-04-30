@@ -19,8 +19,7 @@
 
 /** \file
  *
- * \brief Declare input and output interface specifications which should be
- * implemented by all classes wrapping texture files.
+ * \brief Input interface for tiled images.
  *
  * \author Chris Foster
  */
@@ -31,6 +30,8 @@
 #include "aqsis.h"
 
 #include <string>
+
+#include <boost/shared_ptr.hpp>
 
 #include "imagefiletype.h"
 #include "texfileheader.h"
@@ -54,18 +55,46 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 	public:
 		virtual ~IqTiledTexInputFile() {};
 
-		/// get the file name
+		//--------------------------------------------------
+		/// \name Metadata access
+		//@{
+		/// Get the file name
 		virtual const char* fileName() const = 0;
-
-		/// get a string representing the file type
+		/// Get the file type
 		virtual EqImageFileType fileType() const = 0;
-
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
+		/// Get tile dimensions
+		virtual SqTileInfo tileInfo() const = 0;
+		//@}
 
+		//--------------------------------------------------
+		/// \name Functions for accessing multiple sub-images.
+		//@{
+		/** Set the image index in a multi-image file.
+		 *
+		 * In general, this function may be expected to modify the image header
+		 * to reflect the metadata for the new image level.
+		 *
+		 * \param newIndex - new index in the multi-image file.
+		 */
+		virtual void setImageIndex(TqInt newIndex) = 0;
+		/** Get the image index for a multi-image file.
+		 *
+		 * \return the current image index
+		 */
+		virtual TqInt imageIndex() const = 0;
+		/** Get the number of images in the multi-image file.
+		 *
+		 * \return The number of images
+		 */
+		virtual TqInt numSubImages() const = 0;
+		//@}
+
+		//--------------------------------------------------
 		/** \brief Read in a tile.
 		 *
-		 * Array2DType is a type modelling a simple resizeable 2D array
+		 * ArrayT is a type modelling a simple resizeable 2D array
 		 * interface.  It should provide the following methods:
 		 *   - void resize(TqInt width, TqInt height, const CqChannelList& channels)
 		 *     Resizes the buffer.  (width, height) is the new dimensions for
@@ -79,8 +108,8 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * \tileX - horizontal tile coordinate, starting from 0 in the top left.
 		 * \tileY - vertical tile coordinate, starting from 0 in the top left.
 		 */
-		template<typename Array2DType>
-		void readTile(Array2DType& buffer, TqInt tileX, TqInt tileY) const;
+		template<typename ArrayT>
+		void readTile(ArrayT& buffer, TqInt tileX, TqInt tileY) const;
 
 		/** \brief Open a tiled input file.
 		 *
@@ -103,9 +132,19 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * Implementations of readTileImpl() can assume that startLine and
 		 * numScanlines specify a valid range.
 		 */
-		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY);
+		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY) = 0;
 };
 
+
+template<typename ArrayT>
+void IqTiledTexInputFile::readTile(ArrayT& buffer, TqInt tileX, TqInt tileY) const
+{
+	/// \todo Make sure that getting header().channelList() isn't too expensive
+	/// for fast tile access.
+	SqTileInfo info = tileInfo();
+	buffer.resize(info.width, info.height, header().channelList());
+	readTileImpl(buffer.rawData(), tileX, tileY);
+}
 
 } // namespace Aqsis
 

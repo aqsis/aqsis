@@ -29,6 +29,9 @@
 
 #include "aqsis.h"
 
+#include <vector>
+#include <string>
+
 namespace Aqsis {
 
 /** \brief Encapsulate a pair of renderman (token,value) parameter arrays.
@@ -37,7 +40,13 @@ namespace Aqsis {
  * pair of arrays, along with a parameter count.  This interface can be
  * improved upon when passing the parameters around between C++ functions.
  * This class is an attempt to make a more friendly encapsulation of the
- * parameter list interface.
+ * parameter list interface, and should be particularly useful for passing
+ * options between renderman interface calls and the non-core libraries such as
+ * aqsistex.
+ *
+ * \todo This class should be aware of the type of a renderman token - it
+ * should hold parsed token information taken from the renderman symbol table
+ * rather than plain old strings.
  */
 class CqRiParamList
 {
@@ -81,8 +90,17 @@ class CqRiParamList
 		const T& find(const std::string& name, const T& defVal) const;
 
 	private:
-		/// token array
-		const RtToken* m_tokens;
+		/** \brief Extract token names from a token array.
+		 *
+		 * \param tokNames - extracted token names are placed here.
+		 * \param tokens - full tokens (may be type and class qualified)
+		 * \param tokCount - number of tokens.
+		 */
+		static void extractTokenNames(std::vector<std::string>& tokNames,
+				RtToken* tokens, TqInt tokCount);
+		/// token name array
+		std::vector<std::string> m_tokenNames;
+		/// 
 		const RtPointer* m_values;
 		TqInt m_count;
 };
@@ -94,17 +112,19 @@ class CqRiParamList
 // Implementation of CqRiParamList
 inline CqRiParamList::CqRiParamList(CqRiParamList::RtToken tokens[],
 		CqRiParamList::RtPointer values[], TqInt count)
-	: m_tokens(tokens),
+	: m_tokenNames(),
 	m_values(values),
 	m_count(count)
-{ }
+{
+	extractTokenNames(m_tokenNames, tokens, count);
+}
 
 template<typename T>
 inline const T* CqRiParamList::find(const std::string& name) const
 {
 	for(TqInt i = 0; i < m_count; ++i)
 	{
-		if(name == m_tokens[i])
+		if(name == m_tokenNames[i])
 			return reinterpret_cast<T*>(m_values[i]);
 	}
 	return 0;
@@ -118,7 +138,6 @@ inline const T& CqRiParamList::find(const std::string& name, const T& defVal) co
 	else
 		return defVal;
 }
-
 
 #endif // RIPARAMLIST_H_INCLUDED
 

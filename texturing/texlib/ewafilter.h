@@ -38,8 +38,65 @@
 
 namespace Aqsis {
 
-/** \brief A functor class encapsulating Elliptically Weighted Average (EWA)
- * filter weight calculation.
+//------------------------------------------------------------------------------
+/** \brief A filter functor for evaluating 2D gaussian EWA filter weights.
+ *
+ * This filter functor class is conveniently constructed by the
+ * CqEwaFilterFactory class.  It's basically a 2D gaussian filter with a
+ * cutoff, evaluated as described in the class documentation for
+ * CqEwaFilterFactory, and repeated briefly here:
+ *
+ * \verbatim
+ *   Q(x)  = (x-c)^T * Q * (x-c)
+ *   W(x)  =  / exp[-Q(x)]    for  Q(x) < logEdgeWeight
+ *            \ 0             elsewhere
+ * \endverbatim
+ *
+ * Where c is the filter center, Q is the quadratic form matrix and x is the
+ * point at which the filter is being evaluated.  The total fraction of the
+ * ideal filter weight which is lost outside the support is equal to
+ * exp(-logEdgeWeight).
+ */
+class CqEwaFilter
+{
+	public:
+		/** Construct a 2D gaussian filter with the given coefficients.
+		 *
+		 * \param quadForm - quadratic form matrix
+		 * \param filterCenter - the filter is centered on this point.
+		 * \param logEdgeWeight - log of the filter weight at the edge cutoff.
+		 */
+		CqEwaFilter(SqMatrix2D quadForm, CqVector2D filterCenter,
+				TqFloat logEdgeWeight);
+
+		/// EWA filters are never pre-noramlized; return false.
+		static bool isNormalized() { return false; }
+
+		/** \brief Evaluate the filter at the given point in image space.
+		 *
+		 * \param x
+		 * \param y - these parameters are the position in raster space which
+		 *            the filter weight is to be calculated at.  (So for an
+		 *            image of size WxH, x and y would normally lie somewhere
+		 *            in the ranges [0,W] and [0,H] respectively, thought they
+		 *            don't have to)
+		 */
+		TqFloat operator()(TqFloat x, TqFloat y) const;
+		/// Get the extent of the filter in integer raster coordinates.
+		SqFilterSupport support() const;
+
+	private:
+		/// Quadratic form matrix
+		const SqMatrix2D m_quadForm;
+		/// Center point of the gaussian filter function
+		const CqVector2D m_filterCenter;
+		/// The log of the filter weight at the filter edge cutoff.
+		const TqFloat m_logEdgeWeight;
+};
+
+//------------------------------------------------------------------------------
+/** \brief A class encapsulating Elliptically Weighted Average (EWA) filter
+ * weight computation.
  *
  * EWA filtering is based on the convolution of several gaussian filters and
  * composition with the linear approximation to the image warp at the sampling
@@ -98,7 +155,7 @@ namespace Aqsis {
  * the gaussian integrals inside and outside the cutoff. ;-) )  In practise we
  * work with the quantity logEdgeWeight = -ln(C) below.
  */
-class CqEwaFilterWeights
+class CqEwaFilterFactory
 {
 	public:
 		/** \brief Perform EWA filter weight setup
@@ -122,17 +179,20 @@ class CqEwaFilterWeights
 		 * \param maxAspectRatio - maximum anisotropy at which the filter will
 		 *          be clamped.
 		 */
-		inline CqEwaFilterWeights(const SqSampleQuad& sQuad, 
+		CqEwaFilterFactory(const SqSampleQuad& sQuad, 
 				TqFloat baseResS, TqFloat baseResT,
 				TqFloat sBlur = 0, TqFloat tBlur = 0,
 				TqFloat logEdgeWeight = 4, 
 				TqFloat maxAspectRatio = 20);
 
-		/** \brief Adjust the filter to use a texture of a different resolution
+		/** \brief Create an EWA filter functor.
 		 *
-		 * This is useful for adjusting mipmapping where you'd like to create
-		 * the filter for the base texture, but adjust it for use with the
-		 * raster coordinate system of a higher mipmap level where necessary.
+		 * Create an EWA filter functor using a transformation relative to the
+		 * base texture coordinates for which the factory coefficients are
+		 * calculated.  This is useful for mipmapping where you'd like to
+		 * create the filter for the base texture, but adjust it for use with
+		 * the raster coordinate system of a higher mipmap level where
+		 * necessary.
 		 *
 		 * The new raster coordinate system relates to the old one via a scale
 		 * factor and offset.  For example, the new raster x-coordinates are
@@ -145,28 +205,11 @@ class CqEwaFilterWeights
 		 * \param yScale - see xScale
 		 * \param yOff - see xOff
 		 */
-		void adjustTextureScale(TqFloat xScale, TqFloat xOff,
-				TqFloat yScale, TqFloat yOff);
-
-		/** \brief Evaluate the filter at the given point in image space.
-		 *
-		 * \param x
-		 * \param y - these parameters are the position in raster space which
-		 *            the filter weight is to be calculated at.  (So for an
-		 *            image of size WxH, x and y would normally lie somewhere
-		 *            in the ranges [0,W] and [0,H] respectively, thought they
-		 *            don't have to)
-		 */
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
-
-		/// We can't pre-normalize EWA filters; return false.
-		inline static bool isNormalized() { return false; }
+		CqEwaFilter createFilter(TqFloat xScale = 1, TqFloat xOff = 0,
+				TqFloat yScale = 1, TqFloat yOff = 0);
 
 		/// Get the width of the filter along the minor axis of the ellipse
-		inline TqFloat minorAxisWidth();
-
-		/// Get the extent of the filter in integer raster coordinates.
-		inline SqFilterSupport support() const;
+		TqFloat minorAxisWidth();
 	private:
 		/** \brief Compute and cache EWA filter coefficients
 		 *
@@ -179,7 +222,7 @@ class CqEwaFilterWeights
 		 * the minor axis of the filter is cached in m_minorAxisWidth.
 		 *
 		 * For parameters, see the corresponding ones in the
-		 * CqEwaFilterWeights constructor.
+		 * CqEwaFilterFactory constructor.
 		 *
 		 */
 		void computeFilter(const SqSampleQuad& sQuad, TqFloat
@@ -190,7 +233,7 @@ class CqEwaFilterWeights
 		SqMatrix2D m_quadForm;
 		/// Center point of the gaussian filter function
 		CqVector2D m_filterCenter;
-		/// The log of the filter weight at the edge cutoff.
+		/// The log of the filter weight at the filter edge cutoff.
 		TqFloat m_logEdgeWeight;
 		/// Width of the semi-minor axis of the elliptical filter
 		TqFloat m_minorAxisWidth;
@@ -200,7 +243,9 @@ class CqEwaFilterWeights
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad, 
+// CqEwaFilterFactory implementation
+
+inline CqEwaFilterFactory::CqEwaFilterFactory(const SqSampleQuad& sQuad, 
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat logEdgeWeight, TqFloat maxAspectRatio)
 	: m_quadForm(0),
@@ -217,16 +262,35 @@ inline CqEwaFilterWeights::CqEwaFilterWeights(const SqSampleQuad& sQuad,
 	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
 }
 
-inline void CqEwaFilterWeights::adjustTextureScale(TqFloat xScale, TqFloat xOff,
+inline CqEwaFilter CqEwaFilterFactory::createFilter(TqFloat xScale, TqFloat xOff,
 		TqFloat yScale, TqFloat yOff)
 {
-	m_filterCenter.x( xScale*(m_filterCenter.x() + xOff) );
-	m_filterCenter.y( yScale*(m_filterCenter.y() + yOff) );
-	// this matrix multiplication could be rewritten to be mostly optimized away...
-	SqMatrix2D scaleMatrix(1/xScale, 1/yScale);
-	m_quadForm = scaleMatrix*m_quadForm*scaleMatrix;
+	// Special case for the first mipmap level.
+	if(xScale == 1 && yScale == 1 && xOff == 0 && yOff == 0)
+		return CqEwaFilter(m_quadForm, m_filterCenter, m_logEdgeWeight);
+	// Generic case - need to do some scaling etc.
+	TqFloat invXs = 1/xScale;
+	TqFloat invYs = 1/yScale;
+	// The strange-looking matrix which is passed into the CqEwaFilter
+	// constructor below is simply the hand-written version of the following M:
+	//
+	// SqMatrix2D scaleMatrix(1/xScale, 1/yScale);
+	// M = scaleMatrix*m_quadForm*scaleMatrix;
+	return CqEwaFilter(
+			SqMatrix2D(invXs*invXs*m_quadForm.a, invXs*invYs*m_quadForm.b,
+				invXs*invYs*m_quadForm.c, invYs*invYs*m_quadForm.d),
+			CqVector2D(xScale*(m_filterCenter.x() + xOff),
+				yScale*(m_filterCenter.y() + yOff)),
+			m_logEdgeWeight);
 }
 
+inline TqFloat CqEwaFilterFactory::minorAxisWidth()
+{
+	return m_minorAxisWidth;
+}
+
+
+//------------------------------------------------------------------------------
 namespace detail {
 
 /** A lookup table for std::exp(-x).
@@ -281,7 +345,17 @@ extern CqNegExpTable negExpTable;
 
 } // namespace detail
 
-inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
+
+//------------------------------------------------------------------------------
+// CqEwaFilter implementation
+inline CqEwaFilter::CqEwaFilter(SqMatrix2D quadForm, CqVector2D filterCenter,
+		TqFloat logEdgeWeight)
+	: m_quadForm(quadForm),
+	m_filterCenter(filterCenter),
+	m_logEdgeWeight(logEdgeWeight)
+{ }
+
+inline TqFloat CqEwaFilter::operator()(TqFloat x, TqFloat y) const
 {
 	x -= m_filterCenter.x();
 	y -= m_filterCenter.y();
@@ -297,12 +371,7 @@ inline TqFloat CqEwaFilterWeights::operator()(TqFloat x, TqFloat y) const
 	return 0;
 }
 
-inline TqFloat CqEwaFilterWeights::minorAxisWidth()
-{
-	return m_minorAxisWidth;
-}
-
-inline SqFilterSupport CqEwaFilterWeights::support() const
+inline SqFilterSupport CqEwaFilter::support() const
 {
 	TqFloat detQ = m_quadForm.det();
 	// Compute filter radii

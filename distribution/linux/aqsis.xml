@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+	<mime-type type="image/x-exr">
+		<comment xml:lang="en">OpenEXR Image</comment>
+		<glob pattern="*.exr"/>
+	</mime-type>
+	<mime-type type="model/x-rib">
+		<comment xml:lang="en">RenderMan Geometry</comment>
+		<glob pattern="*.rib"/>
+	</mime-type>
+	<mime-type type="model/x-rib-gzip">
+		<comment xml:lang="en">RenderMan Geometry (Compressed)</comment>
+		<glob pattern="*.ribz"/>
+		<glob pattern="*.rib.gz"/>
+	</mime-type>
+	<mime-type type="text/x-sl">
+		<comment xml:lang="en">RenderMan Shader</comment>
+		<glob pattern="*.sl"/>
+	</mime-type>
+		<mime-type type="application/x-slx">
+		<comment xml:lang="en">Aqsis Shader</comment>
+		<glob pattern="*.slx"/>
+	</mime-type>
+</mime-info>
+

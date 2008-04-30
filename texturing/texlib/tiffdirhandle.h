@@ -262,6 +262,10 @@ class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 		 */
 		void writeDirectory();
 
+		/** \brief Determine the number of directories present for this TIFF file.
+		 */
+		tdir_t numDirectories();
+
 	private:
 		friend class CqTiffDirHandle;
 		/** \brief Set the current directory for this tiff file.
