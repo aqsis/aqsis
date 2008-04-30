@@ -36,7 +36,7 @@
 #include "itexturesampler.h"
 #include "mipmaplevelcache.h"
 #include "sampleaccum.h"
-#include "texbufsampler.h" // remove when using tiled textures.
+#include "filtertexture.h"
 #include "texturebuffer.h" // remove when using tiled textures.
 
 namespace Aqsis {
@@ -85,27 +85,30 @@ namespace detail
  *
  * And this can be achieved by scaling the samples during accumulation by
  * setting the scale factor in CqScaledWeights to (1-interp) and interp for
- * map1 and map2 respectively.
- */
+ * map1 and map2 respectively.  */
 template<typename WeightsT>
 class CqScaledWeights
 {
 	private:
-		const WeightsT& m_weights;
+		const WeightsT* m_weights;
 		TqFloat m_scale;
 	public:
 		CqScaledWeights(const WeightsT& weights, TqFloat scale)
-			: m_weights(weights),
+			: m_weights(&weights),
 			m_scale(scale)
 		{ }
 		TqFloat operator()(TqInt i, TqInt j) const
 		{
-			return m_scale*m_weights(i,j);
+			return m_scale*(*m_weights)(i,j);
 		}
 		static bool isNormalized()
 		{
 			// Almost certainly not normalized.
 			return false;
+		}
+		void setWeights(const WeightsT& weights)
+		{
+			m_weights = &weights;
 		}
 		void setWeightScale(TqFloat scale)
 		{
@@ -134,8 +137,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 
 	const CqTextureBuffer<T>& baseBuf = m_levels->level(0);
-	// Construct weights
-	CqEwaFilterWeights weights(quad, baseBuf.width(),
+	// Construct EWA filter factory
+	CqEwaFilterFactory ewaFactory(quad, baseBuf.width(),
 			baseBuf.height(), sampleOpts.sBlur(), sampleOpts.tBlur());
 	bool usingBlur = sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0;
 	// Select mipmap level to use.
@@ -164,20 +167,16 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		// This should be near 0 for blur which doesn't effect the filtering
 		// much, and a asymptote to a positive constant when the blur is the
 		// dominant factor.
-		blurRatio = clamp(2*maxBlur/weights.minorAxisWidth(), 0.0f, 1.0f);
+		blurRatio = clamp(2*maxBlur/ewaFactory.minorAxisWidth(), 0.0f, 1.0f);
 		minFilterWidth += 2*blurRatio;
 	}
-	TqFloat levelCts = log2(weights.minorAxisWidth()/minFilterWidth);
+	TqFloat levelCts = log2(ewaFactory.minorAxisWidth()/minFilterWidth);
 	TqInt level = clamp<TqInt>(lfloor(levelCts), 0, m_levels->numLevels()-1);
 
-	if(level > 0)
-	{
-		// Adjust the filter coefficients for the raster coordinates of the
-		// chosen level
-		const SqLevelTrans& trans = m_levels->levelTrans(level);
-		weights.adjustTextureScale(trans.xScale, trans.xOffset,
-				trans.yScale, trans.yOffset);
-	}
+	// Create filter functor for first chosen level
+	const SqLevelTrans& trans = m_levels->levelTrans(level);
+	CqEwaFilter ewaWeights = ewaFactory.createFilter(trans.xScale, trans.xOffset,
+			trans.yScale, trans.yOffset);
 
 	if( ( sampleOpts.lerp() == Lerp_Always
 		|| (sampleOpts.lerp() == Lerp_Auto && usingBlur && blurRatio > 0.2) )
@@ -203,42 +202,35 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 
 		// renormalize levelInterp into the range [0,1]
 		TqFloat levelInterp = levelCts - level;
-		typedef detail::CqScaledWeights<CqEwaFilterWeights> TqScaledWeights;
-		TqScaledWeights scaledWeights(weights, 1-levelInterp);
+		typedef detail::CqScaledWeights<CqEwaFilter> TqScaledWeights;
+		TqScaledWeights scaledWeights(ewaWeights, 1-levelInterp);
 		CqSampleAccum<TqScaledWeights> accumulator(scaledWeights,
 				sampleOpts.startChannel(), sampleOpts.numChannels(),
 				outSamps, sampleOpts.fill());
 		// Filter first mipmap level
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level), ewaWeights.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 
+		// Create filter functor for next chosen level, and adjust the scaled
+		// weights to use it.
+		const SqLevelTrans& trans2 = m_levels->levelTrans(level+1);
+		CqEwaFilter ewaWeights2 = ewaFactory.createFilter(trans2.xScale, trans2.xOffset,
+				trans2.yScale, trans2.yOffset);
+		scaledWeights.setWeights(ewaWeights2);
 		// Adjust filter weight for the linear interpolation
 		scaledWeights.setWeightScale(levelInterp);
-		// Adjust weight coordinate system.
-		/// \todo This coordinate readjustment is nasty.  The EwaFilterWeights class probably needs a refactor.
-		const SqLevelTrans& trans1 = m_levels->levelTrans(level);
-		const SqLevelTrans& trans2 = m_levels->levelTrans(level+1);
-		weights.adjustTextureScale(
-				trans2.xScale/trans1.xScale,
-				trans1.xScale*(trans2.xOffset - trans1.xOffset),
-				trans2.yScale/trans1.yScale,
-				trans1.yScale*(trans2.yOffset - trans1.yOffset)
-				);
 		// Filter second mipmap level
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level+1)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level+1), ewaWeights2.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 	}
 	else
 	{
 		// Sample a single mipmap level without interpolation.
-		CqSampleAccum<CqEwaFilterWeights> accumulator(weights,
+		CqSampleAccum<CqEwaFilter> accumulator(ewaWeights,
 				sampleOpts.startChannel(), sampleOpts.numChannels(),
 				outSamps, sampleOpts.fill());
-		CqTexBufSampler<CqTextureBuffer<T> >(m_levels->level(level)).applyFilter(
-				accumulator, weights.support(),
-				sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
+		filterTexture(accumulator, m_levels->level(level), ewaWeights.support(),
+				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
 	}
 }
 

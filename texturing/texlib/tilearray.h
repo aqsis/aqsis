@@ -30,79 +30,78 @@
 
 #include "aqsis.h"
 
-#include <map>
 #include <vector>
 
 #include <boost/intrusive_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <tiffio.h>
+#include <boost/scoped_ptr.hpp>
 
-#include "memorysentry.h"
-#include "texturebuffer.h"
-
+//#include "memorysentry.h"
 
 namespace Aqsis {
 
 class IqTiledTexInputFile;
-struct TileKey;
 
 //------------------------------------------------------------------------------
-/** \brief 2D array interface for tiled data - aimed at tiled textures.
- *
- * This class specifies an array interface to 2D tiled data.  The design is
- * based on the premise that each position in the array contains a short fixed
- * length vector of samples.  Getting a reference to this sample vector
- * requires hunting through sets of tiles, and as such may be slow.
- *
- * A primary design requirement is that samples should be as fast as possible
- * to obtain.  If the current implementation doesn't suffice, a possible
- * optimization when accessing blocks of texture (such as during filtering) is
- * to return a list of tiles which cover the block in question.  The filtering
- * code could then perform an explicit loop over the pixels in each tile, which
- * would save the overhead incurred by tile search.  Something like this might
- * be very necessary for reasonable performance in a multithreaded environment
- * where two threads could contend for the same texture.
+/** \brief 2D array interface for tiled data aimed at tiled textures.
  */
-template<typename T>
-class AQSISTEX_SHARE CqTileArray : public CqMemoryMonitored
+template<typename TileT>
+class AQSISTEX_SHARE CqTileArray : boost::noncopyable //, public CqMemoryMonitored
 {
 	public:
 		/** \brief Construct a tiled texture array connected to a file
-		 *
-		 * The constructor throws an error if the file cannot be read.
-		 *
 		 */
-		CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,
+		CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& inFile,
 				const boost::shared_ptr<CqMemorySentry>& memSentry
 					= boost::shared_ptr<CqMemorySentry>() );
 
-		/** \brief Get the value of the array at the given position
-		 *
-		 * This function provides access to the underlying sample data at a
-		 * particular position in the array.  
-		 *
-		 * Positions count from zero in the top-left corner of the image.
-		 *
-		 * \param x - index in width direction (column index)
-		 * \param y - index in height direction (row index)
-		 * \return a lightweight vector holding a reference to the sample data
-		 */
-		CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
+		//--------------------------------------------------
+		/// \name Access to buffer dimensions & metadata
+		//@{
+		/// Get array width
+		TqInt width() const;
+		/// Get array height
+		TqInt height() const;
+		/// Get the number of samples per pixel
+		TqInt numChannels() const;
+		//@}
 
-		/** \brief Set the value of the array at a particular position
+		//--------------------------------------------------
+		/// \name Pixel access
+		//@{
+		/** \brief Access to pixels through a pixel iterator
 		 *
-		 * \todo It mightn't be desirable to support this operation within the
-		 * context of this class - perhaps it should go in derived classes for
-		 * which it makes sense.  Further investigation required.
+		 * The pixel iterator will iterate through all the pixels the provided
+		 * support.
 		 *
-		 * Positions count from zero in the top-left corner of the image.
-		 *
-		 * \param x - index in width direction (column index)
-		 * \param y - index in height direction (row index)
-		 * \param newValue - New value for the
+		 * \param support - support to iterate over
 		 */
-		//void setValue(const TqInt x, const TqInt y, const std::vector<TqFloat>& newValue) = 0;
+		CqIterator begin(const SqFilterSupport& support) const;
+		/** \brief Stochastic iterator access to pixels in the given support.
+		 *
+		 * A stochastic support iterator aims to choose a fixed number of
+		 * samples from the support randomly.  The randomness choices should
+		 * ideally be spread evenly over the support with minimal bunching.
+		 *
+		 * \param support - support to iterate over
+		 * \param numSamples - number of samples to choose in the support.
+		 */
+		CqStochasticIterator beginStochastic(const SqFilterSupport& support,
+				TqInt numSamples) const;
+		//@}
 
+		/// Destructor
+		virtual ~CqTileArray();
+	private:
+		class CqTileHolder
+		{
+			TqInt refCount;
+			boost::scoped_ptr<TileT> tile;
+
+			CqTileHolder(TileT* tile)
+				: refCount(0),
+				tile(tile)
+			{ }
+		};
 		/** \brief Access to the underlying tiles
 		 *
 		 * Algorithms which need to act on the whole image may need access to
@@ -115,26 +114,15 @@ class AQSISTEX_SHARE CqTileArray : public CqMemoryMonitored
 		 *
 		 * \return The tile holding the underlying data at the given indices.
 		 */
-		boost::intrusive_ptr<CqTextureBuffer<T> >& tileForIndex(const TqInt x, const TqInt y) const;
+		TileT& tileForIndex(const TqInt x, const TqInt y) const;
 
-		/// Get the number of samples per pixel
-		TqInt samplesPerPixel() const;
-
-		/// Get array width
-		TqInt width() const;
-		/// Get array height
-		TqInt height() const;
-
-		// Inherited from CqMemoryMonitored
-		virtual CqMemorySentry::TqMemorySize zapMemory();
-
-		/// Destructor
-		virtual ~CqTileArray();
-	private:
 		/** Allocate a new texture tile from the file.
 		 */
 		void allocateTile();
 
+		boost::scoped_array<boost::intrusive_ptr<CqTileHolder> > m_tiles;
+		/// Underlying texture file.
+		boost::shared_ptr<IqTiledTexInputFile> m_inFile;
 		/// Width of the array
 		TqInt m_width;
 		/// Height of the array
@@ -143,20 +131,8 @@ class AQSISTEX_SHARE CqTileArray : public CqMemoryMonitored
 		TqInt m_tileWidth;
 		/// Height of tiles making up the the array
 		TqInt m_tileHeight;
-		/// Number of samples per pixel
-		TqInt m_samplesPerPixel;
-		/// The tile which was last accessed.
-		boost::intrusive_ptr<CqTextureBuffer<T> > m_lastUsedTile;
-		/** A list holding recently used or "hot" tiles in the order of
-		 * hotness.  The same tiles are also held in hotMap.
-		 */
-		std::list<boost::intrusive_ptr<CqTextureBuffer<T> > > m_hotList;
-		/** A map to hold recently used or "hot" tiles.  The same tiles are
-		 * also held in hotList.
-		 */
-		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > m_hotMap;
-		/// A map holding tiles which haven't been used for a while; "cold tiles"
-		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > m_coldMap;
+		/// Number of channels per pixel
+		TqInt m_numChannels;
 };
 
 
@@ -178,54 +154,52 @@ struct TileKey
 
 //------------------------------------------------------------------------------
 // CqTileArray Implementation
-template<typename T>
-CqTileArray<T>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,
+template<typename TileT>
+CqTileArray<TileT>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& inFile,
 		const boost::shared_ptr<CqMemorySentry>& memSentry)
 	: CqMemoryMonitored(memSentry)
 { }
 
-template<typename T>
-inline TqInt CqTileArray<T>::width() const
+template<typename TileT>
+inline TqInt CqTileArray<TileT>::width() const
 {
 	return m_width;
 }
 
-template<typename T>
-inline TqInt CqTileArray<T>::height() const
+template<typename TileT>
+inline TqInt CqTileArray<TileT>::height() const
 {
 	return m_height;
 }
 
-template<typename T>
-inline TqInt CqTileArray<T>::samplesPerPixel() const
+template<typename TileT>
+inline TqInt CqTileArray<TileT>::numChannels() const
 {
-	return m_samplesPerPixel;
+	return m_numChannels;
 }
 
-template<typename T>
-CqSampleVector<T> CqTileArray<T>::operator()(const TqInt x, const TqInt y) const
+template<typename TileT>
+CqSampleVector<TileT> CqTileArray<TileT>::operator()(const TqInt x, const TqInt y) const
 {
 	return (*tileForIndex(x/m_tileWidth, y/m_tileHeight))(x,y);
 }
 
 
-template<typename T>
-boost::intrusive_ptr<CqTextureBuffer<T> >& CqTileArray<T>::tileForIndex(const TqInt x, const TqInt y) const
+template<typename TileT>
+TileT& CqTileArray<TileT>::tileForIndex(const TqInt x, const TqInt y) const
 {
 	/// \todo Implementation
-	if(m_lastUsedTile) 
-	return boost::intrusive_ptr<CqTextureBuffer<T> > (0); // dodgy; get the stub to compile...
 }
 
-template<typename T>
-CqMemorySentry::TqMemorySize CqTileArray<T>::zapMemory()
+template<typename TileT>
+CqMemorySentry::TqMemorySize CqTileArray<TileT>::zapMemory()
 {
 	/// \todo Implementation
 	return 0;
 }
 
-template<typename T>
-CqTileArray<T>::~CqTileArray()
+template<typename TileT>
+CqTileArray<TileT>::~CqTileArray()
 {
 	/// \todo Implementation
 }

@@ -55,6 +55,11 @@ declblock {\#ifndef AQSIS_SYSTEM_WIN32} {open after {\#endif}
   decl {\#include <sys/types.h>} {}
 } 
 
+declblock {\#ifdef AQSIS_SYSTEM_MACOSX} {open after {\#endif}
+} {
+  decl {\#include <Carbon/Carbon.h>} {}
+} 
+
 decl {using std::string;} {public
 } 
 
@@ -66,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 3"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
@@ -92,7 +97,7 @@ Function {} {open
 } {
   Fl_Window m_window {
     label eqsl open
-    xywh {793 487 400 325} type Double resizable visible
+    xywh {618 370 400 325} type Double resizable visible
   } {
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
@@ -149,6 +154,18 @@ else
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+	CFURLRef contentRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, pluginRef);
+	CFURLRef resourceRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, contentRef, CFSTR("/Resources"), true);
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	CFStringRef resourcePath = CFURLCopyFileSystemPath(resourceRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	const char *resourcePtr = CFStringGetCStringPtr(resourcePath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/");
+	std::vector<std::string> renderEngineArgsBundle = renderEngineArgs;
+	renderEngineArgsBundle.push_back("-displays=\"" + resourcePtr + "/lib\" -shaders=\"" + resourcePtr + "/shaders\"");
 \#else
 	std::string program;
 \#endif
@@ -208,6 +225,12 @@ else
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/");
 \#else
 	std::string program;
 \#endif
@@ -246,6 +269,12 @@ m_outputHistory->add(commandLine.c_str());}
 	}
 	std::string program = root;
 	program.append("\\\\");
+\#elif defined(AQSIS_SYSTEM_MACOSX)
+	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+	std::string program = pathPtr;
+	program.append("/");
 \#else
 	std::string program;
 \#endif
@@ -317,7 +346,7 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
         }
       }
     }
-    Fl_Progress m_progress {selected
+    Fl_Progress m_progress {
       xywh {0 300 400 25} selection_color 246 labeltype NO_LABEL align 0
       code0 {o->minimum(0);}
       code1 {o->maximum(100);}
@@ -337,7 +366,7 @@ Function {callback(const char* string)} {open return_type void
 		{
 			float fp = boost::lexical_cast<float>(percentage);
 			m_progress->value(fp);
-			Fl::check();
+			Fl::wait(0);
 		}
 		catch(boost::bad_lexical_cast &)
 		{
@@ -347,5 +376,6 @@ Function {callback(const char* string)} {open return_type void
 	{
 		m_outputConsole->insert(string);
 	}
-	Fl::unlock();} {}
+	Fl::unlock();} {selected
+  }
 } 

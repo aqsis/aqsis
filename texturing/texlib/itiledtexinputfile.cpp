@@ -19,29 +19,40 @@
 
 /** \file
  *
- * \brief Randomized (stochastic) iteration over a filter support
+ * \brief Input interface for tiled images, implementation.
  *
- * \author Chris Foster [ chris42f (at) gmail (dot) com ]
+ * \author Chris Foster
  */
 
-#include "stochasticsuppiter.h"
+#include "itiledtexinputfile.h"
+
+#include "magicnumber.h"
+#include "tiledtiffinputfile.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
-Cq2dQuasiRandomTable CqStochasticSuppIter::m_randTab;
-
-//------------------------------------------------------------------------------
-// Cq2dQuasiRandomTable implementation
-
-Cq2dQuasiRandomTable::Cq2dQuasiRandomTable()
-	: m_rand()
+boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
+		const std::string& fileName)
 {
-	CqLowDiscrepancy rand(2);
-	for(TqUint i = 0; i < m_tableSize; ++i)
+	EqImageFileType type = guessFileType(fileName);
+	switch(type)
 	{
-		m_x[i] = rand.Generate(0, i+1);
-		m_y[i] = rand.Generate(1, i+1);
+		case ImageFile_Tiff:
+			return boost::shared_ptr<IqTiledTexInputFile>(new
+					CqTiledTiffInputFile(fileName));
+		case ImageFile_Unknown:
+			AQSIS_THROW(XqInvalidFile, "File \"" << fileName
+					<< "\" is not a recognised image type");
+			break;
+		default:
+			AQSIS_THROW(XqBadTexture, "Cannot open file \"" << fileName
+					<< "\" of type " << imageFileTypeToString(type)
+					<< " for tiled image I/O");
+			break;
 	}
+	assert(0);
+	return boost::shared_ptr<IqTiledTexInputFile>();
 }
 
 } // namespace Aqsis

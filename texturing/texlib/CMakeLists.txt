@@ -19,35 +19,40 @@ SET(AQSISTEX_SRCS
 	dummytexturesampler.cpp
 	ewafilter.cpp
 	cachedfilter.cpp
+	imagechannel.cpp
 	ishadowsampler.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
+	itiledtexinputfile.cpp
 	magicnumber.cpp
 	maketexture.cpp
+	randomtable.cpp
 	samplequad.cpp
 	shadowsampler.cpp
-	stochasticsuppiter.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
+	tiledtiffinputfile.cpp
 	texturecache.cpp
 	texturesampleoptions.cpp
-	imagechannel.cpp
 	mixedimagebuffer.cpp
 	)
+
 # Header files
 SET(AQSISTEX_HDRS
 	bake.h
+	cachedfilter.h
 	channelinfo.h
 	channellist.h
-	cachedfilter.h
 	dummyshadowsampler.h
 	dummytexturesampler.h
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
+	filtertexture.h
+	iimagechannel.h
 	imagechannel.h
 	imagefiletype.h
 	ishadowsampler.h
@@ -56,18 +61,17 @@ SET(AQSISTEX_HDRS
 	itexturemap_old.h
 	itexturesampler.h
 	itiledtexinputfile.h
-	mipmaplevelcache.h
 	magicnumber.h
 	maketexture.h
 	mipmap.h
+	mipmaplevelcache.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
+	randomtable.h
 	sampleaccum.h
 	samplequad.h
 	samplevector.h
 	shadowsampler.h
-	stochasticsuppiter.h
-	texbufsampler.h
 	texexception.h
 	texfileattributes.h
 	texfileheader.h
@@ -79,6 +83,7 @@ SET(AQSISTEX_HDRS
 	tiffinputfile.h
 	tiffoutputfile.h
 	tilearray.h
+	tiledtiffinputfile.h
 	wrapmode.h
 	)
 IF(AQSIS_OPENEXR_FOUND)

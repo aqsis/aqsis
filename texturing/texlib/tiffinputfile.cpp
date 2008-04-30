@@ -66,8 +66,7 @@ void CqTiffInputFile::setImageIndex(TqInt newIndex)
 // lock on the underlying file handle.
 TqInt CqTiffInputFile::numSubImages() const
 {
-	return TIFFNumberOfDirectories(
-			CqTiffDirHandle(m_fileHandle,m_imageIndex).tiffPtr());
+	return m_fileHandle->numDirectories();
 }
 
 void CqTiffInputFile::readPixelsImpl(TqUint8* buffer,
