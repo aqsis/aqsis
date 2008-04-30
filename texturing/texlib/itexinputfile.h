@@ -126,7 +126,7 @@ class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 {
 	public:
 		//--------------------------------------------------
-		/// \name Methods for sub-image access.
+		/// \name Functions for accessing multiple sub-images.
 		//@{
 		/** Set the image index in a multi-image file.
 		 *

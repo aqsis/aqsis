@@ -167,6 +167,9 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 		//
 		// (the innards of libtiff suggest that TIFFPredictorInit() is only
 		// called by certian codecs)
+		//
+		// \todo Test whether PREDICTOR_FLOATINGPOINT is actually beneficial.
+		// (Some places on the web suggest not.)
 		if(header.channelList().sharedChannelType() == Channel_Float32)
 			setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
 		else
@@ -620,6 +623,13 @@ void CqTiffFileHandle::writeDirectory()
 		AQSIS_THROW(XqInternal, "Could not write tiff subimage to file");
 	++m_currDir;
 }
+
+
+tdir_t CqTiffFileHandle::numDirectories()
+{
+	return TIFFNumberOfDirectories(m_tiffPtr.get());
+}
+
 
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 {

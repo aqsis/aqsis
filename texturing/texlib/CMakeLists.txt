@@ -24,6 +24,7 @@ SET(AQSISTEX_SRCS
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
+	itiledtexinputfile.cpp
 	magicnumber.cpp
 	maketexture.cpp
 	randomtable.cpp
@@ -33,6 +34,7 @@ SET(AQSISTEX_SRCS
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
+	tiledtiffinputfile.cpp
 	texturecache.cpp
 	texturesampleoptions.cpp
 	mixedimagebuffer.cpp
@@ -81,6 +83,7 @@ SET(AQSISTEX_HDRS
 	tiffinputfile.h
 	tiffoutputfile.h
 	tilearray.h
+	tiledtiffinputfile.h
 	wrapmode.h
 	)
 IF(AQSIS_OPENEXR_FOUND)
