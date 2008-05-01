@@ -75,8 +75,6 @@ decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 3"};} {}
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
-decl {string renderViewerArgs[] = {};} {} 
-
 decl {string renderEngineFile = "";} {} 
 
 decl {string renderEngineType = "RenderMan Geometry Files (*.{rib,ribz,rib.gz})";} {} 
@@ -281,11 +279,6 @@ m_outputHistory->add(commandLine.c_str());}
 	commandLine = renderViewer + " ";
 	program.append(renderViewer);
 	std::vector<std::string> args;
-	for(TqInt arg = 0; arg < sizeof(renderViewerArgs)/sizeof(renderViewerArgs[0]); arg++)
-	{
-		args.push_back(renderViewerArgs[arg]);
-		commandLine += renderViewerArgs[arg] + " ";
-	}
 	Aqsis::CqExecute tool(program, args, currentDirectory);
 	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
 	tool.setStdOutCallback(outputStdOut);
