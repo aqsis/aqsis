@@ -269,7 +269,7 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 		}
 
 		// Implementations required by CqSurface
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual bool	Diceable();
@@ -327,7 +327,7 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 
 		/** Get the gemoetric bound of this GPrim.
 		 */
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		/** Dice this GPrim.
 		 * \return A pointer to a new micropolygrid..
 		 */

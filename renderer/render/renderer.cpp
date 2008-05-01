@@ -813,7 +813,6 @@ void CqRenderer::RenderAutoShadows()
 
 				CqTextureMapOld::FlushCache();
 				m_textureCache.flush();
-				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
 		}
