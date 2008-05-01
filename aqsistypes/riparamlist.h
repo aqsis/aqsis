@@ -48,7 +48,7 @@ namespace Aqsis {
  * should hold parsed token information taken from the renderman symbol table
  * rather than plain old strings.
  */
-class CqRiParamList
+class COMMON_SHARE CqRiParamList
 {
 	public:
 		/** \brief Repition of some renderman types.
