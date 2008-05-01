@@ -205,7 +205,7 @@ bool CqOcclusionBox::CanCull( CqBound* bound )
 			if(m_depthTree[node.index].depth < bound->vecMin().z()) 
 				continue;
 
-			if(node.index * 2 + 1 >= m_depthTree.size())
+			if(node.index * 2 + 1 >= static_cast<TqInt>(m_depthTree.size()))
 			{
 				cull = false;
 				break;

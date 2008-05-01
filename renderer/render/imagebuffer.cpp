@@ -789,7 +789,7 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
 	TqFloat opentime = m_CurrentGridInfo.m_ShutterOpenTime;
 	TqFloat closetime = m_CurrentGridInfo.m_ShutterCloseTime;
-	TqFloat timePerSample;
+	TqFloat timePerSample = 0;
 	if(IsMoving)
 	{
 		TqInt numSamples = iXSamples * iYSamples;
@@ -807,8 +807,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
-		TqInt indexT0;
-		TqInt indexT1;
+		TqInt indexT0 = 0;
+		TqInt indexT1 = 0;
 		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
@@ -820,22 +820,22 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			indexT1 = static_cast<TqInt>(lceil((time1 - opentime) * timePerSample));
 		}
 
-		TqFloat maxCocX;
-		TqFloat maxCocY;
+		TqFloat maxCocX = 0;
+		TqFloat maxCocY = 0;
 
-		TqFloat bminx;
-		TqFloat bmaxx;
-		TqFloat bminy;
-		TqFloat bmaxy;
-		TqFloat bminz;
-		TqFloat bmaxz;
+		TqFloat bminx = 0;
+		TqFloat bmaxx = 0;
+		TqFloat bminy = 0;
+		TqFloat bmaxy = 0;
+		TqFloat bminz = 0;
+		TqFloat bmaxz = 0;
 		// these values are the bound of the mpg not including dof extension.
 		// reduce the mpg bound so it doesn't include the coc.
-		TqFloat mpgbminx;
-		TqFloat mpgbmaxx;
-		TqFloat mpgbminy;
-		TqFloat mpgbmaxy;
-		TqInt bound_maxDof;
+		TqFloat mpgbminx = 0;
+		TqFloat mpgbmaxx = 0;
+		TqFloat mpgbminy = 0;
+		TqFloat mpgbmaxy = 0;
+		TqInt bound_maxDof = 1;
 		if(UsingDof)
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );

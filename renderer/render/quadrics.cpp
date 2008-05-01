@@ -93,7 +93,10 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	CqParameterTyped<TqFloat, TqFloat>* pv = this->v();
 	CqParameterTyped<TqFloat, TqFloat>* pst = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(FindUserParam( "st" ));
 
-	TqFloat s0,s1,s2,s3;
+	TqFloat s0 = 0;
+	TqFloat s1 = 0;
+	TqFloat s2 = 0;
+	TqFloat s3 = 0;
 	if( USES( lUses, EnvVars_s ) && NULL != pGrid->pVar(EnvVars_s) && bHasVar(EnvVars_s) )
 	{
 		if( pst )
@@ -114,7 +117,10 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		DONE( lDone, EnvVars_s );
 	}
 
-	TqFloat t0,t1,t2,t3;
+	TqFloat t0 = 0;
+	TqFloat t1 = 0;
+	TqFloat t2 = 0;
+	TqFloat t3 = 0;
 	if( USES( lUses, EnvVars_t ) && NULL != pGrid->pVar(EnvVars_t) && bHasVar(EnvVars_t) )
 	{
 		if( pst )
@@ -135,7 +141,10 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		DONE( lDone, EnvVars_t );
 	}
 
-	TqFloat u0,u1,u2,u3;
+	TqFloat u0 = 0;
+	TqFloat u1 = 0;
+	TqFloat u2 = 0;
+	TqFloat u3 = 0;
 	if( USES( lUses, EnvVars_u ) && NULL != pGrid->pVar(EnvVars_u) && bHasVar(EnvVars_u) )
 	{
 		u0 = pu->pValue( 0 )[0];
@@ -146,7 +155,10 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		DONE( lDone, EnvVars_u );
 	}
 
-	TqFloat v0,v1,v2,v3;
+	TqFloat v0 = 0;
+	TqFloat v1 = 0;
+	TqFloat v2 = 0;
+	TqFloat v3 = 0;
 	if( USES( lUses, EnvVars_v ) && NULL != pGrid->pVar(EnvVars_v) && bHasVar(EnvVars_v) )
 	{
 		v0 = pv->pValue( 0 )[0];
