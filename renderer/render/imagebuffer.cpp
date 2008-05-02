@@ -883,9 +883,9 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			}
 
 			// if bounding box is outside our viewing range, then cull it.
-			if ( bmaxx < (float)xmin || bmaxy < (float)ymin ||
-				bminx > (float)xmax || bminy > (float)ymax ||
-				bminz > ClippingFar() || bmaxz < ClippingNear())
+			if ( bmaxx <= (float)xmin || bmaxy <= (float)ymin ||
+				bminx >= (float)xmax || bminy >= (float)ymax ||
+				bminz >= ClippingFar() || bmaxz <= ClippingNear())
 			{
 				continue;
 			}
