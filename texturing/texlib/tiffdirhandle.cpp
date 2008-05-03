@@ -27,6 +27,7 @@
 #include "tiffdirhandle.h"
 
 #include <sstream>
+#include <cstring>  // for memcpy()
 
 #include <tiffio.hxx>
 
@@ -653,12 +654,7 @@ void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcS
 {
 	for(TqInt i = 0; i < numElems; ++i)
 	{
-		for(TqInt j = 0; j < elemSize; ++j)
-		{
-			*dest = *src;
-			++src;
-			++dest;
-		}
+		std::memcpy(dest, src, elemSize);
 		dest += destStride;
 		src += srcStride;
 	}
