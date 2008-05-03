@@ -446,7 +446,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	ADDREF( pmpgNew );
 
 	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
-	        B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
+	     B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
 	{
 		RELEASEREF( pmpgNew );
 		return ;
@@ -815,9 +815,11 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
 				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
-
-			indexT0 = static_cast<TqInt>(std::floor((time0 - opentime) * timePerSample));
+	
+			indexT0 = static_cast<TqInt>(lfloor((time0 - opentime) * timePerSample));
 			indexT1 = static_cast<TqInt>(lceil((time1 - opentime) * timePerSample));
+			if(indexT0 == indexT1 || time0 < opentime || time0 > closetime || time1 < opentime || time1 > closetime)
+				continue;
 		}
 
 		TqFloat maxCocX = 0;
@@ -1048,7 +1050,16 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 	TqFloat bmaxx = Bound.vecMax().x();
 	TqFloat bminy = Bound.vecMin().y();
 	TqFloat bmaxy = Bound.vecMax().y();
-	//TqFloat bminz = Bound.vecMin().z();
+	TqFloat bminz = Bound.vecMin().z();
+	TqFloat bmaxz = Bound.vecMax().z();
+
+	// if bounding box is outside our viewing range, then cull it.
+	if ( bmaxx <= (float)xmin || bmaxy <= (float)ymin ||
+		bminx >= (float)xmax || bminy >= (float)ymax ||
+		bminz >= ClippingFar() || bmaxz <= ClippingNear())
+	{
+		return;
+	}
 
 	// Now go across all pixels touched by the micropolygon bound.
 	// The first pixel position is at (sX, sY), the last one
@@ -1679,10 +1690,10 @@ void CqImageBuffer::RenderImage()
 		vecMin -= bHalf;
 		vecMax += bHalf;
 
-		long xmin = static_cast<long>( vecMin.x() );
-		long ymin = static_cast<long>( vecMin.y() );
-		long xmax = static_cast<long>( vecMax.x() );
-		long ymax = static_cast<long>( vecMax.y() );
+		long xmin = lfloor( vecMin.x() );
+		long ymin = lfloor( vecMin.y() );
+		long xmax = lceil( vecMax.x() );
+		long ymax = lceil( vecMax.y() );
 
 		if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
 			xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
@@ -1693,6 +1704,12 @@ void CqImageBuffer::RenderImage()
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
+		if( ymax < CropWindowYMin() || xmax < CropWindowXMin() )
+		{
+			CurrentBucket().aMPGs().clear();
+			CurrentBucket().aGrids().clear();
+			continue;
+		}
 
 		if ( !bIsEmpty )
 		{
