@@ -34,6 +34,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 
 //#include "memorysentry.h"
 
@@ -50,9 +51,7 @@ class AQSISTEX_SHARE CqTileArray : boost::noncopyable //, public CqMemoryMonitor
 	public:
 		/** \brief Construct a tiled texture array connected to a file
 		 */
-		CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& inFile,
-				const boost::shared_ptr<CqMemorySentry>& memSentry
-					= boost::shared_ptr<CqMemorySentry>() );
+		CqTileArray(const boost::shared_ptr<IqTiledTexInputFile>& inFile);
 
 		//--------------------------------------------------
 		/// \name Access to buffer dimensions & metadata
@@ -102,62 +101,49 @@ class AQSISTEX_SHARE CqTileArray : boost::noncopyable //, public CqMemoryMonitor
 				tile(tile)
 			{ }
 		};
+
 		/** \brief Access to the underlying tiles
-		 *
-		 * Algorithms which need to act on the whole image may need access to
-		 * the underlying tiles for efficiency (for instance, mipmap
-		 * generation).  Unless efficiency is really an issue, the value()
-		 * function should be used instead.
-		 *
-		 * \param x - index in width direction (column index)
-		 * \param y - index in height direction (row index)
 		 *
 		 * \return The tile holding the underlying data at the given indices.
 		 */
-		TileT& tileForIndex(const TqInt x, const TqInt y) const;
+		TileT& getTile(const TqInt x, const TqInt y) const;
 
-		/** Allocate a new texture tile from the file.
-		 */
-		void allocateTile();
-
-		boost::scoped_array<boost::intrusive_ptr<CqTileHolder> > m_tiles;
 		/// Underlying texture file.
 		boost::shared_ptr<IqTiledTexInputFile> m_inFile;
 		/// Width of the array
 		TqInt m_width;
 		/// Height of the array
 		TqInt m_height;
+		/// Number of channels per pixel
+		TqInt m_numChannels;
 		/// Width of the tiles making up the array
 		TqInt m_tileWidth;
 		/// Height of tiles making up the the array
 		TqInt m_tileHeight;
-		/// Number of channels per pixel
-		TqInt m_numChannels;
+		/// Width of the array
+		TqInt m_widthInTiles;
+		/// Height of the array
+		TqInt m_heightInTiles;
+		/// "2D" array of tiles.  Tiles may be founnd in O(1) time using this array.
+		boost::scoped_array<boost::intrusive_ptr<CqTileHolder> > m_tiles;
 };
-
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-/// Key to use when finding tiles in std::maps.
-struct TileKey
-{
-	TqInt x;
-	TqInt y;
-	bool operator<(const TileKey& rhs)
-	{
-		return x < rhs.x || y < rhs.y;
-	}
-};
-
-//------------------------------------------------------------------------------
 // CqTileArray Implementation
 template<typename TileT>
-CqTileArray<TileT>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& inFile,
-		const boost::shared_ptr<CqMemorySentry>& memSentry)
-	: CqMemoryMonitored(memSentry)
+CqTileArray<TileT>::CqTileArray(const boost::shared_ptr<IqTiledTexInputFile>& inFile)
+	: m_inFile(inFile),
+	m_width(inFile->header().width()),
+	m_height(inFile->header().height()),
+	m_numChannels(inFile->header().channels().numChannels()),
+	m_tileWidth(inFile->tileInfo().width),
+	m_tileHeight(inFile->tileInfo().height),
+	m_widthInTiles((m_width-1)/m_tileWidth + 1),
+	m_heightInTiles((m_height-1)/m_tileHeight + 1),
+	m_tiles(new boost::intrusive_ptr<CqTileHolder>[m_widthInTiles*m_heightInTiles])
 { }
 
 template<typename TileT>
@@ -179,27 +165,19 @@ inline TqInt CqTileArray<TileT>::numChannels() const
 }
 
 template<typename TileT>
-CqSampleVector<TileT> CqTileArray<TileT>::operator()(const TqInt x, const TqInt y) const
+CqTileArray<TileT>::CqIterator CqTileArray<TileT>::begin(
+		const SqFilterSupport& support) const
 {
-	return (*tileForIndex(x/m_tileWidth, y/m_tileHeight))(x,y);
-}
-
-
-template<typename TileT>
-TileT& CqTileArray<TileT>::tileForIndex(const TqInt x, const TqInt y) const
-{
-	/// \todo Implementation
 }
 
 template<typename TileT>
-CqMemorySentry::TqMemorySize CqTileArray<TileT>::zapMemory()
+CqTileArray<TileT>::CqStochasticIterator CqTileArray<TileT>::beginStochastic(
+		const SqFilterSupport& support, TqInt numSamples) const
 {
-	/// \todo Implementation
-	return 0;
 }
 
 template<typename TileT>
-CqTileArray<TileT>::~CqTileArray()
+TileT& CqTileArray<TileT>::getTile(const TqInt x, const TqInt y) const
 {
 	/// \todo Implementation
 }

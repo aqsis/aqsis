@@ -114,8 +114,8 @@ void createMipmapFileHalf(IqTexInputFile& inFile, const std::string& outFileName
 	// Correct the channel list in the output file header so that it indicates
 	// float32 data.  We don't bother to preserve the channel names since they
 	// can't be stored natively by TIFF anyway.
-	header.set<Attr::ChannelList>( CqChannelList(Channel_Float32,
-				header.channelList().numChannels()) );
+	header.channelList() = CqChannelList(Channel_Float32,
+				header.channelList().numChannels());
 	// Create mipmap
 	boost::shared_ptr<IqMultiTexOutputFile> outFile
 		= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);

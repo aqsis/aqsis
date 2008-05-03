@@ -49,14 +49,16 @@ namespace Aqsis {
  *
  * For the best possible compile-time checking, we choose to identify the
  * various image attributes with "tag" structs.  These tags live in the
- * Aqsis::Attr namespace defined above.  They collect together the name of the
- * attribute with the type, so handily allow all the type-checking to be done
- * at compile time.
+ * Aqsis::Attr namespace.  They collect together the name of the attribute with
+ * the type, so handily allow all the type-checking to be done at compile time.
  *
- * For example, to retrieve the width of the image, use
- *   header.find<Attr::Width>()
- * which will automatically know it should return a TqInt as the appropriate
- * type.
+ * For example, to retrieve the image description string, use
+ *   header.find<Attr::Description>()
+ * which will automatically know it should return a std::string as the
+ * appropriate type.
+ *
+ * Attributes which are guarenteed to be always present have specialized
+ * methods to read and write them for convenience and efficiency.
  */
 class AQSISTEX_SHARE CqTexFileHeader
 {
@@ -72,7 +74,26 @@ class AQSISTEX_SHARE CqTexFileHeader
 		CqTexFileHeader();
 
 		//---------------------------------------------------------
-		/// \name Modify image attribute values.
+		/// \name Accessors and modifiers for always-present attributes
+		//@{
+		/// Get the image width
+		TqInt width() const;
+		/// Get the image height
+		TqInt height() const;
+		/// Get the image channel data
+		const CqChannelList& channelList() const;
+
+		/// Set the image width
+		void setWidth(TqInt width);
+		/// Set the image height
+		void setHeight(TqInt height);
+		/// Get a modifyable ref. to the image channel data.
+		CqChannelList& channelList();
+		//@}
+		//---------------------------------------------------------
+
+		//---------------------------------------------------------
+		/// \name Modifiers for image attribute values.
 		//@{
 		/** \brief Set the value of an attribute with the given tag type
 		 *
@@ -99,21 +120,8 @@ class AQSISTEX_SHARE CqTexFileHeader
 		//@}
 
 		//---------------------------------------------------------
-		/** \name Image attribute accessors
-		 *
-		 * Convenience functions are provided for a few often-used attributes.
-		 * All other attributes are accessed via the find() functions.
-		 */
+		/// \name Image attribute accessors/modifiers
 		//@{
-		/// Get the image width
-		TqInt width() const;
-		/// Get the image height
-		TqInt height() const;
-		/// Get the image channel data
-		CqChannelList& channelList();
-		/// Get the image channel data
-		const CqChannelList& channelList() const;
-
 		/** \brief Get a reference to an attribute
 		 *
 		 * AttrTagType provides a typedef AttrTagType::type which is the
@@ -154,8 +162,9 @@ class AQSISTEX_SHARE CqTexFileHeader
 		//@}
 
 	private:
-		void addStandardAttributes();
-
+		TqInt m_width;
+		TqInt m_height;
+		CqChannelList m_channelList;
 		TqAttributeMap m_attributeMap;
 };
 
@@ -184,10 +193,45 @@ class AQSISTEX_SHARE CqTexFileHeader::CqTypeInfoHolder
 //------------------------------------------------------------------------------
 // CqTexFileHeader
 inline CqTexFileHeader::CqTexFileHeader()
-	: m_attributeMap()
+	: m_width(0),
+	m_height(0),
+	m_channelList(),
+	m_attributeMap()
+{ }
+
+
+inline TqInt CqTexFileHeader::width() const
 {
-	addStandardAttributes();
+	return m_width;
 }
+
+inline TqInt CqTexFileHeader::height() const
+{
+	return m_height;
+}
+
+inline const CqChannelList& CqTexFileHeader::channelList() const
+{
+	return m_channelList;
+}
+
+inline void CqTexFileHeader::setWidth(TqInt width)
+{
+	assert(m_width >= 0);
+	m_width = width;
+}
+
+inline void CqTexFileHeader::setHeight(TqInt height)
+{
+	assert(m_height >= 0);
+	m_height = height;
+}
+
+inline CqChannelList& CqTexFileHeader::channelList()
+{
+	return m_channelList;
+}
+
 
 template<typename AttrTagType>
 inline void CqTexFileHeader::set(const typename AttrTagType::type& value)
@@ -199,26 +243,6 @@ template<typename AttrTagType>
 void CqTexFileHeader::erase()
 {
 	m_attributeMap.erase(CqTypeInfoHolder(typeid(AttrTagType)));
-}
-
-inline TqInt CqTexFileHeader::width() const
-{
-	return find<Attr::Width>();
-}
-
-inline TqInt CqTexFileHeader::height() const
-{
-	return find<Attr::Height>();
-}
-
-inline CqChannelList& CqTexFileHeader::channelList()
-{
-	return find<Attr::ChannelList>();
-}
-
-inline const CqChannelList& CqTexFileHeader::channelList() const
-{
-	return find<Attr::ChannelList>();
 }
 
 template<typename AttrTagType>

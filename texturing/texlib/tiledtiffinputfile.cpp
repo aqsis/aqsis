@@ -26,6 +26,8 @@
 
 #include "tiledtiffinputfile.h"
 
+#include <boost/scoped_array.hpp>
+
 #include "texexception.h"
 
 namespace Aqsis {
@@ -78,10 +80,31 @@ TqInt CqTiledTiffInputFile::numSubImages() const
 	return m_numDirs;
 }
 
-void CqTiledTiffInputFile::readTileImpl(TqUint8* buffer, TqInt x, TqInt y)
+void CqTiledTiffInputFile::readTileImpl(TqUint8* buffer, TqInt x, TqInt y,
+		const SqTileInfo tileSize) const
 {
 	CqTiffDirHandle dirHandle(m_fileHandle);
-	TIFFReadTile(dirHandle.tiffPtr(), static_cast<tdata_t>(buffer), x, y, 0, 0);
+	if((x+1)*m_tileInfo.width > m_header.width()
+			|| (y+1)*m_tileInfo.height > m_header.height())
+	{
+		// Here we handle a special case where the tile overlaps either the
+		// right or bottom edge of the image.  In this case, libtiff reads in
+		// the tile as the same size as all other tiles, not touching the parts
+		// of buffer outside the image.  We want to truncate the tile instead.
+		boost::scoped_array<TqUint8> tmpBuf(
+				new TqUint8[TIFFTileSize(dirHandle.tiffPtr())]);
+		TIFFReadTile(dirHandle.tiffPtr(), static_cast<tdata_t>(tmpBuf.get()), x, y, 0, 0);
+		TqInt bytesPerPixel = m_header.channelList().bytesPerPixel();
+		stridedCopy(buffer, tileSize.width*bytesPerPixel, tmpBuf.get(),
+				m_tileInfo.width*bytesPerPixel, tileSize.height,
+				tileSize.width*bytesPerPixel);
+	}
+	else
+	{
+		// Simple case for wholly contained buffers - the provided buffer is
+		// the correct size, and we get libtiff to read directly into it.
+		TIFFReadTile(dirHandle.tiffPtr(), static_cast<tdata_t>(buffer), x, y, 0, 0);
+	}
 }
 
 void CqTiledTiffInputFile::setDirectory(tdir_t newDir)

@@ -223,9 +223,9 @@ void CqImage::saveToFile(const std::string& fileName) const
 	CqTexFileHeader header;
 
 	// Required attributes
-	header.set<Attr::Width>(m_realData->width());
-	header.set<Attr::Height>(m_realData->height());
-	header.set<Attr::ChannelList>(m_realData->channelList());
+	header.setWidth(m_realData->width());
+	header.setHeight(m_realData->height());
+	header.channelList() = m_realData->channelList();
 	// Informational strings
 	header.set<Attr::Software>( (boost::format("%s %s (%s %s)")
 			 % STRNAME % VERSION_STR % __DATE__ % __TIME__).str());

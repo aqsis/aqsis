@@ -123,7 +123,7 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 	// aspect ratio, so set the resolution unit to none.
 	setTiffTagValue<uint16>(TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
 	setTiffTagValue<float>(TIFFTAG_XRESOLUTION, 1.0f);
-	setTiffTagValue<float>(TIFFTAG_YRESOLUTION, header.find<Attr::PixelAspectRatio>());
+	setTiffTagValue<float>(TIFFTAG_YRESOLUTION, header.find<Attr::PixelAspectRatio>(1));
 
 	// Compression-related stuff
 	writeCompressionAttrs(header);
@@ -148,11 +148,11 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 {
 	// Set the compression type.
-	uint16 compression = tiffCompressionTagFromName( header.find<Attr::Compression>());
+	uint16 compression = tiffCompressionTagFromName(header.find<Attr::Compression>("none"));
 	if(!TIFFIsCODECConfigured(compression))
 	{
 		Aqsis::log() << warning << "No TIFF codec found for compression scheme \""
-			<< header.find<Attr::Compression>() << "\"\n";
+			<< header.find<Attr::Compression>("none") << "\"\n";
 		return;
 	}
 	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
@@ -317,8 +317,8 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 {
 	// Fill header with general metadata which won't affect the details of the
 	// pixel memory layout.
-	header.set<Attr::Width>(tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
-	header.set<Attr::Height>(tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
+	header.setWidth(tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
+	header.setHeight(tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
 	if(TIFFIsTiled(tiffPtr()))
 	{
 		header.set<Attr::TileInfo>( SqTileInfo(
@@ -446,12 +446,12 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		// The format is something strange that we don't know how to handle
 		// directly... Use the generic RGBA handling built into libtiff...
 		EqChannelType chanType = Channel_Unsigned8;
-		CqChannelList channelList;
+		CqChannelList& channelList = header.channelList();
+		channelList.clear();
 		channelList.addChannel( SqChannelInfo("r", chanType) );
 		channelList.addChannel( SqChannelInfo("g", chanType) );
 		channelList.addChannel( SqChannelInfo("b", chanType) );
 		channelList.addChannel( SqChannelInfo("a", chanType) );
-		header.set<Attr::ChannelList>(channelList);
 		header.set<Attr::TiffUseGenericRGBA>(true);
 	}
 }
@@ -645,6 +645,24 @@ void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 	}
 }
 
+//------------------------------------------------------------------------------
+// Free functions
+
+void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcStride,
+		TqInt numElems, TqInt elemSize)
+{
+	for(TqInt i = 0; i < numElems; ++i)
+	{
+		for(TqInt j = 0; j < elemSize; ++j)
+		{
+			*dest = *src;
+			++src;
+			++dest;
+		}
+		dest += destStride;
+		src += srcStride;
+	}
+}
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

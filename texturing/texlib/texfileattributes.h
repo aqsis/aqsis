@@ -85,9 +85,7 @@ namespace Attr
 	}
 
 	//--------------------------------------------------
-	/** \name Image dimensions
-	 *
-	 * Image data has dimensions  Width x Height.
+	/** \name DisplayWindow
 	 *
 	 * In addition to the image dimensions, the header may specify a
 	 * DisplayWindow attribute (mainly for use with cropped images).  The
@@ -120,15 +118,9 @@ namespace Attr
 	 *
 	 * \endverbatim
 	 */
-	AQSIS_IMAGE_ATTR_TAG(Width, TqInt);
-	AQSIS_IMAGE_ATTR_TAG(Height, TqInt);
 	AQSIS_IMAGE_ATTR_TAG(DisplayWindow, SqImageRegion);
 	/// aspect ratio = pix_width/pix_height
 	AQSIS_IMAGE_ATTR_TAG(PixelAspectRatio, TqFloat);
-
-	//--------------------------------------------------
-	/// Channel information
-	AQSIS_IMAGE_ATTR_TAG(ChannelList, CqChannelList);
 
 	//--------------------------------------------------
 	/// Tile information

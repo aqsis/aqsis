@@ -26,8 +26,6 @@
 
 #include "tiffoutputfile.h"
 
-#include <cstring>  // for memcpy.
-
 #include <boost/scoped_array.hpp>
 
 #include "aqsismath.h"
@@ -78,9 +76,8 @@ void CqTiffOutputFile::initialize()
 		AQSIS_THROW(XqInternal, "tiff cannot store multiple pixel types in the same image");
 
 	// Use lzw compression if the compression hasn't been specified.
-	std::string& compressionStr = m_header.find<Attr::Compression>();
-	if(compressionStr == "unknown")
-		compressionStr = "lzw";
+	if(!m_header.findPtr<Attr::Compression>())
+		m_header.set<Attr::Compression>("lzw");
 
 	// Timestamp the file.
 	m_header.setTimestamp();
@@ -94,8 +91,8 @@ void CqTiffOutputFile::initialize()
 
 void CqTiffOutputFile::newSubImage(TqInt width, TqInt height)
 {
-	m_header.set<Attr::Width>(width);
-	m_header.set<Attr::Height>(height);
+	m_header.setWidth(width);
+	m_header.setHeight(height);
 
 	m_fileHandle->writeDirectory();
 	m_currentLine = 0;
@@ -123,29 +120,6 @@ void CqTiffOutputFile::writeScanlinePixels(const CqMixedImageBuffer& buffer)
 	}
 	m_currentLine = endLine;
 }
-
-
-namespace {
-
-/** Strided memory copy.
- *
- * Copies numElems data elements from src to dest.  Each data element (eg,
- * contiguous group of pixels) has size given by elemSize bytes.  The stride
- * between one data element and the next is given in bytes.
- */
-void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcStride,
-		TqInt numElems, TqInt elemSize)
-{
-	for(TqInt i = 0; i < numElems; ++i)
-	{
-		std::memcpy(dest, src, elemSize);
-		dest += destStride;
-		src += srcStride;
-	}
-}
-
-} // unnamed namespace
-
 
 void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
 {

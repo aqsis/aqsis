@@ -34,6 +34,9 @@
 
 namespace Aqsis {
 
+/** \brief Input interface for tiled TIFF images, allowing reading of individual tiles.
+ *
+ */
 class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 {
 	public:
@@ -48,7 +51,8 @@ class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 		virtual TqInt imageIndex() const;
 		virtual TqInt numSubImages() const;
 	protected:
-		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY);
+		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY,
+				const SqTileInfo tileSize) const;
 
 		/** \brief Initializations for directory-specific data
 		 *

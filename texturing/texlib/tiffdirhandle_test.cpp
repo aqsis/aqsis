@@ -96,11 +96,11 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 	dirHandle.fillHeader(header);
 
 	// Check that the header has been initialized properly...
-	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Width>(), 6);
-	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Height>(), 4);
+	BOOST_CHECK_EQUAL(header.width(), 6);
+	BOOST_CHECK_EQUAL(header.height(), 4);
 
 	// Check the channels
-	Aqsis::CqChannelList& channelList = header.find<Aqsis::Attr::ChannelList>();
+	Aqsis::CqChannelList& channelList = header.channelList();
 	BOOST_REQUIRE_EQUAL(channelList.numChannels(), 3);
 	BOOST_CHECK_EQUAL(channelList[0].name, "r");
 	BOOST_CHECK_EQUAL(channelList[0].type, Aqsis::Channel_Unsigned8);
@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 		Aqsis::CqTiffDirHandle dirHandle(tiffHandlePtr);
 
 		Aqsis::CqTexFileHeader header;
-		header.set<Aqsis::Attr::Width>(11);
-		header.set<Aqsis::Attr::Height>(1);
+		header.setWidth(11);
+		header.setHeight(1);
 		Aqsis::CqChannelList& channels = header.channelList();
 		channels.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Signed8));
 		header.set<Aqsis::Attr::DisplayWindow>( Aqsis::SqImageRegion(1,2,3,4) );
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 		dirHandle.fillHeader(header);
 
 		// check dimensions
-		BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Width>(), 11);
-		BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Height>(), 1);
+		BOOST_CHECK_EQUAL(header.width(), 11);
+		BOOST_CHECK_EQUAL(header.height(), 1);
 		// check channels
 		Aqsis::CqChannelList& channels = header.channelList();
 		// Note that we can't store actual channel names in tiff, so the "r"

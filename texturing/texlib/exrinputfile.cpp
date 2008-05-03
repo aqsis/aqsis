@@ -116,8 +116,8 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 {
 	// Set width, height
 	const Imath::Box2i& dataBox = exrHeader.dataWindow();
-	header.set<Attr::Width>(dataBox.max.x - dataBox.min.x+1);
-	header.set<Attr::Height>(dataBox.max.y - dataBox.min.y+1);
+	header.setWidth(dataBox.max.x - dataBox.min.x+1);
+	header.setHeight(dataBox.max.y - dataBox.min.y+1);
 	// display window
 	const Imath::Box2i& displayBox = exrHeader.displayWindow();
 	header.set<Attr::DisplayWindow>( SqImageRegion(

@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 	Aqsis::CqTexFileHeader header;
 
 	// Check the channels
-	Aqsis::CqChannelList& channelList = header.find<Aqsis::Attr::ChannelList>();
+	Aqsis::CqChannelList& channelList = header.channelList();
 	BOOST_CHECK_EQUAL(channelList.numChannels(), 0);
 }
 

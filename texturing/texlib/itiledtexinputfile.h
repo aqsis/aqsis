@@ -46,9 +46,8 @@ namespace Aqsis {
  * (0,0) is in the top left of the image, with (1,0) being the tile to the
  * immediate right of (0,0), etc.
  *
- * This interface allows tiles to be read from file one at a time.
- *
- * \todo it should also handle multi-image files.
+ * This interface allows tiles to be read from file one at a time, while also
+ * providing convenient access to various data about the tiling.
  */
 class AQSISTEX_SHARE IqTiledTexInputFile
 {
@@ -64,7 +63,16 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		virtual EqImageFileType fileType() const = 0;
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
-		/// Get tile dimensions
+		/** \brief Get tile dimensions as used by readTile().
+		 *
+		 * Note that this may be different from the tile dimensions as reported
+		 * in the file metadata header.  The header should report correctly on
+		 * the structure of the underlying file, while tileInfo() reports the
+		 * effective tile size used by the interface.  This is to allow file
+		 * formats which aren't tiled at all to share the interface for
+		 * convenience.  (In these cases, the obvious strategy is to consider
+		 * the whole image to be a single tile.)
+		 */
 		virtual SqTileInfo tileInfo() const = 0;
 		//@}
 
@@ -104,6 +112,10 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 *   - TqUint8* rawData()
 		 *     Gets a raw pointer to the data.
 		 *
+		 * Often the dimensions of an image are not a multiple of the tile
+		 * size.  In this case, tiles on the right hand side and bottom of the
+		 * image are resized to exactly fit the image edges.
+		 *
 		 * \param buffer - buffer to read the tile into
 		 * \tileX - horizontal tile coordinate, starting from 0 in the top left.
 		 * \tileY - vertical tile coordinate, starting from 0 in the top left.
@@ -125,25 +137,37 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 	protected:
 		/** \brief Low-level readTile() function to be overridden by child classes
 		 *
-		 * The implementation of readTile simply validates the input
-		 * parameters against the image dimensions as reported by header(),
-		 * sets up the buffer, and calls readPixelsImpl().
+		 * The implementation of readTile simply validates the input parameters
+		 * against the image dimensions as reported by header(), resizes the
+		 * buffer, and calls readPixelsImpl() to do the work.
 		 *
-		 * Implementations of readTileImpl() can assume that startLine and
-		 * numScanlines specify a valid range.
+		 * \param buffer - Pointer to raw data buffer of sufficient size for
+		 *                 the tile data.
+		 * \param tileX - x-coordinate for tile
+		 * \param tileY - y-coordinate for tile
+		 * \param tileSize - Size of the tile to be read.  (May be truncated at
+		 *                   image bottom or right.)
 		 */
-		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY) = 0;
+		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY,
+				const SqTileInfo tileSize) const = 0;
 };
 
 
 template<typename ArrayT>
 void IqTiledTexInputFile::readTile(ArrayT& buffer, TqInt tileX, TqInt tileY) const
 {
-	/// \todo Make sure that getting header().channelList() isn't too expensive
-	/// for fast tile access.
-	SqTileInfo info = tileInfo();
-	buffer.resize(info.width, info.height, header().channelList());
-	readTileImpl(buffer.rawData(), tileX, tileY);
+	SqTileInfo tInfo = tileInfo();
+	const CqTexFileHeader& h = header();
+	// Modify the tile size in the case where a tile of the natural size would
+	// tile fall off the image edge.  
+	if((tileX + 1)*tInfo.width > h.width())
+		tInfo.width = h.width() - tileX*tInfo.width;
+	if((tileY + 1)*tInfo.height > h.height())
+		tInfo.height = h.height() - tileY*tInfo.height;
+	assert(tInfo.width > 0);
+	assert(tInfo.height > 0);
+	buffer.resize(tInfo.width, tInfo.height, h.channelList());
+	readTileImpl(buffer.rawData(), tileX, tileY, tInfo);
 }
 
 } // namespace Aqsis

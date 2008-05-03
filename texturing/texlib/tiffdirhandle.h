@@ -294,6 +294,25 @@ template<typename T>
 boost::shared_array<T> tiffMalloc(const tsize_t size);
 
 
+//------------------------------------------------------------------------------
+// Utility functions
+
+
+/** \brief Strided memory copy.
+ *
+ * Copies numElems data elements from src to dest.  Each data element (eg,
+ * contiguous group of pixels) has size given by elemSize bytes.  The stride
+ * between one data element and the next is given in bytes.
+ *
+ * \param dest - destination buffer
+ * \param destStride - stride between data elements in the destination buffer in bytes
+ * \param src - source buffer
+ * \param srcStride - stride between data elements in the source buffe in bytes
+ * \param elemSize - size of the data element in bytes
+ */
+void stridedCopy(TqUint8* dest, TqInt destStride, const TqUint8* src, TqInt srcStride,
+		TqInt numElems, TqInt elemSize);
+
 
 //==============================================================================
 // Implementation of inline functions and templates
