@@ -1,5 +1,6 @@
-# Title: Aqsis Package for RPM-based systems
+# Title: Aqsis package for Linux (RPM)
 # Author: Aqsis Team (packages@aqsis.org)
+# Info: Last tested with Fedora 8
 
 %define name        aqsis
 %define version     1.3.0

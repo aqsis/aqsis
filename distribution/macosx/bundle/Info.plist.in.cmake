@@ -29,6 +29,6 @@
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.</string>
+	<string>RenderMan® Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.</string>
 </dict>
 </plist>

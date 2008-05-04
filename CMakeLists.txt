@@ -13,6 +13,7 @@ INCLUDE(FindJPEG)
 INCLUDE(FindBoost)
 INCLUDE(FindZLIB)
 INCLUDE(FindFLTK)
+INCLUDE(FindNSIS)
 INCLUDE(FindOpenEXR)
 INCLUDE(FindOsacompile)
 INCLUDE(FindXsltproc)
@@ -157,6 +158,14 @@ ADD_CUSTOM_TARGET(aqsisrc ALL echo
 	DEPENDS  ${PROJECT_BINARY_DIR}/aqsisrc
 	)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
+
+
+#
+# Windows NSIS Packaging
+#
+IF(WIN32)
+	ADD_SUBDIRECTORY(distribution/win/nsis)
+ENDIF(WIN32)
 
 
 #

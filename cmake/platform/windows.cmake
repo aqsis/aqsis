@@ -29,7 +29,7 @@ SET(SCRIPTSDIR "scripts"
 #
 SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\aqsis_install.exe")
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} Aqsis")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.aqsis.org")
+SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.aqsis.org\\\\xoops\\\\modules\\\\newbb")
 SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.aqsis.org")
 SET(CPACK_NSIS_CONTACT "packages@aqsis.org")
 SET(CPACK_NSIS_MODIFY_PATH ON)
