@@ -6,7 +6,9 @@
 
 ; Helper defines
 !define /date YEAR "%Y"
-!define PACKAGE_COPYRIGHT "Copyright (c) ${YEAR}, @CPACK_PACKAGE_VENDOR@."
+!define PACKAGE_NAME "Aqsis Renderer"
+!define PACKAGE_VENDOR "Aqsis Team"
+!define PACKAGE_COPYRIGHT "Copyright (c) ${YEAR}, ${PACKAGE_VENDOR}."
 !define PACKAGE_COPYRIGHT_OTHER "RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved."
 !define PACKAGE_SHELLEXT_EXR "View with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_EXR_INFO "OpenEXR Image"
@@ -19,12 +21,15 @@
 !define PACKAGE_SHELLEXT_SLX_INFO "@CMAKE_PROJECT_NAME@ Shader"
 !define PACKAGE_SHELLEXT_TIF "View with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_TIF_INFO "TIFF Image"
+!define PACKAGE_WEB_SITE "http://www.aqsis.org"
+!define PACKAGE_WEB_SUPPORT "http://www.aqsis.org/xoops/modules/newbb"
+!define PACKAGE_WEB_UPDATE "http://www.aqsis.org/xoops/modules/mydownloads"
 !define PACKAGE_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\aqsis.exe"
 !define PACKAGE_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@"
 !define PACKAGE_UNINST_ROOT_KEY "HKLM"
 !define PACKAGE_STARTMENU_REGVAL "NSIS:StartMenuDir"
 
-Name "@CPACK_PACKAGE_DESCRIPTION_SUMMARY@ @MAJOR@.@MINOR@.@BUILD@"
+Name "${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@"
 BrandingText "www.aqsis.org"
 OutFile "@CMAKE_BINARY_DIR@\aqsis-setup-@MAJOR@.@MINOR@.@BUILD@.exe"
 InstallDir "$PROGRAMFILES\@CMAKE_PROJECT_NAME@"
@@ -42,19 +47,19 @@ XPStyle on
 !define MUI_UNABORTWARNING
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
-!define MUI_HEADERIMAGE_BITMAP "@PROJECT_SOURCE_DIR@\distribution\win\header.bmp"
-!define MUI_HEADERIMAGE_UNBITMAP "@PROJECT_SOURCE_DIR@\distribution\win\header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\header.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP "@CMAKE_SOURCE_DIR@\distribution\win\header.bmp"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "@PROJECT_SOURCE_DIR@\distribution\win\wizard.bmp"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "@PROJECT_SOURCE_DIR@\distribution\win\wizard.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\wizard.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\wizard.bmp"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
-!insertmacro MUI_PAGE_LICENSE "@PROJECT_SOURCE_DIR@\COPYING"
+!insertmacro MUI_PAGE_LICENSE "@CMAKE_SOURCE_DIR@\COPYING"
 
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
@@ -65,7 +70,7 @@ XPStyle on
 ; Start menu page
 Var ICONS_GROUP
 !define MUI_STARTMENUPAGE_NODISABLE
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "@CPACK_PACKAGE_DESCRIPTION_SUMMARY@\@MAJOR@.@MINOR@.@BUILD@"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${PACKAGE_NAME}\@MAJOR@.@MINOR@.@BUILD@"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${PACKAGE_UNINST_ROOT_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${PACKAGE_UNINST_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PACKAGE_STARTMENU_REGVAL}"
@@ -89,15 +94,15 @@ Page custom AdditionalTasks
 
 ; Reserve files
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "@PROJECT_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini"
+ReserveFile "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
 VIProductVersion "@MAJOR@.@MINOR@.@BUILD@.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@MAJOR@.@MINOR@.@BUILD@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PACKAGE_NAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "${PACKAGE_COPYRIGHT}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "@CPACK_PACKAGE_VENDOR@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PACKAGE_VENDOR}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${PACKAGE_COPYRIGHT_OTHER}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@CMAKE_PROJECT_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@"
@@ -117,9 +122,9 @@ SectionIn 1 2
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.dll"
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.exe"
   SetOutPath "$INSTDIR\doc"
-  File "/oname=AUTHORS.txt" "@PROJECT_SOURCE_DIR@\AUTHORS"
-  File "/oname=LICENSE.txt" "@PROJECT_SOURCE_DIR@\COPYING"
-  File "/oname=README.txt" "@PROJECT_SOURCE_DIR@\README"
+  File "/oname=AUTHORS.txt" "@CMAKE_SOURCE_DIR@\AUTHORS"
+  File "/oname=LICENSE.txt" "@CMAKE_SOURCE_DIR@\COPYING"
+  File "/oname=README.txt" "@CMAKE_SOURCE_DIR@\README"
   SetOutPath "$INSTDIR\shaders"
   File "@CMAKE_BINARY_DIR@\shaders\*.slx"
 
@@ -149,13 +154,13 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
-    File /x ".svn" /x "*.sh" "@PROJECT_SOURCE_DIR@\content\ribs\features\layeredshaders\*.*"
+    File /x ".svn" /x "*.sh" "@CMAKE_SOURCE_DIR@\content\ribs\features\layeredshaders\*.*"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    File /x ".svn" /x "*.sh" "@PROJECT_SOURCE_DIR@\content\ribs\scenes\vase\*.*"
+    File /x ".svn" /x "*.sh" "@CMAKE_SOURCE_DIR@\content\ribs\scenes\vase\*.*"
     SetOutPath "$INSTDIR\content\shaders\displacement"
-    File "@PROJECT_SOURCE_DIR@\content\shaders\displacement\dented.sl"
+    File "@CMAKE_SOURCE_DIR@\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"
-    File "@PROJECT_SOURCE_DIR@\content\shaders\light\shadowspot.sl"
+    File "@CMAKE_SOURCE_DIR@\content\shaders\light\shadowspot.sl"
     
 
   ; Shortcuts
@@ -170,22 +175,22 @@ SectionGroup /e "Content" SEC02
   Section /o "Scripts" SEC0202
   SectionIn 1
     SetOutPath "$INSTDIR\scripts"
-    File "@PROJECT_SOURCE_DIR@\tools\mpdump\*.py"
+    File "@CMAKE_SOURCE_DIR@\tools\mpdump\*.py"
   SectionEnd
 
   Section /o "Source Shaders" SEC0203
   SectionIn 1
     SetOutPath "$INSTDIR\shaders"
-    File "@PROJECT_SOURCE_DIR@\shaders\*.sl"
+    File "@CMAKE_SOURCE_DIR@\shaders\*.sl"
   SectionEnd
 SectionGroupEnd
 
 Section "Documentation" SEC03
 SectionIn 1 2
   SetOutPath "$INSTDIR\doc"
-  File "/oname=CHANGES.txt" "@PROJECT_SOURCE_DIR@\ChangeLog.txt"
-  File "/oname=INSTALL.txt" "@PROJECT_SOURCE_DIR@\INSTALL"
-  File "/oname=NOTES.txt" "@PROJECT_SOURCE_DIR@\ReleaseNotes"
+  File "/oname=CHANGES.txt" "@CMAKE_SOURCE_DIR@\ChangeLog.txt"
+  File "/oname=INSTALL.txt" "@CMAKE_SOURCE_DIR@\INSTALL"
+  File "/oname=NOTES.txt" "@CMAKE_SOURCE_DIR@\ReleaseNotes"
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
@@ -197,9 +202,9 @@ SectionEnd
 Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
-  File "@PROJECT_SOURCE_DIR@\aqsistypes\*.h"
-  File "@PROJECT_SOURCE_DIR@\shadercompiler\shadervm\shadeop.h"
-  File "@PROJECT_SOURCE_DIR@\rib\api\ri.h"
+  File "@CMAKE_SOURCE_DIR@\aqsistypes\*.h"
+  File "@CMAKE_SOURCE_DIR@\shadercompiler\shadervm\shadeop.h"
+  File "@CMAKE_SOURCE_DIR@\rib\api\ri.h"
   File "@CMAKE_BINARY_DIR@\rib\api\ri.inl"
   SetOutPath "$INSTDIR\lib"
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.a"
@@ -220,7 +225,7 @@ SectionEnd
 
 Section -AdditionalIcons
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-  WriteIniStr "$INSTDIR\doc\website.url" "InternetShortcut" "URL" "@CPACK_NSIS_URL_INFO_ABOUT@"
+  WriteIniStr "$INSTDIR\doc\website.url" "InternetShortcut" "URL" "${PACKAGE_WEB_SITE}"
   SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\@CMAKE_PROJECT_NAME@ Website.lnk" "$INSTDIR\doc\website.url"
   SetOutPath "$INSTDIR"
@@ -263,7 +268,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$DESKTOP\@CPACK_PACKAGE_DESCRIPTION_SUMMARY@ @MAJOR@.@MINOR@.@BUILD@.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+    CreateShortCut "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
     desktop_end:
 
   ; Create 'Quick Launch' icon
@@ -271,7 +276,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$QUICKLAUNCH\@CPACK_PACKAGE_DESCRIPTION_SUMMARY@.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+    CreateShortCut "$QUICKLAUNCH\${PACKAGE_NAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
@@ -339,10 +344,10 @@ Section -Post
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\application.ico"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayVersion" "@MAJOR@.@MINOR@.@BUILD@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "@CPACK_NSIS_URL_INFO_ABOUT@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@CPACK_PACKAGE_VENDOR@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "@CPACK_NSIS_HELP_LINK@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "@CPACK_NSIS_URL_INFO_ABOUT@"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "${PACKAGE_WEB_SITE}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "${PACKAGE_VENDOR}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "${PACKAGE_WEB_SUPPORT}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "${PACKAGE_WEB_UPDATE}"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Comments" "$INSTDIR"
   WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoModify" 1
   WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoRepair" 1
@@ -350,7 +355,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "@PROJECT_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini" "page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini" "page_tasks.ini"
 FunctionEnd
 
 
@@ -378,11 +383,11 @@ FunctionEnd
 
 Section Uninstall
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
-  Delete "$DESKTOP\@CPACK_PACKAGE_DESCRIPTION_SUMMARY@ @MAJOR@.@MINOR@.@BUILD@.lnk"
-  Delete "$QUICKLAUNCH\@CPACK_PACKAGE_DESCRIPTION_SUMMARY@.lnk"
+  Delete "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk"
+  Delete "$QUICKLAUNCH\${PACKAGE_NAME}.lnk"
 
   RMDir /r "$SMPROGRAMS\$ICONS_GROUP"
-  RMDir "$SMPROGRAMS\@CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+  RMDir "$SMPROGRAMS\${PACKAGE_NAME}"
 
   RMDir /r "$INSTDIR"
 
@@ -411,8 +416,8 @@ Section Uninstall
   DeleteRegKey HKCR ".tiff"
   DeleteRegKey HKCR "Aqsis.TIFF"
 
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
+  DeleteRegKey ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}"
+  DeleteRegKey HKLM "${PACKAGE_DIR_REGKEY}"
 
   SetAutoClose true
 SectionEnd

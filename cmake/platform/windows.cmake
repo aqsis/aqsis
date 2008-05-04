@@ -33,5 +33,4 @@ SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.aqsis.org\\\\xoops\\\\modules\\\\newb
 SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.aqsis.org")
 SET(CPACK_NSIS_CONTACT "packages@aqsis.org")
 SET(CPACK_NSIS_MODIFY_PATH ON)
-SET(CPACK_GENERATOR "NSIS")
 SET(CPACK_SOURCE_GENERATOR "ZIP")
