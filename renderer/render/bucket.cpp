@@ -58,8 +58,6 @@ TqInt	CqBucket::m_DiscreteShiftX;
 TqInt	CqBucket::m_DiscreteShiftY;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
-TqInt	CqBucket::m_realXOrigin;
-TqInt	CqBucket::m_realYOrigin;
 TqInt	CqBucket::m_PixelXSamples;
 TqInt	CqBucket::m_PixelYSamples;
 TqFloat	CqBucket::m_FilterXWidth;
@@ -96,8 +94,6 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
 	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
 	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
-	m_realXOrigin = lfloor(static_cast<TqFloat>(m_XOrigin) - m_DiscreteShiftX);
-	m_realYOrigin = lfloor(static_cast<TqFloat>(m_YOrigin) - m_DiscreteShiftY);
 
 	m_NumTimeRanges = max(4, m_PixelXSamples * m_PixelYSamples);
 

@@ -321,7 +321,7 @@ bool	CqPoints::Diceable()
 /** Get the geometric bound of this GPrim in 'current' space.
  */
 
-void	CqPoints::Bound(CqBound* bound) const
+void	CqPoints::Bound(IqBound* bound) const
 {
 /*	for ( t = 0; t < cTimes(); t++ )
 	{

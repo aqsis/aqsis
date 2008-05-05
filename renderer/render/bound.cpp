@@ -100,7 +100,7 @@ void CqBound::Transform( const CqMatrix& matTransform )
  * \param bound CqBound to add to this.
  */
 
-void CqBound::Encapsulate( const CqBound* const bound )
+void CqBound::Encapsulate( const IqBound* const bound )
 {
 	m_vecMax.x( max( m_vecMax.x(), bound->vecMax().x() ) );
 	m_vecMax.y( max( m_vecMax.y(), bound->vecMax().y() ) );

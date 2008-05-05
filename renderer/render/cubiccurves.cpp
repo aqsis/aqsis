@@ -935,7 +935,7 @@ TqInt CqCubicCurvesGroup::Split(
  *
  * @return CqBound object containing the bounds.
  */
-void CqCubicCurvesGroup::Bound(CqBound* bound) const
+void CqCubicCurvesGroup::Bound(IqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D vecA( FLT_MAX, FLT_MAX, FLT_MAX );

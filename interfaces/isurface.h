@@ -17,6 +17,7 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 #include	"sstring.h"
+#include	"ibound.h"
 
 namespace Aqsis {
 
@@ -27,7 +28,7 @@ class CqParameter;
 struct IqShaderData;
 class CqSurface;
 class CqMicroPolyGrid;
-class CqBound;
+
 
 //----------------------------------------------------------------------
 /** \struct IqSurface
@@ -109,7 +110,7 @@ struct IqSurface
 	virtual void	RenderComplete() = 0;
 	/** Get the gemoetric bound of this GPrim.
 	 */
-	virtual void	Bound(CqBound* bound) const = 0;
+	virtual void	Bound(IqBound* bound) const = 0;
 };
 
 

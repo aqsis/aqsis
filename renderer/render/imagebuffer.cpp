@@ -669,7 +669,6 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			RELEASEREF( ( pMpg ) );
 		}
 		CurrentBucket().aMPGs().clear();
-		CqOcclusionBox::RefreshDepthMap();
 	}
 
 	// Split any grids in this bucket waiting to be processed.
@@ -697,7 +696,6 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 				RELEASEREF( ( pMpg ) );
 			}
 			CurrentBucket().aMPGs().clear();
-			CqOcclusionBox::RefreshDepthMap();
 		}
 		CurrentBucket().aGrids().clear();
 	}
@@ -770,19 +768,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 					long xmin, long xmax, long ymin, long ymax,
 					bool IsMoving, bool UsingDof )
 {
-    CqBucket & Bucket = CurrentBucket();
-    //CqStats& theStats = QGetRenderContext() ->Stats();
-
-    const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
-    bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-
-    TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
-
 	CqHitTestCache hitTestCache;
-	bool cachedHitData = false;
-
-	//bool mustDraw = !m_CurrentGridInfo.m_IsCullable;
+	pMPG->CacheHitTestValues(&hitTestCache);
 
 	TqInt iXSamples = PixelXSamples();
     TqInt iYSamples = PixelYSamples();
@@ -798,11 +785,10 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
     TqInt bound_maxMB = pMPG->cSubBounds();
     TqInt bound_maxMB_1 = bound_maxMB - 1;
-	//TqInt currentIndex = 0;
     for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
     {
-        TqFloat time0;
-        TqFloat time1;
+		TqFloat time0 = m_CurrentGridInfo.m_ShutterOpenTime;
+		TqFloat time1 = m_CurrentGridInfo.m_ShutterCloseTime;
         const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
@@ -892,137 +878,18 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 				continue;
 			}
 
-			// Now go across all pixels touched by the micropolygon bound.
-			// The first pixel position is at (sX, sY), the last one
-			// at (eX, eY).
-			TqInt eX = lceil( bmaxx );
-			TqInt eY = lceil( bmaxy );
-			if ( eX > xmax ) eX = xmax;
-			if ( eY > ymax ) eY = ymax;
-
-			TqInt sX = static_cast<TqInt>(std::floor( bminx ));
-			TqInt sY = static_cast<TqInt>(std::floor( bminy ));
-			if ( sY < ymin ) sY = ymin;
-			if ( sX < xmin ) sX = xmin;
-
-			CqImagePixel* pie, *pie2;
-
-			TqInt nextx = Bucket.RealWidth();
-			Bucket.ImageElement( sX, sY, pie );
-
-			for( int iY = sY; iY < eY; ++iY)
-			{
-				pie2 = pie;
-				pie += nextx;
-
-				for(int iX = sX; iX < eX; ++iX, ++pie2)
-				{
-					TqInt index;
 					if(UsingDof)
 					{
-						// when using dof only one sample per pixel can
-						// possibbly hit (the one corresponding to the
-						// current bounding box).
-						index = pie2->GetDofOffsetIndex(bound_numDof);
-					}
-					else
-					{
-						// when using mb without dof, a range of samples
-						// may have times within the current mb bounding box.
-						index = indexT0;
-					}
-					// only bother sampling if the mpg is not occluded in this pixel.
-					//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
-					{
-
-						// loop over potential samples
-						do
-						{
-							const SqSampleData& sampleData = pie2->SampleData( index );
-							const CqVector2D& vecP = sampleData.m_Position;
-							const TqFloat time = sampleData.m_Time;
-
-							index++;
-
-							CqStats::IncI( CqStats::SPL_count );
-
-							if(IsMoving && (time < time0 || time > time1))
-							{
-								continue;
-							}
-
-							// check if sample lies inside mpg bounding box.
-							if ( UsingDof )
-							{
 								CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-
-								if(!DofBound.Contains2D( vecP ))
-									continue;
-
-								// Check to see if the sample is within the sample's level of detail
-								if ( UsingLevelOfDetail)
-								{
-									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
-									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-									{
-										continue;
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 									}
-								}
-
-
-								CqStats::IncI( CqStats::SPL_bound_hits );
-
-								// Now check if the subsample hits the micropoly
-								bool SampleHit;
-								TqFloat D;
-
-								SampleHit = pMPG->Sample( sampleData, D, time, UsingDof );
-								if ( SampleHit )
-								{
-									sample_hits++;
-									// note index has already been incremented, so we use the previous value.
-									StoreSample( pMPG, pie2, index-1, D );
-								}
-							}
 							else
 							{
-								if(!Bound.Contains2D( vecP ))
-									continue;
-								// Check to see if the sample is within the sample's level of detail
-								if ( UsingLevelOfDetail)
-								{
-									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
-									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-									{
-										continue;
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 									}
 								}
-
-
-								CqStats::IncI( CqStats::SPL_bound_hits );
-
-								// Now check if the subsample hits the micropoly
-								bool SampleHit;
-								TqFloat D;
-
-								pMPG->CacheHitTestValues(&hitTestCache);
-								cachedHitData = true;
-
-								SampleHit = pMPG->Sample( sampleData, D, time );
-								if ( SampleHit )
-								{
-									sample_hits++;
-									// note index has already been incremented, so we use the previous value.
-									StoreSample( pMPG, pie2, index-1, D );
 								}
 							}
-						} while (!UsingDof && index < indexT1);
-					}
-				}
-			}
-		}
-    }
-}
 
 
 
@@ -1030,256 +897,15 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 // simpler than the general case dealt with above.
 void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
 {
-    CqBucket & Bucket = CurrentBucket();
-    //CqStats& theStats = QGetRenderContext() ->Stats();
-
-    const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
-    bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-
-    TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
-
 	CqHitTestCache hitTestCache;
-	bool cachedHitData = false;
-
-	//bool mustDraw = !m_CurrentGridInfo.m_IsCullable;
-
-    CqBound Bound = pMPG->GetTotalBound();
-
-	TqFloat bminx = Bound.vecMin().x();
-	TqFloat bmaxx = Bound.vecMax().x();
-	TqFloat bminy = Bound.vecMin().y();
-	TqFloat bmaxy = Bound.vecMax().y();
-	TqFloat bminz = Bound.vecMin().z();
-	TqFloat bmaxz = Bound.vecMax().z();
-
-	// if bounding box is outside our viewing range, then cull it.
-	if ( bmaxx <= (float)xmin || bmaxy <= (float)ymin ||
-		bminx >= (float)xmax || bminy >= (float)ymax ||
-		bminz >= ClippingFar() || bmaxz <= ClippingNear())
-	{
-		return;
-	}
-
-	// Now go across all pixels touched by the micropolygon bound.
-	// The first pixel position is at (sX, sY), the last one
-	// at (eX, eY).
-	TqInt eX = lceil( bmaxx );
-	TqInt eY = lceil( bmaxy );
-	if ( eX > xmax ) eX = xmax;
-	if ( eY > ymax ) eY = ymax;
-
-	TqInt sX = static_cast<TqInt>(std::floor( bminx ));
-	TqInt sY = static_cast<TqInt>(std::floor( bminy ));
-	if ( sY < ymin ) sY = ymin;
-	if ( sX < xmin ) sX = xmin;
-
-	CqImagePixel* pie, *pie2;
-
-	TqInt iXSamples = PixelXSamples();
-	TqInt iYSamples = PixelYSamples();
-
-	TqInt im = ( bminx < sX ) ? 0 : static_cast<TqInt>(std::floor( ( bminx - sX ) * iXSamples ));
-	TqInt in = ( bminy < sY ) ? 0 : static_cast<TqInt>(std::floor( ( bminy - sY ) * iYSamples ));
-	TqInt em = ( bmaxx > eX ) ? iXSamples : lceil( ( bmaxx - ( eX - 1 ) ) * iXSamples );
-	TqInt en = ( bmaxy > eY ) ? iYSamples : lceil( ( bmaxy - ( eY - 1 ) ) * iYSamples );
-
-	TqInt nextx = Bucket.RealWidth();
-	Bucket.ImageElement( sX, sY, pie );
-
-	for( int iY = sY; iY < eY; ++iY)
-	{
-		pie2 = pie;
-		pie += nextx;
-
-		for(int iX = sX; iX < eX; ++iX, ++pie2)
-		{
-			// only bother sampling if the mpg is not occluded in this pixel.
-			//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
-			{
-				if(!cachedHitData)
-				{
 					pMPG->CacheHitTestValues(&hitTestCache);
-					cachedHitData = true;
-				}
 
-				// Now sample the micropolygon at several subsample positions
-				// within the pixel. The subsample indices range from (start_m, n)
-				// to (end_m-1, end_n-1).
-				register int m, n;
-				n = ( iY == sY ) ? in : 0;
-				int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
-				int start_m = ( iX == sX ) ? im : 0;
-				int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
-				int index_start = n*iXSamples + start_m;
+	const CqBound& Bound = pMPG->GetTotalBound();
 
-				for ( ; n < end_n; n++ )
-				{
-					int index = index_start;
-					for ( m = start_m; m < end_m; m++, index++ )
-					{
-						const SqSampleData& sampleData = pie2->SampleData( index );
-						//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
-						{
-							const CqVector2D& vecP = sampleData.m_Position;
-							const TqFloat time = 0.0;
-
-							CqStats::IncI( CqStats::SPL_count );
-
-							if(!Bound.Contains2D( vecP ))
-								continue;
-
-							// Check to see if the sample is within the sample's level of detail
-							if ( UsingLevelOfDetail)
-							{
-								TqFloat LevelOfDetail = sampleData.m_DetailLevel;
-								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-								{
-									continue;
+	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, false, 0, 0, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 								}
-							}
-
-							CqStats::IncI( CqStats::SPL_bound_hits );
-
-							// Now check if the subsample hits the micropoly
-							bool SampleHit;
-							TqFloat D;
-
-							SampleHit = pMPG->Sample( sampleData, D, time );
-
-							if ( SampleHit )
-							{
-								sample_hits++;
-								StoreSample( pMPG, pie2, index, D );
-							}
-						}
-					}
-					index_start += iXSamples;
-				}
-			}
-	/*        // Now compute the % of samples that hit...
-			TqInt scount = iXSamples * iYSamples;
-			TqFloat max_hits = scount * shd_rate;
-			TqInt hit_rate = ( sample_hits / max_hits ) / 0.125;
-			STATS_INC( MPG_sample_coverage0_125 + CLAMP( hit_rate - 1 , 0, 7 ) );
-	*/  }
-	}
-}
 
 
-void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
-{
-    bool Occludes = m_CurrentMpgSampleInfo.occludes;
-	bool opaque =  m_CurrentMpgSampleInfo.isOpaque;
-
-	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
-	//static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
-	SqImageSample localImageVal;
-
-	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
-
-	std::deque<SqImageSample>& aValues = pie2->Values( index );
-	std::deque<SqImageSample>::iterator sample = aValues.begin();
-	std::deque<SqImageSample>::iterator end = aValues.end();
-
-	// return if the sample is occluded and can be culled.
-	if(opaque)
-	{
-		if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
-			currentOpaqueSample.Data()[Sample_Depth] <= D)
-		{
-			return;
-		}
-	}
-	else
-	{
-		// Sort the color/opacity into the visible point list
-		// return if the sample is occluded and can be culled.
-		while( sample != end )
-		{
-			if((*sample).Data()[Sample_Depth] >= D)
-				break;
-
-			if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-				!(*sample).m_pCSGNode && m_CurrentGridInfo.m_IsCullable)
-				return;
-
-			++sample;
-		}
-	}
-
-    ImageVal.Data()[Sample_Depth] = D ;
-
-	CqStats::IncI( CqStats::SPL_hits );
-	pMPG->MarkHit();
-
-    TqFloat* val = ImageVal.Data();
-	CqColor col;
-	CqColor opa;
-	const SqSampleData& sampleData = pie2->SampleData( index );
-	const CqVector2D& vecP = sampleData.m_Position;
-	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
-
-    val[ Sample_Red ] = col[0];
-    val[ Sample_Green ] = col[1];
-    val[ Sample_Blue ] = col[2];
-    val[ Sample_ORed ] = opa[0];
-    val[ Sample_OGreen ] = opa[1];
-    val[ Sample_OBlue ] = opa[2];
-    val[ Sample_Depth ] = D;
-
-    // Now store any other data types that have been registered.
-	if(m_CurrentGridInfo.m_UsesDataMap)
-	{
-		StoreExtraData(pMPG, ImageVal);
-	}
-
-	if(!opaque)
-	{
-		// If depth is exactly the same as previous sample, chances are we've
-		// hit a MPG grid line.
-		// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-		if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
-		{
-			//(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
-			return;
-		}
-	}
-
-    // Update max depth values
-    //if ( !( DisplayMode() & ModeZ ) && Occludes )
-//    if ( opaque )
- //   {
-//		if( D < pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ() )
-//		{
-//			pie2->SampleData(index).m_occlusionBox->SetMaxOpaqueZ(D);
-//			pie2->SampleData(index).m_occlusionBox->PropagateChanges();
-//			CqOcclusionBox::UpdateDepth(pie2->SampleData(index).m_occlusionIndex, D);
-//		}
-//    }
-
-    ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-
-    ImageVal.m_flags = 0;
-    if ( Occludes )
-    {
-        ImageVal.m_flags |= SqImageSample::Flag_Occludes;
-    }
-    if( m_CurrentGridInfo.m_IsMatte )
-    {
-        ImageVal.m_flags |= SqImageSample::Flag_Matte;
-    }
-
-	if(!opaque)
-	{
-		aValues.insert( sample, ImageVal );
-	}
-	else
-	{
-		// mark this sample as having been written into.
-		ImageVal.m_flags |= SqImageSample::Flag_Valid;
-	}
-}
 
 void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {
@@ -1728,9 +1354,7 @@ void CqImageBuffer::RenderImage()
 		}
 
 
-//		if( !bIsEmpty )	
 			RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
-
 		if ( m_fQuit )
 		{
 			m_fDone = true;
@@ -1747,6 +1371,7 @@ void CqImageBuffer::RenderImage()
 
 	ImageComplete();
 	CqBucket::ShutdownBucket();
+	CqOcclusionBox::DeleteHierarchy();
 
 	// Pass >100 through to progress to allow it to indicate completion.
 

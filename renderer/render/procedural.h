@@ -55,7 +55,7 @@ class CqProcedural : public CqSurface
 
 		//---------------------------------------------- Inlined Public Methods
 	public:
-		void	Bound(CqBound* bound) const
+		void	Bound(IqBound* bound) const
 		{
 			bound->vecMin() = m_Bound.vecMin();
 			bound->vecMax() = m_Bound.vecMax();

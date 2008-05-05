@@ -95,14 +95,6 @@ class CqBucket : public IqBucket
 		{
 			return ( m_YOrigin );
 		}
-		virtual	TqInt	realXOrigin() const
-		{
-			return ( m_realXOrigin );
-		}
-		virtual	TqInt	realYOrigin() const
-		{
-			return ( m_realYOrigin );
-		}
 		static	TqInt	PixelXSamples()
 		{
 			return m_PixelXSamples;
@@ -267,13 +259,10 @@ class CqBucket : public IqBucket
 			m_ImageBuffer = pBuffer;
 		}
 
-		typedef std::vector<SqSampleData>	TqSampleList;
 
 	private:
 		static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
 		static	TqInt	m_YOrigin;		///< Origin in discrete coordinates of this bucket.
-		static	TqInt	m_realXOrigin;		
-		static	TqInt	m_realYOrigin;		
 		static	TqInt	m_XSize;		///< Size of the rendered area of this bucket in discrete coordinates.
 		static	TqInt	m_YSize;		///< Size of the rendered area of this bucket in discrete coordinates.
 		static	TqInt	m_RealWidth;	///< Actual size of the data for this bucket including filter overlap.
@@ -288,7 +277,7 @@ class CqBucket : public IqBucket
 		static	TqInt	m_NumDofBounds;
 		static	std::vector<CqBound>		m_DofBounds;
 		static	std::vector<CqImagePixel>	m_aieImage;
-		static	TqSampleList	m_SamplePoints;
+		static	std::vector<SqSampleData>	m_SamplePoints;
 		static	TqInt	m_NextSamplePoint;
 		static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.

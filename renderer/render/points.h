@@ -147,7 +147,7 @@ class CqPoints : public CqSurface
 			return( false );
 		}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		virtual CqSurface* Clone() const;

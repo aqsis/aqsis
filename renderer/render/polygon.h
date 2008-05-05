@@ -49,7 +49,7 @@ class CqPolygonBase
 		virtual	~CqPolygonBase()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		/** Get a reference to the surface this polygon is associated with.
@@ -158,7 +158,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		bool	CheckDegenerate() const;
 
 		// Overridden fro mCqSurface.
-		virtual	void	Bound(CqBound* bound) const
+		virtual	void	Bound(IqBound* bound) const
 		{
 			CqPolygonBase::Bound(bound);
 			AdjustBoundForTransformationMotion( bound );
@@ -302,7 +302,7 @@ class CqPolygonPoints : public CqSurface
 
 		// Overridden from CqSurface.
 		// NOTE: These should never be called.
-		virtual	void	Bound(CqBound* bound) const
+		virtual	void	Bound(IqBound* bound) const
 		{}
 
 		virtual	CqMicroPolyGridBase* Dice()
@@ -398,7 +398,7 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 			assert(false);
 			return( 0 );
 		}
-		virtual	void	Bound(CqBound* bound) const
+		virtual	void	Bound(IqBound* bound) const
 		{
 			CqPolygonBase::Bound(bound);
 			AdjustBoundForTransformationMotion( bound );
@@ -574,7 +574,7 @@ class CqSurfacePointsPolygons : public CqSurface
 
 		/** Get the gemoetric bound of this GPrim.
 		 */
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 		/** Dice this GPrim.
 		 * \return A pointer to a new micropolygrid..
 		 */

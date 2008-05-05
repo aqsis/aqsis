@@ -1346,7 +1346,7 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 /** Return the boundary extents in object space of the surface patch
  */
 
-void CqSurfaceNURBS::Bound(CqBound* bound) const
+void CqSurfaceNURBS::Bound(IqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );

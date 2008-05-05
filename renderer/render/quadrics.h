@@ -138,7 +138,7 @@ class CqSphere : public CqQuadric
 		virtual	~CqSphere()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -181,7 +181,7 @@ class CqCone : public CqQuadric
 		virtual	~CqCone()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -221,7 +221,7 @@ class CqCylinder : public CqQuadric
 		virtual	~CqCylinder()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -265,7 +265,7 @@ class CqHyperboloid : public CqQuadric
 		virtual	~CqHyperboloid()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -303,7 +303,7 @@ class CqParaboloid : public CqQuadric
 		virtual	~CqParaboloid()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -342,7 +342,7 @@ class CqTorus : public CqQuadric
 		virtual	~CqTorus()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -382,7 +382,7 @@ class CqDisk : public CqQuadric
 		virtual	~CqDisk()
 		{}
 
-		virtual	void	Bound(CqBound* bound) const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );

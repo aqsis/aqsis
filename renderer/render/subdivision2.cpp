@@ -1338,7 +1338,7 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 }
 
 
-void	CqSurfaceSubdivisionPatch::Bound(CqBound* bound) const
+void	CqSurfaceSubdivisionPatch::Bound(IqBound* bound) const
 {
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
@@ -2130,7 +2130,7 @@ bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 }
 
 
-void	CqSurfaceSubdivisionMesh::Bound(CqBound* bound) const
+void	CqSurfaceSubdivisionMesh::Bound(IqBound* bound) const
 {
 	if( m_pTopology && m_pTopology->pPoints() && m_pTopology->pPoints()->P() )
 	{

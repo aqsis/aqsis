@@ -111,7 +111,7 @@ TqInt CqSurface::Uses() const
 /** Adjust the bound of the quadric taking into account transformation motion blur.
  */
 
-void CqSurface::AdjustBoundForTransformationMotion( CqBound* B ) const
+void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 {
 	// Create a map of transformation keyframes, taking into account both object and camera motion.
 	TqInt iTime;
