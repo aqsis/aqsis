@@ -144,7 +144,8 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\Readme.lnk" "$INSTDIR\doc\README.txt"
   SetOutPath "$INSTDIR\bin"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@ (Command Line).lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h' "$INSTDIR\bin\application.ico" 0
   SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Credits.lnk" "$INSTDIR\doc\AUTHORS.txt"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\License.lnk" "$INSTDIR\doc\LICENSE.txt"
@@ -195,8 +196,8 @@ SectionIn 1 2
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-  ;;SetOutPath "$INSTDIR\doc"
-  ;;CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\What's New.lnk" "$INSTDIR\doc\CHANGES.txt"
+  SetOutPath "$INSTDIR\doc"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\What's New.lnk" "$INSTDIR\doc\CHANGES.txt"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -269,7 +270,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+    CreateShortCut "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
     desktop_end:
 
   ; Create 'Quick Launch' icon
@@ -277,7 +278,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$QUICKLAUNCH\${PACKAGE_NAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+    CreateShortCut "$QUICKLAUNCH\${PACKAGE_NAME}.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
