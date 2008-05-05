@@ -47,12 +47,12 @@ XPStyle on
 !define MUI_UNABORTWARNING
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
-!define MUI_HEADERIMAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\header.bmp"
-!define MUI_HEADERIMAGE_UNBITMAP "@CMAKE_SOURCE_DIR@\distribution\win\header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "@WINPACKAGEDIR@\header.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP "@WINPACKAGEDIR@\header.bmp"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\wizard.bmp"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "@CMAKE_SOURCE_DIR@\distribution\win\wizard.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "@WINPACKAGEDIR@\wizard.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "@WINPACKAGEDIR@\wizard.bmp"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
@@ -121,6 +121,7 @@ SectionIn 1 2
   File "@CMAKE_BINARY_DIR@\aqsisrc"
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.dll"
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.exe"
+  File "@WINPACKAGEDIR@\*.ico"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "@CMAKE_SOURCE_DIR@\AUTHORS"
   File "/oname=LICENSE.txt" "@CMAKE_SOURCE_DIR@\COPYING"
@@ -293,44 +294,44 @@ Var /GLOBAL QUICKLAUCH_ICON
     file:
     WriteRegStr HKCR ".exr" "" "Aqsis.EXR"
     WriteRegStr HKCR "Aqsis.EXR" "" "${PACKAGE_SHELLEXT_EXR_INFO}"
-    WriteRegStr HKCR "Aqsis.EXR\DefaultIcon" "" "$INSTDIR\bin\piqsl.exe,1"
+    WriteRegStr HKCR "Aqsis.EXR\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.EXR\shell\open" "" "${PACKAGE_SHELLEXT_EXR}"
     WriteRegStr HKCR "Aqsis.EXR\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
     WriteRegStr HKCR "Aqsis.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
-    WriteRegStr HKCR "Aqsis.RIB\DefaultIcon" "" "$INSTDIR\bin\aqsis.exe,0"
+    WriteRegStr HKCR "Aqsis.RIB\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.RIB\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
     WriteRegStr HKCR "Aqsis.RIB\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
 
     ; Compressed RIB (.rib.gz) support needs looking at - Windows seems to have an issue with double extensions !!!
     WriteRegStr HKCR ".ribz" "" "Aqsis.RIBGZ"
     WriteRegStr HKCR "Aqsis.RIBGZ" "" "${PACKAGE_SHELLEXT_RIBGZ_INFO}"
-    WriteRegStr HKCR "Aqsis.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\aqsis.exe,0"
+    WriteRegStr HKCR "Aqsis.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.RIBGZ\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
     WriteRegStr HKCR "Aqsis.RIBGZ\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
     
     WriteRegStr HKCR ".sl" "" "Aqsis.SL"
     WriteRegStr HKCR "Aqsis.SL" "" "${PACKAGE_SHELLEXT_SL_INFO}"
-    WriteRegStr HKCR "Aqsis.SL\DefaultIcon" "" "$INSTDIR\bin\aqsl.exe,1"
+    WriteRegStr HKCR "Aqsis.SL\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.SL\shell\open" "" "${PACKAGE_SHELLEXT_SL}"
     WriteRegStr HKCR "Aqsis.SL\shell\open\command" "" '"$INSTDIR\bin\aqsl.exe" "%1"'
     
     WriteRegStr HKCR ".slx" "" "Aqsis.SLX"
     WriteRegStr HKCR "Aqsis.SLX" "" "${PACKAGE_SHELLEXT_SLX_INFO}"
-    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\aqsltell.exe,1"
+    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
     WriteRegStr HKCR "Aqsis.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
 
     WriteRegStr HKCR ".tif" "" "Aqsis.TIF"
     WriteRegStr HKCR "Aqsis.TIF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIF\DefaultIcon" "" "$INSTDIR\bin\piqsl.exe,1"
+    WriteRegStr HKCR "Aqsis.TIF\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.TIF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
     WriteRegStr HKCR "Aqsis.TIF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
     WriteRegStr HKCR ".tiff" "" "Aqsis.TIFF"
     WriteRegStr HKCR "Aqsis.TIFF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIFF\DefaultIcon" "" "$INSTDIR\bin\piqsl.exe,1"
+    WriteRegStr HKCR "Aqsis.TIFF\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
     WriteRegStr HKCR "Aqsis.TIFF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
     WriteRegStr HKCR "Aqsis.TIFF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
     file_end:
