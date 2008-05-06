@@ -9,11 +9,11 @@
 	<key>CFBundleIdentifier</key>
 	<string>org.aqsis.Aqsis</string>
 	<key>CFBundleIconFile</key>
-	<string>Aqsis</string>	
+	<string>${CMAKE_PROJECT_NAME}</string>	
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Aqsis Renderer</string>
+	<string>${PACKAGE_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,6 +29,6 @@
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>RenderMan® Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.</string>
+	<string>${PACKAGE_COPYRIGHT_OTHER}</string>
 </dict>
 </plist>

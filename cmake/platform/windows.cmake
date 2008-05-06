@@ -21,6 +21,19 @@ SET(CONTENTDIR "content"
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
+#
+# Create resource file for use during linking
+#
+CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/application.rc.in.cmake" "${PROJECT_BINARY_DIR}/application.rc")
+IF(MSVC)
+	ADD_CUSTOM_COMMAND(TARGET piqsl
+		PRE_LINK
+		COMMAND rc.exe
+		ARGS "application.rc"
+		WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+	)
+ENDIF(MSVC)
+
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.
 #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")

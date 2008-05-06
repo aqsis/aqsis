@@ -5,11 +5,6 @@
 
 
 ; Helper defines
-!define /date YEAR "%Y"
-!define PACKAGE_NAME "Aqsis Renderer"
-!define PACKAGE_VENDOR "Aqsis Team"
-!define PACKAGE_COPYRIGHT "Copyright (c) ${YEAR}, ${PACKAGE_VENDOR}."
-!define PACKAGE_COPYRIGHT_OTHER "RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved."
 !define PACKAGE_SHELLEXT_EXR "View with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_EXR_INFO "OpenEXR Image"
 !define PACKAGE_SHELLEXT_RIB "Render with @CMAKE_PROJECT_NAME@"
@@ -29,7 +24,7 @@
 !define PACKAGE_UNINST_ROOT_KEY "HKLM"
 !define PACKAGE_STARTMENU_REGVAL "NSIS:StartMenuDir"
 
-Name "${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@"
+Name "@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@"
 BrandingText "www.aqsis.org"
 OutFile "@CMAKE_BINARY_DIR@\aqsis-setup-@MAJOR@.@MINOR@.@BUILD@.exe"
 InstallDir "$PROGRAMFILES\@CMAKE_PROJECT_NAME@"
@@ -70,7 +65,7 @@ XPStyle on
 ; Start menu page
 Var ICONS_GROUP
 !define MUI_STARTMENUPAGE_NODISABLE
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${PACKAGE_NAME}\@MAJOR@.@MINOR@.@BUILD@"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "@PACKAGE_NAME@\@MAJOR@.@MINOR@.@BUILD@"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${PACKAGE_UNINST_ROOT_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${PACKAGE_UNINST_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PACKAGE_STARTMENU_REGVAL}"
@@ -99,11 +94,11 @@ ReserveFile "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini"
 
 ; Installer 'Version' tab content
 VIProductVersion "@MAJOR@.@MINOR@.@BUILD@.0"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "@PACKAGE_VENDOR@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@PACKAGE_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@MAJOR@.@MINOR@.@BUILD@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PACKAGE_NAME}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "${PACKAGE_COPYRIGHT}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PACKAGE_VENDOR}"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${PACKAGE_COPYRIGHT_OTHER}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@PACKAGE_COPYRIGHT@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "@PACKAGE_COPYRIGHT_OTHER@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@CMAKE_PROJECT_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@"
 
@@ -121,7 +116,6 @@ SectionIn 1 2
   File "@CMAKE_BINARY_DIR@\aqsisrc"
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.dll"
   File "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.exe"
-  File "@WINPACKAGEDIR@\*.ico"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "@CMAKE_SOURCE_DIR@\AUTHORS"
   File "/oname=LICENSE.txt" "@CMAKE_SOURCE_DIR@\COPYING"
@@ -144,8 +138,8 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\Readme.lnk" "$INSTDIR\doc\README.txt"
   SetOutPath "$INSTDIR\bin"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@ (Command Line).lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h' "$INSTDIR\bin\application.ico" 0
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@.lnk" "$INSTDIR\bin\eqsl.exe"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\@CMAKE_PROJECT_NAME@ (Command Line).lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
   SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Credits.lnk" "$INSTDIR\doc\AUTHORS.txt"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\License.lnk" "$INSTDIR\doc\LICENSE.txt"
@@ -270,7 +264,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
+    CreateShortCut "$DESKTOP\@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe"
     desktop_end:
 
   ; Create 'Quick Launch' icon
@@ -278,7 +272,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$QUICKLAUNCH\${PACKAGE_NAME}.lnk" "$INSTDIR\bin\eqsl.exe" "" "$INSTDIR\bin\application.ico" 0
+    CreateShortCut "$QUICKLAUNCH\@PACKAGE_NAME@.lnk" "$INSTDIR\bin\eqsl.exe"
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
@@ -295,44 +289,44 @@ Var /GLOBAL QUICKLAUCH_ICON
     file:
     WriteRegStr HKCR ".exr" "" "Aqsis.EXR"
     WriteRegStr HKCR "Aqsis.EXR" "" "${PACKAGE_SHELLEXT_EXR_INFO}"
-    WriteRegStr HKCR "Aqsis.EXR\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.EXR\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.EXR\shell\open" "" "${PACKAGE_SHELLEXT_EXR}"
     WriteRegStr HKCR "Aqsis.EXR\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
     WriteRegStr HKCR "Aqsis.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
-    WriteRegStr HKCR "Aqsis.RIB\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.RIB\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
     WriteRegStr HKCR "Aqsis.RIB\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
 
     ; Compressed RIB (.rib.gz) support needs looking at - Windows seems to have an issue with double extensions !!!
     WriteRegStr HKCR ".ribz" "" "Aqsis.RIBGZ"
     WriteRegStr HKCR "Aqsis.RIBGZ" "" "${PACKAGE_SHELLEXT_RIBGZ_INFO}"
-    WriteRegStr HKCR "Aqsis.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.RIBGZ\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
     WriteRegStr HKCR "Aqsis.RIBGZ\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
     
     WriteRegStr HKCR ".sl" "" "Aqsis.SL"
     WriteRegStr HKCR "Aqsis.SL" "" "${PACKAGE_SHELLEXT_SL_INFO}"
-    WriteRegStr HKCR "Aqsis.SL\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.SL\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.SL\shell\open" "" "${PACKAGE_SHELLEXT_SL}"
     WriteRegStr HKCR "Aqsis.SL\shell\open\command" "" '"$INSTDIR\bin\aqsl.exe" "%1"'
     
     WriteRegStr HKCR ".slx" "" "Aqsis.SLX"
     WriteRegStr HKCR "Aqsis.SLX" "" "${PACKAGE_SHELLEXT_SLX_INFO}"
-    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
     WriteRegStr HKCR "Aqsis.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
 
     WriteRegStr HKCR ".tif" "" "Aqsis.TIF"
     WriteRegStr HKCR "Aqsis.TIF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIF\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.TIF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.TIF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
     WriteRegStr HKCR "Aqsis.TIF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
     WriteRegStr HKCR ".tiff" "" "Aqsis.TIFF"
     WriteRegStr HKCR "Aqsis.TIFF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIFF\DefaultIcon" "" "$INSTDIR\bin\mime.ico,0"
+    WriteRegStr HKCR "Aqsis.TIFF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "Aqsis.TIFF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
     WriteRegStr HKCR "Aqsis.TIFF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
     file_end:
@@ -344,10 +338,10 @@ Section -Post
   WriteRegStr HKLM "${PACKAGE_DIR_REGKEY}" "" "$INSTDIR\bin\aqsis.exe"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\application.ico"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\eqsl.exe"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayVersion" "@MAJOR@.@MINOR@.@BUILD@"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "${PACKAGE_WEB_SITE}"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "${PACKAGE_VENDOR}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@PACKAGE_VENDOR@"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "${PACKAGE_WEB_SUPPORT}"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "${PACKAGE_WEB_UPDATE}"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Comments" "$INSTDIR"
@@ -385,11 +379,11 @@ FunctionEnd
 
 Section Uninstall
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
-  Delete "$DESKTOP\${PACKAGE_NAME} @MAJOR@.@MINOR@.@BUILD@.lnk"
-  Delete "$QUICKLAUNCH\${PACKAGE_NAME}.lnk"
+  Delete "$DESKTOP\@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk"
+  Delete "$QUICKLAUNCH\@PACKAGE_NAME@.lnk"
 
   RMDir /r "$SMPROGRAMS\$ICONS_GROUP"
-  RMDir "$SMPROGRAMS\${PACKAGE_NAME}"
+  RMDir "$SMPROGRAMS\@PACKAGE_NAME@"
 
   RMDir /r "$INSTDIR"
 
