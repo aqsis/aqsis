@@ -70,6 +70,17 @@ class AQSISTEX_SHARE CqTextureBuffer
 		CqTextureBuffer(const TqInt width, const TqInt height,
 				const TqInt numChannels);
 
+		/** \brief Wrap a texture buffer around preexisting data
+		 *
+		 * \param pixelData - array of pixel data of the specified size
+		 * \param width - buffer width
+		 * \param height - buffer height
+		 * \param numChannels - number of channels of type T per pixel.
+		 */
+		CqTextureBuffer(boost::shared_array<T> pixelData,
+				const TqInt width, const TqInt height,
+				const TqInt numChannels);
+
 		/** \brief Copy constructor
 		 *
 		 * This constructor creates a copy of rhs, but possibly with a
@@ -244,7 +255,7 @@ class CqTextureBuffer<T>::CqIterator
 		CqIterator(const CqTextureBuffer<T>& buf, const SqFilterSupport& support);
 
 		/// Reference to the underlying buffer.
-		const CqTextureBuffer<T>& m_buf;
+		const CqTextureBuffer<T>* m_buf;
 		/// Support region to iterate over
 		SqFilterSupport m_support;
 		/// current x-position
@@ -295,7 +306,7 @@ class CqTextureBuffer<T>::CqStochasticIterator
 				const SqFilterSupport& support, TqInt numSamples);
 
 		/// Reference to the underlying buffer.
-		const CqTextureBuffer<T>& m_buf;
+		const CqTextureBuffer<T>* m_buf;
 		/// Support region to iterate over
 		SqFilterSupport m_support;
 		/// current x-position
@@ -325,6 +336,16 @@ inline CqTextureBuffer<T>::CqTextureBuffer()
 template<typename T>
 inline CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt numChannels)
 	: m_pixelData(new T[width * height * numChannels]),
+	m_width(width),
+	m_height(height),
+	m_numChannels(numChannels)
+{ }
+
+template<typename T>
+inline CqTextureBuffer<T>::CqTextureBuffer(boost::shared_array<T> pixelData,
+		const TqInt width, const TqInt height,
+		const TqInt numChannels)
+	: m_pixelData(pixelData),
 	m_width(width),
 	m_height(height),
 	m_numChannels(numChannels)
@@ -524,13 +545,13 @@ template<typename T>
 const typename CqTextureBuffer<T>::TqSampleVector
 CqTextureBuffer<T>::CqIterator::operator*() const
 {
-	return m_buf(m_x, m_y);
+	return (*m_buf)(m_x, m_y);
 }
 
 template<typename T>
 CqTextureBuffer<T>::CqIterator::CqIterator(const CqTextureBuffer<T>& buf,
 		const SqFilterSupport& support)
-	: m_buf(buf),
+	: m_buf(&buf),
 	m_support(support),
 	m_x(m_support.sx.start),
 	m_y(m_support.sx.isEmpty() ? m_support.sy.end : m_support.sy.start)
@@ -561,7 +582,7 @@ template<typename T>
 const typename CqTextureBuffer<T>::TqSampleVector
 CqTextureBuffer<T>::CqStochasticIterator::operator*() const
 {
-	return m_buf(m_x, m_y);
+	return (*m_buf)(m_x, m_y);
 }
 
 template<typename T>
@@ -580,7 +601,7 @@ template<typename T>
 CqTextureBuffer<T>::CqStochasticIterator::CqStochasticIterator(
 		const CqTextureBuffer<T>& buf, const SqFilterSupport& support,
 		TqInt numSamples)
-	: m_buf(buf),
+	: m_buf(&buf),
 	m_support(support),
 	m_x(0),
 	m_y(0),

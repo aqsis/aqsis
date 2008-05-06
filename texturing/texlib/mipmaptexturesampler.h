@@ -33,11 +33,10 @@
 
 #include "aqsismath.h"
 #include "ewafilter.h"
+#include "filtertexture.h"
 #include "itexturesampler.h"
 #include "mipmaplevelcache.h"
 #include "sampleaccum.h"
-#include "filtertexture.h"
-#include "texturebuffer.h" // remove when using tiled textures.
 
 namespace Aqsis {
 
@@ -50,23 +49,20 @@ namespace Aqsis {
  * mipmap level to be as small as possible, subject to the filter falling
  * across a sufficient number of pixels.
  */
-template<typename T>
+template<typename LevelCacheT>
 class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 {
-	private:
-		/// Type for the mipmap level cache that the sampler needs.
-		typedef CqMipmapLevelCache<CqTextureBuffer<T> > TqCacheType;
 	public:
 		/** \brief Construct a sampler from the provided set of mipmap levels.
 		 */
-		CqMipmapTextureSampler(const boost::shared_ptr<TqCacheType>& levels);
+		CqMipmapTextureSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqTextureSampler
 		virtual void sample(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
-		boost::shared_ptr<TqCacheType> m_levels;
+		boost::shared_ptr<LevelCacheT> m_levels;
 };
 
 
@@ -120,14 +116,14 @@ class CqScaledWeights
 
 //------------------------------------------------------------------------------
 // CqMipmapTextureSampler implementation
-template<typename T>
-CqMipmapTextureSampler<T>::CqMipmapTextureSampler(
-		const boost::shared_ptr<TqCacheType>& levels)
+template<typename LevelCacheT>
+CqMipmapTextureSampler<LevelCacheT>::CqMipmapTextureSampler(
+		const boost::shared_ptr<LevelCacheT>& levels)
 	: m_levels(levels)
 { }
 
-template<typename T>
-void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
+template<typename LevelCacheT>
+void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	/// \todo Refactor this function - it's getting rather long and unweildly.
@@ -136,10 +132,9 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 
-	const CqTextureBuffer<T>& baseBuf = m_levels->level(0);
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(quad, baseBuf.width(),
-			baseBuf.height(), sampleOpts.sBlur(), sampleOpts.tBlur());
+	CqEwaFilterFactory ewaFactory(quad, m_levels->width0(),
+			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 	bool usingBlur = sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0;
 	// Select mipmap level to use.
 	//
@@ -160,8 +155,8 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 		//
 		// Experiments show that for large blur factors minFilterWidth should
 		// be about 4 for good results.
-		TqFloat maxBlur = max(sampleOpts.sBlur()*baseBuf.width(),
-				sampleOpts.tBlur()*baseBuf.height());
+		TqFloat maxBlur = max(sampleOpts.sBlur()*m_levels->width0(),
+				sampleOpts.tBlur()*m_levels->height0());
 		// To estimate how much to increase the blur, we take the ratio of the
 		// the blur to the computed width of the minor axis of the filter.
 		// This should be near 0 for blur which doesn't effect the filtering
@@ -234,8 +229,9 @@ void CqMipmapTextureSampler<T>::sample(const SqSampleQuad& sampleQuad,
 	}
 }
 
-template<typename T>
-const CqTextureSampleOptions& CqMipmapTextureSampler<T>::defaultSampleOptions() const
+template<typename LevelCacheT>
+const CqTextureSampleOptions&
+CqMipmapTextureSampler<LevelCacheT>::defaultSampleOptions() const
 {
 	return m_levels->defaultSampleOptions();
 }

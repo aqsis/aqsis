@@ -41,6 +41,8 @@ namespace Aqsis
  * A support is represented by two integers, "start" and "end".  These specify
  * the range [start,end) where the left end is *inclusive* and the right end
  * *exclusive*.
+ *
+ * \todo Clean up this class for a more uniform interface (make things more uniform?)
  */
 struct SqFilterSupport1D
 {

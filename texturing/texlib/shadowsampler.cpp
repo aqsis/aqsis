@@ -31,18 +31,18 @@
 #include "sampleaccum.h"
 #include "filtertexture.h"
 #include "texexception.h"
-#include "texturebuffer.h" // remove when using tiled textures.
+#include "tilearray.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqShadowSampler implementation
 
-CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
+CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& file,
 				const CqMatrix& currToWorld)
 	: m_currToLight(),
 	m_currToLightTexCoords(),
-	m_pixelBuf(new CqTextureBuffer<TqFloat>()),
+	m_pixelBuf(),
 	m_defaultSampleOptions()
 {
 	if(!file)
@@ -60,9 +60,6 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 				<< file->fileName() << "\"");
 	}
 	m_currToLight = (*worldToLight) * currToWorld;
-
-	// Read pixel data
-	file->readPixels(*m_pixelBuf);
 
 	// Get matrix which transforms the sample points to texture coordinates.
 	const CqMatrix* worldToLightScreen = header.findPtr<Attr::WorldToScreenMatrix>();
@@ -82,6 +79,9 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTexInputFile>& file,
 	m_currToLightTexCoords.Scale(0.5f, -0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
+
+	// Connect pixel array to file
+	m_pixelBuf.reset(new CqTileArray<TqFloat>(file, 0));
 }
 
 namespace {
@@ -211,8 +211,10 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			// the filter support).  This is absolutely necessary when the
 			// filter support is very large, as can occur with large blur
 			// factors.
-			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
-					sampleOpts.numSamples());
+//			// \todo FIXME - add stochastic sampling back in.
+			filterTextureNowrap(accumulator, *m_pixelBuf, support);
+//			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
+//					sampleOpts.numSamples());
 		}
 	}
 	else

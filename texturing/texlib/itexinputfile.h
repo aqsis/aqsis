@@ -89,6 +89,29 @@ class AQSISTEX_SHARE IqTexInputFile
 		void readPixels(Array2DType& buffer, TqInt startLine = 0,
 				TqInt numScanlines = -1) const;
 
+		/** \brief Low-level readPixels() function to be overridden by child classes
+		 *
+		 * The implementation of readPixels simply validates the input
+		 * parameters against the image dimensions as reported by header(),
+		 * sets up the buffer, and calls readPixelsImpl().
+		 *
+		 * Implementations of readPixelsImpl() can assume that startLine and
+		 * numScanlines specify a valid range.
+		 *
+		 * \note Don't use this low-level interface unless you have a good
+		 * reason.  The higher level readPixels() function is a lot safer and
+		 * more user friendly.
+		 *
+		 * \param buffer - Raw buffer to read the data into.  Must be large
+		 *                 enough to read width*numScanlines pixels with the
+		 *                 same channel structure specified in the image
+		 *                 header.
+		 * \param startLine - scanline to start reading the data from (top == 0)
+		 * \param numScanlines - number of scanlines to read, must be positive!
+		 */
+		virtual void readPixelsImpl(TqUint8* buffer, TqInt startLine,
+				TqInt numScanlines) const = 0;
+
 		/** \brief Open an input image file in any format
 		 *
 		 * Uses magic numbers to determine the file format of the file given by
@@ -100,18 +123,6 @@ class AQSISTEX_SHARE IqTexInputFile
 		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqTexInputFile> open(const std::string& fileName);
-	protected:
-		/** \brief Low-level readPixels() function to be overridden by child classes
-		 *
-		 * The implementation of readPixels simply validates the input
-		 * parameters against the image dimensions as reported by header(),
-		 * sets up the buffer, and calls readPixelsImpl().
-		 *
-		 * Implementations of readPixelsImpl() can assume that startLine and
-		 * numScanlines specify a valid range.
-		 */
-		virtual void readPixelsImpl(TqUint8* buffer, TqInt startLine,
-				TqInt numScanlines) const = 0;
 };
 
 

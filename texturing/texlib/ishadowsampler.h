@@ -38,7 +38,7 @@
 namespace Aqsis {
 
 class IqTiledTexInputFile;
-class IqTexInputFile;
+class IqTiledTexInputFile;
 
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling shadow texture buffers.
@@ -82,7 +82,7 @@ class AQSISTEX_SHARE IqShadowSampler
 		 *               with.
 		 */
 		static boost::shared_ptr<IqShadowSampler> create(
-				const boost::shared_ptr<IqTexInputFile>& file,
+				const boost::shared_ptr<IqTiledTexInputFile>& file,
 				const CqMatrix& camToWorld);
 		/** \brief Create a dummy shadow texture sampler.
 		 *

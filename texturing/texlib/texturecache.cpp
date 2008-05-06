@@ -29,7 +29,7 @@
 #include "exception.h"
 #include "file.h"
 #include "ishadowsampler.h"
-#include "itexinputfile.h"
+#include "itiledtexinputfile.h"
 #include "itexturesampler.h"
 #include "logging.h"
 #include "sstring.h"
@@ -67,7 +67,7 @@ void CqTextureCache::flush()
 
 const CqTexFileHeader* CqTextureCache::textureInfo(const char* name)
 {
-	boost::shared_ptr<IqMultiTexInputFile> file;
+	boost::shared_ptr<IqTiledTexInputFile> file;
 	try
 	{
 		file = getTextureFile(name);
@@ -126,25 +126,37 @@ SamplerT& CqTextureCache::findSampler(
 	}
 }
 
-boost::shared_ptr<IqMultiTexInputFile> CqTextureCache::getTextureFile(
+boost::shared_ptr<IqTiledTexInputFile> CqTextureCache::getTextureFile(
 		const char* name)
 {
 	TqUlong hash = CqString::hash(name);
-	std::map<TqUlong, boost::shared_ptr<IqMultiTexInputFile> >::const_iterator
+	std::map<TqUlong, boost::shared_ptr<IqTiledTexInputFile> >::const_iterator
 		fileIter = m_texFileCache.find(hash);
 	if(fileIter != m_texFileCache.end())
 		// File exists in the cache; return it.
 		return fileIter->second;
-	// Else open the file and store it in the cache before returning it.
-	boost::shared_ptr<IqMultiTexInputFile> file = IqMultiTexInputFile::open(
-			findFileInPath(name, m_searchPathCallback()) );
+	// Else try to open the file and store it in the cache before returning it.
+	std::string fullName = findFileInPath(name, m_searchPathCallback());
+	boost::shared_ptr<IqTiledTexInputFile> file;
+	try
+	{
+		file = IqTiledTexInputFile::open(fullName);
+	}
+	catch(XqBadTexture& e)
+	{
+		file = IqTiledTexInputFile::openAny(fullName);
+		/// \todo Make sure this warning doesn't apply to files used only for
+		/// the textureInfo() function...
+		Aqsis::log() << warning << "Could not open file as a tiled texture: "
+			<< e.what() << ".  Rendering will continue, but may be slower.\n";
+	}
 	m_texFileCache[hash] = file;
 	return file;
 }
 
 template<typename SamplerT>
 boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
-		const boost::shared_ptr<IqMultiTexInputFile>& file)
+		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
 	return SamplerT::create(file);
 }
@@ -153,7 +165,7 @@ boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
 // the camera->world transformation matrix.
 template<>
 boost::shared_ptr<IqShadowSampler>
-CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqMultiTexInputFile>& file)
+CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
 	return IqShadowSampler::create(file, m_currToWorld);
 }

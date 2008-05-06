@@ -41,7 +41,7 @@ namespace Aqsis {
 
 class IqTextureSampler;
 class IqShadowSampler;
-class IqMultiTexInputFile;
+class IqTiledTexInputFile;
 class CqTexFileHeader;
 
 /** \brief A cache managing the various types of texture samplers.
@@ -119,7 +119,7 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 *
 		 * \param name - file name to open.
 		 */
-		boost::shared_ptr<IqMultiTexInputFile> getTextureFile(const char* name);
+		boost::shared_ptr<IqTiledTexInputFile> getTextureFile(const char* name);
 		/** \brief Create a sampler of the given type from a file.
 		 *
 		 * SamplerT - is a sampler type to instantiate.
@@ -128,13 +128,13 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 */
 		template<typename SamplerT>
 		boost::shared_ptr<SamplerT> newSamplerFromFile(
-				const boost::shared_ptr<IqMultiTexInputFile>& file);
+				const boost::shared_ptr<IqTiledTexInputFile>& file);
 
 		/// Cached textures live in here
 		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
 		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
 		/// Cached texture files live in here:
-		std::map<TqUlong, boost::shared_ptr<IqMultiTexInputFile> > m_texFileCache;
+		std::map<TqUlong, boost::shared_ptr<IqTiledTexInputFile> > m_texFileCache;
 		/// Camera -> world transformation - used for creating shadow maps.
 		CqMatrix m_currToWorld;
 		/// Callback function to obtain the current texture search path.

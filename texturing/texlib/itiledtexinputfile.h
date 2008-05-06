@@ -48,6 +48,18 @@ namespace Aqsis {
  *
  * This interface allows tiles to be read from file one at a time, while also
  * providing convenient access to various data about the tiling.
+ *
+ * Tiled images may contain multiple sub-images stored within the single file.
+ * The interface allows random access to tiles from the various sub-images for
+ * convenience.  A useful simplifying assumption is that the tiles for all
+ * subimages are assumed to be of the same size when using this interface.
+ *
+ * Efficiency of random tile access depends strongly on the exact image type
+ * being used to store the tile data.  Some image formats like TIFF don't model
+ * such random access directly, which means switching between subimages may be
+ * costly.  If this becomes an issue, an alternative would be to provide a
+ * clone() function to make a copy of the backend, and use separate copies to
+ * access separate subimages.
  */
 class AQSISTEX_SHARE IqTiledTexInputFile
 {
@@ -77,30 +89,21 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		//@}
 
 		//--------------------------------------------------
-		/// \name Functions for accessing multiple sub-images.
+		/// \name Access to information about sub-images.
 		//@{
-		/** Set the image index in a multi-image file.
-		 *
-		 * In general, this function may be expected to modify the image header
-		 * to reflect the metadata for the new image level.
-		 *
-		 * \param newIndex - new index in the multi-image file.
-		 */
-		virtual void setImageIndex(TqInt newIndex) = 0;
-		/** Get the image index for a multi-image file.
-		 *
-		 * \return the current image index
-		 */
-		virtual TqInt imageIndex() const = 0;
 		/** Get the number of images in the multi-image file.
 		 *
 		 * \return The number of images
 		 */
 		virtual TqInt numSubImages() const = 0;
+		/// Get the width of image with the given index
+		virtual TqInt width(TqInt index) const = 0;
+		/// Get the height of image with the given index
+		virtual TqInt height(TqInt index) const = 0;
 		//@}
 
 		//--------------------------------------------------
-		/** \brief Read in a tile.
+		/** \brief Random read access to tile data.
 		 *
 		 * ArrayT is a type modelling a simple resizeable 2D array
 		 * interface.  It should provide the following methods:
@@ -117,11 +120,13 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * image are resized to exactly fit the image edges.
 		 *
 		 * \param buffer - buffer to read the tile into
-		 * \tileX - horizontal tile coordinate, starting from 0 in the top left.
-		 * \tileY - vertical tile coordinate, starting from 0 in the top left.
+		 * \param tileX - horizontal tile coordinate, starting from 0 in the top left.
+		 * \param tileY - vertical tile coordinate, starting from 0 in the top left.
+		 * \param subImageIdx - subimage index from which to read the tile.
 		 */
 		template<typename ArrayT>
-		void readTile(ArrayT& buffer, TqInt tileX, TqInt tileY) const;
+		void readTile(ArrayT& buffer, TqInt tileX, TqInt tileY,
+				TqInt subImageIdx) const;
 
 		/** \brief Open a tiled input file.
 		 *
@@ -134,6 +139,21 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqTiledTexInputFile> open(const std::string& fileName);
+		/** \brief Open any image file using the tiled interface.
+		 *
+		 * Sometimes it may be useful to wrap any image up in a tiled
+		 * interface.  This function returns a tiled image interface wrapping
+		 * any image type which can be read using the IqTexInputFile interface.
+		 *
+		 * \note Using such images as tiled images is not guaranteed to be
+		 * memory efficient!
+		 *
+		 * \param fileName - file to open.  Can be in any of the formats
+		 * understood by aqsistex.
+		 * \return The newly opened input file
+		 */
+		static boost::shared_ptr<IqTiledTexInputFile> openAny(const std::string& fileName);
+
 	protected:
 		/** \brief Low-level readTile() function to be overridden by child classes
 		 *
@@ -145,29 +165,34 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 *                 the tile data.
 		 * \param tileX - x-coordinate for tile
 		 * \param tileY - y-coordinate for tile
+		 * \param subImageIdx - subimage index
 		 * \param tileSize - Size of the tile to be read.  (May be truncated at
 		 *                   image bottom or right.)
 		 */
 		virtual void readTileImpl(TqUint8* buffer, TqInt tileX, TqInt tileY,
-				const SqTileInfo tileSize) const = 0;
+				TqInt subImageIdx, const SqTileInfo tileSize) const = 0;
 };
 
 
 template<typename ArrayT>
-void IqTiledTexInputFile::readTile(ArrayT& buffer, TqInt tileX, TqInt tileY) const
+void IqTiledTexInputFile::readTile(ArrayT& buffer, TqInt tileX, TqInt tileY,
+		TqInt subImageIdx) const
 {
 	SqTileInfo tInfo = tileInfo();
-	const CqTexFileHeader& h = header();
+	TqInt w = width(subImageIdx);
+	TqInt h = height(subImageIdx);
 	// Modify the tile size in the case where a tile of the natural size would
 	// tile fall off the image edge.  
-	if((tileX + 1)*tInfo.width > h.width())
-		tInfo.width = h.width() - tileX*tInfo.width;
-	if((tileY + 1)*tInfo.height > h.height())
-		tInfo.height = h.height() - tileY*tInfo.height;
+	if((tileX + 1)*tInfo.width > w)
+		tInfo.width = w - tileX*tInfo.width;
+	if((tileY + 1)*tInfo.height > h)
+		tInfo.height = h - tileY*tInfo.height;
 	assert(tInfo.width > 0);
 	assert(tInfo.height > 0);
-	buffer.resize(tInfo.width, tInfo.height, h.channelList());
-	readTileImpl(buffer.rawData(), tileX, tileY, tInfo);
+	assert(subImageIdx >= 0);
+	assert(subImageIdx < numSubImages());
+	buffer.resize(tInfo.width, tInfo.height, header().channelList());
+	readTileImpl(buffer.rawData(), tileX, tileY, subImageIdx, tInfo);
 }
 
 } // namespace Aqsis

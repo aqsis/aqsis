@@ -27,7 +27,7 @@
 #include "ishadowsampler.h"
 
 #include "dummyshadowsampler.h"
-#include "itexinputfile.h"
+#include "itiledtexinputfile.h"
 #include "shadowsampler.h"
 #include "texexception.h"
 
@@ -36,7 +36,7 @@ namespace Aqsis {
 // IqShadowSampler implementation
 
 boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
-		const boost::shared_ptr<IqTexInputFile>& file, const CqMatrix& camToWorld)
+		const boost::shared_ptr<IqTiledTexInputFile>& file, const CqMatrix& camToWorld)
 {
 	assert(file);
 	switch(file->header().channelList().sharedChannelType())

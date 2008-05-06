@@ -34,7 +34,7 @@
 #include "itexinputfile.h"
 #include "mipmaptexturesampler.h"
 #include "texturebuffer.h"
-//#include "tilearray.h"
+#include "tilearray.h"
 
 namespace Aqsis {
 
@@ -45,12 +45,12 @@ namespace {
 
 template<typename T>
 boost::shared_ptr<IqTextureSampler> createMipmapSampler(
-		const boost::shared_ptr<IqMultiTexInputFile>& file)
+		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	boost::shared_ptr<CqMipmapLevelCache<CqTextureBuffer<T> > >
-		levels(new CqMipmapLevelCache<CqTextureBuffer<T> >(file));
-	boost::shared_ptr<IqTextureSampler>
-		sampler(new CqMipmapTextureSampler<T>(levels));
+	typedef CqMipmapLevelCache<CqTileArray<T> > TqLevelCache;
+	boost::shared_ptr<TqLevelCache> levels(new TqLevelCache(file));
+	boost::shared_ptr<IqTextureSampler> sampler(
+			new CqMipmapTextureSampler<TqLevelCache>(levels));
 	return sampler;
 }
 
@@ -62,13 +62,6 @@ boost::shared_ptr<IqTextureSampler> createMipmapSampler(
 
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
-{
-	assert(0);
-	return createDummy();
-}
-
-boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
-		const boost::shared_ptr<IqMultiTexInputFile>& file)
 {
 	if(!file)
 		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
@@ -93,11 +86,18 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 			return createMipmapSampler<TqUint8>(file);
 		case Channel_Signed8:
 			return createMipmapSampler<TqInt8>(file);
+		default:
 		case Channel_TypeUnknown:
 			break;
 	}
 	AQSIS_THROW(XqBadTexture, "Could not create a texture sampler for file \"" 
 			<< file->fileName() << "\"");
+	return createDummy();
+}
+
+boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
+		const boost::shared_ptr<IqMultiTexInputFile>& file)
+{
 	return createDummy();
 }
 

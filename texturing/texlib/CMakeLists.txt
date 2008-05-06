@@ -34,6 +34,7 @@ SET(AQSISTEX_SRCS
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
+	tiledanyinputfile.cpp
 	tiledtiffinputfile.cpp
 	texturecache.cpp
 	texturesampleoptions.cpp
@@ -83,6 +84,7 @@ SET(AQSISTEX_HDRS
 	tiffinputfile.h
 	tiffoutputfile.h
 	tilearray.h
+	tiledanyinputfile.h
 	tiledtiffinputfile.h
 	wrapmode.h
 	)

@@ -27,6 +27,7 @@
 #include "itiledtexinputfile.h"
 
 #include "magicnumber.h"
+#include "tiledanyinputfile.h"
 #include "tiledtiffinputfile.h"
 #include "texexception.h"
 
@@ -53,6 +54,12 @@ boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
 	}
 	assert(0);
 	return boost::shared_ptr<IqTiledTexInputFile>();
+}
+
+boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::openAny(
+		const std::string& fileName)
+{
+	return boost::shared_ptr<IqTiledTexInputFile>(new CqTiledAnyInputFile(fileName));
 }
 
 } // namespace Aqsis
