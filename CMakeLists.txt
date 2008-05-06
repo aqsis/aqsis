@@ -38,6 +38,14 @@ ELSE(WIN32)
 ENDIF(WIN32)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+#
+# Placed some package definitions here else they are not initialised
+#
+SET(PACKAGE_NAME "Aqsis Renderer")
+SET(PACKAGE_VENDOR "Aqsis Team")
+SET(PACKAGE_COPYRIGHT "Copyright (C) 2008, ${PACKAGE_VENDOR}.")
+SET(PACKAGE_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
+
 SET(MAJOR 1)
 SET(MINOR 3)
 SET(BUILD 0)
@@ -131,6 +139,8 @@ ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
 	ADD_SUBDIRECTORY(tools/eqsl)
 ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
+
+
 #
 # Build aqsisrc
 #
@@ -180,11 +190,6 @@ ENDIF(APPLE)
 # Generic Packaging setup
 #
 INCLUDE(InstallRequiredSystemLibraries)
-
-SET(PACKAGE_NAME "Aqsis Renderer")
-SET(PACKAGE_VENDOR "Aqsis Team")
-SET(PACKAGE_COPYRIGHT "Copyright (C) 2008, ${PACKAGE_VENDOR}.")
-SET(PACKAGE_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_NAME}")
 SET(CPACK_PACKAGE_VENDOR "${PACKAGE_VENDOR}")

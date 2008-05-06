@@ -1,6 +1,3 @@
-APPICON ICON "${CMAKE_SOURCE_DIR}/distribution/win/application.ico"
-DOCICON ICON "${CMAKE_SOURCE_DIR}/distribution/win/mime.ico"
-
 1 VERSIONINFO
 FILEVERSION ${MAJOR}, ${MINOR}, ${BUILD}, 0
 PRODUCTVERSION ${MAJOR}, ${MINOR}, ${BUILD}, 0

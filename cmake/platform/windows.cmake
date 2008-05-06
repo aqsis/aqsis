@@ -22,9 +22,12 @@ SET(SCRIPTSDIR "scripts"
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
 #
-# Create resource file for use during linking
+# Create resource files for use during linking
 #
-CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/application.rc.in.cmake" "${PROJECT_BINARY_DIR}/application.rc")
+CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${PROJECT_BINARY_DIR}/info.rc")
+CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJECT_BINARY_DIR}/icon.rc")
+SET(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
+SET(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
 
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.
