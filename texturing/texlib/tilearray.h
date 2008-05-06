@@ -194,6 +194,9 @@ class CqTileArray<T>::CqIterator
 		 */
 		CqIterator(const CqTileArray<T>& tileArray, const SqFilterSupport& support);
 
+		/// Advance to the next tile in the support.
+		void nextTile();
+
 		/// Iterator type for the underlying tiles
 		typedef typename TqTile::CqIterator TqBaseIter;
 		/// Support region to iterate over.
@@ -374,7 +377,7 @@ inline TqInt CqTileArray<T>::numChannels() const
 }
 
 template<typename T>
-typename CqTileArray<T>::CqIterator CqTileArray<T>::begin(
+inline typename CqTileArray<T>::CqIterator CqTileArray<T>::begin(
 		const SqFilterSupport& support) const
 {
 	return CqIterator(*this, intersect(support,
@@ -388,7 +391,7 @@ typename CqTileArray<T>::CqIterator CqTileArray<T>::begin(
 //}
 
 template<typename T>
-inline boost::intrusive_ptr<typename CqTileArray<T>::TqTile> CqTileArray<T>::getTile(
+boost::intrusive_ptr<typename CqTileArray<T>::TqTile> CqTileArray<T>::getTile(
 		const TqInt x, const TqInt y) const
 {
 	assert(x < m_widthInTiles);
@@ -413,23 +416,31 @@ CqTileArray<T>::CqIterator::operator++()
 	// Iterate over the current tile.
 	++m_currPos;
 	if(!m_currPos.inSupport())
-	{
-		// If we've passed outside the support of the current tile, we
-		// advance to the next one.
-		++m_tileX;
-		if(m_tileX >= m_tileXEnd)
-		{
-			m_tileX = m_tileX0;
-			++m_tileY;
-		}
-		if(inSupport())
-		{
-			// Grab the next tile as long as we're within the overall
-			// filter support.
-			m_currPos = m_tileArray->getTile(m_tileX,m_tileY)->begin(m_support);
-		}
-	}
+		nextTile();
 	return *this;
+}
+
+// Optimization note: It's important to have nextTile() as a separate function
+// (at least for gcc-4.1), otherwise operator++ isn't inlined.  Failing to
+// inline operator++() has somewhat severe performance implications.  Since
+// nextTile doesn't get called very often it's not necessary to inline it.
+template<typename T>
+void CqTileArray<T>::CqIterator::nextTile()
+{
+	// If we've passed outside the support of the current tile, we
+	// advance to the next one.
+	++m_tileX;
+	if(m_tileX >= m_tileXEnd)
+	{
+		m_tileX = m_tileX0;
+		++m_tileY;
+	}
+	if(inSupport())
+	{
+		// Grab the next tile as long as we're within the overall
+		// filter support.
+		m_currPos = m_tileArray->getTile(m_tileX,m_tileY)->begin(m_support);
+	}
 }
 
 template<typename T>
