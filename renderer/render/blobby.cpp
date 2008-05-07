@@ -388,7 +388,7 @@ class blobby_vm_assembler
 							CqString dbo(m_strings[m_code[op.index+1]]);
 
 #if defined(AQSIS_SYSTEM_POSIX)
-							CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib";
+							CqString plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib";
 							plugin_path += m_strings[m_code[op.index+1]];
 							dbo = plugin_path;
 							dbo += ".so";

@@ -80,7 +80,7 @@ int main( int argc, const char** argv )
 #elif defined(AQSIS_SYSTEM_MACOSX)
 #else
 
-	g_shader_path = DEFAULT_SHADER_PATH;
+	g_shader_path = AQSIS_XSTR(DEFAULT_SHADER_PATH);
 #endif
 
 	/*Aqsis::QGetRenderContextI();*/

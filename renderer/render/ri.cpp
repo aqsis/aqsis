@@ -523,7 +523,7 @@ void SetDefaultRiOptions( void )
 	separator = "/";
 #else
 	// Minty: Need to work out the executable path here.
-	rootPath = DEFAULT_RC_PATH;
+	rootPath = AQSIS_XSTR(DEFAULT_RC_PATH);
 	separator = "/";
 #endif
 

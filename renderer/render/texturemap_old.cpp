@@ -327,7 +327,7 @@ TqInt CqTextureMapOld::Convert( CqString &strName )
 
 #if defined(AQSIS_SYSTEM_POSIX)
 
-	CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.so";
+	CqString plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib" + extension + "2tif.so";
 	// Check for lib<ext>2tif.so; it it is existing than let the converter to
 	// be called.
 	// I assume on MacOSX and Linux the file we are looking will be something:
@@ -335,7 +335,7 @@ TqInt CqTextureMapOld::Convert( CqString &strName )
 	//     libjpg2tif.dylib, libtga2tif.dylib, ...2tif.dylib
 	if (access(plugin_path.c_str(), F_OK) != 0)
 	{
-		plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.dylib";
+		plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib" + extension + "2tif.dylib";
 		if (access(plugin_path.c_str(), F_OK) != 0)
 			return 0;
 	}

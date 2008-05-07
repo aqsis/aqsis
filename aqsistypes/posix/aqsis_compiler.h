@@ -55,4 +55,7 @@
 #define COMMON_SHARE
 #define AQSISTEX_SHARE
 
+#define AQSIS_XSTR(s) AQSIS_STR(s)
+#define AQSIS_STR(s) #s
+
 #endif // AQSIS_COMPILER_H_INCLUDED
