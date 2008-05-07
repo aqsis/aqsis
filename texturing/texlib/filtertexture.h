@@ -49,7 +49,7 @@ namespace Aqsis {
  *
  * SampleAccumT - A model of the SampleAccumulatorConcept.
  * ArrayT - A texture buffer array type.  This needs to have a pixel iterator
- *          of type ArrayT::CqIterator for filter support regions, accessible
+ *          of type ArrayT::TqIterator for filter support regions, accessible
  *          via a begin() method.  It also needs width(), height() and
  *          numChannels() methods.  See CqTextureBuffer for a model which
  *          satisfies the requirements.
@@ -169,7 +169,7 @@ void filterWrappedBuffer(SampleAccumT& sampleAccum, const ArrayT& buffer,
 			// Here we perform a normal iteration over y, but leave 
 			TqInt xClamp = clamp(tlX, 0, buffer.width()-1);
 			SqFilterSupport clampedSupport(SqFilterSupport1D(xClamp, xClamp+1), tileSupport.sy);
-			for(typename ArrayT::CqIterator i = buffer.begin(clampedSupport);
+			for(typename ArrayT::TqIterator i = buffer.begin(clampedSupport);
 					i.inSupport(); ++i)
 			{
 				for(TqInt ix = tileSupport.sx.start; ix < tileSupport.sx.end; ++ix)
@@ -183,7 +183,7 @@ void filterWrappedBuffer(SampleAccumT& sampleAccum, const ArrayT& buffer,
 		// inverted (and slightly duplicated :-/ ) version of the code above
 		TqInt yClamp = clamp(tlY, 0, buffer.height()-1);
 		SqFilterSupport clampedSupport(tileSupport.sx, SqFilterSupport1D(yClamp, yClamp+1));
-		for(typename ArrayT::CqIterator i = buffer.begin(clampedSupport);
+		for(typename ArrayT::TqIterator i = buffer.begin(clampedSupport);
 				i.inSupport(); ++i)
 		{
 			for(TqInt iy = tileSupport.sy.start; iy < tileSupport.sy.end; ++iy)
@@ -197,7 +197,7 @@ void filterWrappedBuffer(SampleAccumT& sampleAccum, const ArrayT& buffer,
 		SqFilterSupport wrappedSupport(
 				tileSupport.sx.start - tlX, tileSupport.sx.end - tlX,
 				tileSupport.sy.start - tlY, tileSupport.sy.end - tlY);
-		for(typename ArrayT::CqIterator i = buffer.begin(wrappedSupport);
+		for(typename ArrayT::TqIterator i = buffer.begin(wrappedSupport);
 				i.inSupport(); ++i)
 		{
 			sampleAccum.accumulate(i.x() + tlX, i.y() + tlY, *i);
@@ -215,7 +215,7 @@ void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
 		return;
 	// First accumulate samples across the part of the support which lies
 	// inside the buffer.
-	for(typename ArrayT::CqIterator i = buffer.begin(support); i.inSupport(); ++i)
+	for(typename ArrayT::TqIterator i = buffer.begin(support); i.inSupport(); ++i)
 		sampleAccum.accumulate(i.x(), i.y(), *i);
 
 	// Next, if the support isn't wholly inside the buffer, we need to consider
@@ -258,7 +258,7 @@ void filterTextureNowrap(SampleAccumT& sampleAccum, const ArrayT& buffer,
 	// Accumulate samples across the part of the support which lies inside the
 	// buffer only.  No wrapping is performed, so parts of the support outside
 	// the buffer are simply truncated.
-	for(typename ArrayT::CqIterator i = buffer.begin(support); i.inSupport(); ++i)
+	for(typename ArrayT::TqIterator i = buffer.begin(support); i.inSupport(); ++i)
 		sampleAccum.accumulate(i.x(), i.y(), *i);
 }
 
@@ -271,7 +271,7 @@ void filterTextureNowrapStochastic(SampleAccumT& sampleAccum, const ArrayT& buff
 	// Accumulate samples stochastically across the part of the support which
 	// lies inside the buffer only.  No wrapping is performed, so parts of the
 	// support outside the buffer are simply truncated.
-	for(typename ArrayT::CqStochasticIterator i = buffer.beginStochastic(support,
+	for(typename ArrayT::TqStochasticIterator i = buffer.beginStochastic(support,
 				numSamples); i.inSupport(); ++i)
 		sampleAccum.accumulate(i.x(), i.y(), *i);
 }

@@ -81,6 +81,9 @@ class CqTileArray : boost::noncopyable //, public CqMemoryMonitored
 	public:
 		class CqIterator;
 		class CqStochasticIterator;
+
+		typedef CqIterator TqIterator;
+		typedef CqStochasticIterator TqStochasticIterator;
 		typedef typename TqTile::TqSampleVector TqSampleVector;
 
 		/** \brief Construct a tiled texture array connected to a file
@@ -113,7 +116,7 @@ class CqTileArray : boost::noncopyable //, public CqMemoryMonitored
 		 *
 		 * \param support - support to iterate over
 		 */
-		CqIterator begin(const SqFilterSupport& support) const;
+		TqIterator begin(const SqFilterSupport& support) const;
 		/** \brief Stochastic iterator access to pixels in the given support.
 		 *
 		 * A stochastic support iterator aims to choose a fixed number of
@@ -123,8 +126,8 @@ class CqTileArray : boost::noncopyable //, public CqMemoryMonitored
 		 * \param support - support to iterate over
 		 * \param numSamples - number of samples to choose in the support.
 		 */
-//		CqStochasticIterator beginStochastic(const SqFilterSupport& support,
-//				TqInt numSamples) const;
+		TqStochasticIterator beginStochastic(const SqFilterSupport& support,
+				TqInt numSamples) const;
 		//@}
 	private:
 		/** \brief Access to the underlying tiles
@@ -198,7 +201,8 @@ class CqTileArray<T>::CqIterator
 		void nextTile();
 
 		/// Iterator type for the underlying tiles
-		typedef typename TqTile::CqIterator TqBaseIter;
+		typedef typename TqTile::TqIterator TqBaseIter;
+
 		/// Support region to iterate over.
 		SqFilterSupport m_support;
 		/// Parent array to obtain tiles from.
@@ -221,10 +225,11 @@ class CqTileArray<T>::CqIterator
 };
 
 
-//template<typename T>
-//class CqTileArray<T>::CqStocahsticIterator
-//{
-//};
+template<typename T>
+class CqTileArray<T>::CqStochasticIterator
+{
+	/// \todo Implementation
+};
 
 //==============================================================================
 // Implementation details
@@ -253,7 +258,11 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		TqInt m_y0;
 	public:
 		/// Pixel iterator for CqTextureTile
-		class CqIterator;
+		template<typename> class CqIterator;
+
+		/// Iterator types
+		typedef CqIterator<typename ArrayT::TqIterator> TqIterator;
+		typedef CqIterator<typename ArrayT::TqStochasticIterator> TqStochasticIterator;
 		/// Type of samples returned from dereferenceing the pixel iterator
 		typedef typename ArrayT::TqSampleVector TqSampleVector;
 
@@ -271,11 +280,19 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		}
 
 		/// Return a pixel iterator for the given support region
-		CqIterator begin(const SqFilterSupport& support) const
+		TqIterator begin(const SqFilterSupport& support) const
 		{
-			return CqIterator( m_x0, m_y0, m_pixels->begin(
+			return TqIterator( m_x0, m_y0, m_pixels->begin(
 						SqFilterSupport(support.sx.start - m_x0, support.sx.end - m_x0,
 						support.sy.start - m_y0, support.sy.end - m_y0)) );
+		}
+		/// Return a stochastic pixel iterator for the given support region
+		TqStochasticIterator beginStochastic(const SqFilterSupport& support,
+				TqInt numSamps) const
+		{
+			return TqStochasticIterator( m_x0, m_y0, m_pixels->beginStochastic(
+						SqFilterSupport(support.sx.start - m_x0, support.sx.end - m_x0,
+						support.sy.start - m_y0, support.sy.end - m_y0), numSamps) );
 		}
 };
 
@@ -284,12 +301,11 @@ class CqTextureTile : public CqIntrusivePtrCounted
 /** \brief A pixel iterator adjusting an underlying iterator's origin.
  */
 template<typename ArrayT>
+template<typename BaseIterT>
 class CqTextureTile<ArrayT>::CqIterator
 {
 	private:
 		friend class CqTextureTile<ArrayT>;
-		/// Type of the base iterator
-		typedef typename ArrayT::CqIterator TqBaseIter;
 
 		/** \brief Construct a pixel iterator with offset origin.
 		 *
@@ -297,14 +313,14 @@ class CqTextureTile<ArrayT>::CqIterator
 		 * \param y0 - y-coordinate of origin for offset
 		 * \param baseIter - iterator for base tile.
 		 */
-		CqIterator(const TqInt x0, const TqInt y0, const TqBaseIter& baseIter)
+		CqIterator(const TqInt x0, const TqInt y0, const BaseIterT& baseIter)
 			: m_currPos(baseIter),
 			m_x0(x0),
 			m_y0(y0)
 		{ }
 
 		/// Current position in underlying buffer
-		TqBaseIter m_currPos;
+		BaseIterT m_currPos;
 		/// x-coordinate of origin for offset
 		TqInt m_x0;
 		/// y-coordinate of origin for offset
@@ -377,18 +393,20 @@ inline TqInt CqTileArray<T>::numChannels() const
 }
 
 template<typename T>
-inline typename CqTileArray<T>::CqIterator CqTileArray<T>::begin(
+inline typename CqTileArray<T>::TqIterator CqTileArray<T>::begin(
 		const SqFilterSupport& support) const
 {
-	return CqIterator(*this, intersect(support,
+	return TqIterator(*this, intersect(support,
 				SqFilterSupport(0,m_width, 0,m_height)));
 }
 
-//template<typename T>
-//CqTileArray<T>::CqStochasticIterator CqTileArray<T>::beginStochastic(
-//		const SqFilterSupport& support, TqInt numSamples) const
-//{
-//}
+template<typename T>
+inline typename CqTileArray<T>::TqStochasticIterator CqTileArray<T>::beginStochastic(
+		const SqFilterSupport& support, TqInt numSamples) const
+{
+	/// \todo implementation.
+	return TqStochasticIterator();
+}
 
 template<typename T>
 boost::intrusive_ptr<typename CqTileArray<T>::TqTile> CqTileArray<T>::getTile(

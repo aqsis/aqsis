@@ -55,6 +55,9 @@ class AQSISTEX_SHARE CqTextureBuffer
 		class CqIterator;
 		/// Stochastic pixel iterator class
 		class CqStochasticIterator;
+
+		typedef CqIterator TqIterator;
+		typedef CqStochasticIterator TqStochasticIterator;
 		/// Sample vector type returned by operator()
 		typedef CqSampleVector<T> TqSampleVector;
 
@@ -167,7 +170,7 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 *
 		 * \param support - support to iterate over
 		 */
-		CqIterator begin(const SqFilterSupport& support) const;
+		TqIterator begin(const SqFilterSupport& support) const;
 		/** \brief Stochastic iterator access to pixels in the given support.
 		 *
 		 * A stochastic support iterator aims to choose a fixed number of
@@ -177,7 +180,7 @@ class AQSISTEX_SHARE CqTextureBuffer
 		 * \param support - support to iterate over
 		 * \param numSamples - number of samples to choose in the support.
 		 */
-		CqStochasticIterator beginStochastic(const SqFilterSupport& support,
+		TqStochasticIterator beginStochastic(const SqFilterSupport& support,
 				TqInt numSamples) const;
 		//@}
 
@@ -414,19 +417,19 @@ inline const T* CqTextureBuffer<T>::value(const TqInt x, const TqInt y) const
 }
 
 template<typename T>
-inline typename CqTextureBuffer<T>::CqIterator CqTextureBuffer<T>::begin(
+inline typename CqTextureBuffer<T>::TqIterator CqTextureBuffer<T>::begin(
 		const SqFilterSupport& support) const
 {
-	return CqIterator(*this, intersect(SqFilterSupport(0, m_width, 0, m_height),
+	return TqIterator(*this, intersect(SqFilterSupport(0, m_width, 0, m_height),
 				support));
 }
 
 template<typename T>
-inline typename CqTextureBuffer<T>::CqStochasticIterator
+inline typename CqTextureBuffer<T>::TqStochasticIterator
 CqTextureBuffer<T>::beginStochastic(const SqFilterSupport& support,
 		TqInt numSamples) const
 {
-	return CqStochasticIterator(*this,
+	return TqStochasticIterator(*this,
 			intersect(SqFilterSupport(0, m_width, 0, m_height), support),
 			numSamples);
 }
