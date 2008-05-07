@@ -2,8 +2,8 @@
 # Author: Aqsis Team (packages@aqsis.org)
 # Info: Last tested with Fedora 8
 
-%define name        aqsis
-%define version     1.3.0
+%define name        ${CMAKE_PROJECT_NAME}
+%define version     ${MAJOR}.${MINOR}.${BUILD}
 %define release     1%{?dist}
 
 
@@ -17,7 +17,7 @@ BuildRequires:  cmake >= 2.4.6
 BuildRequires:  flex >= 2.5.4
 BuildRequires:  gcc-c++
 BuildRequires:  libtiff-devel >= 3.7.1
-BuildRequires:  libjpeg-devel >= 6.2.0
+BuildRequires:  libjpeg-devel >= 6
 BuildRequires:  bison >= 1.35.0
 BuildRequires:  fltk-fluid >= 1.1.0
 BuildRequires:  libxslt
@@ -121,7 +121,7 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS COPYING README ReleaseNotes
+%doc AUTHORS ChangeLog.txt COPYING README ReleaseNotes
 %{_bindir}/aqsis
 %{_bindir}/aqsl
 %{_bindir}/aqsltell
@@ -155,5 +155,5 @@ rm -rf "$RPM_BUILD_ROOT"
 
 %changelog
 * Sun Apr 27 2008 Leon Tony Atkinson < latkinson [at] aqsis [dot] org > - 1.3.0.alpha
-- Created new SPEC for latest Aqsis release, with some parts based on original SPEC
+- Created new SPEC for latest Aqsis release, with some parts based on original SPEC by Nicolas Chauvet & Tobias Sauerwein
 - Tested against Fedora 8

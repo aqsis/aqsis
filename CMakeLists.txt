@@ -179,6 +179,14 @@ ENDIF(WIN32)
 
 
 #
+# Linux SPEC Packaging
+#
+IF(UNIX AND NOT APPLE)
+	ADD_SUBDIRECTORY(distribution/linux/rpm)
+ENDIF(UNIX AND NOT APPLE)
+
+
+#
 # OSX Bundle Packaging
 #
 IF(APPLE)
