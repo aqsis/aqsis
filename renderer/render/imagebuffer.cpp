@@ -802,10 +802,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			else
 				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
 	
-			indexT0 = static_cast<TqInt>(lfloor((time0 - opentime) * timePerSample));
+			indexT0 = static_cast<TqInt>(std::floor((time0 - opentime) * timePerSample));
 			indexT1 = static_cast<TqInt>(lceil((time1 - opentime) * timePerSample));
-			if(indexT0 == indexT1 || time0 < opentime || time0 > closetime || time1 < opentime || time1 > closetime)
-				continue;
 		}
 
 		TqFloat maxCocX = 0;
@@ -1316,10 +1314,10 @@ void CqImageBuffer::RenderImage()
 		vecMin -= bHalf;
 		vecMax += bHalf;
 
-		long xmin = lfloor( vecMin.x() );
-		long ymin = lfloor( vecMin.y() );
-		long xmax = lceil( vecMax.x() );
-		long ymax = lceil( vecMax.y() );
+		long xmin = static_cast<long>( vecMin.x() );
+		long ymin = static_cast<long>( vecMin.y() );
+		long xmax = static_cast<long>( vecMax.x() );
+		long ymax = static_cast<long>( vecMax.y() );
 
 		if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
 			xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
@@ -1330,12 +1328,6 @@ void CqImageBuffer::RenderImage()
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
-		if( ymax < CropWindowYMin() || xmax < CropWindowXMin() )
-		{
-			CurrentBucket().aMPGs().clear();
-			CurrentBucket().aGrids().clear();
-			continue;
-		}
 
 		if ( !bIsEmpty )
 		{
