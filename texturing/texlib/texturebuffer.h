@@ -277,6 +277,9 @@ template<typename T>
 class CqTextureBuffer<T>::CqStochasticIterator
 {
 	public:
+		/// Construct a null iterator (dereferencing the result is an error)
+		CqStochasticIterator();
+
 		/// Go to the next pixel in the support
 		CqStochasticIterator& operator++();
 
@@ -286,7 +289,7 @@ class CqTextureBuffer<T>::CqStochasticIterator
 		 * against an ending iterator.  However, we ensue that convention here
 		 * for efficiency and convenience.
 		 */
-		bool inSupport();
+		bool inSupport() const;
 		/// Return the x-position of the currently pointed to pixel
 		TqInt x() const;
 		/// Return the y-position of the currently pointed to pixel
@@ -317,7 +320,7 @@ class CqTextureBuffer<T>::CqStochasticIterator
 		/// current y-position
 		TqInt m_y;
 		/// Total number of samples to take.
-		const TqInt m_numSamples;
+		TqInt m_numSamples;
 		/// Current sample number
 		TqInt m_sampleNum;
 };
@@ -576,7 +579,7 @@ CqTextureBuffer<T>::CqStochasticIterator::operator++()
 }
 
 template<typename T>
-bool CqTextureBuffer<T>::CqStochasticIterator::inSupport()
+bool CqTextureBuffer<T>::CqStochasticIterator::inSupport() const
 {
 	return m_sampleNum < m_numSamples;
 }
@@ -599,6 +602,16 @@ TqInt CqTextureBuffer<T>::CqStochasticIterator::y() const
 {
 	return m_y;
 }
+
+template<typename T>
+CqTextureBuffer<T>::CqStochasticIterator::CqStochasticIterator()
+	: m_buf(0),
+	m_support(),
+	m_x(0),
+	m_y(0),
+	m_numSamples(0),
+	m_sampleNum(0)
+{ }
 
 template<typename T>
 CqTextureBuffer<T>::CqStochasticIterator::CqStochasticIterator(

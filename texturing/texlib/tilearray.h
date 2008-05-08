@@ -40,7 +40,7 @@
 //#include "memorysentry.h"
 #include "itiledtexinputfile.h"
 #include "texturebuffer.h"
-//#include "tilebuffer.new.h"
+#include "randomtable.h"
 #include "smartptr.h"
 
 namespace Aqsis {
@@ -109,6 +109,20 @@ class CqTileArray : boost::noncopyable //, public CqMemoryMonitored
 		//--------------------------------------------------
 		/// \name Pixel access
 		//@{
+		/** \brief 2D Indexing operator - floating point pixel interface.
+		 *
+		 * The returned vector is a lightweight view onto the underlying pixel,
+		 * which presents the data as floating point values.
+		 *
+		 * Note that this function is not be very efficient, since the correct
+		 * tile has to be deduced for each invocation, which involves two
+		 * integer divisions.
+		 *
+		 * \param x - pixel index in width direction (column index)
+		 * \param y - pixel index in height direction (row index)
+		 * \return a lightweight vector holding a reference to the channels data
+		 */
+		const TqSampleVector operator()(const TqInt x, const TqInt y) const;
 		/** \brief Access to pixels through a pixel iterator
 		 *
 		 * The pixel iterator will iterate through all the pixels the provided
@@ -225,11 +239,83 @@ class CqTileArray<T>::CqIterator
 };
 
 
+//------------------------------------------------------------------------------
+/** \brief Stochastic pixel iterator for data held by CqTileArray, models
+ * StochasticPixelIteratorConcept.
+ *
+ * This iterator class encapsulates an efficient means for iterating over
+ * pixels held in a CqTileArray.  A given filter support for the region to be
+ * iterated over is first decomposed into non-overlapping pieces.  Each piece
+ * covers the required part of exactly one underlying tile, and stochastic
+ * iterators for these tiles are then used to traverse each tile in turn.
+ *
+ * The total number of samples is divided between the tiles to maximize
+ * stratification; every tile gets a number of samples which is proportional to
+ * the filter area which overlaps it.
+ */
 template<typename T>
 class CqTileArray<T>::CqStochasticIterator
 {
-	/// \todo Implementation
+	public:
+		/// Move to the next pixel in the support.
+		CqStochasticIterator& operator++();
+
+		/// Check whether the iterator still lies inside the support region.
+		bool inSupport() const;
+
+		/// x-coordinate of the currently referenced pixel
+		TqInt x() const;
+		/// y-coordinate of the currently referenced pixel
+		TqInt y() const;
+		/// Return a vector of the current pixel channels.
+		const typename TqTile::TqSampleVector operator*();
+
+	private:
+		/** \brief Construct a pixel iterator with the given underlying array
+		 * and support region.
+		 *
+		 * (Private constructor, since we only want CqTileArray to be able to
+		 * construct this.)
+		 *
+		 * \param tileArray - array to obtain tiles from
+		 * \param support - region to iterate over
+		 */
+		CqStochasticIterator(const CqTileArray<T>& tileArray,
+				const SqFilterSupport& support, TqInt numSamps);
+
+		/// Advance to the next tile in the support.
+		void nextTile();
+
+		/// Iterator type for the underlying tiles
+		typedef typename TqTile::TqStochasticIterator TqBaseIter;
+
+		/// Random number stream for partitioning samples into tiles (see nextTile)
+		static CqRandom m_random;
+
+		/// Support region to iterate over.
+		SqFilterSupport m_support;
+		/// Parent array to obtain tiles from.
+		const CqTileArray<T>* m_tileArray;
+		/// Starting x-coordinate (in tile coordinates with 0 being the top-left)
+		const TqInt m_tileX0;
+		/// One greater than the last valid tile x-coordinate
+		const TqInt m_tileXEnd;
+		/// One greater than the last valid tile y-coordinate
+		const TqInt m_tileYEnd;
+		/// Current tile x-coordinate
+		TqInt m_tileX;
+		/// Current tile y-coordinate
+		TqInt m_tileY;
+		/// Filter area remaining for tiles yet to be filtered over.
+		TqFloat m_remainingArea;
+		/// Number of samples remaining for tiles yet to be filtered over.
+		TqInt m_remainingSamples;
+		/// Current position in the underlying tiles.
+		TqBaseIter m_currPos;
+
+		friend class CqTileArray<T>;
 };
+
 
 //==============================================================================
 // Implementation details
@@ -279,6 +365,19 @@ class CqTextureTile : public CqIntrusivePtrCounted
 			return *m_pixels;
 		}
 
+		/** \brief 2D Indexing operator - floating point pixel interface.
+		 *
+		 * The returned vector is a lightweight view onto the underlying pixel,
+		 * which presents the data as floating point values.
+		 *
+		 * \param x - pixel index in width direction (column index)
+		 * \param y - pixel index in height direction (row index)
+		 * \return a lightweight vector holding a reference to the channels data
+		 */
+		const TqSampleVector operator()(const TqInt x, const TqInt y) const
+		{
+			return (*m_pixels)(x-m_x0, y-m_y0);
+		}
 		/// Return a pixel iterator for the given support region
 		TqIterator begin(const SqFilterSupport& support) const
 		{
@@ -326,6 +425,12 @@ class CqTextureTile<ArrayT>::CqIterator
 		/// y-coordinate of origin for offset
 		TqInt m_y0;
 	public:
+		/// Construct a null iterator (derferencing the result is an error)
+		CqIterator()
+			: m_currPos(),
+			m_x0(0),
+			m_y0(0)
+		{ }
 		/// Move to the next pixel position
 		CqIterator& operator++()
 		{
@@ -393,6 +498,13 @@ inline TqInt CqTileArray<T>::numChannels() const
 }
 
 template<typename T>
+const typename CqTileArray<T>::TqSampleVector
+CqTileArray<T>::operator()(const TqInt x, const TqInt y) const
+{
+	return (*getTile(x/m_tileWidth, y/m_tileHeight))(x,y);
+}
+
+template<typename T>
 inline typename CqTileArray<T>::TqIterator CqTileArray<T>::begin(
 		const SqFilterSupport& support) const
 {
@@ -404,8 +516,8 @@ template<typename T>
 inline typename CqTileArray<T>::TqStochasticIterator CqTileArray<T>::beginStochastic(
 		const SqFilterSupport& support, TqInt numSamples) const
 {
-	/// \todo implementation.
-	return TqStochasticIterator();
+	return TqStochasticIterator(*this, intersect(support,
+				SqFilterSupport(0,m_width, 0,m_height)), numSamples);
 }
 
 template<typename T>
@@ -445,8 +557,6 @@ CqTileArray<T>::CqIterator::operator++()
 template<typename T>
 void CqTileArray<T>::CqIterator::nextTile()
 {
-	// If we've passed outside the support of the current tile, we
-	// advance to the next one.
 	++m_tileX;
 	if(m_tileX >= m_tileXEnd)
 	{
@@ -505,6 +615,125 @@ CqTileArray<T>::CqIterator::CqIterator(const CqTileArray<T>& tileArray,
 	if(support.sx.isEmpty())
 		m_tileY = m_tileYEnd;
 }
+
+
+//------------------------------------------------------------------------------
+// CqTileArray<T>::CqStochasticIterator implementation
+template<typename T>
+CqRandom CqTileArray<T>::CqStochasticIterator::m_random;
+
+template<typename T>
+inline typename CqTileArray<T>::CqStochasticIterator&
+CqTileArray<T>::CqStochasticIterator::operator++()
+{
+	// Go to the next position in the underlying iterator for the current tile.
+	++m_currPos;
+	// When this fails, we move on to the next tile instead.
+	if(!m_currPos.inSupport())
+		nextTile();
+	return *this;
+}
+
+// Optimization note: It's important to have nextTile() as a separate function
+// from operator++ otherwise operator++ may not be inlined.  Failing to inline
+// operator++() has somewhat severe performance implications.
+template<typename T>
+void CqTileArray<T>::CqStochasticIterator::nextTile()
+{
+	if(m_remainingSamples == 0)
+	{
+		m_tileY = m_tileYEnd;
+		return;
+	}
+	TqInt numSamples = 0;
+	while(numSamples == 0)
+	{
+		// Find position of next tile.
+		++m_tileX;
+		if(m_tileX >= m_tileXEnd)
+		{
+			m_tileX = m_tileX0;
+			++m_tileY;
+		}
+		// Compute desired number of samples for the current tile.  This
+		// consists of two parts:
+		// 1) The tile gets a number of samples proportional to the area of the
+		//    support which crosses itself, divided by the total area of
+		//    the remaining filter support which is yet to be covered.
+		TqInt area = intersect(m_support,
+				SqFilterSupport( m_tileX*m_tileArray->m_tileWidth,
+					(m_tileX+1)*m_tileArray->m_tileWidth,
+					m_tileY*m_tileArray->m_tileHeight,
+					(m_tileY+1)*m_tileArray->m_tileHeight)).area();
+		TqFloat desiredSamples = m_remainingSamples*TqFloat(area)/m_remainingArea;
+		numSamples = lfloor(desiredSamples);
+		// 2) For any fractional part of the desired samples which remains, we
+		//    accept an extra sample with probability proportional to the
+		//    fractional part.
+		numSamples += m_random.RandomFloat() < desiredSamples-numSamples;
+		// Note that this scheme is actually biased toward tiles which are
+		// found later in the support in the case that a very small number of
+		// samples is used.  This may not matter in practise...
+		m_remainingArea -= area;
+	}
+	// Grab the underlying iterator for the next tile
+	m_currPos = m_tileArray->getTile(m_tileX,m_tileY)->beginStochastic(m_support,
+			numSamples);
+	m_remainingSamples -= numSamples;
+}
+
+template<typename T>
+inline bool CqTileArray<T>::CqStochasticIterator::inSupport() const
+{
+	return m_tileY < m_tileYEnd;
+}
+
+template<typename T>
+inline TqInt CqTileArray<T>::CqStochasticIterator::x() const
+{
+	return m_currPos.x();
+}
+
+template<typename T>
+inline TqInt CqTileArray<T>::CqStochasticIterator::y() const
+{
+	return m_currPos.y();
+}
+
+template<typename T>
+const typename CqTileArray<T>::TqTile::TqSampleVector
+inline CqTileArray<T>::CqStochasticIterator::operator*()
+{
+	return *m_currPos;
+}
+
+template<typename T>
+CqTileArray<T>::CqStochasticIterator::CqStochasticIterator(const CqTileArray<T>& tileArray,
+		const SqFilterSupport& support, TqInt numSamps)
+	: m_support(support),
+	m_tileArray(&tileArray),
+	m_tileX0(support.sx.start/tileArray.m_tileWidth),
+	m_tileXEnd((support.sx.end-1)/tileArray.m_tileWidth + 1),
+	m_tileYEnd((support.sy.end-1)/tileArray.m_tileHeight + 1),
+	m_tileX(m_tileX0),
+	m_tileY(support.sy.start/tileArray.m_tileHeight),
+	m_remainingArea(support.area()),
+	m_remainingSamples(numSamps),
+	m_currPos()
+{
+	// Make sure that inSupport() works correctly when the support region is
+	// empty.
+	if(support.isEmpty())
+		m_tileY = m_tileYEnd;
+	else
+	{
+		// Back off the iterator by one tile and invoke nextTile() to
+		// properly initialize the underlying iterator.
+		m_tileX -= 1;
+		nextTile();
+	}
+}
+
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

@@ -211,10 +211,8 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 			// the filter support).  This is absolutely necessary when the
 			// filter support is very large, as can occur with large blur
 			// factors.
-//			// \todo FIXME - add stochastic sampling back in.
-			filterTextureNowrap(accumulator, *m_pixelBuf, support);
-//			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
-//					sampleOpts.numSamples());
+			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
+					sampleOpts.numSamples());
 		}
 	}
 	else
