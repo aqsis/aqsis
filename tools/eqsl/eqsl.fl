@@ -165,7 +165,7 @@ else
 	std::vector<std::string> renderEngineArgsBundle;
 	for(int i = 0; i < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); ++i)
 		renderEngineArgsBundle.push_back(renderEngineArgs[i]);
-	renderEngineArgsBundle.push_back(std::string("-displays=\"") + resourcePtr + "/lib\");
+	renderEngineArgsBundle.push_back(std::string("-displays=\"") + resourcePtr + "/lib\"");
 	renderEngineArgsBundle.push_back(std::string("-shaders=\"") + resourcePtr + "/shaders\"");
 \#else
 	std::string program;
