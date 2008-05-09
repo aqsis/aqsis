@@ -58,7 +58,7 @@ class CqIntrusivePtrCounted
 {
 	public:
 		/// Get the number of references count for this object
-		inline TqUint referenceCount() const;
+		inline TqUint refCount() const;
 	protected:
 		/// Construct a reference counted object
 		inline CqIntrusivePtrCounted();
@@ -69,7 +69,7 @@ class CqIntrusivePtrCounted
 		/// Decrease the reference count; required for boost::intrusive_ptr
 		friend inline void intrusive_ptr_release(const CqIntrusivePtrCounted* ptr);
 		/// reference count for use with boost::intrusive_ptr
-		mutable TqUint m_referenceCount;
+		mutable TqUint m_refCount;
 };
 
 
@@ -78,16 +78,16 @@ class CqIntrusivePtrCounted
 // Inline functions for CqIntrusivePtrCounted
 //
 inline CqIntrusivePtrCounted::CqIntrusivePtrCounted()
-	: m_referenceCount(0)
+	: m_refCount(0)
 { }
 
 // pure virtual destructors need an implementation :-/
 inline CqIntrusivePtrCounted::~CqIntrusivePtrCounted()
 { }
 
-inline TqUint CqIntrusivePtrCounted::referenceCount() const
+inline TqUint CqIntrusivePtrCounted::refCount() const
 {
-	return m_referenceCount;
+	return m_refCount;
 }
 
 /** \todo: Threading: the following two functions are not thread-safe.  Using
@@ -98,12 +98,12 @@ inline TqUint CqIntrusivePtrCounted::referenceCount() const
  */
 inline void intrusive_ptr_add_ref(const CqIntrusivePtrCounted* ptr)
 {
-    ++ptr->m_referenceCount;
+    ++ptr->m_refCount;
 }
 
 inline void intrusive_ptr_release(const CqIntrusivePtrCounted* ptr)
 {
-    if(--ptr->m_referenceCount == 0)
+    if(--ptr->m_refCount == 0)
         delete ptr;
 }
 

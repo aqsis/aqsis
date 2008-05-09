@@ -94,6 +94,7 @@ namespace Aqsis {
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
+/// \todo <b>Code Review</b> Random number state shouldn't be stored in static storage - "independent" random number classes are not really independent in this case!  This will cause problems with reproducible sample patterns and big problems with future multithreading.
 static TqUlong mt[N];   /* the array for the state vector  */
 static TqInt   mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 
@@ -185,7 +186,7 @@ TqUint CqRandom::RandomInt()
 TqUint CqRandom::RandomInt( TqUint Range )
 {
 	TqDouble n = RandomFloat( Range );
-	return lround(n);
+	return lfloor(n);
 }
 
 /** Get a random float (0.0 <= value < 1.0).
