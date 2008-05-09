@@ -67,24 +67,26 @@ This package contains example content, including additional scenes and shaders.
 
 
 %prep
+%setup -q
 
 
 %build
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
-mkdir -p "$RPM_BUILD_ROOT/BUILD"
-cd "$RPM_BUILD_ROOT/BUILD"
-cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DDEFAULT_RC_PATH=/ -DLIBDIR="%{_libdir}" ../
+mkdir -p "%{buildroot}BUILD"
+cd "%{buildroot}BUILD"
+cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DAQSIS_BOOST_FILESYSTEM_LIBRARY_NAME=boost_filesystem-mt -DAQSIS_BOOST_REGEX_LIBRARY_NAME=boost_regex-mt -DAQSIS_BOOST_THREAD_LIBRARY_NAME=boost_thread-mt -DAQSIS_BOOST_WAVE_LIBRARY_NAME=boost_wave-mt ../
 make %{?_smp_mflags}
 
 
 %install
-make install
-mkdir -p "%{_datadir}/%{name}/desktop"
-cp "$RPM_BUILD_ROOT/distribution/linux/*.*" "%{_datadir}/%{name}/desktop"
-chmod a+rx "%{_datadir}/%{name}/scripts/mpanalyse.py"
-chmod a+rx "%{_datadir}/%{name}/content/ribs/scenes/vase/render.sh"
-chmod a+rx "%{_datadir}/%{name}/content/ribs/features/layeredshaders/render.sh"
+cd "%{buildroot}BUILD"
+make DESTDIR=%{?buildroot:%{buildroot}} install
+mkdir -p "%{buildroot}%{_datadir}/%{name}/desktop"
+cp "%{buildroot}/distribution/linux/*.*" "%{buildroot}%{_datadir}/%{name}/desktop"
+chmod a+rx "%{buildroot}%{_datadir}/%{name}/scripts/mpanalyse.py"
+chmod a+rx "%{buildroot}%{_datadir}/%{name}/content/ribs/scenes/vase/render.sh"
+chmod a+rx "%{buildroot}%{_datadir}/%{name}/content/ribs/features/layeredshaders/render.sh"
 
 
 %post
@@ -116,7 +118,7 @@ xdg-mime uninstall %{_datadir}/%{name}/desktop/aqsis.xml
 
 
 %clean
-rm -rf "$RPM_BUILD_ROOT"
+rm -rf "%{buildroot}"
 
 
 %files
