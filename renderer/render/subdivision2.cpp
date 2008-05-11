@@ -186,6 +186,31 @@ inline bool isDiscontinuousFaceVertex(const CqParameterTyped<TypeA, TypeB>* pPar
 	return false;
 }
 
+/** \brief Determine whether a facevertex parameter is discontinuous on the
+ * given edge.
+ *
+ * \see isDiscontinuousFaceVertex
+ *
+ * \param pParam - geometric parameter of class "facevertex" to test for discontinuitiy
+ * \param pEdge - edge in the topology data structure
+ * \param arrayIndex - array index for pParam.
+ */
+template<class TypeA, class TypeB>
+inline bool isDiscontinuousFaceVertexEdge(const CqParameterTyped<TypeA, TypeB>* pParam,
+		CqLath* pEdge, TqInt arrayIndex)
+{
+	CqLath* pCompanion = pEdge->ec();
+	if(pCompanion == NULL)
+	{
+		// We're on a boundary; this edge cannot have discontinuous facevertex values.
+		return false;
+	}
+	return !isClose(pParam->pValue(pEdge->FaceVertexIndex())[arrayIndex],
+					pParam->pValue(pEdge->cv()->FaceVertexIndex())[arrayIndex])
+		|| !isClose(pParam->pValue(pCompanion->FaceVertexIndex())[arrayIndex],
+					pParam->pValue(pCompanion->cv()->FaceVertexIndex())[arrayIndex]);
+}
+
 } // unnamed namespace
 
 //------------------------------------------------------------------------------
@@ -522,8 +547,8 @@ void CqSubdivision2::CreateEdgeVertex(CqParameter* pParamToModify,
 				// If either of the adjoining vertices are discontinuous, this
 				// edge should also be - make sure to interpolate it as a fully
 				// hard edge.
-				disctsFaceVertex = isDiscontinuousFaceVertex(pParam, pEdge, arrayindex)
-					|| isDiscontinuousFaceVertex(pParam, pEdge->ccf(), arrayindex);
+				disctsFaceVertex = isDiscontinuousFaceVertexEdge(pParam, pEdge,
+						arrayindex);
 			}
 
 			if( NULL != pEdge->ec() && !disctsFaceVertex)
