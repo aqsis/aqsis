@@ -27,6 +27,8 @@
 
 #include "tiffinputfile.h"
 
+#include "boost/scoped_array.hpp"
+
 #include "tiffdirhandle.h"
 
 namespace Aqsis {
@@ -176,7 +178,38 @@ void CqTiffInputFile::readPixelsTiled(TqUint8* buffer, TqInt startLine,
 void CqTiffInputFile::readPixelsRGBA(TqUint8* buffer, TqInt startLine,
 		TqInt numScanlines) const
 {
-	AQSIS_THROW(XqInternal, "readPixelsRGBA not implemented");
+	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
+	// Support odd tiff formats using the generic RGBA tiff functionality.
+	//
+	// We read in the entire image each time readPixelsRGBA() is called; this
+	// *will* cause a performance bottleneck if the user calls readPixels() on
+	// only a small number of scanlines at a time.
+	boost::scoped_array<uint32> inBuf(
+			new uint32[m_header.width()*m_header.height()]);
+	TIFFReadRGBAImageOriented(dirHandle.tiffPtr(), m_header.width(),
+			m_header.height(), inBuf.get(), ORIENTATION_TOPLEFT, 0);
+
+	// Unfortunately, the RGBA format which libtiff uses puts the RGBA bytes in
+	// the opposite order which we'd like, so we need to swap them.  It's
+	// possible to get around this using TIFFRGBAImageGet() but it's extra work
+	// which somewhat defeats the purpose of using the RGBA functionality as a
+	// catchall fallback anyway.
+	TqInt width = m_header.width();
+	TqInt bytesPerPixel = m_header.channelList().bytesPerPixel();
+	assert(bytesPerPixel == 4);
+	const uint32* inPtr = inBuf.get() + width*startLine;
+	for(TqInt line = 0; line < numScanlines; ++line)
+	{
+		for(TqInt col = 0; col < width; ++col)
+		{
+			buffer[col*bytesPerPixel] = TIFFGetR(inPtr[col]);
+			buffer[col*bytesPerPixel + 1] = TIFFGetG(inPtr[col]);
+			buffer[col*bytesPerPixel + 2] = TIFFGetB(inPtr[col]);
+			buffer[col*bytesPerPixel + 3] = TIFFGetA(inPtr[col]);
+		}
+		buffer += width*bytesPerPixel;
+		inPtr += width;
+	}
 }
 
 void CqTiffInputFile::setDirectory(tdir_t newDir)

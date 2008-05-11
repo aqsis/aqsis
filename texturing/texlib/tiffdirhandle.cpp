@@ -34,6 +34,7 @@
 #include "aqsismath.h"
 #include "matrix.h"
 #include "logging.h"
+#include "texexception.h"
 
 namespace Aqsis
 {
@@ -441,11 +442,18 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 	}
 	catch(XqUnknownTiffFormat& e)
 	{
+		// The format is something strange that we don't know how to handle
+		// directly... Use the generic RGBA handling built into libtiff...
 		Aqsis::log() << warning
 			<< "Cannot handle desired tiff format efficiently: \"" << e.what() << "\".\n"
 			"Switching to generic RGBA handling - this may result in some loss of precision\n";
-		// The format is something strange that we don't know how to handle
-		// directly... Use the generic RGBA handling built into libtiff...
+		char errBuf[1024];
+		if(!TIFFRGBAImageOK(tiffPtr(), errBuf))
+		{
+			AQSIS_THROW(XqBadTexture, "Cannot use generic RGBA tiff interface for file \""
+					<< m_fileHandle->fileName() << "\".  "
+					<< "Libtiff says: " << errBuf);
+		}
 		EqChannelType chanType = Channel_Unsigned8;
 		CqChannelList& channelList = header.channelList();
 		channelList.clear();
