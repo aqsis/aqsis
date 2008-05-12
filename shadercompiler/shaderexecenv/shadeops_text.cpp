@@ -152,7 +152,7 @@ void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cPara
 	}
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -184,7 +184,7 @@ void	CqShaderExecEnv::SO_format( IqShaderData* str, IqShaderData* Result, IqShad
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -217,7 +217,7 @@ void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShade
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -319,7 +319,7 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )

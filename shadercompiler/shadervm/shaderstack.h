@@ -144,7 +144,7 @@ static CqMatrix temp_matrix;
 
 #define OpABRS(OP, NAME) \
 		template <class A, class B, class R>	\
-		inline void	Op##NAME( A& a, B&b, R& r, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState ) \
+		inline void	Op##NAME( A& a, B&b, R& r, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, const CqBitVector& RunningState ) \
 		{ \
 			A vA; \
 			B vB; \
@@ -397,7 +397,8 @@ OpABRS( != , NE )
 OpABRS( *, MUL )
 /** Special case vector multiplication operator.
  */
-inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	CqVector3D vA, vB;
 	CqVector3D* pdA;
@@ -474,7 +475,8 @@ OpABRS( / , DIV )
  * \param pRes The shader data to store the results in.
  * \param RunningState The current SIMD state.
  */
-inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	CqMatrix vA;
 	CqMatrix vB;
@@ -566,7 +568,8 @@ OpABRS( || , LOR )
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -602,7 +605,8 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& Runn
  * \param RunningState The current SIMD state.
  */
 template <class A, class B>
-inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -638,7 +642,8 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, CqBitVector& RunningState )
+inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB,
+		IqShaderData* pC, const CqBitVector& RunningState )
 {
 	TqFloat x, y, z;
 
@@ -679,7 +684,8 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
                         IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, IqShaderData* pD,
                         IqShaderData* pE, IqShaderData* pF, IqShaderData* pG, IqShaderData* pH,
                         IqShaderData* pI, IqShaderData* pJ, IqShaderData* pK, IqShaderData* pL,
-                        IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP, CqBitVector& RunningState )
+                        IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP,
+						const CqBitVector& RunningState )
 {
 	TqFloat a1, a2, a3, a4;
 	TqFloat b1, b2, b3, b4;
@@ -729,7 +735,8 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -764,7 +771,8 @@ inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBit
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat vB;
@@ -834,7 +842,8 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, CqBitVector& RunningState )
+inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat val;
@@ -860,7 +869,8 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, Cq
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderData* pA, CqBitVector& RunningState )
+inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderData* pA,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat val, fi;
@@ -887,7 +897,8 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderDa
  * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
-inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC,
+		IqShaderData* pRes, const CqBitVector& RunningState )
 {
 	CqMatrix m;
 	TqFloat fr, fc;
@@ -911,7 +922,8 @@ inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqSha
  * \param pV The shader data which holds the value to place in the appropriate row/column.
  * \param RunningState The current SIMD state.
  */
-inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pV, CqBitVector& RunningState )
+inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC,
+		IqShaderData* pV, const CqBitVector& RunningState )
 {
 	CqMatrix m;
 	TqFloat fr, fc, val;

@@ -91,7 +91,7 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
 #define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
 #define	FOR_EACH		__iGrid = 0; \
-						CqBitVector& RS = RunningState(); \
+						const CqBitVector& RS = RunningState(); \
 						do \
 						{ \
 							if(!__fVarying || RS.Value( __iGrid ) ) \
@@ -202,7 +202,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		{
 			return ( m_CurrentState );
 		}
-		virtual	CqBitVector& RunningState()
+		virtual	const CqBitVector& RunningState() const
 		{
 			return ( m_RunningState );
 		}
@@ -244,6 +244,10 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 			}
 			// Current state needs to stop executing.
 			m_RunningState.SetAll(false);
+		}
+		virtual bool IsRunning()
+		{
+			return m_RunningState.Count() != 0;
 		}
 		virtual IqShaderData* FindStandardVar( const char* pname );
 

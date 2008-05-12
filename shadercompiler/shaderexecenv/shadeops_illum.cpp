@@ -178,7 +178,7 @@ void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -209,7 +209,7 @@ void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -245,7 +245,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Kt)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -296,7 +296,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(T)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -352,7 +352,7 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -404,7 +404,7 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 			if ( lp->pShader() ->fAmbient() )
 			{
 				__iGrid = 0;
-				CqBitVector& RS = RunningState();
+				const CqBitVector& RS = RunningState();
 				do
 				{
 					if(!__fVarying || RS.Value( __iGrid ) )
@@ -481,7 +481,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 			GetCurrentState();
 
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -568,7 +568,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 			PushState();
 			GetCurrentState();
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -630,7 +630,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -674,7 +674,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 			GetCurrentState();
 
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -722,7 +722,7 @@ void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -810,7 +810,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 		if( exec )
 		{
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -870,7 +870,7 @@ void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShad
 	if ( res )
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -932,7 +932,7 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -969,7 +969,7 @@ void CqShaderExecEnv::SO_gather( IqShaderData* category, IqShaderData* P, IqShad
 
 	__iGrid = 0;
 	__fVarying = true;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1021,7 +1021,7 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1068,7 +1068,7 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1132,7 +1132,7 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )

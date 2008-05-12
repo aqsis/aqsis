@@ -171,7 +171,7 @@ struct IqShaderExecEnv
 	virtual	CqBitVector& CurrentState() = 0;
 	/** Get the running execution state. Bits in the vector indicate which SIMD indexes are valid.
 	 */
-	virtual	CqBitVector& RunningState() = 0;
+	virtual	const CqBitVector& RunningState() const = 0;
 	/** Transfer the current state into the running state.
 	 */
 	virtual	void	GetCurrentState() = 0;
@@ -197,6 +197,14 @@ struct IqShaderExecEnv
 	 * current loop scope.
 	 */
 	virtual void RunningStatesBreak(TqInt numLevels) = 0;
+	/** \brief Determine if any of the current running state bits are set.
+	 *
+	 * Use this in preference to RunningState().Count() != 0, since it may be
+	 * cached for efficiency.
+	 *
+	 * \return true if any SIMD elements are currently running.
+	 */
+	virtual bool IsRunning() = 0;
 	/** Find a named standard variable in the list.
 	 * \param pname Character pointer to the name.
 	 * \return IqShaderData pointer or 0.

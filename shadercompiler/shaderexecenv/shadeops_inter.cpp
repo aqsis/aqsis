@@ -468,7 +468,7 @@ void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 	__fVarying=(Result)->Class()==class_varying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -502,7 +502,7 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 	__fVarying=(Result)->Class()==class_varying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )

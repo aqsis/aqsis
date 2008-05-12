@@ -379,7 +379,7 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -439,7 +439,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -505,7 +505,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -566,7 +566,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 	// Initialize extraction of varargs texture options.
 	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -643,7 +643,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startC
 		std::valarray<TqFloat> val;
 
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -683,7 +683,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startC
 	else
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -732,7 +732,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startC
 		pTMap->PrepareSampleOptions( paramMap );
 
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -761,7 +761,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startC
 	else
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -818,7 +818,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startC
 		pTMap->PrepareSampleOptions( paramMap );
 
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -859,7 +859,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startC
 	else
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -908,7 +908,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startC
 		pTMap->PrepareSampleOptions( paramMap );
 
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -937,7 +937,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startC
 	else
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -959,7 +959,7 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* startChannel, 
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -980,7 +980,7 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* startChannel, 
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1001,7 +1001,7 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, 
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1043,7 +1043,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	// Initialize extraction of varargs texture options.
 	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -1101,7 +1101,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel
 	// Initialize extraction of varargs texture options.
 	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
 
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	gridIdx = 0;
 	do
 	{
@@ -1283,7 +1283,7 @@ void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderDa
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1321,7 +1321,7 @@ void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderD
 	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str()*/ );
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1358,7 +1358,7 @@ void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1399,7 +1399,7 @@ void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1439,7 +1439,7 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1495,7 +1495,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* startCh
 		pMap->PrepareSampleOptions( paramMap );
 
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		TqInt nPages = pMap->NumPages() - 1;
 		do
 		{
@@ -1539,7 +1539,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* startCh
 	else
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )

@@ -96,7 +96,7 @@ void CqShaderVM::SO_ipushv()
 	TqInt ext = m_pEnv->shadingPointCount();
 	bool fVarying = ext > 1;
 	TqInt arrayLen = pVar->ArrayLength();
-	CqBitVector& RS = m_pEnv->RunningState();
+	const CqBitVector& RS = m_pEnv->RunningState();
 	for(TqInt i = 0; i < ext; i++)
 	{
 		if(!fVarying || RS.Value(i))
@@ -129,7 +129,7 @@ void CqShaderVM::SO_pop()
 	TqUint ext = max( m_pEnv->shadingPointCount(), pV->Size() );
 	bool fVarying = ext > 1;
 	TqUint i;
-	CqBitVector& RS = m_pEnv->RunningState();
+	const CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
 	{
 		if(!fVarying || RS.Value( i ))
@@ -147,7 +147,7 @@ void CqShaderVM::SO_ipop()
 	TqInt ext = max( m_pEnv->shadingPointCount(), pVar->Size() );
 	bool fVarying = ext > 1;
 	TqInt arrayLen = pVar->ArrayLength();
-	CqBitVector& RS = m_pEnv->RunningState();
+	const CqBitVector& RS = m_pEnv->RunningState();
 	for(TqInt i = 0; i < ext; i++)
 	{
 		if ( !fVarying || RS.Value( i ) )
@@ -433,7 +433,7 @@ void CqShaderVM::SO_S_GET()
 	AUTOFUNC;
 	POPV( A );
 	TqInt i;
-	CqBitVector& RS = m_pEnv->RunningState();
+	const CqBitVector& RS = m_pEnv->RunningState();
 	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
@@ -450,7 +450,7 @@ void CqShaderVM::SO_S_GET()
 void CqShaderVM::SO_RS_JZ()
 {
 	SqLabel lab = ReadNext().m_Label;
-	if ( m_pEnv->RunningState().Count() == 0 )
+	if ( !m_pEnv->IsRunning() )
 	{
 		m_PO = lab.m_Offset;
 		m_PC = lab.m_pAddress;
@@ -500,9 +500,10 @@ void CqShaderVM::SO_jnz()
 	SqStackEntry stack = POP;
 	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
+	const CqBitVector& RS = m_pEnv->RunningState();
 	do
 	{
-		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
+		if ( !__fVarying || RS.Value( __iGrid ) )
 		{
 			bool _f;
 			f->GetBool( _f, __iGrid );
@@ -526,9 +527,10 @@ void CqShaderVM::SO_jz()
 	SqStackEntry stack = POP;
 	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
+	const CqBitVector& RS = m_pEnv->RunningState();
 	do
 	{
-		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
+		if ( !__fVarying || RS.Value( __iGrid ) )
 		{
 			bool _f;
 			f->GetBool( _f, __iGrid );

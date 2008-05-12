@@ -116,7 +116,7 @@ class COMMON_SHARE CqBitVector
 		/** Get the indexed bit as a boolean.
 		 * \param elem the index of the bit to retrieve.
 		 */
-		bool Value( TqInt elem )
+		bool Value( TqInt elem ) const
 		{
 			assert( elem < m_cLength );
 			return ( ( m_aBits[ elem / CHAR_BIT ] & ( 1 << ( elem % CHAR_BIT ) ) ) ? true : false );
@@ -152,7 +152,7 @@ class COMMON_SHARE CqBitVector
 			Canonize();
 		}
 		/// Count the number of 1 bits in the vector.
-		TqInt	Count();
+		TqInt Count() const;
 		/// Boolean intersection.
 		CqBitVector&	Intersect( CqBitVector& from );
 		/// Boolean union.
@@ -176,7 +176,7 @@ class COMMON_SHARE CqBitVector
 		 * \param from the bitvector to perform the AND with.
 		 * \return the result of the AND operation as a new bitvector.
 		 */
-		CqBitVector operator&( CqBitVector& from )
+		CqBitVector operator&( CqBitVector& from ) const
 		{
 			CqBitVector res( *this );
 			res.Intersect( from );
@@ -186,7 +186,7 @@ class COMMON_SHARE CqBitVector
 		 * \param from the bitvector to perform the OR with.
 		 * \return the result of the OR operation as a new bitvector.
 		 */
-		CqBitVector operator|( CqBitVector& from )
+		CqBitVector operator|( CqBitVector& from ) const
 		{
 			CqBitVector res( *this );
 			res.Union( from );
@@ -196,7 +196,7 @@ class COMMON_SHARE CqBitVector
 		 * \param from the bitvector to perform the exclusive OR with.
 		 * \return the result of the exclusive OR operation as a new bitvector.
 		 */
-		CqBitVector operator^( CqBitVector& from )
+		CqBitVector operator^( CqBitVector& from ) const
 		{
 			CqBitVector res( *this );
 			res.Difference( from );
@@ -235,7 +235,7 @@ class COMMON_SHARE CqBitVector
 		 * \param size the required size of the bitvector.
 		 * \return an integer count of bytes needed.
 		 */
-		TqInt ArraySize()
+		TqInt ArraySize() const
 		{
 			return( NumberOfInts(m_cLength) );
 		}
