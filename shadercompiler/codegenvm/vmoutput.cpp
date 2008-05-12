@@ -782,18 +782,31 @@ void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE )
 	IqParseNode * pNode;
 	pNode = static_cast<IqParseNode*>(CE.GetInterface( ParseNode_Base ));
 
-	IqParseNode * pArg = pNode->pChild();
-	assert( pArg != 0 );
-	IqParseNode* pTrueStmt = pArg->pNextSibling();
+	// Extract the statement trees from the AST
+	IqParseNode * pCondition = pNode->pChild();
+	assert( pCondition != 0 );
+	IqParseNode* pTrueStmt = pCondition->pNextSibling();
 	assert( pTrueStmt != 0 );
 	IqParseNode* pFalseStmt = pTrueStmt->pNextSibling();
+	assert( pFalseStmt != 0 );
 
+	// Write out VM code to evaluate each branch with the correct running state
+	m_slxFile << "\tS_CLEAR\n";		// clear current tmp state
+	pCondition->Accept( *this );	// evaluate conditional
+	m_slxFile << "\tdup\n";			// create a copy of the conditional for the merge step
+	m_slxFile << "\tS_GET\n";		// Pop main stack into current tmp state
+	rsPush();						// push current running state onto state stack
+	m_slxFile << "\tRS_GET\n";		// copy current tmp state to running state
+	pTrueStmt->Accept( *this );		// evaluate true statement
+	m_slxFile << "\tRS_INVERSE\n";	// Invert running state
+	pFalseStmt->Accept( *this );	// evaluate false statement
+	rsPop();						// pop the running state
+
+	// The stack now contains:
+	//  ... conditional true_stmt_result false_stmt_result
+	// Merge the results together
 	TqInt typeT = static_cast<TqInt>( pTrueStmt->ResType() & Type_Mask );
 	const char* pstrTType = gVariableTypeIdentifiers[ typeT ];
-
-	pTrueStmt->Accept( *this );					// true statement
-	pFalseStmt->Accept( *this );				// false statement
-	pArg->Accept( *this );						// relation
 	m_slxFile << "\tmerge" << pstrTType << std::endl;
 }
 

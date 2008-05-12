@@ -175,9 +175,9 @@ void CqShaderVM::SO_mergef()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_float, class_varying);
 	TqInt i;
 	TqInt ext = m_pEnv->shadingPointCount();
@@ -194,18 +194,18 @@ void CqShaderVM::SO_mergef()
 			pResult->SetValue( _aq_F, i );
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_merges()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_string, class_varying);
 	TqInt i;
 	TqInt ext = m_pEnv->shadingPointCount();
@@ -222,18 +222,18 @@ void CqShaderVM::SO_merges()
 			pResult->SetValue( _aq_F, i );
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_mergep()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_point, class_varying);
 	TqInt i;
 	TqInt ext = m_pEnv->shadingPointCount();
@@ -250,18 +250,18 @@ void CqShaderVM::SO_mergep()
 			pResult->SetValue( _aq_F, i );
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_mergec()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_color, class_varying);
 	TqInt i;
 	TqInt ext = m_pEnv->shadingPointCount();
@@ -278,9 +278,9 @@ void CqShaderVM::SO_mergec()
 			pResult->SetValue( _aq_F, i );
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_setfc()
