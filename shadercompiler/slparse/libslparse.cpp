@@ -92,6 +92,7 @@ void ResetParser()
 	ParseErrorStream = &Aqsis::log();
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
+	gLocalVars.clear();
 }
 
 

@@ -156,21 +156,8 @@ int main( int argc, const char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-	// Create a code generator for the requested backend.
-	if(g_backendName == "slx")
-		codeGenerator.reset(new CqCodeGenVM());
-	else if(g_backendName == "dot")
-		codeGenerator.reset(new CqCodeGenGraphviz());
-	else
+	if ( ap.leftovers().size() == 0 )
 	{
-		std::cout << "Unknown backend type: \"" << g_backendName << "\", assuming slx.";
-		codeGenerator.reset(new CqCodeGenVM());
-	}
-
-	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
-	{
-		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
-		//	codeGenerator->OutputTree( GetParseTree(), g_stroutname );
 		std::cout << ap.usagemsg();
 		exit( 0 );
 	}
@@ -182,6 +169,17 @@ int main( int argc, const char** argv )
 			std::list<CqString*> files = Aqsis::CqFile::cliGlob(*e);
 			std::list<CqString*>::iterator it;
 			for(it = files.begin(); it != files.end(); ++it){ 
+				ResetParser();
+				// Create a code generator for the requested backend.
+				if(g_backendName == "slx")
+					codeGenerator.reset(new CqCodeGenVM());
+				else if(g_backendName == "dot")
+					codeGenerator.reset(new CqCodeGenGraphviz());
+				else
+				{
+					std::cout << "Unknown backend type: \"" << g_backendName << "\", assuming slx.";
+					codeGenerator.reset(new CqCodeGenVM());
+				}
 				// current file position is saved for exception handling
 				boost::wave::util::file_position_type current_position;
 
