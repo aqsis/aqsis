@@ -45,8 +45,10 @@ AQSIS_DECLARE_EXCEPTION(XqUnknownTiffFormat, XqInternal);
 //------------------------------------------------------------------------------
 // Helper functions and data for dealing with tiff compression
 //------------------------------------------------------------------------------
+namespace {
+
 typedef std::pair<uint16, const char*> TqComprPair;
-static TqComprPair comprTypesInit[] = {
+TqComprPair comprTypesInit[] = {
 	TqComprPair(COMPRESSION_NONE, "none"),
 	TqComprPair(COMPRESSION_LZW, "lzw"),
 	TqComprPair(COMPRESSION_JPEG, "jpeg"),
@@ -55,7 +57,7 @@ static TqComprPair comprTypesInit[] = {
 	TqComprPair(COMPRESSION_DEFLATE, "deflate"),
 };
 /// vector holding the TIFF compression alternatives that we want to deal with.
-static const std::vector<TqComprPair> compressionTypes( comprTypesInit,
+const std::vector<TqComprPair> compressionTypes( comprTypesInit,
 		comprTypesInit + sizeof(comprTypesInit)/sizeof(TqComprPair));
 
 /// Get the tiff compression type from a string description.
@@ -81,6 +83,8 @@ const char* tiffCompressionNameFromTag(uint16 compressionType)
 	}
 	return "unknown";
 }
+
+} // unnamed namespace
 
 //------------------------------------------------------------------------------
 // CqTiffDirHandle
@@ -237,23 +241,26 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
 }
 
+
+namespace {
+
 /** Convert a type held in the header to the appropriate type understood by
  * libtiff.
  */
 template<typename Tattr, typename Ttiff>
-static Ttiff attrTypeToTiff(const Tattr& attr)
+Ttiff attrTypeToTiff(const Tattr& attr)
 {
 	return Ttiff(attr);
 }
 // Specialize for std::string -> const char*
 template<>
-static const char* attrTypeToTiff(const std::string& attr)
+const char* attrTypeToTiff(const std::string& attr)
 {
 	return attr.c_str();
 }
 // Specialize for CqMatrix -> TqFloat*
 template<>
-static const float* attrTypeToTiff(const CqMatrix& attr)
+const float* attrTypeToTiff(const CqMatrix& attr)
 {
 	return attr.pElements();
 }
@@ -264,7 +271,7 @@ static const float* attrTypeToTiff(const CqMatrix& attr)
  * nothing.
  */
 template<typename Tattr, typename Ttiff>
-static void addAttributeToTiff(ttag_t tag,
+void addAttributeToTiff(ttag_t tag,
 		const CqTexFileHeader& header, CqTiffDirHandle& dirHandle)
 {
 	const typename Tattr::type* headerVal = header.findPtr<Tattr>();
@@ -274,6 +281,9 @@ static void addAttributeToTiff(ttag_t tag,
 				attrTypeToTiff<typename Tattr::type,Ttiff>(*headerVal), false);
 	}
 }
+
+} // unnamed namespace
+
 
 void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 {
@@ -346,6 +356,7 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	}
 }
 
+
 namespace {
 
 /// Extract an attribute from dirHandle and add it to header, if present.
@@ -376,6 +387,7 @@ void addWrapModesToHeader(CqTexFileHeader& header, const CqTiffDirHandle& dirHan
 }
 
 } // unnamed namespace
+
 
 void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 {
@@ -586,11 +598,15 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 // CqTiffFileHandle
 //------------------------------------------------------------------------------
 
+namespace {
+
 void safeTiffClose(TIFF* tif)
 {
 	if(tif)
 		TIFFClose(tif);
 }
+
+} // unnamed namespace
 
 CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
 	: m_fileName(fileName),
