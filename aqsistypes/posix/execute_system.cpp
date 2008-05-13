@@ -25,14 +25,15 @@
 
 #include "execute.h"
 
-#include "logging.h"
-
 #include <boost/scoped_array.hpp>
 #include <sstream>
 
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+
+#include "logging.h"
+#include "exception.h"
 
 namespace Aqsis {
 
@@ -47,39 +48,6 @@ void CqExecute::setStdOutCallback(CqExecute::TqCallback& callback)
 {
 	m_stdCallback = callback;
 }
-
-
-/////////////////////////////////////////////////////////////////////// 
-// ReadAndHandleOutput
-// Monitors handle for input. Exits when child exits or pipe breaks.
-/////////////////////////////////////////////////////////////////////// 
-/*void ReadAndHandleOutput(HANDLE hPipeRead, CqExecute::TqCallback& callBack)
-{
-	CHAR lpBuffer[256];
-	DWORD nBytesRead;
-	DWORD nCharsWritten;
-
-	while(TRUE)
-	{
-		if (!ReadFile(hPipeRead,lpBuffer,sizeof(lpBuffer),
-									  &nBytesRead,NULL) || !nBytesRead)
-		{
-			if (GetLastError() == ERROR_BROKEN_PIPE)
-				break; // pipe done - normal exit path.
-			else
-				Aqsis::log() << error << "Reading child output" << std::endl; // Something bad happened.
-		}
-
-		// Display the character read on the screen.
-//		if (!WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE),lpBuffer,
-//					   nBytesRead,&nCharsWritten,NULL))
-//				DisplayError("WriteConsole"); // Something bad happened.
-		if(!callBack.empty())
-			callBack(lpBuffer);
-	}
-}*/
-
-
 
 void CqExecute::operator()() 
 {
@@ -136,7 +104,11 @@ void CqExecute::operator()()
 				argStore[iarg][arg->size()] = '\0';
 				args[iarg] = &(argStore[iarg])[0];
 			}
-			chdir(m_currDir.c_str());
+			if(chdir(m_currDir.c_str()) == -1)
+			{
+				AQSIS_THROW(XqInternal, "Could not change to directory \""
+						<< m_currDir << "\"");
+			}
 			signal(SIGHUP, SIG_IGN);
 			execvp(&command[0],&args[0]);
 		}

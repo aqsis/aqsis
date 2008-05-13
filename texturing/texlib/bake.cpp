@@ -28,9 +28,11 @@
 #include "bake.h"
 
 #include <ctime>
+#include <cstdio>
 
 #include "aqsismath.h"
 #include "logging.h"
+#include "texexception.h"
 #include "tiffio.h"
 
 namespace Aqsis {
@@ -63,7 +65,7 @@ void save_tiff( const char *filename,
 
 
 	year=1900 + ct->tm_year;
-	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
+	std::sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
 	        year, ct->tm_mon + 1, ct->tm_mday,
 	        ct->tm_hour, ct->tm_min, ct->tm_sec);
 
@@ -140,7 +142,6 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 	TqFloat *temporary;
 	TqInt elmsize = 3;
 	TqFloat invWidth, invSize;
-	TqChar description[80];
 
 	count = 1024 * 1024;
 	number = 0;
@@ -153,14 +154,14 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 	bakefile = fopen( in, "rb" );
 
 	/* Ignore the first line of text eg. Aqsis bake file */
-	fgets( buffer, 200, bakefile ) ;
-	/* Read the second line of text to configure how many floats
-	     * we expect to read
-	     */
-	fgets( buffer, 200, bakefile ) ;
-	sscanf(buffer, "%d", &elmsize);
+	if(std::fgets( buffer, 200, bakefile ) == NULL)
+		AQSIS_THROW(XqInternal, "Could not read bake file header");
+	// Read the second line of text to configure how many floats we expect to
+	// read
+	if(std::fgets( buffer, 200, bakefile ) == NULL || std::sscanf(buffer, "%d", &elmsize) == 0)
+		AQSIS_THROW(XqBadTexture, "Could not read length of bake file \"" << in << "\"");
 
-	while ( fgets( buffer, 200, bakefile ) != NULL )
+	while ( std::fgets( buffer, 200, bakefile ) != NULL )
 	{
 		k = number * 5;
 
@@ -397,13 +398,7 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 		}
 	}
 
-
-	/* Should we do some filterings prior to save to tif file ? */
-	/* convert each scan line */
-	/* Write the some form of version */
-	strcpy( description, "bake2tif conversion for AQSIS");
-
-	save_tiff( tiffname, xpixels, w, h, 3, description );
+	save_tiff( tiffname, xpixels, w, h, 3, "bake2tif conversion for AQSIS");
 
 	free( pixels );
 	free( xpixels );
