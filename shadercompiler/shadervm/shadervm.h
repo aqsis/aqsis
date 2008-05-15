@@ -124,17 +124,20 @@ union UsProgramElement
 #define	AUTOFUNC		bool __fVarying=false;
 
 #define	FUNC(t,Func)	RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(pResult,this); \
 						Push(pResult);
 #define	FUNC1(t,Func)	POPV(ValA); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA);
 #define	FUNC2(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,ValB,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA); \
 						RELEASE(ValB);
@@ -142,7 +145,8 @@ union UsProgramElement
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,ValB,ValC,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
@@ -152,7 +156,8 @@ union UsProgramElement
 						POPV(ValC); \
 						POPV(ValD); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,ValB,ValC,ValD,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
@@ -164,7 +169,8 @@ union UsProgramElement
 						POPV(ValD); \
 						POPV(ValE); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,ValB,ValC,ValD,ValE,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,ValE,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
@@ -179,7 +185,8 @@ union UsProgramElement
 						POPV(ValF); \
 						POPV(ValG); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,pResult,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,pResult,this); \
 						Push(pResult); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
@@ -203,14 +210,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(a,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							Func(a,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a);
@@ -230,14 +238,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(a,b,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							Func(a,b,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a); \
@@ -259,14 +268,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						Func(a,b,c,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							Func(a,b,c,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a); \
@@ -276,17 +286,20 @@ union UsProgramElement
 
 #define	VOIDFUNC(Func)	Func(this);
 #define	VOIDFUNC1(Func)	POPV(ValA); \
-						Func(ValA,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,this); \
 						RELEASE(ValA);
 #define	VOIDFUNC2(Func)	POPV(ValA); \
 						POPV(ValB); \
-						Func(ValA,ValB,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,this); \
 						RELEASE(ValA); \
 						RELEASE(ValB);
 #define	VOIDFUNC3(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						Func(ValA,ValB,ValC,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,this); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
 						RELEASE(ValC);
@@ -294,7 +307,8 @@ union UsProgramElement
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
-						Func(ValA,ValB,ValC,ValD,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,this); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
 						RELEASE(ValC); \
@@ -304,7 +318,8 @@ union UsProgramElement
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
-						Func(ValA,ValB,ValC,ValD,ValE,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,ValE,this); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
 						RELEASE(ValC); \
@@ -317,7 +332,8 @@ union UsProgramElement
 						POPV(ValE); \
 						POPV(ValF); \
 						POPV(ValG); \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this); \
+						if(m_pEnv->IsRunning()) \
+							Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this); \
 						RELEASE(ValA); \
 						RELEASE(ValB); \
 						RELEASE(ValC); \
@@ -339,7 +355,8 @@ union UsProgramElement
 							aParams[iP]=stackitems[iP].m_Data;\
 							iP++;\
 						}\
-						Func(a,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							Func(a,this, cParams, aParams); \
 						delete[](aParams); \
                   				iP=0; \
 						while(iP!=cParams)	{\
@@ -367,14 +384,15 @@ union UsProgramElement
 							aParams[iP]=stackitems[iP].m_Data;\
 							iP++;\
 						}\
-						Func(a,b,c,d,e, this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							Func(a,b,c,d,e, this, cParams, aParams); \
 						delete[](aParams); \
                   				iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						RELEASE(count); \
 						RELEASE(a); \
 						RELEASE(b); \
@@ -391,23 +409,24 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
-                  				SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						apSplinePoints[0]=vala; \
 						apSplinePoints[1]=valb; \
 						apSplinePoints[2]=valc; \
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
-                  				for(iSP=4; iSP<cParams; iSP++) {\
-                     					stackitems[iSP] = POP; \
+						for(iSP=4; iSP<cParams; iSP++) {\
+							stackitems[iSP] = POP; \
 							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
-                  				}\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(value,pResult,this,cParams,apSplinePoints); \
+						if(m_pEnv->IsRunning()) \
+							func(value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
                   				for(iSP=4; iSP<cParams; iSP++) {\
 							Release( stackitems[iSP]);\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(value); \
@@ -427,23 +446,24 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
-                  				SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						apSplinePoints[0]=vala; \
 						apSplinePoints[1]=valb; \
 						apSplinePoints[2]=valc; \
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) {\
-                     					stackitems[iSP] = POP; \
+							stackitems[iSP] = POP; \
 							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
-                  				}\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(basis,value,pResult,this,cParams,apSplinePoints); \
+						if(m_pEnv->IsRunning()) \
+							func(basis,value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
 						for(iSP=4; iSP<cParams; iSP++) {\
 							Release( stackitems[iSP]);\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(basis); \
@@ -468,14 +488,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,pResult,this,cParams,aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,pResult,this,cParams,aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -496,14 +517,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,R,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,R,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -527,14 +549,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -559,14 +582,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,s1,t1,pResult,this, cParams, aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,s1,t1,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -592,14 +616,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -631,14 +656,15 @@ union UsProgramElement
 							iP++;\
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
-						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
-                  				iP=0; \
+						iP=0; \
 						while(iP!=cParams)	{\
 							Release( stackitems[iP]);\
 							iP++;\
 						}\
-                  				delete[](stackitems); \
+						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -651,16 +677,6 @@ union UsProgramElement
 						RELEASE(t3); \
 						RELEASE(s4); \
 						RELEASE(t4);
-
-#define	TRIPLE(T)		POPV(ValA); \
-						POPV(ValB); \
-						POPV(ValC); \
-						RESULT(type_color,__fVarying?class_varying:class_uniform); \
-						pResult->OpTRIPLE_C(*ValA,*ValB,*ValC); \
-						Push(pResult); \
-						RELEASE(ValA): \
-						RELEASE(ValB): \
-						RELEASE(ValC):
 
 //----------------------------------------------------------------------
 /** \class CqShaderVM
@@ -946,10 +962,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_S_CLEAR();
 		void	SO_S_GET();
 		void	SO_RS_JZ();
-		void	SO_RS_JNZ();
 		void	SO_RS_BREAK();
 		void	SO_S_JZ();
-		void	SO_S_JNZ();
 		void	SO_jnz();
 		void	SO_jz();
 		void	SO_jmp();

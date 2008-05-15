@@ -209,6 +209,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		virtual	void	GetCurrentState()
 		{
 			m_RunningState = m_CurrentState;
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual	void	ClearCurrentState()
 		{
@@ -222,12 +223,14 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		{
 			m_RunningState = m_stkState.back();
 			m_stkState.pop_back();
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual	void	InvertRunningState()
 		{
 			m_RunningState.Complement();
 			if ( !m_stkState.empty() )
 				m_RunningState.Intersect( m_stkState.back() );
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual void RunningStatesBreak(TqInt numLevels)
 		{
@@ -244,10 +247,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 			}
 			// Current state needs to stop executing.
 			m_RunningState.SetAll(false);
+			m_isRunning = false;
 		}
 		virtual bool IsRunning()
 		{
-			return m_RunningState.Count() != 0;
+			return m_isRunning;
 		}
 		virtual IqShaderData* FindStandardVar( const char* pname );
 
@@ -432,7 +436,6 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		TqInt	m_vGridRes;				///< The resolution of the grid in u.
 		TqInt	m_microPolygonCount;			///< The resolution of the grid.
 		TqInt	m_shadingPointCount;			///< The resolution of the grid.
-		TqInt	m_GridI;				///< The current SIMD index.
 		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		bool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
@@ -441,6 +444,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		IqTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
+		bool m_isRunning;               ///< True if any bits in the running state are set.
 		std::vector<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
 		IqRenderer*	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.

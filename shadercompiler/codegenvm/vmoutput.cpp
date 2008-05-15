@@ -728,8 +728,8 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 	m_slxFile << ":" << iLabelD << std::endl;
 	if(pNoHitStmt)
 	{
-		m_slxFile << "\tRS_JNZ " << iLabelC << std::endl;	// Skip if all true
 		m_slxFile << "\tRS_INVERSE" << std::endl;		// Inverse running state
+		m_slxFile << "\tRS_JZ " << iLabelC << std::endl;	// exit if not running
 		pNoHitStmt->Accept( *this );						// ray hit statement
 	}
 	m_slxFile << ":" << iLabelC << std::endl;		// continuation label
@@ -769,8 +769,8 @@ void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 	if ( pFalseStmt )
 	{
 		m_slxFile << ":" << iLabelB << std::endl;	// false part label
-		m_slxFile << "\tRS_JNZ " << iLabelA << std::endl;	// exit if all true
 		m_slxFile << "\tRS_INVERSE" << std::endl;	// Invert result
+		m_slxFile << "\tRS_JZ " << iLabelA << std::endl;	// exit if not running
 		pFalseStmt->Accept( *this );				// false statement
 	}
 	m_slxFile << ":" << iLabelA << std::endl;		// conditional exit point

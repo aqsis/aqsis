@@ -42,7 +42,8 @@ void CqShaderVM::SO_land()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -54,7 +55,8 @@ void CqShaderVM::SO_lor()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -395,7 +397,8 @@ void CqShaderVM::SO_xcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 0, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 0, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -405,7 +408,8 @@ void CqShaderVM::SO_ycomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 1, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 1, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -415,7 +419,8 @@ void CqShaderVM::SO_zcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 2, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 2, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -582,7 +587,8 @@ void CqShaderVM::SO_comp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_C( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_C( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -784,10 +790,13 @@ void CqShaderVM::SO_init_illuminance()
 {
 	VARFUNC;
 	POPV( A );
-	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, NULL, this );
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	if(m_pEnv->IsRunning())
+	{
+		m_pEnv->InvalidateIlluminanceCache();
+		m_pEnv->ValidateIlluminanceCache( A, NULL, this );
+		pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	}
 	Push( pResult );
 	RELEASE( A );
 }
@@ -797,10 +806,13 @@ void CqShaderVM::SO_init_illuminance2()
 	VARFUNC;
 	POPV( A );
 	POPV( B );
-	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, B, this );
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	if(m_pEnv->IsRunning())
+	{
+		m_pEnv->InvalidateIlluminanceCache();
+		m_pEnv->ValidateIlluminanceCache( A, B, this );
+		pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	}
 	Push( pResult );
 	RELEASE( A );
 }
@@ -808,7 +820,8 @@ void CqShaderVM::SO_init_illuminance2()
 void CqShaderVM::SO_advance_illuminance()
 {
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_advance_illuminance() );
+	if(m_pEnv->IsRunning())
+		pResult->SetFloat( m_pEnv->SO_advance_illuminance() );
 	Push( pResult );
 }
 
@@ -845,7 +858,8 @@ void CqShaderVM::SO_init_gather()
 void CqShaderVM::SO_advance_gather()
 {
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_advance_gather() );
+	if(m_pEnv->IsRunning())
+		pResult->SetFloat( m_pEnv->SO_advance_gather() );
 	Push( pResult );
 }
 
@@ -867,7 +881,8 @@ void CqShaderVM::SO_atmosphere()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_atmosphere( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_atmosphere( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -878,7 +893,8 @@ void CqShaderVM::SO_displacement()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_displacement( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_displacement( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -889,7 +905,8 @@ void CqShaderVM::SO_lightsource()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_lightsource( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_lightsource( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -900,7 +917,8 @@ void CqShaderVM::SO_surface()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_surface( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_surface( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -911,7 +929,8 @@ void CqShaderVM::SO_attribute()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_attribute( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_attribute( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -922,7 +941,8 @@ void CqShaderVM::SO_option()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_option( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_option( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -933,7 +953,8 @@ void CqShaderVM::SO_rendererinfo()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_rendererinfo( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_rendererinfo( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -946,7 +967,8 @@ void CqShaderVM::SO_textureinfo()
 	POPV( Val );
 	POPV( DataInfo );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_textureinfo( Val, DataInfo, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_textureinfo( Val, DataInfo, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -957,7 +979,8 @@ void CqShaderVM::SO_incident()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_incident( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_incident( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -968,7 +991,8 @@ void CqShaderVM::SO_opposite()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_opposite( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_opposite( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -1192,7 +1216,8 @@ void CqShaderVM::SO_mcomp()
 	POPV( B );
 	POPV( C );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMPM( A, B, C, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMPM( A, B, C, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( C );
 	RELEASE( B );
@@ -1321,7 +1346,8 @@ void CqShaderVM::SO_external()
 		arg_data[x] = stackitems[x].m_Data;
 	};
 
-	m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);
 
 	for ( x = 0 ; x < pCall->arg_types.size();x++)
 	{
@@ -1385,7 +1411,8 @@ void CqShaderVM::SO_rayinfo()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( DataInfo );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
 	Push( pResult );
 }
 

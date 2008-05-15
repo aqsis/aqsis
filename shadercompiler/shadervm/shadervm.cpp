@@ -79,10 +79,8 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"RS_GET", 0, &CqShaderVM::SO_RS_GET, 0, {0}},
         {"RS_INVERSE", 0, &CqShaderVM::SO_RS_INVERSE, 0, {0}},
         {"RS_JZ", 0, &CqShaderVM::SO_RS_JZ, 1, {type_float}},
-        {"RS_JNZ", 0, &CqShaderVM::SO_RS_JNZ, 1, {type_float}},
         {"RS_BREAK", 0, &CqShaderVM::SO_RS_BREAK, 1, {type_integer}},
         {"S_JZ", 0, &CqShaderVM::SO_S_JZ, 1, {type_float}},
-        {"S_JNZ", 0, &CqShaderVM::SO_S_JNZ, 1, {type_float}},
         {"S_GET", 0, &CqShaderVM::SO_S_GET, 0, {0}},
         {"S_CLEAR", 0, &CqShaderVM::SO_S_CLEAR, 0, {0}},
 
@@ -1324,9 +1322,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		        E.m_Command == &CqShaderVM::SO_jmp ||
 		        E.m_Command == &CqShaderVM::SO_jz ||
 		        E.m_Command == &CqShaderVM::SO_RS_JZ ||
-		        E.m_Command == &CqShaderVM::SO_RS_JNZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JNZ )
+		        E.m_Command == &CqShaderVM::SO_S_JZ)
 		{
 			SqLabel lab;
 			lab.m_Offset = aLabels[ static_cast<unsigned int>( m_Program[ i ].m_FloatVal ) ];
