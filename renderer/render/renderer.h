@@ -504,6 +504,9 @@ class CqRenderer : public IqRenderer
 
 
 	private:
+		/// Map type to hold loaded reference shaders.
+		typedef std::map< CqShaderKey, boost::shared_ptr<IqShader> > TqShaderMap;
+
 		boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
 		CqAttributes*	m_pAttrDefault;					///< Default attributes.
@@ -514,7 +517,7 @@ class CqRenderer : public IqRenderer
 		IqDDManager*	m_pDDManager;
 
 		EqRenderMode	m_Mode;
-		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
+		TqShaderMap m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
 		CqTextureCache m_textureCache; ///< Cache for aqsistex texture access.

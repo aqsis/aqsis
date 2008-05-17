@@ -100,7 +100,7 @@ struct IqShader
 	/** Duplicate this shader.
 	 * \return A pointer to a new shader.
 	 */
-	virtual IqShader*	Clone() const = 0;
+	virtual boost::shared_ptr<IqShader> Clone() const = 0;
 	/** Determine whether this shader uses the specified system variable.
 	 * \param Var ID of the variable from EqEnvVars.
 	 */

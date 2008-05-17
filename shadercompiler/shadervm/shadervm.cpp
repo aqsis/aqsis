@@ -23,26 +23,23 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include "shadervm.h"
 
-#include	"multitimer.h"
+#include <cstring>
+#include <ctype.h>
+#include <iostream>
+#include <sstream>
+#include <stddef.h>
 
-#include	<iostream>
+#include "iparameter.h"
+#include "irenderer.h"
+#include "isurface.h"
+#include "logging.h"
+#include "multitimer.h"
+#include "shadervariable.h"
+#include "sstring.h"
+#include "version.h"
 
-#include	<sstream>
-#include	<ctype.h>
-#include	<stddef.h>
-#include	<cstring>
-
-#include	"shadervm.h"
-#include	"iparameter.h"
-#include	"version.h"
-#include	"sstring.h"
-
-#include	"irenderer.h"
-#include	"isurface.h"
-#include	"shadervariable.h"
-#include	"logging.h"
 
 namespace Aqsis {
 
@@ -906,11 +903,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	std::vector<TqUlong> itypes;
 
 	// Initialise the private hash keys.
-
-
 	for(i = 0; i< (TqUint) gcVariableTypeNames; i++)
 		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
-
 
 	bool fShaderSpec = false;
 	while ( !pFile->eof() )
@@ -962,18 +956,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		if ( strcmp( token, "AQSIS_V" ) == 0 )
 		{
 			GetToken( token, 255, pFile );
-
+			// Check that the version string matches the current one.  If not,
+			// fail fatally.
+			if(std::string(token) != VERSION_STR)
+			{
+				AQSIS_THROW(XqBadShader, "Shader compiled with an old/different version ("
+						<< token << ") of aqsis.  Please recompile.");
+			}
 			continue;
-
-			// Get the version information.
-			CqString strVersion(token);
-			//TqInt vMaj, vMin, build;
-			//GET_VERSION_FROM_STRING(vMaj,vMin,build);
-			//if(CHECK_NEWER_VERSION(vMaj,vMin,build))
-			//{
-			//	CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
-			//	return;
-			//}
 		}
 
 		if ( ushash == htoken) // == "USES"
@@ -1006,12 +996,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		{
 			EqVariableType VarType = type_invalid;
 			EqVariableClass VarClass = class_varying;
-			bool			fVarArray = false;
-			bool			fParameter = false;
-			bool			fOutput = false;
+			bool fVarArray = false;
+			bool fParameter = false;
+			bool fOutput = false;
 			switch ( Segment )
 			{
-					case Seg_Data:
+				case Seg_Data:
 					VarType = type_invalid;
 					VarClass = class_invalid;
 					while ( VarType == type_invalid )
@@ -1044,9 +1034,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						while ( i < strlen( token ) && token[ i ] != '[' ) i++;
 						if ( i == strlen( token ) )
 						{
-							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
-							Aqsis::log() << critical << "Invalid variable specification in slx file" << std::endl;
-							return ;
+							AQSIS_THROW(XqBadShader, "Invalid variable specification in slx file");
 						}
 						token[ strlen( token ) - 1 ] = '\0';
 						token[ i ] = '\0';
@@ -1065,8 +1053,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
 					break;
 
-					case Seg_Init:
-					case Seg_Code:
+				case Seg_Init:
+				case Seg_Code:
 					// Check if it is a label
 					if ( strcmp( token, ":" ) == 0 )
 					{
@@ -1107,8 +1095,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								candidates = getShadeOpMethods(&strFunc);
 								if( candidates == NULL )
 								{
-									Aqsis::log() << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
-									exit(1);
+									AQSIS_THROW(XqBadShader, "\"" << strName().c_str()
+										<< "\": No DSO found for external shadeop: \""
+										<< strFunc.c_str() << "\"\n");
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
 							};
@@ -1118,15 +1107,15 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							m_itTypeIdMap = m_TypeIdMap.find( strRetType[1] );
 							if (m_itTypeIdMap != m_TypeIdMap.end())
 							{
-								RetType = (*m_itTypeIdMap)
-								          .second;
+								RetType = (*m_itTypeIdMap).second;
 							}
 							else
 							{
 								//error, we dont know this return type
-								Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
-								exit(1);
-							};
+								AQSIS_THROW(XqBadShader, "\"" << strName()
+									<< "\": Invalid return type in call to external shadeop: \""
+									<< strFunc << "\" : \"" << strRetType << "\"");
+							}
 
 							*pFile >> strArgTypes;
 							for ( TqUint x=1; x < strArgTypes.length()-1; x++ )
@@ -1140,11 +1129,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								else
 								{
 									// Error, unknown arg type
-									Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
-									exit(1);
-								};
+									AQSIS_THROW(XqBadShader, "\"" << strName()
+										<< "\": Invalid argument type in call to external shadeop: \""
+										<< strFunc << "\" : \"" << strArgTypes[x] << "\"");
+								}
 
-							};
+							}
 
 							//Now we need to find a good candidate.
 							std::list<SqDSOExternalCall*>::iterator candidate;
@@ -1155,7 +1145,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								if ((*candidate)->return_type == RetType &&
 								                        (*candidate)->arg_types == ArgTypes) break;
 								candidate++;
-							};
+							}
 
 							// If we are looking for a void return type but have not
 							// found an exact match, we will take the first match with
@@ -1177,26 +1167,26 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 										"\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
 										forcedrop = true;
 										break;
-									};
+									}
 									candidate++;
-								};
+								}
 							}
 
 							if(candidate == candidates->end())
 							{
-								Aqsis::log() << critical << "\"" << strName()
-								.c_str() << "\": No candidate found for call to external shadeop: \"" << strFunc.c_str() <<
-								"\"" << strName().c_str() << "\": Perhaps you need some casts?" <<
-								"\"" << strName().c_str() << "\": The following candidates are in you current DSO path:" << std::endl;
+								Aqsis::log() << error << "\"" << strName()
+									<< "\": No candidate found for call to external shadeop: \""
+									<< strFunc << "\"" << strName() << "\": Perhaps you need some casts?"
+									<< "\"" << strName() << "\": The following candidates are in you current DSO path:\n";
 								candidate = candidates->begin();
 								while (candidate !=candidates->end())
 								{
 									CqString strProto = strPrototype(&strFunc, (*candidate));
 									Aqsis::log() << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
 									candidate++;
-								};
-								exit(1);
-							};
+								}
+								AQSIS_THROW(XqBadShader, "External shadeop not found");
+							}
 
 							if(!(*candidate)->initialised )
 							{
@@ -1210,9 +1200,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									// possibly non-unique per thread.
 									(*candidate)->initData =
 									    ((*candidate)->init)(static_cast<int>(reinterpret_cast<ptrdiff_t>(this)),NULL);
-								};
+								}
 								(*candidate)->initialised = true;
-							};
+							}
 
 							AddCommand( &CqShaderVM::SO_external, pProgramArea );
 							AddDSOExternalCall( (*candidate),pProgramArea );
@@ -1290,22 +1280,17 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 											}
 											break;
 										default:
-											Aqsis::log() << critical << "Unknown literal type\n";
-											return;
+											AQSIS_THROW(XqBadShader, "Unknown literal type");
 									}
 								}
 							}
 							break;
 						}
 					}
-					// If we have not found the opcode, throw an error.
 					if ( i == m_cTransSize )
 					{
-						CqString strErr( "Invalid opcode found : " )
-						;
-						strErr += token;
-						Aqsis::log() << critical << strErr.c_str() << std::endl;
-						return ;
+						// If we have not found the opcode, throw an error.
+						AQSIS_THROW(XqBadShader, "Invalid opcode found: " << token);
 					}
 					break;
 			}
@@ -1344,7 +1329,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			}
 		}
 	}
-
 }
 
 

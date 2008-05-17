@@ -1271,43 +1271,6 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 
 
 //---------------------------------------------------------------------
-/** Register a shader of the specified type with the specified name.
- */
-#if 0
-void CqRenderer::RegisterShader( const char* strName, EqShaderType type, IqShader* pShader )
-{
-	assert( pShader );
-	m_Shaders.LinkLast( new CqShaderRegister( strName, type, pShader ) );
-}
-#endif
-
-
-//---------------------------------------------------------------------
-/** Find a shader of the specified type with the specified name.
- */
-#if 0
-CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type )
-{
-	// Search the register list.
-	CqShaderRegister * pShaderRegister = m_Shaders.pFirst();
-
-
-
-	while ( pShaderRegister )
-	{
-		if ( pShaderRegister->strName() == strName && pShaderRegister->Type() == type )
-		{
-			pOShaderRegister = pShaderRegister ;
-			return ( pShaderRegister );
-		}
-
-		pShaderRegister = pShaderRegister->pNext();
-	}
-	return ( 0 );
-}
-#endif
-
-//---------------------------------------------------------------------
 /** Returns a pointer to the default surface.
  */
 boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
@@ -1359,10 +1322,13 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 	// first, look for the shader of the appropriate type and name in the
 	//  map of shader "templates"
-	if ( m_Shaders.find(key) != m_Shaders.end() )
+	TqShaderMap::const_iterator shadLocation = m_Shaders.find(key);
+	if(shadLocation != m_Shaders.end())
 	{
-		// the shader template is present, so return its clone
-		boost::shared_ptr<IqShader> newShader(m_Shaders[key]->Clone());
+		if(!shadLocation->second)
+			return boost::shared_ptr<IqShader>();
+		// The shader template is present, so return its clone
+		boost::shared_ptr<IqShader> newShader(shadLocation->second->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
@@ -1376,30 +1342,37 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	CqRiFile SLXFile( strFilename.c_str(), "shader" );
 	if ( SLXFile.IsValid() )
 	{
-		boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
+		boost::shared_ptr<CqShaderVM> pRet(new CqShaderVM(this));
 
-		CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
-		const CqString* poptDSOPath = QGetRenderContext()->
-		                              poptCurrent()->GetStringOption( "searchpath", "shader" );
-
+		const CqString* poptDSOPath = QGetRenderContext()->poptCurrent()
+			->GetStringOption( "searchpath", "shader" );
 		if(poptDSOPath)
 		{
 			Aqsis::log() << info << "DSO lib path set to \"" << poptDSOPath->c_str()
-			<< "\"" << std::endl;
-
-			pShader->SetDSOPath( poptDSOPath->c_str() );
+				<< "\"" << std::endl;
+			pRet->SetDSOPath(poptDSOPath->c_str());
 		}
 
-		CqString strRealName( SLXFile.strRealName() );
 		Aqsis::log() << info << "Loading shader \"" << strName
-		<< "\" from file \"" << strRealName.c_str()
-		<< "\"" << std::endl;
+			<< "\" from file \"" << SLXFile.strRealName()
+			<< "\"" << std::endl;
 
-		pShader->SetstrName( strName );
-		pShader->LoadProgram( SLXFile );
+		pRet->SetstrName( strName );
+		try
+		{
+			pRet->LoadProgram( SLXFile );
+		}
+		catch(XqBadShader& e)
+		{
+			Aqsis::log() << error << "could not load shader \"" << strName << "\": "
+				<< e.what() << "\n";
+			// couldn't load the shader; put a null pointer in the map so we
+			// don't try again, and return null.
+			m_Shaders[key] = boost::shared_ptr<CqShaderVM>();
+			return boost::shared_ptr<CqShaderVM>();
+		}
 
-		// add the shader to the map as a template and return its
-		//  clone
+		// add the shader to the map as a template and return its clone
 		m_Shaders[key] = pRet;
 		boost::shared_ptr<IqShader> newShader(pRet->Clone());
 		newShader->SetType( type );
@@ -1408,10 +1381,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	}
 	else
 	{
-		if (
-		    (strcmp( strName, "null" )  != 0) &&
-		    (strcmp( strName, "_def_" ) != 0)
-		)
+		if( strcmp(strName, "null") != 0  &&  strcmp(strName, "_def_") != 0 )
 		{
 			CqString strError;
 			strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
@@ -1441,7 +1411,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		}
 		else
 		{
-			// the boost::shared_ptr analogue of return NULL:
 			return boost::shared_ptr<IqShader>();
 		}
 	}
@@ -1564,70 +1533,6 @@ void CqRenderer::PrepareShaders()
 		(*i)->PrepareShaderForUse();
 	}
 }
-
-
-//---------------------------------------------------------------------
-/** Find a shader of the specified type with the specified name.
- * If not found, try and load one.
- */
-#if 0
-IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
-{
-	CqShaderRegister * pReg = NULL;
-
-	if ( pOShaderRegister && pOShaderRegister->strName() == strName && pOShaderRegister->Type() == type )
-		pReg = pOShaderRegister;
-	else
-		pReg = FindShader( strName, type );
-	if ( pReg != 0 )
-	{
-		IqShader * pShader = pReg->Create();
-		RegisterShader( strName, type, pShader );
-		return ( pShader );
-	}
-	else
-	{
-		// Search in the current directory first.
-		CqString strFilename( strName );
-		strFilename += RI_SHADER_EXTENSION;
-		CqRiFile SLXFile( strFilename.c_str(), "shader" );
-		if ( SLXFile.IsValid() )
-		{
-			CqShaderVM * pShader = new CqShaderVM(this);
-			const CqString *poptDSOPath = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath","shader" );
-			pShader->SetDSOPath( poptDSOPath );
-
-			CqString strRealName( SLXFile.strRealName() );
-			Aqsis::log() << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
-
-			pShader->SetstrName( strName );
-			pShader->LoadProgram( SLXFile );
-			RegisterShader( strName, type, pShader );
-			return ( pShader );
-		}
-		else
-		{
-			if ( strcmp( strName, "null" ) != 0 )
-			{
-				CqString strError;
-				strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
-				Aqsis::log() << error << strError.c_str() << std::endl;
-			}
-			if( type == Type_Surface )
-			{
-				CqShaderVM * pShader = new CqShaderVM(this);
-				pShader->SetstrName( "null" );
-				pShader->DefaultSurface();
-				RegisterShader( strName, type, pShader );
-				return ( pShader );
-			}
-			else
-				return ( NULL );
-		}
-	}
-}
-#endif
-
 
 
 //---------------------------------------------------------------------

@@ -269,9 +269,9 @@ class CqLayeredShader : public IqShader
 			// Not sure, probably always return false for now.
 			return ( false );
 		}
-		virtual IqShader*	Clone() const
+		virtual boost::shared_ptr<IqShader> Clone() const
 		{
-			return ( new CqLayeredShader(*this) );
+			return boost::shared_ptr<IqShader>(new CqLayeredShader(*this));
 		}
 		virtual bool	Uses( TqInt Var ) const
 		{

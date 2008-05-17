@@ -2004,14 +2004,9 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 	DEBUG_RILIGHTSOURCE
 
 	// Find the lightsource shader.
-	//IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
 	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
-
-	if ( !pShader )
-	{
-		Aqsis::log() << error << "Couldn't create light source shader \"" << name << "\"\n";
+	if(!pShader)
 		return 0;
-	}
 
 	pShader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 	CqLightsourcePtr pNew( new CqLightsource( pShader, RI_TRUE ) );
@@ -2140,7 +2135,6 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 	DEBUG_RISURFACE
 
 	// Find the shader.
-	//IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
 	boost::shared_ptr<IqShader> pshadSurface = QGetRenderContext()->CreateShader( name, Type_Surface );
 
 	if ( pshadSurface )
