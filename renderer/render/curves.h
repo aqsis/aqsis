@@ -353,6 +353,12 @@ class CqCurvesGroup : public CqCurve
 		}
 #endif
 		void CloneData(CqCurvesGroup* clone) const;
+		virtual void Transform(
+		    const CqMatrix& matTx,
+		    const CqMatrix& matITTx,
+		    const CqMatrix& matRTx,
+		    TqInt iTime = 0
+		);
 		//--------------------------------------------------- Protected Members
 	protected:
 		TqInt m_ncurves;       ///< Number of curves in the group.
@@ -381,12 +387,6 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		);
 		virtual ~CqLinearCurvesGroup();
 		virtual	TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual void Transform(
-		    const CqMatrix& matTx,
-		    const CqMatrix& matITTx,
-		    const CqMatrix& matRTx,
-		    TqInt iTime = 0
-		);
 		//---------------------------------------------- Inlined Public Methods
 	public:
 #ifdef _DEBUG
@@ -445,12 +445,6 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual	TqUint cVarying() const;
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual	void Bound(IqBound* bound) const;
-		virtual void Transform(
-		    const CqMatrix& matTx,
-		    const CqMatrix& matITTx,
-		    const CqMatrix& matRTx,
-		    TqInt iTime = 0
-		);
 		//---------------------------------------------- Inlined Public Methods
 	public:
 #ifdef _DEBUG
