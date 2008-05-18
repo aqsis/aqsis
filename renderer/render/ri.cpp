@@ -6075,14 +6075,15 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 	// Fill in the position variable according to type.
 	if ( fP != RIL_NONE )
 	{
-		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-		pSurface->P() ->SetSize( pSurface->cVertex() );
+		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P
+			= new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P", 1);
+		P->SetSize(pSurface->cVertex());
 		TqUint i;
 		switch ( fP )
 		{
 				case RIL_P:
 				for ( i = 0; i < pSurface->cVertex(); ++i )
-					pSurface->P()->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+					P->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				break;
 
 				case RIL_Pz:
@@ -6090,15 +6091,16 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 				{
 					CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
 					vecP.z( pPoints[ i ] );
-					pSurface->P()->pValue( i )[0] = vecP;
+					P->pValue( i )[0] = vecP;
 				}
 				break;
 
 				case RIL_Pw:
 				for ( i = 0; i < pSurface->cVertex(); ++i )
-					pSurface->P()->pValue( i )[0] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
+					P->pValue( i )[0] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
 				break;
 		}
+		pSurface->AddPrimitiveVariable(P);
 	}
 
 	// Now process any user defined paramter variables.

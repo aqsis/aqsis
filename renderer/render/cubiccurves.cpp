@@ -582,49 +582,27 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 }
 
 
-//---------------------------------------------------------------------
-/** Convert from the current basis into Bezier for processing.
+//------------------------------------------------------------------------------
+// CqCubicCurvesGroup implementation
+//------------------------------------------------------------------------------
+
+namespace {
+
+/** Get the number of piecewise cubic segments in a curve
  *
- *  \param matBasis	Basis to convert from.
+ * \param numVerts - number of vertices in the curve
+ * \param step - number of verticies per segment
+ * \param isPeriodic - true if the curve is periodic.
  */
-
-void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
+inline TqInt segmentsPerCurve(TqInt numVerts, TqInt step, bool isPeriodic)
 {
-	static CqMatrix matMim1;
-	TqInt i, j;
-
-	if ( matMim1.fIdentity() )
-	{
-		for ( i = 0; i < 4; i++ )
-			for ( j = 0; j < 4; j++ )
-				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
-		matMim1.SetfIdentity( false );
-		matMim1 = matMim1.Inverse();
-	}
-
-	CqMatrix matMj = matBasis;
-	CqMatrix matConv = matMj * matMim1;
-
-	CqMatrix matCP;
-	for ( i = 0; i < 4; i++ )
-	{
-		matCP[ 0 ][ i ] = P()->pValue(i)[0].x();
-		matCP[ 1 ][ i ] = P()->pValue(i)[0].y();
-		matCP[ 2 ][ i ] = P()->pValue(i)[0].z();
-		matCP[ 3 ][ i ] = P()->pValue(i)[0].h();
-	}
-	matCP.SetfIdentity( false );
-
-	matCP = matConv.Transpose() * matCP;
-
-	for ( i = 0; i < 4; i++ )
-	{
-		P()->pValue(i)[0].x( matCP[ 0 ][ i ] );
-		P()->pValue(i)[0].y( matCP[ 1 ][ i ] );
-		P()->pValue(i)[0].z( matCP[ 2 ][ i ] );
-		P()->pValue(i)[0].h( matCP[ 3 ][ i ] );
-	}
+	if(isPeriodic)
+		return numVerts / step;
+	else
+		return (numVerts - 4)/step + 1;
 }
+
+} // unnamed namespace
 
 
 /**
@@ -636,18 +614,26 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
  */
 CqCubicCurvesGroup::CqCubicCurvesGroup(
     TqInt ncurves, TqInt nvertices[], bool periodic
-) : CqCurvesGroup()
+) : CqCurvesGroup(),
+	m_nVertsBezier(0),
+	m_basisTrans()
 {
+	// Inverse of the bezier basis (only computed once).
+	static CqMatrix bezierInv(CqMatrix(RiBezierBasis).Inverse());
+
+	m_basisTrans = pAttributes()->GetMatrixAttribute("System", "Basis")[1] * bezierInv;
 
 	m_ncurves = ncurves;
 	m_periodic = periodic;
 
+	const TqInt vStep = pAttributes()->GetIntegerAttribute("System", "BasisStep")[1];
 	// add up the total number of vertices
 	m_nTotalVerts = 0;
 	TqInt i;
 	for ( i = 0; i < ncurves; i++ )
 	{
 		m_nTotalVerts += nvertices[ i ];
+		m_nVertsBezier += 4*segmentsPerCurve(nvertices[i], vStep, m_periodic);
 	}
 
 	// copy the array of numbers of vertices
@@ -657,7 +643,6 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
 	{
 		m_nvertices.push_back( nvertices[ i ] );
 	}
-
 }
 
 
@@ -682,7 +667,117 @@ CqCubicCurvesGroup::~CqCubicCurvesGroup()
 	m_nvertices.clear();
 }
 
+template<typename DataT, typename SLDataT>
+CqParameter* CqCubicCurvesGroup::convertToBezierBasis(CqParameter* param)
+{
+	// input must be of the vertex storage class.
+	assert(param->Class() == class_vertex);
+	// Cast parameter to the specific type we're dealing with.
+	typedef CqParameterTyped<DataT, SLDataT> TqParam;
+	TqParam* inParam = static_cast<TqParam*>(param);
+	// Number of array elements in the parameters.
+	TqInt arrSize = inParam->Count();
+	// Make a new parameter where we'll store the results of the basis conversion.
+	TqParam* newParam = static_cast<TqParam*>(
+			inParam->CloneType(inParam->strName().c_str(), arrSize));
+	newParam->SetSize(m_nVertsBezier);
+	// Step between cubic curve segments in current basis.
+	const TqInt vStep = pAttributes()->GetIntegerAttribute("System", "BasisStep")[1];
+	// Vertex index to the start of the current curve
+	TqInt currCurveStart = 0;
+	// Index into the full parameter array for the converted output vertices.
+	TqInt outVertIdx = 0;
+	for(TqInt curveNum = 0; curveNum < m_ncurves; ++curveNum)
+	{
+		const TqInt numVerts = m_nvertices[curveNum];
+		// Number of piecewise cubic segments in the current curve.
+		TqInt numSegs = segmentsPerCurve(numVerts, vStep, m_periodic);
 
+		// Iterate over segments in current curve, and convert each to the
+		// bezier basis.
+		TqInt segVertIdx = 0;
+		for(TqInt segNum = 0; segNum < numSegs; ++segNum)
+		{
+			// Get pointers to the input data 
+			DataT* p0 = inParam->pValue(segVertIdx + currCurveStart);
+			DataT* p1 = inParam->pValue((segVertIdx + 1) % numVerts + currCurveStart);
+			DataT* p2 = inParam->pValue((segVertIdx + 2) % numVerts + currCurveStart);
+			DataT* p3 = inParam->pValue((segVertIdx + 3) % numVerts + currCurveStart);
+			// Get pointers to the output data
+			DataT* po0 = newParam->pValue(outVertIdx);
+			DataT* po1 = newParam->pValue(outVertIdx + 1);
+			DataT* po2 = newParam->pValue(outVertIdx + 2);
+			DataT* po3 = newParam->pValue(outVertIdx + 3);
+			for(TqInt i = 0; i < arrSize; ++i)
+			{
+				// Convert current segment to bezier basis and store.
+				//
+				// This is just matrix-vector multiplication, where the
+				// "vector" to be multiplied is [p0, p1, p2, p3] and made of
+				// type DataT.  This works whenever DataT live in a vector
+				// space (ie, everything from colours to floats).
+				//
+				// It even works for hpoints (CqVector4D), given that the
+				// correct homogenous addition operators have been defined for
+				// hpoints.
+				po0[i] = m_basisTrans[0][0]*p0[i] + m_basisTrans[0][1]*p1[i]
+					+ m_basisTrans[0][2]*p2[i] + m_basisTrans[0][3]*p3[i];
+				po1[i] = m_basisTrans[1][0]*p0[i] + m_basisTrans[1][1]*p1[i]
+					+ m_basisTrans[1][2]*p2[i] + m_basisTrans[1][3]*p3[i];
+				po2[i] = m_basisTrans[2][0]*p0[i] + m_basisTrans[2][1]*p1[i]
+					+ m_basisTrans[2][2]*p2[i] + m_basisTrans[2][3]*p3[i];
+				po3[i] = m_basisTrans[3][0]*p0[i] + m_basisTrans[3][1]*p1[i]
+					+ m_basisTrans[3][2]*p2[i] + m_basisTrans[3][3]*p3[i];
+			}
+			segVertIdx += vStep;
+			outVertIdx += 4;
+		}
+		currCurveStart += numVerts;
+	}
+	return newParam;
+}
+
+void CqCubicCurvesGroup::AddPrimitiveVariable(CqParameter* param)
+{
+	// Vertex class primitives have to be handled specially - we need to
+	// transform them into bezier control points from whatever basis they're
+	// currently in.
+	//
+	// Since some bases (eg, power) can result in curves which are
+	// discontinuous across segments, the step of the converted curves is 4.
+	/// \todo Decide whether this is really necessary, or can we assume step 3?
+	if(param->Class() == class_vertex)
+	{
+		CqParameter* newParam = 0;
+		switch(param->Type())
+		{
+			case type_float:
+				newParam = convertToBezierBasis<TqFloat, TqFloat>(param);
+				break;
+			case type_point:
+			case type_normal:
+			case type_vector:
+				newParam = convertToBezierBasis<CqVector3D, CqVector3D>(param);
+				break;
+			case type_hpoint:
+				newParam = convertToBezierBasis<CqVector4D, CqVector3D>(param);
+				break;
+			case type_color:
+				newParam = convertToBezierBasis<CqColor, CqColor>(param);
+				break;
+			case type_matrix:
+				newParam = convertToBezierBasis<CqMatrix, CqMatrix>(param);
+				break;
+			default:
+				assert(0 && "Unsupported type for vertex class interpolation");
+				delete param;
+				return;
+		}
+		delete param;
+		param = newParam;
+	}
+	CqCurvesGroup::AddPrimitiveVariable(param);
+}
 
 /**
  * Returns the number of parameters of varying storage class that this curve
@@ -767,25 +862,11 @@ TqInt CqCubicCurvesGroup::Split(
 	{
 		TqInt nVertex = m_nvertices[ curveN ];
 		// find the total number of piecewise cubic segments in the
-		//  current curve, accounting for periodic curves
-		TqInt npcSegs;
-		if ( m_periodic )
-			npcSegs = m_nvertices[ curveN ] / vStep;
-		else
-			npcSegs = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
+		// current curve.
+		const TqInt npcSegs = segmentsPerCurve(nVertex, vStep, m_periodic);
 
 		// find the number of varying parameters in the current curve
-		TqInt nVarying;
-		if ( m_periodic )
-			nVarying = npcSegs;
-		else
-			nVarying = npcSegs + 1;
-
-		TqInt nextCurveVertexIndex = curveVertexIndexStart + nVertex;
-		TqInt nextCurveVaryingIndex = curveVaryingIndexStart + nVarying;
-		//
-		// the current vertex index within the current curve group
-		TqInt segmentVertexIndex = 0;
+		TqInt nVarying = m_periodic ? npcSegs : npcSegs + 1;
 
 		// the current varying index within the current curve group
 		TqInt segmentVaryingIndex = 0;
@@ -795,15 +876,12 @@ TqInt CqCubicCurvesGroup::Split(
 		//  cubic curve segment within the current curve
 		for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
 		{
-			// each segment needs four vertex indexes, which we
-			//  calculate here.  if the index goes beyond the
-			//  number of vertices then we wrap it around,
-			//  starting back at zero.
+			// Each segment needs four vertex indexes, which we calculate here.
 			TqInt vi[ 4 ];
-			vi[ 0 ] = ((segmentVertexIndex+0)%nVertex) + curveVertexIndexStart;
-			vi[ 1 ] = ((segmentVertexIndex+1)%nVertex) + curveVertexIndexStart;
-			vi[ 2 ] = ((segmentVertexIndex+2)%nVertex) + curveVertexIndexStart;
-			vi[ 3 ] = ((segmentVertexIndex+3)%nVertex) + curveVertexIndexStart;
+			vi[ 0 ] = 4*pcN + curveVertexIndexStart;
+			vi[ 1 ] = 4*pcN + 1 + curveVertexIndexStart;
+			vi[ 2 ] = 4*pcN + 2 + curveVertexIndexStart;
+			vi[ 3 ] = 4*pcN + 3 + curveVertexIndexStart;
 
 			// we also need two varying indexes.  once again, we
 			//  wrap around
@@ -817,8 +895,7 @@ TqInt CqCubicCurvesGroup::Split(
 			TqFloat vstart = ( TqFloat ) pcN / ( TqFloat ) ( npcSegs );
 			TqFloat vend = ( TqFloat ) ( pcN + 1 ) / ( TqFloat ) ( npcSegs );
 
-			// create the new CqLinearCurveSegment for the current
-			//  curve segment
+			// create a new object for the current curve segment
 			boost::shared_ptr<CqCubicCurveSegment> pSeg( new CqCubicCurveSegment() );
 			pSeg->SetSurfaceParameters( *this );
 
@@ -844,81 +921,83 @@ TqInt CqCubicCurvesGroup::Split(
 			    iUP++
 			)
 			{
-				if ( ( *iUP ) ->Class() == class_vertex )
+				switch((*iUP)->Class())
 				{
-					// copy "vertex" class variables
-					CqParameter * pNewUP =
-					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
-					        ( *iUP ) ->Count()
-					    );
-					pNewUP->SetSize( pSeg->cVertex() );
+					case class_vertex:
+						{
+							// copy "vertex" class variables
+							CqParameter * pNewUP =
+								( *iUP ) ->CloneType(
+									( *iUP ) ->strName().c_str(),
+									( *iUP ) ->Count()
+								);
+							pNewUP->SetSize( pSeg->cVertex() );
+							for ( TqInt i = 0; i < 4; i++ )
+							{
+								pNewUP->SetValue(
+									( *iUP ), i, vi[ i ]
+								);
+							}
+							pSeg->AddPrimitiveVariable( pNewUP );
+						}
+						break;
+					case class_varying:
+						{
+							// copy "varying" class variables
+							CqParameter * pNewUP =
+								( *iUP ) ->CloneType(
+									( *iUP ) ->strName().c_str(),
+									( *iUP ) ->Count()
+								);
+							pNewUP->SetSize( pSeg->cVarying() );
 
-					for ( TqInt i = 0; i < 4; i++ )
-					{
-						pNewUP->SetValue(
-						    ( *iUP ), i, vi[ i ]
-						);
-					}
-					pSeg->AddPrimitiveVariable( pNewUP );
+							pNewUP->SetValue( ( *iUP ), 0, vai[ 0 ] );
+							pNewUP->SetValue( ( *iUP ), 1, vai[ 1 ] );
+							pSeg->AddPrimitiveVariable( pNewUP );
+						}
+						break;
+					case class_uniform:
+						{
+							// copy "uniform" class variables
+							CqParameter * pNewUP =
+								( *iUP ) ->CloneType(
+									( *iUP ) ->strName().c_str(),
+									( *iUP ) ->Count()
+								);
+							pNewUP->SetSize( pSeg->cUniform() );
 
+							pNewUP->SetValue( ( *iUP ), 0, curveUniformIndexStart );
+							pSeg->AddPrimitiveVariable( pNewUP );
+						}
+						break;
+					case class_constant:
+						{
+							// copy "constant" class variables
+							CqParameter * pNewUP =
+								( *iUP ) ->CloneType(
+									( *iUP ) ->strName().c_str(),
+									( *iUP ) ->Count()
+								);
+							pNewUP->SetSize( 1 );
+
+							pNewUP->SetValue( ( *iUP ), 0, 0 );
+							pSeg->AddPrimitiveVariable( pNewUP );
+						}
+						break;
+					default:
+						// ignore any other interpolation classes (should warn?)
+						break;
 				}
-				else if ( ( *iUP ) ->Class() == class_varying )
-				{
-					// copy "varying" class variables
-					CqParameter * pNewUP =
-					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
-					        ( *iUP ) ->Count()
-					    );
-					pNewUP->SetSize( pSeg->cVarying() );
-
-					pNewUP->SetValue( ( *iUP ), 0, vai[ 0 ] );
-					pNewUP->SetValue( ( *iUP ), 1, vai[ 1 ] );
-					pSeg->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_uniform )
-				{
-					// copy "uniform" class variables
-					CqParameter * pNewUP =
-					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
-					        ( *iUP ) ->Count()
-					    );
-					pNewUP->SetSize( pSeg->cUniform() );
-
-					pNewUP->SetValue( ( *iUP ), 0, curveUniformIndexStart );
-					pSeg->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_constant )
-				{
-					// copy "constant" class variables
-					CqParameter * pNewUP =
-					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
-					        ( *iUP ) ->Count()
-					    );
-					pNewUP->SetSize( 1 );
-
-					pNewUP->SetValue( ( *iUP ), 0, 0 );
-					pSeg->AddPrimitiveVariable( pNewUP );
-				} // if
 			} // for each user parameter
 
-
-
-			segmentVertexIndex += vStep;
 			segmentVaryingIndex++;
 			nsplits++;
-
-			CqMatrix matBasis = pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
-			pSeg ->ConvertToBezierBasis( matBasis );
 
 			aSplits.push_back( pSeg );
 		}
 
-		curveVertexIndexStart = nextCurveVertexIndex;
-		curveVaryingIndexStart = nextCurveVaryingIndex;
+		curveVertexIndexStart += 4*npcSegs;
+		curveVaryingIndexStart += nVarying;
 		// we've finished our current curve, so we can get the next
 		//  uniform parameter.  there's one uniform parameter per
 		//  facet, so each curve corresponds to a facet.
@@ -930,148 +1009,58 @@ TqInt CqCubicCurvesGroup::Split(
 }
 
 
-/**
- * Calculates bounds for a set of cubic curves.
+/** \brief Calculate bounds for a set of cubic curves.
  *
- * @return CqBound object containing the bounds.
+ * The curves are bounded by finding the minimum and maximum coordinates of the
+ * Bezier control points.  This works because Bezier curves lie inside the
+ * convex hull of their control points.
+ *
+ * The bound is then expanded by the maximum curve width.
  */
 void CqCubicCurvesGroup::Bound(IqBound* bound) const
 {
-	// Get the boundary in camera space.
-	CqVector3D vecA( FLT_MAX, FLT_MAX, FLT_MAX );
-	CqVector3D vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	TqFloat maxCameraSpaceWidth = 0;
-	TqUint nWidthParams = cVarying();
-	TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
-	// Create the matrix required to transform from the current basis to Bezier.
-	static CqMatrix matMim1;
-	TqUint i, j;
+	// Start with an empty bound
+	CqVector3D boundMin(FLT_MAX, FLT_MAX, FLT_MAX);
+	CqVector3D boundMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	if ( matMim1.fIdentity() )
+	// Get bounds of Bezier control hull.
+	for(TqInt i = 0, end = P()->Size(); i < end; ++i)
 	{
-		for ( i = 0; i < 4; i++ )
-			for ( j = 0; j < 4; j++ )
-				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
-		matMim1.SetfIdentity( false );
-		matMim1 = matMim1.Inverse();
+		CqVector3D p = P()->pValue(i)[0];
+		boundMin = min(boundMin, p);
+		boundMax = max(boundMax, p);
 	}
 
-	CqMatrix matMj =pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ]; 
-	CqMatrix matConv = matMj * matMim1;
+	// Find maximum width of the curve
+	TqFloat maxWidth = 0;
+	for(TqInt i = 0, end = width()->Size(); i < end; ++i)
+		maxWidth = max(maxWidth, width()->pValue(i)[0]);
 
-	matConv = matConv.Transpose();
+	// Expand bound by max curve width
+	bound->vecMin() = boundMin - maxWidth/2;
+	bound->vecMax() = boundMax + maxWidth/2;
 
-	TqInt curveVertexIndexStart = 0;     //< Start vertex index of the current curve.
-	// process each curve in the group.  at this level, a curve is a
-	//  set of joined piecewise-cubic curve segments.  curveN is the
-	//  index of the current curve.
-	for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
-	{
-		TqInt nVertex = m_nvertices[ curveN ];
-		// find the total number of piecewise cubic segments in the
-		//  current curve, accounting for periodic curves
-		TqInt npcSegs;
-		if ( m_periodic )
-			npcSegs = m_nvertices[ curveN ] / vStep;
-		else
-			npcSegs = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
-
-		TqInt nextCurveVertexIndex = curveVertexIndexStart + nVertex;
-
-		// the current vertex index within the current curve group
-		TqInt segmentVertexIndex = 0;
-
-		// process each piecewise cubic segment within the current
-		//  curve.  pcN is the index of the current piecewise
-		//  cubic curve segment within the current curve
-		for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
-		{
-			// each segment needs four vertex indexes, which we
-			//  calculate here.  if the index goes beyond the
-			//  number of vertices then we wrap it around,
-			//  starting back at zero.
-			TqInt vi[ 4 ];
-			vi[ 0 ] = ((segmentVertexIndex+0)%nVertex) + curveVertexIndexStart;
-			vi[ 1 ] = ((segmentVertexIndex+1)%nVertex) + curveVertexIndexStart;
-			vi[ 2 ] = ((segmentVertexIndex+2)%nVertex) + curveVertexIndexStart;
-			vi[ 3 ] = ((segmentVertexIndex+3)%nVertex) + curveVertexIndexStart;
-
-			CqMatrix matCP;
-			for ( i = 0; i < 4; i++ )
-			{
-				CqVector4D vecV = P()->pValue( vi[ i ] )[0];
-				matCP[ 0 ][ i ] = vecV.x();
-				matCP[ 1 ][ i ] = vecV.y();
-				matCP[ 2 ][ i ] = vecV.z();
-				matCP[ 3 ][ i ] = vecV.h();
-			}
-			matCP.SetfIdentity( false );
-
-			matCP = matConv * matCP;
-
-			for ( i = 0; i < 4; i++ )
-			{
-				CqVector4D vecV;
-				vecV.x( matCP[ 0 ][ i ] );
-				vecV.y( matCP[ 1 ][ i ] );
-				vecV.z( matCP[ 2 ][ i ] );
-				vecV.h( matCP[ 3 ][ i ] );
-				vecV.Homogenize();
-				// expand the boundary if necessary to accomodate the
-				//  current vertex
-				if ( vecV.x() < vecA.x() )
-					vecA.x( vecV.x() );
-				if ( vecV.y() < vecA.y() )
-					vecA.y( vecV.y() );
-				if ( vecV.x() > vecB.x() )
-					vecB.x( vecV.x() );
-				if ( vecV.y() > vecB.y() )
-					vecB.y( vecV.y() );
-				if ( vecV.z() < vecA.z() )
-					vecA.z( vecV.z() );
-				if ( vecV.z() > vecB.z() )
-					vecB.z( vecV.z() );
-			}
-
-			segmentVertexIndex += vStep;
-		}
-		curveVertexIndexStart = nextCurveVertexIndex; 
-	}
-
-	for ( i = 0; i < ( *P() ).Size(); i++ )
-	{
-		// increase the maximum camera space width of the curve if
-		//  necessary
-		if ( i < nWidthParams )
-		{
-			TqFloat camSpaceWidth = width()->pValue( i )[0];
-			if ( camSpaceWidth > maxCameraSpaceWidth )
-			{
-				maxCameraSpaceWidth = camSpaceWidth;
-			}
-		}
-
-	}
-
-	// increase the size of the boundary by half the width of the
-	//  curve in camera space
-	vecA -= ( maxCameraSpaceWidth / 2.0 );
-	vecB += ( maxCameraSpaceWidth / 2.0 );
-
-	bound->vecMin() = vecA;
-	bound->vecMax() = vecB;
 	AdjustBoundForTransformationMotion( bound );
 }
 
-/**
- * Transforms this GPrim using the specified matrices.
+
+/** Transform a curve group using the specified matrices.
  *
- * @param matTx         Reference to the transformation matrix.
- * @param matITTx       Reference to the inverse transpose of the 
+ * All parameters are transformed by the base class transformation function,
+ * except for the curve widths, which needs special consideration.  Widths
+ * are scaled by the average of the amount which the curve is squashed
+ * perpendicular to the viewing direction.  This isn't the most accurate
+ * algorithm, but it's relatively easy to implement (see notes below).
+ *
+ * The algorithm used assumes that the transformation is not a projective
+ * transformation.  Any affine transformation should be fine.
+ *
+ * \param matTx         Reference to the transformation matrix.
+ * \param matITTx       Reference to the inverse transpose of the 
  *                        transformation matrix, used to transform normals.
- * @param matRTx        Reference to the rotation only transformation matrix, 
+ * \param matRTx        Reference to the rotation only transformation matrix, 
  *                        used to transform vectors.
- * @param iTime			The frame time at which to apply the transformation.
+ * \param iTime			The frame time at which to apply the transformation.
  */
 void CqCubicCurvesGroup::Transform(
     const CqMatrix& matTx,
@@ -1080,94 +1069,45 @@ void CqCubicCurvesGroup::Transform(
     TqInt iTime
 )
 {
-
 	// make sure the "width" parameter is present
 	PopulateWidth();
 
-	// number of points to skip between curves
-	const TqInt vStep =
-	    pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+	/// \todo The algorithm for transforming cubic curve widths is dubious!
+	//
+	// The previous algorithm used a very complicated method which boiled down
+	// to scaling the width parameter of curves by the amount
+	//
+	//   1/(matITTx*CqVector3D(1,0,0)).Magnitude()
+	//
+	// If the transformation is an anisotropic scaling transformation (eg,
+	// squashing more in the x-direction than the y-direction), this is rather
+	// inadequte: it results in different widths depending on the direction
+	// of the scaling.
+	//
+	// A slightly better algorithm is to use the average of the scaling amount
+	// in the x and y directions as done below.  (Chosen since x and y should
+	// be the directions perpendicular to the viewing direction.)
+	//
+	// However, this is far from ideal; ideally the curve would look like it
+	// has been squashed preferentially in one direction if that is the case.
+	// We could achieve this by calculating the width vector which is
+	// proportional to the tangent crossed with the normal, as is currently
+	// done by CqCubicCurveSegment::SplitToPatch.
+	//
+	// The width vector would then be transformed as a normal, and the
+	// resulting length used as the scaling factor, independently for each
+	// width on the curve.  This would be more correct, but is much more
+	// complicated to implement correctly!
+	TqFloat widthScale = 2/((matITTx*CqVector3D(1,0,0)).Magnitude()
+			+ (matITTx*CqVector3D(0,1,0)).Magnitude());
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* w = width();
+	for(TqInt i = 0, end = w->Size(); i < end; ++i)
+		w->pValue(i)[0] *= widthScale;
 
-
-	// First, we want to transform the width array.  For cubic curve
-	//  groups, there is one width parameter at each parametric corner.
-
-	TqInt widthI = 0;
-	TqInt vertexI = 0;
-
-	// Process each curve in the group.  At this level, each single curve
-	//  is a set of piecewise-cubic curves.
-	for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
-	{
-
-		// now, for each curve in the group, we want to know how many
-		//  varying parameters there are, since this determines how
-		//  many widths will need to be transformed for this curve
-		TqInt nsegments;
-		if ( m_periodic )
-		{
-			nsegments = m_nvertices[ curveN ] / vStep;
-		}
-		else
-		{
-			nsegments = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
-		}
-		TqInt nvarying;
-		if ( m_periodic )
-		{
-			nvarying = nsegments;
-		}
-		else
-		{
-			nvarying = nsegments + 1;
-		}
-
-		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
-
-		// now we process all the widths for the current curve
-		for ( TqInt ccwidth = 0; ccwidth < nvarying; ccwidth++ )
-		{
-
-			// first, create a horizontal vector in the new space
-			//  which is the length of the current width in
-			//  current space
-			CqVector3D horiz( 1, 0, 0 );
-			horiz = matITTx * horiz;
-			horiz *= width()->pValue( widthI )[0] / horiz.Magnitude();
-
-			// now, create two points; one at the vertex in
-			//  current space and one which is offset horizontally
-			//  in the new space by the width in the current space.
-			//  transform both points into the new space
-			CqVector3D pt = P()->pValue( vertexI )[0];
-			CqVector3D pt_delta = pt + horiz;
-			pt = matTx * pt;
-			pt_delta = matTx * pt_delta;
-
-			// finally, find the difference between the two
-			//  points in the new space - this is the transformed
-			//  width
-			CqVector3D widthVector = pt_delta - pt;
-			width()->pValue( widthI )[0] = widthVector.Magnitude();
-
-			// we've finished the current width, so we move on
-			//  to the next one.  this means incrementing the width
-			//  index by 1, and the vertex index by vStep
-			++widthI;
-			//            vertexI += vStep;
-			vertexI = (vertexI + vStep)%m_nvertices[curveN];
-		}
-		vertexI = nextCurveVertexIndex;
-	}
-
-	// finally, we want to call the base class transform
+	// For everything else (apart from the width), just call through to the
+	// underlying transformation function.
 	CqCurve::Transform( matTx, matITTx, matRTx, iTime );
-
-
 }
-
-
-
 
 
 } // namespace Aqsis

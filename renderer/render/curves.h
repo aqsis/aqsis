@@ -283,8 +283,6 @@ class CqCubicCurveSegment : public CqCurve
 		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
-		void ConvertToBezierBasis( CqMatrix& matBasis );
-
 		/** \brief Calculate the tangent at a given u along the curve
 		 *
 		 * The algorithm uses the analytical form for the tangent vector at
@@ -443,6 +441,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		    TqInt ncurves, TqInt nvertices[], bool periodic = false
 		);
 		virtual ~CqCubicCurvesGroup();
+		virtual void AddPrimitiveVariable( CqParameter* pParam );
 		virtual	TqUint cVarying() const;
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual	void Bound(IqBound* bound) const;
@@ -475,13 +474,28 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual	TqUint cVertex() const
 		{
 			return m_nTotalVerts;
-		};
+		}
 		/** Returns a string name of the class. */
 		virtual CqString strName() const
 		{
 			return "CqCubicCurvesGroup";
 		}
 		virtual CqSurface* Clone() const;
+	private:
+		/** \brief Convert a vertex parameter from the current to the bezier basis.
+		 *
+		 * \param param - parameter to convert.  Must be vertex storage class.
+		 * \return new converted parameter in the bezier basis.
+		 */
+		template<typename DataT, typename SLDataT>
+		CqParameter* convertToBezierBasis(CqParameter* param);
+
+		/// Total number of verts for vertex data after Bezier basis transform.
+		TqInt m_nVertsBezier;
+		/** \brief Transformation taking parameters in the current basis into
+		 * parameters in the Bezier basis.
+		 */
+		CqMatrix m_basisTrans;
 };
 
 
