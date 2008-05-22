@@ -5827,6 +5827,8 @@ RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny,
 	VALIDATE_RICLIPPINGPLANE
 
 	DEBUG_RICLIPPINGPLANE
+
+	Aqsis::log() << warning << "Ignoring unimplemented interface call: RiClippingPlane\n";
 }
 
 

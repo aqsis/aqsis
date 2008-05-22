@@ -136,6 +136,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_BOXFILTER
 %token	<ctype>	REQUEST_TOKEN_CATMULLROMFILTER
 %token	<ctype>	REQUEST_TOKEN_CLIPPING
+%token	<ctype>	REQUEST_TOKEN_CLIPPING_PLANE
 %token	<ctype>	REQUEST_TOKEN_COLOR
 %token	<ctype>	REQUEST_TOKEN_COLORSAMPLES
 %token	<ctype>	REQUEST_TOKEN_CONCATTRANSFORM
@@ -255,6 +256,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	blobby
 %type	<ctype>	bound
 %type	<ctype>	clipping
+%type	<ctype>	clippingplane
 %type	<ctype>	color
 %type	<ctype>	colorsamples
 %type	<ctype>	concattransform
@@ -442,6 +444,8 @@ complete_request
 			}
 	|	clipping float float
 			{ ParseCallbackInterface->RiClipping($2, $3); }
+	|	clippingplane float float float float float float
+			{ ParseCallbackInterface->RiClippingPlane($2, $3, $4, $5, $6, $7); }
 	|	depthoffield
 			{ ParseCallbackInterface->RiDepthOfField(FLT_MAX, FLT_MAX, FLT_MAX); }
 	|	depthoffield float float float
@@ -1328,6 +1332,7 @@ basis : REQUEST_TOKEN_BASIS	{ ExpectParams(); };
 blobby : REQUEST_TOKEN_BLOBBY	{ ExpectParams(); };
 bound : REQUEST_TOKEN_BOUND	{ ExpectParams(); };
 clipping : REQUEST_TOKEN_CLIPPING	{ ExpectParams(); };
+clippingplane : REQUEST_TOKEN_CLIPPING_PLANE	{ ExpectParams(); };
 color : REQUEST_TOKEN_COLOR	{ ExpectParams(); };
 colorsamples : REQUEST_TOKEN_COLORSAMPLES	{ ExpectParams(); };
 concattransform : REQUEST_TOKEN_CONCATTRANSFORM	{ ExpectParams(); };
