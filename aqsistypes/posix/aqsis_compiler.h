@@ -52,8 +52,16 @@
 
 #define SHARED_LIBRARY_SUFFIX ".so"
 
+/** Macros for DLL import/export on win32.  Unneeded on posix so they're
+ * defined to be empty.
+ */
 #define COMMON_SHARE
 #define AQSISTEX_SHARE
+#define RI_SHARE
+#define SLXARGS_SHARE
+
+#define AQSIS_EXPORT
+
 
 #define AQSIS_XSTR(s) AQSIS_STR(s)
 #define AQSIS_STR(s) #s

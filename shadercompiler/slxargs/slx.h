@@ -17,35 +17,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 /** \file
-		\brief Implements libslxargs, analogous to Pixar's sloarg library.
-		\author Douglas Ward (dsward@vidi.com)
-*/
+ * \brief Implements libslxargs, analogous to Pixar's sloarg library.
+ * \author Douglas Ward (dsward@vidi.com)
+ *
+ * ===================================================================
+ * C-compatible header. C++ constructs must be preprocessor-protected.
+ * ===================================================================
+ */
 
 #ifndef SLX_H_INCLUDED
-#define SLX_H_INCLUDED 1
+#define SLX_H_INCLUDED
 
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
-
-#    define  SLXARGS_SHARE
-
-#  else // !AQSIS_STATIC_LINK
-
-#      ifdef SLXARGS_EXPORTS
-#        define SLXARGS_SHARE __declspec(dllexport)
-#      else
-#        define SLXARGS_SHARE __declspec(dllimport)
-#      endif
-
-#  endif	// AQSIS_STATIC_LINK
-
-#else	// !WIN32
-
-#  define  SLXARGS_SHARE
-
-#endif // WIN32
+#include "aqsis_compiler.h"
 
 #ifdef __cplusplus
 extern "C"
