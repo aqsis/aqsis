@@ -143,7 +143,7 @@ class CqOutput
 		{}
 		virtual void printFloat( const RtFloat )
 		{}
-		virtual void printString( std::string & )
+		virtual void printString(const std::string & )
 		{}
 		virtual void printSpace()
 		{}

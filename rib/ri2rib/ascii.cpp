@@ -109,7 +109,7 @@ void CqASCII::printFloat( const RtFloat f )
 	}
 }
 
-void CqASCII::printString( std::string &str )
+void CqASCII::printString( const std::string &str )
 {
 	OUT << '"' << str << '"';
 }

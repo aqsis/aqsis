@@ -36,7 +36,7 @@ class CqBinary : public CqOutput
 	private:
 		void intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
 		void floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
-		void addString( std::string &, bool &, TqUint & );
+		void addString( const std::string &, bool &, TqUint & );
 		void encodeString( const char * );
 
 		bool m_aRequest[ LAST_Function ];
@@ -47,7 +47,7 @@ class CqBinary : public CqOutput
 		void printRequest( const char *, EqFunctions );
 		void printInteger( const RtInt );
 		void printFloat( const RtFloat );
-		void printString( std::string & );
+		void printString( const std::string & );
 		void printSpace()
 		{}
 		void printEOL()

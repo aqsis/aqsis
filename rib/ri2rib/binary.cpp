@@ -68,7 +68,7 @@ void CqBinary::floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqCha
 #endif
 }
 
-void CqBinary::addString( std::string &s, bool &defined, TqUint &index )
+void CqBinary::addString( const std::string &s, bool &defined, TqUint &index )
 {
 	TqUint j = 0;
 	for ( std::list<std::string>::iterator it = m_aStrings.begin(); it != m_aStrings.end(); it++, j++ )
@@ -192,7 +192,7 @@ void CqBinary::printFloat( const RtFloat f )
 	OUT << '\244' << b1 << b2 << b3 << b4; // 0xA4
 }
 
-void CqBinary::printString( std::string &s )
+void CqBinary::printString( const std::string &s )
 {
 	if ( ( s.length() <= 1 ) )
 	{
