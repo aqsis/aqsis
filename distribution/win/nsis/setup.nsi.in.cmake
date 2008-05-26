@@ -199,6 +199,7 @@ Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "@CMAKE_SOURCE_DIR@\aqsistypes\*.h"
+  File "@CMAKE_SOURCE_DIR@\aqsistypes\win32\*.h"
   File "@CMAKE_SOURCE_DIR@\shadercompiler\shadervm\shadeop.h"
   File "@CMAKE_SOURCE_DIR@\rib\api\ri.h"
   File "@CMAKE_BINARY_DIR@\rib\api\ri.inl"
