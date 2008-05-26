@@ -150,6 +150,18 @@ public:
 	static const int defaultHeight; ///< Default framebuffer height.
 
 private:
+	/** \brief Increment the current image zoom level
+	 *
+	 * \param increment - amount to increase or decrease the current zoom by.
+	 */
+	void incZoom(TqInt increment);
+	/** \brief Modify the current sub image level
+	 *
+	 * \param increase - If true, increase the sub image index, else decrease it.
+	 */
+	void incSubImage(bool increase);
+
+
 	Fl_FrameBuffer_Widget* m_uiImageWidget;			///< The custom image widget.
 	Fl_Menu_Button* m_popupMenu;					///< The right click menu widget.
 	Fl_Scroll *m_scroll;

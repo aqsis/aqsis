@@ -145,21 +145,15 @@ int CqFramebuffer::handle(int event)
 				boost::shared_ptr<Aqsis::CqImage>& image
 					= m_uiImageWidget->image();
 				int key = Fl::event_key();
-				if(Fl::event_alt())
+				if(Fl::event_ctrl())
 				{
 					switch(key)
 					{
-						case 'n':
-							if(image)
-								image->loadNextSubImage();
-								m_scroll->redraw();
-								queueResize();
+						case FL_KP + '+':
+							incSubImage(true);
 							return 1;
-						case 'p':
-							if(image)
-								image->loadPrevSubImage();
-								m_scroll->redraw();
-								queueResize();
+						case FL_KP + '-':
+							incSubImage(false);
 							return 1;
 					}
 				}
@@ -183,23 +177,10 @@ int CqFramebuffer::handle(int event)
 							m_scroll->redraw();
 							return 1;
 						case FL_KP + '+':
-							if(image)
-							{
-								image->setZoom(image->zoom()+1);
-								m_scroll->redraw();
-								queueResize();
-							}
+							incZoom(1);
 							return 1;
 						case FL_KP + '-':
-							if(image)
-							{
-								TqInt newZoom = image->zoom()-1;
-								if(newZoom > 0)
-								{
-									image->setZoom(newZoom);
-									queueResize();
-								}
-							}
+							incZoom(-1);
 							return 1;
 					}
 				}
@@ -240,6 +221,15 @@ int CqFramebuffer::handle(int event)
 					m_lastPos[0] = Fl::event_x();
 					m_lastPos[1] = Fl::event_y();
 					return 1;
+			}
+			break;
+		case FL_MOUSEWHEEL:
+			{
+				if(Fl::event_ctrl())
+					incSubImage(Fl::event_dy() < 0);
+				else 
+					incZoom(-Fl::event_dy());
+				return 1;
 			}
 			break;
 	}
@@ -353,5 +343,42 @@ void CqFramebuffer::checkResize()
 	if(m_doResize)
 		resize();
 }
+
+void CqFramebuffer::incZoom(TqInt increment)
+{
+	boost::shared_ptr<Aqsis::CqImage>& image = m_uiImageWidget->image();
+	if(!image)
+		return;
+
+	TqInt newZoom = image->zoom() + increment;
+	// Only zoom if the new image will be "small enough".
+	/// \todo This restriction should be lifted once we fix the zoom support with a proper image zooming widget.
+	if( newZoom > 0 && (increment < 0
+		|| newZoom * image->imageWidth() * image->imageHeight() < 8000*8000) )
+	{
+		image->setZoom(newZoom);
+		m_scroll->redraw();
+		queueResize();
+	}
+}
+
+void CqFramebuffer::incSubImage(bool increase)
+{
+	boost::shared_ptr<Aqsis::CqImage>& image = m_uiImageWidget->image();
+	if(!image)
+		return;
+
+	// Reset zoom level for safety.
+	/// \todo Fix this when we get a proper image zooming widget!
+	image->setZoom(1);
+
+	if(increase)
+		image->loadNextSubImage();
+	else
+		image->loadPrevSubImage();
+	m_scroll->redraw();
+	queueResize();
+}
+
 
 } // namespace Aqsis
