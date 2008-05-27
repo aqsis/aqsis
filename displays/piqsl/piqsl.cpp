@@ -333,7 +333,7 @@ int main( int argc, char** argv )
 	ArgParse ap;
 
 	// Set up the options
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Tiff file...]" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Image file...]" );
 	ap.argString( "i", "\aSpecify the IP address to listen on (default: %default)", &g_strInterface );
 	ap.argString( "p", "\aSpecify the TCP port to listen on (default: %default)", &g_strPort );
 	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
