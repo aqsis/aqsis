@@ -137,15 +137,6 @@ CqProcedural::~CqProcedural()
 }
 
 
-//----------------------------------------------------------------------
-// RiProcFree()
-//
-extern "C" RtVoid	RiProcFree( RtPointer data )
-{
-	free(data);
-}
-
-
 class CqRiProceduralPlugin : CqPluginBase
 {
 	private:
@@ -234,6 +225,23 @@ class CqRiProceduralPlugin : CqPluginBase
 // created from within the dynamic module may re-use the Subdivide and Free pointers so
 // they must remain linked in.
 static std::list<CqRiProceduralPlugin*> ActiveProcDLList;
+
+
+
+
+
+} // namespace Aqsis
+
+using namespace Aqsis;
+
+//----------------------------------------------------------------------
+// RiProcFree()
+//
+extern "C" RtVoid	RiProcFree( RtPointer data )
+{
+	free(data);
+}
+
 //----------------------------------------------------------------------
 // RiProcDynamicLoad() subdivide function
 //
@@ -257,8 +265,6 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	STATS_INC( GEO_prc_created_dl );
 }
 
-
-
 //----------------------------------------------------------------------
 // RiProcDelayedReadArchive()
 //
@@ -267,7 +273,6 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 	RiReadArchive( (RtToken) ((char**) data)[0], NULL, RI_NULL );
 	STATS_INC( GEO_prc_created_dra );
 }
-
 
 //----------------------------------------------------------------------
 /* RiProcRunProgram()
@@ -550,6 +555,3 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 
 #endif
-
-} // namespace Aqsis
-
