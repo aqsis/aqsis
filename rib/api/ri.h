@@ -104,8 +104,6 @@ extern	"C"
 
 	/* Specific to Aqsis */
 
-	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
-
 	RI_SHARE	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
 	RI_SHARE	RtVoid	RiProgressHandler( RtProgressFunc handler );
 	RI_SHARE	RtFunc	RiPreRenderFunction( RtFunc function );

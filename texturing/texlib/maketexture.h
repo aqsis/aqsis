@@ -38,14 +38,11 @@ namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
-// Filter function type which coincides with the RtFilterFunc type from ri.h
-typedef TqFloat (*TqFilterFunc)(TqFloat, TqFloat, TqFloat, TqFloat);
-
 /// Filtering information for downsampling.
 struct SqFilterInfo
 {
 	/// renderman filter function used in downsampling
-	TqFilterFunc filterFunc;
+	RtFilterFunc filterFunc;
 	/// filter width in x-direction
 	TqFloat xWidth;
 	/// filter width in y-direction
@@ -53,7 +50,7 @@ struct SqFilterInfo
 	//bool isSeparable;
 
 	/// trivial constructor
-	SqFilterInfo(TqFilterFunc filterFunc = 0, TqFloat xWidth = 1, TqFloat yWidth = 1)
+	SqFilterInfo(RtFilterFunc filterFunc = 0, TqFloat xWidth = 1, TqFloat yWidth = 1)
 		: filterFunc(filterFunc), xWidth(xWidth), yWidth(yWidth)
 	{ }
 };

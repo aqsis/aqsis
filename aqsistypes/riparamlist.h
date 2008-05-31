@@ -32,6 +32,8 @@
 #include <vector>
 #include <string>
 
+#include "ri_types.h"
+
 namespace Aqsis {
 
 /** \brief Encapsulate a pair of renderman (token,value) parameter arrays.
@@ -51,18 +53,6 @@ namespace Aqsis {
 class COMMON_SHARE CqRiParamList
 {
 	public:
-		/** \brief Repition of some renderman types.
-		 *
-		 * \todo: Figure out a way to use the proper renderman types here.  We
-		 * really don't want to rely on
-		 * char* == RtToken and
-		 * void* == RtPointer.
-		 *
-		 * \todo <b>Code Review</b> There should be a renderman types header in aqsistypes to alleviate the above issue.
-		 */
-		typedef char* RtToken;
-		typedef void* RtPointer;
-
 		/** \brief Construct the parameter list from the associated C-interface types.
 		 *
 		 * \param tokens - array of parameter description strings ("tokens")
@@ -110,8 +100,8 @@ class COMMON_SHARE CqRiParamList
 // Implementation details
 //==============================================================================
 // Implementation of CqRiParamList
-inline CqRiParamList::CqRiParamList(CqRiParamList::RtToken tokens[],
-		CqRiParamList::RtPointer values[], TqInt count)
+inline CqRiParamList::CqRiParamList(RtToken tokens[],
+		RtPointer values[], TqInt count)
 	: m_tokenNames(),
 	m_values(values),
 	m_count(count)

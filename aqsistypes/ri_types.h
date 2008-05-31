@@ -63,6 +63,10 @@ typedef	RtPointer	RtObjectHandle;
 typedef	RtPointer	RtLightHandle;
 typedef	RtPointer	RtContextHandle;
 
+
+/* Aqsis-specific typedefs */
+typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
+
 #ifdef	__cplusplus
 }
 #endif
