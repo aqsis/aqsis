@@ -237,6 +237,8 @@ void CqMicroPolyGrid::CalcNormals()
 
 void CqMicroPolyGrid::CalcSurfaceDerivatives()
 {
+	/// \todo <b>Code review</b>: This function should probably belong in the shaderexecenv.
+	// It could then be easily modified to use the new centered difference functions in the shaderexecenv
 	bool bdpu, bdpv;
 	TqInt lUses = pSurface() ->Uses();
 	bdpu = ( USES( lUses, EnvVars_dPdu ) );
@@ -277,8 +279,8 @@ void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
 	//  <--   x--x.
 	//        .
 	//
-	CqVector3D* pPmod;
-	pVar(EnvVars_P)->GetPointPtr(pPmod);
+	CqVector3D* pP;
+	pVar(EnvVars_P)->GetPointPtr(pP);
 
 	const TqInt numVertsU = uGridRes() + 1;
 	const TqInt totVerts = numVertsU*(vGridRes() + 1);
@@ -291,33 +293,33 @@ void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
 	// row.
 	const TqFloat degeneracyRatio = 1e-8;
 
-	if((pPmod[0] - pPmod[numVertsU-1]).Magnitude2()
-			> degeneracyRatio*(pPmod[numVertsU] - pPmod[2*numVertsU-1]).Magnitude2())
+	if((pP[0] - pP[numVertsU-1]).Magnitude2()
+			> degeneracyRatio*(pP[numVertsU] - pP[2*numVertsU-1]).Magnitude2())
 	{
 		// Expand first u-row in -v direction.
 		for(TqInt iu = 0; iu < numVertsU; ++iu)
-			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu+numVertsU];
+			pP[iu] = (1+amount)*pP[iu] - amount*pP[iu+numVertsU];
 	}
-	if((pPmod[totVerts-numVertsU] - pPmod[totVerts-1]).Magnitude2()
-			> degeneracyRatio*(pPmod[totVerts-2*numVertsU] - pPmod[totVerts-numVertsU-1]).Magnitude2())
+	if((pP[totVerts-numVertsU] - pP[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pP[totVerts-2*numVertsU] - pP[totVerts-numVertsU-1]).Magnitude2())
 	{
 		// Expand last u-row in +v direction.
 		for(TqInt iu = totVerts-numVertsU; iu < totVerts; ++iu)
-			pPmod[iu] = (1+amount)*pPmod[iu] - amount*pPmod[iu-numVertsU];
+			pP[iu] = (1+amount)*pP[iu] - amount*pP[iu-numVertsU];
 	}
-	if((pPmod[0] - pPmod[totVerts-numVertsU]).Magnitude2()
-			> degeneracyRatio*(pPmod[1] - pPmod[totVerts-numVertsU+1]).Magnitude2())
+	if((pP[0] - pP[totVerts-numVertsU]).Magnitude2()
+			> degeneracyRatio*(pP[1] - pP[totVerts-numVertsU+1]).Magnitude2())
 	{
 		// Expand first v-column in -u direction.
 		for(TqInt iv = 0; iv < totVerts; iv += numVertsU)
-			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv+1];
+			pP[iv] = (1+amount)*pP[iv] - amount*pP[iv+1];
 	}
-	if((pPmod[numVertsU-1] - pPmod[totVerts-1]).Magnitude2()
-			> degeneracyRatio*(pPmod[numVertsU-2] - pPmod[totVerts-2]).Magnitude2())
+	if((pP[numVertsU-1] - pP[totVerts-1]).Magnitude2()
+			> degeneracyRatio*(pP[numVertsU-2] - pP[totVerts-2]).Magnitude2())
 	{
 		// Expand last v-column in +u direction.
 		for(TqInt iv = numVertsU-1; iv < totVerts; iv += numVertsU)
-			pPmod[iv] = (1+amount)*pPmod[iv] - amount*pPmod[iv-1];
+			pP[iv] = (1+amount)*pP[iv] - amount*pP[iv-1];
 	}
 }
 
@@ -328,25 +330,18 @@ void CqMicroPolyGrid::ExpandGridBoundaries(TqFloat amount)
 
 void CqMicroPolyGrid::Shade( bool canCullGrid )
 {
-	register TqInt i;
-
 	// Sanity checks
 	if ( NULL == pVar(EnvVars_P) || NULL == pVar(EnvVars_I) )
 		return ;
 
-	static CqVector3D	vecE( 0, 0, 0 );
-
-	boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
-	boost::shared_ptr<IqShader> pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
-	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
-
 	TqInt lUses = pSurface() ->Uses();
 	TqInt gs = m_pShaderExecEnv->shadingPointCount();
-	TqInt uRes = uGridRes();
-	TqInt vRes = vGridRes();
 	TqInt gsmin1 = gs - 1;
-	long cCulled = 0;
 
+	// Expand grids to prevent grid cracking if enabled
+	const TqFloat* gridExpand = pAttributes()->GetFloatAttribute("aqsis", "expandgrids");
+	if(gridExpand && *gridExpand > 0)
+		ExpandGridBoundaries(*gridExpand);
 
 	const CqVector3D* pP;
 	pVar(EnvVars_P) ->GetPointPtr( pP );
@@ -369,121 +364,63 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if ( !bShadingNormals() && USES( lUses, EnvVars_N ) && NULL != pVar(EnvVars_Ng) && NULL != pVar(EnvVars_N) )
 		pVar(EnvVars_N) ->SetValueFromVariable( pVar(EnvVars_Ng) );
 
-	// Setup uniform variables.
+	// Set eye position - always at the origin in the shading coord system.
 	if ( USES( lUses, EnvVars_E ) )
-		pVar(EnvVars_E) ->SetVector( vecE );
+		pVar(EnvVars_E)->SetVector(CqVector3D(0, 0, 0));
 
-    TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
-    bool bSpline = false;
-    const TqInt *pSpline = QGetRenderContext()->GetIntegerOption( "render", "spline" );
-    if (pSpline) bSpline = true;
-    
-    TqInt buRes = uRes;
-    TqInt bvRes = vRes;
+	// Set du and dv if necessary.  This code assumes that du and dv are
+	// constant across every grid. (Looks to be a good assumption at svn r2117.)
+	/// \todo: Should this be a method of the shaderexecenv?
+	if(USES(lUses, EnvVars_du))
+	{
+		float f0 = 0;
+		float f1 = 0;
+		pVar(EnvVars_u)->GetValue(f0, 0);
+		pVar(EnvVars_u)->GetValue(f1, 1);
+		pVar(EnvVars_du)->SetFloat(f1 - f0);
+	}
+	if(USES(lUses, EnvVars_dv))
+	{
+		float f0 = 0;
+		float f1 = 0;
+		pVar(EnvVars_v)->GetValue(f0, 0);
+		pVar(EnvVars_v)->GetValue(f1, uGridRes() + 1);
+		pVar(EnvVars_dv)->SetFloat(f1 - f0);
+	}
 
-	const TqFloat* gridExpand = pAttributes()->GetFloatAttribute("aqsis", "expandgrids");
-	if(gridExpand && *gridExpand > 0)
-		ExpandGridBoundaries(*gridExpand);
+	// Set I, the incident ray direction; this is just equal to P in shading
+	// (camera) coords for a projective camera transformation, or (0,0,1) for
+	// orthographic.
+	switch(QGetRenderContext()->GetIntegerOption("System", "Projection")[0])
+	{
+		case ProjectionOrthographic:
+			pI->SetVector(CqVector3D(0,0,1));
+			break;
+		case ProjectionPerspective:
+		default:
+			pI->SetValueFromVariable(pVar(EnvVars_P));
+			break;
+	}
 
-    // Make sure uRes and vRes are at least equal to 4
-    // Otherwise spline interpolation will be off
-    if (uRes < 4) buRes = 4;
-    if (vRes < 4) bvRes = 4;
-    CqCubicSpline<TqFloat> sp_u(SplineBasis_CatmullRom, buRes);
-    CqCubicSpline<TqFloat> sp_v(SplineBasis_CatmullRom, bvRes);
-
-    for ( i = gsmin1; i >= 0; i-- )
-    {
-       if (bSpline == true) 
-       { 
-          if ( USES( lUses, EnvVars_du ) )
-          {
-             TqFloat v1, v2;
-             TqInt GridX = i % ( uRes + 1 );
-          
-             if ( GridX < uRes ) {
-             
-                pVar(EnvVars_u) ->GetValue( v1, i + 1 );
-                pVar(EnvVars_u) ->GetValue( v2, i );
-                TqFloat dv =  v1 - v2;
-                pVar(EnvVars_du) ->SetFloat(dv, i );
-                sp_u.pushBack(dv);
-                 } else {
-                   // Make sure uRes at least equal to 4
-                   if (uRes < 4) {
-                      for (TqInt k= uRes; k < 4; k++) {
-                         sp_u.pushBack(sp_u[uRes-1]);
-                      }
-                   }
-             
-                   TqFloat res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
-             
-                   pVar(EnvVars_du) ->SetFloat(res, i );
-                }
-          }
-          if ( USES( lUses, EnvVars_dv ) ){
-             TqFloat v1, v2;
-             TqInt GridY = ( i / ( uRes + 1 ) );
-          
-             if ( GridY < vRes ) {
-                pVar(EnvVars_v) ->GetValue( v1, i + uRes + 1 );
-                pVar(EnvVars_v) ->GetValue( v2, i );
-                TqFloat dv =  v1 - v2;
-                pVar(EnvVars_dv) ->SetFloat( dv, i );
-                sp_v.pushBack(dv);
-             } else {
-                // Make sure vRes at least equal to 4
-                if (vRes < 4) {
-                   for (TqInt k= vRes; k < 4; k++) {
-                      sp_v.pushBack(sp_v[vRes-1]);
-                   }
-                }
-                TqFloat res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
-                pVar(EnvVars_dv) ->SetFloat(res, i );
-             }
-          }
-       } else {
-          if ( USES( lUses, EnvVars_du ) ){
-       
-             pVar(EnvVars_du) ->SetFloat( 1.0f, i );
-       
-          }
-          if ( USES( lUses, EnvVars_dv ) ){
-       
-             pVar(EnvVars_dv) ->SetFloat( 1.0f, i );
-          }
-    
-       }
-
-
-       switch ( proj )
-       {
-       case	ProjectionOrthographic:
-          pI->SetVector( CqVector3D(0,0,1), i );
-          break;
-          
-       case	ProjectionPerspective:
-       default:
-          pI->SetVector( pP[ i ], i );
-          break;
-       }
-    }
-
+	// Calculate surface derivatives if necessary.
 	if ( USES( lUses, EnvVars_dPdu ) || USES( lUses, EnvVars_dPdv ) )
 		CalcSurfaceDerivatives();
 
+	// Initialize surface color Ci to black
 	if ( USES( lUses, EnvVars_Ci ) )
 		pVar(EnvVars_Ci) ->SetColor( gColBlack );
+	// Initialize surface opacity Oi to opaque
 	if ( USES( lUses, EnvVars_Oi ) )
 		pVar(EnvVars_Oi) ->SetColor( gColWhite );
 
-	// Now try and cull any transparent MPs
-	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
+	if(USES(lUses, EnvVars_Os))
 	{
-		TIME_SCOPE("Occlusion Culling")
+		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ)
 		{
-			for ( i = gsmin1; i >= 0; i-- )
+			// Try to cull any transparent MPs
+			TqInt cCulled = 0;
+			TIME_SCOPE("Occlusion Culling")
+			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				if ( pOs[ i ] != gColWhite )
 				{
@@ -493,46 +430,42 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 				else
 					break;
 			}
-		}
 
-		if ( canCullGrid && cCulled == gs )
-		{
-			m_fCulled = true;
-			STATS_INC( GRD_culled );
-			DeleteVariables( true );
-			return ;
-		}
-
-	}
-
-
-	// Now try and cull any true transparent MPs
-	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
-	{
-		//theStats.OcclusionCullTimer().Start();
-		TIME_SCOPE("Occlusion culling")
-		for ( i = gsmin1; i >= 0; i-- )
-		{
-			if ( pOs[ i ] == gColBlack )
+			if ( canCullGrid && cCulled == gs )
 			{
-				cCulled ++;
-				m_CulledPolys.SetValue( i, true );
+				m_fCulled = true;
+				STATS_INC( GRD_culled );
+				DeleteVariables( true );
+				return ;
 			}
-			else
-				break;
 		}
-		//theStats.OcclusionCullTimer().Stop();
-
-		if ( canCullGrid && cCulled == gs )
+		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB)
 		{
-			m_fCulled = true;
-			STATS_INC( GRD_culled );
-			DeleteVariables( true );
-			return ;
+			// Try to cull any true transparent MPs
+			TqInt cCulled = 0;
+			TIME_SCOPE("Occlusion culling")
+			for (TqInt i = gsmin1; i >= 0; i-- )
+			{
+				if ( pOs[ i ] == gColBlack )
+				{
+					cCulled ++;
+					m_CulledPolys.SetValue( i, true );
+				}
+				else
+					break;
+			}
+
+			if ( canCullGrid && cCulled == gs )
+			{
+				m_fCulled = true;
+				STATS_INC( GRD_culled );
+				DeleteVariables( true );
+				return ;
+			}
 		}
 	}
 
+	boost::shared_ptr<IqShader> pshadDisplacement = pSurface()->pAttributes()->pshadDisplacement(QGetRenderContext()->Time());
 	if ( pshadDisplacement )
 	{
 		//theStats.DisplacementTimer().Start();
@@ -549,14 +482,14 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
-	cCulled = 0;
 	if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
 	{
+		TqInt cCulled = 0;
 		const CqVector3D* pNg = NULL;
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
 
 		TIME_SCOPE("Backface culling")
-		for ( i = gsmin1; i >= 0; i-- )
+		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
 			// Calulate the direction the MPG is facing.
 			if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
@@ -578,15 +511,16 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	}
 
 	// Now shade the grid.
+	boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	if ( pshadSurface )
 	{
 		TIME_SCOPE("Surface shading")
-		//boost::shared_ptr<CqSurface> surf(pSurface());
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
 		pshadSurface->Evaluate( m_pShaderExecEnv );
 	}
 
 	// Perform atmosphere shading
+	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface()->pAttributes()->pshadAtmosphere(QGetRenderContext()->Time());
 	if ( pshadAtmosphere )
 	{
 		TIME_SCOPE("Atmosphere shading")
@@ -594,11 +528,11 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	}
 
 	// Now try to cull any true transparent MPs (assigned by the shader code
-	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
+		TqInt cCulled = 0;
 		TIME_SCOPE("Occlusion culling")
-		for ( i = gsmin1; i >= 0; i-- )
+		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
 			{
@@ -620,9 +554,8 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 
 	DeleteVariables( false );
 
-	TqInt	size = m_pShaderExecEnv->shadingPointCount();
-
-	STATS_INC( GRD_shd_size_4 + clamp<TqInt>( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+	STATS_INC( GRD_shd_size_4 + clamp<TqInt>( CqStats::stats_log2(
+					m_pShaderExecEnv->shadingPointCount() ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
