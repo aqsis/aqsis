@@ -421,8 +421,8 @@ int main( int argc, char** argv )
 	CqSocket::initialiseSockets();
 	if(!g_theSocket.prepare(g_strInterface, portno))
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
-
-	Fl::add_fd(g_theSocket,&HandleConnection);
+	else
+		Fl::add_fd(g_theSocket,&HandleConnection);
 
 	window = new CqPiqslMainWindow();
 	char* internalArgs[] = {
