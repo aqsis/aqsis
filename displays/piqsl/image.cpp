@@ -242,12 +242,21 @@ void CqImage::saveToFile(const std::string& fileName) const
 	//   Image description
 	//   Transformation matrices
 
-	// Now create the image, and output the pixel data.
-	boost::shared_ptr<IqTexOutputFile> outFile
-		= IqTexOutputFile::open(fileName, ImageFile_Tiff, header);
+	try
+	{
+		// Now create the image, and output the pixel data.
+		boost::shared_ptr<IqTexOutputFile> outFile
+			= IqTexOutputFile::open(fileName, ImageFile_Tiff, header);
 
-	// Write all pixels out at once.
-	outFile->writePixels(*m_realData);
+		// Write all pixels out at once.
+		outFile->writePixels(*m_realData);
+	}
+	catch(XqInternal& e)
+	{
+		Aqsis::log() << error << "Could not save image \"" << fileName << "\": "
+			<< e.what() << "\n";
+		return;
+	}
 }
 
 void CqImage::fixupDisplayMap(const CqChannelList& channelList)
