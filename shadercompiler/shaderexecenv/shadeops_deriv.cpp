@@ -694,16 +694,8 @@ void CqShaderExecEnv::SO_area( IqShaderData* p, IqShaderData* Result, IqShader* 
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			if ( m_pAttributes )
-			{
-				TqFloat fdu, fdv;
-				du() ->GetFloat( fdu, __iGrid );
-				dv() ->GetFloat( fdv, __iGrid );
-				vecR = ( SO_DuType<CqVector3D>( p, __iGrid, this, Defvec ) * fdu ) %
-				       ( SO_DvType<CqVector3D>( p, __iGrid, this, Defvec ) * fdv );
-				(Result)->SetFloat(vecR.Magnitude(),__iGrid);
-			}
-
+			(Result)->SetFloat( (diffU<CqVector3D>(p, __iGrid)
+					% diffV<CqVector3D>(p, __iGrid)).Magnitude() ,__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
