@@ -292,6 +292,13 @@ class CqDataHandler
 				}
 				else if(root->ValueStr().compare("Close") == 0)
 				{
+					// Send and acknowledge.
+					TiXmlDocument doc("ack.xml");
+					TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+					TiXmlElement* formatsXML = new TiXmlElement("Acknowledge");
+					doc.LinkEndChild(decl);
+					doc.LinkEndChild(formatsXML);
+					sendXMLMessage(doc);
 					m_client->close();
 					m_done = true;
 				}

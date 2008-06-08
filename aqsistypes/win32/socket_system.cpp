@@ -98,7 +98,7 @@ bool CqSocket::initialiseSockets()
 void CqSocket::close()
 {
     int x = 1;
-    setsockopt( m_socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
+    //setsockopt( m_socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
     shutdown( m_socket, SD_BOTH );
     closesocket( m_socket );
 
@@ -273,8 +273,16 @@ int	CqSocket::recvData(std::stringstream& buffer) const
 	{
 		// Read some more into the buffer
 		count = recv(m_socket,&c,sizeof(char),0);
-		if(count <= 0)
-				break;
+		if(count == SOCKET_ERROR)
+		{
+			int err = WSAGetLastError();
+	        Aqsis::log() << error << "Error reading from socket " << err << std::endl;
+			break;
+		}
+
+		// Socket was closed gracefully.
+		if(count == 0)
+			break;
 
 		if(c == '\0')
 		{

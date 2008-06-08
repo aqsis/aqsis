@@ -429,24 +429,11 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
-	SqPiqslDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
-
-	// Close the socket
-	if(pImage && pImage->m_socket)
-	{
-		TiXmlDocument doc("close.xml");
-		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
-		TiXmlElement* closeMsgXML = new TiXmlElement("Close");
-		doc.LinkEndChild(decl);
-		doc.LinkEndChild(closeMsgXML);
-		sendXMLMessage(doc, pImage->m_socket);
-	}
-
-	// Delete the image structure.
-	delete(pImage);
-
-	return(PkDspyErrorNone);
+	/// \note: This should never be called, as Aqsis will look 
+	///		  for the DspyImageDelayClose first and use that if it can.
+	///		  but just in case, it's important we get an ack from
+	///		  piqsl, so we forward the call.
+	return DspyImageDelayClose(image);
 }
 
 
@@ -464,6 +451,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(closeMsgXML);
 		sendXMLMessage(doc, pImage->m_socket);
+		TiXmlDocument* ack = recvXMLMessage(pImage->m_socket);
 	}
 
 	return(PkDspyErrorNone);
