@@ -1759,8 +1759,9 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 									if( envvarend != std::string::npos )
 									{
 										std::string strEnv = stringValue.substr(match + 1, (envvarend - (match + 1)));
-										std::string strVal = getenv(strEnv.c_str());
-										str += strVal;
+										const char* strVal = getenv(strEnv.c_str());
+										if(strVal)
+											str += strVal;
 										strt = envvarend + 1;
 										continue;
 									}
