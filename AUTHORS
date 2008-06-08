@@ -52,6 +52,9 @@ The following people have contributed to the development of Aqsis Renderer:
 	2006 Romain Behar			Blobby support.
 	2006 Marcus Rückert			Linux package management via openSUSE Build Service.
 	2006 Chris Foster			Unix build support for SCons.
+								General development; optimization and bugfixing.
+								aqsistex texture library rewrite.
+								Smooth shading interpolation.
 
 	If anyone is missing from this list, please contact pgregory@aqsis.org.
 
