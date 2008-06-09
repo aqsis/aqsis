@@ -18,7 +18,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-
 /** \file
     \brief Implements Blobby polygonizer
     \author Romain Behar (romainbehar@yahoo.com)
@@ -28,20 +27,22 @@
 *          K-3D
 *
 */
+
+#include "blobby.h"
+
 #include <cstring>
 #include <math.h>
 #include <vector>
 #include <list>
 #include <limits>
 
-#include "aqsis.h"
-#include "ri.h"
-#include "vector4d.h"
-#include "matrix.h"
-#include "blobby.h"
+#include "file.h"
 #include "itexturemap_old.h"
 #include "marchingcubes.h"
+#include "matrix.h"
 #include "plugins.h"
+#include "ri.h"
+#include "vector4d.h"
 
 #if _MSC_VER
 #pragma warning(disable:4786)	// hide stl warnings (VS6)
@@ -385,33 +386,21 @@ class blobby_vm_assembler
 						// Load the DBO plugin
 						if (!DBO_handle)
 						{
-							CqString dbo(m_strings[m_code[op.index+1]]);
-
-#if defined(AQSIS_SYSTEM_POSIX)
-							CqString plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib";
-							plugin_path += m_strings[m_code[op.index+1]];
-							dbo = plugin_path;
-							dbo += ".so";
-
-							if (access(dbo.c_str(), F_OK) != 0)
+							std::string dboName = std::string(m_strings[m_code[op.index+1]])
+										+ SHARED_LIBRARY_SUFFIX;
+							try
 							{
-								dbo = plugin_path;
-								dbo += ".dylib";
-							} 
-#elif defined(AQSIS_SYSTEM_WIN32)
-							char acPath[255];
-						
-							if ( GetModuleFileName( NULL, acPath, 256 ) != 0)
-							{
-								// guaranteed file name of at least one character after path
-								*( strrchr( acPath, '\\' ) + 1 ) = '\0';
+								CqString fullName = findFileInPath(dboName,
+									*QGetRenderContext()->poptCurrent()
+										->GetStringOption("searchpath", "procedural") );
+								DBO_handle = DBO.SimpleDLOpen(&fullName);
 							}
-
-							CqString plugin_path = acPath;
-							plugin_path.append( CqString("/" + dbo + ".dll") );
-							dbo = plugin_path;
-#endif
-							DBO_handle = DBO.SimpleDLOpen(&dbo);
+							catch(XqInvalidFile& e)
+							{
+								Aqsis::log() << error
+									<< "Could not find dynamic blob object \""
+									<< dboName << "\"\n";
+							}
 						}
 
 						// Attach each API DBO functions
@@ -564,7 +553,7 @@ class blobby_vm_assembler
  */
 CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings) : m_nleaf(nleaf), m_ncode(ncode), m_code(code), m_nfloats(nfloats), m_floats(floats), m_nstrings(nstrings), m_strings(strings)
 {
-	blobby_vm_assembler(nleaf, ncode, code, nfloats, floats, nstrings, strings, instructions, bbox);
+	blobby_vm_assembler(nleaf, ncode, code, nfloats, floats, nstrings, strings, m_instructions, m_bbox);
 }
 
 //---------------------------------------------------------------------
@@ -609,16 +598,16 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 	register unsigned long pc;
 
-	for(pc = 0; pc < instructions.size(); )
+	for(pc = 0; pc < m_instructions.size(); )
 	{
-		switch(instructions[pc++].opcode)
+		switch(m_instructions[pc++].opcode)
 		{
 				case NEGATE:
 				case IDEMPOTENTATE:
 					break;
 				case CONSTANT:
 				{
-					result = instructions[pc++].value;
+					result = m_instructions[pc++].value;
 					sum += result;
 					splits[int_index++] = result;
 				}
@@ -626,7 +615,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 				case ELLIPSOID:
 				{
-					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
+					const TqFloat r2 = (m_instructions[pc++].get_matrix() * Point).Magnitude2();
 					result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
 					sum += result;
 					splits[int_index++] = result;
@@ -635,8 +624,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 				case PLANE:
 				{
-					TqInt which = (TqInt) instructions[pc++].value;
-					TqInt n = (TqInt) instructions[pc++].value;
+					TqInt which = (TqInt) m_instructions[pc++].value;
+					TqInt n = (TqInt) m_instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
 					/** \todo Fix to use the new-style texture maps.  Using
@@ -704,7 +693,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					TqInt count, e, f, g, h, i, j;
 
 					e = f = g = h = i = j = 0;
-					count = instructions[pc++].count;
+					count = m_instructions[pc++].count;
 
 					if (m_code[count] >= 7)
 					{
@@ -725,10 +714,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 
 					TqFloat point[3];
-					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
-					const CqVector3D mx = instructions[pc++].get_vector();
-					const CqVector3D mn = instructions[pc++].get_vector();
+					const CqMatrix transformation = m_instructions[pc++].get_matrix();
+					const CqVector3D mid = m_instructions[pc++].get_vector();
+					const CqVector3D mx = m_instructions[pc++].get_vector();
+					const CqVector3D mn = m_instructions[pc++].get_vector();
 					const CqBound bound(mn, mx);
 
 					TqState s;
@@ -753,10 +742,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 				case SEGMENT:
 				{
-					const CqMatrix m = instructions[pc++].get_matrix();
-					const CqVector3D start = instructions[pc++].get_vector();
-					const CqVector3D end = instructions[pc++].get_vector();
-					const TqFloat radius = instructions[pc++].value;
+					const CqMatrix m = m_instructions[pc++].get_matrix();
+					const CqVector3D start = m_instructions[pc++].get_vector();
+					const CqVector3D end = m_instructions[pc++].get_vector();
+					const TqFloat radius = m_instructions[pc++].value;
 
 					// Nearest segment point
 					const CqVector3D segment_point = nearest_segment_point(Point, start, end);
@@ -800,22 +789,22 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 	register TqFloat result;
 	register unsigned long pc;
 
-	for(pc = 0; pc < instructions.size(); )
+	for(pc = 0; pc < m_instructions.size(); )
 	{
-		switch(instructions[pc++].opcode)
+		switch(m_instructions[pc++].opcode)
 		{
 				case NEGATE:
 				case IDEMPOTENTATE:
 					break;
 				case CONSTANT:
 				{
-					stack.push(instructions[pc++].value);
+					stack.push(m_instructions[pc++].value);
 				}
 				break;
 
 				case ELLIPSOID:
 				{
-					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
+					const TqFloat r2 = (m_instructions[pc++].get_matrix() * Point).Magnitude2();
 					result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
 
 					//Aqsis::log() << info << "Ellipsoid: result " << result << std::endl;
@@ -825,8 +814,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 				case PLANE:
 				{
-					TqInt which = (TqInt) instructions[pc++].value;
-					TqInt n = (TqInt) instructions[pc++].value;
+					TqInt which = (TqInt) m_instructions[pc++].value;
+					TqInt n = (TqInt) m_instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
 					/** \todo Fix to use the new-style texture maps.  Using
@@ -869,7 +858,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					TqInt count, e, f, g, h, i, j;
 
 					e = f = g = h = i = j = 0;
-					count = instructions[pc++].count;
+					count = m_instructions[pc++].count;
 
 					if (m_code[count] >= 7)
 					{
@@ -889,10 +878,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 
 					TqFloat point[3];
-					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
-					const CqVector3D mx = instructions[pc++].get_vector();
-					const CqVector3D mn = instructions[pc++].get_vector();
+					const CqMatrix transformation = m_instructions[pc++].get_matrix();
+					const CqVector3D mid = m_instructions[pc++].get_vector();
+					const CqVector3D mx = m_instructions[pc++].get_vector();
+					const CqVector3D mn = m_instructions[pc++].get_vector();
 					const CqBound bound(mn, mx);
 
 					TqState s;
@@ -918,10 +907,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 				case SEGMENT:
 				{
-					const CqMatrix m = instructions[pc++].get_matrix();
-					const CqVector3D start = instructions[pc++].get_vector();
-					const CqVector3D end = instructions[pc++].get_vector();
-					const TqFloat radius = instructions[pc++].value;
+					const CqMatrix m = m_instructions[pc++].get_matrix();
+					const CqVector3D start = m_instructions[pc++].get_vector();
+					const CqVector3D end = m_instructions[pc++].get_vector();
+					const TqFloat radius = m_instructions[pc++].value;
 
 					// Nearest segment point
 					const CqVector3D segment_point = nearest_segment_point(Point, start, end);
@@ -967,7 +956,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 				case ADD:
 				{
-					const TqInt count = instructions[pc++].count;
+					const TqInt count = m_instructions[pc++].count;
 					result = 0.0;
 					for(TqInt i = 0; i != count; ++i)
 					{
@@ -980,7 +969,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 				case MULTIPLY:
 				{
-					const TqInt count = instructions[pc++].count;
+					const TqInt count = m_instructions[pc++].count;
 					result = stack.top();
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
@@ -994,7 +983,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 				case MIN:
 				{
-					const TqInt count = instructions[pc++].count;
+					const TqInt count = m_instructions[pc++].count;
 					result = stack.top();
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
@@ -1007,7 +996,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 				break;
 				case MAX:
 				{
-					const TqInt count = instructions[pc++].count;
+					const TqInt count = m_instructions[pc++].count;
 					result = stack.top();
 					stack.pop();
 					for(TqInt i = 1; i != count; ++i)
@@ -1048,8 +1037,8 @@ TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoint
 
 
 	// Get bounding-box center and sizes
-	const CqVector3D center = ( bbox.vecMax() + bbox.vecMin() ) / 2.0;
-	const CqVector3D length = ( bbox.vecMax() - bbox.vecMin() );
+	const CqVector3D center = ( m_bbox.vecMax() + m_bbox.vecMin() ) / 2.0;
+	const CqVector3D length = ( m_bbox.vecMax() - m_bbox.vecMin() );
 
 	// Calculate voxel sizes and polygonization resolution
 	const TqFloat x_voxel_size = length.x() /  PixelsWidth;

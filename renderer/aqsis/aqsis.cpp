@@ -128,7 +128,6 @@ ArgParse::apstring g_cl_archive_path = "";
 ArgParse::apstring g_cl_texture_path = "";
 ArgParse::apstring g_cl_display_path = "";
 ArgParse::apstring g_cl_procedural_path = "";
-ArgParse::apstring g_cl_plugin_path = "";
 ArgParse::apstring g_cl_type = "";
 ArgParse::apstring g_cl_addtype = "";
 ArgParse::apstring g_cl_mode = "rgba";
@@ -603,7 +602,6 @@ int main( int argc, const char** argv )
 		ap.argString( "textures", "=string\aOverride the default texture searchpath(s)", &g_cl_texture_path );
 		ap.argString( "displays", "=string\aOverride the default display searchpath(s)", &g_cl_display_path );
 		ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s)", &g_cl_procedural_path );
-		ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s)", &g_cl_plugin_path );
 		ap.allowUnrecognizedOptions();
 
 		//_crtBreakAlloc = 1305;
@@ -775,11 +773,6 @@ void RenderFile( FILE* file, std::string&  name )
 		{
 			popt[0] = g_cl_procedural_path.c_str();
 			RiOption( "searchpath", "procedural", &popt, RI_NULL );
-		}
-		if(!g_cl_plugin_path.empty())
-		{
-			popt[0] = g_cl_plugin_path.c_str();
-			RiOption( "searchpath", "plugin", &popt, RI_NULL );
 		}
 
 		RiProgressHandler( &PrintProgress );

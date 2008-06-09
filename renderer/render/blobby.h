@@ -81,8 +81,8 @@ class CqBlobby : public CqSurface
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual void	Bound(IqBound* bound) const
 		{
-			bound->vecMin() = bbox.vecMin();
-			bound->vecMax() = bbox.vecMax();
+			bound->vecMin() = m_bbox.vecMin();
+			bound->vecMax() = m_bbox.vecMax();
 		}
 
 		/** Return CqBlobby's implicit value.
@@ -176,10 +176,10 @@ class CqBlobby : public CqSurface
 
 	private:
 		// Program (list of instructions) that computes implicit values
-		instructions_t instructions;
+		instructions_t m_instructions;
 
 		// Bounding-box
-		CqBound bbox;
+		CqBound m_bbox;
 
 		// RenderMan primitive storage
 		TqInt m_nleaf;

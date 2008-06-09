@@ -563,11 +563,6 @@ class CqTextureMapOld : public IqTextureMapOld
 		}
 		/** Open this image ready for reading.
 		                         */
-
-		/** Use the plugin to convert to a tif file any texture file provided
-		**/
-		virtual TqInt Convert	( CqString &strName );
-
 		virtual	void	Open();
 		/** Close this image file.
 		 */

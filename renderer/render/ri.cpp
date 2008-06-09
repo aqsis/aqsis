@@ -53,7 +53,6 @@
 #include	"curves.h"
 #include	"rifile.h"
 #include	"librib2ri.h"
-#include	"converter.h"
 #include	"shadervm.h"
 #include	"librib.h"
 #include	"libribtypes.h"
@@ -650,17 +649,6 @@ void SetDefaultRiOptions( void )
 	else
 	{
 		Aqsis::log() << info << "AQSIS_PROCEDURAL_PATH not set" << std::endl;
-	}
-
-	if(getenv("AQSIS_PLUGIN_PATH"))
-	{
-		popt[0] = getenv("AQSIS_PLUGIN_PATH");
-		Aqsis::log() << info << "Applying AQSIS_PLUGIN_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "plugin", &popt, RI_NULL );
-	}
-	else
-	{
-		Aqsis::log() << info << "AQSIS_PLUGIN_PATH not set" << std::endl;
 	}
 
 	// Setup a default Display

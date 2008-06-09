@@ -6,8 +6,6 @@ SET(RENDERENGINEDIR "${LIBDIR}"
 	CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(DISPLAYSDIR "${LIBDIR}/aqsis" 
 	CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(PLUGINDIR "${LIBDIR}/aqsis/plugins" 
-	CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(STATICLIBDIR "${LIBDIR}/aqsis" 
 	CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(SHADERDIR "share/aqsis/shaders" 

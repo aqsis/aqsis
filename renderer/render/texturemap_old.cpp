@@ -39,7 +39,6 @@
 #include	"irenderer.h"
 #include	"version.h"
 #include	"renderer.h"
-#include	"converter.h"
 #include	"logging.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
@@ -314,65 +313,6 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
 //----------------------------------------------------------------------
 // Implementation of CqTextureMapOld
 //----------------------------------------------------------------------
-
-/** Support for plugins mainly converter from any bitmap format to .tif file.
- */
-TqInt CqTextureMapOld::Convert( CqString &strName )
-{
-	// Suspicious if this does not have an extension.
-	if (strName.rfind(".") == std::string::npos)
-		return 0;
-
-	const CqString extension = strName.substr(strName.rfind(".")).substr(1);
-
-#if defined(AQSIS_SYSTEM_POSIX)
-
-	CqString plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib" + extension + "2tif.so";
-	// Check for lib<ext>2tif.so; it it is existing than let the converter to
-	// be called.
-	// I assume on MacOSX and Linux the file we are looking will be something:
-	//     libjpg2tif.so, libtga2tif.so, lib...2tif.so or
-	//     libjpg2tif.dylib, libtga2tif.dylib, ...2tif.dylib
-	if (access(plugin_path.c_str(), F_OK) != 0)
-	{
-		plugin_path = AQSIS_XSTR(DEFAULT_PLUGIN_PATH) "/lib" + extension + "2tif.dylib";
-		if (access(plugin_path.c_str(), F_OK) != 0)
-			return 0;
-	}
-
-#elif defined(AQSIS_SYSTEM_WIN32)
-	char acPath[255];
-
-	if ( GetModuleFileName( NULL, acPath, 256 ) != 0)
-	{
-		// guaranteed file name of at least one character after path
-		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
-	}
-	else
-		return 0;
-
-	CqString plugin_path = acPath;
-	plugin_path.append( CqString("/" + extension + "2tif.dll") );
-#endif
-
-	const CqString plugin_function = extension + "2tif";
-
-	TqInt result = 0;
-	CqConverter* const plug = new CqConverter( "plugin", const_cast<char*>(plugin_path.c_str()), const_cast<char*>(plugin_function.c_str()) );
-	char * ( *convert ) ( const char * );
-	if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
-	{
-		char* tiff = 0;
-		if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
-		{
-			strName = tiff;
-			result = 1; // success
-		}
-		plug->Close();
-	}
-	delete plug;
-	return result;
-}
 
 
 //----------------------------------------------------------------------
@@ -1150,10 +1090,7 @@ void CqTextureMapOld::FlushCache()
  */
 void CqTextureMapOld::Open()
 {
-	TqInt wasconverted = 0;
-
 	m_IsValid = false;
-
 
 	// Find the file required.
 	CqRiFile	fileImage( m_strName.c_str(), "texture" );
@@ -1165,21 +1102,7 @@ void CqTextureMapOld::Open()
 	CqString strRealName( fileImage.strRealName() );
 	fileImage.Close();
 
-	// Now try to converted first to tif file
-	// if the plugin is not existant than goes straight to TIFFOpen()
-	wasconverted = Convert( strRealName );
-	if ( wasconverted )
-	{
-		CqString * strnew = new CqString( strRealName );
-		m_ConvertString_Cache.push_back( strnew );
-		// Now open it as a tiff file.
-		m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-	}
-	else
-	{
-		m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-	}
-
+	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
 
 	if ( m_pImage )
 	{
