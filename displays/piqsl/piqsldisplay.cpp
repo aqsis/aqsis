@@ -452,6 +452,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		doc.LinkEndChild(closeMsgXML);
 		sendXMLMessage(doc, pImage->m_socket);
 		TiXmlDocument* ack = recvXMLMessage(pImage->m_socket);
+		delete ack;
 	}
 
 	return(PkDspyErrorNone);
