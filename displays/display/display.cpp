@@ -438,7 +438,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_imageType = Type_File;
 #ifndef	AQSIS_NO_FLTK
 
-		else if((strcmp(drivername, "framebuffer")==0) || (strcmp(drivername, "oldframebuffer")==0))
+		else if((strcmp(drivername, "framebuffer")==0) || (strcmp(drivername, "legacyframebuffer")==0))
 			pImage->m_imageType = Type_Framebuffer;
 #endif // AQSIS_NO_FLTK
 

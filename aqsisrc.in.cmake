@@ -9,7 +9,7 @@ Option "display" "string exr" ["${d_exr_DISPLAYLIB}"]
 Option "display" "string bmp" ["${d_bmp_DISPLAYLIB}"]
 Option "display" "string debugdd" ["debugdd"]
 Option "display" "string piqsl" ["${piqsl_DISPLAYLIB}"]
-Option "display" "string oldframebuffer" ["${display_DISPLAYLIB}"]
+Option "display" "string legacyframebuffer" ["${display_DISPLAYLIB}"]
 
 Option "defaultsearchpath" "string shader" ["${DEFAULT_SHADERPATH}"]
 Option "defaultsearchpath" "string archive" ["${DEFAULT_ARCHIVEPATH}"]
