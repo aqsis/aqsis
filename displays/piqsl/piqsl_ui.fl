@@ -126,7 +126,7 @@ Fl::unlock();}
           MenuItem m_menuImagesAdd {
             label {&Add Image}
             callback {Fl::lock();
-char* filename = fl_file_chooser("Load Image", "TIFF Files (*.tif)", "");
+char* filename = fl_file_chooser("Load Image", "All Supported Files (*.{tif,tiff,exr})\tTIFF Files (*.{tif,tiff})\tOpenEXR Files (*.exr)", "");
 if(filename)
 {
 	std::string name = Aqsis::CqFile::fileName(filename);
