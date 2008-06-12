@@ -23,35 +23,27 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
-
-#include <map>
-#include <vector>
-#include <string>
-#include <stdio.h>
+#include "shaderexecenv.h"
 
 #include "aqsismath.h"
-#include "shaderexecenv.h"
-#include "shadervm.h"
-#include "irenderer.h"
-#include "version.h"
-#include "logging.h"
 
 namespace Aqsis {
 
+namespace {
+
 // Start of the complimentary math functions 
 
-static TqDouble deg(TqDouble f)
+TqDouble deg(TqDouble f)
 {
 	return radToDeg(f);
 }
 
-static TqDouble rad(TqDouble f)
+TqDouble rad(TqDouble f)
 {
 	return degToRad(f);
 }
 
-static TqDouble mod(TqDouble a, TqDouble b)
+TqDouble mod(TqDouble a, TqDouble b)
 {
 	TqInt n = static_cast<TqInt>( a / b );
 	TqDouble a2 = a - n * b;
@@ -60,33 +52,33 @@ static TqDouble mod(TqDouble a, TqDouble b)
 	return a2;
 }
 
-static TqDouble log2(TqDouble x, TqDouble base)
+TqDouble logBase(TqDouble x, TqDouble base)
 {
-	return  ( ::log(x) / ::log(base));
+	return  ( std::log(x) / std::log(base));
 }
 
-static TqDouble sign(TqDouble f)
+TqDouble sign(TqDouble f)
 {
 	return ( f < 0.0 ) ? -1.0 : 1.0;
 }
 
-static TqDouble isqrt(TqDouble f) 
+TqDouble isqrt(TqDouble f) 
 {
 	return 1.0/sqrt(f);
 }
 
-static TqDouble length(CqVector3D point)
+TqDouble length(CqVector3D point)
 {
 	return point.Magnitude();
 }
 
-static TqDouble distance(CqVector3D P1, CqVector3D P2)
+TqDouble distance(CqVector3D P1, CqVector3D P2)
 {
 	CqVector3D result(P1 - P2);
 	return result.Magnitude();
 }
 
-static TqDouble dpow(TqDouble x, TqDouble y)
+TqDouble dpow(TqDouble x, TqDouble y)
 {
 	if ( x < 0.0 )
 		y = std::floor( y );
@@ -94,6 +86,8 @@ static TqDouble dpow(TqDouble x, TqDouble y)
 }
 
 // End of the complimentary math functions 
+} // unnamed namespace
+
 
 void	CqShaderExecEnv::SO_radians( IqShaderData* degrees, IqShaderData* Result, IqShader* pShader )
 {
@@ -107,37 +101,36 @@ void	CqShaderExecEnv::SO_degrees( IqShaderData* radians, IqShaderData* Result, I
 
 void	CqShaderExecEnv::SO_sin( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(sin, a , Result);
+	MathOneParam(std::sin, a , Result);
 }
 
 void	CqShaderExecEnv::SO_asin( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(asin, a , Result);
+	MathOneParam(std::asin, a , Result);
 }
 
 void	CqShaderExecEnv::SO_cos( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(cos, a , Result);
+	MathOneParam(std::cos, a , Result);
 }
 
 void	CqShaderExecEnv::SO_acos( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(acos, a , Result);
+	MathOneParam(std::acos, a , Result);
 }
 
-void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
-{
-	MathOneParam(tan, a , Result);
+void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* pShader ) {
+	MathOneParam(std::tan, a , Result);
 }
 
 void	CqShaderExecEnv::SO_atan( IqShaderData* yoverx, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(atan, yoverx , Result);
+	MathOneParam(std::atan, yoverx , Result);
 }
 
 void	CqShaderExecEnv::SO_atan( IqShaderData* y, IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathTwoParams(atan2, y, x, Result);
+	MathTwoParams(std::atan2, y, x, Result);
 }
 
 void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Result, IqShader* pShader )
@@ -147,17 +140,17 @@ void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Re
 
 void	CqShaderExecEnv::SO_exp( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(exp, x , Result);
+	MathOneParam(std::exp, x , Result);
 }
 
 void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(sqrt, x , Result);
+	MathOneParam(std::sqrt, x , Result);
 }
 
 void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(::log, x , Result);
+	MathOneParam(std::log, x , Result);
 }
 
 void	CqShaderExecEnv::SO_mod( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
@@ -169,13 +162,13 @@ void	CqShaderExecEnv::SO_mod( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 // log(x,base)
 void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData* Result, IqShader* pShader )
 {
-	MathTwoParams(log2, x, base, Result);
+	MathTwoParams(logBase, x, base, Result);
 }
 
 
 void	CqShaderExecEnv::SO_abs( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(abs, x , Result);
+	MathOneParam(std::fabs, x , Result);
 }
 
 void	CqShaderExecEnv::SO_sign( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
@@ -438,13 +431,12 @@ void	CqShaderExecEnv::SO_cclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 
 void	CqShaderExecEnv::SO_floor( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-
-	MathOneParam(floor, x , Result);
+	MathOneParam(std::floor, x , Result);
 }
 
 void	CqShaderExecEnv::SO_ceil( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
-	MathOneParam(ceil, x , Result);
+	MathOneParam(std::ceil, x , Result);
 }
 
 void	CqShaderExecEnv::SO_round( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
