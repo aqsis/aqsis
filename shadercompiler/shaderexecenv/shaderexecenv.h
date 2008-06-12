@@ -420,6 +420,18 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		template<typename T>
 		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
 
+		void MathOneParam(TqDouble (*fp)(TqDouble f), IqShaderData *pA, IqShaderData *pRes);
+
+		void MathOneParamVector(TqDouble (*fp)(CqVector3D V), IqShaderData *pA, IqShaderData *pRes);
+
+		void MathOneParamMatrix(TqDouble (*fp)(CqMatrix m), IqShaderData *pA, IqShaderData *pRes);
+
+		void MathTwoParams(TqDouble (*fp)(TqDouble x, TqDouble y), IqShaderData *pA, IqShaderData *pB, IqShaderData *pRes);
+
+		void MathTwoParamsVector(TqDouble (*fp)(CqVector3D x, CqVector3D y), IqShaderData *pA, IqShaderData *pB, IqShaderData *pRes);
+
+		void MathThreeParams(TqDouble (*fp)(TqDouble f0, TqDouble f1, TqDouble f2), IqShaderData *pA, IqShaderData *pB, IqShaderData *pC, IqShaderData *pRes);
+
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName

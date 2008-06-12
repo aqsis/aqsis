@@ -39,6 +39,20 @@
 
 namespace Aqsis {
 
+// Start of the complimentary math functions 
+
+static TqDouble mix(TqDouble f0, TqDouble f1, TqDouble value)
+{
+	return ( 1.0 - value ) * f0 + (value * f1);
+}
+
+
+static TqDouble determinant(CqMatrix a_Matrix)
+{
+	return a_Matrix.Determinant();
+}
+
+// End of the complimentary math functions 
 
 //----------------------------------------------------------------------
 // transform(s,s,P)
@@ -506,30 +520,7 @@ void CqShaderExecEnv::SO_cmixc( IqShaderData* color0, IqShaderData* color1, IqSh
 
 void	CqShaderExecEnv::SO_fmix( IqShaderData* f0, IqShaderData* f1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
-	bool __fVarying;
-	TqUint __iGrid;
-
-	__fVarying=(f0)->Class()==class_varying;
-	__fVarying=(f1)->Class()==class_varying||__fVarying;
-	__fVarying=(value)->Class()==class_varying||__fVarying;
-
-	__iGrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
-	{
-		if(!__fVarying || RS.Value( __iGrid ) )
-		{
-			TqFloat _aq_f0;
-			(f0)->GetFloat(_aq_f0,__iGrid);
-			TqFloat _aq_f1;
-			(f1)->GetFloat(_aq_f1,__iGrid);
-			TqFloat _aq_value;
-			(value)->GetFloat(_aq_value,__iGrid);
-			TqFloat f( ( 1.0f - _aq_value ) * _aq_f0 + _aq_value * _aq_f1 );
-			(Result)->SetFloat(f,__iGrid);
-		}
-	}
-	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+	MathThreeParams(mix, f0, f1, value, Result);
 }
 
 void    CqShaderExecEnv::SO_pmix( IqShaderData* p0, IqShaderData* p1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
@@ -773,7 +764,7 @@ void CqShaderExecEnv::SO_ctransform( IqShaderData* tospace, IqShaderData* c, IqS
 
 
 //----------------------------------------------------------------------
-// ctransform(s,c)
+// ptlined(P0, P1, Q)
 void CqShaderExecEnv::SO_ptlined( IqShaderData* P0, IqShaderData* P1, IqShaderData* Q, IqShaderData* Result, IqShader* pShader )
 {
 	bool __fVarying;
@@ -927,30 +918,11 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqS
 	}
 }
 
-
-
 //----------------------------------------------------------------------
 // determinant(m)
 void CqShaderExecEnv::SO_determinant( IqShaderData* M, IqShaderData* Result, IqShader* pShader )
 {
-	bool __fVarying;
-	TqUint __iGrid;
-
-	__fVarying=(M)->Class()==class_varying;
-	__fVarying=(Result)->Class()==class_varying||__fVarying;
-
-	__iGrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
-	{
-		if(!__fVarying || RS.Value( __iGrid ) )
-		{
-			CqMatrix _aq_M;
-			(M)->GetMatrix(_aq_M,__iGrid);
-			(Result)->SetFloat(_aq_M.Determinant(),__iGrid);
-		}
-	}
-	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+   MathOneParamMatrix(determinant, M, Result);
 }
 
 

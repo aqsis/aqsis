@@ -351,6 +351,458 @@ const CqMatrix& CqShaderExecEnv::matObjectToWorld() const
 	return ( !m_pTransform ? m_matIdentity : m_pTransform ->matObjectToWorld(m_pTransform->Time(0)) );
 }
 
+//---------------------------------------------------------------------
+/** Apply the same math function using the A as parameter and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathOneParam(TqDouble (*fp)(TqDouble f), IqShaderData *pA, IqShaderData *pRes)
+{
+	TqFloat vA;
+	TqFloat* pdA;
+	TqFloat* pdR;
+	TqInt i, ii = pA->Size();
+
+	if ( ii > 1 )
+	{
+		// A is varying, set them all.
+		pA->GetFloatPtr( pdA );
+		pRes->GetFloatPtr( pdR );
+
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState().Value( i ) )
+				(*pdR) = (*fp)(*pdA);
+			pdA++;
+			pdR++;
+		}
+	}
+	else
+	{
+		// #1: A is uniform, simple one shot case.
+		pA->GetFloat( vA );
+		pRes->SetFloat( (*fp)( vA ) );
+	}
+}
+
+//---------------------------------------------------------------------
+/** Apply the same math function using the A as parameter and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathOneParamVector(TqDouble (*fp)(CqVector3D V), IqShaderData *pA, IqShaderData *pRes)
+{
+	CqVector3D vA;
+	CqVector3D* pdA;
+	TqFloat* pdR;
+	TqInt i, ii = pA->Size();
+
+	if ( ii > 1 )
+	{
+		// A is varying, set them all.
+		pA->GetVectorPtr( pdA );
+		pRes->GetFloatPtr( pdR );
+
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState().Value( i ) )
+				(*pdR) = (*fp)(*pdA);
+			pdA++;
+			pdR++;
+		}
+	}
+	else
+	{
+		// #1: A is uniform, simple one shot case.
+		pA->GetVector( vA );
+		pRes->SetFloat( (*fp)( vA ) );
+	}
+}
+
+//---------------------------------------------------------------------
+/** Apply the same math function using the A as parameter and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathOneParamMatrix(TqDouble (*fp)(CqMatrix m), IqShaderData *pA, IqShaderData *pRes)
+{
+	CqMatrix vA;
+	CqMatrix *pdA;
+	TqFloat* pdR;
+	TqInt i, ii = pA->Size();
+
+	if ( ii > 1 )
+	{
+		// A is varying, set them all.
+		pA->GetMatrixPtr( pdA );
+
+		pRes->GetFloatPtr( pdR );
+
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState().Value( i ) )
+				(*pdR) = (*fp)(*pdA);
+			pdA++;
+			pdR++;
+		}
+	}
+	else
+	{
+		// #1: A is uniform, simple one shot case.
+		pA->GetMatrix( vA );
+		pRes->SetFloat( (*fp)( vA ) );
+	}
+}
+//---------------------------------------------------------------------
+/** Apply the same math function using the A and B as parameters and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathTwoParams(TqDouble (*fp)(TqDouble x, TqDouble y), IqShaderData *pA, IqShaderData *pB, IqShaderData *pRes)
+{
+	TqFloat vA;
+	TqFloat vB;
+	TqFloat* pdA;
+	TqFloat* pdB;
+	TqFloat* pdR;
+	TqInt i, ii;
+
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
+
+
+	TqInt State = 0;
+
+	if (fAVar)
+		State ++;
+	if (fBVar)
+		State += 2;
+
+	switch ( State)
+	{
+		case 0:
+		{
+			// Both are uniform, simple one shot case.
+			pA->GetFloat( vA );
+			pB->GetFloat( vB );
+			pRes->SetFloat( (*fp)(vA, vB) );
+		}
+		break;
+		case 1 :
+		{
+			// A is varying, can just get B's value once.
+			ii = pA->Size();
+			pA->GetFloatPtr( pdA );
+			pB->GetFloat( vB );
+			pRes->GetFloatPtr( pdR );
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), vB );
+				pdA++;
+				pdR++;
+			}
+		}
+		break;
+		case 2:
+		{
+			// B is varying, can just get A's value once.
+			ii = pB->Size();
+			pA->GetFloat( vA );
+			pB->GetFloatPtr( pdB );
+			pRes->GetFloatPtr( pdR );
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)( vA, (*pdB) );
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		case 3 :
+		{
+			// Both are varying, must go accross all processing each element.
+			pA->GetFloatPtr( pdA );
+			pB->GetFloatPtr( pdB );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), (*pdB) );
+				pdA++;
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		default:
+		{
+			
+		}
+		break;
+	}
+}
+
+//---------------------------------------------------------------------
+/** Apply the same math function using the A and B as parameters and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathTwoParamsVector(TqDouble (*fp)(CqVector3D x, CqVector3D y), IqShaderData *pA, IqShaderData *pB, IqShaderData *pRes)
+{
+	CqVector3D vA;
+	CqVector3D vB;
+	CqVector3D* pdA;
+	CqVector3D* pdB;
+	TqFloat* pdR;
+	TqInt i, ii;
+
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
+
+
+	TqInt State = 0;
+
+	if (fAVar)
+		State ++;
+	if (fBVar)
+		State += 2;
+
+	switch ( State)
+	{
+		case 0:
+		{
+			// Both are uniform, simple one shot case.
+			pA->GetVector( vA );
+			pB->GetVector( vB );
+			pRes->SetFloat( (*fp)(vA, vB) );
+		}
+		break;
+		case 1 :
+		{
+			// A is varying, can just get B's value once.
+			ii = pA->Size();
+			pA->GetVectorPtr( pdA );
+			pB->GetVector( vB );
+			pRes->GetFloatPtr( pdR );
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), vB );
+				pdA++;
+				pdR++;
+			}
+		}
+		break;
+		case 2:
+		{
+			// B is varying, can just get A's value once.
+			ii = pB->Size();
+			pA->GetVector( vA );
+			pB->GetVectorPtr( pdB );
+			pRes->GetFloatPtr( pdR );
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)( vA, (*pdB) );
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		case 3 :
+		{
+			// Both are varying, must go accross all processing each element.
+			pA->GetVectorPtr( pdA );
+			pB->GetVectorPtr( pdB );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), (*pdB) );
+				pdA++;
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		default:
+		{
+			
+		}
+		break;
+	}
+}
+
+//---------------------------------------------------------------------
+/** Apply the same math function using the A, B, C as parameters and
+ * set the result accordingly... this is an effort of optimizations.
+ */
+void CqShaderExecEnv::MathThreeParams(TqDouble (*fp)(TqDouble x, TqDouble y, TqDouble z), IqShaderData *pA, IqShaderData *pB, IqShaderData *pC, IqShaderData *pRes)
+{
+	TqFloat vA;
+	TqFloat vB;
+	TqFloat vC;
+	TqFloat* pdA;
+	TqFloat* pdB;
+	TqFloat* pdC;
+	TqFloat* pdR;
+	TqInt i, ii;
+
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
+	bool fCVar = pC->Size() > 1;
+
+	TqInt State = 0;
+
+	if (fAVar)
+		State += 4;
+	if (fBVar)
+		State += 2;
+	if (fCVar)
+		State ++;
+
+
+	switch (State)
+	{
+		case 0:
+		{
+			//All three are uniform, simple one shot case.
+			pA->GetFloat( vA );
+			pB->GetFloat( vB );
+			pC->GetFloat( vC );
+			pRes->SetFloat( (*fp)(vA, vB, vC) );
+		}
+		break;
+		case 1:
+		{
+			// A,B are not varying but C is.
+			pA->GetFloat( vA );
+			pB->GetFloat( vB );
+			pC->GetFloatPtr( pdC );
+			pRes->GetFloatPtr( pdR );
+			ii = pC->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)(vA, vB, (*pdC) );
+				pdC++;
+				pdR++;
+			}
+		}
+		break;
+		case 2:
+		{
+			//A,C are not varying but B is.
+			pA->GetFloat( vA );
+			pB->GetFloatPtr( pdB );
+			pC->GetFloat( vC );
+			pRes->GetFloatPtr( pdR );
+			ii = pB->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)(vA, (*pdB), vC );
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		case 3:
+		{
+			// A is not varying but B, C are.
+			pA->GetFloat( vA );
+			pB->GetFloatPtr( pdB );
+			pC->GetFloatPtr( pdC );
+			pRes->GetFloatPtr( pdR );
+			ii = pB->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)(vA, (*pdB), (*pdC) );
+				pdB++;
+				pdC++;
+				pdR++;
+			}
+		}
+		case 4:
+		{
+			// B,C are not varying but A is.
+			pA->GetFloatPtr( pdA );
+			pB->GetFloat( vB );
+			pC->GetFloat( vC );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), vB, vC );
+				pdA++;
+				pdR++;
+			}
+		}
+		break;
+		case 5:
+		{
+			// B is not varying but A, C are
+			pA->GetFloatPtr( pdA );
+			pB->GetFloat( vB );
+			pC->GetFloatPtr( pdC );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), vB, (*pdC) );
+				pdA++;
+				pdC++;
+				pdR++;
+			}
+		}
+		break;
+		case 6:
+		{
+			// C is not varying but A, B are.
+			pA->GetFloatPtr( pdA );
+			pB->GetFloatPtr( pdB );
+			pC->GetFloat( vC );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), (*pdB), vC );
+				pdA++;
+				pdB++;
+				pdR++;
+			}
+		}
+		break;
+		case 7:
+		{
+			// All three are varying, must go accross all processing each element.
+			pA->GetFloatPtr( pdA );
+			pB->GetFloatPtr( pdB );
+			pC->GetFloatPtr( pdC );
+			pRes->GetFloatPtr( pdR );
+			ii = pA->Size();
+			for ( i = 0; i < ii; i++ )
+			{
+				if ( RunningState().Value( i ) )
+					(*pdR) = (*fp)((*pdA), (*pdB), (*pdC) );
+				pdA++;
+				pdB++;
+				pdC++;
+				pdR++;
+			}
+		}
+		break;
+		default:
+		{
+			
+		}
+		break;
+	}
+}
+
 
 } // namespace Aqsis
 //---------------------------------------------------------------------

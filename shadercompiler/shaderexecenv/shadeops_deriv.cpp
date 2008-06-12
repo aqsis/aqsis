@@ -67,69 +67,50 @@ void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, flo
 
 } // unnamed namespace
 
+static TqDouble dstep(TqDouble mn, TqDouble value)
+{
+	TqDouble result = 1.0;
+
+	if (value < mn) 
+	{
+		result = 0.0;
+	}
+
+	return result;
+}
+
+static TqDouble dsmoothstep(TqDouble mn, TqDouble mx, TqDouble value)
+{
+	TqDouble result = 1.0;
+
+	if (value < mn) 
+	{
+		result = 0.0;
+	}
+	else if (value > mx) 
+	{
+		result = 1.0;
+	}
+	else
+	{
+		TqDouble v = ( value - mn ) / ( mx - mn );
+		result = (v * v * ( 3.0 - 2.0 * v ));
+   	}
+
+   	return result;
+}
+
 
 void	CqShaderExecEnv::SO_step( IqShaderData* _min, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
-	bool __fVarying;
-	TqUint __iGrid;
-
-	__fVarying=(_min)->Class()==class_varying;
-	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(Result)->Class()==class_varying||__fVarying;
-
-	__iGrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
-	{
-		if(!__fVarying || RS.Value( __iGrid ) )
-		{
-			TqFloat _aq__min;
-			(_min)->GetFloat(_aq__min,__iGrid);
-			TqFloat _aq_value;
-			(value)->GetFloat(_aq_value,__iGrid);
-			(Result)->SetFloat(( _aq_value < _aq__min ) ? 0.0f : 1.0f,__iGrid);
-		}
-	}
-	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+	MathTwoParams(dstep, _min, value, Result);
 }
-
 
 //----------------------------------------------------------------------
 // smoothstep(_min,_max,value)
 void	CqShaderExecEnv::SO_smoothstep( IqShaderData* _min, IqShaderData* _max, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
-	bool __fVarying;
-	TqUint __iGrid;
-
-	__fVarying=(value)->Class()==class_varying;
-	__fVarying=(_min)->Class()==class_varying||__fVarying;
-	__fVarying=(_max)->Class()==class_varying||__fVarying;
-	__fVarying=(Result)->Class()==class_varying||__fVarying;
-
-	__iGrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
-	{
-		if(!__fVarying || RS.Value( __iGrid ) )
-		{
-			TqFloat _aq__min;
-			(_min)->GetFloat(_aq__min,__iGrid);
-			TqFloat _aq__max;
-			(_max)->GetFloat(_aq__max,__iGrid);
-			TqFloat _aq_value;
-			(value)->GetFloat(_aq_value,__iGrid);
-			if ( _aq_value < _aq__min )
-				(Result)->SetFloat(0.0f,__iGrid);
-			else if ( _aq_value >= _aq__max )
-				(Result)->SetFloat(1.0f,__iGrid);
-			else
-			{
-				TqFloat v = ( _aq_value - _aq__min ) / ( _aq__max - _aq__min );
-				(Result)->SetFloat(v * v * ( 3.0f - 2.0f * v ),__iGrid);
-			}
-		}
-	}
-	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+	MathThreeParams(dsmoothstep, _min, _max, value, Result);
 }
 
 
