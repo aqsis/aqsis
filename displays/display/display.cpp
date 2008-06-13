@@ -113,7 +113,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
+			sprintf( version, "%s %s (%s %s)", STRNAME_PRINT, VERSION_STR, __DATE__, __TIME__);
 
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
@@ -217,7 +217,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	if (description.empty())
 	{
 		double nSecs = difftime(long_time, start);
-		sprintf(mydescription,"%d secs", static_cast<TqInt>(nSecs));
+		sprintf(mydescription,"Aqsis Renderer, %d secs rendertime", static_cast<TqInt>(nSecs));
 		start = long_time;
 	}
 	else
@@ -272,7 +272,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
-		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
+		sprintf( version, "%s %s (%s %s)", STRNAME_PRINT, VERSION_STR, __DATE__, __TIME__);
 		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );

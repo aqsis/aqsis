@@ -398,7 +398,7 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 		}
 	}
 
-	save_tiff( tiffname, xpixels, w, h, 3, "bake2tif conversion for AQSIS");
+	save_tiff( tiffname, xpixels, w, h, 3, "Aqsis Renderer, bake2tif conversion");
 
 	free( pixels );
 	free( xpixels );

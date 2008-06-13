@@ -30,6 +30,7 @@
 #include "sstring.h"
 
 #define	STRNAME		"Aqsis"
+#define STRNAME_PRINT	"Aqsis Renderer"
 
 #define	VERMAJOR ${MAJOR}
 #define	VERMINOR ${MINOR}
