@@ -89,6 +89,7 @@ INPUT                  = ./aqsistypes \
                          ./displays/display \
                          ./displays/piqsl \
                          ./displays/d_exr \
+                         ./displays/d_sdcBMP \
                          ./displays/d_xpm \
                          ./renderer/aqsis \
                          ./renderer/ddmanager \
