@@ -7,6 +7,8 @@ INCLUDE(macros)
 INCLUDE(FirstCMakeRun)
 INCLUDE(OutOfSourceBuild)
 
+# TODO: Consider the use of FIND_PACKAGE here
+# TODO: Create USE_ variables for optional dependencies.
 INCLUDE(FindWin32Libs)
 INCLUDE(FindTIFF)
 INCLUDE(FindJPEG)
@@ -21,6 +23,9 @@ INCLUDE(FindXcodebuild)
 INCLUDE(FindFlexBison)
 INCLUDE(FindSVNVersion)
 INCLUDE(FindResource)
+
+OPTION(USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
+MARK_AS_ADVANCED(USE_PDIFF)
 
 IF(NOT AQSIS_FLTK_FOUND)
 	MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
@@ -138,7 +143,9 @@ ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
 	ADD_SUBDIRECTORY(tools/eqsl)
 ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
-ADD_SUBDIRECTORY(thirdparty/pdiff)
+IF(USE_PDIFF)
+	ADD_SUBDIRECTORY(thirdparty/pdiff)
+ENDIF(USE_PDIFF)
 #
 # Build aqsisrc
 #
