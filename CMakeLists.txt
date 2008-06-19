@@ -1,5 +1,13 @@
 PROJECT(aqsis_all)
 
+# Set some variables used within various resources, including installer scripts.
+SET(AQSIS_PROJECT_NAME "Aqsis Renderer")
+SET(AQSIS_PROJECT_NAME_SHORT "Aqsis")
+SET(AQSIS_PROJECT_NAME_BASIC "aqsis")
+SET(AQSIS_PROJECT_VENDOR "Aqsis Team")
+SET(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2008, ${AQSIS_PROJECT_VENDOR}.")
+SET(AQSIS_PROJECT_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
+
 # Path to aqsis-specific include directories for cmake helper scripts.
 SET(CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
@@ -240,14 +248,6 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 # Packaging
 #----------
 
-# Set some variables used inside the installer script templates.
-#
-# TODO: Rename these to use the AQSIS_ prefix
-SET(PACKAGE_NAME "Aqsis Renderer")
-SET(PACKAGE_VENDOR "Aqsis Team")
-SET(PACKAGE_COPYRIGHT "Copyright (C) 2008, ${PACKAGE_VENDOR}.")
-SET(PACKAGE_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
-
 
 # Windows NSIS Packaging
 IF(WIN32)
@@ -268,12 +268,12 @@ ENDIF(APPLE)
 # Generic Packaging setup
 INCLUDE(InstallRequiredSystemLibraries)
 
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_NAME}")
-SET(CPACK_PACKAGE_VENDOR "${PACKAGE_VENDOR}")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${AQSIS_PROJECT_NAME}")
+SET(CPACK_PACKAGE_VENDOR "${AQSIS_PROJECT_VENDOR}")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 #SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${BUILD}")
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Aqsis-${MAJOR}.${MINOR}")
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${AQSIS_PROJECT_NAME_SHORT}-${MAJOR}.${MINOR}")
 INCLUDE(CPack)

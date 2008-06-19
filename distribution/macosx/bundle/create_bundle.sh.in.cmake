@@ -133,4 +133,4 @@ if [ -e $DISK_IMAGE ]; then
 	mv -f "${BUNDLEDIR}/$DISK_IMAGE" "${CMAKE_BINARY_DIR}/"
 	exit
 fi
-echo "An error occurred!"
+echo "An error occurred generating $DISK_IMAGE!"

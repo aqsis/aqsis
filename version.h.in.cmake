@@ -29,8 +29,8 @@
 
 #include "sstring.h"
 
-#define	STRNAME		"Aqsis"
-#define STRNAME_PRINT	"Aqsis Renderer"
+#define	STRNAME		"${AQSIS_PROJECT_NAME_SHORT}"
+#define STRNAME_PRINT	"${AQSIS_PROJECT_NAME}"
 
 #define	VERMAJOR ${MAJOR}
 #define	VERMINOR ${MINOR}

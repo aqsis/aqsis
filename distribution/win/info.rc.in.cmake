@@ -24,12 +24,12 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "CompanyName",      "${PACKAGE_VENDOR}"
-            VALUE "FileDescription",  "${PACKAGE_NAME}"
+            VALUE "CompanyName",      "${AQSIS_PROJECT_VENDOR}"
+            VALUE "FileDescription",  "${AQSIS_PROJECT_NAME}"
             VALUE "FileVersion",      VER_FILEVERSION_STR
-            VALUE "LegalCopyright",   "${PACKAGE_COPYRIGHT}"
-            VALUE "LegalTrademarks1", "${PACKAGE_COPYRIGHT_OTHER}"
-            VALUE "ProductName",      "${CMAKE_PROJECT_NAME}"
+            VALUE "LegalCopyright",   "${AQSIS_PROJECT_COPYRIGHT}"
+            VALUE "LegalTrademarks1", "${AQSIS_PROJECT_COPYRIGHT_OTHER}"
+            VALUE "ProductName",      "${AQSIS_PROJECT_NAME}"
             VALUE "ProductVersion",   VER_PRODUCTVERSION_STR
         END
     END

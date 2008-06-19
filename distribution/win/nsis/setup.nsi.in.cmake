@@ -24,9 +24,9 @@
 !define PACKAGE_UNINST_ROOT_KEY "HKLM"
 !define PACKAGE_STARTMENU_REGVAL "NSIS:StartMenuDir"
 
-Name "@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@"
+Name "@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@"
 BrandingText "www.aqsis.org"
-OutFile "@CMAKE_BINARY_DIR@\aqsis-setup-@MAJOR@.@MINOR@.@BUILD@.exe"
+OutFile "@CMAKE_BINARY_DIR@\@AQSIS_PROJECT_NAME_BASIC@-setup-@MAJOR@.@MINOR@.@BUILD@.exe"
 InstallDir "$PROGRAMFILES\@CMAKE_PROJECT_NAME@"
 ShowInstDetails show
 ShowUnInstDetails show
@@ -65,7 +65,7 @@ XPStyle on
 ; Start menu page
 Var ICONS_GROUP
 !define MUI_STARTMENUPAGE_NODISABLE
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "@PACKAGE_NAME@\@MAJOR@.@MINOR@.@BUILD@"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "@AQSIS_PROJECT_NAME@\@MAJOR@.@MINOR@.@BUILD@"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${PACKAGE_UNINST_ROOT_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${PACKAGE_UNINST_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PACKAGE_STARTMENU_REGVAL}"
@@ -94,11 +94,11 @@ ReserveFile "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini"
 
 ; Installer 'Version' tab content
 VIProductVersion "@MAJOR@.@MINOR@.@BUILD@.0"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "@PACKAGE_VENDOR@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@PACKAGE_NAME@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "@AQSIS_PROJECT_VENDOR@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@AQSIS_PROJECT_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@MAJOR@.@MINOR@.@BUILD@.@REVISION@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@PACKAGE_COPYRIGHT@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "@PACKAGE_COPYRIGHT_OTHER@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@AQSIS_PROJECT_COPYRIGHT@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "@AQSIS_PROJECT_COPYRIGHT_OTHER@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@CMAKE_PROJECT_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@"
 
@@ -264,7 +264,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$DESKTOP\@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe"
+    CreateShortCut "$DESKTOP\@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe"
     desktop_end:
 
   ; Create 'Quick Launch' icon
@@ -272,7 +272,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$QUICKLAUNCH\@PACKAGE_NAME@.lnk" "$INSTDIR\bin\eqsl.exe"
+    CreateShortCut "$QUICKLAUNCH\@AQSIS_PROJECT_NAME@.lnk" "$INSTDIR\bin\eqsl.exe"
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
@@ -287,48 +287,48 @@ Var /GLOBAL QUICKLAUCH_ICON
   !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
-    WriteRegStr HKCR ".exr" "" "Aqsis.EXR"
-    WriteRegStr HKCR "Aqsis.EXR" "" "${PACKAGE_SHELLEXT_EXR_INFO}"
-    WriteRegStr HKCR "Aqsis.EXR\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.EXR\shell\open" "" "${PACKAGE_SHELLEXT_EXR}"
-    WriteRegStr HKCR "Aqsis.EXR\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
+    WriteRegStr HKCR ".exr" "" "@AQSIS_PROJECT_NAME_SHORT@.EXR"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR" "" "${PACKAGE_SHELLEXT_EXR_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\shell\open" "" "${PACKAGE_SHELLEXT_EXR}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
-    WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
-    WriteRegStr HKCR "Aqsis.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
-    WriteRegStr HKCR "Aqsis.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.RIB\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
-    WriteRegStr HKCR "Aqsis.RIB\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
+    WriteRegStr HKCR ".rib" "" "@AQSIS_PROJECT_NAME_SHORT@.RIB"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
 
     ; Compressed RIB (.rib.gz) support needs looking at - Windows seems to have an issue with double extensions !!!
-    WriteRegStr HKCR ".ribz" "" "Aqsis.RIBGZ"
-    WriteRegStr HKCR "Aqsis.RIBGZ" "" "${PACKAGE_SHELLEXT_RIBGZ_INFO}"
-    WriteRegStr HKCR "Aqsis.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.RIBGZ\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
-    WriteRegStr HKCR "Aqsis.RIBGZ\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
+    WriteRegStr HKCR ".ribz" "" "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ" "" "${PACKAGE_SHELLEXT_RIBGZ_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
     
-    WriteRegStr HKCR ".sl" "" "Aqsis.SL"
-    WriteRegStr HKCR "Aqsis.SL" "" "${PACKAGE_SHELLEXT_SL_INFO}"
-    WriteRegStr HKCR "Aqsis.SL\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.SL\shell\open" "" "${PACKAGE_SHELLEXT_SL}"
-    WriteRegStr HKCR "Aqsis.SL\shell\open\command" "" '"$INSTDIR\bin\aqsl.exe" "%1"'
+    WriteRegStr HKCR ".sl" "" "@AQSIS_PROJECT_NAME_SHORT@.SL"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL" "" "${PACKAGE_SHELLEXT_SL_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\shell\open" "" "${PACKAGE_SHELLEXT_SL}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\shell\open\command" "" '"$INSTDIR\bin\aqsl.exe" "%1"'
     
-    WriteRegStr HKCR ".slx" "" "Aqsis.SLX"
-    WriteRegStr HKCR "Aqsis.SLX" "" "${PACKAGE_SHELLEXT_SLX_INFO}"
-    WriteRegStr HKCR "Aqsis.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
-    WriteRegStr HKCR "Aqsis.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
+    WriteRegStr HKCR ".slx" "" "@AQSIS_PROJECT_NAME_SHORT@.SLX"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX" "" "${PACKAGE_SHELLEXT_SLX_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
 
-    WriteRegStr HKCR ".tif" "" "Aqsis.TIF"
-    WriteRegStr HKCR "Aqsis.TIF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.TIF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
-    WriteRegStr HKCR "Aqsis.TIF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
+    WriteRegStr HKCR ".tif" "" "@AQSIS_PROJECT_NAME_SHORT@.TIF"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
 
-    WriteRegStr HKCR ".tiff" "" "Aqsis.TIFF"
-    WriteRegStr HKCR "Aqsis.TIFF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "Aqsis.TIFF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "Aqsis.TIFF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
-    WriteRegStr HKCR "Aqsis.TIFF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
+    WriteRegStr HKCR ".tiff" "" "@AQSIS_PROJECT_NAME_SHORT@.TIFF"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
     file_end:
 SectionEnd
 
@@ -341,7 +341,7 @@ Section -Post
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\eqsl.exe"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayVersion" "@MAJOR@.@MINOR@.@BUILD@"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "${PACKAGE_WEB_SITE}"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@PACKAGE_VENDOR@"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@AQSIS_PROJECT_VENDOR@"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "${PACKAGE_WEB_SUPPORT}"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "${PACKAGE_WEB_UPDATE}"
   WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Comments" "$INSTDIR"
@@ -379,11 +379,11 @@ FunctionEnd
 
 Section Uninstall
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
-  Delete "$DESKTOP\@PACKAGE_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk"
-  Delete "$QUICKLAUNCH\@PACKAGE_NAME@.lnk"
+  Delete "$DESKTOP\@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk"
+  Delete "$QUICKLAUNCH\@AQSIS_PROJECT_NAME@.lnk"
 
   RMDir /r "$SMPROGRAMS\$ICONS_GROUP"
-  RMDir "$SMPROGRAMS\@PACKAGE_NAME@"
+  RMDir "$SMPROGRAMS\@AQSIS_PROJECT_NAME@"
 
   RMDir /r "$INSTDIR"
 
@@ -398,19 +398,19 @@ Section Uninstall
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 
   DeleteRegKey HKCR ".exr"
-  DeleteRegKey HKCR "Aqsis.EXR"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR"
   DeleteRegKey HKCR ".rib"
-  DeleteRegKey HKCR "Aqsis.RIB"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB"
   DeleteRegKey HKCR ".ribz"
-  DeleteRegKey HKCR "Aqsis.RIBGZ"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ"
   DeleteRegKey HKCR ".sl"
-  DeleteRegKey HKCR "Aqsis.SL"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL"
   DeleteRegKey HKCR ".slx"
-  DeleteRegKey HKCR "Aqsis.SLX"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX"
   DeleteRegKey HKCR ".tif"
-  DeleteRegKey HKCR "Aqsis.TIF"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF"
   DeleteRegKey HKCR ".tiff"
-  DeleteRegKey HKCR "Aqsis.TIFF"
+  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF"
 
   DeleteRegKey ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}"
   DeleteRegKey HKLM "${PACKAGE_DIR_REGKEY}"

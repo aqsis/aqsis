@@ -4,7 +4,7 @@ SET(SPECPACKAGEDIR "${CMAKE_BINARY_DIR}/specpackage"
 	CACHE STRING "Staging location for Linux SPEC files (relative to CMAKE_BINARY_DIR)"
 	)
 
-SET(CMAKE_PROJECT_NAME "aqsis"
+SET(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_BASIC}"
 	CACHE STRING "Package name for Linux"
 	)
 

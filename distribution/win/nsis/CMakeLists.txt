@@ -4,7 +4,7 @@ SET(WINPACKAGEDIR "${CMAKE_BINARY_DIR}/winpackage"
 	CACHE STRING "Staging location for Windows package (relative to CMAKE_BINARY_DIR)"
 	)
 
-SET(CMAKE_PROJECT_NAME "Aqsis"
+SET(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_SHORT}"
 	CACHE STRING "Package name for Windows"
 	)
 

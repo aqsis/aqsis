@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>${PACKAGE_NAME}</string>
+	<string>${AQSIS_PROJECT_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,6 +29,6 @@
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>${PACKAGE_COPYRIGHT_OTHER}</string>
+	<string>${AQSIS_PROJECT_COPYRIGHT_OTHER}</string>
 </dict>
 </plist>
