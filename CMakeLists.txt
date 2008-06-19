@@ -20,6 +20,8 @@ INCLUDE(FindWin32Libs)
 OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
 OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) ON/OFF" ON)
 OPTION(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
+OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk library" ON)
+OPTION(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
 
 
@@ -31,17 +33,33 @@ INCLUDE(FindTIFF)
 INCLUDE(FindBoost)
 INCLUDE(FindZLIB)
 
-# TODO: Should be optional.  Create USE_ variables for optional dependencies.
-INCLUDE(FindFLTK)
+# Find optional libs
 
-IF(NOT AQSIS_FLTK_FOUND)
-	MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
-ENDIF(NOT AQSIS_FLTK_FOUND)
-IF(NOT AQSIS_FLUID_FOUND)
-	MESSAGE(STATUS "Cannot find Fluid, eqsl and piqsl will not be built")
-ENDIF(NOT AQSIS_FLUID_FOUND)
+# fltk
+IF(AQSIS_USE_FLTK)
+	INCLUDE(FindFLTK)
 
-INCLUDE(FindOpenEXR)
+	IF(NOT AQSIS_FLTK_FOUND)
+		MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
+		SET(AQSIS_USE_FLTK OFF)
+	ENDIF(NOT AQSIS_FLTK_FOUND)
+
+	IF(NOT AQSIS_FLUID_FOUND)
+		MESSAGE(STATUS "Cannot find Fluid, eqsl and piqsl will not be built")
+	ENDIF(NOT AQSIS_FLUID_FOUND)
+ENDIF(AQSIS_USE_FLTK)
+
+# OpenExr
+IF(AQSIS_USE_OPENEXR)
+	INCLUDE(FindOpenEXR)
+
+	IF(NOT AQSIS_OPENEXR_FOUND)
+		MESSAGE(STATUS "Cannot find OpenEXR - aqsis will be build without support for the OpenEXR image format")
+		SET(AQSIS_USE_OPENEXR OFF)
+	ENDIF(NOT AQSIS_OPENEXR_FOUND)
+ENDIF(AQSIS_USE_OPENEXR)
+
+# jpeg
 # libjpeg is no longer needed until aqsis again supports jpeg images.
 #INCLUDE(FindJPEG)
 
@@ -58,6 +76,19 @@ INCLUDE(FindNSIS)
 INCLUDE(FindOsacompile)
 INCLUDE(FindXcodebuild)
 INCLUDE(FindResource)
+
+
+#-------------------------------------------------------------------------------
+# Set program version numbers
+#----------------------------
+
+# These are needed by version.h, as well as the packaging stuff.  Note that
+# some packaging variables are set in the platform-specific config files, and
+# these version variables are potentially used there.
+SET(MAJOR 1)
+SET(MINOR 3)
+SET(BUILD 0)
+SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
 
 
 #-------------------------------------------------------------------------------
@@ -109,6 +140,14 @@ ENDIF(AQSIS_USE_PLUGINS)
 
 
 #-------------------------------------------------------------------------------
+# Create version.h
+#-----------------
+CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
+# Make sure the rest of the build can find version.h
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+
+
+#-------------------------------------------------------------------------------
 # System-specific includes
 #-------------------------
 
@@ -125,18 +164,6 @@ ELSE(UNIX AND NOT APPLE)
 		ENDIF(APPLE)
 	ENDIF(WIN32)
 ENDIF(UNIX AND NOT APPLE)
-
-
-#-------------------------------------------------------------------------------
-# Create version.h
-#-----------------
-SET(MAJOR 1)
-SET(MINOR 3)
-SET(BUILD 0)
-SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
-CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
-# Make sure the rest of the build can find version.h
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
 
 #-------------------------------------------------------------------------------
@@ -168,21 +195,21 @@ ADD_SUBDIRECTORY(shadercompiler/aqsltell)
 ADD_SUBDIRECTORY(rib/ri2rib)
 ADD_SUBDIRECTORY(rib/miqser)
 ADD_SUBDIRECTORY(texturing/teqser)
-IF(AQSIS_FLTK_FOUND)
+IF(AQSIS_USE_FLTK)
 	ADD_SUBDIRECTORY(displays/display)
-ENDIF(AQSIS_FLTK_FOUND)
+ENDIF(AQSIS_USE_FLTK)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
 ADD_SUBDIRECTORY(displays/d_exr)
 ADD_SUBDIRECTORY(displays/d_xpm)
 ADD_SUBDIRECTORY(displays/d_sdcBMP)
 ADD_SUBDIRECTORY(shaders)
-IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
+IF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 	ADD_SUBDIRECTORY(displays/piqsl)
 	GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
-ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
-IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
+ENDIF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
+IF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
 	ADD_SUBDIRECTORY(tools/eqsl)
-ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
+ENDIF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
 IF(AQSIS_USE_PDIFF)
 	ADD_SUBDIRECTORY(thirdparty/pdiff)
 ENDIF(AQSIS_USE_PDIFF)
@@ -191,9 +218,9 @@ ENDIF(AQSIS_USE_PDIFF)
 #-------------------------------------------------------------------------------
 # Build aqsisrc
 #--------------
-IF(AQSIS_FLTK_FOUND)
+IF(AQSIS_USE_FLTK)
 	GET_DIRECTORY_PROPERTY(display_DISPLAYLIB DIRECTORY displays/display DEFINITION DISPLAYLIB)
-ENDIF(AQSIS_FLTK_FOUND)
+ENDIF(AQSIS_USE_FLTK)
 GET_DIRECTORY_PROPERTY(d_exr_DISPLAYLIB DIRECTORY displays/d_exr DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(d_bmp_DISPLAYLIB DIRECTORY displays/d_sdcBMP DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(d_xpm_DISPLAYLIB DIRECTORY displays/d_xpm DEFINITION DISPLAYLIB)
