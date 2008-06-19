@@ -1,4 +1,4 @@
-# Custom Aqsis specific version of FindTIFF
+# Custom Aqsis specific version of FindJPEG
 SET(AQSIS_JPEG_FOUND 0)
 
 SET(AQSIS_JPEG_INCLUDE_SEARCHPATH)

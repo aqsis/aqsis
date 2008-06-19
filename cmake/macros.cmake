@@ -65,6 +65,12 @@ ENDMACRO ( SVN_REPOSITORY_VERSION )
 
 IF(AQSIS_ENABLE_TESTING)
 
+	# Enable testing.  This causes the ADD_TEST command to emit code.  We don't
+	# really use this inbuilt facility, instead relying on the value of the
+	# AQSIS_ENABLE_TESTING variable.  We just need to turn it on.
+	ENABLE_TESTING()
+
+
 	# AQSIS_ADD_TESTS(SOURCE_LIST LINK_LIBS)
 	#
 	# Adds tests based on the boost.test framework.  Each source file is

@@ -1,31 +1,38 @@
 PROJECT(aqsis_all)
 
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Path to aqsis-specific include directories for cmake helper scripts.
+SET(CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 INCLUDE(macros)
 
 INCLUDE(FirstCMakeRun)
 INCLUDE(OutOfSourceBuild)
 
-# TODO: Consider the use of FIND_PACKAGE here
-# TODO: Create USE_ variables for optional dependencies.
+# Find path to precompiled libs on windows.
 INCLUDE(FindWin32Libs)
+
+
+#-------------------------------------------------------------------------------
+# Build-time options which can be set from ccmake or the command line
+#--------------------------------------------------------------------
+OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
+OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) ON/OFF" ON)
+OPTION(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
+OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
+
+
+#-------------------------------------------------------------------------------
+# Find necessary library dependencies.
+#-------------------------------------
+# TODO: Consider the use of FIND_PACKAGE here
 INCLUDE(FindTIFF)
-INCLUDE(FindJPEG)
 INCLUDE(FindBoost)
 INCLUDE(FindZLIB)
-INCLUDE(FindFLTK)
-INCLUDE(FindNSIS)
-INCLUDE(FindOpenEXR)
-INCLUDE(FindOsacompile)
-INCLUDE(FindXsltproc)
-INCLUDE(FindXcodebuild)
-INCLUDE(FindFlexBison)
-INCLUDE(FindSVNVersion)
-INCLUDE(FindResource)
 
-OPTION(USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
-MARK_AS_ADVANCED(USE_PDIFF)
+# TODO: Should be optional.  Create USE_ variables for optional dependencies.
+INCLUDE(FindFLTK)
 
 IF(NOT AQSIS_FLTK_FOUND)
 	MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
@@ -34,8 +41,31 @@ IF(NOT AQSIS_FLUID_FOUND)
 	MESSAGE(STATUS "Cannot find Fluid, eqsl and piqsl will not be built")
 ENDIF(NOT AQSIS_FLUID_FOUND)
 
-ENABLE_TESTING()
+INCLUDE(FindOpenEXR)
+# libjpeg is no longer needed until aqsis again supports jpeg images.
+#INCLUDE(FindJPEG)
 
+
+#-------------------------------------------------------------------------------
+# Find build tools
+#-----------------
+INCLUDE(FindXsltproc)
+INCLUDE(FindFlexBison)
+INCLUDE(FindSVNVersion)
+# Windows-specific build tools:
+INCLUDE(FindNSIS)
+# Apple-specific build tools:
+INCLUDE(FindOsacompile)
+INCLUDE(FindXcodebuild)
+INCLUDE(FindResource)
+
+
+#-------------------------------------------------------------------------------
+# Set variables which control the build
+#--------------------------------------
+
+# Set the locations into which libraries and executables will be placed
+# Note: This is only relevant to the build, not the install.
 IF(WIN32)
 	SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 ELSE(WIN32)
@@ -43,34 +73,46 @@ ELSE(WIN32)
 ENDIF(WIN32)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+# Set default build type the first time cmake is run, but only if it's empty
+# since an alternative value might have been specified on the command line,
+# and we want this to override the default given below.
 #
-# Placed some package definitions here else they are not initialised
-#
-SET(PACKAGE_NAME "Aqsis Renderer")
-SET(PACKAGE_VENDOR "Aqsis Team")
-SET(PACKAGE_COPYRIGHT "Copyright (C) 2008, ${PACKAGE_VENDOR}.")
-SET(PACKAGE_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
+# We need to jump through some hoops here with the SET_IF_EMPTY macro, since
+# CMAKE_BUILD_TYPE is a system-defined variable which means we can't get to it
+# with SET() before it's defined.
+IF(FIRST_CMAKE_RUN)
+	SET_IF_EMPTY(CMAKE_BUILD_TYPE "Release" CACHE STRING
+		"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+		FORCE
+		)
+ENDIF(FIRST_CMAKE_RUN)
 
-SET(MAJOR 1)
-SET(MINOR 3)
-SET(BUILD 0)
-SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
-CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
 
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+#-------------------------------------------------------------------------------
+# Define macros which enable compile-time features
+#-------------------------------------------------
 
-OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
+IF(WIN32)
+	ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
+ELSE(WIN32)
+	SET(DEFAULT_RC_PATH "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
+	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="${DEFAULT_RC_PATH}")
+ENDIF(WIN32)
+
 IF(AQSIS_USE_TIMERS)
 	ADD_DEFINITIONS(-DUSE_TIMERS)
 ENDIF(AQSIS_USE_TIMERS)
 
-OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) ON/OFF" ON)
 IF(AQSIS_USE_PLUGINS)
 	ADD_DEFINITIONS(-DPLUGINS)
 ENDIF(AQSIS_USE_PLUGINS)
 
-OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
 
+#-------------------------------------------------------------------------------
+# System-specific includes
+#-------------------------
+
+# Include setup for system-specific paths, packaging etc
 IF(UNIX AND NOT APPLE)
 	INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/linux.cmake) 
 ELSE(UNIX AND NOT APPLE)
@@ -84,24 +126,22 @@ ELSE(UNIX AND NOT APPLE)
 	ENDIF(WIN32)
 ENDIF(UNIX AND NOT APPLE)
 
-SET(DEFAULT_RC_PATH "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
 
-IF(WIN32)
-	ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
-ELSE(WIN32)
-	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="${DEFAULT_RC_PATH}")
-ENDIF(WIN32)
+#-------------------------------------------------------------------------------
+# Create version.h
+#-----------------
+SET(MAJOR 1)
+SET(MINOR 3)
+SET(BUILD 0)
+SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
+CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
+# Make sure the rest of the build can find version.h
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
-IF(FIRST_CMAKE_RUN)
-	# Set default build type the first time cmake is run, but only if it's
-	# empty (an alternative value might have been specified on the command
-	# line, and we want this to override the default below.).
-	SET_IF_EMPTY(CMAKE_BUILD_TYPE "Release" CACHE STRING
-		"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
-		FORCE
-		)
-ENDIF(FIRST_CMAKE_RUN)
 
+#-------------------------------------------------------------------------------
+# Add directories for all subprojects
+#------------------------------------
 ADD_SUBDIRECTORY(argparse)
 ADD_SUBDIRECTORY(rib/api)
 ADD_SUBDIRECTORY(rib/rib2)
@@ -110,8 +150,8 @@ ADD_SUBDIRECTORY(renderer/ddmanager)
 ADD_SUBDIRECTORY(renderer/raytrace)
 ADD_SUBDIRECTORY(shadercompiler/shaderexecenv)
 ADD_SUBDIRECTORY(aqsistypes)
-# Get the value of AQSISTYPES_LIBRARY from the aqsistypes project, so that downstream projects
-# can use it.
+# Get the value of AQSISTYPES_LIBRARY from the aqsistypes project, so that
+# compiling shaders at build time can proceed (aqsl needs the library).
 GET_DIRECTORY_PROPERTY(AQSISTYPES_LIBRARY DIRECTORY aqsistypes DEFINITION AQSISTYPES_LIBRARY)
 ADD_SUBDIRECTORY(texturing/texlib)
 ADD_SUBDIRECTORY(shadercompiler/shadervm)
@@ -120,8 +160,8 @@ ADD_SUBDIRECTORY(renderer/aqsis)
 ADD_SUBDIRECTORY(shadercompiler/slparse)
 ADD_SUBDIRECTORY(shadercompiler/codegenvm)
 ADD_SUBDIRECTORY(shadercompiler/aqsl)
-# Get the value of AQSL_EXECUTABLE from the shadercompiler/aqsl project, so that downstream projects
-# can use it.
+# Get the value of AQSL_EXECUTABLE from the shadercompiler/aqsl project, so
+# that compiling shaders at build time can proceed.
 GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION AQSL_EXECUTABLE)
 ADD_SUBDIRECTORY(shadercompiler/slxargs)
 ADD_SUBDIRECTORY(shadercompiler/aqsltell)
@@ -143,12 +183,14 @@ ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
 	ADD_SUBDIRECTORY(tools/eqsl)
 ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND)
-IF(USE_PDIFF)
+IF(AQSIS_USE_PDIFF)
 	ADD_SUBDIRECTORY(thirdparty/pdiff)
-ENDIF(USE_PDIFF)
-#
+ENDIF(AQSIS_USE_PDIFF)
+
+
+#-------------------------------------------------------------------------------
 # Build aqsisrc
-#
+#--------------
 IF(AQSIS_FLTK_FOUND)
 	GET_DIRECTORY_PROPERTY(display_DISPLAYLIB DIRECTORY displays/display DEFINITION DISPLAYLIB)
 ENDIF(AQSIS_FLTK_FOUND)
@@ -174,33 +216,36 @@ ADD_CUSTOM_TARGET(aqsisrc ALL echo
 INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
 
+#-------------------------------------------------------------------------------
+# Packaging
+#----------
+
+# Set some variables used inside the installer script templates.
 #
+# TODO: Rename these to use the AQSIS_ prefix
+SET(PACKAGE_NAME "Aqsis Renderer")
+SET(PACKAGE_VENDOR "Aqsis Team")
+SET(PACKAGE_COPYRIGHT "Copyright (C) 2008, ${PACKAGE_VENDOR}.")
+SET(PACKAGE_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
+
+
 # Windows NSIS Packaging
-#
 IF(WIN32)
 	ADD_SUBDIRECTORY(distribution/win/nsis)
 ENDIF(WIN32)
 
-
-#
 # Linux SPEC Packaging
-#
 IF(UNIX AND NOT APPLE)
 	ADD_SUBDIRECTORY(distribution/linux/rpm)
 ENDIF(UNIX AND NOT APPLE)
 
-
-#
 # OSX Bundle Packaging
-#
 IF(APPLE)
 	ADD_SUBDIRECTORY(distribution/macosx/bundle)
 ENDIF(APPLE)
 
 
-#
 # Generic Packaging setup
-#
 INCLUDE(InstallRequiredSystemLibraries)
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_NAME}")
