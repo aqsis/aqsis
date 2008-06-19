@@ -156,7 +156,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 		{
 			IqLightsource * lp = m_pAttributes ->pLight( li );
 			// Initialise the lightsource
-			lp->Initialise( uGridRes(), vGridRes(), microPolygonCount(), shadingPointCount() );
+			lp->Initialise( uGridRes(), vGridRes(), microPolygonCount(), shadingPointCount(), m_hasValidDerivatives );
 			m_Illuminate = 0;
 			// Evaluate the lightsource
 			lp->Evaluate( Ps, Ns, m_pCurrentSurface );

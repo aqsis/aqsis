@@ -81,7 +81,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		 * \param uGridRes Integer grid size, not used.
 		 * \param vGridRes Integer grid size, not used.
 		 */
-		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount );
+		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, bool hasValidDerivatives );
 		//			void		GenerateShadowMap(const char* strShadowName);
 		/** Evaluate the shader.
 		 * \param pPs the point being lit.

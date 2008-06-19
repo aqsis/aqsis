@@ -104,7 +104,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
 	/// \note This should delete through the interface that created it.
 
-	m_pShaderExecEnv->Initialise( cu, cv, numMicroPolygons(cu, cv), numShadingPoints(cu, cv), pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes()->pshadSurface(QGetRenderContext()->Time()).get(), lUses );
+	m_pShaderExecEnv->Initialise( cu, cv, numMicroPolygons(cu, cv), numShadingPoints(cu, cv), hasValidDerivatives(), pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes()->pshadSurface(QGetRenderContext()->Time()).get(), lUses );
 
 	boost::shared_ptr<IqShader> pshadSurface = pSurface ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
@@ -127,7 +127,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 }
 
 //---------------------------------------------------------------------
-/** Build the normals list for the micorpolygons in the grid.
+/** Build the normals list for the micropolygons in the grid.
  */
 
 void CqMicroPolyGrid::CalcNormals()
@@ -372,21 +372,9 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	// constant across every grid. (Looks to be a good assumption at svn r2117.)
 	/// \todo: Should this be a method of the shaderexecenv?
 	if(USES(lUses, EnvVars_du))
-	{
-		float f0 = 0;
-		float f1 = 0;
-		pVar(EnvVars_u)->GetValue(f0, 0);
-		pVar(EnvVars_u)->GetValue(f1, 1);
-		pVar(EnvVars_du)->SetFloat(f1 - f0);
-	}
+		setDu();
 	if(USES(lUses, EnvVars_dv))
-	{
-		float f0 = 0;
-		float f1 = 0;
-		pVar(EnvVars_v)->GetValue(f0, 0);
-		pVar(EnvVars_v)->GetValue(f1, uGridRes() + 1);
-		pVar(EnvVars_dv)->SetFloat(f1 - f0);
-	}
+		setDv();
 
 	// Set I, the incident ray direction; this is just equal to P in shading
 	// (camera) coords for a projective camera transformation, or (0,0,1) for

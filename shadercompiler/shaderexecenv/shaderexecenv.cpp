@@ -185,13 +185,20 @@ CqShaderExecEnv::~CqShaderExecEnv()
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, 
+								TqInt microPolygonCount, TqInt shadingPointCount, 
+								bool hasValidDerivatives,
+								IqAttributes* pAttr, 
+								const boost::shared_ptr<IqTransform>& pTrans, 
+								IqShader* pShader, 
+								TqInt Uses )
 {
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
 
 	m_microPolygonCount = microPolygonCount;
 	m_shadingPointCount = shadingPointCount;
+	m_hasValidDerivatives = hasValidDerivatives;
 	m_LocalIndex = 0;
 
 	// Store a pointer to the attributes definition.
@@ -300,6 +307,59 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 
 			// insert the open time plus shutter offset
 			m_apVariables[ EnvVars_time ]->SetFloat(  shutter[ 0 ] + offset );
+		}
+	}
+
+	// Precompute the derivative indices for use in diffU and diffV
+	m_diffUI1.resize(shadingPointCount);
+	m_diffUI2.resize(shadingPointCount);
+	m_diffVI1.resize(shadingPointCount);
+	m_diffVI2.resize(shadingPointCount);
+	if(hasValidDerivatives)
+	{
+		TqInt uSize = uGridRes+1;
+		TqInt vSize = vGridRes+1;
+		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
+		{
+			TqInt iu = idx % uSize;
+			if(iu == uSize-1)
+			{
+				// Use backward difference for grid boundary end in u-direction
+				m_diffUI1[idx] = idx-1;
+				m_diffUI2[idx] = idx;
+			}
+			else 
+			{
+				// Use forward difference internally
+				m_diffUI1[idx] = idx;
+				m_diffUI2[idx] = idx+1;
+			}
+			TqInt iv = idx / uSize;
+			if(iv == vSize-1)
+			{
+				// Use backward difference for grid boundary end in v-direction
+				m_diffVI1[idx] = idx-uSize;
+				m_diffVI2[idx] = idx;
+			}
+			else 
+			{
+				// Use forward difference internally
+				m_diffVI1[idx] = idx;
+				m_diffVI2[idx] = idx+uSize;
+			}
+		}
+	}
+	else
+	{
+		// If the shading group (grid) is not suitable for derivative calculation (points)
+		// then set all left/right indices to be the same, this way we get zero derivatives
+		// which is correct for points as they have no inherent area.
+		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
+		{
+			m_diffUI1[idx] = idx;
+			m_diffUI2[idx] = idx;
+			m_diffVI1[idx] = idx;
+			m_diffVI2[idx] = idx;
 		}
 	}
 }

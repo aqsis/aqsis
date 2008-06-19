@@ -306,6 +306,22 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		{
 			return ( cu * cv );
 		}
+		virtual bool	hasValidDerivatives() const
+		{
+			return false;
+		}
+		/** \brief Set surface derivative in u.
+		 * 
+		 *  Set the value of du if needed, du is constant across the grid being shaded.
+		 */
+		virtual void setDu();
+		/** \brief Set surface derivative in v.
+		 * 
+		 *  Set the value of dv if needed, dv is constant across the grid being shaded.
+		 */
+		virtual void setDv();
+		virtual void CalcNormals();
+		virtual void CalcSurfaceDerivatives();
 };
 
 class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
@@ -607,6 +623,28 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 		}
 	protected:
 };
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline void CqMicroPolyGridPoints::setDu()
+{
+	pVar(EnvVars_du)->SetFloat(1.0f);
+}
+
+inline void CqMicroPolyGridPoints::setDv()
+{
+	pVar(EnvVars_dv)->SetFloat(1.0f);
+}
+
+inline void	CqMicroPolyGridPoints::CalcNormals()
+{
+}
+
+inline void	CqMicroPolyGridPoints::CalcSurfaceDerivatives()
+{
+}
 
 
 //-----------------------------------------------------------------------

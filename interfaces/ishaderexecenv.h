@@ -131,7 +131,13 @@ struct IqShaderExecEnv
 	virtual	~IqShaderExecEnv()
 	{}
 
-	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
+	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
+		TqInt microPolygonCount, TqInt shadingPointCount, 
+		bool hasValidDerivatives,
+		IqAttributes* pAttr, 
+		const boost::shared_ptr<IqTransform>& pTrans, 
+		IqShader* pShader, 
+		TqInt Uses ) = 0;
 	/** Get grid size in u
 	 */
 	virtual	TqInt	uGridRes() const = 0;

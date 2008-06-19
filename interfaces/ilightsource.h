@@ -39,7 +39,7 @@ struct IqLightsource
 	 * \param uGridRes Integer grid size, not used.
 	 * \param vGridRes Integer grid size, not used.
 	 */
-	virtual	void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount ) = 0;
+	virtual	void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, bool hasValidDerivatives ) = 0;
 	//			void		GenerateShadowMap(const char* strShadowName);
 	/** Evaluate the shader.
 	 * \param pPs the point being lit.

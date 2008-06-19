@@ -68,13 +68,13 @@ CqLightsource::~CqLightsource()
  * \param iGridRes Integer grid resolution.
  * \param iGridRes Integer grid resolution.
  */
-void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount )
+void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, bool hasValidDerivatives )
 {
 	TqInt Uses = gDefLightUses;
 	if ( m_pShader )
 	{
 		Uses |= m_pShader->Uses();
-		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, microPolygonCount, shadingPointCount, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, microPolygonCount, shadingPointCount, hasValidDerivatives, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 	}
 
 	if ( m_pShader )

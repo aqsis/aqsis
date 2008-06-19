@@ -152,6 +152,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	TqInt	vGridRes() const = 0;
 		virtual	TqUint	numMicroPolygons(TqInt cu, TqInt cv) const = 0;
 		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const = 0;
+		virtual bool	hasValidDerivatives() const = 0;
 		virtual IqShaderData* pVar(TqInt index) = 0;
 		/** Get the points of the triangle split line if this grid represents a triangle.
 		 */
@@ -217,8 +218,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		}
 #endif
 
-		void	CalcNormals();
-		void	CalcSurfaceDerivatives();
+		virtual void CalcNormals();
+		virtual void CalcSurfaceDerivatives();
 		/** \brief Expand the boundary micropolygons to cover grid cracks.
 		 *
 		 * This function expands the boundary of a grid by moving the boundary
@@ -321,6 +322,10 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		{
 			return ( ( cu + 1 ) * ( cv + 1 ) );
 		}
+		virtual bool	hasValidDerivatives() const
+		{
+			return true;
+		}
 		virtual	const CqMatrix&	matObjectToWorld() const
 		{
 			assert( m_pShaderExecEnv );
@@ -352,6 +357,17 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		{
 			return(m_pShaderExecEnv);
 		}
+
+		/** \brief Set surface derivative in u.
+		 * 
+		 *  Set the value of du if needed, du is constant across the grid being shaded.
+		 */
+		virtual void setDu();
+		/** \brief Set surface derivative in v.
+		 * 
+		 *  Set the value of dv if needed, dv is constant across the grid being shaded.
+		 */
+		virtual void setDv();
 
 	private:
 		bool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
@@ -412,6 +428,12 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->numShadingPoints(cu, cv) );
 		}
+		virtual bool	hasValidDerivatives() const
+		{
+			assert( GetMotionObject( Time( 0 ) ) );
+			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->hasValidDerivatives() );
+		}
+
 		virtual IqShaderData* pVar(TqInt index)
 		{
 			assert( GetMotionObject( Time( 0 ) ) );
@@ -969,6 +991,27 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{}
 }
 ;
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+inline void CqMicroPolyGrid::setDu()
+{
+	float f0 = 0;
+	float f1 = 0;
+	pVar(EnvVars_u)->GetValue(f0, 0);
+	pVar(EnvVars_u)->GetValue(f1, 1);
+	pVar(EnvVars_du)->SetFloat(f1 - f0);
+}
+
+inline void CqMicroPolyGrid::setDv()
+{
+	float f0 = 0;
+	float f1 = 0;
+	pVar(EnvVars_v)->GetValue(f0, 0);
+	pVar(EnvVars_v)->GetValue(f1, uGridRes() + 1);
+	pVar(EnvVars_dv)->SetFloat(f1 - f0);
+}
 
 
 //-----------------------------------------------------------------------

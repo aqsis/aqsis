@@ -159,7 +159,13 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 #endif
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses );
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
+			TqInt microPolygonCount, TqInt shadingPointCount, 
+			bool hasValidDerivatives,
+			IqAttributes* pAttr, 
+			const boost::shared_ptr<IqTransform>& pTrans, 
+			IqShader* pShader, 
+			TqInt Uses );
 		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );
@@ -449,6 +455,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		IqRenderer*	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
+		bool	m_hasValidDerivatives;	///< Is this shading collection able to provide valid derivatives. RiPoints, can't.
+		std::vector<TqUint>	m_diffUI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqUint>	m_diffUI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
+		std::vector<TqUint>	m_diffVI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqUint>	m_diffVI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
 
 	public:
 
@@ -661,68 +672,31 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 template<typename T>
 T CqShaderExecEnv::diffU(IqShaderData* var, TqInt gridIdx)
 {
-	TqInt uSize = uGridRes()+1;
-	assert(gridIdx < uSize*(vGridRes() + 1));
+	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
+	assert(m_diffUI1[gridIdx] < m_shadingPointCount && m_diffUI2[gridIdx] < m_shadingPointCount);
 
 	T val0;
 	T val1;
 
-	TqInt iu = gridIdx % uSize;
-	if(iu == 0)
-	{
-		// Use forward difference for grid boundary start in u-direction
-		var->GetValue(val0, gridIdx);
-		var->GetValue(val1, gridIdx+1);
-		return val1 - val0;
-	}
-	else if(iu == uSize-1)
-	{
-		// Use backward difference for grid boundary end in u-direction
-		var->GetValue(val0, gridIdx-1);
-		var->GetValue(val1, gridIdx);
-		return val1 - val0;
-	}
-	else
-	{
-		// Use centered difference internally
-		var->GetValue(val0, gridIdx-1);
-		var->GetValue(val1, gridIdx+1);
-		return 0.5*(val1 - val0);
-	}
+	// Using the precalculated left/right indexes, get the two values and return the difference.
+	var->GetValue(val0, m_diffUI1[gridIdx]);
+	var->GetValue(val1, m_diffUI2[gridIdx]);
+	return val1 - val0;
 }
 
 template<typename T>
 T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
 {
-	TqInt uSize = uGridRes()+1;
-	TqInt vSize = vGridRes()+1;
-	assert(gridIdx < uSize*vSize);
+	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
+	assert(m_diffVI1[gridIdx] < m_shadingPointCount && m_diffVI2[gridIdx] < m_shadingPointCount);
 
 	T val0;
 	T val1;
 
-	TqInt iv = gridIdx / uSize;
-	if(iv == 0)
-	{
-		// Use forward difference for grid boundary start in v-direction
-		var->GetValue(val0, gridIdx);
-		var->GetValue(val1, gridIdx+uSize);
-		return val1 - val0;
-	}
-	else if(iv == vSize-1)
-	{
-		// Use backward difference for grid boundary end in v-direction
-		var->GetValue(val0, gridIdx-uSize);
-		var->GetValue(val1, gridIdx);
-		return val1 - val0;
-	}
-	else
-	{
-		// Use centered difference internally
-		var->GetValue(val0, gridIdx-uSize);
-		var->GetValue(val1, gridIdx+uSize);
-		return 0.5*(val1 - val0);
-	}
+	// Using the precalculated left/right indexes, get the two values and return the difference.
+	var->GetValue(val0, m_diffVI1[gridIdx]);
+	var->GetValue(val1, m_diffVI2[gridIdx]);
+	return val1 - val0;
 }
 
 template<typename T>
