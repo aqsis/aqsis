@@ -19,6 +19,11 @@ SET(CONTENTDIR "content"
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
+# Add defines to
+#   (a) Make sure we don't try to use the syslog stuff
+#   (b) Make sure that the math constants from math.h are defined - that is, M_PI etc.
+ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
+
 #
 # Create resource files for use during linking
 #
