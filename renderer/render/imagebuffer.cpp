@@ -229,12 +229,12 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	}
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
-	if ( Bound.vecMin().z() <= 0.0f && Bound.vecMax().z() > FLT_EPSILON )
+	if ( Bound.vecMin().z() <= FLT_EPSILON )
 	{
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
 
-		if ( pSurface->EyeSplitCount() > m_MaxEyeSplits )
+		if ( pSurface->SplitCount() > m_MaxEyeSplits )
 		{
 			CqString objname( "unnamed" );
 			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );

@@ -151,7 +151,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual	void	ForceUndiceable()
 		{
 			m_fDiceable = false;
-			m_EyeSplitCount++;
 		}
 		/** Query if this primitive has been marked as undiceable by the eyesplit check.
 		 */
@@ -183,15 +182,13 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		}
 		/** Get the number of times this GPrim has been split because if crossing the epsilon and eye planes.
 		 */
-		TqInt	EyeSplitCount() const
+		TqInt	SplitCount() const
 		{
-			return ( m_EyeSplitCount );
+			return ( m_SplitCount );
 		}
-		/** Set the number of times this GPrim has been split because if crossing the epsilon and eye planes.
-		 */
-		void	SetEyeSplitCount( TqInt EyeSplitCount )
+		void	SetSplitCount( TqInt SplitCount )
 		{
-			m_EyeSplitCount = EyeSplitCount;
+			m_SplitCount = SplitCount;
 		}
 		/** Get the precalculated split direction.
 		 */
@@ -588,7 +585,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		bool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
-		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
+		TqInt	m_SplitCount;		///< The number of times this GPrim has been split
 	protected:
 		/** Protected member function to clone the data, used by the Clone() functions
 		 *  on the derived classes.
@@ -682,7 +679,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 			{
 				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = true;
-				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				pNewMotion->m_SplitCount = m_SplitCount + 1;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
 					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );

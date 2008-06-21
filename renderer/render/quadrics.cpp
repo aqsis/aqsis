@@ -450,7 +450,8 @@ TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplit
 	pNew1->m_Radius = m_Radius;
 	pNew2->m_Radius = m_Radius;
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiscard = pNew2->m_fDiscard = m_fDiscard;
@@ -590,7 +591,8 @@ TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
 	pNew1->m_Height = pNew2->m_Height = m_Height;
 	pNew1->m_Radius = pNew2->m_Radius = m_Radius;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 
@@ -740,7 +742,8 @@ TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSpl
 	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
 	pNew1->m_Radius = pNew2->m_Radius = m_Radius;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 
@@ -881,7 +884,8 @@ TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& a
 	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
 	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 
@@ -1056,7 +1060,8 @@ TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aS
 	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
 	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 
@@ -1203,7 +1208,8 @@ TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
 	pNew1->m_MajorRadius = pNew2->m_MajorRadius = m_MajorRadius;
 	pNew1->m_MinorRadius = pNew2->m_MinorRadius = m_MinorRadius;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 
@@ -1343,7 +1349,8 @@ TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
 	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
 	pNew1->m_Height = pNew2->m_Height = m_Height;
-	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 

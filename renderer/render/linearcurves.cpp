@@ -191,10 +191,10 @@ TqInt CqLinearCurveSegment::SplitToCurves(
 	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqLinearCurveSegment ) );
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
-	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 0 ] ->SetSplitCount( SplitCount() + 1 );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
-	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 1 ] ->SetSplitCount( SplitCount() + 1 );
 
 	// Iterate through any user parameters, subdividing and storing
 	//  the second value in the target surface.

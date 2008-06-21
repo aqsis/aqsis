@@ -1560,7 +1560,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 			S[ i ] ->TrimLoops() = TrimLoops();
 			S[ i ] ->m_fDiceable = true;
 			S[ i ] ->m_SplitDir = m_SplitDir;
-			S[ i ] ->m_EyeSplitCount = m_EyeSplitCount;
+			S[ i ] ->SetSplitCount( SplitCount() + 1 );
 			//ADDREF( S[ i ] );
 			aSplits.push_back( S[ i ] );
 		}
@@ -1596,8 +1596,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 	pNew2->m_fDiceable = true;
 	pNew1->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
 	pNew2->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetfPatchMesh( false );
 	pNew2->SetfPatchMesh( false );
 

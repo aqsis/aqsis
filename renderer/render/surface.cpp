@@ -155,7 +155,7 @@ void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 CqSurface::CqSurface()
 	: m_fDiceable(true),
 	m_fDiscard(false),
-	m_EyeSplitCount(0),
+	m_SplitCount(0),
 	m_aUserParams(),
 	m_pAttributes(0),
 	m_pTransform(QGetRenderContext()->ptransCurrent()),
@@ -209,7 +209,7 @@ CqSurface::CqSurface()
 void CqSurface::CloneData( CqSurface* clone ) const
 {
 	clone->m_fDiceable = m_fDiceable;
-	clone->m_EyeSplitCount = m_EyeSplitCount;
+	clone->m_SplitCount = m_SplitCount;
 	clone->m_fDiscard = m_fDiscard;
 
 	clone->SetSurfaceParameters( *this );
@@ -543,13 +543,13 @@ TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
-	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 0 ] ->SetSplitCount( SplitCount() + 1 );
 	aSplits[ 0 ] ->m_fDiceable = true;
 	//ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
-	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 1 ] ->SetSplitCount( SplitCount() + 1 );
 	aSplits[ 1 ] ->m_fDiceable = true;
 	//ADDREF( aSplits[ 1 ] );
 

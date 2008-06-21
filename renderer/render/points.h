@@ -603,7 +603,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			{
 				boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = true;
-				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				pNewMotion->m_SplitCount = m_SplitCount + 1;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
 					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );

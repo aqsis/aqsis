@@ -831,7 +831,7 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 	{
 		aSplits[ i ] ->SetSurfaceParameters( *this );
 		aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
-		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
+		aSplits[ i ] ->SetSplitCount( SplitCount() + 1 );
 		aSplits[ i ] ->m_fDiceable = true;
 	}
 
