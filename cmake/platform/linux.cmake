@@ -2,12 +2,8 @@ SET(BINDIR "bin"
 	CACHE STRING "Install location for binary files. (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(LIBDIR "lib" 
 	CACHE STRING "Install location for shared libraries (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(RENDERENGINEDIR "${LIBDIR}" 
-	CACHE STRING "Install location for render dependent shared libraries (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(DISPLAYSDIR "${LIBDIR}/aqsis" 
 	CACHE STRING "Install location for display libraries (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(STATICLIBDIR "${LIBDIR}/aqsis" 
-	CACHE STRING "Install location for static libraries (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(SHADERDIR "share/aqsis/shaders" 
 	CACHE STRING "Install location for shaders (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(SYSCONFDIR "etc/aqsis" 
