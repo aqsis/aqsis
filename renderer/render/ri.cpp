@@ -498,7 +498,6 @@ void SetDefaultRiOptions( void )
 	std::string homeRCPath;
 	std::string currentRCPath;
 	std::string rootPath;
-	std::string separator;
 
 #ifdef AQSIS_SYSTEM_WIN32
 
@@ -512,23 +511,20 @@ void SetDefaultRiOptions( void )
 		_fullpath(root,&stracPath[0],256);
 	}
 	rootPath = root;
-	separator = "\\";
 #elif AQSIS_SYSTEM_MACOSX
 
 	CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	rootPath = pathPtr;
-	separator = "/";
 #else
 	// Minty: Need to work out the executable path here.
 	rootPath = AQSIS_XSTR(DEFAULT_RC_PATH);
-	separator = "/";
 #endif
 
 	systemRCPath = rootPath;
-	systemRCPath.append( separator );
-	systemRCPath.append( "aqsisrc" );
+	systemRCPath.append( DIRSEP );
+	systemRCPath.append( AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME) );
 
 	// Read in the system configuration file if found.
 	FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
@@ -551,9 +547,9 @@ void SetDefaultRiOptions( void )
 	if(getenv("HOME"))
 	{
 		homeRCPath = getenv("HOME");
-		if (homeRCPath[ homeRCPath.length() ] != separator[0])
+		if (homeRCPath[ homeRCPath.length() ] != DIRSEP[0])
 		{
-			homeRCPath.append(separator);
+			homeRCPath.append(DIRSEP);
 		};
 		homeRCPath.append(".aqsisrc");
 		rcfile = fopen( homeRCPath.c_str(), "rb" );

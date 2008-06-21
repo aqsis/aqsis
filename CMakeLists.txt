@@ -32,6 +32,8 @@ OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk lib
 OPTION(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
 
+SET(AQSIS_MAIN_CONFIG_NAME "aqsisrc" CACHE STRING "Name of the main aqsis configuration file")
+MARK_AS_ADVANCED(AQSIS_MAIN_CONFIG_NAME)
 
 #-------------------------------------------------------------------------------
 # Find necessary library dependencies.
@@ -138,6 +140,8 @@ ENDIF(AQSIS_USE_TIMERS)
 IF(AQSIS_USE_PLUGINS)
 	ADD_DEFINITIONS(-DPLUGINS)
 ENDIF(AQSIS_USE_PLUGINS)
+
+ADD_DEFINITIONS(-DAQSIS_MAIN_CONFIG_NAME="${AQSIS_MAIN_CONFIG_NAME}")
 
 
 #-------------------------------------------------------------------------------
