@@ -1,52 +1,70 @@
 SET(AQSIS_BOOST_FOUND 0)
 
 SET(AQSIS_BOOST_VERSION_SUFFIX "-1_34_1" CACHE STRING "Version suffix used on boost libraries (including '-' prefix).")
+MARK_AS_ADVANCED(AQSIS_BOOST_VERSION_SUFFIX)
 
 SET(AQSIS_BOOST_LIBRARIES_DIR "" CACHE PATH "Location to look for boost libraries.")
 
 SET(AQSIS_BOOST_INCLUDE_SEARCHPATH)
 
+# The "standard" naming scheme for boost libraries is something like
+#
+#   name-compiler[-mt]-version
+#
+# Eg: libboost_thread-vc80-mt-1_34_1
+#
+# Unfortunately this recommended naming scheme isn't followed uniformly between
+# the various systems.  Here we make an attempt to guess the appropriate names,
+# but the user is free to set the suffix AQSIS_BOOST_LIB_SUFFIX and prefix
+# AQSIS_BOOST_LIB_PREFIX manually if the automatic guess fails.
+
+# Guess suffix and prefix for boost libs
 IF(WIN32)
 	IF(MSVC AND MSVC80)
-		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME libboost_thread-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME libboost_unit_test_framework-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_WAVE_LIBRARY_NAME libboost_wave-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME libboost_filesystem-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_REGEX_LIBRARY_NAME libboost_regex-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_LIB_SUFFIX_TMP "-vc80-mt${AQSIS_BOOST_VERSION_SUFFIX}")
 	ELSEIF(MSVC AND MSVC90)
-		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME libboost_thread-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME libboost_unit_test_framework-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_WAVE_LIBRARY_NAME libboost_wave-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME libboost_filesystem-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_REGEX_LIBRARY_NAME libboost_regex-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_LIB_SUFFIX_TMP "-vc90-mt${AQSIS_BOOST_VERSION_SUFFIX}")
 	ELSE(MSVC AND MSVC80)
-		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME libboost_thread-mgw34${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME libboost_unit_test_framework-mgw34${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_WAVE_LIBRARY_NAME libboost_wave-mgw34${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME libboost_filesystem-mgw34${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_REGEX_LIBRARY_NAME libboost_regex-mgw34${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_LIB_SUFFIX_TMP "-mgw34${AQSIS_BOOST_VERSION_SUFFIX}")
 	ENDIF(MSVC AND MSVC80)
+	SET(AQSIS_BOOST_LIB_PREFIX_TMP "lib")
 ELSE(WIN32)
 	IF(APPLE)
-		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME boost_unit_test_framework-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_WAVE_LIBRARY_NAME boost_wave-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME boost_filesystem-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
-		SET(AQSIS_BOOST_REGEX_LIBRARY_NAME boost_regex-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_LIB_SUFFIX_TMP "-mt${AQSIS_BOOST_VERSION_SUFFIX}")
+	ELSE(APPLE)
+		SET(AQSIS_BOOST_LIB_SUFFIX_TMP "-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX}")
 	ENDIF(APPLE)
-	SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
-	SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME boost_unit_test_framework-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
-	SET(AQSIS_BOOST_WAVE_LIBRARY_NAME boost_wave-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
-	SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME boost_filesystem-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
-	SET(AQSIS_BOOST_REGEX_LIBRARY_NAME boost_regex-gcc-mt${AQSIS_BOOST_VERSION_SUFFIX} CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
+	SET(AQSIS_BOOST_LIB_PREFIX_TMP "")
 ENDIF(WIN32)
-MARK_AS_ADVANCED(AQSIS_BOOST_VERSION_SUFFIX)
+SET(AQSIS_BOOST_LIB_SUFFIX "${AQSIS_BOOST_LIB_SUFFIX_TMP}" CACHE STRING "Suffix used for all boost library names")
+MARK_AS_ADVANCED(AQSIS_BOOST_LIB_SUFFIX)
+SET(AQSIS_BOOST_LIB_PREFIX "${AQSIS_BOOST_LIB_PREFIX_TMP}" CACHE STRING "Prefix used for all boost library names")
+MARK_AS_ADVANCED(AQSIS_BOOST_LIB_PREFIX)
+
+
+# Create cache variables for the various boost library names.
+SET(AQSIS_BOOST_THREAD_LIBRARY_NAME "${AQSIS_BOOST_LIB_PREFIX}boost_thread${AQSIS_BOOST_LIB_SUFFIX}"
+	CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
 MARK_AS_ADVANCED(AQSIS_BOOST_THREAD_LIBRARY_NAME)
+
+SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME "${AQSIS_BOOST_LIB_PREFIX}boost_unit_test_framework${AQSIS_BOOST_LIB_SUFFIX}"
+	CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
 MARK_AS_ADVANCED(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME)
+
+SET(AQSIS_BOOST_WAVE_LIBRARY_NAME "${AQSIS_BOOST_LIB_PREFIX}boost_wave${AQSIS_BOOST_LIB_SUFFIX}"
+	CACHE STRING "The name of the boost_wave library (undecorated, i.e. the string passed to the compiler)")
 MARK_AS_ADVANCED(AQSIS_BOOST_WAVE_LIBRARY_NAME)
+
+SET(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME "${AQSIS_BOOST_LIB_PREFIX}boost_filesystem${AQSIS_BOOST_LIB_SUFFIX}"
+	CACHE STRING "The name of the boost_filesystem library (undecorated, i.e. the string passed to the compiler)")
 MARK_AS_ADVANCED(AQSIS_BOOST_FILESYSTEM_LIBRARY_NAME)
+
+SET(AQSIS_BOOST_REGEX_LIBRARY_NAME "${AQSIS_BOOST_LIB_PREFIX}boost_regex${AQSIS_BOOST_LIB_SUFFIX}"
+	CACHE STRING "The name of the boost_regex library (undecorated, i.e. the string passed to the compiler)")
 MARK_AS_ADVANCED(AQSIS_BOOST_REGEX_LIBRARY_NAME)
 
+
+# Try to find the libraries.
 FIND_PATH(AQSIS_BOOST_INCLUDE_DIR
 			boost
 			PATHS ${AQSIS_BOOST_INCLUDE_SEARCHPATH}
