@@ -294,8 +294,26 @@ class CqBucket : public IqBucket
 				{
 					return ( s1->GetCachedRasterBound().vecMin().z() > s2->GetCachedRasterBound().vecMin().z() );
 				}
-
-				// don't have bounds for the surface(s). I suspect we should assert here.
+				else if ( s1->fCachedBound() && !s2->fCachedBound() )
+				{
+					CqBound BoundS2;
+					s2->Bound(&BoundS2);
+					return ( s1->GetCachedRasterBound().vecMin().z() > BoundS2.vecMin().z() );
+				}
+				else if ( !s1->fCachedBound() && s2->fCachedBound() )
+				{
+					CqBound BoundS1;
+					s1->Bound(&BoundS1);
+					return ( BoundS1.vecMin().z() > s2->GetCachedRasterBound().vecMin().z() );
+				}
+				else
+				{
+					CqBound BoundS1;
+					s1->Bound(&BoundS1);
+					CqBound BoundS2;
+					s2->Bound(&BoundS2);
+					return ( BoundS1.vecMin().z() > BoundS2.vecMin().z() );
+				}
 				return true;
 			}
 		};

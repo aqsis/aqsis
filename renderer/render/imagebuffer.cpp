@@ -234,12 +234,14 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
 
+		CqString objname( "unnamed" );
+		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+		if ( pattrName != 0 )
+			objname = pattrName[ 0 ];
+		Aqsis::log() << info << "Object \"" << objname.c_str() << "\" spans the epsilon plane" << std::endl;
+
 		if ( pSurface->SplitCount() > m_MaxEyeSplits )
 		{
-			CqString objname( "unnamed" );
-			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-			if ( pattrName != 0 )
-				objname = pattrName[ 0 ];
 			Aqsis::log() << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
 			return( true );
 		}
