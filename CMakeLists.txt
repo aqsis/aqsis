@@ -32,8 +32,12 @@ OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk lib
 OPTION(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
 
+OPTION(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
+MARK_AS_ADVANCED(AQSIS_USE_RPATH)
+
 SET(AQSIS_MAIN_CONFIG_NAME "aqsisrc" CACHE STRING "Name of the main aqsis configuration file")
 MARK_AS_ADVANCED(AQSIS_MAIN_CONFIG_NAME)
+
 
 #-------------------------------------------------------------------------------
 # Find necessary library dependencies.
@@ -128,6 +132,11 @@ IF(FIRST_CMAKE_RUN)
 		)
 ENDIF(FIRST_CMAKE_RUN)
 
+# Set up the install rpath if desired.
+SET(CMAKE_SKIP_RPATH OFF CACHE INTERNAL "Disabled, since we need RPATHS to find aqsl during the build" FORCE)
+IF(AQSIS_USE_RPATH)
+	SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
+ENDIF(AQSIS_USE_RPATH)
 
 #-------------------------------------------------------------------------------
 # Define macros which enable compile-time features
