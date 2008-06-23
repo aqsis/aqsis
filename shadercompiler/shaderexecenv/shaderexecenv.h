@@ -386,11 +386,9 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		 *
 		 *   diff(Y, i) = Y[i+1] - Y[i];
 		 *
-		 * Of course, this is the *forward* difference; for the purposes of
-		 * numerical stability and accuracy, it's probably preferable to use
-		 * the centered difference:
-		 *
-		 *   diff(Y, i) = (Y[i+1] - Y[i-1])/2;
+		 * We choose the asymmetric forward difference here instead of the
+		 * second order centred difference [ diff(Y, i) = (Y[i+1] - Y[i-1])/2 ]
+		 * since the forward difference preserves more surface detail.
 		 *
 		 * In practise a mixture of difference schemes are necessary to work
 		 * with grid boundaries, but the normalization is consistent with the
@@ -411,6 +409,42 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		 */
 		template<typename T>
 		T diffV(IqShaderData* var, TqInt gridIdx);
+		/** \brief Evaluate the partial derivative of a shader var with respect to u.
+		 *
+		 * This is just diffU(var, gridIdx)/du(gridIdx) with some checking for
+		 * the case when du == 0.
+		 *
+		 * \note In many cases it is more appropriate to use the discrete
+		 * analogue, diffU() rather than this function.
+		 *
+		 * \param var - variable to take the derivative of
+		 * \param gridIdx - 1D index into the var grid at which to compute the
+		 *                  derivative.
+		 * \param undefVal - value to be returned when the result is undefined
+		 *                   (ie, when du = 0).
+		 *
+		 * \return d(var)/du at the index gridIdx
+		 */
+		template<typename T>
+		inline T derivU(IqShaderData* var, TqInt gridIdx, const T& undefVal = T());
+		/** \brief Evaluate the partial derivative of a shader var with respect to v.
+		 *
+		 * This is just diffV(var, gridIdx)/dv(gridIdx) with some checking for
+		 * the case when dv == 0.
+		 *
+		 * \note In many cases it is more appropriate to use the discrete
+		 * analogue, diffU() rather than this function.
+		 *
+		 * \param var - variable to take the derivative of
+		 * \param gridIdx - 1D index into the var grid at which to compute the
+		 *                  derivative.
+		 * \param undefVal - value to be returned when the result is undefined
+		 *                   (ie, when dv = 0).
+		 *
+		 * \return d(var)/dv at the index gridIdx
+		 */
+		template<typename T>
+		inline T derivV(IqShaderData* var, TqInt gridIdx, const T& undefVal = T());
 		/** \brief Compute the differential dy/dx.
 		 *
 		 * Computes the derivative of a shader variable of type T with respect
@@ -740,6 +774,27 @@ T CqShaderExecEnv::deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx)
 	{
 		return diffV<T>(y, gridIdx) / dxv;
 	}
+}
+
+
+template<typename T>
+inline T CqShaderExecEnv::derivU(IqShaderData* var, TqInt gridIdx, const T& undefVal)
+{
+	TqFloat duVal = 1;
+	du()->GetFloat(duVal, gridIdx);
+	if(duVal == 0)
+		return undefVal;
+	return diffU<T>(var, gridIdx) * (1/duVal);
+}
+
+template<typename T>
+inline T CqShaderExecEnv::derivV(IqShaderData* var, TqInt gridIdx, const T& undefVal)
+{
+	TqFloat dvVal = 1;
+	dv()->GetFloat(dvVal, gridIdx);
+	if(dvVal == 0)
+		return undefVal;
+	return diffV<T>(var, gridIdx) * (1/dvVal);
 }
 
 //-----------------------------------------------------------------------

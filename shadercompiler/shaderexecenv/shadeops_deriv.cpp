@@ -480,7 +480,6 @@ void	CqShaderExecEnv::SO_spspline( IqShaderData* basis, IqShaderData* value, IqS
 
 void	CqShaderExecEnv::SO_fDu( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqFloat Deffloat = 0.0f;
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -493,7 +492,7 @@ void	CqShaderExecEnv::SO_fDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetFloat(SO_DuType<TqFloat>( p, __iGrid, this, Deffloat ),__iGrid);
+			Result->SetFloat(derivU<TqFloat>(p, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -502,7 +501,6 @@ void	CqShaderExecEnv::SO_fDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 
 void	CqShaderExecEnv::SO_fDv( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqFloat Deffloat = 0.0f;
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -515,7 +513,7 @@ void	CqShaderExecEnv::SO_fDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetFloat(SO_DvType<TqFloat>( p, __iGrid, this, Deffloat ),__iGrid);
+			(Result)->SetFloat(derivV<TqFloat>(p, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -546,7 +544,6 @@ void	CqShaderExecEnv::SO_fDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 
 void	CqShaderExecEnv::SO_cDu( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -559,7 +556,7 @@ void	CqShaderExecEnv::SO_cDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetColor(SO_DuType<CqColor>( p, __iGrid, this, Defcol ),__iGrid);
+			Result->SetColor(derivU<CqColor>(p, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -568,7 +565,6 @@ void	CqShaderExecEnv::SO_cDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 
 void	CqShaderExecEnv::SO_cDv( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -581,7 +577,7 @@ void	CqShaderExecEnv::SO_cDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetColor(SO_DvType<CqColor>( p, __iGrid, this, Defcol ),__iGrid);
+			Result->SetColor(derivV<CqColor>(p, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -612,7 +608,6 @@ void	CqShaderExecEnv::SO_cDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 
 void	CqShaderExecEnv::SO_pDu( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -625,7 +620,7 @@ void	CqShaderExecEnv::SO_pDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetPoint(SO_DuType<CqVector3D>( p, __iGrid, this, Defvec ),__iGrid);
+			Result->SetPoint(derivU<CqVector3D>(p, __iGrid), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -634,7 +629,6 @@ void	CqShaderExecEnv::SO_pDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 
 void	CqShaderExecEnv::SO_pDv( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -647,7 +641,7 @@ void	CqShaderExecEnv::SO_pDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			(Result)->SetPoint(SO_DvType<CqVector3D>( p, __iGrid, this, Defvec ),__iGrid);
+			Result->SetPoint(derivV<CqVector3D>(p, __iGrid),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -679,11 +673,8 @@ void	CqShaderExecEnv::SO_pDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 // area(P)
 void CqShaderExecEnv::SO_area( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
-
-	CqVector3D	vecR;
 
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1246,7 +1237,6 @@ void    CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value,
 // filterstep(edge,s1)
 void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqFloat Deffloat = 0.0f;
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -1258,10 +1248,6 @@ void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqSha
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	TqFloat fdu, fdv;
-	du() ->GetFloat( fdu );
-	dv() ->GetFloat( fdv );
-
 	const CqBitVector& RS = RunningState();
 	do
 	{
@@ -1271,24 +1257,14 @@ void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqSha
 			(s1)->GetFloat(_aq_s1,__iGrid);
 			TqFloat _aq_edge;
 			(edge)->GetFloat(_aq_edge,__iGrid);
-			TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this, Deffloat );
-			TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this, Deffloat );
 
-			TqFloat uwidth = fabs( dsdu * fdu );
-			TqFloat vwidth = fabs( dsdv * fdv );
+			TqFloat uwidth = fabs( diffU<TqFloat>(s1, __iGrid) );
+			TqFloat vwidth = fabs( diffV<TqFloat>(s1, __iGrid) );
 
 			TqFloat w = uwidth + vwidth;
 			w *= _pswidth;
 
 			(Result)->SetFloat(clamp(( _aq_s1 + w / 2.0f - _aq_edge ) / w, 0.0f, 1.0f), __iGrid);
-
-			//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
-			//	SETFLOAT( Result, res );
-
-			//	std::cout << res << std::endl;
-			//	TqFloat res = 1.0f - CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 );
-			//	if( res > 0.0f )
-			//		std::cout << "Aqsis angle/dangle: " << FLOAT(s1) << ", edge: " << FLOAT(edge) << ", dsdu: " << dsdu << ", dsdv: " << dsdv << ", w: " << w << ", res: " << res << std::endl;
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -1328,5 +1304,8 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
+
+
 } // namespace Aqsis
+
 //---------------------------------------------------------------------
