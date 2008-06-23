@@ -65,7 +65,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	/// \todo The shared_ptr should be declared before the if-else block and initialized inside,
 	// then the last 2 lines in the if-else blocks should follow afterward. I couldn't figure out
 	// how to declare the boost pointer separately from its initialization.
-	if (type == "dsm")
+	//if (std::string(type) == "dsm")
+	if (false)  // Removed until DSM is integrated after aqsis-1.4
 	{
 		boost::shared_ptr<CqDisplayRequest> req(new CqDeepDisplayRequest(false, name, type, mode, CqString::hash( mode ), modeID,
 		                                        dataOffset,	dataSize, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, false, false));
