@@ -31,37 +31,41 @@ using libri2rib::CqPLStore;
 using libri2rib::CqError;
 
 
+/* \note: The body of these functions must be unique, otherwise the VC optimiser combines them into a
+ *		  single function, which causes problems when identifying the requested filter from the function 
+ *		  address.
+ */
 RtFloat RiGaussianFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return 1.0;
 }
 RtFloat RiMitchellFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 2.0;
 }
 RtFloat RiBoxFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 3.0;
 }
 RtFloat RiTriangleFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 4.0;
 }
 RtFloat RiCatmullRomFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 5.0;
 }
 RtFloat RiSincFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 6.0;
 }
 RtFloat RiDiskFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 7.0;
 }
 RtFloat RiBesselFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 8.0;
 }
 
 
