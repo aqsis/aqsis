@@ -490,10 +490,10 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
 		bool	m_hasValidDerivatives;	///< Is this shading collection able to provide valid derivatives. RiPoints, can't.
-		std::vector<TqUint>	m_diffUI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
-		std::vector<TqUint>	m_diffUI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
-		std::vector<TqUint>	m_diffVI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
-		std::vector<TqUint>	m_diffVI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
+		std::vector<TqInt>	m_diffUI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqInt>	m_diffUI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
+		std::vector<TqInt>	m_diffVI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqInt>	m_diffVI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
 
 	public:
 
