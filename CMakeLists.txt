@@ -31,6 +31,8 @@ OPTION(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference uti
 OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk library" ON)
 OPTION(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
+OPTION(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
+MARK_AS_ADVANCED(AQSIS_USE_EXTERNAL_TINYXML)
 
 OPTION(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 MARK_AS_ADVANCED(AQSIS_USE_RPATH)
@@ -76,6 +78,16 @@ ENDIF(AQSIS_USE_OPENEXR)
 # jpeg
 # libjpeg is no longer needed until aqsis again supports jpeg images.
 #INCLUDE(FindJPEG)
+
+# find tinyxml.  If not found we use the version distributed with the aqsis
+# source.
+IF(AQSIS_USE_EXTERNAL_TINYXML)
+	INCLUDE(FindTinyXML)
+	IF(NOT AQSIS_TINYXML_FOUND)
+		MESSAGE(STATUS "Cannot find external tinyxml library - using version included with the aqsis source.")
+		SET(AQSIS_USE_EXTERNAL_TINYXML OFF)
+	ENDIF(NOT AQSIS_TINYXML_FOUND)
+ENDIF(AQSIS_USE_EXTERNAL_TINYXML)
 
 
 #-------------------------------------------------------------------------------
