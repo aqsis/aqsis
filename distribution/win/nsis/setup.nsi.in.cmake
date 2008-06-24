@@ -78,6 +78,8 @@ Page custom AdditionalTasks
 !insertmacro MUI_PAGE_INSTFILES
 
 ; Finish page
+!define MUI_FINISHPAGE_RUN "$INSTDIR\redist\vcredist_x86.exe"
+!define MUI_FINISHPAGE_RUN_TEXT "Install Microsoft Visual C++ 2005 (SP1) Runtime"
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\doc\README.txt"
 !insertmacro MUI_PAGE_FINISH
 
@@ -122,6 +124,8 @@ SectionIn 1 2
   File "/oname=README.txt" "@CMAKE_SOURCE_DIR@\README"
   SetOutPath "$INSTDIR\shaders"
   File "@CMAKE_BINARY_DIR@\shaders\*.slx"
+  SetOutPath "$INSTDIR\redist"
+  File "@AQSIS_WIN32LIBS@\MSVC\bin\vcredist_x86.exe"
 
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string archive" ' '["$INSTDIR"]' $R1
