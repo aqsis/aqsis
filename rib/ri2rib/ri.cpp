@@ -12,6 +12,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#include <iostream>
 #include <stdarg.h>
 #include <string>
 #include <stdio.h>
@@ -96,11 +97,17 @@ RtBasis RiPowerBasis = { {1, 0, 0, 0},
 
 
 RtVoid RiProcDelayedReadArchive ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcDelayedReadArchive" << std::endl;
+}
 RtVoid RiProcRunProgram ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcRunProgram" << std::endl;
+}
 RtVoid RiProcDynamicLoad ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcDynamicLoad" << std::endl;
+}
 
 extern "C" RtVoid RiProcFree ( RtPointer data )
 {}
@@ -2296,18 +2303,21 @@ RtVoid RiErrorHandler ( RtErrorFunc handler )
 
 RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorIgnore" << std::endl;
 	return ;
 }
 
 
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorPrint" << std::endl;
 	return ;
 }
 
 
 RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorAbort" << std::endl;
 	return ;
 }
 
