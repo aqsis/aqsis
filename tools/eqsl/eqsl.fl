@@ -75,7 +75,7 @@ decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 3"};} {}
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
-decl {string renderEngineFile = "";} {} 
+decl {string renderEngineFile = ".";} {} 
 
 decl {string renderEngineType = "RenderMan Geometry Files (*.{rib,ribz,rib.gz})";} {} 
 
@@ -83,7 +83,7 @@ decl {string renderViewer = "piqsl";} {}
 
 decl {string shaderCompiler = "aqsl";} {} 
 
-decl {string shaderCompilerFile = "";} {} 
+decl {string shaderCompilerFile = ".";} {} 
 
 decl {string shaderCompilerType = "RenderMan Shader Files (*.sl)";} {} 
 
