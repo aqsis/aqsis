@@ -24,9 +24,10 @@
 */
 
 #include "libslparse.h"
-#include "parsenode.h"
 
 #include "logging.h"
+#include "parsenode.h"
+#include "vardef.h"
 
 extern int yyparse();
 #ifdef	YYDEBUG
@@ -92,7 +93,13 @@ void ResetParser()
 	ParseErrorStream = &Aqsis::log();
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
+	/// \todo Code Review: It might be best to remove these global variables -
+	// they've now become a liability since we've moved to compiling many
+	// shaders in one go.  The symbol tables probably need a hard look anyway.
 	gLocalVars.clear();
+	gLocalFuncs.clear();
+	for(TqInt i = 0; i < EnvVars_Last; ++i)
+		gStandardVars[i].ResetUseCount();
 }
 
 

@@ -67,6 +67,10 @@ class CqVarDef : public IqVarDef
 		{
 			m_UseCount++;
 		}
+		void ResetUseCount()
+		{
+			m_UseCount = 0;
+		}
 		virtual	TqInt	UseCount() const
 		{
 			return ( m_UseCount );

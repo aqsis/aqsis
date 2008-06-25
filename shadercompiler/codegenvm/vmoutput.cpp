@@ -93,6 +93,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 	// Now that we have this information, work out which standard vars are used.
+	/// \todo Code Review: The use of gStandardVars here breaks the data encapsulation of the parser, and should be removed to a better location.
 	TqInt Use = m_pDataGather->VariableUsage();
 	TqUint i;
 	for ( i = 0; i < EnvVars_Last; i++ )
