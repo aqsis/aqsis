@@ -425,6 +425,7 @@ class CqRiProceduralRunProgram
 	public:
 		HANDLE hChildStdinWrDup;
 		HANDLE hChildStdoutRdDup;
+		FILE *fChildStdoutRd;
 		bool m_valid;
 };
 
@@ -436,7 +437,12 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr;
 	PROCESS_INFORMATION piProcInfo;
 	STARTUPINFO siStartInfo;
+	SECURITY_ATTRIBUTES saAttr;
 	BOOL bFuncRetn = FALSE;
+
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+	saAttr.bInheritHandle = TRUE;
+	saAttr.lpSecurityDescriptor = NULL;
 
 	std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
 
@@ -454,21 +460,21 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		// Create a pipe for the child process's STDOUT.
 
-		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
-		        ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0))
+		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0) ||
+		    ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  &saAttr, 0))
 		{
 			Aqsis::log() << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
 			return;
 		}
 
-		SetHandleInformation(hChildStdoutWr, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		SetHandleInformation(hChildStdinRd,  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		SetHandleInformation(hChildStdinWr, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation(hChildStdoutRd,  HANDLE_FLAG_INHERIT, 0);
 
 		ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
 		siStartInfo.cb = sizeof(STARTUPINFO);
 		siStartInfo.hStdOutput = hChildStdoutWr;
 		siStartInfo.hStdInput = hChildStdinRd;
-		siStartInfo.dwFlags = STARTF_USESTDHANDLES;
+		siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 		ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
 		// Create the child process.
@@ -496,9 +502,21 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		CloseHandle(hChildStdoutWr);
 		CloseHandle(hChildStdinRd);
 
+		int fd_hChildStdoutRdDup = _open_osfhandle((long)(hChildStdoutRd), O_RDONLY);
+		FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
+
+		if(!filein)
+		{
+			errno_t err;
+			_get_errno( &err );
+			Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
+			return;
+		}
+
 		// Store the handles.
 		(it->second)->hChildStdinWrDup = hChildStdinWr;
 		(it->second)->hChildStdoutRdDup = hChildStdoutRd;
+		(it->second)->fChildStdoutRd = filein;
 
 		// Proc seems to be valid.
 		run_proc->m_valid = true;
@@ -509,31 +527,16 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			return;
 	}
 
-	int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
-	FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
-	if(!fileout)
-	{
-		errno_t err;
-		_get_errno( &err );
-		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  err << std::endl;
-		return;
-	}
-	// Write out detail and data to the process
-	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
-	fflush( fileout );
+	// Build the procedural arguments into a string and write them out to the 
+	// stdin pipe for the procedural to read.
+	std::stringstream args;
+	args << detail << " " << ((char**)data)[1] << std::endl << std::ends;
+	DWORD bytesWritten;
+	WriteFile( it->second->hChildStdinWrDup, args.str().c_str(), args.str().size(), &bytesWritten, NULL);
+	BOOL result = FlushFileBuffers( it->second->hChildStdinWrDup );
 
 	CqRibBinaryDecoder *decoder;
-	int fd_hChildStdoutRdDup = _open_osfhandle((long)(it->second)->hChildStdoutRdDup, O_RDONLY);
-	FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
-
-	if(!filein)
-	{
-		errno_t err;
-		_get_errno( &err );
-		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
-		return;
-	}
-	decoder = new CqRibBinaryDecoder( filein, 1);
+	decoder = new CqRibBinaryDecoder( it->second->fChildStdoutRd, 1);
 
 	// Parse the resulting block of RIB.
 	CqString strRealName( ((char**)data)[0] );

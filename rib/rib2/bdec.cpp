@@ -1183,7 +1183,7 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 
 				if( !cv.empty() )
 				{
-					if( cv.back() == '\n' )
+					if( cv.back() == '\n' || cv.back() == '\377' )
 					{
 						size = cv.size() + 1;
 						break;

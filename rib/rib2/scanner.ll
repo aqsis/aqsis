@@ -68,6 +68,7 @@ eol					\r\n|\r|\n
 comment			#.*
 array_start		\[
 array_end		\]
+terminator		\377
 
 %s params
 %x incl skip_frame
@@ -96,6 +97,8 @@ array_end		\]
 		BEGIN(skip_frame);
 		fSkipFrame=false;
 	}
+
+<*>{terminator}		{ return TERMINATOR; }
 
 {comment}			{ 
 						lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; 

@@ -113,6 +113,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token <itype> INTEGER_TOKEN
 %token <stype> STRING_TOKEN
 %token <stype> COMMENT
+%token <ctype> TERMINATOR
 %type <itype> integer
 %type <ftype> float
 %type <stype> string
@@ -402,6 +403,13 @@ request : complete_request
 
 				ExpectRequest(); 
 				fRecovering = false;
+			}
+	|	TERMINATOR
+			{
+				Aqsis::log() << Aqsis::info << "Found a terminator character in the stream" << std::endl;
+				ExpectRequest(); 
+				fRecovering = false;
+				YYACCEPT;	
 			}
 	;
 
