@@ -48,6 +48,7 @@
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
+#include <iomanip>
 #else
 #include <unistd.h>
 #include <errno.h>
@@ -530,10 +531,10 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	// Build the procedural arguments into a string and write them out to the 
 	// stdin pipe for the procedural to read.
 	std::stringstream args;
-	args << detail << " " << ((char**)data)[1] << std::endl << std::ends;
+	args << std::setiosflags( std::ios_base::fixed ) << detail << " " << ((char**)data)[1] << std::endl;
 	DWORD bytesWritten;
 	WriteFile( it->second->hChildStdinWrDup, args.str().c_str(), args.str().size(), &bytesWritten, NULL);
-	BOOL result = FlushFileBuffers( it->second->hChildStdinWrDup );
+	//BOOL result = FlushFileBuffers( it->second->hChildStdinWrDup );
 
 	CqRibBinaryDecoder *decoder;
 	decoder = new CqRibBinaryDecoder( it->second->fChildStdoutRd, 1);

@@ -75,6 +75,7 @@ terminator		\377
 
 /* %option lex-compat */
 %option noreject
+%option always-interactive
 
 /* -------------- rules section -------------- */
 
