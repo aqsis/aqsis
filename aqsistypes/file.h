@@ -29,6 +29,7 @@
 
 #include	<iostream>
 #include	<list>
+#include	<vector>
 
 #include	"aqsis.h"
 
@@ -142,8 +143,7 @@ class COMMON_SHARE CqFile
 			return ( len );
 		}
 
-		CqString FixupPath(CqString& strPath);
-
+		static CqString FixupPath(CqString& strPath);
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
 		static std::list<CqString*> cliGlob( const CqString& strFileGlob );
 		static std::string basePath( const CqString& strFilespec );
@@ -151,6 +151,7 @@ class COMMON_SHARE CqFile
 		static std::string extension( const CqString& strFilespec );
 		static std::string baseName( const CqString& strFilespec );
 		static std::string pathSep();
+		static std::vector<std::string> searchPaths( const CqString& searchPath );
 
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.

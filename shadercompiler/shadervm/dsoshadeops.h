@@ -149,7 +149,7 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		std::map<TqChar,EqVariableType>::iterator m_itTypeIdMap ;
 
 		// A list of files (possibly also directories in future) to be searched for shadeops
-		std::list<CqString*> m_pDSOPathList;
+		std::list<CqString> m_DSOPathList;
 		// This is a map of shadeop names to descriptors of shadeop implementations that we
 		// have already found, its for efficiency and to allow us to track initiliased shadeops
 		// to be shutdown later.
