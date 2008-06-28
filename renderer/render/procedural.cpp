@@ -105,7 +105,8 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	// Call the procedural secific Split()
 	RiAttributeBegin();
 
-	m_pSubdivFunc(m_pData, detail);
+	if(m_pSubdivFunc)
+		m_pSubdivFunc(m_pData, detail);
 
 	RiAttributeEnd();
 

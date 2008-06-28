@@ -1761,7 +1761,7 @@ RtVoid CqOutput::RiProcedural( RtPointer data, RtBound bound,
 	}
 	else if ( subdivfunc == RiProcRunProgram )
 	{
-		sf = "ReadProgram";
+		sf = "RunProgram";
 		a = 2;
 	}
 	else if ( subdivfunc == RiProcDynamicLoad )
