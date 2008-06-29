@@ -74,13 +74,15 @@ int main( int argc, const char** argv )
 	float bake;
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] infile outfile" );
-	ap.argFlag( "help", "\aprint this help and exit", &g_help );
-	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argFlag( "help", "\aPrint this help and exit", &g_help );
+	ap.alias( "help" , "h" );
+	ap.argFlag( "version", "\aPrint version information and exit", &g_version );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 		"\a0 = errors\n"
 		"\a1 = warnings (default)\n"
 		"\a2 = information\n"
 		"\a3 = debug", &g_cl_verbose );
+	ap.alias( "verbose" , "v" );
 	ap.argString( "compression", "=string\a[none|lzw|packbits|deflate] (default: %default)", &g_compress );
 	ap.argFlag( "envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube );
 	ap.argFlag( "envlatl", "\aproduce a latlong environment map from an image file.", &g_envlatl );

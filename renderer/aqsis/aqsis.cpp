@@ -557,7 +557,7 @@ int main( int argc, const char** argv )
 		ap.argFlag( "version", "\aPrint version information and exit", &g_cl_version );
 		ap.argFlag( "pause", "\aWait for a keypress on completion", &g_cl_pause );
 		ap.argFlag( "progress", "\aPrint progress information", &g_cl_progress );
-		ap.argFlag( "Progress", "\aPrint prman-compatible progress information (ignores -progressformat)", &g_cl_Progress );
+		ap.argFlag( "Progress", "\aPrint PRMan-compatible progress information (ignores -progressformat)", &g_cl_Progress );
 		ap.argString( "progressformat", "=string\aprintf-style format string for -progress", &g_cl_strprogress );
 		ap.argInt( "endofframe", "=integer\aEquivalent to \"endofframe\" RIB option", &g_cl_endofframe );
 		ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );

@@ -98,10 +98,11 @@ int main( int argc, const char** argv )
 	ap.argString( "backend", " %s \aCompiler backend (default %default).  Possibilities include \"slx\" or \"dot\":\a"
 			      "slx - produce a compiled shader (in the aqsis shader VM stack language)\a"
 				  "dot - make a graphviz visualization of the parse tree (useful for debugging only).", &g_backendName );
-	ap.argFlag( "help", "\aprint this help and exit", &g_help );
+	ap.argFlag( "help", "\aPrint this help and exit", &g_help );
 	ap.alias("help", "h");
-	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argFlag( "version", "\aPrint version information and exit", &g_version );
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
+	ap.alias( "nocolor" , "nc" );
 	ap.argFlag( "d", "\adump sl data", &g_dumpsl );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 			   "\a0 = errors\n"

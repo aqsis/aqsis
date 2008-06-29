@@ -343,9 +343,9 @@ int main( int argc, char** argv )
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Image file...]" );
 	ap.argString( "i", "\aSpecify the IP address to listen on (default: %default)", &g_strInterface );
 	ap.argString( "p", "\aSpecify the TCP port to listen on (default: %default)", &g_strPort );
-	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
+	ap.argFlag( "help", "\aPrint this help and exit", &g_fHelp );
 	ap.alias( "help" , "h" );
-	ap.argFlag( "version", "\aprint version information and exit", &g_fVersion );
+	ap.argFlag( "version", "\aPrint version information and exit", &g_fVersion );
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.alias( "nocolor", "nc" );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
