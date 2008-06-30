@@ -1151,7 +1151,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							// found an exact match, we will take the first match with
 							// suitable arguments and force the return value to be
 							// discarded.
-							bool forcedrop = false;
 							if(candidate == candidates->end() && RetType == type_void)
 							{
 								candidate = candidates->begin()
@@ -1165,7 +1164,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 										Aqsis::log() << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": In place of requested void shadeop: \"" << strFunc.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
-										forcedrop = true;
 										break;
 									}
 									candidate++;
@@ -1206,9 +1204,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							AddCommand( &CqShaderVM::SO_external, pProgramArea );
 							AddDSOExternalCall( (*candidate),pProgramArea );
-
-							if( forcedrop )
-								AddCommand( &CqShaderVM::SO_drop, pProgramArea );
 
 							break;
 						}

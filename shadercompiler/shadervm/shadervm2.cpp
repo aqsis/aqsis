@@ -1637,14 +1637,7 @@ void CqShaderVM::SO_external()
 	delete[]( stackitems );
 	delete[]( arg_data );
 
-	if( pCall->return_type != type_void )
-	{
-		Push( pResult );
-	}
-	else
-	{
-		DeleteTemporaryStorage( pResult );
-	};
+	Push( pResult );
 }
 
 /*
