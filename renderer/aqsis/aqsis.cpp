@@ -547,6 +547,7 @@ int main( int argc, const char** argv )
 {
 	std::signal(SIGINT, aqsisSignalHandler);
 	std::signal(SIGABRT, aqsisSignalHandler);
+	int return_code = 0;
 	
 	StartMemoryDebugging();
 	{
@@ -609,20 +610,20 @@ int main( int argc, const char** argv )
 		if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 		{
 			Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
-			exit( 1 );
+			return( 1 );
 		}
 
 		// Check that the number of arguments to crop are valid if specified.
 		if ( g_cl_cropWindow.size() > 0 && g_cl_cropWindow.size() != 4 )
 		{
-			std::cout << "Error: invalid number of arguments to -crop, expected 4, got " << g_cl_cropWindow.size() << std::endl;
+			Aqsis::log() << Aqsis::error << "Invalid number of arguments to -crop, expected 4, got " << g_cl_cropWindow.size() << std::endl;
 			g_cl_help = true;
 		}
 
 		if ( g_cl_help )
 		{
 			std::cout << ap.usagemsg();
-			exit( 0 );
+			return( 0 );
 		}
 
       		/* Set the priority on the main thread;
@@ -642,7 +643,7 @@ int main( int argc, const char** argv )
 #endif
 			<< "\n"
 			<< "compiled " << __DATE__ << " " << __TIME__ << "\n";
-			exit( 0 );
+			return( 0 );
 		}
 
 #ifdef	AQSIS_SYSTEM_WIN32
@@ -691,7 +692,8 @@ int main( int argc, const char** argv )
 				}
 				else
 				{
-					std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+					Aqsis::log() << Aqsis::error << "Cannot open file \"" << *e << "\"" << std::endl;
+					return_code = -1;
 				}
 			}
 		}
@@ -711,7 +713,7 @@ int main( int argc, const char** argv )
 		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 	}
 
-	return ( 0 );
+	return ( return_code );
 }
 
 /**
