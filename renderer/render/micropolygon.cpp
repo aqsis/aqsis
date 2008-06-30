@@ -135,10 +135,29 @@ void CqMicroPolyGrid::CalcNormals()
 	if ( NULL == pVar(EnvVars_P) || NULL == pVar(EnvVars_N) )
 		return ;
 
-	// Get the handedness of the coordinate system (at the time of creation) and
-	// the coordinate system specified, to check for normal flipping.
+	// We flip the normals if the 'current orientation' differs from the
+	// 'coordinate system orientation' - see RiSpec 'Orientation and Sides'
+	//
+	// The RiSpec is a little tricky to interpret on this point, so here's a
+	// summary of their intent using a sphere as an example:
+	//
+	// No matter which coordinate transformation you perform, the normals of a
+	// sphere should always end up pointing outwards from the centre by
+	// default.  To make them point inwards, use RiReverseOrientation().
+	//
+	// The mess happens since you want this to be true even when using
+	// transformations which change the handedness, such as RiScale(1,1,-1).
+	// By convention, the normal is
+	//
+	//   N = dPdu x dPdv
+	//
+	// This is fine in the default coordinate system.  However, the direction
+	// of the cross product must be reversed if the formula is to give the
+	// correct normal after RiScale(1,1,-1) or similar transformations.
 	bool CSO = this->pSurface()->pTransform()->GetHandedness(this->pSurface()->pTransform()->Time(0));
 	bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+	bool flipNormals = O ^ CSO;
+
 	const CqVector3D* vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecFailsafeN;
@@ -185,9 +204,8 @@ void CqMicroPolyGrid::CalcNormals()
 			{
 				vecN = vecBA % vecCA;	// Cross product is normal.*/
 				vecN.Unit();
-				// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
-				// see RiSpec 'Orientation and Sides'
-				vecN = ( (O && CSO) || (!O && !CSO) ) ? vecN : -vecN;
+				if(flipNormals)
+					vecN = -vecN;
 			}
 			else
 			{

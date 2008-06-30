@@ -507,11 +507,8 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	if ( isDONE( lDone, EnvVars_N ) )
 		pGrid->SetbShadingNormals( true );
 
-	if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
-	{
-		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->pVar(EnvVars_Ng) );
+	if ( isDONE( lDone, EnvVars_Ng ) )
 		pGrid->SetbGeometricNormals( true );
-	}
 
 	// Now we need to dice the user specified parameters as appropriate.
 	std::vector<CqParameter*>::iterator iUP;

@@ -558,20 +558,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& /* aSplits */)
 		{}
 
-		/** Virtual function to indicate whether a particular surface is able
-		 *  to generate geometric normals itself.
-		 */
-		virtual bool	CanGenerateNormals() const
-		{
-			return ( false );
-		}
-
-		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
-		 */
-		virtual	void	GenerateGeometricNormals( TqInt /* uDiceSize */, TqInt /* vDiceSize */,
-			IqShaderData* /* pNormals */ )
-		{}
-
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		

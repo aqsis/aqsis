@@ -299,8 +299,6 @@ class CqSurfaceNURBS : public CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		//virtual bool		CanGenerateNormals() const	{ return( true ); }
-		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );

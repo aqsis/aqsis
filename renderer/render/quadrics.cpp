@@ -169,14 +169,21 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		DONE( lDone, EnvVars_v );
 	}
 
-	/*    if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
-	        DONE( lDone, EnvVars_P );
-	    if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
-	    {
-	        DONE( lDone, EnvVars_Ng );
-	        pGrid->SetbGeometricNormals( true );
-	    }
-	*/
+	// Indicate that P and Ng will be filled in by the loops below.
+	if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
+		DONE( lDone, EnvVars_P );
+	if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
+		DONE( lDone, EnvVars_Ng );
+
+	// Normals need to be flipped depending on the orientation.  Because we
+	// calculate normals in *object* space using DicePoint(), and the transform
+	// with the matrix m_matITTx, we don't need to explicitly consider the
+	// handedness of the current transformation here.  Instead we only need to
+	// consider the current orientation when deciding whether to flip the
+	// normals.
+	bool flipNormals = pAttributes()->
+		GetIntegerAttribute("System", "Orientation")[0] != 0;
+
 	TqFloat du = 1.0 / uDiceSize();
 	TqFloat dv = 1.0 / vDiceSize();
 	for ( v = 0; v <= vDiceSize(); v++ )
@@ -191,9 +198,10 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 				if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
 				{
 					P = DicePoint( u, v, N );
+					if(flipNormals)
+						N = -N;
 					pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
 					pGrid->pVar(EnvVars_Ng)->SetNormal( m_matITTx * N, igrid );
-
 				}
 				else
 				{
@@ -223,6 +231,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 			}
 		}
 	}
+
 	return( lDone );
 }
 
@@ -254,33 +263,8 @@ void CqQuadric::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDi
 }
 
 //---------------------------------------------------------------------
-/** Generate and store the geometric normals for this quadric.
- */
-
-void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
-{
-	int v, u;
-	CqVector3D	N;
-	for ( v = 0; v <= vDiceSize; v++ )
-	{
-		for ( u = 0; u <= uDiceSize; u++ )
-		{
-			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
-			DicePoint( u, v, N );
-			bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
-			bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
-			pNormals->SetNormal( m_matITTx * N, igrid );
-		}
-	}
-}
-
-
-//---------------------------------------------------------------------
 /** Determine whether the quadric is suitable for dicing.
  */
-
-
 bool	CqQuadric::Diceable()
 {
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
@@ -431,7 +415,6 @@ void	CqSphere::Bound(IqBound* bound) const
 
 	AdjustBoundForTransformationMotion( bound );
 }
-
 
 //---------------------------------------------------------------------
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.

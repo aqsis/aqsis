@@ -315,6 +315,8 @@ void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloa
 
 //---------------------------------------------------------------------
 /** Evaluate the nurbs surface at parameter values u,v.
+ *
+ * \todo Code Review: Unused function [except by deprecated CqSurfaceNURBS::GenerateGeometricNormals() ]
  */
 
 CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P )
@@ -1507,6 +1509,26 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 /** Generate the vertex normals if not specified.
  */
 
+/*
+
+// This function used to generate the normals for NURBS, but was disabled in
+// the old cvs repository:
+//
+//   Revision 1.19 - (view) (download) (annotate) - [select for diffs]
+//   Tue Oct 8 20:10:41 2002 UTC (5 years, 8 months ago) by pgregory
+//   Branch: MAIN
+//   Changes since 1.18: +2 -1 lines
+//   Diff to previous 1.18
+//
+//   Fix some bugs in the 'clamping' of NURBS surfaces.
+//   Disable generation of normals as there is a problem with it at the moment. Let the grid generate normals until it is fixed.
+//
+// If this code was to be resurrected, it should be moved into the more modern
+// DiceAll() function, which would also resolve the todo.  We'd need to recall
+// what the "problem" was with the old version - possibly something to do with
+// degenerate control points and tangents?
+
+
 void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
@@ -1539,6 +1561,7 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 	}
 }
 
+*/
 
 //---------------------------------------------------------------------
 /** Split the patch into smaller patches.
