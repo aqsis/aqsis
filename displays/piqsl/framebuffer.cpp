@@ -316,6 +316,9 @@ void CqFramebuffer::resize()
 		title << ": " << m_associatedImage->name();
 	}
 	m_uiImageWidget->size(fw, fh);
+	// Resize the window if it's too small, leave it if it's big enough or bigger.
+	if( w() < fw || h() < fh )
+		resize(x(), y(), min(fw, static_cast<int>(Fl::w()*0.9)), min(fh, static_cast<int>(Fl::h()*0.9)));
 	centerImageWidget();
 	redraw();
 
