@@ -699,7 +699,8 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 
 void CqRenderer::RenderWorld(bool clone)
 {
-	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
+	// While rendering, all primitives should fasttrack straight into the pipeline, 
+	// and shaders should automatically initialise, the easiest way to ensure this
 	// is to switch into 'non' multipass mode.
 	TqInt multiPass = 0;
 	TqInt* pMultipass = GetIntegerOptionWrite("Render", "multipass");
@@ -1306,6 +1307,9 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	boost::shared_ptr<IqShader> newShader(pRet->Clone());
         newShader->SetType ( Type_Surface );
 	m_InstancedShaders.push_back(newShader);
+	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+	if(!(pMultipass && pMultipass[0]))
+		newShader->PrepareShaderForUse();
 	return (newShader);
 
 }
@@ -1331,6 +1335,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		boost::shared_ptr<IqShader> newShader(shadLocation->second->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
+		const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			newShader->PrepareShaderForUse();
 		return (newShader);
 	}
 
@@ -1377,6 +1384,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		boost::shared_ptr<IqShader> newShader(pRet->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
+		const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			newShader->PrepareShaderForUse();
 		return (newShader);
 	}
 	else
@@ -1407,6 +1417,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			boost::shared_ptr<IqShader> newShader(pRet->Clone());
 			newShader->SetType( type );
 			m_InstancedShaders.push_back(newShader);
+			const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+			if(!(pMultipass && pMultipass[0]))
+				newShader->PrepareShaderForUse();
 			return (newShader);
 		}
 		else
