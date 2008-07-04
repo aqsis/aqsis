@@ -29,8 +29,9 @@
 
 #include "aqsis.h"
 
-#include <cmath>
 #include <iostream>
+
+#include "aqsismath.h"
 
 namespace Aqsis
 {
@@ -209,7 +210,7 @@ inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
 	// for l.
 	TqFloat firstTerm = (a+d)*0.5;
 	TqFloat secondTerm = (a-d)*(a-d) + 4*c*b;
-	assert(secondTerm >= 0);
+	assert(secondTerm >= -std::numeric_limits<TqFloat>::epsilon());
 	// For robustness, set secondTerm = 0 if it's negative.  This will get the
 	// real part of the result.
 	if(secondTerm < 0)
