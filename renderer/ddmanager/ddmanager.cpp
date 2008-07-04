@@ -30,6 +30,10 @@
 #include	"winsock2.h"
 #endif
 
+#include	<cstring>
+
+#include	<boost/static_assert.hpp>
+
 #include	"sstring.h"
 #include	"ddmanager.h"
 #include	"rifile.h"
@@ -39,8 +43,6 @@
 #include	"ndspy.h"
 #include	"version.h"
 #include	"debugdd.h"
-
-#include	<cstring>
 
 namespace Aqsis {
 
@@ -208,6 +210,83 @@ TqInt CqDDManager::Uses()
 	return ( m_Uses );
 }
 
+
+namespace {
+
+// Make sure that we've got the correct sizes for the PtDspy* integral
+// constants
+BOOST_STATIC_ASSERT(sizeof(PtDspyUnsigned32) == 4);
+BOOST_STATIC_ASSERT(sizeof(PtDspySigned32) == 4);
+BOOST_STATIC_ASSERT(sizeof(PtDspyUnsigned16) == 2);
+BOOST_STATIC_ASSERT(sizeof(PtDspySigned16) == 2);
+BOOST_STATIC_ASSERT(sizeof(PtDspyUnsigned8) == 1);
+BOOST_STATIC_ASSERT(sizeof(PtDspySigned8) == 1);
+// the above are in units of sizeof(char); check that this is indeed 8 bits...
+BOOST_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
+
+
+/** \brief Select the appropriate output data type given quantization parameters
+ *
+ * According to the RISpec,
+ *
+ * \verbatim
+ *
+ *   The value "one" defines the mapping from floating-point values to fixed
+ *   point values. If one is 0, then quantization is not done and values are
+ *   output as floating point numbers.  
+ *   [...]
+ *   Quantized values are computed using the following formula:
+ *
+ *     value = round( one * value + ditheramplitude * random() );
+ *     value = clamp( value, min, max );
+ *
+ * \endverbatim
+ *
+ * Unless oneVal == 0 (no quantization), we choose here an integral data type
+ * which has sufficient range to encompass both minVal and maxVal.
+ *
+ * \param oneVal - value which 1 should be mapped into by the quantization
+ * \param minVal - minimum value in quantized range.
+ * \param maxVal - maximum value in quantized range.
+ */
+TqUint selectDataFormat(TqFloat oneVal, TqFloat minVal, TqFloat maxVal)
+{
+	if(oneVal == 0)
+	{
+		// no quantization
+		return PkDspyFloat32;
+	}
+	else
+	{
+		// We need to quantize the data; select an integer format which
+		// can handle the requested [min, max] range.
+		if(minVal >= 0)
+		{
+			// Minimum is positive; use unsigned data
+			if(maxVal <= std::numeric_limits<PtDspyUnsigned8>::max())
+				return PkDspyUnsigned8;
+			else if (maxVal <= std::numeric_limits<PtDspyUnsigned16>::max())
+				return PkDspyUnsigned16;
+			else
+				return PkDspyUnsigned32;
+		}
+		else
+		{
+			// Minimum is negative; use signed data
+			if(minVal >= std::numeric_limits<PtDspySigned8>::min()
+					&& maxVal <= std::numeric_limits<PtDspySigned8>::max())
+				return PkDspySigned8;
+			else if(minVal >= std::numeric_limits<PtDspySigned16>::min()
+					&& maxVal <= std::numeric_limits<PtDspySigned16>::max())
+				return PkDspySigned16;
+			else
+				return PkDspySigned32;
+		}
+	}
+}
+
+} // anonymous namespace
+
 void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin )
 {
 	// Get the display mapping from the "display" options, if one exists.
@@ -319,17 +398,12 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			}
 		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
+		TqUint dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 		if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
 		{
 			PtDspyDevFormat fmt;
-			if ( m_QuantizeOneVal == 255 )
-				fmt.type = PkDspyUnsigned8;
-			else if ( m_QuantizeOneVal == 65535 )
-				fmt.type = PkDspyUnsigned16;
-			else if ( m_QuantizeOneVal == 4294967295u )
-				fmt.type = PkDspyUnsigned32;
-			else
-				fmt.type = PkDspyFloat32;
+
+			fmt.type = dataFormat;
 			if (m_modeID & ModeA)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
@@ -347,11 +421,11 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			if (m_modeID & ModeZ)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_ZName );
-				fmt.type = PkDspyFloat32;
 				m_formats.push_back(fmt);
 			}
 		}
-		// Otherwise we are dealing with AOV and should therefore fill in the formats according to it's type.
+		// Otherwise we are dealing with AOV and should therefore fill in the
+		// formats according to its type.
 		else
 		{
 			// Determine the type of the AOV data being displayed.
@@ -401,14 +475,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
 					fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				}
-				if ( m_QuantizeOneVal == 255 )
-					fmt.type = PkDspyUnsigned8;
-				else if ( m_QuantizeOneVal == 65535 )
-					fmt.type = PkDspyUnsigned16;
-				else if ( m_QuantizeOneVal == 4294967295u )
-					fmt.type = PkDspyUnsigned32;
-				else
-					fmt.type = PkDspyFloat32;
+				fmt.type = dataFormat;
 				m_AOVnames.push_back(fmt.name);
 				m_formats.push_back(fmt);
 			}
@@ -510,24 +577,23 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			switch ( type )
 			{
 				case PkDspyFloat32:
-					m_elementSize+=sizeof(float);
+					m_elementSize += sizeof(PtDspyFloat32);
 					break;
 				case PkDspyUnsigned32:
 				case PkDspySigned32:
-					m_elementSize+=sizeof(long);
+					m_elementSize += sizeof(PtDspyUnsigned32);
 					break;
 				case PkDspyUnsigned16:
 				case PkDspySigned16:
-					m_elementSize+=sizeof(short);
+					m_elementSize += sizeof(PtDspyUnsigned16);
 					break;
 				case PkDspyUnsigned8:
 				case PkDspySigned8:
-					m_elementSize+=sizeof(char);
+					m_elementSize += sizeof(PtDspyUnsigned8);
 					break;
 			}
 		}
 
-		//Aqsis::log() << warning << "Elementsize will be " << m_elementSize << std::endl;
 		if ( NULL != m_QueryMethod )
 		{
 			PtDspySizeInfo size;
@@ -996,56 +1062,54 @@ void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 			for (iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
 			{
 				double value = pSamples[m_dataOffsets[index]];
-				// If special quantization instructions have been given for this display, do it now.
-				if ( !( m_QuantizeZeroVal == 0.0f &&
-				        m_QuantizeOneVal  == 0.0f &&
-				        m_QuantizeMinVal  == 0.0f &&
-				        m_QuantizeMaxVal  == 0.0f ) )
+				if ( m_QuantizeOneVal != 0 )
 				{
+					// Perform the quantization
 					value = lround(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
 					value = clamp<double>(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
 				}
 				TqInt type = iformat->type & PkDspyMaskType;
-				/// \todo Eventually, the switch statement below should go away in favour of making
-				// CqDisplayRequest a template which extends CqDisplayRequest for
-				// the appropriate type which it will handle.
 				switch (type)
 				{
 					case PkDspyFloat32:
-						reinterpret_cast<float*>(pdata)[0] = value;
-						pdata += sizeof(float);
+						reinterpret_cast<PtDspyFloat32*>(pdata)[0] = value;
+						pdata += sizeof(PtDspyFloat32);
 						break;
 					case PkDspyUnsigned32:
 						/** \note: We need to do this extra clamp as the quantisation values are stored
 						    single precision floats, as mandated by the spec.,
 						    but single precision floats cannot accurately represent the maximum
-						    unsinged long value of 4294967295. Doing this ensures that the
-						    unsigned long value is clamped before being cast, and the clamp is
+						    PtDspyUnsigned32 value of 4294967295. Doing this ensures that the
+						    PtDspyUnsigned32 value is clamped before being cast, and the clamp is
 						    performed in double precision math to retain accuracy.
 						*/
-						value = clamp<double>(value, 0, 4294967295.0);
-						reinterpret_cast<unsigned long*>(pdata)[0] = static_cast<unsigned long>( value );
-						pdata += sizeof(unsigned long);
+						value = clamp<double>(value, 0,
+								std::numeric_limits<PtDspyUnsigned32>::max());
+						reinterpret_cast<PtDspyUnsigned32*>(pdata)[0] = static_cast<PtDspyUnsigned32>( value );
+						pdata += sizeof(PtDspyUnsigned32);
 						break;
 					case PkDspySigned32:
-						reinterpret_cast<long*>(pdata)[0] = static_cast<long>( value );
-						pdata += sizeof(long);
+						value = clamp<double>(value,
+								std::numeric_limits<PtDspySigned32>::min(),
+								std::numeric_limits<PtDspySigned32>::max());
+						reinterpret_cast<PtDspySigned32*>(pdata)[0] = static_cast<PtDspySigned32>( value );
+						pdata += sizeof(PtDspySigned32);
 						break;
 					case PkDspyUnsigned16:
-						reinterpret_cast<unsigned short*>(pdata)[0] = static_cast<unsigned short>( value );
-						pdata += sizeof(unsigned short);
+						reinterpret_cast<PtDspyUnsigned16*>(pdata)[0] = static_cast<PtDspyUnsigned16>( value );
+						pdata += sizeof(PtDspyUnsigned16);
 						break;
 					case PkDspySigned16:
-						reinterpret_cast<short*>(pdata)[0] = static_cast<short>( value );
-						pdata += sizeof(short);
+						reinterpret_cast<PtDspySigned16*>(pdata)[0] = static_cast<PtDspySigned16>( value );
+						pdata += sizeof(PtDspySigned16);
 						break;
 					case PkDspyUnsigned8:
-						reinterpret_cast<unsigned char*>(pdata)[0] = static_cast<unsigned char>( value );
-						pdata += sizeof(unsigned char);
+						reinterpret_cast<PtDspyUnsigned8*>(pdata)[0] = static_cast<PtDspyUnsigned8>( value );
+						pdata += sizeof(PtDspyUnsigned8);
 						break;
 					case PkDspySigned8:
-						reinterpret_cast<char*>(pdata)[0] = static_cast<char>( value );
-						pdata += sizeof(char);
+						reinterpret_cast<PtDspySigned8*>(pdata)[0] = static_cast<PtDspySigned8>( value );
+						pdata += sizeof(PtDspySigned8);
 						break;
 				}
 				index++;
@@ -1053,6 +1117,7 @@ void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 		}
 	}
 }
+
 
 void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 {

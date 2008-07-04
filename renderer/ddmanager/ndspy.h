@@ -63,7 +63,7 @@ typedef unsigned short PtDspyUnsigned16;
 typedef short PtDspySigned16;
 
 typedef unsigned char PtDspyUnsigned8;
-typedef char PtDspySigned8;
+typedef signed char PtDspySigned8;
 
 typedef PtDspyUnsigned32 PtDspyMsgLen;
 typedef PtDspyUnsigned32 PtDspyServerMessage;
