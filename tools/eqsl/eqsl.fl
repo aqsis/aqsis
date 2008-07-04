@@ -140,9 +140,9 @@ else
 }
 
 // Call relevant commandline
+\#ifdef	AQSIS_SYSTEM_WIN32
 	char acPath[256];
 	char root[256];
-\#ifdef	AQSIS_SYSTEM_WIN32
 	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
 	{
 		// guaranteed file name of at least one character after path
@@ -173,7 +173,7 @@ else
 	commandLine = renderEngine + " ";
 	program.append(renderEngine);
 	std::vector<std::string> args;
-	for(TqInt arg = 0; arg < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); arg++)
+	for(TqInt arg = 0; arg < static_cast<TqInt>(sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0])); arg++)
 	{
 		args.push_back(renderEngineArgs[arg]);
 		commandLine += renderEngineArgs[arg] + " ";
@@ -214,9 +214,9 @@ else
 	}
 
 // Call relevant commandline
+\#ifdef	AQSIS_SYSTEM_WIN32
 	char acPath[256];
 	char root[256];
-\#ifdef	AQSIS_SYSTEM_WIN32
 	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
 	{
 		// guaranteed file name of at least one character after path
@@ -238,7 +238,7 @@ else
 	commandLine = shaderCompiler + " ";
 	program.append(shaderCompiler);
 	std::vector<std::string> args;
-	for(TqInt arg = 0; arg < sizeof(shaderCompilerArgs)/sizeof(shaderCompilerArgs[0]); arg++)
+	for(TqInt arg = 0; arg < static_cast<TqInt>(sizeof(shaderCompilerArgs)/sizeof(shaderCompilerArgs[0])); arg++)
 	{
 		args.push_back(shaderCompilerArgs[arg]);
 		commandLine += shaderCompilerArgs[arg] + " ";
@@ -258,9 +258,9 @@ m_outputHistory->add(commandLine.c_str());}
         MenuItem m_menuToolsFramebuffer {
           label {Open &Framebuffer}
           callback {// Call relevant commandline
+\#ifdef	AQSIS_SYSTEM_WIN32
 	char acPath[256];
 	char root[256];
-\#ifdef	AQSIS_SYSTEM_WIN32
 	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
 	{
 		// guaranteed file name of at least one character after path
@@ -301,7 +301,7 @@ m_outputHistory->add(toolsHistoryTitle.c_str());}
         }
         MenuItem m_menuToolsConsoleClear {
           label {Clear Conso&le}
-          callback {m_outputConsole->clear();}
+          callback {m_outputConsole->buffer()->text("");}
           xywh {0 0 100 20}
           code0 {o->shortcut(FL_COMMAND+'l');}
         }
