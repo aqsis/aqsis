@@ -984,6 +984,8 @@ statement
 								// Increment the count of returns for the current function.
 								if(FunctionReturnCountStack.size() > 0)
 									FunctionReturnCountStack.back()++;
+								else
+									yyerror("return statement outside function scope");
 							}
 	|	loop_modstmt ';'
 	|	loop_control		
