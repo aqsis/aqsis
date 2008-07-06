@@ -48,7 +48,6 @@ std::istream* ParseInputStream = &std::cin;
 CqString ParseStreamName = "stdin";
 std::ostream* ParseErrorStream = &Aqsis::log();
 TqInt ParseLineNumber;
-bool ParseSucceeded = true;
 
 bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
 {
@@ -56,7 +55,6 @@ bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& 
 	ParseStreamName = StreamName;
 	ParseErrorStream = &ErrorStream;
 	ParseLineNumber = 1;
-	ParseSucceeded = true;
 
 	InitStandardNamespace();
 
@@ -73,8 +71,7 @@ bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& 
 	{
 		( *ParseErrorStream ) << error << strError.c_str() << std::endl;
 		( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
-		ParseSucceeded = false;
-		return( false );
+		return false;
 	}
 	Optimise();
 
@@ -83,7 +80,7 @@ bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& 
 		if ( iv->pDefValue() )
 			iv->pDefValue() ->Optimise();
 
-	return ParseSucceeded;
+	return true;
 }
 
 void ResetParser()
@@ -92,7 +89,6 @@ void ResetParser()
 	ParseStreamName = "stdin";
 	ParseErrorStream = &Aqsis::log();
 	ParseLineNumber = 1;
-	ParseSucceeded = true;
 	/// \todo Code Review: It might be best to remove these global variables -
 	// they've now become a liability since we've moved to compiling many
 	// shaders in one go.  The symbol tables probably need a hard look anyway.

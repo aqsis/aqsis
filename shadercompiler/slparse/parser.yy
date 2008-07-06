@@ -41,7 +41,6 @@ namespace Aqsis
 extern CqString ParseStreamName;
 extern std::ostream* ParseErrorStream;
 extern TqInt ParseLineNumber;
-extern bool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
 std::vector<std::pair<bool,CqString> >	ParseNameSpaceStack;
@@ -58,6 +57,8 @@ void	TypeCheck();
 void	Optimise();
 void	InitStandardNamespace();
 void	ProcessShaderArguments( CqParseNode* pArgs );
+
+void Error(const CqString& message, TqInt lineNumber);
 
 }
 
@@ -85,7 +86,7 @@ void	ProcessShaderArguments( CqParseNode* pArgs );
 
 %{
 extern TqInt yylex();
-static void yyerror(const CqString Message);
+static void yyerror(const CqString& Message);
 %}
 
 
@@ -2166,22 +2167,29 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 					pVar->AddFirstChild( Node.pFirstChild() );
 				}
 			}
+			else
+			{
+				Error(CqString("missing default value for shader instance variable \"")
+						+ pVar->strName() + "\"",  pVar->LineNo());
+			}
 			pVar=static_cast<CqParseNodeVariable*>(pVar->pNext());
 		}
 	}
 }
 
+void Error(const CqString& message, TqInt lineNumber)
+{
+	CqString strErr( ParseStreamName.c_str() );
+	strErr += " : ";
+	strErr += lineNumber;
+	strErr += " : ";
+	strErr += message.c_str();
+	throw( strErr );
+}
 
 } // End Namespace
 
-static void yyerror(const CqString Message)
+static void yyerror(const CqString& message)
 {
-	ParseSucceeded = false;
-	//(*ParseErrorStream) << "libslparse > parser > error: " << Message.c_str() << " at " << ParseStreamName.c_str() << " line " << ParseLineNumber << std::endl;
-	CqString strErr( ParseStreamName.c_str() );
-	strErr += " : ";
-	strErr += ParseLineNumber;
-	strErr += " : ";
-	strErr += Message.c_str();
-	throw( strErr );
+	Error(message, ParseLineNumber);
 }
