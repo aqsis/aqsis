@@ -20,6 +20,8 @@ SET(SCRIPTSDIR "scripts"
 #   (b) Make sure that the math constants from math.h are defined - that is, M_PI etc.
 ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
 
+SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} ws3_32)
+
 #
 # Create resource files for use during linking
 #
