@@ -1,83 +1,83 @@
- * BugFix - Fix memory handling problem that could result in large leaks on gcc platforms.
- * BugFix - Properly initialise shader arguments on shaders declared in RiProcedurals.
- * BugFix - Piqsl's framebuffer now resizes to the size of the image being rendered if possible. #1978314
- * BugFix - Aqsis now reports a missing RIB file as an error and returns non-zero return code.
- * BugFix - Quadric normals now behave correctly under a transformation that inverts the coordinate system handedness. #1737642
- * BugFix - The shader compiler and VM now handle DSO functions with return type void properly. #2005026
- * BugFix - Various fixes to the standard callback (RiError*, RiProcedural* and Ri*Filter) handling within the ri2rib library. #1888251
- * BugFix - Fix DSO searchpath handling, before Aqsis would only see the first path on the list. #2005018
- * BugFix - Improve the handling of termination conditions for data from  RiProcedural.
- * BugFix - Fix the standar stream redirection for RunProgram procedurals on Windows.
- * BugFix - Fix the handling of wildcard file specifications in aqsl. #1992808
- * Enhancement - Improve the calculation of surface derivatives, especially for polygons. #1829764
- * Enhancement - Improve the handling of suraces crossing the projection plane, should now deal with eyesplits much better.
- * BugFix - Fix handling of points primitives under certain shading circumstances. #1989897
- * BugFix - Fix piqsl to be more secure in closing connections to Aqsis, would sometimes drop the lst few buckets. #1978293
- * BugFix - Include the standard basis symbols in ri2rib on Windows. #1888255
- * Enhancement - Implement RiClippingPlane support. #1883032
- * BugFix - Fix various bugs with curve primitive rendering. #1102597, #1851789, #1851795
- * Enhancement - ShaderVM now checks the compiler version used to compile a shader, and reports an error if it doesn't match.
- * BugFix - Fixhandling of the conditional operator in aqsl. #1734817
- * BugFix - Fix handling of discontinuous facevertex variables on subdivision surfaces. #1896870
- * BugFix - Fix reading of unusual TIFF formats. #1673833
- * Enhancement - Completely rewritten texture handling, for speed and quality.
- * Enhancement - Introduce eqsl, a simple GUI tool for launching the various Aqsis tools.
- * BugFix - Fix bake file generation, would produce black pixels to the bottom and right of genrated files.
- * BugFix - Fix potentially large memory leak in the shader VM.
- * Enhancement - Include support for a Bundle based distribution on MacOSX.
- * Enhancement - Support wildcards in aqsl.
- * Enhancement - Add support for %NAME% style environment substitution in "searchpaths".
- * BugFix - Check array access index in shaderVM to avoid out of bounds problems. #1812376
- * Enhancement - Add support for smooth shading interpolation.
- * Enhancement - Piqsl, a new powerful framebufer.
- * BugFix - Fix imager shading derivatives calculation.
- * BugFix - Fix the RiColorSamples call so that it is accepted but not used. #1883043
- * BugFix - Fix the signal handling in aqsis, so it can be stopped by CTRL-C cleanly.
- * Enhancement - Use boost::wave as a preprocessor for aqsl, as the slpp code was a bit opaque. #1182387
- * BugFix - Support and honor the "jitter" option to the stochastic hider.
- * BugFix - Fix problem with deformation motion blur when the backface culling changes between deformation frames. #1746338
- * Enhancement - Add a simple workaround for the gridracking problem, that works in some cases.
- * BugFix - Ensure that Ng is available when faceforward() is used in a shader. #1846441
- * BugFix - Fix the tangent calculation for bezier spline curves to be more robust. #1885910
- * BugFix - Fix the "limits" "gridsize" option to only expect a single value.
- * BugFix - Fix problem in cellnoise due to compiler dependent undefined behaviour.
- * BugFix - Fix ScreenWindow to properly clip the view, was clipping at the wrong edges. #1402331
- * BugFix - Fix framebuffer to properly show a cropped render. #1883048
- * BugFix - Implement support for empty DepthOfField request, to turn off DoF. #1881123
- * BugFix - Fix RiTransformPoints implementation, was applying the transformatin in the wrong order. #1880883
- * BugFix - Fix handling of invalid transforms, errors are correctly reported and handled. #1880886
- * BugFix - Handle null lightsource handle gracefully. #1880879
- * BugFix - Fix case of standard shader tokens in ri2rib. #1880865
- * BugFix - Ensure micropolygons are atmosphere shaded before they are transparency culled. 
- * BugFix - Fix problem when a RiTransform used in a motion block, resuts in unreliable handedness.
- * BugFix - Fix shader compiler typechecking of hextuple operator. #1837583
- * BugFix - Add parameter validation for the torus primitive. #1829384
- * BugFix - Fix triangulation code in PointsGeneralPolygons, could result in missing quads. #1690770
- * BugFix - Fix a potential crash with an ObjectInstance with PointsGeneralPolygons. 
- * BugFix - Prepending a '+' to a display name caused pisl to crash. #1776668
- * BugFix - Fix bug in option() shader command when reading PixelAspectRatio.
- * Enhancement - Implement break/continue support in the SL compiler. #1801181
- * Enhancement - Support gamma option in make texture functions.
- * Enhancement - Add support for '@' in searchpaths to substitute the default value.
- * BugFix - RiTransform now supported in motion blur blocks. #1810401
- * BugFix - Support both texture style and normal style of occlusion() function call.
- * BugFix - Fix shadow bias support, wasn't correctly reading or using the shadow bias options.
- * Enhancement - Support "scanlineorder" request topiqsl and framebuffer to support rendering a row od buckets at a time.
- * Enhancement - Reimplemented timer functionality to provide accurate timings at endofframe on all platforms.
- * BugFix - Fix typechecking to improve compile performance.
- * BugFix - Fix the handling of shadowed system variables and functions in the shader compiler. #1664409
- * BugFix - Ensure that code run in the shader argument initialisation is considered when calculatin the list of variables usd by a shader. #1102356
- * BugFix - Make sure that any user specified normals are kept throughout the pipeline.
- * BugFix - Fix problem with normals on RiPoints primitives. #1740063
- * BugFix - Fix to the calculation of the number of varying parameters on a RiPatchMesh primitive in ri2rib. #1740534
- * Enhancement - Add -decodeonly option to miqser to decode a binary file with no additional formatting.
- * BugFix - Fix problem with invalid backfaceculling using shading normal instead of geometric normal. #1737117
- * BugFix - Fix the dummy gather() function to properly return 0 hits and run the appropriate else block if supplied.
- * Enhancement - Various imrovements to the bake functionality.
- * Enhancement - Add support for RiMitchellFilter.
- * BugFix - Fix a memory leak in the shader VM when storing embedded strings.
- * BugFix - Fix a major memory leak in the shader VM related to the use of possibly empty illuminance blocks.
- * BugFix - Make sure that an invalid period specification to the basis calls is handled gracefully. #1629700
- * Enhancement - Implement vector noise() variations. #1629458
- * BugFix - The two argument version of pnoise returning a point was missing.
  * BugFix - Fix the setting of 'L' to be more appropriate in the case of a solar call with no arguments.
+ * BugFix - The two argument version of pnoise returning a point was missing.
+ * Enhancement - Implement vector noise() variations. #1629458
+ * BugFix - Make sure that an invalid period specification to the basis calls is handled gracefully. #1629700
+ * BugFix - Fix a major memory leak in the shader VM related to the use of possibly empty illuminance blocks.
+ * BugFix - Fix a memory leak in the shader VM when storing embedded strings.
+ * Enhancement - Add support for RiMitchellFilter.
+ * Enhancement - Various imrovements to the bake functionality.
+ * BugFix - Fix the dummy gather() function to properly return 0 hits and run the appropriate else block if supplied.
+ * BugFix - Fix problem with invalid backfaceculling using shading normal instead of geometric normal. #1737117
+ * Enhancement - Add -decodeonly option to miqser to decode a binary file with no additional formatting.
+ * BugFix - Fix to the calculation of the number of varying parameters on a RiPatchMesh primitive in ri2rib. #1740534
+ * BugFix - Fix problem with normals on RiPoints primitives. #1740063
+ * BugFix - Make sure that any user specified normals are kept throughout the pipeline.
+ * BugFix - Ensure that code run in the shader argument initialisation is considered when calculatin the list of variables usd by a shader. #1102356
+ * BugFix - Fix the handling of shadowed system variables and functions in the shader compiler. #1664409
+ * BugFix - Fix typechecking to improve compile performance.
+ * Enhancement - Reimplemented timer functionality to provide accurate timings at endofframe on all platforms.
+ * Enhancement - Support "scanlineorder" request topiqsl and framebuffer to support rendering a row od buckets at a time.
+ * BugFix - Fix shadow bias support, wasn't correctly reading or using the shadow bias options.
+ * BugFix - Support both texture style and normal style of occlusion() function call.
+ * BugFix - RiTransform now supported in motion blur blocks. #1810401
+ * Enhancement - Add support for '@' in searchpaths to substitute the default value.
+ * Enhancement - Support gamma option in make texture functions.
+ * Enhancement - Implement break/continue support in the SL compiler. #1801181
+ * BugFix - Fix bug in option() shader command when reading PixelAspectRatio.
+ * BugFix - Prepending a '+' to a display name caused pisl to crash. #1776668
+ * BugFix - Fix a potential crash with an ObjectInstance with PointsGeneralPolygons. 
+ * BugFix - Fix triangulation code in PointsGeneralPolygons, could result in missing quads. #1690770
+ * BugFix - Add parameter validation for the torus primitive. #1829384
+ * BugFix - Fix shader compiler typechecking of hextuple operator. #1837583
+ * BugFix - Fix problem when a RiTransform used in a motion block, resuts in unreliable handedness.
+ * BugFix - Ensure micropolygons are atmosphere shaded before they are transparency culled. 
+ * BugFix - Fix case of standard shader tokens in ri2rib. #1880865
+ * BugFix - Handle null lightsource handle gracefully. #1880879
+ * BugFix - Fix handling of invalid transforms, errors are correctly reported and handled. #1880886
+ * BugFix - Fix RiTransformPoints implementation, was applying the transformatin in the wrong order. #1880883
+ * BugFix - Implement support for empty DepthOfField request, to turn off DoF. #1881123
+ * BugFix - Fix framebuffer to properly show a cropped render. #1883048
+ * BugFix - Fix ScreenWindow to properly clip the view, was clipping at the wrong edges. #1402331
+ * BugFix - Fix problem in cellnoise due to compiler dependent undefined behaviour.
+ * BugFix - Fix the "limits" "gridsize" option to only expect a single value.
+ * BugFix - Fix the tangent calculation for bezier spline curves to be more robust. #1885910
+ * BugFix - Ensure that Ng is available when faceforward() is used in a shader. #1846441
+ * Enhancement - Add a simple workaround for the gridracking problem, that works in some cases.
+ * BugFix - Fix problem with deformation motion blur when the backface culling changes between deformation frames. #1746338
+ * BugFix - Support and honor the "jitter" option to the stochastic hider.
+ * Enhancement - Use boost::wave as a preprocessor for aqsl, as the slpp code was a bit opaque. #1182387
+ * BugFix - Fix the signal handling in aqsis, so it can be stopped by CTRL-C cleanly.
+ * BugFix - Fix the RiColorSamples call so that it is accepted but not used. #1883043
+ * BugFix - Fix imager shading derivatives calculation.
+ * Enhancement - Piqsl, a new powerful framebufer.
+ * Enhancement - Add support for smooth shading interpolation.
+ * BugFix - Check array access index in shaderVM to avoid out of bounds problems. #1812376
+ * Enhancement - Add support for %NAME% style environment substitution in "searchpaths".
+ * Enhancement - Support wildcards in aqsl.
+ * Enhancement - Include support for a Bundle based distribution on MacOSX.
+ * BugFix - Fix potentially large memory leak in the shader VM.
+ * BugFix - Fix bake file generation, would produce black pixels to the bottom and right of genrated files.
+ * Enhancement - Introduce eqsl, a simple GUI tool for launching the various Aqsis tools.
+ * Enhancement - Completely rewritten texture handling, for speed and quality.
+ * BugFix - Fix reading of unusual TIFF formats. #1673833
+ * BugFix - Fix handling of discontinuous facevertex variables on subdivision surfaces. #1896870
+ * BugFix - Fixhandling of the conditional operator in aqsl. #1734817
+ * Enhancement - ShaderVM now checks the compiler version used to compile a shader, and reports an error if it doesn't match.
+ * BugFix - Fix various bugs with curve primitive rendering. #1102597, #1851789, #1851795
+ * Enhancement - Implement RiClippingPlane support. #1883032
+ * BugFix - Include the standard basis symbols in ri2rib on Windows. #1888255
+ * BugFix - Fix piqsl to be more secure in closing connections to Aqsis, would sometimes drop the lst few buckets. #1978293
+ * BugFix - Fix handling of points primitives under certain shading circumstances. #1989897
+ * Enhancement - Improve the handling of suraces crossing the projection plane, should now deal with eyesplits much better.
+ * Enhancement - Improve the calculation of surface derivatives, especially for polygons. #1829764
+ * BugFix - Fix the handling of wildcard file specifications in aqsl. #1992808
+ * BugFix - Fix the standar stream redirection for RunProgram procedurals on Windows.
+ * BugFix - Improve the handling of termination conditions for data from  RiProcedural.
+ * BugFix - Fix DSO searchpath handling, before Aqsis would only see the first path on the list. #2005018
+ * BugFix - Various fixes to the standard callback (RiError*, RiProcedural* and Ri*Filter) handling within the ri2rib library. #1888251
+ * BugFix - The shader compiler and VM now handle DSO functions with return type void properly. #2005026
+ * BugFix - Quadric normals now behave correctly under a transformation that inverts the coordinate system handedness. #1737642
+ * BugFix - Aqsis now reports a missing RIB file as an error and returns non-zero return code.
+ * BugFix - Piqsl's framebuffer now resizes to the size of the image being rendered if possible. #1978314
+ * BugFix - Properly initialise shader arguments on shaders declared in RiProcedurals.
+ * BugFix - Fix memory handling problem that could result in large leaks on gcc platforms.
