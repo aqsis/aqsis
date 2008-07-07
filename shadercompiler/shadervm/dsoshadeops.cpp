@@ -107,7 +107,7 @@ CqDSORepository::SetDSOPath(const char* pathStr)
 		struct stat s;
 		if (!stat( element->c_str(), &s ))
 		{
-			Aqsis::log() << info << "Processing \"" << element->c_str() << "\" for DSO inclusion." << std::endl;
+			//Aqsis::log() << info << "Processing \"" << element->c_str() << "\" for DSO inclusion." << std::endl;
 			if ( S_ISDIR(s.st_mode) )
 			{
 				// We have a directory, list all the libraries in that directory and add them to the path
@@ -118,7 +118,7 @@ CqDSORepository::SetDSOPath(const char* pathStr)
 					for( std::list<CqString*>::iterator f = files.begin(); f != files.end(); ++f)
 					{
 						m_DSOPathList.push_back(*(*f));
-						Aqsis::log() << info << "Added \"" << (*f)->c_str() << "\" as a DSO candidate." << std::endl;
+						//Aqsis::log() << info << "Added \"" << (*f)->c_str() << "\" as a DSO candidate." << std::endl;
 					}
 				}
 			}
