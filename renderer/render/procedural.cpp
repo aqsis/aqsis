@@ -249,13 +249,19 @@ extern "C" RtVoid	RiProcFree( RtPointer data )
 //
 extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
-	CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+	CqString dsoname = CqString( (( char** ) data)[0] );
 	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
 
 	if( !plugin->IsValid() )
 	{
-		Aqsis::log() << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
-		return;
+		dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+		plugin = new CqRiProceduralPlugin( dsoname );
+
+		if( !plugin->IsValid() )
+		{
+			Aqsis::log() << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
+			return;
+		}
 	}
 
 	plugin->ConvertParameters( (( char** ) data)[1] );
