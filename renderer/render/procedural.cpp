@@ -348,16 +348,19 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			// Find the actual location of the executable, using the "procedural" searchpath.
 			CqRiFile searchFile;
 			searchFile.Open((( char** ) data)[0], "procedural");
+			char* progname;
 			if(!searchFile.IsValid())		
 			{
-				Aqsis::log() << error << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath." << std::endl;
-				return;
+				Aqsis::log() << info << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath, will rely on the PATH." << std::endl;
+				progname = ((char**)data)[0];
 			}
+			else
+				progname = strdup(searchFile.strRealName().c_str());
 
 			// Split up the RunProgram program name string
 			int arg_count = 1;
 			char *arg_values[32];
-			arg_values[0] = strdup(searchFile.strRealName().c_str());
+			arg_values[0] = progname;
 			char *i = arg_values[0];
 			for( ; *i != '\0' ; i++ )
 			{
@@ -385,7 +388,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			//			setvbuf( stdout, NULL, _IONBF, 0 );
 
 			execvp( arg_values[0], arg_values );
-			free(arg_values[0]);
+			free(progname);
 		};
 	};
 
@@ -497,20 +500,23 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		// Find the actual location of the executable, using the "procedural" searchpath.
 		CqRiFile searchFile;
 		searchFile.Open((( char** ) data)[0], "procedural");
+		char* progname;
 		if(!searchFile.IsValid())		
 		{
 			searchFile.Open((CqString( (( char** ) data)[0] ) + CqString(".exe")).c_str(), "procedural");
 			if(!searchFile.IsValid())		
 			{
-				Aqsis::log() << error << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath." << std::endl;
-				return;
+				Aqsis::log() << info << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath, will rely on the PATH." << std::endl;
+				progname = ((char**)data)[0];
 			}
+			else
+				progname = _strdup(searchFile.strRealName().c_str());
 		}
+		progname = _strdup(searchFile.strRealName().c_str());
 
 		// Create the child process.
-		char* _exename = _strdup(searchFile.strRealName().c_str());
 		bFuncRetn = CreateProcess(NULL,
-		                          _exename, // command line
+		                          progname, // command line
 		                          NULL,          // process security attributes
 		                          NULL,          // primary thread security attributes
 		                          TRUE,          // handles are inherited
@@ -519,7 +525,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		                          NULL,          // use parent's current directory
 		                          &siStartInfo,  // STARTUPINFO pointer
 		                          &piProcInfo);  // receives PROCESS_INFORMATION
-		free(_exename);
+		free(progname);
 
 		if (bFuncRetn == 0)
 		{
