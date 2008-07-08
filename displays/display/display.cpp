@@ -496,6 +496,13 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				return(err);
 			}
 		}
+		else if(pImage->m_imageType == Type_ZFramebuffer)
+		{
+			// For the zframebuffer, ensure that we're actually receiving a
+			// single channel of z data in floating point format.
+			if(iFormatCount != 1 || strcmp(format->name, "z") != 0 || format->type != PkDspyFloat32)
+				return PkDspyErrorBadParams;
+		}
 
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
 		if(pImage->m_imageType == Type_Framebuffer)
@@ -546,23 +553,23 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			// Determine the appropriate format to save into.
 			if(widestFormat == PkDspyUnsigned8)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUchar);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned8));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned8);
 			}
 			else if(widestFormat == PkDspyUnsigned16)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUshort));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUshort);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned16));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned16);
 			}
 			else if(widestFormat == PkDspyUnsigned32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUlong));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUlong);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned32));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned32);
 			}
 			else if(widestFormat == PkDspyFloat32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqFloat));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqFloat);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyFloat32));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyFloat32);
 			}
 		}
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
