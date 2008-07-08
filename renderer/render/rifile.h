@@ -45,7 +45,7 @@ class CqRiFile : public CqFile
 	public:
 		/** Default constructor
 		 */
-		CqRiFile() : CqFile( 0 )
+		CqRiFile()
 		{}
 		/** Constructor taking an open stream pointer and a name.
 		 * \param Stream a pointer to an already opened input stream to attach this object to.

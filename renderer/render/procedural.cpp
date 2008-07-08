@@ -345,10 +345,19 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		}
 		else
 		{
+			// Find the actual location of the executable, using the "procedural" searchpath.
+			CqRiFile searchFile;
+			searchFile.Open((( char** ) data)[0], "procedural");
+			if(!searchFile.IsValid())		
+			{
+				Aqsis::log() << error << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath." << std::endl;
+				return;
+			}
+
 			// Split up the RunProgram program name string
 			int arg_count = 1;
 			char *arg_values[32];
-			arg_values[0] = ((char**)data)[0] ;
+			arg_values[0] = strdup(searchFile.strRealName().c_str());
 			char *i = arg_values[0];
 			for( ; *i != '\0' ; i++ )
 			{
@@ -375,8 +384,8 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 				throw(XqException("Error preparing stdout for RunProgram"));
 			//			setvbuf( stdout, NULL, _IONBF, 0 );
 
-			// We should use the procedurals searchpath here
 			execvp( arg_values[0], arg_values );
+			free(arg_values[0]);
 		};
 	};
 
@@ -485,10 +494,23 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 		ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
-		// Create the child process.
+		// Find the actual location of the executable, using the "procedural" searchpath.
+		CqRiFile searchFile;
+		searchFile.Open((( char** ) data)[0], "procedural");
+		if(!searchFile.IsValid())		
+		{
+			searchFile.Open((CqString( (( char** ) data)[0] ) + CqString(".exe")).c_str(), "procedural");
+			if(!searchFile.IsValid())		
+			{
+				Aqsis::log() << error << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath." << std::endl;
+				return;
+			}
+		}
 
+		// Create the child process.
+		char* _exename = _strdup(searchFile.strRealName().c_str());
 		bFuncRetn = CreateProcess(NULL,
-		                          ((char**)data)[0],       // command line
+		                          _exename, // command line
 		                          NULL,          // process security attributes
 		                          NULL,          // primary thread security attributes
 		                          TRUE,          // handles are inherited
@@ -497,6 +519,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		                          NULL,          // use parent's current directory
 		                          &siStartInfo,  // STARTUPINFO pointer
 		                          &piProcInfo);  // receives PROCESS_INFORMATION
+		free(_exename);
 
 		if (bFuncRetn == 0)
 		{
