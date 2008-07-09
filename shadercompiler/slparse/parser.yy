@@ -640,6 +640,9 @@ variable_definitions
 												pV->NoDup();
 												pV->AddLastChild(pDecl->pFirstChild());
 
+												// Make sure that any change in the storage type is communicated to the initialiser
+												pV->UpdateStorageStatus();
+
 												pVarNode->AddLastChild(pV);
 												pDecl->ClearChild();
 											}

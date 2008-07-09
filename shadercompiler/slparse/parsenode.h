@@ -548,6 +548,10 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 			if ( pVarDef != 0 )
 				pVarDef->SetDefaultStorage( Storage );
 		}
+		virtual	bool	UpdateStorageStatus()
+		{
+			return fVarying();
+		}
 
 	protected:
 		SqVarRef	m_VarRef;

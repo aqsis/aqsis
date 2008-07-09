@@ -1,4 +1,4 @@
-////---------------------------------------------------------------------
+///---------------------------------------------------------------------
 ////    Class definition file:  TYPECHECK.CPP
 ////    Associated header file: PARSENODE.H
 ////
@@ -514,7 +514,7 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 		strErr += " : ";
 		strErr += LineNo();
 		strErr += " : ";
-		strErr += "Cannot assign a varying value to the uniform variable1 '";
+		strErr += "Cannot assign a varying value to the uniform variable '";
 		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
 		strErr += "'";
 		throw( strErr );
