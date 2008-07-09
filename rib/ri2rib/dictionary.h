@@ -33,7 +33,7 @@
 
 namespace libri2rib {
 
-enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING };
+enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING, FACEVERTEX };
 enum EqTokenType { FLOAT, POINT, VECTOR, NORMAL, COLOR, STRING, MATRIX, HPOINT, INTEGER };
 typedef unsigned int TqTokenId;
 

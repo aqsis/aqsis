@@ -176,7 +176,8 @@ bool CqInlineParse::is_class ( const std::string &str )
 	        ( str == "uniform" ) ||
 	        ( str == "varying" ) ||
 	        ( str == "vertex" )  ||
-	        ( str == "facevarying") )
+	        ( str == "facevarying") ||
+			( str == "facevertex") )
 		return true;
 	return false;
 }
@@ -219,6 +220,8 @@ EqTokenClass CqInlineParse::get_class ( const std::string &str )
 		return VERTEX;
 	if ( str == "facevarying" )
 		return FACEVARYING;
+	if ( str == "facevertex" )
+		return FACEVERTEX;
 	return ( CONSTANT );
 }
 
