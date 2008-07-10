@@ -207,7 +207,8 @@ TqTokenId CqDictionary::getTokenId ( std::string n )
 }
 
 
-TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying )
+TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying,
+		TqUint uniform, TqUint facevarying, TqUint facevertex )
 {
 	TqUint size;
 	std::vector<SqTokenEntry>::iterator first = te.begin();
@@ -215,19 +216,22 @@ TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying, Tq
 	size = getTypeSize( first->ttype );
 	switch ( first->tclass )
 	{
-			case VERTEX:
+		case VERTEX:
 			size *= vertex;
 			break;
-			case VARYING:
+		case VARYING:
 			size *= varying;
 			break;
-			case UNIFORM:
+		case UNIFORM:
 			size *= uniform;
 			break;
-			case CONSTANT:
+		case CONSTANT:
 			break;
-			case FACEVARYING:
+		case FACEVARYING:
 			size *= facevarying;
+			break;
+		case FACEVERTEX:
+			size *= facevertex;
 			break;
 	}
 	size *= ( first->quantity );

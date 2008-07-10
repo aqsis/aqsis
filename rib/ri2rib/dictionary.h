@@ -73,7 +73,8 @@ class CqDictionary
 
 		TqTokenId addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt = 1, bool inln = false );
 		TqTokenId getTokenId ( std::string n );
-		TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying = 0 );
+		TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform,
+				TqUint facevarying, TqUint facevertex);
 		EqTokenType getType ( TqTokenId id );
 
 #ifdef DEBUG
