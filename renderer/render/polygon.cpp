@@ -270,10 +270,25 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue() [ 0 ] = PA.x();
-				pNewUP->pValue() [ 1 ] = PB.x();
-				pNewUP->pValue() [ 2 ] = PD.x();
-				pNewUP->pValue() [ 3 ] = PC.x();
+				// We choose to violate the RI standard here - the RISpec
+				// requires the the surface coordinate u takes the value of the
+				// x-coordinates of the corners of the patch in the same way
+				// that the texture coordinate "t" does.
+				//
+				// This really screws up derivative calcuations in the shading
+				// language since following the RISpec implies that u isn't
+				// aligned with the grid.  Worse, du can turn out to be
+				// technically equal to 0, which prevents the expression
+				//
+				//   dPu = Du(P)*du;
+				//
+				// from making sense.  This is really bad from the point of
+				// view of anyone trying to use something like dPu to antialias
+				// thier shaders.
+				pNewUP->pValue() [ 0 ] = 0;
+				pNewUP->pValue() [ 1 ] = 1;
+				pNewUP->pValue() [ 2 ] = 0;
+				pNewUP->pValue() [ 3 ] = 1;
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
@@ -283,10 +298,12 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue() [ 0 ] = PA.y();
-				pNewUP->pValue() [ 1 ] = PB.y();
-				pNewUP->pValue() [ 2 ] = PD.y();
-				pNewUP->pValue() [ 3 ] = PC.y();
+				// We choose to violate the RI standard here - see the comments
+				// above about u.
+				pNewUP->pValue() [ 0 ] = 0;
+				pNewUP->pValue() [ 1 ] = 0;
+				pNewUP->pValue() [ 2 ] = 1;
+				pNewUP->pValue() [ 3 ] = 1;
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
