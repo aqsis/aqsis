@@ -455,6 +455,7 @@ static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
 	HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr;
+	HANDLE hParentStderrWr, hDupStderrWr;
 	PROCESS_INFORMATION piProcInfo;
 	STARTUPINFO siStartInfo;
 	SECURITY_ATTRIBUTES saAttr;
@@ -481,9 +482,15 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		// Create a pipe for the child process's STDOUT.
 
 		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0) ||
-		    ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  &saAttr, 0))
+		    ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  &saAttr, 0) )
 		{
 			Aqsis::log() << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
+			return;
+		}
+		hParentStderrWr = GetStdHandle(STD_ERROR_HANDLE);
+		if( ! DuplicateHandle(GetCurrentProcess(), hParentStderrWr, GetCurrentProcess(), &hDupStderrWr, 0, TRUE, DUPLICATE_SAME_ACCESS) )
+		{
+			Aqsis::log() << error << "RiProcRunProgram: Stderr handle duplication failed" << std::endl;
 			return;
 		}
 
@@ -493,6 +500,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
 		siStartInfo.cb = sizeof(STARTUPINFO);
 		siStartInfo.hStdOutput = hChildStdoutWr;
+		siStartInfo.hStdError = hDupStderrWr;
 		siStartInfo.hStdInput = hChildStdinRd;
 		siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 		ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
@@ -507,12 +515,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			if(!searchFile.IsValid())		
 			{
 				Aqsis::log() << info << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath, will rely on the PATH." << std::endl;
-				progname = ((char**)data)[0];
+				progname = _strdup(((char**)data)[0]);
 			}
 			else
 				progname = _strdup(searchFile.strRealName().c_str());
 		}
-		progname = _strdup(searchFile.strRealName().c_str());
+		else
+			progname = _strdup(searchFile.strRealName().c_str());
 
 		// Create the child process.
 		bFuncRetn = CreateProcess(NULL,
