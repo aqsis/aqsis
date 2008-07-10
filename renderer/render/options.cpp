@@ -229,6 +229,19 @@ void CqOptions::InitialiseCamera()
 	dofc = dofm *  dofc;
 
 	QGetRenderContext() ->SetDepthOfFieldScale( fabs(dofe.x()-dofc.x()), fabs(dofe.y()-dofc.y()) );
+
+	// Setup the cached data for use during DoF calculations.
+	const TqFloat* dofOptions = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "DepthOfField" );
+	// Set the default values to indicate DOF is off.
+	TqFloat fstop = FLT_MAX, focallength = 0.0f, focaldistance = 0.0f; 
+	if(dofOptions)
+	{
+		fstop = dofOptions[0];
+		focallength = dofOptions[1];
+		focaldistance = dofOptions[2];
+	}
+	QGetRenderContext() ->SetDepthOfFieldData( fstop, focallength, focaldistance );
+
 }
 
 

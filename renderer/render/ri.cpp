@@ -1196,7 +1196,6 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
 
-	QGetRenderContext() ->SetDepthOfFieldData( fstop, focallength, focaldistance );
 	EXCEPTION_CATCH_GUARD("RiDepthOfField")
 }
 
