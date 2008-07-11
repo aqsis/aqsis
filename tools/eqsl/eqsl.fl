@@ -71,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 3"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 2"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
@@ -352,26 +352,48 @@ fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
 
 Function {callback(const char* string)} {open return_type void
 } {
-  code {Fl::lock();
-	boost::cmatch match;
-	if(boost::regex_match(string, match, aqsisProgressExpression))
+  code {
+    static std::string line;
+    Fl::lock();
+    // Buffer input until we have a line.
+	std::string::size_type index = 0, end = 0;
+	std::string input=string;
+	while(1)
 	{
-		std::string percentage;
-		percentage.assign(match[1].first, match[1].second);
-		try
+		if(( end = input.find_first_of('\\n', index)) != std::string::npos) 
 		{
-			float fp = boost::lexical_cast<float>(percentage);
-			m_progress->value(fp);
-			Fl::wait(0);
+			line.append(input, index, end+1);
+			index = end+1;
+			boost::cmatch match;
+			if(boost::regex_match(line.c_str(), match, aqsisProgressExpression))
+			{
+				std::string percentage;
+				percentage.assign(match[1].first, match[1].second);
+				try
+				{
+					float fp = boost::lexical_cast<float>(percentage);
+					m_progress->value(fp);
+					Fl::wait(0);
+				}
+				catch(boost::bad_lexical_cast &)
+				{
+				}
+			}
+			else
+			{
+				m_outputConsole->insert_position(m_outputConsole->buffer()->length());
+				m_outputConsole->insert(line.c_str());
+				m_outputConsole->show_insert_position();
+			}
+			line.clear();
 		}
-		catch(boost::bad_lexical_cast &)
+		else
 		{
+			line.append(input.substr(index));
+			break;
 		}
 	}
-	else
-	{
-		m_outputConsole->insert(string);
-	}
-	Fl::unlock();} {selected
+	Fl::unlock();
+	} {selected
   }
 } 
