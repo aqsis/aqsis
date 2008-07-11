@@ -59,6 +59,8 @@ class CqProcedural : public CqSurface
 		{
 			bound->vecMin() = m_Bound.vecMin();
 			bound->vecMax() = m_Bound.vecMax();
+
+			AdjustBoundForTransformationMotion( bound );
 		};
 		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/*  We have no actual geometry to dice.
