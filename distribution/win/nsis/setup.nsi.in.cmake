@@ -214,7 +214,12 @@ SectionEnd
 SectionGroup "Plugins" SEC05
   Section /o "Simbiont(RM) 2.5" SEC0501
   SectionIn 1
-    ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["@:.:%SIMBIONT_RM_COMPONENTS%\..\SimbiontRM:%SIMBIONT_RM_COMPONENTS%\..:"]' $R6
+    ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["@:.:%SIMBIONT_RM_COMPONENTS%\..\SimbiontRM:%SIMBIONT_RM_COMPONENTS%\.."]' $R6
+  SectionEnd
+
+  Section /o "Massive 3.0" SEC0502
+  SectionIn 1
+    ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string procedural" ' '["@:.:%MASSIVE_HOME%\bin"]' $R7
   SectionEnd
 SectionGroupEnd
 
@@ -229,6 +234,7 @@ SectionGroupEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include and library files"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} "3rd-party support and plugins"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0501} "Darkling Simulations LLC support"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0502} "Massive Software support"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 

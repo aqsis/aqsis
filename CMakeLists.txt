@@ -30,9 +30,12 @@ OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) O
 OPTION(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
 OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk library" ON)
 OPTION(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
-OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
 OPTION(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
 MARK_AS_ADVANCED(AQSIS_USE_EXTERNAL_TINYXML)
+
+OPTION(AQSIS_ENABLE_TESTING "Enable unit testing ON/OFF" OFF)
+OPTION(AQSIS_ENABLE_MASSIVE "Enable Massive support ON/OFF" ON)
+MARK_AS_ADVANCED(AQSIS_ENABLE_MASSIVE)
 
 OPTION(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 MARK_AS_ADVANCED(AQSIS_USE_RPATH)
@@ -51,7 +54,7 @@ INCLUDE(FindZLIB)
 
 # Find optional libs
 
-# fltk
+# FLTK
 IF(AQSIS_USE_FLTK)
 	INCLUDE(FindFLTK)
 
@@ -65,7 +68,7 @@ IF(AQSIS_USE_FLTK)
 	ENDIF(NOT AQSIS_FLUID_FOUND)
 ENDIF(AQSIS_USE_FLTK)
 
-# OpenExr
+# OpenEXR
 IF(AQSIS_USE_OPENEXR)
 	INCLUDE(FindOpenEXR)
 
@@ -75,7 +78,7 @@ IF(AQSIS_USE_OPENEXR)
 	ENDIF(NOT AQSIS_OPENEXR_FOUND)
 ENDIF(AQSIS_USE_OPENEXR)
 
-# jpeg
+# JPEG
 # libjpeg is no longer needed until aqsis again supports jpeg images.
 #INCLUDE(FindJPEG)
 
@@ -239,6 +242,9 @@ ENDIF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
 IF(AQSIS_USE_PDIFF)
 	ADD_SUBDIRECTORY(thirdparty/pdiff)
 ENDIF(AQSIS_USE_PDIFF)
+IF(AQSIS_ENABLE_MASSIVE)
+	ADD_SUBDIRECTORY(thirdparty/massive)
+ENDIF(AQSIS_ENABLE_MASSIVE)
 
 
 #-------------------------------------------------------------------------------
@@ -260,7 +266,11 @@ SET(SHADERPATH "")
 SET(ARCHIVEPATH "")
 SET(TEXTUREPATH "")
 SET(DISPLAYPATH "")
-SET(PROCEDURALPATH "")
+IF(AQSIS_ENABLE_MASSIVE)
+	SET(PROCEDURALPATH %MASSIVE_HOME%/bin)
+ELSE(AQSIS_ENABLE_MASSIVE)
+	SET(PROCEDURALPATH "")
+ENDIF(AQSIS_ENABLE_MASSIVE)
 SET(RESOURCEPATH "")
 CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
 ADD_CUSTOM_TARGET(aqsisrc ALL echo
