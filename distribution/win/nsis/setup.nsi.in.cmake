@@ -211,18 +211,6 @@ SectionIn 1
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.lib"
 SectionEnd
 
-SectionGroup "Plugins" SEC05
-  Section /o "Simbiont(RM) 2.5" SEC0501
-  SectionIn 1
-    ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["@:.:%SIMBIONT_RM_COMPONENTS%\..\SimbiontRM:%SIMBIONT_RM_COMPONENTS%\.."]' $R6
-  SectionEnd
-
-  Section /o "Massive 3.0" SEC0502
-  SectionIn 1
-    ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string procedural" ' '["@:.:%MASSIVE_HOME%\bin"]' $R7
-  SectionEnd
-SectionGroupEnd
-
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Rendering application and essential files only"
@@ -232,9 +220,6 @@ SectionGroupEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0203} "Generic shader source files (.sl)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "User guides and other information"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include and library files"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} "3rd-party support and plugins"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0501} "Darkling Simulations LLC support"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0502} "Massive Software support"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 

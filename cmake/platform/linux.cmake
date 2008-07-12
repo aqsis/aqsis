@@ -15,6 +15,10 @@ SET(CONTENTDIR "share/aqsis/content"
 SET(SCRIPTSDIR "share/aqsis/scripts" 
 	CACHE STRING "Install location for scripts (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 
+IF(AQSIS_ENABLE_MASSIVE)
+	SET(PROCEDURALPATH "%MASSIVE_HOME%/bin:")
+ENDIF(AQSIS_ENABLE_MASSIVE)
+
 IF(FIRST_CMAKE_RUN)
 	# Override default compile flags the first time cmake is run.
 	SET_IF_EMPTY(CMAKE_CXX_FLAGS "-Wall" CACHE STRING "Flags used by the compiler during all build types." FORCE)

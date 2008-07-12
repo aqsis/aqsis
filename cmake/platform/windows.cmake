@@ -15,6 +15,13 @@ SET(CONTENTDIR "content"
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
+IF(AQSIS_ENABLE_MASSIVE)
+	SET(PROCEDURALPATH "%MASSIVE_HOME%\bin:")
+ENDIF(AQSIS_ENABLE_MASSIVE)
+IF(AQSIS_ENABLE_SIMBIONT)
+	SET(SHADERPATH "%SIMBIONT_RM_COMPONENTS%\..\SimbiontRM:%SIMBIONT_RM_COMPONENTS%\..:")
+ENDIF(AQSIS_ENABLE_SIMBIONT)
+
 # Add defines to
 #   (a) Make sure we don't try to use the syslog stuff
 #   (b) Make sure that the math constants from math.h are defined - that is, M_PI etc.
