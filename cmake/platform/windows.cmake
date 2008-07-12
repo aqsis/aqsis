@@ -37,6 +37,21 @@ CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJEC
 SET(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
 SET(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
 
+# Create example content.
+EXECUTE_PROCESS(
+	COMMAND xcopy ${CMAKE_SOURCE_DIR}/content ${CMAKE_BINARY_DIR} /E /C /Y)
+INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/content/ DESTINATION ${CONTENTDIR}
+	PATTERN ".svn" EXCLUDE
+	PATTERN "*.sh" EXCLUDE)
+
+EXECUTE_PROCESS(
+	COMMAND xcopy ${CMAKE_SOURCE_DIR}/tools/mpdump ${CMAKE_BINARY_DIR} /E /C /Y)
+EXECUTE_PROCESS(
+	COMMAND rename mpdump scripts
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/scripts/ DESTINATION ${SCRIPTSDIR}
+	PATTERN ".svn" EXCLUDE)
+
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.
 #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
