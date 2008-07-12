@@ -14,6 +14,8 @@ SET(CONTENTDIR "share/aqsis/content"
 	CACHE STRING "Install location for content (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(SCRIPTSDIR "share/aqsis/scripts" 
 	CACHE STRING "Install location for scripts (relative paths are relative to CMAKE_INSTALL_PREFIX)")
+SET(DESKTOPDIR "share/aqsis/desktop" 
+	CACHE STRING "Install location for desktop integration (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_ENABLE_MASSIVE)
 	SET(PROCEDURALPATH "%MASSIVE_HOME%/bin:")
@@ -41,6 +43,13 @@ ELSE(SYSCONFDIR_IS_ABSOLUTE_PATH)
 ENDIF(SYSCONFDIR_IS_ABSOLUTE_PATH)
 # Add a define for the default location of aqsisrc.
 ADD_DEFINITIONS(-DDEFAULT_RC_PATH="${DEFAULT_RC_PATH}")
+
+# Create desktop content.
+EXECUTE_PROCESS(
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/desktop)
+EXECUTE_PROCESS(
+	COMMAND cp ${CMAKE_SOURCE_DIR}/distribution/linux/*.* ${CMAKE_BINARY_DIR}/desktop/)
+INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/desktop/ DESTINATION ${DESKTOPDIR})
 
 #
 # Packaging setup

@@ -275,6 +275,26 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
 
 #-------------------------------------------------------------------------------
+# Create example content
+#----------
+EXECUTE_PROCESS(
+	COMMAND cp -r ${CMAKE_SOURCE_DIR}/content ${CMAKE_BINARY_DIR}/)
+INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/content/ DESTINATION ${CONTENTDIR}
+	PATTERN ".svn" EXCLUDE
+	PATTERN "*.bat" EXCLUDE
+	PATTERN "${CMAKE_BINARY_DIR}/content/*.sh"
+	FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+EXECUTE_PROCESS(
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/scripts)
+EXECUTE_PROCESS(
+	COMMAND cp ${CMAKE_SOURCE_DIR}/tools/mpdump/*.py ${CMAKE_BINARY_DIR}/scripts/)
+INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/scripts/ DESTINATION ${SCRIPTSDIR}
+	PATTERN "${CMAKE_BINARY_DIR}/scripts/*.py"
+	FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+
+#-------------------------------------------------------------------------------
 # Packaging
 #----------
 

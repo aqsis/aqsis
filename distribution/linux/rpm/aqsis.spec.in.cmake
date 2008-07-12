@@ -124,21 +124,6 @@ make %{?_smp_mflags}
 %install
 cd BUILD
 make DESTDIR="$RPM_BUILD_ROOT" install
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/desktop"
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/features"
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/scenes"
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/shaders/displacement"
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/shaders/light"
-mkdir -p "$RPM_BUILD_ROOT%{_datadir}/%{name}/scripts"
-cp ../distribution/linux/*.* "$RPM_BUILD_ROOT%{_datadir}/%{name}/desktop"
-cp -r ../content/ribs/features/layeredshaders "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/features/"
-cp -r ../content/ribs/scenes/vase "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/scenes/"
-cp ../content/shaders/displacement/dented.sl "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/shaders/displacement/"
-cp ../content/shaders/light/shadowspot.sl "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/shaders/light/"
-cp ../tools/mpdump/*.py "$RPM_BUILD_ROOT%{_datadir}/%{name}/scripts/"
-chmod a+rx "$RPM_BUILD_ROOT%{_datadir}/%{name}/scripts/mpanalyse.py"
-chmod a+rx "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/scenes/vase/render.sh"
-chmod a+rx "$RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/features/layeredshaders/render.sh"
 
 
 %post
