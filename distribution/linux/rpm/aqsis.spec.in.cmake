@@ -110,8 +110,8 @@ This package contains example content, including additional scenes and shaders.
 %build
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
-mkdir BUILD
-cd BUILD
+mkdir build
+cd build
 %if 0%{?suse_version} <= 1030
 cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DSYSCONFDIR="%{_sysconfdir}/%{name}" -DAQSIS_BOOST_FILESYSTEM_LIBRARY_NAME=boost_filesystem -DAQSIS_BOOST_REGEX_LIBRARY_NAME=boost_regex -DAQSIS_BOOST_THREAD_LIBRARY_NAME=boost_thread-mt -DAQSIS_BOOST_WAVE_LIBRARY_NAME=boost_wave ../
 %else
@@ -122,7 +122,7 @@ make %{?_smp_mflags}
 
 ## The %install section needs revising, moving the manual creation and population of dirs to CMake!
 %install
-cd BUILD
+cd build
 make DESTDIR="$RPM_BUILD_ROOT" install
 
 
@@ -197,7 +197,6 @@ rm -rf "$RPM_BUILD_ROOT"
 %files data
 %defattr(-,root,root)
 %{_datadir}/%{name}/content/
-%exclude %{_datadir}/%{name}/content/ribs/*/*/*.bat
 
 
 %changelog
