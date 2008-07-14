@@ -5,7 +5,7 @@ data visualization project I played with a while back.
 
 Eventually we found that the specific data sets we were interested in were
 better visualized as an isosurface using global illumination.  However, the
-volume sampling and integration code has been requested be a few people so
+volume sampling and integration code has been requested by a few people so
 it's been cleaned up a little for distribution.
 
 
