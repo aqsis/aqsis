@@ -30,6 +30,8 @@ IF(AQSIS_ENABLE_MASSIVE)
 	SET(PROCEDURALPATH "${PROCEDURALPATH}%MASSIVE_HOME%/bin:")
 ENDIF(AQSIS_ENABLE_MASSIVE)
 
+ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/distribution/linux)
+
 IF(FIRST_CMAKE_RUN)
 	# Override default compile flags the first time cmake is run.
 	SET_IF_EMPTY(CMAKE_CXX_FLAGS "-Wall" CACHE STRING "Flags used by the compiler during all build types." FORCE)
