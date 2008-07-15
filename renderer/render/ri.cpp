@@ -1363,6 +1363,9 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 
 			SetShaderArgument( pshadImager, token, static_cast<TqPchar>( value ) );
 		}
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			pshadImager->PrepareShaderForUse();
 	}
 	EXCEPTION_CATCH_GUARD("RiImagerV")
 	return ;
@@ -2015,6 +2018,10 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 		if(!QGetRenderContext()->IsWorldBegin())
 			pShader->InitialiseParameters();
 
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			pShader->PrepareShaderForUse();
+
 		// Add it as a Context light as well in case we are in a context that manages it's own lights.
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
 		return ( reinterpret_cast<RtLightHandle>( pNew.get() ) );
@@ -2134,6 +2141,11 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 
 			SetShaderArgument( pshadSurface, token, static_cast<TqPchar>( value ) );
 		}
+
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			pshadSurface->PrepareShaderForUse();
+
 		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
 	}
 	QGetRenderContext() ->AdvanceTime();
@@ -2185,6 +2197,9 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 
 			SetShaderArgument( pshadAtmosphere, token, static_cast<TqPchar>( value ) );
 		}
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			pshadAtmosphere->PrepareShaderForUse();
 	}
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadAtmosphere( pshadAtmosphere, QGetRenderContext() ->Time() );
@@ -2833,6 +2848,9 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 
 			SetShaderArgument( pshadDisplacement, token, static_cast<TqPchar>( value ) );
 		}
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			pshadDisplacement->PrepareShaderForUse();
 	}
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadDisplacement( pshadDisplacement, QGetRenderContext() ->Time() );
@@ -5974,6 +5992,9 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 			SetShaderArgument( newlayer, token, static_cast<TqPchar>( value ) );
 		}
+		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
+		if(!(pMultipass && pMultipass[0]))
+			newlayer->PrepareShaderForUse();
 	}
 	EXCEPTION_CATCH_GUARD("RiShaderLayerV")
 }

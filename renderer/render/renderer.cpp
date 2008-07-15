@@ -1307,9 +1307,6 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	boost::shared_ptr<IqShader> newShader(pRet->Clone());
         newShader->SetType ( Type_Surface );
 	m_InstancedShaders.push_back(newShader);
-	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
-	if(!(pMultipass && pMultipass[0]))
-		newShader->PrepareShaderForUse();
 	return (newShader);
 
 }
@@ -1335,9 +1332,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		boost::shared_ptr<IqShader> newShader(shadLocation->second->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
-		const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
-			newShader->PrepareShaderForUse();
 		return (newShader);
 	}
 
@@ -1384,9 +1378,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		boost::shared_ptr<IqShader> newShader(pRet->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
-		const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
-			newShader->PrepareShaderForUse();
 		return (newShader);
 	}
 	else
@@ -1417,9 +1408,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			boost::shared_ptr<IqShader> newShader(pRet->Clone());
 			newShader->SetType( type );
 			m_InstancedShaders.push_back(newShader);
-			const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
-			if(!(pMultipass && pMultipass[0]))
-				newShader->PrepareShaderForUse();
 			return (newShader);
 		}
 		else

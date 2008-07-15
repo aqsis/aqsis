@@ -1544,7 +1544,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 			rec.m_strSpace = strSpace;
 			rec.m_strName = strName;
 			m_StoredArguments.push_back(rec);
-			Aqsis::log() << debug << "Storing argument : " << strName.c_str() << " : on : " << m_strName.c_str() << std::endl;
+			Aqsis::log() << debug << "Storing argument on shader @" << this << " : " << strName.c_str() << " : on : " << m_strName.c_str() << std::endl;
 		}
 		else
 		{
@@ -1598,7 +1598,7 @@ void CqShaderVM::PrepareShaderForUse( )
 
 void CqShaderVM::InitialiseParameters( )
 {
-	Aqsis::log() << debug << "Preparing shader : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
+	Aqsis::log() << debug << "Preparing shader @" << this << " : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
 
 	// Reinitialise the local variables to their defaults.
 	PrepareDefArgs();
