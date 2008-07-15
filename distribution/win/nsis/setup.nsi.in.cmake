@@ -153,7 +153,7 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content"
-    File /x ".svn" /x "*.sh" "@CMAKE_BINARY_DIR@\content\*"
+    File /x ".svn" /x "*.sh" "@CMAKE_SOURCE_DIR@\content\*"
 
 
   ; Shortcuts
@@ -168,7 +168,7 @@ SectionGroup /e "Content" SEC02
   Section /o "Scripts" SEC0202
   SectionIn 1
     SetOutPath "$INSTDIR\scripts"
-    File "@CMAKE_BINARY_DIR@\scripts\*"
+    File "@CMAKE_SOURCE_DIR@\tools\mpdump\*.py"
   SectionEnd
 
   Section /o "Source Shaders" SEC0203

@@ -10,9 +10,13 @@ SET(SYSCONFDIR "${BINDIR}"
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "include/aqsis" 
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR "content" 
+SET(CONTENTDIR_NAME "content"
+	CACHE STRING "Name of content directory")
+SET(CONTENTDIR "${CONTENTDIR_NAME}" 
 	CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR "scripts" 
+SET(SCRIPTSDIR_NAME "scripts"
+	CACHE STRING "Name of scripts directory")
+SET(SCRIPTSDIR "${SCRIPTSDIR_NAME}" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_ENABLE_AIRDBO)
@@ -39,21 +43,6 @@ CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${PROJEC
 CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJECT_BINARY_DIR}/icon.rc")
 SET(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
 SET(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
-
-# Create example content.
-EXECUTE_PROCESS(
-	COMMAND xcopy ${CMAKE_SOURCE_DIR}/content ${CMAKE_BINARY_DIR} /E /C /Y)
-INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/content/ DESTINATION ${CONTENTDIR}
-	PATTERN ".svn" EXCLUDE
-	PATTERN "*.sh" EXCLUDE)
-
-EXECUTE_PROCESS(
-	COMMAND xcopy ${CMAKE_SOURCE_DIR}/tools/mpdump ${CMAKE_BINARY_DIR} /E /C /Y)
-EXECUTE_PROCESS(
-	COMMAND rename mpdump scripts
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/scripts/ DESTINATION ${SCRIPTSDIR}
-	PATTERN ".svn" EXCLUDE)
 
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.

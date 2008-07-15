@@ -10,11 +10,17 @@ SET(SYSCONFDIR "etc/aqsis"
 	CACHE STRING "Install location for system configuration files (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "include/aqsis" 
 	CACHE STRING "Install location for aqsis header files (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR "share/aqsis/content" 
+SET(CONTENTDIR_NAME "content"
+	CACHE STRING "Name of content directory")
+SET(CONTENTDIR "share/aqsis/${CONTENTDIR_NAME}" 
 	CACHE STRING "Install location for content (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR "share/aqsis/scripts" 
+SET(SCRIPTSDIR_NAME "scripts"
+	CACHE STRING "Name of scripts directory")
+SET(SCRIPTSDIR "share/aqsis/${SCRIPTSDIR_NAME}" 
 	CACHE STRING "Install location for scripts (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(DESKTOPDIR "share/aqsis/desktop" 
+SET(DESKTOPDIR_NAME "desktop"
+	CACHE STRING "Name of desktop integration directory")
+SET(DESKTOPDIR "share/aqsis/${DESKTOPDIR_NAME}" 
 	CACHE STRING "Install location for desktop integration (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_ENABLE_AIRDBO)
@@ -46,35 +52,6 @@ ELSE(SYSCONFDIR_IS_ABSOLUTE_PATH)
 ENDIF(SYSCONFDIR_IS_ABSOLUTE_PATH)
 # Add a define for the default location of aqsisrc.
 ADD_DEFINITIONS(-DDEFAULT_RC_PATH="${DEFAULT_RC_PATH}")
-
-# Create example content.
-EXECUTE_PROCESS(
-	COMMAND cp -r ${CMAKE_SOURCE_DIR}/content ${CMAKE_BINARY_DIR}/)
-INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/content/ DESTINATION ${CONTENTDIR}
-	PATTERN ".svn" EXCLUDE
-	PATTERN "*.bat" EXCLUDE
-	PATTERN "${CMAKE_BINARY_DIR}/content/*.sh"
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-EXECUTE_PROCESS(
-	COMMAND cp -r ${CMAKE_SOURCE_DIR}/tools/mpdump ${CMAKE_BINARY_DIR}/)
-EXECUTE_PROCESS(
-	COMMAND mv mpdump scripts
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/scripts/ DESTINATION ${SCRIPTSDIR}
-	PATTERN ".svn" EXCLUDE
-	PATTERN "${CMAKE_BINARY_DIR}/scripts/*.py"
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-# Create desktop content.
-EXECUTE_PROCESS(
-	COMMAND cp -r ${CMAKE_SOURCE_DIR}/distribution/linux ${CMAKE_BINARY_DIR}/)
-EXECUTE_PROCESS(
-	COMMAND mv linux desktop
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/desktop/ DESTINATION ${DESKTOPDIR}
-	PATTERN ".svn" EXCLUDE
-	PATTERN "rpm" EXCLUDE)
 
 #
 # Packaging setup

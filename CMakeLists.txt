@@ -246,6 +246,9 @@ ENDIF(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
 IF(AQSIS_USE_PDIFF)
 	ADD_SUBDIRECTORY(thirdparty/pdiff)
 ENDIF(AQSIS_USE_PDIFF)
+ADD_SUBDIRECTORY(content)
+ADD_SUBDIRECTORY(distribution/linux)
+ADD_SUBDIRECTORY(tools/mpdump)
 
 
 #-------------------------------------------------------------------------------
