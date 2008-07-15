@@ -33,6 +33,8 @@
 
 set profile to "~/.profile"
 
+set aqsisFound to false
+
 (*Get AQSIS location*)
 tell application "Finder"
 	set aqsisHome to (path to me as string) & "Contents:MacOS:aqsis"
@@ -68,16 +70,16 @@ tell application "Finder"
 			do shell script export
 		end if
 		
-		ignoring application responses
-			tell application "Finder"
-				do shell script aqsisPath & "/Contents/MacOS/" & "eqsl"
-			end tell
-		end ignoring
-		
+		set aqsisFound to true
 	else
-		display dialog "Aqsis Renderer could not be found. Please visit our website for further assistance or to report this issue.\n\n http://www.aqsis.org"
+		display dialog "Aqsis Renderer could not be found. Please visit our website for further assistance or to report this issue.
+
+ http://www.aqsis.org"
 		quit me
 	end if
 end tell
 
 
+if aqsisFound then
+	do shell script aqsisPath & "/Contents/MacOS/" & "eqsl"
+end if

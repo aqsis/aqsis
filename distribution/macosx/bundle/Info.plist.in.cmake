@@ -19,15 +19,15 @@
 	<key>CFBundleShortVersionString</key>
 	<string>${MAJOR}.${MINOR}.${BUILD}</string>
 	<key>CFBundleSignature</key>
-	<string>aplt</string>
+	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>${REVISION}${TYPE}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
 	<key>LSRequiresNativeExecution</key>
-	<string>YES</string>
+	<true/>
 	<key>NSAppleScriptEnabled</key>
-	<string>YES</string>
+	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>${AQSIS_PROJECT_COPYRIGHT_OTHER}</string>
 </dict>
