@@ -4,6 +4,7 @@
 
 echo "=== Compiling Shader(s) ==="
 echo
-aqsl "$1"
+cd `dirname $1`
+aqsl $@
 
 exit 0

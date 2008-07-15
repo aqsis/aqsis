@@ -4,6 +4,7 @@
 
 echo "=== Rendering File(s) ==="
 echo
-aqsis -progress "$1"
+cd `dirname $1`
+aqsis -progress $@
 
 exit 0

@@ -4,6 +4,9 @@
 
 echo "=== Inspecting Shader(s) ==="
 echo
-aqsltell "$1"
+cd `dirname $1`
+aqsltell $@
+echo
+read -p "... done!"
 
 exit 0
