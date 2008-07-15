@@ -70,7 +70,8 @@ tell application "Finder"
 			do shell script export
 		end if
 		
-		set aqsisFound to true
+		do shell script aqsisPath & "/Contents/MacOS/" & "eqsl &> /dev/null &"
+		
 	else
 		display dialog "Aqsis Renderer could not be found. Please visit our website for further assistance or to report this issue.
 
@@ -80,7 +81,4 @@ tell application "Finder"
 end tell
 
 
-if aqsisFound then
-	do shell script aqsisPath & "/Contents/MacOS/" & "eqsl &> /dev/null &"
-end if
 
