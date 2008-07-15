@@ -152,23 +152,23 @@ SectionEnd
 SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
-    SetOutPath "$INSTDIR\content"
-    File /x ".svn" /x "*.sh" "@CMAKE_SOURCE_DIR@\content\*"
+    SetOutPath "$INSTDIR\@CONTENTDIR_NAME@"
+    File /r /x ".svn" /x "*.sh" /x "CMake*.*" "@CMAKE_SOURCE_DIR@\content\*"
 
 
   ; Shortcuts
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples"
-    SetOutPath "$INSTDIR\content\ribs"
-    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Features.lnk" "$INSTDIR\content\ribs\features"
-    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes.lnk" "$INSTDIR\content\ribs\scenes"
+    SetOutPath "$INSTDIR\@CONTENTDIR_NAME@\ribs"
+    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Features.lnk" "$INSTDIR\@CONTENTDIR_NAME@\ribs\features"
+    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes.lnk" "$INSTDIR\@CONTENTDIR_NAME@\ribs\scenes"
     !insertmacro MUI_STARTMENU_WRITE_END
   SectionEnd
 
   Section /o "Scripts" SEC0202
   SectionIn 1
-    SetOutPath "$INSTDIR\scripts"
-    File "@CMAKE_SOURCE_DIR@\tools\mpdump\*.py"
+    SetOutPath "$INSTDIR\@SCRIPTSDIR_NAME@"
+    File /x "CMake*.*" "@CMAKE_SOURCE_DIR@\tools\mpdump\*.py"
   SectionEnd
 
   Section /o "Source Shaders" SEC0203
