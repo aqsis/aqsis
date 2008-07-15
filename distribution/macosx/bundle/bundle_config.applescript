@@ -81,5 +81,6 @@ end tell
 
 
 if aqsisFound then
-	do shell script aqsisPath & "/Contents/MacOS/" & "eqsl"
+	do shell script aqsisPath & "/Contents/MacOS/" & "eqsl &> /dev/null &"
 end if
+
