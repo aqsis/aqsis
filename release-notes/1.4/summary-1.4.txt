@@ -96,4 +96,3 @@ Bugfixes
 Known Issues
 ------------
 
-  * OS X 'Finder' is temporarily blocked when launching Aqsis.app (bundle).
