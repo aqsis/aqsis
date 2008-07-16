@@ -1631,33 +1631,35 @@ void CqShaderVM::InitialiseParameters( )
 		while ( count-- > 0 )
 		{
 			// Get the specified value out.
-			IqShaderData* pVMVal = m_StoredArguments[i].m_Value;
+			IqShaderData* pVMVal = CreateTemporaryStorage(m_StoredArguments[i].m_Value->Type(), m_StoredArguments[i].m_Value->Class());
 
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( pVMVal->Type() == type_point || pVMVal->Type() == type_hpoint )
 			{
 				CqVector3D p;
-				pVMVal->GetPoint( p, 0 );
+				m_StoredArguments[i].m_Value->GetPoint( p, 0 );
 				pVMVal->SetPoint( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_normal )
 			{
 				CqVector3D p;
-				pVMVal->GetNormal( p, 0 );
+				m_StoredArguments[i].m_Value->GetNormal( p, 0 );
 				pVMVal->SetNormal( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_vector )
 			{
 				CqVector3D p;
-				pVMVal->GetVector( p, 0 );
+				m_StoredArguments[i].m_Value->GetVector( p, 0 );
 				pVMVal->SetVector( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_matrix )
 			{
 				CqMatrix m;
-				pVMVal->GetMatrix( m, 0 );
+				m_StoredArguments[i].m_Value->GetMatrix( m, 0 );
 				pVMVal->SetMatrix( matTrans * m );
 			}
+			else
+				pVMVal->SetValueFromVariable(m_StoredArguments[i].m_Value);
 
 			if ( pArray )
 			{
@@ -1666,6 +1668,7 @@ void CqShaderVM::InitialiseParameters( )
 			}
 			else
 				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
+			DeleteTemporaryStorage(pVMVal);
 		}
 	}
 }

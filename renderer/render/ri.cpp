@@ -1364,7 +1364,7 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 			SetShaderArgument( pshadImager, token, static_cast<TqPchar>( value ) );
 		}
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			pshadImager->PrepareShaderForUse();
 	}
 	EXCEPTION_CATCH_GUARD("RiImagerV")
@@ -2019,7 +2019,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 			pShader->InitialiseParameters();
 
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			pShader->PrepareShaderForUse();
 
 		// Add it as a Context light as well in case we are in a context that manages it's own lights.
@@ -2143,7 +2143,7 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 		}
 
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			pshadSurface->PrepareShaderForUse();
 
 		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
@@ -2198,7 +2198,7 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 			SetShaderArgument( pshadAtmosphere, token, static_cast<TqPchar>( value ) );
 		}
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			pshadAtmosphere->PrepareShaderForUse();
 	}
 
@@ -2849,7 +2849,7 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 			SetShaderArgument( pshadDisplacement, token, static_cast<TqPchar>( value ) );
 		}
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			pshadDisplacement->PrepareShaderForUse();
 	}
 
@@ -5993,7 +5993,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 			SetShaderArgument( newlayer, token, static_cast<TqPchar>( value ) );
 		}
 		const TqInt* pMultipass = QGetRenderContext()->poptCurrent()->GetIntegerOption("Render", "multipass");
-		if(!(pMultipass && pMultipass[0]))
+		if(pMultipass && !pMultipass[0])
 			newlayer->PrepareShaderForUse();
 	}
 	EXCEPTION_CATCH_GUARD("RiShaderLayerV")
