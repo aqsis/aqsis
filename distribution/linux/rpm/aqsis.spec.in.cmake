@@ -176,9 +176,11 @@ rm -rf "$RPM_BUILD_ROOT"
 %dir %{_sysconfdir}/%{name}
 %config %{_sysconfdir}/%{name}/aqsisrc
 %dir %{_datadir}/%{name}
-%{_datadir}/%{name}/desktop/
 %{_datadir}/%{name}/scripts/
 %{_datadir}/%{name}/shaders/
+%{_datadir}/applications/
+%{_datadir}/mime/packages/
+%{_datadir}/pixmaps/
 
 
 %files devel
