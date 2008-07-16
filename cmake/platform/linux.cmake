@@ -18,10 +18,6 @@ SET(SCRIPTSDIR_NAME "scripts"
 	CACHE STRING "Name of scripts directory")
 SET(SCRIPTSDIR "share/aqsis/${SCRIPTSDIR_NAME}" 
 	CACHE STRING "Install location for scripts (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(DESKTOPDIR_NAME "desktop"
-	CACHE STRING "Name of desktop integration directory")
-SET(DESKTOPDIR "share/aqsis/${DESKTOPDIR_NAME}" 
-	CACHE STRING "Install location for desktop integration (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_ENABLE_AIRDBO)
 	SET(PROCEDURALPATH "${PROCEDURALPATH}%AIRHOME%/procedurals:")

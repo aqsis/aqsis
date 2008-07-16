@@ -128,17 +128,17 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 
 %post
 /sbin/ldconfig
-xdg-icon-resource install --novendor --size 192 %{_datadir}/%{name}/desktop/application.png aqsis
-xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/%{name}/desktop/mime.png application-x-slx
-xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/%{name}/desktop/mime.png model-x-rib
-xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/%{name}/desktop/mime.png model-x-rib-gzip
-xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/%{name}/desktop/mime.png text-x-sl
-xdg-desktop-menu install --novendor %{_datadir}/%{name}/desktop/aqsis.desktop
-xdg-desktop-menu install --novendor %{_datadir}/%{name}/desktop/aqsl.desktop
-xdg-desktop-menu install --novendor %{_datadir}/%{name}/desktop/aqsltell.desktop
-xdg-desktop-menu install --novendor %{_datadir}/%{name}/desktop/eqsl.desktop
-xdg-desktop-menu install --novendor %{_datadir}/%{name}/desktop/piqsl.desktop
-xdg-mime install --novendor %{_datadir}/%{name}/desktop/aqsis.xml
+xdg-icon-resource install --novendor --size 192 %{_datadir}/pixmaps/aqsis.png aqsis
+xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/pixmaps/aqsis-doc.png application-x-slx
+xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/pixmaps/aqsis-doc.png model-x-rib
+xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/pixmaps/aqsis-doc.png model-x-rib-gzip
+xdg-icon-resource install --novendor --context mimetypes --size 192 %{_datadir}/pixmaps/aqsis-doc.png text-x-sl
+xdg-desktop-menu install --novendor %{_datadir}/applications/aqsis.desktop
+xdg-desktop-menu install --novendor %{_datadir}/applications/aqsl.desktop
+xdg-desktop-menu install --novendor %{_datadir}/applications/aqsltell.desktop
+xdg-desktop-menu install --novendor %{_datadir}/applications/eqsl.desktop
+xdg-desktop-menu install --novendor %{_datadir}/applications/piqsl.desktop
+xdg-mime install --novendor %{_datadir}/mime/packages/aqsis.xml
 
 
 %postun
@@ -151,12 +151,12 @@ xdg-icon-resource uninstall --context mimetypes --size 192 application-x-slx
 xdg-icon-resource uninstall --context mimetypes --size 192 model-x-rib
 xdg-icon-resource uninstall --context mimetypes --size 192 model-x-rib-gzip
 xdg-icon-resource uninstall --context mimetypes --size 192 text-x-sl
-xdg-desktop-menu uninstall %{_datadir}/%{name}/desktop/aqsis.desktop
-xdg-desktop-menu uninstall %{_datadir}/%{name}/desktop/aqsl.desktop
-xdg-desktop-menu uninstall %{_datadir}/%{name}/desktop/aqsltell.desktop
-xdg-desktop-menu uninstall %{_datadir}/%{name}/desktop/eqsl.desktop
-xdg-desktop-menu uninstall %{_datadir}/%{name}/desktop/piqsl.desktop
-xdg-mime uninstall %{_datadir}/%{name}/desktop/aqsis.xml
+xdg-desktop-menu uninstall %{_datadir}/applications/aqsis.desktop
+xdg-desktop-menu uninstall %{_datadir}/applications/aqsl.desktop
+xdg-desktop-menu uninstall %{_datadir}/applications/aqsltell.desktop
+xdg-desktop-menu uninstall %{_datadir}/applications/eqsl.desktop
+xdg-desktop-menu uninstall %{_datadir}/applications/piqsl.desktop
+xdg-mime uninstall %{_datadir}/mime/packages/aqsis.xml
 
 
 %clean

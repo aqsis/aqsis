@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-	<mime-type type="image/x-exr">
-		<comment xml:lang="en">OpenEXR Image</comment>
-		<glob pattern="*.exr"/>
-	</mime-type>
 	<mime-type type="model/x-rib">
 		<comment xml:lang="en">RenderMan Geometry</comment>
 		<glob pattern="*.rib"/>

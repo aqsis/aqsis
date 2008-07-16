@@ -5,8 +5,6 @@
 
 
 ; Helper defines
-!define PACKAGE_SHELLEXT_EXR "View with @CMAKE_PROJECT_NAME@"
-!define PACKAGE_SHELLEXT_EXR_INFO "OpenEXR Image"
 !define PACKAGE_SHELLEXT_RIB "Render with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_RIB_INFO "RenderMan Geometry"
 !define PACKAGE_SHELLEXT_RIBGZ_INFO "RenderMan Geometry (Compressed)"
@@ -14,8 +12,6 @@
 !define PACKAGE_SHELLEXT_SL_INFO "RenderMan Shader"
 !define PACKAGE_SHELLEXT_SLX "Inspect with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_SLX_INFO "@CMAKE_PROJECT_NAME@ Shader"
-!define PACKAGE_SHELLEXT_TIF "View with @CMAKE_PROJECT_NAME@"
-!define PACKAGE_SHELLEXT_TIF_INFO "TIFF Image"
 !define PACKAGE_WEB_SITE "http://www.aqsis.org"
 !define PACKAGE_WEB_SUPPORT "http://www.aqsis.org/xoops/modules/newbb"
 !define PACKAGE_WEB_UPDATE "http://www.aqsis.org/xoops/modules/mydownloads"
@@ -285,12 +281,6 @@ Var /GLOBAL QUICKLAUCH_ICON
   !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
-    WriteRegStr HKCR ".exr" "" "@AQSIS_PROJECT_NAME_SHORT@.EXR"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR" "" "${PACKAGE_SHELLEXT_EXR_INFO}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\shell\open" "" "${PACKAGE_SHELLEXT_EXR}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
-
     WriteRegStr HKCR ".rib" "" "@AQSIS_PROJECT_NAME_SHORT@.RIB"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
@@ -315,19 +305,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
-
-    WriteRegStr HKCR ".tif" "" "@AQSIS_PROJECT_NAME_SHORT@.TIF"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
-
-    WriteRegStr HKCR ".tiff" "" "@AQSIS_PROJECT_NAME_SHORT@.TIFF"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF" "" "${PACKAGE_SHELLEXT_TIF_INFO}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\shell\open" "" "${PACKAGE_SHELLEXT_TIF}"
-    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF\shell\open\command" "" '"$INSTDIR\bin\piqsl.exe" "%1"'
-    file_end:
+	file_end:
 SectionEnd
 
 
