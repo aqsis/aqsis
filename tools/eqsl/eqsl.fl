@@ -71,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 2"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
@@ -139,6 +139,10 @@ else
 	renderEngineFile = fl_file_chooser.value();
 }
 
+std::vector<std::string> renderEngineArgsBundle;
+for(int i = 0; i < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); ++i)
+	renderEngineArgsBundle.push_back(renderEngineArgs[i]);
+
 // Call relevant commandline
 \#ifdef	AQSIS_SYSTEM_WIN32
 	char acPath[256];
@@ -155,16 +159,13 @@ else
 \#elif defined(AQSIS_SYSTEM_MACOSX)
 	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFURLRef contentRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, pluginRef);
-	CFURLRef resourceRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, contentRef, CFSTR("/Resources"), true);
+	CFURLRef resourceRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, contentRef, CFSTR("Resources"), true);
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	CFStringRef resourcePath = CFURLCopyFileSystemPath(resourceRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	const char *resourcePtr = CFStringGetCStringPtr(resourcePath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
 	program.append("/");
-	std::vector<std::string> renderEngineArgsBundle;
-	for(int i = 0; i < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); ++i)
-		renderEngineArgsBundle.push_back(renderEngineArgs[i]);
 	renderEngineArgsBundle.push_back(std::string("-displays=\\\"") + resourcePtr + "/lib\\\"");
 	renderEngineArgsBundle.push_back(std::string("-shaders=\\\"") + resourcePtr + "/shaders\\\"");
 \#else
@@ -173,10 +174,10 @@ else
 	commandLine = renderEngine + " ";
 	program.append(renderEngine);
 	std::vector<std::string> args;
-	for(TqInt arg = 0; arg < static_cast<TqInt>(sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0])); arg++)
+	for(std::vector<std::string>::iterator arg = renderEngineArgsBundle.begin(); arg != renderEngineArgsBundle.end(); ++arg)
 	{
-		args.push_back(renderEngineArgs[arg]);
-		commandLine += renderEngineArgs[arg] + " ";
+		args.push_back(*arg);
+		commandLine += *arg + " ";
 	}
 	args.push_back(renderEngineFile);
 	Aqsis::CqExecute tool(program, args, currentDirectory);

@@ -7,8 +7,18 @@ SET(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_SHORT}"
 	CACHE STRING "Bundle name for OS X"
 	)
 
-SET(SHADERPATH %AQSISHOME%/Contents/Resources/shaders)
-SET(DISPLAYPATH %AQSISHOME%/Contents/Resources/lib)
+SET(DEFAULT_SHADERPATH "./Contents/Resources/shaders")
+SET(DEFAULT_ARCHIVEPATH "./Contents/Resources")
+SET(DEFAULT_TEXTUREPATH "./Contents/Resources")
+SET(DEFAULT_DISPLAYPATH "./Contents/Resources/lib")
+SET(DEFAULT_PROCEDURALPATH "./Contents/Resources")
+SET(DEFAULT_RESOURCEPATH "./Contents/Resources")
+SET(SHADERPATH "%AQSISHOME%/Contents/Resources/shaders")
+SET(ARCHIVEPATH "%AQSISHOME%/Contents/Resources")
+SET(TEXTUREPATH "%AQSISHOME%/Contents/Resources")
+SET(DISPLAYPATH "%AQSISHOME%/Contents/Resources/lib")
+SET(PROCEDURALPATH "%AQSISHOME%/Contents/Resources")
+SET(RESOURCEPATH "%AQSISHOME%/Contents/Resources")
 
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/aqsisrc.in.cmake ${BUNDLEDIR}/aqsisrc)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/create_bundle.sh.in.cmake ${BUNDLEDIR}/create_bundle.sh)
