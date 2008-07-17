@@ -106,7 +106,7 @@ done
 
 ### Purge redundant content
 echo "Purging redundant content..."
-rm -rf $(find "$CONTENTS" -name ".svn")
+rm -rf $(find "$CONTENTS" -name ".svn") $(find "$CONTENTS" -name ".bat") $(find "$CONTENTS" -name "CMake")
 
 ### Create disk image (DMG)
 echo "Creating disk image..."
