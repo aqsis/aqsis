@@ -12,7 +12,8 @@ SCRATCH="${BUNDLEDIR}/scratch"
 SCRIPTS="$RESOURCES/scripts"
 SHADERDIR="$RESOURCES/shaders"
 INCLUDEDIR="$RESOURCES/include"
-CONTENTDIR="${CMAKE_SOURCE_DIR}/content"
+CONTENTSRC="${CMAKE_SOURCE_DIR}/content"
+CONTENTDIR="$SCRATCH/content"
 DISK_IMAGE="$APPLICATION_NAME-$VERSION-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.dmg"
 
 ### Purge files
@@ -25,6 +26,7 @@ mkdir -p "${BUNDLEDIR}"
 mkdir -p "$SCRATCH"
 mkdir -p "$BUNDLE"
 mkdir -p "$CONTENTS"
+mkdir -p "$CONTENTDIR"
 mkdir -p "$RESOURCES"
 mkdir -p "$FRAMEWORKS"
 mkdir -p "$MACOS"
@@ -106,7 +108,12 @@ done
 
 ### Purge redundant content
 echo "Purging redundant content..."
-rm -rf $(find "$CONTENTS" -name ".svn") $(find "$CONTENTS" -name ".bat") $(find "$CONTENTS" -name "CMake")
+rm -rf $(find "$CONTENTS" -name '.svn')
+
+### Prepare examples
+echo "Preparing examples..."
+cp -r "$CONTENTSRC" "$SCRATCH"
+rm -rf $(find "$CONTENTDIR" -name '.svn' -o -name '*.bat' -o -name 'CMakeLists.txt')
 
 ### Create disk image (DMG)
 echo "Creating disk image..."
