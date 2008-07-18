@@ -71,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 2"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
@@ -166,8 +166,8 @@ for(int i = 0; i < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); ++i)
 	const char *resourcePtr = CFStringGetCStringPtr(resourcePath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
 	program.append("/");
-	renderEngineArgsBundle.push_back(std::string("-displays=\\\"") + resourcePtr + "/lib\\\"");
-	renderEngineArgsBundle.push_back(std::string("-shaders=\\\"") + resourcePtr + "/shaders\\\"");
+	renderEngineArgsBundle.push_back(std::string("-displays=") + resourcePtr + "/lib");
+	renderEngineArgsBundle.push_back(std::string("-shaders=") + resourcePtr + "/shaders");
 \#else
 	std::string program;
 \#endif

@@ -46,6 +46,10 @@
 	#include <arpa/inet.h>
 	#define	INVALID_SOCKET -1
 #endif
+#ifdef AQSIS_SYSTEM_MACOSX
+  #include <Carbon/Carbon.h>
+#endif
+
 #include <tinyxml.h>
 
 #include "ndspy.h"
@@ -191,11 +195,29 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				if (!pid)
 				{
-					// TODO: need to pass verbosity level for logginng
+#if defined AQSIS_SYSTEM_MACOSX
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
+					// TODO: need to pass verbosity level for logginng
+					signal(SIGHUP, SIG_IGN);
+					if(execvp("piqsl",argv) < 0)
+					{
+						CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+						CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+						const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+						std::string program = pathPtr;
+						program.append("/piqsl");
+						argv[0] = strdup(program.c_str());
+						execvp(program.c_str(), argv);
+						free(argv[0]);
+					}
+					nice(2);
+#else
+					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
+					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
 					execvp("piqsl",argv);
 					nice(2);
+#endif
 				}
 			} 
 			else
