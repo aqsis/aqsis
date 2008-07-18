@@ -113,7 +113,7 @@ rm -rf $(find "$CONTENTS" -name '.svn')
 ### Prepare examples
 echo "Preparing examples..."
 cp -r "$CONTENTSRC" "$SCRATCH"
-rm -rf $(find "$CONTENTDIR" -name '.svn' -o -name '*.bat' -o -name 'CMakeLists.txt')
+rm -rf $(find "$CONTENTDIR" -name '.svn' -o -name '*.bat' -o -name 'CMake*.*')
 
 ### Create disk image (DMG)
 echo "Creating disk image..."
