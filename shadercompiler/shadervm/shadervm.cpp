@@ -1659,7 +1659,12 @@ void CqShaderVM::InitialiseParameters( )
 				pVMVal->SetMatrix( matTrans * m );
 			}
 			else
-				pVMVal->SetValueFromVariable(m_StoredArguments[i].m_Value);
+			{
+				if ( pArray )
+					pVMVal->ArrayEntry(arrayindex)->SetValueFromVariable( m_StoredArguments[i].m_Value->ArrayEntry(arrayindex));
+				else
+					pVMVal->SetValueFromVariable(m_StoredArguments[i].m_Value);
+			}
 
 			if ( pArray )
 			{
