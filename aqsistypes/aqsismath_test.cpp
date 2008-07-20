@@ -112,6 +112,12 @@ BOOST_AUTO_TEST_CASE(ceilPow2_test)
 	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x110), TqUint(0x200));
 }
 
+BOOST_AUTO_TEST_CASE(log2_test)
+{
+	BOOST_CHECK_CLOSE(Aqsis::log2(1), 0.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::log2(8), 3.0f, 0.00001f);
+}
+
 BOOST_AUTO_TEST_CASE(isClose_test)
 {
 	BOOST_CHECK(Aqsis::isClose(0,0));
