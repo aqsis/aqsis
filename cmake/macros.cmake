@@ -52,6 +52,24 @@ MACRO(SET_IF_EMPTY var)
 	ENDIF(var_EMPTY)
 ENDMACRO(SET_IF_EMPTY)
 
+
+#----------------------------------------------------------------------
+# Macro to prefix an input path with another path if the input path is not absolute.
+#
+# Input:
+#   input_path
+#   path_prefix - prefix for input_path
+# Output:
+#   output_path = path_prefix/input_path if input_path is relative
+#               = input_path if input_path is absolute.
+MACRO(SET_WITH_PATH_PREFIX output_path input_path path_prefix)
+	IF(IS_ABSOLUTE "${input_path}")
+		SET(${output_path} "${input_path}")
+	ELSE(IS_ABSOLUTE ${input_path})
+		SET(${output_path} "${path_prefix}/${input_path}")
+	ENDIF(IS_ABSOLUTE "${input_path}")
+ENDMACRO(SET_WITH_PATH_PREFIX)
+
 #----------------------------------------------------------------------
 # Macro to get the svn revision number
 MACRO( SVN_REPOSITORY_VERSION DESTVAR TOPDIR )
