@@ -1,5 +1,7 @@
 PROJECT(aqsis_all)
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.8 FATAL_ERROR)
+
 # Set some variables used within various resources, including installer scripts.
 SET(AQSIS_PROJECT_NAME "Aqsis Renderer")
 SET(AQSIS_PROJECT_NAME_SHORT "Aqsis")
