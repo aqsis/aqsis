@@ -9,7 +9,7 @@ MakeTexture "rpz.tif" "rpz.map" "clamp" "clamp" "gaussian" 2 2
 MakeTexture "rnz.tif" "rnz.map" "clamp" "clamp" "gaussian" 2 2
 
 
-Display "fisheye.tif" "file" "rgb"
+Display "fisheye.tif" "file" "rgba"
 Display "+fisheye.tif" "framebuffer" "rgba"
 
 Format 512 512 1
