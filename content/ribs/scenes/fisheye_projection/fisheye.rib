@@ -1,0 +1,28 @@
+#ReadArchive "environment_faces.rib"
+
+# Generate individual cube environment face maps
+MakeTexture "rpx.tif" "rpx.map" "clamp" "clamp" "gaussian" 2 2
+MakeTexture "rnx.tif" "rnx.map" "clamp" "clamp" "gaussian" 2 2
+MakeTexture "rpy.tif" "rpy.map" "clamp" "clamp" "gaussian" 2 2
+MakeTexture "rny.tif" "rny.map" "clamp" "clamp" "gaussian" 2 2
+MakeTexture "rpz.tif" "rpz.map" "clamp" "clamp" "gaussian" 2 2
+MakeTexture "rnz.tif" "rnz.map" "clamp" "clamp" "gaussian" 2 2
+
+
+Display "fisheye.tif" "file" "rgb"
+Display "+fisheye.tif" "framebuffer" "rgba"
+
+Format 512 512 1
+PixelSamples 2 2
+
+Imager "fisheye_projection"
+	"string texturename_px" "rpx.map"
+	"string texturename_nx" "rnx.map"
+	"string texturename_py" "rpy.map"
+	"string texturename_ny" "rny.map"
+	"string texturename_pz" "rpz.map"
+	"string texturename_nz" "rnz.map"
+	"float textureFov" 93
+	"float thetaMax" 180
+WorldBegin
+WorldEnd
