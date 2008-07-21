@@ -99,5 +99,5 @@ Known Issues
   * Piqsl only updates the non-zoomed image at present, meaning you will need to zoom-out to the 1:1 size to see render progress. #2022177
   * Smooth shading interpolation does not presently support depth-of-field and motion blur features.
   * The "expandgrids" attribute does not presently support semi-opaque surfaces and shadows using either "depthfilter" or "midpoint".
-  * Massive Software's "DynamicLoad" procedural plugin is presently not supported under Windows.
+  * Massive Software's "DynamicLoad" procedural plugin is presently not supported.
   * The "mpanalyse.py" Python script will not operate standalone and assumes both CGKit and PyOpenGL are installed on your system.
