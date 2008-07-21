@@ -71,7 +71,7 @@ decl {string currentDirectory = ".";} {}
 
 decl {string renderEngine = "aqsis";} {} 
 
-decl {string renderEngineArgs[] = {"-Progress", "-nocolor", "-v 2"};} {} 
+decl {string renderEngineArgs[] = {"-Progress", "-nocolor"};} {} 
 
 decl {string shaderCompilerArgs[] = {"-nocolor"};} {} 
 
