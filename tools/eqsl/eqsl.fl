@@ -271,6 +271,7 @@ m_outputHistory->add(commandLine.c_str());}
 	}
 	std::string program = root;
 	program.append("\\\\");
+
 \#elif defined(AQSIS_SYSTEM_MACOSX)
 	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
@@ -280,16 +281,39 @@ m_outputHistory->add(commandLine.c_str());}
 \#else
 	std::string program;
 \#endif
+
 	commandLine = renderViewer + " ";
 	program.append(renderViewer);
+\#ifndef AQSIS_SYSTEM_WIN32
 	std::vector<std::string> args;
 	Aqsis::CqExecute tool(program, args, currentDirectory);
 	Aqsis::CqExecute::TqCallback outputStdOut(&callback);
 	tool.setStdOutCallback(outputStdOut);
 	boost::thread thread(tool);
+\#else
+	PROCESS_INFORMATION piProcInfo;
+	STARTUPINFO siStartInfo;
+	BOOL bFuncRetn = FALSE;
 
+	ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+	siStartInfo.cb = sizeof(STARTUPINFO);
+	ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
+
+	char *command = "piqsl -i 127.0.0.1";
+	bFuncRetn = CreateProcess(NULL,
+							  command,       // command line
+							  NULL,          // process security attributes
+							  NULL,          // primary thread security attributes
+							  TRUE,          // handles are inherited
+							  IDLE_PRIORITY_CLASS,             // creation flags
+							  NULL,          // use parent's environment
+							  NULL,          // use parent's current directory
+							  &siStartInfo,  // STARTUPINFO pointer
+							  &piProcInfo);  // receives PROCESS_INFORMATION
+\#endif
+	
 // Log commandline event
-m_outputHistory->add(commandLine.c_str());}
+m_outputHistory->add(program.c_str());}
           xywh {0 0 100 20} divider
           code0 {o->shortcut(FL_COMMAND+'F');}
         }
