@@ -121,7 +121,7 @@ INCLUDE(FindResource)
 # some packaging variables are set in the platform-specific config files, and
 # these version variables are potentially used there.
 SET(MAJOR 1)
-SET(MINOR 3)
+SET(MINOR 5)
 SET(BUILD 0)
 SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
 
