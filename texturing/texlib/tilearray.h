@@ -612,7 +612,7 @@ CqTileArray<T>::CqIterator::CqIterator(const CqTileArray<T>& tileArray,
 				support.sy.isEmpty() ? 0 : m_tileY)->begin(m_support))
 {
 	// Make sure that inSupport() works correctly when the support is empty.
-	if(support.sx.isEmpty())
+	if(support.isEmpty())
 		m_tileY = m_tileYEnd;
 }
 

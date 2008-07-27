@@ -213,8 +213,10 @@ void filterTexture(SampleAccumT& sampleAccum, const ArrayT& buffer,
 {
 	if(!sampleAccum.setSampleVectorLength(buffer.numChannels()))
 		return;
+
 	// First accumulate samples across the part of the support which lies
-	// inside the buffer.
+	// inside the buffer.  Note that this may be empty; we could check for this
+	// first with support.intersectsRange() if it helps performance...
 	for(typename ArrayT::TqIterator i = buffer.begin(support); i.inSupport(); ++i)
 		sampleAccum.accumulate(i.x(), i.y(), *i);
 
