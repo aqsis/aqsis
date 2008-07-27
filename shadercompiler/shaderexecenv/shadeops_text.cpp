@@ -256,6 +256,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 	int dso_argc = cParams + 1; // dso_argv[0] is used for the return value
 	void **dso_argv = new void * [ dso_argc ] ;
 
+	// \todo <b>Code Review</b> SO_external is a pretty huge function - it should be split.
+
 	// create storage for the returned value
 	switch ( Result->Type() )
 	{
@@ -380,10 +382,21 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 						{
 							CqString s;
 							apParams[ p - 1 ] ->GetString( s, __iGrid );
-							char *ps = new char[ s.size() + 1 ];
-							strncpy ( ps, s.c_str(), s.size() + 1 );
-							( ( STRING_DESC* ) dso_argv[ p ] ) ->s = ps;
-							( ( STRING_DESC* ) dso_argv[ p ] ) ->bufflen = s.size() + 1;
+							TqInt requiredSize = s.size() + 1;
+							STRING_DESC* dsoStr
+								= reinterpret_cast<STRING_DESC*>(dso_argv[p]);
+							if(requiredSize > dsoStr->bufflen)
+							{
+								// We use malloc() intentionally here - since
+								// the DSO interface is C-based, DSO shadeops
+								// may presumably want to delete the memory
+								// using free() rather than delete.
+								free(dsoStr->s);
+								dsoStr->s = reinterpret_cast<char*>(
+										malloc(sizeof(char) * requiredSize));
+								dsoStr->bufflen = requiredSize;
+							}
+							strncpy(dsoStr->s, s.c_str(), requiredSize );
 						}
 						;
 						break;
@@ -594,31 +607,37 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 	{
 		switch ( apParams[ p - 1 ] ->Type() )
 		{
-				case type_float:
+			case type_float:
 				delete ( float* ) dso_argv[ p ];
 				break;
-				case type_point:
-				case type_triple:
-				case type_vector:
-				case type_normal:
-				case type_color:
-				case type_hpoint:
+			case type_point:
+			case type_triple:
+			case type_vector:
+			case type_normal:
+			case type_color:
+			case type_hpoint:
 				delete[] ( float* ) dso_argv[ p ];
 				break;
-				case type_string:
-				delete ( STRING_DESC* ) dso_argv[ p ];
+			case type_string:
+				{
+					STRING_DESC* dsoStr = reinterpret_cast<STRING_DESC*>(dso_argv[p]);
+					// Using free() rather than delete[] is intentional - see
+					// malloc usage above.
+					free(dsoStr->s);
+					delete dsoStr;
+				}
 				break;
-				case type_matrix:
-				case type_sixteentuple:
+			case type_matrix:
+			case type_sixteentuple:
 				delete[] ( float* ) dso_argv[ p ];
 				break;
-				default:
+			default:
 				// Unhandled TYpe
 				break;
 		};
 	};
 
-	delete dso_argv;
+	delete[] dso_argv;
 }
 
 
