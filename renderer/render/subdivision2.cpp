@@ -440,6 +440,40 @@ void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
 }
 
 //------------------------------------------------------------------------------
+template<class TypeA, class TypeB>
+void CqSubdivision2::DuplicateVertex(CqParameter* pParamToModify, CqLath* pVertex, TqInt iIndex)
+{
+	CqParameterTyped<TypeA, TypeB>* pParam
+		= static_cast<CqParameterTyped<TypeA, TypeB>*>(pParamToModify);
+	for(TqInt arrayindex = 0, arraysize = pParam->Count(); arrayindex < arraysize; arrayindex++ )
+	{
+		if(pParam->Class() == class_vertex || pParam->Class() == class_facevertex)
+		{
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_vertex )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+				IndexFunction = &CqLath::FaceVertexIndex;
+
+			pParam->pValue(iIndex)[arrayindex]	= pParam->pValue((pVertex->*IndexFunction)())[arrayindex];
+		}
+		else
+		{
+			// Get a pointer to the appropriate index accessor function on CqLath based on class.
+			TqInt (CqLath::*IndexFunction)() const;
+			if( pParam->Class() == class_varying )
+				IndexFunction = &CqLath::VertexIndex;
+			else
+				IndexFunction = &CqLath::FaceVertexIndex;
+
+			TypeA A = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
+			pParam->pValue( iIndex )[arrayindex] = A;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 /**
  *	Add a completely new vertex to the list.
  *	Appends a new vertex to the end of the list, updating the referencing
@@ -509,6 +543,85 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 					break;
 				case type_matrix:
 					//CreateVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
+					break;
+				default:
+					// left blank to avoid compiler warnings about unhandled types
+					break;
+			}
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+ *	Duplicate an existing vertex in the mesh.
+ *	Appends a new vertex to the end of the list, updating the referencing
+ *	table as well.
+ *
+ *	@return			The index of the new point.
+ */
+void CqSubdivision2::DuplicateVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
+{
+	iFVIndex=0;
+
+	// If -1 is passed in as the 'vertex' class index, we must create a new value.
+	bool fNewVertex = iVIndex < 0;
+
+	std::vector<CqParameter*>::iterator iUP;
+	TqInt iTime;
+
+	for( iTime = 0; iTime < cTimes(); iTime++ )
+	{
+		for( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
+		{
+			TqInt iIndex = ( *iUP )->Size();
+			// Store the index in the return variable based on its type.
+			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
+			{
+				if( fNewVertex )
+				{
+					assert( iVIndex<0 || iVIndex==iIndex );
+					iVIndex = iIndex;
+					( *iUP )->SetSize( iIndex+1 );
+					// Resize the vertex lath
+					m_aapVertices.resize(iVIndex+1);
+				}
+				else
+					continue;
+			}
+			else if( ( *iUP )->Class() == class_facevarying || ( *iUP )->Class() == class_facevertex )
+			{
+				assert( iFVIndex==0 || iFVIndex==iIndex );
+				iFVIndex = iIndex;
+				( *iUP )->SetSize( iIndex+1 );
+			}
+			else
+				continue;
+
+			switch((*iUP)->Type())
+			{
+				case type_float:
+					DuplicateVertex<TqFloat, TqFloat>(*iUP, pVertex, iIndex);
+					break;
+				case type_integer:
+					DuplicateVertex<TqInt, TqFloat>(*iUP, pVertex, iIndex);
+					break;
+				case type_point:
+				case type_normal:
+				case type_vector:
+					DuplicateVertex<CqVector3D, CqVector3D>(*iUP, pVertex, iIndex);
+					break;
+				case type_color:
+					DuplicateVertex<CqColor, CqColor>(*iUP, pVertex, iIndex);
+					break;
+				case type_hpoint:
+					DuplicateVertex<CqVector4D, CqVector3D>(*iUP, pVertex, iIndex);
+					break;
+				case type_string:
+					//DuplicateVertex<CqString, CqString>(*iUP, pVertex, iIndex);
+					break;
+				case type_matrix:
+					//DuplicateVertex<CqMatrix, CqMatrix>(*iUP, pVertex, iIndex);
 					break;
 				default:
 					// left blank to avoid compiler warnings about unhandled types
@@ -935,8 +1048,14 @@ CqSubdivision2* CqSubdivision2::Clone() const
  */
 bool CqSubdivision2::Finalise()
 {
-	for(std::vector<std::vector<CqLath*> >::const_iterator ivert=m_aapVertices.begin(); ivert!=m_aapVertices.end(); ivert++)
+	CqString objname( "unnamed" );
+	const CqString* pattrName = pPoints()->pAttributes()->GetStringAttribute( "identifier", "name" );
+	if ( pattrName != 0 )
+		objname = pattrName[ 0 ];
+	std::vector<std::vector<CqLath*> >::iterator ivert;
+	for(TqInt i = 0; i < m_aapVertices.size(); ++i)
 	{
+		ivert = m_aapVertices.begin() + i;
 		TqInt cLaths = (*ivert).size();
 
 		// If there is only one lath, it can't be connected to anything.
@@ -1016,7 +1135,25 @@ bool CqSubdivision2::Finalise()
 		// If we have not visited all the laths referencing this vertex, then we have a non-manifold situation.
 		if(cVisited < cLaths)
 		{
-			return( false );
+			Aqsis::log() << error << "Found a non-manifold vertex in the control hull of object \"" << objname.c_str() << "\" at vertex " << pCurrent->VertexIndex() << std::endl;
+			// Now create a duplicate vertex at the same position as this one, and move all
+			// remaining laths to point to that.
+			TqInt iNewVert=-1, iNewFVert;
+			DuplicateVertex(pCurrent, iNewVert, iNewFVert);
+			
+			for(TqInt iLath = 0; iLath < m_aapVertices[i].size(); ++iLath)
+			{
+				if(!aVisited[iLath])
+				{
+					std::vector<CqLath*>::iterator lath = m_aapVertices[i].begin() + iLath;
+					(*lath)->SetVertexIndex(iNewVert);
+					(*lath)->SetFaceVertexIndex(iNewFVert);
+					m_aapVertices[iNewVert].push_back((*lath));
+					m_aapVertices[i].erase(lath);
+					aVisited.erase(aVisited.begin() + iLath);
+					--iLath;
+				}
+			}
 		}
 	}
 

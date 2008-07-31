@@ -146,6 +146,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		void AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex);
 		void AddEdgeVertex(CqLath* pEdge, TqInt& iVIndex, TqInt& iFVIndex);
 		void AddFaceVertex(CqLath* pFace, TqInt& iVIndex, TqInt& iFVIndex);
+		void DuplicateVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex);
 
 		// Overrides from CqMotionSpec
 		virtual	void	ClearMotionObject( boost::shared_ptr<CqPolygonPoints>& A ) const
@@ -175,6 +176,9 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 				TqInt iIndex);
 		template<class TypeA, class TypeB>
 		void CreateFaceVertex(CqParameter* pParamToModify, CqLath* pFace,
+				TqInt iIndex);
+		template<class TypeA, class TypeB>
+		void DuplicateVertex(CqParameter* pParamToModify, CqLath* pVertex,
 				TqInt iIndex);
 
 		/// Array of pointers to laths, one each representing each facet.
