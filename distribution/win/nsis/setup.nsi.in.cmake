@@ -87,7 +87,7 @@ Page custom AdditionalTasks
 
 ; Reserve files
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini"
+ReserveFile "@WINPACKAGEDIR@\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
@@ -327,7 +327,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "@CMAKE_SOURCE_DIR@\distribution\win\nsis\page_tasks.ini" "page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "@WINPACKAGEDIR@\page_tasks.ini" "page_tasks.ini"
 FunctionEnd
 
 

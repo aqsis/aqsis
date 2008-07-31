@@ -5,7 +5,7 @@
 
 [Settings]
 NumFields=10
-Title=Aqsis Renderer 1.2.0 Setup
+Title=@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@ Setup
 CancelEnabled=1
 CancelShow=1
 BackEnabled=1
@@ -72,7 +72,7 @@ State=1
 
 [Field 8]
 Type=Label
-Text=Select the additional tasks you would like Setup to perform while installing Aqsis Renderer 1.2.0, then click Next.
+Text=Select the additional tasks you would like Setup to perform while installing @AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@, then click Next.
 Left=0
 Right=283
 Top=0
