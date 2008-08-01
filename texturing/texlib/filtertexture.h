@@ -30,6 +30,7 @@
 
 #include "aqsis.h"
 
+#include "autobuffer.h"
 #include "filtersupport.h"
 #include "wrapmode.h"
 
@@ -143,10 +144,10 @@ void filterWrappedBuffer(SampleAccumT& sampleAccum, const ArrayT& buffer,
 			|| (wrapModes.tWrap == WrapMode_Black && wrapY))
 	{
 		// If the tile is in a black wrapmode region, accumulate black samples.
-		std::vector<TqFloat> blackSamp(buffer.numChannels(), 0);
+		CqAutoBuffer<TqFloat, 16> blackSamp(buffer.numChannels(), 0);
 		for(TqInt ix = tileSupport.sx.start; ix < tileSupport.sx.end; ++ix)
 			for(TqInt iy = tileSupport.sy.start; iy < tileSupport.sy.end; ++iy)
-				sampleAccum.accumulate(ix, iy, &blackSamp[0]);
+				sampleAccum.accumulate(ix, iy, blackSamp.get());
 	}
 	else if(wrapModes.sWrap == WrapMode_Clamp && wrapX)
 	{

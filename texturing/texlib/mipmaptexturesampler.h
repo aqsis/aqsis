@@ -31,6 +31,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "autobuffer.h"
 #include "aqsismath.h"
 #include "ewafilter.h"
 #include "filtertexture.h"
@@ -63,58 +64,23 @@ class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
 		boost::shared_ptr<LevelCacheT> m_levels;
+
+		/** \brief Filter the given mipmap level into a sample array.
+		 *
+		 * \param level - level to filter
+		 * \param ewaFactory - factory containing parameters for creating ewa
+		 *                     filter weights.
+		 * \param sampleOpts - sample options
+		 * \param outSamps - destination array for samples.
+		 */
+		void filterLevel(TqInt level, const CqEwaFilterFactory& ewaFactory,
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-namespace detail
-{
-
-/** Class for scaling filter weights by a fixed scale amount
- *
- * This is useful for interpolating between two mipmap levels;
- * we want something like
- *
- * result = (1-interp) * map1_accumulated_samples + interp * map2_accumulated_samples
- *
- * And this can be achieved by scaling the samples during accumulation by
- * setting the scale factor in CqScaledWeights to (1-interp) and interp for
- * map1 and map2 respectively.  */
-template<typename WeightsT>
-class CqScaledWeights
-{
-	private:
-		const WeightsT* m_weights;
-		TqFloat m_scale;
-	public:
-		CqScaledWeights(const WeightsT& weights, TqFloat scale)
-			: m_weights(&weights),
-			m_scale(scale)
-		{ }
-		TqFloat operator()(TqInt i, TqInt j) const
-		{
-			return m_scale*(*m_weights)(i,j);
-		}
-		static bool isNormalized()
-		{
-			// Almost certainly not normalized.
-			return false;
-		}
-		void setWeights(const WeightsT& weights)
-		{
-			m_weights = &weights;
-		}
-		void setWeightScale(TqFloat scale)
-		{
-			m_scale = scale;
-		}
-};
-
-} // namespace detail
-
-//------------------------------------------------------------------------------
 // CqMipmapTextureSampler implementation
 template<typename LevelCacheT>
 CqMipmapTextureSampler<LevelCacheT>::CqMipmapTextureSampler(
@@ -126,7 +92,6 @@ template<typename LevelCacheT>
 void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	/// \todo Refactor this function - it's getting rather long and unweildly.
 	SqSampleQuad quad = sampleQuad;
 	quad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
@@ -168,11 +133,11 @@ void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 	TqFloat levelCts = log2(ewaFactory.minorAxisWidth()/minFilterWidth);
 	TqInt level = clamp<TqInt>(lfloor(levelCts), 0, m_levels->numLevels()-1);
 
-	// Create filter functor for first chosen level
-	const SqLevelTrans& trans = m_levels->levelTrans(level);
-	CqEwaFilter ewaWeights = ewaFactory.createFilter(trans.xScale, trans.xOffset,
-			trans.yScale, trans.yOffset);
+	filterLevel(level, ewaFactory, sampleOpts, outSamps);
 
+	// Sometimes we might want to interpolate between the filtered result
+	// already computed above and the next lower mipmap level.  We do that now
+	// if necessary.
 	if( ( sampleOpts.lerp() == Lerp_Always
 		|| (sampleOpts.lerp() == Lerp_Auto && usingBlur && blurRatio > 0.2) )
 		&& level < m_levels->numLevels()-1 )
@@ -186,46 +151,27 @@ void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 		// interpolation near level transitions is necessary to ensure that
 		// they're smooth and invisible.
 		//
-		// Such interpolation is only necessary when large regions of the
+		// Such interpolation is mainly necessary when large regions of the
 		// output image arise from filtering over a small part of a high mipmap
 		// level - something which only occurs with artifically large filter
 		// widths such as those arising from lots of blur.
 		//
 		// Since this extra interpolation isn't really needed for small amounts
-		// of blur, we only do the interpolation when the blur Ratio is large
+		// of blur, we only do the interpolation when the blur ratio is large
 		// enough to make it worthwhile.
 
-		// renormalize levelInterp into the range [0,1]
-		TqFloat levelInterp = levelCts - level;
-		typedef detail::CqScaledWeights<CqEwaFilter> TqScaledWeights;
-		TqScaledWeights scaledWeights(ewaWeights, 1-levelInterp);
-		CqSampleAccum<TqScaledWeights> accumulator(scaledWeights,
-				sampleOpts.startChannel(), sampleOpts.numChannels(),
-				outSamps, sampleOpts.fill());
-		// Filter first mipmap level
-		filterTexture(accumulator, m_levels->level(level), ewaWeights.support(),
-				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
+		// Filter second level into tmpSamps.
+		CqAutoBuffer<TqFloat, 16> tmpSamps(sampleOpts.numChannels());
+		filterLevel(level+1, ewaFactory, sampleOpts, tmpSamps.get());
 
-		// Create filter functor for next chosen level, and adjust the scaled
-		// weights to use it.
-		const SqLevelTrans& trans2 = m_levels->levelTrans(level+1);
-		CqEwaFilter ewaWeights2 = ewaFactory.createFilter(trans2.xScale, trans2.xOffset,
-				trans2.yScale, trans2.yOffset);
-		scaledWeights.setWeights(ewaWeights2);
-		// Adjust filter weight for the linear interpolation
-		scaledWeights.setWeightScale(levelInterp);
-		// Filter second mipmap level
-		filterTexture(accumulator, m_levels->level(level+1), ewaWeights2.support(),
-				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
-	}
-	else
-	{
-		// Sample a single mipmap level without interpolation.
-		CqSampleAccum<CqEwaFilter> accumulator(ewaWeights,
-				sampleOpts.startChannel(), sampleOpts.numChannels(),
-				outSamps, sampleOpts.fill());
-		filterTexture(accumulator, m_levels->level(level), ewaWeights.support(),
-				SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode()));
+		// Mix outSamps and tmpSamps.
+		TqFloat levelInterp = levelCts - level;
+		// We square levelInterp here in order to bias the interpolation toward
+		// the higher resolution mipmap level, since the filtered result on the
+		// higher level is more accurate.
+		levelInterp *= levelInterp;
+		for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
+			outSamps[i] = (1-levelInterp) * outSamps[i] + levelInterp*tmpSamps[i];
 	}
 }
 
@@ -236,6 +182,33 @@ CqMipmapTextureSampler<LevelCacheT>::defaultSampleOptions() const
 	return m_levels->defaultSampleOptions();
 }
 
+template<typename LevelCacheT>
+void CqMipmapTextureSampler<LevelCacheT>::filterLevel(
+		TqInt level, const CqEwaFilterFactory& ewaFactory,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	// Create filter weights for chosen level.
+	const SqLevelTrans& trans = m_levels->levelTrans(level);
+	CqEwaFilter weights = ewaFactory.createFilter(
+		trans.xScale, trans.xOffset,
+		trans.yScale, trans.yOffset
+	);
+	// Create an accumulator for the samples.
+	CqSampleAccum<CqEwaFilter> accumulator(
+		weights,
+		sampleOpts.startChannel(),
+		sampleOpts.numChannels(),
+		outSamps,
+		sampleOpts.fill()
+	);
+	// filter the texture
+	filterTexture(
+		accumulator,
+		m_levels->level(level),
+		weights.support(),
+		SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode())
+	);
+}
 
 } // namespace Aqsis
 

@@ -206,10 +206,10 @@ class CqEwaFilterFactory
 		 * \param yOff - see xOff
 		 */
 		CqEwaFilter createFilter(TqFloat xScale = 1, TqFloat xOff = 0,
-				TqFloat yScale = 1, TqFloat yOff = 0);
+				TqFloat yScale = 1, TqFloat yOff = 0) const;
 
 		/// Get the width of the filter along the minor axis of the ellipse
-		TqFloat minorAxisWidth();
+		TqFloat minorAxisWidth() const;
 	private:
 		/** \brief Compute and cache EWA filter coefficients
 		 *
@@ -263,7 +263,7 @@ inline CqEwaFilterFactory::CqEwaFilterFactory(const SqSampleQuad& sQuad,
 }
 
 inline CqEwaFilter CqEwaFilterFactory::createFilter(TqFloat xScale, TqFloat xOff,
-		TqFloat yScale, TqFloat yOff)
+		TqFloat yScale, TqFloat yOff) const
 {
 	// Special case for the first mipmap level.
 	if(xScale == 1 && yScale == 1 && xOff == 0 && yOff == 0)
@@ -284,7 +284,7 @@ inline CqEwaFilter CqEwaFilterFactory::createFilter(TqFloat xScale, TqFloat xOff
 			m_logEdgeWeight);
 }
 
-inline TqFloat CqEwaFilterFactory::minorAxisWidth()
+inline TqFloat CqEwaFilterFactory::minorAxisWidth() const
 {
 	return m_minorAxisWidth;
 }
