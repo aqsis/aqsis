@@ -109,6 +109,8 @@ class CqMipmapLevelCache
 		 * mode).
 		 */
 		const CqTextureSampleOptions& defaultSampleOptions();
+		/// Returns the underlying texture file attribute header
+		const CqTexFileHeader& header() const;
 	private:
 		/// Initialize all mipmap levels
 		void initLevels();
@@ -205,7 +207,12 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 		levelHeight = max((levelHeight+1)/2, 1);
 		// check expected dimensions against actual dimensions.
 		if(levelWidth != m_texFile->width(i) || levelHeight != m_texFile->height(i))
+		{
+			m_levels.resize(i-1);
+			// TODO: Make this throw again after makeTexture works with env maps.
+			break;
 			AQSIS_THROW(XqBadTexture, "Mipmap level has incorrect size");
+		}
 		// set up scaling and offset transformation for this level.
 		TqFloat levelScale = 1.0/(1 << i);
 		m_levelTransforms.push_back( SqLevelTrans(
@@ -269,6 +276,12 @@ template<typename TextureBufferT>
 inline const CqTextureSampleOptions& CqMipmapLevelCache<TextureBufferT>::defaultSampleOptions()
 {
 	return m_defaultSampleOptions;
+}
+
+template<typename TextureBufferT>
+const CqTexFileHeader& CqMipmapLevelCache<TextureBufferT>::header() const
+{
+	return m_texFile->header();
 }
 
 } // namespace Aqsis

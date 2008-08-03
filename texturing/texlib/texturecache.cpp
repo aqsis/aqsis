@@ -28,6 +28,7 @@
 
 #include "exception.h"
 #include "file.h"
+#include "ienvironmentsampler.h"
 #include "ishadowsampler.h"
 #include "itiledtexinputfile.h"
 #include "itexturesampler.h"
@@ -42,6 +43,7 @@ namespace Aqsis {
 
 CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)
 	: m_textureCache(),
+	m_environmentCache(),
 	m_shadowCache(),
 	m_texFileCache(),
 	m_currToWorld(),
@@ -53,6 +55,11 @@ IqTextureSampler& CqTextureCache::findTextureSampler(const char* name)
 	return findSampler(m_textureCache, name);
 }
 
+IqEnvironmentSampler& CqTextureCache::findEnvironmentSampler(const char* name)
+{
+	return findSampler(m_environmentCache, name);
+}
+
 IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
 {
 	return findSampler(m_shadowCache, name);
@@ -61,6 +68,7 @@ IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
 void CqTextureCache::flush()
 {
 	m_textureCache.clear();
+	m_environmentCache.clear();
 	m_shadowCache.clear();
 	m_texFileCache.clear();
 }

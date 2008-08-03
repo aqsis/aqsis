@@ -41,6 +41,7 @@ namespace Aqsis {
 
 class IqTextureSampler;
 class IqShadowSampler;
+class IqEnvironmentSampler;
 class IqTiledTexInputFile;
 class CqTexFileHeader;
 
@@ -67,6 +68,14 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 * \param name - the texture name.
 		 */
 		IqTextureSampler& findTextureSampler(const char* name);
+		/** \brief Find a texture sampler in the cache or load from file if not found.
+		 *
+		 * If any problems are encountered in opening the texture, issue a
+		 * warning to Aqsis::log(), and return a dummy sampler.
+		 *
+		 * \param name - the texture name.
+		 */
+		IqEnvironmentSampler& findEnvironmentSampler(const char* name);
 		/** \brief Find a shadow sampler in the cache or load from file if not found.
 		 *
 		 * If any problems are encountered in opening the shadow texture, issue
@@ -132,6 +141,7 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 
 		/// Cached textures live in here
 		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
+		std::map<TqUlong, boost::shared_ptr<IqEnvironmentSampler> > m_environmentCache;
 		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
 		/// Cached texture files live in here:
 		std::map<TqUlong, boost::shared_ptr<IqTiledTexInputFile> > m_texFileCache;

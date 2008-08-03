@@ -37,11 +37,6 @@
 
 namespace Aqsis {
 
-const char* g_plainTextureFormatStr = "Plain Texture";
-const char* g_cubeEnvTextureFormatStr = "CubeFace Environment";
-const char* g_latlongEnvTextureFormatStr = "LatLong Environment";
-const char* g_shadowTextureFormatStr = "Shadow";
-
 
 //------------------------------------------------------------------------------
 namespace {
@@ -150,7 +145,7 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 
 	// Set some attributes in the new file header.
 	header.set<Attr::WrapModes>(wrapModes);
-	header.set<Attr::TextureFormat>(g_plainTextureFormatStr);
+	header.set<Attr::TextureFormat>(TextureFormat_Plain);
 	header.set<Attr::TileInfo>(SqTileInfo(32,32));
 
 	if(const char* const* comp = paramList.find<char*>("compression"))

@@ -63,6 +63,7 @@ boost::shared_ptr<IqTextureSampler> createMipmapSampler(
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
+	// TODO: Warn about attempts to open textures with unusual TextureFormat.
 	if(!file)
 		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
 	switch(file->header().channelList().sharedChannelType())

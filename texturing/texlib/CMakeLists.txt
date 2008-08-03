@@ -18,9 +18,11 @@ SET(AQSISTEX_SRCS
 	bake.cpp
 	channelinfo.cpp
 	channellist.cpp
+	dummyenvironmentsampler.cpp
 	dummytexturesampler.cpp
 	ewafilter.cpp
 	cachedfilter.cpp
+	ienvironmentsampler.cpp
 	imagechannel.cpp
 	ishadowsampler.cpp
 	itexinputfile.cpp
@@ -49,12 +51,16 @@ SET(AQSISTEX_HDRS
 	cachedfilter.h
 	channelinfo.h
 	channellist.h
+	dummyenvironmentsampler.h
 	dummyshadowsampler.h
 	dummytexturesampler.h
+	cubeenvironmentsampler.h
+	latlongenvironmentsampler.h
 	ewafilter.h
 	exrinputfile.h
 	filtersupport.h
 	filtertexture.h
+	ienvironmentsampler.h
 	iimagechannel.h
 	imagechannel.h
 	imagefiletype.h

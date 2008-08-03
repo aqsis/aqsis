@@ -43,9 +43,49 @@ namespace Aqsis
 AQSIS_DECLARE_EXCEPTION(XqUnknownTiffFormat, XqInternal);
 
 //------------------------------------------------------------------------------
-// Helper functions and data for dealing with tiff compression
+// Helper functions and data for dealing with tiff <--> header conversions.
 //------------------------------------------------------------------------------
 namespace {
+
+/// String constants which describe the various texture types.
+const char* plainTextureFormatStr = "Plain Texture";
+const char* cubeEnvTextureFormatStr = "CubeFace Environment";
+const char* latlongEnvTextureFormatStr = "LatLong Environment";
+const char* shadowTextureFormatStr = "Shadow";
+
+/// Convert from a string to an EqTextureFormat
+EqTextureFormat texFormatFromString(const std::string& str)
+{
+	if(str == plainTextureFormatStr)
+		return TextureFormat_Plain;
+	else if(str == cubeEnvTextureFormatStr)
+		return TextureFormat_CubeEnvironment;
+	else if(str == latlongEnvTextureFormatStr)
+		return TextureFormat_LatlongEnvironment;
+	else if(str == shadowTextureFormatStr)
+		return TextureFormat_Shadow;
+	return TextureFormat_Unknown;
+}
+
+/// Convert from an EqTextureFormat to a string.
+const char* texFormatToString(EqTextureFormat format)
+{
+	switch(format)
+	{
+		case TextureFormat_Plain:
+			return plainTextureFormatStr;
+		case TextureFormat_CubeEnvironment:
+			return cubeEnvTextureFormatStr;
+		case TextureFormat_LatlongEnvironment:
+			return latlongEnvTextureFormatStr;
+		case TextureFormat_Shadow:
+			return shadowTextureFormatStr;
+		case TextureFormat_Unknown:
+			return "unknown";
+	}
+	assert("unhandled format type" && 0);
+	return "unknown"; // shut up compiler warning.
+}
 
 typedef std::pair<uint16, const char*> TqComprPair;
 TqComprPair comprTypesInit[] = {
@@ -264,6 +304,12 @@ const float* attrTypeToTiff(const CqMatrix& attr)
 {
 	return attr.pElements();
 }
+// Specialize for EqTextureFormat -> const char*
+template<>
+const char* attrTypeToTiff(const EqTextureFormat& format)
+{
+	return texFormatToString(format);
+}
 
 /**
  * Add an attribute with the given tag and name from the header to the given
@@ -300,9 +346,9 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	addAttributeToTiff<Attr::WorldToCameraMatrix,const float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
 
-	/** \todo Add the following optional attributes:
-	 *  - "FieldOfViewCotan" TIFFTAG_PIXAR_FOVCOT,
-	 */
+	// Add cotan of the field of view.
+	addAttributeToTiff<Attr::FieldOfViewCot,float>(
+			TIFFTAG_PIXAR_FOVCOT, header, *this);
 
 	// Set texture wrap mode string
 	const SqWrapModes* wrapModes = header.findPtr<Attr::WrapModes>();
@@ -359,6 +405,19 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 
 namespace {
 
+template<typename Tattr, typename Ttiff>
+typename Tattr::type attrTypeFromTiff(const Ttiff& tiffAttr)
+{
+	return typename Tattr::type(tiffAttr);
+}
+// specialize for const char* -> EqTextureFormat
+template<>
+EqTextureFormat attrTypeFromTiff<Attr::TextureFormat, const char*>(
+		const char* const& texFormatStr)
+{
+	return texFormatFromString(texFormatStr);
+}
+
 /// Extract an attribute from dirHandle and add it to header, if present.
 template<typename Tattr, typename Ttiff>
 void addAttributeToHeader(ttag_t tag, CqTexFileHeader& header,
@@ -366,7 +425,7 @@ void addAttributeToHeader(ttag_t tag, CqTexFileHeader& header,
 {
 	Ttiff temp;
 	if(TIFFGetField(dirHandle.tiffPtr(), tag, &temp))
-		header.set<Tattr>(typename Tattr::type(temp));
+		header.set<Tattr>(attrTypeFromTiff<Tattr, Ttiff>(temp));
 }
 
 /// Add texture wrap modes to the header if they can be found in the TIFF.
@@ -396,7 +455,7 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 	addAttributeToHeader<Attr::HostName,char*>(TIFFTAG_HOSTCOMPUTER, header, *this);
 	addAttributeToHeader<Attr::Description,char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
 	addAttributeToHeader<Attr::DateTime,char*>(TIFFTAG_DATETIME, header, *this);
-	addAttributeToHeader<Attr::TextureFormat,char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
+	addAttributeToHeader<Attr::TextureFormat,const char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
 
 	// Add texturemap-specific stuff to the header if it exists.
 	addWrapModesToHeader(header, *this);
@@ -406,6 +465,9 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
 	addAttributeToHeader<Attr::WorldToCameraMatrix,float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
+	// Add cotan of the field of view.
+	addAttributeToHeader<Attr::FieldOfViewCot,float>(
+			TIFFTAG_PIXAR_FOVCOT, header, *this);
 
 	// Retrieve tags relevant to the display window
 	// The origin of the image is apparently given in resolution units, but

@@ -57,14 +57,6 @@ struct SqFilterInfo
 
 
 //------------------------------------------------------------------------------
-/// String constants which describe the various texture types.
-extern const char* g_plainTextureFormatStr;
-extern const char* g_cubeEnvTextureFormatStr;
-extern const char* g_latlongEnvTextureFormatStr;
-extern const char* g_shadowTextureFormatStr;
-
-
-//------------------------------------------------------------------------------
 /** \brief Convert a plain texture file to the mipmapped format used internally.
  *
  * See mipmap.h for details on the assumptions behind mipmapping in aqsis.

@@ -65,6 +65,17 @@ struct SqTileInfo
 };
 
 //------------------------------------------------------------------------------
+/// Enumeration specifying the texture format
+enum EqTextureFormat
+{
+	TextureFormat_Plain,
+	TextureFormat_CubeEnvironment,
+	TextureFormat_LatlongEnvironment,
+	TextureFormat_Shadow,
+	TextureFormat_Unknown
+};
+
+//------------------------------------------------------------------------------
 /** \brief Standard image header attributes.
  *
  * This namespace contains all the "tag" structs which represent possible image
@@ -144,7 +155,9 @@ namespace Attr
 	AQSIS_IMAGE_ATTR_TAG(WrapModes, SqWrapModes);
 	// texture format (one of "texture" "shadow" or "environment" ? )
 	/// \todo Decide on standard names for these.
-	AQSIS_IMAGE_ATTR_TAG(TextureFormat, std::string);
+	AQSIS_IMAGE_ATTR_TAG(TextureFormat, EqTextureFormat);
+	// cotan(FOV/2) - this is needed for environment map lookup
+	AQSIS_IMAGE_ATTR_TAG(FieldOfViewCot, TqFloat);
 
 	//--------------------------------------------------
 	/// Transformation matrices
