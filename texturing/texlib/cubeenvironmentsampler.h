@@ -87,7 +87,7 @@ CqCubeEnvironmentSampler<LevelCacheT>::CqCubeEnvironmentSampler(
 {
 	// Validate the environment map...
 	const CqTexFileHeader& header = levels->header();
-	m_fovCotan = header.find<Attr::FieldOfViewCot>();
+	m_fovCotan = header.find<Attr::FieldOfViewCot>(1);
 	// TODO: figure out why using levels->header().find<Attr::FieldOfViewCot>(1)) doesn't work!
 }
 

@@ -42,7 +42,9 @@ boost::shared_ptr<IqEnvironmentSampler> createEnvSampler(
 {
 	typedef CqMipmapLevelCache<CqTileArray<T> > TqLevelCache;
 	boost::shared_ptr<TqLevelCache> levels(new TqLevelCache(file));
-	switch(file->header().find<Attr::TextureFormat>(TextureFormat_Unknown))
+	// TODO: Determine why g++ seems to want a temporary here.
+	const CqTexFileHeader& header = file->header();
+	switch(header.find<Attr::TextureFormat>(TextureFormat_Unknown))
 	{
 		case TextureFormat_CubeEnvironment:
 			return boost::shared_ptr<IqEnvironmentSampler>(
