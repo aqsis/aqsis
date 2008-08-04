@@ -1053,7 +1053,7 @@ bool CqSubdivision2::Finalise()
 	if ( pattrName != 0 )
 		objname = pattrName[ 0 ];
 	std::vector<std::vector<CqLath*> >::iterator ivert;
-	for(TqInt i = 0; i < m_aapVertices.size(); ++i)
+	for(TqInt i = 0; i < static_cast<TqInt>(m_aapVertices.size()); ++i)
 	{
 		ivert = m_aapVertices.begin() + i;
 		TqInt cLaths = (*ivert).size();
@@ -1141,7 +1141,7 @@ bool CqSubdivision2::Finalise()
 			TqInt iNewVert=-1, iNewFVert;
 			DuplicateVertex(pCurrent, iNewVert, iNewFVert);
 			
-			for(TqInt iLath = 0; iLath < m_aapVertices[i].size(); ++iLath)
+			for(TqInt iLath = 0; iLath < static_cast<TqInt>(m_aapVertices[i].size()); ++iLath)
 			{
 				if(!aVisited[iLath])
 				{

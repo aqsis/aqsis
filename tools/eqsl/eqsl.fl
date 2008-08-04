@@ -140,7 +140,7 @@ else
 }
 
 std::vector<std::string> renderEngineArgsBundle;
-for(int i = 0; i < sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0]); ++i)
+for(TqInt i = 0; i < static_cast<TqInt>(sizeof(renderEngineArgs)/sizeof(renderEngineArgs[0])); ++i)
 	renderEngineArgsBundle.push_back(renderEngineArgs[i]);
 
 // Call relevant commandline
