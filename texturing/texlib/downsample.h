@@ -24,8 +24,8 @@
  * \author Chris Foster  [chris42f _at_ gmail.com]
  */
 
-#ifndef MIPMAP_H_INCLUDED
-#define MIPMAP_H_INCLUDED
+#ifndef DOWNSAMPLE_H_INCLUDED
+#define DOWNSAMPLE_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -220,4 +220,4 @@ boost::shared_ptr<ArrayT> downsample(const ArrayT& srcBuf,
 
 } // namespace Aqsis
 
-#endif // MIPMAP_H_INCLUDED
+#endif // DOWNSAMPLE_H_INCLUDED

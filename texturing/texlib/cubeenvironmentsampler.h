@@ -34,7 +34,7 @@
 #include "aqsismath.h"
 #include "ewafilter.h"
 #include "ienvironmentsampler.h"
-#include "mipmaplevelcache.h"
+#include "mipmap.h"
 #include "texfileattributes.h"
 
 namespace Aqsis {

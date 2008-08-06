@@ -40,7 +40,7 @@ template<typename T>
 boost::shared_ptr<IqEnvironmentSampler> createEnvSampler(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	typedef CqMipmapLevelCache<CqTileArray<T> > TqLevelCache;
+	typedef CqMipmap<CqTileArray<T> > TqLevelCache;
 	boost::shared_ptr<TqLevelCache> levels(new TqLevelCache(file));
 	// Note: We need the temporary here, since at least one g++ version, 4.0.1
 	// on OSX complains about the expression 

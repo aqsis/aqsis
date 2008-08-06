@@ -73,8 +73,7 @@ SET(AQSISTEX_HDRS
 	itiledtexinputfile.h
 	magicnumber.h
 	maketexture.h
-	mipmaplevelcache.h
-	mipmaptexturesampler.h
+	mipmap.h
 	mixedimagebuffer.h
 	randomtable.h
 	sampleaccum.h
@@ -87,6 +86,7 @@ SET(AQSISTEX_HDRS
 	texturebuffer.h
 	texturecache.h
 	texturesampleoptions.h
+	texturesampler.h
 	tiffdirhandle.h
 	tifffile_test.h
 	tiffinputfile.h

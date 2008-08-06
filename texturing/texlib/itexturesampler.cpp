@@ -32,7 +32,7 @@
 
 #include "dummytexturesampler.h"
 #include "itexinputfile.h"
-#include "mipmaptexturesampler.h"
+#include "texturesampler.h"
 #include "texturebuffer.h"
 #include "tilearray.h"
 
@@ -47,10 +47,10 @@ template<typename T>
 boost::shared_ptr<IqTextureSampler> createMipmapSampler(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	typedef CqMipmapLevelCache<CqTileArray<T> > TqLevelCache;
+	typedef CqMipmap<CqTileArray<T> > TqLevelCache;
 	boost::shared_ptr<TqLevelCache> levels(new TqLevelCache(file));
 	boost::shared_ptr<IqTextureSampler> sampler(
-			new CqMipmapTextureSampler<TqLevelCache>(levels));
+			new CqTextureSampler<TqLevelCache>(levels));
 	return sampler;
 }
 

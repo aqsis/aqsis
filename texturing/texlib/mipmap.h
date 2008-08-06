@@ -24,8 +24,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef LEVELSAMPLERCACHE_H_INCLUDED
-#define LEVELSAMPLERCACHE_H_INCLUDED
+#ifndef MIPMAP_H_INCLUDED
+#define MIPMAP_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -49,26 +49,26 @@ namespace Aqsis
 struct SqLevelTrans;
 
 //------------------------------------------------------------------------------
-/** \brief Mipmap container.
+/** \brief Mipmap level container and sampler class.
  *
- * This class holds a set of associated 2D textures, such as mipmap levels,
- * independently of any of any details of the sampling procedure.
+ * CqMipmap holds a set of mipmap levels, and allows sampling of the mipmap
+ * with correct choice of level for a given filter size.
  *
  * Texture buffers in the cache are constructed on-demand.
  * 
- * In addition to holding a set of buffers, this class also caches the default
- * sampling options, as determined from attributes of the texture file.  When
- * these aren't present, we attempt to choose sensible defaults.
+ * In addition to holding/sampling a set of buffers, this class also caches the
+ * default sampling options, as determined from attributes of the texture file.
+ * When these aren't present, we attempt to choose sensible defaults.
  */
 template<typename TextureBufferT>
-class CqMipmapLevelCache
+class CqMipmap
 {
 	public:
 		/** \brief Construct the cache from an open file.
 		 *
 		 * \param file - read texture data from here.
 		 */
-		CqMipmapLevelCache(const boost::shared_ptr<IqTiledTexInputFile>& file);
+		CqMipmap(const boost::shared_ptr<IqTiledTexInputFile>& file);
 		/// Get the width of the level0 image in the mipmap.
 		TqInt width0() const;
 		/// Get the height of the level0 image in the mipmap.
@@ -200,9 +200,9 @@ inline SqLevelTrans::SqLevelTrans(TqFloat xScale, TqFloat xOffset,
 
 
 //------------------------------------------------------------------------------
-// CqMipmapLevelCache
+// CqMipmap
 template<typename TextureBufferT>
-CqMipmapLevelCache<TextureBufferT>::CqMipmapLevelCache(
+CqMipmap<TextureBufferT>::CqMipmap(
 			const boost::shared_ptr<IqTiledTexInputFile>& file)
 	: m_texFile(file),
 	m_levels(),
@@ -217,32 +217,32 @@ CqMipmapLevelCache<TextureBufferT>::CqMipmapLevelCache(
 }
 
 template<typename TextureBufferT>
-inline TqInt CqMipmapLevelCache<TextureBufferT>::width0() const
+inline TqInt CqMipmap<TextureBufferT>::width0() const
 {
 	return m_width0;
 }
 
 template<typename TextureBufferT>
-inline TqInt CqMipmapLevelCache<TextureBufferT>::height0() const
+inline TqInt CqMipmap<TextureBufferT>::height0() const
 {
 	return m_height0;
 }
 
 template<typename TextureBufferT>
-inline const CqTextureSampleOptions& CqMipmapLevelCache<TextureBufferT>::defaultSampleOptions()
+inline const CqTextureSampleOptions& CqMipmap<TextureBufferT>::defaultSampleOptions()
 {
 	return m_defaultSampleOptions;
 }
 
 template<typename TextureBufferT>
-const CqTexFileHeader& CqMipmapLevelCache<TextureBufferT>::header() const
+const CqTexFileHeader& CqMipmap<TextureBufferT>::header() const
 {
 	return m_texFile->header();
 }
 
 template<typename TextureBufferT>
 template<typename FilterFactoryT>
-void CqMipmapLevelCache<TextureBufferT>::applyFilter(
+void CqMipmap<TextureBufferT>::applyFilter(
 		const FilterFactoryT& filterFactory,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps)
 {
@@ -322,7 +322,7 @@ void CqMipmapLevelCache<TextureBufferT>::applyFilter(
 }
 
 template<typename TextureBufferT>
-const TextureBufferT& CqMipmapLevelCache<TextureBufferT>::getLevel(TqInt levelNum) const
+const TextureBufferT& CqMipmap<TextureBufferT>::getLevel(TqInt levelNum) const
 {
 	assert(levelNum < static_cast<TqInt>(m_levels.size()));
 	assert(levelNum >= 0);
@@ -339,7 +339,7 @@ const TextureBufferT& CqMipmapLevelCache<TextureBufferT>::getLevel(TqInt levelNu
 }
 
 template<typename TextureBufferT>
-inline const SqLevelTrans& CqMipmapLevelCache<TextureBufferT>::levelTrans(
+inline const SqLevelTrans& CqMipmap<TextureBufferT>::levelTrans(
 		TqInt levelNum) const
 {
 	assert(levelNum < static_cast<TqInt>(m_levelTransforms.size()));
@@ -348,13 +348,13 @@ inline const SqLevelTrans& CqMipmapLevelCache<TextureBufferT>::levelTrans(
 }
 
 template<typename TextureBufferT>
-inline TqInt CqMipmapLevelCache<TextureBufferT>::numLevels() const
+inline TqInt CqMipmap<TextureBufferT>::numLevels() const
 {
 	return m_levels.size();
 }
 
 template<typename TextureBufferT>
-void CqMipmapLevelCache<TextureBufferT>::initLevels()
+void CqMipmap<TextureBufferT>::initLevels()
 {
 	TqInt numLevels = m_texFile->numSubImages();
 	m_levels.resize(numLevels);
@@ -414,7 +414,7 @@ void CqMipmapLevelCache<TextureBufferT>::initLevels()
 
 template<typename TextureBufferT>
 template<typename FilterFactoryT>
-void CqMipmapLevelCache<TextureBufferT>::filterLevel(
+void CqMipmap<TextureBufferT>::filterLevel(
 		TqInt level, const FilterFactoryT& filterFactory,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
@@ -443,4 +443,4 @@ void CqMipmapLevelCache<TextureBufferT>::filterLevel(
 
 } // namespace Aqsis
 
-#endif // LEVELSAMPLERCACHE_H_INCLUDED
+#endif // MIPMAP_H_INCLUDED

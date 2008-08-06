@@ -24,8 +24,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef MIPMAPTEXTURESAMPLER_H_INCLUDED
-#define MIPMAPTEXTURESAMPLER_H_INCLUDED
+#ifndef TEXTURESAMPLER_H_INCLUDED
+#define TEXTURESAMPLER_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -33,7 +33,7 @@
 
 #include "ewafilter.h"
 #include "itexturesampler.h"
-#include "mipmaplevelcache.h"
+#include "mipmap.h"
 
 namespace Aqsis {
 
@@ -47,12 +47,12 @@ namespace Aqsis {
  * across a sufficient number of pixels.
  */
 template<typename LevelCacheT>
-class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
+class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 {
 	public:
 		/** \brief Construct a sampler from the provided set of mipmap levels.
 		 */
-		CqMipmapTextureSampler(const boost::shared_ptr<LevelCacheT>& levels);
+		CqTextureSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqTextureSampler
 		virtual void sample(const SqSampleQuad& sampleQuad,
@@ -66,15 +66,15 @@ class AQSISTEX_SHARE CqMipmapTextureSampler : public IqTextureSampler
 //==============================================================================
 // Implementation details
 //==============================================================================
-// CqMipmapTextureSampler implementation
+// CqTextureSampler implementation
 template<typename LevelCacheT>
-CqMipmapTextureSampler<LevelCacheT>::CqMipmapTextureSampler(
+CqTextureSampler<LevelCacheT>::CqTextureSampler(
 		const boost::shared_ptr<LevelCacheT>& levels)
 	: m_levels(levels)
 { }
 
 template<typename LevelCacheT>
-void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
+void CqTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	SqSampleQuad quad = sampleQuad;
@@ -93,11 +93,11 @@ void CqMipmapTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
 
 template<typename LevelCacheT>
 const CqTextureSampleOptions&
-CqMipmapTextureSampler<LevelCacheT>::defaultSampleOptions() const
+CqTextureSampler<LevelCacheT>::defaultSampleOptions() const
 {
 	return m_levels->defaultSampleOptions();
 }
 
 } // namespace Aqsis
 
-#endif // MIPMAPTEXTURESAMPLER_H_INCLUDED
+#endif // TEXTURESAMPLER_H_INCLUDED
