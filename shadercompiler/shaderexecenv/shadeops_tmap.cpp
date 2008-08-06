@@ -1466,7 +1466,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataName
 			switch(*texFormat)
 			{
 				case TextureFormat_CubeEnvironment:
-				case TextureFormat_LatlongEnvironment:
+				case TextureFormat_LatLongEnvironment:
 					formatStr = "environment";
 				case TextureFormat_Shadow:
 					formatStr = "shadow";

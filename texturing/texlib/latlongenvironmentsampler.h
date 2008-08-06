@@ -33,11 +33,8 @@
 
 #include "aqsismath.h"
 #include "ewafilter.h"
-#include "filtertexture.h"
 #include "ienvironmentsampler.h"
 #include "mipmaplevelcache.h"
-#include "sampleaccum.h"
-#include "texfileattributes.h"
 
 namespace Aqsis {
 
@@ -50,13 +47,13 @@ namespace Aqsis {
  * direction.
  */
 template<typename LevelCacheT>
-class AQSISTEX_SHARE CqLatlongEnvironmentSampler : public IqEnvironmentSampler
+class AQSISTEX_SHARE CqLatLongEnvironmentSampler : public IqEnvironmentSampler
 {
 	public:
 		/** \brief Construct a latlong environment sampler from the provided
 		 * set of mipmap levels.
 		 */
-		CqLatlongEnvironmentSampler(const boost::shared_ptr<LevelCacheT>& levels);
+		CqLatLongEnvironmentSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqEnvironmentSampler
 		virtual void sample(const Sq3DSampleQuad& sampleQuad,
@@ -65,24 +62,18 @@ class AQSISTEX_SHARE CqLatlongEnvironmentSampler : public IqEnvironmentSampler
 	private:
 		// mipmap levels.
 		boost::shared_ptr<LevelCacheT> m_levels;
-
-		// TODO: Refactor with CqMipmapTextureSampler
-		void filterLevel(TqInt level, const CqEwaFilterFactory& ewaFactory,
-				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-// CqLatlongEnvironmentSampler implementation
+// CqLatLongEnvironmentSampler implementation
 template<typename LevelCacheT>
-CqLatlongEnvironmentSampler<LevelCacheT>::CqLatlongEnvironmentSampler(
+CqLatLongEnvironmentSampler<LevelCacheT>::CqLatLongEnvironmentSampler(
 		const boost::shared_ptr<LevelCacheT>& levels)
 	: m_levels(levels)
-{
-	// TODO: Validate the environment map?
-}
+{ }
 
 namespace detail {
 
@@ -101,7 +92,7 @@ CqVector2D directionToSpherical(CqVector3D v)
 }
 
 template<typename LevelCacheT>
-void CqLatlongEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQuad,
+void CqLatLongEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
@@ -116,49 +107,13 @@ void CqLatlongEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& samp
 	CqEwaFilterFactory ewaFactory(quad2d, m_levels->width0(),
 			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
-	TqFloat minFilterWidth = 2;
-
-	// TODO: Refactor level calculation with CqTextureSampler?
-	// Determine level to filter over
-	TqFloat levelCts = log2(ewaFactory.minorAxisWidth()/minFilterWidth);
-	TqInt level = clamp<TqInt>(lfloor(levelCts), 0, m_levels->numLevels()-1);
-
-	// Filter the texture.
-	filterLevel(level, ewaFactory, sampleOpts, outSamps);
-}
-
-template<typename LevelCacheT>
-void CqLatlongEnvironmentSampler<LevelCacheT>::filterLevel(
-		TqInt level, const CqEwaFilterFactory& ewaFactory,
-		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
-{
-	// TODO: Refactor with identical function from CqMipmapTextureSampler
-	// Create filter weights for chosen level.
-	const SqLevelTrans& trans = m_levels->levelTrans(level);
-	CqEwaFilter weights = ewaFactory.createFilter(
-		trans.xScale, trans.xOffset,
-		trans.yScale, trans.yOffset
-	);
-	// Create an accumulator for the samples.
-	CqSampleAccum<CqEwaFilter> accumulator(
-		weights,
-		sampleOpts.startChannel(),
-		sampleOpts.numChannels(),
-		outSamps,
-		sampleOpts.fill()
-	);
-	// filter the texture
-	filterTexture(
-		accumulator,
-		m_levels->level(level),
-		weights.support(),
-		SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode())
-	);
+	// Apply the filter to the mipmap levels
+	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);
 }
 
 template<typename LevelCacheT>
 const CqTextureSampleOptions&
-CqLatlongEnvironmentSampler<LevelCacheT>::defaultSampleOptions() const
+CqLatLongEnvironmentSampler<LevelCacheT>::defaultSampleOptions() const
 {
 	return m_levels->defaultSampleOptions();
 }

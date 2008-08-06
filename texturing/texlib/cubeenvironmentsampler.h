@@ -33,10 +33,8 @@
 
 #include "aqsismath.h"
 #include "ewafilter.h"
-#include "filtertexture.h"
 #include "ienvironmentsampler.h"
 #include "mipmaplevelcache.h"
-#include "sampleaccum.h"
 #include "texfileattributes.h"
 
 namespace Aqsis {
@@ -68,10 +66,6 @@ class AQSISTEX_SHARE CqCubeEnvironmentSampler : public IqEnvironmentSampler
 		boost::shared_ptr<LevelCacheT> m_levels;
 		// Scale factor for cube face environment map coordinates = 1/tan(fov/2)
 		TqFloat m_fovCotan;
-
-		// TODO: Refactor with CqMipmapTextureSampler
-		void filterLevel(TqInt level, const CqEwaFilterFactory& ewaFactory,
-				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 };
 
 
@@ -83,14 +77,8 @@ template<typename LevelCacheT>
 CqCubeEnvironmentSampler<LevelCacheT>::CqCubeEnvironmentSampler(
 		const boost::shared_ptr<LevelCacheT>& levels)
 	: m_levels(levels),
-	m_fovCotan(1)
-{
-	// Validate the environment map...
-	const CqTexFileHeader& header = levels->header();
-	m_fovCotan = header.find<Attr::FieldOfViewCot>(1);
-	// TODO: figure out why using levels->header().find<Attr::FieldOfViewCot>(1)) doesn't work!
-}
-
+	m_fovCotan(levels->header().template find<Attr::FieldOfViewCot>(1))
+{ }
 
 namespace detail {
 
@@ -237,49 +225,13 @@ void CqCubeEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQ
 			directionToTexture(sampleQuad.v1), directionToTexture(sampleQuad.v2),
 			directionToTexture(sampleQuad.v3), directionToTexture(sampleQuad.v4)
 			);
-	// TODO: Make blur work properly
+	// TODO: Make blur work correctly...
 	// Construct EWA filter factory
 	CqEwaFilterFactory ewaFactory(quad2d, m_levels->width0(),
 			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
-	TqFloat minFilterWidth = 2;
-
-	// TODO: Refactor level calculation with CqTextureSampler?
-	// Determine level to filter over
-	TqFloat levelCts = log2(ewaFactory.minorAxisWidth()/minFilterWidth);
-	TqInt level = clamp<TqInt>(lfloor(levelCts), 0, m_levels->numLevels()-1);
-
-	// Filter the texture.
-	filterLevel(level, ewaFactory, sampleOpts, outSamps);
-}
-
-template<typename LevelCacheT>
-void CqCubeEnvironmentSampler<LevelCacheT>::filterLevel(
-		TqInt level, const CqEwaFilterFactory& ewaFactory,
-		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
-{
-	// TODO: Refactor with identical function from CqMipmapTextureSampler
-	// Create filter weights for chosen level.
-	const SqLevelTrans& trans = m_levels->levelTrans(level);
-	CqEwaFilter weights = ewaFactory.createFilter(
-		trans.xScale, trans.xOffset,
-		trans.yScale, trans.yOffset
-	);
-	// Create an accumulator for the samples.
-	CqSampleAccum<CqEwaFilter> accumulator(
-		weights,
-		sampleOpts.startChannel(),
-		sampleOpts.numChannels(),
-		outSamps,
-		sampleOpts.fill()
-	);
-	// filter the texture
-	filterTexture(
-		accumulator,
-		m_levels->level(level),
-		weights.support(),
-		SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode())
-	);
+	// Apply the filter to the mipmap levels
+	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);
 }
 
 template<typename LevelCacheT>

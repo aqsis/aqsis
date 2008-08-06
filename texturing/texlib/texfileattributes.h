@@ -70,7 +70,7 @@ enum EqTextureFormat
 {
 	TextureFormat_Plain,
 	TextureFormat_CubeEnvironment,
-	TextureFormat_LatlongEnvironment,
+	TextureFormat_LatLongEnvironment,
 	TextureFormat_Shadow,
 	TextureFormat_Unknown
 };

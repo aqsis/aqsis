@@ -42,23 +42,21 @@ boost::shared_ptr<IqEnvironmentSampler> createEnvSampler(
 {
 	typedef CqMipmapLevelCache<CqTileArray<T> > TqLevelCache;
 	boost::shared_ptr<TqLevelCache> levels(new TqLevelCache(file));
-	// TODO: Determine why g++ seems to want a temporary here.
+	// Note: We need the temporary here, since at least one g++ version, 4.0.1
+	// on OSX complains about the expression 
+	// file->header().find<Attr::TextureFormat>(TextureFormat_Unknown);
 	const CqTexFileHeader& header = file->header();
 	switch(header.find<Attr::TextureFormat>(TextureFormat_Unknown))
 	{
 		case TextureFormat_CubeEnvironment:
 			return boost::shared_ptr<IqEnvironmentSampler>(
 					new CqCubeEnvironmentSampler<TqLevelCache>(levels));
-		case TextureFormat_LatlongEnvironment:
+		case TextureFormat_LatLongEnvironment:
 			return boost::shared_ptr<IqEnvironmentSampler>(
-					new CqLatlongEnvironmentSampler<TqLevelCache>(levels));
+					new CqLatLongEnvironmentSampler<TqLevelCache>(levels));
 		default:
-			Aqsis::log() << warning
-				<< "Accessing non-environment texture \""
-				<< file->fileName()
-				<< "\" as an environment map - defaulting to latlong environment mapping\n";
-			return boost::shared_ptr<IqEnvironmentSampler>(
-					new CqLatlongEnvironmentSampler<TqLevelCache>(levels));
+			AQSIS_THROW(XqBadTexture, "Accessing non-environment texture \""
+				<< file->fileName() << "\" as an environment map");
 	}
 }
 
@@ -73,10 +71,9 @@ const CqTextureSampleOptions& IqEnvironmentSampler::defaultSampleOptions() const
 boost::shared_ptr<IqEnvironmentSampler> IqEnvironmentSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	// TODO: Validation?
-	//file->header().find<Attr::
-	if(!file)
-		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
+	assert(file);
+
+	// Create an environment sampler based on the underlying pixel type.
 	switch(file->header().channelList().sharedChannelType())
 	{
 		case Channel_Float32:

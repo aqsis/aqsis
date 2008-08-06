@@ -39,6 +39,7 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file, const CqMatrix& camToWorld)
 {
 	assert(file);
+	// Create a shadow sampler if the pixel type is floating point.
 	switch(file->header().channelList().sharedChannelType())
 	{
 		case Channel_Float32:
@@ -51,10 +52,10 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 		default:
 			AQSIS_THROW(XqBadTexture, "Cannot use non-float32 pixels in texture file \""
 					<< file->fileName() << "\" as a shadowmap");
+			break;
 	}
 	// shut up compiler warnings - return a null texture
-	assert(0);
-	return boost::shared_ptr<IqShadowSampler>();
+	return createDummy();
 }
 
 boost::shared_ptr<IqShadowSampler> IqShadowSampler::createDummy()

@@ -63,10 +63,24 @@ boost::shared_ptr<IqTextureSampler> createMipmapSampler(
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	// TODO: Warn about attempts to open textures with unusual TextureFormat.
-	if(!file)
-		AQSIS_THROW(XqInvalidFile, "Cannot create texture sampler from null file handle");
-	switch(file->header().channelList().sharedChannelType())
+	assert(file);
+	// Check the texture format and complain if it's not a plain texture
+	const CqTexFileHeader& header = file->header();
+	switch(header.find<Attr::TextureFormat>(TextureFormat_Unknown))
+	{
+		case TextureFormat_CubeEnvironment:
+		case TextureFormat_LatLongEnvironment:
+			Aqsis::log() << warning << "Accessing an environment map as a plain texture\n";
+			break;
+		case TextureFormat_Shadow:
+			Aqsis::log() << warning << "Accessing a shadow map as a plain texture\n";
+			break;
+		default:
+			// no warnings in generic case.
+			break;
+	}
+	// Create a texture sampler based on the underlying pixel type.
+	switch(header.channelList().sharedChannelType())
 	{
 		case Channel_Float32:
 			return createMipmapSampler<TqFloat>(file);

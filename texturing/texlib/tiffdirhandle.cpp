@@ -61,7 +61,7 @@ EqTextureFormat texFormatFromString(const std::string& str)
 	else if(str == cubeEnvTextureFormatStr)
 		return TextureFormat_CubeEnvironment;
 	else if(str == latlongEnvTextureFormatStr)
-		return TextureFormat_LatlongEnvironment;
+		return TextureFormat_LatLongEnvironment;
 	else if(str == shadowTextureFormatStr)
 		return TextureFormat_Shadow;
 	return TextureFormat_Unknown;
@@ -76,7 +76,7 @@ const char* texFormatToString(EqTextureFormat format)
 			return plainTextureFormatStr;
 		case TextureFormat_CubeEnvironment:
 			return cubeEnvTextureFormatStr;
-		case TextureFormat_LatlongEnvironment:
+		case TextureFormat_LatLongEnvironment:
 			return latlongEnvTextureFormatStr;
 		case TextureFormat_Shadow:
 			return shadowTextureFormatStr;
