@@ -32,7 +32,7 @@
 #include "itexinputfile.h"
 #include "itexoutputfile.h"
 #include "magicnumber.h"
-#include "mipmap.h"
+#include "downsample.h"
 #include "texturebuffer.h"
 
 namespace Aqsis {

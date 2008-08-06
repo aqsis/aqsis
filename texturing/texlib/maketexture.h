@@ -59,7 +59,7 @@ struct SqFilterInfo
 //------------------------------------------------------------------------------
 /** \brief Convert a plain texture file to the mipmapped format used internally.
  *
- * See mipmap.h for details on the assumptions behind mipmapping in aqsis.
+ * See downsample.h for details on the assumptions behind mipmapping in aqsis.
  *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.

@@ -51,6 +51,7 @@ SET(AQSISTEX_HDRS
 	cachedfilter.h
 	channelinfo.h
 	channellist.h
+	downsample.h
 	dummyenvironmentsampler.h
 	dummyshadowsampler.h
 	dummytexturesampler.h
@@ -72,7 +73,6 @@ SET(AQSISTEX_HDRS
 	itiledtexinputfile.h
 	magicnumber.h
 	maketexture.h
-	mipmap.h
 	mipmaplevelcache.h
 	mipmaptexturesampler.h
 	mixedimagebuffer.h
