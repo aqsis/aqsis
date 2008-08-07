@@ -340,6 +340,8 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	addAttributeToTiff<Attr::DateTime,const char*>(TIFFTAG_DATETIME, header, *this);
 	addAttributeToTiff<Attr::TextureFormat,const char*>(TIFFTAG_PIXAR_TEXTUREFORMAT, header, *this);
 
+	/// \todo Consider the need for TIFFTAG_SMINSAMPLEVALUE and TIFFTAG_SMAXSAMPLEVALUE
+
 	// Add some matrix attributes
 	addAttributeToTiff<Attr::WorldToScreenMatrix,const float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);

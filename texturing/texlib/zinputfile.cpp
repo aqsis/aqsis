@@ -115,19 +115,19 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 	if(inStream.gcount() != sizeof(height))
 		AQSIS_THROW(XqBadTexture, "cannot read height from aqsis z-file");
 
-	// Read world to screen transformation matrix
-	CqMatrix worldToScreen;
-	worldToScreen.SetfIdentity(false);
-	inStream.read(reinterpret_cast<char*>(worldToScreen.pElements()), 16*sizeof(TqFloat));
-	if(inStream.gcount() != 16*sizeof(TqFloat))
-		AQSIS_THROW(XqBadTexture, "could not read world to screen matrix from aqsis z-file");
-
 	// Read world to camera transformation matrix
 	CqMatrix worldToCamera;
 	worldToCamera.SetfIdentity(false);
 	inStream.read(reinterpret_cast<char*>(worldToCamera.pElements()), 16*sizeof(TqFloat));
 	if(inStream.gcount() != 16*sizeof(TqFloat))
 		AQSIS_THROW(XqBadTexture, "could not read world to camera matrix from aqsis z-file");
+
+	// Read world to screen transformation matrix
+	CqMatrix worldToScreen;
+	worldToScreen.SetfIdentity(false);
+	inStream.read(reinterpret_cast<char*>(worldToScreen.pElements()), 16*sizeof(TqFloat));
+	if(inStream.gcount() != 16*sizeof(TqFloat))
+		AQSIS_THROW(XqBadTexture, "could not read world to screen matrix from aqsis z-file");
 
 	// Save the read header attributes into the file header.
 	header.setWidth(width);

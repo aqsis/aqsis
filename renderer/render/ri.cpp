@@ -5151,7 +5151,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	SqWrapModes wrapModes(wrapModeFromString(swrap), wrapModeFromString(twrap));
 	std::string inFileName = findFileInPath(imagefile,
 			QGetRenderContext()->textureSearchPath());
-	makeTexture(inFileName, std::string(texturefile), SqFilterInfo(filterfunc, swidth, twidth),
+	makeTexture(inFileName, texturefile, SqFilterInfo(filterfunc, swidth, twidth),
 			wrapModes, CqRiParamList(tokens, values, count));
 
 	EXCEPTION_CATCH_GUARD("RiMakeTextureV")
@@ -5450,16 +5450,14 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 
 	DEBUG_RIMAKESHADOW
 
+	assert(picfile != 0 && shadowfile != 0);
+
 	TIME_SCOPE("Shadow Mapping")
-	CqShadowMapOld ZFile( picfile );
-	ZFile.LoadZFile();
 
-	TqInt comp, qual;
-	ProcessCompression( &comp, &qual, count, tokens, values );
-	ZFile.SetCompression( comp );
-	ZFile.SetQuality( qual );
+	std::string inFileName = findFileInPath(picfile,
+			QGetRenderContext()->textureSearchPath());
+	makeShadow(inFileName, shadowfile, CqRiParamList(tokens, values, count));
 
-	ZFile.SaveShadowMapOld( shadowfile );
 	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
 	return ;
 }

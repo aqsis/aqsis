@@ -34,6 +34,8 @@
 #include "magicnumber.h"
 #include "downsample.h"
 #include "texturebuffer.h"
+#include "texexception.h"
+#include "version.h"
 
 namespace Aqsis {
 
@@ -147,6 +149,7 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 	header.set<Attr::WrapModes>(wrapModes);
 	header.set<Attr::TextureFormat>(TextureFormat_Plain);
 	header.set<Attr::TileInfo>(SqTileInfo(32,32));
+	header.set<Attr::Software>(STRNAME " " VERSION_STR_PRINT);
 
 	if(const char* const* comp = paramList.find<char*>("compression"))
 		header.set<Attr::Compression>(*comp);
@@ -183,6 +186,49 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 		default:
 			assert(0);
 	}
+}
+
+void makeShadow(const std::string& inFileName, 
+		const std::string& outFileName,
+		const CqRiParamList& paramList)
+{
+	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(inFileName);
+
+	// Take a copy of the file header.  This means that the output file will
+	// inherit all the recognized attributes of the input file.
+	CqTexFileHeader header = inFile->header();
+
+	// Ensure that the header contains 32-bit floating poing data.  It might be
+	// possible to relax this requirement to also allow 16-bit OpenEXR "half"
+	// data...
+	if(header.channelList().sharedChannelType() != Channel_Float32)
+		AQSIS_THROW(XqBadTexture, "input for shadow map creation must "
+				"contain 32 bit floating point data");
+
+	// Ensure that the screen and camera transformation matrices are present.
+	// If not, the texture will be useless for shadow mapping.
+	if( header.findPtr<Attr::WorldToCameraMatrix>() == 0
+			|| header.findPtr<Attr::WorldToCameraMatrix>() == 0 )
+	{
+		AQSIS_THROW(XqBadTexture, "world->camera and world->screen"
+				" matrices not specified in input file");
+	}
+
+	// Set some attributes in the new file header.
+	header.set<Attr::TextureFormat>(TextureFormat_Shadow);
+	header.set<Attr::TileInfo>(SqTileInfo(32,32));
+	header.set<Attr::Software>(STRNAME " " VERSION_STR_PRINT);
+
+	if(const char* const* comp = paramList.find<char*>("compression"))
+		header.set<Attr::Compression>(*comp);
+
+	// Read all pixels into a buffer (not particularly memory efficient...)
+	CqTextureBuffer<TqFloat> pixelBuf;
+	inFile->readPixels(pixelBuf);
+	// Open output file and write pixel data.
+	boost::shared_ptr<IqTexOutputFile> outFile
+		= IqTexOutputFile::open(outFileName, ImageFile_Tiff, header);
+	outFile->writePixels(pixelBuf);
 }
 
 } // namespace Aqsis

@@ -60,6 +60,8 @@ struct SqFilterInfo
 /** \brief Convert a plain texture file to the mipmapped format used internally.
  *
  * See downsample.h for details on the assumptions behind mipmapping in aqsis.
+ * The output file is a multi-image tiled TIFF file which is efficient for
+ * texture lookup.
  *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
@@ -74,6 +76,20 @@ AQSISTEX_SHARE void makeTexture(const std::string& inFileName,
 		const SqWrapModes& wrapModes,
 		const CqRiParamList& paramList);
 
+/** \brief Convert a texture file to a shadow map.
+ *
+ * This function requires that the input data format be 32bit floating point.
+ * World to camera and world to screen matrices must also be present.  The
+ * output file is a tiled TIFF file which is efficient for shadow mapping.
+ *
+ * \param inFileName - full path to the input texture file.
+ * \param outFileName - full path to the output texture map file.
+ * \param paramList - A renderman param list of extra optional control
+ *                    parameters for the shadow optimization.
+ */
+AQSISTEX_SHARE void makeShadow(const std::string& inFileName, 
+		const std::string& outFileName,
+		const CqRiParamList& paramList);
 
 } // namespace Aqsis
 
