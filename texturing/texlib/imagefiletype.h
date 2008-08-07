@@ -38,6 +38,7 @@ enum EqImageFileType
 	ImageFile_Jpg,
 	ImageFile_Png,
 	ImageFile_AqsisBake,
+	ImageFile_AqsisZfile,
 
 	ImageFile_Unknown
 };
@@ -65,6 +66,8 @@ inline const char* imageFileTypeToString(EqImageFileType type)
 			return "png";
 		case ImageFile_AqsisBake:
 			return "bake";
+		case ImageFile_AqsisZfile:
+			return "aqsis_zfile";
 		case ImageFile_Unknown:
 			return "unknown";
 	}

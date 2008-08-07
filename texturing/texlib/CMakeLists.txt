@@ -43,6 +43,7 @@ SET(AQSISTEX_SRCS
 	texturecache.cpp
 	texturesampleoptions.cpp
 	mixedimagebuffer.cpp
+	zinputfile.cpp
 	)
 
 # Header files
@@ -95,6 +96,7 @@ SET(AQSISTEX_HDRS
 	tiledanyinputfile.h
 	tiledtiffinputfile.h
 	wrapmode.h
+	zinputfile.h
 	)
 IF(AQSIS_USE_OPENEXR)
 	SET(AQSISTEX_SRCS
