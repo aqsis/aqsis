@@ -83,13 +83,14 @@ void CqZInputFile::readPixelsImpl(TqUint8* buffer, TqInt startLine,
 
 void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 {
-	const TqInt magicNumSize = sizeof(gZfileMagicNum)-1;
-	const TqInt versionNumSize = sizeof(VERSION_STR);
+	const char zFileMagicNum[] = "Aqsis ZFile";
+	const TqInt magicNumSize = sizeof(zFileMagicNum)-1;
+	const TqInt versionNumSize = sizeof(VERSION_STR)-1;
 	std::vector<char> buf(max(magicNumSize, versionNumSize));
 
 	// Read in magic number
 	inStream.read(&buf[0], magicNumSize);
-	if(!std::equal(buf.begin(), buf.begin() + magicNumSize, gZfileMagicNum)
+	if(!std::equal(buf.begin(), buf.begin() + magicNumSize, zFileMagicNum)
 		|| inStream.gcount() != magicNumSize)
 	{
 		AQSIS_THROW(XqBadTexture, "Magic number missmatch in zfile");

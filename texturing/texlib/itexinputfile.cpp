@@ -31,6 +31,7 @@
 #include "logging.h"
 #include "magicnumber.h"
 #include "tiffinputfile.h"
+#include "zinputfile.h"
 
 namespace Aqsis {
 
@@ -71,6 +72,8 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 						<< "\": Aqsis was compiled without OpenEXR support");
 #				endif
 				break;
+			case ImageFile_AqsisZfile:
+				file.reset(new CqZInputFile(fileName));
 			default:
 				break;
 		}

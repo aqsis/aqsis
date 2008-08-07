@@ -89,6 +89,11 @@ EqImageFileType guessFileType(std::istream& inStream)
 	{
 		return ImageFile_AqsisBake;
 	}
+	else if( magicNum.size() >= 11
+		&& std::equal(magicNum.begin(), magicNum.begin()+11, "Aqsis ZFile") )
+	{
+		return ImageFile_AqsisZfile;
+	}
 	// Add further magic number matches here
 	else
 	{

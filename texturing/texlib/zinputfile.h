@@ -37,8 +37,6 @@
 
 namespace Aqsis {
 
-const char gZfileMagicNum[] = "Aqsis ZFile";
-
 //------------------------------------------------------------------------------
 /** \brief Scanline-oriented input class for Aqsis Z files.
  *
