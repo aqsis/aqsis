@@ -77,30 +77,95 @@ CqLatLongEnvironmentSampler<LevelCacheT>::CqLatLongEnvironmentSampler(
 
 namespace detail {
 
-/** \brief Map direction v into spherical angular coordinates.
+/** \brief Mapping from directions to coordinates for a latlong environment
+ * texture.
+ *
+ * This class represents a mapping from directions in 3D space to texture
+ * coordinates (s,t) such that s corresponds to the longitude, and t the
+ * latitude in spherical angular coordinates.  s and t are rescaled such that
+ * they lie in the interval [0,1].
  */
-CqVector2D directionToSpherical(CqVector3D v)
+class CqLatLongMapper
 {
-	TqFloat phi = 0.5 + std::atan2(v.y(), v.x())*(1.0/(2*M_PI));
-	TqFloat theta = 0;
-	TqFloat r = v.Magnitude();
-	if(r != 0)
-		theta = std::acos(v.z()/r)*(1.0/M_PI);
-	return CqVector2D(phi, theta);
-}
+	private:
+		/// Reference point for periodic unwrapping of texture coordinates.
+		CqVector2D m_refPoint ;
 
-}
+		/** \brief Map direction v into spherical angular coordinates.
+		 *
+		 * \return CqVector2D(phi, theta) where phi is longitude and theta
+		 *         latitude, and both have been rescaled to lie in the interval
+		 *         [0, 1].
+		 */
+		CqVector2D directionToSpherical(const CqVector3D& v)
+		{
+			TqFloat phi = 0.5 + std::atan2(v.y(), v.x())*(1.0/(2*M_PI));
+			TqFloat theta = 0;
+			TqFloat r = v.Magnitude();
+			if(r != 0)
+				theta = std::acos(v.z()/r)*(1.0/M_PI);
+			return CqVector2D(phi, theta);
+		}
+	public:
+		/** \brief Create a latlong mapper 
+		 *
+		 * \param refDirection - direction which will be used as a reference
+		 *        for periodic unwrapping of texture coordinates.
+		 *        Conceptually, further points mapped by operator() need a
+		 *        longitude of 360 added or subtracted such that they lie close
+		 *        to refDirection in texture space.  If this isn't done, the
+		 *        texture filter width will be far to large.
+		 */
+		CqLatLongMapper(const CqVector3D& refDirection)
+			: m_refPoint(directionToSpherical(refDirection))
+		{ }
+
+		/// \return The texture coordinates of the reference point
+		const CqVector2D& refPoint()
+		{
+			return m_refPoint;
+		}
+
+		/** \brief Map a direction into latlong texture coordinates
+		 *
+		 * \param v - input direction
+		 *
+		 * \return latlong texture coordinates associated with v
+		 */
+		CqVector2D operator()(const CqVector3D& v)
+		{
+			CqVector2D v2d = directionToSpherical(v);
+			// Periodic unwrapping of longitude: Make sure the x component of
+			// v2d is close to m_refPoint.x() so that filter width estimation
+			// works correctly.
+			TqFloat xRef = m_refPoint.x();
+			if(xRef < 0.5)
+			{
+				if(v2d.x() - xRef > 0.5)
+					v2d.x(v2d.x() - 1);
+			}
+			else
+			{
+				if(xRef - v2d.x() > 0.5)
+					v2d.x(v2d.x() + 1);
+			}
+			return v2d;
+		}
+};
+
+} // namespace detail
 
 template<typename LevelCacheT>
 void CqLatLongEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
+	detail::CqLatLongMapper directionToTexture(sampleQuad.v1);
 	SqSampleQuad quad2d(
-			detail::directionToSpherical(sampleQuad.v1),
-			detail::directionToSpherical(sampleQuad.v2),
-			detail::directionToSpherical(sampleQuad.v3),
-			detail::directionToSpherical(sampleQuad.v4)
+			directionToTexture.refPoint(),
+			directionToTexture(sampleQuad.v2),
+			directionToTexture(sampleQuad.v3),
+			directionToTexture(sampleQuad.v4)
 			);
 	// TODO: Make blur work properly
 	// Construct EWA filter factory
