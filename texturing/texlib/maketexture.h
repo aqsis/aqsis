@@ -59,9 +59,9 @@ struct SqFilterInfo
 //------------------------------------------------------------------------------
 /** \brief Convert a plain texture file to the mipmapped format used internally.
  *
- * See downsample.h for details on the assumptions behind mipmapping in aqsis.
  * The output file is a multi-image tiled TIFF file which is efficient for
- * texture lookup.
+ * texture lookup.  See downsample.h for details on the assumptions behind
+ * mipmapping in aqsis.
  *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
@@ -74,6 +74,24 @@ AQSISTEX_SHARE void makeTexture(const std::string& inFileName,
 		const std::string& outFileName,
 		const SqFilterInfo& filterInfo, 
 		const SqWrapModes& wrapModes,
+		const CqRiParamList& paramList);
+
+/** \brief Convert a texture file into a latlong environment map
+ *
+ * The input texture coordinates are assumed to correspond to the latitude and
+ * longitude for the vertical and horizontal directions respectively.  The
+ * output texture is mipmapped tiled TIFF file for efficient texture lookup.
+ *
+ * \param inFileName - full path to the input texture file.
+ * \param outFileName - full path to the output texture map file.
+ * \param filterInfo - information about which filter type and size to use
+ * \param paramList - A renderman param list of extra optional control
+ *                    parameters for the mipmapping procedure.
+ */
+AQSISTEX_SHARE void makeLatLongEnvironment(
+		const std::string& inFileName, 
+		const std::string& outFileName,
+		const SqFilterInfo& filterInfo, 
 		const CqRiParamList& paramList);
 
 /** \brief Convert a texture file to a shadow map.

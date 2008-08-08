@@ -122,13 +122,9 @@ void createMipmapFileHalf(IqTexInputFile& inFile, const std::string& outFileName
 #	endif
 }
 
-} // unnamed namespace
-
-
-//------------------------------------------------------------------------------
-void makeTexture(const std::string& inFileName, const std::string& outFileName,
+void makeTextureImpl(const std::string& inFileName, const std::string& outFileName,
 		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes,
-		const CqRiParamList& paramList)
+		const CqRiParamList& paramList, EqTextureFormat texFormat)
 {
 	std::string inFileRealName = inFileName;
 	if(guessFileType(inFileName) == ImageFile_AqsisBake)
@@ -147,7 +143,7 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 
 	// Set some attributes in the new file header.
 	header.set<Attr::WrapModes>(wrapModes);
-	header.set<Attr::TextureFormat>(TextureFormat_Plain);
+	header.set<Attr::TextureFormat>(texFormat);
 	header.set<Attr::TileInfo>(SqTileInfo(32,32));
 	header.set<Attr::Software>(STRNAME " " VERSION_STR_PRINT);
 
@@ -186,6 +182,29 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 		default:
 			assert(0);
 	}
+}
+
+
+} // unnamed namespace
+
+//------------------------------------------------------------------------------
+
+void makeTexture(const std::string& inFileName, const std::string& outFileName,
+		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes,
+		const CqRiParamList& paramList)
+{
+	makeTextureImpl(inFileName, outFileName, filterInfo, wrapModes, paramList,
+			TextureFormat_Plain);
+}
+
+void makeLatLongEnvironment(const std::string& inFileName, 
+		const std::string& outFileName,
+		const SqFilterInfo& filterInfo, 
+		const CqRiParamList& paramList)
+{
+	makeTextureImpl(inFileName, outFileName, filterInfo,
+			SqWrapModes(WrapMode_Periodic, WrapMode_Clamp),
+			paramList, TextureFormat_LatLongEnvironment);
 }
 
 void makeShadow(const std::string& inFileName, 

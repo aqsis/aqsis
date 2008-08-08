@@ -5218,72 +5218,15 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
 	DEBUG_RIMAKELATLONGENVIRONMENT
 
-	char modes[ 1024 ];
-	char *swrap = "periodic";
-	char *twrap = "clamp";
-
-	assert( imagefile != 0 && reflfile != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
+	assert(imagefile != 0 && reflfile != 0 && filterfunc != 0);
 
 	TIME_SCOPE("Environment Mapping")
 
-	sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-	if ( filterfunc == RiGaussianFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
-	if ( filterfunc == RiMitchellFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "mitchell", swidth, twidth );
-	if ( filterfunc == RiBoxFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-	if ( filterfunc == RiTriangleFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth );
-	if ( filterfunc == RiCatmullRomFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth );
-	if ( filterfunc == RiSincFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth );
-	if ( filterfunc == RiDiskFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth );
-	if ( filterfunc == RiBesselFilter )
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
+	std::string inFileName = findFileInPath(imagefile,
+			QGetRenderContext()->textureSearchPath());
+	makeLatLongEnvironment(inFileName, reflfile, SqFilterInfo(filterfunc,
+				swidth, twidth), CqRiParamList(tokens, values, count));
 
-	// Now load the original image.
-	CqTextureMapOld Source( imagefile );
-	Source.Open();
-	TqInt comp, qual;
-	ProcessCompression( &comp, &qual, count, tokens, values );
-	Source.SetCompression( comp );
-	Source.SetQuality( qual );
-
-	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
-	{
-		// Hopefully CqTextureMapOld will take care of closing the tiff file after
-		// it has SAT mapped it so we can overwrite if needs be.
-		// Create a new image.
-		Source.Interpreted( modes );
-		Source.CreateMIPMAP();
-		TIFF* ptex = TIFFOpen( reflfile, "w" );
-
-		TIFFCreateDirectory( ptex );
-		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, LATLONG_HEADER );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
-		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
-		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = min( Source.XRes(), Source.YRes() );
-		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
-
-
-		for ( int i = 0; i < log2; ++i )
-		{
-			// Write the floating point image to the directory.
-			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
-			if ( !pBuffer )
-				break;
-			Source.WriteTileImage( ptex, pBuffer, 64, 64, Source.Compression(), Source.Quality() );
-		}
-		TIFFClose( ptex );
-	}
-
-	Source.Close();
 	EXCEPTION_CATCH_GUARD("RiMakeLatLongEnvironmentV")
 	return ;
 }
