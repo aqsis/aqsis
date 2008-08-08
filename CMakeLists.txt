@@ -65,12 +65,12 @@ IF(AQSIS_USE_FLTK)
 	INCLUDE(FindFLTK)
 
 	IF(NOT AQSIS_FLTK_FOUND)
-		MESSAGE(STATUS "Cannot find FLTK, display, eqsl and piqsl will not be built")
+		MESSAGE(STATUS "*** FLTK not found ***  building without eqsl, piqsl and legacy framebuffer")
 		SET(AQSIS_USE_FLTK OFF)
 	ENDIF(NOT AQSIS_FLTK_FOUND)
 
 	IF(NOT AQSIS_FLUID_FOUND)
-		MESSAGE(STATUS "Cannot find Fluid, eqsl and piqsl will not be built")
+		MESSAGE(STATUS "*** fluid not found ***  building without eqsl and piqsl")
 	ENDIF(NOT AQSIS_FLUID_FOUND)
 ENDIF(AQSIS_USE_FLTK)
 
