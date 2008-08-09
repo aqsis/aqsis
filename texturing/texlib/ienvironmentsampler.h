@@ -52,11 +52,25 @@ class AQSISTEX_SHARE IqEnvironmentSampler
 	public:
 		/** \brief Sample the texture with the provided sample options.
 		 *
+		 * This function has a default implementation which calls through to
+		 * the other version of the sample() function, but can be overridden to
+		 * deal with sampling methods which can make use of the full
+		 * information in the sampling quadrilateral.
+		 *
 		 * \param sampleQuad - quadrilateral region to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		virtual void sample(const Sq3DSampleQuad& sampleQuad,
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+
+		/** \brief Filter the texture over the given parallelogram region.
+		 *
+		 * \param samplePllgram - parallelogram to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamps - the outSamps samples will be placed here.  
+		 */
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.

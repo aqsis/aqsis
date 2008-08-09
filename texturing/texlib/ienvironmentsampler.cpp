@@ -62,6 +62,14 @@ boost::shared_ptr<IqEnvironmentSampler> createEnvSampler(
 
 } // unnamed namespace
 
+void IqEnvironmentSampler::sample(const Sq3DSampleQuad& sampleQuad,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	// default implementation calls through to the less general version of
+	// sample()
+	sample(Sq3DSamplePllgram(sampleQuad), sampleOpts, outSamps);
+}
+
 const CqTextureSampleOptions& IqEnvironmentSampler::defaultSampleOptions() const
 {
 	static const CqTextureSampleOptions defaultOptions;

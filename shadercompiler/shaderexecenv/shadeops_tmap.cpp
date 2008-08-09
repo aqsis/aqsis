@@ -625,20 +625,17 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startC
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			CqVector3D dr_uOn2 = 0.5*diffU<CqVector3D>(R, gridIdx);
-			CqVector3D dr_vOn2 = 0.5*diffV<CqVector3D>(R, gridIdx);
-			// Centre of the texture region to be filtered.
-			CqVector3D rVal;
-			R->GetVector(rVal, gridIdx);
-			// Compute the sample quadrilateral
-			Sq3DSampleQuad sampleQuad(
-				rVal - dr_uOn2 - dr_vOn2,
-				rVal + dr_uOn2 - dr_vOn2,
-				rVal - dr_uOn2 + dr_vOn2,
-				rVal + dr_uOn2 + dr_vOn2 );
+			// Get texture region to be filtered.
+			CqVector3D RR;
+			R->GetVector(RR, gridIdx);
+			Sq3DSamplePllgram region(
+				RR,
+				diffU<CqVector3D>(R, gridIdx),
+				diffV<CqVector3D>(R, gridIdx)
+			);
 			// buffer where filtered results will be placed.
 			TqFloat texSample = 0;
-			texSampler.sample(sampleQuad, sampleOpts, &texSample);
+			texSampler.sample(region, sampleOpts, &texSample);
 			Result->SetFloat(texSample, gridIdx);
 		}
 	}
@@ -733,20 +730,17 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startC
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			CqVector3D dr_uOn2 = 0.5*diffU<CqVector3D>(R, gridIdx);
-			CqVector3D dr_vOn2 = 0.5*diffV<CqVector3D>(R, gridIdx);
-			// Centre of the texture region to be filtered.
-			CqVector3D rVal;
-			R->GetVector(rVal, gridIdx);
-			// Compute the sample quadrilateral
-			Sq3DSampleQuad sampleQuad(
-				rVal - dr_uOn2 - dr_vOn2,
-				rVal + dr_uOn2 - dr_vOn2,
-				rVal - dr_uOn2 + dr_vOn2,
-				rVal + dr_uOn2 + dr_vOn2 );
+			// Get texture region to be filtered.
+			CqVector3D RR;
+			R->GetVector(RR, gridIdx);
+			Sq3DSamplePllgram region(
+				RR,
+				diffU<CqVector3D>(R, gridIdx),
+				diffV<CqVector3D>(R, gridIdx)
+			);
 			// buffer where filtered results will be placed.
 			TqFloat texSample[3] = {0,0,0};
-			texSampler.sample(sampleQuad, sampleOpts, texSample);
+			texSampler.sample(region, sampleOpts, texSample);
 			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
 			Result->SetColor(resultCol, gridIdx);
 		}

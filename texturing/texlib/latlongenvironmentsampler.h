@@ -56,7 +56,7 @@ class AQSISTEX_SHARE CqLatLongEnvironmentSampler : public IqEnvironmentSampler
 		CqLatLongEnvironmentSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqEnvironmentSampler
-		virtual void sample(const Sq3DSampleQuad& sampleQuad,
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
@@ -80,97 +80,83 @@ namespace detail {
 /** \brief Mapping from directions to coordinates for a latlong environment
  * texture.
  *
- * This class represents a mapping from directions in 3D space to texture
- * coordinates (s,t) such that s corresponds to the longitude, and t the
- * latitude in spherical angular coordinates.  s and t are rescaled such that
- * they lie in the interval [0,1].
+ * This function maps from directions in 3D space to texture coordinates (s,t)
+ * such that s corresponds to the longitude, and t the latitude in spherical
+ * angular coordinates.  s and t are rescaled such that they lie in the
+ * interval [0,1].
+ *
+ * It also maps the edge vectors of the parallelogram region (which should be
+ * considered to lie in the tangent space) using the tangent map to get
+ * corresponding directions in the 2D texture space.
  */
-class CqLatLongMapper
+SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region)
 {
-	private:
-		/// Reference point for periodic unwrapping of texture coordinates.
-		CqVector2D m_refPoint ;
+	CqVector3D R = region.c;
+	// First compute the position of the parallelogram centre.  This is
+	// relatively expensive, since it involves calling atan2(), sqrt() and
+	// acos().
+	TqFloat phi = 0.5 + std::atan2(R.y(), R.x())*(1.0/(2*M_PI));
+	TqFloat theta = 0;
+	TqFloat R2 = R.Magnitude2();
+	if(R2 != 0)
+		theta = std::acos(R.z()/std::sqrt(R2))*(1.0/M_PI);
+	// (s,t) coordinates of parallelogram center
+	CqVector2D st(phi, theta);
 
-		/** \brief Map direction v into spherical angular coordinates.
-		 *
-		 * \return CqVector2D(phi, theta) where phi is longitude and theta
-		 *         latitude, and both have been rescaled to lie in the interval
-		 *         [0, 1].
-		 */
-		CqVector2D directionToSpherical(const CqVector3D& v)
-		{
-			TqFloat phi = 0.5 + std::atan2(v.y(), v.x())*(1.0/(2*M_PI));
-			TqFloat theta = 0;
-			TqFloat r = v.Magnitude();
-			if(r != 0)
-				theta = std::acos(v.z()/r)*(1.0/M_PI);
-			return CqVector2D(phi, theta);
-		}
-	public:
-		/** \brief Create a latlong mapper 
-		 *
-		 * \param refDirection - direction which will be used as a reference
-		 *        for periodic unwrapping of texture coordinates.
-		 *        Conceptually, further points mapped by operator() need a
-		 *        longitude of 360 added or subtracted such that they lie close
-		 *        to refDirection in texture space.  If this isn't done, the
-		 *        texture filter width will be far to large.
-		 */
-		CqLatLongMapper(const CqVector3D& refDirection)
-			: m_refPoint(directionToSpherical(refDirection))
-		{ }
+	// Next compute the coefficients of the tangent map.  That is, the
+	// coefficients of the linear function which take the sides of the 3D
+	// sampling parallelogram into the sides of the 2D one.
+	TqFloat Rxy2 = R.x()*R.x() + R.y()*R.y();
 
-		/// \return The texture coordinates of the reference point
-		const CqVector2D& refPoint()
-		{
-			return m_refPoint;
-		}
+	// Coefficents of the tangent map (note: tMap13 = 0 always)
+	TqFloat tMap11 = 0;
+	TqFloat tMap12 = 0;
+	TqFloat tMap21 = 0;
+	TqFloat tMap22 = 0;
+	TqFloat tMap23 = 0;
+	if(Rxy2 != 0)
+	{
+		TqFloat mult1 = 1/(2*M_PI*Rxy2);
+		tMap11 = -R.y()*mult1;
+		tMap12 = R.x()*mult1;
 
-		/** \brief Map a direction into latlong texture coordinates
-		 *
-		 * \param v - input direction
-		 *
-		 * \return latlong texture coordinates associated with v
-		 */
-		CqVector2D operator()(const CqVector3D& v)
+		if(R2 != 0)
 		{
-			CqVector2D v2d = directionToSpherical(v);
-			// Periodic unwrapping of longitude: Make sure the x component of
-			// v2d is close to m_refPoint.x() so that filter width estimation
-			// works correctly.
-			TqFloat xRef = m_refPoint.x();
-			if(xRef < 0.5)
-			{
-				if(v2d.x() - xRef > 0.5)
-					v2d.x(v2d.x() - 1);
-			}
-			else
-			{
-				if(xRef - v2d.x() > 0.5)
-					v2d.x(v2d.x() + 1);
-			}
-			return v2d;
+			TqFloat mult2 = 1/(M_PI*R2*std::sqrt(Rxy2));
+			tMap21 = R.x()*R.z() * mult2;
+			tMap22 = R.y()*R.z() * mult2;
+			tMap23 = (R.z()*R.z() - R2) * mult2;
 		}
-};
+	}
+
+	// Apply the tangent map to the parallelogram sides
+	CqVector2D side1(
+		tMap11*region.s1.x() + tMap12*region.s1.y(),
+		tMap21*region.s1.x() + tMap22*region.s1.y() + tMap23*region.s1.z()
+	);
+	CqVector2D side2(
+		tMap11*region.s2.x() + tMap12*region.s2.y(),
+		tMap21*region.s2.x() + tMap22*region.s2.y() + tMap23*region.s2.z()
+	);
+	return SqSamplePllgram(st, side1, side2);
+}
 
 } // namespace detail
 
+
 template<typename LevelCacheT>
-void CqLatLongEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQuad,
+void CqLatLongEnvironmentSampler<LevelCacheT>::sample(
+		const Sq3DSamplePllgram& samplePllgram,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
-	detail::CqLatLongMapper directionToTexture(sampleQuad.v1);
-	SqSampleQuad quad2d(
-			directionToTexture.refPoint(),
-			directionToTexture(sampleQuad.v2),
-			directionToTexture(sampleQuad.v3),
-			directionToTexture(sampleQuad.v4)
-			);
-	// TODO: Make blur work properly
+	// Map sampling parallelogram into latlong texture coords.
+	SqSamplePllgram pllgram2D = detail::directionToLatLong(samplePllgram);
+	// TODO: Make blur and width work!
+
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(quad2d, m_levels->width0(),
-			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
+	CqEwaFilterFactory ewaFactory(pllgram2D,
+			m_levels->width0(), m_levels->height0(),
+			sampleOpts.sBlur(), sampleOpts.tBlur());
 
 	// Apply the filter to the mipmap levels
 	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);

@@ -99,15 +99,12 @@ TqFloat minusGlyph(TqFloat x, TqFloat y)
 
 } // anon. namespace
 
-void CqDummyEnvironmentSampler::sample(const Sq3DSampleQuad& sampleQuad,
-	const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+void CqDummyEnvironmentSampler::sample(const Sq3DSamplePllgram& samplePllgram,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	// Decide which of the six faces of the cube we're pointing at.
-	CqVector3D center = sampleQuad.center();
-
-	TqFloat cx = center.x();
-	TqFloat cy = center.y();
-	TqFloat cz = center.z();
+	TqFloat cx = samplePllgram.c.x();
+	TqFloat cy = samplePllgram.c.y();
+	TqFloat cz = samplePllgram.c.z();
 	TqFloat absCx = std::fabs(cx);
 	TqFloat absCy = std::fabs(cy);
 	TqFloat absCz = std::fabs(cz);
@@ -118,7 +115,8 @@ void CqDummyEnvironmentSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	TqFloat glyphX = 0;
 	TqFloat glyphY = 0;
 
-	// Insert a glyph for the axis we're pointing along.
+	// Decide which of the six faces of the cube we're pointing at and insert a
+	// distinguishing glyph as appropriate.
 	if(absCx >= absCy && absCx >= absCz)
 	{
 		// x-axis

@@ -40,7 +40,7 @@ class AQSISTEX_SHARE CqDummyEnvironmentSampler : public IqEnvironmentSampler
 {
 	public:
 		// From IqEnvironmentSampler
-		virtual void sample(const Sq3DSampleQuad& sampleQuad,
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 };
 

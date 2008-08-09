@@ -99,6 +99,52 @@ struct SqSampleQuad
 };
 
 
+//------------------------------------------------------------------------------
+/** \brief 3D quadrilateral over which to sample a texture
+ *
+ * Some texture types such as shadow maps and environment maps need to be
+ * sampled over a 3D quadrilateral rather than a 2D one.  For shadow maps, this
+ * is because the third coordinate is needed to represent the depth away from
+ * the light source of the surface being shadowed.
+ *
+ * \see SqSampleQuad for more detail.
+ */
+struct Sq3DSampleQuad
+{
+	/// v1 to v4 are vectors defining the vertices of the quadrilateral.
+	CqVector3D v1;
+	CqVector3D v2;
+	CqVector3D v3;
+	CqVector3D v4;
+
+	/// Default constructor - set all corner vectors to 0.
+	Sq3DSampleQuad();
+	/// Trivial constructor
+	Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
+			const CqVector3D& v3, const CqVector3D& v4);
+
+	/** \brief Multiply all the vectors in the quad by the specified matrix.
+	 *
+	 * That is perform the transformation
+	 *
+	 *   v1 = mat*v1;
+	 *
+	 * etc.
+	 */
+	void transform(const CqMatrix& mat);
+
+	/// Get the center point of the quadrilateral by averaging the vertices.
+	CqVector3D center() const;
+
+	/** \brief Assign the first two coordinates of a 2D sample quad to this quad.
+	 *
+	 * Leaves other coordinates unchanged.
+	 */
+	void copy2DCoords(const SqSampleQuad& toCopy);
+};
+
+
+//------------------------------------------------------------------------------
 /** \brief 2D parallelogram over which to sample a texture
  *
  * The parallelogram is defined by its center point along with vectors along
@@ -152,47 +198,23 @@ struct SqSamplePllgram
 
 
 //------------------------------------------------------------------------------
-/** \brief 3D quadrilateral over which to sample a texture
+/** \brief 3D parallelogram over which to sample a texture
  *
- * Some texture types such as shadow maps and environment maps need to be
- * sampled over a 3D quadrilateral rather than a 2D one.  For shadow maps, this
- * is because the third coordinate is needed to represent the depth away from
- * the light source of the surface being shadowed.
- *
- * \see SqSampleQuad for more detail.
+ * \see SqSamplePllgram
  */
-struct Sq3DSampleQuad
+struct Sq3DSamplePllgram
 {
-	/// v1 to v4 are vectors defining the vertices of the quadrilateral.
-	CqVector3D v1;
-	CqVector3D v2;
-	CqVector3D v3;
-	CqVector3D v4;
+	/// center point for the sample
+	CqVector3D c;
+	/// first side of parallelogram
+	CqVector3D s1;
+	/// second side of parallelogram
+	CqVector3D s2;
 
-	/// Default constructor - set all corner vectors to 0.
-	Sq3DSampleQuad();
 	/// Trivial constructor
-	Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
-			const CqVector3D& v3, const CqVector3D& v4);
-
-	/** \brief Multiply all the vectors in the quad by the specified matrix.
-	 *
-	 * That is perform the transformation
-	 *
-	 *   v1 = mat*v1;
-	 *
-	 * etc.
-	 */
-	void transform(const CqMatrix& mat);
-
-	/// Get the center point of the quadrilateral by averaging the vertices.
-	CqVector3D center() const;
-
-	/** \brief Assign the first two coordinates of a 2D sample quad to this quad.
-	 *
-	 * Leaves other coordinates unchanged.
-	 */
-	void copy2DCoords(const SqSampleQuad& toCopy);
+	Sq3DSamplePllgram(const CqVector3D& c, const CqVector3D& s1, const CqVector3D s2);
+	/// Convert from a sample quad to a sample parallelogram
+	explicit Sq3DSamplePllgram(const Sq3DSampleQuad& quad);
 };
 
 
@@ -240,6 +262,41 @@ inline CqVector2D SqSampleQuad::center() const
 
 
 //------------------------------------------------------------------------------
+// Sq3DSampleQuad implementation
+inline Sq3DSampleQuad::Sq3DSampleQuad()
+	: v1(0,0,0),
+	v2(0,0,0),
+	v3(0,0,0),
+	v4(0,0,0)
+{ }
+
+inline Sq3DSampleQuad::Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
+		const CqVector3D& v3, const CqVector3D& v4)
+	: v1(v1),
+	v2(v2),
+	v3(v3),
+	v4(v4)
+{ }
+
+inline CqVector3D Sq3DSampleQuad::center() const
+{
+	return 0.25*(v1+v2+v3+v4);
+}
+
+inline void Sq3DSampleQuad::copy2DCoords(const SqSampleQuad& toCopy)
+{
+	v1.x(toCopy.v1.x());
+	v1.y(toCopy.v1.y());
+	v2.x(toCopy.v2.x());
+	v2.y(toCopy.v2.y());
+	v3.x(toCopy.v3.x());
+	v3.y(toCopy.v3.y());
+	v4.x(toCopy.v4.x());
+	v4.y(toCopy.v4.y());
+}
+
+
+//------------------------------------------------------------------------------
 // SqSamplePllgram implementation
 inline SqSamplePllgram::SqSamplePllgram(const CqVector2D& c, const CqVector2D& s1,
 		const CqVector2D s2)
@@ -277,39 +334,21 @@ inline void SqSamplePllgram::scaleWidth(TqFloat xWidth, TqFloat yWidth)
 	}
 }
 
+
 //------------------------------------------------------------------------------
-// Sq3DSampleQuad implementation
-inline Sq3DSampleQuad::Sq3DSampleQuad()
-	: v1(0,0,0),
-	v2(0,0,0),
-	v3(0,0,0),
-	v4(0,0,0)
+// Sq3DSamplePllgram implementation
+inline Sq3DSamplePllgram::Sq3DSamplePllgram(const CqVector3D& c,
+		const CqVector3D& s1, const CqVector3D s2)
+	: c(c),
+	s1(s1),
+	s2(s2)
 { }
 
-inline Sq3DSampleQuad::Sq3DSampleQuad(const CqVector3D& v1, const CqVector3D& v2,
-		const CqVector3D& v3, const CqVector3D& v4)
-	: v1(v1),
-	v2(v2),
-	v3(v3),
-	v4(v4)
+inline Sq3DSamplePllgram::Sq3DSamplePllgram(const Sq3DSampleQuad& quad)
+	: c(quad.center()),
+	s1(0.5*(quad.v2 - quad.v1 + quad.v4 - quad.v3)),
+	s2(0.5*(quad.v1 - quad.v3 + quad.v2 - quad.v4))
 { }
-
-inline CqVector3D Sq3DSampleQuad::center() const
-{
-	return 0.25*(v1+v2+v3+v4);
-}
-
-inline void Sq3DSampleQuad::copy2DCoords(const SqSampleQuad& toCopy)
-{
-	v1.x(toCopy.v1.x());
-	v1.y(toCopy.v1.y());
-	v2.x(toCopy.v2.x());
-	v2.y(toCopy.v2.y());
-	v3.x(toCopy.v3.x());
-	v3.y(toCopy.v3.y());
-	v4.x(toCopy.v4.x());
-	v4.y(toCopy.v4.y());
-}
 
 //------------------------------------------------------------------------------
 

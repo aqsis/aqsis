@@ -58,7 +58,7 @@ class AQSISTEX_SHARE CqCubeEnvironmentSampler : public IqEnvironmentSampler
 		CqCubeEnvironmentSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqEnvironmentSampler
-		virtual void sample(const Sq3DSampleQuad& sampleQuad,
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
@@ -82,29 +82,6 @@ CqCubeEnvironmentSampler<LevelCacheT>::CqCubeEnvironmentSampler(
 
 namespace detail {
 
-/** \brief Mapping from directions to coordinates of a cube face environment texture.
- *
- * Each mipmap level of a cube face environment maps consists of the six faces
- * of a cube.  These are concatenated together into the same texture as follows:
- *
- * \verbatim
- *
- *   +----+----+----+
- *   | +x | +y | +z |
- *   |    |    |    |
- *   +----+----+----+
- *   | -x | -y | -z |
- *   |    |    |    |
- *   +----+----+----+
- *
- * \endverbatim
- *
- * This class represents a mapping from directions in 3D space to texture
- * coordinates (s,t) consistent with the squares of the cube face environment,
- * as laid out above.
- *
- * Orientation of the cube faces is described in the RISpec.
- */
 class CqCubeFaceMapper
 {
 	private:
@@ -213,21 +190,146 @@ class CqCubeFaceMapper
 		}
 };
 
+
+/** \brief Mapping from directions to coordinates of a cube face environment texture.
+ *
+ * Each mipmap level of a cube face environment maps consists of the six faces
+ * of a cube.  These are concatenated together into the same texture as follows:
+ *
+ * \verbatim
+ *
+ *   +----+----+----+
+ *   | +x | +y | +z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *   | -x | -y | -z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *
+ * \endverbatim
+ *
+ * This function represents a mapping from directions in 3D space to texture
+ * coordinates (s,t) consistent with the squares of the cube face environment,
+ * as laid out above.  The tangent map is used to convert directions along the
+ * sides of the 3D sampling parallelogram into side vectors for the 2D result.
+ *
+ * Orientation of the cube faces is described in the RISpec.
+ */
+SqSamplePllgram directionToCubeFaceCoords(const Sq3DSamplePllgram& region,
+		TqFloat fovCotan)
+{
+	// Coefficients of the tangent map which translate one 
+	TqFloat tMap11 = 0, tMap12 = 0, tMap13 = 0; 
+	TqFloat tMap21 = 0, tMap22 = 0, tMap23 = 0; 
+	// Determine which axis we're pointing along, and map (s,t) onto the
+	// appropriate cube face with the range [-1,1].The orientation of faces
+	// is specified in the RISpec, in the section detailing the
+	// RiMakeCubeFaceEnvironment interface call.
+	TqFloat s = 0; TqFloat t = 0;
+	// Scaling and shifting of the range will be computed in the next step
+	// using the following parameters which are adjusted per-face.
+	TqFloat sScale = 0.5/3*fovCotan;
+	TqFloat tScale = -0.5/2*fovCotan;
+	TqFloat sOffset = 0;
+	TqFloat tOffset = 0.25;
+
+	const CqVector3D R = region.c;
+	const TqFloat absRx = std::fabs(R.x());
+	const TqFloat absRy = std::fabs(R.y());
+	const TqFloat absRz = std::fabs(R.z());
+	if(absRx >= absRy && absRx >= absRz)
+	{
+		// x-axis
+		// cube face map parameters
+		TqFloat invRx = 1/R.x();
+		s = R.z()*invRx;
+		t = R.y()*invRx;
+		sScale *= -1;
+		sOffset = 1.0/6;
+		if(R.x() < 0)
+		{
+			tScale *= -1;
+			tOffset = 0.75;
+		}
+		// Tangent map parameters
+		tMap11 = -s*invRx;
+		tMap13 = invRx; 
+		tMap21 = -t*invRx;
+		tMap22 = invRx;
+	}
+	else if(absRy >= absRx && absRy >= absRz)
+	{
+		// y-axis
+		TqFloat invRy = 1/R.y();
+		s = R.x()*invRy;
+		t = R.z()*invRy;
+		sOffset = 0.5;
+		if(R.y() < 0)
+		{
+			sScale *= -1;
+			tOffset = 0.75;
+		}
+		tScale *= -1;
+		// Tangent map parameters
+		tMap11 = invRy;
+		tMap12 = -s*invRy;
+		tMap22 = -t*invRy;
+		tMap23 = invRy; 
+	}
+	else
+	{
+		// z-axis
+		TqFloat invRz = 1/R.z();
+		s = R.x()*invRz;
+		t = R.y()*invRz;
+		sOffset = 5.0/6;
+		if(R.z() < 0)
+		{
+			tScale *= -1;
+			tOffset = 0.75;
+		}
+		// Tangent map parameters
+		tMap11 = invRz;
+		tMap13 = -s*invRz; 
+		tMap22 = invRz;
+		tMap23 = -t*invRz; 
+	}
+	tMap11 *= sScale;
+	tMap12 *= sScale;
+	tMap13 *= sScale;
+	tMap21 *= tScale;
+	tMap22 *= tScale;
+	tMap23 *= tScale;
+
+	// Compute center of new parallelogram with the cube face map.
+	CqVector2D st(sScale*s + sOffset, tScale*t + tOffset);
+
+	// Compute sides of new parallelogram using the tangent map.
+	CqVector2D side1(
+		tMap11*region.s1.x() + tMap12*region.s1.y() + tMap13*region.s1.z(),
+		tMap21*region.s1.x() + tMap22*region.s1.y() + tMap23*region.s1.z()
+	);
+	CqVector2D side2(
+		tMap11*region.s2.x() + tMap12*region.s2.y() + tMap13*region.s2.z(),
+		tMap21*region.s2.x() + tMap22*region.s2.y() + tMap23*region.s2.z()
+	);
+
+	return SqSamplePllgram(st, side1, side2);
+}
+
 } // namespace detail
 
 template<typename LevelCacheT>
-void CqCubeEnvironmentSampler<LevelCacheT>::sample(const Sq3DSampleQuad& sampleQuad,
+void CqCubeEnvironmentSampler<LevelCacheT>::sample(
+		const Sq3DSamplePllgram& samplePllgram,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
-	detail::CqCubeFaceMapper directionToTexture(sampleQuad.center(), m_fovCotan);
-	SqSampleQuad quad2d(
-			directionToTexture(sampleQuad.v1), directionToTexture(sampleQuad.v2),
-			directionToTexture(sampleQuad.v3), directionToTexture(sampleQuad.v4)
-			);
-	// TODO: Make blur work correctly...
+	SqSamplePllgram region2D
+		= detail::directionToCubeFaceCoords(samplePllgram, m_fovCotan);
+	// TODO: Make blur and width work correctly...
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(quad2d, m_levels->width0(),
+	CqEwaFilterFactory ewaFactory(region2D, m_levels->width0(),
 			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
 	// Apply the filter to the mipmap levels

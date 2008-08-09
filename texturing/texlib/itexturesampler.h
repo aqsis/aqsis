@@ -73,10 +73,6 @@ class AQSISTEX_SHARE IqTextureSampler
 
 		/** \brief Filter the texture over the given parallelogram region.
 		 *
-		 * The filter region is described by three parameters, st, diffUst,
-		 * diffVst.  st is the centre point of the filter region, while diffUst
-		 * and diffVst are the two sides.
-		 *
 		 * \param samplePllgram - parallelogram to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
