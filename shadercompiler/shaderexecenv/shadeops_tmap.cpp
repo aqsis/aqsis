@@ -387,24 +387,19 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
-			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
-			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
-			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
+			// Edges of region to be filtered.
+			CqVector2D diffUst(diffU<TqFloat>(s, gridIdx), diffU<TqFloat>(t, gridIdx));
+			CqVector2D diffVst(diffV<TqFloat>(s, gridIdx), diffV<TqFloat>(t, gridIdx));
 			// Centre of the texture region to be filtered.
 			TqFloat ss = 0;
 			TqFloat tt = 0;
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
-			// Compute the sample quadrilateral box.
-			SqSampleQuad sampleQuad(
-				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
-				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
-				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
-				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
+			// Filter region
+			SqSamplePllgram region(CqVector2D(ss,tt), diffUst, diffVst);
 			// length-1 "array" where filtered results will be placed.
 			TqFloat texSample = 0;
-			texSampler.sample(sampleQuad, sampleOpts, &texSample);
+			texSampler.sample(region, sampleOpts, &texSample);
 			Result->SetFloat(texSample, gridIdx);
 		}
 	}
@@ -513,24 +508,19 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 		if(RS.Value(gridIdx))
 		{
 			optExtractor.extractVarying(gridIdx, sampleOpts);
-			TqFloat ds_uOn2 = 0.5*diffU<TqFloat>(s, gridIdx);
-			TqFloat dt_uOn2 = 0.5*diffU<TqFloat>(t, gridIdx);
-			TqFloat ds_vOn2 = 0.5*diffV<TqFloat>(s, gridIdx);
-			TqFloat dt_vOn2 = 0.5*diffV<TqFloat>(t, gridIdx);
+			// Edges of region to be filtered.
+			CqVector2D diffUst(diffU<TqFloat>(s, gridIdx), diffU<TqFloat>(t, gridIdx));
+			CqVector2D diffVst(diffV<TqFloat>(s, gridIdx), diffV<TqFloat>(t, gridIdx));
 			// Centre of the texture region to be filtered.
 			TqFloat ss = 0;
 			TqFloat tt = 0;
 			s->GetFloat(ss,gridIdx);
 			t->GetFloat(tt,gridIdx);
-			// Compute the sample quadrilateral box.
-			SqSampleQuad sampleQuad(
-				CqVector2D(ss - ds_uOn2 - ds_vOn2, tt - dt_uOn2 - dt_vOn2),
-				CqVector2D(ss + ds_uOn2 - ds_vOn2, tt + dt_uOn2 - dt_vOn2),
-				CqVector2D(ss - ds_uOn2 + ds_vOn2, tt - dt_uOn2 + dt_vOn2),
-				CqVector2D(ss + ds_uOn2 + ds_vOn2, tt + dt_uOn2 + dt_vOn2) );
+			// Filter region
+			SqSamplePllgram region(CqVector2D(ss,tt), diffUst, diffVst);
 			// array where filtered results will be placed.
 			TqFloat texSample[3] = {0,0,0};
-			texSampler.sample(sampleQuad, sampleOpts, texSample);
+			texSampler.sample(region, sampleOpts, texSample);
 			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
 			Result->SetColor(resultCol, gridIdx);
 		}

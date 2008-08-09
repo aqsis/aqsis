@@ -28,17 +28,16 @@
 
 namespace Aqsis {
 
-void CqDummyTextureSampler::sample(const SqSampleQuad& sampleQuad,
+void CqDummyTextureSampler::sample(const SqSamplePllgram& samplePllgram,
 	const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	SqSampleQuad quad = sampleQuad;
-	quad.remapPeriodic(true, true);
-	CqVector2D c = quad.center();
+	SqSamplePllgram pllgram = samplePllgram;
+	pllgram.remapPeriodic(true, true);
 
 	// Make an ugly unfiltered black-on-white cross shape to indicate that the
 	// texture isn't present.
-	TqFloat x = c.x();
-	TqFloat y = c.y();
+	TqFloat x = pllgram.c.x();
+	TqFloat y = pllgram.c.y();
 	const TqFloat crossWidth = 0.10;
 	const TqFloat borderWidth = 0.05;
 	TqFloat result = 1;

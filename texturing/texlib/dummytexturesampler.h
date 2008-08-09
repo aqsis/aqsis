@@ -45,7 +45,7 @@ class AQSISTEX_SHARE CqDummyTextureSampler : public IqTextureSampler
 		 * bit like the dreaded red crosses which often appear in powerpoint
 		 * presentations ;-)
 		 */
-		virtual void sample(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSamplePllgram& samplePllgram,
 			const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 };
 

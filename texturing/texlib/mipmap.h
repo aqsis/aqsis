@@ -51,14 +51,16 @@ struct SqLevelTrans;
 //------------------------------------------------------------------------------
 /** \brief Mipmap level container and sampler class.
  *
- * CqMipmap holds a set of mipmap levels, and allows sampling of the mipmap
- * with correct choice of level for a given filter size.
+ * This class uses a set of power-of-two downsampled images (a typical
+ * mipmap) to make texture filtering efficient.  When filtering, a mipmap level
+ * is chosen based on the extent of the filter region.  We choose the mipmap
+ * level to be as small as possible, subject to the filter falling across a
+ * sufficient number of pixels.
  *
- * Texture buffers in the cache are constructed on-demand.
- * 
- * In addition to holding/sampling a set of buffers, this class also caches the
- * default sampling options, as determined from attributes of the texture file.
- * When these aren't present, we attempt to choose sensible defaults.
+ * In addition to holding and sampling a set of mipmap levels, this class also
+ * caches the default sampling options, as determined from attributes of the
+ * texture file.  When these aren't present, we attempt to choose sensible
+ * defaults.
  */
 template<typename TextureBufferT>
 class CqMipmap

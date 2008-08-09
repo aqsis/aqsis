@@ -43,22 +43,45 @@ class CqTexFileHeader;
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling texture buffers.
  *
- * This intent of this interface is to provide texture sampling facilities
- * independently of the sampling options.  Classes which implement the
- * interface should attempt to use the sampling method as specified by a
- * CqTexutureSampleOptions, passed to the sample() interface function.
+ * Sampling consists of filtering the texture over some appropriate filter
+ * region; filtering can be performed with either of the two sample()
+ * functions.  These provide alternative interfaces to specify the filter
+ * region.
  *
+ * Classes which implement the interface may attempt to use the sampling method
+ * as specified by a CqTexutureSampleOptions, passed to the sample() interface
+ * function.  Since this class is designed to be part of the renderman shading
+ * language texture sampling pipeline, the sample method should default to
+ * something else quietly if it's not supported.
  */
 class AQSISTEX_SHARE IqTextureSampler
 {
 	public:
-		/** \brief Sample the texture with the provided sample options.
+		/** \brief Filter the texture over the given quadrilateral region.
 		 *
-		 * \param sampleQuad - quadrilateral region to sample over
+		 * This function has a default implementation which calls through to
+		 * the other version of the sample() function, but can be overridden to
+		 * deal with sampling methods which can make use of the full
+		 * information in the sampling quadrilateral.
+		 *
+		 * \param sampleQuad - quadrilateral region to filter over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamps - results of sampling will be placed here.
+		 */
+		virtual void sample(const SqSampleQuad& sampleQuad,
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+
+		/** \brief Filter the texture over the given parallelogram region.
+		 *
+		 * The filter region is described by three parameters, st, diffUst,
+		 * diffVst.  st is the centre point of the filter region, while diffUst
+		 * and diffVst are the two sides.
+		 *
+		 * \param samplePllgram - parallelogram to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		virtual void sample(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.

@@ -38,13 +38,10 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief A mulitresolution (mipmapped) texture sampler class
+/** \brief A plain texture sampler class.
  *
- * This class uses a set of power-of-two downsampled images (a typical
- * mipmap) to make texture filtering efficient.  When filtering, a mipmap level
- * is chosen based on the extent of the filter quadrilateral.  We choose the
- * mipmap level to be as small as possible, subject to the filter falling
- * across a sufficient number of pixels.
+ * This class implements the IqTextureSampler, providing efficient filtered
+ * texture access using a mipmap.
  */
 template<typename LevelCacheT>
 class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
@@ -55,7 +52,7 @@ class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
 		CqTextureSampler(const boost::shared_ptr<LevelCacheT>& levels);
 
 		// from IqTextureSampler
-		virtual void sample(const SqSampleQuad& sampleQuad,
+		virtual void sample(const SqSamplePllgram& samplePllgram,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 	private:
@@ -74,22 +71,23 @@ CqTextureSampler<LevelCacheT>::CqTextureSampler(
 { }
 
 template<typename LevelCacheT>
-void CqTextureSampler<LevelCacheT>::sample(const SqSampleQuad& sampleQuad,
+void CqTextureSampler<LevelCacheT>::sample(const SqSamplePllgram& samplePllgram,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	SqSampleQuad quad = sampleQuad;
-	quad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
-	quad.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
+	// Scale width if necessary
+	SqSamplePllgram pllgram(samplePllgram);
+	pllgram.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
+	// Remap onto the main part of the texture if periodic.
+	pllgram.remapPeriodic(sampleOpts.sWrapMode() == WrapMode_Periodic,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(quad, m_levels->width0(),
+	CqEwaFilterFactory ewaFactory(pllgram, m_levels->width0(),
 			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
-	// Call through to the mipmap class to do the filtering proper.
+	// Call through to the mipmap class to do the main filtering work.
 	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);
 }
-
 
 template<typename LevelCacheT>
 const CqTextureSampleOptions&

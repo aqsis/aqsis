@@ -158,6 +158,13 @@ class CqEwaFilter
 class CqEwaFilterFactory
 {
 	public:
+		/// \deprecated
+		CqEwaFilterFactory(const SqSampleQuad& sQuad, 
+				TqFloat baseResS, TqFloat baseResT,
+				TqFloat sBlur = 0, TqFloat tBlur = 0,
+				TqFloat logEdgeWeight = 4, 
+				TqFloat maxAspectRatio = 20);
+
 		/** \brief Perform EWA filter weight setup
 		 *
 		 * This initializes the filter to be used over a texture of resolution
@@ -166,20 +173,23 @@ class CqEwaFilterFactory
 		 * adjusted for other lower resolutions using the function
 		 * adjustTextureScale().
 		 *
-		 * \param sQuad - sample quadrilateral representing the preimage of an
-		 *          output pixel under the image warp.
+		 * \param samplePllgram - sample parallelogram representing an
+		 *            approximate preimage of an output pixel box under the
+		 *            image warp.  The sides of the parallelogram give the
+		 *            linear approximation to the image warp at the centre
+		 *            (that is, they represent the Jacobian of the mapping).
 		 * \param baseResS - width of the base texture (used to determine a
-		 *          minimum reconstruction filter variance)
+		 *            minimum reconstruction filter variance)
 		 * \param baseResT - height of the base texture (used to determine a
-		 *          minimum reconstruction filter variance)
+		 *            minimum reconstruction filter variance)
 		 * \param sBlur - Additional filter blur in the s-direction
 		 * \param tBlur - Additional filter blur in the t-direction
 		 * \param logEdgeWeight - Related to the total fraction of the ideal
-		 *          filter weight, which is equal to exp(-logEdgeWeight).
+		 *            filter weight, which is equal to exp(-logEdgeWeight).
 		 * \param maxAspectRatio - maximum anisotropy at which the filter will
-		 *          be clamped.
+		 *            be clamped.
 		 */
-		CqEwaFilterFactory(const SqSampleQuad& sQuad, 
+		CqEwaFilterFactory(const SqSamplePllgram& samplePllgram,
 				TqFloat baseResS, TqFloat baseResT,
 				TqFloat sBlur = 0, TqFloat tBlur = 0,
 				TqFloat logEdgeWeight = 4, 
@@ -225,8 +235,8 @@ class CqEwaFilterFactory
 		 * CqEwaFilterFactory constructor.
 		 *
 		 */
-		void computeFilter(const SqSampleQuad& sQuad, TqFloat
-				baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
+		void computeFilter(const SqSamplePllgram& samplePllgram, TqFloat baseResS,
+				TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 				TqFloat maxAspectRatio);
 
 		/// Quadratic form matrix
@@ -244,7 +254,7 @@ class CqEwaFilterFactory
 // Implementation details
 //==============================================================================
 // CqEwaFilterFactory implementation
-
+/// TODO: - Remove
 inline CqEwaFilterFactory::CqEwaFilterFactory(const SqSampleQuad& sQuad, 
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat logEdgeWeight, TqFloat maxAspectRatio)
@@ -259,7 +269,27 @@ inline CqEwaFilterFactory::CqEwaFilterFactory(const SqSampleQuad& sQuad,
 	m_filterCenter.x(m_filterCenter.x()*baseResS - 0.5);
 	m_filterCenter.y(m_filterCenter.y()*baseResT - 0.5);
 	// compute and cache the filter
-	computeFilter(sQuad, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
+	computeFilter(SqSamplePllgram(sQuad), baseResS, baseResT, sBlur, tBlur,
+			maxAspectRatio);
+}
+inline CqEwaFilterFactory::CqEwaFilterFactory(
+		const SqSamplePllgram& samplePllgram,
+		TqFloat baseResS, TqFloat baseResT,
+		TqFloat sBlur, TqFloat tBlur,
+		TqFloat logEdgeWeight, 
+		TqFloat maxAspectRatio)
+	: m_quadForm(0),
+	m_filterCenter(samplePllgram.c),
+	m_logEdgeWeight(logEdgeWeight),
+	m_minorAxisWidth(0)
+{
+	// Scale the filterCenter up to the dimensions of the base texture, and
+	// adjust by -0.5 in both directions such that the base texture is
+	// *centered* on the unit square.
+	m_filterCenter.x(m_filterCenter.x()*baseResS - 0.5);
+	m_filterCenter.y(m_filterCenter.y()*baseResT - 0.5);
+	// compute and cache the filter
+	computeFilter(samplePllgram, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
 }
 
 inline CqEwaFilter CqEwaFilterFactory::createFilter(TqFloat xScale, TqFloat xOff,

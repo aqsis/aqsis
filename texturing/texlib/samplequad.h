@@ -99,6 +99,58 @@ struct SqSampleQuad
 };
 
 
+/** \brief 2D parallelogram over which to sample a texture
+ *
+ * The parallelogram is defined by its center point along with vectors along
+ * its sides.  As a picture:
+ *
+ * \verbatim
+ *
+ *         _-------
+ *         /|    /
+ *     s2 /  c  /
+ *       /     /
+ *      .----->
+ *        s1
+ *
+ * \endverbatim
+ *
+ * This is a special case of SqSampleQuad, holding less information, but more
+ * specifically adapted to some types of filtering such as EWA.
+ */
+struct SqSamplePllgram
+{
+	/// center point for the sample
+	CqVector2D c;
+	/// first side of parallelogram
+	CqVector2D s1;
+	/// second side of parallelogram
+	CqVector2D s2;
+
+	/// Trivial constructor
+	SqSamplePllgram(const CqVector2D& c, const CqVector2D& s1, const CqVector2D s2);
+	/// Convert from a sample quad to a sample parallelogram
+	explicit SqSamplePllgram(const SqSampleQuad& quad);
+
+	/** \brief Remap the parallelogram to lie in the box [0,1]x[0,1]
+	 *
+	 * The remapping occurs by translating the center by an integer lattice
+	 * point (n,m) such that c lies inside [0,1]x[0,1].
+	 *
+	 * \param xPeriodic - if true, remap in the x direction.
+	 * \param yPeriodic - if true, remap in the y direction.
+	 */
+	void remapPeriodic(bool xPeriodic, bool yPeriodic);
+
+	/** \brief Scale the parallelogram about its center point.
+	 *
+	 * \param xWidth - amount to expand sample quad in the x direction
+	 * \param yWidth - amount to expand sample quad in the y direction
+	 */
+	void scaleWidth(TqFloat xWidth, TqFloat yWidth);
+};
+
+
 //------------------------------------------------------------------------------
 /** \brief 3D quadrilateral over which to sample a texture
  *
@@ -144,7 +196,6 @@ struct Sq3DSampleQuad
 };
 
 
-
 //==============================================================================
 // Implementation details
 //==============================================================================
@@ -185,6 +236,45 @@ inline void SqSampleQuad::remapPeriodic(bool xPeriodic, bool yPeriodic)
 inline CqVector2D SqSampleQuad::center() const
 {
 	return 0.25*(v1+v2+v3+v4);
+}
+
+
+//------------------------------------------------------------------------------
+// SqSamplePllgram implementation
+inline SqSamplePllgram::SqSamplePllgram(const CqVector2D& c, const CqVector2D& s1,
+		const CqVector2D s2)
+	: c(c),
+	s1(s1),
+	s2(s2)
+{ }
+
+inline SqSamplePllgram::SqSamplePllgram(const SqSampleQuad& quad)
+	: c(quad.center()),
+	s1(0.5*(quad.v2 - quad.v1 + quad.v4 - quad.v3)),
+	s2(0.5*(quad.v1 - quad.v3 + quad.v2 - quad.v4))
+{ }
+
+inline void SqSamplePllgram::remapPeriodic(bool xPeriodic, bool yPeriodic)
+{
+	if(xPeriodic || yPeriodic)
+	{
+		if(c.x() < 0 || c.y() < 0 || c.x() >= 1 || c.y() >= 1)
+		{
+			CqVector2D v(std::floor(c.x()),std::floor(c.y()));
+			c -= v;
+		}
+	}
+}
+
+inline void SqSamplePllgram::scaleWidth(TqFloat xWidth, TqFloat yWidth)
+{
+	if(xWidth != 1 || yWidth != 1)
+	{
+		s1.x(s1.x()*xWidth);
+		s1.y(s1.y()*yWidth);
+		s2.x(s1.x()*xWidth);
+		s2.y(s1.y()*yWidth);
+	}
 }
 
 //------------------------------------------------------------------------------

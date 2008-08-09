@@ -32,31 +32,6 @@ namespace Aqsis {
 
 namespace {
 
-/** \brief Estimate the inverse Jacobian of the mapping defined by a sampling quad
- *
- * The four corners of the sampling quad are assumed to point to four corners
- * of a pixel box in the resampled output raster.
- *
- * The averaging in computing the derivatives may be slightly unnecessary, but
- * makes sense for user-supplied 
- */
-inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
-{
-	// Computes the Jacobian of the inverse texture warp - the warp which takes
-	// the destination image to the source image.
-	//
-	// [ds/du ds/dv]
-	// [dt/du dt/dv]
-	//
-	// We use some averaging for numerical stability (giving the factor of 0.5).
-	return SqMatrix2D(
-			0.5*(sQuad.v2.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v3.x()),
-			0.5*(sQuad.v3.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v2.x()),
-			0.5*(sQuad.v2.y() - sQuad.v1.y() + sQuad.v4.y() - sQuad.v3.y()),
-			0.5*(sQuad.v3.y() - sQuad.v1.y() + sQuad.v4.y() - sQuad.v2.y())
-			);
-}
-
 /* \brief Clamp the filter anisotropy to a maximum value.
  *
  * \param covariance - Covariance matrix for a gaussian filter
@@ -95,16 +70,19 @@ namespace detail {
 // Lookup-table for exp(-x) for filter weighting.  20 Data points is probably
 // about right, though it's possible to use even less.  Using 10
 CqNegExpTable negExpTable(20, 6);
-}
 
-void CqEwaFilterFactory::computeFilter(const SqSampleQuad& sQuad,
+} // namespace detail
+
+void CqEwaFilterFactory::computeFilter(const SqSamplePllgram& samplePllgram,
 		TqFloat baseResS, TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
 		TqFloat maxAspectRatio)
 {
 	// Get Jacobian of the inverse texture warp, and scale it by the resolution
 	// of the base texture.
-	SqMatrix2D invJ = SqMatrix2D(baseResS, baseResT)
-			* estimateJacobianInverse(sQuad);
+	SqMatrix2D invJ = SqMatrix2D(baseResS, baseResT) * SqMatrix2D(
+				samplePllgram.s1.x(), samplePllgram.s2.x(),
+				samplePllgram.s1.y(), samplePllgram.s2.y()
+			);
 	// Compute covariance matrix for the gaussian filter
 	//
 	// Variances for the reconstruction & prefilters.  A variance of 1/(2*pi)

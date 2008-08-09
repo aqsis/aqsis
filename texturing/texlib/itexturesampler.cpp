@@ -60,6 +60,21 @@ boost::shared_ptr<IqTextureSampler> createMipmapSampler(
 //------------------------------------------------------------------------------
 // IqTextureSampler implementation
 
+void IqTextureSampler::sample(const SqSampleQuad& sampleQuad,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	// Default implementation for texture quadrilateral sampling.  This just
+	// approximates the quad with a parallelogram and calls through to the
+	// other version of sample().
+	sample(SqSamplePllgram(sampleQuad), sampleOpts, outSamps);
+}
+
+const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const
+{
+	static const CqTextureSampleOptions defaultOptions;
+	return defaultOptions;
+}
+
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
@@ -119,12 +134,6 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::createDummy()
 {
 	return boost::shared_ptr<IqTextureSampler>(new CqDummyTextureSampler());
-}
-
-const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const
-{
-	static const CqTextureSampleOptions defaultOptions;
-	return defaultOptions;
 }
 
 } // namespace Aqsis
