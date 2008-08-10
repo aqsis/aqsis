@@ -434,11 +434,21 @@ void CqMipmap<TextureBufferT>::filterLevel(
 		outSamps,
 		sampleOpts.fill()
 	);
+	SqFilterSupport support = weights.support();
+	if(level == numLevels() - 1)
+	{
+		// Truncate the support to a maximum size of 20x20 if we're on the
+		// highest mipmap level.  If we don't do this, the support can
+		// occasionally be very large, resulting in very long filter times.
+		TqInt cx = (support.sx.start + support.sx.end)/2;
+		TqInt cy = (support.sy.start + support.sy.end)/2;
+		support = intersect(support, SqFilterSupport(cx-10, cx+11, cy-10, cy+11));
+	}
 	// filter the texture
 	filterTexture(
 		accumulator,
 		getLevel(level),
-		weights.support(),
+		support,
 		SqWrapModes(sampleOpts.sWrapMode(), sampleOpts.tWrapMode())
 	);
 }
