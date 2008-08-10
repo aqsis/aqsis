@@ -150,11 +150,12 @@ void CqLatLongEnvironmentSampler<LevelCacheT>::sample(
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Map sampling parallelogram into latlong texture coords.
-	SqSamplePllgram pllgram2D = detail::directionToLatLong(samplePllgram);
-	// TODO: Make blur and width work!
+	SqSamplePllgram region2d = detail::directionToLatLong(samplePllgram);
+	// TODO: Make blur work!
+	region2d.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(pllgram2D,
+	CqEwaFilterFactory ewaFactory(region2d,
 			m_levels->width0(), m_levels->height0(),
 			sampleOpts.sBlur(), sampleOpts.tBlur());
 

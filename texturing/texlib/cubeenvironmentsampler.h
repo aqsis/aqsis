@@ -325,11 +325,12 @@ void CqCubeEnvironmentSampler<LevelCacheT>::sample(
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
-	SqSamplePllgram region2D
+	SqSamplePllgram region2d
 		= detail::directionToCubeFaceCoords(samplePllgram, m_fovCotan);
-	// TODO: Make blur and width work correctly...
+	region2d.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
+	// TODO: Make blur work correctly...
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(region2D, m_levels->width0(),
+	CqEwaFilterFactory ewaFactory(region2d, m_levels->width0(),
 			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
 	// Apply the filter to the mipmap levels
