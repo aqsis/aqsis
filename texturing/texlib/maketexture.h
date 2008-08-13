@@ -71,10 +71,53 @@ struct SqFilterInfo
  *                    parameters for the mipmapping procedure.
  */
 AQSISTEX_SHARE void makeTexture(const std::string& inFileName, 
-		const std::string& outFileName,
-		const SqFilterInfo& filterInfo, 
-		const SqWrapModes& wrapModes,
-		const CqRiParamList& paramList);
+		const std::string& outFileName, const SqFilterInfo& filterInfo, 
+		const SqWrapModes& wrapModes, const CqRiParamList& paramList);
+
+/** \brief Convert six texture files into a cube face environment map
+ *
+ * The input texture files represent the view through the faces of a cube, and
+ * must all be of the same resolution.  Faces should be rendered with a larger
+ * field of view slightly than 90 degrees to avoid filtering artifacts where
+ * the faces meet.
+ *
+ * The output texture is a mipmapped tiled TIFF file for efficient texture
+ * lookup.  Each mipmap level stores the full set of six cube faces in the
+ * order
+ *
+ * \verbatim
+ *
+ *   +----+----+----+
+ *   | +x | +y | +z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *   | -x | -y | -z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *
+ * \endverbatim
+ *
+ * The appropriate orientation for the faces is specified by the RISpec in the
+ * section detailing RiMakeCubeFaceEnvironment.
+ *
+ * \param inNamePx - cube face in +x direction (full path)
+ * \param inNameNx - cube face in -x direction (full path)
+ * \param inNamePy - cube face in +y direction (full path)
+ * \param inNameNy - cube face in -y direction (full path)
+ * \param inNamePz - cube face in +z direction (full path)
+ * \param inNameNz - cube face in -z direction (full path)
+ * \param outFileName - full path to the output texture map file.
+ * \param fieldOfView - full field of view in degrees.
+ * \param filterInfo - information about which filter type and size to use
+ * \param paramList - A renderman param list of extra optional control
+ *                    parameters for the mipmapping procedure.
+ */
+AQSISTEX_SHARE void makeCubeFaceEnvironment(
+		const std::string& inNamePx, const std::string& inNameNx, 
+		const std::string& inNamePy, const std::string& inNameNy, 
+		const std::string& inNamePz, const std::string& inNameNz, 
+		const std::string& outFileName, TqFloat fieldOfView,
+		const SqFilterInfo& filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file into a latlong environment map
  *
@@ -89,10 +132,8 @@ AQSISTEX_SHARE void makeTexture(const std::string& inFileName,
  *                    parameters for the mipmapping procedure.
  */
 AQSISTEX_SHARE void makeLatLongEnvironment(
-		const std::string& inFileName, 
-		const std::string& outFileName,
-		const SqFilterInfo& filterInfo, 
-		const CqRiParamList& paramList);
+		const std::string& inFileName, const std::string& outFileName,
+		const SqFilterInfo& filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file to a shadow map.
  *
@@ -106,8 +147,7 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  *                    parameters for the shadow optimization.
  */
 AQSISTEX_SHARE void makeShadow(const std::string& inFileName, 
-		const std::string& outFileName,
-		const CqRiParamList& paramList);
+		const std::string& outFileName, const CqRiParamList& paramList);
 
 } // namespace Aqsis
 

@@ -4873,6 +4873,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else if ( strcmp( type, "sphere" ) == 0 )
 	{
+		// \todo <b>Code Review</b> Do we really need this when we have RiSphere?
 		// Create a sphere
 		boost::shared_ptr<CqSphere> pSurface( new CqSphere( 1, -1, 1, 0, 360.0 ) );
 		ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -5260,107 +5261,22 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 	DEBUG_RIMAKECUBEFACEENVIRONMENT
 
 	TIME_SCOPE("Environment Mapping")
+
 	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
 	        reflfile != 0 && filterfunc != 0 );
 
-	// Now load the original image.
-	CqTextureMapOld tpx( px );
-	CqTextureMapOld tnx( nx );
-	CqTextureMapOld tpy( py );
-	CqTextureMapOld tny( ny );
-	CqTextureMapOld tpz( pz );
-	CqTextureMapOld tnz( nz );
+	std::string pxFullName = findFileInPath(px, QGetRenderContext()->textureSearchPath());
+	std::string nxFullName = findFileInPath(nx, QGetRenderContext()->textureSearchPath());
+	std::string pyFullName = findFileInPath(py, QGetRenderContext()->textureSearchPath());
+	std::string nyFullName = findFileInPath(ny, QGetRenderContext()->textureSearchPath());
+	std::string pzFullName = findFileInPath(pz, QGetRenderContext()->textureSearchPath());
+	std::string nzFullName = findFileInPath(nz, QGetRenderContext()->textureSearchPath());
 
-	tpx.Open();
-	tnx.Open();
-	tpy.Open();
-	tny.Open();
-	tpz.Open();
-	tnz.Open();
+	makeCubeFaceEnvironment(pxFullName, nxFullName, pyFullName, nyFullName,
+			pzFullName, nzFullName, reflfile, fov,
+			SqFilterInfo(filterfunc, swidth, twidth),
+			CqRiParamList(tokens, values, count));
 
-	if ( tpx.Format() != TexFormat_MIPMAP )
-		tpx.CreateMIPMAP();
-	if ( tnx.Format() != TexFormat_MIPMAP )
-		tnx.CreateMIPMAP();
-	if ( tpy.Format() != TexFormat_MIPMAP )
-		tpy.CreateMIPMAP();
-	if ( tny.Format() != TexFormat_MIPMAP )
-		tny.CreateMIPMAP();
-	if ( tpz.Format() != TexFormat_MIPMAP )
-		tpz.CreateMIPMAP();
-	if ( tnz.Format() != TexFormat_MIPMAP )
-		tnz.CreateMIPMAP();
-	if ( tpx.IsValid() && tnx.IsValid() && tpy.IsValid() && tny.IsValid() && tpz.IsValid() && tnz.IsValid() )
-	{
-		// Check all the same size;
-		bool fValid = false;
-		if ( tpx.XRes() == tnx.XRes() && tpx.XRes() == tpy.XRes() && tpx.XRes() == tny.XRes() && tpx.XRes() == tpz.XRes() && tpx.XRes() == tnz.XRes() &&
-		        tpx.XRes() == tnx.XRes() && tpx.XRes() == tpy.XRes() && tpx.XRes() == tny.XRes() && tpx.XRes() == tpz.XRes() && tpx.XRes() == tnz.XRes() )
-			fValid = true;
-
-		if ( !fValid )
-		{
-			Aqsis::log() << error << "RiMakeCubeFaceEnvironment all images must be the same size" << std::endl;
-			return ;
-		}
-
-		// Now copy the images to the big map.
-		CqTextureMapOld* Images[ 6 ] =
-		    {
-		        &tpx,
-		        &tpy,
-		        &tpz,
-		        &tnx,
-		        &tny,
-		        &tnz
-		    };
-
-		// Create a new image.
-		TIFF* ptex = TIFFOpen( reflfile, "w" );
-
-		RtInt ii;
-		TqInt xRes = tpx.XRes();
-		TqInt yRes = tpx.YRes();
-
-		TqInt numsamples = tpx.SamplesPerPixel();
-		// Number of mip map levels.
-		int log2 = min( xRes, yRes );
-		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
-
-		for ( ii = 0; ii < log2; ++ii )
-		{
-			CqTextureMapBuffer* pLevelBuffer = tpx.CreateBuffer( 0, 0, xRes * 3, yRes * 2, numsamples );
-			TqInt view;
-			for ( view = 0; view < 6; ++view )
-			{
-				// Get the buffer for the approriate cube side at this level.
-				CqTextureMapBuffer* pBuffer = Images[ view ] ->GetBuffer( 0, 0, ii );
-				// Work out where in the combined image it goes.
-				TqInt xoff = view % 3;
-				xoff *= xRes;
-				TqInt yoff = view / 3;
-				yoff *= yRes;
-				TqInt line, col, sample;
-				for ( line = 0; line < yRes; ++line )
-				{
-					for ( col = 0; col < xRes; ++col )
-					{
-						for ( sample = 0; sample < numsamples; ++sample )
-							pLevelBuffer->SetValue( col + xoff, line + yoff, sample, pBuffer->GetValue( col, line, sample ) );
-					}
-				}
-			}
-
-			TIFFCreateDirectory( ptex );
-			TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-			TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
-			TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(degToRad(fov)/2.0) );
-			tpx.WriteTileImage( ptex, pLevelBuffer, 64, 64, tpx.Compression(), tpx.Quality() );
-			xRes /= 2;
-			yRes /= 2;
-		}
-		TIFFClose( ptex );
-	}
 	EXCEPTION_CATCH_GUARD("RiMakeCubeFaceEnvironmentV")
 	return ;
 }
@@ -5434,6 +5350,9 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 	DEBUG_RIMAKEOCCLUSION
 
 	TIME_SCOPE("Shadow Mapping")
+
+	// TODO: Convert to aqsistex; make sure to remove ProcessCompression
+	// and any TIFF dependencies afterward.
 
 	RtInt index;
         unlink(shadowfile);
