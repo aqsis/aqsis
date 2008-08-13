@@ -134,9 +134,27 @@ class AQSISTEX_SHARE IqTexOutputFile
 class AQSISTEX_SHARE IqMultiTexOutputFile : public IqTexOutputFile
 {
 	public:
-		/** \brief Create a new subimage, finalizing the current one.
+		/** \brief Create a new subimage
+		 *
+		 * This function first finalizes the current subimage before setting up
+		 * the file for a new subimage with the same attributes as the previous
+		 * subimage, apart from width and height which may be specified as
+		 * arguments.
+		 *
+		 * \param width - width for the new subimage
+		 * \param height - height for the new subimage
 		 */
 		virtual void newSubImage(TqInt width, TqInt height) = 0;
+
+		/** \brief Create a new subimage with extra header data
+		 *
+		 * This function first finalizes the current subimage before creating a
+		 * new subimage with the same header attributes as the previous one,
+		 * apart from width and height which may be specified as arguments.
+		 *
+		 * \param header - header data for the current subimage.
+		 */
+		virtual void newSubImage(const CqTexFileHeader& header) = 0;
 
 		/** \brief Open an input image file in a given format
 		 *

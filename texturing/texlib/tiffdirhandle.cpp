@@ -52,6 +52,7 @@ const char* plainTextureFormatStr = "Plain Texture";
 const char* cubeEnvTextureFormatStr = "CubeFace Environment";
 const char* latlongEnvTextureFormatStr = "LatLong Environment";
 const char* shadowTextureFormatStr = "Shadow";
+const char* occlusionTextureFormatStr = "Occlusion";
 
 /// Convert from a string to an EqTextureFormat
 EqTextureFormat texFormatFromString(const std::string& str)
@@ -64,6 +65,8 @@ EqTextureFormat texFormatFromString(const std::string& str)
 		return TextureFormat_LatLongEnvironment;
 	else if(str == shadowTextureFormatStr)
 		return TextureFormat_Shadow;
+	else if(str == occlusionTextureFormatStr)
+		return TextureFormat_Occlusion;
 	return TextureFormat_Unknown;
 }
 
@@ -80,6 +83,8 @@ const char* texFormatToString(EqTextureFormat format)
 			return latlongEnvTextureFormatStr;
 		case TextureFormat_Shadow:
 			return shadowTextureFormatStr;
+		case TextureFormat_Occlusion:
+			return occlusionTextureFormatStr;
 		case TextureFormat_Unknown:
 			return "unknown";
 	}

@@ -94,13 +94,25 @@ void CqTiffOutputFile::newSubImage(TqInt width, TqInt height)
 	m_header.setWidth(width);
 	m_header.setHeight(height);
 
+	// It might be reasonable to trim the header for directories after the
+	// first (?)  Any trimming should consider the effect on CqTiffInputFile...
+	nextSubImage(m_header);
+}
+
+void CqTiffOutputFile::newSubImage(const CqTexFileHeader& header)
+{
+	m_header = header;
+	nextSubImage(m_header);
+}
+
+void CqTiffOutputFile::nextSubImage(const CqTexFileHeader& header)
+{
 	m_fileHandle->writeDirectory();
 	m_currentLine = 0;
 
 	// Write header data to this directory.
-	/// \todo The header may be trimmed for directories after the first.
 	CqTiffDirHandle dirHandle(m_fileHandle);
-	dirHandle.writeHeader(m_header);
+	dirHandle.writeHeader(header);
 }
 
 void CqTiffOutputFile::writeScanlinePixels(const CqMixedImageBuffer& buffer)

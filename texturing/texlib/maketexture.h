@@ -30,6 +30,7 @@
 #include "aqsis.h"
 
 #include <string>
+#include <vector>
 
 #include "wrapmode.h"
 #include "riparamlist.h"
@@ -163,6 +164,18 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  *                    parameters for the shadow optimization.
  */
 AQSISTEX_SHARE void makeShadow(const std::string& inFileName, 
+		const std::string& outFileName, const CqRiParamList& paramList);
+
+/** \brief Convert a collection of depth maps into an occlusion map.
+ *
+ * This function requires that each input file be in 32bit floating point
+ * format.  World to camera and world to screen matrices must also be present
+ * in each file.  The output file is a multi-image tiled TIFF file which is
+ * efficient for ambient occlusion lookups.
+ *
+ * \param 
+ */
+AQSISTEX_SHARE void makeOcclusion(const std::vector<std::string>& inFiles,
 		const std::string& outFileName, const CqRiParamList& paramList);
 
 } // namespace Aqsis

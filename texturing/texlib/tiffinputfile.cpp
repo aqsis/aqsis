@@ -224,8 +224,6 @@ void CqTiffInputFile::setDirectory(tdir_t newDir)
 
 	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
 	dirHandle.fillHeader(m_header);
-	/// \todo We'll need to add something to deal with generic RGBA tiff
-	/// reading at some stage.
 }
 
 } // namespace Aqsis

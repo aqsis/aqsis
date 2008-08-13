@@ -59,6 +59,7 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
 		virtual const CqTexFileHeader& header() const;
 		virtual TqInt currentLine() const;
 		virtual void newSubImage(TqInt width, TqInt height);
+		virtual void newSubImage(const CqTexFileHeader& header);
 
 	private:
 		/// Write pixel buffer to file as scanlines
@@ -70,6 +71,8 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
 
 		/// Perform shared initializations needed in construction.
 		void initialize();
+		/// Move to the next subimage, initializing it with the data in header.
+		void nextSubImage(const CqTexFileHeader& header);
 
 		/// File header
 		CqTexFileHeader m_header;

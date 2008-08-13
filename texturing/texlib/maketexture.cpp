@@ -332,29 +332,6 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 }
 
 
-void makeLatLongEnvironment(const std::string& inFileName, 
-		const std::string& outFileName, const SqFilterInfo& filterInfo, 
-		const CqRiParamList& paramList)
-{
-	// Open input file
-	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(inFileName);
-
-	// Build the file metadata header
-	/// \todo: Consider whether we want to start from an empty header instead?
-	CqTexFileHeader header = inFile->header();
-	SqWrapModes wrapModes(WrapMode_Periodic, WrapMode_Clamp);
-	fillOutputHeader(header, wrapModes, TextureFormat_LatLongEnvironment, paramList);
-
-	// Create the output file.
-	boost::shared_ptr<IqMultiTexOutputFile> outFile
-		= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
-
-	// Create mipmap, saving to the output file.
-	createMipmap(*inFile, inFile->header().channelList().sharedChannelType(),
-			*outFile, filterInfo, wrapModes);
-}
-
-
 void makeCubeFaceEnvironment(
 		const std::string& inNamePx, const std::string& inNameNx, 
 		const std::string& inNamePy, const std::string& inNameNy, 
@@ -396,6 +373,29 @@ void makeCubeFaceEnvironment(
 }
 
 
+void makeLatLongEnvironment(const std::string& inFileName, 
+		const std::string& outFileName, const SqFilterInfo& filterInfo, 
+		const CqRiParamList& paramList)
+{
+	// Open input file
+	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(inFileName);
+
+	// Build the file metadata header
+	/// \todo: Consider whether we want to start from an empty header instead?
+	CqTexFileHeader header = inFile->header();
+	SqWrapModes wrapModes(WrapMode_Periodic, WrapMode_Clamp);
+	fillOutputHeader(header, wrapModes, TextureFormat_LatLongEnvironment, paramList);
+
+	// Create the output file.
+	boost::shared_ptr<IqMultiTexOutputFile> outFile
+		= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
+
+	// Create mipmap, saving to the output file.
+	createMipmap(*inFile, inFile->header().channelList().sharedChannelType(),
+			*outFile, filterInfo, wrapModes);
+}
+
+
 void makeShadow(const std::string& inFileName, const std::string& outFileName,
 		const CqRiParamList& paramList)
 {
@@ -432,6 +432,55 @@ void makeShadow(const std::string& inFileName, const std::string& outFileName,
 	boost::shared_ptr<IqTexOutputFile> outFile
 		= IqTexOutputFile::open(outFileName, ImageFile_Tiff, header);
 	outFile->writePixels(pixelBuf);
+}
+
+void makeOcclusion(const std::vector<std::string>& inFiles,
+		const std::string& outFileName, const CqRiParamList& paramList)
+{
+	boost::shared_ptr<IqMultiTexOutputFile> outFile;
+
+	for(std::vector<std::string>::const_iterator fName = inFiles.begin();
+			fName != inFiles.end(); ++fName)
+	{
+		boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(*fName);
+
+		// Take a copy of the file header.
+		CqTexFileHeader header = inFile->header();
+		// Set some extra attributes in the new file header.
+		fillOutputHeader(header, SqWrapModes(WrapMode_Trunc, WrapMode_Trunc),
+				TextureFormat_Occlusion, paramList);
+
+		// Ensure that the header contains 32-bit floating poing data.
+		if(header.channelList().sharedChannelType() != Channel_Float32)
+			AQSIS_THROW(XqBadTexture, "input for occlusion map creation doesn't "
+					"contain 32 bit floating point data in " << *fName);
+
+		// Ensure that the screen and camera transformation matrices are
+		// present.
+		if( header.findPtr<Attr::WorldToCameraMatrix>() == 0
+				|| header.findPtr<Attr::WorldToCameraMatrix>() == 0 )
+		{
+			AQSIS_THROW(XqBadTexture, "world->camera and world->screen"
+					" matrices not specified in input file" << *fName);
+		}
+
+		if(!outFile)
+		{
+			// Open output file
+			boost::shared_ptr<IqMultiTexOutputFile> outFile
+				= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
+		}
+		else
+		{
+			// Else make a new subimage with the given metadata.
+			outFile->newSubImage(header);
+		}
+
+		// Read all pixels into a buffer and write to output file.
+		CqTextureBuffer<TqFloat> pixelBuf;
+		inFile->readPixels(pixelBuf);
+		outFile->writePixels(pixelBuf);
+	}
 }
 
 } // namespace Aqsis

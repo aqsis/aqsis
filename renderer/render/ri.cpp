@@ -45,7 +45,6 @@
 #include	"teapot.h"
 #include	"bunny.h"
 #include	"shaders.h"
-#include	"texturemap_old.h"
 #include	"objectinstance.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
@@ -100,7 +99,6 @@ using namespace Aqsis;
 #include	"ri_debug.h"
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
-static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
@@ -712,9 +710,6 @@ RtVoid	RiEnd()
 	DEBUG_RIEND
 
 	QGetRenderContext() ->EndMainModeBlock();
-
-	// Flush the image cache.
-	CqTextureMapOld::FlushCache();
 
 	// Clear the lightsources stack.
 	Lightsource_stack.clear();
@@ -5351,23 +5346,15 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
 	TIME_SCOPE("Shadow Mapping")
 
-	// TODO: Convert to aqsistex; make sure to remove ProcessCompression
-	// and any TIFF dependencies afterward.
-
-	RtInt index;
-        unlink(shadowfile);
-	for( index = 0; index < npics; ++index )
+	std::vector<std::string> fileNames;
+	fileNames.reserve(npics);
+	for(TqInt i = 0; i < npics; ++i)
 	{
-		CqShadowMapOld ZFile( picfiles[index] );
-		ZFile.LoadZFile();
-
-		TqInt comp, qual;
-		ProcessCompression( &comp, &qual, count, tokens, values );
-		ZFile.SetCompression( comp );
-		ZFile.SetQuality( qual );
-
-		ZFile.SaveShadowMapOld( shadowfile, true );
+		fileNames.push_back(findFileInPath(picfiles[i],
+			QGetRenderContext()->textureSearchPath()));
 	}
+	makeOcclusion(fileNames, shadowfile, CqRiParamList(tokens, values, count));
+
 	EXCEPTION_CATCH_GUARD("RiMakeOcclusionV")
 	return ;
 }
@@ -6251,60 +6238,5 @@ void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char *
 	}
 
 	pShader->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, val );
-}
-
-
-//----------------------------------------------------------------------
-/** Analyze the parameter list and figure what kind of compression is required for texturemapping output files.
-
-	\param	compression	compression	Pointer to an integer to containing the TIFF compression
-	\param	quality it is the quality of jpeg's compression
-	\param	count list counter
-	\param	tokens list of tokens
-	\param	values list of values
-
-	\return	nothing
- */
-
-static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt count, RtToken * tokens, RtPointer * values )
-{
-	*compression = COMPRESSION_NONE;
-	*quality = 70;
-
-	for ( int i = 0; i < count; ++i )
-	{
-		RtToken	token = tokens[ i ];
-		RtString *value = ( RtString * ) values[ i ];
-
-		if ( strstr( token, "compression" ) != 0 )
-		{
-
-			if ( strstr( *value, "none" ) != 0 )
-				* compression = COMPRESSION_NONE;
-
-			else if ( strstr( *value, "lzw" ) != 0 )
-				* compression = COMPRESSION_LZW;
-
-			else if ( strstr( *value, "deflate" ) != 0 )
-				* compression = COMPRESSION_DEFLATE;
-
-			else if ( strstr( *value, "jpeg" ) != 0 )
-				* compression = COMPRESSION_JPEG;
-
-			else if ( strstr( *value, "packbits" ) != 0 )
-				* compression = COMPRESSION_PACKBITS;
-
-
-		}
-		else if ( strstr( token, "quality" ) != 0 )
-		{
-
-			*quality = ( int ) * ( float * ) value;
-			if ( *quality < 0 )
-				* quality = 0;
-			if ( *quality > 100 )
-				* quality = 100;
-		}
-	}
 }
 
