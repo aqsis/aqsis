@@ -63,6 +63,10 @@ struct SqFilterInfo
  * texture lookup.  See downsample.h for details on the assumptions behind
  * mipmapping in aqsis.
  *
+ * The output file contains a duplicate of the recognized metadata from the
+ * input file, so stuff like transformation matrices will be preserved where
+ * possible.
+ *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
  * \param filterInfo - information about which filter type and size to use
@@ -100,6 +104,10 @@ AQSISTEX_SHARE void makeTexture(const std::string& inFileName,
  * The appropriate orientation for the faces is specified by the RISpec in the
  * section detailing RiMakeCubeFaceEnvironment.
  *
+ * The output file contains a duplicate of the recognized metadata from the
+ * input file in the +x direction (inNamePx), so stuff like transformation
+ * matrices will be preserved where possible.
+ *
  * \param inNamePx - cube face in +x direction (full path)
  * \param inNameNx - cube face in -x direction (full path)
  * \param inNamePy - cube face in +y direction (full path)
@@ -125,6 +133,10 @@ AQSISTEX_SHARE void makeCubeFaceEnvironment(
  * longitude for the vertical and horizontal directions respectively.  The
  * output texture is mipmapped tiled TIFF file for efficient texture lookup.
  *
+ * The output file contains a duplicate of the recognized metadata from the
+ * input file, so stuff like transformation matrices will be preserved where
+ * possible.
+ *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
  * \param filterInfo - information about which filter type and size to use
@@ -140,6 +152,10 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  * This function requires that the input data format be 32bit floating point.
  * World to camera and world to screen matrices must also be present.  The
  * output file is a tiled TIFF file which is efficient for shadow mapping.
+ *
+ * The output file contains a duplicate of the recognized metadata from the
+ * input file where possible so the transformation matrices (among other
+ * things) are preserved where possible.
  *
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
