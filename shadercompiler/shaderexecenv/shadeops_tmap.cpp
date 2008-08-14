@@ -1452,11 +1452,17 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataName
 				case TextureFormat_CubeEnvironment:
 				case TextureFormat_LatLongEnvironment:
 					formatStr = "environment";
+					break;
 				case TextureFormat_Shadow:
 					formatStr = "shadow";
+					break;
+				case TextureFormat_Occlusion:
+					formatStr = "occlusion";
+					break;
 				case TextureFormat_Unknown:
 				case TextureFormat_Plain:
 					formatStr = "texture";
+					break;
 			}
 		}
 		pV->SetString(formatStr);
