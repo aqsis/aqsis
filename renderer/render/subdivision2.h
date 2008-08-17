@@ -241,7 +241,7 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 			return( m_pFace );
 		}
 
-		virtual	IqAttributes*	pAttributes() const
+		virtual	IqAttributesPtr	pAttributes() const
 		{
 			return ( pTopology()->pPoints()->pAttributes() );
 		}

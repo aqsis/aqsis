@@ -38,12 +38,10 @@ std::deque<CqLightsourcePtr>	Lightsource_stack;
 
 CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
 		m_pShader( pShader ),
-		m_pAttributes( NULL ),
 		m_pShaderExecEnv(new CqShaderExecEnv( QGetRenderContextI()))
 {
 	// Set a reference with the current attributes.
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
+	m_pAttributes = QGetRenderContext() ->pattrCurrent();
 
 	m_pShader->SetType(Type_Lightsource);
 	m_pTransform = QGetRenderContext() ->ptransCurrent();
@@ -56,10 +54,6 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool f
 
 CqLightsource::~CqLightsource()
 {
-	// Release our reference on the current attributes.
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-	m_pAttributes = 0;
 }
 
 

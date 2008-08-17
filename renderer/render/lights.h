@@ -96,7 +96,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributes* pAttributes() const
+		virtual IqAttributesPtr pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
@@ -262,7 +262,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 
 	private:
 		boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
-		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+		CqAttributesPtr	m_pAttributes;			///< Pointer to the associated attributes.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 		boost::shared_ptr<IqShaderExecEnv>	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
 }

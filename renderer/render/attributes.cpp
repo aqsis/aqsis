@@ -153,8 +153,6 @@ CqAttributes::CqAttributes( const CqAttributes& From )
 
 CqAttributes::~CqAttributes()
 {
-	assert( RefCount() == 0 );
-
 	// Unreference the system attributes.
 	//	TqInt i = m_aAttributes.size();
 	//	while ( i-- > 0 )

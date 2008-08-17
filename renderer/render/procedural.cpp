@@ -91,7 +91,6 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	boost::shared_ptr<CqModeBlock> pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
 	m_pconStored->m_pattrCurrent = m_pAttributes;
-	ADDREF(m_pAttributes);
 
 	m_pconStored->m_ptransCurrent = m_pTransform;
 

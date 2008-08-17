@@ -39,13 +39,11 @@ namespace Aqsis {
 
 CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
 		m_pShader( pShader ),
-		m_pAttributes( NULL ),
 		m_pShaderExecEnv( new CqShaderExecEnv(QGetRenderContextI()) )
 {
 
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	m_pAttributes = QGetRenderContext()->pattrCurrent();
 	m_pShader->SetType(Type_Imager);
-	ADDREF( m_pAttributes );
 }
 
 
@@ -55,9 +53,6 @@ CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool
 
 CqImagersource::~CqImagersource()
 {
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-	m_pAttributes = 0;
 }
 
 //---------------------------------------------------------------------
@@ -91,7 +86,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) );
 
-	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, uGridRes * vGridRes, (uGridRes+1)*(vGridRes+1), true, 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, uGridRes * vGridRes, (uGridRes+1)*(vGridRes+1), true, IqAttributesPtr(), IqTransformPtr(), m_pShader.get(), Uses );
 
 	// Initialise the geometric parameters in the shader exec env.
 

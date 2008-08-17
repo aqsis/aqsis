@@ -134,8 +134,8 @@ class CqRenderer : public IqRenderer
 		virtual	IqOptionsPtr	poptWriteCurrent();
 		virtual IqOptionsPtr	pushOptions();
 		virtual IqOptionsPtr	popOptions();
-		virtual	const CqAttributes*	pattrCurrent();
-		virtual	CqAttributes*	pattrWriteCurrent();
+		virtual	const CqAttributesPtr	pattrCurrent();
+		virtual	CqAttributesPtr	pattrWriteCurrent();
 		virtual	CqTransformPtr	ptransCurrent();
 		void	ptransSetTime( const CqMatrix& matTrans );
 		void	ptransSetCurrentTime( const CqMatrix& matTrans );
@@ -509,7 +509,7 @@ class CqRenderer : public IqRenderer
 
 		boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
-		CqAttributes*	m_pAttrDefault;					///< Default attributes.
+		CqAttributesPtr	m_pAttrDefault;					///< Default attributes.
 		CqOptionsPtr m_poptDefault;  					///< Pointer to default options.
 		CqTransformPtr	m_pTransDefault;				///< Default transformation.
 		CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.

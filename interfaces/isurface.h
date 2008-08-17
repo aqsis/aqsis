@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author$
- *	Last change date:	$Date$
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2008-05-05 18:52:46 +0100 (Mon, 05 May 2008) $
  */
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -18,11 +18,11 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"ibound.h"
+#include	"iattributes.h"
 
 namespace Aqsis {
 
 
-struct IqAttributes;
 struct IqTransform;
 class CqParameter;
 struct IqShaderData;
@@ -68,7 +68,7 @@ struct IqSurface
 	/** Get a pointer to the attributes state associated with this GPrim.
 	 * \return A pointer to a CqAttributes class.
 	 */
-	virtual IqAttributes* pAttributes() const = 0;
+	virtual IqAttributesPtr pAttributes() const = 0;
 	/** Get a pointer to the transformation state associated with this GPrim.
 	 * \return A pointer to a CqTransform class.
 	 */

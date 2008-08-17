@@ -1422,7 +1422,7 @@ void CqShaderVM::ExecuteInit()
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
 	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pRenderContext));
-	Env->Initialise( 1, 1, 1, 1, false, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
+	Env->Initialise( 1, 1, 1, 1, false, IqAttributesPtr(), IqTransformPtr(), this, m_Uses );
 	Initialise( 1, 1, 1, Env );
 
 	// Execute the init program.

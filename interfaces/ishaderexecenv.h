@@ -34,13 +34,12 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"bitvector.h"
-//#include 	"shadeop.h"
+#include	"iattributes.h"
+#include	"itransform.h"
 
 namespace Aqsis {
 
 struct IqSurface;
-struct IqAttributes;
-struct IqTransform;
 struct IqShader;
 struct IqRenderer;
 
@@ -134,8 +133,8 @@ struct IqShaderExecEnv
 	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
 		TqInt microPolygonCount, TqInt shadingPointCount, 
 		bool hasValidDerivatives,
-		IqAttributes* pAttr, 
-		const boost::shared_ptr<IqTransform>& pTrans, 
+		IqAttributesPtr pAttr, 
+		const IqTransformPtr pTrans, 
 		IqShader* pShader, 
 		TqInt Uses ) = 0;
 	/** Get grid size in u
@@ -155,7 +154,7 @@ struct IqShaderExecEnv
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;
 	/** Get a pointer to the associated attributes.
 	 */
-	virtual	const IqAttributes*	pAttributes() const = 0;
+	virtual	const IqAttributesPtr	pAttributes() const = 0;
 	/** Get a pointer to the associated transform.
 	 */
 	virtual	boost::shared_ptr<const IqTransform>	pTransform() const = 0;

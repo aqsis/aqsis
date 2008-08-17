@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author$
- *	Last change date:	$Date$
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2008-06-19 20:09:05 +0100 (Thu, 19 Jun 2008) $
  */
 //------------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ struct IqLightsource
 	/** Get a pointer to the attributes associated with this lightsource.
 	 * \return a CqAttributes pointer.
 	 */
-	virtual IqAttributes*	pAttributes() const = 0;
+	virtual IqAttributesPtr	pAttributes() const = 0;
 
 	// Redirect acces via IqShaderExecEnv
 	virtual	TqInt	uGridRes() const = 0;

@@ -128,7 +128,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		 */
 		virtual CqSurface*	pSurface() const = 0;
 
-		virtual	const IqAttributes* pAttributes() const = 0;
+		virtual	const IqAttributesPtr pAttributes() const = 0;
 
 		virtual bool	usesCSG() const = 0;
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const = 0;
@@ -288,7 +288,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		{
 			return ( m_pSurface.get() );
 		}
-		virtual	const IqAttributes* pAttributes() const
+		virtual	const IqAttributesPtr pAttributes() const
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->pAttributes() );
@@ -460,7 +460,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
 		}
 
-		virtual const IqAttributes* pAttributes() const
+		virtual const IqAttributesPtr pAttributes() const
 		{
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
 		}

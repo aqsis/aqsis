@@ -238,7 +238,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 
 	private:
 		boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
-		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+		CqAttributesPtr	m_pAttributes;			///< Pointer to the associated attributes.
 
 		TqInt m_vGridRes;						///< Size of the bucket X
 		TqInt m_uGridRes;						///<                    Y in pixels

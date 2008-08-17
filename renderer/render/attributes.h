@@ -33,6 +33,7 @@
 #include	<map>
 
 #include	<boost/weak_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -49,14 +50,15 @@ namespace Aqsis {
 struct IqShader;
 class	CqLightsource;
 
-
+class CqAttributes;
+typedef boost::shared_ptr<CqAttributes> CqAttributesPtr;
 //----------------------------------------------------------------------
 /**
 	Container class for the attributes definitions of the graphics state.
 */
 
 
-class CqAttributes : public CqRefCount, public IqAttributes
+class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<CqAttributes>
 {
 	public:
 		CqAttributes();
@@ -67,18 +69,13 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		 * I the external references count is greater than 1, then create a copy on the stack and return that.
 		 * \return a pointer to these attribute safe to write into.
 		 */
-		CqAttributes* Write()
+		CqAttributesPtr Write()
 		{
 			// We are about to write to this attribute,so clone if references exist.
-			if ( RefCount() > 1 )
-			{
-				CqAttributes * pWrite = Clone();
-				ADDREF( pWrite );
-				RELEASEREF( this );
-				return ( pWrite );
-			}
-			else
-				return ( this );
+			CqAttributesPtr pWrite(shared_from_this());
+			if ( !pWrite.unique() )
+				pWrite = Clone();
+			return ( pWrite );
 		}
 
 		CqAttributes& operator=( const CqAttributes& From );
@@ -238,9 +235,9 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		/** Clone the entire attribute state.
 		 * \return a pointer to the new attribute state.
 		 */
-		CqAttributes*	Clone() const
+		CqAttributesPtr	Clone() const
 		{
-			return ( new CqAttributes( *this ) );
+			return ( CqAttributesPtr(new CqAttributes( *this )) );
 		}
 
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
@@ -270,25 +267,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		}
 		virtual	IqLightsource*	pLight( TqInt index );
 
-#ifndef _DEBUG
-
-		virtual	void	Release()
-		{
-			CqRefCount::Release();
-		}
-		virtual	void	AddRef()
-		{
-			CqRefCount::AddRef();
-		}
-#else
-		virtual void AddRef(const TqChar* file, TqInt line)
-		{
-			CqRefCount::AddRef(file, line);
-		}
-		virtual void Release(const TqChar* file, TqInt line)
-		{
-			CqRefCount::Release(file, line);
-		}
+#ifdef _DEBUG
 		CqString className() const
 		{
 			return CqString("CqAttributes");

@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface class for common attributes access.
  *
- *	Last change by:		$Author$
- *	Last change date:	$Date$
+ *	Last change by:		$Author: c42f $
+ *	Last change date:	$Date: 2008-04-14 02:23:53 +0100 (Mon, 14 Apr 2008) $
  */
 //------------------------------------------------------------------------------
 
@@ -156,17 +156,9 @@ struct IqAttributes
 
 	virtual	TqUint	cLights() const	= 0;
 	virtual	IqLightsource*	pLight( TqInt index ) = 0;
-#ifndef _DEBUG
-
-	virtual	void	AddRef() = 0;
-	virtual	void	Release() = 0;
-#else
-
-	virtual void AddRef(const TqChar* file, TqInt line) = 0;
-	virtual void Release(const TqChar* file, TqInt line) = 0;
-#endif
 };
 
+typedef boost::shared_ptr<IqAttributes> IqAttributesPtr;
 
 //-----------------------------------------------------------------------
 

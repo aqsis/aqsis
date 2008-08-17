@@ -155,8 +155,6 @@ CqShaderExecEnv::CqShaderExecEnv(IqRenderer* pRenderContext)
 	m_Illuminate(0),
 	m_IlluminanceCacheValid(false),
 	m_gatherSample(0),
-	m_pAttributes(0),
-	m_pTransform(),
 	m_CurrentState(),
 	m_RunningState(),
 	m_isRunning(false),
@@ -176,9 +174,6 @@ CqShaderExecEnv::~CqShaderExecEnv()
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )
 		delete( m_apVariables[ i ] );
-
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
 }
 
 //---------------------------------------------------------------------
@@ -188,8 +183,8 @@ CqShaderExecEnv::~CqShaderExecEnv()
 void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, 
 								TqInt microPolygonCount, TqInt shadingPointCount, 
 								bool hasValidDerivatives,
-								IqAttributes* pAttr, 
-								const boost::shared_ptr<IqTransform>& pTrans, 
+								IqAttributesPtr pAttr, 
+								const IqTransformPtr pTrans, 
 								IqShader* pShader, 
 								TqInt Uses )
 {
@@ -202,21 +197,10 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes,
 	m_LocalIndex = 0;
 
 	// Store a pointer to the attributes definition.
-	if ( NULL != pAttr )
-	{
-		if( NULL != m_pAttributes )
-			RELEASEREF(m_pAttributes);
-		m_pAttributes = pAttr;
-		ADDREF(m_pAttributes);
-	}
-	else
-		m_pAttributes = NULL;
+	m_pAttributes = pAttr;
 
 	// Store a pointer to the transform.
-	if (pTrans)
-	{
-		m_pTransform = pTrans;
-	}
+	m_pTransform = pTrans;
 
 	m_li = 0;
 	m_Illuminate = 0;

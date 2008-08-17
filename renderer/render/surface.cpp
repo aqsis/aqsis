@@ -41,13 +41,8 @@ TqFloat CqSurface::m_fGridSize = sqrt(256.0);
 
 void CqSurface::SetSurfaceParameters( const CqSurface& From )
 {
-	// If we already have attributes, unreference them now as we don't need them anymore.
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-
 	// Now store and reference our new attributes.
 	m_pAttributes = From.m_pAttributes;
-	ADDREF( m_pAttributes );
 
 	m_pTransform = From.m_pTransform;
 
@@ -157,7 +152,6 @@ CqSurface::CqSurface()
 	m_fDiscard(false),
 	m_SplitCount(0),
 	m_aUserParams(),
-	m_pAttributes(0),
 	m_pTransform(QGetRenderContext()->ptransCurrent()),
 	m_uDiceSize(1),
 	m_vDiceSize(1),
@@ -167,8 +161,7 @@ CqSurface::CqSurface()
 	m_pCSGNode()
 {
 	// Set a refernce with the current attributes.
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
+	m_pAttributes = QGetRenderContext() ->pattrCurrent();
 
 	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
 	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )

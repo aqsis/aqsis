@@ -64,9 +64,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual	~CqSurface()
 		{
 			// Release our reference on the current attributes.
-			if ( m_pAttributes )
-				RELEASEREF( m_pAttributes );
-			m_pAttributes = 0;
+			m_pAttributes.reset();
 
 			std::vector<CqParameter*>::iterator iUP;
 			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
@@ -134,7 +132,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributes* pAttributes() const
+		virtual IqAttributesPtr pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
@@ -580,7 +578,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		std::vector<CqParameter*>	m_aUserParams;			///< Storage for user defined paramter variables.
 		TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
 
-		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
+		CqAttributesPtr m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
 		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.

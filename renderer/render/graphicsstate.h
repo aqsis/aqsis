@@ -174,23 +174,23 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		/** Get a read only pointer to the current attributes.
 		 * \return a pointer to the current attributes.
 		 */
-		virtual	const	CqAttributes*	pattrCurrent() const
+		virtual	const	CqAttributesPtr	pattrCurrent() const
 		{
 			return ( m_pattrCurrent );
 		}
 		/** Set the current set of attributes
 		 * \return a pointer to the old attributes.
 		 */
-		virtual	const	CqAttributes*	pattrCurrent(CqAttributes* newattrs)
+		virtual	const	CqAttributesPtr	pattrCurrent(CqAttributesPtr newattrs)
 		{
-			CqAttributes *prev = m_pattrCurrent;
+			CqAttributesPtr prev = m_pattrCurrent;
 			m_pattrCurrent = newattrs;
 			return ( prev );
 		}
 		/** Get a pointer to the current attributes suitable for writing.
 		 * \return an attribute pointer.
 		 */
-		virtual	CqAttributes*	pattrWriteCurrent()
+		virtual	CqAttributesPtr	pattrWriteCurrent()
 		{
 			m_pattrCurrent = m_pattrCurrent->Write();
 			return ( m_pattrCurrent );
@@ -284,7 +284,7 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		virtual void logInvalidNesting() const;
 
 	public:
-		CqAttributes* m_pattrCurrent;		///< The current attributes.
+		CqAttributesPtr m_pattrCurrent;		///< The current attributes.
 		CqTransformPtr m_ptransCurrent;		///< The current transformation.
 		CqOptionsPtr m_poptCurrent;
 
@@ -730,17 +730,17 @@ class CqObjectModeBlock : public CqModeBlock
 		/** Get a pointer suitable for writing to the attributes at the parent context, as object context doesn't store attributes.
 		 * \return an attributes pointer.
 		 */
-		virtual	const	CqAttributes*	pattrCurrent()
+		virtual	const	CqAttributesPtr	pattrCurrent()
 		{
 			return ( pconParent() ->pattrCurrent() );
 		}
 		/** Get a pointer to the attributes at the parent context, as object context doesn't store attributes.
 		 * \return an attributes pointer.
 		 */
-		virtual	CqAttributes*	pattrWriteCurrent()
+		virtual	CqAttributesPtr	pattrWriteCurrent()
 		{
 			assert( false );
-			return ( 0 );
+			return CqAttributesPtr();
 		}	// Illegal to change attributes here.
 
 	private:

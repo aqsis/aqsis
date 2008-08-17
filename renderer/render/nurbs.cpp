@@ -45,7 +45,7 @@ namespace Aqsis {
 
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_cuVerts( 0 ), m_cvVerts( 0 ), m_umin( 0.0f ), m_umax( 1.0f ), m_vmin( 0.0f ), m_vmax( 1.0f ), m_fPatchMesh( false )
 {
-	TrimLoops() = static_cast<const CqAttributes*>( pAttributes() ) ->TrimLoops();
+	TrimLoops() = static_cast<CqAttributes* const>( pAttributes().get() )->TrimLoops();
 
 	STATS_INC( GPR_nurbs );
 }
@@ -1584,7 +1584,6 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 			S[ i ] ->m_fDiceable = true;
 			S[ i ] ->m_SplitDir = m_SplitDir;
 			S[ i ] ->SetSplitCount( SplitCount() + 1 );
-			//ADDREF( S[ i ] );
 			aSplits.push_back( S[ i ] );
 		}
 		return ( i );

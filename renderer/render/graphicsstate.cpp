@@ -39,7 +39,6 @@ namespace Aqsis {
  */
 
 CqModeBlock::CqModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent, EqModeBlock modetype ) :
-		m_pattrCurrent( 0 ),
 		m_ptransCurrent( ),
 		m_poptCurrent( ),
 		m_pconParent( pconParent ),
@@ -61,8 +60,7 @@ CqModeBlock::~CqModeBlock()
 CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, BeginEnd )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes();
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes());
 	m_ptransCurrent = CqTransformPtr( new CqTransform() );
 	m_poptCurrent = CqOptionsPtr( new CqOptions() );
 }
@@ -74,7 +72,6 @@ CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconPare
 
 CqMainModeBlock::~CqMainModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 	// Make sure any options pushed on the stack are cleared.
 	while(!m_optionsStack.empty())
 	{
@@ -90,8 +87,7 @@ CqMainModeBlock::~CqMainModeBlock()
 CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent , Frame)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
 	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
@@ -103,7 +99,6 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 
 CqFrameModeBlock::~CqFrameModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 	// Make sure any options pushed on the stack are cleared.
 	while(!m_optionsStack.empty())
 	{
@@ -119,8 +114,7 @@ CqFrameModeBlock::~CqFrameModeBlock()
 CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, World )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
 	m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
@@ -132,7 +126,6 @@ CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 
 CqWorldModeBlock::~CqWorldModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 }
 
 
@@ -153,8 +146,7 @@ void CqWorldModeBlock::AddContextLightSource( const CqLightsourcePtr& pLS )
 CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Attribute )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
 	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
@@ -166,7 +158,6 @@ CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>
 
 CqAttributeModeBlock::~CqAttributeModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 }
 
 
@@ -181,8 +172,7 @@ CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
 	{
-		m_pattrCurrent = new CqAttributes();
-		ADDREF( m_pattrCurrent );
+		m_pattrCurrent = CqAttributesPtr(new CqAttributes());
 	}
 	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
@@ -204,8 +194,7 @@ CqTransformModeBlock::~CqTransformModeBlock()
 CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Solid ), m_strType( type )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
 	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 
@@ -237,7 +226,6 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
 
 CqSolidModeBlock::~CqSolidModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 }
 
 
@@ -248,8 +236,7 @@ CqSolidModeBlock::~CqSolidModeBlock()
 CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Object )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes();
-	ADDREF( m_pattrCurrent );
+	m_pattrCurrent = CqAttributesPtr(new CqAttributes());
 	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
@@ -261,7 +248,6 @@ CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pcon
 
 CqObjectModeBlock::~CqObjectModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
 }
 
 
@@ -276,8 +262,7 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
 	{
-		m_pattrCurrent = new CqAttributes();
-		ADDREF( m_pattrCurrent );
+		m_pattrCurrent = CqAttributesPtr(new CqAttributes());
 	}
 
 	if ( pconParent )
@@ -354,7 +339,6 @@ CqResourceModeBlock::CqResourceModeBlock( const boost::shared_ptr<CqModeBlock>& 
 
 CqResourceModeBlock::~CqResourceModeBlock()
 {
-//	RELEASEREF( m_pattrCurrent );
 }
 
 void CqModeBlock::logInvalidNesting() const
