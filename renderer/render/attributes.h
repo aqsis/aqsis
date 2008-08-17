@@ -73,7 +73,7 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 		{
 			// We are about to write to this attribute,so clone if references exist.
 			CqAttributesPtr pWrite(shared_from_this());
-			if ( !pWrite.unique() )
+			if ( pWrite.use_count() > 2 )
 				pWrite = Clone();
 			return ( pWrite );
 		}

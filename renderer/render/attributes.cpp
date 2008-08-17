@@ -163,6 +163,7 @@ CqAttributes::~CqAttributes()
 
 	// Remove ourself from the stack
 	Attribute_stack.erase( m_StackIterator );
+	Aqsis::log() << error << "Attributes deleted" << std::endl;
 }
 
 //---------------------------------------------------------------------
