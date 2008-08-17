@@ -156,17 +156,26 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 		 * stuff might happen.
 		 *
 		 * If the underlying tiff library reports an error trying to set the
-		 * tag, throw an error, but only if throwOnError is true.  Otherwise
-		 * the error is reported to the standard aqsis logging facility at
-		 * "warning" level.
+		 * tag, throw an error, 
 		 *
 		 * \param tag - tiff tag to write
 		 * \param value - value for the tag.
-		 * \param throwOnError - if true, throw when an error occurrs.
 		 */
 		template<typename T>
-		void setTiffTagValue(const ttag_t tag, const T value,
-				bool throwOnError = true);
+		void setTiffTagValue(const ttag_t tag, const T value);
+		/** \brief Write an array tag to the underlying tiff directory.
+		 *
+		 * Attempt to write an the given array of values to the underlying tiff
+		 * directory.  Note that this has the same caveats as
+		 * setTiffTagValue().
+		 *
+		 * \see setTiffTagValue
+		 *
+		 * \param tag - tiff tag to write
+		 * \param values - vector of values for the tag.
+		 */
+		template<typename T>
+		void setTiffTagValue(const ttag_t tag, const std::vector<T>& values);
 		//@}
 
 	private:
@@ -350,24 +359,25 @@ T CqTiffDirHandle::tiffTagValue(const ttag_t tag, const T defaultVal) const
 }
 
 template<typename T>
-void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value,
-		bool throwOnError)
+void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value)
 {
-	
 	if(!TIFFSetField(tiffPtr(), tag, value))
 	{
-		if(throwOnError)
-		{
-			AQSIS_THROW(XqInternal, "Could not set tiff tag " << tag
-					<< " to value " << value
-					<< " for file \"" << m_fileHandle->fileName() << "\"");
-		}
-		else
-		{
-			Aqsis::log() << warning << "Could not set tiff tag " << tag
-					<< " to value " << value
-					<< " for file \"" << m_fileHandle->fileName() << "\"";
-		}
+		AQSIS_THROW(XqInternal, "Could not set tiff tag " << tag
+				<< " to value " << value
+				<< " for file \"" << m_fileHandle->fileName() << "\"");
+	}
+}
+
+template<typename T>
+void CqTiffDirHandle::setTiffTagValue(const ttag_t tag,
+		const std::vector<T>& values)
+{
+	if(!TIFFSetField(tiffPtr(), tag, static_cast<uint32>(values.size()), &values[0]))
+	{
+		AQSIS_THROW(XqInternal, "Could not set array tiff tag " << tag
+				<< " starting with value " << values[0]
+				<< " for file \"" << m_fileHandle->fileName() << "\"");
 	}
 }
 

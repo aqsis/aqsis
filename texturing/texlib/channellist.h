@@ -116,7 +116,7 @@ class AQSISTEX_SHARE CqChannelList
 		//@}
 
 		//----------------------------------------------------------------------
-		/// \name Functions to search for channel names
+		/// \name Functions to deal with channel names
 		//@{
 		/** \brief Get an index for the given channel name
 		 * \throw XqInternal if the channel name isn't in the list.
@@ -125,6 +125,18 @@ class AQSISTEX_SHARE CqChannelList
 		TqInt findChannelIndex(const std::string& name) const;
 		/// \brief Check whether the list of channels contains the given channel name
 		bool hasChannel(const std::string& name) const;
+		/** \brief Return true if the channel list has at least one channel of
+		 * RGB colour data.
+		 *
+		 * This is determined by examining the channel names for "r" "g" or "b"
+		 * channels.
+		 */
+		bool hasRgbChannel() const;
+		/** \brief Return true if the channel list has a intensity channel 
+		 *
+		 * This is determined by examining the channel names for a "y" channel.
+		 */
+		bool hasIntensityChannel() const;
 		//@}
 
 		//----------------------------------------------------------------------
@@ -254,6 +266,16 @@ inline TqInt CqChannelList::findChannelIndex(const std::string& name) const
 inline bool CqChannelList::hasChannel(const std::string& name) const
 {
 	return findChannelIndexImpl(name) >= 0;
+}
+
+inline bool CqChannelList::hasRgbChannel() const
+{
+	return hasChannel("r") || hasChannel("g") || hasChannel("b");
+}
+
+inline bool CqChannelList::hasIntensityChannel() const
+{
+	return hasChannel("y");
 }
 
 inline TqInt CqChannelList::channelByteOffset(TqInt index) const

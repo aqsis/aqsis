@@ -241,25 +241,48 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 	// Assume that the channel type is uniform across the various channels.
 	assert(channelType != Channel_TypeUnknown && channelType != Channel_Float16);
 	TqInt numChannels = channelList.numChannels();
+	assert(numChannels > 0);
 
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, numChannels); 
 	setTiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
-	if(numChannels == 1)
+	if( (channelList.hasIntensityChannel() || numChannels <= 2)
+			&& !channelList.hasRgbChannel() )
 	{
 		// greyscale image
 		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+		if(numChannels == 2)
+		{
+			// Set extra sample types
+			std::vector<uint16> extraSamples(numChannels - 1, EXTRASAMPLE_UNSPECIFIED);
+			if(channelList[1].name == "a")
+				extraSamples[0] = EXTRASAMPLE_ASSOCALPHA;
+			setTiffTagValue(TIFFTAG_EXTRASAMPLES, extraSamples);
+		}
 		// \todo PHOTOMETRIC_LOGL alternative for floats
 	}
 	else
 	{
-		// Multi-channel images.
-		//
-		// Use PHOTOMETRIC_RGB as the default photometric type.
+		// Assume a colour image by default (use PHOTOMETRIC_RGB)
 		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		/// \todo PHOTOMETRIC_LOGLUV alternative for floats
 		if(numChannels > 3)
 		{
-			/// \todo Set TIFFTAG_EXTRASAMPLES appropriately for the a ra, rg, rb channels
+			std::vector<uint16> extraSamples(numChannels - 3, EXTRASAMPLE_UNSPECIFIED);
+			// Set type of extra samples.
+			if(channelList[3].name == "a")
+				extraSamples[0] = EXTRASAMPLE_ASSOCALPHA;
+			if(numChannels >= 6)
+			{
+				// Initial support for setting extra samples for three channel
+				// alpha... This isn't likely to be terribly robust...
+				if(channelList[0].name == "r" && channelList[3].name == "ra")
+					extraSamples[0] = EXTRASAMPLE_ASSOCALPHA;
+				if(channelList[1].name == "g" && channelList[4].name == "ga")
+					extraSamples[1] = EXTRASAMPLE_ASSOCALPHA;
+				if(channelList[2].name == "b" && channelList[5].name == "ba")
+					extraSamples[2] = EXTRASAMPLE_ASSOCALPHA;
+			}
+			setTiffTagValue(TIFFTAG_EXTRASAMPLES, extraSamples);
 		}
 	}
 	/// \todo: deal with TIFFTAG_SGILOGDATAFMT
@@ -328,8 +351,15 @@ void addAttributeToTiff(ttag_t tag,
 	const typename Tattr::type* headerVal = header.findPtr<Tattr>();
 	if(headerVal)
 	{
-		dirHandle.setTiffTagValue<Ttiff>(tag, 
-				attrTypeToTiff<typename Tattr::type,Ttiff>(*headerVal), false);
+		try
+		{
+			dirHandle.setTiffTagValue<Ttiff>(tag, 
+					attrTypeToTiff<typename Tattr::type,Ttiff>(*headerVal));
+		}
+		catch(XqInternal& e)
+		{
+			Aqsis::log() << e << "\n";
+		}
 	}
 }
 
