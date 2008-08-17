@@ -467,8 +467,7 @@ void makeOcclusion(const std::vector<std::string>& inFiles,
 		if(!outFile)
 		{
 			// Open output file
-			boost::shared_ptr<IqMultiTexOutputFile> outFile
-				= IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
+			outFile = IqMultiTexOutputFile::open(outFileName, ImageFile_Tiff, header);
 		}
 		else
 		{
