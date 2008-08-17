@@ -24,6 +24,7 @@ SET(AQSISTEX_SRCS
 	cachedfilter.cpp
 	ienvironmentsampler.cpp
 	imagechannel.cpp
+	iocclusionsampler.cpp
 	ishadowsampler.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
@@ -31,6 +32,7 @@ SET(AQSISTEX_SRCS
 	itiledtexinputfile.cpp
 	magicnumber.cpp
 	maketexture.cpp
+	occlusionsampler.cpp
 	randomtable.cpp
 	samplequad.cpp
 	shadowsampler.cpp

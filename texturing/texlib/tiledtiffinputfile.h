@@ -61,7 +61,7 @@ class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 
 		virtual const char* fileName() const;
 		virtual EqImageFileType fileType() const;
-		virtual const CqTexFileHeader& header() const;
+		virtual const CqTexFileHeader& header(TqInt index = 0) const;
 		virtual SqTileInfo tileInfo() const;
 
 		virtual TqInt numSubImages() const;
@@ -72,7 +72,7 @@ class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 				TqInt subImageIdx, const SqTileInfo tileSize) const;
 
 		/// Header information
-		CqTexFileHeader m_header;
+		std::vector<boost::shared_ptr<CqTexFileHeader> > m_headers;
 		/// Handle to the underlying TIFF structure.
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
 		/// Number of directories in the TIFF file.

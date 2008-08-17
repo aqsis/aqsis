@@ -29,6 +29,7 @@
 #include "exception.h"
 #include "file.h"
 #include "ienvironmentsampler.h"
+#include "iocclusionsampler.h"
 #include "ishadowsampler.h"
 #include "itiledtexinputfile.h"
 #include "itexturesampler.h"
@@ -45,6 +46,7 @@ CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)
 	: m_textureCache(),
 	m_environmentCache(),
 	m_shadowCache(),
+	m_occlusionCache(),
 	m_texFileCache(),
 	m_currToWorld(),
 	m_searchPathCallback(searchPathCallback)
@@ -65,11 +67,17 @@ IqShadowSampler& CqTextureCache::findShadowSampler(const char* name)
 	return findSampler(m_shadowCache, name);
 }
 
+IqOcclusionSampler& CqTextureCache::findOcclusionSampler(const char* name)
+{
+	return findSampler(m_occlusionCache, name);
+}
+
 void CqTextureCache::flush()
 {
 	m_textureCache.clear();
 	m_environmentCache.clear();
 	m_shadowCache.clear();
+	m_occlusionCache.clear();
 	m_texFileCache.clear();
 }
 
@@ -169,13 +177,19 @@ boost::shared_ptr<SamplerT> CqTextureCache::newSamplerFromFile(
 	return SamplerT::create(file);
 }
 
-// Special case of newSamplerFromFile() for shadow maps - they need access to
-// the camera->world transformation matrix.
+// Special case of newSamplerFromFile() for shadow and occlusion maps - they
+// need access to the camera->world transformation matrix.
 template<>
 boost::shared_ptr<IqShadowSampler>
 CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
 	return IqShadowSampler::create(file, m_currToWorld);
+}
+template<>
+boost::shared_ptr<IqOcclusionSampler>
+CqTextureCache::newSamplerFromFile(const boost::shared_ptr<IqTiledTexInputFile>& file)
+{
+	return IqOcclusionSampler::create(file, m_currToWorld);
 }
 
 } // namespace Aqsis

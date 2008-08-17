@@ -33,39 +33,39 @@
 namespace Aqsis {
 
 CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
-	: m_header(),
+	: m_headers(),
 	m_fileHandle(new CqTiffFileHandle(fileName, "r")),
 	m_numDirs(m_fileHandle->numDirectories()),
 	m_tileInfo(0,0),
 	m_widths(),
 	m_heights()
 {
+	m_headers.reserve(m_numDirs);
+	m_widths.reserve(m_numDirs);
+	m_heights.reserve(m_numDirs);
 	// Iterate through all subimages and check some conditions which will
 	// become assumptions in the rest of the code.
 	for(TqInt i = 0; i < m_numDirs; ++i)
 	{
 		CqTiffDirHandle dirHandle(m_fileHandle, i);
-		CqTexFileHeader tmpHeader;
-		dirHandle.fillHeader(tmpHeader);
+		boost::shared_ptr<CqTexFileHeader> tmpHeader(new CqTexFileHeader);
+		dirHandle.fillHeader(*tmpHeader);
 		// Check that the subimage is tiled.
-		SqTileInfo* tileInfo= tmpHeader.findPtr<Attr::TileInfo>();
+		SqTileInfo* tileInfo= tmpHeader->findPtr<Attr::TileInfo>();
 		if(!tileInfo)
 		{
 			AQSIS_THROW(XqBadTexture, "TIFF file \"" << fileName
 					<< "\" has non-tiled sub-image " << i);
 		}
 		// Check that we can natively read the pixel format held in the TIFF.
-		if(tmpHeader.find<Attr::TiffUseGenericRGBA>())
+		if(tmpHeader->find<Attr::TiffUseGenericRGBA>())
 		{
-			AQSIS_THROW(XqBadTexture, "Usupported TIFF pixel format");
+			AQSIS_THROW(XqBadTexture, "Unsupported TIFF pixel format");
 		}
 		if(i == 0)
 		{
-			// Store the tile info and header from the first sub-image.  This
-			// means that only the metadata from the first subimage is
-			// accessible through the IqTiledTexInputFile interface; a useful
-			// simplification.
-			m_header = tmpHeader;
+			// Store the tile info from the first sub-image only.  We force the
+			// tile sizes for other sub-images to match this.
 			m_tileInfo = *tileInfo;
 		}
 		else
@@ -79,8 +79,13 @@ CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
 			}
 		}
 		// Grab store the width and height of the current subimage.
-		m_widths.push_back(tmpHeader.width());
-		m_heights.push_back(tmpHeader.height());
+		m_widths.push_back(tmpHeader->width());
+		m_heights.push_back(tmpHeader->height());
+		// Store the header itself.  Sometimes we really do need access to the
+		// extra attributes (eg, matrices for occlusion sampling).  We could
+		// define special extra methods for these, but it bloats up the
+		// interface a bit.
+		m_headers.push_back(tmpHeader);
 	}
 }
 
@@ -94,9 +99,12 @@ EqImageFileType CqTiledTiffInputFile::fileType() const
 	return ImageFile_Tiff;
 }
 
-const CqTexFileHeader& CqTiledTiffInputFile::header() const
+const CqTexFileHeader& CqTiledTiffInputFile::header(TqInt index) const
 {
-	return m_header;
+	if(index >= 0 && index < m_numDirs)
+		return *m_headers[index];
+	else
+		return *m_headers[0];
 }
 
 SqTileInfo CqTiledTiffInputFile::tileInfo() const
@@ -136,7 +144,7 @@ void CqTiledTiffInputFile::readTileImpl(TqUint8* buffer, TqInt x, TqInt y,
 				new TqUint8[TIFFTileSize(dirHandle.tiffPtr())]);
 		TIFFReadTile(dirHandle.tiffPtr(), static_cast<tdata_t>(tmpBuf.get()),
 				x*m_tileInfo.width, y*m_tileInfo.height, 0, 0);
-		TqInt bytesPerPixel = m_header.channelList().bytesPerPixel();
+		TqInt bytesPerPixel = m_headers[subImageIdx]->channelList().bytesPerPixel();
 		stridedCopy(buffer, tileSize.width*bytesPerPixel, tmpBuf.get(),
 				m_tileInfo.width*bytesPerPixel, tileSize.height,
 				tileSize.width*bytesPerPixel);

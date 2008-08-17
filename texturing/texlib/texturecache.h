@@ -41,6 +41,7 @@ namespace Aqsis {
 
 class IqTextureSampler;
 class IqShadowSampler;
+class IqOcclusionSampler;
 class IqEnvironmentSampler;
 class IqTiledTexInputFile;
 class CqTexFileHeader;
@@ -84,6 +85,14 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		 * \param name - the texture name.
 		 */
 		IqShadowSampler& findShadowSampler(const char* name);
+		/** \brief Find an occlusion sampler in the cache or load from file if not found.
+		 *
+		 * If any problems are encountered in opening the occlusion texture, issue
+		 * a warning to Aqsis::log(), and return a dummy sampler.
+		 *
+		 * \param name - the texture name.
+		 */
+		IqOcclusionSampler& findOcclusionSampler(const char* name);
 		/** \brief Delete all textures from the cache
 		 */
 		void flush();
@@ -143,6 +152,7 @@ class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
 		std::map<TqUlong, boost::shared_ptr<IqTextureSampler> > m_textureCache;
 		std::map<TqUlong, boost::shared_ptr<IqEnvironmentSampler> > m_environmentCache;
 		std::map<TqUlong, boost::shared_ptr<IqShadowSampler> > m_shadowCache;
+		std::map<TqUlong, boost::shared_ptr<IqOcclusionSampler> > m_occlusionCache;
 		/// Cached texture files live in here:
 		std::map<TqUlong, boost::shared_ptr<IqTiledTexInputFile> > m_texFileCache;
 		/// Camera -> world transformation - used for creating shadow maps.

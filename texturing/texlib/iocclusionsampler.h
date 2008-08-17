@@ -19,13 +19,13 @@
 
 /** \file
  *
- * \brief Interface to shadow texture sampling machinery.
+ * \brief Interface to occlusion map sampling machinery.
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef ISHADOWSAMPLER_H_INCLUDED
-#define ISHADOWSAMPLER_H_INCLUDED
+#ifndef IOCCLUSIONSAMPLER_H_INCLUDED
+#define IOCCLUSIONSAMPLER_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -40,25 +40,20 @@ namespace Aqsis {
 class IqTiledTexInputFile;
 
 //------------------------------------------------------------------------------
-/** \brief An interface for sampling shadow texture buffers.
- *
- * This interface provides shadow sampling facilities independently of the
- * sampling options.  Classes which implement the interface should attempt to
- * use the sampling method as specified by a CqShadowSampleOptions, passed to
- * the sample() interface function.
- *
+/** \brief An interface for sampling occlusion texture buffers.
  */
-class AQSISTEX_SHARE IqShadowSampler
+class AQSISTEX_SHARE IqOcclusionSampler
 {
 	public:
-		/** \brief Sample the texture over a quadrilateral region
+		/** \brief Sample the texture over a parallelogram region
 		 *
-		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param samplePllgram - parallelogram region to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
-		virtual void sample(const Sq3DSampleQuad& sampleQuad,
-				const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
+				const CqVector3D& normal, const CqShadowSampleOptions& sampleOpts,
+				TqFloat* outSamps) const = 0;
 
 		/** \brief Get the default sample options for this texture.
 		 *
@@ -74,25 +69,25 @@ class AQSISTEX_SHARE IqShadowSampler
 		//--------------------------------------------------
 		/// \name Factory functions
 		//@{
-		/** \brief Create and return a IqShadowSampler derived class
+		/** \brief Create and return an appropriate IqOcclusionSampler derived class
 		 *
 		 * \param file - texture file which the sampler should be connected
 		 *               with.
 		 */
-		static boost::shared_ptr<IqShadowSampler> create(
+		static boost::shared_ptr<IqOcclusionSampler> create(
 				const boost::shared_ptr<IqTiledTexInputFile>& file,
 				const CqMatrix& camToWorld);
-		/** \brief Create a dummy shadow texture sampler.
+		/** \brief Create a dummy occlusion sampler.
 		 *
-		 * Dummy samplers are useful when a texture file cannot be found but
+		 * Dummy samplers are useful when an occlusion map cannot be found but
 		 * the render should go on regardless.
 		 */
-		static boost::shared_ptr<IqShadowSampler> createDummy();
+		static boost::shared_ptr<IqOcclusionSampler> createDummy();
 		//@}
 
-		virtual ~IqShadowSampler() {}
+		virtual ~IqOcclusionSampler() {}
 };
 
 } // namespace Aqsis
 
-#endif // ISHADOWSAMPLER_H_INCLUDED
+#endif // IOCCLUSIONSAMPLER_H_INCLUDED

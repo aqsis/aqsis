@@ -46,7 +46,7 @@ EqImageFileType CqTiledAnyInputFile::fileType() const
 	return m_texFile->fileType();
 }
 
-const CqTexFileHeader& CqTiledAnyInputFile::header() const
+const CqTexFileHeader& CqTiledAnyInputFile::header(TqInt index) const
 {
 	return m_texFile->header();
 }

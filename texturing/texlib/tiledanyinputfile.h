@@ -58,7 +58,7 @@ class AQSISTEX_SHARE CqTiledAnyInputFile : public IqTiledTexInputFile
 
 		virtual const char* fileName() const;
 		virtual EqImageFileType fileType() const;
-		virtual const CqTexFileHeader& header() const;
+		virtual const CqTexFileHeader& header(TqInt index = 0) const;
 		virtual SqTileInfo tileInfo() const;
 
 		virtual TqInt numSubImages() const;

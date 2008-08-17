@@ -73,8 +73,16 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		virtual const char* fileName() const = 0;
 		/// Get the file type
 		virtual EqImageFileType fileType() const = 0;
-		/// Get the file header data
-		virtual const CqTexFileHeader& header() const = 0;
+		/** Get the file header data
+		 *
+		 * For file types which support multiple sets of header data (eg,
+		 * TIFF), index specifies the header data set to consider.
+		 *
+		 * \param index - Header data set to return.  Child classes should
+		 *                return the primary set of header data if index is
+		 *                larger than the maximum header.
+		 */
+		virtual const CqTexFileHeader& header(TqInt index = 0) const = 0;
 		/** \brief Get tile dimensions as used by readTile().
 		 *
 		 * Note that this may be different from the tile dimensions as reported

@@ -19,17 +19,21 @@
 
 /** \file
  *
- * \brief Shadow texture sampler.
+ * \brief Occlusion texture sampler.
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef SHADOWSAMPLER_H_INCLUDED
-#define SHADOWSAMPLER_H_INCLUDED
+#ifndef OCCLUSIONSAMPLER_H_INCLUDED
+#define OCCLUSIONSAMPLER_H_INCLUDED
 
 #include "aqsis.h"
 
-#include "ishadowsampler.h"
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
+#include "iocclusionsampler.h"
 #include "matrix.h"
 #include "texturesampleoptions.h"
 
@@ -40,39 +44,45 @@ template<typename>
 class CqTileArray;
 
 //------------------------------------------------------------------------------
-/** \brief A sampler for shadow maps, implementing percentage closer filtering.
+/** \brief A sampler for ambient occlusion maps
+ *
+ * In aqsis, an occlusion map is a file containing a set of shadow maps
+ * rendered from many viewpoints surrounding the scene.  A map rendered with
+ * view direction V allows the question "is a point P occluded from direction
+ * -D?" to be answered.  In this way, we can compute the ambient occlusion
+ *  without resorting to raytracing.
  */
-class AQSISTEX_SHARE CqShadowSampler : public IqShadowSampler
+class AQSISTEX_SHARE CqOcclusionSampler : public IqOcclusionSampler
 {
 	public:
-		/** \brief Construct a shadow sampler with data from the provided file.
+		/** \brief Create an occlusion sampler, sampling data from the provided file.
 		 *
-		 * \param file - file to obtain the shadow map data from.
+		 * \param file - file to obtain the occlusion map data from.
 		 * \param currToWorld - a matrix transforming the "current" coordinate
 		 *                      system to the world coordinate system.  Sample
-		 *                      quads are assumed to be passed to the sample()
+		 *                      regions are assumed to be passed to the sample()
 		 *                      function represented in the "current"
 		 *                      coordinate system.
 		 */
-		CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& file,
+		CqOcclusionSampler(const boost::shared_ptr<IqTiledTexInputFile>& file,
 				const CqMatrix& currToWorld);
 
 		// inherited
-		virtual void sample(const Sq3DSampleQuad& sampleQuad,
-				const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const;
+		virtual void sample(const Sq3DSamplePllgram& samplePllgram,
+				const CqVector3D& normal, const CqShadowSampleOptions& sampleOpts,
+				TqFloat* outSamps) const;
 		virtual const CqShadowSampleOptions& defaultSampleOptions() const;
 	private:
-		/// transformation: current -> light coordinates
-		CqMatrix m_currToLight;
-		/// transformation: current -> raster coordinates ( [0,1]x[0,1] )
-		CqMatrix m_currToRaster;
-		/// Pixel data for shadow map.
-		boost::shared_ptr<CqTileArray<TqFloat> > m_pixelBuf;
-		/// Default shadow sampling options.
+		class CqOccView;
+		typedef std::vector<boost::shared_ptr<CqOccView> > TqViewVec;
+
+		/// List of all shadow maps making up the occlusion map.
+		TqViewVec m_maps;
+		/// Default occlusion sampling options.
 		CqShadowSampleOptions m_defaultSampleOptions;
 };
 
 
 } // namespace Aqsis
 
-#endif // SHADOWSAMPLER_H_INCLUDED
+#endif // OCCLUSIONSAMPLER_H_INCLUDED

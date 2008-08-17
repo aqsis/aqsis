@@ -161,7 +161,7 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  * \param inFileName - full path to the input texture file.
  * \param outFileName - full path to the output texture map file.
  * \param paramList - A renderman param list of extra optional control
- *                    parameters for the shadow optimization.
+ *                    parameters for the shadow map generation.
  */
 AQSISTEX_SHARE void makeShadow(const std::string& inFileName, 
 		const std::string& outFileName, const CqRiParamList& paramList);
@@ -173,7 +173,11 @@ AQSISTEX_SHARE void makeShadow(const std::string& inFileName,
  * in each file.  The output file is a multi-image tiled TIFF file which is
  * efficient for ambient occlusion lookups.
  *
- * \param 
+ * \param inFiles - List of full paths to file names containing depth maps of a
+ *                  scene rendered from various different viewpoints.
+ * \param outFileName - full path to output occlusion map file
+ * \param paramList - A renderman param list of extra optional control
+ *                    parameters for the occlusion map generation.
  */
 AQSISTEX_SHARE void makeOcclusion(const std::vector<std::string>& inFiles,
 		const std::string& outFileName, const CqRiParamList& paramList);

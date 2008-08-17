@@ -21,6 +21,7 @@
 /** \file
 		\brief Implements the basic shader operations. (Texture, shadow, env, bake, occlusion related)
 		\author Paul C. Gregory (pgregory@aqsis.org)
+		\author Chris J. Foster (chris42f (at) gmail (dot) com)
 */
 
 #include	"aqsis.h"
@@ -39,6 +40,7 @@
 #include	"irenderer.h"
 #include	"itexturemap_old.h" /// \todo remove after migration to new interface
 #include	"ienvironmentsampler.h"
+#include	"iocclusionsampler.h"
 #include	"ishadowsampler.h"
 #include	"itexturesampler.h"
 #include	"texfileheader.h"
@@ -1317,89 +1319,63 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 
 //----------------------------------------------------------------------
 // occlusion(occlmap,P,N,samples)
-void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* startChannel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_occlusion(IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams)
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
+	// TODO: Formally deprecate and remove the samples parameter?
+	// TODO: Investigate the need for a CqOcclusionSampleOpts options class ?
 
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParamsOld(cParams, apParams, paramMap);
-
-	__iGrid = 0;
-	CqString _aq_occlmap;
-	(occlmap)->GetString(_aq_occlmap,__iGrid);
-	CqVector3D _aq_N;
-	(N)->GetNormal(_aq_N,__iGrid);
-	TqFloat _aq_samples;
-	(samples)->GetFloat(_aq_samples,__iGrid);
-	IqTextureMapOld* pMap = getRenderContext() ->GetOcclusionMap( _aq_occlmap );
-
-	CqVector3D L(0,0,-1);
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
+	if(!getRenderContext())
 	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		const CqBitVector& RS = RunningState();
-		TqInt nPages = pMap->NumPages() - 1;
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				// Storage for the final combined occlusion value.
-				TqFloat occlsum = 0.0f;
-				TqFloat dotsum = 0.0f;
-
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
-
-				CqVector3D _aq_N;
-				CqVector3D _aq_P;
-
-				(N)->GetNormal(_aq_N,__iGrid);
-				(P)->GetPoint(_aq_P,__iGrid);
-				TqInt i = nPages;
-				for( ; i >= 0; i-- )
-				{
-					// Check if the lightsource is behind the sample.
-					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
-
-					// In case of surface shader transform L
-					TqFloat cosangle = Nl * L;
-
-					if( cosangle <= 0.0f )
-					{
-						continue;
-					}
-					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
-					occlsum += cosangle * fv[0];
-					dotsum += cosangle;
-				}
-				if (dotsum != 0.0f)
-					occlsum /= dotsum;
-				(Result)->SetFloat(occlsum,__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	else
+
+	// Get the occlusion map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqOcclusionSampler& occSampler
+		= getRenderContext()->textureCache().findOcclusionSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = occSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	// Start and number of channels.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
+
+	// Initialize extraction of varargs texture options.
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		__iGrid = 0;
-		const CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Get normal to region.
+			CqVector3D NN;
+			N->GetNormal(NN, gridIdx);
+			// Get texture region to be filtered.
+			CqVector3D PP;
+			P->GetPoint(PP, gridIdx);
+			Sq3DSamplePllgram region(
+				PP,
+				diffU<CqVector3D>(P, gridIdx),
+				diffV<CqVector3D>(P, gridIdx)
+			);
+			// length-1 "array" where filtered results will be placed.
+			TqFloat occSample = 0;
+			occSampler.sample(region, NN, sampleOpts, &occSample);
+			Result->SetFloat(occSample, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------

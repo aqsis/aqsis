@@ -41,7 +41,7 @@ namespace Aqsis {
 CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& file,
 				const CqMatrix& currToWorld)
 	: m_currToLight(),
-	m_currToLightTexCoords(),
+	m_currToRaster(),
 	m_pixelBuf(),
 	m_defaultSampleOptions()
 {
@@ -61,22 +61,22 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& f
 	}
 	m_currToLight = (*worldToLight) * currToWorld;
 
-	// Get matrix which transforms the sample points to texture coordinates.
+	// Get matrix which transforms the sample points to raster texture coordinates.
 	const CqMatrix* worldToLightScreen = header.findPtr<Attr::WorldToScreenMatrix>();
 	if(!worldToLightScreen)
 	{
 		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
 				<< file->fileName() << "\"");
 	}
-	m_currToLightTexCoords = (*worldToLightScreen) * currToWorld;
+	m_currToRaster = (*worldToLightScreen) * currToWorld;
 	// worldToLightScreen transforms world coordinates to "screen" coordinates,
 	// ie, onto the 2D box [-1,1]x[-1,1].  We instead want texture coordinates,
 	// which correspond to the box [0,1]x[0,1].  In addition, the direction of
 	// increase of the y-axis should be swapped, since texture coordinates
 	// define the origin to be in the top left of the texture rather than the
 	// bottom right.
-	m_currToLightTexCoords.Translate(CqVector3D(1,-1,0));
-	m_currToLightTexCoords.Scale(0.5f, -0.5f, 1);
+	m_currToRaster.Translate(CqVector3D(1,-1,0));
+	m_currToRaster.Scale(0.5f, -0.5f, 1);
 
 	m_defaultSampleOptions.fillFromFileHeader(header);
 
@@ -159,7 +159,7 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 
 	// Get texture coordinates of sample positions.
 	Sq3DSampleQuad texQuad3D = sampleQuad;
-	texQuad3D.transform(m_currToLightTexCoords);
+	texQuad3D.transform(m_currToRaster);
 	// Copy into (x,y) coordinates of texQuad and scale by the filter width.
 	SqSampleQuad texQuad = texQuad3D;
 	texQuad.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
