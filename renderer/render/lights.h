@@ -73,7 +73,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		/** Get a pointer to the associated lightsource shader.
 		 * \return a pointer to a IqShader derived class.
 		 */
-		virtual boost::shared_ptr<IqShader>	pShader()
+		virtual boost::shared_ptr<IqShader>	pShader() const
 		{
 			return ( m_pShader );
 		}
@@ -96,7 +96,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributesPtr pAttributes() const
+		virtual IqConstAttributesPtr pAttributes() const
 		{
 			return ( m_pAttributes );
 		}

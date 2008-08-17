@@ -37,6 +37,7 @@ std::deque<CqLightsourcePtr>	Lightsource_stack;
  */
 
 CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
+		m_pAttributes(),
 		m_pShader( pShader ),
 		m_pShaderExecEnv(new CqShaderExecEnv( QGetRenderContextI()))
 {

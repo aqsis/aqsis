@@ -82,8 +82,6 @@ enum EqCameraFlags
  * Storage for the graphics state options.
  */
 
-struct IqOptions;
-typedef boost::shared_ptr<IqOptions> IqOptionsPtr;
 struct IqOptions
 {
 	virtual ~IqOptions() {}

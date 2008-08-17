@@ -52,6 +52,8 @@ class	CqLightsource;
 
 class CqAttributes;
 typedef boost::shared_ptr<CqAttributes> CqAttributesPtr;
+typedef boost::shared_ptr<const CqAttributes> CqConstAttributesPtr;
+
 //----------------------------------------------------------------------
 /**
 	Container class for the attributes definitions of the graphics state.
@@ -265,7 +267,7 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 		{
 			return ( apLights().size() );
 		}
-		virtual	IqLightsource*	pLight( TqInt index );
+		virtual	IqLightsource*	pLight( TqInt index ) const;
 
 #ifdef _DEBUG
 		CqString className() const

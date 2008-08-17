@@ -1716,7 +1716,7 @@ IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
 */
 
-bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res )
+bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res ) const
 {
 	// Find the relevant variable.
 	TqInt i = FindLocalVarIndex( name );

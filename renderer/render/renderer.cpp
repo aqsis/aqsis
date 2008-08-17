@@ -90,10 +90,10 @@ CqRenderer::CqRenderer() :
 	m_pImageBuffer = new	CqImageBuffer();
 
 	// Initialize the default attributes, transform and camera transform
-	m_pAttrDefault  = CqAttributesPtr(new CqAttributes);
-	m_pTransDefault = CqTransformPtr( new CqTransform );
-	m_pTransCamera  = CqTransformPtr( new CqTransform );
-	m_pTransDefObj  = CqTransformPtr( new CqTransform );
+	m_pAttrDefault.reset(new CqAttributes);
+	m_pTransDefault.reset( new CqTransform );
+	m_pTransCamera.reset( new CqTransform );
+	m_pTransDefObj.reset( new CqTransform );
 	m_fWorldBegin = false;
 
 	m_poptDefault = CqOptionsPtr(new CqOptions );
@@ -150,9 +150,6 @@ CqRenderer::~CqRenderer()
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
 	delete(m_pDDManager);
-
-	// Delete the default attributes, transform and camera transform
-	m_pAttrDefault.reset();
 
 	if( m_pRaytracer )	// MGC: MEMLEAK_FIX
 	{
@@ -605,7 +602,7 @@ IqOptionsPtr CqRenderer::popOptions()
 /** Return a pointer to the current attributes.
  */
 
-const CqAttributesPtr CqRenderer::pattrCurrent()
+CqAttributesPtr CqRenderer::pattrCurrent() const
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->pattrCurrent() );
@@ -618,7 +615,7 @@ const CqAttributesPtr CqRenderer::pattrCurrent()
 /** Return a writable pointer to the current attributes.
  */
 
-CqAttributesPtr CqRenderer::pattrWriteCurrent()
+CqAttributesPtr CqRenderer::pattrWriteCurrent() const
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->pattrWriteCurrent() );
@@ -631,7 +628,7 @@ CqAttributesPtr CqRenderer::pattrWriteCurrent()
 /** Return a pointer to the current transform.
  */
 
-CqTransformPtr CqRenderer::ptransCurrent()
+CqTransformPtr CqRenderer::ptransCurrent() const
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->ptransCurrent() );

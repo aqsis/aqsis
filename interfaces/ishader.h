@@ -14,7 +14,7 @@
 #define	___ishader_Loaded___
 
 #include	"aqsis.h"
-#include	"itransform.h"
+#include	"interfacefwd.h"
 #include	"iparameter.h"
 #include	<boost/shared_ptr.hpp>
 
@@ -79,7 +79,7 @@ struct IqShader
 	 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
 	 * \return Boolean indicating the parameter existed and res was of an appropriate type.
 	 */
-	virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) = 0;
+	virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const = 0;
 	/** Evaluate the shader code.
 	 * \param pEnv The shader execution environment to evaluate within.
 	 */

@@ -245,7 +245,7 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 		{
 			return ( pTopology()->pPoints()->pAttributes() );
 		}
-		virtual	boost::shared_ptr<IqTransform>	pTransform() const
+		virtual	IqTransformPtr	pTransform() const
 		{
 			return ( pTopology()->pPoints()->pTransform() );
 		}

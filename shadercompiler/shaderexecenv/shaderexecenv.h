@@ -162,8 +162,8 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
 			TqInt microPolygonCount, TqInt shadingPointCount, 
 			bool hasValidDerivatives,
-			IqAttributesPtr pAttr, 
-			const IqTransformPtr pTrans, 
+			const IqConstAttributesPtr& pAttr, 
+			const IqConstTransformPtr& pTrans, 
 			IqShader* pShader, 
 			TqInt Uses );
 		virtual	TqInt	uGridRes() const
@@ -183,11 +183,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 			return ( m_shadingPointCount );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const;
-		const IqAttributesPtr	pAttributes() const
+		const IqConstAttributesPtr	pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
-		boost::shared_ptr<const IqTransform>	pTransform() const
+		const IqConstTransformPtr	pTransform() const
 		{
 			return ( boost::static_pointer_cast<const IqTransform>(m_pTransform) );
 		}
@@ -480,8 +480,8 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		TqInt	m_Illuminate;
 		bool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
 		TqUint	m_gatherSample;				///< Sample index, used during gather loop.
-		IqAttributesPtr m_pAttributes;	///< Pointer to the associated attributes.
-		IqTransformPtr m_pTransform;		///< Pointer to the associated transform.
+		IqConstAttributesPtr m_pAttributes;	///< Pointer to the associated attributes.
+		IqConstTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		bool m_isRunning;               ///< True if any bits in the running state are set.

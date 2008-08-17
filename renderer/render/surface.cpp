@@ -110,7 +110,7 @@ void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 {
 	// Create a map of transformation keyframes, taking into account both object and camera motion.
 	TqInt iTime;
-	IqTransformPtr objectTransform = pTransform();
+	IqConstTransformPtr objectTransform = pTransform();
 	CqTransformPtr cameraTransform = QGetRenderContext()->GetCameraTransform();
 	TqInt objectTimes = objectTransform->cTimes();
 	TqInt cameraTimes = cameraTransform->cTimes();
@@ -152,6 +152,7 @@ CqSurface::CqSurface()
 	m_fDiscard(false),
 	m_SplitCount(0),
 	m_aUserParams(),
+	m_pAttributes(),
 	m_pTransform(QGetRenderContext()->ptransCurrent()),
 	m_uDiceSize(1),
 	m_vDiceSize(1),

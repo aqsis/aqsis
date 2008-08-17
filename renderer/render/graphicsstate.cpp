@@ -39,8 +39,9 @@ namespace Aqsis {
  */
 
 CqModeBlock::CqModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent, EqModeBlock modetype ) :
-		m_ptransCurrent( ),
-		m_poptCurrent( ),
+		m_pattrCurrent(),
+		m_ptransCurrent(),
+		m_poptCurrent(),
 		m_pconParent( pconParent ),
 		m_modetype( modetype)
 {}
@@ -60,9 +61,9 @@ CqModeBlock::~CqModeBlock()
 CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, BeginEnd )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes());
-	m_ptransCurrent = CqTransformPtr( new CqTransform() );
-	m_poptCurrent = CqOptionsPtr( new CqOptions() );
+	m_pattrCurrent.reset(new CqAttributes);
+	m_ptransCurrent.reset(new CqTransform);
+	m_poptCurrent.reset(new CqOptions);
 }
 
 
@@ -87,9 +88,9 @@ CqMainModeBlock::~CqMainModeBlock()
 CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent , Frame)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
-	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_pattrCurrent.reset(new CqAttributes( *pconParent->m_pattrCurrent ));
+	m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
 
 
@@ -114,9 +115,9 @@ CqFrameModeBlock::~CqFrameModeBlock()
 CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, World )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
-	m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_pattrCurrent.reset(new CqAttributes( *pconParent->m_pattrCurrent ));
+	m_ptransCurrent.reset( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
 
 
@@ -146,9 +147,9 @@ void CqWorldModeBlock::AddContextLightSource( const CqLightsourcePtr& pLS )
 CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Attribute )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
-	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_pattrCurrent.reset(new CqAttributes( *pconParent->m_pattrCurrent ));
+	m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
 
 
@@ -172,10 +173,10 @@ CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
 	{
-		m_pattrCurrent = CqAttributesPtr(new CqAttributes());
+		m_pattrCurrent.reset(new CqAttributes);
 	}
-	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
 
 
@@ -194,9 +195,9 @@ CqTransformModeBlock::~CqTransformModeBlock()
 CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Solid ), m_strType( type )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes( *pconParent->m_pattrCurrent ));
-	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_pattrCurrent.reset(new CqAttributes( *pconParent->m_pattrCurrent ));
+	m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 
 	// Create a new CSG tree node of the appropriate type.
 	m_pCSGNode = CqCSGTreeNode::CreateNode( type );
@@ -236,9 +237,9 @@ CqSolidModeBlock::~CqSolidModeBlock()
 CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Object )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = CqAttributesPtr(new CqAttributes());
-	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+	m_pattrCurrent.reset(new CqAttributes());
+	m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 }
 
 
@@ -262,13 +263,13 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
 	{
-		m_pattrCurrent = CqAttributesPtr(new CqAttributes());
+		m_pattrCurrent.reset(new CqAttributes);
 	}
 
 	if ( pconParent )
 	{
-		m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
-		m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );
+		m_ptransCurrent.reset( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+		m_poptCurrent.reset( new CqOptions(*pconParent->m_poptCurrent.get() ) );
 		// Set the default 'new time slot' matrix to the current 0 time matrix, this
 		// takes care of the case of moving from non-Motion to Motion.
 		//m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
@@ -279,8 +280,8 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
 	}
 	else
 	{
-		m_ptransCurrent = CqTransformPtr( new CqTransform() );
-		m_poptCurrent = CqOptionsPtr( new CqOptions() );
+		m_ptransCurrent.reset(new CqTransform);
+		m_poptCurrent.reset(new CqOptions);
 	}
 
 

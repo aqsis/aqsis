@@ -134,9 +134,9 @@ class CqRenderer : public IqRenderer
 		virtual	IqOptionsPtr	poptWriteCurrent();
 		virtual IqOptionsPtr	pushOptions();
 		virtual IqOptionsPtr	popOptions();
-		virtual	const CqAttributesPtr	pattrCurrent();
-		virtual	CqAttributesPtr	pattrWriteCurrent();
-		virtual	CqTransformPtr	ptransCurrent();
+		virtual	CqAttributesPtr	pattrCurrent() const;
+		virtual	CqAttributesPtr	pattrWriteCurrent() const;
+		virtual	CqTransformPtr	ptransCurrent() const;
 		void	ptransSetTime( const CqMatrix& matTrans );
 		void	ptransSetCurrentTime( const CqMatrix& matTrans );
 		void	ptransConcatCurrentTime( const CqMatrix& matTrans );

@@ -38,9 +38,6 @@ struct IqTransform
 };
 
 
-typedef boost::shared_ptr<IqTransform> IqTransformPtr;
-
-
 } // namespace Aqsis
 
 

@@ -34,12 +34,10 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"bitvector.h"
-#include	"iattributes.h"
-#include	"itransform.h"
+#include	"interfacefwd.h"
 
 namespace Aqsis {
 
-struct IqSurface;
 struct IqShader;
 struct IqRenderer;
 
@@ -133,8 +131,8 @@ struct IqShaderExecEnv
 	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
 		TqInt microPolygonCount, TqInt shadingPointCount, 
 		bool hasValidDerivatives,
-		IqAttributesPtr pAttr, 
-		const IqTransformPtr pTrans, 
+		const IqConstAttributesPtr& pAttr, 
+		const IqConstTransformPtr& pTrans, 
 		IqShader* pShader, 
 		TqInt Uses ) = 0;
 	/** Get grid size in u
@@ -154,10 +152,10 @@ struct IqShaderExecEnv
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;
 	/** Get a pointer to the associated attributes.
 	 */
-	virtual	const IqAttributesPtr	pAttributes() const = 0;
+	virtual	const IqConstAttributesPtr pAttributes() const = 0;
 	/** Get a pointer to the associated transform.
 	 */
-	virtual	boost::shared_ptr<const IqTransform>	pTransform() const = 0;
+	virtual	const IqConstTransformPtr pTransform() const = 0;
 	/** Set the pointer to the currently being lit surface
 	 */
 	virtual void SetCurrentSurface(IqSurface* pEnv) = 0;

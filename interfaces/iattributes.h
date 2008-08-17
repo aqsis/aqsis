@@ -155,10 +155,8 @@ struct IqAttributes
 	virtual	void	SetpshadInteriorVolume( const boost::shared_ptr<IqShader>& pshadInteriorVolume, TqFloat time ) = 0;
 
 	virtual	TqUint	cLights() const	= 0;
-	virtual	IqLightsource*	pLight( TqInt index ) = 0;
+	virtual	IqLightsource*	pLight( TqInt index ) const = 0;
 };
-
-typedef boost::shared_ptr<IqAttributes> IqAttributesPtr;
 
 //-----------------------------------------------------------------------
 

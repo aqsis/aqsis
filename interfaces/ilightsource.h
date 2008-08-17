@@ -34,7 +34,7 @@ struct IqLightsource
 	/** Get a pointer to the associated lightsource shader.
 	 * \return a pointer to a IqShader derived class.
 	 */
-	virtual	boost::shared_ptr<IqShader>	pShader() = 0;
+	virtual	boost::shared_ptr<IqShader>	pShader() const = 0;
 	/** Initialise the shader execution environment.
 	 * \param uGridRes Integer grid size, not used.
 	 * \param vGridRes Integer grid size, not used.
@@ -48,7 +48,7 @@ struct IqLightsource
 	/** Get a pointer to the attributes associated with this lightsource.
 	 * \return a CqAttributes pointer.
 	 */
-	virtual IqAttributesPtr	pAttributes() const = 0;
+	virtual IqConstAttributesPtr	pAttributes() const = 0;
 
 	// Redirect acces via IqShaderExecEnv
 	virtual	TqInt	uGridRes() const = 0;

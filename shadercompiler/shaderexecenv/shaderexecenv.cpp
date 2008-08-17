@@ -155,6 +155,8 @@ CqShaderExecEnv::CqShaderExecEnv(IqRenderer* pRenderContext)
 	m_Illuminate(0),
 	m_IlluminanceCacheValid(false),
 	m_gatherSample(0),
+	m_pAttributes(),
+	m_pTransform(),
 	m_CurrentState(),
 	m_RunningState(),
 	m_isRunning(false),
@@ -183,8 +185,8 @@ CqShaderExecEnv::~CqShaderExecEnv()
 void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, 
 								TqInt microPolygonCount, TqInt shadingPointCount, 
 								bool hasValidDerivatives,
-								IqAttributesPtr pAttr, 
-								const IqTransformPtr pTrans, 
+								const IqConstAttributesPtr& pAttr, 
+								const IqConstTransformPtr& pTrans, 
 								IqShader* pShader, 
 								TqInt Uses )
 {

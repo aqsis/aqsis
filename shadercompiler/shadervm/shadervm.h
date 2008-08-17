@@ -159,7 +159,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		virtual void	SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval);
 		virtual	void	SetArgument( IqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );
-		virtual	bool	GetVariableValue( const char* name, IqShaderData* res );
+		virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const;
 		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 		{
 			Execute( pEnv );
@@ -308,6 +308,19 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 				if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash )
 					return ( m_LocalIndex );
+			return ( -1 );
+		}
+		/** Find the index of a named shader variable.
+		 * \param strName Character pointer to the name.
+		 * \return Index of local variable or -1.
+		 */
+		TqInt	FindLocalVarIndex( const char* strName ) const
+		{
+			TqUlong hash = CqString::hash(strName);
+
+			for ( TqUint m = 0; m < m_LocalVars.size(); m++ )
+				if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash )
+					return ( m );
 			return ( -1 );
 		}
 		void	GetToken( char* token, TqInt l, std::istream* pFile );

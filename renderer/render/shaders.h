@@ -230,11 +230,11 @@ class CqLayeredShader : public IqShader
 			}
 			return ( NULL );
 		}
-		virtual	bool	GetVariableValue( const char* name, IqShaderData* res )
+		virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const
 		{
 			// Again, need to search backwards through the list, as the last layer to affect this value will
 			// be the one that matters.
-			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::reverse_iterator i = m_Layers.rbegin();
+			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::const_reverse_iterator i = m_Layers.rbegin();
 			while( i != m_Layers.rend() )
 			{
 				if(i->second->GetVariableValue(name, res))

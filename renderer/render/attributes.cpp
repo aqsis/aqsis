@@ -163,7 +163,6 @@ CqAttributes::~CqAttributes()
 
 	// Remove ourself from the stack
 	Attribute_stack.erase( m_StackIterator );
-	Aqsis::log() << error << "Attributes deleted" << std::endl;
 }
 
 //---------------------------------------------------------------------
@@ -487,7 +486,7 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 }
 
 
-IqLightsource*	CqAttributes::pLight( TqInt index )
+IqLightsource*	CqAttributes::pLight( TqInt index ) const
 {
 	return ( boost::shared_ptr<CqLightsource>(m_apLightsources[index]).get() );
 }

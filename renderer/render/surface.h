@@ -63,9 +63,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		virtual	~CqSurface()
 		{
-			// Release our reference on the current attributes.
-			m_pAttributes.reset();
-
 			std::vector<CqParameter*>::iterator iUP;
 			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 				if ( NULL != ( *iUP ) )
@@ -139,7 +136,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/** Get a pointer to the transformation state associated with this GPrim.
 		 * \return A pointer to a CqTransform class.
 		 */
-		virtual boost::shared_ptr<IqTransform> pTransform() const
+		virtual IqTransformPtr pTransform() const
 		{
 			return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
 		}

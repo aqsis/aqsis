@@ -103,7 +103,7 @@ void CqShaderExecEnv::SO_lightsource( IqShaderData* name, IqShaderData* pV, IqSh
 	TqUint __iGrid;
 
 	// This should only be called within an Illuminance construct, so m_li should be valid.
-	boost::shared_ptr<IqShader> pLightsource;
+	boost::shared_ptr<const IqShader> pLightsource;
 
 	__iGrid = 0;
 	CqString _aq_name;

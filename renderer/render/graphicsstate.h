@@ -174,14 +174,14 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		/** Get a read only pointer to the current attributes.
 		 * \return a pointer to the current attributes.
 		 */
-		virtual	const	CqAttributesPtr	pattrCurrent() const
+		virtual	CqAttributesPtr	pattrCurrent() const
 		{
 			return ( m_pattrCurrent );
 		}
 		/** Set the current set of attributes
 		 * \return a pointer to the old attributes.
 		 */
-		virtual	const	CqAttributesPtr	pattrCurrent(CqAttributesPtr newattrs)
+		virtual	CqAttributesPtr	pattrCurrent(CqAttributesPtr& newattrs)
 		{
 			CqAttributesPtr prev = m_pattrCurrent;
 			m_pattrCurrent = newattrs;
@@ -730,7 +730,7 @@ class CqObjectModeBlock : public CqModeBlock
 		/** Get a pointer suitable for writing to the attributes at the parent context, as object context doesn't store attributes.
 		 * \return an attributes pointer.
 		 */
-		virtual	const	CqAttributesPtr	pattrCurrent()
+		virtual	CqAttributesPtr	pattrCurrent() const
 		{
 			return ( pconParent() ->pattrCurrent() );
 		}
