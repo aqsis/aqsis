@@ -35,6 +35,7 @@
 
 #include "iocclusionsampler.h"
 #include "matrix.h"
+#include "random.h"
 #include "texturesampleoptions.h"
 
 namespace Aqsis
@@ -80,6 +81,8 @@ class AQSISTEX_SHARE CqOcclusionSampler : public IqOcclusionSampler
 		TqViewVec m_maps;
 		/// Default occlusion sampling options.
 		CqShadowSampleOptions m_defaultSampleOptions;
+		/// Random number stream for importance sampling.
+		mutable CqRandom m_random;
 };
 
 

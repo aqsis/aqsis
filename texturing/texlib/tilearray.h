@@ -670,6 +670,7 @@ void CqTileArray<T>::CqStochasticIterator::nextTile()
 		// 2) For any fractional part of the desired samples which remains, we
 		//    accept an extra sample with probability proportional to the
 		//    fractional part.
+		// TODO: Investigate the performance impact of using RandomFloat() here.
 		numSamples += m_random.RandomFloat() < desiredSamples-numSamples;
 		// Note that this scheme is actually biased toward tiles which are
 		// found later in the support in the case that a very small number of

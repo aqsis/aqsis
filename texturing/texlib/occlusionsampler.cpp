@@ -110,18 +110,19 @@ class CqOcclusionSampler::CqOccView
 		CqTileArray<TqFloat> m_pixels;
 
 	public:
-		/** \brief Create a view from levelNum of the provided file.
+		/** \brief Create a view from imageNum of the provided file.
 		 *
-		 * \param
-		 * \param
+		 * \param file - file from which to read the image data.
+		 * \param imageNum - subimage number for this view in the input file
+		 * \param currToWorld - current -> world transformation matrix.
 		 */
-		CqOccView(const boost::shared_ptr<IqTiledTexInputFile>& file, TqInt levelNum,
+		CqOccView(const boost::shared_ptr<IqTiledTexInputFile>& file, TqInt imageNum,
 				const CqMatrix& currToWorld)
 			: m_currToLight(),
 			m_currToRaster(),
 			m_currToRasterVec(),
 			m_negViewDirec(),
-			m_pixels(file, levelNum)
+			m_pixels(file, imageNum)
 		{
 			// TODO refactor with CqShadowSampler, also refactor this function,
 			// since it's a bit unweildly...
@@ -129,7 +130,7 @@ class CqOcclusionSampler::CqOccView
 				AQSIS_THROW(XqInternal,
 						"Cannot construct shadow map from NULL file handle");
 
-			const CqTexFileHeader& header = file->header(levelNum);
+			const CqTexFileHeader& header = file->header(imageNum);
 			if(header.channelList().sharedChannelType() != Channel_Float32)
 				AQSIS_THROW(XqBadTexture,
 						"Shadow maps must hold 32-bit floating point data");
@@ -264,7 +265,8 @@ CqOcclusionSampler::CqOcclusionSampler(
 		const boost::shared_ptr<IqTiledTexInputFile>& file,
 		const CqMatrix& currToWorld)
 	: m_maps(),
-	m_defaultSampleOptions()
+	m_defaultSampleOptions(),
+	m_random()
 {
 	// Connect the multiple shadow maps to the input file.
 	TqInt numMaps = file->numSubImages();
@@ -282,37 +284,79 @@ void CqOcclusionSampler::sample(const Sq3DSamplePllgram& samplePllgram,
 		const CqVector3D& normal, const CqShadowSampleOptions& sampleOpts,
 		TqFloat* outSamps) const
 {
+	assert(sampleOpts.numChannels() == 1);
+
 	// Unit normal indicating the hemisphere to sample for occlusion.
 	CqVector3D N = normal;
 	N.Unit();
 
-	assert(sampleOpts.numChannels() == 1);
-	// Calculate the number of samples per map.  The factor of 2 assumes that
-	// the input shadow maps are evenly distributed around the scene, so that
-	// roughly half of them will be culled via the normal.
-	// TODO: Importance sampling!
-	TqInt numSamples = max<TqInt>(2*sampleOpts.numSamples()/m_maps.size(), 1);
+	const TqFloat sampNumMult = 4.0 * sampleOpts.numSamples() / m_maps.size();
 
-	// Accumulate the total occlusion over all directions
+	// Accumulate the total occlusion over all directions.  Here we use an
+	// importance sampling approach: we decide how many samples each map should
+	// have based on it's relative importance as measured by the map weight.
 	TqFloat totOcc = 0;
-	TqFloat totWeight = 0;
+	TqInt totNumSamples = 0;
+	TqFloat maxWeight = 0;
+	TqViewVec::const_iterator maxWeightMap = m_maps.begin();
 	for(TqViewVec::const_iterator map = m_maps.begin(), end = m_maps.end();
 			map != end; ++map)
 	{
 		TqFloat weight = (*map)->weight(N);
 		if(weight > 0)
 		{
-			// Compute amount of occlusion from the current view.
-			TqFloat occ = 0;
-			(*map)->sample(samplePllgram, sampleOpts, numSamples, &occ);
-			// Accumulate into total occlusion and weight.
-			totOcc += weight * occ;
-			totWeight += weight;
+			// Compute the number of samples to use.  Assuming that the shadow
+			// maps are spread evenly over the sphere, we have an area of 
+			//
+			//    4*PI / m_maps.size()
+			//
+			// steradians per map.  The density of sample points per steradian
+			// should be
+			//
+			//    sampleOpts.numSamples() * weight / PI
+			//
+			// Therefore the expected number of samples per map is
+			TqFloat numSampFlt = sampNumMult*weight;
+			// This isn't an integer though, so we take the floor,
+			TqInt numSamples = lfloor(numSampFlt);
+			// TODO: Investigate performance impact of using RandomFloat() here.
+			if(m_random.RandomFloat() < numSampFlt - numSamples)
+			{
+				// And increment with a probability equal to the extra fraction
+				// of samples that the current map should have.
+				++numSamples;
+			}
+			if(numSamples > 0)
+			{
+				// Compute amount of occlusion from the current view.
+				TqFloat occ = 0;
+				(*map)->sample(samplePllgram, sampleOpts, numSamples, &occ);
+				// Accumulate into total occlusion and weight.
+				totOcc += occ*numSamples;
+				totNumSamples += numSamples;
+			}
+			if(weight > maxWeight)
+			{
+				maxWeight = weight;
+				maxWeightMap = map;
+			}
 		}
 	}
 
+	// The algorithm above sometimes results in no samples being computed for
+	// low total sample numbers.  Here we attempt to allow very small numbers
+	// of samples to be useful by sampling the most highly weighted map if no
+	// samples have been taken
+	if(totNumSamples == 0 && maxWeight > 0)
+	{
+		TqFloat occ = 0;
+		(*maxWeightMap)->sample(samplePllgram, sampleOpts, 1, &occ);
+		totOcc += occ;
+		totNumSamples += 1;
+	}
+
 	// Normalize the sample
-	*outSamps = totOcc / totWeight;
+	*outSamps = totOcc / totNumSamples;
 }
 
 const CqShadowSampleOptions& CqOcclusionSampler::defaultSampleOptions() const
