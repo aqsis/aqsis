@@ -643,12 +643,12 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 		AQSIS_THROW(XqUnknownTiffFormat, "Cannot determine channel type");
 	else
 	{
-		TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
 		// Determine the channel type held in the tiff
 		switch(tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC))
 		{
 			case PHOTOMETRIC_MINISBLACK:
 				{
+					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, 1);
 					// We have an intensity (y) channel only.
 					channelList.addChannel(SqChannelInfo("y", chanType));
 					if(samplesPerPixel == 2)
@@ -666,6 +666,7 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 				break;
 			case PHOTOMETRIC_RGB:
 				{
+					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
 					if(samplesPerPixel < 3)
 						channelList.addUnnamedChannels(chanType, samplesPerPixel);
 					else
