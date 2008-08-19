@@ -96,7 +96,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	return ( 0 );
 }
 
-void CqDisplayRequest::ClearDisplayParams()
+CqDisplayRequest::~CqDisplayRequest()
 {
 	std::vector<UserParameter>::iterator iup;
 	for (iup = m_customParams.begin(); iup != m_customParams.end(); ++iup )
@@ -111,13 +111,6 @@ void CqDisplayRequest::ClearDisplayParams()
 
 TqInt CqDDManager::ClearDisplays()
 {
-	// Free any user parameter data specified on the display requests.
-	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for (i = m_displayRequests.begin(); i != m_displayRequests.end(); ++i)
-	{
-		(*i)->ClearDisplayParams();
-	}
-
 	m_displayRequests.clear();
 	return ( 0 );
 }
