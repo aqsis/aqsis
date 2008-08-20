@@ -33,6 +33,8 @@
 #include <list>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include "aqsis.h"
 #include "rifile.h"
 #include "imagebuffer.h"
@@ -225,7 +227,7 @@ class CqRiProceduralPlugin : CqPluginBase
 // We don't want to DLClose until we are finished rendering, since any RiProcedurals
 // created from within the dynamic module may re-use the Subdivide and Free pointers so
 // they must remain linked in.
-static std::list<CqRiProceduralPlugin*> ActiveProcDLList;
+static std::list<boost::shared_ptr<CqRiProceduralPlugin> > ActiveProcDLList;
 
 
 
@@ -249,12 +251,12 @@ extern "C" RtVoid	RiProcFree( RtPointer data )
 extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
 	CqString dsoname = CqString( (( char** ) data)[0] );
-	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
+	boost::shared_ptr<CqRiProceduralPlugin> plugin(new CqRiProceduralPlugin(dsoname));
 
 	if( !plugin->IsValid() )
 	{
 		dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
-		plugin = new CqRiProceduralPlugin( dsoname );
+		plugin.reset(new CqRiProceduralPlugin(dsoname));
 
 		if( !plugin->IsValid() )
 		{
