@@ -472,7 +472,7 @@ CqShaderVM::CqShaderVM(IqRenderer* pRenderContext)
 	m_strName(),
 	m_Type(Type_Surface),
 	m_LocalIndex(0),
-	m_pEnv(),
+	m_pEnv(0),
 	m_pTransform(),
 	m_LocalVars(),
 	m_StoredArguments(),
@@ -505,7 +505,7 @@ CqShaderVM::CqShaderVM(const CqShaderVM& From)
 	m_strName(),
 	m_Type(Type_Surface),
 	m_LocalIndex(0),
-	m_pEnv(),
+	m_pEnv(0),
 	m_pTransform(),
 	m_LocalVars(),
 	m_StoredArguments(),
@@ -1331,7 +1331,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
 */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, IqShaderExecEnv* pEnv )
 {
 	m_pEnv = pEnv;
 	// Initialise local variables.
@@ -1381,7 +1381,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 /**	Execute a series of shader language bytecodes.
 */
 
-void CqShaderVM::Execute( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Execute(IqShaderExecEnv* pEnv)
 {
 	// Check if there is anything to execute.
 	if ( m_Program.size() <= 0 )
@@ -1419,11 +1419,11 @@ void CqShaderVM::ExecuteInit()
 		return ;
 
 	// Fake an environment
-	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
+	IqShaderExecEnv* pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pRenderContext));
-	Env->Initialise( 1, 1, 1, 1, false, IqAttributesPtr(), IqTransformPtr(), this, m_Uses );
-	Initialise( 1, 1, 1, Env );
+	CqShaderExecEnv Env(m_pRenderContext);
+	Env.Initialise( 1, 1, 1, 1, false, IqAttributesPtr(), IqTransformPtr(), this, m_Uses );
+	Initialise( 1, 1, 1, &Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];

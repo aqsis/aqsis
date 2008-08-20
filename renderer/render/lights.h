@@ -91,7 +91,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 			Ps() ->SetValueFromVariable( pPs );
 			Ns() ->SetValueFromVariable( pNs );
 			m_pShaderExecEnv->SetCurrentSurface(pSurface);
-			m_pShader->Evaluate( m_pShaderExecEnv );
+			m_pShader->Evaluate( m_pShaderExecEnv.get() );
 		}
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.

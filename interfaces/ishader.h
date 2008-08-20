@@ -83,7 +83,7 @@ struct IqShader
 	/** Evaluate the shader code.
 	 * \param pEnv The shader execution environment to evaluate within.
 	 */
-	virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
+	virtual	void	Evaluate( IqShaderExecEnv* pEnv ) = 0;
 	/** Initialise the state of any arguments with default values.
 	 */
 	virtual	void	PrepareDefArgs() = 0;
@@ -92,7 +92,7 @@ struct IqShader
 	 * \param vGridRes The resolution of the grid being shaded in v
 	 * \param pEnv Pointer to the IqShaderExecEnv to evaluate within.
 	 */
-	virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
+	virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, IqShaderExecEnv* pEnv ) = 0;
 	/** Determine whether this shader is an aambient ligthsource shader.
 	 * i.e. A lightsource shader with no Illuminate or Solar constructs.
 	 */

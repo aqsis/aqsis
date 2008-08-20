@@ -107,7 +107,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv );
+	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv.get() );
 
 
 	for ( j = 0; j < vGridRes+1; j++ )
@@ -128,7 +128,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
-		m_pShader->Evaluate( m_pShaderExecEnv );
+		m_pShader->Evaluate( m_pShaderExecEnv.get() );
 		alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 }

@@ -111,11 +111,11 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
 	if ( pshadSurface )
-		pshadSurface->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
+		pshadSurface->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv.get() );
 	if ( pshadDisplacement )
-		pshadDisplacement->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
+		pshadDisplacement->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv.get() );
 	if ( pshadAtmosphere )
-		pshadAtmosphere->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
+		pshadAtmosphere->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv.get() );
 
 	// Initialise the local/public culled variable.
 	m_CulledPolys.SetSize( numShadingPoints(cu, cv) );
@@ -476,7 +476,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	{
 		//theStats.DisplacementTimer().Start();
 		TIME_SCOPE("Displacement")
-		pshadDisplacement->Evaluate( m_pShaderExecEnv );
+		pshadDisplacement->Evaluate( m_pShaderExecEnv.get() );
 		//theStats.DisplacementTimer().Stop();
 
 		// Re-calculate geometric normals and surface derivatives after displacement.
@@ -522,7 +522,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	{
 		TIME_SCOPE("Surface shading")
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
-		pshadSurface->Evaluate( m_pShaderExecEnv );
+		pshadSurface->Evaluate( m_pShaderExecEnv.get() );
 	}
 
 	// Perform atmosphere shading
@@ -530,7 +530,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if ( pshadAtmosphere )
 	{
 		TIME_SCOPE("Atmosphere shading")
-		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
+		pshadAtmosphere->Evaluate( m_pShaderExecEnv.get() );
 	}
 
 	// Now try to cull any true transparent MPs (assigned by the shader code

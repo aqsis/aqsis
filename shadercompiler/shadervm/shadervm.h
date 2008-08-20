@@ -160,7 +160,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		virtual	void	SetArgument( IqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );
 		virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const;
-		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv )
 		{
 			Execute( pEnv );
 		}
@@ -168,7 +168,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		{
 			ExecuteInit();
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv );
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, IqShaderExecEnv* pEnv );
 		virtual	bool	fAmbient() const
 		{
 			return ( m_fAmbient );
@@ -210,7 +210,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		 *   version of aqsis, or is invalid in any other way.
 		 */
 		void	LoadProgram( std::istream* pFile );
-		void	Execute( const boost::shared_ptr<IqShaderExecEnv>& pEnv );
+		void	Execute( IqShaderExecEnv* pEnv );
 		void	ExecuteInit();
 
 
@@ -242,7 +242,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 
 		EqShaderType m_Type;							///< Shader type for libslxarge
 		TqUint	m_LocalIndex;                   ///<  Local Index to speed up
-		boost::shared_ptr<IqShaderExecEnv>	m_pEnv;							///< Pointer to the current excution environment.
+		IqShaderExecEnv* m_pEnv;							///< Pointer to the current excution environment.
 		IqTransformPtr m_pTransform;    ///< Pointer to the transformation at the time the shader was instantiated.
 
 		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.

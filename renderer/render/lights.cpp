@@ -37,8 +37,9 @@ std::deque<CqLightsourcePtr>	Lightsource_stack;
  */
 
 CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
-		m_pAttributes(),
 		m_pShader( pShader ),
+		m_pAttributes(),
+		m_pTransform(),
 		m_pShaderExecEnv(new CqShaderExecEnv( QGetRenderContextI()))
 {
 	// Set a reference with the current attributes.
@@ -73,7 +74,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolyg
 	}
 
 	if ( m_pShader )
-		m_pShader->Initialise( uGridRes, vGridRes, shadingPointCount, m_pShaderExecEnv );
+		m_pShader->Initialise( uGridRes, vGridRes, shadingPointCount, m_pShaderExecEnv.get() );
 
 	if ( USES( Uses, EnvVars_L ) )
 		L() ->Initialise( shadingPointCount );
