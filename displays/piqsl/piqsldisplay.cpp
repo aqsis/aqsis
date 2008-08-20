@@ -30,10 +30,11 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <vector>
+
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
-#include <boost/shared_array.hpp>
 
 #ifdef AQSIS_SYSTEM_WIN32
 	#include <winsock2.h>
@@ -373,8 +374,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if(child)
 			{
 				TiXmlElement* formatNode = child->FirstChildElement("Format");
-				// If we are recieving "rgba" data, ensure that it is in the correct order.
-				boost::shared_array<PtDspyDevFormat> outFormat(new PtDspyDevFormat[iFormatCount]);
+				// If we are recieving "rgba" data, ensure that it is in the
+				// correct order.  First copy the XML "formats" document into
+				// an array, outFormat:
+				std::vector<PtDspyDevFormat> outFormat;
+				outFormat.reserve(iFormatCount);
 				TqInt iformat = 0;
 				while(formatNode)
 				{
@@ -384,12 +388,17 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					TqInt typeID = g_mapNameToType[typeName];
 					char* name = new char[strlen(formatName)+1];
 					strcpy(name, formatName);
-					outFormat[iformat].name = name;
-					outFormat[iformat].type = typeID;
+					PtDspyDevFormat fmt = {name, typeID};
+					outFormat.push_back(fmt);
 					formatNode = formatNode->NextSiblingElement("Format");
 					iformat++;
 				}
-				PtDspyError err = DspyReorderFormatting(iFormatCount, format, Aqsis::min(iFormatCount,4), outFormat.get());
+				// Now reorder the output parameter array "format" using
+				// outFormats as a reference for the desired order.
+				PtDspyError err = DspyReorderFormatting(iFormatCount, format,
+						Aqsis::min(iFormatCount,4), &outFormat[0]);
+				for(TqInt i = 0, end = outFormat.size(); i < end; ++i)
+					delete outFormat[i].name;
 				if( err != PkDspyErrorNone )
 				{
 					return(err);
