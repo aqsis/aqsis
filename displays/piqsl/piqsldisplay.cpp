@@ -35,6 +35,7 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
+#include <boost/shared_ptr.hpp>
 
 #ifdef AQSIS_SYSTEM_WIN32
 	#include <winsock2.h>
@@ -87,7 +88,7 @@ extern "C"
 }
 
 static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock);
-static TiXmlDocument* recvXMLMessage(CqSocket& sock);
+static boost::shared_ptr<TiXmlDocument> recvXMLMessage(CqSocket& sock);
 
 // Define a base64 encoding stream iterator using the boost archive data flow iterators.
 typedef 
@@ -369,7 +370,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
 			sendXMLMessage(displaydoc, pImage->m_socket);
-			TiXmlDocument* formats = recvXMLMessage(pImage->m_socket);
+			boost::shared_ptr<TiXmlDocument> formats = recvXMLMessage(pImage->m_socket);
 			TiXmlElement* child = formats->FirstChildElement("Formats");
 			if(child)
 			{
@@ -404,7 +405,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					return(err);
 				}
 			}
-			delete(formats);
 		}
 		else 
 			return(PkDspyErrorUndefined);
@@ -482,9 +482,9 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(closeMsgXML);
 		sendXMLMessage(doc, pImage->m_socket);
-		TiXmlDocument* ack = recvXMLMessage(pImage->m_socket);
-		delete ack;
+		recvXMLMessage(pImage->m_socket);
 	}
+	delete pImage;
 
 	return(PkDspyErrorNone);
 }
@@ -556,9 +556,9 @@ static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock)
 	return( sock.sendData( message.str() ) );
 }
 
-static TiXmlDocument* recvXMLMessage(CqSocket& sock)
+static boost::shared_ptr<TiXmlDocument> recvXMLMessage(CqSocket& sock)
 {
-	TiXmlDocument* xmlMsg = new TiXmlDocument();
+	boost::shared_ptr<TiXmlDocument> xmlMsg(new TiXmlDocument());
 	std::stringstream buffer;
 	int len = sock.recvData(buffer);
 	if(len > 0)
