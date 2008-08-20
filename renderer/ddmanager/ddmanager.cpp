@@ -877,11 +877,6 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			parameter.vcount = 0;
 			parameter.nbytes = 0;
 
-			// Store the name
-			char* pname = reinterpret_cast<char*>(malloc(Decl.m_strName.size()+1));
-			strcpy(pname, Decl.m_strName.c_str());
-			parameter.name = pname;
-
 			switch ( Decl.m_Type )
 			{
 				case type_string:
