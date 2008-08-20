@@ -399,7 +399,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				PtDspyError err = DspyReorderFormatting(iFormatCount, format,
 						Aqsis::min(iFormatCount,4), &outFormat[0]);
 				for(TqInt i = 0, end = outFormat.size(); i < end; ++i)
-					delete outFormat[i].name;
+					delete[] outFormat[i].name;
 				if( err != PkDspyErrorNone )
 				{
 					return(err);
