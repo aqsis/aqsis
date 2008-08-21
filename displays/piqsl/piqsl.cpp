@@ -167,6 +167,10 @@ class CqDataHandler
 					if(child)
 					{
 						const char* fname = child->GetText();
+						if (fname == NULL)
+						{
+							fname = "ri.pic";
+						}
 						m_client->setName(fname);
 					}
 					// Process the parameters
