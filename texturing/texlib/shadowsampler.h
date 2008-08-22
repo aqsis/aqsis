@@ -65,7 +65,7 @@ class AQSISTEX_SHARE CqShadowSampler : public IqShadowSampler
 		/// transformation: current -> light coordinates
 		CqMatrix m_currToLight;
 		/// transformation: current -> raster coordinates ( [0,1]x[0,1] )
-		CqMatrix m_currToRaster;
+		CqMatrix m_currToTexture;
 		/// Pixel data for shadow map.
 		boost::shared_ptr<CqTileArray<TqFloat> > m_pixelBuf;
 		/// Default shadow sampling options.
