@@ -63,8 +63,14 @@ class COMMON_SHARE CqVector2D
 		{
 			return ( m_x );
 		}
+		/// Get a reference to the x-componenet.
+		TqFloat& x()
+		{
+			return m_x;
+		}
 		/** Set the x component.
 		 * \param x Float new value.
+		 * \deprecated.  Use the x() method returning a non-const reference.
 		 */
 		void	x( TqFloat x )
 		{
@@ -76,8 +82,14 @@ class COMMON_SHARE CqVector2D
 		{
 			return ( m_y );
 		}
+		/// Get a reference to the y-componenet.
+		TqFloat& y()
+		{
+			return m_y;
+		}
 		/** Set the y component.
 		 * \param y Float new value.
+		 * \deprecated.  Use the y() method returning a non-const reference.
 		 */
 		void	y( TqFloat y )
 		{

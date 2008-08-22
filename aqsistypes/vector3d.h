@@ -70,7 +70,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_x );
 		}
+		/// Get a reference to the x-componenet.
+		TqFloat& x()
+		{
+			return m_x;
+		}
 		/** Set the x component.
+		 *
+		 * \deprecated.  Use the x() method returning a non-const reference.
 		 */
 		void	x( TqFloat x )
 		{
@@ -82,7 +89,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_y );
 		}
+		/// Get a reference to the y-componenet.
+		TqFloat& y()
+		{
+			return m_y;
+		}
 		/** Set the y component.
+		 *
+		 * \deprecated.  Use the y() method returning a non-const reference.
 		 */
 		void	y( TqFloat y )
 		{
@@ -94,7 +108,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_z );
 		}
+		/// Get a reference to the z-componenet.
+		TqFloat& z()
+		{
+			return m_z;
+		}
 		/** Set the z component.
+		 *
+		 * \deprecated.  Use the z() method returning a non-const reference.
 		 */
 		void	z( TqFloat z )
 		{
