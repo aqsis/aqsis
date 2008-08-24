@@ -1,7 +1,7 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2007, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -28,8 +28,11 @@
 #include "aqsis.h"
 
 #include <string>
+#include <iostream>
 
 #include <boost/intrusive_ptr.hpp>
+
+#include "aqsismath.h"
 
 namespace ribparse {
 
@@ -50,25 +53,29 @@ class CqRibToken
 			COMMENT,
 			ERROR,
 			ENDOFFILE,
-			NONE
+			UNKNOWN
 		};
 
 		//--------------------------------------------------
 		/// \name Constructors
 		//@{
-		/// Default constructor - initializes with NONE
-		CqRibToken();
+		/// Construct a token of the given type (default value)
+		CqRibToken(EqType type = UNKNOWN);
 		/// Construct a INTEGER token from the given integer value
 		CqRibToken(TqInt intVal);
 		/// Construct a FLOAT token from the given float value
 		CqRibToken(TqFloat floatVal);
 		/// Construct a token with a string as the token value
 		CqRibToken(EqType type, const std::string& strVal);
-		/// Construct a token of the given type (no value)
-		CqRibToken(EqType type);
-		/// Destructor
-		~CqRibToken();
 		//@}
+		
+		/** Equality operator (mostly for testing purposes)
+		 *
+		 * \return true if the token type and data are the same.
+		 */
+		bool operator==(const CqRibToken& rhs) const;
+		/// Format the token to an output stream.
+		friend std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok);
 
 		//--------------------------------------------------
 		/// \name accessors
@@ -129,12 +136,16 @@ struct CqRibToken::SqStringHolder
 
 //--------------------------------------------------
 // CqRibToken implementation
-inline CqRibToken::CqRibToken()
-		: m_type(NONE),
+inline CqRibToken::CqRibToken(CqRibToken::EqType type)
+		: m_type(type),
 		m_intVal(0),
 		m_floatVal(0),
 		m_strVal()
-{}
+{
+	if(type == STRING || type == REQUEST || type == COMMENT
+			|| type == ERROR)
+		m_strVal = boost::intrusive_ptr<SqStringHolder>(new SqStringHolder(""));
+}
 
 inline CqRibToken::CqRibToken(TqInt intVal)
 		: m_type(INTEGER),
@@ -156,17 +167,32 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal
 		m_floatVal(0),
 		m_strVal(new SqStringHolder(strVal))
 {
-	assert(type == STRING || type == REQUEST || type == COMMENT);
+	assert(type == STRING || type == REQUEST || type == COMMENT
+			|| type == ERROR);
 }
 
-inline CqRibToken::CqRibToken(CqRibToken::EqType type)
-		: m_type(type),
-		m_intVal(0),
-		m_floatVal(0),
-		m_strVal()
+inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 {
-	assert(type == BEGIN_ARRAY || type == END_ARRAY || type == ENDOFFILE
-			|| type == NONE);
+	if(m_type != rhs.m_type)
+		return false;
+	switch(m_type)
+	{
+		case BEGIN_ARRAY:
+		case END_ARRAY:
+		case UNKNOWN:
+		case ENDOFFILE:
+		case ERROR:
+		default:
+			return true;
+		case INTEGER:
+			return m_intVal == rhs.m_intVal;
+		case FLOAT:
+			return Aqsis::isClose(m_floatVal, rhs.m_floatVal);
+		case STRING:
+		case REQUEST:
+		case COMMENT:
+			return m_strVal->str == m_strVal->str;
+	}
 }
 
 inline CqRibToken::EqType CqRibToken::type() const
@@ -188,8 +214,47 @@ inline TqFloat CqRibToken::floatVal() const
 
 inline const std::string& CqRibToken::stringVal() const
 {
-	assert(m_type == STRING || m_type == REQUEST || m_type == COMMENT);
+	assert(m_type == STRING || m_type == REQUEST || m_type == COMMENT
+			|| m_type == ERROR);
 	return m_strVal->str;
+}
+
+inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
+{
+	static const std::string tokenNames[] = {
+		"BEGIN_ARRAY",
+		"END_ARRAY",
+		"STRING",
+		"INTEGER",
+		"FLOAT",
+		"REQUEST",
+		"COMMENT",
+		"ERROR",
+		"ENDOFFILE",
+		"UNKNOWN"
+	};
+	outStream << tokenNames[tok.m_type];
+	switch(tok.m_type)
+	{
+		case CqRibToken::BEGIN_ARRAY:
+		case CqRibToken::END_ARRAY:
+		case CqRibToken::UNKNOWN:
+		case CqRibToken::ENDOFFILE:
+			break;
+		case CqRibToken::INTEGER:
+			outStream << ": " << tok.m_intVal;
+			break;
+		case CqRibToken::FLOAT:
+			outStream << ": " << tok.m_floatVal;
+			break;
+		case CqRibToken::STRING:
+		case CqRibToken::REQUEST:
+		case CqRibToken::COMMENT:
+		case CqRibToken::ERROR:
+			outStream << ": \"" << tok.m_strVal->str << "\"";
+			break;
+	}
+	return outStream;
 }
 
 } // namespace ribparse

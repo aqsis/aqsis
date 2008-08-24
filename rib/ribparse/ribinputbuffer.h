@@ -1,7 +1,7 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2007, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -34,8 +34,17 @@ namespace ribparse
 
 /** Input buffer for RIB parsing.
  *
- * Since RIB is a bytestream protocol, this class needs to be very careful
- * about how it uses input buffering.
+ * The buffer supports three main actions:
+ *   * get a single character
+ *   * peek at the next character of input
+ *   * put back the last character read (unget)
+ *
+ * These actions are sufficient for correctly constructing tokens from the RIB
+ * stream.  The RISpec explicitly states that RIB should be thought of as a
+ * stream of single-byte commands.  Because we might be reading from a pipe via
+ * stdin, the "end" of the rib stream may be encountered at any time.  This
+ * class therefore makes sure that any input buffering of a requested number of
+ * characters is non-blocking.
  */
 class CqRibInputBuffer
 {
@@ -75,6 +84,14 @@ class CqRibInputBuffer
 //==============================================================================
 // Implementation details.
 //==============================================================================
+CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
+	: m_inStream(inStream),
+	m_putbackChar(0),
+	m_havePutbackChar(false),
+	m_lineNum(0),
+	m_colNum(0)
+{ }
+
 inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 {
 	if(m_havePutbackChar)

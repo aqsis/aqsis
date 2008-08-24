@@ -1,7 +1,7 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2007, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -44,7 +44,7 @@ CqRibToken CqRibLexer::getToken()
 {
 	while(true)
 	{
-		CqRibInputBuffer::TqOutputType c = m_inBuf.peek();
+		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
 		switch(c)
 		{
 			case ' ':
@@ -57,14 +57,13 @@ CqRibToken CqRibLexer::getToken()
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case '-': case '+': case '.':
+				m_inBuf.unget();
 				return readNumber();
 			case '"':
 				return readString();
 			case '[':
-				m_inBuf.get();
 				return CqRibToken(CqRibToken::BEGIN_ARRAY);
 			case ']':
-				m_inBuf.get();
 				return CqRibToken(CqRibToken::END_ARRAY);
 			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 			case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
@@ -75,12 +74,14 @@ CqRibToken CqRibLexer::getToken()
 			case 'K': case 'L': case 'M': case 'N': case 'O': case 'P':
 			case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V':
 			case 'W': case 'X': case 'Y': case 'Z':
+				m_inBuf.unget();
 				return readRequest();
 			case EOF:
 				return CqRibToken(CqRibToken::ENDOFFILE);
 			default:
 				return error("unrecognized character");
 		}
+		// TODO: integrate binary rib handling
 	}
 }
 
@@ -106,7 +107,7 @@ CqRibToken CqRibLexer::readNumber()
 	// deal with digits before decimal point
 	if(std::isdigit(c))
 		haveReadDigit = true;
-	// TODO: this is not robust against overflow nastyness
+	// TODO: Think of a better way to handle the overflow below robustly?
 	while(std::isdigit(c))
 	{
 		intResult *= 10;
@@ -182,14 +183,12 @@ CqRibToken CqRibLexer::readNumber()
 
 CqRibToken CqRibLexer::readString()
 {
-	// discard '"' special char.
-	CqRibInputBuffer::TqOutputType c = m_inBuf.get();
-	assert(c == '"');
-	std::string strOut;
+	// Assume leading '"' has already been read.
+	std::string outString;
 	bool stringFinished = false;
 	while(!stringFinished)
 	{
-		c = m_inBuf.get();
+		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
 		switch(c)
 		{
 			case '"':
@@ -201,22 +200,22 @@ CqRibToken CqRibLexer::readString()
 				switch(c)
 				{
 					case 'n':
-						strOut += '\n';
+						outString += '\n';
 						break;
 					case 'r':
-						strOut += '\r';
+						outString += '\r';
 						break;
 					case 't':
-						strOut += '\t';
+						outString += '\t';
 						break;
 					case 'b':
-						strOut += '\b';
+						outString += '\b';
 						break;
 					case 'f':
-						strOut += '\f';
+						outString += '\f';
 						break;
 					case '\\':
-						strOut += '\\';
+						outString += '\\';
 						break;
 					case '0':
 					case '1':
@@ -238,7 +237,7 @@ CqRibToken CqRibLexer::readString()
 								c = m_inBuf.get();
 							}
 							m_inBuf.unget();
-							strOut += octalChar;
+							outString += octalChar;
 						}
 						break;
 					case '\n':
@@ -246,7 +245,7 @@ CqRibToken CqRibLexer::readString()
 					default:
 						// ignore the escape '\' if the following char isn't one of
 						// the above.
-						strOut += c;
+						outString += c;
 						break;
 				}
 			break;
@@ -254,10 +253,10 @@ CqRibToken CqRibLexer::readString()
 				return error("End of file found while scanning string");
 			break;
 			default:
-				strOut += c;
+				outString += c;
 		}
 	}
-	return CqRibToken(CqRibToken::STRING, strOut);
+	return CqRibToken(CqRibToken::STRING, outString);
 }
 
 CqRibToken CqRibLexer::readRequest()

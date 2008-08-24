@@ -1,7 +1,7 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2007, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -22,13 +22,6 @@
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
-/* TODO: error handling,
- *   aqsis types,
- *   non-blocking stream buffers,
- *   proper use of doxygen markup,
- *   integrate binary rib handling
- */
-
 #ifndef RIBLEXER_H_INCLUDED
 #define RIBLEXER_H_INCLUDED
 
@@ -47,6 +40,10 @@ namespace ribparse
 
 //------------------------------------------------------------------------------
 /** \brief A lexical analyser for the Renderman Interface Byetstream.
+ *
+ * The lexer translates input characters into a sequence of tokens of type
+ * CqRibToken.  The token values are computed in the lexer rather than being
+ * returned as strings.
  */
 class CqRibLexer
 {
@@ -68,7 +65,9 @@ class CqRibLexer
 	private:
 		/// Read in a number (integer or real)
 		CqRibToken readNumber();
-		/// Read in a string
+		/** \brief Read in a string
+		 * Assumes that the leading '"' has already been read.
+		 */
 		CqRibToken readString();
 		/// Read in a RIB request
 		CqRibToken readRequest();
@@ -77,6 +76,7 @@ class CqRibLexer
 		/// Signal an error condition
 		CqRibToken error(std::string message);
 
+		/// Input buffer from which characters are read.
 		CqRibInputBuffer m_inBuf;
 };
 
