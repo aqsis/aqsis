@@ -76,9 +76,9 @@ CqRibToken CqRibLexer::getToken()
 			case '"':
 				return readString();
 			case '[':
-				return CqRibToken(CqRibToken::BEGIN_ARRAY);
+				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case ']':
-				return CqRibToken(CqRibToken::END_ARRAY);
+				return CqRibToken(CqRibToken::ARRAY_END);
 			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 			case 'g': case 'h': case 'i': case 'j': case 'k': case 'l':
 			case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':

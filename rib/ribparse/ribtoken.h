@@ -44,8 +44,8 @@ class CqRibToken
 		/// Rib token types
 		enum EqType
 		{
-			BEGIN_ARRAY,
-			END_ARRAY,
+			ARRAY_BEGIN,
+			ARRAY_END,
 			STRING,
 			INTEGER,
 			FLOAT,
@@ -174,8 +174,8 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 		return false;
 	switch(m_type)
 	{
-		case BEGIN_ARRAY:
-		case END_ARRAY:
+		case ARRAY_BEGIN:
+		case ARRAY_END:
 		case UNKNOWN:
 		case ENDOFFILE:
 		case ERROR:
@@ -217,8 +217,8 @@ inline const std::string& CqRibToken::stringVal() const
 inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 {
 	static const std::string tokenNames[] = {
-		"BEGIN_ARRAY",
-		"END_ARRAY",
+		"ARRAY_BEGIN",
+		"ARRAY_END",
 		"STRING",
 		"INTEGER",
 		"FLOAT",
@@ -230,8 +230,8 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 	outStream << tokenNames[tok.m_type];
 	switch(tok.m_type)
 	{
-		case CqRibToken::BEGIN_ARRAY:
-		case CqRibToken::END_ARRAY:
+		case CqRibToken::ARRAY_BEGIN:
+		case CqRibToken::ARRAY_END:
 		case CqRibToken::UNKNOWN:
 		case CqRibToken::ENDOFFILE:
 			break;

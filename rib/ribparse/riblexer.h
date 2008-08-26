@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <boost/intrusive_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
@@ -45,7 +46,7 @@ namespace ribparse
  * CqRibToken.  The token values are computed in the lexer rather than being
  * returned as strings.
  */
-class CqRibLexer
+class CqRibLexer : boost::noncopyable
 {
 	public:
 		/** \brief Create new lexer using a given stream.

@@ -3,10 +3,12 @@ PROJECT(RIBPARSE)
 SET(RIBPARSE_HDRS
 	ribinputbuffer.h
 	riblexer.h
+	ribparser.h
 	ribtoken.h
 )
 SET(RIBPARSE_SRCS
 	riblexer.cpp
+	ribparser.cpp
 )
 SET(RIBPARSE_TEST_SRCS
 	riblexer_test.cpp

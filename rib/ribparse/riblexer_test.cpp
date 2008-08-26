@@ -130,10 +130,10 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_array_test)
 {
 	std::istringstream in("[ 1.0 -1 ]");
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::BEGIN_ARRAY));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_BEGIN));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(1.0f));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::END_ARRAY));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_END));
 	CHECK_EOF(lex);
 }
 

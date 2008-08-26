@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+#include <boost/noncopyable.hpp>
+
 namespace ribparse
 {
 
@@ -58,7 +60,7 @@ std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos);
  * class therefore makes sure that any input buffering of a requested number of
  * characters is non-blocking.
  */
-class CqRibInputBuffer
+class CqRibInputBuffer : boost::noncopyable
 {
 	public:
 		/// "Character" type returned from the get() method.
@@ -94,7 +96,7 @@ class CqRibInputBuffer
 //==============================================================================
 
 // SqSourcePos functions
-std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
+inline std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
 {
 	out << "line " << pos.line << ", col " << pos.col;
 	return out;
@@ -102,7 +104,7 @@ std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
 
 //------------------------------------------------------------------------------
 // CqRibInputBuffer implementation
-CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
+inline CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 	: m_inStream(inStream),
 	m_putbackChar(0),
 	m_havePutbackChar(false),
