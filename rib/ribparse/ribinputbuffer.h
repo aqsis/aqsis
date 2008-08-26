@@ -32,11 +32,23 @@
 namespace ribparse
 {
 
+/// A holder for source code positions.
+struct SqSourcePos
+{
+	TqInt line;
+	TqInt col;
+	SqSourcePos(TqInt line, TqInt col) : line(line), col(col) {}
+};
+
+/// pretty print SqSourcePos
+std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos);
+
+
+//------------------------------------------------------------------------------
 /** Input buffer for RIB parsing.
  *
  * The buffer supports three main actions:
  *   * get a single character
- *   * peek at the next character of input
  *   * put back the last character read (unget)
  *
  * These actions are sufficient for correctly constructing tokens from the RIB
@@ -49,7 +61,7 @@ namespace ribparse
 class CqRibInputBuffer
 {
 	public:
-		/// "Character" type returned from the get() and peek() methods.
+		/// "Character" type returned from the get() method.
 		typedef std::istream::int_type TqOutputType;
 
 		/// Construct an input buffer.
@@ -59,13 +71,9 @@ class CqRibInputBuffer
 		TqOutputType get();
 		/// Put the last character back into the input stream
 		void unget();
-		/// Peek (get without removing) at the next character in the input stream
-		TqOutputType peek();
 
-		/// Return the current line number
-		TqInt lineNum() const;
-		/// Return the current column number
-		TqInt colNum() const;
+		/// Return the position of the previous character obtained with get()
+		SqSourcePos pos() const;
 
 	private:
 		/// Stream we are reading from.
@@ -74,69 +82,77 @@ class CqRibInputBuffer
 		TqOutputType m_putbackChar;
 		/// Flag to indicate current character has already been read from inStream.
 		bool m_havePutbackChar;
-		/// Current line number.
-		TqInt m_lineNum;
-		/// Current column number.
-		TqInt m_colNum;
+		/// Current source location
+		SqSourcePos m_currPos;
+		/// Previous source location
+		SqSourcePos m_prevPos;
 };
 
 
 //==============================================================================
 // Implementation details.
 //==============================================================================
+
+// SqSourcePos functions
+std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
+{
+	out << "line " << pos.line << ", col " << pos.col;
+	return out;
+}
+
+//------------------------------------------------------------------------------
+// CqRibInputBuffer implementation
 CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 	: m_inStream(inStream),
 	m_putbackChar(0),
 	m_havePutbackChar(false),
-	m_lineNum(0),
-	m_colNum(0)
+	m_currPos(1,1),
+	m_prevPos(-1,-1)
 { }
 
 inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 {
+	TqOutputType c = 0;
 	if(m_havePutbackChar)
 	{
 		m_havePutbackChar = false;
-		return m_putbackChar;
+		c = m_putbackChar;
 	}
-	if(m_putbackChar == '\n')
+	else
 	{
-		++m_lineNum;
-		m_colNum = 0;
+		c = m_inStream.get();
+		// TODO: Make sure this is actually necessary and that istream::get()
+		// doesn't do any undesirable translation.
+		if(c == '\r')
+		{
+			// translate all '\r' and '\r\n' characters to a single '\n'
+			if(m_inStream.peek() == '\n')
+				m_inStream.get();
+			c = '\n';
+		}
 	}
-	TqOutputType c = m_inStream.get();
-	++m_colNum;
-	if(c == '\r')
-	{
-		// translate all '\r' and '\r\n' characters to a single '\n'
-		if(m_inStream.peek() == '\n')
-			m_inStream.get();
-		c = '\n';
-	}
+	// Save character in case of unget()
 	m_putbackChar = c;
-	return c;
-}
-
-inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::peek()
-{
-	TqOutputType c = get();
-	m_havePutbackChar = true;
+	// Update current line and column position
+	m_prevPos = m_currPos;
+	++m_currPos.col;
+	if(c == '\n')
+	{
+		++m_currPos.line;
+		m_currPos.col = 0;
+	}
 	return c;
 }
 
 inline void CqRibInputBuffer::unget()
 {
+	m_currPos = m_prevPos;
 	m_havePutbackChar = true;
 }
 
-inline TqInt CqRibInputBuffer::lineNum() const
+inline SqSourcePos CqRibInputBuffer::pos() const
 {
-	return m_lineNum;
-}
-
-inline TqInt CqRibInputBuffer::colNum() const
-{
-	return m_colNum;
+	return m_currPos;
 }
 
 } // namespace ribparse

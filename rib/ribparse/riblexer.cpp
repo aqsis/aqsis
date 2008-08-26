@@ -37,13 +37,26 @@ namespace ribparse
 // CqRibLexer implementation
 
 CqRibLexer::CqRibLexer(std::istream& inStream)
-	: m_inBuf(inStream)
+	: m_inBuf(inStream),
+	m_currPos(1,1),
+	m_prevPos(0,0),
+	m_nextTok(),
+	m_haveNext(false)
 {}
 
 CqRibToken CqRibLexer::getToken()
 {
+	m_prevPos = m_currPos;
+	// Return the next token directly if we already have it.
+	if(m_haveNext)
+	{
+		m_haveNext = false;
+		return m_nextTok;
+	}
+	// Else determine the next token.
 	while(true)
 	{
+		m_currPos = m_inBuf.pos();
 		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
 		switch(c)
 		{
@@ -53,7 +66,8 @@ CqRibToken CqRibLexer::getToken()
 				// ignore whitespace
 				break;
 			case '#':
-				return readComment();
+				readComment();
+				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case '-': case '+': case '.':
@@ -83,6 +97,14 @@ CqRibToken CqRibLexer::getToken()
 		}
 		// TODO: integrate binary rib handling
 	}
+}
+
+void CqRibLexer::ungetToken(const CqRibToken& tok)
+{
+	assert(!m_haveNext);
+	m_currPos = m_prevPos;
+	m_haveNext = true;
+	m_nextTok = tok;
 }
 
 CqRibToken CqRibLexer::readNumber()
@@ -278,25 +300,18 @@ CqRibToken CqRibLexer::readRequest()
 	return CqRibToken(CqRibToken::REQUEST, name);
 }
 
-CqRibToken CqRibLexer::readComment()
+void CqRibLexer::readComment()
 {
-	std::string comment;
-	comment.reserve(100);
 	CqRibInputBuffer::TqOutputType c = m_inBuf.get();
 	while(c != EOF && c != '\n')
-	{
-		comment += c;
 		c = m_inBuf.get();
-	}
 	m_inBuf.unget();
-	return CqRibToken(CqRibToken::COMMENT, comment);
 }
 
 CqRibToken CqRibLexer::error(std::string message)
 {
 	std::ostringstream oss;
-	oss << "Bad token at line " << m_inBuf.lineNum()
-		<< " column " << m_inBuf.colNum() << ": " << message;
+	oss << "Bad token at " << m_inBuf.pos() << ": " << message;
 	return CqRibToken(CqRibToken::ERROR, oss.str());
 }
 

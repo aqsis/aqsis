@@ -53,14 +53,25 @@ class CqRibLexer
 		 */
 		CqRibLexer(std::istream& inStream);
 		/** \brief Get the next token.
-		 * \returns The next token from the input stream.
+		 * \return The next token from the input stream.
 		 */
 		CqRibToken getToken();
+		/** \brief Put a token back into the input stream
+		 *
+		 * This only works for a *single* token, since the unget buffer is of
+		 * length one.
+		 *
+		 * \param tok - token to put back.
+		 */
+		void ungetToken(const CqRibToken& tok);
 
-		/// Return the current line number
-		TqInt lineNum() const;
-		/// Return the current column number
-		TqInt colNum() const;
+		/** Return the position in the input file
+		 *
+		 * \return The position in the input file for the previous token
+		 *         obtained with getToken().  Correctly accounts for the use of
+		 *         ungetToken();
+		 */
+		SqSourcePos pos() const;
 
 	private:
 		/// Read in a number (integer or real)
@@ -71,13 +82,21 @@ class CqRibLexer
 		CqRibToken readString();
 		/// Read in a RIB request
 		CqRibToken readRequest();
-		/// Read in a comment.
-		CqRibToken readComment();
+		/// Read in and discard a comment.
+		void readComment();
 		/// Signal an error condition
 		CqRibToken error(std::string message);
 
 		/// Input buffer from which characters are read.
 		CqRibInputBuffer m_inBuf;
+		/// source position of previous token in input stream
+		SqSourcePos m_currPos;
+		/// source position of previous previous token in input stream
+		SqSourcePos m_prevPos;
+		/// next token, if already read.
+		CqRibToken m_nextTok;
+		/// flag indicating whether we've already got the next token.
+		bool m_haveNext;
 };
 
 
@@ -85,14 +104,9 @@ class CqRibLexer
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline TqInt CqRibLexer::lineNum() const
+inline SqSourcePos CqRibLexer::pos() const
 {
-	return m_inBuf.lineNum();
-}
-
-inline TqInt CqRibLexer::colNum() const
-{
-	return m_inBuf.colNum();
+	return m_currPos;
 }
 
 } // namespace ribparse

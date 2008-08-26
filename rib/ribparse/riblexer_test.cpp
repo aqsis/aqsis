@@ -126,17 +126,6 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_test)
 	CHECK_EOF(lex);
 }
 
-BOOST_AUTO_TEST_CASE(CqRibLexer_comments_test)
-{
-	std::istringstream in("# I'm commented out\n##And a structrual comment\n");
-	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::COMMENT, 
-				" I'm commented out"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::COMMENT, 
-				"#And a structrual comment"));
-	CHECK_EOF(lex);
-}
-
 BOOST_AUTO_TEST_CASE(CqRibLexer_array_test)
 {
 	std::istringstream in("[ 1.0 -1 ]");
@@ -156,5 +145,23 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_request_test)
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "version"));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "SomethingElse"));
 	CHECK_EOF(lex);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_position_test)
+{
+	std::istringstream in("Rqst [1.0\n 1] \"asdf\" ");
+	CqRibLexer lex(in);
+	lex.getToken();
+	lex.getToken();
+	lex.getToken();
+	SqSourcePos pos = lex.pos();
+	BOOST_CHECK_EQUAL(pos.line, 1);
+	BOOST_CHECK_EQUAL(pos.col, 7);
+	lex.getToken();
+	lex.getToken();
+	lex.getToken();
+	pos = lex.pos();
+	BOOST_CHECK_EQUAL(pos.line, 2);
+	BOOST_CHECK_EQUAL(pos.col, 4);
 }
 

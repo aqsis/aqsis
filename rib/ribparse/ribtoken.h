@@ -50,7 +50,6 @@ class CqRibToken
 			INTEGER,
 			FLOAT,
 			REQUEST,
-			COMMENT,
 			ERROR,
 			ENDOFFILE,
 			UNKNOWN
@@ -68,7 +67,7 @@ class CqRibToken
 		/// Construct a token with a string as the token value
 		CqRibToken(EqType type, const std::string& strVal);
 		//@}
-		
+
 		/** Equality operator (mostly for testing purposes)
 		 *
 		 * \return true if the token type and data are the same.
@@ -142,8 +141,7 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type)
 		m_floatVal(0),
 		m_strVal()
 {
-	if(type == STRING || type == REQUEST || type == COMMENT
-			|| type == ERROR)
+	if(type == STRING || type == REQUEST || type == ERROR)
 		m_strVal = boost::intrusive_ptr<SqStringHolder>(new SqStringHolder(""));
 }
 
@@ -167,8 +165,7 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal
 		m_floatVal(0),
 		m_strVal(new SqStringHolder(strVal))
 {
-	assert(type == STRING || type == REQUEST || type == COMMENT
-			|| type == ERROR);
+	assert(type == STRING || type == REQUEST || type == ERROR);
 }
 
 inline bool CqRibToken::operator==(const CqRibToken& rhs) const
@@ -190,7 +187,6 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 			return Aqsis::isClose(m_floatVal, rhs.m_floatVal);
 		case STRING:
 		case REQUEST:
-		case COMMENT:
 			return m_strVal->str == m_strVal->str;
 	}
 }
@@ -214,8 +210,7 @@ inline TqFloat CqRibToken::floatVal() const
 
 inline const std::string& CqRibToken::stringVal() const
 {
-	assert(m_type == STRING || m_type == REQUEST || m_type == COMMENT
-			|| m_type == ERROR);
+	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
 	return m_strVal->str;
 }
 
@@ -228,7 +223,6 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 		"INTEGER",
 		"FLOAT",
 		"REQUEST",
-		"COMMENT",
 		"ERROR",
 		"ENDOFFILE",
 		"UNKNOWN"
@@ -249,7 +243,6 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 			break;
 		case CqRibToken::STRING:
 		case CqRibToken::REQUEST:
-		case CqRibToken::COMMENT:
 		case CqRibToken::ERROR:
 			outStream << ": \"" << tok.m_strVal->str << "\"";
 			break;
