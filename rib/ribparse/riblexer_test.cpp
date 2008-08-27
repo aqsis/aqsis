@@ -173,26 +173,32 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_fixedpoint_decode)
 {
 	// Only a selection of the possibilites for fixed-point numbers are tested
 	// here...
-	std::istringstream in("\204ab\205abb\211abab");
+	std::istringstream in("\204a\205bc\212def\213ghij\214k");
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('a' + TqFloat('b')/256));
+	// 0204:  .b
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqFloat('a')/256));
+	// 0205:  b.b
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('b' + TqFloat('c')/256));
+	// 0212:  b.bb
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('d' + ('e' + TqFloat('f')/256)/256));
+	// 0213:  bb.bb
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
-				(TqInt('a') << 8) + 'b' + TqFloat('b')/256));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
-				(TqInt('a') << 8) + 'b' + (TqFloat('a') + TqFloat('b')/256)/256));
+				(TqInt('g') << 8) + 'h' + (TqFloat('i') + TqFloat('j')/256)/256));
+	// 0214:  .__b
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqFloat('k')/256/256/256));
 	CHECK_EOF(lex);
 }
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_short_string_decode)
 {
-	std::istringstream in("\220\221a\230abcdefgh\237abcdefghijklm\\n");
+	std::istringstream in("\220\221a\230bcdefghi\237jklm\\nopqrstuvw");
 	CqRibLexer lex(in);
 	// min. length short string.
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "a"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "abcdefgh"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "bcdefghi"));
 	// Test max. length short string and lack of escaping in encoded strings.
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "abcdefghijklm\\n"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "jklm\\nopqrstuvw"));
 	CHECK_EOF(lex);
 }
 

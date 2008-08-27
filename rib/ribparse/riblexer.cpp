@@ -30,6 +30,7 @@
 #include <string>
 #include <sstream>
 
+#include "aqsismath.h"
 
 namespace ribparse
 {
@@ -75,21 +76,32 @@ TqUint32 decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes)
 
 /** \brief Read and decode a fixed point number.
  *
- * These come packaged in two sets of bytes:
- *  * bytes before the decimal point (magnitude bytes)
- *  * bytes after the decimal point (fractional bytes)
- * for example, bbb.bb has three magnitude bytes and two fractional bytes.  
+ * These come as a set of bytes with the location of the radix point
+ * ("decimal" point) specified with respect to the right hand side.
+ *
+ * \param numBytes - total number of bytes.
+ * \param radixPos - position of radix ("decimal") point.  Must be positive.
+ *
+ * For example:
+ *
+ * \verbatim
+ *
+ *       b.bbb               .__bb
+ *         <--                <---
+ *    radixPos = 3         radixPos = 4
+ *    numBytes = 4         numBytes = 2
+ *
+ * \endverbatim
  *
  * \param inBuf - bytes are read from this input buffer.
- * \param numMagBytes - number of magnitude bytes
- * \param numFracBytes - number of fractional bytes
  */
-TqFloat decodeFixedPoint(CqRibInputBuffer& inBuf, TqInt numMagBytes,
-		TqInt numFracBytes)
+TqFloat decodeFixedPoint(CqRibInputBuffer& inBuf, TqInt numBytes,
+		TqInt radixPos)
 {
-	TqUint32 mag = decodeInt(inBuf, numMagBytes);
-	TqUint32 frac = decodeInt(inBuf, numFracBytes);
-	return mag + static_cast<TqFloat>(frac)/(1 << (8*numFracBytes));
+	assert(radixPos > 0);
+	TqUint32 mag = decodeInt(inBuf, numBytes - radixPos);
+	TqUint32 frac = decodeInt(inBuf, Aqsis::min(radixPos, numBytes));
+	return mag + static_cast<TqFloat>(frac)/(1 << (8*radixPos));
 }
 
 /** \brief Decode a 32-bit IEEE floating point number.
@@ -215,27 +227,18 @@ CqRibToken CqRibLexer::getToken()
 				//   0200 + w  |  <value>
 				// where <value> is w+1 bytes with MSB first.
 				return CqRibToken(static_cast<TqInt>(decodeInt(m_inBuf, c - 0200 + 1)));
-			case 0204: case 0205: case 0206: // b.b to bbb.b
-			case 0210: case 0211: // b.bb and bb.bb
-			case 0214: // b.bbb
+			case 0204: case 0205: case 0206: case 0207: // .b to bbb.b
+			case 0210: case 0211: case 0212: case 0213: // ._b to bb.bb
+			case 0214: case 0215: case 0216: case 0217: // .__b to b.bbb
 				// Decode fixed point numbers.  The encoded token has the form
 				//   0200 + 4*d + w  |  <value>
-				// where <value> is w+d+1 bytes and specifies a fixed point
-				// number with w+1 magnitude bytes and d fractional bytes.
-				//
-				// The number of encoded bytes is restricted by the standard
-				// such that w+d+1 < 5, presumably since a 32-bit float doesn't
-				// have the precision to hold anything more...
-				//
-				// TODO: Resolve disagreement between old code and the RISpec.
+				// where <value> is w+1 bytes specifying a fixed point
+				// number with the radix point ("decimal" point) located d
+				// bytes into the number from the right.
 				return CqRibToken(decodeFixedPoint(m_inBuf,
-					((c - 0200) & 0x03) + 1,  // magnitude bytes
-					((c - 0200) >> 2) & 0x03  // fractional bytes
+					((c - 0200) & 0x03) + 1,  // total bytes
+					((c - 0200) >> 2) & 0x03  // location of radix point
 				));
-			case 0207: case 0212: case 0213: // bbbb.b, bbb.bb and bbbb.bb
-			case 0215: case 0216: case 0217: // bb.bbb to bbbb.bbb
-				// Intentionally omitted from the fixed point decoding; see above.
-				return error("unexpected fixed point encoding");
 			case 0220: case 0221: case 0222: case 0223:
 			case 0224: case 0225: case 0226: case 0227:
 			case 0230: case 0231: case 0232: case 0233:
