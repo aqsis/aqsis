@@ -36,6 +36,10 @@
 
 using namespace ribparse;
 
+//------------------------------------------------------------------------------
+// Test cases for ASCII RIB parsing
+//------------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 {
 	{
@@ -146,6 +150,90 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_request_test)
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "SomethingElse"));
 	CHECK_EOF(lex);
 }
+
+
+//------------------------------------------------------------------------------
+// Test cases for binary RIB decoding
+//------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_integer_decode)
+{
+	std::istringstream in("\200a\201ab\202abc\203abcd");
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqInt('a')));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken((TqInt('a') << 8) + TqInt('b')) );
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+			(TqInt('a') << 16) + (TqInt('b') << 8) + TqInt('c')) );
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+			(TqInt('a') << 24) + (TqInt('b') << 16) + (TqInt('c') << 8) + TqInt('d')) );
+	CHECK_EOF(lex);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_fixedpoint_decode)
+{
+	// Only a selection of the possibilites for fixed-point numbers are tested
+	// here...
+	std::istringstream in("\204ab\205abb\211abab");
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('a' + TqFloat('b')/256));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+				(TqInt('a') << 8) + 'b' + TqFloat('b')/256));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+				(TqInt('a') << 8) + 'b' + (TqFloat('a') + TqFloat('b')/256)/256));
+	CHECK_EOF(lex);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_short_string_decode)
+{
+	std::istringstream in("\220\221a\230abcdefgh\237abcdefghijklm\\n");
+	CqRibLexer lex(in);
+	// min. length short string.
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "a"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "abcdefgh"));
+	// Test max. length short string and lack of escaping in encoded strings.
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "abcdefghijklm\\n"));
+	CHECK_EOF(lex);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_long_string_decode)
+{
+	// We need to do this funny dance with char* here since the string literal
+	// contains null "terminators" which we don't want to actually terminate
+	// the string.
+	const char strPtr[] = "\240\000\240\012aaaaAaaaaA\243\000\000\000\002aX";
+	std::string str(strPtr, strPtr+sizeof(strPtr));
+	std::istringstream in(str);
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aaaaAaaaaA"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aX"));
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
+{
+	std::istringstream in("");
+	CqRibLexer lex(in);
+	// TODO
+	// 32-bit float
+//	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(1.0f));
+	// 64-bit float
+	// 32-bit float array
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_defined_request_test)
+{
+	// TODO
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_defined_string_test)
+{
+	// TODO
+}
+
+//------------------------------------------------------------------------------
+// Test misc. public methods
+//------------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_position_test)
 {

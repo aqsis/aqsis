@@ -87,6 +87,8 @@ class CqRibToken
 		TqFloat floatVal() const;
 		/// Get a string value from the token
 		const std::string& stringVal() const;
+		/// Get a modifiable string from the token.  (Intended for lexer use.)
+		std::string& stringVal();
 		//@}
 
 	private:
@@ -99,7 +101,7 @@ class CqRibToken
 		/// Float value for token
 		TqFloat m_floatVal;
 		/// String value for token
-		boost::intrusive_ptr<const SqStringHolder> m_strVal;
+		boost::intrusive_ptr<SqStringHolder> m_strVal;
 };
 
 
@@ -209,6 +211,12 @@ inline TqFloat CqRibToken::floatVal() const
 }
 
 inline const std::string& CqRibToken::stringVal() const
+{
+	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
+	return m_strVal->str;
+}
+
+inline std::string& CqRibToken::stringVal()
 {
 	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
 	return m_strVal->str;

@@ -27,8 +27,9 @@
 
 #include "aqsis.h"
 
-#include <istream>
+#include <iosfwd>
 #include <vector>
+#include <map>
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -98,6 +99,15 @@ class CqRibLexer : boost::noncopyable
 		CqRibToken m_nextTok;
 		/// flag indicating whether we've already got the next token.
 		bool m_haveNext;
+
+		/// Array of encoded requests for binary RIB decoding
+		std::vector<std::string> m_encodedRequests;
+		/// Map of encoded strings for binary RIB decoding
+		typedef std::map<TqInt, std::string> TqEncodedStringMap;
+		TqEncodedStringMap m_encodedStrings;
+
+		/// Number of array elements remaining in current encoded float array.
+		TqInt m_arrayElementsRemaining;
 };
 
 
