@@ -467,7 +467,7 @@ CqRibToken CqRibLexer::readString()
 {
 	// Assume leading '"' has already been read.
 	CqRibToken outTok(CqRibToken::STRING, "");
-	std::string& outString = outTok.stringVal();
+	std::string& outString = outTok.m_strVal;
 	outString.reserve(30);
 	bool stringFinished = false;
 	while(!stringFinished)
@@ -546,7 +546,7 @@ CqRibToken CqRibLexer::readString()
 CqRibToken CqRibLexer::readRequest()
 {
 	CqRibToken outTok(CqRibToken::REQUEST, "");
-	std::string& name = outTok.stringVal();
+	std::string& name = outTok.m_strVal;
 	name.reserve(30);
 	while(true)
 	{

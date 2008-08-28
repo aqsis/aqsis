@@ -30,8 +30,6 @@
 #include <string>
 #include <iostream>
 
-#include <boost/intrusive_ptr.hpp>
-
 #include "aqsismath.h"
 
 namespace ribparse {
@@ -87,12 +85,10 @@ class CqRibToken
 		TqFloat floatVal() const;
 		/// Get a string value from the token
 		const std::string& stringVal() const;
-		/// Get a modifiable string from the token.  (Intended for lexer use.)
-		std::string& stringVal();
 		//@}
 
 	private:
-		class SqStringHolder;
+		friend class CqRibLexer;
 
 		/// Token type
 		EqType m_type;
@@ -101,7 +97,7 @@ class CqRibToken
 		/// Float value for token
 		TqFloat m_floatVal;
 		/// String value for token
-		boost::intrusive_ptr<SqStringHolder> m_strVal;
+		std::string m_strVal;
 };
 
 
@@ -109,43 +105,13 @@ class CqRibToken
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-/// Struct combining a std::string with intrusive reference counting
-struct CqRibToken::SqStringHolder
-{
-	public:
-		std::string str;
-
-		SqStringHolder(const std::string& str)
-			: str(str)
-		{ }
-	private:
-		mutable TqInt m_refCount;
-
-		/// Increase the reference count; required for boost::intrusive_ptr
-		friend inline void intrusive_ptr_add_ref(const SqStringHolder* ptr)
-		{
-			++ptr->m_refCount;
-		}
-		/// Decrease the reference count; required for boost::intrusive_ptr
-		friend inline void intrusive_ptr_release(const SqStringHolder* ptr)
-		{
-			if(--ptr->m_refCount == 0)
-				delete ptr;
-		}
-};
-
-//--------------------------------------------------
 // CqRibToken implementation
 inline CqRibToken::CqRibToken(CqRibToken::EqType type)
 		: m_type(type),
 		m_intVal(0),
 		m_floatVal(0),
 		m_strVal()
-{
-	if(type == STRING || type == REQUEST || type == ERROR)
-		m_strVal = boost::intrusive_ptr<SqStringHolder>(new SqStringHolder(""));
-}
+{ }
 
 inline CqRibToken::CqRibToken(TqInt intVal)
 		: m_type(INTEGER),
@@ -165,7 +131,7 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal
 		: m_type(type),
 		m_intVal(0),
 		m_floatVal(0),
-		m_strVal(new SqStringHolder(strVal))
+		m_strVal(strVal)
 {
 	assert(type == STRING || type == REQUEST || type == ERROR);
 }
@@ -189,7 +155,7 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 			return Aqsis::isClose(m_floatVal, rhs.m_floatVal);
 		case STRING:
 		case REQUEST:
-			return m_strVal->str == m_strVal->str;
+			return m_strVal == rhs.m_strVal;
 	}
 }
 
@@ -213,13 +179,7 @@ inline TqFloat CqRibToken::floatVal() const
 inline const std::string& CqRibToken::stringVal() const
 {
 	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
-	return m_strVal->str;
-}
-
-inline std::string& CqRibToken::stringVal()
-{
-	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
-	return m_strVal->str;
+	return m_strVal;
 }
 
 inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
@@ -252,7 +212,7 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 		case CqRibToken::STRING:
 		case CqRibToken::REQUEST:
 		case CqRibToken::ERROR:
-			outStream << ": \"" << tok.m_strVal->str << "\"";
+			outStream << ": \"" << tok.m_strVal << "\"";
 			break;
 	}
 	return outStream;
