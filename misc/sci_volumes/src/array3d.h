@@ -86,6 +86,8 @@ Array3D<T>::Array3D(const char* fileName)
 	inFile >> m_ny;
 	inFile >> m_nz;
 	int nTot = m_nx*m_ny*m_nz;
+	if(nTot <= 0)
+		throw std::runtime_error("Data array contains zero elements");
 
 	// Read data into array
 	m_data.reserve(nTot);
