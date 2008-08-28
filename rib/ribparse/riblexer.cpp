@@ -297,14 +297,15 @@ CqRibToken CqRibLexer::getToken()
 				return getToken();
 			case 0314:
 				// Define encoded RIB request.  The encoded token has the form
-				//   0314  |  <code>  |  <request>
+				//   0314  |  <code>  |  <string>
 				// where <code> is the single byte index for the encoded
-				// request, and <request> is the ASCII form of the request.
+				// request, and <string> is a string specifying the ASCII form
+				// of the request.
 				{
 					TqUint8 code = m_inBuf.get();
 					CqRibToken requestNameTok = getToken();
-					if(requestNameTok.type() != CqRibToken::REQUEST)
-						return error("expected request missing from "
+					if(requestNameTok.type() != CqRibToken::STRING)
+						return error("expected string missing from "
 								"encoded request definition");
 					m_encodedRequests[code] = requestNameTok.stringVal();
 				}

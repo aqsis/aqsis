@@ -261,8 +261,8 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 BOOST_AUTO_TEST_CASE(CqRibLexer_defined_request_test)
 {
 	STRING_FROM_CHAR_ARRAY(str,
-			"\314\000DefinedRequest000" // define request at code 0.
-			"\314\377DefinedRequest377" // define request at code 0377.
+			"\314\000\240\021DefinedRequest000" // define request at code 0.
+			"\314\377\"DefinedRequest377\"" // define request at code 0377.
 			"\246\377"                  // reference request 0377
 			"\246\000"                  // reference request 0
 			);
