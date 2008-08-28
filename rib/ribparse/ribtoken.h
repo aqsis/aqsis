@@ -92,12 +92,17 @@ class CqRibToken
 
 		/// Token type
 		EqType m_type;
+
 		/// Integer value for token
 		TqInt m_intVal;
 		/// Float value for token
 		TqFloat m_floatVal;
 		/// String value for token
 		std::string m_strVal;
+		// note: boost::variant was tried for the mutually exclusive values
+		// above, but turned out to have a performance hit of about 7% of total
+		// lexer time for a simple test which read tokens from a large RIB and
+		// sent them to stdout with operator<<.  (g++-4.1, boost-1.34.1)
 };
 
 

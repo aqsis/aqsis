@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 		std::istringstream in(ADD_ESCAPES("_\n_\r_\t_\b_\f_\\_\"_\z_"));
 		CqRibLexer lex(in);
 		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING,
-					"_\n_\r_\t_\b_\f_\\_\"_\\z_"));
+					"_\n_\r_\t_\b_\f_\\_\"_z_"));
 		CHECK_EOF(lex);
 	}
 	{
@@ -202,39 +202,90 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_short_string_decode)
 	CHECK_EOF(lex);
 }
 
+// Do a funny dance with char* for string literals which contains null
+// "terminators" which we don't want to actually terminate the string.
+#define STRING_FROM_CHAR_ARRAY(stringName, array) \
+const char aq_strPtr[] = array; std::string stringName(aq_strPtr, aq_strPtr + sizeof(aq_strPtr)-1)
+
 BOOST_AUTO_TEST_CASE(CqRibLexer_long_string_decode)
 {
-	// We need to do this funny dance with char* here since the string literal
-	// contains null "terminators" which we don't want to actually terminate
-	// the string.
-	const char strPtr[] = "\240\000\240\012aaaaAaaaaA\243\000\000\000\002aX";
-	std::string str(strPtr, strPtr+sizeof(strPtr));
+	STRING_FROM_CHAR_ARRAY(str, "\240\000\240\012aaaaAaaaaA\243\000\000\000\002aX");
 	std::istringstream in(str);
 	CqRibLexer lex(in);
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aaaaAaaaaA"));
 	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aX"));
+	CHECK_EOF(lex);
 }
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 {
-	std::istringstream in("");
-	CqRibLexer lex(in);
-	// TODO
-	// 32-bit float
-//	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(1.0f));
-	// 64-bit float
-	// 32-bit float array
+	{
+		// 32-bit float tests
+		STRING_FROM_CHAR_ARRAY(str, "\244\277\200\000\000a"
+				"\244\100\000\000\000b\244\077\201\200\100");
+		std::istringstream in(str);
+		CqRibLexer lex(in);
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "b"));
+		BOOST_CHECK_EQUAL(lex.getToken(),
+				CqRibToken(1.0f + 1.0f/(1<<7) + 1.0f/(1<<8) + 1.0f/(1<<17)));
+		CHECK_EOF(lex);
+	}
+	{
+		// 64-bit float tests
+		STRING_FROM_CHAR_ARRAY(str, "\245\277\360\000\000\000\000\000\000"
+				"a"
+				"\245\100\004\000\000\000\000\000\000");
+		std::istringstream in(str);
+		CqRibLexer lex(in);
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.5f));
+		CHECK_EOF(lex);
+	}
+	{
+		// 32-bit float array tests
+		STRING_FROM_CHAR_ARRAY(str, "\310\002\277\200\000\000\100\000\000\000a");
+		std::istringstream in(str);
+		CqRibLexer lex(in);
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
+		CHECK_EOF(lex);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_defined_request_test)
 {
-	// TODO
+	STRING_FROM_CHAR_ARRAY(str,
+			"\314\000DefinedRequest000" // define request at code 0.
+			"\314\377DefinedRequest377" // define request at code 0377.
+			"\246\377"                  // reference request 0377
+			"\246\000"                  // reference request 0
+			);
+	std::istringstream in(str);
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest377"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest000"));
+	CHECK_EOF(lex);
 }
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_defined_string_test)
 {
-	// TODO
+	STRING_FROM_CHAR_ARRAY(str,
+			"\315\000\"DefinedString000\"" // define string at code 0.
+			"\316\100\100\"DefinedString100100\"" // define string at code 0100100.
+			"\320\100\100"                 // reference string at 0100100
+			"\317\000"                     // reference string at 0
+			);
+	std::istringstream in(str);
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "DefinedString100100"));
+	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "DefinedString000"));
+	CHECK_EOF(lex);
 }
 
 //------------------------------------------------------------------------------

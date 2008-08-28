@@ -44,11 +44,10 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 	m_prevPos(0,0),
 	m_nextTok(),
 	m_haveNext(false),
-	m_encodedRequests(),
+	m_encodedRequests(256),
 	m_encodedStrings(),
 	m_arrayElementsRemaining(0)
 {}
-
 
 namespace {
 // Helper functions for decoding binary RIB.
@@ -551,7 +550,28 @@ CqRibToken CqRibLexer::readRequest()
 	while(true)
 	{
 		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
-		if(std::isalpha(c))
+		bool acceptChar = false;
+		// Check that
+		// 1. c is in the 7-bit ASCII character set.
+		if(c >= 0 && c < 0200)
+		{
+			// 2. c is not whitespace or a special char
+			switch(c)
+			{
+				case ' ':
+				case '\t':
+				case '\n':
+				case '#':
+				case '"':
+				case '[':
+				case ']':
+					break;
+				default:
+					acceptChar = true;
+			}
+		}
+		// if it's anything else, c continues the request.
+		if(acceptChar)
 			name += c;
 		else
 		{
