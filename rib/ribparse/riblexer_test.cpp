@@ -251,8 +251,10 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 		STRING_FROM_CHAR_ARRAY(str, "\310\002\277\200\000\000\100\000\000\000a");
 		std::istringstream in(str);
 		CqRibLexer lex(in);
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_BEGIN));
 		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
 		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.0f));
+		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_END));
 		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
 		CHECK_EOF(lex);
 	}

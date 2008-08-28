@@ -46,7 +46,7 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 	m_haveNext(false),
 	m_encodedRequests(256),
 	m_encodedStrings(),
-	m_arrayElementsRemaining(0)
+	m_arrayElementsRemaining(-1)
 {}
 
 namespace {
@@ -169,11 +169,15 @@ CqRibToken CqRibLexer::getToken()
 		m_haveNext = false;
 		return m_nextTok;
 	}
-	if(m_arrayElementsRemaining > 0)
+	if(m_arrayElementsRemaining >= 0)
 	{
-		// If we're currently decoding a float array, return the next element.
+		// If we're currently decoding a float array, return the next element,
+		// or an array end token if we've reached the end.
 		--m_arrayElementsRemaining;
-		return CqRibToken(decodeFloat32(m_inBuf));
+		if(m_arrayElementsRemaining < 0)
+			return CqRibToken(CqRibToken::ARRAY_END);
+		else
+			return CqRibToken(decodeFloat32(m_inBuf));
 	}
 	// Else determine the next token.
 	while(true)
@@ -294,7 +298,7 @@ CqRibToken CqRibLexer::getToken()
 				// where <length> is l bytes long, 0 <= l <= 3, and <array> is
 				// an array of 32-bit floating point of length l values in IEEE format.
 				m_arrayElementsRemaining = decodeInt(m_inBuf, c - 0310 + 1);
-				return getToken();
+				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case 0314:
 				// Define encoded RIB request.  The encoded token has the form
 				//   0314  |  <code>  |  <string>
