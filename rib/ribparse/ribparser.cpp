@@ -31,9 +31,10 @@ namespace Aqsis {
 // CqRibParser implementation
 
 CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
+		const boost::shared_ptr<CqRequestMap>& requests,
 		bool ignoreUnrecognized)
 	: m_lex(lexer),
-	m_requests(),
+	m_requests(requests),
 	m_ignoreUnrecognized(ignoreUnrecognized),
 	m_floatArrayPool(),
 	m_intArrayPool(),
@@ -54,10 +55,20 @@ bool CqRibParser::parseNextRequest()
 			tok = m_lex->getToken();
 		}
 		// find a handler for the current request
-		TqRequestMap::const_iterator req = m_requests.find(tok.stringVal());
-		if(req == m_requests.end())
+		if(IqRibRequest* req = m_requests->find(tok.stringVal()))
 		{
-			// If the request isn't found, throw if necessary, otherwise continue.
+			// Mark array pools as free to use.
+			m_floatArrayPool.markUnused();
+			m_intArrayPool.markUnused();
+			m_stringArrayPool.markUnused();
+			// Invoke the request handler.
+			req->handleRequest(*this);
+			return true;
+		}
+		else
+		{
+			// If the request isn't found, throw if desired, otherwise
+			// continue on to the next request in the stream.
 			if(!m_ignoreUnrecognized)
 			{
 				AQSIS_THROW(XqParseError,
@@ -65,22 +76,7 @@ bool CqRibParser::parseNextRequest()
 						<< " (" << m_lex->pos() << ")");
 			}
 		}
-		else
-		{
-			// Mark array pools as free to use.
-			m_floatArrayPool.markUnused();
-			m_intArrayPool.markUnused();
-			m_stringArrayPool.markUnused();
-			// Finally, invoke the request handler.
-			req->second->handleRequest(*this);
-			return true;
-		}
 	}
-}
-
-void CqRibParser::addRequest(const boost::shared_ptr<IqRibRequest>& request)
-{
-	m_requests[request->name()] = request;
 }
 
 TqInt CqRibParser::getInt()
@@ -108,95 +104,6 @@ std::string CqRibParser::getString()
 }
 
 namespace {
-
-/** Helper functions for reading arrays.
- *
- * The code duplication between the readArray() functions here is somewhat
- * alarming, but it's tricky to do something about it without the code becoming
- * an opaque mess of templates.
- *
- * At the very least, we'd need to make the tok.intVal(), tok.floatVal(),
- * tok.stringVal() into a template or overloaded functions taking a reference
- * so that the correct version could be called in a templated readArray().
- * After that we'd still be left with the float case in which it's acceptable
- * for the token to be *either* an integer *or* a float.
- */
-
-/// Read an int array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRiIntArray& buf)
-{
-	bool parsing = true;
-	while(parsing)
-	{
-		CqRibToken tok = lex.getToken();
-		switch(tok.type())
-		{
-			case CqRibToken::INTEGER:
-				buf.push_back(tok.intVal());
-				break;
-			case CqRibToken::ARRAY_END:
-				parsing = false;
-				break;
-			default:
-				AQSIS_THROW(XqParseError,
-						lex.pos() << ": unexpected token " << tok
-						<< "while reading integer array");
-				break;
-		}
-	}
-}
-
-/// Read a float array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRiFloatArray& buf)
-{
-	bool parsing = true;
-	while(parsing)
-	{
-		CqRibToken tok = lex.getToken();
-		switch(tok.type())
-		{
-			case CqRibToken::INTEGER:
-				buf.push_back(tok.intVal());
-				break;
-			case CqRibToken::FLOAT:
-				buf.push_back(tok.floatVal());
-				break;
-			case CqRibToken::ARRAY_END:
-				parsing = false;
-				break;
-			default:
-				AQSIS_THROW(XqParseError,
-						lex.pos() << ": unexpected token " << tok
-						<< "while reading float array");
-				break;
-		}
-	}
-}
-
-/// Read a string array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRiStringArray& buf)
-{
-	bool parsing = true;
-	while(parsing)
-	{
-		CqRibToken tok = lex.getToken();
-		switch(tok.type())
-		{
-			case CqRibToken::STRING:
-				buf.push_back(tok.stringVal());
-				break;
-			case CqRibToken::ARRAY_END:
-				parsing = false;
-				break;
-			default:
-				AQSIS_THROW(XqParseError,
-						lex.pos() << ": unexpected token " << tok
-						<< "while reading string array");
-				break;
-		}
-	}
-}
-
 /** Helper function to consume an ARRAY_BEGIN token and throw an appropriate
  * error if a different token is encountered.
  */
@@ -210,15 +117,45 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
 				<< " array, got token " << tok);
 	}
 }
+}
 
-} // unnamed namespace
+/* Functions for reading arrays.
+ *
+ * The code duplication between the get*Array() functions here is somewhat
+ * alarming, but it's tricky to do something about it without the code becoming
+ * an opaque mess of templates.
+ *
+ * At the very least, we'd need to make the tok.intVal(), tok.floatVal(),
+ * tok.stringVal() into a template or overloaded functions taking a reference
+ * so that the correct version could be called in a templated readArray().
+ * After that we'd still be left with the float case in which it's acceptable
+ * for the token to be *either* an integer *or* a float.
+ */
 
 const TqRiIntArray& CqRibParser::getIntArray()
 {
 	consumeArrayBegin(*m_lex, "integer");
 
 	TqRiIntArray& buf = m_intArrayPool.getBuf();
-	readArray(*m_lex, buf);
+	bool parsing = true;
+	while(parsing)
+	{
+		CqRibToken tok = m_lex->getToken();
+		switch(tok.type())
+		{
+			case CqRibToken::INTEGER:
+				buf.push_back(tok.intVal());
+				break;
+			case CqRibToken::ARRAY_END:
+				parsing = false;
+				break;
+			default:
+				AQSIS_THROW(XqParseError,
+						m_lex->pos() << ": unexpected token " << tok
+						<< "while reading integer array");
+				break;
+		}
+	}
 	return buf;
 }
 
@@ -227,7 +164,28 @@ const TqRiFloatArray& CqRibParser::getFloatArray()
 	consumeArrayBegin(*m_lex, "float");
 
 	TqRiFloatArray& buf = m_floatArrayPool.getBuf();
-	readArray(*m_lex, buf);
+	bool parsing = true;
+	while(parsing)
+	{
+		CqRibToken tok = m_lex->getToken();
+		switch(tok.type())
+		{
+			case CqRibToken::INTEGER:
+				buf.push_back(tok.intVal());
+				break;
+			case CqRibToken::FLOAT:
+				buf.push_back(tok.floatVal());
+				break;
+			case CqRibToken::ARRAY_END:
+				parsing = false;
+				break;
+			default:
+				AQSIS_THROW(XqParseError,
+						m_lex->pos() << ": unexpected token " << tok
+						<< "while reading float array");
+				break;
+		}
+	}
 	return buf;
 }
 
@@ -236,7 +194,25 @@ const TqRiStringArray& CqRibParser::getStringArray()
 	consumeArrayBegin(*m_lex, "string");
 
 	TqRiStringArray& buf = m_stringArrayPool.getBuf();
-	readArray(*m_lex, buf);
+	bool parsing = true;
+	while(parsing)
+	{
+		CqRibToken tok = m_lex->getToken();
+		switch(tok.type())
+		{
+			case CqRibToken::STRING:
+				buf.push_back(tok.stringVal());
+				break;
+			case CqRibToken::ARRAY_END:
+				parsing = false;
+				break;
+			default:
+				AQSIS_THROW(XqParseError,
+						m_lex->pos() << ": unexpected token " << tok
+						<< "while reading string array");
+				break;
+		}
+	}
 	return buf;
 }
 
@@ -248,5 +224,10 @@ const TqRiParamList& CqRibParser::getParamList()
 	return bogus;
 }
 
+//------------------------------------------------------------------------------
+void CqRequestMap::add(IqRibRequest* request)
+{
+	m_requests[request->name()].reset(request);
+}
 
 } // namespace Aqsis

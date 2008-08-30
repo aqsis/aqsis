@@ -32,9 +32,8 @@
 #include <map>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/any.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "riblexer.h"
 #include "requestparam.h"
@@ -43,12 +42,13 @@
 namespace Aqsis {
 
 class CqRibParser;
+class CqRequestMap;
 
 
 //------------------------------------------------------------------------------
 /** \brief RIB request handler interface
  */
-class IqRibRequest
+class IqRibRequest : boost::noncopyable
 {
 	public:
 		/// Construct rib request handler with the given name
@@ -97,11 +97,11 @@ class IqRibRequest
  * a subset of the standard RIB.
  *
  * CqRibParser is designed with both these situations in mind.  In the current
- * implementation, the user adds request handlers - subclasses of IqRibRequest
- * - to the parser at runtime.  When the parser reads a request from the input
- * stream, it looks for a handler with the appropriate name and calls the
- * IqRibRequest::handleRequest() method.  With this setup, the user can define
- * arbitrary actions to be performed on reading a given request.
+ * implementation, the user provides a set of request handlers - subclasses of
+ * IqRibRequest - to the parser at runtime.  When the parser reads a request
+ * from the input stream, it looks for a handler with the appropriate name and
+ * calls the IqRibRequest::handleRequest() method.  With this setup, the user
+ * can define arbitrary actions to be performed on reading a given request.
  *
  */
 class CqRibParser : boost::noncopyable
@@ -110,16 +110,15 @@ class CqRibParser : boost::noncopyable
 		/** Construct a RIB parser, connected to the given lexer.
 		 *
 		 * \param lexer - lexical analyzer for a RIB input stream.
+		 * \param requests - collection of request handlers which will
+		 *        recognized by the parser.
 		 * \param ignoreUnrecognized - If true, ignore unrecognized RIB
 		 *        requests rather than throwing an exception.  This allows
 		 *        selective RIB parsers to be built without too much hassle.
 		 */
 		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
+				const boost::shared_ptr<CqRequestMap>& requests,
 				bool ignoreUnrecognized = false);
-
-		//--------------------------------------------------
-		/// Add a RIB request to the list of valid requests.
-		void addRequest(const boost::shared_ptr<IqRibRequest>& request);
 
 		/** \brief Parse the next RIB request
 		 *
@@ -151,9 +150,6 @@ class CqRibParser : boost::noncopyable
 		//@}
 
 	private:
-		/// TODO: investigate whether this would be faster as a hash table.
-		typedef std::map<std::string,
-				boost::shared_ptr<IqRibRequest> > TqRequestMap;
 		/** \brief A pool of buffers into which RIB arrays will be read.
 		 *
 		 * The pool serves two purposes:
@@ -185,7 +181,7 @@ class CqRibParser : boost::noncopyable
 		/// RIB lexer
 		boost::shared_ptr<CqRibLexer> m_lex;
 		/// Lookup table of RIB requests indexed on request names.
-		TqRequestMap m_requests;
+		boost::shared_ptr<CqRequestMap> m_requests;
 		/// Ignore unrecognized requests rather than throwing an error.
 		bool m_ignoreUnrecognized;
 		/// pool of parsed float arrays for the current request.
@@ -198,6 +194,32 @@ class CqRibParser : boost::noncopyable
 		TqRiParamList m_currParamList;
 };
 
+
+/** \brief A container for RIB request handlers.
+ */
+class CqRequestMap
+{
+	public:
+		/** \brief Add a RIB request to the list of valid requests.
+		 *
+		 * \param request - A pointer to the request object.  This takes
+		 *                  ownership of the request, and will delete it
+		 *                  appropriately.
+		 */
+		void add(IqRibRequest* request);
+
+		/** \brief Find the request with the given name.
+		 *
+		 * \return The request with the given name, or null no such request
+		 *         exists.
+		 */
+		IqRibRequest* find(const std::string& name);
+	private:
+		typedef std::map<std::string, boost::shared_ptr<IqRibRequest> > TqRqstMap;
+		// TODO: Decide on whether there might be a better container to use
+		// here - a hash map for instance.
+		TqRqstMap m_requests;
+};
 
 //------------------------------------------------------------------------------
 /** \class XqParseError
@@ -222,6 +244,7 @@ inline const std::string& IqRibRequest::name() const
 }
 
 //------------------------------------------------------------------------------
+// CqBufferPool implementation
 template<typename T>
 CqRibParser::CqBufferPool<T>::CqBufferPool()
 	: m_buffers(),
@@ -251,6 +274,17 @@ inline void CqRibParser::CqBufferPool<T>::markUnused()
 	m_next = 0;
 }
 
+
+//------------------------------------------------------------------------------
+
+inline IqRibRequest* CqRequestMap::find(const std::string& name)
+{
+	TqRqstMap::iterator i = m_requests.find(name);
+	if(i == m_requests.end())
+		return 0;
+	else
+		return i->second.get();
+}
 
 } // namespace Aqsis
 

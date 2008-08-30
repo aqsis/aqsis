@@ -25,9 +25,9 @@
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
 #include "riblexer.h"
+
 
 #define ADD_ESCAPES(x) #x
 

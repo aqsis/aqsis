@@ -12,6 +12,7 @@ SET(RIBPARSE_SRCS
 )
 SET(RIBPARSE_TEST_SRCS
 	riblexer_test.cpp
+	ribparser_test.cpp
 )
 
 # TODO: RIBPARSE_SHARE macro.
