@@ -76,19 +76,32 @@ class CqRibLexer : boost::noncopyable
 		SqSourcePos pos() const;
 
 	private:
-		/// Read in a number (integer or real)
-		CqRibToken readNumber();
-		/** \brief Read in a string
-		 * Assumes that the leading '"' has already been read.
-		 */
-		CqRibToken readString();
-		/// Read in a RIB request
-		CqRibToken readRequest();
-		/// Read in and discard a comment.
-		void readComment();
-		/// Signal an error condition
-		CqRibToken error(std::string message);
+		//--------------------------------------------------
+		/// \name ASCII RIB decoding functions
+		//@{
+		static CqRibToken readNumber(CqRibInputBuffer& inBuf);
+		static CqRibToken readString(CqRibInputBuffer& inBuf);
+		static CqRibToken readRequest(CqRibInputBuffer& inBuf);
+		static void readComment(CqRibInputBuffer& inBuf);
+		//@}
 
+		//--------------------------------------------------
+		/// \name Binary RIB decoding functions
+		//@{
+		static TqUint32 decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes);
+		static TqFloat decodeFixedPoint(CqRibInputBuffer& inBuf,
+				TqInt numBytes, TqInt radixPos);
+		static TqFloat decodeFloat32(CqRibInputBuffer& inBuf);
+		static TqDouble decodeFloat64(CqRibInputBuffer& inBuf);
+		static std::string decodeString(CqRibInputBuffer& inBuf, TqInt numBytes);
+		void defineEncodedRequest(TqUint8 code, const CqRibToken& requestNameTok);
+		CqRibToken lookupEncodedRequest(TqUint8 code) const;
+		void defineEncodedString(TqInt code, const CqRibToken& stringNameTok);
+		CqRibToken lookupEncodedString(TqInt code) const;
+		//@}
+
+		//--------------------------------------------------
+		// Member data
 		/// Input buffer from which characters are read.
 		CqRibInputBuffer m_inBuf;
 		/// source position of previous token in input stream

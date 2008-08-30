@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief RIB request parameter types.
+ * \brief RI request parameter types.
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
  */
 
@@ -56,7 +56,7 @@ template<EqRiParamType t> struct getRiParamType;
  * This class is intended to be passed around by value, since it should only
  * hold references to arrays rather than arrays themselves.
  */
-class CqRibRequestParam
+class CqRequestParam
 {
 	public:
 		/// Get the type of the data held in the parameter.
@@ -81,29 +81,29 @@ class CqRibRequestParam
 /** \brief A RIB parameter with associated name.
  *
  * This is designed to form part of the optional name,value pair "parameter
- * list" for a RIB request.
+ * list" for a RI request.
  */
-struct SqNamedRibRequestParam
+struct SqNamedRequestParam
 {
 	/// Name of the parameter
 	std::string name;
 	/// value for the parameter
-	CqRibRequestParam param;
+	CqRequestParam param;
 };
 
-/// integer array type for RIB request array paramters
-typedef std::vector<TqInt> TqRibIntArray;
-/// float array type for RIB request array paramters
-typedef std::vector<TqFloat> TqRibFloatArray;
-/// string array type for RIB request array paramters
-typedef std::vector<std::string> TqRibStringArray;
+/// integer array type for RI request array paramters
+typedef std::vector<TqInt> TqRiIntArray;
+/// float array type for RI request array paramters
+typedef std::vector<TqFloat> TqRiFloatArray;
+/// string array type for RI request array paramters
+typedef std::vector<std::string> TqRiStringArray;
 /** Parameter list of (name, value) pairs.
  *
  * TODO: This needs to be refactored to remove duplication between it and
  * CqRiParamList; we should use a common ABC, or a single concrete class if
  * possible.
  */
-typedef std::vector<SqNamedRibRequestParam> TqRibParamList;
+typedef std::vector<SqNamedRequestParam> TqRiParamList;
 
 
 //==============================================================================
@@ -129,13 +129,13 @@ SPECIALIZE_GET_RI_PARAM_TYPE(Param_StringArray, const std::vector<std::string>&)
 
 
 //------------------------------------------------------------------------------
-inline EqRiParamType CqRibRequestParam::type() const
+inline EqRiParamType CqRequestParam::type() const
 {
 	return m_type;
 }
 
 template<EqRiParamType t>
-inline typename getRiParamType<t>::type CqRibRequestParam::value() const
+inline typename getRiParamType<t>::type CqRequestParam::value() const
 {
 	// any_cast will throw in the release build.
 	assert(m_type == t);

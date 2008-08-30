@@ -215,9 +215,11 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 			outStream << ": " << tok.m_floatVal;
 			break;
 		case CqRibToken::STRING:
+			outStream << ": \"" << tok.m_strVal << "\"";
+			break;
 		case CqRibToken::REQUEST:
 		case CqRibToken::ERROR:
-			outStream << ": \"" << tok.m_strVal << "\"";
+			outStream << ": " << tok.m_strVal;
 			break;
 	}
 	return outStream;

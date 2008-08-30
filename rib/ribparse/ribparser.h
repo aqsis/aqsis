@@ -140,14 +140,14 @@ class CqRibParser : boost::noncopyable
 		std::string getString();
 
 		/// Read an array of integers from the input
-		const TqRibIntArray& getIntArray();
+		const TqRiIntArray& getIntArray();
 		/// Read an array of floats from the input
-		const TqRibFloatArray& getFloatArray();
+		const TqRiFloatArray& getFloatArray();
 		/// Read an array of strings from the input
-		const TqRibStringArray& getStringArray();
+		const TqRiStringArray& getStringArray();
 
 		/// Read a parameter list from the input
-		const TqRibParamList& getParamList();
+		const TqRiParamList& getParamList();
 		//@}
 
 	private:
@@ -195,7 +195,7 @@ class CqRibParser : boost::noncopyable
 		/// pool of parsed string arrays for the current request.
 		CqBufferPool<std::string> m_stringArrayPool;
 		/// Storage for the parameter list of the current request.
-		TqRibParamList m_currParamList;
+		TqRiParamList m_currParamList;
 };
 
 

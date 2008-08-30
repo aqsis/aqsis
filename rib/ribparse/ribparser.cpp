@@ -123,7 +123,7 @@ namespace {
  */
 
 /// Read an int array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRibIntArray& buf)
+void readArray(CqRibLexer& lex, TqRiIntArray& buf)
 {
 	bool parsing = true;
 	while(parsing)
@@ -147,7 +147,7 @@ void readArray(CqRibLexer& lex, TqRibIntArray& buf)
 }
 
 /// Read a float array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRibFloatArray& buf)
+void readArray(CqRibLexer& lex, TqRiFloatArray& buf)
 {
 	bool parsing = true;
 	while(parsing)
@@ -174,7 +174,7 @@ void readArray(CqRibLexer& lex, TqRibFloatArray& buf)
 }
 
 /// Read a string array.  Expects the caller to have discarded the ARRAY_BEGIN token.
-void readArray(CqRibLexer& lex, TqRibStringArray& buf)
+void readArray(CqRibLexer& lex, TqRiStringArray& buf)
 {
 	bool parsing = true;
 	while(parsing)
@@ -213,38 +213,38 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
 
 } // unnamed namespace
 
-const TqRibIntArray& CqRibParser::getIntArray()
+const TqRiIntArray& CqRibParser::getIntArray()
 {
 	consumeArrayBegin(*m_lex, "integer");
 
-	TqRibIntArray& buf = m_intArrayPool.getBuf();
+	TqRiIntArray& buf = m_intArrayPool.getBuf();
 	readArray(*m_lex, buf);
 	return buf;
 }
 
-const TqRibFloatArray& CqRibParser::getFloatArray()
+const TqRiFloatArray& CqRibParser::getFloatArray()
 {
 	consumeArrayBegin(*m_lex, "float");
 
-	TqRibFloatArray& buf = m_floatArrayPool.getBuf();
+	TqRiFloatArray& buf = m_floatArrayPool.getBuf();
 	readArray(*m_lex, buf);
 	return buf;
 }
 
-const TqRibStringArray& CqRibParser::getStringArray()
+const TqRiStringArray& CqRibParser::getStringArray()
 {
 	consumeArrayBegin(*m_lex, "string");
 
-	TqRibStringArray& buf = m_stringArrayPool.getBuf();
+	TqRiStringArray& buf = m_stringArrayPool.getBuf();
 	readArray(*m_lex, buf);
 	return buf;
 }
 
-const TqRibParamList& CqRibParser::getParamList()
+const TqRiParamList& CqRibParser::getParamList()
 {
 	// TODO: Implementation!
 	assert(0 && "getParamList not implemented!");
-	static TqRibParamList bogus;
+	static TqRiParamList bogus;
 	return bogus;
 }
 

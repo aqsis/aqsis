@@ -49,117 +49,6 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 	m_arrayElementsRemaining(-1)
 {}
 
-namespace {
-// Helper functions for decoding binary RIB.
-
-/** \brief Decode an unsigned integer.
- *
- * Bytes are arranged from MSB to LSB; this function can read up to four bytes.
- *
- * \param inBuf - bytes are read from this input buffer.
- * \param numBytes - number of bytes taken up by the integer
- */
-TqUint32 decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes)
-{
-	TqUint32 result = 0;
-	switch(numBytes)
-	{
-		// intentional case fallthrough.
-		case 4: result = static_cast<TqUint8>(inBuf.get()) << 24;
-		case 3: result += static_cast<TqUint8>(inBuf.get()) << 16;
-		case 2: result += static_cast<TqUint8>(inBuf.get()) << 8;
-		case 1: result += static_cast<TqUint8>(inBuf.get());
-	}
-	return result;
-}
-
-/** \brief Read and decode a fixed point number.
- *
- * These come as a set of bytes with the location of the radix point
- * ("decimal" point) specified with respect to the right hand side.
- *
- * \param numBytes - total number of bytes.
- * \param radixPos - position of radix ("decimal") point.  Must be positive.
- *
- * For example:
- *
- * \verbatim
- *
- *       b.bbb               .__bb
- *         <--                <---
- *    radixPos = 3         radixPos = 4
- *    numBytes = 4         numBytes = 2
- *
- * \endverbatim
- *
- * \param inBuf - bytes are read from this input buffer.
- */
-TqFloat decodeFixedPoint(CqRibInputBuffer& inBuf, TqInt numBytes,
-		TqInt radixPos)
-{
-	assert(radixPos > 0);
-	TqUint32 mag = decodeInt(inBuf, numBytes - radixPos);
-	TqUint32 frac = decodeInt(inBuf, Aqsis::min(radixPos, numBytes));
-	return mag + static_cast<TqFloat>(frac)/(1 << (8*radixPos));
-}
-
-/** \brief Decode a 32-bit IEEE floating point number.
- *
- * Bits are arranged from MSB to LSB
- *
- * \param inBuf - bytes are read from this input buffer.
- */
-TqFloat decodeFloat32(CqRibInputBuffer& inBuf)
-{
-	// union to avoid illegal type-punning
-	union UqFloatInt32 {
-		TqFloat f;
-		TqUint32 i;
-	};
-	UqFloatInt32 conv;
-	conv.i = decodeInt(inBuf, 4);
-	return conv.f;
-}
-
-/** \brief Decode a 64-bit IEEE floating point number.
- *
- * Bits are arranged from MSB to LSB
- *
- * \param inBuf - bytes are read from this input buffer.
- */
-TqDouble decodeFloat64(CqRibInputBuffer& inBuf)
-{
-	// union to avoid illegal type-punning
-	union UqFloatInt64 {
-		TqDouble d;
-		TqUint64 i;
-	};
-	UqFloatInt64 conv;
-	conv.i = static_cast<TqUint64>(decodeInt(inBuf, 4)) << 32;
-	conv.i += decodeInt(inBuf, 4);
-	return conv.d;
-}
-
-/** \brief Read a string of specified length
- *
- * Since this is for use with binary-encoded RIB, no translations are performed
- * on escape characters etc.
- *
- * \param inBuf - bytes are read from this input buffer.
- * \param numBytes - number of bytes taken up by the string
- */
-std::string decodeString(CqRibInputBuffer& inBuf, TqInt numBytes)
-{
-	std::string str;
-	str.reserve(numBytes);
-	for(TqInt i = 0; i < numBytes; ++i)
-		str += static_cast<char>(inBuf.get());
-	return str;
-}
-
-} // unnamed namespace
-
-
 CqRibToken CqRibLexer::getToken()
 {
 	m_prevPos = m_currPos;
@@ -199,24 +88,24 @@ CqRibToken CqRibLexer::getToken()
 					// "#\377" signals the end of a RunProgram block
 					return CqRibToken(CqRibToken::ENDOFFILE);
 				m_inBuf.unget();
-				readComment();
+				readComment(m_inBuf);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case '-': case '+': case '.':
 				m_inBuf.unget();
-				return readNumber();
+				return readNumber(m_inBuf);
 			case '"':
-				return readString();
+				return readString(m_inBuf);
 			case '[':
 				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case ']':
 				return CqRibToken(CqRibToken::ARRAY_END);
 			default:
 				// If a character is nothing else, it's assumed to represent
-				// the start of a RIB request.
+				// the start of a RI request.
 				m_inBuf.unget();
-				return readRequest();
+				return readRequest(m_inBuf);
 			case EOF:
 				return CqRibToken(CqRibToken::ENDOFFILE);
 
@@ -274,14 +163,7 @@ CqRibToken CqRibLexer::getToken()
 				//   0246  |  <code>
 				// where <code> is a single byte indexing a previously encoded
 				// request.
-				{
-					const std::string& str
-						= m_encodedRequests[static_cast<TqUint8>(m_inBuf.get())];
-					if(str.empty())
-						return error("encoded request not previously defined");
-					else
-						return CqRibToken(CqRibToken::REQUEST, str);
-				}
+				return lookupEncodedRequest(static_cast<TqUint8>(m_inBuf.get()));
 			case 0247:
 			case 0250: case 0251: case 0252: case 0253:
 			case 0254: case 0255: case 0256: case 0257:
@@ -291,7 +173,7 @@ CqRibToken CqRibLexer::getToken()
 			case 0274: case 0275: case 0276: case 0277:
 			case 0300: case 0301: case 0302: case 0303:
 			case 0304: case 0305: case 0306: case 0307:
-				return error("reserved byte encountered");
+				return CqRibToken(CqRibToken::ERROR, "reserved byte encountered");
 			case 0310: case 0311: case 0312: case 0313:
 				// Decode an array of 32-bit floats.  The encoded token has the form
 				//   0310 + l  |  <length>  |  <array>
@@ -300,18 +182,23 @@ CqRibToken CqRibLexer::getToken()
 				m_arrayElementsRemaining = decodeInt(m_inBuf, c - 0310 + 1);
 				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case 0314:
-				// Define encoded RIB request.  The encoded token has the form
+				// Define encoded RI request.  The encoded token has the form
 				//   0314  |  <code>  |  <string>
 				// where <code> is the single byte index for the encoded
 				// request, and <string> is a string specifying the ASCII form
 				// of the request.
 				{
-					TqUint8 code = m_inBuf.get();
+					TqUint8 code = static_cast<TqUint8>(m_inBuf.get());
 					CqRibToken requestNameTok = getToken();
 					if(requestNameTok.type() != CqRibToken::STRING)
-						return error("expected string missing from "
-								"encoded request definition");
-					m_encodedRequests[code] = requestNameTok.stringVal();
+						return CqRibToken(CqRibToken::ERROR,
+								"expected string missing from encoded "
+								"request definition");
+					else if(requestNameTok.stringVal().empty())
+						return CqRibToken(CqRibToken::ERROR,
+								"empty string not valid in encoded "
+								"request definition");
+					defineEncodedRequest(code, requestNameTok);
 				}
 				return getToken();
 			case 0315: case 0316:
@@ -321,11 +208,12 @@ CqRibToken CqRibLexer::getToken()
 				// string in any format.
 				{
 					TqInt code = decodeInt(m_inBuf, c - 0315 + 1);
-					CqRibToken stringTok = getToken();
-					if(stringTok.type() != CqRibToken::STRING)
-						return error("expected string missing from "
-								"encoded string definition");
-					m_encodedStrings[code] = stringTok.stringVal();
+					CqRibToken stringNameTok = getToken();
+					if(stringNameTok.type() != CqRibToken::STRING)
+						return CqRibToken(CqRibToken::ERROR,
+								"expected string missing from encoded "
+								"string definition");
+					defineEncodedString(code, stringNameTok);
 				}
 				return getToken();
 			case 0317: case 0320:
@@ -333,14 +221,7 @@ CqRibToken CqRibLexer::getToken()
 				//   0317 + w  |  <code>
 				// where <code> is a length w+1 unsigned integer representing
 				// the index of a previously defined string.
-				{
-					TqEncodedStringMap::const_iterator pos = m_encodedStrings.find(
-							decodeInt(m_inBuf, c - 0317 + 1));
-					if(pos != m_encodedStrings.end())
-						return CqRibToken(CqRibToken::STRING, pos->second);
-					else
-						return error("encoded string not previously defined");
-				}
+				return lookupEncodedString(decodeInt(m_inBuf, c - 0317 + 1));
 			case 0321: case 0322: case 0323:
 			case 0324: case 0325: case 0326: case 0327:
 			case 0330: case 0331: case 0332: case 0333:
@@ -353,11 +234,10 @@ CqRibToken CqRibLexer::getToken()
 			case 0364: case 0365: case 0366: case 0367:
 			case 0370: case 0371: case 0372: case 0373:
 			case 0374: case 0375: case 0376:
-				return error("reserved byte encountered");
+				return CqRibToken(CqRibToken::ERROR, "reserved byte encountered");
 			case 0377:
 				// 0377 signals the end of a RunProgram block when we're
 				// reading from a pipe.
-				// TODO: Check with Paul if this is correct.
 				return CqRibToken(CqRibToken::ENDOFFILE);
 		}
 	}
@@ -371,23 +251,24 @@ void CqRibLexer::ungetToken(const CqRibToken& tok)
 	m_nextTok = tok;
 }
 
-CqRibToken CqRibLexer::readNumber()
+/// Read in an ASCII number (integer or real)
+CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 {
 	CqRibInputBuffer::TqOutputType c = 0;
 	TqInt sign = 1;
 	TqInt intResult = 0;
 	TqFloat floatResult = 0;
 	bool haveReadDigit = false;
-	c = m_inBuf.get();
+	c = inBuf.get();
 	// deal with optional sign
 	switch(c)
 	{
 		case '+':
-			c = m_inBuf.get();
+			c = inBuf.get();
 			break;
 		case '-':
 			sign = -1;
-			c = m_inBuf.get();
+			c = inBuf.get();
 			break;
 	}
 	// deal with digits before decimal point
@@ -401,27 +282,28 @@ CqRibToken CqRibLexer::readNumber()
 		// this duplication seems like a waste, but it's robust against overflow...
 		floatResult *= 10;
 		floatResult += c - '0';
-		c = m_inBuf.get();
+		c = inBuf.get();
 	}
 	switch(c)
 	{
 		case '.':
 			{
 				// deal with digits to right of decimal point
-				c = m_inBuf.get();
+				c = inBuf.get();
 				if(!haveReadDigit && !std::isdigit(c))
-					return error("Expected at least one digit in float");
+					return CqRibToken(CqRibToken::ERROR,
+							"Expected at least one digit in float");
 				TqFloat thisPlaceVal = 0.1;
 				while(std::isdigit(c))
 				{
 					floatResult += (c - '0') * thisPlaceVal;
 					thisPlaceVal *= 0.1;
-					c = m_inBuf.get();
+					c = inBuf.get();
 				}
 				floatResult *= sign;
 				if(c != 'e' && c != 'E')
 				{
-					m_inBuf.unget();
+					inBuf.unget();
 					return CqRibToken(floatResult);
 				}
 			}
@@ -434,40 +316,44 @@ CqRibToken CqRibLexer::readNumber()
 			// Number is an integer
 			intResult *= sign;
 			if(!haveReadDigit)
-				return error("Expected a digit");
-			m_inBuf.unget();
+				return CqRibToken(CqRibToken::ERROR, "Expected a digit");
+			inBuf.unget();
 			return CqRibToken(intResult);
 			break;
 	}
 	// deal with the exponent
-	c = m_inBuf.get();
+	c = inBuf.get();
 	sign = 1;
 	switch(c)
 	{
 		case '+':
-			c = m_inBuf.get();
+			c = inBuf.get();
 			break;
 		case '-':
 			sign = -1;
-			c = m_inBuf.get();
+			c = inBuf.get();
 			break;
 	}
 	if(!std::isdigit(c))
-		return error("Expected digits in float exponent");
+		return CqRibToken(CqRibToken::ERROR, "Expected digits in float exponent");
 	TqInt exponent = 0;
 	while(std::isdigit(c))
 	{
 		exponent *= 10;
 		exponent += c - '0';
-		c = m_inBuf.get();
+		c = inBuf.get();
 	}
 	exponent *= sign;
-	m_inBuf.unget();
+	inBuf.unget();
 	floatResult *= std::pow(10.0,exponent);
 	return CqRibToken(floatResult);
 }
 
-CqRibToken CqRibLexer::readString()
+/** \brief Read in a string
+ *
+ * Assumes that the leading '"' has already been read.
+ */
+CqRibToken CqRibLexer::readString(CqRibInputBuffer& inBuf)
 {
 	// Assume leading '"' has already been read.
 	CqRibToken outTok(CqRibToken::STRING, "");
@@ -476,7 +362,7 @@ CqRibToken CqRibLexer::readString()
 	bool stringFinished = false;
 	while(!stringFinished)
 	{
-		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
+		CqRibInputBuffer::TqOutputType c = inBuf.get();
 		switch(c)
 		{
 			case '"':
@@ -484,7 +370,7 @@ CqRibToken CqRibLexer::readString()
 				break;
 			case '\\':
 				// deal with escape characters
-				c = m_inBuf.get();
+				c = inBuf.get();
 				switch(c)
 				{
 					case 'n':
@@ -518,13 +404,13 @@ CqRibToken CqRibLexer::readString()
 						{
 							// read in a sequence of (up to) three octal digits
 							unsigned char octalChar = c - '0';
-							c = m_inBuf.get();
+							c = inBuf.get();
 							for(TqInt i = 0; i < 2 && std::isdigit(c); i++ )
 							{
 								octalChar = 8*octalChar + (c - '0');
-								c = m_inBuf.get();
+								c = inBuf.get();
 							}
-							m_inBuf.unget();
+							inBuf.unget();
 							outString += octalChar;
 						}
 						break;
@@ -538,7 +424,8 @@ CqRibToken CqRibLexer::readString()
 				}
 			break;
 			case EOF:
-				return error("End of file found while scanning string");
+				return CqRibToken(CqRibToken::ERROR,
+						"End of file found while scanning string");
 			break;
 			default:
 				outString += c;
@@ -547,14 +434,15 @@ CqRibToken CqRibLexer::readString()
 	return outTok;
 }
 
-CqRibToken CqRibLexer::readRequest()
+/// Read in a RIB request
+CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
 {
 	CqRibToken outTok(CqRibToken::REQUEST, "");
 	std::string& name = outTok.m_strVal;
 	name.reserve(30);
 	while(true)
 	{
-		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
+		CqRibInputBuffer::TqOutputType c = inBuf.get();
 		bool acceptChar = false;
 		// Check that
 		// 1. c is in the 7-bit ASCII character set.
@@ -580,26 +468,165 @@ CqRibToken CqRibLexer::readRequest()
 			name += c;
 		else
 		{
-			m_inBuf.unget();
+			inBuf.unget();
 			break;
 		}
 	}
 	return outTok;
 }
 
-void CqRibLexer::readComment()
+/// Read in and discard a comment.
+void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 {
-	CqRibInputBuffer::TqOutputType c = m_inBuf.get();
+	CqRibInputBuffer::TqOutputType c = inBuf.get();
 	while(c != EOF && c != '\n')
-		c = m_inBuf.get();
-	m_inBuf.unget();
+		c = inBuf.get();
+	inBuf.unget();
 }
 
-CqRibToken CqRibLexer::error(std::string message)
+/** \brief Decode an unsigned integer.
+ *
+ * Bytes are arranged from MSB to LSB; this function can read up to four bytes.
+ *
+ * \param inBuf - bytes are read from this input buffer.
+ * \param numBytes - number of bytes taken up by the integer
+ */
+inline TqUint32 CqRibLexer::decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes)
 {
-	std::ostringstream oss;
-	oss << "Bad token at " << m_inBuf.pos() << ": " << message;
-	return CqRibToken(CqRibToken::ERROR, oss.str());
+	TqUint32 result = 0;
+	switch(numBytes)
+	{
+		// intentional case fallthrough.
+		case 4: result = static_cast<TqUint8>(inBuf.get()) << 24;
+		case 3: result += static_cast<TqUint8>(inBuf.get()) << 16;
+		case 2: result += static_cast<TqUint8>(inBuf.get()) << 8;
+		case 1: result += static_cast<TqUint8>(inBuf.get());
+	}
+	return result;
+}
+
+/** \brief Read and decode a fixed point number.
+ *
+ * These come as a set of bytes with the location of the radix point
+ * ("decimal" point) specified with respect to the right hand side.
+ *
+ * \param numBytes - total number of bytes.
+ * \param radixPos - position of radix ("decimal") point.  Must be positive.
+ *
+ * For example:
+ *
+ * \verbatim
+ *
+ *       b.bbb               .__bb
+ *         <--                <---
+ *    radixPos = 3         radixPos = 4
+ *    numBytes = 4         numBytes = 2
+ *
+ * \endverbatim
+ *
+ * \param inBuf - bytes are read from this input buffer.
+ */
+inline TqFloat CqRibLexer::decodeFixedPoint(CqRibInputBuffer& inBuf,
+		TqInt numBytes, TqInt radixPos)
+{
+	assert(radixPos > 0);
+	TqUint32 mag = decodeInt(inBuf, numBytes - radixPos);
+	TqUint32 frac = decodeInt(inBuf, Aqsis::min(radixPos, numBytes));
+	return mag + static_cast<TqFloat>(frac)/(1 << (8*radixPos));
+}
+
+/** \brief Decode a 32-bit IEEE floating point number.
+ *
+ * Bits are arranged from MSB to LSB
+ *
+ * \param inBuf - bytes are read from this input buffer.
+ */
+inline TqFloat CqRibLexer::decodeFloat32(CqRibInputBuffer& inBuf)
+{
+	// union to avoid illegal type-punning
+	union UqFloatInt32 {
+		TqFloat f;
+		TqUint32 i;
+	};
+	UqFloatInt32 conv;
+	conv.i = decodeInt(inBuf, 4);
+	return conv.f;
+}
+
+/** \brief Decode a 64-bit IEEE floating point number.
+ *
+ * Bits are arranged from MSB to LSB
+ *
+ * \param inBuf - bytes are read from this input buffer.
+ */
+inline TqDouble CqRibLexer::decodeFloat64(CqRibInputBuffer& inBuf)
+{
+	// union to avoid illegal type-punning
+	union UqFloatInt64 {
+		TqDouble d;
+		TqUint64 i;
+	};
+	UqFloatInt64 conv;
+	conv.i = static_cast<TqUint64>(decodeInt(inBuf, 4)) << 32;
+	conv.i += decodeInt(inBuf, 4);
+	return conv.d;
+}
+
+/** \brief Read a string of specified length
+ *
+ * Since this is for use with binary-encoded RIB, no translations are performed
+ * on escape characters etc.
+ *
+ * \param inBuf - bytes are read from this input buffer.
+ * \param numBytes - number of bytes taken up by the string
+ */
+std::string CqRibLexer::decodeString(CqRibInputBuffer& inBuf, TqInt numBytes)
+{
+	std::string str;
+	str.reserve(numBytes);
+	for(TqInt i = 0; i < numBytes; ++i)
+		str += static_cast<char>(inBuf.get());
+	return str;
+}
+
+/** \brief Associate a request name with a numeric code
+ *
+ * \param code - single byte which the request will be associated with.
+ * \param requestNameTok - token holding the request name
+ */
+inline void CqRibLexer::defineEncodedRequest(TqUint8 code,
+		const CqRibToken& requestNameTok)
+{
+	m_encodedRequests[code] = requestNameTok.stringVal();
+}
+
+/// Look up a previously defined encoded request.
+inline CqRibToken CqRibLexer::lookupEncodedRequest(TqUint8 code) const
+{
+	const std::string& str = m_encodedRequests[code];
+	if(str.empty())
+		return CqRibToken(CqRibToken::ERROR,
+				"encoded request not previously defined");
+	else
+		return CqRibToken(CqRibToken::REQUEST, str);
+}
+
+/// Associate a string with a numeric code
+inline void CqRibLexer::defineEncodedString(TqInt code,
+		const CqRibToken& stringNameTok)
+{
+	m_encodedStrings[code] = stringNameTok.stringVal();
+}
+
+/// Look up a previously defined encoded string.
+inline CqRibToken CqRibLexer::lookupEncodedString(TqInt code) const
+{
+	TqEncodedStringMap::const_iterator pos = m_encodedStrings.find(code);
+	if(pos != m_encodedStrings.end())
+		return CqRibToken(CqRibToken::STRING, pos->second);
+	else
+		return CqRibToken(CqRibToken::ERROR,
+				"encoded string not previously defined");
 }
 
 } // namespace ribparse
