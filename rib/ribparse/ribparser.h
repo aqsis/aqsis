@@ -40,7 +40,7 @@
 #include "requestparam.h"
 #include "exception.h"
 
-namespace ribparse {
+namespace Aqsis {
 
 class CqRibParser;
 
@@ -203,7 +203,7 @@ class CqRibParser : boost::noncopyable
 /** \class XqParseError
  * \brief An exception class for parser errors.
  */
-AQSIS_DECLARE_EXCEPTION(XqParseError, Aqsis::XqValidation);
+AQSIS_DECLARE_EXCEPTION(XqParseError, XqValidation);
 
 
 
@@ -252,6 +252,6 @@ inline void CqRibParser::CqBufferPool<T>::markUnused()
 }
 
 
-} // namespace ribparse
+} // namespace Aqsis
 
 #endif // RIBPARSER_H_INCLUDED

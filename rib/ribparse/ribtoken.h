@@ -32,7 +32,7 @@
 
 #include "aqsismath.h"
 
-namespace ribparse {
+namespace Aqsis {
 
 /** \brief A class encapsulating a RIB token
  */
@@ -157,7 +157,7 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 		case INTEGER:
 			return m_intVal == rhs.m_intVal;
 		case FLOAT:
-			return Aqsis::isClose(m_floatVal, rhs.m_floatVal);
+			return isClose(m_floatVal, rhs.m_floatVal);
 		case STRING:
 		case REQUEST:
 			return m_strVal == rhs.m_strVal;
@@ -225,6 +225,6 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 	return outStream;
 }
 
-} // namespace ribparse
+} // namespace Aqsis
 
 #endif // RIBTOKEN_H_INCLUDED

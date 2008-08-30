@@ -31,7 +31,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace ribparse
+namespace Aqsis
 {
 
 /// A holder for source code positions.
@@ -157,6 +157,6 @@ inline SqSourcePos CqRibInputBuffer::pos() const
 	return m_currPos;
 }
 
-} // namespace ribparse
+} // namespace Aqsis
 
 #endif // RIBINPUTBUFFER_H_INCLUDED

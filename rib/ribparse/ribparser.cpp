@@ -25,7 +25,7 @@
 
 #include "ribparser.h"
 
-namespace ribparse {
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqRibParser implementation
@@ -249,4 +249,4 @@ const TqRiParamList& CqRibParser::getParamList()
 }
 
 
-} // namespace ribparse
+} // namespace Aqsis

@@ -37,7 +37,7 @@
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
 
-namespace ribparse
+namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
@@ -133,6 +133,6 @@ inline SqSourcePos CqRibLexer::pos() const
 	return m_currPos;
 }
 
-} // namespace ribparse
+} // namespace Aqsis
 
 #endif // RIBLEXER_H_INCLUDED

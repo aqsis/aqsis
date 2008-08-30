@@ -34,7 +34,7 @@
 #define CHECK_EOF(lex) BOOST_CHECK_EQUAL(lex.getToken(), \
 		CqRibToken(CqRibToken::ENDOFFILE))
 
-using namespace ribparse;
+using namespace Aqsis;
 
 //------------------------------------------------------------------------------
 // Test cases for ASCII RIB parsing

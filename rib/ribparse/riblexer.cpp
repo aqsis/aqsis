@@ -32,7 +32,7 @@
 
 #include "aqsismath.h"
 
-namespace ribparse
+namespace Aqsis
 {
 
 //-------------------------------------------------------------------------------
@@ -531,7 +531,7 @@ inline TqFloat CqRibLexer::decodeFixedPoint(CqRibInputBuffer& inBuf,
 {
 	assert(radixPos > 0);
 	TqUint32 mag = decodeInt(inBuf, numBytes - radixPos);
-	TqUint32 frac = decodeInt(inBuf, Aqsis::min(radixPos, numBytes));
+	TqUint32 frac = decodeInt(inBuf, min(radixPos, numBytes));
 	return mag + static_cast<TqFloat>(frac)/(1 << (8*radixPos));
 }
 
@@ -629,4 +629,4 @@ inline CqRibToken CqRibLexer::lookupEncodedString(TqInt code) const
 				"encoded string not previously defined");
 }
 
-} // namespace ribparse
+} // namespace Aqsis

@@ -32,7 +32,7 @@
 
 #include "exception.h"
 
-namespace ribparse {
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Enumeration of all possible parameter types
@@ -143,5 +143,5 @@ inline typename getRiParamType<t>::type CqRequestParam::value() const
 }
 
 
-} // namespace ribparse
+} // namespace Aqsis
 #endif // REQUESTPARAM_H_INCLUDED
