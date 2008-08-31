@@ -116,12 +116,44 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 	BOOST_CHECK_THROW(parser.getStringArray(), XqParseError);
 }
 
+// Test the rib parser with 
+struct TestRequestHandler : public IqRibRequest
+{
+	std::string s;
+	TqRiIntArray a1;
+	TqRiFloatArray a2;
+
+	TestRequestHandler(const std::string& name)
+		: IqRibRequest(name)
+	{ }
+
+	virtual void handleRequest(CqRibParser& parser)
+	{
+		s = parser.getString();
+		a1 = parser.getIntArray();
+		a2 = parser.getFloatArray();
+	}
+};
+
 BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 {
-	// Test the rib parser with 
-//	class SomeRequestHandler : public IqRiRequest
 	std::istringstream in(
-			"version 3.03\n"
-			"SomeRequest [1 2 3 4] [1.1 1.2 1.3 1.4]\n"
+			"SomeRequest \"blah\" [1 2] [1.1 1.2]\n"
 	);
+	CqRibLexer lex(in);
+	CqRequestMap map;
+	TestRequestHandler* rqst = new TestRequestHandler("SomeRequest");
+	map.add(rqst);
+	CqRibParser parser( boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
+			boost::shared_ptr<CqRequestMap>(&map, nullDeleter));
+
+	BOOST_CHECK_EQUAL(parser.parseNextRequest(), true);
+	BOOST_CHECK_EQUAL(rqst->s, "blah");
+	BOOST_REQUIRE_EQUAL(rqst->a1.size(), 2U);
+	BOOST_CHECK_EQUAL(rqst->a1[0], 1);
+	BOOST_CHECK_EQUAL(rqst->a1[1], 2);
+	BOOST_REQUIRE_EQUAL(rqst->a2.size(), 2U);
+	BOOST_CHECK_CLOSE(rqst->a2[0], 1.1f, 0.0001f);
+	BOOST_CHECK_CLOSE(rqst->a2[1], 1.2f, 0.0001f);
 }
+

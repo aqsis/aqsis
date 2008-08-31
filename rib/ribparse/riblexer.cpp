@@ -178,7 +178,7 @@ CqRibToken CqRibLexer::getToken()
 				// Decode an array of 32-bit floats.  The encoded token has the form
 				//   0310 + l  |  <length>  |  <array>
 				// where <length> is l+1 bytes long, 0 <= l <= 3, and <array> is
-				// an array of 32-bit floating point of length l values in IEEE format.
+				// an array of <length> 32-bit floating point values in IEEE format.
 				m_arrayElementsRemaining = decodeInt(m_inBuf, c - 0310 + 1);
 				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case 0314:
