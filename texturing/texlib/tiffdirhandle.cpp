@@ -392,8 +392,7 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	if(wrapModes)
 	{
 		std::ostringstream oss;
-		oss << wrapModeToString(wrapModes->sWrap)
-			<< " " << wrapModeToString(wrapModes->tWrap);
+		oss << wrapModes->sWrap << " " << wrapModes->tWrap;
 		setTiffTagValue<const char*>(TIFFTAG_PIXAR_WRAPMODES, oss.str().c_str());
 	}
 
@@ -471,13 +470,9 @@ void addWrapModesToHeader(CqTexFileHeader& header, const CqTiffDirHandle& dirHan
 	char* wrapModesStr = 0;
 	if(TIFFGetField(dirHandle.tiffPtr(), TIFFTAG_PIXAR_WRAPMODES, &wrapModesStr))
 	{
-		SqWrapModes modes;
 		std::istringstream iss(wrapModesStr);
-		std::string wrapMode;
-		iss >> wrapMode;
-		modes.sWrap = wrapModeFromString(wrapMode);
-		iss >> wrapMode;
-		modes.tWrap = wrapModeFromString(wrapMode);
+		SqWrapModes modes;
+		iss >> modes.sWrap >> modes.tWrap;
 		header.set<Attr::WrapModes>(modes);
 	}
 }

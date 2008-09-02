@@ -5144,7 +5144,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 
 	TIME_SCOPE("Texture")
 
-	SqWrapModes wrapModes(wrapModeFromString(swrap), wrapModeFromString(twrap));
+	SqWrapModes wrapModes(enumCast<EqWrapMode>(swrap), enumCast<EqWrapMode>(twrap));
 	std::string inFileName = findFileInPath(imagefile,
 			QGetRenderContext()->textureSearchPath());
 	makeTexture(inFileName, texturefile, SqFilterInfo(filterfunc, swidth, twidth),

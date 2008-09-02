@@ -30,12 +30,13 @@
 
 #include "aqsis.h"
 
-#include <iosfwd>
 #include <string>
 
 #ifdef USE_OPENEXR
 #include <half.h>
 #endif
+
+#include "enum.h"
 
 namespace Aqsis {
 
@@ -55,10 +56,22 @@ enum EqChannelType
 	Channel_TypeUnknown
 };
 
+AQSIS_ENUM_INFO_BEGIN(EqChannelType, Channel_TypeUnknown)
+	"uint32",
+	"int32",
+	"float32",
+	"uint16",
+	"int16",
+	"float16",
+	"int8",
+	"uint8",
+	"unknown_channel"
+AQSIS_ENUM_INFO_END
+
 /** \brief Get the number of bytes per pixel required to store the given
  * channel type.
  */
-AQSISTEX_SHARE TqInt bytesPerPixel(EqChannelType type);
+TqInt bytesPerPixel(EqChannelType type);
 
 /** \brief Get the EqChannelType for the given template type
  *
@@ -67,15 +80,6 @@ AQSISTEX_SHARE TqInt bytesPerPixel(EqChannelType type);
  */
 template<typename T>
 inline EqChannelType getChannelTypeEnum();
-
-/** \brief Stream insertion operator for EqChannelType
- *
- * Inserts a human-readable representation of the type to the stream.
- *
- * \param out - stream to write to
- * \param chanType - type to output.
- */
-AQSISTEX_SHARE std::ostream& operator<<(std::ostream& out, EqChannelType chanType);
 
 //------------------------------------------------------------------------------
 /** \brief Hold name and type information about image channels.
@@ -100,7 +104,7 @@ struct SqChannelInfo
  * \param out - stream to write to
  * \param info - output this.
  */
-AQSISTEX_SHARE std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
+std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
 
 /** Comparison operator for SqChannelInfo
  *
@@ -113,6 +117,25 @@ inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2);
 //==============================================================================
 // Implementation details
 //==============================================================================
+inline TqInt bytesPerPixel(EqChannelType type)
+{
+	switch(type)
+	{
+		case Channel_Unsigned32:
+		case Channel_Signed32:
+		case Channel_Float32:
+			return 4;
+			break;
+		case Channel_Unsigned16:
+		case Channel_Signed16:
+		case Channel_Float16:
+			return 2;
+		case Channel_Signed8:
+		case Channel_Unsigned8:
+		default:
+			return 1;
+	}
+}
 
 //------------------------------------------------------------------------------
 // SqChannelInfo
@@ -149,6 +172,12 @@ template<> inline EqChannelType getChannelTypeEnum<TqUint8>() { return Channel_U
 inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2)
 {
 	return info1.name == info2.name && info1.type == info2.type;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info)
+{
+	out << info.name << "-" << info.type;
+	return out;
 }
 
 } // namespace Aqsis

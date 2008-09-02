@@ -88,12 +88,10 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 		case ImageFile_Jpg:
 		case ImageFile_Png:
 			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-					<< "\" - unimplemented file type \""
-					<< imageFileTypeToString(fileType) << "\"");
+					<< "\" - unimplemented file type \"" << fileType << "\"");
 		default:
 			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-					<< "\" - unknown file type \""
-					<< imageFileTypeToString(fileType) << "\"");
+					<< "\" - unknown file type \"" << fileType << "\"");
 	}
 
 	return newFile;
@@ -115,7 +113,7 @@ boost::shared_ptr<IqMultiTexOutputFile> IqMultiTexOutputFile::open(
 	else
 	{
 		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-				<< "\" - file type \"" << imageFileTypeToString(fileType) << "\""
+				<< "\" - file type \"" << fileType << "\""
 				<< " doesn't support multiple subimages");
 	}
 }

@@ -31,6 +31,8 @@
 
 #include <string>
 
+#include "enum.h"
+
 namespace Aqsis
 {
 
@@ -46,66 +48,24 @@ enum EqWrapMode
 	WrapMode_Trunc		///< Truncate the support (ignores weights)
 };
 
+AQSIS_ENUM_INFO_BEGIN(EqWrapMode, WrapMode_Black)
+	"black",
+	"periodic",
+	"clamp",
+	"trunc"
+AQSIS_ENUM_INFO_END
+
+
 /// A pair of wrap modes to specify wrapping in the two texture coordinate directions.
 struct SqWrapModes
 {
 	EqWrapMode sWrap;
 	EqWrapMode tWrap;
 	/// Trivial constructor
-	SqWrapModes(EqWrapMode sWrap = WrapMode_Black, EqWrapMode tWrap = WrapMode_Black);
+	SqWrapModes(EqWrapMode sWrap = WrapMode_Black, EqWrapMode tWrap = WrapMode_Black)
+		: sWrap(sWrap), tWrap(tWrap)
+	{}
 };
-
-/** \brief Get a wrap mode code from a string.
- *
- * If the mode string represents an unknown wrap mode, return WrapMode_Black.
- */
-EqWrapMode wrapModeFromString(const std::string& modeString);
-
-
-/// Return a string representing the given wrap mode.
-const char* wrapModeToString(EqWrapMode mode);
-
-//==============================================================================
-// Implementation details
-//==============================================================================
-
-inline SqWrapModes::SqWrapModes(EqWrapMode sWrap, EqWrapMode tWrap)
-	: sWrap(sWrap),
-	tWrap(tWrap)
-{ }
-
-
-inline EqWrapMode wrapModeFromString(const std::string& modeString)
-{
-	if(modeString == "black")
-		return WrapMode_Black;
-	else if(modeString == "periodic")
-		return WrapMode_Periodic;
-	else if(modeString == "clamp")
-		return WrapMode_Clamp;
-	else
-		// Default: return black... maybe we should have an "unknown" wrap mode
-		// to signal errors...
-		return WrapMode_Black;
-}
-
-inline const char* wrapModeToString(EqWrapMode mode)
-{
-	switch(mode)
-	{
-		case WrapMode_Black:
-			return "black";
-		case WrapMode_Periodic:
-			return "periodic";
-		case WrapMode_Clamp:
-			return "clamp";
-		case WrapMode_Trunc:
-			return "trunc";
-		default:
-			assert(0);
-			return "unknown";
-	}
-}
 
 } // namespace Aqsis
 

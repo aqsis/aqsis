@@ -16,7 +16,6 @@ INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 # Source files
 SET(AQSISTEX_SRCS
 	bake.cpp
-	channelinfo.cpp
 	channellist.cpp
 	dummyenvironmentsampler.cpp
 	dummytexturesampler.cpp

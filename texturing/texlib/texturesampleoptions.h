@@ -30,6 +30,7 @@
 #include "aqsis.h"
 
 #include "aqsismath.h"
+#include "enum.h"
 #include "samplequad.h"
 #include "wrapmode.h"
 
@@ -59,16 +60,12 @@ enum EqTextureFilter
 	TextureFilter_Unknown	///< Unknown filter type.
 };
 
-/** \brief Return a filter type given a descriptive string.
- *
- * \param filterName - The name string is the lowercase suffix (the bit after
- * the underscore) of the associated enum name.
- *
- * \return The EqTextureFilter associated with a name string.  If the string
- * doesn't describe a known filter, return TextureFilter_Unknown.
- */
-AQSISTEX_SHARE EqTextureFilter texFilterTypeFromString(const char* filterName);
-
+AQSIS_ENUM_INFO_BEGIN(EqTextureFilter, TextureFilter_Unknown)
+	"box",
+	"gaussian",
+	"none",
+	"unknown"
+AQSIS_ENUM_INFO_END
 
 //-----------------------------------------------------------------------------
 /** \brief Represent when to do linear interpolation between mipmap levels.
