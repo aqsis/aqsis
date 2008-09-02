@@ -19,40 +19,20 @@
 
 /** \file
  *
- * \brief String conversion convenience class for enums
+ * \brief String conversion capabilities for C++ enums
  *
  * \author Chris Foster [ chris42f (at) g mail (dot) com ]
- */
-
-#ifndef ENUM_H_INCLUDED
-#define ENUM_H_INCLUDED
-
-#include "aqsis.h"
-
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include <boost/static_assert.hpp>
-
-#include "sstring.h" // for CqString::hash()
-
-namespace Aqsis {
-
-//------------------------------------------------------------------------------
-/** \brief Class wrapping enums with string conversion capabilities
  *
  * A very common problem is to handle the conversion between enumeration values
- * and a string representation of those values.  This class and accompanying
- * macros attempts to make that conversion more convenient and (slightly) less
- * error prone by providing a uniform way to do the conversions, and allowing
+ * and a string representation of those values.  This file implements functions
+ * and macros to make that conversion more convenient and less error prone.
+ * It does this by providing a uniform way to do the conversions, and allowing
  * the table of associated strings to be placed in a header file next to the
  * definition of the enum constants themselves.
  *
- * \note This class can ONLY be used for enums which have the default
- * values for enum constants - that is, they start from 0 and go to numItems-1.
- * This restriction could be relaxed with a small amount of effort.
+ * These facilities can ONLY be used for enums which have the default values
+ * for enum constants - that is, they start from 0 and go to numItems-1.  This
+ * restriction could be relaxed with a small amount of effort.
  *
  * Example:
  *
@@ -73,13 +53,9 @@ namespace Aqsis {
  *
  * \endcode
  *
- * For every enum which we desire to use with CqEnum, we need to define the
- * string translation table - the macro AQSIS_ENUM_NAMES is provided for this
- * purpose.
- *
- * A default value for the enum should also be specified.  Due to the
- * way the macros are defined, this needs to come AFTER the names array is
- * defined, but within the same translation unit.
+ * For every enum which we desire to have string convertion support, we need to
+ * define the string translation table - the macros AQSIS_ENUM_INFO_BEGIN and
+ * AQSIS_ENUM_INFO_END are provided for this purpose:
  *
  * \code
  *
@@ -97,79 +73,110 @@ namespace Aqsis {
  *
  * \endcode
  *
- *
- * Following this, the usage is simple:
+ * Following this, it's simple to convert from a string to the enum using
+ * enumCast, and vice versa using enumString.  The stream insertion and
+ * extraction operators are also defined by the macros.
  *
  * \code
  *
+ *  // STRING --> ENUM
+ *
  *	const char* someStr = "Monday";
- *	Day d = CqEnum<Day>(someStr).value();
- *	
- *	// stream-insertion is particularly easy
- *	
- *	std::cout << CqEnum<Day>(d) << "\n";
- *
- *  // alternatively, we can convert from the enum const to a string:
- *
- *  Day d2 = Monday;
- *
  *  // ...
+ *	Day d = enumCast<Day>(someStr);
  *
- *  std::string dayName = CqEnum<Day>(d).name();
+ *  // stream extraction works too...
+ *  std::cin >> d;
+ *
+ * 
+ *  // ENUM --> STRING
+ *	
+ *	Day d = Friday;
+ *  // ...
+ *  std::string s = enumString(d);   // s is "Friday"
+ *	
+ *	// stream-insertion provides the string-representation
+ *	std::cout << d << "\n";     // yeilds Monday on stdout
  *
  * \endcode
  */
-template<typename EnumT>
-class CqEnum
-{
-	public:
-		/// Initialize the CqEnum to the default value.
-		CqEnum();
-		/// Initialize the CqEnum to the given value
-		CqEnum(EnumT value);
-		/** \brief Convert a string representation of the enum into an enum value.
-		 *
-		 * If the conversion fails, use the default value as specified in
-		 * the associated AQSIS_ENUM_INFO_BEGIN macro.
-		 */
-		CqEnum(const std::string& str);
 
-		/// Return a string associated with the current enum value.
-		const std::string& name() const;
-		/// Return the current value of the enumeration constant.
-		EnumT value() const;
+#ifndef ENUM_H_INCLUDED
+#define ENUM_H_INCLUDED
 
-	private:
-		class CqEnumInfo;
-		// Info about enum type conversions including the default and
-		// associated strings constants.
-		const static CqEnumInfo m_enumInfo;
-		// Underlying value
-		EnumT m_value;
-};
+#include "aqsis.h"
+
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <boost/static_assert.hpp>
+
+#include "sstring.h" // for CqString::hash()
+
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
-// Stream insertion for CqEnum<...>
-template<typename EnumT>
-std::ostream& operator<<(std::ostream& out, const CqEnum<EnumT>& e);
-// Stream extraction for CqEnum<...>
-template<typename EnumT>
-std::istream& operator>>(std::istream& in, const CqEnum<EnumT>& e);
 
-//------------------------------------------------------------------------------
-/** The following macros ease the definition of the function returning the
- * string and default values for the enum.
+/** \brief Convert from a string to an enum
+ *
+ * This function attempts to convert the provided string into an enum value of
+ * the provided type, using information specified in an AQSIS_ENUM_INFO_BEGIN /
+ * AQSIS_ENUM_INFO_END block.
+ *
+ * \param str - string representation of enumeration constant
+ * \return Enumeration constant corresponding to str, or the default specified
+ *         in the enum info block if the string doesn't represent a valid
+ *         constant.
  */
+template<typename EnumT>
+EnumT enumCast(const std::string& str);
 
-/** \brief Begin an enum string definition block 
+/** \brief Convert an enumeration constant to a string.
+ *
+ * This function attempts to convert the provided enum value into a string of
+ * using information specified in an AQSIS_ENUM_INFO_BEGIN /
+ * AQSIS_ENUM_INFO_END block.
+ *
+ * \param e - enumeration value to convert
+ * \return a string representation of the enumeration constant.
+ */
+template<typename EnumT>
+const std::string& enumString(EnumT e);
+
+//------------------------------------------------------------------------------
+/** \brief Define enum info block and stream IO operators.
+ *
+ * This macro begins a comma separated list of strings which define the string
+ * names associated with the given enumeration.
+ *
+ * It also causes the standard operator<< and operator>> stream insertion and
+ * extraction operators to be implemented for the enumeration type.  (Note that
+ * we can't do this with a template, because it would pollute the namespace
+ * with an operator<< which tries to use the enum conversion machinary for any
+ * type.)
  *
  * \param EnumT - name of the enum type for which strings are to be provided
  * \param defaultValue - default value for the enum, used when string
- * conversion fails.
+ *                conversion in enumCast() fails.
  */
 #define AQSIS_ENUM_INFO_BEGIN(EnumType, defValue)                              \
+inline std::ostream& operator<<(std::ostream& out, EnumType e)                 \
+{                                                                              \
+	out << enumString(e);                                                      \
+	return out;                                                                \
+}                                                                              \
+inline std::istream& operator>>(std::istream& in, EnumType& e)                 \
+{                                                                              \
+	std::string str;                                                           \
+	in >> str;                                                                 \
+	e = enumCast<EnumType>(str);                                               \
+	return in;                                                                 \
+}                                                                              \
+namespace detail { \
 template<>                                                                     \
-inline CqEnum<EnumType>::CqEnumInfo::CqEnumInfo()                              \
+inline CqEnumInfo<EnumType>::CqEnumInfo()                                      \
 	: m_names(),                                                               \
 	m_lookup(),                                                                \
 	m_defaultValue(defValue)                                                   \
@@ -182,12 +189,15 @@ inline CqEnum<EnumType>::CqEnumInfo::CqEnumInfo()                              \
 	};                                                                         \
 	m_names.assign(enumNames, enumNames + sizeof(enumNames)/sizeof(const char*));\
 	initLookup(m_names, m_lookup);                                             \
+} \
 }
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
+
+namespace detail {
 
 /** \brief Class holding information about enum <---> string conversions.
  *
@@ -197,7 +207,7 @@ inline CqEnum<EnumType>::CqEnumInfo::CqEnumInfo()                              \
  * if necessary.
  */
 template<typename EnumT>
-class CqEnum<EnumT>::CqEnumInfo
+class CqEnumInfo
 {
 	private:
 		typedef TqUlong TqHash;
@@ -242,12 +252,15 @@ class CqEnum<EnumT>::CqEnumInfo
 			assert(hashesAreUnique(lookup));
 		}
 
-		// vector of name strings
+		/// vector of name strings
 		TqNameVec m_names;
-		// sorted vector of (name_hash, enum_const) pairs for fast lookups
+		/// sorted vector of (name_hash, enum_const) pairs for fast lookups
 		TqLookupVec m_lookup;
-		// default value for when string conversion fails and default constructor.
+		/// default value for when string conversion fails and default constructor.
 		EnumT m_defaultValue;
+
+		/// Singleton instance
+		static const CqEnumInfo m_instance;
 
 	public:
 		/** \brief Define enum const --> enum name mapping.
@@ -302,58 +315,31 @@ class CqEnum<EnumT>::CqEnumInfo
 		{
 			return m_defaultValue;
 		}
+
+		static const CqEnumInfo& instance()
+		{
+			return m_instance;
+		}
 };
 
-
-//------------------------------------------------------------------------------
-// CqEnum implementation
 template<typename EnumT>
-const typename CqEnum<EnumT>::CqEnumInfo CqEnum<EnumT>::m_enumInfo;
+const CqEnumInfo<EnumT> CqEnumInfo<EnumT>::m_instance;
 
-template<typename EnumT>
-CqEnum<EnumT>::CqEnum()
-	: m_value(m_enumInfo.defaultValue())
-{ }
-
-template<typename EnumT>
-CqEnum<EnumT>::CqEnum(EnumT value)
-	: m_value(value)
-{ }
-
-template<typename EnumT>
-CqEnum<EnumT>::CqEnum(const std::string& str)
-	: m_value(m_enumInfo.valueFromString(str))
-{ }
-
-template<typename EnumT>
-const std::string& CqEnum<EnumT>::name() const
-{
-	return m_enumInfo.stringFromValue(m_value);
-}
-
-template<typename EnumT>
-EnumT CqEnum<EnumT>::value() const
-{
-	return m_value;
-}
+} // namespace detail
 
 
 //------------------------------------------------------------------------------
-// Free function implementations
+// Free function implementations.
 template<typename EnumT>
-std::ostream& operator<<(std::ostream& out, const CqEnum<EnumT>& e)
+inline EnumT enumCast(const std::string& str)
 {
-	out << e.name();
-	return out;
+	return detail::CqEnumInfo<EnumT>::instance().valueFromString(str);
 }
 
 template<typename EnumT>
-std::istream& operator>>(std::istream& in, CqEnum<EnumT>& e)
+inline const std::string& enumString(EnumT e)
 {
-	std::string str;
-	in >> str;
-	e = CqEnum<EnumT>(str);
-	return in;
+	return detail::CqEnumInfo<EnumT>::instance().stringFromValue(e);
 }
 
 

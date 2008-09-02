@@ -39,69 +39,58 @@ enum Day
 	Wednesday,
 	Thursday,
 	Friday,
-	Saturday
+	Saturday,
+	Unknown
 };
 
 namespace Aqsis {
 // Names for days of the week test enum.  Unfortunately the current
 // implementation requires that this be in the aqsis namespace for things to
 // work correctly :-/
-AQSIS_ENUM_INFO_BEGIN(Day, Monday)
+AQSIS_ENUM_INFO_BEGIN(Day, Unknown)
 	"Sunday",
 	"Monday",
 	"Tuesday",
 	"Wednesday",
 	"Thursday",
 	"Friday",
-	"Saturday"
+	"Saturday",
+	"Unknown"
 AQSIS_ENUM_INFO_END
 }
 
 using namespace Aqsis;
 
 
-BOOST_AUTO_TEST_CASE(CqEnum_default_constructor_test)
+BOOST_AUTO_TEST_CASE(enumCast_test)
 {
-	CqEnum<Day> d;
-	BOOST_CHECK_EQUAL(d.value(), Monday);
-	BOOST_CHECK_EQUAL(d.name(), std::string("Monday"));
+	BOOST_CHECK_EQUAL(enumCast<Day>("Sunday"), Sunday);
+	BOOST_CHECK_EQUAL(enumCast<Day>("Wednesday"), Wednesday);
+	BOOST_CHECK_EQUAL(enumCast<Day>("invalid_day"), Unknown);
+	BOOST_CHECK_EQUAL(enumCast<Day>("Unknown"), Unknown);
 }
 
-BOOST_AUTO_TEST_CASE(CqEnum_string_constructor_test)
+BOOST_AUTO_TEST_CASE(enumString_test)
 {
-	{
-		CqEnum<Day> d("Thursday");
-		BOOST_CHECK_EQUAL(d.value(), Thursday);
-		BOOST_CHECK_EQUAL(d.name(), std::string("Thursday"));
-	}
-
-	{
-		CqEnum<Day> d("Invalid!!");
-		BOOST_CHECK_EQUAL(d.value(), Monday);
-	}
-}
-
-BOOST_AUTO_TEST_CASE(CqEnum_value_constructor_test)
-{
-	CqEnum<Day> d(Saturday);
-	BOOST_CHECK_EQUAL(d.value(), Saturday);
-	BOOST_CHECK_EQUAL(d.name(), std::string("Saturday"));
+	BOOST_CHECK_EQUAL(enumString(Sunday), "Sunday");
+	BOOST_CHECK_EQUAL(enumString(Wednesday), "Wednesday");
+	BOOST_CHECK_EQUAL(enumString(Unknown), "Unknown");
 }
 
 BOOST_AUTO_TEST_CASE(CqEnum_stream_insert_test)
 {
 	std::ostringstream out;
-	out << CqEnum<Day>(Friday);
+	out << Friday;
 	BOOST_CHECK_EQUAL(out.str(), "Friday");
 }
 
 BOOST_AUTO_TEST_CASE(CqEnum_stream_extract_test)
 {
 	std::istringstream in("Saturday Thursday");
-	CqEnum<Day> d;
+	Day d;
 	in >> d;
-	BOOST_CHECK_EQUAL(d.value(), Saturday);
+	BOOST_CHECK_EQUAL(d, Saturday);
 	in >> d;
-	BOOST_CHECK_EQUAL(d.value(), Thursday);
+	BOOST_CHECK_EQUAL(d, Thursday);
 }
 
