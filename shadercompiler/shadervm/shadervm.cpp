@@ -897,14 +897,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pRenderContext));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
-	/*
-	* Private hash key for the data types supported by the shaders
-	*/
-	std::vector<TqUlong> itypes;
-
-	// Initialise the private hash keys.
-	for(i = 0; i< (TqUint) gcVariableTypeNames; i++)
-		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
 
 	bool fShaderSpec = false;
 	while ( !pFile->eof() )
@@ -1015,15 +1007,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						else if ( uhash == htoken) // == "uniform"
 							VarClass = class_uniform;
 						else
-						{
-							TqInt itype = 0;
-							for(itype = 0; itype<gcVariableTypeNames; itype++)
-								if (htoken == itypes[itype]) // == gVariableTypeNames[itype]
-								{
-									VarType = static_cast<EqVariableType>(itype);
-									break;
-								}
-						}
+							VarType = enumCast<EqVariableType>(token);
 						GetToken( token, 255, pFile );
 						htoken = CqString::hash(token);
 					}

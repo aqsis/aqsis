@@ -27,13 +27,14 @@
 #ifndef PRIMVARTYPE_H_INCLUDED
 #define PRIMVARTYPE_H_INCLUDED
 
+#include "enum.h"
+
 namespace Aqsis {
 
 //----------------------------------------------------------------------
-/** \brief Shader variable type identifier.
+/** \brief Primitive variable interpolation/storage class types
  *
- * \attention Any change to this MUST be mirrored in the type identifier and
- * name string tables.
+ * Note that this should be kept in sync with the ENUM_INFO block below.
  */
 enum EqVariableClass
 {
@@ -46,11 +47,21 @@ enum EqVariableClass
     class_facevertex,
 };
 
+AQSIS_ENUM_INFO_BEGIN(EqVariableClass, class_invalid)
+    "invalid",
+    "constant",
+    "uniform",
+    "varying",
+    "vertex",
+    "facevarying",
+    "facevertex"
+AQSIS_ENUM_INFO_END
+
+
 //----------------------------------------------------------------------
-/** \brief Shader variable type identifier.
+/** \brief Primitive and shader variable type identifiers.
  *
- * \attention Any change to this MUST be mirrored in the type identifier and
- * name string tables.
+ * Note that this should be kept in sync with the ENUM_INFO block below.
  */
 enum EqVariableType
 {
@@ -69,6 +80,24 @@ enum EqVariableType
     type_sixteentuple,
     type_bool,
 };
+
+AQSIS_ENUM_INFO_BEGIN(EqVariableType, type_invalid)
+    "invalid",
+    "float",
+    "integer",
+    "point",
+    "string",
+    "color",
+    "triple",
+    "hpoint",
+    "normal",
+    "vector",
+    "void",
+    "matrix",
+    "sixteentuple",
+    "bool"
+AQSIS_ENUM_INFO_END
+
 
 }
 

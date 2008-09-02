@@ -50,6 +50,7 @@ struct SqVarRefTranslator
 };
 
 
+/// \todo <b>Code review</b> This is an almost-duplicate from elsewhere (see primvartype.h)
 static const char* const gVariableTypeNames[] =
     {
         "invalid",

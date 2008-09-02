@@ -61,7 +61,7 @@ class CqShaderVariable : public IqShaderData
 	public:
 		CqShaderVariable();
 		CqShaderVariable( const char* strName, bool fParameter = false );
-		virtual	~CqShaderVariable();
+		virtual	~CqShaderVariable() {}
 
 		virtual void GetBool( bool& res, TqInt index = 0 ) const
 		{
@@ -1847,11 +1847,21 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		}
 };
 
-std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
-std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 
-//-----------------------------------------------------------------------
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline CqShaderVariable::CqShaderVariable()
+	: m_strName(),
+	m_fParameter(false)
+{}
+
+inline CqShaderVariable::CqShaderVariable(const char* strName, bool fParameter)
+	: m_strName(strName),
+	m_fParameter(fParameter)
+{}
 
 } // namespace Aqsis
 

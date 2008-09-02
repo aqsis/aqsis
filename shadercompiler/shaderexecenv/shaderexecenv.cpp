@@ -32,36 +32,6 @@
 
 namespace Aqsis {
 
-const char* gVariableTypeNames[] =
-    {
-        "invalid",
-        "float",
-        "integer",
-        "point",
-        "string",
-        "color",
-        "triple",
-        "hpoint",
-        "normal",
-        "vector",
-        "void",
-        "matrix",
-        "sixteentuple",
-    };
-TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
-
-const char* gVariableClassNames[] =
-    {
-        "invalid",
-        "constant",
-        "uniform",
-        "varying",
-        "vertex",
-        "facevarying",
-    };
-TqInt gcVariableClassNames = sizeof( gVariableClassNames ) / sizeof( gVariableClassNames[ 0 ] );
-
-
 CqNoise	CqShaderExecEnv::m_noise;
 CqCellNoise	CqShaderExecEnv::m_cellnoise;
 CqRandom	CqShaderExecEnv::m_random;

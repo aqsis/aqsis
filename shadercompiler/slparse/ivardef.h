@@ -33,6 +33,12 @@ namespace Aqsis {
 
 struct IqParseNode;
 
+/** \todo <b>Code Review</b>: The types declared here are mostly a duplicate of
+ * those declared in aqsistypes/primvartype.h and should be merged.  Note a
+ * slight inconsistency wrt the hextuple type.  If this gets redone, should
+ * also consider whether we really want the types and storage classes in a
+ * single enum or in multiple enums (which would make life easier).
+ */
 enum EqVariableType
 {
     Type_Nil = 0,
