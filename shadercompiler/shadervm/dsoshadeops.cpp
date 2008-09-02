@@ -24,7 +24,6 @@
 #include	"aqsis.h"
 #include	"sstring.h"
 #include	"irenderer.h"
-#include	"ishaderdata.h"
 #include	"dsoshadeops.h"
 #include	"file.h"
 #include	"logging.h"

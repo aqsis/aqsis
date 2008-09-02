@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-#include	"ishaderdata.h"
+#include	"primvartype.h"
 #include	"parameters.h"
 
 namespace Aqsis {
