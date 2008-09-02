@@ -319,7 +319,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			TqUlong hash = CqString::hash(strName);
 
 			for ( TqUint m = 0; m < m_LocalVars.size(); m++ )
-				if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash )
+				if ( CqString::hash(m_LocalVars[ m ] ->strName().c_str()) == hash )
 					return ( m );
 			return ( -1 );
 		}
