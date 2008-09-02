@@ -34,7 +34,7 @@ SHADEOP_INIT(vol_dens_init)
 	}
 	catch(std::runtime_error& e)
 	{
-		std::cout << e.what() << "\n";
+		std::cerr << e.what() << "\n";
 		return 0;
 	}
 }

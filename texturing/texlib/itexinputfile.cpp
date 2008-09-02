@@ -111,8 +111,7 @@ boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::stri
 	else
 	{
 		AQSIS_THROW(XqInvalidFile, "File \"" << fileName << "\" of type "
-				<< imageFileTypeToString(type)
-				<< " doesn't support multiple subimages.");
+				<< type << " doesn't support multiple subimages.");
 	}
 
 	assert(0);

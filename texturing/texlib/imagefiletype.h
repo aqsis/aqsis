@@ -27,6 +27,8 @@
 #ifndef IMAGEFILETYPE_H_INCLUDED
 #define IMAGEFILETYPE_H_INCLUDED
 
+#include "enum.h"
+
 namespace Aqsis {
 
 /** \brief Enumerate all image file types which aqsistex knows about.
@@ -43,37 +45,15 @@ enum EqImageFileType
 	ImageFile_Unknown
 };
 
-/** \brief Convert an image file type to a string.
- */
-const char* imageFileTypeToString(EqImageFileType type);
-
-
-//==============================================================================
-// Implementation details
-//==============================================================================
-
-inline const char* imageFileTypeToString(EqImageFileType type)
-{
-	switch(type)
-	{
-		case ImageFile_Tiff:
-			return "tiff";
-		case ImageFile_Exr:
-			return "OpenExr";
-		case ImageFile_Jpg:
-			return "jpeg";
-		case ImageFile_Png:
-			return "png";
-		case ImageFile_AqsisBake:
-			return "bake";
-		case ImageFile_AqsisZfile:
-			return "aqsis_zfile";
-		case ImageFile_Unknown:
-			return "unknown";
-	}
-	assert(0);
-	return "fixme!";
-}
+AQSIS_ENUM_INFO_BEGIN(EqImageFileType, ImageFile_Unknown)
+	"tiff",
+	"OpenExr",
+	"jpeg",
+	"png",
+	"bake",
+	"aqsis_zfile",
+	"unknown"
+AQSIS_ENUM_INFO_END
 
 } // namespace Aqsis
 

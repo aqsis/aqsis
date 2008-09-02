@@ -36,21 +36,6 @@ namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
-// free function implementations
-EqTextureFilter texFilterTypeFromString(const char* filterName)
-{
-	if(strcmp(filterName, "box") == 0)
-		return TextureFilter_Box;
-	else if(strcmp(filterName, "gaussian") == 0)
-		return TextureFilter_Gaussian;
-	else if(strcmp(filterName, "none") == 0)
-		return TextureFilter_None;
-	else
-		return TextureFilter_Unknown;
-}
-
-
-//------------------------------------------------------------------------------
 // CqTextureSampleOptions implementation
 
 void CqTextureSampleOptionsBase::fillFromFileHeader(const CqTexFileHeader& header)

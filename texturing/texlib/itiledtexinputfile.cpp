@@ -48,8 +48,7 @@ boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
 			break;
 		default:
 			AQSIS_THROW(XqBadTexture, "Cannot open file \"" << fileName
-					<< "\" of type " << imageFileTypeToString(type)
-					<< " for tiled image I/O");
+					<< "\" of type " << type << " for tiled image I/O");
 			break;
 	}
 	assert(0);

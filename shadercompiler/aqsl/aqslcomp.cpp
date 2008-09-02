@@ -306,7 +306,7 @@ int main( int argc, const char** argv )
 		};
 	}
 
-	return error ? -1 : 0;
+	return error;
 }
 
 

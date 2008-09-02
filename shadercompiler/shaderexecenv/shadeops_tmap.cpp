@@ -147,7 +147,7 @@ class CqSampleOptionExtractorBase
 			{
 				CqString tmp;
 				value->GetString(tmp, 0);
-				opts.setFilterType(texFilterTypeFromString(tmp.c_str()));
+				opts.setFilterType(enumCast<EqTextureFilter>(tmp.c_str()));
 			}
 		}
 
