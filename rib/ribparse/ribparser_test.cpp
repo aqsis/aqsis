@@ -32,6 +32,9 @@
 
 using namespace Aqsis;
 
+//------------------------------------------------------------------------------
+// Tests for getting data from the parser.
+
 BOOST_AUTO_TEST_CASE(CqRibParser_get_scalar_tests)
 {
 	std::istringstream in("42 3.141592 \"some_string\" ");
@@ -115,6 +118,9 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 	// check throw on reading a non-string array
 	BOOST_CHECK_THROW(parser.getStringArray(), XqParseError);
 }
+
+//------------------------------------------------------------------------------
+// Request handler invocation tests.
 
 // Test the rib parser with 
 struct TestRequestHandler : public IqRibRequest

@@ -221,12 +221,6 @@ class CqRequestMap
 		TqRqstMap m_requests;
 };
 
-//------------------------------------------------------------------------------
-/** \class XqParseError
- * \brief An exception class for parser errors.
- */
-AQSIS_DECLARE_EXCEPTION(XqParseError, XqValidation);
-
 
 
 //==============================================================================
