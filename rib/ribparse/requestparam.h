@@ -31,6 +31,7 @@
 #include <boost/any.hpp>
 
 #include "exception.h"
+#include "primvartoken.h"
 
 namespace Aqsis {
 
@@ -38,18 +39,20 @@ namespace Aqsis {
 /// Enumeration of all possible parameter types
 enum EqRiParamType
 {
-	Param_Int,
-	Param_Float,
-	Param_String,
-	Param_IntArray,
-	Param_FloatArray,
-	Param_StringArray
+	ParamType_Int,
+	ParamType_Float,
+	ParamType_String,
+	ParamType_IntArray,
+	ParamType_FloatArray,
+	ParamType_StringArray
 };
 
 //------------------------------------------------------------------------------
-
-// forward declaration
-template<EqRiParamType t> struct getRiParamType;
+/// Metafunction from type constants to the associated types.
+template<EqRiParamType ty> struct getRiParamType
+{
+	typedef TqInt type;
+};
 
 /** \brief A typesafe holder class for multiple request types.
  *
@@ -59,8 +62,12 @@ template<EqRiParamType t> struct getRiParamType;
 class CqRequestParam
 {
 	public:
+		template<typename T>
+		CqRequestParam(const CqPrimvarToken& token, EqRiParamType type, T value);
 		/// Get the type of the data held in the parameter.
 		EqRiParamType type() const;
+		/// Get the token of the data held in the parameter.
+		const CqPrimvarToken& token() const;
 
 		/** \brief Return the value held in the parameter
 		 *
@@ -72,24 +79,13 @@ class CqRequestParam
 		 */
 		template<EqRiParamType typeConst>
 		typename getRiParamType<typeConst>::type value() const;
+
 	private:
+		CqPrimvarToken m_token;
 		EqRiParamType m_type;
 		boost::any m_value;
 };
 
-
-/** \brief A RIB parameter with associated name.
- *
- * This is designed to form part of the optional name,value pair "parameter
- * list" for a RI request.
- */
-struct SqNamedRequestParam
-{
-	/// Name of the parameter
-	std::string name;
-	/// value for the parameter
-	CqRequestParam param;
-};
 
 /// integer array type for RI request array paramters
 typedef std::vector<TqInt> TqRiIntArray;
@@ -97,42 +93,52 @@ typedef std::vector<TqInt> TqRiIntArray;
 typedef std::vector<TqFloat> TqRiFloatArray;
 /// string array type for RI request array paramters
 typedef std::vector<std::string> TqRiStringArray;
+
 /** Parameter list of (name, value) pairs.
  *
  * TODO: This needs to be refactored to remove duplication between it and
  * CqRiParamList; we should use a common ABC, or a single concrete class if
  * possible.
  */
-typedef std::vector<SqNamedRequestParam> TqRiParamList;
+typedef std::vector<CqRequestParam> TqRiParamList;
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-template<EqRiParamType ty>
-struct getRiParamType
-{
-	typedef TqInt type;
-};
 #define SPECIALIZE_GET_RI_PARAM_TYPE(typeEnumVal, typeName)          \
 template<>                                                           \
 struct getRiParamType<typeEnumVal>                                   \
 {                                                                    \
 	typedef typeName type;                                           \
 };
-SPECIALIZE_GET_RI_PARAM_TYPE(Param_Float, TqFloat);
-SPECIALIZE_GET_RI_PARAM_TYPE(Param_String, std::string);
-SPECIALIZE_GET_RI_PARAM_TYPE(Param_IntArray, const std::vector<TqInt>&);
-SPECIALIZE_GET_RI_PARAM_TYPE(Param_FloatArray, const std::vector<TqFloat>&);
-SPECIALIZE_GET_RI_PARAM_TYPE(Param_StringArray, const std::vector<std::string>&);
+SPECIALIZE_GET_RI_PARAM_TYPE(ParamType_Float, TqFloat);
+SPECIALIZE_GET_RI_PARAM_TYPE(ParamType_String, std::string);
+SPECIALIZE_GET_RI_PARAM_TYPE(ParamType_IntArray, const std::vector<TqInt>&);
+SPECIALIZE_GET_RI_PARAM_TYPE(ParamType_FloatArray, const std::vector<TqFloat>&);
+SPECIALIZE_GET_RI_PARAM_TYPE(ParamType_StringArray, const std::vector<std::string>&);
 #undef SPECIALIZE_GET_RI_PARAM_TYPE
 
 
 //------------------------------------------------------------------------------
+template<typename T>
+inline CqRequestParam::CqRequestParam(const CqPrimvarToken& token,
+		EqRiParamType type, T value)
+	: m_token(token),
+	m_type(type),
+	m_value(value)
+{ }
+
 inline EqRiParamType CqRequestParam::type() const
 {
 	return m_type;
 }
+
+inline const CqPrimvarToken& CqRequestParam::token() const
+{
+	return m_token;
+}
+
 
 template<EqRiParamType t>
 inline typename getRiParamType<t>::type CqRequestParam::value() const

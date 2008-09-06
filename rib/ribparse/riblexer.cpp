@@ -41,7 +41,7 @@ namespace Aqsis
 CqRibLexer::CqRibLexer(std::istream& inStream)
 	: m_inBuf(inStream),
 	m_currPos(1,1),
-	m_prevPos(0,0),
+	m_nextPos(1,1),
 	m_nextTok(),
 	m_haveNext(false),
 	m_encodedRequests(256),
@@ -49,15 +49,10 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 	m_arrayElementsRemaining(-1)
 {}
 
-CqRibToken CqRibLexer::getToken()
+/** \brief Scan the next token from the underlying input stream.
+ */
+CqRibToken CqRibLexer::scanNext()
 {
-	m_prevPos = m_currPos;
-	if(m_haveNext)
-	{
-		// Return the next token directly if we already have it.
-		m_haveNext = false;
-		return m_nextTok;
-	}
 	if(m_arrayElementsRemaining >= 0)
 	{
 		// If we're currently decoding a float array, return the next element,
@@ -71,7 +66,7 @@ CqRibToken CqRibLexer::getToken()
 	// Else determine the next token.
 	while(true)
 	{
-		m_currPos = m_inBuf.pos();
+		m_nextPos = m_inBuf.pos();
 		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
 		switch(c)
 		{
@@ -189,7 +184,7 @@ CqRibToken CqRibLexer::getToken()
 				// of the request.
 				{
 					TqUint8 code = static_cast<TqUint8>(m_inBuf.get());
-					CqRibToken requestNameTok = getToken();
+					CqRibToken requestNameTok = scanNext();
 					if(requestNameTok.type() != CqRibToken::STRING)
 						return CqRibToken(CqRibToken::ERROR,
 								"expected string missing from encoded "
@@ -200,7 +195,7 @@ CqRibToken CqRibLexer::getToken()
 								"request definition");
 					defineEncodedRequest(code, requestNameTok);
 				}
-				return getToken();
+				return scanNext();
 			case 0315: case 0316:
 				// Define encoded string.  The encoded token has the form
 				//   0315 + w  |  <code>  |  <string>
@@ -208,14 +203,14 @@ CqRibToken CqRibLexer::getToken()
 				// string in any format.
 				{
 					TqInt code = decodeInt(m_inBuf, c - 0315 + 1);
-					CqRibToken stringNameTok = getToken();
+					CqRibToken stringNameTok = scanNext();
 					if(stringNameTok.type() != CqRibToken::STRING)
 						return CqRibToken(CqRibToken::ERROR,
 								"expected string missing from encoded "
 								"string definition");
 					defineEncodedString(code, stringNameTok);
 				}
-				return getToken();
+				return scanNext();
 			case 0317: case 0320:
 				// Look up predefined string.  The encoded token has the form
 				//   0317 + w  |  <code>
@@ -241,14 +236,6 @@ CqRibToken CqRibLexer::getToken()
 				return CqRibToken(CqRibToken::ENDOFFILE);
 		}
 	}
-}
-
-void CqRibLexer::ungetToken(const CqRibToken& tok)
-{
-	assert(!m_haveNext);
-	m_currPos = m_prevPos;
-	m_haveNext = true;
-	m_nextTok = tok;
 }
 
 /// Read in an ASCII number (integer or real)

@@ -57,21 +57,16 @@ class CqRibLexer : boost::noncopyable
 		/** \brief Get the next token.
 		 * \return The next token from the input stream.
 		 */
-		CqRibToken getToken();
-		/** \brief Put a token back into the input stream
-		 *
-		 * This only works for a *single* token, since the unget buffer is of
-		 * length one.
-		 *
-		 * \param tok - token to put back.
+		const CqRibToken& get();
+		/** \brief Look at but don't remove the next token from the input sequence
+		 * \return the next token from the input stream
 		 */
-		void ungetToken(const CqRibToken& tok);
+		const CqRibToken& peek();
 
 		/** Return the position in the input file
 		 *
 		 * \return The position in the input file for the previous token
-		 *         obtained with getToken().  Correctly accounts for the use of
-		 *         ungetToken();
+		 *         obtained with get().
 		 */
 		SqSourcePos pos() const;
 
@@ -100,14 +95,17 @@ class CqRibLexer : boost::noncopyable
 		CqRibToken lookupEncodedString(TqInt code) const;
 		//@}
 
+		// scan next token from underlying input stream.
+		CqRibToken scanNext();
+
 		//--------------------------------------------------
 		// Member data
 		/// Input buffer from which characters are read.
 		CqRibInputBuffer m_inBuf;
 		/// source position of previous token in input stream
 		SqSourcePos m_currPos;
-		/// source position of previous previous token in input stream
-		SqSourcePos m_prevPos;
+		/// source position of latest token read from the input stream
+		SqSourcePos m_nextPos;
 		/// next token, if already read.
 		CqRibToken m_nextTok;
 		/// flag indicating whether we've already got the next token.
@@ -131,6 +129,25 @@ class CqRibLexer : boost::noncopyable
 inline SqSourcePos CqRibLexer::pos() const
 {
 	return m_currPos;
+}
+
+inline const CqRibToken& CqRibLexer::get()
+{
+	if(!m_haveNext)
+		m_nextTok = scanNext();
+	m_haveNext = false;
+	m_currPos = m_nextPos;
+	return m_nextTok;
+}
+
+inline const CqRibToken& CqRibLexer::peek()
+{
+	if(!m_haveNext)
+	{
+		m_nextTok = scanNext();
+		m_haveNext = true;
+	}
+	return m_nextTok;
 }
 
 } // namespace Aqsis

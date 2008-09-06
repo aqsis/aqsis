@@ -119,6 +119,28 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 	BOOST_CHECK_THROW(parser.getStringArray(), XqParseError);
 }
 
+BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
+{
+	std::istringstream in("\"uniform vector P\" [1 2 3] \"constant integer a\" 42");
+	CqRibLexer lex(in);
+	CqRequestMap map;
+	CqRibParser parser(boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
+			boost::shared_ptr<CqRequestMap>(&map, nullDeleter));
+
+	const TqRiParamList pList = parser.getParamList();
+	BOOST_REQUIRE_EQUAL(pList.size(), 2U);
+	// Check first parameter
+	BOOST_CHECK_EQUAL(pList[0].token().name(), "P");
+	const TqRiFloatArray& P = pList[0].value<ParamType_FloatArray>();
+	BOOST_REQUIRE_EQUAL(P.size(), 3U);
+	BOOST_CHECK_CLOSE(P[0], 1.0f, 0.00001);
+	BOOST_CHECK_CLOSE(P[1], 2.0f, 0.00001);
+	BOOST_CHECK_CLOSE(P[2], 3.0f, 0.00001);
+	// Check second parameter
+	BOOST_CHECK_EQUAL(pList[1].token().name(), "a");
+	BOOST_CHECK_EQUAL(pList[1].value<ParamType_Int>(), 42);
+}
+
 //------------------------------------------------------------------------------
 // Request handler invocation tests.
 
@@ -143,9 +165,7 @@ struct TestRequestHandler : public IqRibRequest
 
 BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 {
-	std::istringstream in(
-			"SomeRequest \"blah\" [1 2] [1.1 1.2]\n"
-	);
+	std::istringstream in("SomeRequest \"blah\" [1 2] [1.1 1.2]\n");
 	CqRibLexer lex(in);
 	CqRequestMap map;
 	TestRequestHandler* rqst = new TestRequestHandler("SomeRequest");

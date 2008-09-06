@@ -47,12 +47,12 @@ bool CqRibParser::parseNextRequest()
 	while(true)
 	{
 		// skip up until the next request.
-		CqRibToken tok = m_lex->getToken();
+		CqRibToken tok = m_lex->get();
 		while(tok.type() != CqRibToken::REQUEST)
 		{
 			if(tok.type() == CqRibToken::ENDOFFILE)
 				return false;
-			tok = m_lex->getToken();
+			tok = m_lex->get();
 		}
 		// find a handler for the current request
 		if(IqRibRequest* req = m_requests->find(tok.stringVal()))
@@ -81,7 +81,7 @@ bool CqRibParser::parseNextRequest()
 
 TqInt CqRibParser::getInt()
 {
-	CqRibToken tok = m_lex->getToken();
+	CqRibToken tok = m_lex->get();
 	if(tok.type() != CqRibToken::INTEGER)
 		AQSIS_THROW(XqParseError, "Found " << tok << " expected INTEGER");
 	return tok.intVal();
@@ -89,7 +89,7 @@ TqInt CqRibParser::getInt()
 
 TqFloat CqRibParser::getFloat()
 {
-	CqRibToken tok = m_lex->getToken();
+	CqRibToken tok = m_lex->get();
 	if(tok.type() != CqRibToken::FLOAT)
 		AQSIS_THROW(XqParseError, "Found " << tok << " expected FLOAT");
 	return tok.floatVal();
@@ -97,7 +97,7 @@ TqFloat CqRibParser::getFloat()
 
 std::string CqRibParser::getString()
 {
-	CqRibToken tok = m_lex->getToken();
+	CqRibToken tok = m_lex->get();
 	if(tok.type() != CqRibToken::STRING)
 		AQSIS_THROW(XqParseError, "Found " << tok << " expected STRING");
 	return tok.stringVal();
@@ -109,7 +109,7 @@ namespace {
  */
 inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
 {
-	CqRibToken tok = lex.getToken();
+	CqRibToken tok = lex.get();
 	if(tok.type() != CqRibToken::ARRAY_BEGIN)
 	{
 		AQSIS_THROW(XqParseError,
@@ -131,7 +131,6 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
  * After that we'd still be left with the float case in which it's acceptable
  * for the token to be *either* an integer *or* a float.
  */
-
 const TqRiIntArray& CqRibParser::getIntArray()
 {
 	consumeArrayBegin(*m_lex, "integer");
@@ -140,7 +139,7 @@ const TqRiIntArray& CqRibParser::getIntArray()
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex->getToken();
+		CqRibToken tok = m_lex->get();
 		switch(tok.type())
 		{
 			case CqRibToken::INTEGER:
@@ -167,7 +166,7 @@ const TqRiFloatArray& CqRibParser::getFloatArray()
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex->getToken();
+		CqRibToken tok = m_lex->get();
 		switch(tok.type())
 		{
 			case CqRibToken::INTEGER:
@@ -197,7 +196,7 @@ const TqRiStringArray& CqRibParser::getStringArray()
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex->getToken();
+		CqRibToken tok = m_lex->get();
 		switch(tok.type())
 		{
 			case CqRibToken::STRING:
@@ -216,12 +215,84 @@ const TqRiStringArray& CqRibParser::getStringArray()
 	return buf;
 }
 
+namespace {
+EqRiParamType paramForVarType(EqVariableType varType)
+{
+	switch(varType)
+	{
+		case type_float:
+		case type_point:
+		case type_color:
+		case type_triple:
+		case type_hpoint:
+		case type_normal:
+		case type_vector:
+		case type_matrix:
+		case type_sixteentuple:
+			return ParamType_Float;
+		case type_string:
+			return ParamType_String;
+		case type_bool:
+		case type_integer:
+			return ParamType_Int;
+		case type_invalid:
+		case type_void:
+		default:
+			assert(0 && "no associated type");
+			return ParamType_Int;
+	}
+}
+}
+
 const TqRiParamList& CqRibParser::getParamList()
 {
-	// TODO: Implementation!
-	assert(0 && "getParamList not implemented!");
-	static TqRiParamList bogus;
-	return bogus;
+	m_currParamList.clear();
+	while(true)
+	{
+		switch(m_lex->peek().type())
+		{
+			case CqRibToken::REQUEST:
+			case CqRibToken::ENDOFFILE:
+				return m_currParamList;
+			case CqRibToken::STRING:
+				break;
+			default:
+				AQSIS_THROW(XqParseError,
+						"name/type string expected in parameter list");
+		}
+		// get a string representing the name of the param list.
+		std::string name = getString();
+		CqPrimvarToken tok(name.c_str());
+		switch(paramForVarType(tok.type()))
+		{
+			case ParamType_Int:
+				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_IntArray, getIntArray()));
+				else
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_Int, getInt()));
+				break;
+			case ParamType_Float:
+				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_FloatArray, getFloatArray()));
+				else
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_Float, getFloat()));
+				break;
+			case ParamType_String:
+				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_StringArray, getStringArray()));
+				else
+					m_currParamList.push_back(
+							CqRequestParam(tok, ParamType_String, getString()));
+				break;
+			default:
+				assert(0 && "invalid param type");
+		}
+	}
 }
 
 //------------------------------------------------------------------------------

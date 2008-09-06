@@ -31,7 +31,7 @@
 
 #define ADD_ESCAPES(x) #x
 
-#define CHECK_EOF(lex) BOOST_CHECK_EQUAL(lex.getToken(), \
+#define CHECK_EOF(lex) BOOST_CHECK_EQUAL(lex.get(), \
 		CqRibToken(CqRibToken::ENDOFFILE))
 
 using namespace Aqsis;
@@ -46,16 +46,16 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 		// Test multiple and adjacent strings
 		std::istringstream in("\"xx\"  \"\"\"a\"");
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "xx"));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "a"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "xx"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, ""));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "a"));
 		CHECK_EOF(lex);
 	}
 	{
 		// Test escape characters; these should be the same as escaping in C++.
 		std::istringstream in(ADD_ESCAPES("_\n_\r_\t_\b_\f_\\_\"_\z_"));
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING,
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING,
 					"_\n_\r_\t_\b_\f_\\_\"_z_"));
 		CHECK_EOF(lex);
 	}
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 		// in C++ as well.
 		std::istringstream in(ADD_ESCAPES("\101_\12_\7"));
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING,
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING,
 					"\101_\12_\7"));
 		CHECK_EOF(lex);
 	}
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 		// Test embedded newlines and tabs
 		std::istringstream in("\"xx\t\nXX\"");
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING,
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING,
 					"xx\t\nXX"));
 		CHECK_EOF(lex);
 	}
@@ -80,14 +80,14 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 		// escaped line break (should discard newline)
 		std::istringstream in("\"jo\\\nined\"");
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "joined"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "joined"));
 		CHECK_EOF(lex);
 	}
 	{
 		// Test what happens when the stream ends before a string end character
 		std::istringstream in("\"xx");
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ERROR));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::ERROR));
 		CHECK_EOF(lex);
 	}
 }
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_int_test)
 	CqRibLexer lex(in);
 	TqInt ints[] = {42, +42, -42};
 	for(TqInt i = 0; i < static_cast<TqInt>(sizeof(ints)/sizeof(ints[0])); ++i)
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(ints[i]));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(ints[i]));
 	CHECK_EOF(lex);
 }
 
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_test)
 		-42E+10, -12.E+10, -.34E+10, -56.78E+10
 	};
 	for(TqInt i = 0; i < static_cast<TqInt>(sizeof(floats)/sizeof(floats[0])); ++i)
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(floats[i]));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(floats[i]));
 	CHECK_EOF(lex);
 }
 
@@ -134,10 +134,10 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_array_test)
 {
 	std::istringstream in("[ 1.0 -1 ]");
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_BEGIN));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(1.0f));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_END));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::ARRAY_BEGIN));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(1.0f));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(-1));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::ARRAY_END));
 	CHECK_EOF(lex);
 }
 
@@ -145,9 +145,9 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_request_test)
 {
 	std::istringstream in("WorldBegin version SomethingElse");
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "WorldBegin"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "version"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "SomethingElse"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "WorldBegin"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "version"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "SomethingElse"));
 	CHECK_EOF(lex);
 }
 
@@ -160,11 +160,11 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_integer_decode)
 {
 	std::istringstream in("\200a\201ab\202abc\203abcd");
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqInt('a')));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken((TqInt('a') << 8) + TqInt('b')) );
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(TqInt('a')));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken((TqInt('a') << 8) + TqInt('b')) );
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
 			(TqInt('a') << 16) + (TqInt('b') << 8) + TqInt('c')) );
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
 			(TqInt('a') << 24) + (TqInt('b') << 16) + (TqInt('c') << 8) + TqInt('d')) );
 	CHECK_EOF(lex);
 }
@@ -176,16 +176,16 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_fixedpoint_decode)
 	std::istringstream in("\204a\205bc\212def\213ghij\214k");
 	CqRibLexer lex(in);
 	// 0204:  .b
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqFloat('a')/256));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(TqFloat('a')/256));
 	// 0205:  b.b
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('b' + TqFloat('c')/256));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken('b' + TqFloat('c')/256));
 	// 0212:  b.bb
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken('d' + ('e' + TqFloat('f')/256)/256));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken('d' + ('e' + TqFloat('f')/256)/256));
 	// 0213:  bb.bb
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
 				(TqInt('g') << 8) + 'h' + (TqFloat('i') + TqFloat('j')/256)/256));
 	// 0214:  .__b
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(TqFloat('k')/256/256/256));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(TqFloat('k')/256/256/256));
 	CHECK_EOF(lex);
 }
 
@@ -194,11 +194,11 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_short_string_decode)
 	std::istringstream in("\220\221a\230bcdefghi\237jklm\\nopqrstuvw");
 	CqRibLexer lex(in);
 	// min. length short string.
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "a"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "bcdefghi"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, ""));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "a"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "bcdefghi"));
 	// Test max. length short string and lack of escaping in encoded strings.
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "jklm\\nopqrstuvw"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "jklm\\nopqrstuvw"));
 	CHECK_EOF(lex);
 }
 
@@ -212,9 +212,9 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_long_string_decode)
 	STRING_FROM_CHAR_ARRAY(str, "\240\000\240\012aaaaAaaaaA\243\000\000\000\002aX");
 	std::istringstream in(str);
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, ""));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aaaaAaaaaA"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "aX"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, ""));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "aaaaAaaaaA"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "aX"));
 	CHECK_EOF(lex);
 }
 
@@ -226,11 +226,11 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 				"\244\100\000\000\000b\244\077\201\200\100");
 		std::istringstream in(str);
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.0f));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "b"));
-		BOOST_CHECK_EQUAL(lex.getToken(),
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "a"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(2.0f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "b"));
+		BOOST_CHECK_EQUAL(lex.get(),
 				CqRibToken(1.0f + 1.0f/(1<<7) + 1.0f/(1<<8) + 1.0f/(1<<17)));
 		CHECK_EOF(lex);
 	}
@@ -241,9 +241,9 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 				"\245\100\004\000\000\000\000\000\000");
 		std::istringstream in(str);
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.5f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "a"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(2.5f));
 		CHECK_EOF(lex);
 	}
 	{
@@ -251,11 +251,11 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_float_decode)
 		STRING_FROM_CHAR_ARRAY(str, "\310\002\277\200\000\000\100\000\000\000a");
 		std::istringstream in(str);
 		CqRibLexer lex(in);
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_BEGIN));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(-1.0f));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(2.0f));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::ARRAY_END));
-		BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "a"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::ARRAY_BEGIN));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(-1.0f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(2.0f));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::ARRAY_END));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "a"));
 		CHECK_EOF(lex);
 	}
 }
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_defined_request_test)
 			);
 	std::istringstream in(str);
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest377"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest000"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest377"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "DefinedRequest000"));
 	CHECK_EOF(lex);
 }
 
@@ -285,8 +285,8 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_defined_string_test)
 			);
 	std::istringstream in(str);
 	CqRibLexer lex(in);
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "DefinedString100100"));
-	BOOST_CHECK_EQUAL(lex.getToken(), CqRibToken(CqRibToken::STRING, "DefinedString000"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "DefinedString100100"));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "DefinedString000"));
 	CHECK_EOF(lex);
 }
 
@@ -298,17 +298,37 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_position_test)
 {
 	std::istringstream in("Rqst [1.0\n 1] \"asdf\" ");
 	CqRibLexer lex(in);
-	lex.getToken();
-	lex.getToken();
-	lex.getToken();
+	lex.get();
+	lex.get();
+	lex.get();
 	SqSourcePos pos = lex.pos();
 	BOOST_CHECK_EQUAL(pos.line, 1);
 	BOOST_CHECK_EQUAL(pos.col, 7);
-	lex.getToken();
-	lex.getToken();
-	lex.getToken();
+	lex.get();
+	lex.get();
+	lex.get();
 	pos = lex.pos();
 	BOOST_CHECK_EQUAL(pos.line, 2);
 	BOOST_CHECK_EQUAL(pos.col, 4);
 }
 
+BOOST_AUTO_TEST_CASE(CqRibLexer_peek_test)
+{
+	std::istringstream in("Rqst [1.0 1]");
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.peek(), CqRibToken(CqRibToken::REQUEST, "Rqst"));
+
+	lex.get();
+	lex.get();
+	lex.get();
+	lex.peek();
+	lex.peek();
+
+	SqSourcePos pos = lex.pos();
+	BOOST_CHECK_EQUAL(pos.line, 1);
+	BOOST_CHECK_EQUAL(pos.col, 7);
+	BOOST_CHECK_EQUAL(lex.peek(), CqRibToken(1));
+	lex.get();
+	lex.get();
+	CHECK_EOF(lex);
+}
