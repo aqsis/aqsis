@@ -66,8 +66,8 @@ CqRibToken CqRibLexer::scanNext()
 	// Else determine the next token.
 	while(true)
 	{
-		m_nextPos = m_inBuf.pos();
 		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
+		m_nextPos = m_inBuf.pos();
 		switch(c)
 		{
 			//------------------------------------------------------------

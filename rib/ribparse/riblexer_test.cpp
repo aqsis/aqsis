@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_position_test)
 	lex.get();
 	pos = lex.pos();
 	BOOST_CHECK_EQUAL(pos.line, 2);
-	BOOST_CHECK_EQUAL(pos.col, 4);
+	BOOST_CHECK_EQUAL(pos.col, 5);
 }
 
 BOOST_AUTO_TEST_CASE(CqRibLexer_peek_test)

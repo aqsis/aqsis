@@ -30,6 +30,9 @@
 #include <iostream>
 
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
+
+#include "ribparse_share.h"
 
 namespace Aqsis
 {
@@ -60,7 +63,7 @@ std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos);
  * class therefore makes sure that any input buffering of a requested number of
  * characters is non-blocking.
  */
-class CqRibInputBuffer : boost::noncopyable
+RIBPARSE_SHARE class CqRibInputBuffer : boost::noncopyable
 {
 	public:
 		/// "Character" type returned from the get() method.
@@ -78,8 +81,13 @@ class CqRibInputBuffer : boost::noncopyable
 		SqSourcePos pos() const;
 
 	private:
+		/// Determine whether the given stream is gzipped.
+		static bool isGzippedStream(std::istream& in);
+
 		/// Stream we are reading from.
-		std::istream& m_inStream;
+		std::istream* m_inStream;
+		/// gzip decompressor for compressed input
+		boost::scoped_ptr<std::istream> m_gzipStream;
 		/// Character which was put back into the input.
 		TqOutputType m_putbackChar;
 		/// Flag to indicate current character has already been read from inStream.
@@ -104,14 +112,6 @@ inline std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
 
 //------------------------------------------------------------------------------
 // CqRibInputBuffer implementation
-inline CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
-	: m_inStream(inStream),
-	m_putbackChar(0),
-	m_havePutbackChar(false),
-	m_currPos(1,1),
-	m_prevPos(-1,-1)
-{ }
-
 inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 {
 	TqOutputType c = 0;
@@ -122,14 +122,14 @@ inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 	}
 	else
 	{
-		c = m_inStream.get();
+		c = m_inStream->get();
 		// TODO: Make sure this is actually necessary and that istream::get()
 		// doesn't do any undesirable translation.
 		if(c == '\r')
 		{
 			// translate all '\r' and '\r\n' characters to a single '\n'
-			if(m_inStream.peek() == '\n')
-				m_inStream.get();
+			if(m_inStream->peek() == '\n')
+				m_inStream->get();
 			c = '\n';
 		}
 	}
