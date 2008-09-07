@@ -20,7 +20,7 @@
 /** \file
  *
  * \brief RIB parser interface
- * \author Chris Foster [chris42f (at) gmail (d0t) com]
+ * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
 #ifndef RIBPARSER_H_INCLUDED
@@ -35,33 +35,14 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "riblexer.h"
-#include "requestparam.h"
 #include "exception.h"
+#include "primvartoken.h"
+#include "riblexer.h"
+#include "iribrequest.h"
 
 namespace Aqsis {
 
-class CqRibParser;
 class CqRequestMap;
-
-
-//------------------------------------------------------------------------------
-/** \brief RIB request handler interface
- */
-class IqRibRequest : boost::noncopyable
-{
-	public:
-		/** \brief Handle a RIB request by reading from the parser
-		 *
-		 * The request handler is expected to call the CqRibParser::get*
-		 * functions in order to read appropriate parameters from the parser.
-		 */
-		virtual void handleRequest(CqRibParser& parser) = 0;
-
-		/// overridable destructor
-		virtual ~IqRibRequest() {}
-};
-
 
 //------------------------------------------------------------------------------
 /** \brief A flexible parser for RIB-like file formats.
@@ -128,15 +109,40 @@ class CqRibParser : boost::noncopyable
 		/// Read a string from the input
 		std::string getString();
 
-		/// Read an array of integers from the input
+		/** \brief Read an array of integers from the input.
+		 *
+		 * A reference to the array is valid until parsing the next request
+		 * commences.
+		 */
 		const TqRiIntArray& getIntArray();
-		/// Read an array of floats from the input
+		/** \brief Read an array of floats from the input
+		 *
+		 * A reference to the array is valid until parsing the next request
+		 * commences.
+		 */
 		const TqRiFloatArray& getFloatArray();
-		/// Read an array of strings from the input
+		/** \brief Read an array of strings from the input
+		 *
+		 * A reference to the array is valid until parsing the next request
+		 * commences.
+		 */
 		const TqRiStringArray& getStringArray();
 
-		/// Read a parameter list from the input
-		const TqRiParamList& getParamList();
+		/** \brief Read a list of (token,value) pairs from the input stream.
+		 *
+		 * Most RI requests allow extra data to be passed in the form of
+		 * parameter lists of (token, value) pairs.  A token is a string giving
+		 * the type and name of the value data.  The value data is an array of
+		 * floats strings or integers.  Value data consisting of a single float
+		 * string or integer is parsed as an array of length one.
+		 *
+		 * References to the _value_ data inserted into paramList are valid
+		 * until parsing the next request commences.
+		 * 
+		 * \param paramList - destination for (token, value) pairs as read from
+		 *            the input stream.
+		 */
+		const void getParamList(IqRibParamList& paramList);
 		//@}
 
 	private:
@@ -180,8 +186,6 @@ class CqRibParser : boost::noncopyable
 		CqBufferPool<TqInt> m_intArrayPool;
 		/// pool of parsed string arrays for the current request.
 		CqBufferPool<std::string> m_stringArrayPool;
-		/// Storage for the parameter list of the current request.
-		TqRiParamList m_currParamList;
 };
 
 

@@ -27,6 +27,8 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+#include <boost/any.hpp>
+
 #include "ribparser.h"
 #include "smartptr.h"
 
@@ -119,26 +121,57 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 	BOOST_CHECK_THROW(parser.getStringArray(), XqParseError);
 }
 
+
+// Dummy param list which just accumulates all parameters into a list of
+// (token, value) pairs.
+struct DummyParamList : IqRibParamList
+{
+	std::vector<std::pair<CqPrimvarToken, boost::any> > tokValPairs;
+
+	virtual void append(const CqPrimvarToken& token, const TqRiIntArray& value)
+	{
+		tokValPairs.push_back(std::pair<CqPrimvarToken, boost::any>(token, value));
+	}
+	virtual void append(const CqPrimvarToken& token, const TqRiFloatArray& value)
+	{
+		tokValPairs.push_back(std::pair<CqPrimvarToken, boost::any>(token, value));
+	}
+	virtual void append(const CqPrimvarToken& token, const TqRiStringArray& value)
+	{
+		tokValPairs.push_back(std::pair<CqPrimvarToken, boost::any>(token, value));
+	}
+};
+
 BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
 {
-	std::istringstream in("\"uniform vector P\" [1 2 3] \"constant integer a\" 42");
+	std::istringstream in("\"uniform vector P\" [1 2 3] \"constant integer a\" 42\n"
+			              "\"constant string texname\" \"somefile.map\"");
 	CqRibLexer lex(in);
 	CqRequestMap map;
 	CqRibParser parser(boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
 			boost::shared_ptr<CqRequestMap>(&map, nullDeleter));
 
-	const TqRiParamList pList = parser.getParamList();
-	BOOST_REQUIRE_EQUAL(pList.size(), 2U);
+	// Grab the parameter list from the parser.
+	DummyParamList pList;
+	parser.getParamList(pList);
+	BOOST_REQUIRE_EQUAL(pList.tokValPairs.size(), 3U);
+
 	// Check first parameter
-	BOOST_CHECK_EQUAL(pList[0].token().name(), "P");
-	const TqRiFloatArray& P = pList[0].value<ParamType_FloatArray>();
+	BOOST_CHECK_EQUAL(pList.tokValPairs[0].first.name(), "P");
+	const TqRiFloatArray& P = boost::any_cast<const TqRiFloatArray&>(pList.tokValPairs[0].second);
 	BOOST_REQUIRE_EQUAL(P.size(), 3U);
 	BOOST_CHECK_CLOSE(P[0], 1.0f, 0.00001);
 	BOOST_CHECK_CLOSE(P[1], 2.0f, 0.00001);
 	BOOST_CHECK_CLOSE(P[2], 3.0f, 0.00001);
 	// Check second parameter
-	BOOST_CHECK_EQUAL(pList[1].token().name(), "a");
-	BOOST_CHECK_EQUAL(pList[1].value<ParamType_Int>(), 42);
+	BOOST_CHECK_EQUAL(pList.tokValPairs[1].first.name(), "a");
+	const TqRiIntArray& a = boost::any_cast<const TqRiIntArray&>(pList.tokValPairs[1].second);
+	BOOST_REQUIRE_EQUAL(a.size(), 1U);
+	BOOST_CHECK_EQUAL(a[0], 42);
+	// Check third parameter
+	BOOST_CHECK_EQUAL(pList.tokValPairs[2].first.name(), "texname");
+	const TqRiStringArray& texname = boost::any_cast<const TqRiStringArray&>(pList.tokValPairs[2].second);
+	BOOST_CHECK_EQUAL(texname[0], "somefile.map");
 }
 
 //------------------------------------------------------------------------------

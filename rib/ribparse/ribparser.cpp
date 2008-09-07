@@ -38,8 +38,7 @@ CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 	m_ignoreUnrecognized(ignoreUnrecognized),
 	m_floatArrayPool(),
 	m_intArrayPool(),
-	m_stringArrayPool(),
-	m_currParamList()
+	m_stringArrayPool()
 { }
 
 bool CqRibParser::parseNextRequest()
@@ -215,45 +214,17 @@ const TqRiStringArray& CqRibParser::getStringArray()
 	return buf;
 }
 
-namespace {
-EqRiParamType paramForVarType(EqVariableType varType)
+const void CqRibParser::getParamList(IqRibParamList& paramList)
 {
-	switch(varType)
-	{
-		case type_float:
-		case type_point:
-		case type_color:
-		case type_triple:
-		case type_hpoint:
-		case type_normal:
-		case type_vector:
-		case type_matrix:
-		case type_sixteentuple:
-			return ParamType_Float;
-		case type_string:
-			return ParamType_String;
-		case type_bool:
-		case type_integer:
-			return ParamType_Int;
-		case type_invalid:
-		case type_void:
-		default:
-			assert(0 && "no associated type");
-			return ParamType_Int;
-	}
-}
-}
-
-const TqRiParamList& CqRibParser::getParamList()
-{
-	m_currParamList.clear();
 	while(true)
 	{
 		switch(m_lex->peek().type())
 		{
 			case CqRibToken::REQUEST:
 			case CqRibToken::ENDOFFILE:
-				return m_currParamList;
+				// If we get to the next request or end of file, return since
+				// we're done parsing the parameter list
+				return;
 			case CqRibToken::STRING:
 				break;
 			default:
@@ -261,36 +232,71 @@ const TqRiParamList& CqRibParser::getParamList()
 						"name/type string expected in parameter list");
 		}
 		// get a string representing the name of the param list.
-		std::string name = getString();
-		CqPrimvarToken tok(name.c_str());
-		switch(paramForVarType(tok.type()))
+		CqPrimvarToken primvarTok(m_lex->get().stringVal().c_str());
+
+		// Now parse the value associated with the parameter string.
+		switch(primvarTok.type())
 		{
-			case ParamType_Int:
-				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_IntArray, getIntArray()));
-				else
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_Int, getInt()));
+			//--------------------------------------------------
+			// Parameters represented as floats
+			case type_float:
+				if(m_lex->peek().type() == CqRibToken::FLOAT)
+				{
+					// deal with the special case where the next token is a
+					// single float rather than an array.
+					TqRiFloatArray& buf = m_floatArrayPool.getBuf();
+					buf.push_back(m_lex->get().floatVal());
+					paramList.append(primvarTok, buf);
+					break;
+				}
+				// intentional case fallthrough.
+			case type_point:
+			case type_vector:
+			case type_normal:
+			case type_hpoint:
+			case type_matrix:
+			case type_color:
+				// Any of the above types need to correspond to a float array.
+				paramList.append(primvarTok, getFloatArray());
 				break;
-			case ParamType_Float:
-				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_FloatArray, getFloatArray()));
+			//--------------------------------------------------
+			// Parameters represented as integers
+			case type_integer:
+				if(m_lex->peek().type() == CqRibToken::INTEGER)
+				{
+					TqRiIntArray& buf = m_intArrayPool.getBuf();
+					buf.push_back(m_lex->get().intVal());
+					paramList.append(primvarTok, buf);
+				}
 				else
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_Float, getFloat()));
+					paramList.append(primvarTok, getIntArray());
 				break;
-			case ParamType_String:
-				if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_StringArray, getStringArray()));
+			//--------------------------------------------------
+			// Parameters represented as strings
+			case type_string:
+				if(m_lex->peek().type() == CqRibToken::STRING)
+				{
+					// special case where next token is a single string.
+					TqRiStringArray& buf = m_stringArrayPool.getBuf();
+					buf.push_back(m_lex->get().stringVal());
+					paramList.append(primvarTok, buf);
+				}
 				else
-					m_currParamList.push_back(
-							CqRequestParam(tok, ParamType_String, getString()));
+					paramList.append(primvarTok, getStringArray());
 				break;
+			//--------------------------------------------------
+			// Invalid parameters.
+			case type_bool:
+			case type_invalid:
+			case type_void:
+			case type_triple:
+			case type_sixteentuple:
 			default:
-				assert(0 && "invalid param type");
+				// Any of the types above aren't really valid RIB, so we
+				// disallow them here.
+				AQSIS_THROW(XqParseError, "invalid token type '"
+						<< primvarTok.type() << "' in parameter list");
+				break;
 		}
 	}
 }
