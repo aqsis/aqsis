@@ -151,10 +151,6 @@ struct TestRequestHandler : public IqRibRequest
 	TqRiIntArray a1;
 	TqRiFloatArray a2;
 
-	TestRequestHandler(const std::string& name)
-		: IqRibRequest(name)
-	{ }
-
 	virtual void handleRequest(CqRibParser& parser)
 	{
 		s = parser.getString();
@@ -168,8 +164,8 @@ BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 	std::istringstream in("SomeRequest \"blah\" [1 2] [1.1 1.2]\n");
 	CqRibLexer lex(in);
 	CqRequestMap map;
-	TestRequestHandler* rqst = new TestRequestHandler("SomeRequest");
-	map.add(rqst);
+	TestRequestHandler* rqst = new TestRequestHandler();
+	map.add("SomeRequest", rqst);
 	CqRibParser parser( boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
 			boost::shared_ptr<CqRequestMap>(&map, nullDeleter));
 

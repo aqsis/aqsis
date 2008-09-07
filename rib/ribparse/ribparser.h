@@ -51,11 +51,6 @@ class CqRequestMap;
 class IqRibRequest : boost::noncopyable
 {
 	public:
-		/// Construct rib request handler with the given name
-		IqRibRequest(const std::string& name);
-		/// overridable destructor
-		virtual ~IqRibRequest() {}
-
 		/** \brief Handle a RIB request by reading from the parser
 		 *
 		 * The request handler is expected to call the CqRibParser::get*
@@ -63,13 +58,8 @@ class IqRibRequest : boost::noncopyable
 		 */
 		virtual void handleRequest(CqRibParser& parser) = 0;
 
-		/** Get the name of the request.
-		 *
-		 * The name cannot change over the object lifetime.
-		 */
-		const std::string& name() const;
-	private:
-		const std::string m_name;
+		/// overridable destructor
+		virtual ~IqRibRequest() {}
 };
 
 
@@ -206,7 +196,7 @@ class CqRequestMap
 		 *                  ownership of the request, and will delete it
 		 *                  appropriately.
 		 */
-		void add(IqRibRequest* request);
+		void add(const std::string& name, IqRibRequest* request);
 
 		/** \brief Find the request with the given name.
 		 *
@@ -226,18 +216,6 @@ class CqRequestMap
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-// IqRibRequest Implementation
-inline IqRibRequest::IqRibRequest(const std::string& name)
-	: m_name(name)
-{}
-
-inline const std::string& IqRibRequest::name() const
-{
-	return m_name;
-}
-
-//------------------------------------------------------------------------------
 // CqBufferPool implementation
 template<typename T>
 CqRibParser::CqBufferPool<T>::CqBufferPool()
