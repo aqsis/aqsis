@@ -18,7 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
- * \brief A RIB token class.
+ * \brief RIB lexer implementation
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 

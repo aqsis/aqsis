@@ -75,7 +75,7 @@ class CqRequestMap;
  * can define arbitrary actions to be performed on reading a given request.
  *
  */
-class CqRibParser : boost::noncopyable
+RIBPARSE_SHARE class CqRibParser : boost::noncopyable
 {
 	public:
 		/** Construct a RIB parser, connected to the given lexer.
@@ -260,6 +260,11 @@ inline IqRibRequest* CqRequestMap::find(const std::string& name)
 		return 0;
 	else
 		return i->second.get();
+}
+
+inline void CqRequestMap::add(const std::string& name, IqRibRequest* request)
+{
+	m_requests[name].reset(request);
 }
 
 } // namespace Aqsis

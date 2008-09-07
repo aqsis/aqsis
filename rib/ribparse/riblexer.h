@@ -36,6 +36,7 @@
 
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
+#include "ribparse_share.h"
 
 namespace Aqsis
 {
@@ -47,7 +48,7 @@ namespace Aqsis
  * CqRibToken.  The token values are computed in the lexer rather than being
  * returned as strings.
  */
-class CqRibLexer : boost::noncopyable
+RIBPARSE_SHARE class CqRibLexer : boost::noncopyable
 {
 	public:
 		/** \brief Create new lexer using a given stream.

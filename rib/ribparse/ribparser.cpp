@@ -301,10 +301,4 @@ const void CqRibParser::getParamList(IqRibParamList& paramList)
 	}
 }
 
-//------------------------------------------------------------------------------
-void CqRequestMap::add(const std::string& name, IqRibRequest* request)
-{
-	m_requests[name].reset(request);
-}
-
 } // namespace Aqsis
