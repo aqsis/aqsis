@@ -4,7 +4,10 @@ SET(BUNDLEDIR "${CMAKE_BINARY_DIR}/bundle"
 	CACHE STRING "Staging location for bundles (relative to CMAKE_BINARY_DIR)"
 	)
 SET(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_SHORT}"
-	CACHE STRING "Bundle name for OS X"
+	CACHE STRING "Package name for OS X"
+	)
+SET(AQSIS_PACKAGE_NAME "${CMAKE_PROJECT_NAME}-${MAJOR}.${MINOR}.${BUILD}-${CMAKE_SYSTEM_NAME}.dmg"
+	CACHE STRING "Package filename for OS X"
 	)
 
 SET(DEFAULT_SHADERPATH "./Contents/Resources/shaders")

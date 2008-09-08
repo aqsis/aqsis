@@ -22,7 +22,7 @@
 
 Name "@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@"
 BrandingText "www.aqsis.org"
-OutFile "@CMAKE_BINARY_DIR@\@AQSIS_PROJECT_NAME_BASIC@-setup-@MAJOR@.@MINOR@.@BUILD@.exe"
+OutFile "@CMAKE_BINARY_DIR@\@AQSIS_PACKAGE_NAME@"
 InstallDir "$PROGRAMFILES\@CMAKE_PROJECT_NAME@"
 ShowInstDetails show
 ShowUnInstDetails show

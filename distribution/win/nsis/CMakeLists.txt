@@ -8,6 +8,10 @@ SET(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_SHORT}"
 	CACHE STRING "Package name for Windows"
 	)
 
+SET(AQSIS_PACKAGE_NAME "${AQSIS_PROJECT_NAME_BASIC}-setup-${MAJOR}.${MINOR}.${BUILD}.exe"
+	CACHE STRING "Package filename for Windows"
+	)
+
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/setup.nsi.in.cmake" "${WINPACKAGEDIR}/setup.nsi" @ONLY)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/page_tasks.ini.in.cmake" "${WINPACKAGEDIR}/page_tasks.ini" @ONLY)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/../header.bmp" "${WINPACKAGEDIR}/header.bmp" COPYONLY)
