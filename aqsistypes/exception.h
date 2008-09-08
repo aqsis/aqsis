@@ -128,6 +128,13 @@ AQSIS_DECLARE_EXCEPTION(XqInvalidFile, XqInternal);
  */
 AQSIS_DECLARE_EXCEPTION(XqValidation, XqException);
 
+/** \class XqParseError
+ * \brief An exception class for parsing errors
+ *
+ * Eg: errors in parsing a RIB stream or parsing Ri primvar definition tokens.
+ */
+AQSIS_DECLARE_EXCEPTION(XqParseError, XqValidation);
+
 //------------------------------------------------------------------------------
 /** \class XqEnvironment
  * \brief Base class for external and OS-level exceptions

@@ -33,11 +33,10 @@
 #include	"color.h"
 #include	"sstring.h"
 #include	"matrix.h"
-#include	"ishaderdata.h"
 #include	"bitvector.h"
 #include	"shadervariable.h"
 
-#include	"ishaderdata.h"
+#include	"primvartype.h"
 #include	"plugins.h"
 #include	"idsoshadeops.h"
 #include	"shadeop.h"
@@ -61,6 +60,7 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		 */
 		void BuildTypeMaps(void)
 		{
+			/// \todo Code Review - use stuff from primvartype.h instead of m_TypeNameMap 
 			m_TypeNameMap["invalid"] = type_invalid;
 			m_TypeIdMap['@'] = type_invalid;
 			m_TypeNameMap["integer"] = type_integer;

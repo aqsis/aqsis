@@ -50,10 +50,12 @@ typedef	double	TqDouble;
 typedef boost::int8_t TqInt8;
 typedef boost::int16_t TqInt16;
 typedef boost::int32_t TqInt32;
+typedef boost::int64_t TqInt64;
 
 typedef boost::uint8_t TqUint8;
 typedef boost::uint16_t TqUint16;
 typedef boost::uint32_t TqUint32;
+typedef boost::uint64_t TqUint64;
 
 
 #endif	// AQSIS_TYPES_INCLUDED
