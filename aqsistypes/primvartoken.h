@@ -48,7 +48,7 @@ namespace Aqsis {
  *     type which are attached to each vertex (or other "attachment point").
  *
  */
-COMMON_SHARE class CqPrimvarToken
+class COMMON_SHARE CqPrimvarToken
 {
 	public:
 		/// Trivial constructor.
