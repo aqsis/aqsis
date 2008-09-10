@@ -63,7 +63,7 @@ echo "Resolving external dependencies..."
 for folder in "$MACOS/" $( ls -R "$RESOURCES/" | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$FRAMEWORKS/"; do
 	for file in $( ls $folder ); do
 		#echo "Resolving dependencies for $file"
-		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v $BUNDLE_NAME| sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep dylib | grep opt | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep libboost | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			#echo "  ==>>>  $file  needs  $bn  ( $dep )"
 			if [ ! -e $FRAMEWORKS/$bn ]; then
