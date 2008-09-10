@@ -75,7 +75,7 @@ class CqRequestMap;
  * can define arbitrary actions to be performed on reading a given request.
  *
  */
-RIBPARSE_SHARE class CqRibParser : boost::noncopyable
+class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 {
 	public:
 		/** Construct a RIB parser, connected to the given lexer.
@@ -168,8 +168,6 @@ RIBPARSE_SHARE class CqRibParser : boost::noncopyable
 				CqBufferPool();
 				/// Get the next available buffer from the pool.
 				std::vector<T>& getBuf();
-				/// Release the previous buffer obtained with getBuf.
-				void releasePrev();
 				/// Mark all buffers in the pool as unused.
 				void markUnused();
 		};
@@ -236,12 +234,6 @@ std::vector<T>& CqRibParser::CqBufferPool<T>::getBuf()
 	++m_next;
 	buf.clear();
 	return buf;
-}
-
-template<typename T>
-inline void CqRibParser::CqBufferPool<T>::releasePrev()
-{
-	--m_next;
 }
 
 template<typename T>

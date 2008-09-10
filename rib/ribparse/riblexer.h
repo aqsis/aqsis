@@ -48,7 +48,7 @@ namespace Aqsis
  * CqRibToken.  The token values are computed in the lexer rather than being
  * returned as strings.
  */
-RIBPARSE_SHARE class CqRibLexer : boost::noncopyable
+class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:
 		/** \brief Create new lexer using a given stream.
