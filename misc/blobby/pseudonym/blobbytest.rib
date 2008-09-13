@@ -1,0 +1,196 @@
+##RenderMan RIB
+version 3.04
+Display "blobbytest.tif" "file" "rgb"
+
+Option "limits" "bucketsize" [16 16]
+Option "limits" "gridsize" [256]
+Option "limits" "texturememory" [256]
+Option "limits" "eyesplits" [10]
+#Shader Path
+Option "searchpath" "shader" ["&:.:~"]
+
+Orientation "rh"
+PixelSamples 3 3
+PixelFilter "catmull-rom" 3 3
+FrameBegin 36
+ShadingInterpolation "smooth"
+ShadingRate 1
+Quantize "rgba" 255 0 255 0.5
+##########
+Format 768 512 1
+Projection "perspective" "fov" [37.8493]
+Clipping 0.1 1000
+Shutter 36 36
+Transform [ 0.999848 0.00026245 -0.0174504 0  0 0.999887 0.015038 0  -0.0174524 0.0150357 -0.999735 0  0.184297 -1.12669 36.5966 1 ]
+WorldBegin 
+TransformBegin 
+CoordinateSystem "worldspace"
+TransformEnd 
+Attribute "identifier" "name" ["directionalLightShape1"]
+TransformBegin 
+ConcatTransform [ 0.473594 -0.508136 -0.719379 0  -0.78252 -0.617605 -0.0789145 0  0.404193 -0.600302 0.69012 0  -10.2608 8.5602 3.8406 1 ]
+LightSource "distantlight" 1 "intensity" [1]"lightcolor" [1 1 1]
+TransformEnd 
+Attribute "identifier" "name" ["directionalLightShape2"]
+TransformBegin 
+ConcatTransform [ 0.160414 0.673585 -0.721491 0  -0.813179 0.504502 0.290204 0  -0.559471 -0.540149 -0.628675 0  -9.42651 2.93635 7.22425 1 ]
+LightSource "distantlight" 2 "intensity" [2]"lightcolor" [0.992206 1 0.651]
+TransformEnd 
+Attribute "identifier" "name" ["directionalLightShape3"]
+TransformBegin 
+ConcatTransform [ 0.917119 -0.371616 0.144203 0  0.24134 0.805581 0.541104 0  0.31725 0.461455 -0.828499 0  -10.8116 -1.44329 11.894 1 ]
+LightSource "distantlight" 3 "intensity" [0.7]"lightcolor" [0.105 0.825177 1]
+TransformEnd 
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	0 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -9.58084 1.16461 0.184752 1
+	3 0 0 0  0 3 0 0  0 0 3 0  -6.98705 1.16461 0.139477 1
+]
+[""]
+	"vertex color Cs" [
+		1 0 0
+		0 1 0
+	]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	1 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -1.0584 1.11167 0.0351962 1
+	3 0 0 0  0 3 0 0  0 0 3 0  1.53539 1.11167 -0.0100787 1
+
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	2 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  8.68156 1.11167 -0.134815 1
+	3 0 0 0  0 3 0 0  0 0 3 0  11.2753 1.11167 -0.18009 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	3 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -9.6324 6.40533 0.264483 1
+	3 0 0 0  0 3 0 0  0 0 3 0  -7.03861 6.40533 0.219208 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	4 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -1.16286 6.45827 0.117443 1
+	3 0 0 0  0 3 0 0  0 0 3 0  1.43093 6.45827 0.0721684 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	5 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  8.68296 6.45827 -0.0544163 1
+	3 0 0 0  0 3 0 0  0 0 3 0  11.2768 6.45827 -0.0996911 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	0 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  11.3797 -4.55255 -0.267113 1
+	3 0 0 0  0 3 0 0  0 0 3 0  8.78594 -4.55255 -0.221839 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	0 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -0.795213 -4.55255 -0.054599 1
+	3 0 0 0  0 3 0 0  0 0 3 0  1.79858 -4.55255 -0.0998738 1
+]
+[""]
+AttributeEnd
+
+AttributeBegin 
+Sides 2
+Color [0.5 0.5 0.5]
+Surface "matte" 
+Blobby 2 [
+	1001 0
+	1001 16
+	0 2 0 1
+]
+[
+	3 0 0 0  0 3 0 0  0 0 3 0  -6.93555 -4.28787 0.0565624 1
+	3 0 0 0  0 3 0 0  0 0 3 0  -9.52934 -4.28787 0.101837 1
+]
+[""]
+AttributeEnd
+
+WorldEnd 
+FrameEnd 
+

@@ -167,6 +167,10 @@ class CqDataHandler
 					if(child)
 					{
 						const char* fname = child->GetText();
+						if (fname == NULL)
+						{
+							fname = "ri.pic";
+						}
 						m_client->setName(fname);
 					}
 					// Process the parameters
@@ -207,7 +211,7 @@ class CqDataHandler
 						}
 					}
 					child = root->FirstChildElement("Formats");
-					CqChannelInfoList channelList;
+					CqChannelList channelList;
 					if(child)
 					{
 						TiXmlElement* format = child->FirstChildElement("Format");
@@ -230,7 +234,7 @@ class CqDataHandler
 						TiXmlDocument doc("formats.xml");
 						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 						TiXmlElement* formatsXML = new TiXmlElement("Formats");
-						for(CqChannelInfoList::const_iterator ichan = channelList.begin();
+						for(CqChannelList::const_iterator ichan = channelList.begin();
 								ichan != channelList.end(); ++ichan)
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");
@@ -292,6 +296,13 @@ class CqDataHandler
 				}
 				else if(root->ValueStr().compare("Close") == 0)
 				{
+					// Send and acknowledge.
+					TiXmlDocument doc("ack.xml");
+					TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+					TiXmlElement* formatsXML = new TiXmlElement("Acknowledge");
+					doc.LinkEndChild(decl);
+					doc.LinkEndChild(formatsXML);
+					sendXMLMessage(doc);
 					m_client->close();
 					m_done = true;
 				}
@@ -333,11 +344,12 @@ int main( int argc, char** argv )
 	ArgParse ap;
 
 	// Set up the options
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Tiff file...]" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Image file...]" );
 	ap.argString( "i", "\aSpecify the IP address to listen on (default: %default)", &g_strInterface );
 	ap.argString( "p", "\aSpecify the TCP port to listen on (default: %default)", &g_strPort );
-	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
-	ap.argFlag( "version", "\aprint version information and exit", &g_fVersion );
+	ap.argFlag( "help", "\aPrint this help and exit", &g_fHelp );
+	ap.alias( "help" , "h" );
+	ap.argFlag( "version", "\aPrint version information and exit", &g_fVersion );
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.alias( "nocolor", "nc" );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
@@ -418,10 +430,10 @@ int main( int argc, char** argv )
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();
-	if(!g_theSocket.prepare(g_strInterface, portno))
+	if(g_theSocket.prepare(g_strInterface, portno))
+		Fl::add_fd(g_theSocket,&HandleConnection);
+	else
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
-
-	Fl::add_fd(g_theSocket,&HandleConnection);
 
 	window = new CqPiqslMainWindow();
 	char* internalArgs[] = {
@@ -449,7 +461,7 @@ int main( int argc, char** argv )
 			{
 				// load one image
 				boost::shared_ptr<CqImage> newImage(new CqImage(name));
-				newImage->loadFromTiff(name);
+				newImage->loadFromFile(name);
 				window->addImageToCurrentBook(newImage);
 			}
 		}

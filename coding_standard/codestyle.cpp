@@ -34,55 +34,50 @@ namespace Aqsis
 
 //------------------------------------------------------------------------------
 // Implementation for CqIntWrapper
-//------------------------------------------------------------------------------
 CqIntWrapper::CqIntWrapper()
 	: m_data(new TqInt(-1))
 { }
 
-//------------------------------------------------------------------------------
-// Ok, this method would probably be inline in reality.  Just pretend that it
-// does something less trivial ;-)
 void CqIntWrapper::setData(TqInt data)
 {
 	// As documented in the interface, this class only holds values >= minValue
 	// Use exceptions to indicate failure conditions.
 	if (data < minValue)
-		throw XqException("data too small.");
+	{
+		AQSIS_THROW(XqException, "requested data = " << data
+				<< "smaller than minimum value = " << minValue);
+	}
 	// If runtime performance is critical (for example, in an inline function),
 	// consider using assert().  Assert signifies not only that an error
 	// condition shouldn't happen, but that we don't want to even attempt to
 	// recover.
 	// assert(data >= minValue);
 
+	// Use constants when you know a quantity cannot change.  Anything to help
+	// the compiler catch errors at compile-time is a "good thing".
 	const TqInt theAnswer = 42;
-	const TqUint maxInsults = 10;
 
 	if(*m_data == theAnswer && data != theAnswer)
 	{
-		for(TqUint i = 0; i < maxInsults; ++i)
+		// Avoid using unsigned integers, even for things which logically
+		// cannot be negative.  Many experts (though perhaps not all) agree
+		// that this is a bad thing in C and C++ because of the subtle bugs it
+		// can cause.  For example, the following is false on most
+		// architectures:
+		//
+		//   (int)(-1) < (unsigned int)(1)
+		//
+		// For more information, see the aqsis mailing list post:
+		//   'Unsigned integers "considered harmful"?'
+		// http://sourceforge.net/mailarchive/forum.php?thread_name=20070829120534.GA17365%40physics.uq.edu.au&forum_name=aqsis-development
+		const TqInt maxInsults = 10;
+
+		for(TqInt i = 0; i < maxInsults; ++i)
 			std::cout << "You idiot! You're overriding the answer.\n";
-
-		// Portability warning: "i" still defined in this scope under VC++6; see
-		// http://www.boost.org/more/microsoft_vcpp.html
-
-		// Recommended workaround to declare i in another loop: explicitly wrap
-		// in a block using an extra { } pair:
-		{
-			for(TqUint i = 0; i < maxInsults; ++i)
-				std::cout << "You idiot! You're overriding the answer.\n";
-		}
 	}
 	*m_data = data;
 }
 
-//------------------------------------------------------------------------------
-CqIntWrapper::~CqIntWrapper()
-{
-	// We don't have to do anything here, because the smart pointer will handle
-	// the correct freeing of the memory used by m_data.
-}
-
-//------------------------------------------------------------------------------
 std::string CqIntWrapper::inaneComment() const
 {
 	// Try not to use "magic numbers".  Define named constants if necessary.

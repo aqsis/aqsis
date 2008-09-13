@@ -39,7 +39,7 @@
 #include	"parameters.h"
 #include	"ishader.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 class CqImagersource;
@@ -82,8 +82,6 @@ enum EqCameraFlags
  * Storage for the graphics state options.
  */
 
-struct IqOptions;
-typedef boost::shared_ptr<IqOptions> IqOptionsPtr;
 struct IqOptions
 {
 	virtual ~IqOptions() {}
@@ -123,7 +121,7 @@ struct IqOptions
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //-----------------------------------------------------------------------
 //}  // End of #ifdef IOPTIONS_H_INCLUDED

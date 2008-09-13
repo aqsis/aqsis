@@ -33,7 +33,7 @@
 #include	<boost/shared_ptr.hpp>
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct SqImageSample;
 struct IqRenderer;
@@ -124,7 +124,7 @@ struct IqDDManager
 	virtual TqInt	Uses( ) = 0;
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// IDDMANAGER_H_INCLUDED
 

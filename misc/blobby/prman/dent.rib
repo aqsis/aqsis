@@ -1,0 +1,66 @@
+FrameBegin 0
+Display "dent.tif" "tiff" "rgba"
+Format 200 150 1
+Clipping 1e-3 1e2
+Projection "perspective" "fov" 5
+LightSource "distantlight" 1 "from" [-7 10 -7] "intensity" [0.7]
+LightSource "distantlight" 2 "from" [7 10 -7] "intensity" [0.7]
+LightSource "ambientlight" 3 "intensity" [0.1]
+Translate 0 0 30
+WorldBegin
+Imager "background" "color" [1 1 1]
+Color [.2 .6 .1]
+Surface "plastic"
+ShadingInterpolation "smooth"
+ShadingRate 1.0
+Sides 2
+TransformBegin
+Translate -.7 -.55 0
+Rotate 290 1 -1 1
+Blobby 2 [
+		1001 0
+		1001 16
+		2 2 0 1
+	] [
+		1   0 0 0  0 1   0 0  0 0 1   0   0 0   0 1
+		0.5 0 0 0  0 0.5 0 0  0 0 0.5 0   0 0.4 0 1
+	] [ "" ]
+TransformEnd
+TransformBegin
+Translate .7 -.55 0
+Rotate 140 1 -1 1
+Blobby 2 [
+		1001 0
+		1001 16
+		2 2 0 1
+	] [
+		1 0 0 0  0 1   0 0  0 0 1   0   0 0 0 1
+		5 0 0 0  0 0.4 0 0  0 0 0.4 0   0 0 0 1
+	] [ "" ]
+TransformEnd
+TransformBegin
+Translate -.7 .55 0
+Rotate 290 1 -1 1
+Blobby 2 [
+		1001 0
+		1001 16
+		4 0 1
+	] [
+		1   0 0 0  0 1   0 0  0 0 1   0   0 0   0 1
+		0.5 0 0 0  0 0.5 0 0  0 0 0.5 0   0 0.4 0 1
+	] [ "" ]
+TransformEnd
+TransformBegin
+Translate .7 .55 0
+Rotate 140 1 -1 1
+Blobby 2 [
+		1001 0
+		1001 16
+		4 0 1
+	] [
+		1 0 0 0  0 1   0 0  0 0 1   0   0 0 0 1
+		5 0 0 0  0 0.4 0 0  0 0 0.4 0   0 0 0 1
+	] [ "" ]
+TransformEnd
+WorldEnd
+FrameEnd

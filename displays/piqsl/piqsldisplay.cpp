@@ -30,10 +30,12 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <vector>
+
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
-#include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 
 #ifdef AQSIS_SYSTEM_WIN32
 	#include <winsock2.h>
@@ -46,6 +48,10 @@
 	#include <arpa/inet.h>
 	#define	INVALID_SOCKET -1
 #endif
+#ifdef AQSIS_SYSTEM_MACOSX
+  #include <Carbon/Carbon.h>
+#endif
+
 #include <tinyxml.h>
 
 #include "ndspy.h"
@@ -82,7 +88,7 @@ extern "C"
 }
 
 static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock);
-static TiXmlDocument* recvXMLMessage(CqSocket& sock);
+static boost::shared_ptr<TiXmlDocument> recvXMLMessage(CqSocket& sock);
 
 // Define a base64 encoding stream iterator using the boost archive data flow iterators.
 typedef 
@@ -191,11 +197,29 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				if (!pid)
 				{
-					// TODO: need to pass verbosity level for logginng
+#if defined AQSIS_SYSTEM_MACOSX
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
+					// TODO: need to pass verbosity level for logginng
+					signal(SIGHUP, SIG_IGN);
+					if(execvp("piqsl",argv) < 0)
+					{
+						CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
+						CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+						const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+						std::string program = pathPtr;
+						program.append("/piqsl");
+						argv[0] = strdup(program.c_str());
+						execvp(program.c_str(), argv);
+						free(argv[0]);
+					}
+					nice(2);
+#else
+					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
+					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
 					execvp("piqsl",argv);
 					nice(2);
+#endif
 				}
 			} 
 			else
@@ -346,13 +370,16 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
 			sendXMLMessage(displaydoc, pImage->m_socket);
-			TiXmlDocument* formats = recvXMLMessage(pImage->m_socket);
+			boost::shared_ptr<TiXmlDocument> formats = recvXMLMessage(pImage->m_socket);
 			TiXmlElement* child = formats->FirstChildElement("Formats");
 			if(child)
 			{
 				TiXmlElement* formatNode = child->FirstChildElement("Format");
-				// If we are recieving "rgba" data, ensure that it is in the correct order.
-				boost::shared_array<PtDspyDevFormat> outFormat(new PtDspyDevFormat[iFormatCount]);
+				// If we are recieving "rgba" data, ensure that it is in the
+				// correct order.  First copy the XML "formats" document into
+				// an array, outFormat:
+				std::vector<PtDspyDevFormat> outFormat;
+				outFormat.reserve(iFormatCount);
 				TqInt iformat = 0;
 				while(formatNode)
 				{
@@ -362,18 +389,22 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					TqInt typeID = g_mapNameToType[typeName];
 					char* name = new char[strlen(formatName)+1];
 					strcpy(name, formatName);
-					outFormat[iformat].name = name;
-					outFormat[iformat].type = typeID;
+					PtDspyDevFormat fmt = {name, typeID};
+					outFormat.push_back(fmt);
 					formatNode = formatNode->NextSiblingElement("Format");
 					iformat++;
 				}
-				PtDspyError err = DspyReorderFormatting(iFormatCount, format, Aqsis::min(iFormatCount,4), outFormat.get());
+				// Now reorder the output parameter array "format" using
+				// outFormats as a reference for the desired order.
+				PtDspyError err = DspyReorderFormatting(iFormatCount, format,
+						Aqsis::min(iFormatCount,4), &outFormat[0]);
+				for(TqInt i = 0, end = outFormat.size(); i < end; ++i)
+					delete[] outFormat[i].name;
 				if( err != PkDspyErrorNone )
 				{
 					return(err);
 				}
 			}
-			delete(formats);
 		}
 		else 
 			return(PkDspyErrorUndefined);
@@ -429,24 +460,11 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
-	SqPiqslDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
-
-	// Close the socket
-	if(pImage && pImage->m_socket)
-	{
-		TiXmlDocument doc("close.xml");
-		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
-		TiXmlElement* closeMsgXML = new TiXmlElement("Close");
-		doc.LinkEndChild(decl);
-		doc.LinkEndChild(closeMsgXML);
-		sendXMLMessage(doc, pImage->m_socket);
-	}
-
-	// Delete the image structure.
-	delete(pImage);
-
-	return(PkDspyErrorNone);
+	/// \note: This should never be called, as Aqsis will look 
+	///		  for the DspyImageDelayClose first and use that if it can.
+	///		  but just in case, it's important we get an ack from
+	///		  piqsl, so we forward the call.
+	return DspyImageDelayClose(image);
 }
 
 
@@ -464,7 +482,9 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(closeMsgXML);
 		sendXMLMessage(doc, pImage->m_socket);
+		recvXMLMessage(pImage->m_socket);
 	}
+	delete pImage;
 
 	return(PkDspyErrorNone);
 }
@@ -536,9 +556,9 @@ static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock)
 	return( sock.sendData( message.str() ) );
 }
 
-static TiXmlDocument* recvXMLMessage(CqSocket& sock)
+static boost::shared_ptr<TiXmlDocument> recvXMLMessage(CqSocket& sock)
 {
-	TiXmlDocument* xmlMsg = new TiXmlDocument();
+	boost::shared_ptr<TiXmlDocument> xmlMsg(new TiXmlDocument());
 	std::stringstream buffer;
 	int len = sock.recvData(buffer);
 	if(len > 0)
