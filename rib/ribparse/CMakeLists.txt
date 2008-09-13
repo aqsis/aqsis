@@ -1,8 +1,10 @@
 PROJECT(RIBPARSE)
 
 SET(RIBPARSE_HDRS
+	iribrequest.h
 	ribinputbuffer.h
 	riblexer.h
+	ribparse_share.h
 	ribparser.h
 	ribtoken.h
 )
@@ -15,6 +17,10 @@ SET(RIBPARSE_TEST_SRCS
 	ribinputbuffer_test.cpp
 	riblexer_test.cpp
 	ribparser_test.cpp
+)
+
+SET(RIBPARSE_INSTALL_HDRS
+	${RIBPARSE_HDRS}
 )
 
 ADD_DEFINITIONS(-DRIBPARSE_EXPORTS)
@@ -45,6 +51,8 @@ INSTALL(TARGETS ribparse
 	RUNTIME DESTINATION ${BINDIR}
 	LIBRARY DESTINATION ${LIBDIR}
 	ARCHIVE DESTINATION ${LIBDIR})
+
+INSTALL(FILES ${RIBPARSE_HDRS} DESTINATION ${INCLUDEDIR})
 
 SOURCE_GROUP("Header Files" FILES ${RIBPARSE_HDRS})
 

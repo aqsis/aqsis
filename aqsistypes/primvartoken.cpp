@@ -155,10 +155,10 @@ void CqPrimvarToken::parse(const char* tokenStr)
 // public methods
 
 CqPrimvarToken::CqPrimvarToken(const char* token)
-	: m_name(),
-	m_class(class_invalid),
+	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(1)
+	m_arraySize(1),
+	m_name()
 {
 	if(token)
 		parse(token);
@@ -169,10 +169,10 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* typeToken, const std::string& name)
-	: m_name(),
-	m_class(class_invalid),
+	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(1)
+	m_arraySize(1),
+	m_name()
 {
 	if(typeToken)
 		parse(typeToken);

@@ -52,8 +52,8 @@ class COMMON_SHARE CqPrimvarToken
 {
 	public:
 		/// Trivial constructor.
-		CqPrimvarToken(const std::string& name, EqVariableClass Class,
-				EqVariableType type, TqInt arraySize);
+		CqPrimvarToken(EqVariableClass Class, EqVariableType type,
+				TqInt arraySize, const std::string& name);
 		/** \brief Parse type and name information from an RtToken string.
 		 *
 		 * In the renderman interface, strings come bundled together in an
@@ -96,19 +96,28 @@ class COMMON_SHARE CqPrimvarToken
 		TqInt arraySize() const;
 		//@}
 
+		/** \brief Number of float/int/string elements needed by values of the
+		 * token type.
+		 *
+		 * \return The number of float/int/strings needed to store a single
+		 * element of a primitive variable of this type and array length.  For
+		 * example, a "vector[2]" would need 3*2 floats per element.
+		 */
+		TqInt storageCount() const;
+
 		/** \brief comparison operator for sorted containers.
 		 *
 		 * Having operator< implemented allows us to construct sorted
 		 * containers of CqPrimvarToken's
 		 */
-//		bool operator<(const CqPrimvarToken rhs);
+//		bool operator<(const CqPrimvarToken rhs) const;
 	private:
-		std::string m_name;
-		/// name hash for fast lookups
-//		TqUlong m_nameHash;
 		EqVariableClass m_class;
 		EqVariableType m_type;
 		TqInt m_arraySize;
+		std::string m_name;
+		/// name hash for fast lookups
+//		TqUlong m_nameHash;
 
 		/** Parse a primitive variable token
 		 *
@@ -124,12 +133,12 @@ class COMMON_SHARE CqPrimvarToken
 // Implementation details
 //==============================================================================
 
-inline CqPrimvarToken::CqPrimvarToken(const std::string& name,
-		EqVariableClass Class, EqVariableType type, TqInt arraySize)
-	: m_name(name),
-	m_class(Class),
+inline CqPrimvarToken::CqPrimvarToken(EqVariableClass Class, EqVariableType type,
+		TqInt arraySize, const std::string& name)
+	: m_class(Class),
 	m_type(type),
-	m_arraySize(arraySize)
+	m_arraySize(arraySize),
+	m_name(name)
 {
 	assert(m_arraySize > 0);
 }
@@ -152,6 +161,40 @@ inline EqVariableType CqPrimvarToken::type() const
 inline TqInt CqPrimvarToken::arraySize() const
 {
 	return m_arraySize;
+}
+
+inline TqInt CqPrimvarToken::storageCount() const
+{
+	TqInt count = 0;
+	switch(m_type)
+	{
+		case type_float:
+		case type_integer:
+		case type_bool:
+		case type_string:
+			count = 1;
+			break;
+		case type_triple:
+		case type_point:
+		case type_normal:
+		case type_vector:
+		case type_color:
+			count = 3;
+			break;
+		case type_hpoint:
+			count = 4;
+			break;
+		case type_matrix:
+		case type_sixteentuple:
+			count = 16;
+			break;
+		case type_void:
+			break;
+		default:
+			assert(0 && "storage length unknown for type");
+			break;
+	}
+	return count*m_arraySize;
 }
 
 } // namespace Aqsis
