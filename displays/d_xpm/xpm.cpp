@@ -9,8 +9,6 @@
 
 
 #include <iostream>
-#include <string.h>
-
 #undef DSPY_INTERNAL
 #include "ndspy.h"
 #include "aspXpm.h"

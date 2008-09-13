@@ -14,7 +14,7 @@
 #include	"aqsis.h"
 #include	<boost/shared_ptr.hpp>
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 struct IqTransform
 {
@@ -38,7 +38,10 @@ struct IqTransform
 };
 
 
-} // namespace Aqsis
+typedef boost::shared_ptr<IqTransform> IqTransformPtr;
+
+
+END_NAMESPACE( Aqsis )
 
 
 #endif	//	___itransform_Loaded___

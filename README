@@ -26,32 +26,31 @@ Documentation
 
 The documentation may be accessed online at the aqsis wiki:
 
-http://wiki.aqsis.org/doc/index
+http://wiki.aqsis.org
 
 
 Brief list of tools
 -------------------
 
-* Binary command line tools and graphical interfaces:
-	aqsis		-	the renderer
-	aqsl		-	the shader compiler
-	aqsltell	-	the shader inspection tool
-	eqsl		-	the toolsuite user interface
-	teqser		-	the texture pre-processor
-	miqser		-	the RIB processor
-	piqsl		-	the advanced framebuffer
+* Binary command line tools:
+   aqsis    - the renderer
+   aqsl     - the shader compiler
+   aqsltell - the shader inspection tool
+   teqser   - the texture pre-processor
+   miqser   - the RIB processor
+   piqsl	- the advanced framebuffer
 
 * Scripts:
-	mpanalyse.py	-	Analysis tool for micropolygon dump format (see scripts
-						directory).  Note that mpanalyse requires CGKit and pyOpenGL
-						as extra dependencies.
+   mpanalyse.py - Analysis tool for micropolygon dump format (see scripts
+				  directory).  Note that mpanalyse requires CGKit and pyOpenGL
+				  as extra dependencies.
 
 
 License
 -------
 
 Aqsis is licensed under the GNU GPL.  See the COPYING file for details.
-libri2rib is licensed under the GNU LGPL. See the rib/ri2rib/COPYING_LGPL file
+libri2rib is licensed under the GNU LGPL. See the libri2rib/COPYING_LGPL file
 for details.
 
 
@@ -84,7 +83,7 @@ zlib    - http://www.zlib.net
 
 
 Happy Rendering!
-- Aqsis Team
+Aqsis Team
 
 
 ----------------------------------------------------------------------

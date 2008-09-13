@@ -27,15 +27,11 @@
 #include	"aqsis.h"
 #include	"logging.h"
 #include	"logging_streambufs.h"
-#include	"file.h"
 
 #include	<iostream>
 #include	<fstream>
 #include	<sstream>
-#include	<cstdlib>
-#include	<cstring>
-#include	<string>
-#include	<vector>
+#include	<stdio.h>
 #include	<boost/scoped_ptr.hpp>
 
 #ifdef	AQSIS_SYSTEM_WIN32
@@ -52,12 +48,6 @@
 
 #include	"version.h"
 
-//  Setup wave, and the cpp lexer
-#include <boost/wave.hpp>
-#include <boost/wave/cpplexer/cpp_lex_token.hpp>    // token class
-#include <boost/wave/cpplexer/cpp_lex_iterator.hpp> // lexer class
-
-//
 using namespace Aqsis;
 
 extern "C" void PreProcess(int argc, char** argv);
@@ -70,7 +60,6 @@ ArgParse::apstringvec g_includes; // Filled in with strings to pass to the prepr
 ArgParse::apstringvec g_undefines; // Filled in with strings to pass to the preprocessor
 ArgParse::apstring g_backendName = "slx"; /// Name for the comipler backend.
 
-bool g_dumpsl = 0;
 bool g_cl_no_color = false;
 bool g_cl_syslog = false;
 ArgParse::apint g_cl_verbose = 1;
@@ -79,6 +68,18 @@ void version( std::ostream& Stream )
 {
 	Stream << "aqsl version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
+
+
+const char* g_slppDefArgs[] =
+    {
+        "slpp",
+        "-d",
+        "PI=3.141592654",
+        "-d",
+        "AQSIS",
+        "-c6",
+    };
+int g_cslppDefArgs = sizeof( g_slppDefArgs ) / sizeof( g_slppDefArgs[0] );
 
 
 /** Process the sl file from stdin and produce an slx bytestream.
@@ -98,12 +99,8 @@ int main( int argc, const char** argv )
 	ap.argString( "backend", " %s \aCompiler backend (default %default).  Possibilities include \"slx\" or \"dot\":\a"
 			      "slx - produce a compiled shader (in the aqsis shader VM stack language)\a"
 				  "dot - make a graphviz visualization of the parse tree (useful for debugging only).", &g_backendName );
-	ap.argFlag( "help", "\aPrint this help and exit", &g_help );
-	ap.alias("help", "h");
-	ap.argFlag( "version", "\aPrint version information and exit", &g_version );
-	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
-	ap.alias( "nocolor" , "nc" );
-	ap.argFlag( "d", "\adump sl data", &g_dumpsl );
+	ap.argFlag( "help", "\aprint this help and exit", &g_help );
+	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 			   "\a0 = errors\n"
 			   "\a1 = warnings (default)\n"
@@ -157,156 +154,128 @@ int main( int argc, const char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-	if ( ap.leftovers().size() == 0 )
+	// Create a code generator for the requested backend.
+	if(g_backendName == "slx")
+		codeGenerator.reset(new CqCodeGenVM());
+	else if(g_backendName == "dot")
+		codeGenerator.reset(new CqCodeGenGraphviz());
+	else
 	{
+		std::cout << "Unknown backend type: \"" << g_backendName << "\", assuming slx.";
+		codeGenerator.reset(new CqCodeGenVM());
+	}
+
+	// Pass the shader file through the slpp preprocessor first to generate a temporary file.
+	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
+	{
+		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
+		//	codeGenerator->OutputTree( GetParseTree(), g_stroutname );
 		std::cout << ap.usagemsg();
 		exit( 0 );
 	}
 	else
 	{
+		const char* _template = "slppXXXXXX";
+		char ifile[11];
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
-			//Expand filenames
-			std::list<CqString*> files = Aqsis::CqFile::cliGlob(*e);
-			std::list<CqString*>::iterator it;
-			for(it = files.begin(); it != files.end(); ++it){ 
-				ResetParser();
-				// Create a code generator for the requested backend.
-				if(g_backendName == "slx")
-					codeGenerator.reset(new CqCodeGenVM());
-				else if(g_backendName == "dot")
-					codeGenerator.reset(new CqCodeGenGraphviz());
-				else
-				{
-					std::cout << "Unknown backend type: \"" << g_backendName << "\", assuming slx.";
-					codeGenerator.reset(new CqCodeGenVM());
-				}
-				// current file position is saved for exception handling
-				boost::wave::util::file_position_type current_position;
+			FILE *file = fopen( e->c_str(), "rb" );
+			if ( file != NULL )
+			{
+				fclose(file);
+				strcpy( ifile, _template );
+				char* tempname;
+#ifdef	AQSIS_SYSTEM_WIN32
 
-				try
+				tempname = _mktemp( ifile );
+#else
+
+				tempname = mktemp( ifile );
+#endif //AQSIS_SYSTEM_WIN32
+
+				if( NULL != tempname )
 				{
-					//  Open and read in the specified input file.
-					std::ifstream instream((*it)->c_str());
-					std::string instring;
-	
-					if (!instream.is_open()) 
+					// Build the arguments array for slpp.
+					std::vector<char*>	slppArgs;
+					for ( int defArg = 0; defArg != g_cslppDefArgs; defArg++ )
 					{
-						std::cerr << "Could not open input file: " << (*it)->c_str() << std::endl;
-						continue;
+						char* Arg = new char[strlen(g_slppDefArgs[ defArg ]) + 1];
+						sprintf( Arg, g_slppDefArgs[ defArg ] );
+						slppArgs.push_back(Arg);
 					}
-					instream.unsetf(std::ios::skipws);
-					instring = std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
-					    std::istreambuf_iterator<char>());
-	
-					typedef boost::wave::cpplexer::lex_token<> token_type;
-					typedef boost::wave::cpplexer::lex_iterator<token_type> lex_iterator_type;
-					typedef boost::wave::context<std::string::iterator, lex_iterator_type>
-					    context_type;
-					context_type ctx (instring.begin(), instring.end(), (*it)->c_str());
+
+					// Append the -d arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
+					{
+						char* Arg = new char[strlen("-d") + 1];
+						strcpy( Arg, "-d" );
+						slppArgs.push_back(Arg);
+						Arg = new char[define->size() + 1];
+						strcpy( Arg, define->c_str() );
+						slppArgs.push_back(Arg);
+					}
 
 					// Append the -i arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
 					{
-						ctx.add_sysinclude_path( include->c_str() );
-						ctx.add_include_path( include->c_str() );
+						char* Arg = new char[strlen("-i") + 1];
+						strcpy( Arg, "-i" );
+						slppArgs.push_back(Arg);
+						Arg = new char[include->size() + 1];
+						strcpy( Arg, include->c_str() );
+						slppArgs.push_back(Arg);
 					}
-  
-					// Setup the default defines.
-					ctx.add_macro_definition( "AQSIS" );
-					ctx.add_macro_definition( "PI=3.141592654" );
-  
-					// Append the -d arguments passed in to forward them to the preprocessor.
-					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
-					{
-						ctx.add_macro_definition( define->c_str() );
-					}
-  
+
 					// Append the -u arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
 					{
-						ctx.remove_macro_definition( undefine->c_str() );
+						char* Arg = new char[strlen("-u") + 1];
+						strcpy( Arg, "-u" );
+						slppArgs.push_back(Arg);
+						Arg = new char[undefine->size() + 1];
+						strcpy( Arg, undefine->c_str() );
+						slppArgs.push_back(Arg);
 					}
-  
-					// analyze the input file
-					context_type::iterator_type first = ctx.begin();
-					context_type::iterator_type last = ctx.end();
 
-					std::stringstream preprocessed(std::stringstream::in | std::stringstream::out);
-					std::ofstream dumpfile;
-					if( g_dumpsl )
-					{
-						std::string dumpfname((*it)->c_str());
-						dumpfname.append(".pp");
-						dumpfile.open(dumpfname.c_str());
-					};
+					// Set the output filename.
+					char* Arg = new char[strlen("-o") + 1];
+					strcpy( Arg, "-o" );
+					slppArgs.push_back(Arg);
+					Arg = new char[strlen(tempname) + 1];
+					strcpy( Arg, tempname );
+					slppArgs.push_back(Arg);
 
-					while (first != last) 
-					{
-						current_position = (*first).get_position();
-						preprocessed << (*first).get_value();
-						dumpfile << (*first).get_value();
+					// Set the input filename.
+					char* fileArg = new char[e->size() + 1];
+					sprintf( fileArg, e->c_str() );
+					slppArgs.push_back(fileArg);
 
-						try
-						{
-							++first	;
-						}
-						catch (boost::wave::preprocess_exception &e) 
-  						{
-							Aqsis::log() 
-							<< e.file_name() << "(" << e.line_no() << "): "
-							<< e.description() << std::endl;
-							if (e.get_errorcode() == ::boost::wave::preprocess_exception::last_line_not_terminated )
-							{
-								preprocessed << std::endl;
-								dumpfile << std::endl;
-								break;
-							};
-  						}
-						catch (...) 
-						{
-							throw &e;
-						}
+					PreProcess(slppArgs.size(),&slppArgs[0]);
 
-					};
-  
-					if( dumpfile.is_open() )
-						dumpfile.close();
-  
-					if ( Parse( preprocessed, e->c_str(), Aqsis::log() ) )
+					std::ifstream ppfile( tempname );
+					if ( Parse( ppfile, e->c_str(), Aqsis::log() ) )
 						codeGenerator->OutputTree( GetParseTree(), g_stroutname );
 					else
 						error = true;
+
+					// Delete the temporary file.
+					ppfile.close();
+					remove
+						(tempname);
 				}
-				catch (boost::wave::cpp_exception &e) 
+				else
 				{
-					// some preprocessing error
-					Aqsis::log() 
-					<< e.file_name() << "(" << e.line_no() << "): "
-					<< e.description() << std::endl;
-					continue;
-				}
-				catch (std::exception &e)
-				{
-					// use last recognized token to retrieve the error position
-					Aqsis::log() << current_position.get_file()
-				        << "(" << current_position.get_line() << "): "
-				        << "exception caught: " << e.what()
-				        << std::endl;
-					continue;
-				}
-				catch (...) {
-					// use last recognized token to retrieve the error position
-					Aqsis::log() << current_position.get_file()
-					<< "(" << current_position.get_line() << "): "
-					<< "unexpected exception caught." << std::endl;
-					continue;
+					std::cout << "Could not create temporary file for preprocessing." << std::endl;
+					exit( -1 );
 				}
 			}
-		};
+			else
+			{
+				std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+			}
+		}
 	}
 
-	return error;
+	return error ? -1 : 0;
 }
-
 

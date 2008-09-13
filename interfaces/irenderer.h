@@ -8,16 +8,16 @@
  *	Last change date:	$Date$
  */
 //------------------------------------------------------------------------------
-#ifndef	IRENDERER_H_INCLUDED
-#define	IRENDERER_H_INCLUDED
+#ifndef	___irenderer_Loaded___
+#define	___irenderer_Loaded___
 
-#include "matrix.h"
-#include "itransform.h"
+#include	"matrix.h"
+//#include	"symbols.h"
+#include 	"itransform.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
-struct IqTextureMapOld;
-class CqTextureCache;
+struct IqTextureMap;
 class CqObjectInstance;
 
 struct IqRenderer
@@ -27,9 +27,9 @@ struct IqRenderer
 
 	// Handle various coordinate system transformation requirements.
 
-	virtual	bool	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result ) = 0;
-	virtual	bool	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result) = 0;
-	virtual	bool	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result ) = 0;
+	virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time ) = 0;
+	virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time ) = 0;
+	virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time ) = 0;
 
 	virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const = 0;
 	virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const = 0;
@@ -53,30 +53,16 @@ struct IqRenderer
 	 */
 	virtual	void	PrintString( const char* str ) = 0;
 
-	//--------------------------------------------------
-	/// \name Texture map access
-	//@{
-	/** \brief Get a reference to the texture cache.
-	 *
-	 * \param fileName - File name to search for in the texture resource path.
-	 * \return the texture sampler (always valid).
+	/*
+	 *  Access to the texture map handling component
 	 */
-	virtual	CqTextureCache& textureCache() = 0;
 
-	/// \deprecated
-	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;
-	/// \deprecated
-	virtual	IqTextureMapOld* GetOcclusionMap( const CqString& fileName ) = 0;
-	/// \deprecated
-	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
-	//@}
-
-	/** \brief Return the current texture search path.
-	 *
-	 * This is used as a callback function by the texture library to obtain
-	 * the texture search path when necessary.
+	/** Get a pointer to a loaded texturemap ready for processing.
 	 */
-	virtual const char* textureSearchPath() = 0;
+	virtual	IqTextureMap* GetTextureMap( const CqString& strFileName ) = 0;
+	virtual	IqTextureMap* GetEnvironmentMap( const CqString& strName ) = 0;
+	virtual	IqTextureMap* GetShadowMap( const CqString& strName ) = 0;
+	virtual	IqTextureMap* GetLatLongMap( const CqString& strName ) = 0;
 
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
@@ -102,6 +88,6 @@ IqRenderer* QGetRenderContextI();
 
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
-#endif //IRENDERER_H_INCLUDED
+#endif	//	___irenderer_Loaded___

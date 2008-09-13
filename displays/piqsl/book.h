@@ -35,7 +35,7 @@
 #include	"aqsis.h"
 #include	"ndspy.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 class CqFramebuffer;
 class CqImage;
@@ -135,6 +135,6 @@ inline TqUlong CqBook::numImages() const
 }
 
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	// BOOK_H_INCLUDED

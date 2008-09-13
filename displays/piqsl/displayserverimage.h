@@ -35,7 +35,7 @@
 #include	"image.h"
 #include	"socket.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 struct SqDDMessageBase;
 struct SqDDMessageData;
@@ -113,6 +113,6 @@ inline const CqSocket& CqDisplayServerImage::socket() const
 }
 
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	// DDSERVER_H_INCLUDED

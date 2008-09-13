@@ -53,8 +53,7 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image);
 		virtual ~Fl_FrameBuffer_Widget() {}
 
-		inline void setImage(boost::shared_ptr<Aqsis::CqImage>& image);
-		inline boost::shared_ptr<Aqsis::CqImage>& image();
+		void setImage(boost::shared_ptr<Aqsis::CqImage>& image);
 
 		virtual void draw();
 
@@ -63,7 +62,7 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 };
 
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 /** \class CqFramebuffer
@@ -150,18 +149,6 @@ public:
 	static const int defaultHeight; ///< Default framebuffer height.
 
 private:
-	/** \brief Increment the current image zoom level
-	 *
-	 * \param increment - amount to increase or decrease the current zoom by.
-	 */
-	void incZoom(TqInt increment);
-	/** \brief Modify the current sub image level
-	 *
-	 * \param increase - If true, increase the sub image index, else decrease it.
-	 */
-	void incSubImage(bool increase);
-
-
 	Fl_FrameBuffer_Widget* m_uiImageWidget;			///< The custom image widget.
 	Fl_Menu_Button* m_popupMenu;					///< The right click menu widget.
 	Fl_Scroll *m_scroll;
@@ -205,7 +192,7 @@ inline boost::mutex& CqFramebuffer::mutex()
 	return(m_mutex);
 }
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW,
 		int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : 
@@ -217,11 +204,6 @@ inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW,
 inline void Fl_FrameBuffer_Widget::setImage(boost::shared_ptr<Aqsis::CqImage>& image)
 {
 	m_image = image;
-}
-
-inline boost::shared_ptr<Aqsis::CqImage>& Fl_FrameBuffer_Widget::image()
-{
-	return m_image;
 }
 
 #endif	// FRAMEBUFFER_H_INCLUDED

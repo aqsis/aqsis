@@ -38,9 +38,8 @@
 #include	"displayserverimage.h"
 #include	"aqsismath.h"
 #include 	"logging.h"
-#include	"smartptr.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 /** Close the socket this client is associated with.
@@ -53,9 +52,13 @@ void CqDisplayServerImage::close()
 
 //----------------------------------------------------------------------
 
+/// Do-nothing deleter for holding non-reference counted data in a boost::shared_ptr/array.
+void nullDeleter(const void*)
+{ }
+
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	assert(elementSize == m_realData->channelList().bytesPerPixel());
+	assert(elementSize == m_realData->bytesPerPixel());
 
 	// yuck.  To fix the casts, refactor Image to use signed ints.
 	TqInt cropXmin = static_cast<TqInt>(xmin) - static_cast<TqInt>(m_originX);
@@ -68,7 +71,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
 		// C++
-		const CqMixedImageBuffer bucketBuf(m_realData->channelList(),
+		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
 				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData),
 					nullDeleter), xmaxplus1 - xmin, ymaxplus1 - ymin);
 
@@ -99,7 +102,7 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 	}
 		
 	setFilename(strFilename.str());
-	saveToFile(strFilename.str());
+	saveToTiff(strFilename.str());
 }
 
 
@@ -137,8 +140,8 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
 		size_t dataLen = m_displayData->width() * m_displayData->height() * numChannels() * sizeof(TqUchar);
-		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData())), 
-					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData() + dataLen)), 
+		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get())), 
+					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
 		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
 		dataTextXML->SetCDATA(true);
@@ -156,4 +159,4 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	return(imageXML);
 }
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )

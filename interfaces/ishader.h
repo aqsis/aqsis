@@ -14,12 +14,12 @@
 #define	___ishader_Loaded___
 
 #include	"aqsis.h"
-#include	"interfacefwd.h"
+#include	"itransform.h"
 #include	"iparameter.h"
 #include	<boost/shared_ptr.hpp>
 
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 
 //----------------------------------------------------------------------
@@ -79,11 +79,11 @@ struct IqShader
 	 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
 	 * \return Boolean indicating the parameter existed and res was of an appropriate type.
 	 */
-	virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const = 0;
+	virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) = 0;
 	/** Evaluate the shader code.
 	 * \param pEnv The shader execution environment to evaluate within.
 	 */
-	virtual	void	Evaluate( IqShaderExecEnv* pEnv ) = 0;
+	virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
 	/** Initialise the state of any arguments with default values.
 	 */
 	virtual	void	PrepareDefArgs() = 0;
@@ -92,7 +92,7 @@ struct IqShader
 	 * \param vGridRes The resolution of the grid being shaded in v
 	 * \param pEnv Pointer to the IqShaderExecEnv to evaluate within.
 	 */
-	virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, IqShaderExecEnv* pEnv ) = 0;
+	virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
 	/** Determine whether this shader is an aambient ligthsource shader.
 	 * i.e. A lightsource shader with no Illuminate or Solar constructs.
 	 */
@@ -100,7 +100,7 @@ struct IqShader
 	/** Duplicate this shader.
 	 * \return A pointer to a new shader.
 	 */
-	virtual boost::shared_ptr<IqShader> Clone() const = 0;
+	virtual IqShader*	Clone() const = 0;
 	/** Determine whether this shader uses the specified system variable.
 	 * \param Var ID of the variable from EqEnvVars.
 	 */
@@ -135,6 +135,6 @@ struct IqShader
 
 
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	//	___ishader_Loaded___

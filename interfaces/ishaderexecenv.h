@@ -34,10 +34,13 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"bitvector.h"
-#include	"interfacefwd.h"
+//#include 	"shadeop.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
+struct IqSurface;
+struct IqAttributes;
+struct IqTransform;
 struct IqShader;
 struct IqRenderer;
 
@@ -128,13 +131,7 @@ struct IqShaderExecEnv
 	virtual	~IqShaderExecEnv()
 	{}
 
-	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
-		TqInt microPolygonCount, TqInt shadingPointCount, 
-		bool hasValidDerivatives,
-		const IqConstAttributesPtr& pAttr, 
-		const IqConstTransformPtr& pTrans, 
-		IqShader* pShader, 
-		TqInt Uses ) = 0;
+	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
 	/** Get grid size in u
 	 */
 	virtual	TqInt	uGridRes() const = 0;
@@ -152,10 +149,10 @@ struct IqShaderExecEnv
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;
 	/** Get a pointer to the associated attributes.
 	 */
-	virtual	const IqConstAttributesPtr pAttributes() const = 0;
+	virtual	const IqAttributes*	pAttributes() const = 0;
 	/** Get a pointer to the associated transform.
 	 */
-	virtual	const IqConstTransformPtr pTransform() const = 0;
+	virtual	boost::shared_ptr<const IqTransform>	pTransform() const = 0;
 	/** Set the pointer to the currently being lit surface
 	 */
 	virtual void SetCurrentSurface(IqSurface* pEnv) = 0;
@@ -174,7 +171,7 @@ struct IqShaderExecEnv
 	virtual	CqBitVector& CurrentState() = 0;
 	/** Get the running execution state. Bits in the vector indicate which SIMD indexes are valid.
 	 */
-	virtual	const CqBitVector& RunningState() const = 0;
+	virtual	CqBitVector& RunningState() = 0;
 	/** Transfer the current state into the running state.
 	 */
 	virtual	void	GetCurrentState() = 0;
@@ -200,14 +197,6 @@ struct IqShaderExecEnv
 	 * current loop scope.
 	 */
 	virtual void RunningStatesBreak(TqInt numLevels) = 0;
-	/** \brief Determine if any of the current running state bits are set.
-	 *
-	 * Use this in preference to RunningState().Count() != 0, since it may be
-	 * cached for efficiency.
-	 *
-	 * \return true if any SIMD elements are currently running.
-	 */
-	virtual bool IsRunning() = 0;
 	/** Find a named standard variable in the list.
 	 * \param pname Character pointer to the name.
 	 * \return IqShaderData pointer or 0.
@@ -571,9 +560,85 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 }
 
 
+/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to a second stack entry.
+ */
+template <class R>
+R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* ps )
+{
+	assert( NULL != Var );
+
+	R Retu, Retv;
+	TqInt uRes = ps->uGridRes();
+	TqInt vRes = ps->vGridRes();
+	TqInt GridX = i % ( uRes + 1 );
+	TqInt GridY = ( i / ( uRes + 1 ) );
+
+	R val1, val2;
+	TqFloat u1 = 1.0f, u2 = 0.0f, v1 = 1.0f, v2 = 0.0f;
+
+	// Calculate deriviative in u
+	if ( GridX < uRes )
+	{
+		Var->GetValue( val1, i + 1 );
+		Var->GetValue( val2, i );
+		if ( NULL != den )
+		{
+			den->GetValue( u1, i + 1 );
+			den->GetValue( u2, i );
+		}
+		Retu = val1 - val2;
+		if( u1 != u2 )
+			Retu /= ( u1 - u2 );
+	}
+	else
+	{
+		Var->GetValue( val1, i );
+		Var->GetValue( val2, i - 1 );
+		if ( NULL != den )
+		{
+			den->GetValue( u1, i );
+			den->GetValue( u2, i - 1 );
+		}
+		Retu = val2 - val1;
+		if( u1 != u2 )
+			Retu /= ( u2 - u1 );
+	}
+
+	// Calculate deriviative in v
+	if ( GridY < vRes )
+	{
+		Var->GetValue( val1, i + uRes + 1 );
+		Var->GetValue( val2, i );
+		if ( NULL != den )
+		{
+			den->GetValue( v1, i + uRes + 1 );
+			den->GetValue( v2, i );
+		}
+		Retv = val1 - val2;
+		if( v1 != v2 )
+			Retv /= ( v1 - v2 );
+	}
+	else
+	{
+		Var->GetValue( val1, i );
+		Var->GetValue( val2, i - ( uRes - 1 ) );
+		if ( NULL != den )
+		{
+			den->GetValue( v1, i );
+			den->GetValue( v2, i - ( uRes - 1 ) );
+		}
+		Retv = val2 - val1;
+		if( v1 != v2 )
+			Retv /=  ( v2 - v1 );
+	}
+
+	return ( Retu + Retv );
+}
+
+
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 
 #endif	//	___ishadervariable_Loaded___

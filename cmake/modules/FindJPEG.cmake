@@ -1,4 +1,4 @@
-# Custom Aqsis specific version of FindJPEG
+# Custom Aqsis specific version of FindTIFF
 SET(AQSIS_JPEG_FOUND 0)
 
 SET(AQSIS_JPEG_INCLUDE_SEARCHPATH)
@@ -9,9 +9,6 @@ IF(WIN32)
 		SET(AQSIS_JPEG_INCLUDE_SEARCHPATH ${AQSIS_JPEG_INCLUDE_SEARCHPATH} ${AQSIS_WIN32LIBS}/jpeg/include)
 		IF(MSVC AND MSVC80)
 			SET(AQSIS_JPEG_LIBRARIES_DIR ${AQSIS_WIN32LIBS}/jpeg/lib/vc8 CACHE PATH "Semi-colon separated list of paths to search for jpeg libraries")
-			SET(AQSIS_JPEG_LIBRARY_NAMES ${AQSIS_JPEG_LIBRARY_NAMES} libjpeg)
-		ELSEIF(MSVC AND MSVC90)
-			SET(AQSIS_JPEG_LIBRARIES_DIR ${AQSIS_WIN32LIBS}/jpeg/lib/vc9 CACHE PATH "Semi-colon separated list of paths to search for jpeg libraries")
 			SET(AQSIS_JPEG_LIBRARY_NAMES ${AQSIS_JPEG_LIBRARY_NAMES} libjpeg)
 		ELSE(MSVC AND MSVC80)
 			IF(MINGW)

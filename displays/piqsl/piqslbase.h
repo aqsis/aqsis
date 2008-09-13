@@ -39,7 +39,7 @@
 #include "logging.h"
 #include "book.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 /** \class CqPiqslBase
  * \brief Base class from which the main UI window derives.
@@ -170,6 +170,6 @@ inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksEnd()
 
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	//	___display_Loaded___

@@ -35,7 +35,6 @@ MACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
    SET(${OUTPUT} ${FOUT})
 ENDMACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
 
-
 #----------------------------------------------------------------------
 #
 # Macro which calls the SET command if the variable to be set is currently
@@ -53,59 +52,6 @@ MACRO(SET_IF_EMPTY var)
 	ENDIF(var_EMPTY)
 ENDMACRO(SET_IF_EMPTY)
 
-
-#----------------------------------------------------------------------
-# Determine whether an input path is absolute.  This is a real mess; there's a
-# way to fix it in cmake-2.4.8 and later using IF(IS_ABSOLUTE ...) but we don't
-# want to depend on that yet.
-#
-# The algorithm here is roughly a clone of the version found in the C++ source
-# code of cmake-2.6.0.  I'm not entirely sure if that's the right thing to do...
-MACRO(CHECK_PATH_ABSOLUTE input_path path_is_absolute)
-	SET(${path_is_absolute} FALSE)
-	STRING(LENGTH "${input_path}" _input_length)
-	IF(${_input_length} GREATER 0)
-		# Note: I've left out matching paths starting with a \ on windows,
-		# since I've no idea how to handle these WRT cmake string escape
-		# sequences - they play terribly badly.
-		IF(CYGWIN)
-			# Windows with cygwin
-			SET(_abs_path_regex_str "^(/|~|.:)")
-		ELSEIF(WIN32)
-			# Windows
-			SET(_abs_path_regex_str "^(/|.:)")
-		ELSE(CYGWIN)
-			# Unix
-			SET(_abs_path_regex_str "^(/|~)")
-		ENDIF(CYGWIN)
-		STRING(REGEX MATCH ${_abs_path_regex_str} _path_match "${input_path}")
-		STRING(LENGTH "${_path_match}" _match_length)
-		IF(${_match_length} GREATER 0)
-			SET(${path_is_absolute} TRUE)
-		ENDIF(${_match_length} GREATER 0)
-	ENDIF(${_input_length} GREATER 0)
-ENDMACRO(CHECK_PATH_ABSOLUTE)
-
-
-#----------------------------------------------------------------------
-# Macro to prefix an input path with another path if the input path is not absolute.
-#
-# Input:
-#   input_path
-#   path_prefix - prefix for input_path
-# Output:
-#   output_path = path_prefix/input_path if input_path is relative
-#               = input_path if input_path is absolute.
-MACRO(SET_WITH_PATH_PREFIX output_path input_path path_prefix)
-	CHECK_PATH_ABSOLUTE("${input_path}" _input_path_is_absolute)
-	IF(_input_path_is_absolute)
-		SET(${output_path} "${input_path}")
-	ELSE(_input_path_is_absolute)
-		SET(${output_path} "${path_prefix}/${input_path}")
-	ENDIF(_input_path_is_absolute)
-ENDMACRO(SET_WITH_PATH_PREFIX)
-
-
 #----------------------------------------------------------------------
 # Macro to get the svn revision number
 MACRO( SVN_REPOSITORY_VERSION DESTVAR TOPDIR )
@@ -114,17 +60,10 @@ MACRO( SVN_REPOSITORY_VERSION DESTVAR TOPDIR )
 	ENDIF(NOT ${AQSIS_SVNVERSION_EXECUTABLE} STREQUAL "AQSIS_SVNVERSION_EXECUTABLE-NOTFOUND")
 ENDMACRO ( SVN_REPOSITORY_VERSION )
 
-
 #----------------------------------------------------------------------
 # Facilities for adding unit tests to the build
 
 IF(AQSIS_ENABLE_TESTING)
-
-	# Enable testing.  This causes the ADD_TEST command to emit code.  We don't
-	# really use this inbuilt facility, instead relying on the value of the
-	# AQSIS_ENABLE_TESTING variable.  We just need to turn it on.
-	ENABLE_TESTING()
-
 
 	# AQSIS_ADD_TESTS(SOURCE_LIST LINK_LIBS)
 	#

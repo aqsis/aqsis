@@ -21,12 +21,12 @@
 #include	"color.h"
 
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
-enum ShadingInterpolation
+enum	ShadingInterpolation
 {
-	ShadingInterp_Constant,	///< use constant shading, i.e. one value per micropoly.
-	ShadingInterp_Smooth,	///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
+    ShadingConstant,    	///< use constant shading, i.e. one value per micropoly.
+    ShadingSmooth,    		///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
 };
 
 
@@ -155,11 +155,21 @@ struct IqAttributes
 	virtual	void	SetpshadInteriorVolume( const boost::shared_ptr<IqShader>& pshadInteriorVolume, TqFloat time ) = 0;
 
 	virtual	TqUint	cLights() const	= 0;
-	virtual	IqLightsource*	pLight( TqInt index ) const = 0;
+	virtual	IqLightsource*	pLight( TqInt index ) = 0;
+#ifndef _DEBUG
+
+	virtual	void	AddRef() = 0;
+	virtual	void	Release() = 0;
+#else
+
+	virtual void AddRef(const TqChar* file, TqInt line) = 0;
+	virtual void Release(const TqChar* file, TqInt line) = 0;
+#endif
 };
+
 
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	//	___iattributes_Loaded___

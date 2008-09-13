@@ -36,14 +36,14 @@ void Fl_FrameBuffer_Widget::draw()
 	fl_rectf(x(), y(), w(), h());
 	if(m_image)
 	{
-		boost::shared_ptr<const Aqsis::CqMixedImageBuffer> buf = m_image->displayBuffer();
+		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
 		if(buf)
 		{
-			fl_draw_image(buf->rawData(),
+			fl_draw_image(buf->rawData().get(),
 				x()+m_image->originX(), y()+m_image->originY(),
 				buf->width(), buf->height(),
-				buf->channelList().numChannels(),
-				0); // draw image
+				buf->numChannels(),
+				buf->width()*buf->numChannels()); // draw image
 		}
 	}
 	else
@@ -56,7 +56,7 @@ void Fl_FrameBuffer_Widget::draw()
 
 extern CqPiqslMainWindow* window;
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 void piqsl_cb(Fl_Widget* w, void* v);
 
@@ -141,53 +141,34 @@ int CqFramebuffer::handle(int event)
 		case FL_UNFOCUS:
 			return 1;
 		case FL_KEYDOWN:
+			if (!m_keyHeld)
 			{
-				boost::shared_ptr<Aqsis::CqImage>& image
-					= m_uiImageWidget->image();
-				int key = Fl::event_key();
-				if(Fl::event_ctrl())
+				m_keyHeld = true;
+				//std::cout << "Key: " << Fl::event_key() << " down" << std::endl;
+				switch (Fl::event_key())
 				{
-					switch(key)
-					{
-						case FL_KP + '+':
-							incSubImage(true);
-							return 1;
-						case FL_KP + '-':
-							incSubImage(false);
-							return 1;
-					}
-				}
-				else if(Fl::event_shift())
-				{
-					switch(key)
-					{
-						case 'r':
-							if(image)
-								image->reloadFromFile();
-							return 1;
-					}
-				}
-				else
-				{
-					switch(key)
-					{
-						case 'h':
-							// 'Home' widget back to center
-							centerImageWidget();
-							m_scroll->redraw();
-							return 1;
-						case FL_KP + '+':
-							incZoom(1);
-							return 1;
-						case FL_KP + '-':
-							incZoom(-1);
-							return 1;
-					}
+					case 'r':
+						//std::cout << "Red channel toggle" << std::endl;
+						return 1;
+					case 'h':
+						// 'Home' widget back to center
+						centerImageWidget();
+						m_scroll->redraw();
+						return 1;
 				}
 			}
 			break;
+
 		case FL_KEYUP:
+			m_keyHeld = false;
+			switch (Fl::event_key())
+			{
+				case 'r':
+					//std::cout << "R up" << std::endl;
+					return 1;
+			}
 			break;
+
 		case FL_PUSH:
 			switch (Fl::event_button())
 			{
@@ -196,6 +177,7 @@ int CqFramebuffer::handle(int event)
 					m_lastPos[0] = Fl::event_x();
 					m_lastPos[1] = Fl::event_y();
 					return 1;
+
 			}
 			break;
 		case FL_RELEASE:
@@ -221,15 +203,6 @@ int CqFramebuffer::handle(int event)
 					m_lastPos[0] = Fl::event_x();
 					m_lastPos[1] = Fl::event_y();
 					return 1;
-			}
-			break;
-		case FL_MOUSEWHEEL:
-			{
-				if(Fl::event_ctrl())
-					incSubImage(Fl::event_dy() < 0);
-				else 
-					incZoom(-Fl::event_dy());
-				return 1;
 			}
 			break;
 	}
@@ -316,9 +289,6 @@ void CqFramebuffer::resize()
 		title << ": " << m_associatedImage->name();
 	}
 	m_uiImageWidget->size(fw, fh);
-	// Resize the window if it's too small, leave it if it's big enough or bigger.
-	if( w() < fw || h() < fh )
-		resize(x(), y(), min(fw, static_cast<int>(Fl::w()*0.9)), min(fh, static_cast<int>(Fl::h()*0.9)));
 	centerImageWidget();
 	redraw();
 
@@ -347,41 +317,4 @@ void CqFramebuffer::checkResize()
 		resize();
 }
 
-void CqFramebuffer::incZoom(TqInt increment)
-{
-	boost::shared_ptr<Aqsis::CqImage>& image = m_uiImageWidget->image();
-	if(!image)
-		return;
-
-	TqInt newZoom = image->zoom() + increment;
-	// Only zoom if the new image will be "small enough".
-	/// \todo This restriction should be lifted once we fix the zoom support with a proper image zooming widget.
-	if( newZoom > 0 && (increment < 0
-		|| newZoom * image->imageWidth() * image->imageHeight() < 8000*8000) )
-	{
-		image->setZoom(newZoom);
-		m_scroll->redraw();
-		queueResize();
-	}
-}
-
-void CqFramebuffer::incSubImage(bool increase)
-{
-	boost::shared_ptr<Aqsis::CqImage>& image = m_uiImageWidget->image();
-	if(!image)
-		return;
-
-	// Reset zoom level for safety.
-	/// \todo Fix this when we get a proper image zooming widget!
-	image->setZoom(1);
-
-	if(increase)
-		image->loadNextSubImage();
-	else
-		image->loadPrevSubImage();
-	m_scroll->redraw();
-	queueResize();
-}
-
-
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )

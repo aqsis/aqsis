@@ -33,7 +33,7 @@
 #include	"image.h"
 #include	"sstring.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 int CqBookBrowser::handle(int e) 
 {
@@ -289,4 +289,4 @@ int CqBookBrowser::which_col_near_mouse()
 	return(-1);
 }
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )

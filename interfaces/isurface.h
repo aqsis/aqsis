@@ -18,11 +18,11 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"ibound.h"
-#include	"interfacefwd.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 
+struct IqAttributes;
 struct IqTransform;
 class CqParameter;
 struct IqShaderData;
@@ -68,11 +68,11 @@ struct IqSurface
 	/** Get a pointer to the attributes state associated with this GPrim.
 	 * \return A pointer to a CqAttributes class.
 	 */
-	virtual IqAttributesPtr pAttributes() const = 0;
+	virtual IqAttributes* pAttributes() const = 0;
 	/** Get a pointer to the transformation state associated with this GPrim.
 	 * \return A pointer to a CqTransform class.
 	 */
-	virtual IqTransformPtr pTransform() const = 0;
+	virtual boost::shared_ptr<IqTransform> pTransform() const = 0;
 	/** Perform any precalculation required before dicing.
 	 *  \param uDiceSize Size that the surface will be diced to in u.
 	 *  \param vDiceSize Size that the surface will be diced to in u.
@@ -114,7 +114,7 @@ struct IqSurface
 };
 
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 
 #endif	//	___isurface_Loaded___

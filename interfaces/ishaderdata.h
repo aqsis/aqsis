@@ -10,17 +10,61 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef	ISHADERDATA_H_INCLUDED
-#define	ISHADERDATA_H_INCLUDED
+#ifndef	___ishadervariable_Loaded___
+#define	___ishadervariable_Loaded___
 
-#include "aqsis.h"
+#include	"aqsis.h"
 
-#include "matrix.h"
-#include "primvartype.h"
-#include "sstring.h"
-#include "vector3d.h"
+#include	"vector3d.h"
+#include	"matrix.h"
+#include	"sstring.h"
 
-namespace Aqsis {
+
+START_NAMESPACE( Aqsis )
+
+
+//----------------------------------------------------------------------
+/** \enum EqVariableType
+ * Shader variable type identifier.
+ * \attention Any change to this MUST be mirrored in the type identifier and name string tables.
+ */
+enum EqVariableClass
+{
+    class_invalid = 0,
+
+    class_constant,
+    class_uniform,
+    class_varying,
+    class_vertex,
+    class_facevarying,
+    class_facevertex,
+};
+
+//----------------------------------------------------------------------
+/** \enum EqVariableType
+ * Shader variable type identifier.
+ * \attention Any change to this MUST be mirrored in the type identifier and name string tables.
+ */
+enum EqVariableType
+{
+    type_invalid = 0,
+
+    type_float = 1,
+    type_integer,
+    type_point,
+    type_string,
+    type_color,
+    type_triple,
+    type_hpoint,
+    type_normal,
+    type_vector,
+    type_void,
+    type_matrix,
+    type_sixteentuple,
+    type_bool,
+
+    type_last,
+};
 
 //----------------------------------------------------------------------
 /** \struct IqShaderData
@@ -309,6 +353,7 @@ struct IqShaderData
 
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
-#endif //ISHADERDATA_H_INCLUDED
+
+#endif	//	___ishadervariable_Loaded___

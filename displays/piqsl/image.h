@@ -37,12 +37,10 @@
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include "imagebuffer.h"
 #include "tinyxml.h"
 
-#include "channellist.h"
-#include "mixedimagebuffer.h"
-
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 class CqFramebuffer;
 
@@ -99,7 +97,7 @@ public:
 	 *
 	 * \return The channel info list of channel names and types.
 	 */
-	inline const CqChannelList& channelList() const;
+	inline const CqChannelInfoList& channelsInfo() const;
 	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
 	inline void connectChannelR(const std::string& chanName);
@@ -109,10 +107,6 @@ public:
 	/** \brief Connect a channel of the underlying data to the blue display channel
 	 */
 	inline void connectChannelB(const std::string& chanName);
-	/// Get the scale factor used to display the image.
-	inline TqInt zoom() const;
-	/// Set the scale factor for the displayed image
-	void setZoom(TqInt zoom);
 	/** Get the number of channels in this image.
 	 * \return				The number of channels.
 	 */
@@ -121,7 +115,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual boost::shared_ptr<const CqMixedImageBuffer> displayBuffer() const;
+	virtual boost::shared_ptr<const CqImageBuffer> displayBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
@@ -154,9 +148,9 @@ public:
 	 * Presuming the image size has been setup, allocate the two buffers used
 	 * by the image.
 	 *
-	 * \param channelList - the list of channel information for the image.
+	 * \param channelsInfo - the list of channel information for the image.
 	 */
-	virtual void prepareImageBuffers(const CqChannelList& channelList);
+	virtual void prepareImageBuffers(const CqChannelInfoList& channelsInfo);
 	
 	/** Setup a callback to be called when the image changes.
 	 * \param f			A function that will be called with the region that has changed.
@@ -174,34 +168,21 @@ public:
 	/** Save the image to a TIFF file.
 	 * \param filename	The name of the file to save the image into.
 	 */
-	void saveToFile(const std::string& fileName) const;
-	/** Load the image from a file on disk.
-	 * \param fileName	The name of the TIFF file to load the image data from.
+	void saveToTiff(const std::string& filename) const;
+	/** Load the image from a TIFF file on disk.
+	 * \param filename	The name of the TIFF file to load the image data from.
 	 */
-	void loadFromFile(const std::string& fileName, TqInt imageIndex = 0);
-	/** \brief Load the next subimage from the current image file.
-	 *
-	 * Do nothing if there is no next subimage.
-	 */
-	void loadNextSubImage();
-	/** \brief Load the previous subimage from the current image file.
-	 *
-	 * Do nothing if there is no previous subimage.
-	 */
-	void loadPrevSubImage();
-	/** \brief Reload the current image file.
-	 */
-	void reloadFromFile();
+	void loadFromTiff(const std::string& filename);
 
 protected:
-	/** Check m_displayMap is pointing to valid channel names from channels.
+	/** Check m_displayMap is pointing to valid channel names from channelsInfo.
 	 *
 	 * If the map isn't pointing to valid channels, then set the offending
-	 * channels names to the first one in channels
+	 * channels names to the first one in channelsInfo
 	 *
-	 * \param channelList - channels which the map must point to.
+	 * \param channelsInfo - channels which the map must point to.
 	 */
-	void fixupDisplayMap(const CqChannelList& channelList);
+	void fixupDisplayMap(const CqChannelInfoList& channelsInfo);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -211,18 +192,15 @@ protected:
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
     std::string		m_description;		///< Description or Software' renderer name.
-	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
-	boost::shared_ptr<CqMixedImageBuffer> m_zoomDisplayData;	///< Zoomed 8bit buffer for display. 
-	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
+	boost::shared_ptr<CqImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+	boost::shared_ptr<CqImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
 	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
 	TqUlong			m_imageWidth;	///< The total image width.
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
-	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
-	TqInt			m_zoom;  ///< How much the image will be scaled by when displayed
-	TqChannelNameMap m_displayMap;  ///< map from display to underlying channel names
+	TqChannelNameMap m_displayMap; ///< map from display to underlying channel names
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
@@ -245,8 +223,6 @@ inline CqImage::CqImage( const std::string& name)
 	m_imageHeight(0),
 	m_originX(0),
 	m_originY(0),
-	m_imageIndex(0),
-	m_zoom(1),
 	m_displayMap(),
 	m_updateCallback(),
 	m_mutex()
@@ -303,30 +279,22 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
-inline TqInt CqImage::zoom() const
+inline const CqChannelInfoList& CqImage::channelsInfo() const
 {
-	return m_zoom;
-}
-
-inline const CqChannelList& CqImage::channelList() const
-{
-	return m_realData->channelList();
+	return m_realData->channelsInfo();
 }
 
 inline TqUint CqImage::numChannels() const
 {
 	if(m_realData)
-		return (m_realData->channelList().numChannels());
+		return(m_realData->channelsInfo().numChannels());
 	else
 		return 0;
 }
 
-inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
+inline boost::shared_ptr<const CqImageBuffer> CqImage::displayBuffer() const
 {
-	if(m_zoom > 1)
-		return m_zoomDisplayData;
-	else
-		return m_displayData;
+	return m_displayData;
 }
 
 inline TqUlong CqImage::originX() const
@@ -367,6 +335,6 @@ inline boost::mutex& CqImage::mutex() const
 }
 
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif	// IMAGE_H_INCLUDED

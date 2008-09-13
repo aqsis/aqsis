@@ -40,7 +40,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 
 class CqBookBrowser : public Fl_Browser_
@@ -175,6 +175,6 @@ inline void CqBookBrowser::setCurrentSelected(CqBook::TqImageList::size_type ind
 	m_currentSelected = index;
 }
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif //BOOK_BROWSER_H_INCLUDED 1

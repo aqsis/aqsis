@@ -141,16 +141,13 @@ class CqIntWrapper
 
 		/** \brief The destructor.
 		 *
-		 * Note: virtual so we can extend from CqIntWrapper.  (Undesirable
+		 * Note: virtual so we can extend from CqIntWrapper.  (Only undesirable
 		 * for lightweight classes.)
 		 *
 		 * Note also that virtual methods which are overridden from base
 		 * classes should explicitly be declared virtual for clarity.
-		 *
-		 * "Implementations" which are blank can be put inline to avoid a lot
-		 * of extra boilerplate code.
 		 */
-		virtual ~CqIntWrapper() {}
+		virtual ~CqIntWrapper();
 
 		/** \brief Get the integer data held in CqIntWrapper
 		 *
@@ -242,14 +239,10 @@ std::string toString(const T& obj);
 // fully-qualified names such as std::string.
 
 
-
-//==============================================================================
-// Implementation details
-//==============================================================================
-// The implementation section of a header should be clearly marked using a
-// notice like that above.  This helps readers distinguish between the interface
-// and implementation.
-
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Implementation details follow below...
+//
 // Inline function implementations should be placed at the end of the header
 // files.
 //
@@ -257,7 +250,8 @@ std::string toString(const T& obj);
 // header, rather than in with the template declarations.
 
 //------------------------------------------------------------------------------
-// CqIntWrapper implementation
+// Inline function(s) for CqIntWrapper
+//------------------------------------------------------------------------------
 inline TqInt CqIntWrapper::data() const
 {
 	return *m_data;
@@ -265,7 +259,8 @@ inline TqInt CqIntWrapper::data() const
 
 
 //------------------------------------------------------------------------------
-// SqPoint implementation
+// Inline function(s) for SqPoint
+//------------------------------------------------------------------------------
 
 // Use initialisation lists for the member data before the constructor-body
 // proper where possible.  They are clearer, less error prone, and more
@@ -282,8 +277,10 @@ inline SqPoint::SqPoint(const TqFloat x, const TqFloat y)
 { }
 
 
+
 //------------------------------------------------------------------------------
-// Free function implementations
+//------------------------------------------------------------------------------
+// Implementation for template functions
 
 template<typename T>
 std::string toString(const T& obj)

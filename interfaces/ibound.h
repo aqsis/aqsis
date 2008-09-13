@@ -31,7 +31,7 @@
 
 #include	"matrix.h"
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 class CqPlane;
 
@@ -76,6 +76,6 @@ struct IqBound
 inline IqBound::~IqBound()
 {}
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 #endif // BOUND_H_INCLUDED

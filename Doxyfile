@@ -89,7 +89,6 @@ INPUT                  = ./aqsistypes \
                          ./displays/display \
                          ./displays/piqsl \
                          ./displays/d_exr \
-                         ./displays/d_sdcBMP \
                          ./displays/d_xpm \
                          ./renderer/aqsis \
                          ./renderer/ddmanager \
@@ -106,9 +105,19 @@ INPUT                  = ./aqsistypes \
                          ./shadercompiler/shaderexecenv \
                          ./shadercompiler/shadervm \
                          ./shadercompiler/slparse \
+                         ./shadercompiler/slpp \
                          ./shadercompiler/slxargs \
                          ./texturing/teqser \
-                         ./texturing/texlib
+                         ./texturing/plugins/bake2tif \
+                         ./texturing/plugins/bmp2tif \
+                         ./texturing/plugins/common \
+                         ./texturing/plugins/exr2tif \
+                         ./texturing/plugins/gif2tif \
+                         ./texturing/plugins/jpg2tif \
+                         ./texturing/plugins/pcx2tif \
+                         ./texturing/plugins/png2tif \
+                         ./texturing/plugins/ppm2tif \
+                         ./texturing/plugins/tga2tif
 FILE_PATTERNS          = *.h \
                          *.cpp \
                          *.c

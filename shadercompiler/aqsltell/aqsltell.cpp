@@ -46,8 +46,7 @@
 #include <string>
 #include <vector>
 
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
 
 
 namespace Aqsis
@@ -80,15 +79,14 @@ int main( int argc, const char** argv )
 #elif defined(AQSIS_SYSTEM_MACOSX)
 #else
 
-	g_shader_path = AQSIS_XSTR(DEFAULT_SHADER_PATH);
+	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
 
 	/*Aqsis::QGetRenderContextI();*/
 	ArgParse ap;
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
-	ap.argFlag( "help", "\aPrint this help and exit", &g_cl_help );
-	ap.alias( "help" , "h" );
-	ap.argFlag( "version", "\aPrint version information and exit", &g_cl_version );
+	ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
+	ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
 	ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )

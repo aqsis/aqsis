@@ -28,7 +28,7 @@
 #include "framebuffer.h"
 
 
-namespace Aqsis {
+START_NAMESPACE( Aqsis )
 
 CqBook::CqBook( const std::string& name ) : m_name(name)
 {
@@ -75,5 +75,5 @@ void CqBook::removeImage(TqImageListIterator item)
 	}
 }
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
