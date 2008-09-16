@@ -1,0 +1,25 @@
+Summary of changes in aqsis-1.4.1 (chronological order):
+
+
+Enhancements
+------------
+
+ * Make the subdivision code a lot more resilient to non-manifold meshes. 
+ * Add support for OSX Universal binaries.
+
+
+Bugfixes
+--------
+
+ * Texture wrapping incorrect when texture isn't multiple of tile size.
+ * Fix a serious memory leak involving string arguments to DSO shadops.
+ * Added missing 'ndspy.h' include to Windows installer (NSIS).
+ * aqsistex segfaults when opening 2-channel greyscale TIFFs.
+ * aqsistex failed to set TIFFTAG_EXTRASAMPLES to identify alpha channel types.
+ * Fix a minor memory leak in CqDisplayRequest.
+ * Fix a minor memory leak in RiProcDynamicLoad plugin handling code.
+ * fix a very minor memory leak in piqsldisplay.
+ * Fix a minor memory leak in the ddmanager
+ * Fix memory leak - make sure the SqPiqslDisplayInstance struct is deleted DspyImageDelayClose() should delete the display instance struct.
+ * Default to "ri.pic" when a NULL string is passed to RiDisplay.
+ * Fix a memory leak related to the attribute stack.
