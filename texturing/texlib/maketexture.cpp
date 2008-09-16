@@ -30,9 +30,11 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "aqsismath.h"
 #include "bake.h"
 #include "itexinputfile.h"
 #include "itexoutputfile.h"
+#include "logging.h"
 #include "magicnumber.h"
 #include "downsample.h"
 #include "texturebuffer.h"
@@ -295,6 +297,23 @@ void fillOutputHeader(CqTexFileHeader& header, const SqWrapModes& wrapModes,
 	}
 }
 
+void clampFilterWidth(SqFilterInfo& filterInfo, const std::string& outFileName)
+{
+	if(filterInfo.xWidth < 1 || filterInfo.yWidth < 1)
+	{
+		TqFloat xWidthOld = filterInfo.xWidth;
+		TqFloat yWidthOld = filterInfo.yWidth;
+		filterInfo.xWidth = Aqsis::max(filterInfo.xWidth, 1.0f);
+		filterInfo.yWidth = Aqsis::max(filterInfo.yWidth, 1.0f);
+		Aqsis::log() << warning << "Filter width "
+			"[" << xWidthOld << " x " << yWidthOld << "]"
+			" clamped to "
+			"[" << filterInfo.xWidth << " x " << filterInfo.yWidth << "]"
+			" when creating texture " << outFileName << "\n";
+	}
+}
+
+
 } // unnamed namespace
 
 //------------------------------------------------------------------------------
@@ -302,9 +321,10 @@ void fillOutputHeader(CqTexFileHeader& header, const SqWrapModes& wrapModes,
 //------------------------------------------------------------------------------
 
 void makeTexture(const std::string& inFileName, const std::string& outFileName,
-		const SqFilterInfo& filterInfo, const SqWrapModes& wrapModes,
+		SqFilterInfo filterInfo, const SqWrapModes& wrapModes,
 		const CqRiParamList& paramList)
 {
+	clampFilterWidth(filterInfo, outFileName);
 	// Convert bakefile if necessary.
 	std::string inFileRealName = inFileName;
 	if(guessFileType(inFileName) == ImageFile_AqsisBake)
@@ -337,8 +357,9 @@ void makeCubeFaceEnvironment(
 		const std::string& inNamePy, const std::string& inNameNy, 
 		const std::string& inNamePz, const std::string& inNameNz, 
 		const std::string& outFileName, TqFloat fieldOfView,
-		const SqFilterInfo& filterInfo, const CqRiParamList& paramList)
+		SqFilterInfo filterInfo, const CqRiParamList& paramList)
 {
+	clampFilterWidth(filterInfo, outFileName);
 	// Open the input files
 	boost::shared_ptr<IqTexInputFile> inPx = IqTexInputFile::open(inNamePx);
 	boost::shared_ptr<IqTexInputFile> inNx = IqTexInputFile::open(inNameNx);
@@ -374,9 +395,10 @@ void makeCubeFaceEnvironment(
 
 
 void makeLatLongEnvironment(const std::string& inFileName, 
-		const std::string& outFileName, const SqFilterInfo& filterInfo, 
+		const std::string& outFileName, SqFilterInfo filterInfo, 
 		const CqRiParamList& paramList)
 {
+	clampFilterWidth(filterInfo, outFileName);
 	// Open input file
 	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(inFileName);
 
