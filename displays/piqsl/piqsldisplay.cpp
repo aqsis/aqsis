@@ -41,11 +41,13 @@
 	#include <winsock2.h>
 	typedef	u_long in_addr_t;
 #else
+	#include <errno.h>
 	#include <signal.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
+	#include <unistd.h>
 	#define	INVALID_SOCKET -1
 #endif
 #ifdef AQSIS_SYSTEM_MACOSX
@@ -197,10 +199,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				if (!pid)
 				{
+					// Child process executes the following after forking.
 #if defined AQSIS_SYSTEM_MACOSX
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
+					nice(2);
 					if(execvp("piqsl",argv) < 0)
 					{
 						CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
@@ -212,16 +216,31 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 						execvp(program.c_str(), argv);
 						free(argv[0]);
 					}
-					nice(2);
 #else
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
-					execvp("piqsl",argv);
 					nice(2);
+					execvp("piqsl",argv);
 #endif
+					// The child process shouldn't end up here.  If it does
+					// there's an error and we should terminate now after
+					// trying to report the problem.
+					switch(errno)
+					{
+						case EACCES:
+							Aqsis::log() << error << "access denied when executing piqsl\n";
+							break;
+						case ENOENT:
+							Aqsis::log() << error << "piqsl executable not found\n";
+							break;
+						default:
+							Aqsis::log() << error << "Could not execute piqsl\n";
+							break;
+					}
+					exit(1);
 				}
-			} 
+			}
 			else
 			{
 				// An error occurred
