@@ -45,6 +45,7 @@
 	#include <signal.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
+	#include <time.h>  // for nanosleep()
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <unistd.h>
@@ -278,16 +279,24 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				return(PkDspyErrorUndefined);
 			}
 #endif
-			// The FB should be running at this point.
-			// Lets try and connect
-			if(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port))
+			// The framebuffer should be running at this point, but may not be
+			// responsive right away.  We try to connect at fixed intervals
+			// until we get a response or pass the timeout.
+			//
+			// timeRemaining and interval are in milliseconds.
+			long timeRemaining = 10000;
+			const long interval = 100;
+			while(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port) && timeRemaining > 0)
 			{
-#ifndef	AQSIS_SYSTEM_WIN32
-				sleep(2); //Give it time to startup
-#else
-				Sleep(2000); //Give it time to startup
-#endif
-				pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
+#				ifdef AQSIS_SYSTEM_WIN32
+					Sleep(interval);
+#				else
+					timespec sleepTime;
+					sleepTime.tv_sec = 0;
+					sleepTime.tv_nsec = 1000000*interval;
+					nanosleep(&sleepTime, 0);
+#				endif
+				timeRemaining -= interval;
 			}
 		}
 		if(pImage->m_socket)
