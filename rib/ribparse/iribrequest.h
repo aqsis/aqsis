@@ -31,6 +31,8 @@
 
 #include <vector>
 
+#include "primvartoken.h"
+
 namespace Aqsis {
 
 class CqRibParser;
