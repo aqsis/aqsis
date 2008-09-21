@@ -229,7 +229,7 @@ void CqCurve::PopulateWidth()
 	        "width"
 	    );
 	widthP->SetSize( cVarying() );
-	for ( TqUint i = 0; i < cVarying(); i++ )
+	for (TqInt i = 0, numVarying = cVarying(); i < numVarying; i++ )
 	{
 		widthP->pValue( i )[0] = widthvalue;
 	}
