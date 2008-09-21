@@ -71,7 +71,7 @@ class COMMON_SHARE CqPrimvarToken
 		 * \param token - token string to parse.
 		 * \todo Cleanup this to use a const version of RtToken...
 		 */
-		CqPrimvarToken(const char* token);
+		explicit CqPrimvarToken(const char* token);
 		/** \brief Parse type information from an RtToken string
 		 *
 		 * \param typeToken has the form
@@ -111,6 +111,7 @@ class COMMON_SHARE CqPrimvarToken
 		 * containers of CqPrimvarToken's
 		 */
 //		bool operator<(const CqPrimvarToken rhs) const;
+		bool operator==(const CqPrimvarToken rhs) const;
 	private:
 		EqVariableClass m_class;
 		EqVariableType m_type;
@@ -195,6 +196,12 @@ inline TqInt CqPrimvarToken::storageCount() const
 			break;
 	}
 	return count*m_arraySize;
+}
+
+inline bool CqPrimvarToken::operator==(const CqPrimvarToken rhs) const
+{
+	return m_type == rhs.m_type && m_class == rhs.m_class
+		&& m_arraySize == rhs.m_arraySize && m_name == rhs.m_name;
 }
 
 } // namespace Aqsis
