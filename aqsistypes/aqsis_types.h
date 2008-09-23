@@ -19,43 +19,97 @@
 
 
 /** \file
-		\brief Declares typedefs for the basic types.
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief Declares typedefs for the basic types.
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ * \author Chris Foster (chris42f (at) gmail (d0t) com)
+ *
+ * ===================================================================
+ * C-compatible header. C++ constructs must be preprocessor-protected.
+ * ===================================================================
+ */
 
 
-#ifndef	AQSIS_TYPES_INCLUDED
-#define	AQSIS_TYPES_INCLUDED
+#ifndef AQSIS_TYPES_INCLUDED
+#define AQSIS_TYPES_INCLUDED
 
-#include <boost/cstdint.hpp>
+#include "aqsis_config.h"
 
-typedef	char	TqChar;
-typedef	unsigned char	TqUchar;
-typedef	char*	TqPchar;
-typedef	unsigned char*	TqPuchar;
+/// \todo <b>Code review</b> Consider whether we can avoid polluting the global namespace with these typedefs.  C compatibility needs to be assured, so we may have to duplicate the header...
+//--------------------------------------------------------------------------------
+typedef char TqChar;
+typedef unsigned char TqUchar;
 
-typedef	int	TqInt;
-typedef	unsigned int	TqUint;
-typedef	long	TqLong;
-typedef	unsigned long	TqUlong;
+/// \todo <b>Code review</b> Deprecate these pointer types?  They're inconsistently used and of dubious usefulness anyway.
+typedef char* TqPchar;
+typedef unsigned char* TqPuchar;
 
-typedef	short	TqShort;
-typedef	unsigned short	TqUshort;
+typedef int TqInt;
+typedef unsigned int TqUint;
+typedef long TqLong;
+typedef unsigned long TqUlong;
 
-typedef	float	TqFloat;
-typedef	double	TqDouble;
+typedef short TqShort;
+typedef unsigned short TqUshort;
 
-
-// Integer types with specific size.
-typedef boost::int8_t TqInt8;
-typedef boost::int16_t TqInt16;
-typedef boost::int32_t TqInt32;
-typedef boost::int64_t TqInt64;
-
-typedef boost::uint8_t TqUint8;
-typedef boost::uint16_t TqUint16;
-typedef boost::uint32_t TqUint32;
-typedef boost::uint64_t TqUint64;
+typedef float TqFloat;
+typedef double TqDouble;
 
 
-#endif	// AQSIS_TYPES_INCLUDED
+//--------------------------------------------------------------------------------
+// Typedefs for integer types with specific sizes.
+//
+// This approach - based on a combination of stdint.h and limit macros from
+// limits.h - is taken from boost/cstdint.hpp.  Unfortunately we have to use
+// our own version here for C compatibility.
+
+#ifdef AQSIS_HAVE_STDINT_H
+
+	// Use types from the C99 stdint.h header.
+#	include <stdint.h>
+
+	typedef int8_t  TqInt8;
+	typedef uint8_t TqUint8;
+
+	typedef int16_t  TqInt16;
+	typedef uint16_t TqUint16;
+
+	typedef int32_t  TqInt32;
+	typedef uint32_t TqUint32;
+
+#else // AQSIS_HAVE_STDINT_H
+
+	// If the stdint.h header is not present, fall back on using the limits
+	// macros from limits.h to guess the correct types.
+#	include <limits.h>
+
+#	if UCHAR_MAX == 0xff
+		typedef signed char   TqInt8;
+		typedef unsigned char TqUint8;
+#	else
+#		error 8 bit integers not autodetected - please modify aqsis_types.h \
+			or contact the aqsis team.
+#	endif
+
+#	if USHRT_MAX == 0xffff
+		typedef short          TqInt16;
+		typedef unsigned short TqUint16;
+#	else
+#		error 16 bit integers not autodetected - please modify aqsis_types.h \
+			or contact the aqsis team.
+#	endif
+
+#	if ULONG_MAX == 0xffffffff
+		typedef long          TqInt32;
+		typedef unsigned long TqUint32;
+#	elif UINT_MAX == 0xffffffff
+		typedef int           TqInt32;
+		typedef unsigned int  TqUint32;
+#	else
+#		error 32 bit integers not autodetected - please modify aqsis_types.h \
+			or contact the aqsis team.
+#	endif
+
+#endif // AQSIS_HAVE_STDINT_H
+
+
+#endif // AQSIS_TYPES_INCLUDED

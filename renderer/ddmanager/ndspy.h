@@ -34,7 +34,7 @@
 #ifndef	NDSPY_H_INCLUDED
 #define	NDSPY_H_INCLUDED
 
-#include "aqsis_compiler.h"
+#include "aqsis.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,20 +50,15 @@ typedef float PtDspyFloat32;
 #	define PkDspyByteOrderNative PkDspyByteOrderLoHi
 #endif
 
-/// \todo Consider using TqUint32 etc from aqsis_types.h instead of the below.
-#if defined(__mips64) || defined(__alpha) || defined(__x86_64) || defined(_M_X64)
-typedef unsigned int PtDspyUnsigned32;
-typedef int PtDspySigned32;
-#else
-typedef unsigned long PtDspyUnsigned32;
-typedef long PtDspySigned32;
-#endif
+typedef TqUint32 PtDspyUnsigned32;
+typedef TqInt32 PtDspySigned32;
 
-typedef unsigned short PtDspyUnsigned16;
-typedef short PtDspySigned16;
+typedef TqUint16 PtDspyUnsigned16;
+typedef TqInt16 PtDspySigned16;
 
-typedef unsigned char PtDspyUnsigned8;
-typedef signed char PtDspySigned8;
+typedef TqUint8 PtDspyUnsigned8;
+typedef TqInt8 PtDspySigned8;
+
 
 typedef PtDspyUnsigned32 PtDspyMsgLen;
 typedef PtDspyUnsigned32 PtDspyServerMessage;

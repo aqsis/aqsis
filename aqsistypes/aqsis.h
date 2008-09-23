@@ -20,21 +20,25 @@
 /** \file
  * \brief Main Aqsis include for basic macros and types needed by all aqsis headers.
  *
- * This file should be included by every aqsis C++ source file.  Moreover, it
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ *
+ * This file should be included by every aqsis source file.  Moreover, it
  * should be included before any other headers, since aqsis_compiler.h defines
  * some constants which potentially modify the behaviour of other standard
  * includes.
  *
- * \author Paul C. Gregory (pgregory@aqsis.org)
+ * ===================================================================
+ * C-compatible header. C++ constructs must be preprocessor-protected.
+ * ===================================================================
  */
 
 #ifndef AQSIS_H_INCLUDED
-#define AQSIS_H_INCLUDED 1
+#define AQSIS_H_INCLUDED
 
-#include	<assert.h>
+#include <assert.h>
 
-#include	"aqsis_types.h"
-#include	"aqsis_compiler.h"
+#include "aqsis_types.h"
+#include "aqsis_compiler.h"
 
 // macro which stringizes the value held in another macro.
 #define AQSIS_XSTR(s) AQSIS_STR(s)
