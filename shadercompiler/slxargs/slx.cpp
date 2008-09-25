@@ -92,7 +92,6 @@ static const char * SLX_DETAIL_UNKNOWN_STR = "unknown";
 static const char * SLX_DETAIL_VARYING_STR = "varying";
 static const char * SLX_DETAIL_UNIFORM_STR = "uniform";
 
-
 /*
  * Open shader file specified in global 'currentShaderFile', return file pointer
  */
@@ -647,7 +646,6 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 	}
 }
 
-
 /*
  * Read shader info from , set these global variables -
  *    currentShaderType, currentShaderNArgs, currentShaderArgsArray.
@@ -747,7 +745,10 @@ static int GetSearchPathListCount()
 	listElementCount = 0;
 	currentChar = NULL;
 
-	listCharCount = strlen( shaderSearchPathList );
+	if ( shaderSearchPathList != NULL )
+	{
+		listCharCount = strlen( shaderSearchPathList );
+	}
 
 	if ( listCharCount > 0 )
 	{
@@ -801,11 +802,14 @@ static int GetSearchPathEntryAtIndex( int pathIdx )
 		currentShaderSearchPath = NULL;
 	}
 
-	currentShaderSearchPath = ( char * ) malloc( strlen( shaderSearchPathList ) + 1 );
+	if ( shaderSearchPathList != NULL )
+	{
+		listCharCount = strlen( shaderSearchPathList );
+	}
+	currentShaderSearchPath = ( char * ) malloc( listCharCount + 1 );
 	currentChar = shaderSearchPathList;
 	copyOutChar = currentShaderSearchPath;
 	*copyOutChar = 0x0;
-	listCharCount = strlen( shaderSearchPathList );
 
 	currentChar = shaderSearchPathList;
 	for ( listCharIdx = 0; listCharIdx < listCharCount; listCharIdx++ )
@@ -839,18 +843,23 @@ static int GetSearchPathEntryAtIndex( int pathIdx )
 
 /*
  * Attempt to open shader file using entries from the search path list and shader name
+ * 
+ * \pre currentShaderSearchPath must not point to an allocated buffer
+ *      (i.e. SLX_EndShader() should have been called before LoadShaderInfo() is called)
+ * \pre name must not be NULL
  */
 static bool LoadShaderInfo ( char *name )
 {
 	bool result;
 	char * shaderFileName;
-	int stringLength;
+	size_t stringLength;
 	FILE * shaderInputFile;
 	int pathListCount;
 	int pathListIdx;
 	bool doLoop;
 
 	result = false;
+	shaderFileName = NULL;
 	stringLength = 0;
 	shaderInputFile = NULL;
 	pathListCount = 0;
@@ -867,50 +876,71 @@ static bool LoadShaderInfo ( char *name )
 	//	{
 	//		doLoop = false;
 	//	}
-	currentShaderSearchPath = (char*)malloc(strlen("")+1);
-	strcpy(currentShaderSearchPath, "");
-	while ( doLoop == true )
+	
+	// Build a full file path description
+	stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
+	shaderFileName = ( char * ) malloc( stringLength );
+	if ( shaderFileName != NULL )
 	{
-		// Build a full file path description
-		stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
-		shaderFileName = ( char * ) malloc( stringLength );
 		strcpy( shaderFileName, name );
-
+	
 		// Check if RI_SHADER_EXTENSION is at the very end of the name
 		if ( strlen(name) < strlen(RI_SHADER_EXTENSION) ||
-		        strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
+		     strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
+		{
 			strcat( shaderFileName, RI_SHADER_EXTENSION );
-
-		stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
-		currentShaderFilePath = ( char * ) malloc( stringLength );
-		strcpy( currentShaderFilePath, currentShaderSearchPath );
-		if( strlen(currentShaderSearchPath) > 0 &&
-		        (currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '/') &&
-		        (currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '\\') )
-			strcat( currentShaderFilePath, "/" );
-		strcat( currentShaderFilePath, shaderFileName );
-
-		// attempt to open the shader file
-		//std::cout << "Trying: " << currentShaderFilePath << std::endl;
-		shaderInputFile = OpenCurrentShader();
-		if ( shaderInputFile != NULL )
+		}
+	
+		// --> shaderFileName is now the base shader name + extension
+		
+		// Check all search paths, always starting with the current directory...
+		currentShaderSearchPath = (char*)malloc(strlen("")+1);
+		if ( currentShaderSearchPath != NULL )
 		{
-			CloseCurrentShader( shaderInputFile );	// Success
-
-			GetCurrentShaderInfo( name, currentShaderFilePath );
-
-			result = true;
-			doLoop = false;
+			strcpy(currentShaderSearchPath, "");
+			while ( doLoop == true )
+			{
+				stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
+				if ( currentShaderFilePath != NULL )
+				{
+					free( currentShaderFilePath );
+				}
+				currentShaderFilePath = ( char * ) malloc( stringLength );
+				if ( currentShaderFilePath != NULL )
+				{
+					strcpy( currentShaderFilePath, currentShaderSearchPath );
+					if( strlen(currentShaderSearchPath) > 0 &&
+					        (currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '/') &&
+					        (currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '\\') )
+						strcat( currentShaderFilePath, "/" );
+					strcat( currentShaderFilePath, shaderFileName );
+			
+					// attempt to open the shader file
+					//std::cout << "Trying: " << currentShaderFilePath << std::endl;
+					shaderInputFile = OpenCurrentShader();
+					if ( shaderInputFile != NULL )
+					{
+						CloseCurrentShader( shaderInputFile );	// Success
+			
+						GetCurrentShaderInfo( name, currentShaderFilePath );
+			
+						result = true;
+						doLoop = false;
+					}
+			
+					if ( result == false )
+					{
+						if ( GetSearchPathEntryAtIndex( pathListIdx ) == false )
+							doLoop = false;
+						pathListIdx++;
+					}
+				}
+			}
 		}
 
-		if ( result == false )
-		{
-			if ( GetSearchPathEntryAtIndex( pathListIdx ) == false )
-				doLoop = false;
-			pathListIdx++;
-		}
+		free( shaderFileName );
 	}
-
+	
 	return result;
 }
 
@@ -922,7 +952,7 @@ static bool LoadShaderInfo ( char *name )
  */
 void SLX_SetPath ( char *path )
 {
-	int pathLength;
+	size_t pathLength;
 
 	pathLength = 0;
 
@@ -1000,10 +1030,8 @@ char *SLX_GetPath ( void )
  */
 int SLX_SetShader ( char *name )
 {
-	int result;
-	int stringLength;
+	size_t stringLength;
 
-	result = -1;
 	stringLength = 0;
 
 	SlxLastError = RIE_NOERROR;
@@ -1039,22 +1067,31 @@ int SLX_SetShader ( char *name )
 			// Create new string with .slx
 			stringLength = strlen( name ) + strlen( RI_SHADER_EXTENSION ) + 1;
 			currentShader = ( char * ) malloc( stringLength );
-			strcpy( currentShader, name );
-			strcat( currentShader, RI_SHADER_EXTENSION );
+			if ( currentShader != NULL )
+			{
+				strcpy( currentShader, name );
+				strcat( currentShader, RI_SHADER_EXTENSION );
+			}
+			else
+			{
+				SlxLastError = RIE_NOMEM;
+			}
 		}
 		else
 		{
 			currentShader = ( char * ) malloc( stringLength );
-			strcpy( currentShader, name );
+			if ( currentShader != NULL )
+			{
+				strcpy( currentShader, name );
+			}
+			else
+			{
+				SlxLastError = RIE_NOMEM;
+			}
 		}
-		result = 0;
-	}
-	else
-	{
-		result = -1;
 	}
 
-	return result;
+	return SlxLastError==RIE_NOERROR? 0 : -1;
 }
 
 
@@ -1065,7 +1102,7 @@ char *SLX_GetName ( void )
 {
 	SlxLastError = RIE_NOERROR;
 
-	if ( strlen( currentShader ) <= 0 )
+	if ( (currentShader == NULL) || (strlen( currentShader ) <= 0) )
 	{
 		SlxLastError = RIE_NOFILE;
 	}
@@ -1080,14 +1117,12 @@ char *SLX_GetName ( void )
 SLX_TYPE SLX_GetType ( void )
 {
 	SLX_TYPE slxType;
-	FILE * shaderInputFile;
 
 	slxType = SLX_TYPE_UNKNOWN;
-	shaderInputFile = NULL;
 
 	SlxLastError = RIE_NOERROR;
 
-	if ( strlen( currentShader ) > 0 )
+	if ( (currentShader != NULL) && (strlen( currentShader ) > 0) )
 	{
 		slxType = currentShaderType;
 	}
@@ -1110,7 +1145,7 @@ int SLX_GetNArgs ( void )
 
 	result = 0;
 
-	if ( strlen( currentShader ) > 0 )
+	if ( (currentShader != NULL) && (strlen( currentShader ) > 0) )
 	{
 		result = currentShaderNArgs;
 	}
@@ -1197,7 +1232,7 @@ void SLX_EndShader ( void )
 		free( currentShader );
 		currentShader = NULL;
 	}
-
+	
 	if ( currentShaderFilePath != NULL )
 	{
 		free( currentShaderFilePath );
@@ -1275,8 +1310,8 @@ char *SLX_TypetoStr ( SLX_TYPE type )
 			case SLX_TYPE_IMAGER:
 			slxTypeStr = ( char * ) SLX_TYPE_IMAGER_STR;
 			break;
-		        case SLX_TYPE_MATRIX:
-		        slxTypeStr = ( char * ) SLX_TYPE_MATRIX_STR;
+			case SLX_TYPE_MATRIX:
+			slxTypeStr = ( char * ) SLX_TYPE_MATRIX_STR;
 			break;
 
 	}
