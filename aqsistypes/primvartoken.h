@@ -51,6 +51,10 @@ namespace Aqsis {
 class COMMON_SHARE CqPrimvarToken
 {
 	public:
+		/** \brief Default constructor.
+		 * Equivilant to CqPrimvarToken(class_invalid, type_invalid, 1, "")
+		 */
+		CqPrimvarToken();
 		/// Trivial constructor.
 		CqPrimvarToken(EqVariableClass Class, EqVariableType type,
 				TqInt arraySize, const std::string& name);
@@ -133,6 +137,13 @@ class COMMON_SHARE CqPrimvarToken
 //==============================================================================
 // Implementation details
 //==============================================================================
+
+inline CqPrimvarToken::CqPrimvarToken()
+	: m_class(class_invalid),
+	m_type(type_invalid),
+	m_arraySize(1),
+	m_name()
+{ }
 
 inline CqPrimvarToken::CqPrimvarToken(EqVariableClass Class, EqVariableType type,
 		TqInt arraySize, const std::string& name)
