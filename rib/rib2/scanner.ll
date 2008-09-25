@@ -47,6 +47,7 @@ static std::stack<unsigned int> LineNumberStack;
 #define YY_DECL int yylex( YYSTYPE *lvalp )
 
 static int scannerinput(char* Buffer, int MaxSize);
+char* decodeStringEscapes(const char* inBuf);
 #undef YY_INPUT
 #define YY_INPUT(buffer, result, max_size) (result = scannerinput(buffer, max_size))
 
@@ -63,7 +64,7 @@ letter				[A-Za-z]
 digit					[0-9]
 float				[+\-]?{digit}*(\.{digit}*)?([eE][+\-]?{digit}+)?
 integer			[+\-]?{digit}+
-string				\"[^"\n]*\"
+string				\"([^"]|\\\")*\"
 eol					\r\n|\r|\n
 comment			#.*
 array_start		\[
@@ -112,7 +113,7 @@ terminator		\377
 
 <params>{integer}		{ lvalp->itype = atoi(yytext); return INTEGER_TOKEN; }
 <params>{float}			{ lvalp->ftype = atof(yytext); return FLOAT_TOKEN; }
-<params>{string}		{ std::string temp(yytext); lvalp->stype = new char[temp.size()-1]; strcpy(lvalp->stype, temp.substr(1, temp.size()-2).c_str()); return STRING_TOKEN; }
+<params>{string}		{ lvalp->stype = decodeStringEscapes(yytext); return STRING_TOKEN; }
 <INITIAL>{integer}		{ return INVALID_VALUE; }
 <INITIAL>{float}		{ return INVALID_VALUE; }
 <INITIAL>{string}		{ return INVALID_VALUE; }
@@ -273,4 +274,100 @@ static int scannerinput(char* Buffer, int MaxSize)
 struct yy_buffer_state* current_flex_buffer(void)
 {
         return YY_CURRENT_BUFFER;
+}
+
+/** \brief Decode escape sequences embedded in strings.
+ *
+ * This function decodes escape sequences in strings as per the RIspec,
+ * appendix C.2.  It also removes the leading and trailing " characters from
+ * the given string token.
+ *
+ * \param inBuf - C-string containing string token text.
+ *
+ * \return a pointer to a dynamically allocated C-string containing the decoded
+ * string data.
+ */
+char* decodeStringEscapes(const char* inBuf)
+{
+	// discard opening "
+	assert(inBuf[0] == '"');
+	++inBuf;
+	std::string outString;
+	outString.reserve(30);
+	bool stringFinished = false;
+	while(!stringFinished)
+	{
+		char c = *(inBuf++);
+		switch(c)
+		{
+			case '"':
+				stringFinished = true;
+				break;
+			case '\\':
+				// deal with escape characters
+				c = *(inBuf++);
+				switch(c)
+				{
+					case 'n':
+						outString += '\n';
+						break;
+					case 'r':
+						outString += '\r';
+						break;
+					case 't':
+						outString += '\t';
+						break;
+					case 'b':
+						outString += '\b';
+						break;
+					case 'f':
+						outString += '\f';
+						break;
+					case '\\':
+						outString += '\\';
+						break;
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						{
+							// read in a sequence of (up to) three octal digits
+							unsigned char octalChar = c - '0';
+							c = *(inBuf++);
+							for(TqInt i = 0; i < 2 && std::isdigit(c); i++ )
+							{
+								octalChar = 8*octalChar + (c - '0');
+								c = *(inBuf++);
+							}
+							--inBuf;
+							outString += octalChar;
+						}
+						break;
+					case '\r':
+						// handle \r\n pairs
+						if(*(inBuf+1) == '\n')
+							++inBuf;
+						break;
+					case '\n':
+						break;
+					default:
+						// ignore the escape '\' if the following char isn't one of
+						// the above.
+						outString += c;
+						break;
+				}
+			break;
+			default:
+				outString += c;
+		}
+	}
+	char* outBuf = new char[outString.size()+1];
+	strcpy(outBuf, outString.c_str());
+	return outBuf;
 }
