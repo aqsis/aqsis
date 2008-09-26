@@ -145,14 +145,7 @@ static int CloseCurrentShader( FILE * shaderInputFile )
  */
 static SLX_VISSYMDEF * GetShaderArgRecAt( SLX_VISSYMDEF * theShaderArgArray, int argIdx )
 {
-	long unsigned int arrayPtr;
-	long unsigned int arrayOffset;
-	SLX_VISSYMDEF * recPtr;
-
-	arrayPtr = ( long unsigned int ) theShaderArgArray;
-	arrayOffset = ( long unsigned int ) argIdx * sizeof( SLX_VISSYMDEF );
-	recPtr = ( SLX_VISSYMDEF * ) ( arrayPtr + arrayOffset );
-	return recPtr;
+	return theShaderArgArray + argIdx;
 }
 
 
