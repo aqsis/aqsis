@@ -30,6 +30,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -43,6 +44,8 @@
 namespace Aqsis {
 
 class CqRequestMap;
+
+RIBPARSE_SHARE extern const std::vector<CqPrimvarToken> g_standardVars;
 
 //------------------------------------------------------------------------------
 /** \brief A flexible parser for RIB-like file formats.
@@ -78,7 +81,7 @@ class CqRequestMap;
 class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 {
 	public:
-		/** Construct a RIB parser, connected to the given lexer.
+		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
 		 * \param lexer - lexical analyzer for a RIB input stream.
 		 * \param requests - collection of request handlers which will
@@ -90,6 +93,26 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 				const boost::shared_ptr<CqRequestMap>& requests,
 				bool ignoreUnrecognized = false);
+
+		/** \brief Make a primitive variable token known to the parser.
+		 *
+		 * When parsing variable parameter lists for requests, the parser needs
+		 * to know about which value type to expect after a token.  This
+		 * function allows a variable name to be assiciated with a
+		 * corresponding type.  For example, "P" usually maps to "vertex
+		 * point[1] P" by convention.
+		 *
+		 * The global variable g_standardVars holds a list of standard
+		 * variables which may be passed to this function, but any other list
+		 * may be used in principle.
+		 *
+		 * \param InputIter - An input iterator for which *i yeilds a
+		 *                    CqPrimvarToken.
+		 * \param beg - begin iterator in the token sequence
+		 * \param end - end iterator in the token sequence
+		 *
+		 */
+		void declareVariable(const CqPrimvarToken& tok);
 
 		/** \brief Parse the next RIB request
 		 *
@@ -176,6 +199,9 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		boost::shared_ptr<CqRibLexer> m_lex;
 		/// Lookup table of RIB requests indexed on request names.
 		boost::shared_ptr<CqRequestMap> m_requests;
+		/// Map of declared primvar tokens
+		typedef std::map<std::string, CqPrimvarToken> TqPrimvarMap;
+		TqPrimvarMap m_declaredVars;
 		/// Ignore unrecognized requests rather than throwing an error.
 		bool m_ignoreUnrecognized;
 		/// pool of parsed float arrays for the current request.
@@ -242,6 +268,11 @@ inline void CqRibParser::CqBufferPool<T>::markUnused()
 	m_next = 0;
 }
 
+//------------------------------------------------------------------------------
+inline void CqRibParser::declareVariable(const CqPrimvarToken& tok)
+{
+	m_declaredVars.insert(TqPrimvarMap::value_type(tok.name(), tok));
+}
 
 //------------------------------------------------------------------------------
 
