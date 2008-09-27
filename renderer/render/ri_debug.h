@@ -89,7 +89,7 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 		size *= Decl.m_Count;
 
 		int j;
-		_message << "["; 
+		_message << "\"" << token << "\" ["; 
 		switch( Decl.m_Type )
 		{
 			case type_integer:
