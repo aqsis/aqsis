@@ -64,7 +64,7 @@ CqPluginBase::DLOpen( CqString *library )
 	void * handle = NULL;
 	Aqsis::log() << info << "Loading plugin \"" << library->c_str() << "\"" << std::endl;
 
-#ifdef	PLUGINS
+#ifndef AQSIS_NO_PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 
 	handle = ( void* ) LoadLibrary( library->c_str() );
@@ -76,7 +76,7 @@ CqPluginBase::DLOpen( CqString *library )
 		tstring = CqString("./") + *library;
 	handle = ( void * ) dlopen( tstring.c_str(), RTLD_NOW);
 #endif
-#endif
+#endif // AQSIS_NO_PLUGINS
 
 	if ( handle )
 		m_activeHandles.push_back( handle );
@@ -94,7 +94,7 @@ CqPluginBase::DLSym( void *handle, CqString *symbol )
 {
 	void * location = NULL;
 
-#ifdef	PLUGINS
+#ifndef AQSIS_NO_PLUGINS
 
 	if ( handle )
 	{
@@ -108,7 +108,7 @@ CqPluginBase::DLSym( void *handle, CqString *symbol )
 
 	};
 
-#endif
+#endif // AQSIS_NO_PLUGINS
 
 	return location;
 }
@@ -116,7 +116,7 @@ CqPluginBase::DLSym( void *handle, CqString *symbol )
 void
 CqPluginBase::DLClose( void *handle )
 {
-#ifdef	PLUGINS
+#ifndef AQSIS_NO_PLUGINS
 	if ( handle )
 	{
 
@@ -129,7 +129,7 @@ CqPluginBase::DLClose( void *handle )
 
 	};
 	m_activeHandles.remove( handle );
-#endif
+#endif // AQSIS_NO_PLUGINS
 }
 
 CqPluginBase::~CqPluginBase()
@@ -146,7 +146,7 @@ const CqString
 CqPluginBase::DLError( void )
 {
 	CqString errorlog;
-#ifdef	PLUGINS
+#ifdef AQSIS_NO_PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 
 	LPVOID lpMsgBuf;
@@ -178,7 +178,7 @@ CqPluginBase::DLError( void )
 #else
 
 	errorlog = "Aqsis was built without plugin support\n";
-#endif
+#endif // AQSIS_NO_PLUGINS
 
 	return errorlog;
 }

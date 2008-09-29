@@ -28,7 +28,6 @@ INCLUDE(FindWin32Libs)
 # Build-time options which can be set from ccmake or the command line
 #--------------------------------------------------------------------
 OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
-OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) ON/OFF" ON)
 OPTION(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
 MARK_AS_ADVANCED(AQSIS_USE_PDIFF)
 OPTION(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk library" ON)
@@ -169,10 +168,6 @@ ENDIF(AQSIS_USE_RPATH)
 IF(AQSIS_USE_TIMERS)
 	ADD_DEFINITIONS(-DUSE_TIMERS)
 ENDIF(AQSIS_USE_TIMERS)
-
-IF(AQSIS_USE_PLUGINS)
-	ADD_DEFINITIONS(-DPLUGINS)
-ENDIF(AQSIS_USE_PLUGINS)
 
 ADD_DEFINITIONS(-DAQSIS_MAIN_CONFIG_NAME="${AQSIS_MAIN_CONFIG_NAME}")
 

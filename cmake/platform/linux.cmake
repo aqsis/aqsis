@@ -34,9 +34,7 @@ IF(FIRST_CMAKE_RUN)
 	SET_IF_EMPTY(CMAKE_C_FLAGS "-Wall" CACHE STRING "Flags for C compiler." FORCE)
 ENDIF(FIRST_CMAKE_RUN)
 
-IF(AQSIS_USE_PLUGINS)
-	SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} dl)
-ENDIF(AQSIS_USE_PLUGINS)
+SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} dl)
 
 # Determine the default location of aqsisrc.  This depends on whether
 # SYSCONFDIR is an absolute or relative path.  Relative paths are relative to
