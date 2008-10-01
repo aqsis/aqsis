@@ -31,10 +31,10 @@
 
 #include	"aqsis.h"
 
-#include	"ishaderdata.h"
+#include	"primvartype.h"
 #include	"parameters.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \struct SqParameterDeclaration
@@ -79,6 +79,6 @@ struct SqParameterDeclaration
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SYMBOLS_H_INCLUDED

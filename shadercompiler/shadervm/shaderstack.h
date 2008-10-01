@@ -43,7 +43,7 @@
 #include	"shadervariable.h"
 #include	"shadervm_common.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 #define DECLARE_SHADERSTACK_TEMPS \
 static TqFloat temp_float; \
@@ -144,7 +144,7 @@ static CqMatrix temp_matrix;
 
 #define OpABRS(OP, NAME) \
 		template <class A, class B, class R>	\
-		inline void	Op##NAME( A& a, B&b, R& r, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState ) \
+		inline void	Op##NAME( A& a, B&b, R& r, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, const CqBitVector& RunningState ) \
 		{ \
 			A vA; \
 			B vB; \
@@ -227,7 +227,7 @@ class SHADERVM_SHARE CqShaderStack
 	public:
 		CqShaderStack() : m_iTop( 0 )
 		{
-			m_maxsamples = MAX(m_maxsamples, m_samples);
+			m_maxsamples = max(m_maxsamples, m_samples);
 			m_Stack.resize( m_maxsamples);
 		}
 		virtual ~CqShaderStack()
@@ -253,7 +253,7 @@ class SHADERVM_SHARE CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = true;
 			m_iTop ++;
-			m_maxsamples = MAX(m_iTop, m_maxsamples);
+			m_maxsamples = max(m_iTop, m_maxsamples);
 
 
 		}
@@ -273,7 +273,7 @@ class SHADERVM_SHARE CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = false;
 			m_iTop ++;
-			m_maxsamples = MAX(m_iTop, m_maxsamples);
+			m_maxsamples = max(m_iTop, m_maxsamples);
 
 		}
 
@@ -314,9 +314,7 @@ class SHADERVM_SHARE CqShaderStack
 		void	Drop()
 		{
 			bool f = false;
-			Pop( f );
-
-
+			Release(Pop(f));
 		}
 
 		/**
@@ -324,15 +322,12 @@ class SHADERVM_SHARE CqShaderStack
 		 */
 		static void Statistics();
 
-
 		/** set the more efficient number of samples per type of variable at run-time.
 		 */
 		static void	SetSamples(TqInt n)
 		{
 			m_samples = (TqUint) n;
 		}
-
-
 
 	protected:
 		std::vector<SqStackEntry>	m_Stack;
@@ -402,7 +397,8 @@ OpABRS( != , NE )
 OpABRS( *, MUL )
 /** Special case vector multiplication operator.
  */
-inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	CqVector3D vA, vB;
 	CqVector3D* pdA;
@@ -479,7 +475,8 @@ OpABRS( / , DIV )
  * \param pRes The shader data to store the results in.
  * \param RunningState The current SIMD state.
  */
-inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	CqMatrix vA;
 	CqMatrix vB;
@@ -571,7 +568,8 @@ OpABRS( || , LOR )
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -607,7 +605,8 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& Runn
  * \param RunningState The current SIMD state.
  */
 template <class A, class B>
-inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -643,11 +642,12 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, CqBitVector& RunningState )
+inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB,
+		IqShaderData* pC, const CqBitVector& RunningState )
 {
 	TqFloat x, y, z;
 
-	TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
+	TqInt i = max( max( pA->Size(), pB->Size() ), pC->Size() ) - 1;
 	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 		if ( !__fVarying || RunningState.Value( i ) )
@@ -684,18 +684,19 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
                         IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, IqShaderData* pD,
                         IqShaderData* pE, IqShaderData* pF, IqShaderData* pG, IqShaderData* pH,
                         IqShaderData* pI, IqShaderData* pJ, IqShaderData* pK, IqShaderData* pL,
-                        IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP, CqBitVector& RunningState )
+                        IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP,
+						const CqBitVector& RunningState )
 {
 	TqFloat a1, a2, a3, a4;
 	TqFloat b1, b2, b3, b4;
 	TqFloat c1, c2, c3, c4;
 	TqFloat d1, d2, d3, d4;
 
-	TqInt ii1 = MAX( MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
-	TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
-	TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
-	TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
-	TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
+	TqInt ii1 = max( max( max( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
+	TqInt ii2 = max( max( max( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
+	TqInt ii3 = max( max( max( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
+	TqInt ii4 = max( max( max( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
+	TqInt ii = max( max( max( ii1, ii2 ), ii3 ), ii4 ) - 1;
 	bool __fVarying = ii > 0;
 	for ( ; ii >= 0; ii-- )
 	{
@@ -734,7 +735,8 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	A* pdA;
@@ -769,7 +771,8 @@ inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBit
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat vB;
@@ -839,12 +842,13 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, CqBitVector& RunningState )
+inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat val;
 
-	TqInt i = MAX( pRes->Size(), pA->Size() ) - 1;
+	TqInt i = max( pRes->Size(), pA->Size() ) - 1;
 	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
@@ -865,12 +869,13 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, Cq
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderData* pA, CqBitVector& RunningState )
+inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderData* pA,
+		const CqBitVector& RunningState )
 {
 	A vA;
 	TqFloat val, fi;
 
-	TqInt i = MAX( MAX( pRes->Size(), pA->Size() ), index->Size() ) - 1;
+	TqInt i = max( max( pRes->Size(), pA->Size() ), index->Size() ) - 1;
 	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
@@ -892,12 +897,13 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderDa
  * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
-inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pRes, CqBitVector& RunningState )
+inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC,
+		IqShaderData* pRes, const CqBitVector& RunningState )
 {
 	CqMatrix m;
 	TqFloat fr, fc;
 
-	TqInt i = MAX( pA->Size(), pRes->Size() ) - 1;
+	TqInt i = max( pA->Size(), pRes->Size() ) - 1;
 	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 		if ( !__fVarying || RunningState.Value( i ) )
@@ -916,12 +922,13 @@ inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqSha
  * \param pV The shader data which holds the value to place in the appropriate row/column.
  * \param RunningState The current SIMD state.
  */
-inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pV, CqBitVector& RunningState )
+inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC,
+		IqShaderData* pV, const CqBitVector& RunningState )
 {
 	CqMatrix m;
 	TqFloat fr, fc, val;
 
-	TqInt i = MAX( pA->Size(), pV->Size() ) - 1;
+	TqInt i = max( pA->Size(), pV->Size() ) - 1;
 	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
@@ -940,6 +947,6 @@ inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, Iq
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADERSTACK_H_INCLUDED

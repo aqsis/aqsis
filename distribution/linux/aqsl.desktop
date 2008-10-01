@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Aqsis Shader Compiler
+GenericName=RenderMan Shader Compiler
+NoDisplay=true
+Comment=Compile RenderMan Shading Language (RSL) files
+Icon=aqsis
+TryExec=aqsl
+Exec=/usr/share/aqsis/scripts/aqsl.sh %F
+Terminal=true
+MimeType=text/x-sl;
+Categories=Graphics;3DGraphics;ConsoleOnly;

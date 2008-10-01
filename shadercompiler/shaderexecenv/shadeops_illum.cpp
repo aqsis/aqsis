@@ -25,12 +25,12 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
 #include	<stdio.h>
 
+#include	"aqsismath.h"
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
@@ -38,7 +38,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 // init_illuminance()
@@ -156,7 +156,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 		{
 			IqLightsource * lp = m_pAttributes ->pLight( li );
 			// Initialise the lightsource
-			lp->Initialise( uGridRes(), vGridRes(), microPolygonCount(), shadingPointCount() );
+			lp->Initialise( uGridRes(), vGridRes(), microPolygonCount(), shadingPointCount(), m_hasValidDerivatives );
 			m_Illuminate = 0;
 			// Evaluate the lightsource
 			lp->Evaluate( Ps, Ns, m_pCurrentSurface );
@@ -178,7 +178,7 @@ void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -209,7 +209,7 @@ void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -245,7 +245,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(Kt)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -296,7 +296,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 	__fVarying=(T)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -352,7 +352,7 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -404,7 +404,7 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 			if ( lp->pShader() ->fAmbient() )
 			{
 				__iGrid = 0;
-				CqBitVector& RS = RunningState();
+				const CqBitVector& RS = RunningState();
 				do
 				{
 					if(!__fVarying || RS.Value( __iGrid ) )
@@ -443,7 +443,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	Result->SetColor( gColBlack );
 
@@ -481,7 +481,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 			GetCurrentState();
 
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -531,7 +531,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	Result->SetColor( gColBlack );
 	__fVarying = true;
@@ -568,7 +568,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 			PushState();
 			GetCurrentState();
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -593,7 +593,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 					(roughness)->GetFloat(_aq_roughness,__iGrid);
 					CqColor colCl;
 					Cl() ->GetColor( colCl, __iGrid );
-					(Result)->SetColor(_aq_Result + colCl * pow( MAX( 0.0f, _aq_N * H ), 1.0f / ( _aq_roughness / 8.0f ) ),__iGrid);
+					(Result)->SetColor(_aq_Result + colCl * pow( max( 0.0f, _aq_N * H ), 1.0f / ( _aq_roughness / 8.0f ) ),__iGrid);
 
 				}
 			}
@@ -630,7 +630,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -657,7 +657,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 	if ( NULL == pDefAngle )
 		return ;
 
-	pDefAngle->SetFloat( PIO2 );
+	pDefAngle->SetFloat( M_PI_2 );
 
 	// Initialise the return value
 	Result->SetColor( gColBlack );
@@ -674,7 +674,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 			GetCurrentState();
 
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -694,7 +694,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 					(size)->GetFloat(_aq_size,__iGrid);
 					CqColor colCl;
 					Cl() ->GetColor( colCl, __iGrid );
-					(Result)->SetColor(_aq_Result + colCl * pow( MAX( 0.0f, vecR * Ln ), _aq_size ),__iGrid);
+					(Result)->SetColor(_aq_Result + colCl * pow( max( 0.0f, vecR * Ln ), _aq_size ),__iGrid);
 
 				}
 			}
@@ -722,7 +722,7 @@ void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -810,7 +810,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 		if( exec )
 		{
 			__iGrid = 0;
-			CqBitVector& RS = RunningState();
+			const CqBitVector& RS = RunningState();
 			do
 			{
 				if(!__fVarying || RS.Value( __iGrid ) )
@@ -831,12 +831,12 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 					CqVector3D vecAxis( 0, 1, 0 );
 					if ( NULL != Axis )
 						Axis->GetVector( vecAxis, __iGrid );
-					TqFloat fAngle = PI;
+					TqFloat fAngle = M_PI;
 					if ( NULL != Angle )
 						Angle->GetFloat( fAngle, __iGrid );
 
 					TqFloat cosangle = Ln * vecAxis;
-					cosangle = CLAMP( cosangle, -1, 1 );
+					cosangle = clamp(cosangle, -1.0f, 1.0f);
 					if ( acos( cosangle ) > fAngle )
 						m_CurrentState.SetValue( __iGrid, false );
 					else
@@ -870,7 +870,7 @@ void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShad
 	if ( res )
 	{
 		__iGrid = 0;
-		CqBitVector& RS = RunningState();
+		const CqBitVector& RS = RunningState();
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -890,11 +890,11 @@ void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShad
 				CqVector3D vecAxis( 0.0f, 1.0f, 0.0f );
 				if ( NULL != Axis )
 					Axis->GetVector( vecAxis, __iGrid );
-				TqFloat fAngle = PI;
+				TqFloat fAngle = M_PI;
 				if ( NULL != Angle )
 					Angle->GetFloat( fAngle, __iGrid );
 				TqFloat cosangle = Ln * vecAxis;
-				cosangle = CLAMP( cosangle, -1, 1 );
+				cosangle = clamp(cosangle, -1.0f, 1.0f);
 				if ( acos( cosangle ) > fAngle )
 				{
 					// Make sure we set the light color to zero in the areas that won't be lit.
@@ -932,7 +932,7 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -969,7 +969,7 @@ void CqShaderExecEnv::SO_gather( IqShaderData* category, IqShaderData* P, IqShad
 
 	__iGrid = 0;
 	__fVarying = true;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1021,7 +1021,7 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1041,7 +1041,7 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 			(rough)->GetFloat(_aq_rough,__iGrid);
 			CqColor colCl;
 			Cl() ->GetColor( colCl, __iGrid );
-			(Result)->SetColor(colCl * pow( MAX( 0.0f, _aq_N * H ), 1.0f / ( _aq_rough / 8.0f ) ),__iGrid);
+			(Result)->SetColor(colCl * pow( max( 0.0f, _aq_N * H ), 1.0f / ( _aq_rough / 8.0f ) ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -1051,7 +1051,6 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 // calculatenormal(P)
 void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -1068,49 +1067,13 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			//CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, this, Defvec );
-			//CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, this, Defvec );
-			//CqVector3D	N = dPdu % dPdv;
-
-			CqVector3D Ret, Ret2;
-			TqInt uRes = uGridRes();
-			TqInt GridX = __iGrid % ( uRes + 1 );
-
-			CqVector3D v1, v2;
-			if ( GridX < uRes )
-			{
-				p->GetValue( v1, __iGrid + 1 );
-				p->GetValue( v2, __iGrid );
-				Ret = ( v1 - v2 );
-			}
-			else
-			{
-				p->GetValue( v1, __iGrid );
-				p->GetValue( v2, __iGrid - 1 );
-				Ret = ( v1 - v2 );
-			}
-			TqInt vRes = vGridRes();
-			TqInt GridY = ( __iGrid / ( uRes + 1 ) );
-
-			if ( GridY < vRes )
-			{
-				p->GetValue( v1, __iGrid + uRes + 1 );
-				p->GetValue( v2, __iGrid );
-				Ret2 = ( v1 - v2 );
-			}
-			else
-			{
-				p->GetValue( v1, __iGrid );
-				p->GetValue( v2, __iGrid - ( uRes + 1 ) );
-				Ret2 = ( v1 - v2 );
-			}
-
-			CqVector3D N = Ret % Ret2;
+			CqVector3D N = diffU<CqVector3D>(p, __iGrid)
+				% diffV<CqVector3D>(p, __iGrid);
 			N.Unit();
 			N *= neg;
 			(Result)->SetNormal(N,__iGrid);
@@ -1132,7 +1095,7 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 
 	__fVarying = true;
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1161,5 +1124,5 @@ void CqShaderExecEnv::SO_rayinfo( IqShaderData* dataname, IqShaderData* pV, IqSh
 	(Result)->SetFloat(Ret,__iGrid);
 }
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

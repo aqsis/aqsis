@@ -32,7 +32,7 @@
 #include	"file.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -41,13 +41,12 @@ START_NAMESPACE( Aqsis )
 
 CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
 		m_pShader( pShader ),
-		m_pAttributes( NULL ),
+		m_pAttributes(), 
 		m_pShaderExecEnv( new CqShaderExecEnv(QGetRenderContextI()) )
 {
 
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	m_pAttributes = QGetRenderContext()->pattrCurrent();
 	m_pShader->SetType(Type_Imager);
-	ADDREF( m_pAttributes );
 }
 
 
@@ -57,29 +56,20 @@ CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool
 
 CqImagersource::~CqImagersource()
 {
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-	m_pAttributes = 0;
 }
 
 //---------------------------------------------------------------------
-/** Initialise the environment for the specified grid size
- *   and execute the shader on the complete grid.
- * \param uGridRes Integer grid resolution == 1.
- * \param vGridRes Integer grid resolution == 1.
- * \param x Integer Raster position.
- * \param y Integer Raster position.
- * \param color Initial value Ci.
- * \param opacity Initial value Oi.
- * \param depth Initial value depth (not required).
- * \param coverage Initial value "alpha"
- */
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
 	TIME_SCOPE("Imager shading")
 
-	TqInt uGridRes = pBucket->Width();
-	TqInt vGridRes = pBucket->Height();
+	// We use one less than the bucket width and height here, since these
+	// resolutions really represent one less than the number of shaded points
+	// in each direction.  (Usually they describe the number of micropolygons
+	// on a grid which is one less than the number of shaded vertices.  This
+	// concept has no real analogue in context of an imager shader.)
+	TqInt uGridRes = pBucket->Width()-1;
+	TqInt vGridRes = pBucket->Height()-1;
 	TqInt x = pBucket->XOrigin();
 	TqInt y = pBucket->YOrigin();
 
@@ -99,7 +89,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) );
 
-	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, uGridRes * vGridRes, (uGridRes+1)*(vGridRes+1), 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, uGridRes * vGridRes, (uGridRes+1)*(vGridRes+1), true, IqAttributesPtr(), IqTransformPtr(), m_pShader.get(), Uses );
 
 	// Initialise the geometric parameters in the shader exec env.
 
@@ -119,12 +109,12 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv );
+	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv.get() );
 
 
-	for ( j = 0; j < vGridRes; j++ )
+	for ( j = 0; j < vGridRes+1; j++ )
 	{
-		for ( i = 0; i < uGridRes; i++ )
+		for ( i = 0; i < uGridRes+1; i++ )
 		{
 			TqInt off = j * ( uGridRes + 1 ) + i;
 			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
@@ -140,7 +130,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
-		m_pShader->Evaluate( m_pShaderExecEnv );
+		m_pShader->Evaluate( m_pShaderExecEnv.get() );
 		alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 }
@@ -197,7 +187,7 @@ TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 

@@ -34,7 +34,7 @@
 class CqBucket;
 
 
-START_NAMESPACE( Aqsis );
+namespace Aqsis {
 
 
 /**
@@ -108,6 +108,6 @@ private:
 };
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis
 
 #endif

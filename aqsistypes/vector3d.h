@@ -34,7 +34,7 @@
 
 #include	"vector2d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 
@@ -70,7 +70,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_x );
 		}
+		/// Get a reference to the x-componenet.
+		TqFloat& x()
+		{
+			return m_x;
+		}
 		/** Set the x component.
+		 *
+		 * \deprecated.  Use the x() method returning a non-const reference.
 		 */
 		void	x( TqFloat x )
 		{
@@ -82,7 +89,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_y );
 		}
+		/// Get a reference to the y-componenet.
+		TqFloat& y()
+		{
+			return m_y;
+		}
 		/** Set the y component.
+		 *
+		 * \deprecated.  Use the y() method returning a non-const reference.
 		 */
 		void	y( TqFloat y )
 		{
@@ -94,7 +108,14 @@ class COMMON_SHARE CqVector3D
 		{
 			return ( m_z );
 		}
+		/// Get a reference to the z-componenet.
+		TqFloat& z()
+		{
+			return m_z;
+		}
 		/** Set the z component.
+		 *
+		 * \deprecated.  Use the z() method returning a non-const reference.
 		 */
 		void	z( TqFloat z )
 		{
@@ -378,6 +399,20 @@ class COMMON_SHARE CqVector3D
 ;
 
 
+//------------------------------------------------------------------------------
+/** \brief Determine whether two vectors are equal to within some tolerance
+ *
+ * The closeness criterion for vectors is based on the euclidian norm - ie, the
+ * usual distance function between two vectors.  v1 and v2 are "close" if
+ *
+ * length(v1 - v2) < tol*max(length(v1), length(v2));
+ *
+ * \param v1, v2 - vectors to compare
+ * \param tolerance for comparison
+ */
+bool isClose(const CqVector3D& v1, const CqVector3D& v2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 // Inline function implementations.
@@ -407,8 +442,15 @@ inline CqVector3D lerp(const T t, const CqVector3D& v0, const CqVector3D& v1)
 			       (1-t)*v0.m_z + t*v1.m_z);
 }
 
+inline bool isClose(const CqVector3D& v1, const CqVector3D& v2, TqFloat tol)
+{
+	TqFloat diff2 = (v1 - v2).Magnitude2();
+	TqFloat tol2 = tol*tol;
+	return diff2 <= tol2*v1.Magnitude2() || diff2 <= tol2*v2.Magnitude2();
+}
+
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// VECTOR3D_H_INCLUDED

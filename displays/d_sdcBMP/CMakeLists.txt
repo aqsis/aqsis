@@ -7,7 +7,7 @@ ADD_DEFINITIONS(-DD_BMP_EXPORTS)
 
 INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 
-ADD_LIBRARY(d_bmp SHARED ${D_BMP_SRCS} ${D_BMP_HDRS})
+ADD_LIBRARY(d_bmp SHARED ${D_BMP_SRCS} ${D_BMP_HDRS} ${INFORES_SRCS})
 
 # Generate the display declaration for the aqsisrc file.
 GET_TARGET_PROPERTY(LOCOFD_BMP d_bmp LOCATION)

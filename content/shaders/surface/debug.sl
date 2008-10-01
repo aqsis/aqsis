@@ -12,4 +12,3 @@ debug ()
   Oi = Os;
   Ci = Os * c;
 }
-

@@ -25,11 +25,10 @@
 
 #include	"aqsis.h"
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
-#include	<stdio.h>
+#include	<cstring>
 
 #if defined(REGEXP)
 #include        <regex.h>
@@ -43,7 +42,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 static TqFloat match(const char *string, const char *pattern);
 
@@ -104,7 +103,7 @@ void CqShaderExecEnv::SO_lightsource( IqShaderData* name, IqShaderData* pV, IqSh
 	TqUint __iGrid;
 
 	// This should only be called within an Illuminance construct, so m_li should be valid.
-	boost::shared_ptr<IqShader> pLightsource;
+	boost::shared_ptr<const IqShader> pLightsource;
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -469,7 +468,7 @@ void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 	__fVarying=(Result)->Class()==class_varying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -503,7 +502,7 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 	__fVarying=(Result)->Class()==class_varying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -525,5 +524,5 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

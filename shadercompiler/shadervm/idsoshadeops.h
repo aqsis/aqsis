@@ -36,7 +36,7 @@
 #include	"shadeop.h"
 #include	"ishaderexecenv.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This is used as the datablock for SO_external within UsProgramElement
 // Additionally it cotains the init and shutdown funnction pointers, it
@@ -68,6 +68,6 @@ private:
 	virtual SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*) = 0;
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// IDSOSHADEOPS_H

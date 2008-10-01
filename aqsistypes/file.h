@@ -29,12 +29,13 @@
 
 #include	<iostream>
 #include	<list>
+#include	<vector>
 
 #include	"aqsis.h"
 
 #include	"sstring.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 // This should'nt really be in here, but for now it will do
 #ifdef AQSIS_SYSTEM_WIN32
@@ -42,6 +43,21 @@ START_NAMESPACE( Aqsis )
 #else
 #define DIRSEP "/"
 #endif
+
+//-----------------------------------------------------------------------
+/** \brief Find an absolute path to the given file name in the provided search path.
+ *
+ * This function should deprecate a common usage of CqFile simply to get the
+ * absolute file name in the search path.
+ *
+ * \param fileName - path-relative name of the file.
+ * \param searchPath - colon-separated string of directories in which to search
+ *                     for the given file name.
+ * \return Absolute file name; throws an XqInvalidFile if the file is not found.
+ */
+COMMON_SHARE std::string findFileInPath(const std::string& fileName,
+		const std::string& searchPath);
+
 
 //----------------------------------------------------------------------
 /** \class CqFile
@@ -127,14 +143,15 @@ class COMMON_SHARE CqFile
 			return ( len );
 		}
 
-		CqString FixupPath(CqString& strPath);
-
+		static CqString FixupPath(CqString& strPath);
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
+		static std::list<CqString*> cliGlob( const CqString& strFileGlob );
 		static std::string basePath( const CqString& strFilespec );
 		static std::string fileName( const CqString& strFilespec );
 		static std::string extension( const CqString& strFilespec );
 		static std::string baseName( const CqString& strFilespec );
 		static std::string pathSep();
+		static std::vector<std::string> searchPaths( const CqString& searchPath );
 
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
@@ -143,8 +160,9 @@ class COMMON_SHARE CqFile
 }
 ;
 
+
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !FILE_H_INCLUDED

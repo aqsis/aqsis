@@ -1,82 +1,32 @@
-/*___________________________________________________________________________
-**
-** Based on Renderman Interface version 3.2
-**
-** Renderman Interface is Copyright (c) 1988 Pixar. All Rights reserved.
-**
-**___________________________________________________________________________
-*/
+/*----------------------------------------------------------------------------*/
+/** \file
+ * \brief Aqsis implementation of the Renderman Interface version 3.2
+ *
+ * The Renderman Interface is Copyright (c) 1988 Pixar. All Rights reserved.
+ *
+ * ===================================================================
+ * C-compatible header. C++ constructs must be preprocessor-protected.
+ * ===================================================================
+ */
+/*----------------------------------------------------------------------------*/
 
-/* Is ri.h included already? */
-#ifndef	RI_H_INCLUDED
-#define	RI_H_INCLUDED 1
+#ifndef RI_H_INCLUDED
+#define RI_H_INCLUDED
 
-#include	"float.h"
+#include "aqsis_compiler.h"
 
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
+#include <float.h>
 
-#    define  RI_SHARE
-
-#  else /* !AQSIS_STATIC_LINK */
-
-#      ifdef RI_EXPORTS
-#        define RI_SHARE __declspec(dllexport)
-#      else
-#        define RI_SHARE __declspec(dllimport)
-#      endif
-
-#  endif	/* AQSIS_STATIC_LINK */
-
-#else	/* !WIN32 */
-
-#  define  RI_SHARE
-
-#endif /* WIN32 */
+#include "ri_types.h"
 
 #ifdef	__cplusplus
 extern	"C"
 {
 #endif
 
-
 	/*
 	 *		RenderMan Interface Standard Include File
 	 */
-
-	/* Definitions of Abstract Types Used in RI */
-
-	typedef	short	RtBoolean;
-	typedef	int		RtInt;
-	typedef	float	RtFloat;
-
-	typedef	char*	RtToken;
-
-	typedef	RtFloat	RtColor[ 3 ];
-	typedef	RtFloat	RtPoint[ 3 ];
-	typedef	RtFloat	RtMatrix[ 4 ][ 4 ];
-	typedef	RtFloat	RtBasis[ 4 ][ 4 ];
-	typedef	RtFloat	RtBound[ 6 ];
-	typedef	char*	RtString;
-
-	typedef	void*	RtPointer;
-	typedef	void	RtVoid;
-
-	typedef	RtFloat	( *RtFilterFunc ) ( RtFloat, RtFloat, RtFloat, RtFloat );
-	typedef	RtFloat	( *RtFloatFunc ) ();
-	typedef	RtVoid	( *RtFunc ) ();
-	typedef	RtVoid	( *RtErrorFunc ) ( RtInt code, RtInt severity, RtString message );
-	typedef	RtErrorFunc	RtErrorHandler;
-
-	typedef	RtVoid	( *RtProcSubdivFunc ) ( RtPointer, RtFloat );
-	typedef	RtVoid	( *RtProcFreeFunc ) ( RtPointer );
-	typedef	RtVoid	( *RtArchiveCallback ) ( RtToken, char *, ... );
-
-	typedef	RtPointer	RtObjectHandle;
-	typedef	RtPointer	RtLightHandle;
-	typedef	RtPointer	RtContextHandle;
-
-	/* Extern Declarations for Predefined RI Data Structures */
 
 #define	RI_FALSE	0
 #define	RI_TRUE		1
@@ -91,6 +41,8 @@ extern	"C"
 #define	RI_PIO2		RI_PI/2
 
 #define	RI_SHADER_EXTENSION	".slx"
+
+	/* Extern Declarations for Predefined RI Data Structures */
 
 	RI_SHARE	extern	RtToken	RI_FRAMEBUFFER, RI_FILE;
 	RI_SHARE	extern	RtToken	RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z, RI_AZ;
@@ -115,7 +67,6 @@ extern	"C"
 	RI_SHARE	extern	RtToken	RI_RASTER, RI_SCREEN, RI_CAMERA, RI_WORLD,
 	RI_OBJECT;
 	RI_SHARE	extern	RtToken	RI_INSIDE, RI_OUTSIDE, RI_LH, RI_RH;
-	/*__declspec(dllimport) RtToken RI_P; */
 	RI_SHARE	extern	RtToken	RI_P, RI_PZ, RI_PW, RI_N, RI_NP, RI_CS, RI_OS,
 	RI_S, RI_T, RI_ST;
 	RI_SHARE	extern	RtToken	RI_BILINEAR, RI_BICUBIC;
@@ -152,8 +103,6 @@ extern	"C"
 #include	"ri.inl"
 
 	/* Specific to Aqsis */
-
-	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
 
 	RI_SHARE	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
 	RI_SHARE	RtVoid	RiProgressHandler( RtProgressFunc handler );
@@ -213,6 +162,4 @@ extern	"C"
 #define RIE_SEVERE      ((RtInt)3)      /* So bad you should probably abort */
 
 
-#endif
-
-
+#endif // RI_H_INCLUDED

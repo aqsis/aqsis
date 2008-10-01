@@ -30,7 +30,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqListEntry
@@ -210,7 +210,7 @@ class COMMON_SHARE CqList
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef LIST_H_INCLUDED
 #endif

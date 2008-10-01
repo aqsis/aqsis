@@ -21,7 +21,7 @@
 #include	"funcdef.h"
 #include	"list.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 extern const char* gShaderTypeNames[];
 extern TqInt gcShaderTypeNames;
@@ -547,6 +547,10 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 			IqVarDef * pVarDef = CqVarDef::GetVariablePtr( m_VarRef );
 			if ( pVarDef != 0 )
 				pVarDef->SetDefaultStorage( Storage );
+		}
+		virtual	bool	UpdateStorageStatus()
+		{
+			return fVarying();
 		}
 
 	protected:
@@ -2016,6 +2020,6 @@ class CqParseNodeDeclaration : public CqParseNode
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !PARSENODE_H_INCLUDED

@@ -23,27 +23,25 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include "shadervm.h"
 
-#include	"multitimer.h"
+#include <cstring>
+#include <ctype.h>
+#include <iostream>
+#include <sstream>
+#include <stddef.h>
 
-#include	<iostream>
+#include "iparameter.h"
+#include "irenderer.h"
+#include "isurface.h"
+#include "logging.h"
+#include "multitimer.h"
+#include "shadervariable.h"
+#include "sstring.h"
+#include "version.h"
 
-#include	<sstream>
-#include	<ctype.h>
-#include	<stddef.h>
 
-#include	"shadervm.h"
-#include	"iparameter.h"
-#include	"version.h"
-#include	"sstring.h"
-
-#include	"irenderer.h"
-#include	"isurface.h"
-#include	"shadervariable.h"
-#include	"logging.h"
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /*
  * Type, name and private hash key for the name
@@ -78,10 +76,8 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"RS_GET", 0, &CqShaderVM::SO_RS_GET, 0, {0}},
         {"RS_INVERSE", 0, &CqShaderVM::SO_RS_INVERSE, 0, {0}},
         {"RS_JZ", 0, &CqShaderVM::SO_RS_JZ, 1, {type_float}},
-        {"RS_JNZ", 0, &CqShaderVM::SO_RS_JNZ, 1, {type_float}},
         {"RS_BREAK", 0, &CqShaderVM::SO_RS_BREAK, 1, {type_integer}},
         {"S_JZ", 0, &CqShaderVM::SO_S_JZ, 1, {type_float}},
-        {"S_JNZ", 0, &CqShaderVM::SO_S_JNZ, 1, {type_float}},
         {"S_GET", 0, &CqShaderVM::SO_S_GET, 0, {0}},
         {"S_CLEAR", 0, &CqShaderVM::SO_S_CLEAR, 0, {0}},
 
@@ -470,6 +466,94 @@ static const TqUlong ehash = CqString::hash("external");
 static const TqUlong ohash = CqString::hash("output");
 
 
+CqShaderVM::CqShaderVM(IqRenderer* pRenderContext)
+	: CqShaderStack(),
+	m_Uses(0xFFFFFFFF),
+	m_strName(),
+	m_Type(Type_Surface),
+	m_LocalIndex(0),
+	m_pEnv(0),
+	m_pTransform(),
+	m_LocalVars(),
+	m_StoredArguments(),
+	m_ProgramInit(),
+	m_Program(),
+	m_ProgramStrings(),
+	m_uGridRes(0),
+	m_vGridRes(0),
+	m_shadingPointCount(0),
+	m_PC(0),
+	m_PO(0),
+	m_PE(0),
+	m_fAmbient(true),
+	m_outsideWorld(false),
+	m_pRenderContext(pRenderContext)
+{
+	// Find out if this shader is being declared outside the world construct. If so
+	// if is effectively being defined in 'camera' space, which will affect the
+	// transformation of parameters. Should only affect lightsource shaders as these
+	// are the only ones valid outside the world.
+	if (NULL != m_pRenderContext)
+		m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+	else
+		m_outsideWorld = false;
+}
+
+CqShaderVM::CqShaderVM(const CqShaderVM& From)
+	: CqShaderStack(),
+	m_Uses(0),
+	m_strName(),
+	m_Type(Type_Surface),
+	m_LocalIndex(0),
+	m_pEnv(0),
+	m_pTransform(),
+	m_LocalVars(),
+	m_StoredArguments(),
+	m_ProgramInit(),
+	m_Program(),
+	m_ProgramStrings(),
+	m_uGridRes(0),
+	m_vGridRes(0),
+	m_shadingPointCount(0),
+	m_PC(0),
+	m_PO(0),
+	m_PE(0),
+	m_fAmbient(true),
+	m_outsideWorld(false),
+	m_pRenderContext(0)
+{
+	*this = From;
+	// Find out if this shader is being declared outside the world construct. If so
+	// if is effectively being defined in 'camera' space, which will affect the
+	// transformation of parameters. Should only affect lightsource shaders as these
+	// are the only ones valid outside the world.
+	if (NULL != m_pRenderContext)
+		m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+	else
+		m_outsideWorld = false;
+}
+
+CqShaderVM::~CqShaderVM()
+{
+	// Delete the local variables.
+	for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
+	{
+		delete *i;
+	}
+	// Delete strings used by the program
+	for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin();
+			i != m_ProgramStrings.end(); i++ )
+	{
+		delete *i;
+	}
+	// Delete stored shader arguments
+	for(std::vector<SqArgumentRecord>::iterator i = m_StoredArguments.begin();
+			i != m_StoredArguments.end(); ++i)
+	{
+		delete i->m_Value;
+	}
+}
+
 //---------------------------------------------------------------------
 /**
  *  Function to create a local variable for a specific shader
@@ -813,17 +897,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pRenderContext));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
-	/*
-	* Private hash key for the data types supported by the shaders
-	*/
-	std::vector<TqUlong> itypes;
-
-	// Initialise the private hash keys.
-
-
-	for(i = 0; i< (TqUint) gcVariableTypeNames; i++)
-		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
-
 
 	bool fShaderSpec = false;
 	while ( !pFile->eof() )
@@ -875,18 +948,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		if ( strcmp( token, "AQSIS_V" ) == 0 )
 		{
 			GetToken( token, 255, pFile );
-
+			// Check that the version string matches the current one.  If not,
+			// fail fatally.
+			if(std::string(token) != VERSION_STR)
+			{
+				AQSIS_THROW(XqBadShader, "Shader compiled with an old/different version ("
+						<< token << ") of aqsis.  Please recompile.");
+			}
 			continue;
-
-			// Get the version information.
-			CqString strVersion(token);
-			//TqInt vMaj, vMin, build;
-			//GET_VERSION_FROM_STRING(vMaj,vMin,build);
-			//if(CHECK_NEWER_VERSION(vMaj,vMin,build))
-			//{
-			//	CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
-			//	return;
-			//}
 		}
 
 		if ( ushash == htoken) // == "USES"
@@ -919,12 +988,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		{
 			EqVariableType VarType = type_invalid;
 			EqVariableClass VarClass = class_varying;
-			bool			fVarArray = false;
-			bool			fParameter = false;
-			bool			fOutput = false;
+			bool fVarArray = false;
+			bool fParameter = false;
+			bool fOutput = false;
 			switch ( Segment )
 			{
-					case Seg_Data:
+				case Seg_Data:
 					VarType = type_invalid;
 					VarClass = class_invalid;
 					while ( VarType == type_invalid )
@@ -938,15 +1007,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						else if ( uhash == htoken) // == "uniform"
 							VarClass = class_uniform;
 						else
-						{
-							TqInt itype = 0;
-							for(itype = 0; itype<gcVariableTypeNames; itype++)
-								if (htoken == itypes[itype]) // == gVariableTypeNames[itype]
-								{
-									VarType = static_cast<EqVariableType>(itype);
-									break;
-								}
-						}
+							VarType = enumCast<EqVariableType>(token);
 						GetToken( token, 255, pFile );
 						htoken = CqString::hash(token);
 					}
@@ -957,9 +1018,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						while ( i < strlen( token ) && token[ i ] != '[' ) i++;
 						if ( i == strlen( token ) )
 						{
-							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
-							Aqsis::log() << critical << "Invalid variable specification in slx file" << std::endl;
-							return ;
+							AQSIS_THROW(XqBadShader, "Invalid variable specification in slx file");
 						}
 						token[ strlen( token ) - 1 ] = '\0';
 						token[ i ] = '\0';
@@ -978,8 +1037,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
 					break;
 
-					case Seg_Init:
-					case Seg_Code:
+				case Seg_Init:
+				case Seg_Code:
 					// Check if it is a label
 					if ( strcmp( token, ":" ) == 0 )
 					{
@@ -1020,8 +1079,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								candidates = getShadeOpMethods(&strFunc);
 								if( candidates == NULL )
 								{
-									Aqsis::log() << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
-									exit(1);
+									AQSIS_THROW(XqBadShader, "\"" << strName().c_str()
+										<< "\": No DSO found for external shadeop: \""
+										<< strFunc.c_str() << "\"\n");
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
 							};
@@ -1031,15 +1091,15 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							m_itTypeIdMap = m_TypeIdMap.find( strRetType[1] );
 							if (m_itTypeIdMap != m_TypeIdMap.end())
 							{
-								RetType = (*m_itTypeIdMap)
-								          .second;
+								RetType = (*m_itTypeIdMap).second;
 							}
 							else
 							{
 								//error, we dont know this return type
-								Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
-								exit(1);
-							};
+								AQSIS_THROW(XqBadShader, "\"" << strName()
+									<< "\": Invalid return type in call to external shadeop: \""
+									<< strFunc << "\" : \"" << strRetType << "\"");
+							}
 
 							*pFile >> strArgTypes;
 							for ( TqUint x=1; x < strArgTypes.length()-1; x++ )
@@ -1053,11 +1113,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								else
 								{
 									// Error, unknown arg type
-									Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
-									exit(1);
-								};
+									AQSIS_THROW(XqBadShader, "\"" << strName()
+										<< "\": Invalid argument type in call to external shadeop: \""
+										<< strFunc << "\" : \"" << strArgTypes[x] << "\"");
+								}
 
-							};
+							}
 
 							//Now we need to find a good candidate.
 							std::list<SqDSOExternalCall*>::iterator candidate;
@@ -1068,13 +1129,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								if ((*candidate)->return_type == RetType &&
 								                        (*candidate)->arg_types == ArgTypes) break;
 								candidate++;
-							};
+							}
 
 							// If we are looking for a void return type but have not
 							// found an exact match, we will take the first match with
 							// suitable arguments and force the return value to be
 							// discarded.
-							bool forcedrop = false;
 							if(candidate == candidates->end() && RetType == type_void)
 							{
 								candidate = candidates->begin()
@@ -1088,28 +1148,27 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 										Aqsis::log() << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": In place of requested void shadeop: \"" << strFunc.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
-										forcedrop = true;
 										break;
-									};
+									}
 									candidate++;
-								};
+								}
 							}
 
 							if(candidate == candidates->end())
 							{
-								Aqsis::log() << critical << "\"" << strName()
-								.c_str() << "\": No candidate found for call to external shadeop: \"" << strFunc.c_str() <<
-								"\"" << strName().c_str() << "\": Perhaps you need some casts?" <<
-								"\"" << strName().c_str() << "\": The following candidates are in you current DSO path:" << std::endl;
+								Aqsis::log() << error << "\"" << strName()
+									<< "\": No candidate found for call to external shadeop: \""
+									<< strFunc << "\"" << strName() << "\": Perhaps you need some casts?"
+									<< "\"" << strName() << "\": The following candidates are in you current DSO path:\n";
 								candidate = candidates->begin();
 								while (candidate !=candidates->end())
 								{
 									CqString strProto = strPrototype(&strFunc, (*candidate));
 									Aqsis::log() << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
 									candidate++;
-								};
-								exit(1);
-							};
+								}
+								AQSIS_THROW(XqBadShader, "External shadeop not found");
+							}
 
 							if(!(*candidate)->initialised )
 							{
@@ -1123,15 +1182,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									// possibly non-unique per thread.
 									(*candidate)->initData =
 									    ((*candidate)->init)(static_cast<int>(reinterpret_cast<ptrdiff_t>(this)),NULL);
-								};
+								}
 								(*candidate)->initialised = true;
-							};
+							}
 
 							AddCommand( &CqShaderVM::SO_external, pProgramArea );
 							AddDSOExternalCall( (*candidate),pProgramArea );
-
-							if( forcedrop )
-								AddCommand( &CqShaderVM::SO_drop, pProgramArea );
 
 							break;
 						}
@@ -1203,22 +1259,17 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 											}
 											break;
 										default:
-											Aqsis::log() << critical << "Unknown literal type\n";
-											return;
+											AQSIS_THROW(XqBadShader, "Unknown literal type");
 									}
 								}
 							}
 							break;
 						}
 					}
-					// If we have not found the opcode, throw an error.
 					if ( i == m_cTransSize )
 					{
-						CqString strErr( "Invalid opcode found : " )
-						;
-						strErr += token;
-						Aqsis::log() << critical << strErr.c_str() << std::endl;
-						return ;
+						// If we have not found the opcode, throw an error.
+						AQSIS_THROW(XqBadShader, "Invalid opcode found: " << token);
 					}
 					break;
 			}
@@ -1235,9 +1286,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		        E.m_Command == &CqShaderVM::SO_jmp ||
 		        E.m_Command == &CqShaderVM::SO_jz ||
 		        E.m_Command == &CqShaderVM::SO_RS_JZ ||
-		        E.m_Command == &CqShaderVM::SO_RS_JNZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JNZ )
+		        E.m_Command == &CqShaderVM::SO_S_JZ)
 		{
 			SqLabel lab;
 			lab.m_Offset = aLabels[ static_cast<unsigned int>( m_Program[ i ].m_FloatVal ) ];
@@ -1259,7 +1308,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			}
 		}
 	}
-
 }
 
 
@@ -1267,7 +1315,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
 */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, IqShaderExecEnv* pEnv )
 {
 	m_pEnv = pEnv;
 	// Initialise local variables.
@@ -1317,7 +1365,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 /**	Execute a series of shader language bytecodes.
 */
 
-void CqShaderVM::Execute( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Execute(IqShaderExecEnv* pEnv)
 {
 	// Check if there is anything to execute.
 	if ( m_Program.size() <= 0 )
@@ -1355,11 +1403,11 @@ void CqShaderVM::ExecuteInit()
 		return ;
 
 	// Fake an environment
-	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
+	IqShaderExecEnv* pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pRenderContext));
-	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
-	Initialise( 1, 1, 1, Env );
+	CqShaderExecEnv Env(m_pRenderContext);
+	Env.Initialise( 1, 1, 1, 1, false, IqAttributesPtr(), IqTransformPtr(), this, m_Uses );
+	Initialise( 1, 1, 1, &Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];
@@ -1480,7 +1528,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 			rec.m_strSpace = strSpace;
 			rec.m_strName = strName;
 			m_StoredArguments.push_back(rec);
-			Aqsis::log() << debug << "Storing argument : " << strName.c_str() << " : on : " << m_strName.c_str() << std::endl;
+			Aqsis::log() << debug << "Storing argument on shader @" << this << " : " << strName.c_str() << " : on : " << m_strName.c_str() << std::endl;
 		}
 		else
 		{
@@ -1534,7 +1582,7 @@ void CqShaderVM::PrepareShaderForUse( )
 
 void CqShaderVM::InitialiseParameters( )
 {
-	Aqsis::log() << debug << "Preparing shader : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
+	Aqsis::log() << debug << "Preparing shader @" << this << " : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
 
 	// Reinitialise the local variables to their defaults.
 	PrepareDefArgs();
@@ -1562,37 +1610,44 @@ void CqShaderVM::InitialiseParameters( )
 		CqMatrix matTrans;
 
 		if (getTransform())
-			matTrans = m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time() );
+			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), matTrans );
 
 		while ( count-- > 0 )
 		{
 			// Get the specified value out.
-			IqShaderData* pVMVal = m_StoredArguments[i].m_Value;
+			IqShaderData* pVMVal = CreateTemporaryStorage(m_StoredArguments[i].m_Value->Type(), m_StoredArguments[i].m_Value->Class());
 
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( pVMVal->Type() == type_point || pVMVal->Type() == type_hpoint )
 			{
 				CqVector3D p;
-				pVMVal->GetPoint( p, 0 );
+				m_StoredArguments[i].m_Value->GetPoint( p, 0 );
 				pVMVal->SetPoint( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_normal )
 			{
 				CqVector3D p;
-				pVMVal->GetNormal( p, 0 );
+				m_StoredArguments[i].m_Value->GetNormal( p, 0 );
 				pVMVal->SetNormal( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_vector )
 			{
 				CqVector3D p;
-				pVMVal->GetVector( p, 0 );
+				m_StoredArguments[i].m_Value->GetVector( p, 0 );
 				pVMVal->SetVector( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_matrix )
 			{
 				CqMatrix m;
-				pVMVal->GetMatrix( m, 0 );
+				m_StoredArguments[i].m_Value->GetMatrix( m, 0 );
 				pVMVal->SetMatrix( matTrans * m );
+			}
+			else
+			{
+				if ( pArray )
+					pVMVal->ArrayEntry(arrayindex)->SetValueFromVariable( m_StoredArguments[i].m_Value->ArrayEntry(arrayindex));
+				else
+					pVMVal->SetValueFromVariable(m_StoredArguments[i].m_Value);
 			}
 
 			if ( pArray )
@@ -1602,6 +1657,7 @@ void CqShaderVM::InitialiseParameters( )
 			}
 			else
 				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
+			DeleteTemporaryStorage(pVMVal);
 		}
 	}
 }
@@ -1644,7 +1700,7 @@ IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
 */
 
-bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res )
+bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res ) const
 {
 	// Find the relevant variable.
 	TqInt i = FindLocalVarIndex( name );
@@ -1773,5 +1829,5 @@ void CqShaderVM::ShutdownShaderEngine()
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

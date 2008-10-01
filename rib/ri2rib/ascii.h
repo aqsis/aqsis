@@ -28,7 +28,7 @@
 
 #include "output.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 class CqASCII : public CqOutput
 {
@@ -45,7 +45,7 @@ class CqASCII : public CqOutput
 		virtual void printRequest( const char *, EqFunctions );
 		virtual void printInteger( const RtInt );
 		virtual void printFloat( const RtFloat );
-		virtual void printString( std::string & );
+		virtual void printString( const std::string & );
 		virtual void printSpace();
 		virtual void printEOL();
 
@@ -63,5 +63,5 @@ class CqASCII : public CqOutput
 }
 ;
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

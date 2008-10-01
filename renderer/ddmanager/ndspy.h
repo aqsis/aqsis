@@ -25,42 +25,32 @@
  * renderman display driver interface.
  *
  * \author Paul C. Gregory (pgregory@aqsis.org)
+ *
+ * ===================================================================
+ * C-compatible header. C++ constructs must be preprocessor-protected.
+ * ===================================================================
  */
 
-#ifndef	___ndspy_Loaded___
-#define	___ndspy_Loaded___
+#ifndef	NDSPY_H_INCLUDED
+#define	NDSPY_H_INCLUDED
 
-
-#ifdef	WIN32
-#define _qExport __declspec(dllexport)
-#define _qImport __declspec(dllimport)
-#else	// !WIN32
-#define _qExport
-#define _qImport
-#endif // WIN32
+#include "aqsis_compiler.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef	char*	RtToken;
-typedef	void*	RtPointer;
-
+#include "ri_types.h"
 
 typedef double PtDspyFloat64;
 typedef float PtDspyFloat32;
 
-#if defined(__mips)
-#define PkDspyByteOrderNative	PkDspyByteOrderHiLo
-#elif defined(__mips64)
-#define PkDspyByteOrderNative	PkDspyByteOrderHiLo
-#elif defined(__sparc)
-#define PkDspyByteOrderNative	PkDspyByteOrderHiLo
-#elif defined(__alpha)
-#define PkDspyByteOrderNative	PkDspyByteOrderLoHi
+#if defined(__mips) || defined(__mips64) || defined(__sparc)
+#	define PkDspyByteOrderNative PkDspyByteOrderHiLo
 #else
-#define PkDspyByteOrderNative	PkDspyByteOrderLoHi
+#	define PkDspyByteOrderNative PkDspyByteOrderLoHi
 #endif
 
+/// \todo Consider using TqUint32 etc from aqsis_types.h instead of the below.
 #if defined(__mips64) || defined(__alpha) || defined(__x86_64) || defined(_M_X64)
 typedef unsigned int PtDspyUnsigned32;
 typedef int PtDspySigned32;
@@ -73,7 +63,7 @@ typedef unsigned short PtDspyUnsigned16;
 typedef short PtDspySigned16;
 
 typedef unsigned char PtDspyUnsigned8;
-typedef char PtDspySigned8;
+typedef signed char PtDspySigned8;
 
 typedef PtDspyUnsigned32 PtDspyMsgLen;
 typedef PtDspyUnsigned32 PtDspyServerMessage;
@@ -186,7 +176,7 @@ extern "C"
 	PtDspyDevFormat *DspyCopyDevFormat(PtDspyDevFormat *f,int fc);
 
 
-	_qExport PtDspyError DspyImageOpen(PtDspyImageHandle * image,
+	AQSIS_EXPORT PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	                                   const char *drivername,
 	                                   const char *filename,
 	                                   int width,
@@ -197,7 +187,7 @@ extern "C"
 	                                   PtDspyDevFormat *format,
 	                                   PtFlagStuff *flagstuff);
 
-	_qExport PtDspyError DspyImageData(PtDspyImageHandle image,
+	AQSIS_EXPORT PtDspyError DspyImageData(PtDspyImageHandle image,
 	                                   int xmin,
 	                                   int xmaxplus1,
 	                                   int ymin,
@@ -205,11 +195,11 @@ extern "C"
 	                                   int entrysize,
 	                                   const unsigned char *data);
 
-	_qExport PtDspyError DspyImageClose(PtDspyImageHandle);
+	AQSIS_EXPORT PtDspyError DspyImageClose(PtDspyImageHandle);
 
-	_qExport PtDspyError DspyImageDelayClose(PtDspyImageHandle);
+	AQSIS_EXPORT PtDspyError DspyImageDelayClose(PtDspyImageHandle);
 
-	_qExport PtDspyError DspyImageQuery(PtDspyImageHandle image,
+	AQSIS_EXPORT PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	                                    PtDspyQueryType type,
 	                                    size_t size,
 	                                    void *data);
@@ -220,7 +210,7 @@ extern "C"
 
 #endif	//	DSPY_INTERNAL
 
-#endif // ___ndspy_Loaded___
+#endif // NDSPY_H_INCLUDED
 
 
 

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Aqsis User Interface
+GenericName=RenderMan User Interface
+Comment=Graphical user interface for Aqsis tools
+Icon=aqsis
+TryExec=eqsl
+Exec=eqsl
+Terminal=false
+Categories=Graphics;3DGraphics;

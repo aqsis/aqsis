@@ -33,17 +33,16 @@
 #include	"color.h"
 #include	"sstring.h"
 #include	"matrix.h"
-#include	"ishaderdata.h"
 #include	"bitvector.h"
 #include	"shadervariable.h"
 
-#include	"ishaderdata.h"
+#include	"primvartype.h"
 #include	"plugins.h"
 #include	"idsoshadeops.h"
 #include	"shadeop.h"
 #include	"shadervm_common.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /**   CqDSORepository: This class is responsible for searching for shader
@@ -61,6 +60,7 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		 */
 		void BuildTypeMaps(void)
 		{
+			/// \todo Code Review - use stuff from primvartype.h instead of m_TypeNameMap 
 			m_TypeNameMap["invalid"] = type_invalid;
 			m_TypeIdMap['@'] = type_invalid;
 			m_TypeNameMap["integer"] = type_integer;
@@ -149,7 +149,7 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		std::map<TqChar,EqVariableType>::iterator m_itTypeIdMap ;
 
 		// A list of files (possibly also directories in future) to be searched for shadeops
-		std::list<CqString*> m_pDSOPathList;
+		std::list<CqString> m_DSOPathList;
 		// This is a map of shadeop names to descriptors of shadeop implementations that we
 		// have already found, its for efficiency and to allow us to track initiliased shadeops
 		// to be shutdown later.
@@ -163,6 +163,6 @@ class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBa
 		SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*);
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// DSOSHADEOPS_H

@@ -27,7 +27,7 @@
 #include "aqsis.h"
 #include "vector3d.h"
 #include "curves.h"
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 static const TqUlong hwidth = CqString::hash("width");
@@ -44,20 +44,6 @@ CqCurve::CqCurve() : CqSurface()
 
 	STATS_INC( GPR_crv );
 }
-
-
-
-/**
- * CqCurve copy constructor.
- */
-/* CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
- * {
- * 	( *this ) = from;
- * 
- * 	STATS_INC( GPR_crv );
- * }
- */
-
 
 
 /**
@@ -93,7 +79,6 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
 	}
 
 }
-
 
 
 /**
@@ -188,11 +173,7 @@ TqFloat CqCurve::GetGridLength() const
 	        "limits", "gridsize"
 	    );
 	if ( poptGridSize != NULL )
-	{
-		micropolysPerGrid =
-		    static_cast<TqFloat>( poptGridSize[ 0 ] ) *
-		    static_cast<TqFloat>( poptGridSize[ 1 ] );
-	}
+		micropolysPerGrid = poptGridSize[0];
 
 	// find the shading rate
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute(
@@ -248,6 +229,69 @@ void CqCurve::PopulateWidth()
 
 	// add the width array to the curve as a primitive variable
 	AddPrimitiveVariable( widthP );
+}
+
+
+bool CqCurve::Diceable()
+{
+	// OK, here the CqCubicCurveSegment line has two options:
+	//  1. split into two more lines
+	//  2. turn into a bilinear patch for rendering
+	// We don't want to go turning into a patch unless absolutely
+	// necessary, since patches cost more.  We only want to become a patch
+	// if the current curve is "best handled" as a patch.  For now, I'm
+	// choosing to define that the curve is best handled as a patch under
+	// one or more of the following two conditions:
+	//  1. If the maximum width is a significant fraction of the length of
+	//      the line (width greater than 0.75 x length; ignoring normals).
+	//  2. If the length of the line (ignoring the width; cos' it's
+	//      covered by point 1) is such that it's likely a bilinear
+	//      patch would be diced immediately if we created one (so that
+	//      patches don't have to get split!).
+	//  3. If the curve crosses the eye plane (m_fDiceable == false).
+
+	// find the length of the CqLinearCurveSegment line in raster space
+	if( m_splitDecision == Split_Undecided )
+	{
+		// AGG - 31/07/04
+		// well, if we follow the above statagy we end up splitting into
+		// far too many grids (with roughly 1 mpg per grid). so after
+		// profiling a few scenes, the fastest method seems to be just
+		// to convert to a patch immediatly.
+		// we really need a native dice for curves but until that time
+		// i reckon this is best.
+		//m_splitDecision = Split_Patch;
+
+		CqMatrix matCtoR;
+		QGetRenderContext() ->matSpaceToSpace(
+									"camera", "raster",
+									NULL, NULL,
+									QGetRenderContextI()->Time(),
+									matCtoR
+									);
+		CqVector2D hull[ 2 ];     // control hull
+		hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];
+		hull[ 1 ] = matCtoR * P()->pValue( 1 )[0];
+		CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
+		TqFloat lengthraster = lengthVector.Magnitude();
+
+		// find the approximate "length" of a diced patch in raster space
+		TqFloat gridlength = GetGridLength();
+
+		// decide whether to split into more curve segments or a patch
+		if(( lengthraster < gridlength ) || ( !m_fDiceable ))
+		{
+			// split into a patch
+			m_splitDecision = Split_Patch;
+		}
+		else
+		{
+			// split into smaller curves
+			m_splitDecision = Split_Curve;
+		}
+	}
+
+	return false;
 }
 
 
@@ -326,5 +370,70 @@ void CqCurvesGroup::CloneData( CqCurvesGroup* clone ) const
 	clone->m_nTotalVerts = m_nTotalVerts;
 }
 
+/** Transform a curve group using the specified matrices.
+ *
+ * All parameters are transformed by the base class transformation function,
+ * except for the curve widths, which needs special consideration.  Widths
+ * are scaled by the average of the amount which the curve is squashed
+ * perpendicular to the viewing direction.  This isn't the most accurate
+ * algorithm, but it's relatively easy to implement (see notes below).
+ *
+ * The algorithm used assumes that the transformation is not a projective
+ * transformation.  Any affine transformation should be fine.
+ *
+ * \param matTx         Reference to the transformation matrix.
+ * \param matITTx       Reference to the inverse transpose of the 
+ *                        transformation matrix, used to transform normals.
+ * \param matRTx        Reference to the rotation only transformation matrix, 
+ *                        used to transform vectors.
+ * \param iTime			The frame time at which to apply the transformation.
+ */
+void CqCurvesGroup::Transform(
+    const CqMatrix& matTx,
+    const CqMatrix& matITTx,
+    const CqMatrix& matRTx,
+    TqInt iTime
+)
+{
+	// make sure the "width" parameter is present
+	PopulateWidth();
 
-END_NAMESPACE( Aqsis )
+	/// \todo The algorithm for transforming curve widths is dubious!
+	//
+	// The previous algorithm used a very complicated method which boiled down
+	// to scaling the width parameter of curves by the amount
+	//
+	//   1/(matITTx*CqVector3D(1,0,0)).Magnitude()
+	//
+	// If the transformation is an anisotropic scaling transformation (eg,
+	// squashing more in the x-direction than the y-direction), this is rather
+	// inadequte: it results in different widths depending on the direction
+	// of the scaling.
+	//
+	// A slightly better algorithm is to use the average of the scaling amount
+	// in the x and y directions as done below.  (Chosen since x and y should
+	// be the directions perpendicular to the viewing direction.)
+	//
+	// However, this is far from ideal; ideally the curve would look like it
+	// has been squashed preferentially in one direction if that is the case.
+	// We could achieve this by calculating the width vector which is
+	// proportional to the tangent crossed with the normal, as is currently
+	// done by CqCubicCurveSegment::SplitToPatch.
+	//
+	// The width vector would then be transformed as a normal, and the
+	// resulting length used as the scaling factor, independently for each
+	// width on the curve.  This would be more correct, but is much more
+	// complicated to implement correctly!
+	TqFloat widthScale = 2/((matITTx*CqVector3D(1,0,0)).Magnitude()
+			+ (matITTx*CqVector3D(0,1,0)).Magnitude());
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* w = width();
+	for(TqInt i = 0, end = w->Size(); i < end; ++i)
+		w->pValue(i)[0] *= widthScale;
+
+	// For everything else (apart from the width), just call through to the
+	// underlying transformation function.
+	CqCurve::Transform( matTx, matITTx, matRTx, iTime );
+}
+
+
+} // namespace Aqsis

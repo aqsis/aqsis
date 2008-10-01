@@ -31,7 +31,7 @@
 
 #include	"surface.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 #define	ESTIMATEGRIDSIZE    8
@@ -70,7 +70,6 @@ class CqQuadric : public CqSurface
 			return ( cVarying() );
 		}
 
-
 		// Overrides from CqSurface
 		virtual bool	Diceable();
 
@@ -105,7 +104,6 @@ class CqQuadric : public CqSurface
 
 		// Derived from CqSurface
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 #ifdef _DEBUG
 
@@ -141,10 +139,6 @@ class CqSphere : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual bool	CanGenerateNormals() const
-		{
-			return ( true );
-		}
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -224,10 +218,6 @@ class CqCylinder : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual bool	CanGenerateNormals() const
-		{
-			return ( true );
-		}
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -385,10 +375,6 @@ class CqDisk : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual bool	CanGenerateNormals() const
-		{
-			return ( true );
-		}
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -414,6 +400,6 @@ class CqDisk : public CqQuadric
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !QUADRICS_H_INCLUDED

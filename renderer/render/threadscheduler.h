@@ -34,7 +34,7 @@
 #include	<boost/thread/condition.hpp>
 
 
-START_NAMESPACE( Aqsis );
+namespace Aqsis { 
 
 
 /**
@@ -72,6 +72,6 @@ private:
 };
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis
 
 #endif

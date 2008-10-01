@@ -31,7 +31,7 @@
 
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqBucket;
 class CqMicroPolygon;
@@ -145,7 +145,7 @@ class CqMPDump
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif // MPDUMP_H
 

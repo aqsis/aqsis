@@ -38,7 +38,7 @@
 #include <FL/fl_draw.H>
 #endif // AQSIS_NO_LTK
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /** FLTK Widget used to show a constantly updating image.
  *
@@ -134,6 +134,6 @@ struct SqDisplayInstance
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	___display_Loaded___

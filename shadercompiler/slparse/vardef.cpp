@@ -10,7 +10,7 @@
 #include	"parsenode.h"
 #include	"vardef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// Global array of standard variable definitions
@@ -212,5 +212,5 @@ IqVarDef* IqVarDef::GetVariablePtr( const SqVarRef& Ref )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

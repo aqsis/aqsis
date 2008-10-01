@@ -30,13 +30,12 @@
 
 #include "aqsis.h"
 
-#include "vector3d.h"
 #include "aqsismath.h"
+#include "vector3d.h"
 
 #include <iostream>
 
-START_NAMESPACE( Aqsis )
-
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 /** \class CqColor
@@ -522,9 +521,22 @@ class COMMON_SHARE CqColor
 		TqFloat	m_fRed,     				///< the red component 0.0-1.0
 		m_fGreen,     			///< the green component 0.0-1.0
 		m_fBlue;			///< the blue component 0.0-1.0
-}
-;
+};
 
+//------------------------------------------------------------------------------
+/** \brief Determine whether two colours are equal to within some tolerance.
+ *
+ * This performs elementwise comparisons of the componenets using the float
+ * version of isClose().  The colours are close whenever all thier componenets
+ * are.
+ *
+ * \param c1, c2 - colours to compare
+ * \param tol - tolerance for the comparison.
+ */
+bool isClose(const CqColor& c1, const CqColor& c2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
+
+//------------------------------------------------------------------------------
 /// Static white color
 COMMON_SHARE extern CqColor	gColWhite;
 /// Static black color
@@ -538,8 +550,7 @@ COMMON_SHARE extern CqColor	gColBlue;
 
 
 //-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-// Inline function implementations.
+// Implementation details
 //-----------------------------------------------------------------------
 inline CqColor min(const CqColor a, const CqColor b)
 {
@@ -570,9 +581,16 @@ inline CqColor lerp(const T t, const CqColor c0, const CqColor c1)
 			       (1-t)*c0.m_fBlue + t*c1.m_fBlue);
 }
 
+inline bool isClose(const CqColor& c1, const CqColor& c2, TqFloat tol)
+{
+	return isClose(c1.fRed(), c2.fRed(), tol)
+		&& isClose(c1.fGreen(), c2.fGreen(), tol)
+		&& isClose(c1.fBlue(), c2.fBlue(), tol);
+}
+
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 //}  // End of #ifdef _H_INCLUDED

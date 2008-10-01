@@ -29,7 +29,7 @@
 #include	"trimcurve.h"
 #include	"lights.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 std::list<CqAttributes*>	Attribute_stack;
@@ -116,7 +116,7 @@ CqAttributes::CqAttributes()
 	ADD_SYSTEM_ATTR8( TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );	// an array of 2D vectors representing the coordinate space.
 	ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
 	ADD_SYSTEM_ATTR( ShadingRateSqrt, TqFloat, TqFloat, type_float, 1.0f );					// the current effective sqrt(shading rate).
-	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingConstant );	// the current shading interpolation mode.
+	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingInterp_Constant );	// the current shading interpolation mode.
 	ADD_SYSTEM_ATTR( GeometricFlatness, TqFloat, TqFloat, type_float, 1.0f );				// the current screen-space geometric flatness.
 	ADD_SYSTEM_ATTR( Matte, TqInt, TqFloat, type_integer, 0 );				// the current state of the matte flag.
 	ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
@@ -150,8 +150,6 @@ CqAttributes::CqAttributes( const CqAttributes& From )
 
 CqAttributes::~CqAttributes()
 {
-	assert( RefCount() == 0 );
-
 	// Unreference the system attributes.
 	//	TqInt i = m_aAttributes.size();
 	//	while ( i-- > 0 )
@@ -485,13 +483,13 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 }
 
 
-IqLightsource*	CqAttributes::pLight( TqInt index )
+IqLightsource*	CqAttributes::pLight( TqInt index ) const
 {
 	return ( boost::shared_ptr<CqLightsource>(m_apLightsources[index]).get() );
 }
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

@@ -27,13 +27,13 @@
 #include	"transform.h"
 #include	"renderer.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(false)
+CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(false), m_Handedness(false)
 {}
 
 
@@ -170,6 +170,7 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
+	ct.m_Handedness = !flip;
 
 	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
@@ -199,7 +200,8 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
 	bool flip = ( !matTrans.fIdentity() && det < 0 );
-	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera", NULL, NULL, QGetRenderContext()->Time());
+	CqMatrix matCtoW;
+	QGetRenderContext()->matSpaceToSpace("world", "camera", NULL, NULL, QGetRenderContext()->Time(), matCtoW);
 	TqFloat camdet = matCtoW.Determinant();
 	bool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
 
@@ -375,4 +377,4 @@ SqTransformation CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

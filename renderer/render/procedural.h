@@ -31,7 +31,7 @@
 #include        "matrix.h"
 #include        "surface.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -59,6 +59,8 @@ class CqProcedural : public CqSurface
 		{
 			bound->vecMin() = m_Bound.vecMin();
 			bound->vecMax() = m_Bound.vecMax();
+
+			AdjustBoundForTransformationMotion( bound );
 		};
 		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/*  We have no actual geometry to dice.
@@ -118,13 +120,14 @@ class CqProcedural : public CqSurface
 
 };
 
+} // namespace Aqsis
+
 // The built in RiProcedurals
 extern "C" RtVoid  RiProcFree( RtPointer data );
 extern "C" RtVoid  RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
 extern "C" RtVoid  RiProcRunProgram( RtPointer data, RtFloat detail );
 extern "C" RtVoid  RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
-END_NAMESPACE( Aqsis )
 
 #endif // PROCEDURAL_H_INCLUDED
 

@@ -12,6 +12,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#include <iostream>
 #include <stdarg.h>
 #include <string>
 #include <stdio.h>
@@ -22,46 +23,50 @@
 #include "context.h"
 
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 static CqContext context;
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 
 using libri2rib::context;
 using libri2rib::CqPLStore;
 using libri2rib::CqError;
 
 
+/* \note: The body of these functions must be unique, otherwise the VC optimiser combines them into a
+ *		  single function, which causes problems when identifying the requested filter from the function 
+ *		  address.
+ */
 RtFloat RiGaussianFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return 1.0;
 }
 RtFloat RiMitchellFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 2.0;
 }
 RtFloat RiBoxFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 3.0;
 }
 RtFloat RiTriangleFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 4.0;
 }
 RtFloat RiCatmullRomFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 5.0;
 }
 RtFloat RiSincFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 6.0;
 }
 RtFloat RiDiskFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 7.0;
 }
 RtFloat RiBesselFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	return 1.0;
+	return 8.0;
 }
 
 
@@ -92,11 +97,17 @@ RtBasis RiPowerBasis = { {1, 0, 0, 0},
 
 
 RtVoid RiProcDelayedReadArchive ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcDelayedReadArchive" << std::endl;
+}
 RtVoid RiProcRunProgram ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcRunProgram" << std::endl;
+}
 RtVoid RiProcDynamicLoad ( RtPointer data, RtFloat detail )
-{}
+{
+	std::cout << "RiProcDynamicLoad" << std::endl;
+}
 
 extern "C" RtVoid RiProcFree ( RtPointer data )
 {}
@@ -2292,18 +2303,21 @@ RtVoid RiErrorHandler ( RtErrorFunc handler )
 
 RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorIgnore" << std::endl;
 	return ;
 }
 
 
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorPrint" << std::endl;
 	return ;
 }
 
 
 RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
+	std::cout << "RiErrorAbort" << std::endl;
 	return ;
 }
 

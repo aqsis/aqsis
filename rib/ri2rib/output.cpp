@@ -33,7 +33,9 @@
 
 #include "stddef.h"
 
-USING_NAMESPACE( libri2rib );
+#include <cstring>
+
+namespace libri2rib {
 
 #define PR(x,y)  printRequest(x,y)
 #ifdef	PI
@@ -241,7 +243,8 @@ bool CqOutput::nestingContains(EqBlocks type) const
 // ******* ******* ******* PRINTING TOOLS ******* ******* *******
 // **************************************************************
 void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
-                        RtInt vertex, RtInt varying, RtInt uniform, RtInt facevarying )
+                        RtInt vertex, RtInt varying, RtInt uniform,
+						RtInt facevarying, RtInt facevertex)
 {
 	RtFloat * flt;
 	RtInt *nt;
@@ -268,7 +271,8 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 		printToken( tokens[ i ] );
 		S;
 		tt = m_Dictionary.getType( id );
-		sz = m_Dictionary.allocSize( id, vertex, varying, uniform, facevarying);
+		sz = m_Dictionary.allocSize( id, vertex, varying, uniform,
+				facevarying, facevertex);
 
 		switch ( tt )
 		{
@@ -942,6 +946,25 @@ RtVoid CqOutput::RiGeometricApproximation( RtToken type, RtFloat value )
 	EOL;
 }
 
+namespace {
+
+const char* getBasisName(RtBasis basis)
+{
+	if(basis == RiBezierBasis)
+		return "bezier";
+	if(basis == RiBSplineBasis)
+		return "b-spline";
+	if(basis == RiCatmullRomBasis)
+		return "catmull-rom";
+	if(basis == RiHermiteBasis)
+		return "hermite";
+	if(basis == RiPowerBasis)
+		return "power";
+	return 0;
+}
+
+} // unnamed namespace
+
 RtVoid CqOutput::RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
 	RtInt i;
@@ -949,20 +972,30 @@ RtVoid CqOutput::RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vst
 
 	PR( "Basis", Basis );
 	S;
-	for ( i = 0; i < 16; i++ )
+	if(const char* basisName = getBasisName(ubasis))
 	{
-		m[ i ] = ubasis[ i / 4 ][ i % 4 ];
+		PS(basisName);
 	}
-	printArray( 16, &( m[ 0 ] ) );
+	else
+	{
+		for ( i = 0; i < 16; i++ )
+			m[ i ] = ubasis[ i / 4 ][ i % 4 ];
+		printArray( 16, &( m[ 0 ] ) );
+	}
 	S;
 	PI( ustep );
 	S;
 
-	for ( i = 0; i < 16; i++ )
+	if(const char* basisName = getBasisName(vbasis))
 	{
-		m[ i ] = vbasis[ i / 4 ][ i % 4 ];
+		PS(basisName);
 	}
-	printArray( 16, m );
+	else
+	{
+		for ( i = 0; i < 16; i++ )
+			m[ i ] = vbasis[ i / 4 ][ i % 4 ];
+		printArray( 16, &( m[ 0 ] ) );
+	}
 	S;
 	PI( vstep );
 	EOL;
@@ -1203,7 +1236,7 @@ RtVoid CqOutput::RiPolygonV( RtInt nverts, RtInt n, RtToken tokens[], RtPointer 
 {
 	PR( "Polygon", Polygon );
 	S;
-	printPL( n, tokens, parms, nverts, nverts, nverts );
+	printPL( n, tokens, parms, nverts, nverts, 1, nverts, nverts );
 }
 
 RtVoid CqOutput::RiGeneralPolygonV( RtInt nloops, RtInt nverts[],
@@ -1219,7 +1252,7 @@ RtVoid CqOutput::RiGeneralPolygonV( RtInt nloops, RtInt nverts[],
 	S;
 	printArray( nloops, nverts );
 	S;
-	printPL( n, tokens, parms, nbpts, nbpts, nbpts );
+	printPL( n, tokens, parms, nbpts, nbpts, 1, nbpts, nbpts );
 }
 
 RtVoid CqOutput::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[],
@@ -1245,7 +1278,7 @@ RtVoid CqOutput::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[],
 		if ( psize < verts[ i ] )
 			psize = verts[ i ];
 	}
-	printPL( n, tokens, parms, psize + 1, psize + 1, npolys, nbpts );
+	printPL( n, tokens, parms, psize + 1, psize + 1, npolys, nbpts, nbpts );
 }
 
 RtVoid CqOutput::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[],
@@ -1280,8 +1313,7 @@ RtVoid CqOutput::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt n
 		if ( psize < verts[ i ] )
 			psize = verts[ i ];
 	}
-	RtInt facevarying = nv;
-	printPL( n, tokens, parms, psize + 1, psize + 1, npolys, facevarying );
+	printPL( n, tokens, parms, psize + 1, psize + 1, npolys, nv, nv );
 }
 
 RtVoid CqOutput::RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )
@@ -1562,6 +1594,11 @@ RtVoid CqOutput::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
                             RtInt n, RtToken tokens[], RtPointer parms[] )
 {
 	PR( "Blobby", Blobby );
+	std::ostringstream tmp;
+	tmp << nleaf;
+	std::string tmp2 (tmp.str());
+	S;
+	print(tmp2.c_str());
 	S;
 	printArray( ncode, code );
 	S;
@@ -1709,7 +1746,7 @@ RtVoid CqOutput::RiSubdivisionMeshV( RtToken mask, RtInt nf, RtInt nverts[],
 		if ( psize < verts[ i ] )
 			psize = verts[ i ];
 	}
-	printPL( n, tokens, parms, psize + 1, psize + 1, nf, vsize );
+	printPL( n, tokens, parms, psize + 1, psize + 1, nf, vsize, vsize );
 }
 
 RtVoid CqOutput::RiProcedural( RtPointer data, RtBound bound,
@@ -1725,7 +1762,7 @@ RtVoid CqOutput::RiProcedural( RtPointer data, RtBound bound,
 	}
 	else if ( subdivfunc == RiProcRunProgram )
 	{
-		sf = "ReadProgram";
+		sf = "RunProgram";
 		a = 2;
 	}
 	else if ( subdivfunc == RiProcDynamicLoad )
@@ -2052,3 +2089,5 @@ RtVoid CqOutput::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken va
 	S;
 	printToken( variable2 );
 }
+
+} // namespace libri2rib

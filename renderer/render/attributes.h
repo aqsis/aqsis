@@ -33,6 +33,7 @@
 #include	<map>
 
 #include	<boost/weak_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -44,10 +45,13 @@
 #include	"trimcurve.h"
 #include	"iattributes.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 struct IqShader;
 class	CqLightsource;
 
+class CqAttributes;
+typedef boost::shared_ptr<CqAttributes> CqAttributesPtr;
+typedef boost::shared_ptr<const CqAttributes> CqConstAttributesPtr;
 
 //----------------------------------------------------------------------
 /**
@@ -55,7 +59,7 @@ class	CqLightsource;
 */
 
 
-class CqAttributes : public CqRefCount, public IqAttributes
+class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<CqAttributes>
 {
 	public:
 		CqAttributes();
@@ -66,18 +70,13 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		 * I the external references count is greater than 1, then create a copy on the stack and return that.
 		 * \return a pointer to these attribute safe to write into.
 		 */
-		CqAttributes* Write()
+		CqAttributesPtr Write()
 		{
 			// We are about to write to this attribute,so clone if references exist.
-			if ( RefCount() > 1 )
-			{
-				CqAttributes * pWrite = Clone();
-				ADDREF( pWrite );
-				RELEASEREF( this );
-				return ( pWrite );
-			}
-			else
-				return ( this );
+			CqAttributesPtr pWrite(shared_from_this());
+			if ( pWrite.use_count() > 2 )
+				pWrite = Clone();
+			return ( pWrite );
 		}
 
 		CqAttributes& operator=( const CqAttributes& From );
@@ -108,7 +107,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 			boost::shared_ptr<CqNamedParameterList> pAttr = m_aAttributes.Find( strName );
 			if ( pAttr )
 			{
-				if ( pAttr.unique() )
+				if ( pAttr.use_count() <= 2 )
 					return ( pAttr );
 				else
 				{
@@ -237,9 +236,9 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		/** Clone the entire attribute state.
 		 * \return a pointer to the new attribute state.
 		 */
-		CqAttributes*	Clone() const
+		CqAttributesPtr	Clone() const
 		{
-			return ( new CqAttributes( *this ) );
+			return ( CqAttributesPtr(new CqAttributes( *this )) );
 		}
 
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
@@ -267,27 +266,9 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		{
 			return ( apLights().size() );
 		}
-		virtual	IqLightsource*	pLight( TqInt index );
+		virtual	IqLightsource*	pLight( TqInt index ) const;
 
-#ifndef _DEBUG
-
-		virtual	void	Release()
-		{
-			CqRefCount::Release();
-		}
-		virtual	void	AddRef()
-		{
-			CqRefCount::AddRef();
-		}
-#else
-		virtual void AddRef(const TqChar* file, TqInt line)
-		{
-			CqRefCount::AddRef(file, line);
-		}
-		virtual void Release(const TqChar* file, TqInt line)
-		{
-			CqRefCount::Release(file, line);
-		}
+#ifdef _DEBUG
 		CqString className() const
 		{
 			return CqString("CqAttributes");
@@ -501,7 +482,7 @@ extern std::list<CqAttributes*>	Attribute_stack;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef ATTRIBUTES_H_INCLUDED
 #endif

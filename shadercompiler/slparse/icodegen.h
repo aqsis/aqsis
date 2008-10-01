@@ -34,7 +34,7 @@
 #include	"ivardef.h"
 #include	"ifuncdef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 #define	VM_SHADER_EXTENSION	".slx"
@@ -50,6 +50,7 @@ struct SqVarRefTranslator
 };
 
 
+/// \todo <b>Code review</b> This is an almost-duplicate from elsewhere (see primvartype.h)
 static const char* const gVariableTypeNames[] =
     {
         "invalid",
@@ -80,6 +81,6 @@ class IqCodeGen
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// ICODEGEN_H

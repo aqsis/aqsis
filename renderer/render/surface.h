@@ -45,12 +45,10 @@
 #include	"isurface.h"
 #include	"logging.h"
 #include	"stats.h"
+#include	"micropolygon.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
-
-class CqMicroPolyGrid;
-class CqMicroPolyGridBase;
 
 //----------------------------------------------------------------------
 /** \class CqSurface
@@ -64,11 +62,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		virtual	~CqSurface()
 		{
-			// Release our reference on the current attributes.
-			if ( m_pAttributes )
-				RELEASEREF( m_pAttributes );
-			m_pAttributes = 0;
-
 			std::vector<CqParameter*>::iterator iUP;
 			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 				if ( NULL != ( *iUP ) )
@@ -135,14 +128,14 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributes* pAttributes() const
+		virtual IqAttributesPtr pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
 		/** Get a pointer to the transformation state associated with this GPrim.
 		 * \return A pointer to a CqTransform class.
 		 */
-		virtual boost::shared_ptr<IqTransform> pTransform() const
+		virtual IqTransformPtr pTransform() const
 		{
 			return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
 		}
@@ -152,7 +145,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual	void	ForceUndiceable()
 		{
 			m_fDiceable = false;
-			m_EyeSplitCount++;
 		}
 		/** Query if this primitive has been marked as undiceable by the eyesplit check.
 		 */
@@ -184,15 +176,13 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		}
 		/** Get the number of times this GPrim has been split because if crossing the epsilon and eye planes.
 		 */
-		TqInt	EyeSplitCount() const
+		TqInt	SplitCount() const
 		{
-			return ( m_EyeSplitCount );
+			return ( m_SplitCount );
 		}
-		/** Set the number of times this GPrim has been split because if crossing the epsilon and eye planes.
-		 */
-		void	SetEyeSplitCount( TqInt EyeSplitCount )
+		void	SetSplitCount( TqInt SplitCount )
 		{
-			m_EyeSplitCount = EyeSplitCount;
+			m_SplitCount = SplitCount;
 		}
 		/** Get the precalculated split direction.
 		 */
@@ -562,20 +552,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& /* aSplits */)
 		{}
 
-		/** Virtual function to indicate whether a particular surface is able
-		 *  to generate geometric normals itself.
-		 */
-		virtual bool	CanGenerateNormals() const
-		{
-			return ( false );
-		}
-
-		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
-		 */
-		virtual	void	GenerateGeometricNormals( TqInt /* uDiceSize */, TqInt /* vDiceSize */,
-			IqShaderData* /* pNormals */ )
-		{}
-
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		
@@ -589,7 +565,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		bool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
-		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
+		TqInt	m_SplitCount;		///< The number of times this GPrim has been split
 	protected:
 		/** Protected member function to clone the data, used by the Clone() functions
 		 *  on the derived classes.
@@ -598,57 +574,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		std::vector<CqParameter*>	m_aUserParams;			///< Storage for user defined paramter variables.
 		TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
 
-		template <class T, class SLT>
-		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-		{
-			TqInt iv, iu;
-			for ( iv = 0; iv <= vSize; iv++ )
-			{
-				TqFloat v = ( 1.0f / vSize ) * iv;
-				for ( iu = 0; iu <= uSize; iu++ )
-				{
-					TqFloat u = ( 1.0f / uSize ) * iu;
-					IqShaderData* arrayValue;
-					TqInt i;
-					for(i = 0; i<pParam->Count(); i++)
-					{
-						arrayValue = pData->ArrayEntry(i);
-						T vec = BilinearEvaluate( pParam->pValue(0) [ i ], pParam->pValue(1) [ i ], pParam->pValue(2) [ i ], pParam->pValue(3) [ i ], u, v );
-						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
-					}
-				}
-			}
-		}
-
-		template <class T, class SLT>
-		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, bool u )
-		{
-			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
-
-			TqInt i;
-			for(i = 0; i<pParam->Count(); i++)
-			{
-				if ( u )
-				{
-					pTResult2->pValue( 1 ) [ i ] = pTParam->pValue( 1 ) [ i ];
-					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
-					pTResult1->pValue( 1 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 1 ) [ i ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 2 ) [ i ] = static_cast<T>( ( pTParam->pValue( 2 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
-				}
-				else
-				{
-					pTResult2->pValue( 2 ) [ i ] = pTParam->pValue( 2 ) [ i ];
-					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
-					pTResult1->pValue( 2 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 2 ) [ i ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 1 ) [ i ] = static_cast<T>( ( pTParam->pValue( 1 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
-				}
-			}
-		}
-
-		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
+		CqAttributesPtr m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
 		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
@@ -692,7 +618,20 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		}
 		/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
 		 */
-		virtual	CqMicroPolyGridBase* Dice();
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			CqMotionMicroPolyGrid* pGrid = new CqMotionMicroPolyGrid;
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+			{
+				CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
+				pGrid->AddTimeSlot( Time( i ), pGrid2 );
+				ADDREF(pGrid2);
+				pGrid->SetfTriangular( pGrid2->fTriangular() );
+			}
+			pGrid->Initialise(m_uDiceSize, m_vDiceSize, shared_from_this());
+			return ( pGrid );
+		}
 		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
 		 */
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
@@ -720,7 +659,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 			{
 				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = true;
-				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				pNewMotion->m_SplitCount = m_SplitCount + 1;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
 					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
@@ -844,7 +783,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef SURFACE_H_INCLUDED
 #endif

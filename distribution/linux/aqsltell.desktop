@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Aqsis Shader Inspector
+GenericName=RenderMan Shader Inspector
+NoDisplay=true
+Comment=Inspect compiled RenderMan Shading Language (RSL) files
+Icon=aqsis
+TryExec=aqsltell
+Exec=/usr/share/aqsis/scripts/aqsltell.sh %F
+Terminal=true
+MimeType=application/x-slx;
+Categories=Graphics;3DGraphics;ConsoleOnly;

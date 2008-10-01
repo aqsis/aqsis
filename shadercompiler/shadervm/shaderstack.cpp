@@ -30,7 +30,7 @@
 #undef SHADERSTACKSTATS /* define if you want to know at run-time the max. depth of stack */
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 TqUint   CqShaderStack::m_samples = 18;
 TqUint   CqShaderStack::m_maxsamples = 18;
@@ -347,5 +347,5 @@ void CqShaderStack::Statistics()
 	}
 #endif
 }
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

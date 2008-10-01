@@ -50,7 +50,7 @@
 // step size of the arrays of vertices and triangles
 #define ALLOC_SIZE 65536
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //_____________________________________________________________________________
 // print cube for debug
@@ -1438,4 +1438,4 @@ void MarchingCubes::write(const TqChar *fn, bool bin )
 
 
 //---------------------------------------------------------------------
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

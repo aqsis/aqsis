@@ -46,7 +46,7 @@
 #include "attributes.h"
 #include "transform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqLightsource;
 typedef boost::shared_ptr<CqLightsource> CqLightsourcePtr;
@@ -73,7 +73,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		/** Get a pointer to the associated lightsource shader.
 		 * \return a pointer to a IqShader derived class.
 		 */
-		virtual boost::shared_ptr<IqShader>	pShader()
+		virtual boost::shared_ptr<IqShader>	pShader() const
 		{
 			return ( m_pShader );
 		}
@@ -81,7 +81,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		 * \param uGridRes Integer grid size, not used.
 		 * \param vGridRes Integer grid size, not used.
 		 */
-		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount );
+		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, bool hasValidDerivatives );
 		//			void		GenerateShadowMap(const char* strShadowName);
 		/** Evaluate the shader.
 		 * \param pPs the point being lit.
@@ -91,12 +91,12 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 			Ps() ->SetValueFromVariable( pPs );
 			Ns() ->SetValueFromVariable( pNs );
 			m_pShaderExecEnv->SetCurrentSurface(pSurface);
-			m_pShader->Evaluate( m_pShaderExecEnv );
+			m_pShader->Evaluate( m_pShaderExecEnv.get() );
 		}
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributes* pAttributes() const
+		virtual IqConstAttributesPtr pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
@@ -262,7 +262,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 
 	private:
 		boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
-		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+		CqAttributesPtr	m_pAttributes;			///< Pointer to the associated attributes.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 		boost::shared_ptr<IqShaderExecEnv>	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
 }
@@ -278,7 +278,7 @@ extern std::deque<CqLightsourcePtr>	Lightsource_stack;
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef LIGHTS_H_INCLUDED
 #endif

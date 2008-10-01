@@ -1,4 +1,4 @@
-////---------------------------------------------------------------------
+///---------------------------------------------------------------------
 ////    Class definition file:  TYPECHECK.CPP
 ////    Associated header file: PARSENODE.H
 ////
@@ -12,7 +12,7 @@
 
 #include	<queue>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///---------------------------------------------------------------------
 /// CqParseNodeFunctionCall::TypeCheck
@@ -503,6 +503,24 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 		return ( Type_Nil );
 	}
 
+	// First check if we are assigning a varying value to a uniform variable.
+	bool assigneeIsVarying = false;
+	IqVarDef* pVarDef = CqVarDef::GetVariablePtr( m_VarRef );
+	if ( pVarDef != 0 )
+		assigneeIsVarying = ( pVarDef->Type() & Type_Varying ) != 0;
+	if(!assigneeIsVarying && m_fVarying)
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot assign a varying value to the uniform variable '";
+		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
+		strErr += "'";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	
 	TqInt	MyType = ( ResType() & Type_Mask );
 	// Type check the assignment expression first.
 	CqParseNode* pExpr = m_pChild;
@@ -892,8 +910,10 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCa
 	CqParseNode* pExpr = m_pChild;
 	while ( pExpr != 0 )
 	{
+		// Have to get this here, in case the type check inserts a cast above the current expression.
+		CqParseNode* pnextChild = pExpr->pNext();
 		pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
-		pExpr = pExpr->pNext();
+		pExpr = pnextChild;
 	}
 	// Check if expecting a sixteentuple, if not add a cast
 	TqInt i;
@@ -1021,5 +1041,5 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast,
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

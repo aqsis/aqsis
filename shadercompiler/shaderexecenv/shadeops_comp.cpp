@@ -37,7 +37,7 @@
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -52,7 +52,7 @@ void	CqShaderExecEnv::SO_setcomp( IqShaderData* p, IqShaderData* index, IqShader
 	__fVarying=(index)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -81,7 +81,7 @@ void	CqShaderExecEnv::SO_setxcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -108,7 +108,7 @@ void	CqShaderExecEnv::SO_setycomp( IqShaderData* p, IqShaderData* v, IqShader* p
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -135,7 +135,7 @@ void	CqShaderExecEnv::SO_setzcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -153,5 +153,5 @@ void	CqShaderExecEnv::SO_setzcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

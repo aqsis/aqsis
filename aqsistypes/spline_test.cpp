@@ -25,14 +25,7 @@
 
 #include "spline.h"
 
-
-#ifdef AQSIS_SYSTEM_MACOSX
-    #define BOOST_AUTO_TEST_MAIN
-	#include <boost/test/included/unit_test.hpp>
-#else
-	#include <boost/test/auto_unit_test.hpp>
-#endif
-
+#include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 
@@ -49,8 +42,8 @@ BOOST_AUTO_TEST_CASE(CqCubicSpline_index_access_test)
 	Aqsis::CqCubicSpline<TqFloat> spline(Aqsis::SplineBasis_CatmullRom);
 	spline.pushBack(1.0f);
 	spline.pushBack(2.0f);
-	BOOST_CHECK_EQUAL(spline[0], 1.0f);
-	BOOST_CHECK_EQUAL(spline[1], 2.0f);
+	BOOST_CHECK_CLOSE(spline[0], 1.0f, 1e-5f);
+	BOOST_CHECK_CLOSE(spline[1], 2.0f, 1e-5f);
 }
 
 BOOST_AUTO_TEST_CASE(CqCubicSpline_clear_test)
@@ -69,9 +62,9 @@ BOOST_AUTO_TEST_CASE(CqCubicSpline_Linear_evaluate_test)
 	spline.pushBack(2.0f);
 	spline.pushBack(4.0f);
 	spline.pushBack(5.0f);
-	BOOST_CHECK_EQUAL(spline.evaluate(0.5f), 3.0f);
-	BOOST_CHECK_EQUAL(spline.evaluate(0.0f), 2.0f);
-	BOOST_CHECK_EQUAL(spline.evaluate(0.25f), 2.5f);
-	BOOST_CHECK_EQUAL(spline.evaluate(0.75f), 3.5f);
-	BOOST_CHECK_EQUAL(spline.evaluate(0.875f), 3.75f);
+	BOOST_CHECK_CLOSE(spline.evaluate(0.5f), 3.0f, 1e-5f);
+	BOOST_CHECK_CLOSE(spline.evaluate(0.0f), 2.0f, 1e-5f);
+	BOOST_CHECK_CLOSE(spline.evaluate(0.25f), 2.5f, 1e-5f);
+	BOOST_CHECK_CLOSE(spline.evaluate(0.75f), 3.5f, 1e-5f);
+	BOOST_CHECK_CLOSE(spline.evaluate(0.875f), 3.75f, 1e-5f);
 }

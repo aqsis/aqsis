@@ -21,7 +21,7 @@
 #include	"threadscheduler.h"
 
 
-START_NAMESPACE( Aqsis );
+namespace Aqsis {
 
 /**
  * \brief Wrapper class for a unit to be processed by a thread.
@@ -108,4 +108,4 @@ void CqThreadScheduler::joinAll()
 }
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis

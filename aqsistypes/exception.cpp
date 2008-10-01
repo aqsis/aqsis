@@ -18,15 +18,16 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
-		\brief Exception implementation
-*/
+ * \brief Exception implementation
+ */
 
 #include "exception.h"
+
 #include <ostream>
 
-START_NAMESPACE(Aqsis)
+namespace Aqsis {
 
-//////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 XqException::XqException (const std::string& reason)
 : std::runtime_error (reason), m_file ("Unspecified"), m_line (0)
 {
@@ -63,73 +64,8 @@ XqException::~XqException () throw ()
 {
 }
 
-//////////////////////////////////////////////////////////////////////////////
-XqInternal::XqInternal (const std::string& reason, const std::string& detail,
-const std::string& file, const unsigned int line)
-: XqException (reason, detail, file, line)
-{
-}
-
-XqInternal::XqInternal (const std::string& reason,	const std::string& file,
-	const unsigned int line)
-: XqException (reason, file, line)
-{
-}
-
-const char* XqInternal::description () const
-{
-	return "Internal error";
-}
-
-XqInternal::~XqInternal () throw ()
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////
-XqEnvironment::XqEnvironment (const std::string& reason, const std::string& detail,
-const std::string& file, const unsigned int line)
-: XqException (reason, detail, file, line)
-{
-}
-
-XqEnvironment::XqEnvironment (const std::string& reason,	const std::string& file,
-	const unsigned int line)
-: XqException (reason, file, line)
-{
-}
-
-const char* XqEnvironment::description () const
-{
-	return "Environment error";
-}
-
-XqEnvironment::~XqEnvironment () throw ()
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////
-XqValidation::XqValidation (const std::string& reason, const std::string& detail,
-const std::string& file, const unsigned int line)
-: XqException (reason, detail, file, line)
-{
-}
-
-XqValidation::XqValidation (const std::string& reason,	const std::string& file,
-const unsigned int line)
-: XqException (reason, file, line)
-{
-}
-
-const char* XqValidation::description () const
-{
-	return "Validation error";
-}
-
-XqValidation::~XqValidation () throw ()
-{
-}
 	
-//////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& o, const XqException& e)
 {
 	o << e.description () << " (" << e.where ().first << "," << e.where ().second << ")";	
@@ -141,4 +77,4 @@ std::ostream& operator<<(std::ostream& o, const XqException& e)
 	return o;
 }
 
-END_NAMESPACE(Aqsis)
+} // namespace Aqsis

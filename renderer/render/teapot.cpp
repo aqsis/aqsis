@@ -37,7 +37,7 @@
 #include	"teapot.h"
 #include	"patch.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 static CqVector3D Patch01[ 13*10 ] = { /*u=13 v=10 */
                                          CqVector3D( 1.5, 0.0, 0.0 ),
@@ -662,7 +662,7 @@ TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------
 
 

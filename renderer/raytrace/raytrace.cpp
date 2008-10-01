@@ -26,7 +26,7 @@
 #include	"aqsis.h"
 #include	"raytrace.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /// Required function that implements Class Factory design pattern for Raytrace libraries
@@ -48,4 +48,4 @@ void CqRaytrace::Finalise()
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

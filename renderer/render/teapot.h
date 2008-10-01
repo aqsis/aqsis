@@ -39,7 +39,7 @@
 #include	"matrix.h"
 #include	"surface.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqTeapot
@@ -101,6 +101,6 @@ class CqTeapot : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !TEAPOT_H_INCLUDED

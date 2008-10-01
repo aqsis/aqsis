@@ -18,11 +18,16 @@
 
 
 /** \file
-		\brief Global Aqsis include to include all files required within Aqsis
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief Main Aqsis include for basic macros and types needed by all aqsis headers.
+ *
+ * This file should be included by every aqsis C++ source file.  Moreover, it
+ * should be included before any other headers, since aqsis_compiler.h defines
+ * some constants which potentially modify the behaviour of other standard
+ * includes.
+ *
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ */
 
-//? Is .h included already?
 #ifndef AQSIS_H_INCLUDED
 #define AQSIS_H_INCLUDED 1
 
@@ -31,5 +36,8 @@
 #include	"aqsis_types.h"
 #include	"aqsis_compiler.h"
 
+// macro which stringizes the value held in another macro.
+#define AQSIS_XSTR(s) AQSIS_STR(s)
+#define AQSIS_STR(s) #s
 
 #endif // AQSIS_H_INCLUDED

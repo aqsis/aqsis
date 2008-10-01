@@ -30,37 +30,7 @@
 
 #include	"shadervm.h"
 
-START_NAMESPACE( Aqsis )
-
-const char* gVariableTypeNames[] =
-    {
-        "invalid",
-        "float",
-        "integer",
-        "point",
-        "string",
-        "color",
-        "triple",
-        "hpoint",
-        "normal",
-        "vector",
-        "void",
-        "matrix",
-        "sixteentuple",
-    };
-TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
-
-const char* gVariableClassNames[] =
-    {
-        "invalid",
-        "constant",
-        "uniform",
-        "varying",
-        "vertex",
-        "facevarying",
-    };
-TqInt gcVariableClassNames = sizeof( gVariableClassNames ) / sizeof( gVariableClassNames[ 0 ] );
-
+namespace Aqsis {
 
 CqNoise	CqShaderExecEnv::m_noise;
 CqCellNoise	CqShaderExecEnv::m_cellnoise;
@@ -145,13 +115,26 @@ TqInt gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_P
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv(IqRenderer* pRenderContext) : m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 ), m_pRenderContext(pRenderContext), m_LocalIndex( 0 )
-{
-	m_apVariables.resize( EnvVars_Last );
-	TqInt i;
-	for ( i = 0; i < EnvVars_Last; i++ )
-		m_apVariables[ i ] = 0;
-}
+CqShaderExecEnv::CqShaderExecEnv(IqRenderer* pRenderContext)
+	: m_apVariables(EnvVars_Last, 0),
+	m_uGridRes(0),
+	m_vGridRes(0),
+	m_microPolygonCount(0),
+	m_shadingPointCount(0),
+	m_li(0),
+	m_Illuminate(0),
+	m_IlluminanceCacheValid(false),
+	m_gatherSample(0),
+	m_pAttributes(),
+	m_pTransform(),
+	m_CurrentState(),
+	m_RunningState(),
+	m_isRunning(false),
+	m_stkState(),
+	m_pRenderContext(pRenderContext),
+	m_LocalIndex(0),
+	m_pCurrentSurface(0)
+{ }
 
 
 //----------------------------------------------------------------------
@@ -163,40 +146,33 @@ CqShaderExecEnv::~CqShaderExecEnv()
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )
 		delete( m_apVariables[ i ] );
-
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
 }
 
 //---------------------------------------------------------------------
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, 
+								TqInt microPolygonCount, TqInt shadingPointCount, 
+								bool hasValidDerivatives,
+								const IqConstAttributesPtr& pAttr, 
+								const IqConstTransformPtr& pTrans, 
+								IqShader* pShader, 
+								TqInt Uses )
 {
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
 
 	m_microPolygonCount = microPolygonCount;
 	m_shadingPointCount = shadingPointCount;
+	m_hasValidDerivatives = hasValidDerivatives;
 	m_LocalIndex = 0;
 
 	// Store a pointer to the attributes definition.
-	if ( NULL != pAttr )
-	{
-		if( NULL != m_pAttributes )
-			RELEASEREF(m_pAttributes);
-		m_pAttributes = pAttr;
-		ADDREF(m_pAttributes);
-	}
-	else
-		m_pAttributes = NULL;
+	m_pAttributes = pAttr;
 
 	// Store a pointer to the transform.
-	if (pTrans)
-	{
-		m_pTransform = pTrans;
-	}
+	m_pTransform = pTrans;
 
 	m_li = 0;
 	m_Illuminate = 0;
@@ -206,6 +182,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 	m_CurrentState.SetSize( m_shadingPointCount );
 	m_RunningState.SetSize( m_shadingPointCount );
 	m_RunningState.SetAll( true );
+	m_isRunning = true;
 
 
 	if ( pShader )
@@ -288,6 +265,59 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 			m_apVariables[ EnvVars_time ]->SetFloat(  shutter[ 0 ] + offset );
 		}
 	}
+
+	// Precompute the derivative indices for use in diffU and diffV
+	m_diffUI1.resize(shadingPointCount);
+	m_diffUI2.resize(shadingPointCount);
+	m_diffVI1.resize(shadingPointCount);
+	m_diffVI2.resize(shadingPointCount);
+	if(hasValidDerivatives)
+	{
+		TqInt uSize = uGridRes+1;
+		TqInt vSize = vGridRes+1;
+		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
+		{
+			TqInt iu = idx % uSize;
+			if(iu == uSize-1)
+			{
+				// Use backward difference for grid boundary end in u-direction
+				m_diffUI1[idx] = idx-1;
+				m_diffUI2[idx] = idx;
+			}
+			else 
+			{
+				// Use forward difference internally
+				m_diffUI1[idx] = idx;
+				m_diffUI2[idx] = idx+1;
+			}
+			TqInt iv = idx / uSize;
+			if(iv == vSize-1)
+			{
+				// Use backward difference for grid boundary end in v-direction
+				m_diffVI1[idx] = idx-uSize;
+				m_diffVI2[idx] = idx;
+			}
+			else 
+			{
+				// Use forward difference internally
+				m_diffVI1[idx] = idx;
+				m_diffVI2[idx] = idx+uSize;
+			}
+		}
+	}
+	else
+	{
+		// If the shading group (grid) is not suitable for derivative calculation (points)
+		// then set all left/right indices to be the same, this way we get zero derivatives
+		// which is correct for points as they have no inherent area.
+		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
+		{
+			m_diffUI1[idx] = idx;
+			m_diffUI2[idx] = idx;
+			m_diffVI1[idx] = idx;
+			m_diffVI2[idx] = idx;
+		}
+	}
 }
 
 IqShaderData* CqShaderExecEnv::FindStandardVar( const char* pname )
@@ -338,5 +368,5 @@ const CqMatrix& CqShaderExecEnv::matObjectToWorld() const
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

@@ -32,7 +32,7 @@
 #include	"surface.h"
 #include	"vector4d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqPolygonBase
@@ -111,10 +111,10 @@ class CqPolygonBase
 
 		/** Get a pointer to the attributes state associated with this polygon.
 		 */
-		virtual	IqAttributes*	pAttributes() const = 0;
+		virtual	IqAttributesPtr	pAttributes() const = 0;
 		/** Get a pointer to the transfrom associated with this polygon.
 		 */
-		virtual	boost::shared_ptr<IqTransform>	pTransform() const = 0;
+		virtual	IqTransformPtr	pTransform() const = 0;
 
 		/** Get the index of this polygon if it is a member of a polygon mesh
 		 */
@@ -253,11 +253,11 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( cVertex() );
 		}
 
-		virtual	IqAttributes*	pAttributes() const
+		virtual	IqAttributesPtr	pAttributes() const
 		{
 			return ( CqSurface::pAttributes() );
 		}
-		virtual	boost::shared_ptr<IqTransform>	pTransform() const
+		virtual	IqTransformPtr	pTransform() const
 		{
 			return ( CqSurface::pTransform() );
 		}
@@ -503,11 +503,11 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 			return ( m_aIndices.size() );
 		}
 
-		virtual	IqAttributes*	pAttributes() const
+		virtual	IqAttributesPtr	pAttributes() const
 		{
 			return ( m_pPoints->pAttributes() );
 		}
-		virtual	boost::shared_ptr<IqTransform>	pTransform() const
+		virtual	IqTransformPtr	pTransform() const
 		{
 			return ( m_pPoints->pTransform() );
 		}
@@ -635,6 +635,6 @@ class CqSurfacePointsPolygons : public CqSurface
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !POLYGON_H_INCLUDED

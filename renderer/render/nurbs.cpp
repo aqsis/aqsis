@@ -35,7 +35,7 @@
 #include	"attributes.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -43,7 +43,7 @@ START_NAMESPACE( Aqsis )
 
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_cuVerts( 0 ), m_cvVerts( 0 ), m_umin( 0.0f ), m_umax( 1.0f ), m_vmin( 0.0f ), m_vmax( 1.0f ), m_fPatchMesh( false )
 {
-	TrimLoops() = static_cast<const CqAttributes*>( pAttributes() ) ->TrimLoops();
+	TrimLoops() = static_cast<const CqAttributes*>(pAttributes().get())->TrimLoops();
 
 	STATS_INC( GPR_nurbs );
 }
@@ -313,6 +313,8 @@ void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloa
 
 //---------------------------------------------------------------------
 /** Evaluate the nurbs surface at parameter values u,v.
+ *
+ * \todo Code Review: Unused function [except by deprecated CqSurfaceNURBS::GenerateGeometricNormals() ]
  */
 
 CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P )
@@ -329,12 +331,12 @@ CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D&
 	std::vector<std::vector<TqFloat> > Nu, Nv;
 	std::vector<CqVector4D> temp( q + 1 );
 
-	TqInt du = MIN( d, p );
+	TqInt du = min( d, p );
 	for ( k = p + 1; k <= d; k++ )
 		for ( l = 0; l <= d - k; l++ )
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
 
-	TqInt dv = MIN( d, q );
+	TqInt dv = min( d, q );
 	for ( l = q + 1; l <= d; l++ )
 		for ( k = 0; k <= d - l; k++ )
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -352,7 +354,7 @@ CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D&
 			for ( r = 0; r <= p; r++ )
 				temp[ s ] = temp[ s ] + Nu[ k ][ r ] * CP( uspan - p + r, vspan - q + s );
 		}
-		TqInt dd = MIN( d - k, dv );
+		TqInt dd = min( d - k, dv );
 		for ( l = 0; l <= dd; l++ )
 		{
 			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -1505,6 +1507,26 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 /** Generate the vertex normals if not specified.
  */
 
+/*
+
+// This function used to generate the normals for NURBS, but was disabled in
+// the old cvs repository:
+//
+//   Revision 1.19 - (view) (download) (annotate) - [select for diffs]
+//   Tue Oct 8 20:10:41 2002 UTC (5 years, 8 months ago) by pgregory
+//   Branch: MAIN
+//   Changes since 1.18: +2 -1 lines
+//   Diff to previous 1.18
+//
+//   Fix some bugs in the 'clamping' of NURBS surfaces.
+//   Disable generation of normals as there is a problem with it at the moment. Let the grid generate normals until it is fixed.
+//
+// If this code was to be resurrected, it should be moved into the more modern
+// DiceAll() function, which would also resolve the todo.  We'd need to recall
+// what the "problem" was with the old version - possibly something to do with
+// degenerate control points and tangents?
+
+
 void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
@@ -1537,6 +1559,7 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 	}
 }
 
+*/
 
 //---------------------------------------------------------------------
 /** Split the patch into smaller patches.
@@ -1558,8 +1581,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 			S[ i ] ->TrimLoops() = TrimLoops();
 			S[ i ] ->m_fDiceable = true;
 			S[ i ] ->m_SplitDir = m_SplitDir;
-			S[ i ] ->m_EyeSplitCount = m_EyeSplitCount;
-			//ADDREF( S[ i ] );
+			S[ i ] ->SetSplitCount( SplitCount() + 1 );
 			aSplits.push_back( S[ i ] );
 		}
 		return ( i );
@@ -1594,8 +1616,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 	pNew2->m_fDiceable = true;
 	pNew1->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
 	pNew2->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSplitCount( SplitCount() + 1 );
+	pNew2->SetSplitCount( SplitCount() + 1 );
 	pNew1->SetfPatchMesh( false );
 	pNew2->SetfPatchMesh( false );
 
@@ -1650,7 +1672,8 @@ bool	CqSurfaceNURBS::Diceable()
 
 	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
-	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
 		CqVector3D vT = P()->pValue( i )[0];
@@ -1695,8 +1718,8 @@ bool	CqSurfaceNURBS::Diceable()
 
 	MaxuLen /= ShadingRateSqrt;
 	MaxvLen /= ShadingRateSqrt;
-	m_uDiceSize = static_cast<TqUint>( MAX( ROUND( MaxuLen ), 1 ) );
-	m_vDiceSize = static_cast<TqUint>( MAX( ROUND( MaxvLen ), 1 ) );
+	m_uDiceSize = max<TqInt>(lround(MaxuLen), 1);
+	m_vDiceSize = max<TqInt>(lround(MaxvLen), 1);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -1736,7 +1759,8 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 	TqFloat Len = 0;
 	TqFloat MaxLen = 0;
 	TqInt cSegments = 0;
-	CqMatrix matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 
 	TqUint iTrimCurvePoint;
 	for ( iTrimCurvePoint = 0; iTrimCurvePoint < Curve.cVerts() - 1; iTrimCurvePoint++ )
@@ -1767,7 +1791,7 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 	MaxLen /= ShadingRateSqrt;
 
-	TqInt SplitCount = static_cast<TqUint>( MAX( MaxLen, 1 ) );
+	TqInt SplitCount = static_cast<TqUint>( max(MaxLen, 1.0f) );
 
 	return ( SplitCount * cSegments );
 }
@@ -2250,4 +2274,4 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 
 //-------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

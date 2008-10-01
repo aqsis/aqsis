@@ -24,15 +24,16 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<cmath>
+#include	"patch.h"
 
+#include	"forwarddiff.h"
+#include	"imagebuffer.h"
 #include	"micropolygon.h"
 #include	"renderer.h"
-#include	"patch.h"
 #include	"vector2d.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Constructor both u and vbasis matrices default to bezier.
@@ -79,83 +80,87 @@ CqSurface* CqSurfacePatchBicubic::Clone() const
 }
 
 
+namespace {
 
+/** \brief Implementation of natural subdivision for bicubic patches.
+ */
+template <class T, class SLT>
+void bicubicPatchNatSubdiv(CqParameter* pParam, CqParameter* pResult1,
+		CqParameter* pResult2, bool u)
+{
+	TqInt iu, iv;
+
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+	CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+	CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+	if ( u )
+	{
+		for ( iv = 0; iv < 4; iv++ )
+		{
+			TqUint ivo = ( iv * 4 );
+			pTResult1->pValue() [ ivo + 0 ] = pTParam->pValue() [ ivo + 0 ];
+			pTResult1->pValue() [ ivo + 1 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 0 ] + pTParam->pValue() [ ivo + 1 ] ) / 2.0f );
+			pTResult1->pValue() [ ivo + 2 ] = static_cast<T>( pTResult1->pValue() [ ivo + 1 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
+
+			pTResult2->pValue() [ ivo + 3 ] = pTParam->pValue() [ ivo + 3 ];
+			pTResult2->pValue() [ ivo + 2 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 2 ] + pTParam->pValue() [ ivo + 3 ] ) / 2.0f );
+			pTResult2->pValue() [ ivo + 1 ] = static_cast<T>( pTResult2->pValue() [ ivo + 2 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
+
+			pTResult1->pValue() [ ivo + 3 ] = static_cast<T>( ( pTResult1->pValue() [ ivo + 2 ] + pTResult2->pValue() [ ivo + 1 ] ) / 2.0f );
+			pTResult2->pValue() [ ivo + 0 ] = pTResult1->pValue() [ ivo + 3 ];
+		}
+	}
+	else
+	{
+		for ( iu = 0; iu < 4; iu++ )
+		{
+			pTResult1->pValue() [ 0 + iu ] = pTParam->pValue() [ 0 + iu ];
+			pTResult1->pValue() [ 4 + iu ] = static_cast<T>( ( pTParam->pValue() [ 0 + iu ] + pTParam->pValue() [ 4 + iu ] ) / 2.0f );
+			pTResult1->pValue() [ 8 + iu ] = static_cast<T>( pTResult1->pValue() [ 4 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
+
+			pTResult2->pValue() [ 12 + iu ] = pTParam->pValue() [ 12 + iu ];
+			pTResult2->pValue() [ 8 + iu ] = static_cast<T>( ( pTParam->pValue() [ 8 + iu ] + pTParam->pValue() [ 12 + iu ] ) / 2.0f );
+			pTResult2->pValue() [ 4 + iu ] = static_cast<T>( pTResult2->pValue() [ 8 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
+
+			pTResult1->pValue() [ 12 + iu ] = static_cast<T>( ( pTResult1->pValue() [ 8 + iu ] + pTResult2->pValue() [ 4 + iu ] ) / 2.0f );
+			pTResult2->pValue() [ 0 + iu ] = pTResult1->pValue() [ 12 + iu ];
+		}
+	}
+}
+
+} // unnamed namespace
 
 void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u )
 {
 	switch ( pParam->Type() )
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-
-			case type_matrix:
-			{
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				//			break;
-			}
-
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+		case type_float:
+			bicubicPatchNatSubdiv<TqFloat, TqFloat>(pParam, pParam1, pParam2, u);
+			break;
+		case type_integer:
+			bicubicPatchNatSubdiv<TqInt, TqFloat>(pParam, pParam1, pParam2, u);
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			bicubicPatchNatSubdiv<CqVector3D, CqVector3D>(pParam, pParam1, pParam2, u);
+			break;
+		case type_hpoint:
+			bicubicPatchNatSubdiv<CqVector4D, CqVector3D>(pParam, pParam1, pParam2, u);
+			break;
+		case type_color:
+			bicubicPatchNatSubdiv<CqColor, CqColor>(pParam, pParam1, pParam2, u);
+			break;
+		case type_string:
+			bicubicPatchNatSubdiv<CqString, CqString>(pParam, pParam1, pParam2, u);
+			break;
+		case type_matrix:
+			/// \todo why is this commented out?
+			//bicubicPatchNatSubdiv<CqMatrix, CqMatrix>(pParam, pParam1, pParam2, u);
+			//break;
+		default:
+			// left blank to avoid compiler warnings about unhandled types
+			break;
 	}
 }
 
@@ -193,70 +198,85 @@ void CqSurfacePatchBicubic::Bound(IqBound* bound) const
 
 
 //---------------------------------------------------------------------
+namespace {
+
+/** \brief Implementation of dicing for bicubic patches.
+ */
+template <class T, class SLT>
+void bicubicPatchNatDice(TqFloat uSize, TqFloat vSize, CqParameter* pParam,
+		IqShaderData* pData)
+{
+	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
+	CqForwardDiffBezier<T> vFD0( 1.0f / vSize );
+	CqForwardDiffBezier<T> vFD1( 1.0f / vSize );
+	CqForwardDiffBezier<T> vFD2( 1.0f / vSize );
+	CqForwardDiffBezier<T> vFD3( 1.0f / vSize );
+	CqForwardDiffBezier<T> uFD0( 1.0f / uSize );
+
+	IqShaderData* arrayValue;
+	TqInt i;
+	for(i = 0; i<pTParam->Count(); i++)
+	{
+		vFD0.CalcForwardDiff( pTParam->pValue(0) [ i ], pTParam->pValue(4) [ i ], pTParam->pValue(8) [ i ], pTParam->pValue(12) [ i ] );
+		vFD1.CalcForwardDiff( pTParam->pValue(1) [ i ], pTParam->pValue(5) [ i ], pTParam->pValue(9) [ i ], pTParam->pValue(13) [ i ] );
+		vFD2.CalcForwardDiff( pTParam->pValue(2) [ i ], pTParam->pValue(6) [ i ], pTParam->pValue(10) [ i ], pTParam->pValue(14) [ i ] );
+		vFD3.CalcForwardDiff( pTParam->pValue(3) [ i ], pTParam->pValue(7) [ i ], pTParam->pValue(11) [ i ], pTParam->pValue(15) [ i ] );
+
+		TqInt iv, iu;
+		for ( iv = 0; iv <= vSize; iv++ )
+		{
+			T vA = vFD0.GetValue();
+			T vB = vFD1.GetValue();
+			T vC = vFD2.GetValue();
+			T vD = vFD3.GetValue();
+			uFD0.CalcForwardDiff( vA, vB, vC, vD );
+
+			for ( iu = 0; iu <= uSize; iu++ )
+			{
+				T vec = uFD0.GetValue();
+				TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+				arrayValue = pData->ArrayEntry(i);
+				arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+			}
+		}
+	}
+}
+
+} // unnamed namespace
+
 /** Dice the patch into a mesh of micropolygons.
  */
-
-
-void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
+void CqSurfacePatchBicubic::NaturalDice(CqParameter* pParam, TqInt uDiceSize,
+		TqInt vDiceSize, IqShaderData* pData)
 {
-	switch ( pParameter->Type() )
+	switch(pParam->Type())
 	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
-
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+		case type_float:
+			bicubicPatchNatDice<TqFloat, TqFloat>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_integer:
+			bicubicPatchNatDice<TqInt, TqFloat>( uDiceSize, vDiceSize, pParam, pData );
+			break;
+		case type_point:
+		case type_vector:
+		case type_normal:
+			bicubicPatchNatDice<CqVector3D, CqVector3D>( uDiceSize, vDiceSize, pParam, pData );
+			break;
+		case type_hpoint:
+			bicubicPatchNatDice<CqVector4D, CqVector3D>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_color:
+			bicubicPatchNatDice<CqColor, CqColor>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_string:
+			bicubicPatchNatDice<CqString, CqString>(uDiceSize, vDiceSize, pParam, pData);
+			break;
+		case type_matrix:
+			bicubicPatchNatDice<CqMatrix, CqMatrix>( uDiceSize, vDiceSize, pParam, pData );
+			break;
+		default:
+			// left blank to avoid compiler warnings about unhandled types
+			break;
 	}
 }
 
@@ -286,7 +306,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 16 ];
@@ -390,8 +411,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen *= 3;
 	vLen *= 3;
-	m_uDiceSize = static_cast<TqInt>( MAX( ROUND( uLen ), 1 ) );
-	m_vDiceSize = static_cast<TqInt>( MAX( ROUND( vLen ), 1 ) );
+	m_uDiceSize = max<TqInt>(lround( uLen ), 1);
+	m_vDiceSize = max<TqInt>(lround( vLen ), 1);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -412,7 +433,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 	if( NULL != poptGridSize )
 		gs = poptGridSize[0];
 
-	if( m_uDiceSize * m_vDiceSize > gs * gs )
+	TqFloat gs2 = gs*gs;
+	if( m_uDiceSize > gs2 || m_vDiceSize > gs2 || (m_uDiceSize * m_vDiceSize) > gs2 )
 		return false;
 
 	return ( true );
@@ -718,7 +740,8 @@ bool	CqSurfacePatchBilinear::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix matCtoR;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];
@@ -746,8 +769,8 @@ bool	CqSurfacePatchBilinear::Diceable()
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
 	// TODO: Should ensure powers of half to prevent cracking.
-	uLen = MAX( ROUND( uLen ), 1 );
-	vLen = MAX( ROUND( vLen ), 1 );
+	uLen = max<TqInt>(lround(uLen), 1);
+	vLen = max<TqInt>(lround(vLen), 1);
 
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );
@@ -776,12 +799,6 @@ bool	CqSurfacePatchBilinear::Diceable()
 		return false;
 
 	return ( true );
-}
-
-void CqSurfacePatchBilinear::PostDice(CqMicroPolyGrid * pGrid)
-{
-	if (m_fHasPhantomFourthVertex)
-		pGrid->SetfTriangular(true);
 }
 
 
@@ -815,7 +832,7 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 	{
 		aSplits[ i ] ->SetSurfaceParameters( *this );
 		aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
-		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
+		aSplits[ i ] ->SetSplitCount( SplitCount() + 1 );
 		aSplits[ i ] ->m_fDiceable = true;
 	}
 
@@ -877,6 +894,11 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 	}
 }
 
+void CqSurfacePatchBilinear::PostDice(CqMicroPolyGrid * pGrid)
+{
+	if(m_fHasPhantomFourthVertex)
+		pGrid->SetfTriangular(true);
+}
 
 //---------------------------------------------------------------------
 /** Destructor.
@@ -1314,4 +1336,4 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 	return ( cSplits );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

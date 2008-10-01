@@ -30,7 +30,7 @@
 
 #define OUT (*out)
 
-USING_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 CqASCII::CqASCII(const char *name, const int fdesc,
 			const SqOptions::EqCompression comp,
@@ -100,10 +100,16 @@ void CqASCII::printInteger( const RtInt i )
 
 void CqASCII::printFloat( const RtFloat f )
 {
-	OUT << f;
+	if (f == RI_INFINITY)
+	{
+		OUT << "1e38";
+	} else
+	{
+		OUT << f;
+	}
 }
 
-void CqASCII::printString( std::string &str )
+void CqASCII::printString( const std::string &str )
 {
 	OUT << '"' << str << '"';
 }
@@ -172,3 +178,6 @@ void CqASCII::print( const char *c )
 {
 	OUT << c;
 }
+
+
+} // namespace libri2rib

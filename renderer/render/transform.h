@@ -39,7 +39,7 @@
 #include	"options.h"
 #include	"itransform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 struct SqTransformation
 {
@@ -136,7 +136,7 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif // TRANSFORM_H_INCLUDED

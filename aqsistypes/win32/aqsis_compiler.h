@@ -56,21 +56,6 @@
 #define WIN32_LEAN_AND_MEAN
 
 ///----------------------------------------------------------------------
-///
-/// Namespace macros for those cases where they aren't supported
-/// by the host compiler. These can also be disabled by setting
-/// /D NO_NAMESPACES in the compiler options.
-
-#ifdef  NO_NAMESPACES
-#define START_NAMESPACE(x)	/* start disabled namespace x */
-#define END_NAMESPACE(x)	/* end disabled namespace x */
-#define USING_NAMESPACE(x)  /* using disabled namespace x */
-#else
-#define START_NAMESPACE(x)	namespace x {
-#define END_NAMESPACE(x)	}
-#define USING_NAMESPACE(x)  using namespace x;
-#endif
-
 
 #if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
 #pragma comment( compiler )
@@ -85,9 +70,23 @@
 
 #define SHARED_LIBRARY_SUFFIX ".dll"
 
+/** Macros for DLL import/export
+ *
+ * Only defined when we're using dynamic linking (the default).
+ *
+ * These are setup so that the build will export the necessary symbols whenever
+ * it's compiling files for a DLL, and import those symbols when it's merely
+ * using them from a separate DLL.  To enable export during the build, the
+ * build script should define the appropriate *_EXPORTS macro, for example,
+ * COMMON_EXPORTS.
+ */
+
 #ifdef	AQSIS_STATIC_LINK
 
-#  define  COMMON_SHARE
+#	define COMMON_SHARE
+#	define AQSISTEX_SHARE
+#	define RI_SHARE
+#	define SLXARGS_SHARE
 
 #else // !AQSIS_STATIC_LINK
 
@@ -97,6 +96,27 @@
 #      define COMMON_SHARE __declspec(dllimport)
 #    endif
 
+#    ifdef AQSISTEX_EXPORTS
+#      define AQSISTEX_SHARE __declspec(dllexport)
+#    else
+#      define AQSISTEX_SHARE __declspec(dllimport)
+#    endif
+
+#	ifdef RI_EXPORTS
+#		define RI_SHARE __declspec(dllexport)
+#	else
+#		define RI_SHARE __declspec(dllimport)
+#	endif
+
+#	ifdef SLXARGS_EXPORTS
+#		define SLXARGS_SHARE __declspec(dllexport)
+#	else
+#		define SLXARGS_SHARE __declspec(dllimport)
+#	endif
+
 #endif	// AQSIS_STATIC_LINK
+
+/// Export from a DLL.
+#define AQSIS_EXPORT __declspec(dllexport)
 
 #endif // AQSIS_COMPILER_H_INCLUDED

@@ -39,7 +39,7 @@
 
 #include	"parsenode.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std::string, std::string> >& Stack );
 IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTranslator> >& Stack );
@@ -514,4 +514,4 @@ void CqCodeGenDataGather::Visit( IqParseNodeMessagePassingFunction& MPF )
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

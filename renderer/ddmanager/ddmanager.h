@@ -38,7 +38,7 @@
 #include	"ndspy.h"
 #undef		DSPY_INTERNAL
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /** \brief Structure for packaging CqDDManager private static member variables
@@ -84,6 +84,9 @@ struct SqDDMemberData
 //---------------------------------------------------------------------
 /** \class CqDisplayRequest
  * Base class for display requests.
+ *
+ * \todo <b>Code review</b>: This class could be tweaked to use a more
+ * RAII-like style.
  */
 class CqDisplayRequest
 {
@@ -99,7 +102,7 @@ class CqDisplayRequest
 				m_AOVSize(dataSize), m_QuantizeZeroVal(quantizeZeroVal), m_QuantizeOneVal(quantizeOneVal),
 				m_QuantizeMinVal(quantizeMinVal), m_QuantizeMaxVal(quantizeMaxVal), m_QuantizeDitherVal(quantizeDitherVal), m_QuantizeSpecified(quantizeSpecified), m_QuantizeDitherSpecified(quantizeDitherSpecified)
 		{}
-		virtual ~CqDisplayRequest(){}
+		virtual ~CqDisplayRequest();
 
 		/* Query if this display uses the dispay mode variable (one of rgbaz)
 		 * specified by the hash token.
@@ -111,7 +114,6 @@ class CqDisplayRequest
 		 */
 		virtual	void ThisDisplayUses( TqInt& Uses );
 
-		virtual void ClearDisplayParams();
 		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin );
 		void CloseDisplayLibrary();
 		void ConstructStringsParameter(const char* name, const char** strings, TqInt count, UserParameter& parameter);
@@ -263,7 +265,7 @@ class CqDDManager : public IqDDManager
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// ___ddmanager_Loaded___
 

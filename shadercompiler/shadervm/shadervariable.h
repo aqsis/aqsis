@@ -46,7 +46,7 @@
 #include	"ishaderdata.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -61,7 +61,7 @@ class CqShaderVariable : public IqShaderData
 	public:
 		CqShaderVariable();
 		CqShaderVariable( const char* strName, bool fParameter = false );
-		virtual	~CqShaderVariable();
+		virtual	~CqShaderVariable() {}
 
 		virtual void GetBool( bool& res, TqInt index = 0 ) const
 		{
@@ -152,6 +152,8 @@ class CqShaderVariableArray: public CqShaderVariable
 		}
 		virtual	~CqShaderVariableArray()
 		{
+			for ( TqUint i = 0; i < m_aVariables.size(); i++ )
+				delete m_aVariables[i];
 		}
 
 		// Overridden from IqShaderData.
@@ -1845,13 +1847,23 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		}
 };
 
-std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
-std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 
-//-----------------------------------------------------------------------
+//==============================================================================
+// Implementation details
+//==============================================================================
 
-END_NAMESPACE( Aqsis )
+inline CqShaderVariable::CqShaderVariable()
+	: m_strName(),
+	m_fParameter(false)
+{}
+
+inline CqShaderVariable::CqShaderVariable(const char* strName, bool fParameter)
+	: m_strName(strName),
+	m_fParameter(fParameter)
+{}
+
+} // namespace Aqsis
 
 #endif	// !SHADERVARIABLE_H_INCLUDED
 

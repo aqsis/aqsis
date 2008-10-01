@@ -33,6 +33,9 @@
 #include	<stack>
 #include	<map>
 
+#include <boost/noncopyable.hpp>
+
+#include	"aqsismath.h"
 #include	"bitvector.h"
 #include	"color.h"
 #include	"noise.h"
@@ -70,13 +73,8 @@
 
 #endif // WIN32
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
-
-SHADERCONTEXT_SHARE extern const char*	gVariableClassNames[];
-SHADERCONTEXT_SHARE extern TqInt	gcVariableClassNames;
-SHADERCONTEXT_SHARE extern const char*	gVariableTypeNames[];
-SHADERCONTEXT_SHARE extern TqInt	gcVariableTypeNames;
 SHADERCONTEXT_SHARE extern const char*	gVariableNames[];	///< Vector of variable names.
 SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
@@ -88,7 +86,7 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
 #define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
 #define	FOR_EACH		__iGrid = 0; \
-						CqBitVector& RS = RunningState(); \
+						const CqBitVector& RS = RunningState(); \
 						do \
 						{ \
 							if(!__fVarying || RS.Value( __iGrid ) ) \
@@ -135,18 +133,13 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
 #define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
-#define	GET_FILTER_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f; \
-							GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
-#define	GET_TEXTURE_PARAMS	std::map<std::string, IqShaderData*> paramMap; \
-							GetTexParams(cParams, apParams, paramMap);
-
 
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
+class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
 {
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);
@@ -161,7 +154,13 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 #endif
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses );
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
+			TqInt microPolygonCount, TqInt shadingPointCount, 
+			bool hasValidDerivatives,
+			const IqConstAttributesPtr& pAttr, 
+			const IqConstTransformPtr& pTrans, 
+			IqShader* pShader, 
+			TqInt Uses );
 		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );
@@ -179,11 +178,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 			return ( m_shadingPointCount );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const;
-		const IqAttributes*	pAttributes() const
+		const IqConstAttributesPtr	pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
-		boost::shared_ptr<const IqTransform>	pTransform() const
+		const IqConstTransformPtr	pTransform() const
 		{
 			return ( boost::static_pointer_cast<const IqTransform>(m_pTransform) );
 		}
@@ -204,13 +203,14 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		{
 			return ( m_CurrentState );
 		}
-		virtual	CqBitVector& RunningState()
+		virtual	const CqBitVector& RunningState() const
 		{
 			return ( m_RunningState );
 		}
 		virtual	void	GetCurrentState()
 		{
 			m_RunningState = m_CurrentState;
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual	void	ClearCurrentState()
 		{
@@ -224,12 +224,14 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		{
 			m_RunningState = m_stkState.back();
 			m_stkState.pop_back();
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual	void	InvertRunningState()
 		{
 			m_RunningState.Complement();
 			if ( !m_stkState.empty() )
 				m_RunningState.Intersect( m_stkState.back() );
+			m_isRunning = m_RunningState.Count() != 0;
 		}
 		virtual void RunningStatesBreak(TqInt numLevels)
 		{
@@ -246,6 +248,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 			}
 			// Current state needs to stop executing.
 			m_RunningState.SetAll(false);
+			m_isRunning = false;
+		}
+		virtual bool IsRunning()
+		{
+			return m_isRunning;
 		}
 		virtual IqShaderData* FindStandardVar( const char* pname );
 
@@ -366,43 +373,88 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		}
 
 	private:
-		/** Internal function to extract additional named filter parameters from an array of stack entries.
+		/** \brief Evaluate discrete difference of a shader variable in the u-direction
+		 *
+		 * This is the discrete analogue to differentiation: for a 1D grid, "Y",
+		 * the discrete first order difference is conceptually just the
+		 * difference between consecutive grid points:
+		 *
+		 *   diff(Y, i) = Y[i+1] - Y[i];
+		 *
+		 * We choose the asymmetric forward difference here instead of the
+		 * second order centred difference [ diff(Y, i) = (Y[i+1] - Y[i-1])/2 ]
+		 * since the forward difference preserves more surface detail.
+		 *
+		 * In practise a mixture of difference schemes are necessary to work
+		 * with grid boundaries, but the normalization is consistent with the
+		 * forward difference.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
-		{
-			CqString strParam;
-			TqFloat f;
-
-			int i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				apParams[ i + 1 ] ->GetFloat( f, 0 );
-
-				if ( strParam.compare( "width" ) == 0 )
-					_pswidth = _ptwidth = f;
-				else if ( strParam.compare( "swidth" ) == 0 )
-					_pswidth = f;
-				else if ( strParam.compare( "twidth" ) == 0 )
-					_ptwidth = f;
-				i += 2;
-				cParams -= 2;
-			}
-		}
-		/** Internal function to extract additional named texture control parameters from an array of stack entries.
+		template<typename T>
+		T diffU(IqShaderData* var, TqInt gridIdx);
+		/** \brief Evaluate discrete difference of a shader variable in the v-direction
+		 *
+		 * This is the discrete analogue to differentiation
+		 * \see diffU for more details.
+		 *
+		 * \param var - variable to take the difference of.
+		 * \param gridIdx - 1D index into the 2D grid of data.
 		 */
-		void	GetTexParams( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
-		{
-			CqString strParam;
-			TqInt i = 0;
-			while ( cParams > 0 )
-			{
-				apParams[ i ] ->GetString( strParam, 0 );
-				map[ strParam ] = apParams[ i + 1 ];
-				i += 2;
-				cParams -= 2;
-			}
-		}
+		template<typename T>
+		T diffV(IqShaderData* var, TqInt gridIdx);
+		/** \brief Evaluate the partial derivative of a shader var with respect to u.
+		 *
+		 * This is just diffU(var, gridIdx)/du(gridIdx) with some checking for
+		 * the case when du == 0.
+		 *
+		 * \note In many cases it is more appropriate to use the discrete
+		 * analogue, diffU() rather than this function.
+		 *
+		 * \param var - variable to take the derivative of
+		 * \param gridIdx - 1D index into the var grid at which to compute the
+		 *                  derivative.
+		 * \param undefVal - value to be returned when the result is undefined
+		 *                   (ie, when du = 0).
+		 *
+		 * \return d(var)/du at the index gridIdx
+		 */
+		template<typename T>
+		inline T derivU(IqShaderData* var, TqInt gridIdx, const T& undefVal = T());
+		/** \brief Evaluate the partial derivative of a shader var with respect to v.
+		 *
+		 * This is just diffV(var, gridIdx)/dv(gridIdx) with some checking for
+		 * the case when dv == 0.
+		 *
+		 * \note In many cases it is more appropriate to use the discrete
+		 * analogue, diffU() rather than this function.
+		 *
+		 * \param var - variable to take the derivative of
+		 * \param gridIdx - 1D index into the var grid at which to compute the
+		 *                  derivative.
+		 * \param undefVal - value to be returned when the result is undefined
+		 *                   (ie, when dv = 0).
+		 *
+		 * \return d(var)/dv at the index gridIdx
+		 */
+		template<typename T>
+		inline T derivV(IqShaderData* var, TqInt gridIdx, const T& undefVal = T());
+		/** \brief Compute the differential dy/dx.
+		 *
+		 * Computes the derivative of a shader variable of type T with respect
+		 * to a given float variable.
+		 *
+		 * \param y - a variable of type T.
+		 * \param x - a float variable.
+		 * \param gridIdx - 1D index into the 2D grids of data.
+		 *
+		 * \return dy/dx if dx is nonzero.  If dx == 0, return a default
+		 * constructed value for T.
+		 */
+		template<typename T>
+		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
+
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
@@ -419,19 +471,24 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		TqInt	m_vGridRes;				///< The resolution of the grid in u.
 		TqInt	m_microPolygonCount;			///< The resolution of the grid.
 		TqInt	m_shadingPointCount;			///< The resolution of the grid.
-		TqInt	m_GridI;				///< The current SIMD index.
 		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		bool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
 		TqUint	m_gatherSample;				///< Sample index, used during gather loop.
-		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
-		IqTransformPtr m_pTransform;		///< Pointer to the associated transform.
+		IqConstAttributesPtr m_pAttributes;	///< Pointer to the associated attributes.
+		IqConstTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
+		bool m_isRunning;               ///< True if any bits in the running state are set.
 		std::vector<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
 		IqRenderer*	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
+		bool	m_hasValidDerivatives;	///< Is this shading collection able to provide valid derivatives. RiPoints, can't.
+		std::vector<TqInt>	m_diffUI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqInt>	m_diffUI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
+		std::vector<TqInt>	m_diffVI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqInt>	m_diffVI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
 
 	public:
 
@@ -637,10 +694,106 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 };
 
 
+//==============================================================================
+// Implementation details
+//==============================================================================
 
+template<typename T>
+T CqShaderExecEnv::diffU(IqShaderData* var, TqInt gridIdx)
+{
+	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
+	assert(m_diffUI1[gridIdx] < m_shadingPointCount && m_diffUI2[gridIdx] < m_shadingPointCount);
+
+	T val0;
+	T val1;
+
+	// Using the precalculated left/right indexes, get the two values and return the difference.
+	var->GetValue(val0, m_diffUI1[gridIdx]);
+	var->GetValue(val1, m_diffUI2[gridIdx]);
+	return val1 - val0;
+}
+
+template<typename T>
+T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
+{
+	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
+	assert(m_diffVI1[gridIdx] < m_shadingPointCount && m_diffVI2[gridIdx] < m_shadingPointCount);
+
+	T val0;
+	T val1;
+
+	// Using the precalculated left/right indexes, get the two values and return the difference.
+	var->GetValue(val0, m_diffVI1[gridIdx]);
+	var->GetValue(val1, m_diffVI2[gridIdx]);
+	return val1 - val0;
+}
+
+template<typename T>
+T CqShaderExecEnv::deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx)
+{
+	// At first sight this seems like a strange kind of derivative operation,
+	// since we may view both x and y as values which vary across the grid:
+	//
+	// x = x(u,v)
+	// y = y(u,v)
+	//
+	// However, if y is a function of x,  y = y(x(u,v)), we have:
+	//
+	// dy/du = dy/dx * dx/du
+	// dy/dv = dy/dx * dx/dv
+	//
+	// (all derivatives with respect to u and v are partial derivatives in
+	// these expressions.)
+	//
+	// This gives us two equivilant possibilities for calculating dy/dx:
+	//
+	// dy/dx = (dy/du) / (dx/du) = diffU(y) / diffU(x)
+	// dy/dx = (dy/dv) / (dx/dv) = diffV(y) / diffV(x)
+	//
+	// Either of these is fine, as long as dx/du and dx/dv are nonzero to
+	// within floating poing rounding error.  For numerical stability, we
+	// choose the direction u or v which has the maximum value for the value of
+	// dx.
+	//
+	TqFloat dxu = diffU<TqFloat>(x, gridIdx);
+	TqFloat dxv = diffV<TqFloat>(x, gridIdx);
+	TqFloat absDxu = std::fabs(dxu);
+	if(absDxu >= std::fabs(dxv))
+	{	
+		if(absDxu > 0) 
+			return diffU<T>(y, gridIdx) / dxu;
+		else
+			return T();
+	}
+	else
+	{
+		return diffV<T>(y, gridIdx) / dxv;
+	}
+}
+
+
+template<typename T>
+inline T CqShaderExecEnv::derivU(IqShaderData* var, TqInt gridIdx, const T& undefVal)
+{
+	TqFloat duVal = 1;
+	du()->GetFloat(duVal, gridIdx);
+	if(duVal == 0)
+		return undefVal;
+	return diffU<T>(var, gridIdx) * (1/duVal);
+}
+
+template<typename T>
+inline T CqShaderExecEnv::derivV(IqShaderData* var, TqInt gridIdx, const T& undefVal)
+{
+	TqFloat dvVal = 1;
+	dv()->GetFloat(dvVal, gridIdx);
+	if(dvVal == 0)
+		return undefVal;
+	return diffV<T>(var, gridIdx) * (1/dvVal);
+}
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !SHADEREXECENV_H_INCLUDED

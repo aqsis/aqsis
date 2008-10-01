@@ -68,12 +68,14 @@ eol					\r\n|\r|\n
 comment			#.*
 array_start		\[
 array_end		\]
+terminator		\377
 
 %s params
 %x incl skip_frame
 
 /* %option lex-compat */
 %option noreject
+%option always-interactive
 
 /* -------------- rules section -------------- */
 
@@ -96,6 +98,8 @@ array_end		\]
 		BEGIN(skip_frame);
 		fSkipFrame=false;
 	}
+
+<*>{terminator}		{ return TERMINATOR; }
 
 {comment}			{ 
 						lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; 
@@ -128,6 +132,7 @@ MitchellFilter			{ return REQUEST_TOKEN_MITCHELLFILTER; }
 BoxFilter			{ return REQUEST_TOKEN_BOXFILTER; }
 CatmullRomFilter		{ return REQUEST_TOKEN_CATMULLROMFILTER; }
 Clipping			{ return REQUEST_TOKEN_CLIPPING; }
+ClippingPlane		{ return REQUEST_TOKEN_CLIPPING_PLANE; }
 Color				{ return REQUEST_TOKEN_COLOR; }
 ColorSamples			{ return REQUEST_TOKEN_COLORSAMPLES; }
 ConcatTransform			{ return REQUEST_TOKEN_CONCATTRANSFORM; }

@@ -33,7 +33,7 @@
 
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqClippingVolume
 {
@@ -76,6 +76,6 @@ class CqClippingVolume
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !CLIPPINGVOLUME_H_INCLUDED

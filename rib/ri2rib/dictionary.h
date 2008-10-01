@@ -31,9 +31,9 @@
 #include "aqsis.h"
 #include "ri.h"
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
-enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING };
+enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING, FACEVERTEX };
 enum EqTokenType { FLOAT, POINT, VECTOR, NORMAL, COLOR, STRING, MATRIX, HPOINT, INTEGER };
 typedef unsigned int TqTokenId;
 
@@ -73,7 +73,8 @@ class CqDictionary
 
 		TqTokenId addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt = 1, bool inln = false );
 		TqTokenId getTokenId ( std::string n );
-		TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying = 0 );
+		TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform,
+				TqUint facevarying, TqUint facevertex);
 		EqTokenType getType ( TqTokenId id );
 
 #ifdef DEBUG
@@ -83,5 +84,5 @@ class CqDictionary
 };
 
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

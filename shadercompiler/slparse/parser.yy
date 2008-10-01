@@ -5,7 +5,9 @@
 %{
 #ifdef	WIN32
 #include <malloc.h>
+#if _MSC_VER
 #pragma warning(disable : 4786)
+#endif
 #include <cstdio>
 #include <memory>
 namespace std
@@ -20,7 +22,9 @@ namespace std
 #include <map>
 #include <string>
 #include <vector>
+#include <stack>
 #include <cassert>
+#include <cstring>
 
 #include	"parsenode.h"
 #include	"logging.h"
@@ -38,12 +42,12 @@ namespace Aqsis
 extern CqString ParseStreamName;
 extern std::ostream* ParseErrorStream;
 extern TqInt ParseLineNumber;
-extern bool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
 std::vector<std::pair<bool,CqString> >	ParseNameSpaceStack;
 int blockID = 0;
-std::vector<TqInt>		FunctionReturnCountStack;
+std::stack<TqInt> functionReturnCountStack;
+std::stack<CqParseNodeDeclaration*> currentFunctionStack;
 EqShaderType gShaderType;
 
 bool	FindVariable(const char* name, SqVarRef& ref);
@@ -55,6 +59,8 @@ void	TypeCheck();
 void	Optimise();
 void	InitStandardNamespace();
 void	ProcessShaderArguments( CqParseNode* pArgs );
+
+void Error(const CqString& message, TqInt lineNumber);
 
 }
 
@@ -82,7 +88,7 @@ void	ProcessShaderArguments( CqParseNode* pArgs );
 
 %{
 extern TqInt yylex();
-static void yyerror(const CqString Message);
+static void yyerror(const CqString& Message);
 %}
 
 
@@ -236,14 +242,19 @@ shader_definition
 	;
  
 function_definition
-	:	function_declaration formals ')' '{' statements '}'
+	:	function_declaration formals ')'
+							{
+								// Push a new level onto the return count stack.
+								functionReturnCountStack.push(0);
+								currentFunctionStack.push(static_cast<CqParseNodeDeclaration*>($1));
+							}
+		'{' statements '}'
 							{
 								CqParseNodeDeclaration* pDecl=static_cast<CqParseNodeDeclaration*>($1);
 
 								// If no return/or multiple returns, then this is not a valid function.
-								if((pDecl->Type()!=Type_Void) &&
-								   (FunctionReturnCountStack.size() <=0 ||
-								    FunctionReturnCountStack.back() != 1))
+								if(pDecl->Type() != Type_Void &&
+								    functionReturnCountStack.top() != 1)
 									yyerror("Must have one return in function");
 								
 								// Make a string of the parameter types.
@@ -266,34 +277,41 @@ function_definition
 								}
 
 								// Add the function declaration to the list of local functions.
-								CqFuncDef funcdef(pDecl->Type(), pDecl->strName(), pDecl->strName(), strArgTypes.c_str(), $5, pArgs);
+								CqFuncDef funcdef(pDecl->Type(), pDecl->strName(), pDecl->strName(), strArgTypes.c_str(), $6, pArgs);
 								CqFuncDef::AddFunction(funcdef);
 								$$=new CqParseNode();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
 								popScope();
-								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
+								functionReturnCountStack.pop();
+								currentFunctionStack.pop();
 							}
-	|	function_declaration ')' '{' statements '}'
+	|	function_declaration ')'
+							{
+								// Push a new level onto the functionReturnCountStack.
+								functionReturnCountStack.push(0);
+								currentFunctionStack.push(static_cast<CqParseNodeDeclaration*>($1));
+							}
+		'{' statements '}'
 							{
 								CqParseNodeDeclaration* pDecl=static_cast<CqParseNodeDeclaration*>($1);
 
 								// If no return/or multiple returns, then this is not a valid function.
-								if((pDecl->Type()!=Type_Void) &&
-								   (FunctionReturnCountStack.size() <=0 ||
-								    FunctionReturnCountStack.back() != 1))
+								if(pDecl->Type() != Type_Void &&
+								    functionReturnCountStack.top() != 1)
 									yyerror("Must have one return in function");
 
 								// Add the function declaration to the list of local functions.
-								CqFuncDef funcdef(pDecl->Type(), pDecl->strName(), pDecl->strName(), "", $4, 0);
+								CqFuncDef funcdef(pDecl->Type(), pDecl->strName(), pDecl->strName(), "", $5, 0);
 								CqFuncDef::AddFunction(funcdef);
 								$$=new CqParseNode();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
 								popScope();
-								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
+								functionReturnCountStack.pop();
+								currentFunctionStack.pop();
 							}
 	;
 
@@ -303,16 +321,12 @@ function_declaration
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
 								pushScope(*$2,true);
-								// Push a new level onto the FunctionReturnCountStack.
-								FunctionReturnCountStack.push_back(0);
 							}
 	|	IDENTIFIER '('		{	
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$1).c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
 								pushScope(*$1,true);
-								// Push a new level onto the FunctionReturnCountStack.
-								FunctionReturnCountStack.push_back(0);
 							}
 	|	typespec SYMBOL '(' {
 								// TODO: Should warn about duplicate declarations.
@@ -324,8 +338,6 @@ function_declaration
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
 								pushScope(strName,true);
-								// Push a new level onto the FunctionReturnCountStack.
-								FunctionReturnCountStack.push_back(0);
 							}
 	|	SYMBOL '('			{	
 								// TODO: Should warn about duplicate declarations.
@@ -337,8 +349,6 @@ function_declaration
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
 								pushScope(strName,true);
-								// Push a new level onto the FunctionReturnCountStack.
-								FunctionReturnCountStack.push_back(0);
 							}
 	;
 
@@ -635,6 +645,9 @@ variable_definitions
 												pV->SetPos(ParseLineNumber,ParseStreamName.c_str());
 												pV->NoDup();
 												pV->AddLastChild(pDecl->pFirstChild());
+
+												// Make sure that any change in the storage type is communicated to the initialiser
+												pV->UpdateStorageStatus();
 
 												pVarNode->AddLastChild(pV);
 												pDecl->ClearChild();
@@ -975,12 +988,24 @@ statement
 							}
 	|	RETURN expression ';'
 							{
-								$$=new CqParseNode();
+								// Check that the return is valid
+								if(functionReturnCountStack.empty())
+									yyerror("return statement outside function scope");
+								else
+								{
+									functionReturnCountStack.top()++;
+									if(currentFunctionStack.top()->Type() != Type_Void)
+									{
+										if(functionReturnCountStack.top() > 1)
+											yyerror("more than one return in function");
+									}
+									else if(functionReturnCountStack.top() > 0)
+										yyerror("void functions cannot have a return");
+								}
+								// Create a cast node casting to the function return type.
+								$$=new CqParseNodeCast(currentFunctionStack.top()->Type());
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($2);
-								// Increment the count of returns for the current function.
-								if(FunctionReturnCountStack.size() > 0)
-									FunctionReturnCountStack.back()++;
 							}
 	|	loop_modstmt ';'
 	|	loop_control		
@@ -2161,22 +2186,29 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 					pVar->AddFirstChild( Node.pFirstChild() );
 				}
 			}
+			else
+			{
+				Error(CqString("missing default value for shader instance variable \"")
+						+ pVar->strName() + "\"",  pVar->LineNo());
+			}
 			pVar=static_cast<CqParseNodeVariable*>(pVar->pNext());
 		}
 	}
 }
 
+void Error(const CqString& message, TqInt lineNumber)
+{
+	CqString strErr( ParseStreamName.c_str() );
+	strErr += " : ";
+	strErr += lineNumber;
+	strErr += " : ";
+	strErr += message.c_str();
+	throw( strErr );
+}
 
 } // End Namespace
 
-static void yyerror(const CqString Message)
+static void yyerror(const CqString& message)
 {
-	ParseSucceeded = false;
-	//(*ParseErrorStream) << "libslparse > parser > error: " << Message.c_str() << " at " << ParseStreamName.c_str() << " line " << ParseLineNumber << std::endl;
-	CqString strErr( ParseStreamName.c_str() );
-	strErr += " : ";
-	strErr += ParseLineNumber;
-	strErr += " : ";
-	strErr += Message.c_str();
-	throw( strErr );
+	Error(message, ParseLineNumber);
 }

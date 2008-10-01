@@ -33,7 +33,12 @@
 #include <list>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
+#include "aqsis.h"
 #include "rifile.h"
+#include "imagebuffer.h"
+#include "micropolygon.h"
 #include "renderer.h"
 #include "procedural.h"
 #include "plugins.h"
@@ -45,13 +50,15 @@
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
+#include <iomanip>
 #else
 #include <unistd.h>
+#include <errno.h>
 #endif
 
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /**
@@ -86,7 +93,6 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	boost::shared_ptr<CqModeBlock> pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
 	m_pconStored->m_pattrCurrent = m_pAttributes;
-	ADDREF(m_pAttributes);
 
 	m_pconStored->m_ptransCurrent = m_pTransform;
 
@@ -100,7 +106,8 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	// Call the procedural secific Split()
 	RiAttributeBegin();
 
-	m_pSubdivFunc(m_pData, detail);
+	if(m_pSubdivFunc)
+		m_pSubdivFunc(m_pData, detail);
 
 	RiAttributeEnd();
 
@@ -130,15 +137,6 @@ CqProcedural::~CqProcedural()
 {
 	if( m_pFreeFunc )
 		m_pFreeFunc( m_pData );
-}
-
-
-//----------------------------------------------------------------------
-// RiProcFree()
-//
-extern "C" RtVoid	RiProcFree( RtPointer data )
-{
-	free(data);
 }
 
 
@@ -229,19 +227,42 @@ class CqRiProceduralPlugin : CqPluginBase
 // We don't want to DLClose until we are finished rendering, since any RiProcedurals
 // created from within the dynamic module may re-use the Subdivide and Free pointers so
 // they must remain linked in.
-static std::list<CqRiProceduralPlugin*> ActiveProcDLList;
+static std::list<boost::shared_ptr<CqRiProceduralPlugin> > ActiveProcDLList;
+
+
+
+
+
+} // namespace Aqsis
+
+using namespace Aqsis;
+
+//----------------------------------------------------------------------
+// RiProcFree()
+//
+extern "C" RtVoid	RiProcFree( RtPointer data )
+{
+	free(data);
+}
+
 //----------------------------------------------------------------------
 // RiProcDynamicLoad() subdivide function
 //
 extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
-	CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
-	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
+	CqString dsoname = CqString( (( char** ) data)[0] );
+	boost::shared_ptr<CqRiProceduralPlugin> plugin(new CqRiProceduralPlugin(dsoname));
 
 	if( !plugin->IsValid() )
 	{
-		Aqsis::log() << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
-		return;
+		dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+		plugin.reset(new CqRiProceduralPlugin(dsoname));
+
+		if( !plugin->IsValid() )
+		{
+			Aqsis::log() << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
+			return;
+		}
 	}
 
 	plugin->ConvertParameters( (( char** ) data)[1] );
@@ -253,8 +274,6 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	STATS_INC( GEO_prc_created_dl );
 }
 
-
-
 //----------------------------------------------------------------------
 // RiProcDelayedReadArchive()
 //
@@ -263,7 +282,6 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 	RiReadArchive( (RtToken) ((char**) data)[0], NULL, RI_NULL );
 	STATS_INC( GEO_prc_created_dra );
 }
-
 
 //----------------------------------------------------------------------
 /* RiProcRunProgram()
@@ -328,10 +346,22 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		}
 		else
 		{
+			// Find the actual location of the executable, using the "procedural" searchpath.
+			CqRiFile searchFile;
+			searchFile.Open((( char** ) data)[0], "procedural");
+			char* progname;
+			if(!searchFile.IsValid())		
+			{
+				Aqsis::log() << info << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath, will rely on the PATH." << std::endl;
+				progname = ((char**)data)[0];
+			}
+			else
+				progname = strdup(searchFile.strRealName().c_str());
+
 			// Split up the RunProgram program name string
 			int arg_count = 1;
 			char *arg_values[32];
-			arg_values[0] = ((char**)data)[0] ;
+			arg_values[0] = progname;
 			char *i = arg_values[0];
 			for( ; *i != '\0' ; i++ )
 			{
@@ -358,12 +388,17 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 				throw(XqException("Error preparing stdout for RunProgram"));
 			//			setvbuf( stdout, NULL, _IONBF, 0 );
 
-			// We should use the procedurals searchpath here
 			execvp( arg_values[0], arg_values );
+			free(progname);
 		};
 	};
 
 	FILE *fileout = (it->second)->out;
+	if(!fileout)
+	{
+		Aqsis::log() << error << "Unable to open output stream for \"RunProgram\" error is " <<  errno << std::endl;
+		return;
+	}
 	// Write out detail and data to the process
 	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
 	fflush( fileout );
@@ -376,6 +411,11 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	//potential blocking.
 	CqRibBinaryDecoder *decoder;
 	FILE *filein = (it->second)->in;
+	if(!filein)
+	{
+		Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  errno << std::endl;
+		return;
+	}
 	decoder = new CqRibBinaryDecoder( filein, 1);
 
 	// Parse the resulting block of RIB.
@@ -406,6 +446,7 @@ class CqRiProceduralRunProgram
 	public:
 		HANDLE hChildStdinWrDup;
 		HANDLE hChildStdoutRdDup;
+		FILE *fChildStdoutRd;
 		bool m_valid;
 };
 
@@ -415,9 +456,15 @@ static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
 	HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr;
+	HANDLE hParentStderrWr, hDupStderrWr;
 	PROCESS_INFORMATION piProcInfo;
 	STARTUPINFO siStartInfo;
+	SECURITY_ATTRIBUTES saAttr;
 	BOOL bFuncRetn = FALSE;
+
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+	saAttr.bInheritHandle = TRUE;
+	saAttr.lpSecurityDescriptor = NULL;
 
 	std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
 
@@ -435,27 +482,51 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		// Create a pipe for the child process's STDOUT.
 
-		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
-		        ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0))
+		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0) ||
+		    ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  &saAttr, 0) )
 		{
 			Aqsis::log() << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
 			return;
 		}
+		hParentStderrWr = GetStdHandle(STD_ERROR_HANDLE);
+		if( ! DuplicateHandle(GetCurrentProcess(), hParentStderrWr, GetCurrentProcess(), &hDupStderrWr, 0, TRUE, DUPLICATE_SAME_ACCESS) )
+		{
+			Aqsis::log() << error << "RiProcRunProgram: Stderr handle duplication failed" << std::endl;
+			return;
+		}
 
-		SetHandleInformation(hChildStdoutWr, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		SetHandleInformation(hChildStdinRd,  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		SetHandleInformation(hChildStdinWr, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation(hChildStdoutRd,  HANDLE_FLAG_INHERIT, 0);
 
 		ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
 		siStartInfo.cb = sizeof(STARTUPINFO);
 		siStartInfo.hStdOutput = hChildStdoutWr;
+		siStartInfo.hStdError = hDupStderrWr;
 		siStartInfo.hStdInput = hChildStdinRd;
-		siStartInfo.dwFlags = STARTF_USESTDHANDLES;
+		siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 		ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
-		// Create the child process.
+		// Find the actual location of the executable, using the "procedural" searchpath.
+		CqRiFile searchFile;
+		searchFile.Open((( char** ) data)[0], "procedural");
+		char* progname;
+		if(!searchFile.IsValid())		
+		{
+			searchFile.Open((CqString( (( char** ) data)[0] ) + CqString(".exe")).c_str(), "procedural");
+			if(!searchFile.IsValid())		
+			{
+				Aqsis::log() << info << "RiProcRunProgram: Could not find \"" << ((char**)data)[0] << "\" in \"procedural\" searchpath, will rely on the PATH." << std::endl;
+				progname = _strdup(((char**)data)[0]);
+			}
+			else
+				progname = _strdup(searchFile.strRealName().c_str());
+		}
+		else
+			progname = _strdup(searchFile.strRealName().c_str());
 
+		// Create the child process.
 		bFuncRetn = CreateProcess(NULL,
-		                          ((char**)data)[0],       // command line
+		                          progname, // command line
 		                          NULL,          // process security attributes
 		                          NULL,          // primary thread security attributes
 		                          TRUE,          // handles are inherited
@@ -464,6 +535,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		                          NULL,          // use parent's current directory
 		                          &siStartInfo,  // STARTUPINFO pointer
 		                          &piProcInfo);  // receives PROCESS_INFORMATION
+		free(progname);
 
 		if (bFuncRetn == 0)
 		{
@@ -477,9 +549,21 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		CloseHandle(hChildStdoutWr);
 		CloseHandle(hChildStdinRd);
 
+		int fd_hChildStdoutRdDup = _open_osfhandle((long)(hChildStdoutRd), O_RDONLY);
+		FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
+
+		if(!filein)
+		{
+			errno_t err;
+			_get_errno( &err );
+			Aqsis::log() << error << "Unable to open input stream for \"RunProgram\" error is " <<  err << std::endl;
+			return;
+		}
+
 		// Store the handles.
 		(it->second)->hChildStdinWrDup = hChildStdinWr;
 		(it->second)->hChildStdoutRdDup = hChildStdoutRd;
+		(it->second)->fChildStdoutRd = filein;
 
 		// Proc seems to be valid.
 		run_proc->m_valid = true;
@@ -490,16 +574,16 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			return;
 	}
 
-	int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
-	FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
-	// Write out detail and data to the process
-	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
-	fflush( fileout );
+	// Build the procedural arguments into a string and write them out to the 
+	// stdin pipe for the procedural to read.
+	std::stringstream args;
+	args << std::setiosflags( std::ios_base::fixed ) << detail << " " << ((char**)data)[1] << std::endl;
+	DWORD bytesWritten;
+	WriteFile( it->second->hChildStdinWrDup, args.str().c_str(), args.str().size(), &bytesWritten, NULL);
+	//BOOL result = FlushFileBuffers( it->second->hChildStdinWrDup );
 
 	CqRibBinaryDecoder *decoder;
-	int fd_hChildStdoutRdDup = _open_osfhandle((long)(it->second)->hChildStdoutRdDup, O_RDONLY);
-	FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
-	decoder = new CqRibBinaryDecoder( filein, 1);
+	decoder = new CqRibBinaryDecoder( it->second->fChildStdoutRd, 1);
 
 	// Parse the resulting block of RIB.
 	CqString strRealName( ((char**)data)[0] );
@@ -521,6 +605,3 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 
 #endif
-
-END_NAMESPACE( Aqsis )
-

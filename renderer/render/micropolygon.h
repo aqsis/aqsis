@@ -34,7 +34,6 @@
 #include	"list.h"
 #include	"bound.h"
 #include	"vector2d.h"
-#include	"vector3d.h"
 #include	"shaderexecenv.h"
 #include	"ishaderdata.h"
 #include	"motion.h"
@@ -43,7 +42,7 @@
 #include	"logging.h"
 #include       <boost/utility.hpp>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqVector3D;
 class CqImageBuffer;
@@ -65,6 +64,48 @@ struct SqGridInfo
 
 
 //----------------------------------------------------------------------
+/** \brief Cache of output sample data for a micropoly
+ *
+ * This cache holds colour and opacity output data for a micropolygon.  The
+ * coefficients allow colour and opacity to be interpolated across the face of
+ * the micropolygon.  For CqMicroPolygon, interpolation may be either "smooth"
+ * (uses a linear approximation over the micropoly) or "constant" - using a
+ * constant value for each micropolygon.
+ *
+ * AOV's are handled seperately - they do not support smooth shading in the
+ * current implementation.
+ *
+ * \todo Code Review: This struct is a bit kludgy, holding stuff which should
+ * be only visible to the micropolygon implementation classes.  It's made worse
+ * by the fact that the smooth shading interpolation coefficients are
+ * irrelevant to some micropolygon subclasses (CqMicroPolygonPoints for eg).
+ */
+struct SqMpgSampleInfo
+{
+	/// Color for flat shading and for the "zero" point of smooth shading.
+	CqColor color;
+	/// Color multipilers used for smooth shading interpolation
+	CqColor colorMultX;
+	CqColor colorMultY;
+
+	/// Opacity
+	CqColor opacity;
+	/// Opacity multipilers used for smooth shading interpolation
+	CqColor opacityMultX;
+	CqColor opacityMultY;
+
+	/// Whether to use smooth shading interpolation or not
+	bool smoothInterpolation;
+
+	/// Whether the opacity is full.
+	bool occludes;
+	/// Whether to store samples deriving from this micropoly in the opaque
+	/// sample slot or not.
+	bool isOpaque;
+};
+
+
+//----------------------------------------------------------------------
 /** \class CqMicroPolyGridBase
  * Base class from which all MicroPolyGrids are derived.
  */
@@ -80,10 +121,10 @@ class CqMicroPolyGridBase : public CqRefCount
 		/** Pure virtual function, splits the grid into micropolys.
 		 * \param pImage Pointer to the image buffer being rendered.
 		 */
-		virtual	void	Split( CqImageBuffer* pImage ) = 0;
+		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
-		virtual	void	Shade() = 0;
+		virtual	void	Shade(bool canCullGrid = true ) = 0;
 		virtual	void	TransferOutputVariables() = 0;
 		/*
 		 * Delete all the variables per grid 
@@ -94,7 +135,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		 */
 		virtual CqSurface*	pSurface() const = 0;
 
-		virtual	const IqAttributes* pAttributes() const = 0;
+		virtual	const IqConstAttributesPtr pAttributes() const = 0;
 
 		virtual bool	usesCSG() const = 0;
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const = 0;
@@ -118,6 +159,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	TqInt	vGridRes() const = 0;
 		virtual	TqUint	numMicroPolygons(TqInt cu, TqInt cv) const = 0;
 		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const = 0;
+		virtual bool	hasValidDerivatives() const = 0;
 		virtual IqShaderData* pVar(TqInt index) = 0;
 		/** Get the points of the triangle split line if this grid represents a triangle.
 		 */
@@ -196,8 +238,20 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		}
 #endif
 
-		void	CalcNormals();
-		void	CalcSurfaceDerivatives();
+		virtual void CalcNormals();
+		virtual void CalcSurfaceDerivatives();
+		/** \brief Expand the boundary micropolygons to cover grid cracks.
+		 *
+		 * This function expands the boundary of a grid by moving the boundary
+		 * vertices outward along the vectors which connect them to the
+		 * interior vertices of the grid.  This is a computationally cheap and
+		 * easy way to cover cracks between adjacent grids which result from
+		 * differing dicing rates.
+		 *
+		 * \param amount - fraction of a micropolygon to expand the boundary
+		 *                 outward by.
+		 */
+		void ExpandGridBoundaries(TqFloat amount);
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
@@ -243,8 +297,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( CqImageBuffer* pImage );
-		virtual	void	Shade();
+		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 
 		/** Get a pointer to the surface which this grid belongs.
@@ -254,7 +308,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		{
 			return ( m_pSurface.get() );
 		}
-		virtual	const IqAttributes* pAttributes() const
+		virtual	const IqConstAttributesPtr pAttributes() const
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->pAttributes() );
@@ -286,6 +340,10 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const
 		{
 			return ( ( cu + 1 ) * ( cv + 1 ) );
+		}
+		virtual bool	hasValidDerivatives() const
+		{
+			return true;
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const
 		{
@@ -319,6 +377,17 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 			return(m_pShaderExecEnv);
 		}
 
+		/** \brief Set surface derivative in u.
+		 * 
+		 *  Set the value of du if needed, du is constant across the grid being shaded.
+		 */
+		virtual void setDu();
+		/** \brief Set surface derivative in v.
+		 * 
+		 *  Set the value of dv if needed, dv is constant across the grid being shaded.
+		 */
+		virtual void setDv();
+
 	private:
 		bool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
 		bool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
@@ -347,8 +416,8 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-		virtual	void	Split( CqImageBuffer* pImage );
-		virtual	void	Shade();
+		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 		
 		/**
@@ -378,6 +447,12 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->numShadingPoints(cu, cv) );
 		}
+		virtual bool	hasValidDerivatives() const
+		{
+			assert( GetMotionObject( Time( 0 ) ) );
+			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->hasValidDerivatives() );
+		}
+
 		virtual IqShaderData* pVar(TqInt index)
 		{
 			assert( GetMotionObject( Time( 0 ) ) );
@@ -404,7 +479,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
 		}
 
-		virtual const IqAttributes* pAttributes() const
+		virtual const IqConstAttributesPtr pAttributes() const
 		{
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
 		}
@@ -435,6 +510,12 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		virtual	CqMicroPolyGridBase* LinearInterpolateMotionObjects( TqFloat /* Fraction */, CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & /* B */ ) const
 		{
 			return ( A );
+		}
+		void	Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface )
+		{
+			assert( GetMotionObject( Time( 0 ) ) );
+			static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->Initialise(cu, cv, pSurface);
+			CacheGridInfo();
 		}
 
 	private:
@@ -620,6 +701,28 @@ class CqMicroPolygon : boost::noncopyable
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
+
+		/** \brief Cache information needed to interpolate colour and opacity
+		 * across the micropolygon.
+		 *
+		 * This function should caches constant values for the micropolygon, or
+		 * computes the interpolation coefficients necessary for smooth
+		 * shading.
+		 *
+		 * \param cache - location into which to store the interpolation coefficients.
+		 */
+		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
+
+		/** \brief Get colour and opacity at pos using cached coefficients
+		 *
+		 * \param cache - previously cached coefficients for this micropolygon
+		 * \param pos - position to evaluate color and opacity at
+		 * \param outCol - interpolated colour output will be placed here.
+		 * \param outOpac - interpolated opacity output will be placed here.
+		 */
+		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
+				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
+
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
@@ -653,6 +756,15 @@ class CqMicroPolygon : boost::noncopyable
 		}
 
 	protected:
+		/** \brief Cache output interpolation coefficients for constant shading
+		 * \see CacheOutputInterpCoeffs
+		 */
+		virtual void CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) const;
+		/** \brief Cache output interpolation coefficients for smooth shading
+		 * \see CacheOutputInterpCoeffs
+		 */
+		virtual void CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const;
+
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
 			switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
@@ -849,10 +961,31 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 }
 ;
 
+//==============================================================================
+// Implementation details
+//==============================================================================
+inline void CqMicroPolyGrid::setDu()
+{
+	float f0 = 0;
+	float f1 = 0;
+	pVar(EnvVars_u)->GetValue(f0, 0);
+	pVar(EnvVars_u)->GetValue(f1, 1);
+	pVar(EnvVars_du)->SetFloat(f1 - f0);
+}
+
+inline void CqMicroPolyGrid::setDv()
+{
+	float f0 = 0;
+	float f1 = 0;
+	pVar(EnvVars_v)->GetValue(f0, 0);
+	pVar(EnvVars_v)->GetValue(f1, uGridRes() + 1);
+	pVar(EnvVars_dv)->SetFloat(f1 - f0);
+}
+
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !MICROPOLYGON_H_INCLUDED
 

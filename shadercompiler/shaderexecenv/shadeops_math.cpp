@@ -23,21 +23,21 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<math.h>
-#include	<map>
-#include	<vector>
-#include	<string>
-#include	<stdio.h>
+#include <map>
+#include <vector>
+#include <string>
+#include <stdio.h>
 
-#include	"shaderexecenv.h"
-#include	"shadervm.h"
-#include	"irenderer.h"
-#include	"version.h"
-#include	"logging.h"
+#include "aqsismath.h"
+#include "shaderexecenv.h"
+#include "shadervm.h"
+#include "irenderer.h"
+#include "version.h"
+#include "logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis {
 
 // If you want for 32 compiler as fast implementation of sqrt, inversesqrt and abs() just define FASTSQRT below
 //#define FASTSQRT 
@@ -83,14 +83,14 @@ void	CqShaderExecEnv::SO_radians( IqShaderData* degrees, IqShaderData* Result, I
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_degrees;
 			(degrees)->GetFloat(_aq_degrees,__iGrid);
-			(Result)->SetFloat(RAD( _aq_degrees ),__iGrid);
+			(Result)->SetFloat(degToRad( _aq_degrees ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -105,14 +105,14 @@ void	CqShaderExecEnv::SO_degrees( IqShaderData* radians, IqShaderData* Result, I
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_radians;
 			(radians)->GetFloat(_aq_radians,__iGrid);
-			(Result)->SetFloat(DEG( _aq_radians ),__iGrid);
+			(Result)->SetFloat(radToDeg( _aq_radians ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -127,14 +127,14 @@ void	CqShaderExecEnv::SO_sin( IqShaderData* a, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_a;
 			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( sin( _aq_a ) ),__iGrid);
+			(Result)->SetFloat(std::sin(_aq_a), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -149,14 +149,14 @@ void	CqShaderExecEnv::SO_asin( IqShaderData* a, IqShaderData* Result, IqShader* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_a;
 			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( asin( _aq_a ) ),__iGrid);
+			(Result)->SetFloat(std::asin(_aq_a), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -171,14 +171,14 @@ void	CqShaderExecEnv::SO_cos( IqShaderData* a, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_a;
 			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( cos( _aq_a ) ),__iGrid);
+			(Result)->SetFloat(std::cos(_aq_a), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -193,14 +193,14 @@ void	CqShaderExecEnv::SO_acos( IqShaderData* a, IqShaderData* Result, IqShader* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_a;
 			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( acos( _aq_a ) ),__iGrid);
+			(Result)->SetFloat(std::acos(_aq_a), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -215,14 +215,14 @@ void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_a;
 			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( tan( _aq_a ) ),__iGrid);
+			(Result)->SetFloat(std::tan(_aq_a), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -237,14 +237,14 @@ void	CqShaderExecEnv::SO_atan( IqShaderData* yoverx, IqShaderData* Result, IqSha
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_yoverx;
 			(yoverx)->GetFloat(_aq_yoverx,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( atan( _aq_yoverx ) ),__iGrid);
+			(Result)->SetFloat(std::atan(_aq_yoverx), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -260,7 +260,7 @@ void	CqShaderExecEnv::SO_atan( IqShaderData* y, IqShaderData* x, IqShaderData* R
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -269,7 +269,7 @@ void	CqShaderExecEnv::SO_atan( IqShaderData* y, IqShaderData* x, IqShaderData* R
 			(x)->GetFloat(_aq_x,__iGrid);
 			TqFloat _aq_y;
 			(y)->GetFloat(_aq_y,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( atan2( _aq_y, _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::atan2(_aq_y, _aq_x), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -285,7 +285,7 @@ void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Re
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -297,8 +297,8 @@ void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Re
 			TqFloat yy = _aq_y;
 			TqFloat xx = _aq_x;
 			if ( xx < 0.0f )
-				yy = FLOOR( yy );
-			(Result)->SetFloat(static_cast<TqFloat>( pow( xx, yy ) ),__iGrid);
+				yy = std::floor( yy );
+			(Result)->SetFloat(std::pow(xx, yy), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -313,14 +313,14 @@ void	CqShaderExecEnv::SO_exp( IqShaderData* x, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( exp( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::exp(_aq_x), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -335,7 +335,7 @@ void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -343,7 +343,7 @@ void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* 
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
 #ifndef FASTSQRT
-			(Result)->SetFloat(static_cast<TqFloat>( sqrt( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::sqrt(_aq_x), __iGrid);
 #else
 			(Result)->SetFloat(static_cast<TqFloat>( sqrtf( _aq_x ) ),__iGrid);
 #endif
@@ -361,14 +361,14 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( ::log( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::log(_aq_x), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -384,7 +384,7 @@ void	CqShaderExecEnv::SO_mod( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -415,7 +415,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData*
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -424,7 +424,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData*
 			(x)->GetFloat(_aq_x,__iGrid);
 			TqFloat _aq_base;
 			(base)->GetFloat(_aq_base,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( ::log( _aq_x ) / ::log( _aq_base ) ),__iGrid);
+			(Result)->SetFloat(std::log(_aq_x) / std::log(_aq_base), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -440,7 +440,7 @@ void	CqShaderExecEnv::SO_abs( IqShaderData* x, IqShaderData* Result, IqShader* p
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -448,7 +448,7 @@ void	CqShaderExecEnv::SO_abs( IqShaderData* x, IqShaderData* Result, IqShader* p
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
 #ifndef FASTSQRT
-			(Result)->SetFloat(static_cast<TqFloat>( fabs( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::fabs(_aq_x), __iGrid);
 #else
 			(Result)->SetFloat(absf( _aq_x ),__iGrid);
 #endif
@@ -466,7 +466,7 @@ void	CqShaderExecEnv::SO_sign( IqShaderData* x, IqShaderData* Result, IqShader* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -489,7 +489,7 @@ void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -498,12 +498,12 @@ void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			(a)->GetFloat(_aq_a,__iGrid);
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
-			TqFloat fRes = MIN( _aq_a, _aq_b );
+			TqFloat fRes = min( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				TqFloat fn;
 				apParams[ cParams ] ->GetFloat( fn, __iGrid );
-				fRes = MIN( fRes, fn );
+				fRes = Aqsis::min( fRes, fn );
 			}
 			(Result)->SetFloat(fRes,__iGrid);
 		}
@@ -521,7 +521,7 @@ void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -530,12 +530,12 @@ void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			(a)->GetFloat(_aq_a,__iGrid);
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
-			TqFloat fRes = MAX( _aq_a, _aq_b );
+			TqFloat fRes = max( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				TqFloat fn;
 				apParams[ cParams ] ->GetFloat( fn, __iGrid );
-				fRes = MAX( fRes, fn );
+				fRes = Aqsis::max( fRes, fn );
 			}
 			(Result)->SetFloat(fRes,__iGrid);
 		}
@@ -553,7 +553,7 @@ void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -567,7 +567,7 @@ void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			{
 				CqVector3D pn;
 				apParams[ cParams ] ->GetPoint( pn, __iGrid );
-				res = min( res, pn );
+				res = Aqsis::min( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
 		}
@@ -585,7 +585,7 @@ void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -599,7 +599,7 @@ void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			{
 				CqVector3D pn;
 				apParams[ cParams ] ->GetPoint( pn, __iGrid );
-				res = max( res, pn );
+				res = Aqsis::max( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
 		}
@@ -617,7 +617,7 @@ void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -631,7 +631,7 @@ void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			{
 				CqColor cn;
 				apParams[ cParams ] ->GetColor( cn, __iGrid );
-				res = min( res, cn );
+				res = Aqsis::min( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
 		}
@@ -649,7 +649,7 @@ void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -663,7 +663,7 @@ void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			{
 				CqColor cn;
 				apParams[ cParams ] ->GetColor( cn, __iGrid );
-				res = max( res, cn );
+				res = Aqsis::max( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
 		}
@@ -682,7 +682,7 @@ void	CqShaderExecEnv::SO_clamp( IqShaderData* a, IqShaderData* _min, IqShaderDat
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -693,7 +693,7 @@ void	CqShaderExecEnv::SO_clamp( IqShaderData* a, IqShaderData* _min, IqShaderDat
 			(_min)->GetFloat(_aq__min,__iGrid);
 			TqFloat _aq__max;
 			(_max)->GetFloat(_aq__max,__iGrid);
-			(Result)->SetFloat(CLAMP( _aq_a, _aq__min, _aq__max ),__iGrid);
+			(Result)->SetFloat(clamp( _aq_a, _aq__min, _aq__max ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -710,7 +710,7 @@ void	CqShaderExecEnv::SO_pclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -738,7 +738,7 @@ void	CqShaderExecEnv::SO_cclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -764,14 +764,14 @@ void	CqShaderExecEnv::SO_floor( IqShaderData* x, IqShaderData* Result, IqShader*
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( FLOOR( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::floor(_aq_x), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -786,14 +786,14 @@ void	CqShaderExecEnv::SO_ceil( IqShaderData* x, IqShaderData* Result, IqShader* 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( CEIL( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(std::ceil(_aq_x), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -809,17 +809,14 @@ void	CqShaderExecEnv::SO_round( IqShaderData* x, IqShaderData* Result, IqShader*
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			if ( _aq_x >= 0.0f )
-				res = static_cast<TqFloat>( static_cast<TqInt>( _aq_x + 0.5f ) );
-			else
-				res = static_cast<TqFloat>( static_cast<TqInt>( ( CEIL( _aq_x - 0.5f ) ) ) );
+			res = round(_aq_x);
 			(Result)->SetFloat(res,__iGrid);
 		}
 	}
@@ -835,7 +832,7 @@ void	CqShaderExecEnv::SO_length( IqShaderData* V, IqShaderData* Result, IqShader
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -858,7 +855,7 @@ void	CqShaderExecEnv::SO_distance( IqShaderData* P1, IqShaderData* P2, IqShaderD
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -883,7 +880,7 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -891,7 +888,7 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
 #ifndef FASTSQRT
-			(Result)->SetFloat(1.0f / static_cast<TqFloat>( sqrt( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(1.0f / std::sqrt(_aq_x), __iGrid);
 #else
 			(Result)->SetFloat(isqrtf( _aq_x ) ,__iGrid);
 #endif
@@ -902,5 +899,5 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 
 
 
-END_NAMESPACE(    Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

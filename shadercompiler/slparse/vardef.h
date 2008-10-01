@@ -17,7 +17,7 @@
 #include	"sstring.h"
 #include	"ivardef.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 struct IqParseNode;
@@ -66,6 +66,10 @@ class CqVarDef : public IqVarDef
 		virtual	void	IncUseCount()
 		{
 			m_UseCount++;
+		}
+		void ResetUseCount()
+		{
+			m_UseCount = 0;
 		}
 		virtual	TqInt	UseCount() const
 		{
@@ -145,6 +149,6 @@ extern CqVarDef	gStandardVars[];
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !VARDEF_H_INCLUDED

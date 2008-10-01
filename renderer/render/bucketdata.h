@@ -33,28 +33,11 @@
 #include	"color.h"
 #include	"imagepixel.h"
 #include	"occlusion.h"
+#include	"micropolygon.h"
 
 #include	<vector>
 
-START_NAMESPACE( Aqsis );
-
-
-/** \brief Used to hold info about a Micropolygon that is used when
- * rendering the Micropolygon.
- *
- *  It caches the info for use by multiple samples.
- */
-struct SqMpgSampleInfo
-{
-	CqColor		m_Colour;
-	CqColor		m_Opacity;
-	/// Whether the opacity is full.
-	bool		m_Occludes;
-	/// Whether the mpg can use the faster StoreOpaqueSample
-	/// routine that assumes a few things.
-	bool		m_IsOpaque;
-};
-
+namespace Aqsis {
 
 
 /**
@@ -134,6 +117,6 @@ private:
 };
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis
 
 #endif

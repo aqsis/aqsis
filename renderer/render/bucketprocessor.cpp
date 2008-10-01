@@ -24,7 +24,7 @@
 #include	"bucketprocessor.h"
 
 
-START_NAMESPACE( Aqsis );
+namespace Aqsis {
 
 
 CqBucketProcessor::CqBucketProcessor() :
@@ -166,4 +166,4 @@ void CqBucketProcessor::popSurface()
 }
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis

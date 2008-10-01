@@ -37,7 +37,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <stdio.h>
+#include <cstdlib>
 #include "bdec.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
@@ -166,7 +166,7 @@ CqRibBinaryDecoder::initZlib( int buffersize )
 
 	/* Check the gzip magic number */
 	// Start by only buffering 2 bytes
-	zbuffersize = 2;
+	zbuffersize = 1;
 	for (len = 0; len < 2; len++)
 	{
 		try
@@ -179,10 +179,9 @@ CqRibBinaryDecoder::initZlib( int buffersize )
 		}
 		if (c != gz_magic[len])
 		{
-			if (len != 0)
-				zavailable++, zcurrent--;
-			if (c != EOF)
-				zavailable++, zcurrent--;
+			// Roll back any characters we peeked from the buffer.
+			zavailable += len+1;
+			zcurrent -= len+1;
 			is_gzip = 0;
 			zbuffersize = buffersize;
 
@@ -1183,7 +1182,7 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 
 				if( !cv.empty() )
 				{
-					if( cv.back() == '\n' )
+					if( cv.back() == '\n' || cv.back() == '\377' )
 					{
 						size = cv.size() + 1;
 						break;

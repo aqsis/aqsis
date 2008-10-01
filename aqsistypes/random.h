@@ -36,7 +36,7 @@
 #include	"aqsis.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 /*
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -119,6 +119,6 @@ class COMMON_SHARE CqRandom
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !RANDOM_H_INCLUDED

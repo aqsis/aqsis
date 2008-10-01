@@ -23,16 +23,33 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<fstream>
-
-#include	<string.h>
-#include	<ctype.h>
-
-#include	"aqsis.h"
-
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+#include	<ctype.h>
+#include	<fstream>
+#include	<string.h>
+
+#include	"exception.h"
+
+namespace Aqsis {
+
+
+//---------------------------------------------------------------------
+std::string findFileInPath(const std::string& fileName, const std::string& searchPath)
+{
+	// Just call through to the CqFile search path handling.  It's better to
+	// encapsulate this messyness here for the time being than have it spread
+	// any further through the aqsis source.
+	CqFile searchFile;
+	searchFile.Open(fileName.c_str(), searchPath.c_str());
+	if(!searchFile.IsValid())
+	{
+		AQSIS_THROW_DETAIL(XqInvalidFile, "Could not find file \"" << fileName << "\"",
+				"full search path: \"" << searchPath << "\"");
+	}
+	return std::string(searchFile.strRealName().c_str());
+}
+
 
 //---------------------------------------------------------------------
 /** Constructor
@@ -65,23 +82,11 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 			// if not found there, search in the specified option searchpath.
 			CqString SearchPath( strSearchPathOption );
 			// Search each specified path in the search path (separated by ':' or ';')
-			unsigned int start = 0;
-			while ( 1 )
+			std::vector<std::string> paths = searchPaths( strSearchPathOption );
+			for ( std::vector<std::string>::const_iterator strPath = paths.begin(); strPath != paths.end(); ++strPath )
 			{
-				// Find the next search path in the spec.
-				unsigned int len = SearchPath.find_first_of( ";:", start ) - start;
-				// Check if it is realy meant as a drive spec.
-				if ( len == 1 && isalpha( SearchPath[ start ] ) )
-					len += strcspn( &SearchPath[ start + 2 ], ";:" ) + 1;
-				CqString strPath = SearchPath.substr( start, len );
-				if ( strPath == "" )
-					break;
-
-				// Apply any system specific string modification.
-				strPath = FixupPath( strPath );
-
 				// See if the shader can be found in this directory
-				CqString strAlternativeFilename = strPath;
+				CqString strAlternativeFilename = *strPath;
 				// Check the path is correctly terminated
 				if ( strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '/' &&
 				        strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '\\' )
@@ -104,10 +109,6 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 					m_strRealName = strAlternativeFilename;
 					break;
 				}
-				if ( len < strlen( &SearchPath[ start ] ) )
-					start += len + 1;
-				else
-					break;
 			}
 		}
 		if ( !pFStream->is_open() )
@@ -118,5 +119,37 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 }
 
 
-END_NAMESPACE( Aqsis )
+std::vector<std::string> CqFile::searchPaths(const CqString& searchPath)
+{
+	std::vector<std::string> searchPaths;
+	// Scan for pathspecs separated be ':' or ';', being careful to spot
+	// Windows drivespecs.
+	unsigned int start = 0;
+	while ( 1 )
+	{
+		// Find the next search path in the spec.
+		unsigned int len = searchPath.find_first_of( ";:", start ) - start;
+		// Check if it is realy meant as a drive spec.
+		if ( len == 1 && isalpha( searchPath[ start ] ) )
+			len += strcspn( &searchPath[ start + 2 ], ";:" ) + 1;
+		CqString strPath = searchPath.substr( start, len );
+		if ( strPath == "" )
+			break;
+
+		// Apply any system specific string modification.
+		strPath = FixupPath( strPath );
+
+		searchPaths.push_back(strPath);
+
+		if ( len < strlen( &searchPath[ start ] ) )
+			start += len + 1;
+		else
+			break;
+	}
+	return searchPaths;
+}
+
+
+
+} // namespace Aqsis
 //---------------------------------------------------------------------

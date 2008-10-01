@@ -39,7 +39,7 @@
 #include	"color.h"
 #include	"vector2d.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 class CqBucket;
 
@@ -417,7 +417,7 @@ class CqImagePixel
 			if( r == 0.0 )
 				return;
 
-			TqFloat adj = MAX(fabs(pos.x()), fabs(pos.y())) / r;
+			TqFloat adj = max(fabs(pos.x()), fabs(pos.y())) / r;
 			pos.x(pos.x() * adj);
 			pos.y(pos.y() * adj);
 		}
@@ -438,7 +438,7 @@ class CqImagePixel
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGEPIXEL_H_INCLUDED
 #endif

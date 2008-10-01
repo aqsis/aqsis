@@ -23,7 +23,7 @@
  */
 #include "inlineparse.h"
 
-USING_NAMESPACE( libri2rib );
+namespace libri2rib {
 
 void CqInlineParse::check_syntax ()
 {
@@ -42,7 +42,7 @@ void CqInlineParse::check_syntax ()
 			throw CqError ( RIE_SYNTAX, RIE_ERROR, "void parameter declaration", false );
 			case 4:
 			case 7:
-			throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", true );
+			throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad declaration", true );
 			return ;
 			case 1:
 			inline_def = false;
@@ -51,7 +51,7 @@ void CqInlineParse::check_syntax ()
 			lc( word[ 0 ] );
 			if ( is_type( word[ 0 ] ) == false )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", true );
+				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad declaration", true );
 			}
 			inline_def = true;
 			tc = UNIFORM;
@@ -64,7 +64,7 @@ void CqInlineParse::check_syntax ()
 			lc( word[ 1 ] );
 			if ( ( is_class( word[ 0 ] ) == false ) || ( is_type( word[ 1 ] ) == false ) )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", true );
+				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad declaration", true );
 			}
 			inline_def = true;
 			tc = get_class( word[ 0 ] );
@@ -77,7 +77,7 @@ void CqInlineParse::check_syntax ()
 			if ( ( is_type( word[ 0 ] ) == false ) || ( word[ 1 ] != "[" ) ||
 			        ( is_int( word[ 2 ] ) == false ) || ( word[ 3 ] != "]" ) )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", true );
+				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad declaration", true );
 			}
 			inline_def = true;
 			tc = UNIFORM;
@@ -92,7 +92,7 @@ void CqInlineParse::check_syntax ()
 			        ( word[ 2 ] != "[" ) || ( is_int( word[ 3 ] ) == false ) ||
 			        ( word[ 4 ] != "]" ) )
 			{
-				throw CqError( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", true );
+				throw CqError( RIE_SYNTAX, RIE_ERROR, "Bad declaration", true );
 			}
 			inline_def = true;
 			tc = get_class( word[ 0 ] );
@@ -176,7 +176,8 @@ bool CqInlineParse::is_class ( const std::string &str )
 	        ( str == "uniform" ) ||
 	        ( str == "varying" ) ||
 	        ( str == "vertex" )  ||
-	        ( str == "facevarying") )
+	        ( str == "facevarying") ||
+			( str == "facevertex") )
 		return true;
 	return false;
 }
@@ -219,6 +220,8 @@ EqTokenClass CqInlineParse::get_class ( const std::string &str )
 		return VERTEX;
 	if ( str == "facevarying" )
 		return FACEVARYING;
+	if ( str == "facevertex" )
+		return FACEVERTEX;
 	return ( CONSTANT );
 }
 
@@ -261,3 +264,5 @@ void CqInlineParse::lc( std::string &str )
 		str[ i ] = tolower( str[ i ] );
 	}
 }
+
+} // namespace libri2rib

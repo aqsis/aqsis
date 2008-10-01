@@ -36,7 +36,7 @@
 
 #include "socket_system.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqSocket
@@ -82,6 +82,6 @@ class COMMON_SHARE CqSocket : boost::noncopyable
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !FILE_H_INCLUDED

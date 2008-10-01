@@ -23,9 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"multitimer.h"
-
-#include	"aqsis.h"
+#include	"imagebuffer.h"
 
 #ifdef WIN32
 #include    <windows.h>
@@ -33,16 +31,18 @@
 #include	<math.h>
 #include	<boost/thread/thread.hpp>
 
+#include	"multitimer.h"
+#include	"aqsismath.h"
 #include	"stats.h"
 #include	"options.h"
 #include	"renderer.h"
 #include	"surface.h"
-#include	"imagebuffer.h"
 #include	"micropolygon.h"
 #include	"bucketprocessor.h"
 #include	"threadscheduler.h"
 
-START_NAMESPACE( Aqsis )
+
+namespace Aqsis {
 
 static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
@@ -229,10 +229,10 @@ void	CqImageBuffer::SetImage()
 
 	m_iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
 	m_iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes ) );
-	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes ) );
-	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes ) );
-	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes ) );
+	m_CropWindowXMin = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes);
+	m_CropWindowXMax = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes);
+	m_CropWindowYMin = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes);
+	m_CropWindowYMax = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes);
 	m_cXBuckets = ( ( m_iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
 	m_cYBuckets = ( ( m_iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
 	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
@@ -321,17 +321,19 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	}
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
-	if ( Bound.vecMin().z() <= 0.0f && Bound.vecMax().z() > FLT_EPSILON )
+	if ( Bound.vecMin().z() <= FLT_EPSILON )
 	{
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
 
-		if ( pSurface->EyeSplitCount() > m_MaxEyeSplits )
+		CqString objname( "unnamed" );
+		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+		if ( pattrName != 0 )
+			objname = pattrName[ 0 ];
+		Aqsis::log() << info << "Object \"" << objname.c_str() << "\" spans the epsilon plane" << std::endl;
+
+		if ( pSurface->SplitCount() > m_MaxEyeSplits )
 		{
-			CqString objname( "unnamed" );
-			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-			if ( pattrName != 0 )
-				objname = pattrName[ 0 ];
 			Aqsis::log() << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
 			return( true );
 		}
@@ -343,15 +345,17 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 
 	// Convert the bounds to raster space.
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix mat;
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), mat );
+	Bound.Transform( mat );
 
 	// Take into account depth-of-field
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
 		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( minz );
 		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( maxz );
-		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
 		Bound.vecMin().x( Bound.vecMin().x() - cocX );
 		Bound.vecMin().y( Bound.vecMin().y() - cocY );
 		Bound.vecMax().x( Bound.vecMax().x() + cocX );
@@ -416,7 +420,9 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			transShaderToWorld = pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) ->getTransform();
 		else if ( pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
 			transShaderToWorld = pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) ->getTransform();
-		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time() ) * vecDB;
+		CqMatrix mat;
+		QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time(), mat );
+		vecDB = mat * vecDB;
 		db = vecDB.Magnitude();
 
 		Bound.vecMax() += db;
@@ -448,8 +454,8 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
 			return;
 
-		XMinb = CLAMP( XMinb, 0, cXBuckets() );
-		YMinb = CLAMP( YMinb, 0, cYBuckets() );
+		XMinb = clamp( XMinb, 0, cXBuckets() );
+		YMinb = clamp( YMinb, 0, cYBuckets() );
 	}
 
 	// Sanity check we are not putting into a bucket that has already been processed.
@@ -494,7 +500,7 @@ bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcess
 		nextBucket = bucketProcessor.getBucket()->getRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
-		nextBucketX = MAX( nextBucketX, 0 );
+		nextBucketX = max( nextBucketX, 0 );
 		pos = BucketPosition( nextBucketX, nextBucket );
 
 		if ( ( nextBucketX < cXBuckets() ) &&
@@ -615,7 +621,7 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
     is called which can be used to display the bucket inside a window or
     save it to disk.
  */
-void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
+void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax )
 {
 	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
 	bool fDiceable = false;
@@ -643,7 +649,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 			if ( pGrid->vfCulled() == false )
 			{
 				// Split any grids in this bucket waiting to be processed.
-				pGrid->Split( this );
+				pGrid->Split( this, xmin, xmax, ymin, ymax);
 			}
 
 			RELEASEREF( pGrid );
@@ -752,9 +758,10 @@ void CqImageBuffer::RenderImage()
 	// Render the surface at the front of the list.
 	m_fDone = false;
 
-	CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
+	CqVector2D bHalf = CqVector2D( std::floor(m_FilterXWidth / 2.0f), std::floor(m_FilterYWidth / 2.0f) );
 
-	RtProgressFunc pProgressHandler = QGetRenderContext()->pProgressHandler();
+	RtProgressFunc pProgressHandler = NULL;
+	pProgressHandler = QGetRenderContext()->pProgressHandler();
 
 	const CqString* pstrBucketOrder = QGetRenderContext() ->poptCurrent()->GetStringOption( "render", "bucketorder" );
 	enum EqBucketOrder order = Bucket_Horizontal;
@@ -876,7 +883,7 @@ void CqImageBuffer::RenderImage()
 							}
 						}
 
-						RenderSurface( pSurface );
+						RenderSurface( pSurface, xmin, xmax, ymin, ymax );
 					}
 				}
 			}
@@ -973,8 +980,8 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 			{
 				m_CurrentBucketCol = (TqInt) rg.RandomFloat(m_cXBuckets);
 				m_CurrentBucketRow = (TqInt) rg.RandomFloat(m_cYBuckets);
-				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
-				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+				m_CurrentBucketCol = clamp(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = clamp(m_CurrentBucketRow, 0, m_cYBuckets - 1);
 			}
 			while ( Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed() );
 
@@ -1015,8 +1022,8 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 				if (radius > r)
 					break;
 
-				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
-				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+				m_CurrentBucketCol = clamp(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = clamp(m_CurrentBucketRow, 0, m_cYBuckets - 1);
 			}
 			while (Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed());
 
@@ -1108,7 +1115,7 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 

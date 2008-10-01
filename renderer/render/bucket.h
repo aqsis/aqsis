@@ -40,8 +40,7 @@
 #include	"iddmanager.h"
 #include	"bucketdata.h"
 
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //-----------------------------------------------------------------------
 /** Class holding data about a particular bucket.
@@ -285,7 +284,7 @@ class CqBucket : public IqBucket
 		void	RenderMP_Static( CqMicroPolygon* pMP );
 };
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef BUCKET_H_INCLUDED
 #endif

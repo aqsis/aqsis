@@ -33,6 +33,7 @@
 #include	<string>
 #include	<map>
 #include	<numeric>
+#include	<cstdlib>
 
 #include	"version.h"
 #include	"vmoutput.h"
@@ -41,7 +42,7 @@
 #include	"aqsismath.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std::string, std::string> >& Stack );
@@ -92,6 +93,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 	// Now that we have this information, work out which standard vars are used.
+	/// \todo Code Review: The use of gStandardVars here breaks the data encapsulation of the parser, and should be removed to a better location.
 	TqInt Use = m_pDataGather->VariableUsage();
 	TqUint i;
 	for ( i = 0; i < EnvVars_Last; i++ )
@@ -419,9 +421,9 @@ void CqCodeGenOutput::Visit( IqParseNodeOperator& OP )
 	if ( pNode->NodeType() != ParseNode_LogicalOp )
 	{
 		if ( pOperandA )
-			m_slxFile << pstrBType;
-		if ( pOperandB )
 			m_slxFile << pstrAType;
+		if ( pOperandB )
+			m_slxFile << pstrBType;
 	}
 	m_slxFile << std::endl;
 }
@@ -727,8 +729,8 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 	m_slxFile << ":" << iLabelD << std::endl;
 	if(pNoHitStmt)
 	{
-		m_slxFile << "\tRS_JNZ " << iLabelC << std::endl;	// Skip if all true
 		m_slxFile << "\tRS_INVERSE" << std::endl;		// Inverse running state
+		m_slxFile << "\tRS_JZ " << iLabelC << std::endl;	// exit if not running
 		pNoHitStmt->Accept( *this );						// ray hit statement
 	}
 	m_slxFile << ":" << iLabelC << std::endl;		// continuation label
@@ -768,8 +770,8 @@ void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 	if ( pFalseStmt )
 	{
 		m_slxFile << ":" << iLabelB << std::endl;	// false part label
-		m_slxFile << "\tRS_JNZ " << iLabelA << std::endl;	// exit if all true
 		m_slxFile << "\tRS_INVERSE" << std::endl;	// Invert result
+		m_slxFile << "\tRS_JZ " << iLabelA << std::endl;	// exit if not running
 		pFalseStmt->Accept( *this );				// false statement
 	}
 	m_slxFile << ":" << iLabelA << std::endl;		// conditional exit point
@@ -781,18 +783,31 @@ void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE )
 	IqParseNode * pNode;
 	pNode = static_cast<IqParseNode*>(CE.GetInterface( ParseNode_Base ));
 
-	IqParseNode * pArg = pNode->pChild();
-	assert( pArg != 0 );
-	IqParseNode* pTrueStmt = pArg->pNextSibling();
+	// Extract the statement trees from the AST
+	IqParseNode * pCondition = pNode->pChild();
+	assert( pCondition != 0 );
+	IqParseNode* pTrueStmt = pCondition->pNextSibling();
 	assert( pTrueStmt != 0 );
 	IqParseNode* pFalseStmt = pTrueStmt->pNextSibling();
+	assert( pFalseStmt != 0 );
 
+	// Write out VM code to evaluate each branch with the correct running state
+	m_slxFile << "\tS_CLEAR\n";		// clear current tmp state
+	pCondition->Accept( *this );	// evaluate conditional
+	m_slxFile << "\tdup\n";			// create a copy of the conditional for the merge step
+	m_slxFile << "\tS_GET\n";		// Pop main stack into current tmp state
+	rsPush();						// push current running state onto state stack
+	m_slxFile << "\tRS_GET\n";		// copy current tmp state to running state
+	pTrueStmt->Accept( *this );		// evaluate true statement
+	m_slxFile << "\tRS_INVERSE\n";	// Invert running state
+	pFalseStmt->Accept( *this );	// evaluate false statement
+	rsPop();						// pop the running state
+
+	// The stack now contains:
+	//  ... conditional true_stmt_result false_stmt_result
+	// Merge the results together
 	TqInt typeT = static_cast<TqInt>( pTrueStmt->ResType() & Type_Mask );
 	const char* pstrTType = gVariableTypeIdentifiers[ typeT ];
-
-	pTrueStmt->Accept( *this );					// true statement
-	pFalseStmt->Accept( *this );				// false statement
-	pArg->Accept( *this );						// relation
 	m_slxFile << "\tmerge" << pstrTType << std::endl;
 }
 
@@ -1054,4 +1069,4 @@ void CqCodeGenOutput::rsPop()
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

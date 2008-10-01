@@ -23,16 +23,14 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include "shadervm.h"
 
-#include	<iostream>
+#include <iostream>
 
-#include	<ctype.h>
+#include "logging.h"
+#include "shadeopmacros.h"
 
-#include	"shadervm.h"
-#include	"logging.h"
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 DECLARE_SHADERSTACK_TEMPS
 
@@ -56,7 +54,11 @@ void CqShaderVM::SO_pushif()
 {
 	CONSTFUNC;
 	RESULT(type_float, class_uniform);
-	pResult->SetFloat( ReadNext().m_FloatVal );
+	TqFloat f = ReadNext().m_FloatVal;
+	// We need to perform this operation regardless of whether any SIMD
+	// elements are running, since it's used to push the parameter count of
+	// varargs functions...
+	pResult->SetFloat(f);
 	Push( pResult );
 }
 
@@ -67,8 +69,11 @@ void CqShaderVM::SO_puship()
 	TqFloat f2 = ReadNext().m_FloatVal;
 	TqFloat f3 = ReadNext().m_FloatVal;
 	RESULT(type_point, class_uniform);
-	CqVector3D v(f,f2,f3);
-	pResult->SetValue(v);
+	if(m_pEnv->IsRunning())
+	{
+		CqVector3D v(f,f2,f3);
+		pResult->SetValue(v);
+	}
 	Push( pResult );
 }
 
@@ -77,7 +82,8 @@ void CqShaderVM::SO_pushis()
 	CONSTFUNC;
 	RESULT(type_string, class_uniform);
 	CqString * ps = ReadNext().m_pString;
-	pResult->SetValue( *ps );
+	if(m_pEnv->IsRunning())
+		pResult->SetValue( *ps );
 	Push( pResult );
 }
 
@@ -91,25 +97,32 @@ void CqShaderVM::SO_ipushv()
 	AUTOFUNC;
 	POPV( A );	// Index
 	IqShaderData* pVar = GetVar( ReadNext().m_iVariable );
-	if ( pVar->ArrayLength() == 0 )
-	{
-		// Report error.
-		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
-		return ;
-	}
-	//If either the value or the index is varying, so must the result be.
+	// If either the value or the index is varying, so must the result be.
 	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
-	TqInt ext = m_pEnv->shadingPointCount();
-	bool fVarying = ext > 1;
-	TqInt i;
-	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		if(!fVarying || RS.Value( i ))
+		TqInt ext = m_pEnv->shadingPointCount();
+		bool fVarying = ext > 1;
+		TqInt arrayLen = pVar->ArrayLength();
+		const CqBitVector& RS = m_pEnv->RunningState();
+		for(TqInt i = 0; i < ext; i++)
 		{
-			TqFloat _aq_A;
-			A->GetFloat( _aq_A, i );
-			pResult->SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
+			if(!fVarying || RS.Value(i))
+			{
+				TqFloat aVal;
+				A->GetFloat(aVal, i);
+				TqInt index = lfloor(aVal);
+				if(index >= 0 && index < arrayLen)
+				{
+					pResult->SetValueFromVariable(pVar->ArrayEntry(index), i);
+				}
+				else
+				{
+					Aqsis::log() << error
+						<< "indexing array out of bounds: " << pVar->strName()
+						<< "[" << A->strName() << "=" << index << "]\n";
+				}
+			}
 		}
 	}
 	Push( pResult );
@@ -122,14 +135,17 @@ void CqShaderVM::SO_pop()
 	TqInt iVar = ReadNext().m_iVariable;
 	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
-	bool fVarying = ext > 1;
-	TqUint i;
-	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		if(!fVarying || RS.Value( i ))
-			pV->SetValueFromVariable( Val, i );
+		TqUint ext = max( m_pEnv->shadingPointCount(), pV->Size() );
+		bool fVarying = ext > 1;
+		TqUint i;
+		const CqBitVector& RS = m_pEnv->RunningState();
+		for ( i = 0; i < ext; i++ )
+		{
+			if(!fVarying || RS.Value( i ))
+				pV->SetValueFromVariable( Val, i );
+		}
 	}
 	RELEASE( Val );
 }
@@ -137,33 +153,33 @@ void CqShaderVM::SO_pop()
 void CqShaderVM::SO_ipop()
 {
 	AUTOFUNC;
-	UsProgramElement& el = ReadNext();
-	IqShaderData* pV = GetVar( el.m_iVariable );
-	CqShaderVariableArray* pVA = static_cast<CqShaderVariableArray*>( pV );
-	if ( pV->ArrayLength() == 0 )
-	{
-		// Report error.
-		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
-		return ;
-	}
+	IqShaderData* pVar = GetVar(ReadNext().m_iVariable);
 	POPV( A );
 	POPV( Val );
-	//TqInt ext=__fVarying?m_pEnv->shadingPointCount():1;
-	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
-	bool fVarying = ext > 1;
-	TqUint i;
-	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		if ( !fVarying || RS.Value( i ) )
+		TqInt ext = max( m_pEnv->shadingPointCount(), pVar->Size() );
+		bool fVarying = ext > 1;
+		TqInt arrayLen = pVar->ArrayLength();
+		const CqBitVector& RS = m_pEnv->RunningState();
+		for(TqInt i = 0; i < ext; i++)
 		{
-			TqFloat fIndex;
-			A->GetFloat( fIndex, i );
-			TqInt index = static_cast<unsigned int>( fIndex );
-            		if (index < pVA->ArrayLength())
-            		{
-               			( *pVA ) [ index ] ->SetValueFromVariable( Val, i );
-            		}
+			if ( !fVarying || RS.Value( i ) )
+			{
+				TqFloat fIndex;
+				A->GetFloat(fIndex, i);
+				TqInt index = lfloor(fIndex);
+				if(index >= 0 && index < arrayLen)
+				{
+					pVar->ArrayEntry(index)->SetValueFromVariable(Val, i);
+				}
+				else
+				{
+					Aqsis::log() << error
+						<< "indexing array out of bounds: " << pVar->strName()
+						<< "[" << A->strName() << "=" << index << "]\n";
+				}
+			}
 		}
 	}
 	RELEASE( Val );
@@ -174,112 +190,124 @@ void CqShaderVM::SO_mergef()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_float, class_varying);
-	TqInt i;
-	TqInt ext = m_pEnv->shadingPointCount();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		bool _aq_A;
-		TqFloat _aq_T, _aq_F;
-		A->GetBool( _aq_A, i );
-		T->GetFloat( _aq_T, i );
-		F->GetFloat( _aq_F, i );
-		if ( _aq_A )
-			pResult->SetValue( _aq_T, i );
-		else
-			pResult->SetValue( _aq_F, i );
+		TqInt i;
+		TqInt ext = m_pEnv->shadingPointCount();
+		for ( i = 0; i < ext; i++ )
+		{
+			bool _aq_A;
+			TqFloat _aq_T, _aq_F;
+			A->GetBool( _aq_A, i );
+			T->GetFloat( _aq_T, i );
+			F->GetFloat( _aq_F, i );
+			if ( _aq_A )
+				pResult->SetValue( _aq_T, i );
+			else
+				pResult->SetValue( _aq_F, i );
+		}
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_merges()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_string, class_varying);
-	TqInt i;
-	TqInt ext = m_pEnv->shadingPointCount();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		bool _aq_A;
-		CqString _aq_T, _aq_F;
-		A->GetBool( _aq_A, i );
-		T->GetString( _aq_T, i );
-		F->GetString( _aq_F, i );
-		if ( _aq_A )
-			pResult->SetValue( _aq_T, i );
-		else
-			pResult->SetValue( _aq_F, i );
+		TqInt i;
+		TqInt ext = m_pEnv->shadingPointCount();
+		for ( i = 0; i < ext; i++ )
+		{
+			bool _aq_A;
+			CqString _aq_T, _aq_F;
+			A->GetBool( _aq_A, i );
+			T->GetString( _aq_T, i );
+			F->GetString( _aq_F, i );
+			if ( _aq_A )
+				pResult->SetValue( _aq_T, i );
+			else
+				pResult->SetValue( _aq_F, i );
+		}
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_mergep()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_point, class_varying);
-	TqInt i;
-	TqInt ext = m_pEnv->shadingPointCount();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		bool _aq_A;
-		CqVector3D _aq_T, _aq_F;
-		A->GetBool( _aq_A, i );
-		T->GetPoint( _aq_T, i );
-		F->GetPoint( _aq_F, i );
-		if ( _aq_A )
-			pResult->SetValue( _aq_T, i );
-		else
-			pResult->SetValue( _aq_F, i );
+		TqInt i;
+		TqInt ext = m_pEnv->shadingPointCount();
+		for ( i = 0; i < ext; i++ )
+		{
+			bool _aq_A;
+			CqVector3D _aq_T, _aq_F;
+			A->GetBool( _aq_A, i );
+			T->GetPoint( _aq_T, i );
+			F->GetPoint( _aq_F, i );
+			if ( _aq_A )
+				pResult->SetValue( _aq_T, i );
+			else
+				pResult->SetValue( _aq_F, i );
+		}
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_mergec()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( A );	// Relational result
 	POPV( F );	// False statement
 	POPV( T );	// True statement
+	POPV( A );	// Relational result
 	RESULT(type_color, class_varying);
-	TqInt i;
-	TqInt ext = m_pEnv->shadingPointCount();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		bool _aq_A;
-		CqColor _aq_T, _aq_F;
-		A->GetBool( _aq_A, i );
-		T->GetColor( _aq_T, i );
-		F->GetColor( _aq_F, i );
-		if ( _aq_A )
-			pResult->SetValue( _aq_T, i );
-		else
-			pResult->SetValue( _aq_F, i );
+		TqInt i;
+		TqInt ext = m_pEnv->shadingPointCount();
+		for ( i = 0; i < ext; i++ )
+		{
+			bool _aq_A;
+			CqColor _aq_T, _aq_F;
+			A->GetBool( _aq_A, i );
+			T->GetColor( _aq_T, i );
+			F->GetColor( _aq_F, i );
+			if ( _aq_A )
+				pResult->SetValue( _aq_T, i );
+			else
+				pResult->SetValue( _aq_F, i );
+		}
 	}
 	Push( pResult );
+	RELEASE( A );
 	RELEASE( T );
 	RELEASE( F );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_setfc()
@@ -287,7 +315,8 @@ void CqShaderVM::SO_setfc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpCAST_FC( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCAST_FC( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -297,7 +326,8 @@ void CqShaderVM::SO_setfp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpCAST_FP( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCAST_FP( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -308,7 +338,8 @@ void CqShaderVM::SO_setfm()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
-	OpCAST_FM( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCAST_FM( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -320,7 +351,8 @@ void CqShaderVM::SO_settc()
 	POPV( B );
 	POPV( C );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpTRIPLE_C( pResult, A, B, C, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpTRIPLE_C( pResult, A, B, C, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( C );
 	RELEASE( B );
@@ -334,7 +366,8 @@ void CqShaderVM::SO_settp()
 	POPV( B );
 	POPV( C );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpTRIPLE_P( pResult, A, B, C, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpTRIPLE_P( pResult, A, B, C, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( C );
 	RELEASE( B );
@@ -346,7 +379,8 @@ void CqShaderVM::SO_setpc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpCAST_PC( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCAST_PC( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -356,7 +390,8 @@ void CqShaderVM::SO_setcp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpCAST_CP( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCAST_CP( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -381,7 +416,8 @@ void CqShaderVM::SO_setwm()
 	POPV( O );
 	POPV( P );
 	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
-	OpHEXTUPLE_M( pResult, P, O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpHEXTUPLE_M( pResult, P, O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( P );
 	RELEASE( O );
@@ -431,16 +467,19 @@ void CqShaderVM::SO_S_GET()
 	// Get the current state from the current stack entry
 	AUTOFUNC;
 	POPV( A );
-	TqInt i;
-	CqBitVector& RS = m_pEnv->RunningState();
-	TqInt ext = m_pEnv->shadingPointCount();
-	for ( i = 0; i < ext; i++ )
+	if(m_pEnv->IsRunning())
 	{
-		if ( RS.Value( i ) )
+		TqInt i;
+		const CqBitVector& RS = m_pEnv->RunningState();
+		TqInt ext = m_pEnv->shadingPointCount();
+		for ( i = 0; i < ext; i++ )
 		{
-			bool _aq_A;
-			A->GetBool( _aq_A, i );
-			m_pEnv->CurrentState().SetValue( i, _aq_A );
+			if ( RS.Value( i ) )
+			{
+				bool _aq_A;
+				A->GetBool( _aq_A, i );
+				m_pEnv->CurrentState().SetValue( i, _aq_A );
+			}
 		}
 	}
 	RELEASE( A );
@@ -449,17 +488,7 @@ void CqShaderVM::SO_S_GET()
 void CqShaderVM::SO_RS_JZ()
 {
 	SqLabel lab = ReadNext().m_Label;
-	if ( m_pEnv->RunningState().Count() == 0 )
-	{
-		m_PO = lab.m_Offset;
-		m_PC = lab.m_pAddress;
-	}
-}
-
-void CqShaderVM::SO_RS_JNZ()
-{
-	SqLabel lab = ReadNext().m_Label;
-	if ( m_pEnv->RunningState().Count() == m_pEnv->RunningState().Size() )
+	if ( !m_pEnv->IsRunning() )
 	{
 		m_PO = lab.m_Offset;
 		m_PC = lab.m_pAddress;
@@ -482,16 +511,6 @@ void CqShaderVM::SO_S_JZ()
 	}
 }
 
-void CqShaderVM::SO_S_JNZ()
-{
-	SqLabel lab = ReadNext().m_Label;
-	if ( m_pEnv->CurrentState().Count() == m_pEnv->RunningState().Size() )
-	{
-		m_PO = lab.m_Offset;
-		m_PC = lab.m_pAddress;
-	}
-}
-
 void CqShaderVM::SO_jnz()
 {
 	SqLabel lab = ReadNext().m_Label;
@@ -499,9 +518,10 @@ void CqShaderVM::SO_jnz()
 	SqStackEntry stack = POP;
 	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
+	const CqBitVector& RS = m_pEnv->RunningState();
 	do
 	{
-		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
+		if ( !__fVarying || RS.Value( __iGrid ) )
 		{
 			bool _f;
 			f->GetBool( _f, __iGrid );
@@ -525,9 +545,10 @@ void CqShaderVM::SO_jz()
 	SqStackEntry stack = POP;
 	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
+	const CqBitVector& RS = m_pEnv->RunningState();
 	do
 	{
-		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
+		if ( !__fVarying || RS.Value( __iGrid ) )
 		{
 			bool _f;
 			f->GetBool( _f, __iGrid );
@@ -557,7 +578,8 @@ void CqShaderVM::SO_lsff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLSS_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLSS_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -569,7 +591,8 @@ void CqShaderVM::SO_lspp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLSS_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLSS_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -581,7 +604,8 @@ void CqShaderVM::SO_lscc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLSS_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLSS_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -593,7 +617,8 @@ void CqShaderVM::SO_gtff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGRT_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGRT_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -605,7 +630,8 @@ void CqShaderVM::SO_gtpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGRT_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGRT_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -617,7 +643,8 @@ void CqShaderVM::SO_gtcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGRT_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGRT_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -629,7 +656,8 @@ void CqShaderVM::SO_geff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGE_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGE_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -641,7 +669,8 @@ void CqShaderVM::SO_gepp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGE_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGE_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -653,7 +682,8 @@ void CqShaderVM::SO_gecc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpGE_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpGE_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -665,7 +695,8 @@ void CqShaderVM::SO_leff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLE_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLE_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -677,7 +708,8 @@ void CqShaderVM::SO_lepp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLE_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLE_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -689,7 +721,8 @@ void CqShaderVM::SO_lecc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLE_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLE_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -701,7 +734,8 @@ void CqShaderVM::SO_eqff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpEQ_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpEQ_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -713,7 +747,8 @@ void CqShaderVM::SO_eqpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpEQ_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpEQ_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -725,7 +760,8 @@ void CqShaderVM::SO_eqcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpEQ_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpEQ_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -737,7 +773,8 @@ void CqShaderVM::SO_eqss()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpEQ_SS( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpEQ_SS( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -749,7 +786,8 @@ void CqShaderVM::SO_neff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpNE_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNE_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -761,7 +799,8 @@ void CqShaderVM::SO_nepp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpNE_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNE_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -773,7 +812,8 @@ void CqShaderVM::SO_necc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpNE_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNE_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -785,7 +825,8 @@ void CqShaderVM::SO_ness()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpNE_SS( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNE_SS( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -797,7 +838,8 @@ void CqShaderVM::SO_mulff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpMUL_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMUL_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -809,7 +851,8 @@ void CqShaderVM::SO_divff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpDIV_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIV_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -821,7 +864,8 @@ void CqShaderVM::SO_addff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpADD_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpADD_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -833,7 +877,8 @@ void CqShaderVM::SO_subff()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpSUB_FF( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpSUB_FF( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -844,7 +889,8 @@ void CqShaderVM::SO_negf()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpNEG_F( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNEG_F( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -855,7 +901,8 @@ void CqShaderVM::SO_mulpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpMULV( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMULV( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -867,7 +914,8 @@ void CqShaderVM::SO_divpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpDIV_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIV_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -879,7 +927,8 @@ void CqShaderVM::SO_addpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpADD_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpADD_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -891,7 +940,8 @@ void CqShaderVM::SO_subpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpSUB_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpSUB_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -903,7 +953,8 @@ void CqShaderVM::SO_crspp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpCRS_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCRS_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -915,7 +966,8 @@ void CqShaderVM::SO_dotpp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpDOT_PP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDOT_PP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -926,7 +978,8 @@ void CqShaderVM::SO_negp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpNEG_P( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNEG_P( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -937,7 +990,8 @@ void CqShaderVM::SO_mulcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpMUL_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMUL_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -949,7 +1003,8 @@ void CqShaderVM::SO_divcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpDIV_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIV_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -961,7 +1016,8 @@ void CqShaderVM::SO_addcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpADD_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpADD_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -973,7 +1029,8 @@ void CqShaderVM::SO_subcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpSUB_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpSUB_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -985,7 +1042,8 @@ void CqShaderVM::SO_crscc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpCRS_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCRS_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -997,7 +1055,8 @@ void CqShaderVM::SO_dotcc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpDOT_CC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDOT_CC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1008,7 +1067,8 @@ void CqShaderVM::SO_negc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpNEG_C( A, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpNEG_C( A, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -1019,7 +1079,8 @@ void CqShaderVM::SO_mulfp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpMUL_FP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMUL_FP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1031,7 +1092,8 @@ void CqShaderVM::SO_divfp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpDIV_FP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIV_FP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1043,7 +1105,8 @@ void CqShaderVM::SO_addfp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpADD_FP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpADD_FP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1055,7 +1118,8 @@ void CqShaderVM::SO_subfp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
-	OpSUB_FP( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpSUB_FP( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1067,7 +1131,8 @@ void CqShaderVM::SO_mulfc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpMUL_FC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMUL_FC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1079,7 +1144,8 @@ void CqShaderVM::SO_divfc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpDIV_FC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIV_FC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1091,7 +1157,8 @@ void CqShaderVM::SO_addfc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpADD_FC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpADD_FC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1103,7 +1170,8 @@ void CqShaderVM::SO_subfc()
 	POPV( A );
 	POPV( B );
 	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	OpSUB_FC( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpSUB_FC( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1115,7 +1183,8 @@ void CqShaderVM::SO_mulmm()
 	POPV( A );
 	POPV( B );
 	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
-	OpMUL_MM( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpMUL_MM( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -1127,11 +1196,13 @@ void CqShaderVM::SO_divmm()
 	POPV( A );
 	POPV( B );
 	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
-	OpDIVMM( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpDIVMM( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
 }
+
 
 void CqShaderVM::SO_radians()
 {
@@ -1193,5 +1264,5 @@ void CqShaderVM::SO_pow()
 	FUNC2( type_float, m_pEnv->SO_pow );
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

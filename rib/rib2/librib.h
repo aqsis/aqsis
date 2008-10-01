@@ -55,6 +55,7 @@ class RendermanInterface
 		virtual	RtFloat RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar ) = 0;
+		virtual	RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz ) = 0;
 		virtual	RtVoid	RiColor( RtColor Cq ) = 0;
 		virtual	RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn ) = 0;
 		virtual	RtVoid	RiConcatTransform( RtMatrix transform ) = 0;

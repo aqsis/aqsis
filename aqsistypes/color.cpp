@@ -30,7 +30,7 @@
 #include	"color.h"
 #include	"matrix.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 /// Global white color
@@ -56,17 +56,15 @@ CqColor CqColor::rgbtohsv() const
 	TqFloat R = m_fRed, G = m_fGreen, B = m_fBlue;
 	TqFloat H = UNDEFINED, S, V;
 	// RGB_TO_HSV from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 592
-	TqFloat max = MAX( m_fRed, m_fGreen );
-	max = MAX( max, m_fBlue );
-	TqFloat min = MIN( m_fRed, m_fGreen );
-	min = MIN( min, m_fBlue );
-	TqFloat diff = max - min;
+	TqFloat maxComp = max(max(m_fRed, m_fGreen), m_fBlue);
+	TqFloat minComp = min(min(m_fRed, m_fGreen), m_fBlue);
+	TqFloat diff = maxComp - minComp;
 
-	V = max;
+	V = maxComp;
 
 	// Next Saturation
-	if ( max != 0.0 )
-		S = diff / max;
+	if ( maxComp != 0.0 )
+		S = diff / maxComp;
 	else
 		S = 0.0;
 
@@ -75,15 +73,15 @@ CqColor CqColor::rgbtohsv() const
 		H = UNDEFINED;	// UNDEFINED
 	else
 	{
-		TqFloat r_dist = ( max - R ) / diff;
-		TqFloat g_dist = ( max - G ) / diff;
-		TqFloat b_dist = ( max - B ) / diff;
+		TqFloat r_dist = ( maxComp - R ) / diff;
+		TqFloat g_dist = ( maxComp - G ) / diff;
+		TqFloat b_dist = ( maxComp - B ) / diff;
 
-		if ( R == max )
+		if ( R == maxComp )
 			H = b_dist - g_dist;
-		else if ( G == max )
+		else if ( G == maxComp )
 			H = 2.0 + r_dist - b_dist;
-		else if ( B == max )
+		else if ( B == maxComp )
 			H = 4.0 + g_dist - r_dist;
 
 		H *= 60.0;
@@ -107,13 +105,11 @@ CqColor CqColor::rgbtohsl() const
 	TqFloat H = UNDEFINED, S = 0.0f, L;
 	TqFloat R = m_fRed, G = m_fGreen, B = m_fBlue;
 	// RGB_TO_HLS from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 595
-	TqFloat max = MAX( R, G );
-	max = MAX( max, B );
-	TqFloat min = MIN( R, G );
-	min = MIN( min, B );
-	TqFloat diff = max - min;
+	TqFloat maxComp = max(max(R, G), B);
+	TqFloat minComp = min(min(R, G), B);
+	TqFloat diff = maxComp - minComp;
 
-	L = ( max + min ) / 2;
+	L = ( maxComp + minComp ) / 2;
 
 	// Next Saturation
 	if ( fabs( diff ) <= Small_Value )
@@ -124,20 +120,20 @@ CqColor CqColor::rgbtohsl() const
 	else
 	{
 		if ( L < 0.5 )
-			S = diff / ( max + min );
+			S = diff / ( maxComp + minComp );
 		else
-			S = diff / ( 2.0 - max - min );
+			S = diff / ( 2.0 - maxComp - minComp );
 
-		TqFloat r_dist = ( max - R ) / diff;
-		TqFloat g_dist = ( max - G ) / diff;
-		TqFloat b_dist = ( max - B ) / diff;
+		TqFloat r_dist = ( maxComp - R ) / diff;
+		TqFloat g_dist = ( maxComp - G ) / diff;
+		TqFloat b_dist = ( maxComp - B ) / diff;
 
 		// Next Hue
-		if ( R == max )
+		if ( R == maxComp )
 			H = b_dist - g_dist;
-		else if ( G == max )
+		else if ( G == maxComp )
 			H = 2.0 + r_dist - b_dist;
-		else if ( B == max )
+		else if ( B == maxComp )
 			H = 4.0 + g_dist - r_dist;
 
 		H *= 60;
@@ -206,7 +202,7 @@ CqColor CqColor::hsvtorgb() const
 		if ( H == 360 )
 			H = 0;
 		H /= 60;	// H is now in [0,6]
-		TqInt i = static_cast<TqInt>( FLOOR( H ) );
+		TqInt i = lfloor(H);
 		TqFloat f = H - i;
 		TqFloat p = V * ( 1.0 - S );
 		TqFloat q = V * ( 1.0 - ( S * f ) );
@@ -348,6 +344,6 @@ CqColor CqColor::YIQtorgb() const
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

@@ -37,8 +37,8 @@
 #include    	"bucket.h"
 #include	"mpdump.h"
 
+namespace Aqsis {
 
-START_NAMESPACE( Aqsis )
 
 class CqMicroPolygon;
 class CqBucketProcessor;
@@ -116,6 +116,20 @@ class CqImageBuffer
 		TqInt	iYRes() const
 		{
 			return ( m_iYRes );
+		}
+		/** Get the cropped image in width pixels
+		 * \return Integer horizontal resolution.
+		 */
+		TqInt	xResCrop() const
+		{
+			return m_CropWindowXMax - m_CropWindowXMin;
+		}
+		/** Get the cropped image in height pixels
+		 * \return Integer vertical resolution.
+		 */
+		TqInt	yResCrop() const
+		{
+			return m_CropWindowYMax - m_CropWindowYMin;
 		}
 		/** Get the minimum horizontal pixel to render.
 		 * \return Integer minimum pixel index.
@@ -280,7 +294,7 @@ class CqImageBuffer
 #endif
 
 
-		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface );
+		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
 		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
 		bool	OcclusionCullSurface( const CqBucketProcessor& bucketProcessor, const boost::shared_ptr<CqSurface>& pSurface );
 
@@ -322,7 +336,7 @@ class CqImageBuffer
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGEBUFFER_H_INCLUDED
 #endif

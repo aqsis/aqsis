@@ -31,15 +31,82 @@
 #include	"pool.h"
 #include	<vector>
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
-/**
- *	Individual topology element class.
- *	Holds information about mesh neighbourhoods allowing easy data aextraction about mesh topology.
+/** \brief A "Lath" holds topological information about mesh neighbourhoods.
+ *
+ * Linked structures of laths allow adjoining faces/vertices/edges to be
+ * represented, with neighbours accessible in O(1) time.
+ *
+ * For more information, see the article "Data Structures for Multiresolution
+ * Representation of Unstructured Meshes" by K. Joy, J. Legakis and R.
+ * MacCracken in "Hierarchical and Geometrical Methods in Scientific
+ * Visualization" (may be found on google books).
+ *
+ * The article lists several types of lath data structures.  The one we use
+ * here is a variation on the "corner lath", with extra pointers to reference
+ * data up and down the subdivision tree.  Geometrically, there is a corner
+ * lath for each corner of each face in the mesh; in the following diagram,
+ * A,B,C,D,E,F,G and H are laths.
+ *
+ * \verbatim
+ *
+ *  |                     |                     |                     |
+ * -+---------------------+---------------------+---------------------+-
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                  F---> G                  |                     |
+ *  |                     |  |                  |                     |
+ * -+------------------^--+--v---------------^--+---------------------+-
+ *  |                  |  |                  |  |                     |
+ *  |                  E <---A------------>  B  |                     |
+ *  |                  |  |                  |  |                     |
+ *  |                  |  |  ^               |  |                     |
+ *  |                  |  |  |               |  |                     |
+ *  |                  |  |  |               |  |                     |
+ *  |                  v  |  |               v  |                     |
+ *  |                     |  |                  |                     |
+ *  |                  H---> D  <------------C---->                   |
+ *  |                     |  |                  |                     |
+ * -+---------------------+--|------------------+---------------------+-
+ *  |                     |  v                  |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ *  |                     |                     |                     |
+ * -+---------------------+---------------------+---------------------+-
+ *  |                     |                     |                     |
+ *
+ * \endverbatim
+ *
+ * As shown, the natural operations on such a data structure are traversal in
+ * clockwise loops around either vertices or faces.  These are accessed via the
+ * CqLath::cv() and CqLath::cf() functions respectively.
+ *
+ * Each lath corresponds to a unique face and vertex.  Laths can also be
+ * associated with a unique edge; the edge which the cv() pointer "crosses
+ * over" is chosen for this.  Two laths are then associated with any
+ * non-boundary edge.  Given a lath, it's possible to get the other lath
+ * associated with the same edge (the "edge companion") with the CqLath::ec()
+ * function.  In the diagram, laths A and H are companions for the same edge.
+ *
+ * To manage parameters attached to the mesh, the lath keeps an index into the
+ * parameter arrays for both data stored on vertices (class vertex/varying) and
+ * per-face data stored on vertices (class facevertex/facevarying).
  */
-
 class CqLath
 {
 	public:
@@ -423,6 +490,6 @@ inline void CqLath::Qfv(std::vector<const CqLath*>& Result) const
 	Qfe(Result);
 }
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	//	LATH_H_LOADED

@@ -40,7 +40,7 @@
 #include "irenderer.h"
 #include "itransform.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /**
@@ -230,11 +230,11 @@ class CqLayeredShader : public IqShader
 			}
 			return ( NULL );
 		}
-		virtual	bool	GetVariableValue( const char* name, IqShaderData* res )
+		virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const
 		{
 			// Again, need to search backwards through the list, as the last layer to affect this value will
 			// be the one that matters.
-			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::reverse_iterator i = m_Layers.rbegin();
+			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::const_reverse_iterator i = m_Layers.rbegin();
 			while( i != m_Layers.rend() )
 			{
 				if(i->second->GetVariableValue(name, res))
@@ -243,7 +243,7 @@ class CqLayeredShader : public IqShader
 			}
 			return ( false );
 		}
-		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv );
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv );
 		virtual	void	PrepareDefArgs()
 		{
 			// Call PrepareDefArgs on all layers
@@ -254,7 +254,7 @@ class CqLayeredShader : public IqShader
 				++i;
 			}
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, IqShaderExecEnv* pEnv )
 		{
 			// Call Initialise on all layers.
 			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
@@ -269,9 +269,9 @@ class CqLayeredShader : public IqShader
 			// Not sure, probably always return false for now.
 			return ( false );
 		}
-		virtual IqShader*	Clone() const
+		virtual boost::shared_ptr<IqShader> Clone() const
 		{
-			return ( new CqLayeredShader(*this) );
+			return boost::shared_ptr<IqShader>(new CqLayeredShader(*this));
 		}
 		virtual bool	Uses( TqInt Var ) const
 		{
@@ -345,7 +345,7 @@ class CqLayeredShader : public IqShader
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef SHADERS_H_INCLUDED
 #endif

@@ -20,7 +20,7 @@
 
 #include	"bucketdata.h"
 
-START_NAMESPACE( Aqsis );
+namespace Aqsis {
 
 
 CqBucketData::CqBucketData()
@@ -85,4 +85,4 @@ bool CqBucketData::canCull(const CqBound* bound) const
 }
 
 
-END_NAMESPACE( Aqsis );
+} // namespace Aqsis

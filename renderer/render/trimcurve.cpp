@@ -13,7 +13,7 @@
 #include	"trimcurve.h"
 #include	"surface.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -374,4 +374,4 @@ void CqTrimCurve::Clamp()
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

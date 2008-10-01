@@ -3,6 +3,8 @@ using namespace librib;
 
 #include "ri.h"
 
+#include <cstring>
+
 namespace librib2ri
 {
 
@@ -68,6 +70,10 @@ RendermanInterface::RtFloat Engine::RiCatmullRomFilter( RtFloat x, RtFloat y, Rt
 RendermanInterface::RtVoid Engine::RiClipping( RtFloat cnear, RtFloat cfar )
 {
 	::RiClipping( cnear, cfar );
+}
+RendermanInterface::RtVoid Engine::RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz )
+{
+	::RiClippingPlane(x, y, z, nx, ny, nz);
 }
 RendermanInterface::RtVoid Engine::RiColor( RtColor Cq )
 {

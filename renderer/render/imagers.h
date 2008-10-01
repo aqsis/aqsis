@@ -39,10 +39,10 @@
 #include "shaderexecenv.h"
 #include "vector4d.h"
 #include "version.h"
+#include "attributes.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
-class CqAttributes;
 class IqBucket;
 
 //----------------------------------------------------------------------
@@ -72,7 +72,12 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			return ( m_pShader );
 		}
 
-		void	Initialise( IqBucket* pBucket );
+		/** \brief Initialise and execute the imager shader over the provided bucket.
+		 *
+		 * \param pBucket - Bucket from which to take the source shader data for the
+		 *                  imager shader.
+		 */
+		void Initialise(IqBucket* pBucket);
 
 
 		// Forwarding functions for IqShaderExecEnv
@@ -235,7 +240,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 
 	private:
 		boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
-		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+		CqConstAttributesPtr	m_pAttributes;			///< Pointer to the associated attributes.
 
 		TqInt m_vGridRes;						///< Size of the bucket X
 		TqInt m_uGridRes;						///<                    Y in pixels
@@ -252,7 +257,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 //}  // End of #ifdef IMAGERS_H_INCLUDED
 #endif

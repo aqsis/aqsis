@@ -30,7 +30,7 @@
 #include	"imagers.h"
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 //---------------------------------------------------------------------
@@ -122,7 +122,7 @@ void CqOptions::InitialiseCamera()
 
 			case	ProjectionPerspective:
 			{
-				TqFloat fov = GetFloatOption( "System", "Clipping" ) [ 0 ] * ( tan( RAD( GetFloatOption( "System", "FOV" ) [ 0 ] / 2.0f ) ) );
+				TqFloat fov = GetFloatOption( "System", "Clipping" ) [ 0 ] * ( tan( degToRad( GetFloatOption( "System", "FOV" ) [ 0 ] / 2.0f ) ) );
 				TqFloat l = GetFloatOption( "System", "ScreenWindow" ) [ 0 ] * fov;
 				TqFloat r = GetFloatOption( "System", "ScreenWindow" ) [ 1 ] * fov;
 				TqFloat t = GetFloatOption( "System", "ScreenWindow" ) [ 2 ] * fov;
@@ -133,9 +133,9 @@ void CqOptions::InitialiseCamera()
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( false );
 				matCameraToScreen.SetElement( 0, 0, ( 2.0f * n ) / ( r - l ) );
-				matCameraToScreen.SetElement( 2, 0, ( r + l ) / ( r - l ) );
+				matCameraToScreen.SetElement( 2, 0, (-( r + l )) / ( r - l ) );
 				matCameraToScreen.SetElement( 1, 1, ( 2.0f * n ) / ( t - b ) );
-				matCameraToScreen.SetElement( 2, 1, ( t + b ) / ( t - b ) );
+				matCameraToScreen.SetElement( 2, 1, (-( t + b )) / ( t - b ) );
 				TqFloat a = f / ( f - n );
 				//			matCameraToScreen.SetElement(2,2,-((f+n)/(f-n)));
 				matCameraToScreen.SetElement( 2, 2, a );
@@ -209,14 +209,16 @@ void CqOptions::InitialiseCamera()
 				break;
 			}
 	}
-	CqMatrix matWorldToCamera( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time() ) );
+	CqMatrix matWorldToCamera;
+	QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time(), matWorldToCamera );
 	QGetRenderContext() ->SetmatScreen( matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatNDC( matScreenToNDC * matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatRaster( matNDCToRaster * matScreenToNDC * matCameraToScreen * matWorldToCamera );
 
 	CqMatrix matWorldToScreen = matCameraToScreen * matWorldToCamera;
 
-	CqMatrix dofm = QGetRenderContext() ->matVSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
+	CqMatrix dofm;
+	QGetRenderContext() ->matVSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), dofm );
 
 	CqVector3D	dofe( 1, 1, -1 );
 	CqVector3D	dofc( 0, 0, -1 );
@@ -225,6 +227,19 @@ void CqOptions::InitialiseCamera()
 	dofc = dofm *  dofc;
 
 	QGetRenderContext() ->SetDepthOfFieldScale( fabs(dofe.x()-dofc.x()), fabs(dofe.y()-dofc.y()) );
+
+	// Setup the cached data for use during DoF calculations.
+	const TqFloat* dofOptions = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "DepthOfField" );
+	// Set the default values to indicate DOF is off.
+	TqFloat fstop = FLT_MAX, focallength = 0.0f, focaldistance = 0.0f; 
+	if(dofOptions)
+	{
+		fstop = dofOptions[0];
+		focallength = dofOptions[1];
+		focaldistance = dofOptions[2];
+	}
+	QGetRenderContext() ->SetDepthOfFieldData( fstop, focallength, focaldistance );
+
 }
 
 
@@ -777,4 +792,4 @@ CqColor CqOptions::GetOpacityImager( TqFloat x, TqFloat y )
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

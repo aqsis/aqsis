@@ -28,7 +28,7 @@
 
 #include "bitvector.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** Return a new bitvector which is the intersection of the current one and the one specified.
@@ -102,7 +102,7 @@ CqBitVector&	CqBitVector::Difference( CqBitVector& from )
 /** Count the number of set bits in the bit vector.
  */
 
-TqInt CqBitVector::Count()
+TqInt CqBitVector::Count() const
 {
 	register TqInt count;
 	register TqInt i;
@@ -150,5 +150,5 @@ std::ostream &operator<<( std::ostream &Stream, CqBitVector &Vector )
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

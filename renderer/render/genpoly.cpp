@@ -27,7 +27,7 @@
 #include	"genpoly.h"
 #include	"aqsismath.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** Copy constructor
@@ -459,4 +459,4 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

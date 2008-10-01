@@ -37,7 +37,7 @@
 
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqPolygonGeneral2D
@@ -146,7 +146,7 @@ class CqPolygonGeneral2D
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif	//	___genpoly_Loaded___

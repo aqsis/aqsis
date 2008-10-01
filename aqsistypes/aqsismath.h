@@ -27,6 +27,8 @@
 #define AQSISMATH_H_INCLUDED
 
 #include "aqsis.h"
+#include <cmath>
+#include <limits>
 
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
@@ -64,6 +66,16 @@ inline TqLong lround(const T x)
 	return lfloor(x - 0.5) + 1;
 }
 
+/** \brief Round the given floating point number to the nearest integer
+ *
+ * Something like function this is part of the C99 standard.
+ */
+template<typename T>
+inline T round(const T x)
+{
+	return std::floor(x - 0.5) + 1;
+}
+
 /** \brief Linearly interpolate between two values
  *
  * Note: It may be worth checking the efficiency of this template.
@@ -90,37 +102,82 @@ inline T clamp(const T x, const T min, const T max)
 	return x < min ? min : (x > max ? max : x);
 }
 
-/// Determine the minimum of the two values given.
+/** \brief Determine the minimum of the two values given.
+ *
+ * Note that there are specific versions of min() for other types like CqColor.
+ */
 template<typename T>
 inline T min(const T a, const T b)
 {
 	return (a < b) ? a : b;
 }
 
-/// Determine the maximum of the two values given.
+/** \brief Determine the maximum of the two values given.
+ *
+ * Note that there are specific versions of max() for other types like CqColor.
+ */
 template<typename T>
 inline T max(const T a, const T b)
 {
 	return (a < b) ? b : a;
 }
 
-// There were originally min, max and clamp macros for colors and vectors -
-// corresponding inline function have been moved to color.h and vector.h as
-// more appropriate places.
-
 /// Convert the given angle in degrees to radians.
-template<typename T>
-inline T rad(const T a)
+inline TqFloat degToRad(const TqFloat a)
 {
-	return a/180.0f*PI;
+	return a/180.0*M_PI;
 }
 
 /// Convert the given angle in radians to degrees.
-template<typename T>
-inline T deg(const T a)
+inline TqFloat radToDeg(const TqFloat a)
 {
-	return a/PI*180.0f;
+	return a/M_PI*180.0;
 }
+
+/** \brief Calculate the next highest power of two above the given value
+ */
+inline TqUint ceilPow2(const TqUint x)
+{
+	TqUint y = x - 1;
+	for (TqUint i = 1; i; i <<= 1)
+		y |= y >> i;
+	// y is now the next highest power of two minus 1.
+	return y + 1;
+}
+
+/** \brief Calculate the base-2 logarithm of a number.
+ *
+ * In principle we could use log2() from math.h here.  However it's part of the
+ * C99 standard rather than C89, and won't be available on all platforms.
+ */
+inline TqFloat log2(TqFloat x)
+{
+	// log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
+	return 1.4426950408889633 * std::log(x);
+}
+
+/** \brief Determine whether two numbers are equal to within a tolerance.
+ *
+ * Compare two numbers for closeness - we want the difference to be less than
+ * some desired fraction of the maximum of the two values.  By default the
+ * tolerance is close to the smallest representable TqFloat.
+ *
+ * This function is overloaded for several other aqsis types (eg
+ * vectors/colours) for ease of use in templates.
+ *
+ * \param x1, x2 - numbers to compare
+ * \param tol - tolerance for the comparison.
+ */
+inline bool isClose(TqFloat x1, TqFloat x2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon())
+{
+	// The relative efficiency of using of std::fabs() here vs multiplication
+	// appears to depend on architecture.  on amd64 multiplication seems to be
+	// faster, while on pentium4 it seems better to use std::fabs()...
+	TqFloat d = std::fabs(x1-x2);
+	return d <= tol*std::fabs(x1) || d <= tol*std::fabs(x2);
+}
+
 
 /** \brief Return a number with only the lowest bit of the input set.
  *
@@ -147,17 +204,6 @@ inline T deg(const T a)
 //		x |= x >> i;
 //	return x;
 //}
-
-/** \brief Calculate the next highest power of two above the given value
- */
-inline TqUint ceilPow2(const TqUint x)
-{
-	TqUint y = x - 1;
-	for (TqUint i = 1; i; i <<= 1)
-		y |= y >> i;
-	// y is now the next highest power of two minus 1.
-	return y + 1;
-}
 
 } // namespace Aqsis
 

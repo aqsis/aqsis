@@ -19,16 +19,16 @@
 */
 
 #include <sys/stat.h>
+#include <cstring>
 
 #include	"aqsis.h"
 #include	"sstring.h"
 #include	"irenderer.h"
-#include	"ishaderdata.h"
 #include	"dsoshadeops.h"
 #include	"file.h"
 #include	"logging.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //---------------------------------------------------------------------
 /** This does replicate effort from CqFile and at present doesnt handle NT either
@@ -96,50 +96,39 @@ CqDSORepository::SetDSOPath(const char* pathStr)
 	if ( pathStr == NULL )
 		return;
 
-	CqString Path(pathStr);
-	CqString::size_type iLeft = 0;
-	CqString::size_type iRight = iLeft ;
-
-	// Split the string up into the components of the path;
-	while(iRight <= Path.length())
+	// Scan through all the paths in the searchpath option.
+	std::vector<std::string> paths = CqFile::searchPaths(pathStr);
+	for ( std::vector<std::string>::const_iterator element = paths.begin(); element != paths.end(); ++element )
 	{
-		if (    Path[iRight] == ';' ||  // completed a path element with ';'
-		        ( Path[iRight] == ':' && ( iRight - iLeft ) > 1) || // completed a path element ':'
-		        ( iRight+1 > Path.length() && iLeft != iRight) ) // hit end of list
-		{
-			CqString *element = new CqString(Path.substr(iLeft,iRight - iLeft));
-			// Here, if element points to a directory, we can add each library in the
-			// named directory which is not already in the path list
+		// Here, if element points to a directory, we can add each library in the
+		// named directory which is not already in the path list
 
-			struct stat s;
-			if (!stat( element->c_str(), &s ))
+		struct stat s;
+		if (!stat( element->c_str(), &s ))
+		{
+			//Aqsis::log() << info << "Processing \"" << element->c_str() << "\" for DSO inclusion." << std::endl;
+			if ( S_ISDIR(s.st_mode) )
 			{
-				if ( S_ISDIR(s.st_mode) )
+				// We have a directory, list all the libraries in that directory and add them to the path
+				CqString wild = CqString(*element) + CqString( DIRSEP ) + CqString( "*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
+				std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
+				if ( !files.empty() )
 				{
-					// We have a directory, list all the libraries in that directory and add them to the path
-					CqString wild = *element + CqString( DIRSEP ) + CqString( "*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
-					std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
-					if ( !files.empty() )
+					for( std::list<CqString*>::iterator f = files.begin(); f != files.end(); ++f)
 					{
-						m_pDSOPathList.splice(m_pDSOPathList.end(), files);
+						m_DSOPathList.push_back(*(*f));
+						//Aqsis::log() << info << "Added \"" << (*f)->c_str() << "\" as a DSO candidate." << std::endl;
 					}
-					delete(element);
-				}
-				else
-				{
-					m_pDSOPathList.push_back(element);
 				}
 			}
 			else
-				delete(element);
+			{
+				m_DSOPathList.push_back(*element);
+				Aqsis::log() << info << "Added \"" << element->c_str() << "\" as a DSO candidate." << std::endl;
+			}
 		}
-
-		if (    Path[iRight] == ';' ||  // completed a path element with ';'
-		        ( Path[iRight] == ':' && ( iRight - iLeft ) > 1) ) // completed a path element ':'
-			iLeft = iRight + 1  ;
-		iRight ++ ;
-	};
-};
+	}
+}
 
 
 //---------------------------------------------------------------------
@@ -152,14 +141,14 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 	CqString strTableSymbol = *pShadeOpName + "_shadeops" ;
 
 	std::list<SqDSOExternalCall*>* oplist = new (std::list<SqDSOExternalCall*>);
-	std::list<CqString*>::iterator itPathEntry;
+	std::list<CqString>::iterator itPathEntry;
 	SqShadeOp *pTableSymbol = NULL;
 
 	Aqsis::log() << debug << "Looking for DSO candidates for shadeop \"" << pShadeOpName->c_str() << "\"" << std::endl;
-	for ( itPathEntry = m_pDSOPathList.begin() ; itPathEntry != m_pDSOPathList.end() ; itPathEntry++ )
+	for ( itPathEntry = m_DSOPathList.begin() ; itPathEntry != m_DSOPathList.end() ; itPathEntry++ )
 	{
-		Aqsis::log() << debug << "Looking in shared library : " << (*itPathEntry)->c_str() << std::endl;
-		void *handle = DLOpen( (*itPathEntry) );
+		Aqsis::log() << debug << "Looking in shared library : " << itPathEntry->c_str() << std::endl;
+		void *handle = DLOpen( &(*itPathEntry) );
 
 		if( handle != NULL )
 		{
@@ -314,5 +303,5 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 };
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

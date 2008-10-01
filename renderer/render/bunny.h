@@ -35,7 +35,7 @@
 #include	"aqsis.h"
 #include	"ri.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 //----------------------------------------------------------------------
 /** \class CqBunny
@@ -80,7 +80,7 @@ class CqBunny
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !BUNNY_H_INCLUDED
 

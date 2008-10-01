@@ -34,7 +34,7 @@
 #include <stdio.h>
 
 
-START_NAMESPACE( libri2rib )
+namespace libri2rib {
 
 class CqStream
 {
@@ -101,5 +101,5 @@ class CqStreamFDesc : public CqStream
 };
 
 
-END_NAMESPACE( libri2rib )
+} // namespace libri2rib
 #endif

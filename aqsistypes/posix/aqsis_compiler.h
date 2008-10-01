@@ -50,19 +50,17 @@
  */
 #define	AQSIS_COMPILER_GCC	1
 
-
-#ifdef  NO_NAMESPACES
-#define START_NAMESPACE(x)	/* start disabled namespace x */
-#define END_NAMESPACE(x)	/* end disabled namespace x */
-#define USING_NAMESPACE(x)  /* using disabled namespace x */
-#else
-#define START_NAMESPACE(x)	namespace x {
-#define END_NAMESPACE(x)	}
-#define USING_NAMESPACE(x)  using namespace x;
-#endif
-
 #define SHARED_LIBRARY_SUFFIX ".so"
 
+/** Macros for DLL import/export on win32.  Unneeded on posix so they're
+ * defined to be empty.
+ */
 #define COMMON_SHARE
+#define AQSISTEX_SHARE
+#define RI_SHARE
+#define SLXARGS_SHARE
+
+#define AQSIS_EXPORT
+
 
 #endif // AQSIS_COMPILER_H_INCLUDED

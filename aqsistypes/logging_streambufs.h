@@ -32,7 +32,7 @@
 #endif
 #endif
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 ///////////////////////////////////////////////////////////
 // tag_buf
@@ -266,7 +266,7 @@ class COMMON_SHARE ansi_buf :
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// ___logging_streambufs_Loaded___
 

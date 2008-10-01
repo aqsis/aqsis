@@ -21,6 +21,7 @@
 /** \file
 		\brief Implements the basic shader operations. (Texture, shadow, env, bake, occlusion related)
 		\author Paul C. Gregory (pgregory@aqsis.org)
+		\author Chris J. Foster (chris42f (at) gmail (dot) com)
 */
 
 #include	"aqsis.h"
@@ -29,930 +30,781 @@
 #include	<io.h>
 #endif
 
-#include	<math.h>
 #include	<map>
 #include	<vector>
 #include	<string>
-#include	<stdio.h>
+#include	<cstring>
 
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
-#include	"itexturemap.h"
+#include	"itexturemap_old.h" /// \todo remove after migration to new interface
+#include	"ienvironmentsampler.h"
+#include	"iocclusionsampler.h"
+#include	"ishadowsampler.h"
+#include	"itexturesampler.h"
+#include	"texfileheader.h"
+#include	"texturecache.h"
 #include	"version.h"
 #include	"logging.h"
 
-START_NAMESPACE(    Aqsis )
+namespace Aqsis
+{
 
+namespace
+{
+
+// helper functions and classes.
+
+/** \brief Basic extractor for sample options from RSL texture() varargs
+ * parameter list.
+ *
+ * Extracts options which are valid for all texture function types.
+ */
+template<typename SampleOptsT>
+class CqSampleOptionExtractorBase
+{
+	private:
+		/**
+		 * Possible texture sample options; these will be null if no sample
+		 * options are specified.
+		 *
+		 * \todo Inspection of the parameter list would be better done at
+		 * shader load-time, assuming the parameter names are constant.
+		 */
+		IqShaderData* m_sBlur;
+		IqShaderData* m_tBlur;
+
+	protected:
+		/** \brief Cache varying options, and extract uniform ones.
+		 *
+		 * \param paramList - list of additional parameters to an RSL texture()
+		 *                    call as (name,value) pairs.
+		 * \param numParams - length of paramList.
+		 * \param opts - sample options in which to place uniform options.
+		 */
+		void extractUniformAndCacheVarying(IqShaderData** paramList, TqInt numParams,
+				SampleOptsT& opts)
+		{
+			CqString paramName;
+			for(TqInt i = 0; i < numParams; i+=2)
+			{
+				// Parameter name and data
+				paramList[i]->GetString(paramName, 0);
+				IqShaderData* param = paramList[i+1];
+				handleParam(paramName, param, opts);
+			}
+		}
+
+		/** \brief extract or cache a single parameter.
+		 *
+		 * Cache the parameter in the desired member variable if it's varying.
+		 * If it's uniform then set the appropriate field in the sample
+		 * options.
+		 *
+		 * \param name - parameter name
+		 * \param value - parameter shader data
+		 * \param opts - sample options into which uniform parameters should be placed.
+		 */
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				SampleOptsT& opts)
+		{
+			// The following are varying
+			if(name == "blur")
+			{
+				m_sBlur = value;
+				m_tBlur = value;
+			}
+			else if(name == "sblur")
+			{
+				m_sBlur = value;
+			}
+			else if(name == "tblur")
+			{
+				m_tBlur = value;
+			}
+			// The rest are uniform
+			else if(name == "width")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setSWidth(tmp);
+				opts.setTWidth(tmp);
+			}
+			else if(name == "swidth")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setSWidth(tmp);
+			}
+			else if(name == "twidth")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setTWidth(tmp);
+			}
+			else if(name == "filter")
+			{
+				CqString tmp;
+				value->GetString(tmp, 0);
+				opts.setFilterType(enumCast<EqTextureFilter>(tmp.c_str()));
+			}
+		}
+
+	public:
+		/** \brief Initialize option extractor: extract uniform options, and cache varying ones.
+		 *
+		 * Cache the parameter in the desired member variable if it's varying.
+		 * If it's uniform then set the appropriate field in the sample
+		 * options.  Whether things are uniform or varying is described by the
+		 * RISpec in the section dealing with the texture() shadeops.
+		 *
+		 * \param paramList - list of additional parameters to an RSL texture()
+		 *                    call as (name,value) pairs.
+		 * \param numParams - length of paramList.
+		 * \param opts - sample options container to extract options into.
+		 */
+		CqSampleOptionExtractorBase()
+			: m_sBlur(0),
+			m_tBlur(0)
+		{ }
+
+		/// Null destructor
+		virtual ~CqSampleOptionExtractorBase() {}
+
+		/** \brief Extract texture sample options from cached parameters
+		 *
+		 * \param gridIdx - index into varying shader parameter data.
+		 */
+		void extractVarying(TqInt gridIdx, SampleOptsT& opts)
+		{
+			if(m_sBlur)
+			{
+				TqFloat tmp = 0;
+				m_sBlur->GetFloat(tmp, gridIdx);
+				opts.setSBlur(tmp);
+			}
+			if(m_tBlur)
+			{
+				TqFloat tmp = 0;
+				m_tBlur->GetFloat(tmp, gridIdx);
+				opts.setTBlur(tmp);
+			}
+		}
+};
+
+
+//------------------------------------------------------------------------------
+/** \brief Extractor for plain texture options
+ */
+class CqSampleOptionExtractor
+	: private CqSampleOptionExtractorBase<CqTextureSampleOptions>
+{
+	protected:
+		// From CqSampleOptionExtractorBase.
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				CqTextureSampleOptions& opts)
+		{
+			if(name == "fill")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setFill(tmp);
+			}
+			else if(name == "lerp")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				// Make sure lerp is one of the valid values.
+				opts.setLerp(static_cast<EqMipmapLerp>(
+							clamp<TqInt>(lround(tmp), 0, 2)));
+			}
+			else
+			{
+				// Else call through to the base class for the more basic
+				// texture sample options.
+				CqSampleOptionExtractorBase<CqTextureSampleOptions>
+					::handleParam(name, value, opts);
+			}
+		}
+	public:
+		CqSampleOptionExtractor(IqShaderData** paramList, TqInt numParams,
+				CqTextureSampleOptions& opts)
+			: CqSampleOptionExtractorBase<CqTextureSampleOptions>()
+		{
+			extractUniformAndCacheVarying(paramList, numParams, opts);
+		}
+
+		CqSampleOptionExtractorBase<CqTextureSampleOptions>::extractVarying;
+};
+
+
+//------------------------------------------------------------------------------
+class CqShadowOptionExtractor
+	: private CqSampleOptionExtractorBase<CqShadowSampleOptions>
+{
+	private:
+		/// Cached values for varying shadow bias.
+		IqShaderData* m_biasLow;
+		IqShaderData* m_biasHigh;
+	protected:
+		// From CqSampleOptionExtractor.
+		virtual void handleParam(const CqString& name, IqShaderData* value,
+				CqShadowSampleOptions& opts)
+		{
+			if(name == "bias")
+			{
+				m_biasLow = value;
+				m_biasHigh = value;
+			}
+			else if(name == "bias0")
+			{
+				m_biasLow = value;
+				if(!m_biasHigh)
+					m_biasHigh = value;
+			}
+			else if(name == "bias1")
+			{
+				m_biasHigh = value;
+				if(!m_biasLow)
+					m_biasLow = value;
+			}
+			else if(name == "samples")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setNumSamples(static_cast<TqInt>(tmp));
+			}
+			else
+			{
+				// Else call through to the base class for the more basic
+				// texture sample options.
+				CqSampleOptionExtractorBase<CqShadowSampleOptions>
+					::handleParam(name, value, opts);
+			}
+		}
+	public:
+		CqShadowOptionExtractor(IqShaderData** paramList, TqInt numParams,
+				CqShadowSampleOptions& opts)
+			: CqSampleOptionExtractorBase<CqShadowSampleOptions>(),
+			m_biasLow(0),
+			m_biasHigh(0)
+		{
+			extractUniformAndCacheVarying(paramList, numParams, opts);
+		}
+
+		void extractVarying(TqInt gridIdx, CqShadowSampleOptions& opts)
+		{
+			if(m_biasLow)
+			{
+				TqFloat tmp = 0;
+				m_biasLow->GetFloat(tmp, gridIdx);
+				opts.setBiasLow(tmp);
+			}
+			if(m_biasHigh)
+			{
+				TqFloat tmp = 0;
+				m_biasHigh->GetFloat(tmp, gridIdx);
+				opts.setBiasHigh(tmp);
+			}
+			CqSampleOptionExtractorBase<CqShadowSampleOptions>::extractVarying(gridIdx, opts);
+		}
+};
+
+
+//------------------------------------------------------------------------------
+/// Fill any shadow sampling options obtainable from the renderer context via RiOptions.
+void getRenderContextShadowOpts(const IqRenderer& context, CqShadowSampleOptions& sampleOpts)
+{
+	// Shadow biases
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias"))
+		sampleOpts.setBias(*biasPtr);
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias0"))
+		sampleOpts.setBiasLow(*biasPtr);
+	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias1"))
+		sampleOpts.setBiasHigh(*biasPtr);
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Extract additional named texture control parameters from an array of stack
+ * entries.
+ */
+void GetTexParamsOld( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
+{
+	CqString strParam;
+	TqInt i = 0;
+	while ( cParams > 0 )
+	{
+		apParams[ i ] ->GetString( strParam, 0 );
+		map[ strParam ] = apParams[ i + 1 ];
+		i += 2;
+		cParams -= 2;
+	}
+}
+
+} // unnamed namespace.
 
 //----------------------------------------------------------------------
 // texture(S)
-void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams )
 {
-	TqFloat Deffloat = 0.0f;
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
-	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-	}
-
-
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
-	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-
-					TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-					TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat fs, ft;
-				s() ->GetFloat( fs, __iGrid );
-				t() ->GetFloat( ft, __iGrid );
-				pTMap->SampleMap( fs, ft, swidth, twidth, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan >= val.size() )
-					(Result)->SetFloat(fill,__iGrid);
-				else
-					(Result)->SetFloat(val[ static_cast<unsigned int>( fchan ) ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	SO_ftexture2(name, startChannel, s(), t(), Result, pShader, cParams, apParams);
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
-void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams)
 {
-	TqFloat Deffloat = 0.0f;
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
+	if(!getRenderContext())
 	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
 
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
 
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-
-					TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-					TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat _aq_s;
-				(s)->GetFloat(_aq_s,__iGrid);
-				TqFloat _aq_t;
-				(t)->GetFloat(_aq_t,__iGrid);
-				pTMap->SampleMap( _aq_s, _aq_t, swidth, twidth, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan >= val.size() )
-					(Result)->SetFloat(fill,__iGrid);
-				else
-					(Result)->SetFloat(val[ static_cast<unsigned int>( fchan ) ],__iGrid);
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Edges of region to be filtered.
+			CqVector2D diffUst(diffU<TqFloat>(s, gridIdx), diffU<TqFloat>(t, gridIdx));
+			CqVector2D diffVst(diffV<TqFloat>(s, gridIdx), diffV<TqFloat>(t, gridIdx));
+			// Centre of the texture region to be filtered.
+			TqFloat ss = 0;
+			TqFloat tt = 0;
+			s->GetFloat(ss,gridIdx);
+			t->GetFloat(tt,gridIdx);
+			// Filter region
+			SqSamplePllgram region(CqVector2D(ss,tt), diffUst, diffVst);
+			// length-1 "array" where filtered results will be placed.
+			TqFloat texSample = 0;
+			texSampler.sample(region, sampleOpts, &texSample);
+			Result->SetFloat(texSample, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-
-
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	if(!getRenderContext())
 	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-
-				// Sample the texture.
-				TqFloat _aq_s1;
-				(s1)->GetFloat(_aq_s1,__iGrid);
-				TqFloat _aq_t1;
-				(t1)->GetFloat(_aq_t1,__iGrid);
-				TqFloat _aq_s2;
-				(s2)->GetFloat(_aq_s2,__iGrid);
-				TqFloat _aq_t2;
-				(t2)->GetFloat(_aq_t2,__iGrid);
-				TqFloat _aq_s3;
-				(s3)->GetFloat(_aq_s3,__iGrid);
-				TqFloat _aq_t3;
-				(t3)->GetFloat(_aq_t3,__iGrid);
-				TqFloat _aq_s4;
-				(s4)->GetFloat(_aq_s4,__iGrid);
-				TqFloat _aq_t4;
-				(t4)->GetFloat(_aq_t4,__iGrid);
-				pTMap->SampleMap( _aq_s1, _aq_t1, _aq_s2, _aq_t2, _aq_s3, _aq_t3, _aq_s4, _aq_t4, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan >= val.size() )
-					(Result)->SetFloat(fill,__iGrid);
-				else
-					(Result)->SetFloat(val[ static_cast<unsigned int>( fchan ) ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	else
+
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Compute the sample quadrilateral box.  Unfortunately we need all
+			// these temporaries because the shader data interface leaves a bit
+			// to be desired ;-)
+			TqFloat s1Val = 0;  s1->GetFloat(s1Val, gridIdx);
+			TqFloat s2Val = 0;  s2->GetFloat(s2Val, gridIdx);
+			TqFloat s3Val = 0;  s3->GetFloat(s3Val, gridIdx);
+			TqFloat s4Val = 0;  s4->GetFloat(s4Val, gridIdx);
+			TqFloat t1Val = 0;  t1->GetFloat(t1Val, gridIdx);
+			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
+			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
+			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
+			SqSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+						CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
+
+			// length-1 "array" where filtered results will be placed.
+			TqFloat texSample = 0;
+			texSampler.sample(sampleQuad, sampleOpts, &texSample);
+			Result->SetFloat(texSample, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // texture(S)
-void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqFloat Deffloat = 0.0f;
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
-	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-	}
-
-
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
-	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-
-					TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-					TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat fs, ft;
-				s() ->GetFloat( fs, __iGrid );
-				t() ->GetFloat( ft, __iGrid );
-				pTMap->SampleMap( fs, ft, swidth, twidth, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				CqColor colResult;
-				colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
-				colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
-				colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
-
-				(Result)->SetColor(colResult,__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetColor(CqColor( 0, 0, 0 ),__iGrid);	// Default, no color
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	SO_ctexture2(name, startChannel, s(), t(), Result, pShader, cParams, apParams);
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
-void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqFloat Deffloat = 0.0f;
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
+	if(!getRenderContext())
 	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
 
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
 
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(3);
 
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-
-					TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-					TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat _aq_s;
-				(s)->GetFloat(_aq_s,__iGrid);
-				TqFloat _aq_t;
-				(t)->GetFloat(_aq_t,__iGrid);
-				pTMap->SampleMap( _aq_s, _aq_t, swidth, twidth, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				CqColor colResult;
-				colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
-				colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
-				colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
-
-				(Result)->SetColor(colResult,__iGrid);
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Edges of region to be filtered.
+			CqVector2D diffUst(diffU<TqFloat>(s, gridIdx), diffU<TqFloat>(t, gridIdx));
+			CqVector2D diffVst(diffV<TqFloat>(s, gridIdx), diffV<TqFloat>(t, gridIdx));
+			// Centre of the texture region to be filtered.
+			TqFloat ss = 0;
+			TqFloat tt = 0;
+			s->GetFloat(ss,gridIdx);
+			t->GetFloat(tt,gridIdx);
+			// Filter region
+			SqSamplePllgram region(CqVector2D(ss,tt), diffUst, diffVst);
+			// array where filtered results will be placed.
+			TqFloat texSample[3] = {0,0,0};
+			texSampler.sample(region, sampleOpts, texSample);
+			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
+			Result->SetColor(resultCol, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetColor(CqColor( 0, 0, 0 ),__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-
-
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	if(!getRenderContext())
 	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				// Sample the texture.
-				TqFloat _aq_s1;
-				(s1)->GetFloat(_aq_s1,__iGrid);
-				TqFloat _aq_t1;
-				(t1)->GetFloat(_aq_t1,__iGrid);
-				TqFloat _aq_s2;
-				(s2)->GetFloat(_aq_s2,__iGrid);
-				TqFloat _aq_t2;
-				(t2)->GetFloat(_aq_t2,__iGrid);
-				TqFloat _aq_s3;
-				(s3)->GetFloat(_aq_s3,__iGrid);
-				TqFloat _aq_t3;
-				(t3)->GetFloat(_aq_t3,__iGrid);
-				TqFloat _aq_s4;
-				(s4)->GetFloat(_aq_s4,__iGrid);
-				TqFloat _aq_t4;
-				(t4)->GetFloat(_aq_t4,__iGrid);
-				pTMap->SampleMap( _aq_s1, _aq_t1, _aq_s2, _aq_t2, _aq_s3, _aq_t3, _aq_s4, _aq_t4, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				CqColor colResult;
-				colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
-				colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
-				colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
-
-				(Result)->SetColor(colResult,__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	else
+
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqTextureSampler& texSampler
+		= getRenderContext()->textureCache().findTextureSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(3);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetColor(CqColor( 0, 0, 0 ),__iGrid);	// Default, completely lit
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Compute the sample quadrilateral box.  Unfortunately we need all
+			// these temporaries because the shader data interface leaves a bit
+			// to be desired ;-)
+			TqFloat s1Val = 0;  s1->GetFloat(s1Val, gridIdx);
+			TqFloat s2Val = 0;  s2->GetFloat(s2Val, gridIdx);
+			TqFloat s3Val = 0;  s3->GetFloat(s3Val, gridIdx);
+			TqFloat s4Val = 0;  s4->GetFloat(s4Val, gridIdx);
+			TqFloat t1Val = 0;  t1->GetFloat(t1Val, gridIdx);
+			TqFloat t2Val = 0;  t2->GetFloat(t2Val, gridIdx);
+			TqFloat t3Val = 0;  t3->GetFloat(t3Val, gridIdx);
+			TqFloat t4Val = 0;  t4->GetFloat(t4Val, gridIdx);
+			SqSampleQuad sampleQuad(CqVector2D(s1Val, t1Val), CqVector2D(s2Val, t2Val),
+					CqVector2D(s3Val, t3Val), CqVector2D(s4Val, t4Val));
+			// array where filtered results will be placed.
+			TqFloat texSample[3] = {0,0,0};
+			texSampler.sample(sampleQuad, sampleOpts, texSample);
+			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
+			Result->SetColor(resultCol, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
+}
+
+
+
+//----------------------------------------------------------------------
+// environment(S,P)
+void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+{
+	TqInt gridIdx = 0;
+
+	if(!getRenderContext())
+	{
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
+	}
+
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqEnvironmentSampler& texSampler
+		= getRenderContext()->textureCache().findEnvironmentSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
+	{
+		if(RS.Value(gridIdx))
+		{
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Get texture region to be filtered.
+			CqVector3D RR;
+			R->GetVector(RR, gridIdx);
+			Sq3DSamplePllgram region(
+				RR,
+				diffU<CqVector3D>(R, gridIdx),
+				diffV<CqVector3D>(R, gridIdx)
+			);
+			// buffer where filtered results will be placed.
+			TqFloat texSample = 0;
+			texSampler.sample(region, sampleOpts, &texSample);
+			Result->SetFloat(texSample, gridIdx);
+		}
+	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
+}
+
+//----------------------------------------------------------------------
+// environment(S,P,P,P,P)
+void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+{
+	TqInt gridIdx = 0;
+
+	if(!getRenderContext())
+	{
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
+	}
+
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqEnvironmentSampler& texSampler
+		= getRenderContext()->textureCache().findEnvironmentSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
+	{
+		if(RS.Value(gridIdx))
+		{
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Construct the sample quadrilateral
+			CqVector3D r1Val;  R1->GetVector(r1Val, gridIdx);
+			CqVector3D r2Val;  R2->GetVector(r2Val, gridIdx);
+			CqVector3D r3Val;  R3->GetVector(r3Val, gridIdx);
+			CqVector3D r4Val;  R4->GetVector(r4Val, gridIdx);
+			Sq3DSampleQuad sampleQuad(r1Val, r2Val, r3Val, r4Val);
+			// buffer where filtered results will be placed.
+			TqFloat texSample = 0;
+			texSampler.sample(sampleQuad, sampleOpts, &texSample);
+			Result->SetFloat(texSample, gridIdx);
+		}
+	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 
 //----------------------------------------------------------------------
 // environment(S,P)
-void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-
-	// Try with LatLong map file
-	if ( pTMap == 0 )
+	if(!getRenderContext())
 	{
-		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
-	}
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
-	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
 
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqEnvironmentSampler& texSampler
+		= getRenderContext()->textureCache().findEnvironmentSampler(mapName.c_str());
 
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(3);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		pTMap->PrepareSampleOptions( paramMap );
-		std::valarray<TqFloat> val;
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f )
-				{
-					CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this, Defvec );
-					swidth = dRdu * fdu;
-				}
-				if ( fdv != 0.0f )
-				{
-					CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this, Defvec );
-					twidth = dRdv * fdv;
-				}
-				else
-				{
-					swidth = CqVector3D( 1.0 / pTMap->XRes() );
-					twidth = CqVector3D( 1.0 / pTMap->YRes() );
-				}
-
-				// Sample the texture.
-				CqVector3D _aq_R;
-				(R)->GetVector(_aq_R,__iGrid);
-				pTMap->SampleMap( _aq_R, swidth, twidth, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan >= val.size() )
-					(Result)->SetFloat(fill,__iGrid);
-				else
-					(Result)->SetFloat(val[ static_cast<unsigned int>( fchan ) ],__iGrid);
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Get texture region to be filtered.
+			CqVector3D RR;
+			R->GetVector(RR, gridIdx);
+			Sq3DSamplePllgram region(
+				RR,
+				diffU<CqVector3D>(R, gridIdx),
+				diffV<CqVector3D>(R, gridIdx)
+			);
+			// buffer where filtered results will be placed.
+			TqFloat texSample[3] = {0,0,0};
+			texSampler.sample(region, sampleOpts, texSample);
+			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
+			Result->SetColor(resultCol, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // environment(S,P,P,P,P)
-void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-	// Try with LatLong map file
-	if ( pTMap == 0 )
+	if(!getRenderContext())
 	{
-		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
 
+	// Get the texture map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqEnvironmentSampler& texSampler
+		= getRenderContext()->textureCache().findEnvironmentSampler(mapName.c_str());
 
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
+	// Create new sample options to sample the texture with.
+	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(3);
+
+	// Initialize extraction of varargs texture options.
+	CqSampleOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				// Sample the texture.
-				CqVector3D _aq_R1;
-				(R1)->GetVector(_aq_R1,__iGrid);
-				CqVector3D _aq_R2;
-				(R2)->GetVector(_aq_R2,__iGrid);
-				CqVector3D _aq_R3;
-				(R3)->GetVector(_aq_R3,__iGrid);
-				CqVector3D _aq_R4;
-				(R4)->GetVector(_aq_R4,__iGrid);
-				pTMap->SampleMap( _aq_R1, _aq_R2, _aq_R3, _aq_R4, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan >= val.size() )
-					(Result)->SetFloat(fill,__iGrid);
-				else
-					(Result)->SetFloat(val[ static_cast<unsigned int>( fchan ) ],__iGrid);
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Construct the sample quadrilateral
+			CqVector3D r1Val;  R1->GetVector(r1Val, gridIdx);
+			CqVector3D r2Val;  R2->GetVector(r2Val, gridIdx);
+			CqVector3D r3Val;  R3->GetVector(r3Val, gridIdx);
+			CqVector3D r4Val;  R4->GetVector(r4Val, gridIdx);
+			Sq3DSampleQuad sampleQuad(r1Val, r2Val, r3Val, r4Val);
+			// buffer where filtered results will be placed.
+			TqFloat texSample[3] = {0,0,0};
+			texSampler.sample(sampleQuad, sampleOpts, texSample);
+			CqColor resultCol(texSample[0], texSample[1], texSample[2]);
+			Result->SetColor(resultCol, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-}
-
-
-//----------------------------------------------------------------------
-// environment(S,P)
-void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
-{
-	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-	// Try with LatLong map file
-	if ( pTMap == 0 )
-	{
-		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
-	}
-	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if ( m_pAttributes )
-	{
-		du() ->GetFloat( fdu );
-		dv() ->GetFloat( fdv );
-	}
-
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
-	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f )
-				{
-					CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this, Defvec );
-					swidth = dRdu * fdu;
-				}
-				if ( fdv != 0.0f )
-				{
-					CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this, Defvec );
-					twidth = dRdv * fdv;
-				}
-				else
-				{
-					swidth = CqVector3D( 1.0 / pTMap->XRes() );
-					twidth = CqVector3D( 1.0 / pTMap->YRes() );
-				}
-
-				// Sample the texture.
-				CqVector3D _aq_R;
-				(R)->GetVector(_aq_R,__iGrid);
-				pTMap->SampleMap( _aq_R, swidth, twidth, val );
-
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan + 2 >= val.size() )
-					(Result)->SetColor(CqColor( fill, fill, fill ),__iGrid);
-				else
-					(Result)->SetColor(CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ),__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetColor(CqColor( 0.0f, 0.0f, 0.0f ),__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-}
-
-//----------------------------------------------------------------------
-// environment(S,P,P,P,P)
-void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
-{
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	TqFloat fill = 0.0f;
-	if ( paramMap.find( "fill" ) != paramMap.end() )
-		paramMap[ "fill" ] ->GetFloat( fill );
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-	// Try with LatLong map file
-	if ( pTMap == 0 )
-	{
-		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
-	}
-	__iGrid = 0;
-
-	__fVarying = true;
-	if ( pTMap != 0 && pTMap->IsValid() )
-	{
-		std::valarray<TqFloat> val;
-		pTMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				// Sample the texture.
-				CqVector3D _aq_R1;
-				(R1)->GetVector(_aq_R1,__iGrid);
-				CqVector3D _aq_R2;
-				(R2)->GetVector(_aq_R2,__iGrid);
-				CqVector3D _aq_R3;
-				(R3)->GetVector(_aq_R3,__iGrid);
-				CqVector3D _aq_R4;
-				(R4)->GetVector(_aq_R4,__iGrid);
-				pTMap->SampleMap( _aq_R1, _aq_R2, _aq_R3, _aq_R4, val );
-
-				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				if ( fchan + 2 >= val.size() )
-					(Result)->SetColor(CqColor( fill, fill, fill ),__iGrid);
-				else
-					(Result)->SetColor(CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ),__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetColor(CqColor( 0.0f, 0.0f, 0.0f ),__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // bump(S)
-void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -960,7 +812,7 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqSha
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -973,7 +825,7 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqSha
 
 //----------------------------------------------------------------------
 // bump(S,F,F)
-void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -981,7 +833,7 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqSha
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -994,7 +846,7 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqSha
 
 //----------------------------------------------------------------------
 // bump(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -1002,7 +854,7 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqSha
 	__fVarying = true;
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1015,216 +867,115 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqSha
 
 //----------------------------------------------------------------------
 // shadow(S,P)
-void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	IqShaderData* pDefBias = NULL;
-	IqShaderData* pDefBias0 = NULL;
-	IqShaderData* pDefBias1 = NULL;
+	TqInt gridIdx = 0;
 
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	// If the bias values haven't been specified in the arguments to the function, use those from the 
-	// Option stack.
-	if ( paramMap.find( "bias" ) == paramMap.end() )
+	if(!getRenderContext())
 	{
-		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			bias = poptBias[0];
-		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
-		pDefBias->SetFloat( bias );
-		paramMap["bias"] = pDefBias;
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	if ( paramMap.find( "bias0" ) == paramMap.end() )
+
+	// Get the shadow map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqShadowSampler& shadSampler
+		= getRenderContext()->textureCache().findShadowSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	// Start and number of channels.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
+
+	// Initialize extraction of varargs texture options.
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
+		if(RS.Value(gridIdx))
 		{
-			TqFloat bias0 = poptBias[0];
-			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias0->SetFloat( bias0 );
-			paramMap["bias0"] = pDefBias0;
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Get first differences along U & V directions for the sample quad.
+			CqVector3D dP_uOn2 = 0.5f*diffU<CqVector3D>(P, gridIdx);
+			CqVector3D dP_vOn2 = 0.5f*diffV<CqVector3D>(P, gridIdx);
+			// Centre of the texture region to be filtered.
+			CqVector3D centerP;
+			P->GetPoint(centerP, gridIdx);
+			// Compute the sample quadrilateral box.
+			Sq3DSampleQuad sampleQuad(
+				centerP - dP_uOn2 - dP_vOn2, centerP + dP_uOn2 - dP_vOn2, 
+				centerP - dP_uOn2 + dP_vOn2, centerP + dP_uOn2 + dP_vOn2);
+			// length-1 "array" where filtered results will be placed.
+			TqFloat shadSample = 0;
+			shadSampler.sample(sampleQuad, sampleOpts, &shadSample);
+			Result->SetFloat(shadSample, gridIdx);
 		}
 	}
-	if ( paramMap.find( "bias1" ) == paramMap.end() )
-	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-		{
-			TqFloat bias1 = poptBias[0];
-			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias1->SetFloat( bias1 );
-			paramMap["bias1"] = pDefBias1;
-		}
-	}
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
-
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
-	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
-
-				CqVector3D _aq_P;
-				(P)->GetPoint(_aq_P,__iGrid);
-
-				pMap->SampleMap( _aq_P, swidth, twidth, fv, 0 );
-				(Result)->SetFloat(fv[ 0 ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	if(NULL != pDefBias)
-		pShader->DeleteTemporaryStorage( pDefBias );
-	if(NULL != pDefBias0)
-		pShader->DeleteTemporaryStorage( pDefBias0 );
-	if(NULL != pDefBias1)
-		pShader->DeleteTemporaryStorage( pDefBias1 );
-		
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
 // shadow(S,P,P,P,P)
 
-void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	IqShaderData* pDefBias = NULL;
-	IqShaderData* pDefBias0 = NULL;
-	IqShaderData* pDefBias1 = NULL;
+	TqInt gridIdx = 0;
 
-	bool __fVarying;
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	// If the bias values haven't been specified in the arguments to the function, use those from the 
-	// Option stack.
-	if ( paramMap.find( "bias" ) == paramMap.end() )
+	if(!getRenderContext())
 	{
-		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			bias = poptBias[0];
-		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
-		pDefBias->SetFloat( bias );
-		paramMap["bias"] = pDefBias;
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	if ( paramMap.find( "bias0" ) == paramMap.end() )
+
+	// Get the shadow map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqShadowSampler& shadSampler
+		= getRenderContext()->textureCache().findShadowSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	// Start and number of channels.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
+
+	// Initialize extraction of varargs texture options.
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
+		if(RS.Value(gridIdx))
 		{
-			TqFloat bias0 = poptBias[0];
-			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias0->SetFloat( bias0 );
-			paramMap["bias0"] = pDefBias0;
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+
+			// Get sampling quad, explicitly provided by user.
+			Sq3DSampleQuad sampleQuad;
+			P1->GetPoint(sampleQuad.v1, gridIdx);
+			P2->GetPoint(sampleQuad.v2, gridIdx);
+			P3->GetPoint(sampleQuad.v3, gridIdx);
+			P4->GetPoint(sampleQuad.v4, gridIdx);
+
+			// length-1 "array" where filtered results will be placed.
+			TqFloat shadSample = 0;
+			shadSampler.sample(sampleQuad, sampleOpts, &shadSample);
+			Result->SetFloat(shadSample, gridIdx);
 		}
 	}
-	if ( paramMap.find( "bias1" ) == paramMap.end() )
-	{
-		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-		{
-			TqFloat bias1 = poptBias[0];
-			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			pDefBias1->SetFloat( bias1 );
-			paramMap["bias1"] = pDefBias1;
-		}
-	}
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	TqFloat _aq_channel;
-	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
-
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
-	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				CqVector3D _aq_P1;
-				(P1)->GetPoint(_aq_P1,__iGrid);
-				CqVector3D _aq_P2;
-				(P2)->GetPoint(_aq_P2,__iGrid);
-				CqVector3D _aq_P3;
-				(P3)->GetPoint(_aq_P3,__iGrid);
-				CqVector3D _aq_P4;
-				(P4)->GetPoint(_aq_P4,__iGrid);
-				pMap->SampleMap( _aq_P1, _aq_P2, _aq_P3, _aq_P4, fv, 0 );
-				(Result)->SetFloat(fv[ 0 ],__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	else
-	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-	}
-	if(NULL != pDefBias)
-		pShader->DeleteTemporaryStorage( pDefBias );
-	if(NULL != pDefBias0)
-		pShader->DeleteTemporaryStorage( pDefBias0 );
-	if(NULL != pDefBias1)
-		pShader->DeleteTemporaryStorage( pDefBias1 );
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 // SIGGRAPH 2002; Larry G. Bake functions
@@ -1385,7 +1136,7 @@ void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderDa
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1423,7 +1174,7 @@ void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderD
 	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str()*/ );
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1460,7 +1211,7 @@ void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1501,7 +1252,7 @@ void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1541,7 +1292,7 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 
 
 	__iGrid = 0;
-	CqBitVector& RS = RunningState();
+	const CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -1568,355 +1319,163 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 
 //----------------------------------------------------------------------
 // occlusion(occlmap,P,N,samples)
-void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_occlusion(IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams)
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	TqInt gridIdx = 0;
 
-	if ( !getRenderContext() )
-		return ;
+	// TODO: Formally deprecate and remove the samples parameter?
+	// TODO: Investigate the need for a CqOcclusionSampleOpts options class ?
 
-	std::map<std::string, IqShaderData*> paramMap;
-	GetTexParams(cParams, apParams, paramMap);
-
-	__iGrid = 0;
-	CqString _aq_occlmap;
-	(occlmap)->GetString(_aq_occlmap,__iGrid);
-	CqVector3D _aq_N;
-	(N)->GetNormal(_aq_N,__iGrid);
-	TqFloat _aq_samples;
-	(samples)->GetFloat(_aq_samples,__iGrid);
-	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_occlmap );
-
-	CqVector3D L(0,0,-1);
-
-	__fVarying = true;
-	if ( pMap != 0 && pMap->IsValid() )
+	if(!getRenderContext())
 	{
-		std::valarray<TqFloat> fv;
-		pMap->PrepareSampleOptions( paramMap );
-
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		TqInt nPages = pMap->NumPages() - 1;
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				// Storage for the final combined occlusion value.
-				TqFloat occlsum = 0.0f;
-				TqFloat dotsum = 0.0f;
-
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
-
-				CqVector3D _aq_N;
-				CqVector3D _aq_P;
-
-				(N)->GetNormal(_aq_N,__iGrid);
-				(P)->GetPoint(_aq_P,__iGrid);
-				TqInt i = nPages;
-				for( ; i >= 0; i-- )
-				{
-					// Check if the lightsource is behind the sample.
-					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
-
-					// In case of surface shader transform L
-					TqFloat cosangle = Nl * L;
-
-					if( cosangle <= 0.0f )
-					{
-						continue;
-					}
-					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
-					occlsum += cosangle * fv[0];
-					dotsum += cosangle;
-				}
-				if (dotsum != 0.0f)
-					occlsum /= dotsum;
-				(Result)->SetFloat(occlsum,__iGrid);
-			}
-		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+		/// \todo This check seems unnecessary - how could the render context be null?
+		return;
 	}
-	else
+
+	// Get the occlusion map.
+	CqString mapName;
+	name->GetString(mapName, gridIdx);
+	const IqOcclusionSampler& occSampler
+		= getRenderContext()->textureCache().findOcclusionSampler(mapName.c_str());
+
+	// Create new sample options to sample the texture with.
+	CqShadowSampleOptions sampleOpts = occSampler.defaultSampleOptions();
+	// Set some uniform sample options.
+	// Start and number of channels.
+	TqFloat startChannelIdx;
+	startChannel->GetFloat(startChannelIdx, gridIdx);
+	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	sampleOpts.setNumChannels(1);
+	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
+
+	// Initialize extraction of varargs texture options.
+	CqShadowOptionExtractor optExtractor(apParams, cParams, sampleOpts);
+
+	const CqBitVector& RS = RunningState();
+	gridIdx = 0;
+	do
 	{
-		__iGrid = 0;
-		CqBitVector& RS = RunningState();
-		do
+		if(RS.Value(gridIdx))
 		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
-				(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-			}
+			optExtractor.extractVarying(gridIdx, sampleOpts);
+			// Get normal to region.
+			CqVector3D NN;
+			N->GetNormal(NN, gridIdx);
+			// Get texture region to be filtered.
+			CqVector3D PP;
+			P->GetPoint(PP, gridIdx);
+			Sq3DSamplePllgram region(
+				PP,
+				diffU<CqVector3D>(P, gridIdx),
+				diffV<CqVector3D>(P, gridIdx)
+			);
+			// length-1 "array" where filtered results will be placed.
+			TqFloat occSample = 0;
+			occSampler.sample(region, NN, sampleOpts, &occSample);
+			Result->SetFloat(occSample, gridIdx);
 		}
-		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	while( ++gridIdx < static_cast<TqInt>(shadingPointCount()) );
 }
 
 //----------------------------------------------------------------------
-// textureinfo
-// support resolution, type, channels, projectionmatrix(*) and viewingmatrix(*)
-// User has to provide an array of TqFloat (2) for resolution
-//                     an string for type
-//                     an integer for channels
-//                     an array of floats (16) for both projectionmatrix and viewingmatrix
-//                     (*) the name must be a shadow map
-//
-
-void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
+// textureinfo(texturename, dataname, output variable);
+void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataName, IqShaderData* pV, IqShaderData* result, IqShader* pShader )
 {
-	TqUint __iGrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	TqFloat Ret = 0.0f;
-	IqTextureMap* pMap = NULL;
-	IqTextureMap *pSMap = NULL;
-	IqTextureMap *pEMap = NULL;
-	IqTextureMap *pTMap = NULL;
-
-	__iGrid = 0;
-	CqString _aq_name;
-	(name)->GetString(_aq_name,__iGrid);
-	CqString _aq_dataname;
-	(dataname)->GetString(_aq_dataname,__iGrid);
-
-	if ( !pMap && strstr( _aq_name.c_str(), ".tif" ) )
+	if(!getRenderContext())
 	{
-		pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
-		{
-			pMap = pTMap;
-		}
-		else if ( pTMap )
-		{
-			//delete pTMap;
-			pTMap = NULL;
-		}
-	}
-	if ( !pMap )
-	{
-		pSMap = getRenderContext() ->GetShadowMap( _aq_name );
-		if ( pSMap && ( pSMap->Type() == MapType_Shadow ) )
-		{
-			pMap = pSMap;
-		}
-		else if ( pSMap )
-		{
-			//delete pSMap;
-			pSMap = NULL;
-		}
+		// \todo Is this check necessary?
+		return;
 	}
 
-	if ( !pMap )
+	// Name of the texture file.
+	CqString textureName;
+	name->GetString(textureName, 0);
+	const CqTexFileHeader* header
+		= getRenderContext()->textureCache().textureInfo(textureName.c_str());
+	if(!header)
 	{
-		pEMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
-		if ( pEMap && ( pEMap->Type() == MapType_Environment ) )
-		{
-			pMap = pEMap;
-		}
-		else if ( pEMap )
-		{
-			//delete pEMap;
-			pEMap = NULL;
-		}
+		// Texture not found - return 0.
+		result->SetFloat(0);
+		return;
 	}
 
-	if ( !pMap )
+	// Name identifying the texture attribute desired.
+	CqString dataNameStr;
+	dataName->GetString(dataNameStr, 0);
+
+	TqFloat returnVal = 0;
+	if(dataNameStr == "exists" && pV->Type() == type_float)
 	{
-		pTMap = getRenderContext() ->GetTextureMap( _aq_name );
-		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
-		{
-			pMap = pTMap;
-		}
-		else if ( pTMap )
-		{
-			//delete pTMap;
-			pTMap = NULL;
-		}
+		pV->SetFloat(1);
+		returnVal = 1;
 	}
-
-
-	if ( pMap == 0 )
+	else if(dataNameStr == "resolution" && pV->Type() == type_float
+			&& pV->ArrayLength() == 2)
 	{
-		(Result)->SetFloat(Ret,__iGrid);
-		return ;
+		pV->ArrayEntry(0)->SetFloat(header->width());
+		pV->ArrayEntry(1)->SetFloat(header->height());
+		returnVal = 1;
 	}
-
-	if ( _aq_dataname.compare( "exists" ) == 0 )
+	else if(dataNameStr == "type" && pV->Type() == type_string)
 	{
-		if ( pV->Type() == type_float )
+		const EqTextureFormat* texFormat = header->findPtr<Attr::TextureFormat>();
+		CqString formatStr = "texture";
+		if(texFormat)
 		{
-			pV->SetFloat( 1.0f );
-			Ret = 1.0f;
-		}
-	}
-
-	if ( _aq_dataname.compare( "resolution" ) == 0 )
-	{
-		if ( pV->Type() == type_float &&
-		        pV->ArrayLength() > 0 )
-		{
-
-			if ( pV->ArrayLength() == 2 )
+			switch(*texFormat)
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( pMap->XRes() ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( pMap->YRes() ) );
-				Ret = 1.0f;
-
+				case TextureFormat_CubeEnvironment:
+				case TextureFormat_LatLongEnvironment:
+					formatStr = "environment";
+					break;
+				case TextureFormat_Shadow:
+					formatStr = "shadow";
+					break;
+				case TextureFormat_Occlusion:
+					formatStr = "occlusion";
+					break;
+				case TextureFormat_Unknown:
+				case TextureFormat_Plain:
+					formatStr = "texture";
+					break;
 			}
 		}
+		pV->SetString(formatStr);
+		returnVal = 1;
 	}
-	if ( _aq_dataname.compare( "type" ) == 0 )
+	else if(dataNameStr == "channels" && pV->Type() == type_float)
 	{
-		if ( pV->Type() == type_string )
+		pV->SetFloat(header->channelList().numChannels());
+		returnVal = 1;
+	}
+	else if(dataNameStr == "viewingmatrix" && pV->Type() == type_matrix)
+	{
+		const CqMatrix* worldToLight = header->findPtr<Attr::WorldToCameraMatrix>();
+		if(worldToLight)
 		{
-			if ( pMap->Type() == MapType_Texture )
-			{
-				pV->SetString( "texture" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_Bump )
-			{
-				pV->SetString( "bump" );
-				Ret = 1.0f;
-
-			}
-
-			if ( pMap->Type() == MapType_Shadow )
-			{
-				pV->SetString( "shadow" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_Environment )
-			{
-				pV->SetString( "environment" );
-				Ret = 1.0f;
-
-			}
-			if ( pMap->Type() == MapType_LatLong )
-			{
-				// both latlong/cube respond the same way according to BMRT
-				// It makes sense since both use environment() shader fct.
-				pV->SetString( "environment" );
-				Ret = 1.0f;
-
-			}
-
-
+			CqMatrix currToWorld;
+			getRenderContext()->matSpaceToSpace("current", "world",
+					NULL, NULL, 0, currToWorld);
+			pV->SetMatrix((*worldToLight)*currToWorld);
+			returnVal = 1;
 		}
 	}
-
-	if ( _aq_dataname.compare( "channels" ) == 0 )
+	else if(dataNameStr == "projectionmatrix" && pV->Type() == type_matrix)
 	{
-		if ( pV->Type() == type_float )
+		const CqMatrix* worldToLightNdc = header->findPtr<Attr::WorldToScreenMatrix>();
+		if(worldToLightNdc)
 		{
-			pV->SetFloat( static_cast<TqFloat>( pMap->SamplesPerPixel() ) );
-			Ret = 1.0f;
-		}
-
-	}
-
-	if ( _aq_dataname.compare( "viewingmatrix" ) == 0 )
-	{
-		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
-		        ( pV->Type() == type_matrix ) )
-		{
-			IqTextureMap* pTmp = NULL;
-			if (pTMap) pTmp = pTMap;
-			if (pSMap) pTmp = pSMap;
-			if ( pTmp )   // && pTmp->Type() == MapType_Shadow)
-			{
-
-
-				CqMatrix m = pTmp->GetMatrix( 0 );  /* WorldToCamera */
-				if ( pV->ArrayLength() == 16 )
-				{
-
-					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
-					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
-					pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 2 ] ) );
-					pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 3 ] ) );
-					pV->ArrayEntry( 4 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 0 ] ) );
-					pV->ArrayEntry( 5 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 1 ] ) );
-					pV->ArrayEntry( 6 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 2 ] ) );
-					pV->ArrayEntry( 7 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 3 ] ) );
-					pV->ArrayEntry( 8 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 0 ] ) );
-					pV->ArrayEntry( 9 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 1 ] ) );
-					pV->ArrayEntry( 10 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 2 ] ) );
-					pV->ArrayEntry( 11 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 3 ] ) );
-					pV->ArrayEntry( 12 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 0 ] ) );
-					pV->ArrayEntry( 13 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 1 ] ) );
-					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
-					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
-
-				}
-				else
-				{
-					pV->SetMatrix( m, 0 );
-				}
-				Ret = 1.0f;
-
-			}
-
+			CqMatrix currToWorld;
+			getRenderContext()->matSpaceToSpace("current", "world",
+					NULL, NULL, 0, currToWorld);
+			pV->SetMatrix((*worldToLightNdc)*currToWorld);
+			returnVal = 1;
 		}
 	}
-
-	if ( _aq_dataname.compare( "projectionmatrix" ) == 0 )
-	{
-		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
-		        ( pV->Type() == type_matrix ) )
-		{
-			// init the matrix in case of wrong sl logic
-			IqTextureMap* pTmp = NULL;
-			if (pTMap) pTmp = pTMap;
-			if (pSMap) pTmp = pSMap;
-			if ( pTmp )    // && pTmp->Type() == MapType_Shadow)
-			{
-
-				CqMatrix m = pTmp->GetMatrix( 1 ); /* WorldToScreen */
-				if ( pV->ArrayLength() == 16 )
-				{
-					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
-					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
-					pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 2 ] ) );
-					pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 3 ] ) );
-					pV->ArrayEntry( 4 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 0 ] ) );
-					pV->ArrayEntry( 5 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 1 ] ) );
-					pV->ArrayEntry( 6 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 2 ] ) );
-					pV->ArrayEntry( 7 ) ->SetFloat( static_cast<TqFloat>( m[ 1 ][ 3 ] ) );
-					pV->ArrayEntry( 8 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 0 ] ) );
-					pV->ArrayEntry( 9 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 1 ] ) );
-					pV->ArrayEntry( 10 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 2 ] ) );
-					pV->ArrayEntry( 11 ) ->SetFloat( static_cast<TqFloat>( m[ 2 ][ 3 ] ) );
-					pV->ArrayEntry( 12 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 0 ] ) );
-					pV->ArrayEntry( 13 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 1 ] ) );
-					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
-					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
-
-
-				}
-				else
-				{
-					pV->SetMatrix( m, 0 );
-
-				}
-				Ret = 1.0f;
-			}
-
-		}
-	}
-
-	//delete pMap;
-
-	(Result)->SetFloat(Ret,__iGrid);
-
+	result->SetFloat(returnVal);
 }
 
-
-
-END_NAMESPACE(    Aqsis )
 //---------------------------------------------------------------------
+} // namespace Aqsis
+

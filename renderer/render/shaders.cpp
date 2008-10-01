@@ -30,7 +30,7 @@
 #include	"shaders.h"
 #include	"file.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 
 
@@ -67,7 +67,7 @@ bool LayerNameMatch(std::pair<CqString, boost::shared_ptr<IqShader> >& elem1, st
 
 
 
-void CqLayeredShader::Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqLayeredShader::Evaluate( IqShaderExecEnv* pEnv )
 {
 	if(!m_Layers.empty())
 	{
@@ -114,6 +114,6 @@ void CqLayeredShader::SetType( EqShaderType type)
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 

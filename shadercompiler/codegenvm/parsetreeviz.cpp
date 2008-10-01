@@ -169,21 +169,8 @@ void CqParseTreeViz::Visit(IqParseNodeShader& node)
 void CqParseTreeViz::Visit(IqParseNodeFunctionCall& node)
 {
 	IqFuncDef* funcDef = node.pFuncDef();
-	const std::string fxnName = node.strName();
-	if(!node.pFuncDef()->fLocal() && fxnName.find("operator") == 0)
-	{
-		// We've got a built-in operator: make a special node appearance.
-		if(fxnName[8] == 'n')
-			setNodeProperty(node, "label", "neg");
-		else
-			setNodeProperty(node, "label", fxnName[8]);
-		setNodeProperty(node, "shape", "box");
-	}
-	else
-	{
-		setNodeProperty(node, "label", fxnName);
-		setNodeProperty(node, "shape", "box");
-	}
+	setNodeProperty(node, "label", funcDef->strVMName());
+	setNodeProperty(node, "shape", "box");
 	setNodeProperty(node, "fillcolor", functionCallColor);
 	m_calledFunctions.insert(funcDef);
 	visitChildren(node);

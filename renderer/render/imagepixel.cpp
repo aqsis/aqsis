@@ -39,7 +39,7 @@
 
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 /// \todo Previous code for the sample pool
 /// CqSampleDataPool	SqImageSample::m_theSamplePool;
@@ -442,21 +442,21 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 					else
 					{
 						samplecolor.SetColorRGB(
-						    LERP( sample_data[Sample_ORed], samplecolor.fRed(), 0 ),
-						    LERP( sample_data[Sample_OGreen], samplecolor.fGreen(), 0 ),
-						    LERP( sample_data[Sample_OBlue], samplecolor.fBlue(), 0 )
+						    lerp( sample_data[Sample_ORed], samplecolor.fRed(), 0.0f ),
+						    lerp( sample_data[Sample_OGreen], samplecolor.fGreen(), 0.0f ),
+						    lerp( sample_data[Sample_OBlue], samplecolor.fBlue(), 0.0f )
 						);
 						sampleopacity.SetColorRGB(
-						    LERP( sample_data[Sample_Red], sampleopacity.fRed(), 0 ),
-						    LERP( sample_data[Sample_Green], sampleopacity.fGreen(), 0 ),
-						    LERP( sample_data[Sample_Blue], sampleopacity.fBlue(), 0 )
+						    lerp( sample_data[Sample_Red], sampleopacity.fRed(), 0.0f ),
+						    lerp( sample_data[Sample_Green], sampleopacity.fGreen(), 0.0f ),
+						    lerp( sample_data[Sample_Blue], sampleopacity.fBlue(), 0.0f )
 						);
 					}
 				}
 				else
 				{
 					samplecolor = ( samplecolor *
-					                ( gColWhite - CqColor(CLAMP(sample_data[Sample_ORed], 0.0f, 1.0f), CLAMP(sample_data[Sample_OGreen], 0.0f, 1.0f), CLAMP(sample_data[Sample_OBlue], 0.0f, 1.0f)) ) ) +
+					                ( gColWhite - CqColor(clamp(sample_data[Sample_ORed], 0.0f, 1.0f), clamp(sample_data[Sample_OGreen], 0.0f, 1.0f), clamp(sample_data[Sample_OBlue], 0.0f, 1.0f)) ) ) +
 					              CqColor(sample_data[Sample_Red], sample_data[Sample_Green], sample_data[Sample_Blue]);
 					sampleopacity = ( ( gColWhite - sampleopacity ) *
 					                  CqColor(sample_data[Sample_ORed], sample_data[Sample_OGreen], sample_data[Sample_OBlue]) ) +
@@ -586,4 +586,4 @@ SqSampleData& CqImagePixel::SampleData( std::vector<SqSampleData>& samplePoints,
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

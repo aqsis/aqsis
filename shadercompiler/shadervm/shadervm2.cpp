@@ -23,16 +23,14 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include "shadervm.h"
 
-#include	<iostream>
+#include <iostream>
 
-#include	<ctype.h>
-
-#include	"shadervm.h"
+#include "shadeopmacros.h"
 
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 DECLARE_SHADERSTACK_TEMPS
 
@@ -42,7 +40,8 @@ void CqShaderVM::SO_land()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -54,7 +53,8 @@ void CqShaderVM::SO_lor()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -209,6 +209,81 @@ void CqShaderVM::SO_smoothstep()
 	AUTOFUNC;
 	FUNC3( type_float, m_pEnv->SO_smoothstep );
 }
+
+
+// Special macros for declaring the spline shadeops.
+#define	SPLINE(t,func)	POPV(count);	\
+						POPV(value); \
+						POPV(vala);	\
+						POPV(valb);	\
+						POPV(valc);	\
+						POPV(vald);	\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
+						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						apSplinePoints[0]=vala; \
+						apSplinePoints[1]=valb; \
+						apSplinePoints[2]=valc; \
+						apSplinePoints[3]=vald; \
+						TqInt iSP; \
+						for(iSP=4; iSP<cParams; iSP++) {\
+							stackitems[iSP] = POP; \
+							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(value,pResult,this,cParams,apSplinePoints); \
+						delete[](apSplinePoints); \
+                  				for(iSP=4; iSP<cParams; iSP++) {\
+							Release( stackitems[iSP]);\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(value); \
+						RELEASE(vala); \
+						RELEASE(valb); \
+						RELEASE(valc); \
+						RELEASE(vald);
+#define	SSPLINE(t,func)	POPV(count); \
+						POPV(basis); \
+						POPV(value); \
+						POPV(vala);	\
+						POPV(valb);	\
+						POPV(valc);	\
+						POPV(vald);	\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
+						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						apSplinePoints[0]=vala; \
+						apSplinePoints[1]=valb; \
+						apSplinePoints[2]=valc; \
+						apSplinePoints[3]=vald; \
+						TqInt iSP; \
+						for(iSP=4; iSP<cParams; iSP++) {\
+							stackitems[iSP] = POP; \
+							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(basis,value,pResult,this,cParams,apSplinePoints); \
+						delete[](apSplinePoints); \
+						for(iSP=4; iSP<cParams; iSP++) {\
+							Release( stackitems[iSP]);\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(basis); \
+						RELEASE(value); \
+						RELEASE(vala); \
+						RELEASE(valb); \
+						RELEASE(valc); \
+						RELEASE(vald);
 
 void CqShaderVM::SO_fspline()
 {
@@ -395,7 +470,8 @@ void CqShaderVM::SO_xcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 0, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 0, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -405,7 +481,8 @@ void CqShaderVM::SO_ycomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 1, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 1, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -415,7 +492,8 @@ void CqShaderVM::SO_zcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_P( A, 2, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_P( A, 2, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( A );
 }
@@ -582,7 +660,8 @@ void CqShaderVM::SO_comp()
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMP_C( A, B, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMP_C( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( B );
 	RELEASE( A );
@@ -677,6 +756,213 @@ void CqShaderVM::SO_trace()
 	VARFUNC;
 	FUNC2( type_color, m_pEnv->SO_trace );
 }
+
+
+// Macros for declaring the texture shadeops
+#define	TEXTURE(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,pResult,this,cParams,aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel);
+#define	TEXTURE1(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(R); /* point */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,R,pResult,this, cParams, aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(R);
+#define	TEXTURE3(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(P); /* point */\
+						POPV(N); /* normal */\
+						POPV(samples); /* samples */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(P); \
+						RELEASE(N); \
+						RELEASE(samples);
+#define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(s1); /* s */\
+						POPV(t1); /* t */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,s1,t1,pResult,this, cParams, aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(s1); \
+						RELEASE(t1);
+#define	TEXTURE4(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(R1); /* R1 */\
+						POPV(R2); /* R2 */\
+						POPV(R3); /* R3 */\
+						POPV(R4); /* R4 */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(R1); \
+						RELEASE(R2); \
+						RELEASE(R3); \
+						RELEASE(R4);
+#define	TEXTURE8(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(s1); /* s1 */\
+						POPV(t1); /* t1 */\
+						POPV(s2); /* s2 */\
+						POPV(t2); /* t2 */\
+						POPV(s3); /* s3 */\
+						POPV(t3); /* t3 */\
+						POPV(s4); /* s4 */\
+						POPV(t4); /* t4 */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						if(m_pEnv->IsRunning()) \
+							func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
+						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+						delete[](stackitems); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(s1); \
+						RELEASE(t1); \
+						RELEASE(s2); \
+						RELEASE(t2); \
+						RELEASE(s3); \
+						RELEASE(t3); \
+						RELEASE(s4); \
+						RELEASE(t4);
 
 void CqShaderVM::SO_shadow()
 {
@@ -784,10 +1070,13 @@ void CqShaderVM::SO_init_illuminance()
 {
 	VARFUNC;
 	POPV( A );
-	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, NULL, this );
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	if(m_pEnv->IsRunning())
+	{
+		m_pEnv->InvalidateIlluminanceCache();
+		m_pEnv->ValidateIlluminanceCache( A, NULL, this );
+		pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	}
 	Push( pResult );
 	RELEASE( A );
 }
@@ -797,10 +1086,13 @@ void CqShaderVM::SO_init_illuminance2()
 	VARFUNC;
 	POPV( A );
 	POPV( B );
-	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, B, this );
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	if(m_pEnv->IsRunning())
+	{
+		m_pEnv->InvalidateIlluminanceCache();
+		m_pEnv->ValidateIlluminanceCache( A, B, this );
+		pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	}
 	Push( pResult );
 	RELEASE( A );
 }
@@ -808,7 +1100,8 @@ void CqShaderVM::SO_init_illuminance2()
 void CqShaderVM::SO_advance_illuminance()
 {
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_advance_illuminance() );
+	if(m_pEnv->IsRunning())
+		pResult->SetFloat( m_pEnv->SO_advance_illuminance() );
 	Push( pResult );
 }
 
@@ -845,7 +1138,8 @@ void CqShaderVM::SO_init_gather()
 void CqShaderVM::SO_advance_gather()
 {
 	RESULT(type_float, class_varying);
-	pResult->SetFloat( m_pEnv->SO_advance_gather() );
+	if(m_pEnv->IsRunning())
+		pResult->SetFloat( m_pEnv->SO_advance_gather() );
 	Push( pResult );
 }
 
@@ -867,7 +1161,8 @@ void CqShaderVM::SO_atmosphere()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_atmosphere( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_atmosphere( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -878,7 +1173,8 @@ void CqShaderVM::SO_displacement()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_displacement( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_displacement( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -889,7 +1185,8 @@ void CqShaderVM::SO_lightsource()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_lightsource( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_lightsource( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -900,7 +1197,8 @@ void CqShaderVM::SO_surface()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_surface( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_surface( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -911,7 +1209,8 @@ void CqShaderVM::SO_attribute()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_attribute( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_attribute( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -922,7 +1221,8 @@ void CqShaderVM::SO_option()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_option( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_option( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -933,7 +1233,8 @@ void CqShaderVM::SO_rendererinfo()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_rendererinfo( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_rendererinfo( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -946,7 +1247,8 @@ void CqShaderVM::SO_textureinfo()
 	POPV( Val );
 	POPV( DataInfo );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_textureinfo( Val, DataInfo, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_textureinfo( Val, DataInfo, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -957,7 +1259,8 @@ void CqShaderVM::SO_incident()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_incident( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_incident( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -968,7 +1271,8 @@ void CqShaderVM::SO_opposite()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_opposite( Val, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_opposite( Val, pV, pResult );
 	Push( pResult );
 	RELEASE( Val );
 }
@@ -1192,7 +1496,8 @@ void CqShaderVM::SO_mcomp()
 	POPV( B );
 	POPV( C );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpCOMPM( A, B, C, pResult, m_pEnv->RunningState() );
+	if(m_pEnv->IsRunning())
+		OpCOMPM( A, B, C, pResult, m_pEnv->RunningState() );
 	Push( pResult );
 	RELEASE( C );
 	RELEASE( B );
@@ -1321,7 +1626,8 @@ void CqShaderVM::SO_external()
 		arg_data[x] = stackitems[x].m_Data;
 	};
 
-	m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);
 
 	for ( x = 0 ; x < pCall->arg_types.size();x++)
 	{
@@ -1331,14 +1637,7 @@ void CqShaderVM::SO_external()
 	delete[]( stackitems );
 	delete[]( arg_data );
 
-	if( pCall->return_type != type_void )
-	{
-		Push( pResult );
-	}
-	else
-	{
-		DeleteTemporaryStorage( pResult );
-	};
+	Push( pResult );
 }
 
 /*
@@ -1385,10 +1684,11 @@ void CqShaderVM::SO_rayinfo()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( DataInfo );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
+	if(m_pEnv->IsRunning())
+		m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
 	Push( pResult );
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 //---------------------------------------------------------------------

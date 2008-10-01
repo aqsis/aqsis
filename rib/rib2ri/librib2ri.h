@@ -27,6 +27,7 @@ class RIB_SHARE Engine :
 		virtual	RtFloat RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 		virtual	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar );
+		virtual	RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz );
 		virtual	RtVoid	RiColor( RtColor Cq );
 		virtual	RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn );
 		virtual	RtVoid	RiConcatTransform( RtMatrix transform );

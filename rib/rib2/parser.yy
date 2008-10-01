@@ -22,6 +22,7 @@ using namespace librib;
 
 #include "libribtypes.h"
 #include "logging.h"
+#include "aqsismath.h"
 
 #include <algorithm>
 #include <iostream>
@@ -30,6 +31,7 @@ using namespace librib;
 #include <string>
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 #ifdef	_DEBUG
 #define	YYDEBUG	1
@@ -111,6 +113,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token <itype> INTEGER_TOKEN
 %token <stype> STRING_TOKEN
 %token <stype> COMMENT
+%token <ctype> TERMINATOR
 %type <itype> integer
 %type <ftype> float
 %type <stype> string
@@ -134,6 +137,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_BOXFILTER
 %token	<ctype>	REQUEST_TOKEN_CATMULLROMFILTER
 %token	<ctype>	REQUEST_TOKEN_CLIPPING
+%token	<ctype>	REQUEST_TOKEN_CLIPPING_PLANE
 %token	<ctype>	REQUEST_TOKEN_COLOR
 %token	<ctype>	REQUEST_TOKEN_COLORSAMPLES
 %token	<ctype>	REQUEST_TOKEN_CONCATTRANSFORM
@@ -253,6 +257,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	blobby
 %type	<ctype>	bound
 %type	<ctype>	clipping
+%type	<ctype>	clippingplane
 %type	<ctype>	color
 %type	<ctype>	colorsamples
 %type	<ctype>	concattransform
@@ -399,6 +404,13 @@ request : complete_request
 				ExpectRequest(); 
 				fRecovering = false;
 			}
+	|	TERMINATOR
+			{
+				Aqsis::log() << Aqsis::info << "Found a terminator character in the stream" << std::endl;
+				ExpectRequest(); 
+				fRecovering = false;
+				YYACCEPT;	
+			}
 	;
 
 complete_request
@@ -440,6 +452,10 @@ complete_request
 			}
 	|	clipping float float
 			{ ParseCallbackInterface->RiClipping($2, $3); }
+	|	clippingplane float float float float float float
+			{ ParseCallbackInterface->RiClippingPlane($2, $3, $4, $5, $6, $7); }
+	|	depthoffield
+			{ ParseCallbackInterface->RiDepthOfField(FLT_MAX, FLT_MAX, FLT_MAX); }
 	|	depthoffield float float float
 			{ ParseCallbackInterface->RiDepthOfField($2, $3, $4); }
 	|	shutter float float
@@ -493,7 +509,6 @@ complete_request
 			}
 	|	colorsamples scalar_array scalar_array
 			{
-				ColorSamples = $2->Count();
 				ParseCallbackInterface->RiColorSamples($2->Count(), &(*$2)[0], &(*$3)[0]);
 				DiscardArrayValue($2);
 				DiscardArrayValue($3);
@@ -1325,6 +1340,7 @@ basis : REQUEST_TOKEN_BASIS	{ ExpectParams(); };
 blobby : REQUEST_TOKEN_BLOBBY	{ ExpectParams(); };
 bound : REQUEST_TOKEN_BOUND	{ ExpectParams(); };
 clipping : REQUEST_TOKEN_CLIPPING	{ ExpectParams(); };
+clippingplane : REQUEST_TOKEN_CLIPPING_PLANE	{ ExpectParams(); };
 color : REQUEST_TOKEN_COLOR	{ ExpectParams(); };
 colorsamples : REQUEST_TOKEN_COLORSAMPLES	{ ExpectParams(); };
 concattransform : REQUEST_TOKEN_CONCATTRANSFORM	{ ExpectParams(); };
@@ -2099,10 +2115,10 @@ int AppendFrames(const char* frames)
 				{
 					n += endptr - nptr;
 					// Store the range between f1 and f2;
-					if(FrameList.size() <= MAX(f1, f2))
-						FrameList.resize(MAX(f1, f2)+1, 0);
-					TqUint start = MIN(f1, f2);
-					TqUint end = MAX(f1, f2);
+					if(FrameList.size() <= Aqsis::max(f1, f2))
+						FrameList.resize(Aqsis::max(f1, f2)+1, 0);
+					TqUint start = Aqsis::min(f1, f2);
+					TqUint end = Aqsis::max(f1, f2);
 					TqUint i;
 					for(i = start; i <= end; i++)
 						FrameList[i] = 1;

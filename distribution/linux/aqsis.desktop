@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Aqsis Renderer
+GenericName=RenderMan Renderer
+NoDisplay=true
+Comment=Render RenderMan Interface Bytestream (RIB) files
+Icon=aqsis
+TryExec=aqsis
+Exec=/usr/share/aqsis/scripts/aqsis.sh %f
+Terminal=true
+MimeType=model/x-rib;model/x-rib-gzip;
+Categories=Graphics;3DGraphics;ConsoleOnly;

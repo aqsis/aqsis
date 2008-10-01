@@ -43,7 +43,10 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <csignal>
 #include <ctime>
+#include <cstdlib>
+#include <memory>
 
 #ifdef AQSIS_SYSTEM_WIN32
   #include <windows.h>
@@ -125,7 +128,6 @@ ArgParse::apstring g_cl_archive_path = "";
 ArgParse::apstring g_cl_texture_path = "";
 ArgParse::apstring g_cl_display_path = "";
 ArgParse::apstring g_cl_procedural_path = "";
-ArgParse::apstring g_cl_plugin_path = "";
 ArgParse::apstring g_cl_type = "";
 ArgParse::apstring g_cl_addtype = "";
 ArgParse::apstring g_cl_mode = "rgba";
@@ -290,6 +292,37 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	std:: cout << std::flush;
 }
 
+/** \brief Event handler to restore the color for the console when catching an
+ * asyncronous interruption.
+ *
+ * Writing this function *portably* is fraught with difficulty; it may be
+ * better to disable it all together and put up with messy colour on the
+ * terminal.  Various places on the web suggest that very few C-library
+ * functions can be called from this function with predictable results.
+ *
+ * (see for example the dinkumware docs for signal.h:
+ * http://www.dinkumware.com/manuals/?manual=compleat&page=signal.html )
+ *
+ * Here we attempt an intentionally minimal (though still formally undefined)
+ * handler, which nevertheless seems to work on posix (linux).
+ *
+ * To do the job completely portably, we'd need to declare a flag of type
+ * sig_atomic_t, and periodically check this during the render.  This would
+ * add extra unjustified complexity...
+ */
+extern "C" void aqsisSignalHandler(int sig)
+{
+	// Reset the state of the stderr output stream to no-colour (undefined
+	// behaviour :-/ ).
+	std::fputs("\033[0m", stderr);
+
+	// Calling signal() is explicitly allowed by the standard.  We reset the
+	// handler to to the default before raising the signal once more.
+	std::signal(sig, SIG_DFL);
+	// Calling raise() is undefined, but is at least legal on POSIX according
+	// to the man pages.  Calling exit() is, OTOH not legal on POSIX.
+	std::raise(sig);
+}
 
 /** Function to setup specific options needed after options are complete but before the world is created.
 	Used as the callback function to a RiPreWorldFunction call.
@@ -512,6 +545,10 @@ static void SetPriority(int priority)
 
 int main( int argc, const char** argv )
 {
+	std::signal(SIGINT, aqsisSignalHandler);
+	std::signal(SIGABRT, aqsisSignalHandler);
+	int return_code = 0;
+	
 	StartMemoryDebugging();
 	{
 		ArgParse ap;
@@ -521,7 +558,7 @@ int main( int argc, const char** argv )
 		ap.argFlag( "version", "\aPrint version information and exit", &g_cl_version );
 		ap.argFlag( "pause", "\aWait for a keypress on completion", &g_cl_pause );
 		ap.argFlag( "progress", "\aPrint progress information", &g_cl_progress );
-		ap.argFlag( "Progress", "\aPrint prman-compatible progress information (ignores -progressformat)", &g_cl_Progress );
+		ap.argFlag( "Progress", "\aPrint PRMan-compatible progress information (ignores -progressformat)", &g_cl_Progress );
 		ap.argString( "progressformat", "=string\aprintf-style format string for -progress", &g_cl_strprogress );
 		ap.argInt( "endofframe", "=integer\aEquivalent to \"endofframe\" RIB option", &g_cl_endofframe );
 		ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
@@ -566,7 +603,6 @@ int main( int argc, const char** argv )
 		ap.argString( "textures", "=string\aOverride the default texture searchpath(s)", &g_cl_texture_path );
 		ap.argString( "displays", "=string\aOverride the default display searchpath(s)", &g_cl_display_path );
 		ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s)", &g_cl_procedural_path );
-		ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s)", &g_cl_plugin_path );
 		ap.allowUnrecognizedOptions();
 
 		//_crtBreakAlloc = 1305;
@@ -574,20 +610,20 @@ int main( int argc, const char** argv )
 		if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 		{
 			Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
-			exit( 1 );
+			return( 1 );
 		}
 
 		// Check that the number of arguments to crop are valid if specified.
 		if ( g_cl_cropWindow.size() > 0 && g_cl_cropWindow.size() != 4 )
 		{
-			std::cout << "Error: invalid number of arguments to -crop, expected 4, got " << g_cl_cropWindow.size() << std::endl;
+			Aqsis::log() << Aqsis::error << "Invalid number of arguments to -crop, expected 4, got " << g_cl_cropWindow.size() << std::endl;
 			g_cl_help = true;
 		}
 
 		if ( g_cl_help )
 		{
 			std::cout << ap.usagemsg();
-			exit( 0 );
+			return( 0 );
 		}
 
       		/* Set the priority on the main thread;
@@ -607,7 +643,7 @@ int main( int argc, const char** argv )
 #endif
 			<< "\n"
 			<< "compiled " << __DATE__ << " " << __TIME__ << "\n";
-			exit( 0 );
+			return( 0 );
 		}
 
 #ifdef	AQSIS_SYSTEM_WIN32
@@ -656,7 +692,8 @@ int main( int argc, const char** argv )
 				}
 				else
 				{
-					std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+					Aqsis::log() << Aqsis::error << "Cannot open file \"" << *e << "\"" << std::endl;
+					return_code = -1;
 				}
 			}
 		}
@@ -676,7 +713,7 @@ int main( int argc, const char** argv )
 		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 	}
 
-	return ( 0 );
+	return ( return_code );
 }
 
 /**
@@ -738,11 +775,6 @@ void RenderFile( FILE* file, std::string&  name )
 		{
 			popt[0] = g_cl_procedural_path.c_str();
 			RiOption( "searchpath", "procedural", &popt, RI_NULL );
-		}
-		if(!g_cl_plugin_path.empty())
-		{
-			popt[0] = g_cl_plugin_path.c_str();
-			RiOption( "searchpath", "plugin", &popt, RI_NULL );
 		}
 
 		RiProgressHandler( &PrintProgress );

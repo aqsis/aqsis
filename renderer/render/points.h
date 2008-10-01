@@ -33,19 +33,16 @@
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"kdtree.h"
+#include 	"micropolygon.h"
 
 #include	"ri.h"
 
 #include        "polygon.h"
-#include        "micropolygon.h"
 
 #include	<algorithm>
 #include	<functional>
 
-START_NAMESPACE( Aqsis )
-
-
-class CqPoints;
+namespace Aqsis {
 
 
 //----------------------------------------------------------------------
@@ -53,6 +50,7 @@ class CqPoints;
  * Class for handling KDTree data representing the points primitive.
  */
 
+class CqPoints;
 class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 {
 		class CqPointsKDTreeDataComparator
@@ -73,7 +71,7 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		{}
 		virtual ~CqPointsKDTreeData()
 		{
-		}
+		};
 
 		virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
 		{
@@ -279,23 +277,6 @@ class CqPoints : public CqSurface
 			return ( A );
 		}
 
-	protected:
-		template <class T, class SLT>
-		void	TypedNaturalDice( CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-		{
-			TqUint i;
-			for ( i = 0; i < nVertices(); i++ )
-			{
-				IqShaderData* arrayValue;
-				TqInt j;
-				for(j = 0; j<pParam->Count(); j++)
-				{
-					arrayValue = pData->ArrayEntry(j);
-					arrayValue->SetValue( static_cast<SLT>( pParam->pValue() [ m_KDTree.aLeaves()[ i ] ] ), i );
-				}
-			}
-		}
-
 	private:
 		boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
 		TqInt	m_nVertices;					///< Number of points this surfaces represents.
@@ -315,7 +296,7 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		virtual	~CqMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage );
+		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
 
 		virtual	TqUint	GridSize() const
 		{
@@ -326,6 +307,22 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		{
 			return ( cu * cv );
 		}
+		virtual bool	hasValidDerivatives() const
+		{
+			return false;
+		}
+		/** \brief Set surface derivative in u.
+		 * 
+		 *  Set the value of du if needed, du is constant across the grid being shaded.
+		 */
+		virtual void setDu();
+		/** \brief Set surface derivative in v.
+		 * 
+		 *  Set the value of dv if needed, dv is constant across the grid being shaded.
+		 */
+		virtual void setDv();
+		virtual void CalcNormals();
+		virtual void CalcSurfaceDerivatives();
 };
 
 class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
@@ -336,7 +333,7 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 		virtual	~CqMotionMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage );
+		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
 };
 
 //----------------------------------------------------------------------
@@ -347,8 +344,7 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 class CqMicroPolygonPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index , TqFloat radius ) :
-			CqMicroPolygon( pGrid, Index ), m_radius( radius )
+		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) : CqMicroPolygon(pGrid, Index)
 		{}
 		virtual	~CqMicroPolygonPoints()
 		{}
@@ -368,8 +364,13 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		}
 
 	public:
-		virtual	void CalculateTotalBound()
+		void Initialise( TqFloat radius )
 		{
+			m_radius = radius;
+		}
+		virtual	CqBound&	GetTotalBound( ) const
+		{
+			static CqBound b;
 			CqVector3D Pmin, Pmax;
 			pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);
 			Pmax = Pmin;
@@ -377,12 +378,18 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			Pmin.y( Pmin.y() - m_radius );
 			Pmax.x( Pmax.x() + m_radius );
 			Pmax.y( Pmax.y() + m_radius );
-			m_Bound.vecMin() = Pmin;
-			m_Bound.vecMax() = Pmax;
+			b.vecMin() = Pmin;
+			b.vecMax() = Pmax;
+			return( b );
 		}
-
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
-		virtual void	CacheHitTestValues(CqHitTestCache* cache) const { }
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
+
+		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
+		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
+				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 
 	private:
 		TqFloat	m_radius;
@@ -399,9 +406,12 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 class CqMovingMicroPolygonKeyPoints
 {
 	public:
-		CqMovingMicroPolygonKeyPoints( const CqVector3D& vA, TqFloat radius) :
-			m_Point0( vA ), m_radius( radius )
+		CqMovingMicroPolygonKeyPoints()
 		{}
+		CqMovingMicroPolygonKeyPoints( const CqVector3D& vA, TqFloat radius)
+		{
+			Initialise( vA, radius );
+		}
 		virtual ~CqMovingMicroPolygonKeyPoints()
 		{}
 
@@ -420,7 +430,7 @@ class CqMovingMicroPolygonKeyPoints
 		}
 
 	public:
-		bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+		bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 		{
 			if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
 			{
@@ -429,6 +439,9 @@ class CqMovingMicroPolygonKeyPoints
 			}
 			return( false );
 		}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 		CqBound	GetTotalBound() const
 		{
@@ -441,10 +454,15 @@ class CqMovingMicroPolygonKeyPoints
 			return( CqBound( Pmin, Pmax ) );
 		}
 
+		void	Initialise( const CqVector3D& vA, TqFloat radius )
+		{
+			m_Point0 = vA;
+			m_radius = radius;
+		}
+
 		CqVector3D	m_Point0;
 		TqFloat		m_radius;
 
-	private:
 		static	CqObjectPool<CqMovingMicroPolygonKeyPoints>	m_thePool;
 }
 ;
@@ -458,8 +476,8 @@ class CqMovingMicroPolygonKeyPoints
 class CqMicroPolygonMotionPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotionPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) :
-			CqMicroPolygon( pGrid, Index ), m_BoundReady( false )
+		CqMicroPolygonMotionPoints(CqMicroPolyGridBase* pGrid, TqInt Index) : 
+			CqMicroPolygon(pGrid, Index), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotionPoints()
 		{
@@ -488,11 +506,11 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{}
 
 		// Overrides from CqMicroPolygon
-		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void CalculateTotalBound();
 		virtual const CqBound&	GetTotalBound() const
 		{
-			return ( m_Bound );
+			return( m_Bound );
 		}
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
@@ -500,10 +518,13 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time ) const
+		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
-				Aqsis::log() << error << "MP bound list not ready" << std::endl;
+			{
+				Aqsis::log() << error << "MP Bound list not ready" << std::endl;
+				throw XqException("MP error");
+			}
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
@@ -514,9 +535,10 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{
 			return true;
 		}
-
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
-
+		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
+		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
+				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 	private:
 		CqBound	m_Bound;					///< Stored bound.
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
@@ -579,7 +601,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			{
 				boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = true;
-				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				pNewMotion->m_SplitCount = m_SplitCount + 1;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
 					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
@@ -597,11 +619,34 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			}
 			CqSurface::RenderComplete();
 		}
+	protected:
 };
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline void CqMicroPolyGridPoints::setDu()
+{
+	pVar(EnvVars_du)->SetFloat(1.0f);
+}
+
+inline void CqMicroPolyGridPoints::setDv()
+{
+	pVar(EnvVars_dv)->SetFloat(1.0f);
+}
+
+inline void	CqMicroPolyGridPoints::CalcNormals()
+{
+}
+
+inline void	CqMicroPolyGridPoints::CalcSurfaceDerivatives()
+{
+}
 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 #endif	// !POINTS_H_INCLUDED

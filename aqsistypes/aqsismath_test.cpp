@@ -24,6 +24,7 @@
  */
 
 #include "aqsismath.h"
+#include "limits.h"
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -57,6 +58,21 @@ BOOST_AUTO_TEST_CASE(lround_test)
 	BOOST_CHECK_EQUAL(Aqsis::lround<float>(-1.7f), -2);
 }
 
+BOOST_AUTO_TEST_CASE(round_test)
+{
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(1.0f), 1.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(1.2f), 1.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(1.5f), 2.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(1.7f), 2.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(2*float(LONG_MAX) + 0.1), 2*float(LONG_MAX), 0.00001f);
+
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(-1.0f), -1.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(-1.2f), -1.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(-1.5f), -1.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(-1.7f), -2.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::round<float>(-2*float(LONG_MAX) + 0.1), -2*float(LONG_MAX), 0.00001f);
+}
+
 BOOST_AUTO_TEST_CASE(lerp_test)
 {
 	BOOST_CHECK_CLOSE((Aqsis::lerp<float,float>(0.1f, 1.0f, 2.0f)), 1.1f, 0.00001f);
@@ -80,19 +96,41 @@ BOOST_AUTO_TEST_CASE(max_test)
 	BOOST_CHECK_EQUAL(Aqsis::max<float>(1.0f, 2.0f), 2.0f);
 }
 
-BOOST_AUTO_TEST_CASE(rad_test)
+BOOST_AUTO_TEST_CASE(degToRad_test)
 {
-	BOOST_CHECK_CLOSE(Aqsis::rad(180.0f), PI, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::degToRad(180.0f), float(M_PI), 0.00001f);
 }
 
-BOOST_AUTO_TEST_CASE(deg_test)
+BOOST_AUTO_TEST_CASE(radToDeg_test)
 {
-	BOOST_CHECK_CLOSE(Aqsis::deg(PI), 180.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::radToDeg(M_PI), 180.0f, 0.00001f);
 }
 
 BOOST_AUTO_TEST_CASE(ceilPow2_test)
 {
 	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x100), TqUint(0x100));
 	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x110), TqUint(0x200));
+}
+
+BOOST_AUTO_TEST_CASE(log2_test)
+{
+	BOOST_CHECK_CLOSE(Aqsis::log2(1), 0.0f, 0.00001f);
+	BOOST_CHECK_CLOSE(Aqsis::log2(8), 3.0f, 0.00001f);
+}
+
+BOOST_AUTO_TEST_CASE(isClose_test)
+{
+	BOOST_CHECK(Aqsis::isClose(0,0));
+
+	const TqFloat f1 = 1.5;
+	BOOST_CHECK(Aqsis::isClose(f1, f1));
+	BOOST_CHECK(Aqsis::isClose(f1, (f1*100.0)/100.0));
+
+	const TqFloat eps = 1e-4;
+
+	BOOST_CHECK(!Aqsis::isClose(f1, f1 + eps));
+	BOOST_CHECK(!Aqsis::isClose(f1, f1 + eps, 1e-5));
+	BOOST_CHECK(Aqsis::isClose(f1, f1 + eps, 1e-4));
+	BOOST_CHECK(Aqsis::isClose(f1, f1 - eps, 1e-4));
 }
 
