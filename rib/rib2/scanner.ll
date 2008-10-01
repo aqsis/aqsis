@@ -16,6 +16,7 @@ extern "C" int isatty(int);
 #include <stack>
 #include <string>
 #include <vector>
+#include <cctype>
 #include <assert.h>
 #include <stdio.h>
 
