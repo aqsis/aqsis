@@ -513,8 +513,8 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		}
 		void	Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface )
 		{
-			assert( GetMotionObject( Time( 0 ) ) );
-			static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->Initialise(cu, cv, pSurface);
+			//assert( GetMotionObject( Time( 0 ) ) );
+			//static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->Initialise(cu, cv, pSurface);
 			CacheGridInfo();
 		}
 
