@@ -49,7 +49,7 @@ class CqCurve : public CqSurface
 		CqCurve();
 		virtual ~CqCurve();
 		virtual void AddPrimitiveVariable( CqParameter* pParam );
-		virtual	void Bound(IqBound* bound) const;
+		virtual	void Bound(CqBound* bound) const;
 		virtual void SetDefaultPrimitiveVariables( bool bUseDef_st = true );
 #ifdef _DEBUG
 
@@ -444,7 +444,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual void AddPrimitiveVariable( CqParameter* pParam );
 		virtual	TqUint cVarying() const;
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual	void Bound(IqBound* bound) const;
+		virtual	void Bound(CqBound* bound) const;
 		//---------------------------------------------- Inlined Public Methods
 	public:
 #ifdef _DEBUG

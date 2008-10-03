@@ -35,7 +35,7 @@ namespace Aqsis {
 /** Return the boundary extents in camera space of the polygon
  */
 
-void CqPolygonBase::Bound(IqBound* bound) const
+void CqPolygonBase::Bound(CqBound* bound) const
 {
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
@@ -518,7 +518,7 @@ CqSurface* CqPolygonPoints::Clone() const
 }
 
 
-void	CqSurfacePointsPolygons::Bound(IqBound* bound) const
+void	CqSurfacePointsPolygons::Bound(CqBound* bound) const
 {
 	if( m_pPoints && m_pPoints->P() )
 	{

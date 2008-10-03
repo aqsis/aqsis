@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2008-05-05 18:52:46 +0100 (Mon, 05 May 2008) $
+ *	Last change by:		$Author$
+ *	Last change date:	$Date$
  */
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -17,7 +17,6 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 #include	"sstring.h"
-#include	"ibound.h"
 #include	"interfacefwd.h"
 
 namespace Aqsis {
@@ -28,7 +27,7 @@ class CqParameter;
 struct IqShaderData;
 class CqSurface;
 class CqMicroPolyGrid;
-
+class CqBound;
 
 //----------------------------------------------------------------------
 /** \struct IqSurface
@@ -110,7 +109,7 @@ struct IqSurface
 	virtual void	RenderComplete() = 0;
 	/** Get the gemoetric bound of this GPrim.
 	 */
-	virtual void	Bound(IqBound* bound) const = 0;
+	virtual void	Bound(CqBound* bound) const = 0;
 };
 
 
