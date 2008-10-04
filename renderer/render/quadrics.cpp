@@ -339,10 +339,9 @@ TqUlong CqQuadric::EstimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
-
-	m_uDiceSize = lceil( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
-	m_vDiceSize = lceil( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
+	TqFloat sqrtShadingRate = sqrt(AdjustedShadingRate());
+	m_uDiceSize = lceil(ESTIMATEGRIDSIZE * maxusize/sqrtShadingRate);
+	m_vDiceSize = lceil(ESTIMATEGRIDSIZE * maxvsize/sqrtShadingRate);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );

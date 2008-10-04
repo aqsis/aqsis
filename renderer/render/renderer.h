@@ -371,8 +371,13 @@ class CqRenderer : public IqRenderer
 			return CqVector2D(m_DepthOfFieldScale * c);
 		}
 
-		//void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
-		//CqShaderRegister* FindShader( const char* strName, EqShaderType type );
+		/** \brief Return minimum circle of confusion radius for objects inside a bound
+		 *
+		 * If the bound spans the focal plane 0 is returned.  In other cases
+		 * the minimum circle of confusion is nonzero and lies on the bound.
+		 */
+		const TqFloat MinCoCForBound(const CqBound& bound) const;
+
 		boost::shared_ptr<IqShader> getDefaultSurfaceShader();
 
 		struct SqOutputDataEntry

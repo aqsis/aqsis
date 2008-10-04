@@ -1836,6 +1836,8 @@ void CqMicroPolygonMotion::BuildBoundList()
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+	// TODO: This version of shadingrate isn't accurate if using
+	// GeometricApproximation "focusfactor" 
 	TqFloat shadingrate = pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	m_BoundList.Clear();

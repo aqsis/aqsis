@@ -678,6 +678,21 @@ CqParameter* CqSurface::FindUserParam( const char* name ) const
 	return( NULL );
 }
 
+TqFloat CqSurface::AdjustedShadingRate() const
+{
+	TqFloat shadingRate =
+		m_pAttributes->GetFloatAttribute("System", "ShadingRate")[0];
+	CqRenderer* context = QGetRenderContext();
+	if(context->UsingDepthOfField())
+	{
+		// Adjust dice size for the CoC
+		const TqFloat* focusFactor =
+			m_pAttributes->GetFloatAttribute("System", "GeometricFocusFactor");
+		const TqFloat minCoC = context->MinCoCForBound(m_Bound);
+		shadingRate *= max(1.0, 0.25*minCoC*(focusFactor[0] + minCoC*focusFactor[1]));
+	}
+	return shadingRate;
+}
 
 //---------------------------------------------------------------------
 

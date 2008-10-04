@@ -53,7 +53,6 @@ namespace Aqsis {
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
 {
-	TqFloat			m_ShadingRate;
 	TqFloat			m_ShutterOpenTime;
 	TqFloat			m_ShutterCloseTime;
 	const TqFloat*	        m_LodBounds;
