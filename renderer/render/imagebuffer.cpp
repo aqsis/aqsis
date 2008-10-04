@@ -367,6 +367,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 		if( Bucket(XMinb, YMinb).IsProcessed() )
 		{
+			Aqsis:log() << error << "Trying to put a primitive in a bucket that has already been processed!" << std::endl;
 			XMinb = CurrentBucketCol();
 			YMinb = CurrentBucketRow();
 		}
