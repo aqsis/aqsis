@@ -4474,6 +4474,7 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	PARAM_CONSTRAINT_CHECK(zmin, >=, -absRadius);
 	PARAM_CONSTRAINT_CHECK(zmax, <=, absRadius);
 	PARAM_CONSTRAINT_CHECK(zmax, >=, -absRadius);
+	PARAM_CONSTRAINT_CHECK(zmin, <, zmax);
 	/// \todo thetamax == 0 should probably log a warning rather than an error.
 	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
 
