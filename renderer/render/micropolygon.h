@@ -942,13 +942,13 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		virtual TqFloat Time(TqUint index) const
 		{
-			assert( index < static_cast<TqInt>(m_Times.size()) );
+			assert( index < m_Times.size() );
 			return(m_Times[index]);
 		}
 
 		virtual CqMovingMicroPolygonKey* Key(TqUint index) const
 		{
-			assert( index < static_cast<TqInt>(m_Keys.size()) );
+			assert( index < m_Keys.size() );
 			return(m_Keys[index]);
 		}
 

@@ -125,8 +125,8 @@ void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& buc
 	m_bucketData->m_PixelYSamples = pixelYSamples;
 	m_bucketData->m_FilterXWidth = filterXWidth;
 	m_bucketData->m_FilterYWidth = filterYWidth;
-	m_bucketData->m_DiscreteShiftX = std::floor(m_bucketData->m_FilterXWidth/2.0f);
-	m_bucketData->m_DiscreteShiftY = std::floor(m_bucketData->m_FilterYWidth/2.0f);
+	m_bucketData->m_DiscreteShiftX = lfloor(m_bucketData->m_FilterXWidth/2.0f);
+	m_bucketData->m_DiscreteShiftY = lfloor(m_bucketData->m_FilterYWidth/2.0f);
 	m_bucketData->m_RealWidth = m_bucketData->m_XSize + (m_bucketData->m_DiscreteShiftX*2);
 	m_bucketData->m_RealHeight = m_bucketData->m_YSize + (m_bucketData->m_DiscreteShiftY*2);
 
