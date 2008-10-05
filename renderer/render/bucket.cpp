@@ -1101,48 +1101,37 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMP )
 		return;
 	}
 
-	// fill in sample info for this mpg so we don't have to keep fetching it for each sample.
-	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
-	{
-		m_bucketData->m_CurrentMpgSampleInfo.color = pMP->colColor()[0];
-	}
-	else
-	{
-		m_bucketData->m_CurrentMpgSampleInfo.color = gColWhite;
-	}
-
-	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
-	{
-		m_bucketData->m_CurrentMpgSampleInfo.opacity = pMP->colOpacity()[0];
-		m_bucketData->m_CurrentMpgSampleInfo.occludes = m_bucketData->m_CurrentMpgSampleInfo.opacity >= gColWhite;
-	}
-	else
-	{
-		m_bucketData->m_CurrentMpgSampleInfo.opacity = gColWhite;
-		m_bucketData->m_CurrentMpgSampleInfo.occludes = true;
-	}
-
-	// use the single imagesample rather than the list if possible.
-	// transparent, matte or csg samples, or if we need more than the first depth
-	// value have to use the (slower) list.
-	m_bucketData->m_CurrentMpgSampleInfo.isOpaque = m_bucketData->m_CurrentMpgSampleInfo.occludes &&
-	                                    !pMP->pGrid()->pCSGNode() &&
-	                                    !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) &&
-	                                    !pMP->pGrid()->GetCachedGridInfo().m_IsMatte;
-
-	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
+	bool UsingDof = QGetRenderContext()->UsingDepthOfField();
 	bool IsMoving = pMP->IsMoving();
 
+	// Cache the shading interpolation type.  Ideally this should really be
+	// done by the CacheOutputInterpCoeffs(), or possibly once per grid...
+	const TqInt* interpType = pMP->pGrid()->pAttributes()
+		->GetIntegerAttribute("System", "ShadingInterpolation");
+	// At this stage, only use smooth shading interpolation for stationary
+	// grids without DoF.
+	/// \todo Allow smooth shading with MB or DoF.
+	m_bucketData->m_CurrentMpgSampleInfo.smoothInterpolation
+		= !(UsingDof || IsMoving) && (*interpType == ShadingInterp_Smooth);
+
+	// Cache output sample info for this mpg so we don't have to keep fetching
+	// it for each sample.
+	pMP->CacheOutputInterpCoeffs(m_bucketData->m_CurrentMpgSampleInfo);
+
+	// use the single imagesample rather than the list if possible.
+	// transparent, matte or csg samples, or if we need more than the first
+	// depth value have to use the (slower) list.
+	m_bucketData->m_CurrentMpgSampleInfo.isOpaque =
+		m_bucketData->m_CurrentMpgSampleInfo.occludes
+		&& !pMP->pGrid()->pCSGNode()
+		&& !pMP->pGrid()->GetCachedGridInfo().m_IsMatte
+		&& !(QGetRenderContext()->poptCurrent()->
+				GetIntegerOption("System", "DisplayMode")[0] & ModeZ);
+
 	if(IsMoving || UsingDof)
-	{
 		RenderMP_MBOrDof( pMP, IsMoving, UsingDof );
-	}
 	else
-	{
 		RenderMP_Static( pMP );
-	}
 }
 
 

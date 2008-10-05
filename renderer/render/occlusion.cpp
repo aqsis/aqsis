@@ -522,8 +522,10 @@ void CqOcclusionTree::SampleMP( std::vector<CqImagePixel>& aieImage,
 			pMP->MarkHit();
 
 			TqFloat* val = ImageVal.Data();
-			const CqColor& col = MpgSampleInfo.color;
-			const CqColor& opa = MpgSampleInfo.opacity;
+			CqColor col;
+			CqColor opa;
+			pMP->InterpolateOutputs(MpgSampleInfo, sample.m_Position, col, opa);
+
 			val[ 0 ] = col[0];
 			val[ 1 ] = col[1];
 			val[ 2 ] = col[2];
