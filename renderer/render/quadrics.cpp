@@ -401,7 +401,7 @@ void	CqSphere::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
-	Circle( vA, vB, vC, m_Radius, m_PhiMin, m_PhiMax, curve );
+	Circle( vA, vB, vC, m_Radius, std::min(m_PhiMin, m_PhiMax), std::max(m_PhiMin, m_PhiMax), curve );
 
 	CqMatrix matRot( degToRad ( m_ThetaMin ), vC );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
@@ -1161,7 +1161,7 @@ void	CqTorus::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
-	Circle( vA, vB, vC, m_MinorRadius, degToRad( m_PhiMin ), degToRad( m_PhiMax ), curve );
+	Circle( vA, vB, vC, m_MinorRadius, degToRad( std::min(m_PhiMin, m_PhiMax) ), degToRad( std::max(m_PhiMin, m_PhiMax) ), curve );
 	CqMatrix matRot( degToRad ( m_ThetaMin ), vC );
 	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot * ( *i );
