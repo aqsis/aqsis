@@ -90,7 +90,6 @@ class CqCubeFaceMapper
 		TqInt m_denomIndex;
 		TqFloat m_sOffset;
 		TqFloat m_tOffset;
-		TqFloat m_fovScale;
 		TqFloat m_sScale;
 		TqFloat m_tScale;
 	public:
@@ -110,7 +109,6 @@ class CqCubeFaceMapper
 			m_denomIndex(0),
 			m_sOffset(0),
 			m_tOffset(0.25),
-			m_fovScale(0.5*fovCotan),
 			m_sScale(0.5/3*fovCotan),
 			// use negative sign, since t increases _downward from the top_
 			m_tScale(-0.5/2*fovCotan)

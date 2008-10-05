@@ -41,11 +41,14 @@
 	#include <winsock2.h>
 	typedef	u_long in_addr_t;
 #else
+	#include <errno.h>
 	#include <signal.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
+	#include <time.h>  // for nanosleep()
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
+	#include <unistd.h>
 	#define	INVALID_SOCKET -1
 #endif
 #ifdef AQSIS_SYSTEM_MACOSX
@@ -197,10 +200,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				if (!pid)
 				{
+					// Child process executes the following after forking.
 #if defined AQSIS_SYSTEM_MACOSX
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
+					nice(2);
 					if(execvp("piqsl",argv) < 0)
 					{
 						CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
@@ -212,16 +217,31 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 						execvp(program.c_str(), argv);
 						free(argv[0]);
 					}
-					nice(2);
 #else
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
-					execvp("piqsl",argv);
 					nice(2);
+					execvp("piqsl",argv);
 #endif
+					// The child process shouldn't end up here.  If it does
+					// there's an error and we should terminate now after
+					// trying to report the problem.
+					switch(errno)
+					{
+						case EACCES:
+							Aqsis::log() << error << "access denied when executing piqsl\n";
+							break;
+						case ENOENT:
+							Aqsis::log() << error << "piqsl executable not found\n";
+							break;
+						default:
+							Aqsis::log() << error << "Could not execute piqsl\n";
+							break;
+					}
+					exit(1);
 				}
-			} 
+			}
 			else
 			{
 				// An error occurred
@@ -259,16 +279,24 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				return(PkDspyErrorUndefined);
 			}
 #endif
-			// The FB should be running at this point.
-			// Lets try and connect
-			if(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port))
+			// The framebuffer should be running at this point, but may not be
+			// responsive right away.  We try to connect at fixed intervals
+			// until we get a response or pass the timeout.
+			//
+			// timeRemaining and interval are in milliseconds.
+			long timeRemaining = 10000;
+			const long interval = 100;
+			while(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port) && timeRemaining > 0)
 			{
-#ifndef	AQSIS_SYSTEM_WIN32
-				sleep(2); //Give it time to startup
-#else
-				Sleep(2000); //Give it time to startup
-#endif
-				pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
+#				ifdef AQSIS_SYSTEM_WIN32
+					Sleep(interval);
+#				else
+					timespec sleepTime;
+					sleepTime.tv_sec = 0;
+					sleepTime.tv_nsec = 1000000*interval;
+					nanosleep(&sleepTime, 0);
+#				endif
+				timeRemaining -= interval;
 			}
 		}
 		if(pImage->m_socket)

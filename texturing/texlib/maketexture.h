@@ -76,7 +76,7 @@ struct SqFilterInfo
  *                    parameters for the mipmapping procedure.
  */
 AQSISTEX_SHARE void makeTexture(const std::string& inFileName, 
-		const std::string& outFileName, const SqFilterInfo& filterInfo, 
+		const std::string& outFileName, SqFilterInfo filterInfo, 
 		const SqWrapModes& wrapModes, const CqRiParamList& paramList);
 
 /** \brief Convert six texture files into a cube face environment map
@@ -126,7 +126,7 @@ AQSISTEX_SHARE void makeCubeFaceEnvironment(
 		const std::string& inNamePy, const std::string& inNameNy, 
 		const std::string& inNamePz, const std::string& inNameNz, 
 		const std::string& outFileName, TqFloat fieldOfView,
-		const SqFilterInfo& filterInfo, const CqRiParamList& paramList);
+		SqFilterInfo filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file into a latlong environment map
  *
@@ -146,7 +146,7 @@ AQSISTEX_SHARE void makeCubeFaceEnvironment(
  */
 AQSISTEX_SHARE void makeLatLongEnvironment(
 		const std::string& inFileName, const std::string& outFileName,
-		const SqFilterInfo& filterInfo, const CqRiParamList& paramList);
+		SqFilterInfo filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file to a shadow map.
  *

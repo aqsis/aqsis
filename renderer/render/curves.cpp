@@ -93,7 +93,7 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
  *
  * @return CqBound object containing the bounds.
  */
-void CqCurve::Bound(IqBound* bound) const
+void CqCurve::Bound(CqBound* bound) const
 {
 
 	// Get the boundary in camera space.
@@ -164,7 +164,6 @@ void CqCurve::CloneData(CqCurve* clone) const
  */
 TqFloat CqCurve::GetGridLength() const
 {
-
 	// we want to find the number of micropolygons per grid - the default
 	//  is 256 (16x16 micropolygon grid).
 	TqFloat micropolysPerGrid = 256;
@@ -175,21 +174,10 @@ TqFloat CqCurve::GetGridLength() const
 	if ( poptGridSize != NULL )
 		micropolysPerGrid = poptGridSize[0];
 
-	// find the shading rate
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute(
-	                          "System", "ShadingRate"
-	                      ) [ 0 ];
-
-	// we assume that the grids are square and take the square root to find
-	//  the number of micropolygons along one side
-	TqFloat mpgsAlongSide = sqrt( micropolysPerGrid );
-
-	// now, the number of pixels (raster space length) taken up by one
-	//  micropolygon is given by 1 / shading rate.  So, to find the length
-	//  in raster space of the edge of the micropolygon grid, we divide its
-	//  length (in micropolygons) by the shading rate
-	return mpgsAlongSide / ShadingRate;
-
+	// Assuming the grid is square, the side length of the grid in raster space
+	// is the following.
+	// TODO: this assumption may be pretty bad for RiCurves!
+	return sqrt(micropolysPerGrid * AdjustedShadingRate());
 }
 
 
@@ -222,7 +210,7 @@ void CqCurve::PopulateWidth()
 	        "width"
 	    );
 	widthP->SetSize( cVarying() );
-	for ( TqUint i = 0; i < cVarying(); i++ )
+	for (TqInt i = 0, numVarying = cVarying(); i < numVarying; i++ )
 	{
 		widthP->pValue( i )[0] = widthvalue;
 	}

@@ -1828,6 +1828,23 @@ void	CqRenderer::SetImage( CqImageBuffer* pImage )
 	m_pImageBuffer = pImage;
 }
 
+const TqFloat CqRenderer::MinCoCForBound(const CqBound& bound) const
+{
+	assert(m_UsingDepthOfField);
+	TqFloat z1 = bound.vecMin().z();
+	TqFloat z2 = bound.vecMax().z();
+	// First check whether the bound spans the focal plane; if so, return 0.
+	TqFloat focalDist = 1/m_OneOverFocalDistance;
+	if((z1 - focalDist)*(z2 - focalDist) < 0)
+		return 0;
+	// Otherwise, the minimum focal blur is achieved at one of the
+	// z-extents of the bound.
+	TqFloat minBlur = min(std::fabs(1/z1 - m_OneOverFocalDistance),
+				std::fabs(1/z2 - m_OneOverFocalDistance));
+	return m_DofMultiplier * min(m_DepthOfFieldScale.x(),
+			m_DepthOfFieldScale.y()) * minBlur;
+}
+
 //---------------------------------------------------------------------
 
 } // namespace Aqsis

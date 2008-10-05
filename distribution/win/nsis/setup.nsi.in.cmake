@@ -367,6 +367,9 @@ Section Uninstall
   ReadRegStr $PATH_NT HKCU "Environment" "PATH"
   ${un.WordReplace} "$PATH_NT" "$INSTDIR\bin;" "" "+" $PATH
   WriteRegExpandStr HKCU "Environment" "PATH" "$PATH"
+  ${If} $PATH == ""
+    DeleteRegValue HKCU "Environment" "PATH"
+  ${EndIf}
 
   ReadRegStr $PATH_NT_ALL HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
   ${un.WordReplace} "$PATH_NT_ALL" "$INSTDIR\bin;" "" "+" $PATH

@@ -1,5 +1,17 @@
 PROJECT(AQSISTYPES)
 
+#----------------------------------------------------------------------
+# create aqsis_config.h
+INCLUDE (CheckIncludeFiles)
+
+CHECK_INCLUDE_FILES(stdint.h AQSIS_HAVE_STDINT_H)
+CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/aqsis_config.h.in.cmake"
+	"${PROJECT_BINARY_DIR}/aqsis_config.h")
+
+
+#----------------------------------------------------------------------
+# Source files
+
 # NOTE: Not sure if this best, or we should exhaustively list the files.
 # The reason being, if we add a new file in this system, we need to 
 # manually re-run CMake to generate the source files, however, if we
@@ -7,7 +19,7 @@ PROJECT(AQSISTYPES)
 # re-run cmake.
 FILE(GLOB AQSISTYPES_SRCS ${PROJECT_SOURCE_DIR}/*.cpp)
 FILE(GLOB AQSISTYPES_HDRS ${PROJECT_SOURCE_DIR}/*.h)
-# TODO: choose the right subdirectory
+
 IF(UNIX OR APPLE)
 	FILE(GLOB AQSISTYPES_SYSTEM_SRCS ${PROJECT_SOURCE_DIR}/posix/*.cpp)
 	FILE(GLOB AQSISTYPES_SYSTEM_HDRS ${PROJECT_SOURCE_DIR}/posix/*.h)
@@ -19,12 +31,19 @@ ELSE(UNIX OR APPLE)
 ENDIF(UNIX OR APPLE)
 
 SET(AQSISTYPES_SRCS ${AQSISTYPES_SRCS} ${AQSISTYPES_SYSTEM_SRCS})
-SET(AQSISTYPES_HDRS ${AQSISTYPES_HDRS} ${AQSISTYPES_SYSTEM_HDRS})
+SET(AQSISTYPES_HDRS
+	${AQSISTYPES_HDRS}
+	${AQSISTYPES_SYSTEM_HDRS}
+	"${PROJECT_BINARY_DIR}/aqsis_config.h"
+)
 
 FILE(GLOB AQSISTYPES_TEST_SRCS ${PROJECT_SOURCE_DIR}/*_test.cpp)
 
 FILTER_OUT("${AQSISTYPES_TEST_SRCS}" "${AQSISTYPES_SRCS}" AQSISTYPES_SRCS) 
 
+
+#------------------------------------------------------------------------------
+# Targets
 INCLUDE_DIRECTORIES(${AQSIS_BOOST_INCLUDE_DIR})
 
 # Internal dependencies

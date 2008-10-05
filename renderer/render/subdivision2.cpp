@@ -1501,7 +1501,7 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 }
 
 
-void	CqSurfaceSubdivisionPatch::Bound(IqBound* bound) const
+void	CqSurfaceSubdivisionPatch::Bound(CqBound* bound) const
 {
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
@@ -2167,8 +2167,6 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	CqVector2D	avecHull[ 4 ];
 	TqInt i;
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
 	for ( i = 0; i < 4; i++ )
 		avecHull[ i ] = matCtoR * pTopology()->pPoints()->P()->pValue() [ aQfv[ i ]->VertexIndex() ];
 
@@ -2183,8 +2181,9 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	Vec2 = avecHull[ 2 ] - avecHull[ 1 ];
 	vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
-	uLen = sqrt( uLen / ShadingRate);
-	vLen = sqrt( vLen / ShadingRate);
+	TqFloat shadingRate = AdjustedShadingRate();
+	uLen = sqrt(uLen/shadingRate);
+	vLen = sqrt(vLen/shadingRate);
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
@@ -2294,7 +2293,7 @@ bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 }
 
 
-void	CqSurfaceSubdivisionMesh::Bound(IqBound* bound) const
+void	CqSurfaceSubdivisionMesh::Bound(CqBound* bound) const
 {
 	if( m_pTopology && m_pTopology->pPoints() && m_pTopology->pPoints()->P() )
 	{

@@ -2286,7 +2286,6 @@ RtVoid	RiShadingRate( RtFloat size )
 	PARAM_CONSTRAINT_CHECK(size, >, 0.0f);
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt( size );
 	QGetRenderContext() ->AdvanceTime();
 
 	EXCEPTION_CATCH_GUARD("RiShadingRate")
@@ -2446,16 +2445,31 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 
 	if ( type != 0 && strstr( type, RI_FLATNESS ) )
 	{
-		TqFloat* flatnessAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "GeometricFlatness" );
+		TqFloat* flatnessAttr = QGetRenderContext()->pattrWriteCurrent()->
+			GetFloatAttributeWrite("System", "GeometricFlatness");
 		flatnessAttr[0] = value;
-		Aqsis::log() << warning << "RiGeometricApproximation flatness test not yet implemented" << std::endl;
+		Aqsis::log() << warning
+			<< "RiGeometricApproximation flatness test not yet implemented\n";
+	}
+	else if(type && strstr(type, "focusfactor"))
+	{
+		TqFloat* focusFactorAttr = QGetRenderContext()->pattrWriteCurrent()->
+			GetFloatAttributeWrite("System", "GeometricFocusFactor");
+		if(strstr(type, "focusfactor1"))
+			focusFactorAttr[0] = value;
+		else
+			focusFactorAttr[1] = value;
+	}
+	else if(type && strstr(type, "motionfactor"))
+	{
+		Aqsis::log() << warning
+			<< "RiGeometricApproximation \"motionfactor\" not yet implemented\n";
 	}
 	else
 	{
-		Aqsis::log() << warning << "RiGeometricApproximation type not known" << std::endl;
+		Aqsis::log() << warning << "RiGeometricApproximation type not known\n";
 	}
 	EXCEPTION_CATCH_GUARD("RiGeometricApproximation")
-	return ;
 }
 
 
@@ -3417,6 +3431,8 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	TqInt  pixels_h = static_cast<TqInt> ( Bound.vecCross().y() );
 
 	// Adjust to shading rate
+	// TODO: Blobbies should be CqSurfaces - in that case they could make of
+	// the AdjustedShadingRate() function to adjust the shading for DoF and MB
 	TqInt shading_rate = max(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
 	pixels_w /= shading_rate;
 	pixels_h /= shading_rate;
@@ -4458,6 +4474,7 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	PARAM_CONSTRAINT_CHECK(zmin, >=, -absRadius);
 	PARAM_CONSTRAINT_CHECK(zmax, <=, absRadius);
 	PARAM_CONSTRAINT_CHECK(zmax, >=, -absRadius);
+	PARAM_CONSTRAINT_CHECK(zmin, <, zmax);
 	/// \todo thetamax == 0 should probably log a warning rather than an error.
 	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
 

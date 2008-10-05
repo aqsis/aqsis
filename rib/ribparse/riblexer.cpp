@@ -30,6 +30,8 @@
 #include <string>
 #include <sstream>
 
+#include <boost/cstdint.hpp> // for uint64_t
+
 #include "aqsismath.h"
 
 namespace Aqsis
@@ -551,10 +553,10 @@ inline TqDouble CqRibLexer::decodeFloat64(CqRibInputBuffer& inBuf)
 	// union to avoid illegal type-punning
 	union UqFloatInt64 {
 		TqDouble d;
-		TqUint64 i;
+		boost::uint64_t i;
 	};
 	UqFloatInt64 conv;
-	conv.i = static_cast<TqUint64>(decodeInt(inBuf, 4)) << 32;
+	conv.i = static_cast<boost::uint64_t>(decodeInt(inBuf, 4)) << 32;
 	conv.i += decodeInt(inBuf, 4);
 	return conv.d;
 }

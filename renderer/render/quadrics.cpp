@@ -339,10 +339,9 @@ TqUlong CqQuadric::EstimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
-
-	m_uDiceSize = lceil( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
-	m_vDiceSize = lceil( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
+	TqFloat sqrtShadingRate = sqrt(AdjustedShadingRate());
+	m_uDiceSize = lceil(ESTIMATEGRIDSIZE * maxusize/sqrtShadingRate);
+	m_vDiceSize = lceil(ESTIMATEGRIDSIZE * maxvsize/sqrtShadingRate);
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
@@ -398,7 +397,7 @@ CqSurface*	CqSphere::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqSphere::Bound(IqBound* bound) const
+void	CqSphere::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
@@ -537,7 +536,7 @@ CqSurface*	CqCone::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqCone::Bound(IqBound* bound) const
+void	CqCone::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	TqFloat zmin = m_vMin * m_Height;
@@ -692,7 +691,7 @@ CqSurface*	CqCylinder::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqCylinder::Bound(IqBound* bound) const
+void	CqCylinder::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( m_Radius, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
@@ -835,7 +834,7 @@ CqSurface*	CqHyperboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqHyperboloid::Bound(IqBound* bound) const
+void	CqHyperboloid::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	curve.push_back( m_Point1 );
@@ -997,7 +996,7 @@ CqSurface*	CqParaboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqParaboloid::Bound(IqBound* bound) const
+void	CqParaboloid::Bound(CqBound* bound) const
 {
 	/*	TqFloat xminang,yminang,xmaxang,ymaxang;
 		xminang=yminang=min(m_ThetaMin,m_ThetaMax);
@@ -1158,7 +1157,7 @@ CqSurface*	CqTorus::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqTorus::Bound(IqBound* bound) const
+void	CqTorus::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
@@ -1299,7 +1298,7 @@ CqSurface*	CqDisk::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqDisk::Bound(IqBound* bound) const
+void	CqDisk::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( m_MinorRadius, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );

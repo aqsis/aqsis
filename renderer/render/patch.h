@@ -77,7 +77,7 @@ class CqSurfacePatchBicubic : public CqSurface
 			return ( P()->pValue( ( iRow * 4 ) + iCol )[0] );
 		}
 
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
@@ -147,7 +147,7 @@ class CqSurfacePatchBilinear : public CqSurface
 		}
 
 		void	GenNormals();
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
@@ -227,7 +227,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		virtual	void	SetDefaultPrimitiveVariables( bool bUseDef_st = true )
 		{}
 
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual	CqMicroPolyGridBase* Dice()
 		{
 			return ( 0 );
@@ -326,7 +326,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		}
 #endif
 
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual	CqMicroPolyGridBase* Dice()
 		{
 			return ( 0 );

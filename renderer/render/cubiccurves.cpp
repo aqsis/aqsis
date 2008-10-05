@@ -1017,7 +1017,7 @@ TqInt CqCubicCurvesGroup::Split(
  *
  * The bound is then expanded by the maximum curve width.
  */
-void CqCubicCurvesGroup::Bound(IqBound* bound) const
+void CqCubicCurvesGroup::Bound(CqBound* bound) const
 {
 	// Start with an empty bound
 	CqVector3D boundMin(FLT_MAX, FLT_MAX, FLT_MAX);

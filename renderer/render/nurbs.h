@@ -300,7 +300,7 @@ class CqSurfaceNURBS : public CqSurface
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 
-		virtual	void	Bound(IqBound* bound) const;
+		virtual	void	Bound(CqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual bool	Diceable();
 

@@ -169,7 +169,7 @@ void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* 
 /** Get the boundary extents in camera space of the surface patch
  */
 
-void CqSurfacePatchBicubic::Bound(IqBound* bound) const
+void CqSurfacePatchBicubic::Bound(CqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -313,8 +313,6 @@ bool	CqSurfacePatchBicubic::Diceable()
 	CqVector2D	avecHull[ 16 ];
 	TqInt i;
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
 	for ( i = 0; i < 16; i++ )
 		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
 
@@ -404,8 +402,9 @@ bool	CqSurfacePatchBicubic::Diceable()
 			vLen = Vec3.Magnitude2();
 	}
 
-	uLen = sqrt( uLen  / ShadingRate);
-	vLen = sqrt( vLen  / ShadingRate);
+	TqFloat shadingRate = AdjustedShadingRate();
+	uLen = sqrt(uLen/shadingRate);
+	vLen = sqrt(vLen/shadingRate);
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 	// TODO: Should ensure powers of half to prevent cracking.
@@ -682,7 +681,7 @@ CqSurface* CqSurfacePatchBilinear::Clone() const
 /** Return the boundary extents in camera space of the surface patch
  */
 
-void CqSurfacePatchBilinear::Bound(IqBound* bound) const
+void CqSurfacePatchBilinear::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -747,8 +746,6 @@ bool	CqSurfacePatchBilinear::Diceable()
 	CqVector2D	avecHull[ 4 ];
 	TqInt i;
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
 	for ( i = 0; i < 4; i++ )
 		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
 
@@ -763,8 +760,9 @@ bool	CqSurfacePatchBilinear::Diceable()
 	Vec2 = avecHull[ 3 ] - avecHull[ 1 ];
 	vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
-	uLen = sqrt( uLen / ShadingRate);
-	vLen = sqrt( vLen / ShadingRate);
+	TqFloat shadingRate = AdjustedShadingRate();
+	uLen = sqrt(uLen/shadingRate);
+	vLen = sqrt(vLen/shadingRate);
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
@@ -933,7 +931,7 @@ CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-void CqSurfacePatchMeshBicubic::Bound(IqBound* bound) const
+void CqSurfacePatchMeshBicubic::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -1164,7 +1162,7 @@ CqSurface* CqSurfacePatchMeshBilinear::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-void CqSurfacePatchMeshBilinear::Bound(IqBound* bound) const
+void CqSurfacePatchMeshBilinear::Bound(CqBound* bound) const
 {
 	assert( NULL != P() );
 

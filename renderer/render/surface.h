@@ -223,7 +223,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		{
 			return ( m_CachedBound );
 		}
-		void	AdjustBoundForTransformationMotion( IqBound* B ) const;
+		void	AdjustBoundForTransformationMotion( CqBound* B ) const;
 
 		boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
 		{
@@ -567,6 +567,21 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
 		TqInt	m_SplitCount;		///< The number of times this GPrim has been split
 	protected:
+		/** Get the shading rate, adjusted for DoF (and MB in the future)
+		 *
+		 * Without depth of field or motion blur, this function just returns
+		 * the shading rate as given by the current attribute set.
+		 *
+		 * When depth of field is turned on, the shading rate is increased
+		 * according to value of the system "GeometricFocusFactor" attribute
+		 * (as specified with RiGeometricApproximation("focusfactor", ...) )
+		 *
+		 * \todo No adjustment is yet implemented for motion blur, but the
+		 * intention is to allow RiGeometricApproximation("motionfactor", ...)
+		 * to have an effect on the returned shading rate as well.
+		 */
+		TqFloat AdjustedShadingRate() const;
+
 		/** Protected member function to clone the data, used by the Clone() functions
 		 *  on the derived classes.
 		 */
@@ -604,7 +619,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		/** Get combined bound for all times
 		 * \return CqBound representing the geometric boundary of this GPrim over all time slots.
 		 */
-		virtual	void	Bound(IqBound* bound) const
+		virtual	void	Bound(CqBound* bound) const
 		{
 			bound->vecMin() = CqVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 			bound->vecMax() = CqVector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);

@@ -1346,7 +1346,7 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 /** Return the boundary extents in object space of the surface patch
  */
 
-void CqSurfaceNURBS::Bound(IqBound* bound) const
+void CqSurfaceNURBS::Bound(CqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -1670,8 +1670,6 @@ bool	CqSurfaceNURBS::Diceable()
 	if (gs >= 1.0)
 		gridsize = gs * gs;
 
-	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
-
 	CqMatrix matCtoR;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
@@ -1716,8 +1714,9 @@ bool	CqSurfaceNURBS::Diceable()
 		return ( false );
 	}
 
-	MaxuLen /= ShadingRateSqrt;
-	MaxvLen /= ShadingRateSqrt;
+	TqFloat sqrtShadingRate = sqrt(AdjustedShadingRate());
+	MaxuLen /= sqrtShadingRate;
+	MaxvLen /= sqrtShadingRate;
 	m_uDiceSize = max<TqInt>(lround(MaxuLen), 1);
 	m_vDiceSize = max<TqInt>(lround(MaxvLen), 1);
 
@@ -1788,8 +1787,7 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 			MaxLen = Len;
 		cSegments++;
 	}
-	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
-	MaxLen /= ShadingRateSqrt;
+	MaxLen /= sqrt(AdjustedShadingRate());
 
 	TqInt SplitCount = static_cast<TqUint>( max(MaxLen, 1.0f) );
 

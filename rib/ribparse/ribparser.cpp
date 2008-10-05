@@ -21,6 +21,8 @@
  *
  * \brief RIB parser implementation
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
+ *
+ * TODO: Standardize the error reporting
  */
 
 #include "ribparser.h"
@@ -35,6 +37,7 @@ CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 		bool ignoreUnrecognized)
 	: m_lex(lexer),
 	m_requests(requests),
+	m_declaredVars(),
 	m_ignoreUnrecognized(ignoreUnrecognized),
 	m_floatArrayPool(),
 	m_intArrayPool(),
@@ -233,6 +236,19 @@ const void CqRibParser::getParamList(IqRibParamList& paramList)
 		}
 		// get a string representing the name of the param list.
 		CqPrimvarToken primvarTok(m_lex->get().stringVal().c_str());
+		// If the string wasn't an inline declaration, retrieve it from the
+		// stored set of parameters.
+		if(primvarTok.type() == type_invalid)
+		{
+			TqPrimvarMap::const_iterator tokLoc
+				= m_declaredVars.find(primvarTok.name());
+			if(tokLoc == m_declaredVars.end())
+			{
+				AQSIS_THROW(XqParseError, "Unknown token \"" << primvarTok.name()
+						<< "\" encountered at" << " (" << m_lex->pos() << ")");
+			}
+			primvarTok = tokLoc->second;
+		}
 
 		// Now parse the value associated with the parameter string.
 		switch(primvarTok.type())

@@ -29,6 +29,7 @@
 
 #include <ctime>
 #include <cstdio>
+#include <cstdlib>
 
 #include "aqsismath.h"
 #include "logging.h"
