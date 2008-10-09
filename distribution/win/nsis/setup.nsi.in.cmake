@@ -351,6 +351,7 @@ FunctionEnd
 
 
 ; Uninstaller
+!include "LogicLib.nsh"
 !include "WordFunc.nsh"
 !insertmacro un.WordReplace
 
