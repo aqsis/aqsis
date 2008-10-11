@@ -34,6 +34,7 @@
 
 #include "multitimer.h"
 #include "ri.h"
+#include "enum.h"
 
 namespace Aqsis {
 
@@ -55,32 +56,101 @@ extern void gStats_setF( TqInt index, TqFloat value );
 //----------------------------------------------------------------------
 // Timer stuff.
 
-#if USE_TIMERS
+#ifdef USE_TIMERS
 
 /// Append time taken to the end of the current scope to the named timer.
-#define TIME_SCOPE(name) AQSIS_TIME_SCOPE(g_timerSet.getTimer(name));
-
+#define AQSIS_TIME_SCOPE(id) CqScopeTimer aq_scope_timer__(\
+		g_timerSet.getTimer(EqTimerStats::id))
 /// Start the named timer.
-#define TIMER_START(name) g_timerSet.getTimer(name).start();
+#define AQSIS_TIMER_START(id) g_timerSet.getTimer(EqTimerStats::id).start()
 /// Stop the named timer and append the time since the corresponding TIMER_START
-#define TIMER_STOP(name) g_timerSet.getTimer(name).stop();
+#define AQSIS_TIMER_STOP(id) g_timerSet.getTimer(EqTimerStats::id).stop()
 
-/// Dump timing information from all global timers into the given destination stream.
-#define TIMER_DUMP(dest) g_timerSet.dump(dest);
+/// A class enum containing constants for each operation to be timed.
+struct EqTimerStats
+{
+	enum Enum
+	{
+		// surface handling
+		Post_surface,
+		Dicable_check,
+		Dicing,
+		Splitting,
+		// buckets
+		Display_bucket,
+		Prepare_bucket,
+		// culling
+		Backface_culling,
+		Occlusion_culling_initialisation,
+		Occlusion_culling_surfaces,
+		Occlusion_culling,
+		// grids
+		Project_points,
+		Bust_grids,
+		// shading
+		Atmosphere_shading,
+		Displacement_shading,
+		Imager_shading,
+		Surface_shading,
+		// texturing
+		Make_texture,
+		// sampling
+		Combine_samples,
+		Filter_samples,
+		Render_MPGs,
+		// high level
+		Frame,
+		Parse,
 
-/// Clear all timers from the global timer repository
-#define CLEAR_TIMERS g_timerSet.clearTimers();
+		// invalid
+		LAST,
+	};
+	static const TqInt size = LAST;
+};
 
-extern CqTimerSet g_timerSet;
+AQSIS_ENUM_INFO_BEGIN(EqTimerStats::Enum, EqTimerStats::LAST)
+	// surface handling
+	"Post surface",
+	"Dicable check",
+	"Dicing",
+	"Splitting",
+	//buckets
+	"Display bucket",
+	"Prepare bucket",
+	// culling
+	"Backface culling",
+	"Occlusion culling initialisation",
+	"Occlusion culling surfaces",
+	"Occlusion culling",
+	// grids
+	"Project points",
+	"Bust grids",
+	// shading
+	"Atmosphere shading",
+	"Displacement shading",
+	"Imager shading",
+	"Surface shading",
+	// texturing
+	"Make texture",
+	// sampling
+	"Combine samples",
+	"Filter samples",
+	"Render MPGs",
+	// high level
+	"Frame",
+	"Parse",
+	// invalid
+	"LAST"
+AQSIS_ENUM_INFO_END
+
+extern CqTimerSet<EqTimerStats> g_timerSet;
 
 #else // USE_TIMERS
 
 // dummy declarations if compiled without timers.
-#define TIME_SCOPE(name)
-#define TIMER_START(identifier)
-#define TIMER_STOP(identifier)
-#define TIMER_DUMP(dest)
-#define CLEAR_TIMERS
+#define AQSIS_TIME_SCOPE(name)
+#define AQSIS_TIMER_START(identifier)
+#define AQSIS_TIMER_STOP(identifier)
 
 #endif // USE_TIMERS
 

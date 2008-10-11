@@ -31,9 +31,13 @@
 
 #include "aqsis.h"
 
-#include <iosfwd>
-#include <map>
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <ctime>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
@@ -76,30 +80,48 @@ class COMMON_SHARE CqTimer
 
 
 //------------------------------------------------------------------------------
-/** \brief Factory class and storage for a set of CqTimer's
+/** \brief Storage for a set of CqTimer's
  *
- * The factory supports retreival of timers by name, and manages the lifetime
+ * The set supports retreival of timers by identifier, and manages the lifetime
  * of the timer classes.  Dumping the timer results to a stream in text format
- * is supported via the dump() function.
+ * is supported via the printTimes() function.
+ *
+ * EnumClassT is a "class enum" specifying enum label identifiers for the
+ * individual timers held by CqTimerSet:
+ *
+ * \code
+ * struct EnumClassT
+ * {
+ *   enum Enum
+ *   {
+ *     // ... enumeration constants
+ *   };
+ *   static const int size = length_of_Enum;
+ * };
+ * \endcode
  */
-COMMON_SHARE class CqTimerSet
+template<typename EnumClassT>
+class CqTimerSet
 {
 	public:
+		// Set up EnumClassT::size timers.
+		CqTimerSet();
+
 		/// Get a timer by name, or create a new one if it doesn't exist.
-		CqTimer& getTimer(const std::string& timerName);
-		/// Delete all timers from the factory
-		void clearTimers();
+		CqTimer& getTimer(typename EnumClassT::Enum id);
 
 		/// Dump timing results to the given stream
-		void dump(std::ostream& ostr);
+		void printTimes(std::ostream& ostr) const;
 
 	private:
-		void numThou(std::ostream& ostr, int n);
-		std::string timeToString(double time);
+		static void numThou(std::ostream& ostr, int n);
+		static std::string timeToString(double time);
 
-		typedef std::map<std::string, boost::shared_ptr<CqTimer> > TqTimerMap;
-		TqTimerMap m_map;
+		struct SqTimeSort;
+		typedef std::vector<boost::shared_ptr<CqTimer> > TqTimerVec;
+		TqTimerVec m_timers;
 };
+
 
 //------------------------------------------------------------------------------
 /** \brief A scope class for starting and automatically stopping a timer.
@@ -111,7 +133,7 @@ COMMON_SHARE class CqTimerSet
  * //...
  *
  * {
- *   AQSIS_TIME_SCOPE(someTimer);
+ *   CqScopeTimer scopeTimer(someTimer);
  *
  *   // ...
  *
@@ -125,10 +147,6 @@ class CqScopeTimer
 	private:
 		CqTimer& m_timer;
 };
-
-/// Add time until the end of the current scope to the given timer
-#define AQSIS_TIME_SCOPE(timer) CqScopeTimer aq_scope_timer__(timer)
-
 
 
 //==============================================================================
@@ -172,22 +190,95 @@ inline long CqTimer::numSamples() const
 
 //------------------------------------------------------------------------------
 // CqTimerSet implementation
-inline CqTimer& CqTimerSet::getTimer(const std::string& timerName)
+template<typename EnumClassT>
+inline CqTimerSet<EnumClassT>::CqTimerSet()
+	: m_timers(EnumClassT::size)
 {
-	TqTimerMap::iterator pos = m_map.find(timerName);
-	if (pos != m_map.end())
-		return *pos->second;
-	else
+	for(int i = 0; i < EnumClassT::size; ++i)
+		m_timers[i].reset(new CqTimer());
+}
+
+template<typename EnumClassT>
+inline CqTimer& CqTimerSet<EnumClassT>::getTimer(typename EnumClassT::Enum id)
+{
+	return *m_timers[id];
+}
+
+/// Functor for sorting times in decreasing order.
+template<typename EnumClassT>
+struct CqTimerSet<EnumClassT>::SqTimeSort
+{
+	typedef std::pair<typename EnumClassT::Enum, const CqTimer*> TqValueType;
+	bool operator() (const TqValueType& lhs, const TqValueType& rhs) const
 	{
-		boost::shared_ptr<CqTimer> newOne(new CqTimer());
-		m_map.insert(TqTimerMap::value_type(timerName, newOne));
-		return *newOne;
+		return lhs.second->totalTime() > rhs.second->totalTime();
+	}
+};
+
+template<typename EnumClassT>
+void CqTimerSet<EnumClassT>::printTimes(std::ostream& ostr) const
+{
+	ostr << std::setw(65) << std::setfill('-') << "-\n";
+	char tStr[100];
+	time_t t = time(0);
+	std::strftime(tStr, sizeof(tStr), " at %X %#x", localtime(&t));
+	ostr << "Timings" << tStr << "\n";
+	ostr << std::setw(65) << std::setfill('-') << "-\n";
+
+	// Sort the timers first
+	std::vector<std::pair<typename EnumClassT::Enum, const CqTimer*> > sorted;
+	for(int i = 0, end = m_timers.size(); i < end; ++i)
+	{
+		sorted.push_back(std::make_pair(
+			static_cast<typename EnumClassT::Enum>(i), m_timers[i].get()));
+	}
+	std::sort(sorted.begin(), sorted.end(), SqTimeSort());
+
+	// Output times
+	for(int i = 0, end = sorted.size(); i < end; ++i)
+	{
+		const CqTimer* timer = sorted[i].second;
+		long numSamps = timer->numSamples();
+		if(numSamps > 0)
+		{
+			ostr << sorted[i].first
+				<< " took " << timeToString(timer->totalTime())
+				<< "(called ";
+			numThou(ostr, numSamps);
+			ostr << " time" << ((numSamps > 1) ? "s" : "") << ")\n";
+		}
 	}
 }
 
-inline void CqTimerSet::clearTimers()
+/// Format a number with commas as thousands separators
+template<typename EnumClassT>
+void CqTimerSet<EnumClassT>::numThou(std::ostream& ostr, int n)
 {
-	m_map.clear();
+	if (n > 1000)
+	{
+		numThou(ostr, n / 1000);
+		ostr << "," << std::setw(3) << std::setfill('0') << (n - ((n / 1000) * 1000));
+	}
+	else
+		ostr << n;
+}
+
+/// Format time as a string, choosing the most appropriate SI prefix
+template<typename EnumClassT>
+std::string CqTimerSet<EnumClassT>::timeToString(double time)
+{
+	std::ostringstream ostr;
+	ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+	ostr.precision(2);
+
+	if (time > 0.5)
+		ostr << time << " seconds ";
+	else if(time > 1e-3)
+		ostr << time*1e3 << " milli secs ";
+	else
+		ostr << time*1e6 << " micro secs ";
+
+	return ostr.str();
 }
 
 //------------------------------------------------------------------------------

@@ -541,14 +541,12 @@ CqTextureMapOld::~CqTextureMapOld()
  */
 CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt directory, bool fProt )
 {
-        //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
 	CqTextureMapBuffer *lastcache = m_apLast[directory%256];
 
 	if (lastcache && lastcache->IsValid(s, t, directory))
 	{
-		//TIMER_STOP("GetBuffer");
 		QGetRenderContext() ->Stats().IncTextureHits( 0, 4 );
 		return lastcache;
 	}
@@ -563,7 +561,6 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 			QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
 			CqTextureMapBuffer* pbuffer = *i;
 			m_apLast[directory%256] = pbuffer;
-			//TIMER_STOP("GetBuffer");
 			return ( pbuffer );
 		}
 	}
@@ -577,7 +574,6 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 		if ( !fileImage.IsValid() )
 		{
 			Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
-			//TIMER_STOP("GetBuffer");
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -624,7 +620,6 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 		m_apMipMaps[directory%256].push_front( pTMB );
 		m_apLast[directory%256] = pTMB;
 	}
-	//TIMER_STOP("GetBuffer");
 	return ( pTMB );
 }
 
@@ -788,7 +783,6 @@ void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, 
 {
 	register TqInt c;
 
-	TIME_SCOPE("Texture mapping")
 
 	// u/v is provided to the function now; they are the average of
 	// sample positions (u1,v1), (u2, v2).
@@ -882,7 +876,6 @@ void CqTextureMapOld::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 {
 	register TqInt c;
 
-	TIME_SCOPE("Texture mapping")
 
 	// u/v is provided to the function now; they are the average of
 	// sample positions (u1,v1), (u2, v2).
@@ -1913,7 +1906,6 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 
         u = v = 0.0f;
 
-	TIME_SCOPE("Environment mapping")
 
 	// Textures are filtered with either bilinear or trilinear mip-mapping.
 	// Trilinear gives higher image quality but takes more time.  To disable trilinear

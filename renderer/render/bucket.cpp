@@ -723,7 +723,7 @@ void CqBucket::FilterBucket(bool empty)
 		// Init & Execute the imager shader
 
 		QGetRenderContext() ->poptCurrent()->InitialiseColorImager( this );
-		TIME_SCOPE("Imager shading")
+		AQSIS_TIME_SCOPE(Imager_shading);
 
 		if ( fImager )
 		{

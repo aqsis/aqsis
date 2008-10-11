@@ -35,7 +35,6 @@
 #include "irenderer.h"
 #include "isurface.h"
 #include "logging.h"
-#include "multitimer.h"
 #include "shadervariable.h"
 #include "sstring.h"
 #include "version.h"

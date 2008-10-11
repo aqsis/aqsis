@@ -357,7 +357,6 @@ void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, 
 	if (index == 0)
 		CriticalMeasure();
 
-	TIME_SCOPE("Shadow Mapping")
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );

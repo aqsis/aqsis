@@ -56,7 +56,7 @@ CqImagersource::~CqImagersource()
 //---------------------------------------------------------------------
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
-	TIME_SCOPE("Imager shading")
+	AQSIS_TIME_SCOPE(Imager_shading);
 
 	// We use one less than the bucket width and height here, since these
 	// resolutions really represent one less than the number of shaded points

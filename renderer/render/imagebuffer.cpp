@@ -299,7 +299,7 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
-	TIME_SCOPE("Post Surface")
+	AQSIS_TIME_SCOPE(Post_surface);
 	// Count the number of total gprims
 	STATS_INC( GPR_created_total );
 
@@ -647,7 +647,7 @@ void CqImageBuffer::CacheGridInfo(CqMicroPolyGridBase* pGrid)
 void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
 	{
-		TIME_SCOPE("Render MPGs")
+		AQSIS_TIME_SCOPE(Render_MPGs);
 		// Render any waiting MPGs
 		std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
 		CqMicroPolyGridBase* pPrevGrid = NULL;
@@ -1031,7 +1031,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 			bool fCull = false;
 			if ( !bIsEmpty && pSurface->fCachedBound() )
 			{
-				TIME_SCOPE("Occlusion culling surfaces")
+				AQSIS_TIME_SCOPE(Occlusion_culling_surfaces);
 				fCull = OcclusionCullSurface( pSurface );
 			}
 			if ( fCull )
@@ -1046,7 +1046,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		bool fDiceable = false;
 		// Dice & shade the surface if it's small enough...
 		{
-			TIME_SCOPE("Dicable check")
+			AQSIS_TIME_SCOPE(Dicable_check);
 			fDiceable = pSurface->Diceable();
 		}
 
@@ -1056,7 +1056,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 			Bucket.popSurface();
 			CqMicroPolyGridBase* pGrid;
 			{
-				TIME_SCOPE("Dicing")
+				AQSIS_TIME_SCOPE(Dicing);
 				pGrid = pSurface->Dice();
 			}
 
@@ -1090,7 +1090,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 				TqInt cSplits = 0;
 				std::vector<boost::shared_ptr<CqSurface> > aSplits;
 				{
-					TIME_SCOPE("Splits")
+					AQSIS_TIME_SCOPE(Splitting);
 					cSplits = pSurface->Split( aSplits );
 				}
 				TqInt i;
@@ -1129,27 +1129,23 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
 	if(!bIsEmpty)
 	{
-		TIME_SCOPE("Combine")
+		AQSIS_TIME_SCOPE(Combine_samples);
 		CqBucket::CombineElements(depthfilter, zThreshold);
 	}
 
-	TIMER_START("Filter")
-	if (fImager)
-		bIsEmpty = false;
-
-	Bucket.FilterBucket(bIsEmpty);
-	if(!bIsEmpty)
 	{
-		Bucket.ExposeBucket();
-		// \note: Used to quantize here too, but not any more, as it is handled by
-		//	  ddmanager in a specific way for each display.
-	}
+		AQSIS_TIME_SCOPE(Filter_samples);
+		if (fImager)
+			bIsEmpty = false;
 
-	TIMER_STOP("Filter")
+		Bucket.FilterBucket(bIsEmpty);
+		if(!bIsEmpty)
+			Bucket.ExposeBucket();
+	}
 
 	BucketComplete();
 	{
-		TIME_SCOPE("Display bucket")
+		AQSIS_TIME_SCOPE(Display_bucket);
 		QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
 	}
 }
@@ -1296,7 +1292,7 @@ void CqImageBuffer::RenderImage()
 			bIsEmpty = false;
 
 		{
-			TIME_SCOPE("Prepare bucket")
+			AQSIS_TIME_SCOPE(Prepare_bucket);
 			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), bJitter, bIsEmpty );
 			CqBucket::InitialiseFilterValues();
 		}
@@ -1331,7 +1327,7 @@ void CqImageBuffer::RenderImage()
 
 		if ( !bIsEmpty )
 		{
-			TIME_SCOPE("Occlusion culling initialisation")
+			AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
 			CqOcclusionBox::SetupHierarchy( &CurrentBucket(), xmin, ymin, xmax, ymax );
 		}
 
