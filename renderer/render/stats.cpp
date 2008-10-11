@@ -21,21 +21,23 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+#include "stats.h"
+
 #include <iomanip>
 #include <iostream>
 #include <cstring>
 #include <string>
 
-#include "multitimer.h"
 #include "attributes.h"
 #include "imagebuffer.h"
 #include "renderer.h"
-#include "stats.h"
 #include "transform.h"
 #include "aqsismath.h"
 
 namespace Aqsis {
 
+/// Global collection of timer objects.
+CqTimerSet g_timerSet;
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
 // simply provide empty implementations and not have to link to libaqsis.
@@ -108,6 +110,9 @@ void CqStats::InitialiseFrame()
  */
 void CqStats::PrintStats( TqInt level ) const
 {
+#	define STATS_INT_GETI( index )	getI( index )
+#	define STATS_INT_GETF( index )	getF( index )
+
 	std::ostream& MSG = std::cout;
 	/*! Levels
 		Minimum := 0

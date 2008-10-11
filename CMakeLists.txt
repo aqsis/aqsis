@@ -165,10 +165,6 @@ ENDIF(AQSIS_USE_RPATH)
 # Define macros which enable compile-time features
 #-------------------------------------------------
 
-IF(AQSIS_USE_TIMERS)
-	ADD_DEFINITIONS(-DUSE_TIMERS)
-ENDIF(AQSIS_USE_TIMERS)
-
 ADD_DEFINITIONS(-DAQSIS_MAIN_CONFIG_NAME="${AQSIS_MAIN_CONFIG_NAME}")
 
 

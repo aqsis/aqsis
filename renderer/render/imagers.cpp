@@ -23,12 +23,9 @@
 		\author Michel Joron (joron@sympatico.ca)
 */
 
-#include	"multitimer.h"
-
-#include	"aqsis.h"
 #include	"imagers.h"
-#include	"file.h"
 
+#include	"stats.h"
 
 namespace Aqsis {
 

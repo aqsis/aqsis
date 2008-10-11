@@ -24,72 +24,10 @@
  *
  * Originally based on code published on the
  * CodeProject site:  http://www.codeproject.com/debug/multitimer.asp
- *
- *
- * \begincode
- *
- * Example usage:
- *  
- *	#include "multitimer.h"
- *  
- *	void my_func()
- *	{
- *		{
- *			TIME_SCOPE("some test")
- *			...
- *		}
- *		...
- *		CLEAR_TIMERS
- *		...
- *	 
- *		TIMER_START("some manual timer")
- *		...
- *		TIMER_STOP("some manual timer")
- *		...
- *	 
- *		TIMER_DUMP(std::cout)
- *	}
- *
- * \endcode
- *
  */
 
 #ifndef MULTITIMER_H_INCLUDED
 #define MULTITIMER_H_INCLUDED
-
-#if USE_TIMERS
-
-
-/// Append time taken to the end of the current scope to the named timer.
-#define TIME_SCOPE(name) CqScopeTimer _tim(g_timerFactory.getTimer(name));
-
-/// Start the named timer.
-#define TIMER_START(name) g_timerFactory.getTimer(name).start();
-/// Stop the named timer and append the time since the corresponding TIMER_START
-#define TIMER_STOP(name) g_timerFactory.getTimer(name).stop();
-
-/// Dump timing information from all global timers into the given destination stream.
-#define TIMER_DUMP(dest) g_timerFactory.dump(dest);
-
-/// Clear all timers from the global timer repository
-#define CLEAR_TIMERS g_timerFactory.clearTimers();
-
-
-#else // USE_TIMERS
-
-
-// dummy declarations if compiled without timers.
-#define TIME_SCOPE(name)
-#define TIMER_START(identifier)
-#define TIMER_STOP(identifier)
-#define TIMER_DUMP(dest)
-#define CLEAR_TIMERS
-
-
-#endif // USE_TIMERS
-
-
-#if USE_TIMERS
 
 #include "aqsis.h"
 
@@ -101,7 +39,6 @@
 #include <boost/timer.hpp>
 
 namespace Aqsis {
-
 
 //------------------------------------------------------------------------------
 /** \brief Simple accumulated timer class.
@@ -145,54 +82,58 @@ class COMMON_SHARE CqTimer
  * of the timer classes.  Dumping the timer results to a stream in text format
  * is supported via the dump() function.
  */
-class COMMON_SHARE CqTimerFactory
+COMMON_SHARE class CqTimerSet
 {
 	public:
 		/// Get a timer by name, or create a new one if it doesn't exist.
 		CqTimer& getTimer(const std::string& timerName);
-		/// Get an existing timer by name; return null if it doesn't exist.
-		CqTimer* getExistingTimer(const std::string& timerName);
 		/// Delete all timers from the factory
 		void clearTimers();
 
-		/// Format time as a string, choosing the most appropriate SI prefix
-		std::string timeToString(double time);
 		/// Dump timing results to the given stream
 		void dump(std::ostream& ostr);
 
 	private:
 		void numThou(std::ostream& ostr, int n);
+		std::string timeToString(double time);
 
 		typedef std::map<std::string, boost::shared_ptr<CqTimer> > TqTimerMap;
 		TqTimerMap m_map;
 };
+
+//------------------------------------------------------------------------------
+/** \brief A scope class for starting and automatically stopping a timer.
+ *
+ * Create one of these to time a scope:
+ *
+ * CqTimer someTimer;
+ *
+ * //...
+ *
+ * {
+ *   AQSIS_TIME_SCOPE(someTimer);
+ *
+ *   // ...
+ *
+ * } // someTimer is automatically stopped here.
+ */
+class CqScopeTimer
+{
+	public:
+		CqScopeTimer(CqTimer& timer);
+		~CqScopeTimer();
+	private:
+		CqTimer& m_timer;
+};
+
+/// Add time until the end of the current scope to the given timer
+#define AQSIS_TIME_SCOPE(timer) CqScopeTimer aq_scope_timer__(timer)
 
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-COMMON_SHARE extern CqTimerFactory g_timerFactory;
-
-// A scope class for starting and automatically stopping a timer.
-class CqScopeTimer
-{
-	public:
-		CqScopeTimer(CqTimer& timer)
-			: m_timer(timer)
-		{
-			m_timer.start();
-		}
-		~CqScopeTimer()
-		{
-			m_timer.stop();
-		}
-	private:
-		CqTimer& m_timer;
-};
-
-
-//------------------------------------------------------------------------------
 // CqTimer implementation
 inline CqTimer::CqTimer()
 	: m_totalTime(0),
@@ -230,16 +171,8 @@ inline long CqTimer::numSamples() const
 
 
 //------------------------------------------------------------------------------
-// CqTimerFactory implementation
-inline CqTimer* CqTimerFactory::getExistingTimer(const std::string& timerName)
-{
-	TqTimerMap::iterator pos = m_map.find(timerName);
-	if (pos == m_map.end())
-		return 0;
-	return pos->second.get();
-}
-
-inline CqTimer& CqTimerFactory::getTimer(const std::string& timerName)
+// CqTimerSet implementation
+inline CqTimer& CqTimerSet::getTimer(const std::string& timerName)
 {
 	TqTimerMap::iterator pos = m_map.find(timerName);
 	if (pos != m_map.end())
@@ -252,10 +185,24 @@ inline CqTimer& CqTimerFactory::getTimer(const std::string& timerName)
 	}
 }
 
+inline void CqTimerSet::clearTimers()
+{
+	m_map.clear();
+}
+
+//------------------------------------------------------------------------------
+// CqScopeTimer implementation
+inline CqScopeTimer::CqScopeTimer(CqTimer& timer)
+	: m_timer(timer)
+{
+	m_timer.start();
+}
+
+inline CqScopeTimer::~CqScopeTimer()
+{
+	m_timer.stop();
+}
 
 } // namespace Aqsis
-
-
-#endif // USE_TIMERS
 
 #endif // MULTITIMER_H_INCLUDED

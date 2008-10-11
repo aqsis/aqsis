@@ -36,8 +36,6 @@
 
 #include	"mpdump.h"
 
-#include	"multitimer.h"
-
 namespace Aqsis {
 
 

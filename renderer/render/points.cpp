@@ -31,15 +31,12 @@
 
 #include	<cmath>
 
-#include	"aqsis.h"
 #include	"points.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"polygon.h"
-
 #include	"ri.h"
-
-#include	"multitimer.h"
+#include	"stats.h"
 
 
 namespace Aqsis {

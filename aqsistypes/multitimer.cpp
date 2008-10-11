@@ -25,7 +25,7 @@
  *
  * Originally based on code published on the
  * CodeProject site:  http://www.codeproject.com/debug/multitimer.asp
-*/
+ */
 
 #include "aqsis.h"
 
@@ -37,46 +37,27 @@
 
 #include "multitimer.h"
 
-#if USE_TIMERS
-
 namespace Aqsis {
 
-CqTimerFactory g_timerFactory;
-
-//------------------------------------------------------------------------------
-// CqTimerFactory implementation
-
-void CqTimerFactory::clearTimers()
-{
-	m_map.clear();
-}
-
-std::string CqTimerFactory::timeToString(double time)
+/// Format time as a string, choosing the most appropriate SI prefix
+std::string CqTimerSet::timeToString(double time)
 {
 	std::ostringstream ostr;
-	ostr.setf(std::ios_base::fixed, std::ios_base::floatfield)
-		;
+	ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
 	ostr.precision(2);
 
-	if (time < 0)
-	{
-		ostr << '-';
-		time = -time;
-	}
+	if (time > 0.5)
+		ostr << time << " seconds ";
+	else if(time > 1e-3)
+		ostr << time*1e3 << " milli secs ";
+	else if(time > 1e-6)
+		ostr << time*1e6 << " micro secs ";
 
-	if (time > 500)
-		ostr << time / 1000 << " seconds ";
-	else
-	{
-		if (time > 1)
-			ostr << time << " milli secs ";
-		else
-			ostr << time * 1000 << " micro secs ";
-	}
 	return ostr.str();
 }
 
 namespace {
+// Helpers for sorting a list of timers.
 struct SqSorty
 {
 	SqSorty(const std::string& s, const CqTimer* t)
@@ -86,16 +67,19 @@ struct SqSorty
 	std::string str;
 	const CqTimer* tim;
 };
+
+// Fuctor sorting by highest time first
 struct SqTimeSort
-{	// Highest time first
+{
 	bool operator() (const SqSorty& m1, const SqSorty& m2)
 	{
 		return (m1.tim->totalTime() > m2.tim->totalTime());
 	}
 };
+
 } // unnamed namespace
 
-void CqTimerFactory::dump(std::ostream& ostr)
+void CqTimerSet::dump(std::ostream& ostr)
 {
 	ostr << std::setw(65) << std::setfill('-') << "-\n";
 	char tStr[100];
@@ -134,7 +118,7 @@ void CqTimerFactory::dump(std::ostream& ostr)
 }
 
 /// Format a number with commas as thousands separators
-void CqTimerFactory::numThou(std::ostream& ostr, int n)
+void CqTimerSet::numThou(std::ostream& ostr, int n)
 {
 	if (n > 1000)
 	{
@@ -146,6 +130,3 @@ void CqTimerFactory::numThou(std::ostream& ostr, int n)
 }
 
 } // namespace Aqsis
-
-#endif	// USE_TIMERS
-

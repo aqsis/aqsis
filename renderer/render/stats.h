@@ -27,12 +27,13 @@
 #ifndef STATS_H_INCLUDED
 #define STATS_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include  <time.h>
-#include  <iostream>
+#include <time.h>
+#include <iostream>
 
-#include	"ri.h"
+#include "multitimer.h"
+#include "ri.h"
 
 namespace Aqsis {
 
@@ -51,10 +52,37 @@ extern void gStats_setF( TqInt index, TqFloat value );
 #define	STATS_SETF( index , value )		gStats_setF( CqStats::index , value )
 
 
-// Internal stuff.
-#define STATS_INT_GETI( index )	getI( index )
-#define STATS_INT_GETF( index )	getF( index )
+//----------------------------------------------------------------------
+// Timer stuff.
 
+#if USE_TIMERS
+
+/// Append time taken to the end of the current scope to the named timer.
+#define TIME_SCOPE(name) AQSIS_TIME_SCOPE(g_timerSet.getTimer(name));
+
+/// Start the named timer.
+#define TIMER_START(name) g_timerSet.getTimer(name).start();
+/// Stop the named timer and append the time since the corresponding TIMER_START
+#define TIMER_STOP(name) g_timerSet.getTimer(name).stop();
+
+/// Dump timing information from all global timers into the given destination stream.
+#define TIMER_DUMP(dest) g_timerSet.dump(dest);
+
+/// Clear all timers from the global timer repository
+#define CLEAR_TIMERS g_timerSet.clearTimers();
+
+extern CqTimerSet g_timerSet;
+
+#else // USE_TIMERS
+
+// dummy declarations if compiled without timers.
+#define TIME_SCOPE(name)
+#define TIMER_START(identifier)
+#define TIMER_STOP(identifier)
+#define TIMER_DUMP(dest)
+#define CLEAR_TIMERS
+
+#endif // USE_TIMERS
 
 //----------------------------------------------------------------------
 /** \class CqStats

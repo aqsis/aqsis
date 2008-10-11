@@ -24,8 +24,6 @@
 		\todo: <b>Code Review</b>
 */
 
-#include	"multitimer.h"
-
 #include	"aqsis.h"
 
 #include	<stdarg.h>
@@ -60,6 +58,7 @@
 #include	"logging.h"
 #include	"logging_streambufs.h"
 #include	"maketexture.h"
+#include	"stats.h"
 
 #include	"ri_cache.h"
 

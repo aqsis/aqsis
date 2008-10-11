@@ -37,7 +37,7 @@
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"bucket.h"
-#include	"multitimer.h"
+#include	"stats.h"
 
 #include	"imagers.h"
 

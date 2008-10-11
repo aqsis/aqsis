@@ -29,7 +29,6 @@
 #include    <windows.h>
 #endif
 
-#include	"multitimer.h"
 #include	"aqsismath.h"
 #include	"stats.h"
 #include	"options.h"

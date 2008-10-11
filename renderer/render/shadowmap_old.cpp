@@ -24,7 +24,6 @@
 */
 
 #include	"aqsis.h"
-#include	"multitimer.h"
 
 #include	<cstring>
 #include	<iostream>
@@ -36,6 +35,7 @@
 #include	"version.h"
 #include	"renderer.h"
 #include	"logging.h"
+#include	"stats.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
