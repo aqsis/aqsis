@@ -1,3 +1,9 @@
+/**
+ * Menger Sponge primitive as renderman ProcDynamicLoad procedural geometry.
+ *
+ * Author: Chris Foster [chris42f (at) gmail (d0t) com]
+ */
+
 #include <ri.h>
 
 #include <sstream>
