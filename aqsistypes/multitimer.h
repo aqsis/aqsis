@@ -55,7 +55,7 @@ namespace Aqsis {
  * and maximum times out of the samples, or even an entire histogram) but these
  * should only be added if needed in the future.
  */
-class COMMON_SHARE CqTimer
+class CqTimer
 {
 	public:
 		/// Initialize a timer with 
