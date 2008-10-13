@@ -146,7 +146,7 @@ const CqString
 CqPluginBase::DLError( void )
 {
 	CqString errorlog;
-#ifdef AQSIS_NO_PLUGINS
+#ifndef AQSIS_NO_PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 
 	LPVOID lpMsgBuf;
