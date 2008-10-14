@@ -10,9 +10,9 @@
 #include <iostream>
 //#include <cstdlib>
 
-extern "C" RtPointer ConvertParameters(char* initialdata);
-extern "C" void Subdivide(RtPointer blinddata, RtFloat detailsize);
-extern "C" void Free(RtPointer blinddata);
+extern "C" AQSIS_EXPORT RtPointer ConvertParameters(char* initialdata);
+extern "C" AQSIS_EXPORT void Subdivide(RtPointer blinddata, RtFloat detailsize);
+extern "C" AQSIS_EXPORT void Free(RtPointer blinddata);
 
 
 /** A simple vector class with overloaded operators

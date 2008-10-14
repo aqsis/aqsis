@@ -14,5 +14,5 @@ WorldBegin
 	#
 	#   "level  xmin xmax  ymin ymax  zmin zmax"
 	#
-	Procedural "DynamicLoad" ["menger.so" "4  -1 1  -1 1  -1 1"] [-1 1  -1 1  -1 1]
+	Procedural "DynamicLoad" ["menger" "4  -1 1  -1 1  -1 1"] [-1 1  -1 1  -1 1]
 WorldEnd

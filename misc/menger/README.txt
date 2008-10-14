@@ -34,11 +34,23 @@ turn, and removing the centre 1/9th of the material as seen down the axis.
 Compiling
 =========
 
-The procedural must be compiled into a shared library before use.  On 64-bit
-linux systems with g++ this may be achieved as follows:
+The procedural must be compiled into a shared library before use.  
+
+Linux
+-----
+
+On 64-bit linux systems with g++ use the following command line:
 
 g++ -Wall -fPIC -O3 -shared menger.cpp -I /path/to/rih -o menger.so
 
 where path/to/rih is a path at which ri.h for the renderer can be found.
-Other systems and compilers should be similar, but the compiler flags required
-to obtain an appropriate shared library may vary.
+
+
+Win32
+-----
+
+On Win32 with the free Microsoft compiler (tested with VC2005):
+
+cl cl "/Ipath_to_aqsis_install\include\aqsis" menger.cpp /LD /MD /link "/LIBPATH:path_to_aqsis_install\lib" aqsis.lib
+
+where path_to_aqsis_install is the base path that the Aqsis package is installed, i.e. C:\Program Files\Aqsis.
