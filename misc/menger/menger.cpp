@@ -84,7 +84,7 @@ class MengerSponge
 		{ }
 		/** Extract sponge parameters from a string
 		 *
-		 * initString is in the form "level  x1 y1 z1  x2 y2 z2"
+		 * initString is in the form "level  x1 x2  y1 y1  z2 z2"
 		 */
 		MengerSponge(const char* initString)
 			: m_level(1),
@@ -92,8 +92,9 @@ class MengerSponge
 			m_max(1)
 		{
 			std::istringstream(initString) >> m_level
-				>> m_min.x >> m_min.y >> m_min.z
-				>> m_max.x >> m_max.y >> m_max.z;
+				>> m_min.x >> m_max.x
+				>> m_min.y >> m_max.y
+				>> m_min.z >> m_max.z;
 		}
 
 		/** Fill a renderman bound array with the bound for the current
