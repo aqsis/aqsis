@@ -60,17 +60,17 @@ class PrimVars
 		typedef FloatPrimVars::const_iterator const_iterator;
 		typedef FloatPrimVars::iterator iterator;
 
-		void append(const Aqsis::CqPrimvarToken& token,
-				const Aqsis::TqRiFloatArray& value = Aqsis::TqRiFloatArray());
-
 		// Find primvars by name
 		//   Methods returning pointers return null if not found;
 		//   Methods returning references throw if not found.
 		const Aqsis::TqRiFloatArray* findPtr(const std::string& name) const;
 		const Aqsis::TqRiFloatArray& find(const std::string& name) const;
-
 		const Aqsis::TqRiFloatArray* findPtr(const Aqsis::CqPrimvarToken& tok) const;
 		const Aqsis::TqRiFloatArray& find(const Aqsis::CqPrimvarToken& tok) const;
+
+		/// Convenience function appending the given (token,value) pair to the array.
+		void append(const Aqsis::CqPrimvarToken& token,
+				const Aqsis::TqRiFloatArray& value = Aqsis::TqRiFloatArray());
 
 		// Iterator access
 		const_iterator begin() const;
@@ -78,11 +78,15 @@ class PrimVars
 		const_iterator end() const;
 		iterator end();
 
+		/// Number of primvars
+		int size() const;
+		/// Indexing
+		TokFloatValPair& operator[](int i);
+		const TokFloatValPair& operator[](int i) const;
 		/// Access to the primvar last appended to the container.
 		TokFloatValPair& back();
-	private:
-		typedef std::vector<int> IndexVec;
 
+	private:
 		FloatPrimVars m_vars;
 
 		template<typename T>
@@ -212,6 +216,19 @@ inline PrimVars::iterator PrimVars::end()
 inline TokFloatValPair& PrimVars::back()
 {
 	return m_vars.back();
+}
+inline TokFloatValPair& PrimVars::operator[](int i)
+{
+	return m_vars[i];
+}
+inline const TokFloatValPair& PrimVars::operator[](int i) const
+{
+	return m_vars[i];
+}
+
+inline int PrimVars::size() const
+{
+	return m_vars.size();
 }
 
 /// Search for a primvar, returning a pointer or null if not found.

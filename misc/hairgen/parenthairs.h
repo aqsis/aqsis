@@ -26,7 +26,7 @@ class ParentHairs
 {
 	public:
 		/// Number of parent hairs per child in interpolation scheme
-		static const int numParents = 5;
+		static const int m_parentsPerChild = 5;
 
 		/** Create a parent hair interpolation object.
 		 *
@@ -57,10 +57,13 @@ class ParentHairs
 
 	private:
 		//--------------------------------------------------
-		static int findMaxDistIndex(const float dist[numParents]);
+		static int findMaxDistIndex(const float dist[m_parentsPerChild]);
 
-		void getParents(const Vec3& pos, int ind[numParents],
-				float weights[numParents]) const;
+		void getParents(const Vec3& pos, int ind[m_parentsPerChild],
+				float weights[m_parentsPerChild]) const;
+
+		static void perChildStorage(const PrimVars& primVars, int numParents,
+				std::vector<int>& storageCounts);
 
 		//--------------------------------------------------
 		/// flag for linear/cubic hairs
@@ -69,6 +72,7 @@ class ParentHairs
 		int m_vertsPerCurve;
 		/// hair primitive variables
 		boost::shared_ptr<PrimVars> m_primVars;
+		std::vector<int> m_storageCounts;
 		/// base points of hairs.
 		std::vector<Vec3> m_baseP;
 };

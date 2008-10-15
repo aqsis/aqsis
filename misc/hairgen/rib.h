@@ -117,7 +117,8 @@ class CurvesRequest : public Aqsis::IqRibRequest
 
 			// We can't deal with periodic curves or interpolate when there's
 			// less that four parents.
-			if(periodic || static_cast<int>(numVerts.size()) < ParentHairs::numParents)
+			if(periodic || static_cast<int>(numVerts.size()) <
+					ParentHairs::m_parentsPerChild)
 				return;
 
 			m_hairs.reset(new ParentHairs(linear, numVerts, primVars));
