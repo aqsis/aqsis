@@ -70,8 +70,11 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 					perChildStorage = m_vertsPerCurve;
 				else
 				{
+					// TODO: Fix this properly.
 					// varying count for cubic bezier splines.
-					perChildStorage = 2*(m_vertsPerCurve-1)/3;
+					// perChildStorage = 2*(m_vertsPerCurve-1)/3;
+					// varying count for cubic b-splines
+					perChildStorage = m_vertsPerCurve-2;
 				}
 				break;
 			case Aqsis::class_vertex:
