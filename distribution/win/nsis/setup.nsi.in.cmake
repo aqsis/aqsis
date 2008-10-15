@@ -254,6 +254,7 @@ Function AdditionalTasks
   Var /GLOBAL AQSISHOME
   Var /GLOBAL DESKTOP_ICON
   Var /GLOBAL FILE_EXTENSION
+  Var /GLOBAL MUI_PAGE_CUSTOM
   Var /GLOBAL PATH_NT
   Var /GLOBAL PATH_NT_ALL
   Var /GLOBAL PATH_NT_NONE
@@ -316,8 +317,8 @@ Function AdditionalTasksLeave
 
   ${NSD_GetState} $PATH_NT $CURRENTUSER
   ${NSD_GetState} $PATH_NT_ALL $ALLUSERS
-  ${NSD_GetState} $DESKTOP_ICON $DESKTOP
-  ${NSD_GetState} $QUICKLAUCH_ICON $QUICKLAUCH
+  ${NSD_GetState} $DESKTOP_ICON $DESKTOPUSER
+  ${NSD_GetState} $QUICKLAUCH_ICON $QUICKLAUCHUSER
   ${NSD_GetState} $AQSISHOME $HOME
   ${NSD_GetState} $FILE_EXTENSION $MIME
 FunctionEnd
@@ -351,7 +352,7 @@ FunctionEnd
 
 Function DesktopIcon
   ; Create desktop icon
-  ${If} $DESKTOP == 1
+  ${If} $DESKTOPUSER == 1
 
     DetailPrint "Creating desktop icon, please wait..."
 
@@ -363,7 +364,7 @@ FunctionEnd
 
 Function DesktopQuicklaunch
   ; Create Quick Lanuch icon
-  ${If} $QUICKLAUCH == 1
+  ${If} $QUICKLAUCHUSER == 1
 
     DetailPrint "Creating Quick Launch icon, please wait..."
 
