@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
 
 # Requires aqsis-1.5 to build.
 
-SET(AQSIS_HOME "/usr"
+SET(AQSIS_HOME "/usr/local"
 	CACHE PATH
 	"Base location of aqsis install")
 
