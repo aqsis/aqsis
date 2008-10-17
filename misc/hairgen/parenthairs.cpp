@@ -181,7 +181,7 @@ void ParentHairs::getParents(const Vec3& pos, int ind[m_parentsPerChild],
 
 	kdtree::kdtree2_result_vector neighbours;
 
-	m_lookupTree->n_nearest_brute_force(childPos, m_parentsPerChild, neighbours);
+	m_lookupTree->n_nearest(childPos, m_parentsPerChild, neighbours);
 
 	float maxDist2 = 0;
 	for(int i = 0; i < m_parentsPerChild; ++i)
