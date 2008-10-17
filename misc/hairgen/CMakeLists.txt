@@ -12,6 +12,7 @@ SET(HAIRGEN_SOURCES
 	emitter.cpp
 	hair.cpp
 	parenthairs.cpp
+	kdtree/kdtree2.cpp
 )
 
 INCLUDE_DIRECTORIES("${AQSIS_HOME}/include")

@@ -11,6 +11,9 @@
 #include <algorithm> 
 #include <iostream>
 
+namespace kdtree
+{
+
 // utility
 
 inline float squared(const float x) {
@@ -807,3 +810,5 @@ void kdtree2_node::process_terminal_node_fixedball(searchrecord& sr) {
 
   }
 }
+
+} // namespace kdtree

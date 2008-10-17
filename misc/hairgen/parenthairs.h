@@ -8,8 +8,10 @@
 
 #include <vector>
 
+#include <boost/scoped_ptr.hpp>
 #include <aqsis/ribparser.h>
 
+#include "kdtree/kdtree2.hpp"
 #include "primvar.h"
 #include "util.h"
 
@@ -57,13 +59,13 @@ class ParentHairs
 
 	private:
 		//--------------------------------------------------
-		static int findMaxDistIndex(const float dist[m_parentsPerChild]);
-
 		void getParents(const Vec3& pos, int ind[m_parentsPerChild],
 				float weights[m_parentsPerChild]) const;
 
 		static void perChildStorage(const PrimVars& primVars, int numParents,
 				std::vector<int>& storageCounts);
+
+		void initLookup(const Aqsis::TqRiFloatArray& P, int numParents);
 
 		//--------------------------------------------------
 		/// flag for linear/cubic hairs
@@ -74,7 +76,11 @@ class ParentHairs
 		boost::shared_ptr<PrimVars> m_primVars;
 		std::vector<int> m_storageCounts;
 		/// base points of hairs.
-		std::vector<Vec3> m_baseP;
+//		 std::vector<Vec3> m_baseP;  // old implementation.
+		// implementation via kdtree lookup
+		kdtree::kdtree2_array m_baseP;
+		/// search tree
+		boost::scoped_ptr<kdtree::kdtree2> m_lookupTree;
 };
 
 #endif // PARENTHAIRS_H_INCLUDED

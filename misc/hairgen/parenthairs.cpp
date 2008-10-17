@@ -12,19 +12,15 @@ ParentHairs::ParentHairs(bool linear,
 	m_vertsPerCurve(numVerts[0]),
 	m_primVars(primVars),
 	m_storageCounts(),
-	m_baseP()
+	m_baseP(),
+	m_lookupTree()
 {
-	const Aqsis::TqRiFloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
-				Aqsis::class_vertex, Aqsis::type_point, 1, "P"));
 	// Check that we have enough parents for interpolation scheme
 	if(static_cast<int>(numVerts.size()) < m_parentsPerChild)
 		throw std::runtime_error("number of parent hairs must be >= 4");
-	// initialize the per-child storage counts
-	perChildStorage(*primVars, numVerts.size(), m_storageCounts);
 	// iterate over the curves, finding the base point for each.
 	for(int i = 0, numNumVerts = numVerts.size(); i < numNumVerts; ++i)
 	{
-		m_baseP.push_back(Vec3(&P[m_vertsPerCurve*3*i]));
 		// check that all parent curves have the same length.
 		if(numVerts[i] != m_vertsPerCurve)
 		{
@@ -32,6 +28,12 @@ ParentHairs::ParentHairs(bool linear,
 					"must be constant");
 		}
 	}
+	// initialize the per-child storage counts
+	perChildStorage(*primVars, numVerts.size(), m_storageCounts);
+	// initialize the child --> parent hair lookup scheme.
+	const Aqsis::TqRiFloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
+				Aqsis::class_vertex, Aqsis::type_point, 1, "P"));
+	initLookup(P, numVerts.size());
 }
 
 bool ParentHairs::linear() const
@@ -161,27 +163,6 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 	}
 }
 
-/** Find the index of the maximum element of the array.
- *
- * \param dist - array of m_parentsPerChild distances.
- * \return index such that dist[index] is the maximum in the array.
- */
-inline int ParentHairs::findMaxDistIndex(const float dist[m_parentsPerChild])
-{
-	// compute max index and distance
-	int maxIdx = 0;
-	float maxDist = dist[maxIdx];
-	for(int i = 1; i < m_parentsPerChild; ++i)
-	{
-		if(dist[i] > maxDist)
-		{
-			maxDist = dist[i];
-			maxIdx = i;
-		}
-	}
-	return maxIdx;
-}
-
 /** Get parent particle weigths and indices for a given child position.
  *
  * \param pos - child particle position
@@ -191,43 +172,35 @@ inline int ParentHairs::findMaxDistIndex(const float dist[m_parentsPerChild])
 void ParentHairs::getParents(const Vec3& pos, int ind[m_parentsPerChild],
 		float weights[m_parentsPerChild]) const
 {
-	float dist[m_parentsPerChild] = {0,0,0,0};
+	// Search for closest parents using a kd-tree.  The kdtree2 interface kinda
+	// sucks, so we need to allocate a std::vector here.
+	std::vector<float> childPos(3);
+	childPos[0] = pos.x();
+	childPos[1] = pos.y();
+	childPos[2] = pos.z();
 
-	// inital indices and distances are the first four.
+	kdtree::kdtree2_result_vector neighbours;
+
+	m_lookupTree->n_nearest_brute_force(childPos, m_parentsPerChild, neighbours);
+
+	float maxDist2 = 0;
 	for(int i = 0; i < m_parentsPerChild; ++i)
 	{
-		ind[i] = i;
-		dist[i] = (m_baseP[i] - pos).Magnitude();
+		if(neighbours[i].dis > maxDist2)
+			maxDist2 = neighbours[i].dis;
 	}
-
-	// index of the furtherest of the closest parent base points to pos.
-	int maxIdx = findMaxDistIndex(dist);
-	float maxDist = dist[maxIdx];
-
-	// Find the closest four points to pos from the parent hair base points.
-	for(int i = m_parentsPerChild, end = m_baseP.size(); i < end; ++i)
-	{
-		float d = (m_baseP[i] - pos).Magnitude();
-		if(d < maxDist)
-		{
-			ind[maxIdx] = i;
-			dist[maxIdx] = d;
-			maxIdx = findMaxDistIndex(dist);
-			maxDist = dist[maxIdx];
-		}
-	}
-
 	// Compute weights
 	float totWeight = 0;
 	for(int i = 0; i < m_parentsPerChild; ++i)
 	{
+		ind[i] = neighbours[i].idx;
 		// This is the same weighting function for parent hairs as
 		// blender uses - just an exponential decay with distance.
 //				float w = std::pow(2, -6*dist[i]/maxDist);
-		// Interpolation quality is better if modified the weights are slightly
-		// modified when the number of parent particles is higher.  Here's one
-		// for 5 or 6 parent particles.
-		float w = std::pow(2, -10*dist[i]/maxDist);
+		// Interpolation quality is better if the weights are slightly modified
+		// when the number of parent particles is higher.  Here's one for 5 or
+		// 6 parent particles.
+		float w = std::pow(2, -10*std::sqrt(neighbours[i].dis/maxDist2));
 		weights[i] = w;
 		totWeight += w;
 	}
@@ -275,3 +248,20 @@ void ParentHairs::perChildStorage(const PrimVars& primVars, int numParents,
 	}
 }
 
+/** Initialize the kdtree for finding parent particles for a child.
+ *
+ * \param P - Positions array for parent curves.  Every m_vertsPerCurve'th
+ *            position represents the start vector for a curve.
+ * \param numParents - total number of parent particles.
+ */
+void ParentHairs::initLookup(const Aqsis::TqRiFloatArray& P, int numParents)
+{
+	m_baseP.resize(boost::extents[numParents][3]);
+	for(int i = 0, end = P.size()/(3*m_vertsPerCurve); i < end; ++i)
+	{
+		m_baseP[i][0] = P[3*m_vertsPerCurve*i];
+		m_baseP[i][1] = P[3*m_vertsPerCurve*i+1];
+		m_baseP[i][2] = P[3*m_vertsPerCurve*i+2];
+	}
+	m_lookupTree.reset(new kdtree::kdtree2(m_baseP));
+}

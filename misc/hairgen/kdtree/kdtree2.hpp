@@ -23,6 +23,9 @@
 #include <boost/multi_array.hpp>
 #include <boost/array.hpp>
 
+namespace kdtree
+{
+
 using namespace std;
 using namespace boost;
 
@@ -221,6 +224,6 @@ private:
 
 };
 
-
+} // namespace kdtree
 
 #endif
