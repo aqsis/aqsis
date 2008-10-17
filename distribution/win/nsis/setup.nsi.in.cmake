@@ -1,6 +1,6 @@
 ; Title: Aqsis package for Win32 (NSIS)
 ; Author: Aqsis Team (packages@aqsis.org)
-; Info: Last tested with NSIS 2.39
+; Info: Last tested with NSIS 2.40
 ; Other: To make updates easier, all message strings have been placed within the top 20 lines (approx.) of this file.
 
 
@@ -390,7 +390,7 @@ Function RegisterMIME
   ; Create file association(s)
   ${If} $MIME == 1
 
-    DetailPrint "Creating file associations, please wait..."
+    DetailPrint "Updating file associations, please wait..."
 
     WriteRegStr HKCR ".rib" "" "@AQSIS_PROJECT_NAME_SHORT@.RIB"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
