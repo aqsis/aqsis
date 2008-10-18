@@ -171,7 +171,6 @@ class HairProcedural
 		boost::shared_ptr<EmitterMesh> m_emitter;
 		boost::shared_ptr<ParentHairs> m_parentHairs;
 		HairParams m_params;
-		Aqsis::CqMatrix m_emitterToHairsTrans;
 
 		/** Construct a set of linear hairs, given their base points and
 		 * normals on the emitting mesh.
@@ -281,7 +280,7 @@ class HairProcedural
 				if(!faceVars)
 					continue;
 
-				transformPrimVars(*faceVars, m_emitterToHairsTrans);
+				transformPrimVars(*faceVars, m_params.emitterToHairMatrix);
 
 				m_parentHairs->childInterp(*faceVars);
 
