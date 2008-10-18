@@ -7,6 +7,7 @@
 #define PARENTHAIRS_H_INCLUDED
 
 #include <vector>
+#include <iosfwd>
 
 #include <boost/scoped_ptr.hpp>
 #include <aqsis/ribparser.h>
@@ -14,6 +15,34 @@
 #include "kdtree/kdtree2.hpp"
 #include "primvar.h"
 #include "util.h"
+
+
+/** Holder for the set of hair modifiers.
+ */
+struct HairModifiers
+{
+	/** "End rough" is amount of random displacement of the hair endpoints.
+	 *
+	 * End rough amoung varies as endRough*pow(v, endRoughShape) along the
+	 * curve with lengthwise surface parameter v.
+	 */
+	float endRough;
+	float endRoughShape;
+
+	HairModifiers()
+		: endRough(0),
+		endRoughShape(1)
+	{ }
+
+	/** Parse a modifier parameter name from the input stream
+	 *
+	 * \param name - name of the parameter
+	 * \param in - stream from which to read the value.
+	 *
+	 * \return true if the name was recognized and processed, false otherwise.
+	 */
+	bool parseParam(const std::string& name, std::istream& in);
+};
 
 /** A class encapsulating an interpolation scheme based on a set of parent
  * hairs.
@@ -41,7 +70,8 @@ class ParentHairs
 		 * \param primVars - Set of primvars for parent curves.
 		 */
 		ParentHairs(bool linear, const Aqsis::TqRiIntArray& numVerts,
-				const boost::shared_ptr<PrimVars>& primVars);
+				const boost::shared_ptr<PrimVars>& primVars,
+				const HairModifiers& modifiers);
 
 		/** Create a set of interpolated child primvars based on the parent
 		 * hair primvars.
@@ -67,16 +97,19 @@ class ParentHairs
 
 		void initLookup(const Aqsis::TqRiFloatArray& P, int numParents);
 
+		void applyEndRough(PrimVars& primVars, float amount, float shape) const;
+
 		//--------------------------------------------------
 		/// flag for linear/cubic hairs
 		bool m_linear;
+		/// Set of modifiers for child hairs.
+		HairModifiers m_modifiers;
 		/// number of vertex-class values per hair.
 		int m_vertsPerCurve;
 		/// hair primitive variables
 		boost::shared_ptr<PrimVars> m_primVars;
 		std::vector<int> m_storageCounts;
 		/// base points of hairs.
-//		 std::vector<Vec3> m_baseP;  // old implementation.
 		// implementation via kdtree lookup
 		kdtree::kdtree2_array m_baseP;
 		/// search tree

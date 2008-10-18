@@ -49,28 +49,43 @@ Here's an overview of the process:
   * Write shaders making use of interpolated primitive variables on the child curves.
   * Render!
 
-Required RIB files
-------------------
 
-In order to use the procedural, the user needs to specify the emitting
-mesh for the hairs and the parent curves.  These should be supplied in standard
-RIB format; the procedural parses this RIB and creates child hairs using the
-interpolation scheme.
+Calling the procedural
+----------------------
 
-file/to/render.rib:
-  # ...
-  Procedural "DynamicLoad" [
-  	"hairgen"
-  	"30000 path/to/emitter.rib  path/to/curves.rib [ <emitter_to_curves_transform> ]"
-  	]
-  	[ <bounding_box_for_child_hairs> ]
-  # ...
+The procedural may be called by putting the following in a RIB file:
 
-path/to/emitter.rib:
-  PointsPolygons ...
+Procedural "DynamicLoad" [ "hairgen" "<params>" ] [ <bounding_box_for_child_hairs> ]
 
-path/to/curves.rib:
-  Curves ...
+The parameter string "<params>" is a list of (name,value) pairs the form
+
+"name1=value1; name2=value2; ..."
+
+Whitespace (including newlines) is not significant within the list and
+semicolons are required to separate each (name,value) pair.  Values are
+specified as simply as possible:
+  * integers and floats are just how you'd normally write them.
+  * booleans are specified with the words "true" and "false"
+  * strings cannot contain have whitespace (though this could be relaxed with
+    some effort)
+  * values which may be written as an array of basic types are written as a
+    whitespace separated list (eg, for a 4x4 matrix, we'd have have the value
+    string "1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1")
+
+Here's the available parameters, first the general ones:
+  * num_hairs               - total number of child hairs to generate (1000)
+  * emitter_file_name       - path to RIB file containing emitting PointsPolygons mesh ("")
+  * hair_file_name          - path to RIB file containing parent Curves ("")
+  * emitter_to_hair_matrix  - transformation applied to the emitting mesh to
+                              take it into the space of the parent hairs (identity)
+  * verbose                 - boolean specifying whether to print extra debug info (false)
+
+Now some parameters which modify the child hairs individually:
+  * end_rough               - amount of random "roughness" to add to child hairs end points.
+  * end_rough_shape         - how the roughness is distributed along the hair,
+                              specifically, the position is modified according
+							  to P += end_rough*pow(v, end_rough_shape)*randVec;
+							  where v is the lengthwise curve surface parameter.
 
 
 Interpolated primvars

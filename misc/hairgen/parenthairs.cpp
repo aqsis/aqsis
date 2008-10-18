@@ -5,10 +5,35 @@
 
 #include "parenthairs.h"
 
+#include <cmath>
+#include <iostream>
+
+//------------------------------------------------------------------------------
+// HairModifiers implementation
+bool HairModifiers::parseParam(const std::string& name, std::istream& in)
+{
+	if(name == "end_rough")
+	{
+		in >> endRough;
+		return true;
+	}
+	else if(name == "end_rough_shape")
+	{
+		in >> endRoughShape;
+		return true;
+	}
+	return false;
+}
+
+
+//------------------------------------------------------------------------------
+// ParentHairs implementation
 ParentHairs::ParentHairs(bool linear,
 		const Aqsis::TqRiIntArray& numVerts,
-		const boost::shared_ptr<PrimVars>& primVars)
+		const boost::shared_ptr<PrimVars>& primVars,
+		const HairModifiers& modifiers)
 	: m_linear(linear),
+	m_modifiers(modifiers),
 	m_vertsPerCurve(numVerts[0]),
 	m_primVars(primVars),
 	m_storageCounts(),
@@ -161,6 +186,35 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 			}
 		}
 	}
+
+	applyEndRough(childVars, m_modifiers.endRough, m_modifiers.endRoughShape);
+}
+
+/** Apply "end rough" child hair modifier.
+ */
+void ParentHairs::applyEndRough(PrimVars& primVars, float amount, float shape) const
+{
+	if(amount == 0)
+		return;
+	Aqsis::TqRiFloatArray& P = primVars.find("P");
+//	Aqsis::TqRiFloatArray& Ng_emit = primVars.find("Ng_emit");
+	for(int curveNum = 0, numCurves = P.size()/(3*m_vertsPerCurve);
+				curveNum < numCurves; ++curveNum)
+	{
+		Vec3 rough = amount*(Vec3(uRand(), uRand(), uRand())-0.5);
+		// Get the component of rough which is perpendicular to Ng.
+//		Vec3 Ng = Vec3(&Ng_emit[3*curveNum]).Unit();
+//		rough -= (rough*Ng)*Ng;
+		for(int i = 0; i < m_vertsPerCurve; ++i)
+		{
+			int idx = 3*(m_vertsPerCurve*curveNum + i);
+			float amp = float(i)/(m_vertsPerCurve-1);
+			amp = std::pow(amp, shape);
+			P[idx] += amp*rough.x();
+			P[idx+1] += amp*rough.y();
+			P[idx+2] += amp*rough.z();
+		}
+	}
 }
 
 /** Get parent particle weigths and indices for a given child position.
@@ -263,5 +317,5 @@ void ParentHairs::initLookup(const Aqsis::TqRiFloatArray& P, int numParents)
 		m_baseP[i][1] = P[3*m_vertsPerCurve*i+1];
 		m_baseP[i][2] = P[3*m_vertsPerCurve*i+2];
 	}
-	m_lookupTree.reset(new kdtree::kdtree2(m_baseP));
+	m_lookupTree.reset(new kdtree::kdtree2(m_baseP, false));
 }

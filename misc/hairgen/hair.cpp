@@ -12,6 +12,9 @@
 #include <aqsis/aqsismath.h>
 #include <aqsis/matrix.h>
 
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 // project includes
 #include "primvar.h"
 #include "emitter.h"
@@ -56,6 +59,108 @@ void transformPrimVars(PrimVars& primVars, const Aqsis::CqMatrix& pointTrans)
 	}
 }
 
+/** A structure holding all parameters to the hair procedural.
+ *
+ * The constructor provides for parsing of key-value pairs for parameters held
+ * in the struct.
+ */
+struct HairParams
+{
+	int numHairs;
+	float hairLength;
+	float hairWidth;
+	std::string emitterFileName;
+	std::string hairFileName;
+	Aqsis::CqMatrix emitterToHairMatrix;
+	HairModifiers hairModifiers;
+	bool verbose;
+
+	/** Parse hair parameters from the given input string.
+	 *
+	 * The parameter string should have the form
+	 *
+	 * name1=value1; name2=value2; ...
+	 *
+	 * whitespace (including newlines) is not significant.  Semicolons are
+	 * required to separate each (name,value) pair.  Values are specified in
+	 * a form compatible with operator>>.
+	 */
+	HairParams(const std::string& paramString)
+		: numHairs(1000),
+		hairLength(0.1),
+		hairWidth(0.01),
+		emitterFileName(),
+		hairFileName(),
+		emitterToHairMatrix(),
+		hairModifiers(),
+		verbose(false)
+	{
+		typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+		Tokenizer tokens(paramString, boost::char_separator<char>(";"));
+		for(Tokenizer::iterator tok = tokens.begin(); tok != tokens.end(); ++tok)
+		{
+			std::string keyValuePair = *tok;
+			std::string::size_type pos = keyValuePair.find("=");
+			if(pos == std::string::npos)
+			{
+				boost::algorithm::trim_if(keyValuePair,
+						boost::algorithm::is_any_of(" \n\r\t"));
+				if(keyValuePair != "")
+					g_errStream << "hairgen: value not found in parameter \""
+						<< keyValuePair << "\"\n";
+				continue;
+			}
+			std::string name = keyValuePair.substr(0,pos);
+			boost::algorithm::trim_if(name, boost::algorithm::is_any_of(" \n\r\t"));
+			if(name == "")
+				continue;
+			std::istringstream valueStream(keyValuePair.substr(pos+1));
+
+			// Read in value for the provided name.
+			if(name == "num_hairs")
+			{
+				int num = 0;
+				valueStream >> numHairs;
+			}
+			else if(name == "emitter_file_name")
+			{
+				valueStream >> emitterFileName;
+			}
+			else if(name == "hair_file_name")
+			{
+				valueStream >> hairFileName;
+			}
+			else if(name == "emitter_to_hair_matrix")
+			{
+				float mInit[16];
+				int i = 0;
+				while(i < 16 && valueStream >> mInit[i])
+					++i;
+				if(i == 16)
+					emitterToHairMatrix = Aqsis::CqMatrix(mInit);
+			}
+			else if(name == "verbose")
+			{
+				valueStream >> std::boolalpha >> verbose;
+			}
+			else
+			{
+				if(!hairModifiers.parseParam(name, valueStream))
+				{
+					g_errStream << "hairgen: WARNING: procedural parameter \""
+						<< name << "\" not recognized\n";
+				}
+			}
+
+			// Warning if value read failed.
+			if(!valueStream)
+			{
+				g_errStream << "hairgen: WARNING: could not parse parameter \""
+					<< name << "\"\n";
+			}
+		}
+	}
+};
 
 //------------------------------------------------------------------------------
 /** Holder for procedural data related to hair generation.
@@ -65,26 +170,8 @@ class HairProcedural
 	private:
 		boost::shared_ptr<EmitterMesh> m_emitter;
 		boost::shared_ptr<ParentHairs> m_parentHairs;
-		int m_numChildren;
-		float m_hairLength;
-		float m_hairWidth;
+		HairParams m_params;
 		Aqsis::CqMatrix m_emitterToHairsTrans;
-
-		/**
-		 */
-		static void loadEmitter( const std::string& fileName, int numChildren,
-				boost::shared_ptr<EmitterMesh>& emitter,
-				boost::shared_ptr<ParentHairs>& parentHairs)
-		{
-			std::ifstream inFile(fileName.c_str());
-			if(inFile)
-			{
-				Aqsis::CqRequestMap requests;
-				requests.add("PointsPolygons", new PointsPolygonsRequest(emitter, numChildren));
-				requests.add("Curves", new CurvesRequest(parentHairs));
-				parseStream(inFile, requests);
-			}
-		}
 
 		/** Construct a set of linear hairs, given their base points and
 		 * normals on the emitting mesh.
@@ -122,7 +209,7 @@ class HairProcedural
 				if(Nh_emit)
 				{
 					const Aqsis::TqRiFloatArray& Nh = *Nh_emit;
-					float lengthMult = m_hairLength / std::sqrt(Nh[i]*Nh[i]
+					float lengthMult = m_params.hairLength / std::sqrt(Nh[i]*Nh[i]
 							+ Nh[i+1]*Nh[i+1] + Nh[i+2]*Nh[i+2]);
 					P[2*i+3] = P_emit[i] + lengthMult*Nh[i] + jitterN.x();
 					P[2*i+4] = P_emit[i+1] + lengthMult*Nh[i+1] + jitterN.y();
@@ -130,9 +217,9 @@ class HairProcedural
 				}
 				else
 				{
-					P[2*i+3] = P_emit[i] + m_hairLength*Ng_emit[0] + jitterN.x();
-					P[2*i+4] = P_emit[i+1] + m_hairLength*Ng_emit[1] + jitterN.y();
-					P[2*i+5] = P_emit[i+2] + m_hairLength*Ng_emit[2] + jitterN.z();
+					P[2*i+3] = P_emit[i] + m_params.hairLength*Ng_emit[0] + jitterN.x();
+					P[2*i+4] = P_emit[i+1] + m_params.hairLength*Ng_emit[1] + jitterN.y();
+					P[2*i+5] = P_emit[i+2] + m_params.hairLength*Ng_emit[2] + jitterN.z();
 				}
 			}
 		}
@@ -145,53 +232,36 @@ class HairProcedural
 		 */
 		HairProcedural(const char* initialdata)
 			: m_emitter(),
-			m_parentHairs(),
-			m_numChildren(0),
-			m_hairLength(0.1),
-			m_hairWidth(0.01),
-			m_emitterToHairsTrans()
+			m_params(initialdata),
+			m_parentHairs()
 		{
-			std::istringstream in(initialdata);
-			in >> m_numChildren;
-			if(m_numChildren <= 0)
-				throw std::runtime_error("Number of child hairs should be positive");
-			//in >> m_hairLength;
-			//in >> m_hairWidth;
-
-			std::string emitterFileName;
-			in >> emitterFileName;
-			std::string curveFileName;
-			in >> curveFileName;
-
-			float mInit[16];
-			// discard leading '[' character
-			for(std::istream::int_type c = in.get(); c != '[' && c != EOF; c = in.get());
-			// read in transformation matrix.
-			for(int i = 0; i < 16; ++i)
-				in >> mInit[i];
-			m_emitterToHairsTrans = Aqsis::CqMatrix(mInit);
-
-			std::ifstream emitterStream(emitterFileName.c_str());
+			std::ifstream emitterStream(m_params.emitterFileName.c_str());
 			if(emitterStream)
 			{
 				Aqsis::CqRequestMap requests;
-				requests.add("PointsPolygons", new PointsPolygonsRequest(m_emitter, m_numChildren));
+				requests.add("PointsPolygons",
+						new PointsPolygonsRequest(m_emitter, m_params.numHairs));
 				parseStream(emitterStream, requests);
 			}
 			if(!m_emitter)
 				throw std::runtime_error("Could not find PointsPolygons emitter mesh in file");
 
-			std::ifstream curveStream(curveFileName.c_str());
+			std::ifstream curveStream(m_params.hairFileName.c_str());
 			if(curveStream)
 			{
 				Aqsis::CqRequestMap requests;
-				requests.add("Curves", new CurvesRequest(m_parentHairs));
+				requests.add("Curves", new CurvesRequest(m_parentHairs,
+							m_params.hairModifiers));
 				parseStream(curveStream, requests);
 			}
 			if(!m_parentHairs)
 				throw std::runtime_error("Could not find parent Curves in file");
 
-			g_errStream << "Created hair procedural with " << m_numChildren << " hairs\n";
+			if(m_params.verbose)
+			{
+				std::cout << "Created hair procedural with "
+					<< m_params.numHairs << " hairs\n";
+			}
 		}
 
 		/** Subdivide the hair procedural into a set of RiCurves
@@ -250,7 +320,7 @@ AQSIS_EXPORT extern "C" RtPointer ConvertParameters(char* initialdata)
 	}
 	catch(std::runtime_error& e)
 	{
-		g_errStream << "ERROR hairgen: " << e.what() << "\n";
+		g_errStream << "hairgen: ERROR: " << e.what() << "\n";
 	}
 
 	return reinterpret_cast<RtPointer>(params);

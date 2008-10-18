@@ -68,6 +68,11 @@ class PrimVars
 		const Aqsis::TqRiFloatArray* findPtr(const Aqsis::CqPrimvarToken& tok) const;
 		const Aqsis::TqRiFloatArray& find(const Aqsis::CqPrimvarToken& tok) const;
 
+		Aqsis::TqRiFloatArray* findPtr(const std::string& name);
+		Aqsis::TqRiFloatArray& find(const std::string& name);
+		Aqsis::TqRiFloatArray* findPtr(const Aqsis::CqPrimvarToken& tok);
+		Aqsis::TqRiFloatArray& find(const Aqsis::CqPrimvarToken& tok);
+
 		/// Convenience function appending the given (token,value) pair to the array.
 		void append(const Aqsis::CqPrimvarToken& token,
 				const Aqsis::TqRiFloatArray& value = Aqsis::TqRiFloatArray());
@@ -195,6 +200,23 @@ inline const Aqsis::TqRiFloatArray& PrimVars::find(
 		const Aqsis::CqPrimvarToken& tok) const
 {
 	return findImpl(tok);
+}
+
+inline Aqsis::TqRiFloatArray* PrimVars::findPtr(const std::string& name)
+{
+	return const_cast<Aqsis::TqRiFloatArray*>(findPtrImpl(name));
+}
+inline Aqsis::TqRiFloatArray& PrimVars::find(const std::string& name)
+{
+	return const_cast<Aqsis::TqRiFloatArray&>(findImpl(name));
+}
+inline Aqsis::TqRiFloatArray* PrimVars::findPtr(const Aqsis::CqPrimvarToken& tok)
+{
+	return const_cast<Aqsis::TqRiFloatArray*>(findPtrImpl(tok));
+}
+inline Aqsis::TqRiFloatArray& PrimVars::find(const Aqsis::CqPrimvarToken& tok)
+{
+	return const_cast<Aqsis::TqRiFloatArray&>(findImpl(tok));
 }
 
 inline PrimVars::const_iterator PrimVars::begin() const

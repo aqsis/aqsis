@@ -95,9 +95,11 @@ class CurvesRequest : public Aqsis::IqRibRequest
 {
 	private:
 		boost::shared_ptr<ParentHairs>& m_hairs;
+		const HairModifiers& m_hairModifiers;
 	public:
-		CurvesRequest(boost::shared_ptr<ParentHairs>& hairs)
-			: m_hairs(hairs)
+		CurvesRequest(boost::shared_ptr<ParentHairs>& hairs, const HairModifiers& hairModifiers)
+			: m_hairs(hairs),
+			m_hairModifiers(hairModifiers)
 		{ }
 
 		void handleRequest(Aqsis::CqRibParser& parser)
@@ -121,7 +123,7 @@ class CurvesRequest : public Aqsis::IqRibRequest
 					ParentHairs::m_parentsPerChild)
 				return;
 
-			m_hairs.reset(new ParentHairs(linear, numVerts, primVars));
+			m_hairs.reset(new ParentHairs(linear, numVerts, primVars, m_hairModifiers));
 		}
 };
 
