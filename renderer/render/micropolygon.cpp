@@ -491,10 +491,20 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
 
 		AQSIS_TIME_SCOPE(Backface_culling);
+		// When backface culling, we must use the geometric normal (Ng) as
+		// this is the normal that properly represents the actual micropolygon
+		// geometry. However, if the primitive specifies custom normals as
+		// primitive variables, the direction of those should be honored, in case
+		// the user has intentionally switched the surface direction.
+		// Therefore, we compare the direction of Ng with that of N and flip Ng 
+		// if they don't match.
 		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
+			TqFloat s = 1.0f;
+			if(NULL != pN)
+				s = ( ( pN[i] * pNg[i] ) < 0.0f ) ? -1.0f : 1.0f;
 			// Calulate the direction the MPG is facing.
-			if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+			if ( ( ( s * pNg[ i ] ) * pP[ i ] ) >= 0 )
 			{
 				cCulled++;
 				STATS_INC( MPG_culled );
@@ -625,8 +635,8 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "alpha" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
-		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
+//		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
 	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
 	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
@@ -966,6 +976,7 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 
 void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
+	TqInt lUses = pSurface() ->Uses();
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
 	TqInt cu = pGridA->uGridRes();
@@ -1006,6 +1017,18 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		pg->pVar(EnvVars_P) ->GetPointPtr( pP );
 		CqVector3D* pNg;
 		pg->pVar(EnvVars_Ng) ->GetPointPtr( pNg );
+		CqVector3D* pN = NULL;
+		if ( USES( lUses, EnvVars_N ) )
+			pg->pVar(EnvVars_N) ->GetPointPtr( pN );
+
+
+		// When backface culling, we must use the geometric normal (Ng) as
+		// this is the normal that properly represents the actual micropolygon
+		// geometry. However, if the primitive specifies custom normals as
+		// primitive variables, the direction of those should be honored, in case
+		// the user has intentionally switched the surface direction.
+		// Therefore, we compare the direction of Ng with that of N and flip Ng 
+		// if they don't match.
 
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -1020,8 +1043,11 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			// Now try and cull any hidden MPs if Sides==1
 			if ( canBeBFCulled )
 			{
+				TqFloat s = 1.0f;
+				if( NULL != pN )
+					s = ( ( pN[i] * pNg[i] ) < 0.0f ) ? -1.0f : 1.0f;
 				AQSIS_TIME_SCOPE(Backface_culling);
-				if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+				if ( (  ( s * pNg[ i ] ) * pP[ i ] ) >= 0 )
 					totalBFCulled[i]++;
 			}
 		}
