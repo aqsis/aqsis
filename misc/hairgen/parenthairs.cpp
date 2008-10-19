@@ -14,12 +14,7 @@ bool HairModifiers::parseParam(const std::string& name, std::istream& in)
 {
 	if(name == "end_rough")
 	{
-		in >> endRough;
-		return true;
-	}
-	else if(name == "end_rough_shape")
-	{
-		in >> endRoughShape;
+		in >> std::boolalpha >> endRough;
 		return true;
 	}
 	return false;
@@ -187,32 +182,18 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		}
 	}
 
-	applyEndRough(childVars, m_modifiers.endRough, m_modifiers.endRoughShape);
-}
-
-/** Apply "end rough" child hair modifier.
- */
-void ParentHairs::applyEndRough(PrimVars& primVars, float amount, float shape) const
-{
-	if(amount == 0)
-		return;
-	Aqsis::TqRiFloatArray& P = primVars.find("P");
-//	Aqsis::TqRiFloatArray& Ng_emit = primVars.find("Ng_emit");
-	for(int curveNum = 0, numCurves = P.size()/(3*m_vertsPerCurve);
-				curveNum < numCurves; ++curveNum)
+	if(m_modifiers.endRough)
 	{
-		Vec3 rough = amount*(Vec3(uRand(), uRand(), uRand())-0.5);
-		// Get the component of rough which is perpendicular to Ng.
-//		Vec3 Ng = Vec3(&Ng_emit[3*curveNum]).Unit();
-//		rough -= (rough*Ng)*Ng;
-		for(int i = 0; i < m_vertsPerCurve; ++i)
+		// Add random vectors to help with end rough.
+		childVars.append(Aqsis::CqPrimvarToken(Aqsis::class_uniform,
+					Aqsis::type_vector, 1, "endRoughRand"));
+		Aqsis::TqRiFloatArray& rand1 = *childVars.back().value;
+		rand1.reserve(3*numChildren);
+		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
 		{
-			int idx = 3*(m_vertsPerCurve*curveNum + i);
-			float amp = float(i)/(m_vertsPerCurve-1);
-			amp = std::pow(amp, shape);
-			P[idx] += amp*rough.x();
-			P[idx+1] += amp*rough.y();
-			P[idx+2] += amp*rough.z();
+			rand1.push_back(2*uRand()-1);
+			rand1.push_back(2*uRand()-1);
+			rand1.push_back(2*uRand()-1);
 		}
 	}
 }

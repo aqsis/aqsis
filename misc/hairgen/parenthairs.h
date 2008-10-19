@@ -24,14 +24,11 @@ struct HairModifiers
 	/** "End rough" is amount of random displacement of the hair endpoints.
 	 *
 	 * End rough amoung varies as endRough*pow(v, endRoughShape) along the
-	 * curve with lengthwise surface parameter v.
 	 */
-	float endRough;
-	float endRoughShape;
+	bool endRough;
 
 	HairModifiers()
-		: endRough(0),
-		endRoughShape(1)
+		: endRough(false)
 	{ }
 
 	/** Parse a modifier parameter name from the input stream
@@ -96,8 +93,6 @@ class ParentHairs
 				std::vector<int>& storageCounts);
 
 		void initLookup(const Aqsis::TqRiFloatArray& P, int numParents);
-
-		void applyEndRough(PrimVars& primVars, float amount, float shape) const;
 
 		//--------------------------------------------------
 		/// flag for linear/cubic hairs

@@ -52,7 +52,6 @@ Here's an overview of the process:
 
 Calling the procedural
 ----------------------
-
 The procedural may be called by putting the following in a RIB file:
 
 Procedural "DynamicLoad" [ "hairgen" "<params>" ] [ <bounding_box_for_child_hairs> ]
@@ -66,7 +65,7 @@ semicolons are required to separate each (name,value) pair.  Values are
 specified as simply as possible:
   * integers and floats are just how you'd normally write them.
   * booleans are specified with the words "true" and "false"
-  * strings cannot contain have whitespace (though this could be relaxed with
+  * strings cannot contain whitespace (though this could be relaxed with
     some effort)
   * values which may be written as an array of basic types are written as a
     whitespace separated list (eg, for a 4x4 matrix, we'd have have the value
@@ -81,11 +80,18 @@ Here's the available parameters, first the general ones:
   * verbose                 - boolean specifying whether to print extra debug info (false)
 
 Now some parameters which modify the child hairs individually:
-  * end_rough               - amount of random "roughness" to add to child hairs end points.
-  * end_rough_shape         - how the roughness is distributed along the hair,
-                              specifically, the position is modified according
-							  to P += end_rough*pow(v, end_rough_shape)*randVec;
-							  where v is the lengthwise curve surface parameter.
+  * end_rough               - boolean specifying whether to attach extra
+                              randomness for use in simulating the blender
+                              "end rough" randomness in a shader.
+
+
+Shaders
+-------
+Shaders related to hairs can be found in the shaders directory.
+
+  * hair_gritz.sl is an example from a siggraph course showing how to do
+    strand lighting based on the curve tangent.
+  * endrough.sl is a displacement shader simulating blender "end rough"
 
 
 Interpolated primvars
@@ -99,22 +105,22 @@ In order to avoid naming clashes, primvars from the emitting mesh are renamed
 with an "_emit" suffix.  Consider the following:
 
 PointsPolygons [..] [..]
-	"P" [..]
-	"Cs" [..]
-	"st" [..]
+    "P" [..]
+    "Cs" [..]
+    "st" [..]
 
 Curves "cubic" "nonperiodic" [..]
-	"P" [..] 
-	"width" [..]
+    "P" [..] 
+    "width" [..]
 
 (Here primvar types and interpolation classes have been omitted for brevity.)
 For this input data, the procedural generates a set of curves with the
 following primvars attached:
 
 Curves "cubic" "nonperiodic" [..]
-	"P_emit" [..]    # <-- interpolated from emitting mesh
-	"Cs_emit" [..]   # <-- interpolated from emitting mesh
-	"st_emit" [..]   # <-- interpolated from emitting mesh
-	"P" [..]         # <-- interpolated from parent curves
-	"width" [..]     # <-- interpolated from parent curves
+    "P_emit" [..]    # <-- interpolated from emitting mesh
+    "Cs_emit" [..]   # <-- interpolated from emitting mesh
+    "st_emit" [..]   # <-- interpolated from emitting mesh
+    "P" [..]         # <-- interpolated from parent curves
+    "width" [..]     # <-- interpolated from parent curves
 
