@@ -10,7 +10,8 @@
 #include <iosfwd>
 
 #include <boost/scoped_ptr.hpp>
-#include <aqsis/ribparser.h>
+
+#include <ribparser.h>
 
 #include "kdtree/kdtree2.hpp"
 #include "primvar.h"

@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 
-#include <aqsis/smartptr.h>
-#include <aqsis/ribparser.h>
+#include <smartptr.h>
+#include <ribparser.h>
 
 #include "parenthairs.h"
 #include "primvar.h"

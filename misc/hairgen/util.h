@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <iosfwd>
 
-#include <aqsis/vector3d.h>
+#include <vector3d.h>
 
 /// Alias for the longwinded Aqsis::CqVector3D
 typedef Aqsis::CqVector3D Vec3;

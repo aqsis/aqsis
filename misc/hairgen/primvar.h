@@ -14,9 +14,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <aqsis/iribrequest.h>
-#include <aqsis/primvartoken.h>
-#include <aqsis/ri.h>
+#include <iribrequest.h>
+#include <primvartoken.h>
+#include <ri.h>
 
 
 //------------------------------------------------------------------------------
