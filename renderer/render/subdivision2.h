@@ -278,8 +278,6 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual bool	Diceable();
 
-		virtual	CqMicroPolyGridBase* DiceExtract();
-
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
@@ -288,7 +286,6 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 			return( false );
 		}
 
-		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
 		boost::shared_ptr<CqSubdivision2> Extract( TqInt iTime );
 
 		virtual CqSurface* Clone() const
@@ -299,6 +296,11 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 		}
 
 	private:
+		CqMicroPolyGridBase* DiceExtract();
+
+		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
+		void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqInt ifvA, TqUint indexA );
+
 		boost::shared_ptr<CqSubdivision2>	m_pTopology;
 		CqLath*			m_pFace;
 		TqInt			m_Uses;
