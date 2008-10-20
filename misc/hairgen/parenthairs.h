@@ -27,9 +27,11 @@ struct HairModifiers
 	 * End rough amoung varies as endRough*pow(v, endRoughShape) along the
 	 */
 	bool endRough;
+	int rootIndex;
 
 	HairModifiers()
-		: endRough(false)
+		: endRough(false),
+		rootIndex(-1)
 	{ }
 
 	/** Parse a modifier parameter name from the input stream

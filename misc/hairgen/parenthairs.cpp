@@ -17,6 +17,11 @@ bool HairModifiers::parseParam(const std::string& name, std::istream& in)
 		in >> std::boolalpha >> endRough;
 		return true;
 	}
+	else if(name == "root_index")
+	{
+		in >> rootIndex;
+		return true;
+	}
 	return false;
 }
 
@@ -54,6 +59,17 @@ ParentHairs::ParentHairs(bool linear,
 	const Aqsis::TqRiFloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
 				Aqsis::class_vertex, Aqsis::type_point, 1, "P"));
 	initLookup(P, numVerts.size());
+
+	if(m_modifiers.rootIndex < 0)
+	{
+		// Modify root index for a sensible default.  For hairs which
+		// interpolate the control points this should be 0.  Otherwise it
+		// should be something else.
+		//
+		// Currently we guess 1 for cubic curves, since this corresponds to the
+		// way MOSAIC works using b-splines.
+		m_modifiers.rootIndex = m_linear ? 0 : 1;
+	}
 }
 
 bool ParentHairs::linear() const
@@ -171,7 +187,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
 		{
 			Vec3 deltaP = Vec3(&P_emit[3*curveNum])
-				- Vec3(&P_child[storageStride*curveNum]);
+				- Vec3(&P_child[storageStride*curveNum+3*m_modifiers.rootIndex]);
 			for(int k = curveNum*storageStride, kEnd = (curveNum+1)*storageStride;
 					k < kEnd; k += 3)
 			{

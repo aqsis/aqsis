@@ -78,6 +78,10 @@ Here's the available parameters, first the general ones:
   * emitter_to_hair_matrix  - transformation applied to the emitting mesh to
                               take it into the space of the parent hairs (identity)
   * verbose                 - boolean specifying whether to print extra debug info (false)
+  * root_index              - index of the control point representing the root
+                              of the hair.  For spline types which don't go
+                              exactly through their control points, this may
+                              not be the first control point (root_index=0).
 
 Now some parameters which modify the child hairs individually:
   * end_rough               - boolean specifying whether to attach extra
