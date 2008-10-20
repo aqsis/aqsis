@@ -197,7 +197,7 @@ SectionIn 1
   File "@CMAKE_SOURCE_DIR@\shadercompiler\shadervm\shadeop.h"
   File "@CMAKE_SOURCE_DIR@\rib\api\ri.h"
   File "@CMAKE_BINARY_DIR@\rib\api\ri.inl"
-  File "@CMAKE_SOURCE_DIR@\rib\ribparse\iribrequest.h"
+  File "@CMAKE_SOURCE_DIR@\rib\ribparse\*.h"
   SetOutPath "$INSTDIR\lib"
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.a"
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.lib"

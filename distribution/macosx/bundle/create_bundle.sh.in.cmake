@@ -57,7 +57,7 @@ cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix/"*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager/ndspy.h" "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/rib/api/ri.h" "$INCLUDEDIR/"
 cp "${CMAKE_BINARY_DIR}/rib/api/ri.inl" "$INCLUDEDIR/"
-cp "${CMAKE_SOURCE_DIR}/rib/ribparse/iribrequest.h" "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/rib/ribparse/"*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm/shadeop.h" "$INCLUDEDIR/"
 
 ### Resolve external dependencies
