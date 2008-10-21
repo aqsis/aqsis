@@ -54,20 +54,33 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 	for(PrimVars::const_iterator i = m_primVars->begin(), end = m_primVars->end();
 			i != end; ++i)
 	{
-		if(!(i->token.Class() == Aqsis::class_constant
-				|| i->token.Class() == Aqsis::class_uniform))
+		if(i->token.Class() == Aqsis::class_constant
+				|| i->token.Class() == Aqsis::class_uniform)
+		{
+			storageCounts.push_back(0);
+			// uniform and constant primvars on the mesh interpolate to
+			// constant primvars on the curves
+			interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_constant,
+				i->token.type(), i->token.arraySize(), i->token.name() + "_emit"));
+			// We can just copy over constant/uniform data; no interpolation needed.
+			if(i->token.Class() == Aqsis::class_constant)
+				*interpVars->back().value = *i->value;
+			else
+			{
+				int stride = i->token.storageCount();
+				interpVars->back().value->assign(i->value->begin() + stride*faceIdx,
+					i->value->begin() + stride*(faceIdx+1));
+			}
+		}
+		else
 		{
 			storageCounts.push_back(i->token.storageCount());
-			// Construct new uniform token for output curves
+			// varying, vertex, facevarying and facevertex primvars interpolate
+			// to uniform primvars on the curves
 			interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_uniform,
 				i->token.type(), i->token.arraySize(), i->token.name() + "_emit"));
 			// Allocate storage
 			interpVars->back().value->assign(numParticles*storageCounts.back(), 0);
-		}
-		else
-		{
-			// TODO: constant and uniform class variables.
-			storageCounts.push_back(0);
 		}
 	}
 
@@ -113,32 +126,26 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 				end = m_primVars->end(); srcVar != end;
 				++srcVar, ++storageIndex, ++destVar)
 		{
-			bool useVertIndex = true;
+			int storageStride = storageCounts[storageIndex];
+			// Get pointers to source parameters for the vertices
+			const float* src[4] = {0,0,0,0};
 			switch(srcVar->token.Class())
 			{
 				case Aqsis::class_varying:
 				case Aqsis::class_vertex:
-					useVertIndex = true;
+					for(int i = 0; i < face.numVerts; ++i)
+						src[i] = &(*srcVar->value)[storageStride*face.v[i]];
 					break;
 				case Aqsis::class_facevarying:
 				case Aqsis::class_facevertex:
-					useVertIndex = false;
+					for(int i = 0; i < face.numVerts; ++i)
+						src[i] = &(*srcVar->value)[
+							storageStride*(face.faceVaryingIndex+i) ];
 					break;
 				default:
+					// Other classes don't need any interpolation, so we just
+					// go to the next primvar in m_primVars
 					continue;
-			}
-			int storageStride = storageCounts[storageIndex];
-			// Get pointers to source parameters for the vertices
-			const float* src[4] = {0,0,0,0};
-			if(useVertIndex)
-			{
-				for(int i = 0; i < face.numVerts; ++i)
-					src[i] = &(*srcVar->value)[storageStride*face.v[i]];
-			}
-			else
-			{
-				for(int i = 0; i < face.numVerts; ++i)
-					src[i] = &(*srcVar->value)[ storageStride*(face.faceVaryingIndex+i) ];
 			}
 
 			// Interpolate the primvar pointed to by srcVar to the current
@@ -157,7 +164,7 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 		}
 	}
 
-	// Finally, add face-constant parameters.
+	// Finally, add extra face-constant parameters.
 	Vec3 Ng_emitVec = faceNormal(face);
 	float Ng_emit[] = {Ng_emitVec.x(), Ng_emitVec.y(), Ng_emitVec.z()};
 	interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_constant, Aqsis::type_normal,

@@ -310,7 +310,7 @@ class HairProcedural
 //------------------------------------------------------------------------------
 // RiProcDynamicLoad plugin interface functions.
 
-AQSIS_EXPORT extern "C" RtPointer ConvertParameters(char* initialdata)
+extern "C" AQSIS_EXPORT RtPointer ConvertParameters(char* initialdata)
 {
 	HairProcedural* params = 0;
 	try
@@ -325,7 +325,7 @@ AQSIS_EXPORT extern "C" RtPointer ConvertParameters(char* initialdata)
 	return reinterpret_cast<RtPointer>(params);
 }
 
-AQSIS_EXPORT extern "C" void Subdivide(RtPointer blinddata, RtFloat detailsize)
+extern "C" AQSIS_EXPORT void Subdivide(RtPointer blinddata, RtFloat detailsize)
 {
 	const HairProcedural* p = reinterpret_cast<HairProcedural*>(blinddata);
 
@@ -333,7 +333,7 @@ AQSIS_EXPORT extern "C" void Subdivide(RtPointer blinddata, RtFloat detailsize)
 		p->subdivide();
 }
 
-AQSIS_EXPORT extern "C" void Free(RtPointer blinddata)
+extern "C" AQSIS_EXPORT void Free(RtPointer blinddata)
 {
 	delete reinterpret_cast<HairProcedural*>(blinddata);
 }
