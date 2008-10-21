@@ -40,6 +40,16 @@ ParentHairs::ParentHairs(bool linear,
 	m_baseP(),
 	m_lookupTree()
 {
+	if(m_modifiers.rootIndex < 0)
+	{
+		// Modify root index for a sensible default.  For hairs which
+		// interpolate the control points this should be 0.  Otherwise it
+		// should be something else.
+		//
+		// Currently we guess 1 for cubic curves, since this corresponds to the
+		// way MOSAIC works (using catmull-rom splines)
+		m_modifiers.rootIndex = m_linear ? 0 : 1;
+	}
 	// Check that we have enough parents for interpolation scheme
 	if(static_cast<int>(numVerts.size()) < m_parentsPerChild)
 		throw std::runtime_error("number of parent hairs must be >= 4");
@@ -59,17 +69,6 @@ ParentHairs::ParentHairs(bool linear,
 	const Aqsis::TqRiFloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
 				Aqsis::class_vertex, Aqsis::type_point, 1, "P"));
 	initLookup(P, numVerts.size());
-
-	if(m_modifiers.rootIndex < 0)
-	{
-		// Modify root index for a sensible default.  For hairs which
-		// interpolate the control points this should be 0.  Otherwise it
-		// should be something else.
-		//
-		// Currently we guess 1 for cubic curves, since this corresponds to the
-		// way MOSAIC works using b-splines.
-		m_modifiers.rootIndex = m_linear ? 0 : 1;
-	}
 }
 
 bool ParentHairs::linear() const
@@ -310,9 +309,10 @@ void ParentHairs::initLookup(const Aqsis::TqRiFloatArray& P, int numParents)
 	m_baseP.resize(boost::extents[numParents][3]);
 	for(int i = 0, end = P.size()/(3*m_vertsPerCurve); i < end; ++i)
 	{
-		m_baseP[i][0] = P[3*m_vertsPerCurve*i];
-		m_baseP[i][1] = P[3*m_vertsPerCurve*i+1];
-		m_baseP[i][2] = P[3*m_vertsPerCurve*i+2];
+		int baseIdx = 3*(m_vertsPerCurve*i + m_modifiers.rootIndex);
+		m_baseP[i][0] = P[baseIdx];
+		m_baseP[i][1] = P[baseIdx+1];
+		m_baseP[i][2] = P[baseIdx+2];
 	}
 	m_lookupTree.reset(new kdtree::kdtree2(m_baseP, false));
 }
