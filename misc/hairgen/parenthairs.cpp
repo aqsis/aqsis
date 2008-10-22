@@ -260,6 +260,14 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 void ParentHairs::computeClumpWeights(std::vector<float>& clumpWeights) const
 {
 	clumpWeights.resize(m_vertsPerCurve);
+	// Convert the clumpShape parameter into an exponent in the same way that
+	// blender does.
+	float clumpPow = 0;
+	if(m_modifiers.clumpShape < 0)
+		clumpPow = 1 + m_modifiers.clumpShape;
+	else
+		clumpPow = 1 + 9*m_modifiers.clumpShape;
+	// compute weights along the curve.
 	for(int i = 0; i < m_vertsPerCurve; ++i)
 	{
 		float v = float(i)/(m_vertsPerCurve-1);
@@ -269,7 +277,7 @@ void ParentHairs::computeClumpWeights(std::vector<float>& clumpWeights) const
 			v = 1-v;
 		}
 		clumpWeights[i] = std::fabs(m_modifiers.clump)
-			* std::pow(v, m_modifiers.clumpShape);
+			* std::pow(v, clumpPow);
 	}
 }
 

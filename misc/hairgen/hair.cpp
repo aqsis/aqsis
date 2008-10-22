@@ -258,7 +258,7 @@ class HairProcedural
 
 			if(m_params.verbose)
 			{
-				std::cout << "Created hair procedural with "
+				std::cout << "hairgen: Created hair procedural with "
 					<< m_params.numHairs << " hairs\n";
 			}
 		}
@@ -272,6 +272,8 @@ class HairProcedural
 		 */
 		void subdivide() const
 		{
+			if(m_params.verbose)
+				std::cout << "hairgen: Starting hair generation\n";
 			for(int faceNum = 0, numFaces = m_emitter->numFaces();
 					faceNum < numFaces; ++faceNum)
 			{
@@ -303,6 +305,8 @@ class HairProcedural
 				RiCurvesV(linearStr, numCurves, &nVerts[0], "nonperiodic",
 						pList.count(), pList.tokens(), pList.values());
 			}
+			if(m_params.verbose)
+				std::cout << "hairgen: Hair generation done.\n";
 		}
 };
 

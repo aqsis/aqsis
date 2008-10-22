@@ -98,10 +98,13 @@ Now some parameters which modify the child hairs individually:
                       The root of the child hairs clump toward the parents in
                       an analogous way to the tip for clump > 0.
   * clump_shape   - clump_shape is used in conjunction with clump, to control
-					the blending between parent hairs and child hairs.  For
-					surface parameter v not at the tip of the curves, the
-					clump parameter is modified to be
-					  clump*pow(v, clump_shape)
+					the blending between parent hairs and child hairs and
+					should lie in the interval [-1,1].  For surface parameter
+					v not at the tip of the curves, the clump parameter is
+					modified to be clump*pow(v, clumpPow) where
+					clumpPow = 1+clump_shape  for  -1 <= clump_shape < 0 and
+					clumpPow = 1+9*clump_shape  for  0= < clump_shape <= 1
+
 
 
 Shaders
