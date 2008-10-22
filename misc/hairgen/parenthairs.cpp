@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 //------------------------------------------------------------------------------
 // HairModifiers implementation
@@ -20,6 +21,16 @@ bool HairModifiers::parseParam(const std::string& name, std::istream& in)
 	else if(name == "root_index")
 	{
 		in >> rootIndex;
+		return true;
+	}
+	else if(name == "clump")
+	{
+		in >> clump;
+		return true;
+	}
+	else if(name == "clump_shape")
+	{
+		in >> clumpShape;
 		return true;
 	}
 	return false;
@@ -111,6 +122,9 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		newPrimvars.push_back(&childValues);
 	}
 
+	std::vector<int> closestParent;
+	if(m_modifiers.clump != 0)
+		closestParent.resize(numChildren);
 	// loop over all child curves
 	for(int curveNum = 0; curveNum < numChildren; ++curveNum)
 	{
@@ -119,6 +133,8 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		float weights[m_parentsPerChild];
 		Vec3 currP(&P_emit[3*curveNum]);
 		getParents(currP, parentIdx, weights);
+		if(m_modifiers.clump != 0)
+			closestParent[curveNum] = parentIdx[0];
 
 		// loop over all primvars of parent curves
 		int storageIndex = 0;
@@ -157,7 +173,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		}
 	}
 
-	const Aqsis::TqRiFloatArray& P_child = childVars.find("P");
+	Aqsis::TqRiFloatArray& P_child = childVars.find("P");
 	// Apply corrections to interpolation scheme for variables of class
 	// "point".  This is necessary since the desired base point of the hair
 	// (stored in P_emit) isn't stationary under the interpolation scheme.
@@ -197,6 +213,26 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		}
 	}
 
+	if(m_modifiers.clump != 0)
+	{
+		// Apply clumping to P after correction factor.
+		const Aqsis::TqRiFloatArray& P_parent = m_primVars->find("P");
+		std::vector<float> weights;
+		computeClumpWeights(weights);
+		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
+		{
+			const float* parentP = &P_parent[3*m_vertsPerCurve*closestParent[curveNum]];
+			float* childP = &P_child[3*m_vertsPerCurve*curveNum];
+			for(int k = 0; k < m_vertsPerCurve; ++k)
+			{
+				int i = 3*k;
+				childP[i] = (1-weights[k])*childP[i] + weights[k]*parentP[i];
+				childP[i+1] = (1-weights[k])*childP[i+1] + weights[k]*parentP[i+1];
+				childP[i+2] = (1-weights[k])*childP[i+2] + weights[k]*parentP[i+2];
+			}
+		}
+	}
+
 	if(m_modifiers.endRough)
 	{
 		// Add random vectors to help with end rough.
@@ -213,7 +249,34 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 	}
 }
 
+/** Compute weights to use in hair clumping
+ *
+ * A clump weight is the amount the hair is weighted toward the parent hair.  A
+ * value of zero indicates no clumping, while a value of one indicates that
+ * every child hair would lie exactly on top of the corresponding parent.
+ *
+ * \param clumpWeights - vector of computed clump weights (output)
+ */
+void ParentHairs::computeClumpWeights(std::vector<float>& clumpWeights) const
+{
+	clumpWeights.resize(m_vertsPerCurve);
+	for(int i = 0; i < m_vertsPerCurve; ++i)
+	{
+		float v = float(i)/(m_vertsPerCurve-1);
+		if(m_modifiers.clump < 0)
+		{
+			// for negative values of clump, clump hair root rather than tips.
+			v = 1-v;
+		}
+		clumpWeights[i] = std::fabs(m_modifiers.clump)
+			* std::pow(v, m_modifiers.clumpShape);
+	}
+}
+
 /** Get parent particle weigths and indices for a given child position.
+ *
+ * The indicies of the parents are returned in order from the closest to
+ * the most distant parent from the child position.
  *
  * \param pos - child particle position
  * \param ind - indices of parent particles (output parameter).
@@ -232,15 +295,12 @@ void ParentHairs::getParents(const Vec3& pos, int ind[m_parentsPerChild],
 	kdtree::kdtree2_result_vector neighbours;
 
 	m_lookupTree->n_nearest(childPos, m_parentsPerChild, neighbours);
+	// sort so that nearest neighbours come first.
+	std::sort(neighbours.begin(), neighbours.end());
 
-	float maxDist2 = 0;
-	for(int i = 0; i < m_parentsPerChild; ++i)
-	{
-		if(neighbours[i].dis > maxDist2)
-			maxDist2 = neighbours[i].dis;
-	}
 	// Compute weights
 	float totWeight = 0;
+	float maxDis = neighbours.back().dis;
 	for(int i = 0; i < m_parentsPerChild; ++i)
 	{
 		ind[i] = neighbours[i].idx;
@@ -250,7 +310,7 @@ void ParentHairs::getParents(const Vec3& pos, int ind[m_parentsPerChild],
 		// Interpolation quality is better if the weights are slightly modified
 		// when the number of parent particles is higher.  Here's one for 5 or
 		// 6 parent particles.
-		float w = std::pow(2, -10*std::sqrt(neighbours[i].dis/maxDist2));
+		float w = std::pow(2, -10*std::sqrt(neighbours[i].dis/maxDis));
 		weights[i] = w;
 		totWeight += w;
 	}

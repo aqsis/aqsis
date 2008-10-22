@@ -36,14 +36,6 @@ inline void swap(float& a, float&b) {
 
 
 //
-//       KDTREE2_RESULT implementation
-// 
-
-inline bool operator<(const kdtree2_result& e1, const kdtree2_result& e2) {
-  return (e1.dis < e2.dis);
-}
-
-//
 //       KDTREE2_RESULT_VECTOR implementation
 // 
 float kdtree2_result_vector::max_value() {

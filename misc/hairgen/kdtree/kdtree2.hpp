@@ -6,6 +6,8 @@
 //
 // Licensed under the Academic Free License version 1.1 found in file LICENSE
 // with additional provisions in that same file.
+//
+// Minor modifications by Chris Foster.
 
 
 
@@ -57,6 +59,11 @@ public:
   float dis;  // its square Euclidean distance
   int idx;    // which neighbor was found
 }; 
+
+//
+// comparison operator for sorting of results by distance.
+//
+bool operator<(const kdtree2_result& e1, const kdtree2_result& e2);
 
 class kdtree2_result_vector : public vector<kdtree2_result> {
   // inherit a vector<kdtree2_result>
@@ -223,6 +230,19 @@ private:
 
 
 };
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+//
+//       KDTREE2_RESULT implementation
+// 
+
+inline bool operator<(const kdtree2_result& e1, const kdtree2_result& e2) {
+  return (e1.dis < e2.dis);
+}
+
 
 } // namespace kdtree
 

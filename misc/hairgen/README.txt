@@ -84,9 +84,24 @@ Here's the available parameters, first the general ones:
                               not be the first control point (root_index=0).
 
 Now some parameters which modify the child hairs individually:
-  * end_rough               - boolean specifying whether to attach extra
-                              randomness for use in simulating the blender
-                              "end rough" randomness in a shader.
+  * end_rough     - boolean specifying whether to attach extra randomness for
+                    use in simulating the blender "end rough" randomness in a
+                    shader.
+  * clump         - Clump specifies clumping behaviour in which child hairs
+                    clump toward the dominant parent.  This parameter is
+                    modelled after blender, and should lie in the interval [-1,1]:
+                    For clump > 0:
+                      The tips of child hairs clump toward the parents.  At
+                      the tip, the weight of the parent hair is clump, and the
+                      weight of the non-clumped child hair is (1-clump)
+                    clump < 0:
+                      The root of the child hairs clump toward the parents in
+                      an analogous way to the tip for clump > 0.
+  * clump_shape   - clump_shape is used in conjunction with clump, to control
+					the blending between parent hairs and child hairs.  For
+					surface parameter v not at the tip of the curves, the
+					clump parameter is modified to be
+					  clump*pow(v, clump_shape)
 
 
 Shaders

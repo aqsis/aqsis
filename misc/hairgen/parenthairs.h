@@ -22,16 +22,41 @@
  */
 struct HairModifiers
 {
-	/** "End rough" is amount of random displacement of the hair endpoints.
-	 *
-	 * End rough amoung varies as endRough*pow(v, endRoughShape) along the
+	/** end_rough specifies whether or not to attach a random vector to the
+	 * curves for use in displacement shaders.
+	 * TODO: genralize this.
 	 */
 	bool endRough;
+	/** root_index specifies which vertex index along the parent splines
+	 * corresponds to the position of the hair root.  Negative values cause
+	 * hairgen to choose a default automatically.
+	 */
 	int rootIndex;
+	/** Clump specifies clumping behaviour in which child hairs clump toward
+	 * the dominant parent.  This parameter is modelled after blender, and
+	 * should lie in the interval [-1,1]:
+	 * For clump > 0:
+	 *   The tips of child hairs clump toward the parents.  At the tip, the
+	 *   weight of the parent hair is clump, and the weight of the non-clumped
+	 *   child hair is (1-clump)
+	 * clump < 0:
+	 *   The root of the child hairs clump toward the parents in an analogous
+	 *   way to the tip for clump > 0.
+	 */
+	float clump;
+	/** clump_shape is used in conjunction with clump, to control the blending
+	 * between parent hairs and child hairs.  For surface parameter v not at
+	 * the tip of the curves, the clump parameter is modified to be
+	 *
+	 *   clump*pow(v, clump_shape)
+	 */
+	float clumpShape;
 
 	HairModifiers()
 		: endRough(false),
-		rootIndex(-1)
+		rootIndex(-1),
+		clump(0),
+		clumpShape(1)
 	{ }
 
 	/** Parse a modifier parameter name from the input stream
@@ -89,6 +114,8 @@ class ParentHairs
 
 	private:
 		//--------------------------------------------------
+		void computeClumpWeights(std::vector<float>& clumpWeights) const;
+
 		void getParents(const Vec3& pos, int ind[m_parentsPerChild],
 				float weights[m_parentsPerChild]) const;
 
