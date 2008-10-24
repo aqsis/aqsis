@@ -31,7 +31,6 @@
 #include	<math.h>
 #include	<boost/thread/thread.hpp>
 
-#include	"multitimer.h"
 #include	"aqsismath.h"
 #include	"stats.h"
 #include	"options.h"
@@ -392,7 +391,7 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
-	TIME_SCOPE("Post Surface")
+	AQSIS_TIME_SCOPE(Post_surface);
 	// Count the number of total gprims
 	STATS_INC( GPR_created_total );
 
@@ -626,7 +625,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long 
 	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
 	bool fDiceable = false;
 	{
-		TIME_SCOPE("Diceable check");
+		AQSIS_TIME_SCOPE(Dicable_check);
 		fDiceable = pSurface->Diceable();
 	}
 
@@ -635,7 +634,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long 
 	{
 		CqMicroPolyGridBase* pGrid = 0;
 		{
-			TIME_SCOPE("Dicing");
+				AQSIS_TIME_SCOPE(Dicing);
 			pGrid = pSurface->Dice();
 		}
 
@@ -663,7 +662,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long 
 
 		// Split it
 		{
-			TIME_SCOPE("Splits");
+			AQSIS_TIME_SCOPE(Splitting);
 			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			TqInt cSplits = pSurface->Split( aSplits );
 			for ( TqInt i = 0; i < cSplits; i++ )
@@ -865,6 +864,7 @@ void CqImageBuffer::RenderImage()
 				// Render any waiting subsurfaces.
 				while ( bucketProcessors[i].hasPendingSurfaces() )
 				{
+					AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
 					boost::shared_ptr<CqSurface> pSurface = bucketProcessors[i].getTopSurface();
 					if (pSurface)
 					{
@@ -874,7 +874,7 @@ void CqImageBuffer::RenderImage()
 						// Cull surface if it's hidden
 						if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 						{
-							TIME_SCOPE("Occlusion culling");
+							AQSIS_TIME_SCOPE(Occlusion_culling);
 							if ( !bucketProcessors[i].isInitiallyEmpty() &&
 							     pSurface->fCachedBound() &&
 							     OcclusionCullSurface( bucketProcessors[i], pSurface ) )
@@ -904,7 +904,7 @@ void CqImageBuffer::RenderImage()
 			bucketProcessors[i].postProcess( fImager, depthfilter, zThreshold );
 			BucketComplete();
 			{
-				TIME_SCOPE("Display bucket");
+				AQSIS_TIME_SCOPE(Display_bucket);
 				const CqBucket* bucket = bucketProcessors[i].getBucket();
 				if (bucket)
 					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucket );

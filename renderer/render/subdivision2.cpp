@@ -1743,17 +1743,34 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	}
 }
 
-
-
-static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqInt ifvA, TqUint indexA )
+void CqSurfaceSubdivisionPatch::StoreDiceAPVar(
+		const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam,
+		TqUint ivA, TqInt ifvA, TqUint indexA)
 {
 	// Find the argument
 	IqShaderData * pArg = pShader->FindArgument( pParam->strName() );
 	if ( pArg )
 	{
-		TqInt index = ivA;
-		if( pParam->Class() == class_facevarying || pParam->Class() == class_facevertex )
-			index = ifvA;
+		TqInt index = 0;
+		switch(pParam->Class())
+		{
+			case class_constant:
+				break;
+			case class_uniform:
+				index = m_FaceIndex;
+				break;
+			case class_varying:
+			case class_vertex:
+				index = ivA;
+				break;
+			case class_facevarying:
+			case class_facevertex:
+				index = ifvA;
+				break;
+			case class_invalid:
+				assert(0 && "encountered primvar class_invalid!");
+				return;
+		}
 
 		switch ( pParam->Type() )
 		{

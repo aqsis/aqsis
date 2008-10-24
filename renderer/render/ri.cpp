@@ -24,8 +24,6 @@
 		\todo: <b>Code Review</b>
 */
 
-#include	"multitimer.h"
-
 #include	"aqsis.h"
 
 #include	<stdarg.h>
@@ -60,6 +58,7 @@
 #include	"logging.h"
 #include	"logging_streambufs.h"
 #include	"maketexture.h"
+#include	"stats.h"
 
 #include	"ri_cache.h"
 
@@ -746,7 +745,7 @@ RtVoid	RiFrameBegin( RtInt number )
 	// done in WorldEnd (!) not FrameEnd since it can happen that there is
 	// not FrameEnd (and usually there's not much between WorldEnd and FrameEnd).
 	//QGetRenderContext() ->Stats().StartFrameTimer();
-	TIMER_START("Frame")
+	AQSIS_TIMER_START(Frame);
 
 	QGetRenderContext() ->BeginFrameModeBlock();
 	QGetRenderContext() ->SetCurrentFrame( number );
@@ -809,8 +808,8 @@ RtVoid	RiWorldBegin()
 	// Start the frame timer (just in case there was no FrameBegin block. If there
 	// was, nothing happens)
 	//QGetRenderContext() ->Stats().StartFrameTimer();
-	TIMER_START("Frame")
-	TIMER_START("Parse")
+	AQSIS_TIMER_START(Frame);
+	AQSIS_TIMER_START(Parse);
 
 	// Now that the options have all been set, setup any undefined camera parameters.
 	const TqInt* pCameraOpts = QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "CameraFlags");
@@ -918,7 +917,7 @@ RtVoid	RiWorldEnd()
 		( *QGetRenderContext()->pPreRenderFunction() ) ();
 
 	// Stop the parsing counter
-	TIMER_STOP("Parse")
+	AQSIS_TIMER_STOP(Parse);
 
 
 	QGetRenderContext() -> Stats().PrintInfo();
@@ -949,8 +948,7 @@ RtVoid	RiWorldEnd()
 	QGetRenderContext() ->EndWorldModeBlock();
 
 	// Stop the frame timer
-	//QGetRenderContext() ->Stats().StopFrameTimer();
-	TIMER_STOP("Frame")
+	AQSIS_TIMER_STOP(Frame);
 
 	if ( !fFailed )
 	{
@@ -5159,7 +5157,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	assert( imagefile != 0 && texturefile != 0
 			&& swrap != 0 && twrap != 0 && filterfunc != 0 );
 
-	TIME_SCOPE("Texture")
+	AQSIS_TIME_SCOPE(Make_texture);
 
 	SqWrapModes wrapModes(enumCast<EqWrapMode>(swrap), enumCast<EqWrapMode>(twrap));
 	std::string inFileName = findFileInPath(imagefile,
@@ -5233,7 +5231,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
 	assert(imagefile != 0 && reflfile != 0 && filterfunc != 0);
 
-	TIME_SCOPE("Environment Mapping")
+	AQSIS_TIME_SCOPE(Make_texture);
 
 	std::string inFileName = findFileInPath(imagefile,
 			QGetRenderContext()->textureSearchPath());
@@ -5272,7 +5270,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 	DEBUG_RIMAKECUBEFACEENVIRONMENT
 
-	TIME_SCOPE("Environment Mapping")
+	AQSIS_TIME_SCOPE(Make_texture);
 
 	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
 	        reflfile != 0 && filterfunc != 0 );
@@ -5323,7 +5321,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 
 	assert(picfile != 0 && shadowfile != 0);
 
-	TIME_SCOPE("Shadow Mapping")
+	AQSIS_TIME_SCOPE(Make_texture);
 
 	std::string inFileName = findFileInPath(picfile,
 			QGetRenderContext()->textureSearchPath());
@@ -5361,7 +5359,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
 	DEBUG_RIMAKEOCCLUSION
 
-	TIME_SCOPE("Shadow Mapping")
+	AQSIS_TIME_SCOPE(Make_texture);
 
 	std::vector<std::string> fileNames;
 	fileNames.reserve(npics);

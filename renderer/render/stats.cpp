@@ -21,21 +21,23 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+#include "stats.h"
+
 #include <iomanip>
 #include <iostream>
 #include <cstring>
 #include <string>
 
-#include "multitimer.h"
 #include "attributes.h"
 #include "imagebuffer.h"
 #include "renderer.h"
-#include "stats.h"
 #include "transform.h"
 #include "aqsismath.h"
 
 namespace Aqsis {
 
+/// Global collection of timer objects.
+CqTimerSet<EqTimerStats> g_timerSet;
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
 // simply provide empty implementations and not have to link to libaqsis.
@@ -108,6 +110,9 @@ void CqStats::InitialiseFrame()
  */
 void CqStats::PrintStats( TqInt level ) const
 {
+#	define STATS_INT_GETI( index )	getI( index )
+#	define STATS_INT_GETF( index )	getF( index )
+
 	std::ostream& MSG = std::cout;
 	/*! Levels
 		Minimum := 0
@@ -115,12 +120,11 @@ void CqStats::PrintStats( TqInt level ) const
 		Verbose := 2
 		Max		:= 3
 	*/
-	//! level >= 0
 	if( level > 0 )
-		TIMER_DUMP(OUT_CONSOLE, SORT_TIMES)
+		g_timerSet.printTimes(MSG);
 
-		MSG << std::setiosflags(std::ios_base::fixed)
-			<< std::setfill(' ') << std::setprecision(6);
+	MSG << std::setiosflags(std::ios_base::fixed)
+		<< std::setfill(' ') << std::setprecision(6);
 
 	//! Most important informations
 	if ( level == 2 || level == 3 )

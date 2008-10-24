@@ -76,7 +76,7 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 	assert(m_bucket);
 
 	{
-		TIME_SCOPE("Prepare bucket");
+		AQSIS_TIME_SCOPE(Prepare_bucket);
 		m_bucket->PrepareBucket( pos, size,
 					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth,
 					 viewRangeXMin, viewRangeXMax, viewRangeYMin, viewRangeYMax,
@@ -86,7 +86,7 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 
 	if ( !m_initiallyEmpty )
 	{
-		TIME_SCOPE("Occlusion culling initialisation");
+		AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
 		m_bucketData.setupOcclusionHierarchy(m_bucket);
 	}
 }
@@ -96,7 +96,7 @@ void CqBucketProcessor::process()
 	if (!m_bucket)
 		return;
 
-	TIME_SCOPE("Render MPs");
+	AQSIS_TIME_SCOPE(Render_MPGs);
 	m_bucket->RenderWaitingMPs();
 }
 
@@ -109,11 +109,11 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 	// micropolygons rendered to that pixel.
 	if (!m_initiallyEmpty)
 	{
-		TIME_SCOPE("Combine");
+		AQSIS_TIME_SCOPE(Combine_samples);
 		m_bucket->CombineElements(depthfilter, zThreshold);
 	}
 
-	TIMER_START("Filter");
+	AQSIS_TIMER_START(Filter_samples);
 	m_bucket->FilterBucket(m_initiallyEmpty, imager);
 	if (!m_initiallyEmpty)
 	{
@@ -121,7 +121,7 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 		// \note: Used to quantize here too, but not any more, as it is handled by
 		//	  ddmanager in a specific way for each display.
 	}
-	TIMER_STOP("Filter");
+	AQSIS_TIMER_STOP(Filter_samples);
 
 	assert(!m_bucket->IsProcessed());
 	m_bucket->SetProcessed();

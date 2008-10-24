@@ -40,4 +40,4 @@ ADD_CUSTOM_TARGET(osxbundle
 	COMMAND sh ./create_bundle.sh
 	)
 
-ADD_DEPENDENCIES(osxbundle aqsis aqsl aqsltell eqsl miqser piqsl teqser display d_bmp d_exr d_xpm piqsldisplay shaders bundleconfig)
+ADD_DEPENDENCIES(osxbundle aqsis aqsl aqsltell eqsl miqser piqsl teqser display d_bmp d_exr d_xpm piqsldisplay shaders ribparse bundleconfig)

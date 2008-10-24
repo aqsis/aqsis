@@ -52,10 +52,12 @@ cp "${CMAKE_SOURCE_DIR}/tools/mpdump/mpanalyse.py" "$SCRIPTS/"
 cp "${CMAKE_BINARY_DIR}/shaders/"*.slx "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/shaders/"*.sl "$SHADERDIR/"
 cp "${CMAKE_SOURCE_DIR}/aqsistypes/"*.h "$INCLUDEDIR/"
+cp "${CMAKE_BINARY_DIR}/aqsistypes/aqsis_config.h" "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/aqsistypes/posix/"*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/renderer/ddmanager/ndspy.h" "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/rib/api/ri.h" "$INCLUDEDIR/"
 cp "${CMAKE_BINARY_DIR}/rib/api/ri.inl" "$INCLUDEDIR/"
+cp "${CMAKE_SOURCE_DIR}/rib/ribparse/"*.h "$INCLUDEDIR/"
 cp "${CMAKE_SOURCE_DIR}/shadercompiler/shadervm/shadeop.h" "$INCLUDEDIR/"
 
 ### Resolve external dependencies

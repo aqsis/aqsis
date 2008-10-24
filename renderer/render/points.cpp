@@ -35,9 +35,6 @@
 #include	"imagebuffer.h"
 #include	"renderer.h"
 
-#include	"multitimer.h"
-
-
 namespace Aqsis {
 
 CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
@@ -462,13 +459,13 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
 
-	TIMER_START("Project points")
+	AQSIS_TIMER_START(Project_points);
 	// Transform the whole grid to hybrid camera/raster space
 
 	CqVector3D* pP;
 	pVar(EnvVars_P) ->GetPointPtr( pP );
 
-	TIMER_STOP("Project points")
+	AQSIS_TIMER_STOP(Project_points);
 
 	TqInt iu;
 	TqInt iTime, tTime = pSurface()->pTransform()->cTimes();

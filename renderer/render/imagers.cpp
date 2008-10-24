@@ -23,14 +23,13 @@
 		\author Michel Joron (joron@sympatico.ca)
 */
 
-#include	"multitimer.h"
-
 #include	"imagers.h"
 #include	"iddmanager.h"
 #include	"attributes.h"
 #include	"renderer.h"
 #include	"file.h"
 
+#include	"stats.h"
 
 namespace Aqsis {
 
@@ -61,7 +60,7 @@ CqImagersource::~CqImagersource()
 //---------------------------------------------------------------------
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
-	TIME_SCOPE("Imager shading")
+	AQSIS_TIME_SCOPE(Imager_shading);
 
 	// We use one less than the bucket width and height here, since these
 	// resolutions really represent one less than the number of shaded points

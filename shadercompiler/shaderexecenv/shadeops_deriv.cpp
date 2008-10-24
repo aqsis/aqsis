@@ -751,7 +751,8 @@ void CqShaderExecEnv::SO_faceforward( IqShaderData* N, IqShaderData* I, IqShader
 			CqVector3D Nref;
 			Ng() ->GetNormal( Nref, __iGrid );
 			TqFloat s = ( ( ( -_aq_I ) * Nref ) < 0.0f ) ? -1.0f : 1.0f;
-			(Result)->SetNormal(_aq_N * s,__iGrid);
+			TqFloat s2 = ( ( _aq_N * Nref ) < 0.0f ) ? -1.0f : 1.0f;
+			(Result)->SetNormal(s * s2 * _aq_N,__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);

@@ -1,6 +1,6 @@
 ; Title: Aqsis package for Win32 (NSIS)
 ; Author: Aqsis Team (packages@aqsis.org)
-; Info: Last tested with NSIS 2.37
+; Info: Last tested with NSIS 2.40
 ; Other: To make updates easier, all message strings have been placed within the top 20 lines (approx.) of this file.
 
 
@@ -33,7 +33,7 @@ XPStyle on
 
 
 ; Pages
-!include "MUI.nsh"
+!include "MUI2.nsh"
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
 !define MUI_HEADERIMAGE
@@ -68,7 +68,7 @@ Var ICONS_GROUP
 !insertmacro MUI_PAGE_STARTMENU Application $ICONS_GROUP
 
 ; Environment page
-Page custom AdditionalTasks
+Page custom AdditionalTasks AdditionalTasksLeave
 
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
@@ -80,14 +80,13 @@ Page custom AdditionalTasks
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
 
 ; Language files
 !insertmacro MUI_LANGUAGE "English"
-
-; Reserve files
-!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "@WINPACKAGEDIR@\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
@@ -192,11 +191,13 @@ Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "@CMAKE_SOURCE_DIR@\aqsistypes\*.h"
+  File "@CMAKE_BINARY_DIR@\aqsistypes\aqsis_config.h"
   File "@CMAKE_SOURCE_DIR@\aqsistypes\win32\*.h"
   File "@CMAKE_SOURCE_DIR@\renderer\ddmanager\ndspy.h"
   File "@CMAKE_SOURCE_DIR@\shadercompiler\shadervm\shadeop.h"
   File "@CMAKE_SOURCE_DIR@\rib\api\ri.h"
   File "@CMAKE_BINARY_DIR@\rib\api\ri.inl"
+  File "@CMAKE_SOURCE_DIR@\rib\ribparse\*.h"
   SetOutPath "$INSTDIR\lib"
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.a"
   File /nonfatal "@CMAKE_BINARY_DIR@\bin\@CMAKE_BUILD_TYPE@\*.lib"
@@ -227,61 +228,172 @@ Section -AdditionalIcons
 SectionEnd
 
 
-Section -AdditionalTasks
-Var /GLOBAL AQSISHOME
-Var /GLOBAL DESKTOP_ICON
-Var /GLOBAL FILE_EXTENSION
-Var /GLOBAL PATH
-Var /GLOBAL PATH_NT
-Var /GLOBAL PATH_NT_ALL
-Var /GLOBAL QUICKLAUCH_ICON
+Section -Post
+  WriteUninstaller "$INSTDIR\uninst.exe"
+  WriteRegStr HKLM "${PACKAGE_DIR_REGKEY}" "" "$INSTDIR\bin\aqsis.exe"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayName" "$(^Name)"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\eqsl.exe"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayVersion" "@MAJOR@.@MINOR@.@BUILD@"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "${PACKAGE_WEB_SITE}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@AQSIS_PROJECT_VENDOR@"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "${PACKAGE_WEB_SUPPORT}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "${PACKAGE_WEB_UPDATE}"
+  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Comments" "$INSTDIR"
+  WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoRepair" 1
 
-  ; Update 'PATH' for current user
-  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT "page_tasks.ini" "Field 1" "State"
-  StrCmp $PATH_NT "1" "path_nt" "path_nt_end"
-    path_nt:
+  Call EnvironmentCurrent
+  Call EnvironmentAll
+  Call DesktopIcon
+  Call DesktopQuicklaunch
+  Call EnvironmentHome
+  Call RegisterMIME
+SectionEnd
+
+
+Function AdditionalTasks
+  Var /GLOBAL AQSISHOME
+  Var /GLOBAL DESKTOP_ICON
+  Var /GLOBAL FILE_EXTENSION
+  Var /GLOBAL MUI_PAGE_CUSTOM
+  Var /GLOBAL PATH_NT
+  Var /GLOBAL PATH_NT_ALL
+  Var /GLOBAL PATH_NT_NONE
+  Var /GLOBAL QUICKLAUCH_ICON
+
+  !include LogicLib.nsh
+  !include nsDialogs.nsh
+  !insertmacro MUI_HEADER_TEXT "Choose Additional Tasks" "Choose the additional tasks to be performed."
+
+  nsDialogs::Create /NOUNLOAD 1018
+    Pop $MUI_PAGE_CUSTOM
+
+    ${If} $MUI_PAGE_CUSTOM == error
+      Abort
+    ${EndIf}
+
+  ${NSD_CreateLabel} 0 0 100% 20 "Update PATH environment variable:"
+    Pop $R9
+
+  ${NSD_CreateRadioButton} 5 20 100% 20 "For current user"
+    Pop $PATH_NT
+
+  ${NSD_CreateRadioButton} 5 40 100% 20 "For all users"
+    Pop $PATH_NT_ALL
+    ${NSD_SetState} $PATH_NT_ALL ${BST_CHECKED}
+
+  ${NSD_CreateRadioButton} 5 60 100% 20 "None"
+    Pop $PATH_NT_NONE
+
+  ${NSD_CreateLabel} 0 90 100% 20 "Additional tasks:"
+    Pop $R8
+
+  ${NSD_CreateCheckBox} 5 110 100% 20 "Create a desktop icon"
+    Pop $DESKTOP_ICON
+    ${NSD_SetState} $DESKTOP_ICON ${BST_CHECKED}
+
+  ${NSD_CreateCheckBox} 5 130 100% 20 "Create a Quick Launch icon"
+    Pop $QUICKLAUCH_ICON
+
+  ${NSD_CreateCheckBox} 5 150 100% 20 "Create AQSISHOME environment variable"
+    Pop $AQSISHOME
+    ${NSD_SetState} $AQSISHOME ${BST_CHECKED}
+
+  ${NSD_CreateCheckBox} 5 170 100% 20 "Associate @AQSIS_PROJECT_NAME_SHORT@ with the RIB, SL and SLX file extensions"
+    Pop $FILE_EXTENSION
+    ${NSD_SetState} $FILE_EXTENSION ${BST_CHECKED}
+
+  nsDialogs::Show
+FunctionEnd
+
+
+Function AdditionalTasksLeave
+  Var /GLOBAL ALLUSERS
+  Var /GLOBAL CURRENTUSER
+  Var /GLOBAL DESKTOPUSER
+  Var /GLOBAL QUICKLAUCHUSER
+  Var /GLOBAL HOME
+  Var /GLOBAL MIME
+  Var /GLOBAL PATH
+
+  ${NSD_GetState} $PATH_NT $CURRENTUSER
+  ${NSD_GetState} $PATH_NT_ALL $ALLUSERS
+  ${NSD_GetState} $DESKTOP_ICON $DESKTOPUSER
+  ${NSD_GetState} $QUICKLAUCH_ICON $QUICKLAUCHUSER
+  ${NSD_GetState} $AQSISHOME $HOME
+  ${NSD_GetState} $FILE_EXTENSION $MIME
+FunctionEnd
+
+
+Function EnvironmentCurrent
+  ; Update environment variables for current user
+  ${If} $CURRENTUSER == 1
+
+    DetailPrint "Updating PATH environment variable, please wait..."
+
     ReadRegStr $PATH HKCU "Environment" "PATH"
     WriteRegExpandStr HKCU "Environment" "PATH" "$INSTDIR\bin;$PATH"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-    path_nt_end:
+  ${EndIf}
+FunctionEnd
 
-  ; Update 'PATH' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT_ALL "page_tasks.ini" "Field 2" "State"
-  StrCmp $PATH_NT_ALL "1" "path_nt_all" "path_nt_all_end"
-    path_nt_all:
+
+Function EnvironmentAll
+  ; Update environment variables for all users
+  ${If} $ALLUSERS == 1
+
+    DetailPrint "Updating PATH environment variable, please wait..."
+
     ReadRegStr $PATH HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
     WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$INSTDIR\bin;$PATH"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-    path_nt_all_end:
+  ${EndIf}
+FunctionEnd
 
-  ; Create 'Desktop' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 4" "State"
-  StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
-    desktop:
+
+Function DesktopIcon
+  ; Create desktop icon
+  ${If} $DESKTOPUSER == 1
+
+    DetailPrint "Creating desktop icon, please wait..."
+
     SetOutPath "$INSTDIR\bin"
     CreateShortCut "$DESKTOP\@AQSIS_PROJECT_NAME@ @MAJOR@.@MINOR@.@BUILD@.lnk" "$INSTDIR\bin\eqsl.exe"
-    desktop_end:
+  ${EndIF}
+FunctionEnd
 
-  ; Create 'Quick Launch' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 5" "State"
-  StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
-    quicklaunch:
+
+Function DesktopQuicklaunch
+  ; Create Quick Lanuch icon
+  ${If} $QUICKLAUCHUSER == 1
+
+    DetailPrint "Creating Quick Launch icon, please wait..."
+
     SetOutPath "$INSTDIR\bin"
     CreateShortCut "$QUICKLAUNCH\@AQSIS_PROJECT_NAME@.lnk" "$INSTDIR\bin\eqsl.exe"
-    quicklaunch_end:
+  ${EndIF}
+FunctionEnd
 
-  ; Create 'AQSISHOME' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 6" "State"
-  StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
-    aqsishome:
+
+Function EnvironmentHome
+  ; Update environment variables for all users
+  ${If} $HOME == 1
+
+    DetailPrint "Updating AQSISHOME environment variable, please wait..."
+
     WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-    aqsishome_end:
+  ${EndIf}
+FunctionEnd
 
+
+Function RegisterMIME
   ; Create file association(s)
-  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
-  StrCmp $FILE_EXTENSION "1" "file" "file_end"
-    file:
+  ${If} $MIME == 1
+
+    DetailPrint "Updating file associations, please wait..."
+
     WriteRegStr HKCR ".rib" "" "@AQSIS_PROJECT_NAME_SHORT@.RIB"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
@@ -306,47 +418,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
     WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
-	file_end:
-SectionEnd
-
-
-Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PACKAGE_DIR_REGKEY}" "" "$INSTDIR\bin\aqsis.exe"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayName" "$(^Name)"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\eqsl.exe"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "DisplayVersion" "@MAJOR@.@MINOR@.@BUILD@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLInfoAbout" "${PACKAGE_WEB_SITE}"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Publisher" "@AQSIS_PROJECT_VENDOR@"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "HelpLink" "${PACKAGE_WEB_SUPPORT}"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "URLUpdateInfo" "${PACKAGE_WEB_UPDATE}"
-  WriteRegStr ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "Comments" "$INSTDIR"
-  WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoModify" 1
-  WriteRegDWORD ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}" "NoRepair" 1
-SectionEnd
-
-
-Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "@WINPACKAGEDIR@\page_tasks.ini" "page_tasks.ini"
-FunctionEnd
-
-
-Function AdditionalTasks
-  !insertmacro MUI_HEADER_TEXT "Choose Additional Tasks" "Choose the additional tasks to be performed."
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "page_tasks.ini"
-FunctionEnd
-
-
-Function un.onUninstSuccess
-  HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
-FunctionEnd
-
-
-Function un.onInit
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name) and all of its components?" IDYES +2
-  Abort
+  ${EndIF}
 FunctionEnd
 
 
@@ -377,8 +449,6 @@ Section Uninstall
 
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 
-  DeleteRegKey HKCR ".exr"
-  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.EXR"
   DeleteRegKey HKCR ".rib"
   DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB"
   DeleteRegKey HKCR ".ribz"
@@ -387,10 +457,6 @@ Section Uninstall
   DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL"
   DeleteRegKey HKCR ".slx"
   DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX"
-  DeleteRegKey HKCR ".tif"
-  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIF"
-  DeleteRegKey HKCR ".tiff"
-  DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.TIFF"
 
   DeleteRegKey ${PACKAGE_UNINST_ROOT_KEY} "${PACKAGE_UNINST_KEY}"
   DeleteRegKey HKLM "${PACKAGE_DIR_REGKEY}"

@@ -36,8 +36,6 @@
 
 #include	"mpdump.h"
 
-#include	"multitimer.h"
-
 namespace Aqsis {
 
 
@@ -443,7 +441,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		{
 			// Try to cull any transparent MPs
 			TqInt cCulled = 0;
-			TIME_SCOPE("Occlusion Culling")
+			AQSIS_TIME_SCOPE(Occlusion_culling);
 			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				if ( pOs[ i ] != gColWhite )
@@ -467,7 +465,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		{
 			// Try to cull any true transparent MPs
 			TqInt cCulled = 0;
-			TIME_SCOPE("Occlusion culling")
+			AQSIS_TIME_SCOPE(Occlusion_culling);
 			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				if ( pOs[ i ] == gColBlack )
@@ -492,10 +490,8 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface()->pAttributes()->pshadDisplacement(QGetRenderContext()->Time());
 	if ( pshadDisplacement )
 	{
-		//theStats.DisplacementTimer().Start();
-		TIME_SCOPE("Displacement")
+		AQSIS_TIME_SCOPE(Displacement_shading);
 		pshadDisplacement->Evaluate( m_pShaderExecEnv.get() );
-		//theStats.DisplacementTimer().Stop();
 
 		// Re-calculate geometric normals and surface derivatives after displacement.
 		// \note: This is a bit overkill, might be a better way of doing it.
@@ -512,11 +508,21 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		const CqVector3D* pNg = NULL;
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
 
-		TIME_SCOPE("Backface culling")
+		AQSIS_TIME_SCOPE(Backface_culling);
+		// When backface culling, we must use the geometric normal (Ng) as
+		// this is the normal that properly represents the actual micropolygon
+		// geometry. However, if the primitive specifies custom normals as
+		// primitive variables, the direction of those should be honored, in case
+		// the user has intentionally switched the surface direction.
+		// Therefore, we compare the direction of Ng with that of N and flip Ng 
+		// if they don't match.
 		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
+			TqFloat s = 1.0f;
+			if(NULL != pN)
+				s = ( ( pN[i] * pNg[i] ) < 0.0f ) ? -1.0f : 1.0f;
 			// Calulate the direction the MPG is facing.
-			if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+			if ( ( ( s * pNg[ i ] ) * pP[ i ] ) >= 0 )
 			{
 				cCulled++;
 				STATS_INC( MPG_culled );
@@ -538,7 +544,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	if ( pshadSurface )
 	{
-		TIME_SCOPE("Surface shading")
+		AQSIS_TIME_SCOPE(Surface_shading);
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
 		pshadSurface->Evaluate( m_pShaderExecEnv.get() );
 	}
@@ -547,7 +553,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface()->pAttributes()->pshadAtmosphere(QGetRenderContext()->Time());
 	if ( pshadAtmosphere )
 	{
-		TIME_SCOPE("Atmosphere shading")
+		AQSIS_TIME_SCOPE(Atmosphere_shading);
 		pshadAtmosphere->Evaluate( m_pShaderExecEnv.get() );
 	}
 
@@ -555,7 +561,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
 		TqInt cCulled = 0;
-		TIME_SCOPE("Occlusion culling")
+		AQSIS_TIME_SCOPE(Occlusion_culling);
 		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
@@ -647,8 +653,8 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "alpha" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
-		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
+//		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
 	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
 	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
@@ -685,7 +691,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	TqInt cu = uGridRes();
 	TqInt cv = vGridRes();
 
-	TIMER_START("Project points")
+	AQSIS_TIMER_START(Project_points);
 	CqMatrix matCameraToRaster;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
 	CqMatrix matCameraToObject0;
@@ -787,9 +793,9 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	}
 	m_TriangleSplitLine.AddTimeSlot(keyframeTimes.begin()->first, sl );
 
-	TIMER_STOP("Project points")
+	AQSIS_TIMER_STOP(Project_points);
 
-	TIMER_START("Bust grids")
+	AQSIS_TIMER_START(Bust_grids);
 	// Get the required trim curve sense, if specified, defaults to "inside".
 	const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
 	CqString strTrimSense( "inside" );
@@ -917,7 +923,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 		//	}
 		}
 	}
-	TIMER_STOP("Bust grids")
+	AQSIS_TIMER_STOP(Bust_grids);
 //	if(tooSmall_)
 //	{
 //		CqString objname( "unnamed" );
@@ -985,13 +991,14 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 
 void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
+	TqInt lUses = pSurface() ->Uses();
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
 	TqInt cu = pGridA->uGridRes();
 	TqInt cv = pGridA->vGridRes();
 	TqInt iTime;
 
-	TIMER_START("Project points")
+	AQSIS_TIMER_START(Project_points);
 	CqMatrix matCameraToRaster;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
 	// Check to see if this surface is single sided, if so, we can do backface culling.
@@ -1025,6 +1032,18 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		pg->pVar(EnvVars_P) ->GetPointPtr( pP );
 		CqVector3D* pNg;
 		pg->pVar(EnvVars_Ng) ->GetPointPtr( pNg );
+		CqVector3D* pN = NULL;
+		if ( USES( lUses, EnvVars_N ) )
+			pg->pVar(EnvVars_N) ->GetPointPtr( pN );
+
+
+		// When backface culling, we must use the geometric normal (Ng) as
+		// this is the normal that properly represents the actual micropolygon
+		// geometry. However, if the primitive specifies custom normals as
+		// primitive variables, the direction of those should be honored, in case
+		// the user has intentionally switched the surface direction.
+		// Therefore, we compare the direction of Ng with that of N and flip Ng 
+		// if they don't match.
 
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -1039,8 +1058,11 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			// Now try and cull any hidden MPs if Sides==1
 			if ( canBeBFCulled )
 			{
-				TIME_SCOPE("Backface culling")
-				if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
+				TqFloat s = 1.0f;
+				if( NULL != pN )
+					s = ( ( pN[i] * pNg[i] ) < 0.0f ) ? -1.0f : 1.0f;
+				AQSIS_TIME_SCOPE(Backface_culling);
+				if ( (  ( s * pNg[ i ] ) * pP[ i ] ) >= 0 )
 					totalBFCulled[i]++;
 			}
 		}
@@ -1062,9 +1084,9 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		}
 		m_TriangleSplitLine.AddTimeSlot(Time( iTime ), sl );
 	}
-	TIMER_STOP("Project points")
+	AQSIS_TIMER_STOP(Project_points);
 
-	TIMER_START("Bust grids")
+	AQSIS_TIMER_START(Bust_grids);
 	// Get the required trim curve sense, if specified, defaults to "inside".
 	const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
 	CqString strTrimSense( "inside" );
@@ -1151,7 +1173,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			pImage->AddMPG( pTemp );
 		}
 	}
-	TIMER_STOP("Bust grids")
+	AQSIS_TIMER_STOP(Bust_grids);
 
 	RELEASEREF( pGridA );
 

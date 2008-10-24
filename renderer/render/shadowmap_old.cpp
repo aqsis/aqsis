@@ -24,7 +24,6 @@
 */
 
 #include	"aqsis.h"
-#include	"multitimer.h"
 
 #include	<cstring>
 #include	<iostream>
@@ -36,6 +35,7 @@
 #include	"version.h"
 #include	"renderer.h"
 #include	"logging.h"
+#include	"stats.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -357,7 +357,6 @@ void	CqShadowMapOld::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, 
 	if (index == 0)
 		CriticalMeasure();
 
-	TIME_SCOPE("Shadow Mapping")
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );

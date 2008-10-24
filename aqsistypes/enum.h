@@ -220,6 +220,14 @@ class CqEnumInfo
 			{
 				return p.first < h;
 			}
+			bool operator()(TqHash p, const std::pair<TqHash, EnumT>& h)
+			{
+				return p < h.first;
+			}
+			bool operator()(const std::pair<TqHash, EnumT>& p, const std::pair<TqHash, EnumT>& h)
+			{
+				return p.first < h.first;
+			}
 		};
 
 		/** Check that hashed values stored in the lookup vector are unique.

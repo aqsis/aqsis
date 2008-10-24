@@ -40,7 +40,6 @@
 #include	"vector3d.h"
 #include	"matrix.h"
 #include	"color.h"
-//#include	"stats.h"
 #include	"logging.h"
 
 #include	"ishaderdata.h"

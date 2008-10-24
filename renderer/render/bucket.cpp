@@ -41,7 +41,7 @@
 #include	"micropolygon.h"
 
 #include	"bucket.h"
-#include	"multitimer.h"
+#include	"stats.h"
 
 #include	<algorithm>
 #include	<valarray>
@@ -61,13 +61,6 @@ CqBucket::CqBucket() : m_bProcessed(false), m_bucketData(0)
  */
 void CqBucket::AddMP( boost::shared_ptr<CqMicroPolygon>& pMP )
 {
-#ifdef _DEBUG
-	std::vector<CqMicroPolygon*>::iterator end = m_micropolygons.end();
-	for (std::vector<CqMicroPolygon*>::iterator i = m_micropolygons.begin(); i != end; i++)
-		if ((*i) == pMP)
-			assert( false );
-#endif
-
 	m_micropolygons.push_back( pMP );
 }
 
@@ -795,7 +788,7 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 		// Init & Execute the imager shader
 
 		QGetRenderContext() ->poptCurrent()->InitialiseColorImager( this );
-		TIME_SCOPE("Imager shading")
+		AQSIS_TIME_SCOPE(Imager_shading);
 
 		if ( fImager )
 		{
