@@ -70,10 +70,12 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_strings_test)
 	}
 	{
 		// Test embedded newlines and tabs
-		std::istringstream in("\"xx\t\nXX\"");
+		std::istringstream in("\"xx\t\nXX\"  \"a\r\nb\rc\nd\"");
 		CqRibLexer lex(in);
 		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING,
 					"xx\t\nXX"));
+		BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING,
+					"a\nb\nc\nd"));
 		CHECK_EOF(lex);
 	}
 	{
@@ -287,6 +289,23 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_defined_string_test)
 	CqRibLexer lex(in);
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "DefinedString100100"));
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::STRING, "DefinedString000"));
+	CHECK_EOF(lex);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_binarymode_newlines)
+{
+	// Test that the lexer correctly avoids translating newline characters when
+	// in binary mode.
+	//
+	// For simplicity, we perform this test with the integer binary encoding
+	std::istringstream in("\203a\rcd\203a\ncd\203a\r\nd");
+	CqRibLexer lex(in);
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
+		(TqInt('a') << 24) + (TqInt('\r') << 16) + (TqInt('c') << 8) + TqInt('d')) );
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
+		(TqInt('a') << 24) + (TqInt('\n') << 16) + (TqInt('c') << 8) + TqInt('d')) );
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(
+		(TqInt('a') << 24) + (TqInt('\r') << 16) + (TqInt('\n') << 8) + TqInt('d')) );
 	CHECK_EOF(lex);
 }
 
