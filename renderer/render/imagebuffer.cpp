@@ -438,7 +438,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
-	TqInt XMinb = 0, YMinb = 0;
+	TqInt XMinb = 0, YMinb = 0, XMaxb = 0, YMaxb = 0;
 	if ( !pSurface->IsUndiceable() )
 	{
 		// Find out which bucket(s) the surface belongs to.
@@ -449,19 +449,43 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 		XMinb = static_cast<TqInt>( Bound.vecMin().x() ) / XBucketSize();
 		YMinb = static_cast<TqInt>( Bound.vecMin().y() ) / YBucketSize();
+		XMaxb = static_cast<TqInt>( Bound.vecMax().x() ) / XBucketSize();
+		YMaxb = static_cast<TqInt>( Bound.vecMax().y() ) / YBucketSize();
 
 		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
 			return;
 
 		XMinb = clamp( XMinb, 0, cXBuckets() );
 		YMinb = clamp( YMinb, 0, cYBuckets() );
+		XMaxb = clamp( XMaxb, 0, cXBuckets() );
+		YMaxb = clamp( YMaxb, 0, cYBuckets() );
 	}
 
 	// Sanity check we are not putting into a bucket that has already been processed.
 	CqBucket* bucket = &Bucket( XMinb, YMinb );
 	if ( bucket->IsProcessed() )
 	{
-		throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
+		// Scan over the buckets that the bound touches, looking for the first one that isn't processed.
+		TqInt yb = YMinb;
+		TqInt xb = XMinb + 1;
+		bool done = false;
+		while(!done && yb <= YMaxb)
+		{
+			while(!done && xb <= XMaxb)
+			{
+				CqBucket& availBucket = Bucket(xb, yb);
+				if(!availBucket.IsProcessed())
+				{
+					availBucket.AddGPrim(pSurface);
+					done = true;
+				}
+				++xb;
+			}
+			xb = XMinb;
+			++yb;
+		}
+		if(!done)
+			throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
 	}
 	else
 	{
