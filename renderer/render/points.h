@@ -33,6 +33,7 @@
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"kdtree.h"
+#include 	"micropolygon.h"
 
 #include	"ri.h"
 
@@ -343,7 +344,7 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 class CqMicroPolygonPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonPoints() : CqMicroPolygon()
+		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) : CqMicroPolygon(pGrid, Index)
 		{}
 		virtual	~CqMicroPolygonPoints()
 		{}
@@ -367,7 +368,7 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		{
 			m_radius = radius;
 		}
-		virtual	CqBound&			GetTotalBound( )
+		virtual	CqBound&	GetTotalBound( ) const
 		{
 			static CqBound b;
 			CqVector3D Pmin, Pmax;
@@ -381,7 +382,7 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			b.vecMax() = Pmax;
 			return( b );
 		}
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
@@ -391,9 +392,6 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 
 	private:
-		CqMicroPolygonPoints( const CqMicroPolygonPoints& From )
-		{}
-
 		TqFloat	m_radius;
 
 		static	CqObjectPool<CqMicroPolygonPoints>	m_thePool;
@@ -478,7 +476,8 @@ class CqMovingMicroPolygonKeyPoints
 class CqMicroPolygonMotionPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotionPoints() : CqMicroPolygon(), m_BoundReady( false )
+		CqMicroPolygonMotionPoints(CqMicroPolyGridBase* pGrid, TqInt Index) : 
+			CqMicroPolygon(pGrid, Index), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotionPoints()
 		{
@@ -509,32 +508,34 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		// Overrides from CqMicroPolygon
 		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void CalculateTotalBound();
-		virtual	CqBound&		GetTotalBound( /*bool fForce = false */);
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return( m_Bound );
 		}
-		virtual	TqInt			cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
 		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+			{
+				Aqsis::log() << error << "MP Bound list not ready" << std::endl;
+				throw XqException("MP error");
+			}
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
-		virtual void	BuildBoundList();
+		virtual void	BuildBoundList( TqUint timeRanges );
 
 		virtual bool IsMoving()
 		{
 			return true;
 		}
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
@@ -544,9 +545,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKeyPoints*>	m_Keys;
-
-		CqMicroPolygonMotionPoints( const CqMicroPolygonMotionPoints& From )
-		{}
 
 		static	CqObjectPool<CqMicroPolygonMotionPoints>	m_thePool;
 

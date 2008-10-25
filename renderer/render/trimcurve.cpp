@@ -12,7 +12,6 @@
 
 #include	"trimcurve.h"
 #include	"surface.h"
-#include	"imagebuffer.h"
 
 namespace Aqsis {
 

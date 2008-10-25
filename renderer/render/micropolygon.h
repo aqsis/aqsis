@@ -27,8 +27,6 @@
 #ifndef MICROPOLYGON_H_INCLUDED
 #define MICROPOLYGON_H_INCLUDED 1
 
-#include	"ri.h"
-
 #include	"aqsis.h"
 
 #include	"pool.h"
@@ -36,21 +34,34 @@
 #include	"list.h"
 #include	"bound.h"
 #include	"vector2d.h"
-#include	"vector3d.h"
-#include	"vector4d.h"
 #include	"shaderexecenv.h"
 #include	"ishaderdata.h"
 #include	"motion.h"
 #include	"csgtree.h"
 #include	"refcount.h"
 #include	"logging.h"
+#include       <boost/utility.hpp>
 
 namespace Aqsis {
 
 class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
+class CqMicroPolygon;
 struct SqSampleData;
+
+// This struct holds info about a grid that can be cached and used for all its mpgs.
+struct SqGridInfo
+{
+	TqFloat			m_ShadingRate;
+	TqFloat			m_ShutterOpenTime;
+	TqFloat			m_ShutterCloseTime;
+	const TqFloat*	        m_LodBounds;
+	bool			m_IsMatte;
+	bool			m_IsCullable;
+	bool			m_UsesDataMap;
+};
+
 
 //----------------------------------------------------------------------
 /** \brief Cache of output sample data for a micropoly
@@ -109,10 +120,6 @@ class CqMicroPolyGridBase : public CqRefCount
 
 		/** Pure virtual function, splits the grid into micropolys.
 		 * \param pImage Pointer to the image buffer being rendered.
-		 * \param xmin The minimum x pixel, taking into account clipping etc.
-		 * \param xmax The maximum x pixel, taking into account clipping etc.
-		 * \param ymin The minimum y pixel, taking into account clipping etc.
-		 * \param ymax The maximum y pixel, taking into account clipping etc.
 		 */
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, shade the grid.
@@ -192,10 +199,23 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
 		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() = 0; 
 
+		const SqGridInfo& GetCachedGridInfo() const
+		{
+			return m_CurrentGridInfo;
+		}
+
 	protected:
 		bool m_fCulled; ///< Boolean indicating the entire grid is culled.
 		CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
 		bool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
+
+		/** Cached info about the given grid so it can be
+		 * referenced by multiple mpgs. */
+		SqGridInfo m_CurrentGridInfo;
+
+		/** Cache some info about the given grid so it can be
+		 * referenced by multiple mpgs. */
+		void CacheGridInfo();
 };
 
 
@@ -295,8 +315,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		}
 		virtual bool	usesCSG() const
 		{
-			bool result = (m_pCSGNode.get() != NULL);
-			return(result);
+			return (m_pCSGNode.get() != NULL);
 		}
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
 		{
@@ -492,6 +511,12 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		{
 			return ( A );
 		}
+		void	Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface )
+		{
+			//assert( GetMotionObject( Time( 0 ) ) );
+			//static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->Initialise(cu, cv, pSurface);
+			CacheGridInfo();
+		}
 
 	private:
 };
@@ -524,10 +549,18 @@ struct CqHitTestCache
  * Abstract base class from which static and motion micropolygons are derived.
  */
 
-class CqMicroPolygon : public CqRefCount
+class CqMicroPolygon : boost::noncopyable
 {
 	public:
-		CqMicroPolygon();
+		/** Constructor, setting up the pointer to the grid
+		 * this micropoly came from; and the index of the
+		 * shading point associated with this micropolygon
+		 * within the donor grid.
+		 * 
+		 * \param pGrid CqMicroPolyGrid pointer.
+		 * \param Index Integer grid index.
+		 */
+		CqMicroPolygon( CqMicroPolyGridBase* pGrid, TqInt Index );
 		virtual	~CqMicroPolygon();
 
 		/** Overridden operator new to allocate micropolys from a pool.
@@ -551,22 +584,6 @@ class CqMicroPolygon : public CqRefCount
 			return CqString("CqMicroPolygon");
 		}
 #endif
-		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
-		 * \param From Donor micropoly.
-		 */
-		CqMicroPolygon& operator=( const CqMicroPolygon& From )
-		{
-			if ( m_pGrid != NULL )
-				RELEASEREF( m_pGrid );
-			m_pGrid = From.m_pGrid;
-			ADDREF( m_pGrid );
-			m_Index = From.m_Index;
-			m_IndexCode = From.m_IndexCode;
-			m_BoundCode = From.m_BoundCode;
-			m_Flags = From.m_Flags;
-
-			return ( *this );
-		}
 
 	private:
 		enum EqMicroPolyFlags
@@ -577,16 +594,6 @@ class CqMicroPolygon : public CqRefCount
 		};
 
 	public:
-		/** Set up the pointer to the grid this micropoly came from.
-		 * \param pGrid CqMicroPolyGrid pointer.
-		 */
-		void	SetGrid( CqMicroPolyGridBase* pGrid )
-		{
-			if ( m_pGrid )
-				RELEASEREF( m_pGrid );
-			m_pGrid = pGrid;
-			ADDREF( m_pGrid );
-		}
 		/** Get the pointer to the grid this micropoly came from.
 		 * \return Pointer to the CqMicroPolyGrid.
 		 */
@@ -599,25 +606,6 @@ class CqMicroPolygon : public CqRefCount
 		TqInt GetIndex() const
 		{
 			return( m_Index );
-		}
-		/** Set the index of the shading point associated with this
-		 *  micropolygon within the donor grid.
-		 * \param Index Integer grid index.
-		 */
-		void	SetIndex( TqInt Index )
-		{
-			assert( m_pGrid != 0 && static_cast<TqInt>(m_pGrid->pShaderExecEnv()->shadingPointCount()) > Index );
-			m_Index = Index;
-		}
-		/** Release this micropolys reference to the donor grid.
-		 */
-		void	Detach()
-		{
-			if ( m_pGrid != 0 )
-			{
-				RELEASEREF( m_pGrid );
-				m_pGrid = 0;
-			}
 		}
 		/** Get the color of this micropoly.
 		 * \return CqColor reference.
@@ -646,16 +634,12 @@ class CqMicroPolygon : public CqRefCount
 		/** Get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
 		 */
-		virtual	CqBound& GetTotalBound()
-		{
-			return m_Bound;
-		}
 		virtual	const CqBound& GetTotalBound() const
 		{
 			return m_Bound;
 		}
 
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			return ( 1 );
 		}
@@ -663,7 +647,7 @@ class CqMicroPolygon : public CqRefCount
 		/**
 		* \todo Review: Unused parameter iIndex
 		*/				
-		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time ) const
 		{
 			time = 0.0f;
 			return ( GetTotalBound() );
@@ -702,7 +686,7 @@ class CqMicroPolygon : public CqRefCount
 			return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
 		}
 
-		virtual bool IsMoving()
+		virtual bool IsMoving() const
 		{
 			return false;
 		}
@@ -713,12 +697,10 @@ class CqMicroPolygon : public CqRefCount
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
-		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
-		virtual void	CacheHitTestValues(CqHitTestCache* cache);
-		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
+		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
 
 		/** \brief Cache information needed to interpolate colour and opacity
 		 * across the micropolygon.
@@ -742,7 +724,7 @@ class CqMicroPolygon : public CqRefCount
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 
 		void	Initialise();
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
 		virtual const CqVector3D& PointA() const
 		{
@@ -806,14 +788,10 @@ class CqMicroPolygon : public CqRefCount
 
 		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
-		CqHitTestCache* m_pHitTestCache; // struct to hold cached values used in the point-in-poly test
-	private:
-		/**
-		* \todo Review: operator= defined, but empty copy-ctor.
-		*/
-		CqMicroPolygon( const CqMicroPolygon& From)
-		{}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const;
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 
+	private:
 		static	CqObjectPool<CqMicroPolygon> m_thePool;
 }
 ;
@@ -856,7 +834,7 @@ class CqMovingMicroPolygonKey
 	public:
 		const CqBound&	GetTotalBound();
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
 		const bool IsDegenerate() const
 		{
@@ -888,7 +866,8 @@ class CqMovingMicroPolygonKey
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( false )
+		CqMicroPolygonMotion( CqMicroPolyGridBase* pGrid, TqInt Index ) :
+			CqMicroPolygon( pGrid, Index ), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotion()
 		{
@@ -919,38 +898,34 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		// Overrides from CqMicroPolygon
 		virtual void CalculateTotalBound();
-		virtual	CqBound&	GetTotalBound()
-		{
-			return m_Bound;
-		}
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time ) const
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				Aqsis::log() << error << "MP bound list not ready" << std::endl;
 			assert( iIndex < static_cast<TqInt>(m_BoundList.Size()) );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
-		virtual void	BuildBoundList();
+		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual void	MarkTrimmed()
 		{
 			m_fTrimmed = true;
 		}
 
-		virtual bool IsMoving()
+		virtual bool IsMoving() const
 		{
 			return true;
 		}
@@ -965,15 +940,15 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 			return(m_Keys.size());
 		}
 
-		virtual TqFloat Time(TqInt index) const
+		virtual TqFloat Time(TqUint index) const
 		{
-			assert( index < static_cast<TqInt>(m_Times.size()) );
+			assert( index < m_Times.size() );
 			return(m_Times[index]);
 		}
 
-		virtual CqMovingMicroPolygonKey* Key(TqInt index) const
+		virtual CqMovingMicroPolygonKey* Key(TqUint index) const
 		{
-			assert( index < static_cast<TqInt>(m_Keys.size()) );
+			assert( index < m_Keys.size() );
 			return(m_Keys[index]);
 		}
 
@@ -983,12 +958,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
 		bool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
-
-		/**
-		* \todo Review Empty copy-ctor, but default operator=!
-		*/
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
-		{}
 }
 ;
 

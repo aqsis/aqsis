@@ -60,10 +60,10 @@ void TIFF_ErrorHandler(const char*, const char*, va_list);
 void TIFF_WarnHandler(const char*, const char*, va_list);
 
 
-static TqUlong ohash = CqString::hash( "object" ); //< == "object"
-static TqUlong shash = CqString::hash( "shader" ); //< == "shader"
-static TqUlong chash = CqString::hash( "camera" ); //< == "camera"
-static TqUlong cuhash = CqString::hash( "current" ); //< == "current"
+static const TqUlong ohash = CqString::hash( "object" ); //< == "object"
+static const TqUlong shash = CqString::hash( "shader" ); //< == "shader"
+static const TqUlong chash = CqString::hash( "camera" ); //< == "camera"
+static const TqUlong cuhash = CqString::hash( "current" ); //< == "current"
 
 static CqMatrix oldkey[2];  //< to eliminate Inverse(), Transpose() matrix ops.
 static CqMatrix oldresult[2];
@@ -806,7 +806,6 @@ void CqRenderer::RenderAutoShadows()
 
 				CqTextureMapOld::FlushCache();
 				m_textureCache.flush();
-				CqOcclusionBox::DeleteHierarchy();
 				clippingVolume().clear();
 			}
 		}
@@ -857,11 +856,10 @@ void CqRenderer::Initialise()
 bool	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result )
 {
 	CqMatrix	matA, matB;
-	TqUlong fhash, thash;
 
 	// Get the hash keys for From,To spaces
-	fhash = CqString::hash( strFrom );
-	thash = CqString::hash( strTo );
+	const TqUlong fhash = CqString::hash( strFrom );
+	const TqUlong thash = CqString::hash( strTo );
 
 	// Get the two component matrices.
 	// First check for special cases.
@@ -918,11 +916,9 @@ bool	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const
 {
 	CqMatrix	matA, matB;
 
-	TqUlong fhash, thash;
-
 	// Get the hash keys for From,To spaces
-	fhash = CqString::hash( strFrom );
-	thash = CqString::hash( strTo );
+	const TqUlong fhash = CqString::hash( strFrom );
+	const TqUlong thash = CqString::hash( strTo );
 
 	// Get the two component matrices.
 	// First check for special cases.
@@ -991,11 +987,9 @@ bool	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const
 {
 	CqMatrix	matA, matB;
 
-	TqUlong fhash, thash;
-
 	// Get the hash keys for From,To spaces
-	fhash = CqString::hash( strFrom );
-	thash = CqString::hash( strTo );
+	const TqUlong fhash = CqString::hash( strFrom );
+	const TqUlong thash = CqString::hash( strTo );
 
 	// Get the two component matrices.
 	// First check for special cases.
@@ -1115,7 +1109,7 @@ CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strPa
 bool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
 	// Search for the same named system in the current list.
-	TqUlong hash = CqString::hash( strName );
+	const TqUlong hash = CqString::hash( strName );
 	for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
 	{
 		if ( m_aCoordSystems[ i ].m_hash == hash )
@@ -1222,7 +1216,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	// Search the local parameter declaration list.
 	std::vector<SqParameterDeclaration>::iterator is;
 	std::vector<SqParameterDeclaration>::iterator end = m_Symbols.end();
-	TqUlong hash = CqString::hash( strDecl );
+	const TqUlong hash = CqString::hash( strDecl );
 	for ( is = m_Symbols.begin(); is != end ; is++ )
 	{
 		if ( is->m_hash == 0)

@@ -24,6 +24,10 @@
 */
 
 #include	"imagers.h"
+#include	"iddmanager.h"
+#include	"attributes.h"
+#include	"renderer.h"
+#include	"file.h"
 
 #include	"stats.h"
 

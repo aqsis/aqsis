@@ -41,7 +41,6 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"options.h"
-#include	"bound.h"
 #include	"spline.h"
 #include	"trimcurve.h"
 #include	"iattributes.h"
@@ -294,7 +293,7 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 
 				const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
 				{
-					TqUlong hash = CqString::hash(pname);
+					const TqUlong hash = CqString::hash(pname);
 					TqInt i = _hash( pname);
 
 					if ( m_aLists[ i ].empty() )
@@ -323,7 +322,7 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 
 				boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
 				{
-					TqUlong hash = CqString::hash(pname);
+					const TqUlong hash = CqString::hash(pname);
 					TqUlong i = _hash( pname);
 
 					if ( m_aLists[ i ].empty() )

@@ -35,19 +35,17 @@
 #include	<deque>
 #include	<valarray>
 
-#include	"bitvector.h"
-#include	"renderer.h"
 #include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
 
 namespace Aqsis {
 
+class CqBucket;
+
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
  */
-
-class CqCSGTreeNode;
 
 enum EqSampleIndices
 {
@@ -128,9 +126,9 @@ class CqSampleDataPool
 
 	private:
 		std::vector<TqFloat>	m_theDataPool;
-		TqUint					m_nextSlot;
-		TqUint					m_slotSize;
-		std::stack<TqInt>		m_freeSlots;
+		TqUint			m_nextSlot;
+		TqUint			m_slotSize;
+		std::stack<TqInt>	m_freeSlots;
 };
 
 
@@ -138,29 +136,26 @@ struct SqImageSample
 {
 	SqImageSample() : m_flags(0)
 	{
-		m_sampleSlot = m_theSamplePool.Allocate();
+		/// \todo Previous code for the sample pool
+		/// m_sampleSlot = m_theSamplePool.Allocate();
+		m_data = new TqFloat[m_sampleSize];
 	}
 
 	/// Copy constructor
-	///
 	SqImageSample(const SqImageSample& from)
 	{
-		m_sampleSlot = m_theSamplePool.Allocate();
+		/// \todo Previous code for the sample pool
+		/// m_sampleSlot = m_theSamplePool.Allocate();
+		m_data = new TqFloat[m_sampleSize];
 		*this = from;
 	}
 
 	~SqImageSample()
 	{
-		m_theSamplePool.DeAllocate(m_sampleSlot);
+		/// \todo Previous code for the sample pool
+		/// m_theSamplePool.DeAllocate(m_sampleSlot);
+		delete [] m_data;
 	}
-
-
-	enum {
-	    Flag_Occludes = 0x0001,
-	    Flag_Matte = 0x0002,
-	    Flag_Valid = 0x0004
-	};
-
 
 	SqImageSample& operator=(const SqImageSample& from)
 	{
@@ -169,40 +164,80 @@ struct SqImageSample
 
 		const TqFloat* fromData = from.Data();
 		TqFloat* toData = Data();
-		for(TqInt i=0; i<m_theSamplePool.slotSize(); ++i)
+		/// \todo Previous code for the sample pool
+		/// for(TqInt i=0; i<m_theSamplePool.slotSize(); ++i)
+		for(TqUint i=0; i<m_sampleSize; ++i)
 			toData[i] = fromData[i];
 
 		return(*this);
 	}
 
-
-	static void SetSampleSize(TqInt size)
+	static void SetSampleSize(TqUint size)
 	{
-		m_theSamplePool.Initialise(size);
+		/// \todo Previous code for the sample pool
+		/// m_theSamplePool.Initialise(size);
+		m_sampleSize = size;
 	}
 
 	TqFloat* Data()
 	{
-		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		/// \todo Previous code for the sample pool
+		/// return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		return m_data;
 	}
-
 	const TqFloat* Data() const
 	{
-		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		/// \todo Previous code for the sample pool
+		/// return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		return m_data;
 	}
 
-	TqInt sampleSlot() const
+	void resetFlags()
 	{
-		return(m_sampleSlot);
+		m_flags = 0;
+	}
+	bool isValid() const
+	{
+		return (m_flags & Flag_Valid) != 0;
+	}
+	void setValid()
+	{
+		m_flags |= Flag_Valid;
+	}
+	bool isMatte() const
+	{
+		return (m_flags & Flag_Matte) != 0;
+	}
+	void setMatte()
+	{
+		m_flags |= Flag_Matte;
+	}
+	bool isOccludes() const
+	{
+		return (m_flags & Flag_Occludes) != 0;
+	}
+	void setOccludes()
+	{
+		m_flags |= Flag_Occludes;
 	}
 
-	TqInt m_flags;
 	boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 
 private:
+	enum {
+	    Flag_Occludes = 0x0001,
+	    Flag_Matte = 0x0002,
+	    Flag_Valid = 0x0004
+	};
+
+	TqInt	m_flags;
 	TqInt	m_sampleSlot;
 
-	static	CqSampleDataPool m_theSamplePool;
+	/// \todo Previous code for the sample pool
+	/// static  CqSampleDataPool m_theSamplePool;
+	static TqUint	m_sampleSize;
+	TqFloat*	m_data;
+
 }
 ;
 
@@ -246,15 +281,15 @@ class CqImagePixel
 		{
 			return ( m_YSamples );
 		}
-		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
-		void	JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
-		void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
+		void	AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples );
+		void	InitialiseSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples );
+		void	JitterSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
+		void	OffsetSamples( std::vector<SqSampleData>& samplePoints, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );
 
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
 		 */
-		TqFloat	Coverage()
+		TqFloat	Coverage() const
 		{
 			return ( m_Data.Data()[Sample_Coverage] );
 		}
@@ -266,9 +301,9 @@ class CqImagePixel
 		 * \return A color representing the averaged color at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		CqColor	Color()
+		CqColor	Color() const
 		{
-			TqFloat* data = m_Data.Data();
+			const TqFloat* data = m_Data.Data();
 			return ( CqColor(data[Sample_Red], data[Sample_Green], data[Sample_Blue]) );
 		}
 		void	SetColor(const CqColor& col)
@@ -282,9 +317,9 @@ class CqImagePixel
 		 * \return A color representing the averaged opacity at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		CqColor	Opacity()
+		CqColor	Opacity() const
 		{
-			TqFloat* data = m_Data.Data();
+			const TqFloat* data = m_Data.Data();
 			return ( CqColor(data[Sample_ORed], data[Sample_OGreen], data[Sample_OBlue]) );
 		}
 		void	SetOpacity(const CqColor& col)
@@ -298,7 +333,7 @@ class CqImagePixel
 		 * \return A float representing the averaged depth at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		TqFloat	Depth()
+		TqFloat	Depth() const
 		{
 			return ( m_Data.Data()[Sample_Depth] );
 		}
@@ -310,7 +345,7 @@ class CqImagePixel
 		 * \return A float representing the premultiplied alpha value of this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		TqFloat	Alpha()
+		TqFloat	Alpha() const
 		{
 			return ( m_Data.Data()[Sample_Alpha] );
 		}
@@ -339,7 +374,7 @@ class CqImagePixel
 
 		/** Clear all sample information from this pixel.
 		 */
-		void	Clear();
+		void	Clear( std::vector<SqSampleData>& samplePoints );
 		/** Get a reference to the array of values for the specified sample.
 		 * \param m The horizontal index of the required sample point.
 		 * \param n The vertical index of the required sample point.
@@ -347,28 +382,28 @@ class CqImagePixel
 		 */
 		//std::list<SqImageSample>&	Values( TqInt index );
 
-		SqImageSample& OpaqueValues( TqInt index );
+		SqImageSample& OpaqueValues( std::vector<SqSampleData>& samplePoints, TqInt index );
 
-		void	Combine(EqFilterDepth eDepthFilter, CqColor zThreshold);
-
-		/** Get the sample data for the specified sample index.
-		 * \param The index of the required sample point.
-		 * \return A reference to the sample data.
-		 */
-		const SqSampleData& SampleData( TqInt index ) const;
+		void	Combine( std::vector<SqSampleData>& samplePoints, EqFilterDepth eDepthFilter, CqColor zThreshold );
 
 		/** Get the sample data for the specified sample index.
 		 * \param The index of the required sample point.
 		 * \return A reference to the sample data.
 		 */
-		SqSampleData& SampleData( TqInt index );
+		const SqSampleData& SampleData( std::vector<SqSampleData>& samplePoints, TqInt index ) const;
+
+		/** Get the sample data for the specified sample index.
+		 * \param The index of the required sample point.
+		 * \return A reference to the sample data.
+		 */
+		SqSampleData& SampleData( std::vector<SqSampleData>& samplePoints, TqInt index );
 
 		/** Get the index of the sample that contains a dof offset that lies
 		 *  in bounding-box number i.
 		 * \param The index of the bounding box in question.
 		 * \return The index of the sample that contains a dof offset in said bb.
 		 */
-		TqInt GetDofOffsetIndex(TqInt i)
+		TqInt GetDofOffsetIndex(TqInt i) const
 		{
 			return m_DofOffsetIndices[i];
 		}

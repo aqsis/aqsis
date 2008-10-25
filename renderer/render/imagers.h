@@ -38,10 +38,12 @@
 #include "matrix.h"
 #include "shaderexecenv.h"
 #include "vector4d.h"
-#include "imagebuffer.h"
 #include "version.h"
+#include "attributes.h"
 
 namespace Aqsis {
+
+class IqBucket;
 
 //----------------------------------------------------------------------
 /** \class CqImagersource

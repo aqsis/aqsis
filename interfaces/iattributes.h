@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface class for common attributes access.
  *
- *	Last change by:		$Author: c42f $
- *	Last change date:	$Date: 2008-04-14 02:23:53 +0100 (Mon, 14 Apr 2008) $
+ *	Last change by:		$Author$
+ *	Last change date:	$Date$
  */
 //------------------------------------------------------------------------------
 

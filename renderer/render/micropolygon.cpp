@@ -42,6 +42,23 @@ namespace Aqsis {
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
 CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
+void CqMicroPolyGridBase::CacheGridInfo()
+{
+	m_CurrentGridInfo.m_IsMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+
+	// this is true if the mpgs can safely be occlusion culled.
+	m_CurrentGridInfo.m_IsCullable = !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) && !(this->pCSGNode());
+
+	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
+
+	m_CurrentGridInfo.m_ShadingRate = this->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+
+	m_CurrentGridInfo.m_LodBounds = this->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+}
+
+
 //---------------------------------------------------------------------
 /** Default constructor
  */
@@ -120,6 +137,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 	m_CulledPolys.SetAll( false );
 
 	TqInt size = numMicroPolygons(cu, cv);
+	CacheGridInfo();
 
 	STATS_INC( GRD_size_4 + clamp<TqInt>(CqStats::stats_log2(size) - 2, 0, 7) );
 }
@@ -863,21 +881,18 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 
 			if ( tTime > 1 )
 			{
-				CqMicroPolygonMotion * pNew = new CqMicroPolygonMotion();
-				pNew->SetGrid( this );
-				pNew->SetIndex( iIndex );
+				boost::shared_ptr<CqMicroPolygonMotion> pNew(new CqMicroPolygonMotion(this, iIndex));
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				std::map<TqFloat, TqInt>::iterator keyFrame;
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
-				pImage->AddMPG( pNew );
+				boost::shared_ptr<CqMicroPolygon> pTemp(pNew);
+				pImage->AddMPG( pTemp );
 			}
 			else
 			{
-				CqMicroPolygon *pNew = new CqMicroPolygon();
-				pNew->SetGrid( this );
-				pNew->SetIndex( iIndex );
+				boost::shared_ptr<CqMicroPolygon> pNew(new CqMicroPolygon(this, iIndex));
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
@@ -1151,12 +1166,11 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 					fTrimmed = true;
 			}
 
-			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
-			pNew->SetGrid( this );
-			pNew->SetIndex( iIndex );
+			boost::shared_ptr<CqMicroPolygonMotion> pNew( new CqMicroPolygonMotion( this, iIndex ) );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pTemp( pNew );
+			pImage->AddMPG( pTemp );
 		}
 	}
 	AQSIS_TIMER_STOP(Bust_grids);
@@ -1179,13 +1193,14 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 /** Default constructor
  */
 
-CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 ), m_pHitTestCache( 0 )
+CqMicroPolygon::CqMicroPolygon(CqMicroPolyGridBase* pGrid, TqInt Index ) : m_pGrid( pGrid ), m_Index(Index), m_Flags( 0 )
 {
 	STATS_INC( MPG_allocated );
 	STATS_INC( MPG_current );
 	TqInt cMPG = STATS_GETI( MPG_current );
 	TqInt cPeak = STATS_GETI( MPG_peak );
 	STATS_SETI( MPG_peak, cMPG > cPeak ? cMPG : cPeak );
+	ADDREF(pGrid);
 }
 
 
@@ -1295,14 +1310,14 @@ void CqMicroPolygon::Initialise()
  * \return Boolean indicating sample hit.
  */
 
-bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
+bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
 {
 	// AGG - optimised version of above.
 	TqFloat x = vecP.x(), y = vecP.y();
 
 	// start with the edge that failed last time to get the most benefit
 	// from an early exit.
-	int e = m_pHitTestCache->m_LastFailedEdge;
+	int e = hitTestCache.m_LastFailedEdge;
 	int prev = e - 1;
 	if(prev < 0)
 		prev = 3;
@@ -1315,19 +1330,19 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
 		// or neither sides.
 		if(e & 2)
 		{
-			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
-			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
+			if( (( y - hitTestCache.m_Y[e]) * hitTestCache.m_YMultiplier[e] ) -
+			        (( x - hitTestCache.m_X[e]) * hitTestCache.m_XMultiplier[e] ) < 0)
 			{
-				m_pHitTestCache->m_LastFailedEdge = e;
+				hitTestCache.m_LastFailedEdge = e;
 				return false;
 			}
 		}
 		else
 		{
-			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
-			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) <= 0)
+			if( (( y - hitTestCache.m_Y[e]) * hitTestCache.m_YMultiplier[e] ) -
+			        (( x - hitTestCache.m_X[e]) * hitTestCache.m_XMultiplier[e] ) <= 0)
 			{
-				m_pHitTestCache->m_LastFailedEdge = e;
+				hitTestCache.m_LastFailedEdge = e;
 				return false;
 			}
 		}
@@ -1337,8 +1352,8 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
 		e = (e+1) & 3;
 	}
 
-	Depth = ( m_pHitTestCache->m_D - ( m_pHitTestCache->m_VecN.x() * vecP.x() ) -
-	          ( m_pHitTestCache->m_VecN.y() * vecP.y() ) ) * m_pHitTestCache->m_OneOverVecNZ;
+	Depth = ( hitTestCache.m_D - ( hitTestCache.m_VecN.x() * vecP.x() ) -
+	          ( hitTestCache.m_VecN.y() * vecP.y() ) ) * hitTestCache.m_OneOverVecNZ;
 
 	return true;
 }
@@ -1348,10 +1363,8 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
  * This must be called prior to calling fContains() on a mpg.
  */
 
-inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
+inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const
 {
-	m_pHitTestCache = cache;
-
 	int j = 3;
 	for(int i=0; i<4; ++i)
 	{
@@ -1383,7 +1396,7 @@ inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D
 	cache->m_LastFailedEdge = 0;
 }
 
-void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
 {
 	CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
 	CacheHitTestValues(cache, points);
@@ -1575,7 +1588,7 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 	}
 }
 
-CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
+CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 {
 	CqVector2D kA, kB, kC, kD;
 	CqVector2D kResult;
@@ -1649,14 +1662,13 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
 	// If using DoF, we need to adjust the point positions, and the hit test cache,
 	// \note: this invalidates the hit test cache, but we are using DoF, so all bets are off anyway.
 	// still, would be good to find out if there is a better way of doing this.
-	CqHitTestCache hitTestCache;
 
 	if(UsingDof)
 	{
@@ -1680,7 +1692,7 @@ bool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat tim
 		CacheHitTestValues(&hitTestCache, points);
 	}
 
-	if ( fContains( vecSample, D, time ) )
+	if ( fContains( hitTestCache, vecSample, D, time ) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )
@@ -1854,7 +1866,7 @@ void CqMicroPolygonMotion::CalculateTotalBound()
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-void CqMicroPolygonMotion::BuildBoundList()
+void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
@@ -1873,7 +1885,6 @@ void CqMicroPolygonMotion::BuildBoundList()
 	TqFloat dy = fabs(m_Keys.front()->m_Point0.y() - m_Keys.back()->m_Point0.y());
 	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
-	TqUint timeRanges = CqBucket::NumTimeRanges();
 	TqUint divisions = min(d, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;
@@ -1934,10 +1945,9 @@ void CqMicroPolygonMotion::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
-	CqHitTestCache hitTestCache;
 	CqVector3D points[4];
 
 	// Calculate the position in time of the MP.
@@ -2000,7 +2010,7 @@ bool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFlo
 	}
 	CacheHitTestValues(&hitTestCache, points);
 
-	if ( CqMicroPolygon::fContains(vecSample, D, time) )
+	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, time) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )

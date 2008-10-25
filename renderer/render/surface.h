@@ -41,14 +41,13 @@
 #include	"matrix.h"
 #include	"parameters.h"
 #include	"bound.h"
-#include	"micropolygon.h"
 #include	"csgtree.h"
 #include	"isurface.h"
 #include	"logging.h"
 #include	"stats.h"
+#include	"micropolygon.h"
 
 namespace Aqsis {
-
 
 
 //----------------------------------------------------------------------
@@ -443,14 +442,14 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		virtual void AddPrimitiveVariable( CqParameter* pParam )
 		{
-			static TqUlong RIH_P = CqString::hash("P");
-			static TqUlong RIH_N = CqString::hash("N");
-			static TqUlong RIH_CS = CqString::hash("Cs");
-			static TqUlong RIH_OS = CqString::hash("Os");
-			static TqUlong RIH_S = CqString::hash("s");
-			static TqUlong RIH_T = CqString::hash("t") ;
-			static TqUlong RIH_U = CqString::hash("u");
-			static TqUlong RIH_V = CqString::hash("v");
+			static const TqUlong RIH_P = CqString::hash("P");
+			static const TqUlong RIH_N = CqString::hash("N");
+			static const TqUlong RIH_CS = CqString::hash("Cs");
+			static const TqUlong RIH_OS = CqString::hash("Os");
+			static const TqUlong RIH_S = CqString::hash("s");
+			static const TqUlong RIH_T = CqString::hash("t") ;
+			static const TqUlong RIH_U = CqString::hash("u");
+			static const TqUlong RIH_V = CqString::hash("v");
 
 			m_aUserParams.push_back( pParam );
 
@@ -599,7 +598,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		bool	m_CachedBound;		///< Whether or not the bound has been cached
 		CqBound	m_Bound;			///< The cached object bound
 		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
-		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
 }
 ;
 
@@ -618,7 +616,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		virtual	~CqDeformingSurface()
 		{}
 
-		/** Get combnied bound for all times
+		/** Get combined bound for all times
 		 * \return CqBound representing the geometric boundary of this GPrim over all time slots.
 		 */
 		virtual	void	Bound(CqBound* bound) const
@@ -637,7 +635,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		 */
 		virtual	CqMicroPolyGridBase* Dice()
 		{
-			CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
+			CqMotionMicroPolyGrid* pGrid = new CqMotionMicroPolyGrid;
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
 			{
@@ -646,6 +644,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 				ADDREF(pGrid2);
 				pGrid->SetfTriangular( pGrid2->fTriangular() );
 			}
+			pGrid->Initialise(m_uDiceSize, m_vDiceSize, shared_from_this());
 			return ( pGrid );
 		}
 		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.

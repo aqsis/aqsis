@@ -36,93 +36,131 @@
 #include	"aqsismath.h"
 #include	"surface.h"
 #include	"imagepixel.h"
+#include	"occlusion.h"
+#include	"renderer.h"
+#include	"micropolygon.h"
+
 #include	"bucket.h"
 #include	"stats.h"
 
-#include	"imagers.h"
-
+#include	<algorithm>
+#include	<valarray>
+#include	<cmath>
 
 
 namespace Aqsis {
 
 
 //----------------------------------------------------------------------
-/** Static data on CqBucket
- */
+CqBucket::CqBucket() : m_bProcessed(false), m_bucketData(0)
+{
+}
 
-TqInt	CqBucket::m_XSize;
-TqInt	CqBucket::m_YSize;
-TqInt	CqBucket::m_RealWidth;
-TqInt	CqBucket::m_RealHeight;
-TqInt	CqBucket::m_DiscreteShiftX;
-TqInt	CqBucket::m_DiscreteShiftY;
-TqInt	CqBucket::m_XOrigin;
-TqInt	CqBucket::m_YOrigin;
-TqInt	CqBucket::m_PixelXSamples;
-TqInt	CqBucket::m_PixelYSamples;
-TqFloat	CqBucket::m_FilterXWidth;
-TqFloat	CqBucket::m_FilterYWidth;
-TqInt	CqBucket::m_NumTimeRanges;
-TqInt	CqBucket::m_NumDofBounds;
-CqImageBuffer* CqBucket::m_ImageBuffer;
-std::vector<CqBound>		CqBucket::m_DofBounds;
-std::vector<CqImagePixel>	CqBucket::m_aieImage;
-std::vector<SqSampleData>	CqBucket::m_SamplePoints;
-TqInt	CqBucket::m_NextSamplePoint = 0;
-std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
-std::vector<TqFloat> CqBucket::m_aFilterValues;
-std::vector<TqFloat> CqBucket::m_aDatas;
-std::vector<TqFloat> CqBucket::m_aCoverages;
+//----------------------------------------------------------------------
+/** Add an MP to the list of deferred MPs.
+ */
+void CqBucket::AddMP( boost::shared_ptr<CqMicroPolygon>& pMP )
+{
+	m_micropolygons.push_back( pMP );
+}
+
+
+//----------------------------------------------------------------------
+TqInt CqBucket::getCol() const
+{
+	return m_col;
+}
+
+//----------------------------------------------------------------------
+void CqBucket::setCol(TqInt value)
+{
+	m_col = value;
+}
+
+//----------------------------------------------------------------------
+TqInt CqBucket::getRow() const
+{
+	return m_row;
+}
+
+//----------------------------------------------------------------------
+void CqBucket::setRow(TqInt value)
+{
+	m_row = value;
+}
+
+//----------------------------------------------------------------------
+/** Mark this bucket as processed
+ */
+void CqBucket::SetProcessed( bool bProc )
+{
+	assert( !bProc || (bProc && IsEmpty()) );
+	m_bProcessed = bProc;
+}
 
 
 //----------------------------------------------------------------------
 /** Initialise the static image storage area.
- *  Clear,Allocate, Init. the m_aieImage samples
+ *  Clear,Allocate, Init. the m_bucketData->m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter, bool empty )
+void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& bucketSize,
+			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+			      TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+			      TqFloat clippingNear, TqFloat clippingFar,
+			      bool fJitter, bool empty )
 {
-	m_XOrigin = xorigin;
-	m_YOrigin = yorigin;
-	m_XSize = xsize;
-	m_YSize = ysize;
-	m_PixelXSamples = m_ImageBuffer->PixelXSamples();
-	m_PixelYSamples = m_ImageBuffer->PixelYSamples();
-	m_FilterXWidth = m_ImageBuffer->FilterXWidth();
-	m_FilterYWidth = m_ImageBuffer->FilterYWidth();
-	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
-	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
-	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
-	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
+	m_bucketData->m_XOrigin = static_cast<TqInt>( bucketPos.x() );
+	m_bucketData->m_YOrigin = static_cast<TqInt>( bucketPos.y() );
+	m_bucketData->m_XSize = static_cast<TqInt>( bucketSize.x() );
+	m_bucketData->m_YSize = static_cast<TqInt>( bucketSize.y() );
+	m_bucketData->m_PixelXSamples = pixelXSamples;
+	m_bucketData->m_PixelYSamples = pixelYSamples;
+	m_bucketData->m_FilterXWidth = filterXWidth;
+	m_bucketData->m_FilterYWidth = filterYWidth;
+	m_bucketData->m_DiscreteShiftX = lfloor(m_bucketData->m_FilterXWidth/2.0f);
+	m_bucketData->m_DiscreteShiftY = lfloor(m_bucketData->m_FilterYWidth/2.0f);
+	m_bucketData->m_RealWidth = m_bucketData->m_XSize + (m_bucketData->m_DiscreteShiftX*2);
+	m_bucketData->m_RealHeight = m_bucketData->m_YSize + (m_bucketData->m_DiscreteShiftY*2);
 
-	m_NumTimeRanges = max(4, m_PixelXSamples * m_PixelYSamples);
+	m_bucketData->m_viewRangeXMin = viewRangeXMin;
+	m_bucketData->m_viewRangeXMax = viewRangeXMax;
+	m_bucketData->m_viewRangeYMin = viewRangeYMin;
+	m_bucketData->m_viewRangeYMax = viewRangeYMax;
+	m_bucketData->m_clippingNear = clippingNear;
+	m_bucketData->m_clippingFar = clippingFar;
 
-	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+        TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+        TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
 	// Allocate the image element storage if this is the first bucket
-	if(m_aieImage.empty())
+	if(m_bucketData->m_aieImage.empty())
 	{
 		SqImageSample::SetSampleSize(QGetRenderContext() ->GetOutputDataTotalSize());
 
-		m_aieImage.resize( m_RealWidth * m_RealHeight );
-		m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
-		m_SamplePoints.resize( m_RealWidth * m_RealHeight * m_PixelXSamples * m_PixelYSamples );
-		m_NextSamplePoint = 0;
+		m_bucketData->m_aieImage.resize( m_bucketData->m_RealWidth * m_bucketData->m_RealHeight );
+		m_bucketData->m_aSamplePositions.resize( m_bucketData->m_RealWidth * m_bucketData->m_RealHeight );
+		m_bucketData->m_SamplePoints.resize( m_bucketData->m_RealWidth * m_bucketData->m_RealHeight * m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples );
+		m_bucketData->m_NextSamplePoint = 0;
 
 		CalculateDofBounds();
 
 		// Initialise the samples for this bucket.
 		TqInt which = 0;
-		for ( TqInt i = 0; i < m_RealHeight; i++ )
+		for ( TqInt i = 0; i < m_bucketData->m_RealHeight; i++ )
 		{
-			for ( TqInt j = 0; j < m_RealWidth; j++ )
+			for ( TqInt j = 0; j < m_bucketData->m_RealWidth; j++ )
 			{
-				m_aieImage[which].Clear();
-				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
-				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				if(useJitter)
-					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
+				m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
+				m_bucketData->m_aieImage[which].AllocateSamples( this,
+										 m_bucketData->m_PixelXSamples,
+										 m_bucketData->m_PixelYSamples );
+				m_bucketData->m_aieImage[which].InitialiseSamples( m_bucketData->m_SamplePoints,
+										   m_bucketData->m_aSamplePositions[which] );
+				//if(fJitter)
+				m_bucketData->m_aieImage[which].JitterSamples( m_bucketData->m_SamplePoints,
+									       m_bucketData->m_aSamplePositions[which],
+									       opentime, closetime);
 
 				which++;
 			}
@@ -131,50 +169,56 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	// Shuffle the Sample and DOD positions 
 	std::vector<CqImagePixel>::iterator itPix;
-	TqUint size = m_aieImage.size();  
+	TqUint size = m_bucketData->m_aieImage.size();  
 	TqUint i = 0;
 	if (size > 1)
 	{
 		CqRandom rand(19);
-		for( itPix = m_aieImage.begin(), i=0 ; itPix <= m_aieImage.end(), i < size - 1; itPix++, i++)
+		for( itPix = m_bucketData->m_aieImage.begin(), i=0 ; itPix <= m_bucketData->m_aieImage.end(), i < size - 1; itPix++, i++)
 		{
 			TqUint other = i + rand.RandomInt(size - i);
 			if (other >= size) other = size - 1;
-			(*itPix).m_SampleIndices.swap(m_aieImage[other].m_SampleIndices);  
-			(*itPix).m_DofOffsetIndices.swap(m_aieImage[other].m_DofOffsetIndices); 
-		};
-	};
+			(*itPix).m_SampleIndices.swap(m_bucketData->m_aieImage[other].m_SampleIndices);  
+			(*itPix).m_DofOffsetIndices.swap(m_bucketData->m_aieImage[other].m_DofOffsetIndices); 
+		}
+	}
 
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
-	//TqInt numPixels = m_RealWidth*m_RealHeight;
-	for ( TqInt ii = 0; ii < m_RealHeight; ii++ )
+	//TqInt numPixels = m_bucketData->m_RealWidth*m_bucketData->m_RealHeight;
+	for ( TqInt ii = 0; ii < m_bucketData->m_RealHeight; ii++ )
 	{
-		for ( TqInt j = 0; j < m_RealWidth; j++ )
+		for ( TqInt j = 0; j < m_bucketData->m_RealWidth; j++ )
 		{
-			CqVector2D bPos2( m_XOrigin, m_YOrigin );
-			bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( ii - m_DiscreteShiftY ) );
+			CqVector2D bPos2( m_bucketData->m_XOrigin, m_bucketData->m_YOrigin );
+			bPos2 += CqVector2D( ( j - m_bucketData->m_DiscreteShiftX ), ( ii - m_bucketData->m_DiscreteShiftY ) );
 
 			if(!empty)
-				m_aieImage[which].Clear();
+				m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
 
-			if(useJitter)
-				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
-			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
+			//if(fJitter)
+			m_bucketData->m_aieImage[which].JitterSamples( m_bucketData->m_SamplePoints,
+								       m_bucketData->m_aSamplePositions[which],
+								       opentime, closetime);
+			m_bucketData->m_aieImage[which].OffsetSamples( m_bucketData->m_SamplePoints,
+								       bPos2,
+								       m_bucketData->m_aSamplePositions[which] );
 
 			which++;
 		}
 	}
+
+	InitialiseFilterValues();
 }
 
 
 void CqBucket::CalculateDofBounds()
 {
-	m_NumDofBounds = m_PixelXSamples * m_PixelYSamples;
-	m_DofBounds.resize(m_NumDofBounds);
+	m_bucketData->m_NumDofBounds = m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples;
+	m_bucketData->m_DofBounds.resize(m_bucketData->m_NumDofBounds);
 
-	TqFloat dx = 2.0 / m_PixelXSamples;
-	TqFloat dy = 2.0 / m_PixelYSamples;
+	TqFloat dx = 2.0 / m_bucketData->m_PixelXSamples;
+	TqFloat dy = 2.0 / m_bucketData->m_PixelYSamples;
 
 	// I know this is far from an optimal way of calculating this,
 	// but it's only done once so I don't care.
@@ -182,9 +226,9 @@ void CqBucket::CalculateDofBounds()
 	TqFloat minX = -1.0;
 	TqFloat minY = -1.0;
 	TqInt which = 0;
-	for(int j = 0; j < m_PixelYSamples; ++j)
+	for(int j = 0; j < m_bucketData->m_PixelYSamples; ++j)
 	{
-		for(int i = 0; i < m_PixelXSamples; ++i)
+		for(int i = 0; i < m_bucketData->m_PixelXSamples; ++i)
 		{
 			CqVector2D topLeft(minX, minY);
 			CqVector2D topRight(minX + dx, minY);
@@ -216,11 +260,11 @@ void CqBucket::CalculateDofBounds()
 				bottomRight.y(minY + dy);
 			}
 
-			m_DofBounds[which].vecMin() = topLeft;
-			m_DofBounds[which].vecMax() = topLeft;
-			m_DofBounds[which].Encapsulate(topRight);
-			m_DofBounds[which].Encapsulate(bottomLeft);
-			m_DofBounds[which].Encapsulate(bottomRight);
+			m_bucketData->m_DofBounds[which].vecMin() = topLeft;
+			m_bucketData->m_DofBounds[which].vecMax() = topLeft;
+			m_bucketData->m_DofBounds[which].Encapsulate(topRight);
+			m_bucketData->m_DofBounds[which].Encapsulate(bottomLeft);
+			m_bucketData->m_DofBounds[which].Encapsulate(bottomRight);
 
 			which++;
 			minX += dx;
@@ -236,7 +280,7 @@ void CqBucket::CalculateDofBounds()
 
 void CqBucket::InitialiseFilterValues()
 {
-	if( !m_aFilterValues.empty() )
+	if( !m_bucketData->m_aFilterValues.empty() )
 		return;
 
 	// Allocate and fill in the filter values array for each pixel.
@@ -245,7 +289,7 @@ void CqBucket::InitialiseFilterValues()
 
 	TqUint numvalues = static_cast<TqUint>( ( (lceil(FilterXWidth()) + 1) * (lceil(FilterYWidth()) + 1) ) * numperpixel );
 
-	m_aFilterValues.resize( numvalues );
+	m_bucketData->m_aFilterValues.resize( numvalues );
 
 	RtFilterFunc pFilter;
 	pFilter = QGetRenderContext() ->poptCurrent()->funcFilter();
@@ -254,8 +298,8 @@ void CqBucket::InitialiseFilterValues()
 	if( NULL == pFilter )
 		pFilter = RiBoxFilter;
 
-	TqFloat xmax = m_DiscreteShiftX;
-	TqFloat ymax = m_DiscreteShiftY;
+	TqFloat xmax = m_bucketData->m_DiscreteShiftX;
+	TqFloat ymax = m_bucketData->m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
 	TqFloat xfw = std::ceil(FilterXWidth());
@@ -297,7 +341,7 @@ void CqBucket::InitialiseFilterValues()
 							TqFloat w = 0.0f;
 							if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
 								w = ( *pFilter ) ( fx, fy, std::ceil(FilterXWidth()), std::ceil(FilterYWidth()) );
-							m_aFilterValues[ cindex ] = w;
+							m_bucketData->m_aFilterValues[ cindex ] = w;
 						}
 					}
 				}
@@ -309,14 +353,36 @@ void CqBucket::InitialiseFilterValues()
 
 
 //----------------------------------------------------------------------
+void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const
+{
+	iXPos -= m_bucketData->m_XOrigin;
+	iYPos -= m_bucketData->m_YOrigin;
+	
+	// Check within renderable range
+	//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+	//	iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+
+	TqInt i = ( ( iYPos + m_bucketData->m_DiscreteShiftY ) * ( m_bucketData->m_RealWidth ) ) + ( iXPos + m_bucketData->m_DiscreteShiftX );
+	pie = &m_bucketData->m_aieImage[ i ];
+}
+
+
+//----------------------------------------------------------------------
+CqImagePixel& CqBucket::ImageElement(TqUint index) const
+{
+	assert(index < m_bucketData->m_aieImage.size());
+	return m_bucketData->m_aieImage[index];
+}
+
+//----------------------------------------------------------------------
 /** Combine the subsamples into single pixel samples and coverage information.
  */
 
 void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshold)
 {
-	std::vector<CqImagePixel>::iterator end = m_aieImage.end();
-	for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(); i != end ; i++ )
-		i->Combine(filterdepth, zThreshold);
+	std::vector<CqImagePixel>::iterator end = m_bucketData->m_aieImage.end();
+	for ( std::vector<CqImagePixel>::iterator i = m_bucketData->m_aieImage.begin(); i != end ; i++ )
+		i->Combine(m_bucketData->m_SamplePoints, filterdepth, zThreshold);
 }
 
 
@@ -327,7 +393,7 @@ void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshol
  * \param iYPos Screen position of sample.
  */
 
-CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
+CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -344,7 +410,7 @@ CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
+CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -362,7 +428,7 @@ CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
+TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -380,7 +446,7 @@ TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
+TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -398,7 +464,7 @@ TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
+const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -413,16 +479,16 @@ const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucket::FilterBucket(bool empty)
+void CqBucket::FilterBucket(bool empty, bool fImager)
 {
 	CqImagePixel * pie;
 
 	TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-	m_aDatas.resize( datasize * RealWidth() * RealHeight() );
-	m_aCoverages.resize( RealWidth() * RealHeight() );
+	m_bucketData->m_aDatas.resize( datasize * RealWidth() * RealHeight() );
+	m_bucketData->m_aCoverages.resize( RealWidth() * RealHeight() );
 
-	TqInt xmax = m_DiscreteShiftX;
-	TqInt ymax = m_DiscreteShiftY;
+	TqInt xmax = m_bucketData->m_DiscreteShiftX;
+	TqInt ymax = m_bucketData->m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
 	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
@@ -435,12 +501,6 @@ void CqBucket::FilterBucket(bool empty)
 
 	TqInt x, y;
 	TqInt i = 0;
-
-	bool fImager = false;
-	const CqString* systemOptions;
-	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
-		if( systemOptions[ 0 ].compare("null") != 0 )
-			fImager = true;
 
 	TqInt endy = YOrigin() + Height();
 	TqInt endx = XOrigin() + Width();
@@ -492,17 +552,19 @@ void CqBucket::FilterBucket(bool empty)
 
 							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
 							{
-								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+								const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+														   sampleIndex );
 								CqVector2D vecS = sampleData.m_Position;
 								vecS -= CqVector2D( xcent, ycent );
 								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 								{
 									TqInt cindex = sindex + sampleData.m_SubCellIndex;
-									TqFloat g = m_aFilterValues[ cindex ];
+									TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 									gTot += g;
-									if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+									if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints, sampleIndex ).isValid() )
 									{
-										SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
+										SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+															     sampleIndex );
 										for ( TqInt k = 0; k < datasize; ++k )
 											samples[k] += pSample.Data()[k] * g;
 										sampleCounts[pixelIndex]++;
@@ -552,13 +614,14 @@ void CqBucket::FilterBucket(bool empty)
 						for ( sy = 0; sy < PixelYSamples(); sy++ )
 						{
 							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-							const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+							const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+													   sampleIndex );
 							CqVector2D vecS = sampleData.m_Position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
 								TqInt cindex = sindex + sampleData.m_SubCellIndex;
-								TqFloat g = m_aFilterValues[ cindex ];
+								TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 								gTot += g;
 								if(sampleCounts[pixelIndex] > 0)
 								{
@@ -577,20 +640,20 @@ void CqBucket::FilterBucket(bool empty)
 					// Set depth to infinity if no samples.
 					if ( SampleCount == 0 )
 					{
-						memset(&m_aDatas[i*datasize], 0, datasize * sizeof(float));
-						m_aDatas[ i*datasize+6 ] = FLT_MAX;
-						m_aCoverages[i] = 0.0;
+						memset(&m_bucketData->m_aDatas[i*datasize], 0, datasize * sizeof(float));
+						m_bucketData->m_aDatas[ i*datasize+6 ] = FLT_MAX;
+						m_bucketData->m_aCoverages[i] = 0.0;
 					}
 					else
 					{
 						float oneOverGTot = 1.0 / gTot;
 						for ( TqInt k = 0; k < datasize; k ++)
-							m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
+							m_bucketData->m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
 
 						if ( SampleCount >= numsubpixels)
-							m_aCoverages[ i ] = 1.0;
+							m_bucketData->m_aCoverages[ i ] = 1.0;
 						else
-							m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+							m_bucketData->m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
 					}
 
 					i++;
@@ -627,17 +690,19 @@ void CqBucket::FilterBucket(bool empty)
 								for ( sx = 0; sx < PixelXSamples(); sx++ )
 								{
 									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-									const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+									const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+															   sampleIndex );
 									CqVector2D vecS = sampleData.m_Position;
 									vecS -= CqVector2D( xcent, ycent );
 									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 									{
 										TqInt cindex = sindex + sampleData.m_SubCellIndex;
-										TqFloat g = m_aFilterValues[ cindex ];
+										TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 										gTot += g;
-										if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+										if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints, sampleIndex ).isValid() )
 										{
-											SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
+											SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+																     sampleIndex );
 											for ( TqInt k = 0; k < datasize; ++k )
 												samples[k] += pSample.Data()[k] * g;
 											SampleCount++;
@@ -655,20 +720,20 @@ void CqBucket::FilterBucket(bool empty)
 					// Set depth to infinity if no samples.
 					if ( SampleCount == 0 )
 					{
-						memset(&m_aDatas[i*datasize], 0, datasize * sizeof(float));
-						m_aDatas[ i*datasize+6 ] = FLT_MAX;
-						m_aCoverages[i] = 0.0;
+						memset(&m_bucketData->m_aDatas[i*datasize], 0, datasize * sizeof(float));
+						m_bucketData->m_aDatas[ i*datasize+6 ] = FLT_MAX;
+						m_bucketData->m_aCoverages[i] = 0.0;
 					}
 					else
 					{
 						float oneOverGTot = 1.0 / gTot;
 						for ( TqInt k = 0; k < datasize; k ++)
-							m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
+							m_bucketData->m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
 
 						if ( SampleCount >= numsubpixels)
-							m_aCoverages[ i ] = 1.0;
+							m_bucketData->m_aCoverages[ i ] = 1.0;
 						else
-							m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+							m_bucketData->m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
 					}
 
 					i++;
@@ -680,12 +745,12 @@ void CqBucket::FilterBucket(bool empty)
 	{
 		// empty bucket.
 		TqInt size = Width()*Height();
-		memset(&m_aDatas[0], 0, size * datasize * sizeof(float));
-		memset(&m_aCoverages[0], 0, size * sizeof(float));
+		memset(&m_bucketData->m_aDatas[0], 0, size * datasize * sizeof(float));
+		memset(&m_bucketData->m_aCoverages[0], 0, size * sizeof(float));
 		for(i = 0; i<size; ++i)
 		{
 			// Set the depth to infinity.
-			m_aDatas[ i*datasize+6 ] = FLT_MAX;
+			m_bucketData->m_aDatas[ i*datasize+6 ] = FLT_MAX;
 		}
 	}
 
@@ -702,9 +767,9 @@ void CqBucket::FilterBucket(bool empty)
 		{
 			SqImageSample& spl = pie2->GetPixelSample();
 			for (TqInt k=0; k < datasize; k++)
-				spl.Data()[k] = m_aDatas[ i * datasize + k ];
+				spl.Data()[k] = m_bucketData->m_aDatas[ i * datasize + k ];
 			TqFloat* sample_data = spl.Data();
-			sample_data[Sample_Coverage] = m_aCoverages[ i++ ];
+			sample_data[Sample_Coverage] = m_bucketData->m_aCoverages[ i++ ];
 
 			// Calculate the alpha as the combination of the opacity and the coverage.
 			TqFloat a = ( sample_data[Sample_ORed] + sample_data[Sample_OGreen] + sample_data[Sample_OBlue] ) / 3.0f;
@@ -951,19 +1016,285 @@ void CqBucket::QuantizeBucket()
 }
 
 //----------------------------------------------------------------------
-/** Clear any data on the bucket
+/** Get the flag that indicates whether the bucket is empty.  It is
+ * empty only when this bucket doesn't contain any surface,
+ * micropolygon or grids.
  */
-void CqBucket::ShutdownBucket()
+bool CqBucket::IsEmpty()
 {
-	m_aieImage.clear();
-	m_aFilterValues.clear();
-	m_aCoverages.clear();
-	m_aDatas.clear();
-	std::vector<std::vector<CqVector2D> >::iterator i;
-	for( i=m_aSamplePositions.begin(); i!=m_aSamplePositions.end(); i++ )
-		(*i).clear();
-	m_aSamplePositions.clear();
-	m_SamplePoints.clear();
+	return !pTopSurface() && m_micropolygons.empty();
+}
+
+
+//----------------------------------------------------------------------
+bool CqBucket::hasPendingSurfaces() const
+{
+	return ! m_gPrims.empty();
+}
+
+
+//----------------------------------------------------------------------
+bool CqBucket::hasPendingMPs() const
+{
+	return ! m_micropolygons.empty();
+}
+
+//----------------------------------------------------------------------
+/** Render any waiting MPs.
+ 
+    Render ready micro polygons waiting to be processed, so that we
+    have as few as possible MPs waiting and using memory at any given
+    moment
+ 
+ * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ */
+
+void CqBucket::RenderWaitingMPs()
+{
+	for ( std::vector<boost::shared_ptr<CqMicroPolygon> >::iterator itMP = m_micropolygons.begin();
+	      itMP != m_micropolygons.end();
+	      itMP++ )
+	{
+		CqMicroPolygon* mp = (*itMP).get();
+		RenderMicroPoly( mp );
+	}
+
+	m_micropolygons.clear();
+}
+
+
+//----------------------------------------------------------------------
+/** Render a particular micropolygon.
+ 
+ * \param pMP Pointer to the micropolygon to process.
+ * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ 
+   \see CqBucket, CqImagePixel
+ */
+
+void CqBucket::RenderMicroPoly( CqMicroPolygon* pMP )
+{
+	const CqBound& Bound = pMP->GetTotalBound();
+
+	// if bounding box is outside our viewing range, then cull it.
+	if ( Bound.vecMax().x() < m_bucketData->m_viewRangeXMin ||
+	     Bound.vecMax().y() < m_bucketData->m_viewRangeYMin ||
+	     Bound.vecMin().x() > m_bucketData->m_viewRangeXMax ||
+	     Bound.vecMin().y() > m_bucketData->m_viewRangeYMax ||
+	     Bound.vecMin().z() > m_bucketData->m_clippingFar ||
+	     Bound.vecMax().z() < m_bucketData->m_clippingNear )
+	{
+		STATS_INC( MPG_culled );
+		return;
+	}
+
+	bool UsingDof = QGetRenderContext()->UsingDepthOfField();
+	bool IsMoving = pMP->IsMoving();
+
+	// Cache the shading interpolation type.  Ideally this should really be
+	// done by the CacheOutputInterpCoeffs(), or possibly once per grid...
+	const TqInt* interpType = pMP->pGrid()->pAttributes()
+		->GetIntegerAttribute("System", "ShadingInterpolation");
+	// At this stage, only use smooth shading interpolation for stationary
+	// grids without DoF.
+	/// \todo Allow smooth shading with MB or DoF.
+	m_bucketData->m_CurrentMpgSampleInfo.smoothInterpolation
+		= !(UsingDof || IsMoving) && (*interpType == ShadingInterp_Smooth);
+
+	// Cache output sample info for this mpg so we don't have to keep fetching
+	// it for each sample.
+	pMP->CacheOutputInterpCoeffs(m_bucketData->m_CurrentMpgSampleInfo);
+
+	// use the single imagesample rather than the list if possible.
+	// transparent, matte or csg samples, or if we need more than the first
+	// depth value have to use the (slower) list.
+	m_bucketData->m_CurrentMpgSampleInfo.isOpaque =
+		m_bucketData->m_CurrentMpgSampleInfo.occludes
+		&& !pMP->pGrid()->pCSGNode()
+		&& !pMP->pGrid()->GetCachedGridInfo().m_IsMatte
+		&& !(QGetRenderContext()->poptCurrent()->
+				GetIntegerOption("System", "DisplayMode")[0] & ModeZ);
+
+	if(IsMoving || UsingDof)
+		RenderMP_MBOrDof( pMP, IsMoving, UsingDof );
+	else
+		RenderMP_Static( pMP );
+}
+
+
+//---------------------------------------------------------------------
+/** This function assumes that either dof or mb or both are being
+ * used.
+ */
+void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
+				 bool IsMoving, bool UsingDof )
+{
+	CqHitTestCache hitTestCache;
+	pMP->CacheHitTestValues(&hitTestCache);
+
+	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
+	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
+	TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
+	TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
+
+	const TqUint timeRanges = std::max(4, m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples);
+	TqInt bound_maxMB = pMP->cSubBounds( timeRanges );
+	TqInt bound_maxMB_1 = bound_maxMB - 1;
+	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
+	{
+		const CqBound& Bound = pMP->SubBound( bound_numMB, time0 );
+
+		// get the index of the first and last samples that can fall inside
+		// the time range of this bound
+		if (IsMoving)
+		{
+			if ( bound_numMB != bound_maxMB_1 )
+				pMP->SubBound( bound_numMB + 1, time1 );
+			else
+				time1 = closetime;
+		}
+
+		TqFloat maxCocX = 0.0f;
+		TqFloat maxCocY = 0.0f;
+
+		TqFloat bminx = 0.0f;
+		TqFloat bmaxx = 0.0f;
+		TqFloat bminy = 0.0f;
+		TqFloat bmaxy = 0.0f;
+		TqFloat bminz = 0.0f;
+		TqFloat bmaxz = 0.0f;
+		// these values are the bound of the mpg not including dof extension.
+		// reduce the mpg bound so it doesn't include the coc.
+		TqFloat mpgbminx = 0.0f;
+		TqFloat mpgbmaxx = 0.0f;
+		TqFloat mpgbminy = 0.0f;
+		TqFloat mpgbmaxy = 0.0f;
+		TqInt bound_maxDof = 0;
+		if (UsingDof)
+		{
+			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
+			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
+			maxCocX = std::max( minZCoc.x(), maxZCoc.x() );
+			maxCocY = std::max( minZCoc.y(), maxZCoc.y() );
+
+			mpgbminx = Bound.vecMin().x() + maxCocX;
+			mpgbmaxx = Bound.vecMax().x() - maxCocX;
+			mpgbminy = Bound.vecMin().y() + maxCocY;
+			mpgbmaxy = Bound.vecMax().y() - maxCocY;
+			bminz = Bound.vecMin().z();
+			bmaxz = Bound.vecMax().z();
+
+			bound_maxDof = m_bucketData->m_NumDofBounds;
+		}
+		else
+		{
+			bminx = Bound.vecMin().x();
+			bmaxx = Bound.vecMax().x();
+			bminy = Bound.vecMin().y();
+			bmaxy = Bound.vecMax().y();
+			bminz = Bound.vecMin().z();
+			bmaxz = Bound.vecMax().z();
+
+			bound_maxDof = 1;
+		}
+
+		for ( TqInt bound_numDof = 0; bound_numDof < bound_maxDof; bound_numDof++ )
+		{
+			if (UsingDof)
+			{
+				// now shift the bounding box to cover only a given range of
+				// lens positions.
+				const CqBound DofBound = DofSubBound( bound_numDof );
+				TqFloat leftOffset = DofBound.vecMax().x() * maxCocX;
+				TqFloat rightOffset = DofBound.vecMin().x() * maxCocX;
+				TqFloat topOffset = DofBound.vecMax().y() * maxCocY;
+				TqFloat bottomOffset = DofBound.vecMin().y() * maxCocY;
+
+				bminx = mpgbminx - leftOffset;
+				bmaxx = mpgbmaxx - rightOffset;
+				bminy = mpgbminy - topOffset;
+				bmaxy = mpgbmaxy - bottomOffset;
+			}
+
+			// if bounding box is outside our viewing range, then cull it.
+			if ( bmaxx < m_bucketData->m_viewRangeXMin ||
+			     bmaxy < m_bucketData->m_viewRangeYMin ||
+			     bminx > m_bucketData->m_viewRangeXMax ||
+			     bminy > m_bucketData->m_viewRangeYMax ||
+			     bminz > m_bucketData->m_clippingFar ||
+			     bmaxz < m_bucketData->m_clippingNear )
+			{
+				continue;
+			}
+
+			if (UsingDof)
+			{
+				const CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+										m_bucketData->m_SamplePoints,
+										pMP,
+										DofBound,
+										IsMoving,
+										time0,
+										time1,
+										true,
+										bound_numDof,
+										m_bucketData->m_CurrentMpgSampleInfo,
+										currentGridInfo.m_LodBounds[0] >= 0.0f,
+										currentGridInfo,
+										hitTestCache);
+			}
+			else
+			{
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+										m_bucketData->m_SamplePoints,
+										pMP,
+										Bound,
+										IsMoving,
+										time0,
+										time1,
+										false,
+										0,
+										m_bucketData->m_CurrentMpgSampleInfo,
+										currentGridInfo.m_LodBounds[0] >= 0.0f,
+										currentGridInfo,
+										hitTestCache);
+			}
+		}
+	}
+}
+
+
+//---------------------------------------------------------------------
+/** This function assumes that neither dof or mb are being used. It is
+ * much simpler than the general case dealt with above. */
+void CqBucket::RenderMP_Static( CqMicroPolygon* pMP )
+{
+	CqHitTestCache hitTestCache;
+	pMP->CacheHitTestValues(&hitTestCache);
+
+	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
+	const CqBound& Bound = pMP->GetTotalBound();
+
+	m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+							m_bucketData->m_SamplePoints,
+							pMP,
+							Bound,
+							false,
+							0,
+							0,
+							false,
+							0,
+							m_bucketData->m_CurrentMpgSampleInfo,
+							currentGridInfo.m_LodBounds[0] >= 0.0f,
+							currentGridInfo,
+							hitTestCache);
 }
 
 

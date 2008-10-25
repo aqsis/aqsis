@@ -127,20 +127,20 @@ class CqDisplayRequest
 		 * We implement the standard functionality, but allow child classes
 		 * to override.
 		 */
-		virtual void DisplayBucket(IqBucket* pBucket);
+		virtual void DisplayBucket(const IqBucket* pBucket);
 
 		//----------------------------------------------
 		// Pure virtual functions
 		//----------------------------------------------
 		/* Does quantization, or in the case of DSM does the compression.
 		 */
-		virtual void FormatBucketForDisplay(IqBucket* pBucket);
+		virtual void FormatBucketForDisplay(const IqBucket* pBucket);
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.
 		 * Used when the display wants scanline order.
 		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual bool CollapseBucketsToScanlines(IqBucket* pBucket);
+		virtual bool CollapseBucketsToScanlines(const IqBucket* pBucket);
 		/* Sends the data to the display.
 		*/
 		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
@@ -206,13 +206,13 @@ class CqDeepDisplayRequest : virtual public CqDisplayRequest
 
 		/* Does quantization, or in the case of DSM does the compression.
 		 */
-		virtual void FormatBucketForDisplay(IqBucket* pBucket);
+		virtual void FormatBucketForDisplay(const IqBucket* pBucket);
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.
 		 * Used when the display wants scanline order.
 		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual bool CollapseBucketsToScanlines(IqBucket* pBucket);
+		virtual bool CollapseBucketsToScanlines(const IqBucket* pBucket);
 		/*
 		 * Sends the data to the display.
 		 */
@@ -249,7 +249,7 @@ class CqDDManager : public IqDDManager
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
-		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
+		virtual	TqInt	DisplayBucket( const IqBucket* pBucket );
 		virtual	bool	fDisplayNeeds( const TqChar* var );
 		virtual	TqInt	Uses();
 

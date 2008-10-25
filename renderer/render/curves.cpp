@@ -24,21 +24,14 @@
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
-#include <stdio.h>
-#include <string.h>
 #include "aqsis.h"
-#include "imagebuffer.h"
-#include "micropolygon.h"
-#include "renderer.h"
-#include "patch.h"
-#include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
 namespace Aqsis {
 
 
-static TqUlong hwidth = CqString::hash("width");
-static TqUlong hcwidth = CqString::hash("constantwidth");
+static const TqUlong hwidth = CqString::hash("width");
+static const TqUlong hcwidth = CqString::hash("constantwidth");
 
 /**
  * CqCurve constructor.

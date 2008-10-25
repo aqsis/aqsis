@@ -32,12 +32,8 @@
 #include	<cmath>
 
 #include	"points.h"
-#include	"micropolygon.h"
 #include	"imagebuffer.h"
-#include	"polygon.h"
-#include	"ri.h"
-#include	"stats.h"
-
+#include	"renderer.h"
 
 namespace Aqsis {
 
@@ -509,9 +505,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
-			CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints();
-			pNew->SetGrid( this );
-			pNew->SetIndex( iu );
+			CqMicroPolygonMotionPoints* pNew = new CqMicroPolygonMotionPoints( this, iu );
 
 			TqFloat radius;
 			TqFloat i_radius = 1.0f;
@@ -561,7 +555,8 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 				pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
 			}
 			pNew->CalculateTotalBound( );
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+			pImage->AddMPG( pMP );
 		}
 	}
 	else
@@ -617,13 +612,12 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 			radius = ras_radius * 0.5f;
 
-			CqMicroPolygonPoints *pNew = new CqMicroPolygonPoints();
-			pNew->SetGrid( this );
-			pNew->SetIndex( iu );
+			CqMicroPolygonPoints* pNew = new CqMicroPolygonPoints(this, iu);
 			pNew->Initialise( radius );
-			//pNew->GetTotalBound();
+			pNew->CalculateTotalBound();
 
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+			pImage->AddMPG( pMP );
 		}
 	}
 
@@ -631,7 +625,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 }
 
 
-bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
@@ -734,9 +728,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 	TqInt iu;
 	for ( iu = 0; iu < cu; iu++ )
 	{
-		CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints();
-		pNew->SetGrid( pGridA );
-		pNew->SetIndex( iu );
+		CqMicroPolygonMotionPoints* pNew = new CqMicroPolygonMotionPoints( pGridA, iu );
 
 		TqFloat radius;
 		TqInt iTime;
@@ -795,7 +787,8 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 			pNew->AppendKey( Point, radius, Time( iTime ) );
 		}
 		pNew->CalculateTotalBound( );
-		pImage->AddMPG( pNew );
+		boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+		pImage->AddMPG( pMP );
 	}
 
 	RELEASEREF( pGridA );
@@ -825,19 +818,10 @@ void CqMicroPolygonMotionPoints::CalculateTotalBound()
 }
 
 //---------------------------------------------------------------------
-/** Calculate the 2D boundary of this micropolygon,
- * \param fForce Boolean flag to force the recalculation of the cached bound.
- */
-
-CqBound& CqMicroPolygonMotionPoints::GetTotalBound( )
-{
-	return ( m_Bound );
-}
-
-//---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-void CqMicroPolygonMotionPoints::BuildBoundList()
+
+void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
 {
 	m_BoundList.Clear();
 
@@ -884,7 +868,7 @@ void CqMicroPolygonMotionPoints::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 	return( fContains( vecSample, D, time ) );

@@ -34,13 +34,8 @@
 
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"teapot.h"
-#include	"micropolygon.h"
-#include	"imagebuffer.h"
 #include	"patch.h"
-
-#include	"ri.h"
 
 namespace Aqsis {
 

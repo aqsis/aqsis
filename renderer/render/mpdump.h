@@ -29,11 +29,13 @@
 #ifndef MPDUMP_H
 #define MPDUMP_H
 
-#include	"micropolygon.h"
 #include	"renderer.h"
-//#include	"imagebuffer.h"
 
 namespace Aqsis {
+
+class CqBucket;
+class CqMicroPolygon;
+struct SqSampleData;
 
 /**
    Dump micro polygons into a file for debugging.
@@ -102,7 +104,7 @@ class CqMPDump
 		    This method has to be called after the sample initialization in
 			CqImageBuffer::RenderImage().
 		 */
-		void dumpPixelSamples();
+		void dumpPixelSamples(TqInt bucketCol, TqInt bucketRow, const CqBucket* currentBucket);
 
 		/**
 		   Dump a pixel sample.

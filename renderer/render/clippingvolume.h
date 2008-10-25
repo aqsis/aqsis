@@ -29,6 +29,7 @@
 
 #include	"aqsis.h"
 #include	"vector3d.h"
+#include	"bound.h"
 
 #include	<vector>
 

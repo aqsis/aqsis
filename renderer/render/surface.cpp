@@ -32,7 +32,7 @@
 
 namespace Aqsis {
 
-TqFloat CqSurface::m_fGridSize = sqrt(256.0);
+//TqFloat CqSurface::m_fGridSize = sqrt(256.0);
 
 
 //---------------------------------------------------------------------

@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2008-06-19 20:09:05 +0100 (Thu, 19 Jun 2008) $
+ *	Last change by:		$Author$
+ *	Last change date:	$Date$
  */
 //------------------------------------------------------------------------------
 

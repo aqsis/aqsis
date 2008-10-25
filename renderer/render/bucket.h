@@ -34,15 +34,11 @@
 #include	<queue>
 #include	<deque>
 
-#include	"iddmanager.h"
-#include	"bitvector.h"
-#include	"micropolygon.h"
-#include	"renderer.h"
-#include	"ri.h"
 #include	"surface.h"
 #include	"color.h"
-#include	"vector2d.h"
-#include    "imagepixel.h"
+#include	"imagepixel.h"
+#include	"iddmanager.h"
+#include	"bucketdata.h"
 
 namespace Aqsis {
 
@@ -53,162 +49,120 @@ namespace Aqsis {
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket() : m_bProcessed( false )
-		{}
-		CqBucket( const CqBucket& From )
-		{
-			*this = From;
-		}
+		CqBucket();
+
 		virtual ~CqBucket();
-
-		CqBucket& operator=( const CqBucket& From )
-		{
-			m_ampgWaiting = From.m_ampgWaiting;
-			m_agridWaiting = From.m_agridWaiting;
-			m_bProcessed = From.m_bProcessed;
-
-			return ( *this );
-		}
 
 		// Overridden from IqBucket
 		virtual	TqInt	Width() const
 		{
-			return ( m_XSize );
+			return ( m_bucketData->m_XSize );
 		}
 		virtual	TqInt	Height() const
 		{
-			return ( m_YSize );
+			return ( m_bucketData->m_YSize );
 		}
 		virtual	TqInt	RealWidth() const
 		{
-			return ( m_RealWidth );
+			return ( m_bucketData->m_RealWidth );
 		}
 		virtual	TqInt	RealHeight() const
 		{
-			return ( m_RealHeight );
+			return ( m_bucketData->m_RealHeight );
 		}
 		virtual	TqInt	XOrigin() const
 		{
-			return ( m_XOrigin );
+			return ( m_bucketData->m_XOrigin );
 		}
 		virtual	TqInt	YOrigin() const
 		{
-			return ( m_YOrigin );
+			return ( m_bucketData->m_YOrigin );
 		}
-		static	TqInt	PixelXSamples()
+		TqInt	PixelXSamples() const
 		{
-			return m_PixelXSamples;
+			return m_bucketData->m_PixelXSamples;
 		}
-		static	TqInt	PixelYSamples()
+		TqInt	PixelYSamples() const
 		{
-			return m_PixelYSamples;
+			return m_bucketData->m_PixelYSamples;
 		}
-		static	TqFloat	FilterXWidth()
+		TqFloat	FilterXWidth() const
 		{
-			return m_FilterXWidth;
+			return m_bucketData->m_FilterXWidth;
 		}
-		static	TqFloat	FilterYWidth()
+		TqFloat	FilterYWidth() const
 		{
-			return m_FilterYWidth;
-		}
-		static	TqInt	NumTimeRanges()
-		{
-			return m_NumTimeRanges;
-		}
-		static	TqInt	NumDofBounds()
-		{
-			return m_NumDofBounds;
+			return m_bucketData->m_FilterYWidth;
 		}
 
-		static const CqBound& DofSubBound(TqInt index)
+		virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) const;
+		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) const;
+		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) const;
+		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) const;
+		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos ) const;
+
+		/** Set up the necessary data for the bucket to render
+		 *
+		 * \param viewRangeXMin Integer minimum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeXMax Integer maximum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeYMin Integer minimum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeYMax Integer maximum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 */
+		void	PrepareBucket( const CqVector2D& pos, const CqVector2D& size,
+				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+				       TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+				       TqFloat clippingNear, TqFloat clippingFar,
+				       bool fJitter = true, bool empty = false );
+
+		CqImagePixel& ImageElement(TqUint index) const;
+
+		std::vector<SqSampleData>& SamplePoints() const
 		{
-			assert(index < m_NumDofBounds);
-			return m_DofBounds[index];
+			return(m_bucketData->m_SamplePoints);
 		}
 
-		virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
-		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
-		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
-		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
-		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
-
-		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool useJitter = true, bool empty = false );
-		static	void	CalculateDofBounds();
-		static	void	InitialiseFilterValues();
-		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+		TqInt GetNextSamplePointIndex()
 		{
-			iXPos -= m_XOrigin;
-			iYPos -= m_YOrigin;
-
-			TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
-			assert(i >= 0 && i < static_cast<TqInt>(m_aieImage.size()));
-			pie = &m_aieImage[ i ];
-		}
-		static CqImagePixel& ImageElement(TqInt index)
-		{
-			assert( index < static_cast<TqInt>(m_aieImage.size()) );
-			return(m_aieImage[index]);
-		}
-
-		static	std::vector<SqSampleData>& SamplePoints()
-		{
-			return(m_SamplePoints);
-		}
-
-		static TqInt GetNextSamplePointIndex()
-		{
-			TqInt index = m_NextSamplePoint;
-			m_NextSamplePoint++;
+			TqInt index = m_bucketData->m_NextSamplePoint;
+			m_bucketData->m_NextSamplePoint++;
 			return(index);
 		}
 
-		static	void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
-		void	FilterBucket(bool empty);
+		void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
+		void	FilterBucket(bool empty, bool fImager);
 		void	ExposeBucket();
 		void	QuantizeBucket();
-		static	void	ShutdownBucket();
 
 		/** Add a GPRim to the stack of deferred GPrims.
 		* \param The Gprim to be added.
 		 */
 		void	AddGPrim( const boost::shared_ptr<CqSurface>& pGPrim )
 		{
-			m_aGPrims.push(pGPrim);
+			m_gPrims.push(pGPrim);
 		}
 
-		/** Add an MPG to the list of deferred MPGs.
+		/** Add an MP to the list of deferred MPs.
 		 */
-		void	AddMPG( CqMicroPolygon* pmpgNew )
-		{
-#ifdef _DEBUG
-			std::vector<CqMicroPolygon*>::iterator end = m_ampgWaiting.end();
-			for (std::vector<CqMicroPolygon*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
-				if ((*i) == pmpgNew)
-					assert( false );
-#endif
+		void	AddMP( boost::shared_ptr<CqMicroPolygon>& pMP );
 
-			m_ampgWaiting.push_back( pmpgNew );
-		}
-		/** Add a Micropoly grid to the list of deferred grids.
-		 */
-		void	AddGrid( CqMicroPolyGridBase* pgridNew )
-		{
-#ifdef _DEBUG
-			std::vector<CqMicroPolyGridBase*>::iterator end = m_agridWaiting.end();
-			for (std::vector<CqMicroPolyGridBase*>::iterator i = m_agridWaiting.begin(); i != end; i++)
-				if ((*i) == pgridNew)
-					assert( false );
-#endif
-
-			m_agridWaiting.push_back( pgridNew );
-		}
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
 		boost::shared_ptr<CqSurface> pTopSurface()
 		{
-			if (!m_aGPrims.empty())
+			if (!m_gPrims.empty())
 			{
-				return m_aGPrims.top();
+				return m_gPrims.top();
 			}
 			else
 			{
@@ -219,73 +173,60 @@ class CqBucket : public IqBucket
 		 */
 		void popSurface()
 		{
-			m_aGPrims.pop();
+			m_gPrims.pop();
 		}
 		/** Get a count of deferred GPrims.
 		 */
-		TqInt cGPrims()
+		TqInt cGPrims() const
 		{
-			return ( m_aGPrims.size() );
+			return ( m_gPrims.size() );
 		}
-		/** Get a reference to the vector of deferred MPGs.
+		/** Get the flag that indicates whether the bucket is
+		 * empty.  It is empty only when this bucket doesn't
+		 * contain any surface, micropolygon or grids.
 		 */
-		std::vector<CqMicroPolygon*>& aMPGs()
-		{
-			return ( m_ampgWaiting );
-		}
-		/** Get a reference to the vector of deferred grids.
+		bool IsEmpty();
+		/** Get the flag that indicates whether the bucket has
+		 * pending surfaces.
 		 */
-		std::vector<CqMicroPolyGridBase*>& aGrids()
-		{
-			return ( m_agridWaiting );
-		}
+		bool hasPendingSurfaces() const;
+		/** Get the flag that indicates whether the bucket has
+		 * pending MPs to render.
+		 */
+		bool hasPendingMPs() const;
 		/** Get the flag that indicates if the bucket has been processed yet.
 		 */
 		bool IsProcessed() const
 		{
 			return( m_bProcessed );
 		}
-
 		/** Mark this bucket as processed
 		 */
-		void SetProcessed( bool bProc =  true)
-		{
-			m_bProcessed = bProc;
-		}
-		/** Set the pointer to the image buffer
+		void SetProcessed( bool bProc =  true);
+		/** Set the pointer to the bucket data
 		 */
-		static void SetImageBuffer( CqImageBuffer* pBuffer )
+		void SetBucketData( CqBucketData* bucketData )
 		{
-			m_ImageBuffer = pBuffer;
+			m_bucketData = bucketData;
 		}
 
+		/** Render any waiting MPs.
+		 */
+		void RenderWaitingMPs();
+
+		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const;
+
+		/** Get the column of the bucket in the image */
+		TqInt getCol() const;
+		/** Set the column of the bucket in the image */
+		void setCol(TqInt value);
+		/** Get the row of the bucket in the image */
+		TqInt getRow() const;
+		/** Set the row of the bucket in the image */
+		void setRow(TqInt value);
 
 	private:
-		static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
-		static	TqInt	m_YOrigin;		///< Origin in discrete coordinates of this bucket.
-		static	TqInt	m_XSize;		///< Size of the rendered area of this bucket in discrete coordinates.
-		static	TqInt	m_YSize;		///< Size of the rendered area of this bucket in discrete coordinates.
-		static	TqInt	m_RealWidth;	///< Actual size of the data for this bucket including filter overlap.
-		static	TqInt	m_RealHeight;	///< Actual size of the data for this bucket including filter overlap.
-		static	TqInt	m_DiscreteShiftX;	///<
-		static	TqInt	m_DiscreteShiftY;
-		static	TqInt	m_PixelXSamples;
-		static	TqInt	m_PixelYSamples;
-		static	TqFloat	m_FilterXWidth;
-		static	TqFloat	m_FilterYWidth;
-		static	TqInt	m_NumTimeRanges;
-		static	TqInt	m_NumDofBounds;
-		static	std::vector<CqBound>		m_DofBounds;
-		static	std::vector<CqImagePixel>	m_aieImage;
-		static	std::vector<SqSampleData>	m_SamplePoints;
-		static	TqInt	m_NextSamplePoint;
-		static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
-		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
-		static	std::vector<TqFloat>	m_aDatas;
-		static	std::vector<TqFloat>	m_aCoverages;
-		static	CqImageBuffer*	m_ImageBuffer;	///< Pointer to the image buffer this bucket belongs to.
-
-		// this is a compare functor for sorting surfaces in order of depth.
+		/// This is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
 		{
 			bool operator()(const boost::shared_ptr<CqSurface>& s1, const boost::shared_ptr<CqSurface>& s2) const
@@ -294,38 +235,54 @@ class CqBucket : public IqBucket
 				{
 					return ( s1->GetCachedRasterBound().vecMin().z() > s2->GetCachedRasterBound().vecMin().z() );
 				}
-				else if ( s1->fCachedBound() && !s2->fCachedBound() )
-				{
-					CqBound BoundS2;
-					s2->Bound(&BoundS2);
-					return ( s1->GetCachedRasterBound().vecMin().z() > BoundS2.vecMin().z() );
-				}
-				else if ( !s1->fCachedBound() && s2->fCachedBound() )
-				{
-					CqBound BoundS1;
-					s1->Bound(&BoundS1);
-					return ( BoundS1.vecMin().z() > s2->GetCachedRasterBound().vecMin().z() );
-				}
-				else
-				{
-					CqBound BoundS1;
-					s1->Bound(&BoundS1);
-					CqBound BoundS2;
-					s2->Bound(&BoundS2);
-					return ( BoundS1.vecMin().z() > BoundS2.vecMin().z() );
-				}
+
+				// don't have bounds for the surface(s). I suspect we should assert here.
 				return true;
 			}
 		};
 
-		std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
-		std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
+		/// Flag indicating if this bucket has been processed yet.
+		bool	m_bProcessed;
+
+		/// Bucket column in the image
+		TqInt m_col;
+		/// Bucket row in the image
+		TqInt m_row;
+
+		/// Dynamic bucket data
+		CqBucketData* m_bucketData;
+
+		/// Vector of vectors of waiting micropolygons in this bucket
+		std::vector<boost::shared_ptr<CqMicroPolygon> > m_micropolygons;
 
 		/// A sorted list of primitives for this bucket
-		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_aGPrims;
-		bool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
-}
-;
+		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
+
+		void	InitialiseFilterValues();
+
+		void	CalculateDofBounds();
+
+		const CqBound& DofSubBound(TqInt index) const
+		{
+			assert(index < m_bucketData->m_NumDofBounds);
+			return m_bucketData->m_DofBounds[index];
+		}
+
+		/** Render a particular micropolygon.
+		 *
+		 * \param pMPG Pointer to the micropolygon to process.
+		 * \see CqBucket, CqImagePixel
+		 */
+		void	RenderMicroPoly( CqMicroPolygon* pMP );
+
+		/** This function assumes that either dof or mb or
+		 * both are being used. */
+		void	RenderMP_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
+		/** This function assumes that neither dof or mb are
+		 * being used. It is much simpler than the general
+		 * case dealt with above. */
+		void	RenderMP_Static( CqMicroPolygon* pMP );
+};
 
 } // namespace Aqsis
 

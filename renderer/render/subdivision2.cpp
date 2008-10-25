@@ -25,6 +25,7 @@
 
 #include	"subdivision2.h"
 #include	"patch.h"
+#include	"micropolygon.h"
 
 #include	<fstream>
 #include	<vector>
@@ -1568,7 +1569,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 {
 	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
-	static TqInt aDiceSizes[] = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4 };
+	static const TqInt aDiceSizes[] = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4 };
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
 	assert( pFace() );
@@ -1737,6 +1738,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 		TqInt i;
 		for ( i = 0; i < pTopology()->cTimes(); i++ )
 			pGrid->AddTimeSlot( pTopology()->Time( i ), apGrids[ i ] );
+		pGrid->Initialise(dicesize, dicesize, pTopology()->pPoints() );
 		return( pGrid );
 	}
 }

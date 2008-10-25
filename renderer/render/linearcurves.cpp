@@ -24,23 +24,17 @@
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
-#include <stdio.h>
-#include <string.h>
 #include "aqsis.h"
-#include "imagebuffer.h"
-#include "micropolygon.h"
-#include "renderer.h"
 #include "patch.h"
-#include "vector2d.h"
 #include "vector3d.h"
 #include "curves.h"
 namespace Aqsis {
 
 
-static TqUlong hp = CqString::hash("P");
-static TqUlong hu = CqString::hash("u");
-static TqUlong hn = CqString::hash("N");
-static TqUlong hv = CqString::hash("v");
+static const TqUlong hp = CqString::hash("P");
+static const TqUlong hu = CqString::hash("u");
+static const TqUlong hn = CqString::hash("N");
+static const TqUlong hv = CqString::hash("v");
 
 /**
  * CqLinearCurveSegment constructor.

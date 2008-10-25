@@ -32,34 +32,17 @@
 
 #include	<vector>
 
-#include	"bitvector.h"
-#include	"micropolygon.h"
-#include	"renderer.h"
-#include	"ri.h"
-#include	"sstring.h"
 #include	"surface.h"
-#include	"color.h"
 #include	"vector2d.h"
-#include    	"imagepixel.h"
 #include    	"bucket.h"
-#include	"kdtree.h"
-#include	"occlusion.h"
-#include	"clippingvolume.h"
 #include	"mpdump.h"
 
 namespace Aqsis {
 
 
-// This struct holds info about a grid that can be cached and used for all its mpgs.
-struct SqGridInfo
-{
-	TqFloat			m_ShutterOpenTime;
-	TqFloat			m_ShutterCloseTime;
-	const TqFloat*	        m_LodBounds;
-	bool			m_IsMatte;
-	bool			m_IsCullable;
-	bool			m_UsesDataMap;
-};
+class CqMicroPolygon;
+class CqBucketProcessor;
+
 
 // Enumeration of the type of rendering order of the buckets (experimental)
 enum EqBucketOrder {
@@ -120,11 +103,6 @@ class CqImageBuffer
 		{}
 		virtual	~CqImageBuffer();
 
-		CqVector2D	BucketPosition() const;
-		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
-		CqVector2D	BucketSize() const;
-		CqVector2D	BucketSize( TqInt x, TqInt y) const;
-
 		/** Get the horizontal resolution of this image.
 		 * \return Integer horizontal resolution.
 		 */
@@ -139,13 +117,17 @@ class CqImageBuffer
 		{
 			return ( m_iYRes );
 		}
-		/// Return the width of the cropped image in pixels
-		TqInt xResCrop() const
+		/** Get the cropped image in width pixels
+		 * \return Integer horizontal resolution.
+		 */
+		TqInt	xResCrop() const
 		{
 			return m_CropWindowXMax - m_CropWindowXMin;
 		}
-		/// Return the height of the cropped image in pixels
-		TqInt yResCrop() const
+		/** Get the cropped image in height pixels
+		 * \return Integer vertical resolution.
+		 */
+		TqInt	yResCrop() const
 		{
 			return m_CropWindowYMax - m_CropWindowYMin;
 		}
@@ -208,40 +190,40 @@ class CqImageBuffer
 		/** Get the number of horizontal samples per pixel.
 		 * \return Integer sample count.
 		 */
-		TqInt	PixelXSamples() const
+		TqInt   PixelXSamples() const
 		{
 			return ( m_PixelXSamples );
 		}
 		/** Get the number of vertical samples per pixel.
 		 * \return Integer sample count.
 		 */
-		TqInt	PixelYSamples() const
+		TqInt   PixelYSamples() const
 		{
 			return ( m_PixelYSamples );
 		}
 		/** Get the width of the pixel filter in the horizontal direction.
 		 * \return Integer filter width, in pixels.
 		 */
-		TqFloat	FilterXWidth() const
+		TqFloat FilterXWidth() const
 		{
 			return ( m_FilterXWidth );
 		}
 		/** Get the width of the pixel filter in the vertical direction.
 		 * \return Integer filter width, in pixels.
 		 */
-		TqFloat	FilterYWidth() const
+		TqFloat FilterYWidth() const
 		{
 			return ( m_FilterYWidth );
 		}
-		/** Get the near clipping distance.
-		 * \return Float distance from the camera that objects must be to be visible.
+		/** Get the Near Clipping distance.
+		 * \return Float distance of the Near Clipping.
 		 */
 		TqFloat	ClippingNear() const
 		{
 			return ( m_ClippingNear );
 		}
-		/** Get the far clipping distance.
-		 * \return Float distance from the camera that objects will be clipped from view.
+		/** Get the Far Clipping distance.
+		 * \return Float distance of the Far Clipping.
 		 */
 		TqFloat	ClippingFar() const
 		{
@@ -254,57 +236,6 @@ class CqImageBuffer
 		{
 			return ( m_DisplayMode );
 		}
-		/** Get the column index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketCol() const
-		{
-			return ( m_CurrentBucketCol );
-		}
-		/** Get the row index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketRow() const
-		{
-			return ( m_CurrentBucketRow );
-		}
-
-		// Move to the next bucket to process.
-    		bool NextBucket(EqBucketOrder order);
-
-		/** Get a pointer to the current bucket
-		 */
-		CqBucket& CurrentBucket()
-		{
-			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
-		}
-		/** Get a pointer to the bucket at position x,y in the grid.
-		 */
-		CqBucket& Bucket( TqInt x, TqInt y)
-		{
-			return( m_Buckets[y][x] );
-		}
-
-		void	DeleteImage();
-		void	SaveImage( const char* strName );
-
-		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
-		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		void	AddMPG( CqMicroPolygon* pmpgNew );
-		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
-		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
-		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
-		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
-		void	RenderImage();
-		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
-
-		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
-		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-
-
-
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
 		    */
@@ -312,6 +243,13 @@ class CqImageBuffer
 		{
 			return ( m_fDone );
 		}
+
+		CqVector2D	BucketPosition( TqInt x, TqInt y ) const;
+		CqVector2D	BucketSize( TqInt x, TqInt y ) const;
+
+		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
+		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		void	RenderImage();
 
 		virtual	void	SetImage();
 		virtual	void	Quit();
@@ -322,7 +260,6 @@ class CqImageBuffer
 		{}
 		virtual	void	ImageComplete()
 		{}
-		virtual	bool	IsCurrentBucketEmpty();
 
 
 	private:
@@ -352,15 +289,47 @@ class CqImageBuffer
 		TqInt	m_CurrentBucketRow;	///< Row index of the bucket currently being processed.
 		TqInt	m_MaxEyeSplits;	        ///< Max Eye Splits by default 10
 
-		SqMpgSampleInfo m_CurrentMpgSampleInfo;
-
-		SqGridInfo m_CurrentGridInfo;
-
 #if ENABLE_MPDUMP
 		CqMPDump	m_mpdump;
 #endif
 
-		void CacheGridInfo( CqMicroPolyGridBase* pGrid );
+
+		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
+		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
+		bool	OcclusionCullSurface( const CqBucketProcessor& bucketProcessor, const boost::shared_ptr<CqSurface>& pSurface );
+
+		void	DeleteImage();
+
+		/** Move to the next bucket to process.
+		 */
+    		bool NextBucket(EqBucketOrder order);
+
+		/** Get a pointer to the current bucket
+		 */
+		CqBucket& CurrentBucket()
+		{
+			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
+		}
+		/** Get a pointer to the bucket at position x,y in the grid.
+		 */
+		CqBucket& Bucket( TqInt x, TqInt y)
+		{
+			return( m_Buckets[y][x] );
+		}
+		/** Get the column index of the bucket currently being processed.
+		 * \return Integer bucket index.
+		 */
+		TqInt	CurrentBucketCol() const
+		{
+			return ( m_CurrentBucketCol );
+		}
+		/** Get the row index of the bucket currently being processed.
+		 * \return Integer bucket index.
+		 */
+		TqInt	CurrentBucketRow() const
+		{
+			return ( m_CurrentBucketRow );
+		}
 };
 
 

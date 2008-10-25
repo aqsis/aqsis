@@ -140,7 +140,7 @@ TqInt CqDDManager::CloseDisplays()
 	return ( 0 );
 }
 
-TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
+TqInt CqDDManager::DisplayBucket( const IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 
@@ -979,7 +979,7 @@ void CqDisplayRequest::PrepareSystemParameters()
 	m_customParams.push_back(parameter);
 }
 
-void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
+void CqDisplayRequest::DisplayBucket( const IqBucket* pBucket )
 {
 	// If the display is not validated, don't send it data.
 	// Or if a DspyImageData function was not found for
@@ -1016,7 +1016,7 @@ void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
 	}
 }
 
-void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
+void CqDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 	TqUint	xmin = pBucket->XOrigin();
@@ -1107,7 +1107,7 @@ void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 }
 
 
-void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
+void CqDeepDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 {
 
 }
@@ -1115,7 +1115,7 @@ void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 //-----------------------------------------------------------------------------
 // Return true if a scanline of buckets has been accumulated, false otherwise.
 //-----------------------------------------------------------------------------
-bool CqDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
 {
 
 	//Aqsis::log() << debug << "CqDisplayRequest::CollapseBuckets...()" << std::endl;
@@ -1125,7 +1125,7 @@ bool CqDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint	xmaxplus1 = xmin + pBucket->Width();
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
-	TqUint width = QGetRenderContext()->pImage()->xResCrop();
+	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
 	TqUint x, y;
 
 	//Aqsis::log() << debug << "xmin: " << xmin << " ymin: " << ymin << " xmaxplus1: " << xmaxplus1 << " ymaxplus1: " << ymaxplus1 << " width: " << width <<//std::endl;
@@ -1148,7 +1148,7 @@ bool CqDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 	return false;
 }
 
-bool CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqDeepDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
 {
 	return false;
 }

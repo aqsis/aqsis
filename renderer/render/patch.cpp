@@ -892,6 +892,11 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 	}
 }
 
+void CqSurfacePatchBilinear::PostDice(CqMicroPolyGrid * pGrid)
+{
+	if(m_fHasPhantomFourthVertex)
+		pGrid->SetfTriangular(true);
+}
 
 //---------------------------------------------------------------------
 /** Destructor.
