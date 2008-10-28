@@ -52,6 +52,11 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 {}
 
 /** \brief Scan the next token from the underlying input stream.
+ *
+ * Optimization note: this is intentionally all one big function, since there's
+ * a performance hit of perhaps 10% or so associated with splitting the ascii
+ * and binary decoding up.  It's slightly more natural to handle all the cases
+ * at once.
  */
 CqRibToken CqRibLexer::scanNext()
 {
@@ -65,7 +70,8 @@ CqRibToken CqRibLexer::scanNext()
 		else
 			return CqRibToken(decodeFloat32(m_inBuf));
 	}
-	// Else determine the next token.
+	// Else determine the next token.  The while loop is to ignore whitespace
+	// and comments.
 	while(true)
 	{
 		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
@@ -78,6 +84,7 @@ CqRibToken CqRibLexer::scanNext()
 			case ' ':
 			case '\t':
 			case '\n':
+			case '\r':
 				// ignore whitespace
 				break;
 			case '#':
@@ -403,6 +410,11 @@ CqRibToken CqRibLexer::readString(CqRibInputBuffer& inBuf)
 							outString += octalChar;
 						}
 						break;
+					case '\r':
+						// discard newlines, including "\r\n" pairs.
+						if(inBuf.get() != '\n')
+							inBuf.unget();
+						break;
 					case '\n':
 						break;
 					default:
@@ -411,13 +423,19 @@ CqRibToken CqRibLexer::readString(CqRibInputBuffer& inBuf)
 						outString += c;
 						break;
 				}
-			break;
+				break;
+			case '\r':
+				if(inBuf.get() != '\n')
+					inBuf.unget();
+				outString += '\n';
+				break;
 			case EOF:
 				return CqRibToken(CqRibToken::ERROR,
 						"End of file found while scanning string");
-			break;
+				break;
 			default:
 				outString += c;
+				break;
 		}
 	}
 	return outTok;
@@ -443,6 +461,7 @@ CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
 				case ' ':
 				case '\t':
 				case '\n':
+				case '\r':
 				case '#':
 				case '"':
 				case '[':
@@ -468,7 +487,7 @@ CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
 void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 {
 	CqRibInputBuffer::TqOutputType c = inBuf.get();
-	while(c != EOF && c != '\n')
+	while(c != EOF && c != '\n' && c != '\r')
 		c = inBuf.get();
 	inBuf.unget();
 }

@@ -36,14 +36,18 @@ namespace Aqsis {
 CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 	: m_inStream(&inStream),
 	m_gzipStream(),
-	m_putbackChar(0),
-	m_havePutbackChar(false),
+	m_bufPos(1),
+	m_bufEnd(2),
 	m_currPos(1,0),
 	m_prevPos(-1,-1)
 {
+	// Zero the putback chars
+	m_buffer[0] = 0;
+	m_buffer[1] = 0;
 	if(isGzippedStream(inStream))
 	{
 #ifdef USE_GZIPPED_RIB
+		// Initialise gzip decompressor
 		namespace io = boost::iostreams;
 		io::filtering_stream<io::input>* zipStream = 0;
 		m_gzipStream.reset(zipStream = new io::filtering_stream<io::input>());
@@ -56,6 +60,58 @@ CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 	}
 }
 
+/** \brief Fill the internal buffer with as many characters as possible
+ * (guarenteed >= 1)
+ *
+ * This function reads in as many characters as possible using a non-blocking
+ * read on the istream.  If no characters are returned from the non-blocking
+ * read, a single character is read using the blocking std::istream::get()
+ * function.
+ *
+ * Postconditions: The m_bufPos index is one before the next character in the
+ * input stream.  The m_bufEnd index points to one after the last valid
+ * character.  m_bufPos < m_bufEnd
+ */
+void CqRibInputBuffer::bufferNextChars()
+{
+	// Precondition: m_bufPos is pointing to a one off the end of the valid
+	// characters in the buffer.
+	assert(m_bufPos == m_bufEnd);
+	// first make sure that we're not at the maximum extent of the buffer; if
+	// so we need to wrap around to the beginning.
+	if(m_bufEnd == m_bufSize)
+	{
+		// Copy over some chars so that we can always unget() at least one and
+		// still look back into the buffer an additional char for line ending
+		// detection.
+		m_buffer[0] = m_buffer[m_bufSize-2];
+		m_buffer[1] = m_buffer[m_bufSize-1];
+		// Reset buffer position
+		m_bufPos = 1;
+	}
+	// Now fill the buffer with as many characters as possible using a
+	// non-blocking read with readsome().
+	char auxBuf[m_bufSize];
+	int numRead = m_inStream->readsome(auxBuf, m_bufSize - m_bufPos);
+	if(numRead > 0)
+	{
+		// copy the chars over as unsigned.  Ugly, but necessary if our
+		// buffer is going to accomodate holding EOFs.
+		for(int i = 0; i < numRead; ++i)
+			m_buffer[m_bufPos+i] = static_cast<unsigned char>(auxBuf[i]);
+		m_bufEnd = m_bufPos + numRead;
+	}
+	else
+	{
+		// Else ugh: We failed to read a group of characters with the
+		// non-blocking read so we have to make an inefficient read of a single
+		// charater.  (Reading a single char may block, but that's acceptable.)
+		m_buffer[m_bufPos] = m_inStream->get();
+		m_bufEnd = m_bufPos + 1;
+	}
+}
+
+/// Determine whether the given stream is gzipped.
 bool CqRibInputBuffer::isGzippedStream(std::istream& in)
 {
 	bool isZipped = false;

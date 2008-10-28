@@ -50,6 +50,7 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_sourcepos_test)
 
 	for(int i = 0; i < 9; ++i)
 		inBuf.get();
+	BOOST_CHECK_EQUAL(inBuf.get(), '\r');
 	BOOST_CHECK_EQUAL(inBuf.get(), '\n');
 	pos = inBuf.pos();
 	BOOST_CHECK_EQUAL(pos.line, 3);
@@ -80,3 +81,24 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_gzip_test)
 	BOOST_CHECK_EQUAL(extractedStr, "some rib\ncharacters\nhere\n");
 }
 
+BOOST_AUTO_TEST_CASE(CqRibInputBuffer_bufwrap_test)
+{
+	// Test that buffer wrapping works correctly.
+	std::string inStr(
+		// 5*64 chars, which is enough to cause the buffer of 256 chars to wrap around.
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
+	);
+	std::istringstream in(inStr);
+	CqRibInputBuffer inBuf(in);
+
+	std::istream::int_type c = 0;
+	std::string extractedStr;
+	while((c = inBuf.get()) != EOF)
+		extractedStr += c;
+
+	BOOST_CHECK_EQUAL(extractedStr, inStr);
+}

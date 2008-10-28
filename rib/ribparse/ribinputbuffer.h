@@ -81,17 +81,23 @@ class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 		SqSourcePos pos() const;
 
 	private:
-		/// Determine whether the given stream is gzipped.
 		static bool isGzippedStream(std::istream& in);
+		void bufferNextChars();
 
 		/// Stream we are reading from.
 		std::istream* m_inStream;
 		/// gzip decompressor for compressed input
 		boost::scoped_ptr<std::istream> m_gzipStream;
-		/// Character which was put back into the input.
-		TqOutputType m_putbackChar;
-		/// Flag to indicate current character has already been read from inStream.
-		bool m_havePutbackChar;
+
+		/// Internal buffer size.
+		static const TqInt m_bufSize = 256;
+		/// Internal buffer of characters.
+		TqOutputType m_buffer[m_bufSize];
+		/// Position of current character [ie, last char returned with get() ]
+		TqInt m_bufPos;
+		/// Position of last valid character in input buffer.
+		TqInt m_bufEnd;
+
 		/// Current source location
 		SqSourcePos m_currPos;
 		/// Previous source location
@@ -114,42 +120,32 @@ inline std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
 // CqRibInputBuffer implementation
 inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 {
-	TqOutputType c = 0;
-	if(m_havePutbackChar)
-	{
-		m_havePutbackChar = false;
-		c = m_putbackChar;
-	}
-	else
-	{
-		c = m_inStream->get();
-		// TODO: Make sure this is actually necessary and that istream::get()
-		// doesn't do any undesirable translation.
-		if(c == '\r')
-		{
-			// translate all '\r' and '\r\n' characters to a single '\n'
-			if(m_inStream->peek() == '\n')
-				m_inStream->get();
-			c = '\n';
-		}
-	}
-	// Save character in case of unget()
-	m_putbackChar = c;
-	// Update current line and column position
+	// Get next character.
+	++m_bufPos;
+	if(m_bufPos >= m_bufEnd)
+		bufferNextChars();
+	TqOutputType c = m_buffer[m_bufPos];
+
+	// Keep line and column numbers up to date.
 	m_prevPos = m_currPos;
 	++m_currPos.col;
-	if(c == '\n')
+	if(c == '\r' || (c == '\n' && m_buffer[m_bufPos-1] != '\r'))
 	{
 		++m_currPos.line;
 		m_currPos.col = 0;
 	}
+	else if(c == '\n')
+		m_currPos.col = 0;
 	return c;
 }
 
 inline void CqRibInputBuffer::unget()
 {
+	// Precondition: current buffer position is at least two chars into the
+	// buffer so that lookback can work.
+	assert(m_bufPos >= 1);
+	--m_bufPos;
 	m_currPos = m_prevPos;
-	m_havePutbackChar = true;
 }
 
 inline SqSourcePos CqRibInputBuffer::pos() const

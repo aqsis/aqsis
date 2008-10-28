@@ -45,14 +45,26 @@ namespace Aqsis
 /** \brief A lexical analyser for the Renderman Interface Byetstream.
  *
  * The lexer translates input characters into a sequence of tokens of type
- * CqRibToken.  The token values are computed in the lexer rather than being
- * returned as strings.
+ * CqRibToken.  The input can be either in ASCII or binary RIB format.  In
+ * addition the lexer supports decompression of a RIB stream from the gzip
+ * format.
+ *
+ * Performance consideration: If the input stream corresponds to std::cin and
+ * high performance is desired, the user should call
+ * std::ios_base::sync_with_stdio(false) to encourage buffering directly by the
+ * C++ iostream library.  If not, bytes are likely to be read one at a time,
+ * resulting in significantly poor lexer performance (measured to be
+ * approximately a factor of two slower on linux/g++/amd64).
  */
 class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:
 		/** \brief Create new lexer using a given stream.
-		 * \param inStream - stream to connect to
+		 *
+		 * \param inStream - stream to connect with.  Note that this stream
+		 * should be opened in binary mode, so that no translation of newline
+		 * characters is performed.  If not, any binary encoded RIB will be
+		 * read incorrectly.
 		 */
 		CqRibLexer(std::istream& inStream);
 		/** \brief Get the next token.
