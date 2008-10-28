@@ -245,6 +245,10 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, numChannels); 
 	setTiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
+	// It's hard to know which algorithm for deciding the photometric type is
+	// the best here.  Perhaps it would be better to simply depend on the
+	// number of channels, since TIFF doesn't have a standard facility to store
+	// channel names...
 	if( (channelList.hasIntensityChannel() || numChannels <= 2)
 			&& !channelList.hasRgbChannel() )
 	{

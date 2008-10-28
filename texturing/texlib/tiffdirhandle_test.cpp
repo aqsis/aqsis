@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 		header.setWidth(11);
 		header.setHeight(1);
 		Aqsis::CqChannelList& channels = header.channelList();
-		channels.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Signed8));
+		channels.addChannel(Aqsis::SqChannelInfo("y", Aqsis::Channel_Signed8));
 		header.set<Aqsis::Attr::DisplayWindow>( Aqsis::SqImageRegion(1,2,3,4) );
 
 		dirHandle.writeHeader(header);
@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 		BOOST_CHECK_EQUAL(header.height(), 1);
 		// check channels
 		Aqsis::CqChannelList& channels = header.channelList();
-		// Note that we can't store actual channel names in tiff, so the "r"
-		// above is lost and deduced to be a luminance channel...
+		// Note that we can't store actual channel names in tiff, but a single
+		// channel is deduced to be an intensity channel under normal circumstances.
 		BOOST_CHECK_EQUAL(channels[0].name, "y");
 		BOOST_CHECK_EQUAL(channels[0].type, Aqsis::Channel_Signed8);
 		// check display window
