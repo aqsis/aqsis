@@ -37,15 +37,10 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include "exception.h"
-#include "primvartoken.h"
 #include "riblexer.h"
 #include "iribrequest.h"
 
 namespace Aqsis {
-
-class CqRequestMap;
-
-RIBPARSE_SHARE extern const std::vector<CqPrimvarToken> g_standardVars;
 
 //------------------------------------------------------------------------------
 /** \brief A flexible parser for RIB-like file formats.
@@ -70,17 +65,27 @@ RIBPARSE_SHARE extern const std::vector<CqPrimvarToken> g_standardVars;
  * requests.  In addition, there are cases where a user may only want to parse
  * a subset of the standard RIB.
  *
- * CqRibParser is designed with both these situations in mind.  In the current
- * implementation, the user provides a set of request handlers - subclasses of
- * IqRibRequest - to the parser at runtime.  When the parser reads a request
- * from the input stream, it looks for a handler with the appropriate name and
- * calls the IqRibRequest::handleRequest() method.  With this setup, the user
- * can define arbitrary actions to be performed on reading a given request.
+ * CqRibParser is designed with both these situations in mind.  The user
+ * provides a request handler of type IqRibRequestHandler to the parser at
+ * runtime.  When the parser reads a request from the input stream, it sends
+ * that request to the handler object.  The handler can then call back to the
+ * parser in order to get any request arguments.
  *
+ * The parser achieves the ideal of being completely ignorant of the
+ * semantics of any requests or request parameter lists.  In this design, all
+ * the semantics are offloaded to the IqRibRequestHandler class.
  */
 class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 {
 	public:
+		// Array types which are passed to RI request handlers from the RIB parser.
+		/// RIB int array type
+		typedef std::vector<TqInt> TqIntArray;
+		/// RIB float array type
+		typedef std::vector<TqFloat> TqFloatArray;
+		/// RIB string array type
+		typedef std::vector<std::string> TqStringArray;
+
 		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
 		 * \param lexer - lexical analyzer for a RIB input stream.
@@ -91,28 +96,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		 *        selective RIB parsers to be built without too much hassle.
 		 */
 		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
-				const boost::shared_ptr<CqRequestMap>& requests,
-				bool ignoreUnrecognized = false);
-
-		/** \brief Make a primitive variable token known to the parser.
-		 *
-		 * When parsing variable parameter lists for requests, the parser needs
-		 * to know about which value type to expect after a token.  This
-		 * function allows a variable name to be assiciated with a
-		 * corresponding type.  For example, "P" usually maps to "vertex
-		 * point[1] P" by convention.
-		 *
-		 * The global variable g_standardVars holds a list of standard
-		 * variables which may be passed to this function, but any other list
-		 * may be used in principle.
-		 *
-		 * \param InputIter - An input iterator for which *i yeilds a
-		 *                    CqPrimvarToken.
-		 * \param beg - begin iterator in the token sequence
-		 * \param end - end iterator in the token sequence
-		 *
-		 */
-		void declareVariable(const CqPrimvarToken& tok);
+				const boost::shared_ptr<IqRibRequestHandler>& requestHandler);
 
 		/** \brief Parse the next RIB request
 		 *
@@ -123,7 +107,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		bool parseNextRequest();
 
 		//--------------------------------------------------
-		/// \name callbacks for request parameter parsing.
+		/// \name callbacks for request required parameters.
 		//@{
 		/// Read an integer from the input
 		TqInt getInt();
@@ -137,19 +121,30 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		 * A reference to the array is valid until parsing the next request
 		 * commences.
 		 */
-		const TqRiIntArray& getIntArray();
+		const TqIntArray& getIntArray();
 		/** \brief Read an array of floats from the input
 		 *
 		 * A reference to the array is valid until parsing the next request
 		 * commences.
 		 */
-		const TqRiFloatArray& getFloatArray();
+		const TqFloatArray& getFloatArray();
 		/** \brief Read an array of strings from the input
 		 *
 		 * A reference to the array is valid until parsing the next request
 		 * commences.
 		 */
-		const TqRiStringArray& getStringArray();
+		const TqStringArray& getStringArray();
+		//@}
+
+		//--------------------------------------------------
+		/// \name callbacks for parameter list parsing (used by IqRibParamListHandler)
+		//@{
+		/// Read an integer or integer array from the input as an array
+		const TqIntArray& getIntParam();
+		/// Read an float or float array from the input as an array
+		const TqFloatArray& getFloatParam();
+		/// Read an string or string array from the input as an array
+		const TqStringArray& getStringParam();
 
 		/** \brief Read a list of (token,value) pairs from the input stream.
 		 *
@@ -165,7 +160,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		 * \param paramList - destination for (token, value) pairs as read from
 		 *            the input stream.
 		 */
-		const void getParamList(IqRibParamList& paramList);
+		const void getParamList(IqRibParamListHandler& paramHandler);
 		//@}
 
 	private:
@@ -197,13 +192,8 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 
 		/// RIB lexer
 		boost::shared_ptr<CqRibLexer> m_lex;
-		/// Lookup table of RIB requests indexed on request names.
-		boost::shared_ptr<CqRequestMap> m_requests;
-		/// Map of declared primvar tokens
-		typedef std::map<std::string, CqPrimvarToken> TqPrimvarMap;
-		TqPrimvarMap m_declaredVars;
-		/// Ignore unrecognized requests rather than throwing an error.
-		bool m_ignoreUnrecognized;
+		/// RIB requests handler
+		boost::shared_ptr<IqRibRequestHandler> m_requestHandler;
 		/// pool of parsed float arrays for the current request.
 		CqBufferPool<TqFloat> m_floatArrayPool;
 		/// pool of parsed int arrays for the current request.
@@ -211,34 +201,6 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		/// pool of parsed string arrays for the current request.
 		CqBufferPool<std::string> m_stringArrayPool;
 };
-
-
-/** \brief A container for RIB request handlers.
- */
-class CqRequestMap
-{
-	public:
-		/** \brief Add a RIB request to the list of valid requests.
-		 *
-		 * \param request - A pointer to the request object.  This takes
-		 *                  ownership of the request, and will delete it
-		 *                  appropriately.
-		 */
-		void add(const std::string& name, IqRibRequest* request);
-
-		/** \brief Find the request with the given name.
-		 *
-		 * \return The request with the given name, or null no such request
-		 *         exists.
-		 */
-		IqRibRequest* find(const std::string& name);
-	private:
-		typedef std::map<std::string, boost::shared_ptr<IqRibRequest> > TqRqstMap;
-		// TODO: Decide on whether there might be a better container to use
-		// here - a hash map for instance.
-		TqRqstMap m_requests;
-};
-
 
 
 //==============================================================================
@@ -266,28 +228,6 @@ template<typename T>
 inline void CqRibParser::CqBufferPool<T>::markUnused()
 {
 	m_next = 0;
-}
-
-//------------------------------------------------------------------------------
-inline void CqRibParser::declareVariable(const CqPrimvarToken& tok)
-{
-	m_declaredVars.insert(TqPrimvarMap::value_type(tok.name(), tok));
-}
-
-//------------------------------------------------------------------------------
-
-inline IqRibRequest* CqRequestMap::find(const std::string& name)
-{
-	TqRqstMap::iterator i = m_requests.find(name);
-	if(i == m_requests.end())
-		return 0;
-	else
-		return i->second.get();
-}
-
-inline void CqRequestMap::add(const std::string& name, IqRibRequest* request)
-{
-	m_requests[name].reset(request);
 }
 
 } // namespace Aqsis

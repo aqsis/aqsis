@@ -23,11 +23,13 @@
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
-#include "ribparser.h"
+#include "standardvars.h"
 
 namespace Aqsis {
 
-static const CqPrimvarToken standardVarsInit[] = {
+namespace {
+
+const CqPrimvarToken standardVarsInit[] = {
 	//--------------------------------------------------
 	// Standard shader instance variables
 	CqPrimvarToken(class_uniform,  type_float,   1, "Ka"),
@@ -126,7 +128,14 @@ static const CqPrimvarToken standardVarsInit[] = {
 	CqPrimvarToken(class_uniform,  type_float,   1, "expandgrids"),
 };
 
-const std::vector<CqPrimvarToken> g_standardVars(standardVarsInit,
+const std::vector<CqPrimvarToken> standardVars(standardVarsInit,
 		standardVarsInit + sizeof(standardVarsInit)/sizeof(CqPrimvarToken));
+
+} // unnamed namespace
+
+const std::vector<CqPrimvarToken>& standardRibVariables()
+{
+	return standardVars;
+}
 
 }

@@ -30,23 +30,11 @@
 #include "aqsis.h"
 
 #include <vector>
-
-#include "primvartoken.h"
+#include <string>
 
 namespace Aqsis {
 
 class CqRibParser;
-
-
-//------------------------------------------------------------------------------
-// Array types which are passed to RI request handlers from the RIB parser.
-
-/// integer array type for RI request array paramters
-typedef std::vector<TqInt> TqRiIntArray;
-/// float array type for RI request array paramters
-typedef std::vector<TqFloat> TqRiFloatArray;
-/// string array type for RI request array paramters
-typedef std::vector<std::string> TqRiStringArray;
 
 
 //------------------------------------------------------------------------------
@@ -55,7 +43,7 @@ typedef std::vector<std::string> TqRiStringArray;
  * Code expecting to handle RIB requests should inherit from this class.  This
  * allows it to be attached to and called by the RIB parser at runtime.
  */
-class IqRibRequest
+class IqRibRequestHandler
 {
 	public:
 		/** \brief Handle a RIB request by reading from the parser
@@ -63,32 +51,34 @@ class IqRibRequest
 		 * The request handler is expected to call the CqRibParser::get*
 		 * functions of the parser object in order to read the required
 		 * parameters for the request.
+		 *
+		 * \param requestName - name of the request to handle.
+		 * \param parser - source from which request parameters should be read.
 		 */
-		virtual void handleRequest(CqRibParser& parser) = 0;
+		virtual void handleRequest(const std::string& requestName,
+				CqRibParser& parser) = 0;
 
-		virtual ~IqRibRequest() {}
+		virtual ~IqRibRequestHandler() {}
 };
 
 //------------------------------------------------------------------------------
-/** \brief RIB parameter list interface.
- *
- * An implementation of this object needs to be prepared to accept a list of
- * (token, value) pairs as they are parsed.
- */
-class IqRibParamList
+/// RIB parameter list handler.
+class IqRibParamListHandler
 {
 	public:
-		/// Add an (token, integer array) pair to the end of the parameter list
-		virtual void append(const CqPrimvarToken& token,
-				const TqRiIntArray& value) = 0;
-		/// Add an (token, float array) pair to the end of the parameter list
-		virtual void append(const CqPrimvarToken& token,
-				const TqRiFloatArray& value) = 0;
-		/// Add an (token, string array) pair to the end of the parameter list
-		virtual void append(const CqPrimvarToken& token,
-				const TqRiStringArray& value) = 0;
+		/** \brief Read a RIB parameter with the supplied name from the parser.
+		 *
+		 * The handler should be prepared to determine the type of parameter to
+		 * be read by inspecting the parameter name.  It should then read the
+		 * parameter using CqRibParser::getIntParam(), getFloatParam() or
+		 * getStringParam().
+		 *
+		 * \param name - raw parameter name as read from the input stream
+		 * \param parser - source from which the parameter should be read.
+		 */
+		virtual void readParameter(const std::string& name, CqRibParser& parser) = 0;
 
-		virtual ~IqRibParamList() {}
+		virtual ~IqRibParamListHandler() {}
 };
 
 } // namespace Aqsis

@@ -33,12 +33,9 @@ namespace Aqsis {
 // CqRibParser implementation
 
 CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
-		const boost::shared_ptr<CqRequestMap>& requests,
-		bool ignoreUnrecognized)
+				const boost::shared_ptr<IqRibRequestHandler>& requestHandler)
 	: m_lex(lexer),
-	m_requests(requests),
-	m_declaredVars(),
-	m_ignoreUnrecognized(ignoreUnrecognized),
+	m_requestHandler(requestHandler),
 	m_floatArrayPool(),
 	m_intArrayPool(),
 	m_stringArrayPool()
@@ -46,39 +43,23 @@ CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 
 bool CqRibParser::parseNextRequest()
 {
-	while(true)
+	// skip up until the next request.  This guards against the case that a
+	// previous request resulted in an exception which left the parser in an
+	// odd state.
+	CqRibToken tok = m_lex->get();
+	while(tok.type() != CqRibToken::REQUEST)
 	{
-		// skip up until the next request.
-		CqRibToken tok = m_lex->get();
-		while(tok.type() != CqRibToken::REQUEST)
-		{
-			if(tok.type() == CqRibToken::ENDOFFILE)
-				return false;
-			tok = m_lex->get();
-		}
-		// find a handler for the current request
-		if(IqRibRequest* req = m_requests->find(tok.stringVal()))
-		{
-			// Mark array pools as free to use.
-			m_floatArrayPool.markUnused();
-			m_intArrayPool.markUnused();
-			m_stringArrayPool.markUnused();
-			// Invoke the request handler.
-			req->handleRequest(*this);
-			return true;
-		}
-		else
-		{
-			// If the request isn't found, throw if desired, otherwise
-			// continue on to the next request in the stream.
-			if(!m_ignoreUnrecognized)
-			{
-				AQSIS_THROW(XqParseError,
-						"urecognized RIB request " << tok.stringVal()
-						<< " (" << m_lex->pos() << ")");
-			}
-		}
+		if(tok.type() == CqRibToken::ENDOFFILE)
+			return false;
+		tok = m_lex->get();
 	}
+	// Mark array pools as free to use.
+	m_floatArrayPool.markUnused();
+	m_intArrayPool.markUnused();
+	m_stringArrayPool.markUnused();
+	// Invoke the request handler.
+	m_requestHandler->handleRequest(tok.stringVal(), *this);
+	return true;
 }
 
 TqInt CqRibParser::getInt()
@@ -133,11 +114,11 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
  * After that we'd still be left with the float case in which it's acceptable
  * for the token to be *either* an integer *or* a float.
  */
-const TqRiIntArray& CqRibParser::getIntArray()
+const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 {
 	consumeArrayBegin(*m_lex, "integer");
 
-	TqRiIntArray& buf = m_intArrayPool.getBuf();
+	TqIntArray& buf = m_intArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
@@ -160,11 +141,11 @@ const TqRiIntArray& CqRibParser::getIntArray()
 	return buf;
 }
 
-const TqRiFloatArray& CqRibParser::getFloatArray()
+const CqRibParser::TqFloatArray& CqRibParser::getFloatArray()
 {
 	consumeArrayBegin(*m_lex, "float");
 
-	TqRiFloatArray& buf = m_floatArrayPool.getBuf();
+	TqFloatArray& buf = m_floatArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
@@ -190,11 +171,11 @@ const TqRiFloatArray& CqRibParser::getFloatArray()
 	return buf;
 }
 
-const TqRiStringArray& CqRibParser::getStringArray()
+const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 {
 	consumeArrayBegin(*m_lex, "string");
 
-	TqRiStringArray& buf = m_stringArrayPool.getBuf();
+	TqStringArray& buf = m_stringArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
@@ -217,7 +198,51 @@ const TqRiStringArray& CqRibParser::getStringArray()
 	return buf;
 }
 
-const void CqRibParser::getParamList(IqRibParamList& paramList)
+const CqRibParser::TqIntArray& CqRibParser::getIntParam()
+{
+	if(m_lex->peek().type() == CqRibToken::INTEGER)
+	{
+		TqIntArray& buf = m_intArrayPool.getBuf();
+		buf.push_back(m_lex->get().intVal());
+		return buf;
+	}
+	return getIntArray();
+}
+
+const CqRibParser::TqFloatArray& CqRibParser::getFloatParam()
+{
+	switch(m_lex->peek().type())
+	{
+		case CqRibToken::INTEGER:
+			{
+				TqFloatArray& buf = m_floatArrayPool.getBuf();
+				buf.push_back(m_lex->get().intVal());
+				return buf;
+			}
+		case CqRibToken::FLOAT:
+			{
+				TqFloatArray& buf = m_floatArrayPool.getBuf();
+				buf.push_back(m_lex->get().floatVal());
+				return buf;
+			}
+		default:
+			return getFloatArray();
+	}
+}
+
+const CqRibParser::TqStringArray& CqRibParser::getStringParam()
+{
+	if(m_lex->peek().type() == CqRibToken::STRING)
+	{
+		// special case where next token is a single string.
+		TqStringArray& buf = m_stringArrayPool.getBuf();
+		buf.push_back(m_lex->get().stringVal());
+		return buf;
+	}
+	return getStringArray();
+}
+
+const void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 {
 	while(true)
 	{
@@ -232,88 +257,10 @@ const void CqRibParser::getParamList(IqRibParamList& paramList)
 				break;
 			default:
 				AQSIS_THROW(XqParseError,
-						"name/type string expected in parameter list");
+						"parameter name string expected in param list, got "
+						<< m_lex->peek());
 		}
-		// get a string representing the name of the param list.
-		CqPrimvarToken primvarTok(m_lex->get().stringVal().c_str());
-		// If the string wasn't an inline declaration, retrieve it from the
-		// stored set of parameters.
-		if(primvarTok.type() == type_invalid)
-		{
-			TqPrimvarMap::const_iterator tokLoc
-				= m_declaredVars.find(primvarTok.name());
-			if(tokLoc == m_declaredVars.end())
-			{
-				AQSIS_THROW(XqParseError, "Unknown token \"" << primvarTok.name()
-						<< "\" encountered at" << " (" << m_lex->pos() << ")");
-			}
-			primvarTok = tokLoc->second;
-		}
-
-		// Now parse the value associated with the parameter string.
-		switch(primvarTok.type())
-		{
-			//--------------------------------------------------
-			// Parameters represented as floats
-			case type_float:
-				if(m_lex->peek().type() == CqRibToken::FLOAT)
-				{
-					// deal with the special case where the next token is a
-					// single float rather than an array.
-					TqRiFloatArray& buf = m_floatArrayPool.getBuf();
-					buf.push_back(m_lex->get().floatVal());
-					paramList.append(primvarTok, buf);
-					break;
-				}
-				// intentional case fallthrough.
-			case type_point:
-			case type_vector:
-			case type_normal:
-			case type_hpoint:
-			case type_matrix:
-			case type_color:
-				// Any of the above types need to correspond to a float array.
-				paramList.append(primvarTok, getFloatArray());
-				break;
-			//--------------------------------------------------
-			// Parameters represented as integers
-			case type_integer:
-				if(m_lex->peek().type() == CqRibToken::INTEGER)
-				{
-					TqRiIntArray& buf = m_intArrayPool.getBuf();
-					buf.push_back(m_lex->get().intVal());
-					paramList.append(primvarTok, buf);
-				}
-				else
-					paramList.append(primvarTok, getIntArray());
-				break;
-			//--------------------------------------------------
-			// Parameters represented as strings
-			case type_string:
-				if(m_lex->peek().type() == CqRibToken::STRING)
-				{
-					// special case where next token is a single string.
-					TqRiStringArray& buf = m_stringArrayPool.getBuf();
-					buf.push_back(m_lex->get().stringVal());
-					paramList.append(primvarTok, buf);
-				}
-				else
-					paramList.append(primvarTok, getStringArray());
-				break;
-			//--------------------------------------------------
-			// Invalid parameters.
-			case type_bool:
-			case type_invalid:
-			case type_void:
-			case type_triple:
-			case type_sixteentuple:
-			default:
-				// Any of the types above aren't really valid RIB, so we
-				// disallow them here.
-				AQSIS_THROW(XqParseError, "invalid token type '"
-						<< primvarTok.type() << "' in parameter list");
-				break;
-		}
+		paramHandler.readParameter(m_lex->get().stringVal(), *this);
 	}
 }
 
