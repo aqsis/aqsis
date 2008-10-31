@@ -52,6 +52,7 @@ const CqPrimvarToken standardVarsInit[] = {
 	CqPrimvarToken(class_uniform,  type_float,   1, "Kd"),
 	CqPrimvarToken(class_uniform,  type_float,   1, "Ks"),
 	CqPrimvarToken(class_uniform,  type_float,   1, "Kr"),
+	CqPrimvarToken(class_uniform,  type_float,   1, "Km"),
 	CqPrimvarToken(class_uniform,  type_float,   1, "roughness"),
 	CqPrimvarToken(class_uniform,  type_string,  1, "texturename"),
 	CqPrimvarToken(class_uniform,  type_color,   1, "specularcolor"),
@@ -139,9 +140,14 @@ const CqPrimvarToken standardVarsInit[] = {
 	CqPrimvarToken(class_uniform,  type_string,  1, "shadowmapname"),
 	CqPrimvarToken(class_uniform,  type_integer, 1, "res"),
 	// Attribute "Render"
-	CqPrimvarToken(class_uniform,  type_integer,   1, "multipass"),
+	CqPrimvarToken(class_uniform,  type_integer, 1, "multipass"),
 	// Attribute "aqsis"
 	CqPrimvarToken(class_uniform,  type_float,   1, "expandgrids"),
+
+	//--------------------------------------------------
+	// Extra options not used by aqsis, but apparently commonly exported in RIB files.
+	// Attribute "light"
+	CqPrimvarToken(class_uniform,  type_string,  1, "shadows"),
 };
 
 const std::vector<CqPrimvarToken> standardVars(standardVarsInit,

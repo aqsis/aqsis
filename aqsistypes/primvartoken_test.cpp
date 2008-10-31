@@ -60,6 +60,13 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "P");
 	}
+
+	{
+		// Check a special case kludge - integer types can be specified either
+		// with "int" or with "integer"
+		CqPrimvarToken tok("uniform int i");
+		BOOST_CHECK_EQUAL(tok.type(), type_integer);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)

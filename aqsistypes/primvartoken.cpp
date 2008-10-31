@@ -100,6 +100,16 @@ EnumT lowercaseEnumCast(std::string tok)
 } // unnamed namespace
 
 
+// Helper for uniformly formatted errors.
+#define PARSE_ERROR(token, message) \
+	AQSIS_THROW(XqParseError, "invalid primvar \"" << token << "\": " << message)
+
+/** Parse a primitive variable token
+ *
+ * m_class, m_type, m_arraySize and m_name will be extracted if present
+ * and in the correct order.  m_class and m_type will be set to invalid
+ * if not present.
+ */
 void CqPrimvarToken::parse(const char* tokenStr)
 {
 	CqPrimvarTokenizer tokenizer(tokenStr);
@@ -121,26 +131,35 @@ void CqPrimvarToken::parse(const char* tokenStr)
 	// (2) attempt to parse type
 	m_type = lowercaseEnumCast<EqVariableType>(tok);
 	if(m_type != type_invalid)
+	{
 		NEXT_OR_END;
+	}
+	else if(tok == "int")
+	{
+		// Kludge - support "int" for type_integer, even though it's not
+		// standard since some content expects it.
+		m_type = type_integer;
+		NEXT_OR_END;
+	}
 	// (3) attempt to parse array size
 	if(tok == "[")
 	{
 		tok = tokenizer.get();
 		if(tok == "")
-			AQSIS_THROW(XqParseError, "expected primvar array size after '['");
+			PARSE_ERROR(tokenStr, "expected array size after '['");
 		// Convert to integer.
 		std::istringstream in(tok);
 		in >> m_arraySize;
 		// check array size is positive and nothing is left over in the token.
 		if(m_arraySize <= 0 || in.get() != EOF)
-			AQSIS_THROW(XqParseError, "primvar array size must be a positive integer");
+			PARSE_ERROR(tokenStr, "array size must be a positive integer");
 		// Consume a "]" token
 		if(tokenizer.get() != "]")
-			AQSIS_THROW(XqParseError, "expected ']' after primvar array size");
+			PARSE_ERROR(tokenStr, "expected ']' after array size");
 		NEXT_OR_END;
 	}
 	if(tok == "]")
-		AQSIS_THROW(XqParseError, "']' is not a valid primvar name");
+		PARSE_ERROR(tokenStr, "']' is not a valid name");
 	// (4) anything remaining corresponds to the name.
 	m_name = tok;
 
@@ -148,7 +167,7 @@ void CqPrimvarToken::parse(const char* tokenStr)
 
 	// Finally check that we've run out of tokens.
 	if(tokenizer.get() != "")
-		AQSIS_THROW(XqParseError, "too many tokens in primvar type declaration");
+		PARSE_ERROR(tokenStr, "too many words in token");
 }
 
 //-----------------------------------------
@@ -165,7 +184,7 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 	if(m_class == class_invalid)
 		m_class = class_uniform;
 	if(m_name == "")
-		AQSIS_THROW(XqParseError, "expected primvar name in token");
+		PARSE_ERROR(token, "expected name in token");
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* typeToken, const std::string& name)
@@ -177,7 +196,8 @@ CqPrimvarToken::CqPrimvarToken(const char* typeToken, const std::string& name)
 	if(typeToken)
 		parse(typeToken);
 	if(m_name != "")
-		AQSIS_THROW(XqParseError, "unexpected primvar name in type string");
+		AQSIS_THROW(XqParseError, "invalid primvar: unexpected name \""
+				<< m_name << "\" in type string \"" << typeToken << "\"");
 	m_name = name;
 	if(m_class == class_invalid)
 		m_class = class_uniform;

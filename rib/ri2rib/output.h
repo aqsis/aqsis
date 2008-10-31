@@ -26,16 +26,17 @@
 #ifndef RI2RIB_OUTPUT_H
 #define RI2RIB_OUTPUT_H 1
 
+#include "aqsis.h"
+
 #include <fstream>
 #include <stack>
 #include <string>
 #include <sstream>
-#include "aqsis.h"
+
 #include "ri.h"
-#include "dictionary.h"
 #include "options.h"
 #include "outstream.h"
-
+#include "tokendictionary.h"
 
 namespace libri2rib {
 
@@ -85,7 +86,7 @@ class CqOutput
 		static const RtInt m_blockErrors[];
 		static const EqFunctions m_blockFunctions[];
 
-		CqDictionary m_Dictionary;
+		Aqsis::CqTokenDictionary m_Dictionary;
 
 		RtInt m_ColorNComps;
 		RtInt m_ObjectHandle;

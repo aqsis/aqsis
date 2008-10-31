@@ -27,15 +27,20 @@
 #endif
 
 #include "output.h"
-#include "error.h"
-#include "inlineparse.h"
-#include "context.h"
 
 #include "stddef.h"
-
 #include <cstring>
 
+#include "error.h"
+#include "context.h"
+#include "exception.h"
+
 namespace libri2rib {
+
+// Bring in some names from the Aqsis namespace.
+//
+// \todo: Consider replacing namespace libri2rib with Aqsis or remove this using.
+using namespace Aqsis;
 
 #define PR(x,y)  printRequest(x,y)
 #ifdef	PI
@@ -51,7 +56,7 @@ namespace libri2rib {
 
 CqOutput::CqOutput( const char *name, int fdesc,
                     SqOptions::EqCompression comp)
-		:
+		: m_Dictionary(true),
 		m_ColorNComps( 3 ),
 		m_ObjectHandle( 1 ),
 		m_LightHandle( 1 )
@@ -235,9 +240,32 @@ bool CqOutput::nestingContains(EqBlocks type) const
 }
 
 
-
-
-
+/** Return size of the primvar array associated with the given token, and
+ * having a length corresponding to one of the given interpolation class
+ * lengths.
+ */
+static TqInt allocSize(const CqPrimvarToken& tok, TqInt vertex, TqInt varying,
+		TqInt uniform, TqInt facevarying, TqInt facevertex)
+{
+	switch(tok.Class())
+	{
+		case class_vertex:
+			return tok.storageCount()*vertex;
+		case class_varying:
+			return tok.storageCount()*varying;
+		case class_uniform:
+			return tok.storageCount()*uniform;
+		case class_constant:
+			return tok.storageCount();
+		case class_facevarying:
+			return tok.storageCount()*facevarying;
+		case class_facevertex:
+			return tok.storageCount()*facevertex;
+		default:
+			assert(0 && "Invalid token class");
+			return 0;
+	}
+}
 
 // **************************************************************
 // ******* ******* ******* PRINTING TOOLS ******* ******* *******
@@ -250,59 +278,70 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 	RtInt *nt;
 	char **cp;
 
-	TqTokenId id;
-	EqTokenType tt;
-
-	RtInt i;
-	TqUint j;
-	TqUint sz;
-	for ( i = 0; i < n ; i++ )
+	for (TqInt i = 0; i < n ; i++ )
 	{
+		CqPrimvarToken tok;
 		try
 		{
-			id = m_Dictionary.getTokenId( std::string( tokens[ i ] ) );
+			tok = CqPrimvarToken(tokens[i]);
+			m_Dictionary.lookupType(tok);
+			if(!tok.hasType())
+			{
+				// Ugly way to report the error!
+				CqError(RIE_BADTOKEN, RIE_ERROR, "Could not parse ", tokens[i],
+						"", true).manage();
+				continue;
+			}
 		}
-		catch ( CqError & r )
+		catch(XqParseError& e)
 		{
-			r.manage();
+			// More ugly error reportage.
+			CqError(RIE_BADTOKEN, RIE_ERROR, e.what(), true).manage();
 			continue;
 		}
 
 		printToken( tokens[ i ] );
 		S;
-		tt = m_Dictionary.getType( id );
-		sz = m_Dictionary.allocSize( id, vertex, varying, uniform,
-				facevarying, facevertex);
 
-		switch ( tt )
+		TqInt storageCount = allocSize(tok, vertex, varying, uniform,
+				facevarying, facevertex);
+		switch ( tok.type() )
 		{
-				case FLOAT:
-				case POINT:
-				case VECTOR:
-				case NORMAL:
-				case MATRIX:
-				case HPOINT:
+			case type_float:
+			case type_point:
+			case type_vector:
+			case type_normal:
+			case type_matrix:
+			case type_hpoint:
 				flt = static_cast<RtFloat *> ( parms[ i ] );
-				printArray( sz, flt );
+				printArray( storageCount, flt );
 				break;
-				case COLOR:
+			case type_color:
 				flt = static_cast<RtFloat *> ( parms[ i ] );
-				printArray( sz * m_ColorNComps, flt );
+				// Kludge.  We divide by three here since CqPrimvarToken
+				// assumes 3 channels per color.
+				printArray( storageCount / 3 * m_ColorNComps, flt );
 				break;
-				case STRING:
+			case type_string:
 				cp = static_cast<char **> ( parms[ i ] );
 				print( "[" );
 				S;
-				for ( j = 0; j < sz; j++ )
+				for (TqInt j = 0; j < storageCount; j++ )
 				{
 					printCharP( cp[ j ] );
 					S;
 				}
 				print( "]" );
 				break;
-				case INTEGER:
+			case type_integer:
 				nt = static_cast<RtInt *> ( parms[ i ] );
-				printArray( sz, nt );
+				printArray( storageCount, nt );
+				break;
+			default:
+				{
+					CqError(RIE_BADTOKEN, RIE_ERROR, "Unrecognised token ", tok.name(),
+						"", true).manage();
+				}
 				break;
 		}
 		S;
@@ -345,14 +384,7 @@ std::string CqOutput::getFilterFuncName( RtFilterFunc filterfunc, const char *na
 // *****************************************************************
 RtToken CqOutput::RiDeclare( const char *name, const char *declaration )
 {
-	CqInlineParse ip;
-	std::string a( name );
-	std::string b( declaration );
-
-	b += " ";
-	b += a;
-	ip.parse( b );
-	m_Dictionary.addToken( ip.getIdentifier(), ip.getClass(), ip.getType(), ip.getQuantity(), false );
+	m_Dictionary.insert(CqPrimvarToken(declaration, name));
 
 	PR( "Declare", Declare );
 	S;

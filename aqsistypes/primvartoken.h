@@ -137,12 +137,6 @@ class COMMON_SHARE CqPrimvarToken
 		TqInt m_arraySize;
 		std::string m_name;
 
-		/** Parse a primitive variable token
-		 *
-		 * m_class, m_type, m_arraySize and m_name will be extracted if present
-		 * and in the correct order.  m_class and m_type will be set to invalid
-		 * if not present.
-		 */
 		void parse(const char* token);
 };
 
