@@ -4,10 +4,12 @@
 // This software is licensed under the GPLv2 - see the file COPYING for details.
 
 #include <iostream>
+#include <map>
 #include <string>
 
 #include <smartptr.h>
 #include <ribparser.h>
+#include <tokendictionary.h>
 
 #include "parenthairs.h"
 #include "primvar.h"
@@ -20,36 +22,26 @@
  * stuffs them into a PrimVars container.  As such, it currently supports only
  * float primvars.
  */
-class PrimVarInserter : public Aqsis::IqRibParamList
+class PrimVarInserter : public Aqsis::IqRibParamListHandler
 {
 	private:
 		PrimVars& m_primVars;
+		const Aqsis::CqTokenDictionary& m_tokenDict;
 	public:
-		PrimVarInserter(PrimVars& primVars)
-			: m_primVars(primVars)
+		PrimVarInserter(PrimVars& primVars, const Aqsis::CqTokenDictionary& tokenDict)
+			: m_primVars(primVars),
+			m_tokenDict(tokenDict)
 		{ }
 
 		// inherited
-		virtual void append(const Aqsis::CqPrimvarToken& token,
-				const Aqsis::TqRiIntArray& value)
+		virtual void readParameter(const std::string& name, Aqsis::CqRibParser& parser)
 		{
-			// string arrays aren't handled.
-			g_errStream << "hairgen: integer primvars not yet handled - "
-				<< token.name() << " discarded\n";
-		}
-
-		virtual void append(const Aqsis::CqPrimvarToken& token,
-				const Aqsis::TqRiFloatArray& value)
-		{
-			m_primVars.append(token, value);
-		}
-
-		virtual void append(const Aqsis::CqPrimvarToken& token,
-				const Aqsis::TqRiStringArray& value)
-		{
-			// string arrays aren't handled.
-			g_errStream << "hairgen: string primvars not yet handled - "
-				<< token.name() << " discarded\n";
+			Aqsis::CqPrimvarToken token(name.c_str());
+			m_tokenDict.lookupType(token);
+			if(token.storageType() == Aqsis::type_float)
+				m_primVars.append(token, parser.getFloatParam());
+			else
+				g_errStream << "hairgen: primvar not handled: " << token.name() << " discarded\n";
 		}
 };
 
@@ -59,26 +51,30 @@ class PrimVarInserter : public Aqsis::IqRibParamList
  *
  * Grabs the PointsPolygons data, and puts it into a EmitterMesh object.
  */
-class PointsPolygonsRequest : public Aqsis::IqRibRequest
+class PointsPolygonsRequestHandler : public Aqsis::IqRibRequestHandler
 {
 	private:
 		boost::shared_ptr<EmitterMesh>& m_emitter;
 		TqInt m_numHairs;
+		Aqsis::CqTokenDictionary m_tokenDict;
 	public:
-		PointsPolygonsRequest(boost::shared_ptr<EmitterMesh>& emitter, int numHairs)
+		PointsPolygonsRequestHandler(boost::shared_ptr<EmitterMesh>& emitter, int numHairs)
 			: m_emitter(emitter),
-			m_numHairs(numHairs)
+			m_numHairs(numHairs),
+			m_tokenDict(true)
 		{ }
 
-		void handleRequest(Aqsis::CqRibParser& parser)
+		void handleRequest(const std::string& name, Aqsis::CqRibParser& parser)
 		{
+			if(name != "PointsPolygons")
+				return;
 			// number of verts per polygon
-			const Aqsis::TqRiIntArray& numVerts = parser.getIntArray();
+			const IntArray& numVerts = parser.getIntArray();
 			// indices for vertice into the primvars of type vertex or varying
-			const Aqsis::TqRiIntArray& vertIndices = parser.getIntArray();
+			const IntArray& vertIndices = parser.getIntArray();
 			// Handle all primvars
 			boost::shared_ptr<PrimVars> primVars(new PrimVars());
-			PrimVarInserter pList(*primVars);
+			PrimVarInserter pList(*primVars, m_tokenDict);
 			parser.getParamList(pList);
 
 			m_emitter.reset(new EmitterMesh(numVerts, vertIndices,
@@ -91,30 +87,35 @@ class PointsPolygonsRequest : public Aqsis::IqRibRequest
  *
  * Grabs the Curves data, and puts it into a ParentHairs object.
  */
-class CurvesRequest : public Aqsis::IqRibRequest
+class CurvesRequestHandler : public Aqsis::IqRibRequestHandler
 {
 	private:
 		boost::shared_ptr<ParentHairs>& m_hairs;
 		const HairModifiers& m_hairModifiers;
+		Aqsis::CqTokenDictionary m_tokenDict;
 	public:
-		CurvesRequest(boost::shared_ptr<ParentHairs>& hairs, const HairModifiers& hairModifiers)
+		CurvesRequestHandler(boost::shared_ptr<ParentHairs>& hairs,
+				const HairModifiers& hairModifiers)
 			: m_hairs(hairs),
-			m_hairModifiers(hairModifiers)
+			m_hairModifiers(hairModifiers),
+			m_tokenDict(true)
 		{ }
 
-		void handleRequest(Aqsis::CqRibParser& parser)
+		void handleRequest(const std::string& name, Aqsis::CqRibParser& parser)
 		{
+			if(name != "Curves")
+				return;
 			// Curve type - "linear" or "cubic"
 			std::string typeStr = parser.getString();
 			bool linear = typeStr == "linear";
 			// Number of verts per curve
-			const Aqsis::TqRiIntArray& numVerts = parser.getIntArray();
+			const IntArray& numVerts = parser.getIntArray();
 			// periodic curves - "periodic" or "nonperiodic"
 			std::string periodicStr = parser.getString();
 			bool periodic = periodicStr == "periodic";
 			// Handle all primvars
 			boost::shared_ptr<PrimVars> primVars(new PrimVars());
-			PrimVarInserter pList(*primVars);
+			PrimVarInserter pList(*primVars, m_tokenDict);
 			parser.getParamList(pList);
 
 			// We can't deal with periodic curves or interpolate when there's
@@ -136,20 +137,13 @@ class CurvesRequest : public Aqsis::IqRibRequest
  *                   parser.  Only handlers for the particular requests of
  *                   interest should be included.
  */
-inline void parseStream(std::istream& ribStream, Aqsis::CqRequestMap& requests)
+inline void parseStream(std::istream& ribStream,
+		Aqsis::IqRibRequestHandler& requestHandler)
 {
 	Aqsis::CqRibLexer lex(ribStream);
 	Aqsis::CqRibParser parser(
 		boost::shared_ptr<Aqsis::CqRibLexer>(&lex, Aqsis::nullDeleter),
-		boost::shared_ptr<Aqsis::CqRequestMap>(&requests, Aqsis::nullDeleter),
-		true);
-	for(std::vector<Aqsis::CqPrimvarToken>::const_iterator
-		i = Aqsis::g_standardVars.begin(),
-		end = Aqsis::g_standardVars.end();
-		i != end; ++i)
-	{
-		parser.declareVariable(*i);
-	}
+		boost::shared_ptr<Aqsis::IqRibRequestHandler>(&requestHandler, Aqsis::nullDeleter) );
 
 	bool parsing = true;
 	while(parsing)
@@ -160,7 +154,7 @@ inline void parseStream(std::istream& ribStream, Aqsis::CqRequestMap& requests)
 		}
 		catch(Aqsis::XqParseError& e)
 		{
-			g_errStream << e << "\n";
+			g_errStream << "hairgen: " << e << "\n";
 		}
 	}
 }

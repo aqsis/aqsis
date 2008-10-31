@@ -94,7 +94,7 @@ class ParentHairs
 		 *                   thrown.
 		 * \param primVars - Set of primvars for parent curves.
 		 */
-		ParentHairs(bool linear, const Aqsis::TqRiIntArray& numVerts,
+		ParentHairs(bool linear, const IntArray& numVerts,
 				const boost::shared_ptr<PrimVars>& primVars,
 				const HairModifiers& modifiers);
 
@@ -122,7 +122,7 @@ class ParentHairs
 		static void perChildStorage(const PrimVars& primVars, int numParents,
 				std::vector<int>& storageCounts);
 
-		void initLookup(const Aqsis::TqRiFloatArray& P, int numParents);
+		void initLookup(const FloatArray& P, int numParents);
 
 		//--------------------------------------------------
 		/// flag for linear/cubic hairs

@@ -40,7 +40,7 @@ bool HairModifiers::parseParam(const std::string& name, std::istream& in)
 //------------------------------------------------------------------------------
 // ParentHairs implementation
 ParentHairs::ParentHairs(bool linear,
-		const Aqsis::TqRiIntArray& numVerts,
+		const IntArray& numVerts,
 		const boost::shared_ptr<PrimVars>& primVars,
 		const HairModifiers& modifiers)
 	: m_linear(linear),
@@ -77,7 +77,7 @@ ParentHairs::ParentHairs(bool linear,
 	// initialize the per-child storage counts
 	perChildStorage(*primVars, numVerts.size(), m_storageCounts);
 	// initialize the child --> parent hair lookup scheme.
-	const Aqsis::TqRiFloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
+	const FloatArray& P = m_primVars->find(Aqsis::CqPrimvarToken(
 				Aqsis::class_vertex, Aqsis::type_point, 1, "P"));
 	initLookup(P, numVerts.size());
 }
@@ -94,11 +94,11 @@ int ParentHairs::vertsPerCurve() const
 
 void ParentHairs::childInterp(PrimVars& childVars) const
 {
-	const Aqsis::TqRiFloatArray& P_emit = childVars.find("P_emit");
+	const FloatArray& P_emit = childVars.find("P_emit");
 
 	int numChildren = P_emit.size()/3;
 
-	typedef std::vector<Aqsis::TqRiFloatArray*> PrimVarValueVec;
+	typedef std::vector<FloatArray*> PrimVarValueVec;
 	// vector of value vectors for new child primvars, used during interpolation.
 	PrimVarValueVec newPrimvars;
 	// allocate child storage.
@@ -107,7 +107,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		const TokFloatValPair& parentVar = (*m_primVars)[i];
 		// child hairs have the same tokens as parents
 		childVars.append(parentVar.token);
-		Aqsis::TqRiFloatArray& childValues = *childVars.back().value;
+		FloatArray& childValues = *childVars.back().value;
 		if(parentVar.token.Class() == Aqsis::class_constant)
 		{
 			// for class constant, no interpolation is required, so we may
@@ -173,7 +173,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		}
 	}
 
-	Aqsis::TqRiFloatArray& P_child = childVars.find("P");
+	FloatArray& P_child = childVars.find("P");
 	// Apply corrections to interpolation scheme for variables of class
 	// "point".  This is necessary since the desired base point of the hair
 	// (stored in P_emit) isn't stationary under the interpolation scheme.
@@ -198,7 +198,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		// interpolated from parent hairs, and we need to apply the correction
 		// term to it.
 		int storageStride = m_storageCounts[storageIndex];
-		Aqsis::TqRiFloatArray& value = **destVar;
+		FloatArray& value = **destVar;
 		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
 		{
 			Vec3 deltaP = Vec3(&P_emit[3*curveNum])
@@ -216,7 +216,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 	if(m_modifiers.clump != 0)
 	{
 		// Apply clumping to P after correction factor.
-		const Aqsis::TqRiFloatArray& P_parent = m_primVars->find("P");
+		const FloatArray& P_parent = m_primVars->find("P");
 		std::vector<float> weights;
 		computeClumpWeights(weights);
 		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
@@ -238,7 +238,7 @@ void ParentHairs::childInterp(PrimVars& childVars) const
 		// Add random vectors to help with end rough.
 		childVars.append(Aqsis::CqPrimvarToken(Aqsis::class_uniform,
 					Aqsis::type_vector, 1, "endRoughRand"));
-		Aqsis::TqRiFloatArray& rand1 = *childVars.back().value;
+		FloatArray& rand1 = *childVars.back().value;
 		rand1.reserve(3*numChildren);
 		for(int curveNum = 0; curveNum < numChildren; ++curveNum)
 		{
@@ -372,7 +372,7 @@ void ParentHairs::perChildStorage(const PrimVars& primVars, int numParents,
  *            position represents the start vector for a curve.
  * \param numParents - total number of parent particles.
  */
-void ParentHairs::initLookup(const Aqsis::TqRiFloatArray& P, int numParents)
+void ParentHairs::initLookup(const FloatArray& P, int numParents)
 {
 	m_baseP.resize(boost::extents[numParents][3]);
 	for(int i = 0, end = P.size()/(3*m_vertsPerCurve); i < end; ++i)

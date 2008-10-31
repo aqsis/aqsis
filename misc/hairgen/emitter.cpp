@@ -9,7 +9,7 @@
 // EmitterMesh Implementation
 
 EmitterMesh::EmitterMesh(
-		const Aqsis::TqRiIntArray& nverts, const Aqsis::TqRiIntArray& verts,
+		const IntArray& nverts, const IntArray& verts,
 		boost::shared_ptr<PrimVars> primVars, int totParticles)
 	: m_faces(),
 	m_P(),
@@ -18,7 +18,7 @@ EmitterMesh::EmitterMesh(
 	m_lowDiscrep(2)
 {
 	// initialize vertex positions
-	const Aqsis::TqRiFloatArray* P = primVars->findPtr(
+	const FloatArray* P = primVars->findPtr(
 			Aqsis::CqPrimvarToken(Aqsis::class_vertex, Aqsis::type_point, 1, "P") );
 	if(!P)
 		throw std::runtime_error("\"vertex point[1] P\" must be present"
@@ -168,7 +168,7 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 	Vec3 Ng_emitVec = faceNormal(face);
 	float Ng_emit[] = {Ng_emitVec.x(), Ng_emitVec.y(), Ng_emitVec.z()};
 	interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_constant, Aqsis::type_normal,
-				1, "Ng_emit"), Aqsis::TqRiFloatArray(Ng_emit, Ng_emit+3));
+				1, "Ng_emit"), FloatArray(Ng_emit, Ng_emit+3));
 
 	return interpVars;
 }
@@ -204,8 +204,8 @@ Vec3 EmitterMesh::faceNormal(const MeshFace& face) const
  * \param verts - concatenated array of vertex indices into the primvar arrays.
  * \param faces - newly initialised faces go here.
  */
-void EmitterMesh::createFaceList(const Aqsis::TqRiIntArray& nverts,
-		const Aqsis::TqRiIntArray& verts,
+void EmitterMesh::createFaceList(const IntArray& nverts,
+		const IntArray& verts,
 		FaceVec& faces) const
 {
 	// Create face list

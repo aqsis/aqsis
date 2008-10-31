@@ -18,6 +18,7 @@
 #include <primvartoken.h>
 #include <ri.h>
 
+#include "util.h"
 
 //------------------------------------------------------------------------------
 /** A renderman token-value pair
@@ -43,7 +44,7 @@ struct TokValPair
 
 
 /// token value pairs with float arrays as the value.
-typedef TokValPair<Aqsis::TqRiFloatArray> TokFloatValPair;
+typedef TokValPair<FloatArray> TokFloatValPair;
 typedef std::vector<TokFloatValPair> FloatPrimVars;
 
 
@@ -63,19 +64,19 @@ class PrimVars
 		// Find primvars by name
 		//   Methods returning pointers return null if not found;
 		//   Methods returning references throw if not found.
-		const Aqsis::TqRiFloatArray* findPtr(const std::string& name) const;
-		const Aqsis::TqRiFloatArray& find(const std::string& name) const;
-		const Aqsis::TqRiFloatArray* findPtr(const Aqsis::CqPrimvarToken& tok) const;
-		const Aqsis::TqRiFloatArray& find(const Aqsis::CqPrimvarToken& tok) const;
+		const FloatArray* findPtr(const std::string& name) const;
+		const FloatArray& find(const std::string& name) const;
+		const FloatArray* findPtr(const Aqsis::CqPrimvarToken& tok) const;
+		const FloatArray& find(const Aqsis::CqPrimvarToken& tok) const;
 
-		Aqsis::TqRiFloatArray* findPtr(const std::string& name);
-		Aqsis::TqRiFloatArray& find(const std::string& name);
-		Aqsis::TqRiFloatArray* findPtr(const Aqsis::CqPrimvarToken& tok);
-		Aqsis::TqRiFloatArray& find(const Aqsis::CqPrimvarToken& tok);
+		FloatArray* findPtr(const std::string& name);
+		FloatArray& find(const std::string& name);
+		FloatArray* findPtr(const Aqsis::CqPrimvarToken& tok);
+		FloatArray& find(const Aqsis::CqPrimvarToken& tok);
 
 		/// Convenience function appending the given (token,value) pair to the array.
 		void append(const Aqsis::CqPrimvarToken& token,
-				const Aqsis::TqRiFloatArray& value = Aqsis::TqRiFloatArray());
+				const FloatArray& value = FloatArray());
 
 		// Iterator access
 		const_iterator begin() const;
@@ -95,9 +96,9 @@ class PrimVars
 		FloatPrimVars m_vars;
 
 		template<typename T>
-		const Aqsis::TqRiFloatArray* findPtrImpl(const T& id) const;
+		const FloatArray* findPtrImpl(const T& id) const;
 		template<typename T>
-		const Aqsis::TqRiFloatArray& findImpl(const T& id) const;
+		const FloatArray& findImpl(const T& id) const;
 };
 
 
@@ -177,46 +178,46 @@ inline bool operator==(const TokValPair<T>& pair, const Aqsis::CqPrimvarToken& t
 // PrimVars implementation
 
 inline void PrimVars::append(const Aqsis::CqPrimvarToken& token,
-		const Aqsis::TqRiFloatArray& value)
+		const FloatArray& value)
 {
 	m_vars.push_back(TokFloatValPair(token, value));
 }
 
-inline const Aqsis::TqRiFloatArray* PrimVars::findPtr(const std::string& name) const
+inline const FloatArray* PrimVars::findPtr(const std::string& name) const
 {
 	return findPtrImpl(name);
 }
-inline const Aqsis::TqRiFloatArray& PrimVars::find(const std::string& name) const
+inline const FloatArray& PrimVars::find(const std::string& name) const
 {
 	return findImpl(name);
 }
 
-inline const Aqsis::TqRiFloatArray* PrimVars::findPtr(
+inline const FloatArray* PrimVars::findPtr(
 		const Aqsis::CqPrimvarToken& tok) const
 {
 	return findPtrImpl(tok);
 }
-inline const Aqsis::TqRiFloatArray& PrimVars::find(
+inline const FloatArray& PrimVars::find(
 		const Aqsis::CqPrimvarToken& tok) const
 {
 	return findImpl(tok);
 }
 
-inline Aqsis::TqRiFloatArray* PrimVars::findPtr(const std::string& name)
+inline FloatArray* PrimVars::findPtr(const std::string& name)
 {
-	return const_cast<Aqsis::TqRiFloatArray*>(findPtrImpl(name));
+	return const_cast<FloatArray*>(findPtrImpl(name));
 }
-inline Aqsis::TqRiFloatArray& PrimVars::find(const std::string& name)
+inline FloatArray& PrimVars::find(const std::string& name)
 {
-	return const_cast<Aqsis::TqRiFloatArray&>(findImpl(name));
+	return const_cast<FloatArray&>(findImpl(name));
 }
-inline Aqsis::TqRiFloatArray* PrimVars::findPtr(const Aqsis::CqPrimvarToken& tok)
+inline FloatArray* PrimVars::findPtr(const Aqsis::CqPrimvarToken& tok)
 {
-	return const_cast<Aqsis::TqRiFloatArray*>(findPtrImpl(tok));
+	return const_cast<FloatArray*>(findPtrImpl(tok));
 }
-inline Aqsis::TqRiFloatArray& PrimVars::find(const Aqsis::CqPrimvarToken& tok)
+inline FloatArray& PrimVars::find(const Aqsis::CqPrimvarToken& tok)
 {
-	return const_cast<Aqsis::TqRiFloatArray&>(findImpl(tok));
+	return const_cast<FloatArray&>(findImpl(tok));
 }
 
 inline PrimVars::const_iterator PrimVars::begin() const
@@ -255,7 +256,7 @@ inline int PrimVars::size() const
 
 /// Search for a primvar, returning a pointer or null if not found.
 template<typename T>
-inline const Aqsis::TqRiFloatArray* PrimVars::findPtrImpl(const T& id) const
+inline const FloatArray* PrimVars::findPtrImpl(const T& id) const
 {
 	// dumb linear search...  The primvars array is expected to be pretty short
 	// in pretty much all cases so this should be ok.
@@ -268,9 +269,9 @@ inline const Aqsis::TqRiFloatArray* PrimVars::findPtrImpl(const T& id) const
 
 /// Search for a primvar, returning a reference or throwing if not found.
 template<typename T>
-inline const Aqsis::TqRiFloatArray& PrimVars::findImpl(const T& id) const
+inline const FloatArray& PrimVars::findImpl(const T& id) const
 {
-	const Aqsis::TqRiFloatArray* var = findPtr(id);
+	const FloatArray* var = findPtr(id);
 	if(!var)
 		throw std::runtime_error("Primvar not found");
 	return *var;

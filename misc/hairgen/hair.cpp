@@ -40,7 +40,7 @@ void transformPrimVars(PrimVars& primVars, const Aqsis::CqMatrix& pointTrans)
 	for(PrimVars::const_iterator var = primVars.begin(),
 			end = primVars.end(); var != end; ++var)
 	{
-		Aqsis::TqRiFloatArray& value = *var->value;
+		FloatArray& value = *var->value;
 		switch(var->token.type())
 		{
 			case Aqsis::type_point:
@@ -189,15 +189,15 @@ class HairProcedural
 		void linearHairsFromPoints(PrimVars& curveVars) const
 		{
 			// construct points
-			const Aqsis::TqRiFloatArray& P_emit = curveVars.find("P_emit");
-			const Aqsis::TqRiFloatArray& Ng_emit = curveVars.find("Ng_emit");
-			const Aqsis::TqRiFloatArray* Nh_emit = curveVars.findPtr("Nh_emit");
+			const FloatArray& P_emit = curveVars.find("P_emit");
+			const FloatArray& Ng_emit = curveVars.find("Ng_emit");
+			const FloatArray* Nh_emit = curveVars.findPtr("Nh_emit");
 			int numP = P_emit.size()*2;
 
 			// Add "P" to primvar list
 			curveVars.append(Aqsis::CqPrimvarToken(Aqsis::class_vertex,
 						Aqsis::type_point, 1, "P"));
-			Aqsis::TqRiFloatArray& P = *curveVars.back().value;
+			FloatArray& P = *curveVars.back().value;
 			P.resize(numP, 0);
 			for(int i = 0, PmeshSize = P_emit.size(); i+2 < PmeshSize; i += 3)
 			{
@@ -207,7 +207,7 @@ class HairProcedural
 				Vec3 jitterN = 0.1*(Vec3(uRand(), uRand(), uRand()) - 0.5);
 				if(Nh_emit)
 				{
-					const Aqsis::TqRiFloatArray& Nh = *Nh_emit;
+					const FloatArray& Nh = *Nh_emit;
 					float lengthMult = m_params.hairLength / std::sqrt(Nh[i]*Nh[i]
 							+ Nh[i+1]*Nh[i+1] + Nh[i+2]*Nh[i+2]);
 					P[2*i+3] = P_emit[i] + lengthMult*Nh[i] + jitterN.x();
@@ -237,10 +237,8 @@ class HairProcedural
 			std::ifstream emitterStream(m_params.emitterFileName.c_str());
 			if(emitterStream)
 			{
-				Aqsis::CqRequestMap requests;
-				requests.add("PointsPolygons",
-						new PointsPolygonsRequest(m_emitter, m_params.numHairs));
-				parseStream(emitterStream, requests);
+				PointsPolygonsRequestHandler requestHandler(m_emitter, m_params.numHairs);
+				parseStream(emitterStream, requestHandler);
 			}
 			if(!m_emitter)
 				throw std::runtime_error("Could not find PointsPolygons emitter mesh in file");
@@ -248,10 +246,8 @@ class HairProcedural
 			std::ifstream curveStream(m_params.hairFileName.c_str());
 			if(curveStream)
 			{
-				Aqsis::CqRequestMap requests;
-				requests.add("Curves", new CurvesRequest(m_parentHairs,
-							m_params.hairModifiers));
-				parseStream(curveStream, requests);
+				CurvesRequestHandler requestHandler(m_parentHairs, m_params.hairModifiers);
+				parseStream(curveStream, requestHandler);
 			}
 			if(!m_parentHairs)
 				throw std::runtime_error("Could not find parent Curves in file");
@@ -291,13 +287,13 @@ class HairProcedural
 //				// Add "constantwidth" to primvar list
 //				faceVars->append(Aqsis::CqPrimvarToken(Aqsis::class_constant,
 //							Aqsis::type_float, 1, "constantwidth"),
-//						Aqsis::TqRiFloatArray(1, m_hairWidth) );
+//						FloatArray(1, m_hairWidth) );
 
 				// Convert all inherited mesh primvars into a rendeman parameter list.
 				ParamList pList(*faceVars);
 
 				int numCurves = faceVars->find("P_emit").size()/3;
-				Aqsis::TqRiIntArray nVerts(numCurves, m_parentHairs->vertsPerCurve());
+				IntArray nVerts(numCurves, m_parentHairs->vertsPerCurve());
 
 				RtToken linearStr = const_cast<RtToken>(
 						m_parentHairs->linear() ? "linear" : "cubic");
