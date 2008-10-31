@@ -86,6 +86,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		/// RIB string array type
 		typedef std::vector<std::string> TqStringArray;
 
+		//--------------------------------------------------
 		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
 		 * \param lexer - lexical analyzer for a RIB input stream.
@@ -97,6 +98,9 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		 */
 		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 				const boost::shared_ptr<IqRibRequestHandler>& requestHandler);
+
+		/// Access to the underlying lexer object.
+		const boost::shared_ptr<CqRibLexer>& lexer();
 
 		/** \brief Parse the next RIB request
 		 *

@@ -19,16 +19,32 @@
 
 /** \file
  *
- * \brief List of predeclared standard RIB primitive variables
+ * \brief List of predeclared standard primitive variables
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
-#include "standardvars.h"
+#include "tokendictionary.h"
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
+// CqTokenDictionary implementation
+CqTokenDictionary::CqTokenDictionary(bool useDefaultVars)
+	: m_dict()
+{
+	if(useDefaultVars)
+	{
+		const std::vector<CqPrimvarToken>& vars = standardPrimvars();
+		for(int i = 0, end = vars.size(); i < end; ++i)
+			m_dict.insert(TqPrimvarMap::value_type(vars[i].name(), vars[i]));
+	}
+}
+
+
+//------------------------------------------------------------------------------
 namespace {
 
+// Array of standard variables
 const CqPrimvarToken standardVarsInit[] = {
 	//--------------------------------------------------
 	// Standard shader instance variables
@@ -133,7 +149,7 @@ const std::vector<CqPrimvarToken> standardVars(standardVarsInit,
 
 } // unnamed namespace
 
-const std::vector<CqPrimvarToken>& standardRibVariables()
+const std::vector<CqPrimvarToken>& standardPrimvars()
 {
 	return standardVars;
 }

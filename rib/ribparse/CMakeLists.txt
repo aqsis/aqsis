@@ -7,13 +7,11 @@ SET(RIBPARSE_HDRS
 	ribparse_share.h
 	ribparser.h
 	ribtoken.h
-	standardvars.h
 )
 SET(RIBPARSE_SRCS
 	ribinputbuffer.cpp
 	riblexer.cpp
 	ribparser.cpp
-	standardvars.cpp
 )
 SET(RIBPARSE_TEST_SRCS
 	ribinputbuffer_test.cpp

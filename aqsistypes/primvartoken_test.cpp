@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 		CqPrimvarToken tok("VERTEX veCtor P");
 		BOOST_CHECK_EQUAL(tok.Class(), class_vertex);
 		BOOST_CHECK_EQUAL(tok.type(), type_vector);
-		BOOST_CHECK_EQUAL(tok.arraySize(), 1);
+		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "P");
 	}
 }
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 		CqPrimvarToken tok("matrix some_mat");
 		BOOST_CHECK_EQUAL(tok.Class(), class_uniform);
 		BOOST_CHECK_EQUAL(tok.type(), type_matrix);
-		BOOST_CHECK_EQUAL(tok.arraySize(), 1);
+		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "some_mat");
 	}
 
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 		CqPrimvarToken tok("matrix", "some_mat");
 		BOOST_CHECK_EQUAL(tok.Class(), class_uniform);
 		BOOST_CHECK_EQUAL(tok.type(), type_matrix);
-		BOOST_CHECK_EQUAL(tok.arraySize(), 1);
+		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "some_mat");
 	}
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 		CqPrimvarToken tok(static_cast<const char*>(0), "some_mat");
 		BOOST_CHECK_EQUAL(tok.Class(), class_uniform);
 		BOOST_CHECK_EQUAL(tok.type(), type_invalid);
-		BOOST_CHECK_EQUAL(tok.arraySize(), 1);
+		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "some_mat");
 	}
 }

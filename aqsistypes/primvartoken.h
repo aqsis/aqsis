@@ -100,8 +100,8 @@ class COMMON_SHARE CqPrimvarToken
 		TqInt arraySize() const;
 		//@}
 
-		/** \brief Number of float/int/string elements needed by values of the
-		 * token type.
+		/** \brief Number of float/int/string elements needed to represent a
+		 * single value of the token type.
 		 *
 		 * \return The number of float/int/strings needed to store a single
 		 * element of a primitive variable of this type and array length.  For
@@ -109,20 +109,33 @@ class COMMON_SHARE CqPrimvarToken
 		 */
 		TqInt storageCount() const;
 
-		/** \brief comparison operator for sorted containers.
+		/** \brief Return the type of array required to store a variable of this type.
 		 *
-		 * Having operator< implemented allows us to construct sorted
-		 * containers of CqPrimvarToken's
+		 * The result is one of type_float, type_integer, type_string, or
+		 * type_invalid.  For the first three, values of the token type can be
+		 * stored in an array of the corresponding type: TqFloat, TqInt or
+		 * std::string.
 		 */
-//		bool operator<(const CqPrimvarToken rhs) const;
-		bool operator==(const CqPrimvarToken rhs) const;
+		EqVariableType storageType() const;
+
+		/** \brief Determine whether the token is correctly typed.
+		 *
+		 * A token is incorrectly typed when the class and type are not fully
+		 * specified.  For example, tokens which come from a string which only
+		 * specifies the name leave the type unspecified.
+		 */
+		bool hasType() const;
+
+		/** \brief Compare two tokens for equality
+		 *
+		 * Tokens are equal if their name, size and array counts are equal.
+		 */
+		bool operator==(const CqPrimvarToken& rhs) const;
 	private:
 		EqVariableClass m_class;
 		EqVariableType m_type;
 		TqInt m_arraySize;
 		std::string m_name;
-		/// name hash for fast lookups
-//		TqUlong m_nameHash;
 
 		/** Parse a primitive variable token
 		 *
@@ -141,7 +154,7 @@ class COMMON_SHARE CqPrimvarToken
 inline CqPrimvarToken::CqPrimvarToken()
 	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(1),
+	m_arraySize(0),
 	m_name()
 { }
 
@@ -152,7 +165,7 @@ inline CqPrimvarToken::CqPrimvarToken(EqVariableClass Class, EqVariableType type
 	m_arraySize(arraySize),
 	m_name(name)
 {
-	assert(m_arraySize > 0);
+	assert(m_arraySize >= 0);
 }
 
 inline const std::string& CqPrimvarToken::name() const
@@ -206,10 +219,45 @@ inline TqInt CqPrimvarToken::storageCount() const
 			assert(0 && "storage length unknown for type");
 			break;
 	}
-	return count*m_arraySize;
+	return m_arraySize <= 0 ? count : count*m_arraySize;
 }
 
-inline bool CqPrimvarToken::operator==(const CqPrimvarToken rhs) const
+inline EqVariableType CqPrimvarToken::storageType() const
+{
+	switch(m_type)
+	{
+		// Parameters representable as float arrays
+		case type_float:
+		case type_point:
+		case type_vector:
+		case type_normal:
+		case type_hpoint:
+		case type_matrix:
+		case type_color:
+			return type_float;
+		// Parameters representable as integer arrays
+		case type_bool:
+		case type_integer:
+			return type_integer;
+		// Parameters representable as string arrays
+		case type_string:
+			return type_string;
+		// Invalid parameters.
+		case type_invalid:
+		case type_void:
+		case type_triple:
+		case type_sixteentuple:
+		default:
+			return type_invalid;
+	}
+}
+
+inline bool CqPrimvarToken::hasType() const
+{
+	return m_type != type_invalid && m_class != class_invalid;
+}
+
+inline bool CqPrimvarToken::operator==(const CqPrimvarToken& rhs) const
 {
 	return m_type == rhs.m_type && m_class == rhs.m_class
 		&& m_arraySize == rhs.m_arraySize && m_name == rhs.m_name;

@@ -41,6 +41,11 @@ CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 	m_stringArrayPool()
 { }
 
+const boost::shared_ptr<CqRibLexer>& CqRibParser::lexer()
+{
+	return m_lex;
+}
+
 bool CqRibParser::parseNextRequest()
 {
 	// skip up until the next request.  This guards against the case that a
