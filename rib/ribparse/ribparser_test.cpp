@@ -31,6 +31,7 @@
 
 #include "ribparser.h"
 #include "smartptr.h"
+#include "primvartoken.h"
 
 using namespace Aqsis;
 
@@ -183,7 +184,27 @@ struct DummyParamListHandler : IqRibParamListHandler
 {
 	std::vector<std::pair<std::string, boost::any> > tokValPairs;
 	virtual void readParameter(const std::string& name, CqRibParser& parser)
-	{ }
+	{
+		CqPrimvarToken token(name.c_str());
+		switch(token.storageType())
+		{
+			case type_integer:
+				tokValPairs.push_back(std::pair<std::string, boost::any>(name,
+							parser.getIntParam()));
+				break;
+			case type_float:
+				tokValPairs.push_back(std::pair<std::string, boost::any>(name,
+							parser.getFloatParam()));
+				break;
+			case type_string:
+				tokValPairs.push_back(std::pair<std::string, boost::any>(name,
+							parser.getStringParam()));
+				break;
+			default:
+				assert(0 && "type not recognized.");
+				break;
+		}
+	}
 };
 
 BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
@@ -196,24 +217,22 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
 	f.parser.getParamList(pList);
 	BOOST_REQUIRE_EQUAL(pList.tokValPairs.size(), 3U);
 
-	// TODO: Fix up this test case!!!
-
 	// Check first parameter
-//	BOOST_CHECK_EQUAL(pList.tokValPairs[0].first.name(), "P");
-//	const CqRibParser::TqFloatArray& P = boost::any_cast<const CqRibParser::TqFloatArray&>(pList.tokValPairs[0].second);
-//	BOOST_REQUIRE_EQUAL(P.size(), 3U);
-//	BOOST_CHECK_CLOSE(P[0], 1.0f, 0.00001);
-//	BOOST_CHECK_CLOSE(P[1], 2.0f, 0.00001);
-//	BOOST_CHECK_CLOSE(P[2], 3.0f, 0.00001);
-//	// Check second parameter
-//	BOOST_CHECK_EQUAL(pList.tokValPairs[1].first.name(), "a");
-//	const CqRibParser::TqIntArray& a = boost::any_cast<const CqRibParser::TqIntArray&>(pList.tokValPairs[1].second);
-//	BOOST_REQUIRE_EQUAL(a.size(), 1U);
-//	BOOST_CHECK_EQUAL(a[0], 42);
-//	// Check third parameter
-//	BOOST_CHECK_EQUAL(pList.tokValPairs[2].first.name(), "texname");
-//	const CqRibParser::TqStringArray& texname = boost::any_cast<const CqRibParser::TqStringArray&>(pList.tokValPairs[2].second);
-//	BOOST_CHECK_EQUAL(texname[0], "somefile.map");
+	BOOST_CHECK_EQUAL(pList.tokValPairs[0].first, "uniform vector P");
+	const CqRibParser::TqFloatArray& P = boost::any_cast<const CqRibParser::TqFloatArray&>(pList.tokValPairs[0].second);
+	BOOST_REQUIRE_EQUAL(P.size(), 3U);
+	BOOST_CHECK_CLOSE(P[0], 1.0f, 0.00001);
+	BOOST_CHECK_CLOSE(P[1], 2.0f, 0.00001);
+	BOOST_CHECK_CLOSE(P[2], 3.0f, 0.00001);
+	// Check second parameter
+	BOOST_CHECK_EQUAL(pList.tokValPairs[1].first, "constant integer a");
+	const CqRibParser::TqIntArray& a = boost::any_cast<const CqRibParser::TqIntArray&>(pList.tokValPairs[1].second);
+	BOOST_REQUIRE_EQUAL(a.size(), 1U);
+	BOOST_CHECK_EQUAL(a[0], 42);
+	// Check third parameter
+	BOOST_CHECK_EQUAL(pList.tokValPairs[2].first, "constant string texname");
+	const CqRibParser::TqStringArray& texname = boost::any_cast<const CqRibParser::TqStringArray&>(pList.tokValPairs[2].second);
+	BOOST_CHECK_EQUAL(texname[0], "somefile.map");
 }
 
 //------------------------------------------------------------------------------

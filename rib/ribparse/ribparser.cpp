@@ -265,7 +265,12 @@ const void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 						"parameter name string expected in param list, got "
 						<< m_lex->peek());
 		}
-		paramHandler.readParameter(m_lex->get().stringVal(), *this);
+		// Note: we NEED to copy paramName into a temporary variable here.
+		// The current token is returned by reference from the lexer, and will
+		// be overwritten due to the user calling any of the parser getter
+		// functions inside readParameter().
+		std::string paramName = m_lex->get().stringVal();
+		paramHandler.readParameter(paramName, *this);
 	}
 }
 
