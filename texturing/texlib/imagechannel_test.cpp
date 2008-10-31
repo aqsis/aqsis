@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(CqImageChannel_test_copyFrom_floatOut)
 
 	TqFloat expectedData[] = {0.5f, 1.0f};
 	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
-		BOOST_CHECK_CLOSE(destData[i], expectedData[i], 100.0f/uint16Max);
+		BOOST_CHECK_CLOSE(destData[i], expectedData[i], 1.1*100.0f/uint16Max);
 }
 
 BOOST_AUTO_TEST_CASE(CqImageChannel_test_copyFromSameType)
