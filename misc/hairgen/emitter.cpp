@@ -61,7 +61,7 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 			// uniform and constant primvars on the mesh interpolate to
 			// constant primvars on the curves
 			interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_constant,
-				i->token.type(), i->token.arraySize(), i->token.name() + "_emit"));
+				i->token.type(), i->token.count(), i->token.name() + "_emit"));
 			// We can just copy over constant/uniform data; no interpolation needed.
 			if(i->token.Class() == Aqsis::class_constant)
 				*interpVars->back().value = *i->value;
@@ -78,7 +78,7 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 			// varying, vertex, facevarying and facevertex primvars interpolate
 			// to uniform primvars on the curves
 			interpVars->append(Aqsis::CqPrimvarToken(Aqsis::class_uniform,
-				i->token.type(), i->token.arraySize(), i->token.name() + "_emit"));
+				i->token.type(), i->token.count(), i->token.name() + "_emit"));
 			// Allocate storage
 			interpVars->back().value->assign(numParticles*storageCounts.back(), 0);
 		}

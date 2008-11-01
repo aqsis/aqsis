@@ -54,25 +54,25 @@ class COMMON_SHARE CqPrimvarToken
 	public:
 
 		/** \brief Default constructor.
-		 * Equivilant to CqPrimvarToken(class_invalid, type_invalid, 1, "")
+		 * Equivalent to CqPrimvarToken(class_invalid, type_invalid, 0, "")
 		 */
 		CqPrimvarToken();
 		/// Trivial constructor.
 		CqPrimvarToken(EqVariableClass Class, EqVariableType type,
-				TqInt arraySize, const std::string& name);
+				TqInt count, const std::string& name);
 		/** \brief Parse type and name information from an RtToken string.
 		 *
 		 * In the renderman interface, strings come bundled together in an
 		 * "RtToken" of format
 		 *
-		 *   [  [ class ]  type  [ '[' array_size ']' ]  ]   name
+		 *   [  [ class ]  type  [ '[' count ']' ]  ]   name
 		 *
 		 * where the square brackets indicate optional components.  This
 		 * constructor parses tokens of that form.  For parts of the token
 		 * which aren't present, defaults are:
 		 *   * class = class_uniform  (or class_invaild if type == type_invalid)
 		 *   * type = type_invalid
-		 *   * array_size = 0
+		 *   * count = 1  (array size)
 		 *
 		 * \throw XqParseError whenever the token fails to have the format
 		 * shown above.
@@ -101,8 +101,8 @@ class COMMON_SHARE CqPrimvarToken
 		EqVariableClass Class() const;
 		/// get the primvar type
 		EqVariableType type() const;
-		/// get the primvar array size.
-		TqInt arraySize() const;
+		/// get the primvar array size.  Non-arrays have a count of 1.
+		TqInt count() const;
 		//@}
 
 		//--------------------------------------------------
@@ -153,7 +153,7 @@ class COMMON_SHARE CqPrimvarToken
 	private:
 		EqVariableClass m_class;
 		EqVariableType m_type;
-		TqInt m_arraySize;
+		TqInt m_count;
 		std::string m_name;
 
 		void parse(const char* token);
@@ -167,18 +167,18 @@ class COMMON_SHARE CqPrimvarToken
 inline CqPrimvarToken::CqPrimvarToken()
 	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(0),
+	m_count(1),
 	m_name()
 { }
 
 inline CqPrimvarToken::CqPrimvarToken(EqVariableClass Class, EqVariableType type,
-		TqInt arraySize, const std::string& name)
+		TqInt count, const std::string& name)
 	: m_class(Class),
 	m_type(type),
-	m_arraySize(arraySize),
+	m_count(count),
 	m_name(name)
 {
-	assert(m_arraySize >= 0);
+	assert(m_count >= 0);
 }
 
 inline const std::string& CqPrimvarToken::name() const
@@ -196,37 +196,37 @@ inline EqVariableType CqPrimvarToken::type() const
 	return m_type;
 }
 
-inline TqInt CqPrimvarToken::arraySize() const
+inline TqInt CqPrimvarToken::count() const
 {
-	return m_arraySize;
+	return m_count;
 }
 
 inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponents) const
 {
-	TqInt count = 0;
+	TqInt typeCount = 0;
 	switch(m_type)
 	{
 		case type_float:
 		case type_integer:
 		case type_bool:
 		case type_string:
-			count = 1;
+			typeCount = 1;
 			break;
 		case type_triple:
 		case type_point:
 		case type_normal:
 		case type_vector:
-			count = 3;
+			typeCount = 3;
 			break;
 		case type_color:
-			count = numColorComponents;
+			typeCount = numColorComponents;
 			break;
 		case type_hpoint:
-			count = 4;
+			typeCount = 4;
 			break;
 		case type_matrix:
 		case type_sixteentuple:
-			count = 16;
+			typeCount = 16;
 			break;
 		case type_void:
 			break;
@@ -234,7 +234,7 @@ inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponents) const
 			assert(0 && "storage length unknown for type");
 			break;
 	}
-	return m_arraySize <= 0 ? count : count*m_arraySize;
+	return typeCount*m_count;
 }
 
 inline TqInt CqPrimvarToken::storageCount(const SqInterpClassCounts& classCounts,
@@ -293,7 +293,7 @@ inline bool CqPrimvarToken::hasType() const
 inline bool CqPrimvarToken::operator==(const CqPrimvarToken& rhs) const
 {
 	return m_type == rhs.m_type && m_class == rhs.m_class
-		&& m_arraySize == rhs.m_arraySize && m_name == rhs.m_name;
+		&& m_count == rhs.m_count && m_name == rhs.m_name;
 }
 
 } // namespace Aqsis

@@ -106,7 +106,7 @@ EnumT lowercaseEnumCast(std::string tok)
 
 /** Parse a primitive variable token
  *
- * m_class, m_type, m_arraySize and m_name will be extracted if present
+ * m_class, m_type, m_count and m_name will be extracted if present
  * and in the correct order.  m_class and m_type will be set to invalid
  * if not present.
  */
@@ -149,9 +149,9 @@ void CqPrimvarToken::parse(const char* tokenStr)
 			PARSE_ERROR(tokenStr, "expected array size after '['");
 		// Convert to integer.
 		std::istringstream in(tok);
-		in >> m_arraySize;
+		in >> m_count;
 		// check array size is positive and nothing is left over in the token.
-		if(m_arraySize <= 0 || in.get() != EOF)
+		if(m_count <= 0 || in.get() != EOF)
 			PARSE_ERROR(tokenStr, "array size must be a positive integer");
 		// Consume a "]" token
 		if(tokenizer.get() != "]")
@@ -176,7 +176,7 @@ void CqPrimvarToken::parse(const char* tokenStr)
 CqPrimvarToken::CqPrimvarToken(const char* token)
 	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(-1),
+	m_count(-1),
 	m_name()
 {
 	assert(token != 0);
@@ -185,7 +185,7 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 		PARSE_ERROR(token, "expected token name");
 	if(m_type == type_invalid)
 	{
-		if(m_class != class_invalid || m_arraySize != -1)
+		if(m_class != class_invalid || m_count != -1)
 		{
 			// If the type isn't found, neither should be the class or array size,
 			PARSE_ERROR(token, "is incomplete - expected a type");
@@ -196,14 +196,14 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 		if(m_class == class_invalid)
 			m_class = class_uniform;
 	}
-	if(m_arraySize == -1)
-		m_arraySize = 0;
+	if(m_count == -1)
+		m_count = 1;
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
 	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(0),
+	m_count(1),
 	m_name()
 {
 	assert(typeToken != 0);

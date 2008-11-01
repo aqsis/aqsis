@@ -131,7 +131,7 @@ class ParamList
 				std::ostringstream out;
 				out << i->token.Class() << " "
 					<< i->token.type() << " "
-					<< "[" << i->token.arraySize() << "] "
+					<< "[" << i->token.count() << "] "
 					<< i->token.name();
 				m_tokenStorage.push_back(out.str());
 				m_tokens.push_back(const_cast<RtToken>(m_tokenStorage.back().c_str()));
