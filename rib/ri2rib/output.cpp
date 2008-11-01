@@ -240,34 +240,6 @@ bool CqOutput::nestingContains(EqBlocks type) const
 }
 
 
-/** Return size of the primvar array associated with the given token, and
- * having a length corresponding to one of the given interpolation class
- * lengths.
- */
-static TqInt allocSize(const CqPrimvarToken& tok, TqInt numColorComponents,
-		TqInt vertex, TqInt varying, TqInt uniform, TqInt facevarying, TqInt facevertex)
-{
-	TqInt storage = tok.storageCount(numColorComponents);
-	switch(tok.Class())
-	{
-		case class_vertex:
-			return storage*vertex;
-		case class_varying:
-			return storage*varying;
-		case class_uniform:
-			return storage*uniform;
-		case class_constant:
-			return storage;
-		case class_facevarying:
-			return storage*facevarying;
-		case class_facevertex:
-			return storage*facevertex;
-		default:
-			assert(0 && "Invalid token class");
-			return 0;
-	}
-}
-
 // **************************************************************
 // ******* ******* ******* PRINTING TOOLS ******* ******* *******
 // **************************************************************
@@ -275,10 +247,6 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
                         RtInt vertex, RtInt varying, RtInt uniform,
 						RtInt facevarying, RtInt facevertex)
 {
-	RtFloat * flt;
-	RtInt *nt;
-	char **cp;
-
 	for (TqInt i = 0; i < n ; i++ )
 	{
 		CqPrimvarToken tok;
@@ -296,39 +264,28 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 		printToken( tokens[ i ] );
 		S;
 
-		TqInt storageCount = allocSize(tok, m_ColorNComps, vertex, varying, uniform,
-				facevarying, facevertex);
-		switch ( tok.type() )
+		TqInt storageCount = tok.storageCount(SqInterpClassCounts(uniform, varying,
+					vertex, facevarying, facevertex), m_ColorNComps);
+		switch ( tok.storageType() )
 		{
 			case type_float:
-			case type_point:
-			case type_vector:
-			case type_normal:
-			case type_matrix:
-			case type_hpoint:
-				flt = static_cast<RtFloat *> ( parms[ i ] );
-				printArray( storageCount, flt );
-				break;
-			case type_color:
-				flt = static_cast<RtFloat *> ( parms[ i ] );
-				// Kludge.  We divide by three here since CqPrimvarToken
-				// assumes 3 channels per color.
-				printArray( storageCount, flt );
+				printArray( storageCount, static_cast<RtFloat*>(parms[i]) );
 				break;
 			case type_string:
-				cp = static_cast<char **> ( parms[ i ] );
-				print( "[" );
-				S;
-				for (TqInt j = 0; j < storageCount; j++ )
 				{
-					printCharP( cp[ j ] );
+					char** cp = static_cast<char **> ( parms[ i ] );
+					print( "[" );
 					S;
+					for (TqInt j = 0; j < storageCount; j++ )
+					{
+						printCharP( cp[ j ] );
+						S;
+					}
+					print( "]" );
 				}
-				print( "]" );
 				break;
 			case type_integer:
-				nt = static_cast<RtInt *> ( parms[ i ] );
-				printArray( storageCount, nt );
+				printArray( storageCount, static_cast<RtInt*>(parms[i]) );
 				break;
 			default:
 				{

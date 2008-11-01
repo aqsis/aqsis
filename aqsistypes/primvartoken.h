@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "interpclasscounts.h"
 #include "primvartype.h"
 
 namespace Aqsis {
@@ -105,7 +106,7 @@ class COMMON_SHARE CqPrimvarToken
 		/** \brief Number of float/int/string elements needed to represent a
 		 * single value of the token type.
 		 *
-		 * \param numColorComponenets - The number of color components.  This
+		 * \param numColorComponents - The number of color components.  This
 		 * is three by default, but may be more or less in principle since the
 		 * renderman interface has facility to deal with spectral color.
 		 *
@@ -113,7 +114,15 @@ class COMMON_SHARE CqPrimvarToken
 		 * element of a primitive variable of this type and array length.  For
 		 * example, a "vector[2]" would need 3*2 floats per element.
 		 */
-		TqInt storageCount(TqInt numColorComponenets = 3) const;
+		TqInt storageCount(TqInt numColorComponents = 3) const;
+		/** \brief Number of float/int/string elements needed to represent a
+		 * primvar of the token type.
+		 *
+		 * \param classCounts - counts for the various interpolation classes
+		 * \param numColorComponents - The number of color components.
+		 */
+		TqInt storageCount(const SqInterpClassCounts& classCounts,
+				TqInt numColorComponents = 3) const;
 
 		/** \brief Return the type of array required to store a variable of this type.
 		 *
@@ -188,7 +197,7 @@ inline TqInt CqPrimvarToken::arraySize() const
 	return m_arraySize;
 }
 
-inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponenets) const
+inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponents) const
 {
 	TqInt count = 0;
 	switch(m_type)
@@ -206,7 +215,7 @@ inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponenets) const
 			count = 3;
 			break;
 		case type_color:
-			count = numColorComponenets;
+			count = numColorComponents;
 			break;
 		case type_hpoint:
 			count = 4;
@@ -222,6 +231,24 @@ inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponenets) const
 			break;
 	}
 	return m_arraySize <= 0 ? count : count*m_arraySize;
+}
+
+inline TqInt CqPrimvarToken::storageCount(const SqInterpClassCounts& classCounts,
+		TqInt numColorComponents) const
+{
+	TqInt singleVarCount = storageCount(numColorComponents);
+	switch(m_class)
+	{
+		case class_constant:    return singleVarCount;
+		case class_uniform:     return singleVarCount*classCounts.uniform;
+		case class_varying:     return singleVarCount*classCounts.varying;
+		case class_vertex:      return singleVarCount*classCounts.vertex;
+		case class_facevarying: return singleVarCount*classCounts.facevarying;
+		case class_facevertex:  return singleVarCount*classCounts.facevertex;
+		default:
+			assert(0 && "Can't get storage count for class_invalid");
+			return 0;
+	}
 }
 
 inline EqVariableType CqPrimvarToken::storageType() const
