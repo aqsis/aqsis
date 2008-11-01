@@ -509,7 +509,13 @@ complete_request
 			}
 	|	colorsamples scalar_array scalar_array
 			{
-				ParseCallbackInterface->RiColorSamples($2->Count(), &(*$2)[0], &(*$3)[0]);
+				int nRgbCount = $2->Count();
+				if(nRgbCount % 3 != 0)
+					yyerror("ColorSamples: nRGB must be a multiple of 3 components");
+				else if(nRgbCount != $3->Count())
+					yyerror("ColorSamples: nRGB and RGBn must be the same length");
+				else
+					ParseCallbackInterface->RiColorSamples(nRgbCount/3, &(*$2)[0], &(*$3)[0]);
 				DiscardArrayValue($2);
 				DiscardArrayValue($3);
 			}
