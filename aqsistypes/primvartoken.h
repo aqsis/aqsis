@@ -63,30 +63,32 @@ class COMMON_SHARE CqPrimvarToken
 		 * In the renderman interface, strings come bundled together in an
 		 * "RtToken" of format
 		 *
-		 *   [class]  [type]  [ '['array_size']' ]  name
+		 *   [  [ class ]  type  [ '[' array_size ']' ]  ]   name
 		 *
-		 * where the class, type and array size are optional.  This constructor
-		 * parses tokens of that form.  For parts which aren't present,
-		 * defaults are:
-		 *   * class = class_uniform
+		 * where the square brackets indicate optional components.  This
+		 * constructor parses tokens of that form.  For parts of the token
+		 * which aren't present, defaults are:
+		 *   * class = class_uniform  (or class_invaild if type == type_invalid)
 		 *   * type = type_invalid
-		 *   * array_size = 1
+		 *   * array_size = 0
+		 *
+		 * \throw XqParseError whenever the token fails to have the format
+		 * shown above.
 		 *
 		 * \param token - token string to parse.
 		 * \todo Cleanup this to use a const version of RtToken...
 		 */
 		explicit CqPrimvarToken(const char* token);
 		/** \brief Parse type information from an RtToken string
+		 * 
+		 * \throw XqParseError if typeToken fails to have the required form.
 		 *
-		 * \param typeToken has the form
-		 *
-		 *   [class]  type  [ '['array_size']' ]
-		 *
+		 * \param typeToken has the form  [ [class]  type  [ '['array_size']' ] ]
 		 * \param name is the primvar name, and may not be empty.
 		 *
 		 * \see CqPrimvarToken(const char* token)
 		 */
-		CqPrimvarToken(const char* typeToken, const std::string& name);
+		CqPrimvarToken(const char* typeToken, const char* name);
 
 		/// \name Accessors
 		//@{
@@ -103,11 +105,15 @@ class COMMON_SHARE CqPrimvarToken
 		/** \brief Number of float/int/string elements needed to represent a
 		 * single value of the token type.
 		 *
+		 * \param numColorComponenets - The number of color components.  This
+		 * is three by default, but may be more or less in principle since the
+		 * renderman interface has facility to deal with spectral color.
+		 *
 		 * \return The number of float/int/strings needed to store a single
 		 * element of a primitive variable of this type and array length.  For
 		 * example, a "vector[2]" would need 3*2 floats per element.
 		 */
-		TqInt storageCount() const;
+		TqInt storageCount(TqInt numColorComponenets = 3) const;
 
 		/** \brief Return the type of array required to store a variable of this type.
 		 *
@@ -182,7 +188,7 @@ inline TqInt CqPrimvarToken::arraySize() const
 	return m_arraySize;
 }
 
-inline TqInt CqPrimvarToken::storageCount() const
+inline TqInt CqPrimvarToken::storageCount(TqInt numColorComponenets) const
 {
 	TqInt count = 0;
 	switch(m_type)
@@ -197,8 +203,10 @@ inline TqInt CqPrimvarToken::storageCount() const
 		case type_point:
 		case type_normal:
 		case type_vector:
-		case type_color:
 			count = 3;
+			break;
+		case type_color:
+			count = numColorComponenets;
 			break;
 		case type_hpoint:
 			count = 4;

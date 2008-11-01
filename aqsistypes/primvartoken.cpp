@@ -102,7 +102,7 @@ EnumT lowercaseEnumCast(std::string tok)
 
 // Helper for uniformly formatted errors.
 #define PARSE_ERROR(token, message) \
-	AQSIS_THROW(XqParseError, "invalid primvar \"" << token << "\": " << message)
+	AQSIS_THROW(XqParseError, "invalid token \"" << token << "\": " << message)
 
 /** Parse a primitive variable token
  *
@@ -176,30 +176,43 @@ void CqPrimvarToken::parse(const char* tokenStr)
 CqPrimvarToken::CqPrimvarToken(const char* token)
 	: m_class(class_invalid),
 	m_type(type_invalid),
-	m_arraySize(0),
+	m_arraySize(-1),
 	m_name()
 {
-	if(token)
-		parse(token);
-	if(m_class == class_invalid)
-		m_class = class_uniform;
+	assert(token != 0);
+	parse(token);
 	if(m_name == "")
-		PARSE_ERROR(token, "expected name in token");
+		PARSE_ERROR(token, "expected token name");
+	if(m_type == type_invalid)
+	{
+		if(m_class != class_invalid || m_arraySize != -1)
+		{
+			// If the type isn't found, neither should be the class or array size,
+			PARSE_ERROR(token, "is incomplete - expected a type");
+		}
+	}
+	else
+	{
+		if(m_class == class_invalid)
+			m_class = class_uniform;
+	}
+	if(m_arraySize == -1)
+		m_arraySize = 0;
 }
 
-CqPrimvarToken::CqPrimvarToken(const char* typeToken, const std::string& name)
+CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
 	: m_class(class_invalid),
 	m_type(type_invalid),
 	m_arraySize(0),
 	m_name()
 {
-	if(typeToken)
-		parse(typeToken);
+	assert(typeToken != 0);
+	parse(typeToken);
 	if(m_name != "")
-		AQSIS_THROW(XqParseError, "invalid primvar: unexpected name \""
+		AQSIS_THROW(XqParseError, "invalid token: unexpected name \""
 				<< m_name << "\" in type string \"" << typeToken << "\"");
 	m_name = name;
-	if(m_class == class_invalid)
+	if(m_type != type_invalid && m_class == class_invalid)
 		m_class = class_uniform;
 }
 

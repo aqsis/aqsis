@@ -36,8 +36,15 @@ class PrimVarInserter : public Aqsis::IqRibParamListHandler
 		// inherited
 		virtual void readParameter(const std::string& name, Aqsis::CqRibParser& parser)
 		{
-			Aqsis::CqPrimvarToken token(name.c_str());
-			m_tokenDict.lookupType(token);
+			Aqsis::CqPrimvarToken token;
+			try
+			{
+				token = m_tokenDict.parseAndLookup(name);
+			}
+			catch(Aqsis::XqValidation& e)
+			{
+				g_errStream << "hairgen: " << e.what() << "\n";
+			}
 			if(token.storageType() == Aqsis::type_float)
 				m_primVars.append(token, parser.getFloatParam());
 			else

@@ -30,6 +30,7 @@
 
 #include <map>
 
+#include "exception.h"
 #include "primvartoken.h"
 
 namespace Aqsis
@@ -56,19 +57,20 @@ class CqTokenDictionary
 		 */
 		void insert(const CqPrimvarToken& token);
 
-		/** \brief Look and assign the primvar type.
+		/** \brief Parse the token string and look up the type if necessary.
 		 *
-		 * This method only has an effect if the input token previously
-		 * lacked a type, as determined by CqPrimvarToken::hasType().
-		 */
-		void lookupType(CqPrimvarToken& token) const;
-
-		/** \brief Find a primvar with the given name.
+		 * The input token string is parsed according to the rules definied for
+		 * renderman tokens (see CqPrimvarToken).  If the resulting token is
+		 * not fully type-qualified according to CqPrimvarToken::hasType() then
+		 * it is further looked up in the dictionary.
+		 *
+		 * \throw XqValidation If the primvar has no type and cannot be found
+		 *                     in the dictionary.
 		 *
 		 * \return the primvar, or 0 if the given name is not in the
 		 * dictionary.
 		 */
-		const CqPrimvarToken* find(const std::string& name) const;
+		CqPrimvarToken parseAndLookup(const std::string& tokenStr) const;
 	private:
 		typedef std::map<std::string, CqPrimvarToken> TqPrimvarMap;
 		// TODO: Decide on whether there might be a better container to use
@@ -101,23 +103,22 @@ inline void CqTokenDictionary::insert(const CqPrimvarToken& token)
 	m_dict[token.name()] = token;
 }
 
-inline void CqTokenDictionary::lookupType(CqPrimvarToken& token) const
+inline CqPrimvarToken CqTokenDictionary::parseAndLookup(
+		const std::string& tokenStr) const
 {
+	CqPrimvarToken token(tokenStr.c_str());
 	if(!token.hasType())
 	{
 		TqPrimvarMap::const_iterator pos = m_dict.find(token.name());
 		if(pos != m_dict.end())
 			token = pos->second;
+		else
+		{
+			AQSIS_THROW(XqValidation, "undeclared token \""
+					<< tokenStr << "\" encountered");
+		}
 	}
-}
-
-inline const CqPrimvarToken* CqTokenDictionary::find(const std::string& name) const
-{
-	TqPrimvarMap::const_iterator pos = m_dict.find(name);
-	if(pos == m_dict.end())
-		return 0;
-	else
-		return &pos->second;
+	return token;
 }
 
 } // namespace Aqsis

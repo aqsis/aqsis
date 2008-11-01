@@ -244,23 +244,24 @@ bool CqOutput::nestingContains(EqBlocks type) const
  * having a length corresponding to one of the given interpolation class
  * lengths.
  */
-static TqInt allocSize(const CqPrimvarToken& tok, TqInt vertex, TqInt varying,
-		TqInt uniform, TqInt facevarying, TqInt facevertex)
+static TqInt allocSize(const CqPrimvarToken& tok, TqInt numColorComponents,
+		TqInt vertex, TqInt varying, TqInt uniform, TqInt facevarying, TqInt facevertex)
 {
+	TqInt storage = tok.storageCount(numColorComponents);
 	switch(tok.Class())
 	{
 		case class_vertex:
-			return tok.storageCount()*vertex;
+			return storage*vertex;
 		case class_varying:
-			return tok.storageCount()*varying;
+			return storage*varying;
 		case class_uniform:
-			return tok.storageCount()*uniform;
+			return storage*uniform;
 		case class_constant:
-			return tok.storageCount();
+			return storage;
 		case class_facevarying:
-			return tok.storageCount()*facevarying;
+			return storage*facevarying;
 		case class_facevertex:
-			return tok.storageCount()*facevertex;
+			return storage*facevertex;
 		default:
 			assert(0 && "Invalid token class");
 			return 0;
@@ -283,17 +284,9 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 		CqPrimvarToken tok;
 		try
 		{
-			tok = CqPrimvarToken(tokens[i]);
-			m_Dictionary.lookupType(tok);
-			if(!tok.hasType())
-			{
-				// Ugly way to report the error!
-				CqError(RIE_BADTOKEN, RIE_ERROR, "Could not parse ", tokens[i],
-						"", true).manage();
-				continue;
-			}
+			tok = m_Dictionary.parseAndLookup(tokens[i]);
 		}
-		catch(XqParseError& e)
+		catch(XqValidation& e)
 		{
 			// More ugly error reportage.
 			CqError(RIE_BADTOKEN, RIE_ERROR, e.what(), true).manage();
@@ -303,7 +296,7 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 		printToken( tokens[ i ] );
 		S;
 
-		TqInt storageCount = allocSize(tok, vertex, varying, uniform,
+		TqInt storageCount = allocSize(tok, m_ColorNComps, vertex, varying, uniform,
 				facevarying, facevertex);
 		switch ( tok.type() )
 		{
@@ -320,7 +313,7 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
 				flt = static_cast<RtFloat *> ( parms[ i ] );
 				// Kludge.  We divide by three here since CqPrimvarToken
 				// assumes 3 channels per color.
-				printArray( storageCount / 3 * m_ColorNComps, flt );
+				printArray( storageCount, flt );
 				break;
 			case type_string:
 				cp = static_cast<char **> ( parms[ i ] );

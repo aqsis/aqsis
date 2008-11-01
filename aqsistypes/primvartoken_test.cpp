@@ -86,14 +86,6 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
 		BOOST_CHECK_EQUAL(tok.name(), "some_mat");
 	}
-
-	{
-		CqPrimvarToken tok(static_cast<const char*>(0), "some_mat");
-		BOOST_CHECK_EQUAL(tok.Class(), class_uniform);
-		BOOST_CHECK_EQUAL(tok.type(), type_invalid);
-		BOOST_CHECK_EQUAL(tok.arraySize(), 0);
-		BOOST_CHECK_EQUAL(tok.name(), "some_mat");
-	}
 }
 
 // tests for parsing invalid tokens.
@@ -109,6 +101,8 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_invalid_parse_test)
 	BOOST_CHECK_THROW(CqPrimvarToken("[ 2"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("["), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("float varying u"), XqParseError);
+	BOOST_CHECK_THROW(CqPrimvarToken("varying u"), XqParseError);
+	BOOST_CHECK_THROW(CqPrimvarToken("[2] u"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("[2] float st"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("P Cs"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("P", "Cs"), XqParseError);
