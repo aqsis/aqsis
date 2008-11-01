@@ -35,7 +35,7 @@ namespace Aqsis {
 
 
 void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
-			int constant_size, int uniform_size, int varying_size, int vertex_size, int facevarying_size, std::stringstream& _message)
+		const SqInterpClassCounts& interpClassCounts, std::stringstream& _message)
 {
 	RtInt i;
 	for(i=0; i<count; i++)
@@ -43,71 +43,23 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
+		CqPrimvarToken tok = declToPrimvarToken(
+				QGetRenderContext()->FindParameterDecl(token) );
 
-		// Work out the amount of data to copy determined by the
-		// class, the type and the array size.
-		int size = 1;
-		switch( Decl.m_Class )
-		{
-			case class_constant:
-				size = constant_size;
-				break;
-
-			case class_uniform:
-				size = uniform_size;
-				break;
-
-			case class_varying:
-				size = varying_size;
-				break;
-
-			case class_vertex:
-				size = vertex_size;
-				break;
-
-			case class_facevarying:
-				size = facevarying_size;
-				break;
-
-			default:
-				break;
-		}
-
-		// If it is a compound type, increase the length by the number of elements.
-		if( Decl.m_Type == type_point ||
-			Decl.m_Type == type_normal ||
-			Decl.m_Type == type_color ||
-			Decl.m_Type == type_vector)
-			size *= 3;
-		else if( Decl.m_Type == type_hpoint)
-			size *= 4;
-		else if( Decl.m_Type == type_matrix)
-			size *= 16;
-
-		// If it is an array, increase the size by the number of elements in the array.
-		size *= Decl.m_Count;
+		int size = tok.storageCount(interpClassCounts);
 
 		int j;
 		_message << "\"" << token << "\" ["; 
-		switch( Decl.m_Type )
+		switch( tok.storageType() )
 		{
 			case type_integer:
 				for(j=0; j<size; j++)
-					_message << reinterpret_cast<RtInt*>(values[i])[j];
+					_message << reinterpret_cast<RtInt*>(values[i])[j] << " ";
 				break;
-
-			case type_point:
-			case type_color:
-			case type_normal:
-			case type_vector:
-			case type_hpoint:
-			case type_matrix:
 			case type_float:
 				for(j=0; j<size; j++)
 					_message << reinterpret_cast<RtFloat*>(values[i])[j] << " ";
 				break;
-
 			case type_string:
 				{
 					for(j=0; j<size; j++)
@@ -119,7 +71,6 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 					}
 				}
 				break;
-
 			default:
 				break;
 		}

@@ -87,11 +87,9 @@ class RiCacheBase
 
 	protected:
 		virtual	void	CachePlist(RtInt count, RtToken tokens[], RtPointer values[],
-				int uniform_size, int varying_size, int vertex_size,
-				int facevarying_size, int facevertex_size)
+				const SqInterpClassCounts& interpClassCounts)
 		{
-			m_interpClassCounts = SqInterpClassCounts(uniform_size,
-					varying_size, vertex_size, facevarying_size, facevertex_size);
+			m_interpClassCounts = interpClassCounts;
 			m_count = count;
 			m_tokens = new RtToken[count];
 			m_values = new RtPointer[count];

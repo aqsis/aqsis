@@ -46,15 +46,13 @@
 		<xsl:choose>
 			<xsl:when test="Type = 'PARAMETERLIST'">
 				<xsl:text>&#x9;&#x9;// Output the plist here.&#xa;</xsl:text>
-				<xsl:text>		int constant_size = 1;
+				<xsl:text>
 		int uniform_size = 1;
 		int varying_size = 1;
 		int vertex_size = 1;
 		int facevarying_size = 1;
+		int facevertex_size = 1;
 </xsl:text>
-				<xsl:if test="../../ConstantSize">
-					<xsl:value-of select="../../ConstantSize"/>
-				</xsl:if>
 				<xsl:if test="../../UniformSize">
 					<xsl:value-of select="../../UniformSize"/>
 				</xsl:if>
@@ -67,7 +65,11 @@
 				<xsl:if test="../../FaceVaryingSize">
 					<xsl:value-of select="../../FaceVaryingSize"/>
 				</xsl:if>
-				<xsl:text>		DebugPlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size, _message);&#xa;</xsl:text>
+				<xsl:if test="../../FaceVertexSize">
+					<xsl:value-of select="../../FaceVertexSize"/>
+				</xsl:if>
+				<xsl:text>		DebugPlist(count, tokens, values, SqInterpClassCounts(uniform_size, varying_size,
+			vertex_size, facevarying_size, facevertex_size), _message);&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( Type, 'Array')">
 				<xsl:choose>

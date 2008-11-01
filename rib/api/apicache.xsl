@@ -118,7 +118,8 @@
 				<xsl:if test="../../FaceVertexSize">
 					<xsl:value-of select="../../FaceVertexSize"/>
 				</xsl:if>
-				<xsl:text>		CachePlist(count, tokens, values, uniform_size, varying_size, vertex_size, facevarying_size, facevertex_size);&#xa;</xsl:text>
+				<xsl:text>		CachePlist(count, tokens, values, SqInterpClassCounts(uniform_size, varying_size,
+			vertex_size, facevarying_size, facevertex_size) );&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( Type, 'Array')">
 				<xsl:choose>
