@@ -52,6 +52,7 @@ namespace Aqsis {
 class COMMON_SHARE CqPrimvarToken
 {
 	public:
+
 		/** \brief Default constructor.
 		 * Equivilant to CqPrimvarToken(class_invalid, type_invalid, 1, "")
 		 */
@@ -91,6 +92,7 @@ class COMMON_SHARE CqPrimvarToken
 		 */
 		CqPrimvarToken(const char* typeToken, const char* name);
 
+		//--------------------------------------------------
 		/// \name Accessors
 		//@{
 		/// get the primvar name
@@ -103,6 +105,9 @@ class COMMON_SHARE CqPrimvarToken
 		TqInt arraySize() const;
 		//@}
 
+		//--------------------------------------------------
+		/// \name Storage information for RI array-representation
+		//@{
 		/** \brief Number of float/int/string elements needed to represent a
 		 * single value of the token type.
 		 *
@@ -123,7 +128,6 @@ class COMMON_SHARE CqPrimvarToken
 		 */
 		TqInt storageCount(const SqInterpClassCounts& classCounts,
 				TqInt numColorComponents = 3) const;
-
 		/** \brief Return the type of array required to store a variable of this type.
 		 *
 		 * The result is one of type_float, type_integer, type_string, or
@@ -132,6 +136,7 @@ class COMMON_SHARE CqPrimvarToken
 		 * std::string.
 		 */
 		EqVariableType storageType() const;
+		//@}
 
 		/** \brief Determine whether the token is correctly typed.
 		 *
@@ -140,7 +145,6 @@ class COMMON_SHARE CqPrimvarToken
 		 * specifies the name leave the type unspecified.
 		 */
 		bool hasType() const;
-
 		/** \brief Compare two tokens for equality
 		 *
 		 * Tokens are equal if their name, size and array counts are equal.

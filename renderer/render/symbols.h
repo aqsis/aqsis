@@ -33,6 +33,7 @@
 
 #include	"primvartype.h"
 #include	"parameters.h"
+#include "primvartoken.h"
 
 namespace Aqsis {
 
@@ -75,6 +76,11 @@ struct SqParameterDeclaration
 
 }
 ;
+
+inline CqPrimvarToken declToPrimvarToken(const SqParameterDeclaration& decl)
+{
+	return CqPrimvarToken(decl.m_Class, decl.m_Type, decl.m_Count, decl.m_strName);
+}
 
 
 //-----------------------------------------------------------------------

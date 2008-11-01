@@ -19,6 +19,7 @@ INCLUDE(macros)
 
 INCLUDE(FirstCMakeRun)
 INCLUDE(OutOfSourceBuild)
+INCLUDE(XslTransform)
 
 # Find path to precompiled libs on windows.
 INCLUDE(FindWin32Libs)

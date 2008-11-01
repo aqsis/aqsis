@@ -27,12 +27,14 @@
 #ifndef RI_CACHE_H_INCLUDED
 #define RI_CACHE_H_INCLUDED 1
 
-#include	"aqsis.h"
-#include	"symbols.h"
-#include	"ri.h"
-#include	"renderer.h"
+#include "aqsis.h"
 
-#include	<cstring>
+#include <cstring>
+
+#include "primvartoken.h"
+#include "ri.h"
+#include "renderer.h"
+#include "symbols.h"
 
 namespace Aqsis {
 
@@ -40,7 +42,7 @@ namespace Aqsis {
 class RiCacheBase
 {
 	public:
-		RiCacheBase()	:	m_count(0), m_tokens(0), m_values(0)
+		RiCacheBase()	:	m_count(0), m_tokens(0), m_values(0), m_interpClassCounts()
 		{}
 		virtual ~RiCacheBase()
 		{
@@ -48,42 +50,35 @@ class RiCacheBase
 			int i;
 			for(i=0; i<m_count; i++)
 			{
-				SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( m_tokens[i] );
-				if(Decl.m_Type == type_string)
+				CqPrimvarToken tok = declToPrimvarToken(
+						QGetRenderContext()->FindParameterDecl( m_tokens[i] ) );
+				// Delete i'th value based on type.
+				RtPointer value = m_values[i];
+				switch(tok.storageType())
 				{
-					int size = 1;
-					switch( Decl.m_Class )
-					{
-						case class_constant:
-							size = m_constant_size;
-							break;
-
-						case class_uniform:
-							size = m_uniform_size;
-							break;
-
-						case class_varying:
-							size = m_varying_size;
-							break;
-
-						case class_vertex:
-							size = m_vertex_size;
-							break;
-
-						case class_facevarying:
-							size = m_facevarying_size;
-							break;
-						default:
-							break;
-					}
-					int j;
-					for(j=0; j<size; j++)
-						delete[](reinterpret_cast<RtString*>(m_values[i])[j]);
+					case type_integer:
+						delete[] reinterpret_cast<RtInt*>(value);
+						break;
+					case type_float:
+						delete[] reinterpret_cast<RtFloat*>(value);
+						break;
+					case type_string:
+						{
+							int size = tok.storageCount(m_interpClassCounts);
+							RtString* strArray = reinterpret_cast<RtString*>(value);
+							for(int j=0; j<size; j++)
+								delete[] strArray[j];
+						}
+						delete[] reinterpret_cast<RtString*>(m_values[i]);
+						break;
+					default:
+						break;
 				}
-				delete[](m_tokens[i]);
-				delete[](reinterpret_cast<RtString*>(m_values[i]));
+				// Delete i'th token
+				delete[] m_tokens[i];
 			}
 
+			// Delete token and value arrays.
 			delete[] m_tokens;
 			delete[] m_values;
 		}
@@ -92,15 +87,11 @@ class RiCacheBase
 
 	protected:
 		virtual	void	CachePlist(RtInt count, RtToken tokens[], RtPointer values[],
-		                        int constant_size, int uniform_size, int varying_size, int vertex_size, int facevarying_size )
+				int uniform_size, int varying_size, int vertex_size,
+				int facevarying_size, int facevertex_size)
 		{
-			// Cache the sizes as we need them during destruction.
-			m_constant_size = constant_size;
-			m_uniform_size = uniform_size;
-			m_varying_size = varying_size;
-			m_vertex_size = vertex_size;
-			m_facevarying_size = facevarying_size;
-
+			m_interpClassCounts = SqInterpClassCounts(uniform_size,
+					varying_size, vertex_size, facevarying_size, facevertex_size);
 			m_count = count;
 			m_tokens = new RtToken[count];
 			m_values = new RtPointer[count];
@@ -115,68 +106,22 @@ class RiCacheBase
 				strcpy(newtoken, token);
 				m_tokens[i] = newtoken;
 
-				SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
+				CqPrimvarToken tok = declToPrimvarToken(
+						QGetRenderContext()->FindParameterDecl( token ) );
 
-				// Work out the amount of data to copy determined by the
-				// class, the type and the array size.
-				int size = 1;
-				switch( Decl.m_Class )
-				{
-					case class_constant:
-						size = constant_size;
-						break;
-
-					case class_uniform:
-						size = uniform_size;
-						break;
-
-					case class_varying:
-						size = varying_size;
-						break;
-
-					case class_vertex:
-						size = vertex_size;
-						break;
-
-					case class_facevarying:
-						size = facevarying_size;
-						break;
-
-					default:
-						break;
-				}
-
-				// If it is a compound type, increase the length by the number of elements.
-				if( Decl.m_Type == type_point ||
-				        Decl.m_Type == type_normal ||
-				        Decl.m_Type == type_color ||
-				        Decl.m_Type == type_vector)
-					size *= 3;
-				else if( Decl.m_Type == type_hpoint)
-					size *= 4;
-				else if( Decl.m_Type == type_matrix)
-					size *= 16;
-
-				// If it is an array, increase the size by the number of elements in the array.
-				size *= Decl.m_Count;
+				int size = tok.storageCount(m_interpClassCounts);
 
 				int j;
-				switch( Decl.m_Type )
+				switch( tok.storageType() )
 				{
 					case type_integer:
-						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtInt*>(values[i]));
+						m_values[i] = CopyAtomicValue(size,
+								reinterpret_cast<RtInt*>(values[i]));
 						break;
-
-					case type_point:
-					case type_color:
-					case type_normal:
-					case type_vector:
-					case type_hpoint:
-					case type_matrix:
 					case type_float:
-						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtFloat*>(values[i]));
+						m_values[i] = CopyAtomicValue(size,
+								reinterpret_cast<RtFloat*>(values[i]));
 						break;
-
 					case type_string:
 						{
 							RtString* copyvalue = new RtString[size];
@@ -189,7 +134,6 @@ class RiCacheBase
 							m_values[i] = reinterpret_cast<RtPointer>(copyvalue);
 						}
 						break;
-
 					default:
 						m_values[i] = 0;
 						break;
@@ -207,15 +151,10 @@ class RiCacheBase
 			return((RtPointer)copyvalue);
 		}
 
-
 		RtInt		m_count;
 		RtToken*	m_tokens;
 		RtPointer*	m_values;
-		int			m_constant_size;
-		int			m_uniform_size;
-		int			m_varying_size;
-		int			m_vertex_size;
-		int			m_facevarying_size;
+		SqInterpClassCounts m_interpClassCounts;
 };
 
 
