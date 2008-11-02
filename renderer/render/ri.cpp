@@ -1544,17 +1544,17 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 	// Check options.
 	for ( TqInt i = 0; i < count; ++i )
 	{
-		SqParameterDeclaration Decl;
+		CqPrimvarToken tok;
 		try
 		{
-			Decl = QGetRenderContext()->FindParameterDecl( tokens[ i ] );
+			tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ i ] ));
 		}
-		catch( XqException e )
+		catch( XqException& e )
 		{
-			Aqsis::log() << error << e.what() << std::endl;
+			Aqsis::log() << error << "RiHider: " << e.what() << std::endl;
 			continue;
 		}
-		const TqUlong hash = CqString::hash(Decl.m_strName.c_str());
+		const TqUlong hash = CqString::hash(tok.name().c_str());
 		if ( hash == RIH_DEPTHFILTER )
 			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
 		else if ( hash == RIH_JITTER )
@@ -1645,39 +1645,35 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 	for ( TqInt i = 0; i < count; ++i )
 	{
 		RtToken	token = tokens[ i ];
-		RtPointer	value = values[ i ];
+		RtPointer value = values[ i ];
 
 		// Search for the parameter in the declarations.
 		// Note Options can only be uniform.
-		SqParameterDeclaration Decl;
+		CqPrimvarToken tok;
 		try
 		{
-			Decl = QGetRenderContext()->FindParameterDecl( token );
+			tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
 		}
-		catch( XqException e )
+		catch( XqException& e )
 		{
-			Aqsis::log() << error << e.what() << std::endl;
+			Aqsis::log() << error << "RiOption: " << e.what() << std::endl;
 			continue;
 		}
-		TqInt Type = Decl.m_Type;
-		TqInt Class = Decl.m_Class;
-		TqInt Count = Decl.m_Count;
-		CqString undecoratedName = Decl.m_strName;
-		if ( Decl.m_strName == "" || Class != class_uniform )
+		if ( tok.Class() != class_uniform )
 		{
-			if ( Decl.m_strName == "" )
-				Aqsis::log() << warning << "Unrecognised declaration : " << token << std::endl;
-			else
-				Aqsis::log() << warning << "Options can only be uniform [" << token << "]" << std::endl;
-			return ;
+			Aqsis::log() << warning << "RiOption: options can only be uniform ["
+				<< token << "]" << std::endl;
+			continue;
 		}
 
-		switch ( Type )
+		TqInt Count = tok.count();
+		const char* undecoratedName = tok.name().c_str();
+		switch ( tok.type() )
 		{
 			case type_float:
 			{
 				RtFloat* pf = reinterpret_cast<RtFloat*>( value );
-				TqFloat* pOpt = QGetRenderContext()->poptWriteCurrent()->GetFloatOptionWrite(name, undecoratedName.c_str(), Count);
+				TqFloat* pOpt = QGetRenderContext()->poptWriteCurrent()->GetFloatOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = pf[ j ];
@@ -1687,7 +1683,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_integer:
 			{
 				RtInt* pi = reinterpret_cast<RtInt*>( value );
-				TqInt* pOpt = QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite(name, undecoratedName.c_str(), Count);
+				TqInt* pOpt = QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = pi[ j ];
@@ -1697,7 +1693,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_string:
 			{
 				char** ps = reinterpret_cast<char**>( value );
-				CqString* pOpt = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite(name, undecoratedName.c_str(), Count);
+				CqString* pOpt = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 				{
@@ -1706,7 +1702,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 					{
 						// Get the old value for use in escape replacement
 						CqString str_old = pOpt[ 0 ];
-						CqString* pOptStd = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite("defaultsearchpath", undecoratedName.c_str(), Count);
+						CqString* pOptStd = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite("defaultsearchpath", undecoratedName, Count);
 						CqString str_std = pOptStd[ 0 ];
 						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
 						// Build the string, checking for & and @ characters  and replace with old and default string, respectively.
@@ -1765,7 +1761,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_color:
 			{
 				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqColor* pOpt = QGetRenderContext()->poptWriteCurrent()->GetColorOptionWrite(name, undecoratedName.c_str(), Count);
+				CqColor* pOpt = QGetRenderContext()->poptWriteCurrent()->GetColorOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqColor(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
@@ -1775,7 +1771,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_point:
 			{
 				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
@@ -1785,7 +1781,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_normal:
 			{
 				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
@@ -1795,7 +1791,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_vector:
 			{
 				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
@@ -1805,7 +1801,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_hpoint:
 			{
 /*				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqVector4D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetHPointOptionWrite(name, undecoratedName.c_str(), Count);
+				CqVector4D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetHPointOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqVector4D(pc[ (j*4) ], pc[ (j*4)+1 ], pc[ (j*4)+2 ], pc[ (j*4)+3]); */
@@ -1815,7 +1811,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_matrix:
 			{
 /*				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
-				CqMatrix* pOpt = QGetRenderContext()->poptWriteCurrent()->GetMatrixOptionWrite(name, undecoratedName.c_str(), Count);
+				CqMatrix* pOpt = QGetRenderContext()->poptWriteCurrent()->GetMatrixOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 					pOpt[ j ] = CqMatrix(pm[ j    ], pm[ j+1  ], pm[ j+2  ], pm[ j+3  ],
@@ -1823,6 +1819,9 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 							        pm[ j+8  ], pm[ j+9  ], pm[ j+10 ], pm[ j+11 ],
 							        pm[ j+12 ], pm[ j+13 ], pm[ j+14 ], pm[ j+15 ]); */
 			}
+			break;
+
+			default:
 			break;
 		}
 	}
@@ -3053,51 +3052,38 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		TqInt Type = 0;
-		TqInt Class = 0;
-		bool bArray = false;
 		CqParameter* pParam = pAttr->pParameter( token );
 		if ( pParam == 0 )
 		{
 			// Search for the parameter in the declarations.
 			// Note attributes can only be uniform.
-			SqParameterDeclaration Decl;
+			CqPrimvarToken tok;
 			try
 			{
-				Decl = QGetRenderContext()->FindParameterDecl( token );
+				tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
 			}
-			catch( XqException e )
+			catch( XqException& e )
 			{
 				Aqsis::log() << error << e.what() << std::endl;
 				continue;
 			}
-			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
+			if ( tok.Class() == class_uniform )
 			{
-				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
-				Type = Decl.m_Type;
-				Class = Decl.m_Class;
-				bArray = Decl.m_Count > 0;
+				pParam = CqParameter::Create(tok);
 				pAttr->AddParameter( pParam );
 			}
 			else
 			{
-				if ( Decl.m_strName == "" )
-					Aqsis::log() << warning << "Unrecognised declaration \"" << token << "\"" << std::endl;
-				else
-					Aqsis::log() << warning << "Attributes can only be uniform" << std::endl;
-				return ;
+				Aqsis::log() << warning << "RiAttribute: Attributes can only be uniform [" << tok.name() << "]\n";
+				continue;
 			}
 		}
-		else
-		{
-			Type = pParam->Type();
-			Class = pParam->Class();
-			bArray = pParam->Count() > 0;
-		}
+		EqVariableType Type = pParam->Type();
+		bool bArray = pParam->Count() > 1;
 
 		switch ( Type )
 		{
-				case type_float:
+			case type_float:
 				{
 					RtFloat * pf = reinterpret_cast<RtFloat*>( value );
 					if ( bArray )
@@ -3111,7 +3097,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 				}
 				break;
 
-				case type_integer:
+			case type_integer:
 				{
 					RtInt* pi = reinterpret_cast<RtInt*>( value );
 					if ( bArray )
@@ -3125,7 +3111,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 				}
 				break;
 
-				case type_string:
+			case type_string:
 				{
 					char** ps = reinterpret_cast<char**>( value );
 					if ( bArray )
@@ -3148,11 +3134,15 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 #endif
 
 				}
+				break;
 				// TODO: Rest of parameter types.
+			default:
+				Aqsis::log() << warning
+					<< "RiAttribute \"" << name
+					<< "\": unimplemented attribute type [" << token << "]\n";
 		}
 	}
 	EXCEPTION_CATCH_GUARD("RiAttributeV")
-	return ;
 }
 
 
@@ -3997,9 +3987,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		std::vector<void*> aNewParams;
 		for( iUserParam = 0; iUserParam < count; ++iUserParam )
 		{
-			SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] );
+			CqPrimvarToken tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] ));
 			TqInt elem_size = 0;
-			switch( Decl.m_Type )
+			switch( tok.type() )
 			{
 				case type_float:
 					elem_size = sizeof(RtFloat);
@@ -4022,9 +4012,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					break;
 			}
 			// Take into account array primitive variables.
-			elem_size *= Decl.m_Count;
+			elem_size *= tok.count();
 
-			if( Decl.m_Class == class_facevarying || Decl.m_Class == class_facevertex )
+			if( tok.Class() == class_facevarying || tok.Class() == class_facevertex )
 			{
 				char* pNew = static_cast<char*>( malloc( elem_size * fvcount) );
 				aNewParams.push_back( pNew );
@@ -4037,7 +4027,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				}
 				modifiedValues[ iUserParam ] = aNewParams.back();
 			}
-			else if( Decl.m_Class == class_uniform )
+			else if( tok.Class() == class_uniform )
 			{
 				// Allocate enough for 1 value per triangle, then duplicate values from the original list
 				// accordingly.
@@ -5917,20 +5907,20 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
-		const TqUlong hash = CqString::hash(Decl.m_strName.c_str());
+		CqPrimvarToken tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
+		const TqUlong hash = CqString::hash(tok.name().c_str());
 
-		if ( (hash == RIH_P) && (Decl.m_Class == class_vertex ))
+		if ( (hash == RIH_P) && (tok.Class() == class_vertex ))
 		{
 			fP = RIL_P;
 			pPoints = ( RtFloat* ) value;
 		}
-		else if ( (hash == RIH_PZ) && (Decl.m_Class == class_vertex ) )
+		else if ( (hash == RIH_PZ) && (tok.Class() == class_vertex ) )
 		{
 			fP = RIL_Pz;
 			pPoints = ( RtFloat* ) value;
 		}
-		else if ( (hash == RIH_PW) && (Decl.m_Class == class_vertex ) )
+		else if ( (hash == RIH_PW) && (tok.Class() == class_vertex ) )
 		{
 			fP = RIL_Pw;
 			pPoints = ( RtFloat* ) value;
@@ -5946,17 +5936,17 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 	{
 		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P
 			= new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P", 1);
-		P->SetSize(pSurface->cVertex());
-		TqUint i;
+		TqInt cVertex = pSurface->cVertex();
+		P->SetSize(cVertex);
 		switch ( fP )
 		{
-				case RIL_P:
-				for ( i = 0; i < pSurface->cVertex(); ++i )
+			case RIL_P:
+				for (TqInt i = 0; i < cVertex; ++i )
 					P->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				break;
 
-				case RIL_Pz:
-				for ( i = 0; i < pSurface->cVertex(); ++i )
+			case RIL_Pz:
+				for (TqInt i = 0; i < cVertex; ++i )
 				{
 					CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
 					vecP.z( pPoints[ i ] );
@@ -5964,8 +5954,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 				}
 				break;
 
-				case RIL_Pw:
-				for ( i = 0; i < pSurface->cVertex(); ++i )
+			case RIL_Pw:
+				for (TqInt i = 0; i < cVertex; ++i )
 					P->pValue( i )[0] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
 				break;
 		}
@@ -5978,10 +5968,10 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		std::vector<TqInt>::iterator iUserParam;
 		for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); ++iUserParam )
 		{
-			SqParameterDeclaration Decl;
+			CqPrimvarToken tok;
 			try
 			{
-				Decl = QGetRenderContext()->FindParameterDecl( tokens[ *iUserParam ] );
+				tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ *iUserParam ] ));
 			}
 			catch( XqException e )
 			{
@@ -5989,10 +5979,10 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 				continue;
 			}
 
-			CqParameter* pNewParam = ( *Decl.m_pCreate ) ( Decl.m_strName.c_str(), Decl.m_Count );
+			CqParameter* pNewParam = CqParameter::Create(tok);
 			// Now go across all values and fill in the parameter variable.
 			TqInt cValues = 1;
-			switch ( Decl.m_Class )
+			switch ( tok.Class() )
 			{
 				case class_uniform:
 					cValues = pSurface->cUniform();
@@ -6020,7 +6010,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 			pNewParam->SetSize( cValues );
 
 			TqInt i;
-			switch ( Decl.m_Type )
+			switch ( tok.type() )
 			{
 					case type_float:
 					{
@@ -6029,7 +6019,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pFloatParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
 					}
 					break;
@@ -6041,7 +6031,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pIntParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
 					}
 					break;
@@ -6055,7 +6045,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector3D( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
 					}
 					break;
@@ -6067,7 +6057,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pStringParam->pValue( iValIndex ) [ iArrayIndex ] = CqString( pValue[ i ] );
 					}
 					break;
@@ -6079,7 +6069,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pColorParam->pValue( iValIndex ) [ iArrayIndex ] = CqColor( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
 					}
 					break;
@@ -6091,7 +6081,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector4D( pValue[ ( i * 4 ) ], pValue[ ( i * 4 ) + 1 ], pValue[ ( i * 4 ) + 2 ], pValue[ ( i * 4 ) + 3 ] );
 					}
 					break;
@@ -6103,7 +6093,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
-							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
+							for ( iArrayIndex = 0; iArrayIndex < tok.count(); ++iArrayIndex, ++i )
 								pMatrixParam->pValue( iValIndex ) [ iArrayIndex ] = CqMatrix( pValue[ ( i * 16 ) ], pValue[ ( i * 16 ) + 1 ], pValue[ ( i * 16 ) + 2 ], pValue[ ( i * 16 ) + 3 ],
 								        pValue[ ( i * 16 ) + 4 ], pValue[ ( i * 16 ) + 5 ], pValue[ ( i * 16 ) + 6 ], pValue[ ( i * 16 ) + 7 ],
 								        pValue[ ( i * 16 ) + 8 ], pValue[ ( i * 16 ) + 9 ], pValue[ ( i * 16 ) + 10 ], pValue[ ( i * 16 ) + 11 ],
@@ -6241,17 +6231,17 @@ RtFunc	RiPreWorldFunction( RtFunc function )
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char * name, TqPchar val )
 {
 	// Find the relevant variable.
-	SqParameterDeclaration Decl;
+	CqPrimvarToken tok;
 	try
 	{
-		Decl = QGetRenderContext() ->FindParameterDecl( name );
+		tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( name ));
 	}
-	catch( XqException e )
+	catch( XqException& e )
 	{
 		Aqsis::log() << error << e.what() << std::endl;
 		return;
 	}
 
-	pShader->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, val );
+	pShader->SetArgument( tok.name(), tok.type(), "", val );
 }
 

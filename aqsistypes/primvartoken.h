@@ -159,6 +159,8 @@ class COMMON_SHARE CqPrimvarToken
 		void parse(const char* token);
 };
 
+/// Stream insertion operator.
+inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok);
 
 //==============================================================================
 // Implementation details
@@ -294,6 +296,13 @@ inline bool CqPrimvarToken::operator==(const CqPrimvarToken& rhs) const
 {
 	return m_type == rhs.m_type && m_class == rhs.m_class
 		&& m_count == rhs.m_count && m_name == rhs.m_name;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok)
+{
+	out << tok.Class() << " " << tok.type() << "[" << tok.count() << "] "
+		<< tok.name();
+	return out;
 }
 
 } // namespace Aqsis

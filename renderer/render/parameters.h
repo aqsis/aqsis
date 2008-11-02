@@ -35,6 +35,7 @@
 #include	"ishaderdata.h"
 #include	"iparameter.h"
 #include	"bilinear.h"
+#include	"primvartoken.h"
 #include	<boost/shared_ptr.hpp>
 
 namespace Aqsis {
@@ -51,6 +52,15 @@ class CqParameter : public IqParameter
 		CqParameter( const char* strName, TqInt Count = 1 );
 		CqParameter( const CqParameter& From );
 		virtual	~CqParameter();
+
+		/** \brief Create a CqParameter derived class of the type defined by tok.
+		 *
+		 * \param tok - Token specifying the class, type, name and count of the
+		 *              primitive variable
+		 * \return An instance of CqParameterTypedBlah where Blah corresponds
+		 *         to the appropriate name and class etc.
+		 */
+		static CqParameter* Create(const CqPrimvarToken& tok);
 
 		/** Pure virtual, clone function, which only creates a new parameter with matching type, no data.
 		 * \return A pointer to a new parameter with the same type.

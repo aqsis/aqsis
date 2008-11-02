@@ -85,6 +85,69 @@ CqParameter::~CqParameter()
 	STATS_DEC( PRM_current );
 }
 
+CqParameter* CqParameter::Create(const CqPrimvarToken& tok)
+{
+	CqParameter* ( *createFunc ) ( const char* strName, TqInt Count ) = 0;
+	if(tok.count() <= 1)
+	{
+		switch(tok.Class())
+		{
+			case class_constant:
+				createFunc = gVariableCreateFuncsConstant[tok.type()];
+				break;
+			case class_uniform:
+				createFunc = gVariableCreateFuncsUniform[tok.type()];
+				break;
+			case class_varying:
+				createFunc = gVariableCreateFuncsVarying[tok.type()];
+				break;
+			case class_vertex:
+				createFunc = gVariableCreateFuncsVertex[tok.type()];
+				break;
+			case class_facevarying:
+				createFunc = gVariableCreateFuncsFaceVarying[tok.type()];
+				break;
+			case class_facevertex:
+				createFunc = gVariableCreateFuncsFaceVertex[tok.type()];
+				break;
+			default:
+				break;
+		}
+	}
+	else
+	{
+		switch(tok.Class())
+		{
+			case class_constant:
+				createFunc = gVariableCreateFuncsConstantArray[tok.type()];
+				break;
+			case class_uniform:
+				createFunc = gVariableCreateFuncsUniformArray[tok.type()];
+				break;
+			case class_varying:
+				createFunc = gVariableCreateFuncsVaryingArray[tok.type()];
+				break;
+			case class_vertex:
+				createFunc = gVariableCreateFuncsVertexArray[tok.type()];
+				break;
+			case class_facevarying:
+				createFunc = gVariableCreateFuncsFaceVaryingArray[tok.type()];
+				break;
+			case class_facevertex:
+				createFunc = gVariableCreateFuncsFaceVertexArray[tok.type()];
+				break;
+			default:
+				break;
+		}
+	}
+	if(!createFunc)
+	{
+		AQSIS_THROW(XqInternal, "Could not create CqParameter for token \""
+				<< tok << "\"");
+	}
+	return createFunc(tok.name().c_str(), tok.count());
+}
+
 
 CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count ) =
     {
