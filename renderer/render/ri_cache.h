@@ -31,10 +31,9 @@
 
 #include <cstring>
 
-#include "primvartoken.h"
 #include "ri.h"
 #include "renderer.h"
-#include "symbols.h"
+#include "logging.h"
 
 namespace Aqsis {
 
@@ -50,8 +49,8 @@ class RiCacheBase
 			int i;
 			for(i=0; i<m_count; i++)
 			{
-				CqPrimvarToken tok = declToPrimvarToken(
-						QGetRenderContext()->FindParameterDecl( m_tokens[i] ) );
+				CqPrimvarToken tok = QGetRenderContext()->
+					tokenDict().parseAndLookup(m_tokens[i]);
 				// Delete i'th value based on type.
 				RtPointer value = m_values[i];
 				switch(tok.storageType())
@@ -104,8 +103,15 @@ class RiCacheBase
 				strcpy(newtoken, token);
 				m_tokens[i] = newtoken;
 
-				CqPrimvarToken tok = declToPrimvarToken(
-						QGetRenderContext()->FindParameterDecl( token ) );
+				CqPrimvarToken tok;
+				try
+				{
+					tok = QGetRenderContext()->tokenDict().parseAndLookup(token);
+				}
+				catch(XqValidation& e)
+				{
+					Aqsis::log() << error << e.what() << "\n";
+				}
 
 				int size = tok.storageCount(m_interpClassCounts);
 

@@ -40,7 +40,7 @@
 #include	"vector2d.h"
 
 #include	"shaders.h"
-#include	"symbols.h"
+#include	"tokendictionary.h"
 #include	"iddmanager.h"
 #include	"irenderer.h"
 #include	"iraytrace.h"
@@ -245,13 +245,10 @@ class CqRenderer : public IqRenderer
 			return ( m_Stats );
 		}
 
-		// Contect change callbacks
-		virtual	SqParameterDeclaration FindParameterDecl( const char* strDecl );
-		virtual	void	AddParameterDecl( const char* strName, const char* strType );
-		virtual	void	ClearSymbolTable()
-		{
-			m_Symbols.clear();
-		}
+		/// Return the current dictionary of declared tokens.
+		CqTokenDictionary& tokenDict();
+		/// Return the current dictionary of declared tokens.
+		const CqTokenDictionary& tokenDict() const;
 
 		/** Get the list of currently registered shaders.
 		 * \return A reference to a list of CqShaderRegister classes.
@@ -509,6 +506,8 @@ class CqRenderer : public IqRenderer
 
 
 	private:
+		const SqOutputDataEntry* FindOutputDataEntry(const char* name);
+
 		/// Map type to hold loaded reference shaders.
 		typedef std::map< CqShaderKey, boost::shared_ptr<IqShader> > TqShaderMap;
 
@@ -532,7 +531,8 @@ class CqRenderer : public IqRenderer
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.
 		CqTransformPtr	m_pTransDefObj;				///< The initial transformation for objects.
 		bool			m_fWorldBegin;
-		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
+		/// Renderman symbol table
+		CqTokenDictionary m_tokenDict;
 
 		TqFloat			m_DofMultiplier;
 		TqFloat			m_OneOverFocalDistance;
@@ -577,7 +577,19 @@ inline CqRenderer* QGetRenderContext()
 void	QSetRenderContext( CqRenderer* pRenderer );
 
 
-//-----------------------------------------------------------------------
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline CqTokenDictionary& CqRenderer::tokenDict()
+{
+	return m_tokenDict;
+}
+
+inline const CqTokenDictionary& CqRenderer::tokenDict() const
+{
+	return m_tokenDict;
+}
 
 } // namespace Aqsis
 

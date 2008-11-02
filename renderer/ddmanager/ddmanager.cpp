@@ -852,19 +852,19 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 		else
 		{
 			// Otherwise, construct a UserParameter structure and fill in the details.
-			SqParameterDeclaration Decl;
+			CqPrimvarToken tok;
 			try
 			{
-				Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+				tok = QGetRenderContext()->tokenDict().parseAndLookup(param->first.c_str());
 			}
-			catch ( XqException e )
+			catch (XqValidation& e)
 			{
 				Aqsis::log() << error << e.what() << std::endl;
 				return;
 			}
 
 			// Check the parameter type is uniform, not valid for non-surface requests otherwise.
-			if ( Decl.m_Class != class_uniform )
+			if ( tok.Class() != class_uniform )
 			{
 				assert( false );
 				continue;
@@ -877,26 +877,26 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			parameter.vcount = 0;
 			parameter.nbytes = 0;
 
-			switch ( Decl.m_Type )
+			switch ( tok.type() )
 			{
 				case type_string:
 				{
 					const char** strings = static_cast<const char**>( param->second );
-					ConstructStringsParameter(Decl.m_strName.c_str(), strings, Decl.m_Count, parameter);
+					ConstructStringsParameter(tok.name().c_str(), strings, tok.count(), parameter);
 				}
 				break;
 
 				case type_float:
 				{
 					const RtFloat* floats = static_cast<RtFloat*>( param->second );
-					ConstructFloatsParameter(Decl.m_strName.c_str(), floats, Decl.m_Count, parameter);
+					ConstructFloatsParameter(tok.name().c_str(), floats, tok.count(), parameter);
 				}
 				break;
 
 				case type_integer:
 				{
 					const RtInt* ints = static_cast<RtInt*>( param->second );
-					ConstructIntsParameter(Decl.m_strName.c_str(), ints, Decl.m_Count, parameter);
+					ConstructIntsParameter(tok.name().c_str(), ints, tok.count(), parameter);
 				}
 				break;
 				default:

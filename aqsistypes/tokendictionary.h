@@ -57,6 +57,9 @@ class COMMON_SHARE CqTokenDictionary
 		 */
 		void insert(const CqPrimvarToken& token);
 
+		/// Remove all defined tokens from the dictionary
+		void clear();
+
 		/** \brief Parse the token string and look up the type if necessary.
 		 *
 		 * The input token string is parsed according to the rules definied for
@@ -101,6 +104,11 @@ COMMON_SHARE const std::vector<CqPrimvarToken>& standardPrimvars();
 inline void CqTokenDictionary::insert(const CqPrimvarToken& token)
 {
 	m_dict[token.name()] = token;
+}
+
+inline void CqTokenDictionary::clear()
+{
+	m_dict.clear();
 }
 
 inline CqPrimvarToken CqTokenDictionary::parseAndLookup(

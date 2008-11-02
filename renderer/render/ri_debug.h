@@ -28,7 +28,6 @@
 #define RI_DEBUG_H_INCLUDED 1
 
 #include	"aqsis.h"
-#include	"symbols.h"
 #include	"renderer.h"
 
 namespace Aqsis {
@@ -43,8 +42,7 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		CqPrimvarToken tok = declToPrimvarToken(
-				QGetRenderContext()->FindParameterDecl(token) );
+		CqPrimvarToken tok = QGetRenderContext()->tokenDict().parseAndLookup(token);
 
 		int size = tok.storageCount(interpClassCounts);
 

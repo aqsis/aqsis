@@ -37,7 +37,6 @@
 #include	"patch.h"
 #include	"polygon.h"
 #include	"nurbs.h"
-#include	"symbols.h"
 #include	"bilinear.h"
 #include	"quadrics.h"
 #include	"teapot.h"
@@ -478,8 +477,13 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 
 	DEBUG_RIDECLARE
 
-	CqString strName( name ), strDecl( declaration );
-	QGetRenderContext() ->AddParameterDecl( strName.c_str(), strDecl.c_str() );
+	CqPrimvarToken tok;
+	if(declaration)
+		tok = CqPrimvarToken(declaration, name);
+	else // declaration is allowed to be RI_NULL
+		tok = CqPrimvarToken(class_invalid, type_invalid, 0, name);
+	QGetRenderContext()->tokenDict().insert(tok);
+
 	EXCEPTION_CATCH_GUARD("RiDeclare")
 	return ( 0 );
 }
@@ -1547,9 +1551,9 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 		CqPrimvarToken tok;
 		try
 		{
-			tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ i ] ));
+			tok = QGetRenderContext()->tokenDict().parseAndLookup(tokens[i]);
 		}
-		catch( XqException& e )
+		catch(XqValidation& e)
 		{
 			Aqsis::log() << error << "RiHider: " << e.what() << std::endl;
 			continue;
@@ -1652,9 +1656,9 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		CqPrimvarToken tok;
 		try
 		{
-			tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
+			tok = QGetRenderContext()->tokenDict().parseAndLookup(token);
 		}
-		catch( XqException& e )
+		catch(XqValidation& e)
 		{
 			Aqsis::log() << error << "RiOption: " << e.what() << std::endl;
 			continue;
@@ -3060,9 +3064,9 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 			CqPrimvarToken tok;
 			try
 			{
-				tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
+				tok = QGetRenderContext()->tokenDict().parseAndLookup(token);
 			}
-			catch( XqException& e )
+			catch(XqValidation& e)
 			{
 				Aqsis::log() << error << e.what() << std::endl;
 				continue;
@@ -3987,7 +3991,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		std::vector<void*> aNewParams;
 		for( iUserParam = 0; iUserParam < count; ++iUserParam )
 		{
-			CqPrimvarToken tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] ));
+			CqPrimvarToken tok = QGetRenderContext()->tokenDict().parseAndLookup(tokens[iUserParam]);
 			TqInt elem_size = 0;
 			switch( tok.type() )
 			{
@@ -5907,9 +5911,18 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		CqPrimvarToken tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( token ));
-		const TqUlong hash = CqString::hash(tok.name().c_str());
+		CqPrimvarToken tok;
+		try
+		{
+			tok = QGetRenderContext()->tokenDict().parseAndLookup(token);
+		}
+		catch(XqValidation& e)
+		{
+			Aqsis::log() << error << e.what() << "\n";
+			continue;
+		}
 
+		const TqUlong hash = CqString::hash(tok.name().c_str());
 		if ( (hash == RIH_P) && (tok.Class() == class_vertex ))
 		{
 			fP = RIL_P;
@@ -5968,16 +5981,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		std::vector<TqInt>::iterator iUserParam;
 		for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); ++iUserParam )
 		{
-			CqPrimvarToken tok;
-			try
-			{
-				tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( tokens[ *iUserParam ] ));
-			}
-			catch( XqException e )
-			{
-				Aqsis::log() << error << e.what() << std::endl;
-				continue;
-			}
+			CqPrimvarToken tok = QGetRenderContext()->tokenDict().parseAndLookup(tokens[*iUserParam]);
 
 			CqParameter* pNewParam = CqParameter::Create(tok);
 			// Now go across all values and fill in the parameter variable.
@@ -6234,9 +6238,9 @@ void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char *
 	CqPrimvarToken tok;
 	try
 	{
-		tok = declToPrimvarToken(QGetRenderContext()->FindParameterDecl( name ));
+		tok = QGetRenderContext()->tokenDict().parseAndLookup(name);
 	}
-	catch( XqException& e )
+	catch(XqValidation& e)
 	{
 		Aqsis::log() << error << e.what() << std::endl;
 		return;

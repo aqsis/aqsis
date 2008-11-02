@@ -40,7 +40,6 @@
 #include	"rifile.h"
 #include	"texturemap_old.h"
 #include	"shadervm.h"
-#include	"inlineparse.h"
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
@@ -833,7 +832,7 @@ void CqRenderer::Quit()
 
 void CqRenderer::Initialise()
 {
-	ClearSymbolTable();
+	m_tokenDict.clear();
 	FlushShaders();
 
 	// Truncate the array of named coordinate systems to just the standard ones.
@@ -1123,137 +1122,6 @@ bool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld
 	// If we got here, it didn't exists.
 	m_aCoordSystems.push_back( SqCoordSys( strName, matToWorld, matToWorld.Inverse() ) );
 	return ( false );
-}
-
-
-//----------------------------------------------------------------------
-/** Find a parameter type declaration and return it.
- * \param strDecl Character pointer to the name of the declaration to find.
- */
-
-SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
-{
-	CqInlineParse parser;
-	std::string __strDecl( strDecl );
-	parser.parse( __strDecl );
-
-	if( parser.isInline() )
-	{
-		SqParameterDeclaration Decl;
-		Decl.m_strName = parser.getIdentifier();
-		Decl.m_Count = parser.getQuantity();
-		Decl.m_Type = parser.getType();
-		Decl.m_Class = parser.getClass();
-		Decl.m_strSpace = "";
-
-		// Get the creation function.
-		switch ( Decl.m_Class )
-		{
-				case class_constant:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsConstantArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsConstant[ Decl.m_Type ];
-				}
-				break;
-
-				case class_uniform:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsUniformArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsUniform[ Decl.m_Type ];
-				}
-				break;
-
-				case class_varying:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsVarying[ Decl.m_Type ];
-				}
-				break;
-
-				case class_vertex:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsVertex[ Decl.m_Type ];
-				}
-				break;
-
-				case class_facevarying:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsFaceVaryingArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsFaceVarying[ Decl.m_Type ];
-				}
-				break;
-
-				case class_facevertex:
-				{
-					if ( Decl.m_Count > 1 )
-						Decl.m_pCreate = gVariableCreateFuncsFaceVertexArray[ Decl.m_Type ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsFaceVertex[ Decl.m_Type ];
-				}
-				break;
-
-				default:
-				{
-					// left blank to avoid compiler warnings about unhandled types
-					break;
-				}
-		}
-		return ( Decl );
-	}
-
-	CqString strName = strDecl;
-	// Search the local parameter declaration list.
-	std::vector<SqParameterDeclaration>::iterator is;
-	std::vector<SqParameterDeclaration>::iterator end = m_Symbols.end();
-	const TqUlong hash = CqString::hash( strDecl );
-	for ( is = m_Symbols.begin(); is != end ; is++ )
-	{
-		if ( is->m_hash == 0)
-		{
-			is->m_hash = CqString::hash( is->m_strName.c_str() );
-		}
-		if ( hash == is->m_hash)
-			return ( *is );
-	}
-	return ( SqParameterDeclaration( "", type_invalid, class_invalid, 0, 0, "" ) );
-}
-
-
-//----------------------------------------------------------------------
-/** Add a parameter type declaration to the local declarations.
- * \param strName Character pointer to parameter name.
- * \param strType Character pointer to string containing the type identifier.
- */
-
-void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
-{
-	CqString strDecl( strType );
-	strDecl += " ";
-	strDecl += strName;
-	SqParameterDeclaration Decl;
-	try
-	{
-		Decl = FindParameterDecl( strDecl.c_str() );
-	}
-	catch( XqException e )
-	{
-		Aqsis::log() << error << e.what () << std::endl;
-		return;
-	}
-
-	// Put new declaration at the top to make it take priority over previous
-	m_Symbols.insert( m_Symbols.begin(), Decl );
 }
 
 
@@ -1664,130 +1532,77 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	if( ( offset = OutputDataIndex( name ) ) != -1 )
 		return(offset);
 
-	SqParameterDeclaration Decl;
-	try
-	{
-		Decl = FindParameterDecl( name );
-	}
-	catch( XqException e )
-	{
-			Aqsis::log() << error << e.what() << std::endl;
-		return(-1);
-	}
-	if( Decl.m_Type != type_invalid )
-	{
-		if( Decl.m_Count != 1 )
-			throw("Error: Cannot use array as an output type");
+	CqPrimvarToken tok = m_tokenDict.parseAndLookup(name);
+	if(tok.type() == type_invalid || tok.type() == type_string)
+		AQSIS_THROW(XqValidation, "Cannot use \"" << tok << "\" as an AOV");
+	if( tok.count() != 1 )
+		AQSIS_THROW(XqValidation, "Cannot use an array as an AOV [" << tok << "]");
 
-		SqOutputDataEntry DataEntry;
-		TqInt NumSamples = 0;
-		switch( Decl.m_Type )
-		{
-				case type_float:
-				case type_integer:
-				NumSamples = 1;
-				break;
-				case type_point:
-				case type_normal:
-				case type_vector:
-				case type_hpoint:
-				NumSamples = 3;
-				break;
-				case type_color:
-				// \note: Color is handled separately in case we ever support RiColorSamples
-				NumSamples = 3;
-				break;
-				case type_matrix:
-				NumSamples = 16;
-				break;
-				case type_string:
-				throw("Error: String not valid as an output type");
-				break;
-				default:
-				break;	// left blank to avoid compiler warnings about unhandled types
-		}
+	TqInt NumSamples = tok.storageCount();
+	SqOutputDataEntry DataEntry;
 
-		DataEntry.m_Offset = m_OutputDataOffset;
-		DataEntry.m_NumSamples = NumSamples;
-		DataEntry.m_Type = Decl.m_Type;
-		m_OutputDataOffset += NumSamples;
-		m_OutputDataTotalSize += NumSamples;
+	DataEntry.m_Offset = m_OutputDataOffset;
+	DataEntry.m_NumSamples = NumSamples;
+	DataEntry.m_Type = tok.type();
+	m_OutputDataOffset += NumSamples;
+	m_OutputDataTotalSize += NumSamples;
 
-		// Add the new entry to the map, using the Decl name as the key.
-		m_OutputDataEntries[Decl.m_strName] = DataEntry;
+	// Add the new entry to the map, using the token name as the key.
+	m_OutputDataEntries[tok.name()] = DataEntry;
 
-		return( DataEntry.m_Offset );
-	}
-	else
-		Aqsis::log() << error << "Unrecognised AOV output variable \"" << name << "\"" << std::endl;
-
-	return( -1 );
+	return DataEntry.m_Offset;
 }
 
 TqInt CqRenderer::OutputDataIndex( const char* name )
 {
-	SqParameterDeclaration Decl;
-	try
-	{
-		Decl = FindParameterDecl( name );
-	}
-	catch( XqException e )
-	{
-		Aqsis::log() << error << e.what() << std::endl;
-		return(-1);
-	}
-	if( Decl.m_Type != type_invalid )
-	{
-		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
-		if( entry != m_OutputDataEntries.end() )
-			return( entry->second.m_Offset );
-	}
-	return( -1 );
+	const SqOutputDataEntry* entry = FindOutputDataEntry(name);
+	if(!entry)
+		return -1;
+	return( entry->m_Offset );
 }
 
 TqInt CqRenderer::OutputDataSamples( const char* name )
 {
-	SqParameterDeclaration Decl;
-	try
-	{
-		Decl = FindParameterDecl( name );
-	}
-	catch( XqException e )
-	{
-		Aqsis::log() << error << e.what() << std::endl;
-		return(-1);
-	}
-	if( Decl.m_Type != type_invalid )
-	{
-		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
-		if( entry != m_OutputDataEntries.end() )
-			return( entry->second.m_NumSamples );
-	}
-	return( 0 );
+	const SqOutputDataEntry* entry = FindOutputDataEntry(name);
+	if(!entry)
+		return 0;
+	return entry->m_NumSamples;
 }
-
 
 TqInt CqRenderer::OutputDataType( const char* name )
 {
-	SqParameterDeclaration Decl;
-	try
-	{
-		Decl = FindParameterDecl( name );
-	}
-	catch( XqException e )
-	{
-		Aqsis::log() << error << e.what() << std::endl;
-		return(-1);
-	}
-	if( Decl.m_Type != type_invalid )
-	{
-		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
-		if( entry != m_OutputDataEntries.end() )
-			return( entry->second.m_Type );
-	}
-	return( 0 );
+	const SqOutputDataEntry* entry = FindOutputDataEntry(name);
+	if(!entry)
+		return 0;
+	return entry->m_Type;
 }
 
+/** \brief Found the AOV data entry corresponding to the given name
+ *
+ * \param name - name of the AOV data
+ * \return the data entry or 0 if not found
+ */
+const CqRenderer::SqOutputDataEntry* CqRenderer::FindOutputDataEntry(const char* name)
+{
+	CqPrimvarToken tok;
+	try
+	{
+		tok = m_tokenDict.parseAndLookup(name);
+	}
+	catch(XqValidation& e)
+	{
+		Aqsis::log() << error << e.what() << std::endl;
+		return 0;
+	}
+	if( tok.type() != type_invalid )
+	{
+		std::map<std::string, SqOutputDataEntry>::iterator entry
+			= m_OutputDataEntries.find( tok.name() );
+		if( entry != m_OutputDataEntries.end() )
+			return &entry->second;
+	}
+	return 0;
+}
 
 CqObjectInstance* CqRenderer::OpenNewObjectInstance()
 {
