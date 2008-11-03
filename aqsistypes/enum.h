@@ -230,18 +230,6 @@ class CqEnumInfo
 			}
 		};
 
-		/** Check that hashed values stored in the lookup vector are unique.
-		 *
-		 * It's pretty unlikely, but not inconceivable to have hash collisions
-		 * - this function checks that there are none.
-		 */
-		static bool hashesAreUnique(const TqLookupVec& lookup)
-		{
-			for(int i = 1, end = lookup.size(); i < end; ++i)
-				if(lookup[i-1].first == lookup[i].first)
-					return false;
-			return true;
-		}
 		/** \brief Initialize the lookup vector.
 		 *
 		 * \param names - string names for 
@@ -257,7 +245,6 @@ class CqEnumInfo
 				lookup.push_back(std::make_pair(h, static_cast<EnumT>(i)));
 			}
 			std::sort(lookup.begin(), lookup.end());
-			assert(hashesAreUnique(lookup));
 		}
 
 		/// vector of name strings
@@ -305,17 +292,24 @@ class CqEnumInfo
 		EnumT valueFromString(const std::string& str) const
 		{
 			TqHash h = CqString::hash(str.c_str());
-			// Binary search on hashed strings.  Assumes hashes are unique.
-			typename TqLookupVec::const_iterator i = std::lower_bound(
-					m_lookup.begin(), m_lookup.end(), h, SqHashCmp());
-			if(i != m_lookup.end() && i->first == h)
-				return i->second;
+			// Binary search on hashed strings.
+			typename TqLookupVec::const_iterator pos =
+				std::lower_bound(m_lookup.begin(), m_lookup.end(), h, SqHashCmp());
+			// Find the correct string in the presence of hash collisions.
+			for(typename TqLookupVec::const_iterator end = m_lookup.end();
+					pos != end && pos->first == h; ++pos)
+			{
+				EnumT value = pos->second;
+				if(stringFromValue(value) == str)
+					return value;
+			}
 			return m_defaultValue;
 		}
 		/// Return the string corresponding to the provided enum value.
 		const std::string& stringFromValue(EnumT value) const
 		{
-			assert(value < static_cast<int>(m_names.size()) && value >= 0);
+			assert(value >= 0);
+			assert(value < static_cast<int>(m_names.size()));
 			return m_names[value];
 		}
 		/// Return the default value for the enum
