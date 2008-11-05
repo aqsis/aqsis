@@ -63,7 +63,7 @@ void CqBucketProcessor::reset()
 	m_initiallyEmpty = false;
 }
 
-bool CqBucketProcessor::canCull(const CqBound* bound) const
+bool CqBucketProcessor::canCull(const CqBound& bound) const
 {
 	return m_bucketData.canCull(bound);
 }
@@ -87,7 +87,7 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 	if ( !m_initiallyEmpty )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
-		m_bucketData.setupOcclusionHierarchy(m_bucket);
+		m_bucketData.setupOcclusionTree(*m_bucket, viewRangeXMin, viewRangeYMin, viewRangeXMax, viewRangeYMax);
 	}
 }
 
@@ -96,8 +96,27 @@ void CqBucketProcessor::process()
 	if (!m_bucket)
 		return;
 
-	AQSIS_TIME_SCOPE(Render_MPGs);
-	m_bucket->RenderWaitingMPs();
+	// Render any waiting subsurfaces.
+	// \todo Need to refine the exit condition, to ensure that all previous buckets have been
+	// duly processed.
+	while ( hasPendingSurfaces() )
+	{
+		boost::shared_ptr<CqSurface> surface = getTopSurface();
+		if (surface)
+		{
+			// Advance to next surface
+			popSurface();
+			m_bucket->RenderSurface( surface );
+			{
+				AQSIS_TIME_SCOPE(Render_MPGs);
+				m_bucket->RenderWaitingMPs();
+			}
+		}
+	}
+	{
+		AQSIS_TIME_SCOPE(Render_MPGs);
+		m_bucket->RenderWaitingMPs();
+	}
 }
 
 void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )

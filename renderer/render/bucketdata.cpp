@@ -73,15 +73,14 @@ void CqBucketData::reset()
 	m_aCoverages.clear();
 }
 
-void CqBucketData::setupOcclusionHierarchy(const CqBucket* bucket)
+void CqBucketData::setupOcclusionTree(const CqBucket& bucket, TqInt xmin, TqInt ymin, TqInt xmax, TqInt ymax)
 {
-	assert(bucket);
-	m_OcclusionBox.SetupHierarchy(bucket);
+	m_OcclusionTree.setupTree(bucket, xmin, ymin, xmax, ymax);
 }
 
-bool CqBucketData::canCull(const CqBound* bound) const
+bool CqBucketData::canCull(const CqBound& bound) const
 {
-	return m_OcclusionBox.KDTree()->CanCull(bound);
+	return m_OcclusionTree.canCull(bound);
 }
 
 

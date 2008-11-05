@@ -380,7 +380,7 @@ class CqImagePixel
 		 * \param n The vertical index of the required sample point.
 		 * \return A Reference to a vector of SqImageSample data.
 		 */
-		//std::list<SqImageSample>&	Values( TqInt index );
+		std::deque<SqImageSample>&	Values( std::vector<SqSampleData>& samplePoints, TqInt index );
 
 		SqImageSample& OpaqueValues( std::vector<SqSampleData>& samplePoints, TqInt index );
 

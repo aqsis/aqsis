@@ -65,10 +65,10 @@ public:
 	void reset();
 
 	/** Setup occlusion hierarchy */
-	void setupOcclusionHierarchy(const CqBucket* bucket);
+	void setupOcclusionTree(const CqBucket& bucket, TqInt xmin, TqInt ymin, TqInt xmax, TqInt ymax);
 
 	/** Whether we can cull what's represented by the given bound */
-	bool canCull(const CqBound* bound) const;
+	bool canCull(const CqBound& bound) const;
 
 private:
 	/// Origin in discrete coordinates of this bucket.
@@ -83,6 +83,10 @@ private:
 	TqInt	m_RealWidth;
 	/// Actual size of the data for this bucket including filter overlap.
 	TqInt	m_RealHeight;
+	/// Actual origin of the data for this bucket including filter overlap.
+	TqInt	m_realXOrigin;
+	/// Actual size of the data for this bucket including filter overlap.
+	TqInt	m_realYOrigin;
 
 	TqInt	m_DiscreteShiftX;
 	TqInt	m_DiscreteShiftY;
@@ -113,7 +117,7 @@ private:
 
 	SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
-	CqOcclusionBox m_OcclusionBox;
+	CqOcclusionTree m_OcclusionTree;
 };
 
 

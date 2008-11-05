@@ -558,11 +558,11 @@ void CqImagePixel::OffsetSamples( std::vector<SqSampleData>& samplePoints, CqVec
 	}
 }
 
-//std::deque<SqImageSample>& CqImagePixel::Values( TqInt index )
-//{
-//    assert( index < m_XSamples*m_YSamples );
-//	return ( CqBucket::SamplePoints()[m_SampleIndices[ index ]].m_Data );
-//}
+std::deque<SqImageSample>&	CqImagePixel::Values( std::vector<SqSampleData>& samplePoints, TqInt index )
+{
+    assert( index < m_XSamples*m_YSamples );
+	return ( samplePoints[m_SampleIndices[ index ]].m_Data );
+}
 
 SqImageSample& CqImagePixel::OpaqueValues( std::vector<SqSampleData>& samplePoints, TqInt index )
 {

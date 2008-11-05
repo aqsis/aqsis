@@ -261,6 +261,12 @@ class CqImageBuffer
 		virtual	void	ImageComplete()
 		{}
 
+		/** Get a pointer to the bucket at position x,y in the grid.
+		 */
+		CqBucket& Bucket( TqInt x, TqInt y)
+		{
+			return( m_Buckets[y][x] );
+		}
 
 	private:
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
@@ -293,28 +299,18 @@ class CqImageBuffer
 		CqMPDump	m_mpdump;
 #endif
 
-
-		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
 		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
-		bool	OcclusionCullSurface( const CqBucketProcessor& bucketProcessor, const boost::shared_ptr<CqSurface>& pSurface );
-
 		void	DeleteImage();
 
 		/** Move to the next bucket to process.
 		 */
-    		bool NextBucket(EqBucketOrder order);
+		bool NextBucket(EqBucketOrder order);
 
 		/** Get a pointer to the current bucket
 		 */
 		CqBucket& CurrentBucket()
 		{
 			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
-		}
-		/** Get a pointer to the bucket at position x,y in the grid.
-		 */
-		CqBucket& Bucket( TqInt x, TqInt y)
-		{
-			return( m_Buckets[y][x] );
 		}
 		/** Get the column index of the bucket currently being processed.
 		 * \return Integer bucket index.

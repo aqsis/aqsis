@@ -455,10 +455,10 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
 			return;
 
-		XMinb = clamp( XMinb, 0, cXBuckets() );
-		YMinb = clamp( YMinb, 0, cYBuckets() );
-		XMaxb = clamp( XMaxb, 0, cXBuckets() );
-		YMaxb = clamp( YMaxb, 0, cYBuckets() );
+		XMinb = clamp( XMinb, 0, cXBuckets()-1 );
+		YMinb = clamp( YMinb, 0, cYBuckets()-1 );
+		XMaxb = clamp( XMaxb, 0, cXBuckets()-1 );
+		YMaxb = clamp( YMaxb, 0, cYBuckets()-1 );
 	}
 
 	// Sanity check we are not putting into a bucket that has already been processed.
@@ -484,71 +484,14 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			xb = XMinb;
 			++yb;
 		}
-		if(!done)
-			throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
+//		if(!done)
+//			throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
 	}
 	else
 	{
 		bucket->AddGPrim( pSurface );
 	}
 }
-
-//----------------------------------------------------------------------
-/** Test if this surface can be occlusion culled. If it can then
- * transfer surface to the next bucket it covers, or delete it if it
- * covers no more.
- * \param pSurface A pointer to a CqSurface derived class.
- * \return Boolean indicating that the GPrim has been culled.
-*/
-
-bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcessor, const boost::shared_ptr<CqSurface>& pSurface )
-{
-	const CqBound RasterBound( pSurface->GetCachedRasterBound() );
-
-	if ( bucketProcessor.canCull( &RasterBound ) )
-	{
-		// pSurface is behind everying in this bucket but it may be
-		// visible in other buckets it overlaps.
-		// bucket to the right
-		TqInt nextBucket = bucketProcessor.getBucket()->getCol() + 1;
-		CqVector2D pos = BucketPosition( nextBucket, bucketProcessor.getBucket()->getRow() );
-		if ( ( nextBucket < cXBuckets() ) &&
-		        ( RasterBound.vecMax().x() >= pos.x() ) )
-		{
-			Bucket( nextBucket, bucketProcessor.getBucket()->getRow() ).AddGPrim( pSurface );
-			return true;
-		}
-
-		// next row
-		nextBucket = bucketProcessor.getBucket()->getRow() + 1;
-		// find bucket containing left side of bound
-		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
-		nextBucketX = max( nextBucketX, 0 );
-		pos = BucketPosition( nextBucketX, nextBucket );
-
-		if ( ( nextBucketX < cXBuckets() ) &&
-		        ( nextBucket  < cYBuckets() ) &&
-		        ( RasterBound.vecMax().y() >= pos.y() ) )
-		{
-			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
-			return true;
-		}
-
-		// Bound covers no more buckets therefore we can delete the surface completely.
-		CqString objname( "unnamed" );
-		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-		if( pattrName )
-			objname = *pattrName;
-		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-		STATS_INC( GPR_culled );
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 
 //----------------------------------------------------------------------
 /** Add a new micro polygon to the list of waiting ones.
@@ -607,11 +550,12 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 		for ( TqInt j = iYBa; j <= iYBb; j++ )
 		{
 			CqBucket* bucket = &Bucket( i, j );
-			if ( bucket->IsProcessed() )
-			{
-				Aqsis::log() << warning << "Bucket already processed but a new MP touches it" << std::endl;
-			}
-			else
+			// Only add the MPG if the bucket isn't processed.
+			// \note It is possible for this to happen validly, if a primitive is occlusion culled in a 
+			// previous bucket, and not in a subsequent one. When it gets processed in the later bucket
+			// the MPGs can leak into the previous one, shouldn't be a problem, as the occlusion culling 
+			// means the MPGs shouldn't be rendered in that bucket anyway.
+			if ( !bucket->IsProcessed() )
 			{
 				bucket->AddMP( pmpgNew );
 			}
@@ -619,97 +563,6 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 	}
 }
 
-//----------------------------------------------------------------------
-/** Render the given Surface
- 
-    This method loops through all the gprims stored in the specified bucket
-    and checks if the gprim can be diced and turned into a grid of micro
-    polygons or if it is still too large and has to be split (this check
-    is done in CqSurface::Diceable()).
- 
-    The dicing is done by the gprim in CqSurface::Dice(). After that
-    the entire grid is shaded by calling CqMicroPolyGridBase::Shade().
-    The shaded grid is then stored in the current bucket and will eventually
-    be further processed by RenderGrids().
- 
-    If the gprim could not yet be diced, it is split into a number of
-    smaller gprims (CqSurface::Split()) which are again assigned to
-    buckets (this doesn't necessarily have to be the current one again)
-    by calling PostSurface() (just as if it were regular gprims).
- 
-    Finally, when all the gprims are diced and the resulting micro polygons
-    are rendered, the individual subpixel samples are combined into one
-    pixel color and opacity which is then exposed and quantized.
-    After that the method BucketComplete() and IqDDManager::DisplayBucket()
-    is called which can be used to display the bucket inside a window or
-    save it to disk.
- */
-void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax )
-{
-	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
-	bool fDiceable = false;
-	{
-		AQSIS_TIME_SCOPE(Dicable_check);
-		fDiceable = pSurface->Diceable();
-	}
-
-	// Dice & shade the surface if it's small enough...
-	if ( fDiceable )
-	{
-		CqMicroPolyGridBase* pGrid = 0;
-		{
-				AQSIS_TIME_SCOPE(Dicing);
-			pGrid = pSurface->Dice();
-		}
-
-		if ( NULL != pGrid )
-		{
-			ADDREF( pGrid );
-			// Only shade in all cases since the Displacement could be called in the shadow map creation too.
-			pGrid->Shade();
-			pGrid->TransferOutputVariables();
-
-			if ( pGrid->vfCulled() == false )
-			{
-				// Split any grids in this bucket waiting to be processed.
-				pGrid->Split( this, xmin, xmax, ymin, ymax);
-			}
-
-			RELEASEREF( pGrid );
-		}
-	}
-	// The surface is not small enough, so split it...
-	else if ( !pSurface->fDiscard() )
-	{
-		// Decrease the total gprim count since this gprim is replaced by other gprims
-		STATS_DEC( GPR_created_total );
-
-		// Split it
-		{
-			AQSIS_TIME_SCOPE(Splitting);
-			std::vector<boost::shared_ptr<CqSurface> > aSplits;
-			TqInt cSplits = pSurface->Split( aSplits );
-			for ( TqInt i = 0; i < cSplits; i++ )
-			{
-				PostSurface( aSplits[ i ] );
-			}
-
-			/// \debug:
-			/*
-			  if(pSurface->IsUndiceable())
-			  {
-			  CqBound Bound( pSurface->Bound() );
-			  std::cout << pSurface << " - " << Bound.vecMin().z() << " --> " << Bound.vecMax().z() << std::endl;
-			  for ( i = 0; i < cSplits; i++ )
-			  {
-			  CqBound SBound( aSplits[i]->Bound() );
-			  std::cout << "\t" << aSplits[i] << " - " << SBound.vecMin().z() << " --> " << SBound.vecMax().z() << std::endl;
-			  }
-			  }
-			*/			
-		}
-	}
-}
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
@@ -856,62 +709,35 @@ void CqImageBuffer::RenderImage()
 			bucketProcessors[i].setBucket(&CurrentBucket());
 			if (fImager)
 				bucketProcessors[i].setInitiallyEmpty(false);
-			{
-				// Set up some bounds for the bucket.
-				const CqBucket* bucket = bucketProcessors[i].getBucket();
-				const CqVector2D bPos = BucketPosition( bucket->getCol(),
-									bucket->getRow() );
-				const CqVector2D bSize = BucketSize( bucket->getCol(),
-								     bucket->getRow() );
-				const CqVector2D vecMin = bPos - bHalf;
-				const CqVector2D vecMax = bPos + bSize + bHalf;
 
-				TqInt xmin = static_cast<TqInt>( vecMin.x() );
-				TqInt ymin = static_cast<TqInt>( vecMin.y() );
-				TqInt xmax = static_cast<TqInt>( vecMax.x() );
-				TqInt ymax = static_cast<TqInt>( vecMax.y() );
-				if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
-					xmin = static_cast<TqInt>(CropWindowXMin() - m_FilterXWidth / 2.0f);
-				if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
-					ymin = static_cast<TqInt>(CropWindowYMin() - m_FilterYWidth / 2.0f);
-				if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
-					xmax = static_cast<TqInt>(CropWindowXMax() + m_FilterXWidth / 2.0f);
-				if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
-					ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
+			// Set up some bounds for the bucket.
+			const CqBucket* bucket = bucketProcessors[i].getBucket();
+			const CqVector2D bPos = BucketPosition( bucket->getCol(),
+								bucket->getRow() );
+			const CqVector2D bSize = BucketSize( bucket->getCol(),
+								 bucket->getRow() );
+			const CqVector2D vecMin = bPos - bHalf;
+			const CqVector2D vecMax = bPos + bSize + bHalf;
 
-				bucketProcessors[i].preProcess( bPos, bSize,
-								m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
-								xmin, xmax, ymin, ymax,
-								m_ClippingNear, m_ClippingFar );
+			TqInt xmin = static_cast<TqInt>( vecMin.x() );
+			TqInt ymin = static_cast<TqInt>( vecMin.y() );
+			TqInt xmax = static_cast<TqInt>( vecMax.x() );
+			TqInt ymax = static_cast<TqInt>( vecMax.y() );
+			if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
+				xmin = static_cast<TqInt>(CropWindowXMin() - m_FilterXWidth / 2.0f);
+			if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
+				ymin = static_cast<TqInt>(CropWindowYMin() - m_FilterYWidth / 2.0f);
+			if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
+				xmax = static_cast<TqInt>(CropWindowXMax() + m_FilterXWidth / 2.0f);
+			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
+				ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
+			bucketProcessors[i].preProcess( bPos, bSize,
+							m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
+							xmin, xmax, ymin, ymax,
+							m_ClippingNear, m_ClippingFar );
 
-				// Render any waiting subsurfaces.
-				while ( bucketProcessors[i].hasPendingSurfaces() )
-				{
-					AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
-					boost::shared_ptr<CqSurface> pSurface = bucketProcessors[i].getTopSurface();
-					if (pSurface)
-					{
-						// Advance to next surface
-						bucketProcessors[i].popSurface();
-
-						// Cull surface if it's hidden
-						if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
-						{
-							AQSIS_TIME_SCOPE(Occlusion_culling);
-							if ( !bucketProcessors[i].isInitiallyEmpty() &&
-							     pSurface->fCachedBound() &&
-							     OcclusionCullSurface( bucketProcessors[i], pSurface ) )
-							{
-								continue;
-							}
-						}
-
-						RenderSurface( pSurface, xmin, xmax, ymin, ymax );
-					}
-				}
-			}
-
+			// Kick off a thread to process this bucket.
 			threadProcessors.push_back( CqThreadProcessor( &bucketProcessors[i] ) );
 			threadScheduler.addWorkUnit( threadProcessors.back() );
 
@@ -920,6 +746,7 @@ void CqImageBuffer::RenderImage()
 			pendingBuckets = NextBucket(order);
 		}
 
+		// Wait for all current buckets to complete before allocating more to the available threads.
 		threadScheduler.joinAll();
 		threadProcessors.clear();
 

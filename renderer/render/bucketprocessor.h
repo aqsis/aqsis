@@ -57,7 +57,8 @@ public:
 	void reset();
 
 	/** Whether we can cull what's represented by the given bound */
-	bool canCull(const CqBound* bound) const;
+	bool canCull(const CqBound& bound) const;
+	
 
 	/** Prepare the data for the bucket to be processed */
 	void preProcess(const CqVector2D& pos, const CqVector2D& size,

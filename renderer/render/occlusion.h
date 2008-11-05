@@ -17,190 +17,105 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 /** \file
-		\brief Declares the hierarchical occlusion culling class.
-		\author Andy Gill (billybobjimboy@users.sf.net)
-*/
+ * \brief Hierarchical occlusion culling tree
+ * \author Paul Gregory
+ * \author Chris Foster
+ */
 
-//? Is .h included already?
 #ifndef OCCLUSION_H_INCLUDED
-#define OCCLUSION_H_INCLUDED 1
+#define OCCLUSION_H_INCLUDED
 
-#include <boost/array.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include "aqsis.h"
 
 #include <vector>
 
-#include "aqsis.h"
-#include "kdtree.h"
 #include "vector2d.h"
-#include "imagepixel.h"
 
 namespace Aqsis {
 
 class CqBound;
 class CqBucket;
-class CqMicroPolygon;
-
-struct SqMpgSampleInfo;
-struct SqImageSample;
 struct SqSampleData;
-struct SqGridInfo;
 
-class CqOcclusionTree;
-class CqHitTestCache;
-//typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
-//typedef boost::weak_ptr<CqOcclusionTree> CqOcclusionTreeWeakPtr;
-typedef CqOcclusionTree* CqOcclusionTreePtr;
-typedef CqOcclusionTree* CqOcclusionTreeWeakPtr;
-
-
-/**	\brief	The CqOcclusionKDTreeData class
-	Specialisation of the KDTree data class to support generation of a KDTree
-	representing the sample data of a bucket.
-*/
-class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
+/** \brief An tree for occlusion culling of bounded objects.
+ *
+ * Given the bound for an object, the task of CqOcclusionTree is to decide
+ * whether the object is partially visible or completely hidden by previously
+ * rendered objects.  (If the latter, the object can usually be thrown away
+ * immediately.)
+ *
+ * The tree uses a binary space partition in alternate directions (x,y) and is
+ * stored in an array for efficiency.  Each tree node stores the maximum depth
+ * found in opaque samples connected to its child nodes.  This means that if a
+ * surface is further away than the root node (for example) it can be safely
+ * culled, and so on down the tree.
+ */
+class CqOcclusionTree
 {
 	public:
-		CqOcclusionTree(TqInt dimension = 0);
-		~CqOcclusionTree();
+		/// Construct an uninitialized tree.
+		CqOcclusionTree();
 
-		void AddSample(const std::pair<TqInt, TqInt>& sample)
-		{
-			m_SampleIndices.push_back(sample);
-		}
-		bool CanCull( const CqBound* bound );
-		void SampleMP( std::vector<CqImagePixel>& aieImage,
-			       std::vector<SqSampleData>& samplePoints,
-			       CqMicroPolygon* pMP,
-			       const CqBound& bound,
-			       bool usingMB,
-			       TqFloat time0,
-			       TqFloat time1,
-			       bool usingDof,
-			       TqInt dofboundindex,
-			       const SqMpgSampleInfo& MpgSampleInfo,
-			       bool usingLOD,
-			       const SqGridInfo& gridInfo,
-			       CqHitTestCache& hitTestCache );
+		/** \brief Setup the hierarchy for one bucket and cache samples.
+		 *
+		 * This should be called before rendering each bucket, it sets up the
+		 * tree based on the sample positions, and associates individual
+		 * samples from the bucket to leaf nodes of the tree.
+		 *
+		 * \param bucket - the bucket to be rendered.
+		 * \param xMin - left edge of culling region.
+		 * \param yMin - top edge of culling region.
+		 * \param xMax - right edge of culling region.
+		 * \param yMax - bottom edge of culling region.
+		 *
+		 * Note that the culling region may be smaller than the bucket in
+		 * general (in particular for buckets which fall partially off the edge
+		 * of the image).
+		 */
+		void setupTree(const CqBucket& bucket, TqInt xMin, TqInt yMin,
+				TqInt xMax, TqInt yMax);
 
-		void ConstructTree(const CqBucket* bucket);
-		void InitialiseBounds(const CqBucket* bucket);
-		void UpdateBounds(const CqBucket* bucket);
+		/** \brief Rebuild the occlusion tree.
+		 *
+		 * The tree is rebuilt based on the current opaque sample depths from
+		 * the bucket provided to SetupHierarchy()
+		 */
+		void updateDepths();
+
+		/** \brief Determine whether a bounded object can be culled.
+		 *
+		 * \param bound - bound of the object.
+		 * \return true if the object is occlueded behind previously rendered
+		 *         objects and can be culled, false otherwise.
+		 */
+		bool canCull(const CqBound& bound) const;
 
 	private:
-		class CqOcclusionTreeComparator
-		{
-			public:
-				CqOcclusionTreeComparator(const CqBucket* bucket, TqInt dimension) :
-					m_bucket( bucket ), m_Dim( dimension )
-				{}
+		static TqInt treeIndexForPoint(TqInt treeDepth, const CqVector2D& p);
+		void propagateDepths();
 
-				bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
-
-			private:
-				const CqBucket*	m_bucket;
-				TqInt		m_Dim;
-		};
-
-		enum { s_ChildrenPerNode = 4 };
-		typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
-
-		typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
-
-		void SplitNode(const CqBucket* bucket, CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
-
-		void StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample);
-
-		SqSampleData& Sample(const CqBucket* bucket, size_t index) const;
-		SqSampleData& Sample(std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, size_t index) const;
-
-		void PropagateChanges();
-
-		void OutputTree(const char* name);
-
-		TqInt Dimensions() const
-		{
-			return(2);
-		}
-
-		TqInt NumSamples() const
-		{
-			return(m_SampleIndices.size());
-		}
-
-		TqFloat MaxOpaqueZ() const
-		{
-			return(m_MaxOpaqueZ);
-		}
-
-		void SetMaxOpaqueZ(TqFloat z)
-		{
-			m_MaxOpaqueZ = z;
-		}
-
-		const CqVector2D& MinSamplePoint() const
-		{
-			return(m_MinSamplePoint);
-		}
-
-		const CqVector2D& MaxSamplePoint() const
-		{
-			return(m_MaxSamplePoint);
-		}
-
-		void SortElements(const CqBucket* bucket, TqInt dimension)
-		{
-			std::sort(m_SampleIndices.begin(),
-				  m_SampleIndices.end(),
-				  CqOcclusionTreeComparator(bucket, dimension) );
-		}
-
-		CqOcclusionTreeWeakPtr	m_Parent;
-		TqInt		m_Dimension;
-		CqVector2D	m_MinSamplePoint;
-		CqVector2D	m_MaxSamplePoint;
-		TqFloat		m_MinTime;
-		TqFloat		m_MaxTime;
-		TqFloat		m_MaxOpaqueZ;
-		TqInt		m_MinDofBoundIndex;
-		TqInt		m_MaxDofBoundIndex;
-		TqFloat		m_MinDetailLevel;
-		TqFloat		m_MaxDetailLevel;
-		TqChildArray	m_Children;
-		TqSampleIndices	m_SampleIndices;
-
-	public:
-		static TqInt		m_Tab;
+		/// min (top left) of the area straddled by the tree
+		CqVector2D m_treeBoundMin;
+		/// max (bottom right) of the area straddled by the tree
+		CqVector2D m_treeBoundMax;
+		/// min (top left) of the culling area
+		CqVector2D m_cullBoundMin;
+		/// max (bottom right) of the culling area
+		CqVector2D m_cullBoundMax;
+		/// Vector holding samples points associated with the leaf nodes.
+		std::vector<std::vector<SqSampleData*> > m_leafSamples;
+		/// Binary tree of depths stored in an array.
+		std::vector<TqFloat> m_depthTree;
+		/// The index in the depth tree of the first terminal node.
+		TqInt m_firstLeafNode;
+		/// Number of tree levels (having only the root gives m_numLevels == 1)
+		TqInt m_numLevels;
 };
 
 
-class CqOcclusionBox
-{
-	public:
-		CqOcclusionBox();
-		~CqOcclusionBox();
-
-		void SetupHierarchy( const CqBucket* bucket );
-
-		bool CanCull( const CqBound* bound ) const;
-
-		const CqOcclusionTreePtr& KDTree() const
-		{
-			return(m_KDTree);
-		}
-
-	protected:
-		CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
-};
-
-
+extern CqOcclusionTree g_occlusionTree;
 
 } // namespace Aqsis
 
-
 #endif // OCCLUSION_H_INCLUDED
-

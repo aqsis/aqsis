@@ -39,6 +39,7 @@
 #include	"occlusion.h"
 #include	"renderer.h"
 #include	"micropolygon.h"
+#include	"imagebuffer.h"
 
 #include	"bucket.h"
 #include	"stats.h"
@@ -122,6 +123,8 @@ void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& buc
 	m_bucketData->m_DiscreteShiftY = lfloor(m_bucketData->m_FilterYWidth/2.0f);
 	m_bucketData->m_RealWidth = m_bucketData->m_XSize + (m_bucketData->m_DiscreteShiftX*2);
 	m_bucketData->m_RealHeight = m_bucketData->m_YSize + (m_bucketData->m_DiscreteShiftY*2);
+	m_bucketData->m_realXOrigin = lfloor(static_cast<TqFloat>(m_bucketData->m_XOrigin) - m_bucketData->m_DiscreteShiftX);
+	m_bucketData->m_realYOrigin = lfloor(static_cast<TqFloat>(m_bucketData->m_YOrigin) - m_bucketData->m_DiscreteShiftY);
 
 	m_bucketData->m_viewRangeXMin = viewRangeXMin;
 	m_bucketData->m_viewRangeXMax = viewRangeXMax;
@@ -1045,36 +1048,99 @@ bool CqBucket::hasPendingMPs() const
     Render ready micro polygons waiting to be processed, so that we
     have as few as possible MPs waiting and using memory at any given
     moment
- 
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
 void CqBucket::RenderWaitingMPs()
 {
-	for ( std::vector<boost::shared_ptr<CqMicroPolygon> >::iterator itMP = m_micropolygons.begin();
-	      itMP != m_micropolygons.end();
-	      itMP++ )
+	bool mpgsRendered = false;
 	{
-		CqMicroPolygon* mp = (*itMP).get();
-		RenderMicroPoly( mp );
-	}
+		for ( std::vector<boost::shared_ptr<CqMicroPolygon> >::iterator itMP = m_micropolygons.begin();
+			  itMP != m_micropolygons.end();
+			  itMP++ )
+		{
+			CqMicroPolygon* mp = (*itMP).get();
+			RenderMicroPoly( mp );
+			mpgsRendered = true;
+		}
 
-	m_micropolygons.clear();
+		m_micropolygons.clear();
+	}
+	if(mpgsRendered)
+		m_bucketData->m_OcclusionTree.updateDepths();
 }
 
+
+//----------------------------------------------------------------------
+/** Render the given Surface
+ */
+void CqBucket::RenderSurface( boost::shared_ptr<CqSurface>& surface )
+{
+	// Cull surface if it's hidden
+	if ( !( QGetRenderContext()->pImage()->DisplayMode() & ModeZ ) && !surface->pCSGNode() )
+	{
+		AQSIS_TIME_SCOPE(Occlusion_culling);
+		if ( surface->fCachedBound() &&
+			 occlusionCullSurface( surface ) )
+		{
+			return;
+		}
+	}
+
+	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
+	bool fDiceable = false;
+	{
+		AQSIS_TIME_SCOPE(Dicable_check);
+		fDiceable = surface->Diceable();
+	}
+
+	// Dice & shade the surface if it's small enough...
+	if ( fDiceable )
+	{
+		CqMicroPolyGridBase* pGrid = 0;
+		{
+			AQSIS_TIME_SCOPE(Dicing);
+			pGrid = surface->Dice();
+		}
+
+		if ( NULL != pGrid )
+		{
+			ADDREF( pGrid );
+			// Only shade in all cases since the Displacement could be called in the shadow map creation too.
+			pGrid->Shade();
+			pGrid->TransferOutputVariables();
+
+			if ( pGrid->vfCulled() == false )
+			{
+				// Split any grids in this bucket waiting to be processed.
+				pGrid->Split( QGetRenderContext()->pImage(), realXOrigin(), realXOrigin()+RealWidth(), realYOrigin(), realYOrigin()+RealHeight());
+			}
+
+			RELEASEREF( pGrid );
+		}
+	}
+	// The surface is not small enough, so split it...
+	else if ( !surface->fDiscard() )
+	{
+		// Decrease the total gprim count since this gprim is replaced by other gprims
+		STATS_DEC( GPR_created_total );
+
+		// Split it
+		{
+			AQSIS_TIME_SCOPE(Splitting);
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
+			TqInt cSplits = surface->Split( aSplits );
+			for ( TqInt i = 0; i < cSplits; i++ )
+			{
+				QGetRenderContext()->pImage()->PostSurface( aSplits[ i ] );
+			}
+		}
+	}
+}
 
 //----------------------------------------------------------------------
 /** Render a particular micropolygon.
  
  * \param pMP Pointer to the micropolygon to process.
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- 
    \see CqBucket, CqImagePixel
  */
 
@@ -1122,66 +1188,215 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMP )
 				GetIntegerOption("System", "DisplayMode")[0] & ModeZ);
 
 	if(IsMoving || UsingDof)
-		RenderMP_MBOrDof( pMP, IsMoving, UsingDof );
+		RenderMPG_MBOrDof( pMP, IsMoving, UsingDof );
 	else
-		RenderMP_Static( pMP );
+		RenderMPG_Static( pMP );
 }
 
 
-//---------------------------------------------------------------------
-/** This function assumes that either dof or mb or both are being
- * used.
- */
-void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
-				 bool IsMoving, bool UsingDof )
-{
-	CqHitTestCache hitTestCache;
-	pMP->CacheHitTestValues(&hitTestCache);
 
-	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
+// this function assumes that neither dof or mb are being used. it is much
+// simpler than the general case dealt with above.
+void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG)
+{
+	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
+    const TqFloat* LodBounds = currentGridInfo.m_LodBounds;
+    bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+
+    TqInt sample_hits = 0;
+    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
+
+	CqHitTestCache hitTestCache;
+	bool cachedHitData = false;
+
+	//bool mustDraw = !m_CurrentGridInfo.m_IsCullable;
+
+    CqBound Bound = pMPG->GetTotalBound();
+
+	TqFloat bminx = Bound.vecMin().x();
+	TqFloat bmaxx = Bound.vecMax().x();
+	TqFloat bminy = Bound.vecMin().y();
+	TqFloat bmaxy = Bound.vecMax().y();
+	//TqFloat bminz = Bound.vecMin().z();
+
+	// Now go across all pixels touched by the micropolygon bound.
+	// The first pixel position is at (sX, sY), the last one
+	// at (eX, eY).
+	TqInt eX = lceil( bmaxx );
+	TqInt eY = lceil( bmaxy );
+	if ( eX > m_bucketData->m_viewRangeXMax ) eX = m_bucketData->m_viewRangeXMax;
+	if ( eY > m_bucketData->m_viewRangeYMax ) eY = m_bucketData->m_viewRangeYMax;
+
+	TqInt sX = static_cast<TqInt>(std::floor( bminx ));
+	TqInt sY = static_cast<TqInt>(std::floor( bminy ));
+	if ( sY < m_bucketData->m_viewRangeYMin ) sY = m_bucketData->m_viewRangeYMin;
+	if ( sX < m_bucketData->m_viewRangeXMin ) sX = m_bucketData->m_viewRangeXMin;
+
+	CqImagePixel* pie, *pie2;
+
+	TqInt iXSamples = PixelXSamples();
+	TqInt iYSamples = PixelYSamples();
+
+	TqInt im = ( bminx < sX ) ? 0 : static_cast<TqInt>(std::floor( ( bminx - sX ) * iXSamples ));
+	TqInt in = ( bminy < sY ) ? 0 : static_cast<TqInt>(std::floor( ( bminy - sY ) * iYSamples ));
+	TqInt em = ( bmaxx > eX ) ? iXSamples : lceil( ( bmaxx - ( eX - 1 ) ) * iXSamples );
+	TqInt en = ( bmaxy > eY ) ? iYSamples : lceil( ( bmaxy - ( eY - 1 ) ) * iYSamples );
+
+	TqInt nextx = RealWidth();
+	ImageElement( sX, sY, pie );
+
+	for( int iY = sY; iY < eY; ++iY)
+	{
+		pie2 = pie;
+		pie += nextx;
+
+		for(int iX = sX; iX < eX; ++iX, ++pie2)
+		{
+			// only bother sampling if the mpg is not occluded in this pixel.
+			//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+			{
+				if(!cachedHitData)
+				{
+					pMPG->CacheHitTestValues(&hitTestCache);
+					cachedHitData = true;
+				}
+
+				// Now sample the micropolygon at several subsample positions
+				// within the pixel. The subsample indices range from (start_m, n)
+				// to (end_m-1, end_n-1).
+				register int m, n;
+				n = ( iY == sY ) ? in : 0;
+				int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
+				int start_m = ( iX == sX ) ? im : 0;
+				int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
+				int index_start = n*iXSamples + start_m;
+
+				for ( ; n < end_n; n++ )
+				{
+					int index = index_start;
+					for ( m = start_m; m < end_m; m++, index++ )
+					{
+						const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints, index );
+						//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+						{
+							const CqVector2D& vecP = sampleData.m_Position;
+							const TqFloat time = 0.0;
+
+							CqStats::IncI( CqStats::SPL_count );
+
+							if(!Bound.Contains2D( vecP ))
+								continue;
+
+							// Check to see if the sample is within the sample's level of detail
+							if ( UsingLevelOfDetail)
+							{
+								TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+								{
+									continue;
+								}
+							}
+
+							CqStats::IncI( CqStats::SPL_bound_hits );
+
+							// Now check if the subsample hits the micropoly
+							bool SampleHit;
+							TqFloat D;
+
+							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time );
+
+							if ( SampleHit )
+							{
+								sample_hits++;
+								StoreSample( pMPG, pie2, index, D );
+							}
+						}
+					}
+					index_start += iXSamples;
+				}
+			}
+	/*        // Now compute the % of samples that hit...
+			TqInt scount = iXSamples * iYSamples;
+			TqFloat max_hits = scount * shd_rate;
+			TqInt hit_rate = ( sample_hits / max_hits ) / 0.125;
+			STATS_INC( MPG_sample_coverage0_125 + CLAMP( hit_rate - 1 , 0, 7 ) );
+	*/  }
+	}
+}
+
+// this function assumes that either dof or mb or both are being used.
+void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, bool UsingDof )
+{
+	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
+
+    const TqFloat* LodBounds = currentGridInfo.m_LodBounds;
+    bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+
+    TqInt sample_hits = 0;
+    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
+
+	CqHitTestCache hitTestCache;
+	bool cachedHitData = false;
+
+	TqInt iXSamples = PixelXSamples();
+    TqInt iYSamples = PixelYSamples();
+
+	TqFloat opentime = currentGridInfo.m_ShutterOpenTime;
 	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
-	TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
-	TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
+	TqFloat timePerSample = 0;
+	if(IsMoving)
+	{
+		TqInt numSamples = iXSamples * iYSamples;
+		timePerSample = (float)numSamples / ( closetime - opentime );
+	}
 
 	const TqUint timeRanges = std::max(4, m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples);
-	TqInt bound_maxMB = pMP->cSubBounds( timeRanges );
-	TqInt bound_maxMB_1 = bound_maxMB - 1;
-	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
-	{
-		const CqBound& Bound = pMP->SubBound( bound_numMB, time0 );
+	TqInt bound_maxMB = pMPG->cSubBounds( timeRanges );
+    TqInt bound_maxMB_1 = bound_maxMB - 1;
+	//TqInt currentIndex = 0;
+    for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
+    {
+        TqFloat time0;
+        TqFloat time1;
+        const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
-		if (IsMoving)
+		TqInt indexT0 = 0;
+		TqInt indexT1 = 0;
+		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
-				pMP->SubBound( bound_numMB + 1, time1 );
+				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
-				time1 = closetime;
+				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
+	
+			indexT0 = static_cast<TqInt>(std::floor((time0 - opentime) * timePerSample));
+			indexT1 = static_cast<TqInt>(lceil((time1 - opentime) * timePerSample));
 		}
 
-		TqFloat maxCocX = 0.0f;
-		TqFloat maxCocY = 0.0f;
+		TqFloat maxCocX = 0;
+		TqFloat maxCocY = 0;
 
-		TqFloat bminx = 0.0f;
-		TqFloat bmaxx = 0.0f;
-		TqFloat bminy = 0.0f;
-		TqFloat bmaxy = 0.0f;
-		TqFloat bminz = 0.0f;
-		TqFloat bmaxz = 0.0f;
+		TqFloat bminx = 0;
+		TqFloat bmaxx = 0;
+		TqFloat bminy = 0;
+		TqFloat bmaxy = 0;
+		TqFloat bminz = 0;
+		TqFloat bmaxz = 0;
 		// these values are the bound of the mpg not including dof extension.
 		// reduce the mpg bound so it doesn't include the coc.
-		TqFloat mpgbminx = 0.0f;
-		TqFloat mpgbmaxx = 0.0f;
-		TqFloat mpgbminy = 0.0f;
-		TqFloat mpgbmaxy = 0.0f;
-		TqInt bound_maxDof = 0;
-		if (UsingDof)
+		TqFloat mpgbminx = 0;
+		TqFloat mpgbmaxx = 0;
+		TqFloat mpgbminy = 0;
+		TqFloat mpgbmaxy = 0;
+		TqInt bound_maxDof = 1;
+		if(UsingDof)
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
-			maxCocX = std::max( minZCoc.x(), maxZCoc.x() );
-			maxCocY = std::max( minZCoc.y(), maxZCoc.y() );
+			maxCocX = max( minZCoc.x(), maxZCoc.x() );
+			maxCocY = max( minZCoc.y(), maxZCoc.y() );
 
 			mpgbminx = Bound.vecMin().x() + maxCocX;
 			mpgbmaxx = Bound.vecMax().x() - maxCocX;
@@ -1206,7 +1421,7 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 
 		for ( TqInt bound_numDof = 0; bound_numDof < bound_maxDof; bound_numDof++ )
 		{
-			if (UsingDof)
+			if(UsingDof)
 			{
 				// now shift the bounding box to cover only a given range of
 				// lens positions.
@@ -1233,68 +1448,369 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 				continue;
 			}
 
-			if (UsingDof)
+			// Now go across all pixels touched by the micropolygon bound.
+			// The first pixel position is at (sX, sY), the last one
+			// at (eX, eY).
+			TqInt eX = lceil( bmaxx );
+			TqInt eY = lceil( bmaxy );
+			if ( eX > m_bucketData->m_viewRangeXMax ) eX = m_bucketData->m_viewRangeXMax;
+			if ( eY > m_bucketData->m_viewRangeYMax ) eY = m_bucketData->m_viewRangeYMax;
+
+			TqInt sX = static_cast<TqInt>(std::floor( bminx ));
+			TqInt sY = static_cast<TqInt>(std::floor( bminy ));
+			if ( sY < m_bucketData->m_viewRangeYMin ) sY = m_bucketData->m_viewRangeYMin;
+			if ( sX < m_bucketData->m_viewRangeXMin ) sX = m_bucketData->m_viewRangeXMin;
+
+			CqImagePixel* pie, *pie2;
+
+			TqInt nextx = RealWidth();
+			ImageElement( sX, sY, pie );
+
+			for( int iY = sY; iY < eY; ++iY)
 			{
-				const CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
-										m_bucketData->m_SamplePoints,
-										pMP,
-										DofBound,
-										IsMoving,
-										time0,
-										time1,
-										true,
-										bound_numDof,
-										m_bucketData->m_CurrentMpgSampleInfo,
-										currentGridInfo.m_LodBounds[0] >= 0.0f,
-										currentGridInfo,
-										hitTestCache);
+				pie2 = pie;
+				pie += nextx;
+
+				for(int iX = sX; iX < eX; ++iX, ++pie2)
+				{
+					TqInt index;
+					if(UsingDof)
+					{
+						// when using dof only one sample per pixel can
+						// possibbly hit (the one corresponding to the
+						// current bounding box).
+						index = pie2->GetDofOffsetIndex(bound_numDof);
+					}
+					else
+					{
+						// when using mb without dof, a range of samples
+						// may have times within the current mb bounding box.
+						index = indexT0;
+					}
+					// only bother sampling if the mpg is not occluded in this pixel.
+					//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+					{
+
+						// loop over potential samples
+						do
+						{
+							const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints, index );
+							const CqVector2D& vecP = sampleData.m_Position;
+							const TqFloat time = sampleData.m_Time;
+
+							index++;
+
+							CqStats::IncI( CqStats::SPL_count );
+
+							if(IsMoving && (time < time0 || time > time1))
+							{
+								continue;
+							}
+
+							// check if sample lies inside mpg bounding box.
+							if ( UsingDof )
+							{
+								CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
+
+								if(!DofBound.Contains2D( vecP ))
+									continue;
+
+								// Check to see if the sample is within the sample's level of detail
+								if ( UsingLevelOfDetail)
+								{
+									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+									{
+										continue;
+									}
+								}
+
+
+								CqStats::IncI( CqStats::SPL_bound_hits );
+
+								// Now check if the subsample hits the micropoly
+								bool SampleHit;
+								TqFloat D;
+
+								SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+								if ( SampleHit )
+								{
+									sample_hits++;
+									// note index has already been incremented, so we use the previous value.
+									StoreSample( pMPG, pie2, index-1, D );
+								}
+							}
+							else
+							{
+								if(!Bound.Contains2D( vecP ))
+									continue;
+								// Check to see if the sample is within the sample's level of detail
+								if ( UsingLevelOfDetail)
+								{
+									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+									{
+										continue;
+									}
+								}
+
+
+								CqStats::IncI( CqStats::SPL_bound_hits );
+
+								// Now check if the subsample hits the micropoly
+								bool SampleHit;
+								TqFloat D;
+
+								pMPG->CacheHitTestValues(&hitTestCache);
+								cachedHitData = true;
+
+								SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+								if ( SampleHit )
+								{
+									sample_hits++;
+									// note index has already been incremented, so we use the previous value.
+									StoreSample( pMPG, pie2, index-1, D );
+								}
+							}
+						} while (!UsingDof && index < indexT1);
+					}
+				}
 			}
-			else
+		}
+    }
+}
+
+void CqBucket::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
+{
+	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
+
+    bool Occludes = m_bucketData->m_CurrentMpgSampleInfo.occludes;
+	bool opaque =  m_bucketData->m_CurrentMpgSampleInfo.isOpaque;
+
+	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(m_bucketData->m_SamplePoints, index);
+	//static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
+	SqImageSample localImageVal;
+
+	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
+
+	std::deque<SqImageSample>& aValues = pie2->Values( m_bucketData->m_SamplePoints, index );
+	std::deque<SqImageSample>::iterator sample = aValues.begin();
+	std::deque<SqImageSample>::iterator end = aValues.end();
+
+	// return if the sample is occluded and can be culled.
+	if(opaque)
+	{
+		if((currentOpaqueSample.isValid()) &&
+			currentOpaqueSample.Data()[Sample_Depth] <= D)
+		{
+			return;
+		}
+	}
+	else
+	{
+		// Sort the color/opacity into the visible point list
+		// return if the sample is occluded and can be culled.
+		while( sample != end )
+		{
+			if((*sample).Data()[Sample_Depth] >= D)
+				break;
+
+			if(((*sample).isOccludes()) &&
+				!(*sample).m_pCSGNode && currentGridInfo.m_IsCullable)
+				return;
+
+			++sample;
+		}
+	}
+
+    ImageVal.Data()[Sample_Depth] = D ;
+
+	CqStats::IncI( CqStats::SPL_hits );
+	pMPG->MarkHit();
+
+    TqFloat* val = ImageVal.Data();
+	CqColor col;
+	CqColor opa;
+	const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints, index );
+	const CqVector2D& vecP = sampleData.m_Position;
+	pMPG->InterpolateOutputs(m_bucketData->m_CurrentMpgSampleInfo, vecP, col, opa);
+
+    val[ Sample_Red ] = col[0];
+    val[ Sample_Green ] = col[1];
+    val[ Sample_Blue ] = col[2];
+    val[ Sample_ORed ] = opa[0];
+    val[ Sample_OGreen ] = opa[1];
+    val[ Sample_OBlue ] = opa[2];
+    val[ Sample_Depth ] = D;
+
+    // Now store any other data types that have been registered.
+	if(currentGridInfo.m_UsesDataMap)
+	{
+		StoreExtraData(pMPG, ImageVal);
+	}
+
+	if(!opaque)
+	{
+		// If depth is exactly the same as previous sample, chances are we've
+		// hit a MPG grid line.
+		// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
+		if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
+		{
+			//(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+			return;
+		}
+	}
+
+    ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
+
+    ImageVal.resetFlags();
+    if ( Occludes )
+    {
+        ImageVal.setOccludes();
+    }
+    if( currentGridInfo.m_IsMatte )
+    {
+        ImageVal.setMatte();
+    }
+
+	if(!opaque)
+	{
+		aValues.insert( sample, ImageVal );
+	}
+	else
+	{
+		// mark this sample as having been written into.
+		ImageVal.setValid();
+	}
+}
+
+
+
+void CqBucket::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
+{
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
+	for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
+	{
+		IqShaderData* pData;
+		if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
+		{
+			switch ( pData->Type() )
 			{
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
-										m_bucketData->m_SamplePoints,
-										pMP,
-										Bound,
-										IsMoving,
-										time0,
-										time1,
-										false,
-										0,
-										m_bucketData->m_CurrentMpgSampleInfo,
-										currentGridInfo.m_LodBounds[0] >= 0.0f,
-										currentGridInfo,
-										hitTestCache);
+					case type_float:
+					case type_integer:
+					{
+						TqFloat f;
+						pData->GetFloat( f, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = f;
+						break;
+					}
+					case type_point:
+					case type_normal:
+					case type_vector:
+					case type_hpoint:
+					{
+						CqVector3D v;
+						pData->GetPoint( v, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = v.x();
+						sample.Data()[ entry->second.m_Offset + 1 ] = v.y();
+						sample.Data()[ entry->second.m_Offset + 2 ] = v.z();
+						break;
+					}
+					case type_color:
+					{
+						CqColor c;
+						pData->GetColor( c, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = c.fRed();
+						sample.Data()[ entry->second.m_Offset + 1 ] = c.fGreen();
+						sample.Data()[ entry->second.m_Offset + 2 ] = c.fBlue();
+						break;
+					}
+					case type_matrix:
+					{
+						CqMatrix m;
+						pData->GetMatrix( m, pMPG->GetIndex() );
+						TqFloat* pElements = m.pElements();
+						sample.Data()[ entry->second.m_Offset ] = pElements[ 0 ];
+						sample.Data()[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+						sample.Data()[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+						sample.Data()[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+						sample.Data()[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+						sample.Data()[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+						sample.Data()[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+						sample.Data()[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+						sample.Data()[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+						sample.Data()[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+						sample.Data()[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+						sample.Data()[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+						sample.Data()[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+						sample.Data()[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+						sample.Data()[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+						sample.Data()[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+						break;
+					}
+					default:
+					// left blank to avoid compiler warnings about unhandled
+					//  types
+					break;
 			}
 		}
 	}
 }
 
+//----------------------------------------------------------------------
+/** Test if this surface can be occlusion culled. If it can then
+ * transfer surface to the next bucket it covers, or delete it if it
+ * covers no more.
+ * \param pSurface A pointer to a CqSurface derived class.
+*/
 
-//---------------------------------------------------------------------
-/** This function assumes that neither dof or mb are being used. It is
- * much simpler than the general case dealt with above. */
-void CqBucket::RenderMP_Static( CqMicroPolygon* pMP )
+bool CqBucket::occlusionCullSurface( const boost::shared_ptr<CqSurface>& surface )
 {
-	CqHitTestCache hitTestCache;
-	pMP->CacheHitTestValues(&hitTestCache);
+	const CqBound RasterBound( surface->GetCachedRasterBound() );
 
-	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
-	const CqBound& Bound = pMP->GetTotalBound();
+	if ( m_bucketData->canCull( RasterBound ) )
+	{
+		// Surface is behind everying in this bucket but it may be
+		// visible in other buckets it overlaps.
+		// bucket to the right
+		TqInt nextBucket = getCol() + 1;
+		CqVector2D pos = QGetRenderContext()->pImage()->BucketPosition( nextBucket, getRow() );
+		if ( ( nextBucket < QGetRenderContext()->pImage()->cXBuckets() ) &&
+			 ( RasterBound.vecMax().x() >= pos.x() ) )
+		{
+			QGetRenderContext()->pImage()->Bucket( nextBucket, getRow() ).AddGPrim( surface );
+			return true;
+		}
 
-	m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
-							m_bucketData->m_SamplePoints,
-							pMP,
-							Bound,
-							false,
-							0,
-							0,
-							false,
-							0,
-							m_bucketData->m_CurrentMpgSampleInfo,
-							currentGridInfo.m_LodBounds[0] >= 0.0f,
-							currentGridInfo,
-							hitTestCache);
+		// next row
+		nextBucket = getRow() + 1;
+		// find bucket containing left side of bound
+		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / QGetRenderContext()->pImage()->XBucketSize();
+		nextBucketX = max( nextBucketX, 0 );
+		pos = QGetRenderContext()->pImage()->BucketPosition( nextBucketX, nextBucket );
+
+		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
+			 ( nextBucket  < QGetRenderContext()->pImage()->cYBuckets() ) &&
+			 ( RasterBound.vecMax().y() >= pos.y() ) )
+		{
+			QGetRenderContext()->pImage()->Bucket( nextBucketX, nextBucket ).AddGPrim( surface );
+			return true;
+		}
+
+		// Bound covers no more buckets therefore we can delete the surface completely.
+		CqString objname( "unnamed" );
+		const CqString* pattrName = surface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+		if( pattrName )
+			objname = *pattrName;
+		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+		STATS_INC( GPR_occlusion_culled );
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 

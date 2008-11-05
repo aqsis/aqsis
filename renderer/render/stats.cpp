@@ -134,6 +134,7 @@ void CqStats::PrintStats( TqInt level ) const
 			GPrim stats
 		*/
 		TqFloat _gpr_c_q = 100.0f * STATS_INT_GETI( GPR_culled ) / STATS_INT_GETI( GPR_created_total );
+		TqFloat _gpr_oc_q = 100.0f * STATS_INT_GETI( GPR_occlusion_culled ) / STATS_INT_GETI( GPR_created_total );
 		TqFloat _gpr_u_q = 100.0f * STATS_INT_GETI( GPR_created_total ) / STATS_INT_GETI( GPR_allocated );
 		MSG << "Input geometry:\n\t" << STATS_INT_GETI( GPR_created ) << " primitives created\n\n"
 		<< "\t"	<<	STATS_INT_GETI( GPR_subdiv ) << " subdivision primitives\n\t"
@@ -148,7 +149,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "GPrims:\n\t"
 		<< STATS_INT_GETI( GPR_allocated ) <<  " allocated\n\t"
 		<< STATS_INT_GETI( GPR_created_total ) <<  " used (" << _gpr_u_q << "%), " << STATS_INT_GETI( GPR_peak ) << " peak,\n\t"
-		<< STATS_INT_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n" << std::endl;
+		<< STATS_INT_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n\t"
+		<< STATS_INT_GETI( GPR_occlusion_culled ) << " occlusion culled (" << _gpr_oc_q << "%)\n" << std::endl;
 		/*
 			GPrim stats - End
 			-------------------------------------------------------------------

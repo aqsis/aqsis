@@ -78,6 +78,14 @@ class CqBucket : public IqBucket
 		{
 			return ( m_bucketData->m_YOrigin );
 		}
+		virtual	TqInt	realXOrigin() const
+		{
+			return ( m_bucketData->m_realXOrigin );
+		}
+		virtual	TqInt	realYOrigin() const
+		{
+			return ( m_bucketData->m_realYOrigin );
+		}
 		TqInt	PixelXSamples() const
 		{
 			return m_bucketData->m_PixelXSamples;
@@ -213,8 +221,9 @@ class CqBucket : public IqBucket
 		/** Render any waiting MPs.
 		 */
 		void RenderWaitingMPs();
+		void RenderSurface( boost::shared_ptr<CqSurface>& surface);
 
-		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const;
+		void ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const;
 
 		/** Get the column of the bucket in the image */
 		TqInt getCol() const;
@@ -277,11 +286,14 @@ class CqBucket : public IqBucket
 
 		/** This function assumes that either dof or mb or
 		 * both are being used. */
-		void	RenderMP_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
+		bool 	occlusionCullSurface(const boost::shared_ptr<CqSurface>& surface);
+		void	RenderMPG_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
+		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
+		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
-		void	RenderMP_Static( CqMicroPolygon* pMP );
+		void	RenderMPG_Static( CqMicroPolygon* pMPG);
 };
 
 } // namespace Aqsis
