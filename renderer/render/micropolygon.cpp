@@ -439,9 +439,11 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	{
 		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ)
 		{
-			// Try to cull any transparent MPs
+			// As we are rendering a standard depth map, anything that is semi-transparent
+			// doesn't contribute, so remove any semi-transparent micropolygons.
+			AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
+
 			TqInt cCulled = 0;
-			AQSIS_TIME_SCOPE(Occlusion_culling);
 			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				if ( pOs[ i ] != gColWhite )
@@ -463,9 +465,10 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		}
 		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB)
 		{
-			// Try to cull any true transparent MPs
+			// When rendering a color image, cull any micropolygons that are fully transparent.
+			AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
+
 			TqInt cCulled = 0;
-			AQSIS_TIME_SCOPE(Occlusion_culling);
 			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				if ( pOs[ i ] == gColBlack )
@@ -504,11 +507,11 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	// Now try and cull any hidden MPs if Sides==1
 	if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
 	{
+		AQSIS_TIME_SCOPE(Backface_culling);
+
 		TqInt cCulled = 0;
 		const CqVector3D* pNg = NULL;
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
-
-		AQSIS_TIME_SCOPE(Backface_culling);
 		// When backface culling, we must use the geometric normal (Ng) as
 		// this is the normal that properly represents the actual micropolygon
 		// geometry. However, if the primitive specifies custom normals as
@@ -557,11 +560,12 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		pshadAtmosphere->Evaluate( m_pShaderExecEnv.get() );
 	}
 
-	// Now try to cull any true transparent MPs (assigned by the shader code
+	// Cull any MPGs whose alpha is completely transparent after shading.
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
+		AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
+		
 		TqInt cCulled = 0;
-		AQSIS_TIME_SCOPE(Occlusion_culling);
 		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
@@ -573,15 +577,14 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 				break;
 		}
 
-//		if ( cCulled == gs )
-//		{
-//			m_fCulled = true;
-//			STATS_INC( GRD_culled );
-//			DeleteVariables( true );
-//			return ;
-//		}
+		if ( cCulled == gs )
+		{
+			m_fCulled = true;
+			STATS_INC( GRD_culled );
+			DeleteVariables( true );
+			return ;
+		}
 	}
-
 	DeleteVariables( false );
 
 	STATS_INC( GRD_shd_size_4 + clamp<TqInt>( CqStats::stats_log2(

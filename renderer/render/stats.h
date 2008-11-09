@@ -84,6 +84,7 @@ struct EqTimerStats
 		Occlusion_culling_initialisation,
 		Occlusion_culling_surfaces,
 		Occlusion_culling,
+		Transparency_culling_micropolygons,
 		// grids
 		Project_points,
 		Bust_grids,
@@ -122,6 +123,7 @@ AQSIS_ENUM_INFO_BEGIN(EqTimerStats::Enum, EqTimerStats::LAST)
 	"Occlusion culling initialisation",
 	"Occlusion culling surfaces",
 	"Occlusion culling",
+	"Transparency culling micropolygons",
 	// grids
 	"Project points",
 	"Bust grids",

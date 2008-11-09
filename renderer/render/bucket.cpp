@@ -109,7 +109,7 @@ void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& buc
 			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 			      TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
 			      TqFloat clippingNear, TqFloat clippingFar,
-			      bool fJitter, bool empty )
+			      bool fJitter)
 {
 	m_bucketData->m_XOrigin = static_cast<TqInt>( bucketPos.x() );
 	m_bucketData->m_YOrigin = static_cast<TqInt>( bucketPos.y() );
@@ -188,7 +188,6 @@ void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& buc
 
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
-	//TqInt numPixels = m_bucketData->m_RealWidth*m_bucketData->m_RealHeight;
 	for ( TqInt ii = 0; ii < m_bucketData->m_RealHeight; ii++ )
 	{
 		for ( TqInt j = 0; j < m_bucketData->m_RealWidth; j++ )
@@ -196,8 +195,7 @@ void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& buc
 			CqVector2D bPos2( m_bucketData->m_XOrigin, m_bucketData->m_YOrigin );
 			bPos2 += CqVector2D( ( j - m_bucketData->m_DiscreteShiftX ), ( ii - m_bucketData->m_DiscreteShiftY ) );
 
-			if(!empty)
-				m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
+			m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
 
 			//if(fJitter)
 			m_bucketData->m_aieImage[which].JitterSamples( m_bucketData->m_SamplePoints,
@@ -482,7 +480,7 @@ const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos ) const
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucket::FilterBucket(bool empty, bool fImager)
+void CqBucket::FilterBucket(bool fImager)
 {
 	CqImagePixel * pie;
 
@@ -510,8 +508,7 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 
 	bool useSeperable = true;
 
-
-	if(!empty)
+	if(m_bucketData->hasValidSamples())
 	{
 		// non-seperable is faster for very small filter widths.
 		if(FilterXWidth() <= 16.0 || FilterYWidth() <= 16.0)
@@ -829,43 +826,46 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 
 void CqBucket::ExposeBucket()
 {
-	if ( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
-	        QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
-		return ;
-	else
+	if(m_bucketData->hasValidSamples())
 	{
-		CqImagePixel* pie;
-		ImageElement( XOrigin(), YOrigin(), pie );
-		TqInt x, y;
-		TqFloat exposegain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
-		TqFloat exposegamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
-		TqFloat oneovergamma = 1.0f / exposegamma;
-		TqFloat endx, endy;
-		TqInt   nextx;
-		endy = Height();
-		endx = Width();
-		nextx = RealWidth();
-
-		for ( y = 0; y < endy; y++ )
+		if ( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
+				QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
+			return ;
+		else
 		{
-			CqImagePixel* pie2 = pie;
-			for ( x = 0; x < endx; x++ )
-			{
-				// color=(color*gain)^1/gamma
-				if ( exposegain != 1.0 )
-					pie2->SetColor( pie2->Color() * exposegain );
+			CqImagePixel* pie;
+			ImageElement( XOrigin(), YOrigin(), pie );
+			TqInt x, y;
+			TqFloat exposegain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
+			TqFloat exposegamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
+			TqFloat oneovergamma = 1.0f / exposegamma;
+			TqFloat endx, endy;
+			TqInt   nextx;
+			endy = Height();
+			endx = Width();
+			nextx = RealWidth();
 
-				if ( exposegamma != 1.0 )
+			for ( y = 0; y < endy; y++ )
+			{
+				CqImagePixel* pie2 = pie;
+				for ( x = 0; x < endx; x++ )
 				{
-					CqColor col = pie2->Color();
-					col.SetfRed ( pow( col.fRed (), oneovergamma ) );
-					col.SetfGreen( pow( col.fGreen(), oneovergamma ) );
-					col.SetfBlue ( pow( col.fBlue (), oneovergamma ) );
-					pie2->SetColor( col );
+					// color=(color*gain)^1/gamma
+					if ( exposegain != 1.0 )
+						pie2->SetColor( pie2->Color() * exposegain );
+
+					if ( exposegamma != 1.0 )
+					{
+						CqColor col = pie2->Color();
+						col.SetfRed ( pow( col.fRed (), oneovergamma ) );
+						col.SetfGreen( pow( col.fGreen(), oneovergamma ) );
+						col.SetfBlue ( pow( col.fBlue (), oneovergamma ) );
+						pie2->SetColor( col );
+					}
+					pie2++;
 				}
-				pie2++;
+				pie += nextx;
 			}
-			pie += nextx;
 		}
 	}
 }
@@ -877,121 +877,89 @@ void CqBucket::ExposeBucket()
 
 void CqBucket::QuantizeBucket()
 {
-	// Initiliaze the random with a value based on the X,Y coordinate
-	static CqRandom random( 61 );
-	TqFloat endx, endy;
-	TqInt   nextx;
-	endy = Height();
-	endx = Width();
-	nextx = RealWidth();
-
-
-	if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
+	if(m_bucketData->hasValidSamples())
 	{
-		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
-		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
-		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
-		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		double ditheramplitude = pQuant [ 3 ];
+		// Initiliaze the random with a value based on the X,Y coordinate
+		static CqRandom random( 61 );
+		TqFloat endx, endy;
+		TqInt   nextx;
+		endy = Height();
+		endx = Width();
+		nextx = RealWidth();
 
-		// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
-		if ( one == 0 && min == 0 && max == 0 )
-			return ;
 
-		CqImagePixel* pie;
-		ImageElement( XOrigin(), YOrigin(), pie );
-		TqInt x, y;
-
-		for ( y = 0; y < endy; y++ )
+		if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 		{
-			CqImagePixel* pie2 = pie;
-			for ( x = 0; x < endx; x++ )
-			{
-				double r, g, b, a;
-				double _or, _og, _ob;
-				double s = random.RandomFloat();
-				CqColor col = pie2->Color();
-				CqColor opa = pie2->Opacity();
-				TqFloat alpha = pie2->Alpha();
-				if ( modf( one * col.fRed () + ditheramplitude * s, &r ) > 0.5 )
-					r += 1;
-				if ( modf( one * col.fGreen() + ditheramplitude * s, &g ) > 0.5 )
-					g += 1;
-				if ( modf( one * col.fBlue () + ditheramplitude * s, &b ) > 0.5 )
-					b += 1;
-				if ( modf( one * opa.fRed () + ditheramplitude * s, &_or ) > 0.5 )
-					_or += 1;
-				if ( modf( one * opa.fGreen() + ditheramplitude * s, &_og ) > 0.5 )
-					_og += 1;
-				if ( modf( one * opa.fBlue () + ditheramplitude * s, &_ob ) > 0.5 )
-					_ob += 1;
-				if ( modf( one * alpha + ditheramplitude * s, &a ) > 0.5 )
-					a += 1;
-				r = clamp<double>(r, min, max);
-				g = clamp<double>(g, min, max);
-				b = clamp<double>(b, min, max);
-				_or = clamp<double>(_or, min, max);
-				_og = clamp<double>(_og, min, max);
-				_ob = clamp<double>(_ob, min, max);
-				a = clamp<double>(a, min, max);
-				col.SetfRed ( r );
-				col.SetfGreen( g );
-				col.SetfBlue ( b );
-				opa.SetfRed ( _or );
-				opa.SetfGreen( _og );
-				opa.SetfBlue ( _ob );
-				pie2->SetColor( col );
-				pie2->SetOpacity( opa );
-				pie2->SetAlpha( a );
-				pie2++;
-			}
-			pie += nextx;
-		}
-	}
-
-	if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
-	{
-		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
-		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
-		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
-		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		double ditheramplitude = pQuant [ 3 ];
-		if( ditheramplitude == 0.0f && one == 0 && min == 0 && max == 0 )
-			return;
-
-		CqImagePixel* pie;
-		ImageElement( XOrigin(), YOrigin(), pie );
-		TqInt x, y;
-		for ( y = 0; y < endy; y++ )
-		{
-			CqImagePixel* pie2 = pie;
-			for ( x = 0; x < endx; x++ )
-			{
-				double d;
-				if ( modf( one * pie2->Depth() + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
-					d += 1;
-				d = clamp<double>( d, min, max );
-				pie2->SetDepth( d );
-				pie2++;
-			}
-			pie += nextx;
-		}
-	}
-
-	// Now go through the other AOV's and quantize those if necessary.
-	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext()->GetMapOfOutputDataEntries();
-	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
-	for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
-	{
-		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", entry->first.c_str() );
-		if( NULL != pQuant )
-		{
-			TqInt startindex = entry->second.m_Offset;
-			TqInt endindex = startindex + entry->second.m_NumSamples;
+			const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
 			TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 			TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 			TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
 			double ditheramplitude = pQuant [ 3 ];
+
+			// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
+			if ( one == 0 && min == 0 && max == 0 )
+				return ;
+
+			CqImagePixel* pie;
+			ImageElement( XOrigin(), YOrigin(), pie );
+			TqInt x, y;
+
+			for ( y = 0; y < endy; y++ )
+			{
+				CqImagePixel* pie2 = pie;
+				for ( x = 0; x < endx; x++ )
+				{
+					double r, g, b, a;
+					double _or, _og, _ob;
+					double s = random.RandomFloat();
+					CqColor col = pie2->Color();
+					CqColor opa = pie2->Opacity();
+					TqFloat alpha = pie2->Alpha();
+					if ( modf( one * col.fRed () + ditheramplitude * s, &r ) > 0.5 )
+						r += 1;
+					if ( modf( one * col.fGreen() + ditheramplitude * s, &g ) > 0.5 )
+						g += 1;
+					if ( modf( one * col.fBlue () + ditheramplitude * s, &b ) > 0.5 )
+						b += 1;
+					if ( modf( one * opa.fRed () + ditheramplitude * s, &_or ) > 0.5 )
+						_or += 1;
+					if ( modf( one * opa.fGreen() + ditheramplitude * s, &_og ) > 0.5 )
+						_og += 1;
+					if ( modf( one * opa.fBlue () + ditheramplitude * s, &_ob ) > 0.5 )
+						_ob += 1;
+					if ( modf( one * alpha + ditheramplitude * s, &a ) > 0.5 )
+						a += 1;
+					r = clamp<double>(r, min, max);
+					g = clamp<double>(g, min, max);
+					b = clamp<double>(b, min, max);
+					_or = clamp<double>(_or, min, max);
+					_og = clamp<double>(_og, min, max);
+					_ob = clamp<double>(_ob, min, max);
+					a = clamp<double>(a, min, max);
+					col.SetfRed ( r );
+					col.SetfGreen( g );
+					col.SetfBlue ( b );
+					opa.SetfRed ( _or );
+					opa.SetfGreen( _og );
+					opa.SetfBlue ( _ob );
+					pie2->SetColor( col );
+					pie2->SetOpacity( opa );
+					pie2->SetAlpha( a );
+					pie2++;
+				}
+				pie += nextx;
+			}
+		}
+
+		if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
+		{
+			const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
+			TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+			TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+			TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+			double ditheramplitude = pQuant [ 3 ];
+			if( ditheramplitude == 0.0f && one == 0 && min == 0 && max == 0 )
+				return;
 
 			CqImagePixel* pie;
 			ImageElement( XOrigin(), YOrigin(), pie );
@@ -1001,18 +969,53 @@ void CqBucket::QuantizeBucket()
 				CqImagePixel* pie2 = pie;
 				for ( x = 0; x < endx; x++ )
 				{
-					TqInt sampleindex;
-					for( sampleindex = startindex; sampleindex < endindex; sampleindex++ )
-					{
-						double d;
-						if ( modf( one * pie2->GetPixelSample().Data()[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
-							d += 1.0f;
-						d = clamp<double>( d, min, max );
-						pie2->GetPixelSample().Data()[sampleindex] = d;
-					}
+					double d;
+					if ( modf( one * pie2->Depth() + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
+						d += 1;
+					d = clamp<double>( d, min, max );
+					pie2->SetDepth( d );
 					pie2++;
 				}
 				pie += nextx;
+			}
+		}
+
+		// Now go through the other AOV's and quantize those if necessary.
+		std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext()->GetMapOfOutputDataEntries();
+		std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
+		for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
+		{
+			const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", entry->first.c_str() );
+			if( NULL != pQuant )
+			{
+				TqInt startindex = entry->second.m_Offset;
+				TqInt endindex = startindex + entry->second.m_NumSamples;
+				TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+				TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+				TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+				double ditheramplitude = pQuant [ 3 ];
+
+				CqImagePixel* pie;
+				ImageElement( XOrigin(), YOrigin(), pie );
+				TqInt x, y;
+				for ( y = 0; y < endy; y++ )
+				{
+					CqImagePixel* pie2 = pie;
+					for ( x = 0; x < endx; x++ )
+					{
+						TqInt sampleindex;
+						for( sampleindex = startindex; sampleindex < endindex; sampleindex++ )
+						{
+							double d;
+							if ( modf( one * pie2->GetPixelSample().Data()[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 )
+								d += 1.0f;
+							d = clamp<double>( d, min, max );
+							pie2->GetPixelSample().Data()[sampleindex] = d;
+						}
+						pie2++;
+					}
+					pie += nextx;
+				}
 			}
 		}
 	}
@@ -1106,11 +1109,13 @@ void CqBucket::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 		{
 			ADDREF( pGrid );
 			// Only shade in all cases since the Displacement could be called in the shadow map creation too.
+			// \note Timings for shading are broken down into component parts within this function.
 			pGrid->Shade();
 			pGrid->TransferOutputVariables();
 
 			if ( pGrid->vfCulled() == false )
 			{
+				AQSIS_TIME_SCOPE(Bust_grids);
 				// Split any grids in this bucket waiting to be processed.
 				pGrid->Split( QGetRenderContext()->pImage(), realXOrigin(), realXOrigin()+RealWidth(), realYOrigin(), realYOrigin()+RealHeight());
 			}
@@ -1627,6 +1632,8 @@ void CqBucket::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt inde
 
 	CqStats::IncI( CqStats::SPL_hits );
 	pMPG->MarkHit();
+	// Record the fact that we have valid samples in the bucket.
+	m_bucketData->setHasValidSamples();
 
     TqFloat* val = ImageVal.Data();
 	CqColor col;

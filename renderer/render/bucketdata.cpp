@@ -23,7 +23,7 @@
 namespace Aqsis {
 
 
-CqBucketData::CqBucketData()
+	CqBucketData::CqBucketData() : m_hasValidSamples(false)
 {
 }
 
@@ -71,6 +71,8 @@ void CqBucketData::reset()
 	m_aFilterValues.clear();
 	m_aDatas.clear();
 	m_aCoverages.clear();
+
+	m_hasValidSamples = false;
 }
 
 void CqBucketData::setupOcclusionTree(const CqBucket& bucket, TqInt xmin, TqInt ymin, TqInt xmax, TqInt ymax)

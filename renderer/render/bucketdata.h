@@ -70,6 +70,16 @@ public:
 	/** Whether we can cull what's represented by the given bound */
 	bool canCull(const CqBound& bound) const;
 
+	/** Indicate that some valid samples have been recorded in the bucket */
+	void setHasValidSamples();
+
+	/** Return true if the bucket data contains some valid samples.
+	  * Used to identify whether it's necessary to filter and process the bucket data
+	  * before passing it onto the display.
+	  * \returns	True if the bucket data contains some valid samples.
+	  */
+	bool hasValidSamples() const;
+
 private:
 	/// Origin in discrete coordinates of this bucket.
 	TqInt	m_XOrigin;
@@ -118,8 +128,19 @@ private:
 	SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
 	CqOcclusionTree m_OcclusionTree;
+
+	bool	m_hasValidSamples;
 };
 
+inline void CqBucketData::setHasValidSamples()
+{
+	m_hasValidSamples = true;
+}
+
+inline bool CqBucketData::hasValidSamples() const
+{
+	return m_hasValidSamples;
+}
 
 } // namespace Aqsis
 

@@ -131,7 +131,7 @@ class CqBucket : public IqBucket
 				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 				       TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
 				       TqFloat clippingNear, TqFloat clippingFar,
-				       bool fJitter = true, bool empty = false );
+				       bool fJitter = true);
 
 		CqImagePixel& ImageElement(TqUint index) const;
 
@@ -148,7 +148,7 @@ class CqBucket : public IqBucket
 		}
 
 		void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
-		void	FilterBucket(bool empty, bool fImager);
+		void	FilterBucket(bool fImager);
 		void	ExposeBucket();
 		void	QuantizeBucket();
 

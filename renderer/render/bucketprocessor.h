@@ -75,13 +75,6 @@ public:
 	 */
 	void postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
 
-	/** Is the bucket empty initially?
-	 */
-	bool isInitiallyEmpty() const;
-	/** Set if the bucket is empty initially
-	 */
-	void setInitiallyEmpty(bool value);
-
 	/** Whether the bucket has pending surfaces to render
 	 */
 	bool hasPendingSurfaces() const;
@@ -99,10 +92,6 @@ public:
 private:
 	/// Pointer to the current bucket
 	CqBucket* m_bucket;
-
-	/// Whether the buckets is empty before starting to manipulate
-	/// it
-	bool m_initiallyEmpty;
 
 	/// Bucket data for the current bucket
 	CqBucketData m_bucketData;

@@ -707,8 +707,6 @@ void CqImageBuffer::RenderImage()
 		/////////////////////////////////////////////////////////////////////////
 
 			bucketProcessors[i].setBucket(&CurrentBucket());
-			if (fImager)
-				bucketProcessors[i].setInitiallyEmpty(false);
 
 			// Set up some bounds for the bucket.
 			const CqBucket* bucket = bucketProcessors[i].getBucket();

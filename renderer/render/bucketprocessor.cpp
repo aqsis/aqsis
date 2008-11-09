@@ -42,7 +42,6 @@ void CqBucketProcessor::setBucket(CqBucket* bucket)
 
 	m_bucket = bucket;
 	m_bucket->SetBucketData(&m_bucketData);
-	m_initiallyEmpty = m_bucket->IsEmpty();
 }
 
 const CqBucket* CqBucketProcessor::getBucket() const
@@ -59,8 +58,6 @@ void CqBucketProcessor::reset()
 
 	m_bucket->SetBucketData(static_cast<CqBucketData*>(0));
 	m_bucket = 0;
-
-	m_initiallyEmpty = false;
 }
 
 bool CqBucketProcessor::canCull(const CqBound& bound) const
@@ -81,10 +78,9 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth,
 					 viewRangeXMin, viewRangeXMax, viewRangeYMin, viewRangeYMax,
 					 clippingNear, clippingFar,
-					 true, m_initiallyEmpty );
+					 true );
 	}
 
-	if ( !m_initiallyEmpty )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
 		m_bucketData.setupOcclusionTree(*m_bucket, viewRangeXMin, viewRangeYMin, viewRangeXMax, viewRangeYMax);
@@ -126,34 +122,21 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 
 	// Combine the colors at each pixel sample for any
 	// micropolygons rendered to that pixel.
-	if (!m_initiallyEmpty)
 	{
 		AQSIS_TIME_SCOPE(Combine_samples);
 		m_bucket->CombineElements(depthfilter, zThreshold);
 	}
 
-	AQSIS_TIMER_START(Filter_samples);
-	m_bucket->FilterBucket(m_initiallyEmpty, imager);
-	if (!m_initiallyEmpty)
 	{
+		AQSIS_TIME_SCOPE(Filter_samples);
+		m_bucket->FilterBucket(imager);
 		m_bucket->ExposeBucket();
 		// \note: Used to quantize here too, but not any more, as it is handled by
 		//	  ddmanager in a specific way for each display.
 	}
-	AQSIS_TIMER_STOP(Filter_samples);
 
 	assert(!m_bucket->IsProcessed());
 	m_bucket->SetProcessed();
-}
-
-bool CqBucketProcessor::isInitiallyEmpty() const
-{
-	return m_initiallyEmpty;
-}
-
-void CqBucketProcessor::setInitiallyEmpty(bool value)
-{
-	m_initiallyEmpty = value;
 }
 
 bool CqBucketProcessor::hasPendingSurfaces() const
