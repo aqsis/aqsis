@@ -29,10 +29,13 @@
 #define THREADSCHEDULER_H_INCLUDED 1
 
 #include	"aqsis.h"
+#include	<boost/function.hpp>
+
+#ifdef	ENABLE_THREADING
 #include	<boost/thread/thread.hpp>
 #include	<boost/thread/mutex.hpp>
 #include	<boost/thread/condition.hpp>
-
+#endif
 
 namespace Aqsis { 
 
@@ -61,6 +64,7 @@ private:
 	TqInt m_maxThreads;
 	/// Current number of active threads running
 	TqInt m_activeThreads;
+#ifdef	ENABLE_THREADING
 	/// Hold the group of active threads
 	boost::thread_group m_threadGroup;
 	/// Mutex for condition
@@ -69,6 +73,7 @@ private:
 	boost::mutex m_mutexActiveThreads;
 	/// Condition to wait for available threads
 	boost::condition m_threadsAvailable;
+#endif
 };
 
 

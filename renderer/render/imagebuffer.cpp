@@ -29,7 +29,6 @@
 #include    <windows.h>
 #endif
 #include	<math.h>
-#include	<boost/thread/thread.hpp>
 
 #include	"aqsismath.h"
 #include	"stats.h"
@@ -46,7 +45,7 @@ namespace Aqsis {
 static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
 
-
+#define MULTIPROCESSING_NBUCKETS 1
 /** Implementing a work unit for a boost::thread (the operator()()
  * method), that is, a piece of code that will run in parallel.
  */
@@ -153,7 +152,6 @@ private:
 };
 
 */
-
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -663,7 +661,8 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-#define MULTIPROCESSING_NBUCKETS 1
+	std::vector<CqBucketProcessor> bucketProcessors;
+	TqInt numConcurrentBuckets = 1;
 
 /* mafm: Sample code to use with the CqThreadProcessor2 alternative
  * approach.
@@ -685,17 +684,20 @@ void CqImageBuffer::RenderImage()
 	return;
 */
 
-	std::vector<CqBucketProcessor> bucketProcessors;
-	bucketProcessors.resize(MULTIPROCESSING_NBUCKETS);
+#ifdef		ENABLE_THREADING
+	numConcurrentBuckets = MULTIPROCESSING_NBUCKETS;
+#endif
+
+	bucketProcessors.resize(numConcurrentBuckets);
 
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
 	{
-		CqThreadScheduler threadScheduler(MULTIPROCESSING_NBUCKETS);
+		CqThreadScheduler threadScheduler(numConcurrentBuckets);
 		std::vector<CqThreadProcessor> threadProcessors;
 
-		for (int i = 0; pendingBuckets && i < MULTIPROCESSING_NBUCKETS; ++i)
+		for (int i = 0; pendingBuckets && i < numConcurrentBuckets; ++i)
 		{
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
@@ -748,7 +750,7 @@ void CqImageBuffer::RenderImage()
 		threadScheduler.joinAll();
 		threadProcessors.clear();
 
-		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
+		for (int i = 0; !m_fQuit && i < numConcurrentBuckets; ++i)
 		{
 			bucketProcessors[i].postProcess( fImager, depthfilter, zThreshold );
 			BucketComplete();

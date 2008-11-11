@@ -45,13 +45,13 @@ OPTION(AQSIS_ENABLE_MASSIVE "Enable Massive support ON/OFF" ON)
 MARK_AS_ADVANCED(AQSIS_ENABLE_MASSIVE)
 OPTION(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support ON/OFF" ON)
 MARK_AS_ADVANCED(AQSIS_ENABLE_SIMBIONT)
+OPTION(AQSIS_ENABLE_THREADING "Enable multi-threading ON/OFF" OFF)
 
 OPTION(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 MARK_AS_ADVANCED(AQSIS_USE_RPATH)
 
 SET(AQSIS_MAIN_CONFIG_NAME "aqsisrc" CACHE STRING "Name of the main aqsis configuration file")
 MARK_AS_ADVANCED(AQSIS_MAIN_CONFIG_NAME)
-
 
 #-------------------------------------------------------------------------------
 # Find necessary library dependencies.
