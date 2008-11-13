@@ -1,43 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
+<!DOCTYPE interface [
+	<!ENTITY cr "&#xa;">
+	<!ENTITY tab "&#x9;">
+]>
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-
-
 	<xsl:output method="text"/>
 	<xsl:strip-space elements="RiAPI"/>
 
-
-	<!--	API	-->
 	<xsl:template match="RiAPI">
-		<!--	Procedures	-->
 		<xsl:apply-templates select="Procedures/Procedure"/>
+		<xsl:text>&cr;</xsl:text>
 	</xsl:template>
 
+	<!-- Many RI calls are only valid within a given scope.  This is 
+	-->
 	<xsl:template match="Procedure">
-		<xsl:value-of select="concat('#define VALIDATE_', translate(Name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))"/>
-		<xsl:if test="Valid">
-			<xsl:value-of select="string(' \&#xa;')"/>
-			<xsl:text>{ \&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;if(!ValidateState(', count(Valid/child::*), ', ')"/>
-			<xsl:for-each select="Valid/child::*">
-				<xsl:value-of select="string(name())"/>
-				<xsl:if test="position() != last()">
-					<xsl:text>, </xsl:text>
-				</xsl:if>
-			</xsl:for-each>
-			<xsl:value-of select="string(') ) \&#xa;')"/>
-			<xsl:text>&#x9;{ \&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;&#x9;Aqsis::log() &lt;&lt; error &lt;&lt; &quot;Invalid state for ', Name, ' [&quot; &lt;&lt; GetStateAsString() &lt;&lt; &quot;]&quot; &lt;&lt; std::endl; \&#xa;')"/>
-			<xsl:value-of select="string('&#x9;&#x9;return')"/>
-			<xsl:if test="ReturnType != 'RtVoid'">
-				<xsl:text>(0)</xsl:text>
-			</xsl:if>
-			<xsl:text>; \&#xa;</xsl:text>
-			<xsl:text>&#x9;} \&#xa;</xsl:text>
-			<xsl:text>}&#xa;</xsl:text>
+#define VALIDATE_<xsl:value-of select="translate(Name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+<xsl:if test="ValidScope"> \
+{ \
+	if(!ValidateState(<xsl:value-of select="count(ValidScope/*)"/>, <xsl:apply-templates select="ValidScope/*"/>) ) \
+	{ \
+		Aqsis::log() &lt;&lt; error &lt;&lt; "Invalid state for <xsl:value-of select="Name"/> [" &lt;&lt; GetStateAsString() &lt;&lt; "]" &lt;&lt; std::endl; \
+		return<xsl:if test="ReturnType != 'RtVoid'">(0)</xsl:if>; \
+	} \
+}
+</xsl:if>
+	</xsl:template>
+
+	<xsl:template match="ValidScope/*">
+		<xsl:value-of select="name()"/>
+		<xsl:if test="position() != last()">
+			<xsl:text>, </xsl:text>
 		</xsl:if>
-		<xsl:text>&#xa;</xsl:text>
 	</xsl:template>
 
 </xsl:stylesheet>

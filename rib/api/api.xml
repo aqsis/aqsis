@@ -1,5 +1,234 @@
 <?xml version="1.0"?>
 <RiAPI>
+	<!-- ====================================================================== -->
+	<Types>
+		<!-- data types -->
+		<Type>
+			<Name>RtBoolean</Name>
+			<C>
+				<Type>RtBoolean</Type>
+				<Typedef>short</Typedef>
+			</C>
+			<Rib>
+				<Type>TqInt</Type>
+				<Getter>getInt</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtInt</Name>
+			<C>
+				<Type>RtInt</Type>
+				<Typedef>int</Typedef>
+			</C>
+			<Rib>
+				<Type>TqInt</Type>
+				<Getter>getInt</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtIntArray</Name>
+			<C>
+				<Type>RtInt[]</Type>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqIntArray&amp;</Type>
+				<Getter>getIntArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtFloat</Name>
+			<C>
+				<Type>RtFloat</Type>
+				<Typedef>float</Typedef>
+			</C>
+			<Rib>
+				<Type>TqFloat</Type>
+				<Getter>getFloat</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtFloatArray</Name>
+			<C>
+				<Type>RtFloat[]</Type>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtToken</Name>
+			<C>
+				<Type>RtToken</Type>
+				<Typedef>char*</Typedef>
+			</C>
+			<Rib>
+				<Type>std::string</Type>
+				<Getter>getString</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtColor</Name>
+			<C>
+				<Type>RtColor</Type>
+				<Typedef>RtFloat[3]</Typedef>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtPoint</Name>
+			<C>
+				<Type>RtPoint</Type>
+				<Typedef>RtFloat[3]</Typedef>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtPointArray</Name>
+			<C>
+				<Type>RtPoint[]</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtMatrix</Name>
+			<C>
+				<Type>RtMatrix</Type>
+				<Typedef>RtFloat[4][4]</Typedef>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtBasis</Name>
+			<C>
+				<Type>RtBasis</Type>
+				<Typedef>RtFloat[4][4]</Typedef>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtBound</Name>
+			<C>
+				<Type>RtBound</Type>
+				<Typedef>RtFloat[6]</Typedef>
+			</C>
+			<Rib>
+				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Getter>getFloatArray</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtString</Name>
+			<C>
+				<Type>RtString</Type>
+				<Typedef>char*</Typedef>
+			</C>
+			<Rib>
+				<Type>std::string</Type>
+				<Getter>getString</Getter>
+			</Rib>
+		</Type>
+		<Type>
+			<Name>RtStringArray</Name>
+			<C>
+				<Type>RtString[]</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtTokenArray</Name>
+			<C>
+				<Type>RtToken[]</Type>
+			</C>
+		</Type>
+
+		<!-- pointer types -->
+		<Type>
+			<Name>RtPointer</Name>
+			<C>
+				<Type>RtPointer</Type>
+				<Typedef>void*</Typedef>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtVoid</Name>
+			<C>
+				<Type>RtVoid</Type>
+				<Typedef>void</Typedef>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtObjectHandle</Name>
+			<C>
+				<Type>RtObjectHandle</Type>
+				<Typedef>RtPointer</Typedef>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtLightHandle</Name>
+			<C>
+				<Type>RtLightHandle</Type>
+				<Typedef>RtPointer</Typedef>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtContextHandle</Name>
+			<C>
+				<Type>RtContextHandle</Type>
+				<Typedef>RtPointer</Typedef>
+			</C>
+		</Type>
+
+		<!-- function types -->
+		<Type>
+			<Name>RtFilterFunc</Name>
+			<C>
+				<Type>RtFilterFunc</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtArchiveCallback</Name>
+			<C>
+				<Type>RtArchiveCallback</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtErrorFunc</Name>
+			<C>
+				<Type>RtErrorFunc</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtProcSubdivFunc</Name>
+			<C>
+				<Type>RtProcSubdivFunc</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtProcFreeFunc</Name>
+			<C>
+				<Type>RtProcFreeFunc</Type>
+			</C>
+		</Type>
+		<Type>
+			<Name>RtFilterFunc</Name>
+			<C>
+				<Type>RtFilterFunc</Type>
+			</C>
+		</Type>
+	</Types>
+
+	<!-- ====================================================================== -->
 	<Procedures>
 		<Procedure>
 			<Name>RiDeclare</Name>
@@ -14,7 +243,7 @@
 					<Type>RtString</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<Outside/>
 				<BeginEnd/>
 				<Frame/>
@@ -24,7 +253,7 @@
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -37,9 +266,9 @@
 					<Type>RtToken</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<Outside/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -47,9 +276,9 @@
 			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -61,37 +290,37 @@
 					<Type>RtInt</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiFrameEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiWorldBegin</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiWorldEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<World/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -111,10 +340,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -126,10 +355,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -153,10 +382,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -180,10 +409,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -194,15 +423,12 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -218,10 +444,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -241,10 +467,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -260,10 +486,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -275,10 +501,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -294,10 +520,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -317,10 +543,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -336,10 +562,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -350,15 +576,12 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -386,10 +609,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -408,15 +631,12 @@
 					<Name>mode</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -619,15 +839,12 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -653,10 +870,10 @@
 </Length>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -668,10 +885,10 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -682,37 +899,34 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiAttributeBegin</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiAttributeEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Attribute/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -724,16 +938,16 @@
 					<Type>RtColor</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -745,16 +959,16 @@
 					<Type>RtColor</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -794,16 +1008,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -814,12 +1028,9 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
@@ -827,7 +1038,7 @@
 				<Transform/>
 				<Solid/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -838,12 +1049,9 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
@@ -851,7 +1059,7 @@
 				<Transform/>
 				<Solid/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -867,16 +1075,16 @@
 					<Type>RtBoolean</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -887,21 +1095,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -912,21 +1117,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -937,21 +1139,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -962,21 +1161,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -988,16 +1184,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1009,16 +1205,16 @@
 					<Type>RtToken</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1030,16 +1226,16 @@
 					<Type>RtBoolean</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1051,16 +1247,16 @@
 					<Type>RtBound</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1072,16 +1268,16 @@
 					<Type>RtBound</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1105,16 +1301,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1130,16 +1326,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1151,32 +1347,32 @@
 					<Type>RtToken</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiReverseOrientation</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1188,32 +1384,32 @@
 					<Type>RtInt</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiIdentity</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1225,16 +1421,16 @@
 					<Type>RtMatrix</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1246,16 +1442,16 @@
 					<Type>RtMatrix</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1267,16 +1463,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1296,16 +1492,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1329,16 +1525,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1358,16 +1554,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1403,16 +1599,16 @@
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1423,21 +1619,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1448,21 +1641,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1474,15 +1664,15 @@
 					<Type>RtToken</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1509,39 +1699,39 @@
 </Length>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiTransformBegin</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiTransformEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Transform/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1552,21 +1742,18 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1577,10 +1764,7 @@
 					<Name>nvertices</Name>
 					<Type>RtInt</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = nvertices;
 </VaryingSize>
@@ -1588,14 +1772,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = nvertices;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1613,10 +1797,7 @@
 					<Length>		int __nverts_length = nloops;
 </Length>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 0;
 		{
@@ -1629,14 +1810,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = varying_size;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1666,10 +1847,7 @@
 		}
 </Length>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -1689,14 +1867,14 @@
 				facevarying_size+=nverts[__i];
 		}
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1738,10 +1916,7 @@
 		}
 </Length>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -1761,14 +1936,14 @@
 				facevarying_size+=nverts[__i];
 		}
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1792,16 +1967,16 @@
 					<Type>RtInt</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1812,10 +1987,7 @@
 					<Name>type</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -1825,14 +1997,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = varying_size;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1859,10 +2031,7 @@
 					<Name>vwrap</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<UniformSize>
 		if(strcmp(type, "bilinear")==0)
@@ -1902,14 +2071,14 @@
 </VaryingSize>
 			<VertexSize>		vertex_size=nu*nv;
 </VertexSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -1962,10 +2131,7 @@
 					<Name>vmax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<UniformSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
 </UniformSize>
@@ -1973,14 +2139,14 @@
 </VaryingSize>
 			<VertexSize>		vertex_size=nu*nv;
 </VertexSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2070,14 +2236,14 @@
 </Length>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2100,10 +2266,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2111,14 +2274,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2137,10 +2300,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2148,14 +2308,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2178,10 +2338,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2189,14 +2346,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2215,10 +2372,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2226,14 +2380,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2256,10 +2410,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2267,14 +2418,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2293,10 +2444,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2304,14 +2452,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2338,10 +2486,7 @@
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
@@ -2349,14 +2494,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = 4;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2380,13 +2525,13 @@
 					<Type>RtProcFreeFunc</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2397,18 +2542,15 @@
 					<Name>type</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2420,45 +2562,45 @@
 					<Type>RtToken</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiSolidEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Solid/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiObjectBegin</Name>
 			<ReturnType>RtObjectHandle</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiObjectEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Object/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2470,13 +2612,13 @@
 					<Type>RtObjectHandle</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2490,18 +2632,18 @@
 				</Argument>
 				<Argument>
 					<Name>...</Name>
-					<Type></Type>
+					<Type/>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2520,24 +2662,24 @@
 </Length>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
-			</Valid>
+				<Object/>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
 			<Name>RiMotionEnd</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
-			<Valid>
+			<ValidScope>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2572,15 +2714,12 @@
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2615,15 +2754,12 @@
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2650,15 +2786,12 @@
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2709,15 +2842,12 @@
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2732,15 +2862,12 @@
 					<Name>shadowfile</Name>
 					<Type>RtString</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2762,15 +2889,12 @@
 					<Name>shadowfile</Name>
 					<Type>RtString</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -2818,7 +2942,7 @@
 					<Type>RtErrorFunc</Type>
 				</Argument>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<Outside/>
 				<BeginEnd/>
 				<Frame/>
@@ -2828,7 +2952,7 @@
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 		
 		<Procedure>
@@ -2906,7 +3030,7 @@
 				</Argument>
 				<Argument>
 					<Name>...</Name>
-					<Type></Type>
+					<Type/>
 				</Argument>
 			</Arguments>
 		</Procedure>
@@ -3013,19 +3137,16 @@
 					<Length>		int __str_length = nstr;
 </Length>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 		
 		<Procedure>
@@ -3036,10 +3157,7 @@
 					<Name>npoints</Name>
 					<Type>RtInt</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size = npoints;
 </VaryingSize>
@@ -3047,14 +3165,14 @@
 </VertexSize>
 			<FaceVaryingSize>		facevarying_size = npoints;
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -3080,10 +3198,7 @@
 					<Name>wrap</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<UniformSize>		uniform_size = ncurves;
 </UniformSize>
@@ -3118,14 +3233,14 @@
 				vertex_size+=nvertices[__i];
 		}
 </VertexSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -3200,10 +3315,7 @@
 		}
 </Length>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -3223,14 +3335,14 @@
 				facevarying_size+=nvertices[__i];
 		}
 </FaceVaryingSize>
-			<Valid>
+			<ValidScope>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
 				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -3245,10 +3357,7 @@
 					<Name>callback</Name>
 					<Type>RtArchiveCallback</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 		</Procedure>
 
@@ -3328,21 +3437,18 @@
 					<Name>layername</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
-			<Valid>
+			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
+				<Object/>
 				<Motion/>
-			</Valid>
+			</ValidScope>
 		</Procedure>
 
 		<Procedure>
@@ -3383,10 +3489,7 @@
 					<Name>type</Name>
 					<Type>RtToken</Type>
 				</Argument>	
-				<Argument>
-					<Name>plist</Name>
-					<Type>PARAMETERLIST</Type>
-				</Argument>
+				<ParamList/>
 			</Arguments>
 		</Procedure>
 		<Procedure>

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
+<!DOCTYPE interface [
+	<!ENTITY cr "&#xa;">
+	<!ENTITY tab "&#x9;">
+	<!-- Ugly hack - need to redeclare xmlns:xsl to workaround an xsltproc bug. -->
+	<!ENTITY space "<xsl:text xmlns:xsl='http://www.w3.org/1999/XSL/Transform'> </xsl:text>">
+]>
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-
-
 	<xsl:output method="text"/>
 	<xsl:strip-space elements="RiAPI"/>
+	<xsl:include href="api_utils.xsl"/>
 
 
 	<!--	API	-->
@@ -19,7 +24,7 @@
 	<!--	Procedure	-->
 	<xsl:template match="Procedure">
 		<xsl:value-of select="concat('void ', Name, 'Debug(')"/>
-		<xsl:apply-templates select="Arguments/Argument" mode="arg_parameters"/>
+		<xsl:apply-templates select="Arguments" mode="procedure_formals"/>
 		<xsl:text>)&#xa;</xsl:text>
 		<xsl:text>{&#xa;</xsl:text>
 		<xsl:text>&#x9;if(QGetRenderContext() == 0 || !QGetRenderContext()->poptCurrent()) return;&#xa;</xsl:text>
@@ -28,49 +33,51 @@
 		<xsl:text>&#x9;{&#xa;</xsl:text>
 		<xsl:text>&#x9;&#x9;std::stringstream _message;&#xa;</xsl:text>
 		<xsl:value-of select="concat('&#x9;&#x9;_message &lt;&lt; &quot;', Name, ' &quot;;&#xa;')"/>
-		<xsl:apply-templates select="Arguments/Argument" mode="arg_output"/>
+		<xsl:apply-templates select="Arguments" mode="arg_output"/>
 		<xsl:text>&#x9;&#x9;Aqsis::log() &lt;&lt;  _message.str().c_str() &lt;&lt; std::endl;&#xa;</xsl:text>
 		<xsl:text>&#x9;}&#xa;</xsl:text>
 		<xsl:text>}&#xa;</xsl:text>
 	</xsl:template>
 
-	<xsl:template match="Procedure" mode="macro">
-		<xsl:value-of select="concat('#define DEBUG_', translate(Name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), ' ')"/>
-		<xsl:value-of select="concat(Name, 'Debug(')"/>
-		<xsl:apply-templates select="Arguments/Argument" mode="macro_call"/>
-		<xsl:text>);&#xa;</xsl:text>
-	</xsl:template>
+<xsl:template match="Procedure" mode="macro">
+#define DEBUG_<xsl:value-of select="translate(Name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+	&space;<xsl:value-of select="Name"/>Debug(<xsl:apply-templates select="Arguments" mode="procedure_call"/>);
+</xsl:template>
+
 
 	<!--	Argument copy within the constructor	-->
-	<xsl:template match="Argument" mode="arg_output">
-		<xsl:choose>
-			<xsl:when test="Type = 'PARAMETERLIST'">
-				<xsl:text>&#x9;&#x9;// Output the plist here.&#xa;</xsl:text>
-				<xsl:text>
+	<xsl:template match="Arguments" mode="arg_output">
+		<xsl:apply-templates select="Argument" mode="arg_output"/>
+		<xsl:if test="ParamList">
+			<xsl:text>&#x9;&#x9;// Output the plist here.&#xa;</xsl:text>
+			<xsl:text>
 		int uniform_size = 1;
 		int varying_size = 1;
 		int vertex_size = 1;
 		int facevarying_size = 1;
 		int facevertex_size = 1;
 </xsl:text>
-				<xsl:if test="../../UniformSize">
-					<xsl:value-of select="../../UniformSize"/>
-				</xsl:if>
-				<xsl:if test="../../VaryingSize">
-					<xsl:value-of select="../../VaryingSize"/>
-				</xsl:if>
-				<xsl:if test="../../VertexSize">
-					<xsl:value-of select="../../VertexSize"/>
-				</xsl:if>
-				<xsl:if test="../../FaceVaryingSize">
-					<xsl:value-of select="../../FaceVaryingSize"/>
-				</xsl:if>
-				<xsl:if test="../../FaceVertexSize">
-					<xsl:value-of select="../../FaceVertexSize"/>
-				</xsl:if>
-				<xsl:text>		DebugPlist(count, tokens, values, SqInterpClassCounts(uniform_size, varying_size,
+			<xsl:if test="../UniformSize">
+				<xsl:value-of select="../UniformSize"/>
+			</xsl:if>
+			<xsl:if test="../VaryingSize">
+				<xsl:value-of select="../VaryingSize"/>
+			</xsl:if>
+			<xsl:if test="../VertexSize">
+				<xsl:value-of select="../VertexSize"/>
+			</xsl:if>
+			<xsl:if test="../FaceVaryingSize">
+				<xsl:value-of select="../FaceVaryingSize"/>
+			</xsl:if>
+			<xsl:if test="../FaceVertexSize">
+				<xsl:value-of select="../FaceVertexSize"/>
+			</xsl:if>
+			<xsl:text>		DebugPlist(count, tokens, values, SqInterpClassCounts(uniform_size, varying_size,
 			vertex_size, facevarying_size, facevertex_size), _message);&#xa;</xsl:text>
-			</xsl:when>
+		</xsl:if>
+	</xsl:template>
+	<xsl:template match="Argument" mode="arg_output">
+		<xsl:choose>
 			<xsl:when test="contains( Type, 'Array')">
 				<xsl:choose>
 					<xsl:when test="./Length">
@@ -131,45 +138,5 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-
-
-	<!--	Argument to the cache constructor	-->
-	<xsl:template match="Argument" mode="arg_parameters">
-		<xsl:choose>
-			<xsl:when test="Type = 'PARAMETERLIST'">
-				<xsl:text>RtInt count, RtToken tokens[], RtPointer values[]</xsl:text>
-			</xsl:when>
-			<xsl:when test="contains( Type, 'Array')">
-				<xsl:value-of select="concat(substring-before(Type, 'Array'), ' ', Name, '[]')"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="concat(Type, ' ', Name)"/>
-			</xsl:otherwise>
-		</xsl:choose>
-		<xsl:if test="last() != position()">
-		   <xsl:text>, </xsl:text>
-		</xsl:if>
-	</xsl:template>
-
-	<!--	Arguments to macro construct method	-->
-	<xsl:template match="Argument" mode="macro_call">
-		<xsl:choose>
-			<xsl:when test="Type = 'PARAMETERLIST'">
-				<xsl:if test="position() != 1">
-				   <xsl:text>, </xsl:text>
-				</xsl:if>
-				<xsl:text>count, tokens, values</xsl:text>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:if test="not(Type = '')">
-					<xsl:if test="position() != 1">
-					   <xsl:text>, </xsl:text>
-					</xsl:if>
-					<xsl:value-of select="Name"/>
-				</xsl:if>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-
 
 </xsl:stylesheet>
