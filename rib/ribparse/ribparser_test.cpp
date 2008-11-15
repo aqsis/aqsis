@@ -65,10 +65,11 @@ struct NullRequestFixture
 
 BOOST_AUTO_TEST_CASE(CqRibParser_get_scalar_tests)
 {
-	NullRequestFixture f("42 3.141592 \"some_string\" ");
+	NullRequestFixture f("42 3.141592 3 \"some_string\" ");
 
 	BOOST_CHECK_EQUAL(f.parser.getInt(), 42);
 	BOOST_CHECK_CLOSE(f.parser.getFloat(), 3.141592f, 0.0001f);
+	BOOST_CHECK_CLOSE(f.parser.getFloat(), 3.0f, 0.0001f);
 	BOOST_CHECK_EQUAL(f.parser.getString(), "some_string");
 }
 
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getIntArray_test)
 
 BOOST_AUTO_TEST_CASE(CqRibParser_getFloatArray_test)
 {
-	NullRequestFixture f("[1 2.1 3.2 4] [-2.0e1 -4.1] [\"asdf\"]");
+	NullRequestFixture f("[1 2.1 3.2 4] [-2.0e1 -4.1]  1 2.0  [1 2.0] [\"asdf\"]");
 
 	const TqFloat eps = 0.0001;
 
@@ -111,6 +112,20 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getFloatArray_test)
 	BOOST_REQUIRE_EQUAL(a2.size(), 2U);
 	BOOST_CHECK_CLOSE(a2[0], -2.0e1f, eps);
 	BOOST_CHECK_CLOSE(a2[1], -4.1f, eps);
+
+	// check that we can read a float array with fixed length in either format.
+	{
+		const CqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
+		BOOST_REQUIRE_EQUAL(a.size(), 2U);
+		BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
+		BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
+	}
+	{
+		const CqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
+		BOOST_REQUIRE_EQUAL(a.size(), 2U);
+		BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
+		BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
+	}
 
 	// check throw on reading a non-float array
 	BOOST_CHECK_THROW(f.parser.getFloatArray(), XqParseError);
@@ -129,6 +144,40 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 
 	// check throw on reading a non-string array
 	BOOST_CHECK_THROW(f.parser.getStringArray(), XqParseError);
+}
+
+class StringToBasisDummy : public IqStringToBasis
+{
+	public:
+		virtual CqRibParser::TqBasis* getBasis(const std::string& name) const
+		{
+			static CqRibParser::TqBasis testBasis = {
+				{1, 2, 3, 4},
+				{5, 6, 7, 8},
+				{9, 10, 11, 12},
+				{13, 14, 15, 16}
+			};
+			if(name == "test")
+				return &testBasis;
+			else
+				return 0;
+		}
+};
+
+BOOST_AUTO_TEST_CASE(CqRibParser_getBasis_test)
+{
+	NullRequestFixture f("[ 0 1 2 3   4 5 6 7   8 9 10 11   12 13 14 15] "
+			" \"test\" \"unknown\"");
+	const CqRibParser::TqBasis* basis = f.parser.getBasis(StringToBasisDummy());
+	for(int i = 0; i < 16; ++i)
+		BOOST_CHECK_CLOSE((*basis)[i/4][i%4], TqFloat(i), 0.00001);
+
+	basis = f.parser.getBasis(StringToBasisDummy());
+	for(int i = 0; i < 16; ++i)
+		BOOST_CHECK_CLOSE((*basis)[i/4][i%4], TqFloat(i+1), 0.00001);
+
+	basis = f.parser.getBasis(StringToBasisDummy());
+	BOOST_CHECK_EQUAL(basis, static_cast<CqRibParser::TqBasis*>(0));
 }
 
 BOOST_AUTO_TEST_CASE(CqRibParser_getIntParam_test)

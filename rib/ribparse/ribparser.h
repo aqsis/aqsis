@@ -42,6 +42,8 @@
 
 namespace Aqsis {
 
+class IqStringToBasis;
+
 //------------------------------------------------------------------------------
 /** \brief A flexible parser for RIB-like file formats.
  *
@@ -86,6 +88,8 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		/// RIB string array type
 		typedef std::vector<std::string> TqStringArray;
 
+		typedef TqFloat TqBasis[4][4];
+
 		//--------------------------------------------------
 		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
@@ -122,22 +126,51 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 
 		/** \brief Read an array of integers from the input.
 		 *
-		 * A reference to the array is valid until parsing the next request
-		 * commences.
+		 * \return a reference to the array which is valid until parsing the
+		 * next request commences.
 		 */
 		const TqIntArray& getIntArray();
 		/** \brief Read an array of floats from the input
 		 *
-		 * A reference to the array is valid until parsing the next request
-		 * commences.
+		 * The array can be in two formats.  The default is an array of
+		 * indeterminate length, in the format
+		 *
+		 *   '[' num_1 num_2 ... num_n ']'
+		 *
+		 * However, if the length parameter is non-negative, the function also
+		 * parses arrays without the delimiting brackets, that is, of the form
+		 *
+		 *   num_1 num_2 ... num_n
+		 *
+		 * \param length - number of elements expected in the array.  When
+		 * non-negative, this also allows arrays without delimiting brackets to
+		 * be parsed.
+		 *
+		 * \return a reference to the array which is valid until parsing the
+		 * next request commences.
+		 * \return a reference to the array which is valid until parsing the
+		 * next request commences.
 		 */
-		const TqFloatArray& getFloatArray();
+		const TqFloatArray& getFloatArray(TqInt length = -1);
 		/** \brief Read an array of strings from the input
 		 *
-		 * A reference to the array is valid until parsing the next request
-		 * commences.
+		 * \return a reference to the array which is valid until parsing the
+		 * next request commences.
 		 */
 		const TqStringArray& getStringArray();
+
+		/** \brief Read in a basis matrix.
+		 *
+		 * The basis can be represented either explicitly as an array of 16
+		 * floats, or as a string providing the basis name.  When the string
+		 * form is encountered, stringToBasis.getBasis() is invoked with the
+		 * basis name and the result returned.
+		 *
+		 * \param stringToBasis - callback object mapping basis names to basis
+		 *                        matrices.
+		 * \return A pointer to the retrieved basis matrix.
+		 */
+		const TqBasis* getBasis(const IqStringToBasis& stringToBasis);
 		//@}
 
 		//--------------------------------------------------
@@ -206,6 +239,15 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		CqBufferPool<std::string> m_stringArrayPool;
 };
 
+/// Callback interface to get a basis from a name string.
+class IqStringToBasis
+{
+	public:
+		/// Get the spline basis corresponding to a name string (throw if not found)
+		virtual CqRibParser::TqBasis* getBasis(const std::string& name) const = 0;
+
+		virtual ~IqStringToBasis() {};
+};
 
 //==============================================================================
 // Implementation details

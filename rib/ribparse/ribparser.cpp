@@ -78,9 +78,16 @@ TqInt CqRibParser::getInt()
 TqFloat CqRibParser::getFloat()
 {
 	CqRibToken tok = m_lex->get();
-	if(tok.type() != CqRibToken::FLOAT)
-		AQSIS_THROW(XqParseError, "Found " << tok << " expected FLOAT");
-	return tok.floatVal();
+	switch(tok.type())
+	{
+		case CqRibToken::INTEGER:
+			return tok.intVal();
+		case CqRibToken::FLOAT:
+			return tok.floatVal();
+		default:
+			AQSIS_THROW(XqParseError, "Found " << tok << " expected float");
+			return 0;
+	}
 }
 
 std::string CqRibParser::getString()
@@ -146,32 +153,54 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 	return buf;
 }
 
-const CqRibParser::TqFloatArray& CqRibParser::getFloatArray()
+const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 {
-	consumeArrayBegin(*m_lex, "float");
-
 	TqFloatArray& buf = m_floatArrayPool.getBuf();
-	bool parsing = true;
-	while(parsing)
+	if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
 	{
-		CqRibToken tok = m_lex->get();
-		switch(tok.type())
+		// Read an array in [ num1 num2 ... num_n ] format
+		consumeArrayBegin(*m_lex, "float");
+
+		bool parsing = true;
+		while(parsing)
 		{
-			case CqRibToken::INTEGER:
-				buf.push_back(tok.intVal());
-				break;
-			case CqRibToken::FLOAT:
-				buf.push_back(tok.floatVal());
-				break;
-			case CqRibToken::ARRAY_END:
-				parsing = false;
-				break;
-			default:
-				AQSIS_THROW(XqParseError,
-						m_lex->pos() << ": unexpected token " << tok
-						<< "while reading float array");
-				break;
+			CqRibToken tok = m_lex->get();
+			switch(tok.type())
+			{
+				case CqRibToken::INTEGER:
+					buf.push_back(tok.intVal());
+					break;
+				case CqRibToken::FLOAT:
+					buf.push_back(tok.floatVal());
+					break;
+				case CqRibToken::ARRAY_END:
+					parsing = false;
+					break;
+				default:
+					AQSIS_THROW(XqParseError,
+							m_lex->pos() << ": unexpected token " << tok
+							<< "while reading float array");
+					break;
+			}
 		}
+
+		if(length >= 0 && static_cast<TqInt>(buf.size()) != length)
+		{
+			AQSIS_THROW(XqParseError, "expected " << length
+					<< " float array componenets, got " << buf.size());
+		}
+	}
+	else if(length >= 0)
+	{
+		// Read an array in  num1 num2 ... num_n  format (ie, without the usual
+		// array delimiters).
+		for(TqInt i = 0; i < length; ++i)
+			buf.push_back(getFloat());
+	}
+	else
+	{
+		AQSIS_THROW(XqParseError, "unexpected token " << m_lex->peek()
+				<< " while reading float array");
 	}
 	return buf;
 }
@@ -201,6 +230,29 @@ const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 		}
 	}
 	return buf;
+}
+
+const CqRibParser::TqBasis* CqRibParser::getBasis(
+		const IqStringToBasis& stringToBasis)
+{
+	switch(m_lex->peek().type())
+	{
+		case CqRibToken::ARRAY_BEGIN:
+			{
+				const CqRibParser::TqFloatArray& basis = getFloatArray();
+				if(basis.size() != 16)
+					AQSIS_THROW(XqParseError, "basis array must be of length 16");
+				// Note: This cast is a little ugly, but should only cause
+				// problems in the *very* odd case that the alignment of
+				// RtBasis and RtFloat* is different.
+				return reinterpret_cast<TqBasis*>(const_cast<TqFloat*>(&basis[0]));
+			}
+		case CqRibToken::STRING:
+			return stringToBasis.getBasis(getString());
+		default:
+			AQSIS_THROW(XqParseError, "expected string or float array for basis");
+			return 0;
+	}
 }
 
 const CqRibParser::TqIntArray& CqRibParser::getIntParam()
