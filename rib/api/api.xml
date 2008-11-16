@@ -148,7 +148,7 @@
 				<Type>RtString[]</Type>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqStringArray&amp;</Type>
+				<Type>SqRtTokenArrayHolder</Type>
 				<Getter>getStringArray</Getter>
 			</Rib>
 		</Type>
@@ -158,7 +158,7 @@
 				<Type>RtToken[]</Type>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqStringArray&amp;</Type>
+				<Type>SqRtTokenArrayHolder</Type>
 				<Getter>getStringArray</Getter>
 			</Rib>
 		</Type>
@@ -185,10 +185,6 @@
 				<Type>RtObjectHandle</Type>
 				<Typedef>RtPointer</Typedef>
 			</C>
-			<Rib>
-				<Type>CqRibHandle</Type>
-				<Getter>getInt</Getter>
-			</Rib>
 		</Type>
 		<Type>
 			<Name>RtLightHandle</Name>
@@ -196,10 +192,6 @@
 				<Type>RtLightHandle</Type>
 				<Typedef>RtPointer</Typedef>
 			</C>
-			<Rib>
-				<Type>CqRibHandle</Type>
-				<Getter>getInt</Getter>
-			</Rib>
 		</Type>
 		<Type>
 			<Name>RtContextHandle</Name>
@@ -2855,7 +2847,7 @@
 				<RibArgsCanBeArray/>
 				<ParamList/>
 			</Arguments>
-			<Rib/>
+			<Rib><CustomImpl/></Rib>
 			<VaryingSize>		varying_size = 4;
 </VaryingSize>
 			<VertexSize>		vertex_size = 4;
