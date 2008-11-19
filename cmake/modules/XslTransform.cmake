@@ -1,5 +1,5 @@
 #
-# The following handy macros are stolen from boost and used here with
+# The following handy macros are borrowed from boost and used here with
 # modifications to mesh better with the aqsis build and to fix some bugs (the
 # original xsl_transform() didn't correctly generate a dependency on the xsl
 # file.
@@ -177,8 +177,8 @@ macro(xsl_transform OUTPUT INPUT)
     add_custom_command(OUTPUT ${THIS_XSL_OUTPUT_FILE}
       COMMAND ${THIS_XSL_CATALOG} ${AQSIS_XSLTPROC_EXECUTABLE} ${XSLTPROC_FLAGS} 
         ${THIS_XSL_EXTRA_FLAGS} -o ${THIS_XSL_OUTPUT} 
-        --path ${CMAKE_CURRENT_SOURCE_DIR}
-        ${THIS_XSL_STYLESHEET} ${INPUT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/${THIS_XSL_STYLESHEET} 
+        ${CMAKE_CURRENT_SOURCE_DIR}/${INPUT}
       COMMENT ${THIS_XSL_COMMENT}
       DEPENDS ${INPUT} ${THIS_XSL_DEFAULT_ARGS} ${THIS_XSL_STYLESHEET})
     set_source_files_properties(${THIS_XSL_OUTPUT_FILE}
