@@ -288,12 +288,12 @@ void CqMipmap<TextureBufferT>::applyFilter(
 	// if necessary.
 	if( ( sampleOpts.lerp() == Lerp_Always
 		|| (sampleOpts.lerp() == Lerp_Auto && usingBlur && blurRatio > 0.2) )
-		&& level < numLevels()-1 )
+		&& level < numLevels()-1 && levelCts > 0)
 	{
-		// Use linear interpolation between the results of filtering on two
-		// different mipmap levels.  This should only be necessary if using
-		// filter blur, however the user can also turn it on explicitly using
-		// the "lerp" option.
+		// Use interpolation between the results of filtering on two different
+		// mipmap levels.  This should only be necessary if using filter blur,
+		// however the user can also turn it on explicitly using the "lerp"
+		// option.
 		//
 		// Experiments with large amounts of blurring show that some form of
 		// interpolation near level transitions is necessary to ensure that
