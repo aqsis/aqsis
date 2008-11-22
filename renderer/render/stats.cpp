@@ -36,8 +36,12 @@
 
 namespace Aqsis {
 
+#ifdef USE_TIMERS
+
 /// Global collection of timer objects.
 CqTimerSet<EqTimerStats> g_timerSet;
+
+#endif // USE_TIMERS
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
 // simply provide empty implementations and not have to link to libaqsis.
@@ -120,8 +124,10 @@ void CqStats::PrintStats( TqInt level ) const
 		Verbose := 2
 		Max		:= 3
 	*/
+#	ifdef USE_TIMERS
 	if( level > 0 )
 		g_timerSet.printTimes(MSG);
+#	endif // USE_TIMERS
 
 	MSG << std::setiosflags(std::ios_base::fixed)
 		<< std::setfill(' ') << std::setprecision(6);
