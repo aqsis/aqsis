@@ -173,8 +173,8 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 					{
 						Aqsis::log() << info << "Argument " << iArg << " doesn't match:";
 						if(!arg->empty())
-							Aqsis::log() << " got " << TypeName(arg->front().first);
-						Aqsis::log() << " expected " << TypeName(pfunc->aTypeSpec()[iArg]) << std::endl;
+							Aqsis::log() << info << " got " << TypeName(arg->front().first);
+						Aqsis::log() << info << " expected " << TypeName(pfunc->aTypeSpec()[iArg]) << std::endl;
 						fArgsFailed = true;
 					}
 				}
