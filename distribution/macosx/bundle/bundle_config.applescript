@@ -22,7 +22,7 @@
 
 (*
 /** \file
-		\brief Exports the AQSISHOME to the users .profile.
+		\brief Exports the AQSISHOME to the users .bash_profile.
 		\author Tobias Sauerwein (tsauerwein@aqsis.org)
 */
 *)
@@ -31,7 +31,7 @@
 --  Copyright 2008 Aqsis. All rights reserved.
 
 
-set profile to "~/.profile"
+set profile to "~/.bash_profile"
 
 set aqsisFound to false
 
@@ -42,7 +42,7 @@ tell application "Finder"
 	if exists file aqsisHome then
 		set aqsisPath to quoted form of text 1 thru -2 of POSIX path of (path to me)
 		tell application "Finder"
-			set localProfile to (home as string) & ".profile"
+			set localProfile to (home as string) & ".bash_profile"
 			if not (exists file localProfile) then
 				open for access file localProfile
 				close access file localProfile
