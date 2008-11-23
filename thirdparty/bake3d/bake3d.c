@@ -404,7 +404,8 @@ SHADEOP (texture3c)
 SHADEOP_SHUTDOWN (map_cleanup)
 {
 	//printf("map_cleanup");
-	for ( int i = 0; i < MyList.CurrentFiles; i++)
+        int i;
+	for ( i = 0; i < MyList.CurrentFiles; i++)
 	{
 		if (MyList.pList[i].CloudFile)
 		{
