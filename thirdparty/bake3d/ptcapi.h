@@ -30,30 +30,30 @@
 typedef void * PtcPointCloud;
 
 // Create a new Point cloud file
-extern "C" PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars,const char **vartypes, const char **varnames, float *world2eye, float
+PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars,const char **vartypes, const char **varnames, float *world2eye, float
 	        *world2ndc, float *format);
 
 // Write a point to the Point cloud file
-extern "C" int PtcWriteDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float radius, float *data);
+int PtcWriteDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float radius, float *data);
 
 // Finish and close the Point cloud file
-extern "C" void PtcFinishPointCloudFile ( PtcPointCloud pointcloud);
+void PtcFinishPointCloudFile ( PtcPointCloud pointcloud);
 
 // Open an existant the Point cloud file
-extern "C" PtcPointCloud PtcOpenPointCloudFile ( const char *filename, int *nvars,const char **vartypes, const char **varnames );
+PtcPointCloud PtcOpenPointCloudFile ( const char *filename, int *nvars,const char **vartypes, const char **varnames );
 
 
 // Get information from any point from the Point cloud file
-extern "C" int PtcGetPointCloudInfo ( PtcPointCloud pointcloud, const char *request,void *result );
+int PtcGetPointCloudInfo ( PtcPointCloud pointcloud, const char *request,void *result );
 
 // Get one point from the Point clound file
-extern "C" int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data );
+int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data );
 
 // Get one normal, radius, user_data from the location point
-extern "C" int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data );
+int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data );
 
 
 // Close Point cloud file
-extern "C" void PtcClosePointCloudFile ( PtcPointCloud pointcloud );
+void PtcClosePointCloudFile ( PtcPointCloud pointcloud );
 
 #endif

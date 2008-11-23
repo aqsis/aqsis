@@ -71,7 +71,8 @@ PtcPointCloud FindCloudRead(char *s)
 {
 
 	//printf("%s MaxFiles %d CurrentFiles %d \n", s, MyList.MaxFiles, MyList.CurrentFiles);
-	for (int i=0; i < MyList.CurrentFiles; i++)
+	int i;
+	for (i=0; i < MyList.CurrentFiles; i++)
 	{
 		//printf("name of %s %s\n", s, MyList.pList[i].filename);
 		if (MyList.pList[i].ReadWrite == 0 && strcmp(MyList.pList[i].filename, s) == 0)
@@ -84,7 +85,8 @@ PtcPointCloud FindCloudRead(char *s)
 
 PtcPointCloud FindCloudWrite(char *s)
 {
-	for (int i=0; i < MyList.CurrentFiles; i++)
+	int i;
+	for (i=0; i < MyList.CurrentFiles; i++)
 	{
 		if (MyList.pList[i].ReadWrite == 1 && strcmp(MyList.pList[i].filename, s) == 0)
 		{
