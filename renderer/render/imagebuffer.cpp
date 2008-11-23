@@ -191,11 +191,13 @@ CqVector2D	CqImageBuffer::BucketPosition( TqInt x, TqInt y ) const
 
 CqVector2D CqImageBuffer::BucketSize(TqInt x, TqInt y) const
 {
+	TqUint iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	TqUint iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 	CqVector2D	vecA = BucketPosition(x,y);
-	vecA.x( m_iXRes - vecA.x() );
+	vecA.x( iXRes - vecA.x() );
 	if ( vecA.x() > m_XBucketSize )
 		vecA.x( m_XBucketSize );
-	vecA.y( m_iYRes - vecA.y() );
+	vecA.y( iYRes - vecA.y() );
 	if ( vecA.y() > m_YBucketSize )
 		vecA.y( m_YBucketSize );
 
@@ -224,14 +226,10 @@ void	CqImageBuffer::SetImage()
 	m_FilterXWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
 	m_FilterYWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
 
-	m_iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	m_iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_CropWindowXMin = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes);
-	m_CropWindowXMax = clamp<TqInt>(lceil( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes);
-	m_CropWindowYMin = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes);
-	m_CropWindowYMax = clamp<TqInt>(lceil( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes);
-	m_cXBuckets = ( ( m_iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
-	m_cYBuckets = ( ( m_iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
+	TqUint iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	TqUint iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	m_cXBuckets = ( ( iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
+	m_cYBuckets = ( ( iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
 	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 	m_PixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
 
@@ -272,8 +270,6 @@ void	CqImageBuffer::SetImage()
 
 void	CqImageBuffer::DeleteImage()
 {
-	m_iXRes = 0;
-	m_iYRes = 0;
 }
 
 
@@ -366,10 +362,10 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	Bound.vecMax().y( Bound.vecMax().y() + m_FilterYWidth / 2.0f );
 
 	// If the bounds are completely outside the viewing frustum, cull the primitive.
-	if ( Bound.vecMin().x() > CropWindowXMax() ||
-	        Bound.vecMin().y() > CropWindowYMax() ||
-	        Bound.vecMax().x() < CropWindowXMin() ||
-	        Bound.vecMax().y() < CropWindowYMin() )
+	if( Bound.vecMin().x() > QGetRenderContext()->cropWindowXMax() ||
+		Bound.vecMin().y() > QGetRenderContext()->cropWindowYMax() ||
+		Bound.vecMax().x() < QGetRenderContext()->cropWindowXMin() ||
+		Bound.vecMax().y() < QGetRenderContext()->cropWindowYMin() )
 		return ( true );
 
 	// Restore Z-Values to camera space.
@@ -501,10 +497,10 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
 
-	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f ||
-	     B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
-	     B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f ||
-	     B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
+	if ( B.vecMax().x() < QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2.0f ||
+	     B.vecMax().y() < QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2.0f ||
+	     B.vecMin().x() > QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2.0f ||
+	     B.vecMin().y() > QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f )
 	{
 		return ;
 	}
@@ -723,14 +719,14 @@ void CqImageBuffer::RenderImage()
 			TqInt ymin = static_cast<TqInt>( vecMin.y() );
 			TqInt xmax = static_cast<TqInt>( vecMax.x() );
 			TqInt ymax = static_cast<TqInt>( vecMax.y() );
-			if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
-				xmin = static_cast<TqInt>(CropWindowXMin() - m_FilterXWidth / 2.0f);
-			if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
-				ymin = static_cast<TqInt>(CropWindowYMin() - m_FilterYWidth / 2.0f);
-			if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
-				xmax = static_cast<TqInt>(CropWindowXMax() + m_FilterXWidth / 2.0f);
-			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
-				ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
+			if ( xmin < QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2 )
+				xmin = static_cast<TqInt>(QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2.0f);
+			if ( ymin < QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2 )
+				ymin = static_cast<TqInt>(QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2.0f);
+			if ( xmax > QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2 )
+				xmax = static_cast<TqInt>(QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2.0f);
+			if ( ymax > QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2 )
+				ymax = static_cast<TqInt>(QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f);
 
 			bucketProcessors[i].preProcess( bPos, bSize,
 							m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
@@ -758,7 +754,9 @@ void CqImageBuffer::RenderImage()
 				AQSIS_TIME_SCOPE(Display_bucket);
 				const CqBucket* bucket = bucketProcessors[i].getBucket();
 				if (bucket)
+				{
 					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucket );
+				}
 			}
 			bucketProcessors[i].reset();
 

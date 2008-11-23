@@ -82,8 +82,6 @@ class CqImageBuffer
 		CqImageBuffer() :
 				m_fQuit( false ),
 				m_fDone( true ),
-				m_iXRes( 0 ),
-				m_iYRes( 0 ),
 				m_cXBuckets( 0 ),
 				m_cYBuckets( 0 ),
 				m_XBucketSize( 0 ),
@@ -92,10 +90,6 @@ class CqImageBuffer
 				m_PixelYSamples( 0 ),
 				m_FilterXWidth( 0 ),
 				m_FilterYWidth( 0 ),
-				m_CropWindowXMin( 0 ),
-				m_CropWindowYMin( 0 ),
-				m_CropWindowXMax( 0 ),
-				m_CropWindowYMax( 0 ),
 				m_DisplayMode( ModeRGB ),
 				m_CurrentBucketCol( 0 ),
 				m_CurrentBucketRow( 0 ),
@@ -103,62 +97,6 @@ class CqImageBuffer
 		{}
 		virtual	~CqImageBuffer();
 
-		/** Get the horizontal resolution of this image.
-		 * \return Integer horizontal resolution.
-		 */
-		TqInt	iXRes() const
-		{
-			return ( m_iXRes );
-		}
-		/** Get the vertical resolution of this image.
-		 * \return Integer vertical resolution.
-		 */
-		TqInt	iYRes() const
-		{
-			return ( m_iYRes );
-		}
-		/** Get the cropped image in width pixels
-		 * \return Integer horizontal resolution.
-		 */
-		TqInt	xResCrop() const
-		{
-			return m_CropWindowXMax - m_CropWindowXMin;
-		}
-		/** Get the cropped image in height pixels
-		 * \return Integer vertical resolution.
-		 */
-		TqInt	yResCrop() const
-		{
-			return m_CropWindowYMax - m_CropWindowYMin;
-		}
-		/** Get the minimum horizontal pixel to render.
-		 * \return Integer minimum pixel index.
-		 */
-		TqInt	CropWindowXMin() const
-		{
-			return ( m_CropWindowXMin );
-		}
-		/** Get the minimum vertical pixel to render.
-		 * \return Integer minimum pixel index.
-		 */
-		TqInt	CropWindowYMin() const
-		{
-			return ( m_CropWindowYMin );
-		}
-		/** Get the maximum horizontal pixel to render.
-		 * \return Integer maximum pixel index.
-		 */
-		TqInt	CropWindowXMax() const
-		{
-			return ( m_CropWindowXMax );
-		}
-		/** Get the maximum vertical pixel to render.
-		 * \return Integer maximum pixel index.
-		 */
-		TqInt	CropWindowYMax() const
-		{
-			return ( m_CropWindowYMax );
-		}
 		/** Get the number of buckets in the horizontal direction.
 		 * \return Integer horizontal bucket count.
 		 */
@@ -272,8 +210,6 @@ class CqImageBuffer
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
 		bool	m_fDone;			///< Set when the render of this image has completed.
 
-		TqInt	m_iXRes;			///< Integer horizontal image resolution.
-		TqInt	m_iYRes;			///< Integer vertical image resolution.
 		TqInt	m_cXBuckets;		///< Integer horizontal bucket count.
 		TqInt	m_cYBuckets;		///< Integer vertical bucket count.
 		TqInt	m_XBucketSize;		///< Integer horizontal bucket size.
@@ -282,10 +218,6 @@ class CqImageBuffer
 		TqInt	m_PixelYSamples;	///< Integer vertical sample per pixel count.
 		TqFloat	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
 		TqFloat	m_FilterYWidth;		///< Integer vertical pixel filter width in pixels.
-		TqInt	m_CropWindowXMin;	///< Integer minimum horizontal pixel to render.
-		TqInt	m_CropWindowYMin;	///< Integer minimum vertical pixel to render.
-		TqInt	m_CropWindowXMax;	///< Integer maximum horizontal pixel to render.
-		TqInt	m_CropWindowYMax;	///< Integer maximum vertical pixel to render.
 		TqFloat	m_ClippingNear;		///< Near clipping distance.
 		TqFloat	m_ClippingFar;		///< Far clipping distance.
 		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.

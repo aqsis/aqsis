@@ -82,8 +82,8 @@ void CqMPDump::dumpImageInfo()
 		return;
 	}
 
-	int width = QGetRenderContext()->pImage()->iXRes();
-	int height = QGetRenderContext()->pImage()->iYRes();
+	int width = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	int height = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 	size_t len_written = fwrite((void*)&id, sizeof(short), 1, out);
 	len_written += fwrite((void*)&width, sizeof(int), 1, out);
 	len_written += fwrite((void*)&height, sizeof(int), 1, out);

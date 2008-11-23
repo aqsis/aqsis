@@ -109,7 +109,7 @@ struct IqDDManager
 	virtual	TqInt	ClearDisplays() = 0;
 	/** Open all displays in the managers list.
 	 */
-	virtual	TqInt	OpenDisplays() = 0;
+	virtual	TqInt	OpenDisplays(TqInt width, TqInt height) = 0;
 	/** Close all displays in the managers list, rendering is finished.
 	 */
 	virtual	TqInt	CloseDisplays() = 0;

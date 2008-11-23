@@ -122,7 +122,6 @@ ArgParse::apflag g_cl_beep = 0;
 ArgParse::apint g_cl_verbose = 1;
 ArgParse::apflag g_cl_echoapi = 0;
 ArgParse::apfloatvec g_cl_cropWindow;
-ArgParse::apstring g_cl_rc_path = "";
 ArgParse::apstring g_cl_shader_path = "";
 ArgParse::apstring g_cl_archive_path = "";
 ArgParse::apstring g_cl_texture_path = "";
@@ -597,7 +596,6 @@ int main( int argc, const char** argv )
 		ap.argFlag( "mpdump", "\aOutput MP list to a custom 'dump' file", &g_cl_mpdump );
 #endif	// ENABLE_MPDUMP
 
-		ap.argString( "rc", "=string\aOverride the default RIB configuration file", &g_cl_rc_path );
 		ap.argString( "shaders", "=string\aOverride the default shader searchpath(s)", &g_cl_shader_path );
 		ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
 		ap.argString( "textures", "=string\aOverride the default texture searchpath(s)", &g_cl_texture_path );

@@ -114,7 +114,7 @@ class CqDisplayRequest
 		 */
 		virtual	void ThisDisplayUses( TqInt& Uses );
 
-		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin );
+		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin, TqInt width, TqInt height );
 		void CloseDisplayLibrary();
 		void ConstructStringsParameter(const char* name, const char** strings, TqInt count, UserParameter& parameter);
 		void ConstructIntsParameter(const char* name, const TqInt* ints, TqInt count, UserParameter& parameter);
@@ -146,32 +146,34 @@ class CqDisplayRequest
 		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
 
 	protected:
-		bool		m_valid;
+		bool			m_valid;
 		std::string 	m_name;
 		std::string 	m_type;
 		std::string 	m_mode;
-		TqUlong		m_modeHash;
-		TqInt		m_modeID;
-		TqInt		m_AOVOffset;
-		TqInt		m_AOVSize;
+		TqUlong			m_modeHash;
+		TqInt			m_modeID;
+		TqInt			m_AOVOffset;
+		TqInt			m_AOVSize;
+		TqInt			m_width;
+		TqInt			m_height;
 		std::vector<UserParameter> m_customParams;
-		void*		m_DriverHandle;
+		void*			m_DriverHandle;
 		PtDspyImageHandle m_imageHandle;
-		PtFlagStuff	m_flags;
+		PtFlagStuff		m_flags;
 		std::vector<PtDspyDevFormat> m_formats;
-		std::vector<TqInt>		m_dataOffsets;
+		std::vector<TqInt>			m_dataOffsets;
 		std::vector<std::string>	m_AOVnames;
-		TqInt		m_elementSize;
-		TqFloat		m_QuantizeZeroVal;
-		TqFloat		m_QuantizeOneVal;
-		TqFloat		m_QuantizeMinVal;
-		TqFloat		m_QuantizeMaxVal;
-		TqFloat		m_QuantizeDitherVal;
-		bool		m_QuantizeSpecified;
-		bool		m_QuantizeDitherSpecified;
-		DspyImageOpenMethod		m_OpenMethod;
+		TqInt			m_elementSize;
+		TqFloat			m_QuantizeZeroVal;
+		TqFloat			m_QuantizeOneVal;
+		TqFloat			m_QuantizeMinVal;
+		TqFloat			m_QuantizeMaxVal;
+		TqFloat			m_QuantizeDitherVal;
+		bool			m_QuantizeSpecified;
+		bool			m_QuantizeDitherSpecified;
+		DspyImageOpenMethod			m_OpenMethod;
 		DspyImageQueryMethod		m_QueryMethod;
-		DspyImageDataMethod		m_DataMethod;
+		DspyImageDataMethod			m_DataMethod;
 		DspyImageCloseMethod		m_CloseMethod;
 		DspyImageDelayCloseMethod	m_DelayCloseMethod;
 
@@ -247,7 +249,7 @@ class CqDDManager : public IqDDManager
 		}
 		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments );
 		virtual	TqInt	ClearDisplays();
-		virtual	TqInt	OpenDisplays();
+		virtual	TqInt	OpenDisplays(TqInt width, TqInt height);
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( const IqBucket* pBucket );
 		virtual	bool	fDisplayNeeds( const TqChar* var );

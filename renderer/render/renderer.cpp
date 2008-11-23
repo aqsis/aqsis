@@ -700,6 +700,13 @@ void CqRenderer::RenderWorld(bool clone)
 		multiPass = pMultipass[0];
 		pMultipass[0] = 0;
 	}
+
+	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	TqInt iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	m_cropWindowXMin = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, iXRes);
+	m_cropWindowXMax = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, iXRes);
+	m_cropWindowYMin = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, iYRes);
+	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
 	
 	// Ensure that the camera and projection matrices are initialised.
 	poptCurrent()->InitialiseCamera();
@@ -712,7 +719,7 @@ void CqRenderer::RenderWorld(bool clone)
 	else
 		PostWorld();
 
-	m_pDDManager->OpenDisplays();
+	m_pDDManager->OpenDisplays(m_cropWindowXMax - m_cropWindowXMin, m_cropWindowYMax - m_cropWindowYMin);
 	pImage() ->RenderImage();
 	m_pDDManager->CloseDisplays();
 

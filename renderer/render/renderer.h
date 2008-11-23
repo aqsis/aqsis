@@ -504,6 +504,22 @@ class CqRenderer : public IqRenderer
 			return(m_clippingVolume);
 		}
 
+		const TqUint cropWindowXMin() const
+		{
+			return m_cropWindowXMin;
+		}
+		const TqUint cropWindowXMax() const
+		{
+			return m_cropWindowXMax;
+		}
+		const TqUint cropWindowYMin() const
+		{
+			return m_cropWindowYMin;
+		}
+		const TqUint cropWindowYMax() const
+		{
+			return m_cropWindowYMax;
+		}
 
 	private:
 		const SqOutputDataEntry* FindOutputDataEntry(const char* name);
@@ -561,6 +577,12 @@ class CqRenderer : public IqRenderer
 		CqClippingVolume	m_clippingVolume;
 
 		std::deque<boost::shared_ptr<CqSurface> >	m_aWorld;
+
+		// Cached calculated cropwindow coordinates in raster space.
+		TqUint				m_cropWindowXMin;
+		TqUint				m_cropWindowXMax;
+		TqUint				m_cropWindowYMin;
+		TqUint				m_cropWindowYMax;
 
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
