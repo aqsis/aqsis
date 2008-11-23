@@ -18,7 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <shadeop.h>
+
 #include "ptcapi.h"
+
 
 SHADEOP_TABLE (bake3d) = {
                              { "float bake3f (string, string, point, normal, string, float)", "map_init", "map_cleanup"},
