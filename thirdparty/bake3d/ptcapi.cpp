@@ -136,7 +136,6 @@ extern "C"
 		ptc->fp = fopen(filename, "rb");
 		if (ptc->fp)
 		{
-			int n = 0;
 			char name[80];
 			fread(name, 1, strlen(PTCNAME) + 1, ptc->fp);
 			fread(&ptc->signature, 1, 1, ptc->fp);

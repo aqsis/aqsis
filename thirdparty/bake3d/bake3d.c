@@ -135,7 +135,6 @@ static void bake3d_one(void *argv[], char *type)
 	char *vartypes[2];
 
 	STRING_DESC *ptc = (STRING_DESC *) argv[1];
-	STRING_DESC *format = (STRING_DESC *) argv[2];
 
 	float *point = (float*) argv[3];
 	float *normal = (float*) argv[4];
@@ -166,14 +165,12 @@ static void bake3d_radius(void *argv[], char *type)
 	char *vartypes[2];
 
 	STRING_DESC *ptc = (STRING_DESC *) argv[1];
-	STRING_DESC *rgba = (STRING_DESC *) argv[2];
 
 	float *point = (float*) argv[3];
 	float *normal = (float*) argv[4];
 	STRING_DESC *name = (STRING_DESC*) argv[5];
 	float *f = (float*) argv[6];
-	STRING_DESC *sradius = (STRING_DESC*) argv[7];
-	float *radius = (float*) argv[8];
+	float *radius = (float*) argv[8]; // assume it will be radius
 
 	varnames[0] = name->s;
 	varnames[1] = 0;
@@ -197,19 +194,14 @@ static void bake3d_all(void *argv[], char *type)
 	char *vartypes[2];
 
 	STRING_DESC *ptc = (STRING_DESC *) argv[1];
-	STRING_DESC *rgba = (STRING_DESC *) argv[2];
 
 	float *point = (float*) argv[3];
 	float *normal = (float*) argv[4];
 	STRING_DESC *name = (STRING_DESC*) argv[5];
 	float *f = (float*) argv[6];
-	STRING_DESC *sformat = (STRING_DESC*) argv[7];
 	float *format = (float*) argv[8];
-	STRING_DESC *raster = (STRING_DESC*) argv[9];
 	float *world2eye = (float*) argv[10];
-	STRING_DESC *ndc = (STRING_DESC*) argv[11];
 	float *world2ndc = (float*) argv[12];
-	STRING_DESC *sradius = (STRING_DESC*) argv[13];
 	float *radius = (float*) argv[14];
 
 	varnames[0] = name->s;
