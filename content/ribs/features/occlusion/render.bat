@@ -16,6 +16,8 @@ ECHO === Rendering File(s) ===
 ECHO.
 aqsis.exe -progress "occlmap.rib"
 aqsis.exe -progress "simple.rib"
+ECHO === Rendering using the envlight.ptc file ===
+aqsis.exe -progress "simple_texture3d.rib"
 IF ERRORLEVEL 0 GOTO end
 
 
