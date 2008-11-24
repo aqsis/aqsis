@@ -22,7 +22,6 @@
 extern "C"
 {
 #include "ptcapi.h"
-}
 
 
 SHADEOP_TABLE (bake3d) = {
@@ -427,4 +426,5 @@ SHADEOP_INIT (map_init)
 	MyList.pList = NULL;
 
 	return (void *) &MyList;
+}
 }
