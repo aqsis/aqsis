@@ -124,7 +124,7 @@ int diff(const void *a, const void *b)
 *4. Call PtcOpenPointCloudFile again with the allocated arrays.
 * \return a file handle than shall be used in other reading calls.
 */
-PtcPointCloud PtcOpenPointCloudFile ( const char *filename, int *nvars, const char **vartypes, const char **varnames )
+extern "C" PtcPointCloud PtcOpenPointCloudFile ( const char *filename, int *nvars, const char **vartypes, const char **varnames )
 {
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *) (new PtcPointCloudHandle);
 	char exist;
@@ -235,7 +235,7 @@ PtcPointCloud PtcOpenPointCloudFile ( const char *filename, int *nvars, const ch
 *\return           1 if the request is successful, 0 otherwise.
 *note: Some point cloud files generated may not contain the  'format', `world2eye' or 'world2ndc' information.
 */
-int PtcGetPointCloudInfo ( PtcPointCloud pointcloud, const char *request, void *result )
+extern "C" int PtcGetPointCloudInfo ( PtcPointCloud pointcloud, const char *request, void *result )
 {
 	int error = 1;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
@@ -311,7 +311,7 @@ int PtcGetPointCloudInfo ( PtcPointCloud pointcloud, const char *request, void *
 * note: normal, radius and user data can be null if their value is not needed.
 *       point is read to know which data to read
 */
-int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data )
+extern "C" int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data )
 {
 	int error = 1;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
@@ -353,7 +353,7 @@ int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, flo
 	return error;
 }
 
-int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data )
+extern "C" int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, float *radius, float *user_data )
 {
 	int error = 1;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
@@ -417,7 +417,7 @@ int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, flo
 /**
 * Closes a file opened with PtcOpenPointCloudFile.
 */
-void PtcClosePointCloudFile ( PtcPointCloud pointcloud )
+extern "C" void PtcClosePointCloudFile ( PtcPointCloud pointcloud )
 {
 	int error = 0;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
@@ -449,7 +449,7 @@ void PtcClosePointCloudFile ( PtcPointCloud pointcloud )
 * \param world2ndc A world to NDC transformation matrix. optional)
 * \param format The X resolution, Y resolution and aspect ratio of the image. (optional)
 */
-PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars, const char **vartypes, const char **varnames, float *world2eye, float *world2ndc, float *format)
+extern "C" PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars, const char **vartypes, const char **varnames, float *world2eye, float *world2ndc, float *format)
 {
 	PtcPointCloudHandle *  ptc = new PtcPointCloudHandle;
 	unsigned char exist;
@@ -551,7 +551,7 @@ PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars, const c
 *        passed to PtcCreatePointCloudFile.
 * \return 1 if the operation is successful, 0 otherwise.
 */
-int PtcWriteDataPoint ( PtcPointCloud pointcloud, float *point, float *normal, float radius, float *data)
+extern "C" int PtcWriteDataPoint ( PtcPointCloud pointcloud, float *point, float *normal, float radius, float *data)
 {
 	int error = 0;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
@@ -605,7 +605,7 @@ int PtcWriteDataPoint ( PtcPointCloud pointcloud, float *point, float *normal, f
 /**
 * Writes out all data to disk and closes the file.
 */
-void PtcFinishPointCloudFile ( PtcPointCloud pointcloud)
+extern "C" void PtcFinishPointCloudFile ( PtcPointCloud pointcloud)
 {
 	int error = 0;
 	PtcPointCloudHandle * ptc = (PtcPointCloudHandle *)(pointcloud);
