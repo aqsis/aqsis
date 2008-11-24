@@ -29,6 +29,7 @@
 
 typedef void * PtcPointCloud;
 
+extern "C" {
 // Create a new Point cloud file
 PtcPointCloud PtcCreatePointCloudFile ( const char *filename, int nvars,const char **vartypes, const char **varnames, float *world2eye, float
 	        *world2ndc, float *format);
@@ -55,5 +56,6 @@ int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*normal, flo
 
 // Close Point cloud file
 void PtcClosePointCloudFile ( PtcPointCloud pointcloud );
+}
 
 #endif
