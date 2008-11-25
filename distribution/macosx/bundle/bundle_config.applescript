@@ -31,7 +31,11 @@
 --  Copyright 2008 Aqsis. All rights reserved.
 
 
-set profile to "~/.bash_profile"
+set bash_profile to ".bash_profile"
+set bashrc to ".bashrc"
+set profile to ".profile"
+
+set targetProfile to "~/"
 
 set aqsisFound to false
 
@@ -39,34 +43,45 @@ set aqsisFound to false
 tell application "Finder"
 	set aqsisHome to (path to me as string) & "Contents:MacOS:aqsis"
 	set aqsisPath to ""
-	if exists file aqsisHome then
+	if (exists file aqsisHome) then
 		set aqsisPath to quoted form of text 1 thru -2 of POSIX path of (path to me)
 		tell application "Finder"
-			set localProfile to (home as string) & ".bash_profile"
-			if not (exists file localProfile) then
-				open for access file localProfile
-				close access file localProfile
+			set localProfile to POSIX path of ((home as string) & bash_profile)
+			set fileExists to my checkExistsFile(localProfile)
+			if fileExists is not equal to 1 then
+				set localProfile to POSIX path of ((home as string) & bashrc)
+				set fileExists to my checkExistsFile(localProfile)
+				if fileExists is not equal to 1 then
+					set localProfile to POSIX path of ((home as string) & profile)
+					set fileExists to my checkExistsFile(localProfile)
+					if fileExists is not equal to 1 then
+						do shell script ("touch " & localProfile)
+					end if
+				end if
 			end if
+			set targetProfile to localProfile
 		end tell
 		
+		quit me
+		
 		(*export $AQSISHOME path*)
-		set search to do shell script "/usr/bin/sed -n 's/^export AQSISHOME=.* # Entry managed by Aqsis Renderer$/&/p'  " & profile
+		set search to do shell script "/usr/bin/sed -n 's/^export AQSISHOME=.* # Entry managed by Aqsis Renderer$/&/p'  " & targetProfile
 		if search is "" then
-			set export to "/bin/echo 'export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer' >> " & profile
+			set export to "/bin/echo 'export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer' >> " & targetProfile
 			do shell script export
 		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer%' " & profile
+			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer%' " & targetProfile
 			do shell script export
 		end if
 		
 		(*export $PATH*)
 		set systemPath to "$AQSISHOME/Contents/MacOS:$PATH"
-		set search to do shell script "/usr/bin/sed -n 's/^export PATH=.* # Entry managed by Aqsis Renderer$/&/p'  " & profile
+		set search to do shell script "/usr/bin/sed -n 's/^export PATH=.* # Entry managed by Aqsis Renderer$/&/p'  " & targetProfile
 		if search is "" then
-			set export to "/bin/echo 'export PATH=" & systemPath & " # Entry managed by Aqsis Renderer' >> " & profile
+			set export to "/bin/echo 'export PATH=" & systemPath & " # Entry managed by Aqsis Renderer' >> " & targetProfile
 			do shell script export
 		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export PATH=" & systemPath & " # Entry managed by Aqsis Renderer%' " & profile
+			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export PATH=" & systemPath & " # Entry managed by Aqsis Renderer%' " & targetProfile
 			do shell script export
 		end if
 		
@@ -82,3 +97,17 @@ end tell
 
 
 
+
+on checkExistsFile(theFilename)
+	set theTerminalCommand to "test -f " & theFilename & ";
+testResult=$?;
+if [[ $testResult = 0 ]]; then
+echo '1'
+elif [[ $testResult = 1 ]]; then
+echo '0'
+else
+echo '-1'
+fi"
+	
+	return (do shell script theTerminalCommand) as integer
+end checkExistsFile
