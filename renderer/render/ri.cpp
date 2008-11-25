@@ -889,6 +889,7 @@ RtVoid	RiWorldBegin()
 	// therefore rely on information setup here.
 	QGetRenderContext()->poptWriteCurrent()->InitialiseCamera();
 	QGetRenderContext()->pImage()->SetImage();
+	QGetRenderContext()->initialiseCropWindow();
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 

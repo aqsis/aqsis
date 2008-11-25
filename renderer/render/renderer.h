@@ -504,6 +504,8 @@ class CqRenderer : public IqRenderer
 			return(m_clippingVolume);
 		}
 
+		void initialiseCropWindow();
+
 		const TqUint cropWindowXMin() const
 		{
 			return m_cropWindowXMin;

@@ -701,13 +701,8 @@ void CqRenderer::RenderWorld(bool clone)
 		pMultipass[0] = 0;
 	}
 
-	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	TqInt iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_cropWindowXMin = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, iXRes);
-	m_cropWindowXMax = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, iXRes);
-	m_cropWindowYMin = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, iYRes);
-	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
-	
+	initialiseCropWindow();
+
 	// Ensure that the camera and projection matrices are initialised.
 	poptCurrent()->InitialiseCamera();
 	pImage()->SetImage();
@@ -1667,6 +1662,16 @@ const TqFloat CqRenderer::MinCoCForBound(const CqBound& bound) const
 			m_DepthOfFieldScale.y()) * minBlur;
 }
 
+void CqRenderer::initialiseCropWindow()
+{
+	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	TqInt iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	m_cropWindowXMin = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, iXRes);
+	m_cropWindowXMax = clamp<TqInt>(lceil( iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, iXRes);
+	m_cropWindowYMin = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, iYRes);
+	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
+}
+	
 //---------------------------------------------------------------------
 
 } // namespace Aqsis
