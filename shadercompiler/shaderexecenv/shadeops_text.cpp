@@ -311,7 +311,7 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 				break;
 				case type_matrix:
 				case type_sixteentuple:
-				dso_argv[ 0 ] = ( void* ) new TqFloat[ 16 ];
+				dso_argv[ p ] = ( void* ) new TqFloat[ 16 ];
 				break;
 				default:
 				// Unhandled TYpe
