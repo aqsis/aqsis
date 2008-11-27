@@ -364,7 +364,8 @@ void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) cons
 	//	iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
 
 	TqInt i = ( ( iYPos + m_bucketData->m_DiscreteShiftY ) * ( m_bucketData->m_RealWidth ) ) + ( iXPos + m_bucketData->m_DiscreteShiftX );
-	pie = &m_bucketData->m_aieImage[ i ];
+	if (i < m_bucketData->m_aieImage.size())
+		pie = &m_bucketData->m_aieImage[ i ];
 }
 
 
