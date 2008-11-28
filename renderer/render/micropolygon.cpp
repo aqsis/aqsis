@@ -619,59 +619,69 @@ void CqMicroPolyGrid::TransferOutputVariables()
  */
 void CqMicroPolyGrid::DeleteVariables( bool all )
 {
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Cs" ) || all )
+   	IqDDManager *pManager = QGetRenderContext() ->pDDmanager();
+
+	if ( all || ! pManager->fDisplayNeeds( "Cs" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Os" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Os" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Os );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "du" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "du" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_du );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dv" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "dv" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dv );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "L" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "L" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_L );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Cl" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Cl" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Cl );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ol" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Ol" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ol );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dPdu" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "dPdu" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdu );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dPdv" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "dPdv" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdv );
 
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "s" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "s" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_s );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "t" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "t" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_t );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "I" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "I" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_I );
 
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ps" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Ps" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ps );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "E" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "E" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_E );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "ncomps" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "ncomps" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_ncomps );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "time" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "time" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_time );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "alpha" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "alpha" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
-//		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
-	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
+// \note: Needed by trim curves, need to work out how to check for their existence.
+// \note: Needed by trim curves, need to work out how to check for their existence.
+/*	if ( !pManager->fDisplayNeeds( "N" ) )
+ *		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+ *      if ( all || !pManager->fDisplayNeeds( "u" )   ) 		
+ *		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
+ * 	if ( all || !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ) 		
+ *		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
+ */
+	if ( all ) 		
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
-	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
+	if ( all ) 		
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
 	if ( all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
-//	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )			// \note: Needed by backface culling.
-//		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) || all )
+ // \note: Needed by backface culling.
+/*	if ( !pManager->fDisplayNeeds( "Ng" ) )			        
+ *		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+ */
+	if ( all || !pManager->fDisplayNeeds( "Ci" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Oi" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
-
-	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ns" ) || all )
+	if ( all || !pManager->fDisplayNeeds( "Ns" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ns );
 }
 
