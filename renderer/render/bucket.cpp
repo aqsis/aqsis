@@ -1080,7 +1080,7 @@ void CqBucket::RenderWaitingMPs()
 void CqBucket::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 {
 	// Cull surface if it's hidden
-	if ( !( QGetRenderContext()->pImage()->DisplayMode() & ModeZ ) && !surface->pCSGNode() )
+	if ( !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" )[0] & ModeZ ) && !surface->pCSGNode() )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling);
 		if ( surface->fCachedBound() &&

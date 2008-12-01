@@ -230,12 +230,6 @@ void	CqImageBuffer::SetImage()
 	TqUint iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 	m_cXBuckets = ( ( iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
 	m_cYBuckets = ( ( iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
-	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
-	m_PixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-
-	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
-	m_DisplayMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
 	m_MaxEyeSplits = 10;
 	const TqInt* poptEyeSplits = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "eyesplits" );
@@ -686,6 +680,11 @@ void CqImageBuffer::RenderImage()
 
 	bucketProcessors.resize(numConcurrentBuckets);
 
+	TqUint pixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	TqUint pixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+	TqFloat clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	TqFloat clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
+
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
@@ -698,9 +697,9 @@ void CqImageBuffer::RenderImage()
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
 			if(m_mpdump.IsOpen())
-				m_mpdump.dumpPixelSamples(CurrentBucketCol(),
-							  CurrentBucketRow(),
-							  &CurrentBucket());
+				m_mpdump.dumpPixelSamples(m_CurrentBucketCol,
+										  m_CurrentBucketRow(),
+										  &CurrentBucket());
 #endif
 		/////////////////////////////////////////////////////////////////////////
 
@@ -729,9 +728,9 @@ void CqImageBuffer::RenderImage()
 				ymax = static_cast<TqInt>(QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f);
 
 			bucketProcessors[i].preProcess( bPos, bSize,
-							m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
+							pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
 							xmin, xmax, ymin, ymax,
-							m_ClippingNear, m_ClippingFar );
+							clippingNear, clippingFar );
 
 			// Kick off a thread to process this bucket.
 			threadProcessors.push_back( CqThreadProcessor( &bucketProcessors[i] ) );

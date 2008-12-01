@@ -86,11 +86,8 @@ class CqImageBuffer
 				m_cYBuckets( 0 ),
 				m_XBucketSize( 0 ),
 				m_YBucketSize( 0 ),
-				m_PixelXSamples( 0 ),
-				m_PixelYSamples( 0 ),
 				m_FilterXWidth( 0 ),
 				m_FilterYWidth( 0 ),
-				m_DisplayMode( ModeRGB ),
 				m_CurrentBucketCol( 0 ),
 				m_CurrentBucketRow( 0 ),
 				m_MaxEyeSplits(10)
@@ -124,55 +121,6 @@ class CqImageBuffer
 		TqInt	YBucketSize() const
 		{
 			return ( m_YBucketSize );
-		}
-		/** Get the number of horizontal samples per pixel.
-		 * \return Integer sample count.
-		 */
-		TqInt   PixelXSamples() const
-		{
-			return ( m_PixelXSamples );
-		}
-		/** Get the number of vertical samples per pixel.
-		 * \return Integer sample count.
-		 */
-		TqInt   PixelYSamples() const
-		{
-			return ( m_PixelYSamples );
-		}
-		/** Get the width of the pixel filter in the horizontal direction.
-		 * \return Integer filter width, in pixels.
-		 */
-		TqFloat FilterXWidth() const
-		{
-			return ( m_FilterXWidth );
-		}
-		/** Get the width of the pixel filter in the vertical direction.
-		 * \return Integer filter width, in pixels.
-		 */
-		TqFloat FilterYWidth() const
-		{
-			return ( m_FilterYWidth );
-		}
-		/** Get the Near Clipping distance.
-		 * \return Float distance of the Near Clipping.
-		 */
-		TqFloat	ClippingNear() const
-		{
-			return ( m_ClippingNear );
-		}
-		/** Get the Far Clipping distance.
-		 * \return Float distance of the Far Clipping.
-		 */
-		TqFloat	ClippingFar() const
-		{
-			return ( m_ClippingFar );
-		}
-		/** Get the display.
-		 * \return Integer display mode as a member of enum Mode.
-		 */
-		TqInt	DisplayMode() const
-		{
-			return ( m_DisplayMode );
 		}
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
@@ -214,13 +162,8 @@ class CqImageBuffer
 		TqInt	m_cYBuckets;		///< Integer vertical bucket count.
 		TqInt	m_XBucketSize;		///< Integer horizontal bucket size.
 		TqInt	m_YBucketSize;		///< Integer vertical bucket size.
-		TqInt	m_PixelXSamples;	///< Integer horizontal sample per pixel count.
-		TqInt	m_PixelYSamples;	///< Integer vertical sample per pixel count.
 		TqFloat	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
 		TqFloat	m_FilterYWidth;		///< Integer vertical pixel filter width in pixels.
-		TqFloat	m_ClippingNear;		///< Near clipping distance.
-		TqFloat	m_ClippingFar;		///< Far clipping distance.
-		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
 		std::vector<std::vector<CqBucket> >	m_Buckets; ///< Array of bucket storage classes (row/col)
 		TqInt	m_CurrentBucketCol;	///< Column index of the bucket currently being processed.
@@ -242,21 +185,7 @@ class CqImageBuffer
 		 */
 		CqBucket& CurrentBucket()
 		{
-			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
-		}
-		/** Get the column index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketCol() const
-		{
-			return ( m_CurrentBucketCol );
-		}
-		/** Get the row index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketRow() const
-		{
-			return ( m_CurrentBucketRow );
+			return( m_Buckets[m_CurrentBucketRow][m_CurrentBucketCol] );
 		}
 };
 
