@@ -1689,6 +1689,17 @@ void CqShaderVM::SO_rayinfo()
 	Push( pResult );
 }
 
+void CqShaderVM::SO_bake3d()
+{
+	VARFUNC;
+	FUNC4PLUS( type_float, m_pEnv->SO_bake3d );
+}
+
+void CqShaderVM::SO_texture3d()
+{
+	VARFUNC;
+	FUNC3PLUS( type_float, m_pEnv->SO_texture3d );
+}
 
 } // namespace Aqsis
 //---------------------------------------------------------------------

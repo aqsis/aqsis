@@ -688,9 +688,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 		virtual STD_SO	SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_external( DSOMethod method, void* initData, DEFPARAMVAR );
-		virtual	STD_SO	SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
-		virtual	STD_SO	SO_occlusion_rt( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
+		virtual STD_SO	SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
+		virtual STD_SO	SO_occlusion_rt( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
 		virtual STD_SO	SO_rayinfo( STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_bake3d( STRINGVAL ptc, STRINGVAL channels, POINTVAL P, NORMALVAL N, DEFPARAMVAR );
+		virtual STD_SO	SO_texture3d( STRINGVAL ptc, POINTVAL P, NORMALVAL N, DEFPARAMVAR );
 };
 
 

@@ -434,13 +434,16 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"bake_3n", 0, &CqShaderVM::SO_bake_3n, 0, {0}},
         {"bake_3v", 0, &CqShaderVM::SO_bake_3v, 0, {0}},
         {"bake_3p", 0, &CqShaderVM::SO_bake_3p, 0, {0}},
-
+      
         {"external", 0, &CqShaderVM::SO_external, 1, {type_invalid}},
 
         {"occlusion", 0, &CqShaderVM::SO_occlusion, 0, {0}},
         {"occlusion_rt", 0, &CqShaderVM::SO_occlusion_rt, 0, {0}},
 
         {"rayinfo", 0, &CqShaderVM::SO_rayinfo, 1, {type_invalid}},
+
+        {"bake3d", 0, &CqShaderVM::SO_bake3d, 0, {0}},
+        {"texture3d", 0, &CqShaderVM::SO_texture3d, 0, {0}},
     };
 
 /*
