@@ -354,8 +354,8 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 	__iGrid = 0;
 	const CqBitVector& RS = RunningState();
 
-	TqFloat ClippingNear = static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	TqFloat ClippingFar = static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	TqFloat ClippingNear = getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ;
+	TqFloat ClippingFar = getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 1 ] ;
 	TqFloat DeltaClipping = ClippingFar - ClippingNear;
 
 	do
