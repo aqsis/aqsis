@@ -79,10 +79,16 @@ inline CqSampleVector<T>::CqSampleVector(const T* sampleData)
 template<typename T>
 inline TqFloat CqSampleVector<T>::operator[](TqInt index) const
 {
-	// The following if statement should be optimised away at compile time.
+	// This function is performance critical since it's inside the inner loop
+	// for all texture filtering operations.
+	//
+	// The if statement here should be optimised away.
 	if(std::numeric_limits<T>::is_integer)
-		return static_cast<TqFloat>(m_sampleData[index])
-			/ std::numeric_limits<T>::max();
+	{
+		// The following division should also be optimized away.
+		const TqFloat scale = 1.0/std::numeric_limits<T>::max();
+		return scale*m_sampleData[index];
+	}
 	else
 		return m_sampleData[index];
 }
