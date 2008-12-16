@@ -658,25 +658,22 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 	if ( all || !pManager->fDisplayNeeds( "alpha" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-// \note: Needed by trim curves, need to work out how to check for their existence.
-// \note: Needed by trim curves, need to work out how to check for their existence.
-/*	if ( !pManager->fDisplayNeeds( "N" ) )
- *		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
- *      if ( all || !pManager->fDisplayNeeds( "u" )   ) 		
- *		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
- * 	if ( all || !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ) 		
- *		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
- */
+	// Needed by ?
+	if ( all )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+
+	// (u,v) are needed by trim curves; need to work out how to check for their
+	// existence.
 	if ( all ) 		
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
 	if ( all ) 		
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
 	if ( all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
- // \note: Needed by backface culling.
-/*	if ( !pManager->fDisplayNeeds( "Ng" ) )			        
- *		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
- */
+	// Needed by backface culling.
+	if ( all )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+
 	if ( all || !pManager->fDisplayNeeds( "Ci" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
 	if ( all || !pManager->fDisplayNeeds( "Oi" ) )
