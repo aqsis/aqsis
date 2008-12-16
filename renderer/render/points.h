@@ -531,7 +531,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual bool IsMoving()
+		virtual bool IsMoving() const
 		{
 			return true;
 		}
