@@ -188,7 +188,6 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"divcc", 0, &CqShaderVM::SO_divcc, 0, {0}},
         {"addcc", 0, &CqShaderVM::SO_addcc, 0, {0}},
         {"subcc", 0, &CqShaderVM::SO_subcc, 0, {0}},
-        {"crscc", 0, &CqShaderVM::SO_crscc, 0, {0}},
         {"dotcc", 0, &CqShaderVM::SO_dotcc, 0, {0}},
         {"negc", 0, &CqShaderVM::SO_negc, 0, {0}},
 

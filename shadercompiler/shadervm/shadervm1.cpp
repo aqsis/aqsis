@@ -1036,19 +1036,6 @@ void CqShaderVM::SO_subcc()
 	RELEASE( A );
 }
 
-void CqShaderVM::SO_crscc()
-{
-	AUTOFUNC;
-	POPV( A );
-	POPV( B );
-	RESULT(type_color, __fVarying?class_varying:class_uniform);
-	if(m_pEnv->IsRunning())
-		OpCRS_CC( A, B, pResult, m_pEnv->RunningState() );
-	Push( pResult );
-	RELEASE( B );
-	RELEASE( A );
-}
-
 void CqShaderVM::SO_dotcc()
 {
 	AUTOFUNC;

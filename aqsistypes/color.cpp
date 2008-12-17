@@ -37,15 +37,9 @@ namespace Aqsis {
 CqColor	gColWhite( 1, 1, 1 );
 /// Global black color
 CqColor	gColBlack( 0, 0, 0 );
-/// Global pure red color
-CqColor	gColRed( 1, 0, 0 );
-/// Global pure green color
-CqColor	gColGreen( 0, 1, 0 );
-/// Global pure blue color
-CqColor	gColBlue( 0, 0, 1 );
 
 /// The value of an undefined color component.
-#define	UNDEFINED -1
+const TqFloat UNDEFINED = -1;
 
 //---------------------------------------------------------------------
 /* Color space conversion.

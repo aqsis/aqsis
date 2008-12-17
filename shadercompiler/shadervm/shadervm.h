@@ -461,7 +461,6 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_divcc();
 		void	SO_addcc();
 		void	SO_subcc();
-		void	SO_crscc();
 		void	SO_dotcc();
 		void	SO_negc();
 		void	SO_mulfp();
