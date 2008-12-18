@@ -187,7 +187,7 @@ class COMMON_SHARE CqVector3D
 		/// Dot product
 		friend TqFloat operator*(const CqVector3D& a, const CqVector3D& b);
 		/// Cross product
-		COMMON_SHARE friend CqVector3D operator%(const CqVector3D& a, const CqVector3D& b);
+		friend CqVector3D operator%(const CqVector3D& a, const CqVector3D& b);
 
 		// Stream insertion
 		COMMON_SHARE friend std::ostream &operator<<(std::ostream &Stream, const CqVector3D &Vector);
