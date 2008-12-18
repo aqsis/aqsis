@@ -45,43 +45,14 @@ CqVector3D::CqVector3D( const CqVector4D &From )
 //---------------------------------------------------------------------
 /** Copy constructor from color.
  */
-
 CqVector3D::CqVector3D( const CqColor &From )
 {
 	*this = From;
 }
 
-
-//---------------------------------------------------------------------
-/** Cross product of two vectors.
- */
-
-CqVector3D operator%( const CqVector3D &a, const CqVector3D &b )
-{
-	return ( CqVector3D( ( a.m_y * b.m_z ) - ( a.m_z * b.m_y ),
-	                     ( a.m_z * b.m_x ) - ( a.m_x * b.m_z ),
-	                     ( a.m_x * b.m_y ) - ( a.m_y * b.m_x ) ) );
-}
-
-//---------------------------------------------------------------------
-/** Sets this vector to be the cross product of itself and another vector.
- */
-
-CqVector3D &CqVector3D::operator%=( const CqVector3D &From )
-{
-	CqVector3D	vecTemp( *this );
-
-	m_x = ( vecTemp.m_y * From.m_z ) - ( vecTemp.m_z * From.m_y );
-	m_y = ( vecTemp.m_z * From.m_x ) - ( vecTemp.m_x * From.m_z );
-	m_z = ( vecTemp.m_x * From.m_y ) - ( vecTemp.m_y * From.m_x );
-
-	return ( *this );
-}
-
 //---------------------------------------------------------------------
 /** Copy from specified 4D vector.
  */
-
 CqVector3D &CqVector3D::operator=( const CqVector4D &From )
 {
 	if ( From.h() != 1.0 )
