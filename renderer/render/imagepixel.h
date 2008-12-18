@@ -41,7 +41,7 @@
 
 namespace Aqsis {
 
-class CqBucket;
+class CqBucketProcessor;
 
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
@@ -281,7 +281,7 @@ class CqImagePixel
 		{
 			return ( m_YSamples );
 		}
-		void	AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples );
+		void	AllocateSamples( CqBucketProcessor* bp, TqInt XSamples, TqInt YSamples );
 		void	InitialiseSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples );
 		void	JitterSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
 		void	OffsetSamples( std::vector<SqSampleData>& samplePoints, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );

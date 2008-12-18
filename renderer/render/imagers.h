@@ -43,8 +43,6 @@
 
 namespace Aqsis {
 
-class IqBucket;
-
 //----------------------------------------------------------------------
 /** \class CqImagersource
  * Abstract base class from which all Imagersources are derived.
@@ -77,7 +75,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 		 * \param pBucket - Bucket from which to take the source shader data for the
 		 *                  imager shader.
 		 */
-		void Initialise(IqBucket* pBucket);
+		void Initialise(const CqRegion& DRegion, IqChannelBuffer* buffer);
 
 
 		// Forwarding functions for IqShaderExecEnv

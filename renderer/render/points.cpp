@@ -34,6 +34,7 @@
 #include	"points.h"
 #include	"imagebuffer.h"
 #include	"renderer.h"
+#include	"bucketprocessor.h"
 
 namespace Aqsis {
 
@@ -436,7 +437,7 @@ void	CqPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const 
 	pTimePoints->Transform(matTx, matITTx, matRTx, 0);
 }
 
-void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 {
 	if ( NULL == pVar(EnvVars_P) )
 		return ;
@@ -556,7 +557,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			}
 			pNew->CalculateTotalBound( );
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
-			pImage->AddMPG( pMP );
+			QGetRenderContext()->pImage()->AddMPG( pMP );
 		}
 	}
 	else
@@ -617,7 +618,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			pNew->CalculateTotalBound();
 
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
-			pImage->AddMPG( pMP );
+			QGetRenderContext()->pImage()->AddMPG( pMP );
 		}
 	}
 
@@ -654,15 +655,13 @@ void CqMicroPolygonPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
- * \param pImage Pointer to image being rendered into.
- * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMotionMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 {
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( 0 ) ) );
@@ -788,7 +787,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 		}
 		pNew->CalculateTotalBound( );
 		boost::shared_ptr<CqMicroPolygon> pMP( pNew );
-		pImage->AddMPG( pMP );
+		QGetRenderContext()->pImage()->AddMPG( pMP );
 	}
 
 	RELEASEREF( pGridA );

@@ -754,7 +754,7 @@ void CqImageBuffer::RenderImage()
 				const CqBucket* bucket = bucketProcessors[i].getBucket();
 				if (bucket)
 				{
-					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucket );
+					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucketProcessors[i].DRegion(), &(bucketProcessors[i].getChannelBuffer()) );
 				}
 			}
 			bucketProcessors[i].reset();

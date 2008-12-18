@@ -33,6 +33,7 @@
 #include	"shaders.h"
 #include	"trimcurve.h"
 #include	"spline.h"
+#include	"bucketprocessor.h"
 
 #include	"mpdump.h"
 
@@ -686,14 +687,13 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 
 //---------------------------------------------------------------------
 /** Split the shaded grid into microploygons, and insert them into the relevant buckets in the image buffer.
- * \param pImage Pointer to image being rendered into.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 {
 	if ( NULL == pVar(EnvVars_P) )
 		return ;
@@ -898,7 +898,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
 				boost::shared_ptr<CqMicroPolygon> pTemp(pNew);
-				pImage->AddMPG( pTemp );
+				QGetRenderContext()->pImage()->AddMPG( pTemp );
 			}
 			else
 			{
@@ -907,7 +907,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 					pNew->MarkTrimmed();
 				pNew->Initialise();
 				pNew->CalculateTotalBound();
-				pImage->AddMPG( pNew );
+				QGetRenderContext()->pImage()->AddMPG( pNew );
 			}
 
 			// Calculate MPG area
@@ -992,14 +992,13 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
- * \param pImage Pointer to image being rendered into.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 {
 	TqInt lUses = pSurface() ->Uses();
 	// Get the main object, the one that was shaded.
@@ -1180,7 +1179,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
 			boost::shared_ptr<CqMicroPolygon> pTemp( pNew );
-			pImage->AddMPG( pTemp );
+			QGetRenderContext()->pImage()->AddMPG( pTemp );
 		}
 	}
 	AQSIS_TIMER_STOP(Bust_grids);

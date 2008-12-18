@@ -51,6 +51,8 @@ namespace Aqsis {
  */
 
 class CqPoints;
+class CqBucketProcessor;
+
 class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 {
 		class CqPointsKDTreeDataComparator
@@ -296,7 +298,7 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		virtual	~CqMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( long xmin, long xmax, long ymin, long ymax );
 
 		virtual	TqUint	GridSize() const
 		{
@@ -333,7 +335,7 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 		virtual	~CqMotionMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( long xmin, long xmax, long ymin, long ymax );
 };
 
 //----------------------------------------------------------------------

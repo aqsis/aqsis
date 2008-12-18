@@ -32,7 +32,7 @@
 
 #include "autobuffer.h"
 #include "bound.h"
-#include "bucket.h"
+#include "bucketprocessor.h"
 #include "imagepixel.h"
 
 namespace Aqsis {
@@ -55,32 +55,31 @@ CqOcclusionTree::CqOcclusionTree()
 	m_numLevels(0)
 {}
 
-void CqOcclusionTree::setupTree(const CqBucket& bucket, TqInt xMin, TqInt yMin,
+void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt yMin,
 				TqInt xMax, TqInt yMax)
 {
 	// Now setup the new array based tree.
 	// First work out how deep the tree needs to be.
-	TqInt numSamples = (bucket.RealHeight() * bucket.RealWidth())
-		* (bucket.PixelXSamples() * bucket.PixelYSamples());
+	TqInt numSamples = bp->numSamples();
 	TqInt depth = lceil(log2(numSamples));
 	m_numLevels = depth + 1;
 	TqInt numTotalNodes = lceil(std::pow(2.0, depth+1))-1;
 	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<SqSampleData*>());
+	m_leafSamples.assign(numLeafNodes, std::vector<const SqSampleData*>());
 
 	// Compute and cache bounds of tree and culling area.
-	m_treeBoundMin = CqVector2D(bucket.realXOrigin(), bucket.realYOrigin());
-	CqVector2D treeDiag(bucket.RealWidth(), bucket.RealHeight());
+	m_treeBoundMin = CqVector2D(bp->SRegion().vecMin());
+	CqVector2D treeDiag(bp->SRegion().vecCross());
 	m_treeBoundMax = m_treeBoundMin + treeDiag;
 	m_cullBoundMin = CqVector2D(xMin, yMin);
 	m_cullBoundMax = CqVector2D(xMax, yMax);
 
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
-	std::vector<SqSampleData>& samples = bucket.SamplePoints();
-	std::vector<SqSampleData>::iterator sample;
+	const std::vector<SqSampleData>& samples = bp->SamplePoints();
+	std::vector<SqSampleData>::const_iterator sample;
 	for(sample = samples.begin(); sample != samples.end(); ++sample)
 	{
 		// Convert samplePos into normalized units for finding sample position.
@@ -113,7 +112,7 @@ void CqOcclusionTree::updateDepths()
 			continue;
 		TqFloat max = 0;
 		bool hit = false;
-		for(std::vector<SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
+		for(std::vector<const SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
 				end = m_leafSamples[i].end(); sample != end; ++sample)
 		{
 			TqFloat depth; 
@@ -218,8 +217,8 @@ bool CqOcclusionTree::canCull(const CqBound& bound) const
 TqInt CqOcclusionTree::treeIndexForPoint(TqInt treeDepth, const CqVector2D& p)
 {
 	assert(treeDepth > 0);
-	assert(p.x() >= 0 && p.x() <= 1);
-	assert(p.y() >= 0 && p.y() <= 1);
+	//assert(p.x() >= 0 && p.x() <= 1);
+	//assert(p.y() >= 0 && p.y() <= 1);
 
 	const TqInt numXSubdivisions = treeDepth / 2;
 	const TqInt numYSubdivisions = (treeDepth-1) / 2;

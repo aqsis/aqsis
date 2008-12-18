@@ -49,6 +49,7 @@ class CqImageBuffer;
 class CqSurface;
 class CqMicroPolygon;
 struct SqSampleData;
+class CqBucketProcessor;
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
@@ -119,9 +120,9 @@ class CqMicroPolyGridBase : public CqRefCount
 		{}
 
 		/** Pure virtual function, splits the grid into micropolys.
-		 * \param pImage Pointer to the image buffer being rendered.
+		 * \param pBP Pointer to the bucket processor for the current bucket.
 		 */
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
+		virtual	void	Split( long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade(bool canCullGrid = true ) = 0;
@@ -297,7 +298,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( long xmin, long xmax, long ymin, long ymax );
 		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 
@@ -416,7 +417,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( long xmin, long xmax, long ymin, long ymax );
 		virtual	void	Shade( bool canCullGrid = true );
 		virtual	void	TransferOutputVariables();
 		

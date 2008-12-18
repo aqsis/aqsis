@@ -28,7 +28,7 @@
 #include	"options.h"
 #include	"random.h"
 #include	"logging.h"
-#include	"bucket.h"
+#include	"bucketprocessor.h"
 
 #include	<algorithm>
 
@@ -79,7 +79,7 @@ CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom )
  * \param YSamples Integer samples count in Y.
  */
 
-void CqImagePixel::AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples )
+void CqImagePixel::AllocateSamples( CqBucketProcessor* bp, TqInt XSamples, TqInt YSamples )
 {
 	if( m_XSamples != XSamples || m_YSamples != YSamples )
 	{
@@ -93,7 +93,7 @@ void CqImagePixel::AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSam
 			// rendering, including any AOV data.
 			m_SampleIndices.resize( numSamples );
 			for(TqInt i=0; i<numSamples; i++)
-				m_SampleIndices[i] = bucket->GetNextSamplePointIndex();
+				m_SampleIndices[i] = bp->GetNextSamplePointIndex();
 			m_DofOffsetIndices.resize( numSamples );
 		}
 	}

@@ -140,16 +140,16 @@ TqInt CqDDManager::CloseDisplays()
 	return ( 0 );
 }
 
-TqInt CqDDManager::DisplayBucket( const IqBucket* pBucket )
+TqInt CqDDManager::DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer* pBuffer )
 {
 	static CqRandom random( 61 );
 
-	if ( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+	if ( (pBuffer->width() == 0) || (pBuffer->height() == 0) )
 		return(0);
-	TqInt xmin = pBucket->XOrigin();
-	TqInt ymin = pBucket->YOrigin();
-	TqInt xmaxplus1 = xmin + pBucket->Width();
-	TqInt ymaxplus1 = ymin + pBucket->Height();
+	TqUint xmin = DRegion.vecMin().x();
+	TqUint ymin = DRegion.vecMin().y();
+	TqUint xmaxplus1 = DRegion.vecMax().x();
+	TqUint ymaxplus1 = DRegion.vecMax().y();
 
 	// If completely outside the crop rectangle, don't bother sending.
 	if( xmaxplus1 <= QGetRenderContext()->cropWindowXMin() ||
@@ -161,9 +161,10 @@ TqInt CqDDManager::DisplayBucket( const IqBucket* pBucket )
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
 	for ( i = m_displayRequests.begin(); i != m_displayRequests.end(); ++i )
 	{
-		(*i)->DisplayBucket(pBucket);
+		(*i)->DisplayBucket(DRegion, pBuffer);
 	}
 	return ( 0 );
+
 }
 
 bool CqDDManager::fDisplayNeeds( const TqChar* var )
@@ -980,7 +981,7 @@ void CqDisplayRequest::PrepareSystemParameters()
 	m_customParams.push_back(parameter);
 }
 
-void CqDisplayRequest::DisplayBucket( const IqBucket* pBucket )
+void CqDisplayRequest::DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer* pBuffer )
 {
 	// If the display is not validated, don't send it data.
 	// Or if a DspyImageData function was not found for
@@ -988,23 +989,23 @@ void CqDisplayRequest::DisplayBucket( const IqBucket* pBucket )
 	if ( !m_valid || !m_DataMethod )
 		return;
 
-	TqUint	xmin = pBucket->XOrigin();
-	TqUint	ymin = pBucket->YOrigin();
-	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();
+	TqUint	xmin = DRegion.vecMin().x();
+	TqUint	ymin = DRegion.vecMin().y();
+	TqUint	xmaxplus1 = DRegion.vecMax().x();
+	TqUint	ymaxplus1 = DRegion.vecMax().y();
 	PtDspyError err;
 
 	// Dispatch to display sub-type methods
 	// Copy relevant data from the bucket and store locally,
 	// while quantizing and/or compressing
-	FormatBucketForDisplay( pBucket );
+	FormatBucketForDisplay( DRegion, pBuffer );
 	// Now that the bucket data has been constructed, send it to the display
 	// either lines by lines or bucket by bucket.
 	// Check if the display needs scanlines, and if so, accumulate bucket data
 	// until a scanline is complete. Send to display when complete.
 	if (m_flags.flags & PkDspyFlagsWantsScanLineOrder)
 	{
-		if (CollapseBucketsToScanlines( pBucket ))
+		if (CollapseBucketsToScanlines( DRegion ))
 		{
 			// Filled a scan line: time to send complete rows to display
 			SendToDisplay(ymin, ymaxplus1);
@@ -1015,18 +1016,15 @@ void CqDisplayRequest::DisplayBucket( const IqBucket* pBucket )
 		// Send the bucket information as they come in
 		err = (m_DataMethod)(m_imageHandle, xmin, xmaxplus1, ymin, ymaxplus1, m_elementSize, m_DataBucket);
 	}
+
 }
 
-void CqDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
+void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const IqChannelBuffer* pBuffer )
 {
 	static CqRandom random( 61 );
-	TqUint	xmin = pBucket->XOrigin();
-	TqUint	ymin = pBucket->YOrigin();
-	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();
 
 	if (m_DataBucket == 0)
-		m_DataBucket = new unsigned char[m_elementSize * pBucket->Width() * pBucket->Height()];
+		m_DataBucket = new unsigned char[m_elementSize * static_cast<int>(DRegion.area())];
 	if ((m_flags.flags & PkDspyFlagsWantsScanLineOrder) && m_DataRow == 0)
 	{
 		m_DataRow = new unsigned char[m_elementSize * m_width * m_height];
@@ -1037,18 +1035,25 @@ void CqDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 	unsigned char* pdata = m_DataBucket;
 	TqUint y;
 
-	for ( y = ymin; y < ymaxplus1; ++y )
+	for ( y = 0; y < pBuffer->height(); ++y )
 	{
 		TqUint x;
-		for ( x = xmin; x < xmaxplus1; ++x )
+		for ( x = 0; x < pBuffer->width(); ++x )
 		{
 			TqInt index = 0;
-			const TqFloat* pSamples = pBucket->Data( x, y );
 			std::vector<PtDspyDevFormat>::iterator iformat;
 			double s = random.RandomFloat();
 			for (iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
 			{
-				double value = pSamples[m_dataOffsets[index]];
+				double value = 0.0;
+				try
+				{
+					value = (*pBuffer)(x, y, pBuffer->getChannelIndex(iformat->name))[0];
+				}
+				catch(std::string v)
+				{
+					std::cout << "Invalid channel name " << iformat->name << std::endl;
+				}
 				if ( m_QuantizeOneVal != 0 )
 				{
 					// Perform the quantization
@@ -1106,7 +1111,7 @@ void CqDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 }
 
 
-void CqDeepDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
+void CqDeepDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const IqChannelBuffer* pBuffer )
 {
 
 }
@@ -1114,19 +1119,15 @@ void CqDeepDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 //-----------------------------------------------------------------------------
 // Return true if a scanline of buckets has been accumulated, false otherwise.
 //-----------------------------------------------------------------------------
-bool CqDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
+bool CqDisplayRequest::CollapseBucketsToScanlines( const CqRegion& DRegion )
 {
 
-	//Aqsis::log() << debug << "CqDisplayRequest::CollapseBuckets...()" << std::endl;
-
 	unsigned char* pdata = m_DataBucket;
-	TqUint	xmin = pBucket->XOrigin();
-	TqUint	ymin = pBucket->YOrigin();
-	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();
+	TqUint	xmin = DRegion.vecMin().x();
+	TqUint	ymin = DRegion.vecMin().y();
+	TqUint	xmaxplus1 = DRegion.vecMax().x();
+	TqUint	ymaxplus1 = DRegion.vecMax().y();
 	TqUint x, y;
-
-	//Aqsis::log() << debug << "xmin: " << xmin << " ymin: " << ymin << " xmaxplus1: " << xmaxplus1 << " ymaxplus1: " << ymaxplus1 << " width: " << width <<//std::endl;
 
 	for (y = ymin; y < ymaxplus1; y++)
 	{
@@ -1146,7 +1147,7 @@ bool CqDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
 	return false;
 }
 
-bool CqDeepDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
+bool CqDeepDisplayRequest::CollapseBucketsToScanlines( const CqRegion& DRegion )
 {
 	return false;
 }

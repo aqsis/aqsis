@@ -716,13 +716,13 @@ boost::shared_ptr<IqShader>	CqOptions::pshadImager() const
  * \param depth Initial value depth (not required).
  * \param coverage Initial value "alpha"
  */
-void CqOptions::InitialiseColorImager( IqBucket* pBucket )
+void CqOptions::InitialiseColorImager( const CqRegion& DRegion, IqChannelBuffer* buffer )
 {
 	// Each time with finished up a bucket; we will execute the imager shader
 	// on the gridsize about the same size as the bucket
 	if ( m_pshadImager != NULL )
 	{
-		m_pshadImager->Initialise( pBucket );
+		m_pshadImager->Initialise( DRegion, buffer );
 	}
 }
 

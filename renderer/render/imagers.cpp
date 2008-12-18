@@ -58,7 +58,7 @@ CqImagersource::~CqImagersource()
 }
 
 //---------------------------------------------------------------------
-void CqImagersource::Initialise( IqBucket* pBucket )
+void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffer )
 {
 	AQSIS_TIME_SCOPE(Imager_shading);
 
@@ -67,10 +67,10 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	// in each direction.  (Usually they describe the number of micropolygons
 	// on a grid which is one less than the number of shaded vertices.  This
 	// concept has no real analogue in context of an imager shader.)
-	TqInt uGridRes = pBucket->Width()-1;
-	TqInt vGridRes = pBucket->Height()-1;
-	TqInt x = pBucket->XOrigin();
-	TqInt y = pBucket->YOrigin();
+	TqInt uGridRes = DRegion.width()-1;
+	TqInt vGridRes = DRegion.height()-1;
+	TqInt x = DRegion.vecMin().x();
+	TqInt y = DRegion.vecMin().y();
 
 	m_uYOrigin = static_cast<TqInt>( y );
 	m_uXOrigin = static_cast<TqInt>( x );
@@ -106,22 +106,27 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	ncomps() ->SetFloat( components );
 	time() ->SetFloat( shuttertime );
 
-
-
 	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv.get() );
 
-
+	TqUint redIndex = buffer->getChannelIndex("r");
+	TqUint greenIndex = buffer->getChannelIndex("g");
+	TqUint blueIndex = buffer->getChannelIndex("b");
+	TqUint redOIndex = buffer->getChannelIndex("or");
+	TqUint greenOIndex = buffer->getChannelIndex("og");
+	TqUint blueOIndex = buffer->getChannelIndex("ob");
+	TqUint alphaIndex = buffer->getChannelIndex("a");
+	TqUint coverageIndex = buffer->getChannelIndex("coverage");
 	for ( j = 0; j < vGridRes+1; j++ )
 	{
 		for ( i = 0; i < uGridRes+1; i++ )
 		{
 			TqInt off = j * ( uGridRes + 1 ) + i;
 			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
-			Ci() ->SetColor( pBucket->Color( x + i, y + j ), off );
-			CqColor opa = pBucket->Opacity( x + i, y + j );
+			Ci() ->SetColor( CqColor((*buffer)(i, j, redIndex)[0], (*buffer)(i, j, greenIndex)[0], (*buffer)(i, j, blueIndex)[0]), off );
+			CqColor opa((*buffer)(i, j, redOIndex)[0], (*buffer)(i, j, greenOIndex)[0], (*buffer)(i, j, blueOIndex)[0]);
 			Oi() ->SetColor( opa, off );
 			TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
-			alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ) * avopa, off );
+			alpha() ->SetFloat( (*buffer)(i, j, coverageIndex)[0] * avopa, off );
 			s() ->SetFloat( x + i + 0.5, off );
 			t() ->SetFloat( y + j + 0.5, off );
 		}

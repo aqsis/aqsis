@@ -35,7 +35,7 @@
 namespace Aqsis {
 
 class CqBound;
-class CqBucket;
+class CqBucketProcessor;
 struct SqSampleData;
 
 /** \brief An tree for occlusion culling of bounded objects.
@@ -63,7 +63,7 @@ class CqOcclusionTree
 		 * tree based on the sample positions, and associates individual
 		 * samples from the bucket to leaf nodes of the tree.
 		 *
-		 * \param bucket - the bucket to be rendered.
+		 * \param bp - the bucket processor for the current bucket.
 		 * \param xMin - left edge of culling region.
 		 * \param yMin - top edge of culling region.
 		 * \param xMax - right edge of culling region.
@@ -73,7 +73,7 @@ class CqOcclusionTree
 		 * general (in particular for buckets which fall partially off the edge
 		 * of the image).
 		 */
-		void setupTree(const CqBucket& bucket, TqInt xMin, TqInt yMin,
+		void setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt yMin,
 				TqInt xMax, TqInt yMax);
 
 		/** \brief Rebuild the occlusion tree.
@@ -104,7 +104,7 @@ class CqOcclusionTree
 		/// max (bottom right) of the culling area
 		CqVector2D m_cullBoundMax;
 		/// Vector holding samples points associated with the leaf nodes.
-		std::vector<std::vector<SqSampleData*> > m_leafSamples;
+		std::vector<std::vector<const SqSampleData*> > m_leafSamples;
 		/// Binary tree of depths stored in an array.
 		std::vector<TqFloat> m_depthTree;
 		/// The index in the depth tree of the first terminal node.

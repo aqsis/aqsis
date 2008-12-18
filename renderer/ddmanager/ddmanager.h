@@ -127,20 +127,20 @@ class CqDisplayRequest
 		 * We implement the standard functionality, but allow child classes
 		 * to override.
 		 */
-		virtual void DisplayBucket(const IqBucket* pBucket);
+		virtual void DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer* pBuffer);
 
 		//----------------------------------------------
 		// Pure virtual functions
 		//----------------------------------------------
 		/* Does quantization, or in the case of DSM does the compression.
 		 */
-		virtual void FormatBucketForDisplay(const IqBucket* pBucket);
+		virtual void FormatBucketForDisplay( const CqRegion& DRegion, const IqChannelBuffer* pBuffer);
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.
 		 * Used when the display wants scanline order.
 		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual bool CollapseBucketsToScanlines(const IqBucket* pBucket);
+		virtual bool CollapseBucketsToScanlines(const CqRegion& DRegion);
 		/* Sends the data to the display.
 		*/
 		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
@@ -153,9 +153,9 @@ class CqDisplayRequest
 		TqUlong			m_modeHash;
 		TqInt			m_modeID;
 		TqInt			m_AOVOffset;
-		TqInt			m_AOVSize;
-		TqInt			m_width;
-		TqInt			m_height;
+		TqUint			m_AOVSize;
+		TqUint			m_width;
+		TqUint			m_height;
 		std::vector<UserParameter> m_customParams;
 		void*			m_DriverHandle;
 		PtDspyImageHandle m_imageHandle;
@@ -208,13 +208,13 @@ class CqDeepDisplayRequest : virtual public CqDisplayRequest
 
 		/* Does quantization, or in the case of DSM does the compression.
 		 */
-		virtual void FormatBucketForDisplay(const IqBucket* pBucket);
+		virtual void FormatBucketForDisplay( const CqRegion& DRegion, const IqChannelBuffer* pBuffer);
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.
 		 * Used when the display wants scanline order.
 		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual bool CollapseBucketsToScanlines(const IqBucket* pBucket);
+		virtual bool CollapseBucketsToScanlines(const CqRegion& DRegion );
 		/*
 		 * Sends the data to the display.
 		 */
@@ -251,7 +251,7 @@ class CqDDManager : public IqDDManager
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays(TqInt width, TqInt height);
 		virtual	TqInt	CloseDisplays();
-		virtual	TqInt	DisplayBucket( const IqBucket* pBucket );
+		virtual	TqInt	DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer* pBucket );
 		virtual	bool	fDisplayNeeds( const TqChar* var );
 		virtual	TqInt	Uses();
 

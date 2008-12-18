@@ -29,6 +29,7 @@
 
 #include	"aqsis.h"
 #include	"color.h"
+#include	"region.h"
 #include	<map>
 #include	<boost/shared_ptr.hpp>
 
@@ -39,55 +40,15 @@ struct SqImageSample;
 struct IqRenderer;
 class CqParameter;
 
-struct IqBucket
+struct IqChannelBuffer
 {
-	virtual ~IqBucket()
-	{
-	};
-	/** Get the bucket size in X
-	 */
-	virtual	TqInt	Width() const = 0;
-	/** Get the bucket size in Y
-	 */
-	virtual	TqInt	Height() const = 0;
-	/** Get the bucket size in X including filtering extra
-	 */
-	virtual	TqInt	RealWidth() const = 0;
-	/** Get the bucket size in Y including filtering extra
-	 */
-	virtual	TqInt	RealHeight() const = 0;
-	/** Get the position of this bucket in X
-	 */
-	virtual	TqInt	XOrigin() const = 0;
-	/** Get the position of this bucket in Y
-	 */
-	virtual	TqInt	YOrigin() const = 0;
+	public:
+		virtual ~IqChannelBuffer() {}	
 
-	/** Get an element color from this bucket. If the requested address is not within this bucket, returns black.
-	 * \param iXPos Screen position of the requested element.
-	 * \param iYPos Screen position of the requested element.
-	 */
-	virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) const = 0;
-	/** Get an element opacity from this bucket. If the requested address is not within this bucket, returns transparent.
-	 * \param iXPos Screen position of the requested element.
-	 * \param iYPos Screen position of the requested element.
-	 */
-	virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) const = 0;
-	/** Get an element coverage from this bucket. If the requested address is not within this bucket, returns 0.
-	 * \param iXPos Screen position of the requested element.
-	 * \param iYPos Screen position of the requested element.
-	 */
-	virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) const = 0;
-	/** Get an element depth from this bucket. If the requested address is not within this bucket, returns FLT_MAX.
-	 * \param iXPos Screen position of the requested element.
-	 * \param iYPos Screen position of the requested element.
-	 */
-	virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) const = 0;
-	/** Get a pointer to the sample array
-	 * \param iXPos Screen position of the requested element.
-	 * \param iYPos Screen position of the requested element.
-	 */
-	virtual const TqFloat* Data( TqInt iXPos, TqInt iYPos ) const = 0;
+		virtual TqUint width() const = 0;
+		virtual TqUint height() const = 0;
+		virtual TqUint getChannelIndex(const std::string& name) const = 0;
+		virtual std::vector<TqFloat>::const_iterator operator()(TqUint x, TqUint y, TqUint index) const = 0;
 };
 
 struct IqDDManager
@@ -115,7 +76,7 @@ struct IqDDManager
 	virtual	TqInt	CloseDisplays() = 0;
 	/** Display a bucket.
 	 */
-	virtual	TqInt	DisplayBucket( const IqBucket* pBucket ) = 0;
+	virtual	TqInt	DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer* pBuffer ) = 0;
 	/** Determine if any of the displays need the named shader variable.
 	 */
 	virtual bool	fDisplayNeeds( const TqChar* var) = 0;

@@ -37,13 +37,14 @@
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
+#include	"region.h"
 #include	"ishader.h"
+#include	"iddmanager.h"
 
 namespace Aqsis {
 
 
 class CqImagersource;
-struct IqBucket;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode
@@ -114,7 +115,7 @@ struct IqOptions
 	virtual void SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager ) = 0;
 	virtual boost::shared_ptr<IqShader>	pshadImager() const = 0;
 
-	virtual void	InitialiseColorImager( IqBucket* pBucket ) = 0;
+	virtual void	InitialiseColorImager( const CqRegion& DRegion, IqChannelBuffer* buffer ) = 0;
 	virtual CqColor GetColorImager( TqFloat x, TqFloat y ) = 0;
 	virtual CqColor GetOpacityImager( TqFloat x, TqFloat y ) = 0;
 	virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y ) = 0;

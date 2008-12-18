@@ -1339,7 +1339,7 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	const TqFloat* boundAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODBound" );
 
 	CqBound bound(boundAttr);
-	if(bound.Volume2() > 0)
+	if(bound.vecCross().Magnitude2() > 0)
 	{
 		CqMatrix mat;
 		QGetRenderContext() ->matSpaceToSpace( "object", "raster", NULL, pSurface->pTransform().get(), QGetRenderContext()->Time(), mat );

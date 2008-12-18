@@ -44,7 +44,6 @@ namespace Aqsis {
 
 
 class CqImagersource;
-struct IqBucket;
 
 //----------------------------------------------------------------------
 /** \class CqOptions
@@ -164,7 +163,7 @@ class CqOptions : public IqOptions
 		virtual void SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager );
 		virtual boost::shared_ptr<IqShader>	pshadImager() const;
 
-		virtual void	InitialiseColorImager( IqBucket* pBucket );
+		virtual void	InitialiseColorImager( const CqRegion& DRegion, IqChannelBuffer* buffer );
 		virtual CqColor GetColorImager( TqFloat x, TqFloat y );
 		virtual CqColor GetOpacityImager( TqFloat x, TqFloat y );
 		virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y );
