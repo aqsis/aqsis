@@ -101,14 +101,12 @@ inline TqUint CqChannelBuffer::addChannel(const std::string& name, TqUint size)
 
 inline TqUint CqChannelBuffer::getChannelIndex(const std::string& name) const
 {
-	try
-	{
-		return m_channels.at(name).first;
-	}
-	catch(std::out_of_range t)
-	{
-		throw(std::string("Error channel does not exist"));
-	}
+	std::map<std::string, std::pair<TqUint, TqInt> >::const_iterator iter;
+	if((iter = m_channels.find(name)) != m_channels.end())
+		return iter->second.first;
+	else
+		// \todo: Need to deal with this error
+		return 0;
 }
 
 inline void CqChannelBuffer::allocate(TqUint width, TqUint height)
