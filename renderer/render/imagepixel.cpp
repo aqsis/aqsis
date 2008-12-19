@@ -441,15 +441,15 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 					}
 					else
 					{
-						samplecolor.SetColorRGB(
-						    lerp( sample_data[Sample_ORed], samplecolor.fRed(), 0.0f ),
-						    lerp( sample_data[Sample_OGreen], samplecolor.fGreen(), 0.0f ),
-						    lerp( sample_data[Sample_OBlue], samplecolor.fBlue(), 0.0f )
+						samplecolor = CqColor(
+						    lerp( sample_data[Sample_ORed], samplecolor.r(), 0.0f ),
+						    lerp( sample_data[Sample_OGreen], samplecolor.g(), 0.0f ),
+						    lerp( sample_data[Sample_OBlue], samplecolor.b(), 0.0f )
 						);
-						sampleopacity.SetColorRGB(
-						    lerp( sample_data[Sample_Red], sampleopacity.fRed(), 0.0f ),
-						    lerp( sample_data[Sample_Green], sampleopacity.fGreen(), 0.0f ),
-						    lerp( sample_data[Sample_Blue], sampleopacity.fBlue(), 0.0f )
+						sampleopacity = CqColor(
+						    lerp( sample_data[Sample_Red], sampleopacity.r(), 0.0f ),
+						    lerp( sample_data[Sample_Green], sampleopacity.g(), 0.0f ),
+						    lerp( sample_data[Sample_Blue], sampleopacity.b(), 0.0f )
 						);
 					}
 				}
@@ -466,7 +466,7 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 				// Now determine if the sample opacity meets the limit for depth mapping.
 				// If so, store the depth in the appropriate nearest opaque sample slot.
 				// The test is, if any channel of the opacity color is greater or equal to the threshold.
-				if(sample_data[Sample_ORed] >= zThreshold.fRed() || sample_data[Sample_OGreen] >= zThreshold.fGreen() || sample_data[Sample_OBlue] >= zThreshold.fBlue())
+				if(sample_data[Sample_ORed] >= zThreshold.r() || sample_data[Sample_OGreen] >= zThreshold.g() || sample_data[Sample_OBlue] >= zThreshold.b())
 				{
 					// Make sure we store the nearest and second nearest depth values.
 					opaqueDepths[1] = opaqueDepths[0];
@@ -490,12 +490,12 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 				// to the opaque sample, which is then sent to the display.
 				opaqueValue = *samples->m_Data.begin();
 				// Set the color and opacity.
-				opaqueValue.Data()[Sample_Red] = samplecolor.fRed();
-				opaqueValue.Data()[Sample_Green] = samplecolor.fGreen();
-				opaqueValue.Data()[Sample_Blue] = samplecolor.fBlue();
-				opaqueValue.Data()[Sample_ORed] = sampleopacity.fRed();
-				opaqueValue.Data()[Sample_OGreen] = sampleopacity.fGreen();
-				opaqueValue.Data()[Sample_OBlue] = sampleopacity.fBlue();
+				opaqueValue.Data()[Sample_Red] = samplecolor.r();
+				opaqueValue.Data()[Sample_Green] = samplecolor.g();
+				opaqueValue.Data()[Sample_Blue] = samplecolor.b();
+				opaqueValue.Data()[Sample_ORed] = sampleopacity.r();
+				opaqueValue.Data()[Sample_OGreen] = sampleopacity.g();
+				opaqueValue.Data()[Sample_OBlue] = sampleopacity.b();
 				opaqueValue.setValid();
 
 				if ( depthfilter != Filter_Min )
@@ -521,7 +521,7 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 						for ( sample = samples->m_Data.begin(); sample != samples->m_Data.end(); sample++ )
 						{
 							TqFloat* sample_data = sample->Data();
-							if(sample_data[Sample_ORed] >= zThreshold.fRed() || sample_data[Sample_OGreen] >= zThreshold.fGreen() || sample_data[Sample_OBlue] >= zThreshold.fBlue())
+							if(sample_data[Sample_ORed] >= zThreshold.r() || sample_data[Sample_OGreen] >= zThreshold.g() || sample_data[Sample_OBlue] >= zThreshold.b())
 							{
 								totDepth += sample_data[Sample_Depth];
 								totCount++;

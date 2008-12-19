@@ -125,7 +125,7 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 			Ci() ->SetColor( CqColor((*buffer)(i, j, redIndex)[0], (*buffer)(i, j, greenIndex)[0], (*buffer)(i, j, blueIndex)[0]), off );
 			CqColor opa((*buffer)(i, j, redOIndex)[0], (*buffer)(i, j, greenOIndex)[0], (*buffer)(i, j, blueOIndex)[0]);
 			Oi() ->SetColor( opa, off );
-			TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
+			TqFloat avopa = ( opa.r() + opa.g() + opa.b() ) /3.0f;
 			alpha() ->SetFloat( (*buffer)(i, j, coverageIndex)[0] * avopa, off );
 			s() ->SetFloat( x + i + 0.5, off );
 			t() ->SetFloat( y + j + 0.5, off );

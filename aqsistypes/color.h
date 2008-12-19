@@ -29,10 +29,10 @@
 
 #include "aqsis.h"
 
+#include <iostream>
+
 #include "aqsismath.h"
 #include "vector3d.h"
-
-#include <iostream>
 
 namespace Aqsis {
 
@@ -61,67 +61,29 @@ class COMMON_SHARE CqColor
 		 */
 		CqColor(const TqFloat From[ 3 ]);
 
-		/** Get the red component.
-		 * \return float red component 0.0-1.0.
-		 */
-		TqFloat fRed() const;
-		/** Set the red component.
-		 * \param fValue the new value for the red component 0.0-1.0.
-		 */
-		void SetfRed(const TqFloat fValue);
-		/** Get the freen component.
-		 * \return float green component 0.0-1.0.
-		 */
-		TqFloat fGreen() const;
-		/** Set the green component.
-		 * \param fValue the new value for the green component 0.0-1.0.
-		 */
-		void SetfGreen(const TqFloat fValue);
-		/** Get the blue component.
-		 * \return float blue component 0.0-1.0.
-		 */
-		TqFloat fBlue() const;
-		/** Set the blue component.
-		 * \param fValue the new value for the blue component 0.0-1.0.
-		 */
-		void SetfBlue(const TqFloat fValue);
-		/** Get the color as indiviual components.
-		 * \param pfRed pointer to the area to store the red component.
-		 * \param pfGreen pointer to the area to store the green component.
-		 * \param pfBlue pointer to the area to store the blue component.
-		 */
-		void GetColorRGB(TqFloat* pfRed, TqFloat* pfGreen, TqFloat* pfBlue);
-		/** Set the color as individual components.
-		 * \param fRed the new value for the red component 0.0-1.0.
-		 * \param fGreen the new value for the green component 0.0-1.0.
-		 * \param fBlue the new value for the blue component 0.0-1.0.
-		 */
-		void SetColorRGB(TqFloat fRed, TqFloat fGreen, TqFloat fBlue);
-
-		CqColor rgbtohsv() const;
-		CqColor rgbtohsl() const;
-		CqColor rgbtoXYZ() const;
-		CqColor rgbtoxyY() const;
-		CqColor rgbtoYIQ() const;
-		CqColor hsvtorgb() const;
-		CqColor hsltorgb() const;
-		CqColor XYZtorgb() const;
-		CqColor xyYtorgb() const;
-		CqColor YIQtorgb() const;
-
-		/// Clamp the components to the range 0.0-1.0.
-		void Clamp();
+		//@{
+		/// Const component access
+		TqFloat r() const;
+		TqFloat g() const;
+		TqFloat b() const;
+		//@}
+		//@{
+		/// Non-const component access; can be used to set individual components
+		TqFloat& r();
+		TqFloat& g();
+		TqFloat& b();
+		//@}
 
 		/** Array based component access.
 		 * \param i integer component index, 0-2.
 		 * \return a reference to the float value of the appropriate component, returns blue if index is invalid.
 		 */
-		TqFloat& operator[] (TqInt i);
+		TqFloat& operator[](TqInt i);
 		/** Array based read only component access.
 		 * \param i integer component index, 0-2.
 		 * \return a constant reference the float value of the appropriate component, returns blue if index is invalid.
 		 */
-		const TqFloat& operator[] (TqInt i) const;
+		TqFloat operator[](TqInt i) const;
 		/** Copy value from a 3D vector.
 		 * \param From the vector to get the color cmoponents from.
 		 * \return a reference to this color.
@@ -210,12 +172,11 @@ class COMMON_SHARE CqColor
 
 		/** \brief Linearly interpolate between two colors
 		 *
-		 * \param t - interpolation parameter; a floating point between 0 and 1.
+		 * \param t - interpolation parameter
 		 * \param c0 - color corresponding to t = 0
 		 * \param c1 - color corresponding to t = 1
 		 */
-		template<typename T>
-		friend CqColor lerp(const T t, const CqColor c0, const CqColor c1);
+		friend CqColor lerp(const TqFloat t, const CqColor c0, const CqColor c1);
 
 		/** Component wise friend addition operator.
 		 * \param f float to add to each component.
@@ -308,6 +269,22 @@ class COMMON_SHARE CqColor
 		TqFloat m_fBlue;    ///< the blue component 0.0-1.0
 };
 
+
+//------------------------------------------------------------------------------
+/// \name Color-space conversion functions
+//@{
+CqColor rgbtohsv(const CqColor& col);
+CqColor rgbtohsl(const CqColor& col);
+CqColor rgbtoXYZ(const CqColor& col);
+CqColor rgbtoxyY(const CqColor& col);
+CqColor rgbtoYIQ(const CqColor& col);
+CqColor hsvtorgb(const CqColor& col);
+CqColor hsltorgb(const CqColor& col);
+CqColor XYZtorgb(const CqColor& col);
+CqColor xyYtorgb(const CqColor& col);
+CqColor YIQtorgb(const CqColor& col);
+//@}
+
 //------------------------------------------------------------------------------
 /** \brief Determine whether two colours are equal to within some tolerance.
  *
@@ -323,9 +300,9 @@ bool isClose(const CqColor& c1, const CqColor& c2,
 
 //------------------------------------------------------------------------------
 /// Static white color
-COMMON_SHARE extern CqColor gColWhite;
+COMMON_SHARE extern const CqColor gColWhite;
 /// Static black color
-COMMON_SHARE extern CqColor gColBlack;
+COMMON_SHARE extern const CqColor gColBlack;
 
 
 
@@ -363,68 +340,33 @@ inline CqColor::CqColor(const TqFloat From[ 3 ])
 	m_fBlue(From[ 2 ])
 { }
 
-inline TqFloat CqColor::fRed() const
+
+inline TqFloat CqColor::r() const
 {
 	return m_fRed;
 }
-
-inline void CqColor::SetfRed(const TqFloat fValue)
-{
-	m_fRed = fValue;
-}
-
-inline TqFloat CqColor::fGreen() const
+inline TqFloat CqColor::g() const
 {
 	return m_fGreen;
 }
-
-inline void CqColor::SetfGreen(const TqFloat fValue)
+inline TqFloat CqColor::b() const
 {
-	m_fGreen = fValue;
+	return m_fBlue;
 }
-
-inline TqFloat CqColor::fBlue() const
+inline TqFloat& CqColor::r()
+{
+	return m_fRed;
+}
+inline TqFloat& CqColor::g()
+{
+	return m_fGreen;
+}
+inline TqFloat& CqColor::b()
 {
 	return m_fBlue;
 }
 
-inline void CqColor::SetfBlue(const TqFloat fValue)
-{
-	m_fBlue = fValue;
-}
-
-inline void CqColor::GetColorRGB(TqFloat* pfRed, TqFloat* pfGreen, TqFloat* pfBlue)
-{
-	*pfRed = m_fRed;
-	*pfGreen = m_fGreen;
-	*pfBlue = m_fBlue;
-}
-
-inline void CqColor::SetColorRGB(TqFloat fRed, TqFloat fGreen, TqFloat fBlue)
-{
-	m_fRed = fRed;
-	m_fGreen = fGreen;
-	m_fBlue = fBlue;
-}
-
-inline void CqColor::Clamp()
-{
-	if (m_fRed > 1.0)
-		m_fRed = 1.0;
-	if (m_fGreen > 1.0)
-		m_fGreen = 1.0;
-	if (m_fBlue > 1.0)
-		m_fBlue = 1.0;
-
-	if (m_fRed < 0.0)
-		m_fRed = 0.0;
-	if (m_fGreen < 0.0)
-		m_fGreen = 0.0;
-	if (m_fBlue < 0.0)
-		m_fBlue = 0.0;
-}
-
-inline TqFloat& CqColor::operator[] (TqInt i)
+inline TqFloat& CqColor::operator[](TqInt i)
 {
 	if (i==0)
 		return m_fRed;
@@ -434,7 +376,7 @@ inline TqFloat& CqColor::operator[] (TqInt i)
 		return m_fBlue;
 }
 
-inline const TqFloat& CqColor::operator[] (TqInt i) const
+inline TqFloat CqColor::operator[](TqInt i) const
 {
 	if (i==0)
 		return m_fRed;
@@ -572,8 +514,7 @@ inline CqColor clamp(const CqColor c, const CqColor min, const CqColor max)
 			clamp(c.m_fBlue, min.m_fBlue, max.m_fBlue));
 }
 
-template<typename T>
-inline CqColor lerp(const T t, const CqColor c0, const CqColor c1)
+inline CqColor lerp(const TqFloat t, const CqColor c0, const CqColor c1)
 {
 	return CqColor((1-t)*c0.m_fRed + t*c1.m_fRed,
 			       (1-t)*c0.m_fGreen + t*c1.m_fGreen,
@@ -657,9 +598,9 @@ inline std::ostream& operator<<(std::ostream& Stream, const CqColor& a)
 
 inline bool isClose(const CqColor& c1, const CqColor& c2, TqFloat tol)
 {
-	return isClose(c1.fRed(), c2.fRed(), tol)
-		&& isClose(c1.fGreen(), c2.fGreen(), tol)
-		&& isClose(c1.fBlue(), c2.fBlue(), tol);
+	return isClose(c1.r(), c2.r(), tol)
+		&& isClose(c1.g(), c2.g(), tol)
+		&& isClose(c1.b(), c2.b(), tol);
 }
 
 //-----------------------------------------------------------------------

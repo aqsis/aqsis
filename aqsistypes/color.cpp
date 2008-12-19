@@ -23,35 +23,29 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<math.h>
-
-#include	"aqsis.h"
-
 #include	"color.h"
+
 #include	"matrix.h"
 
 namespace Aqsis {
 
 
-/// Global white color
-CqColor	gColWhite( 1, 1, 1 );
-/// Global black color
-CqColor	gColBlack( 0, 0, 0 );
+// Global white color
+const CqColor gColWhite(1, 1, 1);
+// Global black color
+const CqColor gColBlack(0, 0, 0);
 
-/// The value of an undefined color component.
-const TqFloat UNDEFINED = -1;
+// The value of an undefined color component.
+static const TqFloat UNDEFINED = -1;
 
 //---------------------------------------------------------------------
-/* Color space conversion.
- */
-
-CqColor CqColor::rgbtohsv() const
+CqColor rgbtohsv(const CqColor& col)
 {
-	TqFloat R = m_fRed, G = m_fGreen, B = m_fBlue;
+	TqFloat R = col.r(), G = col.g(), B = col.b();
 	TqFloat H = UNDEFINED, S, V;
 	// RGB_TO_HSV from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 592
-	TqFloat maxComp = max(max(m_fRed, m_fGreen), m_fBlue);
-	TqFloat minComp = min(min(m_fRed, m_fGreen), m_fBlue);
+	TqFloat maxComp = max(max(R, G), B);
+	TqFloat minComp = min(min(R, G), B);
 	TqFloat diff = maxComp - minComp;
 
 	V = maxComp;
@@ -86,18 +80,12 @@ CqColor CqColor::rgbtohsv() const
 	return ( CqColor( H / 360.0, S, V ) );
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::rgbtohsl() const
+CqColor rgbtohsl(const CqColor& col)
 {
-
-	static TqFloat Small_Value = 0.0000001;
+	const TqFloat Small_Value = 0.0000001;
 
 	TqFloat H = UNDEFINED, S = 0.0f, L;
-	TqFloat R = m_fRed, G = m_fGreen, B = m_fBlue;
+	TqFloat R = col.r(), G = col.g(), B = col.b();
 	// RGB_TO_HLS from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 595
 	TqFloat maxComp = max(max(R, G), B);
 	TqFloat minComp = min(min(R, G), B);
@@ -138,52 +126,30 @@ CqColor CqColor::rgbtohsl() const
 	return ( CqColor( H / 360.0, S, L ) );
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::rgbtoXYZ() const
+CqColor rgbtoXYZ(const CqColor& col)
 {
-	CqColor c( *this );
-	return ( c );
+	assert(0 && "Not implemented!");
+	return col;
+}
+CqColor rgbtoxyY(const CqColor& col)
+{
+	assert(0 && "Not implemented!");
+	return col;
 }
 
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::rgbtoxyY() const
+CqColor rgbtoYIQ(const CqColor& col)
 {
-	CqColor c( *this );
-	return ( c );
-}
-
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::rgbtoYIQ() const
-{
-	static CqMatrix matRGBtoYIQ( 0.299, 0.587, 0.114, 0,
+	const CqMatrix matRGBtoYIQ( 0.299, 0.587, 0.114, 0,
 	                             0.596, -0.274, -0.322, 0,
 	                             0.212, -0.523, 0.311, 0,
 	                             0, 0, 0, 1 );
 
-	CqColor c = CqColor( matRGBtoYIQ * CqVector3D( m_fRed, m_fGreen, m_fBlue ) );
-
-	return ( c );
+	return CqColor( matRGBtoYIQ * CqVector3D(col) );
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::hsvtorgb() const
+CqColor hsvtorgb(const CqColor& col)
 {
-	TqFloat H = m_fRed * 360.0, S = m_fGreen, V = m_fBlue;
+	TqFloat H = col.r() * 360.0, S = col.g(), V = col.b();
 	TqFloat R = 0.0f, G = 0.0f, B = 0.0f;
 	// HSV_TO_RGB from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 593
 	if ( S == 0.0 )
@@ -203,32 +169,32 @@ CqColor CqColor::hsvtorgb() const
 		TqFloat t = V * ( 1.0 - ( S * ( 1.0 - f ) ) );
 		switch ( i )
 		{
-				case 0:
+			case 0:
 				R = V;
 				G = t;
 				B = p;
 				break;
-				case 1:
+			case 1:
 				R = q;
 				G = V;
 				B = p;
 				break;
-				case 2:
+			case 2:
 				R = p;
 				G = V;
 				B = t;
 				break;
-				case 3:
+			case 3:
 				R = p;
 				G = q;
 				B = V;
 				break;
-				case 4:
+			case 4:
 				R = t;
 				G = p;
 				B = V;
 				break;
-				case 5:
+			case 5:
 				R = V;
 				G = p;
 				B = q;
@@ -236,14 +202,10 @@ CqColor CqColor::hsvtorgb() const
 		}
 	}
 
-	return ( CqColor( R, G, B ) );
+	return CqColor(R, G, B);
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
+/// Helper function for hsltorgb().
 static TqFloat HSLValue( TqFloat n1, TqFloat n2, TqFloat hue )
 {
 	TqFloat Value;
@@ -265,14 +227,9 @@ static TqFloat HSLValue( TqFloat n1, TqFloat n2, TqFloat hue )
 	return ( Value );
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::hsltorgb() const
+CqColor hsltorgb(const CqColor& col)
 {
-	TqFloat R, G, B, H = m_fRed * 360.0, S = m_fGreen, L = m_fBlue;
+	TqFloat R, G, B, H = col.r() * 360.0, S = col.g(), L = col.b();
 	// HLS_TO_RGB from Foley, van Dam, Feiner, Hughes 2nd Ed. Pg 596
 
 	TqFloat m2, m1;
@@ -284,7 +241,7 @@ CqColor CqColor::hsltorgb() const
 
 	if ( S == 0 )
 	{
-		assert( m_fRed < 0 );
+		assert( col.r() < 0 );
 		R = G = B = L;
 	}
 	else
@@ -297,43 +254,26 @@ CqColor CqColor::hsltorgb() const
 	return ( CqColor( R, G, B ) );
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::XYZtorgb() const
+CqColor XYZtorgb(const CqColor& col)
 {
-	CqColor c( *this );
-	return ( c );
+	assert(0 && "Not implemented!");
+	return col;
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::xyYtorgb() const
+CqColor xyYtorgb(const CqColor& col)
 {
-	CqColor c( *this );
-	return ( c );
+	assert(0 && "Not implemented!");
+	return col;
 }
 
-
-//---------------------------------------------------------------------
-/** Color space conversion.
- */
-
-CqColor CqColor::YIQtorgb() const
+CqColor YIQtorgb(const CqColor& col)
 {
-	static CqMatrix matRGBtoYIQ( 1, 0.956, 0.621, 0,
+	const CqMatrix matYIQtoRGB( 1, 0.956, 0.621, 0,
 	                             1, -0.272, -0.647, 0,
 	                             1, -1.105, 1.702, 0,
 	                             0, 0, 0, 1 );
 
-	CqColor c = CqColor( matRGBtoYIQ * CqVector3D( m_fRed, m_fGreen, m_fBlue ) );
-
-	return ( c );
+	return CqColor( matYIQtoRGB * CqVector3D(col) );
 }
 
 //---------------------------------------------------------------------

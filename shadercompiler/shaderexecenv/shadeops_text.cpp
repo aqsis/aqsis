@@ -84,7 +84,7 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 								CqColor col;
 								apParams[ ivar++ ] ->GetColor( col, varyingindex );
 								CqString strVal;
-								strVal.Format( "%f,%f,%f", col.fRed(), col.fGreen(), col.fBlue() );
+								strVal.Format( "%f,%f,%f", col.r(), col.g(), col.b() );
 								strRes += strVal;
 							}
 							break;

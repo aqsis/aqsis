@@ -1185,7 +1185,9 @@ void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderD
 			(t)->GetFloat(_aq_t,__iGrid);
 			CqColor _aq_f;
 			(f)->GetColor(_aq_f,__iGrid);
-			_aq_f.GetColorRGB( &rgb[ 0 ], &rgb[ 1 ], &rgb[ 2 ] );
+			rgb[0] = _aq_f.r();
+			rgb[1] = _aq_f.g();
+			rgb[2] = _aq_f.b();
 			bake_3( bd, ( char * ) _aq_name.c_str(), _aq_s, _aq_t, rgb );
 		}
 	}

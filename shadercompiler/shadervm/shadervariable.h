@@ -975,7 +975,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		}
 		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
-			res = ( ( m_Value.fRed() != 0.0f ) || ( m_Value.fGreen() != 0.0f ) || ( m_Value.fBlue() != 0.0f ) );
+			res = ( ( m_Value.r() != 0.0f ) || ( m_Value.g() != 0.0f ) || ( m_Value.b() != 0.0f ) );
 		}
 		virtual	IqShaderData* Clone() const
 		{
@@ -1761,7 +1761,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		}
 		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
-			res = ( ( m_aValue[ index ].fRed() != 0.0f ) || ( m_aValue[ index ].fGreen() != 0.0f ) || ( m_aValue[ index ].fBlue() != 0.0f ) );
+			res = ( ( m_aValue[ index ].r() != 0.0f ) || ( m_aValue[ index ].g() != 0.0f ) || ( m_aValue[ index ].b() != 0.0f ) );
 		}
 		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 		 * \param pVal The stack entry to assign.

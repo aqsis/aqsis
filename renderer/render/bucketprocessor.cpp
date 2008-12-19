@@ -608,13 +608,13 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 					// == 1 after a call to imager shader in 3delight and BMRT.
 					// Therefore I did not ask for alpha value and set directly the pCols[i]
 					// with imager value. see imagers.cpp
-					m_channelBuffer(x, y, redIndex)[0] = imager.fRed();
-					m_channelBuffer(x, y, greenIndex)[0] = imager.fGreen();
-					m_channelBuffer(x, y, blueIndex)[0] = imager.fBlue();
+					m_channelBuffer(x, y, redIndex)[0] = imager.r();
+					m_channelBuffer(x, y, greenIndex)[0] = imager.g();
+					m_channelBuffer(x, y, blueIndex)[0] = imager.b();
 					imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x+DRegion().vecMin().x() , y+DRegion().vecMin().y() );
-					m_channelBuffer(x, y, redOIndex)[0] = imager.fRed();
-					m_channelBuffer(x, y, greenOIndex)[0] = imager.fGreen();
-					m_channelBuffer(x, y, blueOIndex)[0] = imager.fBlue();
+					m_channelBuffer(x, y, redOIndex)[0] = imager.r();
+					m_channelBuffer(x, y, greenOIndex)[0] = imager.g();
+					m_channelBuffer(x, y, blueOIndex)[0] = imager.b();
 					TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
 					m_channelBuffer(x, y, alphaIndex)[0] = a;
 				}
@@ -1508,9 +1508,9 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 					{
 						CqColor c;
 						pData->GetColor( c, pMPG->GetIndex() );
-						sample.Data()[ entry->second.m_Offset ] = c.fRed();
-						sample.Data()[ entry->second.m_Offset + 1 ] = c.fGreen();
-						sample.Data()[ entry->second.m_Offset + 2 ] = c.fBlue();
+						sample.Data()[ entry->second.m_Offset ] = c.r();
+						sample.Data()[ entry->second.m_Offset + 1 ] = c.g();
+						sample.Data()[ entry->second.m_Offset + 2 ] = c.b();
 						break;
 					}
 					case type_matrix:

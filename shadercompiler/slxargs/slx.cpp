@@ -535,9 +535,9 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 					if ( shaderVar->ArrayLength() == 0 )
 					{
 						shaderVar->GetColor( aCqColor );
-						aRtColor[ 0 ] = aCqColor.fRed();
-						aRtColor[ 1 ] = aCqColor.fGreen();
-						aRtColor[ 2 ] = aCqColor.fBlue();
+						aRtColor[ 0 ] = aCqColor.r();
+						aRtColor[ 1 ] = aCqColor.g();
+						aRtColor[ 2 ] = aCqColor.b();
 						defaultValLength = sizeof( RtColor );
 						defaultVal = ( char * ) malloc( defaultValLength );
 						memcpy( defaultVal, &aRtColor, defaultValLength );

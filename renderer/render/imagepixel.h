@@ -309,9 +309,9 @@ class CqImagePixel
 		void	SetColor(const CqColor& col)
 		{
 			TqFloat* data = m_Data.Data();
-			data[Sample_Red] = col.fRed();
-			data[Sample_Green] = col.fGreen();
-			data[Sample_Blue] = col.fBlue();
+			data[Sample_Red] = col.r();
+			data[Sample_Green] = col.g();
+			data[Sample_Blue] = col.b();
 		}
 		/** Get the averaged opacity of this pixel
 		 * \return A color representing the averaged opacity at this pixel.
@@ -325,9 +325,9 @@ class CqImagePixel
 		void	SetOpacity(const CqColor& col)
 		{
 			TqFloat* data = m_Data.Data();
-			data[Sample_ORed] = col.fRed();
-			data[Sample_OGreen] = col.fGreen();
-			data[Sample_OBlue] = col.fBlue();
+			data[Sample_ORed] = col.r();
+			data[Sample_OGreen] = col.g();
+			data[Sample_OBlue] = col.b();
 		}
 		/** Get the averaged depth of this pixel
 		 * \return A float representing the averaged depth at this pixel.

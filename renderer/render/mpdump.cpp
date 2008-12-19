@@ -192,9 +192,9 @@ void CqMPDump::dumpVec3(const CqVector3D& v)
 // Dump a color
 void CqMPDump::dumpCol(const CqColor& c)
 {
-	TqFloat r = c.fRed();
-	TqFloat g = c.fGreen();
-	TqFloat b = c.fBlue();
+	TqFloat r = c.r();
+	TqFloat g = c.g();
+	TqFloat b = c.b();
 
 	size_t len_written = fwrite((void*)&r, sizeof(TqFloat), 1, out);
 	len_written += fwrite((void*)&g, sizeof(TqFloat), 1, out);

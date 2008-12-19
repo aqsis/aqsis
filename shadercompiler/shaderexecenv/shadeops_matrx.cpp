@@ -718,12 +718,11 @@ void CqShaderExecEnv::SO_ctransform( IqShaderData* fromspace, IqShaderData* tosp
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	CqString strfromspace( "rgb" );
+	CqString fromSpaceName( "rgb" );
 	if ( NULL != fromspace )
-		fromspace->GetString( strfromspace );
-	CqString _aq_tospace;
-	(tospace)->GetString(_aq_tospace,__iGrid);
-
+		fromspace->GetString( fromSpaceName );
+	CqString toSpaceName;
+	(tospace)->GetString(toSpaceName,__iGrid);
 
 	__iGrid = 0;
 	const CqBitVector& RS = RunningState();
@@ -731,32 +730,21 @@ void CqShaderExecEnv::SO_ctransform( IqShaderData* fromspace, IqShaderData* tosp
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			CqColor _aq_c;
-			(c)->GetColor(_aq_c,__iGrid);
-			CqColor res( _aq_c );
-			if ( strfromspace.compare( "hsv" ) == 0 )
-				res = _aq_c.hsvtorgb();
-			else if ( strfromspace.compare( "hsl" ) == 0 )
-				res = _aq_c.hsltorgb();
-			else if ( strfromspace.compare( "XYZ" ) == 0 )
-				res = _aq_c.XYZtorgb();
-			else if ( strfromspace.compare( "xyY" ) == 0 )
-				res = _aq_c.xyYtorgb();
-			else if ( strfromspace.compare( "YIQ" ) == 0 )
-				res = _aq_c.YIQtorgb();
+			CqColor col;
+			(c)->GetColor(col,__iGrid);
+			if      (fromSpaceName == "hsv")  col = hsvtorgb(col);
+			else if (fromSpaceName == "hsl")  col = hsltorgb(col);
+			else if (fromSpaceName == "XYZ")  col = XYZtorgb(col);
+			else if (fromSpaceName == "xyY")  col = xyYtorgb(col);
+			else if (fromSpaceName == "YIQ")  col = YIQtorgb(col);
 
-			if ( _aq_tospace.compare( "hsv" ) == 0 )
-				res = _aq_c.rgbtohsv();
-			else if ( _aq_tospace.compare( "hsl" ) == 0 )
-				res = _aq_c.rgbtohsl();
-			else if ( _aq_tospace.compare( "XYZ" ) == 0 )
-				res = _aq_c.rgbtoXYZ();
-			else if ( _aq_tospace.compare( "xyY" ) == 0 )
-				res = _aq_c.rgbtoxyY();
-			else if ( _aq_tospace.compare( "YIQ" ) == 0 )
-				res = _aq_c.rgbtoYIQ();
+			if      (toSpaceName == "hsv")   col = rgbtohsv(col);
+			else if (toSpaceName == "hsl")   col = rgbtohsl(col);
+			else if (toSpaceName == "XYZ")   col = rgbtoXYZ(col);
+			else if (toSpaceName == "xyY")   col = rgbtoxyY(col);
+			else if (toSpaceName == "YIQ")   col = rgbtoYIQ(col);
 
-			(Result)->SetColor(res,__iGrid);
+			(Result)->SetColor(col,__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);

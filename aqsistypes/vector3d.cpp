@@ -78,9 +78,9 @@ CqVector3D &CqVector3D::operator=( const CqVector4D &From )
 
 CqVector3D &CqVector3D::operator=( const CqColor &From )
 {
-	m_x = From.fRed();
-	m_y = From.fGreen();
-	m_z = From.fBlue();
+	m_x = From.r();
+	m_y = From.g();
+	m_z = From.b();
 
 	return ( *this );
 }
