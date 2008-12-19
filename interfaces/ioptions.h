@@ -37,14 +37,14 @@
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
-#include	"region.h"
 #include	"ishader.h"
-#include	"iddmanager.h"
 
 namespace Aqsis {
 
 
 class CqImagersource;
+class CqRegion;
+struct IqChannelBuffer;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode

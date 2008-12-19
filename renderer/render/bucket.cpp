@@ -95,24 +95,23 @@ void CqBucket::SetProcessed( bool bProc )
 /** Initialise the static image storage area.
  */
 
-void CqBucket::PrepareBucket( const CqVector2D& bucketPos, const CqVector2D& bucketSize,
-			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
-			      bool fJitter)
+void CqBucket::PrepareBucket( TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
+			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth)
 {
 	m_PixelXSamples = pixelXSamples;
 	m_PixelYSamples = pixelYSamples;
 	m_FilterXWidth = filterXWidth;
 	m_FilterYWidth = filterYWidth;
 
-	m_DRegion = CqRegion( bucketPos, bucketPos + bucketSize );
+	m_DRegion = CqRegion( xMin, yMin, xMax, yMax );
 
 	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
 	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
 
-	TqFloat sminx = lfloor(bucketPos.x()) - m_DiscreteShiftX;
-	TqFloat sminy = lfloor(bucketPos.y()) - m_DiscreteShiftY;
-	TqFloat smaxx = sminx + bucketSize.x() + (m_DiscreteShiftX*2);
-	TqFloat smaxy = sminy + bucketSize.y() + (m_DiscreteShiftY*2);
+	TqInt sminx = xMin - m_DiscreteShiftX;
+	TqInt sminy = yMin - m_DiscreteShiftY;
+	TqInt smaxx = xMax + m_DiscreteShiftX;
+	TqInt smaxy = yMax + m_DiscreteShiftY;
 	m_SRegion = CqRegion( sminx, sminy, smaxx, smaxy );
 }
 
@@ -134,13 +133,6 @@ void CqBucket::AddMP( boost::shared_ptr<CqMicroPolygon>& pMP )
 	m_micropolygons.push_back( pMP );
 }
 
-
-//---------------------------------------------------------------------
-/* Pure virtual destructor for CqBucket
- */
-CqBucket::~CqBucket()
-{
-}
 
 } // namespace Aqsis
 

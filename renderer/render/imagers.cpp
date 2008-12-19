@@ -28,6 +28,7 @@
 #include	"attributes.h"
 #include	"renderer.h"
 #include	"file.h"
+#include	"region.h"
 
 #include	"stats.h"
 
@@ -69,8 +70,8 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 	// concept has no real analogue in context of an imager shader.)
 	TqInt uGridRes = DRegion.width()-1;
 	TqInt vGridRes = DRegion.height()-1;
-	TqInt x = DRegion.vecMin().x();
-	TqInt y = DRegion.vecMin().y();
+	TqInt x = DRegion.xMin();
+	TqInt y = DRegion.yMin();
 
 	m_uYOrigin = static_cast<TqInt>( y );
 	m_uXOrigin = static_cast<TqInt>( x );
@@ -114,7 +115,6 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 	TqUint redOIndex = buffer->getChannelIndex("or");
 	TqUint greenOIndex = buffer->getChannelIndex("og");
 	TqUint blueOIndex = buffer->getChannelIndex("ob");
-	TqUint alphaIndex = buffer->getChannelIndex("a");
 	TqUint coverageIndex = buffer->getChannelIndex("coverage");
 	for ( j = 0; j < vGridRes+1; j++ )
 	{

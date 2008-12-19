@@ -146,10 +146,10 @@ TqInt CqDDManager::DisplayBucket( const CqRegion& DRegion, const IqChannelBuffer
 
 	if ( (pBuffer->width() == 0) || (pBuffer->height() == 0) )
 		return(0);
-	TqUint xmin = DRegion.vecMin().x();
-	TqUint ymin = DRegion.vecMin().y();
-	TqUint xmaxplus1 = DRegion.vecMax().x();
-	TqUint ymaxplus1 = DRegion.vecMax().y();
+	TqInt xmin = DRegion.xMin();
+	TqInt ymin = DRegion.yMin();
+	TqInt xmaxplus1 = DRegion.xMax();
+	TqInt ymaxplus1 = DRegion.yMax();
 
 	// If completely outside the crop rectangle, don't bother sending.
 	if( xmaxplus1 <= QGetRenderContext()->cropWindowXMin() ||
@@ -243,7 +243,7 @@ BOOST_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
  * \param minVal - minimum value in quantized range.
  * \param maxVal - maximum value in quantized range.
  */
-TqUint selectDataFormat(TqFloat oneVal, TqFloat minVal, TqFloat maxVal)
+TqInt selectDataFormat(TqFloat oneVal, TqFloat minVal, TqFloat maxVal)
 {
 	if(oneVal == 0)
 	{
@@ -395,7 +395,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			}
 		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
-		TqUint dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
+		TqInt dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 		if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
 		{
 			PtDspyDevFormat fmt;
@@ -442,8 +442,8 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			}
 			// Now create the channels formats.
 			PtDspyDevFormat fmt;
-			TqUint i;
-			for ( i = 0; i < (TqUint) m_AOVSize; i++ )
+			TqInt i;
+			for ( i = 0; i < (TqInt) m_AOVSize; i++ )
 			{
 				if (componentNames.size()>i)
 				{
@@ -545,7 +545,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			{
 				// Scan through the generated names to find the ones specified, and use the index
 				// of the found name as an offset into the data from the dataOffset passed in originally.
-				TqUint iname;
+				TqInt iname;
 				for (iname = 0; iname < m_AOVnames.size(); iname++)
 				{
 					if (i->name == m_AOVnames[iname])
@@ -989,10 +989,10 @@ void CqDisplayRequest::DisplayBucket( const CqRegion& DRegion, const IqChannelBu
 	if ( !m_valid || !m_DataMethod )
 		return;
 
-	TqUint	xmin = DRegion.vecMin().x();
-	TqUint	ymin = DRegion.vecMin().y();
-	TqUint	xmaxplus1 = DRegion.vecMax().x();
-	TqUint	ymaxplus1 = DRegion.vecMax().y();
+	TqInt	xmin = DRegion.xMin();
+	TqInt	ymin = DRegion.yMin();
+	TqInt	xmaxplus1 = DRegion.xMax();
+	TqInt	ymaxplus1 = DRegion.yMax();
 	PtDspyError err;
 
 	// Dispatch to display sub-type methods
@@ -1033,12 +1033,10 @@ void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const Iq
 	SqImageSample val;
 	// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 	unsigned char* pdata = m_DataBucket;
-	TqUint y;
 
-	for ( y = 0; y < pBuffer->height(); ++y )
+	for ( TqInt y = 0, endy = pBuffer->height(); y < endy; ++y )
 	{
-		TqUint x;
-		for ( x = 0; x < pBuffer->width(); ++x )
+		for ( TqInt x = 0, endx = pBuffer->width(); x < endx; ++x )
 		{
 			TqInt index = 0;
 			std::vector<PtDspyDevFormat>::iterator iformat;
@@ -1123,11 +1121,11 @@ bool CqDisplayRequest::CollapseBucketsToScanlines( const CqRegion& DRegion )
 {
 
 	unsigned char* pdata = m_DataBucket;
-	TqUint	xmin = DRegion.vecMin().x();
-	TqUint	ymin = DRegion.vecMin().y();
-	TqUint	xmaxplus1 = DRegion.vecMax().x();
-	TqUint	ymaxplus1 = DRegion.vecMax().y();
-	TqUint x, y;
+	TqInt	xmin = DRegion.xMin();
+	TqInt	ymin = DRegion.yMin();
+	TqInt	xmaxplus1 = DRegion.xMax();
+	TqInt	ymaxplus1 = DRegion.yMax();
+	TqInt x, y;
 
 	for (y = ymin; y < ymaxplus1; y++)
 	{
@@ -1152,10 +1150,10 @@ bool CqDeepDisplayRequest::CollapseBucketsToScanlines( const CqRegion& DRegion )
 	return false;
 }
 
-void CqDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
+void CqDisplayRequest::SendToDisplay(TqInt ymin, TqInt ymaxplus1)
 {
 	//Aqsis::log() << debug << "CqDisplayRequest::SendToDisplay()" << std::endl;
-	TqUint y;
+	TqInt y;
 	PtDspyError err;
 	unsigned char* pdata = m_DataRow;
 
@@ -1167,7 +1165,7 @@ void CqDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
 	}
 }
 
-void CqDeepDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
+void CqDeepDisplayRequest::SendToDisplay(TqInt ymin, TqInt ymaxplus1)
 {
 
 }

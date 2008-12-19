@@ -38,6 +38,7 @@
 #include	"color.h"
 #include	"imagepixel.h"
 #include	"iddmanager.h"
+#include	"region.h"
 
 namespace Aqsis {
 
@@ -50,10 +51,8 @@ class CqBucket
 	public:
 		CqBucket();
 
-		virtual ~CqBucket();
-
-		virtual const CqRegion& SRegion() const;
-		virtual const CqRegion& DRegion() const;
+		const CqRegion& SRegion() const;
+		const CqRegion& DRegion() const;
 		TqUint numSamples() const;
 		TqInt	DiscreteShiftX() const
 		{
@@ -97,9 +96,8 @@ class CqBucket
 		 * image part being rendered, takes into account
 		 * buckets and clipping.
 		 */
-		void	PrepareBucket( const CqVector2D& pos, const CqVector2D& size,
-				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
-				       bool fJitter = true);
+		void	PrepareBucket( TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
+				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth);
 
 		/** Add a GPRim to the stack of deferred GPrims.
 		* \param The Gprim to be added.

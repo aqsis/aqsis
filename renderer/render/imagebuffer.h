@@ -130,8 +130,8 @@ class CqImageBuffer
 			return ( m_fDone );
 		}
 
-		CqVector2D	BucketPosition( TqInt x, TqInt y ) const;
-		CqVector2D	BucketSize( TqInt x, TqInt y ) const;
+		void	bucketPosition(TqInt x, TqInt y, TqInt& xpos, TqInt& ypos ) const;
+		void	bucketSize(TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const;
 
 		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
@@ -189,6 +189,49 @@ class CqImageBuffer
 		}
 };
 
+//-----------------------------------------------------------------------
+// Implementation
+//
+
+//----------------------------------------------------------------------
+/** Get the screen position for the bucket at x,y.
+ * \param x		The x index of the bucket.
+ * \param y		The y index of the bucket.
+ * \param xpos	A reference to the variable that will receive the x position
+ * in screen space.
+ * \param ypos	A reference to the variable that will receive the y position
+ * in screen space.
+ */
+
+inline void	CqImageBuffer::bucketPosition( TqInt x, TqInt y, TqInt& xpos, TqInt& ypos ) const
+{
+	xpos = x * XBucketSize();
+	ypos = y * YBucketSize();
+}
+
+//----------------------------------------------------------------------
+/** Get the screen size for the bucket at x,y.
+ * \param x		The x index of the bucket.
+ * \param y		The y index of the bucket.
+ * \param xsize	A reference to the variable that will receive the x size
+ * in screen space.
+ * \param ysize	A reference to the variable that will receive the y size
+ * in screen space.
+ */
+
+inline void	CqImageBuffer::bucketSize( TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const
+{
+	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	TqInt iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	TqInt xpos, ypos;
+	bucketPosition(x,y, xpos, ypos);
+	xsize = iXRes - xpos;
+	if ( xsize> m_XBucketSize )
+		xsize = m_XBucketSize;
+	ysize = iYRes - ypos;
+	if ( ysize > m_YBucketSize )
+		ysize = m_YBucketSize;
+}
 
 
 //-----------------------------------------------------------------------

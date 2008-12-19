@@ -29,7 +29,6 @@
 
 #include	"aqsis.h"
 #include	"color.h"
-#include	"region.h"
 #include	<map>
 #include	<boost/shared_ptr.hpp>
 
@@ -38,6 +37,7 @@ namespace Aqsis {
 
 struct SqImageSample;
 struct IqRenderer;
+class CqRegion;
 class CqParameter;
 
 struct IqChannelBuffer
@@ -45,10 +45,15 @@ struct IqChannelBuffer
 	public:
 		virtual ~IqChannelBuffer() {}	
 
-		virtual TqUint width() const = 0;
-		virtual TqUint height() const = 0;
-		virtual TqUint getChannelIndex(const std::string& name) const = 0;
-		virtual std::vector<TqFloat>::const_iterator operator()(TqUint x, TqUint y, TqUint index) const = 0;
+		virtual TqInt width() const = 0;
+		virtual TqInt height() const = 0;
+		virtual TqInt getChannelIndex(const std::string& name) const = 0;
+
+		typedef std::vector<TqFloat> TqChannelValues;
+		typedef TqChannelValues::iterator TqChannelPtr;
+		typedef TqChannelValues::const_iterator TqConstChannelPtr;
+
+		virtual TqConstChannelPtr operator()(TqInt x, TqInt y, TqInt index) const = 0;
 };
 
 struct IqDDManager

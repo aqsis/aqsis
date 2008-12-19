@@ -143,7 +143,7 @@ class CqDisplayRequest
 		virtual bool CollapseBucketsToScanlines(const CqRegion& DRegion);
 		/* Sends the data to the display.
 		*/
-		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
+		virtual void SendToDisplay(TqInt ymin, TqInt ymaxplus1);
 
 	protected:
 		bool			m_valid;
@@ -153,9 +153,9 @@ class CqDisplayRequest
 		TqUlong			m_modeHash;
 		TqInt			m_modeID;
 		TqInt			m_AOVOffset;
-		TqUint			m_AOVSize;
-		TqUint			m_width;
-		TqUint			m_height;
+		TqInt			m_AOVSize;
+		TqInt			m_width;
+		TqInt			m_height;
 		std::vector<UserParameter> m_customParams;
 		void*			m_DriverHandle;
 		PtDspyImageHandle m_imageHandle;
@@ -218,7 +218,7 @@ class CqDeepDisplayRequest : virtual public CqDisplayRequest
 		/*
 		 * Sends the data to the display.
 		 */
-		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
+		virtual void SendToDisplay(TqInt ymin, TqInt ymaxplus1);
 
 	private:
 

@@ -70,8 +70,8 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 	m_leafSamples.assign(numLeafNodes, std::vector<const SqSampleData*>());
 
 	// Compute and cache bounds of tree and culling area.
-	m_treeBoundMin = CqVector2D(bp->SRegion().vecMin());
-	CqVector2D treeDiag(bp->SRegion().vecCross());
+	m_treeBoundMin = CqVector2D(bp->SRegion().xMin(), bp->SRegion().yMin());
+	CqVector2D treeDiag(bp->SRegion().diagonal());
 	m_treeBoundMax = m_treeBoundMin + treeDiag;
 	m_cullBoundMin = CqVector2D(xMin, yMin);
 	m_cullBoundMax = CqVector2D(xMax, yMax);

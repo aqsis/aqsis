@@ -163,47 +163,6 @@ CqImageBuffer::~CqImageBuffer()
 }
 
 
-//----------------------------------------------------------------------
-/** Get the screen position for the bucket at x,y.
- * \return Bucket position as 2d vector (xpos, ypos).
- */
-
-CqVector2D	CqImageBuffer::BucketPosition( TqInt x, TqInt y ) const
-{
-	CqVector2D	vecA;
-	vecA.x( x );
-	vecA.y( y );
-	vecA.x( vecA.x() * XBucketSize() );
-	vecA.y( vecA.y() * YBucketSize() );
-
-	return ( vecA );
-}
-
-//----------------------------------------------------------------------
-/** Get the bucket size for the bucket at x,y.
- 
-    Usually the return value is just (XBucketSize, YBucketSize) except
-    for the buckets on the right and bottom side of the image where the
-    size can be smaller. The crop window is not taken into account.
- 
- * \return Bucket size as 2d vector (xsize, ysize).
- */
-
-CqVector2D CqImageBuffer::BucketSize(TqInt x, TqInt y) const
-{
-	TqUint iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	TqUint iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	CqVector2D	vecA = BucketPosition(x,y);
-	vecA.x( iXRes - vecA.x() );
-	if ( vecA.x() > m_XBucketSize )
-		vecA.x( m_XBucketSize );
-	vecA.y( iYRes - vecA.y() );
-	if ( vecA.y() > m_YBucketSize )
-		vecA.y( m_YBucketSize );
-
-	return ( vecA );
-}
-
 
 //----------------------------------------------------------------------
 /** Construct the image buffer to an initial state using the current options.
@@ -622,8 +581,6 @@ void CqImageBuffer::RenderImage()
 	// Render the surface at the front of the list.
 	m_fDone = false;
 
-	CqVector2D bHalf = CqVector2D( std::floor(m_FilterXWidth / 2.0f), std::floor(m_FilterYWidth / 2.0f) );
-
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext()->pProgressHandler();
 
@@ -685,6 +642,12 @@ void CqImageBuffer::RenderImage()
 	TqFloat clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
 	TqFloat clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
 
+	// Calculate how much bigger to make the bucket to account for the filter
+	// requirements.
+	TqInt bXHalf = static_cast<TqInt>(std::floor(m_FilterXWidth / 2.0f));
+	TqInt bYHalf = static_cast<TqInt>(std::floor(m_FilterYWidth / 2.0f));
+	std::cout << bXHalf << ", " << bYHalf << std::endl;
+
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
@@ -707,17 +670,14 @@ void CqImageBuffer::RenderImage()
 
 			// Set up some bounds for the bucket.
 			const CqBucket* bucket = bucketProcessors[i].getBucket();
-			const CqVector2D bPos = BucketPosition( bucket->getCol(),
-								bucket->getRow() );
-			const CqVector2D bSize = BucketSize( bucket->getCol(),
-								 bucket->getRow() );
-			const CqVector2D vecMin = bPos - bHalf;
-			const CqVector2D vecMax = bPos + bSize + bHalf;
+			TqInt xpos, ypos, xsize, ysize;
+			bucketPosition(bucket->getCol(), bucket->getRow(), xpos, ypos);
+			bucketSize(bucket->getCol(), bucket->getRow(), xsize, ysize);
+			TqInt xmin = xpos - bXHalf;
+			TqInt ymin = ypos - bYHalf;
+			TqInt xmax = xpos + xsize + bXHalf;
+			TqInt ymax = ypos + ysize + bYHalf;
 
-			TqInt xmin = static_cast<TqInt>( vecMin.x() );
-			TqInt ymin = static_cast<TqInt>( vecMin.y() );
-			TqInt xmax = static_cast<TqInt>( vecMax.x() );
-			TqInt ymax = static_cast<TqInt>( vecMax.y() );
 			if ( xmin < QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2 )
 				xmin = static_cast<TqInt>(QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2.0f);
 			if ( ymin < QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2 )
@@ -727,7 +687,7 @@ void CqImageBuffer::RenderImage()
 			if ( ymax > QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2 )
 				ymax = static_cast<TqInt>(QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f);
 
-			bucketProcessors[i].preProcess( bPos, bSize,
+			bucketProcessors[i].preProcess( xpos, ypos, xpos + xsize, ypos + ysize,
 							pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
 							xmin, xmax, ymin, ymax,
 							clippingNear, clippingFar );

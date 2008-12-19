@@ -381,8 +381,8 @@ class CqRenderer : public IqRenderer
 		{
 			SqOutputDataEntry() : m_Offset(0), m_NumSamples(0), m_Type(type_void) {}
 			SqOutputDataEntry(TqInt off, TqInt num, TqInt type) : m_Offset(off), m_NumSamples(num), m_Type(type) {}
-			TqUint	m_Offset;
-			TqUint	m_NumSamples;
+			TqInt	m_Offset;
+			TqInt	m_NumSamples;
 			TqInt	m_Type;
 		};
 		TqInt	RegisterOutputData( const char* name );
@@ -508,19 +508,19 @@ class CqRenderer : public IqRenderer
 
 		void initialiseCropWindow();
 
-		const TqUint cropWindowXMin() const
+		const TqInt cropWindowXMin() const
 		{
 			return m_cropWindowXMin;
 		}
-		const TqUint cropWindowXMax() const
+		const TqInt cropWindowXMax() const
 		{
 			return m_cropWindowXMax;
 		}
-		const TqUint cropWindowYMin() const
+		const TqInt cropWindowYMin() const
 		{
 			return m_cropWindowYMin;
 		}
-		const TqUint cropWindowYMax() const
+		const TqInt cropWindowYMax() const
 		{
 			return m_cropWindowYMax;
 		}
@@ -583,10 +583,10 @@ class CqRenderer : public IqRenderer
 		std::deque<boost::shared_ptr<CqSurface> >	m_aWorld;
 
 		// Cached calculated cropwindow coordinates in raster space.
-		TqUint				m_cropWindowXMin;
-		TqUint				m_cropWindowXMax;
-		TqUint				m_cropWindowYMin;
-		TqUint				m_cropWindowYMax;
+		TqInt				m_cropWindowXMin;
+		TqInt				m_cropWindowXMax;
+		TqInt				m_cropWindowYMin;
+		TqInt				m_cropWindowYMax;
 
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

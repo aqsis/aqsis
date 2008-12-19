@@ -60,7 +60,7 @@ class CqBucketProcessor
 		TqInt GetNextSamplePointIndex();
 
 		/** Prepare the data for the bucket to be processed */
-		void preProcess(const CqVector2D& pos, const CqVector2D& size,
+		void preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
 				TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 				TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
 				TqFloat clippingNear, TqFloat clippingFar);

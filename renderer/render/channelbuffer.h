@@ -31,15 +31,13 @@
 
 #include "aqsis.h"
 
-#include "iddmanager.h"
-
 #include <string>
 #include <map>
 #include <vector>
 #include <stdexcept>
 #include <iostream>
 
-#include <assert.h>
+#include "iddmanager.h"
 
 namespace Aqsis {
 
@@ -55,23 +53,23 @@ class CqChannelBuffer : public IqChannelBuffer
 		virtual ~CqChannelBuffer() {}	
 
 		void clearChannels();
-		TqUint addChannel(const std::string& name, TqUint size);
-		void allocate(TqUint width, TqUint height);
+		TqInt addChannel(const std::string& name, TqInt size);
+		void allocate(TqInt width, TqInt height);
 
-		std::vector<TqFloat>::iterator operator()(TqUint x, TqUint y, TqUint index);
+		TqChannelPtr operator()(TqInt x, TqInt y, TqInt index);
 
 		// Overidden from IqChannelBuffer
-		virtual TqUint width() const;
-		virtual TqUint height() const;
-		virtual TqUint getChannelIndex(const std::string& name) const;
-		virtual std::vector<TqFloat>::const_iterator operator()(TqUint x, TqUint y, TqUint index) const;
+		virtual TqInt width() const;
+		virtual TqInt height() const;
+		virtual TqInt getChannelIndex(const std::string& name) const;
+		virtual TqConstChannelPtr operator()(TqInt x, TqInt y, TqInt index) const;
 	
 	private:
-		TqUint	m_width;
-		TqUint	m_height;
-		TqUint m_elementSize;
-		std::map<std::string, std::pair<TqUint, TqInt> >	m_channels;
-		std::vector<TqFloat>	m_data;
+		TqInt	m_width;
+		TqInt	m_height;
+		TqInt m_elementSize;
+		std::map<std::string, std::pair<TqInt, TqInt> >	m_channels;
+		TqChannelValues	m_data;
 };
 
 //--------------------------------------------------------
@@ -88,7 +86,7 @@ inline void CqChannelBuffer::clearChannels()
 inline CqChannelBuffer::CqChannelBuffer() : m_elementSize(0)
 {}
 
-inline TqUint CqChannelBuffer::addChannel(const std::string& name, TqUint size)
+inline TqInt CqChannelBuffer::addChannel(const std::string& name, TqInt size)
 {
 		if(m_channels.find(name) != m_channels.end())
 			throw(std::string("Error: channel already exists"));
@@ -99,9 +97,9 @@ inline TqUint CqChannelBuffer::addChannel(const std::string& name, TqUint size)
 		return m_channels[name].first;
 }
 
-inline TqUint CqChannelBuffer::getChannelIndex(const std::string& name) const
+inline TqInt CqChannelBuffer::getChannelIndex(const std::string& name) const
 {
-	std::map<std::string, std::pair<TqUint, TqInt> >::const_iterator iter;
+	std::map<std::string, std::pair<TqInt, TqInt> >::const_iterator iter;
 	if((iter = m_channels.find(name)) != m_channels.end())
 		return iter->second.first;
 	else
@@ -109,27 +107,27 @@ inline TqUint CqChannelBuffer::getChannelIndex(const std::string& name) const
 		return 0;
 }
 
-inline void CqChannelBuffer::allocate(TqUint width, TqUint height)
+inline void CqChannelBuffer::allocate(TqInt width, TqInt height)
 {
 	m_width = width;
 	m_height = height;
 	m_data.resize(m_width*m_height*m_elementSize);
 }
 
-inline std::vector<TqFloat>::iterator CqChannelBuffer::operator()(TqUint x, TqUint y, TqUint index)
+inline IqChannelBuffer::TqChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index)
 {
 	assert(index < m_channels.size());
 	assert(x < m_width);
 	assert(y < m_height);
 
-	TqUlong offset = ( y * m_width * m_elementSize ) + ( x * m_elementSize ) + index;
+	TqInt offset = ( y * m_width * m_elementSize ) + ( x * m_elementSize ) + index;
 
 	assert(offset < m_data.size() );
 
 	return m_data.begin() + offset;
 }
 
-inline std::vector<TqFloat>::const_iterator CqChannelBuffer::operator()(TqUint x, TqUint y, TqUint index) const
+inline IqChannelBuffer::TqConstChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index) const
 {
 	assert(index < m_channels.size());
 	assert(x < m_width);
@@ -142,12 +140,12 @@ inline std::vector<TqFloat>::const_iterator CqChannelBuffer::operator()(TqUint x
 	return m_data.begin() + offset;
 }
 
-inline TqUint CqChannelBuffer::width() const
+inline TqInt CqChannelBuffer::width() const
 {
 	return m_width;
 }
 
-inline TqUint CqChannelBuffer::height() const
+inline TqInt CqChannelBuffer::height() const
 {
 	return m_height;
 }

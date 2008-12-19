@@ -38,66 +38,71 @@ namespace Aqsis {
  * A simple 2D region class.
  */
 
-class COMMON_SHARE CqRegion 
+class CqRegion 
 {
 	public:
-		CqRegion(TqFloat XMin = 0.0f, TqFloat YMin = 0.0f, TqFloat XMax = 0.0f, TqFloat YMax = 0.0f);
-		CqRegion(const CqVector2D& vecMin, const CqVector2D& vecMax);
-		~CqRegion() {}
+		CqRegion(TqInt xMin = 0, TqInt yMin = 0, TqInt xMax = 0, TqInt yMax = 0);
 
-	const CqVector2D& vecMin() const;
-	const CqVector2D& vecMax() const;
-	CqVector2D vecCross() const;
-	const TqFloat width() const;
-	const TqFloat height() const;
-	const TqFloat area() const;
+	TqInt xMin() const;
+	TqInt xMax() const;
+	TqInt yMin() const;
+	TqInt yMax() const;
+	TqInt width() const;
+	TqInt height() const;
+	TqInt area() const;
+	CqVector2D diagonal() const;
 
 	private:
-		CqVector2D	m_vecMin;
-		CqVector2D	m_vecMax;
+		TqInt		m_xMin;
+		TqInt		m_yMin;
+		TqInt		m_xMax;
+		TqInt		m_yMax;
 };
 
 
-inline CqRegion::CqRegion(TqFloat XMin, TqFloat YMin, TqFloat XMax, TqFloat YMax)
-{
-	m_vecMin = CqVector2D(XMin, YMin);
-	m_vecMax = CqVector2D(XMax, YMax);
-}
-
-inline CqRegion::CqRegion(const CqVector2D& vecMin, const CqVector2D& vecMax) : m_vecMin(vecMin), m_vecMax(vecMax)
+inline CqRegion::CqRegion(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax) : m_xMin(xMin), m_yMin(yMin), m_xMax(xMax), m_yMax(yMax)
 {
 }
 
-inline const CqVector2D& CqRegion::vecMin() const
+inline TqInt CqRegion::xMin() const
 {
-	return m_vecMin;
+	return m_xMin;
 }
 
-inline const CqVector2D& CqRegion::vecMax() const
+inline TqInt CqRegion::xMax() const
 {
-	return m_vecMax;
+	return m_xMax;
 }
 
-inline CqVector2D CqRegion::vecCross() const
+inline TqInt CqRegion::yMin() const
 {
-	return( m_vecMax - m_vecMin );
+	return m_yMin;
 }
 
-inline const TqFloat CqRegion::width() const
+inline TqInt CqRegion::yMax() const
 {
-	return m_vecMax.x() - m_vecMin.x();
+	return m_yMax;
 }
 
-inline const TqFloat CqRegion::height() const
+inline TqInt CqRegion::width() const
 {
-	return m_vecMax.y() - m_vecMin.y();
+	return m_xMax - m_xMin;
 }
 
-inline const TqFloat CqRegion::area() const
+inline TqInt CqRegion::height() const
+{
+	return m_yMax - m_yMin;
+}
+
+inline TqInt CqRegion::area() const
 {
 	return width() * height();
 }
 
+inline CqVector2D CqRegion::diagonal() const
+{
+	return CqVector2D(m_xMax - m_xMin, m_yMax - m_yMin);
+}
 //-----------------------------------------------------------------------
 
 } // namespace Aqsis
