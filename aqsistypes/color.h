@@ -273,16 +273,16 @@ class COMMON_SHARE CqColor
 //------------------------------------------------------------------------------
 /// \name Color-space conversion functions
 //@{
-CqColor rgbtohsv(const CqColor& col);
-CqColor rgbtohsl(const CqColor& col);
-CqColor rgbtoXYZ(const CqColor& col);
-CqColor rgbtoxyY(const CqColor& col);
-CqColor rgbtoYIQ(const CqColor& col);
-CqColor hsvtorgb(const CqColor& col);
-CqColor hsltorgb(const CqColor& col);
-CqColor XYZtorgb(const CqColor& col);
-CqColor xyYtorgb(const CqColor& col);
-CqColor YIQtorgb(const CqColor& col);
+COMMON_SHARE CqColor rgbtohsv(const CqColor& col);
+COMMON_SHARE CqColor rgbtohsl(const CqColor& col);
+COMMON_SHARE CqColor rgbtoXYZ(const CqColor& col);
+COMMON_SHARE CqColor rgbtoxyY(const CqColor& col);
+COMMON_SHARE CqColor rgbtoYIQ(const CqColor& col);
+COMMON_SHARE CqColor hsvtorgb(const CqColor& col);
+COMMON_SHARE CqColor hsltorgb(const CqColor& col);
+COMMON_SHARE CqColor XYZtorgb(const CqColor& col);
+COMMON_SHARE CqColor xyYtorgb(const CqColor& col);
+COMMON_SHARE CqColor YIQtorgb(const CqColor& col);
 //@}
 
 //------------------------------------------------------------------------------
