@@ -72,13 +72,31 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 
 	{
 		AQSIS_TIME_SCOPE(Prepare_bucket);
-		m_bucket->PrepareBucket( xMin, yMin, xMax, yMax,
-					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth);
 
-		m_viewRangeXMin = viewRangeXMin;
-		m_viewRangeXMax = viewRangeXMax;
-		m_viewRangeYMin = viewRangeYMin;
-		m_viewRangeYMax = viewRangeYMax;
+		m_PixelXSamples = pixelXSamples;
+		m_PixelYSamples = pixelYSamples;
+		m_FilterXWidth = filterXWidth;
+		m_FilterYWidth = filterYWidth;
+
+		m_DRegion = CqRegion( xMin, yMin, xMax, yMax );
+
+		m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
+		m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
+
+		TqInt sminx = xMin - m_DiscreteShiftX;
+		TqInt sminy = yMin - m_DiscreteShiftY;
+		TqInt smaxx = xMax + m_DiscreteShiftX;
+		TqInt smaxy = yMax + m_DiscreteShiftY;
+
+		if ( sminx < QGetRenderContext()->cropWindowXMin() - m_DiscreteShiftX )
+			sminx = static_cast<TqInt>(QGetRenderContext()->cropWindowXMin() - m_DiscreteShiftX );
+		if ( sminy < QGetRenderContext()->cropWindowYMin() - m_DiscreteShiftY )
+			sminy = static_cast<TqInt>(QGetRenderContext()->cropWindowYMin() - m_DiscreteShiftY );
+		if ( smaxx > QGetRenderContext()->cropWindowXMax() + m_DiscreteShiftX )
+			smaxx = static_cast<TqInt>(QGetRenderContext()->cropWindowXMax() + m_DiscreteShiftX);
+		if ( smaxy > QGetRenderContext()->cropWindowYMax() + m_DiscreteShiftY )
+			smaxy = static_cast<TqInt>(QGetRenderContext()->cropWindowYMax() + m_DiscreteShiftY );
+		m_SRegion = CqRegion( sminx, sminy, smaxx, smaxy );
 
 		m_clippingNear = clippingNear;
 		m_clippingFar = clippingFar;
@@ -167,7 +185,7 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
-		m_OcclusionTree.setupTree(this, viewRangeXMin, viewRangeYMin, viewRangeXMax, viewRangeYMax);
+		m_OcclusionTree.setupTree(this, SRegion().xMin(), SRegion().yMin(), SRegion().xMax(), SRegion().yMax());
 	}
 }
 
@@ -175,6 +193,11 @@ void CqBucketProcessor::process()
 {
 	if (!m_bucket)
 		return;
+
+	{
+		AQSIS_TIME_SCOPE(Render_MPGs);
+		RenderWaitingMPs();
+	}
 
 	// Render any waiting subsurfaces.
 	// \todo Need to refine the exit condition, to ensure that all previous buckets have been
@@ -933,10 +956,10 @@ void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 	const CqBound& Bound = pMP->GetTotalBound();
 
 	// if bounding box is outside our viewing range, then cull it.
-	if ( Bound.vecMax().x() < m_viewRangeXMin ||
-	     Bound.vecMax().y() < m_viewRangeYMin ||
-	     Bound.vecMin().x() > m_viewRangeXMax ||
-	     Bound.vecMin().y() > m_viewRangeYMax ||
+	if ( Bound.vecMax().x() < SRegion().xMin() ||
+	     Bound.vecMax().y() < SRegion().yMin() ||
+	     Bound.vecMin().x() > SRegion().xMax() ||
+	     Bound.vecMin().y() > SRegion().yMax() ||
 	     Bound.vecMin().z() > m_clippingFar ||
 	     Bound.vecMax().z() < m_clippingNear )
 	{
@@ -1008,13 +1031,13 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 	// at (eX, eY).
 	TqInt eX = lceil( bmaxx );
 	TqInt eY = lceil( bmaxy );
-	if ( eX > m_viewRangeXMax ) eX = m_viewRangeXMax;
-	if ( eY > m_viewRangeYMax ) eY = m_viewRangeYMax;
+	if ( eX > SRegion().xMax() ) eX = SRegion().xMax();
+	if ( eY > SRegion().yMax() ) eY = SRegion().yMax();
 
 	TqInt sX = static_cast<TqInt>(std::floor( bminx ));
 	TqInt sY = static_cast<TqInt>(std::floor( bminy ));
-	if ( sY < m_viewRangeYMin ) sY = m_viewRangeYMin;
-	if ( sX < m_viewRangeXMin ) sX = m_viewRangeXMin;
+	if ( sY < SRegion().yMin() ) sY = SRegion().yMin();
+	if ( sX < SRegion().xMin() ) sX = SRegion().xMin();
 
 	CqImagePixel* pie, *pie2;
 
@@ -1222,10 +1245,10 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			}
 
 			// if bounding box is outside our viewing range, then cull it.
-			if ( bmaxx < m_viewRangeXMin ||
-			     bmaxy < m_viewRangeYMin ||
-			     bminx > m_viewRangeXMax ||
-			     bminy > m_viewRangeYMax ||
+			if ( bmaxx < SRegion().xMin() ||
+			     bmaxy < SRegion().yMin() ||
+			     bminx > SRegion().xMax() ||
+			     bminy > SRegion().yMax() ||
 			     bminz > m_clippingFar ||
 			     bmaxz < m_clippingNear )
 			{
@@ -1237,13 +1260,13 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			// at (eX, eY).
 			TqInt eX = lceil( bmaxx );
 			TqInt eY = lceil( bmaxy );
-			if ( eX > m_viewRangeXMax ) eX = m_viewRangeXMax;
-			if ( eY > m_viewRangeYMax ) eY = m_viewRangeYMax;
+			if ( eX > SRegion().xMax() ) eX = SRegion().xMax();
+			if ( eY > SRegion().yMax() ) eY = SRegion().yMax();
 
 			TqInt sX = static_cast<TqInt>(std::floor( bminx ));
 			TqInt sY = static_cast<TqInt>(std::floor( bminy ));
-			if ( sY < m_viewRangeYMin ) sY = m_viewRangeYMin;
-			if ( sX < m_viewRangeXMin ) sX = m_viewRangeXMin;
+			if ( sY < SRegion().yMin() ) sY = SRegion().yMin();
+			if ( sX < SRegion().xMin() ) sX = SRegion().xMin();
 
 			CqImagePixel* pie, *pie2;
 
@@ -1557,39 +1580,46 @@ bool CqBucketProcessor::occlusionCullSurface( const boost::shared_ptr<CqSurface>
 
 	if ( m_OcclusionTree.canCull( RasterBound ) )
 	{
-		// Surface is behind everying in this bucket but it may be
-		// visible in other buckets it overlaps.
-		// bucket to the right
-		TqInt nextBucket = m_bucket->getCol() + 1;
-		TqInt xpos, ypos;
-		QGetRenderContext()->pImage()->bucketPosition( nextBucket, m_bucket->getRow(), xpos, ypos );
-		if ( ( nextBucket < QGetRenderContext()->pImage()->cXBuckets() ) &&
-			 ( RasterBound.vecMax().x() >= xpos ) )
-		{
-			QGetRenderContext()->pImage()->Bucket( nextBucket, m_bucket->getRow() ).AddGPrim( surface );
-			return true;
-		}
-
-		// next row
-		nextBucket = m_bucket->getRow() + 1;
-		// find bucket containing left side of bound
-		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / QGetRenderContext()->pImage()->XBucketSize();
-		nextBucketX = max( nextBucketX, 0 );
-		QGetRenderContext()->pImage()->bucketPosition( nextBucketX, nextBucket, xpos, ypos );
-
-		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
-			 ( nextBucket  < QGetRenderContext()->pImage()->cYBuckets() ) &&
-			 ( RasterBound.vecMax().y() >= ypos ) )
-		{
-			QGetRenderContext()->pImage()->Bucket( nextBucketX, nextBucket ).AddGPrim( surface );
-			return true;
-		}
-
-		// Bound covers no more buckets therefore we can delete the surface completely.
 		CqString objname( "unnamed" );
 		const CqString* pattrName = surface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 		if( pattrName )
 			objname = *pattrName;
+
+		// Surface is behind everying in this bucket but it may be
+		// visible in other buckets it overlaps.
+		// bucket to the right
+		TqInt nextBucketX = m_bucket->getCol() + 1;
+		TqInt xpos, ypos;
+		QGetRenderContext()->pImage()->bucketPosition( nextBucketX, m_bucket->getRow(), xpos, ypos );
+		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
+			 ( RasterBound.vecMax().x() >= xpos ) )
+		{
+			Aqsis::log() << info << "GPrim: \"" << objname << 
+					"\" occluded in bucket: " << m_bucket->getCol() << ", " << m_bucket->getRow() << 
+					" shifted into bucket: " << nextBucketX << ", " << m_bucket->getRow() << std::endl;
+			QGetRenderContext()->pImage()->Bucket( nextBucketX, m_bucket->getRow() ).AddGPrim( surface );
+			return true;
+		}
+
+		// next row
+		TqInt nextBucketY = m_bucket->getRow() + 1;
+		// find bucket containing left side of bound
+		nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / QGetRenderContext()->pImage()->XBucketSize();
+		nextBucketX = max( nextBucketX, 0 );
+		QGetRenderContext()->pImage()->bucketPosition( nextBucketX, nextBucketY, xpos, ypos );
+
+		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
+			 ( nextBucketY  < QGetRenderContext()->pImage()->cYBuckets() ) &&
+			 ( RasterBound.vecMax().y() >= ypos ) )
+		{
+			Aqsis::log() << info << "GPrim: \"" << objname << 
+				"\" occluded in bucket: " << m_bucket->getCol() << ", " << m_bucket->getRow() << 
+				" shifted into bucket: " << nextBucketX << ", " << nextBucketY << std::endl;
+			QGetRenderContext()->pImage()->Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
+			return true;
+		}
+
+		// Bound covers no more buckets therefore we can delete the surface completely.
 		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
 		STATS_INC( GPR_occlusion_culled );
 		return true;

@@ -146,10 +146,15 @@ class CqBucketProcessor
 		CqOcclusionTree m_OcclusionTree;
 
 		// View range and clipping info (to know when to skip rendering)
-		TqInt	m_viewRangeXMin;
-		TqInt	m_viewRangeXMax;
-		TqInt	m_viewRangeYMin;
-		TqInt	m_viewRangeYMax;
+		CqRegion	m_SRegion;
+		CqRegion	m_DRegion;
+		TqInt	m_DiscreteShiftX;
+		TqInt	m_DiscreteShiftY;
+		TqInt	m_PixelXSamples;
+		TqInt	m_PixelYSamples;
+		TqFloat	m_FilterXWidth;
+		TqFloat	m_FilterYWidth;
+
 		TqFloat	m_clippingNear;
 		TqFloat	m_clippingFar;
 
@@ -160,50 +165,42 @@ class CqBucketProcessor
 
 inline const CqRegion& CqBucketProcessor::SRegion() const
 {
-	assert(m_bucket);
-	return m_bucket->SRegion();
+	return m_SRegion;
 }
 
 inline const CqRegion& CqBucketProcessor::DRegion() const
 {
-	assert(m_bucket);
-	return m_bucket->DRegion();
+	return m_DRegion;
 }
 
 inline TqFloat	CqBucketProcessor::DiscreteShiftX() const
 {
-	assert(m_bucket);
-	return m_bucket->DiscreteShiftX();
+	return m_DiscreteShiftX;
 }
 
 inline TqFloat	CqBucketProcessor::DiscreteShiftY() const
 {
-	assert(m_bucket);
-	return m_bucket->DiscreteShiftY();
+	return m_DiscreteShiftY;
 }
 
 inline TqFloat	CqBucketProcessor::FilterXWidth() const
 {
-	assert(m_bucket);
-	return m_bucket->FilterXWidth();
+	return m_FilterXWidth;
 }
 
 inline TqFloat	CqBucketProcessor::FilterYWidth() const
 {
-	assert(m_bucket);
-	return m_bucket->FilterYWidth();
+	return m_FilterYWidth;
 }
 
 inline TqInt	CqBucketProcessor::PixelXSamples() const
 {
-	assert(m_bucket);
-	return m_bucket->PixelXSamples();
+	return m_PixelXSamples;
 }
 
 inline TqInt	CqBucketProcessor::PixelYSamples() const
 {
-	assert(m_bucket);
-	return m_bucket->PixelYSamples();
+	return m_PixelYSamples;
 }
 
 inline TqInt CqBucketProcessor::GetNextSamplePointIndex()

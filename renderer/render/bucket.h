@@ -51,54 +51,6 @@ class CqBucket
 	public:
 		CqBucket();
 
-		const CqRegion& SRegion() const;
-		const CqRegion& DRegion() const;
-		TqUint numSamples() const;
-		TqInt	DiscreteShiftX() const
-		{
-			return m_DiscreteShiftX;
-		}
-		TqInt	DiscreteShiftY() const
-		{
-			return m_DiscreteShiftY;
-		}
-		TqInt	PixelXSamples() const
-		{
-			return m_PixelXSamples;
-		}
-		TqInt	PixelYSamples() const
-		{
-			return m_PixelYSamples;
-		}
-		TqFloat	FilterXWidth() const
-		{
-			return m_FilterXWidth;
-		}
-		TqFloat	FilterYWidth() const
-		{
-			return m_FilterYWidth;
-		}
-		/** Set up the necessary data for the bucket to render
-		 *
-		 * \param viewRangeXMin Integer minimum extend of the
-		 * image part being rendered, takes into account
-		 * buckets and clipping.
-		 *
-		 * \param viewRangeXMax Integer maximum extend of the
-		 * image part being rendered, takes into account
-		 * buckets and clipping.
-		 *
-		 * \param viewRangeYMin Integer minimum extend of the
-		 * image part being rendered, takes into account
-		 * buckets and clipping.
-		 *
-		 * \param viewRangeYMax Integer maximum extend of the
-		 * image part being rendered, takes into account
-		 * buckets and clipping.
-		 */
-		void	PrepareBucket( TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
-				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth);
-
 		/** Add a GPRim to the stack of deferred GPrims.
 		* \param The Gprim to be added.
 		 */
@@ -182,18 +134,6 @@ class CqBucket
 		/// Bucket row in the image
 		TqInt m_row;
 
-		/// Bucket classification information.
-		CqRegion	m_SRegion;
-		CqRegion	m_DRegion;
-
-		TqInt	m_DiscreteShiftX;
-		TqInt	m_DiscreteShiftY;
-		TqInt	m_PixelXSamples;
-		TqInt	m_PixelYSamples;
-		TqFloat	m_FilterXWidth;
-		TqFloat	m_FilterYWidth;
-
-
 		/// Vector of vectors of waiting micropolygons in this bucket
 		std::vector<boost::shared_ptr<CqMicroPolygon> > m_micropolygons;
 
@@ -205,21 +145,6 @@ class CqBucket
 //------------------------------------------------------------
 // Implementation details
 //------------------------------------------------------------
-
-
-inline TqUint CqBucket::numSamples() const
-{
-	return m_SRegion.area() * m_PixelXSamples * m_PixelYSamples;
-}
-
-inline const CqRegion& CqBucket::SRegion() const
-{
-	return m_SRegion;
-}
-inline const CqRegion& CqBucket::DRegion() const
-{
-	return m_DRegion;
-}
 
 inline std::vector<boost::shared_ptr<CqMicroPolygon> >& CqBucket::micropolygons()
 {

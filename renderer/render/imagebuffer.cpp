@@ -642,12 +642,6 @@ void CqImageBuffer::RenderImage()
 	TqFloat clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
 	TqFloat clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
 
-	// Calculate how much bigger to make the bucket to account for the filter
-	// requirements.
-	TqInt bXHalf = static_cast<TqInt>(std::floor(m_FilterXWidth / 2.0f));
-	TqInt bYHalf = static_cast<TqInt>(std::floor(m_FilterYWidth / 2.0f));
-	std::cout << bXHalf << ", " << bYHalf << std::endl;
-
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
@@ -673,23 +667,10 @@ void CqImageBuffer::RenderImage()
 			TqInt xpos, ypos, xsize, ysize;
 			bucketPosition(bucket->getCol(), bucket->getRow(), xpos, ypos);
 			bucketSize(bucket->getCol(), bucket->getRow(), xsize, ysize);
-			TqInt xmin = xpos - bXHalf;
-			TqInt ymin = ypos - bYHalf;
-			TqInt xmax = xpos + xsize + bXHalf;
-			TqInt ymax = ypos + ysize + bYHalf;
-
-			if ( xmin < QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2 )
-				xmin = static_cast<TqInt>(QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2.0f);
-			if ( ymin < QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2 )
-				ymin = static_cast<TqInt>(QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2.0f);
-			if ( xmax > QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2 )
-				xmax = static_cast<TqInt>(QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2.0f);
-			if ( ymax > QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2 )
-				ymax = static_cast<TqInt>(QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f);
 
 			bucketProcessors[i].preProcess( xpos, ypos, xpos + xsize, ypos + ysize,
 							pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
-							xmin, xmax, ymin, ymax,
+							0, 0, 0, 0,
 							clippingNear, clippingFar );
 
 			// Kick off a thread to process this bucket.

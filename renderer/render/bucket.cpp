@@ -90,32 +90,6 @@ void CqBucket::SetProcessed( bool bProc )
 	m_bProcessed = bProc;
 }
 
-
-//----------------------------------------------------------------------
-/** Initialise the static image storage area.
- */
-
-void CqBucket::PrepareBucket( TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
-			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth)
-{
-	m_PixelXSamples = pixelXSamples;
-	m_PixelYSamples = pixelYSamples;
-	m_FilterXWidth = filterXWidth;
-	m_FilterYWidth = filterYWidth;
-
-	m_DRegion = CqRegion( xMin, yMin, xMax, yMax );
-
-	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
-	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
-
-	TqInt sminx = xMin - m_DiscreteShiftX;
-	TqInt sminy = yMin - m_DiscreteShiftY;
-	TqInt smaxx = xMax + m_DiscreteShiftX;
-	TqInt smaxy = yMax + m_DiscreteShiftY;
-	m_SRegion = CqRegion( sminx, sminy, smaxx, smaxy );
-}
-
-
 //----------------------------------------------------------------------
 /** Check if there are any surfaces in this bucket to be processed.
  */
