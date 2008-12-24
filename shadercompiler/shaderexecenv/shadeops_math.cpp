@@ -259,13 +259,7 @@ void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* p
 		{
 			TqFloat aVal;
 			(a)->GetFloat(aVal,__iGrid);
-			TqFloat res = std::tan(aVal);
-			if(std::isnan(res))
-			{
-				res = 0;
-				domainError("tan", a, aVal);
-			}
-			(Result)->SetFloat(res, __iGrid);
+			(Result)->SetFloat(std::tan(aVal), __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
