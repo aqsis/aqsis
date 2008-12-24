@@ -39,6 +39,8 @@
 
 namespace Aqsis {
 
+namespace {
+
 // If you want for 32 compiler as fast implementation of sqrt, inversesqrt and abs() just define FASTSQRT below
 //#define FASTSQRT 
 // Fast inverse square root
@@ -73,6 +75,31 @@ inline TqFloat sqrtf(float f)
 	return 1.0f/isqrtf(f);
 }
 #endif
+
+inline void domainError(const char* funcName, IqShaderData* var, TqFloat varValue)
+{
+	std::ostream& out = Aqsis::log();
+	out << warning << "domain error: " << funcName << "(";
+	if(var->strName() != "")
+		out << var->strName() << "=";
+	out << varValue << ") is undefined, result has been set to zero\n";
+}
+
+inline void domainError(const char* funcName, IqShaderData* var1, IqShaderData* var2,
+		TqFloat var1Value, TqFloat var2Value)
+{
+	std::ostream& out = Aqsis::log();
+	out << warning << "domain error: " << funcName << "(";
+	if(var1->strName() != "")
+		out << var1->strName() << "=";
+	out << var1Value << ", ";
+	if(var2->strName() != "")
+		out << var2->strName() << "=";
+	out << var2Value;
+	out << ") is undefined, result has been set to zero\n";
+}
+
+} // unnamed namespace
 
 void	CqShaderExecEnv::SO_radians( IqShaderData* degrees, IqShaderData* Result, IqShader* pShader )
 {
@@ -154,9 +181,14 @@ void	CqShaderExecEnv::SO_asin( IqShaderData* a, IqShaderData* Result, IqShader* 
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_a;
-			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(std::asin(_aq_a), __iGrid);
+			TqFloat aVal;
+			(a)->GetFloat(aVal,__iGrid);
+			TqFloat res = 0;
+			if(aVal < -1 || aVal > 1)
+				domainError("asin", a, aVal);
+			else
+				res = std::asin(aVal);
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -198,9 +230,14 @@ void	CqShaderExecEnv::SO_acos( IqShaderData* a, IqShaderData* Result, IqShader* 
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_a;
-			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(std::acos(_aq_a), __iGrid);
+			TqFloat aVal;
+			(a)->GetFloat(aVal,__iGrid);
+			TqFloat res = 0;
+			if(aVal < -1 || aVal > 1)
+				domainError("acos", a, aVal);
+			else
+				res = std::acos(aVal);
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -220,9 +257,15 @@ void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_a;
-			(a)->GetFloat(_aq_a,__iGrid);
-			(Result)->SetFloat(std::tan(_aq_a), __iGrid);
+			TqFloat aVal;
+			(a)->GetFloat(aVal,__iGrid);
+			TqFloat res = std::tan(aVal);
+			if(std::isnan(res))
+			{
+				res = 0;
+				domainError("tan", a, aVal);
+			}
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -290,15 +333,29 @@ void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Re
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_x;
-			(x)->GetFloat(_aq_x,__iGrid);
-			TqFloat _aq_y;
-			(y)->GetFloat(_aq_y,__iGrid);
-			TqFloat yy = _aq_y;
-			TqFloat xx = _aq_x;
-			if ( xx < 0.0f )
-				yy = std::floor( yy );
-			(Result)->SetFloat(std::pow(xx, yy), __iGrid);
+			TqFloat xVal;
+			(x)->GetFloat(xVal,__iGrid);
+			TqFloat yVal;
+			(y)->GetFloat(yVal,__iGrid);
+			TqFloat res = 0;
+			if(xVal < 0)
+			{
+				TqInt yInt = lfloor(yVal);
+				if(yInt != yVal)
+				{
+					res = 0;
+					domainError("pow", x, y, xVal, yVal);
+				}
+				else
+				{
+					res = std::pow(xVal, yInt);
+				}
+			}
+			else
+			{
+				res = std::pow(xVal, yVal);
+			}
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -340,13 +397,22 @@ void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* 
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_x;
-			(x)->GetFloat(_aq_x,__iGrid);
+			TqFloat xVal;
+			(x)->GetFloat(xVal,__iGrid);
+			TqFloat res = 0;
+			if(xVal < 0)
+			{
+				domainError("sqrt", x, xVal);
+			}
+			else
+			{
 #ifndef FASTSQRT
-			(Result)->SetFloat(std::sqrt(_aq_x), __iGrid);
+				res = std::sqrt(xVal);
 #else
-			(Result)->SetFloat(static_cast<TqFloat>( sqrtf( _aq_x ) ),__iGrid);
+				res = sqrtf(xVal);
 #endif
+			}
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -366,9 +432,14 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* p
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_x;
-			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(std::log(_aq_x), __iGrid);
+			TqFloat xVal;
+			(x)->GetFloat(xVal,__iGrid);
+			TqFloat res = 0;
+			if(xVal <= 0)
+				domainError("log", x, xVal);
+			else
+				res = std::log(xVal);
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -420,11 +491,16 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData*
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_x;
-			(x)->GetFloat(_aq_x,__iGrid);
-			TqFloat _aq_base;
-			(base)->GetFloat(_aq_base,__iGrid);
-			(Result)->SetFloat(std::log(_aq_x) / std::log(_aq_base), __iGrid);
+			TqFloat xVal;
+			(x)->GetFloat(xVal,__iGrid);
+			TqFloat baseVal;
+			(base)->GetFloat(baseVal,__iGrid);
+			TqFloat res = 0;
+			if(xVal <= 0 || baseVal <= 0)
+				domainError("log", x, base, xVal, baseVal);
+			else
+				res = std::log(xVal)/std::log(baseVal);
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -885,13 +961,22 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			TqFloat _aq_x;
-			(x)->GetFloat(_aq_x,__iGrid);
+			TqFloat xVal;
+			(x)->GetFloat(xVal,__iGrid);
+			TqFloat res = 0;
+			if(xVal <= 0)
+			{
+				domainError("inversesqrt", x, xVal);
+			}
+			else
+			{
 #ifndef FASTSQRT
-			(Result)->SetFloat(1.0f / std::sqrt(_aq_x), __iGrid);
+				res = 1/std::sqrt(xVal);
 #else
-			(Result)->SetFloat(isqrtf( _aq_x ) ,__iGrid);
+				res = isqrtf(xVal);
 #endif
+			}
+			(Result)->SetFloat(res, __iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
