@@ -91,8 +91,6 @@ class CqBucketProcessor
 		void	FilterBucket(bool fImager);
 		void	ExposeBucket();
 
-		TqFloat	DiscreteShiftX() const;
-		TqFloat	DiscreteShiftY() const;
 		TqFloat	FilterXWidth() const;
 		TqFloat	FilterYWidth() const;
 		TqInt	PixelXSamples() const;
@@ -171,16 +169,6 @@ inline const CqRegion& CqBucketProcessor::SRegion() const
 inline const CqRegion& CqBucketProcessor::DRegion() const
 {
 	return m_DRegion;
-}
-
-inline TqFloat	CqBucketProcessor::DiscreteShiftX() const
-{
-	return m_DiscreteShiftX;
-}
-
-inline TqFloat	CqBucketProcessor::DiscreteShiftY() const
-{
-	return m_DiscreteShiftY;
 }
 
 inline TqFloat	CqBucketProcessor::FilterXWidth() const

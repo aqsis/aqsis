@@ -165,7 +165,7 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 			for ( TqInt j = 0; j < maxX; j++ )
 			{
 				CqVector2D bPos2( DRegion().xMin(), DRegion().yMin() );
-				bPos2 += CqVector2D( ( j - DiscreteShiftX() ), ( ii - DiscreteShiftY() ) );
+				bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( ii - m_DiscreteShiftY ) );
 
 				m_aieImage[which].Clear( m_SamplePoints );
 
@@ -291,8 +291,8 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 	m_aDatas.resize( datasize * SRegion().area() );
 	m_aCoverages.resize( SRegion().area() );
 
-	TqInt xmax = static_cast<TqInt>(DiscreteShiftX());
-	TqInt ymax = static_cast<TqInt>(DiscreteShiftY());
+	TqInt xmax = m_DiscreteShiftX;
+	TqInt ymax = m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
 	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
@@ -653,10 +653,10 @@ void CqBucketProcessor::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& p
 	//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
 	//	iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
 
-	TqInt maxX = SRegion().width();
-	TqInt i = ( ( iYPos + DiscreteShiftY() ) * ( maxX ) ) + ( iXPos + DiscreteShiftX() );
+	TqInt i = (iYPos + m_DiscreteShiftY)*SRegion().width() + iXPos + m_DiscreteShiftX;
 
-	assert(i < m_aieImage.size());
+	assert(i < static_cast<TqInt>(m_aieImage.size()));
+	assert(i >= 0);
 	pie = &m_aieImage[ i ];
 }
 
@@ -732,8 +732,8 @@ void CqBucketProcessor::InitialiseFilterValues()
 	if( NULL == pFilter )
 		pFilter = RiBoxFilter;
 
-	TqFloat xmax = DiscreteShiftX();
-	TqFloat ymax = DiscreteShiftY();
+	TqFloat xmax = m_DiscreteShiftX;
+	TqFloat ymax = m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
 	TqFloat xfw = std::ceil(FilterXWidth());
