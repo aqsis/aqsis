@@ -116,20 +116,20 @@ inline void CqChannelBuffer::allocate(TqInt width, TqInt height)
 
 inline IqChannelBuffer::TqChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index)
 {
-	assert(index < m_channels.size());
+	assert(index < static_cast<TqInt>(m_channels.size()));
 	assert(x < m_width);
 	assert(y < m_height);
 
 	TqInt offset = ( y * m_width * m_elementSize ) + ( x * m_elementSize ) + index;
 
-	assert(offset < m_data.size() );
+	assert(offset < static_cast<TqInt>(m_data.size()));
 
 	return m_data.begin() + offset;
 }
 
 inline IqChannelBuffer::TqConstChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index) const
 {
-	assert(index < m_channels.size());
+	assert(index < static_cast<TqInt>(m_channels.size()));
 	assert(x < m_width);
 	assert(y < m_height);
 
