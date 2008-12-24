@@ -627,10 +627,6 @@ class CqMicroPolygon : boost::noncopyable
 			return ( &col[m_Index] );
 		}
 
-		/** Calculate the bound of the micropoly.
-		*/
-		virtual void CalculateTotalBound();
-
 		// Overridables
 		/** Get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
@@ -766,6 +762,10 @@ class CqMicroPolygon : boost::noncopyable
 		 */
 		virtual void CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const;
 
+		/** \brief Calculate and store the bound of the micropoly.
+		 */
+		void CalculateTotalBound();
+
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
 			switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
@@ -780,10 +780,9 @@ class CqMicroPolygon : boost::noncopyable
 					return ( m_Index );
 			}
 		}
-		TqLong	m_IndexCode;
+		TqInt m_IndexCode;
 		CqBound	m_Bound;					///< Stored bound.
 
-		TqLong	m_BoundCode;
 		CqMicroPolyGridBase*	m_pGrid;		///< Pointer to the donor grid.
 		TqInt	m_Index;		///< Index within the donor grid.
 
@@ -898,7 +897,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{}
 
 		// Overrides from CqMicroPolygon
-		virtual void CalculateTotalBound();
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return ( m_Bound );

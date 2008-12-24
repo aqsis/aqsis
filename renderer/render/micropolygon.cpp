@@ -906,7 +906,6 @@ void CqMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
-				pNew->CalculateTotalBound();
 				QGetRenderContext()->pImage()->AddMPG( pNew );
 			}
 
@@ -1308,6 +1307,8 @@ void CqMicroPolygon::Initialise()
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000000 ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
+
+	CalculateTotalBound();
 }
 
 
@@ -1763,81 +1764,16 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& s
 }
 
 //---------------------------------------------------------------------
-/** Calculate the 2D boundary of this micropolygon,
- */
-
 void CqMicroPolygon::CalculateTotalBound()
 {
 	CqVector3D * pP;
 	m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-
-	// Calculate the boundary, and store the indexes in the cache.
-	const CqVector3D& B = pP[ m_Index + 1 ];
 	TqInt cu = m_pGrid->uGridRes();
+	const CqVector3D& A = pP[ m_Index ];
+	const CqVector3D& B = pP[ m_Index + 1 ];
 	const CqVector3D& C = pP[ m_Index + cu + 2 ];
 	const CqVector3D& D = pP[ m_Index + cu + 1 ];
-
-	TqShort BCMinX = 0;
-	TqShort BCMaxX = 0;
-	TqShort BCMinY = 0;
-	TqShort BCMaxY = 0;
-	TqShort BCMinZ = 0;
-	TqShort BCMaxZ = 0;
-	m_BoundCode = 0xe4;
-	TqInt TempIndexTable[ 4 ] = {	GetCodedIndex( m_BoundCode, 0 ),
-	                              GetCodedIndex( m_BoundCode, 1 ),
-	                              GetCodedIndex( m_BoundCode, 2 ),
-	                              GetCodedIndex( m_BoundCode, 3 ) };
-	if ( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() )
-		BCMinX = 1;
-	if ( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )
-		BCMaxX = 1;
-	if ( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() )
-		BCMinY = 1;
-	if ( B.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )
-		BCMaxY = 1;
-	if ( B.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )
-		BCMinZ = 1;
-	if ( B.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )
-		BCMaxZ = 1;
-
-	if ( C.x() < pP[ TempIndexTable[ BCMinX ] ].x() )
-		BCMinX = 2;
-	if ( C.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )
-		BCMaxX = 2;
-	if ( C.y() < pP[ TempIndexTable[ BCMinY ] ].y() )
-		BCMinY = 2;
-	if ( C.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )
-		BCMaxY = 2;
-	if ( C.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )
-		BCMinZ = 2;
-	if ( C.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )
-		BCMaxZ = 2;
-
-	if ( !IsDegenerate() )
-	{
-		if ( D.x() < pP[ TempIndexTable[ BCMinX ] ].x() )
-			BCMinX = 3;
-		if ( D.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )
-			BCMaxX = 3;
-		if ( D.y() < pP[ TempIndexTable[ BCMinY ] ].y() )
-			BCMinY = 3;
-		if ( D.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )
-			BCMaxY = 3;
-		if ( D.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )
-			BCMinZ = 3;
-		if ( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )
-			BCMaxZ = 3;
-	}
-	m_BoundCode = ( ( BCMinX & 0x3 ) |
-	                ( ( BCMinY & 0x3 ) << 2 ) |
-	                ( ( BCMinZ & 0x3 ) << 4 ) |
-	                ( ( BCMaxX & 0x3 ) << 6 ) |
-	                ( ( BCMaxY & 0x3 ) << 8 ) |
-	                ( ( BCMaxZ & 0x3 ) << 10 ) );
-
-	m_Bound = CqBound( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(),
-	                   pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
+	m_Bound = CqBound( min(min(min(A,B),C),D), max(max(max(A,B),C),D) );
 
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
@@ -1854,23 +1790,6 @@ void CqMicroPolygon::CalculateTotalBound()
 	}
 }
 
-
-//---------------------------------------------------------------------
-/** Calculate the 2D boundary of this micropolygon,
- */
-
-void CqMicroPolygonMotion::CalculateTotalBound()
-{
-	assert( NULL != m_Keys[ 0 ] );
-
-	m_Bound = m_Keys[ 0 ] ->GetTotalBound();
-	std::vector<CqMovingMicroPolygonKey*>::iterator i;
-	for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-	{
-		CqBound B((*i)->GetTotalBound());
-		m_Bound.Encapsulate( &B );
-	}
-}
 
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,

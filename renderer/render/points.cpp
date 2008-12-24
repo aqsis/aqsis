@@ -555,7 +555,6 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 
 				pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
 			}
-			pNew->CalculateTotalBound( );
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
 			QGetRenderContext()->pImage()->AddMPG( pMP );
 		}
@@ -615,7 +614,6 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 
 			CqMicroPolygonPoints* pNew = new CqMicroPolygonPoints(this, iu);
 			pNew->Initialise( radius );
-			pNew->CalculateTotalBound();
 
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
 			QGetRenderContext()->pImage()->AddMPG( pMP );
@@ -785,7 +783,6 @@ void CqMotionMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long y
 
 			pNew->AppendKey( Point, radius, Time( iTime ) );
 		}
-		pNew->CalculateTotalBound( );
 		boost::shared_ptr<CqMicroPolygon> pMP( pNew );
 		QGetRenderContext()->pImage()->AddMPG( pMP );
 	}
@@ -802,19 +799,6 @@ void CqMotionMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long y
 	*/    //		delete( GetMotionObject( Time( iTime ) ) );
 }
 
-
-void CqMicroPolygonMotionPoints::CalculateTotalBound()
-{
-	assert( NULL != m_Keys[0] );
-
-	m_Bound = m_Keys[0]->GetTotalBound();
-	std::vector<CqMovingMicroPolygonKeyPoints*>::iterator i;
-	for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-	{
-		CqBound B = (*i)->GetTotalBound();
-		m_Bound.Encapsulate( &B );
-	}
-}
 
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
