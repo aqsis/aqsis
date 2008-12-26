@@ -324,6 +324,22 @@ class COMMON_SHARE CqVector2D
 bool isClose(const CqVector2D& v1, const CqVector2D& v2,
 		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
+/// Determine a componentwise minimum for two vectors
+CqVector2D min(const CqVector2D& v1, const CqVector2D& v2);
+
+/// Determine a componentwise maximum for two vectors
+CqVector2D max(const CqVector2D& v1, const CqVector2D& v2);
+
+/** \brief Componenetwise multiplication of two vectors.
+ *
+ * This may also be thought of as a transformation by the matrix
+ * [ trans.x()  0         ]
+ * [ 0          trans.y() ]
+ *
+ * Unfortunately we can't use operator*() for this, since it's already used for
+ * the dot product.
+ */
+CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v);
 
 
 //==============================================================================
@@ -337,6 +353,20 @@ inline bool isClose(const CqVector2D& v1, const CqVector2D& v2, TqFloat tol)
 	return diff2 <= tol2*v1.Magnitude2() || diff2 <= tol2*v2.Magnitude2();
 }
 
+inline CqVector2D min(const CqVector2D& v1, const CqVector2D& v2)
+{
+	return CqVector2D(min(v1.x(), v2.x()), min(v1.y(), v2.y()));
+}
+
+inline CqVector2D max(const CqVector2D& v1, const CqVector2D& v2)
+{
+	return CqVector2D(max(v1.x(), v2.x()), max(v1.y(), v2.y()));
+}
+
+inline CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v)
+{
+	return CqVector2D(trans.x()*v.x(), trans.y()*v.y());
+}
 
 } // namespace Aqsis
 

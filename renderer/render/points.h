@@ -369,20 +369,12 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		void Initialise( TqFloat radius )
 		{
 			m_radius = radius;
-		}
-		virtual	CqBound&	GetTotalBound( ) const
-		{
-			static CqBound b;
-			CqVector3D Pmin, Pmax;
-			pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);
-			Pmax = Pmin;
-			Pmin.x( Pmin.x() - m_radius );
-			Pmin.y( Pmin.y() - m_radius );
-			Pmax.x( Pmax.x() + m_radius );
-			Pmax.y( Pmax.y() + m_radius );
-			b.vecMin() = Pmin;
-			b.vecMax() = Pmax;
-			return( b );
+
+			// compute the bound.
+			CqVector3D pos;
+			pGrid()->pVar(EnvVars_P)->GetPoint(pos, m_Index);
+			m_Bound.vecMin() = pos - CqVector3D(m_radius, m_radius, 0);
+			m_Bound.vecMax() = pos + CqVector3D(m_radius, m_radius, 0);
 		}
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
@@ -445,7 +437,7 @@ class CqMovingMicroPolygonKeyPoints
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
-		CqBound	GetTotalBound() const
+		CqBound	GetBound() const
 		{
 			CqVector3D Pmin, Pmax;
 			Pmin = Pmax = m_Point0;
@@ -509,10 +501,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 
 		// Overrides from CqMicroPolygon
 		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		virtual const CqBound&	GetTotalBound() const
-		{
-			return( m_Bound );
-		}
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
@@ -541,7 +529,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
 	private:
-		CqBound	m_Bound;					///< Stored bound.
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
 		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
@@ -549,8 +536,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 
 		static	CqObjectPool<CqMicroPolygonMotionPoints>	m_thePool;
 
-}
-;
+};
 
 
 //----------------------------------------------------------------------

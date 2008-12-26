@@ -1774,20 +1774,6 @@ void CqMicroPolygon::CalculateTotalBound()
 	const CqVector3D& C = pP[ m_Index + cu + 2 ];
 	const CqVector3D& D = pP[ m_Index + cu + 1 ];
 	m_Bound = CqBound( min(min(min(A,B),C),D), max(max(max(A,B),C),D) );
-
-	// Adjust for DOF
-	if ( QGetRenderContext() ->UsingDepthOfField() )
-	{
-		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
-		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
-
-		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
-		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
-		m_Bound.vecMax().x( m_Bound.vecMax().x() + cocX );
-		m_Bound.vecMax().y( m_Bound.vecMax().y() + cocY );
-	}
 }
 
 
@@ -1818,7 +1804,7 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 	TqFloat time = opentime + dt;
 	TqInt startKey = 0;
 	TqUint endKey = 1;
-	CqBound bound = m_Keys[startKey]->GetTotalBound();
+	CqBound bound = m_Keys[startKey]->GetBound();
 
 	m_BoundList.SetSize( divisions );
 
@@ -1832,9 +1818,9 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 		// interpolate between this key and the previous to get the
 		// bound at our end time.
 		TqInt endKey_1 = endKey - 1;
-		const CqBound& end0 = m_Keys[endKey_1]->GetTotalBound();
+		const CqBound& end0 = m_Keys[endKey_1]->GetBound();
 		TqFloat end0Time = m_Times[endKey_1];
-		const CqBound& end1 = m_Keys[endKey]->GetTotalBound();
+		const CqBound& end1 = m_Keys[endKey]->GetBound();
 		TqFloat end1Time = m_Times[endKey];
 
 		TqFloat mix = (time - end0Time) / (end1Time - end0Time);
@@ -1850,7 +1836,7 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 		while(startKey < endKey_1)
 		{
 			startKey++;
-			CqBound B(m_Keys[startKey]->GetTotalBound());
+			CqBound B(m_Keys[startKey]->GetBound());
 			bound.Encapsulate(&B);
 		}
 
@@ -1986,10 +1972,10 @@ void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB
 	m_Times.push_back( time );
 	m_Keys.push_back( pMP );
 	if ( m_Times.size() == 1 )
-		m_Bound = pMP->GetTotalBound();
+		m_Bound = pMP->GetBound();
 	else
 	{
-		CqBound B(pMP->GetTotalBound());
+		CqBound B(pMP->GetBound());
 		m_Bound.Encapsulate( &B );
 	}
 }
@@ -2042,7 +2028,7 @@ void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D
 /** Calculate the 2D boundary of this micropolygon,
  */
 
-const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
+const CqBound& CqMovingMicroPolygonKey::GetBound()
 {
 	if(m_BoundReady)
 		return m_Bound;
@@ -2054,20 +2040,6 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 	m_Bound.vecMax().x( max( m_Point0.x(), max( m_Point1.x(), max( m_Point2.x(), m_Point3.x() ) ) ) );
 	m_Bound.vecMax().y( max( m_Point0.y(), max( m_Point1.y(), max( m_Point2.y(), m_Point3.y() ) ) ) );
 	m_Bound.vecMax().z( max( m_Point0.z(), max( m_Point1.z(), max( m_Point2.z(), m_Point3.z() ) ) ) );
-
-	// Adjust for DOF
-	if ( QGetRenderContext() ->UsingDepthOfField() )
-	{
-		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
-		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
-		TqFloat cocX = max( minZCoc.x(), maxZCoc.x() );
-		TqFloat cocY = max( minZCoc.y(), maxZCoc.y() );
-
-		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
-		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
-		m_Bound.vecMax().x( m_Bound.vecMax().x() + cocX );
-		m_Bound.vecMax().y( m_Bound.vecMax().y() + cocY );
-	}
 
 	m_BoundReady = true;
 	return ( m_Bound );

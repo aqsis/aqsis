@@ -447,15 +447,29 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 {
-	// Quick check for outside crop window.
-	CqBound	B( pmpgNew->GetTotalBound() );
+	CqRenderer* renderContext = QGetRenderContext();
+	CqBound B = pmpgNew->GetBound();
 
-	if ( B.vecMax().x() < QGetRenderContext()->cropWindowXMin() - m_FilterXWidth / 2.0f ||
-	     B.vecMax().y() < QGetRenderContext()->cropWindowYMin() - m_FilterYWidth / 2.0f ||
-	     B.vecMin().x() > QGetRenderContext()->cropWindowXMax() + m_FilterXWidth / 2.0f ||
-	     B.vecMin().y() > QGetRenderContext()->cropWindowYMax() + m_FilterYWidth / 2.0f )
+	// Expand the micropolygon bound for DoF if necessary.
+	if(renderContext->UsingDepthOfField())
 	{
-		return ;
+		// Get the maximum CoC multiplier for the micropolygon depth.
+		const CqVector2D maxCoC = max(
+			renderContext->GetCircleOfConfusion(B.vecMin().z()),
+			renderContext->GetCircleOfConfusion(B.vecMax().z())
+		);
+		// Expand the bound by the CoC radius
+		B.vecMin() -= CqVector3D(maxCoC);
+		B.vecMax() += CqVector3D(maxCoC);
+	}
+
+	// Discard when outside the crop window.
+	if ( B.vecMax().x() < renderContext->cropWindowXMin() - m_FilterXWidth / 2.0f ||
+	     B.vecMax().y() < renderContext->cropWindowYMin() - m_FilterYWidth / 2.0f ||
+	     B.vecMin().x() > renderContext->cropWindowXMax() + m_FilterXWidth / 2.0f ||
+	     B.vecMin().y() > renderContext->cropWindowYMax() + m_FilterYWidth / 2.0f )
+	{
+		return;
 	}
 
 	////////// Dump the micro polygon into a dump file //////////

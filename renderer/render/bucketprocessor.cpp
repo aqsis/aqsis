@@ -950,23 +950,8 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
  * \param pMP Pointer to the micropolygon to process.
    \see CqBucket, CqImagePixel
  */
-
 void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 {
-	const CqBound& Bound = pMP->GetTotalBound();
-
-	// if bounding box is outside our viewing range, then cull it.
-	if ( Bound.vecMax().x() < SRegion().xMin() ||
-	     Bound.vecMax().y() < SRegion().yMin() ||
-	     Bound.vecMin().x() > SRegion().xMax() ||
-	     Bound.vecMin().y() > SRegion().yMax() ||
-	     Bound.vecMin().z() > m_clippingFar ||
-	     Bound.vecMax().z() < m_clippingNear )
-	{
-		STATS_INC( MPG_culled );
-		return;
-	}
-
 	bool UsingDof = QGetRenderContext()->UsingDepthOfField();
 	bool IsMoving = pMP->IsMoving();
 
@@ -1018,7 +1003,7 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 
 	//bool mustDraw = !m_CurrentGridInfo.m_IsCullable;
 
-    CqBound Bound = pMPG->GetTotalBound();
+    CqBound Bound = pMPG->GetBound();
 
 	TqFloat bminx = Bound.vecMin().x();
 	TqFloat bmaxx = Bound.vecMax().x();
@@ -1185,18 +1170,19 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 		TqFloat maxCocX = 0;
 		TqFloat maxCocY = 0;
 
-		TqFloat bminx = 0;
-		TqFloat bmaxx = 0;
-		TqFloat bminy = 0;
-		TqFloat bmaxy = 0;
-		TqFloat bminz = 0;
-		TqFloat bmaxz = 0;
-		// these values are the bound of the mpg not including dof extension.
-		// reduce the mpg bound so it doesn't include the coc.
-		TqFloat mpgbminx = 0;
-		TqFloat mpgbmaxx = 0;
-		TqFloat mpgbminy = 0;
-		TqFloat mpgbmaxy = 0;
+		TqFloat bminx = Bound.vecMin().x();
+		TqFloat bmaxx = Bound.vecMax().x();
+		TqFloat bminy = Bound.vecMin().y();
+		TqFloat bmaxy = Bound.vecMax().y();
+		TqFloat bminz = Bound.vecMin().z();
+		TqFloat bmaxz = Bound.vecMax().z();
+		// if bounding box is outside our viewing range, then cull it.
+		if ( bminz > m_clippingFar || bmaxz < m_clippingNear )
+			continue;
+		TqFloat mpgbminx = bminx;
+		TqFloat mpgbmaxx = bmaxx;
+		TqFloat mpgbminy = bminy;
+		TqFloat mpgbmaxy = bmaxy;
 		TqInt bound_maxDof = 1;
 		if(UsingDof)
 		{
@@ -1204,25 +1190,10 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
 			maxCocX = max( minZCoc.x(), maxZCoc.x() );
 			maxCocY = max( minZCoc.y(), maxZCoc.y() );
-
-			mpgbminx = Bound.vecMin().x() + maxCocX;
-			mpgbmaxx = Bound.vecMax().x() - maxCocX;
-			mpgbminy = Bound.vecMin().y() + maxCocY;
-			mpgbmaxy = Bound.vecMax().y() - maxCocY;
-			bminz = Bound.vecMin().z();
-			bmaxz = Bound.vecMax().z();
-
 			bound_maxDof = m_NumDofBounds;
 		}
 		else
 		{
-			bminx = Bound.vecMin().x();
-			bmaxx = Bound.vecMax().x();
-			bminy = Bound.vecMin().y();
-			bmaxy = Bound.vecMax().y();
-			bminz = Bound.vecMin().z();
-			bmaxz = Bound.vecMax().z();
-
 			bound_maxDof = 1;
 		}
 
@@ -1242,17 +1213,6 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 				bmaxx = mpgbmaxx - rightOffset;
 				bminy = mpgbminy - topOffset;
 				bmaxy = mpgbmaxy - bottomOffset;
-			}
-
-			// if bounding box is outside our viewing range, then cull it.
-			if ( bmaxx < SRegion().xMin() ||
-			     bmaxy < SRegion().yMin() ||
-			     bminx > SRegion().xMax() ||
-			     bminy > SRegion().yMax() ||
-			     bminz > m_clippingFar ||
-			     bmaxz < m_clippingNear )
-			{
-				continue;
 			}
 
 			// Now go across all pixels touched by the micropolygon bound.

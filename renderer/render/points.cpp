@@ -810,12 +810,12 @@ void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
 
 	assert( NULL != m_Keys[0] );
 
-	CqBound start = m_Keys[0]->GetTotalBound();
+	CqBound start = m_Keys[0]->GetBound();
 	TqFloat	startTime = m_Times[ 0 ];
 	TqInt cTimes = m_Keys.size();
 	for ( TqInt i = 1; i < cTimes; i++ )
 	{
-		CqBound end = m_Keys[i]->GetTotalBound();
+		CqBound end = m_Keys[i]->GetBound();
 		CqBound mid0( start );
 		CqBound mid1;
 		TqFloat endTime = m_Times[ i ];
@@ -887,10 +887,10 @@ void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius
 	m_Times.push_back( time );
 	m_Keys.push_back( pMP );
 	if ( m_Times.size() == 1 )
-		m_Bound = pMP->GetTotalBound();
+		m_Bound = pMP->GetBound();
 	else
 	{
-		CqBound B(pMP->GetTotalBound());
+		CqBound B(pMP->GetBound());
 		m_Bound.Encapsulate( &B );
 	}
 }

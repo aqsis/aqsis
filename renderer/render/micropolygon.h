@@ -627,15 +627,18 @@ class CqMicroPolygon : boost::noncopyable
 			return ( &col[m_Index] );
 		}
 
-		// Overridables
-		/** Get the bound of the micropoly.
-		 * \return CqBound representing the conservative bound.
+		/** \brief Get the tight micropolygon bound (not including DoF).
+		 *
+		 * This bound should tightly cover the region in raster space directly
+		 * touched by the micropolygon.  In the moving case this includes any
+		 * parts of the area and depth swept out during the motion.
 		 */
-		virtual	const CqBound& GetTotalBound() const
+		const CqBound& GetBound() const
 		{
 			return m_Bound;
 		}
 
+		// Overridables
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			return ( 1 );
@@ -647,7 +650,7 @@ class CqMicroPolygon : boost::noncopyable
 		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time ) const
 		{
 			time = 0.0f;
-			return ( GetTotalBound() );
+			return ( GetBound() );
 		}
 
 		/** Query if the micropolygon has been successfully hit by a pixel sample.
@@ -781,7 +784,7 @@ class CqMicroPolygon : boost::noncopyable
 			}
 		}
 		TqInt m_IndexCode;
-		CqBound	m_Bound;					///< Stored bound.
+		CqBound	m_Bound;		///< Tight bound, not including DoF.
 
 		CqMicroPolyGridBase*	m_pGrid;		///< Pointer to the donor grid.
 		TqInt	m_Index;		///< Index within the donor grid.
@@ -832,7 +835,7 @@ class CqMovingMicroPolygonKey
 
 
 	public:
-		const CqBound&	GetTotalBound();
+		const CqBound&	GetBound();
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
 		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
@@ -897,10 +900,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{}
 
 		// Overrides from CqMicroPolygon
-		virtual const CqBound&	GetTotalBound() const
-		{
-			return ( m_Bound );
-		}
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
