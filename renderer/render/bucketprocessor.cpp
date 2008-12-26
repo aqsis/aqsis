@@ -1128,7 +1128,6 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
     //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
 
 	CqHitTestCache hitTestCache;
-	bool cachedHitData = false;
 
 	TqInt iXSamples = PixelXSamples();
     TqInt iYSamples = PixelYSamples();
@@ -1141,6 +1140,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 		TqInt numSamples = iXSamples * iYSamples;
 		timePerSample = (float)numSamples / ( closetime - opentime );
 	}
+
+	if(UsingDof)
+		pMPG->CacheCocMultipliers(hitTestCache);
 
 	const TqInt timeRanges = std::max(4, PixelXSamples() * PixelYSamples() );
 	TqInt bound_maxMB = pMPG->cSubBounds( timeRanges );
@@ -1321,15 +1323,11 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 									}
 								}
 
-
 								CqStats::IncI( CqStats::SPL_bound_hits );
 
 								// Now check if the subsample hits the micropoly
 								bool SampleHit;
 								TqFloat D;
-
-								pMPG->CacheHitTestValues(&hitTestCache);
-								cachedHitData = true;
 
 								SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
 								if ( SampleHit )

@@ -543,6 +543,17 @@ struct CqHitTestCache
 	// this holds the index of the last edge that failed an edge test, chances
 	// are it will fail on the next sample as well, so we test this edge first.
 	TqInt	m_LastFailedEdge;
+
+	// These four vectors hold the circle of confusion dof offset multipliers
+	// for each of the four vertices in the order PointB(), PointC, PointD(),
+	// PointA().
+	CqVector2D cocMult[4];
+
+	// These two vectors hold the extents of the circle of confusion
+	// multipliers, used during fast sample rejection based on the bounding
+	// box.
+	CqVector2D cocMultMin;
+	CqVector2D cocMultMax;
 };
 
 //----------------------------------------------------------------------
@@ -701,6 +712,20 @@ class CqMicroPolygon : boost::noncopyable
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
+		/** \brief Cache sampling data related to depth of field.
+		 *
+		 * The circle of confusion multipliers for each vertex of a static
+		 * micropolygon are independent of the sample point and can be cached.
+		 * The minimum and maximum of these multipliers can also be cached, and
+		 * used in the bounding box test for fast sample rejection.
+		 *
+		 * Child classes should override this function in order to cache
+		 * any relevant depth of field data which can be reused for multiple
+		 * sample points.
+		 *
+		 * \param cache - storage for the cached CoC multiplers.
+		 */
+		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
 
 		/** \brief Cache information needed to interpolate colour and opacity
 		 * across the micropolygon.
@@ -792,7 +817,6 @@ class CqMicroPolygon : boost::noncopyable
 		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const;
-		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 
 	private:
 		static	CqObjectPool<CqMicroPolygon> m_thePool;
@@ -917,6 +941,8 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		virtual void	BuildBoundList( TqUint timeRanges );
 
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+
+		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
 
 		virtual void	MarkTrimmed()
 		{

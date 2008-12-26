@@ -1412,31 +1412,18 @@ void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
 	CacheHitTestValues(cache, points);
 }
 
-
-// AGG - 19-6-04
-// this version moves the corners of the mpg for dof.
-// currently we don't use this as it's a fair bit slower than just offsetting
-// the sample position in the opposite direction (we need to call this for every
-// sample instead of just once). however, it is more correct than moving the
-// sample because the corners may move by different amounts. if I can work out
-// how to make it fast enough we should use this version.
-void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc)
+void CqMicroPolygon::CacheCocMultipliers(CqHitTestCache& cache) const
 {
-	CqVector3D points[4];
-	points[0].x(PointB().x() - (coc[1].x() * DofOffset.x()));
-	points[0].y(PointB().y() - (coc[1].y() * DofOffset.y()));
-	points[0].z(PointB().z());
-	points[1].x(PointC().x() - (coc[2].x() * DofOffset.x()));
-	points[1].y(PointC().y() - (coc[2].y() * DofOffset.y()));
-	points[1].z(PointC().z());
-	points[2].x(PointD().x() - (coc[3].x() * DofOffset.x()));
-	points[2].y(PointD().y() - (coc[3].y() * DofOffset.y()));
-	points[2].z(PointD().z());
-	points[3].x(PointA().x() - (coc[0].x() * DofOffset.x()));
-	points[3].y(PointA().y() - (coc[0].y() * DofOffset.y()));
-	points[3].z(PointA().z());
+	const CqRenderer* renderContext = QGetRenderContext();
+	cache.cocMult[0] = renderContext->GetCircleOfConfusion(PointB().z());
+	cache.cocMult[1] = renderContext->GetCircleOfConfusion(PointC().z());
+	cache.cocMult[2] = renderContext->GetCircleOfConfusion(PointD().z());
+	cache.cocMult[3] = renderContext->GetCircleOfConfusion(PointA().z());
 
-	CacheHitTestValues(cache, points);
+	cache.cocMultMin = min(min(min(cache.cocMult[0], cache.cocMult[1]),
+				cache.cocMult[2]), cache.cocMult[3]);
+	cache.cocMultMax = max(max(max(cache.cocMult[0], cache.cocMult[1]),
+				cache.cocMult[2]), cache.cocMult[3]);
 }
 
 void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
@@ -1674,31 +1661,39 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 
 bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample.m_Position;
-
-	// If using DoF, we need to adjust the point positions, and the hit test cache,
-	// \note: this invalidates the hit test cache, but we are using DoF, so all bets are off anyway.
-	// still, would be good to find out if there is a better way of doing this.
+	CqVector2D vecSample = sample.m_Position;
 
 	if(UsingDof)
 	{
-		CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
-		CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(points[0].z());
-		points[0].x(points[0].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[0].y(points[0].y() - ( coc.y() * sample.m_DofOffset.y() ));
+		CqVector2D dofOffset = sample.m_DofOffset;
+		// For DoF, we first check whether the sample position can possibly
+		// fall inside the tight bounding box for the micropolygon.  This
+		// allows us to reject a lot of points before the more expensive
+		// point-in-polygon test takes place.
+		//
+		// The sample point is displaced along the direction of the DoF offset
+		// by the range of CoC radii for the micropolygon, and tested against
+		// the tight bounding box.  (The range is represented by a min/max CoC
+		// multiplier pair forming a 2D bouding box.)  If range intersects the
+		// micropolygon bounding box then we need to continue to the precise
+		// point-in-polygon test.
+		if( !(m_Bound.Intersects(
+				vecSample + compMul(hitTestCache.cocMultMin, dofOffset),
+				vecSample + compMul(hitTestCache.cocMultMax, dofOffset))) )
+			return false;
 
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[1].z());
-		points[1].x(points[1].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[1].y(points[1].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[2].z());
-		points[2].x(points[2].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[2].y(points[2].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[3].z());
-		points[3].x(points[3].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[3].y(points[3].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
+		// When using DoF, we need to adjust the micropolygon point positions
+		// along the opposite of the direction of the DoF offset for the
+		// current sample.
+		CqVector2D* coc = &hitTestCache.cocMult[0];
+		CqVector3D points[4] = {
+			PointB() - CqVector3D(compMul(coc[0], dofOffset)),
+			PointC() - CqVector3D(compMul(coc[1], dofOffset)),
+			PointD() - CqVector3D(compMul(coc[2], dofOffset)),
+			PointA() - CqVector3D(compMul(coc[3], dofOffset))
+		};
+		// Having displaced and slightly distorted the micropolygon, we now
+		// need to calculate the hit test coefficients.
 		CacheHitTestValues(&hitTestCache, points);
 	}
 
@@ -1861,7 +1856,7 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 
 bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample.m_Position;
+	const CqVector2D vecSample = sample.m_Position;
 	CqVector3D points[4];
 
 	// Calculate the position in time of the MP.
@@ -1884,7 +1879,55 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleD
 		}
 	}
 
-	// Then adjust for DoF if necessary and setup a hittestcache structure for hit testing.
+	// Interpolate the bounding box along the motion segment to get the
+	// bounding box at the appropriate sample time.
+	CqBound tightBound;
+	if(Exact)
+	{
+		tightBound = m_Keys[iIndex]->GetBound();
+	}
+	else
+	{
+		const CqBound& bound1 = m_Keys[iIndex]->GetBound();
+		const CqBound& bound2 = m_Keys[iIndex+1]->GetBound();
+		tightBound = CqBound(
+			(1-Fraction)*bound1.vecMin() + Fraction*bound2.vecMin(),
+			(1-Fraction)*bound1.vecMax() + Fraction*bound2.vecMax()
+		);
+	}
+	// Cull potential sample hits before the more expensive point-in-polygon
+	// test by checking that the sample actually lies within the tight bound.
+	if(UsingDof)
+	{
+		// For DoF, we also need to displace the sample pos by the
+		// minimum & maximum DoF offsets before checking against the tight bound.
+		//
+		// A possible optimization for scenes which have lots of motion toward
+		// the camera is to use the interpolated bound depths to get the CoC
+		// multipliers directly, but this proved to be about 8% slower on the
+		// simple example, dofmb.rib, in the RTS.
+		/*
+		const CqRenderer* renderContext = QGetRenderContext();
+		CqVector2D cocMult1 = renderContext->GetCircleOfConfusion(tightBound.vecMin().z());
+		CqVector2D cocMult2 = renderContext->GetCircleOfConfusion(tightBound.vecMax().z());
+		*/
+		CqVector2D dofOffset = sample.m_DofOffset;
+		if( !(tightBound.Intersects(
+				vecSample + compMul(hitTestCache.cocMultMin, dofOffset),
+				vecSample + compMul(hitTestCache.cocMultMax, dofOffset))) )
+			return false;
+	}
+	else
+	{
+		if( !tightBound.Contains2D(vecSample) )
+			return false;
+	}
+
+	// If we get to here, it's fairly likely that the sample will actually hit
+	// the micropolygon so we need to compute the actual position of the
+	// micropolygon vertices at the sample time.
+
+	// Interpolate the polygon vertices along the motion segment.
 	if ( Exact )
 	{
 		CqMovingMicroPolygonKey * pMP1 = m_Keys[ iIndex ];
@@ -1906,22 +1949,19 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleD
 
 	if(UsingDof)
 	{
-		CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(points[0].z());
-		points[0].x(points[0].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[0].y(points[0].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[1].z());
-		points[1].x(points[1].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[1].y(points[1].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[2].z());
-		points[2].x(points[2].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[2].y(points[2].y() - ( coc.y() * sample.m_DofOffset.y() ));
-
-		coc = QGetRenderContext()->GetCircleOfConfusion(points[3].z());
-		points[3].x(points[3].x() - ( coc.x() * sample.m_DofOffset.x() ));
-		points[3].y(points[3].y() - ( coc.y() * sample.m_DofOffset.y() ));
+		const CqRenderer* renderContext = QGetRenderContext();
+		// Adjust the micropolygon vertices by the DoF offest.
+		CqVector2D dofOffset = sample.m_DofOffset;
+		points[0] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+						points[0].z()), dofOffset));
+		points[1] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+						points[1].z()), dofOffset));
+		points[2] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+						points[2].z()), dofOffset));
+		points[3] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+						points[3].z()), dofOffset));
 	}
+	// Fill in the hit test coefficients for the current sample.
 	CacheHitTestValues(&hitTestCache, points);
 
 	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, time) )
@@ -1953,6 +1993,26 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleD
 		return ( false );
 }
 
+void CqMicroPolygonMotion::CacheCocMultipliers(CqHitTestCache& cache) const
+{
+	// Here we cache the CoC range for the full MB bound to be used in the
+	// tight DoF bounds test.  We can't calculate and cache the CoC values for
+	// the four corners of the micropolygon like in the static case, since the
+	// depth is a function of time in general.
+	const CqRenderer* renderContext = QGetRenderContext();
+	CqVector2D cocMult1 = renderContext->GetCircleOfConfusion(GetBound().vecMin().z());
+	CqVector2D cocMult2 = renderContext->GetCircleOfConfusion(GetBound().vecMax().z());
+	if(renderContext->MinCoCForBound(GetBound()) == 0)
+	{
+		// special case for when the bound crosses the focal plane, in which
+		// case the min() of the CoC multipliers retrieved above doesn't
+		// actually give the correct minimum.
+		cache.cocMultMin = CqVector2D(0,0);
+	}
+	else
+		cache.cocMultMin = min(cocMult1, cocMult2);
+	cache.cocMultMax = max(cocMult1, cocMult2);
+}
 
 //---------------------------------------------------------------------
 /** Store the vectors of the micropolygon at the specified shutter time.
