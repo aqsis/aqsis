@@ -792,7 +792,23 @@ class CqMicroPolygon : boost::noncopyable
 
 		/** \brief Calculate and store the bound of the micropoly.
 		 */
-		void CalculateTotalBound();
+		void CalculateBound();
+
+		/** \brief Decide whether a sample falls into the bound after DoF offsetting.
+		 *
+		 * The sample position is displaced along the direction of the DoF
+		 * offset by the range of CoC radii for a micropolygon, as cached in
+		 * the hit test cache.  If the resulting range of positions passes
+		 * through the bounding box, return true, indicating that the precise
+		 * point-in-polygon test must be performed.
+		 *
+		 * \param bound - bounding box for a micropolygon
+		 * \param cache - cache containing min and max CoC multiplers for the
+		 *                micropolygon.
+		 * \param sample - sample position etc.
+		 */
+		static bool dofSampleInBound(const CqBound& bound, const CqHitTestCache& cache, 
+				const SqSampleData& sample);
 
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
@@ -1005,7 +1021,6 @@ inline void CqMicroPolyGrid::setDv()
 	pVar(EnvVars_v)->GetValue(f1, uGridRes() + 1);
 	pVar(EnvVars_dv)->SetFloat(f1 - f0);
 }
-
 
 //-----------------------------------------------------------------------
 

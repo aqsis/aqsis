@@ -1308,7 +1308,7 @@ void CqMicroPolygon::Initialise()
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
 
-	CalculateTotalBound();
+	CalculateBound();
 }
 
 
@@ -1649,7 +1649,26 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 	return ( kResult );
 }
 
-
+inline bool CqMicroPolygon::dofSampleInBound(const CqBound& bound,
+		const CqHitTestCache& cache, const SqSampleData& sample)
+{
+	CqVector2D dofOffset = sample.m_DofOffset;
+	CqVector2D samplePos = sample.m_Position;
+	// Compute the two ends of a line segment on which the sample would
+	// lie after offsetting by the "true" CoC multiplier*DoF offset.  The true
+	// offset can't be calculated without knowing the sample hit depth, but
+	// these allow us to put bounds on what it can be.
+	CqVector2D cocMin = samplePos + compMul(cache.cocMultMin, dofOffset);
+	CqVector2D cocMax = samplePos + compMul(cache.cocMultMax, dofOffset);
+	// cocMin and cocMax define a bounding box, but may not be the bottom-left
+	// and top-right.  We swap the components as necessary so that cocMin is
+	// the bottom left and cocMax is the top-right.
+	if(dofOffset.x() < 0)
+		std::swap(cocMin.x(), cocMax.x());
+	if(dofOffset.y() < 0)
+		std::swap(cocMin.y(), cocMax.y());
+	return bound.Intersects(cocMin, cocMax);
+}
 
 //---------------------------------------------------------------------
 /** Sample the specified point against the MPG at the specified time.
@@ -1665,27 +1684,18 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& s
 
 	if(UsingDof)
 	{
-		CqVector2D dofOffset = sample.m_DofOffset;
 		// For DoF, we first check whether the sample position can possibly
 		// fall inside the tight bounding box for the micropolygon.  This
 		// allows us to reject a lot of points before the more expensive
 		// point-in-polygon test takes place.
-		//
-		// The sample point is displaced along the direction of the DoF offset
-		// by the range of CoC radii for the micropolygon, and tested against
-		// the tight bounding box.  (The range is represented by a min/max CoC
-		// multiplier pair forming a 2D bouding box.)  If range intersects the
-		// micropolygon bounding box then we need to continue to the precise
-		// point-in-polygon test.
-		if( !(m_Bound.Intersects(
-				vecSample + compMul(hitTestCache.cocMultMin, dofOffset),
-				vecSample + compMul(hitTestCache.cocMultMax, dofOffset))) )
+		if(!dofSampleInBound(m_Bound, hitTestCache, sample))
 			return false;
 
 		// When using DoF, we need to adjust the micropolygon point positions
 		// along the opposite of the direction of the DoF offset for the
 		// current sample.
 		CqVector2D* coc = &hitTestCache.cocMult[0];
+		CqVector2D dofOffset = sample.m_DofOffset;
 		CqVector3D points[4] = {
 			PointB() - CqVector3D(compMul(coc[0], dofOffset)),
 			PointC() - CqVector3D(compMul(coc[1], dofOffset)),
@@ -1759,7 +1769,7 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& s
 }
 
 //---------------------------------------------------------------------
-void CqMicroPolygon::CalculateTotalBound()
+void CqMicroPolygon::CalculateBound()
 {
 	CqVector3D * pP;
 	m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
@@ -1911,10 +1921,7 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleD
 		CqVector2D cocMult1 = renderContext->GetCircleOfConfusion(tightBound.vecMin().z());
 		CqVector2D cocMult2 = renderContext->GetCircleOfConfusion(tightBound.vecMax().z());
 		*/
-		CqVector2D dofOffset = sample.m_DofOffset;
-		if( !(tightBound.Intersects(
-				vecSample + compMul(hitTestCache.cocMultMin, dofOffset),
-				vecSample + compMul(hitTestCache.cocMultMax, dofOffset))) )
+		if(!dofSampleInBound(tightBound, hitTestCache, sample))
 			return false;
 	}
 	else
