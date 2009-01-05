@@ -1233,6 +1233,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			CqImagePixel* pie, *pie2;
 
 			TqInt nextx = SRegion().width();
+			if(sX >= eX || sY >= eY)
+				continue;
+
 			ImageElement( sX, sY, pie );
 
 			for( int iY = sY; iY < eY; ++iY)

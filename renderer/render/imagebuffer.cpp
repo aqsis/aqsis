@@ -482,10 +482,10 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 
 	// Find out the minimum bucket touched by the micropoly bound.
 
-	B.vecMin().x( B.vecMin().x() - m_FilterXWidth / 2.0f );
-	B.vecMin().y( B.vecMin().y() - m_FilterYWidth / 2.0f );
-	B.vecMax().x( B.vecMax().x() + m_FilterXWidth / 2.0f );
-	B.vecMax().y( B.vecMax().y() + m_FilterYWidth / 2.0f );
+	B.vecMin().x( B.vecMin().x() - (lfloor(m_FilterXWidth / 2.0f)) );
+	B.vecMin().y( B.vecMin().y() - (lfloor(m_FilterYWidth / 2.0f)) );
+	B.vecMax().x( B.vecMax().x() + (lfloor(m_FilterXWidth / 2.0f)) );
+	B.vecMax().y( B.vecMax().y() + (lfloor(m_FilterYWidth / 2.0f)) );
 
 	TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / m_XBucketSize );
 	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / m_YBucketSize );
