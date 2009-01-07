@@ -3125,13 +3125,13 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 						for ( j = 0; j < pParam->Count(); ++j )
 						{
 							CqString str( ps[ j ] );
-							static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ j ] = str;
+							static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ j ] = str;
 						}
 					}
 					else
 					{
 						CqString str( ps[ 0 ] );
-						static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ 0 ] = str;
+						static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ 0 ] = str;
 					}
 #ifdef REQUIRED
 					if( (strcmp(name, "identifier")==0) && (strcmp(token, "name")==0))
