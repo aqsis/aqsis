@@ -1369,7 +1369,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
-			pVal->GetString( m_aValue[ 0 ], index );
+			pVal->GetString( m_aValue[index], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
