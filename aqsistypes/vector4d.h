@@ -27,16 +27,13 @@
 #ifndef VECTOR4D_H_INCLUDED
 #define VECTOR4D_H_INCLUDED 1
 
-#include	<iostream>
+#include "aqsis.h"
 
-#include	"aqsis.h"
-#include	"vector3d.h"
+#include <iostream>
+
+#include "aqsismath.h"
 
 namespace Aqsis {
-
-//-----------------------------------------------------------------------
-
-class COMMON_SHARE CqVector3D;
 
 //----------------------------------------------------------------------
 /** \brief A homogeneous length-4 vector.
@@ -72,9 +69,10 @@ class CqVector4D
 	public:
 		CqVector4D() : m_x( 0.0f ), m_y( 0.0f ), m_z( 0.0f ), m_h( 1.0f )
 		{}
+		explicit CqVector4D(TqFloat f) : m_x(f), m_y(f), m_z(f), m_h(1)
+		{}
 		CqVector4D( TqFloat x, TqFloat y, TqFloat z, TqFloat h = 1.0f ) : m_x( x ), m_y( y ), m_z( z ), m_h( h )
 		{}
-		CqVector4D( const CqVector3D &From );
 		CqVector4D( const TqFloat Array[ 4 ] ) : m_x( Array[ 0 ] ), m_y( Array[ 1 ] ), m_z( Array[ 2 ] ), m_h( Array[ 3 ] )
 		{}
 		~CqVector4D()
@@ -227,7 +225,6 @@ class CqVector4D
 			}
 		}
 
-		CqVector4D& operator= ( const CqVector3D &From );
 		CqVector4D& operator+=( const CqVector4D &From );
 		CqVector4D& operator-=( const CqVector4D &From );
 		CqVector4D& operator%=( const CqVector4D &From );
@@ -310,12 +307,6 @@ bool isClose(const CqVector4D& v1, const CqVector4D& v2,
 //==============================================================================
 // Implementation details
 //==============================================================================
-/** Copy constructor from 3D Vector.
- */
-inline CqVector4D::CqVector4D( const CqVector3D &From )
-{
-	*this = From;
-}
 
 //---------------------------------------------------------------------
 /** Return magnitude squared of this vector.
@@ -416,21 +407,6 @@ inline CqVector4D &CqVector4D::operator%=( const CqVector4D &From )
 	m_x = ( A.m_y * B.m_z ) - ( A.m_z * B.m_y );
 	m_y = ( A.m_z * B.m_x ) - ( A.m_x * B.m_z );
 	m_z = ( A.m_x * B.m_y ) - ( A.m_y * B.m_x );
-
-	return ( *this );
-}
-
-
-//---------------------------------------------------------------------
-/** Copy from specified 3D vector.
- */
-
-inline CqVector4D &CqVector4D::operator=( const CqVector3D &From )
-{
-	m_x = From.x();
-	m_y = From.y();
-	m_z = From.z();
-	m_h = 1.0;
 
 	return ( *this );
 }

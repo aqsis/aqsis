@@ -70,8 +70,8 @@ void CqPolygonGeneral2D::CalcAxis()
 	TqFloat maxNormalComp = 0;
 	while(i+2 < cVertices() && maxNormalComp < 1e-6)
 	{
-		CqVector3D diff1 = P->pValue(m_aiVertices[i+1])[0] - P->pValue(m_aiVertices[i])[0];
-		CqVector3D diff2 = P->pValue(m_aiVertices[i+2])[0] - P->pValue(m_aiVertices[i+1])[0];
+		CqVector3D diff1 = vectorCast<CqVector3D>(P->pValue(m_aiVertices[i+1])[0] - P->pValue(m_aiVertices[i])[0]);
+		CqVector3D diff2 = vectorCast<CqVector3D>(P->pValue(m_aiVertices[i+2])[0] - P->pValue(m_aiVertices[i+1])[0]);
 		normal = diff1 % diff2;
 		// get absolute value of normal componenets.
 		normal = Aqsis::max(normal, -normal);

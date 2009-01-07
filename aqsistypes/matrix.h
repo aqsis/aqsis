@@ -257,16 +257,6 @@ class COMMON_SHARE CqMatrix
 		 * \param vec - The vector to multiply.
 		 */
 		CqVector3D operator*(const CqVector3D &vec) const;
-		/** \brief Translate matrix by 4D Vector.
-		 * \param vec - The vector to translate by.
-		 * \return Result of translating this matrix by the vector.
-		 */
-		CqMatrix operator+(const CqVector4D &vec) const;
-		/** \brief Translate matrix by 4D Vector.
-		 * \param vec - The vector to translate by.
-		 * \return Result of translating this matrix by the vector.
-		 */
-		CqMatrix operator-(const CqVector4D &vec) const;
 		/** \brief Add two matrices.
 		 * \param from - The matrix to add.
 		 * \return Result of adding from to this matrix.
@@ -314,15 +304,6 @@ class COMMON_SHARE CqMatrix
 		 * \param from - The matrix to subtract.
 		 */
 		CqMatrix& operator-=( const CqMatrix &from );
-		/** \brief Translate this matrix by 4D Vector.
-		 * \param vec - The vector to translate by.
-		 * \return The result of translating this matrix by the specified vector.
-		 */
-		CqMatrix& operator+=( const CqVector4D &vec );
-		/** \brief Translate this matrix by 4D Vector.
-		 * \param vec - The vector to translate by.
-		 */
-		CqMatrix& operator-=( const CqVector4D &vec );
 		/** \brief Multiply this matrix by specified matrix.
 		 *
 		 * This takes into account the types of matrices, in an attempt to
@@ -754,42 +735,6 @@ inline CqVector3D CqMatrix::operator*( const CqVector3D &vec ) const
 	}
 
 	return Result;
-}
-
-inline CqMatrix CqMatrix::operator+( const CqVector4D &vec ) const
-{
-	CqMatrix temp( *this );
-	temp += vec;
-	return temp;
-}
-
-inline CqMatrix &CqMatrix::operator+=( const CqVector4D &vec )
-{
-	CqMatrix trans( vec );
-	this->PreMultiply( trans );
-	return *this;
-}
-
-inline CqMatrix CqMatrix::operator-( const CqVector4D &vec ) const
-{
-	CqMatrix temp( *this );
-	temp -= vec;
-	return temp;
-}
-
-inline CqMatrix &CqMatrix::operator-=( const CqVector4D &vec )
-{
-	CqVector4D temp( vec );
-
-	temp.x( -temp.x() );
-	temp.y( -temp.y() );
-	temp.z( -temp.z() );
-
-	CqMatrix trans( temp );
-
-	this->PreMultiply( trans );
-
-	return *this;
 }
 
 inline CqMatrix CqMatrix::operator+( const CqMatrix &from ) const

@@ -34,16 +34,14 @@
 const TqFloat epsilon = 0.1f; 
 
 
-static bool equals(const Aqsis::CqVector3D& a, const Aqsis::CqVector3D& b)
+static bool vecEquals(const Aqsis::CqVector3D& a, const Aqsis::CqVector3D& b)
 {
-	if ((a.x() > (b.x() + 0.000001f)
-			|| a.x() < (b.x() - 0.000001f)) ||
-		(a.y() > (b.y() + 0.000001f)
-			|| a.y() < (b.y() - 0.000001f)) ||
-		(a.z() > (b.z() + 0.000001f)
-			|| a.z() < (b.z() - 0.000001f)))
-			return false;
-	return true;
+	return Aqsis::isClose(a,b);
+}
+
+static bool colEquals(const Aqsis::CqColor& a, const Aqsis::CqColor& b)
+{
+	return Aqsis::isClose(a,b);
 }
 
 
@@ -107,110 +105,110 @@ BOOST_AUTO_TEST_CASE(CqNoise_1D_vector_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGNoise1(1.0f))(Aqsis::CqVector3D(0.5f, 0.745078f, 0.730963f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGNoise1(1.0f))(Aqsis::CqVector3D(0.5f, 0.745078f, 0.730963f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_1D_vector_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGPNoise1(1.0f, 2.0f))(Aqsis::CqVector3D(0.5f, 0.685829f, 0.674439f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGPNoise1(1.0f, 2.0f))(Aqsis::CqVector3D(0.5f, 0.685829f, 0.674439f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_2D_vector_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGNoise2(1.0f, 3.0f))(Aqsis::CqVector3D(0.5f, 0.75016f, 0.290464f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGNoise2(1.0f, 3.0f))(Aqsis::CqVector3D(0.5f, 0.75016f, 0.290464f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_2D_vector_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGPNoise2(1.0f, 2.0f, 3.0f, 2.0f))(Aqsis::CqVector3D(0.5f, 0.736767f, 0.490799f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGPNoise2(1.0f, 2.0f, 3.0f, 2.0f))(Aqsis::CqVector3D(0.5f, 0.736767f, 0.490799f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_3D_vector_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGNoise3(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f)))(Aqsis::CqVector3D(0.5f, 0.515687f, 0.393374f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGNoise3(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f)))(Aqsis::CqVector3D(0.5f, 0.515687f, 0.393374f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_3D_vector_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGPNoise3(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), Aqsis::CqVector3D(1.0f, 2.0f, 3.0f)))(Aqsis::CqVector3D(0.5f, 0.724586f, 0.545074f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGPNoise3(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), Aqsis::CqVector3D(1.0f, 2.0f, 3.0f)))(Aqsis::CqVector3D(0.5f, 0.724586f, 0.545074f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_4D_vector_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGNoise4(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f), 3.0f))(Aqsis::CqVector3D(0.5f, 0.575012f, 0.320111f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGNoise4(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f), 3.0f))(Aqsis::CqVector3D(0.5f, 0.575012f, 0.320111f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_4D_vector_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.PGPNoise4(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f, Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f))(Aqsis::CqVector3D(0.5f, 0.62703f, 0.349767f)));
+	BOOST_CHECK_PREDICATE(vecEquals, (noise.PGPNoise4(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f, Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f))(Aqsis::CqVector3D(0.5f, 0.62703f, 0.349767f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_1D_color_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGNoise1(1.0f))(Aqsis::CqColor(0.5f, 0.745078f, 0.730963f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGNoise1(1.0f))(Aqsis::CqColor(0.5f, 0.745078f, 0.730963f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_1D_color_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGPNoise1(1.0f, 2.0f))(Aqsis::CqColor(0.5f, 0.685829f, 0.674439f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGPNoise1(1.0f, 2.0f))(Aqsis::CqColor(0.5f, 0.685829f, 0.674439f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_2D_color_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGNoise2(1.0f, 3.0f))(Aqsis::CqColor(0.5f, 0.75016f, 0.290464f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGNoise2(1.0f, 3.0f))(Aqsis::CqColor(0.5f, 0.75016f, 0.290464f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_2D_color_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGPNoise2(1.0f, 2.0f, 3.0f, 2.0f))(Aqsis::CqColor(0.5f, 0.736767f, 0.490799f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGPNoise2(1.0f, 2.0f, 3.0f, 2.0f))(Aqsis::CqColor(0.5f, 0.736767f, 0.490799f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_3D_color_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGNoise3(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f)))(Aqsis::CqColor(0.5f, 0.515687f, 0.393374f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGNoise3(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f)))(Aqsis::CqColor(0.5f, 0.515687f, 0.393374f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_3D_color_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGPNoise3(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), Aqsis::CqVector3D(1.0f, 2.0f, 3.0f)))(Aqsis::CqColor(0.5f, 0.724586f, 0.545074f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGPNoise3(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), Aqsis::CqVector3D(1.0f, 2.0f, 3.0f)))(Aqsis::CqColor(0.5f, 0.724586f, 0.545074f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_4D_color_Perlin_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGNoise4(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f), 3.0f))(Aqsis::CqColor(0.5f, 0.575012f, 0.320111f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGNoise4(Aqsis::CqVector3D(1.0f, 3.0f, 2.0f), 3.0f))(Aqsis::CqColor(0.5f, 0.575012f, 0.320111f)));
 }
 
 BOOST_AUTO_TEST_CASE(CqNoise_4D_color_Perlin_periodic_noise_test)
 {
 	Aqsis::CqNoise noise;
 	
-	BOOST_CHECK_PREDICATE(equals, (noise.CGPNoise4(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f, Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f))(Aqsis::CqColor(0.5f, 0.62703f, 0.349767f)));
+	BOOST_CHECK_PREDICATE(colEquals, (noise.CGPNoise4(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f, Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f))(Aqsis::CqColor(0.5f, 0.62703f, 0.349767f)));
 }

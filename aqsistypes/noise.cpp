@@ -24,9 +24,10 @@
 		\author Stefan Gustavson (stegu@itn.liu.se)
 */
 
-#include	"aqsis.h"
-#include	"noise.h"
-#include  "noise1234.h"
+#include "noise.h"
+
+#include "noise1234.h"
+#include "vectorcast.h"
 
 
 namespace Aqsis {
@@ -315,7 +316,7 @@ CqVector3D	CqNoise::PGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D&
  */
 CqColor CqNoise::CGNoise1( TqFloat x )
 {
-	return ( CqColor( PGNoise1( x ) ) );
+	return vectorCast<CqColor>( PGNoise1( x ) );
 }
 
 //---------------------------------------------------------------------
@@ -323,7 +324,7 @@ CqColor CqNoise::CGNoise1( TqFloat x )
  */
 CqColor CqNoise::CGPNoise1( TqFloat x, TqFloat px )
 {
-	return ( CqColor( PGPNoise1( x, px ) ) );
+	return vectorCast<CqColor>( PGPNoise1( x, px ) );
 }
 
 //---------------------------------------------------------------------
@@ -331,7 +332,7 @@ CqColor CqNoise::CGPNoise1( TqFloat x, TqFloat px )
  */
 CqColor CqNoise::CGNoise2( TqFloat x, TqFloat y )
 {
-	return ( CqColor( PGNoise2( x, y ) ) );
+	return vectorCast<CqColor>( PGNoise2( x, y ) );
 }
 
 //---------------------------------------------------------------------
@@ -339,7 +340,7 @@ CqColor CqNoise::CGNoise2( TqFloat x, TqFloat y )
  */
 CqColor	CqNoise::CGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py )
 {
-	return CqColor( PGPNoise2( x, y, px, py ) );
+	return vectorCast<CqColor>( PGPNoise2( x, y, px, py ) );
 }
 
 //---------------------------------------------------------------------
@@ -347,7 +348,7 @@ CqColor	CqNoise::CGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py )
  */
 CqColor	CqNoise::CGNoise3( const CqVector3D& v )
 {
-	return CqColor( PGNoise3( v ) );
+	return vectorCast<CqColor>( PGNoise3( v ) );
 }
 
 //---------------------------------------------------------------------
@@ -355,7 +356,7 @@ CqColor	CqNoise::CGNoise3( const CqVector3D& v )
  */
 CqColor	CqNoise::CGPNoise3( const CqVector3D& v, const CqVector3D& pv )
 {
-	return CqColor( PGPNoise3( v, pv ) );
+	return vectorCast<CqColor>( PGPNoise3( v, pv ) );
 }
 
 //---------------------------------------------------------------------
@@ -363,7 +364,7 @@ CqColor	CqNoise::CGPNoise3( const CqVector3D& v, const CqVector3D& pv )
  */
 CqColor	CqNoise::CGNoise4( const CqVector3D& v, TqFloat t )
 {
-	return CqColor( PGNoise4( v, t ) );
+	return vectorCast<CqColor>( PGNoise4( v, t ) );
 }
 
 //---------------------------------------------------------------------
@@ -371,7 +372,7 @@ CqColor	CqNoise::CGNoise4( const CqVector3D& v, TqFloat t )
  */
 CqColor	CqNoise::CGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv, TqFloat pt )
 {
-	return CqColor( PGPNoise4( v, t, pv, pt ) );
+	return vectorCast<CqColor>( PGPNoise4( v, t, pv, pt ) );
 }
 
 

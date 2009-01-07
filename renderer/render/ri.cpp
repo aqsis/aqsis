@@ -2718,7 +2718,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
 	DEBUG_RIROTATE
 
-	CqMatrix	matRot( degToRad( angle ), CqVector4D( dx, dy, dz ) );
+	CqMatrix	matRot( degToRad( angle ), CqVector3D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 	//        QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
@@ -3262,7 +3262,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqFloat	MinX, MaxX;
 		TqFloat	MinY, MaxY;
 		TqFloat	MinZ, MaxZ;
-		CqVector3D	vecTemp = pPointsClass->P()->pValue( 0 )[0];
+		CqVector3D vecTemp = vectorCast<CqVector3D>(pPointsClass->P()->pValue(0)[0]);
 		MinX = MaxX = vecTemp.x();
 		MinY = MaxY = vecTemp.y();
 		MinZ = MaxZ = vecTemp.z();
@@ -3273,7 +3273,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqUint iVert;
 		for ( iVert = 1; iVert < pPointsClass->P() ->Size(); ++iVert )
 		{
-			vecTemp = pPointsClass->P()->pValue( iVert )[0];
+			vecTemp = vectorCast<CqVector3D>(pPointsClass->P()->pValue(iVert)[0]);
 			MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 			MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 			MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -5956,7 +5956,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		{
 			case RIL_P:
 				for (TqInt i = 0; i < cVertex; ++i )
-					P->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+					P->pValue( i )[0] = CqVector4D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				break;
 
 			case RIL_Pz:
@@ -5964,7 +5964,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 				{
 					CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
 					vecP.z( pPoints[ i ] );
-					P->pValue( i )[0] = vecP;
+					P->pValue( i )[0] = vectorCast<CqVector4D>(vecP);
 				}
 				break;
 

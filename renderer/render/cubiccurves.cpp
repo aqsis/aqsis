@@ -357,7 +357,7 @@ CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
 	// Read 3D vertices into the array pg.
 	CqVector3D pg[4];
 	for(TqInt i=0; i <= 3; i++)
-		pg[i] = *P()->pValue(i);
+		pg[i] = vectorCast<CqVector3D>(*P()->pValue(i));
 
 	if(u == 0.0f)
 		return chooseEndpointTangent(pg[1] - pg[0], pg[2] - pg[0], pg[3] - pg[0]);
@@ -443,25 +443,25 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	    > ( "P", 1 )
 	);
 	pPatch->P() ->SetSize( 16 );
-	pPatch->P()->pValue( 0  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset0;
-	pPatch->P()->pValue( 1  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset02;
-	pPatch->P()->pValue( 2  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset02;
-	pPatch->P()->pValue( 3  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset0;
+	pPatch->P()->pValue( 0  )[0] = P()->pValue( 0 )[0] + vectorCast<CqVector4D>(widthOffset0);
+	pPatch->P()->pValue( 1  )[0] = P()->pValue( 0 )[0] + vectorCast<CqVector4D>(widthOffset02);
+	pPatch->P()->pValue( 2  )[0] = P()->pValue( 0 )[0] - vectorCast<CqVector4D>(widthOffset02);
+	pPatch->P()->pValue( 3  )[0] = P()->pValue( 0 )[0] - vectorCast<CqVector4D>(widthOffset0);
 
-	pPatch->P()->pValue( 4  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset1;
-	pPatch->P()->pValue( 5  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset12;
-	pPatch->P()->pValue( 6  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset12;
-	pPatch->P()->pValue( 7  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset1;
+	pPatch->P()->pValue( 4  )[0] = P()->pValue( 1 )[0] + vectorCast<CqVector4D>(widthOffset1);
+	pPatch->P()->pValue( 5  )[0] = P()->pValue( 1 )[0] + vectorCast<CqVector4D>(widthOffset12);
+	pPatch->P()->pValue( 6  )[0] = P()->pValue( 1 )[0] - vectorCast<CqVector4D>(widthOffset12);
+	pPatch->P()->pValue( 7  )[0] = P()->pValue( 1 )[0] - vectorCast<CqVector4D>(widthOffset1);
 
-	pPatch->P()->pValue( 8  )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) + widthOffset2;
-	pPatch->P()->pValue( 9  )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) + widthOffset22;
-	pPatch->P()->pValue( 10 )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) - widthOffset22;
-	pPatch->P()->pValue( 11 )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) - widthOffset2;
+	pPatch->P()->pValue( 8  )[0] = P()->pValue( 2 )[0] + vectorCast<CqVector4D>(widthOffset2);
+	pPatch->P()->pValue( 9  )[0] = P()->pValue( 2 )[0] + vectorCast<CqVector4D>(widthOffset22);
+	pPatch->P()->pValue( 10 )[0] = P()->pValue( 2 )[0] - vectorCast<CqVector4D>(widthOffset22);
+	pPatch->P()->pValue( 11 )[0] = P()->pValue( 2 )[0] - vectorCast<CqVector4D>(widthOffset2);
 
-	pPatch->P()->pValue( 12 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) + widthOffset3;
-	pPatch->P()->pValue( 13 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) + widthOffset32;
-	pPatch->P()->pValue( 14 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) - widthOffset32;
-	pPatch->P()->pValue( 15 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) - widthOffset3;
+	pPatch->P()->pValue( 12 )[0] = P()->pValue( 3 )[0] + vectorCast<CqVector4D>(widthOffset3);
+	pPatch->P()->pValue( 13 )[0] = P()->pValue( 3 )[0] + vectorCast<CqVector4D>(widthOffset32);
+	pPatch->P()->pValue( 14 )[0] = P()->pValue( 3 )[0] - vectorCast<CqVector4D>(widthOffset32);
+	pPatch->P()->pValue( 15 )[0] = P()->pValue( 3 )[0] - vectorCast<CqVector4D>(widthOffset3);
 
 	// set the normals on the patch
 	//	pPatch->AddPrimitiveVariable(
@@ -1026,7 +1026,7 @@ void CqCubicCurvesGroup::Bound(CqBound* bound) const
 	// Get bounds of Bezier control hull.
 	for(TqInt i = 0, end = P()->Size(); i < end; ++i)
 	{
-		CqVector3D p = P()->pValue(i)[0];
+		CqVector3D p = vectorCast<CqVector3D>(P()->pValue(i)[0]);
 		boundMin = min(boundMin, p);
 		boundMax = max(boundMax, p);
 	}

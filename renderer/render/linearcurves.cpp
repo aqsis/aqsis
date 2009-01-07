@@ -247,7 +247,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	//                      the first point
 	//  widthOffset1  - offset to account for the width of the patch at
 	//                      the second point
-	CqVector3D direction = P()->pValue( 1 )[0] - P()->pValue( 0 )[0];
+	CqVector3D direction = vectorCast<CqVector3D>(P()->pValue( 1 )[0] - P()->pValue( 0 )[0]);
 	CqVector3D normal0, normal1;
 	GetNormal( 0, normal0 );
 	GetNormal( 1, normal1 );
@@ -272,10 +272,10 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	    > ( "P", 1 )
 	);
 	pPatch->P() ->SetSize( 4 );
-	pPatch->P()->pValue( 0 )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset0;
-	pPatch->P()->pValue( 1 )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset0;
-	pPatch->P()->pValue( 2 )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset1;
-	pPatch->P()->pValue( 3 )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset1;
+	pPatch->P()->pValue( 0 )[0] = P()->pValue( 0 )[0] + vectorCast<CqVector4D>(widthOffset0);
+	pPatch->P()->pValue( 1 )[0] = P()->pValue( 0 )[0] - vectorCast<CqVector4D>(widthOffset0);
+	pPatch->P()->pValue( 2 )[0] = P()->pValue( 1 )[0] + vectorCast<CqVector4D>(widthOffset1);
+	pPatch->P()->pValue( 3 )[0] = P()->pValue( 1 )[0] - vectorCast<CqVector4D>(widthOffset1);
 
 	// set the normals on the patch
 	/*    pPatch->AddPrimitiveVariable(

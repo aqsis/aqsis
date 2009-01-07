@@ -177,7 +177,7 @@ void CqSurfacePatchBicubic::Bound(CqBound* bound) const
 	TqInt i;
 	for ( i = 0; i < 16; i++ )
 	{
-		CqVector3D	vecV = P()->pValue( i )[0];
+		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )
@@ -236,7 +236,7 @@ void bicubicPatchNatDice(TqFloat uSize, TqFloat vSize, CqParameter* pParam,
 				T vec = uFD0.GetValue();
 				TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
 				arrayValue = pData->ArrayEntry(i);
-				arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+				arrayValue->SetValue( paramToShaderType<SLT, T>(vec), igrid );
 			}
 		}
 	}
@@ -338,9 +338,9 @@ bool	CqSurfacePatchBicubic::Diceable()
 		while ( i++ < 4 )
 		{
 			// Get the distance to the line for each point
-			CqVector3D	vec = avecHull[ u + i ] - vec0;
+			CqVector3D vec = vectorCast<CqVector3D>(avecHull[u+i] - vec0);
 			vec.Unit();
-			vec %= vecL;
+			vec %= vectorCast<CqVector3D>(vecL);
 			if ( vec.Magnitude() > 1 )
 				return ( false );
 		}
@@ -365,9 +365,9 @@ bool	CqSurfacePatchBicubic::Diceable()
 		while ( i++ < 4 )
 		{
 			// Get the distance to the line for each point
-			CqVector3D	vec = avecHull[ v + ( i * 4 ) ] - vec0;
+			CqVector3D vec = vectorCast<CqVector3D>(avecHull[v + i*4] - vec0);
 			vec.Unit();
-			vec %= vecL;
+			vec %= vectorCast<CqVector3D>(vecL);
 			if ( vec.Magnitude() > 1 )
 				return ( false );
 		}
@@ -691,7 +691,7 @@ void CqSurfacePatchBilinear::Bound(CqBound* bound) const
 	TqInt i;
 	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 3 : 4 ); i++ )
 	{
-		CqVector3D	vecV = P()->pValue( i )[0];
+		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )
@@ -941,7 +941,7 @@ void CqSurfacePatchMeshBicubic::Bound(CqBound* bound) const
 	TqUint i;
 	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = P()->pValue( i )[0];
+		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )
@@ -1172,7 +1172,7 @@ void CqSurfacePatchMeshBilinear::Bound(CqBound* bound) const
 	TqUint i;
 	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = P()->pValue( i )[0];
+		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )

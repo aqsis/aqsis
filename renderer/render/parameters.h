@@ -27,19 +27,32 @@
 #ifndef PARAMETERS_H_INCLUDED
 #define PARAMETERS_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<boost/shared_ptr.hpp>
 
 #include	"isurface.h"
 #include	"ishaderdata.h"
 #include	"iparameter.h"
 #include	"bilinear.h"
 #include	"primvartoken.h"
-#include	<boost/shared_ptr.hpp>
+#include	"vectorcast.h"
 
 namespace Aqsis {
 
+/** \brief Convert a primvar type into the associated shading language type
+ *
+ * CqParameters have two associated types - the type T of the primvar and the
+ * type SLT of the associated shading language type.  Values of type T needs to
+ * be converted into type SLT during the dicing process.
+ *
+ * \param paramVal - primvar value
+ * \return the associated shading type 
+ */
+template<typename SLT, typename T>
+SLT paramToShaderType(const T& paramVal);
 
 //----------------------------------------------------------------------
 /** \class CqParameter
@@ -413,7 +426,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( m_aValues[ 0 ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(m_aValues[0]), i );
 		}
 
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
@@ -427,7 +440,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( m_aValues[ 0 ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(m_aValues[0]), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -548,7 +561,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size ; i++ )
-				pResult->SetValue( m_Value, i );
+				pResult->SetValue( paramToShaderType<SLT,T>(m_Value), i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
@@ -559,7 +572,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size ; i++ )
-				pResult->SetValue( m_Value, i );
+				pResult->SetValue( paramToShaderType<SLT,T>(m_Value), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -661,7 +674,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size ; i++ )
-				pResult->SetValue( this->pValue(i)[0], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(this->pValue(i)[0]), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -994,7 +1007,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size; ++i )
 				for( j = 0; j < this->Count(); ++j )
-					pResult->SetValue( pValue( 0 ) [ j ], i );
+					pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
@@ -1005,7 +1018,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ 0 ]), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -1018,7 +1031,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ ArrayIndex ]), i );
 		}
 
 		// Overridden from CqParameterTyped<T>
@@ -1130,7 +1143,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size; ++i )
 				for( j = 0; j < this->Count(); ++j )
-					pResult->SetValue( pValue( 0 ) [ j ], i );
+					pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
@@ -1141,7 +1154,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ 0 ]), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -1154,7 +1167,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			TqUint i;
 			TqUint size = max<TqInt>(u*v, pResult->Size());
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ ArrayIndex ]), i );
 		}
 
 		// Overridden from CqParameterTyped<T>
@@ -1252,7 +1265,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			TqUint i;
 			TqUint size = pResult->Size();
 			for ( i = 0; i < size; i++ )
-				pResult->SetValue( this->pValue( 0 ) [ 0 ], i );
+				pResult->SetValue( paramToShaderType<SLT,T>(this->pValue( 0 ) [ 0 ]), i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -1389,7 +1402,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 				                           pValue( 2 ) [ 0 ],
 				                           pValue( 3 ) [ 0 ],
 				                           iu * diu, iv * div );
-				( *pResData++ ) = res;
+				( *pResData++ ) = paramToShaderType<SLT,T>(res);
 			}
 		}
 	}
@@ -1401,7 +1414,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 		{
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
-				( *pResData++ ) = res;
+				( *pResData++ ) = paramToShaderType<SLT,T>(res);
 		}
 	}
 }
@@ -1415,7 +1428,7 @@ void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pRe
 
 	TqUint iu;
 	for ( iu = 0; iu <= pResult->Size(); iu++ )
-		( *pResData++ ) = pValue(iu)[0];
+		( *pResData++ ) = paramToShaderType<SLT,T>(pValue(iu)[0]);
 }
 
 /** Dice the value into a grid using bilinear interpolation.
@@ -1460,7 +1473,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 								   pValue( 2 ) [ arrayIndex ],
 								   pValue( 3 ) [ arrayIndex ],
 								   iu * diu, iv * div );
-					( *(pResData[arrayIndex])++ ) = res;
+					( *(pResData[arrayIndex])++ ) = paramToShaderType<SLT,T>(res);
 				}
 			}
 		}
@@ -1476,7 +1489,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData
 
 	TqUint iu;
 	for ( iu = 0; iu <= pResult->Size(); iu++ )
-		( *pResData++ ) = pValue(iu)[0];
+		( *pResData++ ) = paramToShaderType<SLT,T>(pValue(iu)[0]);
 }
 
 /** Dice the value into a grid using bilinear interpolation.
@@ -1517,7 +1530,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
 				                           pValue( 2 ) [ ArrayIndex ],
 				                           pValue( 3 ) [ ArrayIndex ],
 				                           iu * diu, iv * div );
-				( *pResData++ ) = res;
+				( *pResData++ ) = paramToShaderType<SLT,T>(res);
 			}
 		}
 	}
@@ -1932,7 +1945,22 @@ extern CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName
 extern CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* strName, TqInt Count );
 
-//-----------------------------------------------------------------------
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+template<typename SLT, typename T>
+inline SLT paramToShaderType(const T& paramVal)
+{
+	return SLT(paramVal);
+}
+
+template<>
+inline CqVector3D paramToShaderType(const CqVector4D& paramVal)
+{
+	return vectorCast<CqVector3D>(paramVal);
+}
+
 
 } // namespace Aqsis
 

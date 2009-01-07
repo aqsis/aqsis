@@ -434,7 +434,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 13 * 10 );
 	for ( i = 0; i < 13*10; i++ )
-		pSurface->P()->pValue( i )[0] = Patch01[ i ];
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch01[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -459,7 +459,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 13 * 7 );
 	for ( i = 0; i < 13*7; i++ )
-		pSurface->P()->pValue( i )[0] = Patch02[ i ] ;
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch02[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -482,7 +482,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P()->pValue( i )[0] = Patch03[ i ] ;
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch03[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -505,7 +505,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P()->pValue( i )[0] = Patch04[ i ] ;
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch04[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -528,7 +528,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P()->pValue( i )[0] = Patch05[ i ] ;
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch05[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -551,7 +551,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
 	pSurface->P() ->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P()->pValue( i )[0] = Patch06[ i ] ;
+		pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch06[ i ]);
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -580,11 +580,11 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		{
 
 			if ( i < 13 )
-				pSurface->P()->pValue( i )[0] = CqVector3D( 0.0, 0.0, 0.0 );
+				pSurface->P()->pValue( i )[0] = CqVector4D(0.0f);
 			else if ( i < 39 )
-				pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ];
+				pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch01[ i - 13 ]);
 			else
-				pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ] * 0.85;
+				pSurface->P()->pValue( i )[0] = vectorCast<CqVector4D>(Patch01[ i - 13 ] * 0.85);
 
 
 		}

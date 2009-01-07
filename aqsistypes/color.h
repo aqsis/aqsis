@@ -32,7 +32,6 @@
 #include <iostream>
 
 #include "aqsismath.h"
-#include "vector3d.h"
 
 namespace Aqsis {
 
@@ -52,10 +51,6 @@ class COMMON_SHARE CqColor
 		CqColor(TqFloat fRed, TqFloat fGreen, TqFloat fBlue);
 		/// Greyscale constructor
 		CqColor(TqFloat f);
-		/** 3D vector constructor.
-		 * \param From the vector to copy the component values from.
-		 */
-		CqColor(const CqVector3D& From);
 		/** Array component constructor.
 		 * \param From array of floats to use as the components.
 		 */
@@ -84,11 +79,6 @@ class COMMON_SHARE CqColor
 		 * \return a constant reference the float value of the appropriate component, returns blue if index is invalid.
 		 */
 		TqFloat operator[](TqInt i) const;
-		/** Copy value from a 3D vector.
-		 * \param From the vector to get the color cmoponents from.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator=(const CqVector3D& From);
 		/** Additive assign operator.
 		 * \param colFrom the color to add to this.
 		 * \return a reference to this color.
@@ -329,11 +319,6 @@ inline CqColor::CqColor(TqFloat f)
 	m_fBlue(f)
 { }
 
-inline CqColor::CqColor(const CqVector3D& From)
-{
-	*this = From;
-}
-
 inline CqColor::CqColor(const TqFloat From[ 3 ])
 	: m_fRed(From[ 0 ]),
 	m_fGreen(From[ 1 ]),
@@ -384,14 +369,6 @@ inline TqFloat CqColor::operator[](TqInt i) const
 		return m_fGreen;
 	else
 		return m_fBlue;
-}
-
-inline CqColor& CqColor::operator=(const CqVector3D& From)
-{
-	m_fRed = From.x();
-	m_fGreen = From.y();
-	m_fBlue = From.z();
-	return *this;
 }
 
 inline CqColor& CqColor::operator+=(const CqColor &colFrom)

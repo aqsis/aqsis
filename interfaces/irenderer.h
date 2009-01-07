@@ -20,6 +20,8 @@ struct IqTextureMapOld;
 class CqTextureCache;
 class CqObjectInstance;
 
+class CqColor;
+
 struct IqRenderer
 {
 	virtual	~IqRenderer()

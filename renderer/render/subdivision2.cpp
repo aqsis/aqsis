@@ -24,11 +24,13 @@
 */
 
 #include	"subdivision2.h"
-#include	"patch.h"
-#include	"micropolygon.h"
 
 #include	<fstream>
 #include	<vector>
+
+#include	"patch.h"
+#include	"micropolygon.h"
+#include	"vectorcast.h"
 
 namespace Aqsis {
 
@@ -1420,7 +1422,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 	TqInt i;
 	for( i = 0; i < cVertices(); i++ )
 	{
-		CqVector3D vec = pPoints()->P()->pValue()[ pVertex( i )->VertexIndex() ];
+		CqVector3D vec = vectorCast<CqVector3D>(pPoints()->P()->pValue()[ pVertex( i )->VertexIndex() ]);
 		file << "v " << vec.x() << " " << vec.y() << " " << vec.z() << std::endl;
 	}
 
@@ -1490,7 +1492,7 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 		else
 			file << "***";
 
-		CqVector3D vecP = pPoints()->P()->pValue(pL->VertexIndex())[0];
+		CqVector3D vecP = vectorCast<CqVector3D>(pPoints()->P()->pValue(pL->VertexIndex())[0]);
 		vecP = matCameraToObject0 * vecP;
 		file << "[P=" << vecP << "]";
 
@@ -1539,7 +1541,7 @@ void	CqSurfaceSubdivisionPatch::Bound(CqBound* bound) const
 		{
 			TqInt iTime;
 			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
-				bound->Encapsulate((CqVector3D)pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
+				bound->Encapsulate(vectorCast<CqVector3D>(pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]));
 		}
 	}
 
@@ -1800,7 +1802,7 @@ void CqSurfaceSubdivisionPatch::StoreDiceAPVar(
 				case type_hpoint:
 				{
 					CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( index ), indexA );
+					pArg->SetValue( vectorCast<CqVector3D>(*pNParam->pValue( index )), indexA );
 				}
 				break;
 
@@ -1841,7 +1843,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	TqInt lDone = 0;
 
 	if ( USES( lUses, EnvVars_P ) )
-		pGrid->pVar(EnvVars_P) ->SetPoint( pPoints->P()->pValue( iParam )[0], iData );
+		pGrid->pVar(EnvVars_P) ->SetPoint( vectorCast<CqVector3D>(pPoints->P()->pValue( iParam )[0]), iData );
 
 	// Special cases for s and t if "st" exists, it should override s and t.
 	CqParameter* pParam;
@@ -2068,7 +2070,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 		// Need to get rid of any 'h' values added to the "P" variables during multiplication.
 		TqUint i;
 		for( i = 0; i < pSurface->cVertex(); i++ )
-			pSurface->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->P()->pValue(i)[0] );
+			pSurface->P()->pValue(i)[0].Homogenize();
 
 		CqMatrix matuBasis( RiBSplineBasis );
 		CqMatrix matvBasis( RiBSplineBasis );
@@ -2316,7 +2318,7 @@ void	CqSurfaceSubdivisionMesh::Bound(CqBound* bound) const
 	{
 		TqInt PointIndex;
 		for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-			bound->Encapsulate( (CqVector3D)m_pTopology->pPoints()->P()->pValue()[PointIndex] );
+			bound->Encapsulate( vectorCast<CqVector3D>(m_pTopology->pPoints()->P()->pValue()[PointIndex]) );
 	}
 	AdjustBoundForTransformationMotion( bound );
 }
@@ -2431,7 +2433,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 	// Need to get rid of any 'h' values added to the "P" variables during multiplication.
 	TqUint i;
 	for( i = 0; i < cVerts; i++ )
-		pSurface->pPoints()->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->pPoints()->P()->pValue(i)[0] );
+		pSurface->pPoints()->P()->pValue(i)[0].Homogenize();
 
 	TqInt iP = 0;
 	for( iF = aQff.begin(); iF != aQff.end(); iF++ )

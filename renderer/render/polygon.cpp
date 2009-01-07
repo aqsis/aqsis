@@ -95,7 +95,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 
 		while ( i < n )
 		{
-			vecN0 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
+			vecN0 = PolyP(i) - vecA;
 			if ( vecN0.Magnitude() > FLT_EPSILON )
 				break;
 			i++;
@@ -103,7 +103,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 		i++;
 		while ( i < n )
 		{
-			vecN1 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
+			vecN1 = PolyP(i) - vecA;
 			if ( vecN1.Magnitude() > FLT_EPSILON && vecN1 != vecN0 )
 				break;
 			i++;
@@ -232,10 +232,10 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 			CqVector3D PA, PB, PC, PD;
 			CqMatrix matCurrentToWorld;
 			QGetRenderContext() ->matSpaceToSpace( "current", "object", NULL, Surface().pTransform().get(), Surface().pTransform() ->Time(0), matCurrentToWorld );
-			PA = matCurrentToWorld * pNew->P() ->pValue() [ 0 ];
-			PB = matCurrentToWorld * pNew->P() ->pValue() [ 1 ];
-			PC = matCurrentToWorld * pNew->P() ->pValue() [ 3 ];
-			PD = matCurrentToWorld * pNew->P() ->pValue() [ 2 ];
+			PA = matCurrentToWorld * vectorCast<CqVector3D>(pNew->P() ->pValue() [ 0 ]);
+			PB = matCurrentToWorld * vectorCast<CqVector3D>(pNew->P() ->pValue() [ 1 ]);
+			PC = matCurrentToWorld * vectorCast<CqVector3D>(pNew->P() ->pValue() [ 3 ]);
+			PD = matCurrentToWorld * vectorCast<CqVector3D>(pNew->P() ->pValue() [ 2 ]);
 
 			if ( USES( iUses, EnvVars_s ) && !bHasVar(EnvVars_s) )
 			{
@@ -522,7 +522,7 @@ void	CqSurfacePointsPolygons::Bound(CqBound* bound) const
 	{
 		TqInt PointIndex;
 		for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-			bound->Encapsulate( (CqVector3D)m_pPoints->P()->pValue()[PointIndex] );
+			bound->Encapsulate( vectorCast<CqVector3D>(m_pPoints->P()->pValue()[PointIndex]) );
 	}
 	AdjustBoundForTransformationMotion( bound );
 }

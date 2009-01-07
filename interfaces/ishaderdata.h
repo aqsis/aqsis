@@ -22,6 +22,8 @@
 
 namespace Aqsis {
 
+class CqColor;
+
 //----------------------------------------------------------------------
 /** \struct IqShaderData
  * Interface to the shader engine specific implementation of a shader variable.

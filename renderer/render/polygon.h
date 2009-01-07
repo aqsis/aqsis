@@ -62,7 +62,7 @@ class CqPolygonBase
 		/** Get a reference to the polygon point at the specified index.
 		 * \param i Integer index in of the vertex in question.
 		 */
-		virtual	const	CqVector4D& PolyP( TqInt i ) const = 0;
+		virtual	const	CqVector3D PolyP( TqInt i ) const = 0;
 		/** Get a reference to the polygon normal at the specified index.
 		 * \param i Integer index in of the vertex in question.
 		 */
@@ -203,9 +203,9 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( *this );
 		}
 
-		virtual	const	CqVector4D& PolyP( TqInt i ) const
+		virtual	const	CqVector3D PolyP( TqInt i ) const
 		{
-			return ( P()->pValue( i )[0] );
+			return vectorCast<CqVector3D>( P()->pValue( i )[0] );
 		}
 		virtual	const	CqVector3D& PolyN( TqInt i ) const
 		{
@@ -457,9 +457,9 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 			return ( *m_pPoints );
 		}
 
-		virtual	const CqVector4D& PolyP( TqInt i ) const
+		virtual	const CqVector3D PolyP( TqInt i ) const
 		{
-			return ( m_pPoints->P()->pValue( m_aIndices[ i ] )[0] );
+			return vectorCast<CqVector3D>( m_pPoints->P()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const CqVector3D& PolyN( TqInt i ) const
 		{

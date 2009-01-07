@@ -42,6 +42,7 @@
 #include	"bitvector.h"
 #include	"shadervariable.h"
 #include	"shadervm_common.h"
+#include	"vectorcast.h"
 
 namespace Aqsis {
 
@@ -596,6 +597,26 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes,
 		pRes->SetValue( -vA );
 	}
 }
+
+namespace detail {
+
+template<typename T1, typename T2>
+inline T2 castShaderVar(const T1& t1)
+{
+	return static_cast<T2>(t1);
+}
+
+template<> inline CqColor castShaderVar(const CqVector3D& v)
+{
+	return vectorCast<CqColor>(v);
+}
+template<> inline CqVector3D castShaderVar(const CqColor& c)
+{
+	return vectorCast<CqVector3D>(c);
+}
+
+} // namespace detail
+
 /* Templatised cast operator, cast the current stack entry to the spcified type.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -622,7 +643,7 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes,
 		for ( i = 0; i < ii; i++ )
 		{
 			if ( RunningState.Value( i ) )
-				pRes->SetValue( static_cast<B>( *pdA ), i );
+				pRes->SetValue( detail::castShaderVar<A,B>(*pdA), i );
 			pdA++;
 		}
 	}
@@ -630,9 +651,10 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes,
 	{
 		/* Uniform, simple one shot case. */
 		pA->GetValue( vA );
-		pRes->SetValue( static_cast<B>( vA ) );
+		pRes->SetValue( detail::castShaderVar<A,B>(vA) );
 	}
 }
+
 /* Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
  * \param pA The shader data to use as the first triple element.

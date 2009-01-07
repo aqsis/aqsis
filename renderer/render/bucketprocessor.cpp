@@ -832,8 +832,8 @@ void CqBucketProcessor::CalculateDofBounds()
 				bottomRight.y(minY + dy);
 			}
 
-			m_DofBounds[which].vecMin() = topLeft;
-			m_DofBounds[which].vecMax() = topLeft;
+			m_DofBounds[which].vecMin() = vectorCast<CqVector3D>(topLeft);
+			m_DofBounds[which].vecMax() = vectorCast<CqVector3D>(topLeft);
 			m_DofBounds[which].Encapsulate(topRight);
 			m_DofBounds[which].Encapsulate(bottomLeft);
 			m_DofBounds[which].Encapsulate(bottomRight);

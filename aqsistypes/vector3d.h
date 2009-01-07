@@ -35,26 +35,19 @@
 
 namespace Aqsis {
 
-//-----------------------------------------------------------------------
-
-class CqVector4D;
-class CqColor;
-
 //----------------------------------------------------------------------
 /** \class CqVector3D
  * \brief Define class structure for 3D vector.
  */
 
-class COMMON_SHARE CqVector3D
+class CqVector3D
 {
 	public:
 		/// Construct the zero vector.
 		CqVector3D();
-		CqVector3D(const CqVector2D &From);
-		CqVector3D(const CqColor &From);
+		explicit CqVector3D(const CqVector2D &From);
 		CqVector3D(TqFloat x, TqFloat y, TqFloat z);
 		CqVector3D(TqFloat f);
-		CqVector3D(const CqVector4D &From);
 		CqVector3D(const TqFloat Array[3]);
 
 		/** Get the x component.
@@ -108,8 +101,6 @@ class COMMON_SHARE CqVector3D
 		TqFloat Magnitude() const;
 		CqVector3D& Unit();
 
-		CqVector3D& operator= (const CqVector4D &From);
-		CqVector3D& operator= (const CqColor &From);
 		/** Addition assignment operator.
 		 */
 		CqVector3D& operator+=(const CqVector3D &From);
@@ -190,7 +181,7 @@ class COMMON_SHARE CqVector3D
 		friend CqVector3D operator%(const CqVector3D& a, const CqVector3D& b);
 
 		// Stream insertion
-		COMMON_SHARE friend std::ostream &operator<<(std::ostream &Stream, const CqVector3D &Vector);
+		friend std::ostream &operator<<(std::ostream &Stream, const CqVector3D &Vector);
 
 	private:
 		TqFloat m_x; ///< X component.
@@ -538,6 +529,12 @@ inline bool isClose(const CqVector3D& v1, const CqVector3D& v2, TqFloat tol)
 	TqFloat diff2 = (v1 - v2).Magnitude2();
 	TqFloat tol2 = tol*tol;
 	return diff2 <= tol2*v1.Magnitude2() || diff2 <= tol2*v2.Magnitude2();
+}
+
+inline std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector )
+{
+	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z;
+	return ( Stream );
 }
 
 //-----------------------------------------------------------------------

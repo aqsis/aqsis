@@ -251,7 +251,7 @@ void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
 		for(TqInt j = 0; j < pTParam->Count(); j++)
 		{
 			arrayValue = pData->ArrayEntry(j);
-			arrayValue->SetValue( static_cast<SLT>( pTParam->pValue() [ paramIdx[i] ] ), i );
+			arrayValue->SetValue( paramToShaderType<SLT, T>( pTParam->pValue() [ paramIdx[i] ] ), i );
 		}
 	}
 }
@@ -321,7 +321,7 @@ void	CqPoints::Bound(CqBound* bound) const
 	{
 		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/
 		for( TqUint i = 0; i < nVertices(); i++ )
-			bound->Encapsulate( (CqVector3D)m_pPoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
+			bound->Encapsulate( vectorCast<CqVector3D>(m_pPoints->P()->pValue(m_KDTree.aLeaves()[i])[0]) );
 /*	}*/
 
 	// Expand the bound to take into account the width of the particles.

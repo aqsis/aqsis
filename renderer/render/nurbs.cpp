@@ -1354,7 +1354,7 @@ void CqSurfaceNURBS::Bound(CqBound* bound) const
 	TqUint i;
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector3D	vecV = P()->pValue( i )[0];
+		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )
@@ -1448,7 +1448,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
-							arrayValue->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+							arrayValue->SetValue(vectorCast<CqVector3D>(Evaluate(su, sv, pTParam)), igrid);
 						}
 						break;
 					}
@@ -1674,7 +1674,7 @@ bool	CqSurfaceNURBS::Diceable()
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector3D vT = P()->pValue( i )[0];
+		CqVector3D vT = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		//vT.h(1.0f);
 		vT = matCtoR * vT;
 		avecHull[ i ] = vT;
@@ -1777,9 +1777,9 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 		u2 = vecCP.x();
 		v2 = vecCP.y();
 
-		CqVector3D vecP = Evaluate( u, v, P() );
+		CqVector3D vecP = vectorCast<CqVector3D>(Evaluate( u, v, P() ));
 		vecP = matCtoR * vecP;
-		CqVector3D vecP2 = Evaluate( u2, v2, P() );
+		CqVector3D vecP2 = vectorCast<CqVector3D>(Evaluate( u2, v2, P() ));
 		vecP2 = matCtoR * vecP2;
 
 		Len = ( vecP2 - vecP ).Magnitude();
@@ -1833,7 +1833,7 @@ void CqSurfaceNURBS::OutputMesh()
 				            * ( S[ s ] ->m_auKnots[ S[ s ] ->m_cuVerts ] - S[ s ] ->m_auKnots[ S[ s ] ->m_uOrder - 1 ] )
 				            + S[ s ] ->m_auKnots[ S[ s ] ->m_uOrder - 1 ];
 
-				aaPoints[ i ][ j ] = S[ s ] ->Evaluate( u, v, P() );
+				aaPoints[ i ][ j ] = vectorCast<CqVector3D>(S[ s ] ->Evaluate( u, v, P() ));
 			}
 		}
 
@@ -1887,7 +1887,7 @@ void CqSurfaceNURBS::AppendMesh( const char *name, TqInt index )
 			            * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 			            + m_auKnots[ m_uOrder - 1 ];
 
-			aaPoints[ i ][ j ] = Evaluate( u, v, P() );
+			aaPoints[ i ][ j ] = vectorCast<CqVector3D>(Evaluate( u, v, P() ));
 		}
 	}
 

@@ -105,7 +105,7 @@ void CqCurve::Bound(CqBound* bound) const
 	{
 		// expand the boundary if necessary to accomodate the
 		//  current vertex
-		CqVector3D vecV = P()->pValue( i )[0];
+		CqVector3D vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
 		if ( vecV.x() < vecA.x() )
 			vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() )

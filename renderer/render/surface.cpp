@@ -381,7 +381,7 @@ void surfaceNaturalDice(TqFloat uSize, TqFloat vSize, CqParameter* pParam,
 				arrayValue = pData->ArrayEntry(i);
 				T vec = BilinearEvaluate( pTParam->pValue(0) [ i ], pTParam->pValue(1) [ i ], pTParam->pValue(2) [ i ], pTParam->pValue(3) [ i ], u, v );
 				TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-				arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+				arrayValue->SetValue( paramToShaderType<SLT, T>( vec ), igrid );
 			}
 		}
 	}
