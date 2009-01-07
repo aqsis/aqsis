@@ -2187,7 +2187,7 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	TqInt i;
 
 	for ( i = 0; i < 4; i++ )
-		avecHull[ i ] = matCtoR * pTopology()->pPoints()->P()->pValue() [ aQfv[ i ]->VertexIndex() ];
+		avecHull[i] = vectorCast<CqVector2D>(matCtoR * pTopology()->pPoints()->P()->pValue()[aQfv[i]->VertexIndex()]);
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;

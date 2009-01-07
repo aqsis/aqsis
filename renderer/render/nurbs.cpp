@@ -1673,12 +1673,7 @@ bool	CqSurfaceNURBS::Diceable()
 	CqMatrix matCtoR;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
-	{
-		CqVector3D vT = vectorCast<CqVector3D>(P()->pValue( i )[0]);
-		//vT.h(1.0f);
-		vT = matCtoR * vT;
-		avecHull[ i ] = vT;
-	}
+		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
 
 	// Now work out the longest continuous line in raster space for u and v.
 	TqFloat uLen = 0;

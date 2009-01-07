@@ -30,6 +30,7 @@
 #include "aqsismath.h"
 #include "vector2d.h"
 #include "vector3d.h"
+#include "vectorcast.h"
 
 namespace Aqsis {
 
@@ -232,10 +233,10 @@ inline SqSampleQuad::SqSampleQuad(const CqVector2D& v1, const CqVector2D& v2,
 { }
 
 inline SqSampleQuad::SqSampleQuad(const Sq3DSampleQuad& srcQuad)
-	: v1(srcQuad.v1),
-	v2(srcQuad.v2),
-	v3(srcQuad.v3),
-	v4(srcQuad.v4)
+	: v1(vectorCast<CqVector2D>(srcQuad.v1)),
+	v2(vectorCast<CqVector2D>(srcQuad.v2)),
+	v3(vectorCast<CqVector2D>(srcQuad.v3)),
+	v4(vectorCast<CqVector2D>(srcQuad.v4))
 { }
 
 inline void SqSampleQuad::remapPeriodic(bool xPeriodic, bool yPeriodic)

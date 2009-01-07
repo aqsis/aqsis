@@ -35,25 +35,16 @@
 
 namespace Aqsis {
 
-//-----------------------------------------------------------------------
-
-class CqVector3D;
-class CqVector4D;
-
 //----------------------------------------------------------------------
-/** \class CqVector2D
- * \brief Define class structure for 2D vector.
+/** \brief Define class structure for 2D vector.
  */
-
-class COMMON_SHARE CqVector2D
+class CqVector2D
 {
 	public:
 		CqVector2D() : m_x(0.0f), m_y(0.0f)
 		{}
 		CqVector2D( TqFloat x, TqFloat y ) : m_x( x ), m_y( y )
 		{}
-		explicit CqVector2D( const CqVector3D &From );
-		explicit CqVector2D( const CqVector4D &From );
 		~CqVector2D()
 		{}
 
@@ -162,8 +153,6 @@ class COMMON_SHARE CqVector2D
 			m_y /= Mag;
 		}
 
-		CqVector2D& operator= ( const CqVector3D &From );
-		CqVector2D& operator= ( const CqVector4D &From );
 		/** Addition assignment operator.
 		 */
 		CqVector2D& operator+=( const CqVector2D &From )
@@ -302,13 +291,11 @@ class COMMON_SHARE CqVector2D
 		{
 			return ( a.m_x * b.m_x + a.m_y * b.m_y );
 		} // Dot product
-		friend std::ostream &operator<<( std::ostream &Stream, const CqVector2D &Vector );
 
 	protected:
 		TqFloat	m_x;		///< X component.
 		TqFloat	m_y;		///< Y component.
-}
-;
+};
 
 //------------------------------------------------------------------------------
 /** \brief Determine whether two vectors are equal to within some tolerance
@@ -341,6 +328,9 @@ CqVector2D max(const CqVector2D& v1, const CqVector2D& v2);
  */
 CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v);
 
+/// Stream insertion
+std::ostream &operator<<(std::ostream& out, const CqVector2D& v);
+
 
 //==============================================================================
 // Implementation details
@@ -366,6 +356,12 @@ inline CqVector2D max(const CqVector2D& v1, const CqVector2D& v2)
 inline CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v)
 {
 	return CqVector2D(trans.x()*v.x(), trans.y()*v.y());
+}
+
+inline std::ostream &operator<<(std::ostream& out, const CqVector2D& v)
+{
+	out << v.x() << "," << v.y();
+	return out;
 }
 
 } // namespace Aqsis

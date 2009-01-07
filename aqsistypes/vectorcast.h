@@ -78,6 +78,12 @@ inline T vectorCast(const CqVector2D& v)
 	return T(v);
 }
 
+template<>
+inline CqVector3D vectorCast(const CqVector2D& v)
+{
+	return CqVector3D(v.x(), v.y(), 0);
+}
+
 
 //----------------------------------------
 // casting from CqVector3D
@@ -91,6 +97,12 @@ template<>
 inline CqColor vectorCast(const CqVector3D& v)
 {
 	return CqColor(v.x(), v.y(), v.z());
+}
+
+template<>
+inline CqVector2D vectorCast(const CqVector3D& v)
+{
+	return CqVector2D(v.x(), v.y());
 }
 
 template<>
@@ -119,6 +131,20 @@ inline CqVector3D vectorCast(const CqVector4D& v)
 	else
 	{
 		return CqVector3D(v.x(), v.y(), v.z());
+	}
+}
+
+template<>
+inline CqVector2D vectorCast(const CqVector4D& v)
+{
+	if(v.h() != 1)
+	{
+		TqFloat hInv = 1/v.h();
+		return CqVector2D(hInv*v.x(), hInv*v.y());
+	}
+	else
+	{
+		return CqVector2D(v.x(), v.y());
 	}
 }
 

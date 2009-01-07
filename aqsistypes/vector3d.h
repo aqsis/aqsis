@@ -31,7 +31,6 @@
 #include <iostream>
 
 #include "aqsismath.h"
-#include "vector2d.h"
 
 namespace Aqsis {
 
@@ -45,7 +44,6 @@ class CqVector3D
 	public:
 		/// Construct the zero vector.
 		CqVector3D();
-		explicit CqVector3D(const CqVector2D &From);
 		CqVector3D(TqFloat x, TqFloat y, TqFloat z);
 		CqVector3D(TqFloat f);
 		CqVector3D(const TqFloat Array[3]);
@@ -215,11 +213,6 @@ inline CqVector3D::CqVector3D()
 	: m_x(0.0f),
 	m_y(0.0f),
 	m_z(0.0f)
-{}
-inline CqVector3D::CqVector3D(const CqVector2D &From)
-	: m_x(From.x()),
-	m_y(From.y()),
-	m_z(0)
 {}
 inline CqVector3D::CqVector3D(TqFloat x, TqFloat y, TqFloat z)
 	: m_x(x),

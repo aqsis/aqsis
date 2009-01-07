@@ -9,14 +9,15 @@
  */
 //------------------------------------------------------------------------------
 
-#ifndef	___trimcurve_Loaded___
-#define	___trimcurve_Loaded___
+#ifndef TRIMCURVE_H_INCLUDED
+#define TRIMCURVE_H_INCLUDED
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<vector>
+#include <vector>
 
-#include	"vector3d.h"
+#include "vector2d.h"
+#include "vector3d.h"
 
 namespace Aqsis {
 
@@ -168,4 +169,4 @@ class CqTrimLoopArray
 } // namespace Aqsis
 
 
-#endif	//	___trimcurve_Loaded___
+#endif // TRIMCURVE_H_INCLUDED

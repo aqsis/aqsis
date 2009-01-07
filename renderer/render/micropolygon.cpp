@@ -1475,10 +1475,10 @@ void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) con
 void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 {
 	// Get 2D coordinates of verts in the (x,y) plane.
-	CqVector2D p1(PointA());
-	CqVector2D p2(PointB());
-	CqVector2D p3(PointC());
-	CqVector2D p4(PointD());
+	CqVector2D p1(vectorCast<CqVector2D>(PointA()));
+	CqVector2D p2(vectorCast<CqVector2D>(PointB()));
+	CqVector2D p3(vectorCast<CqVector2D>(PointC()));
+	CqVector2D p4(vectorCast<CqVector2D>(PointD()));
 
 	// 2D diagonal vectors for the micropolygon.  The order of the vertices
 	// (p1, p2, p3, p4) here winds around the micropoly, rather than taking the
@@ -1591,10 +1591,10 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 	CqVector2D kResult;
 	bool flip = false;
 
-	kA = CqVector2D( PointA() );
-	kB = CqVector2D( PointB() );
-	kC = CqVector2D( PointD() );
-	kD = CqVector2D( PointC() );
+	kA = vectorCast<CqVector2D>( PointA() );
+	kB = vectorCast<CqVector2D>( PointB() );
+	kC = vectorCast<CqVector2D>( PointD() );
+	kD = vectorCast<CqVector2D>( PointC() );
 
 	if(fabs(kB.x() - kA.x()) < fabs(kC.x() - kA.x()) )
 	{
@@ -1697,10 +1697,10 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& s
 		CqVector2D* coc = &hitTestCache.cocMult[0];
 		CqVector2D dofOffset = sample.m_DofOffset;
 		CqVector3D points[4] = {
-			PointB() - CqVector3D(compMul(coc[0], dofOffset)),
-			PointC() - CqVector3D(compMul(coc[1], dofOffset)),
-			PointD() - CqVector3D(compMul(coc[2], dofOffset)),
-			PointA() - CqVector3D(compMul(coc[3], dofOffset))
+			PointB() - vectorCast<CqVector3D>(compMul(coc[0], dofOffset)),
+			PointC() - vectorCast<CqVector3D>(compMul(coc[1], dofOffset)),
+			PointD() - vectorCast<CqVector3D>(compMul(coc[2], dofOffset)),
+			PointA() - vectorCast<CqVector3D>(compMul(coc[3], dofOffset))
 		};
 		// Having displaced and slightly distorted the micropolygon, we now
 		// need to calculate the hit test coefficients.
@@ -1959,13 +1959,13 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleD
 		const CqRenderer* renderContext = QGetRenderContext();
 		// Adjust the micropolygon vertices by the DoF offest.
 		CqVector2D dofOffset = sample.m_DofOffset;
-		points[0] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+		points[0] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
 						points[0].z()), dofOffset));
-		points[1] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+		points[1] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
 						points[1].z()), dofOffset));
-		points[2] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+		points[2] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
 						points[2].z()), dofOffset));
-		points[3] -= CqVector3D(compMul(renderContext->GetCircleOfConfusion(
+		points[3] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
 						points[3].z()), dofOffset));
 	}
 	// Fill in the hit test coefficients for the current sample.

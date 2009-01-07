@@ -459,8 +459,8 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 			renderContext->GetCircleOfConfusion(B.vecMax().z())
 		);
 		// Expand the bound by the CoC radius
-		B.vecMin() -= CqVector3D(maxCoC);
-		B.vecMax() += CqVector3D(maxCoC);
+		B.vecMin() -= vectorCast<CqVector3D>(maxCoC);
+		B.vecMax() += vectorCast<CqVector3D>(maxCoC);
 	}
 
 	// Discard when outside the crop window.

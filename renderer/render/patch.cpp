@@ -314,7 +314,7 @@ bool	CqSurfacePatchBicubic::Diceable()
 	TqInt i;
 
 	for ( i = 0; i < 16; i++ )
-		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
+		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
 
 	// First check flatness, a curve which is too far off flat will
 	// produce unreliable results when the length is approximated below.
@@ -747,7 +747,7 @@ bool	CqSurfacePatchBilinear::Diceable()
 	TqInt i;
 
 	for ( i = 0; i < 4; i++ )
-		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
+		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;

@@ -257,9 +257,11 @@ bool CqCurve::Diceable()
 									QGetRenderContextI()->Time(),
 									matCtoR
 									);
-		CqVector2D hull[ 2 ];     // control hull
-		hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];
-		hull[ 1 ] = matCtoR * P()->pValue( 1 )[0];
+		// control hull
+		CqVector2D hull[2] = {
+			vectorCast<CqVector2D>(matCtoR * P()->pValue(0)[0]),
+			vectorCast<CqVector2D>(matCtoR * P()->pValue(1)[0])
+		};
 		CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
 		TqFloat lengthraster = lengthVector.Magnitude();
 
