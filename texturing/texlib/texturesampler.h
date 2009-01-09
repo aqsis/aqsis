@@ -82,8 +82,8 @@ void CqTextureSampler<LevelCacheT>::sample(const SqSamplePllgram& samplePllgram,
 			sampleOpts.tWrapMode() == WrapMode_Periodic);
 
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(pllgram, m_levels->width0(),
-			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
+	CqEwaFilterFactory ewaFactory(pllgram, m_levels->width0(), m_levels->height0(),
+			ewaBlurMatrix(sampleOpts.sBlur(), sampleOpts.tBlur()));
 
 	// Call through to the mipmap class to do the main filtering work.
 	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);

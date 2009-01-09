@@ -105,21 +105,22 @@ class CqEwaFilter
  * Image Warping", which may be found at http://www.cs.cmu.edu/~ph/.
  * "Physically Based Rendering" also has a small section mentioning EWA.
  *
- * The derivation of an EWA filter may be broken into three conceptual stages:
+ * The derivation of an EWA filter may be broken into four conceptual stages:
  *   1) Reconstruct a continuous image from the discrete samples using a
  *      gaussian *reconstruction filter*.  The reconstruction filter support
  *      should be wide enough to avoid samples "falling between" the discrete
  *      points of the source image.
- *   2) Warp this continuous 2D image into another part of the 2D plane with an
+ *   2) Apply a texture blur filter to this continuous image.
+ *   3) Warp the 2D image into another part of the 2D plane with an
  *      arbitrary transformation.  This effect of the transformation on the
  *      filter kernel is approximated by the local linear approximation (ie,
  *      the Jacobian).
- *   3) Filter the resulting image with a gaussian "prefilter" before
+ *   4) Filter the resulting image with a gaussian "prefilter" before
  *      converting back to discrete samples.  The support of the prefilter
  *      should be wide enough to remove aliasing.
  *
  * The neat thing about EWA is that the full filter which you get after putting
- * the steps 1-3 together is just another gaussian filter acting on the
+ * the steps 1-4 together is just another gaussian filter acting on the
  * original image.  This means we can implement it by simple iteration over a
  * box in the source image which contains the filter support.  The result may
  * be computed deterministically and hence suffers from no sampling error.  The
@@ -182,7 +183,8 @@ class CqEwaFilterFactory
 		 *            minimum reconstruction filter variance)
 		 * \param baseResT - height of the base texture (used to determine a
 		 *            minimum reconstruction filter variance)
-		 * \param sBlur - Additional filter blur in the s-direction
+		 * \param blurVariance - Variance matrix for additional filter blur
+		 *            (see ewaBlurMatrix() )
 		 * \param tBlur - Additional filter blur in the t-direction
 		 * \param logEdgeWeight - Related to the total fraction of the ideal
 		 *            filter weight, which is equal to exp(-logEdgeWeight).
@@ -191,7 +193,7 @@ class CqEwaFilterFactory
 		 */
 		CqEwaFilterFactory(const SqSamplePllgram& samplePllgram,
 				TqFloat baseResS, TqFloat baseResT,
-				TqFloat sBlur = 0, TqFloat tBlur = 0,
+				const SqMatrix2D& blurVariance,
 				TqFloat logEdgeWeight = 4, 
 				TqFloat maxAspectRatio = 20);
 
@@ -236,7 +238,7 @@ class CqEwaFilterFactory
 		 *
 		 */
 		void computeFilter(const SqSamplePllgram& samplePllgram, TqFloat baseResS,
-				TqFloat baseResT, TqFloat sBlur, TqFloat tBlur,
+				TqFloat baseResT, const SqMatrix2D& blurVariance,
 				TqFloat maxAspectRatio);
 
 		/// Quadratic form matrix
@@ -248,6 +250,17 @@ class CqEwaFilterFactory
 		/// Width of the semi-minor axis of the elliptical filter
 		TqFloat m_minorAxisWidth;
 };
+
+
+/** \brief Compute the blur variance matrix for axis-aligned blur.
+ *
+ * The returned matrix gives an appropriate blur ellipse aligned with
+ * the x and y axes.
+ *
+ * \param sBlur - blur in x-direction
+ * \param tBlur - blur in y-direction
+ */
+SqMatrix2D ewaBlurMatrix(TqFloat sBlur, TqFloat tBlur);
 
 
 //==============================================================================
@@ -269,13 +282,13 @@ inline CqEwaFilterFactory::CqEwaFilterFactory(const SqSampleQuad& sQuad,
 	m_filterCenter.x(m_filterCenter.x()*baseResS - 0.5);
 	m_filterCenter.y(m_filterCenter.y()*baseResT - 0.5);
 	// compute and cache the filter
-	computeFilter(SqSamplePllgram(sQuad), baseResS, baseResT, sBlur, tBlur,
+	computeFilter(SqSamplePllgram(sQuad), baseResS, baseResT, ewaBlurMatrix(sBlur, tBlur),
 			maxAspectRatio);
 }
 inline CqEwaFilterFactory::CqEwaFilterFactory(
 		const SqSamplePllgram& samplePllgram,
 		TqFloat baseResS, TqFloat baseResT,
-		TqFloat sBlur, TqFloat tBlur,
+		const SqMatrix2D& blurVariance,
 		TqFloat logEdgeWeight, 
 		TqFloat maxAspectRatio)
 	: m_quadForm(0),
@@ -289,7 +302,23 @@ inline CqEwaFilterFactory::CqEwaFilterFactory(
 	m_filterCenter.x(m_filterCenter.x()*baseResS - 0.5);
 	m_filterCenter.y(m_filterCenter.y()*baseResT - 0.5);
 	// compute and cache the filter
-	computeFilter(samplePllgram, baseResS, baseResT, sBlur, tBlur, maxAspectRatio);
+	computeFilter(samplePllgram, baseResS, baseResT, blurVariance, maxAspectRatio);
+}
+
+inline SqMatrix2D ewaBlurMatrix(TqFloat sBlur, TqFloat tBlur)
+{
+	if(sBlur > 0 || tBlur > 0)
+	{
+		// The factor blurScale gives an amount of blur which is roughly
+		// consistent with that used by PRMan (and 3delight) for the same
+		// scenes.
+		const TqFloat blurScale = 0.5f;
+		TqFloat sStdDev = sBlur*blurScale;
+		TqFloat tStdDev = tBlur*blurScale;
+		return SqMatrix2D(sStdDev*sStdDev, tStdDev*tStdDev);
+	}
+	else
+		return SqMatrix2D(0);
 }
 
 inline CqEwaFilter CqEwaFilterFactory::createFilter(TqFloat xScale, TqFloat xOff,

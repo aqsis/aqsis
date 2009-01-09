@@ -42,10 +42,26 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 /** \brief Sampler for cube face environment maps
  *
- * Cube environment maps represent all directions with textures mapped onto the
- * six faces of a cube.  This sampler maps directions to associated cube face
- * texture coordinates and then samples underlying mipmap level at that
- * position.
+ * A cube face environment map consists of the six faces of a cube as viewed
+ * from the cube centre.  The cube environment sampler maps directions to
+ * associated cube face texture coordinates and then samples the appropriate
+ * mipmap level at that position.
+ *
+ * The faces are concatenated together into a single texture as follows:
+ *
+ * \verbatim
+ *
+ *   +----+----+----+
+ *   | +x | +y | +z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *   | -x | -y | -z |
+ *   |    |    |    |
+ *   +----+----+----+
+ *
+ * \endverbatim
+ *
+ * Orientation of the cube faces is described in the RISpec.
  */
 template<typename LevelCacheT>
 class AQSISTEX_SHARE CqCubeEnvironmentSampler : public IqEnvironmentSampler
@@ -80,161 +96,38 @@ CqCubeEnvironmentSampler<LevelCacheT>::CqCubeEnvironmentSampler(
 	m_fovCotan(levels->header().template find<Attr::FieldOfViewCot>(1))
 { }
 
-namespace detail {
-
-class CqCubeFaceMapper
+template<typename LevelCacheT>
+void CqCubeEnvironmentSampler<LevelCacheT>::sample(
+		const Sq3DSamplePllgram& region,
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	private:
-		TqInt m_sIndex;
-		TqInt m_tIndex;
-		TqInt m_denomIndex;
-		TqFloat m_sOffset;
-		TqFloat m_tOffset;
-		TqFloat m_sScale;
-		TqFloat m_tScale;
-	public:
-		/** \brief Create a cube face mapper onto a particular face.
-		 *
-		 * The face to map onto is chosen by determining which face the given
-		 * reference direction maps onto.
-		 *
-		 * \param refDirection - Direction which determines which face will be
-		 *                       mapped onto.
-		 * \param fovCotan - 1/tan(FOV/2) where FOV is the field of view of an
-		 *                   individual face.
-		 */
-		CqCubeFaceMapper(const CqVector3D& refDirection, TqFloat fovCotan)
-			: m_sIndex(0),
-			m_tIndex(0),
-			m_denomIndex(0),
-			m_sOffset(0),
-			m_tOffset(0.25),
-			m_sScale(0.5/3*fovCotan),
-			// use negative sign, since t increases _downward from the top_
-			m_tScale(-0.5/2*fovCotan)
-		{
-			const TqFloat vx = refDirection.x();
-			const TqFloat vy = refDirection.y();
-			const TqFloat vz = refDirection.z();
-			const TqFloat absVx = std::fabs(vx);
-			const TqFloat absVy = std::fabs(vy);
-			const TqFloat absVz = std::fabs(vz);
+	// The tricky task here is to map the 3D sample parallelogram into a
+	// 2D one on the appropriate cube face.  This involves mapping both the
+	// centre point, along with the parallelogram sides.
 
-			const TqInt xIdx = 0;
-			const TqInt yIdx = 1;
-			const TqInt zIdx = 2;
-
-			// Determine which axis we're pointing along, and set parameters
-			// to map onto the correct cube face.  The orientation of faces is
-			// specified in the RISpec, in the section detailing the
-			// RiMakeCubeFaceEnvironment interface call.
-			if(absVx >= absVy && absVx >= absVz)
-			{
-				// x-axis
-				m_sIndex = zIdx;
-				m_tIndex = yIdx;
-				m_denomIndex = xIdx;
-				m_sScale *= -1;
-				m_sOffset = 1.0/6;
-				if(vx < 0)
-				{
-					m_tScale *= -1;
-					m_tOffset = 0.75;
-				}
-			}
-			else if(absVy >= absVx && absVy >= absVz)
-			{
-				// y-axis
-				m_sIndex = xIdx;
-				m_tIndex = zIdx;
-				m_denomIndex = yIdx;
-				m_sOffset = 0.5;
-				if(vy < 0)
-				{
-					m_sScale *= -1;
-					m_tOffset = 0.75;
-				}
-				m_tScale *= -1;
-			}
-			else
-			{
-				// z-axis
-				m_sIndex = xIdx;
-				m_tIndex = yIdx;
-				m_denomIndex = zIdx;
-				m_sOffset = 5.0/6;
-				if(vz < 0)
-				{
-					m_tScale *= -1;
-					m_tOffset = 0.75;
-				}
-			}
-		}
-
-		/** \brief Map a direction into texture coordinates
-		 *
-		 * This function uses the parameters determined in the constructor to
-		 * map the given point onto the corresponding cube face.
-		 *
-		 * \param v - direction
-		 *
-		 * \return texture coordinates associated with v
-		 */
-		CqVector2D operator()(const CqVector3D& v)
-		{
-			TqFloat s = m_sScale*v[m_sIndex]/v[m_denomIndex] + m_sOffset;
-			TqFloat t = m_tScale*v[m_tIndex]/v[m_denomIndex] + m_tOffset;
-			return CqVector2D(s,t);
-		}
-};
-
-
-/** \brief Mapping from directions to coordinates of a cube face environment texture.
- *
- * Each mipmap level of a cube face environment maps consists of the six faces
- * of a cube.  These are concatenated together into the same texture as follows:
- *
- * \verbatim
- *
- *   +----+----+----+
- *   | +x | +y | +z |
- *   |    |    |    |
- *   +----+----+----+
- *   | -x | -y | -z |
- *   |    |    |    |
- *   +----+----+----+
- *
- * \endverbatim
- *
- * This function represents a mapping from directions in 3D space to texture
- * coordinates (s,t) consistent with the squares of the cube face environment,
- * as laid out above.  The tangent map is used to convert directions along the
- * sides of the 3D sampling parallelogram into side vectors for the 2D result.
- *
- * Orientation of the cube faces is described in the RISpec.
- */
-SqSamplePllgram directionToCubeFaceCoords(const Sq3DSamplePllgram& region,
-		TqFloat fovCotan)
-{
-	// Coefficients of the tangent map which translate one 
-	TqFloat tMap11 = 0, tMap12 = 0, tMap13 = 0; 
-	TqFloat tMap21 = 0, tMap22 = 0, tMap23 = 0; 
-	// Determine which axis we're pointing along, and map (s,t) onto the
-	// appropriate cube face with the range [-1,1].The orientation of faces
-	// is specified in the RISpec, in the section detailing the
-	// RiMakeCubeFaceEnvironment interface call.
+	// (s,t) will end up in the range [-1,1] for the appropriate face.
 	TqFloat s = 0; TqFloat t = 0;
 	// Scaling and shifting of the range will be computed in the next step
 	// using the following parameters which are adjusted per-face.
-	TqFloat sScale = 0.5/3*fovCotan;
-	TqFloat tScale = -0.5/2*fovCotan;
+	TqFloat sScale = 1;
+	TqFloat tScale = -1;
 	TqFloat sOffset = 0;
 	TqFloat tOffset = 0.25;
+
+	// Coefficients of the linear tangent map which translate the 3D
+	// parallogram sides into the 2D ones.
+	TqFloat tMap11 = 0, tMap12 = 0, tMap13 = 0; 
+	TqFloat tMap21 = 0, tMap22 = 0, tMap23 = 0; 
 
 	const CqVector3D R = region.c;
 	const TqFloat absRx = std::fabs(R.x());
 	const TqFloat absRy = std::fabs(R.y());
 	const TqFloat absRz = std::fabs(R.z());
+	// Determine which axis we're pointing along, and map (s,t) onto the
+	// appropriate cube face with the range [-1,1].  Also compute the
+	// appropriate tangent map coefficients.  The orientation of faces is
+	// specified in the RISpec, in the section detailing the
+	// RiMakeCubeFaceEnvironment interface call.
 	if(absRx >= absRy && absRx >= absRz)
 	{
 		// x-axis
@@ -292,16 +185,21 @@ SqSamplePllgram directionToCubeFaceCoords(const Sq3DSamplePllgram& region,
 		tMap22 = invRz;
 		tMap23 = -t*invRz; 
 	}
-	tMap11 *= sScale;
-	tMap12 *= sScale;
-	tMap13 *= sScale;
-	tMap21 *= tScale;
-	tMap22 *= tScale;
-	tMap23 *= tScale;
 
-	// Compute center of new parallelogram with the cube face map.
-	CqVector2D st(sScale*s + sOffset, tScale*t + tOffset);
+	// (s1,t1) are the correctly-oriented coordinates on the cube face
+	// [-1,1]x[-1,1] used for computing the blur variance matrix.
+	TqFloat s1 = s*sScale;
+	TqFloat t1 = t*tScale;
 
+	sScale *= 0.5/3*m_fovCotan;
+	tScale *= 0.5/2*m_fovCotan;
+
+	tMap11 *= sScale; tMap12 *= sScale; tMap13 *= sScale;
+	tMap21 *= tScale; tMap22 *= tScale; tMap23 *= tScale;
+
+	// Compute center of new parallelogram
+	// centre of the face.
+	CqVector2D st(s*sScale + sOffset, t*tScale + tOffset);
 	// Compute sides of new parallelogram using the tangent map.
 	CqVector2D side1(
 		tMap11*region.s1.x() + tMap12*region.s1.y() + tMap13*region.s1.z(),
@@ -311,26 +209,38 @@ SqSamplePllgram directionToCubeFaceCoords(const Sq3DSamplePllgram& region,
 		tMap11*region.s2.x() + tMap12*region.s2.y() + tMap13*region.s2.z(),
 		tMap21*region.s2.x() + tMap22*region.s2.y() + tMap23*region.s2.z()
 	);
-
-	return SqSamplePllgram(st, side1, side2);
-}
-
-} // namespace detail
-
-template<typename LevelCacheT>
-void CqCubeEnvironmentSampler<LevelCacheT>::sample(
-		const Sq3DSamplePllgram& samplePllgram,
-		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
-{
-	// Map the corners of the sampling quadrialateral into 2D texture coordinates.
-	SqSamplePllgram region2d
-		= detail::directionToCubeFaceCoords(samplePllgram, m_fovCotan);
+	// Construct the mapped 2D sample parallelogram.
+	SqSamplePllgram region2d(st, side1, side2);
 	region2d.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
-	// TODO: Make blur work correctly...
-	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(region2d, m_levels->width0(),
-			m_levels->height0(), sampleOpts.sBlur(), sampleOpts.tBlur());
 
+	// Compute the blur matrix if necessary.
+	SqMatrix2D blurVariance(0);
+	// The blurAmp here is chosen to approximately give the same amount of
+	// blurring as latlong environment maps with the same user input.
+	const TqFloat blurAmp = (sampleOpts.sBlur() + sampleOpts.tBlur())*0.22;
+	if(blurAmp > 0)
+	{
+		// A fixed angle maps to a larger region at the edges of a face than at
+		// the middle.  The blur needs to be adjusted accordingly - we require
+		// that the blur is constant in angular space.
+		//
+		// To compute the adjustment, it's necessary to compute the tangent map
+		// (jacobian) of the texture to environment sphere mapping, call this
+		// J.  The blur variance is then inverse(J.transpose * J), scaled by
+		// the user-requested blur variance.
+		//
+		// The factor of m_fovCotan is added so that changing the cube face fov
+		// doesn't change the amount of blur.  The scaling factors of 1.5=3/2
+		// and 2.25=(3/2)*(3/2) are needed to undo the stretching that happens
+		// when the blur is scaled by the non-square base texture resolution
+		// (which has a ratio of 3:2)
+		blurVariance = blurAmp*blurAmp * m_fovCotan*m_fovCotan * (s1*s1 + t1*t1 + 1)
+			* SqMatrix2D(s1*s1+1, 1.5*t1*s1, 1.5*t1*s1,  2.25*(t1*t1+1));
+	}
+
+	// Construct the filter factory
+	CqEwaFilterFactory ewaFactory(region2d, m_levels->width0(),
+			m_levels->height0(), blurVariance);
 	// Apply the filter to the mipmap levels
 	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);
 }

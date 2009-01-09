@@ -88,8 +88,12 @@ namespace detail {
  * It also maps the edge vectors of the parallelogram region (which should be
  * considered to lie in the tangent space) using the tangent map to get
  * corresponding directions in the 2D texture space.
+ *
+ * Finally, it rescales the blur in the longitudinal direction so that any
+ * blurring is isotropic in angular space.
  */
-SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region)
+SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region,
+		TqFloat& sBlur)
 {
 	CqVector3D R = region.c;
 	// First compute the position of the parallelogram centre.  This is
@@ -98,8 +102,9 @@ SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region)
 	TqFloat phi = 0.5 + std::atan2(R.y(), R.x())*(1.0/(2*M_PI));
 	TqFloat theta = 0;
 	TqFloat R2 = R.Magnitude2();
+	TqFloat RLen = std::sqrt(R2);
 	if(R2 != 0)
-		theta = std::acos(R.z()/std::sqrt(R2))*(1.0/M_PI);
+		theta = std::acos(R.z()/RLen)*(1.0/M_PI);
 	// (s,t) coordinates of parallelogram center
 	CqVector2D st(phi, theta);
 
@@ -107,6 +112,7 @@ SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region)
 	// coefficients of the linear function which take the sides of the 3D
 	// sampling parallelogram into the sides of the 2D one.
 	TqFloat Rxy2 = R.x()*R.x() + R.y()*R.y();
+	TqFloat RxyLen = std::sqrt(Rxy2);
 
 	// Coefficents of the tangent map (note: tMap13 = 0 always)
 	TqFloat tMap11 = 0;
@@ -122,12 +128,16 @@ SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region)
 
 		if(R2 != 0)
 		{
-			TqFloat mult2 = 1/(M_PI*R2*std::sqrt(Rxy2));
+			TqFloat mult2 = 1/(M_PI*R2*RxyLen);
 			tMap21 = R.x()*R.z() * mult2;
 			tMap22 = R.y()*R.z() * mult2;
 			tMap23 = (R.z()*R.z() - R2) * mult2;
 		}
 	}
+
+	// Modify the sblur factor; the factor of 0.0001 is added to clamp the
+	// maximum blur near the singularities at the poles.
+	sBlur *= RLen / (RxyLen + 0.0001);
 
 	// Apply the tangent map to the parallelogram sides
 	CqVector2D side1(
@@ -149,15 +159,18 @@ void CqLatLongEnvironmentSampler<LevelCacheT>::sample(
 		const Sq3DSamplePllgram& samplePllgram,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
+	TqFloat sBlur = sampleOpts.sBlur();
 	// Map sampling parallelogram into latlong texture coords.
-	SqSamplePllgram region2d = detail::directionToLatLong(samplePllgram);
-	// TODO: Make blur work!
+	SqSamplePllgram region2d = detail::directionToLatLong(samplePllgram, sBlur);
 	region2d.scaleWidth(sampleOpts.sWidth(), sampleOpts.tWidth());
 
+	// Compute the blur variance matrix.  tBlur is scaled by a factor of two so
+	// that the blur will be isotropic in angular space.
+	SqMatrix2D blurVariance = ewaBlurMatrix(sBlur, 2*sampleOpts.tBlur());
+
 	// Construct EWA filter factory
-	CqEwaFilterFactory ewaFactory(region2d,
-			m_levels->width0(), m_levels->height0(),
-			sampleOpts.sBlur(), sampleOpts.tBlur());
+	CqEwaFilterFactory ewaFactory(region2d, m_levels->width0(),
+			m_levels->height0(), blurVariance);
 
 	// Apply the filter to the mipmap levels
 	m_levels->applyFilter(ewaFactory, sampleOpts, outSamps);
