@@ -92,7 +92,7 @@ namespace detail {
  * Finally, it rescales the blur in the longitudinal direction so that any
  * blurring is isotropic in angular space.
  */
-SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region,
+inline SqSamplePllgram directionToLatLong(const Sq3DSamplePllgram& region,
 		TqFloat& sBlur)
 {
 	CqVector3D R = region.c;

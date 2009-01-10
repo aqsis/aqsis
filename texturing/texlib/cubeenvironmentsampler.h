@@ -217,7 +217,7 @@ void CqCubeEnvironmentSampler<LevelCacheT>::sample(
 	SqMatrix2D blurVariance(0);
 	// The blurAmp here is chosen to approximately give the same amount of
 	// blurring as latlong environment maps with the same user input.
-	const TqFloat blurAmp = (sampleOpts.sBlur() + sampleOpts.tBlur())*0.22;
+	const TqFloat blurAmp = (sampleOpts.sBlur() + sampleOpts.tBlur())*0.25;
 	if(blurAmp > 0)
 	{
 		// A fixed angle maps to a larger region at the edges of a face than at

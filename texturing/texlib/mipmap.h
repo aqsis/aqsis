@@ -244,11 +244,9 @@ const CqTexFileHeader& CqMipmap<TextureBufferT>::header() const
 
 template<typename TextureBufferT>
 template<typename FilterFactoryT>
-void CqMipmap<TextureBufferT>::applyFilter(
-		const FilterFactoryT& filterFactory,
+void CqMipmap<TextureBufferT>::applyFilter(const FilterFactoryT& filterFactory,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps)
 {
-	bool usingBlur = sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0;
 	// Select mipmap level to use.
 	//
 	// The minimum filter width is the minimum number of pixels over which the
@@ -262,7 +260,7 @@ void CqMipmap<TextureBufferT>::applyFilter(
 		// levels is necessary, reset the filter support width.
 		minFilterWidth = 4;
 	}
-	else if(usingBlur)
+	else if(sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0)
 	{
 		// When using blur, the minimum filter width needs to be increased.
 		//
@@ -287,7 +285,7 @@ void CqMipmap<TextureBufferT>::applyFilter(
 	// already computed above and the next lower mipmap level.  We do that now
 	// if necessary.
 	if( ( sampleOpts.lerp() == Lerp_Always
-		|| (sampleOpts.lerp() == Lerp_Auto && usingBlur && blurRatio > 0.2) )
+		|| (sampleOpts.lerp() == Lerp_Auto && blurRatio > 0.2) )
 		&& level < numLevels()-1 && levelCts > 0)
 	{
 		// Use interpolation between the results of filtering on two different
@@ -321,6 +319,8 @@ void CqMipmap<TextureBufferT>::applyFilter(
 		for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 			outSamps[i] = (1-levelInterp) * outSamps[i] + levelInterp*tmpSamps[i];
 	}
+	// Debug - colourise mipmap level selection.
+	// outSamps[level%sampleOpts.numCahnnels()] += 0.1;
 }
 
 template<typename TextureBufferT>
