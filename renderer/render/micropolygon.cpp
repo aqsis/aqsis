@@ -1034,25 +1034,46 @@ void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime), matObjectToCameraT  );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
-		// Transform the whole grid to hybrid camera/raster space
 		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		CqVector3D* pP;
 		pg->pVar(EnvVars_P) ->GetPointPtr( pP );
 		CqVector3D* pNg;
-		pg->pVar(EnvVars_Ng) ->GetPointPtr( pNg );
+		pg->pVar(EnvVars_Ng)->GetNormalPtr(pNg);
 		CqVector3D* pN = NULL;
 		if ( USES( lUses, EnvVars_N ) )
-			pg->pVar(EnvVars_N) ->GetPointPtr( pN );
+			pg->pVar(EnvVars_N)->GetNormalPtr(pN);
 
+		// Cull any hidden MPs if Sides==1.  Note that this has to happen
+		// *before* the transformation into hybrid camera/raster space below.
+		if ( canBeBFCulled )
+		{
+			AQSIS_TIME_SCOPE(Backface_culling);
+			if(iTime > 0)
+			{
+				// The primary grid already has geometric normals computed
+				// during shading, but additional grid keys don't so we need
+				// to compute them here.
+				pg->CalcNormals();
+			}
+			for ( i = gsmin1; i >= 0; i-- )
+			{
+				// When backface culling, we must use the geometric normal (Ng)
+				// as this is the normal that properly represents the actual
+				// micropolygon geometry. However, if the primitive specifies
+				// custom normals as primitive variables, the direction of
+				// those should be honored, in case the user has intentionally
+				// switched the surface direction.  Therefore, we compare the
+				// direction of Ng with that of N and flip Ng if they don't
+				// match.
+				TqFloat s = 1.0f;
+				if(pN)
+					s = (pN[i] * pNg[i] < 0.0f) ? -1.0f : 1.0f;
+				if(s * pNg[i] * pP[i] >= 0)
+					totalBFCulled[i]++;
+			}
+		}
 
-		// When backface culling, we must use the geometric normal (Ng) as
-		// this is the normal that properly represents the actual micropolygon
-		// geometry. However, if the primitive specifies custom normals as
-		// primitive variables, the direction of those should be honored, in case
-		// the user has intentionally switched the surface direction.
-		// Therefore, we compare the direction of Ng with that of N and flip Ng 
-		// if they don't match.
-
+		// Transform the whole grid to hybrid camera/raster space
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			CqVector3D Point( pP[ i ] );
@@ -1062,18 +1083,8 @@ void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
 			aaPtimes[ iTime ][ i ].z( zdepth );
 			pP[ i ] = aaPtimes[ iTime ][ i ];
-
-			// Now try and cull any hidden MPs if Sides==1
-			if ( canBeBFCulled )
-			{
-				TqFloat s = 1.0f;
-				if( NULL != pN )
-					s = ( ( pN[i] * pNg[i] ) < 0.0f ) ? -1.0f : 1.0f;
-				AQSIS_TIME_SCOPE(Backface_culling);
-				if ( (  ( s * pNg[ i ] ) * pP[ i ] ) >= 0 )
-					totalBFCulled[i]++;
-			}
 		}
+
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
 		v0 = aaPtimes[ iTime ][ 0 ];
