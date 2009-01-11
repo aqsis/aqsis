@@ -115,7 +115,7 @@ g_mapTypeToName[name] = #name;
 std::map<std::string, TqInt>	g_mapNameToType;
 std::map<TqInt, std::string>	g_mapTypeToName;
 
-PtDspyError DspyImageOpen(PtDspyImageHandle * image,
+extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
                           const char *filename,
                           int width,
@@ -148,20 +148,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		*image = pImage;
 
 		pImage->m_filename = filename;
-
-		// Scan the formats table to see what the widest channel format specified is.
-		TqUint widestFormat = PkDspySigned8;
-		TqInt i;
-		for(i=0; i<iFormatCount; i++)
-			if(format[i].type < widestFormat)
-				widestFormat = format[i].type;
-
-		if(widestFormat == PkDspySigned8)
-			widestFormat = PkDspyUnsigned8;
-		else if(widestFormat == PkDspySigned16)
-			widestFormat = PkDspyUnsigned16;
-		else if(widestFormat == PkDspySigned32)
-			widestFormat = PkDspyUnsigned32;
 
 		int scanorder;
 		if( DspyFindIntInParamList("scanlineorder", &scanorder, paramCount, parameters ) == PkDspyErrorNone )
@@ -390,7 +376,8 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				TiXmlElement* formatv = new TiXmlElement("Format");
 				formatv->SetAttribute("name", format[iformat].name);
-				TiXmlText* formatText = new TiXmlText(g_mapTypeToName[format[iformat].type]);
+				TiXmlText* formatText = new TiXmlText(g_mapTypeToName[
+						PkDspyMaskType & format[iformat].type]);
 				formatv->LinkEndChild(formatText); 
 				formatsXML->LinkEndChild(formatv);
 			}
@@ -444,7 +431,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 }
 
 
-PtDspyError DspyImageData(PtDspyImageHandle image,
+extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
                           int xmin,
                           int xmaxplus1,
                           int ymin,
@@ -486,7 +473,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 }
 
 
-PtDspyError DspyImageClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
 	/// \note: This should never be called, as Aqsis will look 
 	///		  for the DspyImageDelayClose first and use that if it can.
@@ -496,7 +483,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 }
 
 
-PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 {
 	SqPiqslDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
@@ -518,9 +505,9 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 }
 
 
-PtDspyError DspyImageQuery(PtDspyImageHandle image,
+extern "C" PtDspyError DspyImageQuery(PtDspyImageHandle image,
                            PtDspyQueryType type,
-                           int size,
+                           size_t size,
                            void *data)
 {
 	SqPiqslDisplayInstance* pImage;
