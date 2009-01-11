@@ -117,7 +117,7 @@ CqAttributes::CqAttributes()
 	ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
 	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingInterp_Constant );	// the current shading interpolation mode.
 	ADD_SYSTEM_ATTR( GeometricFlatness, TqFloat, TqFloat, type_float, 1.0f );				// the current screen-space geometric flatness.
-	ADD_SYSTEM_ATTR2( GeometricFocusFactor, TqFloat, TqFloat, type_float, 0.0f, 0.0f );		// multiplier for CoC area to be added to shading rate for depth of field
+	ADD_SYSTEM_ATTR( GeometricFocusFactor, TqFloat, TqFloat, type_float, 0.0f );		// multiplier for CoC area to multiply the shading rate for depth of field
 	ADD_SYSTEM_ATTR( Matte, TqInt, TqFloat, type_integer, 0 );				// the current state of the matte flag.
 	ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
 	ADD_SYSTEM_ATTR2( BasisStep, TqInt, TqFloat, type_integer, 3, 3 );	// the steps to advance the evaluation window in the u direction.

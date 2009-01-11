@@ -563,10 +563,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			return(false);
 		}
 
-		bool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
-		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
-		TqInt	m_SplitCount;		///< The number of times this GPrim has been split
-	protected:
 		/** Get the shading rate, adjusted for DoF (and MB in the future)
 		 *
 		 * Without depth of field or motion blur, this function just returns
@@ -581,6 +577,11 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 * to have an effect on the returned shading rate as well.
 		 */
 		TqFloat AdjustedShadingRate() const;
+
+		bool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
+		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
+		TqInt	m_SplitCount;		///< The number of times this GPrim has been split
+	protected:
 
 		/** Protected member function to clone the data, used by the Clone() functions
 		 *  on the derived classes.

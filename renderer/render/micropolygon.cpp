@@ -43,7 +43,7 @@ namespace Aqsis {
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
 CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
-void CqMicroPolyGridBase::CacheGridInfo()
+void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>& surface)
 {
 	m_CurrentGridInfo.m_IsMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
 
@@ -52,7 +52,10 @@ void CqMicroPolyGridBase::CacheGridInfo()
 
 	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
 
-	m_CurrentGridInfo.m_ShadingRate = this->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	// ShadingRate may be modified by RiGeometricApproximation "focusfactor" or
+	// "motionfactor", so we need to get the appropriate adjusted rate rather
+	// than grabbing it directly from the grid attribute set.
+	m_CurrentGridInfo.m_ShadingRate = surface->AdjustedShadingRate();
 	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
@@ -138,7 +141,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 	m_CulledPolys.SetAll( false );
 
 	TqInt size = numMicroPolygons(cu, cv);
-	CacheGridInfo();
+	CacheGridInfo(pSurface);
 
 	STATS_INC( GRD_size_4 + clamp<TqInt>(CqStats::stats_log2(size) - 2, 0, 7) );
 }
@@ -1800,9 +1803,7 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-	// TODO: This version of shadingrate isn't accurate if using
-	// GeometricApproximation "focusfactor" 
-	TqFloat shadingrate = pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	TqFloat shadingrate = pGrid()->GetCachedGridInfo().m_ShadingRate;
 
 	m_BoundList.Clear();
 

@@ -216,7 +216,7 @@ class CqMicroPolyGridBase : public CqRefCount
 
 		/** Cache some info about the given grid so it can be
 		 * referenced by multiple mpgs. */
-		void CacheGridInfo();
+		void CacheGridInfo(const boost::shared_ptr<const CqSurface>& surface);
 };
 
 
@@ -516,7 +516,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		{
 			//assert( GetMotionObject( Time( 0 ) ) );
 			//static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->Initialise(cu, cv, pSurface);
-			CacheGridInfo();
+			CacheGridInfo(pSurface);
 		}
 
 	private:

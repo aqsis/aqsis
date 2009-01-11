@@ -685,11 +685,17 @@ TqFloat CqSurface::AdjustedShadingRate() const
 	CqRenderer* context = QGetRenderContext();
 	if(context->UsingDepthOfField())
 	{
-		// Adjust dice size for the CoC
+		// Adjust dice size with the CoC area.  This ensures that very blurry
+		// parts of a scene only have relatively few micropolys and allows the
+		// number of sample-in-micropolygon tests per pixel to be constant as
+		// the image size is increased.
+		//
+		// If this isn't included then render time increases roughly
+		// quadratically with number of pixels which makes things very slow.
 		const TqFloat* focusFactor =
 			m_pAttributes->GetFloatAttribute("System", "GeometricFocusFactor");
 		const TqFloat minCoC = context->MinCoCForBound(m_Bound);
-		shadingRate *= max(1.0, 0.25*minCoC*(focusFactor[0] + minCoC*focusFactor[1]));
+		shadingRate *= max(1.0, 0.25*minCoC*minCoC*focusFactor[0]);
 	}
 	return shadingRate;
 }

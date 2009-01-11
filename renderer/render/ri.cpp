@@ -2445,7 +2445,11 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 
 	DEBUG_RIGEOMETRICAPPROXIMATION
 
-	if ( type != 0 && strstr( type, RI_FLATNESS ) )
+	PARAM_CONSTRAINT_CHECK(type, !=, 0);
+	PARAM_CONSTRAINT_CHECK(value, >=, 0);
+
+	std::string typeStr = type;
+	if(typeStr == RI_FLATNESS)
 	{
 		TqFloat* flatnessAttr = QGetRenderContext()->pattrWriteCurrent()->
 			GetFloatAttributeWrite("System", "GeometricFlatness");
@@ -2453,16 +2457,13 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 		Aqsis::log() << warning
 			<< "RiGeometricApproximation flatness test not yet implemented\n";
 	}
-	else if(type && strstr(type, "focusfactor"))
+	else if(typeStr == "focusfactor")
 	{
 		TqFloat* focusFactorAttr = QGetRenderContext()->pattrWriteCurrent()->
 			GetFloatAttributeWrite("System", "GeometricFocusFactor");
-		if(strstr(type, "focusfactor1"))
-			focusFactorAttr[0] = value;
-		else
-			focusFactorAttr[1] = value;
+		focusFactorAttr[0] = value;
 	}
-	else if(type && strstr(type, "motionfactor"))
+	else if(typeStr == "motionfactor")
 	{
 		Aqsis::log() << warning
 			<< "RiGeometricApproximation \"motionfactor\" not yet implemented\n";
@@ -2471,6 +2472,7 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 	{
 		Aqsis::log() << warning << "RiGeometricApproximation type not known\n";
 	}
+
 	EXCEPTION_CATCH_GUARD("RiGeometricApproximation")
 }
 
