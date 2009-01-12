@@ -317,7 +317,7 @@ static const TqUlong RIH_INDIRECT = CqString::hash( "indirect" );
 static const TqUlong RIH_LIGHT = CqString::hash( "light" );
 static const TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
-RtInt	RiLastError = 0;
+RtInt	RiLastError = RIE_NOERROR;
 
 //----------------------------------------------------------------------
 // CreateGPrim

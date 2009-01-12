@@ -28,6 +28,8 @@
 #include	<ctype.h>
 #include	<fstream>
 #include	<string.h>
+#include        <boost/filesystem/path.hpp>
+#include        <boost/filesystem/operations.hpp>
 
 #include	"exception.h"
 
@@ -99,15 +101,20 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 #endif // !AQSIS_SYSTEM_WIN32
 
 				strAlternativeFilename += strFilename;
-
-				// Clear the previous error first.
-				pFStream->clear();
-				pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
-				if ( pFStream->is_open() )
-				{
-					m_pStream = pFStream;
-					m_strRealName = strAlternativeFilename;
-					break;
+				
+				// Does the file exist?
+				m_fExists = boost::filesystem::exists(boost::filesystem::path(strAlternativeFilename.c_str()));
+				if(m_fExists)
+ 				{				
+					// Clear the previous error first.
+					pFStream->clear();
+					pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
+					if ( pFStream->is_open() )
+					{
+				  		m_pStream = pFStream;
+				  		m_strRealName = strAlternativeFilename;
+						break;			  		
+					}					
 				}
 			}
 		}
@@ -115,7 +122,10 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 			delete pFStream;
 	}
 	else
+	{
 		m_pStream = pFStream;
+		m_fExists = true;
+	}
 }
 
 

@@ -119,14 +119,16 @@ TqInt CqDDManager::OpenDisplays(TqInt width, TqInt height)
 {
 	// Now go over any requested displays launching the clients.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
+	TqInt dspNo = 0;
 	for (i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
 	{
-		(*i)->LoadDisplayLibrary(m_MemberData, m_DspyPlugin, width, height);
+		(*i)->LoadDisplayLibrary(m_MemberData, m_DspyPlugin, dspNo, width, height);
 		m_MemberData.m_strOpenMethod = "DspyImageOpen";
 		m_MemberData.m_strQueryMethod = "DspyImageQuery";
 		m_MemberData.m_strDataMethod = "DspyImageData";
 		m_MemberData.m_strCloseMethod = "DspyImageClose";
 		m_MemberData.m_strDelayCloseMethod = "DspyImageDelayClose";
+		dspNo++;
 	}
 	return ( 0 );
 }
@@ -281,39 +283,75 @@ TqInt selectDataFormat(TqFloat oneVal, TqFloat minVal, TqFloat maxVal)
 
 } // anonymous namespace
 
-void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin, TqInt width, TqInt height )
+void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin, TqInt dspNo, TqInt width, TqInt height )
 {
 	// First store the width and height, as this is the first time we know about them.
 	m_width = width;
 	m_height = height;
-	// Get the display mapping from the "display" options, if one exists.
+	
+	// Init the driver file and type storage
 	CqString strDriverFile = "";
-	CqString displayType = m_type;
+	CqString displayType   = m_type;
+	
+	// Get the display mapping from the "display" options, if one exists.	
 	const CqString* poptDisplay = QGetRenderContext()->poptCurrent()->GetStringOption("display", displayType.c_str());
 	if (0 != poptDisplay)
 		strDriverFile = poptDisplay[0];
 	else
 	{
+		// Try to get a mapping from the aqsis options
+		CqString mappingFormat;
 		const CqString* poptDisplayMapping = QGetRenderContext()->poptCurrent()->GetStringOption("display", "mapping");
 		if (0 != poptDisplayMapping)
+			mappingFormat = poptDisplayMapping[0];
+		else
 		{
-			CqString strMapping = poptDisplayMapping[0];
-			strDriverFile.Format(strMapping.c_str(), displayType.c_str());
+			// fallback to platforms default Dspy plugin mapping format
+#ifdef AQSIS_SYSTEM_WIN32
+			mappingFormat = "%s.lib";
+#endif // AQSIS_SYSTEM_WIN32
+#ifdef AQSIS_SYSTEM_POSIX
+			mappingFormat = "lib%s.so";
+#endif // AQSIS_SYSTEM_POSIX
+#ifdef AQSIS_SYSTEM_MACOSX
+			mappingFormat = "lib%s.dylib";
+#endif // AQSIS_SYSTEM_MACOSX
 		}
+		strDriverFile.Format(mappingFormat.c_str(), displayType.c_str());
 	}
-	Aqsis::log() << debug << "Attempting to load \"" << strDriverFile.c_str() << "\" for display type \""<< displayType.c_str() << "\"" << std::endl;
-	// Display type not found.
-	if ( strDriverFile.empty() )
-		throw( CqString( "Invalid display type \"" ) + CqString( m_type ) + CqString( "\"" ) + CqString(" (") + strDriverFile + CqString(")") );
+	
+	// Load the display driver
+	Aqsis::log() << debug << "Attempting to load \"" << strDriverFile.c_str() << "\" for display(" << dspNo << ") type \""<< displayType.c_str() << "\"" << std::endl;
 	if ( strDriverFile != "debugdd")
 	{
 		// Try to open the file to see if it's really there
 		CqRiFile fileDriver( strDriverFile.c_str(), "display" );
-		if ( !fileDriver.IsValid() )
-			throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
-		CqString strDriverPathAndFile = fileDriver.strRealName();
-
+		
+		// Missing display driver?
+		if ( !fileDriver.Exists() )
+		{
+			std::ostringstream reason;
+			if (dspNo == 0)
+			{
+				// Primary display
+			        // TODO: this should bring down the renderer
+				reason << "Cannot find the primary display(" << dspNo << ") driver \"" << m_type << "\"";
+				Aqsis::log() << error << reason.str() << std::endl;
+				CloseDisplayLibrary();
+				return;
+			}
+			else
+			{
+				// Flag secondary display as invalid
+				reason << "Cannot find the secondary display(" << dspNo << ") driver \"" << m_type << "\" (Skipping Display)";
+				Aqsis::log() << warning << reason.str() << std::endl;
+				CloseDisplayLibrary();
+				return;
+			}
+		}
+		
 		// Load the dynamic object and locate the relevant symbols.
+		CqString strDriverPathAndFile = fileDriver.strRealName();		
 		m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
 		if ( m_DriverHandle != NULL )
 		{
@@ -353,7 +391,26 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			}
 		}
 		else
-			Aqsis::log() << error << "Could not successfully load the display driver" << std::endl;
+		{
+			std::ostringstream reason;
+			if (dspNo == 0)
+			{
+	       			// Primary display
+			        // TODO: this should bring down the renderer
+				reason << "Could not successfully load the primary display(" << dspNo << ") driver \"" << m_type << "\"";
+				Aqsis::log() << error << reason.str() << std::endl;
+				CloseDisplayLibrary();
+				return;
+			}
+			else
+			{
+				// Flag secondary display as invalid
+				reason << "Could not successfully load the secondary display(" << dspNo << ") driver \"" << m_type << "\" (Skipping Display)";
+				Aqsis::log() << warning << reason.str() << std::endl;
+				CloseDisplayLibrary();
+				return;
+			}
+		}
 	}
 	else
 	{

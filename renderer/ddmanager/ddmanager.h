@@ -114,7 +114,7 @@ class CqDisplayRequest
 		 */
 		virtual	void ThisDisplayUses( TqInt& Uses );
 
-		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin, TqInt width, TqInt height );
+		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin, TqInt dspNo, TqInt width, TqInt height );
 		void CloseDisplayLibrary();
 		void ConstructStringsParameter(const char* name, const char** strings, TqInt count, UserParameter& parameter);
 		void ConstructIntsParameter(const char* name, const TqInt* ints, TqInt count, UserParameter& parameter);

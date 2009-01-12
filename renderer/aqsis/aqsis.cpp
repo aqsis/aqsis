@@ -100,7 +100,7 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #endif
 
 // Forward declarations
-void RenderFile( FILE* file, std::string& name );
+RtInt RenderFile( FILE* file, std::string& name );
 
 // Command-line arguments
 ArgParse::apflag g_cl_pause;
@@ -546,7 +546,7 @@ int main( int argc, const char** argv )
 {
 	std::signal(SIGINT, aqsisSignalHandler);
 	std::signal(SIGABRT, aqsisSignalHandler);
-	int return_code = 0;
+	RtInt return_code = 0;
 	
 	StartMemoryDebugging();
 	{
@@ -643,7 +643,7 @@ int main( int argc, const char** argv )
 			<< "compiled " << __DATE__ << " " << __TIME__ << "\n";
 			return( 0 );
 		}
-
+		
 #ifdef	AQSIS_SYSTEM_WIN32
 		std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
 #endif
@@ -685,7 +685,19 @@ int main( int argc, const char** argv )
 				if ( file != NULL )
 				{
 					std::string name(*e);
-					RenderFile( file, name );
+					try
+					{
+						return_code = RenderFile( file, name );
+					}
+					catch(const std::exception& e)
+					{
+						Aqsis::log() << Aqsis::error << e.what() << std::endl;
+						return_code = -1;
+					}
+					catch(...)
+					{
+						Aqsis::log() << Aqsis::error << "unknown exception has been encountered" << std::endl;
+					}
 					fclose( file );
 				}
 				else
@@ -729,78 +741,77 @@ int main( int argc, const char** argv )
   \param file An open file handle
   \param name The file name
  */
-void RenderFile( FILE* file, std::string&  name )
+RtInt RenderFile( FILE* file, std::string&  name )
 {
-	librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
-
-	try
+        RtInt returnCode = RIE_NOERROR;
+        
+        librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
+        
+	RiBegin( "aqsis" );
+	
+	if ( !g_cl_nostandard )
+		librib::StandardDeclarations( renderengine );
+	
+	if ( g_cl_echoapi )
 	{
-		RiBegin( "aqsis" );
-
-		if ( !g_cl_nostandard )
-			librib::StandardDeclarations( renderengine );
-
-		if ( g_cl_echoapi )
-		{
-			RtInt echoapi = 1;
-			RiOption( "statistics", "echoapi", &echoapi, RI_NULL );
-		}
-
-		/* Allow any command line arguments to override system/env settings */
-		const char* popt[1];
-		Aqsis::log() << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
-		if(!g_cl_shader_path.empty())
-		{
-			popt[0] = g_cl_shader_path.c_str();
-			RiOption( "searchpath", "shader", &popt, RI_NULL );
-		}
-		if(!g_cl_archive_path.empty())
-		{
-			popt[0] = g_cl_archive_path.c_str();
-			RiOption( "searchpath", "archive", &popt, RI_NULL );
-		}
-		if(!g_cl_texture_path.empty())
-		{
-			popt[0] = g_cl_texture_path.c_str();
-			RiOption( "searchpath", "texture", &popt, RI_NULL );
-		}
-		if(!g_cl_display_path.empty())
-		{
-			popt[0] = g_cl_display_path.c_str();
-			RiOption( "searchpath", "display", &popt, RI_NULL );
-		}
-		if(!g_cl_procedural_path.empty())
-		{
-			popt[0] = g_cl_procedural_path.c_str();
-			RiOption( "searchpath", "procedural", &popt, RI_NULL );
-		}
-
-		RiProgressHandler( &PrintProgress );
-		RiPreWorldFunction( &PreWorld );
-
-
-		librib::ClearFrames();
-		// Pass in specified frame lists.
-		if(g_cl_frames.size() == 2)
-		{
-			std::stringstream strframes;
-			strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
-			librib::AppendFrames(strframes.str().c_str());
-		}
-		if(!g_cl_framesList.empty())
-			librib::AppendFrames(g_cl_framesList.c_str());
-
-		librib::Parse( file, name, *renderengine, Aqsis::log(), NULL );
-
-		RiEnd();
-
-		if ( !g_cl_nostandard )
-			librib::CleanupDeclarations( *renderengine );
+		RtInt echoapi = 1;
+		RiOption( "statistics", "echoapi", &echoapi, RI_NULL );
 	}
-	catch(Aqsis::XqException& x)
+	
+	/* Allow any command line arguments to override system/env settings */
+	const char* popt[1];
+	Aqsis::log() << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
+	if(!g_cl_shader_path.empty())
 	{
-		Aqsis::log() << Aqsis::error << x.what() << std::endl;
+		popt[0] = g_cl_shader_path.c_str();
+		RiOption( "searchpath", "shader", &popt, RI_NULL );
 	}
+	if(!g_cl_archive_path.empty())
+	{
+		popt[0] = g_cl_archive_path.c_str();
+		RiOption( "searchpath", "archive", &popt, RI_NULL );
+	}
+	if(!g_cl_texture_path.empty())
+	{
+		popt[0] = g_cl_texture_path.c_str();
+		RiOption( "searchpath", "texture", &popt, RI_NULL );
+	}
+	if(!g_cl_display_path.empty())
+	{
+		popt[0] = g_cl_display_path.c_str();
+		RiOption( "searchpath", "display", &popt, RI_NULL );
+	}
+	if(!g_cl_procedural_path.empty())
+	{
+		popt[0] = g_cl_procedural_path.c_str();
+		RiOption( "searchpath", "procedural", &popt, RI_NULL );
+	}
+	
+	RiProgressHandler( &PrintProgress );
+	RiPreWorldFunction( &PreWorld );
+	
+	librib::ClearFrames();
+	// Pass in specified frame lists.
+	if(g_cl_frames.size() == 2)
+	{
+		std::stringstream strframes;
+		strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
+		librib::AppendFrames(strframes.str().c_str());
+	}
+	if(!g_cl_framesList.empty())
+		librib::AppendFrames(g_cl_framesList.c_str());
 
+	librib::Parse( file, name, *renderengine, Aqsis::log(), NULL );
+	
+	RiEnd();
+	
+	if ( !g_cl_nostandard )
+		librib::CleanupDeclarations( *renderengine );
+	
+	// get the last error code
+        returnCode = RiLastError;
+	
 	librib2ri::DestroyRIBEngine( renderengine );
+
+        return returnCode;
 }
