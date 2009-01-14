@@ -13,8 +13,8 @@
 !define PACKAGE_SHELLEXT_SLX "Inspect with @CMAKE_PROJECT_NAME@"
 !define PACKAGE_SHELLEXT_SLX_INFO "@CMAKE_PROJECT_NAME@ Shader"
 !define PACKAGE_WEB_SITE "http://www.aqsis.org"
-!define PACKAGE_WEB_SUPPORT "http://www.aqsis.org/xoops/modules/newbb"
-!define PACKAGE_WEB_UPDATE "http://www.aqsis.org/xoops/modules/mydownloads"
+!define PACKAGE_WEB_SUPPORT "http://community.aqsis.org"
+!define PACKAGE_WEB_UPDATE "http://downloads.sourceforge.net/aqsis"
 !define PACKAGE_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\aqsis.exe"
 !define PACKAGE_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CMAKE_PROJECT_NAME@"
 !define PACKAGE_UNINST_ROOT_KEY "HKLM"
@@ -102,6 +102,8 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@"
 
 ; Installation types (i.e. full/minimal/custom)
 !include "TextFunc.nsh"
+!include "StrFunc.nsh"
+${StrRep}
 !insertmacro ConfigWrite
 
 InstType "Full"
@@ -122,12 +124,14 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\redist"
   File "@AQSIS_WIN32LIBS@\MSVC\bin\vcredist_x86.exe"
 
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string archive" ' '["$INSTDIR"]' $R1
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string texture" ' '["$INSTDIR"]' $R2
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string display" ' '["$INSTDIR\bin"]' $R3
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string procedural" ' '["$INSTDIR\bin"]' $R4
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string resource" ' '["$INSTDIR"]' $R5
+  ; Convert backslashes, as used by the $INSTDIR variable, to forward-slashes - Defined in RISpec (http://renderman.pixar.com)
+  ${StrRep} $R0 $INSTDIR "\" "/"
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string shader" ' '["$R0/shaders"]' $R1
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string archive" ' '["$R0"]' $R2
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string texture" ' '["$R0"]' $R3
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string display" ' '["$R0/bin"]' $R4
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string procedural" ' '["$R0/bin"]' $R5
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string resource" ' '["$R0"]' $R6
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
@@ -436,6 +440,7 @@ Section Uninstall
 
   RMDir /r "$INSTDIR"
 
+  DetailPrint "Updating PATH environment variable, please wait..."
   ReadRegStr $PATH_NT HKCU "Environment" "PATH"
   ${un.WordReplace} "$PATH_NT" "$INSTDIR\bin;" "" "+" $PATH
   WriteRegExpandStr HKCU "Environment" "PATH" "$PATH"
@@ -447,8 +452,10 @@ Section Uninstall
   ${un.WordReplace} "$PATH_NT_ALL" "$INSTDIR\bin;" "" "+" $PATH
   WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH"
 
+  DetailPrint "Updating AQSISHOME environment variable, please wait..."
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 
+  DetailPrint "Updating file associations, please wait..."
   DeleteRegKey HKCR ".rib"
   DeleteRegKey HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB"
   DeleteRegKey HKCR ".ribz"
