@@ -2106,7 +2106,7 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtInt</Type>
-					<RibValue>paramList.find("P").size()</RibValue>
+					<RibValue>paramList.countP()</RibValue>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -2993,7 +2993,7 @@
 				<Argument>
 					<Name>npoints</Name>
 					<Type>RtInt</Type>
-					<RibValue>paramList.find("P").size()</RibValue>
+					<RibValue>paramList.countP()</RibValue>
 				</Argument>
 				<ParamList/>
 			</Arguments>

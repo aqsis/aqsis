@@ -299,7 +299,7 @@ const CqRibParser::TqStringArray& CqRibParser::getStringParam()
 	return getStringArray();
 }
 
-const void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
+void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 {
 	while(true)
 	{

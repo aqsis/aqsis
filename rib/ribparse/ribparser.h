@@ -197,7 +197,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		 * \param paramList - destination for (token, value) pairs as read from
 		 *            the input stream.
 		 */
-		const void getParamList(IqRibParamListHandler& paramHandler);
+		void getParamList(IqRibParamListHandler& paramHandler);
 		//@}
 
 	private:

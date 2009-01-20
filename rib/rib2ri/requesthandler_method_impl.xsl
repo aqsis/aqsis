@@ -67,7 +67,7 @@ void CqRibRequestHandler::handle<xsl:value-of select="substring-after(Name,'Ri')
 	<!-- Collect the parameter list if necessary -->
 <xsl:if test="Arguments/ParamList">
 	// Extract the parameter list
-	CqParamListHandler paramList();
+	CqParamListHandler paramList(m_tokenDict);
 	parser.getParamList(paramList);
 </xsl:if>
 	<!-- // Validate the length of the parameter arrays (TODO) -->
