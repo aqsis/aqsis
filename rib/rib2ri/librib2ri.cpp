@@ -168,7 +168,10 @@ RendermanInterface::RtVoid Engine::RiErrorAbort( RtInt code, RtInt severity, RtS
 {
 	::RiErrorAbort( code, severity, message );
 }
-//RendermanInterface::RtVoid Engine::RiErrorHandler(RtErrorFunc handler) { ::RiErrorHandler(handler); }
+RendermanInterface::RtVoid Engine::RiErrorHandler(RtErrorFunc handler)
+{
+	::RiErrorHandler(handler);
+}
 RendermanInterface::RtVoid Engine::RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
 	::RiErrorIgnore( code, severity, message );
@@ -553,7 +556,16 @@ RendermanInterface::RtFunc Engine::GetProceduralFunction( RtToken type )
 
 	return ( NULL );
 }
-
+RendermanInterface::RtErrorFunc Engine::GetErrorFunction( RtToken type )
+{
+	if ( strcmp( type, "ignore" ) == 0 )
+		return ( &::RiErrorIgnore );
+	else if ( strcmp( type, "print" ) == 0 )
+		return ( &::RiErrorPrint );
+	else if ( strcmp( type, "abort" ) == 0 )
+		return ( &::RiErrorAbort );
+	return ( NULL );
+}
 
 /**
   Create an instance of a RendermanInterface that sends the requests to the RenderMan Interface "C" API.

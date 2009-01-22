@@ -28,6 +28,7 @@ namespace std
 
 #include	"parsenode.h"
 #include	"logging.h"
+#include	"exception.h"
 #include	"aqsismath.h"
 
 # define YYMAXDEPTH 100000
@@ -2198,12 +2199,8 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 
 void Error(const CqString& message, TqInt lineNumber)
 {
-	CqString strErr( ParseStreamName.c_str() );
-	strErr += " : ";
-	strErr += lineNumber;
-	strErr += " : ";
-	strErr += message.c_str();
-	throw( strErr );
+	AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+		ParseStreamName.c_str() << " : " << lineNumber << " : " << message.c_str());
 }
 
 } // End Namespace

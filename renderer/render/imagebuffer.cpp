@@ -432,7 +432,8 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			++yb;
 		}
 //		if(!done)
-//			throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
+//			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+//				"Bucket already processed but a new Surface touches it");
 	}
 	else
 	{

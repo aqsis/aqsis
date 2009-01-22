@@ -46,18 +46,21 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& f
 	m_defaultSampleOptions()
 {
 	if(!file)
-		AQSIS_THROW(XqInternal, "Cannot construct shadow map from NULL file handle");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_NoFile,
+						"Cannot construct shadow map from NULL file handle");
 
 	const CqTexFileHeader& header = file->header();
 	if(header.channelList().sharedChannelType() != Channel_Float32)
-		AQSIS_THROW(XqBadTexture, "Shadow maps must hold 32-bit floating point data");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+						"Shadow maps must hold 32-bit floating point data");
 
 	// Get matrix which transforms the sample points to the light camera coordinates.
 	const CqMatrix* worldToLight = header.findPtr<Attr::WorldToCameraMatrix>();
 	if(!worldToLight)
 	{
-		AQSIS_THROW(XqBadTexture, "No world -> camera matrix found in file \""
-				<< file->fileName() << "\"");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+						"No world -> camera matrix found in file \""
+						<< file->fileName() << "\"");
 	}
 	m_currToLight = (*worldToLight) * currToWorld;
 
@@ -65,8 +68,9 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& f
 	const CqMatrix* worldToLightScreen = header.findPtr<Attr::WorldToScreenMatrix>();
 	if(!worldToLightScreen)
 	{
-		AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
-				<< file->fileName() << "\"");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+						"No world -> screen matrix found in file \""
+						<< file->fileName() << "\"");
 	}
 	m_currToTexture = (*worldToLightScreen) * currToWorld;
 	// worldToLightScreen transforms world coordinates to "screen" coordinates,

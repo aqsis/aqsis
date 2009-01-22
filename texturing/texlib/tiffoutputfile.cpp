@@ -73,7 +73,8 @@ void CqTiffOutputFile::initialize()
 {
 	// make sure all channels are the same type.
 	if(m_header.channelList().sharedChannelType() == Channel_TypeUnknown)
-		AQSIS_THROW(XqInternal, "tiff cannot store multiple pixel types in the same image");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Limit,
+			"tiff cannot store multiple pixel types in the same image");
 
 	// Use lzw compression if the compression hasn't been specified.
 	if(!m_header.findPtr<Attr::Compression>())
@@ -140,10 +141,10 @@ void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
 	if( buffer.height() % tileInfo.height != 0
 		&& m_currentLine + buffer.height() != m_header.height() )
 	{
-		AQSIS_THROW(XqInternal, "pixel buffer with height = " << buffer.height()
-				<< " must be a multiple of requested tile height (= " << tileInfo.height
-				<< ") or run exactly to the full image height (= " << m_header.height()
-				<< ").");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+				"pixel buffer with height = " << buffer.height() << " must be a multiple "
+				"of requested tile height (= " << tileInfo.height << ") or run exactly to "
+				"the full image height (= " << m_header.height() << ").");
 	}
 
 	CqTiffDirHandle dirHandle(m_fileHandle);
@@ -182,7 +183,7 @@ void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
 void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
 	if(!buffer.channelList().channelTypesMatch(m_header.channelList()))
-		AQSIS_THROW(XqInternal, "Buffer and file channels don't match");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Buffer and file channels don't match");
 	if(m_header.findPtr<Attr::TileInfo>())
 		writeTiledPixels(buffer);
 	else

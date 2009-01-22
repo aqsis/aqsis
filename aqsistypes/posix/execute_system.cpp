@@ -106,8 +106,8 @@ void CqExecute::operator()()
 			}
 			if(chdir(m_currDir.c_str()) == -1)
 			{
-				AQSIS_THROW(XqInternal, "Could not change to directory \""
-						<< m_currDir << "\"");
+				AQSIS_THROW_XQERROR(XqInternal, EqE_System,
+					"Could not change to directory \"" << m_currDir << "\"");
 			}
 			signal(SIGHUP, SIG_IGN);
 			execvp(&command[0],&args[0]);

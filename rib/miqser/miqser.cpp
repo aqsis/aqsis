@@ -89,12 +89,12 @@ ArgParse::apint g_cl_compression = 0;	// Default None
 ArgParse::apstring g_cl_output = "";
 ArgParse::apflag g_cl_decodeOnly = 0;
 
-RtToken g_indentNone = "None";
-RtToken g_indentSpace = "Space";
-RtToken g_indentTab = "Tab";
-RtToken g_typeBinary = "Binary";
-RtToken g_compressionNone = "None";
-RtToken g_compressionGzip = "Gzip";
+RtToken g_indentNone      = tokenCast("None");
+RtToken g_indentSpace     = tokenCast("Space");
+RtToken g_indentTab       = tokenCast("Tab");
+RtToken g_typeBinary      = tokenCast("Binary");
+RtToken g_compressionNone = tokenCast("None");
+RtToken g_compressionGzip = tokenCast("Gzip");
 
 #ifdef	AQSIS_SYSTEM_POSIX
 ArgParse::apflag g_cl_syslog = 0;
@@ -241,13 +241,13 @@ void setupOutputFormat()
 			itype[0] = g_indentTab;
 		else
 			itype[0] = g_indentNone;
-		RiOption("RI2RIB_Indentation", "Type", &itype, RI_NULL);
+		RiOption(tokenCast("RI2RIB_Indentation"), "Type", &itype, RI_NULL);
 		// Output indentation level if specified
 		if(g_cl_indentlevel > 0)
 		{
 			RtInt isize[1];
 			isize[0] = g_cl_indentlevel;
-			RiOption("RI2RIB_Indentation", "Size", &isize, RI_NULL);
+			RiOption(tokenCast("RI2RIB_Indentation"), "Size", &isize, RI_NULL);
 		}
 	}
 
@@ -256,7 +256,7 @@ void setupOutputFormat()
 	{
 		RtToken itype[1];
 		itype[0] = g_typeBinary;
-		RiOption("RI2RIB_Output", "Type", &itype, RI_NULL);
+		RiOption(tokenCast("RI2RIB_Output"), "Type", &itype, RI_NULL);
 	}
 
 	// Setup the compression if specified
@@ -267,7 +267,7 @@ void setupOutputFormat()
 			itype[0] = g_compressionGzip;
 		else
 			itype[0] = g_compressionNone;
-		RiOption("RI2RIB_Output", "Compression", &itype, RI_NULL);
+		RiOption(tokenCast("RI2RIB_Output"), "Compression", &itype, RI_NULL);
 	}
 }
 
@@ -346,7 +346,7 @@ void parseAndFormat( FILE* file, const std::string&  name )
 		if(!g_cl_archive_path.empty())
 		{
 			popt[0] = g_cl_archive_path.c_str();
-			RiOption( "searchpath", "archive", &popt, RI_NULL );
+			RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
 		}
 
 		librib::ClearFrames();

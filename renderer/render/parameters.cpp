@@ -142,8 +142,8 @@ CqParameter* CqParameter::Create(const CqPrimvarToken& tok)
 	}
 	if(!createFunc)
 	{
-		AQSIS_THROW(XqInternal, "Could not create CqParameter for token \""
-				<< tok << "\"");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+			"Could not create CqParameter for token \"" << tok << "\"");
 	}
 	return createFunc(tok.name().c_str(), tok.count());
 }

@@ -40,7 +40,7 @@ namespace Aqsis
 {
 
 /// An exception for internal usage by the tiff handling code.
-AQSIS_DECLARE_EXCEPTION(XqUnknownTiffFormat, XqInternal);
+AQSIS_DECLARE_XQEXCEPTION(XqUnknownTiffFormat, XqInternal);
 
 //------------------------------------------------------------------------------
 // Helper functions and data for dealing with tiff <--> header conversions.
@@ -306,8 +306,9 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
         case Channel_Unsigned8:
 			sampleFormat = SAMPLEFORMAT_UINT;
 			break;
-	default:
-			AQSIS_THROW(XqInternal, "Cannot handle provided pixel sample format");
+		default:
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Limit,
+				"Cannot handle provided pixel sample format");
 			break;
     }
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
@@ -537,7 +538,8 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
 		if(planarConfig != PLANARCONFIG_CONTIG)
-			AQSIS_THROW(XqUnknownTiffFormat, "non-interlaced channels detected");
+			AQSIS_THROW_XQERROR(XqUnknownTiffFormat, EqE_BadFile,
+				"non-interlaced channels detected");
 		// Check that the origin is at the topleft of the image.
 		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
 				ORIENTATION_TOPLEFT);
@@ -547,7 +549,8 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 				<< "TIFF orientation for file \"" << m_fileHandle->fileName()
 				<< "\" is not top-left.  This may result in unexpected results\n";
 			/// \todo Decide whether to use generic TIFF loading facilities for this.
-			//AQSIS_THROW(XqUnknownTiffFormat, "orientation isn't top-left");
+			//AQSIS_THROW_XQERROR(XqUnknownTiffFormat, EqE_Limit,
+			//	"orientation isn't top-left");
 		}
 	}
 	catch(XqUnknownTiffFormat& e)
@@ -560,9 +563,9 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		char errBuf[1024];
 		if(!TIFFRGBAImageOK(tiffPtr(), errBuf))
 		{
-			AQSIS_THROW(XqBadTexture, "Cannot use generic RGBA tiff interface for file \""
-					<< m_fileHandle->fileName() << "\".  "
-					<< "Libtiff says: " << errBuf);
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Cannot use generic RGBA tiff interface for file \"" << m_fileHandle->fileName()
+				<< "\".  " << "Libtiff says: " << errBuf);
 		}
 		EqChannelType chanType = Channel_Unsigned8;
 		CqChannelList& channelList = header.channelList();
@@ -639,7 +642,8 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 	channelList.clear();
 	EqChannelType chanType = guessChannelType();
 	if(chanType == Channel_TypeUnknown)
-		AQSIS_THROW(XqUnknownTiffFormat, "Cannot determine channel type");
+		AQSIS_THROW_XQERROR(XqUnknownTiffFormat, EqE_Limit,
+			"Cannot determine channel type");
 	else
 	{
 		// Determine the channel type held in the tiff
@@ -700,7 +704,8 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 			//case PHOTOMETRIC_LOGL:
 			//case PHOTOMETRIC_LOGLUV:
 			default:
-				AQSIS_THROW(XqUnknownTiffFormat, "Unknown photometric type");
+				AQSIS_THROW_XQERROR(XqUnknownTiffFormat, EqE_Limit,
+					"Unknown photometric type");
 		}
 	}
 }
@@ -727,7 +732,8 @@ CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* open
 	m_currDir(0)
 {
 	if(!m_tiffPtr)
-		AQSIS_THROW(XqInvalidFile, "Could not open tiff file \"" << fileName << "\"");
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
+			"Could not open tiff file \"" << fileName << "\"");
 }
 
 CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
@@ -737,7 +743,8 @@ CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 {
 	if(!m_tiffPtr)
 	{
-		AQSIS_THROW(XqInternal, "Could not use input stream for tiff");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_NoFile,
+			"Could not use input stream for tiff");
 	}
 }
 
@@ -748,7 +755,8 @@ CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
 {
 	if(!m_tiffPtr)
 	{
-		AQSIS_THROW(XqInternal, "Could not use output stream for tiff");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_NoFile,
+			"Could not use output stream for tiff");
 	}
 }
 
@@ -757,7 +765,8 @@ void CqTiffFileHandle::writeDirectory()
 {
 	assert(!m_isInputFile);
 	if(!TIFFWriteDirectory(m_tiffPtr.get()))
-		AQSIS_THROW(XqInternal, "Could not write tiff subimage to file");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile,
+			"Could not write tiff subimage to file");
 	++m_currDir;
 }
 
@@ -774,8 +783,8 @@ void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 	{
 		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
 		{
-			AQSIS_THROW(XqInternal, "Requested tiff directory "
-					<< dirIdx << " out of range for file \""
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+					"Requested tiff directory " << dirIdx << " out of range for file \""
 					<< m_fileName << "\"");
 		}
 		m_currDir = dirIdx;

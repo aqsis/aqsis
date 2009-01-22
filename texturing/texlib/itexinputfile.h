@@ -190,8 +190,8 @@ void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 	if(startLine < 0 || startLine >= imageHeight
 			|| startLine + numScanlines > imageHeight)
 	{
-		AQSIS_THROW(XqInternal, "Attempt to read scanlines " << startLine
-				<< " to " << startLine + numScanlines - 1
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Attempt to read scanlines "
+				<< startLine << " to " << startLine + numScanlines - 1
 				<< " outside image boundaries for file \"" << fileName() << "\".");
 	}
 	// Resize the buffer to deal with the new data

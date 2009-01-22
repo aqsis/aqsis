@@ -33,6 +33,7 @@
 #include	<cstring>
 
 #include	<boost/static_assert.hpp>
+#include	<boost/format.hpp>
 
 #include	"sstring.h"
 #include	"ddmanager.h"
@@ -293,7 +294,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	CqString strDriverFile = "";
 	CqString displayType   = m_type;
 	
-	// Get the display mapping from the "display" options, if one exists.	
+	// Get the display mapping from the "display" options, if one exists.
 	const CqString* poptDisplay = QGetRenderContext()->poptCurrent()->GetStringOption("display", displayType.c_str());
 	if (0 != poptDisplay)
 		strDriverFile = poptDisplay[0];
@@ -308,7 +309,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		{
 			// fallback to platforms default Dspy plugin mapping format
 #ifdef AQSIS_SYSTEM_WIN32
-			mappingFormat = "%s.lib";
+			mappingFormat = "%s.dll";
 #endif // AQSIS_SYSTEM_WIN32
 #ifdef AQSIS_SYSTEM_POSIX
 			mappingFormat = "lib%s.so";
@@ -317,7 +318,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			mappingFormat = "lib%s.dylib";
 #endif // AQSIS_SYSTEM_MACOSX
 		}
-		strDriverFile.Format(mappingFormat.c_str(), displayType.c_str());
+		strDriverFile = boost::str(boost::format(mappingFormat.c_str()) % displayType.c_str());
 	}
 	
 	// Load the display driver
@@ -330,28 +331,25 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		// Missing display driver?
 		if ( !fileDriver.Exists() )
 		{
-			std::ostringstream reason;
 			if (dspNo == 0)
 			{
 				// Primary display
-			        // TODO: this should bring down the renderer
-				reason << "Cannot find the primary display(" << dspNo << ") driver \"" << m_type << "\"";
-				Aqsis::log() << error << reason.str() << std::endl;
-				CloseDisplayLibrary();
-				return;
+				AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
+						"Cannot find the primary display(" << dspNo << ") driver \""
+						<< m_type << "\"");
 			}
 			else
 			{
 				// Flag secondary display as invalid
-				reason << "Cannot find the secondary display(" << dspNo << ") driver \"" << m_type << "\" (Skipping Display)";
-				Aqsis::log() << warning << reason.str() << std::endl;
+				Aqsis::log() << warning << "Cannot find the secondary display("
+					<< dspNo << ") driver \"" << m_type << "\" (Skipping Display)\n";
 				CloseDisplayLibrary();
 				return;
 			}
 		}
 		
 		// Load the dynamic object and locate the relevant symbols.
-		CqString strDriverPathAndFile = fileDriver.strRealName();		
+		CqString strDriverPathAndFile = fileDriver.strRealName();
 		m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
 		if ( m_DriverHandle != NULL )
 		{
@@ -392,21 +390,18 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		}
 		else
 		{
-			std::ostringstream reason;
 			if (dspNo == 0)
 			{
-	       			// Primary display
-			        // TODO: this should bring down the renderer
-				reason << "Could not successfully load the primary display(" << dspNo << ") driver \"" << m_type << "\"";
-				Aqsis::log() << error << reason.str() << std::endl;
-				CloseDisplayLibrary();
-				return;
+				// Primary display
+				AQSIS_THROW_XQERROR(XqInvalidFile, EqE_BadFile,
+					"Could not successfully load the primary display(" << dspNo
+					<< ") driver \"" << m_type << "\"");
 			}
 			else
 			{
 				// Flag secondary display as invalid
-				reason << "Could not successfully load the secondary display(" << dspNo << ") driver \"" << m_type << "\" (Skipping Display)";
-				Aqsis::log() << warning << reason.str() << std::endl;
+				Aqsis::log() << warning << "Could not successfully load the secondary display("
+					<< dspNo << ") driver \"" << m_type << "\" (Skipping Display)\n";
 				CloseDisplayLibrary();
 				return;
 			}
@@ -502,7 +497,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			TqInt i;
 			for ( i = 0; i < (TqInt) m_AOVSize; i++ )
 			{
-				if (componentNames.size()>i)
+			  if (static_cast<TqInt>(componentNames.size()) > i )
 				{
 
 					if (componentNames.substr(i, 1) == "r")
@@ -603,7 +598,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				// Scan through the generated names to find the ones specified, and use the index
 				// of the found name as an offset into the data from the dataOffset passed in originally.
 				TqInt iname;
-				for (iname = 0; iname < m_AOVnames.size(); iname++)
+				for (iname = 0; iname < static_cast<TqInt>(m_AOVnames.size()); iname++)
 				{
 					if (i->name == m_AOVnames[iname])
 					{
@@ -612,7 +607,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 					}
 				}
 				// If we got here, and didn't find it, add 0 as the offset, and issue an error.
-				if ( iname == m_AOVnames.size() )
+				if (iname == static_cast<TqInt>(m_AOVnames.size()))
 				{
 					Aqsis::log() << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
 					m_dataOffsets.push_back(m_AOVOffset);

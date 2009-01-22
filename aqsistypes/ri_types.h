@@ -68,6 +68,28 @@ typedef	RtPointer	RtContextHandle;
 typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
 
 #ifdef	__cplusplus
+
+/** tokenCast
+ * /brief The RISpec prevents us from doing The Right Thing (tm) and using:
+ *
+ *   typedef const char* RtToken;
+ *
+ * The RISpec clearly specifies:
+ * 
+ *   typedef char* RtToken;
+ *
+ * Whereas using const char* would have made much more sense.  At the same time, there's
+ * probably lots of code which relies on RtToken being non-const, so we can't just modify
+ * the typedef.
+ * 
+ * Please use this convience function to avoid the conversion warning when using a RtToken
+ *   warning: deprecated conversion from string constant to 'char*'
+ **/
+inline char* tokenCast(const char* token)
+{
+	return const_cast< char* >(token);
+}
+
 }
 #endif
 

@@ -27,7 +27,7 @@
 
 #include "imagechannel.h"
 
-#include "exception.h"
+#include "texexception.h"
 #include "ndspy.h"
 
 namespace Aqsis {
@@ -52,7 +52,8 @@ EqChannelType chanFormatFromPkDspy(TqInt dspyFormat)
 		case PkDspySigned8:
 			return Channel_Signed8;
 		default:
-			AQSIS_THROW(XqInternal, "Unknown PkDspy data format");
+			assert(0 && "Unknown PkDspy data format");
+			return Channel_Unsigned8;
 	}
 }
 
@@ -178,10 +179,9 @@ void CqImageChannel::requireSize(TqInt width, TqInt height) const
 	// Normal image channels cannot change size; just check that the sizes match.
 	if(m_width != width || m_height != height)
 	{
-		AQSIS_THROW_DETAIL(XqInternal,
-				"Image channel cannot produce required size", 
-				"required size = " << width << "x" << height 
-				<< "; actual size = " << m_width << "x" << m_height);
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+				"Image channel cannot produce required size, required size = "
+				<< width << "x" << height  << "; actual size = " << m_width << "x" << m_height);
 	}
 }
 

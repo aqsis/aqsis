@@ -378,7 +378,8 @@ CqMatrix CqMatrix::Inverse() const
 			if ( a.m_elements[ j ][ j ] == 0.0f )
 			{
 				// Can't invert a singular matrix!
-				//				throw XssMatrix(MatrixErr_Singular, __LINE__, ssMakeWide(__FILE__));
+				// AQSIS_THROW_XQERROR(XqInternal, EqE_Math,
+				//		"Can't invert a singular matrix!");
 			}
 			TqFloat scale = 1.0f / a.m_elements[ j ][ j ];
 			b.m_elements[ j ][ 0 ] *= scale;

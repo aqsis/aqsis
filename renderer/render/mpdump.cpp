@@ -54,7 +54,8 @@ void CqMPDump::open()
 		Aqsis::log() << info << "Creating '" << filename << "'" << std::endl;
 		size_t len_written = fwrite((void*)&sf, sizeof(int), 1, out);
 		if(len_written != 1)
-			throw(XqException("Error writing mpdump file"));
+			AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 	}
 	else
 		Aqsis::log() << error << "Could not create '" << filename << "'" << std::endl;
@@ -88,7 +89,8 @@ void CqMPDump::dumpImageInfo()
 	len_written += fwrite((void*)&width, sizeof(int), 1, out);
 	len_written += fwrite((void*)&height, sizeof(int), 1, out);
 	if(len_written != 3)
-		throw(XqException("Error writing mpdump file"));
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 }
 
 // Dump all pixel samples of the current bucket
@@ -134,7 +136,8 @@ void CqMPDump::dump(int x, int y, int idx, const SqSampleData& sd)
 	f = sd.m_Position.y();
 	len_written += fwrite((void*)&f, sizeof(TqFloat), 1, out);
 	if(len_written != 6)
-		throw(XqException("Error writing mpdump file"));
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 }
 
 // Dump a micro polygon
@@ -153,7 +156,8 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 	mpcount++;
 	size_t len_written = fwrite((void*)&id, sizeof(short), 1, out);
 	if(len_written != 1)
-		throw(XqException("Error writing mpdump file"));
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 
 	v = mp.PointA();
 	dumpVec3(v);
@@ -186,7 +190,8 @@ void CqMPDump::dumpVec3(const CqVector3D& v)
 	len_written += fwrite((void*)&y, sizeof(TqFloat), 1, out);
 	len_written += fwrite((void*)&z, sizeof(TqFloat), 1, out);
 	if(len_written != 3)
-		throw(XqException("Error writing mpdump file"));
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 }
 
 // Dump a color
@@ -200,7 +205,8 @@ void CqMPDump::dumpCol(const CqColor& c)
 	len_written += fwrite((void*)&g, sizeof(TqFloat), 1, out);
 	len_written += fwrite((void*)&b, sizeof(TqFloat), 1, out);
 	if(len_written != 3)
-		throw(XqException("Error writing mpdump file"));
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
+				"Error writing mpdump file");
 }
 
 

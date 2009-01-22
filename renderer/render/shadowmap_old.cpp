@@ -179,7 +179,7 @@ void CqShadowMapOld::LoadZFile()
 		if ( file != NULL )
 		{
 			// Save a file type and version marker
-			TqPchar origHeader = ZFILE_HEADER;
+			TqPchar origHeader = tokenCast(ZFILE_HEADER);
 			TqInt headerLength = strlen( ZFILE_HEADER );
 			boost::shared_array<TqChar> strHeader( new TqChar[ headerLength ] );
 			file.read( strHeader.get(), headerLength );

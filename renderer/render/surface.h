@@ -205,17 +205,12 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			m_Bound = pBound;
 			m_CachedBound = true;
 		}
-		/** Retrieve the cached bound. If it has never been cached then we
-		 * throw an error as this is probably a bug.
+		/** Retrieve the cached bound. assert() if it has never been cached.
 		 * \return The object bound in hybrid raster/camera space
 		 */
 		CqBound	GetCachedRasterBound()
 		{
-			if ( m_CachedBound == false && m_fDiceable )
-			{
-				Aqsis::log() << critical << "No cached bound available" << std::endl;
-			}
-
+			assert(m_CachedBound || !m_fDiceable);
 			return m_Bound;
 		}
 

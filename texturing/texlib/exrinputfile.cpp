@@ -55,7 +55,7 @@ EqChannelType channelTypeFromExr(Imf::PixelType exrType)
 		case Imf::HALF:
 			return Channel_Float16;
 		default:
-			AQSIS_THROW(XqInternal, "Unknown OpenEXR pixel type");
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Unknown OpenEXR pixel type");
 	}
 }
 
@@ -70,7 +70,8 @@ Imf::PixelType exrChannelType(EqChannelType type)
 		case Channel_Float16:
 			return Imf::HALF;
 		default:
-			AQSIS_THROW(XqInternal, "Unsupported output pixel type for OpenEXR");
+				AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+						"Unsupported output pixel type for OpenEXR");
 	}
 }
 
@@ -166,7 +167,7 @@ CqExrInputFile::CqExrInputFile(const std::string& fileName)
 	}
 	catch(Iex::BaseExc &e)
 	{
-		AQSIS_THROW(XqBadTexture, e.what());
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile, e.what());
 	}
 	convertHeader(m_exrFile->header(), m_header);
 }

@@ -55,7 +55,7 @@ CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 		zipStream->push(inStream);
 		m_inStream = m_gzipStream.get();
 #else
-		AQSIS_THROW(XqParseError, "gzipped RIB detected, but aqsis compiled without gzip support.");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Unimplement, "gzipped RIB detected, but aqsis compiled without gzip support.");
 #endif // USE_GZIPPED_RIB
 	}
 }

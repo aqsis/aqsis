@@ -66,8 +66,9 @@ class CqPrimvarTokenizer
 					case 0:
 						return std::string(m_wordBegin, m_currPos);
 					case '#': case '"':
-						AQSIS_THROW(XqParseError, "invalid character '"
-								<< *m_currPos << "' in primvar type declaration");
+						AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+							"invalid character '" << *m_currPos
+							<< "' in primvar type declaration");
 						break;
 					case '[': case ']':
 						if(m_wordBegin < m_currPos)
@@ -101,8 +102,9 @@ EnumT lowercaseEnumCast(std::string tok)
 
 
 // Helper for uniformly formatted errors.
-#define PARSE_ERROR(token, message) \
-	AQSIS_THROW(XqParseError, "invalid token \"" << token << "\": " << message)
+#define PARSE_ERROR(token, message)                               \
+	AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,    \
+		"invalid token \"" << token << "\": " << message)
 
 /** Parse a primitive variable token
  *
@@ -209,8 +211,9 @@ CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
 	assert(typeToken != 0);
 	parse(typeToken);
 	if(m_name != "")
-		AQSIS_THROW(XqParseError, "invalid token: unexpected name \""
-				<< m_name << "\" in type string \"" << typeToken << "\"");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+			"invalid token: unexpected name \"" << m_name << "\" in type string \""
+			<< typeToken << "\"");
 	m_name = name;
 	if(m_type != type_invalid && m_class == class_invalid)
 		m_class = class_uniform;

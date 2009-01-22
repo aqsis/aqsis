@@ -44,7 +44,8 @@ CqImage::~CqImage()
 void CqImage::setZoom(TqInt zoom)
 {
 	if(zoom <= 0)
-		throw XqInternal("Negative or zero zoom specified.", __FILE__, __LINE__);
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Math,
+			"Negative or zero zoom specified.");
 
 	if(zoom == m_zoom || !m_displayData)
 		return;
@@ -95,7 +96,8 @@ void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 	boost::mutex::scoped_lock lock(mutex());
 
 	if(channelList.numChannels() == 0)
-		throw XqInternal("Not enough image channels to display", __FILE__, __LINE__);
+		AQSIS_THROW_XQERROR(XqInternal, EqE_MissingData,
+			"Not enough image channels to display");
 
 	// Set up buffer for holding the full-precision data
 	m_realData = boost::shared_ptr<CqMixedImageBuffer>(

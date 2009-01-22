@@ -43,12 +43,13 @@ boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
 			return boost::shared_ptr<IqTiledTexInputFile>(new
 					CqTiledTiffInputFile(fileName));
 		case ImageFile_Unknown:
-			AQSIS_THROW(XqInvalidFile, "File \"" << fileName
-					<< "\" is not a recognised image type");
+			AQSIS_THROW_XQERROR(XqInvalidFile, EqE_BadFile,
+				"File \"" << fileName << "\" is not a recognised image type");
 			break;
 		default:
-			AQSIS_THROW(XqBadTexture, "Cannot open file \"" << fileName
-					<< "\" of type " << type << " for tiled image I/O");
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Cannot open file \"" << fileName << "\" of type " << type
+				<< " for tiled image I/O");
 			break;
 	}
 	assert(0);

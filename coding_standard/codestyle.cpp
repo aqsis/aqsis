@@ -44,8 +44,8 @@ void CqIntWrapper::setData(TqInt data)
 	// Use exceptions to indicate failure conditions.
 	if (data < minValue)
 	{
-		AQSIS_THROW(XqException, "requested data = " << data
-				<< "smaller than minimum value = " << minValue);
+		AQSIS_THROW_XQERROR(XqException, EqE_Bug, "requested data = "
+			<< data << "smaller than minimum value = " << minValue);
 	}
 	// If runtime performance is critical (for example, in an inline function),
 	// consider using assert().  Assert signifies not only that an error

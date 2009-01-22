@@ -28,8 +28,8 @@
 #include	<ctype.h>
 #include	<fstream>
 #include	<string.h>
-#include        <boost/filesystem/path.hpp>
-#include        <boost/filesystem/operations.hpp>
+#include	<boost/filesystem/path.hpp>
+#include	<boost/filesystem/operations.hpp>
 
 #include	"exception.h"
 
@@ -46,8 +46,9 @@ std::string findFileInPath(const std::string& fileName, const std::string& searc
 	searchFile.Open(fileName.c_str(), searchPath.c_str());
 	if(!searchFile.IsValid())
 	{
-		AQSIS_THROW_DETAIL(XqInvalidFile, "Could not find file \"" << fileName << "\"",
-				"full search path: \"" << searchPath << "\"");
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
+			"Could not find file \"" << fileName << "\" full search path: \""
+			<< searchPath << "\"");
 	}
 	return std::string(searchFile.strRealName().c_str());
 }

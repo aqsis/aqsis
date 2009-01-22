@@ -18,62 +18,22 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
- * \brief Exception implementation
+ * \brief Declares classes for the aqsis exception heiarchy
  */
 
 #include "exception.h"
 
 #include <ostream>
+#include <boost/filesystem/path.hpp>
 
-namespace Aqsis {
-
-//------------------------------------------------------------------------------
-XqException::XqException (const std::string& reason)
-: std::runtime_error (reason), m_file ("Unspecified"), m_line (0)
+namespace Aqsis
 {
-}
 
-XqException::XqException (const std::string& reason, const std::string& detail,
-const std::string& file, const unsigned int line)
-: std::runtime_error (reason), m_detail (detail), m_file (file), m_line (line)
-{
-}
-
-XqException::XqException (const std::string& reason,	const std::string& file,
-const unsigned int line)
-: std::runtime_error (reason), m_file (file), m_line (line)
-{
-}
-
-const std::string& XqException::detail () const
-{
-	return m_detail;
-}
-
-std::pair<std::string, unsigned int> XqException::where () const
-{
-	return std::make_pair (m_file, m_line);
-}
-
-const char* XqException::description () const
-{
-	return "General error";
-}
-
-XqException::~XqException () throw ()
-{
-}
-
-	
-//------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& o, const XqException& e)
 {
-	o << e.description () << " (" << e.where ().first << "," << e.where ().second << ")";	
-	o <<": " << e.what ();
-	
-	if (!e.detail ().empty ())
-		o << " - " << e.detail ();
-		
+	o << e.description () << " (" << boost::filesystem::path(e.where().first).leaf() << ", " << e.where().second << ")";
+	o <<": " << e.what();
+
 	return o;
 }
 

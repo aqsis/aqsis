@@ -571,7 +571,10 @@ class CqRenderer : public IqRenderer
 		std::vector<CqObjectInstance*>	m_ObjectInstances;
 		bool	m_bObjectOpen;
 
-		RtErrorFunc	m_pErrorHandler;		///< A pointer to the error hadling function.
+		// Error Handling
+		RtErrorFunc m_pErrorHandler; ///< pointer to the error handling function
+		bool        m_abortRender;   ///< bool to signal the renderer to cleanup and exit
+
 		RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
 		RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
 		RtFunc	m_pPreWorldFunction;	///< A pointer to the function called just prior to starting the world.

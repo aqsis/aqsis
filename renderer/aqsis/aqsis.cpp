@@ -334,21 +334,23 @@ RtVoid PreWorld()
 {
 	if ( g_cl_fb )
 	{
-		RiDisplay( "aqsis", "framebuffer", "rgb", NULL );
+		RiDisplay( tokenCast("aqsis"), tokenCast("framebuffer"), tokenCast("rgb"), NULL );
 	}
 	else if ( !g_cl_type.empty() )
 	{
-		RiDisplay( "aqsis", const_cast<char*>(g_cl_type.c_str()), const_cast<char*>(g_cl_mode.c_str()), NULL );
+		RiDisplay( tokenCast("aqsis"), tokenCast(g_cl_type.c_str()),
+				   tokenCast(g_cl_mode.c_str()), NULL );
 	}
 	else if ( !g_cl_addtype.empty() )
 	{
-		RiDisplay( "+aqsis", const_cast<char*>(g_cl_addtype.c_str()), const_cast<char*>(g_cl_mode.c_str()), NULL );
+		RiDisplay( tokenCast("+aqsis"), tokenCast(g_cl_addtype.c_str()),
+				   tokenCast(g_cl_mode.c_str()), NULL );
 	}
 
 	// Pass the statistics option onto Aqsis.
 	if ( g_cl_endofframe >= 0 )
 	{
-		RiOption( "statistics", "endofframe", &g_cl_endofframe, RI_NULL );
+		RiOption( tokenCast("statistics"), "endofframe", &g_cl_endofframe, RI_NULL );
 	}
 
 	// Pass the crop window onto Aqsis.
@@ -405,7 +407,8 @@ RtVoid PreWorld()
 
 			size_t len_written = fwrite(i->c_str(),1,i->length(),writePipe);
 			if(len_written != i->length())
-				throw(Aqsis::XqException("Error forwarding pipe data"));
+				AQSIS_THROW_XQERROR(Aqsis::XqInvalidFile, RIE_SYSTEM,
+					"Error forwarding pipe data");
 			fflush(writePipe);
 			fclose(writePipe);
 
@@ -743,11 +746,11 @@ int main( int argc, const char** argv )
  */
 RtInt RenderFile( FILE* file, std::string&  name )
 {
-        RtInt returnCode = RIE_NOERROR;
-        
-        librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
-        
-	RiBegin( "aqsis" );
+	RtInt returnCode = RIE_NOERROR;
+	
+	librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
+	
+	RiBegin( RI_NULL );
 	
 	if ( !g_cl_nostandard )
 		librib::StandardDeclarations( renderengine );
@@ -755,7 +758,7 @@ RtInt RenderFile( FILE* file, std::string&  name )
 	if ( g_cl_echoapi )
 	{
 		RtInt echoapi = 1;
-		RiOption( "statistics", "echoapi", &echoapi, RI_NULL );
+		RiOption( tokenCast("statistics"), "echoapi", &echoapi, RI_NULL );
 	}
 	
 	/* Allow any command line arguments to override system/env settings */
@@ -764,27 +767,27 @@ RtInt RenderFile( FILE* file, std::string&  name )
 	if(!g_cl_shader_path.empty())
 	{
 		popt[0] = g_cl_shader_path.c_str();
-		RiOption( "searchpath", "shader", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "shader", &popt, RI_NULL );
 	}
 	if(!g_cl_archive_path.empty())
 	{
 		popt[0] = g_cl_archive_path.c_str();
-		RiOption( "searchpath", "archive", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
 	}
 	if(!g_cl_texture_path.empty())
 	{
 		popt[0] = g_cl_texture_path.c_str();
-		RiOption( "searchpath", "texture", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "texture", &popt, RI_NULL );
 	}
 	if(!g_cl_display_path.empty())
 	{
 		popt[0] = g_cl_display_path.c_str();
-		RiOption( "searchpath", "display", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "display", &popt, RI_NULL );
 	}
 	if(!g_cl_procedural_path.empty())
 	{
 		popt[0] = g_cl_procedural_path.c_str();
-		RiOption( "searchpath", "procedural", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "procedural", &popt, RI_NULL );
 	}
 	
 	RiProgressHandler( &PrintProgress );
@@ -809,9 +812,9 @@ RtInt RenderFile( FILE* file, std::string&  name )
 		librib::CleanupDeclarations( *renderengine );
 	
 	// get the last error code
-        returnCode = RiLastError;
+	returnCode = RiLastError;
 	
 	librib2ri::DestroyRIBEngine( renderengine );
 
-        return returnCode;
+	return returnCode;
 }

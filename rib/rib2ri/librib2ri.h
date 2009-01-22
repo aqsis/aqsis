@@ -51,7 +51,7 @@ class RIB_SHARE Engine :
 		virtual	RtVoid	RiElseIf( RtString condition);
 		virtual	RtVoid	RiIfEnd( );
 		virtual	RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message );
-		//virtual	RtVoid	RiErrorHandler(RtErrorFunc handler);
+		virtual	RtVoid	RiErrorHandler( RtErrorFunc handler );
 		virtual	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message );
 		virtual	RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message );
 		virtual	RtVoid	RiExposure( RtFloat gain, RtFloat gamma );
@@ -137,9 +137,10 @@ class RIB_SHARE Engine :
 		virtual RtVoid	RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual RtVoid	RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 );
 
-		virtual RtFilterFunc	GetFilterFunction( RtToken type );
-		virtual RtBasis*	GetBasisMatrix( RtToken type );
-		virtual	RtFunc	GetProceduralFunction( RtToken type );
+		virtual RtFilterFunc GetFilterFunction( RtToken type );
+		virtual RtBasis*     GetBasisMatrix( RtToken type );
+		virtual RtFunc       GetProceduralFunction( RtToken type );
+		virtual RtErrorFunc  GetErrorFunction( RtToken token );
 };
 
 extern "C"

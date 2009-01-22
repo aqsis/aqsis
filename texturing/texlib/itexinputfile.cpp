@@ -68,8 +68,9 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 #				ifdef USE_OPENEXR
 				file.reset(new CqExrInputFile(fileName));
 #				else
-				AQSIS_THROW(XqInvalidFile, "Cannot open file \"" << fileName
-						<< "\": Aqsis was compiled without OpenEXR support");
+				AQSIS_THROW_XQERROR(XqInvalidFile, EqE_Unimplement,
+						"Cannot open file \"" << fileName << "\""
+						": Aqsis was compiled without OpenEXR support");
 #				endif
 				break;
 			case ImageFile_AqsisZfile:
@@ -92,7 +93,8 @@ boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileNa
 	if(file)
 		return file;
 	else
-		AQSIS_THROW(XqInvalidFile, "Unknown file type for \"" << fileName << "\"");
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_BadFile, "Unknown file type for \""
+				<< fileName << "\"");
 
 	assert(0);
 	return boost::shared_ptr<IqTexInputFile>();
@@ -110,8 +112,9 @@ boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::stri
 		return file;
 	else
 	{
-		AQSIS_THROW(XqInvalidFile, "File \"" << fileName << "\" of type "
-				<< type << " doesn't support multiple subimages.");
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_BadFile,
+			"File \"" << fileName << "\" of type " << type << " doesn't support "
+			"multiple subimages.");
 	}
 
 	assert(0);

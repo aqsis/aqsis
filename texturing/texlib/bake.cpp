@@ -156,11 +156,11 @@ void bakeToTiff(const char* in, const char* tiffname, int bake)
 
 	/* Ignore the first line of text eg. Aqsis bake file */
 	if(std::fgets( buffer, 200, bakefile ) == NULL)
-		AQSIS_THROW(XqInternal, "Could not read bake file header");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Could not read bake file header");
 	// Read the second line of text to configure how many floats we expect to
 	// read
 	if(std::fgets( buffer, 200, bakefile ) == NULL || std::sscanf(buffer, "%d", &elmsize) == 0)
-		AQSIS_THROW(XqBadTexture, "Could not read length of bake file \"" << in << "\"");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile, "Could not read length of bake file \"" << in << "\"");
 
 	while ( std::fgets( buffer, 200, bakefile ) != NULL )
 	{

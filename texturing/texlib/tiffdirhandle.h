@@ -343,8 +343,8 @@ T CqTiffDirHandle::tiffTagValue(const ttag_t tag) const
 	}
 	else
 	{
-		AQSIS_THROW(XqInternal, "Could not get tiff tag " << tag
-				<< " from file \"" << m_fileHandle->fileName() << "\"");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Could not get tiff tag "
+				<< tag << " from file \"" << m_fileHandle->fileName() << "\"");
 	}
 }
 
@@ -363,9 +363,9 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value)
 {
 	if(!TIFFSetField(tiffPtr(), tag, value))
 	{
-		AQSIS_THROW(XqInternal, "Could not set tiff tag " << tag
-				<< " to value " << value
-				<< " for file \"" << m_fileHandle->fileName() << "\"");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_System, "Could not set tiff tag "
+				<< tag << " to value " << value << " for file \""
+				<< m_fileHandle->fileName() << "\"");
 	}
 }
 
@@ -375,9 +375,9 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag,
 {
 	if(!TIFFSetField(tiffPtr(), tag, static_cast<uint32>(values.size()), &values[0]))
 	{
-		AQSIS_THROW(XqInternal, "Could not set array tiff tag " << tag
-				<< " starting with value " << values[0]
-				<< " for file \"" << m_fileHandle->fileName() << "\"");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_System, "Could not set array tiff tag "
+				<< tag << " starting with value " << values[0] << " for file \""
+				<< m_fileHandle->fileName() << "\"");
 	}
 }
 
@@ -395,7 +395,7 @@ boost::shared_array<T> tiffMalloc(const tsize_t size)
 {
 	boost::shared_array<T> buf(reinterpret_cast<T*>(_TIFFmalloc(size)), _TIFFfree);
 	if(!buf)
-		AQSIS_THROW(XqInternal, "Could not allocate memory with _TIFFmalloc");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_NoMem, "Could not allocate memory with _TIFFmalloc");
 	return buf;
 }
 

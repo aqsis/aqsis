@@ -41,7 +41,7 @@ namespace Aqsis {
  *     number/shape of subtextures.
  *   * Trying to use a non-floating point texture as a shadow map.
  */
-AQSIS_DECLARE_EXCEPTION(XqBadTexture, XqInternal);
+AQSIS_DECLARE_XQEXCEPTION(XqBadTexture, XqInternal);
 
 } // namespace Aqsis
 

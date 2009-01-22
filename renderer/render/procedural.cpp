@@ -318,7 +318,8 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
 		if( pipe( run_proc->fd_in ) || pipe( run_proc->fd_out ) )
 		{
-			throw(XqException("Error creating pipes"));
+			AQSIS_THROW_XQERROR(XqInternal, EqE_System,
+				"Error creating pipes");
 		}
 
 		run_proc->pid = fork() ;
@@ -381,11 +382,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 			close( STDIN_FILENO );
 			if(dup( run_proc->fd_out[0] )<0)
-				throw(XqException("Error preparing stdin for RunProgram"));
+				AQSIS_THROW_XQERROR(XqInternal, EqE_System,
+					"Error preparing stdin for RunProgram");
 			//			setvbuf( stdin, NULL, _IONBF, 0 );
 			close( STDOUT_FILENO );
 			if(dup( run_proc->fd_in[1] )<0)
-				throw(XqException("Error preparing stdout for RunProgram"));
+				AQSIS_THROW_XQERROR(XqInternal, EqE_System,
+					"Error preparing stdout for RunProgram");
 			//			setvbuf( stdout, NULL, _IONBF, 0 );
 
 			execvp( arg_values[0], arg_values );

@@ -258,8 +258,8 @@ inline const typename AttrTagType::type& CqTexFileHeader::find() const
 	const_iterator iter = m_attributeMap.find(CqTypeInfoHolder(typeid(AttrTagType)));
 	if(iter == m_attributeMap.end())
 	{
-		AQSIS_THROW(XqInternal, "Requested attribute \"" << AttrTagType::name()
-				<< "\" not present in file header");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Requested attribute \""
+				<< AttrTagType::name() << "\" not present in file header");
 	}
 	return boost::any_cast<const typename AttrTagType::type&>(iter->second);
 }

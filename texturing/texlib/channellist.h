@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "channelinfo.h"
-#include "exception.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
@@ -258,8 +258,8 @@ inline TqInt CqChannelList::findChannelIndex(const std::string& name) const
 {
 	TqInt index = findChannelIndexImpl(name);
 	if(index < 0)
-		AQSIS_THROW(XqInternal, "Cannot find image channel with name \""
-				<< name << "\"");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+			"Cannot find image channel with name \"" << name << "\"");
 	return static_cast<TqInt>(index);
 }
 

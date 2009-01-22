@@ -32,6 +32,10 @@ RtInt RiLastError;
 
 namespace libri2rib {
 
+/** \todo remove this method as this should be going through the current error
+ * handler. Workout what todo with the a severe level here, does it make sense
+ * that the throw point should flag the error to abort the engine.
+ */
 RtVoid CqError::manage ()
 {
 	RiLastError = m_Code;

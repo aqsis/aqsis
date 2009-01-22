@@ -122,8 +122,8 @@ inline CqPrimvarToken CqTokenDictionary::parseAndLookup(
 			token = pos->second;
 		else
 		{
-			AQSIS_THROW(XqValidation, "undeclared token \""
-					<< tokenStr << "\" encountered");
+			AQSIS_THROW_XQERROR(XqValidation, EqE_Syntax,
+				"undeclared token \"" << tokenStr << "\" encountered");
 		}
 	}
 	return token;

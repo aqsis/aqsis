@@ -50,8 +50,9 @@ boost::shared_ptr<IqShadowSampler> IqShadowSampler::create(
 			}
 		case Channel_Float16: // float16 may be useful in future...
 		default:
-			AQSIS_THROW(XqBadTexture, "Cannot use non-float32 pixels in texture file \""
-					<< file->fileName() << "\" as a shadowmap");
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Cannot use non-float32 pixels in texture file \"" << file->fileName()
+				<< "\" as a shadowmap");
 			break;
 	}
 	// shut up compiler warnings - return a null texture

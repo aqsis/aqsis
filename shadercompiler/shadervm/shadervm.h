@@ -114,7 +114,7 @@ union UsProgramElement
  * unrecognized shadops or is otherwise invalid, this is the exception to
  * throw.
  */
-AQSIS_DECLARE_EXCEPTION(XqBadShader, XqInternal);
+AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
 
 
 //----------------------------------------------------------------------

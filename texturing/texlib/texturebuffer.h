@@ -442,7 +442,7 @@ void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& 
 {
 	if(channelList.sharedChannelType() != getChannelTypeEnum<T>())
 	{
-		AQSIS_THROW(XqInternal, "CqTextureBuffer channel type is"
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "CqTextureBuffer channel type is"
 				"incompatible with new channel type requested");
 	}
 	resize(width, height, channelList.bytesPerPixel()/sizeof(T));

@@ -146,7 +146,7 @@ void CqRibRequestHandler::handleRequest(const std::string& requestName,
 		TqRequestHandler handler = pos->second;
 		(this->*handler)(parser);
 	}
-	AQSIS_THROW(XqParseError, "unrecognized request");
+	AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken, "unrecognized request");
 }
 
 
@@ -257,7 +257,8 @@ inline RtFilterFunc toRiType(const CqFilterFuncString& filterName)
 	else if(filterName == "disk")        return &::RiDiskFilter;
 	else
 	{
-		AQSIS_THROW(XqParseError, "unknown filter function \"" << filterName << "\"");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+			"unknown filter function \"" << filterName << "\"");
 		return 0;
 	}
 }
@@ -269,8 +270,8 @@ inline RtErrorFunc toRiType(const CqErrorHandlerString& handlerName)
     else if(handlerName == "abort")  return &::RiErrorAbort;
 	else
 	{
-		AQSIS_THROW(XqParseError, "unknown error handler function \""
-				<< handlerName << "\"");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+			"unknown error handler function \"" << handlerName << "\"");
 		return 0;
 	}
 }
@@ -278,7 +279,8 @@ inline RtErrorFunc toRiType(const CqErrorHandlerString& handlerName)
 inline RtMatrix& toRiType(const SqRtMatrixHolder& matrixHolder)
 {
 	if(matrixHolder.matrix.size() != 16)
-		AQSIS_THROW(XqParseError, "RtMatrix must have 16 elements");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			"RtMatrix must have 16 elements");
 	return *reinterpret_cast<RtMatrix*>(
 			const_cast<TqFloat*>(&matrixHolder.matrix[0]));
 }
@@ -307,8 +309,8 @@ class CqStringToBasis : public IqStringToBasis
 			else if(name == "power")       return &::RiPowerBasis;
 			else
 			{
-				AQSIS_THROW(XqParseError, "unknown basis name \""
-						<< name << "\"");
+				AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+					"unknown basis name \"" << name << "\"");
 			}
 		}
 };
@@ -444,7 +446,8 @@ void CqRibRequestHandler::handleIlluminate(CqRibParser& parser)
 		std::string name = parser.getString();
 		TqNamedLightMap::const_iterator pos = m_namedLightMap.find(name);
 		if(pos == m_namedLightMap.end())
-			AQSIS_THROW(XqParseError, "undeclared light name \"" << name << "\"");
+			AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+					"undeclared light name \"" << name << "\"");
 		lightHandle = pos->second;
 	}
 	else
@@ -452,7 +455,8 @@ void CqRibRequestHandler::handleIlluminate(CqRibParser& parser)
 		TqInt sequencenumber = parser.getInt();
 		TqLightMap::const_iterator pos = m_lightMap.find(sequencenumber);
 		if(pos == m_lightMap.end())
-			AQSIS_THROW(XqParseError, "undeclared light number " << sequencenumber);
+			AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+					"undeclared light number " << sequencenumber);
 		lightHandle = pos->second;
 	}
 	TqInt onoff = parser.getInt();
@@ -488,8 +492,9 @@ void CqRibRequestHandler::handleSubdivisionMesh(CqRibParser& parser)
 		TqInt ntags = tags.size();
 		if(static_cast<TqInt>(nargs->size()) != ntags*2)
 		{
-			AQSIS_THROW(XqParseError, "Invalid nargs length " << nargs->size()
-					<< "; expected length 2*ntags = " << 2*ntags);
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+					"Invalid nargs length " << nargs->size() << "; expected length "
+					"2*ntags = " << 2*ntags);
 		}
 
 		// Check that the argument arrays have length consistent with nargs
@@ -502,12 +507,14 @@ void CqRibRequestHandler::handleSubdivisionMesh(CqRibParser& parser)
 		}
 		if(intArgsLen != static_cast<TqInt>(intargs->size()))
 		{
-			AQSIS_THROW(XqParseError, "Invalid intargs length " << intargs->size()
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+					"Invalid intargs length " << intargs->size()
 					<< "; expected length = " << intArgsLen);
 		}
 		if(floatArgsLen != static_cast<TqInt>(floatargs->size()))
 		{
-			AQSIS_THROW(XqParseError, "Invalid floatargs length " << floatargs->size()
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+					"Invalid floatargs length " << floatargs->size()
 					<< "; expected length = " << floatArgsLen);
 		}
 	}
@@ -562,8 +569,8 @@ void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
     else if(procName == "DynamicLoad")   subdivideFunc = &::RiProcDynamicLoad;
 	else
 	{
-		AQSIS_THROW(XqParseError, "unknown procedural function \""
-				<< procName << "\"");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+					"unknown procedural function \"" << procName << "\"");
 	}
 
 	// get argument string array.
@@ -596,7 +603,8 @@ void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
 	// get procedural bounds
 	const CqRibParser::TqFloatArray& bound = parser.getFloatArray();
 	if(bound.size() != 6)
-		AQSIS_THROW(XqParseError, "expected 6 elements in RtBound array");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+					"expected 6 elements in RtBound array");
 
 	RiProcedural(pdata, toRiType(bound), subdivideFunc, &::RiProcFree);
 }
@@ -627,7 +635,8 @@ void CqRibRequestHandler::handleObjectInstance(CqRibParser& parser)
 		std::string name = parser.getString();
 		TqNamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);
 		if(pos == m_namedObjectMap.end())
-			AQSIS_THROW(XqParseError, "undeclared object name \"" << name << "\"");
+			AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+					"undeclared object name \"" << name << "\"");
 		RiObjectInstance(pos->second);
 	}
 	else
@@ -635,7 +644,8 @@ void CqRibRequestHandler::handleObjectInstance(CqRibParser& parser)
 		TqInt sequencenumber = parser.getInt();
 		TqObjectMap::const_iterator pos = m_objectMap.find(sequencenumber);
 		if(pos == m_objectMap.end())
-			AQSIS_THROW(XqParseError, "undeclared object number " << sequencenumber);
+			AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+					"undeclared object number " << sequencenumber);
 		RiObjectInstance(pos->second);
 	}
 }

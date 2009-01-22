@@ -232,7 +232,7 @@ int main( int argc, const char** argv )
 		level = Aqsis::DEBUG;
 	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
 
-	RiBegin( "teqser" );
+	RiBegin(RI_NULL);
 
 	if ( g_envcube )
 	{

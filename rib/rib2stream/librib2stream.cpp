@@ -528,17 +528,22 @@ RendermanInterface::RtVoid Stream::RiConnectShaderLayers( RtToken type, RtToken 
 
 RendermanInterface::RtFilterFunc Stream::GetFilterFunction( RtToken type )
 {
-	m_Stream << "Filter: " << type << std::endl;
+	m_Stream << "GetFilterFunction(): " << type << std::endl;
 	return ( NULL );
 }
 RendermanInterface::RtBasis* Stream::GetBasisMatrix( RtToken type )
 {
-	m_Stream << "Filter: " << type << std::endl;
+	m_Stream << "GetBasisMatrix(): " << type << std::endl;
 	return ( NULL );
 }
 RendermanInterface::RtFunc Stream::GetProceduralFunction( RtToken type )
 {
-	m_Stream << "Filter: " << type << std::endl;
+	m_Stream << "GetProceduralFunction(): " << type << std::endl;
+	return ( NULL );
+}
+RendermanInterface::RtErrorFunc Stream::GetErrorFunction( RtToken type )
+{
+	m_Stream << "GetErrorFunction(): " << type << std::endl;
 	return ( NULL );
 }
 

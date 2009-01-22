@@ -46,8 +46,8 @@ CqZInputFile::CqZInputFile(const std::string& fileName)
 {
 	if(!m_fileStream.is_open())
 	{
-		AQSIS_THROW(XqInvalidFile, "Could not open z-file \""
-				<< fileName << "\" for reading");
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
+				"Could not open z-file \"" << fileName << "\" for reading");
 	}
 	readHeader(m_fileStream, m_header);
 	m_dataBegin = m_fileStream.tellg();
@@ -93,7 +93,8 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 	if(!std::equal(buf.begin(), buf.begin() + magicNumSize, zFileMagicNum)
 		|| inStream.gcount() != magicNumSize)
 	{
-		AQSIS_THROW(XqBadTexture, "Magic number missmatch in zfile");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Magic number missmatch in zfile");
 	}
 
 	// Read in Aqsis version.  We require this to match the current aqsis version.
@@ -101,33 +102,38 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 	if(!std::equal(buf.begin(), buf.begin() + versionNumSize, VERSION_STR)
 		|| inStream.gcount() != versionNumSize)
 	{
-		AQSIS_THROW(XqBadTexture, "zfile was created with a different aqsis version");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_Version,
+				"zfile was created with a different aqsis version");
 	}
 
 	// Read in map width
 	TqUint width = 0;
 	inStream.read(reinterpret_cast<char*>(&width), sizeof(width));
 	if(inStream.gcount() != sizeof(width))
-		AQSIS_THROW(XqBadTexture, "cannot read width from aqsis z-file");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+			"cannot read width from aqsis z-file");
 	// Read in map height
 	TqUint height = 0;
 	inStream.read(reinterpret_cast<char*>(&height), sizeof(height));
 	if(inStream.gcount() != sizeof(height))
-		AQSIS_THROW(XqBadTexture, "cannot read height from aqsis z-file");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+			"cannot read height from aqsis z-file");
 
 	// Read world to camera transformation matrix
 	CqMatrix worldToCamera;
 	worldToCamera.SetfIdentity(false);
 	inStream.read(reinterpret_cast<char*>(worldToCamera.pElements()), 16*sizeof(TqFloat));
 	if(inStream.gcount() != 16*sizeof(TqFloat))
-		AQSIS_THROW(XqBadTexture, "could not read world to camera matrix from aqsis z-file");
+		AQSIS_THROW_XQERROR(XqBadTexture,EqE_BadFile,
+			"could not read world to camera matrix from aqsis z-file");
 
 	// Read world to screen transformation matrix
 	CqMatrix worldToScreen;
 	worldToScreen.SetfIdentity(false);
 	inStream.read(reinterpret_cast<char*>(worldToScreen.pElements()), 16*sizeof(TqFloat));
 	if(inStream.gcount() != 16*sizeof(TqFloat))
-		AQSIS_THROW(XqBadTexture, "could not read world to screen matrix from aqsis z-file");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+			"could not read world to screen matrix from aqsis z-file");
 
 	// Save the read header attributes into the file header.
 	header.setWidth(width);

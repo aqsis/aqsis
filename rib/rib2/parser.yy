@@ -394,9 +394,9 @@ request : complete_request
 					// RISpec 3.2 isn't very clear, not sure if stripping the '#'s is right or not
 					if( $1[0] == '#' && $1[1] == '#' ) // Structure comment
 					{
-						pArchiveCallback("structure", "%s", &( $1[2]) ); 
+						pArchiveCallback(tokenCast("structure"), tokenCast("%s"), &( $1[2]) ); 
 					} else {  // User Data Record comment
-						pArchiveCallback("comment", "%s", &( $1[1]) ); 
+						pArchiveCallback(tokenCast("comment"), tokenCast("%s"), &( $1[1]) ); 
 					};
 				};
 				DiscardStringValue($1);
@@ -920,7 +920,7 @@ complete_request
 		}
 
                 RendermanInterface::RtFunc pFunc = ParseCallbackInterface->GetProceduralFunction( $2 );
-                RendermanInterface::RtFunc pFreeFunc = ParseCallbackInterface->GetProceduralFunction( "RiProcFree" );
+                RendermanInterface::RtFunc pFreeFunc = ParseCallbackInterface->GetProceduralFunction( tokenCast("RiProcFree") );
 		ParseCallbackInterface->RiProcedural(pdata, &(*$4)[0], (void (*)(void ) ) pFunc, pFreeFunc);
                 DiscardStringValue($2);
                 DiscardArrayValue($3);
@@ -1213,16 +1213,9 @@ complete_request
 			}
 	|	errorhandler string
 			{
-/*
-				// TODO: names should be stored elsewhere.
-				if(strcmp($2,"ignore")==0)
-					ParseCallbackInterface->RiErrorHandler(&ParseCallbackInterface->RiErrorIgnore);
-				else if(strcmp($2,"print")==0)
-					ParseCallbackInterface->RiErrorHandler(&ParseCallbackInterface->RiErrorPrint);
-				else if(strcmp($2,"abort")==0)
-					ParseCallbackInterface->RiErrorHandler(&ParseCallbackInterface->RiErrorAbort);
-*/
-									}
+				RendermanInterface::RtErrorFunc pErrorFunc = ParseCallbackInterface->GetErrorFunction($2);
+				ParseCallbackInterface->RiErrorHandler(pErrorFunc);
+			}
 	|	errorignore
 			{ printf("ERRORIGNORE\n"); }
 	|	errorprint

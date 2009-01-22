@@ -31,8 +31,7 @@
 
 namespace Aqsis {
 
-bool TestCondition(RtString condition, RtString where);
-
+bool TestCondition(RtString condition, const char* where);
 
 //-----------------------------------------------------------------------
 

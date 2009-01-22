@@ -30,6 +30,7 @@
 #include	<math.h>
 #include	<list>
 #include	<stdio.h>
+#include    <stdlib.h>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -133,26 +134,28 @@ bool   IfOk = true;
 #define EXCEPTION_TRY_GUARD try {
 
 /// Exception catch guard to prevent exceptions propagating outside of Ri calls
-#define EXCEPTION_CATCH_GUARD(procName) 							\
-}																	\
-catch(const XqValidation& e)										\
-{																	\
-	Aqsis::log() << error << "ignoring invalid " << procName << ":\n" \
-		<< error << e.what() << "\n";								\
-}																	\
-catch(const XqException& e)											\
-{																	\
-	Aqsis::log() << error << e << "\n";								\
-}																	\
-catch(const std::exception& e)										\
-{																	\
-	Aqsis::log() << error << "std::exception encountered in "		\
-		<< procName << ": " << e.what() << "\n";					\
-}																	\
-catch(...)															\
-{																	\
-	Aqsis::log() << error << "unknown exception encountered in "	\
-		<< procName << "\n";										\
+#define EXCEPTION_CATCH_GUARD(procName)                                        \
+}                                                                              \
+catch(const XqValidation& e)                                                   \
+{                                                                              \
+	Aqsis::log() << error << "ignoring invalid " << procName << ":\n"          \
+		<< error << e.what() << "\n";                                          \
+}                                                                              \
+catch(const XqException& e)                                                    \
+{                                                                              \
+	QGetRenderContext()->pErrorHandler()(e.code(),                             \
+										 EqE_Error,                            \
+										 const_cast<char*>(e.what()));         \
+}                                                                              \
+catch(const std::exception& e)                                                 \
+{                                                                              \
+	Aqsis::log() << error << "std::exception encountered in "                  \
+		<< procName << ": " << e.what() << "\n";                               \
+}                                                                              \
+catch(...)                                                                     \
+{                                                                              \
+	Aqsis::log() << error << "unknown exception encountered in "               \
+		<< procName << "\n";                                                   \
 }
 
 //---------------------------------------------------------------------
@@ -166,106 +169,106 @@ CqRandom worldrand;
 // Interface parameter token strings.
 
 
-RtToken	RI_FRAMEBUFFER	= "framebuffer";
-RtToken	RI_FILE	= "file";
-RtToken	RI_RGB	= "rgb";
-RtToken	RI_RGBA	= "rgba";
-RtToken	RI_RGBZ	= "rgbz";
-RtToken	RI_RGBAZ	= "rgbaz";
-RtToken	RI_A	= "a";
-RtToken	RI_Z	= "z";
-RtToken	RI_AZ	= "az";
-RtToken	RI_MERGE	= "merge";
-RtToken	RI_ORIGIN	= "origin";
-RtToken	RI_PERSPECTIVE	= "perspective";
-RtToken	RI_ORTHOGRAPHIC	= "orthographic";
-RtToken	RI_HIDDEN	= "hidden";
-RtToken	RI_PAINT	= "paint";
-RtToken	RI_CONSTANT	= "constant";
-RtToken	RI_SMOOTH	= "smooth";
-RtToken	RI_FLATNESS	= "flatness";
-RtToken	RI_FOV	= "fov";
+RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
+RtToken RI_FILE             = tokenCast("file");
+RtToken RI_RGB              = tokenCast("rgb");
+RtToken RI_RGBA             = tokenCast("rgba");
+RtToken RI_RGBZ             = tokenCast("rgbz");
+RtToken RI_RGBAZ            = tokenCast("rgbaz");
+RtToken RI_A                = tokenCast("a");
+RtToken RI_Z                = tokenCast("z");
+RtToken RI_AZ               = tokenCast("az");
+RtToken RI_MERGE            = tokenCast("merge");
+RtToken RI_ORIGIN           = tokenCast("origin");
+RtToken RI_PERSPECTIVE      = tokenCast("perspective");
+RtToken RI_ORTHOGRAPHIC     = tokenCast("orthographic");
+RtToken RI_HIDDEN           = tokenCast("hidden");
+RtToken RI_PAINT            = tokenCast("paint");
+RtToken RI_CONSTANT         = tokenCast("constant");
+RtToken RI_SMOOTH           = tokenCast("smooth");
+RtToken RI_FLATNESS         = tokenCast("flatness");
+RtToken RI_FOV              = tokenCast("fov");
 
-RtToken	RI_AMBIENTLIGHT	= "ambientlight";
-RtToken	RI_POINTLIGHT	= "pointlight";
-RtToken	RI_DISTANTLIGHT	= "distantlight";
-RtToken	RI_SPOTLIGHT	= "spotlight";
-RtToken	RI_INTENSITY	= "intensity";
-RtToken	RI_LIGHTCOLOR	= "lightcolor";
-RtToken	RI_FROM	= "from";
-RtToken	RI_TO	= "to";
-RtToken	RI_CONEANGLE	= "coneangle";
-RtToken	RI_CONEDELTAANGLE	= "conedeltaangle";
-RtToken	RI_BEAMDISTRIBUTION	= "beamdistribution";
-RtToken	RI_MATTE	= "matte";
-RtToken	RI_METAL	= "metal";
-RtToken	RI_PLASTIC	= "plastic";
-RtToken	RI_PAINTEDPLASTIC	= "paintedplastic";
-RtToken	RI_KA	= "Ka";
-RtToken	RI_KD	= "Kd";
-RtToken	RI_KS	= "Ks";
-RtToken	RI_ROUGHNESS	= "roughness";
-RtToken	RI_SPECULARCOLOR	= "specularcolor";
-RtToken	RI_DEPTHCUE	= "depthcue";
-RtToken	RI_FOG	= "fog";
-RtToken	RI_BUMPY	= "bumpy";
-RtToken	RI_MINDISTANCE	= "mindistance";
-RtToken	RI_MAXDISTANCE	= "maxdistance";
-RtToken	RI_BACKGROUND	= "background";
-RtToken	RI_DISTANCE	= "distance";
+RtToken RI_AMBIENTLIGHT     = tokenCast("ambientlight");
+RtToken RI_POINTLIGHT       = tokenCast("pointlight");
+RtToken RI_DISTANTLIGHT     = tokenCast("distantlight");
+RtToken RI_SPOTLIGHT        = tokenCast("spotlight");
+RtToken RI_INTENSITY        = tokenCast("intensity");
+RtToken RI_LIGHTCOLOR       = tokenCast("lightcolor");
+RtToken RI_FROM             = tokenCast("from");
+RtToken RI_TO               = tokenCast("to");
+RtToken RI_CONEANGLE        = tokenCast("coneangle");
+RtToken RI_CONEDELTAANGLE   = tokenCast("conedeltaangle");
+RtToken RI_BEAMDISTRIBUTION = tokenCast("beamdistribution");
+RtToken RI_MATTE            = tokenCast("matte");
+RtToken RI_METAL            = tokenCast("metal");
+RtToken RI_PLASTIC          = tokenCast("plastic");
+RtToken RI_PAINTEDPLASTIC   = tokenCast("paintedplastic");
+RtToken RI_KA               = tokenCast("Ka");
+RtToken RI_KD               = tokenCast("Kd");
+RtToken RI_KS               = tokenCast("Ks");
+RtToken RI_ROUGHNESS        = tokenCast("roughness");
+RtToken RI_SPECULARCOLOR    = tokenCast("specularcolor");
+RtToken RI_DEPTHCUE         = tokenCast("depthcue");
+RtToken RI_FOG              = tokenCast("fog");
+RtToken RI_BUMPY            = tokenCast("bumpy");
+RtToken RI_MINDISTANCE      = tokenCast("mindistance");
+RtToken RI_MAXDISTANCE      = tokenCast("maxdistance");
+RtToken RI_BACKGROUND       = tokenCast("background");
+RtToken RI_DISTANCE         = tokenCast("distance");
 
-RtToken	RI_RASTER	= "raster";
-RtToken	RI_SCREEN	= "screen";
-RtToken	RI_CAMERA	= "camera";
-RtToken	RI_WORLD	= "world";
-RtToken	RI_OBJECT	= "object";
-RtToken	RI_INSIDE	= "inside";
-RtToken	RI_OUTSIDE	= "outside";
-RtToken	RI_LH	= "lh";
-RtToken	RI_RH	= "rh";
-RtToken	RI_P	= "P";
-RtToken	RI_PZ	= "Pz";
-RtToken	RI_PW	= "Pw";
-RtToken	RI_N	= "N";
-RtToken	RI_NP	= "Np";
-RtToken	RI_CS	= "Cs";
-RtToken	RI_OS	= "Os";
-RtToken	RI_S	= "s";
-RtToken	RI_T	= "t";
-RtToken	RI_ST	= "st";
-RtToken	RI_BILINEAR	= "bilinear";
-RtToken	RI_BICUBIC	= "bicubic";
-RtToken	RI_CUBIC	= "cubic";
-RtToken	RI_LINEAR	= "linear";
-RtToken	RI_PRIMITIVE	= "primitive";
-RtToken	RI_INTERSECTION	= "intersection";
-RtToken	RI_UNION	= "union";
-RtToken	RI_DIFFERENCE	= "difference";
-RtToken	RI_WRAP	= "wrap";
-RtToken	RI_NOWRAP	= "nowrap";
-RtToken	RI_PERIODIC	= "periodic";
-RtToken	RI_NONPERIODIC	= "nonperiodic";
-RtToken	RI_CLAMP	= "clamp";
-RtToken	RI_BLACK	= "black";
-RtToken	RI_IGNORE	= "ignore";
-RtToken	RI_PRINT	= "print";
-RtToken	RI_ABORT	= "abort";
-RtToken	RI_HANDLER	= "handler";
-RtToken	RI_IDENTIFIER	= "identifier";
-RtToken	RI_NAME	= "name";
-RtToken	RI_CURRENT	= "current";
-RtToken	RI_SHADER	= "shader";
-RtToken	RI_EYE	= "eye";
-RtToken	RI_NDC	= "ndc";
-RtToken	RI_AMPLITUDE	=	"amplitude";
-RtToken	RI_COMMENT	=	"comment";
-RtToken	RI_CONSTANTWIDTH	=	"constantwidth";
-RtToken	RI_KR	=	"Kr";
-RtToken	RI_SHINYMETAL	=	"shinymetal";
-RtToken	RI_STRUCTURE	=	"structure";
-RtToken	RI_TEXTURENAME	=	"texturename";
-RtToken	RI_VERBATIM	=	"verbatim";
-RtToken	RI_WIDTH	=	"width";
+RtToken RI_RASTER           = tokenCast("raster");
+RtToken RI_SCREEN           = tokenCast("screen");
+RtToken RI_CAMERA           = tokenCast("camera");
+RtToken RI_WORLD            = tokenCast("world");
+RtToken RI_OBJECT           = tokenCast("object");
+RtToken RI_INSIDE           = tokenCast("inside");
+RtToken RI_OUTSIDE          = tokenCast("outside");
+RtToken RI_LH               = tokenCast("lh");
+RtToken RI_RH               = tokenCast("rh");
+RtToken RI_P                = tokenCast("P");
+RtToken RI_PZ               = tokenCast("Pz");
+RtToken RI_PW               = tokenCast("Pw");
+RtToken RI_N                = tokenCast("N");
+RtToken RI_NP               = tokenCast("Np");
+RtToken RI_CS               = tokenCast("Cs");
+RtToken RI_OS               = tokenCast("Os");
+RtToken RI_S                = tokenCast("s");
+RtToken RI_T                = tokenCast("t");
+RtToken RI_ST               = tokenCast("st");
+RtToken RI_BILINEAR         = tokenCast("bilinear");
+RtToken RI_BICUBIC          = tokenCast("bicubic");
+RtToken RI_CUBIC            = tokenCast("cubic");
+RtToken RI_LINEAR           = tokenCast("linear");
+RtToken RI_PRIMITIVE        = tokenCast("primitive");
+RtToken RI_INTERSECTION     = tokenCast("intersection");
+RtToken RI_UNION            = tokenCast("union");
+RtToken RI_DIFFERENCE       = tokenCast("difference");
+RtToken RI_WRAP             = tokenCast("wrap");
+RtToken RI_NOWRAP           = tokenCast("nowrap");
+RtToken RI_PERIODIC         = tokenCast("periodic");
+RtToken RI_NONPERIODIC      = tokenCast("nonperiodic");
+RtToken RI_CLAMP            = tokenCast("clamp");
+RtToken RI_BLACK            = tokenCast("black");
+RtToken RI_IGNORE           = tokenCast("ignore");
+RtToken RI_PRINT            = tokenCast("print");
+RtToken RI_ABORT            = tokenCast("abort");
+RtToken RI_HANDLER          = tokenCast("handler");
+RtToken RI_IDENTIFIER       = tokenCast("identifier");
+RtToken RI_NAME             = tokenCast("name");
+RtToken RI_CURRENT          = tokenCast("current");
+RtToken RI_SHADER           = tokenCast("shader");
+RtToken RI_EYE              = tokenCast("eye");
+RtToken RI_NDC              = tokenCast("ndc");
+RtToken RI_AMPLITUDE        = tokenCast("amplitude");
+RtToken RI_COMMENT          = tokenCast("comment");
+RtToken RI_CONSTANTWIDTH    = tokenCast("constantwidth");
+RtToken RI_KR               = tokenCast("Kr");
+RtToken RI_SHINYMETAL       = tokenCast("shinymetal");
+RtToken RI_STRUCTURE        = tokenCast("structure");
+RtToken RI_TEXTURENAME      = tokenCast("texturename");
+RtToken RI_VERBATIM         = tokenCast("verbatim");
+RtToken RI_WIDTH            = tokenCast("width");
 
 RtBasis	RiBezierBasis	= {{ -1.0f,       3.0f,      -3.0f,       1.0f},
                          {  3.0f,      -6.0f,       3.0f,       0.0f},
@@ -383,7 +386,7 @@ void parameterConstraintCheck(bool condition, const T1& val1, const T2& val2,
 		out << "parameter check "
 			<< "\"" << val1Str << " " << cmpStr << " " << val2Str << "\""
 			<< " failed: [" << val1 << " not " << cmpStr << " " << val2 << "]";
-		throw XqValidation(out.str(), __FILE__, __LINE__);
+		AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency, out.str());
 	}
 }
 
@@ -597,7 +600,7 @@ void SetDefaultRiOptions( void )
 	{
 		popt[0] = getenv("AQSIS_SHADER_PATH");
 		Aqsis::log() << info << "Applying AQSIS_SHADER_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "shader", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "shader", &popt, RI_NULL );
 	}
 	else
 	{
@@ -608,7 +611,7 @@ void SetDefaultRiOptions( void )
 	{
 		popt[0] = getenv("AQSIS_ARCHIVE_PATH");
 		Aqsis::log() << info << "Applying AQSIS_ARCHIVE_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "archive", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
 	}
 	else
 	{
@@ -619,7 +622,7 @@ void SetDefaultRiOptions( void )
 	{
 		popt[0] = getenv("AQSIS_TEXTURE_PATH");
 		Aqsis::log() << info << "Applying AQSIS_TEXTURE_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "texture", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "texture", &popt, RI_NULL );
 	}
 	else
 	{
@@ -630,7 +633,7 @@ void SetDefaultRiOptions( void )
 	{
 		popt[0] = getenv("AQSIS_DISPLAY_PATH");
 		Aqsis::log() << info << "Applying AQSIS_DISPLAY_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "display", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "display", &popt, RI_NULL );
 	}
 	else
 	{
@@ -641,7 +644,7 @@ void SetDefaultRiOptions( void )
 	{
 		popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
 		Aqsis::log() << info << "Applying AQSIS_PROCEDURAL_PATH (" << popt[0] << ")" << std::endl;
-		RiOption( "searchpath", "procedural", &popt, RI_NULL );
+		RiOption( tokenCast("searchpath"), "procedural", &popt, RI_NULL );
 	}
 	else
 	{
@@ -650,7 +653,7 @@ void SetDefaultRiOptions( void )
 
 	// Setup a default Display
 	Aqsis::log() << info << "Setting up default display: Display \"ri.pic\" \"file\" \"rgba\"" << std::endl;
-	RiDisplay( "ri.pic", "file", "rgba", NULL );
+	RiDisplay( tokenCast("ri.pic"), tokenCast("file"), tokenCast("rgba"), NULL );
 }
 
 //----------------------------------------------------------------------
@@ -877,8 +880,6 @@ RtVoid	RiWorldBegin()
 		if( filter != RiBoxFilter || xwidth != 1 || ywidth != 1)
 			Aqsis::log() << warning << "When rendering a Z buffer the filter mode should be \"box\" with a width of 1x1" << std::endl;
 	}
-
-
 
 	QGetRenderContext()->SetWorldBegin();
 	
@@ -1561,9 +1562,9 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 		}
 		const TqUlong hash = CqString::hash(tok.name().c_str());
 		if ( hash == RIH_DEPTHFILTER )
-			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
+		  RiOption( tokenCast("Hider"), "depthfilter", ( RtToken ) values[ i ], NULL );
 		else if ( hash == RIH_JITTER )
-			RiOption( "Hider", "jitter", ( RtFloat* ) values[ i ], NULL );
+		  RiOption( tokenCast("Hider"), "jitter", ( RtFloat* ) values[ i ], NULL );
 	}
 
 	EXCEPTION_CATCH_GUARD("RiHiderV")
@@ -4913,8 +4914,8 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	aValues.push_back(bunny.Points());
 	aValues.push_back(bunny.S());
 	aValues.push_back(bunny.T());
-	aTags.push_back("catmull-clark");
-	aTags.push_back("interpolateboundary");
+	aTags.push_back(tokenCast("catmull-clark"));
+	aTags.push_back(tokenCast("interpolateboundary"));
 
 	static TqInt params[] = { 0, 0 };
 
@@ -5418,36 +5419,58 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 
 
 //----------------------------------------------------------------------
-// RiErrorIgnore
-// Function used by RiErrorHandler to continue after errors.
-//
+// Standard Error Handlers
+
+/** RiErrorIgnore
+ * Standard error handler where the error is ignored and no diagnostic
+ * message is generated
+ * \param code indicates the type of error
+ * \param severity indicates how serious the error is
+ * \param message is a character string containing an error message
+ */
 RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
+	RiLastError = code;
+	
 	return ;
 }
 
-
-//----------------------------------------------------------------------
-// RiErrorPrint
-// Function used by RiErrorHandler to print an error message to stdout and continue.
-//
+/** RiErrorPrint
+ * Standard error handler where a diagnostic message is generated for the error. The
+ * rendering system will attempt to ignore this erroneous information and continue
+ * rendering
+ * \param code indicates the type of error
+ * \param severity indicates how serious the error is
+ * \param message is a character string containing an error message
+ */
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
-	// Don't use this!
-	Aqsis::log() << error << "RiError: " << code << " : " << severity << " : " << message << std::endl;
+	// Store the code in RiLastError
+	RiErrorIgnore(code, severity, message);
+	
+	// Print the error message
+	Aqsis::log() << error << "(" << code << ", " << severity << ") " << message << "\n";
+	
 	return ;
 }
 
-
-//----------------------------------------------------------------------
-// RiErrorAbort
-// Function used by RiErrorHandler to print and error and stop.
-//
+/** RiErrorPrint
+ * Standard error handler where the first error will cause a diagnostic message to be
+ * generated and the rendering system will immediately terminate
+ * \param code indicates the type of error
+ * \param severity indicates how serious the error is
+ * \param message is a character string containing an error message
+ */
 RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
+	// Store the code in RiLastError &  Print the error message
+	RiErrorPrint(code, severity, message);
+	
+	// Abort the engine
+	std::exit(code);
+	
 	return ;
 }
-
 
 //----------------------------------------------------------------------
 // RiSubdivisionMesh

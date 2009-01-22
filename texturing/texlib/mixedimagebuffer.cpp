@@ -104,7 +104,8 @@ void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source,
 		TqInt topLeftX, TqInt topLeftY)
 {
 	if(source.m_channelList.numChannels() != m_channelList.numChannels())
-		AQSIS_THROW(XqInternal, "Number of source and destination channels do not match");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Limit,
+			"Number of source and destination channels do not match");
 
 	// compute size and top left coords of region to copy.
 	TqInt copyWidth = 0;
@@ -270,7 +271,7 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 					new CqImageChannelTyped<TqUint8>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		default:
-			throw XqInternal("Unknown channel type", __FILE__, __LINE__);
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Unknown channel type");
 	}
 }
 

@@ -178,8 +178,8 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 	TqInt numScanlines = min(buffer.height(), header().height() - currentLine());
 	if(buffer.width() != header().width())
 	{
-		AQSIS_THROW(XqInternal, "Cannot put pixels from buffer into file \""
-				<< fileName() << "\": buffer has incorrect width.");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Cannot put pixels from buffer "
+				"into file \"" << fileName() << "\": buffer has incorrect width.");
 	}
 	if(numScanlines > 0)
 	{
@@ -190,7 +190,8 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 	}
 	else
 	{
-		AQSIS_THROW(XqInternal, "Attempt to write buffer off the end of an image");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+			"Attempt to write buffer off the end of an image");
 	}
 }
 

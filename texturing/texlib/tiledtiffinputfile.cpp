@@ -54,13 +54,14 @@ CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
 		SqTileInfo* tileInfo= tmpHeader->findPtr<Attr::TileInfo>();
 		if(!tileInfo)
 		{
-			AQSIS_THROW(XqBadTexture, "TIFF file \"" << fileName
-					<< "\" has non-tiled sub-image " << i);
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile, "TIFF file \""
+				<< fileName << "\" has non-tiled sub-image " << i);
 		}
 		// Check that we can natively read the pixel format held in the TIFF.
 		if(tmpHeader->find<Attr::TiffUseGenericRGBA>())
 		{
-			AQSIS_THROW(XqBadTexture, "Unsupported TIFF pixel format");
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Unsupported TIFF pixel format");
 		}
 		if(i == 0)
 		{
@@ -74,8 +75,8 @@ CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
 			if(m_tileInfo.width != tileInfo->width
 					|| m_tileInfo.height != tileInfo->height)
 			{
-				AQSIS_THROW(XqBadTexture, "TIFF file \"" << fileName
-						<< "\" has unequal tile sizes for sub-images");
+				AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile, "TIFF file \""
+						<< fileName << "\" has unequal tile sizes for sub-images");
 			}
 		}
 		// Grab store the width and height of the current subimage.

@@ -156,7 +156,8 @@ void createMipmap(const TexSrcT& texSrc, const EqChannelType chanType,
 			createMipmapTypedHalf(texSrc, outFile, filterInfo, wrapModes);
 			break;
 		default:
-			AQSIS_THROW(XqBadTexture, "Cannot create mipmap for input channel types");
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_Limit,
+				"Cannot create mipmap for input channel types");
 	}
 }
 
@@ -257,14 +258,17 @@ void checkCubeFaceCompatible(const IqTexInputFile& file1, const IqTexInputFile& 
 	const CqTexFileHeader& h1 = file1.header();
 	const CqTexFileHeader& h2 = file2.header();
 	if(h1.width() != h2.width())
-		AQSIS_THROW(XqBadTexture, "cube face widths not compatible for "
-				<< file1.fileName() << " and " << file2.fileName());
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"cube face widths not compatible for " << file1.fileName()
+				<< " and " << file2.fileName());
 	if(h1.height() != h2.height())
-		AQSIS_THROW(XqBadTexture, "cube face heights not compatible for "
-				<< file1.fileName() << " and " << file2.fileName());
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"cube face heights not compatible for " << file1.fileName()
+				<< " and " << file2.fileName());
 	if(!h1.channelList().channelTypesMatch(h2.channelList()))
-		AQSIS_THROW(XqBadTexture, "cube face channels not compatible for "
-				<< file1.fileName() << " and " << file2.fileName());
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"cube face channels not compatible for " << file1.fileName()
+				<< " and " << file2.fileName());
 }
 
 /** \brief Fill an output file header with texture file metadata
@@ -431,16 +435,16 @@ void makeShadow(const std::string& inFileName, const std::string& outFileName,
 	// possible to relax this requirement to also allow 16-bit OpenEXR "half"
 	// data...
 	if(header.channelList().sharedChannelType() != Channel_Float32)
-		AQSIS_THROW(XqBadTexture, "input for shadow map creation must "
-				"contain 32 bit floating point data");
+		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"input for shadow map creation must contain 32 bit floating point data");
 
 	// Ensure that the screen and camera transformation matrices are present.
 	// If not, the texture will be useless for shadow mapping.
 	if( header.findPtr<Attr::WorldToCameraMatrix>() == 0
 			|| header.findPtr<Attr::WorldToCameraMatrix>() == 0 )
 	{
-		AQSIS_THROW(XqBadTexture, "world->camera and world->screen"
-				" matrices not specified in input file");
+		AQSIS_THROW_XQERROR(XqBadTexture,EqE_BadFile,
+				"world->camera and world->screen matrices not specified in input file");
 	}
 
 	// Set some attributes in the new file header.
@@ -474,16 +478,18 @@ void makeOcclusion(const std::vector<std::string>& inFiles,
 
 		// Ensure that the header contains 32-bit floating poing data.
 		if(header.channelList().sharedChannelType() != Channel_Float32)
-			AQSIS_THROW(XqBadTexture, "input for occlusion map creation doesn't "
-					"contain 32 bit floating point data in " << *fName);
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"input for occlusion map creation doesn't contain 32 bit floating point"
+				"data in " << *fName);
 
 		// Ensure that the screen and camera transformation matrices are
 		// present.
 		if( header.findPtr<Attr::WorldToCameraMatrix>() == 0
 				|| header.findPtr<Attr::WorldToCameraMatrix>() == 0 )
 		{
-			AQSIS_THROW(XqBadTexture, "world->camera and world->screen"
-					" matrices not specified in input file" << *fName);
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"world->camera and world->screen matrices not specified in input file"
+				<< *fName);
 		}
 
 		if(!outFile)

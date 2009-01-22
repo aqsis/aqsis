@@ -120,8 +120,8 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		case Channel_TypeUnknown:
 			break;
 	}
-	AQSIS_THROW(XqBadTexture, "Could not create a texture sampler for file \"" 
-			<< file->fileName() << "\"");
+	AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+		"Could not create a texture sampler for file \"" << file->fileName() << "\"");
 	return createDummy();
 }
 

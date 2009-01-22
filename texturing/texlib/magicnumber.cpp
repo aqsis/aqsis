@@ -31,7 +31,7 @@
 #include <fstream>
 #include <vector>
 
-#include "exception.h"
+#include "texexception.h"
 
 namespace Aqsis {
 
@@ -62,7 +62,7 @@ EqImageFileType guessFileType(const std::string& fileName)
 	std::ifstream inFile(fileName.c_str());
 	if(!inFile)
 	{
-		AQSIS_THROW(XqInvalidFile, "Cannot open file \""
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile, "Cannot open file \""
 				<< fileName << "\" for reading");
 	}
 	return guessFileType(inFile);

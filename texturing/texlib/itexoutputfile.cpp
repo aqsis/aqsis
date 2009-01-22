@@ -66,12 +66,12 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	// Check some of the header data to make sure it's minimally sane...
 	if(header.width() <= 0 || header.height() <= 0)
 	{
-		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Cannot open \"" << fileName
 				<< "\" - image width and height cannot be negative or zero.");
 	}
 	if(header.channelList().numChannels() == 0)
 	{
-		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
+		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Cannot open \"" << fileName
 				<< "\" - no data channels present.");
 	}
 
@@ -87,11 +87,11 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 		case ImageFile_Exr:
 		case ImageFile_Jpg:
 		case ImageFile_Png:
-			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-					<< "\" - unimplemented file type \"" << fileType << "\"");
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Unimplement, "Cannot open \""
+					<< fileName << "\" - unimplemented file type \"" << fileType << "\"");
 		default:
-			AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-					<< "\" - unknown file type \"" << fileType << "\"");
+			AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Cannot open \""
+					<< fileName << "\" - unknown file type \"" << fileType << "\"");
 	}
 
 	return newFile;
@@ -112,8 +112,8 @@ boost::shared_ptr<IqMultiTexOutputFile> IqMultiTexOutputFile::open(
 	}
 	else
 	{
-		AQSIS_THROW(XqInternal, "Cannot open \"" << fileName
-				<< "\" - file type \"" << fileType << "\""
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Incapable, "Cannot open \""
+				<< fileName << "\" - file type \"" << fileType << "\""
 				<< " doesn't support multiple subimages");
 	}
 }

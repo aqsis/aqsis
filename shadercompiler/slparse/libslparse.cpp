@@ -26,6 +26,7 @@
 #include "libslparse.h"
 
 #include "logging.h"
+#include "exception.h"
 #include "parsenode.h"
 #include "vardef.h"
 
@@ -67,9 +68,15 @@ bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& 
 		yyparse();
 		TypeCheck();
 	}
-	catch(CqString strError)
+	catch(XqParseError e)
 	{
-		( *ParseErrorStream ) << error << strError.c_str() << std::endl;
+		( *ParseErrorStream ) << error << e.what() << std::endl;
+		( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
+		return false;
+	}
+	catch(...)
+	{
+		( *ParseErrorStream ) << error << "unknown exception" << std::endl;
 		( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
 		return false;
 	}

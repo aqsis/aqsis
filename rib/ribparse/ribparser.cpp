@@ -71,7 +71,8 @@ TqInt CqRibParser::getInt()
 {
 	CqRibToken tok = m_lex->get();
 	if(tok.type() != CqRibToken::INTEGER)
-		AQSIS_THROW(XqParseError, "Found " << tok << " expected INTEGER");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			"Found " << tok << " expected INTEGER");
 	return tok.intVal();
 }
 
@@ -85,7 +86,8 @@ TqFloat CqRibParser::getFloat()
 		case CqRibToken::FLOAT:
 			return tok.floatVal();
 		default:
-			AQSIS_THROW(XqParseError, "Found " << tok << " expected float");
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"Found " << tok << " expected FLOAT");
 			return 0;
 	}
 }
@@ -94,7 +96,8 @@ std::string CqRibParser::getString()
 {
 	CqRibToken tok = m_lex->get();
 	if(tok.type() != CqRibToken::STRING)
-		AQSIS_THROW(XqParseError, "Found " << tok << " expected STRING");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			"Found " << tok << " expected STRING");
 	return tok.stringVal();
 }
 
@@ -107,7 +110,7 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
 	CqRibToken tok = lex.get();
 	if(tok.type() != CqRibToken::ARRAY_BEGIN)
 	{
-		AQSIS_THROW(XqParseError,
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 				lex.pos() << ": expected " << arrayType
 				<< " array, got token " << tok);
 	}
@@ -144,7 +147,7 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 				parsing = false;
 				break;
 			default:
-				AQSIS_THROW(XqParseError,
+				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 						m_lex->pos() << ": unexpected token " << tok
 						<< "while reading integer array");
 				break;
@@ -177,7 +180,7 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 					parsing = false;
 					break;
 				default:
-					AQSIS_THROW(XqParseError,
+					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 							m_lex->pos() << ": unexpected token " << tok
 							<< "while reading float array");
 					break;
@@ -186,8 +189,9 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 
 		if(length >= 0 && static_cast<TqInt>(buf.size()) != length)
 		{
-			AQSIS_THROW(XqParseError, "expected " << length
-					<< " float array componenets, got " << buf.size());
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"expected " << length << " float array componenets, got "
+				<< buf.size());
 		}
 	}
 	else if(length >= 0)
@@ -199,7 +203,8 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 	}
 	else
 	{
-		AQSIS_THROW(XqParseError, "unexpected token " << m_lex->peek()
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"unexpected token " << m_lex->peek()
 				<< " while reading float array");
 	}
 	return buf;
@@ -223,9 +228,9 @@ const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 				parsing = false;
 				break;
 			default:
-				AQSIS_THROW(XqParseError,
-						m_lex->pos() << ": unexpected token " << tok
-						<< "while reading string array");
+				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+					m_lex->pos() << ": unexpected token " << tok
+					<< "while reading string array");
 				break;
 		}
 	}
@@ -241,7 +246,8 @@ const CqRibParser::TqBasis* CqRibParser::getBasis(
 			{
 				const CqRibParser::TqFloatArray& basis = getFloatArray();
 				if(basis.size() != 16)
-					AQSIS_THROW(XqParseError, "basis array must be of length 16");
+					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+						"basis array must be of length 16");
 				// Note: This cast is a little ugly, but should only cause
 				// problems in the *very* odd case that the alignment of
 				// RtBasis and RtFloat* is different.
@@ -250,7 +256,8 @@ const CqRibParser::TqBasis* CqRibParser::getBasis(
 		case CqRibToken::STRING:
 			return stringToBasis.getBasis(getString());
 		default:
-			AQSIS_THROW(XqParseError, "expected string or float array for basis");
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"expected string or float array for basis");
 			return 0;
 	}
 }
@@ -313,7 +320,7 @@ void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 			case CqRibToken::STRING:
 				break;
 			default:
-				AQSIS_THROW(XqParseError,
+				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 						"parameter name string expected in param list, got "
 						<< m_lex->peek());
 		}

@@ -247,8 +247,9 @@ TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& aS
 				return cCurves;
 			}
 			default:
-			throw;
+				assert(0 && "Unknown split decision");
 	}
+	return 0;
 }
 
 

@@ -159,8 +159,9 @@ TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& a
 			}
 
 			default:
-			throw;
+				assert(0);
 	}
+	return 0;
 }
 
 

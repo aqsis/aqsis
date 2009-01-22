@@ -117,7 +117,7 @@ inline bool Condition(const T& A, const T& B, TqUlong comp)
  *                IfBegin "$limits:bgcolor == [0.2 0.2 0.4]"
  * \param   where  it is from IfBegin, ElseIf for printfs debugging.
  */
-bool TestCondition(RtString condition, RtString where)
+bool TestCondition(RtString condition, const char* where)
 {
 
 	char StringA[80];

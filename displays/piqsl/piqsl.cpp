@@ -436,9 +436,8 @@ int main( int argc, char** argv )
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
 
 	window = new CqPiqslMainWindow();
-	char* internalArgs[] = {
-		"piqsl"
-	};
+	char arg1[] = "piqsl";
+	char* internalArgs[] = {arg1};
 	window->show(1, internalArgs);
 
 

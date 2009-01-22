@@ -60,7 +60,7 @@ const char* CqTiffInputFile::fileName() const
 void CqTiffInputFile::setImageIndex(TqInt newIndex)
 {
 	if(newIndex < 0)
-		AQSIS_THROW(XqInternal, "Cannot set negative image index.");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Cannot set negative image index.");
 	setDirectory(newIndex);
 }
 
@@ -217,8 +217,8 @@ void CqTiffInputFile::setDirectory(tdir_t newDir)
 	const tdir_t numDirs = numSubImages();
 	if(newDir >= numDirs)
 	{
-		AQSIS_THROW(XqInternal, "TIFF directory " << newDir
-				<< " out of range [0," << numDirs-1 << "]");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "TIFF directory "
+			<< newDir << " out of range [0," << numDirs-1 << "]");
 	}
 	m_imageIndex = newDir;
 

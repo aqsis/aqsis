@@ -484,12 +484,12 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{
 			PtDspyDevFormat outFormat[] =
-			    {
-			        {"r", widestFormat},
-			        {"g", widestFormat},
-			        {"b", widestFormat},
-			        {"a", widestFormat},
-			    };
+				{
+					{tokenCast("r"), widestFormat},
+					{tokenCast("g"), widestFormat},
+					{tokenCast("b"), widestFormat},
+					{tokenCast("a"), widestFormat},
+				};
 			PtDspyError err = DspyReorderFormatting(iFormatCount, format, min(iFormatCount,4), outFormat);
 			if( err != PkDspyErrorNone )
 			{

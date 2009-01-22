@@ -127,12 +127,12 @@ class CqOcclusionSampler::CqOccView
 			// TODO refactor with CqShadowSampler, also refactor this function,
 			// since it's a bit unweildly...
 			if(!file)
-				AQSIS_THROW(XqInternal,
+				AQSIS_THROW_XQERROR(XqInternal, EqE_NoFile,
 						"Cannot construct shadow map from NULL file handle");
 
 			const CqTexFileHeader& header = file->header(imageNum);
 			if(header.channelList().sharedChannelType() != Channel_Float32)
-				AQSIS_THROW(XqBadTexture,
+				AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
 						"Shadow maps must hold 32-bit floating point data");
 
 			// Get matrix which transforms the sample points to the light
@@ -141,7 +141,8 @@ class CqOcclusionSampler::CqOccView
 				= header.findPtr<Attr::WorldToCameraMatrix>();
 			if(!worldToLight)
 			{
-				AQSIS_THROW(XqBadTexture, "No world -> camera matrix found in file \""
+				AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+						"No world -> camera matrix found in file \""
 						<< file->fileName() << "\"");
 			}
 			m_currToLight = (*worldToLight) * currToWorld;
@@ -151,7 +152,8 @@ class CqOcclusionSampler::CqOccView
 				= header.findPtr<Attr::WorldToScreenMatrix>();
 			if(!worldToLightScreen)
 			{
-				AQSIS_THROW(XqBadTexture, "No world -> screen matrix found in file \""
+				AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+						"No world -> screen matrix found in file \""
 						<< file->fileName() << "\"");
 			}
 			m_currToRaster = (*worldToLightScreen) * currToWorld;

@@ -1792,7 +1792,8 @@ CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, Cq
 	// Make a new buffer to store the downsampled image in.
 	CqTextureMapBuffer* outBuf = texMap.CreateBuffer(0, 0, newWidth, newHeight, directory, protectBuffer);
 	if(outBuf->pVoidBufferData() == NULL)
-		throw XqException("Cannot create buffer for downsampled image");
+		AQSIS_THROW_XQERROR(XqInternal, EqE_NoMem,
+			"Cannot create buffer for downsampled image");
 	std::vector<TqFloat> accum(samplesPerPixel);
 	for(TqInt y = 0; y < newHeight; y++)
 	{

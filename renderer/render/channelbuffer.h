@@ -89,7 +89,8 @@ inline CqChannelBuffer::CqChannelBuffer() : m_elementSize(0)
 inline TqInt CqChannelBuffer::addChannel(const std::string& name, TqInt size)
 {
 		if(m_channels.find(name) != m_channels.end())
-			throw(std::string("Error: channel already exists"));
+			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+				"Error: channel already exists");
 
 		TqInt index = m_channels.size();
 		m_channels[name] = std::pair<int, int>(index, size);

@@ -652,10 +652,7 @@ CqTransformPtr CqRenderer::ptransWriteCurrent()
 
 void	CqRenderer::ptransSetTime( const CqMatrix& matTrans )
 {
-	if ( !m_pconCurrent )
-	{
-		throw 0;
-	}
+	assert(m_pconCurrent);
 
 	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::Set() ) );
 	m_pconCurrent->ptransSetCurrent( newTrans );
@@ -663,10 +660,7 @@ void	CqRenderer::ptransSetTime( const CqMatrix& matTrans )
 
 void	CqRenderer::ptransSetCurrentTime( const CqMatrix& matTrans )
 {
-	if ( !m_pconCurrent )
-	{
-		throw 0;
-	}
+	assert(m_pconCurrent);
 
 	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::SetCurrent() ) );
 	m_pconCurrent->ptransSetCurrent( newTrans );
@@ -674,10 +668,7 @@ void	CqRenderer::ptransSetCurrentTime( const CqMatrix& matTrans )
 
 void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 {
-	if ( !m_pconCurrent )
-	{
-		throw 0;
-	}
+	assert(m_pconCurrent);
 
 	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::ConcatCurrent() ) );
 	m_pconCurrent->ptransSetCurrent( newTrans );
@@ -1536,9 +1527,11 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 
 	CqPrimvarToken tok = m_tokenDict.parseAndLookup(name);
 	if(tok.type() == type_invalid || tok.type() == type_string)
-		AQSIS_THROW(XqValidation, "Cannot use \"" << tok << "\" as an AOV");
+		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+			"Cannot use \"" << tok << "\" as an AOV");
 	if( tok.count() != 1 )
-		AQSIS_THROW(XqValidation, "Cannot use an array as an AOV [" << tok << "]");
+		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+			"Cannot use an array as an AOV [" << tok << "]");
 
 	TqInt NumSamples = tok.storageCount();
 	SqOutputDataEntry DataEntry;

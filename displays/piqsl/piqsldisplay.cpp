@@ -187,8 +187,12 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				if (!pid)
 				{
 					// Child process executes the following after forking.
+					char arg1[] = "piqsl";
+					char arg2[] = "-i";
+					char arg3[] = "127.0.0.1";
+					char* argv[4] = {arg1, arg2, arg3, NULL};
+
 #if defined AQSIS_SYSTEM_MACOSX
-					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
 					nice(2);
@@ -204,7 +208,6 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 						free(argv[0]);
 					}
 #else
-					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					// TODO: need to pass verbosity level for logginng
 					signal(SIGHUP, SIG_IGN);
 					nice(2);

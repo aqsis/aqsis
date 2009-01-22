@@ -512,7 +512,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 			if ( !m_BoundReady )
 			{
 				Aqsis::log() << error << "MP Bound list not ready" << std::endl;
-				throw XqException("MP error");
+				AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "MP error");
 			}
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );

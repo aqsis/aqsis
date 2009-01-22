@@ -228,7 +228,7 @@ class RefCountRecord
 			else if (eventType() == Release)
 				std::cout << "Release: ";
 			else
-				throw;
+				assert(0 && "unknown event type reached");
 
 			// now put in the file name and line
 			std::cout << fileName() << ": " << lineNumber();

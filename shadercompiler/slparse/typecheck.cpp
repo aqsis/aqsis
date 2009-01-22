@@ -9,6 +9,7 @@
 #include	"aqsis.h"
 #include	"parsenode.h"
 #include	"logging.h"
+#include	"exception.h"
 
 #include	<queue>
 
@@ -205,11 +206,8 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 	{
 		if(!CheckOnly)
 		{
-			CqString strErr = "Arguments to function not valid : ";
-			strErr += strName();
-			strErr += " - ";
-			strErr += LineNo();
-			throw( strErr );
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"Arguments to function not valid : " <<  strName() <<  " - " <<  LineNo());
 		}
 		return ( Type_Nil );
 	}
@@ -424,15 +422,9 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCa
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( MyType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( MyType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -449,15 +441,10 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count,  bool& ne
 	bool temp;
 	if ( m_pChild && m_pChild->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
 	{
-		TqInt	IndexType = ( m_pChild->ResType() & Type_Mask );
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Array index must be float type : ";
-		strErr += CqParseNode::TypeName( IndexType );
-		throw( strErr );
-		return ( Type_Nil );
+		TqInt IndexType = ( m_pChild->ResType() & Type_Mask );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Array index must be float type "
+			<< ": " << CqParseNode::TypeName( IndexType ));
 	}
 
 	// Check if the variable is an array.
@@ -465,15 +452,10 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count,  bool& ne
 	// Check if the declaration marked it as an arry
 	if(!(pVar->Type()&Type_Array))
 	{
-		TqInt	myType = ( ResType() & Type_Mask );
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Attempt to access array member of non-array type : ";
-		strErr += CqParseNode::TypeName( myType );
-		throw( strErr );
-		return ( Type_Nil );
+		TqInt myType = ( ResType() & Type_Mask );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " <<  LineNo() << " : Attempt to access array member of "
+			<< "non-array type : " << CqParseNode::TypeName( myType ));
 	}
 
 	return ( CqParseNodeVariable::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
@@ -493,17 +475,10 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 	        pShaderNode() &&
 	        CqVarDef::GetVariablePtr( m_VarRef )->ReadOnly( pShaderNode()->ShaderType() ) )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot access read only variable '";
-		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
-		strErr += "' in shader type '";
-		strErr += gShaderTypeNames[ pShaderNode()->ShaderType() ];
-		strErr += "'";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot access read only variable '"
+			<< CqVarDef::GetVariablePtr( m_VarRef )->strName() << "' in shader type '"
+			<< gShaderTypeNames[ pShaderNode()->ShaderType() ] << "'");
 	}
 
 	// First check if we are assigning a varying value to a uniform variable.
@@ -513,15 +488,9 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 		assigneeIsVarying = ( pVarDef->Type() & Type_Varying ) != 0;
 	if(!assigneeIsVarying && m_fVarying)
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot assign a varying value to the uniform variable '";
-		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
-		strErr += "'";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot assign a varying value to the "
+			<< "uniform variable '" << CqVarDef::GetVariablePtr( m_VarRef )->strName() << "'");
 	}
 	
 	TqInt	MyType = ( ResType() & Type_Mask );
@@ -549,15 +518,9 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( MyType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( MyType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -575,14 +538,9 @@ TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count,  bool& need
 	if ( m_pChild->pNext() ->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
 	{
 		TqInt	IndexType = ( m_pChild->pNext() ->ResType() & Type_Mask );
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Array index must be float type : ";
-		strErr += CqParseNode::TypeName( IndexType );
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo()<< " : Array index must be float type : "
+			<< CqParseNode::TypeName( IndexType ));
 	}
 
 	return ( CqParseNodeAssign::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
@@ -624,13 +582,9 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast, bo
 
 	if ( !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot find a suitable cast for the operands.";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot find a suitable cast for the "
+			<< "operands.");
 	}
 
 	return ( Type_Nil );
@@ -669,13 +623,9 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast,
 
 	if ( !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Relational can operators only return float.";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Relational can operators only return "
+			<< "float.");
 	}
 
 	return ( Type_Nil );
@@ -754,13 +704,9 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsC
 
 	if ( !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot find a suitable cast for the operands.";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot find a suitable cast for the "
+			<< "operands.");
 	}
 
 	return ( Type_Nil );
@@ -794,15 +740,9 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast,
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( MyType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( MyType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -831,15 +771,9 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast, 
 	TqInt NewType = FindCast( m_tTo, pTypes, Count, index );
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( NewType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( NewType ) << " to any of the required types");
 	}
 	else
 	{
@@ -888,15 +822,9 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( NewType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( NewType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -936,15 +864,9 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCa
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( NewType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( NewType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -975,15 +897,9 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 
 	if ( NewType == Type_Nil && !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot convert from type ";
-		strErr += CqParseNode::TypeName( MyType );
-		strErr += " to any of the required types";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot convert from type "
+			<< CqParseNode::TypeName( MyType ) << " to any of the required types");
 	}
 	return ( NewType );
 }
@@ -1031,13 +947,9 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCast,
 
 	if ( !CheckOnly )
 	{
-		CqString strErr( strFileName() );
-		strErr += " : ";
-		strErr += LineNo();
-		strErr += " : ";
-		strErr += "Cannot find a suitable cast for the expressions.";
-		throw( strErr );
-		return ( Type_Nil );
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			strFileName() << " : " << LineNo() << " : Cannot find a suitable cast for the "
+			<< "expressions.");
 	}
 
 	return ( Type_Nil );
