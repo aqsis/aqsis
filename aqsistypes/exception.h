@@ -38,7 +38,7 @@ namespace Aqsis
 
 /** General message based exception. Specific exceptions are derived from this.
  */
-class COMMON_SHARE XqException : public std::runtime_error
+class XqException : public std::runtime_error
 {
 	public:
 
