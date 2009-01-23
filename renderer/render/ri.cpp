@@ -88,6 +88,7 @@ extern "C" __declspec(dllimport) void report_refcounts();
 
 
 #include	"ri.h"
+#include    "ri_convenience.h"
 
 #include	"sstring.h"
 
@@ -116,17 +117,6 @@ bool   IfOk = true;
 	if (!IfOk) \
 		return 0;\
 	}
-
-#define	EXTRACT_PARAMETERS(_start) \
-	va_list	pArgs; \
-	va_start( pArgs, _start ); \
-\
-	std::vector<RtToken> aTokens; \
-	std::vector<RtPointer> aValues; \
-	RtInt count = BuildParameterList( pArgs, aTokens, aValues ); 
-
-#define PASS_PARAMETERS \
-	count, aTokens.size()>0?&aTokens[0]:0, aValues.size()>0?&aValues[0]:0
 
 //---------------------------------------------------------------------
 /// Exception try guard to be inserted at the top of all Ri calls which intend
@@ -330,29 +320,6 @@ inline
 RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 {
 	CreateGPrim( boost::static_pointer_cast<CqSurface,T>( pSurface ) );
-}
-
-//----------------------------------------------------------------------
-// BuildParameterList
-// Helper function to build a parameter list to pass on to the V style functions.
-// returns a parameter count.
-
-RtInt BuildParameterList( va_list pArgs, std::vector<RtToken>& aTokens, std::vector<RtPointer>& aValues )
-{
-	RtInt count = 0;
-	RtToken pToken = va_arg( pArgs, RtToken );
-	RtPointer pValue;
-	aTokens.clear();
-	aValues.clear();
-	while ( pToken != 0 && pToken != RI_NULL )          	// While not RI_NULL
-	{
-		aTokens.push_back( pToken );
-		pValue = va_arg( pArgs, RtPointer );
-		aValues.push_back( pValue );
-		pToken = va_arg( pArgs, RtToken );
-		count++;
-	}
-	return ( count );
 }
 
 //--------------------------------------------------------------------------------
@@ -1098,9 +1065,9 @@ RtVoid	RiCropWindow( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
 //
 RtVoid	RiProjection( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiProjectionV( name, PASS_PARAMETERS );
+	RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -1326,9 +1293,9 @@ RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 //
 RtVoid	RiImager( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiImagerV( name, PASS_PARAMETERS );
+	RiImagerV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -1422,9 +1389,9 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 //
 RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
 {
-	EXTRACT_PARAMETERS( mode )
+	AQSIS_COLLECT_RI_PARAMETERS( mode )
 
-	RiDisplayV( name, type, mode, PASS_PARAMETERS );
+	RiDisplayV( name, type, mode, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -1521,9 +1488,9 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 //
 RtVoid	RiHider( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiHiderV( name, PASS_PARAMETERS );
+	RiHiderV( name, AQSIS_PASS_RI_PARAMETERS );
 
 }
 
@@ -1627,9 +1594,9 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 //
 RtVoid	RiOption( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiOptionV( name, PASS_PARAMETERS );
+	RiOptionV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -1967,9 +1934,9 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
 //
 RtLightHandle	RiLightSource( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	return ( RiLightSourceV( name, PASS_PARAMETERS ) );
+	return ( RiLightSourceV( name, AQSIS_PASS_RI_PARAMETERS ) );
 }
 
 
@@ -2038,9 +2005,9 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 RtLightHandle	RiAreaLightSource( RtToken name, ... )
 {
 
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	return ( RiAreaLightSourceV( name, PASS_PARAMETERS ) );
+	return ( RiAreaLightSourceV( name, AQSIS_PASS_RI_PARAMETERS ) );
 }
 
 
@@ -2101,9 +2068,9 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 //
 RtVoid	RiSurface( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiSurfaceV( name, PASS_PARAMETERS );
+	RiSurfaceV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -2158,9 +2125,9 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiAtmosphere( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiAtmosphereV( name, PASS_PARAMETERS );
+	RiAtmosphereV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -2825,9 +2792,9 @@ RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiDisplacement( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
-	RiDisplacementV( name, PASS_PARAMETERS );
+	RiDisplacementV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -3009,7 +2976,7 @@ RtVoid	RiTransformEnd()
 //
 RtVoid	RiAttribute( RtToken name, ... )
 {
-	EXTRACT_PARAMETERS( name )
+	AQSIS_COLLECT_RI_PARAMETERS( name )
 
 	const TqUlong hash = CqString::hash(name);
 
@@ -3022,7 +2989,7 @@ RtVoid	RiAttribute( RtToken name, ... )
 	if (hash == RIH_VISIBILITY)
 		return;
 
-	RiAttributeV( name, PASS_PARAMETERS );
+	RiAttributeV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -3160,9 +3127,9 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiPolygon( RtInt nvertices, ... )
 {
-	EXTRACT_PARAMETERS( nvertices )
+	AQSIS_COLLECT_RI_PARAMETERS( nvertices )
 
-	RiPolygonV( nvertices, PASS_PARAMETERS );
+	RiPolygonV( nvertices, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -3215,9 +3182,9 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 //
 RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
 {
-	EXTRACT_PARAMETERS( nverts )
+	AQSIS_COLLECT_RI_PARAMETERS( nverts )
 
-	RiGeneralPolygonV( nloops, nverts, PASS_PARAMETERS );
+	RiGeneralPolygonV( nloops, nverts, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -3371,9 +3338,9 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
                  RtInt nstrings, RtString strings[], ... )
 {
 
-	EXTRACT_PARAMETERS( strings )
+	AQSIS_COLLECT_RI_PARAMETERS( strings )
 
-	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, PASS_PARAMETERS );
+	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, AQSIS_PASS_RI_PARAMETERS );
 
 	return ;
 }
@@ -3554,9 +3521,9 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
  **/
 RtVoid	RiPoints( RtInt nvertices, ... )
 {
-	EXTRACT_PARAMETERS( nvertices )
+	AQSIS_COLLECT_RI_PARAMETERS( nvertices )
 
-	RiPointsV( nvertices, PASS_PARAMETERS );
+	RiPointsV( nvertices, AQSIS_PASS_RI_PARAMETERS );
 
 	return ;
 }
@@ -3651,9 +3618,9 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 
 RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ... )
 {
-	EXTRACT_PARAMETERS( wrap )
+	AQSIS_COLLECT_RI_PARAMETERS( wrap )
 
-	RiCurvesV( type, ncurves, nvertices, wrap, PASS_PARAMETERS );
+	RiCurvesV( type, ncurves, nvertices, wrap, AQSIS_PASS_RI_PARAMETERS );
 
 	return ;
 }
@@ -3747,9 +3714,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 //
 RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 {
-	EXTRACT_PARAMETERS( verts )
+	AQSIS_COLLECT_RI_PARAMETERS( verts )
 
-	RiPointsPolygonsV( npolys, nverts, verts, PASS_PARAMETERS );
+	RiPointsPolygonsV( npolys, nverts, verts, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -3813,9 +3780,9 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 //
 RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... )
 {
-	EXTRACT_PARAMETERS( verts )
+	AQSIS_COLLECT_RI_PARAMETERS( verts )
 
-	RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, PASS_PARAMETERS );
+	RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, AQSIS_PASS_RI_PARAMETERS );
 
 	return ;
 }
@@ -4137,9 +4104,9 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 //
 RtVoid	RiPatch( RtToken type, ... )
 {
-	EXTRACT_PARAMETERS( type )
+	AQSIS_COLLECT_RI_PARAMETERS( type )
 
-	RiPatchV( type, PASS_PARAMETERS );
+	RiPatchV( type, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4217,9 +4184,9 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 //
 RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, ... )
 {
-	EXTRACT_PARAMETERS( vwrap )
+	AQSIS_COLLECT_RI_PARAMETERS( vwrap )
 
-	RiPatchMeshV( type, nu, uwrap, nv, vwrap, PASS_PARAMETERS );
+	RiPatchMeshV( type, nu, uwrap, nv, vwrap, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4316,9 +4283,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                   RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, ... )
 {
-	EXTRACT_PARAMETERS( vmax )
+	AQSIS_COLLECT_RI_PARAMETERS( vmax )
 
-	RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, PASS_PARAMETERS );
+	RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4443,9 +4410,9 @@ RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[]
 //
 RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiSphereV( radius, zmin, zmax, thetamax, PASS_PARAMETERS );
+	RiSphereV( radius, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4499,9 +4466,9 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 //
 RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiConeV( height, radius, thetamax, PASS_PARAMETERS );
+	RiConeV( height, radius, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4549,9 +4516,9 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 //
 RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiCylinderV( radius, zmin, zmax, thetamax, PASS_PARAMETERS );
+	RiCylinderV( radius, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4595,9 +4562,9 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 //
 RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiHyperboloidV( point1, point2, thetamax, PASS_PARAMETERS );
+	RiHyperboloidV( point1, point2, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4643,9 +4610,9 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 //
 RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiParaboloidV( rmax, zmin, zmax, thetamax, PASS_PARAMETERS );
+	RiParaboloidV( rmax, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4689,9 +4656,9 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 //
 RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiDiskV( height, radius, thetamax, PASS_PARAMETERS );
+	RiDiskV( height, radius, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4735,9 +4702,9 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 //
 RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ... )
 {
-	EXTRACT_PARAMETERS( thetamax )
+	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
 
-	RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, PASS_PARAMETERS );
+	RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4824,9 +4791,9 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 //
 RtVoid	RiGeometry( RtToken type, ... )
 {
-	EXTRACT_PARAMETERS( type )
+	AQSIS_COLLECT_RI_PARAMETERS( type )
 
-	RiGeometryV( type, PASS_PARAMETERS );
+	RiGeometryV( type, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4934,7 +4901,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	                    params,
 	                    0,
 	                    0,
-	                    PASS_PARAMETERS );
+	                    AQSIS_PASS_RI_PARAMETERS );
 	RiAttributeEnd();
 
 	} else
@@ -5130,9 +5097,9 @@ RtVoid	RiMotionEnd()
 //
 RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	EXTRACT_PARAMETERS( twidth )
+	AQSIS_COLLECT_RI_PARAMETERS( twidth )
 
-	RiMakeTextureV( pic, tex, swrap, twrap, filterfunc, swidth, twidth, PASS_PARAMETERS );
+	RiMakeTextureV( pic, tex, swrap, twrap, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
 
 }
 
@@ -5205,9 +5172,9 @@ RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToke
 //
 RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	EXTRACT_PARAMETERS( twidth )
+	AQSIS_COLLECT_RI_PARAMETERS( twidth )
 
-	RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, PASS_PARAMETERS );
+	RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
 	return ;
 }
 
@@ -5247,9 +5214,9 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 //
 RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	EXTRACT_PARAMETERS( twidth )
+	AQSIS_COLLECT_RI_PARAMETERS( twidth )
 
-	RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, PASS_PARAMETERS );
+	RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5296,9 +5263,9 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 //
 RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
 {
-	EXTRACT_PARAMETERS( shadowfile )
+	AQSIS_COLLECT_RI_PARAMETERS( shadowfile )
 
-	RiMakeShadowV( picfile, shadowfile, PASS_PARAMETERS );
+	RiMakeShadowV( picfile, shadowfile, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5336,9 +5303,9 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 //
 RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, ... )
 {
-	EXTRACT_PARAMETERS( shadowfile )
+	AQSIS_COLLECT_RI_PARAMETERS( shadowfile )
 
-	RiMakeOcclusionV( npics, picfiles, shadowfile, PASS_PARAMETERS );
+	RiMakeOcclusionV( npics, picfiles, shadowfile, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5478,9 +5445,9 @@ RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 //
 RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ... )
 {
-	EXTRACT_PARAMETERS( floatargs )
+	AQSIS_COLLECT_RI_PARAMETERS( floatargs )
 
-	RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, PASS_PARAMETERS );
+	RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, AQSIS_PASS_RI_PARAMETERS );
 }
 
 //----------------------------------------------------------------------
@@ -5638,9 +5605,9 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 {
-	EXTRACT_PARAMETERS( callback )
+	AQSIS_COLLECT_RI_PARAMETERS( callback )
 
-	RiReadArchiveV( name, callback, PASS_PARAMETERS );
+	RiReadArchiveV( name, callback, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5721,9 +5688,9 @@ RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny,
 //
 RtVoid	RiResource( RtToken handle, RtToken type, ... )
 {
-	EXTRACT_PARAMETERS( type )
+	AQSIS_COLLECT_RI_PARAMETERS( type )
 
-	RiResourceV( handle, type, PASS_PARAMETERS );
+	RiResourceV( handle, type, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5787,9 +5754,9 @@ RtVoid	RiResourceEnd()
 
 RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
 {
-	EXTRACT_PARAMETERS( layername )
+	AQSIS_COLLECT_RI_PARAMETERS( layername )
 
-	RiShaderLayerV( type, name, layername, PASS_PARAMETERS );
+	RiShaderLayerV( type, name, layername, AQSIS_PASS_RI_PARAMETERS );
 }
 
 RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
