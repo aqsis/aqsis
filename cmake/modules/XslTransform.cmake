@@ -87,22 +87,16 @@ ENDMACRO(PARSE_ARGUMENTS)
 
 # Transforms the source XML file by applying the given XSL stylesheet.
 #
-#   xsl_transform(output input [input2 input3 ...]
+#   xsl_transform(output input
 #                 STYLESHEET stylesheet
 #                 [CATALOG catalog]
-#                 [DIRECTORY mainfile]
-#                 [PARAMETERS param1=value1 param2=value2 ...]
-#                 [[MAKE_ALL_TARGET | MAKE_TARGET] target]
-#                 [COMMENT comment])
+#                 [PARAMETERS param1=value1 param2=value2 ...])
 #
-# This macro builds a custom command that transforms an XML file
-# (input) via the given XSL stylesheet. The output will either be a
-# single file (the default) or a directory (if the DIRECTION argument
-# is specified). The STYLESHEET stylesheet must be a valid XSL
-# stylesheet. Any extra input files will be used as additional
-# dependencies for the target. For example, these extra input files
-# might refer to other XML files that are included by the input file
-# through XInclude.
+# This macro builds a custom command that transforms an XML file (input) via
+# the given XSL stylesheet. The STYLESHEET stylesheet must be a valid XSL
+# stylesheet. Any extra input files will be used as additional dependencies for
+# the target. For example, these extra input files might refer to other XML
+# files that are included by the input file through XInclude.
 #
 # When the XSL transform output is going to a directory, the mainfile
 # argument provides the name of a file that will be generated within
@@ -118,18 +112,14 @@ ENDMACRO(PARSE_ARGUMENTS)
 # that can be used correspond to the <xsl:param> elements within the
 # stylesheet.
 # 
-# To associate a target name with the result of the XSL
-# transformation, use the MAKE_TARGET or MAKE_ALL_TARGET option and
-# provide the name of the target. The MAKE_ALL_TARGET option only
-# differs from MAKE_TARGET in that MAKE_ALL_TARGET will make the
-# resulting target a part of the default build.
+# A target name of ${STYLESHEET}__${INPUT}__result will be generated
+# for the transformation, and made part of the default build.
 #
-# If a COMMENT argument is provided, it will be used as the comment
-# CMake provides when running this XSL transformation. Otherwise, the
-# comment will be "Generating "output" via XSL transformation...".
+# The comment CMake provides when running the XSL transformation will be
+# "Generating "output" via XSL transformation...".
 macro(xsl_transform OUTPUT INPUT)
   parse_arguments(THIS_XSL
-    "STYLESHEET;CATALOG;MAKE_ALL_TARGET;MAKE_TARGET;PARAMETERS;DIRECTORY;COMMENT"
+    "STYLESHEET;CATALOG;PARAMETERS;SEARCHPATH"
     ""
     ${ARGN}
     )
@@ -152,47 +142,25 @@ macro(xsl_transform OUTPUT INPUT)
       --stringparam ${XSL_PARAM_NAME} ${XSL_PARAM_VALUE})
   endforeach(PARAM)
 
-  # If the user didn't provide a comment for this transformation,
-  # create a default one.
-  if(NOT THIS_XSL_COMMENT)
-    set(THIS_XSL_COMMENT "Generating ${OUTPUT} via XSL transformation...")
-  endif(NOT THIS_XSL_COMMENT)
-
-  # Figure out the actual output file that we tell CMake about
-  # (THIS_XSL_OUTPUT_FILE) and the output file or directory that we
-  # tell xsltproc about (THIS_XSL_OUTPUT).
-  if (THIS_XSL_DIRECTORY)
-    set(THIS_XSL_OUTPUT_FILE ${OUTPUT}/${THIS_XSL_DIRECTORY})
-    set(THIS_XSL_OUTPUT      ${OUTPUT}/)
-  else(THIS_XSL_DIRECTORY)
-    set(THIS_XSL_OUTPUT_FILE ${OUTPUT})
-    set(THIS_XSL_OUTPUT      ${OUTPUT})
-  endif(THIS_XSL_DIRECTORY)
-
   if(NOT THIS_XSL_STYLESHEET)
     message(SEND_ERROR 
       "xsl_transform macro invoked without a STYLESHEET argument")
   else(NOT THIS_XSL_STYLESHEET)
     # Run the XSLT processor to do the XML transformation.
-    add_custom_command(OUTPUT ${THIS_XSL_OUTPUT_FILE}
+    add_custom_command(OUTPUT ${OUTPUT}
       COMMAND ${THIS_XSL_CATALOG} ${AQSIS_XSLTPROC_EXECUTABLE} ${XSLTPROC_FLAGS} 
-        ${THIS_XSL_EXTRA_FLAGS} -o ${THIS_XSL_OUTPUT} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/${THIS_XSL_STYLESHEET} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/${INPUT}
-      COMMENT ${THIS_XSL_COMMENT}
+        ${THIS_XSL_EXTRA_FLAGS} -o ${OUTPUT} 
+        --path "${CMAKE_CURRENT_SOURCE_DIR}:${THIS_XSL_SEARCHPATH}"
+        ${THIS_XSL_STYLESHEET} ${INPUT}
+      COMMENT "Generating ${OUTPUT} via XSL transformation..."
       DEPENDS ${INPUT} ${THIS_XSL_DEFAULT_ARGS} ${THIS_XSL_STYLESHEET})
     set_source_files_properties(${THIS_XSL_OUTPUT_FILE}
       PROPERTIES GENERATED TRUE)
 
     # Create a custom target to refer to the result of this
     # transformation.
-    if (THIS_XSL_MAKE_ALL_TARGET)
-      add_custom_target(${THIS_XSL_MAKE_ALL_TARGET} ALL
-        DEPENDS ${THIS_XSL_OUTPUT_FILE})
-    elseif(THIS_XSL_MAKE_TARGET)
-      add_custom_target(${THIS_XSL_MAKE_TARGET}
-        DEPENDS ${THIS_XSL_OUTPUT_FILE})
-    endif(THIS_XSL_MAKE_ALL_TARGET)
+    add_custom_target("${THIS_XSL_STYLESHEET}__${INPUT}__result" ALL
+      DEPENDS ${THIS_XSL_OUTPUT_FILE})
   endif(NOT THIS_XSL_STYLESHEET)
 endmacro(xsl_transform)
 
