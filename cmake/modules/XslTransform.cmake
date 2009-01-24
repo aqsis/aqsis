@@ -118,49 +118,61 @@ ENDMACRO(PARSE_ARGUMENTS)
 # The comment CMake provides when running the XSL transformation will be
 # "Generating "output" via XSL transformation...".
 macro(xsl_transform OUTPUT INPUT)
-  parse_arguments(THIS_XSL
-    "STYLESHEET;CATALOG;PARAMETERS;SEARCHPATH"
-    ""
-    ${ARGN}
-    )
-  
-  # TODO: Is this the best way to handle catalogs? The alternative is
-  # that we could provide explicit remappings to the xsl_transform
-  # macro, and it could generate a temporary XML catalog file.
-  if (THIS_XSL_CATALOG)
-    set(THIS_XSL_CATALOG "XML_CATALOG_FILES=${THIS_XSL_CATALOG}")
-  endif (THIS_XSL_CATALOG)
+	parse_arguments(THIS_XSL
+		"STYLESHEET;CATALOG;PARAMETERS;SEARCHPATH"
+		""
+		${ARGN}
+	)
 
-  # Translate XSL parameters into a form that xsltproc can use.
-  set(THIS_XSL_EXTRA_FLAGS)
-  foreach(PARAM ${THIS_XSL_PARAMETERS})
-    string(REGEX REPLACE "([^=]*)=([^;]*)" "\\1;\\2"
-      XSL_PARAM_LIST ${PARAM})
-    list(GET XSL_PARAM_LIST 0 XSL_PARAM_NAME)
-    list(GET XSL_PARAM_LIST 1 XSL_PARAM_VALUE)
-    list(APPEND THIS_XSL_EXTRA_FLAGS 
-      --stringparam ${XSL_PARAM_NAME} ${XSL_PARAM_VALUE})
-  endforeach(PARAM)
+	if(NOT THIS_XSL_STYLESHEET)
+		message(SEND_ERROR 
+		"xsl_transform macro invoked without a STYLESHEET argument")
+	endif(NOT THIS_XSL_STYLESHEET)
 
-  if(NOT THIS_XSL_STYLESHEET)
-    message(SEND_ERROR 
-      "xsl_transform macro invoked without a STYLESHEET argument")
-  else(NOT THIS_XSL_STYLESHEET)
-    # Run the XSLT processor to do the XML transformation.
-    add_custom_command(OUTPUT ${OUTPUT}
-      COMMAND ${THIS_XSL_CATALOG} ${AQSIS_XSLTPROC_EXECUTABLE} ${XSLTPROC_FLAGS} 
-        ${THIS_XSL_EXTRA_FLAGS} -o ${OUTPUT} 
-        --path "${CMAKE_CURRENT_SOURCE_DIR}:${THIS_XSL_SEARCHPATH}"
-        ${THIS_XSL_STYLESHEET} ${INPUT}
-      COMMENT "Generating ${OUTPUT} via XSL transformation..."
-      DEPENDS ${INPUT} ${THIS_XSL_DEFAULT_ARGS} ${THIS_XSL_STYLESHEET})
-    set_source_files_properties(${THIS_XSL_OUTPUT_FILE}
-      PROPERTIES GENERATED TRUE)
+	# TODO: Is this the best way to handle catalogs? The alternative is
+	# that we could provide explicit remappings to the xsl_transform
+	# macro, and it could generate a temporary XML catalog file.
+	if (THIS_XSL_CATALOG)
+		set(THIS_XSL_CATALOG "XML_CATALOG_FILES=${THIS_XSL_CATALOG}")
+	endif (THIS_XSL_CATALOG)
 
-    # Create a custom target to refer to the result of this
-    # transformation.
-    add_custom_target("${THIS_XSL_STYLESHEET}__${INPUT}__result" ALL
-      DEPENDS ${THIS_XSL_OUTPUT_FILE})
-  endif(NOT THIS_XSL_STYLESHEET)
+	# Translate XSL parameters into a form that xsltproc can use.
+	set(THIS_XSL_EXTRA_FLAGS)
+	foreach(PARAM ${THIS_XSL_PARAMETERS})
+		string(REGEX REPLACE "([^=]*)=([^;]*)" "\\1;\\2"
+			XSL_PARAM_LIST ${PARAM})
+		list(GET XSL_PARAM_LIST 0 XSL_PARAM_NAME)
+		list(GET XSL_PARAM_LIST 1 XSL_PARAM_VALUE)
+		list(APPEND THIS_XSL_EXTRA_FLAGS 
+			--stringparam ${XSL_PARAM_NAME} ${XSL_PARAM_VALUE})
+	endforeach(PARAM)
+
+	# Find the location of the input XML file.  This is so we can set the
+	# dependencies of the generated file correctly (the input XML may be in
+	# a directory other than the current one).
+	if(THIS_XSL_SEARCHPATH)
+		set(THIS_XSL_SEARCHPATH "${CMAKE_CURRENT_SOURCE_DIR}:${THIS_XSL_SEARCHPATH}")
+	else(THIS_XSL_SEARCHPATH)
+		set(THIS_XSL_SEARCHPATH "${CMAKE_CURRENT_SOURCE_DIR}")
+	endif(THIS_XSL_SEARCHPATH)
+	find_file(INPUT_FULL_LOC ${INPUT} PATHS ${THIS_XSL_SEARCHPATH} NO_DEFAULT_PATH)
+
+	# Run the XSLT processor to do the XML transformation.
+	get_filename_component(OUTPUT_BASENAME ${OUTPUT} NAME)
+	add_custom_command(OUTPUT ${OUTPUT}
+		COMMAND ${THIS_XSL_CATALOG} ${AQSIS_XSLTPROC_EXECUTABLE} ${XSLTPROC_FLAGS} 
+			${THIS_XSL_EXTRA_FLAGS} -o ${OUTPUT} 
+			--path ${THIS_XSL_SEARCHPATH}
+			${THIS_XSL_STYLESHEET} ${INPUT}
+		COMMENT "Generating ${OUTPUT_BASENAME} via XSL transformation..."
+		DEPENDS ${INPUT_FULL_LOC} ${THIS_XSL_DEFAULT_ARGS} ${THIS_XSL_STYLESHEET}
+	)
+	set_source_files_properties(${OUTPUT} PROPERTIES GENERATED TRUE)
+
+	# Create a custom target to refer to the result of this
+	# transformation.
+	add_custom_target("${THIS_XSL_STYLESHEET}__${INPUT}__result" ALL
+		DEPENDS ${OUTPUT})
+
 endmacro(xsl_transform)
 
