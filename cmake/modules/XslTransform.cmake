@@ -90,7 +90,8 @@ ENDMACRO(PARSE_ARGUMENTS)
 #   xsl_transform(output input
 #                 STYLESHEET stylesheet
 #                 [CATALOG catalog]
-#                 [PARAMETERS param1=value1 param2=value2 ...])
+#                 [PARAMETERS param1=value1 param2=value2 ...]
+#                 [MAKE_ALL_TARGET target])
 #
 # This macro builds a custom command that transforms an XML file (input) via
 # the given XSL stylesheet. The STYLESHEET stylesheet must be a valid XSL
@@ -112,14 +113,15 @@ ENDMACRO(PARSE_ARGUMENTS)
 # that can be used correspond to the <xsl:param> elements within the
 # stylesheet.
 # 
-# A target name of ${STYLESHEET}__${INPUT}__result will be generated
-# for the transformation, and made part of the default build.
+# To associate a target name with the result of the XSL transformation, use the
+# MAKE_ALL_TARGET option and provide the name of the target.  The target will
+# be made part of the default build.
 #
 # The comment CMake provides when running the XSL transformation will be
 # "Generating "output" via XSL transformation...".
 macro(xsl_transform OUTPUT INPUT)
 	parse_arguments(THIS_XSL
-		"STYLESHEET;CATALOG;PARAMETERS;SEARCHPATH"
+		"STYLESHEET;CATALOG;PARAMETERS;SEARCHPATH;MAKE_ALL_TARGET"
 		""
 		${ARGN}
 	)
@@ -171,8 +173,9 @@ macro(xsl_transform OUTPUT INPUT)
 
 	# Create a custom target to refer to the result of this
 	# transformation.
-	add_custom_target("${THIS_XSL_STYLESHEET}__${INPUT}__result" ALL
-		DEPENDS ${OUTPUT})
+	if(THIS_XSL_MAKE_ALL_TARGET)
+		add_custom_target(${THIS_XSL_MAKE_ALL_TARGET} ALL DEPENDS ${OUTPUT})
+	endif(THIS_XSL_MAKE_ALL_TARGET)
 
 endmacro(xsl_transform)
 
