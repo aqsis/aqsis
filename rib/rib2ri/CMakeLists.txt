@@ -1,6 +1,7 @@
 project(RIB2RI)
 
 set(RIB2RI_HDRS
+	rib2ri_share.h
 	ribrequesthandler.h
 )
 
@@ -41,30 +42,30 @@ set_source_files_properties(ribrequesthandler.cpp PROPERTIES
 # Add include directory for generated files.
 include_directories(${RIB2RI_BINARY_DIR})
 
-add_definitions(-DRIB2RI_EXPORTS)
 include(${AQSISTYPES_SOURCE_DIR}/export.cmake)
 include(${RIBPARSE_SOURCE_DIR}/export.cmake)
 include(${RIBAPI_SOURCE_DIR}/export.cmake)
-
-add_library(aqsis_rib2ri SHARED
-	${RIB2RI_HDRS}
-	${RIB2RI_SRCS}
-)
 
 set(LINKLIBS)
 include(${AQSISTYPES_SOURCE_DIR}/link.cmake)
 include(${RIBPARSE_SOURCE_DIR}/link.cmake)
 
-target_link_libraries(aqsis_rib2ri ${LINKLIBS})
+# Note: we don't actually build a library here, since the unresolved symbols
+# (like RiSphereV) are problematic on windows and to a lesser extent OSX.  It
+# might be possible to build a static library and link that into the other
+# shared libs that need it...
 
 
 #--------------------------------------------------
 # Unit tests
 
+
 set(RIB2RI_TEST_SRCS
 	ribrequesthandler_test.cpp
 )
 
-set(LINKLIBS)
-include(link.cmake)
-aqsis_add_tests(${RIB2RI_TEST_SRCS} ${LINKLIBS})
+aqsis_add_tests(${RIB2RI_TEST_SRCS}
+	LINKWITH ${LINKLIBS}
+	EXTRASOURCE ${RIB2RI_SRCS}
+)
+

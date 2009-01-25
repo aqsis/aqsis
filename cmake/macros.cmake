@@ -126,21 +126,33 @@ IF(AQSIS_ENABLE_TESTING)
 	ENABLE_TESTING()
 
 
-	# AQSIS_ADD_TESTS(SOURCE_LIST LINK_LIBS)
+	# AQSIS_ADD_TESTS(source1 [source2 ...]
+	#                 [ LINKWITH link_lib_list ]
+	#                 [ EXTRASOURCE aux_source_files] )
 	#
 	# Adds tests based on the boost.test framework.  Each source file is
 	# assumed to constitue an independent set of tests, and is built into its
 	# own executable.
 	#
 	# Arguments:
-	#   SOURCE_LIST - list of sources using boost.test.  One test set per file.
-	#   LINK_LIBS   - list of libraries which these tests need to be linked against.
+	#   source1 [source2, ...] - set of sources using boost.test.
+	#                            One test set per file.
+	#   link_lib_list  - list of libraries which these tests need to be linked
+	#                    against.
+	#   aux_source_files - auxiliary source files which should be linked
+	#                      with each of the test sources source1, ...
 	#
 	# The boost test library is automatically linked with the generated
 	# executables, so there's no need to include it in the LINK_LIBS list.
 	#
-	MACRO(AQSIS_ADD_TESTS SOURCE_LIST LINK_LIBS)
-		FOREACH(TEST_SRC ${SOURCE_LIST})
+	MACRO(AQSIS_ADD_TESTS)
+		PARSE_ARGUMENTS(THIS_ATEST
+			"LINKWITH;EXTRASOURCE"
+			""
+			${ARGN}
+		)
+		# all source files go into THIS_ATEST_DEFAULT_ARGS
+		FOREACH(TEST_SRC ${THIS_ATEST_DEFAULT_ARGS})
 			# Remove any prefixed-path from the test source and remove the
 			# extension to get the test name.
 			GET_FILENAME_COMPONENT(TEST_EXE_NAME ${TEST_SRC} NAME_WE)
@@ -150,11 +162,12 @@ IF(AQSIS_ENABLE_TESTING)
 			ADD_EXECUTABLE(${TEST_EXE_NAME}
 				${TEST_SRC}
 				${CMAKE_SOURCE_DIR}/build_tools/boostautotestmain.cpp
+				${THIS_ATEST_EXTRASOURCE}
 				)
 			# Perhaps we should remove boostautotestmain.cpp in favor of simply
 			# defining BOOST_AUTO_TEST_MAIN in each test file.
 			TARGET_LINK_LIBRARIES(${TEST_EXE_NAME}
-				${LINK_LIBS}
+				${THIS_ATEST_LINKWITH}
 				${AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY}
 				)
 			ADD_TEST(${TEST_NAME} ${EXECUTABLE_OUTPUT_PATH}/${TEST_EXE_NAME})
@@ -164,7 +177,7 @@ IF(AQSIS_ENABLE_TESTING)
 ELSE(AQSIS_ENABLE_TESTING)
 
 	# If testing is not enabled, AQSIS_ADD_TESTS is a No-op.
-	MACRO(AQSIS_ADD_TESTS SOURCE_LIST LINK_LIBS)
-	ENDMACRO(AQSIS_ADD_TESTS SOURCE_LIST LINK_LIBS)
+	MACRO(AQSIS_ADD_TESTS)
+	ENDMACRO(AQSIS_ADD_TESTS)
 
 ENDIF(AQSIS_ENABLE_TESTING)
