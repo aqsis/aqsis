@@ -32,31 +32,26 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 // CqRibParser implementation
 
-CqRibParser::CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
+CqRibParser::CqRibParser(std::istream& inputStream,
 				const boost::shared_ptr<IqRibRequestHandler>& requestHandler)
-	: m_lex(lexer),
+	: m_lex(inputStream),
 	m_requestHandler(requestHandler),
 	m_floatArrayPool(),
 	m_intArrayPool(),
 	m_stringArrayPool()
 { }
 
-const boost::shared_ptr<CqRibLexer>& CqRibParser::lexer()
-{
-	return m_lex;
-}
-
 bool CqRibParser::parseNextRequest()
 {
 	// skip up until the next request.  This guards against the case that a
 	// previous request resulted in an exception which left the parser in an
 	// odd state.
-	CqRibToken tok = m_lex->get();
+	CqRibToken tok = m_lex.get();
 	while(tok.type() != CqRibToken::REQUEST)
 	{
 		if(tok.type() == CqRibToken::ENDOFFILE)
 			return false;
-		tok = m_lex->get();
+		tok = m_lex.get();
 	}
 	// Mark array pools as free to use.
 	m_floatArrayPool.markUnused();
@@ -67,9 +62,21 @@ bool CqRibParser::parseNextRequest()
 	return true;
 }
 
+void CqRibParser::pushInput(std::istream& inStream)
+{
+	// TODO
+	AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "pushInput not implemented");
+}
+
+void CqRibParser::popInput()
+{
+	// TODO
+	AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "popInput not implemented");
+}
+
 TqInt CqRibParser::getInt()
 {
-	CqRibToken tok = m_lex->get();
+	CqRibToken tok = m_lex.get();
 	if(tok.type() != CqRibToken::INTEGER)
 		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 			"Found " << tok << " expected INTEGER");
@@ -78,7 +85,7 @@ TqInt CqRibParser::getInt()
 
 TqFloat CqRibParser::getFloat()
 {
-	CqRibToken tok = m_lex->get();
+	CqRibToken tok = m_lex.get();
 	switch(tok.type())
 	{
 		case CqRibToken::INTEGER:
@@ -94,7 +101,7 @@ TqFloat CqRibParser::getFloat()
 
 std::string CqRibParser::getString()
 {
-	CqRibToken tok = m_lex->get();
+	CqRibToken tok = m_lex.get();
 	if(tok.type() != CqRibToken::STRING)
 		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 			"Found " << tok << " expected STRING");
@@ -131,13 +138,13 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
  */
 const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 {
-	consumeArrayBegin(*m_lex, "integer");
+	consumeArrayBegin(m_lex, "integer");
 
 	TqIntArray& buf = m_intArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex->get();
+		CqRibToken tok = m_lex.get();
 		switch(tok.type())
 		{
 			case CqRibToken::INTEGER:
@@ -148,7 +155,7 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 				break;
 			default:
 				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-						m_lex->pos() << ": unexpected token " << tok
+						m_lex.pos() << ": unexpected token " << tok
 						<< "while reading integer array");
 				break;
 		}
@@ -159,15 +166,15 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 {
 	TqFloatArray& buf = m_floatArrayPool.getBuf();
-	if(m_lex->peek().type() == CqRibToken::ARRAY_BEGIN)
+	if(m_lex.peek().type() == CqRibToken::ARRAY_BEGIN)
 	{
 		// Read an array in [ num1 num2 ... num_n ] format
-		consumeArrayBegin(*m_lex, "float");
+		consumeArrayBegin(m_lex, "float");
 
 		bool parsing = true;
 		while(parsing)
 		{
-			CqRibToken tok = m_lex->get();
+			CqRibToken tok = m_lex.get();
 			switch(tok.type())
 			{
 				case CqRibToken::INTEGER:
@@ -181,7 +188,7 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 					break;
 				default:
 					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-							m_lex->pos() << ": unexpected token " << tok
+							m_lex.pos() << ": unexpected token " << tok
 							<< "while reading float array");
 					break;
 			}
@@ -204,7 +211,7 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 	else
 	{
 		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				"unexpected token " << m_lex->peek()
+				"unexpected token " << m_lex.peek()
 				<< " while reading float array");
 	}
 	return buf;
@@ -212,13 +219,13 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 
 const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 {
-	consumeArrayBegin(*m_lex, "string");
+	consumeArrayBegin(m_lex, "string");
 
 	TqStringArray& buf = m_stringArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex->get();
+		CqRibToken tok = m_lex.get();
 		switch(tok.type())
 		{
 			case CqRibToken::STRING:
@@ -229,7 +236,7 @@ const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 				break;
 			default:
 				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-					m_lex->pos() << ": unexpected token " << tok
+					m_lex.pos() << ": unexpected token " << tok
 					<< "while reading string array");
 				break;
 		}
@@ -237,10 +244,54 @@ const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 	return buf;
 }
 
+void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
+{
+	while(true)
+	{
+		switch(m_lex.peek().type())
+		{
+			case CqRibToken::REQUEST:
+			case CqRibToken::ENDOFFILE:
+				// If we get to the next request or end of file, return since
+				// we're done parsing the parameter list
+				return;
+			case CqRibToken::STRING:
+				break;
+			default:
+				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+						"parameter name string expected in param list, got "
+						<< m_lex.peek());
+		}
+		// Note: we NEED to copy paramName into a temporary variable here.
+		// The current token is returned by reference from the lexer, and will
+		// be overwritten due to the user calling any of the parser getter
+		// functions inside readParameter().
+		std::string paramName = m_lex.get().stringVal();
+		paramHandler.readParameter(paramName, *this);
+	}
+}
+
+IqRibParser::EqRibToken CqRibParser::peekNextType()
+{
+	switch(m_lex.peek().type())
+	{
+		case CqRibToken::ARRAY_BEGIN:
+			return Tok_Array;
+		case CqRibToken::STRING:
+			return Tok_String;
+		case CqRibToken::INTEGER:
+			return Tok_Int;
+		case CqRibToken::FLOAT:
+			return Tok_Float;
+		default:
+			return Tok_RequestEnd;
+	}
+}
+
 const CqRibParser::TqBasis* CqRibParser::getBasis(
 		const IqStringToBasis& stringToBasis)
 {
-	switch(m_lex->peek().type())
+	switch(m_lex.peek().type())
 	{
 		case CqRibToken::ARRAY_BEGIN:
 			{
@@ -264,10 +315,10 @@ const CqRibParser::TqBasis* CqRibParser::getBasis(
 
 const CqRibParser::TqIntArray& CqRibParser::getIntParam()
 {
-	if(m_lex->peek().type() == CqRibToken::INTEGER)
+	if(m_lex.peek().type() == CqRibToken::INTEGER)
 	{
 		TqIntArray& buf = m_intArrayPool.getBuf();
-		buf.push_back(m_lex->get().intVal());
+		buf.push_back(m_lex.get().intVal());
 		return buf;
 	}
 	return getIntArray();
@@ -275,18 +326,18 @@ const CqRibParser::TqIntArray& CqRibParser::getIntParam()
 
 const CqRibParser::TqFloatArray& CqRibParser::getFloatParam()
 {
-	switch(m_lex->peek().type())
+	switch(m_lex.peek().type())
 	{
 		case CqRibToken::INTEGER:
 			{
 				TqFloatArray& buf = m_floatArrayPool.getBuf();
-				buf.push_back(m_lex->get().intVal());
+				buf.push_back(m_lex.get().intVal());
 				return buf;
 			}
 		case CqRibToken::FLOAT:
 			{
 				TqFloatArray& buf = m_floatArrayPool.getBuf();
-				buf.push_back(m_lex->get().floatVal());
+				buf.push_back(m_lex.get().floatVal());
 				return buf;
 			}
 		default:
@@ -296,41 +347,14 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatParam()
 
 const CqRibParser::TqStringArray& CqRibParser::getStringParam()
 {
-	if(m_lex->peek().type() == CqRibToken::STRING)
+	if(m_lex.peek().type() == CqRibToken::STRING)
 	{
 		// special case where next token is a single string.
 		TqStringArray& buf = m_stringArrayPool.getBuf();
-		buf.push_back(m_lex->get().stringVal());
+		buf.push_back(m_lex.get().stringVal());
 		return buf;
 	}
 	return getStringArray();
-}
-
-void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
-{
-	while(true)
-	{
-		switch(m_lex->peek().type())
-		{
-			case CqRibToken::REQUEST:
-			case CqRibToken::ENDOFFILE:
-				// If we get to the next request or end of file, return since
-				// we're done parsing the parameter list
-				return;
-			case CqRibToken::STRING:
-				break;
-			default:
-				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-						"parameter name string expected in param list, got "
-						<< m_lex->peek());
-		}
-		// Note: we NEED to copy paramName into a temporary variable here.
-		// The current token is returned by reference from the lexer, and will
-		// be overwritten due to the user calling any of the parser getter
-		// functions inside readParameter().
-		std::string paramName = m_lex->get().stringVal();
-		paramHandler.readParameter(paramName, *this);
-	}
 }
 
 } // namespace Aqsis

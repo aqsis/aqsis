@@ -25,7 +25,7 @@ For each RI procedure, create a method to recognize the form of the RIB
 binding for that procedure.
 -->
 <xsl:template match="Procedure">
-void CqRibRequestHandler::handle<xsl:value-of select="substring-after(Name,'Ri')"/>(CqRibParser&amp; parser)
+void CqRibRequestHandler::handle<xsl:value-of select="substring-after(Name,'Ri')"/>(IqRibParser&amp; parser)
 {
 <!--	// Extract all arguments for the RIB binding of the current procedure from
 	// the parser, and compute the implicit arguments given by array lengths.  
@@ -53,7 +53,7 @@ void CqRibRequestHandler::handle<xsl:value-of select="substring-after(Name,'Ri')
 	list can be an array -->
 <xsl:if test="Arguments/RibArgsCanBeArray">
 	// Collect all args as an array
-	const CqRibParser::TqFloatArray&amp; allArgs = parser.getFloatArray(<xsl:value-of select="count(Arguments/Argument)"/>);
+	const IqRibParser::TqFloatArray&amp; allArgs = parser.getFloatArray(<xsl:value-of select="count(Arguments/Argument)"/>);
 </xsl:if>
 
 	<!-- Next collect arguments which don't have special values specified

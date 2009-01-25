@@ -197,16 +197,13 @@ std::string SqRiInputParams::toString() const
 struct RequestHandlerFixture
 {
 	std::istringstream in;
-	CqRibLexer lex;
 	CqRibRequestHandler handler;
 	CqRibParser parser;
 
 	RequestHandlerFixture(const std::string& stringToParse)
 		: in(stringToParse),
-		lex(in),
 		handler(),
-		parser(boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
-			boost::shared_ptr<CqRibRequestHandler>(&handler, nullDeleter))
+		parser(in, boost::shared_ptr<CqRibRequestHandler>(&handler, nullDeleter))
 	{ }
 };
 

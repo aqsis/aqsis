@@ -28,174 +28,59 @@
 
 #include "aqsis.h"
 
-#include <string>
 #include <map>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include "exception.h"
+#include "iribparser.h"
 #include "riblexer.h"
-#include "iribrequest.h"
 
 namespace Aqsis {
 
-class IqStringToBasis;
-
 //------------------------------------------------------------------------------
-/** \brief A flexible parser for RIB-like file formats.
+/** \brief A RIB parser implementing the IqRibParser interface.
  *
- *
- * At a high level, the renderman interface bytestream (RIB) is a sequence of
- * renderman interface call requests.  Each request has the format
- *
- *   request  =>  SomeRequestName [required_params] [param_list]
- *
- * the required parameters is list of parameters of type string, int, float, or
- * array of these basic types.  The optional parameter list is a set of
- * (string,array) paris;
- *
- *   required_params  =>  [ param ... ]
- *   param_list  =>  [ string param ... ]
- *   param  =>  ( int | float | string | int_array | float_array | string_array )
- *
- *
- * There are a standard set of requests defined by the renderman interface, but
- * most RenderMan-compliant renderers also define implementation-specific
- * requests.  In addition, there are cases where a user may only want to parse
- * a subset of the standard RIB.
- *
- * CqRibParser is designed with both these situations in mind.  The user
- * provides a request handler of type IqRibRequestHandler to the parser at
- * runtime.  When the parser reads a request from the input stream, it sends
- * that request to the handler object.  The handler can then call back to the
- * parser in order to get any request arguments.
- *
- * The parser achieves the ideal of being completely ignorant of the
- * semantics of any requests or request parameter lists.  In this design, all
- * the semantics are offloaded to the IqRibRequestHandler class.
+ * \see IqRibparser
  */
-class RIBPARSE_SHARE CqRibParser : boost::noncopyable
+class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyable
 {
 	public:
-		// Array types which are passed to RI request handlers from the RIB parser.
-		/// RIB int array type
-		typedef std::vector<TqInt> TqIntArray;
-		/// RIB float array type
-		typedef std::vector<TqFloat> TqFloatArray;
-		/// RIB string array type
-		typedef std::vector<std::string> TqStringArray;
-
-		typedef TqFloat TqBasis[4][4];
-
-		//--------------------------------------------------
 		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
-		 * \param lexer - lexical analyzer for a RIB input stream.
+		 * \param inputStream - input stream from which to read
 		 * \param requestHandler - Handler for requests which will be recognized
 		 *                         by the parser.
 		 */
-		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
+		CqRibParser(std::istream& inputStream,
 				const boost::shared_ptr<IqRibRequestHandler>& requestHandler);
 
-		/// Access to the underlying lexer object.
-		const boost::shared_ptr<CqRibLexer>& lexer();
+		// The following are inherited; see docs in IqRibParser.
 
-		/** \brief Parse the next RIB request
-		 *
-		 * \throw XqParseError if an error is encountered
-		 *
-		 * \return false if the end of the input stream has been reached.
-		 */
-		bool parseNextRequest();
+		// Parser driver method
+		virtual bool parseNextRequest();
 
-		//--------------------------------------------------
-		/// \name callbacks for request required parameters.
-		//@{
-		/// Read an integer from the input
-		TqInt getInt();
-		/// Read a float from the input
-		TqFloat getFloat();
-		/// Read a string from the input
-		std::string getString();
+		// stream stack management
+		virtual void pushInput(std::istream& inStream);
+		virtual void popInput();
 
-		/** \brief Read an array of integers from the input.
-		 *
-		 * \return a reference to the array which is valid until parsing the
-		 * next request commences.
-		 */
-		const TqIntArray& getIntArray();
-		/** \brief Read an array of floats from the input
-		 *
-		 * The array can be in two formats.  The default is an array of
-		 * indeterminate length, in the format
-		 *
-		 *   '[' num_1 num_2 ... num_n ']'
-		 *
-		 * However, if the length parameter is non-negative, the function also
-		 * parses arrays without the delimiting brackets, that is, of the form
-		 *
-		 *   num_1 num_2 ... num_n
-		 *
-		 * \param length - number of elements expected in the array.  When
-		 * non-negative, this also allows arrays without delimiting brackets to
-		 * be parsed.
-		 *
-		 * \return a reference to the array which is valid until parsing the
-		 * next request commences.
-		 * \return a reference to the array which is valid until parsing the
-		 * next request commences.
-		 */
-		const TqFloatArray& getFloatArray(TqInt length = -1);
-		/** \brief Read an array of strings from the input
-		 *
-		 * \return a reference to the array which is valid until parsing the
-		 * next request commences.
-		 */
-		const TqStringArray& getStringArray();
+		// Callbacks for request required parameters.
+		virtual TqInt getInt();
+		virtual TqFloat getFloat();
+		virtual std::string getString();
+		virtual const TqIntArray& getIntArray();
+		virtual const TqFloatArray& getFloatArray(TqInt length = -1);
+		virtual const TqStringArray& getStringArray();
+		virtual void getParamList(IqRibParamListHandler& paramHandler);
+		virtual EqRibToken peekNextType();
+		virtual const TqBasis* getBasis(const IqStringToBasis& stringToBasis);
 
-		/** \brief Read in a basis matrix.
-		 *
-		 * The basis can be represented either explicitly as an array of 16
-		 * floats, or as a string providing the basis name.  When the string
-		 * form is encountered, stringToBasis.getBasis() is invoked with the
-		 * basis name and the result returned.
-		 *
-		 * \param stringToBasis - callback object mapping basis names to basis
-		 *                        matrices.
-		 * \return A pointer to the retrieved basis matrix.
-		 */
-		const TqBasis* getBasis(const IqStringToBasis& stringToBasis);
-		//@}
-
-		//--------------------------------------------------
-		/// \name callbacks for parameter list parsing (used by IqRibParamListHandler)
-		//@{
-		/// Read an integer or integer array from the input as an array
-		const TqIntArray& getIntParam();
-		/// Read an float or float array from the input as an array
-		const TqFloatArray& getFloatParam();
-		/// Read an string or string array from the input as an array
-		const TqStringArray& getStringParam();
-
-		/** \brief Read a list of (token,value) pairs from the input stream.
-		 *
-		 * Most RI requests allow extra data to be passed in the form of
-		 * parameter lists of (token, value) pairs.  A token is a string giving
-		 * the type and name of the value data.  The value data is an array of
-		 * floats strings or integers.  Value data consisting of a single float
-		 * string or integer is parsed as an array of length one.
-		 *
-		 * References to the _value_ data inserted into paramList are valid
-		 * until parsing the next request commences.
-		 * 
-		 * \param paramList - destination for (token, value) pairs as read from
-		 *            the input stream.
-		 */
-		void getParamList(IqRibParamListHandler& paramHandler);
-		//@}
+		// Callbacks for parameter list parsing (used by IqRibParamListHandler)
+		virtual const TqIntArray& getIntParam();
+		virtual const TqFloatArray& getFloatParam();
+		virtual const TqStringArray& getStringParam();
 
 	private:
 		/** \brief A pool of buffers into which RIB arrays will be read.
@@ -225,7 +110,7 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		};
 
 		/// RIB lexer
-		boost::shared_ptr<CqRibLexer> m_lex;
+		CqRibLexer m_lex;
 		/// RIB requests handler
 		boost::shared_ptr<IqRibRequestHandler> m_requestHandler;
 		/// pool of parsed float arrays for the current request.
@@ -234,16 +119,6 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		CqBufferPool<TqInt> m_intArrayPool;
 		/// pool of parsed string arrays for the current request.
 		CqBufferPool<std::string> m_stringArrayPool;
-};
-
-/// Callback interface to get a basis from a name string.
-class IqStringToBasis
-{
-	public:
-		/// Get the spline basis corresponding to a name string (throw if not found)
-		virtual CqRibParser::TqBasis* getBasis(const std::string& name) const = 0;
-
-		virtual ~IqStringToBasis() {};
 };
 
 //==============================================================================

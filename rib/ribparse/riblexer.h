@@ -61,10 +61,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 	public:
 		/** \brief Create new lexer using a given stream.
 		 *
-		 * \param inStream - stream to connect with.  Note that this stream
-		 * should be opened in binary mode, so that no translation of newline
-		 * characters is performed.  If not, any binary encoded RIB will be
-		 * read incorrectly.
+		 * \param inStream - stream to connect with.
 		 */
 		CqRibLexer(std::istream& inStream);
 		/** \brief Get the next token.

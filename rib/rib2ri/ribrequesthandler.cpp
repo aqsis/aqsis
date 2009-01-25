@@ -54,7 +54,7 @@ class CqParamListHandler : public IqRibParamListHandler
 			m_countP(-1)
 		{ }
 
-		virtual void readParameter(const std::string& name, CqRibParser& parser)
+		virtual void readParameter(const std::string& name, IqRibParser& parser)
 		{
 			CqPrimvarToken tok(name.c_str());
 			switch(tok.storageType())
@@ -65,7 +65,7 @@ class CqParamListHandler : public IqRibParamListHandler
 					break;
 				case type_float:
 					{
-						const CqRibParser::TqFloatArray& floats = parser.getFloatParam();
+						const IqRibParser::TqFloatArray& floats = parser.getFloatParam();
 						m_values.push_back( reinterpret_cast<RtPointer>(
 								const_cast<RtFloat*>(&floats[0])) );
 						if(tok.name() == "P")
@@ -74,7 +74,7 @@ class CqParamListHandler : public IqRibParamListHandler
 					break;
 				case type_string:
 					{
-						const CqRibParser::TqStringArray& strings = parser.getStringParam();
+						const IqRibParser::TqStringArray& strings = parser.getStringParam();
 						m_stringValues.push_back(std::vector<RtToken>(strings.size(), 0));
 						std::vector<RtToken>& stringsDest = m_stringValues.back();
 						for(TqInt i = 0, end = strings.size(); i < end; ++i)
@@ -143,7 +143,7 @@ CqRibRequestHandler::CqRibRequestHandler()
 }
 
 void CqRibRequestHandler::handleRequest(const std::string& requestName,
-		CqRibParser& parser)
+		IqRibParser& parser)
 {
 	TqHandlerMap::const_iterator pos = m_requestHandlerMap.find(requestName);
 	if(pos == m_requestHandlerMap.end())
@@ -181,12 +181,12 @@ inline RtToken toRiType(const std::string& str)
 	return const_cast<RtToken>(str.c_str());
 }
 
-inline RtInt* toRiType(const CqRibParser::TqIntArray& a)
+inline RtInt* toRiType(const IqRibParser::TqIntArray& a)
 {
 	return const_cast<RtInt*>(&a[0]);
 }
 
-inline RtFloat* toRiType(const CqRibParser::TqFloatArray& a)
+inline RtFloat* toRiType(const IqRibParser::TqFloatArray& a)
 {
 	return const_cast<RtFloat*>(&a[0]);
 }
@@ -209,11 +209,11 @@ struct CqErrorHandlerString : public std::string
 
 struct SqRtMatrixHolder
 {
-	const CqRibParser::TqFloatArray& matrix;
-	SqRtMatrixHolder(const CqRibParser::TqFloatArray& matrix) : matrix(matrix) { }
+	const IqRibParser::TqFloatArray& matrix;
+	SqRtMatrixHolder(const IqRibParser::TqFloatArray& matrix) : matrix(matrix) { }
 };
 
-/** A conversion class, converting CqRibParser::TqStringArray to
+/** A conversion class, converting IqRibParser::TqStringArray to
  * RtStringArray/RtTokenArray
  *
  * This is necessary, since RtTokenArray is an array of naked pointers; we need
@@ -226,10 +226,10 @@ struct SqRtTokenArrayHolder
 	/** Extract a vector of RtToken pointers from a vector of std::strings,
 	 * storing them in the tokenStorage array.
 	 */
-	void convertToTokens(const CqRibParser::TqStringArray& strings)
+	void convertToTokens(const IqRibParser::TqStringArray& strings)
 	{
 		tokenStorage.reserve(strings.size());
-		for(CqRibParser::TqStringArray::const_iterator i = strings.begin(),
+		for(IqRibParser::TqStringArray::const_iterator i = strings.begin(),
 				end = strings.end(); i != end; ++i)
 		{
 			tokenStorage.push_back(const_cast<RtToken>(i->c_str()));
@@ -238,7 +238,7 @@ struct SqRtTokenArrayHolder
 
 	SqRtTokenArrayHolder() { }
 
-	SqRtTokenArrayHolder(const CqRibParser::TqStringArray& strings)
+	SqRtTokenArrayHolder(const IqRibParser::TqStringArray& strings)
 	{
 		convertToTokens(strings);
 	}
@@ -302,11 +302,11 @@ inline RtToken* toRiType(SqRtTokenArrayHolder& stringArrayHolder)
 }
 
 
-/// Callback object for CqRibParser::getBasis()
+/// Callback object for IqRibParser::getBasis()
 class CqStringToBasis : public IqStringToBasis
 {
 	public:
-		virtual CqRibParser::TqBasis* getBasis(const std::string& name) const
+		virtual IqRibParser::TqBasis* getBasis(const std::string& name) const
 		{
 			if(name == "bezier")           return &::RiBezierBasis;
 			else if(name == "b-spline")    return &::RiBSplineBasis;
@@ -325,7 +325,7 @@ class CqStringToBasis : public IqStringToBasis
 
 //--------------------------------------------------
 
-void CqRibRequestHandler::handleVersion(CqRibParser& parser)
+void CqRibRequestHandler::handleVersion(IqRibParser& parser)
 {
 	parser.getFloat();
 	// Don't do anything with the version number; just blunder on regardless.
@@ -341,7 +341,7 @@ void CqRibRequestHandler::handleVersion(CqRibParser& parser)
 
 //--------------------------------------------------
 
-void CqRibRequestHandler::handleDeclare(CqRibParser& parser)
+void CqRibRequestHandler::handleDeclare(IqRibParser& parser)
 {
 	// Collect arguments from parser.
 	std::string name = parser.getString();
@@ -353,9 +353,9 @@ void CqRibRequestHandler::handleDeclare(CqRibParser& parser)
 	RiDeclare(toRiType(name), toRiType(declaration));
 }
 
-void CqRibRequestHandler::handleDepthOfField(CqRibParser& parser)
+void CqRibRequestHandler::handleDepthOfField(IqRibParser& parser)
 {
-	if(parser.lexer()->peek().type() == CqRibToken::REQUEST)
+	if(parser.peekNextType() == IqRibParser::Tok_RequestEnd)
 	{
 		// If called without arguments, reset to the default pinhole camera.
 		RiDepthOfField(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -372,11 +372,11 @@ void CqRibRequestHandler::handleDepthOfField(CqRibParser& parser)
 	}
 }
 
-void CqRibRequestHandler::handleColorSamples(CqRibParser& parser)
+void CqRibRequestHandler::handleColorSamples(IqRibParser& parser)
 {
 	// Collect arguments from parser.
-	const CqRibParser::TqFloatArray& nRGB = parser.getFloatArray();
-	const CqRibParser::TqFloatArray& RGBn = parser.getFloatArray();
+	const IqRibParser::TqFloatArray& nRGB = parser.getFloatArray();
+	const IqRibParser::TqFloatArray& RGBn = parser.getFloatArray();
 
 	TqInt N = nRGB.size()/3;
 
@@ -395,7 +395,7 @@ void CqRibRequestHandler::handleColorSamples(CqRibParser& parser)
  * \param parser - parser from which to read the arguments
  */
 void CqRibRequestHandler::handleLightSourceGeneral(
-		TqLightSourceVFunc riLightSourceFunc, CqRibParser& parser)
+		TqLightSourceVFunc riLightSourceFunc, IqRibParser& parser)
 {
 	// Collect arguments from parser.
 	std::string name = parser.getString();
@@ -407,7 +407,7 @@ void CqRibRequestHandler::handleLightSourceGeneral(
 	// some test scenes which use it).
 	std::string lightName;
 	bool useLightName = false;
-	if(parser.lexer()->peek().type() == CqRibToken::STRING)
+	if(parser.peekNextType() == IqRibParser::Tok_String)
 	{
 		lightName = parser.getString();
 		useLightName = true;
@@ -433,21 +433,21 @@ void CqRibRequestHandler::handleLightSourceGeneral(
 	}
 }
 
-void CqRibRequestHandler::handleLightSource(CqRibParser& parser)
+void CqRibRequestHandler::handleLightSource(IqRibParser& parser)
 {
 	handleLightSourceGeneral(&RiLightSourceV, parser);
 }
 
-void CqRibRequestHandler::handleAreaLightSource(CqRibParser& parser)
+void CqRibRequestHandler::handleAreaLightSource(IqRibParser& parser)
 {
 	handleLightSourceGeneral(&RiAreaLightSourceV, parser);
 }
 
-void CqRibRequestHandler::handleIlluminate(CqRibParser& parser)
+void CqRibRequestHandler::handleIlluminate(IqRibParser& parser)
 {
 	// Collect arguments from parser.
 	RtLightHandle lightHandle = 0;
-	if(parser.lexer()->peek().type() == CqRibToken::STRING)
+	if(parser.peekNextType() == IqRibParser::Tok_String)
 	{
 		std::string name = parser.getString();
 		TqNamedLightMap::const_iterator pos = m_namedLightMap.find(name);
@@ -471,23 +471,23 @@ void CqRibRequestHandler::handleIlluminate(CqRibParser& parser)
 	RiIlluminate(lightHandle, onoff);
 }
 
-void CqRibRequestHandler::handleSubdivisionMesh(CqRibParser& parser)
+void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 {
 	// Collect arguments from parser.
 	std::string scheme = parser.getString();
-	const CqRibParser::TqIntArray& nvertices = parser.getIntArray();
-	const CqRibParser::TqIntArray& vertices = parser.getIntArray();
+	const IqRibParser::TqIntArray& nvertices = parser.getIntArray();
+	const IqRibParser::TqIntArray& vertices = parser.getIntArray();
 
 	TqInt nfaces = nvertices.size();
 
 	// The following four arguments are optional.
 	SqRtTokenArrayHolder tags;
-	const CqRibParser::TqIntArray* nargs = 0;
-	const CqRibParser::TqIntArray* intargs = 0;
-	const CqRibParser::TqFloatArray* floatargs = 0;
+	const IqRibParser::TqIntArray* nargs = 0;
+	const IqRibParser::TqIntArray* intargs = 0;
+	const IqRibParser::TqFloatArray* floatargs = 0;
 	TqInt ntags = 0;
 
-	if(parser.lexer()->peek() == CqRibToken::ARRAY_BEGIN)
+	if(parser.peekNextType() == IqRibParser::Tok_Array)
 	{
 		tags.convertToTokens(parser.getStringArray());
 		nargs = &parser.getIntArray();
@@ -544,10 +544,10 @@ void CqRibRequestHandler::handleSubdivisionMesh(CqRibParser& parser)
 			paramList.count(), paramList.tokens(), paramList.values());
 }
 
-void CqRibRequestHandler::handleHyperboloid(CqRibParser& parser)
+void CqRibRequestHandler::handleHyperboloid(IqRibParser& parser)
 {
 	// Collect all args as an array
-	const CqRibParser::TqFloatArray& allArgs = parser.getFloatArray(7);
+	const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(7);
 
 	// Collect arguments from parser.
 	RtPoint* point1 = reinterpret_cast<RtPoint*>(const_cast<RtFloat*>(&allArgs[0]));
@@ -563,7 +563,7 @@ void CqRibRequestHandler::handleHyperboloid(CqRibParser& parser)
 			paramList.count(), paramList.tokens(), paramList.values());
 }
 
-void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
+void CqRibRequestHandler::handleProcedural(IqRibParser& parser)
 {
 	// Collect arguments from parser.
 
@@ -580,7 +580,7 @@ void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
 	}
 
 	// get argument string array.
-	const CqRibParser::TqStringArray& args = parser.getStringArray();
+	const IqRibParser::TqStringArray& args = parser.getStringArray();
 
 	// Convert the string array to something passable as data arguments to the
 	// builtin procedurals.
@@ -607,7 +607,7 @@ void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
 	}
 
 	// get procedural bounds
-	const CqRibParser::TqFloatArray& bound = parser.getFloatArray();
+	const IqRibParser::TqFloatArray& bound = parser.getFloatArray();
 	if(bound.size() != 6)
 		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 					"expected 6 elements in RtBound array");
@@ -615,12 +615,12 @@ void CqRibRequestHandler::handleProcedural(CqRibParser& parser)
 	RiProcedural(pdata, toRiType(bound), subdivideFunc, &::RiProcFree);
 }
 
-void CqRibRequestHandler::handleObjectBegin(CqRibParser& parser)
+void CqRibRequestHandler::handleObjectBegin(IqRibParser& parser)
 {
 	// The RIB identifier objects is an integer according to the RISpec, but
 	// the previous parser also allowed strings.  See also notes in
 	// generalHandleLightSource().
-	if(parser.lexer()->peek().type() == CqRibToken::STRING)
+	if(parser.peekNextType() == IqRibParser::Tok_String)
 	{
 		std::string lightName = parser.getString();
 		if(RtObjectHandle handle = RiObjectBegin())
@@ -634,9 +634,9 @@ void CqRibRequestHandler::handleObjectBegin(CqRibParser& parser)
 	}
 }
 
-void CqRibRequestHandler::handleObjectInstance(CqRibParser& parser)
+void CqRibRequestHandler::handleObjectInstance(IqRibParser& parser)
 {
-	if(parser.lexer()->peek().type() == CqRibToken::STRING)
+	if(parser.peekNextType() == IqRibParser::Tok_String)
 	{
 		std::string name = parser.getString();
 		TqNamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);

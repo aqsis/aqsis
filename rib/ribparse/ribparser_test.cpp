@@ -41,7 +41,7 @@ using namespace Aqsis;
 struct NullRibRequestHandler : public IqRibRequestHandler
 {
 	virtual void handleRequest(const std::string& requestName,
-			CqRibParser& parser)
+			IqRibParser& parser)
 	{
 		assert(0 && "shouldn't call NullRibRequestHandler::handleRequest()");
 	}
@@ -50,16 +50,13 @@ struct NullRibRequestHandler : public IqRibRequestHandler
 struct NullRequestFixture
 {
 	std::istringstream in;
-	CqRibLexer lex;
 	NullRibRequestHandler nullHandler;
 	CqRibParser parser;
 
 	NullRequestFixture(const std::string& stringToParse)
 		: in(stringToParse),
-		lex(in),
 		nullHandler(),
-		parser(boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
-			boost::shared_ptr<NullRibRequestHandler>(&nullHandler, nullDeleter))
+		parser(in, boost::shared_ptr<NullRibRequestHandler>(&nullHandler, nullDeleter))
 	{ }
 };
 
@@ -78,7 +75,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getIntArray_test)
 	NullRequestFixture f("[1 2 3 4] [] [1 1.1]");
 
 	// check that we can read int arrays
-	const CqRibParser::TqIntArray& a1 = f.parser.getIntArray();
+	const IqRibParser::TqIntArray& a1 = f.parser.getIntArray();
 	BOOST_REQUIRE_EQUAL(a1.size(), 4U);
 	BOOST_CHECK_EQUAL(a1[0], 1);
 	BOOST_CHECK_EQUAL(a1[1], 2);
@@ -86,7 +83,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getIntArray_test)
 	BOOST_CHECK_EQUAL(a1[3], 4);
 
 	// check that we can read empty arrays
-	const CqRibParser::TqIntArray& a3 = f.parser.getIntArray();
+	const IqRibParser::TqIntArray& a3 = f.parser.getIntArray();
 	BOOST_CHECK_EQUAL(a3.size(), 0U);
 
 	// check throw on reading a non-int array
@@ -100,7 +97,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getFloatArray_test)
 	const TqFloat eps = 0.0001;
 
 	// check that mixed ints and floats can be read as a float array.
-	const CqRibParser::TqFloatArray& a1 = f.parser.getFloatArray();
+	const IqRibParser::TqFloatArray& a1 = f.parser.getFloatArray();
 	BOOST_REQUIRE_EQUAL(a1.size(), 4U);
 	BOOST_CHECK_CLOSE(a1[0], 1.0f, eps);
 	BOOST_CHECK_CLOSE(a1[1], 2.1f, eps);
@@ -108,20 +105,20 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getFloatArray_test)
 	BOOST_CHECK_CLOSE(a1[3], 4.0f, eps);
 
 	// check that we can read a float array
-	const CqRibParser::TqFloatArray& a2 = f.parser.getFloatArray();
+	const IqRibParser::TqFloatArray& a2 = f.parser.getFloatArray();
 	BOOST_REQUIRE_EQUAL(a2.size(), 2U);
 	BOOST_CHECK_CLOSE(a2[0], -2.0e1f, eps);
 	BOOST_CHECK_CLOSE(a2[1], -4.1f, eps);
 
 	// check that we can read a float array with fixed length in either format.
 	{
-		const CqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
+		const IqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
 		BOOST_REQUIRE_EQUAL(a.size(), 2U);
 		BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
 		BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
 	}
 	{
-		const CqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
+		const IqRibParser::TqFloatArray& a = f.parser.getFloatArray(2);
 		BOOST_REQUIRE_EQUAL(a.size(), 2U);
 		BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
 		BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
@@ -136,7 +133,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 	NullRequestFixture f("[\"asdf\" \"1234\" \"!@#$\"] 123");
 
 	// Check that we can read string arrays
-	const CqRibParser::TqStringArray& a = f.parser.getStringArray();
+	const IqRibParser::TqStringArray& a = f.parser.getStringArray();
 	BOOST_REQUIRE_EQUAL(a.size(), 3U);
 	BOOST_CHECK_EQUAL(a[0], "asdf");
 	BOOST_CHECK_EQUAL(a[1], "1234");
@@ -149,9 +146,9 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringArray_test)
 class StringToBasisDummy : public IqStringToBasis
 {
 	public:
-		virtual CqRibParser::TqBasis* getBasis(const std::string& name) const
+		virtual IqRibParser::TqBasis* getBasis(const std::string& name) const
 		{
-			static CqRibParser::TqBasis testBasis = {
+			static IqRibParser::TqBasis testBasis = {
 				{1, 2, 3, 4},
 				{5, 6, 7, 8},
 				{9, 10, 11, 12},
@@ -168,7 +165,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getBasis_test)
 {
 	NullRequestFixture f("[ 0 1 2 3   4 5 6 7   8 9 10 11   12 13 14 15] "
 			" \"test\" \"unknown\"");
-	const CqRibParser::TqBasis* basis = f.parser.getBasis(StringToBasisDummy());
+	const IqRibParser::TqBasis* basis = f.parser.getBasis(StringToBasisDummy());
 	for(int i = 0; i < 16; ++i)
 		BOOST_CHECK_CLOSE((*basis)[i/4][i%4], TqFloat(i), 0.00001);
 
@@ -177,18 +174,18 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getBasis_test)
 		BOOST_CHECK_CLOSE((*basis)[i/4][i%4], TqFloat(i+1), 0.00001);
 
 	basis = f.parser.getBasis(StringToBasisDummy());
-	BOOST_CHECK_EQUAL(basis, static_cast<CqRibParser::TqBasis*>(0));
+	BOOST_CHECK_EQUAL(basis, static_cast<IqRibParser::TqBasis*>(0));
 }
 
 BOOST_AUTO_TEST_CASE(CqRibParser_getIntParam_test)
 {
 	NullRequestFixture f("1 [2 3]");
 
-	const CqRibParser::TqIntArray& a1 = f.parser.getIntParam();
+	const IqRibParser::TqIntArray& a1 = f.parser.getIntParam();
 	BOOST_REQUIRE_EQUAL(a1.size(), 1U);
 	BOOST_CHECK_EQUAL(a1[0], 1);
 
-	const CqRibParser::TqIntArray& a2 = f.parser.getIntParam();
+	const IqRibParser::TqIntArray& a2 = f.parser.getIntParam();
 	BOOST_REQUIRE_EQUAL(a2.size(), 2U);
 	BOOST_CHECK_EQUAL(a2[0], 2);
 	BOOST_CHECK_EQUAL(a2[1], 3);
@@ -198,15 +195,15 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getFloatParam_test)
 {
 	NullRequestFixture f("1 2.0 [3.0 4]");
 
-	const CqRibParser::TqFloatArray& a1 = f.parser.getFloatParam();
+	const IqRibParser::TqFloatArray& a1 = f.parser.getFloatParam();
 	BOOST_REQUIRE_EQUAL(a1.size(), 1U);
 	BOOST_CHECK_CLOSE(a1[0], 1.0f, 0.00001);
 
-	const CqRibParser::TqFloatArray& a2 = f.parser.getFloatParam();
+	const IqRibParser::TqFloatArray& a2 = f.parser.getFloatParam();
 	BOOST_REQUIRE_EQUAL(a2.size(), 1U);
 	BOOST_CHECK_CLOSE(a2[0], 2.0f, 0.00001);
 
-	const CqRibParser::TqFloatArray& a3 = f.parser.getFloatParam();
+	const IqRibParser::TqFloatArray& a3 = f.parser.getFloatParam();
 	BOOST_REQUIRE_EQUAL(a3.size(), 2U);
 	BOOST_CHECK_CLOSE(a3[0], 3.0f, 0.00001);
 	BOOST_CHECK_CLOSE(a3[1], 4.0f, 0.00001);
@@ -216,11 +213,11 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringParam_test)
 {
 	NullRequestFixture f("\"aa\" [\"bb\" \"cc\"]");
 
-	const CqRibParser::TqStringArray& a1 = f.parser.getStringParam();
+	const IqRibParser::TqStringArray& a1 = f.parser.getStringParam();
 	BOOST_REQUIRE_EQUAL(a1.size(), 1U);
 	BOOST_CHECK_EQUAL(a1[0], "aa");
 
-	const CqRibParser::TqStringArray& a2 = f.parser.getStringParam();
+	const IqRibParser::TqStringArray& a2 = f.parser.getStringParam();
 	BOOST_REQUIRE_EQUAL(a2.size(), 2U);
 	BOOST_CHECK_EQUAL(a2[0], "bb");
 	BOOST_CHECK_EQUAL(a2[1], "cc");
@@ -232,7 +229,7 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getStringParam_test)
 struct DummyParamListHandler : IqRibParamListHandler
 {
 	std::vector<std::pair<std::string, boost::any> > tokValPairs;
-	virtual void readParameter(const std::string& name, CqRibParser& parser)
+	virtual void readParameter(const std::string& name, IqRibParser& parser)
 	{
 		CqPrimvarToken token(name.c_str());
 		switch(token.storageType())
@@ -268,19 +265,22 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
 
 	// Check first parameter
 	BOOST_CHECK_EQUAL(pList.tokValPairs[0].first, "uniform vector P");
-	const CqRibParser::TqFloatArray& P = boost::any_cast<const CqRibParser::TqFloatArray&>(pList.tokValPairs[0].second);
+	const IqRibParser::TqFloatArray& P =
+		boost::any_cast<const IqRibParser::TqFloatArray&>(pList.tokValPairs[0].second);
 	BOOST_REQUIRE_EQUAL(P.size(), 3U);
 	BOOST_CHECK_CLOSE(P[0], 1.0f, 0.00001);
 	BOOST_CHECK_CLOSE(P[1], 2.0f, 0.00001);
 	BOOST_CHECK_CLOSE(P[2], 3.0f, 0.00001);
 	// Check second parameter
 	BOOST_CHECK_EQUAL(pList.tokValPairs[1].first, "constant integer a");
-	const CqRibParser::TqIntArray& a = boost::any_cast<const CqRibParser::TqIntArray&>(pList.tokValPairs[1].second);
+	const IqRibParser::TqIntArray& a =
+		boost::any_cast<const IqRibParser::TqIntArray&>(pList.tokValPairs[1].second);
 	BOOST_REQUIRE_EQUAL(a.size(), 1U);
 	BOOST_CHECK_EQUAL(a[0], 42);
 	// Check third parameter
 	BOOST_CHECK_EQUAL(pList.tokValPairs[2].first, "constant string texname");
-	const CqRibParser::TqStringArray& texname = boost::any_cast<const CqRibParser::TqStringArray&>(pList.tokValPairs[2].second);
+	const IqRibParser::TqStringArray& texname =
+		boost::any_cast<const IqRibParser::TqStringArray&>(pList.tokValPairs[2].second);
 	BOOST_CHECK_EQUAL(texname[0], "somefile.map");
 }
 
@@ -292,10 +292,10 @@ struct TestRequestHandler : public IqRibRequestHandler
 {
 	std::string name;
 	std::string s;
-	CqRibParser::TqIntArray a1;
-	CqRibParser::TqFloatArray a2;
+	IqRibParser::TqIntArray a1;
+	IqRibParser::TqFloatArray a2;
 
-	virtual void handleRequest(const std::string& requestName, CqRibParser& parser)
+	virtual void handleRequest(const std::string& requestName, IqRibParser& parser)
 	{
 		name = requestName;
 		s = parser.getString();
@@ -307,10 +307,8 @@ struct TestRequestHandler : public IqRibRequestHandler
 BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 {
 	std::istringstream in("SomeRequest \"blah\" [1 2] [1.1 1.2]\n");
-	CqRibLexer lex(in);
 	TestRequestHandler handler;
-	CqRibParser parser( boost::shared_ptr<CqRibLexer>(&lex, nullDeleter),
-			boost::shared_ptr<TestRequestHandler>(&handler, nullDeleter));
+	CqRibParser parser(in, boost::shared_ptr<TestRequestHandler>(&handler, nullDeleter));
 
 	BOOST_CHECK_EQUAL(parser.parseNextRequest(), true);
 	BOOST_CHECK_EQUAL(handler.name, "SomeRequest");

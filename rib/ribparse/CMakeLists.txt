@@ -1,7 +1,7 @@
 PROJECT(RIBPARSE)
 
 SET(RIBPARSE_HDRS
-	iribrequest.h
+	iribparser.h
 	ribinputbuffer.h
 	riblexer.h
 	ribparse_share.h

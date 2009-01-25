@@ -25,7 +25,7 @@
 <xsl:template match="Procedure" mode="method_definition">
 	<xsl:text>void handle</xsl:text>
 	<xsl:value-of select="substring-after(Name,'Ri')"/>
-	<xsl:text>(CqRibParser&amp; parser);&cr;</xsl:text>
+	<xsl:text>(IqRibParser&amp; parser);&cr;</xsl:text>
 </xsl:template>
 
 </xsl:stylesheet>
