@@ -18,30 +18,30 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
- * \brief Define RIBPARSE_SHARE macro for DLL symbol import/export on windows.
+ * \brief Define RIB2RI_SHARE macro for DLL symbol import/export on windows.
  *
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
-#ifndef RIBPARSE_SHARE_H_INCLUDED
-#define RIBPARSE_SHARE_H_INCLUDED
+#ifndef RIB2RI_SHARE_H_INCLUDED
+#define RIB2RI_SHARE_H_INCLUDED
 
 #include "aqsis_compiler.h"
 
 
 #ifdef AQSIS_SYSTEM_WIN32
 #	ifdef AQSIS_STATIC_LINK
-#		define RIBPARSE_SHARE
+#		define RIB2RI_SHARE
 #	else
-#		ifdef RIBPARSE_EXPORTS
-#			define RIBPARSE_SHARE __declspec(dllexport)
+#		ifdef RIB2RI_EXPORTS
+#			define RIB2RI_SHARE __declspec(dllexport)
 #		else
-#			define RIBPARSE_SHARE __declspec(dllimport)
+#			define RIB2RI_SHARE __declspec(dllimport)
 #		endif
 #	endif
 #else
-#	define RIBPARSE_SHARE
+#	define RIB2RI_SHARE
 #endif
 
 
-#endif // RIBPARSE_SHARE_H_INCLUDED
+#endif // RIB2RI_SHARE_H_INCLUDED

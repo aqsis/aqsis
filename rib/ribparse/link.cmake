@@ -1,0 +1,1 @@
+SET(LINKLIBS ribparse ${LINKLIBS})

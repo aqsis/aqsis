@@ -94,11 +94,8 @@ class RIBPARSE_SHARE CqRibParser : boost::noncopyable
 		/** \brief Construct a RIB parser, connected to the given lexer.
 		 *
 		 * \param lexer - lexical analyzer for a RIB input stream.
-		 * \param requests - collection of request handlers which will
-		 *        recognized by the parser.
-		 * \param ignoreUnrecognized - If true, ignore unrecognized RIB
-		 *        requests rather than throwing an exception.  This allows
-		 *        selective RIB parsers to be built without too much hassle.
+		 * \param requestHandler - Handler for requests which will be recognized
+		 *                         by the parser.
 		 */
 		CqRibParser(const boost::shared_ptr<CqRibLexer>& lexer,
 				const boost::shared_ptr<IqRibRequestHandler>& requestHandler);

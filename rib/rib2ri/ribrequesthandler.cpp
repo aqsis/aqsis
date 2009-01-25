@@ -27,7 +27,6 @@
 
 #include "ri.h"
 #include "ribparser.h"
-#include "paramlisthandler.h"
 
 namespace Aqsis
 {
@@ -84,25 +83,30 @@ class CqParamListHandler : public IqRibParamListHandler
 					}
 					break;
 				case type_invalid:
-					AQSIS_THROW(XqParseError, "unknown type in token \""
-							<< name << "\"");
-					break;
 				default:
 					assert(0 && "Unknown storage type; we should never get here.");
+					return;
 			}
 
 			m_tokenStorage.push_back(name);
-			m_tokens.push_back(const_cast<RtToken>(m_tokenStorage.back().c_str()));
 		}
 
 		RtToken* tokens()
 		{
-			return &m_tokens[0];
+			// Copy pointers to stored tokens into an array of RtToken.
+			TqInt numTokens = m_tokenStorage.size();
+			if(static_cast<TqInt>(m_tokens.size()) != numTokens)
+			{
+				m_tokens.resize(numTokens, 0);
+				for(TqInt i = 0; i < numTokens; ++i)
+					m_tokens[i] = const_cast<RtToken>(m_tokenStorage[i].c_str());
+			}
+			return numTokens > 0 ? &m_tokens[0] : 0;
 		}
 
 		RtPointer* values()
 		{
-			return &m_values[0];
+			return m_values.size() > 0 ? &m_values[0] : 0;
 		}
 
 		RtInt count()
@@ -113,7 +117,8 @@ class CqParamListHandler : public IqRibParamListHandler
 		TqInt countP()
 		{
 			if(m_countP < 0)
-				AQSIS_THROW(XqParseError, "variable \"P\" not found in parameter list");
+				AQSIS_THROW_XQERROR(XqParseError, EqE_MissingData,
+						"variable \"P\" not found in parameter list");
 			return m_countP;
 		}
 };
@@ -141,12 +146,13 @@ void CqRibRequestHandler::handleRequest(const std::string& requestName,
 		CqRibParser& parser)
 {
 	TqHandlerMap::const_iterator pos = m_requestHandlerMap.find(requestName);
-	if(pos != m_requestHandlerMap.end())
+	if(pos == m_requestHandlerMap.end())
 	{
-		TqRequestHandler handler = pos->second;
-		(this->*handler)(parser);
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+				"unrecognized request \"" << requestName << "\"");
 	}
-	AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken, "unrecognized request");
+	TqRequestHandler handler = pos->second;
+	(this->*handler)(parser);
 }
 
 
