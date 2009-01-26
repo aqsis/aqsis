@@ -48,7 +48,6 @@ INCLUDE_DIRECTORIES(${AQSIS_BOOST_INCLUDE_DIR})
 
 # Internal dependencies
 INCLUDE(${PROJECT_SOURCE_DIR}/export.cmake)
-INCLUDE(${RIBAPI_SOURCE_DIR}/export.cmake)
 
 # Group header files for Visual Studio
 SOURCE_GROUP("Header files" FILES ${AQSISTYPES_HDRS})
