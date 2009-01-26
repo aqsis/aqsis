@@ -124,10 +124,16 @@ void CqTiffOutputFile::writeScanlinePixels(const CqMixedImageBuffer& buffer)
 	const TqUint8* rawBuf = buffer.rawData();
 	const TqInt rowStride = buffer.channelList().bytesPerPixel()*buffer.width();
 	const TqInt endLine = m_currentLine + buffer.height();
+	// Temporary buffer for scanlines.  We need to copy the data into here
+	// since libtiff trashes the buffer when encoding is turned on.  (The TIFF
+	// docs don't seem to mention this though, ugh.)
+	boost::scoped_array<TqUint8> lineBuf(new TqUint8[rowStride]);
 	for(TqInt line = m_currentLine; line < endLine; ++line)
 	{
-		TIFFWriteScanline( dirHandle.tiffPtr(),
-				reinterpret_cast<tdata_t>(const_cast<TqUint8*>(rawBuf)),
+		// copy the data into temp buffer.
+		std::memcpy(lineBuf.get(), rawBuf, rowStride);
+		// write data
+		TIFFWriteScanline( dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(lineBuf.get()),
 				static_cast<uint32>(line) );
 		rawBuf += rowStride;
 	}
