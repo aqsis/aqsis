@@ -29,12 +29,15 @@ xsl_transform(${CMAKE_CURRENT_BINARY_DIR}/requestlists.inl
 )
 
 # Set dependencies of source files on generated includes.
-set_source_files_properties(ribrequesthandler.h PROPERTIES
-	OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/requesthandler_method_defs.inl
-)
+
+# There's no object file for ribrequesthandler.h, so it seems like the
+# OBJECT_DEPENDS command won't correctly force requesthandler_method_defs.inl
+# to be built before ribrequesthandler.h is used.  As a workaround it's being
+# added to the dependencies for ribrequesthandler.cpp for the moment.
 list(APPEND RIBREQUESTHANDLER_CPP_DEPS 
 	${CMAKE_CURRENT_BINARY_DIR}/requestlists.inl
 	${CMAKE_CURRENT_BINARY_DIR}/requesthandler_method_impl.inl
+	${CMAKE_CURRENT_BINARY_DIR}/requesthandler_method_defs.inl
 )
 set_source_files_properties(ribrequesthandler.cpp PROPERTIES
 	OBJECT_DEPENDS "${RIBREQUESTHANDLER_CPP_DEPS}"
