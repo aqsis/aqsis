@@ -26,6 +26,8 @@
 
 #include "tiffoutputfile.h"
 
+#include <cstring>  // for memcpy()
+
 #include <boost/scoped_array.hpp>
 
 #include "aqsismath.h"
