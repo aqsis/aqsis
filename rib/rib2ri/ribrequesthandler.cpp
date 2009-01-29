@@ -25,6 +25,8 @@
 
 #include "ribrequesthandler.h"
 
+#include <cstring>  // for strcpy
+
 #include "ri.h"
 #include "ribparser.h"
 

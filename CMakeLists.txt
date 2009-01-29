@@ -2,6 +2,13 @@ PROJECT(aqsis_all)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
 
+# Make cmake versions newer than 2.4 behave like 2.4
+# remove these when upgrading to cmake 2.6
+IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER "2.4")
+	cmake_policy(SET CMP0003 OLD)
+	cmake_policy(SET CMP0005 OLD)
+ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER "2.4")
+
 # Set some variables used within various resources, including installer scripts.
 SET(AQSIS_PROJECT_NAME "Aqsis Renderer")
 SET(AQSIS_PROJECT_NAME_SHORT "Aqsis")
@@ -107,7 +114,17 @@ ENDIF(AQSIS_USE_EXTERNAL_TINYXML)
 # Find build tools
 #-----------------
 INCLUDE(FindXsltproc)
+
 INCLUDE(FindFlexBison)
+
+IF(NOT AQSIS_FLEX_EXECUTABLE_FOUND)
+	MESSAGE(FATAL_ERROR "Aqsis requires flex")
+ENDIF(NOT AQSIS_FLEX_EXECUTABLE_FOUND)
+
+IF(NOT AQSIS_BISON_EXECUTABLE_FOUND)
+	MESSAGE(FATAL_ERROR "Aqsis requires bison")
+ENDIF(NOT AQSIS_BISON_EXECUTABLE_FOUND)
+
 INCLUDE(FindSVNVersion)
 # Windows-specific build tools:
 INCLUDE(FindNSIS)
