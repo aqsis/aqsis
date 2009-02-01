@@ -136,12 +136,29 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 			for( iVE = aQve.begin(); iVE != aQve.end(); iVE++ )
 				m_mapSharpCorners[(*iVE)] = Sharpness;
 		}
-		TqFloat		CornerSharpness( CqLath* pLath )
+		TqFloat		CornerSharpness( CqLath* pLath ) const
 		{
-			if( m_mapSharpCorners.find( pLath ) != m_mapSharpCorners.end() )
-				return( m_mapSharpCorners[ pLath ] );
-			return( 0.0f );
+			TqSharpnessMap::const_iterator pos = m_mapSharpCorners.find(pLath);
+			if(pos != m_mapSharpCorners.end())
+				return pos->second;
+			return 0.0f;
 		}
+
+		/** \brief Push a point to the limit surface
+		 *
+		 * Sensible subdivision schemes push any vertex in the mesh toward a
+		 * limiting position on the limit surface.  This function determines
+		 * the limit point of a given vertex.
+		 *
+		 * Warning: This function currently ignores edge hardness, since only
+		 * the limit mask for the standard subdivision rules is present in the
+		 * literature.
+		 *
+		 * \param vert - Lath connected to the vertex for which we want the
+		 *               limit point.
+		 * \return Limit point corresponding to vert.
+		 */
+		CqVector3D limitPoint(CqLath* vert) const;
 
 		void AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex);
 		void AddEdgeVertex(CqLath* pEdge, TqInt& iVIndex, TqInt& iFVIndex);
@@ -181,6 +198,8 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		void DuplicateVertex(CqParameter* pParamToModify, CqLath* pVertex,
 				TqInt iIndex);
 
+		typedef std::map<CqLath*, TqFloat> TqSharpnessMap;
+
 		/// Array of pointers to laths, one each representing each facet.
 		std::vector<CqLath*>				m_apFacets;
 		/// Array of arrays of pointers to laths each array representing the total laths referencing a single vertex.
@@ -194,7 +213,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		/// Map of sharp edges.
 		std::map<CqLath*, TqFloat>			m_mapSharpEdges;
 		/// Map of sharp corners.
-		std::map<CqLath*, TqFloat>			m_mapSharpCorners;
+		TqSharpnessMap			m_mapSharpCorners;
 
 
 		/// Flag indicating whether the topology structures have been finalised.

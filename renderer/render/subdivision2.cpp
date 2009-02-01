@@ -156,6 +156,209 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 	m_fFinalised=false;
 }
 
+CqVector3D CqSubdivision2::limitPoint(CqLath* vert) const
+{
+	// To compute the limit point, we make use of a limit mask for
+	// Catmull-Clark subdivision.  For the standard Catmull-Clark scheme this
+	// has a surprisingly simple form which is given in the literature, for
+	// example, see
+	//
+	// "Efficient, Fair Interpolation using Catmull-Clark Surfaces" by Mark
+	// Halstead, Tony DeRose and Michael Kass, SIGGRAPH 1993 (Proceedings of
+	// the 20th annual conference on Computer graphics and interactive
+	// techniques)
+	//
+	// Aqsis uses a genralised Catmull-Clark scheme which has been modified to
+	// allow creasing, sharp corners and interpolation of the manifold
+	// boundary.  This makes things more complicated:
+	//
+	// * Creases pose a difficulty since they introduce possibly several extra
+	//   parameters into the subdivision matrix and presumably make the limit
+	//   mask more difficult to compute.  For now we just ignore creases and hope
+	//   for the best!
+	//
+	// * For boundary vertices the subdivision matrix is simple and we can
+	//   compute the limit mask by hand (see below)
+	//
+	// * For sharp corners the vertex is stationary under subdivision so this
+	//   case is trivial.
+
+	const CqVector4D* P = pPoints()->P()->pValue();
+	const CqVector3D vPos = vectorCast<CqVector3D>(P[vert->VertexIndex()]);
+
+	// Sharp corners don't move under subdivision; just return them.
+	if(CornerSharpness(vert) > 0.0f)
+		return vPos;
+
+	if(vert->isBoundaryVertex())
+	{
+		// Consider a mesh boundary in the neighbourhood of a vertex v:
+		//
+		// ... --- e1 ------- v ------- e2 --- ...
+		//         |          |         |
+		//         |          |         |
+		//         .          .         .
+		//         .          .         .
+		//
+		// With the "interpolateboundary" tag, the neighbourhood of v is
+		// subdivided according to the subdivision matrix
+		//
+		//         [6 1 1]
+		// S = 1/8 [4 4 0]
+		//         [4 0 4]
+		//
+		// where the order of matrix elements corresponds to [v, e1, e2].  S
+		// maps a neighbourhood of the vertex v at step N to the neighbourhood
+		// at step N+1 - it gives us the new position of v and the position of
+		// the two new edge vertices on the boundary.  That is, after one step
+		// of subdivision of the neighbourhood of v, the above diagram becomes
+		//
+		// ... --- e1 --e1'-- v'--e2'-- e2 --- ...
+		//         |    .     |    .    |
+		//         |    .     |    .    |
+		//         .          .         .
+		//         .          .         .
+		//
+		// with  [v' e1' e2']^T  =  S * [v e1 e2]^T
+		//
+		// Note that S is independent of the valence of the vertex v for
+		// boundary subdivision.
+		//
+		//
+		// As required by the theory, the largest eigenvalue of S is 1.  The
+		// associated left-eigenvector gives the desired limit mask,
+		//
+		// l1 = 1/6 [4 1 1]
+		//
+		// where l1 has been normalised so that the components add to 1.  That
+		// is, the position of v on the limit surface is
+		// 
+		// v_limit = 1/6 * (4*v + 1*e1 + 1*e2)
+		//
+		// (In hindsight this probably amounts to simple b-spline subdivision,
+		// but the above gives a nice simple illustration of the general method
+		// used to derive limit masks.  Unfortunately the eigenanalysis is much
+		// more tricky in most cases.)
+
+		if(vert->isCornerVertex())
+		{
+			// Special case for corner vertices - these don't move under
+			// subdivision
+			return vPos;
+		}
+
+		// Now we know we're on a boundary with more than two edges
+
+		// get clockwise edge vertex, e1
+		const CqLath* v = vert;
+		while(v->cv())
+			v = v->cv();
+		CqVector3D edgeSum = vectorCast<CqVector3D>(P[v->ccf()->VertexIndex()]);
+
+		// get anticlocwise edge vertex, e2
+		v = vert;
+		while(v->ccv())
+			v = v->ccv();
+		edgeSum += vectorCast<CqVector3D>(P[v->cf()->VertexIndex()]);
+
+		return (4.0/6)*vPos + (1.0/6)*edgeSum;
+	}
+	else
+	{
+		// Else use the general limit mask for an interior part of the mesh.
+		// This is discussed in various places in the literature, see [Halsted
+		// 1993] for example.  For the classic Catmull-Clark rules, the mask is
+		//
+		// v' = (n^2 * v  +  sum_i (4*e_i + f_i)) / (n*(n+5))
+		//
+		// where n is the valence of the vertex v, e_i are the vertices
+		// attached to adjoining edges, and f_i are the remaining vertices on
+		// adjoining faces.  In this form the limit mask is only valid for
+		// quadrilateral neighbourhoods (guaranteed after one step of
+		// subdivision) for which there is a single f_i per face.
+		//
+		// For the general case, we can adjust the meaning of f_i so that the
+		// formula above still gives the correct results.  Consider a non-quad
+		// face, eg
+		//
+		//
+		//   f4       e1     f1
+		//     +------+------+
+		//     |      |      |
+		//     |      |      |
+		//     |      |      |
+		//  e4 +------+------+ e2
+		//     |      |v      \                                              .
+		//     |      |        \                                             .
+		//     |      |    .C   + g1
+		//     +------+e3      /
+		//   f3        \      /
+		//              +----+ g2
+		//              g3          * f2
+		//
+		//
+		// The limit mask above doesn't apply for the non-quadrilateral face.
+		// However, the position of the centroid, C, is the only way in which
+		// the extra vertices g_i effect the neighbourhood of v after the first
+		// subdivision step.  This means that we just need to compute a fake
+		// value for the vertex f2 to replace the g_i so that the centroid is
+		// the same:
+		//
+		// f2 = (4/m - 1)*(v + e2 + e3)  +  4/m * sum_i g_i
+		//
+		// where m is the number of edges on the face.  For more discussion,
+		// see page 11 of
+		//
+		//   "Fast C 2 Interpolating Subdivision Surfaces using Iterative
+		//   Inversion of Stationary Subdivision Rules", Andrew Thall, 2003,
+		//   Technical Report TR02-001, UNC-Chapel Hill.
+		//
+
+		const CqLath* faceVert = vert;
+		CqVector3D eSum;
+		CqVector3D fSum;
+		TqInt numEdges = 0;
+		do
+		{
+			// Add edge onto edge sum.
+			const CqLath* const e = faceVert->cf();
+			eSum += vectorCast<CqVector3D>(P[e->VertexIndex()]);
+			// Add up remaining face verts.  For a quad mesh there will only be
+			// one of these.
+			// Add face vert to face sum.
+			const CqLath* f = e->cf();
+			if(f->cf()->cf() == faceVert)
+			{
+				fSum += vectorCast<CqVector3D>(P[f->VertexIndex()]);
+			}
+			else
+			{
+				// This is the special case of a non-quadrilateral face.  As
+				// described abeove, we need to compute the sum of the
+				// additional vertices.
+				CqVector3D gSum;
+				TqInt numVerts = 3;
+				const CqLath* const eNext = faceVert->ccf();
+				while(f != eNext)
+				{
+					gSum += vectorCast<CqVector3D>(P[f->VertexIndex()]);
+					++numVerts;
+					f = f->cf();
+				}
+				fSum += (4.0/numVerts - 1) * ( vPos
+						+ vectorCast<CqVector3D>(P[e->VertexIndex()])
+						+ vectorCast<CqVector3D>(P[eNext->VertexIndex()]) )
+					+ 4.0/numVerts*gSum;
+			}
+
+			faceVert = faceVert->cv();
+			++numEdges;
+		}
+		while(faceVert != vert);
+
+		return 1.0/(numEdges*(numEdges+5)) * (numEdges*numEdges*vPos + 4*eSum + fSum);
+	}
+}
 
 //------------------------------------------------------------------------------
 namespace {
@@ -299,7 +502,8 @@ void CqSubdivision2::CreateVertex(CqParameter* pParamToModify,
 
 					// Get the current vertex;
 					S = pParam->pValue( (pVertex->*IndexFunction)() )[arrayindex];
-					pParam->pValue( iIndex )[arrayindex] = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
+					pParam->pValue( iIndex )[arrayindex] =
+						static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 				}
 			}
 			else
@@ -696,6 +900,8 @@ void CqSubdivision2::CreateEdgeVertex(CqParameter* pParamToModify,
 			}
 			else
 			{
+				// Edge point lies on a boundary - in this case it's just the
+				// average of the two adjoining boundary vertices.
 				A = pParam->pValue( (pEdge->*IndexFunction)() )[arrayindex];
 				B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[arrayindex];
 				A = static_cast<TypeA>( (A+B)/2.0f );
@@ -2178,16 +2384,63 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	if ( aQfv.size() != 4 )
 		return ( false );
 
-	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
+	// Otherwise we should continue to try to find the most advantageous split
+	// direction, OR the dice size.
+	//
+	//
+	// Computing the dice size for a subdivision surface is slightly tricky.
+	//
+	// We can't just use the current corners of the patch, since a small patch
+	// may become arbitrarily large under subdivision if it has large
+	// neighbouring patches.  For example, consider the following mesh,
+	//
+	// +---+----------------------------------------------+
+	// |   |                                              |
+	// |   |                                              |
+	// |   |                                              |
+	// |   |                                              |
+	// |   |                                              |
+	// +---+----------------------------------------------+
+	// 
+	// and perform one subdivision step -
+	// 
+	// 1) Add new vertices and move old ones
+	// 
+	// o = new face or edge vertex
+	// X = moved vertex
+	// 
+	// +-o-+---X------------------o-----------------------+
+	// |   |                                              |
+	// |   |                                              |
+	// o o |   o <-- note how     o                       o
+	// |   |         much this                            |
+	// |   |         moves                                |
+	// +-o-+---X------------------o-----------------------+
+	//      
+	// 
+	// 2) Add edges.
+	// 
+	// +-+-----+------------------+-----------------------+
+	// | |     |                  |                       |
+	// | |     |                  |                       |
+	// +-+-----+------------------+-----------------------+
+	// | |     |                  |                       |
+	// | |     |                  |                       |
+	// +-+-----+------------------+-----------------------+
+	//  <----->
+	//    |
+	// this whole section came from the small original face on the left, and
+	// has area more than twice the original size of the patch.
+	//
+	// Instead, we've got to compute the positions of the vertices on the limit
+	// surface:
+
 	CqMatrix matCtoR;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
-
-	// Convert the control hull to raster space.
+	QGetRenderContext() ->matSpaceToSpace("camera", "raster", NULL, NULL,
+			QGetRenderContext()->Time(), matCtoR );
 	CqVector2D	avecHull[ 4 ];
-	TqInt i;
-
-	for ( i = 0; i < 4; i++ )
-		avecHull[i] = vectorCast<CqVector2D>(matCtoR * pTopology()->pPoints()->P()->pValue()[aQfv[i]->VertexIndex()]);
+	for (TqInt i = 0; i < 4; i++ )
+		avecHull[i] = vectorCast<CqVector2D>( matCtoR*pTopology()->limitPoint(aQfv[i]) );
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;

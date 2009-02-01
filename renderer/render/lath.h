@@ -242,19 +242,19 @@ class CqLath
 		TqInt cQve() const;
 		TqInt cQvf() const;
 
-		bool isBoundaryFacet()
+		bool isBoundaryFacet() const
 		{
 			// Check if any of the vertices are boundary, if so then this facet must be.
-			std::vector<CqLath*> aQfv;
+			std::vector<const CqLath*> aQfv;
 			Qfv(aQfv);
-			std::vector<CqLath*>::iterator iVert;
+			std::vector<const CqLath*>::iterator iVert;
 			for( iVert = aQfv.begin(); iVert != aQfv.end(); iVert++ )
 				if( (*iVert)->isBoundaryVertex() )
 					return( true );
 			return( false );
 		}
 
-		bool isBoundaryEdge()
+		bool isBoundaryEdge() const
 		{
 			// If this edge has no companion it must be boundary.
 			if( NULL == ec() )
@@ -262,7 +262,7 @@ class CqLath
 			return( false );
 		}
 
-		bool isBoundaryVertex()
+		bool isBoundaryVertex() const
 		{
 			// Check if the ccv loop is closed, if not must be boundary.
 			CqLath* pNext = ccv();
@@ -274,6 +274,12 @@ class CqLath
 			}
 			return( false );
 		}
+
+		/** \brief Check whether the vertex is a corner
+		 *
+		 * A corner vertex has only two edges and one face attached.
+		 */
+		bool isCornerVertex() const;
 
 	private:
 		///	Declared private to prevent copying.
@@ -488,6 +494,13 @@ inline void CqLath::Qev(std::vector<const CqLath*>& Result) const
 inline void CqLath::Qfv(std::vector<const CqLath*>& Result) const
 {
 	Qfe(Result);
+}
+
+
+inline bool CqLath::isCornerVertex() const
+{
+	assert(cf() != NULL);
+	return (cv() == NULL)  &&  (cf()->cv() == NULL);
 }
 
 } // namespace Aqsis
