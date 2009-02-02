@@ -81,8 +81,9 @@ class CqBucketProcessor
 		TqUint numSamples() const;
 		const std::vector<SqSampleData>& SamplePoints() const;
 
-		const CqRegion& SRegion() const;
-		const CqRegion& DRegion() const;
+		const CqRegion& SampleRegion() const;
+		const CqRegion& DisplayRegion() const;
+		const CqRegion& DataRegion() const;
 
 	private:
 		void	InitialiseFilterValues();
@@ -136,16 +137,19 @@ class CqBucketProcessor
 		std::vector<std::vector<CqVector2D> >	m_aSamplePositions;
 		/// Vector of filter weights precalculated.
 		std::vector<TqFloat>	m_aFilterValues;
-		std::vector<TqFloat>	m_aDatas;
-		std::vector<TqFloat>	m_aCoverages;
 
 		SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
 		CqOcclusionTree m_OcclusionTree;
 
 		// View range and clipping info (to know when to skip rendering)
-		CqRegion	m_SRegion;
-		CqRegion	m_DRegion;
+		/// The total size of the array of sample available for this bucket.
+		CqRegion	m_DataRegion;
+		/// The area of the samples array that will be used to sample micropolygons.
+		CqRegion	m_SampleRegion;
+		/// The area of the samples array that will be sent to the display. 
+		CqRegion	m_DisplayRegion;
+
 		TqInt	m_DiscreteShiftX;
 		TqInt	m_DiscreteShiftY;
 		TqInt	m_PixelXSamples;
@@ -161,14 +165,19 @@ class CqBucketProcessor
 		CqChannelBuffer	m_channelBuffer;
 };
 
-inline const CqRegion& CqBucketProcessor::SRegion() const
+inline const CqRegion& CqBucketProcessor::DataRegion() const
 {
-	return m_SRegion;
+	return m_DataRegion;
 }
 
-inline const CqRegion& CqBucketProcessor::DRegion() const
+inline const CqRegion& CqBucketProcessor::SampleRegion() const
 {
-	return m_DRegion;
+	return m_SampleRegion;
+}
+
+inline const CqRegion& CqBucketProcessor::DisplayRegion() const
+{
+	return m_DisplayRegion;
 }
 
 inline TqFloat	CqBucketProcessor::FilterXWidth() const
@@ -200,7 +209,7 @@ inline TqInt CqBucketProcessor::GetNextSamplePointIndex()
 
 inline TqUint CqBucketProcessor::numSamples() const
 {
-	return SRegion().area() * PixelXSamples() * PixelYSamples();
+	return DataRegion().area() * PixelXSamples() * PixelYSamples();
 }
 
 inline const std::vector<SqSampleData>& CqBucketProcessor::SamplePoints() const
