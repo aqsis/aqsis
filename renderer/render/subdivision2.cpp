@@ -156,7 +156,7 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 	m_fFinalised=false;
 }
 
-CqVector3D CqSubdivision2::limitPoint(CqLath* vert) const
+CqVector3D CqSubdivision2::limitPoint(CqLath* vert)
 {
 	// To compute the limit point, we make use of a limit mask for
 	// Catmull-Clark subdivision.  For the standard Catmull-Clark scheme this
@@ -183,12 +183,30 @@ CqVector3D CqSubdivision2::limitPoint(CqLath* vert) const
 	// * For sharp corners the vertex is stationary under subdivision so this
 	//   case is trivial.
 
-	const CqVector4D* P = pPoints()->P()->pValue();
-	const CqVector3D vPos = vectorCast<CqVector3D>(P[vert->VertexIndex()]);
+	const CqVector3D vPos = vectorCast<CqVector3D>(
+			pPoints()->P()->pValue()[vert->VertexIndex()]);
 
 	// Sharp corners don't move under subdivision; just return them.
 	if(CornerSharpness(vert) > 0.0f)
 		return vPos;
+
+	// We need to make sure that all parent faces of vert are subdivided, since
+	// we need the positions as input to the limit point calculation.
+	if(vert->pParentFacet())
+	{
+		CqLath* v = vert->pParentFacet();
+		// TODO: Do this more efficiently!
+		const CqLath* const v0 = v;
+		do
+		{
+			subdivideNeighbourFaces(v);
+			v = v->cf();
+		} while(v != v0);
+	}
+	// Grab a pointer to the positions.  It's very important that we do this
+	// *after* the possible subdivision steps above, or the array may have been
+	// reallocated.
+	const CqVector4D* P = pPoints()->P()->pValue();
 
 	if(vert->isBoundaryVertex())
 	{
@@ -1381,7 +1399,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 {
 	assert(pFace);
 
-	// If this has already beed subdivided then skip it.
+	// If this has already been subdivided then skip it.
 	if( pFace->pFaceVertex() )
 	{
 		apSubFaces.clear();
@@ -1417,23 +1435,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		std::vector<CqLath*>::iterator vertexIt;
 		std::vector<CqLath*>::iterator vertexEnd = parentVertices.end();
 		for( vertexIt = parentVertices.begin(); vertexIt != vertexEnd; ++vertexIt )
-		{
-			CqLath* vertex = *vertexIt;
-			std::vector<CqLath*> vertexFaces;
-			vertex->Qvf( vertexFaces );
-
-			std::vector<CqLath*>::iterator faceIt;
-			std::vector<CqLath*>::iterator faceEnd = vertexFaces.end();
-			for( faceIt = vertexFaces.begin(); faceIt != faceEnd; ++faceIt )
-			{
-				CqLath* face = (*faceIt);
-				if( NULL == face->pFaceVertex() )
-				{
-					std::vector<CqLath*> dummySubFaces;
-					SubdivideFace(face, dummySubFaces);
-				}
-			}
-		}
+			subdivideNeighbourFaces(*vertexIt);
 	}
 
 	std::vector<CqLath*> aQfv;
@@ -1512,10 +1514,12 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		pLathB->SetpClockwiseFacet(pLathC);
 		pLathC->SetpClockwiseFacet(pLathD);
 		pLathD->SetpClockwiseFacet(pLathA);
-		pLathA->SetpParentFacet(pFace);
-		pLathB->SetpParentFacet(pFace);
-		pLathC->SetpParentFacet(pFace);
-		pLathD->SetpParentFacet(pFace);
+		// Attach the new face laths to the corner of the parent facet from
+		// which this face is decended.
+		pLathA->SetpParentFacet(aQfv[i]);
+		pLathB->SetpParentFacet(aQfv[i]);
+		pLathC->SetpParentFacet(aQfv[i]);
+		pLathD->SetpParentFacet(aQfv[i]);
 
 		// Fill in the vertex references table for these vertices.
 		m_aapVertices[pLathA->VertexIndex()].push_back(pLathA);
@@ -1619,6 +1623,33 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	//OutputInfo("out.dat");
 }
 
+/// Subdivide all faces around the given vertex.
+void CqSubdivision2::subdivideNeighbourFaces(CqLath* vert)
+{
+	CqLath* f = vert;
+	std::vector<CqLath*> dummySubFaces;
+	// Step over all the faces sourrounding the vertex, and make sure they're
+	// subdivided.
+	do
+	{
+		if(!f->pFaceVertex())
+			SubdivideFace(f, dummySubFaces);
+		f = f->cv();
+	}
+	while(f && f != vert);
+	if(!f)
+	{
+		// If f was NULL at the end of the previous loop then a boundary was
+		// encountered and we need to go in the other direction too.
+		f = vert->ccv();
+		while(f)
+		{
+			if(!f->pFaceVertex())
+				SubdivideFace(f, dummySubFaces);
+			f = f->ccv();
+		}
+	}
+}
 
 void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces)
 {
@@ -1776,8 +1807,9 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 {
-	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
-	static const TqInt aDiceSizes[] = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4 };
+	// Dice rate table                  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
+	static const TqInt aDiceSizes[] = { 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
+	                                  
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
 	assert( pFace() );
@@ -1828,19 +1860,15 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 		pTemp = pLath;
 
 		// Get data from pLath
-		TqInt ivA = pLath->VertexIndex();
-		TqInt iFVA = pLath->FaceVertexIndex();
 		TqInt indexA = 0;
-		StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
+		StoreDice( pGrid, pMotionPoints, pLath, indexA );
 
 		indexA++;
 		pLath = pLath->ccf();
 		c = 0;
 		while( c < nc )
 		{
-			TqInt ivA = pLath->VertexIndex();
-			TqInt iFVA = pLath->FaceVertexIndex();
-			StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
+			StoreDice(pGrid, pMotionPoints, pLath, indexA);
 			if( c < ( nc - 1 ) )
 				pLath = pLath->cv()->ccf();
 
@@ -1856,18 +1884,14 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 				pTemp = pLath->ccv();
 
 			// Get data from pLath
-			TqInt ivA = pLath->VertexIndex();
-			TqInt iFVA = pLath->FaceVertexIndex();
 			TqInt indexA = ( r * ( nc + 1 ) );
-			StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
+			StoreDice( pGrid, pMotionPoints, pLath, indexA );
 			indexA++;
 			pLath = pLath->cf();
 			c = 0;
 			while( c < nc )
 			{
-				TqInt ivA = pLath->VertexIndex();
-				TqInt iFVA = pLath->FaceVertexIndex();
-				StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
+				StoreDice( pGrid, pMotionPoints, pLath, indexA );
 				if( c < ( nc - 1 ) )
 					pLath = pLath->ccv()->cf();
 
@@ -2043,13 +2067,15 @@ void CqSurfaceSubdivisionPatch::StoreDiceAPVar(
 }
 
 
-void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
+void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, CqLath* vert, TqInt iData)
 {
 	TqInt lUses = m_Uses;
 	TqInt lDone = 0;
 
-	if ( USES( lUses, EnvVars_P ) )
-		pGrid->pVar(EnvVars_P) ->SetPoint( vectorCast<CqVector3D>(pPoints->P()->pValue( iParam )[0]), iData );
+	TqInt iParam = vert->VertexIndex();
+	TqInt iFVParam = vert->FaceVertexIndex();
+
+	pGrid->pVar(EnvVars_P)->SetPoint(m_pTopology->limitPoint(vert), iData);
 
 	// Special cases for s and t if "st" exists, it should override s and t.
 	CqParameter* pParam;
@@ -2438,20 +2464,16 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	CqMatrix matCtoR;
 	QGetRenderContext() ->matSpaceToSpace("camera", "raster", NULL, NULL,
 			QGetRenderContext()->Time(), matCtoR );
-	CqVector2D	avecHull[ 4 ];
+	CqVector2D	hull[ 4 ];
 	for (TqInt i = 0; i < 4; i++ )
-		avecHull[i] = vectorCast<CqVector2D>( matCtoR*pTopology()->limitPoint(aQfv[i]) );
+		hull[i] = vectorCast<CqVector2D>( matCtoR*pTopology()->limitPoint(aQfv[i]) );
 
-	TqFloat uLen = 0;
-	TqFloat vLen = 0;
-
-	CqVector2D	Vec1 = avecHull[ 1 ] - avecHull[ 0 ];
-	CqVector2D	Vec2 = avecHull[ 2 ] - avecHull[ 3 ];
-	uLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
-
-	Vec1 = avecHull[ 3 ] - avecHull[ 0 ];
-	Vec2 = avecHull[ 2 ] - avecHull[ 1 ];
-	vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
+	TqFloat uLen = max(
+			(hull[1] - hull[0]).Magnitude2(),
+			(hull[2] - hull[3]).Magnitude2());
+	TqFloat vLen = max(
+			(hull[3] - hull[0]).Magnitude2(),
+			(hull[2] - hull[1]).Magnitude2());
 
 	TqFloat shadingRate = AdjustedShadingRate();
 	uLen = sqrt(uLen/shadingRate);
@@ -2459,11 +2481,8 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
-	uLen = max<TqInt>(lround(uLen), 1);
-	vLen = max<TqInt>(lround(vLen), 1);
-
-	m_uDiceSize = static_cast<TqInt>( uLen );
-	m_vDiceSize = static_cast<TqInt>( vLen );
+	m_uDiceSize = max<TqInt>(lround(uLen), 1);
+	m_vDiceSize = max<TqInt>(lround(vLen), 1);
 
 	// Note Subd surfaces always have a power of 2 dice rate because they
 	// are diced by recursive subdivision. Hence no need to set it explicitly.

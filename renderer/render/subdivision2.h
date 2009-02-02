@@ -136,7 +136,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 			for( iVE = aQve.begin(); iVE != aQve.end(); iVE++ )
 				m_mapSharpCorners[(*iVE)] = Sharpness;
 		}
-		TqFloat		CornerSharpness( CqLath* pLath ) const
+		TqFloat		CornerSharpness(const CqLath* pLath) const
 		{
 			TqSharpnessMap::const_iterator pos = m_mapSharpCorners.find(pLath);
 			if(pos != m_mapSharpCorners.end())
@@ -154,11 +154,14 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		 * the limit mask for the standard subdivision rules is present in the
 		 * literature.
 		 *
+		 * Non-const since some subdivision may have to be performed to obtain
+		 * the limit point correctly.
+		 *
 		 * \param vert - Lath connected to the vertex for which we want the
 		 *               limit point.
 		 * \return Limit point corresponding to vert.
 		 */
-		CqVector3D limitPoint(CqLath* vert) const;
+		CqVector3D limitPoint(CqLath* vert);
 
 		void AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex);
 		void AddEdgeVertex(CqLath* pEdge, TqInt& iVIndex, TqInt& iFVIndex);
@@ -198,7 +201,9 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		void DuplicateVertex(CqParameter* pParamToModify, CqLath* pVertex,
 				TqInt iIndex);
 
-		typedef std::map<CqLath*, TqFloat> TqSharpnessMap;
+		void subdivideNeighbourFaces(CqLath* vert);
+
+		typedef std::map<const CqLath*, TqFloat> TqSharpnessMap;
 
 		/// Array of pointers to laths, one each representing each facet.
 		std::vector<CqLath*>				m_apFacets;
@@ -317,7 +322,7 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 	private:
 		CqMicroPolyGridBase* DiceExtract();
 
-		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
+		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, CqLath* vert, TqInt iVData);
 		void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqInt ifvA, TqUint indexA );
 
 		boost::shared_ptr<CqSubdivision2>	m_pTopology;

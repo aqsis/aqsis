@@ -99,6 +99,7 @@ TqUlong	gVariableTokens[ EnvVars_Last ] =
  *
  * TODO: Document which parts of the code require these variables.
  *
+ * P:  Necessary for every part of the pipeline!
  * Ng: Assumed to be present if Sides == 1 for back face culling.
  *
  * TODO: See if we can reduce these default requires further.
