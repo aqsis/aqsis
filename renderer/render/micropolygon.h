@@ -29,6 +29,8 @@
 
 #include	"aqsis.h"
 
+#include	<boost/utility.hpp>
+
 #include	"pool.h"
 #include	"color.h"
 #include	"list.h"
@@ -40,7 +42,7 @@
 #include	"csgtree.h"
 #include	"refcount.h"
 #include	"logging.h"
-#include       <boost/utility.hpp>
+#include	"imagepixel.h"
 
 namespace Aqsis {
 
@@ -48,7 +50,6 @@ class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
 class CqMicroPolygon;
-struct SqSampleData;
 class CqBucketProcessor;
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
@@ -708,7 +709,7 @@ class CqMicroPolygon : boost::noncopyable
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
@@ -808,7 +809,7 @@ class CqMicroPolygon : boost::noncopyable
 		 * \param sample - sample position etc.
 		 */
 		static bool dofSampleInBound(const CqBound& bound, const CqHitTestCache& cache, 
-				const SqSampleData& sample);
+				SqSampleDataPtr const sample);
 
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
@@ -956,7 +957,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
 

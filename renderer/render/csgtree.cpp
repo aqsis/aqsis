@@ -195,10 +195,10 @@ void CqCSGTreeNode::ProcessSampleList( std::deque<SqImageSample>& samples )
 	TqInt j = 0;
 	for ( i = samples.begin(); i != samples.end(); ++i, ++j )
 	{
-		if ( ( aChildIndex[j] = isChild( i->m_pCSGNode.get() ) ) >= 0 )
+		if ( ( aChildIndex[j] = isChild( i->csgNode.get() ) ) >= 0 )
 		{
-			if ( ((i->m_pCSGNode.get())->NodeType() == CSGNodeType_Primitive ) &&
-			        ((i->m_pCSGNode.get())->NodeType() == CSGNodeType_Union ) )
+			if ( ((i->csgNode.get())->NodeType() == CSGNodeType_Primitive ) &&
+			        ((i->csgNode.get())->NodeType() == CSGNodeType_Union ) )
 			{
 				abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
 			}
@@ -232,11 +232,11 @@ void CqCSGTreeNode::ProcessSampleList( std::deque<SqImageSample>& samples )
 			bCurrentI = bNewI;
 			if ( pParent() )
 			{
-				i->m_pCSGNode = shared_from_this();
+				i->csgNode = shared_from_this();
 			}
 			else
 			{
-				i->m_pCSGNode = boost::shared_ptr<CqCSGTreeNode>();
+				i->csgNode = boost::shared_ptr<CqCSGTreeNode>();
 			}
 			i++;
 		}
@@ -257,9 +257,9 @@ void CqCSGNodePrimitive::ProcessSampleList( std::deque<SqImageSample>& samples )
 	std::deque<SqImageSample>::iterator i;
 	for ( i = samples.begin(); i != samples.end(); ++i )
 	{
-		if ( i->m_pCSGNode.get() == this )
+		if ( i->csgNode.get() == this )
 		{
-			i->m_pCSGNode = boost::shared_ptr<CqCSGTreeNode>();
+			i->csgNode = boost::shared_ptr<CqCSGTreeNode>();
 		}
 	}
 }

@@ -67,7 +67,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<const SqSampleData*>());
+	m_leafSamples.assign(numLeafNodes, std::vector<SqSampleDataPtr>());
 
 	// Compute and cache bounds of tree and culling area.
 	m_treeBoundMin = CqVector2D(bp->SampleRegion().xMin(), bp->SampleRegion().yMin());
@@ -78,12 +78,12 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
-	const std::vector<SqSampleData>& samples = bp->SamplePoints();
-	std::vector<SqSampleData>::const_iterator sample;
+	const std::vector<SqSampleDataPtr>& samples = bp->samplePoints();
+	std::vector<SqSampleDataPtr>::const_iterator sample;
 	for(sample = samples.begin(); sample != samples.end(); ++sample)
 	{
 		// Convert samplePos into normalized units for finding sample position.
-		CqVector2D samplePos = sample->m_Position - m_treeBoundMin;
+		CqVector2D samplePos = (*sample)->position - m_treeBoundMin;
 		samplePos.x(samplePos.x() / treeDiag.x());
 		samplePos.y(samplePos.y() / treeDiag.y());
 		// Locate leaf node for the sample position
@@ -94,7 +94,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 		assert((sampleNodeIndex*2)+1 >= numTotalNodes);
 
 		m_depthTree[sampleNodeIndex] = FLT_MAX;
-		m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(&(*sample));
+		m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(SqSampleDataPtr(*sample));
 	}
 	// Fix up parent depths.
 	propagateDepths();
@@ -112,12 +112,12 @@ void CqOcclusionTree::updateDepths()
 			continue;
 		TqFloat max = 0;
 		bool hit = false;
-		for(std::vector<const SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
+		for(std::vector<SqSampleDataPtr>::iterator sample = m_leafSamples[i].begin(),
 				end = m_leafSamples[i].end(); sample != end; ++sample)
 		{
 			TqFloat depth; 
-			if((*sample)->m_OpaqueSample.isValid() &&
-				(depth = (*sample)->m_OpaqueSample.Data()[Sample_Depth]) > max)
+			if((*sample)->opaqueSample.flags & SqImageSample::Flag_Valid &&
+				(depth = (*sample)->opaqueSample.data[Sample_Depth]) > max)
 			{
 				max = depth;
 				hit = true;

@@ -29,18 +29,20 @@
 #define POINTS_H_INCLUDED
 
 #include	"aqsis.h"
+
+#include	<algorithm>
+#include	<functional>
+
 #include	"matrix.h"
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"kdtree.h"
 #include 	"micropolygon.h"
-
+#include	"imagepixel.h"
 #include	"ri.h"
+#include	"polygon.h"
+#include	"imagepixel.h"
 
-#include        "polygon.h"
-
-#include	<algorithm>
-#include	<functional>
 
 namespace Aqsis {
 
@@ -376,7 +378,7 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			m_Bound.vecMin() = pos - CqVector3D(m_radius, m_radius, 0);
 			m_Bound.vecMax() = pos + CqVector3D(m_radius, m_radius, 0);
 		}
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheCocMultipliers(CqHitTestCache& cache) {}
@@ -524,7 +526,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{
 			return true;
 		}
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;

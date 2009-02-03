@@ -112,12 +112,15 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 		// Allocate the image element storage if this is the first bucket
 		if(m_aieImage.empty())
 		{
-			SqImageSample::SetSampleSize(QGetRenderContext() ->GetOutputDataTotalSize());
+			SqImageSample::sampleSize = QGetRenderContext() ->GetOutputDataTotalSize();
 
 			m_aieImage.resize( DataRegion().area() );
 			m_aSamplePositions.resize( DataRegion().area() );
-			m_SamplePoints.resize( DataRegion().area() * PixelXSamples() * PixelYSamples() );
+			m_samplePoints.resize( DataRegion().area() * PixelXSamples() * PixelYSamples() );
 			m_NextSamplePoint = 0;
+			// Allocate all the samples
+			for(std::vector<SqSampleDataPtr>::iterator i = m_samplePoints.begin(), e = m_samplePoints.end(); i != e; ++i)
+				(*i) = new SqSampleData;
 
 			CalculateDofBounds();
 
@@ -129,16 +132,13 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 			{
 				for ( TqInt j = 0; j < maxX; j++ )
 				{
-					m_aieImage[which].Clear( m_SamplePoints );
+					m_aieImage[which].Clear();
 					m_aieImage[which].AllocateSamples( this,
 											 PixelXSamples(),
 											 PixelYSamples() );
-					m_aieImage[which].InitialiseSamples( m_SamplePoints,
-											   m_aSamplePositions[which] );
+					m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
 					//if(fJitter)
-					m_aieImage[which].JitterSamples( m_SamplePoints,
-											   m_aSamplePositions[which],
-											   opentime, closetime);
+					m_aieImage[which].JitterSamples( m_aSamplePositions[which], opentime, closetime);
 
 					which++;
 				}
@@ -156,7 +156,7 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 			{
 				TqInt other = i + rand.RandomInt(size - i);
 				if (other >= size) other = size - 1;
-				(*itPix).m_SampleIndices.swap(m_aieImage[other].m_SampleIndices);  
+				(*itPix).m_samples.swap(m_aieImage[other].m_samples);  
 				(*itPix).m_DofOffsetIndices.swap(m_aieImage[other].m_DofOffsetIndices); 
 			}
 		}
@@ -172,15 +172,11 @@ void CqBucketProcessor::preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMa
 				CqVector2D bPos2( DisplayRegion().xMin(), DisplayRegion().yMin() );
 				bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( ii - m_DiscreteShiftY ) );
 
-				m_aieImage[which].Clear( m_SamplePoints );
+				m_aieImage[which].Clear();
 
 				//if(fJitter)
-				m_aieImage[which].JitterSamples( m_SamplePoints,
-										   m_aSamplePositions[which],
-										   opentime, closetime);
-				m_aieImage[which].OffsetSamples( m_SamplePoints,
-										   bPos2,
-										   m_aSamplePositions[which] );
+				m_aieImage[which].JitterSamples( m_aSamplePositions[which], opentime, closetime);
+				m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
 				which++;
 			}
@@ -259,7 +255,7 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 void CqBucketProcessor::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshold)
 {
 	for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(), end = m_aieImage.end(); i != end ; i++ )
-		i->Combine(m_SamplePoints, filterdepth, zThreshold);
+		i->Combine(filterdepth, zThreshold);
 }
 
 //----------------------------------------------------------------------
@@ -362,21 +358,19 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 
 							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
 							{
-								const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints,
-														   sampleIndex );
-								CqVector2D vecS = sampleData.m_Position;
+								SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
+								CqVector2D vecS = sampleData->position;
 								vecS -= CqVector2D( xcent, ycent );
 								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 								{
-									TqInt cindex = sindex + sampleData.m_SubCellIndex;
+									TqInt cindex = sindex + sampleData->subCellIndex;
 									TqFloat g = m_aFilterValues[ cindex ];
 									gTot += g;
-									if ( pie2->OpaqueValues( m_SamplePoints, sampleIndex ).isValid() )
+									if ( pie2->OpaqueValues( sampleIndex ).flags & SqImageSample::Flag_Valid )
 									{
-										SqImageSample& pSample = pie2->OpaqueValues( m_SamplePoints,
-															     sampleIndex );
+										SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 										for ( TqInt k = 0; k < datasize; ++k )
-											samples[k] += pSample.Data()[k] * g;
+											samples[k] += pSample.data[k] * g;
 										sampleCounts[pixelIndex]++;
 									}
 								}
@@ -424,13 +418,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 						for ( sy = 0; sy < PixelYSamples(); sy++ )
 						{
 							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-							const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints,
-													   sampleIndex );
-							CqVector2D vecS = sampleData.m_Position;
+							SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
+							CqVector2D vecS = sampleData->position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
-								TqInt cindex = sindex + sampleData.m_SubCellIndex;
+								TqInt cindex = sindex + sampleData->subCellIndex;
 								TqFloat g = m_aFilterValues[ cindex ];
 								gTot += g;
 								if(sampleCounts[pixelIndex] > 0)
@@ -503,21 +496,19 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 								for ( sx = 0; sx < PixelXSamples(); sx++ )
 								{
 									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-									const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints,
-															   sampleIndex );
-									CqVector2D vecS = sampleData.m_Position;
+									SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
+									CqVector2D vecS = sampleData->position;
 									vecS -= CqVector2D( xcent, ycent );
 									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 									{
-										TqInt cindex = sindex + sampleData.m_SubCellIndex;
+										TqInt cindex = sindex + sampleData->subCellIndex;
 										TqFloat g = m_aFilterValues[ cindex ];
 										gTot += g;
-										if ( pie2->OpaqueValues( m_SamplePoints, sampleIndex ).isValid() )
+										if ( pie2->OpaqueValues( sampleIndex ).flags & SqImageSample::Flag_Valid )
 										{
-											SqImageSample& pSample = pie2->OpaqueValues( m_SamplePoints,
-																     sampleIndex );
+											SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 											for ( TqInt k = 0; k < datasize; ++k )
-												samples[k] += pSample.Data()[k] * g;
+												samples[k] += pSample.data[k] * g;
 											SampleCount++;
 										}
 									}
@@ -1075,10 +1066,10 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 					int index = index_start;
 					for ( m = start_m; m < end_m; m++, index++ )
 					{
-						const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints, index );
+						SqSampleDataPtr sampleData = pie2->SampleData( index );
 						//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
 						{
-							const CqVector2D& vecP = sampleData.m_Position;
+							const CqVector2D& vecP = sampleData->position;
 							const TqFloat time = 0.0;
 
 							CqStats::IncI( CqStats::SPL_count );
@@ -1089,7 +1080,7 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 							// Check to see if the sample is within the sample's level of detail
 							if ( UsingLevelOfDetail)
 							{
-								TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+								TqFloat LevelOfDetail = sampleData->detailLevel;
 								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
 									continue;
@@ -1274,9 +1265,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 						// loop over potential samples
 						do
 						{
-							const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints, index );
-							const CqVector2D& vecP = sampleData.m_Position;
-							const TqFloat time = sampleData.m_Time;
+							SqSampleDataPtr sampleData = pie2->SampleData( index );
+							const CqVector2D& vecP = sampleData->position;
+							const TqFloat time = sampleData->time;
 
 							index++;
 
@@ -1298,7 +1289,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
 								{
-									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									TqFloat LevelOfDetail = sampleData->detailLevel;
 									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 									{
 										continue;
@@ -1327,7 +1318,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
 								{
-									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									TqFloat LevelOfDetail = sampleData->detailLevel;
 									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 									{
 										continue;
@@ -1363,21 +1354,21 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
     bool Occludes = m_CurrentMpgSampleInfo.occludes;
 	bool opaque =  m_CurrentMpgSampleInfo.isOpaque;
 
-	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(m_SamplePoints, index);
+	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
 	//static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
 	SqImageSample localImageVal;
 
 	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
-	std::deque<SqImageSample>& aValues = pie2->Values( m_SamplePoints, index );
+	std::deque<SqImageSample>& aValues = pie2->Values( index );
 	std::deque<SqImageSample>::iterator sample = aValues.begin();
 	std::deque<SqImageSample>::iterator end = aValues.end();
 
 	// return if the sample is occluded and can be culled.
 	if(opaque)
 	{
-		if((currentOpaqueSample.isValid()) &&
-			currentOpaqueSample.Data()[Sample_Depth] <= D)
+		if((currentOpaqueSample.flags & SqImageSample::Flag_Valid) &&
+			currentOpaqueSample.data[Sample_Depth] <= D)
 		{
 			return;
 		}
@@ -1388,29 +1379,29 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		// return if the sample is occluded and can be culled.
 		while( sample != end )
 		{
-			if((*sample).Data()[Sample_Depth] >= D)
+			if((*sample).data[Sample_Depth] >= D)
 				break;
 
-			if(((*sample).isOccludes()) &&
-				!(*sample).m_pCSGNode && currentGridInfo.m_IsCullable)
+			if(((*sample).flags & SqImageSample::Flag_Occludes) &&
+				!(*sample).csgNode && currentGridInfo.m_IsCullable)
 				return;
 
 			++sample;
 		}
 	}
 
-    ImageVal.Data()[Sample_Depth] = D ;
+    ImageVal.data[Sample_Depth] = D ;
 
 	CqStats::IncI( CqStats::SPL_hits );
 	pMPG->MarkHit();
 	// Record the fact that we have valid samples in the bucket.
 	m_hasValidSamples = true;
 
-    TqFloat* val = ImageVal.Data();
+    TqFloat* val = ImageVal.data;
 	CqColor col;
 	CqColor opa;
-	const SqSampleData& sampleData = pie2->SampleData( m_SamplePoints, index );
-	const CqVector2D& vecP = sampleData.m_Position;
+	SqSampleDataPtr sampleData = pie2->SampleData( index );
+	const CqVector2D& vecP = sampleData->position;
 	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
 
     val[ Sample_Red ] = col[0];
@@ -1432,24 +1423,20 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		// If depth is exactly the same as previous sample, chances are we've
 		// hit a MPG grid line.
 		// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-		if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
+		if ( sample != end && (*sample).data[Sample_Depth] == ImageVal.data[Sample_Depth] && !(*sample).csgNode )
 		{
 			//(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
 			return;
 		}
 	}
 
-    ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
+    ImageVal.csgNode = pMPG->pGrid()->pCSGNode();
 
-    ImageVal.resetFlags();
+    ImageVal.flags = 0;
     if ( Occludes )
-    {
-        ImageVal.setOccludes();
-    }
+        ImageVal.flags |= SqImageSample::Flag_Occludes;
     if( currentGridInfo.m_IsMatte )
-    {
-        ImageVal.setMatte();
-    }
+        ImageVal.flags |= SqImageSample::Flag_Matte;
 
 	if(!opaque)
 	{
@@ -1458,7 +1445,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	else
 	{
 		// mark this sample as having been written into.
-		ImageVal.setValid();
+		ImageVal.flags |= SqImageSample::Flag_Valid;
 	}
 }
 
@@ -1480,7 +1467,7 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 					{
 						TqFloat f;
 						pData->GetFloat( f, pMPG->GetIndex() );
-						sample.Data()[ entry->second.m_Offset ] = f;
+						sample.data[ entry->second.m_Offset ] = f;
 						break;
 					}
 					case type_point:
@@ -1490,18 +1477,18 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 					{
 						CqVector3D v;
 						pData->GetPoint( v, pMPG->GetIndex() );
-						sample.Data()[ entry->second.m_Offset ] = v.x();
-						sample.Data()[ entry->second.m_Offset + 1 ] = v.y();
-						sample.Data()[ entry->second.m_Offset + 2 ] = v.z();
+						sample.data[ entry->second.m_Offset ] = v.x();
+						sample.data[ entry->second.m_Offset + 1 ] = v.y();
+						sample.data[ entry->second.m_Offset + 2 ] = v.z();
 						break;
 					}
 					case type_color:
 					{
 						CqColor c;
 						pData->GetColor( c, pMPG->GetIndex() );
-						sample.Data()[ entry->second.m_Offset ] = c.r();
-						sample.Data()[ entry->second.m_Offset + 1 ] = c.g();
-						sample.Data()[ entry->second.m_Offset + 2 ] = c.b();
+						sample.data[ entry->second.m_Offset ] = c.r();
+						sample.data[ entry->second.m_Offset + 1 ] = c.g();
+						sample.data[ entry->second.m_Offset + 2 ] = c.b();
 						break;
 					}
 					case type_matrix:
@@ -1509,22 +1496,22 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 						CqMatrix m;
 						pData->GetMatrix( m, pMPG->GetIndex() );
 						TqFloat* pElements = m.pElements();
-						sample.Data()[ entry->second.m_Offset ] = pElements[ 0 ];
-						sample.Data()[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
-						sample.Data()[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
-						sample.Data()[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
-						sample.Data()[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
-						sample.Data()[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
-						sample.Data()[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
-						sample.Data()[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
-						sample.Data()[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
-						sample.Data()[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
-						sample.Data()[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
-						sample.Data()[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
-						sample.Data()[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
-						sample.Data()[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
-						sample.Data()[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
-						sample.Data()[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+						sample.data[ entry->second.m_Offset ] = pElements[ 0 ];
+						sample.data[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+						sample.data[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+						sample.data[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+						sample.data[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+						sample.data[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+						sample.data[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+						sample.data[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+						sample.data[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+						sample.data[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+						sample.data[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+						sample.data[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+						sample.data[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+						sample.data[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+						sample.data[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+						sample.data[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
 						break;
 					}
 					default:

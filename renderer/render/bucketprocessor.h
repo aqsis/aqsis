@@ -56,8 +56,8 @@ class CqBucketProcessor
 		/** Reset the status of the object */
 		void reset();
 
-		/** Get the next sample point index from the bucket data */
-		TqInt GetNextSamplePointIndex();
+		/** Get the next sample point from the bucket data */
+		SqSampleDataPtr GetNextSamplePoint();
 
 		/** Prepare the data for the bucket to be processed */
 		void preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
@@ -79,7 +79,7 @@ class CqBucketProcessor
 		CqChannelBuffer& getChannelBuffer();
 
 		TqUint numSamples() const;
-		const std::vector<SqSampleData>& SamplePoints() const;
+		const std::vector<SqSampleDataPtr>& samplePoints() const;
 
 		const CqRegion& SampleRegion() const;
 		const CqRegion& DisplayRegion() const;
@@ -131,7 +131,7 @@ class CqBucketProcessor
 
 		std::vector<CqBound>		m_DofBounds;
 		std::vector<CqImagePixel>	m_aieImage;
-		std::vector<SqSampleData>	m_SamplePoints;
+		std::vector<SqSampleDataPtr>	m_samplePoints;
 		TqInt	m_NextSamplePoint;
 		/// Vector of vectors of jittered sample positions precalculated.
 		std::vector<std::vector<CqVector2D> >	m_aSamplePositions;
@@ -200,11 +200,11 @@ inline TqInt	CqBucketProcessor::PixelYSamples() const
 	return m_PixelYSamples;
 }
 
-inline TqInt CqBucketProcessor::GetNextSamplePointIndex()
+inline SqSampleDataPtr CqBucketProcessor::GetNextSamplePoint()
 {
 	TqInt index = m_NextSamplePoint;
 	m_NextSamplePoint++;
-	return(index);
+	return(m_samplePoints[index]);
 }
 
 inline TqUint CqBucketProcessor::numSamples() const
@@ -212,9 +212,9 @@ inline TqUint CqBucketProcessor::numSamples() const
 	return DataRegion().area() * PixelXSamples() * PixelYSamples();
 }
 
-inline const std::vector<SqSampleData>& CqBucketProcessor::SamplePoints() const
+inline const std::vector<SqSampleDataPtr>& CqBucketProcessor::samplePoints() const
 {
-	return m_SamplePoints;
+	return m_samplePoints;
 }
 
 inline CqChannelBuffer& CqBucketProcessor::getChannelBuffer()
