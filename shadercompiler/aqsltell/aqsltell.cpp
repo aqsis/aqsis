@@ -235,12 +235,16 @@ int main( int argc, const char** argv )
 					}
 					else
 					{
-						printf( "ERROR - null pointer to value" );
+						printf( "ERROR - null pointer to value\n" );
 					}
 					//std::cout << std::endl;
 				}
 
 				SLX_EndShader();
+			}
+			else
+			{
+				printf("ERROR - could not read shader file\n");
 			}
 		}
 	}

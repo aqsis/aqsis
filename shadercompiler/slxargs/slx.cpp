@@ -40,6 +40,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include "ri.h"
 #include "slx.h"
 
@@ -666,53 +668,59 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 
 	if ( SLXFile.IsValid() )
 	{
-		CqShaderVM * pShader = new CqShaderVM(QGetRenderContextI());
-		pShader->SetDSOPath( DSOPath );
-		pShader->LoadProgram( SLXFile );
-		pShader->SetstrName( filePath );
-		pShader->ExecuteInit();
-
-		varCount = pShader->GetShaderVarCount();
-
-		AllocateShaderArgsArray( varCount, &newArray );
-
-		theShaderType = SLX_TYPE_UNKNOWN;
-		aShaderType = pShader->Type();
-		switch ( aShaderType )
+		try
 		{
-				case Type_Surface:
-				theShaderType = SLX_TYPE_SURFACE;
-				break;
-				case Type_Lightsource:
-				theShaderType = SLX_TYPE_LIGHT;
-				break;
-				case Type_Volume:
-				theShaderType = SLX_TYPE_VOLUME;
-				break;
-				case Type_Displacement:
-				theShaderType = SLX_TYPE_DISPLACEMENT;
-				break;
-				case Type_Transformation:
-				theShaderType = SLX_TYPE_TRANSFORMATION;
-				break;
-				case Type_Imager:
-				theShaderType = SLX_TYPE_IMAGER;
-				break;
-		}
+			boost::shared_ptr<CqShaderVM> pShader(new CqShaderVM(QGetRenderContextI()));
+			pShader->SetDSOPath( DSOPath );
+			pShader->LoadProgram( SLXFile );
+			pShader->SetstrName( filePath );
+			pShader->ExecuteInit();
 
-		// Iterate through list of shader variables and build array of SLX_VISSYMDEF shader argument records.
-		// N.B. Not all shader variables are shader arguments, so NArgs may be less than varCount;
-		for ( i = 0; i < varCount; i++ )
+			varCount = pShader->GetShaderVarCount();
+
+			AllocateShaderArgsArray( varCount, &newArray );
+
+			theShaderType = SLX_TYPE_UNKNOWN;
+			aShaderType = pShader->Type();
+			switch ( aShaderType )
+			{
+					case Type_Surface:
+					theShaderType = SLX_TYPE_SURFACE;
+					break;
+					case Type_Lightsource:
+					theShaderType = SLX_TYPE_LIGHT;
+					break;
+					case Type_Volume:
+					theShaderType = SLX_TYPE_VOLUME;
+					break;
+					case Type_Displacement:
+					theShaderType = SLX_TYPE_DISPLACEMENT;
+					break;
+					case Type_Transformation:
+					theShaderType = SLX_TYPE_TRANSFORMATION;
+					break;
+					case Type_Imager:
+					theShaderType = SLX_TYPE_IMAGER;
+					break;
+			}
+
+			// Iterate through list of shader variables and build array of SLX_VISSYMDEF shader argument records.
+			// N.B. Not all shader variables are shader arguments, so NArgs may be less than varCount;
+			for ( i = 0; i < varCount; i++ )
+			{
+				AddShaderVar( pShader.get(), i, newArray, &theNArgs );
+			}
+
+			// Store shader info and arguments array in global storage
+			currentShaderArgsArray = newArray;
+			currentShaderNArgs = theNArgs;
+			currentShaderType = theShaderType;
+		}
+		catch(XqBadShader& e)
 		{
-			AddShaderVar( pShader, i, newArray, &theNArgs );
+			// todo: how do we report this error in more detail?
+			result = RIE_BADFILE;
 		}
-
-		// Store shader info and arguments array in global storage
-		currentShaderArgsArray = newArray;
-		currentShaderNArgs = theNArgs;
-		currentShaderType = theShaderType;
-
-		delete pShader;
 	}
 	else
 	{
@@ -915,9 +923,8 @@ static bool LoadShaderInfo ( char *name )
 					{
 						CloseCurrentShader( shaderInputFile );	// Success
 			
-						GetCurrentShaderInfo( name, currentShaderFilePath );
+						result = GetCurrentShaderInfo(name, currentShaderFilePath) == RIE_NOERROR;
 			
-						result = true;
 						doLoop = false;
 					}
 			
