@@ -30,9 +30,10 @@
 #include <iosfwd>
 #include <vector>
 #include <map>
+#include <stack>
 
-#include <boost/intrusive_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
@@ -40,6 +41,19 @@
 
 namespace Aqsis
 {
+
+/// A holder for source code positions along with the filename.
+struct SqSourceFilePos
+{
+	TqInt line;
+	TqInt col;
+	const char* fileName;
+	SqSourceFilePos(TqInt line, TqInt col, const char* fileName)
+		: line(line), col(col), fileName(fileName) {}
+};
+
+/// pretty print source file position
+std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos);
 
 //------------------------------------------------------------------------------
 /** \brief A lexical analyser for the Renderman Interface Byetstream.
@@ -59,15 +73,35 @@ namespace Aqsis
 class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:
-		/** \brief Create new lexer using a given stream.
+		/** Create a new lexer without input stream.
 		 *
-		 * \param inStream - stream to connect with.
+		 * get() operations will return ENDOFFILE tokens until pushInput() is
+		 * called.
 		 */
-		CqRibLexer(std::istream& inStream);
+		CqRibLexer();
+
+		/** \brief Push a stream onto the input stack
+		 *
+		 * The stream should be opened in binary mode so that no translation of
+		 * newline characters is performed.
+		 *
+		 * \param inStream - new stream from which RIB will be read.
+		 * \param streamName - Name of the stream, used for error messages.
+		 */
+		void pushInput(std::istream& inStream, const std::string& streamName);
+		/** \brief Pop a stream off the input stack
+		 *
+		 * If the stream is the last on the input stack, the lexer reverts to
+		 * using null input and will always return EOF tokens.
+		 */
+		void popInput();
+
 		/** \brief Get the next token.
 		 * \return The next token from the input stream.
 		 */
 		const CqRibToken& get();
+		/// Put the previous token back into the input.
+		void unget();
 		/** \brief Look at but don't remove the next token from the input sequence
 		 * \return the next token from the input stream
 		 */
@@ -78,7 +112,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		 * \return The position in the input file for the previous token
 		 *         obtained with get().
 		 */
-		SqSourcePos pos() const;
+		SqSourceFilePos pos() const;
 
 	private:
 		//--------------------------------------------------
@@ -111,7 +145,9 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		//--------------------------------------------------
 		// Member data
 		/// Input buffer from which characters are read.
-		CqRibInputBuffer m_inBuf;
+		CqRibInputBuffer* m_inBuf;
+		/// Stack of input buffers.
+		std::stack<boost::shared_ptr<CqRibInputBuffer> > m_inputStack;
 		/// source position of previous token in input stream
 		SqSourcePos m_currPos;
 		/// source position of latest token read from the input stream
@@ -136,9 +172,20 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline SqSourcePos CqRibLexer::pos() const
+
+// SqSourcePos functions
+inline std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos)
 {
-	return m_currPos;
+	out << pos.fileName << ":" << pos.line << " (col " << pos.col << ")";
+	return out;
+}
+
+//------------------------------------------------------------------------------
+// CqRibLexer functions
+inline SqSourceFilePos CqRibLexer::pos() const
+{
+	return SqSourceFilePos(m_currPos.line, m_currPos.col,
+			m_inBuf ? m_inBuf->streamName().c_str() : "null");
 }
 
 inline const CqRibToken& CqRibLexer::get()
@@ -148,6 +195,12 @@ inline const CqRibToken& CqRibLexer::get()
 	m_haveNext = false;
 	m_currPos = m_nextPos;
 	return m_nextTok;
+}
+
+inline void CqRibLexer::unget()
+{
+	assert(!m_haveNext);
+	m_haveNext = true;
 }
 
 inline const CqRibToken& CqRibLexer::peek()

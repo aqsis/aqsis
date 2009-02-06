@@ -9,6 +9,7 @@ SET(RIBPARSE_HDRS
 	ribtoken.h
 )
 SET(RIBPARSE_SRCS
+	iribparser.cpp
 	ribinputbuffer.cpp
 	riblexer.cpp
 	ribparser.cpp

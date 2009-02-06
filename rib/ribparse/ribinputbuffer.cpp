@@ -33,8 +33,9 @@
 
 namespace Aqsis {
 
-CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
+CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream, const std::string& streamName)
 	: m_inStream(&inStream),
+	m_streamName(streamName),
 	m_gzipStream(),
 	m_bufPos(1),
 	m_bufEnd(2),
@@ -46,7 +47,7 @@ CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 	m_buffer[1] = 0;
 	if(isGzippedStream(inStream))
 	{
-#ifdef USE_GZIPPED_RIB
+#		ifdef USE_GZIPPED_RIB
 		// Initialise gzip decompressor
 		namespace io = boost::iostreams;
 		io::filtering_stream<io::input>* zipStream = 0;
@@ -54,9 +55,10 @@ CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream)
 		zipStream->push(io::gzip_decompressor());
 		zipStream->push(inStream);
 		m_inStream = m_gzipStream.get();
-#else
-		AQSIS_THROW_XQERROR(XqParseError, EqE_Unimplement, "gzipped RIB detected, but aqsis compiled without gzip support.");
-#endif // USE_GZIPPED_RIB
+#		else
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Unimplement,
+			"gzipped RIB detected, but aqsis compiled without gzip support.");
+#		endif // USE_GZIPPED_RIB
 	}
 }
 

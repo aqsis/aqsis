@@ -49,15 +49,14 @@ class CqRibToken
 			FLOAT,
 			REQUEST,
 			ERROR,
-			ENDOFFILE,
-			UNKNOWN
+			ENDOFFILE
 		};
 
 		//--------------------------------------------------
 		/// \name Constructors
 		//@{
 		/// Construct a token of the given type (default value)
-		CqRibToken(EqType type = UNKNOWN);
+		CqRibToken(EqType type = ERROR);
 		/// Construct a INTEGER token from the given integer value
 		CqRibToken(TqInt intVal);
 		/// Construct a FLOAT token from the given float value
@@ -149,7 +148,6 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 	{
 		case ARRAY_BEGIN:
 		case ARRAY_END:
-		case UNKNOWN:
 		case ENDOFFILE:
 		case ERROR:
 		default:
@@ -189,7 +187,7 @@ inline const std::string& CqRibToken::stringVal() const
 
 inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 {
-	static const std::string tokenNames[] = {
+	static const char* tokenNames[] = {
 		"ARRAY_BEGIN",
 		"ARRAY_END",
 		"STRING",
@@ -197,15 +195,13 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 		"FLOAT",
 		"REQUEST",
 		"ERROR",
-		"ENDOFFILE",
-		"UNKNOWN"
+		"ENDOFFILE"
 	};
 	outStream << tokenNames[tok.m_type];
 	switch(tok.m_type)
 	{
 		case CqRibToken::ARRAY_BEGIN:
 		case CqRibToken::ARRAY_END:
-		case CqRibToken::UNKNOWN:
 		case CqRibToken::ENDOFFILE:
 			break;
 		case CqRibToken::INTEGER:

@@ -56,8 +56,10 @@ struct NullRequestFixture
 	NullRequestFixture(const std::string& stringToParse)
 		: in(stringToParse),
 		nullHandler(),
-		parser(in, boost::shared_ptr<NullRibRequestHandler>(&nullHandler, nullDeleter))
-	{ }
+		parser(boost::shared_ptr<NullRibRequestHandler>(&nullHandler, nullDeleter))
+	{
+		parser.pushInput(in, "test_stream");
+	}
 };
 
 BOOST_AUTO_TEST_CASE(CqRibParser_get_scalar_tests)
@@ -287,37 +289,74 @@ BOOST_AUTO_TEST_CASE(CqRibParser_getParamList_test)
 //------------------------------------------------------------------------------
 // Request handler invocation tests.
 
-// Test the rib parser with 
-struct TestRequestHandler : public IqRibRequestHandler
+// Test the rib parser with a simple handler which takes a string and two array
+// arguments.
+struct MockRequestHandler : public IqRibRequestHandler
 {
 	std::string name;
 	std::string s;
-	IqRibParser::TqIntArray a1;
-	IqRibParser::TqFloatArray a2;
+	TqInt i;
+	IqRibParser::TqFloatArray a;
 
 	virtual void handleRequest(const std::string& requestName, IqRibParser& parser)
 	{
 		name = requestName;
 		s = parser.getString();
-		a1 = parser.getIntArray();
-		a2 = parser.getFloatArray();
+		i = parser.getInt();
+		a = parser.getFloatArray();
+	}
+};
+
+struct MockHandlerFixture
+{
+	std::istringstream in;
+	MockRequestHandler handler;
+	CqRibParser parser;
+
+	MockHandlerFixture(const char* str)
+		: in(str),
+		handler(),
+		parser(boost::shared_ptr<MockRequestHandler>(&handler, nullDeleter))
+	{
+		parser.pushInput(in, "test_stream");
 	}
 };
 
 BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 {
-	std::istringstream in("SomeRequest \"blah\" [1 2] [1.1 1.2]\n");
-	TestRequestHandler handler;
-	CqRibParser parser(in, boost::shared_ptr<TestRequestHandler>(&handler, nullDeleter));
+	MockHandlerFixture f("SomeRequest \"blah\" #removed_comment\n 42 [1.1 1.2]\n");
 
-	BOOST_CHECK_EQUAL(parser.parseNextRequest(), true);
-	BOOST_CHECK_EQUAL(handler.name, "SomeRequest");
-	BOOST_CHECK_EQUAL(handler.s, "blah");
-	BOOST_REQUIRE_EQUAL(handler.a1.size(), 2U);
-	BOOST_CHECK_EQUAL(handler.a1[0], 1);
-	BOOST_CHECK_EQUAL(handler.a1[1], 2);
-	BOOST_REQUIRE_EQUAL(handler.a2.size(), 2U);
-	BOOST_CHECK_CLOSE(handler.a2[0], 1.1f, 0.0001f);
-	BOOST_CHECK_CLOSE(handler.a2[1], 1.2f, 0.0001f);
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
+
+	BOOST_CHECK_EQUAL(f.handler.name, "SomeRequest");
+	BOOST_CHECK_EQUAL(f.handler.s, "blah");
+	BOOST_CHECK_EQUAL(f.handler.i, 42);
+	BOOST_REQUIRE_EQUAL(f.handler.a.size(), 2U);
+	BOOST_CHECK_CLOSE(f.handler.a[0], 1.1f, 0.0001f);
+	BOOST_CHECK_CLOSE(f.handler.a[1], 1.2f, 0.0001f);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
+}
+
+
+BOOST_AUTO_TEST_CASE(CqRibParser_request_error_recovery)
+{
+	// Test recovery after an invalid request.  According to the RISpec, the
+	// parser should recover by discarding tokens until the next request name
+	// is read.
+	MockHandlerFixture f("SomeInvalidRequest SomeRequest \"blah\" 42 [1.1 1.2]\n");
+
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
+
+	BOOST_CHECK_EQUAL(f.handler.name, "SomeRequest");
+	BOOST_CHECK_EQUAL(f.handler.s, "blah");
+	BOOST_CHECK_EQUAL(f.handler.i, 42);
+	BOOST_REQUIRE_EQUAL(f.handler.a.size(), 2U);
+	BOOST_CHECK_CLOSE(f.handler.a[0], 1.1f, 0.0001f);
+	BOOST_CHECK_CLOSE(f.handler.a[1], 1.2f, 0.0001f);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
 }
 

@@ -40,8 +40,9 @@ namespace Aqsis
 //-------------------------------------------------------------------------------
 // CqRibLexer implementation
 
-CqRibLexer::CqRibLexer(std::istream& inStream)
-	: m_inBuf(inStream),
+CqRibLexer::CqRibLexer()
+	: m_inBuf(0),
+	m_inputStack(),
 	m_currPos(1,1),
 	m_nextPos(1,1),
 	m_nextTok(),
@@ -49,7 +50,34 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
 	m_encodedRequests(256),
 	m_encodedStrings(),
 	m_arrayElementsRemaining(-1)
-{}
+{ }
+
+void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName)
+{
+	m_inputStack.push( boost::shared_ptr<CqRibInputBuffer>(
+				new CqRibInputBuffer(inStream, streamName)) );
+	m_inBuf = m_inputStack.top().get();
+	m_currPos = SqSourcePos(1,1);
+	m_nextPos = SqSourcePos(1,1);
+}
+
+void CqRibLexer::popInput()
+{
+	assert(!m_inputStack.empty());
+	m_inputStack.pop();
+	if(!m_inputStack.empty())
+	{
+		m_inBuf = m_inputStack.top().get();
+		m_currPos = m_inBuf->pos();
+		m_nextPos = m_inBuf->pos();
+	}
+	else
+	{
+		m_inBuf = 0;
+		m_currPos = SqSourcePos(1,1);
+		m_nextPos = SqSourcePos(1,1);
+	}
+}
 
 /** \brief Scan the next token from the underlying input stream.
  *
@@ -60,6 +88,8 @@ CqRibLexer::CqRibLexer(std::istream& inStream)
  */
 CqRibToken CqRibLexer::scanNext()
 {
+	if(!m_inBuf)
+		return CqRibToken(CqRibToken::ENDOFFILE);
 	if(m_arrayElementsRemaining >= 0)
 	{
 		// If we're currently decoding a float array, return the next element,
@@ -68,14 +98,14 @@ CqRibToken CqRibLexer::scanNext()
 		if(m_arrayElementsRemaining < 0)
 			return CqRibToken(CqRibToken::ARRAY_END);
 		else
-			return CqRibToken(decodeFloat32(m_inBuf));
+			return CqRibToken(decodeFloat32(*m_inBuf));
 	}
 	// Else determine the next token.  The while loop is to ignore whitespace
 	// and comments.
 	while(true)
 	{
-		CqRibInputBuffer::TqOutputType c = m_inBuf.get();
-		m_nextPos = m_inBuf.pos();
+		CqRibInputBuffer::TqOutputType c = m_inBuf->get();
+		m_nextPos = m_inBuf->pos();
 		switch(c)
 		{
 			//------------------------------------------------------------
@@ -88,19 +118,19 @@ CqRibToken CqRibLexer::scanNext()
 				// ignore whitespace
 				break;
 			case '#':
-				if(m_inBuf.get() == 0377)
+				if(m_inBuf->get() == 0377)
 					// "#\377" signals the end of a RunProgram block
 					return CqRibToken(CqRibToken::ENDOFFILE);
-				m_inBuf.unget();
-				readComment(m_inBuf);
+				m_inBuf->unget();
+				readComment(*m_inBuf);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case '-': case '+': case '.':
-				m_inBuf.unget();
-				return readNumber(m_inBuf);
+				m_inBuf->unget();
+				return readNumber(*m_inBuf);
 			case '"':
-				return readString(m_inBuf);
+				return readString(*m_inBuf);
 			case '[':
 				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case ']':
@@ -108,8 +138,8 @@ CqRibToken CqRibLexer::scanNext()
 			default:
 				// If a character is nothing else, it's assumed to represent
 				// the start of a RI request.
-				m_inBuf.unget();
-				return readRequest(m_inBuf);
+				m_inBuf->unget();
+				return readRequest(*m_inBuf);
 			case EOF:
 				return CqRibToken(CqRibToken::ENDOFFILE);
 
@@ -122,7 +152,7 @@ CqRibToken CqRibLexer::scanNext()
 				// Decode integers - the encoded token has the form
 				//   0200 + w  |  <value>
 				// where <value> is w+1 bytes with MSB first.
-				return CqRibToken(static_cast<TqInt>(decodeInt(m_inBuf, c - 0200 + 1)));
+				return CqRibToken(static_cast<TqInt>(decodeInt(*m_inBuf, c - 0200 + 1)));
 			case 0204: case 0205: case 0206: case 0207: // .b to bbb.b
 			case 0210: case 0211: case 0212: case 0213: // ._b to bb.bb
 			case 0214: case 0215: case 0216: case 0217: // .__b to b.bbb
@@ -131,7 +161,7 @@ CqRibToken CqRibLexer::scanNext()
 				// where <value> is w+1 bytes specifying a fixed point
 				// number with the radix point ("decimal" point) located d
 				// bytes into the number from the right.
-				return CqRibToken(decodeFixedPoint(m_inBuf,
+				return CqRibToken(decodeFixedPoint(*m_inBuf,
 					((c - 0200) & 0x03) + 1,  // total bytes
 					((c - 0200) >> 2) & 0x03  // location of radix point
 				));
@@ -142,32 +172,32 @@ CqRibToken CqRibLexer::scanNext()
 				// Decode strings shorter than 16 bytes.  The encoded token has the form
 				//   0220 + w  |  <string>
 				// where <string> contains w bytes.
-				return CqRibToken(CqRibToken::STRING, decodeString(m_inBuf, c - 0220));
+				return CqRibToken(CqRibToken::STRING, decodeString(*m_inBuf, c - 0220));
 			case 0240: case 0241: case 0242: case 0243:
 				// Decode strings of length >= 16 bytes.  The encoded token has the form
 				//   0240 + l  |  <length>  |  <string>
 				// where <length> is l bytes long, 0 <= l <= 3, and <string> is
 				// of length l+1.
 				return CqRibToken(CqRibToken::STRING,
-						decodeString(m_inBuf, decodeInt(m_inBuf, c - 0240 + 1)));
+						decodeString(*m_inBuf, decodeInt(*m_inBuf, c - 0240 + 1)));
 			case 0244:
 				// Decode a 32-bit floating point value.  The encoded token has the form
 				//   0244  |  <value>
 				// where <value> is 4 bytes in IEEE floating point format,
 				// transmitted from MSB to LSB
-				return CqRibToken(decodeFloat32(m_inBuf));
+				return CqRibToken(decodeFloat32(*m_inBuf));
 			case 0245:
 				// Decode a 64-bit floating point value.  The encoded token has the form
 				//   0244  |  <value>
 				// where <value> is 8 bytes in IEEE floating point format,
 				// transmitted from MSB to LSB
-				return CqRibToken(static_cast<TqFloat>(decodeFloat64(m_inBuf)));
+				return CqRibToken(static_cast<TqFloat>(decodeFloat64(*m_inBuf)));
 			case 0246:
 				// Read encoded RI request.  The encoded token has the form
 				//   0246  |  <code>
 				// where <code> is a single byte indexing a previously encoded
 				// request.
-				return lookupEncodedRequest(static_cast<TqUint8>(m_inBuf.get()));
+				return lookupEncodedRequest(static_cast<TqUint8>(m_inBuf->get()));
 			case 0247:
 			case 0250: case 0251: case 0252: case 0253:
 			case 0254: case 0255: case 0256: case 0257:
@@ -183,7 +213,7 @@ CqRibToken CqRibLexer::scanNext()
 				//   0310 + l  |  <length>  |  <array>
 				// where <length> is l+1 bytes long, 0 <= l <= 3, and <array> is
 				// an array of <length> 32-bit floating point values in IEEE format.
-				m_arrayElementsRemaining = decodeInt(m_inBuf, c - 0310 + 1);
+				m_arrayElementsRemaining = decodeInt(*m_inBuf, c - 0310 + 1);
 				return CqRibToken(CqRibToken::ARRAY_BEGIN);
 			case 0314:
 				// Define encoded RI request.  The encoded token has the form
@@ -192,7 +222,7 @@ CqRibToken CqRibLexer::scanNext()
 				// request, and <string> is a string specifying the ASCII form
 				// of the request.
 				{
-					TqUint8 code = static_cast<TqUint8>(m_inBuf.get());
+					TqUint8 code = static_cast<TqUint8>(m_inBuf->get());
 					CqRibToken requestNameTok = scanNext();
 					if(requestNameTok.type() != CqRibToken::STRING)
 						return CqRibToken(CqRibToken::ERROR,
@@ -211,7 +241,7 @@ CqRibToken CqRibLexer::scanNext()
 				// where <code> is a length w+1 integer, and <string> is a
 				// string in any format.
 				{
-					TqInt code = decodeInt(m_inBuf, c - 0315 + 1);
+					TqInt code = decodeInt(*m_inBuf, c - 0315 + 1);
 					CqRibToken stringNameTok = scanNext();
 					if(stringNameTok.type() != CqRibToken::STRING)
 						return CqRibToken(CqRibToken::ERROR,
@@ -225,7 +255,7 @@ CqRibToken CqRibLexer::scanNext()
 				//   0317 + w  |  <code>
 				// where <code> is a length w+1 unsigned integer representing
 				// the index of a previously defined string.
-				return lookupEncodedString(decodeInt(m_inBuf, c - 0317 + 1));
+				return lookupEncodedString(decodeInt(*m_inBuf, c - 0317 + 1));
 			case 0321: case 0322: case 0323:
 			case 0324: case 0325: case 0326: case 0327:
 			case 0330: case 0331: case 0332: case 0333:

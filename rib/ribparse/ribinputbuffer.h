@@ -45,9 +45,6 @@ struct SqSourcePos
 	SqSourcePos(TqInt line, TqInt col) : line(line), col(col) {}
 };
 
-/// pretty print SqSourcePos
-std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos);
-
 
 //------------------------------------------------------------------------------
 /** Input buffer for RIB parsing.
@@ -69,8 +66,15 @@ class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 		/// "Character" type returned from the get() method.
 		typedef std::istream::int_type TqOutputType;
 
-		/// Construct an input buffer.
-		CqRibInputBuffer(std::istream& inStream);
+		/** \brief Construct an input buffer.
+		 *
+		 * \param inStream - input stream from which to read.  The stream is
+		 *                   allowed to be null in which case the buffer
+		 *                   returns EOFs.
+		 * \param streamName - name of the stream used in error messages.
+		 */
+		CqRibInputBuffer(std::istream& inStream,
+				const std::string& streamName = "unknown");
 
 		/// Get the next character from the input stream
 		TqOutputType get();
@@ -79,6 +83,8 @@ class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 
 		/// Return the position of the previous character obtained with get()
 		SqSourcePos pos() const;
+		/// Return the name of the input stream
+		const std::string& streamName() const;
 
 	private:
 		static bool isGzippedStream(std::istream& in);
@@ -86,6 +92,8 @@ class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 
 		/// Stream we are reading from.
 		std::istream* m_inStream;
+		/// Stream name
+		const std::string m_streamName;
 		/// gzip decompressor for compressed input
 		boost::scoped_ptr<std::istream> m_gzipStream;
 
@@ -108,15 +116,6 @@ class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 //==============================================================================
 // Implementation details.
 //==============================================================================
-
-// SqSourcePos functions
-inline std::ostream& operator<<(std::ostream& out, const SqSourcePos& pos)
-{
-	out << "line " << pos.line << ", col " << pos.col;
-	return out;
-}
-
-//------------------------------------------------------------------------------
 // CqRibInputBuffer implementation
 inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 {
@@ -151,6 +150,11 @@ inline void CqRibInputBuffer::unget()
 inline SqSourcePos CqRibInputBuffer::pos() const
 {
 	return m_currPos;
+}
+
+inline const std::string& CqRibInputBuffer::streamName() const
+{
+	return m_streamName;
 }
 
 } // namespace Aqsis

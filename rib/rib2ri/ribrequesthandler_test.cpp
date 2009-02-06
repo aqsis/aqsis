@@ -232,7 +232,7 @@ class CqMockParser : public IqRibParser
 			return false;
 		}
 
-		virtual void pushInput(std::istream& inStream) {}
+		virtual void pushInput(std::istream& inStream, const std::string& name) {}
 		virtual void popInput() {}
 
 #		define TRY_GUARD try{

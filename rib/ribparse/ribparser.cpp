@@ -22,7 +22,6 @@
  * \brief RIB parser implementation
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
  *
- * TODO: Standardize the error reporting
  */
 
 #include "ribparser.h"
@@ -32,9 +31,8 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 // CqRibParser implementation
 
-CqRibParser::CqRibParser(std::istream& inputStream,
-				const boost::shared_ptr<IqRibRequestHandler>& requestHandler)
-	: m_lex(inputStream),
+CqRibParser::CqRibParser(const boost::shared_ptr<IqRibRequestHandler>& requestHandler)
+	: m_lex(),
 	m_requestHandler(requestHandler),
 	m_floatArrayPool(),
 	m_intArrayPool(),
@@ -58,28 +56,35 @@ bool CqRibParser::parseNextRequest()
 	m_intArrayPool.markUnused();
 	m_stringArrayPool.markUnused();
 	// Invoke the request handler.
-	m_requestHandler->handleRequest(tok.stringVal(), *this);
+	try
+	{
+		m_requestHandler->handleRequest(tok.stringVal(), *this);
+	}
+	catch(XqParseError& e)
+	{
+		// Add information on the location (file,line etc) of the problem.
+		AQSIS_THROW_XQERROR(XqParseError, e.code(),
+				"Parse error at " << m_lex.pos() <<
+				" while reading " << tok.stringVal() << ": " << e.what());
+	}
 	return true;
 }
 
-void CqRibParser::pushInput(std::istream& inStream)
+void CqRibParser::pushInput(std::istream& inStream, const std::string& streamName)
 {
-	// TODO
-	AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "pushInput not implemented");
+	m_lex.pushInput(inStream, streamName);
 }
 
 void CqRibParser::popInput()
 {
-	// TODO
-	AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "popInput not implemented");
+	m_lex.popInput();
 }
 
 TqInt CqRibParser::getInt()
 {
 	CqRibToken tok = m_lex.get();
 	if(tok.type() != CqRibToken::INTEGER)
-		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-			"Found " << tok << " expected INTEGER");
+		tokenError("integer", tok);
 	return tok.intVal();
 }
 
@@ -93,8 +98,7 @@ TqFloat CqRibParser::getFloat()
 		case CqRibToken::FLOAT:
 			return tok.floatVal();
 		default:
-			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				"Found " << tok << " expected FLOAT");
+			tokenError("float", tok);
 			return 0;
 	}
 }
@@ -103,25 +107,8 @@ std::string CqRibParser::getString()
 {
 	CqRibToken tok = m_lex.get();
 	if(tok.type() != CqRibToken::STRING)
-		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-			"Found " << tok << " expected STRING");
+		tokenError("string", tok);
 	return tok.stringVal();
-}
-
-namespace {
-/** Helper function to consume an ARRAY_BEGIN token and throw an appropriate
- * error if a different token is encountered.
- */
-inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
-{
-	CqRibToken tok = lex.get();
-	if(tok.type() != CqRibToken::ARRAY_BEGIN)
-	{
-		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				lex.pos() << ": expected " << arrayType
-				<< " array, got token " << tok);
-	}
-}
 }
 
 /* Functions for reading arrays.
@@ -138,7 +125,9 @@ inline void consumeArrayBegin(CqRibLexer& lex, const char* arrayType)
  */
 const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 {
-	consumeArrayBegin(m_lex, "integer");
+	CqRibToken tok = m_lex.get();
+	if(tok.type() != CqRibToken::ARRAY_BEGIN)
+		tokenError("integer array", tok);
 
 	TqIntArray& buf = m_intArrayPool.getBuf();
 	bool parsing = true;
@@ -154,9 +143,7 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 				parsing = false;
 				break;
 			default:
-				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-						m_lex.pos() << ": unexpected token " << tok
-						<< "while reading integer array");
+				tokenError("integer array element", tok);
 				break;
 		}
 	}
@@ -169,8 +156,8 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 	if(m_lex.peek().type() == CqRibToken::ARRAY_BEGIN)
 	{
 		// Read an array in [ num1 num2 ... num_n ] format
-		consumeArrayBegin(m_lex, "float");
 
+		m_lex.get(); // consume '['
 		bool parsing = true;
 		while(parsing)
 		{
@@ -187,9 +174,7 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 					parsing = false;
 					break;
 				default:
-					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-							m_lex.pos() << ": unexpected token " << tok
-							<< "while reading float array");
+					tokenError("float array element", tok);
 					break;
 			}
 		}
@@ -210,16 +195,16 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 	}
 	else
 	{
-		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				"unexpected token " << m_lex.peek()
-				<< " while reading float array");
+		tokenError("float array", m_lex.get());
 	}
 	return buf;
 }
 
 const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 {
-	consumeArrayBegin(m_lex, "string");
+	CqRibToken tok = m_lex.get();
+	if(tok.type() != CqRibToken::ARRAY_BEGIN)
+		tokenError("string array", tok);
 
 	TqStringArray& buf = m_stringArrayPool.getBuf();
 	bool parsing = true;
@@ -235,9 +220,7 @@ const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 				parsing = false;
 				break;
 			default:
-				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-					m_lex.pos() << ": unexpected token " << tok
-					<< "while reading string array");
+				tokenError("string array element", tok);
 				break;
 		}
 	}
@@ -258,9 +241,7 @@ void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 			case CqRibToken::STRING:
 				break;
 			default:
-				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-						"parameter name string expected in param list, got "
-						<< m_lex.peek());
+				tokenError("parameter list token", m_lex.get());
 		}
 		// Note: we NEED to copy paramName into a temporary variable here.
 		// The current token is returned by reference from the lexer, and will
@@ -355,6 +336,59 @@ const CqRibParser::TqStringArray& CqRibParser::getStringParam()
 		return buf;
 	}
 	return getStringArray();
+}
+
+
+/** \brief Throw an error from encountering an unexpected token.
+ *
+ * An error string is generated with the form:
+ *
+ * expected <expected> before <token_description>
+ *
+ * where <expected> is a string describing the expected token and
+ * <token_description> is generated from the bad token provided.
+ *
+ * \param expected - string describing the expected token
+ * \param badTok - the problematic token which was actually obtained.
+ */
+void CqRibParser::tokenError(const char* expected, const CqRibToken& badTok)
+{
+	std::ostringstream msg;
+
+	msg << "expected " << expected << " before ";
+	switch(badTok.type())
+	{
+		case CqRibToken::ARRAY_BEGIN:
+			msg << "'['";
+			break;
+		case CqRibToken::ARRAY_END:
+			msg << "']'";
+			break;
+		case CqRibToken::ENDOFFILE:
+			msg << "end of file";
+			break;
+		case CqRibToken::INTEGER:
+			msg << "integer [= " << badTok.intVal() << "]";
+			break;
+		case CqRibToken::FLOAT:
+			msg << "float [= " << badTok.floatVal() << "]";
+			break;
+		case CqRibToken::STRING:
+			msg << "string [= \"" << badTok.stringVal() << "\"]";
+			break;
+		case CqRibToken::REQUEST:
+			msg << "request [= " << badTok.stringVal() << "]";
+			// For unexpected REQUEST tokens we back up by one token so that
+			// the next call to parseNextRequest() can start afresh with the
+			// new request.
+			m_lex.unget();
+			break;
+		case CqRibToken::ERROR:
+			msg << "bad token [" << badTok.stringVal() << "]";
+			break;
+	}
+
+	AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax, msg.str());
 }
 
 } // namespace Aqsis

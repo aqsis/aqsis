@@ -41,21 +41,17 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief A RIB parser implementing the IqRibParser interface.
- *
- * \see IqRibparser
+/** \brief An implementation of the IqRibParser interface.
  */
 class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyable
 {
 	public:
-		/** \brief Construct a RIB parser, connected to the given lexer.
+		/** \brief Construct a RIB parser
 		 *
-		 * \param inputStream - input stream from which to read
-		 * \param requestHandler - Handler for requests which will be recognized
-		 *                         by the parser.
+		 * \param requestHandler - Handler for requests which will be
+		 *                         recognized by the parser.
 		 */
-		CqRibParser(std::istream& inputStream,
-				const boost::shared_ptr<IqRibRequestHandler>& requestHandler);
+		CqRibParser(const boost::shared_ptr<IqRibRequestHandler>& requestHandler);
 
 		// The following are inherited; see docs in IqRibParser.
 
@@ -63,7 +59,7 @@ class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyabl
 		virtual bool parseNextRequest();
 
 		// stream stack management
-		virtual void pushInput(std::istream& inStream);
+		virtual void pushInput(std::istream& inStream, const std::string& streamName);
 		virtual void popInput();
 
 		// Callbacks for request required parameters.
@@ -83,6 +79,7 @@ class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyabl
 		virtual const TqStringArray& getStringParam();
 
 	private:
+		void tokenError(const char* expected, const CqRibToken& badTok); 
 		/** \brief A pool of buffers into which RIB arrays will be read.
 		 *
 		 * The pool serves two purposes:

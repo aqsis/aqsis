@@ -118,11 +118,14 @@ class RIBPARSE_SHARE IqRibParser
 		//--------------------------------------------------
 		/** \brief Construct and return a CqRibParser instance
 		 *
-		 * \param inStream - Initial input stream to go onto the input stack.
-		 * If 0 is provided then the initial input stream is a null stream and
-		 * parseNextRequest() has no effect.
+		 * The initial input stream is a null stream so parseNextRequest() has
+		 * no effect until pushInput() is called.
+		 *
+		 * \param handler - Object which will be called by the parser to handle
+		 * the semantics of the various RIB requests.
 		 */
-		static boost::shared_ptr<IqRibParser> create(std::istream* inStream = 0);
+		static boost::shared_ptr<IqRibParser> create(
+				const boost::shared_ptr<IqRibRequestHandler>& handler);
 
 
 		//--------------------------------------------------
@@ -146,9 +149,10 @@ class RIBPARSE_SHARE IqRibParser
 		 * translation of newline characters is performed.  If not, any binary
 		 * encoded RIB will be read incorrectly.
 		 *
-		 * \param inStream - stream from which RIB will be read.
+		 * \param inStream - stream from which RIB will be read
+		 * \param streamName - name of the input stream
 		 */
-		virtual void pushInput(std::istream& inStream) = 0;
+		virtual void pushInput(std::istream& inStream, const std::string& streamName) = 0;
 		/** \brief Pop a stream off the input stack
 		 *
 		 * If the stream is the last on the input stack, the parser reverts to
