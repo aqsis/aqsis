@@ -32,7 +32,7 @@
 				<Type>RtInt[]</Type>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqIntArray&amp;</Type>
+				<Type>const IqRibParser::TqIntArray&amp;</Type>
 				<Getter>getIntArray</Getter>
 			</Rib>
 		</Type>
@@ -53,7 +53,7 @@
 				<Type>RtFloat[]</Type>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Type>const IqRibParser::TqFloatArray&amp;</Type>
 				<Getter>getFloatArray</Getter>
 			</Rib>
 		</Type>
@@ -75,7 +75,7 @@
 				<Typedef>RtFloat[3]</Typedef>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Type>const IqRibParser::TqFloatArray&amp;</Type>
 				<Getter>getFloatArray</Getter>
 			</Rib>
 		</Type>
@@ -86,7 +86,7 @@
 				<Typedef>RtFloat[3]</Typedef>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Type>const IqRibParser::TqFloatArray&amp;</Type>
 				<Getter>getFloatArray</Getter>
 			</Rib>
 		</Type>
@@ -113,11 +113,6 @@
 				<Type>RtBasis</Type>
 				<Typedef>RtFloat[4][4]</Typedef>
 			</C>
-			<Rib>
-				<Type>const CqRibParser::TqBasis*</Type>
-				<Getter>getBasis</Getter>
-				<GetterArgs>CqStringToBasis()</GetterArgs>
-			</Rib>
 		</Type>
 		<Type>
 			<Name>RtBound</Name>
@@ -126,7 +121,7 @@
 				<Typedef>RtFloat[6]</Typedef>
 			</C>
 			<Rib>
-				<Type>const CqRibParser::TqFloatArray&amp;</Type>
+				<Type>const IqRibParser::TqFloatArray&amp;</Type>
 				<Getter>getFloatArray</Getter>
 				<GetterArgs>6</GetterArgs>
 			</Rib>
@@ -2320,7 +2315,7 @@
 					<Type>RtInt</Type>
 				</Argument>
 			</Arguments>
-			<Rib/>
+			<Rib><CustomImpl/></Rib>
 			<ValidScope>
 				<BeginEnd/>
 				<Frame/>

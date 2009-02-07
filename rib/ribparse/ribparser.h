@@ -71,7 +71,6 @@ class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyabl
 		virtual const TqStringArray& getStringArray();
 		virtual void getParamList(IqRibParamListHandler& paramHandler);
 		virtual EqRibToken peekNextType();
-		virtual const TqBasis* getBasis(const IqStringToBasis& stringToBasis);
 
 		// Callbacks for parameter list parsing (used by IqRibParamListHandler)
 		virtual const TqIntArray& getIntParam();

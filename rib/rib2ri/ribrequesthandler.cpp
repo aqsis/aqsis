@@ -58,7 +58,19 @@ class CqParamListHandler : public IqRibParamListHandler
 
 		virtual void readParameter(const std::string& name, IqRibParser& parser)
 		{
-			CqPrimvarToken tok(name.c_str());
+			CqPrimvarToken tok;
+			try
+			{
+				tok = m_tokenDict.parseAndLookup(name);
+			}
+			catch(XqParseError& e)
+			{
+				throw;
+			}
+			catch(XqValidation& e)
+			{
+				AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax, e.what());
+			}
 			switch(tok.storageType())
 			{
 				case type_integer:
@@ -156,7 +168,6 @@ void CqRibRequestHandler::handleRequest(const std::string& requestName,
 	TqRequestHandler handler = pos->second;
 	(this->*handler)(parser);
 }
-
 
 //--------------------------------------------------
 // Conversion shims from various types into the RI types.
@@ -293,35 +304,10 @@ inline RtMatrix& toRiType(const SqRtMatrixHolder& matrixHolder)
 			const_cast<TqFloat*>(&matrixHolder.matrix[0]));
 }
 
-inline RtBasis& toRiType(const RtBasis* basisPtr)
-{
-	return *const_cast<RtBasis*>(basisPtr);
-}
-
 inline RtToken* toRiType(SqRtTokenArrayHolder& stringArrayHolder)
 {
 	return &stringArrayHolder.tokenStorage[0];
 }
-
-
-/// Callback object for IqRibParser::getBasis()
-class CqStringToBasis : public IqStringToBasis
-{
-	public:
-		virtual IqRibParser::TqBasis* getBasis(const std::string& name) const
-		{
-			if(name == "bezier")           return &::RiBezierBasis;
-			else if(name == "b-spline")    return &::RiBSplineBasis;
-			else if(name == "catmull-rom") return &::RiCatmullRomBasis;
-			else if(name == "hermite")     return &::RiHermiteBasis;
-			else if(name == "power")       return &::RiPowerBasis;
-			else
-			{
-				AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
-					"unknown basis name \"" << name << "\"");
-			}
-		}
-};
 
 } // unnamed namespace
 
@@ -471,6 +457,63 @@ void CqRibRequestHandler::handleIlluminate(IqRibParser& parser)
 
 	// Call through to the C binding.
 	RiIlluminate(lightHandle, onoff);
+}
+
+/** \brief Retrieve a spline basis array from the parser
+ *
+ * A spline basis array can be specified in two ways in a RIB stream: as an
+ * array of 16 floats, or as a string indicating one of the standard bases.
+ * This function returns the appropriate basis array, translating the string
+ * representation into one of the standard arrays if necessary.
+ *
+ * \param parser - read input from here.
+ */
+RtBasis* CqRibRequestHandler::getBasis(IqRibParser& parser)
+{
+	switch(parser.peekNextType())
+	{
+		case IqRibParser::Tok_Array:
+			{
+				const CqRibParser::TqFloatArray& basis = parser.getFloatArray();
+				if(basis.size() != 16)
+					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+						"basis array must be of length 16");
+				// Note: This cast is a little ugly, but should only cause
+				// problems in the *very* odd case that the alignment of
+				// RtBasis and RtFloat* is different.
+				return reinterpret_cast<RtBasis*>(const_cast<TqFloat*>(&basis[0]));
+			}
+		case IqRibParser::Tok_String:
+			{
+				std::string name = parser.getString();
+				if(name == "bezier")           return &::RiBezierBasis;
+				else if(name == "b-spline")    return &::RiBSplineBasis;
+				else if(name == "catmull-rom") return &::RiCatmullRomBasis;
+				else if(name == "hermite")     return &::RiHermiteBasis;
+				else if(name == "power")       return &::RiPowerBasis;
+				else
+				{
+					AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+						"unknown basis \"" << name << "\"");
+				}
+			}
+		default:
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+				"expected string or float array for basis");
+			return 0;
+	}
+}
+
+void CqRibRequestHandler::handleBasis(IqRibParser& parser)
+{
+	// Collect arguments from parser.
+	RtBasis* ubasis = getBasis(parser);
+	TqInt ustep = parser.getInt();
+	RtBasis* vbasis = getBasis(parser);
+	TqInt vstep = parser.getInt();
+
+	// Call through to the C binding.
+	RiBasis(*ubasis, ustep, *vbasis, vstep);
 }
 
 void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)

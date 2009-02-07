@@ -39,7 +39,6 @@ namespace Aqsis {
 
 class IqRibRequestHandler;
 class IqRibParamListHandler;
-class IqStringToBasis;
 
 //------------------------------------------------------------------------------
 /** \brief A flexible parser for RIB-like file formats.
@@ -75,7 +74,7 @@ class IqStringToBasis;
  * to the parser in order to get any required parameters for the request.
  *
  * The parser contains methods getInt(), getFloat(), getString(),
- * getIntArray(), getFloatArray(), getStringArray() and getBasis() which may be
+ * getIntArray(), getFloatArray() and getStringArray() which may be
  * called by the handler object to obtain the required parameters for the
  * request.  In addition, the getParamList() function allows variable argument
  * parameter lists of token value pairs to be parsed.
@@ -102,8 +101,6 @@ class RIBPARSE_SHARE IqRibParser
 		typedef std::vector<TqFloat> TqFloatArray;
 		/// RIB string array type
 		typedef std::vector<std::string> TqStringArray;
-
-		typedef TqFloat TqBasis[4][4];
 
 		/// RIB token types used by the peekNextType() function
 		enum EqRibToken
@@ -234,19 +231,6 @@ class RIBPARSE_SHARE IqRibParser
 		 * returned.
 		 */
 		virtual EqRibToken peekNextType() = 0;
-
-		/** \brief Read in a basis matrix.
-		 *
-		 * The basis can be represented either explicitly as an array of 16
-		 * floats, or as a string providing the basis name.  When the string
-		 * form is encountered, stringToBasis.getBasis() is invoked with the
-		 * basis name and the result returned.
-		 *
-		 * \param stringToBasis - callback object mapping basis names to basis
-		 *                        matrices.
-		 * \return A pointer to the retrieved basis matrix.
-		 */
-		virtual const TqBasis* getBasis(const IqStringToBasis& stringToBasis) = 0;
 		//@}
 
 
@@ -308,17 +292,6 @@ class IqRibParamListHandler
 		virtual void readParameter(const std::string& name, IqRibParser& parser) = 0;
 
 		virtual ~IqRibParamListHandler() {}
-};
-
-//------------------------------------------------------------------------------
-/// Callback interface to get a basis from a name string.
-class IqStringToBasis
-{
-	public:
-		/// Get the spline basis corresponding to a name string (throw if not found)
-		virtual IqRibParser::TqBasis* getBasis(const std::string& name) const = 0;
-
-		virtual ~IqStringToBasis() {};
 };
 
 } // namespace Aqsis

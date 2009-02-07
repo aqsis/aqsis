@@ -269,31 +269,6 @@ IqRibParser::EqRibToken CqRibParser::peekNextType()
 	}
 }
 
-const CqRibParser::TqBasis* CqRibParser::getBasis(
-		const IqStringToBasis& stringToBasis)
-{
-	switch(m_lex.peek().type())
-	{
-		case CqRibToken::ARRAY_BEGIN:
-			{
-				const CqRibParser::TqFloatArray& basis = getFloatArray();
-				if(basis.size() != 16)
-					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-						"basis array must be of length 16");
-				// Note: This cast is a little ugly, but should only cause
-				// problems in the *very* odd case that the alignment of
-				// RtBasis and RtFloat* is different.
-				return reinterpret_cast<TqBasis*>(const_cast<TqFloat*>(&basis[0]));
-			}
-		case CqRibToken::STRING:
-			return stringToBasis.getBasis(getString());
-		default:
-			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				"expected string or float array for basis");
-			return 0;
-	}
-}
-
 const CqRibParser::TqIntArray& CqRibParser::getIntParam()
 {
 	if(m_lex.peek().type() == CqRibToken::INTEGER)
