@@ -131,6 +131,14 @@ class CqImageBuffer
 		}
 
 		void	bucketPosition(TqInt x, TqInt y, TqInt& xpos, TqInt& ypos ) const;
+		/** Get the screen size for the bucket at x,y.
+		 * \param x		The x index of the bucket.
+		 * \param y		The y index of the bucket.
+		 * \param xsize	A reference to the variable that will receive the x size
+		 * in screen space.
+		 * \param ysize	A reference to the variable that will receive the y size
+		 * in screen space.
+		 */
 		void	bucketSize(TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const;
 
 		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
@@ -153,6 +161,14 @@ class CqImageBuffer
 		{
 			return( m_Buckets[y][x] );
 		}
+
+		/** Get an array of neighbour buckets.
+		 *  
+		 *  \param bucket - The bucket whose neighours are to be found.
+		 *  \param neighbours - A reference to the array to be filled.
+		 *  \return A count of the number of neighbour buckets.
+		 */
+		TqInt	neighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours);
 
 	private:
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
@@ -209,16 +225,6 @@ inline void	CqImageBuffer::bucketPosition( TqInt x, TqInt y, TqInt& xpos, TqInt&
 	ypos = y * YBucketSize();
 }
 
-//----------------------------------------------------------------------
-/** Get the screen size for the bucket at x,y.
- * \param x		The x index of the bucket.
- * \param y		The y index of the bucket.
- * \param xsize	A reference to the variable that will receive the x size
- * in screen space.
- * \param ysize	A reference to the variable that will receive the y size
- * in screen space.
- */
-
 inline void	CqImageBuffer::bucketSize( TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const
 {
 	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
@@ -233,6 +239,41 @@ inline void	CqImageBuffer::bucketSize( TqInt x, TqInt y, TqInt& xsize, TqInt& ys
 		ysize = m_YBucketSize;
 }
 
+inline TqInt CqImageBuffer::neighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours)
+{
+	TqInt bx = bucket.getCol();
+	TqInt by = bucket.getRow();
+	neighbours.clear();
+	// Check if it's possible for there to be neighbours in each direction.
+	bool left = bx > 0;
+	bool right = bx < cXBuckets() - 1;
+	bool above = by > 0;
+	bool below = by < cYBuckets() - 1;
+		
+	// Now populate the array based on direction findings.
+	if(left)
+	{
+		neighbours.push_back(&Bucket(bx-1, by));
+		if(above)
+			neighbours.push_back(&Bucket(bx-1, by-1));
+		if(below)
+			neighbours.push_back(&Bucket(bx-1, by+1));
+	}
+	if(right)
+	{
+		neighbours.push_back(&Bucket(bx+1, by));
+		if(above)
+			neighbours.push_back(&Bucket(bx+1, by-1));
+		if(below)
+			neighbours.push_back(&Bucket(bx+1, by+1));
+	}
+	if(above)
+		neighbours.push_back(&Bucket(bx, by-1));
+	if(below)
+		neighbours.push_back(&Bucket(bx, by+1));
+
+	return neighbours.size();
+}
 
 //-----------------------------------------------------------------------
 

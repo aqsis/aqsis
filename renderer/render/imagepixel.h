@@ -302,14 +302,14 @@ class CqImagePixel
 		 * \param The index of the required sample point.
 		 * \return A reference to the sample data.
 		 */
-		SqSampleDataPtr const SampleData( TqInt index ) const;
+		SqSampleData const& SampleData( TqInt index ) const;
 
 		/** \brief Get the sample data for the specified sample index.
 		 *
 		 * \param The index of the required sample point.
 		 * \return A reference to the sample data.
 		 */
-		SqSampleDataPtr SampleData( TqInt index );
+		SqSampleData& SampleData( TqInt index );
 
 		/** \brief Get the index of the sample that contains a dof offset that lies
 		 *  in bounding-box number i.

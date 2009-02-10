@@ -624,9 +624,9 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 }
 
 
-bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample->position;
+	const CqVector2D& vecSample = sample.position;
 
 	CqVector3D P;
 	pGrid()->pVar(EnvVars_P)->GetPoint(P, m_Index);
@@ -851,9 +851,9 @@ void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample->position;
+	const CqVector2D& vecSample = sample.position;
 	return( fContains( vecSample, D, time ) );
 }
 

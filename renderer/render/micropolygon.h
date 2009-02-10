@@ -709,7 +709,7 @@ class CqMicroPolygon : boost::noncopyable
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
@@ -809,7 +809,7 @@ class CqMicroPolygon : boost::noncopyable
 		 * \param sample - sample position etc.
 		 */
 		static bool dofSampleInBound(const CqBound& bound, const CqHitTestCache& cache, 
-				SqSampleDataPtr const sample);
+				SqSampleData const& sample);
 
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
@@ -957,7 +957,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
 

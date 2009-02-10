@@ -244,6 +244,15 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 		//	  ddmanager in a specific way for each display.
 	}
 
+#if 0
+	std::vector<CqBucket*> neighbours;
+	TqInt numNeighbours = QGetRenderContext()->pImage()->neighbours(*m_bucket, neighbours);
+	std::cout << "Bucket @" << m_bucket->getCol() << ", " << m_bucket->getRow() << " has " << numNeighbours << " neighbours at";
+	for(std::vector<CqBucket*>::iterator s = neighbours.begin(), e = neighbours.end(); s != e; ++s)
+		std::cout << " " << (*s)->getCol() << ", " << (*s)->getRow();
+	std:: cout << std::endl;
+#endif
+
 	assert(!m_bucket->IsProcessed());
 	m_bucket->SetProcessed();
 }
@@ -358,12 +367,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 
 							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
 							{
-								SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
-								CqVector2D vecS = sampleData->position;
+								SqSampleData const& sampleData = pie2->SampleData( sampleIndex );
+								CqVector2D vecS = sampleData.position;
 								vecS -= CqVector2D( xcent, ycent );
 								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 								{
-									TqInt cindex = sindex + sampleData->subCellIndex;
+									TqInt cindex = sindex + sampleData.subCellIndex;
 									TqFloat g = m_aFilterValues[ cindex ];
 									gTot += g;
 									if ( pie2->OpaqueValues( sampleIndex ).flags & SqImageSample::Flag_Valid )
@@ -418,12 +427,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 						for ( sy = 0; sy < PixelYSamples(); sy++ )
 						{
 							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-							SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
-							CqVector2D vecS = sampleData->position;
+							SqSampleData const& sampleData = pie2->SampleData( sampleIndex );
+							CqVector2D vecS = sampleData.position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
-								TqInt cindex = sindex + sampleData->subCellIndex;
+								TqInt cindex = sindex + sampleData.subCellIndex;
 								TqFloat g = m_aFilterValues[ cindex ];
 								gTot += g;
 								if(sampleCounts[pixelIndex] > 0)
@@ -496,12 +505,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 								for ( sx = 0; sx < PixelXSamples(); sx++ )
 								{
 									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-									SqSampleDataPtr const sampleData = pie2->SampleData( sampleIndex );
-									CqVector2D vecS = sampleData->position;
+									SqSampleData const& sampleData = pie2->SampleData( sampleIndex );
+									CqVector2D vecS = sampleData.position;
 									vecS -= CqVector2D( xcent, ycent );
 									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 									{
-										TqInt cindex = sindex + sampleData->subCellIndex;
+										TqInt cindex = sindex + sampleData.subCellIndex;
 										TqFloat g = m_aFilterValues[ cindex ];
 										gTot += g;
 										if ( pie2->OpaqueValues( sampleIndex ).flags & SqImageSample::Flag_Valid )
@@ -1066,10 +1075,10 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 					int index = index_start;
 					for ( m = start_m; m < end_m; m++, index++ )
 					{
-						SqSampleDataPtr sampleData = pie2->SampleData( index );
+						SqSampleData const& sampleData = pie2->SampleData( index );
 						//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
 						{
-							const CqVector2D& vecP = sampleData->position;
+							const CqVector2D& vecP = sampleData.position;
 							const TqFloat time = 0.0;
 
 							CqStats::IncI( CqStats::SPL_count );
@@ -1080,7 +1089,7 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 							// Check to see if the sample is within the sample's level of detail
 							if ( UsingLevelOfDetail)
 							{
-								TqFloat LevelOfDetail = sampleData->detailLevel;
+								TqFloat LevelOfDetail = sampleData.detailLevel;
 								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
 									continue;
@@ -1265,9 +1274,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 						// loop over potential samples
 						do
 						{
-							SqSampleDataPtr sampleData = pie2->SampleData( index );
-							const CqVector2D& vecP = sampleData->position;
-							const TqFloat time = sampleData->time;
+							SqSampleData const& sampleData = pie2->SampleData( index );
+							const CqVector2D& vecP = sampleData.position;
+							const TqFloat time = sampleData.time;
 
 							index++;
 
@@ -1289,7 +1298,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
 								{
-									TqFloat LevelOfDetail = sampleData->detailLevel;
+									TqFloat LevelOfDetail = sampleData.detailLevel;
 									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 									{
 										continue;
@@ -1318,7 +1327,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
 								{
-									TqFloat LevelOfDetail = sampleData->detailLevel;
+									TqFloat LevelOfDetail = sampleData.detailLevel;
 									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 									{
 										continue;
@@ -1400,8 +1409,8 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
     TqFloat* val = ImageVal.data;
 	CqColor col;
 	CqColor opa;
-	SqSampleDataPtr sampleData = pie2->SampleData( index );
-	const CqVector2D& vecP = sampleData->position;
+	SqSampleData const& sampleData = pie2->SampleData( index );
+	const CqVector2D& vecP = sampleData.position;
 	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
 
     val[ Sample_Red ] = col[0];

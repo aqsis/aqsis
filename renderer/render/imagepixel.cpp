@@ -366,20 +366,20 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 	TqInt sampleIndex = 0;
 	for ( std::vector<SqSampleDataPtr>::iterator sample = m_samples.begin(), end = m_samples.end(); sample != end; ++sample )
 	{
-		SqSampleDataPtr sampleData = (*sample);
+		SqSampleData& sampleData = *(*sample);
 
-		SqImageSample& opaqueValue = sampleData->opaqueSample;
+		SqImageSample& opaqueValue = sampleData.opaqueSample;
 		sampleIndex++;
 
-		if(!sampleData->data.empty())
+		if(!sampleData.data.empty())
 		{
 			// Sort the samples by depth.
-			std::sort(sampleData->data.begin(), sampleData->data.end(), SqAscendingDepthSort());
+			std::sort(sampleData.data.begin(), sampleData.data.end(), SqAscendingDepthSort());
 			if (opaqueValue.flags & SqImageSample::Flag_Valid)
 			{
 				//	insert opaqueValue into samples in the right place.
-				std::deque<SqImageSample>::iterator isi = sampleData->data.begin();
-				std::deque<SqImageSample>::iterator isend = sampleData->data.end();
+				std::deque<SqImageSample>::iterator isi = sampleData.data.begin();
+				std::deque<SqImageSample>::iterator isend = sampleData.data.end();
 				while( isi != isend )
 				{
 					if((*isi).data[Sample_Depth] >= opaqueValue.data[Sample_Depth])
@@ -387,7 +387,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 
 					++isi;
 				}
-				sampleData->data.insert(isi, opaqueValue);
+				sampleData.data.insert(isi, opaqueValue);
 			}
 
 			// Find out if any of the samples are in a CSG tree.
@@ -399,13 +399,13 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 					bProcessed = false;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
-					for ( std::deque<SqImageSample>::iterator isample = sampleData->data.begin();
-					        isample != sampleData->data.end();
+					for ( std::deque<SqImageSample>::iterator isample = sampleData.data.begin();
+					        isample != sampleData.data.end();
 					        ++isample )
 					{
 						if ( isample->csgNode )
 						{
-							isample->csgNode->ProcessTree( sampleData->data );
+							isample->csgNode->ProcessTree( sampleData.data );
 							bProcessed = true;
 							break;
 						}
@@ -419,8 +419,8 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
-			for ( std::deque<SqImageSample>::reverse_iterator sample = sampleData->data.rbegin();
-			        sample != sampleData->data.rend();
+			for ( std::deque<SqImageSample>::reverse_iterator sample = sampleData.data.rbegin();
+			        sample != sampleData.data.rend();
 			        sample++ )
 			{
 				TqFloat* sample_data = sample->data;
@@ -477,11 +477,11 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 			}
 
 			// Write the collapsed color values back into the opaque entry.
-			if ( !sampleData->data.empty() )
+			if ( !sampleData.data.empty() )
 			{
 				// Make sure the extra sample data from the top entry is copied
 				// to the opaque sample, which is then sent to the display.
-				opaqueValue = *sampleData->data.begin();
+				opaqueValue = *sampleData.data.begin();
 				// Set the color and opacity.
 				opaqueValue.data[Sample_Red] = samplecolor.r();
 				opaqueValue.data[Sample_Green] = samplecolor.g();
@@ -497,7 +497,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 					{
 						//Aqsis::log() << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
 						// Use midpoint for depth
-						if ( sampleData->data.size() > 1 )
+						if ( sampleData.data.size() > 1 )
 							opaqueValue.data[Sample_Depth] = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
 						else
 							opaqueValue.data[Sample_Depth] = FLT_MAX;
@@ -511,7 +511,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 						std::deque<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;
 						TqInt totCount = 0;
-						for ( sample = sampleData->data.begin(); sample != sampleData->data.end(); sample++ )
+						for ( sample = sampleData.data.begin(); sample != sampleData.data.end(); sample++ )
 						{
 							TqFloat* sample_data = sample->data;
 							if(sample_data[Sample_ORed] >= zThreshold.r() || sample_data[Sample_OGreen] >= zThreshold.g() || sample_data[Sample_OBlue] >= zThreshold.b())
@@ -564,16 +564,16 @@ SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
 }
 
 
-SqSampleDataPtr const CqImagePixel::SampleData( TqInt index ) const
+SqSampleData const& CqImagePixel::SampleData( TqInt index ) const
 {
 	assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[index] );
+	return ( *(m_samples[index]) );
 }
 
-SqSampleDataPtr CqImagePixel::SampleData( TqInt index )
+SqSampleData& CqImagePixel::SampleData( TqInt index )
 {
 	assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[index] );
+	return ( *(m_samples[index]) );
 }
 
 

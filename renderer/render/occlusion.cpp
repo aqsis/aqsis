@@ -67,7 +67,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<SqSampleDataPtr>());
+	m_leafSamples.assign(numLeafNodes, std::vector<SqSampleData*>());
 
 	// Compute and cache bounds of tree and culling area.
 	m_treeBoundMin = CqVector2D(bp->SampleRegion().xMin(), bp->SampleRegion().yMin());
@@ -94,7 +94,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt y
 		assert((sampleNodeIndex*2)+1 >= numTotalNodes);
 
 		m_depthTree[sampleNodeIndex] = FLT_MAX;
-		m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(SqSampleDataPtr(*sample));
+		m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back((*sample).get());
 	}
 	// Fix up parent depths.
 	propagateDepths();
@@ -112,7 +112,7 @@ void CqOcclusionTree::updateDepths()
 			continue;
 		TqFloat max = 0;
 		bool hit = false;
-		for(std::vector<SqSampleDataPtr>::iterator sample = m_leafSamples[i].begin(),
+		for(std::vector<SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
 				end = m_leafSamples[i].end(); sample != end; ++sample)
 		{
 			TqFloat depth; 

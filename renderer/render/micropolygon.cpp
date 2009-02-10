@@ -1664,10 +1664,10 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 }
 
 inline bool CqMicroPolygon::dofSampleInBound(const CqBound& bound,
-		const CqHitTestCache& cache, SqSampleDataPtr const sample)
+		const CqHitTestCache& cache, SqSampleData const& sample)
 {
-	CqVector2D dofOffset = sample->dofOffset;
-	CqVector2D samplePos = sample->position;
+	CqVector2D dofOffset = sample.dofOffset;
+	CqVector2D samplePos = sample.position;
 	// Compute the two ends of a line segment on which the sample would
 	// lie after offsetting by the "true" CoC multiplier*DoF offset.  The true
 	// offset can't be calculated without knowing the sample hit depth, but
@@ -1692,9 +1692,9 @@ inline bool CqMicroPolygon::dofSampleInBound(const CqBound& bound,
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	CqVector2D vecSample = sample->position;
+	CqVector2D vecSample = sample.position;
 
 	if(UsingDof)
 	{
@@ -1709,7 +1709,7 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const
 		// along the opposite of the direction of the DoF offset for the
 		// current sample.
 		CqVector2D* coc = &hitTestCache.cocMult[0];
-		CqVector2D dofOffset = sample->dofOffset;
+		CqVector2D dofOffset = sample.dofOffset;
 		CqVector3D points[4] = {
 			PointB() - vectorCast<CqVector3D>(compMul(coc[0], dofOffset)),
 			PointC() - vectorCast<CqVector3D>(compMul(coc[1], dofOffset)),
@@ -1876,9 +1876,9 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr const sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D vecSample = sample->position;
+	const CqVector2D vecSample = sample.position;
 	CqVector3D points[4];
 
 	// Calculate the position in time of the MP.
@@ -1970,7 +1970,7 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleDataPtr
 	{
 		const CqRenderer* renderContext = QGetRenderContext();
 		// Adjust the micropolygon vertices by the DoF offest.
-		CqVector2D dofOffset = sample->dofOffset;
+		CqVector2D dofOffset = sample.dofOffset;
 		points[0] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
 						points[0].z()), dofOffset));
 		points[1] -= vectorCast<CqVector3D>(compMul(renderContext->GetCircleOfConfusion(
