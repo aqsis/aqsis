@@ -35,6 +35,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
+#include "itexturecache.h"
 #include "matrix.h"
 
 namespace Aqsis {
@@ -48,74 +49,27 @@ class CqTexFileHeader;
 
 /** \brief A cache managing the various types of texture samplers.
  */
-class AQSISTEX_SHARE CqTextureCache : boost::noncopyable
+class AQSISTEX_SHARE CqTextureCache : public IqTextureCache, private boost::noncopyable
 {
 	public:
 		/// Type for holding a search-path callback.
 		typedef boost::function<const char* ()> TqSearchPathCallback;
 
 		/** \brief Construct an empty texture cache.
+		 *
+		 * \param searchPathCallback - Function used to return the current
+		 * search path when searching for textures.
 		 */
 		CqTextureCache(TqSearchPathCallback searchPathCallback);
 
-		//--------------------------------------------------
-		// \name Sampler access
-		//@{
-		/** \brief Find a texture sampler in the cache or load from file if not found.
-		 *
-		 * If any problems are encountered in opening the texture, issue a
-		 * warning to Aqsis::log(), and return a dummy sampler.
-		 *
-		 * \param name - the texture name.
-		 */
-		IqTextureSampler& findTextureSampler(const char* name);
-		/** \brief Find a texture sampler in the cache or load from file if not found.
-		 *
-		 * If any problems are encountered in opening the texture, issue a
-		 * warning to Aqsis::log(), and return a dummy sampler.
-		 *
-		 * \param name - the texture name.
-		 */
-		IqEnvironmentSampler& findEnvironmentSampler(const char* name);
-		/** \brief Find a shadow sampler in the cache or load from file if not found.
-		 *
-		 * If any problems are encountered in opening the shadow texture, issue
-		 * a warning to Aqsis::log(), and return a dummy sampler.
-		 *
-		 * \param name - the texture name.
-		 */
-		IqShadowSampler& findShadowSampler(const char* name);
-		/** \brief Find an occlusion sampler in the cache or load from file if not found.
-		 *
-		 * If any problems are encountered in opening the occlusion texture, issue
-		 * a warning to Aqsis::log(), and return a dummy sampler.
-		 *
-		 * \param name - the texture name.
-		 */
-		IqOcclusionSampler& findOcclusionSampler(const char* name);
-		/** \brief Delete all textures from the cache
-		 */
-		void flush();
-		//@}
-
-		//--------------------------------------------------
-		/** \brief Return the texture file attributes for the named file.
-		 *
-		 * If the file is not found or is otherwise invalid, return 0.
-		 *
-		 * \param name - file name 
-		 */
-		const CqTexFileHeader* textureInfo(const char* name);
-
-		/** \brief Set the current -> world transformation
-		 *
-		 * This transformation is used by shadow samplers in order to transform
-		 * the provided shading coordinates into the coordinate system of the
-		 * shadowed light.
-		 *
-		 * \param currToWorld - current -> world transformation.
-		 */
-		void setCurrToWorldMatrix(const CqMatrix& currToWorld);
+		// Inherited from IqTextureCache
+		virtual IqTextureSampler& findTextureSampler(const char* name);
+		virtual IqEnvironmentSampler& findEnvironmentSampler(const char* name);
+		virtual IqShadowSampler& findShadowSampler(const char* name);
+		virtual IqOcclusionSampler& findOcclusionSampler(const char* name);
+		virtual void flush();
+		virtual const CqTexFileHeader* textureInfo(const char* name);
+		virtual void setCurrToWorldMatrix(const CqMatrix& currToWorld);
 
 	private:
 		/** \brief Find a sampler in the given map, or create one from file if needed.

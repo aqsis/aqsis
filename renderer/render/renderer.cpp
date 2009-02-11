@@ -1415,7 +1415,7 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-CqTextureCache& CqRenderer::textureCache()
+IqTextureCache& CqRenderer::textureCache()
 {
 	return m_textureCache;
 }

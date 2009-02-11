@@ -17,7 +17,7 @@
 namespace Aqsis {
 
 struct IqTextureMapOld;
-class CqTextureCache;
+class IqTextureCache;
 class CqObjectInstance;
 
 class CqColor;
@@ -63,7 +63,7 @@ struct IqRenderer
 	 * \param fileName - File name to search for in the texture resource path.
 	 * \return the texture sampler (always valid).
 	 */
-	virtual	CqTextureCache& textureCache() = 0;
+	virtual	IqTextureCache& textureCache() = 0;
 
 	/// \deprecated
 	virtual	IqTextureMapOld* GetEnvironmentMap( const CqString& fileName ) = 0;

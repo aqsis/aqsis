@@ -32,12 +32,11 @@
 #include "aqsismath.h"
 #include "enum.h"
 #include "samplequad.h"
+#include "texfileheader.h"
 #include "wrapmode.h"
 
 namespace Aqsis
 {
-
-class CqTexFileHeader;
 
 //-----------------------------------------------------------------------------
 /** \brief Texture filter types
@@ -88,7 +87,7 @@ enum EqMipmapLerp
  * texture() and environment() RSL calls.  Note that blur and width are left
  * out; the more specific sBlur,tBlur, etc are used instead.
  */
-class AQSISTEX_SHARE CqTextureSampleOptionsBase
+class CqTextureSampleOptionsBase
 {
 	public:
 		/// Trivial constructor.
@@ -190,7 +189,7 @@ class AQSISTEX_SHARE CqTextureSampleOptionsBase
  * The standard renderman shadow sampling options may be passed to calls to the
  * texture() and environment() builtin functions in the RSL.
  */
-class AQSISTEX_SHARE CqTextureSampleOptions : private CqTextureSampleOptionsBase
+class CqTextureSampleOptions : private CqTextureSampleOptionsBase
 {
 	public:
 		/** \brief Set all options to sensible default values
@@ -256,7 +255,7 @@ class AQSISTEX_SHARE CqTextureSampleOptions : private CqTextureSampleOptionsBase
  * shadow() builtin function in the RSL.  These include all the basic texture
  * sampling options, as well as a few texture-specific things such as shadow bias.
  */
-class AQSISTEX_SHARE CqShadowSampleOptions : private CqTextureSampleOptionsBase
+class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 {
 	public:
 		/** \brief Set all options to sensible default values
@@ -468,6 +467,18 @@ inline void CqTextureSampleOptionsBase::setSWrapMode(EqWrapMode sWrapMode)
 inline void CqTextureSampleOptionsBase::setTWrapMode(EqWrapMode tWrapMode)
 {
 	m_tWrapMode = tWrapMode;
+}
+
+inline void CqTextureSampleOptionsBase::fillFromFileHeader(
+		const CqTexFileHeader& header)
+{
+	/// \todo Find a way to store & retrieve the downsampling filter?
+	const SqWrapModes* wrapModes = header.findPtr<Attr::WrapModes>();
+	if(wrapModes)
+	{
+		m_sWrapMode = wrapModes->sWrap;
+		m_tWrapMode = wrapModes->tWrap;
+	}
 }
 
 //------------------------------------------------------------------------------

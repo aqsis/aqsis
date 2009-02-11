@@ -42,7 +42,6 @@ SET(AQSISTEX_SRCS
 	tiledanyinputfile.cpp
 	tiledtiffinputfile.cpp
 	texturecache.cpp
-	texturesampleoptions.cpp
 	mixedimagebuffer.cpp
 	zinputfile.cpp
 	)
@@ -70,6 +69,7 @@ SET(AQSISTEX_HDRS
 	ishadowsampler.h
 	itexinputfile.h
 	itexoutputfile.h
+	itexturecache.h
 	itexturemap_old.h
 	itexturesampler.h
 	itiledtexinputfile.h

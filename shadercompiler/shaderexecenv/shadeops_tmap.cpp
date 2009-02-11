@@ -38,13 +38,12 @@
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
-#include	"itexturemap_old.h" /// \todo remove after migration to new interface
 #include	"ienvironmentsampler.h"
 #include	"iocclusionsampler.h"
 #include	"ishadowsampler.h"
+#include	"itexturecache.h"
 #include	"itexturesampler.h"
 #include	"texfileheader.h"
-#include	"texturecache.h"
 #include	"version.h"
 #include	"logging.h"
 
@@ -323,25 +322,6 @@ void getRenderContextShadowOpts(const IqRenderer& context, CqShadowSampleOptions
 		sampleOpts.setBiasLow(*biasPtr);
 	if(const TqFloat* biasPtr = context.GetFloatOption("shadow", "bias1"))
 		sampleOpts.setBiasHigh(*biasPtr);
-}
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-/**
- * Extract additional named texture control parameters from an array of stack
- * entries.
- */
-void GetTexParamsOld( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
-{
-	CqString strParam;
-	TqInt i = 0;
-	while ( cParams > 0 )
-	{
-		apParams[ i ] ->GetString( strParam, 0 );
-		map[ strParam ] = apParams[ i + 1 ];
-		i += 2;
-		cParams -= 2;
-	}
 }
 
 } // unnamed namespace.
