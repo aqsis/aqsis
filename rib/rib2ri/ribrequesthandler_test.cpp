@@ -858,6 +858,15 @@ BOOST_AUTO_TEST_CASE(RiProcedural_handler_test)
 	Insert(f.parser) << Req("Procedural") << "RunProgram"
 		<< args << IqRibParser::TqFloatArray(6,1.0f);
 }
+BOOST_AUTO_TEST_CASE(RiProcedural_unknown_procedural_test)
+{
+	SqRequestHandlerFixture f;
+	BOOST_CHECK_THROW(
+		Insert(f.parser) << Req("Procedural") << "SomeNonexistantProcName"
+			<< IqRibParser::TqStringArray(1,"asdf") << IqRibParser::TqFloatArray(6,1.0f),
+		XqParseError
+	);
+}
 
 
 //--------------------------------------------------
@@ -951,29 +960,87 @@ BOOST_AUTO_TEST_CASE(RiColor_handler_test)
 }
 
 
-//------------------------------------------------------------------------------
-// Test for parameter list handling, using RiSphere as a proxy.
-//
-BOOST_AUTO_TEST_CASE(invalid_paramlist_handling)
+//--------------------------------------------------
+RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 {
-	{
-		// Check that unknown primvar names throw.
-		SqRequestHandlerFixture f;
-		BOOST_CHECK_THROW(
-			Insert(f.parser) << Req("Sphere") << 1.0f << 1.0f << 1.0f << 1.0f
-				<< "asdf" << IqRibParser::TqFloatArray(1, 42.25f),
-			XqParseError
-		);
-	}
-	{
-		// Check that invalid primvar strings throw.
-		SqRequestHandlerFixture f;
-		BOOST_CHECK_THROW(
-			Insert(f.parser) << Req("Sphere") << 1.0f << 1.0f << 1.0f << 1.0f
-				<< "] bad_token" << IqRibParser::TqFloatArray(1, 42.25f),
-			XqParseError
-		);
-	}
+}
+
+
+//--------------------------------------------------
+RtVoid RiErrorHandler(RtErrorFunc handler)
+{
+}
+
+
+//--------------------------------------------------
+RtVoid RiTransform(RtMatrix transform)
+{
+}
+
+
+//--------------------------------------------------
+RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile,
+		RtInt count, RtToken tokens[], RtPointer values[])
+{
+}
+
+
+//------------------------------------------------------------------------------
+// Test for parameter list handling, using RiOption as a proxy.
+//
+RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+{
+	CheckParams() << Req("Option") << name << ParamList(count, tokens, values);
+}
+
+BOOST_AUTO_TEST_CASE(paramlist_int_array_value_test)
+{
+	SqRequestHandlerFixture f;
+	Insert(f.parser) << Req("Option") << "some_option_name"
+		<< "uniform int asdf" << IqRibParser::TqIntArray(10, 42);
+}
+BOOST_AUTO_TEST_CASE(paramlist_float_array_value_test)
+{
+	SqRequestHandlerFixture f;
+	Insert(f.parser) << Req("Option") << "some_option_name"
+		<< "uniform float asdf" << IqRibParser::TqFloatArray(10, 2.5f);
+}
+BOOST_AUTO_TEST_CASE(paramlist_string_array_value_test)
+{
+	SqRequestHandlerFixture f;
+	Insert(f.parser) << Req("Option") << "some_option_name"
+		<< "uniform string asdf" << IqRibParser::TqStringArray(10, "asdf_value");
+}
+BOOST_AUTO_TEST_CASE(invalid_paramlist_unknown_primvar)
+{
+	// Check that unknown primvar names throw.
+	SqRequestHandlerFixture f;
+	BOOST_CHECK_THROW(
+		Insert(f.parser) << Req("Option") << "some_option_name"
+			<< "asdf" << IqRibParser::TqFloatArray(1, 42.25f),
+		XqParseError
+	);
+}
+BOOST_AUTO_TEST_CASE(invalid_paramlist_invalid_primvar)
+{
+	// Check that invalid primvar strings throw.
+	SqRequestHandlerFixture f;
+	BOOST_CHECK_THROW(
+		Insert(f.parser) << Req("Option") << "some_option_name"
+			<< "] bad_token" << IqRibParser::TqFloatArray(1, 42.25f),
+		XqParseError
+	);
+}
+BOOST_AUTO_TEST_CASE(invalid_paramlist_missing_token)
+{
+	// check that a missing token throws.
+	SqRequestHandlerFixture f;
+	BOOST_CHECK_THROW(
+		Insert(f.parser) << Req("Option") << "some_option_name"
+			<< "P" << IqRibParser::TqFloatArray(4, 42.25f)
+			<< IqRibParser::TqIntArray(1, 42),
+		XqParseError
+	);
 }
 
 
@@ -1046,7 +1113,7 @@ RtVoid RiClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, 
 RtVoid RiShutter(RtFloat opentime, RtFloat closetime) {}
 RtVoid RiPixelVariance(RtFloat variance) {}
 RtVoid RiPixelSamples(RtFloat xsamples, RtFloat ysamples) {}
-RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth) {}
+//RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth) {}
 RtVoid RiExposure(RtFloat gain, RtFloat gamma) {}
 RtVoid RiImagerV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiQuantize(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude) {}
@@ -1062,7 +1129,7 @@ RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {re
 RtVoid RiHiderV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[]) {}
 RtVoid RiRelativeDetail(RtFloat relativedetail) {}
-RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+//RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiAttributeBegin() {}
 RtVoid RiAttributeEnd() {}
 //RtVoid RiColor(RtColor Cq) {}
@@ -1090,7 +1157,7 @@ RtVoid RiOrientation(RtToken orientation) {}
 RtVoid RiReverseOrientation() {}
 RtVoid RiSides(RtInt nsides) {}
 RtVoid RiIdentity() {}
-RtVoid RiTransform(RtMatrix transform) {}
+//RtVoid RiTransform(RtMatrix transform) {}
 RtVoid RiConcatTransform(RtMatrix transform) {}
 RtVoid RiPerspective(RtFloat fov) {}
 RtVoid RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz) {}
@@ -1145,8 +1212,8 @@ RtVoid RiMakeBumpV(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken
 RtVoid RiMakeLatLongEnvironmentV(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiMakeCubeFaceEnvironmentV(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiMakeShadowV(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiErrorHandler(RtErrorFunc handler) {}
+//RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
+//RtVoid RiErrorHandler(RtErrorFunc handler) {}
 RtVoid RiErrorIgnore(RtInt code, RtInt severity, RtString message) {}
 RtVoid RiErrorPrint(RtInt code, RtInt severity, RtString message) {}
 RtVoid RiErrorAbort(RtInt code, RtInt severity, RtString message) {}
