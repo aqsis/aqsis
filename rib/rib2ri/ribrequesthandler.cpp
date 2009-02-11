@@ -28,7 +28,6 @@
 #include <cstring>  // for strcpy
 
 #include "ri.h"
-#include "ribparser.h"
 
 namespace Aqsis
 {
@@ -144,6 +143,13 @@ class CqParamListHandler : public IqRibParamListHandler
 // CqRibRequestHandler implementation
 
 CqRibRequestHandler::CqRibRequestHandler()
+	: m_requestHandlerMap(),
+	m_numColorComps(3),
+	m_tokenDict(),
+	m_lightMap(),
+	m_namedLightMap(),
+	m_objectMap(),
+	m_namedObjectMap()
 {
 	// fill in the handler vectors somehow.
 	// 
@@ -162,8 +168,7 @@ void CqRibRequestHandler::handleRequest(const std::string& requestName,
 	TqHandlerMap::const_iterator pos = m_requestHandlerMap.find(requestName);
 	if(pos == m_requestHandlerMap.end())
 	{
-		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
-				"unrecognized request \"" << requestName << "\"");
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken, "unrecognized request");
 	}
 	TqRequestHandler handler = pos->second;
 	(this->*handler)(parser);
@@ -474,7 +479,7 @@ RtBasis* CqRibRequestHandler::getBasis(IqRibParser& parser)
 	{
 		case IqRibParser::Tok_Array:
 			{
-				const CqRibParser::TqFloatArray& basis = parser.getFloatArray();
+				const IqRibParser::TqFloatArray& basis = parser.getFloatArray();
 				if(basis.size() != 16)
 					AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 						"basis array must be of length 16");
@@ -540,7 +545,7 @@ void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 		floatargs = &parser.getFloatArray();
 
 		// Check that the number of tags matches the number of arguments
-		TqInt ntags = tags.size();
+		ntags = tags.size();
 		if(static_cast<TqInt>(nargs->size()) != ntags*2)
 		{
 			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
