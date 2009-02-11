@@ -1,17 +1,12 @@
 #include "ribrequesthandler.h"
 
-#include <cstddef>
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <boost/assign/std/vector.hpp>
-
 #include "ri.h"
 #include "iribparser.h"
-
-using namespace boost::assign; // necessary for container initialisation operators.
 
 using namespace Aqsis;
 
@@ -186,7 +181,7 @@ std::ostream& operator<<(std::ostream& out, const CqMockRibToken& tok)
 // Compare a token containing an array to a raw C array.
 //
 // assert() if the token doesn't contain an array.
-bool operator==(const CqMockRibToken& lhs, const void* rhs)
+bool tokenVoidCompareEqual(const CqMockRibToken& lhs, const void* rhs)
 {
 	switch(lhs.type())
 	{
@@ -223,6 +218,7 @@ class CqMockParser : public IqRibParser
 		TqInt m_currentRequestStart;
 		std::vector<TqFloatArray> m_floatVecStorage;
 	public:
+		// Helper class to insert parameters into the parser.
 		CqMockParser(CqRibRequestHandler& handler)
 			: m_params(),
 			m_handler(handler),
@@ -318,7 +314,7 @@ class CqMockParser : public IqRibParser
 				case Type_StringArray:	return Tok_Array;
 				case Type_Request:		return Tok_RequestEnd;
 			}
-			assert(0 &&"peekNextType - type unknown");
+			assert(0 && "peekNextType - type unknown");
 		}
 
 		virtual const TqIntArray& getIntParam()
@@ -334,6 +330,7 @@ class CqMockParser : public IqRibParser
 			return getStringArray();
 		}
 };
+
 
 /** Manage mappings from object or light handles to pointers for testing.
  *
@@ -355,23 +352,21 @@ class CqHandleManager
 
 		RtPointer insertHandle(const CqMockRibToken& id)
 		{
-			assert(id.type() == Type_Int
-					|| id.type() == Type_String);
+			assert(id.type() == Type_Int || id.type() == Type_String);
 			RtPointer p = reinterpret_cast<RtPointer>(++m_currHandle);
 			m_handleMap.push_back(std::make_pair(id, p));
 			return p;
 		}
-		RtPointer lookup(const CqMockRibToken& id) const
+		const CqMockRibToken& lookup(RtPointer handle) const
 		{
-			assert(id.type() == Type_String || id.type() == Type_Int);
 			for(TqHandleMap::const_iterator i = m_handleMap.begin();
 					i < m_handleMap.end(); ++i)
 			{
-				if(id == i->first)
-					return i->second;
+				if(handle == i->second)
+					return i->first;
 			}
-			throw std::runtime_error("handle not found");
-			return 0;
+			throw std::runtime_error("sequence id not found");
+			return m_handleMap[0].first;
 		}
 };
 
@@ -388,15 +383,8 @@ struct SqRequestHandlerFixture
 
 	SqRequestHandlerFixture();
 	~SqRequestHandlerFixture();
-
-	void setChecked()
-	{
-		hasBeenChecked = true;
-	}
 };
 
-#define FIXTURE_CHECKED(f) \
-	do { BOOST_CHECK(f.hasBeenChecked); f.hasBeenChecked = false; } while(false)
 
 // global to enable Ri* function implementations to validate the function
 // parameters against those which were input to the handler via the parser.
@@ -415,38 +403,125 @@ SqRequestHandlerFixture::~SqRequestHandlerFixture()
 	g_fixture = 0;
 }
 
-// Check equality of paramters with the input parameters held in the g_fixture
-// global struct.
-void checkParams(const TqTokVec& positionalParams,
-		RtInt count, RtToken tokens[], RtPointer values[])
+
+class Insert
 {
-	BOOST_REQUIRE(g_fixture != 0);
+	private:
+		CqMockParser& m_parser;
+	public:
+		Insert(CqMockParser& parser) : m_parser(parser) {}
+		~Insert()
+		{
+			m_parser.parseNextRequest();
+			BOOST_REQUIRE(g_fixture);
+			BOOST_CHECK(g_fixture->hasBeenChecked);
+			g_fixture->hasBeenChecked = false;
+		}
 
-	TqInt numPosParams = positionalParams.size();
-	TqInt numParams = numPosParams + count;
-	TqInt start = g_fixture->parser.currentRequestStart();
-	TqTokVec::const_iterator p = g_fixture->parser.currParams();
-	BOOST_REQUIRE(start + numParams <=
-			static_cast<TqInt>(g_fixture->parser.params().size()));
-	// Check that all positional parameters match up.
-	for(TqInt i = 0; i < numPosParams; ++i)
-		BOOST_CHECK_EQUAL(*(p++), positionalParams[i]);
+		Insert& operator<<(const CqMockRibToken& tok)
+		{
+			m_parser.params().push_back(tok);
+			return *this;
+		}
+};
 
-	// Check that all parameter-list parameters match up.
-	for(TqInt i = 0; i < count; ++i)
-	{
-		BOOST_CHECK_EQUAL((p++)->getString(), tokens[i]);
-		BOOST_CHECK_EQUAL(*(p++), values[i]);
-	}
 
-	g_fixture->setChecked();
-}
+// Tag struct used to ignore a parameter in the CheckParams() insertion sequence.
+struct IgnoreParam {};
 
+// struct used to hold a param list for insertion into a CheckParams() sequence.
+struct ParamList
+{
+	TqInt count;
+	RtToken* tokens;
+	RtPointer* values;
+	ParamList(TqInt count, RtToken tokens[], RtPointer values[])
+		: count(count), tokens(tokens), values(values)
+	{}
+};
+
+class CheckParams
+{
+	private:
+		TqTokVec::const_iterator m_currParam;
+
+	public:
+		CheckParams() : m_currParam()
+		{
+			BOOST_REQUIRE(g_fixture);
+			m_currParam = g_fixture->parser.currParams();
+		}
+
+		~CheckParams()
+		{
+			g_fixture->hasBeenChecked = true;
+		}
+
+		CheckParams& operator<<(const CqMockRibToken& val)
+		{
+			BOOST_CHECK_EQUAL(*(m_currParam++), val);
+			return *this;
+		}
+
+		CheckParams& operator<<(const IgnoreParam&)
+		{
+			++m_currParam;
+			return *this;
+		}
+
+		CheckParams& operator<<(const ParamList& pList)
+		{
+			for(TqInt i = 0; i < pList.count; ++i)
+			{
+				BOOST_CHECK_EQUAL((m_currParam++)->getString(), pList.tokens[i]);
+				BOOST_CHECK_PREDICATE(tokenVoidCompareEqual,
+						(*(m_currParam++)) (pList.values[i]) );
+			}
+			return *this;
+		}
+};
 
 
 //==============================================================================
 // The actual test cases follow below.
 //==============================================================================
+//
+// Each test is written in two parts
+//
+// 1) The tester function itself inserts request parameters into the parser
+// and kicks off the parsing of the request.  This is done as follows:
+//
+//   SqRequestHandlerFixture f;
+//   Insert(f.parser) << Req("SomeRequestName") << 1.0 << 1.0 << "asdf";
+//
+// f contains the mock parser and an instance of CqRibRequestHandler which is
+// the component that we're actually testing.  The Insert() creates a temporary
+// object of type Insert() which allows insertion of request parameters into
+// the parser.  The destructor of the temporary Insert instance is called at
+// the end of the statement which kicks off parsing of the inserted parameters.
+//
+//
+// 2) The RI function which is going to get called by the request handler.
+// This should check that the parameters were correctly passed through the
+// interface using an instance of CheckParams() as follows:
+//
+// RiSomeRequestName(RtInt var1, RtInt var2, RtString var3)
+// {
+//     CheckParams() << Req("SomeRequestName") << var1 << var2 << var3;
+// }
+//
+// CheckParams uses a global reference to the most recently created
+// SqRequestHandlerFixture, so can access the parameters passed by Insert() and
+// check that these are the same.
+//
+// For some RI functions the RIB form and RI form are sufficiently different
+// that some parameters have to be checked "by hand" without ChechParams() -
+// these parameters should be explicitly ignored in the CheckParams() insertion
+// stream using the IgnoreParam() manipulator.
+//
+// Finally, a renderman parameter list can be passed in using the ParamList
+// object.
+//
 
 //------------------------------------------------------------------------------
 // Tests for handler functions with hand-written implementations.
@@ -454,22 +529,16 @@ void checkParams(const TqTokVec& positionalParams,
 
 RtToken RiDeclare(RtString name, RtString declaration)
 {
-	TqTokVec posParams; posParams += Req("Declare"), name, declaration;
-	checkParams(posParams, 0, 0, 0);
-	g_fixture->setChecked();
+	CheckParams() << Req("Declare") << name << declaration;
+	g_fixture->hasBeenChecked = true;
 	return 0;
 }
 BOOST_AUTO_TEST_CASE(RiDeclare_handler_test)
 {
 	SqRequestHandlerFixture f;
-	f.parser.params() +=
-		Req("Declare"), "asdf", "uniform float",
-		Req("Sphere"), 1.0f, -1.0f, 1.0f, 360.0f,
-			"asdf", IqRibParser::TqFloatArray(1, 42.0f);
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
+	Insert(f.parser) << Req("Declare") << "asdf" << "uniform float";
+	Insert(f.parser) << Req("Sphere") << 1.0f << -1.0f << 1.0f << 360.0f
+						<< "asdf" << IqRibParser::TqFloatArray(1, 42.0f);
 }
 
 
@@ -480,56 +549,44 @@ RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 		BOOST_CHECK_EQUAL(g_fixture->parser.params().size(), 1U);
 		BOOST_CHECK_EQUAL(focallength, FLT_MAX);
 		BOOST_CHECK_EQUAL(focaldistance, FLT_MAX);
-		g_fixture->setChecked();
+		g_fixture->hasBeenChecked = true;
 	}
 	else
 	{
-		TqTokVec posParams;
-		posParams += Req("DepthOfField"), fstop, focallength, focaldistance;
-		checkParams(posParams, 0, 0, 0);
+		CheckParams() << Req("DepthOfField") << fstop << focallength << focaldistance;
 	}
 }
 BOOST_AUTO_TEST_CASE(RiDepthOfField_handler_test)
 {
 	{
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("DepthOfField"), 1.0f, 42.0f, 42.5f;
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
+		Insert(f.parser) << Req("DepthOfField") << 1.0f << 42.0f << 42.5f;
 	}
 	{
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("DepthOfField");
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
+		Insert(f.parser) << Req("DepthOfField");
 	}
 }
 
 
 RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
 {
-	TqTokVec posParams; posParams += Req("ColorSamples"),
-			 IqRibParser::TqFloatArray(nRGB, nRGB + 3*N),
-			 IqRibParser::TqFloatArray(RGBn, RGBn + 3*N);
-	checkParams(posParams, 0, 0, 0);
+	CheckParams() << Req("ColorSamples")
+		<< IqRibParser::TqFloatArray(nRGB, nRGB + 3*N)
+		<< IqRibParser::TqFloatArray(RGBn, RGBn + 3*N);
 }
 BOOST_AUTO_TEST_CASE(RiColorSamples_handler_test)
 {
 	SqRequestHandlerFixture f;
-	f.parser.params() += Req("ColorSamples"), IqRibParser::TqFloatArray(12, 1.0f),
-		IqRibParser::TqFloatArray(12, 1.0f);
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
+	Insert(f.parser) << Req("ColorSamples") << IqRibParser::TqFloatArray(12, 1.0f)
+		<< IqRibParser::TqFloatArray(12, 1.0f);
 }
 
 
 RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
 {
-	TqTokVec posParams;
-	posParams += Req("LightSource"), name;
-	// this is a slight abuse of checkParams, since the RIB and C interfaces
-	// don't match.  It'll fail for nonempty param lists :-/
-	checkParams(posParams, count, tokens, values);
+	CheckParams() << Req("LightSource") << name << IgnoreParam()
+		<< ParamList(count, tokens, values);
 	return g_fixture->handleManager.insertHandle(g_fixture->parser.currParams()[2]);
 }
 BOOST_AUTO_TEST_CASE(RiLightSource_handler_test)
@@ -537,70 +594,55 @@ BOOST_AUTO_TEST_CASE(RiLightSource_handler_test)
 	{
 		// Test integer light identifiers
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("LightSource"), "blahlight", 10;
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
+		Insert(f.parser) << Req("LightSource") << "blahlight" << 10;
 	}
 	{
 		// Test string light identifiers
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("LightSource"), "blahlight", "string_index";
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
+		Insert(f.parser) << Req("LightSource") << "blahlight" << "string_index";
 	}
 }
 
 
 RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
 {
-	TqTokVec::const_iterator p = g_fixture->parser.currParams();
-	BOOST_CHECK_EQUAL(*(p++), Req("Illuminate"));
-	BOOST_CHECK_EQUAL(g_fixture->handleManager.lookup(*(p++)), light);
-	BOOST_CHECK_EQUAL(*(p++), static_cast<int>(onoff));
-	g_fixture->hasBeenChecked = true;
+	CheckParams()
+		<< Req("Illuminate")
+		<< g_fixture->handleManager.lookup(light)
+		<< static_cast<TqInt>(onoff);
 }
 BOOST_AUTO_TEST_CASE(RiIlluminate_handler_test)
 {
 	{
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("Illuminate"), 10, 1;
-		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+		BOOST_CHECK_THROW(
+			Insert(f.parser) << Req("Illuminate") << 10 << 1,
+			XqParseError
+		);
 	}
 	{
 		SqRequestHandlerFixture f;
-		f.parser.params() +=
-			Req("LightSource"), "blahlight", 10,
-			Req("Illuminate"), 10, 0,
-			Req("LightSource"), "asdflight", 11,
-			Req("Illuminate"), 11, 1;
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
-		f.parser.parseNextRequest();
-		FIXTURE_CHECKED(f);
+		Insert(f.parser) << Req("LightSource") << "blahlight" << 10;
+		Insert(f.parser) << Req("Illuminate")  << 10 << 0;
+		Insert(f.parser) << Req("LightSource") << "asdflight" << 11;
+		Insert(f.parser) << Req("Illuminate")  << 11 << 1;
 	}
 }
 
 
 RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 {
-	const TqTokVec& params = g_fixture->parser.params();
-	BOOST_CHECK_EQUAL(params[0].getReq().name, "Basis");
 	BOOST_CHECK_EQUAL(::RiBSplineBasis, ubasis);
-	BOOST_CHECK_EQUAL(params[2].getInt(), ustep);
-	BOOST_CHECK_EQUAL(params[3], vbasis);
-	BOOST_CHECK_EQUAL(params[4].getInt(), vstep);
-	g_fixture->setChecked();
+	TqFloat* vbStart = reinterpret_cast<TqFloat*>(vbasis);
+	CheckParams() << Req("Basis")
+		<< IgnoreParam() << ustep <<
+		IqRibParser::TqFloatArray(vbStart, vbStart+16) << vstep;
 }
 BOOST_AUTO_TEST_CASE(RiBasis_handler_test)
 {
 	SqRequestHandlerFixture f;
-	f.parser.params() += Req("Basis"), "b-spline", 1, IqRibParser::TqFloatArray(16, 2.0f), 42;
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
+	Insert(f.parser) << Req("Basis") << "b-spline"
+		<< 1 << IqRibParser::TqFloatArray(16, 2.0f) << 42;
 }
 
 
@@ -615,16 +657,15 @@ RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[],
 RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
-	TqTokVec posParams; posParams += Req("Hyperboloid"), point1[0], point1[1], point1[2],
-		point2[0], point2[1], point2[2], thetamax;
-	checkParams(posParams, count, tokens, values);
+	CheckParams() << Req("Hyperboloid") << point1[0] << point1[1] << point1[2]
+		<< point2[0] << point2[1] << point2[2] << thetamax
+		<< ParamList(count, tokens, values);
 }
 BOOST_AUTO_TEST_CASE(RiHyperboloidV_handler_test)
 {
 	SqRequestHandlerFixture f;
-	f.parser.params() += Req("Hyperboloid"), 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 360.0f;
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
+	Insert(f.parser) << Req("Hyperboloid") << 1.0f << 2.0f << 3.0f
+		<< 4.0f << 5.0f << 6.0f << 360.0f;
 }
 
 
@@ -650,45 +691,40 @@ RtVoid RiObjectInstance(RtObjectHandle handle)
 // so only a few are tested here.  The hope is that they provide sufficient
 // coverage of the code generator...
 
-
-
-
 RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
-	TqTokVec posParams; posParams += Req("Sphere"), radius, zmin, zmax, thetamax;
-	checkParams(posParams, count, tokens, values);
+	CheckParams() << Req("Sphere") << radius << zmin << zmax << thetamax
+		<< ParamList(count, tokens, values);
 }
 BOOST_AUTO_TEST_CASE(RiSphereV_handler_test)
 {
 	// Test RiSphere; also test the handling of valid parameter lists.
 	SqRequestHandlerFixture f;
-	f.parser.params() += Req("Sphere"), 2.5f, -1.0f, 1.0f, 360.0f,
-		"uniform float blah", IqRibParser::TqFloatArray(2, 42.25f),
-		"Cs", IqRibParser::TqFloatArray(4, 2.0f);
-	// std::cerr << "Checking --- " << f.parser.params() << "\n";
-	f.parser.parseNextRequest();
-	FIXTURE_CHECKED(f);
+	Insert(f.parser) << Req("Sphere") << 2.5f << -1.0f << 1.0f << 360.0f
+		<< "uniform float blah" << IqRibParser::TqFloatArray(2, 42.25f)
+		<< "Cs" << IqRibParser::TqFloatArray(4, 2.0f);
 }
-
 
 BOOST_AUTO_TEST_CASE(invalid_paramlist_handling)
 {
 	{
 		// Check that unknown primvar names throw.
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("Sphere"), 1.0f, 1.0f, 1.0f, 1.0f,
-			"asdf", IqRibParser::TqFloatArray(1, 42.25f);
-		//try{ f.parser.parseNextRequest(); }
-		//catch(XqParseError& e) { std::cerr << e.what() << "\n"; }
-		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+		BOOST_CHECK_THROW(
+			Insert(f.parser) << Req("Sphere") << 1.0f << 1.0f << 1.0f << 1.0f
+				<< "asdf" << IqRibParser::TqFloatArray(1, 42.25f),
+			XqParseError
+		);
 	}
 	{
 		// Check that invalid primvar strings throw.
 		SqRequestHandlerFixture f;
-		f.parser.params() += Req("Sphere"), 1.0f, 1.0f, 1.0f, 1.0f,
-			"] bad_token", IqRibParser::TqFloatArray(1, 42.25f);
-		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+		BOOST_CHECK_THROW(
+			Insert(f.parser) << Req("Sphere") << 1.0f << 1.0f << 1.0f << 1.0f
+				<< "] bad_token" << IqRibParser::TqFloatArray(1, 42.25f),
+			XqParseError
+		);
 	}
 }
 
