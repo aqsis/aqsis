@@ -35,17 +35,30 @@ namespace Aqsis
 namespace {
 
 //------------------------------------------------------------------------------
+/** \brief Implementation of IqRibParamListHandler to read in parameter lists
+ *
+ * This implementation reads a parameter list from the parser and translates it
+ * into the (count, tokens, values) triple which is accepted by the Ri*V form
+ * of the renderman interface functions.
+ */
 class CqParamListHandler : public IqRibParamListHandler
 {
 	private:
+		// Dictionary for looking up RiDeclare'd and standard tokens
 		const CqTokenDictionary& m_tokenDict;
+		// Storage for tokens as pointed to from the token pointer array
 		std::vector<std::string> m_tokenStorage;
+		// RI token pointer array
 		std::vector<RtToken> m_tokens;
+		// RI value pointer array
 		std::vector<RtPointer> m_values;
+		// Storage for vectors of strings
 		std::vector<std::vector<RtToken> > m_stringValues;
+		// Number of vectors in the "P" array (length divided by 3)
 		TqInt m_countP;
 
 	public:
+		/// Construct an empty param list
 		CqParamListHandler(const CqTokenDictionary& tokenDict) :
 			m_tokenDict(tokenDict),
 			m_tokenStorage(),
@@ -55,6 +68,10 @@ class CqParamListHandler : public IqRibParamListHandler
 			m_countP(-1)
 		{ }
 
+		/** \brief Read in the next (token,value) pair from the parser
+		 *
+		 * \throw XqParseError if "P" is found but of the incorrect length
+		 */
 		virtual void readParameter(const std::string& name, IqRibParser& parser)
 		{
 			CqPrimvarToken tok;
@@ -82,7 +99,15 @@ class CqParamListHandler : public IqRibParamListHandler
 						m_values.push_back( reinterpret_cast<RtPointer>(
 								const_cast<RtFloat*>(&floats[0])) );
 						if(tok.name() == "P")
+						{
 							m_countP = floats.size();
+							if(m_countP % 3 != 0)
+							{
+								AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+									"size of \"P\" array must be a multiple of 3");
+							}
+							m_countP /= 3;
+						}
 					}
 					break;
 				case type_string:
@@ -104,6 +129,7 @@ class CqParamListHandler : public IqRibParamListHandler
 			m_tokenStorage.push_back(name);
 		}
 
+		/// Return the set of RI tokens
 		RtToken* tokens()
 		{
 			// Copy pointers to stored tokens into an array of RtToken.
@@ -117,16 +143,22 @@ class CqParamListHandler : public IqRibParamListHandler
 			return numTokens > 0 ? &m_tokens[0] : 0;
 		}
 
+		/// Return the set of RI value pointers
 		RtPointer* values()
 		{
 			return m_values.size() > 0 ? &m_values[0] : 0;
 		}
 
+		/// Return the number of (token,value) pairs.
 		RtInt count()
 		{
 			return m_tokens.size();
 		}
 
+		/** Return the number of vectors in the P array
+		 *
+		 * \throw XqParseError if "P" was not found.
+		 */
 		TqInt countP()
 		{
 			if(m_countP < 0)
