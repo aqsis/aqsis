@@ -41,31 +41,47 @@ CqRibParser::CqRibParser(const boost::shared_ptr<IqRibRequestHandler>& requestHa
 
 bool CqRibParser::parseNextRequest()
 {
-	// skip up until the next request.  This guards against the case that a
-	// previous request resulted in an exception which left the parser in an
-	// odd state.
-	CqRibToken tok = m_lex.get();
-	while(tok.type() != CqRibToken::REQUEST)
-	{
-		if(tok.type() == CqRibToken::ENDOFFILE)
-			return false;
-		tok = m_lex.get();
-	}
 	// Mark array pools as free to use.
 	m_floatArrayPool.markUnused();
 	m_intArrayPool.markUnused();
 	m_stringArrayPool.markUnused();
-	// Invoke the request handler.
+	CqRibToken requestTok = m_lex.get();
+	bool hadRequest = true;
 	try
 	{
-		m_requestHandler->handleRequest(tok.stringVal(), *this);
+		// Get the next token, and make sure it's a request token.
+		switch(requestTok.type())
+		{
+			case CqRibToken::REQUEST:
+				// Invoke the request handler.
+				m_requestHandler->handleRequest(requestTok.stringVal(), *this);
+				break;
+			case CqRibToken::ENDOFFILE:
+				return false;
+			default:
+				hadRequest = false;
+				tokenError("request", requestTok);
+				break;
+		}
 	}
 	catch(XqParseError& e)
 	{
-		// Add information on the location (file,line etc) of the problem.
-		AQSIS_THROW_XQERROR(XqParseError, e.code(),
-				"Parse error at " << m_lex.pos() <<
-				" while reading " << tok.stringVal() << ": " << e.what());
+		// Recover from the error by reading and discarding tokens from the RIB
+		// stream up until the next request, as per the RISpec.
+		CqRibToken::EqType nextType = m_lex.peek().type();
+		while(nextType != CqRibToken::REQUEST && nextType != CqRibToken::ENDOFFILE)
+		{
+			m_lex.get();
+			nextType = m_lex.peek().type();
+		}
+		// Add information on the location (file,line etc) of the problem to
+		// the exception message and rethrow.
+		std::ostringstream message;
+		message << "Parse error at " << m_lex.pos();
+		if(hadRequest)
+			message << " while reading " << requestTok.stringVal();
+		message << ": " << e.what();
+		AQSIS_THROW_XQERROR(XqParseError, e.code(), message.str());
 	}
 	return true;
 }
@@ -341,6 +357,10 @@ void CqRibParser::tokenError(const char* expected, const CqRibToken& badTok)
 			break;
 		case CqRibToken::ENDOFFILE:
 			msg << "end of file";
+			// Put ENDOFFILE back into the input, since not doing so may cause
+			// problems for streams which only provide a single ENDOFFILE
+			// token before blocking (eg, ProcRunProgram pipes).
+			m_lex.unget();
 			break;
 		case CqRibToken::INTEGER:
 			msg << "integer [= " << badTok.intVal() << "]";

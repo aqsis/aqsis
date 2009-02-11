@@ -267,9 +267,20 @@ struct MockRequestHandler : public IqRibRequestHandler
 	virtual void handleRequest(const std::string& requestName, IqRibParser& parser)
 	{
 		name = requestName;
-		s = parser.getString();
-		i = parser.getInt();
-		a = parser.getFloatArray();
+		if(name == "SomeRequest")
+		{
+			s = parser.getString();
+			i = parser.getInt();
+			a = parser.getFloatArray();
+		}
+		else if(name == "SimpleRequest")
+		{
+			i = parser.getInt();
+		}
+		else
+		{
+			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax, "unknown request " << name);
+		}
 	}
 };
 
@@ -305,24 +316,55 @@ BOOST_AUTO_TEST_CASE(CqRibParser_simple_req_test)
 }
 
 
-BOOST_AUTO_TEST_CASE(CqRibParser_request_error_recovery)
+BOOST_AUTO_TEST_CASE(CqRibParser_error_recovery_immediate_request)
 {
 	// Test recovery after an invalid request.  According to the RISpec, the
 	// parser should recover by discarding tokens until the next request name
 	// is read.
-	MockHandlerFixture f("SomeInvalidRequest SomeRequest \"blah\" 42 [1.1 1.2]\n");
+	MockHandlerFixture f("SomeInvalidRequest SimpleRequest 42\n");
 
 	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
 
 	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
-
-	BOOST_CHECK_EQUAL(f.handler.name, "SomeRequest");
-	BOOST_CHECK_EQUAL(f.handler.s, "blah");
+	BOOST_CHECK_EQUAL(f.handler.name, "SimpleRequest");
 	BOOST_CHECK_EQUAL(f.handler.i, 42);
-	BOOST_REQUIRE_EQUAL(f.handler.a.size(), 2U);
-	BOOST_CHECK_CLOSE(f.handler.a[0], 1.1f, 0.0001f);
-	BOOST_CHECK_CLOSE(f.handler.a[1], 1.2f, 0.0001f);
 
 	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
 }
 
+BOOST_AUTO_TEST_CASE(CqRibParser_error_recovery_extra_tokens)
+{
+	// Test throw on extra tokens occurring after a request and before the
+	// start of the next request.
+	MockHandlerFixture f(
+		"SimpleRequest -1 \"some junk\" \"tokens\" SimpleRequest 42\n"
+	);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
+	BOOST_CHECK_EQUAL(f.handler.name, "SimpleRequest");
+	BOOST_CHECK_EQUAL(f.handler.i, -1);
+
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
+	BOOST_CHECK_EQUAL(f.handler.name, "SimpleRequest");
+	BOOST_CHECK_EQUAL(f.handler.i, 42);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibParser_error_recovery_initial_junk)
+{
+	// Test throw on initial junk tokens.
+	MockHandlerFixture f(
+		" \"some junk\" \"tokens\" SimpleRequest 42\n"
+	);
+
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), true);
+	BOOST_CHECK_EQUAL(f.handler.name, "SimpleRequest");
+	BOOST_CHECK_EQUAL(f.handler.i, 42);
+
+	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
+}

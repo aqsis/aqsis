@@ -176,7 +176,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 // SqSourcePos functions
 inline std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos)
 {
-	out << pos.fileName << ":" << pos.line << " (col " << pos.col << ")";
+	out << pos.fileName << ": " << pos.line << " (col " << pos.col << ")";
 	return out;
 }
 
