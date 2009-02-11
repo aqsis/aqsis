@@ -1,16 +1,15 @@
 #include "ribrequesthandler.h"
 
+#include <cstddef>
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <boost/any.hpp>
 #include <boost/assign/std/vector.hpp>
 
 #include "ri.h"
 #include "iribparser.h"
-#include "smartptr.h"
 
 using namespace boost::assign; // necessary for container initialisation operators.
 
@@ -18,25 +17,9 @@ using namespace Aqsis;
 
 
 //------------------------------------------------------------------------------
-typedef std::vector<boost::any> TqAnyVec;
-
-// Insert a std::vector into a stream in RIB format.
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
-{
-	out << "[";
-	for(int i = 0, end = v.size(); i < end; ++i)
-	{
-		out << v[i];
-		if(i != end-1)
-			out << " ";
-	}
-	out << "]";
-	return out;
-}
 
 template<typename T>
-bool arrayEqual(const std::vector<T>& v1, RtPointer v2)
+bool arrayEqual(const std::vector<T>& v1, const void* v2)
 {
 	const T* v2T = reinterpret_cast<const T*>(v2);
 	for(TqInt i = 0, end = v1.size(); i < end; ++i)
@@ -47,274 +30,295 @@ bool arrayEqual(const std::vector<T>& v1, RtPointer v2)
 	return true;
 }
 
-//------------------------------------------------------------------------------
-// Extensions to the boost::any type, allowing for restricted comparison and
-// stream insertion operations.  They're contained in this namespace for safety.
-namespace boost_any_extensions {
-
-// Helper struct to disallow implicit anything -> boost::any conversions for
-// functions below.
-struct SqAnyWrapper
+// struct wrapping a request name for use in parser parameter vector.
+struct Req
 {
-	const boost::any& value;
-	SqAnyWrapper(const boost::any& value)
-		: value(value)
-	{}
+	std::string name;
+
+	Req() : name() {}
+	explicit Req(const char* name) : name(name) {}
+	Req(const Req& rq) : name(rq.name) {}
+
+	bool operator==(const Req& rhs) const
+	{
+		return name == rhs.name;
+	}
 };
 
-/* Insert a boost::any into a stream.
- *
- * It's dangerous to allow boost::any to be taken directly as an argument here,
- * since it has an implicit conversion operator from just about anything.
- * Instead we exploit the fact that there can be only one implicit conversion
- * in a chain to disallow implicit conversions using the SqAnyWrapper struct.
- */
-std::ostream& operator<<(std::ostream& out, const SqAnyWrapper& wrappedAny)
+namespace printer_funcs
 {
-	using ::operator<<; // for std::vector<T> inserter above.
-	const boost::any& a = wrappedAny.value;
-	// This if/else stuff is very ugly but the elegant solution would require
-	// writing a modified boost::any which is more work.
-	if(a.type() == typeid(int))
-		out << boost::any_cast<int>(a);
-	else if(a.type() == typeid(float))
-		out << boost::any_cast<float>(a);
-	else if(a.type() == typeid(const char*))
-		out << "\"" << boost::any_cast<const char*>(a) << "\"";
-	else if(a.type() == typeid(std::string))
-		out << "\"" << boost::any_cast<std::string>(a) << "\"";
-	else if(a.type() == typeid(std::vector<float>))
-		out << boost::any_cast<const std::vector<float>&>(a);
-	else if(a.type() == typeid(std::vector<std::string>))
-		out << boost::any_cast<const std::vector<std::string>&>(a);
-	else
-		throw std::runtime_error(std::string("Unknown boost::any type: ")
-				+ a.type().name());
-	return out;
+	// We put these operator<<() in a namespace so that they can be introduced
+	// into namespace boost in a controllable way.
+
+	// Insert a std::vector into a stream in RIB format.
+	template<typename T>
+	std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
+	{
+		out << "[";
+		for(int i = 0, end = v.size(); i < end; ++i)
+		{
+			out << v[i];
+			if(i != end-1)
+				out << " ";
+		}
+		out << "]";
+		return out;
+	}
+
+	// Insert a Req into a stream.
+	std::ostream& operator<<(std::ostream& out, const Req& r)
+	{
+		out << r.name;
+		return out;
+	}
 }
 
-/* Compare two boost::any for equality.
- *
- * As for operator<<(), taking boost::any directly would be dangerous here
- * because of implicit conversions which we disallow with SqAnyWrapper.
- */
-bool operator==(const SqAnyWrapper& wrappedAnyA, const SqAnyWrapper& wrappedAnyB)
-{
-	const boost::any& a = wrappedAnyA.value;
-	const boost::any& b = wrappedAnyB.value;
-	if(a.type() != b.type())
-		return false;
-	if(a.type() == typeid(int))
-		return boost::any_cast<int>(a) == boost::any_cast<int>(b);
-	else if(a.type() == typeid(float))
-		return boost::any_cast<float>(a) == boost::any_cast<float>(b);
-	else if(a.type() == typeid(const char*))
-		return std::string(boost::any_cast<const char*>(a))
-			== boost::any_cast<const char*>(b);
-	if(a.type() == typeid(IqRibParser::TqIntArray))
-		return boost::any_cast<IqRibParser::TqIntArray>(a)
-			== boost::any_cast<IqRibParser::TqIntArray>(b);
-	if(a.type() == typeid(IqRibParser::TqFloatArray))
-		return boost::any_cast<IqRibParser::TqFloatArray>(a)
-			== boost::any_cast<IqRibParser::TqFloatArray>(b);
-	if(a.type() == typeid(IqRibParser::TqStringArray))
-		return boost::any_cast<IqRibParser::TqStringArray>(a)
-			== boost::any_cast<IqRibParser::TqStringArray>(b);
-	else
-		throw std::runtime_error(std::string("Unknown boost::any type: ")
-				+ a.type().name());
-}
-
-/* Compare a boost::any and an RtPointer for equality.
- *
- * This is used for comparing an input value to a RI parameter list (stored as
- * a boost::any) to the value which comes out (stored as a void*).  Type
- * deduction is via boost::any::type().
- */
-bool operator==(const SqAnyWrapper& wrappedAnyA, RtPointer b)
-{
-	const boost::any& a = wrappedAnyA.value;
-	if(a.type() == typeid(int))
-		return boost::any_cast<int>(a) == *reinterpret_cast<int*>(b);
-	else if(a.type() == typeid(float))
-		return boost::any_cast<float>(a) == *reinterpret_cast<float*>(b);
-	else if(a.type() == typeid(const char*))
-		return boost::any_cast<const char*>(a) == *reinterpret_cast<RtString*>(b);
-	if(a.type() == typeid(IqRibParser::TqIntArray))
-		return arrayEqual(boost::any_cast<IqRibParser::TqIntArray>(a), b);
-	if(a.type() == typeid(IqRibParser::TqFloatArray))
-		return arrayEqual(boost::any_cast<IqRibParser::TqFloatArray>(a), b);
-	if(a.type() == typeid(IqRibParser::TqStringArray))
-		return arrayEqual(boost::any_cast<IqRibParser::TqStringArray>(a), b);
-	else
-		throw std::runtime_error(std::string("Unknown boost::any type: ")
-				+ a.type().name());
-}
-
-} // namespace boost_any_extensions
-
+// Introduce the printer funcs into both the global and boost namespaces so
+// that lookup can find them.
 namespace boost {
-	// Add boost_any_extensions operators to the boost namespace so that they
-	// can be found inside BOOST_CHECK_* functions.
-	using boost_any_extensions::operator<<;
-	using boost_any_extensions::operator==;
+	using printer_funcs::operator<<;
 }
+using printer_funcs::operator<<;
 
 
 //------------------------------------------------------------------------------
-// Struct holding RI function input parameters.
-struct SqRiInputParams
-{
-	std::string requestName;
-	TqAnyVec params;
-	bool hasBeenChecked;
+/** Cheap and nasty variant holding tokens for CqMockParser
+ *
+ * Yeah, boost::variant would allow me to avoid implementing this class, but
+ * the error messages are absolutely insane, to the point of making the code
+ * unmaintainable.
+ */
 
-	// Create an empty input and set the global g_input variable to this.
-	SqRiInputParams();
-	// Set the global g_input variable to 0.
-	~SqRiInputParams();
+enum EqType
+{
+	Type_Int,
+	Type_Float,
+	Type_String,
+	Type_IntArray,
+	Type_FloatArray,
+	Type_StringArray,
+	Type_Request,
 };
 
-// global SqRiInputParams to enable Ri* function implementations to validate the
-// function parameters against those which were input to the handler.
-static SqRiInputParams* g_input = 0;
-
-SqRiInputParams::SqRiInputParams()
-	: requestName(),
-	params(),
-	hasBeenChecked(false)
+class CqMockRibToken
 {
-	g_input = this;
-}
+	private:
+		EqType m_type;
 
-SqRiInputParams::~SqRiInputParams()
-{
-	g_input = 0;
-}
+		TqInt m_int;
+		TqFloat m_float;
+		std::string m_string;
+		Req m_request;
+		IqRibParser::TqIntArray m_ints;
+		IqRibParser::TqFloatArray m_floats;
+		IqRibParser::TqStringArray m_strings;
 
-// Insert parameters into a stream in RIB format.
-std::ostream& operator<<(std::ostream& out, const SqRiInputParams& paramInput)
+	public:
+		CqMockRibToken(TqInt i)
+			: m_type(Type_Int), m_int(i) { }
+		CqMockRibToken(TqFloat f)
+			: m_type(Type_Float), m_float(f) { }
+		CqMockRibToken(const char* s)
+			: m_type(Type_String), m_string(s) { }
+		CqMockRibToken(const std::string& s)
+			: m_type(Type_String), m_string(s) { }
+		CqMockRibToken(const Req& request)
+			: m_type(Type_Request), m_request(request) { }
+		CqMockRibToken(const IqRibParser::TqIntArray& v)
+			: m_type(Type_IntArray), m_ints(v) { }
+		CqMockRibToken(const IqRibParser::TqFloatArray& v)
+			: m_type(Type_FloatArray), m_floats(v) { }
+		CqMockRibToken(const IqRibParser::TqStringArray& v)
+			: m_type(Type_StringArray), m_strings(v) { }
+
+		EqType type() const { return m_type; }
+
+		TqInt getInt() const
+				{ assert(m_type == Type_Int); return m_int; }
+		TqFloat getFloat() const
+				{ assert(m_type == Type_Float); return m_float; }
+		const std::string& getString() const
+				{ assert(m_type == Type_String); return m_string; }
+		const Req& getReq() const
+				{ assert(m_type == Type_Request); return m_request; }
+		const IqRibParser::TqIntArray& getIntArray() const
+				{ assert(m_type == Type_IntArray); return m_ints; }
+		const IqRibParser::TqFloatArray& getFloatArray() const
+				{ assert(m_type == Type_FloatArray); return m_floats; }
+		const IqRibParser::TqStringArray& getStringArray() const
+				{ assert(m_type == Type_StringArray); return m_strings; }
+
+		bool operator==(const CqMockRibToken& rhs) const
+		{
+			if(m_type != rhs.m_type)
+				return false;
+			switch(m_type)
+			{
+				case Type_Int:			return getInt() == rhs.getInt();
+				case Type_Float:		return getFloat() == rhs.getFloat();
+				case Type_String:		return getString() == rhs.getString();
+				case Type_IntArray:		return getIntArray() == rhs.getIntArray();
+				case Type_FloatArray:	return getFloatArray() == rhs.getFloatArray();
+				case Type_StringArray:	return getStringArray() == rhs.getStringArray();
+				case Type_Request:		return getReq() == rhs.getReq();
+			}
+			assert(0 && "unrecognised type??");
+			return false;
+		}
+
+};
+
+std::ostream& operator<<(std::ostream& out, const CqMockRibToken& tok)
 {
-	out << paramInput.requestName << " ";
-	// Positional params
-	for(int i = 0; i < static_cast<TqInt>(paramInput.params.size()); ++i)
-		out << paramInput.params[i] << " ";
+	switch(tok.type())
+	{
+		case Type_Int: 			out << tok.getInt();		break;
+		case Type_Float: 		out << tok.getFloat();		break;
+		case Type_String: 		out << tok.getString();		break;
+		case Type_IntArray: 	out << tok.getIntArray();	break;
+		case Type_FloatArray: 	out << tok.getFloatArray();	break;
+		case Type_StringArray: 	out << tok.getStringArray();break;
+		case Type_Request: 		out << tok.getReq();		break;
+	}
 	return out;
+}
+
+// Compare a token containing an array to a raw C array.
+//
+// assert() if the token doesn't contain an array.
+bool operator==(const CqMockRibToken& lhs, const void* rhs)
+{
+	switch(lhs.type())
+	{
+		case Type_IntArray:		return arrayEqual(lhs.getIntArray(), rhs);
+		case Type_FloatArray:	return arrayEqual(lhs.getFloatArray(), rhs);
+		case Type_StringArray:	return arrayEqual(lhs.getStringArray(), rhs);
+		default:
+			assert(0 && "CqMockRibToken void* compare not implemented for type");
+	}
+	return false;
 }
 
 
 //------------------------------------------------------------------------------
 // Test fixtures, mock objects and checking functions.
 
+typedef std::vector<CqMockRibToken> TqTokVec;
+
 // Mock implementation of the RIB parser interface for testing purposes.
 //
-// This "parser" takes a SqRiInputParams structure describing the input which
+// This "parser" uses a vector of boost::any to describe the input which
 // should be provided to the request handler object.  When data is requested,
 // the mock parser just uses boost::any_cast to cast the current input element
 // to the requested type; an exception is thrown if the types don't match.
+//
+// The input data should be provided via the params() accessor before an
+// attempt is made to use the parser.
 class CqMockParser : public IqRibParser
 {
 	private:
-		const SqRiInputParams& m_params;
+		TqTokVec m_params;
 		CqRibRequestHandler& m_handler;
-		int m_tokenPos;
+		TqInt m_tokenPos;
+		TqInt m_currentRequestStart;
 		std::vector<TqFloatArray> m_floatVecStorage;
 	public:
-		CqMockParser(const SqRiInputParams& params, CqRibRequestHandler& handler)
-			: m_params(params),
+		CqMockParser(CqRibRequestHandler& handler)
+			: m_params(),
 			m_handler(handler),
-			m_tokenPos(0)
+			m_tokenPos(0),
+			m_currentRequestStart(0),
+			m_floatVecStorage()
 		{ }
+
+		TqTokVec& params()
+		{
+			return m_params;
+		}
+
+		TqTokVec::const_iterator currParams() const
+		{
+			return m_params.begin() + m_currentRequestStart;
+		}
+
+		TqInt currentRequestStart() const
+		{
+			return m_currentRequestStart;
+		}
 
 		virtual bool parseNextRequest()
 		{
-			m_handler.handleRequest(m_params.requestName, *this);
+			m_currentRequestStart = m_tokenPos;
+			m_handler.handleRequest(m_params[m_tokenPos++].getReq().name, *this );
 			return false;
 		}
 
 		virtual void pushInput(std::istream& inStream, const std::string& name) {}
 		virtual void popInput() {}
 
-#		define TRY_GUARD try{
-#		define CATCH_GUARD(funcName) } catch(boost::bad_any_cast&) { throw std::runtime_error("bad cast in get" funcName "()"); };
 		virtual TqInt getInt()
 		{
-			TRY_GUARD
-			return boost::any_cast<int>(m_params.params[m_tokenPos++]);
-			CATCH_GUARD("Int")
+			return m_params[m_tokenPos++].getInt();
 		}
 		virtual TqFloat getFloat()
 		{
-			TRY_GUARD
-			return boost::any_cast<float>(m_params.params[m_tokenPos++]);
-			CATCH_GUARD("Float")
+			return m_params[m_tokenPos++].getFloat();
 		}
 		virtual std::string getString()
 		{
-			TRY_GUARD
-			return boost::any_cast<const char*>(m_params.params[m_tokenPos++]);
-			CATCH_GUARD("String")
+			return m_params[m_tokenPos++].getString();
 		}
 
 		virtual const TqIntArray& getIntArray()
 		{
-			TRY_GUARD
-			return boost::any_cast<const TqIntArray&>(m_params.params[m_tokenPos++]);
-			CATCH_GUARD("IntArray")
+			return m_params[m_tokenPos++].getIntArray();
 		}
 		virtual const TqFloatArray& getFloatArray(TqInt length = -1)
 		{
-			TRY_GUARD
-			if(length >= 0 && m_params.params[m_tokenPos].type() == typeid(float))
+			if(length >= 0 && m_params[m_tokenPos].type() == Type_Float)
 			{
 				m_floatVecStorage.push_back(TqFloatArray(length,0));
 				// read in individual floats for the array
 				TqFloatArray& array = m_floatVecStorage.back();
 				for(TqInt i = 0; i < length; ++i)
-					array[i] = boost::any_cast<float>(m_params.params[m_tokenPos++]);
+					array[i] = m_params[m_tokenPos++].getFloat();
 				return array;
 			}
 			else
 			{
-				const TqFloatArray& array = 
-					boost::any_cast<const TqFloatArray&>(m_params.params[m_tokenPos++]);
+				const TqFloatArray& array = m_params[m_tokenPos++].getFloatArray();
 				if(length >= 0 && static_cast<TqInt>(array.size()) != length)
 					throw std::runtime_error("Bad array length detected.");
 				return array;
 			}
-			CATCH_GUARD("FloatArray")
 		}
 		virtual const TqStringArray& getStringArray()
 		{
-			TRY_GUARD
-			return boost::any_cast<const TqStringArray&>(m_params.params[m_tokenPos++]);
-			CATCH_GUARD("StringArray")
+			return m_params[m_tokenPos++].getStringArray();
 		}
-#		undef TRY_GUARD
-#		undef CATCH_GUARD
 
 		virtual void getParamList(IqRibParamListHandler& paramHandler)
 		{
-			while(m_tokenPos < static_cast<TqInt>(m_params.params.size()))
+			while(m_tokenPos < static_cast<TqInt>(m_params.size())
+					&& m_params[m_tokenPos].type() != Type_Request)
 				paramHandler.readParameter(getString(), *this);
 		}
 
 		virtual EqRibToken peekNextType()
 		{
-			if(m_tokenPos >= static_cast<TqInt>(m_params.params.size()))
+			if(m_tokenPos >= static_cast<TqInt>(m_params.size()))
 				return Tok_RequestEnd;
-			const std::type_info& type = m_params.params[m_tokenPos].type();
-			if(type == typeid(int))
-				return Tok_Int;
-			if(type == typeid(float))
-				return Tok_Float;
-			if(type == typeid(const char*))
-				return Tok_String;
-			if(type == typeid(TqIntArray) || type == typeid(TqFloatArray)
-					|| type == typeid(TqStringArray))
-				return Tok_Array;
-			throw std::runtime_error(
-					std::string("peekNextType - type unknown: ") + type.name());
+			switch(m_params[m_tokenPos].type())
+			{
+				case Type_Int:			return Tok_Int;
+				case Type_Float:		return Tok_Float;
+				case Type_String:		return Tok_String;
+				case Type_IntArray:
+				case Type_FloatArray:
+				case Type_StringArray:	return Tok_Array;
+				case Type_Request:		return Tok_RequestEnd;
+			}
+			assert(0 &&"peekNextType - type unknown");
 		}
 
 		virtual const TqIntArray& getIntParam()
@@ -331,50 +335,118 @@ class CqMockParser : public IqRibParser
 		}
 };
 
-
-struct RequestHandlerFixture
+/** Manage mappings from object or light handles to pointers for testing.
+ *
+ * If we want to check that the mapping is happening correctly we need to
+ * record both the RIB object id and the returned pointer.
+ */
+class CqHandleManager
 {
-	CqRibRequestHandler handler;
-	CqMockParser parser;
+	private:
+		TqInt m_currHandle;
+		typedef std::vector<std::pair<CqMockRibToken, RtPointer> > TqHandleMap;
+		TqHandleMap m_handleMap;
 
-	RequestHandlerFixture(const SqRiInputParams& params)
-		: handler(),
-		parser(params, handler)
-	{ }
+	public:
+		CqHandleManager()
+			: m_currHandle(0),
+			m_handleMap()
+		{ }
+
+		RtPointer insertHandle(const CqMockRibToken& id)
+		{
+			assert(id.type() == Type_Int
+					|| id.type() == Type_String);
+			RtPointer p = reinterpret_cast<RtPointer>(++m_currHandle);
+			m_handleMap.push_back(std::make_pair(id, p));
+			return p;
+		}
+		RtPointer lookup(const CqMockRibToken& id) const
+		{
+			assert(id.type() == Type_String || id.type() == Type_Int);
+			for(TqHandleMap::const_iterator i = m_handleMap.begin();
+					i < m_handleMap.end(); ++i)
+			{
+				if(id == i->first)
+					return i->second;
+			}
+			throw std::runtime_error("handle not found");
+			return 0;
+		}
 };
 
+struct SqRequestHandlerFixture
+{
+	// Object to be tested
+	CqRibRequestHandler handler;
+	// Mock parser
+	CqMockParser parser;
+	// Flag indicating that a request has been checked.
+	bool hasBeenChecked;
+	// Manager for holding handles
+	CqHandleManager handleManager;
 
-// Check equality of paramters with the input parameters held in the g_input
+	SqRequestHandlerFixture();
+	~SqRequestHandlerFixture();
+
+	void setChecked()
+	{
+		hasBeenChecked = true;
+	}
+};
+
+#define FIXTURE_CHECKED(f) \
+	do { BOOST_CHECK(f.hasBeenChecked); f.hasBeenChecked = false; } while(false)
+
+// global to enable Ri* function implementations to validate the function
+// parameters against those which were input to the handler via the parser.
+static SqRequestHandlerFixture* g_fixture = 0;
+
+SqRequestHandlerFixture::SqRequestHandlerFixture()
+	: handler(),
+	parser(handler),
+	hasBeenChecked(false)
+{
+	g_fixture = this;
+}
+
+SqRequestHandlerFixture::~SqRequestHandlerFixture()
+{
+	g_fixture = 0;
+}
+
+// Check equality of paramters with the input parameters held in the g_fixture
 // global struct.
-void checkParams(const std::string& name, const TqAnyVec& positionalParams,
+void checkParams(const TqTokVec& positionalParams,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
-	BOOST_REQUIRE(g_input != 0);
+	BOOST_REQUIRE(g_fixture != 0);
 
-	BOOST_CHECK_EQUAL(g_input->requestName, name);
-
-	TqInt numParams = g_input->params.size();
 	TqInt numPosParams = positionalParams.size();
-	BOOST_REQUIRE(numParams >= numPosParams + count);
+	TqInt numParams = numPosParams + count;
+	TqInt start = g_fixture->parser.currentRequestStart();
+	TqTokVec::const_iterator p = g_fixture->parser.currParams();
+	BOOST_REQUIRE(start + numParams <=
+			static_cast<TqInt>(g_fixture->parser.params().size()));
 	// Check that all positional parameters match up.
 	for(TqInt i = 0; i < numPosParams; ++i)
-		BOOST_CHECK_EQUAL(g_input->params[i], positionalParams[i]);
+		BOOST_CHECK_EQUAL(*(p++), positionalParams[i]);
 
 	// Check that all parameter-list parameters match up.
 	for(TqInt i = 0; i < count; ++i)
 	{
-		BOOST_CHECK_EQUAL(std::string(boost::any_cast<const char*>(
-					g_input->params[numPosParams + 2*i])), tokens[i]);
-		BOOST_CHECK_EQUAL(g_input->params[numPosParams + 2*i + 1], values[i]);
+		BOOST_CHECK_EQUAL((p++)->getString(), tokens[i]);
+		BOOST_CHECK_EQUAL(*(p++), values[i]);
 	}
 
-	g_input->hasBeenChecked = true;
+	g_fixture->setChecked();
 }
 
 
 
 //==============================================================================
-// Test cases
+// The actual test cases follow below.
+//==============================================================================
 
 //------------------------------------------------------------------------------
 // Tests for handler functions with hand-written implementations.
@@ -382,58 +454,153 @@ void checkParams(const std::string& name, const TqAnyVec& positionalParams,
 
 RtToken RiDeclare(RtString name, RtString declaration)
 {
+	TqTokVec posParams; posParams += Req("Declare"), name, declaration;
+	checkParams(posParams, 0, 0, 0);
+	g_fixture->setChecked();
 	return 0;
 }
-//BOOST_AUTO_TEST_CASE(RiDeclare_handler_test)
-//{
-//
-//}
+BOOST_AUTO_TEST_CASE(RiDeclare_handler_test)
+{
+	SqRequestHandlerFixture f;
+	f.parser.params() +=
+		Req("Declare"), "asdf", "uniform float",
+		Req("Sphere"), 1.0f, -1.0f, 1.0f, 360.0f,
+			"asdf", IqRibParser::TqFloatArray(1, 42.0f);
+	f.parser.parseNextRequest();
+	FIXTURE_CHECKED(f);
+	f.parser.parseNextRequest();
+	FIXTURE_CHECKED(f);
+}
 
 
 RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 {
+	if(fstop == FLT_MAX)
+	{
+		BOOST_CHECK_EQUAL(g_fixture->parser.params().size(), 1U);
+		BOOST_CHECK_EQUAL(focallength, FLT_MAX);
+		BOOST_CHECK_EQUAL(focaldistance, FLT_MAX);
+		g_fixture->setChecked();
+	}
+	else
+	{
+		TqTokVec posParams;
+		posParams += Req("DepthOfField"), fstop, focallength, focaldistance;
+		checkParams(posParams, 0, 0, 0);
+	}
+}
+BOOST_AUTO_TEST_CASE(RiDepthOfField_handler_test)
+{
+	{
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("DepthOfField"), 1.0f, 42.0f, 42.5f;
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+	}
+	{
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("DepthOfField");
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+	}
 }
 
 
 RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
 {
+	TqTokVec posParams; posParams += Req("ColorSamples"),
+			 IqRibParser::TqFloatArray(nRGB, nRGB + 3*N),
+			 IqRibParser::TqFloatArray(RGBn, RGBn + 3*N);
+	checkParams(posParams, 0, 0, 0);
+}
+BOOST_AUTO_TEST_CASE(RiColorSamples_handler_test)
+{
+	SqRequestHandlerFixture f;
+	f.parser.params() += Req("ColorSamples"), IqRibParser::TqFloatArray(12, 1.0f),
+		IqRibParser::TqFloatArray(12, 1.0f);
+	f.parser.parseNextRequest();
+	FIXTURE_CHECKED(f);
 }
 
 
 RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
 {
-	return 0;
+	TqTokVec posParams;
+	posParams += Req("LightSource"), name;
+	// this is a slight abuse of checkParams, since the RIB and C interfaces
+	// don't match.  It'll fail for nonempty param lists :-/
+	checkParams(posParams, count, tokens, values);
+	return g_fixture->handleManager.insertHandle(g_fixture->parser.currParams()[2]);
 }
-
-
-RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+BOOST_AUTO_TEST_CASE(RiLightSource_handler_test)
 {
-	return 0;
+	{
+		// Test integer light identifiers
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("LightSource"), "blahlight", 10;
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+	}
+	{
+		// Test string light identifiers
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("LightSource"), "blahlight", "string_index";
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+	}
 }
 
 
 RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
 {
+	TqTokVec::const_iterator p = g_fixture->parser.currParams();
+	BOOST_CHECK_EQUAL(*(p++), Req("Illuminate"));
+	BOOST_CHECK_EQUAL(g_fixture->handleManager.lookup(*(p++)), light);
+	BOOST_CHECK_EQUAL(*(p++), static_cast<int>(onoff));
+	g_fixture->hasBeenChecked = true;
+}
+BOOST_AUTO_TEST_CASE(RiIlluminate_handler_test)
+{
+	{
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("Illuminate"), 10, 1;
+		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+	}
+	{
+		SqRequestHandlerFixture f;
+		f.parser.params() +=
+			Req("LightSource"), "blahlight", 10,
+			Req("Illuminate"), 10, 0,
+			Req("LightSource"), "asdflight", 11,
+			Req("Illuminate"), 11, 1;
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+		f.parser.parseNextRequest();
+		FIXTURE_CHECKED(f);
+	}
 }
 
 
 RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 {
-	BOOST_CHECK_EQUAL(g_input->requestName, "Basis");
+	const TqTokVec& params = g_fixture->parser.params();
+	BOOST_CHECK_EQUAL(params[0].getReq().name, "Basis");
 	BOOST_CHECK_EQUAL(::RiBSplineBasis, ubasis);
-	BOOST_CHECK_EQUAL(boost::any_cast<int>(g_input->params[1]), ustep);
-	BOOST_CHECK_EQUAL(g_input->params[2], vbasis);
-	BOOST_CHECK_EQUAL(boost::any_cast<int>(g_input->params[3]), vstep);
-	g_input->hasBeenChecked = true;
+	BOOST_CHECK_EQUAL(params[2].getInt(), ustep);
+	BOOST_CHECK_EQUAL(params[3], vbasis);
+	BOOST_CHECK_EQUAL(params[4].getInt(), vstep);
+	g_fixture->setChecked();
 }
 BOOST_AUTO_TEST_CASE(RiBasis_handler_test)
 {
-	SqRiInputParams input;
-	input.requestName = "Basis";
-	input.params += "b-spline", 1, IqRibParser::TqFloatArray(16, 2.0f), 42;
-	RequestHandlerFixture f(input);
+	SqRequestHandlerFixture f;
+	f.parser.params() += Req("Basis"), "b-spline", 1, IqRibParser::TqFloatArray(16, 2.0f), 42;
 	f.parser.parseNextRequest();
-	BOOST_CHECK(input.hasBeenChecked);
+	FIXTURE_CHECKED(f);
 }
 
 
@@ -448,19 +615,16 @@ RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[],
 RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
-	TqAnyVec posParams; posParams += point1[0], point1[1], point1[2],
+	TqTokVec posParams; posParams += Req("Hyperboloid"), point1[0], point1[1], point1[2],
 		point2[0], point2[1], point2[2], thetamax;
-	checkParams("Hyperboloid", posParams, count, tokens, values);
+	checkParams(posParams, count, tokens, values);
 }
 BOOST_AUTO_TEST_CASE(RiHyperboloidV_handler_test)
 {
-	SqRiInputParams input;
-	input.requestName = "Hyperboloid";
-	input.params += 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 360.0f;
-//	std::cerr << "Checking --- " << input << "\n";
-	RequestHandlerFixture f(input);
+	SqRequestHandlerFixture f;
+	f.parser.params() += Req("Hyperboloid"), 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 360.0f;
 	f.parser.parseNextRequest();
-	BOOST_CHECK(input.hasBeenChecked);
+	FIXTURE_CHECKED(f);
 }
 
 
@@ -486,53 +650,54 @@ RtVoid RiObjectInstance(RtObjectHandle handle)
 // so only a few are tested here.  The hope is that they provide sufficient
 // coverage of the code generator...
 
+
+
+
 RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
-	TqAnyVec posParams; posParams += radius, zmin, zmax, thetamax;
-	checkParams("Sphere", posParams, count, tokens, values);
+	TqTokVec posParams; posParams += Req("Sphere"), radius, zmin, zmax, thetamax;
+	checkParams(posParams, count, tokens, values);
 }
 BOOST_AUTO_TEST_CASE(RiSphereV_handler_test)
 {
 	// Test RiSphere; also test the handling of valid parameter lists.
-	SqRiInputParams input;
-	input.requestName = "Sphere";
-	input.params += 2.5f, -1.0f, 1.0f, 360.0f,
+	SqRequestHandlerFixture f;
+	f.parser.params() += Req("Sphere"), 2.5f, -1.0f, 1.0f, 360.0f,
 		"uniform float blah", IqRibParser::TqFloatArray(2, 42.25f),
 		"Cs", IqRibParser::TqFloatArray(4, 2.0f);
-	// std::cerr << "Checking --- " << input << "\n";
-	RequestHandlerFixture f(input);
+	// std::cerr << "Checking --- " << f.parser.params() << "\n";
 	f.parser.parseNextRequest();
-	BOOST_CHECK(input.hasBeenChecked);
+	FIXTURE_CHECKED(f);
 }
+
 
 BOOST_AUTO_TEST_CASE(invalid_paramlist_handling)
 {
 	{
 		// Check that unknown primvar names throw.
-		SqRiInputParams input;
-		input.requestName = "Sphere";
-		input.params += 1.0f, 1.0f, 1.0f, 1.0f,
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("Sphere"), 1.0f, 1.0f, 1.0f, 1.0f,
 			"asdf", IqRibParser::TqFloatArray(1, 42.25f);
-		RequestHandlerFixture f(input);
 		//try{ f.parser.parseNextRequest(); }
 		//catch(XqParseError& e) { std::cerr << e.what() << "\n"; }
 		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
 	}
 	{
 		// Check that invalid primvar strings throw.
-		SqRiInputParams input;
-		input.requestName = "Sphere";
-		input.params += 1.0f, 1.0f, 1.0f, 1.0f,
+		SqRequestHandlerFixture f;
+		f.parser.params() += Req("Sphere"), 1.0f, 1.0f, 1.0f, 1.0f,
 			"] bad_token", IqRibParser::TqFloatArray(1, 42.25f);
-		RequestHandlerFixture f(input);
 		BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
 	}
 }
 
-//==============================================================================
-// Definitions for Ri*Basis symbols
 
+
+//==============================================================================
+// Definitions of RI symbols
+
+// bases
 RtBasis RiBezierBasis =
 {
 	{ -1,  3, -3, 1},
@@ -540,7 +705,6 @@ RtBasis RiBezierBasis =
 	{ -3,  3,  0, 0},
 	{  1,  0,  0, 0}
 };
-
 RtBasis RiBSplineBasis =
 {
 	{ -1.0 / 6,  3.0 / 6, -3.0 / 6, 1.0 / 6},
@@ -548,7 +712,6 @@ RtBasis RiBSplineBasis =
 	{ -3.0 / 6,  0.0 / 6,  3.0 / 6, 0.0 / 6},
 	{  1.0 / 6,  4.0 / 6,  1.0 / 6, 0.0 / 6}
 };
-
 RtBasis RiCatmullRomBasis =
 {
 	{ -1.0 / 2,  3.0 / 2, -3.0 / 2,  1.0 / 2},
@@ -556,7 +719,6 @@ RtBasis RiCatmullRomBasis =
 	{ -1.0 / 2,  0.0 / 2,  1.0 / 2,  0.0 / 2},
 	{  0.0 / 2,  2.0 / 2,  0.0 / 2,  0.0 / 2}
 };
-
 RtBasis RiHermiteBasis =
 {
 	{  2,  1, -2,  1},
@@ -564,7 +726,6 @@ RtBasis RiHermiteBasis =
 	{  0,  1,  0,  0},
 	{  1,  0,  0,  0}
 };
-
 RtBasis RiPowerBasis =
 {
 	{ 1, 0, 0, 0},
@@ -574,9 +735,8 @@ RtBasis RiPowerBasis =
 };
 
 
-//------------------------------------------------------------------------------
 // Empty implementations of all required Ri* functions.
-// Autogenerated via XSLT.
+// Autogenerated via XSLT, with those functions actually used above commented out.
 
 //RtToken RiDeclare(RtString name, RtString declaration) {return 0;}
 RtVoid RiBegin(RtToken name) {}
@@ -625,7 +785,7 @@ RtVoid RiColor(RtColor Cq) {}
 RtVoid RiOpacity(RtColor Os) {}
 RtVoid RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4) {}
 //RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
-//RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
+RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
 //RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff) {}
 RtVoid RiSurfaceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiDeformationV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
