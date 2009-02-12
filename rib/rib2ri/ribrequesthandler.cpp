@@ -192,6 +192,8 @@ CqRibRequestHandler::CqRibRequestHandler()
 	TqInt numRequests = sizeof(requestNames)/sizeof(const char*);
 	for(TqInt i = 0; i < numRequests; ++i)
 		m_requestHandlerMap[requestNames[i]] = requestHandlers[i];
+	// Add the special RIB-only "version" request to the list.
+	m_requestHandlerMap["version"] = &CqRibRequestHandler::handleVersion;
 }
 
 void CqRibRequestHandler::handleRequest(const std::string& requestName,
@@ -573,8 +575,6 @@ void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 	{
 		tags.convertToTokens(parser.getStringArray());
 		nargs = &parser.getIntArray();
-		intargs = &parser.getIntArray();
-		floatargs = &parser.getFloatArray();
 
 		// Check that the number of tags matches the number of arguments
 		ntags = tags.size();
@@ -593,12 +593,14 @@ void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 			intArgsLen += (*nargs)[2*i];
 			floatArgsLen += (*nargs)[2*i+1];
 		}
+		intargs = &parser.getIntArray();
 		if(intArgsLen != static_cast<TqInt>(intargs->size()))
 		{
 			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
 					"Invalid intargs length " << intargs->size()
 					<< "; expected length = " << intArgsLen);
 		}
+		floatargs = &parser.getFloatArray();
 		if(floatArgsLen != static_cast<TqInt>(floatargs->size()))
 		{
 			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
@@ -736,6 +738,14 @@ void CqRibRequestHandler::handleObjectInstance(IqRibParser& parser)
 					"undeclared object number " << sequencenumber);
 		RiObjectInstance(pos->second);
 	}
+}
+
+void CqRibRequestHandler::handleMotionBegin(IqRibParser& parser)
+{
+	const IqRibParser::TqFloatArray& times = parser.getFloatArray();
+	TqInt N = times.size();
+
+	RiMotionBeginV(toRiType(N), toRiType(times));
 }
 
 } // namespace Aqsis

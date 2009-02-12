@@ -72,3 +72,15 @@ aqsis_add_tests(${RIB2RI_TEST_SRCS}
 	EXTRASOURCE ${RIB2RI_SRCS}
 )
 
+
+if(AQSIS_ENABLE_TESTING)
+	# Speed test for parser and request handler
+	add_executable(parser_speed_test
+		parser_speed_test.cpp
+		${RIB2RI_SRCS}
+		)
+	target_link_libraries(parser_speed_test
+		${LINKLIBS}
+		)
+endif(AQSIS_ENABLE_TESTING)
+

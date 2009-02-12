@@ -599,6 +599,15 @@ class CheckParams
 //------------------------------------------------------------------------------
 // Tests for handler functions with hand-written implementations.
 
+BOOST_AUTO_TEST_CASE(RIB_version_test)
+{
+	// Test the RIB-only version token... this doesn't actually do anything
+	// right now but shouldn't generate an error
+	SqRequestHandlerFixture f;
+	f.parser.params() += Req("version"), 3.03f;
+	f.parser.parseNextRequest();
+}
+
 
 //--------------------------------------------------
 RtToken RiDeclare(RtString name, RtString declaration)
@@ -1048,6 +1057,22 @@ BOOST_AUTO_TEST_CASE(RiPoints_missing_P_variable)
 	);
 }
 
+
+//--------------------------------------------------
+RtVoid RiMotionBeginV(RtInt N, RtFloat times[])
+{
+	CheckParams() << Req("MotionBegin")
+		<< IqRibParser::TqFloatArray(times, times+N);
+}
+BOOST_AUTO_TEST_CASE(RiMotionBegin_handler_test)
+{
+	SqRequestHandlerFixture f;
+	IqRibParser::TqFloatArray times;
+	times += 0, 1, 2.5, 3, 4;
+	Insert(f.parser) << Req("MotionBegin") << times;
+}
+
+
 //--------------------------------------------------
 RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile,
 		RtInt count, RtToken tokens[], RtPointer values[])
@@ -1285,7 +1310,7 @@ RtVoid RiSolidEnd() {}
 RtVoid RiObjectEnd() {}
 //RtVoid RiObjectInstance(RtObjectHandle handle) {}
 RtVoid RiMotionBegin(RtInt N,  ...) {}
-RtVoid RiMotionBeginV(RtInt N, RtFloat times[]) {}
+//RtVoid RiMotionBeginV(RtInt N, RtFloat times[]) {}
 RtVoid RiMotionEnd() {}
 RtVoid RiMakeTextureV(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
 RtVoid RiMakeBumpV(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}

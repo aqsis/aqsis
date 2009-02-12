@@ -23,6 +23,7 @@
  */
 
 #include <sstream>
+#include <cctype>
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -367,4 +368,33 @@ BOOST_AUTO_TEST_CASE(CqRibParser_error_recovery_initial_junk)
 	BOOST_CHECK_EQUAL(f.handler.i, 42);
 
 	BOOST_CHECK_EQUAL(f.parser.parseNextRequest(), false);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibParser_error_message_position)
+{
+	MockHandlerFixture f(
+		"SimpleRequest \"some junk\""
+	);
+
+	bool didThrow = false;
+	try
+	{
+		f.parser.parseNextRequest();
+	}
+	catch(XqParseError& e)
+	{
+		didThrow = true;
+		std::string msg = e.what();
+		std::string::size_type pos = msg.find("(col ");
+		std::string::iterator p = msg.begin() + pos + 5;
+		// strip out the column number from the string
+		TqInt colNum = 0;
+		while(std::isdigit(*p))
+		{
+			colNum = 10*colNum + (*p - '0');
+			++p;
+		}
+		BOOST_CHECK_EQUAL(colNum, 15);
+	}
+	BOOST_CHECK(didThrow);
 }

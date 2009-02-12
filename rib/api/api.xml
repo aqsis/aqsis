@@ -3347,6 +3347,10 @@
 					<Type/>
 				</Argument>
 			</Arguments>
+			<!-- A custom impl is only used here because of the odd fact that
+			both the varargs and Ri*V form are present so the naming is
+			somewhat odd. -->
+			<Rib><CustomImpl/></Rib>
 			<ValidScope>
 				<BeginEnd/>
 				<Frame/>
@@ -3365,7 +3369,6 @@
 				<Argument>
 					<Name>N</Name>
 					<Type>RtInt</Type>
-					<RibValue>times.size()</RibValue>
 				</Argument>
 				<Argument>
 					<Name>times</Name>
@@ -3375,7 +3378,6 @@
 </Length>
 				</Argument>
 			</Arguments>
-			<Rib/>
 			<ValidScope>
 				<BeginEnd/>
 				<Frame/>

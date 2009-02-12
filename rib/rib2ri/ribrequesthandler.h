@@ -89,6 +89,7 @@ class CqRibRequestHandler : public IqRibRequestHandler
 		void handleProcedural(IqRibParser& parser);
 		void handleObjectBegin(IqRibParser& parser);
 		void handleObjectInstance(IqRibParser& parser);
+		void handleMotionBegin(IqRibParser& parser);
 
 
 		//--------------------------------------------------

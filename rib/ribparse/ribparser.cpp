@@ -66,6 +66,8 @@ bool CqRibParser::parseNextRequest()
 	}
 	catch(XqParseError& e)
 	{
+		// Save the error position
+		SqSourceFilePos errorPos = m_lex.pos();
 		// Recover from the error by reading and discarding tokens from the RIB
 		// stream up until the next request, as per the RISpec.
 		CqRibToken::EqType nextType = m_lex.peek().type();
@@ -77,7 +79,7 @@ bool CqRibParser::parseNextRequest()
 		// Add information on the location (file,line etc) of the problem to
 		// the exception message and rethrow.
 		std::ostringstream message;
-		message << "Parse error at " << m_lex.pos();
+		message << "Parse error at " << errorPos;
 		if(hadRequest)
 			message << " while reading " << requestTok.stringVal();
 		message << ": " << e.what();
