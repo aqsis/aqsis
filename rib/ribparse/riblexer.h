@@ -115,6 +115,8 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		SqSourceFilePos pos() const;
 
 	private:
+		struct SqInputState;
+
 		//--------------------------------------------------
 		/// \name ASCII RIB decoding functions
 		//@{
@@ -147,7 +149,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		/// Input buffer from which characters are read.
 		CqRibInputBuffer* m_inBuf;
 		/// Stack of input buffers.
-		std::stack<boost::shared_ptr<CqRibInputBuffer> > m_inputStack;
+		std::stack<boost::shared_ptr<SqInputState> > m_inputStack;
 		/// source position of previous token in input stream
 		SqSourcePos m_currPos;
 		/// source position of latest token read from the input stream
@@ -166,7 +168,6 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		/// Number of array elements remaining in current encoded float array.
 		TqInt m_arrayElementsRemaining;
 };
-
 
 
 //==============================================================================

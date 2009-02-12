@@ -37,6 +37,28 @@
 namespace Aqsis
 {
 
+/** Struct to save the input state of the lexer inside pushInput(), so that it
+ * can be restored inside popInput()
+ */
+struct CqRibLexer::SqInputState
+{
+	CqRibInputBuffer inBuf;
+	SqSourcePos currPos;
+	SqSourcePos nextPos;
+	CqRibToken nextTok;
+	bool haveNext;
+
+	SqInputState(std::istream& inStream, const std::string& streamName,
+			const SqSourcePos& currPos, const SqSourcePos& nextPos,
+			const CqRibToken& nextTok, bool haveNext)
+		: inBuf(inStream, streamName),
+		currPos(currPos),
+		nextPos(nextPos),
+		nextTok(nextTok),
+		haveNext(haveNext)
+	{ }
+};
+
 //-------------------------------------------------------------------------------
 // CqRibLexer implementation
 
@@ -54,29 +76,30 @@ CqRibLexer::CqRibLexer()
 
 void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName)
 {
-	m_inputStack.push( boost::shared_ptr<CqRibInputBuffer>(
-				new CqRibInputBuffer(inStream, streamName)) );
-	m_inBuf = m_inputStack.top().get();
+	m_inputStack.push( boost::shared_ptr<SqInputState>(
+				new SqInputState(inStream, streamName, m_currPos, m_nextPos,
+					m_nextTok, m_haveNext)) );
+	m_inBuf = &m_inputStack.top()->inBuf;
 	m_currPos = SqSourcePos(1,1);
 	m_nextPos = SqSourcePos(1,1);
+	m_haveNext = false;
 }
 
 void CqRibLexer::popInput()
 {
 	assert(!m_inputStack.empty());
+	// Restore the current state to the state before the previous pushInput()
+	const SqInputState& restoreState = *m_inputStack.top();
+	m_currPos = restoreState.currPos;
+	m_nextPos = restoreState.nextPos;
+	m_nextTok = restoreState.nextTok;
+	m_haveNext = restoreState.haveNext;
+	// Pop the stack, and restore the buffer
 	m_inputStack.pop();
 	if(!m_inputStack.empty())
-	{
-		m_inBuf = m_inputStack.top().get();
-		m_currPos = m_inBuf->pos();
-		m_nextPos = m_inBuf->pos();
-	}
+		m_inBuf = &m_inputStack.top()->inBuf;
 	else
-	{
 		m_inBuf = 0;
-		m_currPos = SqSourcePos(1,1);
-		m_nextPos = SqSourcePos(1,1);
-	}
 }
 
 /** \brief Scan the next token from the underlying input stream.

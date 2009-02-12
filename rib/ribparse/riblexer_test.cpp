@@ -373,6 +373,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_streamstack_test)
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream1Start"));
 	BOOST_CHECK_EQUAL(lex.pos().fileName, "stream1");
 
+	lex.peek();
 	std::istringstream in2("Stream2Start");
 	lex.pushInput(in2, "stream2");
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream2Start"));
