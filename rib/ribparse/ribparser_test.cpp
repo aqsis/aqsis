@@ -398,3 +398,37 @@ BOOST_AUTO_TEST_CASE(CqRibParser_error_message_position)
 	}
 	BOOST_CHECK(didThrow);
 }
+
+BOOST_AUTO_TEST_CASE(CqRibParser_EOF_immediate_stop)
+{
+	// Here we try to check that the RIB parser will stop immediately on
+	// reading the EOF character \377.  If it continues past this, the lexer
+	// will read the \321 character which is an illegal reserved byte and
+	// should throw an error.
+	MockHandlerFixture f(
+		"SimpleRequest 42\377\321"
+	);
+
+	BOOST_CHECK(f.parser.parseNextRequest());
+	BOOST_CHECK(!f.parser.parseNextRequest());
+	// ^^ At this point, we would normally stop reading the stream.
+
+	// Check that the next read fails with an exception.
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+}
+
+BOOST_AUTO_TEST_CASE(CqRibParser_EOF_immediate_stop_error)
+{
+	// Check that the RIB parser will stop reading immediately if a request is
+	// terminated incorrectly with an EOF.
+	MockHandlerFixture f(
+		"SimpleRequest \377\321"
+	);
+
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+	BOOST_CHECK(!f.parser.parseNextRequest());
+	// ^^ At this point, we would normally stop reading the stream.
+
+	// Check that the next read fails from reading the reserved byte
+	BOOST_CHECK_THROW(f.parser.parseNextRequest(), XqParseError);
+}
