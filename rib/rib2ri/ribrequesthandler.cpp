@@ -27,6 +27,8 @@
 
 #include <cstring>  // for strcpy
 
+#include <boost/shared_ptr.hpp>
+
 #include "ri.h"
 
 namespace Aqsis
@@ -53,7 +55,7 @@ class CqParamListHandler : public IqRibParamListHandler
 		// RI value pointer array
 		std::vector<RtPointer> m_values;
 		// Storage for vectors of strings
-		std::vector<std::vector<RtToken> > m_stringValues;
+		std::vector<boost::shared_ptr<std::vector<RtToken> > > m_stringValues;
 		// Number of vectors in the "P" array (length divided by 3)
 		TqInt m_countP;
 
@@ -113,8 +115,10 @@ class CqParamListHandler : public IqRibParamListHandler
 				case type_string:
 					{
 						const IqRibParser::TqStringArray& strings = parser.getStringParam();
-						m_stringValues.push_back(std::vector<RtToken>(strings.size(), 0));
-						std::vector<RtToken>& stringsDest = m_stringValues.back();
+						m_stringValues.push_back(
+								boost::shared_ptr<std::vector<RtToken> >(
+								new std::vector<RtToken>(strings.size(), 0)) );
+						std::vector<RtToken>& stringsDest = *m_stringValues.back();
 						for(TqInt i = 0, end = strings.size(); i < end; ++i)
 							stringsDest[i] = const_cast<RtToken>(strings[i].c_str());
 						m_values.push_back( reinterpret_cast<RtPointer>(&stringsDest[0]) );
@@ -136,6 +140,9 @@ class CqParamListHandler : public IqRibParamListHandler
 			TqInt numTokens = m_tokenStorage.size();
 			if(static_cast<TqInt>(m_tokens.size()) != numTokens)
 			{
+				// Copy token storage into a C-array.  We've got to do this
+				// here rather than in readParameter() since m_tokenStorage may
+				// suffer reallocation as the param list is constructed.
 				m_tokens.resize(numTokens, 0);
 				for(TqInt i = 0; i < numTokens; ++i)
 					m_tokens[i] = const_cast<RtToken>(m_tokenStorage[i].c_str());

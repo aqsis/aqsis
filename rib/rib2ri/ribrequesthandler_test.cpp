@@ -1116,6 +1116,21 @@ BOOST_AUTO_TEST_CASE(paramlist_string_array_value_test)
 	Insert(f.parser) << Req("Option") << "some_option_name"
 		<< "uniform string asdf" << IqRibParser::TqStringArray(10, "asdf_value");
 }
+BOOST_AUTO_TEST_CASE(extended_paramlist_test)
+{
+	SqRequestHandlerFixture f;
+	// Check that many mixed params work fine.
+	Insert(f.parser) << Req("Option") << "some_option_name"
+		<< "uniform int user_i" << IqRibParser::TqIntArray(1, 42)
+		<< "uniform float user_f" << IqRibParser::TqFloatArray(1, 2.5f)
+		<< "uniform vector user_v" << IqRibParser::TqFloatArray(3, 3.5f)
+		<< "uniform matrix user_m" << IqRibParser::TqFloatArray(16, 4.5f)
+		<< "uniform string s1" << IqRibParser::TqStringArray(1, "blah")
+		<< "uniform string s2" << IqRibParser::TqStringArray(1, "s2val")
+		<< "uniform string s3" << IqRibParser::TqStringArray(1, "s3val")
+		<< "uniform string s4" << IqRibParser::TqStringArray(1, "s4val");
+}
+
 BOOST_AUTO_TEST_CASE(invalid_paramlist_unknown_primvar)
 {
 	// Check that unknown primvar names throw.
@@ -1147,7 +1162,6 @@ BOOST_AUTO_TEST_CASE(invalid_paramlist_missing_token)
 		XqParseError
 	);
 }
-
 
 
 //==============================================================================
