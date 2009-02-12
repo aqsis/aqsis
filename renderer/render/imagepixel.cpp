@@ -551,31 +551,6 @@ void CqImagePixel::OffsetSamples( CqVector2D& vecPixel, std::vector<CqVector2D>&
 	}
 }
 
-std::deque<SqImageSample>&	CqImagePixel::Values( TqInt index )
-{
-    assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[ index ]->data );
-}
-
-SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
-{
-	assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[ index ]->opaqueSample );
-}
-
-
-SqSampleData const& CqImagePixel::SampleData( TqInt index ) const
-{
-	assert( index < m_XSamples*m_YSamples );
-	return ( *(m_samples[index]) );
-}
-
-SqSampleData& CqImagePixel::SampleData( TqInt index )
-{
-	assert( index < m_XSamples*m_YSamples );
-	return ( *(m_samples[index]) );
-}
-
 
 //---------------------------------------------------------------------
 

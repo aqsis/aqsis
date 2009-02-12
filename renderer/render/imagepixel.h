@@ -433,6 +433,31 @@ inline void CqImagePixel::ProjectToCircle(CqVector2D& pos)
 	pos.y(pos.y() * adj);
 }
 
+inline std::deque<SqImageSample>&	CqImagePixel::Values( TqInt index )
+{
+    assert( index < m_XSamples*m_YSamples );
+	return ( m_samples[ index ]->data );
+}
+
+inline SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
+{
+	assert( index < m_XSamples*m_YSamples );
+	return ( m_samples[ index ]->opaqueSample );
+}
+
+
+inline SqSampleData const& CqImagePixel::SampleData( TqInt index ) const
+{
+	assert( index < m_XSamples*m_YSamples );
+	return ( *(m_samples[index]) );
+}
+
+inline SqSampleData& CqImagePixel::SampleData( TqInt index )
+{
+	assert( index < m_XSamples*m_YSamples );
+	return ( *(m_samples[index]) );
+}
+
 //-----------------------------------------------------------------------
 
 } // namespace Aqsis
