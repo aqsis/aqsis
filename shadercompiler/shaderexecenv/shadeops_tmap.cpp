@@ -44,6 +44,7 @@
 #include	"itexturecache.h"
 #include	"itexturesampler.h"
 #include	"texfileheader.h"
+#include	"channellist.h"
 #include	"version.h"
 #include	"logging.h"
 

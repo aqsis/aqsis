@@ -610,7 +610,7 @@ BOOST_AUTO_TEST_CASE(RIB_version_test)
 
 
 //--------------------------------------------------
-RtToken RiDeclare(RtString name, RtString declaration)
+RI_SHARE RtToken RiDeclare(RtString name, RtString declaration)
 {
 	CheckParams() << Req("Declare") << name << declaration;
 	g_fixture->hasBeenChecked = true;
@@ -626,7 +626,7 @@ BOOST_AUTO_TEST_CASE(RiDeclare_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
+RI_SHARE RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 {
 	if(fstop == FLT_MAX)
 	{
@@ -653,7 +653,7 @@ BOOST_AUTO_TEST_CASE(RiDepthOfField_no_args_test)
 
 
 //--------------------------------------------------
-RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
+RI_SHARE RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
 {
 	CheckParams() << Req("ColorSamples")
 		<< IqRibParser::TqFloatArray(nRGB, nRGB + 3*N)
@@ -668,7 +668,7 @@ BOOST_AUTO_TEST_CASE(RiColorSamples_handler_test)
 
 
 //--------------------------------------------------
-RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+RI_SHARE RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("LightSource") << name << IgnoreParam()
 		<< ParamList(count, tokens, values);
@@ -689,7 +689,7 @@ BOOST_AUTO_TEST_CASE(RiLightSource_string_id_test)
 
 
 //--------------------------------------------------
-RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
+RI_SHARE RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
 {
 	CheckParams()
 		<< Req("Illuminate")
@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE(RiIlluminate_bad_string_handle_test)
 
 
 //--------------------------------------------------
-RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
+RI_SHARE RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 {
 	BOOST_CHECK_EQUAL(::RiBSplineBasis, ubasis);
 	TqFloat* vbStart = reinterpret_cast<TqFloat*>(vbasis);
@@ -742,7 +742,7 @@ BOOST_AUTO_TEST_CASE(RiBasis_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[],
+RI_SHARE RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[],
 		RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[],
 		RtInt intargs[], RtFloat floatargs[],
 		RtInt count, RtToken tokens[], RtPointer values[])
@@ -829,7 +829,7 @@ BOOST_AUTO_TEST_CASE(RiSubdivisionMesh_abbreviated_form_test)
 
 
 //--------------------------------------------------
-RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,
+RI_SHARE RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("Hyperboloid") << point1[0] << point1[1] << point1[2]
@@ -845,7 +845,7 @@ BOOST_AUTO_TEST_CASE(RiHyperboloidV_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
+RI_SHARE RtVoid RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
 {
 	// All the standard procedurals should have RiProcFree
 	BOOST_CHECK_EQUAL(freeproc, RiProcFree);
@@ -879,7 +879,7 @@ BOOST_AUTO_TEST_CASE(RiProcedural_unknown_procedural_test)
 
 
 //--------------------------------------------------
-RtObjectHandle RiObjectBegin()
+RI_SHARE RtObjectHandle RiObjectBegin()
 {
 	CheckParams() << Req("ObjectBegin");
 	return g_fixture->handleManager.insertHandle(g_fixture->parser.currParams()[1]);
@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE(RiObjectBegin_bad_float_id_test)
 
 
 //--------------------------------------------------
-RtVoid RiObjectInstance(RtObjectHandle handle)
+RI_SHARE RtVoid RiObjectInstance(RtObjectHandle handle)
 {
 	CheckParams() << Req("ObjectInstance")
 		<< g_fixture->handleManager.lookup(handle);
@@ -943,7 +943,7 @@ BOOST_AUTO_TEST_CASE(RiObjectInstance_undeclared_error_test)
 // request handler has to do something special or unusual.
 
 //--------------------------------------------------
-RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
+RI_SHARE RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("Sphere") << radius << zmin << zmax << thetamax
@@ -960,7 +960,7 @@ BOOST_AUTO_TEST_CASE(RiSphereV_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiColor(RtColor col)
+RI_SHARE RtVoid RiColor(RtColor col)
 {
 	CheckParams() << Req("Color") << col[0] << col[1] << col[2];
 }
@@ -972,7 +972,7 @@ BOOST_AUTO_TEST_CASE(RiColor_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
+RI_SHARE RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 {
 	BOOST_CHECK_EQUAL(function, RiSincFilter);
 	CheckParams() << Req("PixelFilter") << IgnoreParam() << xwidth << ywidth;
@@ -993,7 +993,7 @@ BOOST_AUTO_TEST_CASE(RiPixelFilter_bad_filter_name)
 
 
 //--------------------------------------------------
-RtVoid RiErrorHandler(RtErrorFunc handler)
+RI_SHARE RtVoid RiErrorHandler(RtErrorFunc handler)
 {
 	BOOST_CHECK_EQUAL(handler, RiErrorAbort);
 	CheckParams() << Req("ErrorHandler");
@@ -1014,7 +1014,7 @@ BOOST_AUTO_TEST_CASE(RiErrorFunc_bad_error_handler_name)
 
 
 //--------------------------------------------------
-RtVoid RiTransform(RtMatrix transform)
+RI_SHARE RtVoid RiTransform(RtMatrix transform)
 {
 	TqFloat* trans = reinterpret_cast<TqFloat*>(transform);
 	CheckParams() << Req("Transform")
@@ -1034,7 +1034,7 @@ BOOST_AUTO_TEST_CASE(RiTransform_handler_test)
 		<< IqRibParser::TqFloatArray(trans, trans+16);
 }
 
-RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[])
+RI_SHARE RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[])
 {
 	// This check will only work for the specific case below
 	BOOST_CHECK_EQUAL(npoints, 4);
@@ -1059,7 +1059,7 @@ BOOST_AUTO_TEST_CASE(RiPoints_missing_P_variable)
 
 
 //--------------------------------------------------
-RtVoid RiMotionBeginV(RtInt N, RtFloat times[])
+RI_SHARE RtVoid RiMotionBeginV(RtInt N, RtFloat times[])
 {
 	CheckParams() << Req("MotionBegin")
 		<< IqRibParser::TqFloatArray(times, times+N);
@@ -1074,7 +1074,7 @@ BOOST_AUTO_TEST_CASE(RiMotionBegin_handler_test)
 
 
 //--------------------------------------------------
-RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile,
+RI_SHARE RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile,
 		RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("MakeOcclusion")
@@ -1093,7 +1093,7 @@ BOOST_AUTO_TEST_CASE(RiMakeOcclusion_handler_test)
 //------------------------------------------------------------------------------
 // Test for parameter list handling, using RiOption as a proxy.
 //
-RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+RI_SHARE RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("Option") << name << ParamList(count, tokens, values);
 }
@@ -1168,35 +1168,35 @@ BOOST_AUTO_TEST_CASE(invalid_paramlist_missing_token)
 // Definitions of RI symbols
 
 // bases
-RtBasis RiBezierBasis =
+RI_SHARE RtBasis RiBezierBasis =
 {
 	{ -1,  3, -3, 1},
 	{  3, -6,  3, 0},
 	{ -3,  3,  0, 0},
 	{  1,  0,  0, 0}
 };
-RtBasis RiBSplineBasis =
+RI_SHARE RtBasis RiBSplineBasis =
 {
 	{ -1.0 / 6,  3.0 / 6, -3.0 / 6, 1.0 / 6},
 	{  3.0 / 6, -6.0 / 6,  3.0 / 6, 0.0 / 6},
 	{ -3.0 / 6,  0.0 / 6,  3.0 / 6, 0.0 / 6},
 	{  1.0 / 6,  4.0 / 6,  1.0 / 6, 0.0 / 6}
 };
-RtBasis RiCatmullRomBasis =
+RI_SHARE RtBasis RiCatmullRomBasis =
 {
 	{ -1.0 / 2,  3.0 / 2, -3.0 / 2,  1.0 / 2},
 	{  2.0 / 2, -5.0 / 2,  4.0 / 2, -1.0 / 2},
 	{ -1.0 / 2,  0.0 / 2,  1.0 / 2,  0.0 / 2},
 	{  0.0 / 2,  2.0 / 2,  0.0 / 2,  0.0 / 2}
 };
-RtBasis RiHermiteBasis =
+RI_SHARE RtBasis RiHermiteBasis =
 {
 	{  2,  1, -2,  1},
 	{ -3, -2,  3, -1},
 	{  0,  1,  0,  0},
 	{  1,  0,  0,  0}
 };
-RtBasis RiPowerBasis =
+RI_SHARE RtBasis RiPowerBasis =
 {
 	{ 1, 0, 0, 0},
 	{ 0, 1, 0, 0},
@@ -1209,132 +1209,132 @@ RtBasis RiPowerBasis =
 // Autogenerated via XSLT, with those functions actually used above commented out.
 
 //RtToken RiDeclare(RtString name, RtString declaration) {return 0;}
-RtVoid RiBegin(RtToken name) {}
-RtVoid RiEnd() {}
-RtContextHandle RiGetContext() {return 0;}
-RtVoid RiContext(RtContextHandle handle) {}
-RtVoid RiFrameBegin(RtInt number) {}
-RtVoid RiFrameEnd() {}
-RtVoid RiWorldBegin() {}
-RtVoid RiWorldEnd() {}
-RtVoid RiIfBegin(RtString condition) {}
-RtVoid RiElseIf(RtString condition) {}
-RtVoid RiElse() {}
-RtVoid RiIfEnd() {}
-RtVoid RiFormat(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio) {}
-RtVoid RiFrameAspectRatio(RtFloat frameratio) {}
-RtVoid RiScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top) {}
-RtVoid RiCropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax) {}
-RtVoid RiProjectionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiClipping(RtFloat cnear, RtFloat cfar) {}
-RtVoid RiClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz) {}
+RI_SHARE RtVoid RiBegin(RtToken name) {}
+RI_SHARE RtVoid RiEnd() {}
+RI_SHARE RtContextHandle RiGetContext() {return 0;}
+RI_SHARE RtVoid RiContext(RtContextHandle handle) {}
+RI_SHARE RtVoid RiFrameBegin(RtInt number) {}
+RI_SHARE RtVoid RiFrameEnd() {}
+RI_SHARE RtVoid RiWorldBegin() {}
+RI_SHARE RtVoid RiWorldEnd() {}
+RI_SHARE RtVoid RiIfBegin(RtString condition) {}
+RI_SHARE RtVoid RiElseIf(RtString condition) {}
+RI_SHARE RtVoid RiElse() {}
+RI_SHARE RtVoid RiIfEnd() {}
+RI_SHARE RtVoid RiFormat(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio) {}
+RI_SHARE RtVoid RiFrameAspectRatio(RtFloat frameratio) {}
+RI_SHARE RtVoid RiScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top) {}
+RI_SHARE RtVoid RiCropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax) {}
+RI_SHARE RtVoid RiProjectionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiClipping(RtFloat cnear, RtFloat cfar) {}
+RI_SHARE RtVoid RiClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz) {}
 //RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance) {}
-RtVoid RiShutter(RtFloat opentime, RtFloat closetime) {}
-RtVoid RiPixelVariance(RtFloat variance) {}
-RtVoid RiPixelSamples(RtFloat xsamples, RtFloat ysamples) {}
+RI_SHARE RtVoid RiShutter(RtFloat opentime, RtFloat closetime) {}
+RI_SHARE RtVoid RiPixelVariance(RtFloat variance) {}
+RI_SHARE RtVoid RiPixelSamples(RtFloat xsamples, RtFloat ysamples) {}
 //RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth) {}
-RtVoid RiExposure(RtFloat gain, RtFloat gamma) {}
-RtVoid RiImagerV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiQuantize(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude) {}
-RtVoid RiDisplayV(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiMitchellFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
-RtVoid RiHiderV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiExposure(RtFloat gain, RtFloat gamma) {}
+RI_SHARE RtVoid RiImagerV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiQuantize(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude) {}
+RI_SHARE RtVoid RiDisplayV(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiMitchellFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) {return 0;}
+RI_SHARE RtVoid RiHiderV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[]) {}
-RtVoid RiRelativeDetail(RtFloat relativedetail) {}
+RI_SHARE RtVoid RiRelativeDetail(RtFloat relativedetail) {}
 //RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiAttributeBegin() {}
-RtVoid RiAttributeEnd() {}
+RI_SHARE RtVoid RiAttributeBegin() {}
+RI_SHARE RtVoid RiAttributeEnd() {}
 //RtVoid RiColor(RtColor Cq) {}
-RtVoid RiOpacity(RtColor Os) {}
-RtVoid RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4) {}
+RI_SHARE RtVoid RiOpacity(RtColor Os) {}
+RI_SHARE RtVoid RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4) {}
 //RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
-RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
+RI_SHARE RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {return 0;}
 //RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff) {}
-RtVoid RiSurfaceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiDeformationV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiDisplacementV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiAtmosphereV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiInteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiExteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiShaderLayerV(RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiConnectShaderLayers(RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2) {}
-RtVoid RiShadingRate(RtFloat size) {}
-RtVoid RiShadingInterpolation(RtToken type) {}
-RtVoid RiMatte(RtBoolean onoff) {}
-RtVoid RiBound(RtBound bound) {}
-RtVoid RiDetail(RtBound bound) {}
-RtVoid RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) {}
-RtVoid RiGeometricApproximation(RtToken type, RtFloat value) {}
-RtVoid RiOrientation(RtToken orientation) {}
-RtVoid RiReverseOrientation() {}
-RtVoid RiSides(RtInt nsides) {}
-RtVoid RiIdentity() {}
+RI_SHARE RtVoid RiSurfaceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiDeformationV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiDisplacementV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiAtmosphereV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiInteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiExteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiShaderLayerV(RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiConnectShaderLayers(RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2) {}
+RI_SHARE RtVoid RiShadingRate(RtFloat size) {}
+RI_SHARE RtVoid RiShadingInterpolation(RtToken type) {}
+RI_SHARE RtVoid RiMatte(RtBoolean onoff) {}
+RI_SHARE RtVoid RiBound(RtBound bound) {}
+RI_SHARE RtVoid RiDetail(RtBound bound) {}
+RI_SHARE RtVoid RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) {}
+RI_SHARE RtVoid RiGeometricApproximation(RtToken type, RtFloat value) {}
+RI_SHARE RtVoid RiOrientation(RtToken orientation) {}
+RI_SHARE RtVoid RiReverseOrientation() {}
+RI_SHARE RtVoid RiSides(RtInt nsides) {}
+RI_SHARE RtVoid RiIdentity() {}
 //RtVoid RiTransform(RtMatrix transform) {}
-RtVoid RiConcatTransform(RtMatrix transform) {}
-RtVoid RiPerspective(RtFloat fov) {}
-RtVoid RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz) {}
-RtVoid RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz) {}
-RtVoid RiScale(RtFloat sx, RtFloat sy, RtFloat sz) {}
-RtVoid RiSkew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2) {}
-RtVoid RiCoordinateSystem(RtToken space) {}
-RtVoid RiCoordSysTransform(RtToken space) {}
-RtPoint* RiTransformPoints(RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[]) {return 0;}
-RtVoid RiTransformBegin() {}
-RtVoid RiTransformEnd() {}
-RtVoid RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiResourceBegin() {}
-RtVoid RiResourceEnd() {}
-RtVoid RiAttributeV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiPolygonV(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiGeneralPolygonV(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiPointsGeneralPolygonsV(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiConcatTransform(RtMatrix transform) {}
+RI_SHARE RtVoid RiPerspective(RtFloat fov) {}
+RI_SHARE RtVoid RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz) {}
+RI_SHARE RtVoid RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz) {}
+RI_SHARE RtVoid RiScale(RtFloat sx, RtFloat sy, RtFloat sz) {}
+RI_SHARE RtVoid RiSkew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2) {}
+RI_SHARE RtVoid RiCoordinateSystem(RtToken space) {}
+RI_SHARE RtVoid RiCoordSysTransform(RtToken space) {}
+RI_SHARE RtPoint* RiTransformPoints(RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[]) {return 0;}
+RI_SHARE RtVoid RiTransformBegin() {}
+RI_SHARE RtVoid RiTransformEnd() {}
+RI_SHARE RtVoid RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiResourceBegin() {}
+RI_SHARE RtVoid RiResourceEnd() {}
+RI_SHARE RtVoid RiAttributeV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiPolygonV(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiGeneralPolygonV(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiPointsGeneralPolygonsV(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep) {}
-RtVoid RiPatchV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[]) {}
+RI_SHARE RtVoid RiPatchV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[]) {}
 //RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiConeV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiCylinderV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiConeV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiCylinderV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiParaboloidV(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiParaboloidV(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc) {}
-RtVoid RiProcFree(RtPointer data) {}
-RtVoid RiProcDelayedReadArchive(RtPointer data, RtFloat detail) {}
-RtVoid RiProcRunProgram(RtPointer data, RtFloat detail) {}
-RtVoid RiProcDynamicLoad(RtPointer data, RtFloat detail) {}
-RtVoid RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiSolidBegin(RtToken type) {}
-RtVoid RiSolidEnd() {}
+RI_SHARE RtVoid RiProcFree(RtPointer data) {}
+RI_SHARE RtVoid RiProcDelayedReadArchive(RtPointer data, RtFloat detail) {}
+RI_SHARE RtVoid RiProcRunProgram(RtPointer data, RtFloat detail) {}
+RI_SHARE RtVoid RiProcDynamicLoad(RtPointer data, RtFloat detail) {}
+RI_SHARE RtVoid RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiSolidBegin(RtToken type) {}
+RI_SHARE RtVoid RiSolidEnd() {}
 //RtObjectHandle RiObjectBegin() {return 0;}
-RtVoid RiObjectEnd() {}
+RI_SHARE RtVoid RiObjectEnd() {}
 //RtVoid RiObjectInstance(RtObjectHandle handle) {}
-RtVoid RiMotionBegin(RtInt N,  ...) {}
+RI_SHARE RtVoid RiMotionBegin(RtInt N,  ...) {}
 //RtVoid RiMotionBeginV(RtInt N, RtFloat times[]) {}
-RtVoid RiMotionEnd() {}
-RtVoid RiMakeTextureV(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiMakeBumpV(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiMakeLatLongEnvironmentV(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiMakeCubeFaceEnvironmentV(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
-RtVoid RiMakeShadowV(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiMotionEnd() {}
+RI_SHARE RtVoid RiMakeTextureV(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiMakeBumpV(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiMakeLatLongEnvironmentV(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiMakeCubeFaceEnvironmentV(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiMakeShadowV(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) {}
 //RtVoid RiErrorHandler(RtErrorFunc handler) {}
-RtVoid RiErrorIgnore(RtInt code, RtInt severity, RtString message) {}
-RtVoid RiErrorPrint(RtInt code, RtInt severity, RtString message) {}
-RtVoid RiErrorAbort(RtInt code, RtInt severity, RtString message) {}
-RtVoid RiArchiveRecord(RtToken type, char * format,  ...) {}
-RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count, RtToken tokens[], RtPointer values[]) {}
+RI_SHARE RtVoid RiErrorIgnore(RtInt code, RtInt severity, RtString message) {}
+RI_SHARE RtVoid RiErrorPrint(RtInt code, RtInt severity, RtString message) {}
+RI_SHARE RtVoid RiErrorAbort(RtInt code, RtInt severity, RtString message) {}
+RI_SHARE RtVoid RiArchiveRecord(RtToken type, char * format,  ...) {}
+RI_SHARE RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count, RtToken tokens[], RtPointer values[]) {}

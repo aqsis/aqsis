@@ -32,6 +32,8 @@
 #include <iosfwd>
 #include <vector>
 
+#include <boost/format.hpp>
+
 #include "channelinfo.h"
 #include "texexception.h"
 
@@ -43,7 +45,7 @@ namespace Aqsis {
  * This class describes the structure of a pixel in hetrogenous images (ie,
  * images made up of possibly different types for each channel inside a pixel).
  */
-class AQSISTEX_SHARE CqChannelList
+class CqChannelList
 {
 	private:
 		/// The underlying container type holding the SqChannelInfo.
@@ -295,6 +297,149 @@ inline void CqChannelList::clear()
 	m_channels.clear();
 	recomputeByteOffsets();
 }
+
+inline CqChannelList CqChannelList::displayChannels()
+{
+    CqChannelList displayChannels;
+    displayChannels.addChannel(SqChannelInfo("r", Channel_Unsigned8));
+    displayChannels.addChannel(SqChannelInfo("g", Channel_Unsigned8));
+    displayChannels.addChannel(SqChannelInfo("b", Channel_Unsigned8));
+	return displayChannels;
+}
+
+inline bool CqChannelList::channelTypesMatch(const CqChannelList& other) const
+{
+	if(numChannels() != other.numChannels())
+		return false;
+	for(TqInt i = 0; i < numChannels(); ++i)
+	{
+		if(m_channels[i].type != other.m_channels[i].type)
+			return false;
+	}
+	return true;
+}
+
+inline void CqChannelList::addChannel(const SqChannelInfo& newChan)
+{
+	m_channels.push_back(newChan);
+	m_offsets.push_back(m_bytesPerPixel);
+	m_bytesPerPixel += newChan.bytesPerPixel();
+}
+
+inline EqChannelType CqChannelList::sharedChannelType() const
+{
+	if(m_channels.empty())
+		return Channel_TypeUnknown;
+	EqChannelType sharedType = m_channels[0].type;
+	for(TqListType::const_iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+	{
+		if(channel->type != sharedType)
+			return Channel_TypeUnknown;
+	}
+	return sharedType;
+}
+
+/// Predicate: true if chInfo has the given name.
+inline bool chanHasName(const SqChannelInfo& chInfo, const TqChar* name)
+{
+	return chInfo.name == name;
+}
+
+inline void CqChannelList::reorderChannels()
+{
+	const TqChar* desiredNames[] = { "r", "g", "b", "a" };
+	TqInt numNames = sizeof(desiredNames) / sizeof(desiredNames[0]);
+	TqInt numChans = m_channels.size();
+	// Return if channels are already in the correct order.
+	if(numChans <= 1 || std::equal(m_channels.begin(), m_channels.begin()
+			+ std::min(numNames, numChans), desiredNames, chanHasName) )
+		return;
+
+	// Reorder the channels
+	TqListType oldChannels;
+	m_channels.swap(oldChannels);
+	// Put any of the standard channels from "desiredNames" in the correct
+	// order at the beginning of the channel list.
+	for(TqInt j = 0; j < numNames; ++j)
+	{
+		for(TqListType::iterator i = oldChannels.begin(); i != oldChannels.end(); ++i)
+		{
+			if(i->name == desiredNames[j])
+			{
+				m_channels.push_back(*i);
+				oldChannels.erase(i);
+				break;
+			}
+		}
+	}
+	// Add the remaining channels back into the 
+	std::copy(oldChannels.begin(), oldChannels.end(), std::back_inserter(m_channels));
+	recomputeByteOffsets();
+}
+
+inline void CqChannelList::addUnnamedChannels(EqChannelType chanType, TqInt numToAdd)
+{
+	for(TqInt i = 1; i <= numToAdd; ++i)
+		addChannel( SqChannelInfo((boost::format("?%02d") % i).str(), chanType) );
+}
+
+inline TqInt CqChannelList::findChannelIndexImpl(const std::string& name) const
+{
+	TqInt index = 0;
+	TqListType::const_iterator ichan = m_channels.begin();
+	while(ichan != m_channels.end() && ichan->name != name)
+	{
+		++ichan;
+		++index;
+	}
+	if(ichan == m_channels.end())
+		return -1;
+	return index;
+}
+
+inline void CqChannelList::recomputeByteOffsets()
+{
+	m_offsets.clear();
+	TqInt offset = 0;
+	for(TqListType::const_iterator chInfo = m_channels.begin();
+			chInfo != m_channels.end(); ++chInfo)
+	{
+		m_offsets.push_back(offset);
+		offset += chInfo->bytesPerPixel();
+	}
+	m_bytesPerPixel = offset;
+}
+
+//------------------------------------------------------------------------------
+// Free functions
+inline std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList)
+{
+	EqChannelType sharedChanType = channelList.sharedChannelType();
+	if(sharedChanType != Channel_TypeUnknown)
+	{
+		out << "(";
+		for(CqChannelList::const_iterator chan = channelList.begin(), end = channelList.end();
+							chan != end; ++chan)
+		{
+			out << chan->name;
+			if(chan+1 != end)
+				out << ",";
+		}
+		out << ")-" << sharedChanType;
+	}
+	else
+	{
+		for(CqChannelList::const_iterator chan = channelList.begin(), end = channelList.end();
+							chan != end; ++chan)
+		{
+			out << *chan;
+			if(chan+1 != end)
+				out << ",";
+		}
+	}
+	return out;
+}
+
 
 } // namespace Aqsis
 

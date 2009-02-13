@@ -2,7 +2,7 @@ PROJECT(AQSISTEX)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/interfaces)
 INCLUDE_DIRECTORIES(
-	${AQSIS_BOOST_INCLUDE_DIR}
+	${Boost_INCLUDE_DIR}
 	${AQSIS_TIFF_INCLUDE_DIR}
 	)
 IF(AQSIS_USE_OPENEXR)
@@ -16,7 +16,6 @@ INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 # Source files
 SET(AQSISTEX_SRCS
 	bake.cpp
-	channellist.cpp
 	dummyenvironmentsampler.cpp
 	dummytexturesampler.cpp
 	ewafilter.cpp

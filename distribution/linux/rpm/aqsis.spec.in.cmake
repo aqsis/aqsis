@@ -113,9 +113,9 @@ export CXXFLAGS=$RPM_OPT_FLAGS
 mkdir build
 cd build
 %if 0%{?suse_version} <= 1030
-cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DSYSCONFDIR="%{_sysconfdir}/%{name}" -DDEFAULT_DISPLAYPATH="%{_libdir}/%{name}" -DAQSIS_BOOST_FILESYSTEM_LIBRARY_NAME=boost_filesystem -DAQSIS_BOOST_REGEX_LIBRARY_NAME=boost_regex -DAQSIS_BOOST_THREAD_LIBRARY_NAME=boost_thread-mt -DAQSIS_BOOST_WAVE_LIBRARY_NAME=boost_wave ../
+cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DSYSCONFDIR="%{_sysconfdir}/%{name}" -DDEFAULT_DISPLAYPATH="%{_libdir}/%{name}" ../
 %else
-cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DSYSCONFDIR="%{_sysconfdir}/%{name}" -DDEFAULT_DISPLAYPATH="%{_libdir}/%{name}" -DAQSIS_BOOST_FILESYSTEM_LIBRARY_NAME=boost_filesystem-mt -DAQSIS_BOOST_REGEX_LIBRARY_NAME=boost_regex-mt -DAQSIS_BOOST_THREAD_LIBRARY_NAME=boost_thread-mt -DAQSIS_BOOST_WAVE_LIBRARY_NAME=boost_wave-mt ../
+cmake -DCMAKE_INSTALL_PREFIX="%{_prefix}" -DLIBDIR="%{_libdir}" -DSYSCONFDIR="%{_sysconfdir}/%{name}" -DDEFAULT_DISPLAYPATH="%{_libdir}/%{name}" ../
 %endif
 make %{?_smp_mflags}
 
