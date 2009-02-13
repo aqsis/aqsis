@@ -1,13 +1,6 @@
 PROJECT(aqsis_all)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
-
-# Make cmake versions newer than 2.4 behave like 2.4
-# remove these when upgrading to cmake 2.6
-IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER "2.4")
-	cmake_policy(SET CMP0003 OLD)
-	cmake_policy(SET CMP0005 OLD)
-ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER "2.4")
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # Set some variables used within various resources, including installer scripts.
 SET(AQSIS_PROJECT_NAME "Aqsis Renderer")
@@ -68,7 +61,7 @@ MARK_AS_ADVANCED(AQSIS_MAIN_CONFIG_NAME)
 INCLUDE(FindTIFF)
 INCLUDE(FindZLIB)
 SET(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install")
-SET(Boost_ADDITIONAL_VERSIONS "1.37.0" "1.38.0")
+SET(Boost_ADDITIONAL_VERSIONS "1.38.0" "1.38" "1.37.0" "1.37")
 FIND_PACKAGE(Boost 1.34.1 COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
 
 # Find optional libs
