@@ -40,6 +40,7 @@
 #include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
+#include	"pool.h"
 
 // Forward declare SqSampleData for the purposes of the
 // boost::intrusive_ptr functionality.
@@ -145,6 +146,21 @@ struct SqSampleData
 	TqFloat		detailLevel;		///< Float level-of-detail sample.
 	std::deque<SqImageSample>	data;	///< Array of sampled surface data for this sample.
 	SqImageSample opaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
+	/** Overridden operator new to allocate micropolys from a pool.
+	 * \todo Review: Unused parameter size
+	 */
+	void* operator new( size_t size )
+	{
+		return( m_thePool.alloc() );
+	}
+
+	/** Overridden operator delete to allocate micropolys from a pool.
+	 */
+	void operator delete( void* p )
+	{
+		m_thePool.free( reinterpret_cast<SqSampleData*>(p) );
+	}
+	static	CqObjectPool<SqSampleData> m_thePool;
 
 	int			references;		///< Reference count for boost::intrusive_ptr
 	/// boost::intrusive_ptr required function, to increment the reference count.

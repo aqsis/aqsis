@@ -45,6 +45,8 @@ namespace Aqsis {
 /// CqSampleDataPool	SqImageSample::m_theSamplePool;
 TqUint SqImageSample::sampleSize(9);
 
+CqObjectPool<SqSampleData> SqSampleData::m_thePool;
+
 //----------------------------------------------------------------------
 /** Constructor
  */
