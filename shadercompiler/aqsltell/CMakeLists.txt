@@ -8,7 +8,7 @@ INCLUDE(${ARGPARSE_SOURCE_DIR}/export.cmake)
 INCLUDE(${SLXARGS_SOURCE_DIR}/export.cmake)
 INCLUDE(${AQSISTEX_SOURCE_DIR}/export.cmake)
 
-ADD_DEFINITIONS(-DDEFAULT_SHADER_PATH="/usr/local/aqsis/share/shaders")
+ADD_DEFINITIONS(-DDEFAULT_SHADER_PATH=/usr/local/aqsis/share/shaders)
 
 ADD_EXECUTABLE(aqsltell ${AQSLTELL_SRCS} ${AQSLTELL_HDRS} ${INFORES_SRCS})
 

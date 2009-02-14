@@ -179,7 +179,7 @@ ENDIF(AQSIS_USE_RPATH)
 # Define macros which enable compile-time features
 #-------------------------------------------------
 
-ADD_DEFINITIONS(-DAQSIS_MAIN_CONFIG_NAME="${AQSIS_MAIN_CONFIG_NAME}")
+ADD_DEFINITIONS(-DAQSIS_MAIN_CONFIG_NAME=${AQSIS_MAIN_CONFIG_NAME})
 
 
 #-------------------------------------------------------------------------------
@@ -285,9 +285,6 @@ SET(DISPLAYPATH "${DISPLAYPATH}" CACHE STRING "Aqsis display searchpath")
 SET(PROCEDURALPATH "${PROCEDURALPATH}" CACHE STRING "Aqsis procedural searchpath")
 SET(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
 CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
-ADD_CUSTOM_TARGET(aqsisrc ALL echo
-	DEPENDS  ${PROJECT_BINARY_DIR}/aqsisrc
-	)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
 
