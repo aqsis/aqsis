@@ -389,3 +389,38 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_streamstack_test)
 	lex.popInput();
 	CHECK_EOF(lex);
 }
+
+struct MockCommentCallback
+{
+	std::string str;
+	void operator()(const std::string& comment)
+	{
+		str = comment;
+	}
+};
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_comment_callback_test)
+{
+	CqRibLexer lex;
+	CHECK_EOF(lex);
+
+	std::istringstream in1("Stream1Start ##some RIB structure comment here\n Stream1End");
+	MockCommentCallback comment1;
+	lex.pushInput(in1, "stream1", boost::ref(comment1));
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream1Start"));
+
+	std::istringstream in2("#A second comment\n  Stream2Start");
+	MockCommentCallback comment2;
+	lex.pushInput(in2, "stream2", boost::ref(comment2));
+
+	BOOST_CHECK_EQUAL(comment2.str, "");
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream2Start"));
+	BOOST_CHECK_EQUAL(comment2.str, "A second comment");
+	CHECK_EOF(lex);
+
+	lex.popInput();
+	BOOST_CHECK_EQUAL(comment1.str, "");
+	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream1End"));
+	BOOST_CHECK_EQUAL(comment1.str, "#some RIB structure comment here");
+	CHECK_EOF(lex);
+}

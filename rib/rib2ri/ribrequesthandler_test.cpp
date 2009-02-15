@@ -301,7 +301,8 @@ class CqMockParser : public IqRibParser
 			return false;
 		}
 
-		virtual void pushInput(std::istream& inStream, const std::string& name) {}
+		virtual void pushInput(std::istream& inStream, const std::string& name,
+				const TqCommentCallback& callback) {}
 		virtual void popInput() {}
 
 		virtual TqInt getInt()

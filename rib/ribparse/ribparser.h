@@ -59,7 +59,8 @@ class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyabl
 		virtual bool parseNextRequest();
 
 		// stream stack management
-		virtual void pushInput(std::istream& inStream, const std::string& streamName);
+		virtual void pushInput(std::istream& inStream, const std::string& streamName,
+				const TqCommentCallback& callback = TqCommentCallback());
 		virtual void popInput();
 
 		// Callbacks for request required parameters.

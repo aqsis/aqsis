@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 #include "ribparse_share.h"
 
@@ -102,6 +103,9 @@ class RIBPARSE_SHARE IqRibParser
 		/// RIB string array type
 		typedef std::vector<std::string> TqStringArray;
 
+		/// Callback function type for passing comments.
+		typedef boost::function<void (const std::string&)> TqCommentCallback;
+
 		/// RIB token types used by the peekNextType() function
 		enum EqRibToken
 		{
@@ -124,7 +128,6 @@ class RIBPARSE_SHARE IqRibParser
 		static boost::shared_ptr<IqRibParser> create(
 				const boost::shared_ptr<IqRibRequestHandler>& handler);
 
-
 		//--------------------------------------------------
 		/** \brief Parse the next RIB request
 		 *
@@ -136,20 +139,36 @@ class RIBPARSE_SHARE IqRibParser
 		 */
 		virtual bool parseNextRequest() = 0;
 
-
 		//--------------------------------------------------
 		/// \name Stream stack management
 		//@{
 		/** \brief Push a stream onto the input stack
 		 *
+		 * The stream will remain as the current input stream until a
+		 * corresponding call to popInput() is encountered.
+		 *
 		 * Note that the stream should be opened in binary mode so that no
 		 * translation of newline characters is performed.  If not, any binary
 		 * encoded RIB will be read incorrectly.
 		 *
+		 * According to the RISpec, it's possible to install a callback
+		 * function to perform a custom action when the parser encounters a
+		 * comment (see the section describing RiReadArchive).  The comment
+		 * callback function is called immediately whenever a comment is
+		 * encountered in the RIB stream.  The argument to the callback is the
+		 * comment string from one character after the leading # up to and not
+		 * including the next end of line character.
+		 *
 		 * \param inStream - stream from which RIB will be read
 		 * \param streamName - name of the input stream
+		 * \param commentCallback - callback function for handling comments in
+		 *                          the RIB stream.  Defaults to an empty
+		 *                          callback which corresponds to discarding
+		 *                          all comments.
 		 */
-		virtual void pushInput(std::istream& inStream, const std::string& streamName) = 0;
+		virtual void pushInput(std::istream& inStream,
+				const std::string& streamName,
+				const TqCommentCallback& callback = TqCommentCallback()) = 0;
 		/** \brief Pop a stream off the input stack
 		 *
 		 * If the stream is the last on the input stack, the parser reverts to
@@ -157,7 +176,6 @@ class RIBPARSE_SHARE IqRibParser
 		 */
 		virtual void popInput() = 0;
 		//@}
-
 
 		//--------------------------------------------------
 		/// \name Callbacks for request parameter parsing.
@@ -232,7 +250,6 @@ class RIBPARSE_SHARE IqRibParser
 		 */
 		virtual EqRibToken peekNextType() = 0;
 		//@}
-
 
 		//--------------------------------------------------
 		/// \name Callbacks used by IqRibParamListHandler in parameter list parsing.

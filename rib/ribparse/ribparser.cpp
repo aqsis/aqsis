@@ -88,9 +88,10 @@ bool CqRibParser::parseNextRequest()
 	return true;
 }
 
-void CqRibParser::pushInput(std::istream& inStream, const std::string& streamName)
+void CqRibParser::pushInput(std::istream& inStream, const std::string& streamName,
+		const TqCommentCallback& callback)
 {
-	m_lex.pushInput(inStream, streamName);
+	m_lex.pushInput(inStream, streamName, callback);
 }
 
 void CqRibParser::popInput()

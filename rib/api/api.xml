@@ -215,7 +215,6 @@
 			</C>
 			<Rib>
 				<Type>RtArchiveCallback</Type>
-				<Value>0</Value>
 			</Rib>
 		</Type>
 		<Type>
@@ -3744,7 +3743,7 @@
 				<Argument>
 					<Name>callback</Name>
 					<Type>RtArchiveCallback</Type>
-					<RibValue>0</RibValue>
+					<RibValue>RiArchiveRecord</RibValue>
 				</Argument>
 				<ParamList/>
 			</Arguments>

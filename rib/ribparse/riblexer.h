@@ -35,6 +35,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "iribparser.h" // for TqCommentCallback
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
 #include "ribparse_share.h"
@@ -73,6 +74,9 @@ std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos);
 class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:
+		/// Comment callback function type
+		typedef IqRibParser::TqCommentCallback TqCommentCallback;
+
 		/** Create a new lexer without input stream.
 		 *
 		 * get() operations will return ENDOFFILE tokens until pushInput() is
@@ -87,8 +91,11 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		 *
 		 * \param inStream - new stream from which RIB will be read.
 		 * \param streamName - Name of the stream, used for error messages.
+		 * \param callback - Callback function used when the lexer encounters a
+		 *                   comment token.
 		 */
-		void pushInput(std::istream& inStream, const std::string& streamName);
+		void pushInput(std::istream& inStream, const std::string& streamName,
+				const TqCommentCallback& callback = TqCommentCallback());
 		/** \brief Pop a stream off the input stack
 		 *
 		 * If the stream is the last on the input stack, the lexer reverts to
@@ -115,6 +122,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		SqSourceFilePos pos() const;
 
 	private:
+		typedef std::map<TqInt, std::string> TqEncodedStringMap;
 		struct SqInputState;
 
 		//--------------------------------------------------
@@ -123,7 +131,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		static CqRibToken readNumber(CqRibInputBuffer& inBuf);
 		static CqRibToken readString(CqRibInputBuffer& inBuf);
 		static CqRibToken readRequest(CqRibInputBuffer& inBuf);
-		static void readComment(CqRibInputBuffer& inBuf);
+		void readComment(CqRibInputBuffer& inBuf);
 		//@}
 
 		//--------------------------------------------------
@@ -159,10 +167,12 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		/// flag indicating whether we've already got the next token.
 		bool m_haveNext;
 
+		/// Pointer to callback function for handling comments
+		TqCommentCallback m_commentCallback;
+
 		/// Array of encoded requests for binary RIB decoding
 		std::vector<std::string> m_encodedRequests;
 		/// Map of encoded strings for binary RIB decoding
-		typedef std::map<TqInt, std::string> TqEncodedStringMap;
 		TqEncodedStringMap m_encodedStrings;
 
 		/// Number of array elements remaining in current encoded float array.

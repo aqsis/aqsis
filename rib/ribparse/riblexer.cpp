@@ -47,15 +47,18 @@ struct CqRibLexer::SqInputState
 	SqSourcePos nextPos;
 	CqRibToken nextTok;
 	bool haveNext;
+	TqCommentCallback commentCallback;
 
 	SqInputState(std::istream& inStream, const std::string& streamName,
 			const SqSourcePos& currPos, const SqSourcePos& nextPos,
-			const CqRibToken& nextTok, bool haveNext)
+			const CqRibToken& nextTok, bool haveNext,
+			const TqCommentCallback& callback)
 		: inBuf(inStream, streamName),
 		currPos(currPos),
 		nextPos(nextPos),
 		nextTok(nextTok),
-		haveNext(haveNext)
+		haveNext(haveNext),
+		commentCallback(callback)
 	{ }
 };
 
@@ -69,20 +72,23 @@ CqRibLexer::CqRibLexer()
 	m_nextPos(1,1),
 	m_nextTok(),
 	m_haveNext(false),
+	m_commentCallback(),
 	m_encodedRequests(256),
 	m_encodedStrings(),
 	m_arrayElementsRemaining(-1)
 { }
 
-void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName)
+void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName,
+		const TqCommentCallback& callback)
 {
 	m_inputStack.push( boost::shared_ptr<SqInputState>(
 				new SqInputState(inStream, streamName, m_currPos, m_nextPos,
-					m_nextTok, m_haveNext)) );
+					m_nextTok, m_haveNext, m_commentCallback)) );
 	m_inBuf = &m_inputStack.top()->inBuf;
 	m_currPos = SqSourcePos(1,1);
 	m_nextPos = SqSourcePos(1,1);
 	m_haveNext = false;
+	m_commentCallback = callback;
 }
 
 void CqRibLexer::popInput()
@@ -94,6 +100,7 @@ void CqRibLexer::popInput()
 	m_nextPos = restoreState.nextPos;
 	m_nextTok = restoreState.nextTok;
 	m_haveNext = restoreState.haveNext;
+	m_commentCallback = restoreState.commentCallback;
 	// Pop the stack, and restore the buffer
 	m_inputStack.pop();
 	if(!m_inputStack.empty())
@@ -540,8 +547,21 @@ CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
 void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 {
 	CqRibInputBuffer::TqOutputType c = inBuf.get();
-	while(c != EOF && c != '\n' && c != '\r')
-		c = inBuf.get();
+	if(m_commentCallback)
+	{
+		std::string comment;
+		while(c != EOF && c != '\n' && c != '\r')
+		{
+			comment += c;
+			c = inBuf.get();
+		}
+		m_commentCallback(comment);
+	}
+	else
+	{
+		while(c != EOF && c != '\n' && c != '\r')
+			c = inBuf.get();
+	}
 	inBuf.unget();
 }
 
