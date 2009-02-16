@@ -262,8 +262,8 @@ class CqMockParser : public IqRibParser
 		void discardIgnoreToks()
 		{
 			// discard any empty tokens.
-			while(m_params[m_tokenPos].type() == Type_Ignore
-					&& m_tokenPos < static_cast<TqInt>(m_params.size()))
+			while(m_tokenPos < static_cast<TqInt>(m_params.size())
+					&& m_params[m_tokenPos].type() == Type_Ignore)
 			{
 				++m_tokenPos;
 			}
