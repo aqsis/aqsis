@@ -22,6 +22,12 @@
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
+#include "aqsis.h"
+
+#ifndef	AQSIS_SYSTEM_WIN32
+#define BOOST_TEST_DYN_LINK
+#endif //AQSIS_SYSTEM_WIN32
+
 #include <sstream>
 #include <cctype>
 
@@ -33,6 +39,7 @@
 #include "ribparser.h"
 #include "smartptr.h"
 #include "primvartoken.h"
+
 
 using namespace Aqsis;
 

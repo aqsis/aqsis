@@ -40,7 +40,7 @@
 
 namespace Aqsis {
 
-class CqNoise1234
+class COMMON_SHARE CqNoise1234
 {
 
 	public:

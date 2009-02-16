@@ -28,6 +28,7 @@
 #define SAMPLEQUAD_H_INCLUDED
 
 #include "aqsismath.h"
+#include "matrix.h"
 #include "vector2d.h"
 #include "vector3d.h"
 #include "vectorcast.h"
@@ -296,6 +297,35 @@ inline void Sq3DSampleQuad::copy2DCoords(const SqSampleQuad& toCopy)
 	v4.y(toCopy.v4.y());
 }
 
+inline void SqSampleQuad::scaleWidth(TqFloat xWidth, TqFloat yWidth)
+{
+	if(xWidth != 1 || yWidth != 1)
+	{
+		CqVector2D c = center();
+		TqFloat cxWeighted = (1 - xWidth)*c.x();
+		TqFloat cyWeighted = (1 - yWidth)*c.y();
+		// Expand v1...v4 away from the quad center by multiplying the x
+		// and y components of the vectors which point from the quad center to
+		// the vertices by the x and y widths respectively.
+		v1.x(xWidth*v1.x() + cxWeighted);
+		v1.y(yWidth*v1.y() + cyWeighted);
+		v2.x(xWidth*v2.x() + cxWeighted);
+		v2.y(yWidth*v2.y() + cyWeighted);
+		v3.x(xWidth*v3.x() + cxWeighted);
+		v3.y(yWidth*v3.y() + cyWeighted);
+		v4.x(xWidth*v4.x() + cxWeighted);
+		v4.y(yWidth*v4.y() + cyWeighted);
+	}
+}
+
+
+inline void Sq3DSampleQuad::transform(const CqMatrix& mat)
+{
+	v1 = mat*v1;
+	v2 = mat*v2;
+	v3 = mat*v3;
+	v4 = mat*v4;
+}
 
 //------------------------------------------------------------------------------
 // SqSamplePllgram implementation
@@ -350,6 +380,7 @@ inline Sq3DSamplePllgram::Sq3DSamplePllgram(const Sq3DSampleQuad& quad)
 	s1(0.5*(quad.v2 - quad.v1 + quad.v4 - quad.v3)),
 	s2(0.5*(quad.v1 - quad.v3 + quad.v2 - quad.v4))
 { }
+
 
 //------------------------------------------------------------------------------
 

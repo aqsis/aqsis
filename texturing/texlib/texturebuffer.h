@@ -48,7 +48,7 @@ namespace Aqsis {
  * are all the same.
  */
 template<typename T>
-class AQSISTEX_SHARE CqTextureBuffer
+class CqTextureBuffer
 {
 	public:
 		/// Pixel iterator class

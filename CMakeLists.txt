@@ -61,8 +61,13 @@ MARK_AS_ADVANCED(AQSIS_MAIN_CONFIG_NAME)
 INCLUDE(FindTIFF)
 INCLUDE(FindZLIB)
 SET(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install")
+IF(WIN32)
+	SET(Boost_USE_STATIC_LIBS ON)
+ENDIF(WIN32)
 SET(Boost_ADDITIONAL_VERSIONS "1.38.0" "1.38" "1.37.0" "1.37")
 FIND_PACKAGE(Boost 1.34.1 COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # Find optional libs
 

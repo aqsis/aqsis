@@ -32,7 +32,6 @@ SET(AQSISTEX_SRCS
 	maketexture.cpp
 	occlusionsampler.cpp
 	randomtable.cpp
-	samplequad.cpp
 	shadowsampler.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
@@ -108,10 +107,14 @@ ENDIF(AQSIS_USE_OPENEXR)
 IF(AQSIS_USE_OPENEXR)
 	ADD_DEFINITIONS(-DUSE_OPENEXR)
 ENDIF(AQSIS_USE_OPENEXR)
-ADD_DEFINITIONS(-DAQSISTEX_EXPORTS)
 
 # Add the library
 ADD_LIBRARY(aqsistex SHARED ${AQSISTEX_SRCS} ${AQSISTEX_HDRS} ${INFORES_SRCS})
+
+# Add the export definition using target properties to 
+# avoid it propagating down to the test targets.
+SET_TARGET_PROPERTIES(aqsistex PROPERTIES COMPILE_DEFINITIONS AQSISTEX_EXPORTS)
+
 
 # Libraries to link in to aqsistex
 SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES}

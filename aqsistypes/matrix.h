@@ -374,7 +374,7 @@ COMMON_SHARE CqVector4D operator*( const CqVector4D &vec, const CqMatrix& matrix
  * \param m2 - matrices to compare
  * \param tolerance - for comparison
  */
-bool isClose(const CqMatrix& m1, const CqMatrix& m2,
+COMMON_SHARE bool isClose(const CqMatrix& m1, const CqMatrix& m2,
 		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
 

@@ -71,7 +71,8 @@ aqsis_add_tests(${RIB2RI_TEST_SRCS}
 	LINKWITH ${LINKLIBS}
 	EXTRASOURCE ${RIB2RI_SRCS}
 )
-
+# Set the exports necessary to avoid incorrect linkage errors.
+SET_PROPERTY(TARGET ribrequesthandler_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
 
 if(AQSIS_ENABLE_TESTING)
 	# Speed test for parser and request handler
@@ -82,5 +83,7 @@ if(AQSIS_ENABLE_TESTING)
 	target_link_libraries(parser_speed_test
 		${LINKLIBS}
 		)
+	# Set the exports necessary to avoid incorrect linkage errors.
+	SET_PROPERTY(TARGET parser_speed_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
 endif(AQSIS_ENABLE_TESTING)
 

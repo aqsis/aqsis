@@ -25,6 +25,10 @@
 
 #include "matrix2d.h"
 
+#ifndef	AQSIS_SYSTEM_WIN32
+#define BOOST_TEST_DYN_LINK
+#endif //AQSIS_SYSTEM_WIN32
+
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -57,8 +61,8 @@ BOOST_AUTO_TEST_CASE(SqMatrix2D_eigenvalue_test)
 
 	A = Aqsis::SqMatrix2D(1,1, 1,2);
 	A.eigenvalues(l1,l2);
-	BOOST_CHECK_CLOSE(l1, TqFloat((3+std::sqrt(5))/2), closeEps);
-	BOOST_CHECK_CLOSE(l2, TqFloat((3-std::sqrt(5))/2), closeEps);
+	BOOST_CHECK_CLOSE(l1, TqFloat((3+std::sqrt(5.0f))/2), closeEps);
+	BOOST_CHECK_CLOSE(l2, TqFloat((3-std::sqrt(5.0f))/2), closeEps);
 }
 
 BOOST_AUTO_TEST_CASE(SqMatrix2D_orthogDiagonalize_test)
@@ -81,8 +85,8 @@ BOOST_AUTO_TEST_CASE(SqMatrix2D_orthogDiagonalize_test)
 		A.eigenvalues(l1,l2);
 		Aqsis::SqMatrix2D R = A.orthogDiagonalize(l1,l2);
 		Aqsis::SqMatrix2D D = R.transpose()*A*R;
-		BOOST_CHECK_CLOSE(D.a, TqFloat((3+std::sqrt(5))/2), closeEps);
-		BOOST_CHECK_CLOSE(D.d, TqFloat((3-std::sqrt(5))/2), closeEps);
+		BOOST_CHECK_CLOSE(D.a, TqFloat((3+std::sqrt(5.0f))/2), closeEps);
+		BOOST_CHECK_CLOSE(D.d, TqFloat((3-std::sqrt(5.0f))/2), closeEps);
 		BOOST_CHECK_SMALL(D.b, closeEps);
 		BOOST_CHECK_SMALL(D.c, closeEps);
 	}

@@ -25,6 +25,10 @@
 
 #include "texfileheader.h"
 
+#ifndef	AQSIS_SYSTEM_WIN32
+#define BOOST_TEST_DYN_LINK
+#endif //AQSIS_SYSTEM_WIN32
+
 #include <boost/test/auto_unit_test.hpp>
 
 // tag types for header testing

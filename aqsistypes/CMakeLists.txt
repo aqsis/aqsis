@@ -52,9 +52,11 @@ INCLUDE(${PROJECT_SOURCE_DIR}/export.cmake)
 # Group header files for Visual Studio
 SOURCE_GROUP("Header files" FILES ${AQSISTYPES_HDRS})
 
-ADD_DEFINITIONS(-DCOMMON_EXPORTS)
-
 ADD_LIBRARY(aqsistypes SHARED ${AQSISTYPES_SRCS} ${AQSISTYPES_HDRS} ${INFORES_SRCS})
+
+# Add the export definition using target properties to 
+# avoid it propagating down to the test targets.
+SET_TARGET_PROPERTIES(aqsistypes PROPERTIES COMPILE_DEFINITIONS COMMON_EXPORTS)
 
 GET_TARGET_PROPERTY(AQSISTYPES_LIBRARY aqsistypes LOCATION)
 
