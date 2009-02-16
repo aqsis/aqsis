@@ -62,19 +62,18 @@ include(${RIBPARSE_SOURCE_DIR}/link.cmake)
 #--------------------------------------------------
 # Unit tests
 
-
-set(RIB2RI_TEST_SRCS
-	ribrequesthandler_test.cpp
-)
-
-aqsis_add_tests(${RIB2RI_TEST_SRCS}
-	LINKWITH ${LINKLIBS}
-	EXTRASOURCE ${RIB2RI_SRCS}
-)
-# Set the exports necessary to avoid incorrect linkage errors.
-SET_PROPERTY(TARGET ribrequesthandler_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
-
 if(AQSIS_ENABLE_TESTING)
+	set(RIB2RI_TEST_SRCS
+		ribrequesthandler_test.cpp
+	)
+
+	aqsis_add_tests(${RIB2RI_TEST_SRCS}
+		LINKWITH ${LINKLIBS}
+		EXTRASOURCE ${RIB2RI_SRCS}
+	)
+	# Set the exports necessary to avoid incorrect linkage errors.
+	set_property(TARGET ribrequesthandler_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
+
 	# Speed test for parser and request handler
 	add_executable(parser_speed_test
 		parser_speed_test.cpp
