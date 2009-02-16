@@ -43,6 +43,9 @@
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
+#include	"iribparser.h"
+#include	"ribrequesthandler.h"
+
 
 namespace Aqsis {
 
@@ -71,35 +74,53 @@ static CqMatrix oldresult[2];
 /** Default constructor for the main renderer class. Initialises current state.
  */
 
-CqRenderer::CqRenderer() :
-		m_pImageBuffer( 0 ),
-		m_Mode( RenderMode_Image ),
-		m_textureCache(boost::bind(&CqRenderer::textureSearchPath, this)),
-		m_fSaveGPrims( false ),
-		m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
-		m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
-		m_FrameNo( 0 ),
-		m_bObjectOpen(false),
-		m_pErrorHandler( &RiErrorPrint ),
-		m_pProgressHandler( NULL ),
-		m_pPreRenderFunction( NULL ),
-		m_pPreWorldFunction( NULL ),
-		m_pRaytracer( NULL )
+CqRenderer::CqRenderer()
+	: m_pconCurrent(),
+	m_Stats(),
+	m_pAttrDefault(new CqAttributes()),
+	m_poptDefault(new CqOptions()),
+	m_pTransDefault(new CqTransform()),
+	m_pImageBuffer(new CqImageBuffer()),
+	m_pDDManager(CreateDisplayDriverManager()),
+	m_Mode(RenderMode_Image),
+	m_Shaders(),
+	m_InstancedShaders(),
+	m_textureCache(boost::bind(&CqRenderer::textureSearchPath, this)),
+	m_fSaveGPrims(false),
+	m_pTransCamera(new CqTransform()),
+	m_pTransDefObj(new CqTransform()),
+	m_fWorldBegin(false),
+	m_tokenDict(),
+	m_ribParser(IqRibParser::create(boost::shared_ptr<IqRibRequestHandler>(
+					new CqRibRequestHandler()))),
+	m_DofMultiplier(0),
+	m_OneOverFocalDistance(FLT_MAX),
+	m_UsingDepthOfField(false),       // DoF for pinhole lens
+	m_DepthOfFieldScale(),
+	m_OutputDataEntries(),
+	m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
+	m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
+	m_FrameNo(0),
+	m_ObjectInstances(),
+	m_bObjectOpen(false),
+	m_pErrorHandler(&RiErrorPrint),
+	m_pProgressHandler(0),
+	m_pPreRenderFunction(0),
+	m_pPreWorldFunction(0),
+	m_pRaytracer(CreateRaytracer()),
+	m_clippingVolume(),
+	m_aWorld(),
+	m_cropWindowXMin(0),
+	m_cropWindowXMax(0),
+	m_cropWindowYMin(0),
+	m_cropWindowYMax(0),
+	m_aCoordSystems(CoordSystem_Last)
 {
-	m_pImageBuffer = new	CqImageBuffer();
+	m_pDDManager->Initialise();
 
-	// Initialize the default attributes, transform and camera transform
-	m_pAttrDefault.reset(new CqAttributes);
-	m_pTransDefault.reset( new CqTransform );
-	m_pTransCamera.reset( new CqTransform );
-	m_pTransDefObj.reset( new CqTransform );
-	m_fWorldBegin = false;
-
-	m_poptDefault = CqOptionsPtr(new CqOptions );
+	m_pRaytracer->Initialise();
 
 	// Initialise the array of coordinate systems.
-	m_aCoordSystems.resize( CoordSystem_Last );
-
 	m_aCoordSystems[ CoordSystem_Camera ].m_strName = "__camera__";
 	m_aCoordSystems[ CoordSystem_Current ].m_strName = "__current__";
 	m_aCoordSystems[ CoordSystem_World ].m_strName = "world";
@@ -113,17 +134,6 @@ CqRenderer::CqRenderer() :
 	m_aCoordSystems[ CoordSystem_Screen ].m_hash = CqString::hash( "screen" );
 	m_aCoordSystems[ CoordSystem_NDC ].m_hash = CqString::hash( "NDC" );
 	m_aCoordSystems[ CoordSystem_Raster ].m_hash = CqString::hash( "raster" );
-
-	m_pDDManager = CreateDisplayDriverManager();
-	m_pDDManager->Initialise();
-
-	m_pRaytracer = CreateRaytracer();
-	m_pRaytracer->Initialise();
-
-	// Set up DoF stuff for pinhole lens ( i.e. no DoF )
-	m_UsingDepthOfField = false;
-
-	// Get the hash keys for object, shader, camera keywords.
 
 	// Set the TIFF Error/Warn handler
 	TIFFSetErrorHandler( &TIFF_ErrorHandler );
@@ -148,13 +158,9 @@ CqRenderer::~CqRenderer()
 
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
-	delete(m_pDDManager);
+	delete m_pDDManager;
 
-	if( m_pRaytracer )	// MGC: MEMLEAK_FIX
-	{
-		delete m_pRaytracer;
-		m_pRaytracer = 0;	// MGC: or better NULL?
-	}
+	delete m_pRaytracer;
 
 	// Clear the ObjectInstance buffer
 	std::vector<CqObjectInstance*>::iterator i;
@@ -1444,6 +1450,24 @@ const char* CqRenderer::textureSearchPath()
 		return "";
 }
 
+void CqRenderer::parseRibStream(std::istream& inputStream, const std::string& name,
+		const IqRenderer::TqRibCommentCallback& commentCallback)
+{
+	m_ribParser->pushInput(inputStream, name, commentCallback);
+	bool parsing = true;
+	while(parsing)
+	{
+		try
+		{
+			parsing = m_ribParser->parseNextRequest();
+		}
+		catch(XqParseError& e)
+		{
+			Aqsis::log() << error << e.what() << "\n";
+		}
+	}
+	m_ribParser->popInput();
+}
 
 bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
 {

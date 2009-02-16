@@ -54,6 +54,7 @@ namespace Aqsis {
 class CqImageBuffer;
 class CqObjectInstance;
 class CqModeBlock;
+class IqRibParser;
 
 struct SqCoordSys
 {
@@ -99,6 +100,10 @@ enum EqRenderMode
  * The main renderer control class.  Contains all information relating to
  * the current image being rendered.  There is only ever one of these,
  * statically defined in the CPP file for this class, and globally available.
+ *
+ * \todo <b>Code Review</b> The renderer class is large and does many disparate
+ * tasks.  It should be broken up into a bunch of helper classes which perform
+ * the details of each task.  These helper classes can be members of CqRenderer.
  */
 
 class CqRenderer;
@@ -207,7 +212,16 @@ class CqRenderer : public IqRenderer
 		virtual	IqTextureMapOld* GetOcclusionMap(const CqString& fileName);
 		virtual	IqTextureMapOld* GetLatLongMap( const CqString& strFileName );
 
-		virtual const char* textureSearchPath();
+
+		/** \brief Return the current texture search path.
+		 *
+		 * This is used as a callback function by the texture library to obtain
+		 * the texture search path when necessary.
+		 */
+		const char* textureSearchPath();
+
+		virtual void parseRibStream(std::istream& inputStream, const std::string& name,
+				const TqRibCommentCallback& commentCallback = TqRibCommentCallback());
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
@@ -554,6 +568,10 @@ class CqRenderer : public IqRenderer
 		/// Renderman symbol table
 		CqTokenDictionary m_tokenDict;
 
+		/// RIB parser, sending parsed commands to the RI.
+		boost::shared_ptr<IqRibParser> m_ribParser;
+
+		/// Variables for depth of field.  \todo Move these to a DoF calculator object.
 		TqFloat			m_DofMultiplier;
 		TqFloat			m_OneOverFocalDistance;
 		bool			m_UsingDepthOfField;
@@ -591,8 +609,7 @@ class CqRenderer : public IqRenderer
 		TqInt				m_cropWindowYMin;
 		TqInt				m_cropWindowYMax;
 
-	public:
-		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
+		std::vector<SqCoordSys>	m_aCoordSystems; ///< List of registered coordinate systems.
 }
 ;
 

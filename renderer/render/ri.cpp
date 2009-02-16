@@ -26,9 +26,9 @@
 
 #include	"aqsis.h"
 
+#include	<fstream>
 #include	<stdarg.h>
 #include	<math.h>
-#include	<list>
 #include	<stdio.h>
 #include    <stdlib.h>
 
@@ -49,11 +49,7 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"rifile.h"
-#include	"librib2ri.h"
 #include	"shadervm.h"
-#include	"librib.h"
-#include	"libribtypes.h"
-#include	"parserstate.h"
 #include	"procedural.h"
 #include	"logging.h"
 #include	"logging_streambufs.h"
@@ -465,11 +461,8 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 //
 void SetDefaultRiOptions( void )
 {
-	std::string systemRCPath;
-	std::string homeRCPath;
-	std::string currentRCPath;
+	// Get the root path for the aqsis installation.
 	std::string rootPath;
-
 #ifdef AQSIS_SYSTEM_WIN32
 
 	char acPath[256];
@@ -493,75 +486,66 @@ void SetDefaultRiOptions( void )
 	rootPath = AQSIS_XSTR(DEFAULT_RC_PATH);
 #endif
 
-	systemRCPath = rootPath;
-	systemRCPath.append( DIRSEP );
-	systemRCPath.append( AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME) );
-
-	// Read in the system configuration file if found.
-	FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
-	if (rcfile != NULL )
+	// Read in the system configuration file.
+	std::string systemRcPath = rootPath;
+	systemRcPath.append( DIRSEP );
+	systemRcPath.append( AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME) );
+	std::ifstream rcFile(systemRcPath.c_str(), std::ios::binary);
+	if(rcFile)
 	{
-		Aqsis::log() << info << "Reading system config \"" << systemRCPath.c_str() << "\"" << std::endl;
-		CqRIBParserState currstate = librib::GetParserState();
-		if (currstate.m_pParseCallbackInterface == NULL)
-			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-		librib::Parse( rcfile, "System Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
-		librib::SetParserState( currstate );
-		fclose(rcfile);
+		Aqsis::log() << info
+			<< "Reading system config \"" << systemRcPath << "\"\n";
+		QGetRenderContext()->parseRibStream(rcFile, systemRcPath);
+		rcFile.close();
 	}
 	else
 	{
-		Aqsis::log() << error << "Could not open system config (" << systemRCPath.c_str() << ")" << std::endl;
+		Aqsis::log() << error
+			<< "Could not open system config (" << systemRcPath.c_str() << ")\n";
 	}
 
-	/* ...then read the .aqsisrc files in $HOME... */
-	if(getenv("HOME"))
+	// Read in the user-specific config in $HOME/.aqsisrc 
+	if(const char* homePath = getenv("HOME"))
 	{
-		homeRCPath = getenv("HOME");
-		if (homeRCPath[ homeRCPath.length() ] != DIRSEP[0])
+		std::string homeRcPath = homePath;
+		if(homeRcPath.empty() || *(homeRcPath.end()-1) == DIRSEP[0])
+			homeRcPath += DIRSEP;
+		homeRcPath += ".aqsisrc";
+
+		std::ifstream rcFile(homeRcPath.c_str(), std::ios::binary);
+		if(rcFile)
 		{
-			homeRCPath.append(DIRSEP);
-		};
-		homeRCPath.append(".aqsisrc");
-		rcfile = fopen( homeRCPath.c_str(), "rb" );
-		if (rcfile != NULL )
-		{
-			Aqsis::log() << info << "Reading user config \"" << homeRCPath.c_str() << "\"" << std::endl;
-			CqRIBParserState currstate = librib::GetParserState();
-			if (currstate.m_pParseCallbackInterface == NULL)
-				currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-			librib::Parse( rcfile, "Home Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
-			librib::SetParserState( currstate );
-			fclose(rcfile);
+			Aqsis::log() << info << "Reading user config \"" << homeRcPath << "\"\n";
+			QGetRenderContext()->parseRibStream(rcFile, homeRcPath);
 		}
 		else
 		{
-			Aqsis::log() << info << "Could not open user config (" << homeRCPath.c_str() << ")" << std::endl;
-	        }
+			Aqsis::log() << info
+				<< "Could not open user config \"" << homeRcPath.c_str() << "\"\n";
+		}
 	}
 	else
 	{
-		Aqsis::log() << info << "Environment variable HOME not set (skipping user config)." << std::endl;
+		Aqsis::log() << info
+			<< "Environment variable HOME not set (skipping user config).\n";
 	}
 
-	/* ...and the current directory... */
-	currentRCPath = ".aqsisrc";
-	rcfile = fopen( currentRCPath.c_str(), "rb" );
-	if (rcfile != NULL )
+	// Read the config file for the current directory.
+	std::string currentRcPath = ".aqsisrc";
+	rcFile.open(currentRcPath.c_str(), std::ios::binary);
+	if(rcFile)
 	{
-		Aqsis::log() << info << "Reading project config \"" << currentRCPath.c_str() << "\"" << std::endl;
-		CqRIBParserState currstate = librib::GetParserState();
-		if (currstate.m_pParseCallbackInterface == NULL)
-			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-		librib::Parse( rcfile, "Current Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
-		librib::SetParserState( currstate );
-		fclose(rcfile);
+		QGetRenderContext()->parseRibStream(rcFile, currentRcPath);
+		rcFile.close();
+		Aqsis::log() << info << "Reading project config \"" << currentRcPath << "\"\n";
 	}
 	else
 	{
-		Aqsis::log() << info << "Could not open project config (" << currentRCPath.c_str() << ")" << std::endl;
-        }
+		Aqsis::log() << info
+			<< "Could not open project config \"" << currentRcPath << "\"\n";
+	}
 
+	// Set options from various environment variables.
 	const char* popt[ 1 ];
 	if(getenv("AQSIS_SHADER_PATH"))
 	{
@@ -5610,7 +5594,6 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 	RiReadArchiveV( name, callback, AQSIS_PASS_RI_PARAMETERS );
 }
 
-
 RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
@@ -5628,23 +5611,17 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 	{
 		CqString strRealName( fileArchive.strRealName() );
 		fileArchive.Close();
-		FILE *file;
-		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
-		{
-#ifdef REQUIRED
-			Aqsis::log() << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
-#endif
 
-			CqRIBParserState currstate = librib::GetParserState();
-			if (currstate.m_pParseCallbackInterface == NULL)
-				currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), callback );
-			librib::SetParserState( currstate );
-			fclose(file);
-		}
-	} else 
+		std::ifstream archiveFile(strRealName.c_str(), std::ios::binary);
+		IqRenderer::TqRibCommentCallback commentCallback;
+		if(callback)
+			commentCallback = CqArchiveCallbackAdaptor(callback);
+		QGetRenderContext()->parseRibStream(archiveFile, name, commentCallback);
+	}
+	else 
 	{
-		Aqsis::log() << error << "Cannot open file \"" << fileArchive.strRealName().c_str() << "\"" << std::endl;
+		Aqsis::log() << error << "Cannot open file \""
+			<< fileArchive.strRealName().c_str() << "\"" << std::endl;
 	}
 	EXCEPTION_CATCH_GUARD("RiReadArchiveV")
 }

@@ -42,6 +42,7 @@ class CqASCII : public CqOutput
 		virtual void endNesting(EqBlocks type);
 
 		virtual void printHeader();
+		virtual void printIndentation();
 		virtual void printRequest( const char *, EqFunctions );
 		virtual void printInteger( const RtInt );
 		virtual void printFloat( const RtFloat );
@@ -59,7 +60,7 @@ class CqASCII : public CqOutput
 	private:
 		SqOptions::EqIndentation m_Indentation;
 		TqInt m_IndentSize;
-		TqUint m_IndentLevel;
+		TqInt m_IndentLevel;
 }
 ;
 

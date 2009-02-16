@@ -74,22 +74,26 @@ void CqASCII::printHeader()
 	OUT << "version 3.03\n";
 }
 
-void CqASCII::printRequest( const char *cp, EqFunctions )
+void CqASCII::printIndentation()
 {
-	TqUint i;
 	switch ( m_Indentation )
 	{
-			case SqOptions::Indentation_None:
-			break;
-			case SqOptions::Indentation_Space:
-			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+		case SqOptions::Indentation_None:
+		break;
+		case SqOptions::Indentation_Space:
+			for (TqInt i = 0; i < m_IndentSize * m_IndentLevel; i++ )
 				OUT << ' ';
 			break;
-			case SqOptions::Indentation_Tab:
-			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+		case SqOptions::Indentation_Tab:
+			for (TqInt i = 0; i < m_IndentSize * m_IndentLevel; i++ )
 				OUT << '\t';
 			break;
 	}
+}
+
+void CqASCII::printRequest( const char *cp, EqFunctions )
+{
+	printIndentation();
 	OUT << cp;
 }
 

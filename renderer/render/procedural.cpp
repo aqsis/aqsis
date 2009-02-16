@@ -426,7 +426,10 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	CqRIBParserState currstate = librib::GetParserState();
 
 	if( currstate.m_pParseCallbackInterface == NULL )
+	{
 		currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+		librib::StandardDeclarations(currstate.m_pParseCallbackInterface);
+	}
 
 	librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
 
@@ -593,7 +596,10 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	CqRIBParserState currstate = librib::GetParserState();
 
 	if( currstate.m_pParseCallbackInterface == NULL )
+	{
 		currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+		librib::StandardDeclarations(currstate.m_pParseCallbackInterface);
+	}
 
 	librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
 

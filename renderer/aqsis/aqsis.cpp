@@ -17,23 +17,29 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+/** \file 
+ * \brief Implementation of the aqsis render tool
+ */
+
+
+//------------------------------------------------------------------------------
+// Includes
+
 #include "aqsis.h"
-#include "exception.h"
-#include "argparse.h"
-#include "file.h"
-#include "librib.h"
-#include "librib2ri.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "ri.h"
-#include "version.h"
-#include "bdec.h"
-#include "parserstate.h"
-#include "exception.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
-#include <io.h>
-#endif // AQSIS_SYSTEM_WIN32
+#	include <io.h>
+#	include <windows.h>
+#else
+#	include <sys/types.h>
+#	include <sys/resource.h>
+#	include <unistd.h>
+#endif
+
+#if defined(AQSIS_SYSTEM_MACOSX)
+#	include "Carbon/Carbon.h"
+#endif
+
 #include <fcntl.h>
 
 #include <iostream>
@@ -48,15 +54,21 @@
 #include <cstdlib>
 #include <memory>
 
-#ifdef AQSIS_SYSTEM_WIN32
-  #include <windows.h>
-  #ifdef _DEBUG
-    #include <crtdbg.h>
-extern "C" __declspec(dllimport) void report_refcounts();
-#endif // _DEBUG
-#endif // !AQSIS_SYSTEM_WIN32
+#include "exception.h"
+#include "argparse.h"
+#include "file.h"
+#include "logging.h"
+#include "logging_streambufs.h"
+#include "ri.h"
+#include "version.h"
+#include "exception.h"
+#include "irenderer.h"
+
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
+
+#include <crtdbg.h>
+extern "C" __declspec(dllimport) void report_refcounts();
 
 #define StartMemoryDebugging() \
     std::ostringstream __buffer; \
@@ -87,21 +99,10 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #define StartMemoryDebugging()
 #define StopMemoryDebugging()
 
-#endif
+#endif // defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
 
-#if defined(AQSIS_SYSTEM_MACOSX)
-#include "Carbon/Carbon.h"
-#endif
 
-#if !defined(AQSIS_SYSTEM_WIN32)
-#include <sys/types.h>
-#include <sys/resource.h>
-#include <unistd.h>
-#endif
-
-// Forward declarations
-RtInt RenderFile( FILE* file, std::string& name );
-
+//------------------------------------------------------------------------------
 // Command-line arguments
 ArgParse::apflag g_cl_pause;
 // Set verbose stats if in debug mode
@@ -110,7 +111,6 @@ ArgParse::apint g_cl_endofframe = 3;
 #else
 ArgParse::apint g_cl_endofframe = -1;
 #endif
-ArgParse::apflag g_cl_nostandard = 0;
 ArgParse::apflag g_cl_help = 0;
 ArgParse::apint g_cl_priority = 1;
 ArgParse::apflag g_cl_version = 0;
@@ -131,8 +131,6 @@ ArgParse::apstring g_cl_type = "";
 ArgParse::apstring g_cl_addtype = "";
 ArgParse::apstring g_cl_mode = "rgba";
 ArgParse::apstring g_cl_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
-ArgParse::apstring g_cl_framesList = "";
-ArgParse::apintvec g_cl_frames;
 ArgParse::apintvec g_cl_res;
 ArgParse::apstringvec g_cl_options;
 
@@ -144,6 +142,8 @@ ArgParse::apflag g_cl_mpdump = 0;
 ArgParse::apflag g_cl_syslog = 0;
 #endif	// AQSIS_SYSTEM_POSIX
 
+
+//------------------------------------------------------------------------------
 /// Function to print the progress of the render.  Used as the callback function to a RiProgressHandler call.
 RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 {
@@ -227,47 +227,47 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 
 			switch ( strProgress[ itag + 1 ] )
 			{
-					case 'p':
+				case 'p':
 					strOutput << std::setw( 6 ) << std::setfill( ' ' ) << std::setprecision( 2 ) << percent;
 					break;
 
-					case 's':
+				case 's':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_secs;
 					break;
 
-					case 'S':
+				case 'S':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_secsleft;
 					break;
 
-					case 'm':
+				case 'm':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_mins;
 					break;
 
-					case 'M':
+				case 'M':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_minsleft;
 					break;
 
-					case 'h':
+				case 'h':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrs;
 					break;
 
-					case 'H':
+				case 'H':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrsleft;
 					break;
 
-					case 't':
+				case 't':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrs << ":" << ( TqInt ) sub_mins << ":" << ( TqInt ) sub_secs;
 					break;
 
-					case 'T':
+				case 'T':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrsleft << ":" << ( TqInt ) sub_minsleft << ":" << ( TqInt ) sub_secsleft;
 					break;
 
-					case 'f':
+				case 'f':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) FrameNo;
 					break;
 
-					case '%':
+				case '%':
 					strOutput << '%';
 					break;
 			}
@@ -291,6 +291,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	std:: cout << std::flush;
 }
 
+
 /** \brief Event handler to restore the color for the console when catching an
  * asyncronous interruption.
  *
@@ -309,7 +310,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
  * sig_atomic_t, and periodically check this during the render.  This would
  * add extra unjustified complexity...
  */
-extern "C" void aqsisSignalHandler(int sig)
+void aqsisSignalHandler(int sig)
 {
 	// Reset the state of the stderr output stream to no-colour (undefined
 	// behaviour :-/ ).
@@ -374,63 +375,13 @@ RtVoid PreWorld()
 	}
 #endif
 
-	for( ArgParse::apstringvec::iterator i = g_cl_options.begin(); i != g_cl_options.end(); ++i )
+	// Parse all the command line options with the RIB parser.
+	for(TqInt i = 0, end = g_cl_options.size(); i < end; ++i)
 	{
-		// This is not pretty, gzopen attempts to read a gzip header
-		//from the stream, if we try and do this before we have sent
-		//the request the we get deadlock, so we have to create the decoder
-		//after the request, we use a buffer size of one to prevent any
-		//potential blocking.
-		librib::CqRibBinaryDecoder *decoder;
-
-		int hpipe[2];
-		FILE *readPipe, *writePipe;
-
-#ifdef AQSIS_SYSTEM_WIN32
-
-		if( _pipe( hpipe, i->length(), _O_TEXT) != -1 )
-#else
-
-		if( pipe( hpipe) != -1 )
-#endif
-
-		{
-			// Feed the string contents into the pipe so that the parser can read them out the other end.
-#ifdef AQSIS_SYSTEM_WIN32
-			readPipe = _fdopen(hpipe[0],"r");
-			writePipe = _fdopen(hpipe[1],"w");
-#else
-
-			readPipe = fdopen(hpipe[0],"r");
-			writePipe = fdopen(hpipe[1],"w");
-#endif
-
-			size_t len_written = fwrite(i->c_str(),1,i->length(),writePipe);
-			if(len_written != i->length())
-				AQSIS_THROW_XQERROR(Aqsis::XqInvalidFile, RIE_SYSTEM,
-					"Error forwarding pipe data");
-			fflush(writePipe);
-			fclose(writePipe);
-
-			decoder = new librib::CqRibBinaryDecoder( readPipe, 16384);
-
-			// Parse the resulting block of RIB.
-			librib::CqRIBParserState currstate = librib::GetParserState();
-
-			if( currstate.m_pParseCallbackInterface == NULL )
-				currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-
-			librib::ParseOpenStream( decoder, "aqsis command line option", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
-
-			librib::SetParserState( currstate );
-
-			delete( decoder );
-
-			fclose(readPipe);
-		}
+		std::istringstream inStream(g_cl_options[i]);
+		Aqsis::QGetRenderContextI()->parseRibStream(inStream, "command_line_option");
 	}
-
-	return ;
+	return;
 }
 
 
@@ -545,6 +496,73 @@ static void SetPriority(int priority)
 }
 #endif
 
+
+/** \brief Render a RIB stream.
+ *
+ * This function
+ *   - sets up a render context
+ *   - sends command line options to the renderer
+ *   - reads the contents of the provided RIB
+ *   - closes the render context
+ * 
+ * \param inStream - An open RIB character stream
+ * \param name - The stream name
+ */
+RtInt renderFile(std::istream& inStream, const std::string& name)
+{
+	RtInt returnCode = RIE_NOERROR;
+	
+	RiBegin( RI_NULL );
+	
+	if ( g_cl_echoapi )
+	{
+		RtInt echoapi = 1;
+		RiOption( tokenCast("statistics"), "echoapi", &echoapi, RI_NULL );
+	}
+	
+	/* Allow any command line arguments to override system/env settings */
+	const char* popt[1];
+	Aqsis::log() << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
+	if(!g_cl_shader_path.empty())
+	{
+		popt[0] = g_cl_shader_path.c_str();
+		RiOption( tokenCast("searchpath"), "shader", &popt, RI_NULL );
+	}
+	if(!g_cl_archive_path.empty())
+	{
+		popt[0] = g_cl_archive_path.c_str();
+		RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
+	}
+	if(!g_cl_texture_path.empty())
+	{
+		popt[0] = g_cl_texture_path.c_str();
+		RiOption( tokenCast("searchpath"), "texture", &popt, RI_NULL );
+	}
+	if(!g_cl_display_path.empty())
+	{
+		popt[0] = g_cl_display_path.c_str();
+		RiOption( tokenCast("searchpath"), "display", &popt, RI_NULL );
+	}
+	if(!g_cl_procedural_path.empty())
+	{
+		popt[0] = g_cl_procedural_path.c_str();
+		RiOption( tokenCast("searchpath"), "procedural", &popt, RI_NULL );
+	}
+
+	RiProgressHandler( &PrintProgress );
+	RiPreWorldFunction( &PreWorld );
+
+	Aqsis::QGetRenderContextI()->parseRibStream(inStream, name);
+
+	RiEnd();
+
+	// get the last error code
+	returnCode = RiLastError;
+
+	return returnCode;
+}
+
+
 int main( int argc, const char** argv )
 {
 	std::signal(SIGINT, aqsisSignalHandler);
@@ -563,7 +581,6 @@ int main( int argc, const char** argv )
 		ap.argFlag( "Progress", "\aPrint PRMan-compatible progress information (ignores -progressformat)", &g_cl_Progress );
 		ap.argString( "progressformat", "=string\aprintf-style format string for -progress", &g_cl_strprogress );
 		ap.argInt( "endofframe", "=integer\aEquivalent to \"endofframe\" RIB option", &g_cl_endofframe );
-		ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
 		ap.argInt( "verbose", "=integer\aSet log output level\n"
 		           "\a0 = errors\n"
 		           "\a1 = warnings (default)\n"
@@ -585,8 +602,6 @@ int main( int argc, const char** argv )
 		ap.argFlag( "fb", "\aSame as --type=\"framebuffer\" --mode=\"rgb\"", &g_cl_fb );
 		ap.alias( "fb", "d" );
 		ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cl_cropWindow, ArgParse::SEP_ARGV, 4);
-		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
-		ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
 		ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 		ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
 		ap.alias( "nocolor", "nc" );
@@ -675,38 +690,44 @@ int main( int argc, const char** argv )
 			std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-		if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
+		if ( ap.leftovers().size() == 0 )
 		{
-			std::string name("stdin");
-			RenderFile( stdin, name );
+			// If no files specified, take input from stdin.
+			//
+			// TODO: We'd like to turn off stdio synchronisation to allow fast
+			// buffering... unfortunately this causes very odd problems with
+			// the aqsis logging facility at the current time.
+			//
+			//std::ios_base::sync_with_stdio(false);
+			renderFile(std::cin, "stdin");
 		}
 		else
 		{
-			for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+			for ( ArgParse::apstringvec::const_iterator fileName = ap.leftovers().begin(); fileName != ap.leftovers().end(); fileName++ )
 			{
-				FILE *file = fopen( e->c_str(), "rb" );
-				if ( file != NULL )
+				std::ifstream inFile(fileName->c_str());
+				if(inFile)
 				{
-					std::string name(*e);
 					try
 					{
-						return_code = RenderFile( file, name );
+						return_code = renderFile(inFile, *fileName);
 					}
 					catch(const std::exception& e)
 					{
 						Aqsis::log() << Aqsis::error << e.what() << std::endl;
-						return_code = -1;
+						return_code = 1;
 					}
 					catch(...)
 					{
-						Aqsis::log() << Aqsis::error << "unknown exception has been encountered" << std::endl;
+						Aqsis::log() << Aqsis::error
+							<< "unknown exception has been encountered\n";
 					}
-					fclose( file );
 				}
 				else
 				{
-					Aqsis::log() << Aqsis::error << "Cannot open file \"" << *e << "\"" << std::endl;
-					return_code = -1;
+					Aqsis::log() << Aqsis::error
+						<< "Cannot open file \"" << *fileName << "\"\n";
+					return_code = 1;
 				}
 			}
 		}
@@ -726,95 +747,5 @@ int main( int argc, const char** argv )
 		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 	}
 
-	return ( return_code );
-}
-
-/**
-  Render a RIB file.
-
-  This function reads RIB requests from the open file \a file and
-  renders the contents of the file. It is the callers responsibility
-  to close the file after the function has returned.
-
-  The RIB file is parsed by the \link librib librib \endlink library and 
-  the RIB requests are processed by the \link librib2ri::Engine 
-  RendermanInterface \endlink object defined in the librib2ri library 
-  (as returned by librib2ri::CreateRIBEngine()).
-   
-  \param file An open file handle
-  \param name The file name
- */
-RtInt RenderFile( FILE* file, std::string&  name )
-{
-	RtInt returnCode = RIE_NOERROR;
-	
-	librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
-	
-	RiBegin( RI_NULL );
-	
-	if ( !g_cl_nostandard )
-		librib::StandardDeclarations( renderengine );
-	
-	if ( g_cl_echoapi )
-	{
-		RtInt echoapi = 1;
-		RiOption( tokenCast("statistics"), "echoapi", &echoapi, RI_NULL );
-	}
-	
-	/* Allow any command line arguments to override system/env settings */
-	const char* popt[1];
-	Aqsis::log() << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
-	if(!g_cl_shader_path.empty())
-	{
-		popt[0] = g_cl_shader_path.c_str();
-		RiOption( tokenCast("searchpath"), "shader", &popt, RI_NULL );
-	}
-	if(!g_cl_archive_path.empty())
-	{
-		popt[0] = g_cl_archive_path.c_str();
-		RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
-	}
-	if(!g_cl_texture_path.empty())
-	{
-		popt[0] = g_cl_texture_path.c_str();
-		RiOption( tokenCast("searchpath"), "texture", &popt, RI_NULL );
-	}
-	if(!g_cl_display_path.empty())
-	{
-		popt[0] = g_cl_display_path.c_str();
-		RiOption( tokenCast("searchpath"), "display", &popt, RI_NULL );
-	}
-	if(!g_cl_procedural_path.empty())
-	{
-		popt[0] = g_cl_procedural_path.c_str();
-		RiOption( tokenCast("searchpath"), "procedural", &popt, RI_NULL );
-	}
-	
-	RiProgressHandler( &PrintProgress );
-	RiPreWorldFunction( &PreWorld );
-	
-	librib::ClearFrames();
-	// Pass in specified frame lists.
-	if(g_cl_frames.size() == 2)
-	{
-		std::stringstream strframes;
-		strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
-		librib::AppendFrames(strframes.str().c_str());
-	}
-	if(!g_cl_framesList.empty())
-		librib::AppendFrames(g_cl_framesList.c_str());
-
-	librib::Parse( file, name, *renderengine, Aqsis::log(), NULL );
-	
-	RiEnd();
-	
-	if ( !g_cl_nostandard )
-		librib::CleanupDeclarations( *renderengine );
-	
-	// get the last error code
-	returnCode = RiLastError;
-	
-	librib2ri::DestroyRIBEngine( renderengine );
-
-	return returnCode;
+	return return_code;
 }

@@ -11,6 +11,11 @@
 #ifndef	IRENDERER_H_INCLUDED
 #define	IRENDERER_H_INCLUDED
 
+#include <iosfwd>
+#include <string>
+
+#include <boost/function.hpp>
+
 #include "matrix.h"
 #include "itransform.h"
 
@@ -24,6 +29,8 @@ class CqColor;
 
 struct IqRenderer
 {
+	typedef boost::function<void (const std::string&)> TqRibCommentCallback;
+
 	virtual	~IqRenderer()
 	{}
 
@@ -73,13 +80,24 @@ struct IqRenderer
 	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
 	//@}
 
-	/** \brief Return the current texture search path.
+	/** \brief Parse a RIB stream and send the resulting commands to the renderer
 	 *
-	 * This is used as a callback function by the texture library to obtain
-	 * the texture search path when necessary.
+	 * The stream should be opened in binary mode or unwanted end-of-line
+	 * translations may occurr.
+	 *
+	 * Note that std::cin is synchronised with the C stdio buffering facilities
+	 * by default, which makes reading inefficient.  Buffering in the C++ layer
+	 * makes reading the bytestream much faster so to encourage (but
+	 * unfortunately not force) this buffering, call the function
+	 * std::ios_base::sync_with_stdio(false).
+	 *
+	 * \param inputStream - input stream in RIB format.
+	 * \param name - name of the stream for error reporting.
+	 * \param commentCallback - Function to be called whenever a comment is
+	 *                          encountered in the RIB stream.
 	 */
-	virtual const char* textureSearchPath() = 0;
-
+	virtual void parseRibStream(std::istream& inputStream, const std::string& name,
+			const TqRibCommentCallback& commentCallback = TqRibCommentCallback()) = 0;
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
 

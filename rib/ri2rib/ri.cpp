@@ -1358,27 +1358,39 @@ RtVoid RiArchiveRecord( RtToken type, char *format, ... )
 {
 	RI2RIB_EXCEPTION_TRY_GUARD
 
-	va_list args;
-	va_start( args, format );
-
 	TqInt size = 256;
-	char* buffer = new char[ size ];
-#if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
-	while ( _vsnprintf( buffer, 256, format, args ) < 0 )
-#else
-	while ( vsnprintf( buffer, 256, format, args ) < 0 )
-#endif
+	char* buffer = 0;
+	bool longEnough = false;
+	while(!longEnough)
 	{
+		delete[] buffer;
+		buffer = new char[size];
+		va_list args;
+		va_start( args, format );
+#		if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
+		TqInt len = _vsnprintf(buffer, size, format, args);
+		// msdn says that _vsnprintf() returns a negative number if the buffer
+		// wasn't long enough.  Add the extra (len < size) for safety in the
+		// case MSVC becomes standard-compliant at some stage in the future...
+		longEnough = len >= 0 && len < size;
 		size *= 2;
-		delete[] ( buffer );
-		buffer = new char[ size ];
+#		else
+		TqInt len = vsnprintf(buffer, size, format, args);
+		// According to the linux man pages, vsnprintf() returns a negative
+		// value on error, or a positive value indicating the number of chars
+		// which would have been written for an infinite-size buffer, not
+		// including the terminating '\0'.  This is claimed to be the
+		// C99-conforming behaviour.
+		if(len < 0)
+			return;
+		longEnough = len < size;
+		size = len+1;
+#		endif
+		va_end(args);
 	}
-	std::string i( buffer );
-	delete[] ( buffer );
+	context.current().RiArchiveRecord(type, buffer);
 
-	va_end( args );
-	context.current().RiArchiveRecord( type, i );
-
+	delete[] buffer;
 	RI2RIB_EXCEPTION_CATCH_GUARD("RiArchiveRecord", )
 }
 

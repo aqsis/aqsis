@@ -1977,6 +1977,7 @@ RtVoid CqOutput::RiArchiveRecord( RtToken type, std::string txt )
 		               "Unknown ArchiveRecord type: ", type, "", true );
 	}
 	// EOL must be forced for binary
+	printIndentation();
 	print( ( tmp + txt + "\n" ).c_str() );
 }
 

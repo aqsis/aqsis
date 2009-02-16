@@ -22,23 +22,18 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+
+//------------------------------------------------------------------------------
 #include "aqsis.h"
-#include "exception.h"
-#include "argparse.h"
-#include "file.h"
-#include "librib.h"
-#include "librib2ri.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "ri.h"
-#include "version.h"
-#include "bdec.h"
-#include "parserstate.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
-#include <io.h>
-#endif // AQSIS_SYSTEM_WIN32
-#include <fcntl.h>
+#	include <windows.h>
+#	include <io.h>
+#	ifdef _DEBUG
+#		include <crtdbg.h>
+		extern "C" __declspec(dllimport) void report_refcounts();
+#	endif
+#endif
 
 #include <iostream>
 #include <iomanip>
@@ -51,43 +46,42 @@
 #include <cstdlib>
 #include <time.h>
 
-#ifdef AQSIS_SYSTEM_WIN32
-  #include <windows.h>
-  #ifdef _DEBUG
-    #include <crtdbg.h>
-extern "C" __declspec(dllimport) void report_refcounts();
-#endif // _DEBUG
-#endif // !AQSIS_SYSTEM_WIN32
+#include "argparse.h"
+#include "exception.h"
+#include "file.h"
+#include "iribparser.h"
+#include "logging.h"
+#include "logging_streambufs.h"
+#include "ri.h"
+#include "ri_convenience.h"
+#include "ribrequesthandler.h"
+#include "version.h"
 
 #if defined(AQSIS_SYSTEM_MACOSX)
-#include "Carbon/Carbon.h"
+#	include "Carbon/Carbon.h"
 #endif
 
+
+//------------------------------------------------------------------------------
 // Forward declarations
 void setupOutputFormat();
-void processFile( FILE* inFile, const std::string& name );
 void processFiles(const ArgParse::apstringvec& fileNames);
-void parseAndFormat( FILE* inFile, const std::string&  name );
-void decodeBinaryOnly(FILE* inFile);
-
+void parseAndFormat(std::istream& ribStream, const std::string& name);
+void parseRibStream(std::istream& ribStream, const std::string& name);
 
 // Command-line arguments
 ArgParse::apflag g_cl_pause;
-ArgParse::apflag g_cl_nostandard = 0;
 ArgParse::apflag g_cl_outstandard = 0;
 ArgParse::apflag g_cl_help = 0;
 ArgParse::apflag g_cl_version = 0;
 ArgParse::apint g_cl_verbose = 1;
 ArgParse::apstring g_cl_archive_path = "";
 ArgParse::apflag g_cl_no_color = 0;
-ArgParse::apstring g_cl_framesList = "";
-ArgParse::apintvec g_cl_frames;
 ArgParse::apint g_cl_indentation = 0;	// Default None
 ArgParse::apint g_cl_indentlevel = 0;
 ArgParse::apflag g_cl_binary = 0;
 ArgParse::apint g_cl_compression = 0;	// Default None
 ArgParse::apstring g_cl_output = "";
-ArgParse::apflag g_cl_decodeOnly = 0;
 
 RtToken g_indentNone      = tokenCast("None");
 RtToken g_indentSpace     = tokenCast("Space");
@@ -112,7 +106,6 @@ int main( int argc, const char** argv )
 	ap.argFlag( "pause", "\aWait for a keypress on completion", &g_cl_pause );
 	ap.argString( "output", "=string\aSet the output filename, default to <stdout>", &g_cl_output );
 	ap.alias( "output", "o" );
-	ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
 	ap.argFlag( "outputstandard", "\aPrint the standard declarations to the resulting RIB", &g_cl_outstandard );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 	           "\a0 = errors\n"
@@ -132,8 +125,6 @@ int main( int argc, const char** argv )
 	           "\a1 = gzip", &g_cl_compression );
 	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_cl_binary );
 	ap.alias( "binary", "b" );
-	ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
-	ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.alias( "nocolor", "nc" );
 #ifdef	AQSIS_SYSTEM_POSIX
@@ -142,7 +133,6 @@ int main( int argc, const char** argv )
 #endif	// AQSIS_SYSTEM_POSIX
 
 	ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
-	ap.argFlag( "decodeonly", "\aDecode a binary rib into text, *without* validating or formatting the result.  (Debug use only)", &g_cl_decodeOnly );
 	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
@@ -198,22 +188,7 @@ int main( int argc, const char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-	if(!g_cl_decodeOnly)
-		setupOutputFormat();
-	else
-	{
-		// special case for binary decoding only - truncate output file to zero length.
-		if(g_cl_output != "")
-		{
-			std::ofstream outFile(g_cl_output.c_str(), std::ios_base::out | std::ios_base::trunc);
-			if(!outFile)
-			{
-				Aqsis::log() << Aqsis::error << "Could not open output file '" << g_cl_output << "'\n";
-				exit(1);
-			}
-		}
-	}
-
+	setupOutputFormat();
 	processFiles(ap.leftovers());
 
 	if(g_cl_pause)
@@ -277,70 +252,36 @@ void setupOutputFormat()
  */
 void processFiles(const ArgParse::apstringvec& fileNames)
 {
-	if ( fileNames.empty() )     // If no files specified, take input from stdin.
+	if ( fileNames.empty() )
 	{
-		std::string name("stdin");
-		processFile( stdin, name );
+		// If no files specified, take input from stdin.
+		parseAndFormat(std::cin, "stdin");
 	}
 	else
 	{
 		for ( ArgParse::apstringvec::const_iterator e = fileNames.begin(); e != fileNames.end(); e++ )
 		{
-			FILE *file = fopen( e->c_str(), "rb" );
+			std::ifstream file(e->c_str(), std::ios::binary);
 			if ( file != NULL )
-			{
-				std::string name(*e);
-				processFile( file, name );
-				fclose( file );
-			}
+				parseAndFormat(file, *e);
 			else
-			{
-				std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
-			}
+				std::cout << "Warning: Cannot open file \"" << *e << "\"\n";
 		}
 	}
 }
 
 
 //------------------------------------------------------------------------------
-/** \brief process a single RIB file
+/** \brief Parse the RIB file and format the result with libri2rib
  */
-void processFile( FILE* file, const std::string&  name )
+void parseAndFormat(std::istream& ribStream, const std::string& name)
 {
-	if(!g_cl_decodeOnly)
-		parseAndFormat(file, name);
-	else
-		decodeBinaryOnly(file);
-}
-
-
-//------------------------------------------------------------------------------
-/** \brief Parse the RIB file and format the result with librib2ri.
- */
-void parseAndFormat( FILE* file, const std::string&  name )
-{
-	librib::RendermanInterface * engine = librib2ri::CreateRIBEngine();
-
 	try
 	{
-		if(g_cl_output.compare("")!=0)
-		{
-			char* outputName = new char[g_cl_output.size()+1];
-			strcpy(outputName, g_cl_output.c_str());
-			outputName[g_cl_output.size()] = '\0';
-			RiBegin(outputName);
-		}
+		if(g_cl_output != "")
+			RiBegin(tokenCast(g_cl_output.c_str()));
 		else
 			RiBegin(RI_NULL);
-
-		if ( !g_cl_nostandard )
-		{
-			if( !g_cl_outstandard )
-				librib::StandardDeclarations( NULL );
-			else
-				librib::StandardDeclarations( engine );
-		}
-
 
 		const char* popt[1];
 		if(!g_cl_archive_path.empty())
@@ -349,57 +290,37 @@ void parseAndFormat( FILE* file, const std::string&  name )
 			RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
 		}
 
-		librib::ClearFrames();
-		// Pass in specified frame lists.
-		if(g_cl_frames.size() == 2)
-		{
-			std::stringstream strframes;
-			strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
-			librib::AppendFrames(strframes.str().c_str());
-		}
-		if(!g_cl_framesList.empty())
-			librib::AppendFrames(g_cl_framesList.c_str());
-
-		librib::Parse( file, name, *engine, Aqsis::log(), NULL );
+		parseRibStream(ribStream, name);
 
 		RiEnd();
-
-		if ( !g_cl_nostandard )
-			librib::CleanupDeclarations( *engine );
 	}
 	catch(Aqsis::XqException& x)
 	{
 		Aqsis::log() << Aqsis::error << x.what() << std::endl;
 	}
-
-	librib2ri::DestroyRIBEngine( engine );
 }
 
 
-//------------------------------------------------------------------------------
-/** \brief decode a binary file, without parsing the result
- *
- * This function performs a simple binary decode, without invoking the RIB
- * parser.  As such it's helpful for debugging, but doesn't necessarily produce
- * valid RIBs.
- *
- * \param inFile - take input from this file.
+/** Parse an open RIB stream, sending all the commands to the current RI context.
  */
-void decodeBinaryOnly(FILE* inFile)
+void parseRibStream(std::istream& ribStream, const std::string& name)
 {
-	try
+	boost::shared_ptr<Aqsis::IqRibParser> ribParser =
+		Aqsis::IqRibParser::create( boost::shared_ptr<Aqsis::IqRibRequestHandler>(
+				new Aqsis::CqRibRequestHandler()) );
+	ribParser->pushInput(ribStream, name,
+			Aqsis::CqArchiveCallbackAdaptor(RiArchiveRecord));
+	bool parsing = true;
+	while(parsing)
 	{
-		librib::CqRibBinaryDecoder decoder(inFile);
-		if(g_cl_output.compare("")!=0)
+		try
 		{
-			std::ofstream outFile(g_cl_output.c_str(), std::ios_base::out | std::ios_base::app);
-			decoder.dumpToStream(outFile);
+			parsing = ribParser->parseNextRequest();
 		}
-		else
-			decoder.dumpToStream(std::cout);
+		catch(Aqsis::XqParseError& e)
+		{
+			Aqsis::log() << Aqsis::error << e.what() << "\n";
+		}
 	}
-	catch(Aqsis::XqException& x)
-	{
-		Aqsis::log() << Aqsis::error << x;
-	}
+	ribParser->popInput();
 }

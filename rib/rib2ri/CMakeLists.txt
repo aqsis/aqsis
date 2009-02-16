@@ -1,31 +1,30 @@
 project(RIB2RI)
 
-set(RIB2RI_HDRS
-	rib2ri_share.h
-	ribrequesthandler.h
-)
-
-set(RIB2RI_SRCS
-	ribrequesthandler.cpp
-)
+include(local.cmake)
 
 # Create generated files using xsl transformations.
+#
+# The MAKE_ALL_TARGET options could be removed if we produced a proper library
+# here.
 xsl_transform(${CMAKE_CURRENT_BINARY_DIR}/requesthandler_method_defs.inl
 	api.xml
 	STYLESHEET requesthandler_method_defs.xsl
 	SEARCHPATH ${RIBAPI_SOURCE_DIR}
+	MAKE_ALL_TARGET requesthandler_method_defs
 )
 
 xsl_transform(${CMAKE_CURRENT_BINARY_DIR}/requesthandler_method_impl.inl
 	api.xml
 	STYLESHEET requesthandler_method_impl.xsl
 	SEARCHPATH ${RIBAPI_SOURCE_DIR}
+	MAKE_ALL_TARGET requesthandler_method_impl
 )
 
 xsl_transform(${CMAKE_CURRENT_BINARY_DIR}/requestlists.inl
 	api.xml
 	STYLESHEET requestlists.xsl
 	SEARCHPATH ${RIBAPI_SOURCE_DIR}
+	MAKE_ALL_TARGET requestlists
 )
 
 # Set dependencies of source files on generated includes.
@@ -53,10 +52,11 @@ set(LINKLIBS)
 include(${AQSISTYPES_SOURCE_DIR}/link.cmake)
 include(${RIBPARSE_SOURCE_DIR}/link.cmake)
 
-# Note: we don't actually build a library here, since the unresolved symbols
-# (like RiSphereV) are problematic on windows and to a lesser extent OSX.  It
-# might be possible to build a static library and link that into the other
-# shared libs that need it...
+# Note: we don't actually build a shared library here, since the files
+# reference symbols which would have to be resolved at runtime.  (This is
+# almost impossible on windows with DLLs and slightly messy on OSX.)  Using a
+# static library as an intermediate part of the build process might be
+# possible.
 
 
 #--------------------------------------------------
@@ -72,7 +72,8 @@ if(AQSIS_ENABLE_TESTING)
 		EXTRASOURCE ${RIB2RI_SRCS}
 	)
 	# Set the exports necessary to avoid incorrect linkage errors.
-	set_property(TARGET ribrequesthandler_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
+	set_property(TARGET ribrequesthandler_test
+		PROPERTY COMPILE_DEFINITIONS RI_EXPORTS)
 
 	# Speed test for parser and request handler
 	add_executable(parser_speed_test
@@ -83,6 +84,7 @@ if(AQSIS_ENABLE_TESTING)
 		${LINKLIBS}
 		)
 	# Set the exports necessary to avoid incorrect linkage errors.
-	SET_PROPERTY(TARGET parser_speed_test PROPERTY COMPILE_DEFINITIONS RIB2RI_EXPORTS RI_EXPORTS)
+	set_property(TARGET parser_speed_test
+		PROPERTY COMPILE_DEFINITIONS RI_EXPORTS)
 endif(AQSIS_ENABLE_TESTING)
 

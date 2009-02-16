@@ -25,7 +25,11 @@
 #ifndef RI_CONVENIENCE_H
 #define RI_CONVENIENCE_H
 
+#include "aqsis.h"
+
 #include <vector>
+#include <cstdarg>
+
 #include "ri_types.h"
 
 namespace Aqsis
@@ -83,6 +87,35 @@ namespace Aqsis
  * \param aValues
  * \param returns a parameter count
  */
+RtInt buildRiParameterList( va_list pArgs, std::vector<RtToken>& aTokens,
+                                 std::vector<RtPointer>& aValues );
+
+/** \brief Adaptor allowing RtArchiveCallback to be bound to
+ * IqRibParser::TqCommentCallback
+ */
+class CqArchiveCallbackAdaptor
+{
+	public:
+		/// Construct adaptor with an underlying callback (may not be null).
+		CqArchiveCallbackAdaptor(RtArchiveCallback callback);
+
+		/** Call through to the underlying RtArchiveCallback function.
+		 *
+		 * The input comment string is examined for a leading #.  If present,
+		 * the # is stripped and the comment sent through to the underlying
+		 * archive callback as a RIB structure comment.  Otherwise the comment
+		 * is sent through unchanged as the plain comment type.
+		 */
+		void operator()(const std::string& comment);
+	private:
+		RtArchiveCallback m_callback;
+};
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+
 inline RtInt buildRiParameterList( va_list pArgs, std::vector<RtToken>& aTokens,
                                  std::vector<RtPointer>& aValues )
 {
@@ -101,6 +134,24 @@ inline RtInt buildRiParameterList( va_list pArgs, std::vector<RtToken>& aTokens,
 	}
 	return ( count );
 }
+
+//------------------------------------------------------------------------------
+inline CqArchiveCallbackAdaptor::CqArchiveCallbackAdaptor(RtArchiveCallback callback)
+	: m_callback(callback)
+{
+	assert(m_callback);
+}
+
+inline void CqArchiveCallbackAdaptor::operator()(const std::string& comment)
+{
+	// If the first character is # then the comment is a special "RIB
+	// structure comment"
+	if(!comment.empty() && comment[0] == '#')
+		m_callback(tokenCast("structure"), tokenCast("%s"), comment.c_str()+1);
+	else
+		m_callback(tokenCast("comment"), tokenCast("%s"), comment.c_str());
+}
+
 
 } // namespace Aqsis
 

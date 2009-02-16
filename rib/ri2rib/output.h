@@ -140,6 +140,8 @@ class CqOutput
 
 		virtual void printHeader()
 		{}
+		virtual void printIndentation()
+		{}
 		virtual void printRequest( const char *, EqFunctions )
 		{}
 		virtual void printInteger( const RtInt )
