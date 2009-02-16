@@ -42,8 +42,8 @@ SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} ws2_32)
 #
 # Create resource files for use during linking
 #
-CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${PROJECT_BINARY_DIR}/info.rc")
-CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJECT_BINARY_DIR}/icon.rc")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${PROJECT_BINARY_DIR}/info.rc")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJECT_BINARY_DIR}/icon.rc")
 SET(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
 SET(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
 
