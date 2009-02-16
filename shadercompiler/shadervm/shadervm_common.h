@@ -27,25 +27,6 @@
 #ifndef SHADERVM_COMMON_H_INCLUDED
 #define SHADERVM_COMMON_H_INCLUDED 1
 
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
-
-#    define  SHADERVM_SHARE
-
-#  else // !AQSIS_STATIC_LINK
-
-#      ifdef SHADERVM_EXPORTS
-#        define SHADERVM_SHARE __declspec(dllexport)
-#      else
-#        define SHADERVM_SHARE __declspec(dllimport)
-#      endif
-
-#  endif	// AQSIS_STATIC_LINK
-
-#else	// !WIN32
-
-#  define  SHADERVM_SHARE
-
-#endif // WIN32
+#include "ishader.h"
 
 #endif	// !SHADERVM_COMMON_H_INCLUDED

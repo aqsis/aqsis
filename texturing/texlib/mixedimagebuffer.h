@@ -69,6 +69,9 @@ typedef std::map<std::string, std::string> TqChannelNameMap;
  * operation may not make sense.  It would be extremly easy to implement some
  * sensible copying behaviour.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+#endif
 class AQSISTEX_SHARE CqMixedImageBuffer : boost::noncopyable
 {
 	public:

@@ -35,6 +35,7 @@
 
 #include	"shadeop.h"
 #include	"ishaderexecenv.h"
+#include	"shadervm_common.h"
 
 namespace Aqsis {
 
@@ -54,7 +55,7 @@ struct SqDSOExternalCall
 
 /** Interface to the repostiory of dynamic shader operations*/
 
-struct IqDSORepository
+struct SHADERVM_SHARE IqDSORepository
 {
 	virtual void SetDSOPath(const char*) = 0;
 	virtual ~IqDSORepository()

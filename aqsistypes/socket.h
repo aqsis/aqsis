@@ -42,6 +42,9 @@ namespace Aqsis {
 /** \class CqSocket
  *  \brief Wrapper class around sockets based communications.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class COMMON_SHARE boost::noncopyable_::noncopyable;
+#endif
 class COMMON_SHARE CqSocket : boost::noncopyable
 {
 	public:

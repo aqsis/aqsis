@@ -52,27 +52,6 @@
 #include	"iattributes.h"
 #include	"itransform.h"
 
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
-
-#    define  SHADERCONTEXT_SHARE
-
-#  else // !AQSIS_STATIC_LINK
-
-#      ifdef SHADERCONTEXT_EXPORTS
-#        define SHADERCONTEXT_SHARE __declspec(dllexport)
-#      else
-#        define SHADERCONTEXT_SHARE __declspec(dllimport)
-#      endif
-
-#  endif	// AQSIS_STATIC_LINK
-
-#else	// !WIN32
-
-#  define  SHADERCONTEXT_SHARE
-
-#endif // WIN32
-
 namespace Aqsis {
 
 SHADERCONTEXT_SHARE extern const char*	gVariableNames[];	///< Vector of variable names.
@@ -138,7 +117,9 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 /** \class CqShaderExecEnv
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
-
+#ifdef AQSIS_SYSTEM_WIN32
+class SHADERCONTEXT_SHARE boost::noncopyable_::noncopyable;
+#endif
 class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
 {
 	public:

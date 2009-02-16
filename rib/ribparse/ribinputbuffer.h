@@ -60,6 +60,9 @@ struct SqSourcePos
  * class therefore makes sure that any input buffering of a requested number of
  * characters is non-blocking.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class RIBPARSE_SHARE boost::noncopyable_::noncopyable;
+#endif
 class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
 {
 	public:

@@ -71,6 +71,9 @@ std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos);
  * resulting in significantly poor lexer performance (measured to be
  * approximately a factor of two slower on linux/g++/amd64).
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class RIBPARSE_SHARE boost::noncopyable_::noncopyable;
+#endif
 class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:

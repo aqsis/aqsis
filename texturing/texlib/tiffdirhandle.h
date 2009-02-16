@@ -74,6 +74,9 @@ namespace Attr {
  * instance of this class blocks access to the underlying tiff file until its
  * destructor is called.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+#endif
 class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
 {
 	public:
@@ -234,6 +237,9 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
  * track of the current directory.  Do *not* use TIFFOpen, TIFFClose,
  * or TIFFSetDirectory outside this class.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+#endif
 class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 {
 	public:

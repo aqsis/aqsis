@@ -273,7 +273,7 @@ class RIBPARSE_SHARE IqRibParser
  * Code expecting to handle RIB requests should inherit from this class.  This
  * allows it to be attached to and called by the RIB parser at runtime.
  */
-class IqRibRequestHandler
+class RIBPARSE_SHARE IqRibRequestHandler
 {
 	public:
 		/** \brief Handle a RIB request by reading from the parser

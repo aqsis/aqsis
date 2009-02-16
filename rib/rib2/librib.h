@@ -12,7 +12,7 @@ namespace librib
 {
 
 /// Provides an abstract base class for objects that implement the Renderman Interface
-class RendermanInterface
+class RIB_SHARE RendermanInterface
 {
 	public:
 		virtual ~RendermanInterface()

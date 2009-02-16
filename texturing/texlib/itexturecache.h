@@ -42,7 +42,7 @@ class CqMatrix;
 /** \brief A cache interface for managing the various types of texture
  * samplers.
  */
-struct IqTextureCache
+struct AQSISTEX_SHARE IqTextureCache
 {
 	//--------------------------------------------------
 	// \name Sampler access

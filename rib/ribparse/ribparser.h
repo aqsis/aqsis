@@ -43,6 +43,9 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 /** \brief An implementation of the IqRibParser interface.
  */
+#ifdef AQSIS_SYSTEM_WIN32
+class RIBPARSE_SHARE boost::noncopyable_::noncopyable;
+#endif
 class RIBPARSE_SHARE CqRibParser : public IqRibParser, private boost::noncopyable
 {
 	public:

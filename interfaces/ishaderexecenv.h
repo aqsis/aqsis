@@ -27,6 +27,28 @@
 #define	___ishaderexecenv_Loaded___
 
 #include	"aqsis.h"
+
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  SHADERCONTEXT_SHARE
+
+#  else // !AQSIS_STATIC_LINK
+
+#      ifdef SHADERCONTEXT_EXPORTS
+#        define SHADERCONTEXT_SHARE __declspec(dllexport)
+#      else
+#        define SHADERCONTEXT_SHARE __declspec(dllimport)
+#      endif
+
+#  endif	// AQSIS_STATIC_LINK
+
+#else	// !WIN32
+
+#  define  SHADERCONTEXT_SHARE
+
+#endif // WIN32
+
 #include	<boost/shared_ptr.hpp>
 
 #include	"ishaderdata.h"
@@ -123,7 +145,7 @@ enum EqEnvVars
  * 'shadable' item, and providing shadeops to process that data.
  */
 
-struct IqShaderExecEnv
+struct SHADERCONTEXT_SHARE IqShaderExecEnv
 {
 	virtual	~IqShaderExecEnv()
 	{}

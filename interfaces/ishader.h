@@ -18,6 +18,27 @@
 #include	"iparameter.h"
 #include	<boost/shared_ptr.hpp>
 
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  SHADERVM_SHARE
+
+#  else // !AQSIS_STATIC_LINK
+
+#      ifdef SHADERVM_EXPORTS
+#        define SHADERVM_SHARE __declspec(dllexport)
+#      else
+#        define SHADERVM_SHARE __declspec(dllimport)
+#      endif
+
+#  endif	// AQSIS_STATIC_LINK
+
+#else	// !WIN32
+
+#  define  SHADERVM_SHARE
+
+#endif // WIN32
+
 
 namespace Aqsis {
 
@@ -50,7 +71,7 @@ struct IqSurface;
  * Abstract base class from which all shaders must be defined.
  */
 
-struct IqShader
+struct SHADERVM_SHARE IqShader
 {
 	virtual	~IqShader()
 	{}
