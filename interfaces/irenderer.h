@@ -22,7 +22,7 @@
 namespace Aqsis {
 
 struct IqTextureMapOld;
-class IqTextureCache;
+struct IqTextureCache;
 class CqObjectInstance;
 
 class CqColor;

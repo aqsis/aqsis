@@ -452,7 +452,7 @@ template<typename T>
 inline void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt numChannels)
 {
 	TqInt newSize = width * height * numChannels;
-	if(newSize != m_width * m_height * m_numChannels);
+	if(newSize != m_width * m_height * m_numChannels)
 		m_pixelData.reset(new T[newSize]);
 	// Set new buffer sizes
 	m_width = width;
