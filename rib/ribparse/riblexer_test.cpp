@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_position_test)
 	f.lex.get();
 	f.lex.get();
 	f.lex.get();
-	SqSourceFilePos pos = f.lex.pos();
+	SqRibPos pos = f.lex.pos();
 	BOOST_CHECK_EQUAL(pos.line, 1);
 	BOOST_CHECK_EQUAL(pos.col, 7);
 	f.lex.get();
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_peek_test)
 	f.lex.peek();
 	f.lex.peek();
 
-	SqSourceFilePos pos = f.lex.pos();
+	SqRibPos pos = f.lex.pos();
 	BOOST_CHECK_EQUAL(pos.line, 1);
 	BOOST_CHECK_EQUAL(pos.col, 7);
 	BOOST_CHECK_EQUAL(f.lex.peek(), CqRibToken(1));
@@ -374,19 +374,19 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_streamstack_test)
 	std::istringstream in1("Stream1Start Stream1End");
 	lex.pushInput(in1, "stream1");
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream1Start"));
-	BOOST_CHECK_EQUAL(lex.pos().fileName, "stream1");
+	BOOST_CHECK_EQUAL(lex.pos().name, "stream1");
 
 	lex.peek();
 	std::istringstream in2("Stream2Start");
 	lex.pushInput(in2, "stream2");
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream2Start"));
-	BOOST_CHECK_EQUAL(lex.pos().fileName, "stream2");
+	BOOST_CHECK_EQUAL(lex.pos().name, "stream2");
 	CHECK_EOF(lex);
 
 	lex.popInput();
 	BOOST_CHECK_EQUAL(lex.get(), CqRibToken(CqRibToken::REQUEST, "Stream1End"));
 	BOOST_CHECK_EQUAL(lex.pos().col, 14);
-	BOOST_CHECK_EQUAL(lex.pos().fileName, "stream1");
+	BOOST_CHECK_EQUAL(lex.pos().name, "stream1");
 	CHECK_EOF(lex);
 
 	lex.popInput();

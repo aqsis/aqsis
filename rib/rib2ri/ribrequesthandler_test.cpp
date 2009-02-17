@@ -310,6 +310,10 @@ class CqMockParser : public IqRibParser
 		virtual void pushInput(std::istream& inStream, const std::string& name,
 				const TqCommentCallback& callback) {}
 		virtual void popInput() {}
+		virtual SqRibPos streamPos()
+		{
+			return SqRibPos(0, m_tokenPos, "test_token_stream");
+		}
 
 		virtual TqInt getInt()
 		{

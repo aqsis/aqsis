@@ -67,7 +67,7 @@ bool CqRibParser::parseNextRequest()
 	catch(XqParseError& e)
 	{
 		// Save the error position
-		SqSourceFilePos errorPos = m_lex.pos();
+		SqRibPos errorPos = m_lex.pos();
 		// Recover from the error by reading and discarding tokens from the RIB
 		// stream up until the next request, as per the RISpec.
 		CqRibToken::EqType nextType = m_lex.peek().type();
@@ -97,6 +97,11 @@ void CqRibParser::pushInput(std::istream& inStream, const std::string& streamNam
 void CqRibParser::popInput()
 {
 	m_lex.popInput();
+}
+
+SqRibPos CqRibParser::streamPos()
+{
+	return m_lex.pos();
 }
 
 TqInt CqRibParser::getInt()

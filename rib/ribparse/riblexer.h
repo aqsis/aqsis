@@ -43,19 +43,6 @@
 namespace Aqsis
 {
 
-/// A holder for source code positions along with the filename.
-struct SqSourceFilePos
-{
-	TqInt line;
-	TqInt col;
-	const char* fileName;
-	SqSourceFilePos(TqInt line, TqInt col, const char* fileName)
-		: line(line), col(col), fileName(fileName) {}
-};
-
-/// pretty print source file position
-std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos);
-
 //------------------------------------------------------------------------------
 /** \brief A lexical analyser for the Renderman Interface Byetstream.
  *
@@ -122,7 +109,7 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 		 * \return The position in the input file for the previous token
 		 *         obtained with get().
 		 */
-		SqSourceFilePos pos() const;
+		SqRibPos pos() const;
 
 	private:
 		typedef std::map<TqInt, std::string> TqEncodedStringMap;
@@ -186,19 +173,10 @@ class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-// SqSourcePos functions
-inline std::ostream& operator<<(std::ostream& out, const SqSourceFilePos& pos)
-{
-	out << pos.fileName << ": " << pos.line << " (col " << pos.col << ")";
-	return out;
-}
-
-//------------------------------------------------------------------------------
 // CqRibLexer functions
-inline SqSourceFilePos CqRibLexer::pos() const
+inline SqRibPos CqRibLexer::pos() const
 {
-	return SqSourceFilePos(m_currPos.line, m_currPos.col,
+	return SqRibPos(m_currPos.line, m_currPos.col,
 			m_inBuf ? m_inBuf->streamName().c_str() : "null");
 }
 

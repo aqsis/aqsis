@@ -30,6 +30,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ri.h"
+#include "logging.h"
 
 namespace Aqsis
 {
@@ -562,6 +563,34 @@ void CqRibRequestHandler::handleBasis(IqRibParser& parser)
 	RiBasis(*ubasis, ustep, *vbasis, vstep);
 }
 
+void CqRibRequestHandler::checkArrayLength(IqRibParser& parser,
+		const char* arrayName, TqInt arrayLength,
+		TqInt expectedLength, const char* expectedLengthDesc)
+{
+	if(arrayLength < expectedLength)
+	{
+		// Produces something like 
+		// "nargs array length 2 is less than expected length 2*ntags = 3"
+		AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+			"Invalid " << arrayName << " length " << arrayLength
+			<< " is less than expected length "
+			<< (expectedLengthDesc ? expectedLengthDesc : "")
+			<< (expectedLengthDesc ? " = " : "")
+			<< expectedLength
+		);
+	}
+	else if(arrayLength > expectedLength)
+	{
+		Aqsis::log() << warning
+			<< parser.streamPos() << ": Invalid "
+			<< arrayName << " length " << arrayLength
+			<< " is greater than expected length "
+			<< (expectedLengthDesc ? expectedLengthDesc : "")
+			<< (expectedLengthDesc ? " = " : "")
+			<< expectedLength << "\n";
+	}
+}
+
 void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 {
 	// Collect arguments from parser.
@@ -585,12 +614,7 @@ void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 
 		// Check that the number of tags matches the number of arguments
 		ntags = tags.size();
-		if(static_cast<TqInt>(nargs->size()) != ntags*2)
-		{
-			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-					"Invalid nargs length " << nargs->size() << "; expected length "
-					"2*ntags = " << 2*ntags);
-		}
+		checkArrayLength(parser, "nargs", nargs->size(), 2*ntags, "2*ntags");
 
 		// Check that the argument arrays have length consistent with nargs
 		TqInt intArgsLen = 0;
@@ -601,19 +625,9 @@ void CqRibRequestHandler::handleSubdivisionMesh(IqRibParser& parser)
 			floatArgsLen += (*nargs)[2*i+1];
 		}
 		intargs = &parser.getIntArray();
-		if(intArgsLen != static_cast<TqInt>(intargs->size()))
-		{
-			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-					"Invalid intargs length " << intargs->size()
-					<< "; expected length = " << intArgsLen);
-		}
+		checkArrayLength(parser, "intargs", intargs->size(), intArgsLen);
 		floatargs = &parser.getFloatArray();
-		if(floatArgsLen != static_cast<TqInt>(floatargs->size()))
-		{
-			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-					"Invalid floatargs length " << floatargs->size()
-					<< "; expected length = " << floatArgsLen);
-		}
+		checkArrayLength(parser, "floatargs", floatargs->size(), floatArgsLen);
 	}
 
 	// Extract the parameter list

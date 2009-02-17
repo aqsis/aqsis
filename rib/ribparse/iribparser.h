@@ -28,6 +28,7 @@
 
 #include "aqsis.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,22 @@
 
 namespace Aqsis {
 
+/// A holder for RIB position and name.
+struct SqRibPos
+{
+	TqInt line;
+	TqInt col;
+	std::string name;
+
+	/// Trivial constructor
+	SqRibPos(TqInt line, TqInt col, const std::string& name);
+};
+
+/// pretty print source file position
+std::ostream& operator<<(std::ostream& out, const SqRibPos& pos);
+
+
+// forward declarations
 class IqRibRequestHandler;
 class IqRibParamListHandler;
 
@@ -140,7 +157,7 @@ class RIBPARSE_SHARE IqRibParser
 		virtual bool parseNextRequest() = 0;
 
 		//--------------------------------------------------
-		/// \name Stream stack management
+		/// \name Stream management
 		//@{
 		/** \brief Push a stream onto the input stack
 		 *
@@ -175,6 +192,12 @@ class RIBPARSE_SHARE IqRibParser
 		 * null input for which parseNextRequest() has no effect.
 		 */
 		virtual void popInput() = 0;
+		/** \brief Get the position in the currently connected RIB
+		 *
+		 * The current position and name of the RIB on top of the stream stack
+		 * is returned.  This should be used for error reporting.
+		 */
+		virtual SqRibPos streamPos() = 0;
 		//@}
 
 		//--------------------------------------------------
@@ -310,6 +333,25 @@ class IqRibParamListHandler
 
 		virtual ~IqRibParamListHandler() {}
 };
+
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+// SqRibPos functions
+
+inline SqRibPos::SqRibPos(TqInt line, TqInt col, const std::string& name)
+	: line(line),
+	col(col),
+	name(name)
+{ }
+
+inline std::ostream& operator<<(std::ostream& out, const SqRibPos& pos)
+{
+	out << pos.name << ": " << pos.line << " (col " << pos.col << ")";
+	return out;
+}
 
 } // namespace Aqsis
 
