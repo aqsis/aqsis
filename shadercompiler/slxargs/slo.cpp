@@ -23,14 +23,12 @@
  * \author Matthias Baas
  */
 
+#include "slo.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-// This is only included for the RtInt type
-#include "ri.h"
-
-
-#include "slo.h"
+#include "ri.h" // For RtInt and RIE_* error codes.
 
 #ifdef AQSIS_COMPILER_MSVC6
 #pragma warning (disable : 4786)

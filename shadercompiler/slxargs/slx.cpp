@@ -31,11 +31,13 @@
  */
 
 #include "aqsis.h"
+#include "slx.h"
 
 #ifdef	AQSIS_COMPILER_MSVC6
 #pragma warning (disable : 4786)
 #endif //AQSIS_COMPILER_MSVC6
 
+#include <fstream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -43,12 +45,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ri.h"
-#include "slx.h"
-
 #include "shadervm.h"
-#include "renderer.h"
-#include "librib2ri.h"
-#include "rifile.h"
 
 using namespace Aqsis;
 
@@ -661,18 +658,17 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	//    librib2ri::Engine renderengine;
 	//    RiBegin("CRIBBER");
 
-	CqString strFilename( filePath );
-	CqFile SLXFile( strFilename.c_str() );
+	std::ifstream slxFile(filePath);
 	result = RIE_NOERROR;
 	theNArgs = 0;
 
-	if ( SLXFile.IsValid() )
+	if ( slxFile )
 	{
 		try
 		{
-			boost::shared_ptr<CqShaderVM> pShader(new CqShaderVM(QGetRenderContextI()));
+			boost::shared_ptr<CqShaderVM> pShader(new CqShaderVM(0));
 			pShader->SetDSOPath( DSOPath );
-			pShader->LoadProgram( SLXFile );
+			pShader->LoadProgram( &slxFile );
 			pShader->SetstrName( filePath );
 			pShader->ExecuteInit();
 
