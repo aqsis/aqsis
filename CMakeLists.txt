@@ -10,6 +10,9 @@ SET(AQSIS_PROJECT_VENDOR "Aqsis Team")
 SET(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2008, ${AQSIS_PROJECT_VENDOR}.")
 SET(AQSIS_PROJECT_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
 
+# Set variable for sources path, which can be used when "${CMAKE_SOURCE_DIR}" incorrectly returns the temp directory
+SET(ENV{CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}")
+
 # Path to aqsis-specific include directories for cmake helper scripts.
 SET(CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
@@ -208,7 +211,6 @@ ELSE(UNIX AND NOT APPLE)
 	ELSE(WIN32)
 		IF(APPLE)
 			INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/macosx.cmake)
-			INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/macosx.cmake)
 		ENDIF(APPLE)
 	ENDIF(WIN32)
 ENDIF(UNIX AND NOT APPLE)
@@ -300,7 +302,6 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
 # Windows NSIS Packaging
 IF(WIN32)
-	ADD_SUBDIRECTORY(distribution/win)
 	ADD_SUBDIRECTORY(distribution/win/nsis)
 ENDIF(WIN32)
 

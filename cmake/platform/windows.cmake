@@ -39,6 +39,24 @@ ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
 
 SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} ws2_32)
 
+#
+# Fix for CMake "imlib set but there is no CMAKE_IMPORT_LIBRARY_SUFFIX" build-time error
+#
+IF(MSVC)
+	SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
+ENDIF(MSVC)
+IF(MINGW)
+	SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
+ENDIF(MINGW)
+
+#
+# Create resource files for use during linking
+#
+CONFIGURE_FILE("$ENV{CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${CMAKE_BINARY_DIR}/info.rc")
+CONFIGURE_FILE("$ENV{CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${CMAKE_BINARY_DIR}/icon.rc")
+SET(INFORES_SRCS "${CMAKE_BINARY_DIR}/info.rc")
+SET(ICONRES_SRCS "${CMAKE_BINARY_DIR}/icon.rc")
+
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.
 #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")

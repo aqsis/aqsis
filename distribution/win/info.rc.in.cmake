@@ -1,10 +1,10 @@
 #include <Windows.h>
 
-#define VER_FILEVERSION             ${MAJOR},${MINOR},${BUILD},0
-#define VER_FILEVERSION_STR         "${MAJOR}.${MINOR}.${BUILD}.0\0"
+#define VER_FILEVERSION             ${MAJOR},${MINOR},${BUILD},${REVISION}
+#define VER_FILEVERSION_STR         "${MAJOR}.${MINOR}.${BUILD}.${REVISION}\0"
 
-#define VER_PRODUCTVERSION          ${MAJOR},${MINOR},0,0
-#define VER_PRODUCTVERSION_STR      "${MAJOR}.${MINOR}\0"
+#define VER_PRODUCTVERSION          VER_FILEVERSION
+#define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
 
 #ifndef DEBUG
 #define VER_DEBUG                   0
