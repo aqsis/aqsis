@@ -39,14 +39,6 @@ ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
 
 SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} ws2_32)
 
-#
-# Create resource files for use during linking
-#
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${PROJECT_BINARY_DIR}/info.rc")
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${PROJECT_BINARY_DIR}/icon.rc")
-SET(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
-SET(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
-
 # There is a bug in NSI that does not handle full unix paths properly. Make
 # sure there is at least one set of four (4) backlasshes.
 #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")

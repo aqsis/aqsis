@@ -300,6 +300,7 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
 # Windows NSIS Packaging
 IF(WIN32)
+	ADD_SUBDIRECTORY(distribution/win)
 	ADD_SUBDIRECTORY(distribution/win/nsis)
 ENDIF(WIN32)
 
