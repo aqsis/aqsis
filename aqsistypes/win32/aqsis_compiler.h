@@ -1,21 +1,22 @@
-// Aqsis
-// Copyright (C) 1997 - 2001, Paul C. Gregory
-//
-// Contact: pgregory@aqsis.org
-//
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
-//
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-//
-// You should have received a copy of the GNU General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/* Aqsis
+ / Copyright (C) 1997 - 2001, Paul C. Gregory
+ /
+ / Contact: pgregory@aqsis.org
+ /
+ / This library is free software; you can redistribute it and/or
+ / modify it under the terms of the GNU General Public
+ / License as published by the Free Software Foundation; either
+ / version 2 of the License, or (at your option) any later version.
+ /
+ / This library is distributed in the hope that it will be useful,
+ / but WITHOUT ANY WARRANTY; without even the implied warranty of
+ / MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ / General Public License for more details.
+ /
+ / You should have received a copy of the GNU General Public
+ / License along with this library; if not, write to the Free Software
+ / Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 
 /** \file
@@ -23,7 +24,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is .h included already?
+/**? Is .h included already? */
 #ifndef AQSIS_COMPILER_H_INCLUDED
 #define AQSIS_COMPILER_H_INCLUDED 1
 
@@ -55,7 +56,7 @@
  */
 #define WIN32_LEAN_AND_MEAN
 
-///----------------------------------------------------------------------
+/*----------------------------------------------------------------------*/
 
 #if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
 #pragma comment( compiler )
@@ -64,12 +65,14 @@
 #pragma warning( disable : 4244 )
 #pragma warning( disable : 4251 )
 
-// Disable the warnings about unsafe arguments to the 
-// STL iterators.
+/* Disable the warnings about unsafe arguments to the 
+   STL iterators.
+*/
 #define	_SCL_SECURE_NO_WARNINGS
 
-// Disable warnings about the alternative safe versions
-// of the C runtime functions.
+/* Disable warnings about the alternative safe versions
+   of the C runtime functions.
+*/
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <sys/stat.h>
@@ -97,7 +100,7 @@
 #	define RI_SHARE
 #	define SLXARGS_SHARE
 
-#else // !AQSIS_STATIC_LINK
+#else 
 
 #    ifdef COMMON_EXPORTS
 #      define COMMON_SHARE __declspec(dllexport)
@@ -123,9 +126,10 @@
 #		define SLXARGS_SHARE __declspec(dllimport)
 #	endif
 
-#endif	// AQSIS_STATIC_LINK
+#endif	
 
-/// Export from a DLL.
+/** Export from a DLL.
+ */
 #define AQSIS_EXPORT __declspec(dllexport)
 
-#endif // AQSIS_COMPILER_H_INCLUDED
+#endif 

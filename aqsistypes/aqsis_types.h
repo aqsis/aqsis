@@ -1,21 +1,22 @@
-// Aqsis
-// Copyright (C) 1997 - 2001, Paul C. Gregory
-//
-// Contact: pgregory@aqsis.org
-//
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
-//
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-//
-// You should have received a copy of the GNU General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/* Aqsis
+ / Copyright (C) 1997 - 2001, Paul C. Gregory
+ /
+ / Contact: pgregory@aqsis.org
+ /
+ / This library is free software; you can redistribute it and/or
+ / modify it under the terms of the GNU General Public
+ / License as published by the Free Software Foundation; either
+ / version 2 of the License, or (at your option) any later version.
+ /
+ / This library is distributed in the hope that it will be useful,
+ / but WITHOUT ANY WARRANTY; without even the implied warranty of
+ / MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ / General Public License for more details.
+ /
+ / You should have received a copy of the GNU General Public
+ / License along with this library; if not, write to the Free Software
+ / Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 
 /** \file
@@ -34,12 +35,14 @@
 
 #include "aqsis_config.h"
 
-/// \todo <b>Code review</b> Consider whether we can avoid polluting the global namespace with these typedefs.  C compatibility needs to be assured, so we may have to duplicate the header...
-//--------------------------------------------------------------------------------
+/** \todo <b>Code review</b> Consider whether we can avoid polluting the global namespace with these typedefs.  C compatibility needs to be assured, so we may have to duplicate the header...
+ */
+/*--------------------------------------------------------------------------------*/
 typedef char TqChar;
 typedef unsigned char TqUchar;
 
-/// \todo <b>Code review</b> Deprecate these pointer types?  They're inconsistently used and of dubious usefulness anyway.
+/** \todo <b>Code review</b> Deprecate these pointer types?  They're inconsistently used and of dubious usefulness anyway.
+ */
 typedef char* TqPchar;
 typedef unsigned char* TqPuchar;
 
@@ -55,16 +58,17 @@ typedef float TqFloat;
 typedef double TqDouble;
 
 
-//--------------------------------------------------------------------------------
-// Typedefs for integer types with specific sizes.
-//
-// This approach - based on a combination of stdint.h and limit macros from
-// limits.h - is taken from boost/cstdint.hpp.  Unfortunately we have to use
-// our own version here for C compatibility.
+/*--------------------------------------------------------------------------------
+ / Typedefs for integer types with specific sizes.
+ /
+ / This approach - based on a combination of stdint.h and limit macros from
+ / limits.h - is taken from boost/cstdint.hpp.  Unfortunately we have to use
+ / our own version here for C compatibility.
+*/
 
 #ifdef AQSIS_HAVE_STDINT_H
 
-	// Use types from the C99 stdint.h header.
+	/* Use types from the C99 stdint.h header. */
 #	include <stdint.h>
 
 	typedef int8_t  TqInt8;
@@ -76,10 +80,11 @@ typedef double TqDouble;
 	typedef int32_t  TqInt32;
 	typedef uint32_t TqUint32;
 
-#else // AQSIS_HAVE_STDINT_H
+#else 
 
-	// If the stdint.h header is not present, fall back on using the limits
-	// macros from limits.h to guess the correct types.
+	/* If the stdint.h header is not present, fall back on using the limits
+	  macros from limits.h to guess the correct types.
+	*/
 #	include <limits.h>
 
 #	if UCHAR_MAX == 0xff
@@ -109,7 +114,7 @@ typedef double TqDouble;
 			or contact the aqsis team.
 #	endif
 
-#endif // AQSIS_HAVE_STDINT_H
+#endif 
 
 
-#endif // AQSIS_TYPES_INCLUDED
+#endif 

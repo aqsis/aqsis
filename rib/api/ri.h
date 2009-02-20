@@ -162,4 +162,4 @@ extern	"C"
 #define RIE_SEVERE      ((RtInt)3)      /* So bad you should probably abort */
 
 
-#endif // RI_H_INCLUDED
+#endif 
