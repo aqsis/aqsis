@@ -508,7 +508,7 @@ void SetDefaultRiOptions( void )
 	if(const char* homePath = getenv("HOME"))
 	{
 		std::string homeRcPath = homePath;
-		if(homeRcPath.empty() || *(homeRcPath.end()-1) == DIRSEP[0])
+		if(!(homeRcPath.empty() || *(homeRcPath.end()-1) == DIRSEP[0]))
 			homeRcPath += DIRSEP;
 		homeRcPath += ".aqsisrc";
 
