@@ -1107,6 +1107,9 @@ BOOST_AUTO_TEST_CASE(RiMakeOcclusion_handler_test)
 RI_SHARE RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
 {
 	CheckParams() << Req("Option") << name << ParamList(count, tokens, values);
+	// Check that the parameter list token count is correct.  Note that the
+	// formula used below assumes there's only one Req in the token stream.
+	BOOST_CHECK_EQUAL(2*count, static_cast<TqInt>(g_fixture->parser.params().size()) - 2);
 }
 
 BOOST_AUTO_TEST_CASE(paramlist_int_array_value_test)

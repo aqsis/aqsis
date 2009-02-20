@@ -160,7 +160,7 @@ class CqParamListHandler : public IqRibParamListHandler
 		/// Return the number of (token,value) pairs.
 		RtInt count()
 		{
-			return m_tokens.size();
+			return m_tokenStorage.size();
 		}
 
 		/** Return the number of vectors in the P array
