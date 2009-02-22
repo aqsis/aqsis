@@ -49,7 +49,8 @@ namespace Aqsis
  * create a std::iostream compatible stream which reads and writes to pipes
  * (see TqPopenStream)
  */
-class CqPopenDevice : public boost::iostreams::device<boost::iostreams::bidirectional>
+class COMMON_SHARE CqPopenDevice
+	: public boost::iostreams::device<boost::iostreams::bidirectional>
 {
 	public:
 		/** \brief Create a child process and connect it with pipes for stdin
