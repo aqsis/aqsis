@@ -12,21 +12,96 @@ CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/aqsis_config.h.in.cmake"
 #----------------------------------------------------------------------
 # Source files
 
-# NOTE: Not sure if this best, or we should exhaustively list the files.
-# The reason being, if we add a new file in this system, we need to 
-# manually re-run CMake to generate the source files, however, if we
-# have to modify this file then 'make' or whatever will spot it automatically
-# re-run cmake.
-FILE(GLOB AQSISTYPES_SRCS ${PROJECT_SOURCE_DIR}/*.cpp)
-FILE(GLOB AQSISTYPES_HDRS ${PROJECT_SOURCE_DIR}/*.h)
+SET(AQSISTYPES_SRCS
+	bitvector.cpp
+	cellnoise.cpp
+	color.cpp
+	exception.cpp
+	file.cpp
+	logging.cpp
+	lowdiscrep.cpp
+	matrix.cpp
+	memorysentry.cpp
+	noise.cpp
+	noise1234.cpp
+	plugins.cpp
+	popen.cpp
+	primvartoken.cpp
+	random.cpp
+	refcount.cpp
+	riparamlist.cpp
+	spline.cpp
+	sstring.cpp
+	tokendictionary.cpp
+)
+
+SET(AQSISTYPES_HDRS
+	aqsis.h
+	aqsis_types.h
+	aqsismath.h
+	autobuffer.h
+	bitvector.h
+	cellnoise.h
+	color.h
+	enum.h
+	exception.h
+	execute.h
+	file.h
+	interpclasscounts.h
+	list.h
+	logging.h
+	logging_streambufs.h
+	lowdiscrep.h
+	matrix.h
+	matrix2d.h
+	memorysentry.h
+	multitimer.h
+	noise.h
+	noise1234.h
+	plugins.h
+	pool.h
+	popen.h
+	primvartoken.h
+	primvartype.h
+	random.h
+	refcount.h
+	region.h
+	ri_convenience.h
+	ri_types.h
+	riparamlist.h
+	smartptr.h
+	socket.h
+	spline.h
+	sstring.h
+	tokendictionary.h
+	vector2d.h
+	vector3d.h
+	vector4d.h
+	vectorcast.h
+)
 
 IF(UNIX OR APPLE)
-	FILE(GLOB AQSISTYPES_SYSTEM_SRCS ${PROJECT_SOURCE_DIR}/posix/*.cpp)
-	FILE(GLOB AQSISTYPES_SYSTEM_HDRS ${PROJECT_SOURCE_DIR}/posix/*.h)
+	SET(AQSISTYPES_SYSTEM_SRCS
+		posix/execute_system.cpp
+		posix/file_system.cpp
+		posix/socket_system.cpp
+	)
+	SET(AQSISTYPES_SYSTEM_HDRS
+		posix/aqsis_compiler.h
+		posix/socket_system.h
+	)
 ELSE(UNIX OR APPLE)
 	IF(WIN32)
-		FILE(GLOB AQSISTYPES_SYSTEM_SRCS ${PROJECT_SOURCE_DIR}/win32/*.cpp)
-		FILE(GLOB AQSISTYPES_SYSTEM_HDRS ${PROJECT_SOURCE_DIR}/win32/*.h)
+		SET(AQSISTYPES_SYSTEM_SRCS
+			win32/execute_system.cpp
+			win32/file_system.cpp
+			win32/socket_system.cpp
+		)
+		SET(AQSISTYPES_SYSTEM_HDRS
+			win32/aqsis_compiler.h
+			win32/socket_system.h
+			win32/unistd.h
+		)
 	ENDIF(WIN32)
 ENDIF(UNIX OR APPLE)
 
@@ -36,11 +111,6 @@ SET(AQSISTYPES_HDRS
 	${AQSISTYPES_SYSTEM_HDRS}
 	"${PROJECT_BINARY_DIR}/aqsis_config.h"
 )
-
-FILE(GLOB AQSISTYPES_TEST_SRCS ${PROJECT_SOURCE_DIR}/*_test.cpp)
-
-FILTER_OUT("${AQSISTYPES_TEST_SRCS}" "${AQSISTYPES_SRCS}" AQSISTYPES_SRCS) 
-
 
 #------------------------------------------------------------------------------
 # Targets
@@ -77,6 +147,31 @@ INSTALL(FILES ${AQSISTYPES_HDRS} DESTINATION ${INCLUDEDIR})
 
 #----------------------------------------------------------------------
 # Testing
+SET(AQSISTYPES_TEST_SRCS
+	aqsismath_test.cpp
+	cellnoise_test.cpp
+	color_test.cpp
+	enum_test.cpp
+	matrix2d_test.cpp
+	matrix_test.cpp
+	noise1234_test.cpp
+	noise_test.cpp
+	popen_test.cpp
+	primvartoken_test.cpp
+	spline_test.cpp
+	vector2d_test.cpp
+	vector3d_test.cpp
+	vector4d_test.cpp
+)
+
 SET(LINKLIBS)
 INCLUDE(link.cmake)
 AQSIS_ADD_TESTS(${AQSISTYPES_TEST_SRCS} LINKWITH ${LINKLIBS})
+
+IF(AQSIS_ENABLE_TESTING)
+	# A helper executable for popen_test.cpp
+	ADD_EXECUTABLE(pipethrough popen_pipethrough_helper_test.cpp)
+	SET_TARGET_PROPERTIES(pipethrough PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+	)
+ENDIF(AQSIS_ENABLE_TESTING)

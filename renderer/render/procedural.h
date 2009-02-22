@@ -27,18 +27,21 @@
 #ifndef PROCEDURAL_H_INCLUDED
 #define PROCEDURAL_H_INCLUDED
 
-#include        "aqsis.h"
-#include        "matrix.h"
-#include        "surface.h"
+#include "aqsis.h"
+
+#include <map>
+
+#include <boost/shared_ptr.hpp>
+
+#include "matrix.h"
+#include "popen.h"
+#include "surface.h"
 
 namespace Aqsis {
 
 
-/**
- * \class CqProcedural
- * 
- * Abstract base class for all Procedural objects, providing the basic state
- * management.
+/** \brief Class to store RiProcedural() arguments before the procedural is
+ * called to generate geometry.
  */
 class CqProcedural : public CqSurface
 {
@@ -119,6 +122,50 @@ class CqProcedural : public CqSurface
 		RtProcFreeFunc m_pFreeFunc;
 
 };
+
+
+//------------------------------------------------------------------------------
+/** \brief Manager for child process streams created by RiProcRunProgram invocations.
+ *
+ * The repository keeps track of a seperate child process stream for each
+ * distinct RunProgram command.  These can be retrieved using the find()
+ * function in order to generate further RIB.
+ */
+class CqRunProgramRepository
+{
+	public:
+		/** \brief Get an iostream pipe connected to the stdin and stdout of
+		 * a child RunProgram process.
+		 *
+		 * If no child process corresponding to 'command' is currently running,
+		 * a new process is started and the stdin and stdout connected to a
+		 * pipe stream which is returned.
+		 *
+		 * If the child process has encountered a problem, the appropriate
+		 * stream flags should be set (test with pipe.fail() or pipe.eof()).
+		 *
+		 * \param command - command line for the child process.  The command
+		 * line will be split up into arguments delimited by whitespace, with
+		 * the fist argument the name of the program to run.  No escaping
+		 * mechanism for whitespace is currently supported.  The program is
+		 * searched for in the procedural searchpath, with the system path as a
+		 * fallback.
+		 */
+		std::iostream& find(const std::string& command);
+
+	private:
+		typedef boost::shared_ptr<TqPopenStream> TqPopenStreamPtr;
+		typedef std::map<std::string, TqPopenStreamPtr> TqRunProgramMap;
+
+		static void splitCommandLine(const std::string& command,
+				std::vector<std::string>& argv);
+
+		TqPopenStream& startNewRunProgram(const std::string& command);
+
+		/// Set of active pipes for child processes.
+		TqRunProgramMap m_activeRunPrograms;
+};
+
 
 } // namespace Aqsis
 

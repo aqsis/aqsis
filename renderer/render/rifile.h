@@ -35,6 +35,24 @@
 
 namespace Aqsis {
 
+/** \brief Find a file in the given RI search path.
+ *
+ * The standard way to specify search paths is using RiOption:
+ *
+ * \code
+ * RiOption("searchpath", "procedural", "list:of:paths");
+ * \endcode
+ *
+ * procedurals will then be looked up in list:of:paths.
+ *
+ * \param fileName - name of the file
+ * \param riSearchPathName - name of the search path as specified to RiOption
+ *                           ("procdural" in the example above)
+ */
+std::string findFileInRiSearchPath(const std::string& fileName,
+		const char* riSearchPathName);
+
+
 //----------------------------------------------------------------------
 /** \class CqRiFile
  * \brief Standard handling of all file types utilising the searchpath options.
@@ -93,7 +111,21 @@ class CqRiFile : public CqFile
 
 };
 
-//-----------------------------------------------------------------------
+//==============================================================================
+// Implementation details
+//==============================================================================
+
+inline std::string findFileInRiSearchPath(const std::string& fileName,
+		const char* riSearchPathName)
+{
+	const CqString* searchPath = QGetRenderContext()->poptCurrent()->
+		GetStringOption("searchpath", riSearchPathName);
+	if(searchPath)
+		return findFileInPath(fileName, searchPath->c_str());
+	else
+		return findFileInPath(fileName, "");
+}
+
 
 } // namespace Aqsis
 
