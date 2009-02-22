@@ -148,10 +148,6 @@ CqRibToken CqRibLexer::scanNext()
 				// ignore whitespace
 				break;
 			case '#':
-				if(m_inBuf->get() == 0377)
-					// "#\377" signals the end of a RunProgram block
-					return CqRibToken(CqRibToken::ENDOFFILE);
-				m_inBuf->unget();
 				readComment(*m_inBuf);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
@@ -550,7 +546,7 @@ void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 	if(m_commentCallback)
 	{
 		std::string comment;
-		while(c != EOF && c != '\n' && c != '\r')
+		while(c != EOF && c != '\n' && c != '\r' && c != 0377)
 		{
 			comment += c;
 			c = inBuf.get();
@@ -559,7 +555,7 @@ void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 	}
 	else
 	{
-		while(c != EOF && c != '\n' && c != '\r')
+		while(c != EOF && c != '\n' && c != '\r' && c != 0377)
 			c = inBuf.get();
 	}
 	inBuf.unget();

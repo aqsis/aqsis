@@ -427,3 +427,16 @@ BOOST_AUTO_TEST_CASE(CqRibLexer_comment_callback_test)
 	BOOST_CHECK_EQUAL(comment1.str, "#some RIB structure comment here");
 	CHECK_EOF(lex);
 }
+
+BOOST_AUTO_TEST_CASE(CqRibLexer_end_of_file_test)
+{
+	// Tests for characters which create EOFs
+	LexerFixture f("Rqst \377 Rq2 # asdf \377\nRq3");
+
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::REQUEST, "Rqst"));
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::ENDOFFILE));
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::REQUEST, "Rq2"));
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::ENDOFFILE));
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::REQUEST, "Rq3"));
+	BOOST_CHECK_EQUAL(f.lex.get(), CqRibToken(CqRibToken::ENDOFFILE));
+}
