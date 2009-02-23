@@ -238,7 +238,7 @@ class HairProcedural
 			if(emitterStream)
 			{
 				PointsPolygonsRequestHandler requestHandler(m_emitter, m_params.numHairs);
-				parseStream(emitterStream, requestHandler);
+				parseStream(emitterStream, m_params.emitterFileName, requestHandler);
 			}
 			if(!m_emitter)
 				throw std::runtime_error("Could not find PointsPolygons emitter mesh in file");
@@ -247,7 +247,7 @@ class HairProcedural
 			if(curveStream)
 			{
 				CurvesRequestHandler requestHandler(m_parentHairs, m_params.hairModifiers);
-				parseStream(curveStream, requestHandler);
+				parseStream(curveStream, m_params.hairFileName, requestHandler);
 			}
 			if(!m_parentHairs)
 				throw std::runtime_error("Could not find parent Curves in file");

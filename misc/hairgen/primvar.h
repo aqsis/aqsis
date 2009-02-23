@@ -14,7 +14,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <iribrequest.h>
 #include <primvartoken.h>
 #include <ri.h>
 

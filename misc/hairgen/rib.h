@@ -8,7 +8,7 @@
 #include <string>
 
 #include <smartptr.h>
-#include <ribparser.h>
+#include <iribparser.h>
 #include <tokendictionary.h>
 
 #include "parenthairs.h"
@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 /** RIB parameter collection from libribparse --> PrimVars container.
  *
- * This class collects primvars as they are parsed by Aqsis::CqRibParser, and
+ * This class collects primvars as they are parsed by Aqsis::IqRibParser, and
  * stuffs them into a PrimVars container.  As such, it currently supports only
  * float primvars.
  */
@@ -34,7 +34,7 @@ class PrimVarInserter : public Aqsis::IqRibParamListHandler
 		{ }
 
 		// inherited
-		virtual void readParameter(const std::string& name, Aqsis::CqRibParser& parser)
+		virtual void readParameter(const std::string& name, Aqsis::IqRibParser& parser)
 		{
 			Aqsis::CqPrimvarToken token;
 			try
@@ -71,7 +71,7 @@ class PointsPolygonsRequestHandler : public Aqsis::IqRibRequestHandler
 			m_tokenDict(true)
 		{ }
 
-		void handleRequest(const std::string& name, Aqsis::CqRibParser& parser)
+		void handleRequest(const std::string& name, Aqsis::IqRibParser& parser)
 		{
 			if(name != "PointsPolygons")
 				return;
@@ -108,7 +108,7 @@ class CurvesRequestHandler : public Aqsis::IqRibRequestHandler
 			m_tokenDict(true)
 		{ }
 
-		void handleRequest(const std::string& name, Aqsis::CqRibParser& parser)
+		void handleRequest(const std::string& name, Aqsis::IqRibParser& parser)
 		{
 			if(name != "Curves")
 				return;
@@ -144,20 +144,19 @@ class CurvesRequestHandler : public Aqsis::IqRibRequestHandler
  *                   parser.  Only handlers for the particular requests of
  *                   interest should be included.
  */
-inline void parseStream(std::istream& ribStream,
+inline void parseStream(std::istream& ribStream, const std::string& streamName,
 		Aqsis::IqRibRequestHandler& requestHandler)
 {
-	Aqsis::CqRibLexer lex(ribStream);
-	Aqsis::CqRibParser parser(
-		boost::shared_ptr<Aqsis::CqRibLexer>(&lex, Aqsis::nullDeleter),
+	boost::shared_ptr<Aqsis::IqRibParser> parser = Aqsis::IqRibParser::create(
 		boost::shared_ptr<Aqsis::IqRibRequestHandler>(&requestHandler, Aqsis::nullDeleter) );
 
+	parser->pushInput(ribStream, streamName);
 	bool parsing = true;
 	while(parsing)
 	{
 		try
 		{
-			parsing = parser.parseNextRequest();
+			parsing = parser->parseNextRequest();
 		}
 		catch(Aqsis::XqParseError& e)
 		{

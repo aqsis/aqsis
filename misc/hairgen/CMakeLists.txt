@@ -27,9 +27,9 @@ LINK_DIRECTORIES("${AQSIS_LIB_PATH}")
 ADD_LIBRARY(hairgen SHARED ${HAIRGEN_SOURCES})
 
 IF(UNIX AND NOT APPLE)
-	TARGET_LINK_LIBRARIES(hairgen aqsistypes ribparse)
+	TARGET_LINK_LIBRARIES(hairgen aqsis_types aqsis_ribparse)
 ELSE(UNIX AND NOT APPLE)
-	TARGET_LINK_LIBRARIES(hairgen aqsis aqsistypes ribparse)
+	TARGET_LINK_LIBRARIES(hairgen aqsis_core aqsis_types aqsis_ribparse)
 ENDIF(UNIX AND NOT APPLE)
 
 IF(WIN32)
