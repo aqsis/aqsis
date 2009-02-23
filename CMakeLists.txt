@@ -225,7 +225,6 @@ ADD_SUBDIRECTORY(aqsistypes)
 # compiling shaders at build time can proceed (aqsl needs the library).
 GET_DIRECTORY_PROPERTY(AQSISTYPES_LIBRARY DIRECTORY aqsistypes DEFINITION AQSISTYPES_LIBRARY)
 ADD_SUBDIRECTORY(rib/api)
-ADD_SUBDIRECTORY(rib/rib2)
 ADD_SUBDIRECTORY(rib/ribparse)
 ADD_SUBDIRECTORY(rib/rib2ri)
 ADD_SUBDIRECTORY(rib/ri2rib)

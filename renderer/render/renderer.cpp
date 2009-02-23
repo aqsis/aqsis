@@ -831,7 +831,6 @@ void CqRenderer::Quit()
 
 void CqRenderer::Initialise()
 {
-	m_tokenDict.clear();
 	FlushShaders();
 
 	// Truncate the array of named coordinate systems to just the standard ones.

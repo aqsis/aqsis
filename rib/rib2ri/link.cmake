@@ -1,1 +1,0 @@
-SET(LINKLIBS aqsis_rib2ri ${LINKLIBS})

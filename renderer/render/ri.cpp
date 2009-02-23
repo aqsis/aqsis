@@ -611,7 +611,6 @@ void SetDefaultRiOptions( void )
 // RiBegin
 // Begin a Renderman render phase.
 //
-extern "C" char *StandardParameters[][2];
 RtVoid	RiBegin( RtToken name )
 {
 	EXCEPTION_TRY_GUARD
@@ -628,17 +627,6 @@ RtVoid	RiBegin( RtToken name )
 	QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
 	// Clear the lightsources stack.
 	Lightsource_stack.clear();
-
-	// Include the standard options (how can we opt out of this).
-	int param = 0;
-	while( StandardParameters[param][0] != NULL )
-	{
-		RiDeclare(
-		    StandardParameters[param][0],
-		    StandardParameters[param][1]
-		);
-		param++;
-	};
 
 	SetDefaultRiOptions();
 
