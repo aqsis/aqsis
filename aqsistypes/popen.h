@@ -50,9 +50,14 @@ namespace Aqsis
  * (see TqPopenStream)
  */
 class COMMON_SHARE CqPopenDevice
-	: public boost::iostreams::device<boost::iostreams::bidirectional>
 {
 	public:
+    typedef char char_type;
+    struct category : boost::iostreams::bidirectional,
+					  boost::iostreams::device_tag,
+					  boost::iostreams::closable_tag
+        { };
+
 		/** \brief Create a child process and connect it with pipes for stdin
 		 * and stdout.
 		 *

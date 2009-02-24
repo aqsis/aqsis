@@ -23,6 +23,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
+#include "aqsis.h"
+
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
 #endif //AQSIS_SYSTEM_WIN32
@@ -31,6 +33,8 @@
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #	include <time.h> // for nanosleep()
+#else
+#	include <windows.h>
 #endif
 
 #include <boost/test/auto_unit_test.hpp>

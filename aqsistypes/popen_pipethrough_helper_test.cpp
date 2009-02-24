@@ -1,3 +1,4 @@
+#include <string>
 #include <iostream>
 
 // Simple helper program for the popoen unit tests.
