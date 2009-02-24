@@ -395,7 +395,7 @@ class blobby_vm_assembler
 										->GetStringOption("searchpath", "procedural") );
 								DBO_handle = DBO.SimpleDLOpen(&fullName);
 							}
-							catch(XqInvalidFile& e)
+							catch(XqInvalidFile& /*e*/)
 							{
 								Aqsis::log() << error
 									<< "Could not find dynamic blob object \""

@@ -1784,7 +1784,7 @@ CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, Cq
 	TqInt samplesPerPixel = inBuf->Samples();
 	bool imEvenS = !(imWidth % 2);
 	bool imEvenT = !(imHeight % 2);
-	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
+	if(m_weights.empty() || !((m_sNumPts % 2 == 1) ^ imEvenS) || !((m_tNumPts % 2 == 1) ^ imEvenT))
 	{
 		// recalculate filter kernel if cached one isn't the right size.
 		computeFilterKernel(m_sWidth, m_tWidth, m_filterFunc, imEvenS, imEvenT);

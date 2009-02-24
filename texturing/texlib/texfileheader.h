@@ -186,7 +186,7 @@ class AQSISTEX_SHARE CqTexFileHeader::CqTypeInfoHolder
 		{ }
 		bool operator<(const CqTypeInfoHolder& rhs) const
 		{
-			return m_typeInfo.before(rhs.m_typeInfo);
+			return m_typeInfo.before(rhs.m_typeInfo) != 0;
 		}
 };
 

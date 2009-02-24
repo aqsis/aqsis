@@ -71,7 +71,7 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		};
 
 	public:
-		CqPointsKDTreeData( const CqPoints* pPoints ) : m_pPointsSurface( pPoints )
+		CqPointsKDTreeData() : m_pPointsSurface( NULL )
 		{}
 		virtual ~CqPointsKDTreeData()
 		{
@@ -104,8 +104,10 @@ class CqPoints : public CqSurface
 	public:
 
 		CqPoints( TqInt nVertices, const boost::shared_ptr<CqPolygonPoints>& pPoints );
-		CqPoints() : m_KDTreeData(this), m_KDTree(&m_KDTreeData)
-		{}
+		CqPoints() : m_KDTree(&m_KDTreeData)
+		{
+			m_KDTreeData.SetpPoints(this); 
+		}
 
 		virtual	~CqPoints()
 		{}

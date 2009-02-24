@@ -57,7 +57,6 @@ void ReadAndHandleOutput(HANDLE hPipeRead, CqExecute::TqCallback& callBack)
 {
 	CHAR lpBuffer[256];
 	DWORD nBytesRead;
-	DWORD nCharsWritten;
 
 	lpBuffer[0] = '\0';
 	while(TRUE)
@@ -71,10 +70,6 @@ void ReadAndHandleOutput(HANDLE hPipeRead, CqExecute::TqCallback& callBack)
 				Aqsis::log() << error << "Reading child output" << std::endl; // Something bad happened.
 		}
 
-		// Display the character read on the screen.
-//		if (!WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE),lpBuffer,
-//					   nBytesRead,&nCharsWritten,NULL))
-//				DisplayError("WriteConsole"); // Something bad happened.
 		lpBuffer[nBytesRead] = '\0';
 		if(!callBack.empty())
 			callBack(lpBuffer);

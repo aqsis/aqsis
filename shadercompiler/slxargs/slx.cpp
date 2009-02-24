@@ -712,7 +712,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 			currentShaderNArgs = theNArgs;
 			currentShaderType = theShaderType;
 		}
-		catch(XqBadShader& e)
+		catch(XqBadShader& /*e*/)
 		{
 			// todo: how do we report this error in more detail?
 			result = RIE_BADFILE;

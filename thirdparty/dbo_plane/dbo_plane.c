@@ -25,9 +25,9 @@ EXPORT void ImplicitBound(State *s, float *bd,
 
 float level(float v, float h)
 {
-  float r=(v/h+1.0)*0.5;
-  if (r<0.0) r=0.0;
-  if (r>1.0) r=1.0;
+  float r=(v/h+1.0f)*0.5f;
+  if (r<0.0) r=0.0f;
+  if (r>1.0) r=1.0f;
   return r;
 }
 

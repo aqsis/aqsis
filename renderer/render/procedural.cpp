@@ -309,7 +309,7 @@ TqPopenStream& CqRunProgramRepository::startNewRunProgram(
 	{
 		progName = findFileInRiSearchPath(progName, "procedural");
 	}
-	catch(XqInvalidFile& e)
+	catch(XqInvalidFile& /*e*/)
 	{
 		Aqsis::log() << info
 			<< "RiProcRunProgram: Could not find \"" << progName
@@ -347,7 +347,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			QGetRenderContext()->parseRibStream(pipe, "[" + command + "]");
 			STATS_INC( GEO_prc_created_prp );
 		}
-		catch(std::ios_base::failure& e)
+		catch(std::ios_base::failure& /*e*/)
 		{
 			Aqsis::log() << error << "RiProcRunProgram: Broken pipe for RunProgram ["
 				<< command << "]  (Likely causes: program not in path or premature exit.)\n";

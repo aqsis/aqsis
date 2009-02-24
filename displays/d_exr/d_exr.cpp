@@ -94,8 +94,14 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "aqsis.h"
+
 #include <assert.h>
 
+// Lower the warning level to eliminate unavoidable warnings from the OpenEXR headers.
+#if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
+#	pragma warning(push,1)
+#endif
 #include <ImfOutputFile.h>
 #include <ImfChannelList.h>
 #include <ImfIntAttribute.h>
@@ -111,6 +117,10 @@
 #include <Iex.h>
 #include <half.h>
 #include <halfFunction.h>
+#if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
+#	pragma warning(pop)
+#endif
+
 #include <string>
 #include <map>
 #include <vector>

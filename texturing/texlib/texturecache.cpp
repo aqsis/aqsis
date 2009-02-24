@@ -89,7 +89,7 @@ const CqTexFileHeader* CqTextureCache::textureInfo(const char* name)
 		file = getTextureFile(name);
 		return &(file->header());
 	}
-	catch(XqInvalidFile& e)
+	catch(XqInvalidFile& /*e*/)
 	{
 		return 0;
 	}

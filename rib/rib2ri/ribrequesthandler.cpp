@@ -82,7 +82,7 @@ class CqParamListHandler : public IqRibParamListHandler
 			{
 				tok = m_tokenDict.parseAndLookup(name);
 			}
-			catch(XqParseError& e)
+			catch(XqParseError& /*e*/)
 			{
 				throw;
 			}
