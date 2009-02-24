@@ -38,6 +38,7 @@
 #endif
 
 #include <boost/test/auto_unit_test.hpp>
+#include <iostream>
 
 
 // Suspend execution for the given number of milliseconds
@@ -57,7 +58,7 @@ void milliSleep(TqInt milliSecs)
 std::string readLine(std::istream& in)
 {
 	std::string s;
-	std::getline(in, s);
+	std::getline(in, s, '\r');
 	return s;
 }
 

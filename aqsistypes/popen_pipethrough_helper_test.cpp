@@ -22,8 +22,8 @@
 int main(int argc, char* argv[])
 {
 	for(int i = 0; i < argc; ++i)
-		std::cout << argv[i] << "\n";
-	std::cout << "end-of-args\n";
+		std::cout << argv[i] << "\r";
+	std::cout << "end-of-args\r";
 	std::cout << std::flush;
 
 	while(true)
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 		std::getline(std::cin, line);
 		if(line.size() == 0)
 			break;
-		std::cout << line << "\n";
+		std::cout << line << "\r";
 		std::cout << std::flush;
 	}
 

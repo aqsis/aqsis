@@ -27,7 +27,7 @@
 #include "popen.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
-//#	include <io.h>
+#	include <windows.h>
 #else
 #	include <unistd.h>
 #	include <signal.h>
@@ -36,6 +36,7 @@
 #include <boost/scoped_array.hpp>
 
 #include "exception.h"
+#include "logging.h"
 
 namespace Aqsis
 {
@@ -45,12 +46,171 @@ namespace Aqsis
 // windows implementation for CqPopenDevice::CqImpl
 class CqPopenDevice::CqImpl
 {
-	// TODO: Implementation!
 	private:
+		/// Handle to the file from which we can read child stdout.
+		HANDLE m_pipeReadHandle;
+		/// Handle to the file into which we can write to the child stdin.
+		HANDLE m_pipeWriteHandle;
 	public:
 		CqImpl(const std::string& progName, const std::vector<std::string>& argv)
 		{
-			AQSIS_THROW_XQERROR(XqInternal, EqE_Unimplement, "CqPopenDevice::CqImpl not yet implemented on windows!");
+			HANDLE hOutputReadTmp,hOutputWrite;
+			HANDLE hInputWriteTmp,hInputRead;
+			HANDLE hErrorWrite;
+			SECURITY_ATTRIBUTES sa;
+			BOOL bFuncRetn = FALSE;
+
+			// Set up the security attributes struct.
+			sa.nLength= sizeof(SECURITY_ATTRIBUTES);
+			sa.lpSecurityDescriptor = NULL;
+			sa.bInheritHandle = TRUE;
+
+			// Create the child output pipe.
+			if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0))
+			{
+				Aqsis::log() << error << "CreatePipe" << std::endl;
+				return;
+			}
+
+			// Create a duplicate of the output write handle for the std error
+			// write handle. This is necessary in case the child application
+			// closes one of its std output handles.
+			if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite,
+									GetCurrentProcess(),&hErrorWrite,0,
+									TRUE,DUPLICATE_SAME_ACCESS))
+			{
+				Aqsis::log() << error << "DuplicateHandle" << std::endl;
+				return;
+			}
+
+			// Create the child input pipe.
+			if (!CreatePipe(&hInputRead,&hInputWriteTmp,&sa,0))
+			{
+				Aqsis::log() << error << "CreatePipe" << std::endl;
+			}
+
+			// Create new output read handle and the input write handles. Set
+			// the Properties to FALSE. Otherwise, the child inherits the
+			// properties and, as a result, non-closeable handles to the pipes
+			// are created.
+			if (!DuplicateHandle(GetCurrentProcess(),hOutputReadTmp,
+								GetCurrentProcess(),
+								&m_pipeReadHandle, // Address of new handle.
+								0,FALSE, // Make it uninheritable.
+								DUPLICATE_SAME_ACCESS))
+			{
+				Aqsis::log() << error << "DuplicateHandle" << std::endl;
+				return;
+			}
+
+			if (!DuplicateHandle(GetCurrentProcess(),hInputWriteTmp,
+								GetCurrentProcess(),
+								&m_pipeWriteHandle, // Address of new handle.
+								0,FALSE, // Make it uninheritable.
+								DUPLICATE_SAME_ACCESS))
+			{
+				Aqsis::log() << error << "DuplicateHandle" << std::endl;
+				return;
+			}
+
+
+			// Close inheritable copies of the handles you do not want to be
+			// inherited.
+			if (!CloseHandle(hOutputReadTmp)) 
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+			if (!CloseHandle(hInputWriteTmp))
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+
+			PROCESS_INFORMATION pi;
+			STARTUPINFO si;
+
+			// Set up the start up info struct.
+			ZeroMemory(&si,sizeof(STARTUPINFO));
+			si.cb = sizeof(STARTUPINFO);
+			si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
+			si.hStdOutput = hOutputWrite;
+			si.hStdInput  = hInputRead;
+			si.hStdError  = hErrorWrite;
+			si.wShowWindow = SW_HIDE;
+			// Use this if you want to hide the child:
+			//     si.wShowWindow = SW_HIDE;
+			// Note that dwFlags must include STARTF_USESHOWWINDOW if you want to
+			// use the wShowWindow flags.
+
+			// Build the command string.
+			std::stringstream strCommand;
+			strCommand << "\"" << progName << "\"";
+			for(std::vector<std::string>::const_iterator arg = argv.begin() + 1; arg != argv.end(); ++arg)
+				strCommand << " \"" << *arg << "\"";
+			TqInt totlen = strCommand.str().size();
+			boost::scoped_array<char> command(new char[totlen+1]);
+			strncpy(&command[0], strCommand.str().c_str(), totlen);
+			command[totlen] = '\0';
+			
+			// Create the child process.
+			bFuncRetn = CreateProcess(NULL,
+									  command.get(), // command line
+									  NULL,          // process security attributes
+									  NULL,          // primary thread security attributes
+									  TRUE,          // handles are inherited
+									  0,             // creation flags
+									  NULL,          // use parent's environment
+									  NULL,		     // use parent's current directory
+									  &si,			 // STARTUPINFO pointer
+									  &pi);			 // receives PROCESS_INFORMATION
+
+			if (bFuncRetn == 0)
+			{
+				Aqsis::log() << error << "CreateProcess " << strCommand.str() << " failed." << std::endl;
+				return;
+			}
+
+			// Close any unnecessary handles.
+			if (!CloseHandle(pi.hThread))
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+
+
+			// Close pipe handles (do not continue to modify the parent).
+			// You need to make sure that no handles to the write end of the
+			// output pipe are maintained in this process or else the pipe will
+			// not close when the child process exits and the ReadFile will hang.
+			if (!CloseHandle(hOutputWrite))
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+
+			if (!CloseHandle(hInputRead ))
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+
+			if (!CloseHandle(hErrorWrite))
+			{
+				Aqsis::log() << error << "CloseHandle" << std::endl;
+				return;
+			}
+		}
+
+		/// Get the handle associated with pipe to read from.
+		HANDLE pipeReadHandle()
+		{
+			return m_pipeReadHandle;
+		}
+		/// Get the handle associated with pipe to write to.
+		HANDLE pipeWriteHandle()
+		{
+			return m_pipeWriteHandle;
 		}
 };
 
@@ -206,8 +366,13 @@ CqPopenDevice::CqPopenDevice(const std::string& progName,
 std::streamsize CqPopenDevice::read(char_type* s, std::streamsize n)
 {
 #	ifdef AQSIS_SYSTEM_WIN32
-	AQSIS_THROW_XQERROR(XqInternal, EqE_Unimplement, "Not implemented!");
-	return 0;
+	DWORD nBytesRead;
+	if (!ReadFile(m_impl->pipeReadHandle(),s,n,&nBytesRead,NULL) || !nBytesRead)
+	{
+		if (GetLastError() != ERROR_BROKEN_PIPE)
+			Aqsis::log() << error << "Reading child output" << std::endl; // Something bad happened.
+	}
+	return static_cast<std::streamsize>(nBytesRead);
 #	else // AQSIS_SYSTEM_WIN32
 	std::streamsize nRead = ::read(m_impl->pipeReadFd(), s, n);
 	if(nRead == -1)
@@ -219,7 +384,13 @@ std::streamsize CqPopenDevice::read(char_type* s, std::streamsize n)
 std::streamsize CqPopenDevice::write(const char_type* s, std::streamsize n)
 {
 #	ifdef AQSIS_SYSTEM_WIN32
-	AQSIS_THROW_XQERROR(XqInternal, EqE_Unimplement, "Not implemented!");
+	DWORD nBytesWritten;
+	if (!WriteFile(m_impl->pipeWriteHandle(),s,n,&nBytesWritten,NULL) || !nBytesWritten)
+	{
+		if (GetLastError() != ERROR_BROKEN_PIPE)
+			Aqsis::log() << error << "Writing child input" << std::endl; // Something bad happened.
+	}
+	return static_cast<std::streamsize>(nBytesWritten);
 	return 0;
 #	else // AQSIS_SYSTEM_WIN32
 	std::streamsize nWrite = ::write(m_impl->pipeWriteFd(), s, n);
@@ -232,7 +403,18 @@ std::streamsize CqPopenDevice::write(const char_type* s, std::streamsize n)
 void CqPopenDevice::close(std::ios_base::openmode mode)
 {
 #	ifdef AQSIS_SYSTEM_WIN32
-	AQSIS_THROW_XQERROR(XqInternal, EqE_Unimplement, "Not implemented!");
+	if(mode == std::ios_base::in)
+		if (!CloseHandle(m_impl->pipeReadHandle()))
+		{
+			Aqsis::log() << error << "CloseHandle" << std::endl;
+			return;
+		}
+	else if(mode == std::ios_base::out)
+		if (!CloseHandle(m_impl->pipeWriteHandle()))
+		{
+			Aqsis::log() << error << "CloseHandle" << std::endl;
+			return;
+		}
 #	else // AQSIS_SYSTEM_WIN32
 	if(mode == std::ios_base::in)
 		::close(m_impl->pipeReadFd());
