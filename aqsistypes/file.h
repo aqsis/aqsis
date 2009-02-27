@@ -27,22 +27,17 @@
 #ifndef FILE_H_INCLUDED
 #define FILE_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	<iostream>
 #include	<list>
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<boost/filesystem/path.hpp>
 
 #include	"sstring.h"
 
 namespace Aqsis {
-
-// This should'nt really be in here, but for now it will do
-#ifdef AQSIS_SYSTEM_WIN32
-#define DIRSEP "\\"
-#else
-#define DIRSEP "/"
-#endif
 
 //-----------------------------------------------------------------------
 /** \brief Find an absolute path to the given file name in the provided search path.
@@ -154,11 +149,6 @@ class COMMON_SHARE CqFile
 		static CqString FixupPath(CqString& strPath);
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
 		static std::list<CqString*> cliGlob( const CqString& strFileGlob );
-		static std::string basePath( const CqString& strFilespec );
-		static std::string fileName( const CqString& strFilespec );
-		static std::string extension( const CqString& strFilespec );
-		static std::string baseName( const CqString& strFilespec );
-		static std::string pathSep();
 		static std::vector<std::string> searchPaths( const CqString& searchPath );
 
 	private:

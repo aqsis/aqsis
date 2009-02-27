@@ -462,7 +462,7 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 void SetDefaultRiOptions( void )
 {
 	// Get the root path for the aqsis installation.
-	std::string rootPath;
+	boost::filesystem::path rootPath;
 #ifdef AQSIS_SYSTEM_WIN32
 
 	char acPath[256];
@@ -487,41 +487,37 @@ void SetDefaultRiOptions( void )
 #endif
 
 	// Read in the system configuration file.
-	std::string systemRcPath = rootPath;
-	systemRcPath.append( DIRSEP );
-	systemRcPath.append( AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME) );
-	std::ifstream rcFile(systemRcPath.c_str(), std::ios::binary);
+	boost::filesystem::path systemRcPath = rootPath / AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME);
+	std::ifstream rcFile(systemRcPath.file_string().c_str(), std::ios::binary);
 	if(rcFile)
 	{
 		Aqsis::log() << info
 			<< "Reading system config \"" << systemRcPath << "\"\n";
-		QGetRenderContext()->parseRibStream(rcFile, systemRcPath);
+		QGetRenderContext()->parseRibStream(rcFile, systemRcPath.file_string());
 		rcFile.close();
 	}
 	else
 	{
 		Aqsis::log() << error
-			<< "Could not open system config (" << systemRcPath.c_str() << ")\n";
+			<< "Could not open system config (" << systemRcPath << ")\n";
 	}
 
 	// Read in the user-specific config in $HOME/.aqsisrc 
 	if(const char* homePath = getenv("HOME"))
 	{
-		std::string homeRcPath = homePath;
-		if(!(homeRcPath.empty() || *(homeRcPath.end()-1) == DIRSEP[0]))
-			homeRcPath += DIRSEP;
-		homeRcPath += ".aqsisrc";
+		boost::filesystem::path homeRcPath = homePath;
+		homeRcPath /= ".aqsisrc";
 
-		std::ifstream rcFile(homeRcPath.c_str(), std::ios::binary);
+		std::ifstream rcFile(homeRcPath.file_string().c_str(), std::ios::binary);
 		if(rcFile)
 		{
 			Aqsis::log() << info << "Reading user config \"" << homeRcPath << "\"\n";
-			QGetRenderContext()->parseRibStream(rcFile, homeRcPath);
+			QGetRenderContext()->parseRibStream(rcFile, homeRcPath.file_string());
 		}
 		else
 		{
 			Aqsis::log() << info
-				<< "Could not open user config \"" << homeRcPath.c_str() << "\"\n";
+				<< "Could not open user config \"" << homeRcPath << "\"\n";
 		}
 	}
 	else

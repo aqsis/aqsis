@@ -25,13 +25,14 @@
 
 #include	"aqsis.h"
 
-#include	<FL/Fl_File_Chooser.H>
 #include	<algorithm>
+
+#include	<boost/filesystem.hpp>
+#include	<FL/Fl_File_Chooser.H>
 #include	<tinyxml.h>
 
 #include	"piqslbase.h"
 #include	"book.h"
-#include	"file.h"
 
 namespace Aqsis {
 
@@ -94,7 +95,8 @@ void CqPiqslBase::saveConfiguration()
 	Fl::lock();
 	if(!m_currentConfigName.empty())
 	{
-		std::string _base = CqFile::basePath(m_currentConfigName);
+		boost::filesystem::path saveDir =
+			boost::filesystem::path(m_currentConfigName).branch_path();
 		TiXmlDocument doc(m_currentConfigName);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 		TiXmlElement* booksXML = new TiXmlElement("Books");
@@ -111,7 +113,7 @@ void CqPiqslBase::saveConfiguration()
 			for(image = (*book)->imagesBegin(); image != (*book)->imagesEnd(); ++image)
 			{
 				// Serialise the image first.
-				(*image)->serialise(_base);
+				(*image)->serialise(saveDir);
 				TiXmlElement* imageXML = (*image)->serialiseToXML();
 				imagesXML->LinkEndChild(imageXML);
 			}
@@ -132,7 +134,7 @@ void CqPiqslBase::exportBook(boost::shared_ptr<CqBook>& book, const std::string&
 	Fl::lock();
 	if(!name.empty() && book)
 	{
-		std::string _base = CqFile::basePath(name);
+		boost::filesystem::path saveDir = boost::filesystem::path(name).branch_path();
 		TiXmlDocument doc(name);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 		TiXmlElement* booksXML = new TiXmlElement("Books");
@@ -146,7 +148,7 @@ void CqPiqslBase::exportBook(boost::shared_ptr<CqBook>& book, const std::string&
 		for(image = book->imagesBegin(); image != book->imagesEnd(); ++image)
 		{
 			// Serialise the image first.
-			(*image)->serialise(_base);
+			(*image)->serialise(saveDir);
 			TiXmlElement* imageXML = (*image)->serialiseToXML();
 			imagesXML->LinkEndChild(imageXML);
 		}
@@ -166,7 +168,6 @@ void CqPiqslBase::loadConfiguration(const std::string& name)
 
 	if(!name.empty())
 	{
-		std::string _base = CqFile::basePath(name);
 		m_currentConfigName = name;
 		TiXmlDocument doc(name);
 		bool loadOkay = doc.LoadFile();

@@ -31,10 +31,6 @@
 namespace Aqsis {
 
 //---------------------------------------------------------------------
-/** This does replicate effort from CqFile and at present doesnt handle NT either
- ** There is a distinction in that we would like to handle directories here which CqFile doesnt
- */
-
 CqString
 CqDSORepository::strPrototype(CqString *strFuncName, SqDSOExternalCall *pExtCall)
 {
@@ -102,6 +98,8 @@ CqDSORepository::SetDSOPath(const char* pathStr)
 	{
 		// Here, if element points to a directory, we can add each library in the
 		// named directory which is not already in the path list
+		//
+		// TODO: Use boost::filesystem stuff properly here.
 
 		struct stat s;
 		if (!stat( element->c_str(), &s ))
@@ -110,7 +108,7 @@ CqDSORepository::SetDSOPath(const char* pathStr)
 			if ( S_ISDIR(s.st_mode) )
 			{
 				// We have a directory, list all the libraries in that directory and add them to the path
-				CqString wild = CqString(*element) + CqString( DIRSEP ) + CqString( "*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
+				CqString wild = (boost::filesystem::path(*element)/"*" SHARED_LIBRARY_SUFFIX).file_string();
 				std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
 				if ( !files.empty() )
 				{

@@ -26,15 +26,15 @@
 
 #include	"aqsis.h"
 
-#include	<fstream>
 #include	<map>
 #include	<algorithm>
 
 #include	<boost/archive/iterators/base64_from_binary.hpp>
 #include	<boost/archive/iterators/transform_width.hpp>
 #include	<boost/archive/iterators/insert_linebreaks.hpp>
+#include	<boost/format.hpp>
+#include	<boost/filesystem.hpp>
 
-#include	"file.h"
 #include	"displayserverimage.h"
 #include	"aqsismath.h"
 #include 	"logging.h"
@@ -80,26 +80,23 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	}
 }
 
-void CqDisplayServerImage::serialise(const std::string& folder)
+void CqDisplayServerImage::serialise(const boost::filesystem::path& directory)
 {
-	// Generate a unique name for the managed image in the specified folder.
-	std::string _ext = CqFile::extension(name());
-	std::string _basename = CqFile::baseName(name());
-	std::stringstream strFilename;
-	strFilename << folder << CqFile::pathSep() << name();
-	FILE* tfile;
-	int index = 1;
-	while((tfile = fopen(strFilename.str().c_str(), "r")) != NULL)
+	namespace fs = boost::filesystem;
+	fs::path fileName(name());
+	// Generate a unique name for the managed image in the specified directory.
+	std::string ext = fs::extension(fileName);
+	std::string base = fs::basename(fileName);
+	fs::path uniquePath = directory/fileName;
+	TqInt index = 1;
+	while(fs::exists(uniquePath))
 	{
-		fclose(tfile);
-		strFilename.clear();
-		strFilename.str("");
-		strFilename << folder << CqFile::pathSep() << _basename<< "." << index << _ext;
-		index++;
+		uniquePath = directory/(boost::format("%s.%d%s") % base % index % ext).str();
+		++index;
 	}
-		
-	setFilename(strFilename.str());
-	saveToFile(strFilename.str());
+
+	setFilename(uniquePath.file_string());
+	saveToFile(uniquePath.file_string());
 }
 
 

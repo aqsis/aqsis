@@ -84,7 +84,7 @@ public:
  	 * only in memory, gets saved to disk so that it can be later reloaded into Piqsl with the book.
  	 * \param folder	The folder on disk to store the TIFF file to.
  	 */
-	virtual void serialise(const std::string& folder);
+	virtual void serialise(const boost::filesystem::path& folder);
 	/** Create an XML element that represents this image in a library XML file.
  	 * \return			A pointer to a generated TinyXML element containing all the data to be
  	 * 					added to the XML file.
