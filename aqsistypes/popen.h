@@ -52,10 +52,10 @@ namespace Aqsis
 class COMMON_SHARE CqPopenDevice
 {
 	public:
-    typedef char char_type;
-    struct category : boost::iostreams::bidirectional,
-					  boost::iostreams::device_tag,
-					  boost::iostreams::closable_tag
+		typedef char char_type;
+		struct category : boost::iostreams::bidirectional,
+						  boost::iostreams::device_tag,
+						  boost::iostreams::closable_tag
         { };
 
 		/** \brief Create a child process and connect it with pipes for stdin

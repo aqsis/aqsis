@@ -354,7 +354,7 @@ class CqPopenDevice::CqImpl
 			return m_pipeWriteFd;
 		}
 };
-#endif // AQSIS_SYSTEM_WIN32
+#endif // !AQSIS_SYSTEM_WIN32
 
 //------------------------------------------------------------------------------
 // CqPopenDevice implementation.
@@ -404,17 +404,21 @@ void CqPopenDevice::close(std::ios_base::openmode mode)
 {
 #	ifdef AQSIS_SYSTEM_WIN32
 	if(mode == std::ios_base::in)
+	{
 		if (!CloseHandle(m_impl->pipeReadHandle()))
 		{
 			Aqsis::log() << error << "CloseHandle" << std::endl;
 			return;
 		}
+	}
 	else if(mode == std::ios_base::out)
+	{
 		if (!CloseHandle(m_impl->pipeWriteHandle()))
 		{
 			Aqsis::log() << error << "CloseHandle" << std::endl;
 			return;
 		}
+	}
 #	else // AQSIS_SYSTEM_WIN32
 	if(mode == std::ios_base::in)
 		::close(m_impl->pipeReadFd());
