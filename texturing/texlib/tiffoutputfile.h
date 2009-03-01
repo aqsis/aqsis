@@ -48,13 +48,13 @@ class AQSISTEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
 		 * \param fileName - name for the new file.
 		 * \param header - header data.
 		 */
-		CqTiffOutputFile(const std::string& fileName, const CqTexFileHeader& header);
+		CqTiffOutputFile(const boostfs::path& fileName, const CqTexFileHeader& header);
 		/** \brief Construct a tiff output file writing to the given stream.
 		 */
 		CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeader& header);
 
 		// inherited
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType();
 		virtual const CqTexFileHeader& header() const;
 		virtual TqInt currentLine() const;

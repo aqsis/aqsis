@@ -83,7 +83,6 @@ SET(AQSISTYPES_HDRS
 IF(UNIX OR APPLE)
 	SET(AQSISTYPES_SYSTEM_SRCS
 		posix/execute_system.cpp
-		posix/file_system.cpp
 		posix/socket_system.cpp
 	)
 	SET(AQSISTYPES_SYSTEM_HDRS
@@ -94,7 +93,6 @@ ELSE(UNIX OR APPLE)
 	IF(WIN32)
 		SET(AQSISTYPES_SYSTEM_SRCS
 			win32/execute_system.cpp
-			win32/file_system.cpp
 			win32/socket_system.cpp
 		)
 		SET(AQSISTYPES_SYSTEM_HDRS
@@ -152,6 +150,7 @@ SET(AQSISTYPES_TEST_SRCS
 	cellnoise_test.cpp
 	color_test.cpp
 	enum_test.cpp
+	file_test.cpp
 	matrix2d_test.cpp
 	matrix_test.cpp
 	noise1234_test.cpp

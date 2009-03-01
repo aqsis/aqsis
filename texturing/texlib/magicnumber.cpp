@@ -57,9 +57,9 @@ TqMagicNumber getMagicNumber(std::istream& inStream)
 } // unnamed namespace
 
 
-EqImageFileType guessFileType(const std::string& fileName)
+EqImageFileType guessFileType(const boostfs::path& fileName)
 {
-	std::ifstream inFile(fileName.c_str());
+	std::ifstream inFile(fileName.file_string().c_str());
 	if(!inFile)
 	{
 		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile, "Cannot open file \""

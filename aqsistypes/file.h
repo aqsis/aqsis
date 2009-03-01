@@ -19,149 +19,167 @@
 
 
 /** \file
-		\brief Declares the CqFile class for handling files with RenderMan searchpath option support.
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief File path utilities
+ *
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ * \author Chris Foster [chris42f (at) gmail (dot) com]
+ */
 
-//? Is .h included already?
 #ifndef FILE_H_INCLUDED
-#define FILE_H_INCLUDED 1
+#define FILE_H_INCLUDED
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<iostream>
-#include	<list>
-#include	<vector>
+#include <string>
 
-#include	<boost/filesystem/path.hpp>
-
-#include	"sstring.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace Aqsis {
 
+// Namespace alias.  boost::filesystem is far too verbose to keep repeating.
+namespace boostfs = boost::filesystem;
+
 //-----------------------------------------------------------------------
-/** \brief Find an absolute path to the given file name in the provided search path.
+//@{
+/** \brief Find a full path for the file name in the given search path.
  *
- * This function should deprecate a common usage of CqFile simply to get the
- * absolute file name in the search path.
+ * There are two versions of this function; one which throws an XqInvalidFile
+ * exception, and one which reports nonexistant files by returning an empty
+ * path.
+ *
+ * File names with a directory component to the path will be found relative to
+ * the current directory, or relative to the root directory if they are
+ * absolute.  Otherwise, the file name is searched for in the list of paths
+ * contained in searchPath.  The current directory is not included in the
+ * search path by default.
+ *
+ * Only regular files will be found by the search (directories are excluded).
+ * Access permissions are checked by attempting to open the file
  *
  * \param fileName - path-relative name of the file.
  * \param searchPath - colon-separated string of directories in which to search
  *                     for the given file name.
- * \return Absolute file name; throws an XqInvalidFile if the file is not found.
+ * \return A full path to the file name.
  */
-COMMON_SHARE std::string findFileInPath(const std::string& fileName,
+COMMON_SHARE boostfs::path findFile(const std::string& fileName,
 		const std::string& searchPath);
+COMMON_SHARE boostfs::path findFileNothrow(const std::string& fileName,
+		const std::string& searchPath);
+//@}
 
 
-//----------------------------------------------------------------------
-/** \class CqFile
- *  \brief Standard handling of all file types utilising the searchpath options.
+/** \brief expand a file pattern to a list of paths.
+ *
+ * Expands the given pattern string to a set of file paths which match.  The
+ * meaning of the glob pattern follows the system conventions - on posix, the
+ * functions from glob.h are used, while on windows the _find* functions from
+ * io.h are used.
+ *
+ * \todo: Make this into a globbing iterator instead.
+ *
+ * \param pattern - file matching pattern 
  */
-class COMMON_SHARE CqFile
+COMMON_SHARE std::vector<std::string> Glob(const std::string& pattern);
+
+/** \brief Exapand a command-line file pattern to a list of paths
+ *
+ * On windows this function uses the Glob() function to expand a file pattern
+ * specified on the command line.  On posix the shell does the expansion so
+ * this function does nothing but return the pattern in a single element
+ * vector.
+ *
+ * \param pattern - file matching pattern 
+ */
+COMMON_SHARE std::vector<std::string> cliGlob(const std::string& pattern);
+
+
+/** \brief Splits a list of paths delimited by ';' or ':' into tokens.
+ *
+ * Model of the boost TokenizerFunction concept for use with boost::tokenizer.
+ *
+ * A search path is a set of paths with individual paths delimited by the
+ * characters ':' or ';'.  On windows, using the colon as a path seperator can
+ * be ambiguous with respect to drive letters like C:\.  On windows a heuristic
+ * is used to attempt to identify such uses and avoid splitting at the drive
+ * letter colon.
+ *
+ * \see TqPathsTokenizer
+ */
+template<typename TokenType>
+class CqSearchPathsTokenFunc
 {
 	public:
-		/** Default constructor
-		 */
-		CqFile() : m_pStream( 0 ), m_bInternal( false ), m_fExists( false )
-		{}
-		/** Constructor taking an open stream pointer and a name.
-		 * \param Stream a pointer to an already opened input stream to attach this object to.
-		 * \param strRealName the name of the file associated with this stream.
-		 */
-		CqFile( std::istream* Stream, const char* strRealName ) :
-			m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( false ),
-			m_fExists( false )
-		{}
-		CqFile( const char* strFilename, const char* strSearchPathOption = "" );
-		/** Dectructor. Takes care of closing the stream if the constructor opened it.
-		 */
-		virtual	~CqFile()
-		{
-			if ( m_pStream != NULL && m_bInternal )
-				delete( m_pStream );
-		}
-
-		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in );
-		/** Close any opened stream associated with this object.
-		 */
-		void	Close()
-		{
-			if ( m_pStream != NULL )
-				delete( m_pStream );
-			m_pStream = NULL;
-		}
-		/** Find out if the stream associated with this object is valid.
-		 * \return boolean indicating validity.
-		 */
-		bool	IsValid() const
-		{
-			return ( m_pStream != NULL );
-		}
-		/** If the file associated with this object exists.
-		 * \return boolean.
-		 */
-		bool	Exists() const
-		{
-			return ( m_fExists );
-		}
-		/** Get the name asociated with this file object.
-		 * \return a read only reference to the string object.
-		 */
-		const CqString&	strRealName() const
-		{
-			return ( m_strRealName );
-		}
-
-		/** Cast to a stream reference.
-		 */
-		operator std::istream&()
-		{
-			return ( *m_pStream );
-		}
-		/** Cast to a stream pointer.
-		 */
-		operator std::istream*()
-		{
-			return ( m_pStream );
-		}
-
-		/** Get the current position within the stream if appropriate.
-		 * \return long integer indicating the offest from the start.
-		 */
-		TqLong	Position()
-		{
-			return ( m_pStream->tellg() );
-		}
-		/** Get the length of the stream if a file.
-		 * \return the lenght as a long integer.
-		 */
-		TqLong	Length()
-		{
-			/// \todo Should check if it is a file here.
-			long pos = Position();
-			m_pStream->seekg( 0, std::ios::end );
-			long len = Position();
-			m_pStream->seekg( pos, std::ios::beg );
-			return ( len );
-		}
-
-		static CqString FixupPath(CqString& strPath);
-		static std::list<CqString*> Glob( const CqString& strFileGlob );
-		static std::list<CqString*> cliGlob( const CqString& strFileGlob );
-		static std::vector<std::string> searchPaths( const CqString& searchPath );
-
+		bool operator()(std::string::const_iterator& next,
+			const std::string::const_iterator end, TokenType& tok) const;
+		void reset() {};
 	private:
-		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
-		CqString	m_strRealName;	///< the name of this file object, usually the filename.
-		bool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
-		bool		m_fExists;      ///< a flag indicating if the file which is Open()ed exists
+		static bool isDelim(char c);
+};
+
+/** \brief A tokenizer type to split search paths into individual paths.
+ *
+ * \code
+ *
+ * // Example
+ *
+ * std::string searchPaths = ".:/home/foo/bar:../../asdf";
+ * TqPathsTokenizer paths(searchPaths);
+ * TqPathsTokenizer::iterator i = paths.begin();
+ * boostfs::path p1 = *i;  // yeilds .
+ * boostfs::path p2 = *i;  // yeilds /home/foo/bar
+ * boostfs::path p3 = *i;  // yeilds ../../asdf
+ *
+ * \endcode
+ */
+typedef boost::tokenizer<CqSearchPathsTokenFunc<boostfs::path>,
+		std::string::const_iterator, boostfs::path> TqPathsTokenizer;
+
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+// CqSearchPathsTokenFunc implementation 
+
+/// Determine whether c is a delimiter between paths
+template<typename TokenType>
+inline bool CqSearchPathsTokenFunc<TokenType>::isDelim(char c)
+{
+	return c == ':' || c == ';';
 }
-;
 
+/// Split a path string into tokens at ':' or ';' characters.
+template<typename TokenType>
+bool CqSearchPathsTokenFunc<TokenType>::operator()(
+		std::string::const_iterator& next, const std::string::const_iterator end,
+		TokenType& tok) const
+{
+	while(next != end && isDelim(*next))
+		++next;
+	if(next == end)
+		return false;
+	// next now points to the first non-delimiter character.
+	std::string::const_iterator start = next;
+	while(next != end && !isDelim(*next))
+		++next;
+#	ifdef AQSIS_SYSTEM_WIN32
+	// Heuristic to allow windows paths with drive letters to be separated by
+	// colons, ie,  C:/foo/bar:../asdf  is split into C:/foo/bar and ../asdf
+	// rather than the C being treated as the first path.
+	if(next - start == 1 && next != end && *next == ':' && std::isalpha(*start))
+	{
+		++next;
+		while(next != end && !isDelim(*next))
+			++next;
+	}
+#	endif // AQSIS_SYSTEM_WIN32
+	// next now points to the delimiter directly after the path.
+	tok.assign(start, next);
+	return true;
+}
 
-//-----------------------------------------------------------------------
 
 } // namespace Aqsis
 
-#endif	// !FILE_H_INCLUDED
+#endif // !FILE_H_INCLUDED

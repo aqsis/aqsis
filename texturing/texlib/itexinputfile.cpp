@@ -41,7 +41,7 @@ namespace {
 
 // Open multi-image input file
 boost::shared_ptr<IqMultiTexInputFile> openMultiInputFile(
-		EqImageFileType type, const std::string& fileName)
+		EqImageFileType type, const boostfs::path& fileName)
 {
 	boost::shared_ptr<IqMultiTexInputFile> file;
 	switch(type)
@@ -57,7 +57,7 @@ boost::shared_ptr<IqMultiTexInputFile> openMultiInputFile(
 
 // Open a simple input file
 boost::shared_ptr<IqTexInputFile> openInputFile(
-		EqImageFileType type, const std::string& fileName)
+		EqImageFileType type, const boostfs::path& fileName)
 {
 	boost::shared_ptr<IqTexInputFile> file = openMultiInputFile(type, fileName);
 	if(!file)
@@ -87,7 +87,7 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 //------------------------------------------------------------------------------
 // IqTexInputFile
 
-boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
+boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const boostfs::path& fileName)
 {
 	boost::shared_ptr<IqTexInputFile> file = openInputFile(guessFileType(fileName), fileName);
 	if(file)
@@ -103,7 +103,8 @@ boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileNa
 //------------------------------------------------------------------------------
 // IqMultiTexInputFile
 
-boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(const std::string& fileName)
+boost::shared_ptr<IqMultiTexInputFile> IqMultiTexInputFile::open(
+		const boostfs::path& fileName)
 {
 	EqImageFileType type = guessFileType(fileName);
 	boost::shared_ptr<IqMultiTexInputFile> file

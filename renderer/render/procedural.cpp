@@ -36,7 +36,6 @@
 
 #include <boost/tokenizer.hpp>
 
-#include "rifile.h"
 #include "renderer.h"
 #include "plugins.h"
 
@@ -134,26 +133,29 @@ class CqRiProceduralPlugin : CqPluginBase
 		CqString m_Error;
 
 	public:
-		CqRiProceduralPlugin( CqString& strDSOName )
+		CqRiProceduralPlugin(CqString& dsoName)
+			: m_ppvfcts(0),
+			m_pvfctpvf(0),
+			m_pvfctpv(0),
+			m_ppriv(0),
+			m_handle(0),
+			m_bIsValid(false),
+			m_Error()
 		{
 			CqString strConver("ConvertParameters");
 			CqString strSubdivide("Subdivide");
 			CqString strFree("Free");
 
-			CqRiFile        fileDSO( strDSOName.c_str(), "procedural" );
-			m_bIsValid = false ;
-
-			if ( !fileDSO.IsValid() )
+			boost::filesystem::path dsoPath = QGetRenderContext()->poptCurrent()
+				->findRiFileNothrow(dsoName, "procedural");
+			if(dsoPath.empty())
 			{
 				m_Error = CqString( "Cannot find Procedural DSO for \"" )
-				          + strDSOName
+				          + dsoName
 				          + CqString ("\" in current searchpath");
-
 				return;
 			}
-
-			CqString strRealName( fileDSO.strRealName() );
-			fileDSO.Close();
+			CqString strRealName = dsoPath.file_string();
 			void *handle = DLOpen( &strRealName );
 
 			if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
@@ -304,16 +306,14 @@ TqPopenStream& CqRunProgramRepository::startNewRunProgram(
 	if(argv.empty())
 		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken, "program name not present");
 	// Attempt to find the program in the procedural path
-	std::string progName = argv[0];
-	try
+	std::string progName = QGetRenderContext()->poptCurrent()
+		->findRiFileNothrow(argv[0], "procedural").file_string();
+	if(progName.empty())
 	{
-		progName = findFileInRiSearchPath(progName, "procedural");
-	}
-	catch(XqInvalidFile& /*e*/)
-	{
+		progName = argv[0];
 		Aqsis::log() << info
 			<< "RiProcRunProgram: Could not find \"" << progName
-			<< "\" in \"procedural\" searchpath, will rely on $PATH.\n";
+			<< "\" in \"procedural\" searchpath, will rely on system path.\n";
 	}
 	TqPopenStreamPtr newPipe(new TqPopenStream(progName, argv));
 	newPipe->exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);

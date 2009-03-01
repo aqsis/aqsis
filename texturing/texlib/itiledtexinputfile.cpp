@@ -34,7 +34,7 @@
 namespace Aqsis {
 
 boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
-		const std::string& fileName)
+		const boostfs::path& fileName)
 {
 	EqImageFileType type = guessFileType(fileName);
 	switch(type)
@@ -57,7 +57,7 @@ boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::open(
 }
 
 boost::shared_ptr<IqTiledTexInputFile> IqTiledTexInputFile::openAny(
-		const std::string& fileName)
+		const boostfs::path& fileName)
 {
 	return boost::shared_ptr<IqTiledTexInputFile>(new CqTiledAnyInputFile(fileName));
 }

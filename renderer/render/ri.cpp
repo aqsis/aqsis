@@ -32,6 +32,8 @@
 #include	<stdio.h>
 #include    <stdlib.h>
 
+#include	<boost/filesystem/fstream.hpp>
+
 #include	"imagebuffer.h"
 #include	"lights.h"
 #include	"renderer.h"
@@ -48,7 +50,6 @@
 #include	"genpoly.h"
 #include	"points.h"
 #include	"curves.h"
-#include	"rifile.h"
 #include	"shadervm.h"
 #include	"procedural.h"
 #include	"logging.h"
@@ -1567,6 +1568,109 @@ RtVoid	RiOption( RtToken name, ... )
 	RiOptionV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
+/** \brief Fudge MTOR paths like //C/foo/bar into C:/foo/bar for windows
+ *
+ * This is a fudge for search paths produced by pixar's RAT on windows; MTOR
+ * seems to produce paths like //C/foo/bar rather than the standard C:/foo/bar.
+ * This function translates such paths.
+ *
+ * \param originalPath - previous value of the path.
+ * \return A path with all instacnes of //<drive_letter>/ changed to
+ *         <drive_letter>:/ on windows.  On posix, just return originalPath.
+ */
+inline static std::string mtorPathFudge(const std::string& originalPath)
+{
+#	ifdef AQSIS_SYSTEM_WIN32
+	if(originalPath.find("//") != std::string::npos)
+	{
+		std::string fixedPath;
+		typedef boost::tokenizer<CqSearchPathsTokenFunc<std::string>,
+				std::string::const_iterator, std::string> TqPathsStrTokenizer;
+		TqPathsStrTokenizer paths(originalPath);
+		for(TqPathsStrTokenizer::iterator path = paths.begin(), end = paths.end();
+				path != end; ++path)
+		{
+			if(!fixedPath.empty())
+				fixedPath += ';'; // add a path separator.
+			if(path->find("//", 0, 2) == 0 && path->length() >= 4 && (*path)[3] == '/')
+			{
+				fixedPath += (*path)[2];
+				fixedPath += ":/";
+				fixedPath += path->substr(4);
+			}
+			else
+				fixedPath += *path;
+		}
+		return fixedPath;
+	}
+#	endif // AQSIS_SYSTEM_WIN32
+	return originalPath;
+}
+
+/** \brief Expand special characters in a search path.
+ *
+ * Special characters are as follows:
+ *   - '&' is replaced by oldPath
+ *   - '@' is replaced by defaultPath
+ *   - '%someVar%' is replaced with the environment variable "someVar"
+ *
+ * \todo Expandion of ${someVar} and $someVar on posix to replace %someVar% syntax?
+ *
+ * \param newPath - Path to be expanded
+ * \param oldPath - Previous value of the path
+ * \param defaultPath - Default value for the path
+ */
+static std::string expandSearchPath(const std::string& newPath,
+		const std::string& oldPath, const std::string& defaultPath)
+{
+	// Get the old value for use in escape replacement
+	Aqsis::log() << debug << "Old searchpath = " << oldPath << std::endl;
+	// Build the string, checking for & and @ characters  and replace with old
+	// and default string, respectively.
+	std::string::size_type strt = 0;
+	std::string::size_type match = 0;
+	std::string expandedPath;
+	while ( 1 )
+	{
+		if ( ( match = newPath.find_first_of("&@%", strt ) ) != std::string::npos )
+		{
+			expandedPath += newPath.substr( strt, (match-strt) );
+			if( newPath[match] == '&' )
+			{
+				// replace & with the old path
+				expandedPath += oldPath;
+				strt = match + 1;
+			}
+			else if( newPath[match] == '@' )
+			{
+				// replace @ with the default path
+				expandedPath += defaultPath;
+				strt = match + 1;
+			}
+			else if( newPath[match] == '%' )
+			{
+				// replace %var% with environment variable %var%
+				std::string::size_type envvarend = newPath.find('%', match + 1);
+				if( envvarend != std::string::npos )
+				{
+					std::string strEnv = newPath.substr(match + 1, (envvarend - (match + 1)));
+					const char* strVal = getenv(strEnv.c_str());
+					if(strVal)
+						expandedPath += strVal;
+					strt = envvarend + 1;
+				}
+			}
+		}
+		else 
+		{
+			expandedPath += newPath.substr(strt);
+			break;
+		}
+	}
+	expandedPath = mtorPathFudge(expandedPath);
+	Aqsis::log() << debug << "New searchpath = " << expandedPath << std::endl;
+	return expandedPath;
+}
 
 //----------------------------------------------------------------------
 // RiOptionV
@@ -1634,67 +1738,23 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			case type_string:
 			{
 				char** ps = reinterpret_cast<char**>( value );
-				CqString* pOpt = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite(name, undecoratedName, Count);
+				CqString* pOpt = QGetRenderContext()->poptWriteCurrent()
+					->GetStringOptionWrite(name, undecoratedName, Count);
 				RtInt j;
 				for ( j = 0; j < Count; ++j )
 				{
-					CqString str( "" );
 					if ( strcmp( name, "searchpath" ) == 0 )
 					{
-						// Get the old value for use in escape replacement
-						CqString str_old = pOpt[ 0 ];
-						CqString* pOptStd = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite("defaultsearchpath", undecoratedName, Count);
-						CqString str_std = pOptStd[ 0 ];
-						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
-						// Build the string, checking for & and @ characters  and replace with old and default string, respectively.
-						std::string::size_type strt = 0;
-						std::string::size_type match = 0;
-						std::string stringValue(ps[ j ]);
-						while ( 1 )
-						{
-							if ( ( match = stringValue.find_first_of("&@%", strt ) ) != std::string::npos )
-							{
-								if( stringValue[match] == '&' )
-								{
-									str += stringValue.substr( strt, (match-strt) );
-									str += str_old;
-									strt = match + 1;
-									continue;
-								}
-								if( stringValue[match] == '@' )
-								{
-									str += stringValue.substr( strt, (match-strt) );
-									str += str_std;
-									strt = match + 1;
-									continue;
-								}
-								if( stringValue[match] == '%' )
-								{
-									str += stringValue.substr( strt, (match-strt) );
-									std::string::size_type envvarend = stringValue.find('%', match + 1);
-									if( envvarend != std::string::npos )
-									{
-										std::string strEnv = stringValue.substr(match + 1, (envvarend - (match + 1)));
-										const char* strVal = getenv(strEnv.c_str());
-										if(strVal)
-											str += strVal;
-										strt = envvarend + 1;
-										continue;
-									}
-								}
-							}
-							else 
-							{
-								str += CqString( ps[ j ] ).substr( strt );
-								break;
-							}
-						}
-						Aqsis::log() << debug << "New searchpath = " << str.c_str() << std::endl;
+						const CqString* pDefSearch
+							= QGetRenderContext()->poptWriteCurrent()
+							->GetStringOption("defaultsearchpath", undecoratedName);
+						std::string defaultSearch;
+						if(pDefSearch)
+							defaultSearch = *pDefSearch;
+						pOpt[j] = expandSearchPath(ps[j], pOpt[j], defaultSearch);
 					}
 					else
-						str = CqString( ps[ j ] );
-
-					pOpt[ j ] = str;
+						pOpt[j] = ps[j];
 				}
 			}
 			break;
@@ -5081,20 +5141,23 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	VALIDATE_CONDITIONAL
 	EXCEPTION_TRY_GUARD
 
+	PARAM_CONSTRAINT_CHECK(imagefile, !=, 0);
+	PARAM_CONSTRAINT_CHECK(texturefile, !=, 0);
+	PARAM_CONSTRAINT_CHECK(swrap, !=, 0);
+	PARAM_CONSTRAINT_CHECK(twrap, !=, 0);
+	PARAM_CONSTRAINT_CHECK(filterfunc, !=, 0);
+
 	CACHE_RIMAKETEXTURE
 
 	VALIDATE_RIMAKETEXTURE
 
 	DEBUG_RIMAKETEXTURE
 
-	assert( imagefile != 0 && texturefile != 0
-			&& swrap != 0 && twrap != 0 && filterfunc != 0 );
-
 	AQSIS_TIME_SCOPE(Make_texture);
 
 	SqWrapModes wrapModes(enumCast<EqWrapMode>(swrap), enumCast<EqWrapMode>(twrap));
-	std::string inFileName = findFileInPath(imagefile,
-			QGetRenderContext()->textureSearchPath());
+	boost::filesystem::path inFileName
+		= QGetRenderContext()->poptCurrent()->findRiFile(imagefile, "texture");
 	makeTexture(inFileName, texturefile, SqFilterInfo(filterfunc, swidth, twidth),
 			wrapModes, CqRiParamList(tokens, values, count));
 
@@ -5166,8 +5229,8 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
 	AQSIS_TIME_SCOPE(Make_texture);
 
-	std::string inFileName = findFileInPath(imagefile,
-			QGetRenderContext()->textureSearchPath());
+	boost::filesystem::path inFileName = QGetRenderContext()->poptCurrent()
+		->findRiFile(imagefile, "texture");
 	makeLatLongEnvironment(inFileName, reflfile, SqFilterInfo(filterfunc,
 				swidth, twidth), CqRiParamList(tokens, values, count));
 
@@ -5197,6 +5260,9 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 	VALIDATE_CONDITIONAL
 	EXCEPTION_TRY_GUARD
 
+	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
+	        reflfile != 0 && filterfunc != 0 );
+
 	CACHE_RIMAKECUBEFACEENVIRONMENT
 
 	VALIDATE_RIMAKECUBEFACEENVIRONMENT
@@ -5205,20 +5271,15 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 	AQSIS_TIME_SCOPE(Make_texture);
 
-	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
-	        reflfile != 0 && filterfunc != 0 );
+	const IqOptions& opts = *QGetRenderContext()->poptCurrent();
 
-	std::string pxFullName = findFileInPath(px, QGetRenderContext()->textureSearchPath());
-	std::string nxFullName = findFileInPath(nx, QGetRenderContext()->textureSearchPath());
-	std::string pyFullName = findFileInPath(py, QGetRenderContext()->textureSearchPath());
-	std::string nyFullName = findFileInPath(ny, QGetRenderContext()->textureSearchPath());
-	std::string pzFullName = findFileInPath(pz, QGetRenderContext()->textureSearchPath());
-	std::string nzFullName = findFileInPath(nz, QGetRenderContext()->textureSearchPath());
-
-	makeCubeFaceEnvironment(pxFullName, nxFullName, pyFullName, nyFullName,
-			pzFullName, nzFullName, reflfile, fov,
-			SqFilterInfo(filterfunc, swidth, twidth),
-			CqRiParamList(tokens, values, count));
+	makeCubeFaceEnvironment(
+		opts.findRiFile(px, "texture"), opts.findRiFile(nx, "texture"),
+		opts.findRiFile(py, "texture"), opts.findRiFile(ny, "texture"),
+		opts.findRiFile(pz, "texture"), opts.findRiFile(nz, "texture"),
+		reflfile, fov, SqFilterInfo(filterfunc, swidth, twidth),
+		CqRiParamList(tokens, values, count)
+	);
 
 	EXCEPTION_CATCH_GUARD("RiMakeCubeFaceEnvironmentV")
 	return ;
@@ -5256,8 +5317,8 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 
 	AQSIS_TIME_SCOPE(Make_texture);
 
-	std::string inFileName = findFileInPath(picfile,
-			QGetRenderContext()->textureSearchPath());
+	boost::filesystem::path inFileName = QGetRenderContext()->poptCurrent()
+		->findRiFile(picfile, "texture");
 	makeShadow(inFileName, shadowfile, CqRiParamList(tokens, values, count));
 
 	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
@@ -5294,12 +5355,12 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
 	AQSIS_TIME_SCOPE(Make_texture);
 
-	std::vector<std::string> fileNames;
+	std::vector<boost::filesystem::path> fileNames;
 	fileNames.reserve(npics);
 	for(TqInt i = 0; i < npics; ++i)
 	{
-		fileNames.push_back(findFileInPath(picfiles[i],
-			QGetRenderContext()->textureSearchPath()));
+		fileNames.push_back( QGetRenderContext()->poptCurrent()
+			->findRiFile(picfiles[i], "texture") );
 	}
 	makeOcclusion(fileNames, shadowfile, CqRiParamList(tokens, values, count));
 
@@ -5589,24 +5650,17 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 
 	DEBUG_RIREADARCHIVE
 
-	CqRiFile	fileArchive( name, "archive" );
+	// Open the archive file
+	boost::filesystem::ifstream archiveFile(
+			QGetRenderContext()->poptCurrent()->findRiFile(name, "archive"),
+			std::ios::binary);
+	// Construct a callback functor
+	IqRenderer::TqRibCommentCallback commentCallback;
+	if(callback)
+		commentCallback = CqArchiveCallbackAdaptor(callback);
+	// Parse the archive
+	QGetRenderContext()->parseRibStream(archiveFile, name, commentCallback);
 
-	if ( fileArchive.IsValid() )
-	{
-		CqString strRealName( fileArchive.strRealName() );
-		fileArchive.Close();
-
-		std::ifstream archiveFile(strRealName.c_str(), std::ios::binary);
-		IqRenderer::TqRibCommentCallback commentCallback;
-		if(callback)
-			commentCallback = CqArchiveCallbackAdaptor(callback);
-		QGetRenderContext()->parseRibStream(archiveFile, name, commentCallback);
-	}
-	else 
-	{
-		Aqsis::log() << error << "Cannot open file \""
-			<< fileArchive.strRealName().c_str() << "\"" << std::endl;
-	}
 	EXCEPTION_CATCH_GUARD("RiReadArchiveV")
 }
 

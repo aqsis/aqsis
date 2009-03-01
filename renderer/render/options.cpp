@@ -367,6 +367,46 @@ void CqOptions::InitialiseDefaultOptions()
 	AddOption( pdefopts );
 }
 
+boost::shared_ptr<const CqNamedParameterList> CqOptions::pOption( const char* strName ) const
+{
+	const TqUlong hash = CqString::hash( strName );
+	std::vector<boost::shared_ptr<CqNamedParameterList> >::const_iterator
+	i = m_aOptions.begin(), end = m_aOptions.end();
+	for ( i = m_aOptions.begin(); i != end; ++i )
+	{
+		if ( ( *i ) ->hash() == hash )
+		{
+			return ( *i );
+		}
+	}
+	boost::shared_ptr<const CqNamedParameterList> retval;
+	return ( retval );
+}
+
+boost::shared_ptr<CqNamedParameterList> CqOptions::pOptionWrite( const char* strName )
+{
+	const TqUlong hash = CqString::hash( strName );
+	std::vector<boost::shared_ptr<CqNamedParameterList> >::iterator
+	i = m_aOptions.begin(), end = m_aOptions.end();
+	for ( ; i != end; ++i )
+	{
+		if ( ( *i ) ->hash() == hash )
+		{
+			if ( ( *i ).unique() )
+			{
+				return ( *i );
+			}
+			else
+			{
+				boost::shared_ptr<CqNamedParameterList> pNew( new CqNamedParameterList( *( *i ) ) );
+				( *i ) = pNew;
+				return ( pNew );
+			}
+		}
+	}
+	m_aOptions.push_back( boost::shared_ptr<CqNamedParameterList>( new CqNamedParameterList( strName ) ) );
+	return ( m_aOptions.back() );
+}
 
 //---------------------------------------------------------------------
 /** Get a system option parameter, takes name and parameter name.
@@ -789,6 +829,36 @@ CqColor CqOptions::GetOpacityImager( TqFloat x, TqFloat y )
 	return result;
 }
 
+boost::filesystem::path CqOptions::findRiFile(const std::string& fileName,
+		const char* riSearchPathName) const
+{
+	boost::filesystem::path path = findRiFileNothrow(fileName, riSearchPathName);
+	if(path.empty())
+	{
+		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
+				"Could not find file " << fileName
+				<< " in RI searchpath " << riSearchPathName);
+	}
+	return path;
+}
+
+boost::filesystem::path CqOptions::findRiFileNothrow(const std::string& fileName,
+		const char* riSearchPathName) const
+{
+	// First search in the given searchpath.
+	const CqString* searchPath = GetStringOption("searchpath", riSearchPathName);
+	boost::filesystem::path loc;
+	if(searchPath)
+		loc = findFileNothrow(fileName, searchPath->c_str());
+	if(loc.empty())
+	{
+		// If not found, try the "resource" searchpath.
+		const CqString* resourcePath = GetStringOption("searchpath", "resource");
+		if(resourcePath)
+			loc = findFileNothrow(fileName, resourcePath->c_str());
+	}
+	return loc;
+}
 
 //---------------------------------------------------------------------
 

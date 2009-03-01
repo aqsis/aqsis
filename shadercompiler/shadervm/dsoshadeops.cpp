@@ -18,15 +18,15 @@
 		\author Tristan Colgate <tristan@inuxtech.co.uk>
 */
 
-#include <sys/stat.h>
+#include "aqsis.h"
+
 #include <cstring>
 
-#include	"aqsis.h"
-#include	"sstring.h"
-#include	"irenderer.h"
-#include	"dsoshadeops.h"
-#include	"file.h"
-#include	"logging.h"
+#include <boost/filesystem.hpp>
+
+#include "dsoshadeops.h"
+#include "file.h"
+#include "logging.h"
 
 namespace Aqsis {
 
@@ -83,47 +83,36 @@ CqDSORepository::strPrototype(CqString *strFuncName, SqDSOExternalCall *pExtCall
 };
 
 //---------------------------------------------------------------------
-/** This does replicate effort from CqFile and at present doesnt handle NT either
- ** There is a distinction in that we would like to handle directories here which CqFile doesnt
- */
-void
-CqDSORepository::SetDSOPath(const char* pathStr)
+void CqDSORepository::SetDSOPath(const char* pathStr)
 {
 	if ( pathStr == NULL )
 		return;
 
-	// Scan through all the paths in the searchpath option.
-	std::vector<std::string> paths = CqFile::searchPaths(pathStr);
-	for ( std::vector<std::string>::const_iterator element = paths.begin(); element != paths.end(); ++element )
+	// Scan through all the paths in the search path
+	std::string pathString = pathStr;
+	TqPathsTokenizer paths(pathString);
+	for(TqPathsTokenizer::iterator path = paths.begin(), end = paths.end();
+			path != end; ++path)
 	{
-		// Here, if element points to a directory, we can add each library in the
-		// named directory which is not already in the path list
-		//
-		// TODO: Use boost::filesystem stuff properly here.
-
-		struct stat s;
-		if (!stat( element->c_str(), &s ))
+		try
 		{
-			//Aqsis::log() << info << "Processing \"" << element->c_str() << "\" for DSO inclusion." << std::endl;
-			if ( S_ISDIR(s.st_mode) )
+			if(boost::filesystem::is_directory(*path))
 			{
-				// We have a directory, list all the libraries in that directory and add them to the path
-				CqString wild = (boost::filesystem::path(*element)/"*" SHARED_LIBRARY_SUFFIX).file_string();
-				std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
-				if ( !files.empty() )
-				{
-					for( std::list<CqString*>::iterator f = files.begin(); f != files.end(); ++f)
-					{
-						m_DSOPathList.push_back(*(*f));
-						//Aqsis::log() << info << "Added \"" << (*f)->c_str() << "\" as a DSO candidate." << std::endl;
-					}
-				}
+				// If the path points to a directory, we add each library in the
+				// named directory to the list of DSO candidates.
+				std::vector<std::string> files = Glob(
+						((*path)/"*" SHARED_LIBRARY_SUFFIX).file_string() );
+				m_DSOPathList.insert(m_DSOPathList.end(), files.begin(), files.end());
 			}
 			else
 			{
-				m_DSOPathList.push_back(*element);
-				Aqsis::log() << info << "Added \"" << element->c_str() << "\" as a DSO candidate." << std::endl;
+				// else add the file itself.
+				m_DSOPathList.push_back(path->file_string());
 			}
+		}
+		catch(boost::filesystem::filesystem_error& /*e*/)
+		{
+			// ignore any errors.
 		}
 	}
 }

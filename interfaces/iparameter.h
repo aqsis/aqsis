@@ -23,16 +23,18 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is iparameter.h included already?
-#ifndef IPARAMETER_H_INCLUDED
-//{
-#define IPARAMETER_H_INCLUDED 1
+#ifndef IPARAMETER_H_INCLUDED //{
+#define IPARAMETER_H_INCLUDED
 
+#include "aqsis.h"
+
+#include "interfacefwd.h"
+#include "primvartype.h"
 #include "sstring.h"
 
 namespace Aqsis {
 
-struct IqSurface;
+struct IqShaderData;
 
 //----------------------------------------------------------------------
 /** \struct IqParameter
@@ -86,5 +88,4 @@ struct IqParameter
 } // namespace Aqsis
 
 //-----------------------------------------------------------------------
-//}  // End of #ifdef IPARAMETER_H_INCLUDED
-#endif
+#endif //} IPARAMETER_H_INCLUDED

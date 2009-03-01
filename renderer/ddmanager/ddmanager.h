@@ -232,7 +232,7 @@ class CqDeepDisplayRequest : virtual public CqDisplayRequest
 class CqDDManager : public IqDDManager
 {
 	public:
-		CqDDManager() : m_fDisplayMapInitialised(false), m_Uses(0)
+		CqDDManager() : m_Uses(0)
 		{}
 		virtual ~CqDDManager()
 		{}
@@ -257,10 +257,7 @@ class CqDDManager : public IqDDManager
 
 	private:
 		std::string	GetStringField( const std::string& s, int idx );
-		void	InitialiseDisplayNameMap();
 		std::vector< boost::shared_ptr<CqDisplayRequest> > m_displayRequests; ///< Array of requested display drivers.
-		bool	m_fDisplayMapInitialised;
-		std::map<std::string, std::string>	m_mapDisplayNames;
 		static SqDDMemberData m_MemberData;
 		CqSimplePlugin m_DspyPlugin;
 		TqInt 	m_Uses;

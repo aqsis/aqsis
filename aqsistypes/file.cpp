@@ -19,148 +19,154 @@
 
 
 /** \file
-		\brief Implements the CqFile class for handling files with RenderMan searchpath option support.
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief File path utilities
+ *
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ * \author Chris Foster [chris42f (at) gmail (dot) com]
+ */
 
-#include	"file.h"
+#include "file.h"
 
-#include	<ctype.h>
-#include	<fstream>
-#include	<string.h>
-#include	<boost/filesystem/path.hpp>
-#include	<boost/filesystem/operations.hpp>
+#include <cctype>
+#include <cstring>
+#include <fstream>
 
-#include	"exception.h"
+#ifdef AQSIS_SYSTEM_WIN32
+#	include <direct.h>
+#	include <io.h>
+#else
+#	include <glob.h>
+#endif
+
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
+#include "exception.h"
 
 namespace Aqsis {
 
 
-//---------------------------------------------------------------------
-std::string findFileInPath(const std::string& fileName, const std::string& searchPath)
+//------------------------------------------------------------------------------
+// findFile implementations
+
+boostfs::path findFile(const std::string& fileName,
+		const std::string& searchPath)
 {
-	// Just call through to the CqFile search path handling.  It's better to
-	// encapsulate this messyness here for the time being than have it spread
-	// any further through the aqsis source.
-	CqFile searchFile;
-	searchFile.Open(fileName.c_str(), searchPath.c_str());
-	if(!searchFile.IsValid())
+	boostfs::path loc = findFileNothrow(fileName, searchPath);
+	if(loc.empty())
 	{
 		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_NoFile,
-			"Could not find file \"" << fileName << "\" full search path: \""
+			"Could not find file \"" << fileName << "\" in path: \""
 			<< searchPath << "\"");
 	}
-	return std::string(searchFile.strRealName().c_str());
+	return loc;
 }
 
-
-//---------------------------------------------------------------------
-/** Constructor
- */
-
-CqFile::CqFile( const char* strFilename, const char* strSearchPathOption ) : m_pStream( 0 )
-{
-	Open( strFilename, strSearchPathOption );
-}
-
-
-//---------------------------------------------------------------------
-/** Attach this CqFile object to a new file if we can find it.
- * \param strFilename Character pointer to the filename.
- * \param strSearchPathOption Character pointer to name of RI "searchpath" option to use as the searchpath.
- * \param mode iostream mode used to open the file.
- */
-
-void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std::ios::openmode mode )
-{
-	// Search in the current directory first.
-	m_strRealName = strFilename;
-	m_bInternal = true;
-	std::ifstream* pFStream = new std::ifstream( strFilename, mode );
-	if ( !pFStream->is_open() )
+namespace {
+	// Wrapper around boostfs::is_regular which ignores exceptions occurring in
+	// the underlying file layer.  I'm not sure if this is the right thing to
+	// do (it masks permissions problems for example), but it allows
+	// findFile*() to continue searching other paths in the search path set in
+	// the case that one of them is inaccessible.
+	bool isRegularFile(boostfs::path filePath)
 	{
-		// If a searchpath option name was specified, use it.
-		if ( strcmp( strSearchPathOption, "" ) != 0 )
+		try
 		{
-			// if not found there, search in the specified option searchpath.
-			CqString SearchPath( strSearchPathOption );
-			// Search each specified path in the search path (separated by ':' or ';')
-			std::vector<std::string> paths = searchPaths( strSearchPathOption );
-			for ( std::vector<std::string>::const_iterator strPath = paths.begin(); strPath != paths.end(); ++strPath )
-			{
-				// See if the shader can be found in this directory
-				CqString strAlternativeFilename = *strPath;
-				// Check the path is correctly terminated
-				if ( strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '/' &&
-				        strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '\\' )
-#ifdef AQSIS_SYSTEM_WIN32
-
-					strAlternativeFilename += "\\";
-#else // AQSIS_SYSTEM_WIN32
-
-					strAlternativeFilename += "/";
-#endif // !AQSIS_SYSTEM_WIN32
-
-				strAlternativeFilename += strFilename;
-				
-				// Does the file exist?
-				m_fExists = boost::filesystem::exists(boost::filesystem::path(strAlternativeFilename.c_str()));
-				if(m_fExists)
- 				{				
-					// Clear the previous error first.
-					pFStream->clear();
-					pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
-					if ( pFStream->is_open() )
-					{
-				  		m_pStream = pFStream;
-				  		m_strRealName = strAlternativeFilename;
-						break;			  		
-					}					
-				}
-			}
+			return is_regular(filePath);
 		}
-		if ( !pFStream->is_open() )
-			delete pFStream;
+		catch(boostfs::filesystem_path_error& e)
+		{ }
+		return false;
+	}
+}
+
+boostfs::path findFileNothrow(const std::string& fileName,
+		const std::string& searchPath)
+{
+	boostfs::path filePath = fileName;
+	if(filePath.has_branch_path())
+	{
+		if(isRegularFile(filePath))
+			return filePath;
 	}
 	else
 	{
-		m_pStream = pFStream;
-		m_fExists = true;
+		TqPathsTokenizer paths(searchPath);
+		for(TqPathsTokenizer::iterator i = paths.begin(), end = paths.end();
+				i != end; ++i)
+		{
+			boostfs::path candidate = (*i)/filePath;
+			if(isRegularFile(candidate))
+				return candidate;
+		}
 	}
+	return boostfs::path();
 }
 
 
-std::vector<std::string> CqFile::searchPaths(const CqString& searchPath)
+// Glob function implementations
+
+#ifdef AQSIS_SYSTEM_WIN32
+// windows globbing implementation
+
+std::vector<std::string> Glob( const std::string& pattern )
 {
-	std::vector<std::string> searchPaths;
-	// Scan for pathspecs separated be ':' or ';', being careful to spot
-	// Windows drivespecs.
-	unsigned int start = 0;
-	while ( 1 )
+	_finddata_t c_file;
+	long hFile;
+	const char *pt = pattern.c_str();
+
+	char drive[_MAX_PATH];
+	char dir[_MAX_PATH];
+	char fname[_MAX_PATH];
+	char ext[_MAX_PATH];
+
+	_splitpath( pt, drive, dir, fname, ext);
+
+	std::string strPath(drive);
+	strPath += dir;
+
+	std::vector<std::string> result;
+	if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
 	{
-		// Find the next search path in the spec.
-		unsigned int len = searchPath.find_first_of( ";:", start ) - start;
-		// Check if it is realy meant as a drive spec.
-		if ( len == 1 && isalpha( searchPath[ start ] ) )
-			len += strcspn( &searchPath[ start + 2 ], ";:" ) + 1;
-		CqString strPath = searchPath.substr( start, len );
-		if ( strPath == "" )
-			break;
-
-		// Apply any system specific string modification.
-		strPath = FixupPath( strPath );
-
-		searchPaths.push_back(strPath);
-
-		if ( len < strlen( &searchPath[ start ] ) )
-			start += len + 1;
-		else
-			break;
+		// we found something here; then we list
+		// all of them with the directory first
+		result.push_back(strPath + c_file.name);
+		while ( _findnext( hFile, &c_file ) == 0 )
+			result.push_back(strPath + c_file.name);
+		_findclose( hFile );
 	}
-	return searchPaths;
+
+	return result;
 }
 
+std::vector<std::string> cliGlob( const std::string& pattern )
+{
+	return Glob(pattern);
+}
 
+#else // AQSIS_SYSTEM_WIN32
+
+// posix globbing implementation
+std::vector<std::string> Glob( const std::string& pattern )
+{
+	glob_t globbuf;
+	globbuf.gl_offs = 0;
+	glob( pattern.c_str(), GLOB_DOOFFS, NULL, &globbuf );
+	std::vector<std::string> result;
+	result.reserve(globbuf.gl_pathc);
+	for(size_t i = 0; i < globbuf.gl_pathc; ++i)
+		result.push_back(globbuf.gl_pathv[i]);
+
+	globfree( &globbuf );
+	return result;
+}
+
+std::vector<std::string> cliGlob(const std::string& pattern)
+{
+	// Under unix, the shell takes care of command-line globbing.
+	return std::vector<std::string>(1, pattern);
+}
+
+#endif // AQSIS_SYSTEM_WIN32
 
 } // namespace Aqsis
-//---------------------------------------------------------------------

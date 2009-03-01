@@ -31,8 +31,8 @@
 #include "aqsis.h"
 
 #include <iosfwd>
-#include <string>
 
+#include "file.h"
 #include "imagefiletype.h"
 
 namespace Aqsis {
@@ -49,11 +49,11 @@ namespace Aqsis {
  * \param fileName - file name to read from.
  * \return a guess at the file type based on the first few bytes.
  */
-AQSISTEX_SHARE EqImageFileType guessFileType(const std::string& fileName);
+AQSISTEX_SHARE EqImageFileType guessFileType(const boostfs::path& fileName);
 
 /** \brief Determine the type of an open file stream by using a "magic number"
  *
- * \see guessFileType(const std::string& fileName)
+ * \see guessFileType(const boostfs::path& fileName)
  *
  * \param inStream - The first few bytes of this stream are read
  */

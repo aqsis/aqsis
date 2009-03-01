@@ -32,7 +32,6 @@
 #include	<algorithm>
 
 #include	"texturemap_old.h"
-#include	"rifile.h"
 #include	"exception.h"
 #include	"irenderer.h"
 #include	"version.h"
@@ -570,17 +569,16 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 
 	if ( !m_pImage )
 	{
-		CqRiFile	fileImage( m_strName.c_str(), "texture" );
-		if ( !fileImage.IsValid() )
+		boost::filesystem::path imagePath = QGetRenderContext()->poptCurrent()
+			->findRiFileNothrow(m_strName, "texture");
+		if ( imagePath.empty() )
 		{
 			Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 			return pTMB;
 		}
-		CqString strRealName( fileImage.strRealName() );
-		fileImage.Close();
 
 		// Now open it as a tiff file.
-		m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+		m_pImage = TIFFOpen( imagePath.file_string().c_str(), "r" );
 	}
 
 	if ( m_pImage )
@@ -1085,20 +1083,18 @@ void CqTextureMapOld::Open()
 	m_IsValid = false;
 
 	// Find the file required.
-	CqRiFile	fileImage( m_strName.c_str(), "texture" );
-	if ( !fileImage.IsValid() )
+	boost::filesystem::path imagePath = QGetRenderContext()->poptCurrent()
+		->findRiFileNothrow(m_strName, "texture");
+	if ( imagePath.empty() )
 	{
 		Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 		return ;
 	}
-	CqString strRealName( fileImage.strRealName() );
-	fileImage.Close();
-
-	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+	m_pImage = TIFFOpen(imagePath.file_string().c_str(), "r" );
 
 	if ( m_pImage )
 	{
-		Aqsis::log() << info << "TextureMapOld: \"" << strRealName.c_str() << "\" is open" << std::endl;
+		Aqsis::log() << info << "TextureMapOld: \"" << imagePath << "\" is open" << std::endl;
 		TqPchar pFormat = 0;
 		TqPchar pModes = 0;
 

@@ -157,13 +157,13 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 //------------------------------------------------------------------------------
 // CqExrInputFile - implementation
 
-CqExrInputFile::CqExrInputFile(const std::string& fileName)
+CqExrInputFile::CqExrInputFile(const boostfs::path& fileName)
 	: m_header(),
 	m_exrFile()
 {
 	try
 	{
-		m_exrFile.reset(new Imf::InputFile(fileName.c_str()));
+		m_exrFile.reset(new Imf::InputFile(fileName.file_string().c_str()));
 	}
 	catch(Iex::BaseExc &e)
 	{
@@ -181,7 +181,7 @@ CqExrInputFile::CqExrInputFile(std::istream& inStream)
 }
 */
 
-const char* CqExrInputFile::fileName() const
+boostfs::path CqExrInputFile::fileName() const
 {
 	return m_exrFile->fileName();
 }

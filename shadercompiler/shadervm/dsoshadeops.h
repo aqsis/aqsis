@@ -21,26 +21,16 @@
 #ifndef DSOSHADEOPS_H
 #define DSOSHADEOPS_H
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<stack>
-#include	<vector>
-#include	<list>
-#include	<map>
+#include <list>
+#include <map>
 
-#include	"vector3d.h"
-#include	"vector4d.h"
-#include	"color.h"
-#include	"sstring.h"
-#include	"matrix.h"
-#include	"bitvector.h"
-#include	"shadervariable.h"
-
-#include	"primvartype.h"
-#include	"plugins.h"
-#include	"idsoshadeops.h"
-#include	"shadeop.h"
-#include	"shadervm_common.h"
+#include "idsoshadeops.h"
+#include "ishader.h"
+#include "primvartype.h"
+#include "plugins.h"
+#include "shadeop.h"
 
 namespace Aqsis {
 

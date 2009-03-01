@@ -30,7 +30,6 @@
 
 #include "aqsis.h"
 
-#include <string>
 #include <fstream>
 
 #include "itexinputfile.h"
@@ -48,10 +47,10 @@ class AQSISTEX_SHARE CqZInputFile : public IqTexInputFile
 	public:
 		/** \brief Open a z-file from a file name
 		 */
-		CqZInputFile(const std::string& fileName);
+		CqZInputFile(const boostfs::path& fileName);
 
 		// inherited
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header() const;
 
@@ -63,7 +62,7 @@ class AQSISTEX_SHARE CqZInputFile : public IqTexInputFile
 		/// Header information
 		CqTexFileHeader m_header;
 		/// Name of the file
-		const std::string m_fileName;
+		const boostfs::path m_fileName;
 		/// Input stream from which to read data
 		mutable std::ifstream m_fileStream;
 		/// Position of the start of depth data in the file.

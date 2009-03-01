@@ -35,15 +35,17 @@
 
 namespace Aqsis {
 
-CqTiffOutputFile::CqTiffOutputFile(const std::string& fileName, const CqTexFileHeader& header)
+CqTiffOutputFile::CqTiffOutputFile(const boostfs::path& fileName,
+		const CqTexFileHeader& header)
 	: m_header(header),
 	m_currentLine(0),
-	m_fileHandle(new CqTiffFileHandle(fileName.c_str(), "w"))
+	m_fileHandle(new CqTiffFileHandle(fileName, "w"))
 {
 	initialize();
 }
 
-CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeader& header)
+CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream,
+		const CqTexFileHeader& header)
 	: m_header(header),
 	m_currentLine(0),
 	m_fileHandle(new CqTiffFileHandle(outStream))
@@ -51,9 +53,9 @@ CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeade
 	initialize();
 }
 
-const char* CqTiffOutputFile::fileName() const
+boostfs::path CqTiffOutputFile::fileName() const
 {
-	return m_fileHandle->fileName().c_str();
+	return m_fileHandle->fileName();
 }
 
 EqImageFileType CqTiffOutputFile::fileType()
@@ -191,7 +193,10 @@ void CqTiffOutputFile::writeTiledPixels(const CqMixedImageBuffer& buffer)
 void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
 	if(!buffer.channelList().channelTypesMatch(m_header.channelList()))
-		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug, "Buffer and file channels don't match");
+	{
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+				"Buffer and file channels don't match");
+	}
 	if(m_header.findPtr<Attr::TileInfo>())
 		writeTiledPixels(buffer);
 	else

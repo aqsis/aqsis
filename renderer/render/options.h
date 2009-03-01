@@ -28,30 +28,31 @@
 //{
 #define OPTIONS_H_INCLUDED 1
 
-#include	<vector>
+#include "aqsis.h"
 
-#include	"ri.h"
-#include	"matrix.h"
-#include	"sstring.h"
-#include	"refcount.h"
-#include	"color.h"
-#include	"exception.h"
-#include	"parameters.h"
-#include	"ishader.h"
-#include	"ioptions.h"
+#include <vector>
+
+#include "color.h"
+#include "file.h"
+#include "ioptions.h"
+#include "ishader.h"
+#include "matrix.h"
+#include "parameters.h"
+#include "ri.h"
+#include "sstring.h"
 
 namespace Aqsis {
 
 
 class CqImagersource;
 
+class CqOptions;
+typedef boost::shared_ptr<CqOptions> CqOptionsPtr;
+
 //----------------------------------------------------------------------
 /** \class CqOptions
  * Storage for the graphics state options.
  */
-
-class CqOptions;
-typedef boost::shared_ptr<CqOptions> CqOptionsPtr;
 class CqOptions : public IqOptions
 {
 	public:
@@ -82,50 +83,12 @@ class CqOptions : public IqOptions
 		 * \param strName Character pointer to the requested options name.
 		 * \return A pointer to the option, or 0 if not found. 
 		 */
-		boost::shared_ptr<const CqNamedParameterList> pOption( const char* strName ) const
-		{
-			const TqUlong hash = CqString::hash( strName );
-			std::vector<boost::shared_ptr<CqNamedParameterList> >::const_iterator
-			i = m_aOptions.begin(), end = m_aOptions.end();
-			for ( i = m_aOptions.begin(); i != end; ++i )
-			{
-				if ( ( *i ) ->hash() == hash )
-				{
-					return ( *i );
-				}
-			}
-			boost::shared_ptr<const CqNamedParameterList> retval;
-			return ( retval );
-			// return ( boost::shared_ptr<const CqNamedParameterList>() );
-		}
+		boost::shared_ptr<const CqNamedParameterList> pOption( const char* strName ) const;
 		/** Get a pointer to a named user option.
 		 * \param strName Character pointer to the requested options name.
 		 * \return A pointer to the option, or 0 if not found. 
 		 */
-		boost::shared_ptr<CqNamedParameterList> pOptionWrite( const char* strName )
-		{
-			const TqUlong hash = CqString::hash( strName );
-			std::vector<boost::shared_ptr<CqNamedParameterList> >::iterator
-			i = m_aOptions.begin(), end = m_aOptions.end();
-			for ( ; i != end; ++i )
-			{
-				if ( ( *i ) ->hash() == hash )
-				{
-					if ( ( *i ).unique() )
-					{
-						return ( *i );
-					}
-					else
-					{
-						boost::shared_ptr<CqNamedParameterList> pNew( new CqNamedParameterList( *( *i ) ) );
-						( *i ) = pNew;
-						return ( pNew );
-					}
-				}
-			}
-			m_aOptions.push_back( boost::shared_ptr<CqNamedParameterList>( new CqNamedParameterList( strName ) ) );
-			return ( m_aOptions.back() );
-		}
+		boost::shared_ptr<CqNamedParameterList> pOptionWrite( const char* strName );
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
 		CqParameter* pParameterWrite( const char* strName, const char* strParam );
 		virtual const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
@@ -167,6 +130,29 @@ class CqOptions : public IqOptions
 		virtual CqColor GetColorImager( TqFloat x, TqFloat y );
 		virtual CqColor GetOpacityImager( TqFloat x, TqFloat y );
 		virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y );
+
+		//@{
+		/** \brief Find a file in the given RI search path.
+		 *
+		 * This function finds a file in the named RI search path as set using
+		 * RiOption("searchpath", "path_name", "path", RI_NULL).  The findFile()
+		 * function is used to perform the search.  If the file is not found in the
+		 * given search path, the "resource" search path is used as a fallback.
+		 *
+		 * If the file is still not found, an XqInvalidFile exception is thrown, or an
+		 * empty path returned for the "Nothrow" version.  Both versions may throw
+		 * boost::filesystem::filesystem_error for underlying OS-level errors.
+		 *
+		 * \see findFile
+		 *
+		 * \param fileName - name of the file
+		 * \param riSearchPathName - name of the search path as specified to RiOption
+		 */
+		virtual boost::filesystem::path findRiFile(const std::string& fileName,
+				const char* riSearchPathName) const;
+		virtual boost::filesystem::path findRiFileNothrow(const std::string& fileName,
+				const char* riSearchPathName) const;
+		//@}
 
 	private:
 		std::vector<boost::shared_ptr<CqNamedParameterList> >	m_aOptions;	///< Vector of user specified options.

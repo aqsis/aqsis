@@ -21,21 +21,19 @@
 		\author Tristan Colgate <tristan@inuxtech.co.uk>
 */
 
-#ifndef IDSOSHADEOPS_H
-#define IDSOSHADEOPS_H
+#ifndef IDSOSHADEOPS_H_INCLUDED
+#define IDSOSHADEOPS_H_INCLUDED
 
-#include	<stack>
-#include	<vector>
-#include	<list>
+#include "aqsis.h"
 
-#include	"aqsis.h"
+#include <list>
 
-#include	"sstring.h"
-#include	"plugins.h"
-
-#include	"shadeop.h"
-#include	"ishaderexecenv.h"
-#include	"shadervm_common.h"
+#include "ishader.h"
+#include "ishaderexecenv.h"
+#include "plugins.h"
+#include "primvartype.h"
+#include "shadeop.h"
+#include "sstring.h"
 
 namespace Aqsis {
 
@@ -58,9 +56,7 @@ struct SqDSOExternalCall
 struct SHADERVM_SHARE IqDSORepository
 {
 	virtual void SetDSOPath(const char*) = 0;
-	virtual ~IqDSORepository()
-	{}
-	;
+	virtual ~IqDSORepository() {}
 
 private:
 	virtual std::list<SqDSOExternalCall*>* getShadeOpMethods(CqString*) = 0;
@@ -71,4 +67,4 @@ private:
 
 } // namespace Aqsis
 
-#endif	// IDSOSHADEOPS_H
+#endif	// IDSOSHADEOPS_H_INCLUDED

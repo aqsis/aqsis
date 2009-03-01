@@ -52,7 +52,7 @@ namespace Aqsis {
 class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 {
 	public:
-		CqTiffInputFile(const std::string& fileName);
+		CqTiffInputFile(const boostfs::path& fileName);
 		/** \param Read the tiff from an input stream rather than a file.
 		 *
 		 * \param inStream - Stream to read from.  This is passed to the
@@ -61,7 +61,7 @@ class AQSISTEX_SHARE CqTiffInputFile : public IqMultiTexInputFile
 		CqTiffInputFile(std::istream& inStream);
 
 		// inherited
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header() const;
 

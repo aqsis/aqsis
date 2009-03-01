@@ -32,7 +32,7 @@
 
 namespace Aqsis {
 
-CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
+CqTiledTiffInputFile::CqTiledTiffInputFile(const boostfs::path& fileName)
 	: m_headers(),
 	m_fileHandle(new CqTiffFileHandle(fileName, "r")),
 	m_numDirs(m_fileHandle->numDirectories()),
@@ -90,9 +90,9 @@ CqTiledTiffInputFile::CqTiledTiffInputFile(const std::string& fileName)
 	}
 }
 
-const char* CqTiledTiffInputFile::fileName() const
+boostfs::path CqTiledTiffInputFile::fileName() const
 {
-	return m_fileHandle->fileName().c_str();
+	return m_fileHandle->fileName();
 }
 
 EqImageFileType CqTiledTiffInputFile::fileType() const

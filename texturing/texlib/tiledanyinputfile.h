@@ -54,9 +54,9 @@ class AQSISTEX_SHARE CqTiledAnyInputFile : public IqTiledTexInputFile
 		 * This simply calls through to IqTexInputFile::open(), so fails in the
 		 * same ways.
 		 */
-		CqTiledAnyInputFile(const std::string& fileName);
+		CqTiledAnyInputFile(const boostfs::path& fileName);
 
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header(TqInt index = 0) const;
 		virtual SqTileInfo tileInfo() const;

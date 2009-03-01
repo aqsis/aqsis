@@ -29,11 +29,11 @@
 
 #include "aqsis.h"
 
-#include <string>
 #include <vector>
 
-#include "wrapmode.h"
+#include "file.h"
 #include "riparamlist.h"
+#include "wrapmode.h"
 
 namespace Aqsis {
 
@@ -75,8 +75,8 @@ struct SqFilterInfo
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the mipmapping procedure.
  */
-AQSISTEX_SHARE void makeTexture(const std::string& inFileName, 
-		const std::string& outFileName, SqFilterInfo filterInfo, 
+AQSISTEX_SHARE void makeTexture(const boostfs::path& inFileName, 
+		const boostfs::path& outFileName, SqFilterInfo filterInfo, 
 		const SqWrapModes& wrapModes, const CqRiParamList& paramList);
 
 /** \brief Convert six texture files into a cube face environment map
@@ -122,10 +122,10 @@ AQSISTEX_SHARE void makeTexture(const std::string& inFileName,
  *                    parameters for the mipmapping procedure.
  */
 AQSISTEX_SHARE void makeCubeFaceEnvironment(
-		const std::string& inNamePx, const std::string& inNameNx, 
-		const std::string& inNamePy, const std::string& inNameNy, 
-		const std::string& inNamePz, const std::string& inNameNz, 
-		const std::string& outFileName, TqFloat fieldOfView,
+		const boostfs::path& inNamePx, const boostfs::path& inNameNx, 
+		const boostfs::path& inNamePy, const boostfs::path& inNameNy, 
+		const boostfs::path& inNamePz, const boostfs::path& inNameNz, 
+		const boostfs::path& outFileName, TqFloat fieldOfView,
 		SqFilterInfo filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file into a latlong environment map
@@ -145,7 +145,7 @@ AQSISTEX_SHARE void makeCubeFaceEnvironment(
  *                    parameters for the mipmapping procedure.
  */
 AQSISTEX_SHARE void makeLatLongEnvironment(
-		const std::string& inFileName, const std::string& outFileName,
+		const boostfs::path& inFileName, const boostfs::path& outFileName,
 		SqFilterInfo filterInfo, const CqRiParamList& paramList);
 
 /** \brief Convert a texture file to a shadow map.
@@ -163,8 +163,8 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the shadow map generation.
  */
-AQSISTEX_SHARE void makeShadow(const std::string& inFileName, 
-		const std::string& outFileName, const CqRiParamList& paramList);
+AQSISTEX_SHARE void makeShadow(const boostfs::path& inFileName, 
+		const boostfs::path& outFileName, const CqRiParamList& paramList);
 
 /** \brief Convert a collection of depth maps into an occlusion map.
  *
@@ -179,8 +179,8 @@ AQSISTEX_SHARE void makeShadow(const std::string& inFileName,
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the occlusion map generation.
  */
-AQSISTEX_SHARE void makeOcclusion(const std::vector<std::string>& inFiles,
-		const std::string& outFileName, const CqRiParamList& paramList);
+AQSISTEX_SHARE void makeOcclusion( const std::vector<boostfs::path>& inFiles,
+		const boostfs::path& outFileName, const CqRiParamList& paramList);
 
 } // namespace Aqsis
 

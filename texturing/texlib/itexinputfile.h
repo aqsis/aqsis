@@ -30,8 +30,7 @@
 
 #include "aqsis.h"
 
-#include <string>
-
+#include "file.h"
 #include "imagefiletype.h"
 #include "texfileheader.h"
 
@@ -59,7 +58,7 @@ class AQSISTEX_SHARE IqTexInputFile
 		/// \name Metadata access
 		//@{
 		/// get the file name
-		virtual const char* fileName() const = 0;
+		virtual boostfs::path fileName() const = 0;
 
 		/// get a string representing the file type
 		virtual EqImageFileType fileType() const = 0;
@@ -122,7 +121,7 @@ class AQSISTEX_SHARE IqTexInputFile
 		 * understood by aqsistex.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqTexInputFile> open(const std::string& fileName);
+		static boost::shared_ptr<IqTexInputFile> open(const boostfs::path& fileName);
 };
 
 
@@ -169,7 +168,7 @@ class AQSISTEX_SHARE IqMultiTexInputFile : public IqTexInputFile
 		 * multiple sub-images.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqMultiTexInputFile> open(const std::string& fileName);
+		static boost::shared_ptr<IqMultiTexInputFile> open(const boostfs::path& fileName);
 };
 
 

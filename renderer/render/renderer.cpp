@@ -27,6 +27,7 @@
 
 #include	<time.h>
 #include	<boost/bind.hpp>
+#include	<boost/filesystem/fstream.hpp>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -37,7 +38,6 @@
 #include	"lath.h"
 #include	"render.h"
 #include	"transform.h"
-#include	"rifile.h"
 #include	"texturemap_old.h"
 #include	"shadervm.h"
 #include	"tiffio.h"
@@ -1190,10 +1190,12 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	// we now create the shader...
 
 	// search in the current directory first
-	CqString strFilename( strName );
-	strFilename += RI_SHADER_EXTENSION;
-	CqRiFile SLXFile( strFilename.c_str(), "shader" );
-	if ( SLXFile.IsValid() )
+	std::string fileName(strName);
+	fileName += RI_SHADER_EXTENSION;
+	boost::filesystem::path shaderPath
+		= poptCurrent()->findRiFileNothrow(fileName, "shader");
+	boost::filesystem::ifstream shaderFile(shaderPath);
+	if(shaderFile)
 	{
 		boost::shared_ptr<CqShaderVM> pRet(new CqShaderVM(this));
 
@@ -1207,13 +1209,13 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		}
 
 		Aqsis::log() << info << "Loading shader \"" << strName
-			<< "\" from file \"" << SLXFile.strRealName()
+			<< "\" from file \"" << shaderPath.file_string()
 			<< "\"" << std::endl;
 
 		pRet->SetstrName( strName );
 		try
 		{
-			pRet->LoadProgram( SLXFile );
+			pRet->LoadProgram(&shaderFile);
 		}
 		catch(XqBadShader& e)
 		{
@@ -1267,7 +1269,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			return boost::shared_ptr<IqShader>();
 		}
 	}
-
 }
 
 //----------------------------------------------------------------------

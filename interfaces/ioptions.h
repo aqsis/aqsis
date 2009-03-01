@@ -23,28 +23,26 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is ioptions.h included already?
 #ifndef IOPTIONS_H_INCLUDED
 //{
-#define IOPTIONS_H_INCLUDED 1
+#define IOPTIONS_H_INCLUDED
 
-#include	<vector>
+#include "aqsis.h"
 
-#include	"ri.h"
-#include	"matrix.h"
-#include	"sstring.h"
-#include	"refcount.h"
-#include	"color.h"
-#include	"exception.h"
-#include	"parameters.h"
-#include	"ishader.h"
+#include <boost/filesystem/path.hpp>
+
+#include "color.h"
+#include "primvartype.h"
+#include "ri_types.h"
+#include "sstring.h"
 
 namespace Aqsis {
 
-
 class CqImagersource;
 class CqRegion;
+class IqShader;
 struct IqChannelBuffer;
+class CqVector3D;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode
@@ -119,6 +117,11 @@ struct IqOptions
 	virtual CqColor GetColorImager( TqFloat x, TqFloat y ) = 0;
 	virtual CqColor GetOpacityImager( TqFloat x, TqFloat y ) = 0;
 	virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y ) = 0;
+
+	virtual boost::filesystem::path findRiFile(const std::string& fileName,
+			const char* riSearchPathName) const = 0;
+	virtual boost::filesystem::path findRiFileNothrow(const std::string& fileName,
+			const char* riSearchPathName) const = 0;
 };
 
 

@@ -725,9 +725,9 @@ void safeTiffClose(TIFF* tif)
 
 } // unnamed namespace
 
-CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
+CqTiffFileHandle::CqTiffFileHandle(const boostfs::path& fileName, const char* openMode)
 	: m_fileName(fileName),
-	m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
+	m_tiffPtr(TIFFOpen(fileName.file_string().c_str(), openMode), safeTiffClose),
 	m_isInputFile(openMode[0] == 'r'),
 	m_currDir(0)
 {

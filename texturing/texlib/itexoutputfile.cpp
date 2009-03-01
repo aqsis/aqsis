@@ -41,7 +41,7 @@ namespace {
  * \return an open file, or NULL if the file type is invalid.
  */
 boost::shared_ptr<IqMultiTexOutputFile> openMultiOutputFile(
-		const std::string& fileName, EqImageFileType fileType,
+		const boostfs::path& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
 {
 	switch(fileType)
@@ -60,7 +60,7 @@ boost::shared_ptr<IqMultiTexOutputFile> openMultiOutputFile(
 //------------------------------------------------------------------------------
 // IqTexOutputFile implementation
 boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
-		const std::string& fileName, EqImageFileType fileType,
+		const boostfs::path& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
 {
 	// Check some of the header data to make sure it's minimally sane...
@@ -101,7 +101,7 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 //------------------------------------------------------------------------------
 // IqMultiTexOutputFile implementation
 boost::shared_ptr<IqMultiTexOutputFile> IqMultiTexOutputFile::open(
-		const std::string& fileName, EqImageFileType fileType,
+		const boostfs::path& fileName, EqImageFileType fileType,
 		const CqTexFileHeader& header)
 {
 	boost::shared_ptr<IqMultiTexOutputFile> newFile

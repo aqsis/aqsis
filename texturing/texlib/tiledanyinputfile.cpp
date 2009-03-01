@@ -31,12 +31,12 @@
 
 namespace Aqsis {
 
-CqTiledAnyInputFile::CqTiledAnyInputFile(const std::string& fileName)
+CqTiledAnyInputFile::CqTiledAnyInputFile(const boostfs::path& fileName)
 	: m_texFile(IqTexInputFile::open(fileName)),
 	m_tileInfo(m_texFile->header().width(), m_texFile->header().height())
 { }
 
-const char* CqTiledAnyInputFile::fileName() const
+boostfs::path CqTiledAnyInputFile::fileName() const
 {
 	return m_texFile->fileName();
 }

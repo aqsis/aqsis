@@ -57,9 +57,9 @@ class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 		 * \throw XqBadTexture if the TIFF file doesn't satisfy the tiling
 		 * assumptions.
 		 */
-		CqTiledTiffInputFile(const std::string& fileName);
+		CqTiledTiffInputFile(const boostfs::path& fileName);
 
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header(TqInt index = 0) const;
 		virtual SqTileInfo tileInfo() const;

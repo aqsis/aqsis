@@ -10,8 +10,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef	___ishader_Loaded___
-#define	___ishader_Loaded___
+#ifndef	ISHADER_H_INCLUDED
+#define	ISHADER_H_INCLUDED
 
 #include	"aqsis.h"
 #include	"interfacefwd.h"
@@ -20,23 +20,16 @@
 
 #ifdef	WIN32
 #  ifdef	AQSIS_STATIC_LINK
-
 #    define  SHADERVM_SHARE
-
-#  else // !AQSIS_STATIC_LINK
-
+#  else
 #      ifdef SHADERVM_EXPORTS
 #        define SHADERVM_SHARE __declspec(dllexport)
 #      else
 #        define SHADERVM_SHARE __declspec(dllimport)
 #      endif
-
-#  endif	// AQSIS_STATIC_LINK
-
-#else	// !WIN32
-
+#  endif // AQSIS_STATIC_LINK
+#else // !WIN32
 #  define  SHADERVM_SHARE
-
 #endif // WIN32
 
 
@@ -65,6 +58,7 @@ enum EqShaderType
 
 struct IqShaderExecEnv;
 struct IqSurface;
+class CqMatrix;
 
 //----------------------------------------------------------------------
 /** \struct IqShader
@@ -153,9 +147,6 @@ struct SHADERVM_SHARE IqShader
 	virtual void SetType(EqShaderType type) = 0;
 };
 
-
-
-
 } // namespace Aqsis
 
-#endif	//	___ishader_Loaded___
+#endif	// ISHADER_H_INCLUDED

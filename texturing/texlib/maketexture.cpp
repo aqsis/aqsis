@@ -301,7 +301,7 @@ void fillOutputHeader(CqTexFileHeader& header, const SqWrapModes& wrapModes,
 	}
 }
 
-void clampFilterWidth(SqFilterInfo& filterInfo, const std::string& outFileName)
+void clampFilterWidth(SqFilterInfo& filterInfo, const boostfs::path& outFileName)
 {
 	if(filterInfo.xWidth < 1 || filterInfo.yWidth < 1)
 	{
@@ -324,18 +324,19 @@ void clampFilterWidth(SqFilterInfo& filterInfo, const std::string& outFileName)
 // Interface function implementations
 //------------------------------------------------------------------------------
 
-void makeTexture(const std::string& inFileName, const std::string& outFileName,
+void makeTexture(const boostfs::path& inFileName, const boostfs::path& outFileName,
 		SqFilterInfo filterInfo, const SqWrapModes& wrapModes,
 		const CqRiParamList& paramList)
 {
 	clampFilterWidth(filterInfo, outFileName);
 	// Convert bakefile if necessary.
-	std::string inFileRealName = inFileName;
+	boostfs::path inFileRealName = inFileName;
 	if(guessFileType(inFileName) == ImageFile_AqsisBake)
 	{
-		inFileRealName = inFileName + ".tif";
+		inFileRealName = inFileName.string() + ".tif";
 		TqInt bakeRes = static_cast<TqInt>(paramList.find<TqFloat>("bake", 256));
-		bakeToTiff(inFileName.c_str(), inFileRealName.c_str(), bakeRes);
+		bakeToTiff(inFileName.file_string().c_str(),
+				   inFileRealName.file_string().c_str(), bakeRes);
 	}
 
 	// Open the input file
@@ -357,10 +358,10 @@ void makeTexture(const std::string& inFileName, const std::string& outFileName,
 
 
 void makeCubeFaceEnvironment(
-		const std::string& inNamePx, const std::string& inNameNx, 
-		const std::string& inNamePy, const std::string& inNameNy, 
-		const std::string& inNamePz, const std::string& inNameNz, 
-		const std::string& outFileName, TqFloat fieldOfView,
+		const boostfs::path& inNamePx, const boostfs::path& inNameNx, 
+		const boostfs::path& inNamePy, const boostfs::path& inNameNy, 
+		const boostfs::path& inNamePz, const boostfs::path& inNameNz, 
+		const boostfs::path& outFileName, TqFloat fieldOfView,
 		SqFilterInfo filterInfo, const CqRiParamList& paramList)
 {
 	clampFilterWidth(filterInfo, outFileName);
@@ -398,8 +399,8 @@ void makeCubeFaceEnvironment(
 }
 
 
-void makeLatLongEnvironment(const std::string& inFileName, 
-		const std::string& outFileName, SqFilterInfo filterInfo, 
+void makeLatLongEnvironment(const boostfs::path& inFileName, 
+		const boostfs::path& outFileName, SqFilterInfo filterInfo, 
 		const CqRiParamList& paramList)
 {
 	clampFilterWidth(filterInfo, outFileName);
@@ -422,7 +423,7 @@ void makeLatLongEnvironment(const std::string& inFileName,
 }
 
 
-void makeShadow(const std::string& inFileName, const std::string& outFileName,
+void makeShadow(const boostfs::path& inFileName, const boostfs::path& outFileName,
 		const CqRiParamList& paramList)
 {
 	boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(inFileName);
@@ -460,12 +461,12 @@ void makeShadow(const std::string& inFileName, const std::string& outFileName,
 	outFile->writePixels(pixelBuf);
 }
 
-void makeOcclusion(const std::vector<std::string>& inFiles,
-		const std::string& outFileName, const CqRiParamList& paramList)
+void makeOcclusion(const std::vector<boostfs::path>& inFiles,
+		const boostfs::path& outFileName, const CqRiParamList& paramList)
 {
 	boost::shared_ptr<IqMultiTexOutputFile> outFile;
 
-	for(std::vector<std::string>::const_iterator fName = inFiles.begin();
+	for(std::vector<boostfs::path>::const_iterator fName = inFiles.begin();
 			fName != inFiles.end(); ++fName)
 	{
 		boost::shared_ptr<IqTexInputFile> inFile = IqTexInputFile::open(*fName);

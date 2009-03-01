@@ -167,8 +167,8 @@ int main( int argc, const char** argv )
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
 			//Expand filenames
-			std::list<CqString*> files = Aqsis::CqFile::cliGlob(*e);
-			std::list<CqString*>::iterator it;
+			std::vector<std::string> files = Aqsis::cliGlob(*e);
+			std::vector<std::string>::iterator it;
 			for(it = files.begin(); it != files.end(); ++it){ 
 				ResetParser();
 				// Create a code generator for the requested backend.
@@ -187,12 +187,12 @@ int main( int argc, const char** argv )
 				try
 				{
 					//  Open and read in the specified input file.
-					std::ifstream instream((*it)->c_str());
+					std::ifstream instream(it->c_str());
 					std::string instring;
 	
 					if (!instream.is_open()) 
 					{
-						std::cerr << "Could not open input file: " << (*it)->c_str() << std::endl;
+						std::cerr << "Could not open input file: " << *it << std::endl;
 						continue;
 					}
 					instream.unsetf(std::ios::skipws);
@@ -203,7 +203,7 @@ int main( int argc, const char** argv )
 					typedef boost::wave::cpplexer::lex_iterator<token_type> lex_iterator_type;
 					typedef boost::wave::context<std::string::iterator, lex_iterator_type>
 					    context_type;
-					context_type ctx (instring.begin(), instring.end(), (*it)->c_str());
+					context_type ctx (instring.begin(), instring.end(), it->c_str());
 
 					// Append the -i arguments passed in to forward them to the preprocessor.
 					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
@@ -236,7 +236,7 @@ int main( int argc, const char** argv )
 					std::ofstream dumpfile;
 					if( g_dumpsl )
 					{
-						std::string dumpfname((*it)->c_str());
+						std::string dumpfname(*it);
 						dumpfname.append(".pp");
 						dumpfile.open(dumpfname.c_str());
 					};

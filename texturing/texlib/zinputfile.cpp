@@ -38,10 +38,10 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 // CqZInputFile Implementation
 
-CqZInputFile::CqZInputFile(const std::string& fileName)
+CqZInputFile::CqZInputFile(const boostfs::path& fileName)
 	: m_header(),
 	m_fileName(fileName),
-	m_fileStream(fileName.c_str(), std::ios::in | std::ios::binary),
+	m_fileStream(fileName.file_string().c_str(), std::ios::in | std::ios::binary),
 	m_dataBegin(0)
 {
 	if(!m_fileStream.is_open())
@@ -53,9 +53,9 @@ CqZInputFile::CqZInputFile(const std::string& fileName)
 	m_dataBegin = m_fileStream.tellg();
 }
 
-const char* CqZInputFile::fileName() const
+boostfs::path CqZInputFile::fileName() const
 {
-	return m_fileName.c_str();
+	return m_fileName;
 }
 
 EqImageFileType CqZInputFile::fileType() const

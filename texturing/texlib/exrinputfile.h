@@ -65,10 +65,10 @@ namespace Attr {
 class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
 {
 	public:
-		CqExrInputFile(const std::string& fileName);
+		CqExrInputFile(const boostfs::path& fileName);
 		/// Constructor which takes an input stream rather than a file name
 		//CqExrInputFile(std::istream& inStream);
-		virtual const char* fileName() const;
+		virtual boostfs::path fileName() const;
 		virtual EqImageFileType fileType() const;
 		virtual const CqTexFileHeader& header() const;
 	private:

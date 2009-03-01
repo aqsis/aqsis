@@ -29,10 +29,9 @@
 
 #include "aqsis.h"
 
-#include <string>
-
 #include <boost/shared_ptr.hpp>
 
+#include "file.h"
 #include "imagefiletype.h"
 #include "texfileheader.h"
 
@@ -70,7 +69,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		/// \name Metadata access
 		//@{
 		/// Get the file name
-		virtual const char* fileName() const = 0;
+		virtual boostfs::path fileName() const = 0;
 		/// Get the file type
 		virtual EqImageFileType fileType() const = 0;
 		/** Get the file header data
@@ -146,7 +145,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * understood by aqsistex.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqTiledTexInputFile> open(const std::string& fileName);
+		static boost::shared_ptr<IqTiledTexInputFile> open(const boostfs::path& fileName);
 		/** \brief Open any image file using the tiled interface.
 		 *
 		 * Sometimes it may be useful to wrap any image up in a tiled
@@ -160,7 +159,7 @@ class AQSISTEX_SHARE IqTiledTexInputFile
 		 * understood by aqsistex.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqTiledTexInputFile> openAny(const std::string& fileName);
+		static boost::shared_ptr<IqTiledTexInputFile> openAny(const boostfs::path& fileName);
 
 	protected:
 		/** \brief Low-level readTile() function to be overridden by child classes

@@ -37,6 +37,7 @@
 
 #include "channellist.h"
 #include "exception.h"
+#include "file.h"
 #include "logging.h"
 #include "texfileheader.h"
 
@@ -250,7 +251,7 @@ class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 		 * \param fileName - name of the tiff to open
 		 * \param openMode - libtiff file open mode ("r" or "w" for read or write)
 		 */
-		CqTiffFileHandle(const std::string& fileName, const char* openMode);
+		CqTiffFileHandle(const boostfs::path& fileName, const char* openMode);
 		/** \brief Construct a tiff file handle from a std::istream
 		 *
 		 * \throw XqInternal if libtiff has a problem with the stream
@@ -267,7 +268,7 @@ class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 		CqTiffFileHandle(std::ostream& outputStream);
 
 		/// Return the file name
-		inline const std::string& fileName() const;
+		inline const boostfs::path& fileName() const;
 
 		/** \brief Write the current directoy to file, and increment the
 		 * directory index.
@@ -287,7 +288,7 @@ class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
 		 */
 		void setDirectory(tdir_t dirIdx);
 
-		const std::string m_fileName;       ///< name of the tiff file
+		const boostfs::path m_fileName;     ///< name of the tiff file
 		boost::shared_ptr<TIFF> m_tiffPtr;  ///< underlying TIFF structure
 		bool m_isInputFile;                 ///< true if the file is open for input
 		tdir_t m_currDir;                   ///< current directory index
@@ -389,7 +390,7 @@ void CqTiffDirHandle::setTiffTagValue(const ttag_t tag,
 
 //------------------------------------------------------------------------------
 // CqTIffFileHandle implementation
-inline const std::string& CqTiffFileHandle::fileName() const
+inline const boostfs::path& CqTiffFileHandle::fileName() const
 {
 	return m_fileName;
 }

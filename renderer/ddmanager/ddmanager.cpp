@@ -37,7 +37,6 @@
 
 #include	"sstring.h"
 #include	"ddmanager.h"
-#include	"rifile.h"
 #include	"imagebuffer.h"
 #include	"shaderexecenv.h"
 #include	"logging.h"
@@ -326,10 +325,10 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	if ( strDriverFile != "debugdd")
 	{
 		// Try to open the file to see if it's really there
-		CqRiFile fileDriver( strDriverFile.c_str(), "display" );
-		
+		boost::filesystem::path displayPath = QGetRenderContext()->poptCurrent()
+			->findRiFileNothrow(strDriverFile, "display");
 		// Missing display driver?
-		if ( !fileDriver.Exists() )
+		if ( displayPath.empty() )
 		{
 			if (dspNo == 0)
 			{
@@ -349,7 +348,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		}
 		
 		// Load the dynamic object and locate the relevant symbols.
-		CqString strDriverPathAndFile = fileDriver.strRealName();
+		CqString strDriverPathAndFile = displayPath.file_string();
 		m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
 		if ( m_DriverHandle != NULL )
 		{
@@ -687,45 +686,6 @@ void CqDisplayRequest::CloseDisplayLibrary()
 	/// causes some important data to be altered and when a new window is opened it crashes.
 	/// The cleanup of the drivers is left to when the CqDDManager instance closes down, and the
 	/// CqSimplePlugin class gets destroyed, which will be at the end of the render, which is fine.
-}
-
-void CqDDManager::InitialiseDisplayNameMap()
-{
-	CqString strConfigFile("displays.ini");
-	const CqString* displays = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath", "display" );
-	if ( displays )
-		strConfigFile = displays[ 0 ] + "/" + strConfigFile;
-
-	Aqsis::log() << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
-
-	CqRiFile fileINI( strConfigFile.c_str(), "display" );
-	if ( fileINI.IsValid() )
-	{
-		// On each line, read the first string, then the second and store them in the map.
-		std::string strLine;
-		std::istream& strmINI = static_cast<std::istream&>( fileINI );
-
-		while ( std::getline( strmINI, strLine ) )
-		{
-			std::string strName, strDriverName;
-			std::string::size_type iStartN = strLine.find_first_not_of( "\t " );
-			std::string::size_type iEndN = strLine.find_first_of( "\t ", iStartN );
-			std::string::size_type iStartD = strLine.find_first_not_of( "\t ", iEndN );
-			std::string::size_type iEndD = strLine.find_first_of( "\t ", iStartD );
-			if ( iStartN != std::string::npos && iEndN != std::string::npos &&
-			        iStartD != std::string::npos )
-			{
-				strName = strLine.substr( iStartN, iEndN );
-				strDriverName = strLine.substr( iStartD, iEndD );
-				m_mapDisplayNames[ strName ] = strDriverName;
-			}
-		}
-		m_fDisplayMapInitialised = true;
-	}
-	else
-	{
-		Aqsis::log() << error << "Could not find " << strConfigFile << " configuration file." << std::endl;
-	}
 }
 
 /**

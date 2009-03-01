@@ -29,8 +29,7 @@
 
 #include "aqsis.h"
 
-#include <string>
-
+#include "file.h"
 #include "exception.h"
 #include "imagefiletype.h"
 #include "mixedimagebuffer.h"
@@ -61,7 +60,7 @@ class AQSISTEX_SHARE IqTexOutputFile
 		/// \name Metadata access
 		//@{
 		/// get the file name
-		virtual const char* fileName() const = 0;
+		virtual boostfs::path fileName() const = 0;
 		/// get the file type
 		virtual EqImageFileType fileType() = 0;
 		/// Get the file header data
@@ -109,7 +108,7 @@ class AQSISTEX_SHARE IqTexOutputFile
 		 * \param fileType - the file type.
 		 * \return The newly opened input file
 		 */
-		static boost::shared_ptr<IqTexOutputFile> open(const std::string& fileName,
+		static boost::shared_ptr<IqTexOutputFile> open(const boostfs::path& fileName,
 				EqImageFileType fileType, const CqTexFileHeader& header);
 
 	protected:
@@ -164,7 +163,7 @@ class AQSISTEX_SHARE IqMultiTexOutputFile : public IqTexOutputFile
 		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqMultiTexOutputFile> open(
-				const std::string& fileName, EqImageFileType fileType,
+				const boostfs::path& fileName, EqImageFileType fileType,
 				const CqTexFileHeader& header);
 };
 

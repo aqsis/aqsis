@@ -152,7 +152,7 @@ boost::shared_ptr<IqTiledTexInputFile> CqTextureCache::getTextureFile(
 		// File exists in the cache; return it.
 		return fileIter->second;
 	// Else try to open the file and store it in the cache before returning it.
-	std::string fullName = findFileInPath(name, m_searchPathCallback());
+	boostfs::path fullName = findFile(name, m_searchPathCallback());
 	boost::shared_ptr<IqTiledTexInputFile> file;
 	try
 	{
