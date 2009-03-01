@@ -171,6 +171,7 @@ IF(AQSIS_ENABLE_TESTING)
 	# A helper executable for popen_test.cpp
 	ADD_EXECUTABLE(pipethrough popen_pipethrough_helper_test.cpp)
 	SET_TARGET_PROPERTIES(pipethrough PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+		RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
 	)
+	ADD_DEPENDENCIES(popen_test pipethrough)
 ENDIF(AQSIS_ENABLE_TESTING)

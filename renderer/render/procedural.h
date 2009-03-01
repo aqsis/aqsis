@@ -141,8 +141,11 @@ class CqRunProgramRepository
 		 * a new process is started and the stdin and stdout connected to a
 		 * pipe stream which is returned.
 		 *
-		 * If the child process has encountered a problem, the appropriate
-		 * stream flags should be set (test with pipe.fail() or pipe.eof()).
+		 * If an error occurs during creation of the child process, an
+		 * XqEnvironment exception will be throw.  Subsequent calls to find()
+		 * will then result in a null pointer being returned.  In addition,
+		 * streams which have their eof() or fail() bits set will be deleted
+		 * and a null pointer returned.
 		 *
 		 * \param command - command line for the child process.  The command
 		 * line will be split up into arguments delimited by whitespace, with
@@ -151,7 +154,7 @@ class CqRunProgramRepository
 		 * searched for in the procedural searchpath, with the system path as a
 		 * fallback.
 		 */
-		std::iostream& find(const std::string& command);
+		std::iostream* find(const std::string& command);
 
 	private:
 		typedef boost::shared_ptr<TqPopenStream> TqPopenStreamPtr;
@@ -160,7 +163,7 @@ class CqRunProgramRepository
 		static void splitCommandLine(const std::string& command,
 				std::vector<std::string>& argv);
 
-		TqPopenStream& startNewRunProgram(const std::string& command);
+		TqPopenStream* startNewRunProgram(const std::string& command);
 
 		/// Set of active pipes for child processes.
 		TqRunProgramMap m_activeRunPrograms;

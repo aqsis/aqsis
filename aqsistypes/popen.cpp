@@ -26,9 +26,13 @@
 
 #include "popen.h"
 
+#include <errno.h>
+
 #ifdef AQSIS_SYSTEM_WIN32
 #	include <windows.h>
 #else
+#	include <cstring> // for strerror()
+#	include <fcntl.h>
 #	include <unistd.h>
 #	include <signal.h>
 #endif // AQSIS_SYSTEM_WIN32
@@ -212,6 +216,26 @@ class CqPopenDevice::CqImpl
 		{
 			return m_pipeWriteHandle;
 		}
+
+		void close(std::ios_base::openmode mode)
+		{
+			if(mode == std::ios_base::in)
+			{
+				if (!CloseHandle(m_impl->pipeReadHandle()))
+				{
+					Aqsis::log() << error << "CloseHandle" << std::endl;
+					return;
+				}
+			}
+			else if(mode == std::ios_base::out)
+			{
+				if (!CloseHandle(m_impl->pipeWriteHandle()))
+				{
+					Aqsis::log() << error << "CloseHandle" << std::endl;
+					return;
+				}
+			}
+		}
 };
 
 #else // AQSIS_SYSTEM_WIN32
@@ -227,12 +251,12 @@ class CqPopenDevice::CqImpl
 
 		/** \brief Connect the given file descriptors to stdin and stdout.
 		 * 
+		 * This function is called _after_ fork() by the child process.
+		 * It connects the new process' stdin and stdout to the provided file
+		 * descriptors corresponding to pipes back to the parent process.
+		 *
 		 * \param newStdin - file descriptor to connect to stdin
 		 * \param newStdout - file descriptor to connect to stdout
-		 *
-		 * This function is used after a fork() to connect the new child
-		 * process stdin and stdout to the provided file descriptors which
-		 * correspond to pipes back to the parent process.
 		 */
 		static bool connectStdInOut(int newStdin, int newStdout)
 		{
@@ -273,6 +297,18 @@ class CqPopenDevice::CqImpl
 			return true;
 		}
 
+		/** Call std::exit() from the child process, writing the error message
+		 * to the error pipe.
+		 */
+		static void errorExit(int errorPipeFd, const char* error)
+		{
+			std::string errorStr = error;
+			errorStr += ": ";
+			errorStr += std::strerror(errno);
+			::write(errorPipeFd, errorStr.c_str(), errorStr.length());
+			std::exit(EXIT_FAILURE);
+		}
+
 	public:
 		CqImpl(const std::string& progName, const std::vector<std::string>& argv)
 			: m_pipeReadFd(-1),
@@ -286,48 +322,91 @@ class CqPopenDevice::CqImpl
 			if(pipe(childStdinFd) == -1)
 			{
 				AQSIS_THROW_XQERROR(XqEnvironment, EqE_System,
-					"Could not creating pipe");
+					"Could not create pipe");
 			}
 			if(pipe(childStdoutFd) == -1)
 			{
 				::close(childStdinFd[0]);
 				::close(childStdinFd[1]);
 				AQSIS_THROW_XQERROR(XqEnvironment, EqE_System,
-					"Could not creating pipe");
+					"Could not create pipe");
+			}
+			// special pipe for error reporting from the child
+			int errorPipe[2];
+			if(::pipe(errorPipe) == -1)
+			{
+				::close(childStdinFd[0]);
+				::close(childStdinFd[1]);
+				::close(childStdoutFd[0]);
+				::close(childStdoutFd[1]);
+				AQSIS_THROW_XQERROR(XqEnvironment, EqE_System,
+					"Could not create pipe");
 			}
 			const int childRead = childStdinFd[0];
 			const int parentWrite = childStdinFd[1];
 			const int childWrite = childStdoutFd[1];
 			const int parentRead = childStdoutFd[0];
+			const int childErrorWrite = errorPipe[1];
+			const int parentErrorRead = errorPipe[0];
+
+			// Ignore all broken-pipe signals; catching and using these to
+			// report would be difficult at best...
 			::signal(SIGPIPE, SIG_IGN);
-			if(pid_t pid = fork())
+			if(pid_t pid = ::fork())
 			{
+				//----------------------------------------
 				// Parent process
 				if(pid == -1)
 				{
 					// Could not create child; close fd's and throw.
-					::close(childRead);
-					::close(childWrite);
-					::close(parentRead);
-					::close(parentWrite);
+					::close(childRead);       ::close(childWrite);
+					::close(parentRead);      ::close(parentWrite);
+					::close(childErrorWrite); ::close(parentErrorRead);
 					AQSIS_THROW_XQERROR(XqEnvironment, EqE_System,
 						"could not fork child process");
 				}
 				// Close the child ends of the pipe 
 				::close(childRead);
 				::close(childWrite);
+				::close(childErrorWrite);
+				// Read any error from the child process.  If the child process
+				// execvp() is successful the child end of the pipe will be
+				// closed and ::read() will return here with zero bytes read.
+				const int bufSize = 256;
+				char errBuf[bufSize+1];
+				int nRead = 0;
+				while((nRead = ::read(parentErrorRead, errBuf, bufSize))
+						== -1 && errno == EINTR);
+				errBuf[nRead] = 0;
+				if(nRead > 0)
+					AQSIS_THROW_XQERROR(XqEnvironment, EqE_System, errBuf);
+				::close(parentErrorRead);
+				// Save the file descriptors connected to the child process
+				// stdin and stdout.
 				m_pipeReadFd = parentRead;
 				m_pipeWriteFd = parentWrite;
 			}
 			else
 			{
+				//----------------------------------------
 				// Child process
-				// Close the parent ends of the pipe
+				// Close the parent ends of the pipes
 				::close(parentRead);
 				::close(parentWrite);
-				// Connect the process stdin to the pipe
+				::close(parentErrorRead);
+				// Set the error pipe to auto-close if execvp() succeeds
+				if(int flags = ::fcntl(childErrorWrite, F_GETFD) >= 0)
+				{
+					flags |= FD_CLOEXEC;
+					if(::fcntl(childErrorWrite, F_SETFD, flags) == -1)
+						errorExit(childErrorWrite, "Could not set error pipe mode");
+				}
+				else
+					errorExit(childErrorWrite, "Could not set error pipe mode");
+				// Connect the process stdin and stdout to the pipes
 				if(!connectStdInOut(childRead, childWrite))
-					std::exit(EXIT_FAILURE);
+					errorExit(childErrorWrite, "Could not connect to child process");
+
 				// Copy argument list into a C-style array of raw pointers.
 				TqInt argc = argv.size();
 				boost::scoped_array<char*> argvRaw(new char*[argc + 1]);
@@ -337,9 +416,9 @@ class CqPopenDevice::CqImpl
 				argvRaw[argc] = 0;
 				// Execute the child program in a new process.
 				::execvp(progName.c_str(), &argvRaw[0]);
-				// We only ever get here if there's an error.
-				std::exit(EXIT_FAILURE);
-				// (note errno's of interest - EACCES ENOENT ENOEXEC)
+
+				// We only ever get here if there's an execvp() error.
+				errorExit(childErrorWrite, "Could not execute child process");
 			}
 		}
 
@@ -352,6 +431,31 @@ class CqPopenDevice::CqImpl
 		int pipeWriteFd()
 		{
 			return m_pipeWriteFd;
+		}
+
+		/// Close the incoming or outgoing pipe depending on the given mode.
+		void close(std::ios_base::openmode mode)
+		{
+			if(mode == std::ios_base::in && m_pipeReadFd != -1)
+			{
+				::close(m_pipeReadFd);
+				// Set the pipe file descriptor to something invalid after
+				// closing.  This means that 
+				m_pipeReadFd = -1;
+			}
+			else if(mode == std::ios_base::out && m_pipeWriteFd != -1)
+			{
+				::close(m_pipeWriteFd);
+				m_pipeWriteFd = -1;
+			}
+		}
+
+		~CqImpl()
+		{
+			// Make sure that the pipe ends are correctly closed on
+			// destruction.
+			this->close(std::ios_base::in);
+			this->close(std::ios_base::out);
 		}
 };
 #endif // !AQSIS_SYSTEM_WIN32
@@ -374,11 +478,15 @@ std::streamsize CqPopenDevice::read(char_type* s, std::streamsize n)
 	}
 	return static_cast<std::streamsize>(nBytesRead);
 #	else // AQSIS_SYSTEM_WIN32
-	std::streamsize nRead = ::read(m_impl->pipeReadFd(), s, n);
+	assert(m_impl->pipeReadFd() != -1);
+	std::streamsize nRead = 0;
+	// Read from pipe, igorning interrupts due to signals.
+	while( (nRead = ::read(m_impl->pipeReadFd(), s, n)) == -1 && errno == EINTR );
 	if(nRead == -1)
+		// TODO: Reconsider which exception this should be.
 		throw std::ios_base::failure("Bad read from pipe");
 	return nRead == 0 ? -1 : nRead;
-#	endif // AQSIS_SYSTEM_WIN32
+#	endif // !AQSIS_SYSTEM_WIN32
 }
 
 std::streamsize CqPopenDevice::write(const char_type* s, std::streamsize n)
@@ -393,38 +501,20 @@ std::streamsize CqPopenDevice::write(const char_type* s, std::streamsize n)
 	return static_cast<std::streamsize>(nBytesWritten);
 	return 0;
 #	else // AQSIS_SYSTEM_WIN32
-	std::streamsize nWrite = ::write(m_impl->pipeWriteFd(), s, n);
+	assert(m_impl->pipeWriteFd() != -1);
+	std::streamsize nWrite = 0;
+	// Write to pipe, ignoring any interrupts due to signals.
+	while( (nWrite = ::write(m_impl->pipeWriteFd(), s, n)) == -1 && errno == EINTR );
 	if(nWrite < n)
+		// TODO: Reconsider which exception this should be.
 		throw std::ios_base::failure("Bad write to pipe");
 	return nWrite;
-#	endif // AQSIS_SYSTEM_WIN32
+#	endif // !AQSIS_SYSTEM_WIN32
 }
 
 void CqPopenDevice::close(std::ios_base::openmode mode)
 {
-#	ifdef AQSIS_SYSTEM_WIN32
-	if(mode == std::ios_base::in)
-	{
-		if (!CloseHandle(m_impl->pipeReadHandle()))
-		{
-			Aqsis::log() << error << "CloseHandle" << std::endl;
-			return;
-		}
-	}
-	else if(mode == std::ios_base::out)
-	{
-		if (!CloseHandle(m_impl->pipeWriteHandle()))
-		{
-			Aqsis::log() << error << "CloseHandle" << std::endl;
-			return;
-		}
-	}
-#	else // AQSIS_SYSTEM_WIN32
-	if(mode == std::ios_base::in)
-		::close(m_impl->pipeReadFd());
-	else if(mode == std::ios_base::out)
-		::close(m_impl->pipeWriteFd());
-#	endif // AQSIS_SYSTEM_WIN32
+	m_impl->close(mode);
 }
 
 } // namespace Aqsis

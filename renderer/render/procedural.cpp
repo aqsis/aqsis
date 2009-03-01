@@ -271,13 +271,21 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 //------------------------------------------------------------------------------
 // CqRunProgramRepository implementation
 //
-std::iostream& CqRunProgramRepository::find(const std::string& command)
+std::iostream* CqRunProgramRepository::find(const std::string& command)
 {
 	TqRunProgramMap::iterator pos = m_activeRunPrograms.find(command);
 	if(pos == m_activeRunPrograms.end())
 		return startNewRunProgram(command);
 	else
-		return *pos->second;
+	{
+		std::iostream* pipe = pos->second.get();
+		if(pipe && (pipe->fail() || pipe->eof()))
+		{
+			pos->second.reset();
+			pipe = 0;
+		}
+		return pipe;
+	}
 }
 
 /** \brief Split the given command line up into a set of tokens seperated with
@@ -297,7 +305,7 @@ void CqRunProgramRepository::splitCommandLine(const std::string& command,
 
 /** \brief Start a new child process for the given RunProgram command
  */
-TqPopenStream& CqRunProgramRepository::startNewRunProgram(
+TqPopenStream* CqRunProgramRepository::startNewRunProgram(
 		const std::string& command)
 {
 	// Get the program name and command line arguments.
@@ -315,10 +323,22 @@ TqPopenStream& CqRunProgramRepository::startNewRunProgram(
 			<< "RiProcRunProgram: Could not find \"" << progName
 			<< "\" in \"procedural\" searchpath, will rely on system path.\n";
 	}
-	TqPopenStreamPtr newPipe(new TqPopenStream(progName, argv));
-	newPipe->exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
-	m_activeRunPrograms.insert(std::make_pair(command, newPipe));
-	return *newPipe;
+	try
+	{
+		// Attempt to open a pipe to the new procedural.
+		TqPopenStreamPtr newPipe(new TqPopenStream(progName, argv));
+		newPipe->exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+		m_activeRunPrograms.insert(std::make_pair(command, newPipe));
+		return newPipe.get();
+	}
+	catch(XqEnvironment& e)
+	{
+		// Install a null pointer to indicate that we shouldn't try to run this
+		// procedural again, and rethrow.
+		m_activeRunPrograms.insert(std::make_pair(command, TqPopenStreamPtr()));
+		AQSIS_THROW_XQERROR(XqEnvironment, e.code(),
+			"error starting runprogram [" << command << "] : " << e.what() );
+	}
 }
 
 
@@ -336,21 +356,21 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		char** args = reinterpret_cast<char**>(data);
 		// Get a pipe connected to the procedural
 		std::string command = args[0];
-		std::iostream& pipe = g_activeRunPrograms.find(command);
-		if(pipe.fail() || pipe.eof())
+		std::iostream* pipe = g_activeRunPrograms.find(command);
+		if(!pipe)
 			return;
 		try
 		{
 			// Push in the procedural arguments
-			pipe << detail << " " << args[1] << "\n" << std::flush;
+			(*pipe) << detail << " " << args[1] << "\n" << std::flush;
 			// And parse the resulting RIB from the pipe.
-			QGetRenderContext()->parseRibStream(pipe, "[" + command + "]");
+			QGetRenderContext()->parseRibStream(*pipe, "[" + command + "]");
 			STATS_INC( GEO_prc_created_prp );
 		}
 		catch(std::ios_base::failure& /*e*/)
 		{
 			Aqsis::log() << error << "RiProcRunProgram: Broken pipe for RunProgram ["
-				<< command << "]  (Likely causes: program not in path or premature exit.)\n";
+				<< command << "]  (premature exit?)\n";
 		}
 	}
 	// TODO: Replace the following catches with a catch guard.

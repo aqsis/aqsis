@@ -23,44 +23,78 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "aqsis.h"
-
-#ifndef	AQSIS_SYSTEM_WIN32
-#define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include "popen.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
-#	include <time.h> // for nanosleep()
-#else
-#	include <windows.h>
-#endif
-
-#include <boost/test/auto_unit_test.hpp>
 #include <iostream>
+#include <sstream>
+#include <cstring> // for std::memset()
+
+#ifndef AQSIS_SYSTEM_WIN32
+#	define BOOST_TEST_DYN_LINK
+#endif
+#include <boost/test/auto_unit_test.hpp>
+
+#include "exception.h"
 
 
-// Suspend execution for the given number of milliseconds
-void milliSleep(TqInt milliSecs)
+using namespace Aqsis;
+
+//------------------------------------------------------------------------------
+// Simple linear buffer for testing purposes.  This like a very crippled
+// version of a std::streambuf, and should be a simple approximation of the
+// buffering which goes on inside boost::streambuf<CqPopenDevice>
+//
+// Warning: when m_bufSize is reached something bad will occur!
+class LineBuffer
 {
-#	ifdef AQSIS_SYSTEM_WIN32
-	Sleep(milliSecs);
-#	else
-	timespec sleepTime;
-	sleepTime.tv_sec = milliSecs/1000;
-	sleepTime.tv_nsec = 1000000*(milliSecs % 1000);
-	nanosleep(&sleepTime, 0);
-#	endif // AQSIS_SYSTEM_WIN32
-}
+	private:
+		CqPopenDevice& m_device;
+		static const int m_bufSize = 1024;
+		char m_buf[m_bufSize];
+		char* m_pos;
+		char* m_end;
 
-// Read a line from the input stream and return as a string.
-std::string readLine(std::istream& in)
-{
-	std::string s;
-	std::getline(in, s, '\r');
-	return s;
-}
+		// Get a character from the device.
+		char getChar()
+		{
+			if(m_pos == m_end)
+			{
+				// Buffer in some more characters.
+				std::streamsize nRead = 0;
+				while(nRead == 0)
+					nRead = m_device.read(m_end, m_buf+m_bufSize - m_end);
+				if(nRead == -1)
+					return '\t';
+				m_end += nRead;
+			}
+			return *(m_pos++);
+		}
+	public:
+		LineBuffer(CqPopenDevice& device)
+			: m_device(device),
+			m_pos(m_buf),
+			m_end(m_buf)
+		{
+			std::memset(m_buf, 0, m_bufSize);
+		}
+
+		// Get a line from the device, terminated with '\t' to avoid problems
+		// with windows end-of-line translation.
+		std::string getLine()
+		{
+			std::string result;
+			char c = getChar();
+			while(c != '\t')
+			{
+				result += c;
+				c = getChar();
+			}
+			return result;
+		}
+};
+
+//------------------------------------------------------------------------------
+// Test cases
 
 BOOST_AUTO_TEST_CASE(CqPopenDevice_test)
 {
@@ -71,40 +105,58 @@ BOOST_AUTO_TEST_CASE(CqPopenDevice_test)
 	};
 	std::vector<std::string> argv(argvInit, argvInit + sizeof(argvInit)/sizeof(char*));
 
-	Aqsis::CqPopenDevice pipeDev(argv[0], argv);
+	CqPopenDevice pipeDev(argv[0], argv);
 
-	// Allow time for the child process to start
-	milliSleep(10);
+	LineBuffer pipe(pipeDev);
 
-	const int bufLen = 256;
-	char buf[bufLen];
+	BOOST_CHECK_EQUAL(argv[0], pipe.getLine());
+	BOOST_CHECK_EQUAL(argv[1], pipe.getLine());
+	BOOST_CHECK_EQUAL(argv[2], pipe.getLine());
+	BOOST_CHECK_EQUAL("end-of-args", pipe.getLine());
 
-	{
-		std::streamsize n = pipeDev.read(buf, bufLen);
-		buf[n] = 0; // make sure buf is safely null-terminated.
-		std::istringstream pipeOutput(buf);
-
-		BOOST_CHECK_EQUAL(argv[0], readLine(pipeOutput));
-		BOOST_CHECK_EQUAL(argv[1], readLine(pipeOutput));
-		BOOST_CHECK_EQUAL(argv[2], readLine(pipeOutput));
-		BOOST_CHECK_EQUAL("end-of-args", readLine(pipeOutput));
-		BOOST_CHECK_EQUAL(pipeOutput.get(), EOF);
-	}
-
-	{
-		pipeDev.write("a\nb1\nc23\n", 9);
-		// Allow time for the child process to echo back the input.
-		milliSleep(10);
-
-		std::streamsize n = pipeDev.read(buf, bufLen);
-		buf[n] = 0; // make sure buf is safely null-terminated.
-		std::istringstream pipeOutput(buf);
-
-		// The script just echos back the input lines
-		BOOST_CHECK_EQUAL("a", readLine(pipeOutput));
-		BOOST_CHECK_EQUAL("b1", readLine(pipeOutput));
-		BOOST_CHECK_EQUAL("c23", readLine(pipeOutput));
-		BOOST_CHECK_EQUAL(pipeOutput.get(), EOF);
-	}
+	pipeDev.write("a\tb1\tc23\t", 9);
+	// The pipethrough executable just echos back the input lines
+	BOOST_CHECK_EQUAL("a", pipe.getLine());
+	BOOST_CHECK_EQUAL("b1", pipe.getLine());
+	BOOST_CHECK_EQUAL("c23", pipe.getLine());
 }
 
+
+BOOST_AUTO_TEST_CASE(CqPopenDevice_earlyexit_test)
+{
+	const char* argvInit[] = {
+		"./pipethrough",
+		"-earlyexit"
+	};
+	std::vector<std::string> argv(argvInit, argvInit + sizeof(argvInit)/sizeof(char*));
+
+	CqPopenDevice pipeDev(argv[0], argv);
+	LineBuffer pipe(pipeDev);
+
+	BOOST_CHECK_EQUAL(argv[0], pipe.getLine());
+	BOOST_CHECK_EQUAL(argv[1], pipe.getLine());
+	BOOST_CHECK_EQUAL("end-of-args", pipe.getLine());
+
+	// The child process should have exited at this point, so writing should fail.
+	BOOST_CHECK_THROW(pipeDev.write("a\tb1\tc23\t", 9),
+			std::ios_base::failure);
+
+	// Check that the device thinks that it's reached EOF.
+	char buf[2];
+	BOOST_CHECK_EQUAL(pipeDev.read(buf, 2), -1);
+}
+
+
+BOOST_AUTO_TEST_CASE(CqPopenDevice_notfound_test)
+{
+	// Check that trying to open a nonexistant executable throws an error.
+	const char* argvInit[] = {
+		"some_nonexistant_executable"
+	};
+	std::vector<std::string> argv(argvInit, argvInit + sizeof(argvInit)/sizeof(char*));
+
+	BOOST_CHECK_THROW(
+		CqPopenDevice pipeDev(argv[0], argv),
+		XqEnvironment
+	);
+}

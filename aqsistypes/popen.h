@@ -48,6 +48,10 @@ namespace Aqsis
  * boost::iostreams::stream and boost::iostreams::streambuf it can be used to
  * create a std::iostream compatible stream which reads and writes to pipes
  * (see TqPopenStream)
+ *
+ * The class is copied by the boost iostreams machinary, so should have
+ * handle-semantics to the underlying pipe resources (this is handily achieved
+ * as a side effect of keeping a pimpl using a boost::shared_ptr).
  */
 class COMMON_SHARE CqPopenDevice
 {
