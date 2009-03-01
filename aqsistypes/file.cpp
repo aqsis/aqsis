@@ -74,7 +74,7 @@ namespace {
 		{
 			return is_regular(filePath);
 		}
-		catch(boostfs::filesystem_path_error& e)
+		catch(boostfs::filesystem_error& e)
 		{ }
 		return false;
 	}
