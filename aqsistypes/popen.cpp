@@ -221,7 +221,7 @@ class CqPopenDevice::CqImpl
 		{
 			if(mode == std::ios_base::in)
 			{
-				if (!CloseHandle(m_impl->pipeReadHandle()))
+				if (!CloseHandle(m_pipeReadHandle))
 				{
 					Aqsis::log() << error << "CloseHandle" << std::endl;
 					return;
@@ -229,7 +229,7 @@ class CqPopenDevice::CqImpl
 			}
 			else if(mode == std::ios_base::out)
 			{
-				if (!CloseHandle(m_impl->pipeWriteHandle()))
+				if (!CloseHandle(m_pipeWriteHandle))
 				{
 					Aqsis::log() << error << "CloseHandle" << std::endl;
 					return;
