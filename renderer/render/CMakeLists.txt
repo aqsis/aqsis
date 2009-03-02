@@ -42,7 +42,7 @@ ADD_LIBRARY(aqsislib SHARED ${AQSISLIB_SRCS} ${AQSISLIB_HDRS}
 							${DDMANAGER_SRCS} ${DDMANAGER_HDRS} 
 							${RAYTRACE_SRCS} ${RAYTRACE_HDRS}
 							${INFORES_SRCS})
-ADD_DEPENDENCIES(aqsislib apiheader apicache apivalidate apidebug ribparser)
+ADD_DEPENDENCIES(aqsislib apiheader apicache apivalidate apidebug ribparse)
 
 SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES} ${AQSIS_ZLIB_LIBRARIES} ${AQSISLIB_SYSTEM_LINKLIBS} ${Boost_THREAD_LIBRARY})
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/link.cmake)

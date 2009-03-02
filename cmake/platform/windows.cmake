@@ -42,12 +42,8 @@ SET(AQSISTYPES_SYSTEM_LINKLIBS ${AQSISTYPES_SYSTEM_LINKLIBS} ws2_32)
 #
 # Fix for CMake "imlib set but there is no CMAKE_IMPORT_LIBRARY_SUFFIX" build-time error
 #
-IF(MSVC)
-	SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
-ENDIF(MSVC)
-IF(MINGW)
-	SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
-ENDIF(MINGW)
+SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
+
 
 #
 # Create resource files for use during linking
