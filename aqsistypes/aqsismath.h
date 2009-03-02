@@ -30,6 +30,9 @@
 #include <cmath>
 #include <limits>
 
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/arithmetic_traits.hpp>
+
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
 // which reside in aqsis_types.h
@@ -78,14 +81,11 @@ inline T round(const T x)
 
 /** \brief Linearly interpolate between two values
  *
- * Note: It may be worth checking the efficiency of this template.
- *
  * \param t - interpolation parameter; a floating point between 0 and 1.
  * \param x0 - value corresponding to t = 0
  * \param x1 - value corresponding to t = 1
  */
-template<typename T, typename V>
-inline V lerp(const T t, const V x0, const V x1)
+inline TqFloat lerp(TqFloat t, const TqFloat x0, const TqFloat x1)
 {
 	return (1-t)*x0 + t*x1;
 }
@@ -97,7 +97,8 @@ inline V lerp(const T t, const V x0, const V x1)
  * \param max - maximum value for x
  */
 template<typename T>
-inline T clamp(const T x, const T min, const T max)
+inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type
+clamp(const T x, const T min, const T max)
 {
 	return x < min ? min : (x > max ? max : x);
 }
@@ -107,7 +108,8 @@ inline T clamp(const T x, const T min, const T max)
  * Note that there are specific versions of min() for other types like CqColor.
  */
 template<typename T>
-inline T min(const T a, const T b)
+inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type
+min(const T a, const T b)
 {
 	return (a < b) ? a : b;
 }
@@ -117,7 +119,8 @@ inline T min(const T a, const T b)
  * Note that there are specific versions of max() for other types like CqColor.
  */
 template<typename T>
-inline T max(const T a, const T b)
+inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type
+max(const T a, const T b)
 {
 	return (a < b) ? b : a;
 }

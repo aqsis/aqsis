@@ -20,11 +20,11 @@
 
 #include "texturesampleoptions.h"
 #include "samplequad.h"
+#include "vecfwd.h"
 
 namespace Aqsis {
 
 struct IqShaderData;
-class CqVector3D;
 class CqString;
 class CqMatrix;
 

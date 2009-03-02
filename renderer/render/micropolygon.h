@@ -36,6 +36,7 @@
 #include	"list.h"
 #include	"bound.h"
 #include	"vector2d.h"
+#include	"vector3d.h"
 #include	"shaderexecenv.h"
 #include	"ishaderdata.h"
 #include	"motion.h"
@@ -46,7 +47,6 @@
 
 namespace Aqsis {
 
-class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
 class CqMicroPolygon;

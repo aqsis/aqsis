@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(round_test)
 
 BOOST_AUTO_TEST_CASE(lerp_test)
 {
-	BOOST_CHECK_CLOSE((Aqsis::lerp<float,float>(0.1f, 1.0f, 2.0f)), 1.1f, 0.00001f);
-	BOOST_CHECK_CLOSE((Aqsis::lerp<float,float>(0.9f, 1.0f, 2.0f)), 1.9f, 0.00001f);
+	BOOST_CHECK_CLOSE((Aqsis::lerp(0.1f, 1.0f, 2.0f)), 1.1f, 0.00001f);
+	BOOST_CHECK_CLOSE((Aqsis::lerp(0.9f, 1.0f, 2.0f)), 1.9f, 0.00001f);
 }
 
 BOOST_AUTO_TEST_CASE(clamp_test)

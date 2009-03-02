@@ -35,6 +35,7 @@
 #include "primvartype.h"
 #include "ri_types.h"
 #include "sstring.h"
+#include "vecfwd.h"
 
 namespace Aqsis {
 
@@ -42,7 +43,6 @@ class CqImagersource;
 class CqRegion;
 class IqShader;
 struct IqChannelBuffer;
-class CqVector3D;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode
