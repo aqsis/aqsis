@@ -46,7 +46,7 @@ extern TqInt ParseLineNumber;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
 std::vector<std::pair<bool,CqString> >	ParseNameSpaceStack;
-int blockID = 0;
+int scopeID = 0;
 std::stack<TqInt> functionReturnCountStack;
 std::stack<CqParseNodeDeclaration*> currentFunctionStack;
 EqShaderType gShaderType;
@@ -1040,9 +1040,7 @@ statement
 	|	'{' 
 							{
 								// Introduce a new scope for the block
-								CqString scopeName("b");
-								scopeName += blockID++;
-								pushScope(scopeName);
+								pushScope("b");
 							}
 		statements 
 							{
@@ -2136,7 +2134,7 @@ void pushScope(CqString name, bool terminal)
 {
 	std::pair<bool,CqString> n;
 	n.first = terminal;
-	n.second = strNameSpace()+name+"::";
+	n.second = strNameSpace() + name + CqString(scopeID++) + "::";
 	ParseNameSpaceStack.push_back(n);
 }
 
