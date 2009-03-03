@@ -9,7 +9,6 @@
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
 #include <boost/assign/std/vector.hpp>
 
