@@ -311,73 +311,14 @@ bool	CqSurfacePatchBicubic::Diceable()
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 16 ];
-	TqInt i;
 
-	for ( i = 0; i < 16; i++ )
+	for (TqInt i = 0; i < 16; i++ )
 		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
-
-	// First check flatness, a curve which is too far off flat will
-	// produce unreliable results when the length is approximated below.
-	m_SplitDir = SplitDir_U;
-	TqInt u;
-	for ( u = 0; u < 16; u += 4 )
-	{
-		// Find an initial line
-		TqFloat Len = 0;
-		CqVector2D	vec0 = avecHull[ u ];
-		CqVector2D	vecL;
-		TqInt i = 4;
-		while ( i-- > 0 && Len < FLT_EPSILON )
-		{
-			vecL = avecHull[ u + i ] - vec0;
-			Len = vecL.Magnitude();
-		}
-		vecL /= Len;	// Normalise
-
-		i = 0;
-		while ( i++ < 4 )
-		{
-			// Get the distance to the line for each point
-			CqVector3D vec = vectorCast<CqVector3D>(avecHull[u+i] - vec0);
-			vec.Unit();
-			vec %= vectorCast<CqVector3D>(vecL);
-			if ( vec.Magnitude() > 1 )
-				return ( false );
-		}
-	}
-	m_SplitDir = SplitDir_V;
-	TqInt v;
-	for ( v = 0; v < 4; v++ )
-	{
-		// Find an initial line
-		TqFloat Len = 0;
-		CqVector2D	vec0 = avecHull[ v ];
-		CqVector2D	vecL;
-		TqInt i = 4;
-		while ( i-- > 0 && Len < FLT_EPSILON )
-		{
-			vecL = avecHull[ v + ( i * 4 ) ] - vec0;
-			Len = vecL.Magnitude();
-		}
-		vecL /= Len;	// Normalise
-
-		i = 0;
-		while ( i++ < 4 )
-		{
-			// Get the distance to the line for each point
-			CqVector3D vec = vectorCast<CqVector3D>(avecHull[v + i*4] - vec0);
-			vec.Unit();
-			vec %= vectorCast<CqVector3D>(vecL);
-			if ( vec.Magnitude() > 1 )
-				return ( false );
-		}
-	}
-
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
 
-	for ( u = 0; u < 16; u += 4 )
+	for (TqInt u = 0; u < 16; u += 4 )
 	{
 		CqVector2D	Vec1 = avecHull[ u + 1 ] - avecHull[ u ];
 		CqVector2D	Vec2 = avecHull[ u + 2 ] - avecHull[ u + 1 ];
@@ -389,7 +330,7 @@ bool	CqSurfacePatchBicubic::Diceable()
 		if ( Vec3.Magnitude2() > uLen )
 			uLen = Vec3.Magnitude2();
 	}
-	for ( v = 0; v < 4; v++ )
+	for (TqInt v = 0; v < 4; v++ )
 	{
 		CqVector2D	Vec1 = avecHull[ v + 4 ] - avecHull[ v ];
 		CqVector2D	Vec2 = avecHull[ v + 8 ] - avecHull[ v + 4 ];
