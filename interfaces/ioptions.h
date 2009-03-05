@@ -41,7 +41,7 @@ namespace Aqsis {
 
 class CqImagersource;
 class CqRegion;
-class IqShader;
+struct IqShader;
 struct IqChannelBuffer;
 
 //----------------------------------------------------------------------
