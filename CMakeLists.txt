@@ -7,8 +7,8 @@ SET(AQSIS_PROJECT_NAME "Aqsis Renderer")
 SET(AQSIS_PROJECT_NAME_SHORT "Aqsis")
 SET(AQSIS_PROJECT_NAME_BASIC "aqsis")
 SET(AQSIS_PROJECT_VENDOR "Aqsis Team")
-SET(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2008, ${AQSIS_PROJECT_VENDOR}.")
-SET(AQSIS_PROJECT_COPYRIGHT_OTHER "RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved.")
+SET(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2009, ${AQSIS_PROJECT_VENDOR}.")
+SET(AQSIS_PROJECT_COPYRIGHT_OTHER "The RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, 2000, 2005 Pixar. All Rights Reserved.")
 
 # Set variable for sources path, which can be used when "${CMAKE_SOURCE_DIR}" incorrectly returns the temp directory
 SET(ENV{CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}")

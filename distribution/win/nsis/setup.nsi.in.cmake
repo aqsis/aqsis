@@ -90,14 +90,14 @@ Page custom AdditionalTasks AdditionalTasksLeave
 
 
 ; Installer 'Version' tab content
-VIProductVersion "@MAJOR@.@MINOR@.@BUILD@.0"
+VIProductVersion "@MAJOR@.@MINOR@.@BUILD@.@REVISION@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "@AQSIS_PROJECT_VENDOR@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@AQSIS_PROJECT_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@MAJOR@.@MINOR@.@BUILD@.@REVISION@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@AQSIS_PROJECT_COPYRIGHT@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "@AQSIS_PROJECT_COPYRIGHT_OTHER@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@CMAKE_PROJECT_NAME@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@AQSIS_PROJECT_NAME@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@MAJOR@.@MINOR@.@BUILD@.@REVISION@"
 
 
 ; Installation types (i.e. full/minimal/custom)
