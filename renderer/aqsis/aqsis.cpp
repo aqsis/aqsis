@@ -166,16 +166,13 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	time( &now );
 
 	// Calculate the various values for putting in the string.
-#ifdef AQSIS_SYSTEM_MACOSX
-
+#	ifdef AQSIS_SYSTEM_MACOSX
 	TqFloat total_secs = ( RtFloat ) 100.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
-#elif	AQSIS_SYSTEM_POSIX
-
+#	elif	AQSIS_SYSTEM_POSIX
 	TqFloat total_secs = ( RtFloat ) 1000000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
-#else
-
+#	else
 	TqFloat total_secs = ( RtFloat ) 1000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
-#endif
+#	endif
 
 	TqFloat total_mins = total_secs / 60.0f;
 	TqFloat total_hrs = total_mins / 60.0f;
@@ -324,8 +321,9 @@ void aqsisSignalHandler(int sig)
 	std::raise(sig);
 }
 
-/** Function to setup specific options needed after options are complete but before the world is created.
-	Used as the callback function to a RiPreWorldFunction call.
+/** Function to setup specific options needed after options are complete but
+ * before the world is created.  Used as the callback function to a
+ * RiPreWorldFunction call.
  */
 #ifdef	AQSIS_SYSTEM_BEOS
 RtVoid PreWorld( ... )
@@ -366,14 +364,14 @@ RtVoid PreWorld()
 		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
 	}
 
-#if ENABLE_MPDUMP
+#	if ENABLE_MPDUMP
 	// Pass the statistics option onto Aqsis.
 	if ( g_cl_mpdump )
 	{
 		RtInt enabled = 1;
 		RiOption( "mpdump", "enabled", &enabled, RI_NULL );
 	}
-#endif
+#	endif
 
 	// Parse all the command line options with the RIB parser.
 	for(TqInt i = 0, end = g_cl_options.size(); i < end; ++i)
@@ -386,143 +384,82 @@ RtVoid PreWorld()
 
 
 #ifndef AQSIS_SYSTEM_WIN32
-
-static void SetPriority(int priority)
+static void setPriority(int priority)
 {
-	pid_t pid = getpid();
-
-        switch(priority)
+	switch(priority)
 	{
-	case 0:
-		{
-		setpriority(PRIO_PROCESS, pid, 10);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Idle" << std::endl;
-#endif
-		} break;
- 
-	case 1:
-		{
-		setpriority(PRIO_PROCESS, pid, 0);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Normal" << std::endl;
-#endif
-		}
-		break;
-	case 2:
-		{
-		int high = getpriority(PRIO_PROCESS, pid);
-		setpriority(PRIO_PROCESS, pid, high);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to High" << std::endl;
-#endif
-    
-		}
-		break;
-	case 3:
-		{
-		setpriority(PRIO_PROCESS, pid, -20);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to RT" << std::endl;
-#endif
-		} break;
- 
-	default:
-		{
-		setpriority(PRIO_PROCESS, pid, 10);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Idle" << std::endl;
-#endif
-		} break;
+		case 0:
+			setpriority(PRIO_PROCESS, 0, 10);
+			Aqsis::log() << Aqsis::debug << "Set priority class to Idle\n";
+			break;
+		case 1:
+			setpriority(PRIO_PROCESS, 0, 0);
+			Aqsis::log() << Aqsis::debug << "Set priority class to Normal\n";
+			break;
+		case 2:
+			{
+				int high = getpriority(PRIO_USER, 0);
+				setpriority(PRIO_PROCESS, 0, high);
+				Aqsis::log() << Aqsis::debug << "Set priority class to High\n";
+			}
+			break;
+		case 3:
+			setpriority(PRIO_PROCESS, 0, -20);
+			Aqsis::log() << Aqsis::debug << "Set priority class to RT\n";
+			break;
+		default:
+			Aqsis::log() << Aqsis::warning
+				<< "Unknown priority level " << priority << "\n";
+			break;
 	}
-	 
 }
-#else
-static void SetPriority(int priority)
+#else // AQSIS_SYSTEM_WIN32
+static void setPriority(int priority)
 {
 	switch (priority)
 	{
-	case 0:
-		{
-		SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Idle" << std::endl;
-#endif
-		} break;
- 
-	case 1:
-		{
-		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Normal" << std::endl;
-#endif
-		}
-		break;
-	case 2:
-		{
-		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to High" << std::endl;
-#endif
-    
-		}
-		break;
-	case 3:
-		{
-		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to RT" << std::endl;
-#endif
-		} break;
- 
-	default:
-		{
-		SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
-
-#if defined(_DEBUG)
-		std::cout << "Set Priority Class to Idle" << std::endl;
-#endif
-		} break;
+		case 0:
+			SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
+			Aqsis::log() << Aqsis::debug << "Set priority class to Idle\n";
+			break;
+		case 1:
+			SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+			Aqsis::log() << Aqsis::debug << "Set priority class to Normal\n";
+			break;
+		case 2:
+			SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+			Aqsis::log() << Aqsis::debug << "Set priority class to High\n";
+			break;
+		case 3:
+			SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+			Aqsis::log() << Aqsis::debug << "Set priority class to RT\n";
+			break;
+		default:
+			Aqsis::log() << Aqsis::warning
+				<< "Unknown priority level " << priority << "\n";
+			break;
 	}
 }
-#endif
+#endif // AQSIS_SYSTEM_WIN32
 
 
-/** \brief Render a RIB stream.
+/** \brief Feed command line options to the renderer.
  *
- * This function
- *   - sets up a render context
- *   - sends command line options to the renderer
- *   - reads the contents of the provided RIB
- *   - closes the render context
- * 
- * \param inStream - An open RIB character stream
- * \param name - The stream name
+ * This function sends all command line options to the renderer, except those
+ * which are set directly before the world block.
  */
-RtInt renderFile(std::istream& inStream, const std::string& name)
+void setupOptions()
 {
-	RtInt returnCode = RIE_NOERROR;
-	
-	RiBegin( RI_NULL );
-	
 	if ( g_cl_echoapi )
 	{
 		RtInt echoapi = 1;
 		RiOption( tokenCast("statistics"), "echoapi", &echoapi, RI_NULL );
 	}
 	
-	/* Allow any command line arguments to override system/env settings */
+	// Allow any command line arguments to override system/env settings
+	Aqsis::log() << Aqsis::info
+		<< "Applying search paths provided at the command line\n";
 	const char* popt[1];
-	Aqsis::log() << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
 	if(!g_cl_shader_path.empty())
 	{
 		popt[0] = g_cl_shader_path.c_str();
@@ -551,15 +488,6 @@ RtInt renderFile(std::istream& inStream, const std::string& name)
 
 	RiProgressHandler( &PrintProgress );
 	RiPreWorldFunction( &PreWorld );
-
-	Aqsis::QGetRenderContextI()->parseRibStream(inStream, name);
-
-	RiEnd();
-
-	// get the last error code
-	returnCode = RiLastError;
-
-	return returnCode;
 }
 
 
@@ -567,8 +495,8 @@ int main( int argc, const char** argv )
 {
 	std::signal(SIGINT, aqsisSignalHandler);
 	std::signal(SIGABRT, aqsisSignalHandler);
-	RtInt return_code = 0;
-	
+	RtInt returnCode = 0;
+
 	StartMemoryDebugging();
 	{
 		ArgParse ap;
@@ -589,13 +517,13 @@ int main( int argc, const char** argv )
 		ap.alias( "verbose", "v" );
 		ap.argFlag( "echoapi", "\aEcho all RI API calls to the log output (experimental)", &g_cl_echoapi);
 
-      		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
-         		"\a0 = idle\n"
-         		"\a1 = normal(default)\n"
-         		"\a2 = high\n"
-         		"\a3 = RT", &g_cl_priority);
-      		ap.alias( "priority", "z");
-
+		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
+			"\a0 = idle\n"
+			"\a1 = normal\n"
+			"\a2 = high\n"
+			"\a3 = RT", &g_cl_priority);
+		ap.alias( "priority", "z");
+		
 		ap.argString( "type", "=string\aSpecify a display device type to use", &g_cl_type );
 		ap.argString( "addtype", "=string\aSpecify a display device type to add", &g_cl_addtype );
 		ap.argString( "mode", "=string\aSpecify a display device mode to use", &g_cl_mode );
@@ -607,12 +535,12 @@ int main( int argc, const char** argv )
 		ap.alias( "nocolor", "nc" );
 		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
 		ap.argStrings( "option", "=string\aA valid RIB Option string, can be specified multiple times.", &g_cl_options);
-#ifdef	AQSIS_SYSTEM_POSIX
+#		ifdef AQSIS_SYSTEM_POSIX
 		ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
-#endif	// AQSIS_SYSTEM_POSIX
-#if	ENABLE_MPDUMP
+#		endif // AQSIS_SYSTEM_POSIX
+#		if ENABLE_MPDUMP
 		ap.argFlag( "mpdump", "\aOutput MP list to a custom 'dump' file", &g_cl_mpdump );
-#endif	// ENABLE_MPDUMP
+#		endif // ENABLE_MPDUMP
 
 		ap.argString( "shaders", "=string\aOverride the default shader searchpath(s)", &g_cl_shader_path );
 		ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
@@ -620,8 +548,6 @@ int main( int argc, const char** argv )
 		ap.argString( "displays", "=string\aOverride the default display searchpath(s)", &g_cl_display_path );
 		ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s)", &g_cl_procedural_path );
 		ap.allowUnrecognizedOptions();
-
-		//_crtBreakAlloc = 1305;
 
 		if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 		{
@@ -642,29 +568,20 @@ int main( int argc, const char** argv )
 			return( 0 );
 		}
 
-      		/* Set the priority on the main thread;
-      		* gentile for single CPU XP/OS
-      		*/
-
-		if (g_cl_priority != 1)
-		{
-			SetPriority(g_cl_priority);
-		}
-
 		if ( g_cl_version )
 		{
 			std::cout << "aqsis version " << VERSION_STR_PRINT
-#ifdef _DEBUG
+#			ifdef _DEBUG
 			<< " (debug build)"
-#endif
+#			endif
 			<< "\n"
 			<< "compiled " << __DATE__ << " " << __TIME__ << "\n";
 			return( 0 );
 		}
-		
-#ifdef	AQSIS_SYSTEM_WIN32
+
+#		ifdef	AQSIS_SYSTEM_WIN32
 		std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
-#endif
+#		endif
 
 		std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
 		std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
@@ -684,62 +601,70 @@ int main( int argc, const char** argv )
 		if( g_cl_verbose > 2 )
 			level = Aqsis::DEBUG;
 		std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
-#ifdef	AQSIS_SYSTEM_POSIX
-
+#		ifdef AQSIS_SYSTEM_POSIX
 		if( g_cl_syslog )
 			std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
-#endif	// AQSIS_SYSTEM_POSIX
+#		endif // AQSIS_SYSTEM_POSIX
 
-		if ( ap.leftovers().size() == 0 )
+		if (g_cl_priority != 1)
 		{
-			// If no files specified, take input from stdin.
-			//
-			// TODO: We'd like to turn off stdio synchronisation to allow fast
-			// buffering... unfortunately this causes very odd problems with
-			// the aqsis logging facility at the current time.
-			//
-			//std::ios_base::sync_with_stdio(false);
-			renderFile(std::cin, "stdin");
+			// Set the priority on the main thread
+			setPriority(g_cl_priority);
 		}
-		else
+
+		RiBegin(RI_NULL);
+		setupOptions();
+		try
 		{
-			for ( ArgParse::apstringvec::const_iterator fileName = ap.leftovers().begin(); fileName != ap.leftovers().end(); fileName++ )
+			if ( ap.leftovers().size() == 0 )
 			{
-				std::ifstream inFile(fileName->c_str());
-				if(inFile)
+				// If no files specified, take input from stdin.
+				//
+				// TODO: We'd like to turn off stdio synchronisation to allow fast
+				// buffering... unfortunately this causes very odd problems with
+				// the aqsis logging facility as of svn r2804
+				//
+				//std::ios_base::sync_with_stdio(false);
+				Aqsis::QGetRenderContextI()->parseRibStream(std::cin, "stdin");
+			}
+			else
+			{
+				for(ArgParse::apstringvec::const_iterator fileName = ap.leftovers().begin();
+						fileName != ap.leftovers().end(); fileName++)
 				{
-					try
+					std::ifstream inFile(fileName->c_str());
+					if(inFile)
 					{
-						return_code = renderFile(inFile, *fileName);
+						Aqsis::QGetRenderContextI()->parseRibStream(inFile, *fileName);
+						returnCode = RiLastError;
 					}
-					catch(const std::exception& e)
-					{
-						Aqsis::log() << Aqsis::error << e.what() << std::endl;
-						return_code = 1;
-					}
-					catch(...)
+					else
 					{
 						Aqsis::log() << Aqsis::error
-							<< "unknown exception has been encountered\n";
+							<< "Cannot open file \"" << *fileName << "\"\n";
+						returnCode = RIE_NOFILE;
 					}
-				}
-				else
-				{
-					Aqsis::log() << Aqsis::error
-						<< "Cannot open file \"" << *fileName << "\"\n";
-					return_code = 1;
 				}
 			}
 		}
-
+		catch(const std::exception& e)
+		{
+			Aqsis::log() << Aqsis::error << e.what() << std::endl;
+			returnCode = RIE_BUG;
+		}
+		catch(...)
+		{
+			Aqsis::log() << Aqsis::error
+				<< "unknown exception has been encountered\n";
+			returnCode = RIE_BUG;
+		}
+		RiEnd();
 	}
 
 	StopMemoryDebugging();
 
 	if(g_cl_beep)
-	{
 		std::cout << "\a" << std::ends;
-	}
 
 	if(g_cl_pause)
 	{
@@ -747,5 +672,5 @@ int main( int argc, const char** argv )
 		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 	}
 
-	return return_code;
+	return returnCode;
 }
