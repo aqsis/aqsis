@@ -33,6 +33,7 @@
 #include	<map>
 #include	<vector>
 #include	<string>
+#include	<cstdio>
 #include	<cstring>
 
 #include	"shaderexecenv.h"

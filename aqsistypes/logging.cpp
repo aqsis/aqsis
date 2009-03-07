@@ -21,6 +21,7 @@
 #include "logging.h"
 #include "logging_streambufs.h"
 
+#include <cstdio>              // For EOF
 #include <iostream>
 #include <sstream>
 #include <vector>

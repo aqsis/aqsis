@@ -1,6 +1,7 @@
 #include "aspXpm.h"
 
 #include <string.h>
+#include <cstdio>
 
 aspXpm::aspXpm( const char *filename, int width, int height, int bpp )
 {

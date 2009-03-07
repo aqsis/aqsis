@@ -23,6 +23,7 @@ tiff files.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+#include	<cstdio>
 #include	<cstdlib>
 #include	<cstring>
 #include	<memory>

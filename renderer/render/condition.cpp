@@ -31,6 +31,7 @@
 #include	"renderer.h"
 #include	"logging.h"
 
+#include	<cstdio>
 #include	<cstring>
 
 namespace Aqsis {
