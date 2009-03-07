@@ -30,10 +30,13 @@
 namespace Aqsis
 {
 
-// forward declarations of vector classes.
-template<typename StoreT> class CqBasicVec3;
+// storage policies
 class CqVec3Data;
 class CqVecRefData;
+
+
+// forward declarations of vector classes.
+template<typename StoreT> class CqBasicVec3;
 
 /// A 3D vector which owns its data storage
 typedef CqBasicVec3<CqVec3Data> CqVec3;
@@ -42,6 +45,16 @@ typedef CqBasicVec3<CqVecRefData> CqRefVec3;
 
 /// Typedef for backward compatibility
 typedef CqVec3 CqVector3D;
+
+
+// forward decls for colors
+template<typename StoreT> class CqBasicColor;
+
+/// A 3D color which owns its data storage
+typedef CqBasicColor<CqVec3Data> CqColor;
+/// A 3D color which holds a reference to external data storage
+typedef CqBasicColor<CqVecRefData> CqRefColor;
+
 
 } // namespace Aqsis
 

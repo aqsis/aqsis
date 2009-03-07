@@ -35,6 +35,7 @@
 
 #include "aqsismath.h"
 #include "vecfwd.h"
+#include "vectorstorage.h"
 
 namespace Aqsis {
 
@@ -60,13 +61,13 @@ class CqBasicVec3
 		/// Construct with given x,y,z componenets.
 		CqBasicVec3(TqFloat x, TqFloat y, TqFloat z);
 		/// Construct with x = y = z = f
-		CqBasicVec3(TqFloat f);
+		explicit CqBasicVec3(TqFloat f);
 		/// Get components from the first three elements of a float array
-		CqBasicVec3(const TqFloat* array);
+		explicit CqBasicVec3(const TqFloat* array);
 		/** Get components from the first three elements of a float array
 		 * Detailed semantics depend on the storage policy.
 		 */
-		CqBasicVec3(TqFloat* array);
+		explicit CqBasicVec3(TqFloat* array);
 		/// Copy from another 3D vector.
 		CqBasicVec3(const CqBasicVec3& rhs);
 		/// Copy from another 3D vector.
@@ -122,7 +123,7 @@ class CqBasicVec3
 		/// \name Op-assign with 3D vectors as the rhs
 		//@{
 		/** Opassign functions with another 3D vector type on the right hand
-		 * side causes the associated operation to be carried componentwise.
+		 * side causes the associated operation to be carried out componentwise.
 		 */
 		template<typename T> CqBasicVec3& operator+=(const CqBasicVec3<T> &rhs);
 		template<typename T> CqBasicVec3& operator-=(const CqBasicVec3<T> &rhs);
@@ -149,19 +150,13 @@ class CqBasicVec3
 		 * Comparison operators return true when the associated comparison is
 		 * true for all componenets at once.
 		 */
-		template<typename StoreT2>
-		bool operator==(const CqBasicVec3<StoreT2> &rhs) const;
+		template<typename T> bool operator==(const CqBasicVec3<T> &rhs) const;
 		/// return true when any of the components of rhs differ from this.
-		template<typename StoreT2>
-		bool operator!=(const CqBasicVec3<StoreT2> &rhs) const;
-		template<typename StoreT2>
-		bool operator>=(const CqBasicVec3<StoreT2> &rhs) const;
-		template<typename StoreT2>
-		bool operator<=(const CqBasicVec3<StoreT2> &rhs) const;
-		template<typename StoreT2>
-		bool operator>(const CqBasicVec3<StoreT2> &rhs) const;
-		template<typename StoreT2>
-		bool operator<(const CqBasicVec3<StoreT2> &rhs) const;
+		template<typename T> bool operator!=(const CqBasicVec3<T> &rhs) const;
+		template<typename T> bool operator>=(const CqBasicVec3<T> &rhs) const;
+		template<typename T> bool operator<=(const CqBasicVec3<T> &rhs) const;
+		template<typename T> bool operator>(const CqBasicVec3<T> &rhs) const;
+		template<typename T> bool operator<(const CqBasicVec3<T> &rhs) const;
 		//@}
 
 	private:
@@ -214,15 +209,15 @@ CqVec3 operator%(const CqBasicVec3<T1>& a, const CqBasicVec3<T2>& b);
 /** \brief Linearly interpolate between two vectors
  *
  * \param t - interpolation parameter
- * \param c0 - color corresponding to t = 0
- * \param c1 - color corresponding to t = 1
+ * \param v0 - vector corresponding to t = 0
+ * \param v1 - vector corresponding to t = 1
  */
 template<typename T1, typename T2>
 CqVec3 lerp(const TqFloat t, const CqBasicVec3<T1>& v0, const CqBasicVec3<T2>& v1);
 
 // Stream insertion
 template<typename T>
-std::ostream &operator<<(std::ostream &out, const CqBasicVec3<T> &v);
+std::ostream& operator<<(std::ostream &out, const CqBasicVec3<T> &v);
 
 /** \brief Determine whether two vectors are equal to within some tolerance
  *
@@ -243,65 +238,6 @@ bool isClose(const CqBasicVec3<T1>& v1, const CqBasicVec3<T2>& v2,
 //==============================================================================
 // Implementation details.
 //==============================================================================
-
-/** \brief Container for 3d vector data
- *
- * This class holds the three components for a 3D vector by value, for use as
- * a storage class for CqBasicVec3.
- */
-class CqVec3Data
-{
-	private:
-		TqFloat m_v[3];
-	public:
-		CqVec3Data(const TqFloat* v)
-		{
-			m_v[0] = v[0];
-			m_v[1] = v[1];
-			m_v[2] = v[2];
-		}
-		CqVec3Data(TqFloat x, TqFloat y, TqFloat z)
-		{
-			m_v[0] = x;
-			m_v[1] = y;
-			m_v[2] = z;
-		}
-		// Indexed component access
-		TqFloat operator[](TqInt i) const
-		{
-			return m_v[i];
-		}
-		TqFloat& operator[](TqInt i)
-		{
-			return m_v[i];
-		}
-};
-
-/** \brief Reference to 3d vector data.
- *
- * This class holds a pointer to data representing the components of a vector.
- * For use as a storage class for CqBasicVec3.
- */
-class CqVecRefData
-{
-	private:
-		TqFloat* m_v;
-	public:
-		CqVecRefData(TqFloat* v)
-			: m_v(v)
-		{ }
-		// Indexed component access
-		TqFloat operator[](TqInt i) const
-		{
-			return m_v[i];
-		}
-		TqFloat& operator[](TqInt i)
-		{
-			return m_v[i];
-		}
-};
-
-//------------------------------------------------------------------------------
 // CqBasicVec3 implementation
 
 //----------------------------------------
@@ -513,6 +449,7 @@ inline CqBasicVec3<StoreT>& CqBasicVec3<StoreT>::operator*=(const TqFloat scale)
 template<typename StoreT>
 inline CqBasicVec3<StoreT>& CqBasicVec3<StoreT>::operator/=(const TqFloat scale)
 {
+	assert(scale != 0);
 	(*this) *= (1/scale);
 	return *this;
 }
@@ -557,7 +494,7 @@ inline bool CqBasicVec3<StoreT>::operator<(const CqBasicVec3<T> &v) const
 }
 
 //------------------------------------------------------------------------------
-// friend functions
+// helper functions
 
 //----------------------------------------
 // float/vector operators
@@ -679,7 +616,7 @@ inline CqVec3 operator%(const CqBasicVec3<T1> &a, const CqBasicVec3<T2> &b)
 }
 
 template<typename T>
-inline std::ostream &operator<<(std::ostream &out, const CqBasicVec3<T> &v)
+inline std::ostream& operator<<(std::ostream &out, const CqBasicVec3<T> &v)
 {
 	out << v.x() << "," << v.y() << "," << v.z();
 	return out;

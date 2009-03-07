@@ -32,29 +32,42 @@
 #include <iostream>
 
 #include "aqsismath.h"
+#include "vecfwd.h"
+#include "vectorstorage.h"
 
 namespace Aqsis {
 
 //-----------------------------------------------------------------------
 /** \brief Class to store and manipulate three component color information.
  */
-class COMMON_SHARE CqColor
+template<typename StoreT>
+class CqBasicColor
 {
 	public:
-		/// Default to black.
-		CqColor();
-		/** Component constructor
-		 * \param fRed red component 0.0-1.0
-		 * \param fGreen green component 0.0-1.0
-		 * \param fBlue blue component 0.0-1.0
+		/// Construct a black color (r,g,b = 0)
+		CqBasicColor();
+		/// Construct a color with the given red,green,blue components.
+		CqBasicColor(TqFloat r, TqFloat g, TqFloat b);
+		/// Greyscale constructor (r,g,b = f)
+		explicit CqBasicColor(TqFloat f);
+		/// Copy (r,g,b) color componenets from an array
+		explicit CqBasicColor(const TqFloat* array);
+		/** \brief Copy value from an array or assign storage
+		 * (semantics depends on the storage policy)
 		 */
-		CqColor(TqFloat fRed, TqFloat fGreen, TqFloat fBlue);
-		/// Greyscale constructor
-		CqColor(TqFloat f);
-		/** Array component constructor.
-		 * \param From array of floats to use as the components.
-		 */
-		CqColor(const TqFloat From[ 3 ]);
+		explicit CqBasicColor(TqFloat* array);
+		/// Copy from another color
+		CqBasicColor(const CqBasicColor& rhs);
+		/// Copy from another color
+		template<typename T>
+		CqBasicColor(const CqBasicColor<T>& rhs);
+
+		/// \name Assignment operators
+		//@{
+		CqBasicColor& operator=(const CqBasicColor& rhs);
+		template<typename T>
+		CqBasicColor& operator=(const CqBasicColor<T>& rhs);
+		//@}
 
 		//@{
 		/// Const component access
@@ -62,206 +75,140 @@ class COMMON_SHARE CqColor
 		TqFloat g() const;
 		TqFloat b() const;
 		//@}
+
 		//@{
-		/// Non-const component access; can be used to set individual components
+		/// Assignable component access
 		TqFloat& r();
 		TqFloat& g();
 		TqFloat& b();
 		//@}
 
-		/** Array based component access.
-		 * \param i integer component index, 0-2.
-		 * \return a reference to the float value of the appropriate component, returns blue if index is invalid.
+		//@{
+		/** Color component setter methods.
+		 * \deprecated Use the methods returning component references.
 		 */
-		TqFloat& operator[](TqInt i);
-		/** Array based read only component access.
-		 * \param i integer component index, 0-2.
-		 * \return a constant reference the float value of the appropriate component, returns blue if index is invalid.
-		 */
-		TqFloat operator[](TqInt i) const;
-		/** Additive assign operator.
-		 * \param colFrom the color to add to this.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator+=(const CqColor &colFrom);
-		/** Subtractive assign operator.
-		 * \param colFrom the color to subtract from this.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator-=(const CqColor &colFrom);
-		/** Component wise multiplicative assign operator.
-		 * \param colFrom the color to multiply this with.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator*=(const CqColor& colFrom);
-		/** Component wise multiplicative assign operator.
-		 * \param fScale the float to multiply each component with.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator*=(TqFloat fScale);
-		/** Component wise divisive assign operator.
-		 * \param fScale the float to divide each component by.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator/=(const TqFloat fScale);
-		/** Component wise divisive assign operator.
-		 * \param colFrom the color to divide this by.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator/=(const CqColor& colFrom);
-		/** Component wise additive assign operator.
-		 * \param Add the float to add to each component.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator+=(const TqFloat Add);
-		/** Component wise subtractive assign operator.
-		 * \param Sub the float to subtract from each component.
-		 * \return a reference to this color.
-		 */
-		CqColor& operator-=(const TqFloat Sub);
-		/** Component wise equality operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating equality.
-		 */
-		bool operator==(const CqColor &colCmp) const;
-		/** Component wise inequality operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating inequality.
-		 */
-		bool operator!=(const CqColor &colCmp) const;
-		/** Component wise greater than or equal to operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating each component is greater than or equal to its counterpart in the argument.
-		 */
-		bool operator>=(const CqColor &colCmp) const;
-		/** Component wise less than or equal to operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating each component is less than or equal to its counterpart in the argument.
-		 */
-		bool operator<=(const CqColor &colCmp) const;
-		/** Component wise greater than to operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating each component is greater than its counterpart in the argument.
-		 */
-		bool operator>(const CqColor &colCmp) const;
-		/** Component wise less than to operator.
-		 * \param colCmp the color to compare this with.
-		 * \return boolean indicating each component is less than its counterpart in the argument.
-		 */
-		bool operator<(const CqColor &colCmp) const;
+		void r(TqFloat r);
+		void g(TqFloat g);
+		void b(TqFloat b);
+		//@}
 
-		/** \brief Determine a componentwise minimum for two colors
+		/// \name Index-based component access 
+		//@{
+		/** Indices outside the valid range 0-2 will cause an assertion in
+		 * debug mode.
 		 */
-		friend CqColor min(const CqColor a, const CqColor b);
-		/** \brief Determine a componentwise maximum for two colors
-		 */
-		friend CqColor max(const CqColor a, const CqColor b);
-		/** \brief Clamp the components of a color to between two given colors.
-		 */
-		friend CqColor clamp(const CqColor c, const CqColor min, const CqColor max);
+		TqFloat& operator[] (TqInt i);
+		TqFloat operator[] (TqInt i) const;
+		//@}
 
-		/** \brief Linearly interpolate between two colors
-		 *
-		 * \param t - interpolation parameter
-		 * \param c0 - color corresponding to t = 0
-		 * \param c1 - color corresponding to t = 1
+		/// \name Op-assign with colors as the rhs
+		//@{
+		/** Opassign functions with another color type on the right hand side
+		 * causes the associated operation to be carried out componentwise.
 		 */
-		friend CqColor lerp(const TqFloat t, const CqColor c0, const CqColor c1);
+		template<typename T> CqBasicColor& operator+=(const CqBasicColor<T> &rhs);
+		template<typename T> CqBasicColor& operator-=(const CqBasicColor<T> &rhs);
+		template<typename T> CqBasicColor& operator*=(const CqBasicColor<T> &scale);
+		template<typename T> CqBasicColor& operator/=(const CqBasicColor<T> &scale);
+		//@}
 
-		/** Component wise friend addition operator.
-		 * \param f float to add to each component.
-		 * \param c color to add to.
-		 * \return new color representing addition. 
+		/// \name Op-assign with floats as the rhs.
+		//@{
+		/** Opassign functions with floats on the right hand side cause the
+		 * associated operation to be carried out on each component.
 		 */
-		friend CqColor operator+(const TqFloat f, const CqColor& c);
-		/** Component wise friend addition operator.
-		 * \param c color to add to.
-		 * \param f float to add to each component.
-		 * \return new color representing addition. 
-		 */
-		friend CqColor operator+(const CqColor& c, const TqFloat f);
-		/** Component wise friend subtraction operator.
-		 * \param f float to subtract from each component.
-		 * \param c color to subtract from.
-		 * \return new color representing subtraction. 
-		 */
-		friend CqColor operator-(const TqFloat f, const CqColor& c);
-		/** Component wise friend subtraction operator.
-		 * \param c color to subtract from.
-		 * \param f float to subtract from each component.
-		 * \return new color representing subtraction. 
-		 */
-		friend CqColor operator-(const CqColor& c, const TqFloat f);
-		/** Component wise friend multiplication operator.
-		 * \param f float to multiply each component with.
-		 * \param c color to multiply with.
-		 * \return new color representing multiplication. 
-		 */
-		friend CqColor operator*(const TqFloat f, const CqColor& c);
-		/** Component wise friend multiplication operator.
-		 * \param c color to multiply with.
-		 * \param f float to multiply each component with.
-		 * \return new color representing multiplication. 
-		 */
-		friend CqColor operator*(const CqColor& c, const TqFloat f);
-		/** Component wise friend division operator.
-		 * \param f float to divide each component by.
-		 * \param c color to divide.
-		 * \return new color representing division. 
-		 */
-		friend CqColor operator/(const TqFloat f, const CqColor& c);
-		/** Component wise friend division operator.
-		 * \param c color to divide.
-		 * \param f float to divide each component by.
-		 * \return new color representing division. 
-		 */
-		friend CqColor operator/(const CqColor& c, const TqFloat f);
+		CqBasicColor& operator+=(const TqFloat f);
+		CqBasicColor& operator-=(const TqFloat f);
+		CqBasicColor& operator*=(const TqFloat scale);
+		CqBasicColor& operator/=(const TqFloat scale);
+		//@}
 
-		/** Component wise friend addition operator.
-		 * \param a color to add to.
-		 * \param b color to add.
-		 * \return new color representing addition. 
+		/// \name Comparison functions
+		//@{
+		/**
+		 * Comparison operators return true when the associated comparison is
+		 * true for all componenets at once, except for != which returns !(c1 == c2)
 		 */
-		friend CqColor operator+(const CqColor& a, const CqColor& b);
-		/** Component wise friend subtraction operator.
-		 * \param a color to subtract from.
-		 * \param b color to subtract.
-		 * \return new color representing subtraction. 
-		 */
-		friend CqColor operator-(const CqColor& a, const CqColor& b);
-		/** Component wise friend multiplication operator.
-		 * \param a color to multiply.
-		 * \param b color to multiply by.
-		 * \return new color representing multiplication. 
-		 */
-		friend CqColor operator*(const CqColor& a, const CqColor& b);
-		/** Component wise friend division operator.
-		 * \param a color to divide.
-		 * \param b color to divide by.
-		 * \return new color representing division. 
-		 */
-		friend CqColor operator/(const CqColor& a, const CqColor& b);
-		/** Component wise friend negation operator.
-		 * \param a color to negate.
-		 * \return new color representing negation. 
-		 */
-		friend CqColor operator-(const CqColor& a);
-		/** Component wide stream output operator.
-		 *\param Stream output stream.
-		 *\param a color to serialize.
-		 *\return input stream.
-		 */
-		friend std::ostream& operator<<(std::ostream& Stream, const CqColor& a);
+		template<typename T> bool operator==(const CqBasicColor<T> &rhs) const;
+		template<typename T> bool operator!=(const CqBasicColor<T> &rhs) const;
+		template<typename T> bool operator>=(const CqBasicColor<T> &rhs) const;
+		template<typename T> bool operator<=(const CqBasicColor<T> &rhs) const;
+		template<typename T> bool operator>(const CqBasicColor<T> &rhs) const;
+		template<typename T> bool operator<(const CqBasicColor<T> &rhs) const;
+		//@}
 
 	private:
-		TqFloat m_fRed;     ///< the red component 0.0-1.0
-		TqFloat m_fGreen;   ///< the green component 0.0-1.0
-		TqFloat m_fBlue;    ///< the blue component 0.0-1.0
+		StoreT m_data;
 };
 
+// Non-member operators & functions for colors
 
-//------------------------------------------------------------------------------
-/// \name Color-space conversion functions
+/// \name Float/color operators
+//@{
+/** The float is promoted to a greyscale color with equal components after
+ * which operations are performed componentwise.
+ */
+template<typename T> CqColor operator+(const TqFloat f, const CqBasicColor<T>& c);
+template<typename T> CqColor operator-(const TqFloat f, const CqBasicColor<T>& c);
+template<typename T> CqColor operator*(const TqFloat f, const CqBasicColor<T>& c);
+template<typename T> CqColor operator/(const TqFloat f, const CqBasicColor<T>& c);
+template<typename T> CqColor operator+(const CqBasicColor<T>& c, const TqFloat f);
+template<typename T> CqColor operator-(const CqBasicColor<T>& c, const TqFloat f);
+template<typename T> CqColor operator*(const CqBasicColor<T>& c, const TqFloat f);
+template<typename T> CqColor operator/(const CqBasicColor<T>& c, const TqFloat f);
+//@}
+
+/// \name color/color arithmetic
+//@{
+/// Componentwise operations on the two colors produce a third.
+template<typename T1, typename T2>
+CqColor operator+(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2>
+CqColor operator-(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2>
+CqColor operator*(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2>
+CqColor operator/(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2>
+CqColor min(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2>
+CqColor max(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b);
+template<typename T1, typename T2, typename T3>
+CqColor clamp(const CqBasicColor<T1>& c, const CqBasicColor<T2>& min, const CqBasicColor<T3>& max);
+//@}
+
+/// Negation
+template<typename T>
+CqColor operator-(const CqBasicColor<T>& c);
+/** \brief Linearly interpolate between two colors
+ *
+ * \param t - interpolation parameter
+ * \param c0 - color corresponding to t = 0
+ * \param c1 - color corresponding to t = 1
+ */
+template<typename T1, typename T2>
+CqColor lerp(const TqFloat t, const CqBasicColor<T1>& c0, const CqBasicColor<T2>& c1);
+
+// Stream insertion
+template<typename T>
+std::ostream& operator<<(std::ostream &out, const CqBasicColor<T> &c);
+
+/** \brief Determine whether two colours are equal to within some tolerance.
+ *
+ * This performs elementwise comparisons of the componenets using the float
+ * version of isClose().  The colours are close whenever all thier componenets
+ * are.
+ *
+ * \param c1, c2 - colours to compare
+ * \param tol - tolerance for the comparison.
+ */
+template<typename T1, typename T2>
+inline bool isClose(const CqBasicColor<T1>& c1, const CqBasicColor<T2>& c2,
+		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
+
+
+//----------------------------------------
+/// \name Color-space conversion functions.  These are restricted to 
 //@{
 COMMON_SHARE CqColor rgbtohsv(const CqColor& col);
 COMMON_SHARE CqColor rgbtohsl(const CqColor& col);
@@ -275,20 +222,8 @@ COMMON_SHARE CqColor xyYtorgb(const CqColor& col);
 COMMON_SHARE CqColor YIQtorgb(const CqColor& col);
 //@}
 
-//------------------------------------------------------------------------------
-/** \brief Determine whether two colours are equal to within some tolerance.
- *
- * This performs elementwise comparisons of the componenets using the float
- * version of isClose().  The colours are close whenever all thier componenets
- * are.
- *
- * \param c1, c2 - colours to compare
- * \param tol - tolerance for the comparison.
- */
-bool isClose(const CqColor& c1, const CqColor& c2,
-		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
-//------------------------------------------------------------------------------
+//----------------------------------------
 /// Static white color
 COMMON_SHARE extern const CqColor gColWhite;
 /// Static black color
@@ -297,290 +232,352 @@ COMMON_SHARE extern const CqColor gColBlack;
 
 
 //==============================================================================
-// Implementation details
+// Implementation details.
 //==============================================================================
-// CqColor implementation
+// CqBasicColor implementation
 
-inline CqColor::CqColor()
-	: m_fRed(0.0f),
-	m_fGreen(0.0f),
-	m_fBlue(0.0f)
+//----------------------------------------
+// Constructors
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor()
+	: m_data(0,0,0)
 { }
 
-inline CqColor::CqColor(TqFloat fRed, TqFloat fGreen, TqFloat fBlue)
-	: m_fRed(fRed),
-	m_fGreen(fGreen),
-	m_fBlue(fBlue)
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor(TqFloat r, TqFloat g, TqFloat b)
+	: m_data(r,g,b)
 { }
 
-inline CqColor::CqColor(TqFloat f)
-	: m_fRed(f),
-	m_fGreen(f),
-	m_fBlue(f)
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor(TqFloat f)
+	: m_data(f,f,f)
 { }
 
-inline CqColor::CqColor(const TqFloat From[ 3 ])
-	: m_fRed(From[ 0 ]),
-	m_fGreen(From[ 1 ]),
-	m_fBlue(From[ 2 ])
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor(const TqFloat* array)
+	: m_data(array)
 { }
 
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor(TqFloat* array)
+	: m_data(array)
+{ }
 
-inline TqFloat CqColor::r() const
-{
-	return m_fRed;
-}
-inline TqFloat CqColor::g() const
-{
-	return m_fGreen;
-}
-inline TqFloat CqColor::b() const
-{
-	return m_fBlue;
-}
-inline TqFloat& CqColor::r()
-{
-	return m_fRed;
-}
-inline TqFloat& CqColor::g()
-{
-	return m_fGreen;
-}
-inline TqFloat& CqColor::b()
-{
-	return m_fBlue;
-}
+template<typename StoreT>
+inline CqBasicColor<StoreT>::CqBasicColor(const CqBasicColor<StoreT>& rhs)
+	: m_data(rhs.m_data)
+{ }
 
-inline TqFloat& CqColor::operator[](TqInt i)
-{
-	if (i==0)
-		return m_fRed;
-	else if (i == 1)
-		return m_fGreen;
-	else
-		return m_fBlue;
-}
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>::CqBasicColor(const CqBasicColor<T>& rhs)
+	: m_data(rhs.r(), rhs.g(), rhs.b())
+{ }
 
-inline TqFloat CqColor::operator[](TqInt i) const
-{
-	if (i==0)
-		return m_fRed;
-	else if (i == 1)
-		return m_fGreen;
-	else
-		return m_fBlue;
-}
+//----------------------------------------
+// Assignment operators
 
-inline CqColor& CqColor::operator+=(const CqColor &colFrom)
+// Need to override the default assignment operator; the templated version
+// below doesn't seem to do so.
+template<typename StoreT>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator=(const CqBasicColor<StoreT>& rhs)
 {
-	m_fRed += colFrom.m_fRed;
-	m_fGreen += colFrom.m_fGreen;
-	m_fBlue += colFrom.m_fBlue;
+	r() = rhs.r();
+	g() = rhs.g();
+	b() = rhs.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator-=(const CqColor &colFrom)
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator=(const CqBasicColor<T>& rhs)
 {
-	m_fRed -= colFrom.m_fRed;
-	m_fGreen -= colFrom.m_fGreen;
-	m_fBlue -= colFrom.m_fBlue;
+	r() = rhs.r();
+	g() = rhs.g();
+	b() = rhs.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator*=(const CqColor& colFrom)
+//----------------------------------------
+// Component access
+template<typename StoreT>
+inline TqFloat CqBasicColor<StoreT>::r() const { return m_data[0]; }
+template<typename StoreT>
+inline TqFloat CqBasicColor<StoreT>::g() const { return m_data[1]; }
+template<typename StoreT>
+inline TqFloat CqBasicColor<StoreT>::b() const { return m_data[2]; }
+
+template<typename StoreT>
+inline TqFloat& CqBasicColor<StoreT>::r() { return m_data[0]; }
+template<typename StoreT>
+inline TqFloat& CqBasicColor<StoreT>::g() { return m_data[1]; }
+template<typename StoreT>
+inline TqFloat& CqBasicColor<StoreT>::b() { return m_data[2]; }
+
+template<typename StoreT>
+inline void CqBasicColor<StoreT>::r(TqFloat r) { m_data[0] = r; }
+template<typename StoreT>
+inline void CqBasicColor<StoreT>::g(TqFloat g) { m_data[1] = g; }
+template<typename StoreT>
+inline void CqBasicColor<StoreT>::b(TqFloat b) { m_data[2] = b; }
+
+template<typename StoreT>
+inline TqFloat& CqBasicColor<StoreT>::operator[](TqInt i)
 {
-	m_fRed *= colFrom.m_fRed;
-	m_fGreen *= colFrom.m_fGreen;
-	m_fBlue *= colFrom.m_fBlue;
+	assert(i >= 0 && i <= 2);
+	return m_data[i];
+}
+template<typename StoreT>
+inline TqFloat CqBasicColor<StoreT>::operator[](TqInt i) const
+{
+	assert(i >= 0 && i <= 2);
+	return m_data[i];
+}
+
+//----------------------------------------
+// opassign operators with colors as the rhs.
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator+=(const CqBasicColor<T> &col)
+{
+	r() += col.r();
+	g() += col.g();
+	b() += col.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator*=(TqFloat fScale)
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator-=(const CqBasicColor<T> &col)
 {
-	m_fRed *= fScale;
-	m_fGreen *= fScale;
-	m_fBlue *= fScale;
+	r() -= col.r();
+	g() -= col.g();
+	b() -= col.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator/=(const TqFloat fScale)
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator*=(const CqBasicColor<T> &scale)
 {
-	m_fRed /= fScale;
-	m_fGreen /= fScale;
-	m_fBlue /= fScale;
+	r() *= scale.r();
+	g() *= scale.g();
+	b() *= scale.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator/=(const CqColor& colFrom)
+template<typename StoreT>
+template<typename T>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator/=(const CqBasicColor<T> &scale)
 {
-	m_fRed /= colFrom.m_fRed;
-	m_fGreen /= colFrom.m_fGreen;
-	m_fBlue /= colFrom.m_fBlue;
+	r() /= scale.r();
+	g() /= scale.g();
+	b() /= scale.b();
 	return *this;
 }
 
-inline CqColor& CqColor::operator+=(const TqFloat Add)
+//----------------------------------------
+// opassign operators with floats as the rhs
+template<typename StoreT>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator+=(const TqFloat f)
 {
-	m_fRed += Add;
-	m_fGreen += Add;
-	m_fBlue += Add;
+	r() += f;
+	g() += f;
+	b() += f;
 	return *this;
 }
 
-inline CqColor& CqColor::operator-=(const TqFloat Sub)
+template<typename StoreT>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator-=(const TqFloat f)
 {
-	m_fRed -= Sub;
-	m_fGreen -= Sub;
-	m_fBlue -= Sub;
+	r() -= f;
+	g() -= f;
+	b() -= f;
 	return *this;
 }
 
-inline bool CqColor::operator==(const CqColor &colCmp) const
+template<typename StoreT>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator*=(const TqFloat scale)
 {
-	return (m_fRed == colCmp.m_fRed) && (m_fGreen == colCmp.m_fGreen) && (m_fBlue == colCmp.m_fBlue);
+	r() *= scale;
+	g() *= scale;
+	b() *= scale;
+	return *this;
 }
 
-inline bool CqColor::operator!=(const CqColor &colCmp) const
+template<typename StoreT>
+inline CqBasicColor<StoreT>& CqBasicColor<StoreT>::operator/=(const TqFloat scale)
 {
-	return !(*this == colCmp);
+	assert(scale != 0);
+	(*this) *= (1/scale);
+	return *this;
 }
 
-inline bool CqColor::operator>=(const CqColor &colCmp) const
+//----------------------------------------
+// comparison operators
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator==(const CqBasicColor<T> &col) const
 {
-	return (m_fRed >= colCmp.m_fRed) && (m_fGreen >= colCmp.m_fGreen) && (m_fBlue >= colCmp.m_fBlue);
+	return (r() == col.r()) && (g() == col.g()) && (b() == col.b());
 }
-
-inline bool CqColor::operator<=(const CqColor &colCmp) const
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator!=(const CqBasicColor<T> &col) const
 {
-	return (m_fRed <= colCmp.m_fRed) && (m_fGreen <= colCmp.m_fGreen) && (m_fBlue <= colCmp.m_fBlue);
+	return (r() != col.r()) || (g() != col.g()) || (b() != col.b());
 }
-
-inline bool CqColor::operator>(const CqColor &colCmp) const
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator>=(const CqBasicColor<T> &col) const
 {
-	return (m_fRed > colCmp.m_fRed) && (m_fGreen > colCmp.m_fGreen) && (m_fBlue > colCmp.m_fBlue);
+	return (r() >= col.r()) && (g() >= col.g()) && (b() >= col.b());
 }
-
-inline bool CqColor::operator<(const CqColor &colCmp) const
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator<=(const CqBasicColor<T> &col) const
 {
-	return (m_fRed < colCmp.m_fRed) && (m_fGreen < colCmp.m_fGreen) && (m_fBlue < colCmp.m_fBlue);
+	return (r() <= col.r()) && (g() <= col.g()) && (b() <= col.b());
 }
-
-
-
-//------------------------------------------------------------------------------
-// Friend functions
-
-inline CqColor min(const CqColor a, const CqColor b)
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator>(const CqBasicColor<T> &col) const
 {
-	return CqColor(min(a.m_fRed, b.m_fRed),
-			min(a.m_fGreen, b.m_fGreen),
-			min(a.m_fBlue, b.m_fBlue));
+	return (r() > col.r()) && (g() > col.g()) && (b() > col.b());
 }
-
-inline CqColor max(const CqColor a, const CqColor b)
+template<typename StoreT>
+template<typename T>
+inline bool CqBasicColor<StoreT>::operator<(const CqBasicColor<T> &col) const
 {
-	return CqColor(max(a.m_fRed, b.m_fRed),
-			max(a.m_fGreen, b.m_fGreen),
-			max(a.m_fBlue, b.m_fBlue));
-}
-
-inline CqColor clamp(const CqColor c, const CqColor min, const CqColor max)
-{
-	return CqColor(clamp(c.m_fRed, min.m_fRed, max.m_fRed),
-			clamp(c.m_fGreen, min.m_fGreen, max.m_fGreen),
-			clamp(c.m_fBlue, min.m_fBlue, max.m_fBlue));
-}
-
-inline CqColor lerp(const TqFloat t, const CqColor c0, const CqColor c1)
-{
-	return CqColor((1-t)*c0.m_fRed + t*c1.m_fRed,
-			       (1-t)*c0.m_fGreen + t*c1.m_fGreen,
-			       (1-t)*c0.m_fBlue + t*c1.m_fBlue);
-}
-
-inline CqColor operator+(const TqFloat f, const CqColor& c)
-{
-	CqColor r(c);
-	return r += f;
-}
-inline CqColor operator+(const CqColor& c, const TqFloat f)
-{
-	CqColor r(c);
-	return r += f;
-}
-inline CqColor operator-(const TqFloat f, const CqColor& c)
-{
-	CqColor r(f, f, f);
-	return r -= c;
-}
-inline CqColor operator-(const CqColor& c, const TqFloat f)
-{
-	CqColor r(c);
-	return r -= f;
-}
-inline CqColor operator*(const TqFloat f, const CqColor& c)
-{
-	CqColor r(f, f, f);
-	return r *= c;
-}
-inline CqColor operator*(const CqColor& c, const TqFloat f)
-{
-	CqColor r(c);
-	return r *= f;
-}
-
-inline CqColor operator/(const TqFloat f, const CqColor& c)
-{
-	CqColor r(f, f, f);
-	return r /= c;
-}
-inline CqColor operator/(const CqColor& c, const TqFloat f)
-{
-	CqColor r(c);
-	return r /= f;
-}
-
-inline CqColor operator+(const CqColor& a, const CqColor& b)
-{
-	CqColor r(a);
-	return r += b;
-}
-inline CqColor operator-(const CqColor& a, const CqColor& b)
-{
-	CqColor r(a);
-	return r -= b;
-}
-inline CqColor operator*(const CqColor& a, const CqColor& b)
-{
-	CqColor r(a);
-	return r *= b;
-}
-inline CqColor operator/(const CqColor& a, const CqColor& b)
-{
-	CqColor r(a);
-	return r /= b;
-}
-inline CqColor operator-(const CqColor& a)
-{
-	return CqColor(-a.m_fRed, -a.m_fGreen, -a.m_fBlue);
-}
-inline std::ostream& operator<<(std::ostream& Stream, const CqColor& a)
-{
-	Stream << a.m_fRed << " " << a.m_fGreen << " " << a.m_fBlue;
-	return Stream;
+	return (r() < col.r()) && (g() < col.g()) && (b() < col.b());
 }
 
 //------------------------------------------------------------------------------
-// Free functions
+// helper functions
 
-inline bool isClose(const CqColor& c1, const CqColor& c2, TqFloat tol)
+//----------------------------------------
+// float/color operators
+template<typename T>
+inline CqColor operator+(const TqFloat f, const CqBasicColor<T>& col)
+{
+	return CqColor(f + col.r(), f + col.g(), f + col.b());
+}
+template<typename T>
+inline CqColor operator-(const TqFloat f, const CqBasicColor<T>& col)
+{
+	return CqColor(f - col.r(), f - col.g(), f - col.b());
+}
+template<typename T>
+inline CqColor operator*(const TqFloat f, const CqBasicColor<T>& col)
+{
+	return CqColor(f * col.r(), f * col.g(), f * col.b());
+}
+template<typename T>
+inline CqColor operator/(const TqFloat f, const CqBasicColor<T>& col)
+{
+	return CqColor(f / col.r(), f / col.g(), f / col.b());
+}
+
+template<typename T>
+inline CqColor operator+(const CqBasicColor<T>& col, const TqFloat f)
+{
+	return CqColor(col) += f;
+}
+template<typename T>
+inline CqColor operator-(const CqBasicColor<T>& col, const TqFloat f)
+{
+	return CqColor(col) -= f;
+}
+template<typename T>
+inline CqColor operator*(const CqBasicColor<T>& col, const TqFloat f)
+{
+	return CqColor(col) *= f;
+}
+template<typename T>
+inline CqColor operator/(const CqBasicColor<T>& col, const TqFloat f)
+{
+	return CqColor(col) /= f;
+}
+
+//----------------------------------------
+// color/color arithmetic
+
+template<typename T1, typename T2>
+inline CqColor operator+(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(a) += b;
+}
+
+template<typename T1, typename T2>
+inline CqColor operator-(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(a) -= b;
+}
+
+template<typename T1, typename T2>
+inline CqColor operator*(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(a) *= b;
+}
+
+template<typename T1, typename T2>
+inline CqColor operator/(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(a) /= b;
+}
+
+template<typename T1, typename T2>
+inline CqColor min(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(min(a.r(), b.r()), min(a.g(), b.g()), min(a.b(), b.b()));
+}
+
+template<typename T1, typename T2>
+inline CqColor max(const CqBasicColor<T1>& a, const CqBasicColor<T2>& b)
+{
+	return CqColor(max(a.r(), b.r()), max(a.g(), b.g()), max(a.b(), b.b()));
+}
+
+template<typename T1, typename T2, typename T3>
+inline CqColor clamp(const CqBasicColor<T1>& col, const CqBasicColor<T2>& min,
+		const CqBasicColor<T3>& max)
+{
+	return CqColor(clamp(col.r(), min.r(), max.r()),
+			clamp(col.g(), min.g(), max.g()),
+			clamp(col.b(), min.b(), max.b()));
+}
+
+//----------------------------------------
+// misc color ops
+template<typename T>
+inline CqColor operator-(const CqBasicColor<T>& col)
+{
+	return CqColor(-col.r(), -col.g(), -col.b());
+}
+
+template<typename T1, typename T2>
+inline CqColor lerp(TqFloat t, const CqBasicColor<T1>& c0, const CqBasicColor<T2>& c1)
+{
+	return CqColor((1-t)*c0.r() + t*c1.r(),
+			      (1-t)*c0.g() + t*c1.g(),
+			      (1-t)*c0.b() + t*c1.b());
+}
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream &out, const CqBasicColor<T> &col)
+{
+	out << col.r() << "," << col.g() << "," << col.b();
+	return out;
+}
+
+template<typename T1, typename T2>
+inline bool isClose(const CqBasicColor<T1>& c1, const CqBasicColor<T2>& c2, TqFloat tol)
 {
 	return isClose(c1.r(), c2.r(), tol)
 		&& isClose(c1.g(), c2.g(), tol)
 		&& isClose(c1.b(), c2.b(), tol);
 }
 
-//-----------------------------------------------------------------------
 
 } // namespace Aqsis
 

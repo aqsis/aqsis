@@ -650,7 +650,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 					if ( pMap != 0 && pMap->IsValid() )
 					{
-						CqVector3D swidth = 0.0f, twidth = 0.0f;
+						CqVector3D swidth(0.0f);
+						CqVector3D twidth(0.0f);
 						CqVector3D aq_P = Point;
 						pMap->SampleMap( aq_P, swidth, twidth, fv, 0, &avg, &depth );
 					}
@@ -725,7 +726,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					point[1] = tmp.y();
 					point[2] = tmp.z();
 
-					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
+					if ((point[2]>= 0.0) && bound.Contains3D(tmp) && pImplicitValue )
 					{
 						(*pImplicitValue)(&s, &result, point,
 							             e, &m_code[f],
@@ -839,7 +840,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 					if ( pMap != 0 && pMap->IsValid() )
 					{
-						CqVector3D swidth = 0.0f, twidth = 0.0f;
+						CqVector3D swidth(0.0f);
+						CqVector3D twidth(0.0f);
 						CqVector3D aq_P = Point;
 						pMap->SampleMap( aq_P, swidth, twidth, fv, 0, &avg, &depth);
 					}
@@ -889,7 +891,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					point[1] = tmp.y();
 					point[2] = tmp.z();
 
-					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
+					if ((point[2]>= 0.0) && bound.Contains3D(tmp) && pImplicitValue )
 					{
 						(*pImplicitValue)(&s, &result, point,
 							          e, &m_code[f],

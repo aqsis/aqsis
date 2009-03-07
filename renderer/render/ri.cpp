@@ -2940,7 +2940,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 		{
 			for(TqInt i =0; i< npoints; i++)
 			{
-				CqVector3D tmp = points[i];
+				CqVector3D tmp(points[i]);
 				tmp = matCToW * tmp;
 				points[i][0] = tmp.x();
 				points[i][1] = tmp.y();

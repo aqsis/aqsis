@@ -18,11 +18,9 @@
 #include "matrix.h"
 #include "primvartype.h"
 #include "sstring.h"
-#include "vector3d.h"
+#include "vecfwd.h"
 
 namespace Aqsis {
-
-class CqColor;
 
 //----------------------------------------------------------------------
 /** \struct IqShaderData

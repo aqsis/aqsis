@@ -18,14 +18,13 @@
 
 #include "matrix.h"
 #include "itransform.h"
+#include "vecfwd.h"
 
 namespace Aqsis {
 
 struct IqTextureMapOld;
 struct IqTextureCache;
 class CqObjectInstance;
-
-class CqColor;
 
 struct IqRenderer
 {
