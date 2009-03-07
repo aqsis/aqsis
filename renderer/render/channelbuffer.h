@@ -65,6 +65,8 @@ class CqChannelBuffer : public IqChannelBuffer
 		virtual TqConstChannelPtr operator()(TqInt x, TqInt y, TqInt index) const;
 	
 	private:
+		TqInt indexOffset(TqInt x, TqInt y, TqInt index) const;
+
 		TqInt	m_width;
 		TqInt	m_height;
 		TqInt m_elementSize;
@@ -72,9 +74,10 @@ class CqChannelBuffer : public IqChannelBuffer
 		TqChannelValues	m_data;
 };
 
-//--------------------------------------------------------
-// Implementation
-//
+
+//==============================================================================
+// Implementation details
+//==============================================================================
 
 inline void CqChannelBuffer::clearChannels()
 {
@@ -88,15 +91,14 @@ inline CqChannelBuffer::CqChannelBuffer() : m_elementSize(0)
 
 inline TqInt CqChannelBuffer::addChannel(const std::string& name, TqInt size)
 {
-		if(m_channels.find(name) != m_channels.end())
-			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
-				"Error: channel already exists");
+	if(m_channels.find(name) != m_channels.end())
+		AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
+			"Error: channel already exists");
 
-		TqInt index = m_channels.size();
-		m_channels[name] = std::pair<int, int>(index, size);
-		m_elementSize += size;
-		
-		return m_channels[name].first;
+	m_channels[name] = std::pair<int, int>(m_elementSize, size);
+	m_elementSize += size;
+	
+	return m_channels[name].first;
 }
 
 inline TqInt CqChannelBuffer::getChannelIndex(const std::string& name) const
@@ -118,28 +120,12 @@ inline void CqChannelBuffer::allocate(TqInt width, TqInt height)
 
 inline IqChannelBuffer::TqChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index)
 {
-	assert(index < static_cast<TqInt>(m_channels.size()));
-	assert(x < m_width);
-	assert(y < m_height);
-
-	TqInt offset = ( y * m_width * m_elementSize ) + ( x * m_elementSize ) + index;
-
-	assert(offset < static_cast<TqInt>(m_data.size()));
-
-	return m_data.begin() + offset;
+	return m_data.begin() + indexOffset(x, y, index);
 }
 
 inline IqChannelBuffer::TqConstChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index) const
 {
-	assert(index < static_cast<TqInt>(m_channels.size()));
-	assert(x < m_width);
-	assert(y < m_height);
-
-	TqUlong offset = ( y * m_width * m_channels.size() ) + ( x * m_channels.size() ) + index;
-
-	assert(offset < m_data.size() );
-
-	return m_data.begin() + offset;
+	return m_data.begin() + indexOffset(x, y, index);
 }
 
 inline TqInt CqChannelBuffer::width() const
@@ -150,6 +136,16 @@ inline TqInt CqChannelBuffer::width() const
 inline TqInt CqChannelBuffer::height() const
 {
 	return m_height;
+}
+
+inline TqInt CqChannelBuffer::indexOffset(TqInt x, TqInt y, TqInt index) const
+{
+	assert(index >= 0 && index < static_cast<TqInt>(m_elementSize));
+	assert(x >= 0 && x < m_width);
+	assert(y >= 0 && y < m_height);
+	TqInt offset = (y*m_width + x)*m_elementSize + index;
+	assert(offset < static_cast<TqInt>(m_data.size()));
+	return offset;
 }
 
 //-----------------------------------------------------------------------
