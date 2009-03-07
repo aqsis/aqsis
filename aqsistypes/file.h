@@ -48,18 +48,19 @@ namespace boostfs = boost::filesystem;
  * exception, and one which reports nonexistant files by returning an empty
  * path.
  *
- * File names with a directory component to the path will be found relative to
- * the current directory, or relative to the root directory if they are
- * absolute.  Otherwise, the file name is searched for in the list of paths
- * contained in searchPath.  The current directory is not included in the
- * search path by default.
+ * The search path is a list of path strings seperated by ":" or ";" (see
+ * CqSearchPathsTokenFunc for details).  A file is found by first checking
+ * whether it's relative to the current directory (ie, starts with ".") or is
+ * absolute; in either of these cases, the file is looked up directly.  In all
+ * other cases, we attempt to locate the file by prefixing fileName with each
+ * path in the search path list, starting from the left.  The current directory
+ * is not included in the search path by default.
  *
- * Only regular files will be found by the search (directories are excluded).
- * Access permissions are checked by attempting to open the file
+ * Only regular files will be found by the search; directories are excluded.
  *
  * \param fileName - path-relative name of the file.
- * \param searchPath - colon-separated string of directories in which to search
- *                     for the given file name.
+ * \param searchPath - colon or semicolon-separated string of directories in
+ *                     which to search for the given file name.
  * \return A full path to the file name.
  */
 COMMON_SHARE boostfs::path findFile(const std::string& fileName,

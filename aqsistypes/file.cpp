@@ -84,21 +84,25 @@ boostfs::path findFileNothrow(const std::string& fileName,
 		const std::string& searchPath)
 {
 	boostfs::path filePath = fileName;
-	if(filePath.has_branch_path())
+	if(filePath.empty())
+		return boostfs::path();
+	// First check whether the path is complete (often called "absolute") or is
+	// relative to the current directory.
+	if(filePath.is_complete() || *filePath.begin() == "." || *filePath.begin() == "..")
 	{
 		if(isRegularFile(filePath))
 			return filePath;
+		else
+			return boostfs::path();
 	}
-	else
+	// In other cases, look for fileName in each path of the searchpath.
+	TqPathsTokenizer paths(searchPath);
+	for(TqPathsTokenizer::iterator i = paths.begin(), end = paths.end();
+			i != end; ++i)
 	{
-		TqPathsTokenizer paths(searchPath);
-		for(TqPathsTokenizer::iterator i = paths.begin(), end = paths.end();
-				i != end; ++i)
-		{
-			boostfs::path candidate = (*i)/filePath;
-			if(isRegularFile(candidate))
-				return candidate;
-		}
+		boostfs::path candidate = (*i)/filePath;
+		if(isRegularFile(candidate))
+			return candidate;
 	}
 	return boostfs::path();
 }

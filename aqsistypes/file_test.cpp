@@ -37,40 +37,46 @@
 #include "exception.h"
 
 using namespace Aqsis;
-namespace fs = boost::filesystem;
-
 
 //------------------------------------------------------------------------------
 // File search tests
 
 // Make a file, including any parent directories as necessary.
-void touch(const fs::path& filePath)
+void touch(const boostfs::path& filePath)
 {
-	fs::create_directories(filePath.branch_path());
-	fs::ofstream file(filePath);
+	boostfs::create_directories(filePath.branch_path());
+	boostfs::ofstream file(filePath);
 	file << "created by findFile() unit tests\n";
 }
 
 
 BOOST_AUTO_TEST_CASE(findFile_test)
 {
-	fs::path filePath = "./foo/bar/somefile.txt";
-	touch(filePath);
+	touch("./foo/bar/somefile.txt");
 
 	// Check that existing files are found.
-	BOOST_CHECK_EQUAL(findFile("somefile.txt", ".:./foo/bar/"), filePath);
+	BOOST_CHECK_EQUAL(findFile("somefile.txt", ".:./foo/bar/"),
+			"./foo/bar/somefile.txt");
 
 	// Check that non-existant files throw
 	BOOST_CHECK_THROW(findFile("some_nonexistant_file.txt", ".:./foo/bar/"),
 			XqInvalidFile);
-	// Or that an empty path is returned.
+	// Or that an empty path is returned for the nothrow version.
 	BOOST_CHECK_EQUAL(findFileNothrow("some_nonexistant_file.txt", ".:./foo/bar/"),
-			fs::path());
+			boostfs::path());
 
-	// Check that explicit relative paths are always found relative to the
-	// current directory, not anywhere in the search path.
-	BOOST_CHECK_THROW(findFile("./somefile.txt", ".:./foo/bar/"),
+	// Check that paths which are explicitly specified relative to the current
+	// directory are not searched for in the path.
+	BOOST_CHECK_THROW(findFile("./bar/somefile.txt", ".:./foo"),
 			XqInvalidFile);
+
+	// Check that relative paths which are not explicitly relative to the
+	// current directory are found in the search path.
+	BOOST_CHECK_EQUAL(findFile("bar/somefile.txt", ".:./foo"),
+			"./foo/bar/somefile.txt");
+
+	// Check that empty paths don't cause problems
+	BOOST_CHECK_EQUAL(findFileNothrow("", ".:./foo"), "");
 
 	// Check that directories aren't considered.
 	BOOST_CHECK_THROW(findFile("./foo", "."),
