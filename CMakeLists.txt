@@ -293,11 +293,15 @@ SET(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
 CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
 INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 
+#-------------------------------------------------------------------------------
+# Build docs
+#--------------
+
+ADD_SUBDIRECTORY(doxygen_docs)
 
 #-------------------------------------------------------------------------------
 # Packaging
 #----------
-
 
 # Windows NSIS Packaging
 IF(WIN32)
