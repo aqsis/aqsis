@@ -64,17 +64,8 @@ class CqOcclusionTree
 		 * samples from the bucket to leaf nodes of the tree.
 		 *
 		 * \param bp - the bucket processor for the current bucket.
-		 * \param xMin - left edge of culling region.
-		 * \param yMin - top edge of culling region.
-		 * \param xMax - right edge of culling region.
-		 * \param yMax - bottom edge of culling region.
-		 *
-		 * Note that the culling region may be smaller than the bucket in
-		 * general (in particular for buckets which fall partially off the edge
-		 * of the image).
 		 */
-		void setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt yMin,
-				TqInt xMax, TqInt yMax);
+		void setupTree(const CqBucketProcessor& bp);
 
 		/** \brief Rebuild the occlusion tree.
 		 *
@@ -99,12 +90,8 @@ class CqOcclusionTree
 		CqVector2D m_treeBoundMin;
 		/// max (bottom right) of the area straddled by the tree
 		CqVector2D m_treeBoundMax;
-		/// min (top left) of the culling area
-		CqVector2D m_cullBoundMin;
-		/// max (bottom right) of the culling area
-		CqVector2D m_cullBoundMax;
 		/// Vector holding samples points associated with the leaf nodes.
-		std::vector<std::vector<SqSampleData*> > m_leafSamples;
+		std::vector<std::vector<const SqSampleData*> > m_leafSamples;
 		/// Binary tree of depths stored in an array.
 		std::vector<TqFloat> m_depthTree;
 		/// The index in the depth tree of the first terminal node.

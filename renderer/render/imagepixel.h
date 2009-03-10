@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright Î÷Î÷ 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -36,26 +36,13 @@
 #include	<valarray>
 
 #include	<boost/intrusive_ptr.hpp>
+#include	<boost/scoped_array.hpp>
+#include	<boost/noncopyable.hpp>
 
 #include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
 #include	"pool.h"
-
-// Forward declare SqSampleData for the purposes of the
-// boost::intrusive_ptr functionality.
-namespace Aqsis
-{
-	struct SqSampleData;
-};
-
-// Declare required functions for boost::intrusive_ptr
-// reference counting of SqSampleData.
-namespace boost
-{
-	void intrusive_ptr_add_ref(Aqsis::SqSampleData* p);
-	void intrusive_ptr_release(Aqsis::SqSampleData* p);
-};
 
 namespace Aqsis {
 
@@ -134,10 +121,8 @@ struct SqImageSample
 /** Structure to hold the info about a sample point.
  */
 
-struct SqSampleData
+struct SqSampleData : private boost::noncopyable
 {
-	SqSampleData()	:	references(0) {}
-
 	CqVector2D	position;			///< Sample position
 	CqVector2D	dofOffset;			///< Dof lens offset.
 	TqInt		dofOffsetIndex;
@@ -146,53 +131,30 @@ struct SqSampleData
 	TqFloat		detailLevel;		///< Float level-of-detail sample.
 	std::deque<SqImageSample>	data;	///< Array of sampled surface data for this sample.
 	SqImageSample opaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
-	/** Overridden operator new to allocate micropolys from a pool.
-	 * \todo Review: Unused parameter size
-	 */
-	void* operator new( size_t size )
-	{
-		return( m_thePool.alloc() );
-	}
-
-	/** Overridden operator delete to allocate micropolys from a pool.
-	 */
-	void operator delete( void* p )
-	{
-		m_thePool.free( reinterpret_cast<SqSampleData*>(p) );
-	}
-	static	CqObjectPool<SqSampleData> m_thePool;
-
-	int			references;		///< Reference count for boost::intrusive_ptr
-	/// boost::intrusive_ptr required function, to increment the reference count.
-	friend		void ::boost::intrusive_ptr_add_ref(SqSampleData* p);
-	/// boost::intrusive_ptr required function, to decrement the reference count.
-	/// and delete if necessary.
-	friend		void ::boost::intrusive_ptr_release(SqSampleData* p);
 };
-
-/// Intrusive reference counted pointer to a sample data structure.
-typedef	boost::intrusive_ptr<SqSampleData>			SqSampleDataPtr;
-
 
 
 //-----------------------------------------------------------------------
 /** Storage class for all data relating to a single pixel in the image.
  */
 
-class CqImagePixel
+class CqImagePixel : private boost::noncopyable
 {
 	public:
-		/** \brief The default constructor.
+		/** \brief Construct a pixel with a given supersampling resolution.
+		 *
+		 * \param xSamples - number of sub-pixel samples in the x-direction
+		 * \param ySamples - number of sub-pixel samples in the y-direction
 		 */
-		CqImagePixel();
-		/** \brief The copy constructor.
-		 * 
-		 *  \param from	-	The pixel object to copy from.
+		CqImagePixel(TqInt xSamples, TqInt ySamples);
+
+		/** \brief Swap the internal sample data with another pixel.
+		 *
+		 * This function swaps both the sample data and associated DoF indices
+		 * with another pixel by efficiently swapping the internal data
+		 * structures.
 		 */
-		CqImagePixel( const CqImagePixel& ieFrom );
-		/** \brief The destructor.
-		 */
-		~CqImagePixel();
+		void swap(CqImagePixel& other);
 
 		/** \brief Get the number of horizontal samples in this pixel
 		 * \return The number of samples as an integer.
@@ -202,87 +164,19 @@ class CqImagePixel
 		 * \return The number of samples as an integer.
 		 */
 		TqInt	YSamples() const;
-		/** \brief Allocate the sample pointer array.
-		 *  
-		 *  Allocates an array of shared pointers to the sample data stored on the 
-		 *  bucket processor, thus registering an interest in those samples for the
-		 *  lifetime of this bucket.
-		 *
-		 *  \param bp - A pointer to the bucket processor that this pixel belongs to.
-		 *  \param XSamples - The number of samples in the x direction for the pixel.
-		 *  \param YSamples - The number of samples in the y direction for the pixel.
-		 */ 
-		void	AllocateSamples( CqBucketProcessor* bp, TqInt XSamples, TqInt YSamples );
-		/** \brief Initialise the sample positions for this pixel.
-		 *
-		 *  This function fills in the canonical information for the samples. It needs to 
-		 *  be called only once when instantiated. It fills in default position, dof offset
-		 *  and motion blur time information for later processing.
-		 *
-		 *  The sample positions are stored on the passed array, and 
-		 *  are copied and adjusted for the bucket position when OffsetSamples is called.
-		 *
-		 *  \param vecSamples - An array of sample positions to fill in.
-		 */
-		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
 		/** \brief Jitter the sample positions.
 		 *
 		 *  Jitter the sample array using the multijitter function from GG IV.
 		 *
-		 *  The sample positions are multi-jittered from the canonical form in vecSamples,
+		 *  The sample positions are multi-jittered from the canonical form,
 		 *  the dof offset indices from the canonical form are shuffled, and the motion
 		 *  blur time offsets are randomised.
 		 *
-		 *  \param vecSamples - The sample positions in canonical form, not adjusted for bucket position.
+		 *  \param offset - The raster space offset of the bucket.
 		 *  \param opentime - The motion blur shutter open time.
 		 *  \param closetime - The motion blur shutter close time.
 		 */
-		void	JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
-		/** \brief Offset the sample information according to the bucket position.
-		 *  
-		 *  Apply the offset in vecPixel to the sample positions stored in vecSamples, and then
-		 *  store them on the sample data directly.
-		 *
-		 *  It is presumed that JitterSamples has already been called.
-		 *
-		 *  \param vecPixel - The 2D coordinate in screen space of this pixel.
-		 *  \param vecSamples - The jittered positions to shift and apply.
-		 *
-		 */
-		void	OffsetSamples( CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );
-
-		/** \brief Get the approximate coverage of this pixel.
-		 * \return Float fraction of the pixel covered.
-		 */
-		TqFloat	Coverage() const;
-		/** \brief Set the approximate coverage of this pixel.
-		 * \param c - Fraction of the pixel covered.
-		 */
-		void	SetCoverage( TqFloat c );
-		/** \brief Get the averaged color of this pixel
-		 * \return A color representing the averaged color at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		CqColor	Color() const;
-		/** \brief Get the averaged opacity of this pixel
-		 * \return A color representing the averaged opacity at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		CqColor	Opacity() const;
-		/** \brief Get the averaged depth of this pixel
-		 * \return A float representing the averaged depth at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		TqFloat	Depth() const;
-		/** \brief Get the premultiplied alpha of this pixel
-		 * \return A float representing the premultiplied alpha value of this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		TqFloat	Alpha() const;
-		/** \brief Get a pointer to the sample data
-		 * \return A constant pointer to the sample data.
-		 */
-		const TqFloat*	Data();
+		void	JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat closetime );
 
 		/** \brief Clear all sample information from this pixel.
 		 */
@@ -327,6 +221,9 @@ class CqImagePixel
 		 */
 		SqSampleData& SampleData( TqInt index );
 
+		/// Get the number of samples in the contained within the pixel.
+		TqInt numSamples() const;
+
 		/** \brief Get the index of the sample that contains a dof offset that lies
 		 *  in bounding-box number i.
 		 *
@@ -342,21 +239,43 @@ class CqImagePixel
 		 */
 		static void ProjectToCircle(CqVector2D& pos);
 
-		/* These are public to allow direct shuffling */
-		std::vector<SqSampleDataPtr> m_samples;
-		std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
+		/// Return the number of references to the pixel
+		TqInt refCount() const;
+
 	private:
+		/** \brief Initialise the sample positions for this pixel.
+		 *
+		 *  This function fills in the canonical information for the samples.
+		 *  It needs to be called only once when instantiated. It fills in
+		 *  default position, dof offset and motion blur time information for
+		 *  later processing.
+		 */
+		void initialiseSamples();
+
 		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
 		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
-		SqImageSample	m_Data;
-}
-;
 
-//-----------------------------------------------------------------------
+		boost::scoped_array<SqSampleData> m_samples;
+		boost::scoped_array<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
+
+		int m_refCount;		///< Reference count for boost::intrusive_ptr
+		/// boost::intrusive_ptr required function, to increment the reference count.
+		friend		void intrusive_ptr_add_ref(CqImagePixel* p);
+		/// boost::intrusive_ptr required function, to decrement the reference count.
+		/// and delete if necessary.
+		friend		void intrusive_ptr_release(CqImagePixel* p);
+}; 
+
+/// Intrusive reference counted pointer to a pixel class.
+typedef	boost::intrusive_ptr<CqImagePixel>			CqImagePixelPtr;
+
+
+//==============================================================================
 // Implementation details
-//
+//==============================================================================
 
-
+//------------------------------------------------------------------------------
+// SqImageSample implementation
 inline SqImageSample::SqImageSample() : flags(0)
 {
 	data = new TqFloat[sampleSize];
@@ -380,12 +299,14 @@ inline SqImageSample& SqImageSample::operator=(const SqImageSample& from)
 
 	const TqFloat* fromData = from.data;
 	TqFloat* toData = data;
-	for(TqUint i=0; i<sampleSize; ++i)
-		toData[i] = fromData[i];
+	std::copy(fromData, fromData + sampleSize, toData);
 
 	return(*this);
 }
 
+
+//------------------------------------------------------------------------------
+// CqImagePixel implementation
 inline TqInt CqImagePixel::XSamples() const
 {
 	return ( m_XSamples );
@@ -396,41 +317,9 @@ inline TqInt CqImagePixel::YSamples() const
 	return ( m_YSamples );
 }
 
-inline TqFloat CqImagePixel::Coverage() const
+inline TqInt CqImagePixel::numSamples() const
 {
-	return ( m_Data.data[Sample_Coverage] );
-}
-
-inline void CqImagePixel::SetCoverage( TqFloat c )
-{
-	m_Data.data[Sample_Coverage] = c;
-}
-
-inline CqColor CqImagePixel::Color() const
-{
-	const TqFloat* data = m_Data.data;
-	return ( CqColor(data[Sample_Red], data[Sample_Green], data[Sample_Blue]) );
-}
-
-inline CqColor CqImagePixel::Opacity() const
-{
-	const TqFloat* data = m_Data.data;
-	return ( CqColor(data[Sample_ORed], data[Sample_OGreen], data[Sample_OBlue]) );
-}
-
-inline TqFloat CqImagePixel::Depth() const
-{
-	return ( m_Data.data[Sample_Depth] );
-}
-
-inline TqFloat CqImagePixel::Alpha() const
-{
-	return ( m_Data.data[Sample_Alpha] );
-}
-
-inline const TqFloat* CqImagePixel::Data()
-{
-	return ( &m_Data.data[0] );
+	return m_XSamples*m_YSamples;
 }
 
 inline TqInt CqImagePixel::GetDofOffsetIndex(TqInt i) const
@@ -449,49 +338,48 @@ inline void CqImagePixel::ProjectToCircle(CqVector2D& pos)
 	pos.y(pos.y() * adj);
 }
 
+inline TqInt CqImagePixel::refCount() const
+{
+	return m_refCount;
+}
+
 inline std::deque<SqImageSample>&	CqImagePixel::Values( TqInt index )
 {
-    assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[ index ]->data );
+    assert(index < numSamples());
+	return m_samples[index].data;
 }
 
 inline SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
 {
-	assert( index < m_XSamples*m_YSamples );
-	return ( m_samples[ index ]->opaqueSample );
+	assert(index < numSamples());
+	return m_samples[index].opaqueSample;
 }
 
 
 inline SqSampleData const& CqImagePixel::SampleData( TqInt index ) const
 {
-	assert( index < m_XSamples*m_YSamples );
-	return ( *(m_samples[index]) );
+	assert(index < numSamples());
+	return m_samples[index];
 }
 
 inline SqSampleData& CqImagePixel::SampleData( TqInt index )
 {
-	assert( index < m_XSamples*m_YSamples );
-	return ( *(m_samples[index]) );
+	assert(index < numSamples());
+	return m_samples[index];
 }
 
-//-----------------------------------------------------------------------
+inline void intrusive_ptr_add_ref(Aqsis::CqImagePixel* p)
+{
+	++(p->m_refCount);
+}
+
+inline void intrusive_ptr_release(Aqsis::CqImagePixel* p)
+{
+	if(--(p->m_refCount) == 0)
+		delete p;
+}
 
 } // namespace Aqsis
-
-// Required implementation for boost::intrusive_ptr
-namespace boost
-{
-	inline void intrusive_ptr_add_ref(Aqsis::SqSampleData* p)
-	{
-		++(p->references);
-	}
-
-	inline void intrusive_ptr_release(Aqsis::SqSampleData* p)
-	{
-		if(--(p->references) == 0)
-			delete p;
-	}
-} // namespace boost
 
 //}  // End of #ifdef IMAGEPIXEL_H_INCLUDED
 #endif

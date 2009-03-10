@@ -196,21 +196,33 @@ void	CqImageBuffer::SetImage()
 		m_MaxEyeSplits = poptEyeSplits[ 0 ];
 
 	TqInt row = 0;
+	TqInt colPos = 0, rowPos = 0;
 	m_Buckets.resize( m_cYBuckets );
 	std::vector<std::vector<CqBucket> >::iterator i;
 	for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
 	{
-		TqInt column = 0;
+		TqInt rowSize = iYRes - rowPos;
+		if(rowSize > m_YBucketSize)
+			rowSize = m_YBucketSize;
 		i->resize( m_cXBuckets );
 		std::vector<CqBucket>::iterator b;
+		TqInt column = 0;
+		colPos = 0;
 		for ( b = i->begin(); b!=i->end(); b++ )
 		{
 			b->SetProcessed( false );
 			b->setCol( column );
 			b->setRow( row );
+			TqInt colSize = iXRes - colPos;
+			if(colSize > m_XBucketSize)
+				colSize = m_XBucketSize;
+			b->setPosition( colPos, rowPos );
+			b->setSize( colSize, rowSize );
 			column++;
+			colPos += m_XBucketSize;
 		}
 		row++;
+		rowPos += m_YBucketSize;
 	}
 
 	m_CurrentBucketCol = m_CurrentBucketRow = 0;
@@ -677,15 +689,8 @@ void CqImageBuffer::RenderImage()
 
 			bucketProcessors[i].setBucket(&CurrentBucket());
 
-			// Set up some bounds for the bucket.
-			const CqBucket* bucket = bucketProcessors[i].getBucket();
-			TqInt xpos, ypos, xsize, ysize;
-			bucketPosition(bucket->getCol(), bucket->getRow(), xpos, ypos);
-			bucketSize(bucket->getCol(), bucket->getRow(), xsize, ysize);
-
-			bucketProcessors[i].preProcess( xpos, ypos, xpos + xsize, ypos + ysize,
-							pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
-							0, 0, 0, 0,
+			// Prepare the bucket processor
+			bucketProcessors[i].preProcess( pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
 							clippingNear, clippingFar );
 
 			// Kick off a thread to process this bucket.

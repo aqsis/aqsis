@@ -56,13 +56,8 @@ class CqBucketProcessor
 		/** Reset the status of the object */
 		void reset();
 
-		/** Get the next sample point from the bucket data */
-		SqSampleDataPtr GetNextSamplePoint();
-
 		/** Prepare the data for the bucket to be processed */
-		void preProcess(TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax,
-				TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
-				TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+		void preProcess( TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 				TqFloat clippingNear, TqFloat clippingFar);
 
 		/** Process the bucket, basically rendering the waiting MPs
@@ -79,11 +74,13 @@ class CqBucketProcessor
 		CqChannelBuffer& getChannelBuffer();
 
 		TqUint numSamples() const;
-		const std::vector<SqSampleDataPtr>& samplePoints() const;
 
 		const CqRegion& SampleRegion() const;
 		const CqRegion& DisplayRegion() const;
 		const CqRegion& DataRegion() const;
+
+		std::vector<CqImagePixelPtr>&	pixels();
+		const std::vector<CqImagePixelPtr>&	pixels() const;
 
 	private:
 		void	InitialiseFilterValues();
@@ -92,11 +89,14 @@ class CqBucketProcessor
 		void	FilterBucket(bool fImager);
 		void	ExposeBucket();
 
+		void	buildCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg);
+		void	applyCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg);
+
 		TqFloat	FilterXWidth() const;
 		TqFloat	FilterYWidth() const;
 		TqInt	PixelXSamples() const;
 		TqInt	PixelYSamples() const;
-		void ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+		void ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixelPtr*& pie );
 
 		CqImagePixel& ImageElement(TqUint index) const;
 		/** Render any waiting MPs.
@@ -130,11 +130,8 @@ class CqBucketProcessor
 		TqInt	m_NumDofBounds;
 
 		std::vector<CqBound>		m_DofBounds;
-		std::vector<CqImagePixel>	m_aieImage;
-		std::vector<SqSampleDataPtr>	m_samplePoints;
-		TqInt	m_NextSamplePoint;
-		/// Vector of vectors of jittered sample positions precalculated.
-		std::vector<std::vector<CqVector2D> >	m_aSamplePositions;
+		std::vector<CqImagePixelPtr>	m_aieImage;
+
 		/// Vector of filter weights precalculated.
 		std::vector<TqFloat>	m_aFilterValues;
 
@@ -200,21 +197,9 @@ inline TqInt	CqBucketProcessor::PixelYSamples() const
 	return m_PixelYSamples;
 }
 
-inline SqSampleDataPtr CqBucketProcessor::GetNextSamplePoint()
-{
-	TqInt index = m_NextSamplePoint;
-	m_NextSamplePoint++;
-	return(m_samplePoints[index]);
-}
-
 inline TqUint CqBucketProcessor::numSamples() const
 {
 	return DataRegion().area() * PixelXSamples() * PixelYSamples();
-}
-
-inline const std::vector<SqSampleDataPtr>& CqBucketProcessor::samplePoints() const
-{
-	return m_samplePoints;
 }
 
 inline CqChannelBuffer& CqBucketProcessor::getChannelBuffer()
@@ -226,6 +211,16 @@ inline const CqBound& CqBucketProcessor::DofSubBound(TqInt index) const
 {
 	assert(index < m_NumDofBounds);
 	return m_DofBounds[index];
+}
+
+inline std::vector<CqImagePixelPtr>& CqBucketProcessor::pixels()
+{
+	return m_aieImage;
+}
+
+inline const std::vector<CqImagePixelPtr>& CqBucketProcessor::pixels() const
+{
+	return m_aieImage;
 }
 
 } // namespace Aqsis

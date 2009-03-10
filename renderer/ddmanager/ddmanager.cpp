@@ -1042,7 +1042,6 @@ void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const Iq
 		m_DataRow = new unsigned char[m_elementSize * m_width * m_height];
 	}
 
-	SqImageSample val;
 	// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 	unsigned char* pdata = m_DataBucket;
 

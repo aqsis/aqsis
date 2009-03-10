@@ -47,54 +47,60 @@ CqOcclusionTree g_occlusionTree;
 CqOcclusionTree::CqOcclusionTree()
 	: m_treeBoundMin(),
 	m_treeBoundMax(),
-	m_cullBoundMin(),
-	m_cullBoundMax(),
 	m_leafSamples(),
 	m_depthTree(),
 	m_firstLeafNode(0),
 	m_numLevels(0)
 {}
 
-void CqOcclusionTree::setupTree(const CqBucketProcessor* bp, TqInt xMin, TqInt yMin,
-				TqInt xMax, TqInt yMax)
+void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 {
 	// Now setup the new array based tree.
 	// First work out how deep the tree needs to be.
-	TqInt numSamples = bp->numSamples();
+	TqInt numSamples = bp.numSamples();
 	TqInt depth = lceil(log2(numSamples));
 	m_numLevels = depth + 1;
 	TqInt numTotalNodes = lceil(std::pow(2.0, depth+1))-1;
 	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<SqSampleData*>());
+	m_leafSamples.assign(numLeafNodes, std::vector<const SqSampleData*>());
 
 	// Compute and cache bounds of tree and culling area.
-	m_treeBoundMin = CqVector2D(bp->SampleRegion().xMin(), bp->SampleRegion().yMin());
-	CqVector2D treeDiag(bp->SampleRegion().diagonal());
-	m_treeBoundMax = m_treeBoundMin + treeDiag;
-	m_cullBoundMin = CqVector2D(xMin, yMin);
-	m_cullBoundMax = CqVector2D(xMax, yMax);
+	m_treeBoundMin = CqVector2D(bp.SampleRegion().xMin(), bp.SampleRegion().yMin());
+	m_treeBoundMax = CqVector2D(bp.SampleRegion().xMax(), bp.SampleRegion().yMax());
 
+	CqVector2D treeDiag = m_treeBoundMax - m_treeBoundMin;
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
-	const std::vector<SqSampleDataPtr>& samples = bp->samplePoints();
-	std::vector<SqSampleDataPtr>::const_iterator sample;
-	for(sample = samples.begin(); sample != samples.end(); ++sample)
+	const std::vector<CqImagePixelPtr>& pixels = bp.pixels();
+	for(std::vector<CqImagePixelPtr>::const_iterator p = pixels.begin(), e = pixels.end(); p != e; ++p)
 	{
-		// Convert samplePos into normalized units for finding sample position.
-		CqVector2D samplePos = (*sample)->position - m_treeBoundMin;
-		samplePos.x(samplePos.x() / treeDiag.x());
-		samplePos.y(samplePos.y() / treeDiag.y());
-		// Locate leaf node for the sample position
-		TqInt sampleNodeIndex = treeIndexForPoint(depth+1, samplePos);
-		// Check that the index is within the tree
-		assert(sampleNodeIndex < numTotalNodes);
-		// Check that the index is a leaf node.
-		assert((sampleNodeIndex*2)+1 >= numTotalNodes);
+		const CqImagePixel& pixel = **p;
+		for(int i = 0, numSamples = pixel.numSamples(); i < numSamples; ++i)
+		{
+			// Convert samplePos into normalized units for finding sample position.
+			CqVector2D samplePos = pixel.SampleData(i).position - m_treeBoundMin;
+			samplePos /= treeDiag;
+			if(samplePos.x() < 0 || samplePos.x() > 1
+				|| samplePos.y() < 0 || samplePos.y() > 1)
+			{
+				// Ignore samples which are outside the bucket sample region;
+				// any surfaces hitting such samples must have been donated
+				// from a neighbouring bucket and we may cull surfaces which
+				// touch them.
+				continue;
+			}
+			// Locate leaf node for the sample position
+			TqInt sampleNodeIndex = treeIndexForPoint(depth+1, samplePos);
+			// Check that the index is within the tree
+			assert(sampleNodeIndex < numTotalNodes);
+			// Check that the index is a leaf node.
+			assert((sampleNodeIndex*2)+1 >= numTotalNodes);
 
-		m_depthTree[sampleNodeIndex] = FLT_MAX;
-		m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back((*sample).get());
+			m_depthTree[sampleNodeIndex] = FLT_MAX;
+			m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(&pixel.SampleData(i));
+		}
 	}
 	// Fix up parent depths.
 	propagateDepths();
@@ -112,7 +118,7 @@ void CqOcclusionTree::updateDepths()
 			continue;
 		TqFloat max = 0;
 		bool hit = false;
-		for(std::vector<SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
+		for(std::vector<const SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
 				end = m_leafSamples[i].end(); sample != end; ++sample)
 		{
 			TqFloat depth; 
@@ -152,10 +158,10 @@ struct SqNodeStack
 bool CqOcclusionTree::canCull(const CqBound& bound) const
 {
 	// Crop the input bound to the culling bound.
-	TqFloat tminX = max(bound.vecMin().x(), m_cullBoundMin.x());
-	TqFloat tminY = max(bound.vecMin().y(), m_cullBoundMin.y());
-	TqFloat tmaxX = min(bound.vecMax().x(), m_cullBoundMax.x());
-	TqFloat tmaxY = min(bound.vecMax().y(), m_cullBoundMax.y());
+	TqFloat tminX = max(bound.vecMin().x(), m_treeBoundMin.x());
+	TqFloat tminY = max(bound.vecMin().y(), m_treeBoundMin.y());
+	TqFloat tmaxX = min(bound.vecMax().x(), m_treeBoundMax.x());
+	TqFloat tmaxY = min(bound.vecMax().y(), m_treeBoundMax.y());
 
 	// Auto buffer with enough auto-allocated room for a stack which can
 	// traverse a depth-20 tree (2^20 = 1024 * 1024 samples in a bucket == lots :)
@@ -217,8 +223,8 @@ bool CqOcclusionTree::canCull(const CqBound& bound) const
 TqInt CqOcclusionTree::treeIndexForPoint(TqInt treeDepth, const CqVector2D& p)
 {
 	assert(treeDepth > 0);
-	//assert(p.x() >= 0 && p.x() <= 1);
-	//assert(p.y() >= 0 && p.y() <= 1);
+	assert(p.x() >= 0 && p.x() <= 1);
+	assert(p.y() >= 0 && p.y() <= 1);
 
 	const TqInt numXSubdivisions = treeDepth / 2;
 	const TqInt numYSubdivisions = (treeDepth-1) / 2;

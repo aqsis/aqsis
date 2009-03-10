@@ -34,7 +34,8 @@
 
 #include	"surface.h"
 #include	"vector2d.h"
-#include    	"bucket.h"
+#include   	"bucket.h"
+#include   	"bucketprocessor.h"
 #include	"mpdump.h"
 
 namespace Aqsis {
@@ -130,17 +131,6 @@ class CqImageBuffer
 			return ( m_fDone );
 		}
 
-		void	bucketPosition(TqInt x, TqInt y, TqInt& xpos, TqInt& ypos ) const;
-		/** Get the screen size for the bucket at x,y.
-		 * \param x		The x index of the bucket.
-		 * \param y		The y index of the bucket.
-		 * \param xsize	A reference to the variable that will receive the x size
-		 * in screen space.
-		 * \param ysize	A reference to the variable that will receive the y size
-		 * in screen space.
-		 */
-		void	bucketSize(TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const;
-
 		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	RenderImage();
@@ -162,13 +152,19 @@ class CqImageBuffer
 			return( m_Buckets[y][x] );
 		}
 
+		enum EqNeighbourLocation
+		{
+			left = 0,
+			right = 1,
+			above = 2,
+			below = 3,
+		};
 		/** Get an array of neighbour buckets.
 		 *  
 		 *  \param bucket - The bucket whose neighours are to be found.
 		 *  \param neighbours - A reference to the array to be filled.
-		 *  \return A count of the number of neighbour buckets.
 		 */
-		TqInt	neighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours);
+		void	axialNeighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours);
 
 	private:
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
@@ -210,69 +206,23 @@ class CqImageBuffer
 //
 
 //----------------------------------------------------------------------
-/** Get the screen position for the bucket at x,y.
- * \param x		The x index of the bucket.
- * \param y		The y index of the bucket.
- * \param xpos	A reference to the variable that will receive the x position
- * in screen space.
- * \param ypos	A reference to the variable that will receive the y position
- * in screen space.
- */
 
-inline void	CqImageBuffer::bucketPosition( TqInt x, TqInt y, TqInt& xpos, TqInt& ypos ) const
-{
-	xpos = x * XBucketSize();
-	ypos = y * YBucketSize();
-}
-
-inline void	CqImageBuffer::bucketSize( TqInt x, TqInt y, TqInt& xsize, TqInt& ysize ) const
-{
-	TqInt iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	TqInt iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	TqInt xpos, ypos;
-	bucketPosition(x,y, xpos, ypos);
-	xsize = iXRes - xpos;
-	if ( xsize> m_XBucketSize )
-		xsize = m_XBucketSize;
-	ysize = iYRes - ypos;
-	if ( ysize > m_YBucketSize )
-		ysize = m_YBucketSize;
-}
-
-inline TqInt CqImageBuffer::neighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours)
+inline void CqImageBuffer::axialNeighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours)
 {
 	TqInt bx = bucket.getCol();
 	TqInt by = bucket.getRow();
 	neighbours.clear();
-	// Check if it's possible for there to be neighbours in each direction.
-	bool left = bx > 0;
-	bool right = bx < cXBuckets() - 1;
-	bool above = by > 0;
-	bool below = by < cYBuckets() - 1;
+	neighbours.resize(4, 0);
 		
-	// Now populate the array based on direction findings.
-	if(left)
-	{
-		neighbours.push_back(&Bucket(bx-1, by));
-		if(above)
-			neighbours.push_back(&Bucket(bx-1, by-1));
-		if(below)
-			neighbours.push_back(&Bucket(bx-1, by+1));
-	}
-	if(right)
-	{
-		neighbours.push_back(&Bucket(bx+1, by));
-		if(above)
-			neighbours.push_back(&Bucket(bx+1, by-1));
-		if(below)
-			neighbours.push_back(&Bucket(bx+1, by+1));
-	}
-	if(above)
-		neighbours.push_back(&Bucket(bx, by-1));
-	if(below)
-		neighbours.push_back(&Bucket(bx, by+1));
-
-	return neighbours.size();
+	// Populate the array slots depending on if there are usable neighbours in that direction.
+	if(bx > 0)
+		neighbours[left] = &Bucket(bx-1, by);
+	if(bx < cXBuckets() - 1)
+		neighbours[right] = &Bucket(bx+1, by);
+	if(by > 0)
+		neighbours[above] = &Bucket(bx, by-1);
+	if(by < cYBuckets() - 1)
+		neighbours[below] = &Bucket(bx, by+1);
 }
 
 //-----------------------------------------------------------------------

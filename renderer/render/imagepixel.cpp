@@ -45,80 +45,50 @@ namespace Aqsis {
 /// CqSampleDataPool	SqImageSample::m_theSamplePool;
 TqUint SqImageSample::sampleSize(9);
 
-CqObjectPool<SqSampleData> SqSampleData::m_thePool;
-
 //----------------------------------------------------------------------
 /** Constructor
  */
 
-CqImagePixel::CqImagePixel() :
-		m_XSamples( 0 ),
-		m_YSamples( 0 )
-{}
-
-
-//----------------------------------------------------------------------
-/** Destructor
- */
-
-CqImagePixel::~CqImagePixel()
-{}
-
-
-//----------------------------------------------------------------------
-/** Copy constructor
- */
-
-CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom )
+CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
+		: m_XSamples(xSamples),
+		m_YSamples(ySamples),
+		m_samples(new SqSampleData[xSamples*ySamples]),
+		m_DofOffsetIndices(new TqInt[xSamples*ySamples]),
+		m_refCount(0)
 {
-	*this = ieFrom;
+	assert(xSamples > 0);
+	assert(ySamples > 0);
+
+	initialiseSamples();
 }
 
 
 //----------------------------------------------------------------------
-/** Allocate the subpixel samples array.
- * \param XSamples Integer samples count in X.
- * \param YSamples Integer samples count in Y.
- */
-
-void CqImagePixel::AllocateSamples( CqBucketProcessor* bp, TqInt XSamples, TqInt YSamples )
+void CqImagePixel::swap(CqImagePixel& other)
 {
-	if( m_XSamples != XSamples || m_YSamples != YSamples )
-	{
-		m_XSamples = XSamples;
-		m_YSamples = YSamples;
-		TqInt numSamples = m_XSamples * m_YSamples;
+	assert(m_XSamples == other.m_XSamples);
+	assert(m_YSamples == other.m_YSamples);
 
-		if ( XSamples > 0 && YSamples > 0 )
-		{
-			// Initialise the OpaqueSampleEntries to the correct depth for the data we are
-			// rendering, including any AOV data.
-			m_samples.resize( numSamples );
-			for(TqInt i=0; i<numSamples; i++)
-				m_samples[i] = bp->GetNextSamplePoint();
-			m_DofOffsetIndices.resize( numSamples );
-		}
-	}
+	m_samples.swap(other.m_samples);
+	m_DofOffsetIndices.swap(other.m_DofOffsetIndices);
 }
 
+
 //----------------------------------------------------------------------
-
-void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
+void CqImagePixel::initialiseSamples()
 {
-	TqInt numSamples = m_XSamples * m_YSamples;
-	TqInt i, j;
+	TqInt nSamples = m_XSamples * m_YSamples;
 
-	vecSamples.resize(numSamples);
 	// Initialise the samples to the centre points.
 	TqFloat XInc = ( 1.0f / m_XSamples ) / 2.0f;
 	TqFloat YInc = ( 1.0f / m_YSamples ) / 2.0f;
 	TqInt y;
 	for ( y = 0; y < m_YSamples; y++ )
 	{
-		TqFloat YSam = YInc + ( YInc * y );
+		TqFloat YSam = YInc*(y + 1);
 		TqInt x;
 		for ( x = 0; x < m_XSamples; x++ )
-			vecSamples[ ( y * m_XSamples ) + x ] = CqVector2D( XInc + ( XInc * x ), YSam );
+			m_samples[y*m_XSamples + x].position = CqVector2D(XInc*(1+x), YSam);
 	}
 
 
@@ -126,13 +96,12 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 	// Fill in the sample times for motion blur, LOD and SubCellIndex entries
 
 	TqFloat time = 0;
-	TqInt nSamples = m_XSamples*m_YSamples;
 	TqFloat dtime = 1.0f / nSamples;
 
-	for ( i = 0; i < nSamples; i++ )
+	for (TqInt i = 0; i < nSamples; i++ )
 	{
-		m_samples[ i ]->subCellIndex = 0;
-		m_samples[ i ]->detailLevel = m_samples[ i ]->time = time;
+		m_samples[i].subCellIndex = 0;
+		m_samples[i].detailLevel = m_samples[i].time = time;
 		time += dtime;
 	}
 
@@ -156,10 +125,10 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 	TqFloat xOffset = -1.0 + sx;
 	TqFloat yOffset = -1.0 + sy;
 	TqInt which = 0;
-	std::vector<CqVector2D> tmpDofOffsets(numSamples);
-	for ( i = 0; i < m_YSamples; ++i )
+	std::vector<CqVector2D> tmpDofOffsets(nSamples);
+	for (TqInt i = 0; i < m_YSamples; ++i )
 	{
-		for ( j = 0; j < m_XSamples; ++j )
+		for (TqInt j = 0; j < m_XSamples; ++j )
 		{
 			tmpDofOffsets[which].x(xOffset);
 			tmpDofOffsets[which].y(yOffset);
@@ -175,19 +144,19 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 	}
 
 	// we now shuffle the dof offsets but remember which one went where.
-	for( i = 0; i < numSamples/2; i++)
+	for(TqInt i = 0; i < nSamples/2; i++)
    	{
-      		int k = random.RandomInt(numSamples/2) + numSamples/2;
-      		if (k >= numSamples) k = numSamples - 1;
+      		int k = random.RandomInt(nSamples/2) + nSamples/2;
+      		if (k >= nSamples) k = nSamples - 1;
       		int tmp = m_DofOffsetIndices[i];
       		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
       		m_DofOffsetIndices[k] = tmp;
    	}
 
-	for( i = 0; i < numSamples; ++i)
+	for(TqInt i = 0; i < nSamples; ++i)
 	{
-		m_samples[m_DofOffsetIndices[i]]->dofOffset = tmpDofOffsets[i];
-		m_samples[m_DofOffsetIndices[i]]->dofOffsetIndex = i;
+		m_samples[m_DofOffsetIndices[i]].dofOffset = tmpDofOffsets[i];
+		m_samples[m_DofOffsetIndices[i]].dofOffsetIndex = i;
 	}
 }
 
@@ -196,10 +165,10 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 /** Shuffle the sample data to avoid repeating patterns in the sampling.
  */
 
-void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime )
+void CqImagePixel::JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat closetime )
 {
-	TqInt numSamples = m_XSamples * m_YSamples;
-	TqFloat subcell_width = 1.0f / numSamples;
+	TqInt nSamples = numSamples();
+	TqFloat subcell_width = 1.0f / nSamples;
 	TqInt m = m_XSamples;
 	TqInt n = m_YSamples;
 	TqInt i, j;
@@ -210,10 +179,8 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 
 	if( m == 1 && n == 1)
 	{
-		TqFloat ranx = random.RandomFloat( 1.0f );
-		TqFloat rany = random.RandomFloat( 1.0f );
-		vecSamples[0].x(ranx);
-		vecSamples[0].y(rany);
+		m_samples[0].position = offset
+			+ CqVector2D(random.RandomFloat(), random.RandomFloat());
 	}
 	else
 	{
@@ -222,8 +189,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 			for ( j = 0; j < m; j++ )
 			{
 				TqInt which = i * m + j;
-				vecSamples[which].x( i );
-				vecSamples[which].y( j );
+				m_samples[which].position = CqVector2D(i,j);
 			}
 		}
 
@@ -232,16 +198,12 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 		{
 			for ( j = 0; j < m; j++ )
 			{
-				TqFloat t;
-				TqInt k;
-
-				k = random.RandomInt( n - 1 - i ) + i;
+				TqInt k = random.RandomInt( n - 1 - i ) + i;
 				TqInt i1 = i * m + j;
 				TqInt i2 = k * m + j;
-				assert( i1 < static_cast<TqInt>(vecSamples.size()) && i2 < static_cast<TqInt>(vecSamples.size()) );
-				t = vecSamples[ i1 ].y();
-				vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
-				vecSamples[ i2 ].y( t );
+				assert(i1 < nSamples);
+				assert(i2 < nSamples);
+				std::swap(m_samples[i1].position.y(), m_samples[i2].position.y());
 			}
 		}
 
@@ -250,17 +212,12 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 		{
 			for ( j = 0; j < n; j++ )
 			{
-				TqFloat t;
-				TqInt k;
-
-				k = random.RandomInt( n - 1 - j ) + j;
+				TqInt k = random.RandomInt( n - 1 - j ) + j;
 				TqInt i1 = j * m + i;
 				TqInt i2 = k * m + i;
-				assert( i1 < static_cast<TqInt>(vecSamples.size()) && i2 < static_cast<TqInt>(vecSamples.size()) );
-				t = vecSamples[ i1 ].x();
-				vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
-				vecSamples[ i2 ].x( t );
-
+				assert(i1 < nSamples);
+				assert(i2 < nSamples);
+				std::swap(m_samples[i1].position.x(), m_samples[i2].position.x());
 			}
 		}
 
@@ -275,11 +232,11 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 			for ( j = 0; j < m; j++ )
 			{
 				TqFloat sx = j * subpixelwidth;
-				TqFloat xindex = vecSamples[ which ].x();
-				TqFloat yindex = vecSamples[ which ].y();
-				vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
-				vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-				m_samples[ which ]->subCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+				TqFloat xindex = m_samples[which].position.x();
+				TqFloat yindex = m_samples[which].position.y();
+				m_samples[which].position.x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx + offset.x() );
+				m_samples[which].position.y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy + offset.y());
+				m_samples[which].subCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
 				which++;
 			}
 		}
@@ -288,7 +245,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 	// Fill in the sample times for motion blur, detail levels for LOD and DoF.
 
 	TqFloat time = 0;
-	TqFloat dtime = 1.0f / numSamples;
+	TqFloat dtime = 1.0f / nSamples;
 	// We use the same random offset for each sample within a pixel.
 	// This ensures the best possible coverage whilst still avoiding
 	// aliasing. (I reckon). should minimise the noise.
@@ -297,41 +254,41 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 	TqFloat lod = 0;
 	TqFloat dlod = dtime;
 
-	for ( i = 0; i < numSamples; i++ )
+	for ( i = 0; i < nSamples; i++ )
 	{
 		// Scale the value of time to the shutter time.
 		TqFloat t = time + randomTime;
 		t = ( closetime - opentime ) * t + opentime;
-		m_samples[ i ]->time = t;
+		m_samples[i].time = t;
 		time += dtime;
 
-		m_samples[ i ]->detailLevel = lod + random.RandomFloat( dlod );
+		m_samples[i].detailLevel = lod + random.RandomFloat( dlod );
 		lod += dlod;
 	}
 
-	std::vector<CqVector2D> tmpDofOffsets(numSamples);
+	std::vector<CqVector2D> tmpDofOffsets(nSamples);
 	// Store the DoF offsets in the canonical order to ensure that
 	// assumptions made about ordering during sampling still hold.
-	for( i = 0; i < numSamples; ++i)
+	for( i = 0; i < nSamples; ++i)
 	{
-		tmpDofOffsets[i] = m_samples[m_DofOffsetIndices[i]]->dofOffset;
+		tmpDofOffsets[i] = m_samples[m_DofOffsetIndices[i]].dofOffset;
 		m_DofOffsetIndices[i] = i;
 	}
 
 	// we now shuffle the dof offsets but remember which one went where.
-	for( i = 0; i < numSamples/2; i++)
+	for( i = 0; i < nSamples/2; i++)
    	{
-      		int k = random.RandomInt(numSamples/2) + numSamples/2;
-      		if (k >= numSamples) k = numSamples - 1;
+      		int k = random.RandomInt(nSamples/2) + nSamples/2;
+      		if (k >= nSamples) k = nSamples - 1;
       		int tmp = m_DofOffsetIndices[i];
       		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
       		m_DofOffsetIndices[k] = tmp;
    	}
 
-	for( i = 0; i < numSamples; ++i)
+	for( i = 0; i < nSamples; ++i)
 	{
-		m_samples[m_DofOffsetIndices[i]]->dofOffset = tmpDofOffsets[i];
-		m_samples[m_DofOffsetIndices[i]]->dofOffsetIndex = i;
+		m_samples[m_DofOffsetIndices[i]].dofOffset = tmpDofOffsets[i];
+		m_samples[m_DofOffsetIndices[i]].dofOffsetIndex = i;
 	}
 }
 
@@ -343,9 +300,9 @@ void CqImagePixel::Clear()
 {
 	for ( TqInt i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
 	{
-		if(!m_samples[i]->data.empty())
-			m_samples[ i ]->data.clear( );
-		m_samples[ i ]->opaqueSample.flags = 0;
+		if(!m_samples[i].data.empty())
+			m_samples[i].data.clear();
+		m_samples[i].opaqueSample.flags = 0;
 	}
 }
 
@@ -366,9 +323,10 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 {
 	TqUint samplecount = 0;
 	TqInt sampleIndex = 0;
-	for ( std::vector<SqSampleDataPtr>::iterator sample = m_samples.begin(), end = m_samples.end(); sample != end; ++sample )
+	TqInt nSamples = numSamples();
+	for(TqInt sampIdx = 0; sampIdx < nSamples; ++sampIdx)
 	{
-		SqSampleData& sampleData = *(*sample);
+		SqSampleData& sampleData = m_samples[sampIdx];
 
 		SqImageSample& opaqueValue = sampleData.opaqueSample;
 		sampleIndex++;
@@ -396,6 +354,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 			bool bProcessed;
 			bool CqCSGRequired = CqCSGTreeNode::IsRequired();
 			if (CqCSGRequired)
+			{
 				do
 				{
 					bProcessed = false;
@@ -414,6 +373,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 					}
 				}
 				while ( bProcessed );
+			}
 
 			CqColor samplecolor = gColBlack;
 			CqColor sampleopacity = gColBlack;
@@ -539,17 +499,6 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				samplecount++;
 			}
 		}
-	}
-}
-
-void CqImagePixel::OffsetSamples( CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples )
-{
-	// add in the pixel offset
-	const TqInt numSamples = m_XSamples * m_YSamples;
-	for ( TqInt i = 0; i < numSamples; i++ )
-	{
-		m_samples[ i ]->position = vecSamples[ i ];
-		m_samples[ i ]->position += vecPixel;
 	}
 }
 
