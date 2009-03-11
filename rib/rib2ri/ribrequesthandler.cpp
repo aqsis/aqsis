@@ -243,12 +243,12 @@ inline RtToken toRiType(const std::string& str)
 
 inline RtInt* toRiType(const IqRibParser::TqIntArray& a)
 {
-	return const_cast<RtInt*>(&a[0]);
+	return a.empty() ? NULL : const_cast<RtInt*>(&a[0]);
 }
 
 inline RtFloat* toRiType(const IqRibParser::TqFloatArray& a)
 {
-	return const_cast<RtFloat*>(&a[0]);
+	return a.empty() ? NULL : const_cast<RtFloat*>(&a[0]);
 }
 
 inline RtArchiveCallback toRiType(RtArchiveCallback c)
