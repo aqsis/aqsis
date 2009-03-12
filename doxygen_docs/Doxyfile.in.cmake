@@ -25,20 +25,20 @@ DOXYFILE_ENCODING      = UTF-8
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = @AQSIS_PROJECT_NAME@
+PROJECT_NAME           = "@AQSIS_PROJECT_NAME@"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = @MAJOR@.@MINOR@.@BUILD@@TYPE@ (revision @REVISION@)
+PROJECT_NUMBER         = "@MAJOR@.@MINOR@.@BUILD@@TYPE@ (revision @REVISION@)"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@
+OUTPUT_DIRECTORY       = "@PROJECT_BINARY_DIR@"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -114,7 +114,7 @@ FULL_PATH_NAMES        = NO
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@
+STRIP_FROM_PATH        = "@CMAKE_SOURCE_DIR@"
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
