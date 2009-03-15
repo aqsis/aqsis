@@ -678,20 +678,17 @@ void CqImageBuffer::RenderImage()
 
 		for (int i = 0; pendingBuckets && i < numConcurrentBuckets; ++i)
 		{
-		////////// Dump the pixel sample positions into a dump file //////////
-#if ENABLE_MPDUMP
-			if(m_mpdump.IsOpen())
-				m_mpdump.dumpPixelSamples(m_CurrentBucketCol,
-										  m_CurrentBucketRow,
-										  &CurrentBucket());
-#endif
-		/////////////////////////////////////////////////////////////////////////
-
 			bucketProcessors[i].setBucket(&CurrentBucket());
 
 			// Prepare the bucket processor
 			bucketProcessors[i].preProcess( pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
 							clippingNear, clippingFar );
+
+#if ENABLE_MPDUMP
+			// Dump the pixel sample positions into a dump file
+			if(m_mpdump.IsOpen())
+				m_mpdump.dumpPixelSamples(bucketProcessors[i]);
+#endif
 
 			// Kick off a thread to process this bucket.
 			threadProcessors.push_back( CqThreadProcessor( &bucketProcessors[i] ) );
