@@ -46,7 +46,7 @@ class CqPixelPool
 				m_pool.pop_back();
 				assert(pixel->XSamples() == xRes);
 				assert(pixel->YSamples() == yRes);
-				pixel->Clear();
+				pixel->clear();
 				return pixel;
 			}
 			return CqImagePixelPtr(new CqImagePixel(xRes, yRes));
@@ -218,7 +218,16 @@ void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
 			}
 		}
 
-		// Jitter the samplepoints and adjust them for the new bucket position.
+		// Determine whether the user has asked for sample jittering
+		bool useJitter = true;
+		if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->
+				GetIntegerOption( "Hider", "jitter" ))
+		{
+			useJitter = static_cast<bool>(*useJitterPtr);
+		}
+
+		// Clear the sample points and and adjust them for the new bucket
+		// position, jittering the samples if necessary.
 		TqInt which = 0;
 		TqInt maxY = DataRegion().height();
 		TqInt maxX = DataRegion().width();
@@ -226,12 +235,14 @@ void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
 		{
 			for ( TqInt j = 0; j < maxX; j++ )
 			{
-				CqVector2D bPos2( DisplayRegion().xMin(), DisplayRegion().yMin() );
-				bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( ii - m_DiscreteShiftY ) );
-
-				m_aieImage[which]->Clear();
-				m_aieImage[which]->JitterSamples( bPos2, opentime, closetime);
-
+				// Setup the offsets
+				CqVector2D bPos2(DisplayRegion().xMin(), DisplayRegion().yMin());
+				bPos2 += CqVector2D(j - m_DiscreteShiftX, ii - m_DiscreteShiftY);
+				m_aieImage[which]->clear();
+				if(useJitter)
+					m_aieImage[which]->setupJitterPattern(bPos2, opentime, closetime);
+				else
+					m_aieImage[which]->setupGridPattern(bPos2, opentime, closetime);
 				which++;
 			}
 		}
@@ -903,15 +914,10 @@ void CqBucketProcessor::CalculateDofBounds()
 	{
 		for(int i = 0; i < PixelXSamples(); ++i)
 		{
-			CqVector2D topLeft(minX, minY);
-			CqVector2D topRight(minX + dx, minY);
-			CqVector2D bottomLeft(minX, minY + dy);
-			CqVector2D bottomRight(minX + dx, minY + dy);
-
-			CqImagePixel::ProjectToCircle(topLeft);
-			CqImagePixel::ProjectToCircle(topRight);
-			CqImagePixel::ProjectToCircle(bottomLeft);
-			CqImagePixel::ProjectToCircle(bottomRight);
+			CqVector2D topLeft = CqImagePixel::projectToCircle(CqVector2D(minX, minY)); 
+			CqVector2D topRight = CqImagePixel::projectToCircle(CqVector2D(minX + dx, minY)); 
+			CqVector2D bottomLeft = CqImagePixel::projectToCircle(CqVector2D(minX, minY + dy)); 
+			CqVector2D bottomRight = CqImagePixel::projectToCircle(CqVector2D(minX + dx, minY + dy)); 
 
 			// if the bound straddles x=0 or y=0 then just using the corners
 			// will give too small a bound, so we enlarge it by including the

@@ -60,18 +60,16 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 	assert(xSamples > 0);
 	assert(ySamples > 0);
 
-	// Allocate sample storage for all the opaque sample hit structures.
 	TqInt nSamples = numSamples();
+	// Allocate sample storage for all the opaque sample hit structures.
 	m_hitSamples.reserve(nSamples*SqImageSample::sampleSize);
 	for(TqInt i = 0; i < nSamples; ++i)
 		allocateHitData(m_samples[i].opaqueSample);
 
-	// Initialise sample data.
-	initialiseSamples();
+	// Create the DoF offsets
+	initialiseDofOffsets();
 }
 
-
-//----------------------------------------------------------------------
 void CqImagePixel::swap(CqImagePixel& other)
 {
 	assert(m_XSamples == other.m_XSamples);
@@ -82,98 +80,51 @@ void CqImagePixel::swap(CqImagePixel& other)
 	m_DofOffsetIndices.swap(other.m_DofOffsetIndices);
 }
 
-
-//----------------------------------------------------------------------
-void CqImagePixel::initialiseSamples()
+/** \brief Initialise the depth of field offsets
+ *
+ * We calculate DoF offsets in a grid inside the unit square and then
+ * project them into the unit circle.  This means that the offset positions
+ * fall into several DoF sub-bounding boxes as used in the sampling code.  The
+ * sub-bounds allow the RenderMicroPoly function to check only a subset of
+ * the samples within the any given pixel against a given micropolygon.
+ *
+ * Note that there is an implicit symmetry to the way we number the bounding
+ * boxes here and in the sampling code where the bb's are created (it should be
+ * left to right, top to bottom).
+ *
+ * m_DofOffsetIndices is also filled in with the default non-shuffled order.
+ */
+void CqImagePixel::initialiseDofOffsets()
 {
-	TqInt nSamples = numSamples();
-
-	// Initialise the samples to the centre points.
-	TqFloat XInc = ( 1.0f / m_XSamples ) / 2.0f;
-	TqFloat YInc = ( 1.0f / m_YSamples ) / 2.0f;
-	TqInt y;
-	for ( y = 0; y < m_YSamples; y++ )
-	{
-		TqFloat YSam = YInc*(y + 1);
-		TqInt x;
-		for ( x = 0; x < m_XSamples; x++ )
-			m_samples[y*m_XSamples + x].position = CqVector2D(XInc*(1+x), YSam);
-	}
-
-
-	static CqRandom random(  53 );
-	// Fill in the sample times for motion blur, LOD and SubCellIndex entries
-
-	TqFloat time = 0;
-	TqFloat dtime = 1.0f / nSamples;
-
-	for (TqInt i = 0; i < nSamples; i++ )
-	{
-		m_samples[i].subCellIndex = 0;
-		m_samples[i].detailLevel = m_samples[i].time = time;
-		time += dtime;
-	}
-
-	// we calculate dof offsets in a grid inside the unit cube and then
-	// project them into the unit circle. This means that the offset
-	// positions match the offset bounding boxes calculated in CqBucket.
-	// The sample test in RenderMicroPoly then can be split into a number
-	// of smaller bounding boxes where we know in advance which samples
-	// fall into each. (This is analagous to what we do for mb now as well).
-	// note that there is an implied symmetry to the way we number the bounding
-	// boxes here and in the bucket code where the bb's are created (it
-	// should be left to right, top to bottom).
+	static CqRandom random(53);
 	TqFloat dx = 2.0 / m_XSamples;
 	TqFloat dy = 2.0 / m_YSamples;
-	// We use the same random offset for each sample within a pixel.
-	// This ensures the best possible coverage whilst still avoiding
-	// aliasing. (I reckon). should minimise the noise.
+	// We use the same random offset for each sample within a pixel.  This
+	// ensures the best possible coverage whilst still avoiding aliasing. (I
+	// reckon). should minimise the noise.
 	TqFloat sx = random.RandomFloat(dx);
 	TqFloat sy = random.RandomFloat(dy);
 	TqFloat xOffset = -1.0 + sx;
 	TqFloat yOffset = -1.0 + sy;
 	TqInt which = 0;
-	std::vector<CqVector2D> tmpDofOffsets(nSamples);
 	for (TqInt i = 0; i < m_YSamples; ++i )
 	{
 		for (TqInt j = 0; j < m_XSamples; ++j )
 		{
-			tmpDofOffsets[which].x(xOffset);
-			tmpDofOffsets[which].y(yOffset);
-			ProjectToCircle(tmpDofOffsets[which]);
-
+			m_samples[which].dofOffset = projectToCircle(CqVector2D(xOffset, yOffset));
 			m_DofOffsetIndices[which] = which;
-
 			xOffset += dx;
 			which++;
 		}
 		yOffset += dy;
 		xOffset = -1.0 + sx;
 	}
-
-	// we now shuffle the dof offsets but remember which one went where.
-	for(TqInt i = 0; i < nSamples/2; i++)
-	{
-		int k = random.RandomInt(nSamples/2) + nSamples/2;
-		if (k >= nSamples) k = nSamples - 1;
-		int tmp = m_DofOffsetIndices[i];
-		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
-		m_DofOffsetIndices[k] = tmp;
-	}
-
-	for(TqInt i = 0; i < nSamples; ++i)
-	{
-		m_samples[m_DofOffsetIndices[i]].dofOffset = tmpDofOffsets[i];
-		m_samples[m_DofOffsetIndices[i]].dofOffsetIndex = i;
-	}
 }
 
 
 //----------------------------------------------------------------------
-/** Shuffle the sample data to avoid repeating patterns in the sampling.
- */
-
-void CqImagePixel::JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat closetime )
+void CqImagePixel::setupJitterPattern(CqVector2D& offset, TqFloat opentime,
+		TqFloat closetime)
 {
 	TqInt nSamples = numSamples();
 	TqFloat subcell_width = 1.0f / nSamples;
@@ -288,23 +239,40 @@ void CqImagePixel::JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat 
    	{
 		int k = random.RandomInt(nSamples/2) + nSamples/2;
 		if (k >= nSamples) k = nSamples - 1;
-		int tmp = m_DofOffsetIndices[i];
-		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
-		m_DofOffsetIndices[k] = tmp;
+		std::swap(m_DofOffsetIndices[i], m_DofOffsetIndices[k]);
    	}
 
 	for( i = 0; i < nSamples; ++i)
-	{
 		m_samples[m_DofOffsetIndices[i]].dofOffset = tmpDofOffsets[i];
-		m_samples[m_DofOffsetIndices[i]].dofOffsetIndex = i;
+}
+
+void CqImagePixel::setupGridPattern(CqVector2D& offset, TqFloat opentime,
+		TqFloat closetime)
+{
+	// Initialize positions to a grid.
+	CqVector2D scale(1.0f/m_XSamples, 1.0f/m_YSamples);
+	for(TqInt j = 0; j < m_YSamples; j++)
+	{
+		for(TqInt i = 0; i < m_XSamples; i++)
+		{
+			m_samples[j*m_XSamples + i].position =
+				offset + scale*CqVector2D(i+0.5, j+0.5);
+		}
+	}
+
+	// Fill in motion blur and LoD with the same regular grid
+	TqInt nSamples = numSamples();
+	TqFloat dt = 1/nSamples;
+	TqFloat time = dt*0.5;
+	for(TqInt i = 0; i < nSamples; ++i)
+	{
+		m_samples[i].time = time;
+		m_samples[i].detailLevel = time;
+		time += dt;
 	}
 }
 
-//----------------------------------------------------------------------
-/** Clear the relevant data from the image element preparing it for the next usage.
- */
-
-void CqImagePixel::Clear()
+void CqImagePixel::clear()
 {
 	TqInt nSamples = numSamples();
 	m_hitSamples.clear();

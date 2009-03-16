@@ -771,6 +771,9 @@ void CqRenderer::RenderAutoShadows()
 				opts->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
 				opts->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
 
+				// Turn off jitter for shadow rendering.
+				opts->GetIntegerOptionWrite("Hider", "jitter")[0] = 0;
+
 				// Make sure the depthFilter is set to "midpoint".
 				opts->GetStringOptionWrite( "Hider", "depthfilter" ) [ 0 ] = CqString("midpoint");
 

@@ -128,12 +128,14 @@ struct SqSampleData : private boost::noncopyable
 {
 	CqVector2D	position;			///< Sample position
 	CqVector2D	dofOffset;			///< Dof lens offset.
-	TqInt		dofOffsetIndex;
 	TqInt		subCellIndex;		///< Subcell index.
 	TqFloat		time;				///< Float sample time.
 	TqFloat		detailLevel;		///< Float level-of-detail sample.
 	std::deque<SqImageSample>	data;	///< Array of sampled surface data for this sample.
 	SqImageSample opaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
+
+	/// Default constructs all class members and sets numeric members to zero.
+	SqSampleData();
 };
 
 
@@ -167,23 +169,41 @@ class CqImagePixel : private boost::noncopyable
 		 * \return The number of samples as an integer.
 		 */
 		TqInt	YSamples() const;
-		/** \brief Jitter the sample positions.
+
+		/** \brief Set up a jittered sample pattern for the pixel
 		 *
-		 *  Jitter the sample array using the multijitter function from GG IV.
+		 * Jitter the sample array using the multijitter function from GG IV.
 		 *
-		 *  The sample positions are multi-jittered from the canonical form,
-		 *  the dof offset indices from the canonical form are shuffled, and the motion
-		 *  blur time offsets are randomised.
+		 * The sample positions are multi-jittered from the canonical form,
+		 * the dof offset indices from the canonical form are shuffled, and the motion
+		 * blur time offsets are randomised.
 		 *
-		 *  \param offset - The raster space offset of the bucket.
-		 *  \param opentime - The motion blur shutter open time.
-		 *  \param closetime - The motion blur shutter close time.
+		 * \param offset - The raster space offset of the bucket.
+		 * \param opentime - The motion blur shutter open time.
+		 * \param closetime - The motion blur shutter close time.
 		 */
-		void	JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat closetime );
+		void setupJitterPattern(CqVector2D& offset, TqFloat opentime,
+				TqFloat closetime);
+		/** \brief Set up a regular sample pattern for the pixel
+		 *
+		 * The samples are evenly distributed over the pixel on a regular grid.
+		 * Sample times and detail levels are also regularly placed.  DoF
+		 * offsets are left untouched.
+		 *
+		 * \param offset - The raster space offset of the bucket.
+		 * \param opentime - The motion blur shutter open time.
+		 * \param closetime - The motion blur shutter close time.
+		 */
+		void setupGridPattern(CqVector2D& offset, TqFloat opentime,
+				TqFloat closetime);
 
 		/** \brief Clear all sample information from this pixel.
+		 *
+		 * Removes all the semitransparent sample hits and resets the opaque
+		 * sample hits to invalid.
 		 */
-		void	Clear();
+		void clear();
+
 		/** \brief Get a reference to the array of values for the specified sample.
 		 * \param index the index of the sample point within the pixel
 		 */
@@ -250,20 +270,13 @@ class CqImagePixel : private boost::noncopyable
 		 *
 		 *  \param pos - The 2D coordinate to convert.
 		 */
-		static void ProjectToCircle(CqVector2D& pos);
+		static CqVector2D projectToCircle(const CqVector2D& pos);
 
 		/// Return the number of references to the pixel
 		TqInt refCount() const;
 
 	private:
-		/** \brief Initialise the sample positions for this pixel.
-		 *
-		 *  This function fills in the canonical information for the samples.
-		 *  It needs to be called only once when instantiated. It fills in
-		 *  default position, dof offset and motion blur time information for
-		 *  later processing.
-		 */
-		void initialiseSamples();
+		void initialiseDofOffsets();
 		/// boost::intrusive_ptr required function, to increment the reference count.
 		friend		void intrusive_ptr_add_ref(CqImagePixel* p);
 		/// boost::intrusive_ptr required function, to decrement the reference count.
@@ -318,6 +331,19 @@ inline SqImageSample& SqImageSample::operator=(const SqImageSample& from)
 
 
 //------------------------------------------------------------------------------
+// SqSampleData implementation
+inline SqSampleData::SqSampleData()
+	: position(),
+	dofOffset(),
+	subCellIndex(0),
+	time(0),
+	detailLevel(0),
+	data(),
+	opaqueSample()
+{ }
+
+
+//------------------------------------------------------------------------------
 // CqImagePixel implementation
 inline TqInt CqImagePixel::XSamples() const
 {
@@ -339,15 +365,13 @@ inline TqInt CqImagePixel::GetDofOffsetIndex(TqInt i) const
 	return m_DofOffsetIndices[i];
 }
 
-inline void CqImagePixel::ProjectToCircle(CqVector2D& pos)
+inline CqVector2D CqImagePixel::projectToCircle(const CqVector2D& pos)
 {
 	TqFloat r = pos.Magnitude();
 	if( r == 0.0 )
-		return;
-
+		return CqVector2D(0,0);
 	TqFloat adj = max(fabs(pos.x()), fabs(pos.y())) / r;
-	pos.x(pos.x() * adj);
-	pos.y(pos.y() * adj);
+	return adj*pos;
 }
 
 inline TqInt CqImagePixel::refCount() const
