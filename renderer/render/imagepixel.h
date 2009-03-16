@@ -74,22 +74,28 @@ enum EqFilterDepth
 };
 
 
-/** \brief A structure holding an array of sample values as floats.
+/** \brief Holder for data from a hit of a micropoly against a sample point.
  *
- * The data managed is a float array. The values stored follow the EqSampleIndices 
- * enum for the standard values, anything above Sample_Alpha is a custom 
- * entry AOV usage.
+ * We allocate hit data in a single large block for all the samples inside a
+ * pixel.  This explicit pooling of the data improves cache locality
+ * dramatically which is particularly necessary when pulling pixels from the
+ * bucket overlap cache and for scenes with lots of semitransparent depth
+ * complexity.
+ *
+ * The float array values stored at index in the associated CqImagePixel follow
+ * the EqSampleIndices enum for the standard values, anything above
+ * Sample_Alpha is a custom entry AOV usage.  See SqImagePixel::sampleHitData()
  */
 struct SqImageSample
 {
 	/// Flags for this sample, using the anonymous enum below.
-	TqInt		flags;
-	/// Pointer to the managed data.
-	TqFloat*	data;
+	TqInt flags;
+	/// Index to the data sample hit array managed by the associated CqImagePixel
+	TqInt index;
 	/// A shared pointer to the CSG node for this sample.
 	/// If the sample originated from a surface that was part of a CSG tree
 	/// this pointer will be valid, otherwise, it will be null.
-	boost::shared_ptr<CqCSGTreeNode>	csgNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
+	boost::shared_ptr<CqCSGTreeNode> csgNode;
 
 	enum {
 	    Flag_Occludes = 0x0001,
@@ -97,7 +103,7 @@ struct SqImageSample
 	    Flag_Valid = 0x0004
 	};
 
-	static TqUint	sampleSize;
+	static TqInt sampleSize;
 
 	/** \brief Default constructor.
  	 */
@@ -105,9 +111,6 @@ struct SqImageSample
 	/** \brief Copy constructor.
  	 */
 	SqImageSample(const SqImageSample& from);
-	/** \brief Destructor.
- 	 */
-	~SqImageSample();
 
 	/** \brief Assignment operator overload.
  	 *  Does a deep copy of the data assigned to the sample.
@@ -182,9 +185,7 @@ class CqImagePixel : private boost::noncopyable
 		 */
 		void	Clear();
 		/** \brief Get a reference to the array of values for the specified sample.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return A Reference to a vector of SqImageSample data.
+		 * \param index the index of the sample point within the pixel
 		 */
 		std::deque<SqImageSample>&	Values( TqInt index );
 
@@ -194,6 +195,18 @@ class CqImagePixel : private boost::noncopyable
 		 *  \param index - The index of the sample within the pixel to query.
 		 */
 		SqImageSample& OpaqueValues( TqInt index );
+
+		//@{
+		/** \brief Return the sample data associated with a micropolygon sample hit.
+		 *
+		 * \param hit - a sample hit which has had data allocated with allocateHitData()
+		 */
+		const TqFloat* sampleHitData(const SqImageSample& hit) const;
+		TqFloat* sampleHitData(const SqImageSample& hit);
+		//@}
+
+		/// Allocate space for a single block of sample hit data.
+		void allocateHitData(SqImageSample& hit);
 
 		/** \brief Combine the sample values accumulated at each sample.
 		 *  
@@ -251,19 +264,25 @@ class CqImagePixel : private boost::noncopyable
 		 *  later processing.
 		 */
 		void initialiseSamples();
-
-		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
-		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
-
-		boost::scoped_array<SqSampleData> m_samples;
-		boost::scoped_array<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
-
-		int m_refCount;		///< Reference count for boost::intrusive_ptr
 		/// boost::intrusive_ptr required function, to increment the reference count.
 		friend		void intrusive_ptr_add_ref(CqImagePixel* p);
 		/// boost::intrusive_ptr required function, to decrement the reference count.
 		/// and delete if necessary.
 		friend		void intrusive_ptr_release(CqImagePixel* p);
+
+		/// The number of samples in the horizontal direction.
+		TqInt m_XSamples;
+		/// The number of samples in the vertical direction.
+		TqInt m_YSamples;
+		/// Array of sample positions within this pixel
+		boost::scoped_array<SqSampleData> m_samples;
+		/// Vector storing sample data for the sample hits within the pixel.
+		std::vector<TqFloat> m_hitSamples;
+		/// A mapping from dof bounding-box index to the sample that contains a
+		/// dof offset in that bb.
+		boost::scoped_array<TqInt> m_DofOffsetIndices;
+		/// Reference count for boost::intrusive_ptr
+		int m_refCount;
 }; 
 
 /// Intrusive reference counted pointer to a pixel class.
@@ -276,32 +295,25 @@ typedef	boost::intrusive_ptr<CqImagePixel>			CqImagePixelPtr;
 
 //------------------------------------------------------------------------------
 // SqImageSample implementation
-inline SqImageSample::SqImageSample() : flags(0)
-{
-	data = new TqFloat[sampleSize];
-}
+inline SqImageSample::SqImageSample()
+	: flags(0),
+	index(-1),
+	csgNode()
+{ }
 
 inline SqImageSample::SqImageSample(const SqImageSample& from)
-{
-	data = new TqFloat[sampleSize];
-	*this = from;
-}
-
-inline SqImageSample::~SqImageSample()
-{
-	delete[](data);
-}
+	: flags(from.flags),
+	index(from.index),
+	csgNode(from.csgNode)
+{ }
 
 inline SqImageSample& SqImageSample::operator=(const SqImageSample& from)
 {
 	flags = from.flags;
+	index = from.index;
 	csgNode = from.csgNode;
 
-	const TqFloat* fromData = from.data;
-	TqFloat* toData = data;
-	std::copy(fromData, fromData + sampleSize, toData);
-
-	return(*this);
+	return *this;
 }
 
 
@@ -355,6 +367,31 @@ inline SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
 	return m_samples[index].opaqueSample;
 }
 
+inline const TqFloat* CqImagePixel::sampleHitData(const SqImageSample& hit) const
+{
+	assert(hit.index >= 0);
+	assert(hit.index + SqImageSample::sampleSize <= static_cast<TqInt>(m_hitSamples.size()));
+	return &m_hitSamples[hit.index];
+}
+
+inline TqFloat* CqImagePixel::sampleHitData(const SqImageSample& hit)
+{
+	assert(hit.index >= 0);
+	assert(hit.index + SqImageSample::sampleSize <= static_cast<TqInt>(m_hitSamples.size()));
+	return &m_hitSamples[hit.index];
+}
+
+inline void CqImagePixel::allocateHitData(SqImageSample& hit)
+{
+	assert(hit.index == -1);
+	// Using a std::vector for m_hitSamples allows the sample size to grow as
+	// necessary with O(log(N)) reallocations for N hits.  The reallocation
+	// time is irrelevant when CqImagePixel's are recycled through the pipeline
+	// since the vector grows to the necessary size in the first few buckets
+	// and remains there for the rest of the frame.
+	hit.index = m_hitSamples.size();
+	m_hitSamples.resize(m_hitSamples.size() + SqImageSample::sampleSize);
+}
 
 inline SqSampleData const& CqImagePixel::SampleData( TqInt index ) const
 {

@@ -473,8 +473,9 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 									SqImageSample& opv = (*pie2)->OpaqueValues(sampleIndex);
 									if ( opv.flags & SqImageSample::Flag_Valid )
 									{
+										TqFloat* data = (*pie2)->sampleHitData(opv);
 										for ( TqInt k = 0; k < datasize; ++k )
-											samples[k] += opv.data[k] * g;
+											samples[k] += data[k] * g;
 										sampleCounts[pixelIndex]++;
 									}
 								}
@@ -611,8 +612,9 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 										SqImageSample& opv = (*pie2)->OpaqueValues(sampleIndex);
 										if ( opv.flags & SqImageSample::Flag_Valid )
 										{
+											TqFloat* data = (*pie2)->sampleHitData(opv);
 											for ( TqInt k = 0; k < datasize; ++k )
-												samples[k] += opv.data[k] * g;
+												samples[k] += data[k] * g;
 											SampleCount++;
 										}
 									}
@@ -1459,10 +1461,11 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	bool opaque =  m_CurrentMpgSampleInfo.isOpaque;
 
 	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
-	//static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
-	SqImageSample localImageVal;
 
-	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
+	SqImageSample newHitSample;
+	if(!opaque)
+		pie2->allocateHitData(newHitSample);
+	SqImageSample& hit = opaque ? currentOpaqueSample : newHitSample;
 
 	std::deque<SqImageSample>& aValues = pie2->Values( index );
 	std::deque<SqImageSample>::iterator sample = aValues.begin();
@@ -1472,7 +1475,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	if(opaque)
 	{
 		if((currentOpaqueSample.flags & SqImageSample::Flag_Valid) &&
-			currentOpaqueSample.data[Sample_Depth] <= D)
+			pie2->sampleHitData(currentOpaqueSample)[Sample_Depth] <= D)
 		{
 			return;
 		}
@@ -1483,7 +1486,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		// return if the sample is occluded and can be culled.
 		while( sample != end )
 		{
-			if((*sample).data[Sample_Depth] >= D)
+			if(pie2->sampleHitData(*sample)[Sample_Depth] >= D)
 				break;
 
 			if(((*sample).flags & SqImageSample::Flag_Occludes) &&
@@ -1494,68 +1497,63 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		}
 	}
 
-    ImageVal.data[Sample_Depth] = D ;
-
 	CqStats::IncI( CqStats::SPL_hits );
 	pMPG->MarkHit();
 	// Record the fact that we have valid samples in the bucket.
 	m_hasValidSamples = true;
 
-    TqFloat* val = ImageVal.data;
 	CqColor col;
 	CqColor opa;
 	SqSampleData const& sampleData = pie2->SampleData( index );
 	const CqVector2D& vecP = sampleData.position;
 	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
 
-    val[ Sample_Red ] = col[0];
-    val[ Sample_Green ] = col[1];
-    val[ Sample_Blue ] = col[2];
-    val[ Sample_ORed ] = opa[0];
-    val[ Sample_OGreen ] = opa[1];
-    val[ Sample_OBlue ] = opa[2];
-    val[ Sample_Depth ] = D;
+	TqFloat* hitData = pie2->sampleHitData(hit);
+    hitData[ Sample_Red ] = col[0];
+    hitData[ Sample_Green ] = col[1];
+    hitData[ Sample_Blue ] = col[2];
+    hitData[ Sample_ORed ] = opa[0];
+    hitData[ Sample_OGreen ] = opa[1];
+    hitData[ Sample_OBlue ] = opa[2];
+    hitData[ Sample_Depth ] = D;
 
     // Now store any other data types that have been registered.
 	if(currentGridInfo.m_UsesDataMap)
 	{
-		StoreExtraData(pMPG, ImageVal);
+		StoreExtraData(pMPG, hitData);
 	}
 
 	if(!opaque)
 	{
 		// If depth is exactly the same as previous sample, chances are we've
-		// hit a MPG grid line.
-		// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-		if ( sample != end && (*sample).data[Sample_Depth] == ImageVal.data[Sample_Depth] && !(*sample).csgNode )
-		{
-			//(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+		// hit a MPG grid line.  We cannot do this if there is CSG involved, as
+		// all samples must be taken and kept the same.
+		if ( sample != end && pie2->sampleHitData(*sample)[Sample_Depth] == hitData[Sample_Depth] && !(*sample).csgNode )
 			return;
-		}
 	}
 
-    ImageVal.csgNode = pMPG->pGrid()->pCSGNode();
+    hit.csgNode = pMPG->pGrid()->pCSGNode();
 
-    ImageVal.flags = 0;
+    hit.flags = 0;
     if ( Occludes )
-        ImageVal.flags |= SqImageSample::Flag_Occludes;
+        hit.flags |= SqImageSample::Flag_Occludes;
     if( currentGridInfo.m_IsMatte )
-        ImageVal.flags |= SqImageSample::Flag_Matte;
+        hit.flags |= SqImageSample::Flag_Matte;
 
 	if(!opaque)
 	{
-		aValues.insert( sample, ImageVal );
+		aValues.insert( sample, hit );
 	}
 	else
 	{
 		// mark this sample as having been written into.
-		ImageVal.flags |= SqImageSample::Flag_Valid;
+		hit.flags |= SqImageSample::Flag_Valid;
 	}
 }
 
 
 
-void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
+void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
@@ -1571,7 +1569,7 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 					{
 						TqFloat f;
 						pData->GetFloat( f, pMPG->GetIndex() );
-						sample.data[ entry->second.m_Offset ] = f;
+						hitData[ entry->second.m_Offset ] = f;
 						break;
 					}
 					case type_point:
@@ -1581,18 +1579,18 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 					{
 						CqVector3D v;
 						pData->GetPoint( v, pMPG->GetIndex() );
-						sample.data[ entry->second.m_Offset ] = v.x();
-						sample.data[ entry->second.m_Offset + 1 ] = v.y();
-						sample.data[ entry->second.m_Offset + 2 ] = v.z();
+						hitData[ entry->second.m_Offset ] = v.x();
+						hitData[ entry->second.m_Offset + 1 ] = v.y();
+						hitData[ entry->second.m_Offset + 2 ] = v.z();
 						break;
 					}
 					case type_color:
 					{
 						CqColor c;
 						pData->GetColor( c, pMPG->GetIndex() );
-						sample.data[ entry->second.m_Offset ] = c.r();
-						sample.data[ entry->second.m_Offset + 1 ] = c.g();
-						sample.data[ entry->second.m_Offset + 2 ] = c.b();
+						hitData[ entry->second.m_Offset ] = c.r();
+						hitData[ entry->second.m_Offset + 1 ] = c.g();
+						hitData[ entry->second.m_Offset + 2 ] = c.b();
 						break;
 					}
 					case type_matrix:
@@ -1600,22 +1598,22 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sam
 						CqMatrix m;
 						pData->GetMatrix( m, pMPG->GetIndex() );
 						TqFloat* pElements = m.pElements();
-						sample.data[ entry->second.m_Offset ] = pElements[ 0 ];
-						sample.data[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
-						sample.data[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
-						sample.data[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
-						sample.data[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
-						sample.data[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
-						sample.data[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
-						sample.data[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
-						sample.data[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
-						sample.data[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
-						sample.data[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
-						sample.data[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
-						sample.data[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
-						sample.data[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
-						sample.data[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
-						sample.data[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+						hitData[ entry->second.m_Offset ] = pElements[ 0 ];
+						hitData[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+						hitData[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+						hitData[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+						hitData[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+						hitData[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+						hitData[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+						hitData[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+						hitData[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+						hitData[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+						hitData[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+						hitData[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+						hitData[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+						hitData[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+						hitData[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+						hitData[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
 						break;
 					}
 					default:

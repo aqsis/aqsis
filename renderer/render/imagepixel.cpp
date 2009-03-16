@@ -43,7 +43,7 @@ namespace Aqsis {
 
 /// \todo Previous code for the sample pool
 /// CqSampleDataPool	SqImageSample::m_theSamplePool;
-TqUint SqImageSample::sampleSize(9);
+TqInt SqImageSample::sampleSize(9);
 
 //----------------------------------------------------------------------
 /** Constructor
@@ -53,12 +53,20 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 		: m_XSamples(xSamples),
 		m_YSamples(ySamples),
 		m_samples(new SqSampleData[xSamples*ySamples]),
+		m_hitSamples(),
 		m_DofOffsetIndices(new TqInt[xSamples*ySamples]),
 		m_refCount(0)
 {
 	assert(xSamples > 0);
 	assert(ySamples > 0);
 
+	// Allocate sample storage for all the opaque sample hit structures.
+	TqInt nSamples = numSamples();
+	m_hitSamples.reserve(nSamples*SqImageSample::sampleSize);
+	for(TqInt i = 0; i < nSamples; ++i)
+		allocateHitData(m_samples[i].opaqueSample);
+
+	// Initialise sample data.
 	initialiseSamples();
 }
 
@@ -69,6 +77,7 @@ void CqImagePixel::swap(CqImagePixel& other)
 	assert(m_XSamples == other.m_XSamples);
 	assert(m_YSamples == other.m_YSamples);
 
+	m_hitSamples.swap(other.m_hitSamples);
 	m_samples.swap(other.m_samples);
 	m_DofOffsetIndices.swap(other.m_DofOffsetIndices);
 }
@@ -77,7 +86,7 @@ void CqImagePixel::swap(CqImagePixel& other)
 //----------------------------------------------------------------------
 void CqImagePixel::initialiseSamples()
 {
-	TqInt nSamples = m_XSamples * m_YSamples;
+	TqInt nSamples = numSamples();
 
 	// Initialise the samples to the centre points.
 	TqFloat XInc = ( 1.0f / m_XSamples ) / 2.0f;
@@ -104,7 +113,6 @@ void CqImagePixel::initialiseSamples()
 		m_samples[i].detailLevel = m_samples[i].time = time;
 		time += dtime;
 	}
-
 
 	// we calculate dof offsets in a grid inside the unit cube and then
 	// project them into the unit circle. This means that the offset
@@ -145,13 +153,13 @@ void CqImagePixel::initialiseSamples()
 
 	// we now shuffle the dof offsets but remember which one went where.
 	for(TqInt i = 0; i < nSamples/2; i++)
-   	{
-      		int k = random.RandomInt(nSamples/2) + nSamples/2;
-      		if (k >= nSamples) k = nSamples - 1;
-      		int tmp = m_DofOffsetIndices[i];
-      		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
-      		m_DofOffsetIndices[k] = tmp;
-   	}
+	{
+		int k = random.RandomInt(nSamples/2) + nSamples/2;
+		if (k >= nSamples) k = nSamples - 1;
+		int tmp = m_DofOffsetIndices[i];
+		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
+		m_DofOffsetIndices[k] = tmp;
+	}
 
 	for(TqInt i = 0; i < nSamples; ++i)
 	{
@@ -278,11 +286,11 @@ void CqImagePixel::JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat 
 	// we now shuffle the dof offsets but remember which one went where.
 	for( i = 0; i < nSamples/2; i++)
    	{
-      		int k = random.RandomInt(nSamples/2) + nSamples/2;
-      		if (k >= nSamples) k = nSamples - 1;
-      		int tmp = m_DofOffsetIndices[i];
-      		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
-      		m_DofOffsetIndices[k] = tmp;
+		int k = random.RandomInt(nSamples/2) + nSamples/2;
+		if (k >= nSamples) k = nSamples - 1;
+		int tmp = m_DofOffsetIndices[i];
+		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
+		m_DofOffsetIndices[k] = tmp;
    	}
 
 	for( i = 0; i < nSamples; ++i)
@@ -298,11 +306,17 @@ void CqImagePixel::JitterSamples( CqVector2D& offset, TqFloat opentime, TqFloat 
 
 void CqImagePixel::Clear()
 {
-	for ( TqInt i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
+	TqInt nSamples = numSamples();
+	m_hitSamples.clear();
+	for ( TqInt i = nSamples - 1; i >= 0; i-- )
 	{
 		if(!m_samples[i].data.empty())
 			m_samples[i].data.clear();
 		m_samples[i].opaqueSample.flags = 0;
+		// Reallocate the opaque samples, as their storage indices may have
+		// changed during the Combine() stage.
+		m_samples[i].opaqueSample.index = -1;
+		allocateHitData(m_samples[i].opaqueSample);
 	}
 }
 
@@ -310,13 +324,20 @@ void CqImagePixel::Clear()
 //----------------------------------------------------------------------
 /** Get the color at the specified sample point by blending the colors that appear at that point.
  */
-// Ascending depth sorting function
-struct SqAscendingDepthSort
+// Ascending depth sorting functor
+class CqAscendingDepthSort
 {
-     bool operator()(const SqImageSample& splStart, const SqImageSample& splEnd) const
-     {
-          return splStart.data[Sample_Depth] < splEnd.data[Sample_Depth];
-     }
+	private:
+		const CqImagePixel& m_pixel;
+	public:
+		CqAscendingDepthSort(const CqImagePixel& pixel)
+			: m_pixel(pixel)
+		{ }
+		bool operator()(const SqImageSample& splStart, const SqImageSample& splEnd) const
+		{
+			return m_pixel.sampleHitData(splStart)[Sample_Depth]
+				< m_pixel.sampleHitData(splEnd)[Sample_Depth];
+		}
 };
 
 void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
@@ -334,7 +355,8 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 		if(!sampleData.data.empty())
 		{
 			// Sort the samples by depth.
-			std::sort(sampleData.data.begin(), sampleData.data.end(), SqAscendingDepthSort());
+			CqAscendingDepthSort closer(*this);
+			std::sort(sampleData.data.begin(), sampleData.data.end(), closer);
 			if (opaqueValue.flags & SqImageSample::Flag_Valid)
 			{
 				//	insert opaqueValue into samples in the right place.
@@ -342,9 +364,8 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				std::deque<SqImageSample>::iterator isend = sampleData.data.end();
 				while( isi != isend )
 				{
-					if((*isi).data[Sample_Depth] >= opaqueValue.data[Sample_Depth])
+					if(closer(opaqueValue, *isi))
 						break;
-
 					++isi;
 				}
 				sampleData.data.insert(isi, opaqueValue);
@@ -385,7 +406,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 			        sample != sampleData.data.rend();
 			        sample++ )
 			{
-				TqFloat* sample_data = sample->data;
+				TqFloat* sample_data = sampleHitData(*sample);
 				if ( sample->flags & SqImageSample::Flag_Matte )
 				{
 					if ( sample->flags & SqImageSample::Flag_Occludes )
@@ -425,10 +446,10 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				{
 					// Make sure we store the nearest and second nearest depth values.
 					opaqueDepths[1] = opaqueDepths[0];
-					opaqueDepths[0] = sample->data[Sample_Depth];
+					opaqueDepths[0] = sample_data[Sample_Depth];
 					// Store the max opaque depth too, if not already stored.
 					if(!(maxOpaqueDepth < FLT_MAX))
-						maxOpaqueDepth = sample->data[Sample_Depth];
+						maxOpaqueDepth = sample_data[Sample_Depth];
 				}
 				samplehit = true;
 			}
@@ -444,15 +465,17 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				// Make sure the extra sample data from the top entry is copied
 				// to the opaque sample, which is then sent to the display.
 				opaqueValue = *sampleData.data.begin();
+				TqFloat* opaqueData = sampleHitData(opaqueValue);
 				// Set the color and opacity.
-				opaqueValue.data[Sample_Red] = samplecolor.r();
-				opaqueValue.data[Sample_Green] = samplecolor.g();
-				opaqueValue.data[Sample_Blue] = samplecolor.b();
-				opaqueValue.data[Sample_ORed] = sampleopacity.r();
-				opaqueValue.data[Sample_OGreen] = sampleopacity.g();
-				opaqueValue.data[Sample_OBlue] = sampleopacity.b();
+				opaqueData[Sample_Red] = samplecolor.r();
+				opaqueData[Sample_Green] = samplecolor.g();
+				opaqueData[Sample_Blue] = samplecolor.b();
+				opaqueData[Sample_ORed] = sampleopacity.r();
+				opaqueData[Sample_OGreen] = sampleopacity.g();
+				opaqueData[Sample_OBlue] = sampleopacity.b();
 				opaqueValue.flags |= SqImageSample::Flag_Valid;
 
+				TqFloat& opaqueDepth = opaqueData[Sample_Depth];
 				if ( depthfilter != Filter_Min )
 				{
 					if ( depthfilter == Filter_MidPoint )
@@ -460,13 +483,13 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 						//Aqsis::log() << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
 						// Use midpoint for depth
 						if ( sampleData.data.size() > 1 )
-							opaqueValue.data[Sample_Depth] = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
+							opaqueDepth = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
 						else
-							opaqueValue.data[Sample_Depth] = FLT_MAX;
+							opaqueDepth = FLT_MAX;
 					}
 					else if ( depthfilter == Filter_Max)
 					{
-						opaqueValue.data[Sample_Depth] = maxOpaqueDepth;
+						opaqueDepth = maxOpaqueDepth;
 					}
 					else if ( depthfilter == Filter_Average )
 					{
@@ -475,7 +498,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 						TqInt totCount = 0;
 						for ( sample = sampleData.data.begin(); sample != sampleData.data.end(); sample++ )
 						{
-							TqFloat* sample_data = sample->data;
+							TqFloat* sample_data = sampleHitData(*sample);
 							if(sample_data[Sample_ORed] >= zThreshold.r() || sample_data[Sample_OGreen] >= zThreshold.g() || sample_data[Sample_OBlue] >= zThreshold.b())
 							{
 								totDepth += sample_data[Sample_Depth];
@@ -484,12 +507,12 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 						}
 						totDepth /= totCount;
 
-						opaqueValue.data[Sample_Depth] = totDepth;
+						opaqueDepth = totDepth;
 					}
 					// Default to "min"
 				}
 				else
-					opaqueValue.data[Sample_Depth] = opaqueDepths[0];
+					opaqueDepth = opaqueDepths[0];
 			}
 		}
 		else

@@ -29,6 +29,7 @@
 #include "aqsis.h"
 
 #include <vector>
+#include <utility>
 
 #include "vector2d.h"
 #include "imagepixel.h"
@@ -37,6 +38,8 @@ namespace Aqsis {
 
 class CqBound;
 class CqBucketProcessor;
+struct SqImagePixel;
+struct SqImageSample;
 
 /** \brief An tree for occlusion culling of bounded objects.
  *
@@ -86,12 +89,14 @@ class CqOcclusionTree
 		static TqInt treeIndexForPoint(TqInt treeDepth, const CqVector2D& p);
 		void propagateDepths();
 
+		typedef std::pair<const CqImagePixel*, const SqImageSample*> TqHitDataRef;
+
 		/// min (top left) of the area straddled by the tree
 		CqVector2D m_treeBoundMin;
 		/// max (bottom right) of the area straddled by the tree
 		CqVector2D m_treeBoundMax;
 		/// Vector holding samples points associated with the leaf nodes.
-		std::vector<std::vector<const SqSampleData*> > m_leafSamples;
+		std::vector<std::vector<TqHitDataRef> > m_leafSamples;
 		/// Binary tree of depths stored in an array.
 		std::vector<TqFloat> m_depthTree;
 		/// The index in the depth tree of the first terminal node.
@@ -100,8 +105,6 @@ class CqOcclusionTree
 		TqInt m_numLevels;
 };
 
-
-extern CqOcclusionTree g_occlusionTree;
 
 } // namespace Aqsis
 

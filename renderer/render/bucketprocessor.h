@@ -112,7 +112,7 @@ class CqBucketProcessor
 		void	RenderMicroPoly( CqMicroPolygon* pMP );
 		void	RenderMPG_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
 		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
-		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
+		void	StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData);
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */

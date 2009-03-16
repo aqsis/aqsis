@@ -37,10 +37,6 @@
 
 namespace Aqsis {
 
-/// Global occlusion tree
-/// \todo Remove!
-CqOcclusionTree g_occlusionTree;
-
 //----------------------------------------------------------------------
 // CqOcclusionTree implementation.
 
@@ -64,7 +60,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<const SqSampleData*>());
+	m_leafSamples.assign(numLeafNodes, std::vector<TqHitDataRef>());
 
 	// Compute and cache bounds of tree and culling area.
 	m_treeBoundMin = CqVector2D(bp.SampleRegion().xMin(), bp.SampleRegion().yMin());
@@ -74,7 +70,8 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
 	const std::vector<CqImagePixelPtr>& pixels = bp.pixels();
-	for(std::vector<CqImagePixelPtr>::const_iterator p = pixels.begin(), e = pixels.end(); p != e; ++p)
+	for(std::vector<CqImagePixelPtr>::const_iterator p = pixels.begin(),
+			e = pixels.end(); p != e; ++p)
 	{
 		const CqImagePixel& pixel = **p;
 		for(int i = 0, numSamples = pixel.numSamples(); i < numSamples; ++i)
@@ -99,7 +96,8 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 			assert((sampleNodeIndex*2)+1 >= numTotalNodes);
 
 			m_depthTree[sampleNodeIndex] = FLT_MAX;
-			m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(&pixel.SampleData(i));
+			m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(
+					TqHitDataRef(&pixel, &pixel.SampleData(i).opaqueSample));
 		}
 	}
 	// Fix up parent depths.
@@ -118,15 +116,18 @@ void CqOcclusionTree::updateDepths()
 			continue;
 		TqFloat max = 0;
 		bool hit = false;
-		for(std::vector<const SqSampleData*>::iterator sample = m_leafSamples[i].begin(),
-				end = m_leafSamples[i].end(); sample != end; ++sample)
+		for(std::vector<TqHitDataRef>::iterator hitRef = m_leafSamples[i].begin(),
+				end = m_leafSamples[i].end(); hitRef != end; ++hitRef)
 		{
-			TqFloat depth; 
-			if((*sample)->opaqueSample.flags & SqImageSample::Flag_Valid &&
-				(depth = (*sample)->opaqueSample.data[Sample_Depth]) > max)
+			if(hitRef->second->flags & SqImageSample::Flag_Valid)
 			{
-				max = depth;
-				hit = true;
+				TqFloat depth = hitRef->first->
+					sampleHitData(*hitRef->second)[Sample_Depth];
+				if(depth > max)
+				{
+					max = depth;
+					hit = true;
+				}
 			}
 		}
 		m_depthTree[i + m_firstLeafNode] = hit ? max : FLT_MAX;
