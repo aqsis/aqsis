@@ -51,6 +51,9 @@ OPTION(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support ON/OFF" ON)
 MARK_AS_ADVANCED(AQSIS_ENABLE_SIMBIONT)
 OPTION(AQSIS_ENABLE_THREADING "Enable multi-threading ON/OFF" OFF)
 
+OPTION(AQSIS_ENABLE_DOC_HTML "Enable HTML developer documentation ON/OFF" ON)
+OPTION(AQSIS_ENABLE_DOC_SEARCHBAR "Enable searchbar in developer documentation ON/OFF" OFF)
+
 OPTION(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 MARK_AS_ADVANCED(AQSIS_USE_RPATH)
 
@@ -297,7 +300,11 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
 # Build docs
 #--------------
 
-ADD_SUBDIRECTORY(doxygen_docs)
+INCLUDE(FindDoxygen)
+
+IF(DOXYGEN_EXECUTABLE)
+	ADD_SUBDIRECTORY(doxygen_docs)
+ENDIF(DOXYGEN_EXECUTABLE)
 
 #-------------------------------------------------------------------------------
 # Packaging
