@@ -18,12 +18,14 @@
  * USA
  */
 
-#include	"bucket.h"
-#include	"multitimer.h"
-#include	"imagebuffer.h"
-#include	"aqsismath.h"
-
 #include	"bucketprocessor.h"
+
+#include	<valarray>
+
+#include	"aqsismath.h"
+#include	"bucket.h"
+#include	"imagebuffer.h"
+#include	"multitimer.h"
 
 
 namespace Aqsis {
@@ -481,7 +483,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 									TqInt cindex = sindex + sampleData.subCellIndex;
 									TqFloat g = m_aFilterValues[ cindex ];
 									gTot += g;
-									SqImageSample& opv = (*pie2)->OpaqueValues(sampleIndex);
+									SqImageSample& opv = (*pie2)->occludingHit(sampleIndex);
 									if ( opv.flags & SqImageSample::Flag_Valid )
 									{
 										TqFloat* data = (*pie2)->sampleHitData(opv);
@@ -620,7 +622,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 										TqInt cindex = sindex + sampleData.subCellIndex;
 										TqFloat g = m_aFilterValues[ cindex ];
 										gTot += g;
-										SqImageSample& opv = (*pie2)->OpaqueValues(sampleIndex);
+										SqImageSample& opv = (*pie2)->occludingHit(sampleIndex);
 										if ( opv.flags & SqImageSample::Flag_Valid )
 										{
 											TqFloat* data = (*pie2)->sampleHitData(opv);
@@ -1062,29 +1064,15 @@ void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 	bool UsingDof = QGetRenderContext()->UsingDepthOfField();
 	bool IsMoving = pMP->IsMoving();
 
-	// Cache the shading interpolation type.  Ideally this should really be
-	// done by the CacheOutputInterpCoeffs(), or possibly once per grid...
-	const TqInt* interpType = pMP->pGrid()->pAttributes()
-		->GetIntegerAttribute("System", "ShadingInterpolation");
 	// At this stage, only use smooth shading interpolation for stationary
 	// grids without DoF.
 	/// \todo Allow smooth shading with MB or DoF.
-	m_CurrentMpgSampleInfo.smoothInterpolation
-		= !(UsingDof || IsMoving) && (*interpType == ShadingInterp_Smooth);
+	m_CurrentMpgSampleInfo.smoothInterpolation = !(UsingDof || IsMoving)
+		&& pMP->pGrid()->GetCachedGridInfo().useSmoothShading;
 
 	// Cache output sample info for this mpg so we don't have to keep fetching
 	// it for each sample.
 	pMP->CacheOutputInterpCoeffs(m_CurrentMpgSampleInfo);
-
-	// use the single imagesample rather than the list if possible.
-	// transparent, matte or csg samples, or if we need more than the first
-	// depth value have to use the (slower) list.
-	m_CurrentMpgSampleInfo.isOpaque =
-		m_CurrentMpgSampleInfo.occludes
-		&& !pMP->pGrid()->pCSGNode()
-		&& !pMP->pGrid()->GetCachedGridInfo().m_IsMatte
-		&& !(QGetRenderContext()->poptCurrent()->
-				GetIntegerOption("System", "DisplayMode")[0] & ModeZ);
 
 	if(IsMoving || UsingDof)
 		RenderMPG_MBOrDof( pMP, IsMoving, UsingDof );
@@ -1099,16 +1087,16 @@ void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 {
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
-    const TqFloat* LodBounds = currentGridInfo.m_LodBounds;
+    const TqFloat* LodBounds = currentGridInfo.lodBounds;
     bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
     TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
+    //TqFloat shd_rate = m_CurrentGridInfo.shadingRate;
 
 	CqHitTestCache hitTestCache;
 	bool cachedHitData = false;
 
-	//bool mustDraw = !m_CurrentGridInfo.m_IsCullable;
+	//bool mustDraw = !m_CurrentGridInfo.isCullable;
 
     CqBound Bound = pMPG->GetBound();
 
@@ -1231,19 +1219,19 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 {
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 
-    const TqFloat* LodBounds = currentGridInfo.m_LodBounds;
+    const TqFloat* LodBounds = currentGridInfo.lodBounds;
     bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
     TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
+    //TqFloat shd_rate = m_CurrentGridInfo.shadingRate;
 
 	CqHitTestCache hitTestCache;
 
 	TqInt iXSamples = PixelXSamples();
     TqInt iYSamples = PixelYSamples();
 
-	TqFloat opentime = currentGridInfo.m_ShutterOpenTime;
-	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
+	TqFloat opentime = currentGridInfo.shutterOpenTime;
+	TqFloat closetime = currentGridInfo.shutterCloseTime;
 	TqFloat timePerSample = 0;
 	if(IsMoving)
 	{
@@ -1462,45 +1450,14 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
 {
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
+	SqImageSample& occlHit = pie2->occludingHit(index);
 
-    bool Occludes = m_CurrentMpgSampleInfo.occludes;
-	bool opaque =  m_CurrentMpgSampleInfo.isOpaque;
-
-	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
-
-	SqImageSample newHitSample;
-	if(!opaque)
-		pie2->allocateHitData(newHitSample);
-	SqImageSample& hit = opaque ? currentOpaqueSample : newHitSample;
-
-	std::deque<SqImageSample>& aValues = pie2->Values( index );
-	std::deque<SqImageSample>::iterator sample = aValues.begin();
-	std::deque<SqImageSample>::iterator end = aValues.end();
-
-	// return if the sample is occluded and can be culled.
-	if(opaque)
+	if(currentGridInfo.isCullable && (occlHit.flags & SqImageSample::Flag_Valid)
+			&& pie2->sampleHitData(occlHit)[Sample_Depth] <= D)
 	{
-		if((currentOpaqueSample.flags & SqImageSample::Flag_Valid) &&
-			pie2->sampleHitData(currentOpaqueSample)[Sample_Depth] <= D)
-		{
-			return;
-		}
-	}
-	else
-	{
-		// Sort the color/opacity into the visible point list
-		// return if the sample is occluded and can be culled.
-		while( sample != end )
-		{
-			if(pie2->sampleHitData(*sample)[Sample_Depth] >= D)
-				break;
-
-			if(((*sample).flags & SqImageSample::Flag_Occludes) &&
-				!(*sample).csgNode && currentGridInfo.m_IsCullable)
-				return;
-
-			++sample;
-		}
+		// If the sample hit is occluded and can be culled then we return early
+		// without storing the hit data at all.
+		return;
 	}
 
 	CqStats::IncI( CqStats::SPL_hits );
@@ -1508,53 +1465,51 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	// Record the fact that we have valid samples in the bucket.
 	m_hasValidSamples = true;
 
+	// Compute the color and opacity of the micropolygon at the hit point.
+	// This is where ShadingInterpolation "smooth" or "constant" comes in.
 	CqColor col;
 	CqColor opa;
 	SqSampleData const& sampleData = pie2->SampleData( index );
 	const CqVector2D& vecP = sampleData.position;
 	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
 
-	TqFloat* hitData = pie2->sampleHitData(hit);
-    hitData[ Sample_Red ] = col[0];
-    hitData[ Sample_Green ] = col[1];
-    hitData[ Sample_Blue ] = col[2];
-    hitData[ Sample_ORed ] = opa[0];
-    hitData[ Sample_OGreen ] = opa[1];
-    hitData[ Sample_OBlue ] = opa[2];
-    hitData[ Sample_Depth ] = D;
-
-    // Now store any other data types that have been registered.
-	if(currentGridInfo.m_UsesDataMap)
+	// Get a pointer to the hit storage.
+	SqImageSample* hit = 0;
+	if(m_CurrentMpgSampleInfo.isOpaque && currentGridInfo.isCullable)
 	{
-		StoreExtraData(pMPG, hitData);
-	}
-
-	if(!opaque)
-	{
-		// If depth is exactly the same as previous sample, chances are we've
-		// hit a MPG grid line.  We cannot do this if there is CSG involved, as
-		// all samples must be taken and kept the same.
-		if ( sample != end && pie2->sampleHitData(*sample)[Sample_Depth] == hitData[Sample_Depth] && !(*sample).csgNode )
-			return;
-	}
-
-    hit.csgNode = pMPG->pGrid()->pCSGNode();
-
-    hit.flags = 0;
-    if ( Occludes )
-        hit.flags |= SqImageSample::Flag_Occludes;
-    if( currentGridInfo.m_IsMatte )
-        hit.flags |= SqImageSample::Flag_Matte;
-
-	if(!opaque)
-	{
-		aValues.insert( sample, hit );
+		// Use the occluding sample storage when possible, since this is
+		// faster.  Hits may be stored in the occluding storage whenever they
+		// can occlude other samples.  This happens when
+		// 1) The micropoly is fully opaque
+		// 2) The micropoly is not part of a CSG
+		// 3) We don't need the entire set of samples for depth filtering.
+		hit = &occlHit;
+		hit->flags = SqImageSample::Flag_Valid;
 	}
 	else
 	{
-		// mark this sample as having been written into.
-		hit.flags |= SqImageSample::Flag_Valid;
+		// Otherwise create some new storage for the hit data in sample hit
+		// vector.
+		pie2->Values(index).push_back(SqImageSample());
+		hit = &pie2->Values(index).back();
+		pie2->allocateHitData(*hit);
 	}
+	// Store the hit data for later use.
+	TqFloat* hitData = pie2->sampleHitData(*hit);
+	hitData[ Sample_Red ] = col[0];
+	hitData[ Sample_Green ] = col[1];
+	hitData[ Sample_Blue ] = col[2];
+	hitData[ Sample_ORed ] = opa[0];
+	hitData[ Sample_OGreen ] = opa[1];
+	hitData[ Sample_OBlue ] = opa[2];
+	hitData[ Sample_Depth ] = D;
+	if(currentGridInfo.usesDataMap)
+		StoreExtraData(pMPG, hitData);
+
+	// Update CSG pointer and flags.
+	hit->csgNode = pMPG->pGrid()->pCSGNode();
+	if(currentGridInfo.isMatte)
+		hit->flags |= SqImageSample::Flag_Matte;
 }
 
 

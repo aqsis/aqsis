@@ -23,17 +23,12 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is imagebuffer.h included already?
-#ifndef IMAGEPIXEL_H_INCLUDED
-//{
+#ifndef IMAGEPIXEL_H_INCLUDED //{
 #define IMAGEPIXEL_H_INCLUDED 1
 
 #include	"aqsis.h"
 
 #include	<vector>
-#include	<stack>
-#include	<deque>
-#include	<valarray>
 
 #include	<boost/intrusive_ptr.hpp>
 #include	<boost/scoped_array.hpp>
@@ -42,11 +37,8 @@
 #include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
-#include	"pool.h"
 
 namespace Aqsis {
-
-class CqBucketProcessor;
 
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
@@ -88,19 +80,18 @@ enum EqFilterDepth
  */
 struct SqImageSample
 {
-	/// Flags for this sample, using the anonymous enum below.
-	TqInt flags;
 	/// Index to the data sample hit array managed by the associated CqImagePixel
 	TqInt index;
+	/// Flags for this sample, using the anonymous enum below.
+	TqUint flags;
 	/// A shared pointer to the CSG node for this sample.
 	/// If the sample originated from a surface that was part of a CSG tree
 	/// this pointer will be valid, otherwise, it will be null.
 	boost::shared_ptr<CqCSGTreeNode> csgNode;
 
 	enum {
-	    Flag_Occludes = 0x0001,
-	    Flag_Matte = 0x0002,
-	    Flag_Valid = 0x0004
+	    Flag_Matte = 0x0001,
+	    Flag_Valid = 0x0002
 	};
 
 	static TqInt sampleSize;
@@ -131,10 +122,21 @@ struct SqSampleData : private boost::noncopyable
 	TqInt		subCellIndex;		///< Subcell index.
 	TqFloat		time;				///< Float sample time.
 	TqFloat		detailLevel;		///< Float level-of-detail sample.
-	std::deque<SqImageSample>	data;	///< Array of sampled surface data for this sample.
-	SqImageSample opaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
+	std::vector<SqImageSample> data;	///< Array of surface "hits" for this sample.
+	/** \brief Minimum depth hit which occludes any hits further away
+	 *
+	 * During micropolygon sampling, occludingHit is used to store the surface
+	 * hit which is closest to the camera for the sample point.  Any
+	 * micropolygon hits further away than this can be culled without being
+	 * stored.  A micropolygon hit can occlude other surfaces when
+	 * 1) The micropoly is opaque
+	 * 2) The micropoly does not participate in CSG
+	 * 3) The z depthfilter is not "max".  (For "midpoint" depth filters we have
+	 *    to keep track of the second-closest depth to the camera as well.)
+	 */
+	SqImageSample occludingHit;
 
-	/// Default constructs all class members and sets numeric members to zero.
+	/// Default construct all members, setting numeric members to zero.
 	SqSampleData();
 };
 
@@ -199,7 +201,7 @@ class CqImagePixel : private boost::noncopyable
 
 		/** \brief Clear all sample information from this pixel.
 		 *
-		 * Removes all the semitransparent sample hits and resets the opaque
+		 * Removes all the semitransparent sample hits and resets the occluding
 		 * sample hits to invalid.
 		 */
 		void clear();
@@ -207,14 +209,14 @@ class CqImagePixel : private boost::noncopyable
 		/** \brief Get a reference to the array of values for the specified sample.
 		 * \param index the index of the sample point within the pixel
 		 */
-		std::deque<SqImageSample>&	Values( TqInt index );
+		std::vector<SqImageSample>& Values( TqInt index );
 
-		/** \brief Get a reference to the image sample that represents
-		 *  the top if the closest sample is opaque.
+		/** \brief Get a reference to the image hit that represents the top
+		 * if the closest sample is occluding.
 		 *
 		 *  \param index - The index of the sample within the pixel to query.
 		 */
-		SqImageSample& OpaqueValues( TqInt index );
+		SqImageSample& occludingHit( TqInt index );
 
 		//@{
 		/** \brief Return the sample data associated with a micropolygon sample hit.
@@ -309,21 +311,21 @@ typedef	boost::intrusive_ptr<CqImagePixel>			CqImagePixelPtr;
 //------------------------------------------------------------------------------
 // SqImageSample implementation
 inline SqImageSample::SqImageSample()
-	: flags(0),
-	index(-1),
+	: index(-1),
+	flags(0),
 	csgNode()
 { }
 
 inline SqImageSample::SqImageSample(const SqImageSample& from)
-	: flags(from.flags),
-	index(from.index),
+	: index(from.index),
+	flags(from.flags),
 	csgNode(from.csgNode)
 { }
 
 inline SqImageSample& SqImageSample::operator=(const SqImageSample& from)
 {
-	flags = from.flags;
 	index = from.index;
+	flags = from.flags;
 	csgNode = from.csgNode;
 
 	return *this;
@@ -339,7 +341,7 @@ inline SqSampleData::SqSampleData()
 	time(0),
 	detailLevel(0),
 	data(),
-	opaqueSample()
+	occludingHit()
 { }
 
 
@@ -379,16 +381,16 @@ inline TqInt CqImagePixel::refCount() const
 	return m_refCount;
 }
 
-inline std::deque<SqImageSample>&	CqImagePixel::Values( TqInt index )
+inline std::vector<SqImageSample>& CqImagePixel::Values( TqInt index )
 {
     assert(index < numSamples());
 	return m_samples[index].data;
 }
 
-inline SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
+inline SqImageSample& CqImagePixel::occludingHit( TqInt index )
 {
 	assert(index < numSamples());
-	return m_samples[index].opaqueSample;
+	return m_samples[index].occludingHit;
 }
 
 inline const TqFloat* CqImagePixel::sampleHitData(const SqImageSample& hit) const
@@ -442,5 +444,4 @@ inline void intrusive_ptr_release(Aqsis::CqImagePixel* p)
 
 } // namespace Aqsis
 
-//}  // End of #ifdef IMAGEPIXEL_H_INCLUDED
-#endif
+#endif //} IMAGEPIXEL_H_INCLUDED

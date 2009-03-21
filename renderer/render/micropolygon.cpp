@@ -45,21 +45,24 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>& surface)
 {
-	m_CurrentGridInfo.m_IsMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+	m_CurrentGridInfo.isMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
 
+	// Cache the shading interpolation type.
+	m_CurrentGridInfo.useSmoothShading = pAttributes()->
+		GetIntegerAttribute("System", "ShadingInterpolation")[0] == ShadingInterp_Smooth;
 	// this is true if the mpgs can safely be occlusion culled.
-	m_CurrentGridInfo.m_IsCullable = !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) && !(this->pCSGNode());
+	m_CurrentGridInfo.isCullable = !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) && !(this->pCSGNode());
 
-	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
+	m_CurrentGridInfo.usesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
 
 	// ShadingRate may be modified by RiGeometricApproximation "focusfactor" or
 	// "motionfactor", so we need to get the appropriate adjusted rate rather
 	// than grabbing it directly from the grid attribute set.
-	m_CurrentGridInfo.m_ShadingRate = surface->AdjustedShadingRate();
-	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+	m_CurrentGridInfo.shadingRate = surface->AdjustedShadingRate();
+	m_CurrentGridInfo.shutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	m_CurrentGridInfo.shutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-	m_CurrentGridInfo.m_LodBounds = this->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+	m_CurrentGridInfo.lodBounds = this->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
 }
 
 
@@ -1477,12 +1480,12 @@ void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) con
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
 	{
 		cache.opacity = *colOpacity();
-		cache.occludes = cache.opacity >= gColWhite;
+		cache.isOpaque = cache.opacity >= gColWhite;
 	}
 	else
 	{
 		cache.opacity = gColWhite;
-		cache.occludes = true;
+		cache.isOpaque = true;
 	}
 }
 
@@ -1578,8 +1581,8 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 			cache.opacityMultX = -Nx*NzInv;
 			cache.opacityMultY = -Ny*NzInv;
 
-			// The micropoly occludes if the values on all vertices do.
-			cache.occludes = (o1 >= gColWhite) && (o2 >= gColWhite)
+			// The micropoly isOpaque if the values on all vertices do.
+			cache.isOpaque = (o1 >= gColWhite) && (o2 >= gColWhite)
 				&& (o3 >= gColWhite) && (o4 >= gColWhite);
 		}
 		else
@@ -1587,7 +1590,7 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 			cache.opacity = oAvg;
 			cache.opacityMultX = gColBlack;
 			cache.opacityMultY = gColBlack;
-			cache.occludes = (cache.opacity >= gColWhite);
+			cache.isOpaque = (cache.opacity >= gColWhite);
 		}
 	}
 	else
@@ -1595,7 +1598,7 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		cache.opacity = gColWhite;
 		cache.opacityMultX = gColBlack;
 		cache.opacityMultY = gColBlack;
-		cache.occludes = true;
+		cache.isOpaque = true;
 	}
 }
 
@@ -1803,7 +1806,7 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-	TqFloat shadingrate = pGrid()->GetCachedGridInfo().m_ShadingRate;
+	TqFloat shadingrate = pGrid()->GetCachedGridInfo().shadingRate;
 
 	m_BoundList.Clear();
 

@@ -55,13 +55,14 @@ class CqBucketProcessor;
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
 {
-	TqFloat			m_ShadingRate;
-	TqFloat			m_ShutterOpenTime;
-	TqFloat			m_ShutterCloseTime;
-	const TqFloat*	        m_LodBounds;
-	bool			m_IsMatte;
-	bool			m_IsCullable;
-	bool			m_UsesDataMap;
+	TqFloat shadingRate;
+	TqFloat shutterOpenTime;
+	TqFloat shutterCloseTime;
+	const TqFloat* lodBounds;
+	bool isMatte;
+	bool isCullable;
+	bool usesDataMap;
+	bool useSmoothShading;
 };
 
 
@@ -99,10 +100,7 @@ struct SqMpgSampleInfo
 	/// Whether to use smooth shading interpolation or not
 	bool smoothInterpolation;
 
-	/// Whether the opacity is full.
-	bool occludes;
-	/// Whether to store samples deriving from this micropoly in the opaque
-	/// sample slot or not.
+	/// True when the micropolygon is fully opaque
 	bool isOpaque;
 };
 

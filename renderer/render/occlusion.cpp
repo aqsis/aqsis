@@ -97,7 +97,7 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 
 			m_depthTree[sampleNodeIndex] = FLT_MAX;
 			m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(
-					TqHitDataRef(&pixel, &pixel.SampleData(i).opaqueSample));
+					TqHitDataRef(&pixel, &pixel.SampleData(i).occludingHit));
 		}
 	}
 	// Fix up parent depths.

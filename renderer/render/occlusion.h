@@ -50,8 +50,8 @@ struct SqImageSample;
  *
  * The tree uses a binary space partition in alternate directions (x,y) and is
  * stored in an array for efficiency.  Each tree node stores the maximum depth
- * found in opaque samples connected to its child nodes.  This means that if a
- * surface is further away than the root node (for example) it can be safely
+ * found in occluding samples connected to its child nodes.  This means that if
+ * a surface is further away than the root node (for example) it can be safely
  * culled, and so on down the tree.
  */
 class CqOcclusionTree
@@ -72,8 +72,8 @@ class CqOcclusionTree
 
 		/** \brief Rebuild the occlusion tree.
 		 *
-		 * The tree is rebuilt based on the current opaque sample depths from
-		 * the bucket provided to SetupHierarchy()
+		 * The tree is rebuilt based on the current occluding sample depths
+		 * from the bucket provided to setupTree()
 		 */
 		void updateDepths();
 

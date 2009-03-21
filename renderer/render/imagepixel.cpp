@@ -23,26 +23,21 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"imagepixel.h"
+#include "imagepixel.h"
 
-#include	"options.h"
-#include	"random.h"
-#include	"logging.h"
-#include	"bucketprocessor.h"
-
-#include	<algorithm>
+#include <algorithm>
+#include <cfloat> // for FLT_MAX
 
 #ifdef WIN32
-#include	<windows.h>
+#	include <windows.h> // Not needed?
 #endif
-#include	<math.h>
 
+#include "aqsismath.h"
+#include "random.h"
 
 
 namespace Aqsis {
 
-/// \todo Previous code for the sample pool
-/// CqSampleDataPool	SqImageSample::m_theSamplePool;
 TqInt SqImageSample::sampleSize(9);
 
 //----------------------------------------------------------------------
@@ -61,10 +56,10 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 	assert(ySamples > 0);
 
 	TqInt nSamples = numSamples();
-	// Allocate sample storage for all the opaque sample hit structures.
+	// Allocate sample storage for all the occluding hits.
 	m_hitSamples.reserve(nSamples*SqImageSample::sampleSize);
 	for(TqInt i = 0; i < nSamples; ++i)
-		allocateHitData(m_samples[i].opaqueSample);
+		allocateHitData(m_samples[i].occludingHit);
 
 	// Create the DoF offsets
 	initialiseDofOffsets();
@@ -280,11 +275,11 @@ void CqImagePixel::clear()
 	{
 		if(!m_samples[i].data.empty())
 			m_samples[i].data.clear();
-		m_samples[i].opaqueSample.flags = 0;
-		// Reallocate the opaque samples, as their storage indices may have
+		m_samples[i].occludingHit.flags = 0;
+		// Reallocate the occluding samples, as their storage indices may have
 		// changed during the Combine() stage.
-		m_samples[i].opaqueSample.index = -1;
-		allocateHitData(m_samples[i].opaqueSample);
+		m_samples[i].occludingHit.index = -1;
+		allocateHitData(m_samples[i].occludingHit);
 	}
 }
 
@@ -317,27 +312,18 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 	{
 		SqSampleData& sampleData = m_samples[sampIdx];
 
-		SqImageSample& opaqueValue = sampleData.opaqueSample;
+		SqImageSample& occlHit = sampleData.occludingHit;
 		sampleIndex++;
 
 		if(!sampleData.data.empty())
 		{
-			// Sort the samples by depth.
-			CqAscendingDepthSort closer(*this);
-			std::sort(sampleData.data.begin(), sampleData.data.end(), closer);
-			if (opaqueValue.flags & SqImageSample::Flag_Valid)
+			if (occlHit.flags & SqImageSample::Flag_Valid)
 			{
-				//	insert opaqueValue into samples in the right place.
-				std::deque<SqImageSample>::iterator isi = sampleData.data.begin();
-				std::deque<SqImageSample>::iterator isend = sampleData.data.end();
-				while( isi != isend )
-				{
-					if(closer(opaqueValue, *isi))
-						break;
-					++isi;
-				}
-				sampleData.data.insert(isi, opaqueValue);
+				//	insert occlHit into samples if it holds valid data.
+				sampleData.data.push_back(occlHit);
 			}
+			// Sort the samples by depth.
+			std::sort(sampleData.data.begin(), sampleData.data.end(), CqAscendingDepthSort(*this));
 
 			// Find out if any of the samples are in a CSG tree.
 			bool bProcessed;
@@ -349,7 +335,7 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 					bProcessed = false;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
-					for ( std::deque<SqImageSample>::iterator isample = sampleData.data.begin();
+					for ( std::vector<SqImageSample>::iterator isample = sampleData.data.begin();
 					        isample != sampleData.data.end();
 					        ++isample )
 					{
@@ -364,38 +350,29 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				while ( bProcessed );
 			}
 
-			CqColor samplecolor = gColBlack;
-			CqColor sampleopacity = gColBlack;
+			CqColor samplecolor;
+			CqColor sampleopacity;
 			bool samplehit = false;
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
-			for ( std::deque<SqImageSample>::reverse_iterator sample = sampleData.data.rbegin();
+			for ( std::vector<SqImageSample>::reverse_iterator sample = sampleData.data.rbegin();
 			        sample != sampleData.data.rend();
 			        sample++ )
 			{
 				TqFloat* sample_data = sampleHitData(*sample);
 				if ( sample->flags & SqImageSample::Flag_Matte )
 				{
-					if ( sample->flags & SqImageSample::Flag_Occludes )
-					{
-						// Optimise common case
-						samplecolor = gColBlack;
-						sampleopacity = gColBlack;
-					}
-					else
-					{
-						samplecolor = CqColor(
-						    lerp( sample_data[Sample_ORed], samplecolor.r(), 0.0f ),
-						    lerp( sample_data[Sample_OGreen], samplecolor.g(), 0.0f ),
-						    lerp( sample_data[Sample_OBlue], samplecolor.b(), 0.0f )
-						);
-						sampleopacity = CqColor(
-						    lerp( sample_data[Sample_Red], sampleopacity.r(), 0.0f ),
-						    lerp( sample_data[Sample_Green], sampleopacity.g(), 0.0f ),
-						    lerp( sample_data[Sample_Blue], sampleopacity.b(), 0.0f )
-						);
-					}
+					samplecolor = CqColor(
+						lerp( sample_data[Sample_ORed], samplecolor.r(), 0.0f ),
+						lerp( sample_data[Sample_OGreen], samplecolor.g(), 0.0f ),
+						lerp( sample_data[Sample_OBlue], samplecolor.b(), 0.0f )
+					);
+					sampleopacity = CqColor(
+						lerp( sample_data[Sample_Red], sampleopacity.r(), 0.0f ),
+						lerp( sample_data[Sample_Green], sampleopacity.g(), 0.0f ),
+						lerp( sample_data[Sample_Blue], sampleopacity.b(), 0.0f )
+					);
 				}
 				else
 				{
@@ -427,41 +404,40 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 				samplecount++;
 			}
 
-			// Write the collapsed color values back into the opaque entry.
+			// Write the collapsed color values back into the occluding entry.
 			if ( !sampleData.data.empty() )
 			{
 				// Make sure the extra sample data from the top entry is copied
-				// to the opaque sample, which is then sent to the display.
-				opaqueValue = *sampleData.data.begin();
-				TqFloat* opaqueData = sampleHitData(opaqueValue);
+				// to the occluding sample, which is then sent to the display.
+				occlHit = *sampleData.data.begin();
+				TqFloat* occlData = sampleHitData(occlHit);
 				// Set the color and opacity.
-				opaqueData[Sample_Red] = samplecolor.r();
-				opaqueData[Sample_Green] = samplecolor.g();
-				opaqueData[Sample_Blue] = samplecolor.b();
-				opaqueData[Sample_ORed] = sampleopacity.r();
-				opaqueData[Sample_OGreen] = sampleopacity.g();
-				opaqueData[Sample_OBlue] = sampleopacity.b();
-				opaqueValue.flags |= SqImageSample::Flag_Valid;
+				occlData[Sample_Red] = samplecolor.r();
+				occlData[Sample_Green] = samplecolor.g();
+				occlData[Sample_Blue] = samplecolor.b();
+				occlData[Sample_ORed] = sampleopacity.r();
+				occlData[Sample_OGreen] = sampleopacity.g();
+				occlData[Sample_OBlue] = sampleopacity.b();
+				occlHit.flags |= SqImageSample::Flag_Valid;
 
-				TqFloat& opaqueDepth = opaqueData[Sample_Depth];
+				TqFloat& occlDepth = occlData[Sample_Depth];
 				if ( depthfilter != Filter_Min )
 				{
 					if ( depthfilter == Filter_MidPoint )
 					{
-						//Aqsis::log() << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
 						// Use midpoint for depth
 						if ( sampleData.data.size() > 1 )
-							opaqueDepth = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
+							occlDepth = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
 						else
-							opaqueDepth = FLT_MAX;
+							occlDepth = FLT_MAX;
 					}
 					else if ( depthfilter == Filter_Max)
 					{
-						opaqueDepth = maxOpaqueDepth;
+						occlDepth = maxOpaqueDepth;
 					}
 					else if ( depthfilter == Filter_Average )
 					{
-						std::deque<SqImageSample>::iterator sample;
+						std::vector<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;
 						TqInt totCount = 0;
 						for ( sample = sampleData.data.begin(); sample != sampleData.data.end(); sample++ )
@@ -475,18 +451,28 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 						}
 						totDepth /= totCount;
 
-						opaqueDepth = totDepth;
+						occlDepth = totDepth;
 					}
 					// Default to "min"
 				}
 				else
-					opaqueDepth = opaqueDepths[0];
+					occlDepth = opaqueDepths[0];
 			}
 		}
 		else
 		{
-			if (opaqueValue.flags & SqImageSample::Flag_Valid)
+			if (occlHit.flags & SqImageSample::Flag_Valid)
 			{
+				if(occlHit.flags & SqImageSample::Flag_Matte)
+				{
+					TqFloat* occlData = sampleHitData(occlHit);
+					occlData[Sample_Red] = 0;
+					occlData[Sample_Green] = 0;
+					occlData[Sample_Blue] = 0;
+					occlData[Sample_ORed] = 0;
+					occlData[Sample_OGreen] = 0;
+					occlData[Sample_OBlue] = 0;
+				}
 				samplecount++;
 			}
 		}
