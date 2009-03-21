@@ -26,6 +26,8 @@ SET(RIBPARSE_INSTALL_HDRS
 
 IF(Boost_IOSTREAMS_FOUND)
 	ADD_DEFINITIONS(-DUSE_GZIPPED_RIB)
+ELSE(Boost_IOSTREAMS_FOUND)
+	MESSAGE(STATUS "*** boost_iostreams not found ***  building without gzipped RIB support")
 ENDIF(Boost_IOSTREAMS_FOUND)
 
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
