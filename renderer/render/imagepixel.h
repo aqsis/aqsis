@@ -278,6 +278,7 @@ class CqImagePixel : private boost::noncopyable
 		TqInt refCount() const;
 
 	private:
+		void multiJitterIndices(TqInt* indices, TqInt numX, TqInt numY);
 		void initialiseDofOffsets();
 		/// boost::intrusive_ptr required function, to increment the reference count.
 		friend		void intrusive_ptr_add_ref(CqImagePixel* p);
