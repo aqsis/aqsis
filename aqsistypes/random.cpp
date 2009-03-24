@@ -157,11 +157,11 @@ static TqUlong genrand_int32(void)
 }
 
 /* generates a random number on [0,1)-real-interval */
-static TqDouble genrand_real2(void)
-{
-	return genrand_int32()*(1.0/4294967296.0);
-	/* divided by 2^32 */
-}
+//static TqDouble genrand_real2(void)
+//{
+//	return genrand_int32()*(1.0/4294967296.0);
+//	/* divided by 2^32 */
+//}
 
 //----------------------------------------------------------------------
 /** \class CqRandom
@@ -193,7 +193,16 @@ TqUint CqRandom::RandomInt( TqUint Range )
  */
 TqFloat	CqRandom::RandomFloat()
 {
-	return genrand_real2();
+	// Divide by 2^32 + 128.  We've got to be quite careful here, because a
+	// float doesn't encompass the entire precision of the uint32 used as the
+	// source of the randomness.  This means that if we just divide by 2^32
+	// in double precision and truncate to a float then sometimes the float
+	// will get rounded up to 1.
+	//
+	// Instead we've got to add the extra 128 to the denominator to ensure that
+	// it always gets correctly rounded down when using the default IEEE
+	// rounding mode.
+	return genrand_int32()*(1.0/4294967424.0);
 }
 
 /** Get a random float in the specified range (0 <= value < Range).
@@ -201,7 +210,7 @@ TqFloat	CqRandom::RandomFloat()
  */
 TqFloat	CqRandom::RandomFloat( TqFloat Range )
 {
-	return (genrand_real2()* Range);
+	return Range*RandomFloat();
 }
 
 /** Set the random internal to known value; eg. at each framebegin we might
