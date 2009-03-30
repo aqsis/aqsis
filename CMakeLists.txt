@@ -70,8 +70,19 @@ SET(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install
 IF(WIN32)
 	SET(Boost_USE_STATIC_LIBS ON)
 ENDIF(WIN32)
+
+#-------------------------------------------------------------------------------
+# Find boost, this is a workaround because Boost versions > 1.35.0 need the
+# system library. CMake versions >2.6.4 should fix this properly.
+#
 SET(Boost_ADDITIONAL_VERSIONS "1.38.0" "1.38" "1.37.0" "1.37")
-FIND_PACKAGE(Boost 1.34.1 COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+FIND_PACKAGE(Boost 1.34.1)
+SET(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
+IF(${local_boost_version} VERSION_LESS "1.35")
+    FIND_PACKAGE(Boost 1.34.1 COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+ELSE(${local_boost_version} VERSION_LESS "1.35")
+    FIND_PACKAGE(Boost 1.34.1 COMPONENTS filesystem iostreams wave unit_test_framework thread regex system)
+ENDIF(${local_boost_version} VERSION_LESS "1.35")
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
