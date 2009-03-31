@@ -51,7 +51,8 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 		m_samples(new SqSampleData[xSamples*ySamples]),
 		m_hitSamples(),
 		m_DofOffsetIndices(new TqInt[xSamples*ySamples]),
-		m_refCount(0)
+		m_refCount(0),
+		m_hasValidSamples(false)
 {
 	assert(xSamples > 0);
 	assert(ySamples > 0);
@@ -74,6 +75,7 @@ void CqImagePixel::swap(CqImagePixel& other)
 	m_hitSamples.swap(other.m_hitSamples);
 	m_samples.swap(other.m_samples);
 	m_DofOffsetIndices.swap(other.m_DofOffsetIndices);
+	m_hasValidSamples = other.m_hasValidSamples;
 }
 
 /** \brief Compute subcell coordinates for multijittered sampling.
@@ -352,6 +354,7 @@ void CqImagePixel::clear()
 {
 	TqInt nSamples = numSamples();
 	m_hitSamples.clear();
+	m_hasValidSamples = false;
 	for ( TqInt i = nSamples - 1; i >= 0; i-- )
 	{
 		if(!m_samples[i].data.empty())

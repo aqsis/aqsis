@@ -34,6 +34,7 @@
 #include	<queue>
 #include	<deque>
 #include	<boost/shared_ptr.hpp>
+#include	<boost/array.hpp>
 
 #include	"surface.h"
 #include	"color.h"
@@ -51,6 +52,13 @@ struct SqBucketCacheSegment
 		right = 1,
 		top = 2,
 		bottom = 3,
+
+		top_left = 4,
+		bottom_left = 5,
+		top_right = 6,
+		bottom_right = 7,
+
+		last
 	};
 	EqBucketCacheSide side;
 	TqInt			  size;
@@ -65,9 +73,8 @@ struct SqBucketCacheSegment
 class CqBucket
 {
 	public:
-		typedef std::vector<boost::shared_ptr<SqBucketCacheSegment> > TqCacheSegVec;
-
-
+		typedef boost::array<boost::shared_ptr<SqBucketCacheSegment>, SqBucketCacheSegment::last > TqCache;
+		
 		CqBucket();
 
 		/** Add a GPRim to the stack of deferred GPrims.
@@ -141,8 +148,9 @@ class CqBucket
 
 		std::vector<boost::shared_ptr<CqMicroPolygon> >& micropolygons();
 
-		TqCacheSegVec& cacheSegments();
-		void addCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg);
+		const TqCache& cacheSegments() const;
+		void setCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, boost::shared_ptr<SqBucketCacheSegment>& seg);
+		void clearCache();
 
 	private:
 		/// This is a compare functor for sorting surfaces in order of depth.
@@ -182,7 +190,7 @@ class CqBucket
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
 
-		TqCacheSegVec m_cacheSegments;
+		TqCache m_cacheSegments;
 };
 
 
@@ -195,12 +203,14 @@ inline std::vector<boost::shared_ptr<CqMicroPolygon> >& CqBucket::micropolygons(
 	return m_micropolygons;
 }
 
-inline void CqBucket::addCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg)
+inline void CqBucket::setCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, boost::shared_ptr<SqBucketCacheSegment>& seg)
 {
-	m_cacheSegments.push_back(seg);
+	// Check there isn't already a cache segment for the position.
+	assert(!m_cacheSegments[side]);
+	m_cacheSegments[side] = seg;
 }
 
-inline CqBucket::TqCacheSegVec& CqBucket::cacheSegments()
+inline const CqBucket::TqCache& CqBucket::cacheSegments() const
 {
 	return m_cacheSegments;
 }
@@ -236,6 +246,14 @@ inline void CqBucket::setSize(TqInt xsize, TqInt ysize)
 	m_xSize = xsize;
 	m_ySize = ysize;
 }
+
+inline void CqBucket::clearCache()
+{
+
+	for(TqInt cseg = 0; cseg < SqBucketCacheSegment::last; ++cseg)
+		m_cacheSegments[cseg].reset();
+}
+
 
 } // namespace Aqsis
 

@@ -35,18 +35,5 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 // CqTexFileHeader implementation
 
-void CqTexFileHeader::setTimestamp()
-{
-	time_t long_time;
-	// Get time as long integer.
-	time( &long_time );
-	// Convert to local time.
-	struct tm* ct = localtime( &long_time );
-	set<Attr::DateTime>(
-			(boost::format("%04d:%02d:%02d %02d:%02d:%02d")
-			% (1900 + ct->tm_year) % (ct->tm_mon + 1) % ct->tm_mday
-			% ct->tm_hour % ct->tm_min % ct->tm_sec).str()
-		);
-}
 
 } // namespace Aqsis

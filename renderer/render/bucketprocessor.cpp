@@ -73,8 +73,17 @@ class CqPixelPool
 // somewhere else non-global!
 CqPixelPool g_pixelPool;
 
+TqInt	CqBucketProcessor::m_DiscreteShiftX;
+TqInt	CqBucketProcessor::m_DiscreteShiftY;
+TqInt	CqBucketProcessor::m_PixelXSamples;
+TqInt	CqBucketProcessor::m_PixelYSamples;
+TqFloat	CqBucketProcessor::m_FilterXWidth;
+TqFloat	CqBucketProcessor::m_FilterYWidth;
+TqFloat	CqBucketProcessor::m_clippingNear;
+TqFloat	CqBucketProcessor::m_clippingFar;
+boost::array<CqRegion, SqBucketCacheSegment::last> CqBucketProcessor::m_cacheRegions;
 
-CqBucketProcessor::CqBucketProcessor() :
+CqBucketProcessor::CqBucketProcessor( ) :
 	m_bucket(0),
 	m_hasValidSamples(false)
 {
@@ -82,6 +91,33 @@ CqBucketProcessor::CqBucketProcessor() :
 
 CqBucketProcessor::~CqBucketProcessor()
 {
+}
+
+void CqBucketProcessor::setupCacheInformation()
+{
+	/* Cache filter width and pixel sample sizes for later use. */
+	m_FilterXWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
+	m_FilterYWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
+	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	m_PixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+	m_clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	m_clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
+	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
+
+	/* Calculate and store the cache region sizes for overlap cacheing */
+	TqInt overlapx = m_DiscreteShiftX*2;
+	TqInt overlapy = m_DiscreteShiftY*2;
+	TqInt width = QGetRenderContext()->pImage()->XBucketSize() + overlapx; 
+	TqInt height = QGetRenderContext()->pImage()->YBucketSize() + overlapy;
+	m_cacheRegions[SqBucketCacheSegment::top_left] = CqRegion(0, 0, overlapx, overlapy);
+	m_cacheRegions[SqBucketCacheSegment::top] = CqRegion(overlapx, 0, width-overlapx, overlapy);
+	m_cacheRegions[SqBucketCacheSegment::top_right] = CqRegion(width-overlapx, 0, width, overlapy);
+	m_cacheRegions[SqBucketCacheSegment::left] = CqRegion(0, overlapy, overlapx, height-overlapy);
+	m_cacheRegions[SqBucketCacheSegment::right] = CqRegion(width-overlapx, overlapy, width, height-overlapy);
+	m_cacheRegions[SqBucketCacheSegment::bottom_left] = CqRegion(0, height-overlapy, overlapx, height);
+	m_cacheRegions[SqBucketCacheSegment::bottom] = CqRegion(overlapx, height-overlapy, width-overlapx, height);
+	m_cacheRegions[SqBucketCacheSegment::bottom_right] = CqRegion(width-overlapx, height-overlapy, width, height);
 }
 
 void CqBucketProcessor::setBucket(CqBucket* bucket)
@@ -108,9 +144,7 @@ void CqBucketProcessor::reset()
 	m_hasValidSamples = false;
 }
 
-void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
-		TqFloat filterXWidth, TqFloat filterYWidth,
-		TqFloat clippingNear, TqFloat clippingFar)
+void CqBucketProcessor::preProcess()
 {
 	assert(m_bucket);
 
@@ -122,15 +156,7 @@ void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
 		TqInt xSize = m_bucket->getXSize();
 		TqInt ySize = m_bucket->getYSize();
 
-		m_PixelXSamples = pixelXSamples;
-		m_PixelYSamples = pixelYSamples;
-		m_FilterXWidth = filterXWidth;
-		m_FilterYWidth = filterYWidth;
-
 		m_DisplayRegion = CqRegion( xPos, yPos, xPos+xSize, yPos+ySize );
-
-		m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
-		m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
 
 		TqInt sminx = xPos - m_DiscreteShiftX;
 		TqInt sminy = yPos - m_DiscreteShiftY;
@@ -151,34 +177,15 @@ void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
 
 		// Now shrink the sample region according to any cache segments that have been
 		// applied.
-//#define BOC_ENABLED
-#ifdef BOC_ENABLED
-		for(CqBucket::TqCacheSegVec::iterator c = m_bucket->cacheSegments().begin(),
-				e = m_bucket->cacheSegments().end(); c != e; ++c)
-		{
-			switch((*c)->side)
-			{
-				case SqBucketCacheSegment::left:
-					sminx += (*c)->size;
-					break;
-				case SqBucketCacheSegment::right:
-					smaxx -= (*c)->size;
-					break;
-				case SqBucketCacheSegment::top:
-					sminy += (*c)->size;
-					break;
-				case SqBucketCacheSegment::bottom:
-					smaxy -= (*c)->size;
-					break;
-				default:
-					break;
-			}
-		}
-#endif // BOC_ENABLED
+		if(m_bucket->cacheSegments()[SqBucketCacheSegment::left])
+			sminx += m_DiscreteShiftX*2;
+		if(m_bucket->cacheSegments()[SqBucketCacheSegment::right])
+			smaxx -= m_DiscreteShiftX*2;
+		if(m_bucket->cacheSegments()[SqBucketCacheSegment::top])
+			sminy += m_DiscreteShiftY*2;
+		if(m_bucket->cacheSegments()[SqBucketCacheSegment::bottom])
+			smaxy -= m_DiscreteShiftY*2;
 		m_SampleRegion = CqRegion(sminx, sminy, smaxx, smaxy);
-
-		m_clippingNear = clippingNear;
-		m_clippingFar = clippingFar;
 
 		TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 		TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
@@ -250,15 +257,24 @@ void CqBucketProcessor::preProcess( TqInt pixelXSamples, TqInt pixelYSamples,
 		}
 		InitialiseFilterValues();
 	}
-
-#ifdef BOC_ENABLED
-	for(CqBucket::TqCacheSegVec::iterator c = m_bucket->cacheSegments().begin(),
-			e = m_bucket->cacheSegments().end(); c != e; ++c)
-	{
-		applyCacheSegment(*c);
-	}
-	m_bucket->cacheSegments().clear();
-#endif // BOC_ENABLED
+	
+	const CqBucket::TqCache& cache = m_bucket->cacheSegments();
+	if(cache[SqBucketCacheSegment::left])
+		applyCacheSegment(SqBucketCacheSegment::left, cache[SqBucketCacheSegment::left]);
+	if(cache[SqBucketCacheSegment::right])
+		applyCacheSegment(SqBucketCacheSegment::right, cache[SqBucketCacheSegment::right]);
+	if(cache[SqBucketCacheSegment::top])
+		applyCacheSegment(SqBucketCacheSegment::top, cache[SqBucketCacheSegment::top]);
+	if(cache[SqBucketCacheSegment::bottom])
+		applyCacheSegment(SqBucketCacheSegment::bottom, cache[SqBucketCacheSegment::bottom]);
+	if(cache[SqBucketCacheSegment::top_left])
+		applyCacheSegment(SqBucketCacheSegment::top_left, cache[SqBucketCacheSegment::top_left]);
+	if(cache[SqBucketCacheSegment::top_right])
+		applyCacheSegment(SqBucketCacheSegment::top_right, cache[SqBucketCacheSegment::top_right]);
+	if(cache[SqBucketCacheSegment::bottom_left])
+		applyCacheSegment(SqBucketCacheSegment::bottom_left, cache[SqBucketCacheSegment::bottom_left]);
+	if(cache[SqBucketCacheSegment::bottom_right])
+		applyCacheSegment(SqBucketCacheSegment::bottom_right, cache[SqBucketCacheSegment::bottom_right]);
 
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling_initialisation);
@@ -319,42 +335,103 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 		ExposeBucket();
 	}
 
-#ifdef BOC_ENABLED
+	boost::shared_ptr<SqBucketCacheSegment> top_left, top_right, bottom_left, bottom_right;
+
 	std::vector<CqBucket*> neighbours;
 	QGetRenderContext()->pImage()->axialNeighbours(*m_bucket, neighbours);
 	if(neighbours[CqImageBuffer::left] && !neighbours[CqImageBuffer::left]->IsProcessed())
 	{
 		boost::shared_ptr<SqBucketCacheSegment> cacheSegment(new SqBucketCacheSegment);
-		cacheSegment->side = SqBucketCacheSegment::right;
-		cacheSegment->size = 2;
-		buildCacheSegment(cacheSegment);
-		neighbours[CqImageBuffer::left]->addCacheSegment(cacheSegment);
+		buildCacheSegment(SqBucketCacheSegment::left, cacheSegment);
+		neighbours[CqImageBuffer::left]->setCacheSegment(SqBucketCacheSegment::right, cacheSegment);
+
+		if(!neighbours[CqImageBuffer::left]->cacheSegments()[SqBucketCacheSegment::top_right])
+		{
+			top_left = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+			buildCacheSegment(SqBucketCacheSegment::top_left, top_left);
+			neighbours[CqImageBuffer::left]->setCacheSegment(SqBucketCacheSegment::top_right, top_left);
+		}
+		if(!neighbours[CqImageBuffer::left]->cacheSegments()[SqBucketCacheSegment::bottom_right])
+		{
+			bottom_left = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+			buildCacheSegment(SqBucketCacheSegment::bottom_left, bottom_left);
+			neighbours[CqImageBuffer::left]->setCacheSegment(SqBucketCacheSegment::bottom_right, bottom_left);
+		}
 	}
 	if(neighbours[CqImageBuffer::right] && !neighbours[CqImageBuffer::right]->IsProcessed())
 	{
 		boost::shared_ptr<SqBucketCacheSegment> cacheSegment(new SqBucketCacheSegment);
-		cacheSegment->side = SqBucketCacheSegment::left;
-		cacheSegment->size = 2;
-		buildCacheSegment(cacheSegment);
-		neighbours[CqImageBuffer::right]->addCacheSegment(cacheSegment);
+		buildCacheSegment(SqBucketCacheSegment::right, cacheSegment);
+		neighbours[CqImageBuffer::right]->setCacheSegment(SqBucketCacheSegment::left, cacheSegment);
+		if(!neighbours[CqImageBuffer::right]->cacheSegments()[SqBucketCacheSegment::top_left])
+		{
+			top_right = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+			buildCacheSegment(SqBucketCacheSegment::top_right, top_right);
+			neighbours[CqImageBuffer::right]->setCacheSegment(SqBucketCacheSegment::top_left, top_right);
+		}
+		if(!neighbours[CqImageBuffer::right]->cacheSegments()[SqBucketCacheSegment::bottom_left])
+		{
+			bottom_right = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+			buildCacheSegment(SqBucketCacheSegment::bottom_right, bottom_right);
+			neighbours[CqImageBuffer::right]->setCacheSegment(SqBucketCacheSegment::bottom_left, bottom_right);
+		}
 	}
 	if(neighbours[CqImageBuffer::above] && !neighbours[CqImageBuffer::above]->IsProcessed())
 	{
 		boost::shared_ptr<SqBucketCacheSegment> cacheSegment(new SqBucketCacheSegment);
-		cacheSegment->side = SqBucketCacheSegment::bottom;
-		cacheSegment->size = 2;
-		buildCacheSegment(cacheSegment);
-		neighbours[CqImageBuffer::above]->addCacheSegment(cacheSegment);
+		buildCacheSegment(SqBucketCacheSegment::top, cacheSegment);
+		neighbours[CqImageBuffer::above]->setCacheSegment(SqBucketCacheSegment::bottom, cacheSegment);
+		if(!neighbours[CqImageBuffer::above]->cacheSegments()[SqBucketCacheSegment::bottom_left])
+		{
+			if(!top_left)
+			{
+				top_left = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+				buildCacheSegment(SqBucketCacheSegment::top_left, top_left);
+			}
+			neighbours[CqImageBuffer::above]->setCacheSegment(SqBucketCacheSegment::bottom_left, top_left);
+		}
+		if(!neighbours[CqImageBuffer::above]->cacheSegments()[SqBucketCacheSegment::bottom_right])
+		{
+			if(!top_right)
+			{
+				top_right = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+				buildCacheSegment(SqBucketCacheSegment::top_right, top_right);
+			}
+			neighbours[CqImageBuffer::above]->setCacheSegment(SqBucketCacheSegment::bottom_right, top_right);
+		}
 	}
 	if(neighbours[CqImageBuffer::below] && !neighbours[CqImageBuffer::below]->IsProcessed())
 	{
 		boost::shared_ptr<SqBucketCacheSegment> cacheSegment(new SqBucketCacheSegment);
-		cacheSegment->side = SqBucketCacheSegment::top;
-		cacheSegment->size = 2;
-		buildCacheSegment(cacheSegment);
-		neighbours[CqImageBuffer::below]->addCacheSegment(cacheSegment);
+		buildCacheSegment(SqBucketCacheSegment::bottom, cacheSegment);
+		neighbours[CqImageBuffer::below]->setCacheSegment(SqBucketCacheSegment::top, cacheSegment);
+		if(!neighbours[CqImageBuffer::below]->cacheSegments()[SqBucketCacheSegment::top_left])
+		{
+			if(!bottom_left)
+			{
+				bottom_left = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+				buildCacheSegment(SqBucketCacheSegment::bottom_left, bottom_left);
+			}
+			neighbours[CqImageBuffer::below]->setCacheSegment(SqBucketCacheSegment::top_left, bottom_left);
+		}
+		if(!neighbours[CqImageBuffer::below]->cacheSegments()[SqBucketCacheSegment::top_right])
+		{
+			if(!bottom_right)
+			{
+				bottom_right = boost::shared_ptr<SqBucketCacheSegment>(new SqBucketCacheSegment);
+				buildCacheSegment(SqBucketCacheSegment::bottom_right, bottom_right);
+			}
+			neighbours[CqImageBuffer::below]->setCacheSegment(SqBucketCacheSegment::top_right, bottom_right);
+		}
 	}
-#endif // BOC_ENABLED
+
+	for(TqInt cseg = 0; cseg < SqBucketCacheSegment::last; ++cseg)
+	{
+		if(m_bucket->cacheSegments()[cseg])
+			dropSegment(cseg);
+	}
+
+	m_bucket->clearCache();
 
 	assert(!m_bucket->IsProcessed());
 	m_bucket->SetProcessed();
@@ -1510,6 +1587,9 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	hit->csgNode = pMPG->pGrid()->pCSGNode();
 	if(currentGridInfo.isMatte)
 		hit->flags |= SqImageSample::Flag_Matte;
+
+	// Mark the pixel as containing valid samples, used later for the cacheing and reuse.
+	pie2->markHasValidSamples();
 }
 
 
@@ -1648,19 +1728,17 @@ bool CqBucketProcessor::occlusionCullSurface( const boost::shared_ptr<CqSurface>
 	}
 }
 
-void CqBucketProcessor::buildCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg)
+void CqBucketProcessor::buildCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, boost::shared_ptr<SqBucketCacheSegment>& seg)
 {
-	TqInt startX = (seg->side == SqBucketCacheSegment::left)? m_DataRegion.width() - seg->size : 0;
-	TqInt startY = (seg->side == SqBucketCacheSegment::top)? m_DataRegion.height() - seg->size : 0;
-	TqInt endX = (seg->side == SqBucketCacheSegment::right)? seg->size : m_DataRegion.width();
-	TqInt endY = (seg->side == SqBucketCacheSegment::bottom)? seg->size : m_DataRegion.height();
-	TqInt segRowLen = endX - startX;
-	TqInt numPixels = (endY-startY)*(endX-startX);
+	CqRegion& segmentRegion = m_cacheRegions[side];
+
+	TqInt segRowLen = segmentRegion.width();
+	TqInt numPixels = segmentRegion.area();
 	seg->cache.resize(numPixels);
 
-	for(TqInt y = startY, sy = 0; y < endY; ++y, ++sy)
+	for(TqInt y = segmentRegion.yMin(), sy = 0, endY = segmentRegion.yMax(); y < endY; ++y, ++sy)
 	{
-		for(TqInt x = startX, sx = 0; x < endX; ++x, ++sx)
+		for(TqInt x = segmentRegion.xMin(), sx = 0, endX = segmentRegion.xMax(); x < endX; ++x, ++sx)
 		{
 			TqInt which = (y*m_DataRegion.width())+x;
 			seg->cache[(sy*segRowLen)+sx] = m_aieImage[which];
@@ -1669,23 +1747,37 @@ void CqBucketProcessor::buildCacheSegment(boost::shared_ptr<SqBucketCacheSegment
 	}
 }
 
-void CqBucketProcessor::applyCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg)
+void CqBucketProcessor::applyCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, const boost::shared_ptr<SqBucketCacheSegment>& seg)
 {
-	TqInt startX = (seg->side == SqBucketCacheSegment::right)? m_DataRegion.width() - seg->size : 0;
-	TqInt startY = (seg->side == SqBucketCacheSegment::bottom)? m_DataRegion.height() - seg->size : 0;
-	TqInt endX = (seg->side == SqBucketCacheSegment::left)? seg->size : m_DataRegion.width();
-	TqInt endY = (seg->side == SqBucketCacheSegment::top)? seg->size : m_DataRegion.height();
-	TqInt segRowLen = endX - startX;
+	CqRegion& segmentRegion = m_cacheRegions[side];
+	TqInt segRowLen = segmentRegion.width();
 
-	for(TqInt y = startY, sy = 0; y < endY; ++y, ++sy)
+	for(TqInt y = segmentRegion.yMin(), sy = 0, endY = segmentRegion.yMax(); y < endY; ++y, ++sy)
 	{
-		for(TqInt x = startX, sx = 0; x < endX; ++x, ++sx)
+		for(TqInt x = segmentRegion.xMin(), sx = 0, endX = segmentRegion.xMax(); x < endX; ++x, ++sx)
 		{
 			TqInt which = (y*m_DataRegion.width())+x;
 			g_pixelPool.free(m_aieImage[which]);
 			m_aieImage[which] = seg->cache[(sy*segRowLen)+sx];
+			m_hasValidSamples |= m_aieImage[which]->hasValidSamples();
 		}
 	}
 }
+
+
+void CqBucketProcessor::dropSegment(TqInt side)
+{
+	CqRegion& segmentRegion = m_cacheRegions[side]; 
+
+	for(TqInt y = segmentRegion.yMin(), sy = 0, endY = segmentRegion.yMax(); y < endY; ++y, ++sy)
+	{
+		for(TqInt x = segmentRegion.xMin(), sx = 0, endX = segmentRegion.xMax(); x < endX; ++x, ++sx)
+		{
+			TqInt which = (y*m_DataRegion.width())+x;
+			m_aieImage[which] = g_pixelPool.allocate(PixelXSamples(), PixelYSamples());
+		}
+	}
+}
+
 
 } // namespace Aqsis

@@ -60,7 +60,7 @@ namespace Aqsis {
  * Attributes which are guarenteed to be always present have specialized
  * methods to read and write them for convenience and efficiency.
  */
-class AQSISTEX_SHARE CqTexFileHeader
+class CqTexFileHeader
 {
 	private:
 		class CqTypeInfoHolder;
@@ -176,7 +176,7 @@ class AQSISTEX_SHARE CqTexFileHeader
  *
  * Hold onto a reference to std::type_info, and provide operator<
  */
-class AQSISTEX_SHARE CqTexFileHeader::CqTypeInfoHolder
+class CqTexFileHeader::CqTypeInfoHolder
 {
 	private:
 		const std::type_info& m_typeInfo;
@@ -230,6 +230,20 @@ inline void CqTexFileHeader::setHeight(TqInt height)
 inline CqChannelList& CqTexFileHeader::channelList()
 {
 	return m_channelList;
+}
+
+inline void CqTexFileHeader::setTimestamp()
+{
+	time_t long_time;
+	// Get time as long integer.
+	time( &long_time );
+	// Convert to local time.
+	struct tm* ct = localtime( &long_time );
+	set<Attr::DateTime>(
+			(boost::format("%04d:%02d:%02d %02d:%02d:%02d")
+			% (1900 + ct->tm_year) % (ct->tm_mon + 1) % ct->tm_mday
+			% ct->tm_hour % ct->tm_min % ct->tm_sec).str()
+		);
 }
 
 

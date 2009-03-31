@@ -29,6 +29,9 @@
 #define BUCKETPROCESSOR_H_INCLUDED 1
 
 #include	"aqsis.h"
+
+#include	<boost/array.hpp>
+
 #include	"bucket.h"
 #include	"channelbuffer.h"
 #include	"occlusion.h"
@@ -53,12 +56,13 @@ class CqBucketProcessor
 		/** Get the bucket to be processed */
 		const CqBucket* getBucket() const;
 
+		static void	setupCacheInformation();
+
 		/** Reset the status of the object */
 		void reset();
 
 		/** Prepare the data for the bucket to be processed */
-		void preProcess( TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
-				TqFloat clippingNear, TqFloat clippingFar);
+		void preProcess();
 
 		/** Process the bucket, basically rendering the waiting MPs
 		 */
@@ -89,8 +93,9 @@ class CqBucketProcessor
 		void	FilterBucket(bool fImager);
 		void	ExposeBucket();
 
-		void	buildCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg);
-		void	applyCacheSegment(boost::shared_ptr<SqBucketCacheSegment>& seg);
+		void	buildCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, boost::shared_ptr<SqBucketCacheSegment>& seg);
+		void	applyCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, const boost::shared_ptr<SqBucketCacheSegment>& seg);
+		void	dropSegment(TqInt side);
 
 		TqFloat	FilterXWidth() const;
 		TqFloat	FilterYWidth() const;
@@ -147,19 +152,20 @@ class CqBucketProcessor
 		/// The area of the samples array that will be sent to the display. 
 		CqRegion	m_DisplayRegion;
 
-		TqInt	m_DiscreteShiftX;
-		TqInt	m_DiscreteShiftY;
-		TqInt	m_PixelXSamples;
-		TqInt	m_PixelYSamples;
-		TqFloat	m_FilterXWidth;
-		TqFloat	m_FilterYWidth;
-
-		TqFloat	m_clippingNear;
-		TqFloat	m_clippingFar;
-
 		bool	m_hasValidSamples;
 
 		CqChannelBuffer	m_channelBuffer;
+
+		static TqInt	m_DiscreteShiftX;
+		static TqInt	m_DiscreteShiftY;
+		static TqInt	m_PixelXSamples;
+		static TqInt	m_PixelYSamples;
+		static TqFloat	m_FilterXWidth;
+		static TqFloat	m_FilterYWidth;
+
+		static TqFloat	m_clippingNear;
+		static TqFloat	m_clippingFar;
+		static boost::array<CqRegion, SqBucketCacheSegment::last> m_cacheRegions;
 };
 
 inline const CqRegion& CqBucketProcessor::DataRegion() const

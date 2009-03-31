@@ -663,11 +663,7 @@ void CqImageBuffer::RenderImage()
 #endif
 
 	bucketProcessors.resize(numConcurrentBuckets);
-
-	TqUint pixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
-	TqUint pixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-	TqFloat clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	TqFloat clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	CqBucketProcessor::setupCacheInformation();
 
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
@@ -681,8 +677,7 @@ void CqImageBuffer::RenderImage()
 			bucketProcessors[i].setBucket(&CurrentBucket());
 
 			// Prepare the bucket processor
-			bucketProcessors[i].preProcess( pixelXSamples, pixelYSamples, m_FilterXWidth, m_FilterYWidth,
-							clippingNear, clippingFar );
+			bucketProcessors[i].preProcess();
 
 #if ENABLE_MPDUMP
 			// Dump the pixel sample positions into a dump file

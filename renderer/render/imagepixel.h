@@ -277,6 +277,12 @@ class CqImagePixel : private boost::noncopyable
 		/// Return the number of references to the pixel
 		TqInt refCount() const;
 
+		/// Mark this pixel as having valid samples.
+		void markHasValidSamples();
+	
+		/// Check if the pixel has any valid samples.
+		bool hasValidSamples();
+
 	private:
 		void multiJitterIndices(TqInt* indices, TqInt numX, TqInt numY);
 		void initialiseDofOffsets();
@@ -299,6 +305,8 @@ class CqImagePixel : private boost::noncopyable
 		boost::scoped_array<TqInt> m_DofOffsetIndices;
 		/// Reference count for boost::intrusive_ptr
 		int m_refCount;
+		/// A flag to indicate successful sample hits in this pixel.
+		bool m_hasValidSamples;
 }; 
 
 /// Intrusive reference counted pointer to a pixel class.
@@ -441,6 +449,16 @@ inline void intrusive_ptr_release(Aqsis::CqImagePixel* p)
 {
 	if(--(p->m_refCount) == 0)
 		delete p;
+}
+
+inline void CqImagePixel::markHasValidSamples()
+{
+	m_hasValidSamples = true;
+}
+
+inline bool CqImagePixel::hasValidSamples()
+{
+	return m_hasValidSamples;
 }
 
 } // namespace Aqsis
