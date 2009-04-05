@@ -62,20 +62,34 @@ class CqOcclusionTree
 
 		/** \brief Setup the hierarchy for one bucket and cache samples.
 		 *
-		 * This should be called before rendering each bucket, it sets up the
+		 * This should be called before rendering each bucket; it sets up the
 		 * tree based on the sample positions, and associates individual
-		 * samples from the bucket to leaf nodes of the tree.
+		 * samples from the bucket to leaf nodes of the tree.  The association
+		 * is recorded by storing the computed leaf node index into the
+		 * occlusionIndex field of the sample point, packed together with the
+		 * index into the vector of depths for the leaf node.
 		 *
 		 * \param bp - the bucket processor for the current bucket.
 		 */
-		void setupTree(const CqBucketProcessor& bp);
+		void setupTree(CqBucketProcessor& bp);
 
-		/** \brief Rebuild the occlusion tree.
+		/** \brief Update the occlusion tree depth at the leaf node index.
 		 *
-		 * The tree is rebuilt based on the current occluding sample depths
-		 * from the bucket provided to setupTree()
+		 * If the depth is smaller than the current depth at the given leaf
+		 * node index, the depth is stored in the tree.
+		 *
+		 * \param depth - new depth for the leaf node
+		 * \param index - index of the leaf node.
 		 */
-		void updateDepths();
+		void setSampleDepth(TqFloat depth, TqInt index);
+
+		/** \brief Update the occlusion tree if necessary.
+		 *
+		 * Depths are propagated from the leaf nodes down to the the root if
+		 * setSampleDepth() actually changed the tree since the last time
+		 * updateTree() was called.
+		 */
+		void updateTree();
 
 		/** \brief Determine whether a bounded object can be culled.
 		 *
@@ -86,23 +100,27 @@ class CqOcclusionTree
 		bool canCull(const CqBound& bound) const;
 
 	private:
-		static TqInt treeIndexForPoint(TqInt treeDepth, const CqVector2D& p);
 		void propagateDepths();
 
-		typedef std::pair<const CqImagePixel*, const SqImageSample*> TqHitDataRef;
+		static TqInt treeIndexForPoint(TqInt treeDepth, const CqVector2D& p);
+
+		/// Number of bits in which to store the sample subindex within a leaf.
+		static const TqInt m_subIndexBits = 8;
 
 		/// min (top left) of the area straddled by the tree
 		CqVector2D m_treeBoundMin;
 		/// max (bottom right) of the area straddled by the tree
 		CqVector2D m_treeBoundMax;
-		/// Vector holding samples points associated with the leaf nodes.
-		std::vector<std::vector<TqHitDataRef> > m_leafSamples;
 		/// Binary tree of depths stored in an array.
 		std::vector<TqFloat> m_depthTree;
+		/// Depths of all sample points within each leaf node with > 1 associated samples.
+		std::vector<std::vector<TqFloat> > m_leafDepthLists;
 		/// The index in the depth tree of the first terminal node.
 		TqInt m_firstLeafNode;
 		/// Number of tree levels (having only the root gives m_numLevels == 1)
 		TqInt m_numLevels;
+		/// True if the tree needs depth propagation since the last time.
+		bool m_needsUpdate;
 };
 
 

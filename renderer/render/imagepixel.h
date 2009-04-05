@@ -120,6 +120,7 @@ struct SqSampleData : private boost::noncopyable
 	CqVector2D	position;			///< Sample position
 	CqVector2D	dofOffset;			///< Dof lens offset.
 	TqInt		subCellIndex;		///< Subcell index.
+	TqUint      occlusionIndex;     ///< Index for sample in occlusion tree.
 	TqFloat		time;				///< Float sample time.
 	TqFloat		detailLevel;		///< Float level-of-detail sample.
 	std::vector<SqImageSample> data;	///< Array of surface "hits" for this sample.
@@ -347,6 +348,7 @@ inline SqSampleData::SqSampleData()
 	: position(),
 	dofOffset(),
 	subCellIndex(0),
+	occlusionIndex(UINT_MAX),
 	time(0),
 	detailLevel(0),
 	data(),

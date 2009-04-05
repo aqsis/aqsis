@@ -1043,21 +1043,16 @@ void CqBucketProcessor::CalculateDofBounds()
 
 void CqBucketProcessor::RenderWaitingMPs()
 {
-	bool mpgsRendered = false;
+	for ( std::vector<boost::shared_ptr<CqMicroPolygon> >::iterator itMP = m_bucket->micropolygons().begin();
+			itMP != m_bucket->micropolygons().end();
+			itMP++ )
 	{
-		for ( std::vector<boost::shared_ptr<CqMicroPolygon> >::iterator itMP = m_bucket->micropolygons().begin();
-			  itMP != m_bucket->micropolygons().end();
-			  itMP++ )
-		{
-			CqMicroPolygon* mp = (*itMP).get();
-			RenderMicroPoly( mp );
-			mpgsRendered = true;
-		}
-
-		m_bucket->micropolygons().clear();
+		CqMicroPolygon* mp = (*itMP).get();
+		RenderMicroPoly( mp );
 	}
-	if(mpgsRendered)
-		m_OcclusionTree.updateDepths();
+	m_bucket->micropolygons().clear();
+
+	m_OcclusionTree.updateTree();
 }
 
 
@@ -1562,6 +1557,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		// 3) We don't need the entire set of samples for depth filtering.
 		hit = &occlHit;
 		hit->flags = SqImageSample::Flag_Valid;
+		m_OcclusionTree.setSampleDepth(D, sampleData.occlusionIndex);
 	}
 	else
 	{

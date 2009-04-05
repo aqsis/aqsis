@@ -43,24 +43,25 @@ namespace Aqsis {
 CqOcclusionTree::CqOcclusionTree()
 	: m_treeBoundMin(),
 	m_treeBoundMax(),
-	m_leafSamples(),
 	m_depthTree(),
+	m_leafDepthLists(),
 	m_firstLeafNode(0),
-	m_numLevels(0)
+	m_numLevels(0),
+	m_needsUpdate(false)
 {}
 
-void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
+void CqOcclusionTree::setupTree(CqBucketProcessor& bp)
 {
 	// Now setup the new array based tree.
 	// First work out how deep the tree needs to be.
 	TqInt numSamples = bp.numSamples();
 	TqInt depth = lceil(log2(numSamples));
 	m_numLevels = depth + 1;
-	TqInt numTotalNodes = lceil(std::pow(2.0, depth+1))-1;
-	TqInt numLeafNodes = lceil(std::pow(2.0, depth));
+	TqInt numLeafNodes = 1 << depth; // pow(2,depth)
+	TqInt numTotalNodes = 2*numLeafNodes - 1;
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafSamples.assign(numLeafNodes, std::vector<TqHitDataRef>());
+	m_leafDepthLists.assign(numTotalNodes, std::vector<TqFloat>());
 
 	// Compute and cache bounds of tree and culling area.
 	m_treeBoundMin = CqVector2D(bp.SampleRegion().xMin(), bp.SampleRegion().yMin());
@@ -69,11 +70,12 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 	CqVector2D treeDiag = m_treeBoundMax - m_treeBoundMin;
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
-	const std::vector<CqImagePixelPtr>& pixels = bp.pixels();
-	for(std::vector<CqImagePixelPtr>::const_iterator p = pixels.begin(),
+	std::vector<CqImagePixelPtr>& pixels = bp.pixels();
+	std::vector<bool> leafOccupied(numLeafNodes, false);
+	for(std::vector<CqImagePixelPtr>::iterator p = pixels.begin(),
 			e = pixels.end(); p != e; ++p)
 	{
-		const CqImagePixel& pixel = **p;
+		CqImagePixel& pixel = **p;
 		for(int i = 0, numSamples = pixel.numSamples(); i < numSamples; ++i)
 		{
 			// Convert samplePos into normalized units for finding sample position.
@@ -93,48 +95,112 @@ void CqOcclusionTree::setupTree(const CqBucketProcessor& bp)
 			// Check that the index is within the tree
 			assert(sampleNodeIndex < numTotalNodes);
 			// Check that the index is a leaf node.
-			assert((sampleNodeIndex*2)+1 >= numTotalNodes);
+			assert(sampleNodeIndex >= m_firstLeafNode);
+			TqInt leafIdx = sampleNodeIndex - m_firstLeafNode;
+			TqInt leafSubIdx = 0;
+			if(!leafOccupied[leafIdx])
+			{
+				m_depthTree[sampleNodeIndex] = FLT_MAX;
+				leafOccupied[leafIdx] = true;
+			}
+			else
+			{
+				// Add the initial entry to the leaf list which would have been
+				// taken care of in m_depthTree if there had only been one
+				// sample for this leaf.
+				if(m_leafDepthLists[leafIdx].empty())
+					m_leafDepthLists[leafIdx].push_back(FLT_MAX);
+				leafSubIdx = m_leafDepthLists[leafIdx].size();
+				// The leaf sub-index needs to fit into the number of bits
+				// avaliable.
+				assert(leafSubIdx < (1 << m_subIndexBits));
 
-			m_depthTree[sampleNodeIndex] = FLT_MAX;
-			m_leafSamples[sampleNodeIndex-m_firstLeafNode].push_back(
-					TqHitDataRef(&pixel, &pixel.SampleData(i).occludingHit));
+				m_leafDepthLists[leafIdx].push_back(FLT_MAX);
+			}
+			// Pack the leaf index and the index into the array of depths for
+			// the leaf together into a single int.
+			//
+			// NOTE: The number of samples per leaf node is only guarenteed
+			// to be small if the sample points are well-stratified.  With
+			// m_subIndexBits = 8 we have up to 16*16 samples per leaf node,
+			// which should be more than enough to make this code reasonably
+			// robust.  That leaves us 24 bits to store the leaf index which
+			// lets us deal with buckets of up to 256*256 with 16*16 subsamples
+			// which should be sufficient.
+			pixel.SampleData(i).occlusionIndex = (leafIdx << m_subIndexBits)
+				| (leafSubIdx & ((1 << m_subIndexBits) - 1));
+			assert((leafIdx << m_subIndexBits) >> m_subIndexBits == leafIdx);
 		}
 	}
 	// Fix up parent depths.
 	propagateDepths();
 }
 
-void CqOcclusionTree::updateDepths()
-{
-	if(m_depthTree.size() == 0)
-		return;
 
-	// Set the terminal node depths to the furthest of the sample points they contain.
-	for(TqInt i = 0, numLeafNodes = m_leafSamples.size(); i < numLeafNodes; ++i)
+void CqOcclusionTree::setSampleDepth(TqFloat depth, TqInt index)
+{
+	// Unpack the coded leaf index.
+	TqInt leafIdx = index >> m_subIndexBits;
+	std::vector<TqFloat>& depths = m_leafDepthLists[leafIdx];
+	if(depths.empty())
 	{
-		if(m_leafSamples[i].size() == 0)
-			continue;
-		TqFloat max = 0;
-		bool hit = false;
-		for(std::vector<TqHitDataRef>::iterator hitRef = m_leafSamples[i].begin(),
-				end = m_leafSamples[i].end(); hitRef != end; ++hitRef)
-		{
-			if(hitRef->second->flags & SqImageSample::Flag_Valid)
-			{
-				TqFloat depth = hitRef->first->
-					sampleHitData(*hitRef->second)[Sample_Depth];
-				if(depth > max)
-				{
-					max = depth;
-					hit = true;
-				}
-			}
-		}
-		m_depthTree[i + m_firstLeafNode] = hit ? max : FLT_MAX;
+		// Special case for a single sample per leaf.
+		//
+		// To be a useful update of the tree, we assume the new sample depth
+		// should occlude the previous one.
+		assert(m_depthTree[m_firstLeafNode + leafIdx] >= depth);
+		m_depthTree[m_firstLeafNode + leafIdx] = depth;
+		m_needsUpdate = true;
 	}
-	// Propagate the changes up the tree.
-	propagateDepths();
+	else
+	{
+		// Unpack the index into the array of sample depths for the leaf.
+		TqInt leafSubIdx = index & ((1 << m_subIndexBits) - 1);
+		assert(depths[leafSubIdx] >= depth);
+		depths[leafSubIdx] = depth;
+		// Compute the maximum depth of samples within the leaf node of the
+		// tree.  Taking the minimum depth wouldn't work, as it would result in
+		// the some surfaces being incorrectly culled.  This is what forces us
+		// to keep the entire list of depths for each leaf node rather than
+		// just a single minimum depth.
+		TqFloat max = 0;
+		for(std::vector<TqFloat>::iterator d = depths.begin(), end = depths.end();
+				d != end; ++d)
+		{
+			if(max < *d)
+				max = *d;
+		}
+		if(m_depthTree[m_firstLeafNode + leafIdx] > max)
+		{
+			m_depthTree[m_firstLeafNode + leafIdx] = max;
+			m_needsUpdate = true;
+		}
+	}
 }
+
+void CqOcclusionTree::updateTree()
+{
+	// Only update the depths if the leaf nodes have changed since the last
+	// update.
+	if(m_needsUpdate)
+		propagateDepths();
+	m_needsUpdate = false;
+}
+
+/** \brief Propagate depths from leaf nodes up the tree to the root.
+ *
+ * This ensures that the depths stored in the tree are valid, given
+ * that the leaf nodes are up to date.
+ */
+void CqOcclusionTree::propagateDepths()
+{
+	// Iterate over each level of the tree in turn, starting at one
+	// level below the leaf nodes, and ending at the root.  This
+	// algorithm is cache-coherent.
+	for(int i = static_cast<int>(std::pow(2.0, m_numLevels-1)) - 2; i >= 0; --i)
+		m_depthTree[i] = max(m_depthTree[2*i+1], m_depthTree[2*i+2]);
+}
+
 
 namespace {
 
@@ -263,20 +329,6 @@ TqInt CqOcclusionTree::treeIndexForPoint(TqInt treeDepth, const CqVector2D& p)
 		}
 	}
 	return index - 1;
-}
-
-/** \brief Propagate depths from leaf nodes up the tree to the root.
- *
- * This ensures that the depths stored in the tree are valid, given that the
- * leaf nodes are up to date.
- */
-void CqOcclusionTree::propagateDepths()
-{
-	// Iterate over each level of the tree in turn, starting at one
-	// level below the leaf nodes, and ending at the root.  This
-	// algorithm is cache-coherent.
-	for(int i = static_cast<int>(std::pow(2.0, m_numLevels-1)) - 2; i >= 0; --i)
-		m_depthTree[i] = max(m_depthTree[2*i+1], m_depthTree[2*i+2]);
 }
 
 } // namespace Aqsis
