@@ -348,7 +348,7 @@ inline SqSampleData::SqSampleData()
 	: position(),
 	dofOffset(),
 	subCellIndex(0),
-	occlusionIndex(UINT_MAX),
+	occlusionIndex(0),
 	time(0),
 	detailLevel(0),
 	data(),
