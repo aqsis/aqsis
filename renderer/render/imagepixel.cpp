@@ -35,6 +35,7 @@
 #include "aqsismath.h"
 #include "autobuffer.h"
 #include "random.h"
+#include "renderer.h"
 
 
 namespace Aqsis {
@@ -62,9 +63,6 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 	m_hitSamples.reserve(nSamples*SqImageSample::sampleSize);
 	for(TqInt i = 0; i < nSamples; ++i)
 		allocateHitData(m_samples[i].occludingHit);
-
-	// Create the DoF offsets
-	initialiseDofOffsets();
 }
 
 void CqImagePixel::swap(CqImagePixel& other)
@@ -77,249 +75,6 @@ void CqImagePixel::swap(CqImagePixel& other)
 	m_DofOffsetIndices.swap(other.m_DofOffsetIndices);
 	m_hasValidSamples = other.m_hasValidSamples;
 }
-
-/** \brief Compute subcell coordinates for multijittered sampling.
- *
- * Consider a pixel containing NxM samples points.  We'd like to place N*M
- * sample points inside the pixel so that they're uniformly distributed, but
- * not evenly spaced.  One way to do this is using a "multijitter" pattern
- * which satisfies two types of stratification:
- *   - The pixel is broken up into a NxM grid of subpixels and each of these
- *     rectangles contains exactly one sample point.  This is similar to simple
- *     jittered sampling.
- *   - If you divide the pixel into N*M columns or rows then exactly one
- *     sample is in each column and one in each row.  This is known as the
- *     Latin Hypercube property.
- *
- * Each subpixel is further broken up into MxN subcells - here's the case for
- * 2x3 sampling:
- *
- *  +-----------+-----------+
- *  |   .   .   |   .   . x |
- *  |...........|...........|
- *  |   .   . x |   .   .   |
- *  +-----------+-----------+
- *  |   .   .   |   . x .   |
- *  |...........|...........|
- *  |   . x .   |   .   .   |
- *  +-----------+-----------+
- *  |   .   .   | x .   .   |
- *  |...........|...........|
- *  | x .   .   |   .   .   |
- *  +-----------+-----------+
- *
- * The x's indicate the canonical starting position for sample points inside
- * the subpixels.  The position of each sample point within its subpixel can be
- * specified by integer (x,y) subcell coordinates.  That's what this function
- * computes and places in the "indices" array.
- *
- * The starting positions shown above satisfy the stratification properties,
- * but are too uniformly distributed.  The shuffling procedure swaps the
- * indices randomly while retaining the stratification to result in a
- * well-stratified but randomised set of indices.
- */
-void CqImagePixel::multiJitterIndices(TqInt* indices, TqInt numX, TqInt numY)
-{
-	static CqRandom random(42);
-
-	// Initialise the subcell coordinates to a regular and stratified but
-	// non-random initial pattern
-	for (TqInt iy = 0; iy < numY; iy++ )
-	{
-		for (TqInt ix = 0; ix < numX; ix++ )
-		{
-			TqInt which = 2*(iy*numX + ix);
-			indices[which] = iy;
-			indices[which+1] = ix;
-		}
-	}
-
-	// Shuffle y subcell coordinates within each row of subpixels.  This is
-	// an in-place "Fisher-Yates shuffle".  Conceptually this is equivilant to:
-	// given K objects, take an object randomly and place it on the end of a
-	// list, giving K-1 objects remaining.  Repeat until the list contains all
-	// K objects.
-	for (TqInt iy = 0; iy < numY; iy++ )
-	{
-		TqInt ix = numX;
-		while(ix > 1)
-		{
-			TqInt ix2 = random.RandomInt(ix);
-			--ix;
-			std::swap(indices[2*(iy*numX + ix) + 1],
-					indices[2*(iy*numX + ix2) + 1]);
-		}
-	}
-
-	// Shuffle x subcell coordinates within each column of subpixels.
-	for (TqInt ix = 0; ix < numX; ix++ )
-	{
-		TqInt iy = numY;
-		while(iy > 1)
-		{
-			TqInt iy2 = random.RandomInt(iy);
-			--iy;
-			std::swap(indices[2*(iy*numX + ix)],
-					indices[2*(iy2*numX + ix)]);
-		}
-	}
-}
-
-/** \brief Initialise the depth of field offsets
- *
- * We calculate DoF offsets in a multijittered grid inside the unit square and
- * then project them into the unit circle.  This means that the offset
- * positions fall into several DoF sub-bounding boxes as used in the sampling
- * code.  The sub-bounds allow the RenderMicroPoly function to check only a
- * subset of the samples within the any given pixel against a given
- * micropolygon.
- *
- * Note that there is an implicit symmetry to the way we number the bounding
- * boxes here and in the sampling code where the bb's are created (it should be
- * left to right, top to bottom).
- *
- * m_DofOffsetIndices is also filled in with the default non-shuffled order.
- */
-void CqImagePixel::initialiseDofOffsets()
-{
-	TqInt nSamples = numSamples();
-
-	if(nSamples == 1)
-	{
-		static CqRandom random(42);
-		m_samples[0].dofOffset = projectToCircle(
-				2*CqVector2D(random.RandomFloat(), random.RandomFloat()) - 1 );
-		m_DofOffsetIndices[0] = 0;
-	}
-	else
-	{
-		// Buffer to hold the subcell indices.  (The stack-allocated buffer is
-		// large enough for 10x10 samples.)
-		CqAutoBuffer<TqInt, 200> indices(nSamples);
-		multiJitterIndices(&indices[0], m_XSamples, m_YSamples);
-
-		TqFloat subPixelHeight = 1.0f / m_YSamples;
-		TqFloat subPixelWidth = 1.0f / m_XSamples;
-		TqFloat subcellWidth = 1.0f / nSamples;
-
-		TqInt which = 0;
-		for (TqInt iy = 0; iy < m_YSamples; iy++ )
-		{
-			for (TqInt ix = 0; ix < m_XSamples; ix++ )
-			{
-				// DoF offsets are created at the centre of the multijittered
-				// subcell indices, and shrunk to lie inside the unit circle.
-				m_samples[which].dofOffset = projectToCircle(
-					-1 + 2*CqVector2D(
-						subPixelWidth*ix + subcellWidth*(indices[2*which] + 0.5),
-						subPixelHeight*iy + subcellWidth*(indices[2*which+1] + 0.5))
-					);
-				m_DofOffsetIndices[which] = which;
-				which++;
-			}
-		}
-	}
-}
-
-
-//----------------------------------------------------------------------
-void CqImagePixel::setupJitterPattern(CqVector2D& offset, TqFloat opentime,
-		TqFloat closetime)
-{
-	TqInt nSamples = numSamples();
-	static CqRandom random(  53 );
-
-	// Initialize points to the "canonical" multi-jittered pattern.
-
-	if( m_XSamples == 1 && m_YSamples == 1)
-	{
-		m_samples[0].position = offset
-			+ CqVector2D(random.RandomFloat(), random.RandomFloat());
-	}
-	else
-	{
-		// Buffer to hold the subcell indices.  (The stack-allocated buffer is
-		// large enough for 10x10 samples.)
-		CqAutoBuffer<TqInt, 200> indices(nSamples);
-
-		multiJitterIndices(&indices[0], m_XSamples, m_YSamples);
-
-		TqFloat subPixelHeight = 1.0f / m_YSamples;
-		TqFloat subPixelWidth = 1.0f / m_XSamples;
-
-		// Use the shuffled subcell coordinates to compute the posititions of
-		// the samples.
-		TqFloat subcellWidth = 1.0f / nSamples;
-		TqInt which = 0;
-		for (TqInt iy = 0; iy < m_YSamples; iy++ )
-		{
-			for (TqInt ix = 0; ix < m_XSamples; ix++ )
-			{
-				TqInt xindex = indices[2*which];
-				TqInt yindex = indices[2*which+1];
-				// Sample positions are placed in a randomly jittered position
-				// within their subcell.  This avoids any remaining aliasing
-				// which would result if we placed the sample positions at the
-				// centre of the subcell.
-				m_samples[which].position = offset + CqVector2D(
-					(xindex+random.RandomFloat())*subcellWidth + ix*subPixelWidth,
-					(yindex+random.RandomFloat())*subcellWidth + iy*subPixelHeight);
-				// Initialise the subcell index (used to lookup filter values
-				// during filtering)
-				m_samples[which].subCellIndex = yindex*m_XSamples + xindex;
-				++which;
-			}
-		}
-	}
-
-	// Fill in the sample times for motion blur, detail levels for LOD and DoF.
-
-	TqFloat time = 0;
-	TqFloat dtime = 1.0f / nSamples;
-	// We use the same random offset for each sample within a pixel.
-	// This ensures the best possible coverage whilst still avoiding
-	// aliasing. (I reckon). should minimise the noise.
-	//
-	// TODO: In fact, this can be improved using a randomized low discrepency
-	// sequence (suitably shuffled or randomized between pixels)
-	TqFloat randomTime = random.RandomFloat( dtime );
-
-	TqFloat lod = 0;
-	TqFloat dlod = dtime;
-
-	for (TqInt i = 0; i < nSamples; i++ )
-	{
-		// Scale the value of time to the shutter time.
-		TqFloat t = time + randomTime;
-		t = ( closetime - opentime ) * t + opentime;
-		m_samples[i].time = t;
-		time += dtime;
-
-		m_samples[i].detailLevel = lod + random.RandomFloat( dlod );
-		lod += dlod;
-	}
-
-	std::vector<CqVector2D> tmpDofOffsets(nSamples);
-	// Store the DoF offsets in the canonical order to ensure that
-	// assumptions made about ordering during sampling still hold.
-	for(TqInt i = 0; i < nSamples; ++i)
-	{
-		tmpDofOffsets[i] = m_samples[m_DofOffsetIndices[i]].dofOffset;
-		m_DofOffsetIndices[i] = i;
-	}
-
-	// we now shuffle the dof offsets but remember which one went where.
-	for(TqInt i = 0; i < nSamples/2; i++)
-   	{
-		int k = random.RandomInt(nSamples/2) + nSamples/2;
-		if (k >= nSamples) k = nSamples - 1;
-		std::swap(m_DofOffsetIndices[i], m_DofOffsetIndices[k]);
-   	}
-
-	for(TqInt i = 0; i < nSamples; ++i)
-		m_samples[m_DofOffsetIndices[i]].dofOffset = tmpDofOffsets[i];
-}
-
 
 void CqImagePixel::setupGridPattern(CqVector2D& offset, TqFloat opentime,
 		TqFloat closetime)
@@ -562,6 +317,35 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 		}
 	}
 }
+
+void CqImagePixel::setSamples(IqSampler* sampler, CqVector2D& offset)
+{
+	const CqVector2D* positions = sampler->get2DSamples();
+	const CqVector2D* dofOffsets = sampler->get2DSamples();
+	const TqFloat* times = sampler->get1DSamples();
+	const TqFloat* lods = sampler->get1DSamples();
+
+	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+
+	TqInt subCellIndex = numSamples()/2;
+
+	TqInt which = 0;
+	for (TqInt iy = 0; iy < m_YSamples; iy++ )
+	{
+		for (TqInt ix = 0; ix < m_XSamples; ix++ )
+		{
+			m_samples[which].position = offset + positions[which];
+			m_samples[which].subCellIndex = subCellIndex;
+			m_samples[which].time = ( closetime - opentime ) * times[which] + opentime;
+			m_samples[which].detailLevel = lods[which];
+			m_samples[which].dofOffset = projectToCircle( -1 + 2 * (dofOffsets[which]) );
+			m_DofOffsetIndices[which] = which;
+			++which;
+		}
+	}
+}
+
 
 
 //---------------------------------------------------------------------

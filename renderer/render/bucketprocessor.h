@@ -35,6 +35,7 @@
 #include	"bucket.h"
 #include	"channelbuffer.h"
 #include	"occlusion.h"
+#include	"isampler.h"
 
 
 namespace Aqsis {
@@ -62,7 +63,7 @@ class CqBucketProcessor
 		void reset();
 
 		/** Prepare the data for the bucket to be processed */
-		void preProcess();
+		void preProcess(IqSampler* sampler);
 
 		/** Process the bucket, basically rendering the waiting MPs
 		 */

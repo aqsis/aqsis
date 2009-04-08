@@ -38,6 +38,8 @@
 #include	"micropolygon.h"
 #include	"bucketprocessor.h"
 #include	"threadscheduler.h"
+#include	"multijitter.h"
+#include	"grid.h"
 
 
 namespace Aqsis {
@@ -664,6 +666,16 @@ void CqImageBuffer::RenderImage()
 
 	bucketProcessors.resize(numConcurrentBuckets);
 	CqBucketProcessor::setupCacheInformation();
+	TqInt pixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	TqInt pixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+	CqMultiJitteredSampler jitteredSampler(pixelXSamples, pixelYSamples);
+	CqGridSampler gridSampler(pixelXSamples, pixelYSamples);
+
+	// Determine whether the user has asked for sample jittering
+	IqSampler* sampler = &jitteredSampler;
+	if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->GetIntegerOption( "Hider", "jitter" ))
+		if(useJitterPtr[0] == 0)
+			sampler = &gridSampler;
 
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
@@ -677,7 +689,7 @@ void CqImageBuffer::RenderImage()
 			bucketProcessors[i].setBucket(&CurrentBucket());
 
 			// Prepare the bucket processor
-			bucketProcessors[i].preProcess();
+			bucketProcessors[i].preProcess(&jitteredSampler);
 
 #if ENABLE_MPDUMP
 			// Dump the pixel sample positions into a dump file

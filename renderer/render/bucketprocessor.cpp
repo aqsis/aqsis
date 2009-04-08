@@ -144,7 +144,7 @@ void CqBucketProcessor::reset()
 	m_hasValidSamples = false;
 }
 
-void CqBucketProcessor::preProcess()
+void CqBucketProcessor::preProcess(IqSampler* sampler)
 {
 	assert(m_bucket);
 
@@ -187,9 +187,6 @@ void CqBucketProcessor::preProcess()
 			smaxy -= m_DiscreteShiftY*2;
 		m_SampleRegion = CqRegion(sminx, sminy, smaxx, smaxy);
 
-		TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-		TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-
 		// Allocate the image element storage if this is the first bucket
 		if(m_aieImage.empty())
 		{
@@ -212,47 +209,22 @@ void CqBucketProcessor::preProcess()
 			}
 		}
 
-		// Shuffle the Sample and DOF positions 
-		std::vector<CqImagePixelPtr>::iterator itPix;
-		TqInt size = m_aieImage.size();  
-		TqInt i = 0;
-		if (size > 1)
-		{
-			CqRandom rand(19);
-			for( itPix = m_aieImage.begin(), i=0 ; itPix <= m_aieImage.end(), i < size - 1; itPix++, i++)
-			{
-				TqInt other = i + rand.RandomInt(size - i);
-				if (other >= size) other = size - 1;
-				(*itPix)->swap(*m_aieImage[other]);
-			}
-		}
-
-		// Determine whether the user has asked for sample jittering
-		bool useJitter = true;
-		if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->
-				GetIntegerOption( "Hider", "jitter" ))
-		{
-			useJitter = static_cast<bool>(*useJitterPtr);
-		}
 
 		// Clear the sample points and and adjust them for the new bucket
 		// position, jittering the samples if necessary.
 		TqInt which = 0;
-		TqInt maxY = DataRegion().height();
-		TqInt maxX = DataRegion().width();
-		for ( TqInt ii = 0; ii < maxY; ii++ )
+		TqInt originY = DisplayRegion().yMin();
+		TqInt originX = DisplayRegion().xMin();
+		TqInt stride = DataRegion().width();
+		for ( TqInt y = SampleRegion().yMin(), yend = SampleRegion().yMax(); y < yend; ++y )
 		{
-			for ( TqInt j = 0; j < maxX; j++ )
+			for ( TqInt x = SampleRegion().xMin(), xend = SampleRegion().xMax(); x < xend; ++x )
 			{
 				// Setup the offsets
-				CqVector2D bPos2(DisplayRegion().xMin(), DisplayRegion().yMin());
-				bPos2 += CqVector2D(j - m_DiscreteShiftX, ii - m_DiscreteShiftY);
+				which = ((y-originY+m_DiscreteShiftY)*stride)+x-originX+m_DiscreteShiftX;
+				CqVector2D bPos2 = CqVector2D(x, y);
 				m_aieImage[which]->clear();
-				if(useJitter)
-					m_aieImage[which]->setupJitterPattern(bPos2, opentime, closetime);
-				else
-					m_aieImage[which]->setupGridPattern(bPos2, opentime, closetime);
-				which++;
+				m_aieImage[which]->setSamples(sampler, bPos2);
 			}
 		}
 		InitialiseFilterValues();

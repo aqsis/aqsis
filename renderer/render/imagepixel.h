@@ -37,6 +37,7 @@
 #include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
+#include	"isampler.h"
 
 namespace Aqsis {
 
@@ -284,9 +285,16 @@ class CqImagePixel : private boost::noncopyable
 		/// Check if the pixel has any valid samples.
 		bool hasValidSamples();
 
+		/** \brief Fill in the sample data using the given distribution object.
+		 *  Initialise the camera sample information for this pixel, including
+		 *  position, depth of field data, motion time and level of detail values.
+		 *
+		 *  \param sampler - A pointer to an object that provides a sample distribution
+		 *					 via the IqSampler interface.
+		 */
+		void setSamples(IqSampler* sampler, CqVector2D& offset);
+
 	private:
-		void multiJitterIndices(TqInt* indices, TqInt numX, TqInt numY);
-		void initialiseDofOffsets();
 		/// boost::intrusive_ptr required function, to increment the reference count.
 		friend		void intrusive_ptr_add_ref(CqImagePixel* p);
 		/// boost::intrusive_ptr required function, to decrement the reference count.
