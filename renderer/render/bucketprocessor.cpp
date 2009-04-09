@@ -157,13 +157,14 @@ void CqBucketProcessor::preProcess(IqSampler* sampler)
 		TqInt ySize = m_bucket->getYSize();
 
 		m_DisplayRegion = CqRegion( xPos, yPos, xPos+xSize, yPos+ySize );
+		m_DataRegion = CqRegion( xPos - m_DiscreteShiftX, yPos - m_DiscreteShiftY, 
+								 xPos + QGetRenderContext()->pImage()->XBucketSize() + m_DiscreteShiftX, 
+								 yPos + QGetRenderContext()->pImage()->YBucketSize() + m_DiscreteShiftY );
 
 		TqInt sminx = xPos - m_DiscreteShiftX;
 		TqInt sminy = yPos - m_DiscreteShiftY;
 		TqInt smaxx = xPos + xSize + m_DiscreteShiftX;
 		TqInt smaxy = yPos + ySize + m_DiscreteShiftY;
-
-		m_DataRegion = CqRegion( sminx, sminy, smaxx, smaxy );
 
 		// Adjust the sample region to take into account the crop window.
 		if ( sminx < QGetRenderContext()->cropWindowXMin() - m_DiscreteShiftX )
