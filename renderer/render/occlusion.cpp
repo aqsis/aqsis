@@ -40,97 +40,67 @@ namespace Aqsis {
 //----------------------------------------------------------------------
 // CqOcclusionTree implementation.
 
+
 CqOcclusionTree::CqOcclusionTree()
 	: m_treeBoundMin(),
 	m_treeBoundMax(),
 	m_depthTree(),
-	m_leafDepthLists(),
 	m_firstLeafNode(0),
 	m_numLevels(0),
+	m_splitXFirst(true),
 	m_needsUpdate(false)
 {}
 
 void CqOcclusionTree::setupTree(CqBucketProcessor& bp)
 {
+	CqRegion reg = bp.SampleRegion();
 	// Now setup the new array based tree.
 	// First work out how deep the tree needs to be.
-	TqInt numSamples = bp.numSamples();
-	TqInt depth = lceil(log2(numSamples));
+	TqInt xSamples = bp.PixelXSamples();
+	TqInt ySamples = bp.PixelYSamples();
+	TqInt numXSubpix = reg.width()*xSamples;
+	TqInt numYSubpix = reg.height()*ySamples;
+	// Get number of subdivisions required in x and y to cover all samples.
+	TqInt depthX = lceil(log2(numXSubpix));
+	TqInt depthY = lceil(log2(numYSubpix));
+	// Adjust the depths in the x or y directions to make sure that they don't
+	// differ by more than one since we always split the tree in alternate
+	// directions.
+	if(depthX < depthY)
+		depthX = depthY - 1;
+	else if(depthY < depthX)
+		depthY = depthX - 1;
+	m_splitXFirst = depthX >= depthY;
+	TqInt depth = depthX + depthY;
+
+	// Depth is the number of gaps between the levels, which is one less than
+	// the number of levels.
 	m_numLevels = depth + 1;
 	TqInt numLeafNodes = 1 << depth; // pow(2,depth)
 	TqInt numTotalNodes = 2*numLeafNodes - 1;
 	m_firstLeafNode = numLeafNodes - 1;
 	m_depthTree.assign(numTotalNodes, 0);
-	m_leafDepthLists.assign(numTotalNodes, std::vector<TqFloat>());
 
-	// Compute and cache bounds of tree and culling area.
-	m_treeBoundMin = CqVector2D(bp.SampleRegion().xMin(), bp.SampleRegion().yMin());
-	m_treeBoundMax = CqVector2D(bp.SampleRegion().xMax(), bp.SampleRegion().yMax());
+	// Compute and cache bounds of tree area.
+	m_treeBoundMin = CqVector2D(reg.xMin(), reg.yMin());
+	CqVector2D treeDiag = compMul(reg.diagonal(),
+		CqVector2D(TqFloat(1<<depthX)/numXSubpix, TqFloat(1<<depthY)/numYSubpix));
+	m_treeBoundMax = m_treeBoundMin + treeDiag;
 
-	CqVector2D treeDiag = m_treeBoundMax - m_treeBoundMin;
 	// Now associate sample points to the leaf nodes, and initialise the leaf
 	// node depths of those that contain sample points to infinity.
-	std::vector<CqImagePixelPtr>& pixels = bp.pixels();
-	std::vector<bool> leafOccupied(numLeafNodes, false);
-	for(std::vector<CqImagePixelPtr>::iterator p = pixels.begin(),
-			e = pixels.end(); p != e; ++p)
+	for(CqSampleIterator sample = bp.pixels(reg); sample.inRegion(); ++sample)
 	{
-		CqImagePixel& pixel = **p;
-		for(int i = 0, numSamples = pixel.numSamples(); i < numSamples; ++i)
-		{
-			// Convert samplePos into normalized units for finding sample position.
-			CqVector2D samplePos = pixel.SampleData(i).position - m_treeBoundMin;
-			samplePos /= treeDiag;
-			if(samplePos.x() < 0 || samplePos.x() > 1
-				|| samplePos.y() < 0 || samplePos.y() > 1)
-			{
-				// Ignore samples which are outside the bucket sample region;
-				// any surfaces hitting such samples must have been donated
-				// from a neighbouring bucket and we may cull surfaces which
-				// touch them.
-				continue;
-			}
-			// Locate leaf node for the sample position
-			TqInt sampleNodeIndex = treeIndexForPoint(depth+1, samplePos);
-			// Check that the index is within the tree
-			assert(sampleNodeIndex < numTotalNodes);
-			// Check that the index is a leaf node.
-			assert(sampleNodeIndex >= m_firstLeafNode);
-			TqInt leafIdx = sampleNodeIndex - m_firstLeafNode;
-			TqInt leafSubIdx = 0;
-			if(!leafOccupied[leafIdx])
-			{
-				m_depthTree[sampleNodeIndex] = FLT_MAX;
-				leafOccupied[leafIdx] = true;
-			}
-			else
-			{
-				// Add the initial entry to the leaf list which would have been
-				// taken care of in m_depthTree if there had only been one
-				// sample for this leaf.
-				if(m_leafDepthLists[leafIdx].empty())
-					m_leafDepthLists[leafIdx].push_back(FLT_MAX);
-				leafSubIdx = m_leafDepthLists[leafIdx].size();
-				// The leaf sub-index needs to fit into the number of bits
-				// avaliable.
-				assert(leafSubIdx < (1 << m_subIndexBits));
-
-				m_leafDepthLists[leafIdx].push_back(FLT_MAX);
-			}
-			// Pack the leaf index and the index into the array of depths for
-			// the leaf together into a single int.
-			//
-			// NOTE: The number of samples per leaf node is only guarenteed
-			// to be small if the sample points are well-stratified.  With
-			// m_subIndexBits = 8 we have up to 16*16 samples per leaf node,
-			// which should be more than enough to make this code reasonably
-			// robust.  That leaves us 24 bits to store the leaf index which
-			// lets us deal with buckets of up to 256*256 with 16*16 subsamples
-			// which should be sufficient.
-			pixel.SampleData(i).occlusionIndex = (leafIdx << m_subIndexBits)
-				| (leafSubIdx & ((1 << m_subIndexBits) - 1));
-			assert((leafIdx << m_subIndexBits) >> m_subIndexBits == leafIdx);
-		}
+		// Compute subpixel coordinates of the sample with the top-left of the
+		// bucket as origin and locate leaf node for the sample position.
+		TqInt sampleNodeIndex = treeIndexForPoint(m_numLevels, m_splitXFirst,
+				sample.subPixelX() - xSamples*reg.xMin(),
+				sample.subPixelY() - ySamples*reg.yMin());
+		// Check that the index is a leaf
+		assert(sampleNodeIndex >= m_firstLeafNode && sampleNodeIndex < numTotalNodes);
+		sample->occlusionIndex = sampleNodeIndex;
+		assert(m_depthTree[sampleNodeIndex] == 0);
+		m_depthTree[sampleNodeIndex] = FLT_MAX;
 	}
 	// Fix up parent depths.
 	propagateDepths();
@@ -139,43 +109,9 @@ void CqOcclusionTree::setupTree(CqBucketProcessor& bp)
 
 void CqOcclusionTree::setSampleDepth(TqFloat depth, TqInt index)
 {
-	// Unpack the coded leaf index.
-	TqInt leafIdx = index >> m_subIndexBits;
-	std::vector<TqFloat>& depths = m_leafDepthLists[leafIdx];
-	if(depths.empty())
-	{
-		// Special case for a single sample per leaf.
-		//
-		// To be a useful update of the tree, we assume the new sample depth
-		// should occlude the previous one.
-		assert(m_depthTree[m_firstLeafNode + leafIdx] >= depth);
-		m_depthTree[m_firstLeafNode + leafIdx] = depth;
-		m_needsUpdate = true;
-	}
-	else
-	{
-		// Unpack the index into the array of sample depths for the leaf.
-		TqInt leafSubIdx = index & ((1 << m_subIndexBits) - 1);
-		assert(depths[leafSubIdx] >= depth);
-		depths[leafSubIdx] = depth;
-		// Compute the maximum depth of samples within the leaf node of the
-		// tree.  Taking the minimum depth wouldn't work, as it would result in
-		// the some surfaces being incorrectly culled.  This is what forces us
-		// to keep the entire list of depths for each leaf node rather than
-		// just a single minimum depth.
-		TqFloat max = 0;
-		for(std::vector<TqFloat>::iterator d = depths.begin(), end = depths.end();
-				d != end; ++d)
-		{
-			if(max < *d)
-				max = *d;
-		}
-		if(m_depthTree[m_firstLeafNode + leafIdx] > max)
-		{
-			m_depthTree[m_firstLeafNode + leafIdx] = max;
-			m_needsUpdate = true;
-		}
-	}
+	assert(m_depthTree[index] >= depth);
+	m_depthTree[index] = depth;
+	m_needsUpdate = true;
 }
 
 void CqOcclusionTree::updateTree()
@@ -184,7 +120,6 @@ void CqOcclusionTree::updateTree()
 	// update.
 	if(m_needsUpdate)
 		propagateDepths();
-	m_needsUpdate = false;
 }
 
 /** \brief Propagate depths from leaf nodes up the tree to the root.
@@ -199,18 +134,19 @@ void CqOcclusionTree::propagateDepths()
 	// algorithm is cache-coherent.
 	for(int i = static_cast<int>(std::pow(2.0, m_numLevels-1)) - 2; i >= 0; --i)
 		m_depthTree[i] = max(m_depthTree[2*i+1], m_depthTree[2*i+2]);
+	m_needsUpdate = false;
 }
 
 
 namespace {
 
 /// Helper struct for tree traversal representing an area of one of the nodes.
-struct SqNodeStack
+struct SqNodeBound
 {
-	SqNodeStack()
+	SqNodeBound()
 		: minX(0), minY(0), maxX(0), maxY(0), index(0), splitInX(true)
 	{}
-	SqNodeStack(TqFloat minX, TqFloat minY, TqFloat maxX, TqFloat maxY, TqInt index, bool splitInX)
+	SqNodeBound(TqFloat minX, TqFloat minY, TqFloat maxX, TqFloat maxY, TqInt index, bool splitInX)
 		: minX(minX), minY(minY), maxX(maxX), maxY(maxY), index(index), splitInX(splitInX)
 	{}
 	/// Minimum extent of bounding box
@@ -232,18 +168,17 @@ bool CqOcclusionTree::canCull(const CqBound& bound) const
 
 	// Auto buffer with enough auto-allocated room for a stack which can
 	// traverse a depth-20 tree (2^20 = 1024 * 1024 samples in a bucket == lots :)
-	CqAutoBuffer<SqNodeStack, 40> stack(2*m_numLevels);
+	CqAutoBuffer<SqNodeBound, 40> stack(2*m_numLevels);
 	TqInt top = -1;
 	// The root node of tree covers the whole bound of the bucket.
-	stack[++top] = SqNodeStack(m_treeBoundMin.x(), m_treeBoundMin.y(),
-			m_treeBoundMax.x(), m_treeBoundMax.y(), 0, true);
-	SqNodeStack terminatingNode(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
+	stack[++top] = SqNodeBound(m_treeBoundMin.x(), m_treeBoundMin.y(),
+			m_treeBoundMax.x(), m_treeBoundMax.y(), 0, m_splitXFirst);
 
 	// Traverse the tree, starting at the root.  We want to find if any of the
 	// leaf nodes are further away than the bound.
 	while(top >= 0)
 	{
-		SqNodeStack node = stack[top--];
+		SqNodeBound node = stack[top--];
 
 		// If the bound intersects the node.
 		if( !(tminX > node.maxX || tminY > node.maxY ||
@@ -263,14 +198,14 @@ bool CqOcclusionTree::canCull(const CqBound& bound) const
 			if(node.splitInX)
 			{
 				TqFloat avgX = 0.5 * (node.maxX + node.minX);
-				stack[++top] = SqNodeStack(node.minX, node.minY, avgX, node.maxY, node.index * 2 + 1, !node.splitInX);
-				stack[++top] = SqNodeStack(avgX, node.minY, node.maxX, node.maxY, node.index * 2 + 2, !node.splitInX);
+				stack[++top] = SqNodeBound(node.minX, node.minY, avgX, node.maxY, node.index * 2 + 1, !node.splitInX);
+				stack[++top] = SqNodeBound(avgX, node.minY, node.maxX, node.maxY, node.index * 2 + 2, !node.splitInX);
 			}
 			else
 			{
 				TqFloat avgY = 0.5*(node.maxY + node.minY);
-				stack[++top] = SqNodeStack(node.minX, node.minY, node.maxX, avgY, node.index * 2 + 1, !node.splitInX);
-				stack[++top] = SqNodeStack(node.minX, avgY, node.maxX, node.maxY, node.index * 2 + 2, !node.splitInX);
+				stack[++top] = SqNodeBound(node.minX, node.minY, node.maxX, avgY, node.index * 2 + 1, !node.splitInX);
+				stack[++top] = SqNodeBound(node.minX, avgY, node.maxX, node.maxY, node.index * 2 + 2, !node.splitInX);
 			}
 		}
 	}
@@ -280,54 +215,68 @@ bool CqOcclusionTree::canCull(const CqBound& bound) const
 
 /** \brief Return the tree index for leaf node containing the given point.
  *
- * \param treeDepth - depth of the tree, (root node has treeDepth == 1).
+ * Here is an example binary spatial subdivision, which may be represented as a
+ * binary tree.  The array indices in which leaf nodes should be stored are
+ * shown.
  *
- * \param p - A point which we'd like the index for.  We assume that the
- *            possible points lie in the box [0,1) x [0,1)
+ * \verbatim
+ *
+ * +---------------+-0.0f
+ * |   |   |   |   |  |
+ * | 7 | 8 | 11| 12|  |       0
+ * |   |   |   |   |  |
+ * |-------|-------|  |      integer y-coords of leaf
+ * |   |   |   |   |  |
+ * | 9 | 10| 13| 14|  |       1
+ * |   |   |   |   |  v
+ * +---------------+-1.0f
+ * |               |
+ * 0.0f  ----->    1.0f
+ *
+ * integer x-coords of leaf
+ *   0   1   2   3
+ *
+ * \endverbatim
+ *
+ *
+ * \param numLevels - number of levels in the tree, (just the root node has
+ *                    numLevels == 1).
+ * \param (x,y) - coordinates of sample within the tree, counting from (0,0) in
+ *                the top left.
  *
  * \return An index for a 2D binary tree stored in a 0-based array.
  */
-TqInt CqOcclusionTree::treeIndexForPoint(TqInt treeDepth, const CqVector2D& p)
+TqInt CqOcclusionTree::treeIndexForPoint(TqInt numLevels, bool splitXFirst,
+		TqInt x, TqInt y)
 {
-	assert(treeDepth > 0);
-	assert(p.x() >= 0 && p.x() <= 1);
-	assert(p.y() >= 0 && p.y() <= 1);
+	assert(numLevels > 0);
+	// The coordinates must lie inside the tree bounds.
+	assert(x < (1 << (numLevels-!splitXFirst/2)));
+	assert(y < (1 << ((numLevels-splitXFirst)/2)));
 
-	const TqInt numXSubdivisions = treeDepth / 2;
-	const TqInt numYSubdivisions = (treeDepth-1) / 2;
-	// true if the last subdivison was along the x-direction.
-	const bool lastSubdivisionInX = (treeDepth % 2 == 0);
+	// The LSB should come from the coordinate which is split last before the
+	// leaves.  Swap here ensure that.
+	if(!splitXFirst ^ (numLevels % 2 == 1))
+		std::swap(x,y);
 
-	// integer coordinates of the point in terms of the subdivison which it
-	// falls into, staring from 0 in the top left.
-	TqInt x = static_cast<int>(floor(p.x() * (1 << numXSubdivisions)));
-	TqInt y = static_cast<int>(floor(p.y() * (1 << numYSubdivisions)));
-
-	// This is the base coordinate for the first leaf in a tree of depth "treeDepth".
-	TqInt index = 1 << (treeDepth-1);
-	if(lastSubdivisionInX)
+	// This is the base index for the first leaf in a tree with numLevels
+	// levels, stored in a 1-based array.
+	TqInt index = 1 << (numLevels-1);
+	// Interlace the bits of x and y to form the index.  Assuming that x has
+	// the last split before the leaves, every second bit of the index starting
+	// with the LSB should come from x.  Every other bit starting from the
+	// LSB+1 should come from y.
+	TqInt idxBit = 0;
+	while(x != 0 || y != 0)
 	{
-		// Every second bit of the index (starting with the LSB) should make up
-		// the coordinate x, so distribute x into index in that fashion.
-		//
-		// Similarly for y, except alternating with the bits of x (starting
-		// from the bit up from the LSB.)
-		for(TqInt i = 0; i < numXSubdivisions; ++i)
-		{
-			index |= (x & (1 << i)) << i
-				| (y & (1 << i)) << (i+1);
-		}
+		index |= (x & 1) <<  idxBit
+			   | (y & 1) << (idxBit+1);
+		x >>= 1;
+		y >>= 1;
+		idxBit += 2;
 	}
-	else
-	{
-		// This is the opposite of the above: x and y are interlaced as before,
-		// but now the LSB of y rather than x goes into the LSB of index.
-		for(TqInt i = 0; i < numYSubdivisions; ++i)
-		{
-			index |= (y & (1 << i)) << i
-				| (x & (1 << i)) << (i+1);
-		}
-	}
+	// Finally subtract one from the index to get to the location in a
+	// zero-based array.
 	return index - 1;
 }
 

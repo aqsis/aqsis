@@ -59,3 +59,9 @@ INSTALL(TARGETS aqsislib
 	ARCHIVE DESTINATION ${LIBDIR})
 
 SOURCE_GROUP("Header Files" FILES ${AQSISLIB_HDRS} ${RIB2RI_HDRS} ${DDMANAGER_HDRS} ${RAYTRACE_HDRS})
+
+#--------------------------------------------------
+# unit tests
+SET(LINKLIBS)
+INCLUDE(link.cmake)
+AQSIS_ADD_TESTS(${AQSISLIB_TEST_SRCS} LINKWITH ${LINKLIBS})

@@ -53,6 +53,38 @@ struct SqImageSample;
  * found in occluding samples connected to its child nodes.  This means that if
  * a surface is further away than the root node (for example) it can be safely
  * culled, and so on down the tree.
+ *
+ * The tree covers the samples in a bucket such that each leaf node corresponds
+ * to exactly one sample position.  In general, the number of samples in a
+ * bucket won't be a power of two.  In this case we allow the tree to "hang
+ * off the edge" of the bucket to the bottom right.  For example, consider 3x3
+ * samples in a bucket (small bucket!).  The next bigger occlusion tree that
+ * can cover the samples is 4x4; the covering looks like this:
+ * 
+ * \verbatim
+ * 
+ *           bucket extent
+ *           <------------>
+ *         
+ *          +====+====+====+----+
+ *     ^   ||    |    |    ||   |
+ *     |   ||    |    |    || 0 |
+ *     |   |+----+----+----+----+
+ *     |   ||    |    |    ||   |
+ *     |   ||    |    |    || 0 |
+ *     |   |+----+----+----+----+
+ *     |   ||    |    |    ||   |
+ *     v   ||    |    |    || 0 |
+ *          +====+====+====+----+
+ *          |    |    |    |    |
+ *          | 0  | 0  | 0  |  0 |
+ *          +----+----+----+----+
+ *
+ * \endverbatim
+ *
+ * Leaf nodes marked with a 0 are unused, with depths set to zero so they don't
+ * interfere with the tree updates.
+ *
  */
 class CqOcclusionTree
 {
@@ -102,7 +134,8 @@ class CqOcclusionTree
 	private:
 		void propagateDepths();
 
-		static TqInt treeIndexForPoint(TqInt treeDepth, const CqVector2D& p);
+		static TqInt treeIndexForPoint(TqInt treeDepth, bool splitXFirst,
+				TqInt x, TqInt y);
 
 		/// Number of bits in which to store the sample subindex within a leaf.
 		static const TqInt m_subIndexBits = 8;
@@ -113,14 +146,18 @@ class CqOcclusionTree
 		CqVector2D m_treeBoundMax;
 		/// Binary tree of depths stored in an array.
 		std::vector<TqFloat> m_depthTree;
-		/// Depths of all sample points within each leaf node with > 1 associated samples.
-		std::vector<std::vector<TqFloat> > m_leafDepthLists;
 		/// The index in the depth tree of the first terminal node.
 		TqInt m_firstLeafNode;
 		/// Number of tree levels (having only the root gives m_numLevels == 1)
 		TqInt m_numLevels;
+		/// True if the occlusion tree is split in the x direction first.
+		bool m_splitXFirst;
 		/// True if the tree needs depth propagation since the last time.
 		bool m_needsUpdate;
+	public:
+		/// Class to expose private functions for testing.
+		//TODO: refactor so that we don't need this!
+		class Test;
 };
 
 
