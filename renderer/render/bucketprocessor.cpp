@@ -1136,6 +1136,12 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 							if(!Bound.Contains2D( vecP ))
 								continue;
 
+							// Occlusion cull the micropoly bound against the current opaque sample hit.
+							const SqImageSample& occlHit = sampleData.occludingHit;
+							if((occlHit.flags & SqImageSample::Flag_Valid) &&
+								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+								continue;
+
 							// Check to see if the sample is within the sample's level of detail
 							if ( UsingLevelOfDetail)
 							{
@@ -1344,6 +1350,11 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 
 								if(!DofBound.Contains2D( vecP ))
 									continue;
+								// Occlusion cull the micropoly bound against the current opaque sample hit.
+								const SqImageSample& occlHit = sampleData.occludingHit;
+								if((occlHit.flags & SqImageSample::Flag_Valid) &&
+									Bound.vecMin.z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+									continue;
 
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
@@ -1374,6 +1385,12 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 							{
 								if(!Bound.Contains2D( vecP ))
 									continue;
+								// Occlusion cull the micropoly bound against the current opaque sample hit.
+								const SqImageSample& occlHit = sampleData.occludingHit;
+								if((occlHit.flags & SqImageSample::Flag_Valid) &&
+									Bound.vecMin.z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+									continue;
+
 								// Check to see if the sample is within the sample's level of detail
 								if ( UsingLevelOfDetail)
 								{
