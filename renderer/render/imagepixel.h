@@ -525,8 +525,8 @@ inline CqImagePixelPtr CqPixelPool::allocate()
 
 inline void CqPixelPool::free(CqImagePixelPtr& pixel)
 {
-	assert(pixel.XSamples() == m_xSamples);
-	assert(pixel.YSamples() == m_ySamples);
+	assert(pixel->XSamples() == m_xSamples);
+	assert(pixel->YSamples() == m_ySamples);
 	if(pixel->refCount() == 1)
 	{
 		m_pool.push_back(pixel);

@@ -335,7 +335,9 @@ inline CqSampleIterator::CqSampleIterator(CqBucketProcessor& processor, CqRegion
 	m_numSubPixels(processor.PixelXSamples()*processor.PixelYSamples()),
 	m_subPixelIndex(0)
 {
-	m_pixel = getPixel(m_pixelX, m_pixelY);
+	// Only get the pixel if the region is non-empty.
+	if(r.width() > 0 && r.height() > 0)
+		m_pixel = getPixel(m_pixelX, m_pixelY);
 }
 
 inline CqSampleIterator& CqSampleIterator::operator++()
