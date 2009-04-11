@@ -32,13 +32,15 @@
 
 #include	"bucket.h"
 #include	"channelbuffer.h"
-#include	"occlusion.h"
+#include	"imagepixel.h"
 #include	"isampler.h"
+#include	"occlusion.h"
 
 
 namespace Aqsis {
 
 class CqSampleIterator;
+class CqRenderer;
 
 /** \brief Reyes processor for geometry covering a bucket.
  *
@@ -56,15 +58,11 @@ class CqBucketProcessor
 	public:
 		/** Default constructor */
 		CqBucketProcessor();
-		/** Destructor */
-		~CqBucketProcessor();
 
 		/** Set the bucket to be processed */
 		void setBucket(CqBucket* bucket);
 		/** Get the bucket to be processed */
 		const CqBucket* getBucket() const;
-
-		static void	setupCacheInformation();
 
 		/** Reset the status of the object */
 		void reset();
@@ -99,7 +97,9 @@ class CqBucketProcessor
 		/// Get an iterator over the samples in the region r.
 		CqSampleIterator pixels(CqRegion& r);
 
+
 	private:
+		//--------------------------------------------------
 		friend class CqSampleIterator;
 
 		void	InitialiseFilterValues();
@@ -128,29 +128,42 @@ class CqBucketProcessor
 		 * \see CqBucket, CqImagePixel
 		 */
 		void	RenderMicroPoly( CqMicroPolygon* pMP );
+		/** This function assumes that either dof or mb or
+		 * both are being used. */
 		void	RenderMPG_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
-		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
-		void	StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData);
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
 		void	RenderMPG_Static( CqMicroPolygon* pMPG);
-		/** This function assumes that either dof or mb or
-		 * both are being used. */
+		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
+		void	StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData);
 		bool 	occlusionCullSurface(const boost::shared_ptr<CqSurface>& surface);
 		const CqBound& DofSubBound(TqInt index) const;
 
+		void setupCacheInformation();
 
+
+		//--------------------------------------------------
 		/// Pointer to the current bucket
 		CqBucket* m_bucket;
+
+		TqInt	m_PixelXSamples;
+		TqInt	m_PixelYSamples;
+		TqFloat	m_FilterXWidth;
+		TqFloat	m_FilterYWidth;
+		TqFloat	m_clippingNear;
+		TqFloat	m_clippingFar;
+		TqInt	m_DiscreteShiftX;
+		TqInt	m_DiscreteShiftY;
 
 		/// Bucket data for the current bucket
 		TqInt	m_NumDofBounds;
 
 		std::vector<CqBound>		m_DofBounds;
 		std::vector<CqImagePixelPtr>	m_aieImage;
+		CqPixelPool m_pixelPool;
 
-		/// Vector of filter weights precalculated.
+		/// Vector of precalculated filter weights
 		std::vector<TqFloat>	m_aFilterValues;
 
 		SqMpgSampleInfo m_CurrentMpgSampleInfo;
@@ -169,16 +182,7 @@ class CqBucketProcessor
 
 		CqChannelBuffer	m_channelBuffer;
 
-		static TqInt	m_DiscreteShiftX;
-		static TqInt	m_DiscreteShiftY;
-		static TqInt	m_PixelXSamples;
-		static TqInt	m_PixelYSamples;
-		static TqFloat	m_FilterXWidth;
-		static TqFloat	m_FilterYWidth;
-
-		static TqFloat	m_clippingNear;
-		static TqFloat	m_clippingFar;
-		static boost::array<CqRegion, SqBucketCacheSegment::last> m_cacheRegions;
+		boost::array<CqRegion, SqBucketCacheSegment::last> m_cacheRegions;
 };
 
 

@@ -665,7 +665,6 @@ void CqImageBuffer::RenderImage()
 #endif
 
 	bucketProcessors.resize(numConcurrentBuckets);
-	CqBucketProcessor::setupCacheInformation();
 	TqInt pixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 	TqInt pixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
 	CqMultiJitteredSampler jitteredSampler(pixelXSamples, pixelYSamples);

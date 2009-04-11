@@ -321,6 +321,38 @@ class CqImagePixel : private boost::noncopyable
 typedef	boost::intrusive_ptr<CqImagePixel>			CqImagePixelPtr;
 
 
+/** \brief A pool for reusing pixel data structures.
+ *
+ * Reusing pixels is useful, since it allows the allocated per-pixel
+ * sample hit storage to grow adaptively to the necessary size, after
+ * which no further allocation is necessary.
+ */
+class CqPixelPool
+{
+	public:
+		/** \brief Initialise the pool
+		 *
+		 * \param xSamples - number of subpixel samples in the x-direction
+		 * \param ySamples - number of subpixel samples in the y-direction
+		 */
+		CqPixelPool(TqInt xSamples, TqInt ySamples);
+
+		/// Allocate a new CqImagePixel, or return a pooled one.
+		CqImagePixelPtr allocate();
+
+		/** \brief Add a pixel to the pool to be reused, and reset the pointer.
+		 *
+		 * The pixel is only freed if the associated reference count is one.
+		 * If not, perform no action.
+		 */
+		void free(CqImagePixelPtr& pixel);
+	private:
+		TqInt m_xSamples;
+		TqInt m_ySamples;
+		std::vector<CqImagePixelPtr> m_pool;
+};
+
+
 //==============================================================================
 // Implementation details
 //==============================================================================
@@ -468,6 +500,40 @@ inline bool CqImagePixel::hasValidSamples()
 {
 	return m_hasValidSamples;
 }
+
+//------------------------------------------------------------------------------
+// CqPixelPool implementation
+inline CqPixelPool::CqPixelPool(TqInt xSamples, TqInt ySamples)
+	: m_xSamples(xSamples),
+	m_ySamples(ySamples),
+	m_pool()
+{ }
+
+inline CqImagePixelPtr CqPixelPool::allocate()
+{
+	if(!m_pool.empty())
+	{
+		CqImagePixelPtr pixel = m_pool.back();
+		m_pool.pop_back();
+		assert(pixel->XSamples() == m_xSamples);
+		assert(pixel->YSamples() == m_ySamples);
+		pixel->clear();
+		return pixel;
+	}
+	return CqImagePixelPtr(new CqImagePixel(m_xSamples, m_ySamples));
+}
+
+inline void CqPixelPool::free(CqImagePixelPtr& pixel)
+{
+	assert(pixel.XSamples() == m_xSamples);
+	assert(pixel.YSamples() == m_ySamples);
+	if(pixel->refCount() == 1)
+	{
+		m_pool.push_back(pixel);
+		pixel = 0;
+	}
+}
+
 
 } // namespace Aqsis
 

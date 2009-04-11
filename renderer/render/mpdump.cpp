@@ -20,7 +20,7 @@
 
 #include "mpdump.h"
 #include "micropolygon.h"
-#include "imagebuffer.h"
+#include "bucketprocessor.h"
 
 namespace Aqsis {
 

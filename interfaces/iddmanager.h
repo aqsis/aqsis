@@ -25,10 +25,10 @@
 
 //? Is .h included already?
 #ifndef IDDMANAGER_H_INCLUDED
-#define IDDMANAGER_H_INCLUDED 1
+#define IDDMANAGER_H_INCLUDED
 
 #include	"aqsis.h"
-#include	"color.h"
+
 #include	<map>
 #include	<boost/shared_ptr.hpp>
 

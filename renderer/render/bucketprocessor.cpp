@@ -28,82 +28,35 @@
 
 namespace Aqsis {
 
-
-/** \brief A pool to hold deleted pixels from cache boundaries.
- */
-class CqPixelPool
+CqBucketProcessor::CqBucketProcessor()
+	: m_bucket(0),
+	m_PixelXSamples(QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "PixelSamples")[0]),
+	m_PixelYSamples(QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "PixelSamples")[1]),
+	m_FilterXWidth(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "FilterWidth")[0]),
+	m_FilterYWidth(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "FilterWidth")[1]),
+	m_clippingNear(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "Clipping")[0]),
+	m_clippingFar(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "Clipping")[1]),
+	m_DiscreteShiftX(lfloor(m_FilterXWidth/2.0f)),
+	m_DiscreteShiftY(lfloor(m_FilterYWidth/2.0f)),
+	m_NumDofBounds(0),
+	m_DofBounds(),
+	m_aieImage(),
+	m_pixelPool(m_PixelXSamples, m_PixelYSamples),
+	m_aFilterValues(),
+	m_CurrentMpgSampleInfo(),
+	m_OcclusionTree(),
+	m_DataRegion(),
+	m_SampleRegion(),
+	m_DisplayRegion(),
+	m_hasValidSamples(false),
+	m_channelBuffer()
 {
-	private:
-		std::vector<CqImagePixelPtr> m_pool;
-	public:
-		/** \brief Allocate a new CqImagePixel, or return a pooled one.
-		 */
-		inline CqImagePixelPtr allocate(TqInt xRes, TqInt yRes)
-		{
-			if(!m_pool.empty())
-			{
-				CqImagePixelPtr pixel = m_pool.back();
-				m_pool.pop_back();
-				assert(pixel->XSamples() == xRes);
-				assert(pixel->YSamples() == yRes);
-				pixel->clear();
-				return pixel;
-			}
-			return CqImagePixelPtr(new CqImagePixel(xRes, yRes));
-		}
-
-		/** \brief Add a pixel to the pool to be reused, and reset the pointer.
-		 *
-		 * The pixel is only freed if the associated reference count is 1.  If
-		 * not, perform no action.
-		 */
-		inline void free(CqImagePixelPtr& pixel)
-		{
-			if(pixel->refCount() == 1)
-			{
-				m_pool.push_back(pixel);
-				pixel = 0;
-			}
-		}
-};
-
-// UGLY HACK!  This global pool should either go into the bucket processor or
-// somewhere else non-global!
-CqPixelPool g_pixelPool;
-
-TqInt	CqBucketProcessor::m_DiscreteShiftX;
-TqInt	CqBucketProcessor::m_DiscreteShiftY;
-TqInt	CqBucketProcessor::m_PixelXSamples;
-TqInt	CqBucketProcessor::m_PixelYSamples;
-TqFloat	CqBucketProcessor::m_FilterXWidth;
-TqFloat	CqBucketProcessor::m_FilterYWidth;
-TqFloat	CqBucketProcessor::m_clippingNear;
-TqFloat	CqBucketProcessor::m_clippingFar;
-boost::array<CqRegion, SqBucketCacheSegment::last> CqBucketProcessor::m_cacheRegions;
-
-CqBucketProcessor::CqBucketProcessor( ) :
-	m_bucket(0),
-	m_hasValidSamples(false)
-{
-}
-
-CqBucketProcessor::~CqBucketProcessor()
-{
+	setupCacheInformation();
 }
 
 void CqBucketProcessor::setupCacheInformation()
 {
-	/* Cache filter width and pixel sample sizes for later use. */
-	m_FilterXWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
-	m_FilterYWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
-	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
-	m_PixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-	m_clippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	m_clippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
-	m_DiscreteShiftX = lfloor(m_FilterXWidth/2.0f);
-	m_DiscreteShiftY = lfloor(m_FilterYWidth/2.0f);
-
-	/* Calculate and store the cache region sizes for overlap cacheing */
+	// Calculate and store the cache region sizes for overlap cacheing
 	TqInt overlapx = m_DiscreteShiftX*2;
 	TqInt overlapy = m_DiscreteShiftY*2;
 	TqInt width = QGetRenderContext()->pImage()->XBucketSize() + overlapx; 
@@ -202,7 +155,7 @@ void CqBucketProcessor::preProcess(IqSampler* sampler)
 			{
 				for ( TqInt j = 0; j < maxX; j++ )
 				{
-					m_aieImage[which] = g_pixelPool.allocate(PixelXSamples(), PixelYSamples());
+					m_aieImage[which] = m_pixelPool.allocate();
 					which++;
 				}
 			}
@@ -1672,7 +1625,7 @@ void CqBucketProcessor::buildCacheSegment(SqBucketCacheSegment::EqBucketCacheSid
 		{
 			TqInt which = (y*m_DataRegion.width())+x;
 			seg->cache[(sy*segRowLen)+sx] = m_aieImage[which];
-			m_aieImage[which] = g_pixelPool.allocate(PixelXSamples(), PixelYSamples());
+			m_aieImage[which] = m_pixelPool.allocate();
 		}
 	}
 }
@@ -1687,7 +1640,7 @@ void CqBucketProcessor::applyCacheSegment(SqBucketCacheSegment::EqBucketCacheSid
 		for(TqInt x = segmentRegion.xMin(), sx = 0, endX = segmentRegion.xMax(); x < endX; ++x, ++sx)
 		{
 			TqInt which = (y*m_DataRegion.width())+x;
-			g_pixelPool.free(m_aieImage[which]);
+			m_pixelPool.free(m_aieImage[which]);
 			m_aieImage[which] = seg->cache[(sy*segRowLen)+sx];
 			m_hasValidSamples |= m_aieImage[which]->hasValidSamples();
 		}
@@ -1704,7 +1657,7 @@ void CqBucketProcessor::dropSegment(TqInt side)
 		for(TqInt x = segmentRegion.xMin(), sx = 0, endX = segmentRegion.xMax(); x < endX; ++x, ++sx)
 		{
 			TqInt which = (y*m_DataRegion.width())+x;
-			m_aieImage[which] = g_pixelPool.allocate(PixelXSamples(), PixelYSamples());
+			m_aieImage[which] = m_pixelPool.allocate();
 		}
 	}
 }

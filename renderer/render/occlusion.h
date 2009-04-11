@@ -29,19 +29,15 @@
 #include "aqsis.h"
 
 #include <vector>
-#include <utility>
 
 #include "vector2d.h"
-#include "imagepixel.h"
 
 namespace Aqsis {
 
 class CqBound;
 class CqBucketProcessor;
-struct SqImagePixel;
-struct SqImageSample;
 
-/** \brief An tree for occlusion culling of bounded objects.
+/** \brief A tree for occlusion culling of bounded objects.
  *
  * Given the bound for an object, the task of CqOcclusionTree is to decide
  * whether the object is partially visible or completely hidden by previously
