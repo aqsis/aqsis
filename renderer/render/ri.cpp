@@ -1218,6 +1218,10 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 	VALIDATE_CONDITIONAL
 	EXCEPTION_TRY_GUARD
 
+	PARAM_CONSTRAINT_CHECK(function, !=, 0);
+	PARAM_CONSTRAINT_CHECK(xwidth, >, 0.0f);
+	PARAM_CONSTRAINT_CHECK(ywidth, >, 0.0f);
+
 	CACHE_RIPIXELFILTER
 
 	VALIDATE_RIPIXELFILTER

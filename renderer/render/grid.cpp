@@ -38,7 +38,6 @@ void CqGridSampler::setupGridPattern()
 {
 	TqInt nSamples = numSamples();
 	// Initialize positions to a grid.
-	TqInt subCellIndex = nSamples/2;
 	TqFloat xScale = 1.0/m_pixelXSamples;
 	TqFloat yScale = 1.0/m_pixelYSamples;
 	for(TqInt j = 0; j < m_pixelYSamples; j++)

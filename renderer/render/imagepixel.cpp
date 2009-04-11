@@ -81,7 +81,6 @@ void CqImagePixel::setupGridPattern(CqVector2D& offset, TqFloat opentime,
 {
 	TqInt nSamples = numSamples();
 	// Initialize positions to a grid.
-	TqInt subCellIndex = nSamples/2;
 	TqFloat xScale = 1.0/m_XSamples;
 	TqFloat yScale = 1.0/m_YSamples;
 	for(TqInt j = 0; j < m_YSamples; j++)
@@ -90,7 +89,6 @@ void CqImagePixel::setupGridPattern(CqVector2D& offset, TqFloat opentime,
 		{
 			m_samples[j*m_XSamples + i].position =
 				offset + CqVector2D(xScale*(i+0.5), yScale*(j+0.5));
-			m_samples[j*m_XSamples + i].subCellIndex = subCellIndex;
 		}
 	}
 
@@ -328,15 +326,12 @@ void CqImagePixel::setSamples(IqSampler* sampler, CqVector2D& offset)
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-	TqInt subCellIndex = numSamples()/2;
-
 	TqInt which = 0;
 	for (TqInt iy = 0; iy < m_YSamples; iy++ )
 	{
 		for (TqInt ix = 0; ix < m_XSamples; ix++ )
 		{
 			m_samples[which].position = offset + positions[which];
-			m_samples[which].subCellIndex = subCellIndex;
 			m_samples[which].time = ( closetime - opentime ) * times[which] + opentime;
 			m_samples[which].detailLevel = lods[which];
 			m_samples[which].dofOffset = projectToCircle( -1 + 2 * (dofOffsets[which]) );

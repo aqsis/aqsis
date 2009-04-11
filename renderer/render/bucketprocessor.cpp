@@ -464,9 +464,8 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 	TqInt ymax = m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
-	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
+	TqInt numSubPixels = ( PixelXSamples() * PixelYSamples() );
 
-	TqInt numperpixel = numsubpixels * numsubpixels;
 	TqInt	xlen = DataRegion().width();
 
 	TqInt SampleCount = 0;
@@ -516,10 +515,9 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 						CqImagePixelPtr* pie2 = pie;
 						for ( TqInt fx = -xmax; fx <= xmax; fx++ )
 						{
-							TqInt index = ( ( ymax * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							TqInt index = ( ( ymax * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numSubPixels;
 							// Now go over each subsample within the pixel
 							TqInt sampleIndex = sy * PixelXSamples();
-							TqInt sindex = index + ( sy * PixelXSamples() * numsubpixels );
 
 							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
 							{
@@ -528,8 +526,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 								vecS -= CqVector2D( xcent, ycent );
 								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 								{
-									TqInt cindex = sindex + sampleData.subCellIndex;
-									TqFloat g = m_aFilterValues[ cindex ];
+									TqFloat g = m_aFilterValues[index + sampleIndex];
 									gTot += g;
 									SqImageSample& opv = (*pie2)->occludingHit(sampleIndex);
 									if ( opv.flags & SqImageSample::Flag_Valid )
@@ -541,7 +538,6 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 									}
 								}
 								sampleIndex++;
-								sindex += numsubpixels;
 							}
 							pie2++;
 						}
@@ -573,7 +569,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 					{
 						CqImagePixelPtr* pie2 = pie;
 
-						TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + xmax ) * numperpixel;
+						TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + xmax ) * numSubPixels;
 						// Now go over each y subsample within the pixel
 						TqInt sx = PixelXSamples() / 2; // use the samples in the centre of the pixel.
 						TqInt sy = 0;
@@ -583,14 +579,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 
 						for ( sy = 0; sy < PixelYSamples(); sy++ )
 						{
-							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
 							SqSampleData const& sampleData = (*pie2)->SampleData( sampleIndex );
 							CqVector2D vecS = sampleData.position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
-								TqInt cindex = sindex + sampleData.subCellIndex;
-								TqFloat g = m_aFilterValues[ cindex ];
+								TqFloat g = m_aFilterValues[index + sampleIndex];
 								gTot += g;
 								if(sampleCounts[pixelIndex] > 0)
 								{
@@ -622,10 +616,10 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 								m_channelBuffer(x, y, channel_i->first)[i] = samples[channel_i->second.m_Offset + i] * oneOverGTot;
 						}
 
-						if ( SampleCount >= numsubpixels)
+						if ( SampleCount >= numSubPixels)
 							aCoverages[ i ] = 1.0;
 						else
-							aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+							aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numSubPixels );
 					}
 
 					i++;
@@ -645,30 +639,26 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 					SampleCount = 0;
 					std::valarray<TqFloat> samples( 0.0f, datasize);
 
-					TqInt fx, fy;
 					// Get the element at the upper left corner of the filter area.
 					ImageElement( x - xmax, y - ymax, pie );
-					for ( fy = -ymax; fy <= ymax; fy++ )
+					for (TqInt fy = -ymax; fy <= ymax; fy++, pie += xlen )
 					{
 						CqImagePixelPtr* pie2 = pie;
-						for ( fx = -xmax; fx <= xmax; fx++ )
+						for (TqInt fx = -xmax; fx <= xmax; fx++, ++pie2 )
 						{
-							TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							TqInt index = ((fy + ymax)*lceil(FilterXWidth()) + fx + xmax) * numSubPixels;
 							// Now go over each subsample within the pixel
-							TqInt sx, sy;
 							TqInt sampleIndex = 0;
-							for ( sy = 0; sy < PixelYSamples(); sy++ )
+							for (TqInt sy = 0; sy < PixelYSamples(); sy++ )
 							{
-								for ( sx = 0; sx < PixelXSamples(); sx++ )
+								for (TqInt sx = 0; sx < PixelXSamples(); sx++ )
 								{
-									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
 									SqSampleData const& sampleData = (*pie2)->SampleData( sampleIndex );
 									CqVector2D vecS = sampleData.position;
 									vecS -= CqVector2D( xcent, ycent );
 									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 									{
-										TqInt cindex = sindex + sampleData.subCellIndex;
-										TqFloat g = m_aFilterValues[ cindex ];
+										TqFloat g = m_aFilterValues[index+sampleIndex];
 										gTot += g;
 										SqImageSample& opv = (*pie2)->occludingHit(sampleIndex);
 										if ( opv.flags & SqImageSample::Flag_Valid )
@@ -682,9 +672,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 									sampleIndex++;
 								}
 							}
-							pie2++;
 						}
-						pie += xlen;
 					}
 
 
@@ -711,10 +699,10 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 								m_channelBuffer(x-DisplayRegion().xMin(), y-DisplayRegion().yMin(), channel_i->first)[i] = samples[channel_i->second.m_Offset + i] * oneOverGTot;
 						}
 
-						if ( SampleCount >= numsubpixels)
+						if ( SampleCount >= numSubPixels)
 							aCoverages[ i ] = 1.0;
 						else
-							aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+							aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numSubPixels );
 					}
 
 					i++;
@@ -871,75 +859,50 @@ void CqBucketProcessor::ExposeBucket()
 }
 
 //----------------------------------------------------------------------
-/** Initialise the static filter values.
+/** Initialise the cache of filter values.
  */
-
 void CqBucketProcessor::InitialiseFilterValues()
 {
 	if( !m_aFilterValues.empty() )
 		return;
 
 	// Allocate and fill in the filter values array for each pixel.
-	TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
-	TqInt numperpixel = numsubpixels * numsubpixels;
+	TqInt numSubPixels = PixelXSamples() * PixelYSamples();
+	TqInt numPixels = (lceil(FilterXWidth()) + 1) * (lceil(FilterYWidth()) + 1);
 
-	TqInt numvalues = static_cast<TqInt>( ( (lceil(FilterXWidth()) + 1) * (lceil(FilterYWidth()) + 1) ) * numperpixel );
-
-	m_aFilterValues.resize( numvalues );
+	m_aFilterValues.resize(numPixels*numSubPixels);
 
 	RtFilterFunc pFilter;
 	pFilter = QGetRenderContext() ->poptCurrent()->funcFilter();
 
-	// Sanity check
-	if( NULL == pFilter )
-		pFilter = RiBoxFilter;
-
-	TqFloat xmax = m_DiscreteShiftX;
-	TqFloat ymax = m_DiscreteShiftY;
+	TqInt xmax = m_DiscreteShiftX;
+	TqInt ymax = m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
 	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
-	TqFloat xfw = std::ceil(FilterXWidth());
-
-	TqFloat subcellwidth = 1.0f / numsubpixels;
-	TqFloat subcellcentre = subcellwidth * 0.5f;
+	TqInt xfw = lceil(FilterXWidth());
 
 	// Go over every pixel touched by the filter
-	TqInt px, py;
-	for ( py = static_cast<TqInt>( -ymax ); py <= static_cast<TqInt>( ymax ); py++ )
+	for(TqInt py = -ymax; py <= ymax; py++)
 	{
-		for( px = static_cast<TqInt>( -xmax ); px <= static_cast<TqInt>( xmax ); px++ )
+		for(TqInt px = -xmax; px <= xmax; px++)
 		{
-			// Get the index of the pixel in the array.
-			TqInt index = static_cast<TqInt>
-			              ( ( ( ( py + ymax ) * xfw ) + ( px + xmax ) ) * numperpixel );
-			TqFloat pfx = px - 0.5f;
-			TqFloat pfy = py - 0.5f;
+			// index of the start of the filter storage for the pixel.
+			TqInt subPixelIndex = ((py + ymax)*xfw + px + xmax)*numSubPixels;
 			// Go over every subpixel in the pixel.
-			TqInt sx, sy;
-			for ( sy = 0; sy < PixelYSamples(); sy++ )
+			for (TqInt sy = 0; sy < PixelYSamples(); sy++ )
 			{
-				for ( sx = 0; sx < PixelXSamples(); sx++ )
+				for (TqInt sx = 0; sx < PixelXSamples(); sx++, ++subPixelIndex )
 				{
-					// Get the index of the subpixel in the array
-					TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-					TqFloat sfx = static_cast<TqFloat>( sx ) / PixelXSamples();
-					TqFloat sfy = static_cast<TqFloat>( sy ) / PixelYSamples();
-					// Go over each subcell in the subpixel
-					TqInt cx, cy;
-					for ( cy = 0; cy < PixelXSamples(); cy++ )
-					{
-						for ( cx = 0; cx < PixelYSamples(); cx++ )
-						{
-							// Get the index of the subpixel in the array
-							TqInt cindex = sindex + ( ( cy * PixelYSamples() ) + cx );
-							TqFloat fx = ( cx * subcellwidth ) + sfx + pfx + subcellcentre;
-							TqFloat fy = ( cy * subcellwidth ) + sfy + pfy + subcellcentre;
-							TqFloat w = 0.0f;
-							if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
-								w = ( *pFilter ) ( fx, fy, std::ceil(FilterXWidth()), std::ceil(FilterYWidth()) );
-							m_aFilterValues[ cindex ] = w;
-						}
-					}
+					// Evaluate the filter at the centre of the subpixel.  The
+					// samples aren't actually at the subpixel centers but the
+					// small inaccuracy doesn't seem to affect image quality
+					// since the noise from the underlying image is much greater.
+					TqFloat fx = (sx + 0.5f) / PixelXSamples() + px - 0.5f;
+					TqFloat fy = (sy + 0.5f) / PixelYSamples() + py - 0.5f;
+					TqFloat w = 0;
+					if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
+						w = ( *pFilter ) ( fx, fy, std::ceil(FilterXWidth()), std::ceil(FilterYWidth()) );
+					m_aFilterValues[ subPixelIndex ] = w;
 				}
 			}
 		}
