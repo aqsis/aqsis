@@ -1101,81 +1101,76 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 
 		for(int iX = sX; iX < eX; ++iX, ++pie2)
 		{
-			// only bother sampling if the mpg is not occluded in this pixel.
-			//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+			if(!cachedHitData)
 			{
-				if(!cachedHitData)
-				{
-					pMPG->CacheHitTestValues(&hitTestCache);
-					cachedHitData = true;
-				}
+				pMPG->CacheHitTestValues(&hitTestCache);
+				cachedHitData = true;
+			}
 
-				// Now sample the micropolygon at several subsample positions
-				// within the pixel. The subsample indices range from (start_m, n)
-				// to (end_m-1, end_n-1).
-				register int m, n;
-				n = ( iY == sY ) ? in : 0;
-				int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
-				int start_m = ( iX == sX ) ? im : 0;
-				int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
-				int index_start = n*iXSamples + start_m;
+			// Now sample the micropolygon at several subsample positions
+			// within the pixel. The subsample indices range from (start_m, n)
+			// to (end_m-1, end_n-1).
+			register int m, n;
+			n = ( iY == sY ) ? in : 0;
+			int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
+			int start_m = ( iX == sX ) ? im : 0;
+			int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
+			int index_start = n*iXSamples + start_m;
 
-				for ( ; n < end_n; n++ )
+			for ( ; n < end_n; n++ )
+			{
+				int index = index_start;
+				for ( m = start_m; m < end_m; m++, index++ )
 				{
-					int index = index_start;
-					for ( m = start_m; m < end_m; m++, index++ )
+					SqSampleData const& sampleData = (*pie2)->SampleData( index );
+					const CqVector2D& vecP = sampleData.position;
+					const TqFloat time = 0.0;
+
+					CqStats::IncI( CqStats::SPL_count );
+
+					if(!Bound.Contains2D( vecP ))
+						continue;
+
+					// Occlusion cull the micropoly bound against the current opaque sample hit.
+					const SqImageSample& occlHit = sampleData.occludingHit;
+					if((occlHit.flags & SqImageSample::Flag_Valid) &&
+						Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+						continue;
+
+					// Check to see if the sample is within the sample's level of detail
+					if ( UsingLevelOfDetail)
 					{
-						SqSampleData const& sampleData = (*pie2)->SampleData( index );
-						//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+						TqFloat LevelOfDetail = sampleData.detailLevel;
+						if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 						{
-							const CqVector2D& vecP = sampleData.position;
-							const TqFloat time = 0.0;
-
-							CqStats::IncI( CqStats::SPL_count );
-
-							if(!Bound.Contains2D( vecP ))
-								continue;
-
-							// Occlusion cull the micropoly bound against the current opaque sample hit.
-							const SqImageSample& occlHit = sampleData.occludingHit;
-							if((occlHit.flags & SqImageSample::Flag_Valid) &&
-								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
-								continue;
-
-							// Check to see if the sample is within the sample's level of detail
-							if ( UsingLevelOfDetail)
-							{
-								TqFloat LevelOfDetail = sampleData.detailLevel;
-								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-								{
-									continue;
-								}
-							}
-
-							CqStats::IncI( CqStats::SPL_bound_hits );
-
-							// Now check if the subsample hits the micropoly
-							bool SampleHit;
-							TqFloat D;
-
-							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time );
-
-							if ( SampleHit )
-							{
-								sample_hits++;
-								StoreSample( pMPG, pie2->get(), index, D );
-							}
+							continue;
 						}
 					}
-					index_start += iXSamples;
+
+					CqStats::IncI( CqStats::SPL_bound_hits );
+
+					// Now check if the subsample hits the micropoly
+					bool SampleHit;
+					TqFloat D;
+
+					SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time );
+
+					if ( SampleHit )
+					{
+						sample_hits++;
+						StoreSample( pMPG, pie2->get(), index, D );
+					}
 				}
+				index_start += iXSamples;
 			}
-	/*        // Now compute the % of samples that hit...
+			/*
+			// Now compute the % of samples that hit...
 			TqInt scount = iXSamples * iYSamples;
 			TqFloat max_hits = scount * shd_rate;
 			TqInt hit_rate = ( sample_hits / max_hits ) / 0.125;
 			STATS_INC( MPG_sample_coverage0_125 + CLAMP( hit_rate - 1 , 0, 7 ) );
-	*/  }
+			*/
+		}
 	}
 }
 
@@ -1323,100 +1318,95 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 						// may have times within the current mb bounding box.
 						index = indexT0;
 					}
-					// only bother sampling if the mpg is not occluded in this pixel.
-					//if(mustDraw || bminz <= pie2->SampleData(index).m_occlusionBox->MaxOpaqueZ())
+					// loop over potential samples
+					do
 					{
+						SqSampleData const& sampleData = (*pie2)->SampleData( index );
+						const CqVector2D& vecP = sampleData.position;
+						const TqFloat time = sampleData.time;
 
-						// loop over potential samples
-						do
+						index++;
+
+						CqStats::IncI( CqStats::SPL_count );
+
+						if(IsMoving && (time < time0 || time > time1))
 						{
-							SqSampleData const& sampleData = (*pie2)->SampleData( index );
-							const CqVector2D& vecP = sampleData.position;
-							const TqFloat time = sampleData.time;
+							continue;
+						}
 
-							index++;
+						// check if sample lies inside mpg bounding box.
+						if ( UsingDof )
+						{
+							CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
 
-							CqStats::IncI( CqStats::SPL_count );
-
-							if(IsMoving && (time < time0 || time > time1))
-							{
+							if(!DofBound.Contains2D( vecP ))
 								continue;
-							}
+							// Occlusion cull the micropoly bound against the current opaque sample hit.
+							const SqImageSample& occlHit = sampleData.occludingHit;
+							if((occlHit.flags & SqImageSample::Flag_Valid) &&
+								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+								continue;
 
-							// check if sample lies inside mpg bounding box.
-							if ( UsingDof )
+							// Check to see if the sample is within the sample's level of detail
+							if ( UsingLevelOfDetail )
 							{
-								CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-
-								if(!DofBound.Contains2D( vecP ))
-									continue;
-								// Occlusion cull the micropoly bound against the current opaque sample hit.
-								const SqImageSample& occlHit = sampleData.occludingHit;
-								if((occlHit.flags & SqImageSample::Flag_Valid) &&
-									Bound.vecMin.z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
-									continue;
-
-								// Check to see if the sample is within the sample's level of detail
-								if ( UsingLevelOfDetail)
+								TqFloat LevelOfDetail = sampleData.detailLevel;
+								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
-									TqFloat LevelOfDetail = sampleData.detailLevel;
-									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-									{
-										continue;
-									}
-								}
-
-
-								CqStats::IncI( CqStats::SPL_bound_hits );
-
-								// Now check if the subsample hits the micropoly
-								bool SampleHit;
-								TqFloat D;
-
-								SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
-								if ( SampleHit )
-								{
-									sample_hits++;
-									// note index has already been incremented, so we use the previous value.
-									StoreSample( pMPG, pie2->get(), index-1, D );
+									continue;
 								}
 							}
-							else
+
+
+							CqStats::IncI( CqStats::SPL_bound_hits );
+
+							// Now check if the subsample hits the micropoly
+							bool SampleHit;
+							TqFloat D;
+
+							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+							if ( SampleHit )
 							{
-								if(!Bound.Contains2D( vecP ))
-									continue;
-								// Occlusion cull the micropoly bound against the current opaque sample hit.
-								const SqImageSample& occlHit = sampleData.occludingHit;
-								if((occlHit.flags & SqImageSample::Flag_Valid) &&
-									Bound.vecMin.z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
-									continue;
+								sample_hits++;
+								// note index has already been incremented, so we use the previous value.
+								StoreSample( pMPG, pie2->get(), index-1, D );
+							}
+						}
+						else
+						{
+							if(!Bound.Contains2D( vecP ))
+								continue;
+							// Occlusion cull the micropoly bound against the current opaque sample hit.
+							const SqImageSample& occlHit = sampleData.occludingHit;
+							if((occlHit.flags & SqImageSample::Flag_Valid) &&
+								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+								continue;
 
-								// Check to see if the sample is within the sample's level of detail
-								if ( UsingLevelOfDetail)
+							// Check to see if the sample is within the sample's level of detail
+							if ( UsingLevelOfDetail)
+							{
+								TqFloat LevelOfDetail = sampleData.detailLevel;
+								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
-									TqFloat LevelOfDetail = sampleData.detailLevel;
-									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-									{
-										continue;
-									}
-								}
-
-								CqStats::IncI( CqStats::SPL_bound_hits );
-
-								// Now check if the subsample hits the micropoly
-								bool SampleHit;
-								TqFloat D;
-
-								SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
-								if ( SampleHit )
-								{
-									sample_hits++;
-									// note index has already been incremented, so we use the previous value.
-									StoreSample( pMPG, pie2->get(), index-1, D );
+									continue;
 								}
 							}
-						} while (!UsingDof && index < indexT1);
-					}
+
+							CqStats::IncI( CqStats::SPL_bound_hits );
+
+							// Now check if the subsample hits the micropoly
+							bool SampleHit;
+							TqFloat D;
+
+							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+							if ( SampleHit )
+							{
+								sample_hits++;
+								// note index has already been incremented, so we use the previous value.
+								StoreSample( pMPG, pie2->get(), index-1, D );
+							}
+						}
+					} while (!UsingDof && index < indexT1);
 				}
 			}
 		}
