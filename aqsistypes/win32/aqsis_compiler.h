@@ -96,6 +96,7 @@
 #	define AQSISTEX_SHARE
 #	define RI_SHARE
 #	define SLXARGS_SHARE
+#	define CORE_SHARE
 
 #else 
 
@@ -122,6 +123,12 @@
 #	else
 #		define SLXARGS_SHARE __declspec(dllimport)
 #	endif
+
+#    ifdef CORE_EXPORTS
+#      define CORE_SHARE __declspec(dllexport)
+#    else
+#      define CORE_SHARE __declspec(dllimport)
+#    endif
 
 #endif	
 
