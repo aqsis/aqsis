@@ -40,7 +40,6 @@
 #include	"patch.h"
 #include	"polygon.h"
 #include	"nurbs.h"
-#include	"bilinear.h"
 #include	"quadrics.h"
 #include	"teapot.h"
 #include	"bunny.h"

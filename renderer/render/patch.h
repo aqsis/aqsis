@@ -32,7 +32,6 @@
 #include	"matrix.h"
 #include	"surface.h"
 #include	"vector4d.h"
-#include	"bilinear.h"
 
 namespace Aqsis {
 

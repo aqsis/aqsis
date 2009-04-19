@@ -24,21 +24,17 @@
 		\author Chris J. Foster (chris42f (at) gmail (dot) com)
 */
 
-#include	"aqsis.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include	<io.h>
 #endif
 
 #include	<map>
-#include	<vector>
 #include	<string>
 #include	<cstdio>
 #include	<cstring>
 
 #include	"shaderexecenv.h"
-#include	"shadervm.h"
-#include	"irenderer.h"
 #include	"ienvironmentsampler.h"
 #include	"iocclusionsampler.h"
 #include	"ishadowsampler.h"
@@ -46,8 +42,6 @@
 #include	"itexturesampler.h"
 #include	"texfileheader.h"
 #include	"channellist.h"
-#include	"version.h"
-#include	"logging.h"
 
 namespace Aqsis
 {

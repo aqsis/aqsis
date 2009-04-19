@@ -23,12 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-#include	"ishaderexecenv.h"
-//#include	"surface.h"
-#include	"refcount.h"
-
-#include	"shadervm.h"
+#include	"shaderexecenv.h"
 
 namespace Aqsis {
 

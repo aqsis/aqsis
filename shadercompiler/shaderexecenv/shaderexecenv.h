@@ -30,8 +30,6 @@
 #include	"aqsis.h"
 
 #include	<vector>
-#include	<stack>
-#include	<map>
 
 #include <boost/noncopyable.hpp>
 
@@ -42,10 +40,10 @@
 #include	"random.h"
 #include	"cellnoise.h"
 #include	"vector3d.h"
-#include	"vector4d.h"
 #include	"ishaderdata.h"
 #include	"ishader.h"
 #include	"ishaderexecenv.h"
+#include	"isurface.h"
 #include	"irenderer.h"
 #include	"matrix.h"
 
@@ -61,58 +59,6 @@ SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key fr
 SHADERCONTEXT_SHARE extern TqInt gDefUses;
 SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 
-#define	INIT_SO			bool __fVarying=false; /* A flag which will be set to indicate if the operation has any varying components. */ \
-						TqInt __iGrid; /* Integer index used to track progress through the varying data */
-#define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
-#define	FOR_EACH		__iGrid = 0; \
-						const CqBitVector& RS = RunningState(); \
-						do \
-						{ \
-							if(!__fVarying || RS.Value( __iGrid ) ) \
-							{
-#define	END_FOR				} \
-						}while( ( ++__iGrid < GridSize() ) && __fVarying);
-
-#define	BEGIN_UNIFORM_SECTION	__iGrid = 0;
-#define	END_UNIFORM_SECTION
-
-#define	BEGIN_VARYING_SECTION	FOR_EACH
-#define	END_VARYING_SECTION		END_FOR
-
-#define	GETFLOAT(Val)		TqFloat _aq_##Val; (Val)->GetFloat(_aq_##Val,__iGrid)
-#define	GETPOINT(Val)		CqVector3D _aq_##Val; (Val)->GetPoint(_aq_##Val,__iGrid)
-#define	GETVECTOR(Val)		CqVector3D _aq_##Val; (Val)->GetVector(_aq_##Val,__iGrid)
-#define	GETNORMAL(Val)		CqVector3D _aq_##Val; (Val)->GetNormal(_aq_##Val,__iGrid)
-#define	GETCOLOR(Val)		CqColor _aq_##Val; (Val)->GetColor(_aq_##Val,__iGrid)
-#define	GETSTRING(Val)		CqString _aq_##Val; (Val)->GetString(_aq_##Val,__iGrid)
-#define	GETBOOLEAN(Val)		bool _aq_##Val; (Val)->GetBool(_aq_##Val,__iGrid)
-#define	GETMATRIX(Val)		CqMatrix _aq_##Val; (Val)->GetMatrix(_aq_##Val,__iGrid)
-
-#define	SETFLOAT(Val, v)	(Val)->SetFloat(v,__iGrid)
-#define	SETPOINT(Val, v)	(Val)->SetPoint(v,__iGrid)
-#define	SETVECTOR(Val, v)	(Val)->SetVector(v,__iGrid)
-#define	SETNORMAL(Val, v)	(Val)->SetNormal(v,__iGrid)
-#define	SETCOLOR(Val, v)	(Val)->SetColor(v,__iGrid)
-#define	SETSTRING(Val, v)	(Val)->SetString(v,__iGrid)
-#define	SETBOOLEAN(Val, v)	(Val)->SetBool(v,__iGrid)
-#define	SETMATRIX(Val, v)	(Val)->SetMatrix(v,__iGrid)
-
-#define	FLOAT(Val)			_aq_##Val
-#define	POINT(Val)			_aq_##Val
-#define	VECTOR(Val)			_aq_##Val
-#define	NORMAL(Val)			_aq_##Val
-#define	COLOR(Val)			_aq_##Val
-#define	STRING(Val)			_aq_##Val
-#define	BOOLEAN(Val)		_aq_##Val
-#define	MATRIX(Val)			_aq_##Val
-
-
-#define	DEFPARAMIMPL		IqShaderData* Result, IqShader* pShader
-#define	DEFVOIDPARAMIMPL	IqShader* pShader
-#define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
-#define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
-
-
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
@@ -125,14 +71,6 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonco
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);
 		virtual	~CqShaderExecEnv();
-
-#ifdef _DEBUG
-
-		CqString className() const
-		{
-			return CqString("CqShaderExecEnv");
-		}
-#endif
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, 
