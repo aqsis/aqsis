@@ -131,6 +131,9 @@ ENDIF(AQSIS_USE_EXTERNAL_TINYXML)
 # Find build tools
 #-----------------
 INCLUDE(FindXsltproc)
+IF(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
+	MESSAGE(FATAL_ERROR "Aqsis requires xsltproc to build")
+ENDIF(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
 
 INCLUDE(FindFlexBison)
 
