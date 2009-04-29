@@ -23,23 +23,14 @@
 		\author Michel Joron joron@sympatico.ca
 */
 
-#include	"aqsis.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include	<io.h>
 #endif
 
-#include	<map>
-#include	<vector>
-#include	<string>
 #include	<cstring>
 
 #include	"shaderexecenv.h"
-#include	"shadervm.h"
-#include	"irenderer.h"
-#include	"itexturesampler.h"
-#include	"version.h"
-#include	"logging.h"
 
 namespace Aqsis
 {

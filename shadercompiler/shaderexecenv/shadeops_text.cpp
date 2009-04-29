@@ -23,18 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
 
-#include	<map>
-#include	<vector>
-#include	<string>
 #include	<cstring>
 
 #include	"shaderexecenv.h"
-#include	"shadervm.h"
-#include	"irenderer.h"
-#include	"version.h"
-#include	"logging.h"
+#include	"shadeop.h"
 
 namespace Aqsis {
 

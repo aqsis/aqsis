@@ -10,11 +10,12 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef	___ilightsource_Loaded___
-#define	___ilightsource_Loaded___
+#ifndef	ILIGHTSOURCE_H_INCLUDED
+#define	ILIGHTSOURCE_H_INCLUDED
 
-#include	"aqsis.h"
-#include	"matrix.h"
+#include "aqsis.h"
+
+#include "interfacefwd.h"
 
 namespace Aqsis {
 
@@ -55,7 +56,6 @@ struct IqLightsource
 	virtual	TqInt	vGridRes() const = 0;
 	virtual	TqInt	microPolygonCount() const = 0;
 	virtual	TqInt	shadingPointCount() const = 0;
-//	virtual	const CqMatrix&	matObjectToWorld() const = 0;
 	virtual	IqShaderData* Cs() = 0;
 	virtual	IqShaderData* Os() = 0;
 	virtual	IqShaderData* Ng() = 0;
@@ -88,4 +88,4 @@ struct IqLightsource
 
 } // namespace Aqsis
 
-#endif	//	___ilightsource_Loaded___
+#endif // ILIGHTSOURCE_H_INCLUDED

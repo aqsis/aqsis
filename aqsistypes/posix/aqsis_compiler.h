@@ -59,6 +59,7 @@
 #define AQSISTEX_SHARE
 #define RI_SHARE
 #define SLXARGS_SHARE
+#define CORE_SHARE
 
 #define AQSIS_EXPORT
 

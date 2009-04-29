@@ -131,6 +131,9 @@ ENDIF(AQSIS_USE_EXTERNAL_TINYXML)
 # Find build tools
 #-----------------
 INCLUDE(FindXsltproc)
+IF(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
+	MESSAGE(FATAL_ERROR "Aqsis requires xsltproc to build")
+ENDIF(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
 
 INCLUDE(FindFlexBison)
 
@@ -161,7 +164,7 @@ INCLUDE(FindResource)
 SET(MAJOR 1)
 SET(MINOR 5)
 SET(BUILD 0)
-SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
+SET(REVISION 0)
 
 
 #-------------------------------------------------------------------------------

@@ -23,24 +23,16 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
 
-#include	<map>
-#include	<vector>
-#include	<string>
 #include	<cstring>
 
 #if defined(REGEXP)
 #include        <regex.h>
 #endif
 
-#include	"shaderexecenv.h"
-#include	"shadervm.h"
-#include	"irenderer.h"
-#include	"isurface.h"
 #include	"ilightsource.h"
+#include	"shaderexecenv.h"
 #include	"version.h"
-#include	"logging.h"
 
 namespace Aqsis {
 

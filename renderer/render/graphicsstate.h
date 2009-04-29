@@ -23,20 +23,20 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is context.h included already?
 #ifndef CONTEXT_H_INCLUDED
-#define CONTEXT_H_INCLUDED 1
-
-#include	<vector>
-#include	<boost/shared_ptr.hpp>
-#include	<boost/enable_shared_from_this.hpp>
+#define CONTEXT_H_INCLUDED
 
 #include	"aqsis.h"
+
+#include	<vector>
+#include	<stack>
+
+#include	<boost/enable_shared_from_this.hpp>
+#include	<boost/shared_ptr.hpp>
 
 #include	"options.h"
 #include	"attributes.h"
 #include	"transform.h"
-//#include	"messages.h"
 #include	"lights.h"
 #include	"csgtree.h"
 
