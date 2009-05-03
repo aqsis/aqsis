@@ -394,11 +394,8 @@ void CqMipmap<TextureBufferT>::initLevels()
 		// check expected dimensions against actual dimensions.
 		if(levelWidth != m_texFile->width(i) || levelHeight != m_texFile->height(i))
 		{
-			m_levels.resize(i-1);
-			// TODO: Make this throw again after makeTexture works with env maps.
-			break;
-			//AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
-			//	"Mipmap level has incorrect size");
+			AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
+				"Mipmap level has incorrect size");
 		}
 		// set up scaling and offset transformation for this level.
 		TqFloat levelScale = 1.0/(1 << i);
