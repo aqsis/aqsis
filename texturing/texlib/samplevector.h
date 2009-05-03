@@ -42,7 +42,7 @@ namespace Aqsis {
  * range [0,1].
  */
 template<typename T>
-class AQSISTEX_SHARE CqSampleVector
+class CqSampleVector
 {
 	public:
 		/** \brief Construct a sample vector.
