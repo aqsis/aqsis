@@ -35,7 +35,19 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
-#include "ribparse_share.h"
+#ifdef AQSIS_SYSTEM_WIN32
+#	ifdef AQSIS_STATIC_LINK
+#		define RIBPARSE_SHARE
+#	else
+#		ifdef RIBPARSE_EXPORTS
+#			define RIBPARSE_SHARE __declspec(dllexport)
+#		else
+#			define RIBPARSE_SHARE __declspec(dllimport)
+#		endif
+#	endif
+#else
+#	define RIBPARSE_SHARE
+#endif
 
 namespace Aqsis {
 

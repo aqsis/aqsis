@@ -32,8 +32,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "ribparse_share.h"
-
 namespace Aqsis
 {
 
@@ -60,10 +58,7 @@ struct SqSourcePos
  * class therefore makes sure that any input buffering of a requested number of
  * characters is non-blocking.
  */
-#ifdef AQSIS_SYSTEM_WIN32
-class RIBPARSE_SHARE boost::noncopyable_::noncopyable;
-#endif
-class RIBPARSE_SHARE CqRibInputBuffer : boost::noncopyable
+class CqRibInputBuffer : boost::noncopyable
 {
 	public:
 		/// "Character" type returned from the get() method.

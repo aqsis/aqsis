@@ -4,7 +4,6 @@ SET(RIBPARSE_HDRS
 	iribparser.h
 	ribinputbuffer.h
 	riblexer.h
-	ribparse_share.h
 	ribparser.h
 	ribtoken.h
 )

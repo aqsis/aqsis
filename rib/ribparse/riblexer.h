@@ -38,7 +38,6 @@
 #include "iribparser.h" // for TqCommentCallback
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
-#include "ribparse_share.h"
 
 namespace Aqsis
 {
@@ -58,10 +57,7 @@ namespace Aqsis
  * resulting in significantly poor lexer performance (measured to be
  * approximately a factor of two slower on linux/g++/amd64).
  */
-#ifdef AQSIS_SYSTEM_WIN32
-class RIBPARSE_SHARE boost::noncopyable_::noncopyable;
-#endif
-class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
+class CqRibLexer : boost::noncopyable
 {
 	public:
 		/// Comment callback function type
