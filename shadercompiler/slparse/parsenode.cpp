@@ -21,7 +21,7 @@
 
 namespace Aqsis {
 
-static const char* gVariableTypeNames[] =
+const char* const gVariableTypeNames[] =
     {
         "invalid",
         "float",
@@ -37,7 +37,6 @@ static const char* gVariableTypeNames[] =
         "matrix",
         "hextuple",
     };
-//static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
 const char* gShaderTypeNames[] =
     {

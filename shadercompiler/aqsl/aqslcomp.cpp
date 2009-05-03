@@ -46,8 +46,6 @@
 
 #include	"libslparse.h"
 #include	"icodegen.h"
-#include	"codegenvm.h"
-#include 	"codegengraphviz.h"
 #include	"argparse.h"
 
 #include	"version.h"

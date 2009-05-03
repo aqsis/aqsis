@@ -158,6 +158,8 @@ enum EqVariableType
     Usage_Shift = 8,
 };
 
+/// \todo <b>Code review</b> This is an almost-duplicate from elsewhere (see primvartype.h)
+extern const char* const gVariableTypeNames[];
 
 enum EqShaderType
 {

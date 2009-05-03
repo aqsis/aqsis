@@ -26,19 +26,20 @@
 #ifndef LIBSLPARSE_H_INCLUDED
 #define LIBSLPARSE_H_INCLUDED
 
+#include "aqsis.h"
+
 #include <iostream>
 #include <string>
-
-#include	"aqsis.h"
-#include	"sstring.h"
-
 
 namespace Aqsis {
 
 struct IqParseNode;
 
-/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream );
+/// Parses an input stream, using the supplied callback object and sending
+/// error data to the supplied output stream
+bool Parse(std::istream& InputStream, const std::string& StreamName,
+		   std::ostream& ErrorStream );
+
 /// Resets the state of the parser, clearing any symbol tables, etc.
 void ResetParser();
 

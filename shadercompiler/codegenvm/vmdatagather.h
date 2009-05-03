@@ -41,6 +41,14 @@
 namespace Aqsis {
 
 
+/// Structure storing a variable reference translation.
+struct SqVarRefTranslator
+{
+	SqVarRef	m_From;
+	SqVarRef	m_To;
+};
+
+
 class CqCodeGenDataGather : public IqParseNodeVisitor
 {
 	public:

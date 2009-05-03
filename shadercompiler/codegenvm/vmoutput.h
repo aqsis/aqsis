@@ -29,6 +29,7 @@
 
 #include	<vector>
 #include	<deque>
+#include	<fstream>
 #include	<map>
 
 #include	"aqsis.h"
@@ -43,6 +44,7 @@ namespace Aqsis {
 
 
 #define	VM_SHADER_EXTENSION	".slx"
+
 
 class CqCodeGenOutput : public IqParseNodeVisitor
 {
