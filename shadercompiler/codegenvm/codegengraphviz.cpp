@@ -22,7 +22,7 @@
  * \author Chris Foster - chris42f (at) gmail (dot) com
 */
 
-#include "codegengraphviz.h"
+#include "icodegen.h"
 
 #include <fstream>
 #include <algorithm>

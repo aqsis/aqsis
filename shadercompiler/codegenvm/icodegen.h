@@ -17,25 +17,46 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+
 /** \file
- * \brief Code generator backend to output a graphviz dot diagram of the parse tree.
- * \author Chris Foster - chris42f (at) gmail (dot) com
+		\brief Compiler backend to output VM code.
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#ifndef CODEGENGRAPHVIZ_H_INCLUDED
-#define CODEGENGRAPHVIZ_H_INCLUDED
+#ifndef ICODEGEN_H_INCLUDED
+#define ICODEGEN_H_INCLUDED
 
-#include "aqsis.h"
+#include	"aqsis.h"
 
-#include <string>
-
-#include "iparsenode.h"
-#include "icodegen.h"
+#include	"iparsenode.h"
+#include	"ivardef.h"
 
 namespace Aqsis {
 
+//----------------------------------------------------------------------
+class IqCodeGen
+{
+	public:
+		virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;
+
+		virtual ~IqCodeGen()
+		{
+		};
+};
+
+
 //-----------------------------------------------------------------------
-/** \brief Code gen wrapper around CqParseTreeViz.
+/** \brief Compiler backend to output VM code.
+ */
+class CqCodeGenVM : public IqCodeGen
+{
+	public:
+		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );
+};
+
+
+//-----------------------------------------------------------------------
+/** \brief Compiler backend for AST visualisation.
  *
  * This code generator produces graphs of the provided AST in the graphviz dot
  * graph-description language.
@@ -48,7 +69,8 @@ class CqCodeGenGraphviz : public IqCodeGen
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );
 };
 
+//-----------------------------------------------------------------------
 
 } // namespace Aqsis
 
-#endif // CODEGENGRAPHVIZ_H_INCLUDED
+#endif	// ICODEGEN_H_INCLUDED

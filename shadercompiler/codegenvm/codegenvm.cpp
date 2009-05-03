@@ -23,20 +23,16 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include "icodegen.h"
 
 #include	<sstream>
-#include	<fstream>
 #include	<deque>
-#include	<string>
 #include	<map>
-
 
 #include	"version.h"
 #include	"vmdatagather.h"
 #include	"vmoutput.h"
-#include	"codegenvm.h"
-#include	"parsenode.h"
+#include	"iparsenode.h"
 
 
 namespace Aqsis {
@@ -108,7 +104,7 @@ IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTr
 			depth++;
 		}
 	}
-	return ( CqVarDef::GetVariablePtr( RealRef ) );
+	return ( IqVarDef::GetVariablePtr( RealRef ) );
 }
 
 

@@ -507,7 +507,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeMessagePassingFunction& MPF )
 
 	pExpr->Accept( *this );
 	SqVarRef temp( MPF.VarRef() );
-	IqVarDef* pVD = CqVarDef::GetVariablePtr( temp );
+	IqVarDef* pVD = IqVarDef::GetVariablePtr( temp );
 	if ( pVD )
 		pVD->IncUseCount();
 }
