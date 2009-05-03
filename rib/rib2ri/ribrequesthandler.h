@@ -30,14 +30,13 @@
 
 #include "iribparser.h"
 #include "ri_types.h"
-#include "rib2ri_share.h"
 #include "tokendictionary.h"
 
 namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
-class RIB2RI_SHARE CqRibRequestHandler : public IqRibRequestHandler
+class CqRibRequestHandler : public IqRibRequestHandler
 {
 	public:
 		/// Construct a request handler.
