@@ -36,7 +36,6 @@
 #include	"nurbs.h"
 #include	"points.h"
 #include	"lath.h"
-#include	"render.h"
 #include	"transform.h"
 #include	"texturemap_old.h"
 #include	"shadervm.h"
