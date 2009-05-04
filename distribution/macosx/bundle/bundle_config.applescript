@@ -22,92 +22,42 @@
 
 (*
 /** \file
-		\brief Exports the AQSISHOME to the users .bash_profile.
+		\brief Aqsis launcher
 		\author Tobias Sauerwein (tsauerwein@aqsis.org)
 */
 *)
 
---  Created by Tobias Sauerwein on 09.04.08.
+--  Created by Tobias Sauerwein on 29.04.09.
 --  Copyright 2008 Aqsis. All rights reserved.
 
+-- set up environment variables
+set aqsisHome to (POSIX path of (path to me as string))
+set aqsisPath to aqsisHome & "/Contents/MacOS"
 
-set bash_profile to ".bash_profile"
-set bashrc to ".bashrc"
-set profile to ".profile"
-
-set targetProfile to "~/"
-
-set aqsisFound to false
-
-(*Get AQSIS location*)
-tell application "Finder"
-	set aqsisHome to (path to me as string) & "Contents:MacOS:aqsis"
-	set aqsisPath to ""
-	if (exists file aqsisHome) then
-		set aqsisPath to quoted form of text 1 thru -2 of POSIX path of (path to me)
-		tell application "Finder"
-			set localProfile to POSIX path of ((home as string) & bash_profile)
-			set fileExists to my checkExistsFile(localProfile)
-			if fileExists is not equal to 1 then
-				set localProfile to POSIX path of ((home as string) & bashrc)
-				set fileExists to my checkExistsFile(localProfile)
-				if fileExists is not equal to 1 then
-					set localProfile to POSIX path of ((home as string) & profile)
-					set fileExists to my checkExistsFile(localProfile)
-					if fileExists is not equal to 1 then
-						do shell script ("touch " & localProfile)
-					end if
-				end if
-			end if
-			set targetProfile to localProfile
-		end tell
-		
-		quit me
-		
-		(*export $AQSISHOME path*)
-		set search to do shell script "/usr/bin/sed -n 's/^export AQSISHOME=.* # Entry managed by Aqsis Renderer$/&/p'  " & targetProfile
-		if search is "" then
-			set export to "/bin/echo 'export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer' >> " & targetProfile
-			do shell script export
-		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export AQSISHOME=" & aqsisPath & " # Entry managed by Aqsis Renderer%' " & targetProfile
-			do shell script export
-		end if
-		
-		(*export $PATH*)
-		set systemPath to "$AQSISHOME/Contents/MacOS:$PATH"
-		set search to do shell script "/usr/bin/sed -n 's/^export PATH=.* # Entry managed by Aqsis Renderer$/&/p'  " & targetProfile
-		if search is "" then
-			set export to "/bin/echo 'export PATH=" & systemPath & " # Entry managed by Aqsis Renderer' >> " & targetProfile
-			do shell script export
-		else
-			set export to "/usr/bin/sed -i.backup 's%^" & search & "$%export PATH=" & systemPath & " # Entry managed by Aqsis Renderer%' " & targetProfile
-			do shell script export
-		end if
-		
-		do shell script aqsisPath & "/Contents/MacOS/" & "eqsl &> /dev/null &"
-		
-	else
-		display dialog "Aqsis Renderer could not be found. Please visit our website for further assistance or to report this issue.
-
- http://www.aqsis.org"
-		quit me
-	end if
-end tell
+-- ask user how to use aqsis
+set question to display dialog ("You are about to launch Aqsis. Do you want to use the shell or eqsl, our graphical frontend?") with icon alias (POSIX file aqsisHome & "Contents:Resources:Aqsis.icns" as string) buttons {"eqsl", "shell"} default button 2
+set answer to button returned of question
 
 
-
-
-on checkExistsFile(theFilename)
-	set theTerminalCommand to "test -f " & theFilename & ";
-testResult=$?;
-if [[ $testResult = 0 ]]; then
-echo '1'
-elif [[ $testResult = 1 ]]; then
-echo '0'
-else
-echo '-1'
-fi"
+if answer is "eqsl" then
 	
-	return (do shell script theTerminalCommand) as integer
-end checkExistsFile
+	do shell script "PATH=\"" & aqsisPath & ":$PATH\" eqsl &> /dev/null &"
+	
+else if answer is "shell" then
+	
+	set AqsisVersion to (do shell script aqsisPath & "/aqsis -version | grep \"aqsis version\" | sed 's/.* \\([0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]*\\) .*/\\1/'")
+	
+	tell application "Terminal"
+		--activate
+		do script with command "export PATH=\"" & aqsisPath & ":$PATH\"; AQSISHOME=\"" & aqsisHome & "\"; export PS1=\"aqsis-" & AqsisVersion & " : \\W$ \";clear ; history -d $((HISTCMD-1))"
+		
+		tell window 1
+			set frontmost to true
+			set title displays custom title to true
+			set custom title to "Aqsis"
+		end tell
+	end tell
+	
+end if
+
+quit me
