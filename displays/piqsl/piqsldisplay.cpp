@@ -26,6 +26,7 @@
 
 #include "aqsis.h"
 
+#include <cstring>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -160,15 +161,14 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		// Check if the user has specified any options
 		char *hostname = NULL;
-		char *port = NULL;
-
 		if( DspyFindStringInParamList("host", &hostname, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_hostname = hostname;
 		else 
 			pImage->m_hostname =  "127.0.0.1";
 
+		char *port = NULL;
 		if( DspyFindStringInParamList("port", &port, paramCount, parameters ) == PkDspyErrorNone )
-			pImage->m_port = atoi(strdup(port));
+			pImage->m_port = atoi(port);
 		else 
 			pImage->m_port = 49515;
 

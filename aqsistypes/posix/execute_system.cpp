@@ -25,8 +25,10 @@
 
 #include "execute.h"
 
-#include <boost/scoped_array.hpp>
+#include <cstring> // strncpy, strlen
 #include <sstream>
+
+#include <boost/scoped_array.hpp>
 
 #include <signal.h>
 #include <sys/wait.h>

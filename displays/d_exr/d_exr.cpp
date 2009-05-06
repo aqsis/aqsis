@@ -121,6 +121,7 @@
 #	pragma warning(pop)
 #endif
 
+#include <cstring>
 #include <string>
 #include <map>
 #include <vector>

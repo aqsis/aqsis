@@ -3,6 +3,7 @@
 
 %{
 
+#include <cstring> // for strcspn, strchr
 #include <iostream>
 #include <fstream>
 #include <string>
