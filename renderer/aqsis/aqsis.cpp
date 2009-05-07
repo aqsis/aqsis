@@ -42,6 +42,7 @@
 
 #include <fcntl.h>
 
+#include <cstring>  // for memset
 #include <iostream>
 #include <iomanip>
 #include <fstream>

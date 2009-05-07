@@ -31,13 +31,15 @@
 #pragma implementation
 #endif // AQSIS_SYSTEM_WIN32
 
+#include "aqsis.h"
+
+#include <cstring>  // for memcpy, memset
 #include <math.h>
 #include <time.h>
 #include <memory.h>
 #include <float.h>
 #include <stdio.h>
 
-#include "aqsis.h"
 #include "renderer.h"
 #include "logging.h"
 

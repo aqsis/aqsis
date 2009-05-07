@@ -25,6 +25,7 @@
 
 #include	"aqsis.h"
 
+#include	<cstring> // for memcmp, strcmp
 #include	<time.h>
 #include	<boost/bind.hpp>
 #include	<boost/filesystem/fstream.hpp>
