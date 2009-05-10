@@ -98,7 +98,6 @@ ELSE(UNIX OR APPLE)
 		SET(AQSISTYPES_SYSTEM_HDRS
 			win32/aqsis_compiler.h
 			win32/socket_system.h
-			win32/unistd.h
 		)
 	ENDIF(WIN32)
 ENDIF(UNIX OR APPLE)

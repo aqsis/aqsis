@@ -22,14 +22,17 @@
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
-#ifdef	WIN32
-#include	<io.h>
-#endif
 #include "outstream.h"
+
+#ifdef AQSIS_SYSTEM_WIN32
+#	include <io.h>
+#else
+#	include <unistd.h>
+#endif
+
 #include "errno.h"
 #include "string.h"
 #include "error.h"
-#include <unistd.h>
 
 
 namespace libri2rib {
