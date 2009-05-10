@@ -18,6 +18,7 @@
 
 #include "matrix.h"
 #include "itransform.h"
+#include "sstring.h"
 #include "vecfwd.h"
 
 namespace Aqsis {

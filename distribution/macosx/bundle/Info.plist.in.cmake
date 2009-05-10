@@ -17,11 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>${MAJOR}.${MINOR}.${BUILD}</string>
+	<string>${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>${REVISION}${TYPE}</string>
+	<string>${SCM_REVISION}${BUILDTYPE}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.4.0</string>
 	<key>LSRequiresNativeExecution</key>

@@ -338,7 +338,7 @@ m_outputHistory->add(toolsHistoryTitle.c_str());}
         MenuItem m_menuHelpAbout {
           label About
           callback {string version = "eqsl version %s\\ncompiled %s %s";
-fl_message(version.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
+fl_message(version.c_str(), AQSIS_VERSION_STR_FULL, __DATE__, __TIME__);}
           xywh {0 0 100 20}
           code0 {\#include <FL/fl_ask.H>}
           code1 {\#include "version.h"}

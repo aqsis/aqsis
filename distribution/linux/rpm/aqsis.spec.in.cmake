@@ -2,7 +2,7 @@
 # Author: Aqsis Team (packages@aqsis.org)
 
 %define name          ${CMAKE_PROJECT_NAME}
-%define version       ${MAJOR}.${MINOR}.${BUILD}
+%define version       ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}
 %define release       1%{?dist}
 
 

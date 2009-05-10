@@ -84,7 +84,7 @@ std::map<TqInt, std::string>	g_mapTypeToName;
 
 void version( std::ostream& Stream )
 {
-	Stream << "piqsl version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+	Stream << "piqsl version " << AQSIS_VERSION_STR_FULL << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 

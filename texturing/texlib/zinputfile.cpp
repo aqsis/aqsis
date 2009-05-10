@@ -85,7 +85,7 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 {
 	const char zFileMagicNum[] = "Aqsis ZFile";
 	const TqInt magicNumSize = sizeof(zFileMagicNum)-1;
-	const TqInt versionNumSize = sizeof(VERSION_STR)-1;
+	const TqInt versionNumSize = sizeof(AQSIS_VERSION_STR)-1;
 	std::vector<char> buf(max(magicNumSize, versionNumSize));
 
 	// Read in magic number
@@ -99,7 +99,7 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 
 	// Read in Aqsis version.  We require this to match the current aqsis version.
 	inStream.read(&buf[0], versionNumSize);
-	if(!std::equal(buf.begin(), buf.begin() + versionNumSize, VERSION_STR)
+	if(!std::equal(buf.begin(), buf.begin() + versionNumSize, AQSIS_VERSION_STR)
 		|| inStream.gcount() != versionNumSize)
 	{
 		AQSIS_THROW_XQERROR(XqBadTexture, EqE_Version,

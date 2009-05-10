@@ -31,7 +31,7 @@ PROJECT_NAME           = "@AQSIS_PROJECT_NAME@"
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = "@MAJOR@.@MINOR@.@BUILD@@TYPE@ (revision @REVISION@)"
+PROJECT_NUMBER         = "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_BUILD@@BUILDTYPE@ (revision @SCM_REVISION@)"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 

@@ -55,7 +55,7 @@
 
 using namespace Aqsis;
 
-#define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
+#define	ZFILE_HEADER		"Aqsis ZFile" AQSIS_VERSION_STR
 #define	SHADOWMAP_HEADER	"Shadow"
 
 #include	<version.h>
@@ -197,7 +197,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-			sprintf( version, "%s %s (%s %s)", STRNAME_PRINT, VERSION_STR, __DATE__, __TIME__);
+			sprintf( version, "Aqsis %s (%s %s)", AQSIS_VERSION_STR, __DATE__, __TIME__);
 
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
@@ -356,7 +356,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
-		sprintf( version, "%s %s (%s %s)", STRNAME_PRINT, VERSION_STR, __DATE__, __TIME__);
+		sprintf( version, "Aqsis %s (%s %s)", AQSIS_VERSION_STR, __DATE__, __TIME__);
 		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );

@@ -1380,7 +1380,7 @@ void CqTextureMapOld::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, Tq
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	sprintf( version, "%s %s", "Aqsis", AQSIS_VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1416,7 +1416,7 @@ void CqTextureMapOld::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, Tq
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	sprintf( version, "%s %s", "Aqsis", AQSIS_VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1454,7 +1454,7 @@ void CqTextureMapOld::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, T
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	sprintf( version, "%s %s", "Aqsis", AQSIS_VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1548,7 +1548,7 @@ void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width
 	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
-	version << STRNAME << " " << VERSION_STR << std::ends;
+	version << "Aqsis" << " " << AQSIS_VERSION_STR << std::ends;
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1619,7 +1619,7 @@ void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong widt
 	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
-	version << STRNAME << " " << VERSION_STR << std::ends;
+	version << "Aqsis" << " " << AQSIS_VERSION_STR << std::ends;
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1686,7 +1686,7 @@ void CqTextureMapOld::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width
 		return;
 	}
 	std::ostringstream version;
-	version << STRNAME << " " << VERSION_STR << std::ends;
+	version << "Aqsis" << " " << AQSIS_VERSION_STR << std::ends;
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
