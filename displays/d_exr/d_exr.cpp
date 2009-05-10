@@ -151,7 +151,6 @@ halfFunction <half> id( halfID );
 halfFunction <half> piz12( round12log );
 
 #include "dspyhlpr.h"
-#include "dspyhlpr.c"
 
 class Image
 {
