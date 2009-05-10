@@ -9,8 +9,15 @@
  * RenderDotC (R) is a registered trademark of Dot C Software, Inc.
  */
 
-#ifndef DSPYHLPR_H
-#define DSPYHLPR_H
+#ifndef DSPYHLPR_H_INCLUDED
+#define DSPYHLPR_H_INCLUDED
+
+#include "ndspy.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 extern PtDspyError
 	DspyFindStringInParamList(const char *string, char **result,
@@ -31,5 +38,8 @@ extern PtDspyError
 extern void
 	DspyMemReverseCopy(unsigned char *t, const unsigned char *s, int len);
 
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif // DSPYHLPR_H_INCLUDED

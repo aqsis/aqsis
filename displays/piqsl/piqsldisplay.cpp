@@ -59,6 +59,7 @@
 #include <tinyxml.h>
 
 #include "ndspy.h"
+#include "dspyhlpr.h"
 #include "version.h"
 #include "socket.h"
 #include "logging.h"
@@ -79,17 +80,6 @@ struct SqPiqslDisplayInstance
 	friend std::istream& operator >>(std::istream &is,struct SqPiqslDisplayInstance &obj);
 	friend std::ostream& operator <<(std::ostream &os,const struct SqPiqslDisplayInstance &obj);
 };
-
-// From displayhelpers.c
-extern "C"
-{
-	PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
-	PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
-	PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
-	PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
-	PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
-	PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
-}
 
 static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock);
 static boost::shared_ptr<TiXmlDocument> recvXMLMessage(CqSocket& sock);

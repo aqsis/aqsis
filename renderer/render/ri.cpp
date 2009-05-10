@@ -49,7 +49,6 @@
 #include	"genpoly.h"
 #include	"points.h"
 #include	"curves.h"
-#include	"shadervm.h"
 #include	"procedural.h"
 #include	"logging.h"
 #include	"logging_streambufs.h"

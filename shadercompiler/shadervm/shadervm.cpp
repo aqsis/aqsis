@@ -42,6 +42,32 @@
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
+// Implement external interface functions for CqShaderVM:
+
+boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext)
+{
+	return boost::shared_ptr<IqShader>(new CqShaderVM(renderContext));
+}
+
+boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
+                                           std::istream& programFile,
+                                           const std::string& dsoPath)
+{
+	boost::shared_ptr<CqShaderVM> shader(new CqShaderVM(renderContext));
+	if(!dsoPath.empty())
+		shader->SetDSOPath(dsoPath.c_str());
+	shader->LoadProgram(&programFile);
+	return shader;
+}
+
+void shutdownShaderVM()
+{
+	CqShaderVM::ShutdownShaderEngine();
+}
+
+//------------------------------------------------------------------------------
+
 /*
  * Type, name and private hash key for the name
  */

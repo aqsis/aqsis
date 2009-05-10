@@ -23,17 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include <aqsis.h>
+#include "aqsis.h"
 
 #include <iostream>
-#include <logging.h>
-#include <logging_streambufs.h>
-
-#include <tiffio.h>
-
 #include <iomanip>
 #include <ios>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -43,8 +37,21 @@
 #include <time.h>
 #include <cstring>
 
-#include "ndspy.h"
+#include <tiffio.h>
+
+#ifndef	AQSIS_NO_FLTK
+#	include <FL/Fl.H>
+#	include <FL/Fl_Window.H>
+#	include <FL/Fl_Box.H>
+#	include <FL/Fl_Image.H>
+#	include <FL/fl_draw.H>
+#endif // AQSIS_NO_LTK
+
 #include "aqsismath.h"
+#include "dspyhlpr.h"
+#include "logging.h"
+#include "logging_streambufs.h"
+#include "ndspy.h"
 
 using namespace Aqsis;
 
@@ -53,29 +60,106 @@ using namespace Aqsis;
 
 #include	<version.h>
 
-#include "display.h"
+namespace {
 
-// From displayhelpers.c
-#ifdef __cplusplus
-extern "C"
+//------------------------------------------------------------------------------
+/** FLTK Widget used to show a constantly updating image.
+ *
+ */
+#ifndef	AQSIS_NO_FLTK
+class Fl_FrameBuffer_Widget : public Fl_Widget
 {
-#endif
-	PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
-	PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
-	PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
-	PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
-	PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
-	PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
-#ifdef __cplusplus
-}
-#endif
+	public:
+		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
+		{
+			w = imageW;
+			h = imageH;
+			d = depth;
+			image = imageD;
+		}
 
-namespace Aqsis {
+		void draw(void)
+		{
+			fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
+		}
+
+	private:
+		int w,h,d;
+		unsigned char* image;
+};
+#endif // AQSIS_NO_FLTK
+
+
+//------------------------------------------------------------------------------
+enum EqDisplayTypes
+{
+    Type_File = 0,
+    Type_Framebuffer,
+    Type_ZFile,
+    Type_ZFramebuffer,
+    Type_Shadowmap,
+};
+
+struct SqDisplayInstance
+{
+	SqDisplayInstance() :
+			m_filename(),
+			m_width(0),
+			m_height(0),
+			m_iFormatCount(0),
+			m_format(PkDspyUnsigned8),
+			m_entrySize(0),
+			m_lineLength(0),
+			m_compression(COMPRESSION_NONE), m_quality(90),
+			m_hostname(),
+			m_RenderWholeFrame(false),
+			m_imageType(Type_File),
+			m_append(0),
+			m_pixelsReceived(0),
+			m_data(0),
+			m_zfbdata(0)
+#ifndef	AQSIS_NO_FLTK
+			,
+			m_theWindow(0),
+			m_uiImageWidget(0),
+			m_uiImage(0)
+#endif // AQSIS_NO_FLTK
+	{}
+	std::string	m_filename;
+	TqInt		m_width;
+	TqInt		m_height;
+	TqInt		m_OriginalSize[2];
+	TqInt		m_origin[2];
+	TqInt		m_iFormatCount;
+	TqInt		m_format;
+	TqInt		m_entrySize;
+	TqInt		m_lineLength;
+	uint16		m_compression, m_quality;
+	std::string	m_hostname;
+	bool		m_RenderWholeFrame;
+	TqInt		m_imageType;
+	TqInt		m_append;
+	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];
+	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
+	// The number of pixels that have already been rendered (used for progress reporting)
+	TqInt		m_pixelsReceived;
+
+	void*		m_data;
+	unsigned char*	m_zfbdata;
+
+#ifndef	AQSIS_NO_FLTK
+
+	Fl_Window*	m_theWindow;
+	Fl_FrameBuffer_Widget* m_uiImageWidget;
+	Fl_RGB_Image*	m_uiImage;
+#endif // AQSIS_NO_FLTK
+};
+//------------------------------------------------------------------------------
 
 
 static char datetime[21];
 static time_t start;
-static CqString description;
+static std::string description;
 
 //----------------------------------------------------------------------
 /** SaveAsShadowMap() Save as a tiff an shadowmap
@@ -408,7 +492,7 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &
 }
 
 
-} // namespace Aqsis
+} // unnamed namespace
 
 
 extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,

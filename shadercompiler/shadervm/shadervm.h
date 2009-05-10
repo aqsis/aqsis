@@ -36,7 +36,6 @@
 #include	"bitvector.h"
 #include	"vector3d.h"
 #include	"color.h"
-#include	"exception.h"
 #include	"sstring.h"
 #include	"matrix.h"
 #include	"noise.h"
@@ -105,17 +104,6 @@ union UsProgramElement
 	SqLabel	m_Label;				///< Program label.
 	SqDSOExternalCall *m_pExtCall	;		///< Call a DSO function
 };
-
-//----------------------------------------------------------------------
-/** \class XqBadShader
- * \brief Exception thrown when loading a shader program fails for some reason.
- *
- * If a compiled shader was generated with the wrong version of aqsis, contains
- * unrecognized shadops or is otherwise invalid, this is the exception to
- * throw.
- */
-AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
-
 
 //----------------------------------------------------------------------
 /** \class CqShaderVM

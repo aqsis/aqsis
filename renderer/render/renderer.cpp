@@ -39,7 +39,7 @@
 #include	"lath.h"
 #include	"transform.h"
 #include	"texturemap_old.h"
-#include	"shadervm.h"
+#include	"ishader.h"
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
@@ -154,7 +154,7 @@ CqRenderer::~CqRenderer()
 	FlushShaders();
 
 	// Shutdown the shaderVM.
-	CqShaderVM::ShutdownShaderEngine();
+	shutdownShaderVM();
 
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
@@ -1142,24 +1142,21 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 		// we must initialize the shader here.  non-default
 		//  shaders are initialized in RiSurfaceV()
 		pMapCheck->SetTransform( QGetRenderContext() ->ptransCurrent() );
-		CqShaderVM* pCreated = static_cast<CqShaderVM*>( pMapCheck.get() );
-		pCreated->PrepareDefArgs();
-
+		pMapCheck->PrepareDefArgs();
 		return pMapCheck;
 	}
 
 	// insert the default surface template into the map
-	boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
-	pRet->SetType( Type_Surface );
-	CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
+	boost::shared_ptr<IqShader> pShader = createShaderVM(this);
+	pShader->SetType( Type_Surface );
 	pShader->SetstrName( "_def_" );
 	pShader->DefaultSurface();
 	pShader->SetTransform( ptransCurrent() );
 	pShader->PrepareDefArgs();
-	m_Shaders[key] = pRet;
+	m_Shaders[key] = pShader;
 
 	// return a clone of the default surface template
-	boost::shared_ptr<IqShader> newShader(pRet->Clone());
+	boost::shared_ptr<IqShader> newShader(pShader->Clone());
         newShader->SetType ( Type_Surface );
 	m_InstancedShaders.push_back(newShader);
 	return (newShader);
@@ -1200,25 +1197,24 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	boost::filesystem::ifstream shaderFile(shaderPath);
 	if(shaderFile)
 	{
-		boost::shared_ptr<CqShaderVM> pRet(new CqShaderVM(this));
-
-		const CqString* poptDSOPath = QGetRenderContext()->poptCurrent()
-			->GetStringOption( "searchpath", "shader" );
-		if(poptDSOPath)
-		{
-			Aqsis::log() << info << "DSO lib path set to \"" << poptDSOPath->c_str()
-				<< "\"" << std::endl;
-			pRet->SetDSOPath(poptDSOPath->c_str());
-		}
-
 		Aqsis::log() << info << "Loading shader \"" << strName
 			<< "\" from file \"" << shaderPath.file_string()
 			<< "\"" << std::endl;
 
-		pRet->SetstrName( strName );
+		std::string dsoPath;
+		const CqString* poptDSOPath = QGetRenderContext()->poptCurrent()
+			->GetStringOption( "searchpath", "shader" );
+		if(poptDSOPath)
+		{
+			dsoPath = poptDSOPath->c_str();
+			Aqsis::log() << info << "DSO lib path set to \"" << dsoPath
+				<< "\"" << std::endl;
+		}
+
+		boost::shared_ptr<IqShader> pShader;
 		try
 		{
-			pRet->LoadProgram(&shaderFile);
+			pShader = createShaderVM(this, shaderFile, dsoPath);
 		}
 		catch(XqBadShader& e)
 		{
@@ -1226,13 +1222,14 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 				<< e.what() << "\n";
 			// couldn't load the shader; put a null pointer in the map so we
 			// don't try again, and return null.
-			m_Shaders[key] = boost::shared_ptr<CqShaderVM>();
-			return boost::shared_ptr<CqShaderVM>();
+			m_Shaders[key] = boost::shared_ptr<IqShader>();
+			return boost::shared_ptr<IqShader>();
 		}
 
+		pShader->SetstrName( strName );
 		// add the shader to the map as a template and return its clone
-		m_Shaders[key] = pRet;
-		boost::shared_ptr<IqShader> newShader(pRet->Clone());
+		m_Shaders[key] = pShader;
+		boost::shared_ptr<IqShader> newShader(pShader->Clone());
 		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
@@ -1252,17 +1249,15 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		}
 		if ( type == Type_Surface )
 		{
-			boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
+			boost::shared_ptr<IqShader> pShader = createShaderVM(this);
 
-			pRet->SetType( type );
-			CqShaderVM* pShader = static_cast<CqShaderVM*>(
-			                          pRet.get() );
+			pShader->SetType( type );
 			pShader->SetstrName( "null" );
 			pShader->DefaultSurface();
 
 			// add the shader to the map and return its clone
-			m_Shaders[key] = pRet;
-			boost::shared_ptr<IqShader> newShader(pRet->Clone());
+			m_Shaders[key] = pShader;
+			boost::shared_ptr<IqShader> newShader(pShader->Clone());
 			newShader->SetType( type );
 			m_InstancedShaders.push_back(newShader);
 			return (newShader);

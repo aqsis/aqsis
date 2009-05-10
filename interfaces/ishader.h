@@ -14,9 +14,15 @@
 #define	ISHADER_H_INCLUDED
 
 #include	"aqsis.h"
+
+#include	<string>
+#include	<iosfwd>
+
+#include	<boost/shared_ptr.hpp>
+
+#include	"exception.h"
 #include	"interfacefwd.h"
 #include	"iparameter.h"
-#include	<boost/shared_ptr.hpp>
 
 #ifdef	WIN32
 #  ifdef	AQSIS_STATIC_LINK
@@ -58,7 +64,20 @@ enum EqShaderType
 
 struct IqShaderExecEnv;
 struct IqSurface;
+struct IqRenderer;
 class CqMatrix;
+
+
+//----------------------------------------------------------------------
+/** \class XqBadShader
+ * \brief Exception thrown when loading a shader program fails for some reason.
+ *
+ * If a compiled shader was generated with the wrong version of aqsis, contains
+ * unrecognized shadops or is otherwise invalid, this is the exception to
+ * throw.
+ */
+AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
+
 
 //----------------------------------------------------------------------
 /** \struct IqShader
@@ -146,6 +165,36 @@ struct SHADERVM_SHARE IqShader
 	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2) = 0;
 	virtual void SetType(EqShaderType type) = 0;
 };
+
+
+//@{
+// \name Transitional interfaces for managing CqShaderVM
+
+//@{
+/** \brief Factory functions for CqShaderVM instances
+ *
+ * \param renderContext - Context within which the shader will operate
+ * \param programFile - file from which to read the shader program
+ * \param dsoPath - search path for DSO shadeops.
+ */
+boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext);
+
+boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
+										   std::istream& programFile,
+										   const std::string& dsoPath);
+//@}
+
+/** \brief Reset ShaderVM static variables
+ *
+ * The shaderVM keeps a pool of shader variables handy to avoid reallocation;
+ * this function erases those to free up memory.
+ *
+ * \todo Move this elsewhere, perhaps into a class managing the current
+ * instances of CqShaderVM?
+ */
+void shutdownShaderVM();
+
+//@}
 
 } // namespace Aqsis
 
