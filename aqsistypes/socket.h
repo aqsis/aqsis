@@ -34,9 +34,18 @@
 
 #include <boost/utility.hpp>
 
-#include "socket_system.h"
+#ifdef AQSIS_SYSTEM_WIN32
+#	include <winsock2.h>
+#endif
+
 
 namespace Aqsis {
+
+#ifdef AQSIS_SYSTEM_WIN32
+typedef SOCKET TqSocketId;
+#else
+typedef int TqSocketId;
+#endif
 
 //----------------------------------------------------------------------
 /** \class CqSocket

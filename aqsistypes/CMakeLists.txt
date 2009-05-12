@@ -92,17 +92,11 @@ IF(UNIX OR APPLE)
 		posix/execute_system.cpp
 		posix/socket_system.cpp
 	)
-	SET(AQSISTYPES_SYSTEM_HDRS
-		posix/socket_system.h
-	)
 ELSE(UNIX OR APPLE)
 	IF(WIN32)
 		SET(AQSISTYPES_SYSTEM_SRCS
 			win32/execute_system.cpp
 			win32/socket_system.cpp
-		)
-		SET(AQSISTYPES_SYSTEM_HDRS
-			win32/socket_system.h
 		)
 	ENDIF(WIN32)
 ENDIF(UNIX OR APPLE)
@@ -110,7 +104,6 @@ ENDIF(UNIX OR APPLE)
 SET(AQSISTYPES_SRCS ${AQSISTYPES_SRCS} ${AQSISTYPES_SYSTEM_SRCS})
 SET(AQSISTYPES_HDRS
 	${AQSISTYPES_HDRS}
-	${AQSISTYPES_SYSTEM_HDRS}
 	"${PROJECT_BINARY_DIR}/aqsis_config.h"
 )
 
