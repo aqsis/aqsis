@@ -13,7 +13,7 @@
 #ifndef RI_H_INCLUDED
 #define RI_H_INCLUDED
 
-#include "aqsis_compiler.h"
+#include "aqsis_config.h"
 
 #include <float.h>
 

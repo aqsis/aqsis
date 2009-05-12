@@ -3,8 +3,15 @@ PROJECT(AQSISTYPES)
 #----------------------------------------------------------------------
 # create aqsis_config.h
 INCLUDE (CheckIncludeFiles)
-
 CHECK_INCLUDE_FILES(stdint.h AQSIS_HAVE_STDINT_H)
+
+IF(WIN32)
+	SET(AQSIS_SYSTEM_TYPE "WIN32")
+ELSEIF(UNIX)
+	SET(AQSIS_SYSTEM_TYPE "POSIX")
+ELSE(WIN32)
+	MESSAGE(SEND_ERROR "Unknown platform!")
+ENDIF(WIN32)
 CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/aqsis_config.h.in.cmake"
 	"${PROJECT_BINARY_DIR}/aqsis_config.h")
 
@@ -86,7 +93,6 @@ IF(UNIX OR APPLE)
 		posix/socket_system.cpp
 	)
 	SET(AQSISTYPES_SYSTEM_HDRS
-		posix/aqsis_compiler.h
 		posix/socket_system.h
 	)
 ELSE(UNIX OR APPLE)
@@ -96,7 +102,6 @@ ELSE(UNIX OR APPLE)
 			win32/socket_system.cpp
 		)
 		SET(AQSISTYPES_SYSTEM_HDRS
-			win32/aqsis_compiler.h
 			win32/socket_system.h
 		)
 	ENDIF(WIN32)
