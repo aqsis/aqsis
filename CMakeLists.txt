@@ -164,7 +164,7 @@ INCLUDE(FindResource)
 SET(VERSION_MAJOR 1)
 SET(VERSION_MINOR 5)
 SET(VERSION_BUILD 0)
-SET(SCM_REVISION "?")
+SET(SCM_REVISION 0)
 
 
 #-------------------------------------------------------------------------------
