@@ -970,7 +970,7 @@ void CqDisplayRequest::PrepareSystemParameters()
 	// "Software"
 	char SoftwareName[ 80 ];
 	const char* Software = SoftwareName;
-	sprintf( SoftwareName, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__ );
+	sprintf( SoftwareName, "Aqsis %s (%s %s)", AQSIS_VERSION_STR, __DATE__, __TIME__ );
 	ConstructStringsParameter("Software", &Software, 1, parameter);
 	m_customParams.push_back(parameter);
 

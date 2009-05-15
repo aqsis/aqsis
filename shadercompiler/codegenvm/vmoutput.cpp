@@ -89,7 +89,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile << S.strShaderType() << std::endl;
 
 	// Output version information.
-	m_slxFile << "AQSIS_V " << VERSION_STR << std::endl;
+	m_slxFile << "AQSIS_V " << AQSIS_VERSION_STR << std::endl;
 	m_slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 	// Now that we have this information, work out which standard vars are used.

@@ -31,7 +31,7 @@
 #ifndef RIF_H_INCLUDED
 #define RIF_H_INCLUDED
 
-#include "aqsis_compiler.h"
+#include "aqsis_config.h"
 #include "ri_types.h"
 
 /** \brief Primitive variable type identifiers */

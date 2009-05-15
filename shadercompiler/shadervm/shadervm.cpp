@@ -977,7 +977,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			GetToken( token, 255, pFile );
 			// Check that the version string matches the current one.  If not,
 			// fail fatally.
-			if(std::string(token) != VERSION_STR)
+			if(std::string(token) != AQSIS_VERSION_STR)
 			{
 				AQSIS_THROW_XQERROR(XqBadShader, EqE_NoShader,
 					"Shader compiled with an old/different version ("

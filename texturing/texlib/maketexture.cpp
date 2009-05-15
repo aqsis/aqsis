@@ -285,7 +285,7 @@ void fillOutputHeader(CqTexFileHeader& header, const SqWrapModes& wrapModes,
 	header.set<Attr::WrapModes>(wrapModes);
 	header.set<Attr::TextureFormat>(texFormat);
 	header.set<Attr::TileInfo>(SqTileInfo(32,32));
-	header.set<Attr::Software>(STRNAME " " VERSION_STR_PRINT);
+	header.set<Attr::Software>("Aqsis " AQSIS_VERSION_STR_FULL);
 	if(const char* const* comp = paramList.find<char*>("compression"))
 		header.set<Attr::Compression>(*comp);
 	if(const TqFloat* quality = paramList.find<TqFloat>("quality"))

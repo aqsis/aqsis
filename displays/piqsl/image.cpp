@@ -229,8 +229,8 @@ void CqImage::saveToFile(const std::string& fileName) const
 	header.setHeight(m_realData->height());
 	header.channelList() = m_realData->channelList();
 	// Informational strings
-	header.set<Attr::Software>( (boost::format("%s %s (%s %s)")
-			 % STRNAME % VERSION_STR % __DATE__ % __TIME__).str());
+	header.set<Attr::Software>( (boost::format("Aqsis %s (%s %s)")
+			 % AQSIS_VERSION_STR % __DATE__ % __TIME__).str());
 
 	header.set<Attr::DisplayWindow>(SqImageRegion(m_frameWidth, m_frameHeight, m_originX, m_originY));
 	header.set<Attr::PixelAspectRatio>(1.0);

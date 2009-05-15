@@ -105,7 +105,7 @@ int main( int argc, const char** argv )
 
 	if ( g_cl_version )
 	{
-		std::cout << "aqsltell version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+		std::cout << "aqsltell version " << AQSIS_VERSION_STR_FULL << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 		exit( 0 );
 	}
 

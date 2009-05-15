@@ -49,7 +49,7 @@ namespace Aqsis {
 struct IqShader;
 struct IqShaderData;
 
-#define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
+#define	ZFILE_HEADER		"Aqsis ZFile" AQSIS_VERSION_STR
 #define	LATLONG_HEADER		"LatLong Environment"
 #define	CUBEENVMAP_HEADER	"CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Shadow"

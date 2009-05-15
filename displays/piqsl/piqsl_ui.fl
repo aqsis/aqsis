@@ -168,7 +168,7 @@ Fl::unlock();} selected
           MenuItem {} {
             label About
             callback {std::string str = "piqsl version %s\\ncompiled %s %s";
-		fl_message(str.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
+		fl_message(str.c_str(), AQSIS_VERSION_STR_FULL, __DATE__, __TIME__);}
             private xywh {5 5 31 20}
           }
         }

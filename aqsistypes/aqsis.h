@@ -24,7 +24,7 @@
  * \author Paul C. Gregory (pgregory@aqsis.org)
  *
  * This file should be included by every aqsis source file.  Moreover, it
- * should be included before any other headers, since aqsis_compiler.h defines
+ * should be included before any other headers, since aqsis_config.h defines
  * some constants which potentially modify the behaviour of other standard
  * includes.
  *
@@ -39,7 +39,7 @@
 #include <assert.h>
 
 #include "aqsis_types.h"
-#include "aqsis_compiler.h"
+#include "aqsis_config.h"
 
 /* macro which stringizes the value held in another macro. */
 #define AQSIS_XSTR(s) AQSIS_STR(s)

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "aqsis_compiler.h"
+#include "aqsis_config.h"
 
 #ifndef AQSIS_SYSTEM_WIN32
 #include <unistd.h>

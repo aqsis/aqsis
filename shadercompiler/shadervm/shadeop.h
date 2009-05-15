@@ -32,7 +32,7 @@
 #ifndef SHADEOP_H_INCLUDED
 #define SHADEOP_H_INCLUDED
 
-#include "aqsis_compiler.h"
+#include "aqsis_config.h"
 
 #ifdef __cplusplus
 #	define EXTERN_C extern "C"

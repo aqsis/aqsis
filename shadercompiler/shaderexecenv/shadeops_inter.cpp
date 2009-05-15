@@ -355,7 +355,7 @@ void CqShaderExecEnv::SO_rendererinfo( IqShaderData* name, IqShaderData* pV, IqS
 	{
 		if ( pV->Type() == type_string )
 		{
-			pV->SetString( STRNAME );
+			pV->SetString( "Aqsis" );
 			Ret = 1.0f;
 		}
 	}
@@ -366,9 +366,9 @@ void CqShaderExecEnv::SO_rendererinfo( IqShaderData* name, IqShaderData* pV, IqS
 		{
 			if ( pV->ArrayLength() >= 4 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( VERMAJOR ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( VERMINOR ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( BUILD ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( AQSIS_VERSION_MAJOR ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( AQSIS_VERSION_MINOR ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( AQSIS_VERSION_BUILD ) );
 				pV->ArrayEntry( 3 ) ->SetFloat( 0.0f );
 				Ret = 1.0f;
 			}
@@ -378,7 +378,7 @@ void CqShaderExecEnv::SO_rendererinfo( IqShaderData* name, IqShaderData* pV, IqS
 	{
 		if ( pV->Type() == type_string )
 		{
-			pV->SetString( VERSION_STR );
+			pV->SetString( AQSIS_VERSION_STR );
 			Ret = 1.0f;
 		}
 	}
