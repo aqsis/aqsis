@@ -32,7 +32,7 @@
 
 -- set up environment variables
 set aqsisHome to (POSIX path of (path to me as string))
-set aqsisPath to aqsisHome & "/Contents/MacOS"
+set aqsisPath to aqsisHome & "Contents/MacOS"
 
 -- ask user how to use aqsis
 set question to display dialog ("You are about to launch Aqsis. Do you want to use the shell or eqsl, our graphical frontend?") with icon alias (POSIX file aqsisHome & "Contents:Resources:Aqsis.icns" as string) buttons {"eqsl", "shell"} default button 2
@@ -49,7 +49,7 @@ else if answer is "shell" then
 	
 	tell application "Terminal"
 		--activate
-		do script with command "export PATH=\"" & aqsisPath & ":$PATH\"; AQSISHOME=\"" & aqsisHome & "\"; export PS1=\"aqsis-" & AqsisVersion & " : \\W$ \";clear ; history -d $((HISTCMD-1))"
+		do script with command "export PATH=\"" & aqsisPath & ":$PATH\"; export AQSISHOME=\"" & aqsisHome & "\"; export PS1=\"aqsis-" & AqsisVersion & " : \\W$ \";clear ; history -d $((HISTCMD-1))"
 		
 		tell window 1
 			set frontmost to true
