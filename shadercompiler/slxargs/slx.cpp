@@ -45,7 +45,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ri.h"
-#include "shadervm.h"
+#include "ishader.h"
+#include "ishaderdata.h"
+#include "color.h"
 
 using namespace Aqsis;
 
@@ -300,13 +302,17 @@ static RtInt AllocateShaderArgsArray( int varCount, SLX_VISSYMDEF ** newArray )
 }
 
 
-/*
- * Extract a shader variable from a CqShaderVM object by index
+/** \brief Extract details about a shader variable.
+ *
+ * \param shaderVar - variable holding the data to be extracted
+ * \param theArgsArray - array into which the shader variable details should be
+ *                       stored
+ * \param theNArgs - index into theArgsArray.  (Data will be stored in
+ *                   theArgsArray[theNArgs] )
  */
-static void AddShaderVar( CqShaderVM * pShader, int i,
+static void AddShaderVar( IqShaderData * shaderVar,
                           SLX_VISSYMDEF * theArgsArray, int *theNArgs )
 {
-	IqShaderData * shaderVar;
 	EqVariableType	theType;
 	EqVariableClass theClass;
 	SLX_TYPE	slxType;
@@ -321,7 +327,6 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 	int	arrayLen = 0;
 	int	arrayIndex;
 
-	shaderVar = pShader->GetShaderVarAt( i );
 	if ( shaderVar != NULL && shaderVar->fParameter() )
 	{
 		theType = shaderVar->Type();
@@ -645,18 +650,10 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 {
 	RtInt result;
-	int i;
-	int varCount;
 	EqShaderType aShaderType;
 	SLX_VISSYMDEF * newArray = 0;
 	int theNArgs;
 	SLX_TYPE theShaderType;
-
-	// establish a rendering context -
-	// (This step should not be necessary after the Aqsis shaderVM is
-	//  moved to a separate libray.)
-	//    librib2ri::Engine renderengine;
-	//    RiBegin("CRIBBER");
 
 	std::ifstream slxFile(filePath);
 	result = RIE_NOERROR;
@@ -666,13 +663,12 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	{
 		try
 		{
-			boost::shared_ptr<CqShaderVM> pShader(new CqShaderVM(0));
-			pShader->SetDSOPath( DSOPath );
-			pShader->LoadProgram( &slxFile );
+			boost::shared_ptr<IqShader> pShader = createShaderVM(0, slxFile, DSOPath);
 			pShader->SetstrName( filePath );
-			pShader->ExecuteInit();
+			pShader->PrepareDefArgs();
 
-			varCount = pShader->GetShaderVarCount();
+			const std::vector<IqShaderData*>& shaderArgs = pShader->GetArguments();
+			int varCount = shaderArgs.size();
 
 			AllocateShaderArgsArray( varCount, &newArray );
 
@@ -702,9 +698,9 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 
 			// Iterate through list of shader variables and build array of SLX_VISSYMDEF shader argument records.
 			// N.B. Not all shader variables are shader arguments, so NArgs may be less than varCount;
-			for ( i = 0; i < varCount; i++ )
+			for ( int i = 0; i < varCount; i++ )
 			{
-				AddShaderVar( pShader.get(), i, newArray, &theNArgs );
+				AddShaderVar( shaderArgs[i], newArray, &theNArgs );
 			}
 
 			// Store shader info and arguments array in global storage
@@ -722,7 +718,6 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	{
 		result = RIE_NOFILE;
 	}
-	//    RiEnd();
 	return result;
 }
 

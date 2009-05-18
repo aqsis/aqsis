@@ -16,6 +16,7 @@
 #include	"aqsis.h"
 
 #include	<string>
+#include	<vector>
 #include	<iosfwd>
 
 #include	<boost/shared_ptr.hpp>
@@ -80,10 +81,8 @@ AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
 
 
 //----------------------------------------------------------------------
-/** \struct IqShader
- * Abstract base class from which all shaders must be defined.
+/** \brief Abstract base class from which all shaders must be defined.
  */
-
 struct SHADERVM_SHARE IqShader
 {
 	virtual	~IqShader()
@@ -108,6 +107,8 @@ struct SHADERVM_SHARE IqShader
 	 * \return A pointer to the argument data if it exists, NULL otherwise.
 	 */
 	virtual	IqShaderData*	FindArgument( const CqString& name ) = 0;
+	/// Get the shader arguments
+	virtual const std::vector<IqShaderData*>& GetArguments() const = 0;
 	/** Get the value of a named shader paramter.
 	 * \param name The name of the shader paramter.
 	 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
@@ -164,6 +165,8 @@ struct SHADERVM_SHARE IqShader
 	virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer) = 0;
 	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2) = 0;
 	virtual void SetType(EqShaderType type) = 0;
+	/// Get the shader type
+	virtual EqShaderType Type() const = 0;
 };
 
 

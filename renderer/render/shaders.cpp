@@ -108,8 +108,28 @@ void CqLayeredShader::Evaluate( IqShaderExecEnv* pEnv )
 	}
 }
 
+const std::vector<IqShaderData*>& CqLayeredShader::GetArguments() const
+{
+	// Implemented only so we can return something (ugh, fat interface; needs
+	// review).  Should only be needed by libslxargs...
+	assert(!m_Layers.empty());
+	return m_Layers.front().second->GetArguments();
+}
+
 void CqLayeredShader::SetType( EqShaderType type)
 {
+}
+
+EqShaderType CqLayeredShader::Type() const
+{
+	// Implemented for completeness.  Probably only needed in libslxargs.
+	if(!m_Layers.empty())
+		return m_Layers.front().second->Type();
+	else
+	{
+		assert(0 && "Type not well-defined");
+		return Type_Surface;
+	}
 }
 
 //---------------------------------------------------------------------

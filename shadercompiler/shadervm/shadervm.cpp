@@ -1746,32 +1746,9 @@ bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res ) const
 }
 
 //---------------------------------------------------------------------
-/**
- * Begin changes to add accessors for libslxargs 
- */
-
-TqInt CqShaderVM::GetShaderVarCount()
+const std::vector<IqShaderData*>& CqShaderVM::GetArguments() const
 {
-	return m_LocalVars.size();
-}
-
-//---------------------------------------------------------------------
-/**
- *
- */
-
-IqShaderData * CqShaderVM::GetShaderVarAt(TqInt varIndex)
-{
-	IqShaderData * result;
-	result = NULL;
-	if (varIndex >= 0)
-	{
-		if ((TqUint) varIndex < m_LocalVars.size())
-		{
-			result = m_LocalVars[varIndex];
-		}
-	}
-	return result;
+	return m_LocalVars;
 }
 
 

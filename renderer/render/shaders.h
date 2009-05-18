@@ -230,6 +230,7 @@ class CqLayeredShader : public IqShader
 			}
 			return ( NULL );
 		}
+		virtual const std::vector<IqShaderData*>& GetArguments() const;
 		virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) const
 		{
 			// Again, need to search backwards through the list, as the last layer to affect this value will
@@ -321,6 +322,7 @@ class CqLayeredShader : public IqShader
 		virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2);
 
 		virtual void SetType(EqShaderType type);
+		virtual EqShaderType Type() const;
 
 	protected:
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.

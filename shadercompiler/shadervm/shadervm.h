@@ -201,15 +201,13 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	Execute( IqShaderExecEnv* pEnv );
 		void	ExecuteInit();
 
-
-		TqInt	GetShaderVarCount();				// for libslxargs
-		IqShaderData*	GetShaderVarAt( int varIndex );  		// for libslxargs
+		virtual const std::vector<IqShaderData*>& GetArguments() const;
 		void SetType(EqShaderType type);
 
-		EqShaderType	Type()
+		virtual EqShaderType Type() const
 		{
 			return ( m_Type );
-		}	// for libslxargs
+		}
 
 
 		/** Assignment operator.
