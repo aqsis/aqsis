@@ -57,7 +57,7 @@ namespace Aqsis
  * resulting in significantly poor lexer performance (measured to be
  * approximately a factor of two slower on linux/g++/amd64).
  */
-class CqRibLexer : boost::noncopyable
+class RIBPARSE_SHARE CqRibLexer : boost::noncopyable
 {
 	public:
 		/// Comment callback function type

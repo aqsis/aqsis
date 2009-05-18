@@ -180,9 +180,9 @@ struct SHADERVM_SHARE IqShader
  * \param programFile - file from which to read the shader program
  * \param dsoPath - search path for DSO shadeops.
  */
-boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext);
+SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext);
 
-boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
+SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
 										   std::istream& programFile,
 										   const std::string& dsoPath);
 //@}
@@ -195,7 +195,7 @@ boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
  * \todo Move this elsewhere, perhaps into a class managing the current
  * instances of CqShaderVM?
  */
-void shutdownShaderVM();
+SHADERVM_SHARE void shutdownShaderVM();
 
 //@}
 
