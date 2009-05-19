@@ -220,6 +220,8 @@ macro(declare_subproject dirname)
 	file(MAKE_DIRECTORY ${${dirname}_BINARY_DIR})
 endmacro()
 
+
+#---------------
 # Include dirname/project.cmake to bring the contents of the directory into the
 # current cmake scope.
 #
@@ -230,23 +232,29 @@ macro(include_subproject dirname)
 	include("${${dirname}_SOURCE_DIR}/project.cmake")
 endmacro()
 
+
+#---------------
+# Declare *and* include a subproject directory
+#
 macro(add_subproject dirname)
 	declare_subproject(${dirname})
 	include_subproject(${dirname})
 endmacro()
 
 
-#-------------------------------------------------------------------------------
-macro(aqsis_set_lib_version target_name)
-	set_target_properties(${target_name} PROPERTIES 
-		SOVERSION ${VERSION_MAJOR}
-		VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
-endmacro()
-
-
+#------------------------------------------------------------------------------
+# Shortcut macro for registering a library for compilation.
+#
+# Usage:
+#
+#    aqsis_add_library( target_name  source1  [source2 ...]
+#                       [COMPILE_DEFINITIONS def1 ...]
+#                       [DEPENDS dep1 ...]
+#                       [LINK_LIBRARIES lib1 ...] )
+#
 macro(aqsis_add_library target_name)
 	parse_arguments(aal "COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES" "" ${ARGN})
-	add_library(${target_name} SHARED ${aal_DEFAULT_ARGS})
+	add_library(${target_name} SHARED ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
 	if(aal_COMPILE_DEFINITIONS)
 		#message("ADDING COMPILE_DEFINITIONS: ${aal_COMPILE_DEFINITIONS}")
 		set_property(TARGET ${target_name} PROPERTY
@@ -266,6 +274,15 @@ macro(aqsis_add_library target_name)
 endmacro()
 
 
+#------------------------------------------------------------------------------
+# Install a set of targets to the correct directories.
+#
+# Usage:
+#
+#    aqsis_install_targets(target1 target2 ...)
+#
+# The targets can be any of shared or static libraries, or executables.
+#
 macro(aqsis_install_targets)
 	install(TARGETS ${ARGN}
 		RUNTIME DESTINATION ${BINDIR}

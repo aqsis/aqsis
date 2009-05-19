@@ -215,7 +215,7 @@ add_subdirectory(include/aqsis)
 include_directories(
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_BINARY_DIR}/include"
-	${Boost_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
 )
 
 add_subdirectory(libs/math)
