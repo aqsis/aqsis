@@ -15,29 +15,12 @@ set(ribparse_hdrs
 )
 source_group("Header Files" FILES ${ribparse_hdrs})
 
-# Add aqsis_ribparse library
-add_library(aqsis_ribparse SHARED ${ribparse_srcs} ${ribparse_hdrs} ${INFORES_SRCS})
-set_target_properties(aqsis_ribparse PROPERTIES COMPILE_DEFINITIONS RIBPARSE_EXPORTS)
-aqsis_set_lib_version(aqsis_ribparse)
+aqsis_add_library(aqsis_ribparse ${ribparse_srcs} ${ribparse_hdrs}
+	COMPILE_DEFINITIONS AQSIS_RIBPARSE_EXPORTS USE_GZIPPED_RIB
+	LINK_LIBRARIES aqsis_riutil ${Boost_IOSTREAMS_LIBRARY}
+)
 
-# Set up linking
-set(linklibs)
-if(Boost_IOSTREAMS_FOUND)
-	set(linklibs ${linklibs} ${Boost_IOSTREAMS_LIBRARY})
-	set_target_properties(aqsis_ribparse PROPERTIES
-		COMPILE_DEFINITIONS USE_GZIPPED_RIB)
-else()
-	message(STATUS
-		"*** boost_iostreams not found ***  building without gzipped RIB support")
-endif()
-
-#include(${AQSISTYPES_SOURCE_DIR}/link.cmake)
-target_link_libraries(aqsis_ribparse aqsis_riutil ${linklibs})
-
-install(TARGETS aqsis_ribparse 
-	RUNTIME DESTINATION ${BINDIR}
-	LIBRARY DESTINATION ${LIBDIR}
-	ARCHIVE DESTINATION ${LIBDIR})
+aqsis_install_targets(aqsis_ribparse)
 
 #--------------------------------------------------
 # Testing

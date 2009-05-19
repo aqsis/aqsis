@@ -51,7 +51,7 @@ IF(aqsis_enable_testing)
 				${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 				)
 			if(_atest_COMPILE_DEFINITIONS)
-				set_target_properties(${TEST_EXE_NAME} PROPERTIES
+				set_property(TARGET ${TEST_EXE_NAME} PROPERTY
 					COMPILE_DEFINITIONS ${_atest_COMPILE_DEFINITIONS})
 			endif()
 			add_test(${TEST_NAME} ${EXECUTABLE_OUTPUT_PATH}/${TEST_EXE_NAME})
