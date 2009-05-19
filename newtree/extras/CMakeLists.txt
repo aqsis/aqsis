@@ -228,6 +228,7 @@ add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
 add_subdirectory(libs/rib2ri)
+#add_subdirectory(libs/core)
 
 add_subdirectory(doc/doxygen)
 

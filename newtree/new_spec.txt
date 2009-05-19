@@ -175,9 +175,9 @@ libs/
             parameters.h
             ri_cache.h
             ri_debug.h
-            apicache.xsl
-            apidebug.xsl
-            apivalidate.xsl
+            ri_cache.xsl  <--  apicache.xsl
+            ri_debug.xsl  <--  apidebug.xsl
+            ri_validate.xsl  <--  apivalidate.xsl
             attributes.cpp
             condition.cpp
             genpoly.cpp
@@ -863,7 +863,7 @@ cmake/
         FirstCMakeRun.cmake
 #        MacroUtils.cmake
 #        OutOfSourceBuild.cmake
-        XslTransform.cmake
+#        XslTransform.cmake
     platform/
         linux.cmake
         macosx.cmake

@@ -8,8 +8,7 @@ add_subproject(geometry)
 add_subproject(reyes)
 add_subproject(texturing_old)
 
-# FIXME
-#include_subproject(rib2ri)
+include_subproject(rib2ri)
 
 set(core_srcs
 	${api_srcs}
@@ -17,6 +16,7 @@ set(core_srcs
 	${geometry_srcs}
 	${reyes_srcs}
 	${texturing_old_srcs}
+	${rib2ri_srcs}
 )
 set(core_hdrs
 	${api_hdrs}
@@ -24,17 +24,54 @@ set(core_hdrs
 	${geometry_hdrs}
 	${reyes_hdrs}
 	${texturing_old_hdrs}
+	${rib2ri_hdrs}
 )
+
+source_group("Header Files" FILES ${core_hdrs})
 
 include_directories(${AQSIS_TIFF_INCLUDE_DIR})
-# Optional macro definitions for non-SHARE macros.
-add_definitions()
 
-aqsis_add_library(target_? ${core_srcs} ${core_hdrs}
-	COMPILE_DEFINITIONS ?_EXPORTS
-	DEPENDS ?
-	LINK_LIBRARIES ?
+# Create list of preprocessor definitions
+set(defs AQSIS_RI_EXPORTS AQSIS_CORE_EXPORTS)
+if(AQSIS_ENABLE_MPDUMP)
+	list(APPEND defs ENABLE_MPDUMP)
+endif()
+if(AQSIS_USE_TIMERS)
+	list(APPEND defs USE_TIMERS)
+endif()
+if(AQSIS_ENABLE_THREADING)
+	list(APPEND defs ENABLE_THREADING)
+endif()
+
+# Libraries
+set(linklibs
+	aqsis_math
+	aqsis_ribparse
+	aqsis_shadervm
+	aqsis_tex
+	aqsis_util
+	aqsis_riutil
+	${AQSIS_TIFF_LIBRARIES}
+	${Boost_THREAD_LIBRARY}
+)
+if(APPLE)
+	list(APPEND linklibs ${CARBON_LIBRARY})
+endif()
+
+# Add library & install
+aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
+	COMPILE_DEFINITIONS ${defs}
+	LINK_LIBRARIES ${linklibs}
 )
 
-aqsis_install_targets(target_?)
+aqsis_install_targets(aqsis_core)
 
+
+#--------------------------------------------------
+# Testing
+set(core_test_srcs
+	${api_test_srcs}
+	${reyes_test_srcs}
+)
+
+aqsis_add_tests(${core_test_srcs} LINK_LIBRARIES aqsis_core)
