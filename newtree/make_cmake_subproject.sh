@@ -30,6 +30,11 @@ include_directories(\${XXX_SOURCE_DIR})
 !
 fi
 
+cat <<!
+# Generate extra files here.  Extra stuff in this directory is...
+$(find ${src_dir} -maxdepth 1 -mindepth 1 \! \( -name \*.h -o -name \*.cpp \) | sort | sed -e 's/^/#/')
+
+!
 
 if ls ${src_dir}/*_test.cpp &> /dev/null ; then cat <<!
 set(XXX_test_srcs
