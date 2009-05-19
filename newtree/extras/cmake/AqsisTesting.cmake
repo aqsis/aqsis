@@ -28,7 +28,7 @@ IF(aqsis_enable_testing)
 	#
 	macro(aqsis_add_tests)
 		parse_arguments(_atest
-			"LINK_LIBRARIES;EXTRASOURCE"
+			"LINK_LIBRARIES;EXTRASOURCE;COMPILE_DEFINITIONS"
 			""
 			${ARGN}
 		)
@@ -50,6 +50,10 @@ IF(aqsis_enable_testing)
 				${_atest_LINK_LIBRARIES}
 				${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 				)
+			if(_atest_COMPILE_DEFINITIONS)
+				set_target_properties(${TEST_EXE_NAME} PROPERTIES
+					COMPILE_DEFINITIONS ${_atest_COMPILE_DEFINITIONS})
+			endif()
 			add_test(${TEST_NAME} ${EXECUTABLE_OUTPUT_PATH}/${TEST_EXE_NAME})
 		endforeach()
 	endmacro()

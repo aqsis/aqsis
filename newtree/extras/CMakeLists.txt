@@ -223,10 +223,11 @@ add_subdirectory(libs/util)
 add_subdirectory(libs/riutil)
 add_subdirectory(libs/ribparse)
 add_subdirectory(libs/slcomp)
-add_subdirectory(libs/shadervm)
 add_subdirectory(libs/tex)
+add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
+add_subdirectory(libs/rib2ri)
 
 add_subdirectory(doc/doxygen)
 
