@@ -40,7 +40,7 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool f
 		m_pShader( pShader ),
 		m_pAttributes(),
 		m_pTransform(),
-		m_pShaderExecEnv(new CqShaderExecEnv( QGetRenderContextI()))
+		m_pShaderExecEnv(IqShaderExecEnv::create(QGetRenderContextI()))
 {
 	// Set a reference with the current attributes.
 	m_pAttributes = QGetRenderContext() ->pattrCurrent();

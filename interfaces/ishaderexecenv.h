@@ -104,6 +104,16 @@ enum EqEnvVars
     EnvVars_Last
 };
 
+/// Vector of variable names corresponding to EqEnvVars
+SHADERCONTEXT_SHARE extern const char*	gVariableNames[];
+/// Vector of hash key from gVariableNames
+SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];
+
+/// Variables needed by default for normal shaders
+SHADERCONTEXT_SHARE extern TqInt gDefUses;
+/// Variables needed by default for light shaders
+SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
+
 
 #define	STD_SO		void
 #define	STD_SOIMPL	void
@@ -147,6 +157,9 @@ enum EqEnvVars
 
 struct SHADERCONTEXT_SHARE IqShaderExecEnv
 {
+	/// Create an IqShaderExecEnv instance with the given render context.
+	static boost::shared_ptr<IqShaderExecEnv> create(IqRenderer* context);
+
 	virtual	~IqShaderExecEnv()
 	{}
 

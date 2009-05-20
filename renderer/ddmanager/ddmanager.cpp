@@ -38,11 +38,12 @@
 #include	"sstring.h"
 #include	"ddmanager.h"
 #include	"imagebuffer.h"
-#include	"shaderexecenv.h"
+#include	"ishaderexecenv.h"
 #include	"logging.h"
 #include	"ndspy.h"
 #include	"version.h"
 #include	"debugdd.h"
+#include	"random.h"
 
 namespace Aqsis {
 

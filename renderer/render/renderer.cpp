@@ -85,7 +85,7 @@ CqRenderer::CqRenderer()
 	m_Mode(RenderMode_Image),
 	m_Shaders(),
 	m_InstancedShaders(),
-	m_textureCache(boost::bind(&CqRenderer::textureSearchPath, this)),
+	m_textureCache(),
 	m_fSaveGPrims(false),
 	m_pTransCamera(new CqTransform()),
 	m_pTransDefObj(new CqTransform()),
@@ -119,6 +119,9 @@ CqRenderer::CqRenderer()
 	m_pDDManager->Initialise();
 
 	m_pRaytracer->Initialise();
+
+	m_textureCache = IqTextureCache::create(
+			boost::bind(&CqRenderer::textureSearchPath, this));
 
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems[ CoordSystem_Camera ].m_strName = "__camera__";
@@ -806,7 +809,7 @@ void CqRenderer::RenderAutoShadows()
 				m_pDDManager = realDDManager;
 
 				CqTextureMapOld::FlushCache();
-				m_textureCache.flush();
+				m_textureCache->flush();
 				clippingVolume().clear();
 			}
 		}
@@ -1421,7 +1424,7 @@ IqRenderer* QGetRenderContextI()
 
 IqTextureCache& CqRenderer::textureCache()
 {
-	return m_textureCache;
+	return *m_textureCache;
 }
 
 IqTextureMapOld* CqRenderer::GetEnvironmentMap( const CqString& strFileName )

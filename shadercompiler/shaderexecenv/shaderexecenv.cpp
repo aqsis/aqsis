@@ -27,6 +27,16 @@
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
+// IqShaderExecEnv implementation
+boost::shared_ptr<IqShaderExecEnv> IqShaderExecEnv::create(IqRenderer* context)
+{
+	return boost::shared_ptr<IqShaderExecEnv>(new CqShaderExecEnv(context));
+}
+
+
+//------------------------------------------------------------------------------
+
 CqNoise	CqShaderExecEnv::m_noise;
 CqCellNoise	CqShaderExecEnv::m_cellnoise;
 CqRandom	CqShaderExecEnv::m_random;

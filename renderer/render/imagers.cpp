@@ -42,9 +42,8 @@ namespace Aqsis {
 CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes(), 
-		m_pShaderExecEnv( new CqShaderExecEnv(QGetRenderContextI()) )
+		m_pShaderExecEnv(IqShaderExecEnv::create(QGetRenderContextI()))
 {
-
 	m_pAttributes = QGetRenderContext()->pattrCurrent();
 	m_pShader->SetType(Type_Imager);
 }

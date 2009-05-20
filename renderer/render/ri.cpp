@@ -54,6 +54,7 @@
 #include	"logging_streambufs.h"
 #include	"maketexture.h"
 #include	"stats.h"
+#include	"random.h"
 
 #include	"ri_cache.h"
 

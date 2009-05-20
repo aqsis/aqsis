@@ -45,7 +45,7 @@
 #include	"irenderer.h"
 #include	"iraytrace.h"
 #include	"iraytrace.h"
-#include	"texturecache.h"
+#include	"itexturecache.h"
 
 #include	"clippingvolume.h"
 
@@ -558,7 +558,7 @@ class CqRenderer : public IqRenderer
 		TqShaderMap m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
-		CqTextureCache m_textureCache; ///< Cache for aqsistex texture access.
+		boost::shared_ptr<IqTextureCache> m_textureCache; ///< Cache for aqsistex texture access.
 		 
 
 		bool	m_fSaveGPrims;

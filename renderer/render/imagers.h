@@ -36,7 +36,7 @@
 #include "color.h"
 #include "list.h"
 #include "matrix.h"
-#include "shaderexecenv.h"
+#include "ishaderexecenv.h"
 #include "vector4d.h"
 #include "version.h"
 #include "attributes.h"

@@ -73,7 +73,7 @@ void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_bShadingNormals( false ),
 		m_bGeometricNormals( false ), 
-		m_pShaderExecEnv(new CqShaderExecEnv(QGetRenderContextI()))
+		m_pShaderExecEnv(IqShaderExecEnv::create(QGetRenderContextI()))
 {
 	STATS_INC( GRD_allocated );
 	STATS_INC( GRD_current );

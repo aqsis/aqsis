@@ -31,8 +31,6 @@
 
 #include <map>
 
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
 #include "itexturecache.h"
@@ -55,9 +53,6 @@ class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
 class AQSISTEX_SHARE CqTextureCache : public IqTextureCache, private boost::noncopyable
 {
 	public:
-		/// Type for holding a search-path callback.
-		typedef boost::function<const char* ()> TqSearchPathCallback;
-
 		/** \brief Construct an empty texture cache.
 		 *
 		 * \param searchPathCallback - Function used to return the current

@@ -37,7 +37,7 @@
 #include	"bound.h"
 #include	"vector2d.h"
 #include	"vector3d.h"
-#include	"shaderexecenv.h"
+#include	"ishaderexecenv.h"
 #include	"ishaderdata.h"
 #include	"motion.h"
 #include	"csgtree.h"

@@ -52,13 +52,6 @@
 
 namespace Aqsis {
 
-SHADERCONTEXT_SHARE extern const char*	gVariableNames[];	///< Vector of variable names.
-SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
-
-
-SHADERCONTEXT_SHARE extern TqInt gDefUses;
-SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
-
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.

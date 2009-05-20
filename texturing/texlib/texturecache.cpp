@@ -40,6 +40,16 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+// IqTextureCache creation function.
+
+boost::shared_ptr<IqTextureCache> IqTextureCache::create(
+		TqSearchPathCallback searchPathCallback)
+{
+	return boost::shared_ptr<IqTextureCache>(
+			new CqTextureCache(searchPathCallback));
+}
+
+//------------------------------------------------------------------------------
 // CqTextureCache
 
 CqTextureCache::CqTextureCache(TqSearchPathCallback searchPathCallback)

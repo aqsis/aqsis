@@ -29,6 +29,9 @@
 
 #include "aqsis.h"
 
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+
 namespace Aqsis {
 
 class IqTextureSampler;
@@ -44,6 +47,19 @@ class CqMatrix;
  */
 struct AQSISTEX_SHARE IqTextureCache
 {
+	/// Type for holding a search-path callback.
+	typedef boost::function<const char* ()> TqSearchPathCallback;
+
+	/** \brief Construct an empty texture cache.
+	 *
+	 * \param searchPathCallback - Function used to return the current search
+	 * path when searching for textures.
+	 */
+	static boost::shared_ptr<IqTextureCache> create(
+			TqSearchPathCallback searchPathCallback);
+
+	virtual ~IqTextureCache() {}
+
 	//--------------------------------------------------
 	// \name Sampler access
 	//@{
@@ -82,8 +98,6 @@ struct AQSISTEX_SHARE IqTextureCache
 	 * \param currToWorld - current -> world transformation.
 	 */
 	virtual void setCurrToWorldMatrix(const CqMatrix& currToWorld) = 0;
-
-	virtual ~IqTextureCache() {}
 };
 
 
