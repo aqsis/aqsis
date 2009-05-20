@@ -4,7 +4,7 @@ project(core)
 add_subproject(api)
 add_subproject(ddmanager)
 add_subproject(geometry)
-#add_subproject(raytrace)
+add_subproject(raytrace)
 add_subproject(reyes)
 add_subproject(texturing_old)
 
@@ -14,6 +14,7 @@ set(core_srcs
 	${api_srcs}
 	${ddmanager_srcs}
 	${geometry_srcs}
+	${raytrace_srcs}
 	${reyes_srcs}
 	${texturing_old_srcs}
 	${rib2ri_srcs}
@@ -22,6 +23,7 @@ set(core_hdrs
 	${api_hdrs}
 	${ddmanager_hdrs}
 	${geometry_hdrs}
+	${raytrace_hdrs}
 	${reyes_hdrs}
 	${texturing_old_hdrs}
 	${rib2ri_hdrs}
