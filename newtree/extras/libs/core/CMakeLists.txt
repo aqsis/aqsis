@@ -34,7 +34,8 @@ source_group("Header Files" FILES ${core_hdrs})
 include_directories(${AQSIS_TIFF_INCLUDE_DIR})
 
 # Create list of preprocessor definitions
-set(defs AQSIS_RI_EXPORTS AQSIS_CORE_EXPORTS)
+set(defs AQSIS_RI_EXPORTS AQSIS_CORE_EXPORTS
+	"AQSIS_MAIN_CONFIG_NAME=${AQSIS_MAIN_CONFIG_NAME}")
 if(AQSIS_ENABLE_MPDUMP)
 	list(APPEND defs ENABLE_MPDUMP)
 endif()

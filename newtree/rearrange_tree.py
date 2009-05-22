@@ -174,18 +174,17 @@ headerNameMap['version.h'] = 'aqsis/version.h'
 headerNameMap['ri.inl'] = 'aqsis/ri/ri.inl'
 
 # Construct a regex to match offending #include lines
-hPattern = re.compile(r'^\s*#\s*include\s+[<"](%s)[">]' % ('|'.join(headerNameMap.keys()),))
+hPattern = re.compile(r'#\s*include\s+[<"](%s)[">]' % ('|'.join(headerNameMap.keys()),))
 #badPattern = re.compile('^\s*#\s*include\s+<(%s)>' % ('|'.join(headerNameMap.keys()),))
 
 # Now modify any lines in the file.
 allSource = findFiles(destDir, re.compile(r'\.(h|cpp|c|yy|ll|fl)$').search)
 for line in fileinput.input(allSource, inplace=True):
-	line = line[:-1]
-	m = hPattern.match(line)
+	m = hPattern.search(line)
 	if m:
 		origName = m.group(1)
-		print re.sub('[<"]%s[">]' % (origName,),
-					'<%s>' % (headerNameMap[origName],), line, 1)
+		sys.stdout.write(re.sub('[<"]%s[">]' % (origName,),
+					'<%s>' % (headerNameMap[origName],), line, 1))
 	else:
-		print line
+		sys.stdout.write(line)
 

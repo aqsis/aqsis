@@ -72,6 +72,7 @@ include/
                 iattributes.h
                 ioptions.h
             reyes/
+                ilightsource.h
                 irenderer.h
                 itransform.h
                 isurface.h
@@ -197,7 +198,6 @@ libs/
             csgtree.h
             forwarddiff.h
             grid.h
-            ilightsource.h
             imagebuffer.h
             imagepixel.h
             imagers.h
@@ -459,12 +459,29 @@ thirdparty/
         tinyxml.cpp
         tinyxmlerror.cpp
         tinyxmlparser.cpp
+    pdiff/
+        CompareArgs.cpp
+        CompareArgs.h
+        LPyramid.cpp
+        LPyramid.h
+        Metric.cpp
+        Metric.h
+        PerceptualDiff.cpp
+        README.txt
+        RGBAImage.cpp
+        RGBAImage.h
+        gpl.txt
+    aqiv/
+        getopt.c
+        iv.c
+        sgigt.c
+        sgigt.h
 
 tools/
     aqsis/
         aqsis.cpp
     aqsl/
-        aqslcomp.cpp
+        aqsl.cpp  <--  aqslcomp.cpp
     aqsltell/
         aqsltell.cpp
     eqsl/
@@ -571,24 +588,6 @@ tools/
             UITest.py
             __init__.py
             bml.sl
-    thirdparty/
-        pdiff/
-            CompareArgs.cpp
-            CompareArgs.h
-            LPyramid.cpp
-            LPyramid.h
-            Metric.cpp
-            Metric.h
-            PerceptualDiff.cpp
-            README.txt
-            RGBAImage.cpp
-            RGBAImage.h
-            gpl.txt
-        aqiv/
-            getopt.c
-            iv.c
-            sgigt.c
-            sgigt.h
 
 doc/
     coding_standard/

@@ -31,7 +31,6 @@ set(reyes_hdrs
 	csgtree.h
 	forwarddiff.h
 	grid.h
-	ilightsource.h
 	imagebuffer.h
 	imagepixel.h
 	imagers.h

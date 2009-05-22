@@ -215,9 +215,10 @@ endfunction()
 # macro.
 #
 macro(declare_subproject dirname)
-	set(${dirname}_SOURCE_DIR "${PROJECT_SOURCE_DIR}/${dirname}")
-	set(${dirname}_BINARY_DIR "${PROJECT_BINARY_DIR}/${dirname}")
-	file(MAKE_DIRECTORY ${${dirname}_BINARY_DIR})
+	get_filename_component(_basedir_name ${dirname} NAME)
+	set(${_basedir_name}_SOURCE_DIR "${PROJECT_SOURCE_DIR}/${dirname}")
+	set(${_basedir_name}_BINARY_DIR "${PROJECT_BINARY_DIR}/${dirname}")
+	file(MAKE_DIRECTORY ${${_basedir_name}_BINARY_DIR})
 endmacro()
 
 
@@ -273,6 +274,50 @@ macro(aqsis_add_library target_name)
 		VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
 endmacro()
 
+
+#------------------------------------------------------------------------------
+# Shortcut macro for registering an executable for compilation.
+#
+# Usage:
+#
+#    aqsis_add_executable( target_name  source1  [source2 ...]
+#                          [GUIAPP]
+#                          [COMPILE_DEFINITIONS def1 ...]
+#                          [DEPENDS dep1 ...]
+#                          [LINK_LIBRARIES lib1 ...] )
+#
+# The GUIAPP option adds some resources for icons on windows, and makes sure
+# that the necessary resource fork is added on OS X.
+#
+macro(aqsis_add_executable target_name)
+	parse_arguments(aae "COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES" "GUIAPP" ${ARGN})
+	set(_srcs ${aae_DEFAULT_ARGS} ${INFORES_SRCS})
+	if(aae_GUIAPP)
+		list(APPEND _srcs ${ICONRES_SRCS})
+	endif()
+	add_executable(${target_name} ${_srcs})
+	if(aae_COMPILE_DEFINITIONS)
+		set_property(TARGET ${target_name} PROPERTY
+			COMPILE_DEFINITIONS ${aae_COMPILE_DEFINITIONS})
+	endif()
+	if(aae_DEPENDS)
+		add_dependencies(${target_name} ${aae_DEPENDS})
+	endif()
+	if(aae_LINK_LIBRARIES)
+		target_link_libraries(${target_name} ${aae_LINK_LIBRARIES})
+	endif()
+	if(aae_GUIAPP)
+		# Add necessary resource fork to binaries linked against FLTK (OS X)
+		if(AQSIS_RESOURCE_EXECUTABLE_FOUND)
+			add_custom_command(TARGET ${target_name}
+				POST_BUILD
+				COMMAND ${AQSIS_RESOURCE_EXECUTABLE}
+				ARGS -t APPL -o ${target_name} ${AQSIS_FLTK_INCLUDE_DIR}/FL/mac.r
+				WORKING_DIRECTORY ${BINDIR}
+			)
+		endif()
+	endif()
+endmacro()
 
 #------------------------------------------------------------------------------
 # Install a set of targets to the correct directories.
