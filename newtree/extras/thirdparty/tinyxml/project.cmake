@@ -27,3 +27,5 @@ if(NOT AQSIS_USE_EXTERNAL_TINYXML)
 
 	include_directories(${tinyxml_SOURCE_DIR})
 endif()
+
+add_definitions(-DTIXML_USE_STL)

@@ -243,9 +243,7 @@ add_subdirectory(tools/piqsl)
 add_subdirectory(tools/teqser)
 
 # Build displays
-# FIXME!
-#add_subdirectory(tools/displays/file)
-#add_subdirectory(tools/displays/piqsl)
+add_subdirectory(tools/displays)
 
 # Build additional plugins
 # FIXME!
@@ -257,26 +255,27 @@ add_subdirectory(doc/doxygen)
 #-------------------------------------------------------------------------------
 # Create aqsisrc
 #--------------
-#get_directory_property(display_DISPLAYLIB DIRECTORY displays/display DEFINITION DISPLAYLIB)
-#get_directory_property(d_exr_DISPLAYLIB DIRECTORY displays/d_exr DEFINITION DISPLAYLIB)
-#get_directory_property(d_bmp_DISPLAYLIB DIRECTORY displays/d_sdcBMP DEFINITION DISPLAYLIB)
-#get_directory_property(d_xpm_DISPLAYLIB DIRECTORY displays/d_xpm DEFINITION DISPLAYLIB)
-## Default search paths.
-#set_with_path_prefix(DEFAULT_SHADERPATH "${SHADERDIR}" "${CMAKE_INSTALL_PREFIX}")
-#set(DEFAULT_ARCHIVEPATH "${CMAKE_INSTALL_PREFIX}")
-#set(DEFAULT_TEXTUREPATH "${CMAKE_INSTALL_PREFIX}")
-#set_with_path_prefix(DEFAULT_DISPLAYPATH "${DISPLAYSDIR}" "${CMAKE_INSTALL_PREFIX}")
-#set_with_path_prefix(DEFAULT_PROCEDURALPATH "${LIBDIR}" "${CMAKE_INSTALL_PREFIX}")
-#set(DEFAULT_RESOURCEPATH "${CMAKE_INSTALL_PREFIX}")
-## Search paths which are settable from the cmake build.
-#set(SHADERPATH "${SHADERPATH}" CACHE STRING "Aqsis shader searchpath")
-#set(ARCHIVEPATH "${ARCHIVEPATH}" CACHE STRING "Aqsis archive searchpath")
-#set(TEXTUREPATH "${TEXTUREPATH}" CACHE STRING "Aqsis texture searchpath")
-#set(DISPLAYPATH "${DISPLAYPATH}" CACHE STRING "Aqsis display searchpath")
-#set(PROCEDURALPATH "${PROCEDURALPATH}" CACHE STRING "Aqsis procedural searchpath")
-#set(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
-#set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
-#configure_file(aqsisrc.in.cmake ${aqsisrc_name})
-#install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR})
+get_directory_property(display_DISPLAYLIB DIRECTORY tools/displays DEFINITION file_display_lib_name)
+get_directory_property(d_exr_DISPLAYLIB DIRECTORY tools/displays DEFINITION exr_display_lib_name)
+get_directory_property(d_bmp_DISPLAYLIB DIRECTORY tools/displays DEFINITION bmp_display_lib_name)
+get_directory_property(d_xpm_DISPLAYLIB DIRECTORY tools/displays DEFINITION xpm_display_lib_name)
+get_directory_property(piqsl_DISPLAYLIB DIRECTORY tools/displays DEFINITION piqsl_display_lib_name)
+# Default search paths.
+set_with_path_prefix(DEFAULT_SHADERPATH "${SHADERDIR}" "${CMAKE_INSTALL_PREFIX}")
+set(DEFAULT_ARCHIVEPATH "${CMAKE_INSTALL_PREFIX}")
+set(DEFAULT_TEXTUREPATH "${CMAKE_INSTALL_PREFIX}")
+set_with_path_prefix(DEFAULT_DISPLAYPATH "${DISPLAYSDIR}" "${CMAKE_INSTALL_PREFIX}")
+set_with_path_prefix(DEFAULT_PROCEDURALPATH "${LIBDIR}" "${CMAKE_INSTALL_PREFIX}")
+set(DEFAULT_RESOURCEPATH "${CMAKE_INSTALL_PREFIX}")
+# Search paths which are settable from the cmake build.
+set(SHADERPATH "${SHADERPATH}" CACHE STRING "Aqsis shader searchpath")
+set(ARCHIVEPATH "${ARCHIVEPATH}" CACHE STRING "Aqsis archive searchpath")
+set(TEXTUREPATH "${TEXTUREPATH}" CACHE STRING "Aqsis texture searchpath")
+set(DISPLAYPATH "${DISPLAYPATH}" CACHE STRING "Aqsis display searchpath")
+set(PROCEDURALPATH "${PROCEDURALPATH}" CACHE STRING "Aqsis procedural searchpath")
+set(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
+set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
+configure_file(aqsisrc.in.cmake ${aqsisrc_name})
+install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR})
 
 

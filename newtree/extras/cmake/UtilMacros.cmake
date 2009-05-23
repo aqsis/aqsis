@@ -216,8 +216,8 @@ endfunction()
 #
 macro(declare_subproject dirname)
 	get_filename_component(_basedir_name ${dirname} NAME)
-	set(${_basedir_name}_SOURCE_DIR "${PROJECT_SOURCE_DIR}/${dirname}")
-	set(${_basedir_name}_BINARY_DIR "${PROJECT_BINARY_DIR}/${dirname}")
+	set(${_basedir_name}_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${dirname}")
+	set(${_basedir_name}_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${dirname}")
 	file(MAKE_DIRECTORY ${${_basedir_name}_BINARY_DIR})
 endmacro()
 

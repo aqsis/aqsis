@@ -507,7 +507,7 @@ tools/
     teqser/
         teqser.cpp
     displays/
-        util/
+        dspyutil/
             dspyhlpr.h
             dspyhlpr.c
         exr/
