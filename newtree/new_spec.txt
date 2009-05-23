@@ -727,12 +727,14 @@ content/
                 vase.rib
     shaders/
         displacement/
+            bumpy.sl
             AqDMap.sl
             borg_metal.sl
             dented.sl
             micro_bumps.sl
             wavy.sl
         imager/
+            background.sl
             bluescreen.sl
             exposure.sl
             fakesky.sl
@@ -742,10 +744,20 @@ content/
         include/
             patterns.sl
         light/
+            ambientlight.sl
+            distantlight.sl
+            pointlight.sl
+            spotlight.sl
             shadowdistant.sl
             shadowpoint.sl
             shadowspot.sl
         surface/
+            constant.sl
+            matte.sl
+            metal.sl
+            paintedplastic.sl
+            plastic.sl
+            shinymetal.sl
             AqSMap.sl
             DPBlueMarble.sl
             DPProctext.h
@@ -765,21 +777,9 @@ content/
             showuser.sl
             sticky_texture.sl
             uvtest.sl
-        standard/
-            ambientlight.sl
-            background.sl
-            bumpy.sl
-            constant.sl
+		volume/
             depthcue.sl
-            distantlight.sl
             fog.sl
-            matte.sl
-            metal.sl
-            paintedplastic.sl
-            plastic.sl
-            pointlight.sl
-            shinymetal.sl
-            spotlight.sl
 
 distribution/
     application-src.svg
