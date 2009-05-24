@@ -122,69 +122,80 @@ def parseDestSpec(fileName):
 #------------------------------------------------------------------------------
 # MAIN PROGRAM
 #------------------------------------------------------------------------------
-# Delete the dest directory and recreate
 destDir = '../../newtree_src'
 sourceDir = '..'
-try:
-	shutil.rmtree(destDir)
-except:
-	pass
-os.mkdir(destDir)
+# Delete the dest directory and recreate
+#try:
+#	shutil.rmtree(destDir)
+#except:
+#	pass
+#os.mkdir(destDir)
 
+if len(sys.argv) < 2:
+	print 'Usage: %s  [copy | fixheaders]' % (sys.argv[0],)
+	sys.exit(1)
 
-#------------------------------------------------------------------------------
-# Create the directory structure.
+# Parse the destination spec.
 (destFileList, destDirList) = parseDestSpec('new_spec.txt')
-for dir in destDirList:
-	newDir = os.path.join(destDir, dir)
-	os.mkdir(newDir)
 
-# Copy over the files
+# Determine the full source->dest mapping for all source files.
 guesser = FileSourceGuesser(findFiles(sourceDir, excludeDirs = ['.git', 'newtree']))
-publicHeaderList = []
+fileMapping = []
 for (destFileName, hintName) in destFileList:
 	sourceFile = guesser.find(destFileName, hintName)
 	if sourceFile is None:
 		raise 'FILE NOT FOUND: %s\n' % (destFileName,)
 	destFile = os.path.join(destDir, destFileName)
-	shutil.copy(sourceFile, destFile)
-	# Save the mapping from source to dest for all library public headers.
-	if destFile.endswith(".h") and destFile.find("include") != -1:
-		publicHeaderList.append((sourceFile, destFile))
+	fileMapping.append((sourceFile, destFile))
 
 
-#------------------------------------------------------------------------------
-# Modify all headers in the project to correctly #include public headers by
-# the full path.
+if sys.argv[1] == 'copy':
+	print 'Copying files from %s to %s' % (sourceDir, destDir)
+	# Create the directory structure.
+	for dir in destDirList:
+		newDir = os.path.join(destDir, dir)
+		try:
+			os.mkdir(newDir)
+		except:
+			pass
+	# Copy over the files
+	for (sourceFile, destFile) in fileMapping:
+		shutil.copy(sourceFile, destFile)
 
-# First construct a dictionary mapping from "X.h" the appropriate
-# "aqsis/.../X.h"
-headerNameMap = dict()
-for (sourceFile, destFile) in publicHeaderList:
-	orig_h_name = os.path.basename(sourceFile)
-	new_h_name = destFile[destFile.find('include/')+len('include/'):]
-	if headerNameMap.has_key(orig_h_name):
-		raise 'Argh, ambiguous header name %s' % (orig_h_name,)
-	headerNameMap[orig_h_name] = new_h_name
+elif sys.argv[1] == 'fixheaders':
+	print 'Fixing header files in %s' % (destDir,)
 
-# Add a special case for aqsis_config.h which comes from a generated file,
-# aqsis_config.h.in.cmake, and version.h which comes from aqsis_version.h
-headerNameMap['aqsis_config.h'] = 'aqsis/config.h'
-headerNameMap['version.h'] = 'aqsis/version.h'
-headerNameMap['ri.inl'] = 'aqsis/ri/ri.inl'
+	# Modify all headers in the project to correctly #include public headers by
+	# the full path.
 
-# Construct a regex to match offending #include lines
-hPattern = re.compile(r'#\s*include\s+[<"](%s)[">]' % ('|'.join(headerNameMap.keys()),))
-#badPattern = re.compile('^\s*#\s*include\s+<(%s)>' % ('|'.join(headerNameMap.keys()),))
+	# First construct a dictionary mapping from "X.h" the appropriate
+	# "aqsis/.../X.h"
+	headerNameMap = dict()
+	for (sourceFile, destFile) in fileMapping:
+		if destFile.endswith(".h") and destFile.find("include") != -1:
+			orig_h_name = os.path.basename(sourceFile)
+			new_h_name = destFile[destFile.find('include/')+len('include/'):]
+			if headerNameMap.has_key(orig_h_name):
+				raise 'Argh, ambiguous header name %s' % (orig_h_name,)
+			headerNameMap[orig_h_name] = new_h_name
 
-# Now modify any lines in the file.
-allSource = findFiles(destDir, re.compile(r'\.(h|cpp|c|yy|ll|fl)$').search)
-for line in fileinput.input(allSource, inplace=True):
-	m = hPattern.search(line)
-	if m:
-		origName = m.group(1)
-		sys.stdout.write(re.sub('[<"]%s[">]' % (origName,),
-					'<%s>' % (headerNameMap[origName],), line, 1))
-	else:
-		sys.stdout.write(line)
+	# Add a special case for aqsis_config.h which comes from a generated file,
+	# aqsis_config.h.in.cmake, and version.h which comes from aqsis_version.h
+	headerNameMap['aqsis_config.h'] = 'aqsis/config.h'
+	headerNameMap['version.h'] = 'aqsis/version.h'
+	headerNameMap['ri.inl'] = 'aqsis/ri/ri.inl'
+
+	# Construct a regex to match offending #include lines
+	hPattern = re.compile(r'#\s*include\s+[<"](%s)[">]' % ('|'.join(headerNameMap.keys()),))
+
+	# Now modify any lines in the file.
+	allSource = findFiles(destDir, re.compile(r'\.(h|cpp|c|yy|ll|fl)$').search)
+	for line in fileinput.input(allSource, inplace=True):
+		m = hPattern.search(line)
+		if m:
+			origName = m.group(1)
+			sys.stdout.write(re.sub('[<"]%s[">]' % (origName,),
+						'<%s>' % (headerNameMap[origName],), line, 1))
+		else:
+			sys.stdout.write(line)
 
