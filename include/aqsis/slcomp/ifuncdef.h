@@ -27,7 +27,7 @@
 #ifndef IFUNCDEF_H_INCLUDED
 #define IFUNCDEF_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 namespace Aqsis {
 

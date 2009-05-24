@@ -28,9 +28,9 @@
 #ifndef FILTERSUPPORT_H_INCLUDED
 #define FILTERSUPPORT_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis
 {

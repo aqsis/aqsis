@@ -33,7 +33,7 @@
 
 #include "error.h"
 #include "context.h"
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace libri2rib {
 

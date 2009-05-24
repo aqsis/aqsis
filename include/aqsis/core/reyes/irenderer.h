@@ -16,10 +16,10 @@
 
 #include <boost/function.hpp>
 
-#include "matrix.h"
-#include "itransform.h"
-#include "sstring.h"
-#include "vecfwd.h"
+#include <aqsis/math/matrix.h>
+#include <aqsis/core/reyes/itransform.h>
+#include <aqsis/util/sstring.h>
+#include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 

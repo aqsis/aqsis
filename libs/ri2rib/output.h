@@ -26,17 +26,17 @@
 #ifndef RI2RIB_OUTPUT_H
 #define RI2RIB_OUTPUT_H 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <fstream>
 #include <stack>
 #include <string>
 #include <sstream>
 
-#include "ri.h"
+#include <aqsis/ri/ri.h>
 #include "options.h"
 #include "outstream.h"
-#include "tokendictionary.h"
+#include <aqsis/riutil/tokendictionary.h>
 
 namespace libri2rib {
 

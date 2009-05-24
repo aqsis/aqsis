@@ -28,7 +28,7 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "texexception.h"
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

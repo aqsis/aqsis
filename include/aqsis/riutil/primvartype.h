@@ -27,7 +27,7 @@
 #ifndef PRIMVARTYPE_H_INCLUDED
 #define PRIMVARTYPE_H_INCLUDED
 
-#include "enum.h"
+#include <aqsis/util/enum.h>
 
 namespace Aqsis {
 

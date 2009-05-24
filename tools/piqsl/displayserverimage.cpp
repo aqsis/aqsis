@@ -24,7 +24,7 @@
 */
 
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<map>
 #include	<algorithm>
@@ -36,9 +36,9 @@
 #include	<boost/filesystem.hpp>
 
 #include	"displayserverimage.h"
-#include	"aqsismath.h"
-#include 	"logging.h"
-#include	"smartptr.h"
+#include	<aqsis/math/math.h>
+#include 	<aqsis/util/logging.h>
+#include	<aqsis/util/smartptr.h>
 
 namespace Aqsis {
 

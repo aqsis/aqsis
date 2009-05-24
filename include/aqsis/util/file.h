@@ -28,7 +28,7 @@
 #ifndef FILE_H_INCLUDED
 #define FILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 

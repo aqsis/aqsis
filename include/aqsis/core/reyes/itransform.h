@@ -11,7 +11,7 @@
 #ifndef	___itransform_Loaded___
 #define	___itransform_Loaded___
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	<boost/shared_ptr.hpp>
 
 namespace Aqsis {

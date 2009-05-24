@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------
 // Includes
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 #	include <io.h>
@@ -55,15 +55,15 @@
 #include <cstdlib>
 #include <memory>
 
-#include "exception.h"
-#include "argparse.h"
-#include "file.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "ri.h"
-#include "version.h"
-#include "exception.h"
-#include "irenderer.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/util/argparse.h>
+#include <aqsis/util/file.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/util/logging_streambufs.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/version.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/core/reyes/irenderer.h>
 
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)

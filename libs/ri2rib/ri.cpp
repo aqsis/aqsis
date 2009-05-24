@@ -25,10 +25,10 @@
 #include <stdarg.h>
 #include <string>
 #include <stdio.h>
-#include "aqsis.h"
-#include "ri.h"
-#include "ri_convenience.h"
-//#include "exception.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/riutil/ri_convenience.h>
+//#include <aqsis/util/exception.h>
 #include "error.h"
 #include "plstore.h"
 #include "context.h"

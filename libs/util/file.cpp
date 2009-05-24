@@ -25,7 +25,7 @@
  * \author Chris Foster [chris42f (at) gmail (dot) com]
  */
 
-#include "file.h"
+#include <aqsis/util/file.h>
 
 #include <cctype>
 #include <cstring>
@@ -41,7 +41,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

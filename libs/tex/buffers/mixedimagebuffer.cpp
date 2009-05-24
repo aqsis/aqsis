@@ -26,15 +26,15 @@
  *
  */
 
-#include "mixedimagebuffer.h"
+#include <aqsis/tex/buffers/mixedimagebuffer.h>
 
 #ifdef USE_OPENEXR
 #include <half.h>
 #endif
 
-#include "exception.h"
-#include "logging.h"
-#include "ndspy.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/ri/ndspy.h>
 
 namespace Aqsis {
 

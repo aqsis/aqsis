@@ -24,7 +24,7 @@
 #ifndef EXCEPTION_H_INCLUDED
 #define EXCEPTION_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 #include <iosfwd>
 #include <stdexcept>
 #include <utility>

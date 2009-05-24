@@ -28,7 +28,7 @@
 #ifndef SOCKET_H_INCLUDED
 #define SOCKET_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <sstream>
 

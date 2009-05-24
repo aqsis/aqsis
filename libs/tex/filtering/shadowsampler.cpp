@@ -27,11 +27,11 @@
 #include "shadowsampler.h"
 
 #include "ewafilter.h"
-#include "itexinputfile.h"
-#include "sampleaccum.h"
-#include "filtertexture.h"
-#include "texexception.h"
-#include "tilearray.h"
+#include <aqsis/tex/io/itexinputfile.h>
+#include <aqsis/tex/filtering/sampleaccum.h>
+#include <aqsis/tex/filtering/filtertexture.h>
+#include <aqsis/tex/texexception.h>
+#include <aqsis/tex/buffers/tilearray.h>
 
 namespace Aqsis {
 

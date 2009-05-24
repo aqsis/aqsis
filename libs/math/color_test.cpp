@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 // Unit tests
 
-#include "color.h"
+#include <aqsis/math/color.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(color_isClose)
 
 // Efficiency tests.
 
-#include "color.h"
+#include <aqsis/math/color.h>
 
 // This is a duplicate of the generic lerp(), but with a different name to
 // allow comparisons with the specialised version.

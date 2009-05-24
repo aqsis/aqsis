@@ -35,12 +35,12 @@
 #ifndef	NDSPY_H_INCLUDED
 #define	NDSPY_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ri_types.h"
+#include <aqsis/ri/ritypes.h>
 
 typedef double PtDspyFloat64;
 typedef float PtDspyFloat32;

@@ -27,7 +27,7 @@
 #include <iostream>
 
 #include "codestyle.h"
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace Aqsis
 {

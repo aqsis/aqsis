@@ -26,7 +26,7 @@
 #ifndef ISAMPLER_H_INCLUDED //{
 #define ISAMPLER_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 namespace Aqsis {
 

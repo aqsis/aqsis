@@ -26,7 +26,7 @@
 #ifndef BUCKETPROCESSOR_H_INCLUDED
 #define BUCKETPROCESSOR_H_INCLUDED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<boost/array.hpp>
 

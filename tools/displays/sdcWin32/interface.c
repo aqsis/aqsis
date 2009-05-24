@@ -13,7 +13,7 @@
 
 #include <windows.h>
 #include "d_sdcWin32.h"
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 
 
 

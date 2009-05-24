@@ -27,13 +27,13 @@
 #ifndef LATLONGENVIRONMENTSAMPLER_H_INCLUDED
 #define LATLONGENVIRONMENTSAMPLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "ewafilter.h"
-#include "ienvironmentsampler.h"
+#include <aqsis/tex/filtering/ienvironmentsampler.h>
 #include "mipmap.h"
 
 namespace Aqsis {

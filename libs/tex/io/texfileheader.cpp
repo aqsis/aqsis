@@ -24,7 +24,7 @@
  * \author Chris Foster
  */
 
-#include "texfileheader.h"
+#include <aqsis/tex/io/texfileheader.h>
 
 #include <ctime>
 

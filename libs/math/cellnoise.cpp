@@ -32,9 +32,9 @@
 //   x-component of the output would depend only upon the x-component of the
 //   input, leading to heavily coherent noise.
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include "cellnoise.h"
+#include <aqsis/math/cellnoise.h>
 
 namespace Aqsis {
 

@@ -22,7 +22,7 @@
 		\brief declares an api for points information compatible with prman, 3delight and pixie
 		\author Michel Joron  (joron@sympatico.ca)
 */
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +55,7 @@
 // -------
 //
 
-#include	"ptcapi.h"
+#include	<aqsis/ri/pointcloud.h>
 
 #define PTCNAME    "Aqsis_PTC"
 #define PTCVERSION 1

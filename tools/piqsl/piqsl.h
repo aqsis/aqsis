@@ -26,7 +26,7 @@
 #ifndef	PIQSL_H_INCLUDED
 #define	PIQSL_H_INCLUDED
 
-#include <aqsis.h>
+#include <aqsis/aqsis.h>
 //#include <../display.h>
 
 #include <FL/Fl.H>

@@ -28,11 +28,11 @@
  *       The Stanford 3D Scanning Repository
  *           http://graphics.stanford.edu/data/3Dscanrep/#bunny|Bunny]
  */
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"bunny.h"
 
 
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

@@ -27,7 +27,7 @@
 #ifndef FRAMEBUFFER_H_INCLUDED
 #define FRAMEBUFFER_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<FL/Fl.H>
 #include	<FL/Fl_Double_Window.H>

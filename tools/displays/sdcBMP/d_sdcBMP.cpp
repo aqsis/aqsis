@@ -42,7 +42,7 @@
 #include <stdlib.h>
 
 
-#include "ndspy.h"  // NOTE: Use Pixar's ndspy.h if you've got it.
+#include <aqsis/ri/ndspy.h>  // NOTE: Use Pixar's ndspy.h if you've got it.
 
 
 typedef struct tagBITMAPFILEHEADER { // bmfh 

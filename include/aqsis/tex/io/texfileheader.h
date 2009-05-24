@@ -28,7 +28,7 @@
 #ifndef TEXFILEHEADER_H_INCLUDED
 #define TEXFILEHEADER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 #include <map>
@@ -36,7 +36,7 @@
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "texfileattributes.h"
+#include <aqsis/tex/io/texfileattributes.h>
 
 namespace Aqsis {
 

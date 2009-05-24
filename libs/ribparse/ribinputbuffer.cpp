@@ -29,7 +29,7 @@
 #	include <boost/iostreams/filter/gzip.hpp>
 #endif
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

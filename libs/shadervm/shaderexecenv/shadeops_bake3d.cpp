@@ -229,7 +229,7 @@ protected:
 };
 
 
-#include "ptcapi.h"
+#include <aqsis/ri/pointcloud.h>
 
 //------------------------------------------------------------------------------
 /** \brief Singleton plain manager of PointCloud files; they are split in two

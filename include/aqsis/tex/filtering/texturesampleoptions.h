@@ -27,13 +27,13 @@
 #ifndef TEXTURESAMPLEOPTIONS_H_INCLUDED
 #define TEXTURESAMPLEOPTIONS_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "aqsismath.h"
-#include "enum.h"
-#include "samplequad.h"
-#include "texfileheader.h"
-#include "wrapmode.h"
+#include <aqsis/math/math.h>
+#include <aqsis/util/enum.h>
+#include <aqsis/tex/filtering/samplequad.h>
+#include <aqsis/tex/io/texfileheader.h>
+#include <aqsis/tex/filtering/wrapmode.h>
 
 namespace Aqsis
 {

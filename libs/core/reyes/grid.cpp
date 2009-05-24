@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis {
 

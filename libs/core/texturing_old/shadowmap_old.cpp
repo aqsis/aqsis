@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<cstring>
 #include	<iostream>
@@ -31,10 +31,10 @@
 #include	<boost/shared_array.hpp>
 
 #include	"texturemap_old.h"
-#include	"random.h"
-#include	"version.h"
+#include	<aqsis/math/random.h>
+#include	<aqsis/version.h>
 #include	"renderer.h"
-#include	"logging.h"
+#include	<aqsis/util/logging.h>
 #include	"stats.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32

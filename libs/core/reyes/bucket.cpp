@@ -24,7 +24,7 @@
 */
 
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #ifdef WIN32
 #include    <windows.h>
@@ -33,7 +33,7 @@
 #include	<algorithm>
 #include	<valarray>
 
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"occlusion.h"

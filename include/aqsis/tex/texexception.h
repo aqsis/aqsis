@@ -27,9 +27,9 @@
 #ifndef TEXEXCEPTIONS_H_INCLUDED
 #define TEXEXCEPTIONS_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

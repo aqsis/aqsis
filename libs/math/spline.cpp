@@ -24,9 +24,9 @@
 */
 
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "spline.h"
+#include <aqsis/math/spline.h>
 
 
 namespace Aqsis {

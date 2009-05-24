@@ -26,9 +26,9 @@
 
 #include <stdio.h>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "shaderexecenv.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 

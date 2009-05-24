@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <iosfwd>
 
-#include <vector3d.h>
+#include <aqsis/math/vector3d.h>
 #include <ribparser.h>
 
 /// Alias for the longwinded Aqsis::CqVector3D

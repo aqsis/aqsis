@@ -23,8 +23,8 @@
  * \author Tobias Sauerwein
  */
 
-#include "cellnoise.h"
-#include "vector3d.h"
+#include <aqsis/math/cellnoise.h>
+#include <aqsis/math/vector3d.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

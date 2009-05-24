@@ -6,7 +6,7 @@
 #ifndef EMITTER_H_INCLUDED
 #define EMITTER_H_INCLUDED
 
-#include <lowdiscrep.h>
+#include <aqsis/math/lowdiscrep.h>
 
 #include "primvar.h"
 #include "util.h"

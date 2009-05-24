@@ -23,10 +23,10 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "color.h"
+#include <aqsis/math/color.h>
 
-#include "matrix.h"
-#include "vectorcast.h"
+#include <aqsis/math/matrix.h>
+#include <aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

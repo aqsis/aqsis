@@ -12,7 +12,7 @@
 #ifndef DSPYHLPR_H_INCLUDED
 #define DSPYHLPR_H_INCLUDED
 
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 
 #ifdef __cplusplus
 extern "C"

@@ -23,8 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-#include	"matrix.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/matrix.h>
 #include	"bound.h"
 
 namespace Aqsis {

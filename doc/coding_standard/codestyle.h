@@ -76,7 +76,7 @@
 // Includes go here.  Note the order.
 
 // First include aqsis.h - it has all the compiler-dependent #defines etc
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 // Next include any C++ standard libraries
 #include <string>

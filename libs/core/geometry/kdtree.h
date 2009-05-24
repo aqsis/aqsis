@@ -27,9 +27,9 @@
 #ifndef	KDTREE_H_LOADED
 #define	KDTREE_H_LOADED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 //#include	"memorypool.h"
-#include	"refcount.h"
+#include	<aqsis/util/refcount.h>
 #include	<vector>
 
 namespace Aqsis {

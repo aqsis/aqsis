@@ -8,9 +8,9 @@
 #include <sstream>
 #include <fstream>
 
-#include <ri.h>
-#include <aqsismath.h>
-#include <matrix.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/math.h>
+#include <aqsis/math/matrix.h>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

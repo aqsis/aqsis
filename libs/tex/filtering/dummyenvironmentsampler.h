@@ -27,7 +27,7 @@
 #ifndef DUMMYENVIRONMENTSAMPLER_H_INCLUDED
 #define DUMMYENVIRONMENTSAMPLER_H_INCLUDED
 
-#include "ienvironmentsampler.h"
+#include <aqsis/tex/filtering/ienvironmentsampler.h>
 
 namespace Aqsis {
 

@@ -33,10 +33,10 @@
 #ifndef VECTORCAST_H_INCLUDED
 #define VECTORCAST_H_INCLUDED
 
-#include "color.h"
-#include "vector2d.h"
-#include "vector3d.h"
-#include "vector4d.h"
+#include <aqsis/math/color.h>
+#include <aqsis/math/vector2d.h>
+#include <aqsis/math/vector3d.h>
+#include <aqsis/math/vector4d.h>
 
 namespace Aqsis {
 

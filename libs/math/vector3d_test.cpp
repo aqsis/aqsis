@@ -23,7 +23,7 @@
  * \author Chris Foster
  */
 
-#include "vector3d.h"
+#include <aqsis/math/vector3d.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

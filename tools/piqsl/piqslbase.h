@@ -26,7 +26,7 @@
 #ifndef	PIQSLBASE_H_INCLUDED
 #define	PIQSLBASE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 
 #include <vector>
@@ -36,7 +36,7 @@
 
 #include "image.h"
 #include "framebuffer.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 #include "book.h"
 
 namespace Aqsis {

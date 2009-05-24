@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<cstring> // for memcmp, strcmp
 #include	<time.h>
@@ -39,11 +39,11 @@
 #include	"lath.h"
 #include	"transform.h"
 #include	"texturemap_old.h"
-#include	"ishader.h"
+#include	<aqsis/shadervm/ishader.h>
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
-#include	"iribparser.h"
+#include	<aqsis/iribparser.h>
 #include	"ribrequesthandler.h"
 
 

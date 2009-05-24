@@ -26,11 +26,11 @@
 #ifndef OCCLUSION_H_INCLUDED
 #define OCCLUSION_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "vector2d.h"
+#include <aqsis/math/vector2d.h>
 
 namespace Aqsis {
 

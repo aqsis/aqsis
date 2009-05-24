@@ -23,17 +23,17 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<math.h>
 #include	<stdio.h>
 
 #include	"nurbs.h"
 #include	"renderer.h"
-#include	"vector3d.h"
+#include	<aqsis/math/vector3d.h>
 #include	"bilinear.h"
 #include	"attributes.h"
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 
 namespace Aqsis {
 

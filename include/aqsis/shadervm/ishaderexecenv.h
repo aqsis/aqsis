@@ -26,7 +26,7 @@
 #ifndef	___ishaderexecenv_Loaded___
 #define	___ishaderexecenv_Loaded___
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #ifdef	WIN32
 #  ifdef	AQSIS_STATIC_LINK
@@ -51,12 +51,12 @@
 
 #include	<boost/shared_ptr.hpp>
 
-#include	"ishaderdata.h"
-#include	"vector3d.h"
-#include	"matrix.h"
-#include	"sstring.h"
-#include	"bitvector.h"
-#include	"interfacefwd.h"
+#include	<aqsis/shadervm/ishaderdata.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/util/bitvector.h>
+#include	<aqsis/core/interfacefwd.h>
 
 namespace Aqsis {
 

@@ -23,10 +23,10 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "libslparse.h"
+#include <aqsis/slcomp/libslparse.h>
 
-#include "logging.h"
-#include "exception.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/util/exception.h>
 #include "parsenode.h"
 #include "vardef.h"
 

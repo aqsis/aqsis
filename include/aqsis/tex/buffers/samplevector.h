@@ -28,7 +28,7 @@
 #ifndef SAMPLEVECTOR_H_INCLUDED
 #define SAMPLEVECTOR_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <limits>
 

@@ -30,7 +30,7 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "tiffdirhandle.h"
 
 namespace Aqsis {

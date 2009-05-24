@@ -30,8 +30,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "texexception.h"
-#include "version.h"
+#include <aqsis/tex/texexception.h>
+#include <aqsis/version.h>
 
 namespace Aqsis {
 

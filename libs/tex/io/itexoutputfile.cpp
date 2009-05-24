@@ -24,9 +24,9 @@
  * \author Chris Foster
  */
 
-#include "itexoutputfile.h"
+#include <aqsis/tex/io/itexoutputfile.h>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 #include "tiffoutputfile.h"
 
 namespace Aqsis {

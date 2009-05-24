@@ -25,15 +25,15 @@
 #ifndef PARSETREEVIS_H_INCLUDED
 #define PARSETREEVIS_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iosfwd>
 #include <string>
 #include <map>
 #include <set>
 
-#include "iparsenode.h"
-#include "ifuncdef.h"
+#include <aqsis/slcomp/iparsenode.h>
+#include <aqsis/slcomp/ifuncdef.h>
 
 namespace Aqsis {
 

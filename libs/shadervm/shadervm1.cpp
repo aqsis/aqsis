@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-#include "logging.h"
+#include <aqsis/util/logging.h>
 #include "shadeopmacros.h"
 
 namespace Aqsis {

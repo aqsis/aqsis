@@ -27,14 +27,14 @@
 #ifndef ITEXOUTPUTFILE_H_INCLUDED
 #define ITEXOUTPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "file.h"
-#include "exception.h"
-#include "imagefiletype.h"
-#include "mixedimagebuffer.h"
-#include "smartptr.h"
-#include "texfileheader.h"
+#include <aqsis/util/file.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/tex/io/imagefiletype.h>
+#include <aqsis/tex/buffers/mixedimagebuffer.h>
+#include <aqsis/util/smartptr.h>
+#include <aqsis/tex/io/texfileheader.h>
 
 namespace Aqsis {
 

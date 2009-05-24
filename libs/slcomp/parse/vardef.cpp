@@ -6,7 +6,7 @@
 ////    Creation date:			22/07/99
 ////---------------------------------------------------------------------
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"parsenode.h"
 #include	"vardef.h"
 

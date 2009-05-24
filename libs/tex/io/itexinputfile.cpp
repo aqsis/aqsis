@@ -25,10 +25,10 @@
  * \author Chris Foster
  */
 
-#include "itexinputfile.h"
+#include <aqsis/tex/io/itexinputfile.h>
 
 #include "exrinputfile.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 #include "magicnumber.h"
 #include "tiffinputfile.h"
 #include "zinputfile.h"

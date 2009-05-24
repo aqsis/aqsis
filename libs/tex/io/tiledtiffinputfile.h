@@ -27,11 +27,11 @@
 #ifndef ITILEDTIFFINPUTFILE_H_INCLUDED
 #define ITILEDTIFFINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "itiledtexinputfile.h"
+#include <aqsis/tex/io/itiledtexinputfile.h>
 #include "tiffdirhandle.h"
 
 namespace Aqsis {

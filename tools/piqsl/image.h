@@ -26,7 +26,7 @@
 #ifndef IMAGE_H_INCLUDED
 #define IMAGE_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 #include <string>
@@ -40,8 +40,8 @@
 
 #include "tinyxml.h"
 
-#include "channellist.h"
-#include "mixedimagebuffer.h"
+#include <aqsis/tex/buffers/channellist.h>
+#include <aqsis/tex/buffers/mixedimagebuffer.h>
 
 namespace Aqsis {
 

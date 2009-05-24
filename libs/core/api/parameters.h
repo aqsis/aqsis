@@ -27,18 +27,18 @@
 #ifndef PARAMETERS_H_INCLUDED
 #define PARAMETERS_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
 #include	<boost/shared_ptr.hpp>
 
-#include	"isurface.h"
-#include	"ishaderdata.h"
-#include	"iparameter.h"
+#include	<aqsis/core/reyes/isurface.h>
+#include	<aqsis/shadervm/ishaderdata.h>
+#include	<aqsis/core/api/iparameter.h>
 #include	"bilinear.h"
-#include	"primvartoken.h"
-#include	"vectorcast.h"
+#include	<aqsis/riutil/primvartoken.h>
+#include	<aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

@@ -27,10 +27,10 @@
 #ifndef	SUBDIVISION2_H_LOADED
 #define	SUBDIVISION2_H_LOADED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 #include "lath.h"
-#include "vector3d.h"
-#include "refcount.h"
+#include <aqsis/math/vector3d.h>
+#include <aqsis/util/refcount.h>
 #include "surface.h"
 #include "polygon.h"
 

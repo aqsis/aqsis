@@ -27,9 +27,9 @@
 		\author Michel Joron (joron@sympatico.ca)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"renderer.h"
-#include	"logging.h"
+#include	<aqsis/util/logging.h>
 
 #include	<cstdio>
 #include	<cstring>

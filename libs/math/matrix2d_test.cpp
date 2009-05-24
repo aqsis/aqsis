@@ -23,7 +23,7 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "matrix2d.h"
+#include <aqsis/math/matrix2d.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

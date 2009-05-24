@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"stats.h"
 #include	"imagebuffer.h"
 #include	"micropolygon.h"
@@ -32,7 +32,7 @@
 #include	"lights.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
-#include	"spline.h"
+#include	<aqsis/math/spline.h>
 #include	"bucketprocessor.h"
 
 #include	"mpdump.h"

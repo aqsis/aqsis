@@ -37,7 +37,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "renderer.h"
-#include "plugins.h"
+#include <aqsis/util/plugins.h>
 
 namespace Aqsis {
 

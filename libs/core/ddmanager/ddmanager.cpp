@@ -24,7 +24,7 @@
 */
 
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	"winsock2.h"
@@ -35,15 +35,15 @@
 #include	<boost/static_assert.hpp>
 #include	<boost/format.hpp>
 
-#include	"sstring.h"
+#include	<aqsis/util/sstring.h>
 #include	"ddmanager.h"
 #include	"imagebuffer.h"
-#include	"ishaderexecenv.h"
-#include	"logging.h"
-#include	"ndspy.h"
-#include	"version.h"
+#include	<aqsis/shadervm/ishaderexecenv.h>
+#include	<aqsis/util/logging.h>
+#include	<aqsis/ri/ndspy.h>
+#include	<aqsis/version.h>
 #include	"debugdd.h"
-#include	"random.h"
+#include	<aqsis/math/random.h>
 
 namespace Aqsis {
 

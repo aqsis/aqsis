@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -53,13 +53,13 @@
 #include	<FL/Fl.H>
 #include	<tinyxml.h>
 
-#include	"argparse.h"
-#include	"logging.h"
-#include	"logging_streambufs.h"
-#include	"sstring.h"
-#include	"socket.h"
+#include	<aqsis/util/argparse.h>
+#include	<aqsis/util/logging.h>
+#include	<aqsis/util/logging_streambufs.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/util/socket.h>
 #include	"image.h"
-#include	"version.h"
+#include	<aqsis/version.h>
 #include	"piqsl.h"
 #include	"piqsl_ui.h"
 #include	"displayserverimage.h"

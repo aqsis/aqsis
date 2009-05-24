@@ -25,12 +25,12 @@
 #ifndef RIBTOKEN_H_INCLUDED
 #define RIBTOKEN_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 #include <iostream>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis {
 

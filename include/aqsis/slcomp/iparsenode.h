@@ -29,10 +29,10 @@
 
 #include	<iostream>
 
-#include	"aqsis.h"
-#include	"ifuncdef.h"
-#include	"ivardef.h"
-#include	"sstring.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/slcomp/ifuncdef.h>
+#include	<aqsis/slcomp/ivardef.h>
+#include	<aqsis/util/sstring.h>
 
 namespace Aqsis {
 

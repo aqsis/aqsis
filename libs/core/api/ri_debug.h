@@ -27,7 +27,7 @@
 #ifndef RI_DEBUG_H_INCLUDED
 #define RI_DEBUG_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"renderer.h"
 
 namespace Aqsis {

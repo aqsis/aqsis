@@ -13,7 +13,7 @@
 #ifndef	___iraytrace_Loaded___
 #define	___iraytrace_Loaded___
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	<boost/shared_ptr.hpp>
 
 namespace Aqsis {

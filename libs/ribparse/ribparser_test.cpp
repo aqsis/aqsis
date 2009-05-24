@@ -22,7 +22,7 @@
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
@@ -37,8 +37,8 @@
 #include <boost/any.hpp>
 
 #include "ribparser.h"
-#include "smartptr.h"
-#include "primvartoken.h"
+#include <aqsis/util/smartptr.h>
+#include <aqsis/riutil/primvartoken.h>
 
 
 using namespace Aqsis;

@@ -23,7 +23,7 @@
 #include <iostream>
 #include <string>
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include <windows.h>

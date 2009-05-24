@@ -28,7 +28,7 @@
 #ifndef EXECUTE_H_INCLUDED
 #define EXECUTE 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/function.hpp>
 

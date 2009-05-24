@@ -28,12 +28,12 @@
 #ifndef MAGICNUMBER_H_INCLUDED
 #define MAGICNUMBER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iosfwd>
 
-#include "file.h"
-#include "imagefiletype.h"
+#include <aqsis/util/file.h>
+#include <aqsis/tex/io/imagefiletype.h>
 
 namespace Aqsis {
 

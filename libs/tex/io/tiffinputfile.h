@@ -28,13 +28,13 @@
 #ifndef TIFFINPUTFILE_H_INCLUDED
 #define TIFFINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexinputfile.h"
+#include <aqsis/tex/io/itexinputfile.h>
 #include "tiffdirhandle.h"
 
 namespace Aqsis {

@@ -49,7 +49,7 @@
 
 extern "C"
 {
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 #include "d_sdcWin32.h"
 }
 

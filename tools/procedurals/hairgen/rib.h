@@ -7,9 +7,9 @@
 #include <map>
 #include <string>
 
-#include <smartptr.h>
-#include <iribparser.h>
-#include <tokendictionary.h>
+#include <aqsis/util/smartptr.h>
+#include <aqsis/iribparser.h>
+#include <aqsis/riutil/tokendictionary.h>
 
 #include "parenthairs.h"
 #include "primvar.h"

@@ -31,7 +31,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 
 namespace Aqsis {

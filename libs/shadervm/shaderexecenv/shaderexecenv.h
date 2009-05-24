@@ -27,28 +27,28 @@
 #ifndef SHADEREXECENV_H_INCLUDED
 #define SHADEREXECENV_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
 #include <boost/noncopyable.hpp>
 
-#include	"aqsismath.h"
-#include	"bitvector.h"
-#include	"color.h"
-#include	"noise.h"
-#include	"random.h"
-#include	"cellnoise.h"
-#include	"vector3d.h"
-#include	"ishaderdata.h"
-#include	"ishader.h"
-#include	"ishaderexecenv.h"
-#include	"isurface.h"
-#include	"irenderer.h"
-#include	"matrix.h"
+#include	<aqsis/math/math.h>
+#include	<aqsis/util/bitvector.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/math/noise.h>
+#include	<aqsis/math/random.h>
+#include	<aqsis/math/cellnoise.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/shadervm/ishaderdata.h>
+#include	<aqsis/shadervm/ishader.h>
+#include	<aqsis/shadervm/ishaderexecenv.h>
+#include	<aqsis/core/reyes/isurface.h>
+#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/math/matrix.h>
 
-#include	"iattributes.h"
-#include	"itransform.h"
+#include	<aqsis/core/api/iattributes.h>
+#include	<aqsis/core/reyes/itransform.h>
 
 namespace Aqsis {
 

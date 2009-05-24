@@ -27,12 +27,12 @@
 #ifndef TEXTURESAMPLER_H_INCLUDED
 #define TEXTURESAMPLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
 #include "ewafilter.h"
-#include "itexturesampler.h"
+#include <aqsis/tex/filtering/itexturesampler.h>
 #include "mipmap.h"
 
 namespace Aqsis {

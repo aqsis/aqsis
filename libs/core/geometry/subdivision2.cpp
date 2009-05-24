@@ -30,7 +30,7 @@
 
 #include	"patch.h"
 #include	"micropolygon.h"
-#include	"vectorcast.h"
+#include	<aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

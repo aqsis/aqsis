@@ -27,13 +27,13 @@
 #ifndef ITILEDTEXINPUTFILE_H_INCLUDED
 #define ITILEDTEXINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
-#include "file.h"
-#include "imagefiletype.h"
-#include "texfileheader.h"
+#include <aqsis/util/file.h>
+#include <aqsis/tex/io/imagefiletype.h>
+#include <aqsis/tex/io/texfileheader.h>
 
 namespace Aqsis {
 

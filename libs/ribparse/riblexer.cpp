@@ -32,7 +32,7 @@
 
 #include <boost/cstdint.hpp> // for uint64_t
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis
 {

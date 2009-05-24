@@ -25,12 +25,12 @@
 #ifndef RI_CONVENIENCE_H
 #define RI_CONVENIENCE_H
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 #include <cstdarg>
 
-#include "ri_types.h"
+#include <aqsis/ri/ritypes.h>
 
 namespace Aqsis
 {

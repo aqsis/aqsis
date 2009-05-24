@@ -23,7 +23,7 @@
  * \author Chris Foster
  */
 
-#include "mixedimagebuffer.h"
+#include <aqsis/tex/buffers/mixedimagebuffer.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
@@ -34,8 +34,8 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include "aqsismath.h"
-#include "smartptr.h"
+#include <aqsis/math/math.h>
+#include <aqsis/util/smartptr.h>
 
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer test cases

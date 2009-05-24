@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 // Unit tests
 
-#include "vector2d.h"
+#include <aqsis/math/vector2d.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

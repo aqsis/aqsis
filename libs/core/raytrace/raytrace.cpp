@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"raytrace.h"
 
 namespace Aqsis {

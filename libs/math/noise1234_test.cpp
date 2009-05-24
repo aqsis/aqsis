@@ -23,7 +23,7 @@
  * \author Tobias Sauerwein
  */
 
-#include "noise1234.h"
+#include <aqsis/math/noise1234.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

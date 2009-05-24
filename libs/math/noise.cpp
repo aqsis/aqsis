@@ -24,10 +24,10 @@
 		\author Stefan Gustavson (stegu@itn.liu.se)
 */
 
-#include "noise.h"
+#include <aqsis/math/noise.h>
 
-#include "noise1234.h"
-#include "vectorcast.h"
+#include <aqsis/math/noise1234.h>
+#include <aqsis/math/vectorcast.h>
 
 
 namespace Aqsis {

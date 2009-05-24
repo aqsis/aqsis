@@ -27,11 +27,11 @@
 #ifndef ITILEDANYINPUTFILE_H_INCLUDED
 #define ITILEDANYINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
-#include "itiledtexinputfile.h"
+#include <aqsis/tex/io/itiledtexinputfile.h>
 
 namespace Aqsis {
 

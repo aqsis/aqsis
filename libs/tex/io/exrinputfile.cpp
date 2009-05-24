@@ -35,8 +35,8 @@
 #include <ImfFrameBuffer.h>
 #include <Iex.h>
 
-#include "logging.h"
-#include "texexception.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

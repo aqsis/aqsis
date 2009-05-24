@@ -29,9 +29,9 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

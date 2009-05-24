@@ -28,7 +28,7 @@
 #ifndef CHANNELINFO_H_INCLUDED
 #define CHANNELINFO_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
@@ -36,7 +36,7 @@
 #include <half.h>
 #endif
 
-#include "enum.h"
+#include <aqsis/util/enum.h>
 
 namespace Aqsis {
 

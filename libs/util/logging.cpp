@@ -16,10 +16,10 @@
 // License along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "logging.h"
-#include "logging_streambufs.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/util/logging_streambufs.h>
 
 #include <cstdio>              // For EOF
 #include <iostream>

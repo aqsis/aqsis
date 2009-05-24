@@ -24,12 +24,12 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "iocclusionsampler.h"
+#include <aqsis/tex/filtering/iocclusionsampler.h>
 
 #include "dummyocclusionsampler.h"
-#include "itiledtexinputfile.h"
+#include <aqsis/tex/io/itiledtexinputfile.h>
 #include "occlusionsampler.h"
-#include "texexception.h"
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

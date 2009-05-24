@@ -1,4 +1,4 @@
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
@@ -12,9 +12,9 @@
 
 #include <boost/assign/std/vector.hpp>
 
-#include "aqsismath.h"
-#include "ri.h"
-#include "iribparser.h"
+#include <aqsis/math/math.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/iribparser.h>
 
 using namespace boost::assign; // necessary for container initialisation operators.
 

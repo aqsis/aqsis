@@ -14,10 +14,10 @@
 #include	<vector>
 #include	<boost/shared_ptr.hpp>
 
-#include	"aqsis.h"
-#include	"matrix.h"
-#include	"sstring.h"
-#include	"interfacefwd.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/core/interfacefwd.h>
 
 namespace Aqsis {
 

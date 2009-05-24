@@ -27,7 +27,7 @@
 #include	<stdio.h>
 
 #include	"shaderexecenv.h"
-#include	"spline.h"
+#include	<aqsis/math/spline.h>
 
 namespace Aqsis {
 

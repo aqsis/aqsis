@@ -31,8 +31,8 @@
 #ifndef RIF_H_INCLUDED
 #define RIF_H_INCLUDED
 
-#include "aqsis_config.h"
-#include "ri_types.h"
+#include <aqsis/config.h>
+#include <aqsis/ri/ritypes.h>
 
 /** \brief Primitive variable type identifiers */
 typedef enum

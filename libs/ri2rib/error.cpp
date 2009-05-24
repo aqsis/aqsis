@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "error.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 
 /// Storage for the last error number reported.

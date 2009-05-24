@@ -27,7 +27,7 @@
 #ifndef IVARDEF_H_INCLUDED
 #define IVARDEF_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 namespace Aqsis {
 

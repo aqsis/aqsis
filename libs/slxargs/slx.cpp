@@ -30,8 +30,8 @@
  *      Valid values should include RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ.
  */
 
-#include "aqsis.h"
-#include "slx.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/ri/slx.h>
 
 #ifdef	AQSIS_COMPILER_MSVC6
 #pragma warning (disable : 4786)
@@ -44,10 +44,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ri.h"
-#include "ishader.h"
-#include "ishaderdata.h"
-#include "color.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/shadervm/ishader.h>
+#include <aqsis/shadervm/ishaderdata.h>
+#include <aqsis/math/color.h>
 
 using namespace Aqsis;
 

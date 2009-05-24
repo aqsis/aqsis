@@ -24,7 +24,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <cstring>
 #include <sstream>
@@ -58,13 +58,13 @@
 
 #include <tinyxml.h>
 
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 #include "dspyhlpr.h"
-#include "version.h"
-#include "socket.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "aqsismath.h"
+#include <aqsis/version.h>
+#include <aqsis/util/socket.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/util/logging_streambufs.h>
+#include <aqsis/math/math.h>
 
 using namespace Aqsis;
 

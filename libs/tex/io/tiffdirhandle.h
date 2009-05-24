@@ -27,7 +27,7 @@
 #ifndef TIFFDIRHANDLE_H_INCLUDED
 #define TIFFDIRHANDLE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
@@ -35,11 +35,11 @@
 #include <boost/utility.hpp>
 #include <tiffio.h>
 
-#include "channellist.h"
-#include "exception.h"
-#include "file.h"
-#include "logging.h"
-#include "texfileheader.h"
+#include <aqsis/tex/buffers/channellist.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/util/file.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/tex/io/texfileheader.h>
 
 namespace Aqsis
 {

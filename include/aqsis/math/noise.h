@@ -28,9 +28,9 @@
 #ifndef NOISE_H_INCLUDED
 #define NOISE_H_INCLUDED 1
 
-#include	"aqsis.h"
-#include	"vector3d.h"
-#include	"color.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/color.h>
 
 namespace Aqsis {
 

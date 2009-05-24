@@ -30,7 +30,7 @@
 #ifndef SLO_H_INCLUDED
 #define SLO_H_INCLUDED
 
-#include "slx.h"
+#include <aqsis/ri/slx.h>
 
 #ifdef __cplusplus
 extern "C"

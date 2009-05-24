@@ -28,12 +28,12 @@
 #ifndef MATRIX_H_INCLUDED
 #define MATRIX_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 
-#include "vector3d.h"
-#include "vector4d.h"
+#include <aqsis/math/vector3d.h>
+#include <aqsis/math/vector4d.h>
 
 namespace Aqsis {
 

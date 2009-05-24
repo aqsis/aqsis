@@ -31,24 +31,24 @@
 #include	<list>
 #include	<boost/shared_ptr.hpp>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"bitvector.h"
-#include	"vector3d.h"
-#include	"color.h"
-#include	"sstring.h"
-#include	"matrix.h"
-#include	"noise.h"
-#include	"ishaderdata.h"
-#include	"ishader.h"
-#include	"irenderer.h"
-#include	"iparameter.h"
+#include	<aqsis/util/bitvector.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/math/noise.h>
+#include	<aqsis/shadervm/ishaderdata.h>
+#include	<aqsis/shadervm/ishader.h>
+#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/core/api/iparameter.h>
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
 //#include 	"parameters.h"
 #include 	"dsoshadeops.h"
-#include	"itransform.h"
+#include	<aqsis/core/reyes/itransform.h>
 #include	"shadervm_common.h"
 
 

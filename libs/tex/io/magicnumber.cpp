@@ -31,7 +31,7 @@
 #include <fstream>
 #include <vector>
 
-#include "texexception.h"
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

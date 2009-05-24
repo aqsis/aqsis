@@ -28,7 +28,7 @@
 #ifndef SAMPLEACCUM_H_INCLUDED
 #define SAMPLEACCUM_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 namespace Aqsis {
 

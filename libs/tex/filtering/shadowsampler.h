@@ -27,11 +27,11 @@
 #ifndef SHADOWSAMPLER_H_INCLUDED
 #define SHADOWSAMPLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "ishadowsampler.h"
-#include "matrix.h"
-#include "texturesampleoptions.h"
+#include <aqsis/tex/filtering/ishadowsampler.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/tex/filtering/texturesampleoptions.h>
 
 namespace Aqsis
 {

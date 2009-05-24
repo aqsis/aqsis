@@ -24,9 +24,9 @@
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 #include "patch.h"
-#include "vector3d.h"
+#include <aqsis/math/vector3d.h>
 #include "curves.h"
 namespace Aqsis {
 

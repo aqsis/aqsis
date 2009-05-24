@@ -27,13 +27,13 @@
 #ifndef RI_CACHE_H_INCLUDED
 #define RI_CACHE_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <cstring>
 
-#include "ri.h"
+#include <aqsis/ri/ri.h>
 #include "renderer.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 

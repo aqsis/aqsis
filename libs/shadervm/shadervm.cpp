@@ -31,13 +31,13 @@
 #include <sstream>
 #include <stddef.h>
 
-#include "iparameter.h"
-#include "irenderer.h"
-#include "isurface.h"
-#include "logging.h"
+#include <aqsis/core/api/iparameter.h>
+#include <aqsis/core/reyes/irenderer.h>
+#include <aqsis/core/reyes/isurface.h>
+#include <aqsis/util/logging.h>
 #include "shadervariable.h"
-#include "sstring.h"
-#include "version.h"
+#include <aqsis/util/sstring.h>
+#include <aqsis/version.h>
 
 
 namespace Aqsis {

@@ -26,11 +26,11 @@
 
 #include	"quadrics.h"
 
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 #include	"imagebuffer.h"
 #include	"nurbs.h"
 
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

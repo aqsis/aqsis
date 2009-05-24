@@ -6,7 +6,7 @@
 ////    Creation date:			25/11/99
 ////---------------------------------------------------------------------
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"parsenode.h"
 
 namespace Aqsis {

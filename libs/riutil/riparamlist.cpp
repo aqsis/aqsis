@@ -24,7 +24,7 @@
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
  */
 
-#include "riparamlist.h"
+#include <aqsis/riutil/riparamlist.h>
 
 #include <boost/tokenizer.hpp>
 

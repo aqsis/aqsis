@@ -26,10 +26,10 @@
 #ifndef ICODEGEN_H_INCLUDED
 #define ICODEGEN_H_INCLUDED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"iparsenode.h"
-#include	"ivardef.h"
+#include	<aqsis/slcomp/iparsenode.h>
+#include	<aqsis/slcomp/ivardef.h>
 
 namespace Aqsis {
 

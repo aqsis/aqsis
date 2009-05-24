@@ -28,8 +28,8 @@
 #include <stack>
 #include <vector>
 
-#include "ri.h"
-#include "vector3d.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/vector3d.h>
 
 
 namespace Aqsis {
@@ -52,7 +52,7 @@ namespace Aqsis {
 // any and all purposes, provided that this notice appears in all copies.
 
 
-#include "aqsis_types.h"
+#include <aqsis/util/inttype.h>
 
 class implicit_functor
 {

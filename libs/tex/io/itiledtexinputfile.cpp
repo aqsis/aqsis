@@ -24,12 +24,12 @@
  * \author Chris Foster
  */
 
-#include "itiledtexinputfile.h"
+#include <aqsis/tex/io/itiledtexinputfile.h>
 
 #include "magicnumber.h"
 #include "tiledanyinputfile.h"
 #include "tiledtiffinputfile.h"
-#include "texexception.h"
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

@@ -27,14 +27,14 @@
 #ifndef BOUND_H_INCLUDED
 #define BOUND_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 #include <float.h>
 
-#include "matrix.h"
+#include <aqsis/math/matrix.h>
 #include "plane.h"
-#include "vector2d.h"
+#include <aqsis/math/vector2d.h>
 
 namespace Aqsis {
 

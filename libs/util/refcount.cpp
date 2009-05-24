@@ -23,8 +23,8 @@
 	\author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
-#include "refcount.h"
-#include "aqsis.h"
+#include <aqsis/util/refcount.h>
+#include <aqsis/aqsis.h>
 
 /// Only include this file under a debug build.  The methods included
 /// here are the debug implementations.  For the non-debug
@@ -38,7 +38,7 @@
 #warning Using the debug reference counting scheme.
 #endif
 
-#include "sstring.h"
+#include <aqsis/util/sstring.h>
 #include <stdlib.h>
 
 

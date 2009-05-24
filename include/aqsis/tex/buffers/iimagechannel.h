@@ -31,7 +31,7 @@
 #ifndef IIMAGECHANNEL_H_INCLUDED
 #define IIMAGECHANNEL_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 namespace Aqsis {
 

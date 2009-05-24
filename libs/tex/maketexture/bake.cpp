@@ -31,9 +31,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "aqsismath.h"
-#include "logging.h"
-#include "texexception.h"
+#include <aqsis/math/math.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/tex/texexception.h>
 #include "tiffio.h"
 
 namespace Aqsis {

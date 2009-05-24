@@ -33,16 +33,16 @@
 #include	<boost/shared_ptr.hpp>
 #include	<boost/enable_shared_from_this.hpp>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include "ri.h"
-#include "color.h"
-#include "list.h"
-#include "matrix.h"
-#include "ishaderexecenv.h"
-#include "vector4d.h"
-#include "version.h"
-#include "ilightsource.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/color.h>
+#include <aqsis/util/list.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/shadervm/ishaderexecenv.h>
+#include <aqsis/math/vector4d.h>
+#include <aqsis/version.h>
+#include <aqsis/core/reyes/ilightsource.h>
 #include "attributes.h"
 #include "transform.h"
 

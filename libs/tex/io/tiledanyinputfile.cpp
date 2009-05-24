@@ -26,8 +26,8 @@
 
 #include "tiledanyinputfile.h"
 
-#include "itexinputfile.h"
-#include "smartptr.h"
+#include <aqsis/tex/io/itexinputfile.h>
+#include <aqsis/util/smartptr.h>
 
 namespace Aqsis {
 

@@ -27,7 +27,7 @@
 #include	<cstring>
 
 #include	"shaderexecenv.h"
-#include	"shadeop.h"
+#include	<aqsis/ri/shadeop.h>
 
 namespace Aqsis {
 

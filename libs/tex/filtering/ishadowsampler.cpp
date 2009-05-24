@@ -24,12 +24,12 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "ishadowsampler.h"
+#include <aqsis/tex/filtering/ishadowsampler.h>
 
 #include "dummyshadowsampler.h"
-#include "itiledtexinputfile.h"
+#include <aqsis/tex/io/itiledtexinputfile.h>
 #include "shadowsampler.h"
-#include "texexception.h"
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

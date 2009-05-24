@@ -23,9 +23,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"shaderstack.h"
-#include	"ishaderdata.h"
+#include	<aqsis/shadervm/ishaderdata.h>
 
 #undef SHADERSTACKSTATS /* define if you want to know at run-time the max. depth of stack */
 

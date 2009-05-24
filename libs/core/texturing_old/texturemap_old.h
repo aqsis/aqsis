@@ -32,17 +32,17 @@
 #include	<list>
 #include	<valarray>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	"tiffio.h"
 
-#include	"sstring.h"
-#include	"color.h"
-#include	"matrix.h"
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/math/matrix.h>
 #include	"itexturemap_old.h"
-#include	"ri.h"
-#include	"ishaderexecenv.h"
-#include	"lowdiscrep.h"
+#include	<aqsis/ri/ri.h>
+#include	<aqsis/shadervm/ishaderexecenv.h>
+#include	<aqsis/math/lowdiscrep.h>
 
 namespace Aqsis {
 

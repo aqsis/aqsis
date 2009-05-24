@@ -26,7 +26,7 @@
 #ifndef LIBSLPARSE_H_INCLUDED
 #define LIBSLPARSE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 #include <string>

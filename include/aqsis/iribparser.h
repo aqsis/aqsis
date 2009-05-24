@@ -26,7 +26,7 @@
 #ifndef IRIBPARSER_H_INCLUDED
 #define IRIBPARSER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 #include <string>

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "argparse.h"
+#include <aqsis/util/argparse.h>
 
 static bool checkArrays(const ArgParse::apintvec& foo,
                         const ArgParse::apfloatvec& bar,

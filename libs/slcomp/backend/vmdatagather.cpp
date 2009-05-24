@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifndef AQSIS_SYSTEM_MACOSX
 #include	<sstream>
@@ -34,7 +34,7 @@
 #include	<map>
 
 
-#include	"version.h"
+#include	<aqsis/version.h>
 #include	"vmdatagather.h"
 
 #include	"parsenode.h"

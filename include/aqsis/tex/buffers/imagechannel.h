@@ -27,15 +27,15 @@
 #ifndef IMAGECHANNEL_H_INCLUDED
 #define IMAGECHANNEL_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <limits>
 #include <string>
 #include <vector>
 
-#include "aqsismath.h"
-#include "channelinfo.h"
-#include "iimagechannel.h"
+#include <aqsis/math/math.h>
+#include <aqsis/tex/buffers/channelinfo.h>
+#include <aqsis/tex/buffers/iimagechannel.h>
 
 namespace Aqsis {
 

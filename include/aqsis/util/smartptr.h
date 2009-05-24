@@ -28,7 +28,7 @@
 #ifndef SMARTPTR_H_INCLUDED
 #define SMARTPTR_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 namespace Aqsis {
 

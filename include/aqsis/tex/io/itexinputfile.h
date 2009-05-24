@@ -28,11 +28,11 @@
 #ifndef ITEXINPUTFILE_H_INCLUDED
 #define ITEXINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "file.h"
-#include "imagefiletype.h"
-#include "texfileheader.h"
+#include <aqsis/util/file.h>
+#include <aqsis/tex/io/imagefiletype.h>
+#include <aqsis/tex/io/texfileheader.h>
 
 namespace Aqsis {
 

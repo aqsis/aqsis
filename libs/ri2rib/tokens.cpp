@@ -14,8 +14,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "ri.h"
-#include "ri_types.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/ri/ritypes.h>
 
 RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
 RtToken RI_FILE             = tokenCast("file");

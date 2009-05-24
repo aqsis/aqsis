@@ -27,7 +27,7 @@
 #include	<stdio.h>
 
 #include	"shaderexecenv.h"
-#include	"vectorcast.h"
+#include	<aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

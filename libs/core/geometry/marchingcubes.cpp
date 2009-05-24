@@ -31,7 +31,7 @@
 #pragma implementation
 #endif // AQSIS_SYSTEM_WIN32
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <cstring>  // for memcpy, memset
 #include <math.h>
@@ -41,7 +41,7 @@
 #include <stdio.h>
 
 #include "renderer.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 // Compute normals
 #undef COMPUTE_NORMALS

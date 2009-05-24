@@ -27,9 +27,9 @@
 #ifndef TIFFOUTPUTFILE_H_INCLUDED
 #define TIFFOUTPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "itexoutputfile.h"
+#include <aqsis/tex/io/itexoutputfile.h>
 
 namespace Aqsis {
 

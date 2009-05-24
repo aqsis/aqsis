@@ -29,7 +29,7 @@
 
 #include <boost/format.hpp>
 
-#include "icodegen.h"
+#include <aqsis/slcomp/icodegen.h>
 
 namespace Aqsis {
 

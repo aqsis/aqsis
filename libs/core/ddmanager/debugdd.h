@@ -15,7 +15,7 @@
 #ifndef ___debugdd_Loaded___
 #define ___debugdd_Loaded___
 
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 
 PtDspyError DebugDspyImageQuery ( PtDspyImageHandle image, PtDspyQueryType type, size_t size, void *data );
 PtDspyError DebugDspyImageOpen ( PtDspyImageHandle *image,

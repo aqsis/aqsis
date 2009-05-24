@@ -26,13 +26,13 @@
 #ifndef MULTIJITTER_H_INCLUDED //{
 #define MULTIJITTER_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
 #include	"isampler.h"
-#include	"vector2d.h"
-#include	"random.h"
+#include	<aqsis/math/vector2d.h>
+#include	<aqsis/math/random.h>
 
 namespace Aqsis {
 

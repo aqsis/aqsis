@@ -39,7 +39,7 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include "smartptr.h"
+#include <aqsis/util/smartptr.h>
 #include "tiffdirhandle.h"
 
 //------------------------------------------------------------------------------

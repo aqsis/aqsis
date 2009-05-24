@@ -28,7 +28,7 @@
 #ifndef TILEARRAY_H_INCLUDED
 #define TILEARRAY_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
@@ -37,11 +37,11 @@
 #include <boost/scoped_array.hpp>
 #include <boost/noncopyable.hpp>
 
-//#include "memorysentry.h"
-#include "itiledtexinputfile.h"
-#include "texturebuffer.h"
+//#include <aqsis/util/memorysentry.h>
+#include <aqsis/tex/io/itiledtexinputfile.h>
+#include <aqsis/tex/buffers/texturebuffer.h>
 #include "randomtable.h"
-#include "smartptr.h"
+#include <aqsis/util/smartptr.h>
 
 namespace Aqsis {
 

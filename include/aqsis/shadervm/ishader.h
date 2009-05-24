@@ -13,7 +13,7 @@
 #ifndef	ISHADER_H_INCLUDED
 #define	ISHADER_H_INCLUDED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<string>
 #include	<vector>
@@ -21,9 +21,9 @@
 
 #include	<boost/shared_ptr.hpp>
 
-#include	"exception.h"
-#include	"interfacefwd.h"
-#include	"iparameter.h"
+#include	<aqsis/util/exception.h>
+#include	<aqsis/core/interfacefwd.h>
+#include	<aqsis/core/api/iparameter.h>
 
 #ifdef	WIN32
 #  ifdef	AQSIS_STATIC_LINK

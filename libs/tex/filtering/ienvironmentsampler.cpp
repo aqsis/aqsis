@@ -24,11 +24,11 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "ienvironmentsampler.h"
+#include <aqsis/tex/filtering/ienvironmentsampler.h>
 #include "cubeenvironmentsampler.h"
 #include "dummyenvironmentsampler.h"
 #include "latlongenvironmentsampler.h"
-#include "tilearray.h"
+#include <aqsis/tex/buffers/tilearray.h>
 
 namespace Aqsis {
 

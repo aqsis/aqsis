@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "execute.h"
+#include <aqsis/util/execute.h>
 
 #include <cstring> // strncpy, strlen
 #include <sstream>
@@ -34,8 +34,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-#include "logging.h"
-#include "exception.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

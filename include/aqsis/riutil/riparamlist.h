@@ -27,12 +27,12 @@
 #ifndef RIPARAMLIST_H_INCLUDED
 #define RIPARAMLIST_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 #include <string>
 
-#include "ri_types.h"
+#include <aqsis/ri/ritypes.h>
 
 namespace Aqsis {
 

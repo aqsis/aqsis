@@ -27,12 +27,12 @@
 #ifndef ITEXTURESAMPLER_H_INCLUDED
 #define ITEXTURESAMPLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
-#include "samplequad.h"
-#include "texturesampleoptions.h"
+#include <aqsis/tex/filtering/samplequad.h>
+#include <aqsis/tex/filtering/texturesampleoptions.h>
 
 namespace Aqsis {
 

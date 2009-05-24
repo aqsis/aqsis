@@ -36,7 +36,7 @@
  */
 
 
-#include	"noise1234.h"
+#include	<aqsis/math/noise1234.h>
 
 namespace Aqsis {
 

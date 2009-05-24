@@ -26,11 +26,11 @@
 
 #include "occlusionsampler.h"
 
-#include "aqsismath.h"
-#include "filtertexture.h"
-#include "sampleaccum.h"
-#include "texexception.h"
-#include "tilearray.h"
+#include <aqsis/math/math.h>
+#include <aqsis/tex/filtering/filtertexture.h>
+#include <aqsis/tex/filtering/sampleaccum.h>
+#include <aqsis/tex/texexception.h>
+#include <aqsis/tex/buffers/tilearray.h>
 
 namespace Aqsis {
 

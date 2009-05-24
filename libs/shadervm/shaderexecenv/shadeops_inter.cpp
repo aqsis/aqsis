@@ -30,9 +30,9 @@
 #include        <regex.h>
 #endif
 
-#include	"ilightsource.h"
+#include	<aqsis/core/reyes/ilightsource.h>
 #include	"shaderexecenv.h"
-#include	"version.h"
+#include	<aqsis/version.h>
 
 namespace Aqsis {
 

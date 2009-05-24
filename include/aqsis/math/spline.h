@@ -26,12 +26,12 @@
 #ifndef SPLINE_H_INCLUDED
 #define SPLINE_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "sstring.h"
-#include "matrix.h"
+#include <aqsis/util/sstring.h>
+#include <aqsis/math/matrix.h>
 
 namespace Aqsis {
 

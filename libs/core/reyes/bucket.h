@@ -28,7 +28,7 @@
 //{
 #define BUCKET_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 #include	<queue>
@@ -37,10 +37,10 @@
 #include	<boost/array.hpp>
 
 #include	"surface.h"
-#include	"color.h"
+#include	<aqsis/math/color.h>
 #include	"imagepixel.h"
 #include	"iddmanager.h"
-#include	"region.h"
+#include	<aqsis/math/region.h>
 
 namespace Aqsis {
 

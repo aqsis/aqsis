@@ -26,8 +26,8 @@
 #include    <stdlib.h>
 #include    <stdio.h>
 
-#include    "aqsis.h"
-#include    "lowdiscrep.h"
+#include    <aqsis/aqsis.h>
+#include    <aqsis/math/lowdiscrep.h>
 #include    <boost/array.hpp>
 #include    <algorithm>
 

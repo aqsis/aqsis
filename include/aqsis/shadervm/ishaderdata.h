@@ -13,12 +13,12 @@
 #ifndef	ISHADERDATA_H_INCLUDED
 #define	ISHADERDATA_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "matrix.h"
-#include "primvartype.h"
-#include "sstring.h"
-#include "vecfwd.h"
+#include <aqsis/math/matrix.h>
+#include <aqsis/riutil/primvartype.h>
+#include <aqsis/util/sstring.h>
+#include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 

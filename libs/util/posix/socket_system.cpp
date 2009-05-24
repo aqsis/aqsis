@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"socket.h"
+#include	<aqsis/util/socket.h>
 
 #include	<sys/types.h>
 #include	<sys/socket.h>
@@ -34,7 +34,7 @@
 #include	<signal.h>
 #include	<cstring>
 
-#include	"logging.h"
+#include	<aqsis/util/logging.h>
 
 namespace Aqsis {
 

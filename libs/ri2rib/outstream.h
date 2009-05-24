@@ -26,7 +26,7 @@
 #ifndef RI2RIB_OUTSTREAM_H
 #define RI2RIB_OUTSTREAM_H 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <fstream>
 #include <string>

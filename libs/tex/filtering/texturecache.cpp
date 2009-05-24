@@ -26,16 +26,16 @@
 
 #include "texturecache.h"
 
-#include "exception.h"
-#include "file.h"
-#include "ienvironmentsampler.h"
-#include "iocclusionsampler.h"
-#include "ishadowsampler.h"
-#include "itiledtexinputfile.h"
-#include "itexturesampler.h"
-#include "logging.h"
-#include "sstring.h"
-#include "texexception.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/util/file.h>
+#include <aqsis/tex/filtering/ienvironmentsampler.h>
+#include <aqsis/tex/filtering/iocclusionsampler.h>
+#include <aqsis/tex/filtering/ishadowsampler.h>
+#include <aqsis/tex/io/itiledtexinputfile.h>
+#include <aqsis/tex/filtering/itexturesampler.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/util/sstring.h>
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

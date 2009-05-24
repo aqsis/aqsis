@@ -27,18 +27,18 @@
 #ifndef SHADERS_H_INCLUDED
 #define SHADERS_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include "color.h"
-#include "exception.h"
-#include "matrix.h"
-#include "sstring.h"
-#include "vector3d.h"
-#include "list.h"
-#include "ishader.h"
-#include "ishaderexecenv.h"
-#include "irenderer.h"
-#include "itransform.h"
+#include <aqsis/math/color.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/util/sstring.h>
+#include <aqsis/math/vector3d.h>
+#include <aqsis/util/list.h>
+#include <aqsis/shadervm/ishader.h>
+#include <aqsis/shadervm/ishaderexecenv.h>
+#include <aqsis/core/reyes/irenderer.h>
+#include <aqsis/core/reyes/itransform.h>
 
 namespace Aqsis {
 

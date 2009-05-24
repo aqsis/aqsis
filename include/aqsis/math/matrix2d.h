@@ -27,11 +27,11 @@
 #ifndef MATRIX2D_H_INCLUDED
 #define MATRIX2D_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis
 {

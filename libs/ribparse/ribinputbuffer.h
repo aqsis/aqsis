@@ -25,14 +25,14 @@
 #ifndef RIBINPUTBUFFER_H_INCLUDED
 #define RIBINPUTBUFFER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "iribparser.h"
+#include <aqsis/iribparser.h>
 
 namespace Aqsis
 {

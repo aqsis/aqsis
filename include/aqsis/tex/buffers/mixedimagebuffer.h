@@ -28,7 +28,7 @@
 #ifndef IMAGEBUFFER_H_INCLUDED
 #define IMAGEBUFFER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 #include <string>
@@ -38,10 +38,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include "aqsismath.h"
-#include "channellist.h"
-#include "exception.h"
-#include "imagechannel.h"
+#include <aqsis/math/math.h>
+#include <aqsis/tex/buffers/channellist.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/tex/buffers/imagechannel.h>
 
 namespace Aqsis {
 

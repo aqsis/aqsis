@@ -12,12 +12,12 @@
 #ifndef TRIMCURVE_H_INCLUDED
 #define TRIMCURVE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "vector2d.h"
-#include "vector3d.h"
+#include <aqsis/math/vector2d.h>
+#include <aqsis/math/vector3d.h>
 
 namespace Aqsis {
 

@@ -29,8 +29,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ri.h"
-#include "logging.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/util/logging.h>
 
 namespace Aqsis
 {

@@ -23,9 +23,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"genpoly.h"
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 
 namespace Aqsis {
 

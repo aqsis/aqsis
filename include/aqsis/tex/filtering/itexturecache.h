@@ -27,7 +27,7 @@
 #ifndef ITEXTURECACHE_H_INCLUDED
 #define ITEXTURECACHE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>

@@ -13,14 +13,14 @@
 #ifndef	___itexturemap_Loaded___
 #define	___itexturemap_Loaded___
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <valarray>
 #include <map>
 
-#include "texturesampleoptions.h"
-#include "samplequad.h"
-#include "vecfwd.h"
+#include <aqsis/tex/filtering/texturesampleoptions.h>
+#include <aqsis/tex/filtering/samplequad.h>
+#include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 

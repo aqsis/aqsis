@@ -27,9 +27,9 @@
 #ifndef REGION_H_INCLUDED
 #define REGION_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "vector2d.h"
+#include <aqsis/math/vector2d.h>
 
 namespace Aqsis {
 

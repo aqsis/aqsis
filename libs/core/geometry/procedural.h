@@ -27,14 +27,14 @@
 #ifndef PROCEDURAL_H_INCLUDED
 #define PROCEDURAL_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 
 #include <boost/shared_ptr.hpp>
 
-#include "matrix.h"
-#include "popen.h"
+#include <aqsis/math/matrix.h>
+#include <aqsis/util/popen.h>
 #include "surface.h"
 
 namespace Aqsis {

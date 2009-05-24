@@ -28,7 +28,7 @@
 #ifndef AUTOBUFFER_H_INCLUDED
 #define AUTOBUFFER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/scoped_array.hpp>
 

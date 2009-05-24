@@ -28,22 +28,22 @@
 //{
 #define SURFACE_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	<boost/enable_shared_from_this.hpp>
 #include	<boost/utility.hpp>
 
 #include	"attributes.h"
 #include	"renderer.h"
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 #include	"transform.h"
-#include	"list.h"
-#include	"refcount.h"
-#include	"matrix.h"
+#include	<aqsis/util/list.h>
+#include	<aqsis/util/refcount.h>
+#include	<aqsis/math/matrix.h>
 #include	"parameters.h"
 #include	"bound.h"
 #include	"csgtree.h"
-#include	"isurface.h"
-#include	"logging.h"
+#include	<aqsis/core/reyes/isurface.h>
+#include	<aqsis/util/logging.h>
 #include	"stats.h"
 #include	"micropolygon.h"
 

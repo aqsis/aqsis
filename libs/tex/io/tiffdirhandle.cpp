@@ -31,10 +31,10 @@
 
 #include <tiffio.hxx>
 
-#include "aqsismath.h"
-#include "matrix.h"
-#include "logging.h"
-#include "texexception.h"
+#include <aqsis/math/math.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis
 {

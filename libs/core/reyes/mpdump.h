@@ -25,11 +25,11 @@
 #ifndef MPDUMP_H_INCLUDED
 #define MPDUMP_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <stdio.h>
 
-#include "vecfwd.h"
+#include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 

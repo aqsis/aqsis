@@ -23,7 +23,7 @@
  * \author Chris Foster
  */
 
-#include "rif.h"
+#include <aqsis/ri/rif.h>
 
 #include "renderer.h"
 

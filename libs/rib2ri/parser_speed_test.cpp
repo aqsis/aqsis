@@ -33,9 +33,9 @@
 #include <cstdlib>
 #include <fstream>
 
-#include "iribparser.h"
+#include <aqsis/iribparser.h>
 #include "ribrequesthandler.h"
-#include "ri.h"
+#include <aqsis/ri/ri.h>
 
 static Aqsis::IqRibParser* g_parser = 0;
 

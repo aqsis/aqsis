@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<cstring>
 #include	<climits>
@@ -32,11 +32,11 @@
 #include	<algorithm>
 
 #include	"texturemap_old.h"
-#include	"exception.h"
-#include	"irenderer.h"
-#include	"version.h"
+#include	<aqsis/util/exception.h>
+#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/version.h>
 #include	"renderer.h"
-#include	"logging.h"
+#include	<aqsis/util/logging.h>
 #include	"stats.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32

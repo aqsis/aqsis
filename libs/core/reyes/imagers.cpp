@@ -27,8 +27,8 @@
 #include	"iddmanager.h"
 #include	"attributes.h"
 #include	"renderer.h"
-#include	"file.h"
-#include	"region.h"
+#include	<aqsis/util/file.h>
+#include	<aqsis/math/region.h>
 
 #include	"stats.h"
 

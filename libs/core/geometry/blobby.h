@@ -31,13 +31,13 @@
 #ifndef BLOBBY_H_INCLUDED
 #define BLOBBY_H_INCLUDED
 
-#include "aqsis.h"
-#include "matrix.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/math/matrix.h>
 #include "surface.h"
-#include "vector4d.h"
+#include <aqsis/math/vector4d.h>
 
-#include "ri.h"
-#include "vector3d.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/vector3d.h>
 
 namespace Aqsis {
 

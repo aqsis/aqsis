@@ -26,12 +26,12 @@
 #ifndef GRID_H_INCLUDED //{
 #define GRID_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
 #include	"isampler.h"
-#include	"vector2d.h"
+#include	<aqsis/math/vector2d.h>
 
 namespace Aqsis {
 

@@ -32,7 +32,7 @@
 #include "imagebuffer.h"
 #include "renderer.h"
 #include "transform.h"
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis {
 

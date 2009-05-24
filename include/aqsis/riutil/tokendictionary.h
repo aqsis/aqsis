@@ -26,12 +26,12 @@
 #ifndef TOKENDICTIONARY_H_INCLUDED
 #define TOKENDICTIONARY_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 
-#include "exception.h"
-#include "primvartoken.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/riutil/primvartoken.h>
 
 namespace Aqsis
 {

@@ -27,7 +27,7 @@
 #ifndef DUMMYSHADOWSAMPLER_H_INCLUDED
 #define DUMMYSHADOWSAMPLER_H_INCLUDED
 
-#include "ishadowsampler.h"
+#include <aqsis/tex/filtering/ishadowsampler.h>
 
 namespace Aqsis {
 

@@ -27,7 +27,7 @@
 #ifndef IDDMANAGER_H_INCLUDED
 #define IDDMANAGER_H_INCLUDED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<map>
 #include	<boost/shared_ptr.hpp>

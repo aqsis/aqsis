@@ -28,18 +28,18 @@
 //{
 #define OPTIONS_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "color.h"
-#include "file.h"
-#include "ioptions.h"
-#include "ishader.h"
-#include "matrix.h"
+#include <aqsis/math/color.h>
+#include <aqsis/util/file.h>
+#include <aqsis/core/api/ioptions.h>
+#include <aqsis/shadervm/ishader.h>
+#include <aqsis/math/matrix.h>
 #include "parameters.h"
-#include "ri.h"
-#include "sstring.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/util/sstring.h>
 
 namespace Aqsis {
 

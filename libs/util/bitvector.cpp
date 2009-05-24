@@ -24,9 +24,9 @@
 */
 
 #include	<iomanip>
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include "bitvector.h"
+#include <aqsis/util/bitvector.h>
 
 namespace Aqsis {
 

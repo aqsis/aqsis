@@ -26,11 +26,11 @@
 #ifndef IPARAMETER_H_INCLUDED //{
 #define IPARAMETER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "interfacefwd.h"
-#include "primvartype.h"
-#include "sstring.h"
+#include <aqsis/core/interfacefwd.h>
+#include <aqsis/riutil/primvartype.h>
+#include <aqsis/util/sstring.h>
 
 namespace Aqsis {
 

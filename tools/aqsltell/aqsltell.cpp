@@ -23,8 +23,8 @@
 		\author Douglas Ward (dsward@vidi.com)
 */
 
-#include "aqsis.h"
-#include "logging.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/util/logging.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <windows.h>
@@ -34,11 +34,11 @@
 #pragma warning(disable : 4786 )
 #endif //AQSIS_COMPILER_MSVC6
 
-#include "argparse.h"
-#include "aqsis.h"
-#include "file.h"
-#include "slx.h"
-#include "version.h"
+#include <aqsis/util/argparse.h>
+#include <aqsis/aqsis.h>
+#include <aqsis/util/file.h>
+#include <aqsis/ri/slx.h>
+#include <aqsis/version.h>
 
 #include <iostream>
 #include <iomanip>

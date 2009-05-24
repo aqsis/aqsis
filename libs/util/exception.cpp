@@ -21,7 +21,7 @@
  * \brief Declares classes for the aqsis exception heiarchy
  */
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 #include <ostream>
 #include <boost/filesystem/path.hpp>

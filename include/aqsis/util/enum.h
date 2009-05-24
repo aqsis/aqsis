@@ -104,7 +104,7 @@
 #ifndef ENUM_H_INCLUDED
 #define ENUM_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <algorithm>
 #include <iostream>
@@ -113,7 +113,7 @@
 
 #include <boost/static_assert.hpp>
 
-#include "sstring.h" // for CqString::hash()
+#include <aqsis/util/sstring.h> // for CqString::hash()
 
 namespace Aqsis {
 

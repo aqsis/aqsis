@@ -25,7 +25,7 @@
  */
 
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 #include <vector>

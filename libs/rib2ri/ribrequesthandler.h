@@ -26,11 +26,11 @@
 #ifndef RIBREQUESTHANDLER_H_INCLUDED
 #define RIBREQUESTHANDLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "iribparser.h"
-#include "ri_types.h"
-#include "tokendictionary.h"
+#include <aqsis/iribparser.h>
+#include <aqsis/ri/ritypes.h>
+#include <aqsis/riutil/tokendictionary.h>
 
 namespace Aqsis
 {

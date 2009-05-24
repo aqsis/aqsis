@@ -32,20 +32,20 @@
 #include	<iostream>
 #include	<time.h>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 #include	"graphicsstate.h"
 #include	"stats.h"
-#include	"vector2d.h"
+#include	<aqsis/math/vector2d.h>
 
 #include	"shaders.h"
-#include	"tokendictionary.h"
+#include	<aqsis/riutil/tokendictionary.h>
 #include	"iddmanager.h"
-#include	"irenderer.h"
+#include	<aqsis/core/reyes/irenderer.h>
 #include	"iraytrace.h"
 #include	"iraytrace.h"
-#include	"itexturecache.h"
+#include	<aqsis/tex/filtering/itexturecache.h>
 
 #include	"clippingvolume.h"
 

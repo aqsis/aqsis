@@ -94,7 +94,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <assert.h>
 
@@ -125,7 +125,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <ndspy.h>
+#include <aqsis/ri/ndspy.h>
 
 #define DspyError(a,b,c) printf(b,c)
 

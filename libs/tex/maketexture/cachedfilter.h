@@ -27,14 +27,14 @@
 #ifndef CACHEDFILTER_H_INCLUDED
 #define CACHEDFILTER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iosfwd>
 #include <vector>
 
-#include "aqsismath.h"
-#include "filtersupport.h"
-#include "maketexture.h"
+#include <aqsis/math/math.h>
+#include <aqsis/tex/buffers/filtersupport.h>
+#include <aqsis/tex/maketexture.h>
 
 namespace Aqsis
 {

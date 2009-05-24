@@ -27,14 +27,14 @@
 #ifndef EWAFILTER_H_INCLUDED
 #define EWAFILTER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "aqsismath.h"
-#include "filtersupport.h"
-#include "matrix2d.h"
-#include "samplequad.h"
+#include <aqsis/math/math.h>
+#include <aqsis/tex/buffers/filtersupport.h>
+#include <aqsis/math/matrix2d.h>
+#include <aqsis/tex/filtering/samplequad.h>
 
 namespace Aqsis {
 

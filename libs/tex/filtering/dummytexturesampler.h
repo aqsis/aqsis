@@ -27,7 +27,7 @@
 #ifndef DUMMYTEXTURESAMPLER_H_INCLUDED
 #define DUMMYTEXTURESAMPLER_H_INCLUDED
 
-#include "itexturesampler.h"
+#include <aqsis/tex/filtering/itexturesampler.h>
 
 namespace Aqsis {
 

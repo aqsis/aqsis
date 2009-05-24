@@ -31,8 +31,8 @@
 #include "micropolygon.h"
 #include "renderer.h"
 #include "patch.h"
-#include "vector2d.h"
-#include "vector3d.h"
+#include <aqsis/math/vector2d.h>
+#include <aqsis/math/vector3d.h>
 #include "curves.h"
 
 namespace Aqsis {

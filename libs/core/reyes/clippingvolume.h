@@ -27,8 +27,8 @@
 #ifndef CLIPPINGVOLUME_H_INCLUDED
 #define CLIPPINGVOLUME_H_INCLUDED
 
-#include	"aqsis.h"
-#include	"vector3d.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/vector3d.h>
 #include	"bound.h"
 
 #include	<vector>

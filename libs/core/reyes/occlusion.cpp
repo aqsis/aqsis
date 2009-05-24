@@ -30,7 +30,7 @@
 #pragma warning(disable : 4786)
 #endif
 
-#include "autobuffer.h"
+#include <aqsis/util/autobuffer.h>
 #include "bound.h"
 #include "bucketprocessor.h"
 #include "imagepixel.h"

@@ -27,11 +27,11 @@
 #ifndef VECTOR2D_H_INCLUDED
 #define VECTOR2D_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 
 namespace Aqsis {
 

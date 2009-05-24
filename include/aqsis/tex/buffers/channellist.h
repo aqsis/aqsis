@@ -27,15 +27,15 @@
 #ifndef CHANNELLIST_H_INCLUDED
 #define CHANNELLIST_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iosfwd>
 #include <vector>
 
 #include <boost/format.hpp>
 
-#include "channelinfo.h"
-#include "texexception.h"
+#include <aqsis/tex/buffers/channelinfo.h>
+#include <aqsis/tex/texexception.h>
 
 namespace Aqsis {
 

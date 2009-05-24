@@ -27,15 +27,15 @@
 //{
 #define IOPTIONS_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/filesystem/path.hpp>
 
-#include "color.h"
-#include "primvartype.h"
-#include "ri_types.h"
-#include "sstring.h"
-#include "vecfwd.h"
+#include <aqsis/math/color.h>
+#include <aqsis/riutil/primvartype.h>
+#include <aqsis/ri/ritypes.h>
+#include <aqsis/util/sstring.h>
+#include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 

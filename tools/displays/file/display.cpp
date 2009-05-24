@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 #include <iomanip>
@@ -47,18 +47,18 @@
 #	include <FL/fl_draw.H>
 #endif // AQSIS_NO_LTK
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "dspyhlpr.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "ndspy.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/util/logging_streambufs.h>
+#include <aqsis/ri/ndspy.h>
 
 using namespace Aqsis;
 
 #define	ZFILE_HEADER		"Aqsis ZFile" AQSIS_VERSION_STR
 #define	SHADOWMAP_HEADER	"Shadow"
 
-#include	<version.h>
+#include	<aqsis/version.h>
 
 namespace {
 

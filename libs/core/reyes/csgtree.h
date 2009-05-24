@@ -27,7 +27,7 @@
 #ifndef CSGTREE_H_INCLUDED
 #define CSGTREE_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 #include	<list>
@@ -35,7 +35,7 @@
 #include	<boost/weak_ptr.hpp>
 #include	<boost/shared_ptr.hpp>
 #include	<boost/enable_shared_from_this.hpp>
-#include	"sstring.h"
+#include	<aqsis/util/sstring.h>
 
 
 namespace Aqsis {

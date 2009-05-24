@@ -13,13 +13,13 @@
 #include	<vector>
 #include	<list>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"sstring.h"
+#include	<aqsis/util/sstring.h>
 #include	"vardef.h"
-#include	"iparsenode.h"
+#include	<aqsis/slcomp/iparsenode.h>
 #include	"funcdef.h"
-#include	"list.h"
+#include	<aqsis/util/list.h>
 
 namespace Aqsis {
 

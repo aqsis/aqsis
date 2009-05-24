@@ -27,13 +27,13 @@
 #ifndef MAKETEXTURE_H_INCLUDED
 #define MAKETEXTURE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
-#include "file.h"
-#include "riparamlist.h"
-#include "wrapmode.h"
+#include <aqsis/util/file.h>
+#include <aqsis/riutil/riparamlist.h>
+#include <aqsis/tex/filtering/wrapmode.h>
 
 namespace Aqsis {
 

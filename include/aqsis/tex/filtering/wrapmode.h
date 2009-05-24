@@ -27,11 +27,11 @@
 #ifndef WRAPMODE_H_INCLUDED
 #define WRAPMODE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
-#include "enum.h"
+#include <aqsis/util/enum.h>
 
 namespace Aqsis
 {

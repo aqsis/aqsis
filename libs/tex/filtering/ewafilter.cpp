@@ -26,7 +26,7 @@
 
 #include "ewafilter.h"
 
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 

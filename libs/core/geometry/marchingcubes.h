@@ -34,7 +34,7 @@
 #pragma interface
 #endif //AQSIS_SYSTEM_WIN32
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 #include "renderer.h"
 
 namespace Aqsis {

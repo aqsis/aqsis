@@ -31,18 +31,18 @@
 #include	<vector>
 #include	<deque>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"vector3d.h"
-#include	"vector4d.h"
-#include	"color.h"
-#include	"sstring.h"
-#include	"matrix.h"
-#include	"ishaderdata.h"
-#include	"bitvector.h"
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/vector4d.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/shadervm/ishaderdata.h>
+#include	<aqsis/util/bitvector.h>
 #include	"shadervariable.h"
 #include	"shadervm_common.h"
-#include	"vectorcast.h"
+#include	<aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

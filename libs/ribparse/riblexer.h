@@ -25,7 +25,7 @@
 #ifndef RIBLEXER_H_INCLUDED
 #define RIBLEXER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iosfwd>
 #include <vector>
@@ -35,7 +35,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "iribparser.h" // for TqCommentCallback
+#include <aqsis/iribparser.h> // for TqCommentCallback
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
 

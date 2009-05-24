@@ -28,7 +28,7 @@
 #include	"options.h"
 #include	"renderer.h"
 #include	"imagers.h"
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

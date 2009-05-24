@@ -30,15 +30,15 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include "ri.h"
-#include "color.h"
-#include "list.h"
-#include "matrix.h"
-#include "ishaderexecenv.h"
-#include "vector4d.h"
-#include "version.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/color.h>
+#include <aqsis/util/list.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/shadervm/ishaderexecenv.h>
+#include <aqsis/math/vector4d.h>
+#include <aqsis/version.h>
 #include "attributes.h"
 
 namespace Aqsis {

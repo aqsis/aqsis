@@ -22,7 +22,7 @@
  * \brief Unit tests for image channel stuff
  * \author Chris Foster
  */
-#include "imagechannel.h"
+#include <aqsis/tex/buffers/imagechannel.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

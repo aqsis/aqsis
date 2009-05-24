@@ -13,9 +13,9 @@
 #ifndef	ILIGHTSOURCE_H_INCLUDED
 #define	ILIGHTSOURCE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "interfacefwd.h"
+#include <aqsis/core/interfacefwd.h>
 
 namespace Aqsis {
 

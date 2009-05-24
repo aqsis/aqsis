@@ -27,7 +27,7 @@
 
 #include "tiffio.h"
 #include <stdio.h>
-#include "aqsis_config.h"
+#include <aqsis/config.h>
 
 #ifndef AQSIS_SYSTEM_WIN32
 #include <unistd.h>

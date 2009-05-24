@@ -23,7 +23,7 @@
  * \author Chris Foster
  */
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "limits.h"
 
 #ifndef	AQSIS_SYSTEM_WIN32

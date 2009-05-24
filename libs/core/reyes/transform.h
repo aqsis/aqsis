@@ -31,13 +31,13 @@
 #include	<boost/utility.hpp>
 #include	<boost/shared_ptr.hpp>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	"motion.h"
-#include	"ri.h"
-#include	"matrix.h"
+#include	<aqsis/ri/ri.h>
+#include	<aqsis/math/matrix.h>
 #include	"options.h"
-#include	"itransform.h"
+#include	<aqsis/core/reyes/itransform.h>
 
 namespace Aqsis {
 

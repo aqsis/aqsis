@@ -27,21 +27,21 @@
 #ifndef MIPMAP_H_INCLUDED
 #define MIPMAP_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 
-#include "autobuffer.h"
-#include "exception.h"
-#include "filtertexture.h"
-#include "itiledtexinputfile.h"
-#include "logging.h"
-#include "sampleaccum.h"
-#include "texexception.h"
-#include "texturesampleoptions.h"
+#include <aqsis/util/autobuffer.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/tex/filtering/filtertexture.h>
+#include <aqsis/tex/io/itiledtexinputfile.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/tex/filtering/sampleaccum.h>
+#include <aqsis/tex/texexception.h>
+#include <aqsis/tex/filtering/texturesampleoptions.h>
 
 namespace Aqsis
 {

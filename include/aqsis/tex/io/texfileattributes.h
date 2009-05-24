@@ -28,13 +28,13 @@
 #ifndef TEXFILEATTRIBUTES_H_INCLUDED
 #define TEXFILEATTRIBUTES_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
-#include "channellist.h"
-#include "matrix.h"
-#include "wrapmode.h"
+#include <aqsis/tex/buffers/channellist.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/tex/filtering/wrapmode.h>
 
 namespace Aqsis {
 

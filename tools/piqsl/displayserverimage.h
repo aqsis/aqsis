@@ -30,10 +30,10 @@
 #include	<vector>
 #include	<string>
 
-#include	"aqsis.h"
-#include	"ndspy.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/ri/ndspy.h>
 #include	"image.h"
-#include	"socket.h"
+#include	<aqsis/util/socket.h>
 
 namespace Aqsis {
 

@@ -27,9 +27,9 @@
 #ifndef OBJECTINSTANCE_H_INCLUDED
 #define OBJECTINSTANCE_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"renderer.h"
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 #include	"ri_cache.h"
 
 #include	<vector>

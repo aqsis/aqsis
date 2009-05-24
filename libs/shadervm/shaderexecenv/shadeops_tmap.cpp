@@ -35,13 +35,13 @@
 #include	<cstring>
 
 #include	"shaderexecenv.h"
-#include	"ienvironmentsampler.h"
-#include	"iocclusionsampler.h"
-#include	"ishadowsampler.h"
-#include	"itexturecache.h"
-#include	"itexturesampler.h"
-#include	"texfileheader.h"
-#include	"channellist.h"
+#include	<aqsis/tex/filtering/ienvironmentsampler.h>
+#include	<aqsis/tex/filtering/iocclusionsampler.h>
+#include	<aqsis/tex/filtering/ishadowsampler.h>
+#include	<aqsis/tex/filtering/itexturecache.h>
+#include	<aqsis/tex/filtering/itexturesampler.h>
+#include	<aqsis/tex/io/texfileheader.h>
+#include	<aqsis/tex/buffers/channellist.h>
 
 namespace Aqsis
 {

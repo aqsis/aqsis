@@ -26,12 +26,12 @@
 #ifndef PRIMVARTOKEN_H_INCLUDED
 #define PRIMVARTOKEN_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 
-#include "interpclasscounts.h"
-#include "primvartype.h"
+#include <aqsis/riutil/interpclasscounts.h>
+#include <aqsis/riutil/primvartype.h>
 
 namespace Aqsis {
 

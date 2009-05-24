@@ -27,7 +27,7 @@
 #ifndef BILINEAR_H_INCLUDED
 #define BILINEAR_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 namespace Aqsis {
 

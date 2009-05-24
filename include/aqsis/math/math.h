@@ -26,7 +26,7 @@
 #ifndef AQSISMATH_H_INCLUDED
 #define AQSISMATH_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 #include <cmath>
 #include <limits>
 

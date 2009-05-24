@@ -22,13 +22,13 @@
  * \author Chris Foster - chris42f (at) gmail (dot) com
 */
 
-#include "icodegen.h"
+#include <aqsis/slcomp/icodegen.h>
 
 #include <fstream>
 #include <algorithm>
 
 #include "parsetreeviz.h"
-#include "iparsenode.h"
+#include <aqsis/slcomp/iparsenode.h>
 
 namespace Aqsis {
 

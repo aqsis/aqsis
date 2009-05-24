@@ -27,9 +27,9 @@ namespace std
 #include <cstring>
 
 #include	"parsenode.h"
-#include	"logging.h"
-#include	"exception.h"
-#include	"aqsismath.h"
+#include	<aqsis/util/logging.h>
+#include	<aqsis/util/exception.h>
+#include	<aqsis/math/math.h>
 
 # define YYMAXDEPTH 100000
 # define YYINITDEPTH  2000

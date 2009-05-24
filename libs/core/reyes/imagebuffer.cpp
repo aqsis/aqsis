@@ -30,7 +30,7 @@
 #endif
 #include	<math.h>
 
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 #include	"stats.h"
 #include	"options.h"
 #include	"renderer.h"

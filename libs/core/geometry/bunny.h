@@ -32,8 +32,8 @@
 #ifndef BUNNY_H_INCLUDED
 #define BUNNY_H_INCLUDED
 
-#include	"aqsis.h"
-#include	"ri.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

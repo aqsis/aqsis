@@ -24,22 +24,22 @@
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
  */
 
-#include "maketexture.h"
+#include <aqsis/tex/maketexture.h>
 
 #include <algorithm>
 
 #include <boost/shared_ptr.hpp>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "bake.h"
-#include "itexinputfile.h"
-#include "itexoutputfile.h"
-#include "logging.h"
+#include <aqsis/tex/io/itexinputfile.h>
+#include <aqsis/tex/io/itexoutputfile.h>
+#include <aqsis/util/logging.h>
 #include "magicnumber.h"
 #include "downsample.h"
-#include "texturebuffer.h"
-#include "texexception.h"
-#include "version.h"
+#include <aqsis/tex/buffers/texturebuffer.h>
+#include <aqsis/tex/texexception.h>
+#include <aqsis/version.h>
 
 namespace Aqsis {
 

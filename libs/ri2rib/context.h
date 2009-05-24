@@ -27,8 +27,8 @@
 #define RI2RIB_CONTEXT_H 1
 
 #include <list>
-#include "ri.h"
-#include "aqsis.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/aqsis.h>
 #include "options.h"
 #include "output.h"
 

@@ -24,7 +24,7 @@
 
 
 //------------------------------------------------------------------------------
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 #	include <windows.h>
@@ -46,16 +46,16 @@
 #include <cstdlib>
 #include <time.h>
 
-#include "argparse.h"
-#include "exception.h"
-#include "file.h"
-#include "iribparser.h"
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "ri.h"
-#include "ri_convenience.h"
+#include <aqsis/util/argparse.h>
+#include <aqsis/util/exception.h>
+#include <aqsis/util/file.h>
+#include <aqsis/iribparser.h>
+#include <aqsis/util/logging.h>
+#include <aqsis/util/logging_streambufs.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/riutil/ri_convenience.h>
 #include "ribrequesthandler.h"
-#include "version.h"
+#include <aqsis/version.h>
 
 #if defined(AQSIS_SYSTEM_MACOSX)
 #	include "Carbon/Carbon.h"

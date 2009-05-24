@@ -38,8 +38,8 @@
 
 #include <assert.h>
 
-#include "aqsis_types.h"
-#include "aqsis_config.h"
+#include <aqsis/util/inttype.h>
+#include <aqsis/config.h>
 
 /* macro which stringizes the value held in another macro. */
 #define AQSIS_XSTR(s) AQSIS_STR(s)

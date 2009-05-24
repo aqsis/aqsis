@@ -27,9 +27,9 @@
 #ifndef CELLNOISE_H_INCLUDED
 #define CELLNOISE_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"vector3d.h"
+#include	<aqsis/math/vector3d.h>
 
 namespace Aqsis {
 

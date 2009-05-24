@@ -23,7 +23,7 @@
  * \author Tobias Sauerwein
  */
 
-#include "spline.h"
+#include <aqsis/math/spline.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

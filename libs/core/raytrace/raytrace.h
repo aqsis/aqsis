@@ -13,7 +13,7 @@
 #ifndef	___raytrace_Loaded___
 #define	___raytrace_Loaded___
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"iraytrace.h"
 
 namespace Aqsis {

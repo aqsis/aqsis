@@ -25,10 +25,10 @@
 
 #include	<string.h>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"lights.h"
 #include	"shaders.h"
-#include	"file.h"
+#include	<aqsis/util/file.h>
 
 namespace Aqsis {
 

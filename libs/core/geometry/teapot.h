@@ -35,8 +35,8 @@
 #ifndef TEAPOT_H_INCLUDED
 #define TEAPOT_H_INCLUDED
 
-#include	"aqsis.h"
-#include	"matrix.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/matrix.h>
 #include	"surface.h"
 
 namespace Aqsis {

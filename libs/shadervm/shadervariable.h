@@ -33,16 +33,16 @@
 #include	<vector>
 #include	<iostream>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"bitvector.h"
-#include	"sstring.h"
-#include	"vector3d.h"
-#include	"matrix.h"
-#include	"color.h"
-#include	"logging.h"
+#include	<aqsis/util/bitvector.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/util/logging.h>
 
-#include	"ishaderdata.h"
+#include	<aqsis/shadervm/ishaderdata.h>
 
 
 namespace Aqsis {

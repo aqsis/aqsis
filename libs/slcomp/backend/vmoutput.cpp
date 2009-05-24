@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifndef AQSIS_SYSTEM_MACOSX
 #include	<sstream>
@@ -35,12 +35,12 @@
 #include	<numeric>
 #include	<cstdlib>
 
-#include	"version.h"
+#include	<aqsis/version.h>
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
-#include	"aqsismath.h"
-#include	"logging.h"
+#include	<aqsis/math/math.h>
+#include	<aqsis/util/logging.h>
 
 namespace Aqsis {
 

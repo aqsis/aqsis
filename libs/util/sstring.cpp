@@ -27,8 +27,8 @@
 
 #include	<stdarg.h>
 
-#include	"aqsis.h"
-#include	"sstring.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/sstring.h>
 
 namespace Aqsis {
 

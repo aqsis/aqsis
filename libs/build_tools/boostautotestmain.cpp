@@ -1,4 +1,4 @@
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 // for boost.test version 1.33
 #define BOOST_AUTO_TEST_MAIN

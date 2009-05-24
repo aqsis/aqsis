@@ -27,7 +27,7 @@
 #ifndef DUMMYOCCLUSIONSAMPLER_H_INCLUDED
 #define DUMMYOCCLUSIONSAMPLER_H_INCLUDED
 
-#include "iocclusionsampler.h"
+#include <aqsis/tex/filtering/iocclusionsampler.h>
 
 namespace Aqsis {
 

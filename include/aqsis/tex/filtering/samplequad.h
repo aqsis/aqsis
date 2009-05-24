@@ -27,11 +27,11 @@
 #ifndef SAMPLEQUAD_H_INCLUDED
 #define SAMPLEQUAD_H_INCLUDED
 
-#include "aqsismath.h"
-#include "matrix.h"
-#include "vector2d.h"
-#include "vector3d.h"
-#include "vectorcast.h"
+#include <aqsis/math/math.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/math/vector2d.h>
+#include <aqsis/math/vector3d.h>
+#include <aqsis/math/vectorcast.h>
 
 namespace Aqsis {
 

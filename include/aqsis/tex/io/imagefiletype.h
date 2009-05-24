@@ -27,7 +27,7 @@
 #ifndef IMAGEFILETYPE_H_INCLUDED
 #define IMAGEFILETYPE_H_INCLUDED
 
-#include "enum.h"
+#include <aqsis/util/enum.h>
 
 namespace Aqsis {
 

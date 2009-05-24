@@ -23,17 +23,17 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/format.hpp>
 
-#include "version.h"
+#include <aqsis/version.h>
 #include "image.h"
 #include "framebuffer.h"
-#include "logging.h"
-#include "ndspy.h"
-#include "itexinputfile.h"
-#include "itexoutputfile.h"
+#include <aqsis/util/logging.h>
+#include <aqsis/ri/ndspy.h>
+#include <aqsis/tex/io/itexinputfile.h>
+#include <aqsis/tex/io/itexoutputfile.h>
 
 namespace Aqsis {
 

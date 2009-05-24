@@ -24,7 +24,7 @@
  *
  */
 
-#include "iribparser.h"
+#include <aqsis/iribparser.h>
 
 #include "ribparser.h"
 

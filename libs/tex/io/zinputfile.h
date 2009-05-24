@@ -28,11 +28,11 @@
 #ifndef ZINPUTFILE_H_INCLUDED
 #define ZINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <fstream>
 
-#include "itexinputfile.h"
+#include <aqsis/tex/io/itexinputfile.h>
 
 namespace Aqsis {
 

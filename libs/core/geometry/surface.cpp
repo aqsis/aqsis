@@ -23,11 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"renderer.h"
 #include	"micropolygon.h"
 #include	"surface.h"
-#include	"vector2d.h"
+#include	<aqsis/math/vector2d.h>
 #include	"imagebuffer.h"
 
 namespace Aqsis {

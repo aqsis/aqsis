@@ -27,14 +27,14 @@
 #ifndef TEXTURECACHE_H_INCLUDED
 #define TEXTURECACHE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 
 #include <boost/utility.hpp>
 
-#include "itexturecache.h"
-#include "matrix.h"
+#include <aqsis/tex/filtering/itexturecache.h>
+#include <aqsis/math/matrix.h>
 
 namespace Aqsis {
 

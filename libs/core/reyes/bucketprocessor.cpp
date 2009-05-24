@@ -20,10 +20,10 @@
 
 #include	<valarray>
 
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 #include	"bucket.h"
 #include	"imagebuffer.h"
-#include	"multitimer.h"
+#include	<aqsis/util/timer.h>
 
 
 namespace Aqsis {

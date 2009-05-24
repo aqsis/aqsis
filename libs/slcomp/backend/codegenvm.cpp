@@ -23,16 +23,16 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "icodegen.h"
+#include <aqsis/slcomp/icodegen.h>
 
 #include	<sstream>
 #include	<deque>
 #include	<map>
 
-#include	"version.h"
+#include	<aqsis/version.h>
 #include	"vmdatagather.h"
 #include	"vmoutput.h"
-#include	"iparsenode.h"
+#include	<aqsis/slcomp/iparsenode.h>
 
 
 namespace Aqsis {

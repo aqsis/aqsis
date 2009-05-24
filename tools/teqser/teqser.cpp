@@ -34,12 +34,12 @@ tiff files.
 #pragma warning (disable : 4100)
 #endif // AQSIS_SYSTEM_WIN32
 
-#include	"aqsis.h"
-#include	"logging.h"
-#include 	"logging_streambufs.h"
-#include	"version.h"
-#include	"argparse.h"
-#include	"ri.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/logging.h>
+#include 	<aqsis/util/logging_streambufs.h>
+#include	<aqsis/version.h>
+#include	<aqsis/util/argparse.h>
+#include	<aqsis/ri/ri.h>
 
 bool	g_version = false;
 bool	g_help = false;

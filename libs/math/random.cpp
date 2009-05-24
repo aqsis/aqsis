@@ -29,13 +29,13 @@
 
 //? Is random.h included already?
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<stdlib.h>
 #include	<stdio.h>
 
-#include	"random.h"
-#include	"aqsismath.h"
+#include	<aqsis/math/random.h>
+#include	<aqsis/math/math.h>
 
 namespace Aqsis {
 

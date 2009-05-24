@@ -35,7 +35,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <sstream>
 
-#include "texturebuffer.h"
+#include <aqsis/tex/buffers/texturebuffer.h>
 #include "tifffile_test.h"
 
 // note: header stuff is tested elsewhere, in tiffdirhandle_test.

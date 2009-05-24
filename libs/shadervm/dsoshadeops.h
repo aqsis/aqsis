@@ -21,16 +21,16 @@
 #ifndef DSOSHADEOPS_H
 #define DSOSHADEOPS_H
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <list>
 #include <map>
 
 #include "idsoshadeops.h"
-#include "ishader.h"
-#include "primvartype.h"
-#include "plugins.h"
-#include "shadeop.h"
+#include <aqsis/shadervm/ishader.h>
+#include <aqsis/riutil/primvartype.h>
+#include <aqsis/util/plugins.h>
+#include <aqsis/ri/shadeop.h>
 
 namespace Aqsis {
 

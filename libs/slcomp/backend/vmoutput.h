@@ -32,12 +32,12 @@
 #include	<fstream>
 #include	<map>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"iparsenode.h"
-#include	"ivardef.h"
-#include	"ifuncdef.h"
-#include	"icodegen.h"
+#include	<aqsis/slcomp/iparsenode.h>
+#include	<aqsis/slcomp/ivardef.h>
+#include	<aqsis/slcomp/ifuncdef.h>
+#include	<aqsis/slcomp/icodegen.h>
 #include	"vmdatagather.h"
 
 namespace Aqsis {

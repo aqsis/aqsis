@@ -28,7 +28,7 @@
 #ifndef THREADSCHEDULER_H_INCLUDED
 #define THREADSCHEDULER_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	<boost/function.hpp>
 
 #ifdef	ENABLE_THREADING

@@ -12,7 +12,7 @@
 #include <string.h>
 
 #undef DSPY_INTERNAL
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 #include "aspXpm.h"
 
 static aspXpm *xpmImg;

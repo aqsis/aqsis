@@ -12,10 +12,10 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"sstring.h"
-#include	"ivardef.h"
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/slcomp/ivardef.h>
 
 namespace Aqsis {
 

@@ -32,9 +32,9 @@
 #	include <windows.h> // Not needed?
 #endif
 
-#include "aqsismath.h"
-#include "autobuffer.h"
-#include "random.h"
+#include <aqsis/math/math.h>
+#include <aqsis/util/autobuffer.h>
+#include <aqsis/math/random.h>
 #include "renderer.h"
 
 

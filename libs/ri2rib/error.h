@@ -27,8 +27,8 @@
 #define RI2RIB_ERROR_H 1
 
 #include <string>
-#include "aqsis.h"
-#include "ri.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/ri/ri.h>
 
 namespace libri2rib {
 

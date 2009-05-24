@@ -8,7 +8,7 @@
  */
 
 #include <string.h>			/* For strcmp */
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 
 PtDspyError DspyFindStringInParamList(const char *string, char **result,
                                       int n, const UserParameter *p)

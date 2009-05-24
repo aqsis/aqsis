@@ -30,12 +30,12 @@
 #include <limits>
 #include <algorithm>
 
-#include "aqsis.h"
-#include "ri.h"
-#include "vector4d.h"
-#include "matrix.h"
+#include <aqsis/aqsis.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/math/vector4d.h>
+#include <aqsis/math/matrix.h>
 #include "jules_bloomenthal.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 

@@ -32,8 +32,8 @@
 
 #include 	<boost/shared_ptr.hpp>
 
-#include	"aqsis.h"
-#include	"ndspy.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/ri/ndspy.h>
 
 namespace Aqsis {
 

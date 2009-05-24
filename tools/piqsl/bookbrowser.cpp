@@ -24,14 +24,14 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<string.h>
 #include	<boost/format.hpp>
 
 #include	"bookbrowser.h"
 #include	"image.h"
-#include	"sstring.h"
+#include	<aqsis/util/sstring.h>
 
 namespace Aqsis {
 

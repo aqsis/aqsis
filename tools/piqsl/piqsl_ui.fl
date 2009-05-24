@@ -136,7 +136,7 @@ Fl::unlock();}
             private xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
             code1 {\#include <FL/fl_ask.H>}
-            code2 {\#include "version.h"}
+            code2 {\#include <aqsis/version.h>}
             code3 {\#include <boost/filesystem/path.hpp>}
           }
           MenuItem m_menuImagesRemove {

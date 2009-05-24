@@ -27,6 +27,6 @@
 #ifndef SHADERVM_COMMON_H_INCLUDED
 #define SHADERVM_COMMON_H_INCLUDED 1
 
-#include "ishader.h"
+#include <aqsis/shadervm/ishader.h>
 
 #endif	// !SHADERVM_COMMON_H_INCLUDED

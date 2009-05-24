@@ -26,7 +26,7 @@
 #ifndef IMAGEPIXEL_H_INCLUDED //{
 #define IMAGEPIXEL_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
@@ -35,8 +35,8 @@
 #include	<boost/noncopyable.hpp>
 
 #include	"csgtree.h"
-#include	"color.h"
-#include	"vector2d.h"
+#include	<aqsis/math/color.h>
+#include	<aqsis/math/vector2d.h>
 #include	"isampler.h"
 
 namespace Aqsis {

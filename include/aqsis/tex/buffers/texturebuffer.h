@@ -29,13 +29,13 @@
 #ifndef TEXTUREBUFFER_H_INCLUDED
 #define TEXTUREBUFFER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_array.hpp>
 
-#include "channellist.h"
-#include "samplevector.h"
-#include "filtersupport.h"
+#include <aqsis/tex/buffers/channellist.h>
+#include <aqsis/tex/buffers/samplevector.h>
+#include <aqsis/tex/buffers/filtersupport.h>
 
 #include "randomtable.h"
 

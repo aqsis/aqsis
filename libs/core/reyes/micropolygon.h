@@ -27,22 +27,22 @@
 #ifndef MICROPOLYGON_H_INCLUDED
 #define MICROPOLYGON_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<boost/utility.hpp>
 
-#include	"pool.h"
-#include	"color.h"
-#include	"list.h"
+#include	<aqsis/util/pool.h>
+#include	<aqsis/math/color.h>
+#include	<aqsis/util/list.h>
 #include	"bound.h"
-#include	"vector2d.h"
-#include	"vector3d.h"
-#include	"ishaderexecenv.h"
-#include	"ishaderdata.h"
+#include	<aqsis/math/vector2d.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/shadervm/ishaderexecenv.h>
+#include	<aqsis/shadervm/ishaderdata.h>
 #include	"motion.h"
 #include	"csgtree.h"
-#include	"refcount.h"
-#include	"logging.h"
+#include	<aqsis/util/refcount.h>
+#include	<aqsis/util/logging.h>
 #include	"imagepixel.h"
 
 namespace Aqsis {

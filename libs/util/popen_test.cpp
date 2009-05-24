@@ -23,7 +23,7 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "popen.h"
+#include <aqsis/util/popen.h>
 
 #include <iostream>
 #include <sstream>
@@ -34,7 +34,7 @@
 #endif
 #include <boost/test/auto_unit_test.hpp>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 
 using namespace Aqsis;

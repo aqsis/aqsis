@@ -26,7 +26,7 @@
 #ifndef RIBPARSER_H_INCLUDED
 #define RIBPARSER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 #include <vector>
@@ -34,8 +34,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "exception.h"
-#include "iribparser.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/iribparser.h>
 #include "riblexer.h"
 
 namespace Aqsis {

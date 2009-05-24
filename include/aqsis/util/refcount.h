@@ -12,8 +12,8 @@
 #ifndef	___refcount_Loaded___
 #define	___refcount_Loaded___
 
-#include	"aqsis.h"
-#include	"sstring.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/sstring.h>
 #include	<vector>
 #include	<list>
 

@@ -29,7 +29,7 @@
 #ifndef MULTITIMER_H_INCLUDED
 #define MULTITIMER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <algorithm>
 #include <iomanip>

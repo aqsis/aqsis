@@ -24,17 +24,17 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "itexturesampler.h"
+#include <aqsis/tex/filtering/itexturesampler.h>
 
 #ifdef USE_OPENEXR
 #	include <half.h>
 #endif
 
 #include "dummytexturesampler.h"
-#include "itexinputfile.h"
+#include <aqsis/tex/io/itexinputfile.h>
 #include "texturesampler.h"
-#include "texturebuffer.h"
-#include "tilearray.h"
+#include <aqsis/tex/buffers/texturebuffer.h>
+#include <aqsis/tex/buffers/tilearray.h>
 
 namespace Aqsis {
 

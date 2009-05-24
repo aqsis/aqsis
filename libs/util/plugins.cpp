@@ -29,7 +29,7 @@
 
 
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <Windows.h>                /* LoadLibrary() */
@@ -46,8 +46,8 @@ extern "C"
 #endif /* AQSIS_SYSTEM_POSIX */
 
 
-#include "plugins.h"
-#include "logging.h"
+#include <aqsis/util/plugins.h>
+#include <aqsis/util/logging.h>
 
 
 namespace Aqsis {

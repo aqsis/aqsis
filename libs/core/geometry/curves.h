@@ -27,8 +27,8 @@
 #ifndef CURVES_H_INCLUDED
 #define CURVES_H_INCLUDED
 
-#include        "aqsis.h"
-#include        "matrix.h"
+#include        <aqsis/aqsis.h>
+#include        <aqsis/math/matrix.h>
 #include        "surface.h"
 #include        "patch.h"
 

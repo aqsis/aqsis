@@ -27,8 +27,8 @@
 #ifndef	LATH_H_LOADED
 #define	LATH_H_LOADED
 
-#include	"aqsis.h"
-#include	"pool.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/pool.h>
 #include	<vector>
 
 namespace Aqsis {

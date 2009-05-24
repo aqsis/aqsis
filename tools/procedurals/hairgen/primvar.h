@@ -14,8 +14,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <primvartoken.h>
-#include <ri.h>
+#include <aqsis/riutil/primvartoken.h>
+#include <aqsis/ri/ri.h>
 
 #include "util.h"
 

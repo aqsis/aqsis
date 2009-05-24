@@ -24,10 +24,10 @@
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
-#include	"aqsis.h"
-#include	"logging.h"
-#include	"logging_streambufs.h"
-#include	"file.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/logging.h>
+#include	<aqsis/util/logging_streambufs.h>
+#include	<aqsis/util/file.h>
 
 #include	<iostream>
 #include	<fstream>
@@ -44,11 +44,11 @@
 #include	"unistd.h"
 #endif //AQSIS_SYSTEM_WIN32
 
-#include	"libslparse.h"
-#include	"icodegen.h"
-#include	"argparse.h"
+#include	<aqsis/slcomp/libslparse.h>
+#include	<aqsis/slcomp/icodegen.h>
+#include	<aqsis/util/argparse.h>
 
-#include	"version.h"
+#include	<aqsis/version.h>
 
 //  Setup wave, and the cpp lexer
 #include <boost/wave.hpp>

@@ -27,8 +27,8 @@
 #ifndef LOWDISCREP_H_INCLUDED
 #define LOWDISCREP_H_INCLUDED 1
 
-#include    "aqsis.h"
-#include    "random.h"
+#include    <aqsis/aqsis.h>
+#include    <aqsis/math/random.h>
 #include    <vector>
 
 

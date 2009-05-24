@@ -13,12 +13,12 @@
 #ifndef	___iattributes_Loaded___
 #define	___iattributes_Loaded___
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"sstring.h"
-#include	"vector3d.h"
-#include	"matrix.h"
-#include	"color.h"
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/math/color.h>
 
 
 namespace Aqsis {

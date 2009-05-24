@@ -24,16 +24,16 @@
 #ifndef IDSOSHADEOPS_H_INCLUDED
 #define IDSOSHADEOPS_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <list>
 
-#include "ishader.h"
-#include "ishaderexecenv.h"
-#include "plugins.h"
-#include "primvartype.h"
-#include "shadeop.h"
-#include "sstring.h"
+#include <aqsis/shadervm/ishader.h>
+#include <aqsis/shadervm/ishaderexecenv.h>
+#include <aqsis/util/plugins.h>
+#include <aqsis/riutil/primvartype.h>
+#include <aqsis/ri/shadeop.h>
+#include <aqsis/util/sstring.h>
 
 namespace Aqsis {
 

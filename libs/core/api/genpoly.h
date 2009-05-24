@@ -30,12 +30,12 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
-#include	"vector2d.h"
-#include	"vector3d.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/vector2d.h>
+#include	<aqsis/math/vector3d.h>
 #include	"surface.h"
 
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 

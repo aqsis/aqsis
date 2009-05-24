@@ -28,8 +28,8 @@
 #ifndef PLUGINS_H_INCLUDED
 #define PLUGINS_H_INCLUDED
 
-#include	"aqsis.h"
-#include	"sstring.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/util/sstring.h>
 #include	<list>
 
 namespace Aqsis {

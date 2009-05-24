@@ -27,9 +27,9 @@
 #include	<string>
 #include	<stdio.h>
 
-#include	"aqsismath.h"
+#include	<aqsis/math/math.h>
 #include	"shaderexecenv.h"
-#include	"ilightsource.h"
+#include	<aqsis/core/reyes/ilightsource.h>
 
 namespace Aqsis {
 

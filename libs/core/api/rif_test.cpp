@@ -23,8 +23,8 @@
  * \author Chris Foster
  */
 
-#include "rif.h"
-#include "ri.h"
+#include <aqsis/ri/rif.h>
+#include <aqsis/ri/ri.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

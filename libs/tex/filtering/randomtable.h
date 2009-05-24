@@ -27,10 +27,10 @@
 #ifndef RANDOMTABLE_H_INCLUDED
 #define RANDOMTABLE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "lowdiscrep.h"
-#include "random.h"
+#include <aqsis/math/lowdiscrep.h>
+#include <aqsis/math/random.h>
 
 namespace Aqsis {
 

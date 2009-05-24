@@ -6,10 +6,10 @@
 ////    Creation date:			25/11/99
 ////---------------------------------------------------------------------
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 #include	"parsenode.h"
-#include	"logging.h"
-#include	"exception.h"
+#include	<aqsis/util/logging.h>
+#include	<aqsis/util/exception.h>
 
 #include	<queue>
 

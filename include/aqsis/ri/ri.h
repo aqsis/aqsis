@@ -13,11 +13,11 @@
 #ifndef RI_H_INCLUDED
 #define RI_H_INCLUDED
 
-#include "aqsis_config.h"
+#include <aqsis/config.h>
 
 #include <float.h>
 
-#include "ri_types.h"
+#include <aqsis/ri/ritypes.h>
 
 #ifdef	__cplusplus
 extern	"C"
@@ -100,7 +100,7 @@ extern	"C"
 	/* Include the automatically generated procedure declarations. 
 	   Generated from api.xml, using apiheader.xsl */
 
-#include	"ri.inl"
+#include	<aqsis/ri/ri.inl>
 
 	/* Specific to Aqsis */
 

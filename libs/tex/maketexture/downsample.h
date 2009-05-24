@@ -27,16 +27,16 @@
 #ifndef DOWNSAMPLE_H_INCLUDED
 #define DOWNSAMPLE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <boost/shared_ptr.hpp>
 
-#include "aqsismath.h"
+#include <aqsis/math/math.h>
 #include "cachedfilter.h"
-#include "sampleaccum.h"
-#include "filtertexture.h"
-#include "texturebuffer.h"
-#include "wrapmode.h"
+#include <aqsis/tex/filtering/sampleaccum.h>
+#include <aqsis/tex/filtering/filtertexture.h>
+#include <aqsis/tex/buffers/texturebuffer.h>
+#include <aqsis/tex/filtering/wrapmode.h>
 
 namespace Aqsis
 {

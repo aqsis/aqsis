@@ -25,9 +25,9 @@
  * \author Chris Foster  chris42f _at_ gmail.com
  */
 
-#include "memorysentry.h"
+#include <aqsis/util/memorysentry.h>
 
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 namespace Aqsis
 {

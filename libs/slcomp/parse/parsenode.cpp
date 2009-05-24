@@ -6,7 +6,7 @@
 ////    Creation date:			18/07/99
 ////---------------------------------------------------------------------
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<algorithm>
 #include	<map>

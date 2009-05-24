@@ -24,7 +24,7 @@
  * \author Chris Foster [ chris42f (at) g mail (dot) com ]
  */
 
-#include "popen.h"
+#include <aqsis/util/popen.h>
 
 #include <errno.h>
 
@@ -39,8 +39,8 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "exception.h"
-#include "logging.h"
+#include <aqsis/util/exception.h>
+#include <aqsis/util/logging.h>
 
 namespace Aqsis
 {

@@ -29,7 +29,7 @@
 //{
 #define CHANNELBUFFER_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <string>
 #include <map>

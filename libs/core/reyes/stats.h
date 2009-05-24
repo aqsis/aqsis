@@ -27,14 +27,14 @@
 #ifndef STATS_H_INCLUDED
 #define STATS_H_INCLUDED 1
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <time.h>
 #include <iostream>
 
-#include "multitimer.h"
-#include "ri.h"
-#include "enum.h"
+#include <aqsis/util/timer.h>
+#include <aqsis/ri/ri.h>
+#include <aqsis/util/enum.h>
 
 namespace Aqsis {
 

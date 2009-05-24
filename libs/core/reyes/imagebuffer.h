@@ -28,12 +28,12 @@
 //{
 #define IMAGEBUFFER_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<vector>
 
 #include	"surface.h"
-#include	"vector2d.h"
+#include	<aqsis/math/vector2d.h>
 #include   	"bucket.h"
 #include   	"bucketprocessor.h"
 #include	"mpdump.h"

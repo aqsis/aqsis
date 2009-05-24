@@ -24,7 +24,7 @@
 		\todo: <b>Code Review</b>
 */
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<fstream>
 #include	<stdarg.h>
@@ -50,11 +50,11 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"procedural.h"
-#include	"logging.h"
-#include	"logging_streambufs.h"
-#include	"maketexture.h"
+#include	<aqsis/util/logging.h>
+#include	<aqsis/util/logging_streambufs.h>
+#include	<aqsis/tex/maketexture.h>
 #include	"stats.h"
-#include	"random.h"
+#include	<aqsis/math/random.h>
 
 #include	"ri_cache.h"
 
@@ -83,10 +83,10 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #endif
 
 
-#include	"ri.h"
-#include    "ri_convenience.h"
+#include	<aqsis/ri/ri.h>
+#include    <aqsis/riutil/ri_convenience.h>
 
-#include	"sstring.h"
+#include	<aqsis/util/sstring.h>
 
 #include	"ri_validate.inl"
 

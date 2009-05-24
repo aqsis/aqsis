@@ -24,11 +24,11 @@
  * \author loosely based on CqInlineParse by Lionel J. Lacour (intuition01@online.fr)
  */
 
-#include "primvartoken.h"
+#include <aqsis/riutil/primvartoken.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

@@ -29,13 +29,13 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
-#include	"matrix.h"
-#include	"ri.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/ri/ri.h>
 #include	"iddmanager.h"
-#include	"plugins.h"
+#include	<aqsis/util/plugins.h>
 #define		DSPY_INTERNAL
-#include	"ndspy.h"
+#include	<aqsis/ri/ndspy.h>
 #undef		DSPY_INTERNAL
 
 namespace Aqsis {

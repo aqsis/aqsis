@@ -23,9 +23,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "execute.h"
+#include <aqsis/util/execute.h>
 
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 #include <boost/scoped_array.hpp>
 #include <sstream>

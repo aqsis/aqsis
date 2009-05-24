@@ -28,11 +28,11 @@
 #ifndef FILTERTEXTURE_H_INCLUDED
 #define FILTERTEXTURE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
-#include "autobuffer.h"
-#include "filtersupport.h"
-#include "wrapmode.h"
+#include <aqsis/util/autobuffer.h>
+#include <aqsis/tex/buffers/filtersupport.h>
+#include <aqsis/tex/filtering/wrapmode.h>
 
 namespace Aqsis {
 

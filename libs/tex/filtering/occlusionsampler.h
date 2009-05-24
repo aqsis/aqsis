@@ -27,16 +27,16 @@
 #ifndef OCCLUSIONSAMPLER_H_INCLUDED
 #define OCCLUSIONSAMPLER_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 
-#include "iocclusionsampler.h"
-#include "matrix.h"
-#include "random.h"
-#include "texturesampleoptions.h"
+#include <aqsis/tex/filtering/iocclusionsampler.h>
+#include <aqsis/math/matrix.h>
+#include <aqsis/math/random.h>
+#include <aqsis/tex/filtering/texturesampleoptions.h>
 
 namespace Aqsis
 {

@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include <shadeop.h>
+#include <aqsis/ri/shadeop.h>
 
 #include "volumesampler.h"
 

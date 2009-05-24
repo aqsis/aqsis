@@ -24,7 +24,7 @@
  * \author Chris Foster [ chris42f (at) g mail (dot) com ]
  */
 
-#include "primvartoken.h"
+#include <aqsis/riutil/primvartoken.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
@@ -32,7 +32,7 @@
 
 #include <boost/test/auto_unit_test.hpp>
 
-#include "exception.h"
+#include <aqsis/util/exception.h>
 
 using namespace Aqsis;
 

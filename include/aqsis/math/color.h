@@ -27,13 +27,13 @@
 #ifndef COLOR_H_INCLUDED
 #define COLOR_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <iostream>
 
-#include "aqsismath.h"
-#include "vecfwd.h"
-#include "vectorstorage.h"
+#include <aqsis/math/math.h>
+#include <aqsis/math/vecfwd.h>
+#include <aqsis/math/vectorstorage.h>
 
 namespace Aqsis {
 

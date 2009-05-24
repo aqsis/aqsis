@@ -25,10 +25,10 @@
  *
  */
 
-#include "imagechannel.h"
+#include <aqsis/tex/buffers/imagechannel.h>
 
-#include "texexception.h"
-#include "ndspy.h"
+#include <aqsis/tex/texexception.h>
+#include <aqsis/ri/ndspy.h>
 
 namespace Aqsis {
 //------------------------------------------------------------------------------

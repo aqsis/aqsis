@@ -24,7 +24,7 @@
  * \author Chris Foster
  */
 
-#include "channellist.h"
+#include <aqsis/tex/buffers/channellist.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

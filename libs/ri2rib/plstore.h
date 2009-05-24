@@ -28,8 +28,8 @@
 
 #include <stdarg.h>
 #include <vector>
-#include "ri.h"
-#include "aqsis.h"
+#include <aqsis/ri/ri.h>
+#include <aqsis/aqsis.h>
 
 namespace libri2rib {
 

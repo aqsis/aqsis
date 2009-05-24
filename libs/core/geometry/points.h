@@ -28,18 +28,18 @@
 #ifndef POINTS_H_INCLUDED
 #define POINTS_H_INCLUDED
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
 #include	<algorithm>
 #include	<functional>
 
-#include	"matrix.h"
+#include	<aqsis/math/matrix.h>
 #include	"surface.h"
-#include	"vector4d.h"
+#include	<aqsis/math/vector4d.h>
 #include	"kdtree.h"
 #include 	"micropolygon.h"
 #include	"imagepixel.h"
-#include	"ri.h"
+#include	<aqsis/ri/ri.h>
 #include	"polygon.h"
 #include	"imagepixel.h"
 

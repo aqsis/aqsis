@@ -23,11 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"socket.h"
+#include	<aqsis/util/socket.h>
 
 #include	<signal.h>
 
-#include	"logging.h"
+#include	<aqsis/util/logging.h>
 
 namespace Aqsis {
 

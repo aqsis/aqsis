@@ -23,14 +23,14 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-#include	"isurface.h"
+#include	<aqsis/aqsis.h>
+#include	<aqsis/core/reyes/isurface.h>
 #include	"parameters.h"
-#include	"vector3d.h"
-#include	"vector4d.h"
-#include	"matrix.h"
-#include	"sstring.h"
-#include	"color.h"
+#include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/vector4d.h>
+#include	<aqsis/math/matrix.h>
+#include	<aqsis/util/sstring.h>
+#include	<aqsis/math/color.h>
 #include	"renderer.h"
 
 namespace Aqsis {

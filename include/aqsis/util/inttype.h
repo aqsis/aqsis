@@ -33,7 +33,7 @@
 #ifndef AQSIS_TYPES_INCLUDED
 #define AQSIS_TYPES_INCLUDED
 
-#include "aqsis_config.h"
+#include <aqsis/config.h>
 
 /** \todo <b>Code review</b> Consider whether we can avoid polluting the global namespace with these typedefs.  C compatibility needs to be assured, so we may have to duplicate the header...
  */

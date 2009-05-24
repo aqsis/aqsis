@@ -23,7 +23,7 @@
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
-#include "tokendictionary.h"
+#include <aqsis/riutil/tokendictionary.h>
 
 namespace Aqsis {
 

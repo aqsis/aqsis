@@ -22,7 +22,7 @@
  * \brief Unit tests for sampling quad operations.
  * \author Chris Foster
  */
-#include "samplequad.h"
+#include <aqsis/tex/filtering/samplequad.h>
 
 #ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

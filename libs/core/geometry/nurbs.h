@@ -29,11 +29,11 @@
 
 #include	<vector>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"ri.h"
-#include	"vector4d.h"
-#include	"vector2d.h"
+#include	<aqsis/ri/ri.h>
+#include	<aqsis/math/vector4d.h>
+#include	<aqsis/math/vector2d.h>
 #include	"surface.h"
 #include	"trimcurve.h"
 

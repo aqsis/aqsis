@@ -15,9 +15,9 @@
 #include <iostream>
 
 #undef DSPY_INTERNAL
-#include "ndspy.h"
+#include <aqsis/ri/ndspy.h>
 #include "debugdd.h"
-#include "logging.h"
+#include <aqsis/util/logging.h>
 
 PtDspyError DebugDspyImageQuery ( PtDspyImageHandle image, PtDspyQueryType type, size_t size, void *data )
 {

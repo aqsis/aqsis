@@ -35,15 +35,15 @@
 #include	<boost/weak_ptr.hpp>
 #include	<boost/enable_shared_from_this.hpp>
 
-#include	"aqsis.h"
+#include	<aqsis/aqsis.h>
 
-#include	"color.h"
-#include	"ri.h"
-#include	"matrix.h"
+#include	<aqsis/math/color.h>
+#include	<aqsis/ri/ri.h>
+#include	<aqsis/math/matrix.h>
 #include	"options.h"
-#include	"spline.h"
+#include	<aqsis/math/spline.h>
 #include	"trimcurve.h"
-#include	"iattributes.h"
+#include	<aqsis/core/api/iattributes.h>
 
 namespace Aqsis {
 struct IqShader;

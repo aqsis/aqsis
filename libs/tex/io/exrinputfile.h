@@ -28,14 +28,14 @@
 #ifndef EXRINPUTFILE_H_INCLUDED
 #define EXRINPUTFILE_H_INCLUDED
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <map>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexinputfile.h"
+#include <aqsis/tex/io/itexinputfile.h>
 
 //------------------------------------------------------------------------------
 namespace Imf {

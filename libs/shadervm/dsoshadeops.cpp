@@ -18,15 +18,15 @@
 		\author Tristan Colgate <tristan@inuxtech.co.uk>
 */
 
-#include "aqsis.h"
+#include <aqsis/aqsis.h>
 
 #include <cstring>
 
 #include <boost/filesystem.hpp>
 
 #include "dsoshadeops.h"
-#include "file.h"
-#include "logging.h"
+#include <aqsis/util/file.h>
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 
