@@ -1,3 +1,0 @@
-PROJECT(PTC)
-
-INCLUDE(${PROJECT_SOURCE_DIR}/local.cmake)

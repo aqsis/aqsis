@@ -1,1 +1,0 @@
-SET(LINKLIBS aqsistex ${LINKLIBS})
