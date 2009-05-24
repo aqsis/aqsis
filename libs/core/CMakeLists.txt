@@ -46,25 +46,13 @@ if(AQSIS_ENABLE_THREADING)
 	list(APPEND defs ENABLE_THREADING)
 endif()
 
-# Libraries
-set(linklibs
-	aqsis_math
-	aqsis_ribparse
-	aqsis_shadervm
-	aqsis_tex
-	aqsis_util
-	aqsis_riutil
-	${AQSIS_TIFF_LIBRARIES}
-	${Boost_THREAD_LIBRARY}
-)
-if(APPLE)
-	list(APPEND linklibs ${CARBON_LIBRARY})
-endif()
 
 # Add library & install
 aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
 	COMPILE_DEFINITIONS ${defs}
-	LINK_LIBRARIES ${linklibs}
+	LINK_LIBRARIES aqsis_math aqsis_ribparse aqsis_shadervm
+		aqsis_tex aqsis_util aqsis_riutil
+		${AQSIS_TIFF_LIBRARIES} ${Boost_THREAD_LIBRARY} ${CARBON_LIBRARY}
 )
 
 aqsis_install_targets(aqsis_core)

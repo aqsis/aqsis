@@ -36,7 +36,6 @@ include_directories(${PROJECT_BINARY_DIR})
 
 aqsis_add_executable(piqsl ${piqsl_srcs} ${piqsl_hdrs} GUIAPP
     LINK_LIBRARIES aqsis_util aqsis_tex ${AQSIS_FLTK_LIBRARIES}
-		${Boost_THREAD_LIBRARY} ${AQSIS_PIQSL_SYSTEM_LINKLIBS}
-		${AQSIS_TINYXML_LIBRARY})
+		${Boost_THREAD_LIBRARY} ${AQSIS_TINYXML_LIBRARY})
 
 aqsis_install_targets(piqsl)
