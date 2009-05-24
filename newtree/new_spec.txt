@@ -1,6 +1,12 @@
 # Specification for the new source tree.
 
-# TODO: Decide where to put aqsisrc.
+description
+AUTHORS
+COPYING
+ChangeLog.txt
+INSTALL
+README
+ReleaseNotes
 aqsisrc.in.cmake
 
 include/
@@ -424,6 +430,7 @@ libs/
         plstore.cpp
         ri.cpp
         tokens.cpp
+        COPYING_LGPL
     slcomp/
         parse/
             funcdef.h
@@ -515,18 +522,23 @@ tools/
             dspyhlpr.c
         exr/
             d_exr.cpp
+            tst.rib
         sdcBMP/
             d_sdcBMP.cpp
             d_sdcBMP.dsp
+            ReadMe.txt  <--  d_sdcBMP/ReadMe.txt
         sdcWin32/
             d_sdcWin32.h
             d_sdcWin32.cpp
             interface.c
+            ReadMe.txt  <--  d_sdcWin32/ReadMe.txt
         xpm/
             aspXpm.h
             aspXpm.cpp
             xpm.cpp
             xpm4pixie.cpp
+            teapotgeom.rib
+            README  <--  d_xpm/README
         file/
             display.cpp
         piqsl/
