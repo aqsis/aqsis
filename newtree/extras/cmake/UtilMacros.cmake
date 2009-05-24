@@ -107,82 +107,6 @@ macro(add_prefix var prefix)
 endmacro()
 
 
-##-------------------------------------------------------------------------------
-## Function to get source lists from a sub-project and make sure any generated
-## files are properly declared.
-##
-##   get_subproject(dirname)
-##
-## Extracts the variables dirname_srcs and dirname_hdrs present in
-## ${dirname_SOURCE_DIR}/CMakeLists.txt.  Any source files in these variables
-## which are specified with relative rather than absolute paths are made
-## absolute.  If dirname_hdrs is nonempty, include_directories will be used
-## to point the compiler in the direction of the directory containing the
-## headers.
-##
-## To deal correctly with build-time generated source files, the user should
-## declare any generated files in the variables dirname_gen_srcs and
-## dirname_gen_hdrs.  If this is done, the GENERATED property will be set
-## correctly for these files, and the include path updated to point at
-## ${dirname_BINARY_DIR} if needed for generated headers.
-#function(get_subproject subproj_name)
-#	# Function to fixup any relative paths in a subproject and make them
-#	# absolute.
-#	function(make_subproj_paths_absolute outvar subproj_name)
-#		set(abs_paths)
-#		foreach(src ${ARGN})
-#			if(IS_ABSOLUTE ${src})
-#				list(APPEND abs_paths ${src})
-#			else()
-#				list(APPEND abs_paths "${${subproj_name}_SOURCE_DIR}/${src}")
-#			endif()
-#		endforeach()
-#		set(${outvar} ${abs_paths} PARENT_SCOPE)
-#	endfunction()
-#	set(dir_name ${${subproj_name}_SOURCE_DIR})
-#	# Find out whether a source variable is defined in the directory.  If
-#	# found, define a variable in the current context corresponding to it.
-#	set(srcs_varname "${subproj_name}_srcs")
-#	get_directory_property(subdir_srcs DIRECTORY ${dir_name}
-#		DEFINITION ${srcs_varname})
-#	if(NOT subdir_srcs STREQUAL "")
-#		make_subproj_paths_absolute(subdir_srcs ${subproj_name} ${subdir_srcs})
-#		set(${srcs_varname} ${subdir_srcs} PARENT_SCOPE)
-#	endif()
-#	# Grab header files from the directory, and add the directory as an
-#	# include directory if necessary.
-#	set(hdrs_varname "${subproj_name}_hdrs")
-#	get_directory_property(subdir_hdrs DIRECTORY ${dir_name}
-#		DEFINITION ${hdrs_varname})
-#	if(NOT subdir_hdrs STREQUAL "")
-#		include_directories(${${subproj_name}_SOURCE_DIR})
-#		make_subproj_paths_absolute(subdir_hdrs ${subproj_name} ${subdir_hdrs})
-#		set(${hdrs_varname} ${subdir_hdrs} PARENT_SCOPE)
-#	endif()
-#	# Sanity check - make sure either sources or headers are defined in the
-#	# directory.
-#	if(subdir_srcs STREQUAL "" AND subdir_hdrs STREQUAL "")
-#		message(SEND_ERROR "No sources or headers defined for directory ${dir_name}")
-#	endif()
-#	# Find out whether there are any generated files from the directory; if
-#	# so, make sure they're marked as generated.
-#	get_directory_property(gen_srcs DIRECTORY ${dir_name}
-#		DEFINITION "${subproj_name}_gen_srcs")
-#	if(NOT gen_srcs STREQUAL "")
-#		set_source_files_properties(${gen_srcs} PROPERTIES GENERATED ON)
-#	endif()
-#	# Finally, find out whether there are any generated header files in the
-#	# directory; if so, make sure they're marked as generated, and add the
-#	# appropriate include directory.
-#	get_directory_property(gen_hdrs DIRECTORY ${dir_name}
-#		DEFINITION "${subproj_name}_gen_hdrs")
-#	if(NOT gen_hdrs STREQUAL "")
-#		set_source_files_properties(${gen_hdrs} PROPERTIES GENERATED ON)
-#		include_directories(${${subproj_name}_BINARY_DIR})
-#	endif()
-#endfunction()
-
-
 #-------------------------------------------------------------------------------
 # Make a list of paths absolute by prefixing with BASE_DIR if necessary
 #
@@ -242,6 +166,14 @@ macro(add_subproject dirname)
 	include_subproject(${dirname})
 endmacro()
 
+
+#------------------------------------------------------------------------------
+# Return the path of the current source directory relative to the base of the
+# build tree.
+macro(source_tree_relpath output_var)
+	file(RELATIVE_PATH ${output_var}
+		 ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+endmacro()
 
 #------------------------------------------------------------------------------
 # Shortcut macro for registering a library for compilation.

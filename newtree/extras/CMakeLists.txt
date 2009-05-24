@@ -203,6 +203,9 @@ else()
 	include(${CMAKE_SOURCE_DIR}/cmake/platform/linux.cmake) 
 endif()
 
+# FIXME!
+set(share_install_dir ${CMAKE_INSTALL_PREFIX}/share/aqsis)
+
 
 #-------------------------------------------------------------------------------
 # Add directories for all subprojects
@@ -246,7 +249,11 @@ add_subdirectory(tools/teqser)
 add_subdirectory(tools/displays)
 
 # Build additional plugins
-# FIXME!
+# TODO
+
+# Build shaders & install examples
+add_subdirectory(content/shaders)
+add_subdirectory(content/examples)
 
 # Build docs
 add_subdirectory(doc/doxygen)
@@ -261,7 +268,7 @@ get_directory_property(d_bmp_DISPLAYLIB DIRECTORY tools/displays DEFINITION bmp_
 get_directory_property(d_xpm_DISPLAYLIB DIRECTORY tools/displays DEFINITION xpm_display_lib_name)
 get_directory_property(piqsl_DISPLAYLIB DIRECTORY tools/displays DEFINITION piqsl_display_lib_name)
 # Default search paths.
-set_with_path_prefix(DEFAULT_SHADERPATH "${SHADERDIR}" "${CMAKE_INSTALL_PREFIX}")
+set(DEFAULT_SHADERPATH ${shader_search_path})
 set(DEFAULT_ARCHIVEPATH "${CMAKE_INSTALL_PREFIX}")
 set(DEFAULT_TEXTUREPATH "${CMAKE_INSTALL_PREFIX}")
 set_with_path_prefix(DEFAULT_DISPLAYPATH "${DISPLAYSDIR}" "${CMAKE_INSTALL_PREFIX}")

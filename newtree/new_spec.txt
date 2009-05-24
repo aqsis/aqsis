@@ -1,5 +1,8 @@
 # Specification for the new source tree.
 
+# TODO: Decide where to put aqsisrc.
+aqsisrc.in.cmake
+
 include/
     aqsis/
         iribparser.h
@@ -777,7 +780,7 @@ content/
             showuser.sl
             sticky_texture.sl
             uvtest.sl
-		volume/
+        volume/
             depthcue.sl
             fog.sl
 
@@ -868,3 +871,4 @@ cmake/
         macosx.cmake
         windows.cmake
 
+# vim: et ts=4
