@@ -92,39 +92,63 @@
  * it's compiling files for a DLL, and import those symbols when it's merely
  * using them from a separate DLL.  To enable export during the build, the
  * build script should define the appropriate *_EXPORTS macro, for example,
- * COMMON_EXPORTS.
+ * AQSIS_MATH_EXPORTS.
  */
 #ifdef AQSIS_STATIC_LINK
-#	define COMMON_SHARE
-#	define AQSISTEX_SHARE
-#	define RI_SHARE
-#	define SLXARGS_SHARE
-#	define CORE_SHARE
+#	define AQSIS_CORE_SHARE
+#	define AQSIS_MATH_SHARE
+#	define AQSIS_RIUTIL_SHARE
+#	define AQSIS_RI_SHARE
+#	define AQSIS_SHADERVM_SHARE
+#	define AQSIS_SLCOMP_SHARE
+#	define AQSIS_SLXARGS_SHARE
+#	define AQSIS_TEX_SHARE
+#	define AQSIS_UTIL_SHARE
 #else
-#	ifdef COMMON_EXPORTS
-#		define COMMON_SHARE __declspec(dllexport)
+#	ifdef AQSIS_CORE_EXPORTS
+#		define AQSIS_CORE_SHARE __declspec(dllexport)
 #	else
-#		define COMMON_SHARE __declspec(dllimport)
+#		define AQSIS_CORE_SHARE __declspec(dllimport)
 #	endif
-#	ifdef AQSISTEX_EXPORTS
-#		define AQSISTEX_SHARE __declspec(dllexport)
+#	ifdef AQSIS_MATH_EXPORTS
+#		define AQSIS_MATH_SHARE __declspec(dllexport)
 #	else
-#		define AQSISTEX_SHARE __declspec(dllimport)
+#		define AQSIS_MATH_SHARE __declspec(dllimport)
 #	endif
-#	ifdef RI_EXPORTS
-#		define RI_SHARE __declspec(dllexport)
+#	ifdef AQSIS_RIUTIL_EXPORTS
+#		define AQSIS_RIUTIL_SHARE __declspec(dllexport)
 #	else
-#		define RI_SHARE __declspec(dllimport)
+#		define AQSIS_RIUTIL_SHARE __declspec(dllimport)
 #	endif
-#	ifdef SLXARGS_EXPORTS
-#		define SLXARGS_SHARE __declspec(dllexport)
+#	ifdef AQSIS_RI_EXPORTS
+#		define AQSIS_RI_SHARE __declspec(dllexport)
 #	else
-#		define SLXARGS_SHARE __declspec(dllimport)
+#		define AQSIS_RI_SHARE __declspec(dllimport)
 #	endif
-#	ifdef CORE_EXPORTS
-#		define CORE_SHARE __declspec(dllexport)
+#	ifdef AQSIS_SHADERVM_EXPORTS
+#		define AQSIS_SHADERVM_SHARE __declspec(dllexport)
 #	else
-#		define CORE_SHARE __declspec(dllimport)
+#		define AQSIS_SHADERVM_SHARE __declspec(dllimport)
+#	endif
+#	ifdef AQSIS_SLCOMP_EXPORTS
+#		define AQSIS_SLCOMP_SHARE __declspec(dllexport)
+#	else
+#		define AQSIS_SLCOMP_SHARE __declspec(dllimport)
+#	endif
+#	ifdef AQSIS_SLXARGS_EXPORTS
+#		define AQSIS_SLXARGS_SHARE __declspec(dllexport)
+#	else
+#		define AQSIS_SLXARGS_SHARE __declspec(dllimport)
+#	endif
+#	ifdef AQSIS_TEX_EXPORTS
+#		define AQSIS_TEX_SHARE __declspec(dllexport)
+#	else
+#		define AQSIS_TEX_SHARE __declspec(dllimport)
+#	endif
+#	ifdef AQSIS_UTIL_EXPORTS
+#		define AQSIS_UTIL_SHARE __declspec(dllexport)
+#	else
+#		define AQSIS_UTIL_SHARE __declspec(dllimport)
 #	endif
 #endif
 
@@ -157,11 +181,15 @@
 
 /* Macros for DLL import/export on win32.  Unneeded on posix so they're
  * defined to be empty. */
-#define COMMON_SHARE
-#define AQSISTEX_SHARE
-#define RI_SHARE
-#define SLXARGS_SHARE
-#define CORE_SHARE
+#define AQSIS_CORE_SHARE
+#define AQSIS_MATH_SHARE
+#define AQSIS_RIUTIL_SHARE
+#define AQSIS_RI_SHARE
+#define AQSIS_SHADERVM_SHARE
+#define AQSIS_SLCOMP_SHARE  // TODO
+#define AQSIS_SLXARGS_SHARE
+#define AQSIS_TEX_SHARE
+#define AQSIS_UTIL_SHARE
 
 #define AQSIS_EXPORT
 

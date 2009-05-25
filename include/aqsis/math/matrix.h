@@ -48,7 +48,7 @@ namespace Aqsis {
  * viewpoint, multiplication of a vector by this matrix on the right is
  * actually multiplication by a row vector on the left...
  */
-class COMMON_SHARE CqMatrix
+class AQSIS_MATH_SHARE CqMatrix
 {
 	public:
 		//--------------------------------------------------
@@ -325,7 +325,7 @@ class COMMON_SHARE CqMatrix
 		 * \param a - The matrix to be scaled.
 		 * \return Result of scaling this matrix by S.
 		 */
-		COMMON_SHARE friend CqMatrix operator*( TqFloat S, const CqMatrix& a );
+		AQSIS_MATH_SHARE friend CqMatrix operator*( TqFloat S, const CqMatrix& a );
 		//@}
 
 		//--------------------------------------------------
@@ -339,15 +339,15 @@ class COMMON_SHARE CqMatrix
 		 * \todo code review Direct floating point comparison is rarely a good
 		 * idea.  We probably need some kind of comparison tolerance in here.
 		 */
-		COMMON_SHARE friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
+		AQSIS_MATH_SHARE friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
 		/// Return !(A == B)
-		COMMON_SHARE friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
+		AQSIS_MATH_SHARE friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
 		/** \brief Outputs a matrix to an output stream.
 		 * \param Stream - Stream to output the matrix to.
 		 * \param matrix - The matrix to output.
 		 * \return The new state of Stream.
 		 */
-		COMMON_SHARE friend std::ostream &operator<<(std::ostream &Stream,
+		AQSIS_MATH_SHARE friend std::ostream &operator<<(std::ostream &Stream,
 				const CqMatrix &matrix);
 		//@}
 
@@ -361,7 +361,7 @@ class COMMON_SHARE CqMatrix
 };
 
 /// Premultiply matrix by vector.
-COMMON_SHARE CqVector4D operator*( const CqVector4D &vec, const CqMatrix& matrix );
+AQSIS_MATH_SHARE CqVector4D operator*( const CqVector4D &vec, const CqMatrix& matrix );
 
 //------------------------------------------------------------------------------
 /** \brief Determine whether two matrices are equal to within some tolerance
@@ -374,7 +374,7 @@ COMMON_SHARE CqVector4D operator*( const CqVector4D &vec, const CqMatrix& matrix
  * \param m2 - matrices to compare
  * \param tolerance - for comparison
  */
-COMMON_SHARE bool isClose(const CqMatrix& m1, const CqMatrix& m2,
+AQSIS_MATH_SHARE bool isClose(const CqMatrix& m1, const CqMatrix& m2,
 		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
 

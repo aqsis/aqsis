@@ -49,7 +49,7 @@ namespace Aqsis {
  * interval [0,1) modulo 1.  Relevant offsets can be obtained by simply using a
  * normal psuedo random number generator.
  */
-class AQSISTEX_SHARE Cq2dQuasiRandomTable
+class AQSIS_TEX_SHARE Cq2dQuasiRandomTable
 {
 	public:
 		/// Initialize the table with quasi random numbers.

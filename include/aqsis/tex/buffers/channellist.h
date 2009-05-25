@@ -205,7 +205,7 @@ class CqChannelList
  * \param out - stream to write to
  * \param channelList - channels to output.
  */
-AQSISTEX_SHARE std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList);
+AQSIS_TEX_SHARE std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList);
 
 //==============================================================================
 // Implementation of inline functions and templates

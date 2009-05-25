@@ -42,7 +42,7 @@ namespace Aqsis {
  * An aqsis Z-file is a very simple platform-dependent binary format for depth
  * buffers:
  */
-class AQSISTEX_SHARE CqZInputFile : public IqTexInputFile
+class AQSIS_TEX_SHARE CqZInputFile : public IqTexInputFile
 {
 	public:
 		/** \brief Open a z-file from a file name

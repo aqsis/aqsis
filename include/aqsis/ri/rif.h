@@ -82,7 +82,7 @@ extern "C" {
  * appropriate values.  1 is returned if the function was unable to parse the
  * token or find the token name in the internal dictionary.
  */
-RI_SHARE RtInt RifGetDeclaration(RtToken name, RifTokenType *tokType,
+AQSIS_RI_SHARE RtInt RifGetDeclaration(RtToken name, RifTokenType *tokType,
 		RifTokenDetail *tokDetail, RtInt *arrayLen);
 
 #ifdef  __cplusplus

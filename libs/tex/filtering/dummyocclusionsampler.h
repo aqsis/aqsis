@@ -36,7 +36,7 @@ namespace Aqsis {
  * Dummy sampler to be used in place of a real one when the requested file is
  * not found.
  */
-class AQSISTEX_SHARE CqDummyOcclusionSampler : public IqOcclusionSampler
+class AQSIS_TEX_SHARE CqDummyOcclusionSampler : public IqOcclusionSampler
 {
 	public:
 		/// Return not-occluded always.

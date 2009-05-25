@@ -42,7 +42,7 @@ class CqTileArray;
 //------------------------------------------------------------------------------
 /** \brief A sampler for shadow maps, implementing percentage closer filtering.
  */
-class AQSISTEX_SHARE CqShadowSampler : public IqShadowSampler
+class AQSIS_TEX_SHARE CqShadowSampler : public IqShadowSampler
 {
 	public:
 		/** \brief Construct a shadow sampler with data from the provided file.

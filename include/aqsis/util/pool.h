@@ -32,7 +32,7 @@
 namespace Aqsis {
 
 template <class T, TqInt CS=8>
-class /*COMMON_SHARE*/ CqObjectPool
+class /*AQSIS_UTIL_SHARE*/ CqObjectPool
 {
 		struct SqLink
 		{

@@ -43,16 +43,16 @@ namespace Aqsis {
 /** \brief Convert a dspy format type into the enum EqChannelType equivilant.
  * \return the equivilant EqChannelType type for the given PkDspy* constant
  */
-AQSISTEX_SHARE EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
+AQSIS_TEX_SHARE EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
 
 /** \brief Convert a EqChannelType to the PkDspy equivilant
  */
-AQSISTEX_SHARE TqInt pkDspyFromChanFormat(EqChannelType format);
+AQSIS_TEX_SHARE TqInt pkDspyFromChanFormat(EqChannelType format);
 
 //------------------------------------------------------------------------------
 /** \brief A constant-valued image channel source
  */
-class AQSISTEX_SHARE CqImageChannelConstant : public IqImageChannelSource
+class AQSIS_TEX_SHARE CqImageChannelConstant : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a constant image channel
@@ -74,7 +74,7 @@ class AQSISTEX_SHARE CqImageChannelConstant : public IqImageChannelSource
  * The checker pattern is suitable for use as a base image to show alpha in
  * other images.
  */
-class AQSISTEX_SHARE CqImageChannelCheckered : public IqImageChannelSource
+class AQSIS_TEX_SHARE CqImageChannelCheckered : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a checker channel
@@ -94,7 +94,7 @@ class AQSISTEX_SHARE CqImageChannelCheckered : public IqImageChannelSource
 //------------------------------------------------------------------------------
 /** \brief A rescaling image channel
  */
-class AQSISTEX_SHARE CqImageChannelZoom : public IqImageChannelSource
+class AQSIS_TEX_SHARE CqImageChannelZoom : public IqImageChannelSource
 {
 	public:
 		/** \brief Construct a checker channel
@@ -141,7 +141,7 @@ class AQSISTEX_SHARE CqImageChannelZoom : public IqImageChannelSource
  * Operations which need access to the type of the channel data (eg,
  * conversions) are performed in the subclass CqImageChannelTyped
  */
-class AQSISTEX_SHARE CqImageChannel : public IqImageChannel
+class AQSIS_TEX_SHARE CqImageChannel : public IqImageChannel
 {
 	public:
 		/** \brief Construct an image channel.

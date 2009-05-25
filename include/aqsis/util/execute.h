@@ -44,7 +44,7 @@ namespace Aqsis {
  *			Provides the ability to redirect stdout/stdin/stderr and 
  *			call registered callbacks with the data.
  */
-class COMMON_SHARE CqExecute
+class AQSIS_UTIL_SHARE CqExecute
 {
 public:
 	CqExecute(const std::string& command, const std::vector<std::string>& args, const std::string& curDir);

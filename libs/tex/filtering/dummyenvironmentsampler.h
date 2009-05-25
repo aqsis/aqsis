@@ -36,7 +36,7 @@ namespace Aqsis {
  * This sampler is intended to make missing environment maps as visible as
  * possible, while also providing useful information on orientation.
  */
-class AQSISTEX_SHARE CqDummyEnvironmentSampler : public IqEnvironmentSampler
+class AQSIS_TEX_SHARE CqDummyEnvironmentSampler : public IqEnvironmentSampler
 {
 	public:
 		// From IqEnvironmentSampler

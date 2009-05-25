@@ -49,7 +49,7 @@ namespace Aqsis {
  *   - Pixel channels are stored interleaved rather than "planar"
  *   - Probably misc. other restrictions (see tiffdirhandle.cpp)
  */
-class AQSISTEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
+class AQSIS_TEX_SHARE CqTiledTiffInputFile : public IqTiledTexInputFile
 {
 	public:
 		/** \brief Open a tiled TIFF file and setup the input interface.

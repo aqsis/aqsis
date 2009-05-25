@@ -38,7 +38,7 @@ namespace Aqsis {
  * Class encapsulating the functionality of the shader cell noise functions.
  */
 
-class COMMON_SHARE CqCellNoise
+class AQSIS_MATH_SHARE CqCellNoise
 {
 	public:
 		// Default constructor.

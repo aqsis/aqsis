@@ -210,24 +210,24 @@ inline bool isClose(const CqBasicColor<T1>& c1, const CqBasicColor<T2>& c2,
 //----------------------------------------
 /// \name Color-space conversion functions.  These are restricted to 
 //@{
-COMMON_SHARE CqColor rgbtohsv(const CqColor& col);
-COMMON_SHARE CqColor rgbtohsl(const CqColor& col);
-COMMON_SHARE CqColor rgbtoXYZ(const CqColor& col);
-COMMON_SHARE CqColor rgbtoxyY(const CqColor& col);
-COMMON_SHARE CqColor rgbtoYIQ(const CqColor& col);
-COMMON_SHARE CqColor hsvtorgb(const CqColor& col);
-COMMON_SHARE CqColor hsltorgb(const CqColor& col);
-COMMON_SHARE CqColor XYZtorgb(const CqColor& col);
-COMMON_SHARE CqColor xyYtorgb(const CqColor& col);
-COMMON_SHARE CqColor YIQtorgb(const CqColor& col);
+AQSIS_MATH_SHARE CqColor rgbtohsv(const CqColor& col);
+AQSIS_MATH_SHARE CqColor rgbtohsl(const CqColor& col);
+AQSIS_MATH_SHARE CqColor rgbtoXYZ(const CqColor& col);
+AQSIS_MATH_SHARE CqColor rgbtoxyY(const CqColor& col);
+AQSIS_MATH_SHARE CqColor rgbtoYIQ(const CqColor& col);
+AQSIS_MATH_SHARE CqColor hsvtorgb(const CqColor& col);
+AQSIS_MATH_SHARE CqColor hsltorgb(const CqColor& col);
+AQSIS_MATH_SHARE CqColor XYZtorgb(const CqColor& col);
+AQSIS_MATH_SHARE CqColor xyYtorgb(const CqColor& col);
+AQSIS_MATH_SHARE CqColor YIQtorgb(const CqColor& col);
 //@}
 
 
 //----------------------------------------
 /// Static white color
-COMMON_SHARE extern const CqColor gColWhite;
+AQSIS_MATH_SHARE extern const CqColor gColWhite;
 /// Static black color
-COMMON_SHARE extern const CqColor gColBlack;
+AQSIS_MATH_SHARE extern const CqColor gColBlack;
 
 
 

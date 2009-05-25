@@ -86,7 +86,7 @@ class XqException : public std::runtime_error
 };
 
 /// Stream insertion operator for the aqsis exception base type.
-COMMON_SHARE std::ostream& operator<<(std::ostream& o, const XqException& e);
+AQSIS_UTIL_SHARE std::ostream& operator<<(std::ostream& o, const XqException& e);
 
 //------------------------------------------------------------------------------
 

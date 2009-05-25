@@ -39,7 +39,7 @@ namespace Aqsis
 //------------------------------------------------------------------------------
 /** \brief A dictionary in which to look up primitive variables.
  */
-class COMMON_SHARE CqTokenDictionary
+class AQSIS_RIUTIL_SHARE CqTokenDictionary
 {
 	public:
 		/** \brief Construct a token dictionary
@@ -95,7 +95,7 @@ class COMMON_SHARE CqTokenDictionary
  *
  * \return A vector of CqPrimvarTokens representing standard predefined tokens.
  */
-COMMON_SHARE const std::vector<CqPrimvarToken>& standardPrimvars();
+AQSIS_RIUTIL_SHARE const std::vector<CqPrimvarToken>& standardPrimvars();
 
 
 //==============================================================================

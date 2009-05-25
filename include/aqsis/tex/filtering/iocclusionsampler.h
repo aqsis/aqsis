@@ -42,7 +42,7 @@ class IqTiledTexInputFile;
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling occlusion texture buffers.
  */
-class AQSISTEX_SHARE IqOcclusionSampler
+class AQSIS_TEX_SHARE IqOcclusionSampler
 {
 	public:
 		/** \brief Sample the texture over a parallelogram region

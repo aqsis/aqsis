@@ -64,7 +64,7 @@ namespace Aqsis {
  * Orientation of the cube faces is described in the RISpec.
  */
 template<typename LevelCacheT>
-class AQSISTEX_SHARE CqCubeEnvironmentSampler : public IqEnvironmentSampler
+class AQSIS_TEX_SHARE CqCubeEnvironmentSampler : public IqEnvironmentSampler
 {
 	public:
 		/** \brief Construct a cube face environment sampler

@@ -48,7 +48,7 @@ class IqTiledTexInputFile;
  * the sample() interface function.
  *
  */
-class AQSISTEX_SHARE IqShadowSampler
+class AQSIS_TEX_SHARE IqShadowSampler
 {
 	public:
 		/** \brief Sample the texture over a quadrilateral region

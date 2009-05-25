@@ -60,7 +60,7 @@ namespace Aqsis {
  * clone() function to make a copy of the backend, and use separate copies to
  * access separate subimages.
  */
-class AQSISTEX_SHARE IqTiledTexInputFile
+class AQSIS_TEX_SHARE IqTiledTexInputFile
 {
 	public:
 		virtual ~IqTiledTexInputFile() {};

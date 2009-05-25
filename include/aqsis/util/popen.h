@@ -53,7 +53,7 @@ namespace Aqsis
  * handle-semantics to the underlying pipe resources (this is handily achieved
  * as a side effect of keeping a pimpl using a boost::shared_ptr).
  */
-class COMMON_SHARE CqPopenDevice
+class AQSIS_UTIL_SHARE CqPopenDevice
 {
 	public:
 		typedef char char_type;

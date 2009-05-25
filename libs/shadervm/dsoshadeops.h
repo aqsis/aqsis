@@ -38,7 +38,7 @@ namespace Aqsis {
 /**   CqDSORepository: This class is responsible for searching for shader
  * operations in extrnal shared libraries. 
  */
-class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBase
+class AQSIS_SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBase
 {
 
 	private:

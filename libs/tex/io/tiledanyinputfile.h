@@ -46,7 +46,7 @@ class IqTexInputFile;
  * user persists in not correctly mipmapping their files then they probably
  * deserve what they get ;-)
  */
-class AQSISTEX_SHARE CqTiledAnyInputFile : public IqTiledTexInputFile
+class AQSIS_TEX_SHARE CqTiledAnyInputFile : public IqTiledTexInputFile
 {
 	public:
 		/** \brief Open any texture file and interpret as a tiled file.

@@ -223,7 +223,7 @@ struct	SqStackEntry
 	IqShaderData*	m_Data;
 };
 
-class SHADERVM_SHARE CqShaderStack
+class AQSIS_SHADERVM_SHARE CqShaderStack
 {
 	public:
 		CqShaderStack() : m_iTop( 0 )

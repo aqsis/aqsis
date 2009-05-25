@@ -25,21 +25,6 @@
 #include	<aqsis/core/interfacefwd.h>
 #include	<aqsis/core/api/iparameter.h>
 
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
-#    define  SHADERVM_SHARE
-#  else
-#      ifdef SHADERVM_EXPORTS
-#        define SHADERVM_SHARE __declspec(dllexport)
-#      else
-#        define SHADERVM_SHARE __declspec(dllimport)
-#      endif
-#  endif // AQSIS_STATIC_LINK
-#else // !WIN32
-#  define  SHADERVM_SHARE
-#endif // WIN32
-
-
 namespace Aqsis {
 
 
@@ -83,7 +68,7 @@ AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
 //----------------------------------------------------------------------
 /** \brief Abstract base class from which all shaders must be defined.
  */
-struct SHADERVM_SHARE IqShader
+struct AQSIS_SHADERVM_SHARE IqShader
 {
 	virtual	~IqShader()
 	{}
@@ -180,9 +165,9 @@ struct SHADERVM_SHARE IqShader
  * \param programFile - file from which to read the shader program
  * \param dsoPath - search path for DSO shadeops.
  */
-SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext);
+AQSIS_SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext);
 
-SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
+AQSIS_SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderContext,
 										   std::istream& programFile,
 										   const std::string& dsoPath);
 //@}
@@ -195,7 +180,7 @@ SHADERVM_SHARE boost::shared_ptr<IqShader> createShaderVM(IqRenderer* renderCont
  * \todo Move this elsewhere, perhaps into a class managing the current
  * instances of CqShaderVM?
  */
-SHADERVM_SHARE void shutdownShaderVM();
+AQSIS_SHADERVM_SHARE void shutdownShaderVM();
 
 //@}
 

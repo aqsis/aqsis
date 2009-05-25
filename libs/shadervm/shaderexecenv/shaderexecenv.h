@@ -57,9 +57,9 @@ namespace Aqsis {
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 #ifdef AQSIS_SYSTEM_WIN32
-class SHADERCONTEXT_SHARE boost::noncopyable_::noncopyable;
+class AQSIS_SHADERVM_SHARE boost::noncopyable_::noncopyable;
 #endif
-class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
+class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::noncopyable
 {
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);

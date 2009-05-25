@@ -23,31 +23,10 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#ifndef	___ishaderexecenv_Loaded___
-#define	___ishaderexecenv_Loaded___
+#ifndef	ISHADEREXECENV_H_INCLUDED
+#define	ISHADEREXECENV_H_INCLUDED
 
 #include	<aqsis/aqsis.h>
-
-#ifdef	WIN32
-#  ifdef	AQSIS_STATIC_LINK
-
-#    define  SHADERCONTEXT_SHARE
-
-#  else // !AQSIS_STATIC_LINK
-
-#      ifdef SHADERCONTEXT_EXPORTS
-#        define SHADERCONTEXT_SHARE __declspec(dllexport)
-#      else
-#        define SHADERCONTEXT_SHARE __declspec(dllimport)
-#      endif
-
-#  endif	// AQSIS_STATIC_LINK
-
-#else	// !WIN32
-
-#  define  SHADERCONTEXT_SHARE
-
-#endif // WIN32
 
 #include	<boost/shared_ptr.hpp>
 
@@ -105,14 +84,14 @@ enum EqEnvVars
 };
 
 /// Vector of variable names corresponding to EqEnvVars
-SHADERCONTEXT_SHARE extern const char*	gVariableNames[];
+AQSIS_SHADERVM_SHARE extern const char*	gVariableNames[];
 /// Vector of hash key from gVariableNames
-SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];
+AQSIS_SHADERVM_SHARE extern TqUlong	gVariableTokens[];
 
 /// Variables needed by default for normal shaders
-SHADERCONTEXT_SHARE extern TqInt gDefUses;
+AQSIS_SHADERVM_SHARE extern TqInt gDefUses;
 /// Variables needed by default for light shaders
-SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
+AQSIS_SHADERVM_SHARE extern TqInt gDefLightUses;
 
 
 #define	STD_SO		void
@@ -155,7 +134,7 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
  * 'shadable' item, and providing shadeops to process that data.
  */
 
-struct SHADERCONTEXT_SHARE IqShaderExecEnv
+struct AQSIS_SHADERVM_SHARE IqShaderExecEnv
 {
 	/// Create an IqShaderExecEnv instance with the given render context.
 	static boost::shared_ptr<IqShaderExecEnv> create(IqRenderer* context);
@@ -613,4 +592,4 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 } // namespace Aqsis
 
 
-#endif	//	___ishadervariable_Loaded___
+#endif // ISHADEREXECENV_H_INCLUDED

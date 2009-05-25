@@ -52,9 +52,9 @@ typedef int TqSocketId;
  *  \brief Wrapper class around sockets based communications.
  */
 #ifdef AQSIS_SYSTEM_WIN32
-class COMMON_SHARE boost::noncopyable_::noncopyable;
+class AQSIS_UTIL_SHARE boost::noncopyable_::noncopyable;
 #endif
-class COMMON_SHARE CqSocket : boost::noncopyable
+class AQSIS_UTIL_SHARE CqSocket : boost::noncopyable
 {
 	public:
 		CqSocket();

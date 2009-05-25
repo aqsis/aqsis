@@ -47,7 +47,7 @@ namespace Aqsis {
  * direction.
  */
 template<typename LevelCacheT>
-class AQSISTEX_SHARE CqLatLongEnvironmentSampler : public IqEnvironmentSampler
+class AQSIS_TEX_SHARE CqLatLongEnvironmentSampler : public IqEnvironmentSampler
 {
 	public:
 		/** \brief Construct a latlong environment sampler from the provided

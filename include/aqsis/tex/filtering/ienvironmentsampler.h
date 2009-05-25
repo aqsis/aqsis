@@ -47,7 +47,7 @@ class IqTiledTexInputFile;
  * the sample() interface function.
  *
  */
-class AQSISTEX_SHARE IqEnvironmentSampler
+class AQSIS_TEX_SHARE IqEnvironmentSampler
 {
 	public:
 		/** \brief Sample the texture with the provided sample options.

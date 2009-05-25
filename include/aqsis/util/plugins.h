@@ -47,7 +47,7 @@ namespace Aqsis {
  *  
  */
 
-class COMMON_SHARE CqPluginBase
+class AQSIS_UTIL_SHARE CqPluginBase
 {
 	public:
 		virtual ~CqPluginBase();

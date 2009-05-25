@@ -36,7 +36,7 @@ namespace Aqsis {
  * Dummy sampler to be used in place of a real one when the requested file is
  * not found.
  */
-class AQSISTEX_SHARE CqDummyShadowSampler : public IqShadowSampler
+class AQSIS_TEX_SHARE CqDummyShadowSampler : public IqShadowSampler
 {
 	public:
 		/// Return not-in-shadow always.

@@ -102,18 +102,18 @@ extern "C"
 	}
 	SLO_VISSYMDEF;
 
-	SLXARGS_SHARE extern void Slo_SetPath ( char * path );
-	SLXARGS_SHARE extern int Slo_SetShader ( char * name );
-	SLXARGS_SHARE extern char *Slo_GetName ( void );
-	SLXARGS_SHARE extern SLO_TYPE Slo_GetType ( void );
-	SLXARGS_SHARE extern int Slo_GetNArgs ( void );
-	SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArgById ( int id );
-	SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArgByName ( char * name );
-	SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArrayArgElement( SLO_VISSYMDEF * array, int index );
-	SLXARGS_SHARE extern void Slo_EndShader ( void );
-	SLXARGS_SHARE extern char *Slo_TypetoStr ( SLO_TYPE type );
-	SLXARGS_SHARE extern char *Slo_StortoStr ( SLO_STORAGE storage );
-	SLXARGS_SHARE extern char *Slo_DetailtoStr ( SLO_DETAIL detail );
+	AQSIS_SLXARGS_SHARE extern void Slo_SetPath ( char * path );
+	AQSIS_SLXARGS_SHARE extern int Slo_SetShader ( char * name );
+	AQSIS_SLXARGS_SHARE extern char *Slo_GetName ( void );
+	AQSIS_SLXARGS_SHARE extern SLO_TYPE Slo_GetType ( void );
+	AQSIS_SLXARGS_SHARE extern int Slo_GetNArgs ( void );
+	AQSIS_SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArgById ( int id );
+	AQSIS_SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArgByName ( char * name );
+	AQSIS_SLXARGS_SHARE extern SLO_VISSYMDEF *Slo_GetArrayArgElement( SLO_VISSYMDEF * array, int index );
+	AQSIS_SLXARGS_SHARE extern void Slo_EndShader ( void );
+	AQSIS_SLXARGS_SHARE extern char *Slo_TypetoStr ( SLO_TYPE type );
+	AQSIS_SLXARGS_SHARE extern char *Slo_StortoStr ( SLO_STORAGE storage );
+	AQSIS_SLXARGS_SHARE extern char *Slo_DetailtoStr ( SLO_DETAIL detail );
 
 #ifdef __cplusplus
 }

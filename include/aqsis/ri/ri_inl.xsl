@@ -32,7 +32,7 @@
 
 	<xsl:template name="procedure_definition">
 		<xsl:param name="useVarargs"/>
-		<xsl:text>&tab;&tab;RI_SHARE </xsl:text>
+		<xsl:text>&tab;&tab;AQSIS_RI_SHARE </xsl:text>
 		<xsl:value-of select="ReturnType"/>
 		<xsl:text> </xsl:text>
 		<xsl:apply-templates select="." mode="procedure_name">

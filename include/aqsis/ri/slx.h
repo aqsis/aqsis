@@ -104,20 +104,20 @@ extern "C"
 
 #define NULL_SLXVISSYMDEF ((SLX_VISSYMDEF *)0)
 
-	SLXARGS_SHARE extern void SLX_SetPath ( char * path );
-	SLXARGS_SHARE extern char *SLX_GetPath ( void );
-	SLXARGS_SHARE extern int SLX_SetShader ( char * name );
-	SLXARGS_SHARE extern char *SLX_GetName ( void );
-	SLXARGS_SHARE extern SLX_TYPE SLX_GetType ( void );
-	SLXARGS_SHARE extern int SLX_GetNArgs ( void );
-	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgById ( int id );
-	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgByName ( char * name );
-	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArrayArgElement( SLX_VISSYMDEF * array, int index );
-	SLXARGS_SHARE extern void SLX_EndShader ( void );
-	SLXARGS_SHARE extern char *SLX_TypetoStr ( SLX_TYPE type );
-	SLXARGS_SHARE extern char *SLX_StortoStr ( SLX_STORAGE storage );
-	SLXARGS_SHARE extern char *SLX_DetailtoStr ( SLX_DETAIL detail );
-	SLXARGS_SHARE extern void SLX_SetDSOPath ( char * path );
+	AQSIS_SLXARGS_SHARE extern void SLX_SetPath ( char * path );
+	AQSIS_SLXARGS_SHARE extern char *SLX_GetPath ( void );
+	AQSIS_SLXARGS_SHARE extern int SLX_SetShader ( char * name );
+	AQSIS_SLXARGS_SHARE extern char *SLX_GetName ( void );
+	AQSIS_SLXARGS_SHARE extern SLX_TYPE SLX_GetType ( void );
+	AQSIS_SLXARGS_SHARE extern int SLX_GetNArgs ( void );
+	AQSIS_SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgById ( int id );
+	AQSIS_SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgByName ( char * name );
+	AQSIS_SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArrayArgElement( SLX_VISSYMDEF * array, int index );
+	AQSIS_SLXARGS_SHARE extern void SLX_EndShader ( void );
+	AQSIS_SLXARGS_SHARE extern char *SLX_TypetoStr ( SLX_TYPE type );
+	AQSIS_SLXARGS_SHARE extern char *SLX_StortoStr ( SLX_STORAGE storage );
+	AQSIS_SLXARGS_SHARE extern char *SLX_DetailtoStr ( SLX_DETAIL detail );
+	AQSIS_SLXARGS_SHARE extern void SLX_SetDSOPath ( char * path );
 
 #ifdef __cplusplus
 }

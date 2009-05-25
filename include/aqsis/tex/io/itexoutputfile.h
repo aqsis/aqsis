@@ -51,7 +51,7 @@ namespace Aqsis {
  * to produce tiled output data by setting the appropriate attributes in the
  * file attribute header.
  */
-class AQSISTEX_SHARE IqTexOutputFile
+class AQSIS_TEX_SHARE IqTexOutputFile
 {
 	public:
 		virtual ~IqTexOutputFile() {};
@@ -130,7 +130,7 @@ class AQSISTEX_SHARE IqTexOutputFile
  * Some file types, such as TIFF support storage of multiple sub-images inside
  * a single file.  This interface supports such usage by allowing 
  */
-class AQSISTEX_SHARE IqMultiTexOutputFile : public IqTexOutputFile
+class AQSIS_TEX_SHARE IqMultiTexOutputFile : public IqTexOutputFile
 {
 	public:
 		/** \brief Create a new subimage

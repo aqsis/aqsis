@@ -273,9 +273,9 @@ class CqVector4D
 			return ( CqVector4D( -v.m_x, -v.m_y, -v.m_z, v.m_h ) );
 		} // Negation
 
-		COMMON_SHARE friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
-		COMMON_SHARE friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
-		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector );
+		AQSIS_MATH_SHARE friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
+		AQSIS_MATH_SHARE friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
+		AQSIS_MATH_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

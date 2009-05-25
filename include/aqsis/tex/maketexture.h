@@ -75,7 +75,7 @@ struct SqFilterInfo
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the mipmapping procedure.
  */
-AQSISTEX_SHARE void makeTexture(const boostfs::path& inFileName, 
+AQSIS_TEX_SHARE void makeTexture(const boostfs::path& inFileName, 
 		const boostfs::path& outFileName, SqFilterInfo filterInfo, 
 		const SqWrapModes& wrapModes, const CqRiParamList& paramList);
 
@@ -121,7 +121,7 @@ AQSISTEX_SHARE void makeTexture(const boostfs::path& inFileName,
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the mipmapping procedure.
  */
-AQSISTEX_SHARE void makeCubeFaceEnvironment(
+AQSIS_TEX_SHARE void makeCubeFaceEnvironment(
 		const boostfs::path& inNamePx, const boostfs::path& inNameNx, 
 		const boostfs::path& inNamePy, const boostfs::path& inNameNy, 
 		const boostfs::path& inNamePz, const boostfs::path& inNameNz, 
@@ -144,7 +144,7 @@ AQSISTEX_SHARE void makeCubeFaceEnvironment(
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the mipmapping procedure.
  */
-AQSISTEX_SHARE void makeLatLongEnvironment(
+AQSIS_TEX_SHARE void makeLatLongEnvironment(
 		const boostfs::path& inFileName, const boostfs::path& outFileName,
 		SqFilterInfo filterInfo, const CqRiParamList& paramList);
 
@@ -163,7 +163,7 @@ AQSISTEX_SHARE void makeLatLongEnvironment(
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the shadow map generation.
  */
-AQSISTEX_SHARE void makeShadow(const boostfs::path& inFileName, 
+AQSIS_TEX_SHARE void makeShadow(const boostfs::path& inFileName, 
 		const boostfs::path& outFileName, const CqRiParamList& paramList);
 
 /** \brief Convert a collection of depth maps into an occlusion map.
@@ -179,7 +179,7 @@ AQSISTEX_SHARE void makeShadow(const boostfs::path& inFileName,
  * \param paramList - A renderman param list of extra optional control
  *                    parameters for the occlusion map generation.
  */
-AQSISTEX_SHARE void makeOcclusion( const std::vector<boostfs::path>& inFiles,
+AQSIS_TEX_SHARE void makeOcclusion( const std::vector<boostfs::path>& inFiles,
 		const boostfs::path& outFileName, const CqRiParamList& paramList);
 
 } // namespace Aqsis

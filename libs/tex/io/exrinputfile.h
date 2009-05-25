@@ -62,7 +62,7 @@ namespace Attr {
  * including data saved with subsampled colour channels, such as
  * luminance-chroma data.
  */
-class AQSISTEX_SHARE CqExrInputFile : public IqTexInputFile
+class AQSIS_TEX_SHARE CqExrInputFile : public IqTexInputFile
 {
 	public:
 		CqExrInputFile(const boostfs::path& fileName);

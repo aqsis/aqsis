@@ -35,7 +35,7 @@ namespace Aqsis {
  *
  * This sampler is intended to make missing textures as visible as possible.
  */
-class AQSISTEX_SHARE CqDummyTextureSampler : public IqTextureSampler
+class AQSIS_TEX_SHARE CqDummyTextureSampler : public IqTextureSampler
 {
 	public:
 		/** \brief Point sample a dummy cross-shaped texture

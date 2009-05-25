@@ -48,9 +48,9 @@ class CqTexFileHeader;
 /** \brief A cache managing the various types of texture samplers.
  */
 #ifdef AQSIS_SYSTEM_WIN32
-class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+class AQSIS_TEX_SHARE boost::noncopyable_::noncopyable;
 #endif
-class AQSISTEX_SHARE CqTextureCache : public IqTextureCache, private boost::noncopyable
+class AQSIS_TEX_SHARE CqTextureCache : public IqTextureCache, private boost::noncopyable
 {
 	public:
 		/** \brief Construct an empty texture cache.

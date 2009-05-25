@@ -45,7 +45,7 @@ class CqMatrix;
 /** \brief A cache interface for managing the various types of texture
  * samplers.
  */
-struct AQSISTEX_SHARE IqTextureCache
+struct AQSIS_TEX_SHARE IqTextureCache
 {
 	/// Type for holding a search-path callback.
 	typedef boost::function<const char* ()> TqSearchPathCallback;

@@ -38,7 +38,7 @@ class CqTiffFileHandle;
 //------------------------------------------------------------------------------
 /** \brief Scanline-based output for the TIFF file format.
  */
-class AQSISTEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
+class AQSIS_TEX_SHARE CqTiffOutputFile : public IqMultiTexOutputFile
 {
 	public:
 		/** \brief Construct a tiff output file with the given file name.

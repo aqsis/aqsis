@@ -118,7 +118,7 @@ struct IqRenderer
 	virtual	bool	IsWorldBegin() const = 0;
 };
 
-RI_SHARE IqRenderer* QGetRenderContextI();
+AQSIS_CORE_SHARE IqRenderer* QGetRenderContextI();
 
 //-----------------------------------------------------------------------
 

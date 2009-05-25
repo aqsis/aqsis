@@ -40,7 +40,7 @@ namespace Aqsis {
  * over 1D to 4D domains.
  */
 
-class COMMON_SHARE CqNoise
+class AQSIS_MATH_SHARE CqNoise
 {
 	public:
 

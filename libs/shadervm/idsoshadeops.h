@@ -53,7 +53,7 @@ struct SqDSOExternalCall
 
 /** Interface to the repostiory of dynamic shader operations*/
 
-struct SHADERVM_SHARE IqDSORepository
+struct AQSIS_SHADERVM_SHARE IqDSORepository
 {
 	virtual void SetDSOPath(const char*) = 0;
 	virtual ~IqDSORepository() {}

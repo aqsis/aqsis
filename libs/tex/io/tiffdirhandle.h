@@ -76,9 +76,9 @@ namespace Attr {
  * destructor is called.
  */
 #ifdef AQSIS_SYSTEM_WIN32
-class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+class AQSIS_TEX_SHARE boost::noncopyable_::noncopyable;
 #endif
-class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
+class AQSIS_TEX_SHARE CqTiffDirHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff directory handle from a tiff file handle
@@ -239,9 +239,9 @@ class AQSISTEX_SHARE CqTiffDirHandle : boost::noncopyable
  * or TIFFSetDirectory outside this class.
  */
 #ifdef AQSIS_SYSTEM_WIN32
-class AQSISTEX_SHARE boost::noncopyable_::noncopyable;
+class AQSIS_TEX_SHARE boost::noncopyable_::noncopyable;
 #endif
-class AQSISTEX_SHARE CqTiffFileHandle : boost::noncopyable
+class AQSIS_TEX_SHARE CqTiffFileHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff file handle

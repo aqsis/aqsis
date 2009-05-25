@@ -52,7 +52,7 @@ typedef TqFloat TqFloatConv;
  * Sources are able to produce image channel data row by row.  This may come
  * from an in-memory buffer, or simply be generated on the fly.
  */
-class AQSISTEX_SHARE IqImageChannelSource
+class AQSIS_TEX_SHARE IqImageChannelSource
 {
 	public:
 		/** \brief Require that the buffer return the given size with
@@ -97,7 +97,7 @@ class AQSISTEX_SHARE IqImageChannelSource
  * Image channel "sinks" are objects which image channel data can be copied
  * into.  The data comes from an associated IqImageChannelSource.
  */
-class AQSISTEX_SHARE IqImageChannelSink
+class AQSIS_TEX_SHARE IqImageChannelSink
 {
 	public:
 		/** \brief Copy data from the source channel, replacing the data in the
@@ -124,7 +124,7 @@ class AQSISTEX_SHARE IqImageChannelSink
 //------------------------------------------------------------------------------
 /** \brief An image channel which is both a source of and a sink for data.
  */
-class AQSISTEX_SHARE IqImageChannel : public IqImageChannelSource, IqImageChannelSink
+class AQSIS_TEX_SHARE IqImageChannel : public IqImageChannelSource, IqImageChannelSink
 { };
 
 

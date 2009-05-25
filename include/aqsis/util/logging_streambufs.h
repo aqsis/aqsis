@@ -38,7 +38,7 @@ namespace Aqsis {
 // tag_buf
 
 /// When attached to an output stream, prepends a string "tag" to the beginning of every line of output
-class COMMON_SHARE tag_buf :
+class AQSIS_UTIL_SHARE tag_buf :
 			public std::streambuf
 {
 	public:
@@ -61,7 +61,7 @@ class COMMON_SHARE tag_buf :
 // timestamp_buf
 
 /// When attached to an output stream, prefixes every line of output with a timestamp
-class COMMON_SHARE timestamp_buf :
+class AQSIS_UTIL_SHARE timestamp_buf :
 			public std::streambuf
 {
 	public:
@@ -82,7 +82,7 @@ class COMMON_SHARE timestamp_buf :
 // show_level_buf
 
 /// When attached to an output stream, prefixes every line of output with its log-level (if any)
-class COMMON_SHARE show_level_buf :
+class AQSIS_UTIL_SHARE show_level_buf :
 			public std::streambuf
 {
 	public:
@@ -103,7 +103,7 @@ class COMMON_SHARE show_level_buf :
 // color_level_buf
 
 /// When attached to an output stream, colors output based on its log level (if any)
-class COMMON_SHARE color_level_buf :
+class AQSIS_UTIL_SHARE color_level_buf :
 			public std::streambuf
 {
 	public:
@@ -124,7 +124,7 @@ class COMMON_SHARE color_level_buf :
 // fold_duplicates_buf
 
 /// When attached to an output stream, replaces duplicate lines of output with a message indicating the number of duplicates
-class COMMON_SHARE fold_duplicates_buf :
+class AQSIS_UTIL_SHARE fold_duplicates_buf :
 			public std::streambuf
 {
 	public:
@@ -149,7 +149,7 @@ class COMMON_SHARE fold_duplicates_buf :
 // reset_level_buf
 
 /// When attached to an output stream, resets the log level to "unknown" after every line of output
-class COMMON_SHARE reset_level_buf :
+class AQSIS_UTIL_SHARE reset_level_buf :
 			public std::streambuf
 {
 	public:
@@ -190,7 +190,7 @@ typedef enum
 #endif // AQSIS_SYSTEM_WIN32
 
 /// When attached to an output stream, filters-out messages below the given level
-class COMMON_SHARE filter_by_level_buf :
+class AQSIS_UTIL_SHARE filter_by_level_buf :
 			public std::streambuf
 {
 	public:
@@ -212,7 +212,7 @@ class COMMON_SHARE filter_by_level_buf :
 
 #ifndef	AQSIS_NO_SYSLOG
 /// When attached to an output stream, copies output to the system log
-class COMMON_SHARE syslog_buf :
+class AQSIS_UTIL_SHARE syslog_buf :
 			public std::streambuf
 {
 	public:
@@ -238,7 +238,7 @@ class COMMON_SHARE syslog_buf :
 // ansi_buf
 
 /// Scans the stream for ANSI control sequences and emulates the behaviour under Windows
-class COMMON_SHARE ansi_buf :
+class AQSIS_UTIL_SHARE ansi_buf :
 			public std::streambuf
 {
 	public:

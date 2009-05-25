@@ -47,7 +47,7 @@ typedef unsigned char	bit;
  
 */
 
-class COMMON_SHARE CqBitVector
+class AQSIS_UTIL_SHARE CqBitVector
 {
 	public:
 		/** Default constructor.

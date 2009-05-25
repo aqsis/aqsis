@@ -44,7 +44,7 @@ namespace Aqsis {
  * texture access using a mipmap.
  */
 template<typename LevelCacheT>
-class AQSISTEX_SHARE CqTextureSampler : public IqTextureSampler
+class AQSIS_TEX_SHARE CqTextureSampler : public IqTextureSampler
 {
 	public:
 		/** \brief Construct a sampler from the provided set of mipmap levels.

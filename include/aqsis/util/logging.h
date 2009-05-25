@@ -26,7 +26,7 @@
 namespace Aqsis {
 
 /// Returns an output stream to be used for all logging
-COMMON_SHARE std::ostream& log();
+AQSIS_UTIL_SHARE std::ostream& log();
 
 // iostream-compatible manipulators - use these
 // at the beginning of a message to indicate its priority, e.g.
@@ -34,14 +34,14 @@ COMMON_SHARE std::ostream& log();
 // Aqsis::log() << info << "Informational message" << std::endl;
 // Aqsis::log() << critical << "Critical message" << std::endl;
 
-COMMON_SHARE std::ostream& emergency(std::ostream&);
-COMMON_SHARE std::ostream& alert(std::ostream&);
-COMMON_SHARE std::ostream& critical(std::ostream&);
-COMMON_SHARE std::ostream& error(std::ostream&);
-COMMON_SHARE std::ostream& warning(std::ostream&);
-COMMON_SHARE std::ostream& notice(std::ostream&);
-COMMON_SHARE std::ostream& info(std::ostream&);
-COMMON_SHARE std::ostream& debug(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& emergency(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& alert(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& critical(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& error(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& warning(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& notice(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& info(std::ostream&);
+AQSIS_UTIL_SHARE std::ostream& debug(std::ostream&);
 
 } // namespace Aqsis
 

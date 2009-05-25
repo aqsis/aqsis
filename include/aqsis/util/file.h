@@ -63,9 +63,9 @@ namespace boostfs = boost::filesystem;
  *                     which to search for the given file name.
  * \return A full path to the file name.
  */
-COMMON_SHARE boostfs::path findFile(const std::string& fileName,
+AQSIS_UTIL_SHARE boostfs::path findFile(const std::string& fileName,
 		const std::string& searchPath);
-COMMON_SHARE boostfs::path findFileNothrow(const std::string& fileName,
+AQSIS_UTIL_SHARE boostfs::path findFileNothrow(const std::string& fileName,
 		const std::string& searchPath);
 //@}
 
@@ -81,7 +81,7 @@ COMMON_SHARE boostfs::path findFileNothrow(const std::string& fileName,
  *
  * \param pattern - file matching pattern 
  */
-COMMON_SHARE std::vector<std::string> Glob(const std::string& pattern);
+AQSIS_UTIL_SHARE std::vector<std::string> Glob(const std::string& pattern);
 
 /** \brief Exapand a command-line file pattern to a list of paths
  *
@@ -92,7 +92,7 @@ COMMON_SHARE std::vector<std::string> Glob(const std::string& pattern);
  *
  * \param pattern - file matching pattern 
  */
-COMMON_SHARE std::vector<std::string> cliGlob(const std::string& pattern);
+AQSIS_UTIL_SHARE std::vector<std::string> cliGlob(const std::string& pattern);
 
 
 /** \brief Splits a list of paths delimited by ';' or ':' into tokens.

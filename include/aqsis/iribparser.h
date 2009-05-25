@@ -37,16 +37,16 @@
 
 #ifdef AQSIS_SYSTEM_WIN32
 #	ifdef AQSIS_STATIC_LINK
-#		define RIBPARSE_SHARE
+#		define AQSIS_RIBPARSER_SHARE
 #	else
-#		ifdef RIBPARSE_EXPORTS
-#			define RIBPARSE_SHARE __declspec(dllexport)
+#		ifdef AQSIS_RIBPARSER_EXPORTS
+#			define AQSIS_RIBPARSER_SHARE __declspec(dllexport)
 #		else
-#			define RIBPARSE_SHARE __declspec(dllimport)
+#			define AQSIS_RIBPARSER_SHARE __declspec(dllimport)
 #		endif
 #	endif
 #else
-#	define RIBPARSE_SHARE
+#	define AQSIS_RIBPARSER_SHARE
 #endif
 
 namespace Aqsis {
@@ -121,7 +121,7 @@ class IqRibParamListHandler;
  * functions like ReadArchive and RiProcRunProgram which require the input
  * context to be changed between requests.
  */
-class RIBPARSE_SHARE IqRibParser
+class AQSIS_RIBPARSER_SHARE IqRibParser
 {
 	public:
 		// Array types which are passed to RI request handlers from the RIB parser.
@@ -308,7 +308,7 @@ class RIBPARSE_SHARE IqRibParser
  * Code expecting to handle RIB requests should inherit from this class.  This
  * allows it to be attached to and called by the RIB parser at runtime.
  */
-class RIBPARSE_SHARE IqRibRequestHandler
+class AQSIS_RIBPARSER_SHARE IqRibRequestHandler
 {
 	public:
 		/** \brief Handle a RIB request by reading from the parser

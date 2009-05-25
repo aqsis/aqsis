@@ -39,7 +39,7 @@ namespace Aqsis {
  * A quasi-random number generator class.
  */
 
-class COMMON_SHARE CqLowDiscrepancy
+class AQSIS_MATH_SHARE CqLowDiscrepancy
 {
 	public:
 		/// Constructor

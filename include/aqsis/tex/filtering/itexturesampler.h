@@ -54,7 +54,7 @@ class CqTexFileHeader;
  * language texture sampling pipeline, the sample method should default to
  * something else quietly if it's not supported.
  */
-class AQSISTEX_SHARE IqTextureSampler
+class AQSIS_TEX_SHARE IqTextureSampler
 {
 	public:
 		/** \brief Filter the texture over the given quadrilateral region.

@@ -43,7 +43,7 @@ typedef std::string CqStringBase;
  * An extended string class, derived from std::string
  */
 
-class COMMON_SHARE CqString : public CqStringBase
+class AQSIS_UTIL_SHARE CqString : public CqStringBase
 {
 	public:
 		CqString() : CqStringBase()
@@ -100,19 +100,19 @@ class COMMON_SHARE CqString : public CqStringBase
 
 
 // Some useful functions
-COMMON_SHARE std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
-COMMON_SHARE CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
-COMMON_SHARE CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
-COMMON_SHARE CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
-COMMON_SHARE CqString operator+( const CqString& strAdd1, TqChar ch );
-COMMON_SHARE CqString operator+( TqChar ch, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
+AQSIS_UTIL_SHARE CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
+AQSIS_UTIL_SHARE CqString operator+( const CqString& strAdd1, TqChar ch );
+AQSIS_UTIL_SHARE CqString operator+( TqChar ch, const CqString& strAdd2 );
 
 // These must be defined so that std::string can be used as a type in the ShaderVM and
 // in the parameter dicing code.
-COMMON_SHARE CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
-COMMON_SHARE CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
-COMMON_SHARE CqString operator*( const CqString& strAdd1, TqFloat f );
-COMMON_SHARE CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
+AQSIS_UTIL_SHARE CqString operator*( const CqString& strAdd1, TqFloat f );
+AQSIS_UTIL_SHARE CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
 
 /// The ultimate function for converting anything into a string
 template<typename value_t>

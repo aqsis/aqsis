@@ -53,7 +53,7 @@ class CqTileArray;
  * -D?" to be answered.  In this way, we can compute the ambient occlusion
  *  without resorting to raytracing.
  */
-class AQSISTEX_SHARE CqOcclusionSampler : public IqOcclusionSampler
+class AQSIS_TEX_SHARE CqOcclusionSampler : public IqOcclusionSampler
 {
 	public:
 		/** \brief Create an occlusion sampler, sampling data from the provided file.

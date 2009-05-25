@@ -85,7 +85,7 @@ namespace Aqsis {
  * A random number generator class.
  */
 
-class COMMON_SHARE CqRandom
+class AQSIS_MATH_SHARE CqRandom
 {
 	public:
 		CqRandom();

@@ -110,7 +110,7 @@ union UsProgramElement
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
+class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
 		CqShaderVM(IqRenderer* pRenderContext);

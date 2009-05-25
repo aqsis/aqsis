@@ -50,7 +50,7 @@ namespace Aqsis {
  * should hold parsed token information taken from the renderman symbol table
  * rather than plain old strings.
  */
-class COMMON_SHARE CqRiParamList
+class AQSIS_RIUTIL_SHARE CqRiParamList
 {
 	public:
 		/** \brief Construct the parameter list from the associated C-interface types.
