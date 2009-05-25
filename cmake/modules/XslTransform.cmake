@@ -83,8 +83,14 @@ macro(xsl_transform OUTPUT INPUT)
 	else(THIS_XSL_SEARCHPATH)
 		set(THIS_XSL_SEARCHPATH "${CMAKE_CURRENT_SOURCE_DIR}")
 	endif(THIS_XSL_SEARCHPATH)
+	# Actually, using find_file may be the "wrong thing to do" here, as hinted
+	# by the fact that it adds stuff to the cache.  However it's easiest for now.
 	find_file(_XML_LOCATION ${INPUT} PATHS ${THIS_XSL_SEARCHPATH} NO_DEFAULT_PATH)
 	find_file(_STYLESHEET_LOCATION ${THIS_XSL_STYLESHEET} PATHS ${THIS_XSL_SEARCHPATH} NO_DEFAULT_PATH)
+	# We don't want these variables to hang around in the cache, so remove them
+	# immediately.
+	unset(_XML_LOCATION CACHE)
+	unset(_STYLESHEET_LOCATION CACHE)
 
 	# Run the XSLT processor to do the XML transformation.
 	get_filename_component(OUTPUT_BASENAME ${OUTPUT} NAME)
