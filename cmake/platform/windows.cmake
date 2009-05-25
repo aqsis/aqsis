@@ -51,16 +51,3 @@ CONFIGURE_FILE("$ENV{CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${CMA
 SET(INFORES_SRCS "${CMAKE_BINARY_DIR}/info.rc")
 SET(ICONRES_SRCS "${CMAKE_BINARY_DIR}/icon.rc")
 
-# There is a bug in NSI that does not handle full unix paths properly. Make
-# sure there is at least one set of four (4) backlasshes.
-#SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-#
-# Packaging setup
-#
-SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\aqsis_install.exe")
-SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} Aqsis")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\community.aqsis.org")
-SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.aqsis.org")
-SET(CPACK_NSIS_CONTACT "packages@aqsis.org")
-SET(CPACK_NSIS_MODIFY_PATH ON)
-SET(CPACK_SOURCE_GENERATOR "ZIP")

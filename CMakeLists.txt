@@ -39,9 +39,6 @@ option(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support" ON)
 option(AQSIS_ENABLE_THREADING "Enable multi-threading (EXPERIMENTAL)" OFF)
 mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT)
 
-option(AQSIS_ENABLE_DOC_HTML "Enable HTML developer documentation" ON)
-mark_as_advanced(AQSIS_ENABLE_DOC_HTML)
-
 option(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 mark_as_advanced(AQSIS_USE_RPATH)
 
@@ -258,6 +255,8 @@ add_subdirectory(content/examples)
 # Build docs
 add_subdirectory(doc/doxygen)
 
+# Packaging
+add_subdirectory(distribution)
 
 #-------------------------------------------------------------------------------
 # Create aqsisrc
@@ -284,5 +283,4 @@ set(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
 set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
 configure_file(aqsisrc.in.cmake ${aqsisrc_name})
 install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR})
-
 
