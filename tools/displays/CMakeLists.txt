@@ -2,7 +2,7 @@ declare_subproject(dspyutil)
 
 # Helper macro to add displays targets.
 macro(aqsis_add_display target_name)
-	aqsis_add_library(${target_name} ${ARGN})
+	aqsis_add_library(${target_name} ${ARGN} PLUGIN)
 	get_target_property(display_lib_name ${target_name} LOCATION)
 	get_filename_component(display_lib_name ${display_lib_name} NAME)
 	# Set variables in the display directory to be picked up when building

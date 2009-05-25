@@ -183,11 +183,20 @@ endmacro()
 #    aqsis_add_library( target_name  source1  [source2 ...]
 #                       [COMPILE_DEFINITIONS def1 ...]
 #                       [DEPENDS dep1 ...]
-#                       [LINK_LIBRARIES lib1 ...] )
+#                       [LINK_LIBRARIES lib1 ...]
+#                       [MODULE] )
 #
+# Specifying the PLUGIN option causes the library to be compiled as a loadable
+# module (see the cmake add_library documentation regarding the MODULE library
+# type).  In addition, PLUGIN causes any prefix which would normally to be
+# added to the library name ("lib" on unix) to be left off.
 macro(aqsis_add_library target_name)
-	parse_arguments(aal "COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES" "" ${ARGN})
-	add_library(${target_name} SHARED ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
+	parse_arguments(aal "COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES" "PLUGIN" ${ARGN})
+	set(aal_lib_type SHARED)
+	if(aal_PLUGIN)
+		set(aal_lib_type MODULE)
+	endif()
+	add_library(${target_name} ${aal_lib_type} ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
 	if(aal_COMPILE_DEFINITIONS)
 		#message("ADDING COMPILE_DEFINITIONS: ${aal_COMPILE_DEFINITIONS}")
 		set_property(TARGET ${target_name} PROPERTY
@@ -201,9 +210,15 @@ macro(aqsis_add_library target_name)
 		#message("ADDING LINK LIBS: ${aal_LINK_LIBRARIES}")
 		target_link_libraries(${target_name} ${aal_LINK_LIBRARIES})
 	endif()
-	set_target_properties(${target_name} PROPERTIES 
-		SOVERSION ${VERSION_MAJOR}
-		VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
+	if(aal_PLUGIN)
+		# For plugins, leave off any standard libraray prefix.
+		set_target_properties(${target_name} PROPERTIES PREFIX "")
+	else()
+		# Only do so-versioning for non-plugins
+		set_target_properties(${target_name} PROPERTIES
+			SOVERSION ${VERSION_MAJOR}
+			VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
+	endif()
 endmacro()
 
 
