@@ -8,7 +8,7 @@ SET(SHADERDIR "shaders"
 	CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
 SET(SYSCONFDIR "${BINDIR}" 
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-SET(INCLUDEDIR "include/aqsis" 
+SET(INCLUDEDIR "include"
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
 SET(CONTENTDIR_NAME "content"
 	CACHE STRING "Name of content directory")

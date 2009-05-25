@@ -20,19 +20,4 @@ set(ri_install_hdrs
 	${ri_inl}
 )
 
-install(FILES ${ri_install_hdrs} DESTINATION ${inc_install_dir}/ri)
-
-# FIXME
-# From project.cmake:
-
-#set(api_xml ${ri_headers_SOURCE_DIR}/ri.xml)
-#
-#set(_ri_inl ${ri_headers_BINARY_DIR}/ri.inl)
-#set(_ri_inl_xsl ${ri_headers_SOURCE_DIR}/ri_inl.xsl)
-#add_custom_command(OUTPUT ${_ri_inl}
-#	COMMAND ${AQSIS_XSLTPROC_EXECUTABLE}
-#		-o ${_ri_inl} --path ${ri_headers_SOURCE_DIR}
-#		${_ri_inl_xsl} ${api_xml}
-#	COMMENT "Generating ri.inl via XSL transformation..."
-#	DEPENDS ${api_xml} ${_ri_inl_xsl}
-#)
+install(FILES ${ri_install_hdrs} DESTINATION ${include_install_dir}/ri)

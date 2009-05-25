@@ -37,8 +37,9 @@ add_custom_target(all_shaders ALL DEPENDS ${compiled_shaders})
 
 # Install all compiled and source shaders, and construct the installed shader
 # search path.
-source_tree_relpath(shaders_reldir)
-set(shaders_install_dir ${share_install_dir}/${shaders_reldir})
+#source_tree_relpath(shaders_reldir)
+#set(shaders_install_dir ${share_install_dir}/${shaders_reldir})
+set(shaders_install_dir ${SHADERDIR})
 set(shader_search_path)
 foreach(dir ${shader_dirs})
 	install(

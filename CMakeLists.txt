@@ -198,9 +198,6 @@ else()
 	include(${CMAKE_SOURCE_DIR}/cmake/platform/linux.cmake) 
 endif()
 
-# FIXME!
-set(share_install_dir ${CMAKE_INSTALL_PREFIX}/share/aqsis)
-
 
 #-------------------------------------------------------------------------------
 # Add directories for all subprojects

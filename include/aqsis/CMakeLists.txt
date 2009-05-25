@@ -1,8 +1,7 @@
 project(headers)
 
-# FIXME inc_install_dir is the base of the header install tree.
-#set(inc_install_dir "${INCLUDEDIR}/aqsis")
-set(inc_install_dir "${CMAKE_INSTALL_PREFIX}/include/aqsis")
+# include_install_dir is the base of the header install tree.
+set(include_install_dir "${INCLUDEDIR}/aqsis")
 
 add_subdirectory(ri)
 
@@ -35,13 +34,13 @@ set(install_hdrs
 	${version_h_name}
 )
 
-install(FILES ${install_hdrs} DESTINATION ${INCLUDEDIR})
+install(FILES ${install_hdrs} DESTINATION ${include_install_dir})
 
 #------------------------------------------------------------------------------
 
 # Install subdirectories of header files.
-install(DIRECTORY math DESTINATION ${inc_install_dir})
-install(DIRECTORY util DESTINATION ${inc_install_dir})
-install(DIRECTORY riutil DESTINATION ${inc_install_dir})
-#install(DIRECTORY tex DESTINATION ${inc_install_dir})
+install(DIRECTORY math DESTINATION ${include_install_dir})
+install(DIRECTORY util DESTINATION ${include_install_dir})
+install(DIRECTORY riutil DESTINATION ${include_install_dir})
+#install(DIRECTORY tex DESTINATION ${include_install_dir})
 
