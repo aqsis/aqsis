@@ -41,5 +41,3 @@ ENDIF(FIRST_CMAKE_RUN)
 # SYSCONFDIR is an absolute or relative path.  Relative paths are relative to
 # CMAKE_INSTALL_PREFIX.
 SET_WITH_PATH_PREFIX(DEFAULT_RC_PATH "${SYSCONFDIR}" "${CMAKE_INSTALL_PREFIX}")
-# Add a define for the default location of aqsisrc.
-ADD_DEFINITIONS(-DDEFAULT_RC_PATH=${DEFAULT_RC_PATH})

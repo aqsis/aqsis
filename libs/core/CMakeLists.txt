@@ -45,6 +45,9 @@ endif()
 if(AQSIS_ENABLE_THREADING)
 	list(APPEND defs ENABLE_THREADING)
 endif()
+if(DEFAULT_RC_PATH)
+	list(APPEND defs "DEFAULT_RC_PATH=${DEFAULT_RC_PATH}")
+endif()
 
 
 # Add library & install
