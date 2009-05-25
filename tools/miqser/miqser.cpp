@@ -57,10 +57,6 @@
 #include "ribrequesthandler.h"
 #include <aqsis/version.h>
 
-#if defined(AQSIS_SYSTEM_MACOSX)
-#	include "Carbon/Carbon.h"
-#endif
-
 
 //------------------------------------------------------------------------------
 // Forward declarations
