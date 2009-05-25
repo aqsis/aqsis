@@ -34,12 +34,10 @@ mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML)
 
 option(aqsis_enable_testing "Enable unit testing" OFF)
 option(AQSIS_ENABLE_MPDUMP "Enable micropolygon dumping code" OFF)
-option(AQSIS_ENABLE_AIRDBO "Enable AIR DBO support" ON)
 option(AQSIS_ENABLE_MASSIVE "Enable Massive support" ON)
 option(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support" ON)
 option(AQSIS_ENABLE_THREADING "Enable multi-threading (EXPERIMENTAL)" OFF)
-mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_AIRDBO
-				 AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT)
+mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT)
 
 option(AQSIS_ENABLE_DOC_HTML "Enable HTML developer documentation" ON)
 mark_as_advanced(AQSIS_ENABLE_DOC_HTML)
@@ -240,10 +238,12 @@ add_subdirectory(libs/core)
 add_subdirectory(tools/aqsl)
 add_subdirectory(tools/aqsltell)
 add_subdirectory(tools/aqsis)
-add_subdirectory(tools/eqsl)
 add_subdirectory(tools/miqser)
-add_subdirectory(tools/piqsl)
 add_subdirectory(tools/teqser)
+if(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
+	add_subdirectory(tools/eqsl)
+	add_subdirectory(tools/piqsl)
+endif()
 
 # Build displays
 add_subdirectory(tools/displays)
