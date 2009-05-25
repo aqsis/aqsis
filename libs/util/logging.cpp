@@ -27,7 +27,7 @@
 #include <vector>
 #include <time.h>
 
-#ifndef	NO_SYSLOG
+#ifndef	AQSIS_NO_SYSLOG
 #include <syslog.h>
 #endif
 
@@ -460,7 +460,7 @@ int fold_duplicates_buf::sync()
 	return 0;
 }
 
-#ifndef	NO_SYSLOG
+#ifndef	AQSIS_NO_SYSLOG
 /////////////////////////////////////////////////////////////////////////////////////////////
 // syslog_buf
 
@@ -528,7 +528,7 @@ void syslog_buf::write_to_system_log(const std::string& Message)
 	syslog(LOG_USER | priority, "%s", Message.c_str());
 }
 
-#endif //NO_SYSLOG
+#endif //AQSIS_NO_SYSLOG
 
 #ifdef	AQSIS_SYSTEM_WIN32
 

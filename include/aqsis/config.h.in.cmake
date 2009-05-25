@@ -45,6 +45,16 @@
 #define NOMINMAX
 #endif
 
+/* Make sure that the math constants from math.h are defined - that is, M_PI
+ * etc.
+ */
+#ifndef _USE_MATH_DEFINES
+#	define _USE_MATH_DEFINES
+#endif
+
+/* Make sure we don't try to use the syslog stuff on windows */
+#define AQSIS_NO_SYSLOG
+
 /* Define the compiler */
 #ifdef __GNUC__
 #define AQSIS_COMPILER_GCC		1
