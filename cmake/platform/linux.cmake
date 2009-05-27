@@ -10,13 +10,9 @@ SET(SYSCONFDIR "etc/aqsis"
 	CACHE STRING "Install location for system configuration files (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "include"
 	CACHE STRING "Install location for aqsis header files (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR_NAME "content"
-	CACHE STRING "Name of content directory")
-SET(CONTENTDIR "share/aqsis/${CONTENTDIR_NAME}" 
-	CACHE STRING "Install location for content (relative paths are relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR_NAME "scripts"
-	CACHE STRING "Name of scripts directory")
-SET(SCRIPTSDIR "share/aqsis/${SCRIPTSDIR_NAME}" 
+SET(EXAMPLESDIR "share/aqsis/examples" 
+	CACHE STRING "Install location for examples (relative paths are relative to CMAKE_INSTALL_PREFIX)")
+SET(SCRIPTSDIR "share/aqsis/scripts" 
 	CACHE STRING "Install location for scripts (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_USE_POINTCLOUD)

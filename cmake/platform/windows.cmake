@@ -10,13 +10,9 @@ SET(SYSCONFDIR "${BINDIR}"
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "include"
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR_NAME "content"
-	CACHE STRING "Name of content directory")
-SET(CONTENTDIR "${CONTENTDIR_NAME}" 
-	CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR_NAME "scripts"
-	CACHE STRING "Name of scripts directory")
-SET(SCRIPTSDIR "${SCRIPTSDIR_NAME}" 
+SET(EXAMPLESDIR "examples" 
+	CACHE STRING "Install location for examples (relative to CMAKE_INSTALL_PREFIX)")
+SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
 IF(AQSIS_USE_POINTCLOUD)
