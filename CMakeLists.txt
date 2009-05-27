@@ -163,6 +163,13 @@ SET(SCM_REVISION 0) # "?"
 # Set variables which control the build
 #--------------------------------------
 
+# Set convenience locations into which libraries and executables will be
+# placed during the build.  Note: This is irrelevant to the install.
+set(RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+#set(ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+
+
 # Set default build type the first time cmake is run, but only if it's empty
 # since an alternative value might have been specified on the command line,
 # and we want this to override the default given below.
