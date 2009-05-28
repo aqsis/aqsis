@@ -8,7 +8,7 @@ macro(aqsis_add_display target_name)
 	# Set variables in the display directory to be picked up when building
 	# the aqsisrc config file.
 	set("${target_name}_lib_name" ${display_lib_name} PARENT_SCOPE)
-	install(TARGETS ${target_name} DESTINATION ${DISPLAYSDIR})
+	install(TARGETS ${target_name} DESTINATION ${DISPLAYSDIR} COMPONENT ${LIBDIR})
 endmacro()
 
 if(AQSIS_USE_OPENEXR)

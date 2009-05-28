@@ -39,8 +39,8 @@ install(FILES ${install_hdrs} DESTINATION ${include_install_dir})
 #------------------------------------------------------------------------------
 
 # Install subdirectories of header files.
-install(DIRECTORY math DESTINATION ${include_install_dir})
-install(DIRECTORY util DESTINATION ${include_install_dir})
-install(DIRECTORY riutil DESTINATION ${include_install_dir})
-#install(DIRECTORY tex DESTINATION ${include_install_dir})
+install(DIRECTORY math DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
+install(DIRECTORY util DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
+install(DIRECTORY riutil DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
+#install(DIRECTORY tex DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
 

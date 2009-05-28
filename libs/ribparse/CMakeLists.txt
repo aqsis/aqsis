@@ -20,7 +20,7 @@ aqsis_add_library(aqsis_ribparse ${ribparse_srcs} ${ribparse_hdrs}
 	LINK_LIBRARIES aqsis_riutil ${Boost_IOSTREAMS_LIBRARY}
 )
 
-aqsis_install_targets(aqsis_ribparse)
+aqsis_install_targets(aqsis_ribparse COMPONENT ${LIBDIR})
 
 #--------------------------------------------------
 # Testing

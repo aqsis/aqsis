@@ -16,7 +16,7 @@ aqsis_add_library(aqsis_math ${math_srcs} ${math_hdrs}
 )
 
 
-aqsis_install_targets(aqsis_math)
+aqsis_install_targets(aqsis_math COMPONENT ${LIBDIR})
 
 #--------------------------------------------------
 # Testing

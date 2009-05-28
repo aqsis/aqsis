@@ -58,7 +58,7 @@ aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
 		${AQSIS_TIFF_LIBRARIES} ${Boost_THREAD_LIBRARY} ${CARBON_LIBRARY}
 )
 
-aqsis_install_targets(aqsis_core)
+aqsis_install_targets(aqsis_core COMPONENT ${LIBDIR})
 
 
 #--------------------------------------------------

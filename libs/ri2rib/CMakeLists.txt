@@ -31,4 +31,4 @@ aqsis_add_library(aqsis_ri2rib ${ri2rib_srcs} ${ri2rib_hdrs}
 	LINK_LIBRARIES aqsis_riutil ${AQSIS_ZLIB_LIBRARIES}
 )
 
-aqsis_install_targets(aqsis_ri2rib)
+aqsis_install_targets(aqsis_ri2rib COMPONENT ${LIBDIR})
