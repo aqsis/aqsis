@@ -25,11 +25,6 @@
 
 #include	<aqsis/aqsis.h>
 
-#ifdef	AQSIS_SYSTEM_WIN32
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include	<tiffio.h>
 #include	<string>
 #include	<list>
 
@@ -40,15 +35,15 @@
 #include	<boost/archive/iterators/remove_whitespace.hpp>
 
 #include	<boost/pfto.hpp>
-#ifndef	AQSIS_SYSTEM_WIN32
-#include	<sys/types.h>
-#include	<sys/socket.h>
-#include	<netinet/in.h>
-#include	<arpa/inet.h>
-#include	<fcntl.h>
-#include	<errno.h>
+#ifndef AQSIS_SYSTEM_WIN32
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+#	include <arpa/inet.h>
+#	include <fcntl.h>
+#	include <errno.h>
 #else
-#include	<winsock2.h>
+#	include <winsock2.h>
 #endif
 #include	<FL/Fl.H>
 #include	<tinyxml.h>
