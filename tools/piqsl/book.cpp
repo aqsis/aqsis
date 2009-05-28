@@ -25,17 +25,16 @@
 
 #include "book.h"
 #include "image.h"
-#include "framebuffer.h"
 
 
 namespace Aqsis {
 
 CqBook::CqBook( const std::string& name ) : m_name(name)
 {
-	m_framebuffer = boost::shared_ptr<CqFramebuffer>(
-			new CqFramebuffer(CqFramebuffer::defaultWidth,
-				CqFramebuffer::defaultHeight, 3, name));
-	m_framebuffer->show();
+//	m_framebuffer = boost::shared_ptr<CqFramebuffer>(
+//			new CqFramebuffer(CqFramebuffer::defaultWidth,
+//				CqFramebuffer::defaultHeight, 3, name));
+//	m_framebuffer->show();
 }
 
 
@@ -59,18 +58,18 @@ boost::shared_ptr<CqImage> CqBook::image(CqBook::TqImageList::size_type index)
 void CqBook::setName( const std::string& name )
 {
 	m_name = name;
-	if(m_framebuffer)
-		m_framebuffer->setBookName(name);
+//	if(m_framebuffer)
+//		m_framebuffer->setBookName(name);
 }
 
 void CqBook::removeImage(TqImageListIterator item)
 {
 	if(item != m_images.end())
 	{
-		if(framebuffer()->image() == (*item))
-		{
-			framebuffer()->disconnect();
-		}
+//		if(framebuffer()->image() == (*item))
+//		{
+//			framebuffer()->disconnect();
+//		}
 		m_images.erase(item);
 	}
 }

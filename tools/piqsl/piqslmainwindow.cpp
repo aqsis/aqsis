@@ -23,36 +23,174 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<aqsis/aqsis.h>
-
-#include	<algorithm>
-
-#include	<boost/filesystem.hpp>
 #include	<FL/Fl_File_Chooser.H>
-#include	<tinyxml.h>
 
-#include	"piqslbase.h"
-#include	"book.h"
+#include	<aqsis/util/logging.h>
+
+#include	"piqslmainwindow.h"
+
+extern Aqsis::CqPiqslMainWindow* window;
 
 namespace Aqsis {
 
+void quit_cb(Fl_Widget* w, void*);
+void addImage_cb(Fl_Widget* w, void*);
 
-boost::shared_ptr<CqBook> CqPiqslBase::addNewBook(std::string name)
+Fl_Menu_Item mainMenu[] = {
+	{"&File", 0, 0, 0, FL_SUBMENU},
+		{"Open Library", 0, (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
+		{"Save Library", 0, (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
+		{"Save Library As", 0, (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
+		{"Quit", 0, quit_cb},
+		{0},
+	{"&Book", 0, 0, 0, FL_SUBMENU},
+		{"New"},
+		{"Export"},
+		{"Rename"},
+		{"Remove"},
+		{0},
+	{"&Image", 0, 0, 0, FL_SUBMENU},
+		{"Add Images", 0, (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
+		{"Remove"},
+		{0},
+	{"&Help", 0, 0, 0, FL_SUBMENU},
+		{"About"},
+		{0},
+	{0}
+};
+
+void CqPiqslMainWindow::saveConfigurationAs() 
 {
+    char* filename = fl_file_chooser("Save Books As", "*.bks", currentConfigName().c_str());
+	if(filename != NULL)
+	{
+		setCurrentConfigName(filename);
+		saveConfiguration();
+	}
+}
+
+void quit_cb(Fl_Widget* w, void*)
+{
+	window->hide();
+}
+
+
+void CqPiqslMainWindow::addImage_cb(Fl_Widget* w, void*)
+{
+	((CqPiqslMainWindow*)(w->parent()->user_data()))->addImage();
+}
+
+void CqPiqslMainWindow::addImage()
+{
+	Fl::lock();
+	char* filename = fl_file_chooser("Load Image", "All Supported Files (*.{tif,tiff,exr})\tTIFF Files (*.{tif,tiff})\tOpenEXR Files (*.exr)", "");
+	if(filename)
+	{
+		std::string name = boost::filesystem::path(filename).leaf();
+		loadImageToCurrentBook(name, filename);
+		updateImageList();
+	}
+	Fl::unlock();
+}
+
+void CqPiqslMainWindow::setImage(const boost::shared_ptr<CqImage>& image)
+{
+	m_scroll->setImage(image);
+}
+
+void CqPiqslMainWindow::update(int X, int Y, int W, int H)
+{
+	Fl::lock();
+	m_scroll->update(X, Y, W, H);
+	Fl::awake();
+	Fl::unlock();
+}
+
+void CqPiqslMainWindow::setCurrentImage(CqBook::TqImageList::size_type index)
+{
+	Fl::lock();
+	// Note: in the FLTK gui, the image indices are 1 based, but inside the CqBook
+	// they are zero based, this is because the (void*) stuff passed around in 
+	// FLTK for the Fl_Browser_ class uses 0 to indicate false.
+	setImage(currentBook()->image(index));
+	boost::function<void(int,int,int,int)> f;
+	f = boost::bind(&CqPiqslMainWindow::update, this, _1, _2, _3, _4);
+	currentBook()->image(index)->setUpdateCallback(f);
+	m_pane->browser()->setCurrentSelected(index+1);
+	m_pane->redraw();
+	Fl::awake();
+	Fl::unlock();
+}
+
+void CqPiqslMainWindow::updateImageList()
+{
+    Fl::lock();
+	m_pane->redraw();
+	Fl::awake();
+	Fl::unlock();
+}
+
+boost::shared_ptr<CqBook>	CqPiqslMainWindow::addNewBook(std::string name)
+{
+    Fl::lock();
+
 	boost::shared_ptr<CqBook> newBook(new CqBook(name));
 	m_books.push_back(newBook);
 	m_currentBook = newBook;
 
+	Aqsis::CqBookBrowser *o = m_pane->browser();
+	o->setBook(newBook);
+	m_columnWidths[0] = 200;
+	m_columnWidths[1] = 0;
+	o->column_widths(m_columnWidths);
+	o->type(FL_MULTI_BROWSER);
+	o->callback(&CqPiqslMainWindow::select_cb, this);
+	o->showcolsep(1);
+	Fl::awake();
+	Fl::unlock();
 	return(newBook);
 }
 
-void CqPiqslBase::setCurrentBook(boost::shared_ptr<CqBook>& book)
+void CqPiqslMainWindow::select_cb(Fl_Widget* w, void* d)
+{
+	((CqPiqslMainWindow*)(d))->select();
+}
+
+void CqPiqslMainWindow::select()
+{
+    Fl::lock();
+	Aqsis::CqBookBrowser* browser = m_pane->browser();
+	int theEvent = Fl::event();
+	if(theEvent == FL_RELEASE || theEvent == FL_KEYDOWN || theEvent == FL_SHORTCUT)
+	{
+		if(currentBook())
+		{
+			std::vector<boost::shared_ptr<Aqsis::CqImage> >::size_type selected = 
+				browser->currentSelected();
+			boost::shared_ptr<Aqsis::CqImage> image = currentBook()->image(selected-1);
+			if(image)
+			{
+				setImage(image);
+				//m_menuImagesRemove->activate();
+			}
+			else
+			{
+				//m_menuImagesRemove->deactivate();
+			}
+		}
+	}
+	Fl::awake();
+	Fl::unlock();
+}
+
+void CqPiqslMainWindow::setCurrentBook(boost::shared_ptr<CqBook>& book)
 {
 	if(std::find(m_books.begin(), m_books.end(), book) != m_books.end())
 		m_currentBook = book;
 }
 
-void CqPiqslBase::deleteBook(boost::shared_ptr<CqBook>& book)
+
+void CqPiqslMainWindow::deleteBook(boost::shared_ptr<CqBook>& book)
 {
 	std::vector<boost::shared_ptr<CqBook> >::iterator entry;
 	if((entry = std::find(m_books.begin(), m_books.end(), book)) != m_books.end())
@@ -66,12 +204,12 @@ void CqPiqslBase::deleteBook(boost::shared_ptr<CqBook>& book)
 	}
 }
 
-boost::shared_ptr<CqBook>& CqPiqslBase::currentBook()
+boost::shared_ptr<CqBook>& CqPiqslMainWindow::currentBook()
 {
 	return(m_currentBook);
 }
 
-TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
+TqUlong CqPiqslMainWindow::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
 	Aqsis::log() << Aqsis::debug << "Piqsl adding image" << std::endl;
 	if(!m_currentBook)
@@ -82,15 +220,11 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 		addNewBook(strBkName.str());
 	}
 	TqUlong id = currentBook()->addImage(image);
-	if(currentBook()->framebuffer())
-	{
-		Aqsis::log() << Aqsis::debug << "Piqsl connecting image to framebuffer" << std::endl;
-		currentBook()->framebuffer()->connect(image);
-	}
+	setCurrentImage(id);
 	return( id );	
 }
 
-void CqPiqslBase::saveConfiguration()
+void CqPiqslMainWindow::saveConfiguration()
 {
 	Fl::lock();
 	if(!m_currentConfigName.empty())
@@ -129,7 +263,7 @@ void CqPiqslBase::saveConfiguration()
 }
 
 
-void CqPiqslBase::exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const
+void CqPiqslMainWindow::exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const
 {
 	Fl::lock();
 	if(!name.empty() && book)
@@ -162,7 +296,7 @@ void CqPiqslBase::exportBook(boost::shared_ptr<CqBook>& book, const std::string&
 }
 
 
-void CqPiqslBase::loadConfiguration(const std::string& name)
+void CqPiqslMainWindow::loadConfiguration(const std::string& name)
 {
 	Fl::lock();
 
@@ -212,7 +346,7 @@ void CqPiqslBase::loadConfiguration(const std::string& name)
 	Fl::unlock();
 }
 
-void CqPiqslBase::loadImageToCurrentBook(const std::string& name, const std::string& filename)
+void CqPiqslMainWindow::loadImageToCurrentBook(const std::string& name, const std::string& filename)
 {
 	boost::shared_ptr<CqImage> newImage(new CqImage(name));
 	newImage->loadFromFile(filename);
@@ -221,6 +355,28 @@ void CqPiqslBase::loadImageToCurrentBook(const std::string& name, const std::str
 	setCurrentImage(id);
 }
 
-//---------------------------------------------------------------------
+
+
+void CqPiqslMainWindow::loadLibrary_cb(Fl_Widget* w, void* d)
+{
+	((CqPiqslMainWindow*)(d))->loadLibrary();
+}
+
+void CqPiqslMainWindow::loadLibrary()
+{
+	char* name = fl_file_chooser("Load Books", "*.bks", currentConfigName().c_str());
+	if(name)
+		loadConfiguration(name);
+}
+
+void CqPiqslMainWindow::saveLibrary_cb(Fl_Widget* w, void* d)
+{
+	((CqPiqslMainWindow*)(d))->saveConfiguration();
+}
+
+void CqPiqslMainWindow::saveLibraryAs_cb(Fl_Widget* w, void* d)
+{
+	((CqPiqslMainWindow*)(d))->saveConfigurationAs();
+}
 
 } // namespace Aqsis

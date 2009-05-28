@@ -37,7 +37,7 @@
 
 namespace Aqsis {
 
-class CqFramebuffer;
+//class CqFramebuffer;
 class CqImage;
 
 //---------------------------------------------------------------------
@@ -62,7 +62,7 @@ public:
 
 	/** Get a shared pointer to the framebuffer associated with this book.
 	 */
-	boost::shared_ptr<CqFramebuffer> framebuffer();
+//	boost::shared_ptr<CqFramebuffer> framebuffer();
 
 	/** \typedef TqImageList
 	 * Typedef for the locally stored image list.
@@ -105,7 +105,7 @@ public:
 private:
 	std::string	m_name;			///< Book name.
 	TqImageList m_images;		///< List of images in the book.
-	boost::shared_ptr<CqFramebuffer> m_framebuffer;	///< Shared pointer to the main framebuffer associated with this book.
+//	boost::shared_ptr<CqFramebuffer> m_framebuffer;	///< Shared pointer to the main framebuffer associated with this book.
 };
 
 // Implementations of inline functions.
@@ -114,10 +114,10 @@ inline const std::string&	CqBook::name() const
 	return ( m_name );
 }
 
-inline boost::shared_ptr<CqFramebuffer> CqBook::framebuffer()
+/*inline boost::shared_ptr<CqFramebuffer> CqBook::framebuffer()
 {
 	return(m_framebuffer);
-}
+}*/
 
 inline CqBook::TqImageListIterator CqBook::imagesBegin()
 {

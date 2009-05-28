@@ -27,13 +27,15 @@
 #ifndef DISPLAYSERVERIMAGE_H_INCLUDED
 #define DISPLAYSERVERIMAGE_H_INCLUDED 1
 
+#include	<aqsis/aqsis.h>
+
 #include	<vector>
 #include	<string>
 
-#include	<aqsis/aqsis.h>
 #include	<aqsis/ri/ndspy.h>
-#include	"image.h"
 #include	<aqsis/util/socket.h>
+
+#include	"image.h"
 
 namespace Aqsis {
 

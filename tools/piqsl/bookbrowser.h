@@ -173,6 +173,7 @@ inline CqBook::TqImageList::size_type CqBookBrowser::currentSelected() const
 inline void CqBookBrowser::setCurrentSelected(CqBook::TqImageList::size_type index)
 {
 	m_currentSelected = index;
+	select((void*)index, 1, 1);
 }
 
 } // namespace Aqsis

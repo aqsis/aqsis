@@ -23,44 +23,115 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#ifndef	PIQSLBASE_H_INCLUDED
-#define	PIQSLBASE_H_INCLUDED
+#ifndef	PIQSLMAINWINDOW_H_INCLUDED
+#define	PIQSLMAINWINDOW_H_INCLUDED
 
-#include <aqsis/aqsis.h>
+#include	<aqsis/aqsis.h>
 
+#include	"pane.h"
+#include	"centerscroll.h"
+#include	"bookbrowser.h"
 
-#include <vector>
-#include <string>
-#include <list>
-#include <boost/shared_ptr.hpp>
-
-#include "image.h"
-#include "framebuffer.h"
-#include <aqsis/util/logging.h>
-#include "book.h"
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Browser.H>
+#include <FL/Fl_Select_Browser.H>
+#include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Menu_Item.H>
+#include <FL/Fl_Menu_Button.H>
+#include <FL/Fl_Pack.H>
 
 namespace Aqsis {
 
-/** \class CqPiqslBase
- * \brief Base class from which the main UI window derives.
- * Offers common functionality not necessarily related directly to the UI
- * which allows the fluid based UI to be kept as light as possible.
- */
-class CqPiqslBase
+extern Fl_Menu_Item mainMenu[];
+
+class CqPiqslMainWindow : public Fl_Double_Window
 {
+private:
+	Fl_Menu_Bar m_menuBar;
+	CqPane* m_pane;
+	CqCenterScroll* m_scroll;
+	bool m_fullScreenImage;
+	int m_columnWidths[2];
+	std::vector<boost::shared_ptr<CqBook> >	m_books;	///< List of books in the library.
+	boost::shared_ptr<CqBook>	m_currentBook;			///< Shared pointer to the current book.
+	std::string m_currentConfigName;					///< Stored name of the library on disk.
 public:
-	CqPiqslBase()		{}
-	virtual ~CqPiqslBase()	{}
+	CqPiqslMainWindow(int w, int h, const char* title)
+		: Fl_Double_Window(w, h, title),
+		m_menuBar(0, 0, w, 25),
+		m_pane(0),
+		m_scroll(0),
+		m_fullScreenImage(false)
+	{
+		// Set user_data to point to this, so we can
+		// get back to the main window from anywhere.
+		user_data((void*)(this));
+
+		mainMenu[1].user_data_ = this;
+		mainMenu[2].user_data_ = this;
+		mainMenu[3].user_data_ = this;
+		m_menuBar.menu(mainMenu);
+		// Setup some callback user data.
+		m_menuBar.box(FL_THIN_UP_BOX);
+
+		m_pane = new CqPane(0, m_menuBar.h(), w, h - m_menuBar.h(), 0.2);
+
+		CqBookBrowser* browser = new CqBookBrowser(0, 0, 1, 100);
+		browser->box(FL_THIN_DOWN_BOX);
+		m_pane->add1(browser);
+
+		m_scroll = new CqCenterScroll(0, m_menuBar.h(), w, h - m_menuBar.h());
+		m_pane->add2(m_scroll);
+
+		browser->take_focus();
+
+		resizable(m_pane);
+		end();
+	}
+	virtual int handle(int event)
+	{
+		switch(event)
+		{
+			case FL_SHORTCUT:
+				switch(Fl::event_key())
+				{
+					case 'f':
+						if(m_fullScreenImage)
+						{
+							m_menuBar.show();
+							m_pane->resize(0, m_menuBar.h(), w(), h() - m_menuBar.h());
+							m_pane->uncollapse();
+							m_fullScreenImage = false;
+							//init_sizes();
+						}
+						else
+						{
+							m_menuBar.hide();
+							m_pane->resize(0, 0, w(), h());
+							m_pane->collapse1();
+							m_fullScreenImage = true;
+							//init_sizes();
+						}
+						return 1;
+				}
+				break;
+		}
+		return Fl_Group::handle(event);
+	}
+	void update(int X, int Y, int W, int H);
 
 	/** Add a new book to the library.
 	 * \param name		The name of the new book.
 	 * \return		A shared pointer to the new book.
 	 */
-	virtual boost::shared_ptr<CqBook>	addNewBook(std::string name);
+	boost::shared_ptr<CqBook>	addNewBook(std::string name);
 	/** Set the current book that all primary selection operations work on.
 	 * \param book		A shared pointer to the book to set as current.
 	 */
-	virtual void	setCurrentBook(boost::shared_ptr<CqBook>& book);
+	void	setCurrentBook(boost::shared_ptr<CqBook>& book);
 	/** Get the current book.
 	 * \return			A shared pointer to the current book.
 	 */
@@ -68,42 +139,40 @@ public:
 	/** Delete a given book, and all it's image references from the libarary.
 	 * \param book		A shared pointer to the book to delete.
 	 */
-	virtual void deleteBook(boost::shared_ptr<CqBook>& book);
+	void deleteBook(boost::shared_ptr<CqBook>& book);
 	/** Add a new image to the current book.
 	 * \param image		A shared pointer to the new image to add.
 	 * \return			The index of the image within the book.
 	 */
-	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
+	TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
 	/** Set the current image index on the current book.
 	 * \param index		The index of the current image in the current book.
 	 */
-	virtual void setCurrentImage(CqBook::TqImageList::size_type index)
-	{}
+	void setCurrentImage(CqBook::TqImageList::size_type index);
 	/** Update the image list of the current book in the UI.
 	 */
-	virtual void updateImageList()
-	{}
+	void updateImageList();
 	/** Save the current library using the locally stored name.
 	 */
-	virtual void saveConfiguration();
+	void saveConfiguration();
 	/** Save the current library, offering the user the chance to choose a name.
 	 * This is overridden in the implementation class to use the UI tools to choose a name.
 	 */
-	virtual void saveConfigurationAs() = 0;
+	void saveConfigurationAs();
 	/** Load a library from the given filename.
 	 * \param name		The name of the XML file to load a library from.
 	 */
-	virtual void loadConfiguration(const std::string& name);
+	void loadConfiguration(const std::string& name);
 	/** Load an image from disk into the current book.
 	 * \param name		The name to give to the image in the display.
 	 * \param filename	The filename of the TIFF image to load.
 	 */
-	virtual void loadImageToCurrentBook(const std::string& name, const std::string& filename);
+	void loadImageToCurrentBook(const std::string& name, const std::string& filename);
 	/** Export a single book to a library file.
 	 * \param book		A shared pointer to the book to save.
 	 * \param name		The filename to save the book into.
 	 */
-	virtual void exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const;
+	void exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const;
 
 	/** Get the current name that the library would be saved to.
 	 * \return			The name of the library on disk.
@@ -135,35 +204,39 @@ public:
  	 */
 	TqBookListIterator booksEnd();
 
-private:
-	std::vector<boost::shared_ptr<CqBook> >	m_books;	///< List of books in the library.
-	boost::shared_ptr<CqBook>	m_currentBook;			///< Shared pointer to the current book.
-	std::string m_currentConfigName;					///< Stored name of the library on disk.
+	void setImage(const boost::shared_ptr<CqImage>& image);
+
+	void addImage();
+	static void addImage_cb(Fl_Widget* w, void*);
+	void select();
+	static void select_cb(Fl_Widget* w, void*);
+	void loadLibrary();
+	static void loadLibrary_cb(Fl_Widget* w, void*);
+	static void saveLibrary_cb(Fl_Widget* w, void*);
+	static void saveLibraryAs_cb(Fl_Widget* w, void*);
 };
 
-
-// Implementation of inline functions.
-inline const std::string& CqPiqslBase::currentConfigName() const
+inline const std::string& CqPiqslMainWindow::currentConfigName() const
 {
 	return(m_currentConfigName);
 }
 
-inline std::string& CqPiqslBase::currentConfigName()
+inline std::string& CqPiqslMainWindow::currentConfigName()
 {
 	return(m_currentConfigName);
 }
 
-inline void CqPiqslBase::setCurrentConfigName(const std::string& name)
+inline void CqPiqslMainWindow::setCurrentConfigName(const std::string& name)
 {
 	m_currentConfigName = name;
 }
 
-inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksBegin()
+inline CqPiqslMainWindow::TqBookListIterator CqPiqslMainWindow::booksBegin()
 {
 	return(m_books.begin());
 }
 
-inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksEnd()
+inline CqPiqslMainWindow::TqBookListIterator CqPiqslMainWindow::booksEnd()
 {
 	return(m_books.end());
 }
@@ -172,4 +245,4 @@ inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksEnd()
 
 } // namespace Aqsis
 
-#endif	//	___display_Loaded___
+#endif	

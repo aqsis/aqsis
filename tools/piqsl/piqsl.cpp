@@ -58,13 +58,13 @@
 #include	<aqsis/util/logging_streambufs.h>
 #include	<aqsis/util/sstring.h>
 #include	<aqsis/util/socket.h>
-#include	"image.h"
 #include	<aqsis/version.h>
+
 #include	"piqsl.h"
-#include	"piqsl_ui.h"
 #include	"displayserverimage.h"
-#include	"framebuffer.h"
 #include	"book.h"
+#include	"piqslmainwindow.h"
+#include	"image.h"
 
 using namespace Aqsis;
 
@@ -249,9 +249,9 @@ class CqDataHandler
 					}
 					m_client->prepareImageBuffers(channelList);
 
-					window->currentBook()->framebuffer()->queueResize();
+//					window->currentBook()->framebuffer()->queueResize();
 					Fl::awake();
-					window->currentBook()->framebuffer()->update();
+//					window->update();
 					window->updateImageList();
 				}
 				else if(root->ValueStr().compare("Data") == 0)
@@ -336,6 +336,8 @@ void HandleConnection(int sock, void *data)
 		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage)));
 	}
 }
+
+
 
 int main( int argc, char** argv )
 {
@@ -435,7 +437,7 @@ int main( int argc, char** argv )
 	else
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
 
-	window = new CqPiqslMainWindow();
+	window = new CqPiqslMainWindow(640, 480, "Piqsl");
 	char arg1[] = "piqsl";
 	char* internalArgs[] = {arg1};
 	window->show(1, internalArgs);
@@ -470,8 +472,7 @@ int main( int argc, char** argv )
 		}
 	}
 
-	int result = 0;
-	for(;;)
+/*	for(;;)
 	{
 		Fl::wait();
 		// Act upon an resize/update requests on the framebuffers.
@@ -483,8 +484,11 @@ int main( int argc, char** argv )
 		}
 		if(Fl::first_window() == NULL)
 			break;
-	}
+	}*/
+	return Fl::run();
 
-	return(result);
+
+	//return(result);
 }
+
 

@@ -26,14 +26,17 @@
 
 #include	<aqsis/aqsis.h>
 
-#include	<string.h>
+#include	<string>
 #include	<boost/format.hpp>
 
 #include	"bookbrowser.h"
+#include	"piqslmainwindow.h"
 #include	"image.h"
-#include	<aqsis/util/sstring.h>
+
+extern Aqsis::CqPiqslMainWindow* window;
 
 namespace Aqsis {
+
 
 int CqBookBrowser::handle(int e) 
 {
@@ -51,13 +54,9 @@ int CqBookBrowser::handle(int e)
 		case FL_MOVE: 
 		{
 			if ( which_col_near_mouse() >= 0 ) 
-			{
 				change_cursor(FL_CURSOR_WE);
-			} 
 			else 
-			{
 				change_cursor(FL_CURSOR_DEFAULT);
-			}
 			ret = 1;
 			break;
 		}
@@ -107,9 +106,34 @@ int CqBookBrowser::handle(int e)
 			ret = 1;
 			break;
 		}
+		case FL_KEYDOWN:
+		case FL_SHORTCUT:
+		{
+			int key = Fl::event_key();
+			switch(key)
+			{
+				case FL_Down:
+					if(selection() != NULL && item_next(selection()) != NULL)
+					{
+						select(item_next(selection()),1, 1);
+						::window->select();
+					}
+					return 1;
+				case FL_Up:
+					if(selection() != NULL && item_prev(selection()) != NULL)
+					{
+						select(item_prev(selection()),1, 1);
+						::window->select();
+					}
+					return 1;
+			}
+			break;
+		}
 	}
-	if ( m_dragging ) return(1);			// dragging? don't pass event to Fl_Browser
-		return(Fl_Browser_::handle(e) ? 1 : ret);
+	if(m_dragging) 
+		return(1);			// dragging? don't pass event to Fl_Browser
+	int hret = Fl_Browser_::handle(e);
+	return(hret ? 1 : ret);
 }
 
 void CqBookBrowser::draw() 

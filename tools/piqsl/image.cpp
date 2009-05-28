@@ -28,67 +28,17 @@
 #include <boost/format.hpp>
 
 #include <aqsis/version.h>
-#include "image.h"
-#include "framebuffer.h"
 #include <aqsis/util/logging.h>
 #include <aqsis/ri/ndspy.h>
 #include <aqsis/tex/io/itexinputfile.h>
 #include <aqsis/tex/io/itexoutputfile.h>
 
+#include "image.h"
+
 namespace Aqsis {
 
 CqImage::~CqImage()
 {
-}
-
-void CqImage::setZoom(TqInt zoom)
-{
-	if(zoom <= 0)
-		AQSIS_THROW_XQERROR(XqInternal, EqE_Math,
-			"Negative or zero zoom specified.");
-
-	if(zoom == m_zoom || !m_displayData)
-		return;
-
-	boost::mutex::scoped_lock lock(mutex());
-	m_zoom = zoom;
-
-	if(!m_zoomDisplayData)
-	{
-		m_zoomDisplayData.reset( new CqMixedImageBuffer(
-				m_displayData->channelList(),
-				m_displayData->width()*m_zoom,
-				m_displayData->height()*m_zoom)
-			);
-	}
-
-	// Make sure the zoom buffer has the right size
-	m_zoomDisplayData->resize( m_displayData->width()*m_zoom,
-			m_displayData->height()*m_zoom, m_displayData->channelList()
-			);
-
-	// Copy channels from display data to zoom data, zooming them as we go.
-	for(TqInt chan = 0; chan < m_displayData->channelList().numChannels();
-			++chan)
-	{
-		m_zoomDisplayData->channel(chan)->copyFrom(
-				CqImageChannelZoom(*(m_displayData->channel(chan)), m_zoom) );
-	}
-	/// \todo: This is a nasty hack - the frame height isn't preserved
-	//anywhere else, so this will be broken when we resize cropped images...
-	//
-	// The fix is time-consuming though; the piqsl CqImage and
-	// CqDisplayServerImage classes really need a thorough refactor to better
-	// seperate two distinct concerns:
-	//
-	// 1) Holding and updating the underlying data piped in from aqsis or a
-	//    file
-	// 2) Formatting that data for display.
-	setFrameSize(m_zoomDisplayData->width(), m_zoomDisplayData->height());
-	setImageSize(m_zoomDisplayData->width(), m_zoomDisplayData->height());
-
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
 }
 
 void CqImage::prepareImageBuffers(const CqChannelList& channelList)

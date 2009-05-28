@@ -36,6 +36,7 @@
 #include	<boost/filesystem.hpp>
 
 #include	"displayserverimage.h"
+
 #include	<aqsis/math/math.h>
 #include 	<aqsis/util/logging.h>
 #include	<aqsis/util/smartptr.h>

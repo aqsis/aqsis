@@ -2,15 +2,14 @@ project(piqsl)
 
 include_subproject(tinyxml)
 
-fltk_wrap_ui(piqsl piqsl_ui.fl)
+#fltk_wrap_ui(piqsl piqsl_ui.fl)
 set(piqsl_srcs
 	book.cpp
 	bookbrowser.cpp
 	displayserverimage.cpp
-	framebuffer.cpp
 	image.cpp
 	piqsl.cpp
-	piqslbase.cpp
+	piqslmainwindow.cpp
 	${piqsl_FLTK_UI_SRCS} 
 	${tinyxml_srcs}
 )
@@ -19,10 +18,12 @@ set(piqsl_hdrs
 	book.h
 	bookbrowser.h
 	displayserverimage.h
-	framebuffer.h
 	image.h
 	piqsl.h
-	piqslbase.h
+	piqslmainwindow.h
+	centerscroll.h
+	pane.h
+	zoomimage.h
 	${tinyxml_hdrs}
 )
 source_group("Header Files" FILES ${piqsl_hdrs})
