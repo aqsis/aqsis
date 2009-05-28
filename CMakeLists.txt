@@ -253,8 +253,8 @@ add_subdirectory(tools/displays)
 # TODO
 
 # Build shaders & install examples
-add_subdirectory(content/shaders)
-add_subdirectory(content/examples)
+add_subdirectory(shaders)
+add_subdirectory(examples)
 
 # Build docs
 add_subdirectory(doc/doxygen)
