@@ -42,6 +42,21 @@ public:
 					return 1;
 				}
 				break;
+			case FL_KEYDOWN:
+			case FL_SHORTCUT:
+				int key = Fl::event_key();
+				switch(key)
+				{
+					case 'h':
+					case FL_Home:
+						if(m_imageWidget.image())
+							m_imageWidget.position(x() + (w()/2)-(m_imageWidget.image()->imageWidth()/2), 
+												   y() + (h()/2)-(m_imageWidget.image()->imageHeight()/2));
+							damage(FL_DAMAGE_ALL);
+						return 1;
+						break;
+				}
+				break;
 		}
 		if(m_imageWidget.handle(event))
 			return(1);
@@ -50,7 +65,7 @@ public:
 	}
 	void setImage(const boost::shared_ptr<CqImage>& image)
 	{
-		m_imageWidget.position(x() + (w()/2)-(image->imageWidth()/2), y() + (h()/2)-(image->imageHeight()/2));
+		//m_imageWidget.position(x() + (w()/2)-(image->imageWidth()/2), y() + (h()/2)-(image->imageHeight()/2));
 		m_imageWidget.setImage(image);
 	}
 

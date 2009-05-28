@@ -34,6 +34,16 @@ public:
 		}
 	}
 
+	void updateImage()
+	{
+		if(m_image)
+		{
+			w(m_image->imageWidth()*m_scale);
+			h(m_image->imageHeight()*m_scale);
+			parent()->damage(FL_DAMAGE_ALL);
+		}
+	}
+
 	void setScale(int newScale)
 	{
 		if(newScale >= 1 && newScale < 100)
@@ -44,12 +54,7 @@ public:
 			x( static_cast<int>(scaleCenterX - ratio*(scaleCenterX - x())) );
 			y( static_cast<int>(scaleCenterY - ratio*(scaleCenterY - y())) );
 			m_scale = newScale;
-			if(m_image)
-			{
-				w(m_image->imageWidth()*m_scale);
-				h(m_image->imageHeight()*m_scale);
-				parent()->damage(FL_DAMAGE_ALL);
-			}
+			updateImage();
 		}
 	}
 	void incScale(int scaleIncr)
@@ -106,14 +111,19 @@ public:
 	void setImage(const boost::shared_ptr<CqImage>& image)
 	{
 		m_image = image;
-		setScale(1);
+		updateImage();
+	}
+
+	boost::shared_ptr<CqImage> image() const
+	{
+		return m_image;
 	}
 
 	void update(int X, int Y, int W, int H)
 	{
 		if(W < 0 || H < 0 || X < 0 || Y < 0)
 		{
-			setScale(m_scale);
+			updateImage();
 			damage(FL_DAMAGE_ALL);
 		}
 		else
