@@ -49,10 +49,7 @@ public:
 				{
 					case 'h':
 					case FL_Home:
-						if(m_imageWidget.image())
-							m_imageWidget.position(x() + (w()/2)-(m_imageWidget.image()->imageWidth()/2), 
-												   y() + (h()/2)-(m_imageWidget.image()->imageHeight()/2));
-							damage(FL_DAMAGE_ALL);
+						centerImageWidget();
 						return 1;
 						break;
 				}
@@ -67,6 +64,26 @@ public:
 	{
 		//m_imageWidget.position(x() + (w()/2)-(image->imageWidth()/2), y() + (h()/2)-(image->imageHeight()/2));
 		m_imageWidget.setImage(image);
+	}
+
+	void centerImageWidget()
+	{
+		if(m_imageWidget.image())
+		{
+			m_imageWidget.position(x() + (w()/2)-(m_imageWidget.image()->imageWidth()/2), 
+								   y() + (h()/2)-(m_imageWidget.image()->imageHeight()/2));
+			damage(FL_DAMAGE_ALL);
+		}
+	}
+
+	boost::shared_ptr<CqImage> image() 
+	{
+		return m_imageWidget.image();
+	}
+	
+	void resizeImageWidget(int w, int h)
+	{
+		m_imageWidget.size(w, h);
 	}
 
 	void update(int X, int Y, int W, int H)

@@ -244,7 +244,7 @@ class CqDataHandler
 					}
 					m_client->prepareImageBuffers(channelList);
 
-//					window->currentBook()->framebuffer()->queueResize();
+					window->queueResize();
 					Fl::awake();
 //					window->update();
 					window->updateImageList();
@@ -467,23 +467,17 @@ int main( int argc, char** argv )
 		}
 	}
 
-/*	for(;;)
+	int result = 0;
+	for(;;)
 	{
 		Fl::wait();
 		// Act upon an resize/update requests on the framebuffers.
-		CqPiqslBase::TqBookListIterator book;
-		for(book = window->booksBegin(); book != window->booksEnd(); ++book)
-		{
-			if((*book)->framebuffer())
-				(*book)->framebuffer()->checkResize();
-		}
+		window->checkResize();
 		if(Fl::first_window() == NULL)
 			break;
-	}*/
-	return Fl::run();
+	}
 
-
-	//return(result);
+	return(result);
 }
 
 

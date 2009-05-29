@@ -35,26 +35,27 @@ namespace Aqsis {
 
 void quit_cb(Fl_Widget* w, void*);
 void addImage_cb(Fl_Widget* w, void*);
+void removeImage_cb(Fl_Widget* w, void*);
 
 Fl_Menu_Item mainMenu[] = {
-	{"&File", FL_ALT+'f', 0, 0, FL_NORMAL_LABEL},
-		{"&Open Library", 0, (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
-		{"Save Library", 0, (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
-		{"Save Library As", 0, (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
-		{"Quit", 0, quit_cb},
+	{"&File", 0, 0, 0, FL_SUBMENU},
+		{"&Open Library", FL_COMMAND+'o', (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
+		{"&Save Library", FL_COMMAND+'s', (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
+		{"Save Library &As", FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
+		{"&Quit", FL_COMMAND+'q', quit_cb},
 		{0},
-	{"&Book", FL_ALT+'b', 0, 0, FL_NORMAL_LABEL},
-		{"New"},
-		{"Export"},
-		{"Rename"},
-		{"Remove"},
+	{"&Book", 0, 0, 0, FL_SUBMENU},
+		{"&New"},
+		{"&Export"},
+		{"&Rename"},
+		{"Re&move"},
 		{0},
-	{"&Image", FL_ALT+'i', 0, 0, FL_NORMAL_LABEL},
-		{"Add Images", 0, (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
-		{"Remove"},
+	{"&Image", 0, 0, 0, FL_SUBMENU},
+		{"&Add", FL_SHIFT+FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
+		{"&Remove", FL_SHIFT+FL_COMMAND+'r', (Fl_Callback*)CqPiqslMainWindow::removeImage_cb},
 		{0},
-	{"&Help", FL_ALT+'h', 0, 0, FL_NORMAL_LABEL},
-		{"About"},
+	{"&Help", FL_ALT+'h', 0, 0, FL_SUBMENU},
+		{"&About"},
 		{0},
 	{0}
 };
@@ -93,6 +94,38 @@ void CqPiqslMainWindow::addImage()
 	Fl::unlock();
 }
 
+void CqPiqslMainWindow::removeImage_cb(Fl_Widget* w, void*)
+{
+	((CqPiqslMainWindow*)(w->parent()->user_data()))->removeImage();
+}
+
+void CqPiqslMainWindow::removeImage()
+{
+	Fl::lock();
+	Aqsis::CqBook::TqImageList::size_type index = m_pane->browser()->currentSelected();
+	if (index > 0) // something must be selected
+	{
+		Aqsis::CqBook::TqImageListIterator item = m_pane->browser()->book()->imagesBegin();
+		item += (index-1);
+		m_pane->browser()->book()->removeImage(item);
+		// If possible, select the image below the one deleted, of not
+		// select the one above, otherwise, select none.
+		if(m_pane->browser()->book()->numImages() < index)
+		{
+			if(m_pane->browser()->book()->numImages() > 0)
+				index -= 1;
+			else
+				index = 0;
+		}
+		m_pane->browser()->setCurrentSelected(index);
+		select();
+		damage(FL_DAMAGE_ALL);
+		//m_menuImagesRemove->deactivate();
+		updateImageList();
+		Fl::awake();
+	}
+	Fl::unlock();
+}
 void CqPiqslMainWindow::setImage(const boost::shared_ptr<CqImage>& image)
 {
 	m_scroll->setImage(image);
@@ -377,6 +410,59 @@ void CqPiqslMainWindow::saveLibrary_cb(Fl_Widget* w, void* d)
 void CqPiqslMainWindow::saveLibraryAs_cb(Fl_Widget* w, void* d)
 {
 	((CqPiqslMainWindow*)(d))->saveConfigurationAs();
+}
+
+
+void CqPiqslMainWindow::queueResize()
+{
+	Fl::lock();
+	m_doResize = true;
+	Fl::unlock();
+}
+
+void CqPiqslMainWindow::resize(int X, int Y, int W, int H)
+{
+	// is the window actually getting resized? (might just be moved)
+	bool isResizing = W != w() || H != h();
+	// call parent's resize()
+	Fl_Double_Window::resize(X, Y, W, H);
+//	if(isResizing)
+//		centerImageWidget();
+}
+
+void CqPiqslMainWindow::resize()
+{
+	Fl::lock();
+	int fw = 640;
+	int fh = 480;
+	boost::shared_ptr<CqImage> image = m_pane->centerScroll()->image();
+	if(image)
+	{
+		if(image->frameWidth() > 0 && image->frameHeight() > 0)
+		{
+			fw = image->frameWidth();
+			fh = image->frameHeight();
+		}
+	}
+	m_pane->centerScroll()->resizeImageWidget(fw, fh);
+	// Resize the window if it's too small, leave it if it's big enough or bigger.
+	int thisW = m_pane->centerScroll()->x() + fw;
+	int thisH = m_pane->centerScroll()->y() + fh;
+	if( w() < thisW || h() < thisH )
+		resize(x(), y(), min(thisW, static_cast<int>(Fl::w()*0.9)), min(thisH, static_cast<int>(Fl::h()*0.9)));
+	m_pane->centerScroll()->centerImageWidget();
+	redraw();
+
+	m_doResize = false;
+	Fl::unlock();
+}
+
+
+/// \note: This should only ever be called from the main thread.
+void CqPiqslMainWindow::checkResize()
+{
+	if(m_doResize)
+		resize();
 }
 
 } // namespace Aqsis

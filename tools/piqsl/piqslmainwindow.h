@@ -58,13 +58,15 @@ private:
 	std::vector<boost::shared_ptr<CqBook> >	m_books;	///< List of books in the library.
 	boost::shared_ptr<CqBook>	m_currentBook;			///< Shared pointer to the current book.
 	std::string m_currentConfigName;					///< Stored name of the library on disk.
+	bool	m_doResize;								///< Flag indicating a resize has been requested.
 public:
 	CqPiqslMainWindow(int w, int h, const char* title)
 		: Fl_Double_Window(w, h, title),
 		m_menuBar(0, 0, w, 25),
 		m_pane(0),
 		m_scroll(0),
-		m_fullScreenImage(false)
+		m_fullScreenImage(false),
+		m_doResize(false)
 	{
 		// Set user_data to point to this, so we can
 		// get back to the main window from anywhere.
@@ -204,6 +206,23 @@ public:
  	 */
 	TqBookListIterator booksEnd();
 
+	/** Queue a request to recalculate the size of this window.
+	 * The resize operation can only be performed on the main thread, this allows other threads to force a recalc.
+	 */
+	void queueResize();
+	/** Perform a recalculation of the size of this framebuffer.
+	 * Actually recalculate the size of the framebuffer window according to the image being displayed. Can
+	 * only be performed in the main thread.
+	 */
+	void resize();
+	/** Overriden Fl_Widget::resize()
+	 */
+	virtual void resize(int X, int Y, int W, int H);
+	/** Check if a resize has been queued and perform it.
+	 * \note Must only be called from the main thread.
+	 */
+	void checkResize();
+
 	void setImage(const boost::shared_ptr<CqImage>& image);
 
 	void addImage();
@@ -214,6 +233,8 @@ public:
 	static void loadLibrary_cb(Fl_Widget* w, void*);
 	static void saveLibrary_cb(Fl_Widget* w, void*);
 	static void saveLibraryAs_cb(Fl_Widget* w, void*);
+	void removeImage();
+	static void removeImage_cb(Fl_Widget* w, void*);
 };
 
 inline const std::string& CqPiqslMainWindow::currentConfigName() const

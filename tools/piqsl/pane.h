@@ -178,12 +178,11 @@ class CqPane : public Fl_Group
 			return(m_browser);
 		}
 
-		virtual void draw()
+		CqCenterScroll* centerScroll()
 		{
-			// Why didn't this work??
-			//fl_rectf(x(), y(), w(), y());
-			Fl_Group::draw();
+			return m_centerScroll;
 		}
+
 		virtual void resize(int x, int y, int w, int h)
 		{
 			Fl_Group::resize(x, y, w, h);
