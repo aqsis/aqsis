@@ -55,6 +55,13 @@ public:
 						centerImageWidget();
 						return 1;
 						break;
+
+					// Ignore cursors, so that the browser gets them.
+					case FL_Up:
+					case FL_Down:
+					case FL_Left:
+					case FL_Right:
+						return 0;
 				}
 				break;
 		}
