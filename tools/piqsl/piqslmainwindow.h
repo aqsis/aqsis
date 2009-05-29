@@ -38,7 +38,7 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Browser.H>
 #include <FL/Fl_Select_Browser.H>
-#include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Sys_Menu_Bar.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Menu_Button.H>
 #include <FL/Fl_Pack.H>
@@ -50,7 +50,7 @@ extern Fl_Menu_Item mainMenu[];
 class CqPiqslMainWindow : public Fl_Double_Window
 {
 private:
-	Fl_Menu_Bar m_menuBar;
+	Fl_Sys_Menu_Bar m_menuBar;
 	CqPane* m_pane;
 	CqCenterScroll* m_scroll;
 	bool m_fullScreenImage;
@@ -101,23 +101,33 @@ public:
 				switch(Fl::event_key())
 				{
 					case 'f':
-						if(m_fullScreenImage)
+						if(!Fl::event_alt())
 						{
-							m_menuBar.show();
-							m_pane->resize(0, m_menuBar.h(), w(), h() - m_menuBar.h());
-							m_pane->uncollapse();
-							m_fullScreenImage = false;
-							//init_sizes();
+							if(m_fullScreenImage)
+							{
+								m_menuBar.show();
+								m_pane->resize(0, m_menuBar.h(), w(), h() - m_menuBar.h());
+								m_pane->uncollapse();
+								m_fullScreenImage = false;
+								//init_sizes();
+							}
+							else
+							{
+								m_menuBar.hide();
+								m_pane->resize(0, 0, w(), h());
+								m_pane->collapse1();
+								m_fullScreenImage = true;
+								//init_sizes();
+							}
+							return 1;
 						}
-						else
-						{
-							m_menuBar.hide();
-							m_pane->resize(0, 0, w(), h());
-							m_pane->collapse1();
-							m_fullScreenImage = true;
-							//init_sizes();
-						}
-						return 1;
+						break;
+					// Swallow the unmodified menu shortcuts, so the menus only activate with alt
+					case 'b':
+					case 'i':
+					case 'h':
+						if(!Fl::event_alt())
+							return 1;
 				}
 				break;
 		}

@@ -38,19 +38,19 @@ void addImage_cb(Fl_Widget* w, void*);
 void removeImage_cb(Fl_Widget* w, void*);
 
 Fl_Menu_Item mainMenu[] = {
-	{"&File", 0, 0, 0, FL_SUBMENU},
+	{"&File", FL_ALT+'f', 0, 0, FL_SUBMENU},
 		{"&Open Library", FL_COMMAND+'o', (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
 		{"&Save Library", FL_COMMAND+'s', (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
 		{"Save Library &As", FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
 		{"&Quit", FL_COMMAND+'q', quit_cb},
 		{0},
-	{"&Book", 0, 0, 0, FL_SUBMENU},
+	{"&Book", FL_ALT+'b', 0, 0, FL_SUBMENU},
 		{"&New"},
 		{"&Export"},
 		{"&Rename"},
 		{"Re&move"},
 		{0},
-	{"&Image", 0, 0, 0, FL_SUBMENU},
+	{"&Image", FL_ALT+'i', 0, 0, FL_SUBMENU},
 		{"&Add", FL_SHIFT+FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
 		{"&Remove", FL_SHIFT+FL_COMMAND+'r', (Fl_Callback*)CqPiqslMainWindow::removeImage_cb},
 		{0},

@@ -48,6 +48,9 @@ public:
 				switch(key)
 				{
 					case 'h':
+						if(Fl::event_alt())
+							return 0;
+							// passthrough
 					case FL_Home:
 						centerImageWidget();
 						return 1;
