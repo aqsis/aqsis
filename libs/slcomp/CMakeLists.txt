@@ -12,4 +12,4 @@ aqsis_add_library(aqsis_slcomp
 	LINK_LIBRARIES aqsis_util
 )
 
-aqsis_install_targets(aqsis_slcomp COMPONENT ${LIBDIR})
+aqsis_install_targets(aqsis_slcomp COMPONENT development)

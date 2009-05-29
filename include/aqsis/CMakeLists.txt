@@ -34,13 +34,13 @@ set(install_hdrs
 	${version_h_name}
 )
 
-install(FILES ${install_hdrs} DESTINATION ${include_install_dir})
+install(FILES ${install_hdrs} DESTINATION ${include_install_dir} COMPONENT development)
 
 #------------------------------------------------------------------------------
 
 # Install subdirectories of header files.
-install(DIRECTORY math DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
-install(DIRECTORY util DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
-install(DIRECTORY riutil DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
-#install(DIRECTORY tex DESTINATION ${include_install_dir} COMPONENT ${INCLUDEDIR})
+install(DIRECTORY math DESTINATION ${include_install_dir} COMPONENT development)
+install(DIRECTORY util DESTINATION ${include_install_dir} COMPONENT development)
+install(DIRECTORY riutil DESTINATION ${include_install_dir} COMPONENT development)
+#install(DIRECTORY tex DESTINATION ${include_install_dir} COMPONENT development)
 

@@ -46,6 +46,7 @@ foreach(dir ${shader_dirs})
 		DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${dir}"
 				  "${CMAKE_CURRENT_BINARY_DIR}/${dir}"
 		DESTINATION ${shaders_install_dir}
+		COMPONENT shaders
 	)
 	set(shader_search_path
 		"${shader_search_path}:${shaders_install_dir}/${dir}")
@@ -56,4 +57,5 @@ set(shader_search_path ${shader_search_path} PARENT_SCOPE)
 install(
 	DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
 	DESTINATION ${shaders_install_dir}
+	COMPONENT shaders
 )

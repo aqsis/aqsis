@@ -12,4 +12,4 @@ aqsis_add_executable(aqsltell ${aqsltell_srcs}
 
 # ^ TODO: aqsis_tex is needed because of the pointcloud API (ugh!)
 
-aqsis_install_targets(aqsltell COMPONENT ${BINDIR})
+aqsis_install_targets(aqsltell COMPONENT main)

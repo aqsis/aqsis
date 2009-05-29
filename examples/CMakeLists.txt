@@ -6,6 +6,7 @@ set(examples_install_dir ${EXAMPLESDIR})
 
 install(DIRECTORY features procedurals scenes
 	DESTINATION ${examples_install_dir}
+	COMPONENT examples
 	# TODO: Refactor the blobby content examples to allow distribution.  For
 	# now we exclude them with a pattern.
 	PATTERN features/blobby EXCLUDE

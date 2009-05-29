@@ -10,7 +10,7 @@ aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
 	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS
 )
 
-aqsis_install_targets(aqsis_riutil COMPONENT ${LIBDIR})
+aqsis_install_targets(aqsis_riutil COMPONENT development)
 
 
 #--------------------------------------------------

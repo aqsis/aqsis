@@ -286,5 +286,5 @@ set(PROCEDURALPATH "${PROCEDURALPATH}" CACHE STRING "Aqsis procedural searchpath
 set(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
 set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
 configure_file(aqsisrc.in.cmake ${aqsisrc_name})
-install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR})
+install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 
