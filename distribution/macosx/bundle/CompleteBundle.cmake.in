@@ -1,0 +1,3 @@
+execute_process(COMMAND sh ${BUNDLEDIR}/create_bundle.sh)
+#execute_process(COMMAND "@OSX_MAKE_STANDALONE_BUNDLE_BASH_SCRIPT@")
+
