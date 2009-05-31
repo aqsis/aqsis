@@ -18,9 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef ARGPARSE_H_INCLUDED
+#define ARGPARSE_H_INCLUDED
+
 #if	_MSC_VER
 #pragma warning( disable : 4786 )
 #endif	// WIN32
+
+#include <aqsis/aqsis.h>
 
 #include <string>
 #include <vector>
@@ -74,7 +79,7 @@ class ArgParseInternalData;	// hide implementation details
  * application.
  */
 
-class ArgParse
+class AQSIS_UTIL_SHARE ArgParse
 {
 	public:
 		// Basic types: ArgParse always uses these typedefs, so that there's
@@ -191,3 +196,5 @@ class ArgParse
 	private:
 		ArgParseInternalData* d;
 };
+
+#endif // !ARGPARSE_H_INCLUDED

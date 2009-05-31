@@ -37,13 +37,13 @@ struct IqParseNode;
 
 /// Parses an input stream, using the supplied callback object and sending
 /// error data to the supplied output stream
-bool Parse(std::istream& InputStream, const std::string& StreamName,
+AQSIS_SLCOMP_SHARE bool Parse(std::istream& InputStream, const std::string& StreamName,
 		   std::ostream& ErrorStream );
 
 /// Resets the state of the parser, clearing any symbol tables, etc.
-void ResetParser();
+AQSIS_SLCOMP_SHARE void ResetParser();
 
-IqParseNode* GetParseTree();
+AQSIS_SLCOMP_SHARE IqParseNode* GetParseTree();
 
 } // namespace Aqsis
 

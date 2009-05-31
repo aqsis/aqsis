@@ -8,6 +8,7 @@ set(riutil_srcs
 
 aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
 	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS
+	LINK_LIBRARIES aqsis_util
 )
 
 aqsis_install_targets(aqsis_riutil COMPONENT development)

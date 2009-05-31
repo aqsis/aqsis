@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+#include	<aqsis/aqsis.h>
+
 #include	<FL/Fl_File_Chooser.H>
 
 #include	<aqsis/util/logging.h>

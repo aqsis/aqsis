@@ -27,4 +27,4 @@ IF(AQSIS_NSIS_EXECUTABLE_FOUND)
 		)
 ENDIF(AQSIS_NSIS_EXECUTABLE_FOUND)
 
-ADD_DEPENDENCIES(winpackage aqsis aqsl aqsltell eqsl miqser piqsl teqser display piqsldisplay shaders)
+ADD_DEPENDENCIES(winpackage aqsis aqsl aqsltell eqsl miqser piqsl teqser file_display piqsl_display all_shaders)

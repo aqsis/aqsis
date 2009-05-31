@@ -48,7 +48,7 @@ class IqCodeGen
 //-----------------------------------------------------------------------
 /** \brief Compiler backend to output VM code.
  */
-class CqCodeGenVM : public IqCodeGen
+class AQSIS_SLCOMP_SHARE CqCodeGenVM : public IqCodeGen
 {
 	public:
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );
@@ -63,7 +63,7 @@ class CqCodeGenVM : public IqCodeGen
  *
  * \see CqParseTreeViz for more information.
  */
-class CqCodeGenGraphviz : public IqCodeGen
+class AQSIS_SLCOMP_SHARE CqCodeGenGraphviz : public IqCodeGen
 {
 	public:
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );

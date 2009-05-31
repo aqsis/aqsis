@@ -100,7 +100,7 @@ extern	"C"
 	/* Include the automatically generated procedure declarations. 
 	   Generated from api.xml, using apiheader.xsl */
 
-#include	<aqsis/ri/ri.inl>
+#include	"aqsis/ri/ri.inl"
 
 	/* Specific to Aqsis */
 
