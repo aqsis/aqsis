@@ -10,5 +10,5 @@ aqsis_add_library(aqsis_slxargs ${slxargs_srcs} ${slxargs_hdrs}
 	LINK_LIBRARIES aqsis_shadervm
 )
 
-aqsis_install_targets(aqsis_slxargs COMPONENT development)
+aqsis_install_targets(aqsis_slxargs)
 

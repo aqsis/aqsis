@@ -15,4 +15,4 @@ aqsis_add_executable(eqsl ${eqsl_srcs} GUIAPP
 	LINK_LIBRARIES aqsis_util ${AQSIS_FLTK_LIBRARIES} 
 		${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
 
-aqsis_install_targets(eqsl COMPONENT main)
+aqsis_install_targets(eqsl)

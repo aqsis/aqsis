@@ -27,7 +27,7 @@ aqsis_add_library(aqsis_tex ${tex_srcs} ${tex_hdrs}
 	LINK_LIBRARIES aqsis_math aqsis_util ${linklibs}
 )
 
-aqsis_install_targets(aqsis_tex COMPONENT development)
+aqsis_install_targets(aqsis_tex)
 
 
 #--------------------------------------------------
