@@ -7,4 +7,4 @@ set(teqser_srcs
 aqsis_add_executable(teqser ${teqser_srcs}
     LINK_LIBRARIES aqsis_util aqsis_core)
 
-aqsis_install_targets(teqser)
+aqsis_install_target(teqser)

@@ -14,4 +14,4 @@ include_directories(${AQSIS_ZLIB_INCLUDE_DIR})
 aqsis_add_executable(pdiff ${pdiff_srcs}
 	LINK_LIBRARIES ${AQSIS_TIFF_LIBRARIES} ${AQSIS_ZLIB_LIBRARIES})
 
-aqsis_install_targets(pdiff)
+aqsis_install_target(pdiff)

@@ -27,5 +27,5 @@ aqsis_add_library(aqsis_shadervm ${shadervm_srcs} ${shadervm_hdrs}
 	LINK_LIBRARIES aqsis_math aqsis_util aqsis_tex
 )
 
-aqsis_install_targets(aqsis_shadervm)
+aqsis_install_target(aqsis_shadervm)
 
