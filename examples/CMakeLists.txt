@@ -4,11 +4,21 @@ project(example_content)
 #set(examples_install_dir ${share_install_dir}/${examples_reldir})
 set(examples_install_dir ${EXAMPLESDIR})
 
-install(DIRECTORY features procedurals scenes
-	DESTINATION ${examples_install_dir}
-	COMPONENT examples
-	# TODO: Refactor the blobby content examples to allow distribution.  For
-	# now we exclude them with a pattern.
-	PATTERN features/blobby EXCLUDE
-)
+if(WIN32)
+	install(DIRECTORY features procedurals scenes
+		DESTINATION ${examples_install_dir}
+		COMPONENT examples
+		# TODO: Refactor the blobby content examples to allow distribution.  For
+		# now we exclude them with a pattern.
+		PATTERN "features/blobby" EXCLUDE
+		PATTERN "*.sh" EXCLUDE)
+else()
+	install(DIRECTORY features procedurals scenes
+		DESTINATION ${examples_install_dir}
+		COMPONENT examples
+		# TODO: Refactor the blobby content examples to allow distribution.  For
+		# now we exclude them with a pattern.
+		PATTERN "features/blobby" EXCLUDE
+		PATTERN "*.bat" EXCLUDE)
+endif()
 

@@ -20,4 +20,4 @@ set(ri_install_hdrs
 	${ri_inl}
 )
 
-install(FILES ${ri_install_hdrs} DESTINATION ${include_install_dir}/ri)
+install(FILES ${ri_install_hdrs} DESTINATION ${include_install_dir}/ri COMPONENT development)

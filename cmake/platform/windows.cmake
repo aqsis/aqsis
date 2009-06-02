@@ -38,11 +38,3 @@ SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
 #   (b) Make sure that the math constants from math.h are defined - that is, M_PI etc.
 ADD_DEFINITIONS(-DNO_SYSLOG -D_USE_MATH_DEFINES)
 
-#
-# Create resource files for use during linking
-#
-CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" "${CMAKE_BINARY_DIR}/info.rc")
-CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" "${CMAKE_BINARY_DIR}/icon.rc")
-SET(INFORES_SRCS "${CMAKE_BINARY_DIR}/info.rc")
-SET(ICONRES_SRCS "${CMAKE_BINARY_DIR}/icon.rc")
-
