@@ -197,6 +197,11 @@ macro(aqsis_add_library target_name)
 		set(aal_lib_type MODULE)
 	endif()
 	add_library(${target_name} ${aal_lib_type} ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
+	get_target_property(aal_name ${target_name} LOCATION)
+	get_filename_component(aal_name ${aal_name} PATH)
+	# Set the variables to be picked up if this library is needed during build, for
+	# example aqsl needs aqsis_slcomp when building the shaders.
+	set("${target_name}_location" ${aal_name})
 	if(aal_COMPILE_DEFINITIONS)
 		#message("ADDING COMPILE_DEFINITIONS: ${aal_COMPILE_DEFINITIONS}")
 		set_property(TARGET ${target_name} PROPERTY

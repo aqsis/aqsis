@@ -13,6 +13,15 @@ set(shader_dirs
 add_prefix(shader_dirs_abs "${CMAKE_CURRENT_BINARY_DIR}/" ${shader_dirs})
 file(MAKE_DIRECTORY ${shader_dirs_abs})
 
+# for visual studio IDE set the path correctly for custom commands
+IF(WIN32 AND MSVC_IDE)
+	FILE(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path_windows)
+	FILE(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path_windows)
+	SET(CMAKE_MSVCIDE_RUN_PATH "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
+		CACHE STATIC "MSVC IDE Run path" FORCE)
+ENDIF(WIN32 AND MSVC_IDE)
+
+
 set(compiled_shaders)
 foreach(dir ${shader_dirs})
 	file(GLOB shader_srcs "${dir}/*.sl")
