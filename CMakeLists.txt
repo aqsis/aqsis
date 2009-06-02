@@ -250,7 +250,8 @@ endif()
 add_subdirectory(tools/displays)
 
 # Build additional plugins
-# TODO
+add_subdirectory(tools/procedurals/hairgen)
+#add_subdirectory(tools/shadeops/sci_volumes)
 
 # Build shaders & install examples
 add_subdirectory(shaders)

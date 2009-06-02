@@ -20,23 +20,14 @@ problem for RenderMan compatible renderers.
 The procedural has been designed with generality in mind, so it should work
 with any program which can output hairs and meshes in RIB format.
 
+
 Compiling
 =========
-In order to compile the procedural, aqsis-1.5 is required, along with cmake for
-the build system.  The procedural can be compiled with the supplied cmake script.
-
-Linux
------
-
-$ cd $build_dir  # should be different from the source directory.
-$ ccmake $path_to_source
-$ # <-- user sets the AQSIS_HOME environment variable correctly inside the cmake GUI
-$ make
-
-Windows
--------
-Windows is unlikely to work with the current script but should do so with
-minimal modifications.
+The procedural is compiled as part of the aqsis distribution and needs
+>= aqsis-1.5 to make use of the aqsis RIB parser.  However, given that the
+aqsis RIB parser is installed, it should be possible to use hairgen with any
+other RenderMan-based renderer which has support for standard
+RiProcDynamicLoad procedural geometry.
 
 
 Usage

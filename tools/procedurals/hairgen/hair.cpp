@@ -119,7 +119,6 @@ struct HairParams
 			// Read in value for the provided name.
 			if(name == "num_hairs")
 			{
-				int num = 0;
 				valueStream >> numHairs;
 			}
 			else if(name == "emitter_file_name")
@@ -231,8 +230,8 @@ class HairProcedural
 		 */
 		HairProcedural(const char* initialdata)
 			: m_emitter(),
-			m_params(initialdata),
-			m_parentHairs()
+			m_parentHairs(),
+			m_params(initialdata)
 		{
 			std::ifstream emitterStream(m_params.emitterFileName.c_str());
 			if(emitterStream)
