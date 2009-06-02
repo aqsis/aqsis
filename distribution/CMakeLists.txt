@@ -9,14 +9,29 @@ SET(AQSIS_PROJECT_COPYRIGHT_OTHER "The RenderMan(R) Interface Procedures and Pro
 if(WIN32)
 	# There is a bug in NSI that does not handle full unix paths properly. Make
 	# sure there is at least one set of four (4) backlasshes.
-	#set(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+	set(CPACK_PACKAGE_FILE_NAME "${AQSIS_PROJECT_NAME_BASIC}-setup-${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
+	set(CPACK_PACKAGE_EXECUTABLES "eqsl.exe;${AQSIS_PROJECT_NAME};aqsis.cmd;${AQSIS_PROJECT_NAME} (Command Line)")
+	set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/distribution/win\\\\header.bmp")
 	set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${AQSIS_PROJECT_NAME_SHORT} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
 	set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\eqsl.exe")
-	set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${AQSIS_PROJECT_NAME} ${AQSIS_VERSION} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
+	set(CPACK_NSIS_DISPLAY_NAME "${AQSIS_PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")
 	set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\community.aqsis.org")
 	set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.aqsis.org")
 	set(CPACK_NSIS_CONTACT "packages@aqsis.org")
 	set(CPACK_NSIS_MODIFY_PATH ON)
+	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+		!include \\\"TextFunc.nsh\\\"
+		!include \\\"StrFunc.nsh\\\"
+		${StrRep}
+		!insertmacro ConfigWrite
+		${StrRep} $R0 $INSTDIR \\\"\\\\\\\" \\\"/\\\"
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string shader\\\" ' '[\\\"$R0/shaders/displacement:$R0/shaders/imager:$R0/shaders/light:$R0/shaders/surface:$R0/shaders/volume\\\"]' $R1
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string archive\\\" ' '[\\\"$R0\\\"]' $R2
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string texture\\\" ' '[\\\"$R0\\\"]' $R3
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string display\\\" ' '[\\\"$R0/bin\\\"]' $R4
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string procedural\\\" ' '[\\\"$R0/bin\\\"]' $R5
+		${ConfigWrite} \\\"$INSTDIR\\\\bin\\\\aqsisrc\\\" 'Option \\\"defaultsearchpath\\\" \\\"string resource\\\" ' '[\\\"$R0\\\"]' $R6
+		")
 	set(CPACK_ALL_INSTALL_TYPES Full Minimal)
 	set(CPACK_COMPONENT_MAIN_INSTALL_TYPES Full Minimal)
 	set(CPACK_COMPONENT_DEVELOPMENT_INSTALL_TYPES Full)
@@ -67,8 +82,10 @@ set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_BUILD}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${AQSIS_PROJECT_NAME_SHORT}")
 
-set(CPACK_COMPONENTS_ALL main examples shaders development)
-set(CPACK_COMPONENT_MAIN_REQUIRED)
+set(CPACK_COMPONENTS_ALL main examples shaders development Unspecified)
+set(CPACK_COMPONENT_MAIN_REQUIRED TRUE)
+set(CPACK_COMPONENT_UNSPECIFIED_REQUIRED TRUE)
+set(CPACK_COMPONENT_UNSPECIFIED_HIDDEN TRUE)
 set(CPACK_COMPONENT_EXAMPLES_GROUP "content")
 set(CPACK_COMPONENT_SHADERS_GROUP "content")
 set(CPACK_COMPONENT_MAIN_DESCRIPTION
