@@ -10,7 +10,7 @@ SET(DISPLAYSDIR "${LIBDIR}"
 	CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(SHADERDIR "${BUNDLE_RESOURCES}/shaders" 
 	CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-SET(SYSCONFDIR "" 
+SET(SYSCONFDIR "etc/aqsis" 
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
 SET(INCLUDEDIR "${BUNDLE_RESOURCES}/include"
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
