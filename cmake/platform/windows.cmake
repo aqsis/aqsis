@@ -1,7 +1,7 @@
 SET(BINDIR "bin" 
 	CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-SET(DISPLAYSDIR "${BINDIR}" 
-	CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
+SET(PLUGINDIR "${BINDIR}" 
+	CACHE STRING "Install location for plugins (relative to CMAKE_INSTALL_PREFIX)")
 SET(LIBDIR "lib" 
 	CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(SHADERDIR "shaders" 

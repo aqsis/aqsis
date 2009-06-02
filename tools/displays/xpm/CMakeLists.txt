@@ -1,1 +1,1 @@
-aqsis_add_display(xpm_display xpm.cpp aspXpm.cpp aspXpm.h)
+aqsis_add_display(xpm xpm.cpp aspXpm.cpp aspXpm.h)

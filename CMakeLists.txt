@@ -266,16 +266,16 @@ add_subdirectory(distribution)
 #-------------------------------------------------------------------------------
 # Create aqsisrc
 #--------------
-get_directory_property(display_DISPLAYLIB DIRECTORY tools/displays DEFINITION file_display_lib_name)
-get_directory_property(d_exr_DISPLAYLIB DIRECTORY tools/displays DEFINITION exr_display_lib_name)
-get_directory_property(d_bmp_DISPLAYLIB DIRECTORY tools/displays DEFINITION bmp_display_lib_name)
-get_directory_property(d_xpm_DISPLAYLIB DIRECTORY tools/displays DEFINITION xpm_display_lib_name)
-get_directory_property(piqsl_DISPLAYLIB DIRECTORY tools/displays DEFINITION piqsl_display_lib_name)
+get_directory_property(display_DISPLAYLIB DIRECTORY tools/displays DEFINITION file_display_name)
+get_directory_property(d_exr_DISPLAYLIB DIRECTORY tools/displays DEFINITION exr_display_name)
+get_directory_property(d_bmp_DISPLAYLIB DIRECTORY tools/displays DEFINITION bmp_display_name)
+get_directory_property(d_xpm_DISPLAYLIB DIRECTORY tools/displays DEFINITION xpm_display_name)
+get_directory_property(piqsl_DISPLAYLIB DIRECTORY tools/displays DEFINITION piqsl_display_name)
 # Default search paths.
 set(DEFAULT_SHADERPATH ${shader_search_path})
 set(DEFAULT_ARCHIVEPATH "${CMAKE_INSTALL_PREFIX}")
 set(DEFAULT_TEXTUREPATH "${CMAKE_INSTALL_PREFIX}")
-set_with_path_prefix(DEFAULT_DISPLAYPATH "${DISPLAYSDIR}" "${CMAKE_INSTALL_PREFIX}")
+set_with_path_prefix(DEFAULT_DISPLAYPATH "${PLUGINDIR}" "${CMAKE_INSTALL_PREFIX}")
 set_with_path_prefix(DEFAULT_PROCEDURALPATH "${LIBDIR}" "${CMAKE_INSTALL_PREFIX}")
 set(DEFAULT_RESOURCEPATH "${CMAKE_INSTALL_PREFIX}")
 # Search paths which are settable from the cmake build.

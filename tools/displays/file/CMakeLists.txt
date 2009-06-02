@@ -14,5 +14,5 @@ else()
     add_definitions(-DAQSIS_NO_FLTK)
 endif()
 
-aqsis_add_display(file_display display.cpp ${dspyutil_srcs}
+aqsis_add_display(file display.cpp ${dspyutil_srcs}
 	LINK_LIBRARIES ${linklibs})

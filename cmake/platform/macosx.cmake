@@ -6,8 +6,8 @@ SET(BINDIR "${BUNDLE_RESOURCES}/MacOS"
 	CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
 SET(LIBDIR "${BUNDLE_RESOURCES}/lib" 
 	CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(DISPLAYSDIR "${LIBDIR}" 
-	CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
+SET(PLUGINDIR "${LIBDIR}" 
+	CACHE STRING "Install location for plugins (relative to CMAKE_INSTALL_PREFIX)")
 SET(SHADERDIR "${BUNDLE_RESOURCES}/shaders" 
 	CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
 SET(SYSCONFDIR "etc/aqsis" 
