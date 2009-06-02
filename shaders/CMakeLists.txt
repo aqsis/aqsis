@@ -40,6 +40,7 @@ add_custom_target(all_shaders ALL DEPENDS ${compiled_shaders})
 #source_tree_relpath(shaders_reldir)
 #set(shaders_install_dir ${share_install_dir}/${shaders_reldir})
 set(shaders_install_dir ${SHADERDIR})
+set_with_path_prefix(shaders_searchpath_dir "${SHADERDIR}" "${CMAKE_INSTALL_PREFIX}")
 set(shader_search_path)
 foreach(dir ${shader_dirs})
 	install(
@@ -53,7 +54,7 @@ foreach(dir ${shader_dirs})
 		COMPONENT main
 	)
 	set(shader_search_path
-		"${shader_search_path}:${shaders_install_dir}/${dir}")
+		"${shader_search_path}:${shaders_searchpath_dir}/${dir}")
 endforeach()
 set(shader_search_path ${shader_search_path} PARENT_SCOPE)
 
