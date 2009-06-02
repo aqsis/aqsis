@@ -10,7 +10,9 @@ set(hairgen_srcs
 add_library(hairgen MODULE ${hairgen_srcs})
 
 set(linklibs aqsis_math aqsis_util aqsis_ribparse)
-if(UNIX AND NOT APPLE)
+if(NOT UNIX OR APPLE)
+	# We need to explicitly link to aqsis_core for the Ri* functions, except
+	# on most unix platforms which find the unresolved symbols at load time.
 	list(APPEND linklibs aqsis_core)
 endif()
 target_link_libraries(hairgen ${linklibs})
