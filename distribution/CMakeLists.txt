@@ -35,7 +35,7 @@ elseif(APPLE)
 	set(CPACK_BUNDLE_ICON "${BUNDLEDIR}/Aqsis.icns")
 	set(CPACK_BUNDLE_PLIST "${BUNDLEDIR}/Info.plist")
 	set(CPACK_BUNDLE_STARTUP_COMMAND "")
-	set(CPACK_GENERATOR "BUNDLE")
+	set(CPACK_GENERATOR "Bundle")
 	set(CPACK_SOURCE_GENERATOR "TGZ")
 	# Custom OS X Bundle
 	add_subdirectory(macosx/bundle)
