@@ -1,7 +1,3 @@
-SET(BUNLE_CONTENTS "Contents"
-	CACHE STRING "Install location for bundle content. (relative to CMAKE_INSTALL_PREFIX)")
-SET(BUNDLE_RESOURCES "${BUNLE_CONTENTS}/Resources"
-	CACHE STRING "Install location for bundle resources. (relative to CMAKE_INSTALL_PREFIX)")
 SET(BINDIR "bin" 
 	CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
 SET(LIBDIR "lib" 

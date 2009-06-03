@@ -43,6 +43,9 @@ if(WIN32)
 	#add_subdirectory(win/nsis)
 
 elseif(APPLE)
+	set(BUNDLEDIR "${CMAKE_BINARY_DIR}/bundle"
+		CACHE STRING "Staging location for bundles (relative to CMAKE_BINARY_DIR)"
+		)
 	set(CPACK_PACKAGE_FILE_NAME
 		"${AQSIS_PROJECT_NAME_SHORT}-${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}-${CMAKE_SYSTEM_NAME}")
 	#set(CPACK_PACKAGE_ICON "")

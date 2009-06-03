@@ -1,8 +1,5 @@
 PROJECT(OSXBUNDLE)
 
-set(BUNDLEDIR "${CMAKE_BINARY_DIR}/bundle"
-	CACHE STRING "Staging location for bundles (relative to CMAKE_BINARY_DIR)"
-	)
 set(CMAKE_PROJECT_NAME "${AQSIS_PROJECT_NAME_SHORT}"
 	CACHE STRING "Package name for OS X"
 	)
