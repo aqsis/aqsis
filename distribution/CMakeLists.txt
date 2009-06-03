@@ -7,13 +7,6 @@ SET(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2009, ${AQSIS_PROJECT_VENDOR}.")
 SET(AQSIS_PROJECT_COPYRIGHT_OTHER "The RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, 2000, 2005 Pixar. All Rights Reserved.")
 
 if(WIN32)
-	# Temporary resource file hack as it seems CMake has issues when using the
-	# 'configure_file()' command within an 'include()' file, like 'windows.cmake'.
-	configure_file("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" info.rc)
-	configure_file("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" icon.rc)
-	set(INFORES_SRCS info.rc)
-	set(ICONRES_SRCS icon.rc)
-
 	# There is a bug in NSI that does not handle full unix paths properly. Make
 	# sure there is at least one set of four (4) backlasshes.
 	set(CPACK_PACKAGE_FILE_NAME "${AQSIS_PROJECT_NAME_BASIC}-setup-${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD}")

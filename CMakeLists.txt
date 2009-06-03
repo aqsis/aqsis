@@ -199,6 +199,14 @@ endif()
 # Include setup for system-specific paths, packaging etc
 if(WIN32)
 	include(${CMAKE_SOURCE_DIR}/cmake/platform/windows.cmake)
+
+	# Temporary resource file hack as it seems CMake has issues when using the
+	# 'configure_file()' command within an 'include()' file, like 'windows.cmake'.
+	configure_file("${CMAKE_SOURCE_DIR}/distribution/win/info.rc.in.cmake" info.rc)
+	configure_file("${CMAKE_SOURCE_DIR}/distribution/win/icon.rc.in.cmake" icon.rc)
+	set(INFORES_SRCS "${PROJECT_BINARY_DIR}/info.rc")
+	set(ICONRES_SRCS "${PROJECT_BINARY_DIR}/icon.rc")
+
 elseif(APPLE)
 	include(${CMAKE_SOURCE_DIR}/cmake/platform/macosx.cmake)
 else()
