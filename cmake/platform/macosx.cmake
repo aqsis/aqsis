@@ -2,17 +2,17 @@ SET(BUNLE_CONTENTS "Contents"
 	CACHE STRING "Install location for bundle content. (relative to CMAKE_INSTALL_PREFIX)")
 SET(BUNDLE_RESOURCES "${BUNLE_CONTENTS}/Resources"
 	CACHE STRING "Install location for bundle resources. (relative to CMAKE_INSTALL_PREFIX)")
-SET(BINDIR "${BUNDLE_RESOURCES}/MacOS" 
+SET(BINDIR "bin" 
 	CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-SET(LIBDIR "${BUNDLE_RESOURCES}/lib" 
+SET(LIBDIR "lib" 
 	CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
 SET(PLUGINDIR "${LIBDIR}" 
 	CACHE STRING "Install location for plugins (relative to CMAKE_INSTALL_PREFIX)")
-SET(SHADERDIR "${BUNDLE_RESOURCES}/shaders" 
+SET(SHADERDIR "share/aqsis/shaders" 
 	CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
 SET(SYSCONFDIR "etc/aqsis" 
 	CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-SET(INCLUDEDIR "${BUNDLE_RESOURCES}/include"
+SET(INCLUDEDIR "include"
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
 SET(EXAMPLESDIR "share/aqsis/examples" 
 	CACHE STRING "Install location for examples (relative to CMAKE_INSTALL_PREFIX)")

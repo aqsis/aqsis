@@ -20,7 +20,7 @@ mkdir "$FRAMEWORKS"
 
 for file in $( ls -l ${CMAKE_BINARY_DIR}/tools | grep -v ^- | grep -v displays | grep -v procedurals | grep -v total | awk '{print $9}' ); do
 	if [ $VERBOSE ]; then
-		echo "Copying: ${CMAKE_BINARY_DIR}/tools/$file/$file"
+		echo "Copying: ${CMAKE_BINARY_DIR}/tools/$file/$file to $BINARIESDIR/"
 	fi
 	/Developer/Tools/CpMac "${CMAKE_BINARY_DIR}/tools/$file/$file" "$BINARIESDIR/"
 done
