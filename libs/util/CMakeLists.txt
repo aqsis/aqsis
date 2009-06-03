@@ -42,7 +42,7 @@ aqsis_add_library(aqsis_util ${util_srcs} ${util_hdrs}
 	LINK_LIBRARIES ${linklibs}
 )
 
-aqsis_install_target(aqsis_util)
+aqsis_install_targets(aqsis_util)
 
 
 #--------------------------------------------------

@@ -11,4 +11,4 @@ endif()
 aqsis_add_executable(aqsis ${aqsis_srcs}
 	LINK_LIBRARIES aqsis_core aqsis_util aqsis_ribparse)
 
-aqsis_install_target(aqsis)
+aqsis_install_targets(aqsis)

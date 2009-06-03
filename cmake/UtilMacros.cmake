@@ -272,35 +272,18 @@ macro(aqsis_add_executable target_name)
 endmacro()
 
 #------------------------------------------------------------------------------
-# Install a target to the correct directory.
+# Install a set of targets to the correct directories.
 #
 # Usage:
 #
-#    aqsis_install_target(target)
+#    aqsis_install_targets(target1 target2 ...)
 #
-# The target can be any of shared or static libraries, or executables.
+# The targets can be any of shared or static libraries, or executables.
 #
-function(aqsis_install_target target)
-	get_target_property(target_type ${target} TYPE)
-	if(WIN32 AND ${target_type} STREQUAL "SHARED_LIBRARY")
-		# On DLL platforms (ie windows), creating a shared library makes both a
-		# .dll and a .lib file.  The mess here is to ensure that they get
-		# assigned to different COMPONENTs: the .lib files are only needed for
-		# compiling things against the aqsis libraries, and are therefore
-		# considered "development" COMPONENTs.
-		install(TARGETS ${target}
-			RUNTIME DESTINATION ${BINDIR}
-			COMPONENT main)
-		install(TARGETS ${target}
-			ARCHIVE DESTINATION ${LIBDIR}
-			COMPONENT development)
-	else()
-		# Non-shared libs or non-DLL platforms
-		install(TARGETS ${target}
-			RUNTIME DESTINATION ${BINDIR}
-			LIBRARY DESTINATION ${LIBDIR}
-			ARCHIVE DESTINATION ${LIBDIR}
-			COMPONENT main)
-	endif()
-endfunction()
-
+macro(aqsis_install_targets)
+	install(TARGETS ${ARGN}
+		RUNTIME DESTINATION ${BINDIR}
+		LIBRARY DESTINATION ${LIBDIR}
+		ARCHIVE DESTINATION ${LIBDIR}
+		COMPONENT main)
+endmacro()

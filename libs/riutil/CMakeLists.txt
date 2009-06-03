@@ -11,7 +11,7 @@ aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
 	LINK_LIBRARIES aqsis_util
 )
 
-aqsis_install_target(aqsis_riutil)
+aqsis_install_targets(aqsis_riutil)
 
 
 #--------------------------------------------------
