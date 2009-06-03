@@ -17,7 +17,7 @@ file(MAKE_DIRECTORY ${shader_dirs_abs})
 IF(WIN32 AND MSVC_IDE)
 	FILE(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path_windows)
 	FILE(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path_windows)
-	SET(CMAKE_MSVCIDE_RUN_PATH "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
+	SET(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_MSVCIDE_RUN_PATH}" "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
 		CACHE STATIC "MSVC IDE Run path" FORCE)
 ENDIF(WIN32 AND MSVC_IDE)
 
