@@ -128,23 +128,23 @@ endif()
 include(FindXsltproc)
 if(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
 	message(FATAL_ERROR "Aqsis requires xsltproc to build")
-endif(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
+endif()
 
 include(FindFlexBison)
 
 if(NOT AQSIS_FLEX_EXECUTABLE_FOUND)
 	message(FATAL_ERROR "Aqsis requires flex to build")
-endif(NOT AQSIS_FLEX_EXECUTABLE_FOUND)
+endif()
 if(NOT AQSIS_BISON_EXECUTABLE_FOUND)
 	message(FATAL_ERROR "Aqsis requires bison to build")
-endif(NOT AQSIS_BISON_EXECUTABLE_FOUND)
+endif()
 
 # Windows-specific build tools:
-INCLUDE(FindNSIS)
+include(FindNSIS)
 # Apple-specific build tools:
-INCLUDE(FindOsacompile)
-INCLUDE(FindXcodebuild)
-INCLUDE(FindResource)
+include(FindOsacompile)
+include(FindXcodebuild)
+include(FindResource)
 
 #-------------------------------------------------------------------------------
 # Set program version numbers
@@ -153,10 +153,10 @@ INCLUDE(FindResource)
 # These are needed by version.h, as well as the packaging stuff.  Note that
 # some packaging variables are set in the platform-specific config files, and
 # these version variables are potentially used there.
-SET(VERSION_MAJOR 1)
-SET(VERSION_MINOR 5)
-SET(VERSION_BUILD 0)
-SET(SCM_REVISION 0) # "?"
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 5)
+set(VERSION_BUILD 0)
+set(SCM_REVISION 0) # "?"
 
 
 #-------------------------------------------------------------------------------

@@ -14,12 +14,12 @@ add_prefix(shader_dirs_abs "${CMAKE_CURRENT_BINARY_DIR}/" ${shader_dirs})
 file(MAKE_DIRECTORY ${shader_dirs_abs})
 
 # for visual studio IDE set the path correctly for custom commands
-IF(WIN32 AND MSVC_IDE)
-	FILE(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path_windows)
-	FILE(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path_windows)
-	SET(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_MSVCIDE_RUN_PATH}" "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
+if(WIN32 AND MSVC_IDE)
+	file(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path_windows)
+	file(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path_windows)
+	set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_MSVCIDE_RUN_PATH}" "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
 		CACHE STATIC "MSVC IDE Run path" FORCE)
-ENDIF(WIN32 AND MSVC_IDE)
+endif()
 
 
 set(compiled_shaders)
