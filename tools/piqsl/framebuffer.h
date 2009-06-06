@@ -19,9 +19,8 @@
 
 
 /** \file
-		\brief Declare the class for a basic framebuffer window.
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief Declare the class for a basic framebuffer window.
+ */
 
 //? Is framebuffer.h included already?
 #ifndef FRAMEBUFFER_H_INCLUDED

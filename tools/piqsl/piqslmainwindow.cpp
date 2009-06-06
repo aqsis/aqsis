@@ -25,11 +25,14 @@
 
 #include	<aqsis/aqsis.h>
 
+#include	<boost/bind.hpp>
+#include	<boost/filesystem.hpp>
 #include	<FL/Fl_File_Chooser.H>
 
 #include	<aqsis/util/logging.h>
 
 #include	"piqslmainwindow.h"
+#include	"image.h"
 
 extern Aqsis::CqPiqslMainWindow* window;
 
@@ -448,10 +451,12 @@ void CqPiqslMainWindow::resize()
 	}
 	m_pane->centerScroll()->resizeImageWidget(fw, fh);
 	// Resize the window if it's too small, leave it if it's big enough or bigger.
+	/*
 	int thisW = m_pane->centerScroll()->x() + fw;
 	int thisH = m_pane->centerScroll()->y() + fh;
 	if( w() < thisW || h() < thisH )
 		resize(x(), y(), min(thisW, static_cast<int>(Fl::w()*0.9)), min(thisH, static_cast<int>(Fl::h()*0.9)));
+	*/
 	m_pane->centerScroll()->centerImageWidget();
 	redraw();
 

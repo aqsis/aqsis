@@ -1,197 +1,114 @@
+// Aqsis
+// Copyright (C) 1997 - 2001, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.org
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+/** \file
+ * \brief A pane widget with movable divider separating left and right columns.
+ */
+
+
 #ifndef PANE_H_INCLUDED
 #define PANE_H_INCLUDED
 
-#include <iostream>
+#include <aqsis/aqsis.h>
 
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Box.H>
 
 #include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 #include "bookbrowser.h"
 #include "centerscroll.h"
 
 namespace Aqsis {
 
-inline int clamp(int x, int min, int max)
-{
-	if(x < min)
-		return min;
-	if(x > max)
-		return max;
-	return x;
-}
-
+//------------------------------------------------------------------------------
+/// Divider box for the two regions of a CqPane
 class CqPaneDividerBox : public Fl_Box
 {
 public:
-	CqPaneDividerBox(int x, int y, int w, int h, const char* l = 0)
-		: Fl_Box(FL_FLAT_BOX, x, y, w, h, l),
-		m_prevDragX(0)
-	{ }
+	CqPaneDividerBox(int x, int y, int w, int h, const char* l = 0);
 
-	void setDragCallback(const boost::function<void (int)>& fxn)
-	{
-		m_dragCallback = fxn;
-	}
+	/// Set the callback used when the box is dragged.
+	void setDragCallback(const boost::function<void (int)>& fxn);
 
-	void draw()
-	{
-		Fl_Box::draw();
-		for(int i = 0; i < 5; ++i)
-		{
-			fl_color(FL_DARK2);
-			fl_rectf(x() + 2, y() + h()/2 + (i-2)*5, 2, 2);
-			fl_color(FL_LIGHT2);
-			fl_point(x() + 2, y() + h()/2 + (i-2)*5);
-		}
-	}
-	int handle(int event)
-	{
-		switch(event)
-		{
-			case FL_ENTER:
-				color(FL_LIGHT1);
-				fl_cursor(FL_CURSOR_WE, FL_FOREGROUND_COLOR, FL_BACKGROUND_COLOR);
-				redraw();
-				return 1;
-			case FL_LEAVE:
-				color(FL_BACKGROUND_COLOR);
-				fl_cursor(FL_CURSOR_DEFAULT, FL_FOREGROUND_COLOR, FL_BACKGROUND_COLOR);
-				redraw();
-				return 1;
-			case FL_PUSH:
-				switch(Fl::event_button())
-				{
-					case FL_LEFT_MOUSE:
-						m_prevDragX = Fl::event_x();
-						return 1;
-				}
-				break;
-			case FL_RELEASE:
-				switch(Fl::event_button())
-				{
-					case FL_LEFT_MOUSE:
-						return 1;
-				}
-				break;
-			case FL_DRAG:
-				switch(Fl::event_button())
-				{
-					case FL_LEFT_MOUSE:
-						if(m_dragCallback)
-							m_dragCallback(Fl::event_x() - m_prevDragX);
-						m_prevDragX = Fl::event_x();
-						return 1;
-				}
-				break;
-		}
-		return Fl_Box::handle(event);
-	}
-	void resize(int x, int y, int w, int h)
-	{
-		Fl_Box::resize(x, y, 6, h);
-	}
+	/// FLTK-required widget drawing function.
+	void draw();
+
+	/// Handle a FLTK event
+	int handle(int event);
+
+	/// Resize the box
+	void resize(int x, int y, int w, int h);
+
 private:
 	int m_prevDragX;
 	boost::function<void (int)> m_dragCallback;
 };
 
+
+//------------------------------------------------------------------------------
+/** \brief A fltk widget representing a resizeable pane with vertical seperator
+ */
 class CqPane : public Fl_Group
 {
+	public:
+		/** \brief Construct a pane with the given position and size.
+		 *
+		 * \param x,y - position
+		 * \param w,h - width & height
+		 * \param l - label
+		 */
+		CqPane(int x, int y, int w, int h, const char* l = 0);
+		/** \brief Construct a pane with the given position, size and divider position.
+		 *
+		 * \param x,y - position
+		 * \param w,h - width & height
+		 * \param divPos - position of the divider as a fraction of the width.
+		 * \param l - label
+		 */
+		CqPane(int x, int y, int w, int h, double divPos, const char* l = 0);
+
+		/// Collapse the left region down to zero width.
+		void collapse1();
+		/// Restore the previously collapsed region.
+		void uncollapse();
+		/// Add a widget to the left half of the pane
+		void add1(CqBookBrowser* widget);
+		/// Add a widget to the right half of the pane
+		void add2(CqCenterScroll* widget);
+
+		CqBookBrowser* browser();
+		CqCenterScroll* centerScroll();
+
+		/// Fltk widget resize method.
+		virtual void resize(int x, int y, int w, int h);
+
 	private:
+		void moveDivider(int dx);
+		void init();
+
 		CqPaneDividerBox m_divider;
 		int m_prevDividerPos;
 		CqBookBrowser* m_browser;
 		CqCenterScroll* m_centerScroll;
-		void moveDivider(int dx)
-		{
-			m_prevDividerPos = m_divider.x();
-			int dividerX = clamp(m_divider.x() + dx, 0, w() - m_divider.w());
-			m_divider.resize(dividerX, y(), m_divider.w(), h());
-			if(m_browser)
-			{
-				m_browser->resize(x(), y(), m_divider.x()-x(), h());
-			}
-			if(m_centerScroll)
-			{
-				int w2X = m_divider.x() + m_divider.w();
-				m_centerScroll->resize(w2X, y(), w() - w2X, h());
-				init_sizes();
-			}
-			damage(FL_DAMAGE_ALL);
-		}
-		void init()
-		{
-			box(FL_FLAT_BOX);
-			m_divider.setDragCallback(boost::bind(&CqPane::moveDivider, this, _1));
-			end();
-		}
-	public:
-		CqPane(int x, int y, int w, int h, const char* l = 0)
-			: Fl_Group(x,y,w,h,l),
-			m_divider(x+w/2, y, 0, h),
-			m_prevDividerPos(0),
-			m_browser(0),
-			m_centerScroll(0)
-		{
-			init();
-		}
-		CqPane(int x, int y, int w, int h, double divPos, const char* l = 0)
-			: Fl_Group(x,y,w,h,l),
-			m_divider(x+static_cast<int>(divPos*w), y, 0, h),
-			m_prevDividerPos(0),
-			m_browser(0),
-			m_centerScroll(0)
-		{
-			init();
-		}
-
-		void uncollapse()
-		{
-			moveDivider(m_prevDividerPos - m_divider.x());
-		}
-		void collapse1()
-		{
-			if(m_divider.x() != x())
-				moveDivider(x() - m_divider.x());
-		}
-		void add1(CqBookBrowser* widget)
-		{
-			remove(m_browser);
-			m_browser = widget;
-			moveDivider(0);
-			Fl_Group::add(widget);
-		}
-		void add2(CqCenterScroll* widget)
-		{
-			remove(m_centerScroll);
-			m_centerScroll = widget;
-			resizable(widget);
-			moveDivider(0);
-			Fl_Group::add(widget);
-		}
-
-		CqBookBrowser* browser()
-		{
-			return(m_browser);
-		}
-
-		CqCenterScroll* centerScroll()
-		{
-			return m_centerScroll;
-		}
-
-		virtual void resize(int x, int y, int w, int h)
-		{
-			Fl_Group::resize(x, y, w, h);
-			if(m_divider.x() + m_divider.w() > x + w)
-				moveDivider(0);
-		}
 };
 
-//-----------------------------------------------------------------------
 
 } // namespace Aqsis
 
