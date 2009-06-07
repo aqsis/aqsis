@@ -128,6 +128,20 @@ public:
 					case 'h':
 						if(!Fl::event_alt())
 							return 1;
+					case FL_BackSpace:
+					case FL_Delete:
+						if(Fl::event_state(FL_CTRL))
+						{
+							// Remove the current image from the current book.
+							//
+							// It's pretty ugly to do the deltion from here;
+							// Piqsl needs to use a proper signals/slots
+							// mechanism or something...
+							removeImage();
+							return 1;
+						}
+						else
+							return 0;
 				}
 				break;
 		}
