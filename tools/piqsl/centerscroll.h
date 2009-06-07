@@ -36,7 +36,9 @@ class CqCenterScroll : public Fl_Scroll
 public:
 	CqCenterScroll(int x, int y, int w, int h, const char* l = 0);
 	/// FLTK event handling
-	int handle(int event);
+	virtual int handle(int event);
+	/// FLTK widget resize
+	virtual void resize(int x, int y, int w, int h);
 
 	/// Center the image.
 	void centerImageWidget();

@@ -87,6 +87,16 @@ int CqCenterScroll::handle(int event)
 		return Fl_Scroll::handle(event);
 }
 
+void CqCenterScroll::resize(int x, int y, int w, int h)
+{
+	int dw = w - this->w();
+	int dh = h - this->h();
+	Fl_Scroll::resize(x,y,w,h);
+	// Scroll the widget so that the window seems to expand equally around the
+	// contained widget.  This keeps the widget more centred than the default.
+	position(xposition()-dw/2, yposition()-dh/2);
+}
+
 void CqCenterScroll::setImage(const boost::shared_ptr<CqImage>& image)
 {
 	//m_imageWidget.position(x() + (w()/2)-(image->imageWidth()/2), y() + (h()/2)-(image->imageHeight()/2));
