@@ -101,6 +101,8 @@ public:
 	 * \return The channel info list of channel names and types.
 	 */
 	inline const CqChannelList& channelList() const;
+	/// Return true if the image represents a z-buffer
+	bool isZBuffer() const;
 	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
 	inline void connectChannelR(const std::string& chanName);
@@ -119,6 +121,8 @@ public:
 	 * \return				A pointer to the start of the display buffer.
 	 */
 	virtual boost::shared_ptr<const CqMixedImageBuffer> displayBuffer() const;
+	/// Return the image data in the native type
+	virtual boost::shared_ptr<const CqMixedImageBuffer> imageBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
@@ -132,6 +136,12 @@ public:
 	 * \param originy		The y origin within the image of the rendered frame.
 	 */
 	virtual void setOrigin(TqUlong originX, TqUlong originY);
+	/// Set the clipping planes (used for depth rendering)
+	void setClipping(TqFloat clippingNear, TqFloat clippingFar);
+	/// Get depth of the near clipping plane
+	TqFloat clippingNear();
+	/// Get depth of the far clipping plane
+	TqFloat clippingFar();
 	/** Get the total width of the image.
 	 * \return			The total width of the image.
 	 */
@@ -205,6 +215,8 @@ protected:
 	 */
 	boost::mutex& mutex() const;
 
+	void updateClippingRange();
+
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
     std::string		m_description;		///< Description or Software' renderer name.
@@ -216,6 +228,8 @@ protected:
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
+	TqFloat			m_clippingFar;	///< Far clipping plane or max depth for z-buffer
+	TqFloat			m_clippingNear;	///< Near clipping plane or min depth for z-buffer
 	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
 	TqChannelNameMap m_displayMap;  ///< map from display to underlying channel names
 
@@ -305,6 +319,14 @@ inline const CqChannelList& CqImage::channelList() const
 	return m_realData->channelList();
 }
 
+inline bool CqImage::isZBuffer() const
+{
+	// Assume a single float32 channel represents a z-buffer.
+	return m_realData
+		&& m_realData->channelList().sharedChannelType() == Channel_Float32
+		&& m_realData->channelList().numChannels() == 1;
+}
+
 inline TqUint CqImage::numChannels() const
 {
 	if(m_realData)
@@ -316,6 +338,11 @@ inline TqUint CqImage::numChannels() const
 inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
 {
 	return m_displayData;
+}
+
+inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::imageBuffer() const
+{
+	return m_realData;
 }
 
 inline TqUlong CqImage::originX() const
@@ -332,6 +359,22 @@ inline void CqImage::setOrigin(TqUlong originX, TqUlong originY)
 {
 	m_originX = originX;
 	m_originY = originY;
+}
+
+inline void CqImage::setClipping(TqFloat clippingNear, TqFloat clippingFar)
+{
+	m_clippingNear = clippingNear;
+	m_clippingFar = clippingFar;
+}
+
+inline TqFloat CqImage::clippingNear()
+{
+	return m_clippingNear;
+}
+
+inline TqFloat CqImage::clippingFar()
+{
+	return m_clippingFar;
 }
 
 inline TqUlong CqImage::imageWidth() const

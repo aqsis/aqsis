@@ -25,6 +25,8 @@
 
 #include <aqsis/aqsis.h>
 
+#include <float.h>
+
 #include <boost/format.hpp>
 
 #include <aqsis/version.h>
@@ -146,6 +148,9 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	m_displayData->initToCheckerboard();
 	m_displayData->compositeOver(*m_realData, m_displayMap);
 
+	// Compute the effective clipping range for z-buffers
+	updateClippingRange();
+
 	if(m_updateCallback)
 		m_updateCallback(-1, -1, -1, -1);
 }
@@ -231,5 +236,46 @@ void CqImage::fixupDisplayMap(const CqChannelList& channelList)
 		m_displayMap["b"] = "b";
 }
 
+/** \brief Update the [near,far] clipping interval for z-buffer data
+ *
+ * If the data represents a z-buffer, iterate across and update the clipping
+ * range reported by the image to reflect the minimum and maximum data present
+ * in the image.  Occurances of FLT_MAX in the data are ignored since that
+ * represents regions without visible objects.
+ */
+void CqImage::updateClippingRange()
+{
+	if(!isZBuffer())
+		return;
+
+	assert(m_realData);
+
+	TqFloat maxD = 0;
+	TqFloat minD = FLT_MAX;
+	// Iterate through the map, updating the min and max depths.
+	const TqFloat* buf = reinterpret_cast<const TqFloat*>(m_realData->rawData());
+	for(int i = 0, size = m_realData->width()*m_realData->height(); i < size; ++i)
+	{
+		TqFloat z = buf[i];
+		// Ignore any occurances of FLT_MAX, since that represents regions
+		// where no objects are found.
+		if(z == FLT_MAX)
+			continue;
+		if(z > maxD)
+			maxD = z;
+		else if(z < minD)
+			minD = z;
+	}
+	if(minD == FLT_MAX)
+		minD = 0;
+	// Make sure a finite range is reported when no data is present.
+	if(maxD <= minD)
+		maxD = minD+1e-5;
+	m_clippingNear = minD;
+	m_clippingFar = maxD;
+
+	if(m_updateCallback)
+		m_updateCallback(-1, -1, -1, -1);
+}
 
 } // namespace Aqsis

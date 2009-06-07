@@ -23,6 +23,8 @@
 
 #include "zoomimage.h"
 
+#include <float.h>
+
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 #include <FL/Fl_Group.H>
@@ -44,8 +46,7 @@ void CqZoomImage::draw()
 	{
 		fl_draw_image(draw_image_cb, this, x(),y(),
 					  m_image->displayBuffer()->width()*m_scale,
-					  m_image->displayBuffer()->height()*m_scale,
-					  m_image->displayBuffer()->channelList().numChannels());
+					  m_image->displayBuffer()->height()*m_scale, 3);
 	}
 	else
 	{
@@ -176,9 +177,30 @@ inline void fillPixel(const uchar* buf, uchar* outBuf, int depth)
  */
 void CqZoomImage::fillScanline(int x, int y, int w, uchar* outBuf)
 {
-	boost::shared_ptr<const Aqsis::CqMixedImageBuffer> buf = m_image->displayBuffer();
-	if(buf)
+	if(m_image->isZBuffer())
 	{
+		const TqFloat clipNear = m_image->clippingNear();
+		const TqFloat clipFar = m_image->clippingFar();
+		const TqFloat invRange = 1/(clipFar - clipNear);
+		boost::shared_ptr<const CqMixedImageBuffer> buf = m_image->imageBuffer();
+		const TqFloat* bufData = reinterpret_cast<const TqFloat*>(buf->rawData());
+		bufData += (buf->width()*(y/m_scale));
+		for(int i = 0; i < w; ++i)
+		{
+			float z = bufData[(x+i)/m_scale];
+			uchar d = static_cast<uchar>(
+					clamp<TqFloat>(255*(1-invRange*(z - clipNear)), 0, 255) );
+			outBuf[0] = d;
+			outBuf[1] = d;
+			outBuf[2] = d;
+			outBuf += 3;
+		}
+	}
+	else
+	{
+		boost::shared_ptr<const CqMixedImageBuffer> buf = m_image->displayBuffer();
+		if(!buf)
+			return;
 		const uchar* bufData = buf->rawData();
 		int depth = buf->channelList().numChannels();
 		bufData += (buf->width()*(y/m_scale))*depth;

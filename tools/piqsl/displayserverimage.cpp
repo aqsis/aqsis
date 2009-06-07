@@ -48,6 +48,8 @@ namespace Aqsis {
  */
 void CqDisplayServerImage::close()
 {
+	// Recompute the effective near and far clipping
+	updateClippingRange();
 	m_socket.close();
 }
 

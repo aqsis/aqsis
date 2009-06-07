@@ -27,6 +27,7 @@
 
 #include	<string>
 #include	<list>
+#include	<float.h>
 
 #include	<boost/thread/thread.hpp>
 #include	<boost/thread/mutex.hpp>
@@ -204,6 +205,27 @@ class CqDataHandler
 							}
 							param = param->NextSiblingElement("IntsParameter");
 						}
+						param = child->FirstChildElement("FloatsParameter");
+						double clipNear = 0;
+						double clipFar = FLT_MAX;
+						while(param)
+						{
+							const char* name = param->Attribute("name");
+							if(name == std::string("near"))
+							{
+								TiXmlElement* value = param->FirstChildElement("Values")
+									->FirstChildElement("Float");
+								value->Attribute("value", &clipNear);
+							}
+							else if(name == std::string("far"))
+							{
+								TiXmlElement* value = param->FirstChildElement("Values")
+									->FirstChildElement("Float");
+								value->Attribute("value", &clipFar);
+							}
+							param = param->NextSiblingElement("FloatsParameter");
+						}
+						m_client->setClipping(clipNear, clipFar);
 					}
 					child = root->FirstChildElement("Formats");
 					CqChannelList channelList;
