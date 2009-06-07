@@ -23,16 +23,18 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<aqsis/aqsis.h>
+#include <aqsis/aqsis.h>
 
-#include	<boost/bind.hpp>
-#include	<boost/filesystem.hpp>
-#include	<FL/Fl_File_Chooser.H>
+#include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
+#include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_Menu_Item.H>
+#include <FL/Fl_Menu_Button.H>
 
-#include	<aqsis/util/logging.h>
+#include <aqsis/util/logging.h>
 
-#include	"piqslmainwindow.h"
-#include	"image.h"
+#include "piqslmainwindow.h"
+#include "image.h"
 
 extern Aqsis::CqPiqslMainWindow* window;
 
@@ -42,7 +44,7 @@ void quit_cb(Fl_Widget* w, void*);
 void addImage_cb(Fl_Widget* w, void*);
 void removeImage_cb(Fl_Widget* w, void*);
 
-Fl_Menu_Item mainMenu[] = {
+static Fl_Menu_Item mainMenu[] = {
 	{"&File", FL_ALT+'f', 0, 0, FL_SUBMENU},
 		{"&Open Library", FL_COMMAND+'o', (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
 		{"&Save Library", FL_COMMAND+'s', (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
@@ -64,6 +66,95 @@ Fl_Menu_Item mainMenu[] = {
 		{0},
 	{0}
 };
+
+CqPiqslMainWindow::CqPiqslMainWindow(int w, int h, const char* title)
+	: Fl_Double_Window(w, h, title),
+	m_menuBar(0, 0, w, 25),
+	m_pane(0),
+	m_scroll(0),
+	m_fullScreenImage(false),
+	m_doResize(false)
+{
+	// Set user_data to point to this, so we can
+	// get back to the main window from anywhere.
+	user_data((void*)(this));
+
+	mainMenu[1].user_data_ = this;
+	mainMenu[2].user_data_ = this;
+	mainMenu[3].user_data_ = this;
+	m_menuBar.menu(mainMenu);
+	// Setup some callback user data.
+	m_menuBar.box(FL_THIN_UP_BOX);
+
+	m_pane = new CqPane(0, m_menuBar.h(), w, h - m_menuBar.h(), 0.2);
+
+	CqBookBrowser* browser = new CqBookBrowser(0, 0, 1, 100);
+	browser->box(FL_THIN_DOWN_BOX);
+	m_pane->add1(browser);
+
+	m_scroll = new CqCenterScroll(0, m_menuBar.h(), w, h - m_menuBar.h());
+	m_pane->add2(m_scroll);
+
+	browser->take_focus();
+
+	resizable(m_pane);
+	end();
+}
+
+int CqPiqslMainWindow::handle(int event)
+{
+	switch(event)
+	{
+		case FL_SHORTCUT:
+			switch(Fl::event_key())
+			{
+				case 'f':
+					if(!Fl::event_alt())
+					{
+						if(m_fullScreenImage)
+						{
+							m_menuBar.show();
+							m_pane->resize(0, m_menuBar.h(), w(), h() - m_menuBar.h());
+							m_pane->uncollapse();
+							m_fullScreenImage = false;
+							//init_sizes();
+						}
+						else
+						{
+							m_menuBar.hide();
+							m_pane->resize(0, 0, w(), h());
+							m_pane->collapse1();
+							m_fullScreenImage = true;
+							//init_sizes();
+						}
+						return 1;
+					}
+					break;
+				// Swallow the unmodified menu shortcuts, so the menus only activate with alt
+				case 'b':
+				case 'i':
+				case 'h':
+					if(!Fl::event_alt())
+						return 1;
+				case FL_BackSpace:
+				case FL_Delete:
+					if(Fl::event_state(FL_CTRL))
+					{
+						// Remove the current image from the current book.
+						//
+						// It's pretty ugly to do the deltion from here;
+						// Piqsl needs to use a proper signals/slots
+						// mechanism or something...
+						removeImage();
+						return 1;
+					}
+					else
+						return 0;
+			}
+			break;
+	}
+	return Fl_Group::handle(event);
+}
 
 void CqPiqslMainWindow::saveConfigurationAs() 
 {
@@ -428,7 +519,7 @@ void CqPiqslMainWindow::queueResize()
 void CqPiqslMainWindow::resize(int X, int Y, int W, int H)
 {
 	// is the window actually getting resized? (might just be moved)
-	bool isResizing = W != w() || H != h();
+	//bool isResizing = W != w() || H != h();
 	// call parent's resize()
 	Fl_Double_Window::resize(X, Y, W, H);
 //	if(isResizing)

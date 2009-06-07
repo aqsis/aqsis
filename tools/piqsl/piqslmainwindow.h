@@ -26,26 +26,18 @@
 #ifndef	PIQSLMAINWINDOW_H_INCLUDED
 #define	PIQSLMAINWINDOW_H_INCLUDED
 
-#include	<aqsis/aqsis.h>
+#include <aqsis/aqsis.h>
 
-#include	"pane.h"
-#include	"centerscroll.h"
-#include	"bookbrowser.h"
+#include "pane.h"
+#include "centerscroll.h"
+#include "bookbrowser.h"
 
 #include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Scroll.H>
 #include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Browser.H>
-#include <FL/Fl_Select_Browser.H>
 #include <FL/Fl_Sys_Menu_Bar.H>
-#include <FL/Fl_Menu_Item.H>
-#include <FL/Fl_Menu_Button.H>
 #include <FL/Fl_Pack.H>
 
 namespace Aqsis {
-
-extern Fl_Menu_Item mainMenu[];
 
 class CqPiqslMainWindow : public Fl_Double_Window
 {
@@ -60,93 +52,8 @@ private:
 	std::string m_currentConfigName;					///< Stored name of the library on disk.
 	bool	m_doResize;								///< Flag indicating a resize has been requested.
 public:
-	CqPiqslMainWindow(int w, int h, const char* title)
-		: Fl_Double_Window(w, h, title),
-		m_menuBar(0, 0, w, 25),
-		m_pane(0),
-		m_scroll(0),
-		m_fullScreenImage(false),
-		m_doResize(false)
-	{
-		// Set user_data to point to this, so we can
-		// get back to the main window from anywhere.
-		user_data((void*)(this));
-
-		mainMenu[1].user_data_ = this;
-		mainMenu[2].user_data_ = this;
-		mainMenu[3].user_data_ = this;
-		m_menuBar.menu(mainMenu);
-		// Setup some callback user data.
-		m_menuBar.box(FL_THIN_UP_BOX);
-
-		m_pane = new CqPane(0, m_menuBar.h(), w, h - m_menuBar.h(), 0.2);
-
-		CqBookBrowser* browser = new CqBookBrowser(0, 0, 1, 100);
-		browser->box(FL_THIN_DOWN_BOX);
-		m_pane->add1(browser);
-
-		m_scroll = new CqCenterScroll(0, m_menuBar.h(), w, h - m_menuBar.h());
-		m_pane->add2(m_scroll);
-
-		browser->take_focus();
-
-		resizable(m_pane);
-		end();
-	}
-	virtual int handle(int event)
-	{
-		switch(event)
-		{
-			case FL_SHORTCUT:
-				switch(Fl::event_key())
-				{
-					case 'f':
-						if(!Fl::event_alt())
-						{
-							if(m_fullScreenImage)
-							{
-								m_menuBar.show();
-								m_pane->resize(0, m_menuBar.h(), w(), h() - m_menuBar.h());
-								m_pane->uncollapse();
-								m_fullScreenImage = false;
-								//init_sizes();
-							}
-							else
-							{
-								m_menuBar.hide();
-								m_pane->resize(0, 0, w(), h());
-								m_pane->collapse1();
-								m_fullScreenImage = true;
-								//init_sizes();
-							}
-							return 1;
-						}
-						break;
-					// Swallow the unmodified menu shortcuts, so the menus only activate with alt
-					case 'b':
-					case 'i':
-					case 'h':
-						if(!Fl::event_alt())
-							return 1;
-					case FL_BackSpace:
-					case FL_Delete:
-						if(Fl::event_state(FL_CTRL))
-						{
-							// Remove the current image from the current book.
-							//
-							// It's pretty ugly to do the deltion from here;
-							// Piqsl needs to use a proper signals/slots
-							// mechanism or something...
-							removeImage();
-							return 1;
-						}
-						else
-							return 0;
-				}
-				break;
-		}
-		return Fl_Group::handle(event);
-	}
+	CqPiqslMainWindow(int w, int h, const char* title);
+	virtual int handle(int event);
 	void update(int X, int Y, int W, int H);
 
 	/** Add a new book to the library.
