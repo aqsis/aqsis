@@ -23,3 +23,4 @@ Bugfixes
  * Fix memory leak - make sure the SqPiqslDisplayInstance struct is deleted DspyImageDelayClose() should delete the display instance struct.
  * Default to "ri.pic" when a NULL string is passed to RiDisplay.
  * Fix a memory leak related to the attribute stack.
+ * Improve the startup of piqsl when launched automatically by aqsis, now much faster where possible, and much more tolerant of slow startup.

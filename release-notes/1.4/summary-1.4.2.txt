@@ -1,0 +1,44 @@
+Summary of changes in aqsis-1.4.2 (chronological order):
+
+
+Enhancements
+------------
+
+* Add a compatibility interface to Pixar's sloarg shader argument library.
+* Improve piqsldisplay standard compliance to work with 3delight
+* Optimization to texture filtering code: precomputed integer image channel normalization.
+* Revised Windows installer, removing unnecessary features and improved logging.
+* Add GeometricApproximation "focusfactor" approximation for faster depth of field rendering.  Off by default.
+
+
+Bugfixes
+--------
+
+* Fix incorrect fixed-size integer types in ndspy.h on some platforms.
+* Fix bug #2128051: "8-bit character encoding missing"
+* Fix printing of parameter lists which was missing the token names when using -echoapi
+* Remove the AQSIS_USE_PLUGINS option from the build system to avoid confusion and broken builds.
+* Fix bug #2167498: "uniform user parameters not working for SDS"
+* Correct the array length count as passed by the RIB parser into RiColorSamples.
+* Fix texture(..., "lerp", 1) which incorrectly used mipmap level 1 when magnifying a texture
+* Fix intermittent aqsl segfault when typechecking functions, especially external DSOs.
+* Fix varying string value assignment in the shading language which acted as if it was uniform.
+* Fix bug #2128030: "unnecessary PATH environment variable"
+* Fix bug #2499967: ".aqsisrc no-longer supports backslashes in paths"
+* Add some basic validity checks to the quadric primitives.
+* Fix bug #2173552 by flipping Ng's direction as necessary when a user specified N is present.
+* Add missing include files to OSX bundle.
+* Add missing include files to NSIS.
+* Fix the installation details for OSX to ensure visibility on the PATH.
+* Fix bug #2498990: Backface culling sometimes incorrect in motion blocks
+* Fix bug in RSL ctransform() function - previously one of fromspace or tospace had to be "rgb".
+
+Known Issues
+------------
+
+  * Piqsl only updates the non-zoomed image at present, meaning you will need to zoom-out to the 1:1 size to see render progress. #2022177
+  * Smooth shading interpolation does not presently support depth-of-field and motion blur features.
+  * The "expandgrids" attribute does not presently support semi-opaque surfaces and shadows using either "depthfilter" or "midpoint".
+  * Massive Software's "DynamicLoad" procedural plugin is presently not supported.
+  * The "mpanalyse.py" Python script will not operate standalone and assumes both CGKit and PyOpenGL are installed on your system.
+  * Backslashes in 'aqsisrc' paths must now be escaped (use \\ to get a single \ ), in accordance with the RISpec.
