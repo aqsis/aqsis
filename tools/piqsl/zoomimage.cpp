@@ -42,9 +42,12 @@ CqZoomImage::CqZoomImage(int x, int y)
 
 void CqZoomImage::draw()
 {
+	fl_color(FL_DARK1);
+	fl_rect(x(), y(), w(), h());
 	if(m_image && m_image->displayBuffer())
 	{
-		fl_draw_image(draw_image_cb, this, x(),y(),
+		fl_draw_image(draw_image_cb, this,
+					  x() + m_image->originX(), y() + m_image->originY(),
 					  m_image->displayBuffer()->width()*m_scale,
 					  m_image->displayBuffer()->height()*m_scale, 3);
 	}
@@ -60,8 +63,8 @@ void CqZoomImage::updateImage()
 {
 	if(m_image)
 	{
-		w(m_image->imageWidth()*m_scale);
-		h(m_image->imageHeight()*m_scale);
+		w(m_image->frameWidth()*m_scale);
+		h(m_image->frameHeight()*m_scale);
 		parent()->damage(FL_DAMAGE_ALL);
 	}
 }

@@ -115,8 +115,8 @@ void CqCenterScroll::centerImageWidget()
 {
 	if(m_imageWidget.image())
 	{
-		m_imageWidget.position(x() + (w()/2)-(m_imageWidget.image()->imageWidth()/2),
-								y() + (h()/2)-(m_imageWidget.image()->imageHeight()/2));
+		m_imageWidget.position(x() + (w()/2)-(m_imageWidget.image()->frameWidth()/2),
+							   y() + (h()/2)-(m_imageWidget.image()->frameHeight()/2));
 		damage(FL_DAMAGE_ALL);
 	}
 }
