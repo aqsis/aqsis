@@ -30,7 +30,10 @@ CqCenterScroll::CqCenterScroll(int x, int y, int w, int h, const char* l)
 	m_imageWidget(x,y),
 	m_prevDragX(0),
 	m_prevDragY(0)
-{ }
+{
+	// Centre the child widget initially.
+	position(this->x() - this->w()/2, this->y() - this->h()/2);
+}
 
 int CqCenterScroll::handle(int event)
 {
@@ -99,8 +102,13 @@ void CqCenterScroll::resize(int x, int y, int w, int h)
 
 void CqCenterScroll::setImage(const boost::shared_ptr<CqImage>& image)
 {
-	//m_imageWidget.position(x() + (w()/2)-(image->imageWidth()/2), y() + (h()/2)-(image->imageHeight()/2));
+	int oldW = m_imageWidget.w();
+	int oldH = m_imageWidget.h();
 	m_imageWidget.setImage(image);
+	// Scroll the position such that the centre of the child widget remains in
+	// the same place.
+	position(xposition() + (m_imageWidget.w() - oldW)/2,
+			 yposition() + (m_imageWidget.h() - oldH)/2);
 }
 
 void CqCenterScroll::centerImageWidget()
