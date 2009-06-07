@@ -85,17 +85,17 @@ public:
 	 * The frame width if the cropped rendered region, within the image.
 	 * \return			The frame width of the image.
 	 */
-	virtual TqUlong	frameWidth() const;
+	virtual TqInt	frameWidth() const;
 	/** Get the frame height of the image.
 	 * The frame height if the cropped rendered region, within the image.
 	 * \return			The frame height of the image.
 	 */
-	virtual TqUlong frameHeight() const;
+	virtual TqInt frameHeight() const;
 	/** Combined setter for frame size.
 	 * \param width			The new frame width.
 	 * \param height		The new frame height.
 	 */
-	virtual void setFrameSize(TqUlong width, TqUlong height);
+	virtual void setFrameSize(TqInt width, TqInt height);
 	/** \brief Get the channel information list for the "real" data.
 	 *
 	 * \return The channel info list of channel names and types.
@@ -126,16 +126,16 @@ public:
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
-	virtual TqUlong originX() const;
+	virtual TqInt originX() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
-	virtual TqUlong originY() const;
+	virtual TqInt originY() const;
 	/** The the origin of the frame within the image.
 	 * \param originx		The x origin within the image of the rendered frame.
 	 * \param originy		The y origin within the image of the rendered frame.
 	 */
-	virtual void setOrigin(TqUlong originX, TqUlong originY);
+	virtual void setOrigin(TqInt originX, TqInt originY);
 	/// Set the clipping planes (used for depth rendering)
 	void setClipping(TqFloat clippingNear, TqFloat clippingFar);
 	/// Get depth of the near clipping plane
@@ -145,16 +145,16 @@ public:
 	/** Get the total width of the image.
 	 * \return			The total width of the image.
 	 */
-	virtual TqUlong imageWidth() const;
+	virtual TqInt imageWidth() const;
 	/** Get the total height of the image.
 	 * \return			The total height of the image.
 	 */
-	virtual TqUlong imageHeight() const;
+	virtual TqInt imageHeight() const;
 	/** Set the total image size.
 	 * \param imageWidth	The total image width.
 	 * \param imageHeight	The total image height.
 	 */
-	virtual void setImageSize(TqUlong imageWidth, TqUlong imageHeight);
+	virtual void setImageSize(TqInt imageWidth, TqInt imageHeight);
 
 	/** \brief Setup the display and full-precision buffers.
 	 *
@@ -222,12 +222,12 @@ protected:
     std::string		m_description;		///< Description or Software' renderer name.
 	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
 	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
-	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
-	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
-	TqUlong			m_imageWidth;	///< The total image width.
-	TqUlong			m_imageHeight;	///< The total image height.
-	TqUlong			m_originX;		///< The origin of the frame within the whole image.
-	TqUlong			m_originY;		///< The origin of the frame within the whole image.
+	TqInt			m_frameWidth;	///< The width of the frame within the whole image.
+	TqInt			m_frameHeight;	///< The height of the frame within the whole image.
+	TqInt			m_imageWidth;	///< The total image width.
+	TqInt			m_imageHeight;	///< The total image height.
+	TqInt			m_originX;		///< The origin of the frame within the whole image.
+	TqInt			m_originY;		///< The origin of the frame within the whole image.
 	TqFloat			m_clippingFar;	///< Far clipping plane or max depth for z-buffer
 	TqFloat			m_clippingNear;	///< Near clipping plane or min depth for z-buffer
 	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
@@ -295,17 +295,17 @@ inline void	CqImage::setFilename( const std::string& name )
 	m_fileName = name;
 }
 
-inline TqUlong CqImage::frameWidth() const
+inline TqInt CqImage::frameWidth() const
 {
 	return( m_frameWidth );
 }
 
-inline TqUlong CqImage::frameHeight() const
+inline TqInt CqImage::frameHeight() const
 {
 	return( m_frameHeight );
 }
 
-inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
+inline void CqImage::setFrameSize(TqInt width, TqInt height)
 {
 	m_frameWidth = width;
 	m_frameHeight = height;
@@ -345,17 +345,17 @@ inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::imageBuffer() const
 	return m_realData;
 }
 
-inline TqUlong CqImage::originX() const
+inline TqInt CqImage::originX() const
 {
 	return( m_originX );
 }
 
-inline TqUlong CqImage::originY() const
+inline TqInt CqImage::originY() const
 {
 	return( m_originY );
 }
 
-inline void CqImage::setOrigin(TqUlong originX, TqUlong originY)
+inline void CqImage::setOrigin(TqInt originX, TqInt originY)
 {
 	m_originX = originX;
 	m_originY = originY;
@@ -377,17 +377,17 @@ inline TqFloat CqImage::clippingFar()
 	return m_clippingFar;
 }
 
-inline TqUlong CqImage::imageWidth() const
+inline TqInt CqImage::imageWidth() const
 {
 	return( m_imageWidth );
 }
 
-inline TqUlong CqImage::imageHeight() const
+inline TqInt CqImage::imageHeight() const
 {
 	return( m_imageHeight );
 }
 
-inline void CqImage::setImageSize(TqUlong imageWidth, TqUlong imageHeight)
+inline void CqImage::setImageSize(TqInt imageWidth, TqInt imageHeight)
 {
 	m_imageWidth = imageWidth;
 	m_imageHeight = imageHeight;
