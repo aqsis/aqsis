@@ -688,7 +688,7 @@ void CqImageBuffer::RenderImage()
 			bucketProcessors[i].setBucket(&CurrentBucket());
 
 			// Prepare the bucket processor
-			bucketProcessors[i].preProcess(&jitteredSampler);
+			bucketProcessors[i].preProcess(sampler);
 
 #if ENABLE_MPDUMP
 			// Dump the pixel sample positions into a dump file
