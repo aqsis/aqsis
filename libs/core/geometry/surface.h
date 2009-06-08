@@ -558,14 +558,15 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			return(false);
 		}
 
-		/** Get the shading rate, adjusted for DoF (and MB in the future)
+		/** Get the shading rate, adjusted for DoF and MB
 		 *
 		 * Without depth of field or motion blur, this function just returns
 		 * the shading rate as given by the current attribute set.
 		 *
 		 * When depth of field is turned on, the shading rate is increased
-		 * according to value of the system "GeometricFocusFactor" attribute
-		 * (as specified with RiGeometricApproximation("focusfactor", ...) )
+		 * proportionally to the area of the circle of confusion, multiplied by
+		 * the value of the system "GeometricFocusFactor" attribute (as
+		 * specified with RiGeometricApproximation("focusfactor", ...) )
 		 *
 		 * \todo No adjustment is yet implemented for motion blur, but the
 		 * intention is to allow RiGeometricApproximation("motionfactor", ...)

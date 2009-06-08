@@ -685,17 +685,36 @@ TqFloat CqSurface::AdjustedShadingRate() const
 	CqRenderer* context = QGetRenderContext();
 	if(context->UsingDepthOfField())
 	{
-		// Adjust dice size with the CoC area.  This ensures that very blurry
+		// Adjust dice size with the CoC *area*.  This ensures that very blurry
 		// parts of a scene only have relatively few micropolys and allows the
 		// number of sample-in-micropolygon tests per pixel to be constant as
 		// the image size is increased.
 		//
 		// If this isn't included then render time increases roughly
 		// quadratically with number of pixels which makes things very slow.
-		const TqFloat* focusFactor =
-			m_pAttributes->GetFloatAttribute("System", "GeometricFocusFactor");
+		const TqFloat focusFactor =
+			m_pAttributes->GetFloatAttribute("System", "GeometricFocusFactor")[0];
 		const TqFloat minCoC = context->MinCoCForBound(m_Bound);
-		shadingRate *= max(1.0, 0.25*minCoC*minCoC*focusFactor[0]);
+
+		// We need a factor which decides the desired ratio of the area of the
+		// circle of confusion to the area of a micropolygon.  The factor
+		// areaRatio = 0.025 was chosen by some experiments demanding that
+		// using focusFactor = 1 yield results almost visually indistingushable
+		// from focusFactor = 0.
+		//
+		// Two main experiments were used to get areaRatio:
+		//   1) Randomly coloured micropolygons: with an input of ShadingRate = 1
+		//      and focusFactor = 1, randomly coloured micropolys (Ci = random())
+		//      should all blend together with no large regions of colour, even
+		//      in image regions with lots of focal blur.
+		//   2) A scene with multiple strong specular highlights (a bilinear
+		//      patch with displacement shader
+		//      P += 0.1*sin(40*v)*cos(20*u) * normalize(N); ):
+		//      This should look indistingushable from the result obtained with
+		//      focusFactor = 1, regardless of the amount of focal blur.
+		//
+		const TqFloat areaRatio = 0.025;
+		shadingRate *= max(1.0f, areaRatio*focusFactor*minCoC*minCoC);
 	}
 	return shadingRate;
 }
