@@ -29,6 +29,7 @@ include_directories(${AQSIS_ZLIB_INCLUDE_DIR})
 aqsis_add_library(aqsis_ri2rib ${ri2rib_srcs} ${ri2rib_hdrs}
 	COMPILE_DEFINITIONS AQSIS_RI_EXPORTS
 	LINK_LIBRARIES aqsis_riutil ${AQSIS_ZLIB_LIBRARIES}
+	DEPENDS ri_inl
 )
 
 aqsis_install_targets(aqsis_ri2rib)
