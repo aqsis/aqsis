@@ -1441,12 +1441,13 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 
 	// Get a pointer to the hit storage.
 	SqImageSample* hit = 0;
-	if(m_CurrentMpgSampleInfo.isOpaque && currentGridInfo.isCullable)
+	if((m_CurrentMpgSampleInfo.isOpaque || (currentGridInfo.matteFlag
+				& SqImageSample::Flag_MatteAlpha)) && currentGridInfo.isCullable)
 	{
 		// Use the occluding sample storage when possible, since this is
 		// faster.  Hits may be stored in the occluding storage whenever they
 		// can occlude other samples.  This happens when
-		// 1) The micropoly is fully opaque
+		// 1) The micropoly is fully opaque (including all MatteAlpha objects)
 		// 2) The micropoly is not part of a CSG
 		// 3) We don't need the entire set of samples for depth filtering.
 		hit = &occlHit;
@@ -1475,8 +1476,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 
 	// Update CSG pointer and flags.
 	hit->csgNode = pMPG->pGrid()->pCSGNode();
-	if(currentGridInfo.isMatte)
-		hit->flags |= SqImageSample::Flag_Matte;
+	hit->flags |= currentGridInfo.matteFlag;
 
 	// Mark the pixel as containing valid samples, used later for the cacheing and reuse.
 	pie2->markHasValidSamples();

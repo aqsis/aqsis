@@ -90,9 +90,18 @@ struct SqImageSample
 	/// this pointer will be valid, otherwise, it will be null.
 	boost::shared_ptr<CqCSGTreeNode> csgNode;
 
+	/** \brief Flags indicating the type of sample.
+	 *
+	 * MatteAlpha is a special aqsis-specific type of matte object which is
+	 * *always* fully opaque from the point of view of the hider, but which
+	 * actually has a user-specifiable alpha and colour.  This is helpful when
+	 * trying to render shadows cast by CG objects onto parts of a live-action
+	 * set.  Ditto for reflections.
+	 */
 	enum {
 	    Flag_Matte = 0x0001,
-	    Flag_Valid = 0x0002
+	    Flag_MatteAlpha = 0x0002,
+	    Flag_Valid = 0x0004
 	};
 
 	static TqInt sampleSize;

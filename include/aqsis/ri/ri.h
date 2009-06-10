@@ -85,11 +85,15 @@ extern	"C"
 	AQSIS_RI_SHARE	extern	RtBasis	RiBezierBasis, RiBSplineBasis, RiCatmullRomBasis,
 	RiHermiteBasis, RiPowerBasis;
 
+// Spline basis steps
 #define	RI_BEZIERSTEP		((RtInt)3)
 #define	RI_BSPLINESTEP		((RtInt)1)
 #define	RI_CATMULLROMSTEP	((RtInt)1)
 #define	RI_HERMITESTEP		((RtInt)2)
 #define	RI_POWERSTEP		((RtInt)4)
+
+// Aqsis-specific "matte with alpha" argument to RiMatte.
+#define RI_MATTEALPHA 2
 
 	AQSIS_RI_SHARE	extern	RtInt	RiLastError;
 

@@ -59,7 +59,7 @@ struct SqGridInfo
 	TqFloat shutterOpenTime;
 	TqFloat shutterCloseTime;
 	const TqFloat* lodBounds;
-	bool isMatte;
+	TqUchar matteFlag;
 	bool isCullable;
 	bool usesDataMap;
 	bool useSmoothShading;

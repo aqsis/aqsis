@@ -45,7 +45,13 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>& surface)
 {
-	m_CurrentGridInfo.isMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+	// Determine the matte flag type.
+	switch(this->pAttributes()->GetIntegerAttribute("System", "Matte")[0])
+	{
+		case 0:  m_CurrentGridInfo.matteFlag = 0;                              break;
+		default: m_CurrentGridInfo.matteFlag = SqImageSample::Flag_Matte;      break;
+		case 2:  m_CurrentGridInfo.matteFlag = SqImageSample::Flag_MatteAlpha; break;
+	}
 
 	// Cache the shading interpolation type.
 	m_CurrentGridInfo.useSmoothShading = pAttributes()->

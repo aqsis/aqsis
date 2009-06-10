@@ -2338,7 +2338,7 @@ RtVoid	RiMatte( RtBoolean onoff )
 
 	DEBUG_RIMATTE
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff != 0;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff;
 	QGetRenderContext() ->AdvanceTime();
 	EXCEPTION_CATCH_GUARD("RiMatte")
 	return ;
