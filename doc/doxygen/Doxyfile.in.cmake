@@ -25,7 +25,7 @@ DOXYFILE_ENCODING      = UTF-8
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = "@AQSIS_PROJECT_NAME@"
+PROJECT_NAME           = "Aqsis Renderer"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
@@ -513,43 +513,9 @@ WARN_LOGFILE           = doxygen.warn
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-#INPUT                  = @CMAKE_SOURCE_DIR@/aqsistypes                     \
-#                         @CMAKE_SOURCE_DIR@/aqsistypes/posix               \
-#                         @CMAKE_SOURCE_DIR@/aqsistypes/win32               \
-#                         @CMAKE_SOURCE_DIR@/argparse                       \
-#                         @CMAKE_SOURCE_DIR@/displays/display               \
-#                         @CMAKE_SOURCE_DIR@/displays/piqsl                 \
-#                         @CMAKE_SOURCE_DIR@/displays/d_exr                 \
-#                         @CMAKE_SOURCE_DIR@/displays/d_sdcBMP              \
-#                         @CMAKE_SOURCE_DIR@/displays/d_xpm                 \
-#                         @CMAKE_SOURCE_DIR@/interfaces                     \
-#                         @CMAKE_SOURCE_DIR@/renderer/aqsis                 \
-#                         @CMAKE_SOURCE_DIR@/renderer/ddmanager             \
-#                         @CMAKE_SOURCE_DIR@/renderer/raytrace              \
-#                         @CMAKE_SOURCE_DIR@/renderer/render                \
-#                         @CMAKE_SOURCE_DIR@/rib/api                        \
-#                         @CMAKE_SOURCE_DIR@/rib/miqser                     \
-#                         @CMAKE_SOURCE_DIR@/rib/ri2rib                     \
-#                         @CMAKE_SOURCE_DIR@/rib/rib2ri                     \
-#                         @CMAKE_SOURCE_DIR@/rib/ribparse                   \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/aqsl            \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/aqsltell        \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/codegenvm       \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/shaderexecenv   \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/shadervm        \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/slparse         \
-#                         @CMAKE_SOURCE_DIR@/shadercompiler/slxargs         \
-#                         @CMAKE_SOURCE_DIR@/texturing/teqser               \
-#                         @CMAKE_SOURCE_DIR@/texturing/texlib
-
-INPUT                  = @CMAKE_SOURCE_DIR@/aqsistypes                     \
-                         @CMAKE_SOURCE_DIR@/argparse                       \
-                         @CMAKE_SOURCE_DIR@/displays                       \
-                         @CMAKE_SOURCE_DIR@/interfaces                     \
-                         @CMAKE_SOURCE_DIR@/renderer                       \
-                         @CMAKE_SOURCE_DIR@/rib                            \
-                         @CMAKE_SOURCE_DIR@/shadercompiler                 \
-                         @CMAKE_SOURCE_DIR@/texturing
+INPUT                  = @CMAKE_SOURCE_DIR@/include       \
+                         @CMAKE_SOURCE_DIR@/libs          \
+                         @CMAKE_SOURCE_DIR@/tools
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -743,7 +709,7 @@ IGNORE_PREFIX          =
 # If the GENERATE_HTML tag is set to YES (the default) Doxygen will 
 # generate HTML output.
 
-GENERATE_HTML          = @AQSIS_DOC_HTML@
+GENERATE_HTML          = YES
 
 # The HTML_OUTPUT tag is used to specify where the HTML docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
@@ -1394,4 +1360,4 @@ DOT_CLEANUP            = YES
 # The SEARCHENGINE tag specifies whether or not a search engine should be 
 # used. If set to NO the values of all tags below this one will be ignored.
 
-SEARCHENGINE           = @AQSIS_DOC_SEARCHBAR@
+SEARCHENGINE           = NO # @AQSIS_DOC_SEARCHBAR@

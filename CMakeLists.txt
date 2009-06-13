@@ -37,7 +37,9 @@ option(AQSIS_ENABLE_MPDUMP "Enable micropolygon dumping code" OFF)
 option(AQSIS_ENABLE_MASSIVE "Enable Massive support" ON)
 option(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support" ON)
 option(AQSIS_ENABLE_THREADING "Enable multi-threading (EXPERIMENTAL)" OFF)
-mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT)
+option(AQSIS_ENABLE_DEVDOCS "Enable developer documentation" OFF)
+mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT
+	AQSIS_ENABLE_DEVDOCS)
 
 option(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 mark_as_advanced(AQSIS_USE_RPATH)
@@ -265,7 +267,9 @@ add_subdirectory(shaders)
 add_subdirectory(examples)
 
 # Build docs
-add_subdirectory(doc/doxygen)
+if(AQSIS_ENABLE_DEVDOCS)
+	add_subdirectory(doc/doxygen)
+endif()
 
 # Packaging
 add_subdirectory(distribution)
