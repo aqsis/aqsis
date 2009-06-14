@@ -9,7 +9,7 @@ Declare "bias" "float"
 Hider "hidden" "depthfilter" "midpoint"
 
 # Output Z data only
-Display "softshadow.z" "zfile" "z"
+Display "softshadow.zfile" "zfile" "z"
 
 Clipping 0.01 10
 
@@ -35,7 +35,7 @@ WorldEnd
 
 FrameEnd
 
-MakeShadow "softshadow.z" "softshadow.map"
+MakeShadow "softshadow.zfile" "softshadow.shad"
 
 #
 #
@@ -62,7 +62,7 @@ Declare "blur" "uniform float"
 
 WorldBegin
   LightSource "ambientlight" 0 "intensity" [0.2]
-  LightSource "shadowspot" 1 "intensity" [75] "from" [5 5 -5] "to" [0 0 0] "coneangle" [0.5] "shadowname" ["softshadow.map"] "blur" [0.03]
+  LightSource "shadowspot" 1 "intensity" [75] "from" [5 5 -5] "to" [0 0 0] "coneangle" [0.5] "shadowname" ["softshadow.shad"] "blur" [0.03]
 
   Color [0.4 0.4 0.1]
   Surface "matte"

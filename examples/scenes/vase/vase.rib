@@ -6,7 +6,7 @@
 Option "searchpath" "shader" ["../../../shaders/light:../../../shaders/displacement:../../../shaders/surface:&"]
 FrameBegin 1
 
-Display "shad1.map" "zfile" "z"
+Display "shad1.shad" "zfile" "z"
 
 Hider "hidden" "depthfilter" "midpoint"
 
@@ -142,7 +142,7 @@ FrameEnd
 
 FrameBegin 2
 
-Display "shad2.map" "zfile" "z"
+Display "shad2.shad" "zfile" "z"
 
 Format 256 256 1
 PixelSamples 1 1
@@ -275,8 +275,8 @@ AttributeEnd
 WorldEnd
 FrameEnd
 
-MakeShadow "shad1.map" "shad1.map"
-MakeShadow "shad2.map" "shad2.map"
+MakeShadow "shad1.shad" "shad1.shad"
+MakeShadow "shad2.shad" "shad2.shad"
 
 
 FrameBegin 3
@@ -300,10 +300,10 @@ Declare "shadowname" "uniform string"
 WorldBegin
 
 LightSource "ambientlight" 1 "intensity" [0.2 ]
-LightSource "shadowspot" 2 "intensity" [20 ] "lightcolor" [1 1 1] "from" [2 6 -3] "to" [0 -1 0] "coneangle" [0.35] "conedeltaangle" [0.01] "shadowname" ["shad1.map"]
+LightSource "shadowspot" 2 "intensity" [20 ] "lightcolor" [1 1 1] "from" [2 6 -3] "to" [0 -1 0] "coneangle" [0.35] "conedeltaangle" [0.01] "shadowname" ["shad1.shad"]
 LightSource "distantlight" 3 "intensity" [0.4 ] "lightcolor" [1 1 1] "from" [-2 10 0] "to" [0 0 0]
 LightSource "distantlight" 4 "intensity" [0.3 ] "lightcolor" [0.7 0.85 0.9] "from" [0 0 -2] "to" [0 0 0]
-LightSource "shadowspot" 5 "intensity" [10 ] "lightcolor" [0.8 1 1] "from" [-4 6 0] "to" [-0.5 -1 0] "coneangle" [0.3] "conedeltaangle" [0.01]  "shadowname" ["shad2.map"]
+LightSource "shadowspot" 5 "intensity" [10 ] "lightcolor" [0.8 1 1] "from" [-4 6 0] "to" [-0.5 -1 0] "coneangle" [0.3] "conedeltaangle" [0.01]  "shadowname" ["shad2.shad"]
 
 AttributeBegin
 Color [0.5490 0.6745 0.4667]

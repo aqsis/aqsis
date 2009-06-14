@@ -25,11 +25,11 @@ Declare "blur" "uniform float"
 WorldBegin
   LightSource "ambientlight" 0 "intensity" [0.2]
   AttributeBegin
-    Attribute "autoshadows" "string shadowmapname" ["autoshadow.map"] "integer res" [300]
+    Attribute "autoshadows" "string shadowmapname" ["autoshadow.shad"] "integer res" [300]
     Translate 5 5 -5
     Rotate -45 0.0 1.0 0.0
     Rotate 35 1.0 0.0 0.0
-    LightSource "shadowspot" 1 "intensity" [75] "coneangle" [0.5] "shadowname" ["autoshadow.map"] "blur" [0.01]
+    LightSource "shadowspot" 1 "intensity" [75] "coneangle" [0.5] "shadowname" ["autoshadow.shad"] "blur" [0.01]
   AttributeEnd
   Illuminate 1 1
 

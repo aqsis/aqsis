@@ -3,7 +3,7 @@ version 3.03
 
 #ReadArchive "envmap.rib"
 # Convert images to envmap.
-MakeCubeFaceEnvironment "rpx.tif" "rnx.tif" "rpy.tif" "rny.tif" "rpz.tif" "rnz.tif" "renv.map" 93 "gaussian" 2 2
+MakeCubeFaceEnvironment "rpx.tif" "rnx.tif" "rpy.tif" "rny.tif" "rpz.tif" "rnz.tif" "rmap.env" 93 "gaussian" 2 2
 
 # Main scene
 FrameBegin 7
@@ -30,7 +30,7 @@ FrameBegin 7
 				Attribute "identifier" "name" ["sphere01_1-sphere01_2"]
 				Sides 1
 				Color [1 1 1]
-				Surface "shinymetal" "Ks" [0.5] "texturename" ["renv.map"]
+				Surface "shinymetal" "Ks" [0.5] "texturename" ["rmap.env"]
 				Sphere 38 -38 38 360
 			AttributeEnd 
 		AttributeEnd 
