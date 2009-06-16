@@ -42,6 +42,9 @@ typedef	char*	RtToken;
 
 typedef	RtFloat	RtColor[ 3 ];
 typedef	RtFloat	RtPoint[ 3 ];
+typedef RtFloat RtVector[ 3 ];
+typedef RtFloat RtNormal[ 3 ];
+typedef RtFloat RtHpoint[ 4 ];
 typedef	RtFloat	RtMatrix[ 4 ][ 4 ];
 typedef	RtFloat	RtBasis[ 4 ][ 4 ];
 typedef	RtFloat	RtBound[ 6 ];
