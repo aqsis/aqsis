@@ -448,61 +448,6 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if ( USES( lUses, EnvVars_Oi ) )
 		pVar(EnvVars_Oi) ->SetColor( gColWhite );
 
-	if(USES(lUses, EnvVars_Os))
-	{
-		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ)
-		{
-			// As we are rendering a standard depth map, anything that is semi-transparent
-			// doesn't contribute, so remove any semi-transparent micropolygons.
-			AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
-
-			TqInt cCulled = 0;
-			for (TqInt i = gsmin1; i >= 0; i-- )
-			{
-				if ( pOs[ i ] != gColWhite )
-				{
-					cCulled ++;
-					m_CulledPolys.SetValue( i, true );
-				}
-				else
-					break;
-			}
-
-			if ( canCullGrid && cCulled == gs )
-			{
-				m_fCulled = true;
-				STATS_INC( GRD_culled );
-				DeleteVariables( true );
-				return ;
-			}
-		}
-		if(QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB)
-		{
-			// When rendering a color image, cull any micropolygons that are fully transparent.
-			AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
-
-			TqInt cCulled = 0;
-			for (TqInt i = gsmin1; i >= 0; i-- )
-			{
-				if ( pOs[ i ] == gColBlack )
-				{
-					cCulled ++;
-					m_CulledPolys.SetValue( i, true );
-				}
-				else
-					break;
-			}
-
-			if ( canCullGrid && cCulled == gs )
-			{
-				m_fCulled = true;
-				STATS_INC( GRD_culled );
-				DeleteVariables( true );
-				return ;
-			}
-		}
-	}
-
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface()->pAttributes()->pshadDisplacement(QGetRenderContext()->Time());
 	if ( pshadDisplacement )
 	{
@@ -690,7 +635,15 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 	if ( all || !pManager->fDisplayNeeds( "Ci" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
 	if ( all || !pManager->fDisplayNeeds( "Oi" ) )
-		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
+	{
+		// Oi is almost always needed, even in z-buffer mode.  The only time
+		// it's not needed is when the zthreshold color is [0,0,0], which makes
+		// all surfaces (even fully transparent) make it into the depth output.
+		const CqColor* zThr = QGetRenderContext()->poptCurrent()
+		                      ->GetColorOption( "limits", "zthreshold" );
+		if ( all || (zThr && *zThr == CqColor(0.0f)) )
+			m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
+	}
 	if ( all || !pManager->fDisplayNeeds( "Ns" ) )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ns );
 }
@@ -1474,23 +1427,27 @@ void CqMicroPolygon::InterpolateOutputs(const SqMpgSampleInfo& cache,
 
 void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) const
 {
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
+	if(IqShaderData* Ci = m_pGrid->pVar(EnvVars_Ci))
 	{
-		cache.color = *colColor();
+		const CqColor* col = 0;
+		Ci->GetColorPtr(col);
+		cache.color = col[m_Index];
 	}
 	else
 	{
-		cache.color = gColWhite;
+		cache.color = CqColor(1.0);
 	}
 
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
+	if(IqShaderData* Oi = m_pGrid->pVar(EnvVars_Oi))
 	{
-		cache.opacity = *colOpacity();
-		cache.isOpaque = cache.opacity >= gColWhite;
+		const CqColor* opa = 0;
+		Oi->GetColorPtr(opa);
+		cache.opacity = opa[m_Index];
+		cache.isOpaque = cache.opacity >= CqColor(1.0);
 	}
 	else
 	{
-		cache.opacity = gColWhite;
+		cache.opacity = CqColor(1.0);
 		cache.isOpaque = true;
 	}
 }
@@ -1521,10 +1478,10 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 
 	TqFloat Nz = d1.x()*d2.y() - d1.y()*d2.x();
 
-	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Ci" ))
+	if(IqShaderData* Ci = m_pGrid->pVar(EnvVars_Ci))
 	{
 		const CqColor* pCi = NULL;
-		m_pGrid->pVar(EnvVars_Ci)->GetColorPtr(pCi);
+		Ci->GetColorPtr(pCi);
 
 		const CqColor& c1 = pCi[GetCodedIndex(m_IndexCode, 0)];
 		const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
@@ -1562,10 +1519,10 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		cache.colorMultY = gColBlack;
 	}
 
-	if(QGetRenderContext()->pDDmanager()->fDisplayNeeds( "Oi" ))
+	if(IqShaderData* Oi = m_pGrid->pVar(EnvVars_Oi))
 	{
 		const CqColor* pOi = NULL;
-		m_pGrid->pVar(EnvVars_Oi)->GetColorPtr(pOi);
+		Oi->GetColorPtr(pOi);
 
 		const CqColor& o1 = pOi[GetCodedIndex(m_IndexCode, 0)];
 		const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];

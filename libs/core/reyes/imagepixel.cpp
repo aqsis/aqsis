@@ -221,10 +221,13 @@ void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
 					                sampleopacity;
 				}
 
-				// Now determine if the sample opacity meets the limit for depth mapping.
-				// If so, store the depth in the appropriate nearest opaque sample slot.
-				// The test is, if any channel of the opacity color is greater or equal to the threshold.
-				if(sample_data[Sample_ORed] >= zThreshold.r() || sample_data[Sample_OGreen] >= zThreshold.g() || sample_data[Sample_OBlue] >= zThreshold.b())
+				// Now determine if the sample opacity meets the limit for
+				// depth mapping.  If so, store the depth in the appropriate
+				// nearest opaque sample slot.  The test is, if all channels of
+				// the opacity color are greater or equal to the threshold.
+				if(   sample_data[Sample_ORed]   >= zThreshold.r()
+				   && sample_data[Sample_OGreen] >= zThreshold.g()
+				   && sample_data[Sample_OBlue]  >= zThreshold.b())
 				{
 					// Make sure we store the nearest and second nearest depth values.
 					opaqueDepths[1] = opaqueDepths[0];
