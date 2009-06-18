@@ -60,9 +60,10 @@ CqImagePixel::CqImagePixel(TqInt xSamples, TqInt ySamples)
 
 	TqInt nSamples = numSamples();
 	// Allocate sample storage for all the occluding hits.
-	m_hitSamples.reserve(nSamples*SqImageSample::sampleSize);
+	TqInt sampSize = SqImageSample::sampleSize;
+	m_hitSamples.resize(nSamples*sampSize);
 	for(TqInt i = 0; i < nSamples; ++i)
-		allocateHitData(m_samples[i].occludingHit);
+		m_samples[i].occludingHit.index = i*sampSize;
 }
 
 void CqImagePixel::swap(CqImagePixel& other)
@@ -106,17 +107,17 @@ void CqImagePixel::setupGridPattern(CqVector2D& offset, TqFloat opentime,
 void CqImagePixel::clear()
 {
 	TqInt nSamples = numSamples();
-	m_hitSamples.clear();
+	TqInt sampSize = SqImageSample::sampleSize;
+	m_hitSamples.resize(nSamples*sampSize);
 	m_hasValidSamples = false;
-	for ( TqInt i = nSamples - 1; i >= 0; i-- )
+	for(TqInt i = 0; i < nSamples; ++i)
 	{
 		if(!m_samples[i].data.empty())
 			m_samples[i].data.clear();
 		m_samples[i].occludingHit.flags = 0;
 		// Reallocate the occluding samples, as their storage indices may have
 		// changed during the Combine() stage.
-		m_samples[i].occludingHit.index = -1;
-		allocateHitData(m_samples[i].occludingHit);
+		m_samples[i].occludingHit.index = i*sampSize;
 	}
 }
 
