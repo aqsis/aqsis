@@ -390,19 +390,6 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if(gridExpand && *gridExpand > 0)
 		ExpandGridBoundaries(*gridExpand);
 
-	const CqVector3D* pP;
-	pVar(EnvVars_P) ->GetPointPtr( pP );
-	const CqColor* pOs = NULL;
-	if ( USES( lUses, EnvVars_Os ) )
-		pVar(EnvVars_Os) ->GetColorPtr( pOs );
-	const CqColor* pCs = NULL;
-	if ( USES( lUses, EnvVars_Cs ) )
-		pVar(EnvVars_Cs) ->GetColorPtr( pCs );
-	IqShaderData* pI = pVar(EnvVars_I);
-	const CqVector3D* pN = NULL;
-	if ( USES( lUses, EnvVars_N ) )
-		pVar(EnvVars_N) ->GetNormalPtr( pN );
-
 	// Calculate geometric normals if not specified by the surface.
 	if ( !bGeometricNormals() && USES( lUses, EnvVars_Ng ) )
 		CalcNormals();
@@ -426,6 +413,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	// Set I, the incident ray direction; this is just equal to P in shading
 	// (camera) coords for a projective camera transformation, or (0,0,1) for
 	// orthographic.
+	IqShaderData* pI = pVar(EnvVars_I);
 	switch(QGetRenderContext()->GetIntegerOption("System", "Projection")[0])
 	{
 		case ProjectionOrthographic:
@@ -468,6 +456,11 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 		AQSIS_TIME_SCOPE(Backface_culling);
 
 		TqInt cCulled = 0;
+		const CqVector3D* pP = NULL;
+		pVar(EnvVars_P) ->GetPointPtr( pP );
+		const CqVector3D* pN = NULL;
+		if ( USES( lUses, EnvVars_N ) )
+			pVar(EnvVars_N) ->GetNormalPtr( pN );
 		const CqVector3D* pNg = NULL;
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
 		// When backface culling, we must use the geometric normal (Ng) as
@@ -519,14 +512,19 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	}
 
 	// Cull any MPGs whose alpha is completely transparent after shading.
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
+	const CqColor* zThr = QGetRenderContext()->poptCurrent()
+	                      ->GetColorOption("limits", "zthreshold");
+	if ( USES( lUses, EnvVars_Oi ) && !(zThr && *zThr == gColBlack) )
 	{
 		AQSIS_TIME_SCOPE(Transparency_culling_micropolygons);
+
+		const CqColor* pOi = NULL;
+		pVar(EnvVars_Oi)->GetColorPtr( pOi );
 		
 		TqInt cCulled = 0;
 		for (TqInt i = gsmin1; i >= 0; i-- )
 		{
-			if ( pOs[ i ] == gColBlack )
+			if ( pOi[ i ] == gColBlack )
 			{
 				cCulled ++;
 				m_CulledPolys.SetValue( i, true );
