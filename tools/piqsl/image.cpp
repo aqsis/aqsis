@@ -257,9 +257,11 @@ void CqImage::updateClippingRange()
 	for(int i = 0, size = m_realData->width()*m_realData->height(); i < size; ++i)
 	{
 		TqFloat z = buf[i];
-		// Ignore any occurances of FLT_MAX, since that represents regions
-		// where no objects are found.
-		if(z == FLT_MAX)
+		// Ignore any depths greater than 0.5*FLT_MAX, since they more than
+		// likely come from regions where the max depth was averaged with a
+		// surface near the camera, and will result in a non-useful
+		// normalisation.
+		if(z >= 0.5f*FLT_MAX)
 			continue;
 		if(z > maxD)
 			maxD = z;
