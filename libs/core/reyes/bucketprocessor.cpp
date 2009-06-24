@@ -28,20 +28,15 @@
 
 namespace Aqsis {
 
-CqBucketProcessor::CqBucketProcessor()
+CqBucketProcessor::CqBucketProcessor(const SqOptionCache& optCache)
 	: m_bucket(0),
-	m_PixelXSamples(QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "PixelSamples")[0]),
-	m_PixelYSamples(QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "PixelSamples")[1]),
-	m_FilterXWidth(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "FilterWidth")[0]),
-	m_FilterYWidth(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "FilterWidth")[1]),
-	m_clippingNear(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "Clipping")[0]),
-	m_clippingFar(QGetRenderContext()->poptCurrent()->GetFloatOption("System", "Clipping")[1]),
-	m_DiscreteShiftX(lfloor(m_FilterXWidth/2.0f)),
-	m_DiscreteShiftY(lfloor(m_FilterYWidth/2.0f)),
+	m_optCache(optCache),
+	m_DiscreteShiftX(lfloor(optCache.xFiltSize/2.0f)),
+	m_DiscreteShiftY(lfloor(optCache.yFiltSize/2.0f)),
 	m_NumDofBounds(0),
 	m_DofBounds(),
 	m_aieImage(),
-	m_pixelPool(m_PixelXSamples, m_PixelYSamples),
+	m_pixelPool(optCache.xSamps, optCache.ySamps),
 	m_aFilterValues(),
 	m_CurrentMpgSampleInfo(),
 	m_OcclusionTree(),
@@ -59,8 +54,8 @@ void CqBucketProcessor::setupCacheInformation()
 	// Calculate and store the cache region sizes for overlap cacheing
 	TqInt overlapx = m_DiscreteShiftX*2;
 	TqInt overlapy = m_DiscreteShiftY*2;
-	TqInt width = QGetRenderContext()->pImage()->XBucketSize() + overlapx; 
-	TqInt height = QGetRenderContext()->pImage()->YBucketSize() + overlapy;
+	TqInt width = m_optCache.xBucketSize + overlapx;
+	TqInt height = m_optCache.yBucketSize + overlapy;
 	m_cacheRegions[SqBucketCacheSegment::top_left] = CqRegion(0, 0, overlapx, overlapy);
 	m_cacheRegions[SqBucketCacheSegment::top] = CqRegion(overlapx, 0, width-overlapx, overlapy);
 	m_cacheRegions[SqBucketCacheSegment::top_right] = CqRegion(width-overlapx, 0, width, overlapy);
@@ -108,9 +103,9 @@ void CqBucketProcessor::preProcess(IqSampler* sampler)
 		TqInt ySize = m_bucket->getYSize();
 
 		m_DisplayRegion = CqRegion( xPos, yPos, xPos+xSize, yPos+ySize );
-		m_DataRegion = CqRegion( xPos - m_DiscreteShiftX, yPos - m_DiscreteShiftY, 
-								 xPos + QGetRenderContext()->pImage()->XBucketSize() + m_DiscreteShiftX, 
-								 yPos + QGetRenderContext()->pImage()->YBucketSize() + m_DiscreteShiftY );
+		m_DataRegion = CqRegion( xPos - m_DiscreteShiftX, yPos - m_DiscreteShiftY,
+								 xPos + m_optCache.xBucketSize + m_DiscreteShiftX,
+								 yPos + m_optCache.yBucketSize + m_DiscreteShiftY );
 
 		TqInt sminx = xPos - m_DiscreteShiftX;
 		TqInt sminy = yPos - m_DiscreteShiftY;
@@ -241,7 +236,7 @@ void CqBucketProcessor::process()
 	}
 }
 
-void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )
+void CqBucketProcessor::postProcess()
 {
 	if (!m_bucket)
 		return;
@@ -250,12 +245,12 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 	// micropolygons rendered to that pixel.
 	{
 		AQSIS_TIME_SCOPE(Combine_samples);
-		CombineElements(depthfilter, zThreshold);
+		CombineElements();
 	}
 
 	{
 		AQSIS_TIME_SCOPE(Filter_samples);
-		FilterBucket(imager);
+		FilterBucket();
 		ExposeBucket();
 	}
 
@@ -365,13 +360,14 @@ void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, con
 /** Combine the subsamples into single pixel samples and coverage information.
  */
 
-void CqBucketProcessor::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshold)
+void CqBucketProcessor::CombineElements()
 {
 	for(TqInt y = m_SampleRegion.yMin() - m_DisplayRegion.yMin() + m_DiscreteShiftY, endY = m_SampleRegion.yMax() - m_DisplayRegion.yMin() + m_DiscreteShiftY; y < endY; ++y)
 	{
 		for(TqInt x = m_SampleRegion.xMin() - m_DisplayRegion.xMin() + m_DiscreteShiftX, endX = m_SampleRegion.xMax() - m_DisplayRegion.xMin() + m_DiscreteShiftX; x < endX; ++x)
 		{
-			m_aieImage[(y*m_DataRegion.width())+x]->Combine(filterdepth, zThreshold);
+			m_aieImage[(y*m_DataRegion.width())+x]->Combine(m_optCache.depthFilter,
+			                                                m_optCache.zThreshold);
 		}
 	}
 }
@@ -380,7 +376,7 @@ void CqBucketProcessor::CombineElements(enum EqFilterDepth filterdepth, CqColor 
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucketProcessor::FilterBucket(bool fImager)
+void CqBucketProcessor::FilterBucket()
 {
 	CqImagePixelPtr * pie;
 
@@ -415,9 +411,9 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 
 	TqInt xmax = m_DiscreteShiftX;
 	TqInt ymax = m_DiscreteShiftY;
-	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
-	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
-	TqInt numSubPixels = ( PixelXSamples() * PixelYSamples() );
+	TqFloat xfwo2 = std::ceil(m_optCache.xFiltSize) * 0.5f;
+	TqFloat yfwo2 = std::ceil(m_optCache.yFiltSize) * 0.5f;
+	TqInt numSubPixels = ( m_optCache.xSamps * m_optCache.ySamps );
 
 	TqInt	xlen = DataRegion().width();
 
@@ -434,7 +430,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 	if(m_hasValidSamples)
 	{
 		// non-seperable is faster for very small filter widths.
-		if(FilterXWidth() <= 16.0 || FilterYWidth() <= 16.0)
+		if(m_optCache.xFiltSize <= 16.0 || m_optCache.yFiltSize <= 16.0)
 			useSeperable = false;
 
 		if(useSeperable)
@@ -442,13 +438,13 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 			// seperable filter. filtering by fx,fy is equivalent to filtering
 			// by fx,1 followed by 1,fy.
 
-			TqInt size = DisplayRegion().width() * DisplayRegion().height() * PixelYSamples();
+			TqInt size = DisplayRegion().width() * DisplayRegion().height() * m_optCache.ySamps;
 			std::valarray<TqFloat> intermediateSamples( 0.0f, size * datasize);
 			std::valarray<TqInt> sampleCounts(0, size);
 			for ( y = DisplayRegion().yMin() - ymax; y < endy + ymax ; y++ )
 			{
 				TqFloat ycent = y + 0.5f;
-				TqInt pixelRow = (y-(DisplayRegion().yMin()-ymax)) * PixelYSamples();
+				TqInt pixelRow = (y-(DisplayRegion().yMin()-ymax)) * m_optCache.ySamps;
 				for ( x = DisplayRegion().xMin(); x < endx ; x++ )
 				{
 					TqFloat xcent = x + 0.5f;
@@ -459,7 +455,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 					TqInt pixelIndex = pixelRow*DisplayRegion().width() + x-DisplayRegion().xMin();
 
 					// filter just in x first
-					for ( TqInt sy = 0; sy < PixelYSamples(); sy++ )
+					for ( TqInt sy = 0; sy < m_optCache.ySamps; sy++ )
 					{
 						TqFloat gTot = 0.0;
 						SampleCount = 0;
@@ -468,11 +464,11 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 						CqImagePixelPtr* pie2 = pie;
 						for ( TqInt fx = -xmax; fx <= xmax; fx++ )
 						{
-							TqInt index = ( ( ymax * lceil(FilterXWidth()) ) + ( fx + xmax ) ) * numSubPixels;
+							TqInt index = ( ( ymax * lceil(m_optCache.xFiltSize) ) + ( fx + xmax ) ) * numSubPixels;
 							// Now go over each subsample within the pixel
-							TqInt sampleIndex = sy * PixelXSamples();
+							TqInt sampleIndex = sy * m_optCache.xSamps;
 
-							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
+							for ( TqInt sx = 0; sx < m_optCache.xSamps; sx++ )
 							{
 								SqSampleData const& sampleData = (*pie2)->SampleData( sampleIndex );
 								CqVector2D vecS = sampleData.position;
@@ -522,15 +518,15 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 					{
 						CqImagePixelPtr* pie2 = pie;
 
-						TqInt index = ( ( ( fy + ymax ) * lceil(FilterXWidth()) ) + xmax ) * numSubPixels;
+						TqInt index = ( ( ( fy + ymax ) * lceil(m_optCache.xFiltSize) ) + xmax ) * numSubPixels;
 						// Now go over each y subsample within the pixel
-						TqInt sx = PixelXSamples() / 2; // use the samples in the centre of the pixel.
+						TqInt sx = m_optCache.xSamps / 2; // use the samples in the centre of the pixel.
 						TqInt sy = 0;
 						TqInt sampleIndex = sx;
-						TqInt pixelRow = (y + fy - (DisplayRegion().yMin()-ymax)) * PixelYSamples();
+						TqInt pixelRow = (y + fy - (DisplayRegion().yMin()-ymax)) * m_optCache.ySamps;
 						TqInt pixelIndex = pixelRow*DisplayRegion().width() + x-DisplayRegion().xMin();
 
-						for ( sy = 0; sy < PixelYSamples(); sy++ )
+						for ( sy = 0; sy < m_optCache.ySamps; sy++ )
 						{
 							SqSampleData const& sampleData = (*pie2)->SampleData( sampleIndex );
 							CqVector2D vecS = sampleData.position;
@@ -546,7 +542,7 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 										samples[k] += intermediateSamples[pixelIndex * datasize + k] * g;
 								}
 							}
-							sampleIndex += PixelXSamples();
+							sampleIndex += m_optCache.xSamps;
 							pixelIndex += DisplayRegion().width();
 						}
 
@@ -599,12 +595,12 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 						CqImagePixelPtr* pie2 = pie;
 						for (TqInt fx = -xmax; fx <= xmax; fx++, ++pie2 )
 						{
-							TqInt index = ((fy + ymax)*lceil(FilterXWidth()) + fx + xmax) * numSubPixels;
+							TqInt index = ((fy + ymax)*lceil(m_optCache.xFiltSize) + fx + xmax) * numSubPixels;
 							// Now go over each subsample within the pixel
 							TqInt sampleIndex = 0;
-							for (TqInt sy = 0; sy < PixelYSamples(); sy++ )
+							for (TqInt sy = 0; sy < m_optCache.ySamps; sy++ )
 							{
-								for (TqInt sx = 0; sx < PixelXSamples(); sx++ )
+								for (TqInt sx = 0; sx < m_optCache.xSamps; sx++ )
 								{
 									SqSampleData const& sampleData = (*pie2)->SampleData( sampleIndex );
 									CqVector2D vecS = sampleData.position;
@@ -719,29 +715,26 @@ void CqBucketProcessor::FilterBucket(bool fImager)
 		QGetRenderContext() ->poptCurrent()->InitialiseColorImager( DisplayRegion(), &m_channelBuffer );
 		AQSIS_TIME_SCOPE(Imager_shading);
 
-		if ( fImager )
+		CqColor imager;
+		for ( y = 0; y < endy ; y++ )
 		{
-			CqColor imager;
-			for ( y = 0; y < endy ; y++ )
+			for ( x = 0; x < endx ; x++ )
 			{
-				for ( x = 0; x < endx ; x++ )
-				{
-					imager = QGetRenderContext() ->poptCurrent()->GetColorImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
-					// Normal case will be to poke the alpha from the image shader and
-					// multiply imager color with it... but after investigation alpha is always
-					// == 1 after a call to imager shader in 3delight and BMRT.
-					// Therefore I did not ask for alpha value and set directly the pCols[i]
-					// with imager value. see imagers.cpp
-					m_channelBuffer(x, y, redIndex)[0] = imager.r();
-					m_channelBuffer(x, y, greenIndex)[0] = imager.g();
-					m_channelBuffer(x, y, blueIndex)[0] = imager.b();
-					imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
-					m_channelBuffer(x, y, redOIndex)[0] = imager.r();
-					m_channelBuffer(x, y, greenOIndex)[0] = imager.g();
-					m_channelBuffer(x, y, blueOIndex)[0] = imager.b();
-					TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
-					m_channelBuffer(x, y, alphaIndex)[0] = a;
-				}
+				imager = QGetRenderContext() ->poptCurrent()->GetColorImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
+				// Normal case will be to poke the alpha from the image shader and
+				// multiply imager color with it... but after investigation alpha is always
+				// == 1 after a call to imager shader in 3delight and BMRT.
+				// Therefore I did not ask for alpha value and set directly the pCols[i]
+				// with imager value. see imagers.cpp
+				m_channelBuffer(x, y, redIndex)[0] = imager.r();
+				m_channelBuffer(x, y, greenIndex)[0] = imager.g();
+				m_channelBuffer(x, y, blueIndex)[0] = imager.b();
+				imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
+				m_channelBuffer(x, y, redOIndex)[0] = imager.r();
+				m_channelBuffer(x, y, greenOIndex)[0] = imager.g();
+				m_channelBuffer(x, y, blueOIndex)[0] = imager.b();
+				TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
+				m_channelBuffer(x, y, alphaIndex)[0] = a;
 			}
 		}
 	}
@@ -820,8 +813,8 @@ void CqBucketProcessor::InitialiseFilterValues()
 		return;
 
 	// Allocate and fill in the filter values array for each pixel.
-	TqInt numSubPixels = PixelXSamples() * PixelYSamples();
-	TqInt numPixels = (lceil(FilterXWidth()) + 1) * (lceil(FilterYWidth()) + 1);
+	TqInt numSubPixels = m_optCache.xSamps * m_optCache.ySamps;
+	TqInt numPixels = (lceil(m_optCache.xFiltSize) + 1) * (lceil(m_optCache.yFiltSize) + 1);
 
 	m_aFilterValues.resize(numPixels*numSubPixels);
 
@@ -830,9 +823,9 @@ void CqBucketProcessor::InitialiseFilterValues()
 
 	TqInt xmax = m_DiscreteShiftX;
 	TqInt ymax = m_DiscreteShiftY;
-	TqFloat xfwo2 = std::ceil(FilterXWidth()) * 0.5f;
-	TqFloat yfwo2 = std::ceil(FilterYWidth()) * 0.5f;
-	TqInt xfw = lceil(FilterXWidth());
+	TqFloat xfwo2 = std::ceil(m_optCache.xFiltSize) * 0.5f;
+	TqFloat yfwo2 = std::ceil(m_optCache.yFiltSize) * 0.5f;
+	TqInt xfw = lceil(m_optCache.xFiltSize);
 
 	// Go over every pixel touched by the filter
 	for(TqInt py = -ymax; py <= ymax; py++)
@@ -842,19 +835,19 @@ void CqBucketProcessor::InitialiseFilterValues()
 			// index of the start of the filter storage for the pixel.
 			TqInt subPixelIndex = ((py + ymax)*xfw + px + xmax)*numSubPixels;
 			// Go over every subpixel in the pixel.
-			for (TqInt sy = 0; sy < PixelYSamples(); sy++ )
+			for (TqInt sy = 0; sy < m_optCache.ySamps; sy++ )
 			{
-				for (TqInt sx = 0; sx < PixelXSamples(); sx++, ++subPixelIndex )
+				for (TqInt sx = 0; sx < m_optCache.xSamps; sx++, ++subPixelIndex )
 				{
 					// Evaluate the filter at the centre of the subpixel.  The
 					// samples aren't actually at the subpixel centers but the
 					// small inaccuracy doesn't seem to affect image quality
 					// since the noise from the underlying image is much greater.
-					TqFloat fx = (sx + 0.5f) / PixelXSamples() + px - 0.5f;
-					TqFloat fy = (sy + 0.5f) / PixelYSamples() + py - 0.5f;
+					TqFloat fx = (sx + 0.5f) / m_optCache.xSamps + px - 0.5f;
+					TqFloat fy = (sy + 0.5f) / m_optCache.ySamps + py - 0.5f;
 					TqFloat w = 0;
 					if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
-						w = ( *pFilter ) ( fx, fy, std::ceil(FilterXWidth()), std::ceil(FilterYWidth()) );
+						w = ( *pFilter ) ( fx, fy, std::ceil(m_optCache.xFiltSize), std::ceil(m_optCache.yFiltSize) );
 					m_aFilterValues[ subPixelIndex ] = w;
 				}
 			}
@@ -864,11 +857,11 @@ void CqBucketProcessor::InitialiseFilterValues()
 
 void CqBucketProcessor::CalculateDofBounds()
 {
-	m_NumDofBounds = PixelXSamples() * PixelYSamples();
+	m_NumDofBounds = m_optCache.xSamps * m_optCache.ySamps;
 	m_DofBounds.resize(m_NumDofBounds);
 
-	TqFloat dx = 2.0 / PixelXSamples();
-	TqFloat dy = 2.0 / PixelYSamples();
+	TqFloat dx = 2.0 / m_optCache.xSamps;
+	TqFloat dy = 2.0 / m_optCache.ySamps;
 
 	// I know this is far from an optimal way of calculating this,
 	// but it's only done once so I don't care.
@@ -876,9 +869,9 @@ void CqBucketProcessor::CalculateDofBounds()
 	TqFloat minX = -1.0;
 	TqFloat minY = -1.0;
 	TqInt which = 0;
-	for(int j = 0; j < PixelYSamples(); ++j)
+	for(int j = 0; j < m_optCache.ySamps; ++j)
 	{
-		for(int i = 0; i < PixelXSamples(); ++i)
+		for(int i = 0; i < m_optCache.xSamps; ++i)
 		{
 			CqVector2D topLeft = CqImagePixel::projectToCircle(CqVector2D(minX, minY)); 
 			CqVector2D topRight = CqImagePixel::projectToCircle(CqVector2D(minX + dx, minY)); 
@@ -1080,8 +1073,8 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 
 	CqImagePixelPtr* pie, *pie2;
 
-	TqInt iXSamples = PixelXSamples();
-	TqInt iYSamples = PixelYSamples();
+	TqInt iXSamples = m_optCache.xSamps;
+	TqInt iYSamples = m_optCache.ySamps;
 
 	TqInt im = ( bminx < sX ) ? 0 : static_cast<TqInt>(std::floor( ( bminx - sX ) * iXSamples ));
 	TqInt in = ( bminy < sY ) ? 0 : static_cast<TqInt>(std::floor( ( bminy - sY ) * iYSamples ));
@@ -1187,8 +1180,8 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 
 	CqHitTestCache hitTestCache;
 
-	TqInt iXSamples = PixelXSamples();
-    TqInt iYSamples = PixelYSamples();
+	TqInt iXSamples = m_optCache.xSamps;
+    TqInt iYSamples = m_optCache.ySamps;
 
 	TqFloat opentime = currentGridInfo.shutterOpenTime;
 	TqFloat closetime = currentGridInfo.shutterCloseTime;
@@ -1202,7 +1195,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 	if(UsingDof)
 		pMPG->CacheCocMultipliers(hitTestCache);
 
-	const TqInt timeRanges = std::max(4, PixelXSamples() * PixelYSamples() );
+	const TqInt timeRanges = std::max(4, m_optCache.xSamps * m_optCache.ySamps );
 	TqInt bound_maxMB = pMPG->cSubBounds( timeRanges );
     TqInt bound_maxMB_1 = bound_maxMB - 1;
 	//TqInt currentIndex = 0;
@@ -1237,7 +1230,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 		TqFloat bminz = Bound.vecMin().z();
 		TqFloat bmaxz = Bound.vecMax().z();
 		// if bounding box is outside our viewing range, then cull it.
-		if ( bminz > m_clippingFar || bmaxz < m_clippingNear )
+		if ( bminz > m_optCache.clipFar || bmaxz < m_optCache.clipNear )
 			continue;
 		TqFloat mpgbminx = bminx;
 		TqFloat mpgbmaxx = bmaxx;
@@ -1592,7 +1585,7 @@ bool CqBucketProcessor::occlusionCullSurface( const boost::shared_ptr<CqSurface>
 		// next row
 		TqInt nextBucketY = m_bucket->getRow() + 1;
 		// find bucket containing left side of bound
-		nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / QGetRenderContext()->pImage()->XBucketSize();
+		nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / m_optCache.xBucketSize;
 		nextBucketX = max( nextBucketX, 0 );
 		TqInt ypos = m_bucket->getYPosition() + m_bucket->getYSize();
 

@@ -1291,7 +1291,6 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 
 	if ( pshadImager )
 	{
-		QGetRenderContext() ->poptWriteCurrent()->GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
 		QGetRenderContext()->poptWriteCurrent()->SetpshadImager( pshadImager );
 		RtInt i;
 		for ( i = 0; i < count; ++i )
@@ -5823,7 +5822,6 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 	}
 	else if(stringtype.compare("imager")==0)
 	{
-		QGetRenderContext() ->poptWriteCurrent()->GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
 		newlayer = QGetRenderContext()->CreateShader( name, Type_Imager );
 		layeredshader = QGetRenderContext()->poptCurrent()->pshadImager();
 

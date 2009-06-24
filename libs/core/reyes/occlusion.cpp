@@ -56,8 +56,8 @@ void CqOcclusionTree::setupTree(CqBucketProcessor& bp)
 	CqRegion reg = bp.SampleRegion();
 	// Now setup the new array based tree.
 	// First work out how deep the tree needs to be.
-	TqInt xSamples = bp.PixelXSamples();
-	TqInt ySamples = bp.PixelYSamples();
+	TqInt xSamples = bp.optCache().xSamps;
+	TqInt ySamples = bp.optCache().ySamps;
 	TqInt numXSubpix = reg.width()*xSamples;
 	TqInt numYSubpix = reg.height()*ySamples;
 	// Get number of subdivisions required in x and y to cover all samples.

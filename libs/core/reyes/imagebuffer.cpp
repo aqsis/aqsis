@@ -87,7 +87,7 @@ public:
 			   std::vector<CqBucket*>& bucketList,
 			   bool fImager,
 			   const CqColor& zThreshold,
-			   enum EqFilterDepth depthfilter,
+			   EqDepthFilter depthfilter,
 			   const CqVector2D& bHalf) :
 		m_imageBuffer(imageBuffer),
 		m_bucketList(bucketList),
@@ -149,11 +149,12 @@ private:
 	std::vector<CqBucket*> m_bucketList;
 	bool m_fImager;
 	CqColor m_zThreshold;
-	enum EqFilterDepth m_depthfilter;
+	EqDepthFilter m_depthfilter;
 	CqVector2D m_bHalf;
 };
 
 */
+
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -174,28 +175,13 @@ void	CqImageBuffer::SetImage()
 {
 	DeleteImage();
 
-	m_XBucketSize = 16;
-	m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
-	/* add artificially a border around based on the current filterwidth so the diced primitives
-	    * may fit better within a bucket */
-	m_FilterXWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
-	m_FilterYWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
+	const IqOptions& opts = *QGetRenderContext()->poptCurrent();
+	m_optCache.cacheOptions(opts);
 
-	TqUint iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	TqUint iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_cXBuckets = ( ( iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
-	m_cYBuckets = ( ( iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
-
-	m_MaxEyeSplits = 10;
-	const TqInt* poptEyeSplits = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "eyesplits" );
-	if ( poptEyeSplits != 0 )
-		m_MaxEyeSplits = poptEyeSplits[ 0 ];
+	TqInt xRes = opts.GetIntegerOption("System", "Resolution")[0];
+	TqInt yRes = opts.GetIntegerOption("System", "Resolution")[1];
+	m_cXBuckets = (xRes + m_optCache.xBucketSize-1)/m_optCache.xBucketSize;
+	m_cYBuckets = (yRes + m_optCache.yBucketSize-1)/m_optCache.yBucketSize;
 
 	TqInt row = 0;
 	TqInt colPos = 0, rowPos = 0;
@@ -203,9 +189,9 @@ void	CqImageBuffer::SetImage()
 	std::vector<std::vector<CqBucket> >::iterator i;
 	for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
 	{
-		TqInt rowSize = iYRes - rowPos;
-		if(rowSize > m_YBucketSize)
-			rowSize = m_YBucketSize;
+		TqInt rowSize = yRes - rowPos;
+		if(rowSize > m_optCache.yBucketSize)
+			rowSize = m_optCache.yBucketSize;
 		i->resize( m_cXBuckets );
 		std::vector<CqBucket>::iterator b;
 		TqInt column = 0;
@@ -215,16 +201,16 @@ void	CqImageBuffer::SetImage()
 			b->SetProcessed( false );
 			b->setCol( column );
 			b->setRow( row );
-			TqInt colSize = iXRes - colPos;
-			if(colSize > m_XBucketSize)
-				colSize = m_XBucketSize;
+			TqInt colSize = xRes - colPos;
+			if(colSize > m_optCache.xBucketSize)
+				colSize = m_optCache.xBucketSize;
 			b->setPosition( colPos, rowPos );
 			b->setSize( colSize, rowSize );
 			column++;
-			colPos += m_XBucketSize;
+			colPos += m_optCache.xBucketSize;
 		}
 		row++;
-		rowPos += m_YBucketSize;
+		rowPos += m_optCache.yBucketSize;
 	}
 
 	m_CurrentBucketCol = m_CurrentBucketRow = 0;
@@ -271,9 +257,9 @@ void	CqImageBuffer::Release()
 bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
-	if ( Bound.vecMin().z() >= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] ||
-	        Bound.vecMax().z() <= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] )
-		return ( true );
+	if ( Bound.vecMin().z() >= m_optCache.clipFar ||
+	     Bound.vecMax().z() <= m_optCache.clipNear )
+		return true;
 
 	if(QGetRenderContext()->clippingVolume().whereIs(Bound) == CqBound::Side_Outside)
 	{
@@ -292,7 +278,7 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 			objname = pattrName[ 0 ];
 		Aqsis::log() << info << "Object \"" << objname.c_str() << "\" spans the epsilon plane" << std::endl;
 
-		if ( pSurface->SplitCount() > m_MaxEyeSplits )
+		if ( pSurface->SplitCount() > m_optCache.maxEyeSplits )
 		{
 			Aqsis::log() << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
 			return( true );
@@ -323,10 +309,10 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	}
 
 	// And expand to account for filter size.
-	Bound.vecMin().x( Bound.vecMin().x() - m_FilterXWidth / 2.0f );
-	Bound.vecMin().y( Bound.vecMin().y() - m_FilterYWidth / 2.0f );
-	Bound.vecMax().x( Bound.vecMax().x() + m_FilterXWidth / 2.0f );
-	Bound.vecMax().y( Bound.vecMax().y() + m_FilterYWidth / 2.0f );
+	Bound.vecMin().x( Bound.vecMin().x() - m_optCache.xFiltSize / 2.0f );
+	Bound.vecMin().y( Bound.vecMin().y() - m_optCache.yFiltSize / 2.0f );
+	Bound.vecMax().x( Bound.vecMax().x() + m_optCache.xFiltSize / 2.0f );
+	Bound.vecMax().y( Bound.vecMax().y() + m_optCache.yFiltSize / 2.0f );
 
 	// If the bounds are completely outside the viewing frustum, cull the primitive.
 	if( Bound.vecMin().x() > QGetRenderContext()->cropWindowXMax() ||
@@ -408,10 +394,10 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		if ( Bound.vecMin().y() < 0 )
 			Bound.vecMin().y( 0.0f );
 
-		XMinb = static_cast<TqInt>( Bound.vecMin().x() ) / XBucketSize();
-		YMinb = static_cast<TqInt>( Bound.vecMin().y() ) / YBucketSize();
-		XMaxb = static_cast<TqInt>( Bound.vecMax().x() ) / XBucketSize();
-		YMaxb = static_cast<TqInt>( Bound.vecMax().y() ) / YBucketSize();
+		XMinb = static_cast<TqInt>( Bound.vecMin().x() ) / m_optCache.xBucketSize;
+		YMinb = static_cast<TqInt>( Bound.vecMin().y() ) / m_optCache.yBucketSize;
+		XMaxb = static_cast<TqInt>( Bound.vecMax().x() ) / m_optCache.xBucketSize;
+		YMaxb = static_cast<TqInt>( Bound.vecMax().y() ) / m_optCache.yBucketSize;
 
 		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
 			return;
@@ -479,10 +465,10 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 	}
 
 	// Discard when outside the crop window.
-	if ( B.vecMax().x() < renderContext->cropWindowXMin() - m_FilterXWidth / 2.0f ||
-	     B.vecMax().y() < renderContext->cropWindowYMin() - m_FilterYWidth / 2.0f ||
-	     B.vecMin().x() > renderContext->cropWindowXMax() + m_FilterXWidth / 2.0f ||
-	     B.vecMin().y() > renderContext->cropWindowYMax() + m_FilterYWidth / 2.0f )
+	if ( B.vecMax().x() < renderContext->cropWindowXMin() - m_optCache.xFiltSize / 2.0f ||
+	     B.vecMax().y() < renderContext->cropWindowYMin() - m_optCache.yFiltSize / 2.0f ||
+	     B.vecMin().x() > renderContext->cropWindowXMax() + m_optCache.xFiltSize / 2.0f ||
+	     B.vecMin().y() > renderContext->cropWindowYMax() + m_optCache.yFiltSize / 2.0f )
 	{
 		return;
 	}
@@ -497,15 +483,15 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 
 	// Find out the minimum bucket touched by the micropoly bound.
 
-	B.vecMin().x( B.vecMin().x() - (lfloor(m_FilterXWidth / 2.0f)) );
-	B.vecMin().y( B.vecMin().y() - (lfloor(m_FilterYWidth / 2.0f)) );
-	B.vecMax().x( B.vecMax().x() + (lfloor(m_FilterXWidth / 2.0f)) );
-	B.vecMax().y( B.vecMax().y() + (lfloor(m_FilterYWidth / 2.0f)) );
+	B.vecMin().x( B.vecMin().x() - (lfloor(m_optCache.xFiltSize / 2.0f)) );
+	B.vecMin().y( B.vecMin().y() - (lfloor(m_optCache.yFiltSize / 2.0f)) );
+	B.vecMax().x( B.vecMax().x() + (lfloor(m_optCache.xFiltSize / 2.0f)) );
+	B.vecMax().y( B.vecMax().y() + (lfloor(m_optCache.yFiltSize / 2.0f)) );
 
-	TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / m_XBucketSize );
-	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / m_YBucketSize );
-	TqInt iXBb = static_cast<TqInt>( B.vecMax().x() / m_XBucketSize );
-	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / m_YBucketSize );
+	TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / m_optCache.xBucketSize );
+	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / m_optCache.yBucketSize );
+	TqInt iXBb = static_cast<TqInt>( B.vecMax().x() / m_optCache.xBucketSize );
+	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / m_optCache.yBucketSize );
 
 	if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
 	        ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
@@ -580,33 +566,6 @@ void CqImageBuffer::RenderImage()
 			bucketmodulo = m_cXBuckets;
 	}
 
-	bool fImager = false;
-	const CqString* systemOptions;
-	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
-		if( systemOptions[ 0 ].compare("null") != 0 )
-			fImager = true;
-
-	const CqString* pstrDepthFilter = QGetRenderContext() ->poptCurrent()->GetStringOption( "Hider", "depthfilter" );
-	const CqColor* pzThreshold = QGetRenderContext() ->poptCurrent()->GetColorOption( "limits", "zthreshold" );
-	CqColor zThreshold(1.0f, 1.0f, 1.0f);	// Default threshold of 1,1,1 means that any objects that are partially transparent won't appear in shadow maps.
-	if(NULL != pzThreshold)
-		zThreshold = pzThreshold[0];
-	enum EqFilterDepth depthfilter = Filter_Min;
-	if ( NULL != pstrDepthFilter )
-	{
-		Aqsis::log() << debug << "Depth filter = " << pstrDepthFilter[0].c_str() << std::endl;
-		if( !pstrDepthFilter[ 0 ].compare( "min" ) )
-			depthfilter = Filter_Min;
-		else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
-			depthfilter = Filter_MidPoint;
-		else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
-			depthfilter = Filter_Max;
-		else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
-			depthfilter = Filter_Average;
-		else
-			Aqsis::log() << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
-	}
-
 	// Render the surface at the front of the list.
 	m_fDone = false;
 
@@ -637,7 +596,7 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-	std::vector<CqBucketProcessor> bucketProcessors;
+	std::vector<boost::shared_ptr<CqBucketProcessor> > bucketProcessors;
 	TqInt numConcurrentBuckets = 1;
 
 /* mafm: Sample code to use with the CqThreadProcessor2 alternative
@@ -664,17 +623,22 @@ void CqImageBuffer::RenderImage()
 	numConcurrentBuckets = MULTIPROCESSING_NBUCKETS;
 #endif
 
-	bucketProcessors.resize(numConcurrentBuckets);
-	TqInt pixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
-	TqInt pixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-	CqMultiJitteredSampler jitteredSampler(pixelXSamples, pixelYSamples);
-	CqGridSampler gridSampler(pixelXSamples, pixelYSamples);
+	for(int i = 0; i < numConcurrentBuckets; ++i)
+	{
+		bucketProcessors.push_back(boost::shared_ptr<CqBucketProcessor>(
+					new CqBucketProcessor(m_optCache)));
+	}
+	CqMultiJitteredSampler jitteredSampler(m_optCache.xSamps, m_optCache.ySamps);
+	CqGridSampler gridSampler(m_optCache.xSamps, m_optCache.ySamps);
 
 	// Determine whether the user has asked for sample jittering
 	IqSampler* sampler = &jitteredSampler;
-	if(const TqInt* useJitterPtr = QGetRenderContext()->poptCurrent()->GetIntegerOption( "Hider", "jitter" ))
-		if(useJitterPtr[0] == 0)
+	if(const TqInt* jitter = QGetRenderContext()->poptCurrent()->
+			GetIntegerOption("Hider", "jitter"))
+	{
+		if(jitter[0] == 0)
 			sampler = &gridSampler;
+	}
 
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
@@ -685,19 +649,19 @@ void CqImageBuffer::RenderImage()
 
 		for (int i = 0; pendingBuckets && i < numConcurrentBuckets; ++i)
 		{
-			bucketProcessors[i].setBucket(&CurrentBucket());
+			bucketProcessors[i]->setBucket(&CurrentBucket());
 
 			// Prepare the bucket processor
-			bucketProcessors[i].preProcess(sampler);
+			bucketProcessors[i]->preProcess(sampler);
 
 #if ENABLE_MPDUMP
 			// Dump the pixel sample positions into a dump file
 			if(m_mpdump.IsOpen())
-				m_mpdump.dumpPixelSamples(bucketProcessors[i]);
+				m_mpdump.dumpPixelSamples(*bucketProcessors[i]);
 #endif
 
 			// Kick off a thread to process this bucket.
-			threadProcessors.push_back( CqThreadProcessor( &bucketProcessors[i] ) );
+			threadProcessors.push_back( CqThreadProcessor( bucketProcessors[i].get() ) );
 			threadScheduler.addWorkUnit( threadProcessors.back() );
 
 			// Advance to next bucket, quit if nothing left
@@ -711,17 +675,17 @@ void CqImageBuffer::RenderImage()
 
 		for (int i = 0; !m_fQuit && i < numConcurrentBuckets; ++i)
 		{
-			bucketProcessors[i].postProcess( fImager, depthfilter, zThreshold );
+			bucketProcessors[i]->postProcess();
 			BucketComplete();
 			{
 				AQSIS_TIME_SCOPE(Display_bucket);
-				const CqBucket* bucket = bucketProcessors[i].getBucket();
+				const CqBucket* bucket = bucketProcessors[i]->getBucket();
 				if (bucket)
 				{
-					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucketProcessors[i].DisplayRegion(), &(bucketProcessors[i].getChannelBuffer()) );
+					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucketProcessors[i]->DisplayRegion(), &(bucketProcessors[i]->getChannelBuffer()) );
 				}
 			}
-			bucketProcessors[i].reset();
+			bucketProcessors[i]->reset();
 
 			if ( pProgressHandler )
 			{

@@ -35,6 +35,7 @@
 #include	"imagepixel.h"
 #include	"isampler.h"
 #include	"occlusion.h"
+#include	"optioncache.h"
 
 
 namespace Aqsis {
@@ -57,7 +58,7 @@ class CqBucketProcessor
 {
 	public:
 		/** Default constructor */
-		CqBucketProcessor();
+		CqBucketProcessor(const SqOptionCache& optCache);
 
 		/** Set the bucket to be processed */
 		void setBucket(CqBucket* bucket);
@@ -77,15 +78,13 @@ class CqBucketProcessor
 		/** Post-process the bucket, which involves the operations
 		 * Combine and Filter
 		 */
-		void postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
+		void postProcess();
 
 		//-------------- Reorganise -------------------------
 		
 		CqChannelBuffer& getChannelBuffer();
 
-		TqUint numSamples() const;
-		TqInt PixelXSamples() const;
-		TqInt PixelYSamples() const;
+		const SqOptionCache& optCache() const;
 
 		const CqRegion& SampleRegion() const;
 		const CqRegion& DisplayRegion() const;
@@ -104,16 +103,14 @@ class CqBucketProcessor
 
 		void	InitialiseFilterValues();
 		void	CalculateDofBounds();
-		void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
-		void	FilterBucket(bool fImager);
+		void	CombineElements();
+		void	FilterBucket();
 		void	ExposeBucket();
 
 		void	buildCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, boost::shared_ptr<SqBucketCacheSegment>& seg);
 		void	applyCacheSegment(SqBucketCacheSegment::EqBucketCacheSide side, const boost::shared_ptr<SqBucketCacheSegment>& seg);
 		void	dropSegment(TqInt side);
 
-		TqFloat	FilterXWidth() const;
-		TqFloat	FilterYWidth() const;
 		void ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixelPtr*& pie );
 
 		CqImagePixel& ImageElement(TqUint index) const;
@@ -147,12 +144,8 @@ class CqBucketProcessor
 		/// Pointer to the current bucket
 		CqBucket* m_bucket;
 
-		TqInt	m_PixelXSamples;
-		TqInt	m_PixelYSamples;
-		TqFloat	m_FilterXWidth;
-		TqFloat	m_FilterYWidth;
-		TqFloat	m_clippingNear;
-		TqFloat	m_clippingFar;
+		/// Cache of RiOptions for fast access during rendering.
+		const SqOptionCache m_optCache;
 		TqInt	m_DiscreteShiftX;
 		TqInt	m_DiscreteShiftY;
 
@@ -257,6 +250,11 @@ class CqSampleIterator
 //==============================================================================
 // CqBucketProcessor implementation.
 
+inline const SqOptionCache& CqBucketProcessor::optCache() const
+{
+	return m_optCache;
+}
+
 inline const CqRegion& CqBucketProcessor::DataRegion() const
 {
 	return m_DataRegion;
@@ -270,31 +268,6 @@ inline const CqRegion& CqBucketProcessor::SampleRegion() const
 inline const CqRegion& CqBucketProcessor::DisplayRegion() const
 {
 	return m_DisplayRegion;
-}
-
-inline TqFloat	CqBucketProcessor::FilterXWidth() const
-{
-	return m_FilterXWidth;
-}
-
-inline TqFloat	CqBucketProcessor::FilterYWidth() const
-{
-	return m_FilterYWidth;
-}
-
-inline TqInt	CqBucketProcessor::PixelXSamples() const
-{
-	return m_PixelXSamples;
-}
-
-inline TqInt	CqBucketProcessor::PixelYSamples() const
-{
-	return m_PixelYSamples;
-}
-
-inline TqUint CqBucketProcessor::numSamples() const
-{
-	return DataRegion().area() * PixelXSamples() * PixelYSamples();
 }
 
 inline CqChannelBuffer& CqBucketProcessor::getChannelBuffer()
@@ -332,7 +305,7 @@ inline CqSampleIterator::CqSampleIterator(CqBucketProcessor& processor, CqRegion
 	m_pixel(0),
 	m_pixelX(r.xMin()),
 	m_pixelY(r.yMin()),
-	m_numSubPixels(processor.PixelXSamples()*processor.PixelYSamples()),
+	m_numSubPixels(processor.m_optCache.xSamps*processor.m_optCache.ySamps),
 	m_subPixelIndex(0)
 {
 	// Only get the pixel if the region is non-empty.
@@ -377,13 +350,13 @@ inline SqSampleData* CqSampleIterator::operator->() const
 
 inline TqInt CqSampleIterator::subPixelX() const
 {
-	TqInt xSamples = m_processor->PixelXSamples();
+	TqInt xSamples = m_processor->m_optCache.xSamps;
 	return xSamples*m_pixelX + m_subPixelIndex % xSamples;
 }
 inline TqInt CqSampleIterator::subPixelY() const
 {
-	return m_processor->PixelYSamples()*m_pixelY
-		+ m_subPixelIndex / m_processor->PixelXSamples();
+	return m_processor->m_optCache.ySamps*m_pixelY
+		+ m_subPixelIndex / m_processor->m_optCache.xSamps;
 }
 
 inline bool CqSampleIterator::inRegion() const

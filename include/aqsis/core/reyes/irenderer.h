@@ -113,8 +113,6 @@ struct IqRenderer
 
 	virtual	TqFloat	Time() const = 0;
 
-	virtual	TqInt	bucketCount() = 0;
-
 	virtual	bool	IsWorldBegin() const = 0;
 };
 

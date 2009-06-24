@@ -531,12 +531,6 @@ TqFloat	CqRenderer::Time() const
 }
 
 
-TqInt CqRenderer::bucketCount()
-{
-	return(pImage()->cXBuckets() * pImage()->cYBuckets() );
-}
-
-
 //----------------------------------------------------------------------
 /** Advance the current shutter time, only valid within motion blocks.
  */
@@ -1653,14 +1647,6 @@ void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)
 {
 	// Ignore warnings
-}
-
-
-void	CqRenderer::SetImage( CqImageBuffer* pImage )
-{
-	if(m_pImageBuffer != NULL)
-		delete(m_pImageBuffer);
-	m_pImageBuffer = pImage;
 }
 
 const TqFloat CqRenderer::MinCoCForBound(const CqBound& bound) const

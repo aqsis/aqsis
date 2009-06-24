@@ -34,9 +34,10 @@
 #include	<boost/scoped_array.hpp>
 #include	<boost/noncopyable.hpp>
 
-#include	"csgtree.h"
 #include	<aqsis/math/color.h>
 #include	<aqsis/math/vector2d.h>
+#include	"csgtree.h"
+#include	"optioncache.h"
 #include	"isampler.h"
 
 namespace Aqsis {
@@ -56,14 +57,6 @@ enum EqSampleIndices
     Sample_Depth = 6,
     Sample_Coverage = 7,
     Sample_Alpha = 8,
-};
-
-enum EqFilterDepth
-{
-    Filter_Min = 0,
-    Filter_MidPoint = 1,
-    Filter_Max = 2,
-    Filter_Average = 3,
 };
 
 
@@ -250,7 +243,7 @@ class CqImagePixel : private boost::noncopyable
 		 *  \param zThreshold - The color value at which to consider a sample opaque
 		 *  					when sampling depth.
 		 */
-		void	Combine( EqFilterDepth eDepthFilter, CqColor zThreshold );
+		void	Combine( EqDepthFilter eDepthFilter, CqColor zThreshold );
 
 		/** \brief Get the sample data for the specified sample index.
 		 *

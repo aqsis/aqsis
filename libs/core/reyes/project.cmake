@@ -13,6 +13,7 @@ set(reyes_srcs
 	mpdump.cpp
 	multijitter.cpp
 	occlusion.cpp
+	optioncache.cpp
 	renderer.cpp
 	shaders.cpp
 	stats.cpp
@@ -42,6 +43,7 @@ set(reyes_hdrs
 	multijitter.h
 	objectinstance.h
 	occlusion.h
+	optioncache.h
 	plane.h
 	renderer.h
 	shaders.h

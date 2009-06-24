@@ -35,14 +35,13 @@
 #include	"surface.h"
 #include	<aqsis/math/vector2d.h>
 #include   	"bucket.h"
-#include   	"bucketprocessor.h"
 #include	"mpdump.h"
+#include	"optioncache.h"
 
 namespace Aqsis {
 
 
 class CqMicroPolygon;
-class CqBucketProcessor;
 
 
 // Enumeration of the type of rendering order of the buckets (experimental)
@@ -85,13 +84,8 @@ class CqImageBuffer
 				m_fDone( true ),
 				m_cXBuckets( 0 ),
 				m_cYBuckets( 0 ),
-				m_XBucketSize( 0 ),
-				m_YBucketSize( 0 ),
-				m_FilterXWidth( 0 ),
-				m_FilterYWidth( 0 ),
 				m_CurrentBucketCol( 0 ),
-				m_CurrentBucketRow( 0 ),
-				m_MaxEyeSplits(10)
+				m_CurrentBucketRow( 0 )
 		{}
 		virtual	~CqImageBuffer();
 
@@ -108,20 +102,6 @@ class CqImageBuffer
 		TqInt	cYBuckets() const
 		{
 			return ( m_cYBuckets );
-		}
-		/** Get the horizontal bucket size.
-		 * \return Integer horizontal bucket size.
-		 */
-		TqInt	XBucketSize() const
-		{
-			return ( m_XBucketSize );
-		}
-		/** Get the vertical bucket size.
-		 * \return Integer vertical bucket size.
-		 */
-		TqInt	YBucketSize() const
-		{
-			return ( m_YBucketSize );
 		}
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
@@ -170,17 +150,13 @@ class CqImageBuffer
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
 		bool	m_fDone;			///< Set when the render of this image has completed.
 
+		SqOptionCache m_optCache;   ///< Cache of commonly used RiOptions
 		TqInt	m_cXBuckets;		///< Integer horizontal bucket count.
 		TqInt	m_cYBuckets;		///< Integer vertical bucket count.
-		TqInt	m_XBucketSize;		///< Integer horizontal bucket size.
-		TqInt	m_YBucketSize;		///< Integer vertical bucket size.
-		TqFloat	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
-		TqFloat	m_FilterYWidth;		///< Integer vertical pixel filter width in pixels.
 
 		std::vector<std::vector<CqBucket> >	m_Buckets; ///< Array of bucket storage classes (row/col)
 		TqInt	m_CurrentBucketCol;	///< Column index of the bucket currently being processed.
 		TqInt	m_CurrentBucketRow;	///< Row index of the bucket currently being processed.
-		TqInt	m_MaxEyeSplits;	        ///< Max Eye Splits by default 10
 
 #if ENABLE_MPDUMP
 		CqMPDump	m_mpdump;

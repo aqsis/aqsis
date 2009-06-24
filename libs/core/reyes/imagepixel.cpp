@@ -141,7 +141,7 @@ class CqAscendingDepthSort
 		}
 };
 
-void CqImagePixel::Combine( enum EqFilterDepth depthfilter, CqColor zThreshold )
+void CqImagePixel::Combine( enum EqDepthFilter depthfilter, CqColor zThreshold )
 {
 	TqUint samplecount = 0;
 	TqInt sampleIndex = 0;

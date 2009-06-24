@@ -148,7 +148,6 @@ class CqRenderer : public IqRenderer
 
 		virtual	TqFloat	Time() const;
 		virtual	void	AdvanceTime();
-		virtual	TqInt	bucketCount();
 
 		/** Set a pointer to the current context.
 		 * Primarily for Procedural objects
@@ -181,9 +180,6 @@ class CqRenderer : public IqRenderer
 		{
 			return ( m_pImageBuffer );
 		}
-		/** Set the pointer to the current image buffer.
-		 */
-		virtual	void	SetImage( CqImageBuffer* pImage );
 
 		// Handle various coordinate system transformation requirements.
 		virtual	bool	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time, CqMatrix& result );
