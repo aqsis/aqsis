@@ -757,7 +757,7 @@ void CqRenderer::RenderAutoShadows()
 				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
 				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
 				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
-				opts->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
+				opts->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = DMode_Z;
 
 				// Set the pixel samples to 1,1 for shadow rendering.
 				opts->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
@@ -785,7 +785,7 @@ void CqRenderer::RenderAutoShadows()
 				m_pDDManager = CreateDisplayDriverManager();
 				m_pDDManager->Initialise();
 				std::map<std::string, void*> args;
-				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
+				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", DMode_Z, 0, 1, args);
 
 				// Store the current camera transform for later.
 				CqTransformPtr defaultCamera;

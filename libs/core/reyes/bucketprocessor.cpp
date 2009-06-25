@@ -28,8 +28,10 @@
 
 namespace Aqsis {
 
-CqBucketProcessor::CqBucketProcessor(const SqOptionCache& optCache)
+CqBucketProcessor::CqBucketProcessor(CqImageBuffer& imageBuf,
+                                     const SqOptionCache& optCache)
 	: m_bucket(0),
+	m_imageBuf(imageBuf),
 	m_optCache(optCache),
 	m_DiscreteShiftX(lfloor(optCache.xFiltSize/2.0f)),
 	m_DiscreteShiftY(lfloor(optCache.yFiltSize/2.0f)),
@@ -257,7 +259,7 @@ void CqBucketProcessor::postProcess()
 	boost::shared_ptr<SqBucketCacheSegment> top_left, top_right, bottom_left, bottom_right;
 
 	std::vector<CqBucket*> neighbours;
-	QGetRenderContext()->pImage()->axialNeighbours(*m_bucket, neighbours);
+	m_imageBuf.axialNeighbours(*m_bucket, neighbours);
 	if(neighbours[CqImageBuffer::left] && !neighbours[CqImageBuffer::left]->IsProcessed())
 	{
 		boost::shared_ptr<SqBucketCacheSegment> cacheSegment(new SqBucketCacheSegment);
@@ -942,12 +944,14 @@ void CqBucketProcessor::RenderWaitingMPs()
 void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 {
 	// Cull surface if it's hidden
-	if ( !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" )[0] & ModeZ ) && !surface->pCSGNode() )
+	if ( !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" )[0] & DMode_Z ) && !surface->pCSGNode() )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling);
 		if ( surface->fCachedBound() &&
-			 occlusionCullSurface( surface ) )
+		     m_OcclusionTree.canCull(surface->GetCachedRasterBound()) )
 		{
+			m_imageBuf.RepostSurface(*m_bucket, surface);
+			STATS_INC( GPR_occlusion_culled );
 			return;
 		}
 	}
@@ -999,7 +1003,7 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 			TqInt cSplits = surface->Split( aSplits );
 			for ( TqInt i = 0; i < cSplits; i++ )
 			{
-				QGetRenderContext()->pImage()->PostSurface( aSplits[ i ] );
+				m_imageBuf.PostSurface( aSplits[ i ] );
 			}
 		}
 	}
@@ -1047,8 +1051,6 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 
 	CqHitTestCache hitTestCache;
 	bool cachedHitData = false;
-
-	//bool mustDraw = !m_CurrentGridInfo.isCullable;
 
     CqBound Bound = pMPG->GetBound();
 
@@ -1183,8 +1185,8 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 	TqInt iXSamples = m_optCache.xSamps;
     TqInt iYSamples = m_optCache.ySamps;
 
-	TqFloat opentime = currentGridInfo.shutterOpenTime;
-	TqFloat closetime = currentGridInfo.shutterCloseTime;
+	TqFloat opentime = m_optCache.shutterOpen;
+	TqFloat closetime = m_optCache.shutterClose;
 	TqFloat timePerSample = 0;
 	if(IsMoving)
 	{
@@ -1411,7 +1413,11 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	SqImageSample& occlHit = pie2->occludingHit(index);
 
-	if(currentGridInfo.isCullable && (occlHit.flags & SqImageSample::Flag_Valid)
+	bool isCullable = !pMPG->pGrid()->usesCSG() &&
+					  !(m_optCache.displayMode & DMode_Z);
+	                  //!(m_optCache.depthFilter & (Filter_Max | Filter_Average));
+
+	if(isCullable && (occlHit.flags & SqImageSample::Flag_Valid)
 			&& pie2->sampleHitData(occlHit)[Sample_Depth] <= D)
 	{
 		// If the sample hit is occluded and can be culled then we return early
@@ -1435,7 +1441,7 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	// Get a pointer to the hit storage.
 	SqImageSample* hit = 0;
 	if((m_CurrentMpgSampleInfo.isOpaque || (currentGridInfo.matteFlag
-				& SqImageSample::Flag_MatteAlpha)) && currentGridInfo.isCullable)
+				& SqImageSample::Flag_MatteAlpha)) && isCullable)
 	{
 		// Use the occluding sample storage when possible, since this is
 		// faster.  Hits may be stored in the occluding storage whenever they
@@ -1546,68 +1552,6 @@ void CqBucketProcessor::StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData)
 					break;
 			}
 		}
-	}
-}
-
-//----------------------------------------------------------------------
-/** Test if this surface can be occlusion culled. If it can then
- * transfer surface to the next bucket it covers, or delete it if it
- * covers no more.
- * \param pSurface A pointer to a CqSurface derived class.
-*/
-
-bool CqBucketProcessor::occlusionCullSurface( const boost::shared_ptr<CqSurface>& surface )
-{
-	const CqBound RasterBound( surface->GetCachedRasterBound() );
-
-	if ( m_OcclusionTree.canCull( RasterBound ) )
-	{
-		CqString objname( "unnamed" );
-		const CqString* pattrName = surface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-		if( pattrName )
-			objname = *pattrName;
-
-		// Surface is behind everying in this bucket but it may be
-		// visible in other buckets it overlaps.
-		// bucket to the right
-		TqInt nextBucketX = m_bucket->getCol() + 1;
-		TqInt xpos = m_bucket->getXPosition() + m_bucket->getXSize();
-		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
-			 ( RasterBound.vecMax().x() >= xpos ) )
-		{
-			Aqsis::log() << info << "GPrim: \"" << objname << 
-					"\" occluded in bucket: " << m_bucket->getCol() << ", " << m_bucket->getRow() << 
-					" shifted into bucket: " << nextBucketX << ", " << m_bucket->getRow() << std::endl;
-			QGetRenderContext()->pImage()->Bucket( nextBucketX, m_bucket->getRow() ).AddGPrim( surface );
-			return true;
-		}
-
-		// next row
-		TqInt nextBucketY = m_bucket->getRow() + 1;
-		// find bucket containing left side of bound
-		nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / m_optCache.xBucketSize;
-		nextBucketX = max( nextBucketX, 0 );
-		TqInt ypos = m_bucket->getYPosition() + m_bucket->getYSize();
-
-		if ( ( nextBucketX < QGetRenderContext()->pImage()->cXBuckets() ) &&
-			 ( nextBucketY  < QGetRenderContext()->pImage()->cYBuckets() ) &&
-			 ( RasterBound.vecMax().y() >= ypos ) )
-		{
-			Aqsis::log() << info << "GPrim: \"" << objname << 
-				"\" occluded in bucket: " << m_bucket->getCol() << ", " << m_bucket->getRow() << 
-				" shifted into bucket: " << nextBucketX << ", " << nextBucketY << std::endl;
-			QGetRenderContext()->pImage()->Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
-			return true;
-		}
-
-		// Bound covers no more buckets therefore we can delete the surface completely.
-		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-		STATS_INC( GPR_occlusion_culled );
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 

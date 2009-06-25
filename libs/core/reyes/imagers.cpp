@@ -82,9 +82,9 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 	TqInt j, i;
 	TqFloat shuttertime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 
-	components = mode & ModeRGB ? 3 : 0;
-	components += mode & ModeA ? 1 : 0;
-	components = mode & ModeZ ? 1 : components;
+	components = mode & DMode_RGB ? 3 : 0;
+	components += mode & DMode_A ? 1 : 0;
+	components = mode & DMode_Z ? 1 : components;
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) );
 

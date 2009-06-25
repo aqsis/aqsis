@@ -56,11 +56,8 @@ class CqBucketProcessor;
 struct SqGridInfo
 {
 	TqFloat shadingRate;
-	TqFloat shutterOpenTime;
-	TqFloat shutterCloseTime;
 	const TqFloat* lodBounds;
 	TqUchar matteFlag;
-	bool isCullable;
 	bool usesDataMap;
 	bool useSmoothShading;
 };

@@ -428,7 +428,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		const TqFloat* pQuant = 0;
 		if (!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
 		{
-			if (m_modeID & ModeZ)
+			if (m_modeID & DMode_Z)
 				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
 			else
 				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
@@ -448,17 +448,17 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
 		TqInt dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
-		if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
+		if (m_modeID & ( DMode_RGB | DMode_A | DMode_Z) )
 		{
 			PtDspyDevFormat fmt;
 
 			fmt.type = dataFormat;
-			if (m_modeID & ModeA)
+			if (m_modeID & DMode_A)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
 				m_formats.push_back(fmt);
 			}
-			if (m_modeID & ModeRGB)
+			if (m_modeID & DMode_RGB)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				m_formats.push_back(fmt);
@@ -467,7 +467,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
 				m_formats.push_back(fmt);
 			}
-			if (m_modeID & ModeZ)
+			if (m_modeID & DMode_Z)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_ZName );
 				m_formats.push_back(fmt);
@@ -580,7 +580,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		std::vector<PtDspyDevFormat>::iterator i;
 		for (i=m_formats.begin(); i!=m_formats.end(); i++)
 		{
-			if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
+			if (m_modeID & ( DMode_RGB | DMode_A | DMode_Z) )
 			{
 				if ( i->name == ddMemberData.m_RedName )
 					m_dataOffsets.push_back(Sample_Red);

@@ -25,10 +25,9 @@
 #include <aqsis/aqsis.h>
 
 #include <aqsis/math/color.h>
+#include <aqsis/core/api/ioptions.h>
 
 namespace Aqsis {
-
-class IqOptions;
 
 
 /// Filter types for shadow map depth data.
@@ -53,13 +52,17 @@ struct SqOptionCache
 	TqInt xSamps;       ///< number of PixelSamples in the x-direction
 	TqInt ySamps;       ///< number of PixelSamples in the y-direction
 
-	TqInt xBucketSize;  ///< Bucket size in the x-direction
-	TqInt yBucketSize;  ///< Bucket size in the y-direction
-
 	TqFloat clipNear;   ///< Depth of the near clipping plane
 	TqFloat clipFar;    ///< Depth of the far clipping plane
 
+	TqFloat shutterOpen;  ///< Camera shutter open time
+	TqFloat shutterClose; ///< Camera shutter close time
+
+	TqInt xBucketSize;  ///< Bucket size in the x-direction
+	TqInt yBucketSize;  ///< Bucket size in the y-direction
 	TqInt maxEyeSplits; ///< Maximum allowed number of eye splits
+
+	EqDisplayMode displayMode; ///< Type of the connected displays
 
 	EqDepthFilter depthFilter; ///< Type of depth filter to use
 	CqColor zThreshold; ///< Opacity threshold for inclusion in depth maps

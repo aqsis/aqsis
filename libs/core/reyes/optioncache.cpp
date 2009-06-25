@@ -33,30 +33,45 @@ SqOptionCache::SqOptionCache()
 	yFiltSize(1),
 	xSamps(1),
 	ySamps(1),
-	xBucketSize(16),
-	yBucketSize(16),
 	clipNear(0),
 	clipFar(0),
+	shutterOpen(0),
+	shutterClose(0),
+	xBucketSize(16),
+	yBucketSize(16),
 	maxEyeSplits(1),
+	displayMode(DMode_None),
 	depthFilter(Filter_Min),
 	zThreshold()
 { }
 
 void SqOptionCache::cacheOptions(const IqOptions& opts)
 {
-	// Cache filter size
+	// Filter size
 	const TqFloat* filtSize = opts.GetFloatOption("System", "FilterWidth");
 	assert(filtSize);
 	xFiltSize = filtSize[0];
 	yFiltSize = filtSize[1];
 
-	// Cache number of pixel samples.
+	// Number of pixel samples.
 	const TqInt* pixelSamps = opts.GetIntegerOption("System", "PixelSamples");
 	assert(pixelSamps);
 	xSamps = pixelSamps[0];
 	ySamps = pixelSamps[1];
 
-	// Cache bucket size.
+	// Location of the clipping planes.
+	const TqFloat* clipLoc = opts.GetFloatOption("System", "Clipping");
+	assert(clipLoc);
+	clipNear = clipLoc[0];
+	clipFar = clipLoc[1];
+
+	// Shutter times.
+	const TqFloat* shutterTimes = opts.GetFloatOption("System", "Shutter");
+	assert(shutterTimes);
+	shutterOpen = shutterTimes[0];
+	shutterClose = shutterTimes[1];
+
+	// Bucket size.
 	xBucketSize = 16;
 	yBucketSize = 16;
 	if(const TqInt* bktSize = opts.GetIntegerOption("limits", "bucketsize"))
@@ -64,19 +79,17 @@ void SqOptionCache::cacheOptions(const IqOptions& opts)
 		xBucketSize = bktSize[0];
 		yBucketSize = bktSize[1];
 	}
-
-	// Cache location of the clipping planes.
-	const TqFloat* clipLoc = opts.GetFloatOption("System", "Clipping");
-	assert(clipLoc);
-	clipNear = clipLoc[0];
-	clipFar = clipLoc[1];
-
-	// Cache eye split bound
+	// Eye split bound
 	maxEyeSplits = 10;
 	if(const TqInt* splits = opts.GetIntegerOption("limits", "eyesplits"))
 		maxEyeSplits = splits[0];
 
-	// Cache depth filter
+	// Display mode.
+	const TqInt* dMode = opts.GetIntegerOption("System", "DisplayMode");
+	assert(dMode);
+	displayMode = static_cast<EqDisplayMode>(dMode[0]);
+
+	// Depth filter
 	depthFilter = Filter_Min;
 	if(const CqString* filtStr = opts.GetStringOption("Hider", "depthfilter"))
 	{
@@ -97,7 +110,7 @@ void SqOptionCache::cacheOptions(const IqOptions& opts)
 	// which are partially transparent won't appear in shadow maps.
 	zThreshold = CqColor(1.0f);
 	if(const CqColor* zTh = opts.GetColorOption("limits", "zthreshold"))
-		zThreshold = *zTh;
+		zThreshold = zTh[0];
 }
 
 } // namespace Aqsis

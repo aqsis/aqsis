@@ -399,13 +399,13 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 		XMaxb = static_cast<TqInt>( Bound.vecMax().x() ) / m_optCache.xBucketSize;
 		YMaxb = static_cast<TqInt>( Bound.vecMax().y() ) / m_optCache.yBucketSize;
 
-		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() )
+		if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets )
 			return;
 
-		XMinb = clamp( XMinb, 0, cXBuckets()-1 );
-		YMinb = clamp( YMinb, 0, cYBuckets()-1 );
-		XMaxb = clamp( XMaxb, 0, cXBuckets()-1 );
-		YMaxb = clamp( YMaxb, 0, cYBuckets()-1 );
+		XMinb = clamp( XMinb, 0, m_cXBuckets-1 );
+		YMinb = clamp( YMinb, 0, m_cYBuckets-1 );
+		XMaxb = clamp( XMaxb, 0, m_cXBuckets-1 );
+		YMaxb = clamp( YMaxb, 0, m_cYBuckets-1 );
 	}
 
 	// Sanity check we are not putting into a bucket that has already been processed.
@@ -439,6 +439,66 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	{
 		bucket->AddGPrim( pSurface );
 	}
+}
+
+
+void CqImageBuffer::RepostSurface(const CqBucket& oldBucket,
+                                  const boost::shared_ptr<CqSurface>& surface)
+{
+	const CqBound rasterBound = surface->GetCachedRasterBound();
+
+	bool wasPosted = false;
+	// Surface is behind everying in this bucket but it may be visible in other
+	// buckets it overlaps.
+	//
+	// First look in bucket to the right
+	TqInt nextBucketX = oldBucket.getCol() + 1;
+	TqInt nextBucketY = oldBucket.getRow();
+	TqInt xpos = oldBucket.getXPosition() + oldBucket.getXSize();
+	if ( nextBucketX < m_cXBuckets && rasterBound.vecMax().x() >= xpos )
+	{
+		Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
+		wasPosted = true;
+	}
+	else
+	{
+		// next row
+		++nextBucketY;
+		// find bucket containing left side of bound
+		nextBucketX = max<TqInt>(0, lfloor( rasterBound.vecMin().x() ) / m_optCache.xBucketSize);
+		TqInt ypos = oldBucket.getYPosition() + oldBucket.getYSize();
+
+		if ( ( nextBucketX < m_cXBuckets ) &&
+			( nextBucketY  < m_cYBuckets ) &&
+			( rasterBound.vecMax().y() >= ypos ) )
+		{
+			Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
+			wasPosted = true;
+		}
+	}
+
+#ifdef DEBUG
+	// Print info about reposting.  This is protected by DEBUG so that scenes
+	// with huge amounts of occlusion won't silently be causing *heaps* of
+	// logging traffic.
+	CqString objName("unnamed");
+	if(const CqString* name = surface->pAttributes()
+			->GetStringAttribute("identifier", "name"))
+		objName = name[0];
+	if(wasPosted)
+	{
+		Aqsis::log() << info << "GPrim: \"" << objName
+			<< "\" occluded in bucket: "
+			<< oldBucket.getCol() << ", " << oldBucket.getRow()
+			<< " shifted into bucket: "
+			<< nextBucketX << ", " << nextBucketY << "\n";
+	}
+	else
+	{
+		Aqsis::log() << info
+			<< "GPrim: \"" << objName << "\" occlusion culled" << std::endl;
+	}
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -567,8 +627,6 @@ void CqImageBuffer::RenderImage()
 	}
 
 	// Render the surface at the front of the list.
-	m_fDone = false;
-
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext()->pProgressHandler();
 
@@ -626,7 +684,7 @@ void CqImageBuffer::RenderImage()
 	for(int i = 0; i < numConcurrentBuckets; ++i)
 	{
 		bucketProcessors.push_back(boost::shared_ptr<CqBucketProcessor>(
-					new CqBucketProcessor(m_optCache)));
+					new CqBucketProcessor(*this, m_optCache)));
 	}
 	CqMultiJitteredSampler jitteredSampler(m_optCache.xSamps, m_optCache.ySamps);
 	CqGridSampler gridSampler(m_optCache.xSamps, m_optCache.ySamps);
@@ -676,7 +734,6 @@ void CqImageBuffer::RenderImage()
 		for (int i = 0; !m_fQuit && i < numConcurrentBuckets; ++i)
 		{
 			bucketProcessors[i]->postProcess();
-			BucketComplete();
 			{
 				AQSIS_TIME_SCOPE(Display_bucket);
 				const CqBucket* bucket = bucketProcessors[i]->getBucket();
@@ -690,7 +747,7 @@ void CqImageBuffer::RenderImage()
 			if ( pProgressHandler )
 			{
 				// Inform the status class how far we have got, and update UI.
-				float Complete = (100.0f * iBucket) / static_cast<float> ( cXBuckets() * cYBuckets() );
+				float Complete = (100.0f * iBucket) / static_cast<float> ( m_cXBuckets * m_cYBuckets );
 				QGetRenderContext() ->Stats().SetComplete( Complete );
 				( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 			}
@@ -702,14 +759,11 @@ void CqImageBuffer::RenderImage()
 		}
 	}
 
-	ImageComplete();
-
 	// Pass >100 through to progress to allow it to indicate completion.
 	if ( pProgressHandler )
 	{
 		( *pProgressHandler ) ( 100.0f, QGetRenderContext() ->CurrentFrame() );
 	}
-	m_fDone = true;
 }
 
 

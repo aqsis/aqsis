@@ -807,7 +807,7 @@ RtVoid	RiWorldBegin()
 
 	// If rendering a depth buffer, check that the filter is "box" 1x1, warn if not.
 	TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
-	if( iMode & ModeZ )
+	if( iMode & DMode_Z )
 	{
 		RtFilterFunc filter = QGetRenderContext() ->poptCurrent()->funcFilter();
 		TqFloat xwidth = QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ];
@@ -1394,19 +1394,19 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 	TqInt dataSize = 0;
 	if ( strncmp( mode, RI_RGB, strlen(RI_RGB) ) == 0 )
 	{
-		eValue |= ModeRGB;
+		eValue |= DMode_RGB;
 		dataSize += 3;
 		index += strlen( RI_RGB );
 	}
 	if ( strncmp( &mode[index], RI_A, strlen( RI_A ) ) == 0 )
 	{
-		eValue |= ModeA;
+		eValue |= DMode_A;
 		dataSize += 1;
 		index += strlen( RI_A );
 	}
 	if ( strncmp( &mode[index], RI_Z, strlen( RI_Z ) ) == 0 )
 	{
-		eValue |= ModeZ;
+		eValue |= DMode_Z;
 		dataSize += 1;
 		index += strlen( RI_Z );
 	}

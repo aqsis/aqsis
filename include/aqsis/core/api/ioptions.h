@@ -31,16 +31,15 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <aqsis/math/color.h>
 #include <aqsis/riutil/primvartype.h>
 #include <aqsis/ri/ritypes.h>
-#include <aqsis/util/sstring.h>
 #include <aqsis/math/vecfwd.h>
 
 namespace Aqsis {
 
 class CqImagersource;
 class CqRegion;
+class CqString;
 struct IqShader;
 struct IqChannelBuffer;
 
@@ -49,10 +48,10 @@ struct IqChannelBuffer;
  */
 enum EqDisplayMode
 {
-    ModeNone = 0x0000,   	///< Invalid.
-    ModeRGB = 0x0001,   		///< Red Green and Blue channels.
-    ModeA = 0x0002,   		///< Alpha channel.
-    ModeZ = 0x0004		///< Depth channel.
+    DMode_None = 0x0000, ///< Invalid.
+    DMode_RGB = 0x0001,  ///< Red Green and Blue channels.
+    DMode_A = 0x0002,    ///< Alpha channel.
+    DMode_Z = 0x0004     ///< Depth channel.
 };
 
 

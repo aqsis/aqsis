@@ -42,6 +42,7 @@ namespace Aqsis {
 
 class CqSampleIterator;
 class CqRenderer;
+class CqImageBuffer;
 
 /** \brief Reyes processor for geometry covering a bucket.
  *
@@ -58,7 +59,7 @@ class CqBucketProcessor
 {
 	public:
 		/** Default constructor */
-		CqBucketProcessor(const SqOptionCache& optCache);
+		CqBucketProcessor(CqImageBuffer& imageBuf, const SqOptionCache& optCache);
 
 		/** Set the bucket to be processed */
 		void setBucket(CqBucket* bucket);
@@ -134,7 +135,6 @@ class CqBucketProcessor
 		void	RenderMPG_Static( CqMicroPolygon* pMPG);
 		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
 		void	StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData);
-		bool 	occlusionCullSurface(const boost::shared_ptr<CqSurface>& surface);
 		const CqBound& DofSubBound(TqInt index) const;
 
 		void setupCacheInformation();
@@ -143,6 +143,8 @@ class CqBucketProcessor
 		//--------------------------------------------------
 		/// Pointer to the current bucket
 		CqBucket* m_bucket;
+		/// Pointer to the image buffer managing the render.
+		CqImageBuffer& m_imageBuf;
 
 		/// Cache of RiOptions for fast access during rendering.
 		const SqOptionCache m_optCache;

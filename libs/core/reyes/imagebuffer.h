@@ -81,56 +81,32 @@ class CqImageBuffer
 	public:
 		CqImageBuffer() :
 				m_fQuit( false ),
-				m_fDone( true ),
 				m_cXBuckets( 0 ),
 				m_cYBuckets( 0 ),
 				m_CurrentBucketCol( 0 ),
 				m_CurrentBucketRow( 0 )
 		{}
-		virtual	~CqImageBuffer();
+		~CqImageBuffer();
 
-		/** Get the number of buckets in the horizontal direction.
-		 * \return Integer horizontal bucket count.
+		void AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
+		void PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		/** \brief Repost a previously posted surface into the next unfinished bucket.
+		 *
+		 * The surface is reposted it to the next unfinished bucket within the
+		 * surface's bound, skipping the old bucket.  Using this function is
+		 * relevant when the surface is culled in the current bucket for
+		 * reasons such as occlusion culling.
+		 *
+		 * \param oldBucket - previous bucket holding the surface.
+		 * \param surface - surface to repost
 		 */
-		TqInt	cXBuckets() const
-		{
-			return ( m_cXBuckets );
-		}
-		/** Get the number of buckets in the vertical direction.
-		 * \return Integer vertical bucket count.
-		 */
-		TqInt	cYBuckets() const
-		{
-			return ( m_cYBuckets );
-		}
-		/** Get completion status of this rendered image.
-		    * \return bool indicating finished or not.
-		    */
-		bool	fDone() const
-		{
-			return ( m_fDone );
-		}
+		void RepostSurface( const CqBucket& oldBucket,
+		                    const boost::shared_ptr<CqSurface>& surface );
+		void RenderImage();
 
-		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
-		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		void	RenderImage();
-
-		virtual	void	SetImage();
-		virtual	void	Quit();
-		virtual	void	Release();
-
-		// Callbacks to overridden image buffer class to allow display/processing etc.
-		virtual	void	BucketComplete()
-		{}
-		virtual	void	ImageComplete()
-		{}
-
-		/** Get a pointer to the bucket at position x,y in the grid.
-		 */
-		CqBucket& Bucket( TqInt x, TqInt y)
-		{
-			return( m_Buckets[y][x] );
-		}
+		void SetImage();
+		void Quit();
+		void Release();
 
 		enum EqNeighbourLocation
 		{
@@ -147,8 +123,13 @@ class CqImageBuffer
 		void	axialNeighbours(CqBucket const& bucket, std::vector<CqBucket*>& neighbours);
 
 	private:
+		/// Get a pointer to the bucket at position x,y in the grid.
+		CqBucket& Bucket( TqInt x, TqInt y)
+		{
+			return m_Buckets[y][x];
+		}
+
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
-		bool	m_fDone;			///< Set when the render of this image has completed.
 
 		SqOptionCache m_optCache;   ///< Cache of commonly used RiOptions
 		TqInt	m_cXBuckets;		///< Integer horizontal bucket count.
@@ -193,11 +174,11 @@ inline void CqImageBuffer::axialNeighbours(CqBucket const& bucket, std::vector<C
 	// Populate the array slots depending on if there are usable neighbours in that direction.
 	if(bx > 0)
 		neighbours[left] = &Bucket(bx-1, by);
-	if(bx < cXBuckets() - 1)
+	if(bx < m_cXBuckets - 1)
 		neighbours[right] = &Bucket(bx+1, by);
 	if(by > 0)
 		neighbours[above] = &Bucket(bx, by-1);
-	if(by < cYBuckets() - 1)
+	if(by < m_cYBuckets - 1)
 		neighbours[below] = &Bucket(bx, by+1);
 }
 

@@ -339,7 +339,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM( Imager, CqString, CqString, type_string, "null" );
 	ADD_SYSTEM_PARAM( DisplayType, CqString, CqString, type_string, "file" );
 	ADD_SYSTEM_PARAM( DisplayName, CqString, CqString, type_string, "aqsis.tif" );
-	ADD_SYSTEM_PARAM( DisplayMode, TqInt, TqFloat, type_integer, ModeRGB );
+	ADD_SYSTEM_PARAM( DisplayMode, TqInt, TqFloat, type_integer, DMode_RGB );
 
 	ADD_SYSTEM_PARAM( Hider, CqString, CqString, type_string, "hidden" );
 	ADD_SYSTEM_PARAM( ColorSamples, TqInt, TqFloat, type_integer, 3 );

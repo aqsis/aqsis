@@ -45,8 +45,9 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>& surface)
 {
+	const IqAttributes& attrs = *pAttributes();
 	// Determine the matte flag type.
-	switch(this->pAttributes()->GetIntegerAttribute("System", "Matte")[0])
+	switch(attrs.GetIntegerAttribute("System", "Matte")[0])
 	{
 		case 0:  m_CurrentGridInfo.matteFlag = 0;                              break;
 		default: m_CurrentGridInfo.matteFlag = SqImageSample::Flag_Matte;      break;
@@ -54,21 +55,19 @@ void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>
 	}
 
 	// Cache the shading interpolation type.
-	m_CurrentGridInfo.useSmoothShading = pAttributes()->
-		GetIntegerAttribute("System", "ShadingInterpolation")[0] == ShadingInterp_Smooth;
-	// this is true if the mpgs can safely be occlusion culled.
-	m_CurrentGridInfo.isCullable = !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) && !(this->pCSGNode());
+	m_CurrentGridInfo.useSmoothShading = attrs.GetIntegerAttribute("System",
+			"ShadingInterpolation")[0] == ShadingInterp_Smooth;
 
-	m_CurrentGridInfo.usesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
+	m_CurrentGridInfo.usesDataMap
+		= !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
 
 	// ShadingRate may be modified by RiGeometricApproximation "focusfactor" or
 	// "motionfactor", so we need to get the appropriate adjusted rate rather
 	// than grabbing it directly from the grid attribute set.
 	m_CurrentGridInfo.shadingRate = surface->AdjustedShadingRate();
-	m_CurrentGridInfo.shutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-	m_CurrentGridInfo.shutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-	m_CurrentGridInfo.lodBounds = this->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+	m_CurrentGridInfo.lodBounds
+		= attrs.GetFloatAttribute("System", "LevelOfDetailBounds");
 }
 
 
