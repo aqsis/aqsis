@@ -1332,7 +1332,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
-			res = m_aValue[ 0 ];
+			res = m_aValue[ index ];
 		}
 		virtual	void	GetStringPtr( const CqString*& res ) const
 		{
@@ -1344,20 +1344,32 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		}
 		virtual	void	SetString( const CqString& s, TqInt index )
 		{
-			m_aValue[ 0 ] = s;
+			m_aValue[ index ] = s;
 		}
 		virtual	void	SetString( const CqString& s )
 		{
-			m_aValue.assign( 0, s );
+			m_aValue.assign( m_aValue.size(), s );
 		}
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			CqString temp;
-			pVal->GetString( temp );
-			m_aValue.assign( 0, temp );
+			TqInt srcSize = pVal->Size();
+			if(srcSize > 1)
+			{
+				assert(Size() == srcSize);
+				const CqString* rhs = 0;
+				pVal->GetStringPtr(rhs);
+				for(TqInt i = 0; i < srcSize; ++i)
+					m_aValue[i] = rhs[i];
+			}
+			else
+			{
+				CqString temp;
+				pVal->GetString( temp );
+				m_aValue.assign( m_aValue.size(), temp );
+			}
 		}
 		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{

@@ -1739,10 +1739,19 @@ bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res ) const
 	TqInt i = FindLocalVarIndex( name );
 	if ( i >= 0 )
 	{
-		res->SetValueFromVariable( m_LocalVars[ i ]);
-		return ( true );
+		IqShaderData* src = m_LocalVars[i];
+		// Check that the result and source variables are compatible: they
+		// - have the same type
+		// - array length, and
+		// - we're not trying to assign a varying to a uniform.
+		if(src->Type() != res->Type() || src->Size() > res->Size()
+		   || src->ArrayLength() != res->ArrayLength())
+			return false;
+		// If everything is ok, set the value.
+		res->SetValueFromVariable(src);
+		return true;
 	}
-	return ( false );
+	return false;
 }
 
 //---------------------------------------------------------------------
