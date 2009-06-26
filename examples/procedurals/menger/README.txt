@@ -43,7 +43,9 @@ On 64-bit linux systems with g++ use the following command line:
 
 g++ -Wall -fPIC -O3 -shared menger.cpp -I /path/to/rih -o menger.so
 
-where path/to/rih is a path at which ri.h for the renderer can be found.
+where path/to/rih is a path at which ri.h for the renderer can be found.  The
+include path to the base of the aqsis include directory might also need to be
+added if the install is not located in the system path.
 
 
 Win32

@@ -21,7 +21,7 @@
 // Author: Chris Foster [chris42f (at) gmail (d0t) com]
 //
 
-#include <aqsis/ri/ri.h>
+#include <ri.h>
 
 #include <sstream>
 #include <iostream>
