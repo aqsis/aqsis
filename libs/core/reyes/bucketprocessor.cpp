@@ -944,7 +944,9 @@ void CqBucketProcessor::RenderWaitingMPs()
 void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 {
 	// Cull surface if it's hidden
-	if ( !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" )[0] & DMode_Z ) && !surface->pCSGNode() )
+	if ( !surface->pCSGNode() && !( (m_optCache.displayMode & DMode_Z) &&
+	                                (m_optCache.depthFilter == Filter_Max ||
+	                                 m_optCache.depthFilter == Filter_Average) ) )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling);
 		if ( surface->fCachedBound() &&
@@ -1026,6 +1028,14 @@ void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 	m_CurrentMpgSampleInfo.smoothInterpolation = !(UsingDof || IsMoving)
 		&& pMP->pGrid()->GetCachedGridInfo().useSmoothShading;
 
+	// Samples hitting the micropoly are occlusion cullable if
+	// 1) The micropoly is not part of a CSG
+	// 2) We don't need the entire set of samples for depth filtering.
+	m_CurrentMpgSampleInfo.isCullable = !pMP->pGrid()->usesCSG() &&
+	                  !( (m_optCache.displayMode & DMode_Z) &&
+	                     (m_optCache.depthFilter == Filter_Max ||
+	                      m_optCache.depthFilter == Filter_Average) );
+
 	// Cache output sample info for this mpg so we don't have to keep fetching
 	// it for each sample.
 	pMP->CacheOutputInterpCoeffs(m_CurrentMpgSampleInfo);
@@ -1045,9 +1055,9 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
     const TqFloat* LodBounds = currentGridInfo.lodBounds;
     bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+	bool isCullable = m_CurrentMpgSampleInfo.isCullable;
 
     TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.shadingRate;
 
 	CqHitTestCache hitTestCache;
 	bool cachedHitData = false;
@@ -1126,10 +1136,9 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 					if(!Bound.Contains2D( vecP ))
 						continue;
 
-					// Occlusion cull the micropoly bound against the current opaque sample hit.
-					const SqImageSample& occlHit = sampleData.occludingHit;
-					if((occlHit.flags & SqImageSample::Flag_Valid) &&
-						Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+					// Occlusion cull the micropoly bound against the current
+					// opaque sample hit.
+					if(isCullable && Bound.vecMin().z() > sampleData.occlZ)
 						continue;
 
 					// Check to see if the sample is within the sample's level of detail
@@ -1176,9 +1185,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 
     const TqFloat* LodBounds = currentGridInfo.lodBounds;
     bool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+	bool isCullable = m_CurrentMpgSampleInfo.isCullable;
 
     TqInt sample_hits = 0;
-    //TqFloat shd_rate = m_CurrentGridInfo.shadingRate;
 
 	CqHitTestCache hitTestCache;
 
@@ -1336,10 +1345,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 
 							if(!DofBound.Contains2D( vecP ))
 								continue;
-							// Occlusion cull the micropoly bound against the current opaque sample hit.
-							const SqImageSample& occlHit = sampleData.occludingHit;
-							if((occlHit.flags & SqImageSample::Flag_Valid) &&
-								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+							// Occlusion cull the micropoly bound against the
+							// current opaque sample hit.
+							if(isCullable && Bound.vecMin().z() > sampleData.occlZ)
 								continue;
 
 							// Check to see if the sample is within the sample's level of detail
@@ -1371,10 +1379,9 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 						{
 							if(!Bound.Contains2D( vecP ))
 								continue;
-							// Occlusion cull the micropoly bound against the current opaque sample hit.
-							const SqImageSample& occlHit = sampleData.occludingHit;
-							if((occlHit.flags & SqImageSample::Flag_Valid) &&
-								Bound.vecMin().z() > (*pie2)->sampleHitData(occlHit)[Sample_Depth])
+							// Occlusion cull the micropoly bound against the
+							// current opaque sample hit.
+							if(isCullable && Bound.vecMin().z() > sampleData.occlZ)
 								continue;
 
 							// Check to see if the sample is within the sample's level of detail
@@ -1410,34 +1417,21 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 
 void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
 {
-	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
-	SqImageSample& occlHit = pie2->occludingHit(index);
-
-	bool isCullable = !pMPG->pGrid()->usesCSG() &&
-					  !(m_optCache.displayMode & DMode_Z);
-	                  //!(m_optCache.depthFilter & (Filter_Max | Filter_Average));
-
-	if(isCullable && (occlHit.flags & SqImageSample::Flag_Valid)
-			&& pie2->sampleHitData(occlHit)[Sample_Depth] <= D)
+	bool isCullable = m_CurrentMpgSampleInfo.isCullable;
+	SqSampleData& sampleData = pie2->SampleData( index );
+	if(isCullable && sampleData.occlZ <= D)
 	{
 		// If the sample hit is occluded and can be culled then we return early
 		// without storing the hit data at all.
 		return;
 	}
-
+	// Record the sample hit in the stats.
 	CqStats::IncI( CqStats::SPL_hits );
 	pMPG->MarkHit();
 	// Record the fact that we have valid samples in the bucket.
 	m_hasValidSamples = true;
 
-	// Compute the color and opacity of the micropolygon at the hit point.
-	// This is where ShadingInterpolation "smooth" or "constant" comes in.
-	CqColor col;
-	CqColor opa;
-	SqSampleData const& sampleData = pie2->SampleData( index );
-	const CqVector2D& vecP = sampleData.position;
-	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, vecP, col, opa);
-
+	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	// Get a pointer to the hit storage.
 	SqImageSample* hit = 0;
 	if((m_CurrentMpgSampleInfo.isOpaque || (currentGridInfo.matteFlag
@@ -1449,9 +1443,43 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		// 1) The micropoly is fully opaque (including all MatteAlpha objects)
 		// 2) The micropoly is not part of a CSG
 		// 3) We don't need the entire set of samples for depth filtering.
-		hit = &occlHit;
+		//
+		// (2 and 3 also determine whether the hit is occlusion cullable.)
+		hit = &pie2->occludingHit(index);
+		if((m_optCache.displayMode & DMode_Z) &&
+		    m_optCache.depthFilter == Filter_MidPoint)
+		{
+			// Special case for the midpoint depthfilter: here we make sure to
+			// update the occluding depth with the *second closest* opaque
+			// surface rather than the closest.
+			TqFloat hitPrevZ = FLT_MAX;
+			if(hit->flags & SqImageSample::Flag_Valid)
+				hitPrevZ = pie2->sampleHitData(*hit)[Sample_Depth];
+			if(hitPrevZ < D)
+			{
+				// view -->      |          |          |
+				// direc      hitPrevZ      D     sampleData.occlZ
+				sampleData.occlZ = D;
+				m_OcclusionTree.setSampleDepth(D, sampleData.occlusionIndex);
+				// In this special case, we don't actually have to store the
+				// hit since the depth is greater than the occluding surface,
+				// so return early.
+				return;
+			}
+			else
+			{
+				// view -->      |          |          |
+				// direc         D      hitPrevZ    sampleData.occlZ
+				sampleData.occlZ = hitPrevZ;
+				m_OcclusionTree.setSampleDepth(hitPrevZ, sampleData.occlusionIndex);
+			}
+		}
+		else
+		{
+			sampleData.occlZ = D;
+			m_OcclusionTree.setSampleDepth(D, sampleData.occlusionIndex);
+		}
 		hit->flags = SqImageSample::Flag_Valid;
-		m_OcclusionTree.setSampleDepth(D, sampleData.occlusionIndex);
 	}
 	else
 	{
@@ -1461,6 +1489,13 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 		hit = &pie2->Values(index).back();
 		pie2->allocateHitData(*hit);
 	}
+
+	// Compute the color and opacity of the micropolygon at the hit point.
+	// This is where ShadingInterpolation "smooth" or "constant" comes in.
+	CqColor col;
+	CqColor opa;
+	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, sampleData.position, col, opa);
+
 	// Store the hit data for later use.
 	TqFloat* hitData = pie2->sampleHitData(*hit);
 	hitData[ Sample_Red ] = col[0];

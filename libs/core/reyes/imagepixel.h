@@ -29,6 +29,7 @@
 #include	<aqsis/aqsis.h>
 
 #include	<vector>
+#include	<cfloat> // for FLT_MAX
 
 #include	<boost/intrusive_ptr.hpp>
 #include	<boost/scoped_array.hpp>
@@ -134,12 +135,18 @@ struct SqSampleData : private boost::noncopyable
 	 * stored.  A micropolygon hit can occlude other surfaces when
 	 * 1) The micropoly is opaque
 	 * 2) The micropoly does not participate in CSG
-	 * 3) The z depthfilter is not "max".  (For "midpoint" depth filters we have
-	 *    to keep track of the second-closest depth to the camera as well.)
+	 * 3) The z depthfilter is "min" or "midpoint" (midpoint uses special case code).
 	 */
 	SqImageSample occludingHit;
+	/** \brief Occluding depth.
+	 *
+	 * This should be the same as the depth in occludingHit, *except* when a
+	 * depth filter mode not equal to "min" is enabled.  (ie, the "midpoint"
+	 * or other more exotic depth filters)
+	 */
+	TqFloat occlZ;
 
-	/// Default construct all members, setting numeric members to zero.
+	/// Default construct members & set numeric members to 0 except occlZ=FLT_MAX.
 	SqSampleData();
 };
 
@@ -392,7 +399,8 @@ inline SqSampleData::SqSampleData()
 	time(0),
 	detailLevel(0),
 	data(),
-	occludingHit()
+	occludingHit(),
+	occlZ(FLT_MAX)
 { }
 
 

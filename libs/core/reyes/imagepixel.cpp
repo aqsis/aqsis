@@ -26,7 +26,6 @@
 #include "imagepixel.h"
 
 #include <algorithm>
-#include <cfloat> // for FLT_MAX
 
 #ifdef WIN32
 #	include <windows.h> // Not needed?
@@ -118,6 +117,8 @@ void CqImagePixel::clear()
 		// Reallocate the occluding samples, as their storage indices may have
 		// changed during the Combine() stage.
 		m_samples[i].occludingHit.index = i*sampSize;
+		// Reset the occluding depth to the maximum.
+		m_samples[i].occlZ = FLT_MAX;
 	}
 }
 
@@ -191,7 +192,7 @@ void CqImagePixel::Combine( enum EqDepthFilter depthfilter, CqColor zThreshold )
 			CqColor samplecolor;
 			CqColor sampleopacity;
 			bool samplehit = false;
-			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
+			TqFloat opaqueDepths[2] = { sampleData.occlZ, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
 			for ( std::vector<SqImageSample>::reverse_iterator sample = sampleData.data.rbegin();
@@ -304,15 +305,26 @@ void CqImagePixel::Combine( enum EqDepthFilter depthfilter, CqColor zThreshold )
 		{
 			if (occlHit.flags & SqImageSample::Flag_Valid)
 			{
+				TqFloat* occlData = sampleHitData(occlHit);
 				if(occlHit.flags & SqImageSample::Flag_Matte)
 				{
-					TqFloat* occlData = sampleHitData(occlHit);
+					// Opaque matte objects are fully transparent black; need
+					// to set the hit data to reflect this.
 					occlData[Sample_Red] = 0;
 					occlData[Sample_Green] = 0;
 					occlData[Sample_Blue] = 0;
 					occlData[Sample_ORed] = 0;
 					occlData[Sample_OGreen] = 0;
 					occlData[Sample_OBlue] = 0;
+				}
+				if(depthfilter == Filter_MidPoint)
+				{
+					// For midpoint depth filters, average the occluding depth
+					// and the depth of the opaque sample.  The occluding depth
+					// represents one surface *behind* the opaque depth in this
+					// case.
+					occlData[Sample_Depth] = 0.5*(occlData[Sample_Depth]
+					                              + sampleData.occlZ);
 				}
 				samplecount++;
 			}

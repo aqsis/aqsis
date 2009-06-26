@@ -97,6 +97,9 @@ struct SqMpgSampleInfo
 	/// Whether to use smooth shading interpolation or not
 	bool smoothInterpolation;
 
+	/// True when samples hitting the micropolygon are occlusion cullable
+	bool isCullable;
+
 	/// True when the micropolygon is fully opaque
 	bool isOpaque;
 };
