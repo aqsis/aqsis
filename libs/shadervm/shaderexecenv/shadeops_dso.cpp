@@ -49,28 +49,27 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 	// create storage for the returned value
 	switch ( Result->Type() )
 	{
-
-			case type_float:
+		case type_float:
 			dso_argv[ 0 ] = ( void* ) new TqFloat;
 			break;
-			case type_point:
-			case type_color:
-			case type_triple:
-			case type_vector:
-			case type_normal:
-			case type_hpoint:
+		case type_point:
+		case type_color:
+		case type_triple:
+		case type_vector:
+		case type_normal:
+		case type_hpoint:
 			dso_argv[ 0 ] = ( void* ) new TqFloat[ 3 ];
 			break;
-			case type_string:
+		case type_string:
 			dso_argv[ 0 ] = ( void* ) new STRING_DESC;
 			( ( STRING_DESC* ) dso_argv[ 0 ] ) ->s = NULL;
 			( ( STRING_DESC* ) dso_argv[ 0 ] ) ->bufflen = 0;
 			break;
-			case type_matrix:
-			case type_sixteentuple:
+		case type_matrix:
+		case type_sixteentuple:
 			dso_argv[ 0 ] = ( void* ) new TqFloat[ 16 ];
 			break;
-			default:
+		default:
 			// Unhandled TYpe
 			break;
 	};
@@ -78,30 +77,29 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 	// Allocate space for the arguments
 	for ( p = 1;p <= cParams;p++ )
 	{
-
 		switch ( apParams[ p - 1 ] ->Type() )
 		{
-				case type_float:
+			case type_float:
 				dso_argv[ p ] = ( void* ) new TqFloat;
 				break;
-				case type_hpoint:
-				case type_point:
-				case type_triple:  // This seems reasonable
-				case type_vector:
-				case type_normal:
-				case type_color:
+			case type_hpoint:
+			case type_point:
+			case type_triple:  // This seems reasonable
+			case type_vector:
+			case type_normal:
+			case type_color:
 				dso_argv[ p ] = ( void* ) new TqFloat[ 3 ];
 				break;
-				case type_string:
+			case type_string:
 				dso_argv[ p ] = ( void* ) new STRING_DESC;
 				( ( STRING_DESC* ) dso_argv[ p ] ) ->s = NULL;
 				( ( STRING_DESC* ) dso_argv[ p ] ) ->bufflen = 0;
 				break;
-				case type_matrix:
-				case type_sixteentuple:
+			case type_matrix:
+			case type_sixteentuple:
 				dso_argv[ p ] = ( void* ) new TqFloat[ 16 ];
 				break;
-				default:
+			default:
 				// Unhandled TYpe
 				break;
 		};
@@ -121,11 +119,11 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 
 				switch ( apParams[ p - 1 ] ->Type() )
 				{
-						case type_float:
+					case type_float:
 						apParams[ p - 1 ] ->GetFloat( *( ( float* ) dso_argv[ p ] ), __iGrid );
 						break;
-						case type_hpoint:
-						case type_point:
+					case type_hpoint:
+					case type_point:
 						{
 							CqVector3D v;
 							apParams[ p - 1 ] ->GetPoint( v, __iGrid );
@@ -133,10 +131,9 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
 							( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
 						}
-						;
 						break;
-						case type_triple:  // This seems reasonable
-						case type_vector:
+					case type_triple:  // This seems reasonable
+					case type_vector:
 						{
 							CqVector3D v;
 							apParams[ p - 1 ] ->GetVector( v, __iGrid );
@@ -144,9 +141,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
 							( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
 						}
-						;
 						break;
-						case type_normal:
+					case type_normal:
 						{
 							CqVector3D v;
 							apParams[ p - 1 ] ->GetNormal( v, __iGrid );
@@ -154,9 +150,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
 							( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
 						}
-						;
 						break;
-						case type_color:
+					case type_color:
 						{
 							CqColor c;
 							apParams[ p - 1 ] ->GetColor( c, __iGrid );
@@ -164,9 +159,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							( ( float* ) dso_argv[ p ] ) [ 1 ] = c[ 1 ];
 							( ( float* ) dso_argv[ p ] ) [ 2 ] = c[ 2 ];
 						}
-						;
 						break;
-						case type_string:
+					case type_string:
 						{
 							CqString s;
 							apParams[ p - 1 ] ->GetString( s, __iGrid );
@@ -186,10 +180,9 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							}
 							strncpy(dsoStr->s, s.c_str(), requiredSize );
 						}
-						;
 						break;
-						case type_matrix:
-						case type_sixteentuple:
+					case type_matrix:
+					case type_sixteentuple:
 						{
 							CqMatrix m;
 							int r, c;
@@ -198,9 +191,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 								for ( c = 0; c < 4; c++ )
 									( ( TqFloat* ) dso_argv[ p ] ) [ ( r * 4 ) + c ] = m[ r ][ c ];
 						}
-						;
 						break;
-						default:
+					default:
 						// Unhandled TYpe
 						break;
 				};
@@ -212,16 +204,14 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 			// Pass the returned value back to aqsis
 			switch ( Result->Type() )
 			{
-
-					case type_float:
+				case type_float:
 					{
 						TqFloat val = *( ( float* ) ( dso_argv[ 0 ] ) );
 						Result->SetFloat( val, __iGrid );
 					}
-					;
 					break;
-					case type_hpoint:
-					case type_point:
+				case type_hpoint:
+				case type_point:
 					{
 						CqVector3D v;
 						v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
@@ -229,10 +219,9 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 						v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
 						Result->SetPoint( v, __iGrid );
 					}
-					;
 					break;
-					case type_triple:  // This seems reasonable
-					case type_vector:
+				case type_triple:  // This seems reasonable
+				case type_vector:
 					{
 						CqVector3D v;
 						v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
@@ -240,9 +229,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 						v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
 						Result->SetVector( v, __iGrid );
 					}
-					;
 					break;
-					case type_normal:
+				case type_normal:
 					{
 						CqVector3D v;
 						v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
@@ -250,9 +238,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 						v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
 						Result->SetNormal( v, __iGrid );
 					}
-					;
 					break;
-					case type_color:
+				case type_color:
 					{
 						CqColor c;
 						c[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
@@ -260,24 +247,21 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 						c[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
 						Result->SetColor( c, __iGrid );
 					}
-					;
 					break;
-					case type_string:
+				case type_string:
 					{
 						CqString s( ( ( STRING_DESC* ) dso_argv[ 0 ] ) ->s );
 						Result->SetString( s, __iGrid );
 					}
-					;
 					break;
-					case type_matrix:
-					case type_sixteentuple:
+				case type_matrix:
+				case type_sixteentuple:
 					{
 						CqMatrix m( ( float* ) dso_argv[ 0 ] );
 						Result->SetMatrix( m, __iGrid );
 					}
-					;
 					break;
-					default:
+				default:
 					// Unhandled TYpe
 					std::cout << "Unsupported type" << std::endl;
 					break;
@@ -289,15 +273,14 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 			{
 				switch ( apParams[ p - 1 ] ->Type() )
 				{
-						case type_float:
+					case type_float:
 						{
 							TqFloat val = *( ( float* ) dso_argv[ p ] ) ;
 							apParams[ p - 1 ] ->SetFloat( val, __iGrid );
 						}
-						;
 						break;
-						case type_hpoint:
-						case type_point:
+					case type_hpoint:
+					case type_point:
 						{
 							CqVector3D v;
 							v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
@@ -305,10 +288,9 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
 							apParams[ p - 1 ] ->SetPoint( v, __iGrid );
 						}
-						;
 						break;
-						case type_triple:  // This seems reasonable
-						case type_vector:
+					case type_triple:  // This seems reasonable
+					case type_vector:
 						{
 							CqVector3D v;
 							v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
@@ -316,9 +298,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
 							apParams[ p - 1 ] ->SetVector( v, __iGrid );
 						}
-						;
 						break;
-						case type_normal:
+					case type_normal:
 						{
 							CqVector3D v;
 							v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
@@ -326,9 +307,8 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
 							apParams[ p - 1 ] ->SetNormal( v, __iGrid );
 						}
-						;
 						break;
-						case type_color:
+					case type_color:
 						{
 							CqColor c;
 							c[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
@@ -336,24 +316,21 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 							c[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
 							apParams[ p - 1 ] ->SetColor( c, __iGrid );
 						}
-						;
 						break;
-						case type_string:
+					case type_string:
 						{
 							CqString s( ( ( STRING_DESC* ) dso_argv[ p ] ) ->s );
 							apParams[ p - 1 ] ->SetString( s, __iGrid );
 						}
-						;
 						break;
-						case type_matrix:
-						case type_sixteentuple:
+					case type_matrix:
+					case type_sixteentuple:
 						{
 							CqMatrix m( ( float* ) dso_argv[ p ] );
 							apParams[ p - 1 ] ->SetMatrix( m, __iGrid );
 						}
-						;
 						break;
-						default:
+					default:
 						// Unhandled TYpe
 						break;
 				};
@@ -366,26 +343,25 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 	// Free up the storage allocated for the return type
 	switch ( Result->Type() )
 	{
-
-			case type_float:
+		case type_float:
 			delete ( float* ) dso_argv[ 0 ];
 			break;
-			case type_point:
-			case type_triple:  // This seems reasonable
-			case type_vector:
-			case type_normal:
-			case type_color:
-			case type_hpoint:
+		case type_point:
+		case type_triple:  // This seems reasonable
+		case type_vector:
+		case type_normal:
+		case type_color:
+		case type_hpoint:
 			delete[] ( float* ) dso_argv[ 0 ];
 			break;
-			case type_string:  // Need to look into these
+		case type_string:  // Need to look into these
 			delete ( STRING_DESC* ) dso_argv[ 0 ];
 			break;
-			case type_matrix:
-			case type_sixteentuple:
+		case type_matrix:
+		case type_sixteentuple:
 			delete[] ( float* ) dso_argv[ 0 ];
 			break;
-			default:
+		default:
 			// Unhandled TYpe
 			break;
 	};
