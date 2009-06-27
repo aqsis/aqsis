@@ -229,6 +229,71 @@ void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShade
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
 
+//----------------------------------------------------------------------
+static TqFloat match(const char *string, const char *pattern)
+{
+#if defined(REGEXP)
+	int status;
+	regex_t re;
+	if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
+	{
+		return(0.0f);      /* report error */
+	}
+	status = regexec(&re, string, (size_t) 0, NULL, 0);
+	regfree(&re);
+
+	if (status != 0)
+	{
+		return(0.0f);      /* report error */
+	}
+	return(1.0f);
+#else
+
+	return (TqFloat) (strstr(string, pattern) != 0);
+#endif
+}
+
+// match(pattern, str)
+void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
+{
+	// TODO: Do this properly.
+	TqUint __iGrid;
+
+	__iGrid = 0;
+	float r = 0.0f;
+	CqString _aq_a;
+	(a)->GetString(_aq_a,__iGrid);
+	CqString _aq_b;
+	(b)->GetString(_aq_b,__iGrid);
+	if ( _aq_a.size() == 0 )
+		r = 0.0f;
+	else if ( _aq_b.size() == 0 )
+		r = 0.0f;
+	else
+	{
+		// Check the simple case first where both strings are identical
+		TqUlong hasha = CqString::hash(_aq_a.c_str());
+		TqUlong hashb = CqString::hash(_aq_b.c_str());
+
+		if (hasha == hashb)
+		{
+			r = 1.0f;
+		}
+		else
+		{
+			/*
+			* Match string b into a
+			*/
+			r = match(_aq_a.c_str(), _aq_b.c_str());
+		}
+
+
+	}
+
+	(Result)->SetFloat(r,__iGrid);
+
+}
+
 
 } // namespace Aqsis
 //---------------------------------------------------------------------
