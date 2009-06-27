@@ -2,6 +2,7 @@ set(shaderexecenv_srcs
 	shadeops_bake3d.cpp
 	shadeops_comp.cpp
 	shadeops_deriv.cpp
+	shadeops_dso.cpp
 	shadeops_illum.cpp
 	shadeops_inter.cpp
 	shadeops_math.cpp
