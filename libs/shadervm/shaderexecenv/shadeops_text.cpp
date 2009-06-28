@@ -25,6 +25,8 @@
 
 #include	"shaderexecenv.h"
 
+#include <boost/regex.hpp>
+
 namespace Aqsis {
 
 //----------------------------------------------------------------------
@@ -230,68 +232,94 @@ void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShade
 }
 
 //----------------------------------------------------------------------
-static TqFloat match(const char *string, const char *pattern)
-{
-#if defined(REGEXP)
-	int status;
-	regex_t re;
-	if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	{
-		return(0.0f);      /* report error */
-	}
-	status = regexec(&re, string, (size_t) 0, NULL, 0);
-	regfree(&re);
-
-	if (status != 0)
-	{
-		return(0.0f);      /* report error */
-	}
-	return(1.0f);
-#else
-
-	return (TqFloat) (strstr(string, pattern) != 0);
-#endif
-}
-
 // match(pattern, str)
-void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
+void CqShaderExecEnv::SO_match( IqShaderData* patternData, IqShaderData* strData,
+                                IqShaderData* resultData, IqShader* pShader )
 {
-	// TODO: Do this properly.
-	TqUint __iGrid;
+	// Grab pointers to the underlying data.
+	const CqString* patPtr = 0;
+	const CqString* strPtr = 0;
+	patternData->GetStringPtr(patPtr);
+	strData->GetStringPtr(strPtr);
+	TqFloat* resPtr = 0;
+	resultData->GetFloatPtr(resPtr);
 
-	__iGrid = 0;
-	float r = 0.0f;
-	CqString _aq_a;
-	(a)->GetString(_aq_a,__iGrid);
-	CqString _aq_b;
-	(b)->GetString(_aq_b,__iGrid);
-	if ( _aq_a.size() == 0 )
-		r = 0.0f;
-	else if ( _aq_b.size() == 0 )
-		r = 0.0f;
-	else
+	// Running state information
+	TqInt simdCount = shadingPointCount();
+	const CqBitVector& rs = RunningState();
+
+	bool patVarying = patternData->Size() > 1;
+	bool strVarying = strData->Size() > 1;
+
+	// The RISpec says that
+	//
+	//   /pattern/ can be any regular expression as described in the POSIX
+	//   manual page on regex()(3X).
+	//
+	// This appears to indicate that 'basic' POSIX.2 spec regexs should be
+	// used corresponding to
+	//
+	//   synType = boost::regex::basic
+	//
+	// Unfortunately basic regexes are a bit crippled: they don't include \|
+	// for alternation.  Also \+ for one or more matches and \? for zero or one
+	// matches are handy and commonly used, so they're also enabled here.
+	boost::regex_constants::syntax_option_type synType
+		= boost::regex::basic | boost::regex::bk_vbar | boost::regex::bk_plus_qm; 
+
+	if(patVarying)
 	{
-		// Check the simple case first where both strings are identical
-		TqUlong hasha = CqString::hash(_aq_a.c_str());
-		TqUlong hashb = CqString::hash(_aq_b.c_str());
-
-		if (hasha == hashb)
+		// Why would anyone have a varying pattern string?  I suppose we'd
+		// better support it for robustness...
+		if(strVarying)
 		{
-			r = 1.0f;
+			for(TqInt i = 0; i < simdCount; ++i)
+			{
+				if(rs.Value(i))
+				{
+					boost::regex pattern(*patPtr, synType);
+					*resPtr = boost::regex_search(*strPtr, pattern);
+				}
+				++strPtr;
+				++patPtr;
+				++resPtr;
+			}
 		}
 		else
 		{
-			/*
-			* Match string b into a
-			*/
-			r = match(_aq_a.c_str(), _aq_b.c_str());
+			for(TqInt i = 0; i < simdCount; ++i)
+			{
+				if(rs.Value(i))
+				{
+					boost::regex pattern(*patPtr, synType);
+					*resPtr = boost::regex_search(*strPtr, pattern);
+				}
+				++patPtr;
+				++resPtr;
+			}
 		}
-
-
 	}
-
-	(Result)->SetFloat(r,__iGrid);
-
+	else
+	{
+		// Non-varying pattern; probably the only sane option...
+		boost::regex pattern(*patPtr, synType);
+		if(strVarying)
+		{
+			for(TqInt i = 0; i < simdCount; ++i)
+			{
+				if(rs.Value(i))
+					*resPtr = boost::regex_search(*strPtr, pattern);
+				++strPtr;
+				++resPtr;
+			}
+		}
+		else
+		{
+			TqFloat res = boost::regex_search(*strPtr, pattern);
+			// Use SetFloat here in case result is varying.
+			resultData->SetFloat(res);
+		}
+	}
 }
 
 

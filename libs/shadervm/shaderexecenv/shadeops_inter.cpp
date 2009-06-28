@@ -26,10 +26,6 @@
 
 #include	<cstring>
 
-#if defined(REGEXP)
-#include        <regex.h>
-#endif
-
 #include	<aqsis/core/reyes/ilightsource.h>
 #include	"shaderexecenv.h"
 #include	<aqsis/version.h>

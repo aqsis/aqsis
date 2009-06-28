@@ -666,6 +666,10 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 		{
 			res = & m_Value;
 		}
+		virtual	void	GetFloatPtr( TqFloat*& res )
+		{
+			res = & m_Value;
+		}
 		virtual	void	SetFloat( const TqFloat& f )
 		{
 			m_Value = f;
@@ -712,6 +716,10 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 			res = m_Value;
 		}
 		virtual	void	GetStringPtr( const CqString*& res ) const
+		{
+			res = &m_Value;
+		}
+		virtual	void	GetStringPtr( CqString*& res )
 		{
 			res = &m_Value;
 		}
@@ -1358,7 +1366,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 			TqInt srcSize = pVal->Size();
 			if(srcSize > 1)
 			{
-				assert(Size() == srcSize);
+				assert(static_cast<TqInt>(Size()) == srcSize);
 				const CqString* rhs = 0;
 				pVal->GetStringPtr(rhs);
 				for(TqInt i = 0; i < srcSize; ++i)
