@@ -31,9 +31,7 @@
 #include <sstream>
 #include <stddef.h>
 
-#include <aqsis/core/api/iparameter.h>
-#include <aqsis/core/reyes/irenderer.h>
-#include <aqsis/core/reyes/isurface.h>
+#include <aqsis/core/isurface.h>
 #include <aqsis/util/logging.h>
 #include "shadervariable.h"
 #include <aqsis/util/sstring.h>

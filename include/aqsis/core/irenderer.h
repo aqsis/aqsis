@@ -17,7 +17,7 @@
 #include <boost/function.hpp>
 
 #include <aqsis/math/matrix.h>
-#include <aqsis/core/reyes/itransform.h>
+#include <aqsis/core/itransform.h>
 #include <aqsis/util/sstring.h>
 #include <aqsis/math/vecfwd.h>
 

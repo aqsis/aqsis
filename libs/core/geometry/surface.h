@@ -42,7 +42,7 @@
 #include	"parameters.h"
 #include	"bound.h"
 #include	"csgtree.h"
-#include	<aqsis/core/reyes/isurface.h>
+#include	<aqsis/core/isurface.h>
 #include	<aqsis/util/logging.h>
 #include	"stats.h"
 #include	"micropolygon.h"

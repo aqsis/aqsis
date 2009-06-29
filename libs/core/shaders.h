@@ -37,8 +37,8 @@
 #include <aqsis/util/list.h>
 #include <aqsis/shadervm/ishader.h>
 #include <aqsis/shadervm/ishaderexecenv.h>
-#include <aqsis/core/reyes/irenderer.h>
-#include <aqsis/core/reyes/itransform.h>
+#include <aqsis/core/irenderer.h>
+#include <aqsis/core/itransform.h>
 
 namespace Aqsis {
 

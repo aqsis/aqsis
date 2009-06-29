@@ -37,7 +37,7 @@
 #include	<aqsis/ri/ri.h>
 #include	<aqsis/math/matrix.h>
 #include	"options.h"
-#include	<aqsis/core/reyes/itransform.h>
+#include	<aqsis/core/itransform.h>
 
 namespace Aqsis {
 

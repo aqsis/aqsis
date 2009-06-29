@@ -29,7 +29,7 @@
 
 #include	<aqsis/math/math.h>
 #include	"shaderexecenv.h"
-#include	<aqsis/core/reyes/ilightsource.h>
+#include	<aqsis/core/ilightsource.h>
 
 namespace Aqsis {
 

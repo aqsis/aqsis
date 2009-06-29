@@ -34,7 +34,7 @@
 
 #include <aqsis/math/color.h>
 #include <aqsis/util/file.h>
-#include <aqsis/core/api/ioptions.h>
+#include <aqsis/core/ioptions.h>
 #include <aqsis/shadervm/ishader.h>
 #include <aqsis/math/matrix.h>
 #include "parameters.h"

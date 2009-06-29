@@ -26,7 +26,7 @@
 
 #include	<cstring>
 
-#include	<aqsis/core/reyes/ilightsource.h>
+#include	<aqsis/core/ilightsource.h>
 #include	"shaderexecenv.h"
 #include	<aqsis/version.h>
 

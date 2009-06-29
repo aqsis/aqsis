@@ -41,14 +41,14 @@
 #include	<aqsis/math/noise.h>
 #include	<aqsis/shadervm/ishaderdata.h>
 #include	<aqsis/shadervm/ishader.h>
-#include	<aqsis/core/reyes/irenderer.h>
-#include	<aqsis/core/api/iparameter.h>
+#include	<aqsis/core/irenderer.h>
+#include	<aqsis/core/iparameter.h>
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
 //#include 	"parameters.h"
 #include 	"dsoshadeops.h"
-#include	<aqsis/core/reyes/itransform.h>
+#include	<aqsis/core/itransform.h>
 #include	"shadervm_common.h"
 
 

@@ -33,9 +33,9 @@
 
 #include	<boost/shared_ptr.hpp>
 
-#include	<aqsis/core/reyes/isurface.h>
+#include	<aqsis/core/isurface.h>
 #include	<aqsis/shadervm/ishaderdata.h>
-#include	<aqsis/core/api/iparameter.h>
+#include	<aqsis/core/iparameter.h>
 #include	"bilinear.h"
 #include	<aqsis/riutil/primvartoken.h>
 #include	<aqsis/math/vectorcast.h>

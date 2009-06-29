@@ -12,24 +12,18 @@ xsl_transform(${_ri_validate_inl} ri.xml STYLESHEET ri_validate.xsl
 	SEARCHPATH "${api_SOURCE_DIR}:${ri_headers_SOURCE_DIR}")
 
 set(api_srcs
-	attributes.cpp
 	condition.cpp
 	genpoly.cpp
 	graphicsstate.cpp
-	options.cpp
-	parameters.cpp
 	ri.cpp
 	rif.cpp
 )
 make_absolute(api_srcs ${api_SOURCE_DIR})
 
 set(api_hdrs
-	attributes.h
 	condition.h
 	genpoly.h
 	graphicsstate.h
-	options.h
-	parameters.h
 	ri_cache.h
 	ri_debug.h
 	${_ri_cache_inl}

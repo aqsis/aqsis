@@ -42,7 +42,7 @@
 #include <aqsis/shadervm/ishaderexecenv.h>
 #include <aqsis/math/vector4d.h>
 #include <aqsis/version.h>
-#include <aqsis/core/reyes/ilightsource.h>
+#include <aqsis/core/ilightsource.h>
 #include "attributes.h"
 #include "transform.h"
 

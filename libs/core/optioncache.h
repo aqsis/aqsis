@@ -25,7 +25,7 @@
 #include <aqsis/aqsis.h>
 
 #include <aqsis/math/color.h>
-#include <aqsis/core/api/ioptions.h>
+#include <aqsis/core/ioptions.h>
 
 namespace Aqsis {
 

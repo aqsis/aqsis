@@ -43,12 +43,12 @@
 #include	<aqsis/shadervm/ishaderdata.h>
 #include	<aqsis/shadervm/ishader.h>
 #include	<aqsis/shadervm/ishaderexecenv.h>
-#include	<aqsis/core/reyes/isurface.h>
-#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/core/isurface.h>
+#include	<aqsis/core/irenderer.h>
 #include	<aqsis/math/matrix.h>
 
-#include	<aqsis/core/api/iattributes.h>
-#include	<aqsis/core/reyes/itransform.h>
+#include	<aqsis/core/iattributes.h>
+#include	<aqsis/core/itransform.h>
 
 namespace Aqsis {
 

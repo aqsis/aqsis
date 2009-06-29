@@ -33,7 +33,7 @@
 
 #include	"texturemap_old.h"
 #include	<aqsis/util/exception.h>
-#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/core/irenderer.h>
 #include	<aqsis/version.h>
 #include	"renderer.h"
 #include	<aqsis/util/logging.h>

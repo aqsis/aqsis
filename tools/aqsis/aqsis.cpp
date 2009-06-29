@@ -63,7 +63,7 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/version.h>
 #include <aqsis/util/exception.h>
-#include <aqsis/core/reyes/irenderer.h>
+#include <aqsis/core/irenderer.h>
 
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)

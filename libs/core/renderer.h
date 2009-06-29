@@ -42,7 +42,7 @@
 #include	"shaders.h"
 #include	<aqsis/riutil/tokendictionary.h>
 #include	"iddmanager.h"
-#include	<aqsis/core/reyes/irenderer.h>
+#include	<aqsis/core/irenderer.h>
 #include	"iraytrace.h"
 #include	"iraytrace.h"
 #include	<aqsis/tex/filtering/itexturecache.h>

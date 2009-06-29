@@ -21,7 +21,6 @@
 
 #include "optioncache.h"
 
-#include <aqsis/core/api/ioptions.h>
 #include <aqsis/util/logging.h>
 #include <aqsis/util/sstring.h>
 

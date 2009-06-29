@@ -24,7 +24,6 @@
 */
 
 #include	<aqsis/aqsis.h>
-#include	<aqsis/core/reyes/isurface.h>
 #include	"parameters.h"
 #include	<aqsis/math/vector3d.h>
 #include	<aqsis/math/vector4d.h>

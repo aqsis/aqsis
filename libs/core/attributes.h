@@ -43,7 +43,7 @@
 #include	"options.h"
 #include	<aqsis/math/spline.h>
 #include	"trimcurve.h"
-#include	<aqsis/core/api/iattributes.h>
+#include	<aqsis/core/iattributes.h>
 
 namespace Aqsis {
 struct IqShader;

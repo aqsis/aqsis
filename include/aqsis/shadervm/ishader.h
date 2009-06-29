@@ -21,9 +21,9 @@
 
 #include	<boost/shared_ptr.hpp>
 
-#include	<aqsis/util/exception.h>
 #include	<aqsis/core/interfacefwd.h>
-#include	<aqsis/core/api/iparameter.h>
+#include	<aqsis/riutil/primvartype.h>
+#include	<aqsis/util/exception.h>
 
 namespace Aqsis {
 
@@ -49,9 +49,12 @@ enum EqShaderType
 
 
 struct IqShaderExecEnv;
+struct IqShaderData;
 struct IqSurface;
+class IqParameter;
 struct IqRenderer;
 class CqMatrix;
+class CqString;
 
 
 //----------------------------------------------------------------------
