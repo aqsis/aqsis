@@ -353,7 +353,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM( Projection, TqInt, TqFloat, type_integer, ProjectionOrthographic );
 	ADD_SYSTEM_PARAM2( Clipping, TqFloat, TqFloat, type_float, FLT_EPSILON, FLT_MAX );
 	ADD_SYSTEM_PARAM3( DepthOfField, TqFloat, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
-	ADD_SYSTEM_PARAM2( Shutter, TqFloat, TqFloat, type_float, 0.0f, 1.0f );
+	ADD_SYSTEM_PARAM2( Shutter, TqFloat, TqFloat, type_float, 0.0f, 0.0f );
 	ADD_SYSTEM_PARAM( FOV, TqFloat, TqFloat, type_float, 90.0f );
 	ADD_SYSTEM_PARAM( SqrtGridSize, TqFloat, TqFloat, type_float, 16.0f );					// Grid size square root.
 
