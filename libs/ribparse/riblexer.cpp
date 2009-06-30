@@ -26,6 +26,7 @@
 
 #include <cctype>
 #include <cmath>
+#include <cstdio> // for EOF
 #include <iostream>
 #include <string>
 #include <sstream>

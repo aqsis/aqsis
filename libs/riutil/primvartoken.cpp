@@ -26,6 +26,8 @@
 
 #include <aqsis/riutil/primvartoken.h>
 
+#include <cstdio> // For EOF
+
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <aqsis/util/exception.h>

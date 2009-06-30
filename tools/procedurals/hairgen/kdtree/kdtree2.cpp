@@ -9,6 +9,7 @@
 #include "kdtree2.hpp"
 
 #include <algorithm> 
+#include <cstdio>  // for printf
 #include <iostream>
 
 namespace kdtree
