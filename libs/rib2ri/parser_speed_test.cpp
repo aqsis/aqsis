@@ -33,7 +33,7 @@
 #include <cstdlib>
 #include <fstream>
 
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 #include "ribrequesthandler.h"
 #include <aqsis/ri/ri.h>
 

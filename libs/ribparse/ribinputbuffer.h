@@ -32,7 +32,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 
 namespace Aqsis
 {

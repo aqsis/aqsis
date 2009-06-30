@@ -43,7 +43,7 @@
 #include	"tiffio.h"
 #include	"objectinstance.h"
 
-#include	<aqsis/iribparser.h>
+#include	<aqsis/ribparser.h>
 #include	"ribrequesthandler.h"
 
 

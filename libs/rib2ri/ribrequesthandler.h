@@ -28,7 +28,7 @@
 
 #include <aqsis/aqsis.h>
 
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 #include <aqsis/ri/ritypes.h>
 #include <aqsis/riutil/tokendictionary.h>
 

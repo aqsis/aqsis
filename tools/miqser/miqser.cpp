@@ -49,7 +49,7 @@
 #include <aqsis/util/argparse.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/util/file.h>
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 #include <aqsis/util/logging.h>
 #include <aqsis/util/logging_streambufs.h>
 #include <aqsis/ri/ri.h>

@@ -1,7 +1,6 @@
 project(ribparse)
 
 set(ribparse_srcs
-	iribparser.cpp
 	ribinputbuffer.cpp
 	riblexer.cpp
 	ribparser.cpp
@@ -10,7 +9,7 @@ set(ribparse_srcs
 set(ribparse_hdrs
 	ribinputbuffer.h
 	riblexer.h
-	ribparser.h
+	ribparser_impl.h
 	ribtoken.h
 )
 source_group("Header Files" FILES ${ribparse_hdrs})

@@ -35,7 +35,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <aqsis/util/exception.h>
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 #include "riblexer.h"
 
 namespace Aqsis {

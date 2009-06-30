@@ -24,9 +24,18 @@
  *
  */
 
-#include "ribparser.h"
+#include "ribparser_impl.h"
 
 namespace Aqsis {
+
+//------------------------------------------------------------------------------
+// IqRibParser implementation.
+boost::shared_ptr<IqRibParser> IqRibParser::create(
+		const boost::shared_ptr<IqRibRequestHandler>& handler)
+{
+	return boost::shared_ptr<IqRibParser>(new CqRibParser(handler));
+}
+
 
 //------------------------------------------------------------------------------
 // CqRibParser implementation

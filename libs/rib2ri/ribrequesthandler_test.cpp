@@ -14,7 +14,7 @@
 
 #include <aqsis/math/math.h>
 #include <aqsis/ri/ri.h>
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 
 using namespace boost::assign; // necessary for container initialisation operators.
 

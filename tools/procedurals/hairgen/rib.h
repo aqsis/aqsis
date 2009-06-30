@@ -8,7 +8,7 @@
 #include <string>
 
 #include <aqsis/util/smartptr.h>
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 #include <aqsis/riutil/tokendictionary.h>
 
 #include "parenthairs.h"

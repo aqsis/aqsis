@@ -36,7 +36,7 @@
 
 #include <boost/any.hpp>
 
-#include "ribparser.h"
+#include "ribparser_impl.h"
 #include <aqsis/util/smartptr.h>
 #include <aqsis/riutil/primvartoken.h>
 

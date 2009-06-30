@@ -35,7 +35,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <aqsis/iribparser.h> // for TqCommentCallback
+#include <aqsis/ribparser.h> // for TqCommentCallback
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
 

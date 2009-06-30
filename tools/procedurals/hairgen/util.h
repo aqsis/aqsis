@@ -10,7 +10,7 @@
 #include <iosfwd>
 
 #include <aqsis/math/vector3d.h>
-#include <aqsis/iribparser.h>
+#include <aqsis/ribparser.h>
 
 /// Alias for the longwinded Aqsis::CqVector3D
 typedef Aqsis::CqVector3D Vec3;

@@ -28,7 +28,7 @@ configure_file(version.h.in.cmake ${version_h_name})
 
 # Install local headers
 set(install_hdrs
-	iribparser.h
+	ribparser.h
 	aqsis.h
 	${config_h_name}
 	${version_h_name}
