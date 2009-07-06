@@ -650,14 +650,14 @@ void kdtree2_node::process_terminal_node(searchrecord& sr) {
 
   const bool debug = false;
 
-  if (debug) {
+/*  if (debug) {
     printf("Processing terminal node %d, %d\n",l,u);
     cout << "Query vector = [";
     for (int i=0; i<dim; i++) cout << sr.qv[i] << ','; 
     cout << "]\n";
     cout << "nn = " << nn << '\n';
     check_query_in_bound(sr);
-  }
+  }*/
 
   for (int i=l; i<=u;i++) {
     int indexofi;  // sr.ind[i]; 
