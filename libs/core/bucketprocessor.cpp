@@ -1197,10 +1197,13 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 	TqFloat opentime = m_optCache.shutterOpen;
 	TqFloat closetime = m_optCache.shutterClose;
 	TqFloat timePerSample = 0;
+	bool fastShutter = false; // true if shutter is "infinitely fast"
+	TqInt numSamples = iXSamples * iYSamples;
 	if(IsMoving)
 	{
-		TqInt numSamples = iXSamples * iYSamples;
-		timePerSample = (float)numSamples / ( closetime - opentime );
+		fastShutter = isClose(closetime, opentime);
+		if(!fastShutter)
+			timePerSample = numSamples / ( closetime - opentime );
 	}
 
 	if(UsingDof)
@@ -1225,10 +1228,21 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			if ( bound_numMB != bound_maxMB_1 )
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
-				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
+				time1 = closetime;
 	
-			indexT0 = static_cast<TqInt>(std::floor((time0 - opentime) * timePerSample));
-			indexT1 = static_cast<TqInt>(lceil((time1 - opentime) * timePerSample));
+			// ignore this motion segment if the shutter times lie outside it.
+			if(time1 < opentime || time0 > closetime)
+				continue;
+			if(fastShutter)
+			{
+				indexT0 = 0;
+				indexT1 = numSamples;
+			}
+			else
+			{
+				indexT0 = lfloor((time0 - opentime) * timePerSample);
+				indexT1 = lceil((time1 - opentime) * timePerSample);
+			}
 		}
 
 		TqFloat maxCocX = 0;
