@@ -1734,7 +1734,19 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& s
 			TqFloat Bx = vB.x();
 			TqFloat By = vB.y();
 
-			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
+			CqVector2D hitPos = vecSample;
+			if(UsingDof)
+			{
+				// DoF interacts with the triangle split line computation: the
+				// micropolygon verts have been moved during the hit
+				// calculation, so we need to move the apparent position of the
+				// hit in the opposite direction before determining which side
+				// of the triangle split line the hit lies on.
+				CqVector2D cocMult = QGetRenderContext()->GetCircleOfConfusion(D);
+				hitPos += compMul(cocMult, sample.dofOffset);
+			}
+
+			TqFloat v = (Ay - By)*hitPos.x() + (Bx - Ax)*hitPos.y() + (Ax*By - Bx*Ay);
 			if ( v <= 0 )
 				return ( false );
 		}
@@ -1965,7 +1977,19 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 			TqFloat Bx = vB.x();
 			TqFloat By = vB.y();
 
-			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
+			CqVector2D hitPos = vecSample;
+			if(UsingDof)
+			{
+				// DoF interacts with the triangle split line computation: the
+				// micropolygon verts have been moved during the hit
+				// calculation, so we need to move the apparent position of the
+				// hit in the opposite direction before determining which side
+				// of the triangle split line the hit lies on.
+				CqVector2D cocMult = QGetRenderContext()->GetCircleOfConfusion(D);
+				hitPos += compMul(cocMult, sample.dofOffset);
+			}
+
+			TqFloat v = (Ay - By)*hitPos.x() + (Bx - Ax)*hitPos.y() + (Ax*By - Bx*Ay);
 			if( v <= 0 )
 				return ( false );
 		}
