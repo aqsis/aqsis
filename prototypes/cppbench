@@ -1,0 +1,128 @@
+#!/bin/bash
+
+function print_help
+{
+cat <<EOF
+Usage: cppbench [options] source_file
+
+Utility for running multiple embedded benchmarks from a single c++ source file.
+Comments in a specific format allow linewise modifications of the source to
+generate various versions on the fly.  These are compiled and the runtime of
+the resulting executable is timed with the unix "time" utility.  The results of
+each benchmark in the suite are displayed in human-readable format.
+
+
+Source code markup:
+	The source file contains several special comment types:
+
+	To specifiy lines which should be uncommented when running the
+	benchmarks name1, name2, there should be a comment of the form
+
+		// code_to_run; //##bench name1 name2 ...
+
+	The description for a particular benchmark is of the form
+
+		//##description name <string describing test>
+
+	Only benchmarks with a description line are considered.
+
+	Finally, the compiler, compiler optimizations and linker flags are given as
+	follows:
+	//##CXX g++
+	//##CXXFLAGS -O3 ...
+	//##LDFLAGS -lm ...
+
+Options:
+	-h                   This help
+	-n name1,name2,...   Specify benchmark names to run.
+	-S                   Dump assembly listings rather than running.
+	-v                   View the modified source before running the benchmark
+
+	<gcc options>
+
+EOF
+}
+
+if [[ -z $1 ]] ; then
+	print_help
+	exit -1
+fi
+
+viewSource=0
+dumpAssembly=0
+while [[ -n $1 ]] ; do
+	case $1 in
+		-n)
+			shift
+			benchmarkNamesToRun="$(echo $1 | tr ',' ' ')";;
+		-h)
+			print_help
+			exit 0;;
+		-v)
+			viewSource=1;;
+		-S)
+			dumpAssembly=1;;
+		*)
+			sourceFile=$1;;
+	esac
+	shift
+done
+
+if [[ ! -f $sourceFile ]] ; then
+	echo "Source file not found" 1>&2
+	exit -1
+fi
+
+# get all the benchmark names
+benchmarkNamesAll=$(awk '/\/\/##description/ { print $2 }' $sourceFile)
+
+if [[ -z $benchmarkNamesAll ]] ; then
+	echo "No benchmarks found" 1>&2
+	exit -1
+fi
+
+if [[ -z $benchmarkNamesToRun ]] ; then
+	benchmarkNamesToRun="$benchmarkNamesAll"
+fi
+
+# get compile flags
+CXX=$(sed -n -e '/\/\/##CXX\>/ { s/\/\/##CXX\>//p ; q}' $sourceFile)
+if [[ -z $CXX ]] ; then
+	CXX=c++
+fi
+CXXFLAGS=$(sed -n -e 's/\/\/##CXXFLAGS//p' $sourceFile)
+if [[ $dumpAssembly == 1 ]] ; then
+	CXXFLAGS="${CXXFLAGS} -S"
+else
+	LDFLAGS=$(sed -n -e 's/\/\/##LDFLAGS//p' $sourceFile)
+fi
+
+tmpFileName=_cppbench_tmp.cpp
+tmpOutName=_cppbench_tmp
+
+# Compile each benchmark.
+for name in $benchmarkNamesToRun ; do
+	notThisNameAlt="\\($(echo $benchmarkNamesAll | sed -e "s/\<$name\> *//" -e 's/ \+/\\|/g')\\)"
+	sed -e '/\/\/##bench.*\<'"$name"'\>/ {s+\(//\|/\*\|\*/\)++}' -e '/\/\/##bench.*\<'"NOT_$notThisNameAlt"'\>/ {s/\/\///}' $sourceFile > $tmpFileName
+	echo "-------------------- Benchmark: $name --------------------"
+	echo "$CXX $CXXFLAGS $sourceFile $LDFLAGS"
+	if [[ $viewSource == 1 ]] ; then
+		less $tmpFileName
+	fi
+	$CXX $CXXFLAGS $tmpFileName -o $tmpOutName $LDFLAGS
+	if [[ $? != 0 ]] ; then
+		exit -1
+	fi
+	if [[ $dumpAssembly == 1 ]] ; then
+		# Move assembly somewhere it can be viewed
+		mv $tmpOutName "${sourceFile%.cpp}.${name}.s"
+	else
+		# output description and time program run
+		echo -n "Description: "
+		sed -n -e 's/.*\/\/##description *\<'"$name"'\> *//p' $sourceFile
+		time ./$tmpOutName 2>/dev/null
+		echo
+	fi
+done
+
+rm -f $tmpFileName $tmpOutName
