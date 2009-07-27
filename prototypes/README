@@ -1,0 +1,15 @@
+Aqsis Prototypes Directory
+--------------------------
+
+This directory is a common location for developers to place prototype code
+outside the main codebase.  It's meant to be a convenient place to store
+code snippets for further discussion and development.
+
+To add a prototype, make a directory with a name reflecting the task at hand,
+and add the code there.  Really simple code which is confined to a single file
+may also be added here directly.  Some sort of brief documentation should
+generally be included - a brief description of the problem and attempted
+solution in comments or a readme file.
+
+Useful scripts for dealing with prototype code are also welcome (for instance,
+the cppbench script is a benchmark runner tool.)
