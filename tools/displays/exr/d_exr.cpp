@@ -98,6 +98,8 @@
 
 #include <assert.h>
 
+#include <boost/shared_ptr.hpp>
+
 // Lower the warning level to eliminate unavoidable warnings from the OpenEXR headers.
 #if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
 #	pragma warning(push,1)
@@ -125,6 +127,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include <aqsis/ri/ndspy.h>
 
 #define DspyError(a,b,c) printf(b,c)
@@ -135,9 +138,6 @@ using namespace std;
 
 namespace
 {
-
-typedef map <string, int>               ChannelOffsetMap;
-typedef vector <halfFunction <half> *>  ChannelLuts;
 
 //
 // Define halfFunctions for the identity and piz12
@@ -150,6 +150,26 @@ half                halfID( half x )
 halfFunction <half> id( halfID );
 halfFunction <half> piz12( round12log );
 
+struct SqImageLayerChannel
+{
+	std::string		channelName;
+	Imf::Channel	channel;
+	int				dataOffset;
+	int				bufferOffset;
+};
+
+typedef vector <SqImageLayerChannel >   LayerChannelList;
+typedef vector <halfFunction <half> *>  LayerChannelLuts;
+
+struct SqImageLayer
+{
+	std::string	layerName;
+	LayerChannelList	channelList;
+	LayerChannelLuts	channelLuts;
+};
+typedef vector<SqImageLayer> LayerList;
+
+
 #include "dspyhlpr.h"
 
 class Image
@@ -157,67 +177,74 @@ class Image
 	public:
 
 		Image (const char filename[],
-		       const Header &header,
-		       ChannelOffsetMap &rmanChannelOffsets,
-		       int rmanPixelSize,
-		       ChannelLuts &channelLuts);
+		       const Header &header);
 
+			  Header &      header ();
 		const Header &      header () const;
+
+			  LayerList&	layers ();
+	    const LayerList&	layers () const;
 
 		void                writePixels (int xMin, int xMaxPlusone,
 		                                 int yMin, int yMaxPlusone,
 		                                 int entrySize,
-		                                 const unsigned char *data);
+		                                 const unsigned char *data,
+										 int layerIndex);
+		void				addLayer(SqImageLayer& layer);
+		void				open();
 	private:
 
-		OutputFile          _file;
+		boost::shared_ptr<OutputFile>          _file;
+		std::string			_fileName;
+		Header				_header;
 		Array <char>        _buffer;
-		vector <int>        _rmanChannelOffsets;
-		vector <int>        _bufferChannelOffsets;
-		int                 _rmanPixelSize;
+		std::map<int, std::vector<char> >	_scanlines;
+		std::map<int, int >	_scanlinesReceived;
 		int                 _bufferPixelSize;
 		int                 _bufferXMin;
 		int                 _bufferNumPixels;
-		int                 _numPixelsReceived;
-		ChannelLuts         _channelLuts;
+		LayerList			_layers;
 };
 
 
+typedef map<string, boost::shared_ptr<Image> > ImageMap;
+ImageMap gImages;
+
+typedef pair<string, int>	ImageLayerEntry;
+typedef vector<ImageLayerEntry> ImageLayerList;
+ImageLayerList	gImageLayers;
+
+
+
 Image::Image (const char filename[],
-              const Header &header,
-              ChannelOffsetMap &rmanChannelOffsets,
-              int rmanPixelSize,
-              ChannelLuts &channelLuts
-             )
+              const Header &header)
 		:
-		_file (filename, header),
-		_rmanPixelSize (rmanPixelSize),
+		_fileName (filename),
+		_header (header),
 		_bufferPixelSize (0),
 		_bufferXMin (header.dataWindow().min.x),
-		_bufferNumPixels (header.dataWindow().max.x - _bufferXMin + 1),
-		_numPixelsReceived (0),
-		_channelLuts (channelLuts)
+		_bufferNumPixels (header.dataWindow().max.x - _bufferXMin + 1)
+{}
+
+
+void Image::addLayer(SqImageLayer& layer)
 {
-
-	V2i dwSize = header.dataWindow().size();
-
-	for (ChannelList::ConstIterator i = header.channels().begin();
-	        i != header.channels().end();
-	        ++i)
+	// Insert the channels into the header
+	for (LayerChannelList::iterator chan = layer.channelList.begin(), chan_end = layer.channelList.end(); chan != chan_end; ++chan)
 	{
-		switch (i.channel().type)
+		header().channels().insert((layer.layerName+"."+chan->channelName).c_str(), chan->channel);
+
+		switch (chan->channel.type)
 		{
 				case HALF:
 
-				_rmanChannelOffsets.push_back (rmanChannelOffsets[i.name()]);
-				_bufferChannelOffsets.push_back (_bufferPixelSize);
+				chan->bufferOffset = _bufferPixelSize;
 				_bufferPixelSize += sizeof (float); // Note: to avoid alignment
 				break;                              // problems when float and half
 				// channels are mixed, halfs
 				case FLOAT:                           // are not packed densely.
 
-				_rmanChannelOffsets.push_back (rmanChannelOffsets[i.name()]);
-				_bufferChannelOffsets.push_back (_bufferPixelSize);
+				chan->bufferOffset = _bufferPixelSize;
 				_bufferPixelSize += sizeof (float);
 				break;
 
@@ -227,54 +254,80 @@ Image::Image (const char filename[],
 				break;
 		}
 	}
+	_layers.push_back(layer);
+}
+
+const Header &Image::header () const
+{
+	return _header;
+}
+
+Header &Image::header ()
+{
+	return _header;
+}
+
+LayerList& Image::layers()
+{
+	return _layers;
+}
+
+const LayerList& Image::layers() const
+{
+	return _layers;
+}
+
+
+void Image::open()
+{
+	V2i dwSize = _header.dataWindow().size();
 
 	_buffer.resizeErase (_bufferNumPixels * _bufferPixelSize);
 
 	FrameBuffer  fb;
-	int          j = 0;
 	int          yStride = 0;
 	char        *base = &_buffer[0] -
 	                    _bufferXMin * _bufferPixelSize;
 
 
-	for (ChannelList::ConstIterator i = header.channels().begin();
-	        i != header.channels().end();
-	        ++i)
+	for(LayerList::iterator layer = _layers.begin(), layerEnd = _layers.end(); layer != layerEnd; ++layer)
 	{
-		fb.insert (i.name(),
-		           Slice (i.channel().type,                     // type
-		                  base + _bufferChannelOffsets[j],      // base
-		                  _bufferPixelSize,                     // xStride
-		                  yStride,                              // yStride
-		                  1,                                    // xSampling
-		                  1));                                  // ySampling
-		++j;
+		for(LayerChannelList::iterator chan = layer->channelList.begin(), chanEnd = layer->channelList.end(); chan != chanEnd; ++chan)
+		{
+			fb.insert((layer->layerName+"."+chan->channelName).c_str(),
+				Slice(chan->channel.type,
+				base + chan->bufferOffset,
+				_bufferPixelSize,
+				yStride,
+				1,
+				1));
+		}
 	}
 
-	_file.setFrameBuffer (fb);
+	_file = boost::shared_ptr<OutputFile>(new OutputFile(_fileName.c_str(), _header));
+	_file->setFrameBuffer (fb);
 }
-
-
-const Header &
-Image::header () const
-{
-	return _file.header();
-}
-
 
 void
 Image::writePixels (int xMin, int xMaxPlusone,
                     int yMin, int yMaxPlusone,
                     int entrySize,
-                    const unsigned char *data)
+                    const unsigned char *data,
+					int layerIndex)
 {
+	// If the image isn't open yet, open it now, the
+	// channel setup must be complete by the time the
+	// first data is written.
+	if(!_file)
+		open();
+
 	//
 	// We can only deal with one scan line at a time.
 	//
 
 	assert (yMin == yMaxPlusone - 1);
 
-	const ChannelList &channels = _file.header().channels();
+	const ChannelList &channels = _file->header().channels();
 	int      numPixels = xMaxPlusone - xMin;
 	int      j = 0;
 
@@ -282,26 +335,32 @@ Image::writePixels (int xMin, int xMaxPlusone,
 	int      toInc;
 
 	//
-	// Copy the pixels into our internal one-line frame buffer.
+	// Copy the pixels into our internal scanline array, collating multiple layers
+	// before copying to the fb and then to the file.
 	//
 
-	toBase = _buffer + _bufferPixelSize * xMin;
+	// If there is no scanline for this y position, allocate one now.
+	if(_scanlines.find(yMin) == _scanlines.end())
+	{
+		_scanlines[yMin].resize (_bufferNumPixels * _bufferPixelSize);
+		_scanlinesReceived[yMin] = 0;
+	}
+
+	toBase = &(_scanlines[yMin][0]) + _bufferPixelSize * xMin;
 	toInc = _bufferPixelSize;
 
-	for (ChannelList::ConstIterator i = channels.begin();
-	        i != channels.end();
-	        ++i)
+	for(LayerChannelList::iterator i = layers()[layerIndex].channelList.begin(), e = layers()[layerIndex].channelList.end(); i != e; ++i)
 	{
-		const unsigned char *from = data + _rmanChannelOffsets[j];
+		const unsigned char *from = data + i->dataOffset;
 		const unsigned char *end  = from + numPixels * entrySize;
 
-		char *to = toBase + _bufferChannelOffsets[j];
+		char *to = toBase + i->bufferOffset;
 
-		switch (i.channel().type)
+		switch (i->channel.type)
 		{
 				case HALF:
 				{
-					halfFunction <half> &lut = *_channelLuts[j];
+					halfFunction <half> &lut = *layers()[layerIndex].channelLuts[j];
 
 					while (from < end)
 					{
@@ -333,18 +392,22 @@ Image::writePixels (int xMin, int xMaxPlusone,
 		++j;
 	}
 
-	_numPixelsReceived += numPixels;
-	assert (_numPixelsReceived <= _bufferNumPixels);
 
-	if (_numPixelsReceived == _bufferNumPixels)
+	_scanlinesReceived[yMin] += numPixels;
+
+	if(_scanlinesReceived[yMin] == (_bufferNumPixels* layers().size()))
 	{
 		//
 		// If our one-line frame buffer is full, then write it to
 		// the output file.
 		//
+		for(int i = 0; i < (_bufferNumPixels * _bufferPixelSize); ++i)
+			_buffer[i] = _scanlines[yMin][i];
 
-		_file.writePixels();
-		_numPixelsReceived = 0;
+		_file->writePixels();
+
+		_scanlines.erase(yMin);
+		_scanlinesReceived.erase(yMin);
 	}
 }
 
@@ -374,150 +437,177 @@ extern "C"
 			//
 
 			Header               header;
-			ChannelOffsetMap     channelOffsets;
-			ChannelLuts          channelLuts;
+
+			// Add a new layer specification to the image reference.
+			SqImageLayer layer;
 			int                  pixelSize = 0;
 
 			halfFunction <half> *rgbLUT = &id;
 			halfFunction <half> *otherLUT = &id;
 
-
 			//
-			// Data window
+			// Open the output file
 			//
 
+			ImageMap::iterator image = gImages.end();
+			if(gImages.find(filename) != gImages.end())
 			{
-				Box2i &dw = header.dataWindow();
-				int n = 2;
-
-				DspyFindIntsInParamList ("origin", &n, &dw.min.x,
-				                         paramCount, parameters);
-				assert (n == 2);
-
-				dw.max.x = dw.min.x + width  - 1;
-				dw.max.y = dw.min.y + height - 1;
+				image = gImages.find(filename);
 			}
-
-			//
-			// Display window
-			//
-
-			{
-				Box2i &dw = header.displayWindow();
-				int n = 2;
-
-				DspyFindIntsInParamList ("OriginalSize", &n, &dw.max.x,
-				                         paramCount, parameters);
-				assert (n == 2);
-
-				dw.min.x  = 0;
-				dw.min.y  = 0;
-				dw.max.x -= 1;
-				dw.max.y -= 1;
-			}
-
-			//
-			//Chromaticities conversion from YB/YA->RGB
-			//
-
-			addChromaticities(header,Chromaticities());
-
-			//
-			// Camera parameters
-			//
-
+			else
 			{
 				//
-				// World-to-NDC matrix, world-to-camera matrix,
-				// near and far clipping plane distances
+				// Data window
 				//
 
-				M44f NP, Nl;
-				float near = 0, far = 0;
-
-				DspyFindMatrixInParamList ("NP", &NP[0][0], paramCount, parameters);
-				DspyFindMatrixInParamList ("Nl", &Nl[0][0], paramCount, parameters);
-				DspyFindFloatInParamList ("near", &near, paramCount, parameters);
-				DspyFindFloatInParamList ("far", &far, paramCount, parameters);
-
-				//
-				// The matrices reflect the orientation of the camera at
-				// render time.
-				//
-
-				header.insert ("worldToNDC", M44fAttribute (NP));
-				header.insert ("worldToCamera", M44fAttribute (Nl));
-				header.insert ("clipNear", FloatAttribute (near));
-				header.insert ("clipFar", FloatAttribute (far));
-
-				//
-				// Projection matrix
-				//
-
-				M44f P = Nl.inverse() * NP;
-
-				//
-				// Derive pixel aspect ratio, screen window width, screen
-				// window center from projection matrix.
-				//
-
-				Box2f sw (V2f ((-1 - P[3][0] - P[2][0]) / P[0][0],
-				               (-1 - P[3][1] - P[2][1]) / P[1][1]),
-				          V2f (( 1 - P[3][0] - P[2][0]) / P[0][0],
-				               ( 1 - P[3][1] - P[2][1]) / P[1][1]));
-
-				header.screenWindowWidth() = sw.max.x - sw.min.x;
-				header.screenWindowCenter() = (sw.max + sw.min) / 2;
-
-				const Box2i &dw = header.displayWindow();
-
-				header.pixelAspectRatio()   = (sw.max.x - sw.min.x) /
-				                              (sw.max.y - sw.min.y) *
-				                              (dw.max.y - dw.min.y + 1) /
-				                              (dw.max.x - dw.min.x + 1);
-			}
-
-			//
-			// Line order
-			//
-
-			header.lineOrder() = INCREASING_Y;
-			flagstuff->flags |= PkDspyFlagsWantsScanLineOrder;
-
-			//
-			// Compression
-			//
-
-			{
-				char *comp = 0;
-
-				DspyFindStringInParamList ("exrcompression", &comp,
-				                           paramCount, parameters);
-
-				if (comp)
 				{
-					if (!strcmp (comp, "none"))
-						header.compression() = NO_COMPRESSION;
-					else if (!strcmp (comp, "rle"))
-						header.compression() = RLE_COMPRESSION;
-					else if (!strcmp (comp, "zips"))
-						header.compression() = ZIPS_COMPRESSION;
-					else if (!strcmp (comp, "zip"))
-						header.compression() = ZIP_COMPRESSION;
-					else if (!strcmp (comp, "piz"))
-						header.compression() = PIZ_COMPRESSION;
+					Box2i &dw = header.dataWindow();
+					int n = 2;
 
-					else if (!strcmp (comp, "piz12"))
-					{
-						header.compression() = PIZ_COMPRESSION;
-						rgbLUT = &piz12;
-					}
+					DspyFindIntsInParamList ("origin", &n, &dw.min.x,
+											 paramCount, parameters);
+					assert (n == 2);
 
-					else
-						THROW (Iex::ArgExc,
-						       "Invalid exrcompression \"" << comp << "\" "
-						       "for image file " << filename << ".");
+					dw.max.x = dw.min.x + width  - 1;
+					dw.max.y = dw.min.y + height - 1;
 				}
+
+				//
+				// Display window
+				//
+
+				{
+					Box2i &dw = header.displayWindow();
+					int n = 2;
+
+					DspyFindIntsInParamList ("OriginalSize", &n, &dw.max.x,
+											 paramCount, parameters);
+					assert (n == 2);
+
+					dw.min.x  = 0;
+					dw.min.y  = 0;
+					dw.max.x -= 1;
+					dw.max.y -= 1;
+				}
+
+				//
+				//Chromaticities conversion from YB/YA->RGB
+				//
+
+				addChromaticities(header,Chromaticities());
+
+				//
+				// Camera parameters
+				//
+
+				{
+					//
+					// World-to-NDC matrix, world-to-camera matrix,
+					// near and far clipping plane distances
+					//
+
+					M44f NP, Nl;
+					float near = 0, far = 0;
+
+					DspyFindMatrixInParamList ("NP", &NP[0][0], paramCount, parameters);
+					DspyFindMatrixInParamList ("Nl", &Nl[0][0], paramCount, parameters);
+					DspyFindFloatInParamList ("near", &near, paramCount, parameters);
+					DspyFindFloatInParamList ("far", &far, paramCount, parameters);
+
+					//
+					// The matrices reflect the orientation of the camera at
+					// render time.
+					//
+
+					header.insert ("worldToNDC", M44fAttribute (NP));
+					header.insert ("worldToCamera", M44fAttribute (Nl));
+					header.insert ("clipNear", FloatAttribute (near));
+					header.insert ("clipFar", FloatAttribute (far));
+
+					//
+					// Projection matrix
+					//
+
+					M44f P = Nl.inverse() * NP;
+
+					//
+					// Derive pixel aspect ratio, screen window width, screen
+					// window center from projection matrix.
+					//
+
+					Box2f sw (V2f ((-1 - P[3][0] - P[2][0]) / P[0][0],
+								   (-1 - P[3][1] - P[2][1]) / P[1][1]),
+							  V2f (( 1 - P[3][0] - P[2][0]) / P[0][0],
+								   ( 1 - P[3][1] - P[2][1]) / P[1][1]));
+
+					header.screenWindowWidth() = sw.max.x - sw.min.x;
+					header.screenWindowCenter() = (sw.max + sw.min) / 2;
+
+					const Box2i &dw = header.displayWindow();
+
+					header.pixelAspectRatio()   = (sw.max.x - sw.min.x) /
+												  (sw.max.y - sw.min.y) *
+												  (dw.max.y - dw.min.y + 1) /
+												  (dw.max.x - dw.min.x + 1);
+				}
+
+				//
+				// Line order
+				//
+
+				header.lineOrder() = INCREASING_Y;
+				flagstuff->flags |= PkDspyFlagsWantsScanLineOrder;
+
+				//
+				// Compression
+				//
+
+				{
+					char *comp = 0;
+
+					DspyFindStringInParamList ("exrcompression", &comp,
+											   paramCount, parameters);
+
+					if (comp)
+					{
+						if (!strcmp (comp, "none"))
+							header.compression() = NO_COMPRESSION;
+						else if (!strcmp (comp, "rle"))
+							header.compression() = RLE_COMPRESSION;
+						else if (!strcmp (comp, "zips"))
+							header.compression() = ZIPS_COMPRESSION;
+						else if (!strcmp (comp, "zip"))
+							header.compression() = ZIP_COMPRESSION;
+						else if (!strcmp (comp, "piz"))
+							header.compression() = PIZ_COMPRESSION;
+
+						else if (!strcmp (comp, "piz12"))
+						{
+							header.compression() = PIZ_COMPRESSION;
+							rgbLUT = &piz12;
+						}
+
+						else
+							THROW (Iex::ArgExc,
+								   "Invalid exrcompression \"" << comp << "\" "
+								   "for image file " << filename << ".");
+					}
+				}
+				Image *newImage = new Image (filename, header);
+				gImages[filename] = boost::shared_ptr<Image>(newImage);
+			}
+
+			char* layerNameParameter = 0;
+			DspyFindStringInParamList ("layername", &layerNameParameter, paramCount, parameters);
+			if(layerNameParameter)
+			{
+				layer.layerName = layerNameParameter;
+			}
+			else
+			{
+				std::stringstream layerName;
+				layerName << "layer_" << gImages[filename]->layers().size();
+				layer.layerName = layerName.str();
 			}
 
 			//
@@ -529,7 +619,7 @@ extern "C"
 				char *ptype = 0;
 
 				DspyFindStringInParamList ("exrpixeltype", &ptype,
-				                           paramCount, parameters);
+										   paramCount, parameters);
 
 				if (ptype)
 				{
@@ -539,43 +629,61 @@ extern "C"
 						pixelType = HALF;
 					else
 						THROW (Iex::ArgExc,
-						       "Invalid exrpixeltype \"" << ptype << "\" "
-						       "for image file " << filename << ".");
+							   "Invalid exrpixeltype \"" << ptype << "\" "
+							   "for image file " << filename << ".");
 				}
-
-				ChannelList &channels = header.channels();
 
 				for (int i = 0; i < formatCount; ++i)
 				{
 					if      (!strcmp (format[i].name, "r"))
 					{
-						channels.insert ("R", Channel (HALF));
-						channelOffsets["R"] = pixelSize;
-						channelLuts.push_back( rgbLUT );
+						SqImageLayerChannel chan;
+						chan.dataOffset = pixelSize;
+						chan.channel = Channel(HALF);
+						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+						chan.channelName = "R";
+						layer.channelList.push_back(chan);
+						layer.channelLuts.push_back( rgbLUT );
 					}
 					else if (!strcmp (format[i].name, "g"))
 					{
-						channels.insert ("G", Channel (HALF));
-						channelOffsets["G"] = pixelSize;
-						channelLuts.push_back( rgbLUT );
+						SqImageLayerChannel chan;
+						chan.dataOffset = pixelSize;
+						chan.channel = Channel(HALF);
+						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+						chan.channelName = "G";
+						layer.channelList.push_back(chan);
+						layer.channelLuts.push_back( rgbLUT );
 					}
 					else if (!strcmp (format[i].name, "b"))
 					{
-						channels.insert ("B", Channel (HALF));
-						channelOffsets["B"] = pixelSize;
-						channelLuts.push_back( rgbLUT );
+						SqImageLayerChannel chan;
+						chan.dataOffset = pixelSize;
+						chan.channel = Channel(HALF);
+						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+						chan.channelName = "B";
+						layer.channelList.push_back(chan);
+						layer.channelLuts.push_back( rgbLUT );
 					}
 					else if (!strcmp (format[i].name, "a"))
 					{
-						channels.insert ("A", Channel (HALF));
-						channelOffsets["A"] = pixelSize;
-						channelLuts.push_back( otherLUT );
+						SqImageLayerChannel chan;
+						chan.dataOffset = pixelSize;
+						chan.channel = Channel(HALF);
+						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+						chan.channelName = "A";
+						layer.channelList.push_back(chan);
+						layer.channelLuts.push_back( otherLUT );
 					}
 					else if (!strcmp (format[i].name, "z"))
 					{
-						channels.insert ("Z", Channel (FLOAT));
-						channelOffsets["Z"] = pixelSize;
-						channelLuts.push_back( otherLUT );
+						SqImageLayerChannel chan;
+						chan.dataOffset = pixelSize;
+						chan.channel = Channel(FLOAT);
+						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+						chan.channelName = "Z";
+						layer.channelList.push_back(chan);
+						layer.channelLuts.push_back( otherLUT );
 					}
 					else
 					{
@@ -585,11 +693,15 @@ extern "C"
 						// another channel's name.
 						//
 
-						if (!channels.findChannel (format[i].name))
+						//if (layer.channelList.find(layerName.str()+"."+format[i].name) != layer.channelOffsets.end())
 						{
-							channels.insert (format[i].name, Channel (pixelType));
-							channelOffsets[format[i].name] = pixelSize;
-							channelLuts.push_back( otherLUT );
+							SqImageLayerChannel chan;
+							chan.dataOffset = pixelSize;
+							chan.channel = Channel(pixelType);
+							chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
+							chan.channelName = format[i].name;
+							layer.channelList.push_back(chan);
+							layer.channelLuts.push_back( otherLUT );
 						}
 					}
 
@@ -598,17 +710,12 @@ extern "C"
 				}
 			}
 
-			//
-			// Open the output file
-			//
+			// Add our layer to the image.
+			gImages[filename]->addLayer(layer);
+			// Setup a new image layer entry for this layer, and pass the index back.
+			gImageLayers.push_back(std::make_pair(filename, gImages[filename]->layers().size()-1));
+			*pvImage = (PtDspyImageHandle) (gImageLayers.size()-1);
 
-			Image *image = new Image (filename,
-			                          header,
-			                          channelOffsets,
-			                          pixelSize,
-			                          channelLuts);
-
-			*pvImage = (PtDspyImageHandle) image;
 		}
 		catch (const exception &e)
 		{
@@ -631,11 +738,18 @@ extern "C"
 	{
 		try
 		{
-			Image *image = (Image *) pvImage;
+			int imageLayerIndex = (int) pvImage;
+			std::string imageName = gImageLayers[imageLayerIndex].first;
+			if(gImages.find(imageName) != gImages.end())
+			{
+				boost::shared_ptr<Image> image = gImages[imageName];
+				SqImageLayer& layer = image->layers()[gImageLayers[imageLayerIndex].second];
+				std::cout << "Writing to: " << imageName << " Layer: " << layer.layerName << std::endl;
 
-			image->writePixels (xmin, xmax_plusone,
-			                    ymin, ymax_plusone,
-			                    entrysize, data);
+				image->writePixels (xmin, xmax_plusone,
+							ymin, ymax_plusone,
+							entrysize, data, gImageLayers[imageLayerIndex].second);
+			}
 		}
 		catch (const exception &e)
 		{
@@ -652,7 +766,7 @@ extern "C"
 	{
 		try
 		{
-			delete (Image *) pvImage;
+			//delete (Image *) pvImage;
 		}
 		catch (const exception &e)
 		{
@@ -696,10 +810,13 @@ extern "C"
 						if (_datalen > sizeof(sizeInfo))
 							_datalen = sizeof(sizeInfo);
 
-						const Image *image = (const Image *) pvImage;
-
-						if (image)
+						int imageLayerIndex = (int) pvImage;
+						std::string imageName = gImageLayers[imageLayerIndex].first;
+						if(gImages.find(imageName) != gImages.end())
 						{
+							boost::shared_ptr<Image> image = gImages[imageName];
+							SqImageLayer& layer = image->layers()[gImageLayers[imageLayerIndex].second];
+
 							const Box2i &dw = image->header().dataWindow();
 
 							sizeInfo.width  = dw.max.x - dw.min.x + 1;
