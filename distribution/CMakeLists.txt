@@ -92,4 +92,8 @@ set(CPACK_COMPONENT_SHADERS_DESCRIPTION
 set(CPACK_COMPONENT_DEVELOPMENT_DESCRIPTION
 	"Include and library files for software development")
 
+set(CPACK_SOURCE_IGNORE_FILES
+	".*/\\\\.git/"
+	)
+
 include(CPack)
