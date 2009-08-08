@@ -210,7 +210,7 @@ class Image
 typedef map<string, boost::shared_ptr<Image> > ImageMap;
 ImageMap gImages;
 
-typedef pair<string, int>	ImageLayerEntry;
+typedef pair<string, size_t>	ImageLayerEntry;
 typedef vector<ImageLayerEntry> ImageLayerList;
 ImageLayerList	gImageLayers;
 
@@ -738,7 +738,7 @@ extern "C"
 	{
 		try
 		{
-			int imageLayerIndex = (int) pvImage;
+			size_t imageLayerIndex = reinterpret_cast<size_t>(pvImage);
 			std::string imageName = gImageLayers[imageLayerIndex].first;
 			if(gImages.find(imageName) != gImages.end())
 			{
@@ -810,7 +810,7 @@ extern "C"
 						if (_datalen > sizeof(sizeInfo))
 							_datalen = sizeof(sizeInfo);
 
-						int imageLayerIndex = (int) pvImage;
+						size_t imageLayerIndex = reinterpret_cast<size_t>(pvImage);
 						std::string imageName = gImageLayers[imageLayerIndex].first;
 						if(gImages.find(imageName) != gImages.end())
 						{
