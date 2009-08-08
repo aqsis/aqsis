@@ -328,6 +328,22 @@ CqVector2D max(const CqVector2D& v1, const CqVector2D& v2);
  */
 CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v);
 
+/** \brief Cross product of two 2D vectors.
+ *
+ * The 2D cross product yeilds a scalar rather than a vector, with otherwise
+ * similar properties to the 3D version.  It can also be thought of as yeilding
+ * the component of the 3D cross product pointing out of the 2D plane.
+ */
+inline TqFloat cross(const CqVector2D a, const CqVector2D b);
+
+/** \brief Maximum of the absolute value of components of v.
+ *
+ * This is called the "max norm" or "infinity norm" and may be used to estimate
+ * the "size" of v without a costly square root.
+ */
+inline TqFloat maxNorm(CqVector2D v);
+
+
 /// Stream insertion
 std::ostream &operator<<(std::ostream& out, const CqVector2D& v);
 
@@ -356,6 +372,16 @@ inline CqVector2D max(const CqVector2D& v1, const CqVector2D& v2)
 inline CqVector2D compMul(const CqVector2D& trans, const CqVector2D& v)
 {
 	return CqVector2D(trans.x()*v.x(), trans.y()*v.y());
+}
+
+inline TqFloat cross(const CqVector2D a, const CqVector2D b)
+{
+	return a.x()*b.y() - a.y()*b.x();
+}
+
+inline TqFloat maxNorm(CqVector2D v)
+{
+	return max(std::fabs(v.x()), std::fabs(v.y()));
 }
 
 inline std::ostream &operator<<(std::ostream& out, const CqVector2D& v)

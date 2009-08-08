@@ -82,24 +82,15 @@ struct SqGridInfo
  */
 struct SqMpgSampleInfo
 {
-	/// Color for flat shading and for the "zero" point of smooth shading.
-	CqColor color;
-	/// Color multipilers used for smooth shading interpolation
-	CqColor colorMultX;
-	CqColor colorMultY;
-
-	/// Opacity
-	CqColor opacity;
-	/// Opacity multipilers used for smooth shading interpolation
-	CqColor opacityMultX;
-	CqColor opacityMultY;
+	/// Color cache
+	CqColor col[4];
+	/// Opacity cache
+	CqColor opa[4];
 
 	/// Whether to use smooth shading interpolation or not
 	bool smoothInterpolation;
-
 	/// True when samples hitting the micropolygon are occlusion cullable
 	bool isCullable;
-
 	/// True when the micropolygon is fully opaque
 	bool isOpaque;
 };

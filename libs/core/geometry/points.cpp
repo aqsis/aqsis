@@ -647,8 +647,8 @@ void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 void CqMicroPolygonPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
 		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
 {
-	outCol = cache.color;
-	outOpac = cache.opacity;
+	outCol = cache.col[0];
+	outOpac = cache.opa[0];
 }
 
 
@@ -866,8 +866,8 @@ void CqMicroPolygonMotionPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache)
 void CqMicroPolygonMotionPoints::InterpolateOutputs(const SqMpgSampleInfo& cache,
 		const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
 {
-	outCol = cache.color;
-	outOpac = cache.opacity;
+	outCol = cache.col[0];
+	outOpac = cache.opa[0];
 }
 
 //---------------------------------------------------------------------

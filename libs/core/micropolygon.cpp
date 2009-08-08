@@ -40,6 +40,7 @@
 namespace Aqsis {
 
 
+CqInvBilinear g_invBilin;
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
 CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
@@ -1377,6 +1378,11 @@ inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D
 	cache->m_OneOverVecNZ = 1.0 / cache->m_VecN.z();
 
 	cache->m_LastFailedEdge = 0;
+
+	g_invBilin.setVertices(vectorCast<CqVector2D>(points[3]),
+						   vectorCast<CqVector2D>(points[0]),
+						   vectorCast<CqVector2D>(points[2]),
+						   vectorCast<CqVector2D>(points[1]));
 }
 
 void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
@@ -1407,18 +1413,30 @@ void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 		CacheOutputInterpCoeffsConstant(cache);
 }
 
+
 void CqMicroPolygon::InterpolateOutputs(const SqMpgSampleInfo& cache,
 	const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
 {
 	if(cache.smoothInterpolation)
 	{
-		outCol = cache.color + cache.colorMultX*pos.x() + cache.colorMultY*pos.y();
-		outOpac = cache.opacity + cache.opacityMultX*pos.x() + cache.opacityMultY*pos.y();
+		// Use reverse bilinear lookup to find the bilinear coordinates of the
+		// sample position inside the micropolygon.
+		CqVector2D uv = g_invBilin(pos);
+//		CqVector2D uv = ReverseBilinear(pos);
+
+		// bilinear evaluation.
+		TqFloat w0 = (1-uv.x())*(1-uv.y());
+		TqFloat w1 = uv.x()*(1-uv.y());
+		TqFloat w2 = (1-uv.x())*uv.y();
+		TqFloat w3 = uv.x()*uv.y();
+
+		outCol = w0*cache.col[0] + w1*cache.col[1] + w2*cache.col[2] + w3*cache.col[3];
+		outOpac = w0*cache.opa[0] + w1*cache.opa[1] + w2*cache.opa[2] + w3*cache.opa[3];
 	}
 	else
 	{
-		outCol = cache.color;
-		outOpac = cache.opacity;
+		outCol = cache.col[0];
+		outOpac = cache.opa[0];
 	}
 }
 
@@ -1428,92 +1446,43 @@ void CqMicroPolygon::CacheOutputInterpCoeffsConstant(SqMpgSampleInfo& cache) con
 	{
 		const CqColor* col = 0;
 		Ci->GetColorPtr(col);
-		cache.color = col[m_Index];
+		cache.col[0] = col[m_Index];
 	}
 	else
 	{
-		cache.color = CqColor(1.0);
+		cache.col[0] = CqColor(1.0);
 	}
 
 	if(IqShaderData* Oi = m_pGrid->pVar(EnvVars_Oi))
 	{
 		const CqColor* opa = 0;
 		Oi->GetColorPtr(opa);
-		cache.opacity = opa[m_Index];
-		cache.isOpaque = cache.opacity >= CqColor(1.0);
+		cache.opa[0] = opa[m_Index];
+		cache.isOpaque = cache.opa[0] >= CqColor(1.0);
 	}
 	else
 	{
-		cache.opacity = CqColor(1.0);
+		cache.opa[0] = CqColor(1.0);
 		cache.isOpaque = true;
 	}
 }
 
 void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 {
-	// Get 2D coordinates of verts in the (x,y) plane.
-	CqVector2D p1(vectorCast<CqVector2D>(PointA()));
-	CqVector2D p2(vectorCast<CqVector2D>(PointB()));
-	CqVector2D p3(vectorCast<CqVector2D>(PointC()));
-	CqVector2D p4(vectorCast<CqVector2D>(PointD()));
-
-	// 2D diagonal vectors for the micropolygon.  The order of the vertices
-	// (p1, p2, p3, p4) here winds around the micropoly, rather than taking the
-	// usual order expected from RiPatch.
-	CqVector2D d1 = p3 - p1;
-	CqVector2D d2 = p4 - p2;
-	// Center point
-	CqVector2D pAvg = 0.25*(p1 + p2 + p3 + p4);
-
-	// For each component of the colour, we compute a linear approximation to
-	// the component over the micropolygon.  This is done by computing a
-	// "normal" vector to a plane constructed such that the colour component
-	// takes the place of the depth, "z".
-	//
-	// This is essentially the same method used to compute the depth of a
-	// sample inside the fContains() function.
-
-	TqFloat Nz = d1.x()*d2.y() - d1.y()*d2.x();
-
+	TqInt indices[4] = {m_Index, m_Index+1, m_Index + pGrid()->uGridRes() + 1,
+						m_Index + pGrid()->uGridRes() + 2};
 	if(IqShaderData* Ci = m_pGrid->pVar(EnvVars_Ci))
 	{
 		const CqColor* pCi = NULL;
 		Ci->GetColorPtr(pCi);
 
-		const CqColor& c1 = pCi[GetCodedIndex(m_IndexCode, 0)];
-		const CqColor& c2 = pCi[GetCodedIndex(m_IndexCode, 1)];
-		const CqColor& c3 = pCi[GetCodedIndex(m_IndexCode, 2)];
-		const CqColor& c4 = pCi[GetCodedIndex(m_IndexCode, 3)];
-		const CqColor cAvg = 0.25*(c1 + c2 + c3 + c4);
-
-		if(Nz != 0)
-		{
-			// Compute smooth shading coefficients for Ci.
-			CqColor c31 = c3 - c1;
-			CqColor c42 = c4 - c2;
-
-			CqColor Nx = d1.y()*c42 - c31*d2.y();
-			CqColor Ny = -d1.x()*c42 + c31*d2.x();
-
-			TqFloat NzInv = 1/Nz;
-			cache.color = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + cAvg;
-			cache.colorMultX = -Nx*NzInv;
-			cache.colorMultY = -Ny*NzInv;
-		}
-		else
-		{
-			// Degenerate to flat shading if the linear approx yields an
-			// infinitely steep plane.
-			cache.color = c1;
-			cache.colorMultX = gColBlack;
-			cache.colorMultY = gColBlack;
-		}
+		for(TqInt i = 0; i < 4; ++i)
+			cache.col[i] = pCi[indices[i]];
 	}
 	else
 	{
-		cache.color = gColWhite;
-		cache.colorMultX = gColBlack;
-		cache.colorMultY = gColBlack;
+		for(TqInt i = 0; i < 4; ++i)
+			cache.col[i] = CqColor(1.0f);
 	}
 
 	if(IqShaderData* Oi = m_pGrid->pVar(EnvVars_Oi))
@@ -1521,43 +1490,19 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 		const CqColor* pOi = NULL;
 		Oi->GetColorPtr(pOi);
 
-		const CqColor& o1 = pOi[GetCodedIndex(m_IndexCode, 0)];
-		const CqColor& o2 = pOi[GetCodedIndex(m_IndexCode, 1)];
-		const CqColor& o3 = pOi[GetCodedIndex(m_IndexCode, 2)];
-		const CqColor& o4 = pOi[GetCodedIndex(m_IndexCode, 3)];
-		const CqColor oAvg = 0.25*(o1 + o2 + o3 + o4);
+		for(TqInt i = 0; i < 4; ++i)
+			cache.opa[i] = pOi[indices[i]];
 
-		if(Nz != 0)
-		{
-			// Compute smooth shading coefficients for Oi.
-			CqColor o31 = o3 - o1;
-			CqColor o42 = o4 - o2;
-
-			CqColor Nx = d1.y()*o42 - o31*d2.y();
-			CqColor Ny = -d1.x()*o42 + o31*d2.x();
-
-			TqFloat NzInv = 1/Nz;
-			cache.opacity = (Nx*pAvg.x() + Ny*pAvg.y())*NzInv + oAvg;
-			cache.opacityMultX = -Nx*NzInv;
-			cache.opacityMultY = -Ny*NzInv;
-
-			// The micropoly isOpaque if the values on all vertices do.
-			cache.isOpaque = (o1 >= gColWhite) && (o2 >= gColWhite)
-				&& (o3 >= gColWhite) && (o4 >= gColWhite);
-		}
-		else
-		{
-			cache.opacity = oAvg;
-			cache.opacityMultX = gColBlack;
-			cache.opacityMultY = gColBlack;
-			cache.isOpaque = (cache.opacity >= gColWhite);
-		}
+		// The micropoly isOpaque if the values on all vertices are.
+		cache.isOpaque = (cache.opa[0] >= gColWhite) &&
+						 (cache.opa[1] >= gColWhite) &&
+						 (cache.opa[2] >= gColWhite) &&
+						 (cache.opa[3] >= gColWhite);
 	}
 	else
 	{
-		cache.opacity = gColWhite;
-		cache.opacityMultX = gColBlack;
-		cache.opacityMultY = gColBlack;
+		for(TqInt i = 0; i < 4; ++i)
+			cache.opa[i] = CqColor(1.0f);
 		cache.isOpaque = true;
 	}
 }
