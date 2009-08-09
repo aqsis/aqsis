@@ -120,6 +120,7 @@ aqsis_install_targets(aqsis_core)
 set(core_test_srcs
 	${api_test_srcs}
 	occlusion_test.cpp
+	bilinear_test.cpp
 )
 
 aqsis_add_tests(${core_test_srcs} LINK_LIBRARIES aqsis_core)
