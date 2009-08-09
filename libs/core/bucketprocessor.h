@@ -133,7 +133,8 @@ class CqBucketProcessor
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
 		void	RenderMPG_Static( CqMicroPolygon* pMPG);
-		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
+		void	StoreSample(CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index,
+							TqFloat D, const CqVector2D& uv);
 		void	StoreExtraData( CqMicroPolygon* pMPG, TqFloat* hitData);
 		const CqBound& DofSubBound(TqInt index) const;
 

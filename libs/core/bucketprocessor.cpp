@@ -1022,11 +1022,8 @@ void CqBucketProcessor::RenderMicroPoly( CqMicroPolygon* pMP )
 	bool UsingDof = QGetRenderContext()->UsingDepthOfField();
 	bool IsMoving = pMP->IsMoving();
 
-	// At this stage, only use smooth shading interpolation for stationary
-	// grids without DoF.
-	/// \todo Allow smooth shading with MB or DoF.
-	m_CurrentMpgSampleInfo.smoothInterpolation = !(UsingDof || IsMoving)
-		&& pMP->pGrid()->GetCachedGridInfo().useSmoothShading;
+	m_CurrentMpgSampleInfo.smoothInterpolation =
+		pMP->pGrid()->GetCachedGridInfo().useSmoothShading;
 
 	// Samples hitting the micropoly are occlusion cullable if
 	// 1) The micropoly is not part of a CSG
@@ -1156,13 +1153,14 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 					// Now check if the subsample hits the micropoly
 					bool SampleHit;
 					TqFloat D;
+					CqVector2D uv;
 
-					SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time );
+					SampleHit = pMPG->Sample( hitTestCache, sampleData, D, uv, time );
 
 					if ( SampleHit )
 					{
 						sample_hits++;
-						StoreSample( pMPG, pie2->get(), index, D );
+						StoreSample( pMPG, pie2->get(), index, D, uv );
 					}
 				}
 				index_start += iXSamples;
@@ -1380,13 +1378,14 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 							// Now check if the subsample hits the micropoly
 							bool SampleHit;
 							TqFloat D;
+							CqVector2D uv;
 
-							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, uv, time, UsingDof );
 							if ( SampleHit )
 							{
 								sample_hits++;
 								// note index has already been incremented, so we use the previous value.
-								StoreSample( pMPG, pie2->get(), index-1, D );
+								StoreSample( pMPG, pie2->get(), index-1, D, uv );
 							}
 						}
 						else
@@ -1413,13 +1412,14 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 							// Now check if the subsample hits the micropoly
 							bool SampleHit;
 							TqFloat D;
+							CqVector2D uv;
 
-							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, time, UsingDof );
+							SampleHit = pMPG->Sample( hitTestCache, sampleData, D, uv, time, UsingDof );
 							if ( SampleHit )
 							{
 								sample_hits++;
 								// note index has already been incremented, so we use the previous value.
-								StoreSample( pMPG, pie2->get(), index-1, D );
+								StoreSample( pMPG, pie2->get(), index-1, D, uv );
 							}
 						}
 					} while (!UsingDof && index < indexT1);
@@ -1429,7 +1429,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
     }
 }
 
-void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
+void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D, const CqVector2D& uv )
 {
 	bool isCullable = m_CurrentMpgSampleInfo.isCullable;
 	SqSampleData& sampleData = pie2->SampleData( index );
@@ -1505,10 +1505,9 @@ void CqBucketProcessor::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, T
 	}
 
 	// Compute the color and opacity of the micropolygon at the hit point.
-	// This is where ShadingInterpolation "smooth" or "constant" comes in.
 	CqColor col;
 	CqColor opa;
-	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, sampleData.position, col, opa);
+	pMPG->InterpolateOutputs(m_CurrentMpgSampleInfo, uv, col, opa);
 
 	// Store the hit data for later use.
 	TqFloat* hitData = pie2->sampleHitData(*hit);

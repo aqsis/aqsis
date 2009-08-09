@@ -40,7 +40,6 @@
 namespace Aqsis {
 
 
-CqInvBilinear g_invBilin;
 CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
 CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
@@ -1294,7 +1293,7 @@ void CqMicroPolygon::Initialise()
  * \return Boolean indicating sample hit.
  */
 
-bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
+bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, CqVector2D& uv, TqFloat time) const
 {
 	// AGG - optimised version of above.
 	TqFloat x = vecP.x(), y = vecP.y();
@@ -1336,8 +1335,9 @@ bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& 
 		e = (e+1) & 3;
 	}
 
-	Depth = ( hitTestCache.m_D - ( hitTestCache.m_VecN.x() * vecP.x() ) -
-	          ( hitTestCache.m_VecN.y() * vecP.y() ) ) * hitTestCache.m_OneOverVecNZ;
+	uv = hitTestCache.xyToUV(vecP);
+	TqFloat* z = hitTestCache.z;
+	Depth = bilerp(z[0], z[1], z[2], z[3], uv);
 
 	return true;
 }
@@ -1372,17 +1372,16 @@ inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D
 		}
 	}
 
-	cache->m_VecN = (points[3] - points[0]) % (points[1] - points[0]);
-	cache->m_VecN.Unit();
-	cache->m_D = cache->m_VecN * points[3];
-	cache->m_OneOverVecNZ = 1.0 / cache->m_VecN.z();
-
 	cache->m_LastFailedEdge = 0;
 
-	g_invBilin.setVertices(vectorCast<CqVector2D>(points[3]),
-						   vectorCast<CqVector2D>(points[0]),
-						   vectorCast<CqVector2D>(points[2]),
-						   vectorCast<CqVector2D>(points[1]));
+	cache->xyToUV.setVertices(vectorCast<CqVector2D>(points[3]),
+							  vectorCast<CqVector2D>(points[0]),
+							  vectorCast<CqVector2D>(points[2]),
+							  vectorCast<CqVector2D>(points[1]));
+	cache->z[0] = points[3].z();
+	cache->z[1] = points[0].z();
+	cache->z[2] = points[2].z();
+	cache->z[3] = points[1].z();
 }
 
 void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
@@ -1415,16 +1414,11 @@ void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 
 
 void CqMicroPolygon::InterpolateOutputs(const SqMpgSampleInfo& cache,
-	const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const
+	const CqVector2D& uv, CqColor& outCol, CqColor& outOpac) const
 {
 	if(cache.smoothInterpolation)
 	{
-		// Use reverse bilinear lookup to find the bilinear coordinates of the
-		// sample position inside the micropolygon.
-		CqVector2D uv = g_invBilin(pos);
-//		CqVector2D uv = ReverseBilinear(pos);
-
-		// bilinear evaluation.
+		// bilinear interpolation.
 		TqFloat w0 = (1-uv.x())*(1-uv.y());
 		TqFloat w1 = uv.x()*(1-uv.y());
 		TqFloat w2 = (1-uv.x())*uv.y();
@@ -1597,10 +1591,11 @@ inline bool CqMicroPolygon::dofSampleInBound(const CqBound& bound,
  * \param vecSample 2D vector to sample against.
  * \param time Shutter time to sample at.
  * \param D Storage for depth if valid hit.
+ * \param uv - Output for parametric coordinates inside the micropolygon.
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
 	CqVector2D vecSample = sample.position;
 
@@ -1629,7 +1624,7 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& s
 		CacheHitTestValues(&hitTestCache, points);
 	}
 
-	if ( fContains( hitTestCache, vecSample, D, time ) )
+	if ( fContains( hitTestCache, vecSample, D, uv, time ) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )
@@ -1793,10 +1788,11 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
  * \param vecSample 2D vector to sample against.
  * \param time Shutter time to sample at.
  * \param D Storage for depth if valid hit.
+ * \param uv - Output for parametric coordinates inside the micropolygon.
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D vecSample = sample.position;
 	CqVector3D points[4];
@@ -1903,7 +1899,7 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 	// Fill in the hit test coefficients for the current sample.
 	CacheHitTestValues(&hitTestCache, points);
 
-	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, time) )
+	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, uv, time) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )

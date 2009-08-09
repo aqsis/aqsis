@@ -625,7 +625,7 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 }
 
 
-bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.position;
 
@@ -849,10 +849,11 @@ void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
  * \param vecSample 2D vector to sample against.
  * \param time Shutter time to sample at.
  * \param D Storage for depth if valid hit.
+ * \param uv - Output for parametric coordinates inside the micropolygon.
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.position;
 	return( fContains( vecSample, D, time ) );
@@ -935,7 +936,6 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 	{
 		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
 		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
-		// Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
 		CqVector3D MidPoint = ( ( pMP2->m_Point0 - pMP1->m_Point0 ) * Fraction ) + pMP1->m_Point0;
 		TqFloat MidRadius = ( ( pMP2->m_radius - pMP1->m_radius ) * Fraction ) + pMP1->m_radius;
 		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude() < MidRadius )

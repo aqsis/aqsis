@@ -380,7 +380,7 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			m_Bound.vecMin() = pos - CqVector3D(m_radius, m_radius, 0);
 			m_Bound.vecMax() = pos + CqVector3D(m_radius, m_radius, 0);
 		}
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheCocMultipliers(CqHitTestCache& cache) {}
@@ -528,7 +528,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{
 			return true;
 		}
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 		virtual void CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const;
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
 				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;

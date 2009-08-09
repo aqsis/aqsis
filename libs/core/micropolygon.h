@@ -31,6 +31,7 @@
 
 #include	<boost/utility.hpp>
 
+#include	"bilinear.h"
 #include	<aqsis/util/pool.h>
 #include	<aqsis/math/color.h>
 #include	<aqsis/util/list.h>
@@ -519,10 +520,9 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 struct CqHitTestCache
 {
-	// these 3 are used in calculating the interpolated depth value
-	CqVector3D m_VecN;
-	TqFloat m_OneOverVecNZ;
-	TqFloat m_D;
+	// Depth values at the four micropolygon vertices for calculating the
+	// interpolated depth at a hit.
+	TqFloat z[4];
 
 	// these 4 hold values used in doing the edge tests. 1 of each for each edge.
 	TqFloat m_YMultiplier[4];
@@ -544,6 +544,10 @@ struct CqHitTestCache
 	// box.
 	CqVector2D cocMultMin;
 	CqVector2D cocMultMax;
+
+	// Inverse bilinear lookup functor from the (x,y) hit position to the
+	// micropolygon (u,v) coordinates.
+	CqInvBilinear xyToUV;
 };
 
 //----------------------------------------------------------------------
@@ -698,9 +702,9 @@ class CqMicroPolygon : boost::noncopyable
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 
-		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& D, CqVector2D& uv, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
 		/** \brief Cache sampling data related to depth of field.
 		 *
@@ -731,12 +735,12 @@ class CqMicroPolygon : boost::noncopyable
 		/** \brief Get colour and opacity at pos using cached coefficients
 		 *
 		 * \param cache - previously cached coefficients for this micropolygon
-		 * \param pos - position to evaluate color and opacity at
+		 * \param uv - parametric coordinates on the micropolygon patch.
 		 * \param outCol - interpolated colour output will be placed here.
 		 * \param outOpac - interpolated opacity output will be placed here.
 		 */
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
-				const CqVector2D& pos, CqColor& outCol, CqColor& outOpac) const;
+				const CqVector2D& uv, CqColor& outCol, CqColor& outOpac) const;
 
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
@@ -946,7 +950,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 
 		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
 

@@ -156,12 +156,38 @@ template <class T>
 T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t );
 
 
+/** \brief Bilinear interpolation, fast version.
+ *
+ * Bilinear interpolation over a "quadrilateral" of values arranged in the
+ * standard order as follows:
+ *
+ * \verbatim
+ *
+ *   C---D    ^
+ *   |   |    | v-direction [ uv.y() ]
+ *   A---B    |
+ *
+ *   u-direction -->
+ *   [ uv.x() ]
+ *
+ * \endverbatim
+ *
+ * This version performs no checks for whether u and v are between 0 and 1 and
+ * may give odd results if they're not.
+ *
+ * \param A,B,C,D - quadrilateral corners.
+ * \param uv - Parametric (u,v) coordinates, should be in the interval [0,1]
+ */
+template<typename T>
+inline T bilerp(T A, T B, T C, T D, CqVector2D uv);
+
+
 
 //==============================================================================
 // Implementation details.
 //==============================================================================
 template <class T>
-T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t )
+inline T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t )
 {
 	T AB, CD;
 	// Work out where the u points are first, then linear interpolate the v value.
@@ -198,6 +224,16 @@ T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, T
 	return ( R );
 }
 
+
+template<typename T>
+inline T bilerp(T A, T B, T C, T D, CqVector2D uv)
+{
+    TqFloat w0 = (1-uv.y())*(1-uv.x());
+    TqFloat w1 = (1-uv.y())*uv.x();
+    TqFloat w2 = uv.y()*(1-uv.x());
+    TqFloat w3 = uv.y()*uv.x();
+    return w0*A + w1*B + w2*C + w3*D;
+}
 
 
 //------------------------------------------------------------------------------
