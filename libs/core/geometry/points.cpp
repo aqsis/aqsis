@@ -625,22 +625,21 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 }
 
 
-bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
+bool CqMicroPolygonPoints::Sample( CqHitTestCache& cache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample.position;
-
-	CqVector3D P;
-	pGrid()->pVar(EnvVars_P)->GetPoint(P, m_Index);
-	if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
+	if( (vectorCast<CqVector2D>(cache.P[0]) - sample.position).Magnitude2()
+		< m_radius*m_radius )
 	{
-		D = P.z();
+		D = cache.P[0].z();
 		return( true );
 	}
 	return( false );
 }
 
 void CqMicroPolygonPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
-{ }
+{
+	pGrid()->pVar(EnvVars_P)->GetPoint(cache.P[0], m_Index);
+}
 
 void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 {
@@ -944,7 +943,7 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
 		CqVector3D MidPoint = ( ( pMP2->m_Point0 - pMP1->m_Point0 ) * Fraction ) + pMP1->m_Point0;
 		TqFloat MidRadius = ( ( pMP2->m_radius - pMP1->m_radius ) * Fraction ) + pMP1->m_radius;
-		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude() < MidRadius )
+		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude2() < MidRadius*MidRadius )
 		{
 			Depth = MidPoint.z();
 			return( true );

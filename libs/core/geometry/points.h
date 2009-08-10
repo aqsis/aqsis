@@ -428,7 +428,7 @@ class CqMovingMicroPolygonKeyPoints
 	public:
 		bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 		{
-			if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
+			if( (vectorCast<CqVector2D>(m_Point0) - vecP).Magnitude2() < m_radius*m_radius )
 			{
 				Depth = m_Point0.z();
 				return( true );
