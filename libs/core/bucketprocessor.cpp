@@ -1057,7 +1057,7 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
     TqInt sample_hits = 0;
 
 	CqHitTestCache hitTestCache;
-	bool cachedHitData = false;
+	pMPG->CacheHitTestValues(hitTestCache, false);
 
     CqBound Bound = pMPG->GetBound();
 
@@ -1103,12 +1103,6 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 
 		for(int iX = sX; iX < eX; ++iX, ++pie2)
 		{
-			if(!cachedHitData)
-			{
-				pMPG->CacheHitTestValues(&hitTestCache);
-				cachedHitData = true;
-			}
-
 			// Now sample the micropolygon at several subsample positions
 			// within the pixel. The subsample indices range from (start_m, n)
 			// to (end_m-1, end_n-1).
@@ -1188,6 +1182,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
     TqInt sample_hits = 0;
 
 	CqHitTestCache hitTestCache;
+	pMPG->CacheHitTestValues(hitTestCache, UsingDof);
 
 	TqInt iXSamples = m_optCache.xSamps;
     TqInt iYSamples = m_optCache.ySamps;
@@ -1203,9 +1198,6 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 		if(!fastShutter)
 			timePerSample = numSamples / ( closetime - opentime );
 	}
-
-	if(UsingDof)
-		pMPG->CacheCocMultipliers(hitTestCache);
 
 	const TqInt timeRanges = std::max(4, m_optCache.xSamps * m_optCache.ySamps );
 	TqInt bound_maxMB = pMPG->cSubBounds( timeRanges );

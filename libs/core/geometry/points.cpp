@@ -639,6 +639,9 @@ bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 	return( false );
 }
 
+void CqMicroPolygonPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
+{ }
+
 void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 {
 	CacheOutputInterpCoeffsConstant(cache);
@@ -858,6 +861,9 @@ bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleD
 	const CqVector2D& vecSample = sample.position;
 	return( fContains( vecSample, D, time ) );
 }
+
+void CqMicroPolygonMotionPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
+{ }
 
 void CqMicroPolygonMotionPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
 {

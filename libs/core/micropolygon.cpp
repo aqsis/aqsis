@@ -858,7 +858,8 @@ void CqMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 					pNew->MarkTrimmed();
 				std::map<TqFloat, TqInt>::iterator keyFrame;
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
-					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
+					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ],  keyFrame->first);
+				pNew->Initialise();
 				boost::shared_ptr<CqMicroPolygon> pTemp(pNew);
 				QGetRenderContext()->pImage()->AddMPG( pTemp );
 			}
@@ -1149,7 +1150,8 @@ void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 
 			boost::shared_ptr<CqMicroPolygonMotion> pNew( new CqMicroPolygonMotion( this, iIndex ) );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
-				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
+				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], Time( iTime ) );
+			pNew->Initialise();
 			boost::shared_ptr<CqMicroPolygon> pTemp( pNew );
 			QGetRenderContext()->pImage()->AddMPG( pTemp );
 		}
@@ -1201,14 +1203,18 @@ CqMicroPolygon::~CqMicroPolygon()
 
 
 //---------------------------------------------------------------------
-/** Initialise the information within the micro polygon used during sampling.
- */
-
 void CqMicroPolygon::Initialise()
 {
-	// Check for degenerate case, if any of the neighbouring points are the same, shuffle them down, and
-	// duplicate the last point exactly. Exact duplication of the last two points is used as a marker in the
-	// fContains function to indicate degeneracy. If more that two points are coincident, we are in real trouble!
+	ComputeVertexOrder();
+	CalculateBound();
+}
+
+void CqMicroPolygon::ComputeVertexOrder()
+{
+	// Check for degenerate case, if any of the neighbouring points are the
+	// same, shuffle them down, and duplicate the last point exactly.
+	// Degeneracy is indicated with the bit 0x8000000 in m_IndexCode.  If more
+	// that two points are coincident, we are in real trouble!
 	TqInt cu = m_pGrid->uGridRes();
 	TqInt IndexA = m_Index;
 	TqInt IndexB = m_Index + 1;
@@ -1217,8 +1223,8 @@ void CqMicroPolygon::Initialise()
 
 	TqShort CodeA = 0;
 	TqShort CodeB = 1;
-	TqShort CodeC = 2;
-	TqShort CodeD = 3;
+	TqShort CodeC = 3;
+	TqShort CodeD = 2;
 
 	const CqVector3D* pP;
 	m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
@@ -1280,8 +1286,6 @@ void CqMicroPolygon::Initialise()
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000000 ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
-
-	CalculateBound();
 }
 
 
@@ -1336,26 +1340,43 @@ bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& 
 	}
 
 	uv = hitTestCache.xyToUV(vecP);
-	TqFloat* z = hitTestCache.z;
+	const TqFloat* z = hitTestCache.z;
 	Depth = bilerp(z[0], z[1], z[2], z[3], uv);
 
 	return true;
 }
 
 //---------------------------------------------------------------------
-/** Cache some values needed for the point in poly test.
- * This must be called prior to calling fContains() on a mpg.
- */
 
-inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const
+void CqMicroPolygon::cachePointInPolyTest(CqHitTestCache& cache,
+										  CqVector3D* pointsIn) const
 {
+	cache.z[0] = pointsIn[0].z();
+	cache.z[1] = pointsIn[1].z();
+	cache.z[2] = pointsIn[2].z();
+	cache.z[3] = pointsIn[3].z();
+	cache.xyToUV.setVertices(vectorCast<CqVector2D>(pointsIn[0]),
+							 vectorCast<CqVector2D>(pointsIn[1]),
+							 vectorCast<CqVector2D>(pointsIn[2]),
+							 vectorCast<CqVector2D>(pointsIn[3]));
+
+	// The point-in-poly test requires a carefully chosen order for the points,
+	// and special cases when the micropoly is degenerate.  This information is
+	// stored in m_IndexCode and used to reorder the points before calculating
+	// the point-in-poly coefficients.
+	const CqVector3D points[4] = {
+		pointsIn[(m_IndexCode >> 2) & 0x3],
+		pointsIn[(m_IndexCode >> 4) & 0x3],
+		pointsIn[(m_IndexCode >> 6) & 0x3],
+		pointsIn[(m_IndexCode ) & 0x3],
+	};
 	int j = 3;
 	for(int i=0; i<4; ++i)
 	{
-		cache->m_YMultiplier[i] = points[i].x() - points[j].x();
-		cache->m_XMultiplier[i] = points[i].y() - points[j].y();
-		cache->m_X[i] = points[j].x();
-		cache->m_Y[i] = points[j].y();
+		cache.m_YMultiplier[i] = points[i].x() - points[j].x();
+		cache.m_XMultiplier[i] = points[i].y() - points[j].y();
+		cache.m_X[i] = points[j].x();
+		cache.m_Y[i] = points[j].y();
 		j = i;
 	}
 
@@ -1365,43 +1386,54 @@ inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D
 	{
 		for(int i=2; i<4; ++i)
 		{
-			cache->m_YMultiplier[i] = points[3].x() - points[1].x();
-			cache->m_XMultiplier[i] = points[3].y() - points[1].y();
-			cache->m_X[i] = points[1].x();
-			cache->m_Y[i] = points[1].y();
+			cache.m_YMultiplier[i] = points[3].x() - points[1].x();
+			cache.m_XMultiplier[i] = points[3].y() - points[1].y();
+			cache.m_X[i] = points[1].x();
+			cache.m_Y[i] = points[1].y();
 		}
 	}
 
-	cache->m_LastFailedEdge = 0;
-
-	cache->xyToUV.setVertices(vectorCast<CqVector2D>(points[3]),
-							  vectorCast<CqVector2D>(points[0]),
-							  vectorCast<CqVector2D>(points[2]),
-							  vectorCast<CqVector2D>(points[1]));
-	cache->z[0] = points[3].z();
-	cache->z[1] = points[0].z();
-	cache->z[2] = points[2].z();
-	cache->z[3] = points[1].z();
+	cache.m_LastFailedEdge = 0;
 }
 
-void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
 {
-	CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
-	CacheHitTestValues(cache, points);
-}
+	// First grab and cache the points.
+	const CqVector3D* gridP = 0;
+	m_pGrid->pVar(EnvVars_P)->GetPointPtr(gridP);
+	TqInt uGridRes = m_pGrid->uGridRes();
+	CqVector3D* P = cache.P;
+	P[0] = gridP[m_Index];
+	P[1] = gridP[m_Index + 1];
+	P[2] = gridP[m_Index + uGridRes + 1];
+	P[3] = gridP[m_Index + uGridRes + 2];
 
-void CqMicroPolygon::CacheCocMultipliers(CqHitTestCache& cache) const
-{
-	const CqRenderer* renderContext = QGetRenderContext();
-	cache.cocMult[0] = renderContext->GetCircleOfConfusion(PointB().z());
-	cache.cocMult[1] = renderContext->GetCircleOfConfusion(PointC().z());
-	cache.cocMult[2] = renderContext->GetCircleOfConfusion(PointD().z());
-	cache.cocMult[3] = renderContext->GetCircleOfConfusion(PointA().z());
+	if(usingDof)
+	{
+		// When using depth of field, the circle of confusion multipliers for
+		// each vertex of a static micropolygon are independent of the sample
+		// point and can be cached.  The minimum and maximum of these
+		// multipliers can also be cached, and used in the bounding box test
+		// for fast sample rejection.
+		const CqRenderer* renderContext = QGetRenderContext();
+		cache.cocMult[0] = renderContext->GetCircleOfConfusion(P[0].z());
+		cache.cocMult[1] = renderContext->GetCircleOfConfusion(P[1].z());
+		cache.cocMult[2] = renderContext->GetCircleOfConfusion(P[2].z());
+		cache.cocMult[3] = renderContext->GetCircleOfConfusion(P[3].z());
 
-	cache.cocMultMin = min(min(min(cache.cocMult[0], cache.cocMult[1]),
-				cache.cocMult[2]), cache.cocMult[3]);
-	cache.cocMultMax = max(max(max(cache.cocMult[0], cache.cocMult[1]),
-				cache.cocMult[2]), cache.cocMult[3]);
+		cache.cocMultMin = min(min(cache.cocMult[0], cache.cocMult[1]),
+							   min(cache.cocMult[2], cache.cocMult[3]));
+		cache.cocMultMax = max(max(cache.cocMult[0], cache.cocMult[1]),
+							   max(cache.cocMult[2], cache.cocMult[3]));
+	}
+	else
+	{
+		// When not using depth of field, the coefficients for the
+		// point-in-polygon test itself can be cached, since the vertices of
+		// the micropolygon aren't effected by any aspect of the sample points
+		// themselves.
+		cachePointInPolyTest(cache, P);
+	}
 }
 
 void CqMicroPolygon::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
@@ -1611,17 +1643,18 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& s
 		// When using DoF, we need to adjust the micropolygon point positions
 		// along the opposite of the direction of the DoF offset for the
 		// current sample.
-		CqVector2D* coc = &hitTestCache.cocMult[0];
+		CqVector2D* coc = hitTestCache.cocMult;
 		CqVector2D dofOffset = sample.dofOffset;
+		CqVector3D* P = hitTestCache.P;
 		CqVector3D points[4] = {
-			PointB() - vectorCast<CqVector3D>(compMul(coc[0], dofOffset)),
-			PointC() - vectorCast<CqVector3D>(compMul(coc[1], dofOffset)),
-			PointD() - vectorCast<CqVector3D>(compMul(coc[2], dofOffset)),
-			PointA() - vectorCast<CqVector3D>(compMul(coc[3], dofOffset))
+			P[0] - vectorCast<CqVector3D>(compMul(coc[0], dofOffset)),
+			P[1] - vectorCast<CqVector3D>(compMul(coc[1], dofOffset)),
+			P[2] - vectorCast<CqVector3D>(compMul(coc[2], dofOffset)),
+			P[3] - vectorCast<CqVector3D>(compMul(coc[3], dofOffset))
 		};
 		// Having displaced and slightly distorted the micropolygon, we now
 		// need to calculate the hit test coefficients.
-		CacheHitTestValues(&hitTestCache, points);
+		cachePointInPolyTest(hitTestCache, points);
 	}
 
 	if ( fContains( hitTestCache, vecSample, D, uv, time ) )
@@ -1710,6 +1743,16 @@ void CqMicroPolygon::CalculateBound()
 	m_Bound = CqBound( min(min(min(A,B),C),D), max(max(max(A,B),C),D) );
 }
 
+
+
+//---------------------------------------------------------------------
+// CqMicroPolygonMotion implementation
+//---------------------------------------------------------------------
+
+void CqMicroPolygonMotion::Initialise()
+{
+	ComputeVertexOrder();
+}
 
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
@@ -1866,20 +1909,20 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 	if ( Exact )
 	{
 		CqMovingMicroPolygonKey * pMP1 = m_Keys[ iIndex ];
-		points[1] = pMP1->m_Point0;
-		points[2] = pMP1->m_Point1;
-		points[3] = pMP1->m_Point2;
-		points[0] = pMP1->m_Point3;
+		points[0] = pMP1->m_Point0;
+		points[1] = pMP1->m_Point1;
+		points[2] = pMP1->m_Point2;
+		points[3] = pMP1->m_Point3;
 	}
 	else
 	{
 		TqFloat F1 = 1.0f - Fraction;
 		CqMovingMicroPolygonKey* pMP1 = m_Keys[ iIndex ];
 		CqMovingMicroPolygonKey* pMP2 = m_Keys[ iIndex + 1 ];
-		points[1] = ( F1 * pMP1->m_Point0 ) + ( Fraction * pMP2->m_Point0 );
-		points[2] = ( F1 * pMP1->m_Point1 ) + ( Fraction * pMP2->m_Point1 );
-		points[3] = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
-		points[0] = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
+		points[0] = ( F1 * pMP1->m_Point0 ) + ( Fraction * pMP2->m_Point0 );
+		points[1] = ( F1 * pMP1->m_Point1 ) + ( Fraction * pMP2->m_Point1 );
+		points[2] = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
+		points[3] = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
 	}
 
 	if(UsingDof)
@@ -1897,7 +1940,7 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 						points[3].z()), dofOffset));
 	}
 	// Fill in the hit test coefficients for the current sample.
-	CacheHitTestValues(&hitTestCache, points);
+	cachePointInPolyTest(hitTestCache, points);
 
 	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, uv, time) )
 	{
@@ -1940,25 +1983,31 @@ bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, SqSampleData co
 		return ( false );
 }
 
-void CqMicroPolygonMotion::CacheCocMultipliers(CqHitTestCache& cache) const
+void CqMicroPolygonMotion::CacheHitTestValues(CqHitTestCache& cache,
+											  bool usingDof) const
 {
-	// Here we cache the CoC range for the full MB bound to be used in the
-	// tight DoF bounds test.  We can't calculate and cache the CoC values for
-	// the four corners of the micropolygon like in the static case, since the
-	// depth is a function of time in general.
-	const CqRenderer* renderContext = QGetRenderContext();
-	CqVector2D cocMult1 = renderContext->GetCircleOfConfusion(GetBound().vecMin().z());
-	CqVector2D cocMult2 = renderContext->GetCircleOfConfusion(GetBound().vecMax().z());
-	if(renderContext->MinCoCForBound(GetBound()) == 0)
+	if(usingDof)
 	{
-		// special case for when the bound crosses the focal plane, in which
-		// case the min() of the CoC multipliers retrieved above doesn't
-		// actually give the correct minimum.
-		cache.cocMultMin = CqVector2D(0,0);
+		// Here we cache the CoC range for the full MB bound to be used in the
+		// tight DoF bounds test.  We can't calculate and cache the CoC values
+		// for the four corners of the micropolygon like in the static case,
+		// since the depth is a function of time in general.
+		const CqRenderer* renderContext = QGetRenderContext();
+		CqVector2D coc1 = renderContext->GetCircleOfConfusion(GetBound().vecMin().z());
+		CqVector2D coc2 = renderContext->GetCircleOfConfusion(GetBound().vecMax().z());
+		if(renderContext->MinCoCForBound(GetBound()) == 0)
+		{
+			// special case for when the bound crosses the focal plane, in
+			// which case the min() of the CoC multipliers retrieved above
+			// doesn't actually give the correct minimum.
+			cache.cocMultMin = CqVector2D(0,0);
+		}
+		else
+			cache.cocMultMin = min(coc1, coc2);
+		cache.cocMultMax = max(coc1, coc2);
 	}
-	else
-		cache.cocMultMin = min(cocMult1, cocMult2);
-	cache.cocMultMax = max(cocMult1, cocMult2);
+	// If using MB but not DoF, there's nothing that we can really usefully
+	// cache here.
 }
 
 //---------------------------------------------------------------------
@@ -1985,49 +2034,6 @@ void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB
 		CqBound B(pMP->GetBound());
 		m_Bound.Encapsulate( &B );
 	}
-}
-
-
-//---------------------------------------------------------------------
-/** Store the vectors of the micropolygon.
- * \param vA 3D Vector.
- * \param vB 3D Vector.
- * \param vC 3D Vector.
- * \param vD 3D Vector.
- */
-
-void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
-{
-	// Check for degenerate case, if any of the neighbouring points are the same, shuffle them down, and
-	// duplicate the last point exactly. Exact duplication of the last two points is used as a marker in the
-	// fContains function to indicate degeneracy. If more that two points are coincident, we are in real trouble!
-	const CqVector3D & vvB = ( vA - vB ).Magnitude() < 1e-2 ? vC : vB;
-	const CqVector3D& vvC = ( vvB - vC ).Magnitude() < 1e-2 ? vD : vC;
-	const CqVector3D& vvD = ( vvC - vD ).Magnitude() < 1e-2 ? vvC : vD;
-
-	// Determine whether the MPG is CW or CCW, must be CCW for fContains to work.
-	bool fFlip = ( ( vA.x() - vvB.x() ) * ( vvB.y() - vvC.y() ) ) >= ( ( vA.y() - vvB.y() ) * ( vvB.x() - vvC.x() ) );
-
-	if ( !fFlip )
-	{
-		m_Point0 = vA;
-		m_Point1 = vvD;
-		m_Point2 = vvC;
-		m_Point3 = vvB;
-	}
-	else
-	{
-		m_Point0 = vA;
-		m_Point1 = vvB;
-		m_Point2 = vvC;
-		m_Point3 = vvD;
-	}
-
-	m_N = ( vA - vvB ) % ( vvC - vvB );
-	m_N.Unit();
-	m_D = m_N * vA;
-
-	m_BoundReady = false;
 }
 
 

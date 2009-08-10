@@ -520,8 +520,10 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 struct CqHitTestCache
 {
-	// Depth values at the four micropolygon vertices for calculating the
-	// interpolated depth at a hit.
+	// Cached vertices for static micropolygons.
+	CqVector3D P[4];
+	// Cached depths for bilinear depth lookup.  These are the same as P[i].z()
+	// in some cases, but are filled in by cachePointInPolyTest.
 	TqFloat z[4];
 
 	// these 4 hold values used in doing the edge tests. 1 of each for each edge.
@@ -535,8 +537,7 @@ struct CqHitTestCache
 	TqInt	m_LastFailedEdge;
 
 	// These four vectors hold the circle of confusion dof offset multipliers
-	// for each of the four vertices in the order PointB(), PointC, PointD(),
-	// PointA().
+	// for each of the four vertices in the natural order (same as cache.P)
 	CqVector2D cocMult[4];
 
 	// These two vectors hold the extents of the circle of confusion
@@ -705,21 +706,16 @@ class CqMicroPolygon : boost::noncopyable
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& D, CqVector2D& uv, TqFloat time ) const;
-		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
-		/** \brief Cache sampling data related to depth of field.
+		/** \brief Cache any values which can be reused for all point-in-poly tests.
 		 *
-		 * The circle of confusion multipliers for each vertex of a static
-		 * micropolygon are independent of the sample point and can be cached.
-		 * The minimum and maximum of these multipliers can also be cached, and
-		 * used in the bounding box test for fast sample rejection.
+		 * Child classes should override this function in order to cache any
+		 * relevant data which can be reused for testing multiple sample points
+		 * for intersection against the micropolygon.
 		 *
-		 * Child classes should override this function in order to cache
-		 * any relevant depth of field data which can be reused for multiple
-		 * sample points.
-		 *
-		 * \param cache - storage for the cached CoC multiplers.
+		 * \param cache - storage for relevant hit test data.
+		 * \param usingDof - true if depth of field is turned on.
 		 */
-		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
+		virtual void CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const;
 
 		/** \brief Cache information needed to interpolate colour and opacity
 		 * across the micropolygon.
@@ -742,7 +738,12 @@ class CqMicroPolygon : boost::noncopyable
 		virtual void InterpolateOutputs(const SqMpgSampleInfo& cache,
 				const CqVector2D& uv, CqColor& outCol, CqColor& outOpac) const;
 
-		void	Initialise();
+		/** \brief Initialise some micropolygon member data.
+		 *
+		 * Initialise the static micropolygon bound and the vertex ordering.
+		 */
+		virtual void Initialise();
+
 		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
 		virtual const CqVector3D& PointA() const
@@ -784,6 +785,16 @@ class CqMicroPolygon : boost::noncopyable
 		 */
 		virtual void CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const;
 
+		/** \brief Compute the vertex ordering necessary for the point-in-poly test.
+		 *
+		 * The vertex ordering in the point-in-poly test needs to be in the
+		 * counterclockwise sense for things to work properly.  This function
+		 * computes the ordering and encodes it into the m_IndexCode member.
+		 *
+		 * Possible degeneracy of vertices is also taken into account when
+		 * computing the ordering.
+		 */
+		void ComputeVertexOrder();
 		/** \brief Calculate and store the bound of the micropoly.
 		 */
 		void CalculateBound();
@@ -826,7 +837,15 @@ class CqMicroPolygon : boost::noncopyable
 
 		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const;
+		/** \brief Cache values needed for the point in poly test.
+		 *
+		 * This must be called prior to calling fContains() on a mpg.
+		 *
+		 * \param cache - cache structure to fill.
+		 * \param points - Points from which to calculate the point in polygon
+		 *                 test coefficients.
+		 */
+		void cachePointInPolyTest(CqHitTestCache& cache, CqVector3D* points) const;
 
 	private:
 		static	CqObjectPool<CqMicroPolygon> m_thePool;
@@ -843,14 +862,14 @@ class CqMicroPolygon : boost::noncopyable
 class CqMovingMicroPolygonKey
 {
 	public:
-		CqMovingMicroPolygonKey()
-		{}
 		CqMovingMicroPolygonKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
-		{
-			Initialise( vA, vB, vC, vD );
-		}
-		~CqMovingMicroPolygonKey()
-		{}
+			: m_Point0(vA),
+			m_Point1(vB),
+			m_Point2(vC),
+			m_Point3(vD),
+			m_Bound(),
+			m_BoundReady(false)
+		{ }
 
 		/** Overridden operator new to allocate micropolys from a pool.
 		 * \todo Review: Unused parameter size
@@ -870,23 +889,13 @@ class CqMovingMicroPolygonKey
 
 	public:
 		const CqBound&	GetBound();
-		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
-
-		const bool IsDegenerate() const
-		{
-			return ( m_Point2 == m_Point3 );
-		}
 
 		CqVector3D	m_Point0;
 		CqVector3D	m_Point1;
 		CqVector3D	m_Point2;
 		CqVector3D	m_Point3;
-		CqVector3D	m_N;			///< The normal to the micropoly.
 
 	protected:
-		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
-
 		CqBound m_Bound;
 		bool	m_BoundReady;
 
@@ -913,6 +922,12 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 				delete( ( *ikey ) );
 		}
 
+		/** \brief Initialise some micropolygon member data.
+		 *
+		 * Initialise the vertex ordering based on the primary (first) key frame.
+		 */
+		virtual void Initialise();
+
 		/** Overridden operator new to avoid the pool allocator from CqMicroPolygon.
 		 */
 		void* operator new( size_t size )
@@ -930,8 +945,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 	public:
 		void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
-		void	DeleteVariables( bool all )
-		{}
 
 		// Overrides from CqMicroPolygon
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
@@ -952,7 +965,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		virtual	bool	Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof = false ) const;
 
-		virtual void CacheCocMultipliers(CqHitTestCache& cache) const;
+		virtual void CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const;
 
 		virtual void	MarkTrimmed()
 		{
@@ -962,11 +975,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		virtual bool IsMoving() const
 		{
 			return true;
-		}
-
-		virtual const bool IsDegenerate() const
-		{
-			return ( m_Keys[0]->IsDegenerate() );
 		}
 
 		virtual TqInt cKeys() const
