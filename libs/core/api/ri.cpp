@@ -2310,11 +2310,10 @@ RtVoid	RiShadingInterpolation( RtToken type )
 
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
 		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Constant;
+	else if ( strcmp( type, RI_SMOOTH ) == 0 )
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Smooth;
 	else
-		if ( strcmp( type, RI_SMOOTH ) == 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Smooth;
-		else
-			Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
 	QGetRenderContext() ->AdvanceTime();
 	EXCEPTION_CATCH_GUARD("RiShadingInterpolation")
