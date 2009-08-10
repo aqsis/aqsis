@@ -144,7 +144,6 @@ void CqMPDump::dump(int x, int y, int idx, const CqVector2D& pos)
 // Dump a micro polygon
 void CqMPDump::dump(const CqMicroPolygon& mp)
 {
-	CqVector3D v;
 	CqColor c;
 	short id = 1;
 
@@ -160,14 +159,14 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 		AQSIS_THROW_XQERROR(XqInvalidFile, EqE_System,
 				"Error writing mpdump file");
 
-	v = mp.PointA();
-	dumpVec3(v);
-	v = mp.PointB();
-	dumpVec3(v);
-	v = mp.PointC();
-	dumpVec3(v);
-	v = mp.PointD();
-	dumpVec3(v);
+	// Dump vertices in a funny circular order for backward-compatibility
+	// rather than in the usual bilinear patch type order.
+	CqVector3D P[4];
+	mp.GetVertices(P);
+	dumpVec3(P[0]);
+	dumpVec3(P[1]);
+	dumpVec3(P[3]);
+	dumpVec3(P[2]);
 	if (mp.pGrid()->pVar(EnvVars_Ci)!=NULL)
 		c = *mp.colColor();
 	else

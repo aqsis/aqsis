@@ -744,37 +744,10 @@ class CqMicroPolygon : boost::noncopyable
 		 */
 		virtual void Initialise();
 
-		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
-
-		virtual const CqVector3D& PointA() const
-		{
-			CqVector3D * pP = NULL;
-			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
-		}
-		virtual const CqVector3D& PointB() const
-		{
-			CqVector3D * pP = NULL;
-			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
-		}
-		virtual const CqVector3D& PointC() const
-		{
-			CqVector3D * pP = NULL;
-			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
-		}
-		virtual const CqVector3D& PointD() const
-		{
-			CqVector3D * pP = NULL;
-			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
-		}
-		virtual const bool IsDegenerate() const
-		{
-			return ( ( m_IndexCode & 0x8000000 ) != 0 );
-		}
-
+		/** \brief Get micropolygon vertices in the natural order.
+		 * \param P - output array for vertices.
+		 */
+		void GetVertices(CqVector3D P[4]) const;
 	protected:
 		/** \brief Cache output interpolation coefficients for constant shading
 		 * \see CacheOutputInterpCoeffs
@@ -815,21 +788,13 @@ class CqMicroPolygon : boost::noncopyable
 		static bool dofSampleInBound(const CqBound& bound, const CqHitTestCache& cache, 
 				SqSampleData const& sample);
 
-		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
-		{
-			switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
-			{
-					case 1:
-					return ( m_Index + 1 );
-					case 2:
-					return ( m_Index + m_pGrid->uGridRes() + 2 );
-					case 3:
-					return ( m_Index + m_pGrid->uGridRes() + 1 );
-					default:
-					return ( m_Index );
-			}
-		}
+		/// Used in m_IndexCode to indicate vertex degeneracy.
+		static const TqUint Degeneracy_Mask = 0x8000000;
+		/** A record of the vertex ordering for counterclockwise arrangement,
+		 * as well as any degeneracy.
+		 */
 		TqInt m_IndexCode;
+
 		CqBound	m_Bound;		///< Tight bound, not including DoF.
 
 		CqMicroPolyGridBase*	m_pGrid;		///< Pointer to the donor grid.

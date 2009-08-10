@@ -1209,11 +1209,22 @@ void CqMicroPolygon::Initialise()
 	CalculateBound();
 }
 
+void CqMicroPolygon::GetVertices(CqVector3D P[4]) const
+{
+	CqVector3D* pP;
+	m_pGrid->pVar(EnvVars_P) ->GetPointPtr(pP);
+	TqInt cu = m_pGrid->uGridRes();
+	P[0] = pP[ m_Index ];
+	P[1] = pP[ m_Index + 1 ];
+	P[2] = pP[ m_Index + cu + 1 ];
+	P[3] = pP[ m_Index + cu + 2 ];
+}
+
 void CqMicroPolygon::ComputeVertexOrder()
 {
 	// Check for degenerate case, if any of the neighbouring points are the
 	// same, shuffle them down, and duplicate the last point exactly.
-	// Degeneracy is indicated with the bit 0x8000000 in m_IndexCode.  If more
+	// Degeneracy is indicated with the bit Degeneracy_Mask in m_IndexCode.  If more
 	// that two points are coincident, we are in real trouble!
 	TqInt cu = m_pGrid->uGridRes();
 	TqInt IndexA = m_Index;
@@ -1277,13 +1288,13 @@ void CqMicroPolygon::ComputeVertexOrder()
 	if ( !fFlip )
 	{
 		m_IndexCode = ( CodeD == -1 ) ?
-		              ( ( CodeA & 0x3 ) | ( ( CodeC & 0x3 ) << 2 ) | ( ( CodeB & 0x3 ) << 4 ) | 0x8000000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeC & 0x3 ) << 2 ) | ( ( CodeB & 0x3 ) << 4 ) | Degeneracy_Mask ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeD & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeB & 0x3 ) << 6 ) );
 	}
 	else
 	{
 		m_IndexCode = ( CodeD == -1 ) ?
-		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | Degeneracy_Mask ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
 }
@@ -1382,7 +1393,7 @@ void CqMicroPolygon::cachePointInPolyTest(CqHitTestCache& cache,
 
 	// if the mpg is degenerate then we repeat edge c=>a so we still have four
 	// edges (it makes the test in fContains() simpler).
-	if(IsDegenerate())
+	if(m_IndexCode & Degeneracy_Mask)
 	{
 		for(int i=2; i<4; ++i)
 		{
@@ -1533,70 +1544,6 @@ void CqMicroPolygon::CacheOutputInterpCoeffsSmooth(SqMpgSampleInfo& cache) const
 	}
 }
 
-CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
-{
-	CqVector2D kA, kB, kC, kD;
-	CqVector2D kResult;
-	bool flip = false;
-
-	kA = vectorCast<CqVector2D>( PointA() );
-	kB = vectorCast<CqVector2D>( PointB() );
-	kC = vectorCast<CqVector2D>( PointD() );
-	kD = vectorCast<CqVector2D>( PointC() );
-
-	if(fabs(kB.x() - kA.x()) < fabs(kC.x() - kA.x()) )
-	{
-		CqVector2D temp = kC;
-		kC = kB;
-		kB = temp;
-		//flip = true;
-	}
-
-	kD += kA - kB - kC;
-	kB -= kA;
-	kC -= kA;
-
-	TqFloat fBCdet = kB.x() * kC.y() - kB.y() * kC.x();
-	TqFloat fCDdet = kC.y() * kD.x() - kC.x() * kD.y();
-
-	CqVector2D kDiff = kA - v;
-	TqFloat fABdet = kDiff.y() * kB.x() - kDiff.x() * kB.y();
-	TqFloat fADdet = kDiff.y() * kD.x() - kDiff.x() * kD.y();
-	TqFloat fA = fCDdet;
-	TqFloat fB = fADdet + fBCdet;
-	TqFloat fC = fABdet;
-
-	if ( fabs( fA ) >= 1.0e-6 )
-	{
-		// t-equation is quadratic
-		TqFloat fDiscr = sqrt( fabs( fB * fB - 4.0f * fA * fC ) );
-		kResult.y( ( -fB + fDiscr ) / ( 2.0f * fA ) );
-		if ( kResult.y() < 0.0f || kResult.y() > 1.0f )
-		{
-			kResult.y( ( -fB - fDiscr ) / ( 2.0f * fA ) );
-			if ( kResult.y() < 0.0f || kResult.y() > 1.0f )
-			{
-				// point p not inside quadrilateral, return invalid result
-				return ( CqVector2D( -1.0f, -1.0f ) );
-			}
-		}
-	}
-	else
-	{
-		// t-equation is linear
-		kResult.y( -fC / fB );
-	}
-	kResult.x( -( kDiff.x() + kResult.y() * kC.x() ) / ( kB.x() + kResult.y() * kD.x() ) );
-	if(flip)
-	{
-		TqFloat temp = kResult.x();
-		kResult.x(kResult.y());
-		kResult.y(temp);
-	}
-
-	return ( kResult );
-}
-
 inline bool CqMicroPolygon::dofSampleInBound(const CqBound& bound,
 		const CqHitTestCache& cache, SqSampleData const& sample)
 {
@@ -1669,8 +1616,6 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& s
 				strTrimSense = pattrTrimSense[ 0 ];
 			bool bOutside = strTrimSense == "outside";
 
-			CqVector2D vecUV = ReverseBilinear( vecSample );
-
 			TqFloat u, v;
 
 			pGrid() ->pVar(EnvVars_u) ->GetFloat( u, m_Index );
@@ -1689,7 +1634,7 @@ bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, SqSampleData const& s
 			pGrid() ->pVar(EnvVars_v) ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
 			CqVector2D uvD( u, v );
 
-			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
+			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, uv.x(), uv.y() );
 
 			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
 			{
