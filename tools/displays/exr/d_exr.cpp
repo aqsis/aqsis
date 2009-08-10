@@ -744,8 +744,6 @@ extern "C"
 			{
 				boost::shared_ptr<Image> image = gImages[imageName];
 				SqImageLayer& layer = image->layers()[gImageLayers[imageLayerIndex].second];
-				std::cout << "Writing to: " << imageName << " Layer: " << layer.layerName << std::endl;
-
 				image->writePixels (xmin, xmax_plusone,
 							ymin, ymax_plusone,
 							entrysize, data, gImageLayers[imageLayerIndex].second);

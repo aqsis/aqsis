@@ -457,76 +457,60 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair("a", 0);
 			}
 			if (m_modeID & DMode_RGB)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair("Ci", 0);
 				fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair("Ci", 1);
 				fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair("Ci", 2);
 			}
 			if (m_modeID & DMode_Z)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_ZName );
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair("z", 0);
 			}
 		}
 		// Otherwise we are dealing with AOV and should therefore fill in the
 		// formats according to its type.
 		else
 		{
-			// Determine the type of the AOV data being displayed.
-			TqInt type = QGetRenderContext()->OutputDataType(m_mode.c_str());
-			std::string componentNames = "";
-			switch (type)
-			{
-				case type_point:
-				case type_normal:
-				case type_vector:
-				case type_hpoint:
-					componentNames = "XYZ";
-					break;
-				case type_color:
-					componentNames = "rgb";
-					break;
-			}
-			// Now create the channels formats.
-			PtDspyDevFormat fmt;
-			TqInt i;
-			for ( i = 0; i < (TqInt) m_AOVSize; i++ )
-			{
-			  if (static_cast<TqInt>(componentNames.size()) > i )
-				{
+			// The values will go into the 'r', 'g', 'b' and 'a' channels 
+			// in order depending on the number of components in the variable type.
 
-					if (componentNames.substr(i, 1) == "r")
-						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
-					else if (componentNames.substr(i, 1) == "g")
-						fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
-					else if (componentNames.substr(i, 1) == "b")
-						fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
-					else if (componentNames.substr(i, 1) == "a")
-						fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
-					else if (componentNames.substr(i, 1) == "z")
-						fmt.name = const_cast<char*>( ddMemberData.m_ZName );
-					else if (componentNames.substr(i, 1) == "X")
-						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
-					else if (componentNames.substr(i, 1) == "Y")
-						fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
-					else if (componentNames.substr(i, 1) == "Z")
-						fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
-					else
-						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
-				}
-				else
-				{
-					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
-					fmt.name = const_cast<char*>( ddMemberData.m_RedName );
-				}
-				fmt.type = dataFormat;
-				m_AOVnames.push_back(fmt.name);
+			// All channels are the same type.
+			PtDspyDevFormat fmt;
+			fmt.type = dataFormat;
+			if(m_AOVSize > 0)
+			{
+				fmt.name = const_cast<char*>(ddMemberData.m_RedName);
 				m_formats.push_back(fmt);
+				m_bufferMap[fmt.name] = std::make_pair(m_mode, 0);
+				if(m_AOVSize > 1)
+				{
+					fmt.name = const_cast<char*>(ddMemberData.m_GreenName);
+					m_formats.push_back(fmt);
+					m_bufferMap[fmt.name] = std::make_pair(m_mode, 1);
+					if(m_AOVSize > 2)
+					{
+						fmt.name = const_cast<char*>(ddMemberData.m_BlueName);
+						m_formats.push_back(fmt);
+						m_bufferMap[fmt.name] = std::make_pair(m_mode, 2);
+						if(m_AOVSize > 3)
+						{
+							fmt.name = const_cast<char*>(ddMemberData.m_AlphaName);
+							m_formats.push_back(fmt);
+							m_bufferMap[fmt.name] = std::make_pair(m_mode, 3);
+						}
+					}
+				}
 			}
 		}
 
@@ -576,44 +560,9 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		else
 			m_valid = true;
 
-		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
-		std::vector<PtDspyDevFormat>::iterator i;
-		for (i=m_formats.begin(); i!=m_formats.end(); i++)
-		{
-			if (m_modeID & ( DMode_RGB | DMode_A | DMode_Z) )
-			{
-				if ( i->name == ddMemberData.m_RedName )
-					m_dataOffsets.push_back(Sample_Red);
-				else if ( i->name == ddMemberData.m_GreenName )
-					m_dataOffsets.push_back(Sample_Green);
-				else if ( i->name == ddMemberData.m_BlueName )
-					m_dataOffsets.push_back(Sample_Blue);
-				else if ( i->name == ddMemberData.m_AlphaName )
-					m_dataOffsets.push_back(Sample_Alpha);
-				else if ( i->name == ddMemberData.m_ZName )
-					m_dataOffsets.push_back(Sample_Depth);
-			}
-			else
-			{
-				// Scan through the generated names to find the ones specified, and use the index
-				// of the found name as an offset into the data from the dataOffset passed in originally.
-				TqInt iname;
-				for (iname = 0; iname < static_cast<TqInt>(m_AOVnames.size()); iname++)
-				{
-					if (i->name == m_AOVnames[iname])
-					{
-						m_dataOffsets.push_back(m_AOVOffset + iname );
-						break;
-					}
-				}
-				// If we got here, and didn't find it, add 0 as the offset, and issue an error.
-				if (iname == static_cast<TqInt>(m_AOVnames.size()))
-				{
-					Aqsis::log() << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
-					m_dataOffsets.push_back(m_AOVOffset);
-				}
-			}
-		}
+		// The formats in m_formats should how have been modified to the appropriate
+		// order, we use the name and the m_bufferMap to map back to the data in the
+		// ChannelBuffer when passing the data to the display.
 
 		// Determine how big each pixel is by summing the format type sizes.
 		m_elementSize = 0;
@@ -1046,19 +995,31 @@ void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const Iq
 	// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 	unsigned char* pdata = m_DataBucket;
 
+	std::vector<std::pair<TqInt, TqInt> > offsets;
+	std::vector<PtDspyDevFormat>::iterator iformat;
+	// Get and cache the offsets, so that the lookup isn't done for every pixel.
+	for (iformat = m_formats.begin(); iformat != m_formats.end(); ++iformat)
+	{
+		std::string bufferChannelName = m_bufferMap[iformat->name].first;
+		TqInt offset = m_bufferMap[iformat->name].second;
+		offsets.push_back(std::make_pair(pBuffer->getChannelIndex(bufferChannelName), offset));
+	}
+
 	for ( TqInt y = 0, endy = pBuffer->height(); y < endy; ++y )
 	{
 		for ( TqInt x = 0, endx = pBuffer->width(); x < endx; ++x )
 		{
-			TqInt index = 0;
-			std::vector<PtDspyDevFormat>::iterator iformat;
 			double s = random.RandomFloat();
-			for (iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
+			TqInt index = 0;
+			for (iformat = m_formats.begin(); iformat != m_formats.end(); ++iformat, ++index)
 			{
+				// NOTE: This needs to be optimised, the lookup is expensive.
+				std::string bufferChannelName = m_bufferMap[iformat->name].first;
+				TqInt offset = m_bufferMap[iformat->name].second;
 				double value = 0.0;
 				try
 				{
-					value = (*pBuffer)(x, y, pBuffer->getChannelIndex(iformat->name))[0];
+					value = (*pBuffer)(x, y, offsets[index].first)[offsets[index].second];
 				}
 				catch(std::string v)
 				{
@@ -1114,7 +1075,6 @@ void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const Iq
 						pdata += sizeof(PtDspySigned8);
 						break;
 				}
-				index++;
 			}
 		}
 	}

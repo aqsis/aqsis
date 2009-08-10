@@ -386,12 +386,8 @@ void CqBucketProcessor::FilterBucket()
 	// Setup the channel buffer ready to accept the output data.
 	// First fill in the default display value r, g, b, a, and z.
 	m_channelBuffer.clearChannels();
-	channelMap[m_channelBuffer.addChannel("r", 1)] = CqRenderer::SqOutputDataEntry(Sample_Red, 1, type_float);
-	channelMap[m_channelBuffer.addChannel("g", 1)] = CqRenderer::SqOutputDataEntry(Sample_Green, 1, type_float);
-	channelMap[m_channelBuffer.addChannel("b", 1)] = CqRenderer::SqOutputDataEntry(Sample_Blue, 1, type_float);
-	channelMap[m_channelBuffer.addChannel("or", 1)] = CqRenderer::SqOutputDataEntry(Sample_ORed, 1, type_float);
-	channelMap[m_channelBuffer.addChannel("og", 1)] = CqRenderer::SqOutputDataEntry(Sample_OGreen, 1, type_float);
-	channelMap[m_channelBuffer.addChannel("ob", 1)] = CqRenderer::SqOutputDataEntry(Sample_OBlue, 1, type_float);
+	channelMap[m_channelBuffer.addChannel("Ci", 3)] = CqRenderer::SqOutputDataEntry(Sample_Red, 3, type_float);
+	channelMap[m_channelBuffer.addChannel("Oi", 3)] = CqRenderer::SqOutputDataEntry(Sample_ORed, 3, type_float);
 	channelMap[m_channelBuffer.addChannel("a", 1)] = CqRenderer::SqOutputDataEntry(Sample_Alpha, 1, type_float);
 	channelMap[m_channelBuffer.addChannel("z", 1)] = CqRenderer::SqOutputDataEntry(Sample_Depth, 1, type_float);
 	channelMap[m_channelBuffer.addChannel("coverage", 1)] = CqRenderer::SqOutputDataEntry(Sample_Coverage, 1, type_float);
@@ -686,12 +682,8 @@ void CqBucketProcessor::FilterBucket()
 	endx = DisplayRegion().width();
 
 	// Set the coverage and alpha values for the pixel.
-	TqInt redIndex = m_channelBuffer.getChannelIndex("r");
-	TqInt greenIndex = m_channelBuffer.getChannelIndex("g");
-	TqInt blueIndex = m_channelBuffer.getChannelIndex("b");
-	TqInt redOIndex = m_channelBuffer.getChannelIndex("or");
-	TqInt greenOIndex = m_channelBuffer.getChannelIndex("og");
-	TqInt blueOIndex = m_channelBuffer.getChannelIndex("ob");
+	TqInt CiIndex = m_channelBuffer.getChannelIndex("Ci");
+	TqInt OiIndex = m_channelBuffer.getChannelIndex("Oi");
 	TqInt alphaIndex = m_channelBuffer.getChannelIndex("a");
 	TqInt coverageIndex = m_channelBuffer.getChannelIndex("coverage");
 	for ( y = 0; y < endy; y++ )
@@ -701,7 +693,7 @@ void CqBucketProcessor::FilterBucket()
 			TqFloat coverage = aCoverages[ i++ ];
 
 			// Calculate the alpha as the combination of the opacity and the coverage.
-			TqFloat a = ( m_channelBuffer(x, y, redOIndex)[0] + m_channelBuffer(x, y, greenOIndex)[0] + m_channelBuffer(x, y, blueOIndex)[0] ) / 3.0f;
+			TqFloat a = ( m_channelBuffer(x, y, OiIndex)[0] + m_channelBuffer(x, y, OiIndex)[1] + m_channelBuffer(x, y, OiIndex)[2] ) / 3.0f;
 			m_channelBuffer(x, y, alphaIndex)[0] = a * coverage;
 			m_channelBuffer(x, y, coverageIndex)[0] = coverage;
 		}
@@ -728,13 +720,13 @@ void CqBucketProcessor::FilterBucket()
 				// == 1 after a call to imager shader in 3delight and BMRT.
 				// Therefore I did not ask for alpha value and set directly the pCols[i]
 				// with imager value. see imagers.cpp
-				m_channelBuffer(x, y, redIndex)[0] = imager.r();
-				m_channelBuffer(x, y, greenIndex)[0] = imager.g();
-				m_channelBuffer(x, y, blueIndex)[0] = imager.b();
+				m_channelBuffer(x, y, CiIndex)[0] = imager.r();
+				m_channelBuffer(x, y, CiIndex)[1] = imager.g();
+				m_channelBuffer(x, y, CiIndex)[2] = imager.b();
 				imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
-				m_channelBuffer(x, y, redOIndex)[0] = imager.r();
-				m_channelBuffer(x, y, greenOIndex)[0] = imager.g();
-				m_channelBuffer(x, y, blueOIndex)[0] = imager.b();
+				m_channelBuffer(x, y, OiIndex)[0] = imager.r();
+				m_channelBuffer(x, y, OiIndex)[1] = imager.g();
+				m_channelBuffer(x, y, OiIndex)[2] = imager.b();
 				TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
 				m_channelBuffer(x, y, alphaIndex)[0] = a;
 			}
@@ -777,9 +769,7 @@ void CqBucketProcessor::ExposeBucket()
 			TqFloat endx, endy;
 			endy = DisplayRegion().height();
 			endx = DisplayRegion().width();
-			TqInt r_index = m_channelBuffer.getChannelIndex("r");
-			TqInt g_index = m_channelBuffer.getChannelIndex("g");
-			TqInt b_index = m_channelBuffer.getChannelIndex("b");
+			TqInt Ci_index = m_channelBuffer.getChannelIndex("Ci");
 
 			TqInt x, y;
 			for ( y = 0; y < endy; y++ )
@@ -789,16 +779,16 @@ void CqBucketProcessor::ExposeBucket()
 					// color=(color*gain)^1/gamma
 					if ( exposegain != 1.0 )
 					{
-						m_channelBuffer(x, y, r_index)[0] *= exposegain;
-						m_channelBuffer(x, y, g_index)[0] *= exposegain;
-						m_channelBuffer(x, y, b_index)[0] *= exposegain;
+						m_channelBuffer(x, y, Ci_index)[0] *= exposegain;
+						m_channelBuffer(x, y, Ci_index)[1] *= exposegain;
+						m_channelBuffer(x, y, Ci_index)[2] *= exposegain;
 					}
 
 					if ( exposegamma != 1.0 )
 					{
-						m_channelBuffer(x, y, r_index)[0] = pow(m_channelBuffer(x, y, r_index)[0], oneovergamma);
-						m_channelBuffer(x, y, g_index)[0] = pow(m_channelBuffer(x, y, g_index)[0], oneovergamma);
-						m_channelBuffer(x, y, b_index)[0] = pow(m_channelBuffer(x, y, b_index)[0], oneovergamma);
+						m_channelBuffer(x, y, Ci_index)[0] = pow(m_channelBuffer(x, y, Ci_index)[0], oneovergamma);
+						m_channelBuffer(x, y, Ci_index)[1] = pow(m_channelBuffer(x, y, Ci_index)[1], oneovergamma);
+						m_channelBuffer(x, y, Ci_index)[2] = pow(m_channelBuffer(x, y, Ci_index)[2], oneovergamma);
 					}
 				}
 			}

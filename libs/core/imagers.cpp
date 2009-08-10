@@ -108,12 +108,8 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 
 	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv.get() );
 
-	TqUint redIndex = buffer->getChannelIndex("r");
-	TqUint greenIndex = buffer->getChannelIndex("g");
-	TqUint blueIndex = buffer->getChannelIndex("b");
-	TqUint redOIndex = buffer->getChannelIndex("or");
-	TqUint greenOIndex = buffer->getChannelIndex("og");
-	TqUint blueOIndex = buffer->getChannelIndex("ob");
+	TqUint CiIndex = buffer->getChannelIndex("Ci");
+	TqUint OiIndex = buffer->getChannelIndex("Oi");
 	TqUint coverageIndex = buffer->getChannelIndex("coverage");
 	for ( j = 0; j < vGridRes+1; j++ )
 	{
@@ -121,8 +117,8 @@ void CqImagersource::Initialise( const CqRegion& DRegion, IqChannelBuffer* buffe
 		{
 			TqInt off = j * ( uGridRes + 1 ) + i;
 			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
-			Ci() ->SetColor( CqColor((*buffer)(i, j, redIndex)[0], (*buffer)(i, j, greenIndex)[0], (*buffer)(i, j, blueIndex)[0]), off );
-			CqColor opa((*buffer)(i, j, redOIndex)[0], (*buffer)(i, j, greenOIndex)[0], (*buffer)(i, j, blueOIndex)[0]);
+			Ci() ->SetColor( CqColor((*buffer)(i, j, CiIndex)[0], (*buffer)(i, j, CiIndex)[1], (*buffer)(i, j, CiIndex)[2]), off );
+			CqColor opa((*buffer)(i, j, OiIndex)[0], (*buffer)(i, j, OiIndex)[1], (*buffer)(i, j, OiIndex)[2]);
 			Oi() ->SetColor( opa, off );
 			TqFloat avopa = ( opa.r() + opa.g() + opa.b() ) /3.0f;
 			alpha() ->SetFloat( (*buffer)(i, j, coverageIndex)[0] * avopa, off );

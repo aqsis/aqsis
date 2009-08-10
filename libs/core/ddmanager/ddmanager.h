@@ -161,8 +161,7 @@ class CqDisplayRequest
 		PtDspyImageHandle m_imageHandle;
 		PtFlagStuff		m_flags;
 		std::vector<PtDspyDevFormat> m_formats;
-		std::vector<TqInt>			m_dataOffsets;
-		std::vector<std::string>	m_AOVnames;
+		std::map<std::string, std::pair<std::string, TqInt> > m_bufferMap;
 		TqInt			m_elementSize;
 		TqFloat			m_QuantizeZeroVal;
 		TqFloat			m_QuantizeOneVal;
