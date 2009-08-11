@@ -637,55 +637,31 @@ extern "C"
 
 				for (int i = 0; i < formatCount; ++i)
 				{
-					if      (!strcmp (format[i].name, "r"))
+					std::string chanName("");
+					char* channelNameParameter = 0;
+					std::stringstream chanParameterName;
+					chanParameterName << "channelname" << i;
+					DspyFindStringInParamList(chanParameterName.str().c_str(), &channelNameParameter, paramCount, parameters);
+					if(channelNameParameter)
+						chanName = channelNameParameter;
+
+					std::string formatName(format[i].name);
+					if(formatName.size() == 1 &&
+						formatName.find_first_of("rgbaz") != std::string::npos)
 					{
 						SqImageLayerChannel chan;
 						chan.dataOffset = pixelSize;
 						chan.channel = Channel(HALF);
 						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-						chan.channelName = "R";
+						if(!chanName.empty())
+							chan.channelName = chanName;
+						else
+						{
+							std::transform(formatName.begin(), formatName.end(), formatName.begin(), toupper);
+							chan.channelName = formatName;
+						}
 						layer.channelList.push_back(chan);
 						layer.channelLuts.push_back( rgbLUT );
-					}
-					else if (!strcmp (format[i].name, "g"))
-					{
-						SqImageLayerChannel chan;
-						chan.dataOffset = pixelSize;
-						chan.channel = Channel(HALF);
-						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-						chan.channelName = "G";
-						layer.channelList.push_back(chan);
-						layer.channelLuts.push_back( rgbLUT );
-					}
-					else if (!strcmp (format[i].name, "b"))
-					{
-						SqImageLayerChannel chan;
-						chan.dataOffset = pixelSize;
-						chan.channel = Channel(HALF);
-						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-						chan.channelName = "B";
-						layer.channelList.push_back(chan);
-						layer.channelLuts.push_back( rgbLUT );
-					}
-					else if (!strcmp (format[i].name, "a"))
-					{
-						SqImageLayerChannel chan;
-						chan.dataOffset = pixelSize;
-						chan.channel = Channel(HALF);
-						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-						chan.channelName = "A";
-						layer.channelList.push_back(chan);
-						layer.channelLuts.push_back( otherLUT );
-					}
-					else if (!strcmp (format[i].name, "z"))
-					{
-						SqImageLayerChannel chan;
-						chan.dataOffset = pixelSize;
-						chan.channel = Channel(FLOAT);
-						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-						chan.channelName = "Z";
-						layer.channelList.push_back(chan);
-						layer.channelLuts.push_back( otherLUT );
 					}
 					else
 					{
@@ -695,13 +671,16 @@ extern "C"
 						// another channel's name.
 						//
 
-						//if (layer.channelList.find(layerName.str()+"."+format[i].name) != layer.channelOffsets.end())
+						//if (layer.channelList.find(format[i].name) != layer.channelOffsets.end())
 						{
 							SqImageLayerChannel chan;
 							chan.dataOffset = pixelSize;
 							chan.channel = Channel(pixelType);
 							chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
-							chan.channelName = format[i].name;
+							if(!chanName.empty())
+								chan.channelName = chanName;
+							else
+								chan.channelName = format[i].name;
 							layer.channelList.push_back(chan);
 							layer.channelLuts.push_back( otherLUT );
 						}
