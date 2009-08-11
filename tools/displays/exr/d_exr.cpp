@@ -123,12 +123,15 @@
 #	pragma warning(pop)
 #endif
 
-#include <cstring>
 #include <string>
 #include <map>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <aqsis/ri/ndspy.h>
+
+#include <cstring>
+#include <cctype>
 
 #define DspyError(a,b,c) printf(b,c)
 
@@ -657,7 +660,9 @@ extern "C"
 							chan.channelName = chanName;
 						else
 						{
-							std::transform(formatName.begin(), formatName.end(), formatName.begin(), toupper);
+							/// \note: The horrid cast on toupper is to keep gcc3.0 happy
+							///  http://lists.debian.org/debian-gcc/2002/04/msg00092.html
+							std::transform(formatName.begin(), formatName.end(), formatName.begin(), (int(*)(int))std::toupper);
 							chan.channelName = formatName;
 						}
 						layer.channelList.push_back(chan);
