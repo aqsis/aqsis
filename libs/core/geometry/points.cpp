@@ -30,6 +30,7 @@
  */
 
 #include	<cmath>
+#include	<cfloat>
 
 #include	"points.h"
 #include	"imagebuffer.h"
@@ -42,6 +43,38 @@ CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_the
 CqObjectPool<CqMicroPolygonPoints>	CqMicroPolygonPoints::m_thePool;
 CqObjectPool<CqMicroPolygonMotionPoints>	CqMicroPolygonMotionPoints::m_thePool;
 
+class CqPointsKDTreeData::CqPointsKDTreeDataComparator
+{
+	public:
+		CqPointsKDTreeDataComparator(const CqPoints* pPoints, TqInt dimension)
+			: m_P(pPoints->pPoints()->P()->pValue()),
+			m_Dim( dimension )
+		{ }
+
+		bool operator()(TqInt a, TqInt b)
+		{
+			return m_P[a][m_Dim] < m_P[b][m_Dim];
+		}
+
+	private:
+		const CqVector4D* m_P;
+		TqInt		m_Dim;
+};
+
+void CqPointsKDTreeData::PartitionElements(std::vector<TqInt>& leavesIn,
+		TqInt dimension, std::vector<TqInt>& out1, std::vector<TqInt>& out2)
+{
+	std::vector<TqInt>::iterator medianPos = leavesIn.begin() + leavesIn.size()/2;
+	// Partition the values in leavesIn about the median position along the
+	// axis specified by dimension.  The nth_element algorithm runs in linear
+	// time, so is asymptotically better than doing this using a sort.
+	std::nth_element(leavesIn.begin(), medianPos, leavesIn.end(),
+					 CqPointsKDTreeDataComparator(m_pPointsSurface, dimension));
+	// All the points less than the point at *medianPos are in out1.  The other
+	// points go into out2.
+	out1.assign(leavesIn.begin(), medianPos);
+	out2.assign(medianPos, leavesIn.end());
+}
 
 void CqPointsKDTreeData::SetpPoints( const CqPoints* pPoints )
 {
@@ -50,11 +83,6 @@ void CqPointsKDTreeData::SetpPoints( const CqPoints* pPoints )
 
 void CqPointsKDTreeData::FreePoints()
 {}
-
-bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt b)
-{
-	return( ( m_pPointsSurface->pPoints()->P()->pValue( a )[0][m_Dim] ) < ( m_pPointsSurface->pPoints()->P()->pValue( b )[0][m_Dim] ) );
-}
 
 
 //---------------------------------------------------------------------

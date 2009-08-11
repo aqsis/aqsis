@@ -57,19 +57,6 @@ class CqBucketProcessor;
 
 class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 {
-		class CqPointsKDTreeDataComparator
-		{
-			public:
-				CqPointsKDTreeDataComparator(const CqPoints* pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
-				{}
-
-				bool operator()(TqInt a, TqInt b);
-
-			private:
-				const CqPoints*	m_pPointsSurface;
-				TqInt		m_Dim;
-		};
-
 	public:
 		CqPointsKDTreeData() : m_pPointsSurface( NULL )
 		{}
@@ -77,10 +64,9 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		{
 		};
 
-		virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
-		{
-			std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPointsSurface, dimension) );
-		}
+		virtual void PartitionElements(std::vector<TqInt>& leavesIn,
+				TqInt dimension, std::vector<TqInt>& out1, std::vector<TqInt>& out2);
+
 		virtual TqInt Dimensions() const
 		{
 			return(3);
@@ -90,6 +76,8 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		void	FreePoints();
 
 	private:
+		class CqPointsKDTreeDataComparator;
+
 		const CqPoints*	m_pPointsSurface;
 };
 

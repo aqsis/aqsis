@@ -49,7 +49,8 @@ struct IqKDTreeData
 
 	/** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
 	 */
-	virtual void SortElements(std::vector<T>& aLeaves, TqInt dimension) = 0;
+	virtual void PartitionElements(std::vector<T>& leavesIn, TqInt dimension,
+								   std::vector<T>& out1, std::vector<T>& out2) = 0;
 	/** Return the number of dimensions in the tree data.
 	 */
 	virtual TqInt Dimensions() const = 0;
@@ -75,12 +76,8 @@ class CqKDTree
 
 		void	Subdivide( CqKDTree<T>& side1, CqKDTree<T>& side2 )
 		{
-			m_pDataInterface->SortElements( m_aLeaves, m_Dim );
-
-			TqInt median = static_cast<TqInt>( aLeaves().size() / 2.0f );
-
-			side1.aLeaves().assign( aLeaves().begin(), aLeaves().begin() + median );
-			side2.aLeaves().assign( aLeaves().begin() + median, aLeaves().end() );
+			m_pDataInterface->PartitionElements(m_aLeaves, m_Dim,
+					side1.aLeaves(), side2.aLeaves());
 
 			side1.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
 			side2.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
