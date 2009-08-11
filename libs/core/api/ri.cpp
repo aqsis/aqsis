@@ -1392,6 +1392,7 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 	TqInt index = 0;
 	TqInt dataOffset = 0;
 	TqInt dataSize = 0;
+	std::string dataName = mode;
 	if ( strncmp( mode, RI_RGB, strlen(RI_RGB) ) == 0 )
 	{
 		eValue |= DMode_RGB;
@@ -1415,14 +1416,16 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 	if(strncmp(&mode[index], "depth", strlen("depth") ) == 0 )
 	{
 		dataSize = 1;
+		/// \todo This shouldn't be a constant.
 		dataOffset = 6;
 	}
-
 	// If none of the standard "rgbaz" strings match, then it is an alternative 'arbitrary output variable'
 	else if( eValue == 0 )
 	{
 		dataOffset = QGetRenderContext()->RegisterOutputData( mode );
 		dataSize = QGetRenderContext()->OutputDataSamples( mode );
+		CqPrimvarToken tok = QGetRenderContext()->tokenDict().parseAndLookup(mode);
+		dataName = tok.name();
 	}
 
 	// Check if the display request is valid.
@@ -1447,7 +1450,7 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
 		}
 		// Add a display driver to the list of requested drivers.
-		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
+		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), dataName.c_str(), eValue, dataOffset, dataSize, mapOfArguments );
 	}
 	EXCEPTION_CATCH_GUARD("RiDisplayV")
 	return ;

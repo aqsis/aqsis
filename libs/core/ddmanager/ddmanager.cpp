@@ -423,33 +423,34 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 
 	if ( NULL != m_OpenMethod )
 	{
-		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
-		// of the RiQuantize option.
-		const TqFloat* pQuant = 0;
-		if (!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
-		{
-			if (m_modeID & DMode_Z)
-				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
-			else
-				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
-			if ( pQuant && !m_QuantizeSpecified)
-			{
-				m_QuantizeOneVal = pQuant[0];
-				m_QuantizeMinVal = pQuant[1];
-				m_QuantizeMaxVal = pQuant[2];
-				m_QuantizeSpecified = true;
-			}
-
-			if ( pQuant && !m_QuantizeDitherSpecified)
-			{
-				m_QuantizeDitherVal = pQuant[3];
-				m_QuantizeDitherSpecified = true;
-			}
-		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
 		TqInt dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 		if (m_modeID & ( DMode_RGB | DMode_A | DMode_Z) )
 		{
+			// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
+			// of the RiQuantize option.
+			const TqFloat* pQuant = 0;
+			if (!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
+			{
+				if (m_modeID & DMode_Z)
+					pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
+				else
+					pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
+				if ( pQuant && !m_QuantizeSpecified)
+				{
+					m_QuantizeOneVal = pQuant[0];
+					m_QuantizeMinVal = pQuant[1];
+					m_QuantizeMaxVal = pQuant[2];
+					m_QuantizeSpecified = true;
+				}
+
+				if ( pQuant && !m_QuantizeDitherSpecified)
+				{
+					m_QuantizeDitherVal = pQuant[3];
+					m_QuantizeDitherSpecified = true;
+				}
+			}
+
 			PtDspyDevFormat fmt;
 
 			fmt.type = dataFormat;
@@ -482,6 +483,38 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		// formats according to its type.
 		else
 		{
+			// If the quantization options haven't been set in the RiDisplay call, check
+			// for a matching Quantize request, otherwise they should default to 0.0f
+			// for floating point output.
+			if (!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
+			{
+				const TqFloat* pQuant = 0;
+				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", m_mode.c_str() );
+				if ( pQuant && !m_QuantizeSpecified)
+				{
+					m_QuantizeOneVal = pQuant[0];
+					m_QuantizeMinVal = pQuant[1];
+					m_QuantizeMaxVal = pQuant[2];
+					m_QuantizeSpecified = true;
+				}
+				else if( !m_QuantizeSpecified)
+				{
+					m_QuantizeOneVal = 
+					m_QuantizeMinVal = 
+					m_QuantizeMaxVal = 0.0f;
+				}
+
+				if ( pQuant && !m_QuantizeDitherSpecified)
+				{
+					m_QuantizeDitherVal = pQuant[3];
+					m_QuantizeDitherSpecified = true;
+				}
+				else if(!m_QuantizeDitherSpecified)
+				{
+					m_QuantizeDitherVal = 0.0f;
+				}
+			}
+
 			// The values will go into the 'r', 'g', 'b' and 'a' channels 
 			// in order depending on the number of components in the variable type.
 
