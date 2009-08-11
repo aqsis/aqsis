@@ -11,6 +11,7 @@ if(WIN32)
 		# TODO: Refactor the blobby content examples to allow distribution.  For
 		# now we exclude them with a pattern.
 		PATTERN "features/blobby" EXCLUDE
+		PATTERN "features/pointcloud" EXCLUDE
 		PATTERN "*.sh" EXCLUDE)
 else()
 	install(DIRECTORY features procedurals scenes
@@ -19,6 +20,7 @@ else()
 		# TODO: Refactor the blobby content examples to allow distribution.  For
 		# now we exclude them with a pattern.
 		PATTERN "features/blobby" EXCLUDE
+		PATTERN "features/pointcloud" EXCLUDE
 		PATTERN "*.bat" EXCLUDE)
 endif()
 

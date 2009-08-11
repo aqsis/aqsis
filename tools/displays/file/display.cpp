@@ -110,7 +110,7 @@ struct SqDisplayInstance
 			m_format(PkDspyUnsigned8),
 			m_entrySize(0),
 			m_lineLength(0),
-			m_compression(COMPRESSION_NONE), m_quality(90),
+			m_compression(COMPRESSION_LZW), m_quality(90),
 			m_hostname(),
 			m_RenderWholeFrame(false),
 			m_imageType(Type_File),
@@ -698,11 +698,11 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				pImage->m_compression = COMPRESSION_PACKBITS;
 		}
 		
-		// Check if the requested compression format is available in libtiff, if not resort to "none"
+		// Check if the requested compression format is available in libtiff, if not resort to "lzw"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
 		{
 			/* Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl; */
-			pImage->m_compression = COMPRESSION_NONE;
+			pImage->m_compression = COMPRESSION_LZW;
 		}
 
 		int quality;
