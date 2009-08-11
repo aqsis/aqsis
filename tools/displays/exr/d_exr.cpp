@@ -167,7 +167,7 @@ struct SqImageLayer
 	LayerChannelList	channelList;
 	LayerChannelLuts	channelLuts;
 };
-typedef vector<SqImageLayer> LayerList;
+typedef std::map<std::string, SqImageLayer> LayerList;
 
 
 #include "dspyhlpr.h"
@@ -189,7 +189,7 @@ class Image
 		                                 int yMin, int yMaxPlusone,
 		                                 int entrySize,
 		                                 const unsigned char *data,
-										 int layerIndex);
+										 std::string layerName);
 		void				addLayer(SqImageLayer& layer);
 		void				open();
 	private:
@@ -210,7 +210,7 @@ class Image
 typedef map<string, boost::shared_ptr<Image> > ImageMap;
 ImageMap gImages;
 
-typedef pair<string, size_t>	ImageLayerEntry;
+typedef pair<std::string, std::string>	ImageLayerEntry;
 typedef vector<ImageLayerEntry> ImageLayerList;
 ImageLayerList	gImageLayers;
 
@@ -254,7 +254,7 @@ void Image::addLayer(SqImageLayer& layer)
 				break;
 		}
 	}
-	_layers.push_back(layer);
+	_layers[layer.layerName] = layer;
 }
 
 const Header &Image::header () const
@@ -292,9 +292,9 @@ void Image::open()
 
 	for(LayerList::iterator layer = _layers.begin(), layerEnd = _layers.end(); layer != layerEnd; ++layer)
 	{
-		for(LayerChannelList::iterator chan = layer->channelList.begin(), chanEnd = layer->channelList.end(); chan != chanEnd; ++chan)
+		for(LayerChannelList::iterator chan = layer->second.channelList.begin(), chanEnd = layer->second.channelList.end(); chan != chanEnd; ++chan)
 		{
-			fb.insert((layer->layerName+"."+chan->channelName).c_str(),
+			fb.insert((layer->second.layerName+"."+chan->channelName).c_str(),
 				Slice(chan->channel.type,
 				base + chan->bufferOffset,
 				_bufferPixelSize,
@@ -313,7 +313,7 @@ Image::writePixels (int xMin, int xMaxPlusone,
                     int yMin, int yMaxPlusone,
                     int entrySize,
                     const unsigned char *data,
-					int layerIndex)
+					std::string layerName)
 {
 	// If the image isn't open yet, open it now, the
 	// channel setup must be complete by the time the
@@ -326,6 +326,7 @@ Image::writePixels (int xMin, int xMaxPlusone,
 	//
 
 	assert (yMin == yMaxPlusone - 1);
+
 
 	const ChannelList &channels = _file->header().channels();
 	int      numPixels = xMaxPlusone - xMin;
@@ -349,7 +350,7 @@ Image::writePixels (int xMin, int xMaxPlusone,
 	toBase = &(_scanlines[yMin][0]) + _bufferPixelSize * xMin;
 	toInc = _bufferPixelSize;
 
-	for(LayerChannelList::iterator i = layers()[layerIndex].channelList.begin(), e = layers()[layerIndex].channelList.end(); i != e; ++i)
+	for(LayerChannelList::iterator i = layers()[layerName].channelList.begin(), e = layers()[layerName].channelList.end(); i != e; ++i)
 	{
 		const unsigned char *from = data + i->dataOffset;
 		const unsigned char *end  = from + numPixels * entrySize;
@@ -360,7 +361,7 @@ Image::writePixels (int xMin, int xMaxPlusone,
 		{
 				case HALF:
 				{
-					halfFunction <half> &lut = *layers()[layerIndex].channelLuts[j];
+					halfFunction <half> &lut = *layers()[layerName].channelLuts[j];
 
 					while (from < end)
 					{
@@ -453,6 +454,7 @@ extern "C"
 			if(gImages.find(filename) != gImages.end())
 			{
 				image = gImages.find(filename);
+				flagstuff->flags |= PkDspyFlagsWantsScanLineOrder;
 			}
 			else
 			{
@@ -713,7 +715,7 @@ extern "C"
 			// Add our layer to the image.
 			gImages[filename]->addLayer(layer);
 			// Setup a new image layer entry for this layer, and pass the index back.
-			gImageLayers.push_back(std::make_pair(filename, gImages[filename]->layers().size()-1));
+			gImageLayers.push_back(std::make_pair(filename, layer.layerName));
 			*pvImage = (PtDspyImageHandle) (gImageLayers.size()-1);
 
 		}
@@ -764,7 +766,15 @@ extern "C"
 	{
 		try
 		{
-			//delete (Image *) pvImage;
+			size_t imageLayerIndex = reinterpret_cast<size_t>(pvImage);
+			std::string imageName = gImageLayers[imageLayerIndex].first;
+			if(gImages.find(imageName) != gImages.end())
+			{
+				boost::shared_ptr<Image> image = gImages[imageName];
+				image->layers().erase(gImageLayers[imageLayerIndex].second);
+				if(image->layers().size() == 0)
+					gImages.erase(imageName);
+			}
 		}
 		catch (const exception &e)
 		{
