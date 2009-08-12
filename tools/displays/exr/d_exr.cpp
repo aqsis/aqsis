@@ -597,6 +597,9 @@ extern "C"
 								   "Invalid exrcompression \"" << comp << "\" "
 								   "for image file " << filename << ".");
 					}
+
+					else
+						header.compression() = ZIP_COMPRESSION;
 				}
 				Image *newImage = new Image (filename, header);
 				gImages[filename] = boost::shared_ptr<Image>(newImage);

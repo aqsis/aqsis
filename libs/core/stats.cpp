@@ -563,7 +563,7 @@ void CqStats::PrintInfo() const
 	Aqsis::log() << info << "		Gain: " << gain << std::endl;
 	Aqsis::log() << info << "		Gamma: " << gamma << std::endl;
 	Aqsis::log() << info << "Shading:" << std::endl;
-	Aqsis::log() << info << "	Bucket size: [" << bX << " " << bY << "]" << std::endl;
+	Aqsis::log() << info << "	Bucket size: " << bX << " " << bY << std::endl;
 	Aqsis::log() << info << "	Gridsize: " << gs << std::endl;
 	Aqsis::log() << info << "Anti-aliasing settings: " << std::endl;
 	Aqsis::log() << info << "	PixelSamples: " << psX << " " << psY << std::endl;
