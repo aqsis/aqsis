@@ -1,14 +1,15 @@
 ##RenderMan RIB-Structure 1.0
 #version 3.03
 
+Option "limits" "bucketsize" [32 32]
 Option "searchpath" "shader" ["../../../shaders/light:../../../shaders/displacement:../../../shaders/surface:&"]
 Option "Render" "integer multipass" [1]
 
 Hider "hidden" "depthfilter" "midpoint"
 
-Display "autoshadow.tif" "file" "rgba" "string compression" "lzw"
+Display "autoshadow.tif" "file" "rgba"
 Display "+autoshadow.tif" "framebuffer" "rgb"
-Format 400 300 1
+Format 480 360 1
 
 PixelFilter "gaussian" 2 2
 PixelSamples 2 2
@@ -25,7 +26,7 @@ Declare "blur" "uniform float"
 WorldBegin
   LightSource "ambientlight" 0 "intensity" [0.2]
   AttributeBegin
-    Attribute "autoshadows" "string shadowmapname" ["autoshadow.shad"] "integer res" [300]
+    Attribute "autoshadows" "string shadowmapname" ["autoshadow.shad"] "integer res" [600]
     Translate 5 5 -5
     Rotate -45 0.0 1.0 0.0
     Rotate 35 1.0 0.0 0.0

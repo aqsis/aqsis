@@ -21,6 +21,10 @@ else()
 		# now we exclude them with a pattern.
 		PATTERN "features/blobby" EXCLUDE
 		PATTERN "features/pointcloud" EXCLUDE
-		PATTERN "*.bat" EXCLUDE)
+		PATTERN "*.bat" EXCLUDE
+		PATTERN "*.sh"
+		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+				GROUP_EXECUTE GROUP_READ
+				WORLD_EXECUTE WORLD_READ)
 endif()
 

@@ -1,8 +1,9 @@
 Orientation "lh"
-Format 320 240 1
+Format 480 360 1
 Option "searchpath" "shader" ["../../../shaders/surface:../../../shaders/imager:&"]
 LightSource "ambientlight" 1 
 Declare "pass" "string"
+Option "limits" "bucketsize" [32 32]
 Option "user" "pass" "bake"		# create 'sphere.bake.bake'
 
 Display "bakesphere.tif" "file" "rgba"

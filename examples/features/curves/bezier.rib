@@ -6,7 +6,8 @@ version 3.03
 FrameBegin 1
 
    #Setup Display
-   Display "bezier.tif" "file" "rgba" "string compression" "lzw"
+   Option "limits" "bucketsize" [32 32]
+   Display "bezier.tif" "file" "rgba"
    Display "+bezier.tif" "framebuffer" "rgb"
    Format 480 360 1
    PixelSamples 2 2

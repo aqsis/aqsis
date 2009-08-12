@@ -6,7 +6,8 @@ version 3.03
 FrameBegin 1
 
    #Setup Display
-   Display "singlepolygon.tif" "file" "rgba" "string compression" "lzw"
+   Option "limits" "bucketsize" [32 32]
+   Display "singlepolygon.tif" "file" "rgba"
    Display "+singlepolygon.tif" "framebuffer" "rgb"
    Format 480 360 1
 

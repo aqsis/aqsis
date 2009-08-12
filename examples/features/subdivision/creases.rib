@@ -1,5 +1,7 @@
-Format 400 300 1
-Display "creases.tif" "file" "rgba" "string compression" "lzw"
+Option "limits" "bucketsize" [32 32]
+
+Format 480 360 1
+Display "creases.tif" "file" "rgba"
 Display "+creases.tif" "framebuffer" "rgb"
 
 Projection "perspective" "fov" 50.000000

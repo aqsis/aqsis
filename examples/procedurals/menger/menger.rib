@@ -1,7 +1,9 @@
-Display "menger.tif" "file" "rgb" "compression" "lzw"
+Option "limits" "bucketsize" [32 32]
+
+Display "menger.tif" "file" "rgb"
 Display "+menger.tif" "framebuffer" "rgb"
 
-Format 512 512 1
+Format 400 400 1
 
 Projection "perspective" "fov" 45
 Translate 0 0 5

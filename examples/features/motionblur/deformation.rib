@@ -1,12 +1,13 @@
-Format 320 240 1
+Format 480 360 1
 PixelSamples 4 4
 ShadingRate 2
 PixelFilter "gaussian" 2 2
 Shutter 0 1
 
 FrameBegin 0
-Display "deformation.tif" "file" "rgba" "string compression" "lzw"
+Display "deformation.tif" "file" "rgba"
 Display "+deformation.tif" "framebuffer" "rgba"
+Option "limits" "bucketsize" [32 32]
 Option "statistics" "endofframe" [3]
 
 Projection "perspective" "fov" [32.0]

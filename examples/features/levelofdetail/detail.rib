@@ -5,11 +5,12 @@ Format 480 360 1
 PixelSamples 3 3
 ShadingRate 1.0
 PixelFilter "gaussian" 2 2
+Option "limits" "bucketsize" [32 32]
 Option "searchpath" "shader" ["../../../shaders/light:../../../shaders/displacement:../../../shaders/surface:&"]
 
 FrameBegin 0
 
-Display "detail.tif" "file" "rgba" "string compression" "lzw"
+Display "detail.tif" "file" "rgba"
 Display "+detail.tif" "framebuffer" "rgb"
 
 # Camera name: "Kamera01"

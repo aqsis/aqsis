@@ -1,9 +1,11 @@
+Option "limits" "bucketsize" [32 32]
+
 Orientation "lh"
-Format 200 150 1
+Format 480 360 1
 PixelSamples 2 2
 PixelFilter "gaussian" 2 2
 FrameBegin 0
-Display "csg.tif" "file" "rgba" "string compression" "lzw"
+Display "csg.tif" "file" "rgba"
 Display "+csg.tif" "framebuffer" "rgb"
 Sides 1
 

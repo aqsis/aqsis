@@ -1,14 +1,15 @@
 ##RenderMan RIB-Structure 1.0
 #version 3.03
 Orientation "lh"
-Format 320 240 1
+Format 480 360 1
 PixelSamples 4 4
 ShadingRate 1.0
+Option "limits" "bucketsize" [32 32]
 Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../../../shaders/light:../../../shaders/displacement:../../../shaders/surface:&"]
 
 FrameBegin 0
-Display "camera.tif" "file" "rgba" "string compression" "lzw"
+Display "camera.tif" "file" "rgba"
 Display "+camera.tif" "framebuffer" "rgb"
 
 Shutter 0 1

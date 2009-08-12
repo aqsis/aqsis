@@ -12,7 +12,7 @@ MakeTexture "rnz.tif" "rnz.tex" "clamp" "clamp" "gaussian" 2 2
 Display "fisheye.tif" "file" "rgba"
 Display "+fisheye.tif" "framebuffer" "rgba"
 
-Format 512 512 1
+Format 400 400 1
 PixelSamples 2 2
 
 Imager "fisheye_projection"

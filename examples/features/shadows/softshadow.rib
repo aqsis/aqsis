@@ -2,7 +2,7 @@
 #version 3.03
 
 Option "searchpath" "shader" ["../../../shaders/light:../../../shaders/displacement:../../../shaders/surface:&"]
-
+Option "limits" "bucketsize" [32 32]
 Option "limits" "eyesplits" [10]
 Declare "bias" "float"
 
@@ -42,9 +42,9 @@ MakeShadow "softshadow.zfile" "softshadow.shad"
 # Now render the scene using the shadow map just calculated.
 #
 #
-Display "softshadow.tif" "file" "rgba" "string compression" "lzw"
+Display "softshadow.tif" "file" "rgba"
 Display "+softshadow.tif" "framebuffer" "rgb"
-Format 400 300 1
+Format 480 360 1
 
 PixelFilter "gaussian" 2 2
 PixelSamples 2 2

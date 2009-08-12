@@ -1,11 +1,12 @@
 version 3.03
-Display "sticky.tif" "file" "rgba" "string compression" "lzw"
+Display "sticky.tif" "file" "rgba"
 Display "+sticky.tif" "framebuffer" "rgb"
-Format 400 300 1
+Format 480 360 1
 ShadingRate 1
 
 Projection "perspective" "fov" 40
 
+Option "limits" "bucketsize" [32 32]
 Option "limits" "eyesplits" 3
 Sides 2
 PixelSamples 2 2

@@ -7,11 +7,12 @@ MakeCubeFaceEnvironment "rpx.tif" "rnx.tif" "rpy.tif" "rny.tif" "rpz.tif" "rnz.t
 
 # Main scene
 FrameBegin 7
+	Option "limits" "bucketsize" [32 32]
 	ShadingRate 1
 	PixelSamples 2 2
 	PixelFilter "gaussian" 2 2
-	Format 640 480 1
-	Display "example.tif" "file" "rgba" "string compression" "lzw"
+	Format 480 360 1
+	Display "example.tif" "file" "rgba"
 	Display "+example.tif" "framebuffer" "rgb"
 	Projection "perspective" "fov" [34.5159]
 	Clipping 0.1 100000

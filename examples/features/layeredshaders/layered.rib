@@ -1,10 +1,11 @@
-Format 200 150 1
+Format 480 360 1
 PixelSamples 4 4
 ShadingRate 1.0
+Option "limits" "bucketsize" [32 32]
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "layered.tif" "file" "rgba" "string compression" "lzw"
+Display "layered.tif" "file" "rgba"
 Display "+layered.tif" "framebuffer" "rgb"
 
 Projection "perspective" "fov" [36.0]
