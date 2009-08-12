@@ -424,7 +424,6 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	if ( NULL != m_OpenMethod )
 	{
 		// Prepare the information and call the DspyImageOpen function in the display device.
-		TqInt dataFormat = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 		if (m_modeID & ( DMode_RGB | DMode_A | DMode_Z) )
 		{
 			// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
@@ -453,7 +452,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 
 			PtDspyDevFormat fmt;
 
-			fmt.type = dataFormat;
+			fmt.type = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 			if (m_modeID & DMode_A)
 			{
 				fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
@@ -520,7 +519,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 
 			// All channels are the same type.
 			PtDspyDevFormat fmt;
-			fmt.type = dataFormat;
+			fmt.type = selectDataFormat(m_QuantizeOneVal, m_QuantizeMinVal, m_QuantizeMaxVal);
 			if(m_AOVSize > 0)
 			{
 				fmt.name = const_cast<char*>(ddMemberData.m_RedName);
