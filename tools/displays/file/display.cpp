@@ -698,11 +698,11 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				pImage->m_compression = COMPRESSION_PACKBITS;
 		}
 		
-		// Check if the requested compression format is available in libtiff, if not resort to "lzw"
+		// Check if the requested compression format is available in libtiff, if not resort to "none"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
 		{
 			/* Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl; */
-			pImage->m_compression = COMPRESSION_LZW;
+			pImage->m_compression = COMPRESSION_NONE;
 		}
 
 		int quality;
