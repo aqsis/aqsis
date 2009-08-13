@@ -88,7 +88,7 @@ struct SqDDMemberData
  * \todo <b>Code review</b>: This class could be tweaked to use a more
  * RAII-like style.
  */
-class CqDisplayRequest
+class CqDisplayRequest : public IqDisplayRequest
 {
 	public:
 		CqDisplayRequest()
@@ -100,7 +100,8 @@ class CqDisplayRequest
 				m_valid(valid), m_name(name), m_type(type), m_mode(mode),
 				m_modeHash(modeHash), m_modeID(modeID), m_AOVOffset(dataOffset),
 				m_AOVSize(dataSize), m_QuantizeZeroVal(quantizeZeroVal), m_QuantizeOneVal(quantizeOneVal),
-				m_QuantizeMinVal(quantizeMinVal), m_QuantizeMaxVal(quantizeMaxVal), m_QuantizeDitherVal(quantizeDitherVal), m_QuantizeSpecified(quantizeSpecified), m_QuantizeDitherSpecified(quantizeDitherSpecified)
+				m_QuantizeMinVal(quantizeMinVal), m_QuantizeMaxVal(quantizeMaxVal), m_QuantizeDitherVal(quantizeDitherVal), m_QuantizeSpecified(quantizeSpecified), m_QuantizeDitherSpecified(quantizeDitherSpecified),
+				m_isLoaded(false)
 		{}
 		virtual ~CqDisplayRequest();
 
@@ -132,6 +133,10 @@ class CqDisplayRequest
 		//----------------------------------------------
 		// Pure virtual functions
 		//----------------------------------------------
+		// Overridden from IqDisplayRequest
+		virtual std::string& 	name();
+		virtual const std::string& 	name() const;
+		virtual bool isLoaded() const;
 		/* Does quantization, or in the case of DSM does the compression.
 		 */
 		virtual void FormatBucketForDisplay( const CqRegion& DRegion, const IqChannelBuffer* pBuffer);
@@ -175,6 +180,7 @@ class CqDisplayRequest
 		DspyImageDataMethod			m_DataMethod;
 		DspyImageCloseMethod		m_CloseMethod;
 		DspyImageDelayCloseMethod	m_DelayCloseMethod;
+		bool			m_isLoaded;
 
 		/// \todo Some of the instance data from SqDisplayRequest
 		//  should be split out into a new structure,
@@ -246,6 +252,10 @@ class CqDDManager : public IqDDManager
 		{
 			return ( 0 );
 		}
+
+		virtual TqInt	numDisplayRequests();
+		virtual boost::shared_ptr<IqDisplayRequest>	displayRequest(TqInt index);
+
 		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments );
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays(TqInt width, TqInt height);
@@ -262,6 +272,35 @@ class CqDDManager : public IqDDManager
 		TqInt 	m_Uses;
 };
 
+
+//----------------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------------
+
+std::string& 	CqDisplayRequest::name()
+{
+	return m_name;
+}
+
+const std::string& 	CqDisplayRequest::name() const
+{
+	return m_name;
+}
+
+bool CqDisplayRequest::isLoaded() const
+{
+	return m_isLoaded;
+}
+
+TqInt CqDDManager::numDisplayRequests()
+{
+	return m_displayRequests.size();
+}
+
+boost::shared_ptr<IqDisplayRequest> CqDDManager::displayRequest(TqInt index)
+{
+	return m_displayRequests[index];
+}
 
 } // namespace Aqsis
 

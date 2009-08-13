@@ -56,6 +56,20 @@ struct IqChannelBuffer
 		virtual TqConstChannelPtr operator()(TqInt x, TqInt y, TqInt index) const = 0;
 };
 
+
+struct IqDisplayRequest
+{
+	public:
+		virtual ~IqDisplayRequest() {}
+
+		/// Get a reference to the name assigned to this display.
+		/// \note: changing this when isLoaded is true will have no effect.
+		virtual std::string& 	name() = 0;
+		virtual const std::string& 	name() const = 0;
+		/// Query if the display has been loaded and initialised.
+		virtual bool isLoaded() const = 0;
+};
+
 struct IqDDManager
 {
 	virtual ~IqDDManager()
@@ -88,6 +102,10 @@ struct IqDDManager
 	/** Determine if any of the displays need the named shader variable.
 	 */
 	virtual TqInt	Uses( ) = 0;
+	/** Get a list of display requests registered with the manager.
+	 */
+	virtual TqInt	numDisplayRequests() = 0;
+	virtual boost::shared_ptr<IqDisplayRequest>	displayRequest(TqInt index) = 0;
 };
 
 } // namespace Aqsis
