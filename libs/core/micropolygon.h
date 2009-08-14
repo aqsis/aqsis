@@ -56,7 +56,6 @@ class CqBucketProcessor;
 // This struct holds info about a grid that can be cached and used for all its mpgs.
 struct SqGridInfo
 {
-	TqFloat shadingRate;
 	const TqFloat* lodBounds;
 	TqUchar matteFlag;
 	bool usesDataMap;

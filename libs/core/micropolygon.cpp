@@ -61,11 +61,6 @@ void CqMicroPolyGridBase::CacheGridInfo(const boost::shared_ptr<const CqSurface>
 	m_CurrentGridInfo.usesDataMap
 		= !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
 
-	// ShadingRate may be modified by RiGeometricApproximation "focusfactor" or
-	// "motionfactor", so we need to get the appropriate adjusted rate rather
-	// than grabbing it directly from the grid attribute set.
-	m_CurrentGridInfo.shadingRate = surface->AdjustedShadingRate();
-
 	m_CurrentGridInfo.lodBounds
 		= attrs.GetFloatAttribute("System", "LevelOfDetailBounds");
 }
@@ -1706,20 +1701,21 @@ void CqMicroPolygonMotion::BuildBoundList(TqUint timeRanges)
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-	TqFloat shadingrate = pGrid()->GetCachedGridInfo().shadingRate;
 
 	m_BoundList.Clear();
 
 	assert( NULL != m_Keys[ 0 ] );
 
-	// compute an approximation of the distance travelled in raster space,
-	// we use this to guide how many sub-bounds to calcuate. note, it's much
-	// better for this to be fast than accurate, it's just a guide.
-	TqFloat dx = fabs(m_Keys.front()->m_Point0.x() - m_Keys.back()->m_Point0.x());
-	TqFloat dy = fabs(m_Keys.front()->m_Point0.y() - m_Keys.back()->m_Point0.y());
-	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
+	// Compute an approximation of the number of micropolygon lengths moved in
+	// raster space.  We use this to guide how many sub-bounds to calcuate.
+	TqFloat polyLen2 = vectorCast<CqVector2D>(m_Keys.front()->GetBound().vecCross())
+						.Magnitude2();
+	TqFloat moveDist2 = (vectorCast<CqVector2D>(m_Keys.front()->m_Point0)
+						- vectorCast<CqVector2D>(m_Keys.back()->m_Point0))
+						.Magnitude2();
+	TqInt polyLengthsMoved = max<TqInt>(1, lfloor(std::sqrt(moveDist2/polyLen2)));
 
-	TqUint divisions = min(d, timeRanges);
+	TqUint divisions = min<TqInt>(polyLengthsMoved, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;
 	TqInt startKey = 0;
