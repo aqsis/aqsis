@@ -109,6 +109,11 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 				return( 1 );
 		}
 
+		virtual bool isMoving() const
+		{
+			return m_IsMoving;
+		}
+
 		virtual	bool GetHandedness(TqFloat time ) const;
 
 		virtual	void	ClearMotionObject( SqTransformation& A ) const;

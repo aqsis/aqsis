@@ -716,6 +716,103 @@ TqFloat CqSurface::AdjustedShadingRate() const
 		const TqFloat areaRatio = 0.025;
 		shadingRate *= max(1.0f, areaRatio*focusFactor*minCoC*minCoC);
 	}
+
+	// Adjust shadingRate based on motionfactor
+
+	//get motionfactor variable from rib, camera transform
+	const TqFloat* motionFactor = m_pAttributes->GetFloatAttribute("System", "GeometricMotionFactor");
+	TqFloat motionFac = motionFactor[0];
+	CqTransformPtr cameraTransform = context->GetCameraTransform();
+
+	if (motionFac > 0.0 && (isMoving() || cameraTransform->isMoving() ) )
+	{
+		// TODO: find optimal scalingConst.  This one seems to work well, as it produces about the level of quality
+		// as a non-motionfactor optimized render which uses a ShadingRate (approx)= average of the
+		// adjusted-shading-rates this algorithm produces.
+		const TqFloat scalingConst = 0.0833;
+
+		// get the exposure-time (Time of shutter close - Time of shutter open)
+		const TqFloat* shutterTimes = context->GetFloatOption( "System", "Shutter" );
+		assert(shutterTimes);
+		TqFloat exposureTime = shutterTimes[1] - shutterTimes[0];
+
+		// get object transform, and keyframe time values
+		IqConstTransformPtr objectTransform = pTransform();
+		TqInt objectTimes = objectTransform->cTimes();
+		TqInt cameraTimes = cameraTransform->cTimes();
+		std::vector<TqFloat>keyframeTimes;
+
+		// store the object+camera keyframe time values in one vector
+		TqInt iTime;
+		for(iTime = 0; iTime < objectTimes; iTime++)
+			keyframeTimes.push_back(objectTransform->Time(iTime));
+		for (iTime = 0; iTime < cameraTimes; iTime++)
+			keyframeTimes.push_back(cameraTransform->Time(iTime));
+
+		// sort and get iterator over unique time-values
+		std::sort(keyframeTimes.begin(), keyframeTimes.end());
+		std::vector<TqFloat>::iterator timesIter = std::unique(keyframeTimes.begin(), keyframeTimes.end());
+		keyframeTimes.resize(timesIter - keyframeTimes.begin());
+
+		// only proceed if object is moving
+		if (keyframeTimes.size() > 1)
+		{
+			CqBound objBound(m_Bound);
+			CqMatrix matCameraToObject0;
+			context->matSpaceToSpace("camera", "object", NULL, pTransform().get(), *keyframeTimes.begin(), matCameraToObject0);
+			objBound.Transform(matCameraToObject0);
+
+			CqVector3D objBoundCuboid[8];
+			objBound.getBoundCuboid(objBoundCuboid);
+
+			TqFloat minSpeed = FLT_MAX; // initialize to max float value
+			CqVector3D prevWorldCuboid[8];
+			CqVector3D currWorldCuboid[8];
+
+			// get bounding box (cuboid) for time 0
+			CqBound prevWorldBound(objBound);
+			CqMatrix matObjectToCameraT0;
+			context->matSpaceToSpace("object", "camera", NULL, pTransform().get(), keyframeTimes[0], matObjectToCameraT0);
+			prevWorldBound.Transform(matObjectToCameraT0);
+			prevWorldBound.getBoundCuboid(prevWorldCuboid);
+
+			for (int t = 1; t < static_cast<int>(keyframeTimes.size()); t++)
+			{
+				// get cuboid for time t
+				CqBound currWorldBound(objBound);
+				CqMatrix matObjectToCameraT1;
+				context->matSpaceToSpace("object", "camera", NULL, pTransform().get(), keyframeTimes[t], matObjectToCameraT1);
+				currWorldBound.Transform(matObjectToCameraT1);
+				currWorldBound.getBoundCuboid(currWorldCuboid);
+
+				// this takes vector differences between verts of cuboids C(t1) and C(t0) and finds min distance^2
+				TqFloat minDist = FLT_MAX;
+				for (int i = 0; i < 8; i++)
+				{
+					CqVector3D vecDiff = currWorldCuboid[i] - prevWorldCuboid[i];
+					TqFloat dist = vecDiff.Magnitude2();
+
+					if (dist < minDist)
+						minDist = dist;
+				}
+
+				// calculate speed of primitive, keep track of min-speed
+				float speed = std::sqrt(minDist) / (keyframeTimes[t] - keyframeTimes[t-1]);
+				if (speed < minSpeed)
+					minSpeed = speed;
+
+				// update prevCuboid
+				for (int i = 0; i < 8; i++)
+					prevWorldCuboid[i] = currWorldCuboid[i];
+			}
+
+			// multiply shading rate by distance factor, user-specified motion-factor and special const
+			TqFloat shadingRateAdj = max<float>(1.0, scalingConst * exposureTime * minSpeed * motionFac);
+
+			shadingRate *= shadingRateAdj;
+		}
+	}
+
 	return shadingRate;
 }
 

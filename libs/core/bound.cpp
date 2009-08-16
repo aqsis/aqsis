@@ -51,6 +51,20 @@ CqBound& CqBound::operator=( const CqBound& From )
 	return ( *this );
 }
 
+/**
+ * Fills \param cuboid with the 8 points of a bounding box
+*/
+void CqBound::getBoundCuboid(CqVector3D cuboid[8])
+{
+	cuboid[ 0 ] = m_vecMin;
+	cuboid[ 1 ] = CqVector3D( m_vecMax.x(), m_vecMin.y(), m_vecMin.z() );
+	cuboid[ 2 ] = CqVector3D( m_vecMin.x(), m_vecMax.y(), m_vecMin.z() );
+	cuboid[ 3 ] = CqVector3D( m_vecMin.x(), m_vecMin.y(), m_vecMax.z() );
+	cuboid[ 4 ] = CqVector3D( m_vecMax.x(), m_vecMax.y(), m_vecMin.z() );
+	cuboid[ 5 ] = CqVector3D( m_vecMin.x(), m_vecMax.y(), m_vecMax.z() );
+	cuboid[ 6 ] = CqVector3D( m_vecMax.x(), m_vecMin.y(), m_vecMax.z() );
+	cuboid[ 7 ] = m_vecMax;
+}
 
 //---------------------------------------------------------------------
 /**

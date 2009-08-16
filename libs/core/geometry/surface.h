@@ -549,7 +549,12 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		
+
+		virtual bool isMoving() const
+		{
+			return m_pTransform->isMoving();
+		}
+
 		/**
 		 * \todo Review: Could this be const?
 		 */

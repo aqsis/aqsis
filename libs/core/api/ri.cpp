@@ -2465,8 +2465,9 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 	}
 	else if(typeStr == "motionfactor")
 	{
-		Aqsis::log() << warning
-			<< "RiGeometricApproximation \"motionfactor\" not yet implemented\n";
+		TqFloat* motionFactorAttr = QGetRenderContext()->pattrWriteCurrent()->
+			GetFloatAttributeWrite("System", "GeometricMotionFactor");
+		motionFactorAttr[0] = value;
 	}
 	else
 	{

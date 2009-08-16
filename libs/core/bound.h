@@ -116,6 +116,9 @@ class CqBound
 
 		CqBound&	operator=( const CqBound& From );
 
+		// Fills passed vector array with the 8 points of a bounding box
+		void 		getBoundCuboid(CqVector3D cuboid[8]);
+
 		void		Transform( const CqMatrix&	matTransform );
 		void		Encapsulate( const CqBound* const bound );
 		void		Encapsulate( const CqVector3D& v );
