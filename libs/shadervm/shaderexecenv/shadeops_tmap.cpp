@@ -138,6 +138,18 @@ class CqSampleOptionExtractorBase
 				value->GetFloat(tmp, 0);
 				opts.setTWidth(tmp);
 			}
+			else if(name == "minwidth")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setMinWidth(tmp);
+			}
+			else if(name == "trunc")
+			{
+				TqFloat tmp = 0;
+				value->GetFloat(tmp, 0);
+				opts.setTruncAmount(tmp);
+			}
 			else if(name == "filter")
 			{
 				CqString tmp;

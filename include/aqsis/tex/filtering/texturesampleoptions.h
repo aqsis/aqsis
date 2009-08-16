@@ -90,10 +90,6 @@ enum EqMipmapLerp
 class CqTextureSampleOptionsBase
 {
 	public:
-		/// Trivial constructor.
-		CqTextureSampleOptionsBase(TqFloat sBlur, TqFloat tBlur, TqFloat sWidth,
-				TqFloat tWidth, EqTextureFilter filterType, TqInt startChannel,
-				TqInt numChannels, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
 		/** Default constructor
 		 *
 		 * Set all numerical quantities to 0 except for sWidth, tWidth,
@@ -113,6 +109,12 @@ class CqTextureSampleOptionsBase
 		TqFloat sWidth() const;
 		/// Get the width multiplier in the t-direction
 		TqFloat tWidth() const;
+		/// Minimum number of pixels spanned by the filter in the smallest direction
+		TqFloat minWidth() const;
+		/// Amount to trunc the "ideal" filter density.
+		TqFloat truncAmount() const;
+		/// Get cached log of truncAmount.
+		TqFloat logTruncAmount() const;
 		/// Get the filter type
 		EqTextureFilter filterType() const;
 		/// Get the start channel index where channels will be read from.
@@ -140,6 +142,10 @@ class CqTextureSampleOptionsBase
 		void setSWidth(TqFloat sWidth);
 		/// Set the width multiplier in the t-direction
 		void setTWidth(TqFloat tWidth);
+		/// Set the minimum number of pixels spanned by the filter in the smallest direction
+		void setMinWidth(TqFloat minWidth);
+		/// Set the filter truncation amount
+		void setTruncAmount(TqFloat trunc);
 		/// Set the filter type
 		void setFilterType(EqTextureFilter type);
 		/// Set the start channel index where channels will be read from.
@@ -171,6 +177,12 @@ class CqTextureSampleOptionsBase
 		/// Filter widths as a multiple of the given filter box.
 		TqFloat m_sWidth;
 		TqFloat m_tWidth;
+		/// Minimum number of pixels spanned by the filter in the smallest direction
+		TqFloat m_minWidth;
+		/// Amount to trunc the ideal filter density.
+		TqFloat m_truncAmount;
+		/// Cached log of m_truncAmount for efficiency.
+		TqFloat m_logTruncAmount;
 		/// Type of filter - represents both the filter weight function and filtering algorithm.
 		EqTextureFilter m_filterType;
 		/// Index of the starting channel (the first channel has index 0)
@@ -204,6 +216,9 @@ class CqTextureSampleOptions : private CqTextureSampleOptionsBase
 		CqTextureSampleOptionsBase::tBlur;
 		CqTextureSampleOptionsBase::sWidth;
 		CqTextureSampleOptionsBase::tWidth;
+		CqTextureSampleOptionsBase::minWidth;
+		CqTextureSampleOptionsBase::truncAmount;
+		CqTextureSampleOptionsBase::logTruncAmount;
 		CqTextureSampleOptionsBase::filterType;
 		CqTextureSampleOptionsBase::startChannel;
 		CqTextureSampleOptionsBase::numChannels;
@@ -217,6 +232,8 @@ class CqTextureSampleOptions : private CqTextureSampleOptionsBase
 		CqTextureSampleOptionsBase::setWidth;
 		CqTextureSampleOptionsBase::setSWidth;
 		CqTextureSampleOptionsBase::setTWidth;
+		CqTextureSampleOptionsBase::setMinWidth;
+		CqTextureSampleOptionsBase::setTruncAmount;
 		CqTextureSampleOptionsBase::setFilterType;
 		CqTextureSampleOptionsBase::setStartChannel;
 		CqTextureSampleOptionsBase::setNumChannels;
@@ -270,6 +287,9 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 		CqTextureSampleOptionsBase::tBlur;
 		CqTextureSampleOptionsBase::sWidth;
 		CqTextureSampleOptionsBase::tWidth;
+		CqTextureSampleOptionsBase::minWidth;
+		CqTextureSampleOptionsBase::truncAmount;
+		CqTextureSampleOptionsBase::logTruncAmount;
 		CqTextureSampleOptionsBase::filterType;
 		CqTextureSampleOptionsBase::startChannel;
 		CqTextureSampleOptionsBase::numChannels;
@@ -283,6 +303,8 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 		CqTextureSampleOptionsBase::setWidth;
 		CqTextureSampleOptionsBase::setSWidth;
 		CqTextureSampleOptionsBase::setTWidth;
+		CqTextureSampleOptionsBase::setMinWidth;
+		CqTextureSampleOptionsBase::setTruncAmount;
 		CqTextureSampleOptionsBase::setFilterType;
 		CqTextureSampleOptionsBase::setStartChannel;
 		CqTextureSampleOptionsBase::setNumChannels;
@@ -325,26 +347,14 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 
 // CqTextureSampleOptionsBase implementation
 
-inline CqTextureSampleOptionsBase::CqTextureSampleOptionsBase(
-		TqFloat sBlur, TqFloat tBlur, TqFloat sWidth, TqFloat tWidth,
-		EqTextureFilter filterType, TqInt startChannel, TqInt numChannels,
-		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
-	: m_sBlur(sBlur),
-	m_tBlur(tBlur),
-	m_sWidth(sWidth),
-	m_tWidth(tWidth),
-	m_filterType(filterType),
-	m_startChannel(startChannel),
-	m_numChannels(numChannels),
-	m_sWrapMode(sWrapMode),
-	m_tWrapMode(tWrapMode)
-{ }
-
 inline CqTextureSampleOptionsBase::CqTextureSampleOptionsBase()
 	: m_sBlur(0),
 	m_tBlur(0),
 	m_sWidth(1),
 	m_tWidth(1),
+	m_minWidth(2),
+	m_truncAmount(0.05),
+	m_logTruncAmount(std::log(m_truncAmount)),
 	m_filterType(TextureFilter_Gaussian),
 	m_startChannel(0),
 	m_numChannels(1),
@@ -371,6 +381,21 @@ inline TqFloat CqTextureSampleOptionsBase::sWidth() const
 inline TqFloat CqTextureSampleOptionsBase::tWidth() const
 {
 	return m_tWidth;
+}
+
+inline TqFloat CqTextureSampleOptionsBase::minWidth() const
+{
+	return m_minWidth;
+}
+
+inline TqFloat CqTextureSampleOptionsBase::truncAmount() const
+{
+	return m_truncAmount;
+}
+
+inline TqFloat CqTextureSampleOptionsBase::logTruncAmount() const
+{
+	return m_logTruncAmount;
 }
 
 inline EqTextureFilter CqTextureSampleOptionsBase::filterType() const
@@ -433,6 +458,19 @@ inline void CqTextureSampleOptionsBase::setTWidth(TqFloat tWidth)
 {
 	assert(tWidth >= 0);
 	m_tWidth = tWidth;
+}
+
+inline void CqTextureSampleOptionsBase::setMinWidth(TqFloat minWidth)
+{
+	assert(minWidth >= 0);
+	m_minWidth = minWidth;
+}
+
+inline void CqTextureSampleOptionsBase::setTruncAmount(TqFloat trunc)
+{
+	assert(trunc >= 0 && trunc <= 1);
+	m_truncAmount = trunc;
+	m_logTruncAmount = std::log(trunc);
 }
 
 inline void CqTextureSampleOptionsBase::setFilterType(EqTextureFilter type)

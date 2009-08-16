@@ -251,16 +251,10 @@ void CqMipmap<TextureBufferT>::applyFilter(const FilterFactoryT& filterFactory,
 	//
 	// The minimum filter width is the minimum number of pixels over which the
 	// shortest length scale of the filter should extend.
-	TqFloat minFilterWidth = 2;
+	TqFloat minFilterWidth = sampleOpts.minWidth();
 	// Blur ratio ranges from 0 at no blur to 1 for a "lot" of blur.
 	TqFloat blurRatio = 0;
-	if(sampleOpts.lerp() != Lerp_Auto)
-	{
-		// If we're not using automatic detection of when a lerp between mipmap
-		// levels is necessary, reset the filter support width.
-		minFilterWidth = 4;
-	}
-	else if(sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0)
+	if(sampleOpts.lerp() == Lerp_Auto && (sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0))
 	{
 		// When using blur, the minimum filter width needs to be increased.
 		//
