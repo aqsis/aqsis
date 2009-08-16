@@ -85,25 +85,9 @@ class CqQuadric : public CqSurface
 		void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const;
 		CqBound	RevolveForBound( const std::vector<CqVector3D>& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta ) const;
 
-		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid );
+		virtual TqInt DiceAll( CqMicroPolyGrid* pGrid );
 
-		/** Pure virtual, get a surface point.
-		 * \param u Surface u coordinate.
-		 * \param v Surface v coordinate.
-		 * \return 3D vector representing the surface point at the specified u,v coordniates.
-		 */
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v ) = 0;
-		/** Pure virtual, get a surface point and normal.
-		 * \param u Surface u coordinate.
-		 * \param v Surface v coordinate.
-		 * \param Normal Storage for the surface normal.
-		 * \return 3D vector representing the surface point at the specified u,v coordniates.
-		 */
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
-
-
-		// Derived from CqSurface
-		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid ) = 0;
 
 #ifdef _DEBUG
 
@@ -137,8 +121,7 @@ class CqSphere : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -158,8 +141,7 @@ class CqSphere : public CqQuadric
 		TqFloat	m_PhiMax;		///< Max angle about x axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -176,8 +158,7 @@ class CqCone : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -198,8 +179,7 @@ class CqCone : public CqQuadric
 		TqFloat	m_vMax;			///< Max value on z axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -216,8 +196,7 @@ class CqCylinder : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -237,8 +216,7 @@ class CqCylinder : public CqQuadric
 		TqFloat	m_ZMax;			///< Max value on z axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -256,8 +234,7 @@ class CqHyperboloid : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -276,8 +253,7 @@ class CqHyperboloid : public CqQuadric
 		CqVector3D	m_Point2;		///< End point of line to revolve.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -294,8 +270,7 @@ class CqParaboloid : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -315,8 +290,7 @@ class CqParaboloid : public CqQuadric
 		TqFloat m_ZMax;			///< Max value on z axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -333,8 +307,7 @@ class CqTorus : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -355,8 +328,7 @@ class CqTorus : public CqQuadric
 		TqFloat m_PhiMax;		///< Max angle about ring.
 		TqFloat	m_ThetaMin;		///< Min andle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
-}
-;
+};
 
 
 //----------------------------------------------------------------------
@@ -373,8 +345,7 @@ class CqDisk : public CqQuadric
 
 		virtual	void	Bound(CqBound* bound) const;
 
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual void DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid );
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
@@ -394,8 +365,7 @@ class CqDisk : public CqQuadric
 		TqFloat	m_MinorRadius;		///< Inner radius of disk.
 		TqFloat	m_ThetaMin;			///< Min angle about z axis.
 		TqFloat	m_ThetaMax;			///< Max angle about z axis.
-}
-;
+};
 
 
 //-----------------------------------------------------------------------

@@ -29,13 +29,13 @@
 #include	<aqsis/math/math.h>
 #include	"imagebuffer.h"
 #include	"nurbs.h"
-
 #include	<aqsis/ri/ri.h>
 
 namespace Aqsis {
 
 static bool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
+static void sinCosGrid(TqFloat t0, TqFloat t1, TqInt numSteps, TqFloat* sint, TqFloat* cost);
 
 #define TOOLARGEQUADS 10000
 static TqUlong RIH_P = CqString::hash("P");
@@ -85,6 +85,8 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	TqInt lDone = 0;
 
 	CqVector3D	P, N;
+	CqVector3D *pointGrid, *normalGrid;
+
 	int v, u;
 
 	CqParameterTyped<TqFloat, TqFloat>* ps = s();
@@ -169,12 +171,6 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		DONE( lDone, EnvVars_v );
 	}
 
-	// Indicate that P and Ng will be filled in by the loops below.
-	if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
-		DONE( lDone, EnvVars_P );
-	if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
-		DONE( lDone, EnvVars_Ng );
-
 	// Normals need to be flipped depending on the orientation.  Because we
 	// calculate normals in *object* space using DicePoint(), and the transform
 	// with the matrix m_matITTx, we don't need to explicitly consider the
@@ -184,6 +180,32 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	bool flipNormals = pAttributes()->
 		GetIntegerAttribute("System", "Orientation")[0] != 0;
 
+	pGrid->pVar(EnvVars_P)->GetPointPtr(pointGrid);
+	pGrid->pVar(EnvVars_N)->GetNormalPtr(normalGrid);
+
+	// check pVars to see if we need to calc points, normals
+	bool usePoints=false;
+	bool useNormals=false;
+
+	if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
+	{
+		usePoints=true;
+		if (USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng))
+		{
+			useNormals = true;
+			DicePoints(pointGrid, normalGrid);
+			// Indicate that P and Ng will be filled in by the loops below.
+			DONE( lDone, EnvVars_P );
+			DONE( lDone, EnvVars_Ng );
+		}
+		else
+		{
+			DicePoints(pointGrid, NULL);
+			// Indicate that P (only) will be filled in by the loops below
+			DONE( lDone, EnvVars_P );
+		}
+	}
+
 	TqFloat du = 1.0 / uDiceSize();
 	TqFloat dv = 1.0 / vDiceSize();
 	for ( v = 0; v <= vDiceSize(); v++ )
@@ -192,20 +214,24 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		for ( u = 0; u <= uDiceSize(); u++ )
 		{
 			TqFloat uf = u * du;
-			TqInt igrid = ( v * ( uDiceSize() + 1 ) ) + u;
-			if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
+			TqInt igrid = ( v * ( uDiceSize() + 1 ) ) + u; // offset for grid point/normal buffer
+
+			if(usePoints)
 			{
-				if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
+				if(useNormals)
 				{
-					P = DicePoint( u, v, N );
+					P = pointGrid[igrid];
+					N = normalGrid[igrid];
+
 					if(flipNormals)
-						N = -N;
+					    N = -N;
+
 					pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
 					pGrid->pVar(EnvVars_Ng)->SetNormal( m_matITTx * N, igrid );
 				}
 				else
 				{
-					P = DicePoint( u, v );
+					P = pointGrid[igrid];
 					pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
 				}
 			}
@@ -236,36 +262,9 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 }
 
 //---------------------------------------------------------------------
-/** Dice the quadric into a grid of MPGs for rendering.
- */
-
-void CqQuadric::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
-{
-	// Special case for "P", else normal bilinear dice for all others.
-
-	TqUlong hash = CqString::hash(pData->strName().c_str());
-	if ( hash == RIH_P )
-	{
-		CqVector3D	P;
-		int v, u;
-		for ( v = 0; v <= vDiceSize; v++ )
-		{
-			for ( u = 0; u <= uDiceSize; u++ )
-			{
-				TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
-				P = DicePoint( u, v );
-				pData->SetPoint( m_matTx * P, igrid );
-			}
-		}
-	}
-	else
-		CqSurface::NaturalDice( pParameter, uDiceSize, vDiceSize, pData );
-}
-
-//---------------------------------------------------------------------
 /** Determine whether the quadric is suitable for dicing.
  */
-bool	CqQuadric::Diceable()
+bool CqQuadric::Diceable()
 {
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
@@ -291,7 +290,6 @@ bool	CqQuadric::Diceable()
 
 
 	return ( true );
-
 }
 
 
@@ -313,13 +311,19 @@ TqUlong CqQuadric::EstimateGridSize()
 	TqFloat udist, vdist;
 	CqVector3D p, pum1, pvm1[ ESTIMATEGRIDSIZE ];
 
+	CqVector3D pointGrid[(ESTIMATEGRIDSIZE+1)*(ESTIMATEGRIDSIZE+1)];
+
+	DicePoints(pointGrid, NULL);
+
 	int v, u;
 	for ( v = 0; v <= ESTIMATEGRIDSIZE; v++ )
 	{
 		for ( u = 0; u <= ESTIMATEGRIDSIZE; u++ )
 		{
-			p = DicePoint( u, v );
+			TqInt gridOffset = ( v * ( ESTIMATEGRIDSIZE + 1 ) ) + u;
+			p = pointGrid[gridOffset];
 			p = matTx * p;
+
 			// If we are on row two or above, calculate the mp size.
 			if ( v >= 1 && u >= 1 )
 			{
@@ -397,7 +401,7 @@ CqSurface*	CqSphere::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqSphere::Bound(CqBound* bound) const
+void CqSphere::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
@@ -459,38 +463,45 @@ TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplit
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqSphere::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqSphere::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat phi = m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize;
+	int thetaRes = m_uDiceSize+1;
+	int phiRes = m_vDiceSize+1;
 
-	TqFloat cosphi = cos( phi );
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> sinPhiTab(new TqFloat[phiRes]);
+	boost::scoped_array<TqFloat> cosPhiTab(new TqFloat[phiRes]);
 
-	return ( CqVector3D( ( m_Radius * cos( theta ) * cosphi ), ( m_Radius * sin( theta ) * cosphi ), ( m_Radius * sin( phi ) ) ) );
-}
+	//build look-up tables for sin(theta), cos(theta) + sin(phi), cos(phi)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
+	sinCosGrid(m_PhiMin, m_PhiMax, phiRes, sinPhiTab.get(), cosPhiTab.get());
 
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat sinTheta = sinThetaTab[u];
+			TqFloat cosPhi = cosPhiTab[v];
+			TqFloat sinPhi = sinPhiTab[v];
 
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
+			// calc surface point
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( ( m_Radius * cosTheta * cosPhi ), ( m_Radius * sinTheta * cosPhi ), ( m_Radius * sinPhi ) );
 
-CqVector3D CqSphere::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.Unit();
-	return ( p );
+			// calc normal vector
+			if (normalGrid != NULL) {
+				CqVector3D N_new = pointGrid[gridOffset];
+				N_new.Unit();
+				normalGrid[gridOffset] = N_new;
+			}
+		}
+	}
 }
 
 
@@ -532,7 +543,7 @@ CqSurface*	CqCone::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqCone::Bound(CqBound* bound) const
+void CqCone::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	TqFloat zmin = m_vMin * m_Height;
@@ -595,57 +606,49 @@ TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqCone::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqInt thetaRes = m_uDiceSize + 1;
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
 
-	TqFloat zmin = m_vMin * m_Height;
-	TqFloat zmax = m_vMax * m_Height;
-	TqFloat z = zmin + ( ( TqFloat ) v * ( zmax - zmin ) ) / m_vDiceSize;
-	TqFloat vv = m_vMin + ( ( TqFloat ) v * ( m_vMax - m_vMin ) ) / m_vDiceSize;
-	TqFloat r = m_Radius * ( 1.0 - vv );
+	//build look-up tables for sin(theta), cos(theta)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
 
-	return ( CqVector3D( r * cos( theta ), r * sin( theta ), z ) );
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			// calc surface point
+			TqFloat zmin = m_vMin * m_Height;
+			TqFloat zmax = m_vMax * m_Height;
+			TqFloat z = zmin + ( ( TqFloat ) v * ( zmax - zmin ) ) / m_vDiceSize;
+			TqFloat vv = m_vMin + ( ( TqFloat ) v * ( m_vMax - m_vMin ) ) / m_vDiceSize;
+			TqFloat r = m_Radius * ( 1.0 - vv );
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat sinTheta = sinThetaTab[u];
+
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( r * cosTheta, r * sinTheta, z );
+
+			// calc normal
+			if (normalGrid != NULL) {
+				TqFloat coneLength = sqrt( m_Height * m_Height + m_Radius * m_Radius );
+				TqFloat xN = m_Height / coneLength;
+				CqVector3D Normal;
+				Normal.x( xN * cosTheta );
+				Normal.y( xN * sinTheta );
+				Normal.z( m_Radius / coneLength );
+
+				normalGrid[gridOffset] = Normal;
+			}
+		}
+	}
 }
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
-
-CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-
-	TqFloat zmin = m_vMin * m_Height;
-	TqFloat zmax = m_vMax * m_Height;
-	TqFloat z = zmin + ( ( TqFloat ) v * ( zmax - zmin ) ) / m_vDiceSize;
-	TqFloat vv = m_vMin + ( ( TqFloat ) v * ( m_vMax - m_vMin ) ) / m_vDiceSize;
-	TqFloat r = m_Radius * ( 1.0 - vv );
-
-	TqFloat cos_theta = cos( theta );
-	TqFloat sin_theta = sin( theta );
-
-	TqFloat coneLength = sqrt( m_Height * m_Height + m_Radius * m_Radius );
-	TqFloat xN = m_Height / coneLength;
-	Normal.x( xN * cos_theta );
-	Normal.y( xN * sin_theta );
-	Normal.z( m_Radius / coneLength );
-
-	return ( CqVector3D( r * cos_theta, r * sin_theta, z ) );
-}
-
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -742,40 +745,42 @@ TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSpl
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqCylinder::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqInt thetaRes = m_uDiceSize + 1;
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
 
-	TqFloat vz = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
-	return ( CqVector3D( m_Radius * cos( theta ), m_Radius * sin( theta ), vz ) );
+	//build look-up tables for sin(theta), cos(theta)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
+
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			// calc surface point
+			TqFloat sinTheta = sinThetaTab[u];
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat vz = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+			CqVector3D point =  CqVector3D( m_Radius * cosTheta, m_Radius * sinTheta, vz );
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = point;
+
+			// calc normal
+			if (normalGrid != NULL) {
+				CqVector3D normal = point;
+				normal.z( 0 );
+				normal.Unit();
+
+				normalGrid[gridOffset] = normal;
+			}
+		}
+	}
 }
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
-
-CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.z( 0 );
-	Normal.Unit();
-
-	return ( p );
-}
-
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -880,69 +885,59 @@ TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& a
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqHyperboloid::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqInt thetaRes = m_uDiceSize + 1;
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
 
-	CqVector3D p;
-	TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
-	p = m_Point1 * ( 1.0 - vv ) + m_Point2 * vv;
+	//build look-up tables for sin(theta), cos(theta)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
 
-	return ( CqVector3D( p.x() * cos( theta ) - p.y() * sin( theta ), p.x() * sin( theta ) + p.y() * cos( theta ), p.z() ) );
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat sinTheta = sinThetaTab[u];
+
+			// calc surface point
+			CqVector3D p;
+			TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
+			p = m_Point1 * ( 1.0 - vv ) + m_Point2 * vv;
+
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( p.x() * cosTheta - p.y() * sinTheta, p.x() * sinTheta + p.y() * cosTheta, p.z() );
+
+			// Calculate the normal vector - this is a bit tortuous, and uses the general
+			// formula for the normal to a surface that is specified by two parametric
+			// parameters.
+			if (normalGrid != NULL) {
+				// Calculate a vector, a, of derivatives of coordinates w.r.t. u
+				TqFloat dxdu = -p.x() * m_ThetaMax * sinTheta - p.y() * m_ThetaMax * cosTheta;
+				TqFloat dydu =  p.x() * m_ThetaMax * cosTheta - p.y() * m_ThetaMax * sinTheta;
+				TqFloat dzdu = 0.0;
+				CqVector3D a(dxdu, dydu, dzdu);
+
+				// Calculate a vector, b, of derivatives of coordinates w.r.t. v
+				CqVector3D p2p1 = m_Point2 - m_Point1;
+				TqFloat dxdv = p2p1.x() * cosTheta  -  p2p1.y() * sinTheta;
+				TqFloat dydv = p2p1.x() * sinTheta  +  p2p1.y() * cosTheta;
+				TqFloat dzdv = p2p1.z();
+				CqVector3D b(dxdv, dydv, dzdv);
+
+				// The normal vector points in the direction of: a x b
+				CqVector3D Normal = a % b;
+				Normal.Unit();
+				normalGrid[gridOffset] = Normal;
+			}
+		}
+	}
 }
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
-
-CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat sin_theta = sin( theta );
-	TqFloat cos_theta = cos( theta );
-
-	CqVector3D p;
-	TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
-	p = m_Point1 * ( 1.0 - vv ) + m_Point2 * vv;
-
-	// Calculate the normal vector - this is a bit tortuous, and uses the general
-	//  formula for the normal to a surface that is specified by two parametric
-	//  parameters.
-
-	// Calculate a vector, a, of derivatives of coordinates w.r.t. u
-	TqFloat dxdu = -p.x() * m_ThetaMax * sin_theta - p.y() * m_ThetaMax * cos_theta;
-	TqFloat dydu =  p.x() * m_ThetaMax * cos_theta - p.y() * m_ThetaMax * sin_theta;
-	TqFloat dzdu = 0.0;
-	CqVector3D a(dxdu, dydu, dzdu);
-
-	// Calculate a vector, b, of derivatives of coordinates w.r.t. v
-	CqVector3D p2p1 = m_Point2 - m_Point1;
-	TqFloat dxdv = p2p1.x() * cos_theta  -  p2p1.y() * sin_theta;
-	TqFloat dydv = p2p1.x() * sin_theta  +  p2p1.y() * cos_theta;
-	TqFloat dzdv = p2p1.z();
-	CqVector3D b(dxdv, dydv, dzdv);
-
-	// The normal vector points in the direction of: a x b
-	Normal = a % b;
-	Normal.Unit();
-
-	// Return the point on the surface.
-	return ( CqVector3D( p.x() * cos_theta - p.y() * sin_theta, p.x() * sin_theta + p.y() * cos_theta, p.z() ) );
-}
-
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -985,8 +980,8 @@ void	CqParaboloid::Bound(CqBound* bound) const
 	/*	TqFloat xminang,yminang,xmaxang,ymaxang;
 		xminang=yminang=min(m_ThetaMin,m_ThetaMax);
 		xmaxang=ymaxang=max(m_ThetaMin,m_ThetaMax);
-	 
-	 
+
+
 		// If start and end in same segement, just use the points.
 		if(static_cast<TqInt>(m_ThetaMin/90)!=static_cast<TqInt>(m_ThetaMax/90))
 		{
@@ -1055,47 +1050,47 @@ TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aS
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqParaboloid::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqInt thetaRes = m_uDiceSize + 1;
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
 
-	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
-	TqFloat r = m_RMax * sqrt( z / m_ZMax );
-	return ( CqVector3D( r * cos( theta ), r * sin( theta ), z ) );
-}
+	//build look-up tables for sin(theta), cos(theta)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
 
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat sinTheta = sinThetaTab[u];
 
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
+			// calc surface point
+			TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+			TqFloat r = m_RMax * sqrt( z / m_ZMax );
 
-CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	TqFloat theta = degToRad( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
-	TqFloat sin_theta = sin( theta );
-	TqFloat cos_theta = cos( theta );
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( r * cosTheta, r * sinTheta, z );
 
-	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
-	TqFloat r = m_RMax * sqrt( z / m_ZMax );
+			// calc normal
+			if (normalGrid != NULL) {
+				// TODO: could put this calculation in look-up-tables as well. -trev
+				TqFloat dzdr = r * 2.0 * m_ZMax / ( m_RMax * m_RMax );
+				TqFloat normalAngle = M_PI_2 - atan( dzdr );
+				CqVector3D Normal;
 
-	TqFloat dzdr = r * 2.0 * m_ZMax / ( m_RMax * m_RMax );
-	TqFloat normalAngle = M_PI_2 - atan( dzdr );
-	Normal.x( cos_theta * cos( normalAngle ) );
-	Normal.y( sin_theta * cos( normalAngle ) );
-	Normal.z( -sin( normalAngle ) );
-
-	return ( CqVector3D( r * cos_theta, r * sin_theta, z ) );
+				Normal.x( cosTheta * cos( normalAngle ) );
+				Normal.y( sinTheta * cos( normalAngle ) );
+				Normal.z( -sin( normalAngle ) );
+				normalGrid[gridOffset] = Normal;
+			}
+		}
+	}
 }
 
 
@@ -1137,7 +1132,7 @@ CqSurface*	CqTorus::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqTorus::Bound(CqBound* bound) const
+void CqTorus::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
@@ -1196,47 +1191,50 @@ TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqTorus::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat phi = degToRad( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
+	int thetaRes = m_uDiceSize+1;
+	int phiRes = m_vDiceSize+1;
 
-	TqFloat r = m_MinorRadius * cos( phi );
-	TqFloat z = m_MinorRadius * sin( phi );
-	return ( CqVector3D( ( m_MajorRadius + r ) * cos( theta ), ( m_MajorRadius + r ) * sin( theta ), z ) );
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> sinPhiTab(new TqFloat[phiRes]);
+	boost::scoped_array<TqFloat> cosPhiTab(new TqFloat[phiRes]);
+
+	//build look-up tables for sin(theta), cos(theta) + sin(phi), cos(phi)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
+	sinCosGrid(degToRad(m_PhiMin), degToRad(m_PhiMax), phiRes, sinPhiTab.get(), cosPhiTab.get());
+
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			TqFloat sinTheta = sinThetaTab[u];
+			TqFloat cosTheta = cosThetaTab[u];
+			TqFloat sinPhi = sinPhiTab[v];
+			TqFloat cosPhi = cosPhiTab[v];
+
+			// calc surface point
+			TqFloat r = m_MinorRadius * cosPhi;
+			TqFloat z = m_MinorRadius * sinPhi;
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( ( m_MajorRadius + r ) * cosTheta, ( m_MajorRadius + r ) * sinTheta, z );
+
+			// calc normal
+			if (normalGrid != NULL) {
+				CqVector3D Normal;
+				Normal.x( cosPhi * cosTheta );
+				Normal.y( cosPhi * sinTheta );
+				Normal.z( sinPhi );
+				normalGrid[gridOffset] = Normal;
+			}
+		}
+	}
 }
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
-
-CqVector3D CqTorus::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat phi = degToRad( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
-
-	TqFloat r = m_MinorRadius * cos( phi );
-	TqFloat z = m_MinorRadius * sin( phi );
-
-	Normal.x( cos( phi ) * cos( theta ) );
-	Normal.y( cos( phi ) * sin( theta ) );
-	Normal.z( sin( phi ) );
-
-	return ( CqVector3D( ( m_MajorRadius + r ) * cos( theta ), ( m_MajorRadius + r ) * sin( theta ), z ) );
-}
-
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -1333,35 +1331,39 @@ TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 	return ( 2 );
 }
 
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- */
-
-CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
+/** Calculate all points on the surface indexed by the surface paramters passed.
+  * \param pointGrid CqVector3D surface points.
+  * \param normalGrid CqVector3D surface normals.
+  */
+void CqDisk::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 {
-	TqFloat theta = degToRad( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat vv = m_MajorRadius - ( ( TqFloat ) v * ( m_MajorRadius - m_MinorRadius ) ) / m_vDiceSize;
-	return ( CqVector3D( vv * cos( theta ), vv * sin( theta ), m_Height ) );
+	TqInt thetaRes = m_uDiceSize + 1;
+	boost::scoped_array<TqFloat> sinThetaTab(new TqFloat[thetaRes]);
+	boost::scoped_array<TqFloat> cosThetaTab(new TqFloat[thetaRes]);
+
+	//build look-up tables for sin(theta), cos(theta)
+	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
+
+	for (TqInt v = 0; v <= m_vDiceSize; v++ )
+	{
+		for (TqInt u = 0; u <= m_uDiceSize; u++ )
+		{
+			TqFloat sinTheta = sinThetaTab[u];
+			TqFloat cosTheta = cosThetaTab[u];
+
+			// calc surface point
+			TqFloat vv = m_MajorRadius - ( ( TqFloat ) v * ( m_MajorRadius - m_MinorRadius ) ) / m_vDiceSize;
+			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
+			pointGrid[gridOffset] = CqVector3D( vv * cosTheta, vv * sinTheta, m_Height );
+
+			// calc normal
+			if (normalGrid != NULL) {
+				CqVector3D Normal = CqVector3D( 0, 0, m_ThetaMax > 0 ? 1 : -1 );
+				normalGrid[gridOffset] = Normal;
+			}
+		}
+	}
 }
-
-
-//---------------------------------------------------------------------
-/** Get a point on the surface indexed by the surface paramters passed.
- * \param u Float surface paramter in u.
- * \param v Float surface paramter in v.
- * \param Normal Storage for the surface normal at that point.
- */
-
-CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
-{
-	Normal = CqVector3D( 0, 0, m_ThetaMax > 0 ? 1 : -1 );
-	return ( DicePoint( u, v ) );
-}
-
 
 //------------------------------------------------------------------------------
 /**
@@ -1523,9 +1525,36 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 }
 
 
+/** \brief Compute a grid of sin(t) and cos(t) at regularly spaced values.
+ *
+ * Computes a regular grid of numSteps sin() and cos() values spaced equally
+ * between t0 and t1 inclusive:
+ *
+ * sint[i] = sin(t0 + dt*i);
+ * cost[i] = cos(t0 + dt*i);
+ *
+ * Where
+ *
+ * dt = (t1-t0)/(numSteps-1);
+ */
+void sinCosGrid(TqFloat t0, TqFloat t1, TqInt numSteps,
+        TqFloat* sint, TqFloat* cost)
+{
+    cost[0] = cos(t0);
+    sint[0] = sin(t0);
+    TqFloat dt = (t1 - t0)/(numSteps-1);
+    TqFloat cosDt = cos(dt);
+    TqFloat sinDt = sin(dt);
+    for(TqInt i = 1; i < numSteps; ++i)
+    {
+        cost[i] = cosDt * cost[i-1] - sinDt * sint[i-1];
+        sint[i] = sinDt * cost[i-1] + cosDt * sint[i-1];
+    }
+}
+
 //---------------------------------------------------------------------
 /** Find the point at which two infinite lines intersect.
- * The algorithm generates a plane from one of the lines and finds the 
+ * The algorithm generates a plane from one of the lines and finds the
  * intersection point between this plane and the other line.
  * \return false if they are parallel, true if they intersect.
  */
@@ -1561,5 +1590,6 @@ void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D
 	p += S;
 }
 
-} // namespace Aqsis
+}
+// namespace Aqsis
 //---------------------------------------------------------------------
