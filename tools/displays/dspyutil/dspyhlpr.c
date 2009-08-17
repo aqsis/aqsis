@@ -27,6 +27,24 @@ PtDspyError DspyFindStringInParamList(const char *string, char **result,
 	return PkDspyErrorNoResource;
 }
 
+PtDspyError DspyFindStringsInParamList(const char *string, char ***result,
+                                      int n, const UserParameter *p)
+{
+	int i;
+
+	for (i = 0; i < n; i++, p++)
+		if (p->vtype == 's' &&
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
+		{
+			*result = (char **)p->value;
+			return PkDspyErrorNone;
+		}
+
+	return PkDspyErrorNoResource;
+}
+
+
 PtDspyError DspyFindMatrixInParamList(const char *string, float *result,
                                       int n, const UserParameter *p)
 {

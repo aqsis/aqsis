@@ -22,6 +22,8 @@ extern "C"
 extern PtDspyError
 	DspyFindStringInParamList(const char *string, char **result,
 	                          int n, const UserParameter *p),
+	DspyFindStringsInParamList(const char *string, char ***result,
+	                          int n, const UserParameter *p),
 	DspyFindMatrixInParamList(const char *string, float *result,
 	                          int n, const UserParameter *p),
 	DspyFindFloatInParamList(const char *string, float *result,

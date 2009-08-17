@@ -661,15 +661,15 @@ extern "C"
 							   "for image file " << filename << ".");
 				}
 
+				// Check for a parameter called "channelnames"
+				char** channelNamesParameter = 0;
+				DspyFindStringsInParamList("channelnames", &channelNamesParameter, paramCount, parameters);
+
 				for (int i = 0; i < formatCount; ++i)
 				{
 					std::string chanName("");
-					char* channelNameParameter = 0;
-					std::stringstream chanParameterName;
-					chanParameterName << "channelname" << i;
-					DspyFindStringInParamList(chanParameterName.str().c_str(), &channelNameParameter, paramCount, parameters);
-					if(channelNameParameter)
-						chanName = channelNameParameter;
+					if(channelNamesParameter)
+						chanName = channelNamesParameter[i];
 
 					std::string formatName(format[i].name);
 					if(formatName.size() == 1 &&
