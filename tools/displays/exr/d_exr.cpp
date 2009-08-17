@@ -601,6 +601,26 @@ extern "C"
 					else
 						header.compression() = ZIP_COMPRESSION;
 				}
+
+				/** If any custom attribute parameters have been specified, add them
+				 *  to the header now.
+				 */
+				const UserParameter* p = parameters;
+				for(int i = 0; i < paramCount; i++, p++)
+				{
+					std::string paramName(p->name);
+					static std::string image_metadata_id("image_metadata:");
+					std::string::size_type loc = paramName.find(image_metadata_id);
+					if(loc == 0)
+					{
+						std::string attrName = paramName.substr(image_metadata_id.size());
+						if(p->vtype == 's')
+						{
+							header.insert(attrName.c_str(), StringAttribute(*(char **)p->value));
+						}
+					}
+				}
+
 				Image *newImage = new Image (filename, header);
 				gImages[filename] = boost::shared_ptr<Image>(newImage);
 			}
