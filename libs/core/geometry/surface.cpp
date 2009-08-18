@@ -678,6 +678,15 @@ CqParameter* CqSurface::FindUserParam( const char* name ) const
 	return( NULL );
 }
 
+
+/// Transform the bound cuboid in into out via the transformation trans.
+static void transformCuboid(CqVector3D out[8], const CqVector3D in[8],
+							const CqMatrix& trans)
+{
+	for(int i = 0; i < 8; ++i)
+		out[i] = trans*in[i];
+}
+
 TqFloat CqSurface::AdjustedShadingRate() const
 {
 	TqFloat shadingRate =
@@ -726,11 +735,6 @@ TqFloat CqSurface::AdjustedShadingRate() const
 
 	if (motionFac > 0.0 && (isMoving() || cameraTransform->isMoving() ) )
 	{
-		// TODO: find optimal scalingConst.  This one seems to work well, as it produces about the level of quality
-		// as a non-motionfactor optimized render which uses a ShadingRate (approx)= average of the
-		// adjusted-shading-rates this algorithm produces.
-		const TqFloat scalingConst = 0.0833;
-
 		// get the exposure-time (Time of shutter close - Time of shutter open)
 		const TqFloat* shutterTimes = context->GetFloatOption( "System", "Shutter" );
 		assert(shutterTimes);
@@ -757,41 +761,60 @@ TqFloat CqSurface::AdjustedShadingRate() const
 		// only proceed if object is moving
 		if (keyframeTimes.size() > 1)
 		{
-			CqBound objBound(m_Bound);
-			CqMatrix matCameraToObject0;
-			context->matSpaceToSpace("camera", "object", NULL, pTransform().get(), *keyframeTimes.begin(), matCameraToObject0);
-			objBound.Transform(matCameraToObject0);
+			// Get the bound for the object, in object space.  TODO: This is
+			// potentially inefficient, because the bound as calculated in
+			// PostSurface() is calculated again.  However, the cached m_Bound
+			// is the bound in hybrid camera/raster space which isn't very
+			// helpful for us.
+			//
+			// TODO: avoid using the expanded bound which has been adjusted for
+			// MB, as returned by the Bound() function.
+			CqBound bound;
+			Bound(&bound);
+			CqVector3D boundVerts[8];
+			bound.getBoundCuboid(boundVerts);
+			// Now get the cuboid corresponding to the bound (in camera space
+			// at time = 0), and transform to object space.  In object space,
+			// the bound is fixed in time by definition.
+			CqMatrix camToObj;
+			context->matSpaceToSpace("camera", "object", NULL, objectTransform.get(),
+									 0, camToObj);
+			transformCuboid(boundVerts, boundVerts, camToObj);
 
-			CqVector3D objBoundCuboid[8];
-			objBound.getBoundCuboid(objBoundCuboid);
+			// TODO: Here we've got to do a composite transform:
+			//
+			// object->camera (time t) * camera->raster (time 0)
+			//
+			// due to the fact that direct object->raster doesn't seem to pick
+			// up the correct camera motion blur.  This should be fixed by
+			// fixing matSpaceToSpace() properly.
+			CqMatrix camToRast;
+			context->matSpaceToSpace("camera", "raster", NULL, objectTransform.get(),
+									 0, camToRast);
 
-			TqFloat minSpeed = FLT_MAX; // initialize to max float value
-			CqVector3D prevWorldCuboid[8];
-			CqVector3D currWorldCuboid[8];
+			TqFloat minSpeed = FLT_MAX;
+			CqVector3D prevVerts[8];
+			CqVector3D currVerts[8];
 
-			// get bounding box (cuboid) for time 0
-			CqBound prevWorldBound(objBound);
-			CqMatrix matObjectToCameraT0;
-			context->matSpaceToSpace("object", "camera", NULL, pTransform().get(), keyframeTimes[0], matObjectToCameraT0);
-			prevWorldBound.Transform(matObjectToCameraT0);
-			prevWorldBound.getBoundCuboid(prevWorldCuboid);
+			// Get raster space bound at start of first motion segment.
+			CqMatrix objToCam;
+			context->matSpaceToSpace("object", "camera", NULL,
+					objectTransform.get(), keyframeTimes[0], objToCam);
+			transformCuboid(prevVerts, boundVerts, camToRast*objToCam);
 
 			for (int t = 1; t < static_cast<int>(keyframeTimes.size()); t++)
 			{
-				// get cuboid for time t
-				CqBound currWorldBound(objBound);
-				CqMatrix matObjectToCameraT1;
-				context->matSpaceToSpace("object", "camera", NULL, pTransform().get(), keyframeTimes[t], matObjectToCameraT1);
-				currWorldBound.Transform(matObjectToCameraT1);
-				currWorldBound.getBoundCuboid(currWorldCuboid);
+				// get cuboid at time t
+				context->matSpaceToSpace("object", "camera", NULL,
+						pTransform().get(), keyframeTimes[t], objToCam);
+				transformCuboid(currVerts, boundVerts, camToRast*objToCam);
 
-				// this takes vector differences between verts of cuboids C(t1) and C(t0) and finds min distance^2
+				// take the differences between verts of cuboids at the current
+				// and previous times, and find the min distance^2
 				TqFloat minDist = FLT_MAX;
 				for (int i = 0; i < 8; i++)
 				{
-					CqVector3D vecDiff = currWorldCuboid[i] - prevWorldCuboid[i];
-					TqFloat dist = vecDiff.Magnitude2();
-
+					TqFloat dist = (currVerts[i] - prevVerts[i]).Magnitude2();
 					if (dist < minDist)
 						minDist = dist;
 				}
@@ -802,11 +825,18 @@ TqFloat CqSurface::AdjustedShadingRate() const
 					minSpeed = speed;
 
 				// update prevCuboid
-				for (int i = 0; i < 8; i++)
-					prevWorldCuboid[i] = currWorldCuboid[i];
+				for(int i = 0; i < 8; ++i)
+					prevVerts[i] = currVerts[i];
 			}
 
-			// multiply shading rate by distance factor, user-specified motion-factor and special const
+			// TODO: find optimal scalingConst.  This one seems to work well,
+			// as it produces about the level of quality as a non-motionfactor
+			// optimized render which uses a ShadingRate (approx)= average of
+			// the adjusted-shading-rates this algorithm produces.
+			const TqFloat scalingConst = 0.0833;
+			// The shading rate is adjusted according to the estimated distance
+			// travelled by a micropolygon across the screen given by
+			// minSpeed*exposureTime.
 			TqFloat shadingRateAdj = max<float>(1.0, scalingConst * exposureTime * minSpeed * motionFac);
 
 			shadingRate *= shadingRateAdj;
