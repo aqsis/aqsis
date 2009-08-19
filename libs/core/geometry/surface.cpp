@@ -124,7 +124,7 @@ void CqSurface::AdjustBoundForTransformationMotion( CqBound* B ) const
 	if( keyframeTimes.size() > 1 )
 	{
 		CqMatrix matCameraToObject0;
-		QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), keyframeTimes.begin()->second, matCameraToObject0 );
+		QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), 0, matCameraToObject0 );
 		CqBound B0;
 		B0.vecMin() = B->vecMin();
 		B0.vecMax() = B->vecMax();
