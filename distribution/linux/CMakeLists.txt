@@ -3,7 +3,7 @@ INSTALL(FILES application.png
 	RENAME aqsis.png)
 
 INSTALL(FILES mime.png
-	DESTINATION ${CMAKE_INSTALL_PREFIX}/share/pixmaps
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/192x192/mimetypes
 	RENAME aqsis-doc.png)
 
 INSTALL(FILES aqsis.xml
