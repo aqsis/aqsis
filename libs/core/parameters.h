@@ -793,10 +793,10 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 {
 	public:
 		CqParameterTypedVaryingArray( const char* strName, TqInt Count = 1 ) :
-				CqParameterTyped<T, SLT>( strName, Count )
-		{
-			m_aValues.resize( 1, std::vector<T>(Count) );
-		}
+				CqParameterTyped<T, SLT>( strName, Count ),
+				m_size(1),
+				m_aValues(Count)
+		{ }
 		CqParameterTypedVaryingArray( const CqParameterTypedVaryingArray<T, I, SLT>& From ) :
 				CqParameterTyped<T, SLT>( From )
 		{
@@ -823,11 +823,12 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual	void	SetSize( TqInt size )
 		{
-			m_aValues.resize( size, std::vector< T >(this->m_Count) );
+			m_size = size;
+			m_aValues.resize(m_size*this->m_Count);
 		}
 		virtual	TqUint	Size() const
 		{
-			return ( m_aValues.size() );
+			return m_size;
 		}
 		virtual	void	Clear()
 		{
@@ -843,7 +844,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			pTResult1->SetSize( 4 );
 			pTResult2->SetSize( 4 );
 			// Check if a valid 4 point quad, do nothing if not.
-			if ( m_aValues.size() == 4 )
+			if ( Size() == 4 )
 			{
 				if ( u )
 				{
@@ -877,26 +878,22 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		virtual	const	T*	pValue() const
 		{
 			assert( 0 < m_aValues.size() );
-			assert( 0 < m_aValues[0].size() );
-			return ( &m_aValues[ 0 ][ 0 ] );
+			return &m_aValues[0];
 		}
 		virtual	T*	pValue()
 		{
 			assert( 0 < m_aValues.size() );
-			assert( 0 < m_aValues[0].size() );
-			return ( &m_aValues[ 0 ][ 0 ] );
+			return &m_aValues[0];
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
-			assert( 0 < m_aValues[0].size() );
-			return ( &m_aValues[ Index ][ 0 ] );
+			assert(Index < Size());
+			return &m_aValues[this->m_Count*Index];
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
-			assert( 0 < m_aValues[0].size() );
-			return ( &m_aValues[ Index ][ 0 ] );
+			assert(Index < Size());
+			return (&m_aValues[this->m_Count*Index]);
 		}
 
 
@@ -906,10 +903,9 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			assert( pFrom->Count() == this->Count() );
 
 			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
-			TqInt index;
 			T* pTargetValues = pValue( idxTarget );
-			T* pSourceValues = pFromTyped->pValue( idxSource );
-			for( index = 0; index < this->Count(); index++ )
+			const T* pSourceValues = pFromTyped->pValue( idxSource );
+			for(TqInt index = 0; index < this->Count(); index++ )
 				pTargetValues[ index ] = pSourceValues[ index ];
 		}
 
@@ -917,15 +913,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		 */
 		CqParameterTypedVaryingArray<T, I, SLT>& operator=( const CqParameterTypedVaryingArray<T, I, SLT>& From )
 		{
-			m_aValues.resize( From.m_aValues.size(), std::vector<T>(From.Count()) );
-			this->m_Count = From.m_Count;
-			TqUint j;
-			for ( j = 0; j < m_aValues.size(); j++ )
-			{
-				TqUint i;
-				for ( i = 0; i < (TqUint) this->m_Count; i++ )
-					m_aValues[ j ][ i ] = From.m_aValues[ j ][ i ];
-			}
+			m_size = From.m_size;
+			m_aValues.assign(From.m_aValues.begin(), From.m_aValues.end());
 			return ( *this );
 		}
 
@@ -939,7 +928,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 
 	private:
-		std::vector<std::vector<T> >	m_aValues;		///< Array of varying values.
+		TqInt m_size;  ///< number of values stored ( == m_aValues.size()/m_Count )
+		std::vector<T>	m_aValues;		///< Array of varying values.
 }
 ;
 
@@ -1443,7 +1433,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 {
 	assert( pResult->Type() == this->Type() );
 	assert( pResult->Class() == class_varying );
-	assert( pResult->Size() == m_aValues.size() );
+	assert( pResult->Size() == Size() );
 
 	T res;
 
@@ -1454,7 +1444,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 		pResult->ArrayEntry(arrayIndex)->GetValuePtr( pResData[arrayIndex] );
 
 	// Check if a valid 4 point quad, do nothing if not.
-	if ( m_aValues.size() == 4 )
+	if ( Size() == 4 )
 	{
 		// Note it is assumed that the variable has been
 		// initialised to the correct size prior to calling.
@@ -1513,7 +1503,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
 	assert( NULL != pResData );
 
 	// Check if a valid 4 point quad, do nothing if not.
-	if ( m_aValues.size() == 4 )
+	if ( Size() == 4 )
 	{
 		// Note it is assumed that the variable has been
 		// initialised to the correct size prior to calling.
