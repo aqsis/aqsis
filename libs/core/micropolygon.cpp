@@ -404,18 +404,29 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	if(USES(lUses, EnvVars_dv))
 		setDv();
 
-	// Set I, the incident ray direction; this is just equal to P in shading
-	// (camera) coords for a projective camera transformation, or (0,0,1) for
-	// orthographic.
-	IqShaderData* pI = pVar(EnvVars_I);
+	// Set I, the incident ray direction.
 	switch(QGetRenderContext()->GetIntegerOption("System", "Projection")[0])
 	{
 		case ProjectionOrthographic:
-			pI->SetVector(CqVector3D(0,0,1));
+			{
+				// For an orthographic camera, all incoming rays are parallel
+				// and in the (0,0,1) direction.  The length of I is set to the
+				// z-component of P so that it represents the distance from the
+				// ray origin (somewhere on the xy plane) to the current
+				// shading point.
+				const CqVector3D* pP = 0;
+				pVar(EnvVars_P)->GetPointPtr(pP);
+				CqVector3D* pI = 0;
+				pVar(EnvVars_I)->GetVectorPtr(pI);
+				for(TqInt i = 0; i < gs; ++i)
+					pI[i] = CqVector3D(0,0,pP[i].z());
+			}
 			break;
 		case ProjectionPerspective:
 		default:
-			pI->SetValueFromVariable(pVar(EnvVars_P));
+			// I is just equal to P in shading (camera) coords for a projective
+			// camera transformation.
+			pVar(EnvVars_I)->SetValueFromVariable(pVar(EnvVars_P));
 			break;
 	}
 
