@@ -81,9 +81,6 @@ void CqPointsKDTreeData::SetpPoints( const CqPoints* pPoints )
 	m_pPointsSurface = pPoints;
 }
 
-void CqPointsKDTreeData::FreePoints()
-{}
-
 
 //---------------------------------------------------------------------
 /** Constructor.

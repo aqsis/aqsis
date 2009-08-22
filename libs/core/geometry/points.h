@@ -73,7 +73,6 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		}
 
 		void	SetpPoints( const CqPoints* pPoints );
-		void	FreePoints();
 
 	private:
 		class CqPointsKDTreeDataComparator;
@@ -129,11 +128,6 @@ class CqPoints : public CqSurface
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
-		virtual void	RenderComplete()
-		{
-			ClearKDTree();
-			CqSurface::RenderComplete();
-		}
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
@@ -245,11 +239,6 @@ class CqPoints : public CqSurface
 		const CqKDTree<TqInt>&	KDTree() const
 		{
 			return( m_KDTree);
-		}
-
-		void ClearKDTree()
-		{
-			m_KDTreeData.FreePoints();
 		}
 
 		/// Initialise the KDTree to point to the whole points list.
@@ -583,16 +572,6 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 				aSplits.push_back( pNewMotion );
 			}
 			return ( cSplits );
-		}
-		virtual void	RenderComplete()
-		{
-			TqInt i;
-			for ( i = 0; i < cTimes(); i++ )
-			{
-				CqPoints* Points = static_cast<CqPoints*>( GetMotionObject( Time( i ) ).get() );
-				Points->ClearKDTree();
-			}
-			CqSurface::RenderComplete();
 		}
 	protected:
 };
