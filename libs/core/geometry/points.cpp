@@ -379,6 +379,13 @@ TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
  
  	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
  
+	// Initialise the max width of the child surfaces.  Initializing with the
+	// current m_MaxWidth is the best strategy when all points in the
+	// collection have similar widths.  For widely varying widths this may be
+	// an inefficient strategy...
+	pA->m_MaxWidth = m_MaxWidth;
+	pB->m_MaxWidth = m_MaxWidth;
+
  	aSplits.push_back( pA );
  	aSplits.push_back( pB );
  
