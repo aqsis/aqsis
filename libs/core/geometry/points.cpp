@@ -271,14 +271,13 @@ void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
 		TqInt diceSize, IqShaderData* pData)
 {
 	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
-	for(TqInt i = 0; i < diceSize; i++ )
+	const T* src = pTParam->pValue();
+	for(TqInt j = 0, arraySize = pTParam->Count(); j < arraySize; j++)
 	{
-		IqShaderData* arrayValue;
-		for(TqInt j = 0; j < pTParam->Count(); j++)
-		{
-			arrayValue = pData->ArrayEntry(j);
-			arrayValue->SetValue( paramToShaderType<SLT, T>( pTParam->pValue() [ paramIdx[i] ] ), i );
-		}
+		SLT* dest = 0;
+		pData->ArrayEntry(j)->GetValuePtr(dest);
+		for(TqInt i = 0; i < diceSize; i++ )
+			dest[i] = paramToShaderType<SLT,T>( src[arraySize*paramIdx[i] + j] );
 	}
 }
 
@@ -343,12 +342,10 @@ bool	CqPoints::Diceable()
 
 void	CqPoints::Bound(CqBound* bound) const
 {
-/*	for ( t = 0; t < cTimes(); t++ )
-	{
-		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/
-		for( TqUint i = 0; i < nVertices(); i++ )
-			bound->Encapsulate( vectorCast<CqVector3D>(m_pPoints->P()->pValue(m_KDTree.aLeaves()[i])[0]) );
-/*	}*/
+	CqVector4D* P = m_pPoints->P()->pValue();
+	std::vector<TqInt>::const_iterator idx = m_KDTree.aLeaves().begin();
+	for(TqInt i = 0; i < m_nVertices; i++)
+		bound->Encapsulate( vectorCast<CqVector3D>( P[idx[i]] ) );
 
 	// Expand the bound to take into account the width of the particles.
 	bound->vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
