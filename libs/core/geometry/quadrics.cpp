@@ -181,31 +181,26 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 		GetIntegerAttribute("System", "Orientation")[0] != 0;
 
 	pGrid->pVar(EnvVars_P)->GetPointPtr(pointGrid);
-	pGrid->pVar(EnvVars_N)->GetNormalPtr(normalGrid);
+	pGrid->pVar(EnvVars_Ng)->GetNormalPtr(normalGrid);
 
-	// check pVars to see if we need to calc points, normals
-	bool usePoints=false;
+	// check pVars to see if we need to calc normals
 	bool useNormals=false;
 
-	if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
+	if (USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng))
 	{
-		usePoints=true;
-		if (USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng))
-		{
-			useNormals = true;
-			DicePoints(pointGrid, normalGrid);
-			// Indicate that P and Ng will be filled in by the loops below.
-			DONE( lDone, EnvVars_P );
-			DONE( lDone, EnvVars_Ng );
-		}
-		else
-		{
-			DicePoints(pointGrid, NULL);
-			// Indicate that P (only) will be filled in by the loops below
-			DONE( lDone, EnvVars_P );
-		}
+		useNormals = true;
+		DicePoints(pointGrid, normalGrid);
+		// Indicate that P and Ng will be filled in by the loops below.
+		DONE( lDone, EnvVars_P );
+		DONE( lDone, EnvVars_Ng );
 	}
-
+	else
+	{
+		DicePoints(pointGrid, NULL);
+		// Indicate that P (only) will be filled in by the loops below
+		DONE( lDone, EnvVars_P );
+	}
+	
 	TqFloat du = 1.0 / uDiceSize();
 	TqFloat dv = 1.0 / vDiceSize();
 	for ( v = 0; v <= vDiceSize(); v++ )
@@ -216,25 +211,22 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 			TqFloat uf = u * du;
 			TqInt igrid = ( v * ( uDiceSize() + 1 ) ) + u; // offset for grid point/normal buffer
 
-			if(usePoints)
+			if(useNormals)
 			{
-				if(useNormals)
-				{
-					P = pointGrid[igrid];
-					N = normalGrid[igrid];
+				N = normalGrid[igrid];
 
-					if(flipNormals)
-					    N = -N;
-
-					pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
-					pGrid->pVar(EnvVars_Ng)->SetNormal( m_matITTx * N, igrid );
-				}
-				else
-				{
-					P = pointGrid[igrid];
-					pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
-				}
+				if(flipNormals)
+				    N = -N;
+				
+				pointGrid[igrid] = m_matTx * pointGrid[igrid];
+				normalGrid[igrid] =  m_matITTx * N;
 			}
+			else
+			{
+				P = pointGrid[igrid];
+				pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
+			}
+		
 			if( USES( lUses, EnvVars_s ) && NULL != pGrid->pVar(EnvVars_s) && bHasVar(EnvVars_s) )
 			{
 				TqFloat _s = BilinearEvaluate( s0, s1, s2, s3, uf, vf );
@@ -489,17 +481,17 @@ void CqSphere::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			TqFloat sinTheta = sinThetaTab[u];
 			TqFloat cosPhi = cosPhiTab[v];
 			TqFloat sinPhi = sinPhiTab[v];
+			
+			// unit point vector
+			CqVector3D unitP = CqVector3D(cosTheta*cosPhi, sinTheta*cosPhi, sinPhi);
 
 			// calc surface point
 			TqInt gridOffset = ( v * ( m_uDiceSize + 1 ) ) + u;
-			pointGrid[gridOffset] = CqVector3D( ( m_Radius * cosTheta * cosPhi ), ( m_Radius * sinTheta * cosPhi ), ( m_Radius * sinPhi ) );
+			pointGrid[gridOffset] = m_Radius * unitP;
 
 			// calc normal vector
-			if (normalGrid != NULL) {
-				CqVector3D N_new = pointGrid[gridOffset];
-				N_new.Unit();
-				normalGrid[gridOffset] = N_new;
-			}
+			if (normalGrid != NULL) 
+				normalGrid[gridOffset] = unitP;
 		}
 	}
 }
@@ -571,7 +563,6 @@ TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits,
 {
 	TqFloat vcent = ( m_vMin + m_vMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
-	//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
 	boost::shared_ptr<CqCone> pNew1( new CqCone() );
 	boost::shared_ptr<CqCone> pNew2( new CqCone() );
@@ -619,6 +610,10 @@ void CqCone::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 	//build look-up tables for sin(theta), cos(theta)
 	sinCosGrid(degToRad(m_ThetaMin), degToRad(m_ThetaMax), thetaRes, sinThetaTab.get(), cosThetaTab.get());
 
+	TqFloat coneLength = sqrt( m_Height * m_Height + m_Radius * m_Radius );
+	TqFloat xN = m_Height / coneLength;
+	TqFloat normalZ = m_Radius / coneLength;
+		
 	for (TqInt v = 0; v <= m_vDiceSize; v++ )
 	{
 		for (TqInt u = 0; u <= m_uDiceSize; u++ )
@@ -636,13 +631,12 @@ void CqCone::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			pointGrid[gridOffset] = CqVector3D( r * cosTheta, r * sinTheta, z );
 
 			// calc normal
-			if (normalGrid != NULL) {
-				TqFloat coneLength = sqrt( m_Height * m_Height + m_Radius * m_Radius );
-				TqFloat xN = m_Height / coneLength;
+			if (normalGrid != NULL) 
+			{		
 				CqVector3D Normal;
 				Normal.x( xN * cosTheta );
 				Normal.y( xN * sinTheta );
-				Normal.z( m_Radius / coneLength );
+				Normal.z( normalZ );
 
 				normalGrid[gridOffset] = Normal;
 			}
@@ -771,10 +765,10 @@ void CqCylinder::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			pointGrid[gridOffset] = point;
 
 			// calc normal
-			if (normalGrid != NULL) {
+			if (normalGrid != NULL) 
+			{
 				CqVector3D normal = point;
 				normal.z( 0 );
-				normal.Unit();
 
 				normalGrid[gridOffset] = normal;
 			}
@@ -827,7 +821,7 @@ CqSurface*	CqHyperboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqHyperboloid::Bound(CqBound* bound) const
+void CqHyperboloid::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	curve.push_back( m_Point1 );
@@ -916,7 +910,8 @@ void CqHyperboloid::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			// Calculate the normal vector - this is a bit tortuous, and uses the general
 			// formula for the normal to a surface that is specified by two parametric
 			// parameters.
-			if (normalGrid != NULL) {
+			if (normalGrid != NULL) 
+			{
 				// Calculate a vector, a, of derivatives of coordinates w.r.t. u
 				TqFloat dxdu = -p.x() * m_ThetaMax * sinTheta - p.y() * m_ThetaMax * cosTheta;
 				TqFloat dydu =  p.x() * m_ThetaMax * cosTheta - p.y() * m_ThetaMax * sinTheta;
@@ -932,7 +927,6 @@ void CqHyperboloid::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 
 				// The normal vector points in the direction of: a x b
 				CqVector3D Normal = a % b;
-				Normal.Unit();
 				normalGrid[gridOffset] = Normal;
 			}
 		}
@@ -975,21 +969,8 @@ CqSurface*	CqParaboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqParaboloid::Bound(CqBound* bound) const
+void CqParaboloid::Bound(CqBound* bound) const
 {
-	/*	TqFloat xminang,yminang,xmaxang,ymaxang;
-		xminang=yminang=min(m_ThetaMin,m_ThetaMax);
-		xmaxang=ymaxang=max(m_ThetaMin,m_ThetaMax);
-
-
-		// If start and end in same segement, just use the points.
-		if(static_cast<TqInt>(m_ThetaMin/90)!=static_cast<TqInt>(m_ThetaMax/90))
-		{
-			if(yminang<90 && ymaxang>90)	yminang=90;
-			if(yminang<270 && ymaxang>270)	ymaxang=270;
-			if(xminang<180 && xmaxang>180)	xmaxang=180;
-		}*/
-
 	TqFloat x1 = m_RMax * cos( degToRad( 0 ) );
 	TqFloat x2 = m_RMax * cos( degToRad( 180 ) );
 	TqFloat y1 = m_RMax * sin( degToRad( 90 ) );
@@ -1078,16 +1059,15 @@ void CqParaboloid::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			pointGrid[gridOffset] = CqVector3D( r * cosTheta, r * sinTheta, z );
 
 			// calc normal
-			if (normalGrid != NULL) {
-				// TODO: could put this calculation in look-up-tables as well. -trev
-				TqFloat dzdr = r * 2.0 * m_ZMax / ( m_RMax * m_RMax );
-				TqFloat normalAngle = M_PI_2 - atan( dzdr );
-				CqVector3D Normal;
-
-				Normal.x( cosTheta * cos( normalAngle ) );
-				Normal.y( sinTheta * cos( normalAngle ) );
-				Normal.z( -sin( normalAngle ) );
-				normalGrid[gridOffset] = Normal;
+			if (normalGrid != NULL) 
+			{
+				TqFloat normalZ;
+				if (r == 0) 
+					normalZ = -1;
+				else
+					normalZ = -0.5*m_RMax*m_RMax/m_ZMax / r;
+					
+				normalGrid[gridOffset] = CqVector3D(cosTheta, sinTheta, normalZ);
 			}
 		}
 	}
@@ -1225,11 +1205,13 @@ void CqTorus::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			pointGrid[gridOffset] = CqVector3D( ( m_MajorRadius + r ) * cosTheta, ( m_MajorRadius + r ) * sinTheta, z );
 
 			// calc normal
-			if (normalGrid != NULL) {
+			if (normalGrid != NULL) 
+			{
 				CqVector3D Normal;
 				Normal.x( cosPhi * cosTheta );
 				Normal.y( cosPhi * sinTheta );
 				Normal.z( sinPhi );
+				
 				normalGrid[gridOffset] = Normal;
 			}
 		}
@@ -1272,7 +1254,7 @@ CqSurface*	CqDisk::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-void	CqDisk::Bound(CqBound* bound) const
+void CqDisk::Bound(CqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( m_MinorRadius, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
@@ -1357,7 +1339,8 @@ void CqDisk::DicePoints( CqVector3D* pointGrid, CqVector3D* normalGrid )
 			pointGrid[gridOffset] = CqVector3D( vv * cosTheta, vv * sinTheta, m_Height );
 
 			// calc normal
-			if (normalGrid != NULL) {
+			if (normalGrid != NULL) 
+			{
 				CqVector3D Normal = CqVector3D( 0, 0, m_ThetaMax > 0 ? 1 : -1 );
 				normalGrid[gridOffset] = Normal;
 			}
@@ -1388,20 +1371,8 @@ void CqQuadric::Circle( const CqVector3D& O, const CqVector3D& X, const CqVector
 		ae += 2 * RI_PI;
 
 	theta = ae - as;
-	/*	if ( theta <= RI_PIO2 )
-			narcs = 1;
-		else
-		{
-			if ( theta <= RI_PI )
-				narcs = 2;
-			else
-			{
-				if ( theta <= 1.5 * RI_PI )
-					narcs = 3;
-				else*/
 	narcs = 4;
-	/*		}
-		}*/
+
 	dtheta = theta / static_cast<TqFloat>( narcs );
 	TqUint n = 2 * narcs + 1;				// n control points ;
 
@@ -1450,21 +1421,8 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 		else
 			theta = 2.0 * RI_PI;
 	}
-
-	/*	if ( fabs( theta ) <= RI_PIO2 )
-			narcs = 1;
-		else
-		{
-			if ( fabs( theta ) <= RI_PI )
-				narcs = 2;
-			else
-			{
-				if ( fabs( theta ) <= 1.5 * RI_PI )
-					narcs = 3;
-				else*/
+	
 	narcs = 4;
-	/*		}
-		}*/
 	dtheta = theta / static_cast<TqFloat>( narcs );
 
 	std::vector<TqFloat> cosines( narcs + 1 );
@@ -1540,15 +1498,22 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 void sinCosGrid(TqFloat t0, TqFloat t1, TqInt numSteps,
         TqFloat* sint, TqFloat* cost)
 {
-    cost[0] = cos(t0);
-    sint[0] = sin(t0);
-    TqFloat dt = (t1 - t0)/(numSteps-1);
-    TqFloat cosDt = cos(dt);
-    TqFloat sinDt = sin(dt);
+	TqDouble prevCos = cos(t0);
+	TqDouble prevSin = sin(t0);
+    TqDouble dt = (t1 - t0)/(numSteps-1);
+    TqDouble cosDt = cos(dt);
+    TqDouble sinDt = sin(dt);
+
+	cost[0] = prevCos;
+	sint[0] = prevSin;
+	
     for(TqInt i = 1; i < numSteps; ++i)
     {
-        cost[i] = cosDt * cost[i-1] - sinDt * sint[i-1];
-        sint[i] = sinDt * cost[i-1] + cosDt * sint[i-1];
+		cost[i] = cosDt * prevCos - sinDt * prevSin;
+        sint[i] = sinDt * prevCos + cosDt * prevSin;
+
+		prevCos = cost[i];
+		prevSin = sint[i];
     }
 }
 
