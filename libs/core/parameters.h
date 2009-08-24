@@ -887,12 +887,12 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			assert(Index < Size());
+			assert(Index < static_cast<TqInt>(Size()));
 			return &m_aValues[this->m_Count*Index];
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			assert(Index < Size());
+			assert(Index < static_cast<TqInt>(Size()));
 			return (&m_aValues[this->m_Count*Index]);
 		}
 
