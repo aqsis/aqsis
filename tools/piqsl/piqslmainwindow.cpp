@@ -30,6 +30,7 @@
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Menu_Item.H>
 #include <FL/Fl_Menu_Button.H>
+#include <FL/fl_ask.H>
 
 #include <aqsis/util/logging.h>
 
@@ -43,26 +44,29 @@ namespace Aqsis {
 void quit_cb(Fl_Widget* w, void*);
 void addImage_cb(Fl_Widget* w, void*);
 void removeImage_cb(Fl_Widget* w, void*);
+void about_cb(Fl_Widget* w, void*);
 
 static Fl_Menu_Item mainMenu[] = {
 	{"&File", FL_ALT+'f', 0, 0, FL_SUBMENU},
 		{"&Open Library", FL_COMMAND+'o', (Fl_Callback*)CqPiqslMainWindow::loadLibrary_cb},
 		{"&Save Library", FL_COMMAND+'s', (Fl_Callback*)CqPiqslMainWindow::saveLibrary_cb},
-		{"Save Library &As", FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
+		{"Save Library &As", FL_SHIFT+FL_COMMAND+'S', (Fl_Callback*)CqPiqslMainWindow::saveLibraryAs_cb, 0, FL_MENU_DIVIDER},
 		{"&Quit", FL_COMMAND+'q', quit_cb},
 		{0},
-	{"&Book", FL_ALT+'b', 0, 0, FL_SUBMENU},
+	// TODO: Re-introduce 'Book' functionality for Aqsis 1.7 (and later).
+/*	{"&Book", FL_ALT+'b', 0, 0, FL_SUBMENU},
 		{"&New"},
 		{"&Export"},
 		{"&Rename"},
 		{"Re&move"},
 		{0},
+*/
 	{"&Image", FL_ALT+'i', 0, 0, FL_SUBMENU},
-		{"&Add", FL_SHIFT+FL_COMMAND+'a', (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
-		{"&Remove", FL_SHIFT+FL_COMMAND+'r', (Fl_Callback*)CqPiqslMainWindow::removeImage_cb},
+		{"&Add", FL_SHIFT+FL_COMMAND+'O', (Fl_Callback*)CqPiqslMainWindow::addImage_cb},
+		{"&Remove", FL_SHIFT+FL_COMMAND+'X', (Fl_Callback*)CqPiqslMainWindow::removeImage_cb},
 		{0},
 	{"&Help", FL_ALT+'h', 0, 0, FL_SUBMENU},
-		{"&About"},
+		{"&About", , (Fl_Callback*)CqPiqslMainWindow::about_cb},
 		{0},
 	{0}
 };
@@ -561,6 +565,12 @@ void CqPiqslMainWindow::checkResize()
 {
 	if(m_doResize)
 		resize();
+}
+
+void CqPiqslMainWindow::about(Fl_Widget* w, void*)
+{
+	std::string str = "piqsl version %s\\ncompiled %s %s";
+	fl_message(version.c_str(), AQSIS_VERSION_STR_FULL, __DATE__, __TIME__);
 }
 
 } // namespace Aqsis
