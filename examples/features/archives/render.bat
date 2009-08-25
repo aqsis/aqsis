@@ -4,7 +4,7 @@ REM ***Render files***
 
 ECHO === Rendering File(s) ===
 ECHO.
-aqsis.exe -progress "menger.rib"
+aqsis.exe -progress "bike.rib"
 IF ERRORLEVEL 0 GOTO end
 
 
