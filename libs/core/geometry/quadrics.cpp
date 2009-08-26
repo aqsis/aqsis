@@ -1509,11 +1509,16 @@ void sinCosGrid(TqFloat t0, TqFloat t1, TqInt numSteps,
 	
     for(TqInt i = 1; i < numSteps; ++i)
     {
-		cost[i] = cosDt * prevCos - sinDt * prevSin;
-        sint[i] = sinDt * prevCos + cosDt * prevSin;
+		TqDouble currCos = cosDt * prevCos - sinDt * prevSin;
+		TqDouble currSin = sinDt * prevCos + cosDt * prevSin;
+        
+		// truncate to float:
+		cost[i] = currCos;
+		sint[i] = currSin;
 
-		prevCos = cost[i];
-		prevSin = sint[i];
+		// save previous calculation as double 
+		prevCos = currCos;
+		prevSin = currSin;
     }
 }
 
