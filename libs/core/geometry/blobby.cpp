@@ -335,7 +335,8 @@ class blobby_vm_assembler
 			{
 					case CqBlobby::CONSTANT:
 					{
-					//Aqsis::log() << warning << "RiBlobby's Constant not supported." << std::endl;
+						m_instructions.push_back(CqBlobby::instruction(CqBlobby::CONSTANT));
+						m_instructions.push_back(CqBlobby::instruction(m_floats[m_code[op.index]]));
 					}
 					break;
 
