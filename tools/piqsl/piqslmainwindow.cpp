@@ -33,6 +33,7 @@
 #include <FL/fl_ask.H>
 
 #include <aqsis/util/logging.h>
+#include <aqsis/version.h>
 
 #include "piqslmainwindow.h"
 #include "image.h"
@@ -41,10 +42,8 @@ extern Aqsis::CqPiqslMainWindow* window;
 
 namespace Aqsis {
 
-void quit_cb(Fl_Widget* w, void*);
-void addImage_cb(Fl_Widget* w, void*);
-void removeImage_cb(Fl_Widget* w, void*);
-void about_cb(Fl_Widget* w, void*);
+static void quit_cb(Fl_Widget* w, void*);
+static void about_cb(Fl_Widget* w, void*);
 
 static Fl_Menu_Item mainMenu[] = {
 	{"&File", FL_ALT+'f', 0, 0, FL_SUBMENU},
@@ -66,7 +65,7 @@ static Fl_Menu_Item mainMenu[] = {
 		{"&Remove", FL_SHIFT+FL_COMMAND+'X', (Fl_Callback*)CqPiqslMainWindow::removeImage_cb},
 		{0},
 	{"&Help", FL_ALT+'h', 0, 0, FL_SUBMENU},
-		{"&About", , (Fl_Callback*)CqPiqslMainWindow::about_cb},
+		{"&About", 0, (Fl_Callback*)about_cb},
 		{0},
 	{0}
 };
@@ -170,7 +169,7 @@ void CqPiqslMainWindow::saveConfigurationAs()
 	}
 }
 
-void quit_cb(Fl_Widget* w, void*)
+static void quit_cb(Fl_Widget* w, void*)
 {
 	window->hide();
 }
@@ -567,10 +566,10 @@ void CqPiqslMainWindow::checkResize()
 		resize();
 }
 
-void CqPiqslMainWindow::about(Fl_Widget* w, void*)
+static void about_cb(Fl_Widget* w, void*)
 {
-	std::string str = "piqsl version %s\\ncompiled %s %s";
-	fl_message(version.c_str(), AQSIS_VERSION_STR_FULL, __DATE__, __TIME__);
+	fl_message("piqsl version %s\ncompiled %s %s",
+			   AQSIS_VERSION_STR_FULL, __DATE__, __TIME__);
 }
 
 } // namespace Aqsis
