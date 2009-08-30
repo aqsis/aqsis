@@ -115,7 +115,7 @@ CqAttributes::CqAttributes()
 	ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
 	ADD_SYSTEM_ATTR8( TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );	// an array of 2D vectors representing the coordinate space.
 	ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
-	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingInterp_Smooth );	// the current shading interpolation mode.
+	ADD_SYSTEM_ATTR( ShadingInterpolation, TqInt, TqFloat, type_integer, ShadingInterp_Smooth );	// the current shading interpolation mode.
 	ADD_SYSTEM_ATTR( GeometricFlatness, TqFloat, TqFloat, type_float, 1.0f );				// the current screen-space geometric flatness.
 	ADD_SYSTEM_ATTR( GeometricFocusFactor, TqFloat, TqFloat, type_float, 1.0f );		// multiplier for CoC area to multiply the shading rate for depth of field
 	ADD_SYSTEM_ATTR( GeometricMotionFactor, TqFloat, TqFloat, type_float, 1.0f );
