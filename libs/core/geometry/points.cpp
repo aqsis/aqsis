@@ -886,8 +886,48 @@ void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
 
 bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
-	const CqVector2D& vecSample = sample.position;
-	return( fContains( vecSample, D, time ) );
+	TqInt iIndex = 0;
+	TqFloat Fraction = 0.0f;
+	bool Exact = true;
+
+	if ( time > m_Times.front() )
+	{
+		if ( time >= m_Times.back() )
+			iIndex = m_Times.size() - 1;
+		else
+		{
+			// Find the appropriate time span.
+			iIndex = 0;
+			while ( time >= m_Times[ iIndex + 1 ] )
+				iIndex += 1;
+			Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
+			Exact = ( m_Times[ iIndex ] == time );
+		}
+	}
+
+	TqFloat r = 0;
+	CqVector3D pos;
+	if( Exact )
+	{
+		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
+		r = pMP1->m_radius;
+		pos = pMP1->m_Point0;
+	}
+	else
+	{
+		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
+		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
+		pos = (pMP2->m_Point0 - pMP1->m_Point0) * Fraction + pMP1->m_Point0;
+		r = (pMP2->m_radius - pMP1->m_radius) * Fraction + pMP1->m_radius;
+	}
+
+	CqVector2D sampPos = sample.position;
+	if( (vectorCast<CqVector2D>(pos) - sampPos).Magnitude2() < r*r )
+	{
+		D = pos.z();
+		return true;
+	}
+	return false;
 }
 
 void CqMicroPolygonMotionPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
@@ -930,57 +970,6 @@ void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius
 		m_Bound.Encapsulate( &B );
 	}
 }
-
-
-//---------------------------------------------------------------------
-/** Determinde whether the 2D point specified lies within this micropolygon.
- * \param vecP 2D vector to test for containment.
- * \param Depth Place to put the depth if valid intersection.
- * \param time The frame time at which to check containment.
- * \return Boolean indicating sample hit.
- */
-
-bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
-{
-	TqInt iIndex = 0;
-	TqFloat Fraction = 0.0f;
-	bool Exact = true;
-
-	if ( time > m_Times.front() )
-	{
-		if ( time >= m_Times.back() )
-			iIndex = m_Times.size() - 1;
-		else
-		{
-			// Find the appropriate time span.
-			iIndex = 0;
-			while ( time >= m_Times[ iIndex + 1 ] )
-				iIndex += 1;
-			Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
-			Exact = ( m_Times[ iIndex ] == time );
-		}
-	}
-
-	if( Exact )
-	{
-		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
-		return( pMP1->fContains( vecP, Depth, time ) );
-	}
-	else
-	{
-		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
-		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
-		CqVector3D MidPoint = ( ( pMP2->m_Point0 - pMP1->m_Point0 ) * Fraction ) + pMP1->m_Point0;
-		TqFloat MidRadius = ( ( pMP2->m_radius - pMP1->m_radius ) * Fraction ) + pMP1->m_radius;
-		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude2() < MidRadius*MidRadius )
-		{
-			Depth = MidPoint.z();
-			return( true );
-		}
-		return ( false );
-	}
-}
-
 
 
 } // namespace Aqsis

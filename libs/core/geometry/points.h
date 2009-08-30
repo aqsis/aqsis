@@ -403,16 +403,6 @@ class CqMovingMicroPolygonKeyPoints
 		}
 
 	public:
-		bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
-		{
-			if( (vectorCast<CqVector2D>(m_Point0) - vecP).Magnitude2() < m_radius*m_radius )
-			{
-				Depth = m_Point0.z();
-				return( true );
-			}
-			return( false );
-		}
-
 		CqBound	GetBound() const
 		{
 			CqVector3D Pmin, Pmax;
@@ -475,8 +465,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		void	DeleteVariables( bool all )
 		{}
 
-		// Overrides from CqMicroPolygon
-		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
