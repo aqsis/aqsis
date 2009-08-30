@@ -656,18 +656,21 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 
 bool CqMicroPolygonPoints::Sample( CqHitTestCache& cache, SqSampleData const& sample, TqFloat& D, CqVector2D& uv, TqFloat time, bool UsingDof ) const
 {
-	if( (vectorCast<CqVector2D>(cache.P[0]) - sample.position).Magnitude2()
-		< m_radius*m_radius )
+	CqVector2D sampPos = sample.position;
+	if(UsingDof)
+		sampPos += compMul(sample.dofOffset, cache.cocMult[0]);
+	if((vectorCast<CqVector2D>(cache.P[0]) - sampPos).Magnitude2() < m_radius*m_radius)
 	{
 		D = cache.P[0].z();
-		return( true );
+		return true;
 	}
-	return( false );
+	return false;
 }
 
 void CqMicroPolygonPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
 {
 	pGrid()->pVar(EnvVars_P)->GetPoint(cache.P[0], m_Index);
+	cache.cocMult[0] = QGetRenderContext()->GetCircleOfConfusion(cache.P[0].z());
 }
 
 void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
@@ -922,6 +925,11 @@ bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, SqSampleD
 	}
 
 	CqVector2D sampPos = sample.position;
+	if(UsingDof)
+	{
+		sampPos += compMul(sample.dofOffset,
+						   QGetRenderContext()->GetCircleOfConfusion(pos.z()));
+	}
 	if( (vectorCast<CqVector2D>(pos) - sampPos).Magnitude2() < r*r )
 	{
 		D = pos.z();
