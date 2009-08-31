@@ -1,6 +1,6 @@
 # Model courtesy of jrMan - www.jrman.org
 
-Display "bike" "file" "rgba"
+Display "bike.tif" "file" "rgba"
 Display "+bike" "framebuffer" "rgb"
 PixelFilter "gaussian" 2 2
 Option "limits" "bucketsize" [32 32]
