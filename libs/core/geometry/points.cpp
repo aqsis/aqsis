@@ -670,7 +670,8 @@ bool CqMicroPolygonPoints::Sample( CqHitTestCache& cache, SqSampleData const& sa
 void CqMicroPolygonPoints::CacheHitTestValues(CqHitTestCache& cache, bool usingDof) const
 {
 	pGrid()->pVar(EnvVars_P)->GetPoint(cache.P[0], m_Index);
-	cache.cocMult[0] = QGetRenderContext()->GetCircleOfConfusion(cache.P[0].z());
+	if(usingDof)
+		cache.cocMult[0] = QGetRenderContext()->GetCircleOfConfusion(cache.P[0].z());
 }
 
 void CqMicroPolygonPoints::CacheOutputInterpCoeffs(SqMpgSampleInfo& cache) const
