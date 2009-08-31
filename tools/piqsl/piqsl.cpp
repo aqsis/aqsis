@@ -35,7 +35,14 @@
 #include	<boost/archive/iterators/transform_width.hpp>
 #include	<boost/archive/iterators/remove_whitespace.hpp>
 
-#include	<boost/pfto.hpp>
+#include    <boost/version.hpp>
+
+#if BOOST_VERSION < 103700
+#   include	<boost/pfto.hpp>
+#else
+#   include	<boost/serialization/pfto.hpp>
+#endif
+
 #ifndef AQSIS_SYSTEM_WIN32
 #	include <sys/types.h>
 #	include <sys/socket.h>
