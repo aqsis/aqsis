@@ -207,7 +207,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 		if(!CheckOnly)
 		{
 			AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-				"Arguments to function not valid : " <<  strName() <<  " - " <<  LineNo());
+				strFileName() << " : " << LineNo() << " : Arguments to function not valid : " <<  strMyName);
 		}
 		return ( Type_Nil );
 	}
