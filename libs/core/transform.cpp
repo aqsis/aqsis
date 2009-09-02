@@ -323,7 +323,7 @@ CqTransform* CqTransform::Inverse( )
 bool CqTransform::GetHandedness( TqFloat time ) const
 {
 	if( m_IsMoving )
-		return ( GetMotionObject( time ).m_Handedness );
+		return ( GetMotionObjectInterpolated( time ).m_Handedness );
 	else
 		return ( m_Handedness );
 }
