@@ -206,7 +206,7 @@ TqInt check_type()
 	yylval.m_pSymbol.eType=0;
 
 	// First check for local variables in the nested namespaces.
-	std::vector<std::pair<bool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+	std::vector<std::pair<bool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin();
 	bool fv = FindVariable((strNameSpace()+(char*)yytext).c_str(), var);
 	while(!fv && i!=ParseNameSpaceStack.rend())
 	{
