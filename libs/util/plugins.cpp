@@ -168,7 +168,7 @@ CqPluginBase::DLError( void )
 
 	// Free the buffer.
 	LocalFree( lpMsgBuf );
-#elif not defined AQSIS_SYSTEM_MACOSX
+#else //not defined AQSIS_SYSTEM_MACOSX
 
 	char* error = dlerror();
 	if( error )

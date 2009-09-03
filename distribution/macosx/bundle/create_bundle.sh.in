@@ -29,11 +29,14 @@ done
 ### Resolve external dependencies
 echo "CPack: - OS X Bundle: Resolving external dependencies..."
 for folder in "$BINARIESDIR/" $( ls -R $RESOURCES/lib | egrep '.+:$' | sed 's/\/\//\//' | sed 's/:/\//' ) "$RESOURCES/lib/" "$FRAMEWORKS/"; do
+    if [ $VERBOSE ]; then
+        echo "Resolving dependencies in $folder"
+	fi
 	for file in $( ls -l $folder | grep ^- | awk '{print $9}' ); do
 		if [ $VERBOSE ]; then
 			echo "Resolving dependencies for $file"
 		fi
-		for dep in $( otool -L $folder$file | grep ".dylib" | grep "/opt/" | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep libboost | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
+		for dep in $( otool -L $folder$file | grep ".dylib" | grep "/opt/" | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep ".dylib" | grep -v "/usr/" | grep -v "/Developer/" | grep -v "/System/" | grep -v "libaqsis" | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep ".a" | grep -v "/usr/" | grep -v "/Developer/" | grep -v "/System/" | grep -v "libaqsis" | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep fltk | grep -v $BUNDLE_NAME | sed s/\(.*\)// ) $( otool -L $folder$file | grep dylib | grep libboost | grep -v $BUNDLE_NAME | sed s/\(.*\)// ); do
 			bn=`basename $dep`
 			if [ $VERBOSE ]; then
 				echo "  ==>>>  $file  needs  $bn  ( $dep )"
@@ -87,3 +90,9 @@ for folder in $( ls -R $RESOURCES/lib | egrep '.+:$' | sed 's/\/\//\//' | sed 's
 		done
 	done
 done
+
+### Display of content of frameworks folder
+if [ $VERBOSE ]; then
+	echo "Content of Frameworks/"
+	ls -l "$FRAMEWORKS"
+fi
