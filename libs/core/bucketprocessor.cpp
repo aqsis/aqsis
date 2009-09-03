@@ -1220,7 +1220,7 @@ void CqBucketProcessor::RenderMPG_MBOrDof( CqMicroPolygon* pMPG, bool IsMoving, 
 			}
 			else
 			{
-				indexT0 = std::max(0, static_cast<TqInt>(lfloor((time0 - opentime) * timePerSample)));
+				indexT0 = max<TqInt>(0, lfloor((time0 - opentime) * timePerSample));
 				indexT1 = lceil((time1 - opentime) * timePerSample);
 			}
 		}
