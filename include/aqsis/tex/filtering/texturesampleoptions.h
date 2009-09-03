@@ -79,6 +79,19 @@ enum EqMipmapLerp
 	Lerp_Auto
 };
 
+/// Approximation type for surfaces during percentage closer filtering.
+enum EqDepthApprox
+{
+	/// Approximate surfaces with a constant depth
+	DApprox_Constant,
+	/// Approximate surfaces with a linear approximation (good for smooth surfaces)
+	DApprox_Linear
+};
+
+AQSIS_ENUM_INFO_BEGIN(EqDepthApprox, DApprox_Constant)
+	"constant",
+	"linear"
+AQSIS_ENUM_INFO_END
 
 //-----------------------------------------------------------------------------
 /** \brief Contain renderman texture sampling options common to all samplers.
@@ -323,6 +336,8 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 		TqFloat biasLow() const;
 		/// Get the high shadow bias
 		TqFloat biasHigh() const;
+		/// Get the depth approximation for shadowed surfaces
+		EqDepthApprox depthApprox() const;
 
 		/// Set the number of samples used by stochastic sampling methods.
 		void setNumSamples(TqInt numSamples);
@@ -331,6 +346,8 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 		/// Set the low and high shadow biases
 		void setBiasLow(TqFloat bias0);
 		void setBiasHigh(TqFloat bias1);
+		/// Set the depth approximation type
+		void setDepthApprox(EqDepthApprox depthApprox);
 	protected:
 		/// Number of samples to take when using a stochastic sampler
 		TqInt m_numSamples;
@@ -338,6 +355,8 @@ class CqShadowSampleOptions : private CqTextureSampleOptionsBase
 		TqFloat m_biasLow;
 		/// High end of linear shadow bias ramp
 		TqFloat m_biasHigh;
+		/// depth approximation for surfaces
+		EqDepthApprox m_depthApprox;
 };
 
 
@@ -554,7 +573,8 @@ inline CqShadowSampleOptions::CqShadowSampleOptions()
 	: CqTextureSampleOptionsBase(),
 	m_numSamples(32),
 	m_biasLow(0),
-	m_biasHigh(0)
+	m_biasHigh(0),
+	m_depthApprox(DApprox_Constant)
 { }
 
 inline TqInt CqShadowSampleOptions::numSamples() const
@@ -570,6 +590,11 @@ inline TqFloat CqShadowSampleOptions::biasLow() const
 inline TqFloat CqShadowSampleOptions::biasHigh() const
 {
 	return m_biasHigh;
+}
+
+inline EqDepthApprox CqShadowSampleOptions::depthApprox() const
+{
+	return m_depthApprox;
 }
 
 inline void CqShadowSampleOptions::setNumSamples(TqInt numSamples)
@@ -595,6 +620,11 @@ inline void CqShadowSampleOptions::setBiasHigh(TqFloat bias1)
 	if(bias1 < m_biasLow)
 		m_biasLow = bias1;
 	m_biasHigh = bias1;
+}
+
+inline void CqShadowSampleOptions::setDepthApprox(EqDepthApprox depthApprox)
+{
+	m_depthApprox = depthApprox;
 }
 
 } // namespace Aqsis

@@ -32,6 +32,8 @@
 #include <aqsis/tex/texexception.h>
 #include <aqsis/tex/buffers/tilearray.h>
 
+#include "depthapprox.h"
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -40,29 +42,6 @@ namespace Aqsis {
 namespace {
 
 // Helper classes
-
-/** \brief Constant "depth approximation" for percentage closer filtering
- *
- * When performing percentage closer filtering, we need a depth approximation
- * for the surface in order to compare the surface depth to the recorded
- * texture map depth.  This class provides the simplest possible depth
- * approximation - a constant.
- *
- * \see CqSampleQuadDepthApprox
- */
-class CqConstDepthApprox
-{
-	private:
-		TqFloat m_depth;
-	public:
-		CqConstDepthApprox(TqFloat depth)
-			: m_depth(depth)
-		{ }
-		TqFloat operator()(TqFloat x, TqFloat y) const
-		{
-			return m_depth;
-		}
-};
 
 /// Constant filter weights for PCF on occlusion maps
 class CqConstFilter

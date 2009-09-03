@@ -26,12 +26,14 @@
 
 #include "shadowsampler.h"
 
-#include "ewafilter.h"
 #include <aqsis/tex/io/itexinputfile.h>
 #include <aqsis/tex/filtering/sampleaccum.h>
 #include <aqsis/tex/filtering/filtertexture.h>
 #include <aqsis/tex/texexception.h>
 #include <aqsis/tex/buffers/tilearray.h>
+
+#include "depthapprox.h"
+#include "ewafilter.h"
 
 namespace Aqsis {
 
@@ -90,69 +92,39 @@ CqShadowSampler::CqShadowSampler(const boost::shared_ptr<IqTiledTexInputFile>& f
 
 namespace {
 
-/** \brief A functor to determine the depth of an (x,y) point in a filter support
- *
- * When performing percentage closer filtering, the depths from the shadow map
- * at some points inside some filter support are compared against to the depth
- * of the surface at the same point.
- *
- * This functor approximates the surface depth by a linear function of the
- * raster coordinates, which is determined from the quadrilateral filter region.
- */
-class CqSampleQuadDepthApprox
+// Apply percentage closer filtering to the given buffer
+template<typename DApprox>
+inline void applyPCF(const CqTileArray<TqFloat>& pixelBuf,
+		const CqShadowSampleOptions& sampleOpts, const SqFilterSupport& support,
+		const CqEwaFilter& ewaWeights, const DApprox& depthFunc, TqFloat* outSamps)
 {
-	private:
-		/// Coefficients used to compute the depth at given (x,y) raster coords.
-		TqFloat m_xMult;
-		TqFloat m_yMult;
-		TqFloat m_z0;
-	public:
-		/** Calculate and store linear approximation coefficints for the given
-		 * sample quad.
-		 *
-		 * \param sampleQuad - quadrilateral in texture space (x,y) and depth
-		 *    (z) over which to filter.
-		 * \param baseTexWidth
-		 * \param baseTexHeight - width and height of the base texture which
-		 *    the texture coordinates will be scaled by
-		 */
-		CqSampleQuadDepthApprox(const Sq3DSampleQuad& sampleQuad,
-				TqFloat baseTexWidth, TqFloat baseTexHeight)
-			: m_xMult(0),
-			m_yMult(0),
-			m_z0(0)
-		{
-			// Compute an approximate normal for the sample quad
-			CqVector3D quadNormal = (sampleQuad.v4 - sampleQuad.v1)
-									% (sampleQuad.v3 - sampleQuad.v2);
-			// Center of the sample quad.  We need the extra factor of 0.5
-			// divided by the base texture dimensions so that pixel sample
-			// positions are *centered* on the unit square.
-			CqVector3D quadCenter = sampleQuad.center()
-				+ CqVector3D(-0.5/baseTexWidth, -0.5/baseTexHeight, 0);
+	// a PCF accumulator for the samples.
+	CqPcfAccum<CqEwaFilter, DApprox> accumulator(
+			ewaWeights, depthFunc, sampleOpts.startChannel(),
+			sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
+	// Finally, perform percentage closer filtering over the texture buffer.
+	if(support.area() <= sampleOpts.numSamples() || sampleOpts.numSamples() < 0)
+	{
+		// If the filter support is small enough compared to the requested
+		// number of samples, iterate over the whole support.  This results
+		// in a completely noise-free result.
+		//
+		// A negative number of samples is also used as a flag to trigger
+		// the deterministic integrator.
+		filterTextureNowrap(accumulator, pixelBuf, support);
+	}
+	else
+	{
+		// Otherwise use stochastic filtering (choose points randomly in
+		// the filter support).  This is absolutely necessary when the
+		// filter support is very large, as can occur with large blur
+		// factors.
+		filterTextureNowrapStochastic(accumulator, pixelBuf, support,
+				sampleOpts.numSamples());
+	}
+}
 
-			// A normal and a point define a plane; here we use this fact to
-			// compute the appropriate coefficients for the linear
-			// approximation to the surface depth.
-			if(quadNormal.z() != 0)
-			{
-				m_xMult = -quadNormal.x()/(quadNormal.z()*baseTexWidth);
-				m_yMult = -quadNormal.y()/(quadNormal.z()*baseTexHeight);
-				m_z0 = quadNormal*quadCenter/quadNormal.z();
-			}
-			else
-			{
-				m_z0 = quadCenter.z();
-			}
-		}
-		/// Compute the depth of the surface at the given raster coordinates.
-		TqFloat operator()(TqFloat x, TqFloat y) const
-		{
-			return m_z0 + m_xMult*x + m_yMult*y;
-		}
-};
-
-} // unnamed namespace
+} // anon namespace
 
 void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 		const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const
@@ -187,36 +159,21 @@ void CqShadowSampler::sample(const Sq3DSampleQuad& sampleQuad,
 	SqFilterSupport support = ewaWeights.support();
 	if(support.intersectsRange(0, m_pixelBuf->width(), 0, m_pixelBuf->height()))
 	{
-		// Get a functor which approximates the surface depth across the filter
-		// support.  This deduced depth will be compared with the depths from
-		// the stored texture buffer.
-		quadLightCoord.copy2DCoords(texQuad);
-		CqSampleQuadDepthApprox depthFunc(quadLightCoord, m_pixelBuf->width(),
-				m_pixelBuf->height());
-
-		// a PCF accumulator for the samples.
-		CqPcfAccum<CqEwaFilter, CqSampleQuadDepthApprox> accumulator(
-				ewaWeights, depthFunc, sampleOpts.startChannel(),
-				sampleOpts.biasLow(), sampleOpts.biasHigh(), outSamps);
-		// Finally, perform percentage closer filtering over the texture buffer.
-		if(support.area() <= sampleOpts.numSamples() || sampleOpts.numSamples() < 0)
+		if(sampleOpts.depthApprox() == DApprox_Constant)
 		{
-			// If the filter support is small enough compared to the requested
-			// number of samples, iterate over the whole support.  This results
-			// in a completely noise-free result.
-			//
-			// A negative number of samples is also used as a flag to trigger
-			// the deterministic integrator.
-			filterTextureNowrap(accumulator, *m_pixelBuf, support);
+			// Functor which approximates the surface depth using a constant.
+			CqConstDepthApprox depthFunc(quadLightCoord.center().z());
+			applyPCF(*m_pixelBuf, sampleOpts, support, ewaWeights, depthFunc, outSamps);
 		}
 		else
 		{
-			// Otherwise use stochastic filtering (choose points randomly in
-			// the filter support).  This is absolutely necessary when the
-			// filter support is very large, as can occur with large blur
-			// factors.
-			filterTextureNowrapStochastic(accumulator, *m_pixelBuf, support,
-					sampleOpts.numSamples());
+			// Get a functor which approximates the surface depth across the filter
+			// support with a linear approximation.  This deduced depth will be
+			// compared with the depths from the stored texture buffer.
+			quadLightCoord.copy2DCoords(texQuad);
+			CqSampleQuadDepthApprox depthFunc(quadLightCoord, m_pixelBuf->width(),
+					m_pixelBuf->height());
+			applyPCF(*m_pixelBuf, sampleOpts, support, ewaWeights, depthFunc, outSamps);
 		}
 	}
 	else

@@ -282,6 +282,12 @@ class CqShadowOptionExtractor
 				value->GetFloat(tmp, 0);
 				opts.setNumSamples(static_cast<TqInt>(tmp));
 			}
+			else if(name == "depthapprox")
+			{
+				CqString tmp;
+				value->GetString(tmp, 0);
+				opts.setDepthApprox(enumCast<EqDepthApprox>(tmp.c_str()));
+			}
 			else
 			{
 				// Else call through to the base class for the more basic
