@@ -477,64 +477,56 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 	ADDREF( this );
 
 	CqMatrix matCameraToObject0;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matCameraToObject0 );
-	CqMatrix matObjectToCamera;
-	QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time(0), matObjectToCamera );
+	QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), 0, matCameraToObject0 );
 	CqMatrix matCameraToRaster;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, pSurface()->pTransform()->Time(0), matCameraToRaster );
-
-	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
+	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, 0, matCameraToRaster );
 
 	// Get a pointer to the surface, so that we can interrogate the "width" parameters.
 	CqPoints* pPoints = static_cast<CqPoints*>( pSurface() );
 
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
 
-	AQSIS_TIMER_START(Project_points);
-	// Transform the whole grid to hybrid camera/raster space
-
 	CqVector3D* pP;
 	pVar(EnvVars_P) ->GetPointPtr( pP );
 
-	AQSIS_TIMER_STOP(Project_points);
+	// Ugh, this static_cast is pretty awful.  We really should either enhance
+	// IqTransform or remove it completely.
+	const CqTransform& objTrans = static_cast<const CqTransform&>(*pSurface()->pTransform());
+	const CqTransform& camTrans = *QGetRenderContext()->GetCameraTransform();
 
-	TqInt iu;
-	TqInt iTime, tTime = pSurface()->pTransform()->cTimes();
-
-	if( tTime > 1 )
+	if( objTrans.isMoving() || camTrans.isMoving() )
 	{
+		// Get an array containing all the transformation key times.
+		std::vector<TqFloat> keyTimes;
+		mergeKeyTimes(keyTimes, objTrans, camTrans);
+		TqInt totTimes = keyTimes.size();
+
 		// Get an array of P's for all time positions.
-		std::vector<std::vector<CqVector3D> > aaPtimes;
-		aaPtimes.resize( pSurface()->pTransform()->cTimes() );
+		std::vector<std::vector<CqVector3D> > aaPtimes(totTimes);
 
 		// Array of cached object to camera matrices for each time slot.
-		std::vector<CqMatrix>	amatObjectToCameraT;
-		amatObjectToCameraT.resize( pSurface()->pTransform()->cTimes() );
-		std::vector<CqMatrix>	amatNObjectToCameraT;
-		amatNObjectToCameraT.resize( pSurface()->pTransform()->cTimes() );
+		std::vector<CqMatrix>	amatObjectToCameraT(totTimes);
+		std::vector<CqMatrix>	amatNObjectToCameraT(totTimes);
 
-		CqMatrix matObjectToCameraT;
-		register TqInt i;
 		TqInt gsmin1 = GridSize() - 1;
 
-
-		for( iTime = 0; iTime < tTime; iTime++ )
+		for( TqInt iTime = 0; iTime < totTimes; iTime++ )
 		{
 			CqMatrix matCameraToObjectT;
-			QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matCameraToObjectT );
-			QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(),  pSurface()->pTransform()->Time( iTime ), amatObjectToCameraT[ iTime ] );
-			QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), amatNObjectToCameraT[ iTime ] );
+			QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, &objTrans, keyTimes[iTime], matCameraToObjectT );
+			QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, &objTrans,  keyTimes[iTime], amatObjectToCameraT[ iTime ] );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, &objTrans, keyTimes[iTime], amatNObjectToCameraT[ iTime ] );
 
 			aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
-			for ( i = gsmin1; i >= 0; i-- )
+			for (TqInt i = gsmin1; i >= 0; i-- )
 			{
 				// This makes sure all our points are in object space.
 				aaPtimes[ iTime ][ i ] = matCameraToObject0 * pP[ i ];
 			}
 		}
 
-		for ( iu = 0; iu < cu; iu++ )
+		for ( TqInt iu = 0; iu < cu; iu++ )
 		{
 			CqMicroPolygonMotionPoints* pNew = new CqMicroPolygonMotionPoints( this, iu );
 
@@ -548,7 +540,7 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 			if( NULL != pWidthParam )
 				i_radius = pWidthParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
 
-			for( iTime = 0; iTime < tTime; iTime++ )
+			for( TqInt iTime = 0; iTime < totTimes; iTime++ )
 			{
 				radius = i_radius;
 				// Get point in camera space.
@@ -583,7 +575,7 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 				TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 				radius = ras_radius * 0.5f;
 
-				pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
+				pNew->AppendKey( Point, radius, keyTimes[iTime] );
 			}
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
 			QGetRenderContext()->pImage()->AddMPG( pMP );
@@ -591,15 +583,14 @@ void CqMicroPolyGridPoints::Split( long xmin, long xmax, long ymin, long ymax )
 	}
 	else
 	{
-		iTime = 0;
 		CqMatrix matWorldToObjectT;
-		QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matWorldToObjectT );
+		QGetRenderContext() ->matSpaceToSpace( "world", "object", NULL, &objTrans, 0, matWorldToObjectT );
 		CqMatrix matObjectToCameraT;
-		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matObjectToCameraT );
+		QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, &objTrans, 0, matObjectToCameraT );
 		CqMatrix matNObjectToCameraT;
-		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, pSurface()->pTransform().get(), pSurface()->pTransform()->Time( iTime ), matNObjectToCameraT );
+		QGetRenderContext() ->matNSpaceToSpace( "object", "camera", NULL, &objTrans, 0, matNObjectToCameraT );
 
-		for ( iu = 0; iu < cu; iu++ )
+		for ( TqInt iu = 0; iu < cu; iu++ )
 		{
 			// Get point in camera space.
 			CqVector3D Point, pt, vecCamP;

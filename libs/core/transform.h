@@ -139,6 +139,18 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 ;
 
 
+/** \brief Collect the key times from two transformations
+ *
+ * The key frame times are collected from trans1 and trans2, and merged
+ * together into a sorted vector of times.  Duplicate key times are eliminated.
+ *
+ * \param times - output vector of times.
+ * \param trans1,trans2 - transformations from which to extract the times.
+ */
+void mergeKeyTimes(std::vector<TqFloat>& times, const CqTransform& trans1,
+				   const CqTransform& trans2);
+
+
 //-----------------------------------------------------------------------
 
 } // namespace Aqsis

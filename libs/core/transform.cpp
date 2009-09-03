@@ -375,6 +375,25 @@ SqTransformation CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, 
 }
 
 
+void mergeKeyTimes(std::vector<TqFloat>& times, const CqTransform& trans1,
+				   const CqTransform& trans2)
+{
+	TqInt n1 = trans1.cTimes();
+	TqInt n2 = trans2.cTimes();
+	times.clear();
+	times.reserve(n1 + n2);
+	// Copy out all the times from the two transforms.
+	for(TqInt i = 0; i < n1; ++i)
+		times.push_back(trans1.Time(i));
+	for(TqInt i = 0; i < n2; ++i)
+		times.push_back(trans2.Time(i));
+	// Sort the times
+	std::sort(times.begin(), times.end());
+	// uniqueify elements and remove non-unique junk from end.
+	std::vector<TqFloat>::iterator endJunk = std::unique(times.begin(), times.end());
+	times.erase(endJunk, times.end());
+}
+
 //---------------------------------------------------------------------
 
 } // namespace Aqsis
