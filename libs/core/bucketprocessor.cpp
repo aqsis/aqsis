@@ -756,41 +756,40 @@ void CqBucketProcessor::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixelPtr*
 
 void CqBucketProcessor::ExposeBucket()
 {
-	if(m_hasValidSamples)
+	// Early exit if the bucket contains no geometry & no imager shader is attached.
+	if(!m_hasValidSamples && !QGetRenderContext()->poptCurrent()->pshadImager())
+		return;
+
+	TqFloat exposegain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
+	TqFloat exposegamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
+	// Early exit if the exposure & gain are trivial
+	if ( exposegain == 1.0 && exposegamma == 1.0 )
+		return;
+
+	TqFloat oneovergamma = 1.0f / exposegamma;
+	TqFloat endx, endy;
+	endy = DisplayRegion().height();
+	endx = DisplayRegion().width();
+	TqInt Ci_index = m_channelBuffer.getChannelIndex("Ci");
+
+	TqInt x, y;
+	for ( y = 0; y < endy; y++ )
 	{
-		if ( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
-			 QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
-			return ;
-		else
+		for ( x = 0; x < endx; x++ )
 		{
-			TqFloat exposegain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
-			TqFloat exposegamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
-			TqFloat oneovergamma = 1.0f / exposegamma;
-			TqFloat endx, endy;
-			endy = DisplayRegion().height();
-			endx = DisplayRegion().width();
-			TqInt Ci_index = m_channelBuffer.getChannelIndex("Ci");
-
-			TqInt x, y;
-			for ( y = 0; y < endy; y++ )
+			// color=(color*gain)^1/gamma
+			if ( exposegain != 1.0 )
 			{
-				for ( x = 0; x < endx; x++ )
-				{
-					// color=(color*gain)^1/gamma
-					if ( exposegain != 1.0 )
-					{
-						m_channelBuffer(x, y, Ci_index)[0] *= exposegain;
-						m_channelBuffer(x, y, Ci_index)[1] *= exposegain;
-						m_channelBuffer(x, y, Ci_index)[2] *= exposegain;
-					}
+				m_channelBuffer(x, y, Ci_index)[0] *= exposegain;
+				m_channelBuffer(x, y, Ci_index)[1] *= exposegain;
+				m_channelBuffer(x, y, Ci_index)[2] *= exposegain;
+			}
 
-					if ( exposegamma != 1.0 )
-					{
-						m_channelBuffer(x, y, Ci_index)[0] = pow(m_channelBuffer(x, y, Ci_index)[0], oneovergamma);
-						m_channelBuffer(x, y, Ci_index)[1] = pow(m_channelBuffer(x, y, Ci_index)[1], oneovergamma);
-						m_channelBuffer(x, y, Ci_index)[2] = pow(m_channelBuffer(x, y, Ci_index)[2], oneovergamma);
-					}
-				}
+			if ( exposegamma != 1.0 )
+			{
+				m_channelBuffer(x, y, Ci_index)[0] = pow(m_channelBuffer(x, y, Ci_index)[0], oneovergamma);
+				m_channelBuffer(x, y, Ci_index)[1] = pow(m_channelBuffer(x, y, Ci_index)[1], oneovergamma);
+				m_channelBuffer(x, y, Ci_index)[2] = pow(m_channelBuffer(x, y, Ci_index)[2], oneovergamma);
 			}
 		}
 	}
