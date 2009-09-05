@@ -1,5 +1,10 @@
 project(core)
 
+# Check for boost thread.
+if(NOT Boost_THREAD_FOUND)
+	message(FATAL_ERROR "Aqsis core requires boost thread to build")
+endif()
+	
 # Generate extra files here.  Extra stuff in this directory is...
 add_subproject(api)
 add_subproject(ddmanager)

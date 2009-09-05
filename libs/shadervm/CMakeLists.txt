@@ -1,5 +1,10 @@
 project(shadervm)
 
+# Check for boost regex.
+if(NOT Boost_REGEX_FOUND)
+	message(FATAL_ERROR "Aqsis shadervm requires boost regex to build")
+endif()
+
 set(shadervm_srcs
 	dsoshadeops.cpp
 	shaderstack.cpp

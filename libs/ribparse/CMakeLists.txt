@@ -1,5 +1,10 @@
 project(ribparse)
 
+# Check for boost iostreams.
+if(NOT Boost_IOSTREAMS_FOUND)
+	message(FATAL_ERROR "Aqsis ribparse requires boost iostreams to build")
+endif()
+
 set(ribparse_srcs
 	ribinputbuffer.cpp
 	riblexer.cpp

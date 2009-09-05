@@ -1,5 +1,10 @@
 project(piqsl)
 
+# Check for boost thread.
+if(NOT Boost_THREAD_FOUND)
+	message(FATAL_ERROR "Piqsl requires boost thread to build")
+endif()
+
 include_subproject(tinyxml)
 
 set(piqsl_srcs

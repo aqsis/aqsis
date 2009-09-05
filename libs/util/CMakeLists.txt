@@ -1,5 +1,10 @@
 project(util)
 
+# Check for boost filesystem.
+if(NOT Boost_FILESYSTEM_FOUND)
+	message(FATAL_ERROR "Aqsis util requires boost filesystem to build")
+endif()
+
 set(util_srcs
 	argparse.cpp
 	bitvector.cpp
