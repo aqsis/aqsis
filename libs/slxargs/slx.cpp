@@ -347,7 +347,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					TqFloat	aTqFloat;
 					RtFloat	aRtFloat;
 					slxType = SLX_TYPE_SCALAR;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray())
 					{
 						shaderVar->GetFloat( aTqFloat );
 						aRtFloat = aTqFloat;
@@ -379,7 +379,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqString	aCqString;
 					char *	aCString;
 					slxType = SLX_TYPE_STRING;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetString( aCqString );
 						aCString = ( char * ) aCqString.c_str();
@@ -416,7 +416,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqVector3D	aCqVector3D;
 					RtPoint	aRtPoint;
 					slxType = SLX_TYPE_POINT;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetPoint( aCqVector3D );
 						aRtPoint[ 0 ] = aCqVector3D[ 0 ];
@@ -456,7 +456,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqVector3D	aCqVector3D;
 					RtPoint	aRtPoint;
 					slxType = SLX_TYPE_NORMAL;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetNormal( aCqVector3D );
 						aRtPoint[ 0 ] = aCqVector3D[ 0 ];
@@ -496,7 +496,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqVector3D	aCqVector3D;
 					RtPoint	aRtPoint;
 					slxType = SLX_TYPE_VECTOR;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetPoint( aCqVector3D );
 						aRtPoint[ 0 ] = aCqVector3D[ 0 ];
@@ -536,7 +536,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqColor	aCqColor;
 					RtColor	aRtColor;
 					slxType = SLX_TYPE_COLOR;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetColor( aCqColor );
 						aRtColor[ 0 ] = aCqColor.r();
@@ -576,7 +576,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					CqMatrix	aCqMatrix;
 					RtMatrix	aRtMatrix;
 					slxType = SLX_TYPE_MATRIX;
-					if ( shaderVar->ArrayLength() == 0 )
+					if ( !shaderVar->isArray() )
 					{
 						shaderVar->GetMatrix( aCqMatrix );
 						aRtMatrix[ 0 ][ 0 ] = aCqMatrix[ 0 ][ 0 ];

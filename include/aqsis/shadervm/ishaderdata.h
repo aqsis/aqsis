@@ -258,7 +258,7 @@ struct IqShaderData
 	 */
 	virtual	const CqString&	strName() const = 0;
 	/** Determine whether this data storage represents a shader argument.
-	 * \return Read only reference to a CqString class.
+	 * \return True if a shader argument, false otherwise.
 	 */
 	virtual	bool	fParameter() const = 0;
 
@@ -300,6 +300,10 @@ struct IqShaderData
 	 * \return Integer array length.
 	 */
 	virtual TqInt	ArrayLength() const = 0;
+	/** Determine if this variable is an array.
+	 * \return True if an array, false otherwise.
+	 */
+	virtual bool	isArray() const = 0;
 	/** Get the i'th entry of the variable array.
 	 * \return Pointer to an object implementing IqShaderData.
 	 */

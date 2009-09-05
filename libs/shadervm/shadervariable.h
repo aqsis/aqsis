@@ -105,6 +105,10 @@ class CqShaderVariable : public IqShaderData
 			m_fParameter = fParameter;
 		}
 
+		virtual bool	isArray() const
+		{
+			return false;
+		}
 		virtual TqInt	ArrayLength() const
 		{
 			return ( 1 );
@@ -384,6 +388,10 @@ class CqShaderVariableArray: public CqShaderVariable
 		virtual TqUint	Size() const
 		{
 			return ( m_aVariables[ 0 ] ->Size() );
+		}
+		virtual bool	isArray() const
+		{
+			return true;
 		}
 		virtual	TqInt	ArrayLength() const
 		{
