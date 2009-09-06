@@ -353,7 +353,7 @@ inline RtMatrix& toRiType(const SqRtMatrixHolder& matrixHolder)
 
 inline RtToken* toRiType(SqRtTokenArrayHolder& stringArrayHolder)
 {
-	return &stringArrayHolder.tokenStorage[0];
+	return stringArrayHolder.tokenStorage.empty()? NULL : &stringArrayHolder.tokenStorage[0];
 }
 
 } // unnamed namespace
