@@ -562,10 +562,10 @@ void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
 			TqFloat fRes = min( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				TqFloat fn;
-				apParams[ cParams ] ->GetFloat( fn, __iGrid );
+				apParams[ i ] ->GetFloat( fn, __iGrid );
 				fRes = Aqsis::min( fRes, fn );
 			}
 			(Result)->SetFloat(fRes,__iGrid);
@@ -594,10 +594,10 @@ void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 			TqFloat _aq_b;
 			(b)->GetFloat(_aq_b,__iGrid);
 			TqFloat fRes = max( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				TqFloat fn;
-				apParams[ cParams ] ->GetFloat( fn, __iGrid );
+				apParams[ i ] ->GetFloat( fn, __iGrid );
 				fRes = Aqsis::max( fRes, fn );
 			}
 			(Result)->SetFloat(fRes,__iGrid);
@@ -626,10 +626,10 @@ void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			CqVector3D _aq_b;
 			(b)->GetPoint(_aq_b,__iGrid);
 			CqVector3D res = min( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				CqVector3D pn;
-				apParams[ cParams ] ->GetPoint( pn, __iGrid );
+				apParams[ i ] ->GetPoint( pn, __iGrid );
 				res = Aqsis::min( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
@@ -658,10 +658,10 @@ void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			CqVector3D _aq_b;
 			(b)->GetPoint(_aq_b,__iGrid);
 			CqVector3D res = max( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				CqVector3D pn;
-				apParams[ cParams ] ->GetPoint( pn, __iGrid );
+				apParams[ i ] ->GetPoint( pn, __iGrid );
 				res = Aqsis::max( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
@@ -690,10 +690,10 @@ void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			CqColor _aq_b;
 			(b)->GetColor(_aq_b,__iGrid);
 			CqColor res = min( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				CqColor cn;
-				apParams[ cParams ] ->GetColor( cn, __iGrid );
+				apParams[ i ] ->GetColor( cn, __iGrid );
 				res = Aqsis::min( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
@@ -722,10 +722,10 @@ void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			CqColor _aq_b;
 			(b)->GetColor(_aq_b,__iGrid);
 			CqColor res = max( _aq_a, _aq_b );
-			while ( cParams-- > 0 )
+			for(TqInt i = 0; i < cParams; ++i)
 			{
 				CqColor cn;
-				apParams[ cParams ] ->GetColor( cn, __iGrid );
+				apParams[ i ] ->GetColor( cn, __iGrid );
 				res = Aqsis::max( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
