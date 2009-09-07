@@ -546,7 +546,10 @@ RtVoid CqOutput::RiProjectionV ( const char *name, RtInt n, RtToken tokens[], Rt
 {
 	PR( "Projection", Projection );
 	S;
-	printCharP( name );
+	if(name == NULL)
+		printCharP("");
+	else
+		printCharP( name );
 	S;
 	printPL( n, tokens, parms );
 }

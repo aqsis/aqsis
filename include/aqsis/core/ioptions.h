@@ -61,6 +61,7 @@ enum EqDisplayMode
  */
 enum EqProjection
 {
+	ProjectionNone,				///< Empty/NULL projection.
     ProjectionOrthographic,   		///< Orthographic projection.
     ProjectionPerspective		///< Perspective projection.
 };

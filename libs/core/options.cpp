@@ -208,6 +208,14 @@ void CqOptions::InitialiseCamera()
 
 				break;
 			}
+
+			case ProjectionNone:
+			{
+				matCameraToScreen.Identity();
+				matScreenToNDC.Identity();
+				matNDCToRaster.Identity();
+				break;
+			}
 	}
 	CqMatrix matWorldToCamera;
 	QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time(), matWorldToCamera );
