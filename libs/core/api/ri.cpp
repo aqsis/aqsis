@@ -1033,9 +1033,15 @@ RtVoid	RiCropWindow( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
 //
 RtVoid	RiProjection( RtToken name, ... )
 {
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
+	if(NULL != name)
+	{
+		AQSIS_COLLECT_RI_PARAMETERS( name )
+		RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
+	}
+	else
+	{
+		RiProjectionV( name, 0, NULL, NULL );
+	}
 }
 
 
@@ -1054,24 +1060,29 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 
 	DEBUG_RIPROJECTION
 
-	if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
-	else if	( strcmp( name, RI_ORTHOGRAPHIC ) == 0 )
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
-	else if( name != RI_NULL )
+	if(NULL != name)
 	{
-		Aqsis::log() << error << "RiProjection: Invalid projection: \"" << name << "\"" << std::endl;
-		return ;
-	}
+		if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
+		else if	( strcmp( name, RI_ORTHOGRAPHIC ) == 0 )
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
+		else if( strlen( name ) == 0 || name == RI_NULL )
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionNone ;
+		else
+		{
+			Aqsis::log() << error << "RiProjection: Invalid projection: \"" << name << "\"" << std::endl;
+			return ;
+		}
 
-	RtInt i;
-	for ( i = 0; i < count; ++i )
-	{
-		RtToken	token = tokens[ i ];
-		RtPointer	value = values[ i ];
+		RtInt i;
+		for ( i = 0; i < count; ++i )
+		{
+			RtToken	token = tokens[ i ];
+			RtPointer	value = values[ i ];
 
-		if ( strcmp( token, RI_FOV ) == 0 )
-			QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FOV" ) [ 0 ] = *( reinterpret_cast<RtFloat*>( value ) ) ;
+			if ( strcmp( token, RI_FOV ) == 0 )
+				QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FOV" ) [ 0 ] = *( reinterpret_cast<RtFloat*>( value ) ) ;
+		}
 	}
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );

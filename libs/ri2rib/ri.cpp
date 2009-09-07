@@ -261,8 +261,15 @@ RtVoid RiCropWindow( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
 RtVoid RiProjection( RtToken name, ... )
 {
 	RI2RIB_EXCEPTION_TRY_GUARD
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-	RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
+	if(NULL != name)
+	{
+		AQSIS_COLLECT_RI_PARAMETERS( name )
+		RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
+	}
+	else
+	{
+		RiProjectionV( name, 0, NULL, NULL );
+	}
 	RI2RIB_EXCEPTION_CATCH_GUARD("RiProjection", )
 }
 
