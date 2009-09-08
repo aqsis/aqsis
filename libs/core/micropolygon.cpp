@@ -558,14 +558,17 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 
 void CqMicroPolyGrid::TransferOutputVariables()
 {
-	boost::shared_ptr<IqShader> pShader = this->pAttributes()->pshadSurface(QGetRenderContext()->Time());
+	boost::shared_ptr<IqShader> pSurface = this->pAttributes()->pshadSurface(QGetRenderContext()->Time());
+	boost::shared_ptr<IqShader> pAtmosphere = this->pAttributes()->pshadAtmosphere(QGetRenderContext()->Time());
 
 	// Only bother transferring ones that have been used in a RiDisplay request.
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& outputVars = QGetRenderContext()->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator outputVar;
 	for( outputVar = outputVars.begin(); outputVar != outputVars.end(); outputVar++ )
 	{
-		IqShaderData* outputData = pShader->FindArgument( outputVar->first );
+		IqShaderData* outputData = pSurface->FindArgument( outputVar->first );
+		if( !outputData && pAtmosphere )
+			outputData = pAtmosphere->FindArgument( outputVar->first );
 		if( NULL != outputData )
 		{
 			IqShaderData* newOutputData = outputData->Clone();
