@@ -32,7 +32,6 @@
 #endif
 
 #include <aqsis/math/math.h>
-#include <aqsis/util/autobuffer.h>
 #include <aqsis/math/random.h>
 #include "renderer.h"
 
@@ -334,6 +333,33 @@ void CqImagePixel::Combine( enum EqDepthFilter depthfilter, CqColor zThreshold )
 
 void CqImagePixel::setSamples(IqSampler* sampler, CqVector2D& offset)
 {
+	static CqRandom rnd(123);
+	TqInt nSamps = numSamples();
+
+	for(TqInt i = 0; i < nSamps; ++i)
+		m_DofOffsetIndices[i] = i;
+
+	bool jitter = true;
+
+	const TqInt* jitterOption;
+	if((jitterOption = QGetRenderContext()->poptCurrent()->
+			GetIntegerOption("Hider", "jitter")) != NULL && jitterOption[0] == 0)
+		jitter = false;
+
+	if(jitter)
+	{
+		// Shuffle the dof offset indices
+		TqInt j = nSamps;
+		while(j > 1)
+		{
+			TqInt j2 = rnd.RandomInt(j);
+			--j;
+			std::swap(m_DofOffsetIndices[j], m_DofOffsetIndices[j2]);
+		}
+	}
+
+	// Get random distributions from the sample generator, and save them into
+	// the pixel sample data structures.
 	const CqVector2D* positions = sampler->get2DSamples();
 	const CqVector2D* dofOffsets = sampler->get2DSamples();
 	const TqFloat* times = sampler->get1DSamples();
@@ -342,18 +368,12 @@ void CqImagePixel::setSamples(IqSampler* sampler, CqVector2D& offset)
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-	TqInt which = 0;
-	for (TqInt iy = 0; iy < m_YSamples; iy++ )
+	for(TqInt i = 0; i < nSamps; ++i)
 	{
-		for (TqInt ix = 0; ix < m_XSamples; ix++ )
-		{
-			m_samples[which].position = offset + positions[which];
-			m_samples[which].time = ( closetime - opentime ) * times[which] + opentime;
-			m_samples[which].detailLevel = lods[which];
-			m_samples[which].dofOffset = projectToCircle( -1 + 2 * (dofOffsets[which]) );
-			m_DofOffsetIndices[which] = which;
-			++which;
-		}
+		m_samples[i].position = offset + positions[i];
+		m_samples[i].time = ( closetime - opentime ) * times[i] + opentime;
+		m_samples[i].detailLevel = lods[i];
+		m_samples[m_DofOffsetIndices[i]].dofOffset = projectToCircle( -1 + 2 * (dofOffsets[i]) );
 	}
 }
 
