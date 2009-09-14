@@ -51,7 +51,7 @@ enum EqShaderType
 struct IqShaderExecEnv;
 struct IqShaderData;
 struct IqSurface;
-class IqParameter;
+struct IqParameter;
 struct IqRenderer;
 class CqMatrix;
 class CqString;
