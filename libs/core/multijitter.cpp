@@ -188,6 +188,17 @@ void CqMultiJitteredSampler::setupJitterPattern(TqInt offset)
 		m_1dSamples[offset+i] = t;
 		sample1d += delta1d;
 	}
+
+	// Setup a randomly shuffled array of indices, between 0 and nSamples.
+	for(TqInt i = 0; i < nSamples; ++i)
+		m_shuffledIndices[offset+i] = i;
+	TqInt j = nSamples;
+	while(j > 1)
+	{
+		TqInt j2 = random.RandomInt(j);
+		--j;
+		std::swap(m_shuffledIndices[offset+j], m_shuffledIndices[offset+j2]);
+	}
 }
 
 
@@ -202,6 +213,12 @@ const TqFloat* CqMultiJitteredSampler::get1DSamples()
 {
 	TqInt jitterIndex = m_random.RandomInt(m_cacheSize);
 	return &m_1dSamples[this->numSamples()*jitterIndex];
+}
+
+const TqInt* CqMultiJitteredSampler::getShuffledIndices()
+{
+	TqInt jitterIndex = m_random.RandomInt(m_cacheSize);
+	return &m_shuffledIndices[this->numSamples()*jitterIndex];
 }
 
 //---------------------------------------------------------------------

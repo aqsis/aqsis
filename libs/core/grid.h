@@ -51,7 +51,8 @@ class CqGridSampler : public IqSampler
 
 		/* Interface functions from IqSampler */
 		virtual const CqVector2D* get2DSamples();		
-		virtual const TqFloat* get1DSamples();		
+		virtual const TqFloat* get1DSamples();	
+		virtual const TqInt* getShuffledIndices();
 
 	private:
 		TqInt numSamples() const;
@@ -66,6 +67,7 @@ class CqGridSampler : public IqSampler
 		TqFloat					m_closeTime;
 		std::vector<CqVector2D>	m_2dSamples;
 		std::vector<TqFloat>	m_1dSamples;
+		std::vector<TqInt>		m_shuffledIndices;
 };
 
 //==============================================================================
@@ -76,8 +78,9 @@ inline CqGridSampler::CqGridSampler(TqInt pixelXSamples, TqInt pixelYSamples) :
 	m_pixelXSamples(pixelXSamples),
 	m_pixelYSamples(pixelYSamples)
 {
-	m_1dSamples.resize(numSamples()*250);
-	m_2dSamples.resize(numSamples()*250);
+	m_1dSamples.resize(numSamples());
+	m_2dSamples.resize(numSamples());
+	m_shuffledIndices.resize(numSamples());
 	setupGridPattern();
 }
 

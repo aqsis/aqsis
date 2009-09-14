@@ -56,6 +56,10 @@ void CqGridSampler::setupGridPattern()
 		m_1dSamples[i] = sample;
 		sample += dt;
 	}
+
+	// Shuffled indices in grid sampler are just canonical distribution.
+	for(TqInt i = 0; i < nSamples; ++i)
+		m_shuffledIndices[i] = i;
 }
 
 const CqVector2D* CqGridSampler::get2DSamples()		
@@ -66,6 +70,11 @@ const CqVector2D* CqGridSampler::get2DSamples()
 const TqFloat* CqGridSampler::get1DSamples()		
 {
 	return &m_1dSamples[0];
+}
+
+const TqInt* CqGridSampler::getShuffledIndices()		
+{
+	return &m_shuffledIndices[0];
 }
 
 //---------------------------------------------------------------------

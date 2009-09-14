@@ -53,6 +53,7 @@ class CqMultiJitteredSampler : public IqSampler
 		/* Interface functions from IqSampler */
 		virtual const CqVector2D* get2DSamples();		
 		virtual const TqFloat* get1DSamples();		
+		virtual const TqInt* getShuffledIndices();
 
 	private:
 		/// Static define for the number of distribution patterns to cache.
@@ -78,6 +79,7 @@ class CqMultiJitteredSampler : public IqSampler
 		TqFloat					m_closeTime;
 		std::vector<CqVector2D>	m_2dSamples;
 		std::vector<TqFloat>	m_1dSamples;
+		std::vector<TqInt>		m_shuffledIndices;
 		CqRandom				m_random;
 };
 
@@ -91,6 +93,8 @@ inline CqMultiJitteredSampler::CqMultiJitteredSampler(TqInt pixelXSamples, TqInt
 {
 	m_1dSamples.resize(numSamples()*m_cacheSize);
 	m_2dSamples.resize(numSamples()*m_cacheSize);
+	m_shuffledIndices.resize(numSamples()*m_cacheSize);
+
 	for(TqInt i = 0; i < m_cacheSize; ++i)
 		setupJitterPattern(i*numSamples());
 	m_random.Reseed(19);

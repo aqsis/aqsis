@@ -333,30 +333,11 @@ void CqImagePixel::Combine( enum EqDepthFilter depthfilter, CqColor zThreshold )
 
 void CqImagePixel::setSamples(IqSampler* sampler, CqVector2D& offset)
 {
-	static CqRandom rnd(123);
 	TqInt nSamps = numSamples();
 
+	const TqInt* shuffledIndices = sampler->getShuffledIndices();
 	for(TqInt i = 0; i < nSamps; ++i)
-		m_DofOffsetIndices[i] = i;
-
-	bool jitter = true;
-
-	const TqInt* jitterOption;
-	if((jitterOption = QGetRenderContext()->poptCurrent()->
-			GetIntegerOption("Hider", "jitter")) != NULL && jitterOption[0] == 0)
-		jitter = false;
-
-	if(jitter)
-	{
-		// Shuffle the dof offset indices
-		TqInt j = nSamps;
-		while(j > 1)
-		{
-			TqInt j2 = rnd.RandomInt(j);
-			--j;
-			std::swap(m_DofOffsetIndices[j], m_DofOffsetIndices[j2]);
-		}
-	}
+		m_DofOffsetIndices[i] = shuffledIndices[i];
 
 	// Get random distributions from the sample generator, and save them into
 	// the pixel sample data structures.

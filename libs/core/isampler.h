@@ -35,7 +35,7 @@ class CqVector2D;
 //------------------------------------------------------------------------------
 /** \brief An interface to sample distribution patterns generation.
  *
- * This interface provides sample distribution information for fucntions in Aqsis
+ * This interface provides sample distribution information for functions in Aqsis
  * that need to sample signals effectively.
  *
  */
@@ -66,7 +66,15 @@ class IqSampler
 		 *
 		 * \returns - a constant pointer to an array of sample times.
 		 */
-		virtual const TqFloat* get1DSamples() = 0;		
+		virtual const TqFloat* get1DSamples() = 0;	
+		/** \brief Return a set of 1D shuffle offsets over the specified sample range.
+		 *
+		 *  Returns a set of integer indices between 0 and the number of samples, randomly
+		 *  shuffled for jittering array indices.
+		 *
+		 * \returns - a constant pointer to an array of integer indices.
+		 */
+		virtual const TqInt* getShuffledIndices() = 0;
 };
 
 } // namespace Aqsis
