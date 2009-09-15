@@ -178,9 +178,12 @@ void CqShaderExecEnv::SO_attribute( IqShaderData* name, IqShaderData* pV, IqShad
 			_aq_name = _aq_name.substr( 0, iColon );
 			const IqParameter* pParam = m_pAttributes ->GetAttribute( _aq_name.c_str(), strParam.c_str() );
 
-			Ret = 1.0f;
+			Ret = 0.0f;
 			if(pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
+			{
 				pParam->CopyToShaderVariable(pV);
+				Ret = 1.0f;
+			}
 		}
 	}
 	Result->SetValue( Ret, 0 );
@@ -290,25 +293,14 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			CqString strParam = strName.substr( iColon + 1, strName.size() - iColon - 1 );
 			strName = strName.substr( 0, iColon );
-			//const CqParameter* pParam = m_pAttributes ->pParameter( strName.c_str(), strParam.c_str() );
+			const IqParameter* pParam = m_pAttributes ->GetAttribute( strName.c_str(), strParam.c_str() );
 
-			Ret = 1.0f;
-
-			if ( NULL != getRenderContext() ->GetStringOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetString( getRenderContext() ->GetStringOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != getRenderContext() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetFloat( getRenderContext() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-
-			else if ( NULL != getRenderContext() ->GetPointOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetPoint( getRenderContext() ->GetPointOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-
-			else if ( NULL != getRenderContext() ->GetColorOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetColor( getRenderContext() ->GetColorOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != getRenderContext() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetFloat( getRenderContext() ->GetFloatOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			/* did not deal with Vector, Normal and Matrix yet */
-			else
-				Ret = 0.0f;
+			Ret = 0.0f;
+			if(pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
+			{
+				pParam->CopyToShaderVariable(pV);
+				Ret = 1.0f;
+			}
 		}
 	}
 
