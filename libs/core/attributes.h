@@ -244,6 +244,9 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
 		CqParameter* pParameterWrite( const char* strName, const char* strParam );
 
+		virtual const	IqParameter* GetAttribute( const char* strName, const char* strParam ) const;
+		virtual IqParameter* GetAttributeWrite( const char* strName, const char* strParam );
+
 		virtual const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const;
 		virtual const	TqInt*	GetIntegerAttribute( const char* strName, const char* strParam ) const;
 		virtual const	CqString* GetStringAttribute( const char* strName, const char* strParam ) const;
@@ -475,6 +478,20 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 		std::list<CqAttributes*>::iterator	m_StackIterator;	///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }
 ;
+
+//----------------------------------------------------------------------
+// Implementation details.
+
+inline const	IqParameter* CqAttributes::GetAttribute( const char* strName, const char* strParam ) const
+{
+	return pParameter(strName, strParam);
+}
+
+inline IqParameter* CqAttributes::GetAttributeWrite( const char* strName, const char* strParam )
+{
+	return pParameterWrite(strName, strParam);
+}
+
 
 /// Global attribute stack.
 extern std::list<CqAttributes*>	Attribute_stack;

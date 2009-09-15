@@ -238,7 +238,7 @@ CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* str
 TqFloat* CqAttributes::GetFloatAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_float)
 		return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -255,7 +255,7 @@ TqFloat* CqAttributes::GetFloatAttributeWrite( const char* strName, const char* 
 TqInt* CqAttributes::GetIntegerAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_integer )
 		return ( static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -272,7 +272,7 @@ TqInt* CqAttributes::GetIntegerAttributeWrite( const char* strName, const char* 
 CqString* CqAttributes::GetStringAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_string )
 		return ( static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -289,7 +289,7 @@ CqString* CqAttributes::GetStringAttributeWrite( const char* strName, const char
 CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_point )
 		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -305,7 +305,11 @@ CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const cha
 
 CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const char* strParam )
 {
-	return ( GetPointAttributeWrite( strName, strParam ) );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 && pParam->Type() == type_vector )
+		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -318,7 +322,11 @@ CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const ch
 
 CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const char* strParam )
 {
-	return ( GetPointAttributeWrite( strName, strParam ) );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 && pParam->Type() == type_normal )
+		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -332,7 +340,7 @@ CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const ch
 CqColor* CqAttributes::GetColorAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_color )
 		return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -349,7 +357,7 @@ CqColor* CqAttributes::GetColorAttributeWrite( const char* strName, const char* 
 CqMatrix* CqAttributes::GetMatrixAttributeWrite( const char* strName, const char* strParam )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_matrix )
 		return ( static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -366,7 +374,7 @@ CqMatrix* CqAttributes::GetMatrixAttributeWrite( const char* strName, const char
 const TqFloat* CqAttributes::GetFloatAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_float )
 		return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -383,7 +391,7 @@ const TqFloat* CqAttributes::GetFloatAttribute( const char* strName, const char*
 const TqInt* CqAttributes::GetIntegerAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_integer )
 		return ( static_cast<const CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -400,7 +408,7 @@ const TqInt* CqAttributes::GetIntegerAttribute( const char* strName, const char*
 const CqString* CqAttributes::GetStringAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_string )
 		return ( static_cast<const CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -417,7 +425,7 @@ const CqString* CqAttributes::GetStringAttribute( const char* strName, const cha
 const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_point )
 		return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -433,7 +441,11 @@ const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const ch
 
 const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const char* strParam ) const
 {
-	return ( GetPointAttribute( strName, strParam ) );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 && pParam->Type() == type_vector )
+		return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -446,7 +458,11 @@ const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const c
 
 const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const char* strParam ) const
 {
-	return ( GetPointAttribute( strName, strParam ) );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 && pParam->Type() == type_normal )
+		return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -460,7 +476,7 @@ const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const c
 const CqColor* CqAttributes::GetColorAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_color )
 		return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
@@ -477,7 +493,7 @@ const CqColor* CqAttributes::GetColorAttribute( const char* strName, const char*
 const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const char* strParam ) const
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
-	if ( pParam != 0 )
+	if ( pParam != 0 && pParam->Type() == type_matrix )
 		return ( static_cast<const CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );

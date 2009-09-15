@@ -27,6 +27,7 @@
 #include	<cstring>
 
 #include	<aqsis/core/ilightsource.h>
+#include	<aqsis/core/iparameter.h>
 #include	"shaderexecenv.h"
 #include	<aqsis/version.h>
 
@@ -175,27 +176,11 @@ void CqShaderExecEnv::SO_attribute( IqShaderData* name, IqShaderData* pV, IqShad
 		{
 			CqString strParam = _aq_name.substr( iColon + 1, _aq_name.size() - iColon - 1 );
 			_aq_name = _aq_name.substr( 0, iColon );
-			//const CqParameter* pParam = m_pAttributes ->pParameter( STRING( name ).c_str(), strParam.c_str() );
+			const IqParameter* pParam = m_pAttributes ->GetAttribute( _aq_name.c_str(), strParam.c_str() );
 
 			Ret = 1.0f;
-			if ( NULL != pAttributes() ->GetFloatAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetFloat( pAttributes() ->GetFloatAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetIntegerAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetFloat( pAttributes() ->GetIntegerAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetStringAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetString( pAttributes() ->GetStringAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetPointAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetPoint( pAttributes() ->GetPointAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetVectorAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetVector( pAttributes() ->GetVectorAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetNormalAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetNormal( pAttributes() ->GetNormalAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetColorAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetColor( pAttributes() ->GetColorAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != pAttributes() ->GetMatrixAttribute( _aq_name.c_str(), strParam.c_str() ) )
-				pV->SetMatrix( pAttributes() ->GetMatrixAttribute( _aq_name.c_str(), strParam.c_str() ) [ 0 ] );
-			else
-				Ret = 0.0f;
+			if(pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
+				pParam->CopyToShaderVariable(pV);
 		}
 	}
 	Result->SetValue( Ret, 0 );

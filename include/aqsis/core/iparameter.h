@@ -57,6 +57,9 @@ struct IqParameter
 	/** Pure virtual, get value size, not array, but varying/vertex size.
 	 */
 	virtual	TqUint	Size() const = 0;
+	/** Pure virtual, get the value array length.
+	 */
+	virtual TqInt ArrayLength() const = 0;
 	/** Pure virtual, clear value contents.
 	 */
 	virtual	void	Clear() = 0;
@@ -68,7 +71,7 @@ struct IqParameter
 	 * \param pSurface Pointer to the surface we are processing used for vertex class variables to perform natural interpolation.
 	 */
 	virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 ) = 0;
-	virtual	void	CopyToShaderVariable( IqShaderData* pResult ) = 0;
+	virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const = 0;
 
 	/** Pure virtual, dice a single array element of the value into a grid using appropriate interpolation for the class.
 	 * \param u Integer dice count for the u direction.

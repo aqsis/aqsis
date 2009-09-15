@@ -38,6 +38,9 @@ struct IqAttributes
 	virtual ~IqAttributes()
 	{}
 
+	virtual const	IqParameter* GetAttribute( const char* strName, const char* strParam ) const = 0;
+	virtual IqParameter* GetAttributeWrite( const char* strName, const char* strParam ) = 0;
+
 	/** Get a named float attribute as read only
 	 */
 	virtual	const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const = 0;

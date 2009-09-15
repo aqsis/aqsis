@@ -97,6 +97,10 @@ class CqParameter : public IqParameter
 		/** Pure virtual, get value size, not array, but varying/vertex size.
 		 */
 		virtual	TqUint	Size() const = 0;
+		virtual TqInt	ArrayLength() const
+		{
+			return Count();
+		}
 		/** Pure virtual, clear value contents.
 		 */
 		virtual	void	Clear() = 0;
@@ -122,7 +126,7 @@ class CqParameter : public IqParameter
 		 * \param pSurface Pointer to the surface we are processing used for vertex class variables to perform natural interpolation.
 		 */
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 ) = 0;
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) = 0;
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const = 0;
 
 		/** Pure virtual, dice a single array element of the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
@@ -292,7 +296,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 			}
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult );
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const;
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
@@ -429,7 +433,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 				pResult->SetValue( paramToShaderType<SLT,T>(m_aValues[0]), i );
 		}
 
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == this->Type() );
@@ -563,7 +567,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			for ( i = 0; i < size ; i++ )
 				pResult->SetValue( paramToShaderType<SLT,T>(m_Value), i );
 		}
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			// Just promote the constant value to varying by duplication.
 			assert( pResult->Type() == this->Type() );
@@ -668,7 +672,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
 		}
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			assert( pResult->Type() == this->Type() );
 			TqUint i;
@@ -871,7 +875,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			}
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult );
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const;
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 );
 
 		// Overridden from CqParameterTyped<T>
@@ -999,7 +1003,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 				for( j = 0; j < this->Count(); ++j )
 					pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == this->Type() );
@@ -1135,7 +1139,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 				for( j = 0; j < this->Count(); ++j )
 					pResult->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			// Just promote the constant value to varying by duplication.
 			assert( pResult->Type() == this->Type() );
@@ -1246,7 +1250,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
 		}
-		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) const
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == this->Type() );
@@ -1410,7 +1414,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 }
 
 template <class T, EqVariableType I, class SLT>
-void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
+void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult ) const
 {
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
@@ -1471,7 +1475,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 }
 
 template <class T, EqVariableType I, class SLT>
-void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
+void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult ) const
 {
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
