@@ -179,7 +179,7 @@ void CqShaderExecEnv::SO_attribute( IqShaderData* name, IqShaderData* pV, IqShad
 			const IqParameter* pParam = m_pAttributes ->GetAttribute( _aq_name.c_str(), strParam.c_str() );
 
 			Ret = 0.0f;
-			if(pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
+			if(pParam && pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
 			{
 				pParam->CopyToShaderVariable(pV);
 				Ret = 1.0f;
@@ -296,7 +296,7 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 			const IqParameter* pParam = m_pAttributes ->GetAttribute( strName.c_str(), strParam.c_str() );
 
 			Ret = 0.0f;
-			if(pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
+			if(pParam && pParam->Type() == pV->Type() && pParam->ArrayLength() == pV->ArrayLength())
 			{
 				pParam->CopyToShaderVariable(pV);
 				Ret = 1.0f;
