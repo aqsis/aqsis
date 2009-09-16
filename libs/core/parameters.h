@@ -141,7 +141,7 @@ class CqParameter : public IqParameter
 		 * \param idxTarget Index of value to set,
 		 * \param idxSource Index of value to get,
 		 */
-		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource ) = 0;
+		virtual	void	SetValue(const CqParameter* pFrom, TqInt idxTarget, TqInt idxSource ) = 0;
 
 		/** Get a reference to the parameter name.
 		 */
@@ -201,11 +201,11 @@ class CqParameterTyped : public CqParameter
 		 */
 		virtual	T*	pValue( const TqInt Index ) = 0;
 
-		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
+		virtual	void	SetValue(const CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
 			assert( pFrom->Type() == this->Type() );
 
-			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
+			const CqParameterTyped<T, SLT>* pFromTyped = static_cast<const CqParameterTyped<T, SLT>*>( pFrom );
 			*pValue( idxTarget ) = *pFromTyped->pValue( idxSource );
 		}
 
@@ -901,12 +901,12 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 
 
-		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
+		virtual	void	SetValue(const CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
 			assert( pFrom->Type() == this->Type() );
 			assert( pFrom->Count() == this->Count() );
 
-			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
+			const CqParameterTyped<T, SLT>* pFromTyped = static_cast<const CqParameterTyped<T, SLT>*>( pFrom );
 			T* pTargetValues = pValue( idxTarget );
 			const T* pSourceValues = pFromTyped->pValue( idxSource );
 			for(TqInt index = 0; index < this->Count(); index++ )
