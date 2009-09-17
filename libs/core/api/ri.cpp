@@ -2928,8 +2928,21 @@ RtVoid	RiCoordSysTransform( RtToken space )
 	// Insert the named coordinate system into the list help on the renderer.
 	CqMatrix matSpaceToWorld;
 	QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time(), matSpaceToWorld ); 
-	QGetRenderContext() ->ptransSetTime( matSpaceToWorld );
+
+	if( QGetRenderContext()->IsWorldBegin() )
+	{
+		// If we're in the WorldBegin/End block, we need to take the 'camera' transform as the starting point.
+		// This is because we have to transform primitives to 'world' coordinates.
+		// So we read the 'default object transform' that is stored at 'RiWorldBegin', set the transform at the current time to that, then concat the specified transform.
+		CqMatrix matDefTrans( QGetRenderContext()->GetDefObjTransform()->matObjectToWorld(QGetRenderContext()->Time()) );
+		QGetRenderContext() ->ptransSetCurrentTime( matDefTrans );
+		QGetRenderContext() ->ptransConcatCurrentTime( matSpaceToWorld );
+	}
+	else
+		QGetRenderContext() ->ptransSetCurrentTime( matSpaceToWorld );
+
 	QGetRenderContext() ->AdvanceTime();
+
 
 	EXCEPTION_CATCH_GUARD("RiCoordSysTransform")
 	return ;

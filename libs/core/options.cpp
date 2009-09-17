@@ -83,12 +83,12 @@ void CqOptions::InitialiseCamera()
 				matNDCToRaster.Identity();
 				// Translate from -1,-1-->1,1 to 0,0-->2,2
 				CqMatrix	T;
-				T.Translate( 1, 1, 0 );
+				T.Translate( 1.0f, 1.0f, 0.0f );
 				// Scale by 0.5 (0,0 --> 1,1) NDC
-				CqMatrix	S( 0.5, 0.5, 0 );
+				CqMatrix	S( 0.5f, 0.5f, 1.0f );
 				CqMatrix	S2( FrameX, FrameY, 0 );
 				// Invert y to fit top down format
-				CqMatrix	S3( 1, -1, 1 );
+				CqMatrix	S3( 1.0f, -1.0f, 1.0f );
 				matScreenToNDC = S * T * S3; // S*T*S2
 				matNDCToRaster = S2;
 

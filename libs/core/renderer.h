@@ -288,6 +288,10 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetmatScreen( const CqMatrix& mat )
 		{
 			m_aCoordSystems[ CoordSystem_Screen ].m_matWorldTo = mat;
+			if(mat.Determinant() != 0)
+				m_aCoordSystems[ CoordSystem_Screen ].m_matToWorld = mat.Inverse();
+			else
+				m_aCoordSystems[ CoordSystem_Screen ].m_matToWorld = CqMatrix();
 		}
 		/** Set the world to NDC matrix.
 		 * \param mat The new matrix to use as the world to NDC transformation.
@@ -295,6 +299,10 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetmatNDC( const CqMatrix& mat )
 		{
 			m_aCoordSystems[ CoordSystem_NDC ].m_matWorldTo = mat;
+			if(mat.Determinant() != 0)
+				m_aCoordSystems[ CoordSystem_NDC ].m_matToWorld = mat.Inverse();
+			else
+				m_aCoordSystems[ CoordSystem_NDC ].m_matToWorld = CqMatrix();
 		}
 		/** Set the world to raster matrix.
 		 * \param mat The new matrix to use as the world to raster transformation.
@@ -302,6 +310,10 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetmatRaster( const CqMatrix& mat )
 		{
 			m_aCoordSystems[ CoordSystem_Raster ].m_matWorldTo = mat;
+			if(mat.Determinant() != 0)
+				m_aCoordSystems[ CoordSystem_Raster ].m_matToWorld = mat.Inverse();
+			else
+				m_aCoordSystems[ CoordSystem_Raster ].m_matToWorld = CqMatrix();
 		}
 		/** Set the world to camera transform.
 		 * \param ptrans A pointer to the transformation object which represents the world to camera transform.
