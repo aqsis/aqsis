@@ -86,27 +86,50 @@ void CqOptions::InitialiseCamera()
 				T.Translate( 1.0f, 1.0f, 0.0f );
 				// Scale by 0.5 (0,0 --> 1,1) NDC
 				CqMatrix	S( 0.5f, 0.5f, 1.0f );
-				CqMatrix	S2( FrameX, FrameY, 0 );
+				CqMatrix	S2( FrameX, FrameY,  1.0f );
 				// Invert y to fit top down format
 				CqMatrix	S3( 1.0f, -1.0f, 1.0f );
 				matScreenToNDC = S * T * S3; // S*T*S2
 				matNDCToRaster = S2;
-
-				// Setup the view frustum clipping volume
+				
+				//Calculate a frame extension for the screen window.  
+				//This frame extension is equal to the current filter width
+				CqMatrix matRasterToScreen = (matNDCToRaster * matScreenToNDC ).Inverse();
+				TqFloat filterWidthX = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 0 ] ) * 0.5f ;
+				TqFloat filterWidthY = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 1 ] ) * 0.5f;
+				CqVector3D frameExtension( filterWidthX,  filterWidthY, 0);
+				
+				//Calculate extra frame in the Raster space
+				CqVector3D rightBottom , leftTop, leftTopScreen,rightBottomScreen;
+				leftTop = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(l, t, 0)) - frameExtension;
+				rightBottom = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(r, b, 0)) + frameExtension;
+				
+				//Get new view frustrum planes in the Screen space
+				leftTopScreen = matRasterToScreen * leftTop;
+				rightBottomScreen = matRasterToScreen * rightBottom;
+												
+				TqFloat newL , newB , newR , newT ;	
+	
+				newL = leftTopScreen.x();
+				newT = leftTopScreen.y();
+				newB = rightBottomScreen.y();
+				newR = rightBottomScreen.x();
+				
+				// Setup the view frustum clDipping volume
 				// Left clipping plane
-				CqPlane pl(1,0,0,fabs(l));
+				CqPlane pl(1,0,0,fabs(newL));
 				QGetRenderContext()->clippingVolume().addPlane(pl);
 
 				// Right clipping plane
-				CqPlane pr(-1,0,0,fabs(r));
+				CqPlane pr(-1,0,0,fabs(newR));
 				QGetRenderContext()->clippingVolume().addPlane(pr);
 
 				// Top clipping plane
-				CqPlane pt(0,-1,0,fabs(t));
+				CqPlane pt(0,-1,0,fabs(newT));
 				QGetRenderContext()->clippingVolume().addPlane(pt);
 
 				// Bottom clipping plane
-				CqPlane pb(0,1,0,fabs(b));
+				CqPlane pb(0,1,0,fabs(newB));
 				QGetRenderContext()->clippingVolume().addPlane(pb);
 
 				// Near clipping plane
@@ -163,33 +186,57 @@ void CqOptions::InitialiseCamera()
 				matScreenToNDC = S * T * S3; // S*T*S2
 				matNDCToRaster = S2;
 
+				//Calculate a frame extension for the screen window.  
+				//This frame extension is equal to the current filter width
+				CqMatrix matRasterToScreen = (matNDCToRaster * matScreenToNDC ).Inverse();
+				TqFloat filterWidthX = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 0 ] ) * 0.5f ;
+				TqFloat filterWidthY = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 1 ] ) * 0.5f;
+				CqVector3D frameExtension( filterWidthX,  filterWidthY, 0);
+				
+				//Calculate extra frame in the Raster space
+				CqVector3D rightBottom , leftTop, leftTopScreen,rightBottomScreen;
+				leftTop = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(l, t, 0)) - frameExtension;
+				rightBottom = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(r, b, 0)) + frameExtension;
+				
+				//Get new view frustrum planes in the Screen space
+				leftTopScreen = matRasterToScreen * leftTop;
+				rightBottomScreen = matRasterToScreen * rightBottom;
+												
+				TqFloat newL , newB , newR , newT ;	
+	
+				newL = leftTopScreen.x();
+				newT = leftTopScreen.y();
+				newB = rightBottomScreen.y();
+				newR = rightBottomScreen.x();
+
+
 				// Setup the view frustum clipping volume
 				// Left clipping plane
-				CqPlane pl(matCameraToScreen[0][3] + matCameraToScreen[0][0],
-				           matCameraToScreen[1][3] + matCameraToScreen[1][0],
-				           matCameraToScreen[2][3] + matCameraToScreen[2][0],
-				           matCameraToScreen[3][3] + matCameraToScreen[3][0]);
+				CqPlane pl(matCameraToScreen[0][3] + matCameraToScreen[0][0] * newL,
+				           matCameraToScreen[1][3] + matCameraToScreen[1][0] * newL,
+				           matCameraToScreen[2][3] + matCameraToScreen[2][0] * newL,
+				           matCameraToScreen[3][3] + matCameraToScreen[3][0] * newL);
 				QGetRenderContext()->clippingVolume().addPlane(pl);
 
 				// Right clipping plane
-				CqPlane pr(matCameraToScreen[0][3] - matCameraToScreen[0][0],
-				           matCameraToScreen[1][3] - matCameraToScreen[1][0],
-				           matCameraToScreen[2][3] - matCameraToScreen[2][0],
-				           matCameraToScreen[3][3] - matCameraToScreen[3][0]);
+				CqPlane pr(matCameraToScreen[0][3] - matCameraToScreen[0][0] * newR,
+				           matCameraToScreen[1][3] - matCameraToScreen[1][0] * newR,
+				           matCameraToScreen[2][3] - matCameraToScreen[2][0] * newR,
+				           matCameraToScreen[3][3] - matCameraToScreen[3][0] * newR);
 				QGetRenderContext()->clippingVolume().addPlane(pr);
 
 				// Top clipping plane
-				CqPlane pt(matCameraToScreen[0][3] - matCameraToScreen[0][1],
-				           matCameraToScreen[1][3] - matCameraToScreen[1][1],
-				           matCameraToScreen[2][3] - matCameraToScreen[2][1],
-				           matCameraToScreen[3][3] - matCameraToScreen[3][1]);
+				CqPlane pt(matCameraToScreen[0][3] - matCameraToScreen[0][1] * newT,
+				           matCameraToScreen[1][3] - matCameraToScreen[1][1] * newT,
+				           matCameraToScreen[2][3] - matCameraToScreen[2][1] * newT,
+				           matCameraToScreen[3][3] - matCameraToScreen[3][1] * newT);
 				QGetRenderContext()->clippingVolume().addPlane(pt);
 
 				// Bottom clipping plane
-				CqPlane pb(matCameraToScreen[0][3] + matCameraToScreen[0][1],
-				           matCameraToScreen[1][3] + matCameraToScreen[1][1],
-				           matCameraToScreen[2][3] + matCameraToScreen[2][1],
-				           matCameraToScreen[3][3] + matCameraToScreen[3][1]);
+				CqPlane pb(matCameraToScreen[0][3] + matCameraToScreen[0][1] * newB,
+				           matCameraToScreen[1][3] + matCameraToScreen[1][1] * newB,
+				           matCameraToScreen[2][3] + matCameraToScreen[2][1] * newB,
+				           matCameraToScreen[3][3] + matCameraToScreen[3][1] * newB);
 				QGetRenderContext()->clippingVolume().addPlane(pb);
 
 				// Near clipping plane
