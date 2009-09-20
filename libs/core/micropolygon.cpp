@@ -189,6 +189,24 @@ void CqMicroPolyGrid::CalcNormals()
 	TqInt uRes = uGridRes()+1;
 	TqInt vRes = vGridRes()+1;
 
+	// For numerical robustness we need to estimate the expected length of N
+	// so we can detect degenerate situations where N came out to be
+	// essentially equal to zero.  We have N = dP_u x dP_v, so that the
+	// expected N length is
+	//
+	//   length(N) ~ length(dP_u)*length(dP_v)
+	//
+	// We estimate the lengths of dP_u and dP_v using the grid diagonal:
+	//
+	//   length(dP_u) ~ length(dP_v) ~ length_of_grid_diagonal / number_of_micropolys_on_diag
+	//
+	const TqFloat expecNlen = (pP[0] - pP[uRes*vRes-1]).Magnitude2()/(uRes*uRes + vRes*vRes);
+	// Our tolerance scaling for lengths to be considered "too small" is:
+	const TqFloat eps = 100*FLT_EPSILON;
+	// tolerances for N^2 & dP_u^2 / dP_v^2 to be considered too small:
+	const TqFloat epsNlen2 = expecNlen*expecNlen*eps*eps;
+	const TqFloat epsdPlen2 = expecNlen*eps*eps;
+
 	CqGridDiff d = m_pShaderExecEnv->GridDiff();
 	for(TqInt v = 0, i = 0; v < vRes; ++v)
 	{
@@ -197,14 +215,14 @@ void CqMicroPolyGrid::CalcNormals()
 			CqVector3D dP_u = d.diffU(pP, u, v);
 			CqVector3D dP_v = d.diffV(pP, u, v);
 			CqVector3D N = dP_u % dP_v;
-			if(N.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
+			if(N.Magnitude2() < epsNlen2)
 			{
 				// If the normal is too small, the grid is probably locally
 				// degenerate; try some neighbouring points as a fallback to
 				// compute a guess at the normal for the current shading point.
-				if(dP_u.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
+				if(dP_u.Magnitude2() < epsdPlen2)
 					dP_u = d.diffU(pP, u, v > 0 ? v-1 : v+1);
-				if(dP_v.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
+				if(dP_v.Magnitude2() < epsdPlen2)
 					dP_v = d.diffV(pP, u > 0 ? u-1 : u+1, v);
 				N = dP_u % dP_v;
 			}
