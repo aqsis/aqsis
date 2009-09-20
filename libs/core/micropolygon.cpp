@@ -32,7 +32,7 @@
 #include	"lights.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
-#include	<aqsis/math/spline.h>
+#include	<aqsis/math/derivatives.h>
 #include	"bucketprocessor.h"
 
 #include	"mpdump.h"
@@ -181,124 +181,79 @@ void CqMicroPolyGrid::CalcNormals()
 	bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 	bool flipNormals = O ^ CSO;
 
-	const CqVector3D* vecMP[ 4 ];
-	CqVector3D	vecN, vecTemp;
-	CqVector3D	vecFailsafeN;
+	const CqVector3D* pP = 0;
+	pVar(EnvVars_P)->GetPointPtr(pP);
+	CqVector3D* pNg = 0;
+	pVar(EnvVars_Ng)->GetNormalPtr(pNg);
 
-	const CqVector3D* pP;
-	pVar(EnvVars_P) ->GetPointPtr( pP );
-	IqShaderData* pNg = pVar(EnvVars_Ng);
+	TqInt uRes = uGridRes()+1;
+	TqInt vRes = vGridRes()+1;
 
-	// Calculate each normal from the top left, top right and bottom left points.
-	register TqInt ur = uGridRes();
-	register TqInt vr = vGridRes();
-
-	// Create a failsafe normal from the corners of the grid, in case we encounter degenerate MP's
-	vecFailsafeN = ( pP[ur] - pP[0] ) % ( pP[(vr*(ur+1))+ur] - pP[0] );
-	vecFailsafeN.Unit();
-
-	TqInt igrid = 0;
-	TqInt iv;
-	for ( iv = 0; iv < vr; iv++ )
+	CqGridDiff d = m_pShaderExecEnv->GridDiff();
+	for(TqInt v = 0, i = 0; v < vRes; ++v)
 	{
-		TqInt iu;
-		for ( iu = 0; iu < ur; iu++ )
+		for(TqInt u = 0; u < uRes; ++u, ++i)
 		{
-			vecMP[ 0 ] = &pP[ igrid ];
-			vecMP[ 1 ] = &pP[ igrid + 1 ];
-			vecMP[ 2 ] = &pP[ igrid + ur + 2 ];
-			vecMP[ 3 ] = &pP[ igrid + ur + 1];
-			TqInt a=0, b=1, c=2;
-			CqVector3D vecBA = ( *vecMP[ b ] ) - ( *vecMP[ a ] );
-			CqVector3D vecCA = ( *vecMP[ c ] ) - ( *vecMP[ a ] );
-			TqFloat bma = vecBA.Magnitude();
-			TqFloat cma = vecCA.Magnitude();
-			if( bma < FLT_EPSILON )
+			CqVector3D dP_u = d.diffU(pP, u, v);
+			CqVector3D dP_v = d.diffV(pP, u, v);
+			CqVector3D N = dP_u % dP_v;
+			if(N.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
 			{
-				b = 3;
-				vecBA = ( *vecMP[ b ] ) - ( *vecMP[ a ] );
-				bma = vecBA.Magnitude();
+				// If the normal is too small, the grid is probably locally
+				// degenerate; try some neighbouring points as a fallback to
+				// compute a guess at the normal for the current shading point.
+				if(dP_u.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
+					dP_u = d.diffU(pP, u, v > 0 ? v-1 : v+1);
+				if(dP_v.Magnitude2() < FLT_EPSILON*FLT_EPSILON)
+					dP_v = d.diffV(pP, u > 0 ? u-1 : u+1, v);
+				N = dP_u % dP_v;
 			}
-
-
-			if( ( bma > FLT_EPSILON ) &&
-			        ( cma > FLT_EPSILON ) &&
-			        ( vecBA != vecCA ) )
-			{
-				vecN = vecBA % vecCA;	// Cross product is normal.*/
-				vecN.Unit();
-				if(flipNormals)
-					vecN = -vecN;
-			}
-			else
-			{
-				//assert(false);
-				vecN = vecFailsafeN;
-			}
-
-			pNg->SetNormal( vecN, igrid );
-			igrid++;
-			// If we are at the last row, last row normal to the same.
-			if ( iv == vr - 1 )
-			{
-				CqVector3D vecNN( vecN );
-				if ( vr > 2 )
-				{
-					CqVector3D vecNm1, vecNm2;
-					pNg->GetNormal( vecNm1, ( ( vr - 1 ) * ( ur + 1 ) ) + iu );
-					pNg->GetNormal( vecNm2, ( ( vr - 2 ) * ( ur + 1 ) ) + iu );
-					vecNN = ( vecNm1 - vecNm2 ) + vecN;
-				}
-				pNg->SetNormal( vecNN, ( vr * ( ur + 1 ) ) + iu );
-			}
+			if(flipNormals)
+				N = -N;
+			N.Unit();
+			pNg[i] = N;
 		}
-		// Set the last one on the row to the same.
-		CqVector3D vecNN( vecN );
-		if ( igrid > 2 )
-		{
-			CqVector3D vecNm1, vecNm2;
-			pNg->GetNormal( vecNm1, igrid - 1 );
-			pNg->GetNormal( vecNm2, igrid - 2 );
-			vecNN = ( vecNm1 - vecNm2 ) + vecN;
-		}
-		pNg->SetNormal( vecNN, igrid );
-		igrid++;
 	}
-	// Set the very last corner value to the last normal calculated.
-	CqVector3D vecNN( vecN );
-	if ( vr > 2 && ur > 2 )
-	{
-		CqVector3D vecNm1, vecNm2;
-		pNg->GetNormal( vecNm1, ( vr - 1 ) * ( ur - 1 ) - 1 );
-		pNg->GetNormal( vecNm2, ( vr - 2 ) * ( ur - 2 ) - 1 );
-		vecNN = ( vecNm1 - vecNm2 ) + vecN;
-	}
-	pNg->SetNormal( vecNN, ( vr + 1 ) * ( ur + 1 ) - 1 );
 }
 
 void CqMicroPolyGrid::CalcSurfaceDerivatives()
 {
-	/// \todo <b>Code review</b>: This function should probably belong in the shaderexecenv.
-	// It could then be easily modified to use the new centered difference functions in the shaderexecenv
-	bool bdpu, bdpv;
+	/// \todo <b>Code review</b>: This function redoes work which is already done in CalcNormals
+	const CqVector3D* pP = 0;
+	pVar(EnvVars_P)->GetPointPtr(pP);
+
 	TqInt lUses = pSurface() ->Uses();
-	bdpu = ( USES( lUses, EnvVars_dPdu ) );
-	bdpv = ( USES( lUses, EnvVars_dPdv ) );
-	IqShaderData * pSDP = pVar(EnvVars_P);
-	static CqVector3D	Defvec( 0, 0, 0 );
 
-	TqInt i;
-
-	TqInt gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
-	for ( i = gsmin1; i >= 0; i-- )
+	TqFloat invDu = 1;
+	CqVector3D* dPdu = 0;
+	if(USES(lUses, EnvVars_dPdu))
 	{
-		if ( bdpu )
+		pVar(EnvVars_dPdu)->GetVectorPtr(dPdu);
+		pVar(EnvVars_du)->GetFloat(invDu);
+		invDu = 1/invDu;
+	}
+
+	TqFloat invDv = 1;
+	CqVector3D* dPdv = 0;
+	if(USES(lUses, EnvVars_dPdv))
+	{
+		pVar(EnvVars_dPdv)->GetVectorPtr(dPdv);
+		pVar(EnvVars_dv)->GetFloat(invDv);
+		invDv = 1/invDv;
+	}
+
+	TqInt uRes = uGridRes()+1;
+	TqInt vRes = vGridRes()+1;
+
+	CqGridDiff d = m_pShaderExecEnv->GridDiff();
+	for(TqInt v = 0, i = 0; v < vRes; ++v)
+	{
+		for(TqInt u = 0; u < uRes; ++u, ++i)
 		{
-			pVar(EnvVars_dPdu) ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
-		}
-		if ( bdpv )
-		{
-			pVar(EnvVars_dPdv) ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
+			if(dPdu)
+				dPdu[i] = d.diffU(pP, u, v)*invDu;
+			if(dPdv)
+				dPdv[i] = d.diffV(pP, u, v)*invDv;
 		}
 	}
 }

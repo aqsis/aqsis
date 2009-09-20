@@ -133,6 +133,8 @@ const CqPrimvarToken standardVarsInit[] = {
 	CqPrimvarToken(class_uniform,  type_integer, 1, "binary"),
 	// Attribute "mpdump"
 	CqPrimvarToken(class_uniform,  type_integer, 1, "enabled"),
+	// Attribute "derivatives"
+	CqPrimvarToken(class_uniform,  type_integer, 1, "centered"),
 
 	//--------------------------------------------------
 	// Aqsis-specific options / attributes

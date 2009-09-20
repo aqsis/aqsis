@@ -46,6 +46,7 @@
 #include	<aqsis/core/isurface.h>
 #include	<aqsis/core/irenderer.h>
 #include	<aqsis/math/matrix.h>
+#include	<aqsis/math/derivatives.h>
 
 #include	<aqsis/core/iattributes.h>
 #include	<aqsis/core/itransform.h>
@@ -97,6 +98,10 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		const IqConstTransformPtr	pTransform() const
 		{
 			return ( boost::static_pointer_cast<const IqTransform>(m_pTransform) );
+		}
+		virtual CqGridDiff GridDiff() const
+		{
+			return m_diff;
 		}
 		virtual void SetCurrentSurface(IqSurface* pEnv)
 		{
@@ -397,10 +402,10 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
 		bool	m_hasValidDerivatives;	///< Is this shading collection able to provide valid derivatives. RiPoints, can't.
-		std::vector<TqInt>	m_diffUI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
-		std::vector<TqInt>	m_diffUI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
-		std::vector<TqInt>	m_diffVI1;	///< Precomputed derivative index for the left hand side of the difference calculation.
-		std::vector<TqInt>	m_diffVI2;	///< Precomputed derivative index for the right hand side of the difference calculation.
+		std::vector<TqInt>	m_diffUidx;	///< Precomputed derivative index for the left hand side of the difference calculation.
+		std::vector<TqInt>	m_diffVidx;	///< Precomputed derivative index for the right hand side of the difference calculation.
+
+		CqGridDiff m_diff;
 
 	public:
 
@@ -615,31 +620,17 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 template<typename T>
 T CqShaderExecEnv::diffU(IqShaderData* var, TqInt gridIdx)
 {
-	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
-	assert(m_diffUI1[gridIdx] < m_shadingPointCount && m_diffUI2[gridIdx] < m_shadingPointCount);
-
-	T val0;
-	T val1;
-
-	// Using the precalculated left/right indexes, get the two values and return the difference.
-	var->GetValue(val0, m_diffUI1[gridIdx]);
-	var->GetValue(val1, m_diffUI2[gridIdx]);
-	return val1 - val0;
+	const T* data = 0;
+	var->GetValuePtr(data);
+	return m_diff.diffU(data, m_diffUidx[gridIdx], m_diffVidx[gridIdx]);
 }
 
 template<typename T>
 T CqShaderExecEnv::diffV(IqShaderData* var, TqInt gridIdx)
 {
-	assert(gridIdx < (uGridRes() + 1)*(vGridRes() + 1));
-	assert(m_diffVI1[gridIdx] < m_shadingPointCount && m_diffVI2[gridIdx] < m_shadingPointCount);
-
-	T val0;
-	T val1;
-
-	// Using the precalculated left/right indexes, get the two values and return the difference.
-	var->GetValue(val0, m_diffVI1[gridIdx]);
-	var->GetValue(val1, m_diffVI2[gridIdx]);
-	return val1 - val0;
+	const T* data = 0;
+	var->GetValuePtr(data);
+	return m_diff.diffV(data, m_diffUidx[gridIdx], m_diffVidx[gridIdx]);
 }
 
 template<typename T>

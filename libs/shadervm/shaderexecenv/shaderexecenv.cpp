@@ -272,58 +272,37 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes,
 		}
 	}
 
-	// Precompute the derivative indices for use in diffU and diffV
-	m_diffUI1.resize(shadingPointCount);
-	m_diffUI2.resize(shadingPointCount);
-	m_diffVI1.resize(shadingPointCount);
-	m_diffVI2.resize(shadingPointCount);
+	m_diffUidx.resize(shadingPointCount);
+	m_diffVidx.resize(shadingPointCount);
+	TqInt uSize = uGridRes+1;
+	TqInt vSize = vGridRes+1;
 	if(hasValidDerivatives)
 	{
-		TqInt uSize = uGridRes+1;
-		TqInt vSize = vGridRes+1;
-		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
+		// Precompute lookup tables from the shading index to u,v indices, to
+		// avoid costly modulo and integer operations in derivative functions.
+		for(TqInt v = 0, i = 0; v < vSize; ++v)
 		{
-			TqInt iu = idx % uSize;
-			if(iu == uSize-1)
+			for(TqInt u = 0; u < uSize; ++u, ++i)
 			{
-				// Use backward difference for grid boundary end in u-direction
-				m_diffUI1[idx] = idx-1;
-				m_diffUI2[idx] = idx;
-			}
-			else 
-			{
-				// Use forward difference internally
-				m_diffUI1[idx] = idx;
-				m_diffUI2[idx] = idx+1;
-			}
-			TqInt iv = idx / uSize;
-			if(iv == vSize-1)
-			{
-				// Use backward difference for grid boundary end in v-direction
-				m_diffVI1[idx] = idx-uSize;
-				m_diffVI2[idx] = idx;
-			}
-			else 
-			{
-				// Use forward difference internally
-				m_diffVI1[idx] = idx;
-				m_diffVI2[idx] = idx+uSize;
+				m_diffUidx[i] = u;
+				m_diffVidx[i] = v;
 			}
 		}
 	}
-	else
+
+	// Determine whether to use centred differences or not.
+	bool useCentred = true;
+	if(pAttr)
 	{
-		// If the shading group (grid) is not suitable for derivative calculation (points)
-		// then set all left/right indices to be the same, this way we get zero derivatives
-		// which is correct for points as they have no inherent area.
-		for(TqInt idx = 0; idx < shadingPointCount; ++idx)
-		{
-			m_diffUI1[idx] = idx;
-			m_diffUI2[idx] = idx;
-			m_diffVI1[idx] = idx;
-			m_diffVI2[idx] = idx;
-		}
+		if(const TqInt* centred = pAttr->GetIntegerAttribute("derivatives", "centered"))
+			useCentred = (centred[0] == 1);
+		else
+			useCentred = (pAttr->GetIntegerAttribute("System", "ShadingInterpolation")[0]
+						== ShadingInterp_Smooth);
 	}
+
+	m_diff.reset(uSize, vSize, !hasValidDerivatives, !hasValidDerivatives,
+				 useCentred);
 }
 
 IqShaderData* CqShaderExecEnv::FindStandardVar( const char* pname )

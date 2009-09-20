@@ -32,6 +32,7 @@
 
 #include	<aqsis/shadervm/ishaderdata.h>
 #include	<aqsis/math/vector3d.h>
+#include	<aqsis/math/derivatives.h>
 #include	<aqsis/math/matrix.h>
 #include	<aqsis/util/sstring.h>
 #include	<aqsis/util/bitvector.h>
@@ -173,6 +174,9 @@ struct AQSIS_SHADERVM_SHARE IqShaderExecEnv
 	/** Set the pointer to the currently being lit surface
 	 */
 	virtual void SetCurrentSurface(IqSurface* pEnv) = 0;
+
+	/// Get the grid difference computation object.
+	virtual CqGridDiff GridDiff() const = 0;
 
 	/** Get the pointer to the currently being lit surface
 	 */
@@ -521,71 +525,6 @@ struct AQSIS_SHADERVM_SHARE IqShaderExecEnv
 	virtual STD_SO	SO_bake3d( STRINGVAL ptc, STRINGVAL format, POINTVAL P, NORMALVAL N, DEFPARAMVAR ) = 0;
 	virtual STD_SO	SO_texture3d( STRINGVAL ptc, POINTVAL P, NORMALVAL N, DEFPARAMVAR ) = 0;
 };
-
-/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
- */
-template <class R>
-R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
-{
-	R Ret;
-	TqInt uRes = ps->uGridRes();
-	TqInt GridX = i % ( uRes + 1 );
-
-	TqFloat fdu;
-	ps->du() ->GetFloat( fdu );
-
-	if ( fdu == 0 )
-		return ( Def );
-
-	R v1, v2;
-	if ( GridX < uRes )
-	{
-		Var->GetValue( v1, i + 1 );
-		Var->GetValue( v2, i );
-		Ret = ( v1 - v2 ) / fdu;
-	}
-	else
-	{
-		Var->GetValue( v1, i );
-		Var->GetValue( v2, i - 1 );
-		Ret = ( v1 - v2 ) / fdu;
-	}
-	return ( Ret );
-}
-
-
-/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
- */
-template <class R>
-R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
-{
-	R Ret;
-	TqInt uRes = ps->uGridRes();
-	TqInt vRes = ps->vGridRes();
-	TqInt GridY = ( i / ( uRes + 1 ) );
-
-	TqFloat fdv;
-	ps->dv() ->GetFloat( fdv );
-
-	if ( fdv == 0 )
-		return ( Def );
-
-	R v1, v2;
-	if ( GridY < vRes )
-	{
-		Var->GetValue( v1, i + uRes + 1 );
-		Var->GetValue( v2, i );
-		Ret = ( v1 - v2 ) / fdv;
-	}
-	else
-	{
-		Var->GetValue( v1, i );
-		Var->GetValue( v2, i - ( uRes + 1 ) );
-		Ret = ( v1 - v2 ) / fdv;
-	}
-	return ( Ret );
-}
-
 
 //-----------------------------------------------------------------------
 
