@@ -344,6 +344,20 @@ class CqRenderer : public IqRenderer
 		{
 			return( m_pTransDefObj );
 		}
+		/** Set the pre projection transform.
+		 * \param ptrans A pointer to the transformation object which represents the transform prior to projection.
+		 */
+		virtual	void	SetpreProjectionTransform( const CqTransformPtr& ptrans )
+		{
+			m_preProjectionTransform = ptrans;
+		}
+		/** Get the pre projection tramsform.
+		 * \return A pointer to the transformation object which represents the the transform prior to projection.
+		 */
+		virtual	CqTransformPtr	GetpreProjectionTransform( )
+		{
+			return( m_preProjectionTransform );
+		}
 
 		/** Set the lens data associated with depth of field effects.
 		    * \param fstop The f-stop of the lens.
@@ -572,6 +586,7 @@ class CqRenderer : public IqRenderer
 		bool	m_fSaveGPrims;
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.
 		CqTransformPtr	m_pTransDefObj;				///< The initial transformation for objects.
+		CqTransformPtr	m_preProjectionTransform;	///< The transformation that was applied prior to projection.
 		bool			m_fWorldBegin;
 		/// Renderman symbol table
 		CqTokenDictionary m_tokenDict;

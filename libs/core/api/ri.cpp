@@ -1085,6 +1085,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 		}
 	}
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
+	QGetRenderContext() ->SetpreProjectionTransform( QGetRenderContext() ->ptransCurrent() );
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
 	EXCEPTION_CATCH_GUARD("RiProjectionV")

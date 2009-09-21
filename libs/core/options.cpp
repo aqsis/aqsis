@@ -42,216 +42,61 @@ void CqOptions::InitialiseCamera()
 	// Setup the Normalising and projection matrices according to the projection
 	// type
 	CqMatrix	matCameraToScreen;
+	CqMatrix	matCameraToImage;
+	CqMatrix	matImageToScreen;
 	CqMatrix	matScreenToCamera;
 	CqMatrix	matScreenToNDC;
 	CqMatrix	matNDCToRaster;
+
+	TqFloat l = GetFloatOption( "System", "ScreenWindow" ) [ 0 ];
+	TqFloat r = GetFloatOption( "System", "ScreenWindow" ) [ 1 ];
+	TqFloat t = GetFloatOption( "System", "ScreenWindow" ) [ 2 ];
+	TqFloat b = GetFloatOption( "System", "ScreenWindow" ) [ 3 ];
+	TqFloat n = GetFloatOption( "System", "Clipping" ) [ 0 ];
+	TqFloat f = GetFloatOption( "System", "Clipping" ) [ 1 ];
+
 	TqInt proj = GetIntegerOption( "System", "Projection" ) [ 0 ];
 	switch ( proj )
 	{
 			case	ProjectionOrthographic:
 			{
-				// Define a matrix to convert from right top left handed coordinate systems.
-				CqMatrix Trl( 1, 1, -1 );
-
-				TqFloat l = GetFloatOption( "System", "ScreenWindow" ) [ 0 ];
-				TqFloat r = GetFloatOption( "System", "ScreenWindow" ) [ 1 ];
-				TqFloat t = GetFloatOption( "System", "ScreenWindow" ) [ 2 ];
-				TqFloat b = GetFloatOption( "System", "ScreenWindow" ) [ 3 ];
-				TqFloat n = GetFloatOption( "System", "Clipping" ) [ 0 ];
-				TqFloat f = GetFloatOption( "System", "Clipping" ) [ 1 ];
-
-				matCameraToScreen.Identity();
-				matCameraToScreen.SetfIdentity( false );
-				matCameraToScreen.SetElement( 0, 0, 2.0f / ( r - l ) );
-				matCameraToScreen.SetElement( 3, 0, -( r + l ) / ( r - l ) );
-				matCameraToScreen.SetElement( 1, 1, 2.0f / ( t - b ) );
-				matCameraToScreen.SetElement( 3, 1, -( t + b ) / ( t - b ) );
-				matCameraToScreen.SetElement( 2, 2, -2.0f / ( f - n ) );
-				matCameraToScreen.SetElement( 3, 2, -( f + n ) / ( f - n ) );
-				matCameraToScreen.SetElement( 2, 3, 0 );
-				matCameraToScreen.SetElement( 3, 3, 1 );
-
-				// Combine with the right to left matrix.
-				matCameraToScreen *= Trl;
-
-				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] >= 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 0 ] :
-				                 ( GetIntegerOption( "System", "Resolution" ) [ 1 ] * GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
-				TqFloat	FrameY = ( GetIntegerOption( "System", "FrameAspectRatio" ) [ 0 ] < 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 1 ] :
-				                 ( GetIntegerOption( "System", "Resolution" ) [ 0 ] * GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ];
-				matScreenToNDC.Identity();
-				matNDCToRaster.Identity();
-				// Translate from -1,-1-->1,1 to 0,0-->2,2
-				CqMatrix	T;
-				T.Translate( 1.0f, 1.0f, 0.0f );
-				// Scale by 0.5 (0,0 --> 1,1) NDC
-				CqMatrix	S( 0.5f, 0.5f, 1.0f );
-				CqMatrix	S2( FrameX, FrameY,  1.0f );
-				// Invert y to fit top down format
-				CqMatrix	S3( 1.0f, -1.0f, 1.0f );
-				matScreenToNDC = S * T * S3; // S*T*S2
-				matNDCToRaster = S2;
-				
-				//Calculate a frame extension for the screen window.  
-				//This frame extension is equal to the current filter width
-				CqMatrix matRasterToScreen = (matNDCToRaster * matScreenToNDC ).Inverse();
-				TqFloat filterWidthX = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 0 ] ) * 0.5f ;
-				TqFloat filterWidthY = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 1 ] ) * 0.5f;
-				CqVector3D frameExtension( filterWidthX,  filterWidthY, 0);
-				
-				//Calculate extra frame in the Raster space
-				CqVector3D rightBottom , leftTop, leftTopScreen,rightBottomScreen;
-				leftTop = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(l, t, 0)) - frameExtension;
-				rightBottom = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(r, b, 0)) + frameExtension;
-				
-				//Get new view frustrum planes in the Screen space
-				leftTopScreen = matRasterToScreen * leftTop;
-				rightBottomScreen = matRasterToScreen * rightBottom;
-												
-				TqFloat newL , newB , newR , newT ;	
-	
-				newL = leftTopScreen.x();
-				newT = leftTopScreen.y();
-				newB = rightBottomScreen.y();
-				newR = rightBottomScreen.x();
-				
-				// Setup the view frustum clDipping volume
-				// Left clipping plane
-				CqPlane pl(1,0,0,fabs(newL));
-				QGetRenderContext()->clippingVolume().addPlane(pl);
-
-				// Right clipping plane
-				CqPlane pr(-1,0,0,fabs(newR));
-				QGetRenderContext()->clippingVolume().addPlane(pr);
-
-				// Top clipping plane
-				CqPlane pt(0,-1,0,fabs(newT));
-				QGetRenderContext()->clippingVolume().addPlane(pt);
-
-				// Bottom clipping plane
-				CqPlane pb(0,1,0,fabs(newB));
-				QGetRenderContext()->clippingVolume().addPlane(pb);
-
-				// Near clipping plane
-				CqPlane pn(0,0,1,fabs(n));
-				QGetRenderContext()->clippingVolume().addPlane(pn);
-
-				// Far clipping plane
-				CqPlane pf(0,0,-1,fabs(f));
-				QGetRenderContext()->clippingVolume().addPlane(pf);
+				// Standard orthographic projection matrix. 
+				//
+				// [ 1    0    0             0 ]
+				// [ 0    1    0             0 ]
+				// [ 0    0    2/(f-n)       0 ]
+				// [ 0    0    -(f+n)/(f-n)  1 ]
+				//
+				matCameraToImage.Identity();
+				matCameraToImage.SetfIdentity( false );
+				matCameraToImage.SetElement( 2, 2, 2.0f/(f-n) );
+				matCameraToImage.SetElement( 3, 2, -(f+n)/(f-n) );
 
 				break;
 			}
 
 			case	ProjectionPerspective:
 			{
-				TqFloat fov = GetFloatOption( "System", "Clipping" ) [ 0 ] * ( tan( degToRad( GetFloatOption( "System", "FOV" ) [ 0 ] / 2.0f ) ) );
-				TqFloat l = GetFloatOption( "System", "ScreenWindow" ) [ 0 ] * fov;
-				TqFloat r = GetFloatOption( "System", "ScreenWindow" ) [ 1 ] * fov;
-				TqFloat t = GetFloatOption( "System", "ScreenWindow" ) [ 2 ] * fov;
-				TqFloat b = GetFloatOption( "System", "ScreenWindow" ) [ 3 ] * fov;
-				TqFloat n = GetFloatOption( "System", "Clipping" ) [ 0 ];
-				TqFloat f = GetFloatOption( "System", "Clipping" ) [ 1 ];
-
-				matCameraToScreen.Identity();
-				matCameraToScreen.SetfIdentity( false );
-				matCameraToScreen.SetElement( 0, 0, ( 2.0f * n ) / ( r - l ) );
-				matCameraToScreen.SetElement( 2, 0, (-( r + l )) / ( r - l ) );
-				matCameraToScreen.SetElement( 1, 1, ( 2.0f * n ) / ( t - b ) );
-				matCameraToScreen.SetElement( 2, 1, (-( t + b )) / ( t - b ) );
+				// Standard perspective projection matrix.
+				//
+				// [ 1/s  0    0           0 ]
+				// [ 0    1/s  0           0 ]
+				// [ 0    0    f/(f-n)     1 ]
+				// [ 0    0    -n*f/(f-n)  0 ]
+				// where s is tan(fov/2.0)
+				//
+				TqFloat fov = GetFloatOption( "System", "FOV" ) [ 0 ];
+				TqFloat s = tan(degToRad(fov)/2.0f);
 				TqFloat a = f / ( f - n );
-				//			matCameraToScreen.SetElement(2,2,-((f+n)/(f-n)));
-				matCameraToScreen.SetElement( 2, 2, a );
-				//			matCameraToScreen.SetElement(3,2,-((2.0f*f*n)/(f-n)));
-				matCameraToScreen.SetElement( 3, 2, -n * a );
-				matCameraToScreen.SetElement( 2, 3, 1 );
-				matCameraToScreen.SetElement( 3, 3, 0 );
 
-				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] >= 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 0 ] :
-				                 ( GetIntegerOption( "System", "Resolution" ) [ 1 ] * GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
-				TqFloat	FrameY = ( GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] < 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 1 ] :
-				                 ( GetIntegerOption( "System", "Resolution" ) [ 0 ] * GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ];
-
-				matScreenToNDC.Identity();
-				matNDCToRaster.Identity();
-				// Translate from -1,-1-->1,1 to 0,0-->2,2
-				CqMatrix	T;
-				T.Translate( 1.0f, 1.0f, 0.0f );
-				// Scale by 0.5 (0,0 --> 1,1) NDC
-				CqMatrix	S( 0.5f, 0.5f, 1.0f );
-				CqMatrix	S2( FrameX, FrameY, 1.0f );
-				// Invert y to fit top down format
-				CqMatrix	S3( 1.0f, -1.0f, 1.0f );
-				matScreenToNDC = S * T * S3; // S*T*S2
-				matNDCToRaster = S2;
-
-				//Calculate a frame extension for the screen window.  
-				//This frame extension is equal to the current filter width
-				CqMatrix matRasterToScreen = (matNDCToRaster * matScreenToNDC ).Inverse();
-				TqFloat filterWidthX = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 0 ] ) * 0.5f ;
-				TqFloat filterWidthY = std::ceil(GetFloatOption( "System", "FilterWidth" ) [ 1 ] ) * 0.5f;
-				CqVector3D frameExtension( filterWidthX,  filterWidthY, 0);
-				
-				//Calculate extra frame in the Raster space
-				CqVector3D rightBottom , leftTop, leftTopScreen,rightBottomScreen;
-				leftTop = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(l, t, 0)) - frameExtension;
-				rightBottom = ((matNDCToRaster * matScreenToNDC ) * CqVector3D(r, b, 0)) + frameExtension;
-				
-				//Get new view frustrum planes in the Screen space
-				leftTopScreen = matRasterToScreen * leftTop;
-				rightBottomScreen = matRasterToScreen * rightBottom;
-												
-				TqFloat newL , newB , newR , newT ;	
-	
-				newL = leftTopScreen.x();
-				newT = leftTopScreen.y();
-				newB = rightBottomScreen.y();
-				newR = rightBottomScreen.x();
-
-
-				// Setup the view frustum clipping volume
-				// Left clipping plane
-				CqPlane pl(matCameraToScreen[0][3] + matCameraToScreen[0][0] * newL,
-				           matCameraToScreen[1][3] + matCameraToScreen[1][0] * newL,
-				           matCameraToScreen[2][3] + matCameraToScreen[2][0] * newL,
-				           matCameraToScreen[3][3] + matCameraToScreen[3][0] * newL);
-				QGetRenderContext()->clippingVolume().addPlane(pl);
-
-				// Right clipping plane
-				CqPlane pr(matCameraToScreen[0][3] - matCameraToScreen[0][0] * newR,
-				           matCameraToScreen[1][3] - matCameraToScreen[1][0] * newR,
-				           matCameraToScreen[2][3] - matCameraToScreen[2][0] * newR,
-				           matCameraToScreen[3][3] - matCameraToScreen[3][0] * newR);
-				QGetRenderContext()->clippingVolume().addPlane(pr);
-
-				// Top clipping plane
-				CqPlane pt(matCameraToScreen[0][3] - matCameraToScreen[0][1] * newT,
-				           matCameraToScreen[1][3] - matCameraToScreen[1][1] * newT,
-				           matCameraToScreen[2][3] - matCameraToScreen[2][1] * newT,
-				           matCameraToScreen[3][3] - matCameraToScreen[3][1] * newT);
-				QGetRenderContext()->clippingVolume().addPlane(pt);
-
-				// Bottom clipping plane
-				CqPlane pb(matCameraToScreen[0][3] + matCameraToScreen[0][1] * newB,
-				           matCameraToScreen[1][3] + matCameraToScreen[1][1] * newB,
-				           matCameraToScreen[2][3] + matCameraToScreen[2][1] * newB,
-				           matCameraToScreen[3][3] + matCameraToScreen[3][1] * newB);
-				QGetRenderContext()->clippingVolume().addPlane(pb);
-
-				// Near clipping plane
-				CqPlane pn(matCameraToScreen[0][2],
-				           matCameraToScreen[1][2],
-				           matCameraToScreen[2][2],
-				           matCameraToScreen[3][2]);
-				QGetRenderContext()->clippingVolume().addPlane(pn);
-
-				// Far clipping plane
-				CqPlane pf(matCameraToScreen[0][3] - matCameraToScreen[0][2],
-				           matCameraToScreen[1][3] - matCameraToScreen[1][2],
-				           matCameraToScreen[2][3] - matCameraToScreen[2][2],
-				           matCameraToScreen[3][3] - matCameraToScreen[3][2]);
-				QGetRenderContext()->clippingVolume().addPlane(pf);
+				matCameraToImage.Identity();
+				matCameraToImage.SetfIdentity( false );
+				matCameraToImage.SetElement( 0, 0, 1.0f/s );
+				matCameraToImage.SetElement( 1, 1, 1.0f/s );
+				matCameraToImage.SetElement( 2, 2, a );
+				matCameraToImage.SetElement( 3, 2, -n * a );
+				matCameraToImage.SetElement( 2, 3, 1.0f );
+				matCameraToImage.SetElement( 3, 3, 0.0f );
 
 				break;
 			}
@@ -264,6 +109,48 @@ void CqOptions::InitialiseCamera()
 				break;
 			}
 	}
+
+	// Image plane to screen window transform
+	// [ 2/(r-l)       0             0  0 ]
+	// [ 0             2/(t-b)       0  0 ]
+	// [ 0             0             1  0 ]
+	// [ -(r+l)/(r-l)  -(t+b)/(t-b)  0  1 ]
+	//
+	// \note: Any transformation specified in the RI stream
+	// before RiProjection is applied to the Camera to Image Plane transform before this transformation.
+	//
+	matImageToScreen.Identity();
+	matImageToScreen.SetfIdentity( false );
+	matImageToScreen.SetElement( 0, 0, 2.0f / ( r - l ) );
+	matImageToScreen.SetElement( 1, 1, 2.0f / ( t - b ) );
+	matImageToScreen.SetElement( 3, 0, (-(r+l))/(r-l) );
+	matImageToScreen.SetElement( 3, 1, (-(t+b))/(t-b) );
+
+	CqMatrix preProjectionTransform;
+	preProjectionTransform.Identity();
+	if(QGetRenderContext()->GetpreProjectionTransform())
+		preProjectionTransform = QGetRenderContext()->GetpreProjectionTransform()->matObjectToWorld(QGetRenderContext()->Time());
+	matCameraToScreen = matImageToScreen * preProjectionTransform * matCameraToImage;
+
+	// Set up the screen to frame matrix
+	TqFloat	FrameX = ( GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] >= 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 0 ] :
+	                 ( GetIntegerOption( "System", "Resolution" ) [ 1 ] * GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
+	TqFloat	FrameY = ( GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] < 1.0 ) ? GetIntegerOption( "System", "Resolution" ) [ 1 ] :
+	                 ( GetIntegerOption( "System", "Resolution" ) [ 0 ] * GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ] ) / GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ];
+
+	matScreenToNDC.Identity();
+	matNDCToRaster.Identity();
+	// Translate from -1,-1-->1,1 to 0,0-->2,2
+	CqMatrix	T;
+	T.Translate( 1.0f, 1.0f, 0.0f );
+	// Scale by 0.5 (0,0 --> 1,1) NDC
+	CqMatrix	S( 0.5f, 0.5f, 1.0f );
+	CqMatrix	S2( FrameX, FrameY, 1.0f );
+	// Invert y to fit top down format
+	CqMatrix	S3( 1.0f, -1.0f, 1.0f );
+	matScreenToNDC = S * T * S3; // S*T*S2
+	matNDCToRaster = S2;
+
 	CqMatrix matWorldToCamera;
 	QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContext()->Time(), matWorldToCamera );
 	QGetRenderContext() ->SetmatScreen( matCameraToScreen * matWorldToCamera );

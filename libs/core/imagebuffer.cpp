@@ -261,10 +261,13 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 	     Bound.vecMax().z() <= m_optCache.clipNear )
 		return true;
 
+	// This needs to be re-enabled when the RiClippingPlane code is wired up.
+#if 0
 	if(QGetRenderContext()->clippingVolume().whereIs(Bound) == CqBound::Side_Outside)
 	{
 		return(true);
 	}
+#endif
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
 	if ( Bound.vecMin().z() <= FLT_EPSILON )
