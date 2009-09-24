@@ -214,39 +214,33 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	// Now we need to dice the user specified parameters as appropriate.
 	std::vector<CqParameter*>::iterator iUP;
 	std::vector<CqParameter*>::iterator end = pPoints()->aUserParams().end();
+	std::vector<boost::shared_ptr<IqShader> > shaders;
+	boost::shared_ptr<IqShader> pShader;
+	if(NULL != (pShader = pGrid->pAttributes()->pshadSurface(QGetRenderContext()->Time())))
+		shaders.push_back(pShader);
+	if(NULL != (pShader = pGrid->pAttributes()->pshadDisplacement(QGetRenderContext()->Time())))
+		shaders.push_back(pShader);
+	if(NULL != (pShader = pGrid->pAttributes()->pshadAtmosphere(QGetRenderContext()->Time())))
+		shaders.push_back(pShader);
+	
 	for ( iUP = pPoints()->aUserParams().begin(); iUP != end ; iUP++ )
 	{
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-		boost::shared_ptr<IqShader> pShader;
-		if ( pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
+		for( std::vector<boost::shared_ptr<IqShader> >::iterator shader = shaders.begin(), last = shaders.end(); shader != last; ++shader )
 		{
-			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
-			if ( NULL != pVar )
+			// If the parameter is uniform or constant, use the standard surface/parameter
+			// mechanism to copy, as it's behaviour is the same as any other surface type.
+			if( (*iUP)->Class() == class_uniform || (*iUP)->Class() == class_constant )
+				(*shader)->SetArgument( ( *iUP ), this );
+			else
 			{
-				/// \todo: Find out how to handle arrays.
-				if(pVar->Type() == ( *iUP )->Type())
-					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
-			}
-		}
-
-		if ( pShader = pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
-		{
-			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
-			if ( NULL != pVar )
-			{
-				/// \todo: Find out how to handle arrays.
-				if(pVar->Type() == ( *iUP )->Type())
-					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
-			}
-		}
-
-		if ( pShader = pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
-		{
-			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
-			if ( NULL != pVar )
-			{
-				/// \todo: Find out how to handle arrays.
-				if(pVar->Type() == ( *iUP )->Type())
+				// For varying, facevarying, vertex or facevertex class parameters,
+				// we need to perform the dicing in custom points code, as we have a u dicesize
+				// of 1, and a v of <the number of points>, and the standard dicing code on
+				// CqParameterTypedVarying<T, I, SLT>::Dice loops over v using <= due to the 
+				// grid nature of normal surfaces, i.e. for 'v' micropolygons, there are v+1 vertices.
+				IqShaderData* pVar = (*shader)->FindArgument( (*iUP)->strName().c_str() );
+				if(NULL != pVar)
 					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
 			}
 		}
@@ -270,6 +264,14 @@ template <class T, class SLT>
 void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
 		TqInt diceSize, IqShaderData* pData)
 {
+	// Check if the target is a varying variable, if not, this is an error.
+	if(pData->Class() != class_varying)
+	{
+		Aqsis::log() << error << "\"" << "Attempt to assign a varying value to uniform variable \"" <<
+			pData->strName() << "\"" << std::endl;
+		return;
+	}
+
 	CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>(pParam);
 	const T* src = pTParam->pValue();
 	for(TqInt j = 0, arraySize = pTParam->Count(); j < arraySize; j++)
@@ -286,6 +288,9 @@ void pointsNaturalDice(CqParameter* pParam, const std::vector<TqInt>& paramIdx,
 void CqPoints::NaturalDice(CqParameter* pParam, TqInt uDiceSize, TqInt vDiceSize,
 		IqShaderData* pData )
 {
+	// \todo: Need to check for 'compatible' types here, not just a match, as
+	// it's possible to assign an hpoint to a point for example, need something
+	// more comprehensive.
 	switch(pParam->Type())
 	{
 		case type_float:

@@ -1704,7 +1704,6 @@ void CqShaderVM::SetArgument( IqParameter* pParam, IqSurface* pSurface )
 	TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
 	if ( i >= 0 )
 	{
-		/// \todo: Find out how to handle arrays.
 		IqShaderData* pVar = m_LocalVars[ i ];
 		if(pVar->Type() == pParam->Type())
 			pParam->Dice(m_uGridRes,m_vGridRes,pVar,pSurface);
