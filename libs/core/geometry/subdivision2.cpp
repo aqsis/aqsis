@@ -43,6 +43,7 @@ namespace Aqsis {
 CqSubdivision2::CqSubdivision2( )
 		: CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >( boost::shared_ptr<CqPolygonPoints>() ),
 		m_bInterpolateBoundary( false ),
+		m_faceVertexParams(),
 		m_fFinalised(false)
 {}
 
@@ -52,12 +53,24 @@ CqSubdivision2::CqSubdivision2( )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( const boost::shared_ptr<CqPolygonPoints>& pPoints ) :  CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints), m_bInterpolateBoundary( false ), m_fFinalised(false)
+CqSubdivision2::CqSubdivision2( const boost::shared_ptr<CqPolygonPoints>& pPoints )
+	:  CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints),
+	m_bInterpolateBoundary( false ),
+	m_faceVertexParams(),
+	m_fFinalised(false)
 {
 	// Store the reference to our points.
 	AddTimeSlot( 0, pPoints );
 
 	STATS_INC( GPR_subdiv );
+
+	// Cache the facevertex user params from the first time slot.
+	for(std::vector<CqParameter*>::iterator iUP = pPoints->aUserParams().begin();
+		iUP != pPoints->aUserParams().end(); iUP++)
+	{
+		if((*iUP)->Class() == class_facevertex)
+			m_faceVertexParams.push_back(*iUP);
+	}
 }
 
 
@@ -2150,6 +2163,101 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	}
 }
 
+namespace {
+
+/** \brief Extract vertex and facevertex indices for the neighbourhood of a
+ * regular patch.
+ *
+ * The neighbourhood of a regular interior SDS patch consists of 9 patches.
+ * Primitive variables to be interpolated are either attached to the vertices
+ * or to the "facevertices".
+ *
+ *  0-----------1-----------2-----------3   <-- vertex
+ *  | 0       1 | 2       3 | 4       5 | <-- facevertex
+ *  |           |           |           |
+ *  |           |           |           |
+ *  | 6       7 | 8       9 | 10     11 |
+ *  4-----------5-----------6-----------7
+ *  | 12     13 | 14     15 | 16     17 |
+ *  |           |           |           |
+ *  |           |           |           |
+ *  | 18     19 | 20     21 | 22     23 |
+ *  8-----------9-----------10----------11
+ *  | 24     25 | 26     27 | 28     29 |
+ *  |           |           |           |
+ *  |           |           |           |
+ *  | 30     31 | 32     33 | 34     35 |
+ *  12----------13----------14----------15
+ *
+ *
+ * As shown, there are 4x4 vertex indices, and 6x6 face vertex indices.  The
+ * numbers shown above show which indices of vertIdx and faceVertIdx correspond
+ * to which positions in the neighbourhood of the central patch.
+ *
+ * \param face - lath for the central patch
+ * \param vertIdx - output array for vertex indices
+ * \param faceVertIdx - output array for facevertex indices
+ */
+void getNbhdIndices(CqLath* face, TqInt vertIdx[16], TqInt faceVertIdx[36])
+{
+	// The following extracts the indices from the lath-based topology; it's a
+	// bit messy and difficult to automate, which is why it's written out in
+	// full.
+	TqInt* vIdx = vertIdx;
+	TqInt* fvIdx = faceVertIdx;
+#	define VGET *vIdx++ = v->VertexIndex()
+#	define FVGET *fvIdx++ = v->FaceVertexIndex()
+	// first column of patches
+	CqLath* vCol = face->cv()->cv()->cf()->cf();
+	CqLath* v = vCol;           VGET; FVGET;
+	v = v->ccf();               VGET; FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();               VGET; FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();               VGET; FVGET;
+	vCol = vCol->cf();
+	v = vCol;                         FVGET;
+	v = v->cf();                      FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                      FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                      FVGET;
+	// second column of patches
+	vCol = vCol->ccv();
+	v = vCol;                   VGET; FVGET;
+	v = v->ccf();               VGET; FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();               VGET; FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();               VGET; FVGET;
+	vCol = vCol->cf();
+	v = vCol;                   VGET; FVGET;
+	v = v->cf();                VGET; FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                VGET; FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                VGET; FVGET;
+	// third column of patches
+	vCol = vCol->ccv();
+	v = vCol;                         FVGET;
+	v = v->ccf();                     FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();                     FVGET;
+	v = v->cv();                      FVGET;
+	v = v->ccf();                     FVGET;
+	vCol = vCol->cf();
+	v = vCol;                   VGET; FVGET;
+	v = v->cf();                VGET; FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                VGET; FVGET;
+	v = v->ccv();                     FVGET;
+	v = v->cf();                VGET; FVGET;
+#	undef VGET
+#	undef FVGET
+}
+
+} // anon namespace
+
 TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	assert( pTopology() );
@@ -2158,79 +2266,13 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 
 	if( pTopology()->CanUsePatch( pFace() ) )
 	{
-		// Find the point indices for the 16 patch vertices.
-		CqLath* pPoint = pFace()->cv()->cv()->cf()->cf();
-		CqLath* pRow = pPoint;
+		TqInt vertIdx[4*4];
+		TqInt faceVertIdx[6*6];
 
-		std::vector<TqInt>	aiVertices;
-		std::vector<TqInt>	aiFVertices;
-
-		// 0,0
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 0,1
-		pPoint = pPoint->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 0,2
-		pPoint = pPoint->cv()->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 0,3
-		pPoint = pPoint->cv()->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 1,0
-		pRow = pPoint = pRow->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 1,1
-		pPoint = pPoint->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 1,2
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 1,3
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 2,0
-		pRow = pPoint = pRow->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 2,1
-		pPoint = pPoint->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 2,2
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 2,3
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 3,0
-		pPoint = pRow->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 3,1
-		pPoint = pPoint->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 3,2
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
-		// 3,3
-		pPoint = pPoint->ccv()->cf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// Extract vertex & facevertex indices.
+		getNbhdIndices(pFace(), vertIdx, faceVertIdx);
 
 		std::vector< boost::shared_ptr<CqSurfacePatchBicubic> > apSurfaces;
-
 		// Create a surface patch
 		boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
 		// Fill in default values for all primitive variables not explicitly specified.
@@ -2245,10 +2287,10 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 				// Copy any 'varying' class primitive variables.
 				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( pSurface->cVarying() );
-				pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
-				pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
-				pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
-				pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
+				pNewUP->SetValue( ( *iUP ), 0, vertIdx[5] );
+				pNewUP->SetValue( ( *iUP ), 1, vertIdx[6] );
+				pNewUP->SetValue( ( *iUP ), 2, vertIdx[9] );
+				pNewUP->SetValue( ( *iUP ), 3, vertIdx[10] );
 				pSurface->AddPrimitiveVariable( pNewUP );
 			}
 			else if ( ( *iUP ) ->Class() == class_vertex )
@@ -2258,27 +2300,45 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 				pNewUP->SetSize( pSurface->cVertex() );
 				TqUint i;
 				for( i = 0; i < pSurface->cVertex(); i++ )
-					pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
+					pNewUP->SetValue( ( *iUP ), i, vertIdx[i] );
 				pSurface->AddPrimitiveVariable( pNewUP );
 			}
 			else if ( ( *iUP ) ->Class() == class_facevarying )
 			{
 				// Copy any 'facevarying' class primitive variables.
 				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cFaceVarying() );
-				TqUint i;
-				for( i = 0; i < pSurface->cFaceVarying(); i++ )
-					pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
+				// The output patch gets one facevarying value per corner.
+				pNewUP->SetSize(4);
+				pNewUP->SetValue( *iUP, 0, faceVertIdx[14] );
+				pNewUP->SetValue( *iUP, 1, faceVertIdx[15] );
+				pNewUP->SetValue( *iUP, 2, faceVertIdx[20] );
+				pNewUP->SetValue( *iUP, 3, faceVertIdx[21] );
 				pSurface->AddPrimitiveVariable( pNewUP );
 			}
 			else if ( ( *iUP ) ->Class() == class_facevertex )
 			{
-				// Copy any 'facevertex' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cFaceVertex() );
-				TqUint i;
-				for( i = 0; i < pSurface->cFaceVertex(); i++ )
-					pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
+				// Convert facevertex values into vertex variables.  We only
+				// convert to patches when the facevertex data is continuous.
+				CqParameter* pNewUP = CqParameter::Create(
+						CqPrimvarToken(class_vertex, (*iUP)->Type(),
+							           (*iUP)->Count(), (*iUP)->strName()) );
+				pNewUP->SetSize(16);
+				pNewUP->SetValue(*iUP, 0, faceVertIdx[0]);
+				pNewUP->SetValue(*iUP, 1, faceVertIdx[2]);
+				pNewUP->SetValue(*iUP, 2, faceVertIdx[3]);
+				pNewUP->SetValue(*iUP, 3, faceVertIdx[5]);
+				pNewUP->SetValue(*iUP, 4, faceVertIdx[12]);
+				pNewUP->SetValue(*iUP, 5, faceVertIdx[14]);
+				pNewUP->SetValue(*iUP, 6, faceVertIdx[15]);
+				pNewUP->SetValue(*iUP, 7, faceVertIdx[17]);
+				pNewUP->SetValue(*iUP, 8, faceVertIdx[18]);
+				pNewUP->SetValue(*iUP, 9, faceVertIdx[20]);
+				pNewUP->SetValue(*iUP, 10, faceVertIdx[21]);
+				pNewUP->SetValue(*iUP, 11, faceVertIdx[23]);
+				pNewUP->SetValue(*iUP, 12, faceVertIdx[30]);
+				pNewUP->SetValue(*iUP, 13, faceVertIdx[32]);
+				pNewUP->SetValue(*iUP, 14, faceVertIdx[33]);
+				pNewUP->SetValue(*iUP, 15, faceVertIdx[35]);
 				pSurface->AddPrimitiveVariable( pNewUP );
 			}
 			else if ( ( *iUP ) ->Class() == class_uniform )
@@ -2509,11 +2569,47 @@ bool CqSurfaceSubdivisionPatch::Diceable()
 	return ( true );
 }
 
+
+namespace {
+
+/** \brief Check that all provided facevertex pairs are continuous.
+ *
+ * This function checks that the parameter "parUntyped" is continuous (equal)
+ * between each provided pair facevertex indices.
+ *
+ * \param parUntyped - parameter to check.
+ * \param fvIndex - an array of pairs of facevertex indices (length
+ *                  2*numPairs).  parUntyped is checked for equality at the
+ *                  indices fvIndex[2*i] fvIndex[2*i+1] for all i between 0 and
+ *                  numPairs-1
+ * \param numPairs - number of facevertex index pairs residing in fvIndex.
+ */
+template<typename T, typename SLT>
+bool allFvertContinuous(const CqParameter& parUntyped, TqInt* fvIndex,
+		TqInt numPairs)
+{
+	const CqParameterTyped<T, SLT>& par
+		= static_cast<const CqParameterTyped<T, SLT>&>(parUntyped);
+	TqInt arLen = par.ArrayLength();
+	for(TqInt i = 0; i < numPairs; ++i)
+	{
+		const T* val1 = par.pValue(fvIndex[2*i]);
+		const T* val2 = par.pValue(fvIndex[2*i+1]);
+		for(TqInt arIdx = 0; arIdx < arLen; ++arIdx)
+		{
+			if( !isClose(val1[arIdx], val2[arIdx]) )
+				return false;
+		}
+	}
+	return true;
+}
+
+} // anon namespace
+
 /**
  * Determine if the topology surrounding the specified face is suitable for
  * conversion to a bicubic patch.
  */
-
 bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 {
 	// If the patch is a quad with each corner having valence 4, and no special features,
@@ -2563,21 +2659,82 @@ bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 			return( false );
 	}
 
-	// Finally check if the "facevarying" indexes match, as patches can't have
-	// different facevarying indexes across the parameter lines.
-	for( iFV = aQfv.begin(); iFV != aQfv.end(); iFV++ )
+	// Finally check if the "facevertex" values match at the patch vertices, as
+	// the interpolation scheme for most discontinuous facevertex data can't be
+	// represented using the vertex interpolation scheme of a bspline patch.
+	if(m_faceVertexParams.size() != 0)
 	{
-		std::vector<CqLath*> aQvv;
-		(*iFV)->Qvv(aQvv);
-		// We already know this must have 4 entries to have passed the previous tests.
-		if( !( aQvv[0]->FaceVertexIndex() == aQvv[1]->FaceVertexIndex() == aQvv[2]->FaceVertexIndex() == aQvv[3]->FaceVertexIndex() ) )
-			return( false );
+		// Get facevertex indices for patches in the current patch
+		// neighbourhood.
+		TqInt vertIdx[16];
+		TqInt fvertIdx[36];
+		getNbhdIndices(pFace, vertIdx, fvertIdx);
 
-		// Check the edge parameter lines from this face vertex.
-		if( (*iFV)->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccf()->ccv()->FaceVertexIndex() )
-			return( false );
-		if( (*iFV)->ccv()->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccv()->ccf()->ccv()->FaceVertexIndex() )
-			return( false );
+		// Pairs of indices into fvertIdx which we should check to make sure
+		// that all facevertex parameters are continuous across over the
+		// current patch neighbourhood.  See docs for getNbhdIndices() for the
+		// geometric meaning of the indices.
+		TqInt pairsToCheckIdx[] = {
+			// Pairs around edges of patch
+			1,2,  3,4,  6,12,  11,17,  18,24,  23,29,  31,32,  33,34,
+			// Vertices in the middle.
+			7,14,   8,14,  13,14,
+			9,15,   10,15,  16,15,
+			19,20,  25,20,  26,20,
+			22,21,  27,21,  28,21
+		};
+		const TqInt maxNumPairs = sizeof(pairsToCheckIdx)/(2*sizeof(TqInt));
+
+		// Look up the face vertex indices for pairs, and remove any pairs which
+		// are definitely equal due to both face vertex indices in the pair
+		// being equal:
+		TqInt pairsToCheck[2*maxNumPairs];
+		TqInt numPairs = 0;
+		for(TqInt i = 0; i < maxNumPairs; ++i)
+		{
+			TqInt fvIdx1 = fvertIdx[pairsToCheckIdx[2*i]];
+			TqInt fvIdx2 = fvertIdx[pairsToCheckIdx[2*i+1]];
+			if(fvIdx1 != fvIdx2)
+			{
+				pairsToCheck[2*numPairs] = fvIdx1;
+				pairsToCheck[2*numPairs+1] = fvIdx2;
+				++numPairs;
+			}
+		}
+
+		// Now check that the facevarying data is continuous between each pair
+		// of indices extracted above.
+		for(std::vector<CqParameter*>::iterator par = m_faceVertexParams.begin(),
+			parEnd = m_faceVertexParams.end(); par != parEnd; ++par)
+		{
+			bool cont = false;
+			switch((*par)->Type())
+			{
+				case type_float:
+					cont = allFvertContinuous<TqFloat, TqFloat>(**par, pairsToCheck, numPairs);
+					break;
+				case type_point:
+				case type_normal:
+				case type_vector:
+					cont = allFvertContinuous<CqVector3D, CqVector3D>(**par, pairsToCheck, numPairs);
+					break;
+				case type_color:
+					cont = allFvertContinuous<CqColor, CqColor>(**par, pairsToCheck, numPairs);
+					break;
+				case type_hpoint:
+					cont = allFvertContinuous<CqVector4D, CqVector3D>(**par, pairsToCheck, numPairs);
+					break;
+				case type_matrix:
+					cont = allFvertContinuous<CqMatrix, CqMatrix>(**par, pairsToCheck, numPairs);
+					break;
+				default:
+					// Ignore remaining parameter types, since they don't make sense to
+					// subdivide.
+					break;
+			}
+			if(!cont)
+				return false;
+		}
 	}
 
 	return( true );

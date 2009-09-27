@@ -219,7 +219,8 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		std::map<CqLath*, TqFloat>			m_mapSharpEdges;
 		/// Map of sharp corners.
 		TqSharpnessMap			m_mapSharpCorners;
-
+		/// List of facevertex parameters, for use in convert to patch testing.
+		std::vector<CqParameter*> m_faceVertexParams;
 
 		/// Flag indicating whether the topology structures have been finalised.
 		bool							m_fFinalised;
