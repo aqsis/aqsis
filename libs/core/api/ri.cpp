@@ -516,8 +516,20 @@ void SetDefaultRiOptions( void )
 		}
 		else
 		{
-			Aqsis::log() << info
-				<< "Could not open user config \"" << homeRcPath << "\"\n";
+			boost::filesystem::path homeRcPath2 = homePath;
+			homeRcPath2 /= "_aqsisrc";
+		
+			std::ifstream rcFile(homeRcPath2.file_string().c_str(), std::ios::binary);
+			if(rcFile)
+			{
+				Aqsis::log() << info << "Reading user config \"" << homeRcPath2 << "\"\n";
+				QGetRenderContext()->parseRibStream(rcFile, homeRcPath2.file_string());
+			}
+			else
+			{
+				Aqsis::log() << info
+					<< "Could not open user config \"" << homeRcPath << "\" or \"" << homeRcPath2 << "\"\n";
+			}
 		}
 	}
 	else
@@ -537,8 +549,20 @@ void SetDefaultRiOptions( void )
 	}
 	else
 	{
-		Aqsis::log() << info
-			<< "Could not open project config \"" << currentRcPath << "\"\n";
+		std::string currentRcPath2 = "_aqsisrc";
+		rcFile.open(currentRcPath2.c_str(), std::ios::binary);
+
+		if(rcFile)
+		{
+			QGetRenderContext()->parseRibStream(rcFile, currentRcPath);
+			rcFile.close();
+			Aqsis::log() << info << "Reading project config \"" << currentRcPath2 << "\"\n";
+		}
+		else
+		{
+			Aqsis::log() << info
+				<< "Could not open project config \"" << currentRcPath << "\" or \"" << currentRcPath2 << "\"\n";
+		}
 	}
 
 	// Set options from various environment variables.
