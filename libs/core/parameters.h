@@ -1010,10 +1010,10 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == this->Type() && pResult->isArray() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i, j;
-			TqUint size = pResult->Size();
-			for ( i = 0; i < size; i++ )
-				for( j = 0; j < this->ArrayLength(); ++j)
+			TqInt size = pResult->Size();
+			TqInt arLen = this->ArrayLength();
+			for(TqInt i = 0; i < size; ++i)
+				for(TqInt j = 0; j < arLen; ++j)
 					pResult->ArrayEntry(j)->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
 
@@ -1147,10 +1147,10 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == this->Type() && pResult->isArray() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i, j;
-			TqUint size = pResult->Size();
-			for ( i = 0; i < size; i++ )
-				for( j = 0; j < this->ArrayLength(); ++j)
+			TqInt size = pResult->Size();
+			TqInt arLen = this->ArrayLength();
+			for(TqInt i = 0; i < size; ++i)
+				for(TqInt j = 0; j < arLen; ++j)
 					pResult->ArrayEntry(j)->SetValue( paramToShaderType<SLT,T>(pValue( 0 ) [ j ]), i );
 		}
 
@@ -1259,10 +1259,10 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			assert( pResult->Type() == this->Type() && pResult->isArray() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i, j;
-			TqUint size = pResult->Size();
-			for ( i = 0; i < size; i++ )
-				for (j = 0; j < this->ArrayLength(); ++j)
+			TqInt size = pResult->Size();
+			TqInt arLen = this->ArrayLength();
+			for(TqInt i = 0; i < size; ++i)
+				for(TqInt j = 0; j < arLen; ++j)
 					pResult->ArrayEntry(j)->SetValue( paramToShaderType<SLT,T>(this->pValue( 0 ) [ j ]), i );
 		}
 
@@ -1503,11 +1503,12 @@ void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData
 	assert( pResult->isArray() && pResult->ArrayLength() == this->ArrayLength() );
 
 	SLT* pResData;
-	TqUint iu, ia;
-	for ( ia = 0; ia <= pResult->ArrayLength(); ia++ )
+	TqInt size = pResult->Size();
+	TqInt arLen = pResult->ArrayLength();
+	for (TqInt ia = 0; ia <= arLen; ++ia)
 	{
 		pResult->ArrayEntry(ia)->GetValuePtr(pResData);
-		for ( iu = 0; iu <= pResult->Size(); iu++ )
+		for (TqInt iu = 0; iu <= size; ++iu)
 			(*pResData++) = paramToShaderType<SLT,T>(pValue(iu)[ia]);
 	}
 }
