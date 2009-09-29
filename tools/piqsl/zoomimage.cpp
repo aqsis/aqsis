@@ -47,7 +47,8 @@ void CqZoomImage::draw()
 	if(m_image && m_image->displayBuffer())
 	{
 		fl_draw_image(draw_image_cb, this,
-					  x() + m_image->originX(), y() + m_image->originY(),
+					  x() + m_image->originX()*m_scale,
+					  y() + m_image->originY()*m_scale,
 					  m_image->displayBuffer()->width()*m_scale,
 					  m_image->displayBuffer()->height()*m_scale, 3);
 	}
