@@ -55,8 +55,8 @@ void CqZoomImage::draw()
 	else
 	{
 		fl_color(FL_FOREGROUND_COLOR);
-		fl_draw("No Image", x(), y(), parent()->w(), parent()->h(),
-				FL_ALIGN_CENTER, 0, 0);
+		fl_draw("No Image", parent()->x(), parent()->y(),
+				parent()->w(), parent()->h(), FL_ALIGN_CENTER, 0, 0);
 	}
 }
 
