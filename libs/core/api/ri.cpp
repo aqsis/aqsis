@@ -2638,11 +2638,11 @@ RtVoid	RiTransform( RtMatrix transform )
 		// This is because we have to transform primitives to 'world' coordinates.
 		// So we read the 'default object transform' that is stored at 'RiWorldBegin', set the transform at the current time to that, then concat the specified transform.
 		CqMatrix matDefTrans( QGetRenderContext()->GetDefObjTransform()->matObjectToWorld(QGetRenderContext()->Time()) );
-		QGetRenderContext() ->ptransSetCurrentTime( matDefTrans );
-		QGetRenderContext() ->ptransConcatCurrentTime( CqMatrix( transform ) );
+		QGetRenderContext() ->ptransSetTime( matDefTrans );
+		QGetRenderContext() ->ptransConcatCurrentTime( matTrans );
 	}
 	else
-		QGetRenderContext() ->ptransSetCurrentTime( CqMatrix( transform ) );
+		QGetRenderContext() ->ptransSetTime( matTrans );
 	QGetRenderContext() ->AdvanceTime();
 
 	EXCEPTION_CATCH_GUARD("RiTransform")
