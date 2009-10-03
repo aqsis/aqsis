@@ -848,8 +848,9 @@ RtVoid	RiWorldBegin()
 	// which case the primitives all 'fast track' into the pipeline and
 	// therefore rely on information setup here.
 	QGetRenderContext()->poptWriteCurrent()->InitialiseCamera();
-	QGetRenderContext()->pImage()->SetImage();
+	// initialiseCropWindow() currently needs to be called befure SetImage() (ugh)
 	QGetRenderContext()->initialiseCropWindow();
+	QGetRenderContext()->pImage()->SetImage();
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 

@@ -131,6 +131,11 @@ class CqImageBuffer
 
 		bool	m_fQuit;			///< Set by system if a quit has been requested.
 
+		/** m_bucketRegion defines the set of non-cropped buckets.  The set of
+		 * valid buckets is from m_bucketRegion.xMin() to m_bucketRegion.xMax()-1
+		 * inclusive, and similarly in the y-direction.
+		 */
+		CqRegion m_bucketRegion;
 		SqOptionCache m_optCache;   ///< Cache of commonly used RiOptions
 		TqInt	m_cXBuckets;		///< Integer horizontal bucket count.
 		TqInt	m_cYBuckets;		///< Integer vertical bucket count.

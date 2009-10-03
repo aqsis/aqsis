@@ -45,7 +45,7 @@
 namespace Aqsis {
 
 static TqInt bucketmodulo = -1;
-static TqInt bucketdirection = -1;
+//static TqInt bucketdirection = -1;
 
 #define MULTIPROCESSING_NBUCKETS 1
 /** Implementing a work unit for a boost::thread (the operator()()
@@ -175,13 +175,23 @@ void	CqImageBuffer::SetImage()
 {
 	DeleteImage();
 
-	const IqOptions& opts = *QGetRenderContext()->poptCurrent();
+	const CqRenderer& ctx = *QGetRenderContext();
+	const IqOptions& opts = *ctx.poptCurrent();
 	m_optCache.cacheOptions(opts);
 
 	TqInt xRes = opts.GetIntegerOption("System", "Resolution")[0];
 	TqInt yRes = opts.GetIntegerOption("System", "Resolution")[1];
-	m_cXBuckets = (xRes + m_optCache.xBucketSize-1)/m_optCache.xBucketSize;
-	m_cYBuckets = (yRes + m_optCache.yBucketSize-1)/m_optCache.yBucketSize;
+	m_cXBuckets = (xRes-1)/m_optCache.xBucketSize + 1;
+	m_cYBuckets = (yRes-1)/m_optCache.yBucketSize + 1;
+
+	// The bucket region specifies the rectangle of buckets which actually need
+	// to be rendered.  m_bucketRegion.xMax() is actually 1 _greater_ than the
+	// maximum bucket coordinate.
+	m_bucketRegion = CqRegion(
+			ctx.cropWindowXMin()/m_optCache.xBucketSize,
+			ctx.cropWindowYMin()/m_optCache.yBucketSize,
+			(ctx.cropWindowXMax()-1)/m_optCache.xBucketSize + 1,
+			(ctx.cropWindowYMax()-1)/m_optCache.yBucketSize + 1);
 
 	TqInt row = 0;
 	TqInt colPos = 0, rowPos = 0;
@@ -213,7 +223,8 @@ void	CqImageBuffer::SetImage()
 		rowPos += m_optCache.yBucketSize;
 	}
 
-	m_CurrentBucketCol = m_CurrentBucketRow = 0;
+	m_CurrentBucketCol = m_bucketRegion.xMin();
+	m_CurrentBucketRow = m_bucketRegion.yMin();
 }
 
 
@@ -388,28 +399,21 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
-	TqInt XMinb = 0, YMinb = 0, XMaxb = 0, YMaxb = 0;
-	if ( !pSurface->IsUndiceable() )
+	TqInt XMinb = 0;
+	TqInt YMinb = 0;
+	TqInt XMaxb = 0;
+	TqInt YMaxb = 0;
+	if (! pSurface->IsUndiceable() )
 	{
-		// Find out which bucket(s) the surface belongs to.
-		if ( Bound.vecMin().x() < 0 )
-			Bound.vecMin().x( 0.0f );
-		if ( Bound.vecMin().y() < 0 )
-			Bound.vecMin().y( 0.0f );
-
 		XMinb = static_cast<TqInt>( Bound.vecMin().x() ) / m_optCache.xBucketSize;
 		YMinb = static_cast<TqInt>( Bound.vecMin().y() ) / m_optCache.yBucketSize;
 		XMaxb = static_cast<TqInt>( Bound.vecMax().x() ) / m_optCache.xBucketSize;
 		YMaxb = static_cast<TqInt>( Bound.vecMax().y() ) / m_optCache.yBucketSize;
-
-		if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets )
-			return;
-
-		XMinb = clamp( XMinb, 0, m_cXBuckets-1 );
-		YMinb = clamp( YMinb, 0, m_cYBuckets-1 );
-		XMaxb = clamp( XMaxb, 0, m_cXBuckets-1 );
-		YMaxb = clamp( YMaxb, 0, m_cYBuckets-1 );
 	}
+	XMinb = clamp( XMinb, m_bucketRegion.xMin(), m_bucketRegion.xMax()-1 );
+	YMinb = clamp( YMinb, m_bucketRegion.yMin(), m_bucketRegion.yMax()-1 );
+	XMaxb = clamp( XMaxb, m_bucketRegion.xMin(), m_bucketRegion.xMax()-1 );
+	YMaxb = clamp( YMaxb, m_bucketRegion.yMin(), m_bucketRegion.yMax()-1 );
 
 	// Sanity check we are not putting into a bucket that has already been processed.
 	CqBucket* bucket = &Bucket( XMinb, YMinb );
@@ -434,9 +438,6 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			xb = XMinb;
 			++yb;
 		}
-//		if(!done)
-//			AQSIS_THROW_XQERROR(XqInternal, EqE_Bug,
-//				"Bucket already processed but a new Surface touches it");
 	}
 	else
 	{
@@ -458,7 +459,7 @@ void CqImageBuffer::RepostSurface(const CqBucket& oldBucket,
 	TqInt nextBucketX = oldBucket.getCol() + 1;
 	TqInt nextBucketY = oldBucket.getRow();
 	TqInt xpos = oldBucket.getXPosition() + oldBucket.getXSize();
-	if ( nextBucketX < m_cXBuckets && rasterBound.vecMax().x() >= xpos )
+	if ( nextBucketX < m_bucketRegion.xMax() && rasterBound.vecMax().x() >= xpos )
 	{
 		Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
 		wasPosted = true;
@@ -468,11 +469,12 @@ void CqImageBuffer::RepostSurface(const CqBucket& oldBucket,
 		// next row
 		++nextBucketY;
 		// find bucket containing left side of bound
-		nextBucketX = max<TqInt>(0, lfloor( rasterBound.vecMin().x() ) / m_optCache.xBucketSize);
+		nextBucketX = max<TqInt>(m_bucketRegion.xMin(),
+				lfloor(rasterBound.vecMin().x())/m_optCache.xBucketSize);
 		TqInt ypos = oldBucket.getYPosition() + oldBucket.getYSize();
 
-		if ( ( nextBucketX < m_cXBuckets ) &&
-			( nextBucketY  < m_cYBuckets ) &&
+		if ( ( nextBucketX < m_bucketRegion.xMax() ) &&
+			( nextBucketY  < m_bucketRegion.yMax() ) &&
 			( rasterBound.vecMax().y() >= ypos ) )
 		{
 			Bucket( nextBucketX, nextBucketY ).AddGPrim( surface );
@@ -556,18 +558,18 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 	TqInt iXBb = static_cast<TqInt>( B.vecMax().x() / m_optCache.xBucketSize );
 	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / m_optCache.yBucketSize );
 
-	if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
-	        ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
+	if ( ( iXBb < m_bucketRegion.xMin() ) || ( iYBb < m_bucketRegion.yMin() ) ||
+	        ( iXBa >= m_bucketRegion.xMax() ) || ( iYBa >= m_bucketRegion.yMax() ) )
 	{
 		return ;
 	}
 
 	// Use sane values -- otherwise sometimes crashes, probably
 	// due to precision problems
-	if ( iXBa < 0 )	iXBa = 0;
-	if ( iYBa < 0 )	iYBa = 0;
-	if ( iXBb >= m_cXBuckets ) iXBb = m_cXBuckets - 1;
-	if ( iYBb >= m_cYBuckets ) iYBb = m_cYBuckets - 1;
+	if ( iXBa < m_bucketRegion.xMin() )  iXBa = m_bucketRegion.xMin();
+	if ( iYBa < m_bucketRegion.yMin() )  iYBa = m_bucketRegion.yMin();
+	if ( iXBb >= m_bucketRegion.xMax() )  iXBb = m_bucketRegion.xMax() - 1;
+	if ( iYBb >= m_bucketRegion.yMax() )  iYBb = m_bucketRegion.yMax() - 1;
 
 	// Add the MP to all the Buckets that it touches
 	for ( TqInt i = iXBa; i <= iXBb; i++ )
@@ -750,7 +752,7 @@ void CqImageBuffer::RenderImage()
 			if ( pProgressHandler )
 			{
 				// Inform the status class how far we have got, and update UI.
-				float Complete = (100.0f * iBucket) / static_cast<float> ( m_cXBuckets * m_cYBuckets );
+				float Complete = (100.0f * iBucket) / static_cast<float> ( m_bucketRegion.area() );
 				QGetRenderContext() ->Stats().SetComplete( Complete );
 				( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 			}
@@ -788,10 +790,22 @@ void CqImageBuffer::Quit()
  */
 bool CqImageBuffer::NextBucket(EqBucketOrder order)
 {
+	// only deal with horizontal bucket orders for now.
+	m_CurrentBucketCol++;
 
+	if( m_CurrentBucketCol >= m_bucketRegion.xMax() )
+	{
+		m_CurrentBucketCol = m_bucketRegion.xMin();
+		m_CurrentBucketRow++;
+		if( m_CurrentBucketRow >= m_bucketRegion.yMax() )
+			return false;
+	}
+
+	// General bucket orders are not ready for prime time.
+	// WARNING: The code below needs to be adjusted to deal with m_bucketRegion
+#if 0
 	TqInt cnt = 0;
-	TqInt total = ((m_cXBuckets - 1) * (m_cYBuckets - 1));
-
+	TqInt total = m_bucketRegion.area();
 
 	for (TqInt i =0; i < m_cYBuckets - 1 ; i++)
 		for (TqInt j = 0; j < m_cXBuckets - 1; j++)
@@ -931,18 +945,17 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 
 			m_CurrentBucketCol++;
 
-			if( m_CurrentBucketCol >= m_cXBuckets )
+			if( m_CurrentBucketCol >= m_bucketRegion.xMax() )
 			{
-
-				m_CurrentBucketCol = 0;
+				m_CurrentBucketCol = m_bucketRegion.xMin();
 				m_CurrentBucketRow++;
-				if( m_CurrentBucketRow >= m_cYBuckets )
+				if( m_CurrentBucketRow >= m_bucketRegion.yMax() )
 					return( false );
-
 			}
 		}
 		break;
 	}
+#endif
 	return( true );
 }
 
