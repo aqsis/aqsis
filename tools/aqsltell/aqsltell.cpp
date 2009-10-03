@@ -38,6 +38,7 @@
 #include <aqsis/aqsis.h>
 #include <aqsis/util/file.h>
 #include <aqsis/ri/slx.h>
+#include <aqsis/ri/slo.h>
 #include <aqsis/version.h>
 
 #include <iostream>
@@ -129,6 +130,7 @@ int main( int argc, const char** argv )
 		{
 			SLX_SetPath( const_cast<char*>( g_shader_path.c_str() ) );
 			SLX_SetDSOPath( const_cast<char*>( g_shader_path.c_str() ) );
+			Slo_SetShader( ( char* ) e->c_str() );
 
 			if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
 			{
@@ -137,13 +139,7 @@ int main( int argc, const char** argv )
 				int i;
 				SLX_VISSYMDEF * symPtr;
 
-				char* currpath = SLX_GetPath();
-				std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << currpath;
-				if ( strlen( currpath ) > 0 &&
-				        ( currpath[ strlen( currpath ) - 1 ] != '/' ) &&
-				        ( currpath[ strlen( currpath ) - 1 ] != '\\' ) )
-					std::cout << "/";
-				std::cout << SLX_GetName() << "\"" << std::endl;
+				std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << Slo_GetName() << "\"" << std::endl;
 				nArgs = SLX_GetNArgs();
 
 				for ( i = 0; i < nArgs; i++ )
