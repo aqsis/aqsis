@@ -14,8 +14,8 @@ Optimisations:
           o New cache-friendly occlusion tree
           o Occlusion culling prior to micropolygon sampling
           o Improved sampling speed for RiPoints
-    * Enable the “focusfactor” approximation for depth of field by default
-    * Implement the “motionfactor” approximation for motion blur
+    * Enable the "focusfactor" approximation for depth of field by default
+    * Implement the "motionfactor" approximation for motion blur
     * Improved shadow map rendering speed
     * Faster splitting code for large point clouds
 
@@ -51,7 +51,7 @@ Bugs Closed Since 1.4.x:
     * #2270656 - (win32 only) aqsl 1.4.1 crashes on some SL syntax errors
     * #1102356 - Rudi Cortes' Skin shader
     * #2834057 - Aqsis failing to compile due to absent of boost-iostreams
-    * #2812953 - shadow(“blur”) filter artifacts with large values
+    * #2812953 - shadow("blur") filter artifacts with large values
     * #2803564 - Scene crash
     * #2730585 - RiProjection doesn't accept RI_NULL as projection
     * #2541492 - std::exception / crash on Cylinder prim?
@@ -59,7 +59,7 @@ Bugs Closed Since 1.4.x:
     * #2138993 - slxargs sets array length to 1 for non-array parameters
     * #2846526 - Bad render for image's first row and column
     * #2853239 - Cannot retrieve string user attributes
-    * #1696939 - CoordSysTransform “NDC”
+    * #1696939 - CoordSysTransform "NDC"
     * #2847147 - Bad sampling for combined DoF and MB
     * #2133952 - smooth shading interpolation artefacts
     * #1929706 - SDS never split to patches when using facevertex
@@ -80,7 +80,7 @@ Bugs Closed Since 1.4.x:
     * #2811280 - Incorrect incident ray length in orthogonal projection
     * #2802439 - AOV not working
     * #2798384 - Piqsl z buffer
-    * #2730562 - OSX: Running the Aqsis app can “wipe” the users environment
+    * #2730562 - OSX: Running the Aqsis app can "wipe" the users environment
     * #2644580 - Function overloading in RSL
     * #2531309 - artifacts with book export in piqsl
     * #2474067 - DoF not implemented for RiPoints
@@ -97,11 +97,11 @@ Bugs Closed Since 1.4.x:
 
 Bugs Remaining at 1.6.0:
 
-    * #2864575 missing ”-frames f1 f2” functionality
+    * #2864575 missing "-frames f1 f2" functionality
     * #2863824 deforming SDS crash with differing primvars
     * #2838825 pre-world command line options apply to all frames
     * #2819398 RSL message passing function names act like keywords
-    * #2811294 environment(“blur”) between cube faces
+    * #2811294 environment("blur") between cube faces
     * #2805396 black regions at glancing angles
     * #2795195 SDS artifacts with creases
     * #2499271 holes in motion blurred surface
