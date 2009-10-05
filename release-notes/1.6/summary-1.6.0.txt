@@ -1,0 +1,123 @@
+Summary of changes in aqsis-1.6.0 
+
+
+Enhancements
+------------
+
+Optimisations:
+    * Avoid recomputing samples at overlapping bucket boundaries
+    * CqMatrix Optimisations
+    * Removal of IqBound
+    * Substantially refactored sampling and occlusion culling code
+          o Tight bounding boxes for sampling
+          o Revive old rasterizer code rather than using a sampling tree
+          o New cache-friendly occlusion tree
+          o Occlusion culling prior to micropolygon sampling
+          o Improved sampling speed for RiPoints
+    * Enable the “focusfactor” approximation for depth of field by default
+    * Implement the “motionfactor” approximation for motion blur
+    * Improved shadow map rendering speed
+    * Faster splitting code for large point clouds
+
+Other changes:
+
+    * Piqsl interface refactor
+          o Single window interface
+          o Improved keyboard shortcuts
+          o Improved zooming
+          o Z-buffer support
+    * Texturing improvements
+          o Rewritten environment filtering as part of aqsis_tex
+          o Finer control over texture filtering with "minwidth" and "trunc" 
+            parameters.
+    * Smooth shading interpolation for depth of field and motion blur
+    * Matte alpha support for directly rendering shadows on otherwise 
+      transparent surfaces
+    * New RIB parser
+          o Better error reporting
+    * Multilayer support for OpenEXR display
+
+
+
+
+Bugs Closed Since 1.4.x:
+
+    * #2853236 - No AOV for volume shaders
+    * #2853241 - min() not working properly with varying
+    * #2731390 - RiBlobby const opcode not implemented
+    * #2846751 - Camera motion blur not working with points
+    * #2563908 - RiExposure has no effect on empty buckets
+    * #2425031 - ARMan fig 12.12 renders incorrectly
+    * #2270656 - (win32 only) aqsl 1.4.1 crashes on some SL syntax errors
+    * #1102356 - Rudi Cortes' Skin shader
+    * #2834057 - Aqsis failing to compile due to absent of boost-iostreams
+    * #2812953 - shadow(“blur”) filter artifacts with large values
+    * #2803564 - Scene crash
+    * #2730585 - RiProjection doesn't accept RI_NULL as projection
+    * #2541492 - std::exception / crash on Cylinder prim?
+    * #2012013 - DSO filename confusion/oversight
+    * #2138993 - slxargs sets array length to 1 for non-array parameters
+    * #2846526 - Bad render for image's first row and column
+    * #2853239 - Cannot retrieve string user attributes
+    * #1696939 - CoordSysTransform “NDC”
+    * #2847147 - Bad sampling for combined DoF and MB
+    * #2133952 - smooth shading interpolation artefacts
+    * #1929706 - SDS never split to patches when using facevertex
+    * #2738390 - Transformations prior to a RiProjection() call are ignored
+    * #2843067 - uniform primvars not working with RiPoints
+    * #2813534 - Escaped strings in RSL not working
+    * #2474255 - DoF artifacts at image edges
+    * #2023668 - .aqsisrc on Windows platform
+    * #2838827 - crop command causes artifacts
+    * #2319297 - Flipped surface normals with light transform
+    * #2862585 - Lighting artifact on polygons
+    * #2862549 - Reading an empty RIB produces a syntax error
+    * #2853253 - illuminate(from) not retrieved in volume with illuminance()
+    * #2827244 - large numbers of RiPoints incorrectly bound
+    * #2811298 - parameter passing using lightsource()
+    * #2811297 - odd behavior with match()
+    * #2811281 - arbitrary output variables not working
+    * #2811280 - Incorrect incident ray length in orthogonal projection
+    * #2802439 - AOV not working
+    * #2798384 - Piqsl z buffer
+    * #2730562 - OSX: Running the Aqsis app can “wipe” the users environment
+    * #2644580 - Function overloading in RSL
+    * #2531309 - artifacts with book export in piqsl
+    * #2474067 - DoF not implemented for RiPoints
+    * #2415815 - MPDump FTBFS with GCC 4.X
+    * #2169128 - Comments not parsed in the middle of an array or command.
+    * #2134164 - incorrect normals with orientation-changing transformations
+    * #2084218 - texture() sometimes returns black for entire grids
+    * #2023290 - cube environment map filtering is broken
+    * #2022177 - zoomed images in piqsl not updated during render
+    * #2013783 - Large cracks in subdivision surfaces
+    * #1829339 - Artefacts in SDS render (large micropolygons)
+    * #1431013 - subdivision mesh problem
+    * #1422544 - ShadingInterpolation glitches
+
+Bugs Remaining at 1.6.0:
+
+    * #2864575 missing ”-frames f1 f2” functionality
+    * #2863824 deforming SDS crash with differing primvars
+    * #2838825 pre-world command line options apply to all frames
+    * #2819398 RSL message passing function names act like keywords
+    * #2811294 environment(“blur”) between cube faces
+    * #2805396 black regions at glancing angles
+    * #2795195 SDS artifacts with creases
+    * #2499271 holes in motion blurred surface
+    * #2430306 instancing shaders is excessivly expensive
+    * #2319319 SDS edge artifacts with uniform layered shading
+    * #2173666 GeneralPolygons with holes are sometimes corrupted.
+    * #2085508 Space on point parameter default values
+    * #2038067 Memory allocation problem with trimmed NURBS
+    * #1876182 multiple definitions allowed for variables in SL
+    * #1848873 Shader parser says syntax error for a variable redeclaration
+    * #1846441 Crash with simple (malformed?) shader
+    * #1829378 type check for RSL printf args sometimes incorrect
+    * #1811161 arraylength() not implemented
+    * #1766621 Null shader won't compile.
+    * #1688157 Subdivision texture mapping error
+    * #1629731 Args to SL functions should not be writable
+    * #1627891 solar()/illuminate() issue within 'surface' shaders
+    * #946045 grid cracking: Black spots / sampling errors
+
