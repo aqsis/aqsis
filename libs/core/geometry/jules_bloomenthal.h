@@ -52,7 +52,7 @@ namespace Aqsis {
 // any and all purposes, provided that this notice appears in all copies.
 
 
-#include <aqsis/util/inttype.h>
+#include <aqsis/inttype.h>
 
 class implicit_functor
 {

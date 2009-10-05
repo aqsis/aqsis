@@ -10,7 +10,7 @@ xsl_transform(${ri_inl_name} ri.xml STYLESHEET ri_inl.xsl
 # Install all headers.
 set(ri_install_hdrs
 	ndspy.h
-	pointcloud.h
+	#pointcloud.h
 	ri.h
 	ritypes.h
 	rif.h

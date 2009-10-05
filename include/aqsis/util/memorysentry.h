@@ -38,7 +38,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include <aqsis/util/inttype.h>
+#include <aqsis/inttype.h>
 
 
 namespace Aqsis

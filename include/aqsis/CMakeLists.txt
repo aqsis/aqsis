@@ -28,8 +28,9 @@ configure_file(version.h.in.cmake ${version_h_name})
 
 # Install local headers
 set(install_hdrs
-	ribparser.h
+	#ribparser.h
 	aqsis.h
+	inttype.h
 	${config_h_name}
 	${version_h_name}
 )
@@ -39,8 +40,8 @@ install(FILES ${install_hdrs} DESTINATION ${include_install_dir} COMPONENT devel
 #------------------------------------------------------------------------------
 
 # Install subdirectories of header files.
-install(DIRECTORY math DESTINATION ${include_install_dir} COMPONENT development)
-install(DIRECTORY util DESTINATION ${include_install_dir} COMPONENT development)
-install(DIRECTORY riutil DESTINATION ${include_install_dir} COMPONENT development)
+#install(DIRECTORY math DESTINATION ${include_install_dir} COMPONENT development)
+#install(DIRECTORY util DESTINATION ${include_install_dir} COMPONENT development)
+#install(DIRECTORY riutil DESTINATION ${include_install_dir} COMPONENT development)
 #install(DIRECTORY tex DESTINATION ${include_install_dir} COMPONENT development)
 

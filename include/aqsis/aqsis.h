@@ -38,7 +38,7 @@
 
 #include <assert.h>
 
-#include <aqsis/util/inttype.h>
+#include <aqsis/inttype.h>
 #include <aqsis/config.h>
 
 /* macro which stringizes the value held in another macro. */
