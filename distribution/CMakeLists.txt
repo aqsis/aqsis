@@ -75,7 +75,7 @@ set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_BUILD}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${AQSIS_PROJECT_NAME_SHORT}")
 
-set(CPACK_COMPONENTS_ALL main examples shaders development Unspecified)
+set(CPACK_COMPONENTS_ALL main examples shaders plugins development Unspecified)
 set(CPACK_COMPONENT_MAIN_REQUIRED TRUE)
 set(CPACK_COMPONENT_UNSPECIFIED_REQUIRED TRUE)
 set(CPACK_COMPONENT_UNSPECIFIED_HIDDEN TRUE)
@@ -89,6 +89,8 @@ set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION
 	"Example files (.rib)")
 set(CPACK_COMPONENT_SHADERS_DESCRIPTION
 	"Generic shader source files (.sl)")
+set(CPACK_COMPONENT_PLUGINS_DESCRIPTION
+	"Plugins for external applications")
 set(CPACK_COMPONENT_DEVELOPMENT_DESCRIPTION
 	"Include and library files for software development")
 

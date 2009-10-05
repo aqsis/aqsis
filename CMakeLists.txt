@@ -261,6 +261,7 @@ add_subdirectory(tools/displays)
 # Build additional plugins
 add_subdirectory(tools/procedurals/hairgen)
 #add_subdirectory(tools/shadeops/sci_volumes)
+add_subdirectory(tools/neqsus)
 
 # Build shaders & install examples
 add_subdirectory(shaders)

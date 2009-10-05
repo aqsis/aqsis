@@ -12,6 +12,8 @@ SET(INCLUDEDIR "include"
 	CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
 SET(EXAMPLESDIR "examples" 
 	CACHE STRING "Install location for examples (relative to CMAKE_INSTALL_PREFIX)")
+SET(NEQSUSDIR "plugins" 
+	CACHE STRING "Install location for neqsus (relative paths are relative to CMAKE_INSTALL_PREFIX)")
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
