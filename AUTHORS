@@ -59,5 +59,8 @@ The following people have contributed to the development of Aqsis Renderer:
                                 General development; optimization and bugfixing.
                                 aqsistex texture library rewrite.
                                 Smooth shading interpolation.
+	2009 Daniel Walters			GSoC Student 2009, network rendering.
+	2009 Trevor Lovett			GSoC Student 2009, optimisation.
+	2009 Ricardo Mayor			General Development and bugfixing.
 
 If anyone is missing from this list, please contact: pgregory@aqsis.org
