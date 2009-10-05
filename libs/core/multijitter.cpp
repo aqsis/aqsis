@@ -143,7 +143,7 @@ void CqMultiJitteredSampler::setupJitterPattern(TqInt offset)
 	{
 		// Buffer to hold the subcell indices.  (The stack-allocated buffer is
 		// large enough for 10x10 samples.)
-		CqAutoBuffer<TqInt, 200> indices(nSamples);
+		CqAutoBuffer<TqInt, 200> indices(nSamples * 2);
 
 		multiJitterIndices(&indices[0], m_pixelXSamples, m_pixelYSamples);
 
