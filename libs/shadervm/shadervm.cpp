@@ -1276,14 +1276,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 											break;
 										case type_string:
 											{
-												( *pFile ) >> std::ws;
-												char c;
-												CqString s( "" );
-												pFile->get
-												();
-												while ( ( c = pFile->get
-															() ) != '"' )
-													s += c;
+												CqString s = GetString(pFile);
 												AddString( s.c_str(), pProgramArea );
 											}
 											break;
@@ -1341,6 +1334,127 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	}
 }
 
+CqString CqShaderVM::GetString(std::istream* pFile)
+{
+	( *pFile ) >> std::ws;
+	char c;
+	CqString s( "" );
+	bool escapeChar = false;
+
+	pFile->get();
+	while ( (( c = pFile->get() ) != '"') || escapeChar  )
+	{
+		if(escapeChar)
+		{
+			//Treatment for escape char
+			switch(c)
+			{
+				case 'a'://Bell (alert)
+					s += '\a';
+					escapeChar = false;
+					break;
+				case 'v'://Vertical tab
+					s += '\v';
+					escapeChar = false;
+					break;
+				case '\''://Single quotation mark
+					s += "'";
+					escapeChar = false;
+					break;
+				case '?'://Literal question mark
+					s += '\?';
+					escapeChar = false;
+					break;
+				case 'n'://New line
+					s += '\n';
+					escapeChar = false;
+					break;
+				case 'r'://Carriage return
+					s += '\r';
+					escapeChar = false;
+					break;
+				case 't'://Horizontal tab
+					s += '\t';
+					escapeChar = false;
+					break;
+				case 'b'://Backspace
+					s += '\b';
+					escapeChar = false;
+					break;
+				case 'f'://Formfeed
+					s += '\f';
+					escapeChar = false;
+					break;
+				case '"'://Double quotation mark
+					s += '"';
+					escapeChar = false;
+					break;
+				case '\\'://Backslash
+					s += '\\';
+					escapeChar = false;
+					break;
+				case 'x'://Hexadecimal
+				case '0'://octal
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					GetNumericEscapeChar(pFile, s,  c);
+					escapeChar = false;
+					break;
+				default :
+					escapeChar = false;
+					break;
+			}
+		}
+		else
+			if (c ==  '\\')
+				escapeChar = true;
+			else
+				s += c;
+	}
+	 return s;
+}
+
+void CqShaderVM::GetNumericEscapeChar(std::istream* pFile, CqString &s, char c)
+{
+	CqString a("");
+	bool isHexadecimal = (c =='x');
+	unsigned int maxLength;
+
+	if (isHexadecimal)
+	{
+		maxLength = 2;
+	}
+	else
+	{
+		a += c;
+		maxLength = 3;
+	}
+	c = pFile->get();
+
+	while ((( c >= '0' && c <= '9') || ((( c >= 'a' && c <= 'f') || ( c >= 'A' && c <= 'F')) && isHexadecimal)) && (a.length() <maxLength))
+	{
+		a += c;
+		c = pFile->get();
+	}
+
+	int numericalBase;
+
+	if(isHexadecimal)
+		numericalBase = 16;
+	else
+		numericalBase = 8;
+	char result = strtoul(a.c_str(), NULL, numericalBase);
+
+	if (result != 0) s += result;
+	pFile->unget();
+}
 
 //---------------------------------------------------------------------
 /**	Ready the shader for execution.

@@ -246,6 +246,19 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		bool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
 		IqRenderer*	m_pRenderContext;
 
+
+		/** Get the char defined in the Numeric Escape char
+		 * \param pFile shader stream
+		 * \return String
+		 */
+		CqString GetString(std::istream* pFile);
+		/** Get the char defined in the Numeric Escape char
+		 * \param pFile shader stream
+		 * \param s result string
+		 * \param c, current character
+		 * \return char equivalence for the numeric escape sequence
+		 */
+		void GetNumericEscapeChar(std::istream* pFile, CqString &s, char c) ;
 		/** Determine whether the program execution has finished.
 		 */
 		bool	fDone()
