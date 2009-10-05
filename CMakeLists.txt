@@ -156,7 +156,7 @@ include(FindResource)
 # some packaging variables are set in the platform-specific config files, and
 # these version variables are potentially used there.
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 6)
+set(VERSION_MINOR 7)
 set(VERSION_BUILD 0)
 set(SCM_REVISION 0) # "?"
 
