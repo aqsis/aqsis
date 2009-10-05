@@ -37,7 +37,6 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 {
 	CqString strRes( "" );
 	CqString strTrans = str;
-	strTrans = strTrans.TranslateEscapes();
 
 	TqUint i = 0;
 	TqUint ivar = 0;

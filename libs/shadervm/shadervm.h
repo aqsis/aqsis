@@ -247,18 +247,22 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		IqRenderer*	m_pRenderContext;
 
 
-		/** Get the char defined in the Numeric Escape char
+		/** \brief Get a string from a program file and interpret escaped chars
+		 *
+		 * Assumes the leading quote (") has already been removed from the
+		 * input, and reads up until the trailing quote
+		 *
 		 * \param pFile shader stream
 		 * \return String
 		 */
-		CqString GetString(std::istream* pFile);
-		/** Get the char defined in the Numeric Escape char
+		static CqString GetString(std::istream* pFile);
+		/** \brief Read in and interpret a numeric escape sequence as a character
+		 *
 		 * \param pFile shader stream
 		 * \param s result string
 		 * \param c, current character
-		 * \return char equivalence for the numeric escape sequence
 		 */
-		void GetNumericEscapeChar(std::istream* pFile, CqString &s, char c) ;
+		static void GetNumericEscapeChar(std::istream* pFile, CqString &s, char c);
 		/** Determine whether the program execution has finished.
 		 */
 		bool	fDone()
