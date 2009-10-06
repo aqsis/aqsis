@@ -1049,7 +1049,6 @@ void CqDisplayRequest::FormatBucketForDisplay( const CqRegion& DRegion, const Iq
 			{
 				// NOTE: This needs to be optimised, the lookup is expensive.
 				std::string bufferChannelName = m_bufferMap[iformat->name].first;
-				TqInt offset = m_bufferMap[iformat->name].second;
 				double value = 0.0;
 				try
 				{

@@ -331,7 +331,6 @@ Image::writePixels (int xMin, int xMaxPlusone,
 	assert (yMin == yMaxPlusone - 1);
 
 
-	const ChannelList &channels = _file->header().channels();
 	int      numPixels = xMaxPlusone - xMin;
 	int      j = 0;
 
@@ -399,7 +398,7 @@ Image::writePixels (int xMin, int xMaxPlusone,
 
 	_scanlinesReceived[yMin] += numPixels;
 
-	if(_scanlinesReceived[yMin] == (_bufferNumPixels* layers().size()))
+	if(_scanlinesReceived[yMin] == _bufferNumPixels*static_cast<int>(layers().size()))
 	{
 		//
 		// If our one-line frame buffer is full, then write it to
@@ -752,7 +751,6 @@ extern "C"
 			if(gImages.find(imageName) != gImages.end())
 			{
 				boost::shared_ptr<Image> image = gImages[imageName];
-				SqImageLayer& layer = image->layers()[gImageLayers[imageLayerIndex].second];
 				image->writePixels (xmin, xmax_plusone,
 							ymin, ymax_plusone,
 							entrysize, data, gImageLayers[imageLayerIndex].second);
@@ -830,7 +828,6 @@ extern "C"
 						if(gImages.find(imageName) != gImages.end())
 						{
 							boost::shared_ptr<Image> image = gImages[imageName];
-							SqImageLayer& layer = image->layers()[gImageLayers[imageLayerIndex].second];
 
 							const Box2i &dw = image->header().dataWindow();
 

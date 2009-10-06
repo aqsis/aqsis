@@ -171,7 +171,7 @@ public:
 
 protected:
 
-    virtual void handleUniformParam(const CqString& name, IqShaderData* value,
+    void handleUniformParam(const CqString& name, IqShaderData* value,
                                     CqBake3DOptions& opts)
     {
         if(name == "radius")
@@ -202,7 +202,7 @@ protected:
             opts.SetEye2World(tmp);
         }
     }
-    virtual void handleUserParam(const CqString& name, IqShaderData* value,
+    void handleUserParam(const CqString& name, IqShaderData* value,
                                  CqBake3DOptions& opts)
     {
         if((name != "radius") && (name != "format") && (name != "eye2ndc") && (name != "eye2world"))
