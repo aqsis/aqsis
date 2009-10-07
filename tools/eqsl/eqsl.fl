@@ -159,15 +159,14 @@ for(TqInt i = 0; i < static_cast<TqInt>(sizeof(renderEngineArgs)/sizeof(renderEn
 \#elif defined(AQSIS_SYSTEM_MACOSX)
 	CFURLRef pluginRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, CFBundleCopyExecutableURL(CFBundleGetMainBundle()));
 	CFURLRef contentRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, pluginRef);
-	CFURLRef resourceRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, contentRef, CFSTR("Resources"), true);
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
-	CFStringRef resourcePath = CFURLCopyFileSystemPath(resourceRef, kCFURLPOSIXPathStyle);
+	CFStringRef contentPath = CFURLCopyFileSystemPath(contentRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
-	const char *resourcePtr = CFStringGetCStringPtr(resourcePath, CFStringGetSystemEncoding());
+	const char *contentPtr = CFStringGetCStringPtr(contentPath, CFStringGetSystemEncoding());
 	std::string program = pathPtr;
 	program.append("/");
-	renderEngineArgsBundle.push_back(std::string("-displays=") + resourcePtr + "/lib");
-	renderEngineArgsBundle.push_back(std::string("-shaders=") + resourcePtr + "/shaders");
+	renderEngineArgsBundle.push_back(std::string("-displays=") + contentPtr + "/lib");
+	renderEngineArgsBundle.push_back(std::string("-shaders=") + contentPtr + "/share/aqsis/shaders/displacement:" + contentPtr + "/share/aqsis/shaders/imager:" + contentPtr + "/share/aqsis/shaders/light:" + "/share/aqsis/shaders/surface:" + contentPtr + "/share/aqsis/shaders/volume");
 \#else
 	std::string program;
 \#endif
