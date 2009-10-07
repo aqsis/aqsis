@@ -42,7 +42,7 @@ namespace Aqsis {
 class CqPiqslMainWindow : public Fl_Double_Window
 {
 private:
-	Fl_Sys_Menu_Bar m_menuBar;
+	Fl_Menu_Bar m_menuBar;
 	CqPane* m_pane;
 	CqCenterScroll* m_scroll;
 	bool m_fullScreenImage;

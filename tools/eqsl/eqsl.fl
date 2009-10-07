@@ -100,7 +100,7 @@ Function {} {open
     Fl_Menu_Bar {} {open
       xywh {0 0 400 25}
       code0 {\#include <FL/Fl_Sys_Menu_Bar.H>}
-      class Fl_Sys_Menu_Bar
+      class Fl_Menu_Bar
     } {
       Submenu m_menuFile {
         label {&File} open
