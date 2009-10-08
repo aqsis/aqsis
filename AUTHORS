@@ -1,4 +1,4 @@
-Aqsis Renderer - An open source RenderMan-compliant 3D rendering solution.
+Aqsis Renderer - An open source 3D rendering solution adhering to the RenderMan standard.
 
 The following people have contributed to the development of Aqsis Renderer:
 
@@ -59,8 +59,14 @@ The following people have contributed to the development of Aqsis Renderer:
                                 General development; optimization and bugfixing.
                                 aqsistex texture library rewrite.
                                 Smooth shading interpolation.
-	2009 Daniel Walters			GSoC Student 2009, network rendering.
-	2009 Trevor Lovett			GSoC Student 2009, optimisation.
-	2009 Ricardo Mayor			General Development and bugfixing.
+    2009 Daniel Walters         GSoC Student 2009, network rendering.
+    2009 Trevor Lovett          GSoC Student 2009, optimisation.
+    2009 Ricardo Mayor          General Development and bugfixing.
+
+Special thanks also goes to the following people:
+
+    2007 Eric Nathen Back       RIB MOSAIC support.
+    2008 Stephen Regelous       Massive software support.
+    2009 Cristin Barghiel       Side Effects Houdini support.
 
 If anyone is missing from this list, please contact: pgregory@aqsis.org

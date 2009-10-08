@@ -36,6 +36,7 @@ Other changes:
     * New RIB parser
           o Better error reporting
     * Multilayer support for OpenEXR display
+    * Side Effects Houdini plugin
 
 
 
