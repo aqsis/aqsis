@@ -174,8 +174,8 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false  );
-		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fParameter = false, bool fOutput = false  );
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, IqShaderData::EqStorage storage );
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, IqShaderData::EqStorage storage );
 		virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 		virtual void DefaultSurface();

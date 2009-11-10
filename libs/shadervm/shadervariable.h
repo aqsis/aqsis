@@ -59,7 +59,7 @@ class CqShaderVariable : public IqShaderData
 {
 	public:
 		CqShaderVariable();
-		CqShaderVariable( const char* strName, bool fParameter = false );
+		CqShaderVariable( const char* strName, EqStorage storage = Unknown );
 		virtual	~CqShaderVariable() {}
 
 		virtual void GetBool( bool& res, TqInt index = 0 ) const
@@ -93,16 +93,16 @@ class CqShaderVariable : public IqShaderData
 
 		/** Determine if this variable is storage for a shader argument.
 		 */
-		virtual bool fParameter() const
+		virtual EqStorage Storage() const
 		{
-			return ( m_fParameter );
+			return ( m_storage );
 		}
 
 		/** Indicate whether or not this variable is a shader argument.
 		 */
-		void SetfParameter( bool fParameter = true )
+		void SetStorage(EqStorage storage)
 		{
-			m_fParameter = fParameter;
+			m_storage = storage;
 		}
 
 		virtual bool	isArray() const
@@ -120,7 +120,7 @@ class CqShaderVariable : public IqShaderData
 
 	protected:
 		CqString	m_strName;		///< Name of this variable.
-		bool	m_fParameter;	///< Flag indicating this variable is a shader argument.
+		EqStorage m_storage;	///< variable storage: temporary, shader parameter, etc
 }
 ;
 
@@ -138,9 +138,9 @@ class CqShaderVariableArray: public CqShaderVariable
 		/** Default constructor.
 		 * \param name Character pointer to the name to use.
 		 * \param Count the size of the array.
-		 * \param fParameter Boolean value, true indicates the shader variable is a shader parameter.
+		 * \param storage behaviour on the shader (temporary / shader parameter etc)
 		 */
-		CqShaderVariableArray( const char* name, TqInt Count, bool fParameter = false ) : CqShaderVariable( name, fParameter )
+		CqShaderVariableArray( const char* name, TqInt Count, EqStorage storage = Unknown ) : CqShaderVariable( name, storage )
 		{
 			assert( Count > 0 );
 			m_aVariables.resize( Count );
@@ -444,7 +444,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		CqShaderVariableUniform() : CqShaderVariable()
 		{
 		}
-		CqShaderVariableUniform( const char* strName, bool fParameter = false ) : CqShaderVariable( strName, fParameter )
+		CqShaderVariableUniform( const char* strName, EqStorage storage = Unknown ) : CqShaderVariable( strName, storage )
 		{
 
 		}
@@ -663,7 +663,7 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 		CqShaderVariableUniformFloat( ) : CqShaderVariableUniform<type_float, TqFloat>()
 		{
 		}
-		CqShaderVariableUniformFloat( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
+		CqShaderVariableUniformFloat( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_float, TqFloat>( strName, storage )
 		{
 		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
@@ -716,7 +716,7 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 		CqShaderVariableUniformString( ) : CqShaderVariableUniform<type_string, CqString>()
 		{
 		}
-		CqShaderVariableUniformString( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
+		CqShaderVariableUniformString( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_string, CqString>( strName, storage )
 		{
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
@@ -761,7 +761,7 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 		CqShaderVariableUniformPoint() : CqShaderVariableUniform<type_point, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformPoint( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformPoint( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, storage )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -830,7 +830,7 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 		CqShaderVariableUniformVector() : CqShaderVariableUniform<type_vector, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformVector( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformVector( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, storage )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -899,7 +899,7 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 		CqShaderVariableUniformNormal() : CqShaderVariableUniform<type_normal, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformNormal( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformNormal( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, storage )
 		{}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
@@ -967,7 +967,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		CqShaderVariableUniformColor() : CqShaderVariableUniform<type_color, CqColor>()
 		{
 		}
-		CqShaderVariableUniformColor( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
+		CqShaderVariableUniformColor( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_color, CqColor>( strName, storage )
 		{
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
@@ -1008,7 +1008,7 @@ class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix
 		CqShaderVariableUniformMatrix() : CqShaderVariableUniform<type_matrix, CqMatrix>()
 		{
 		}
-		CqShaderVariableUniformMatrix( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
+		CqShaderVariableUniformMatrix( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, storage )
 		{
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
@@ -1056,7 +1056,7 @@ class CqShaderVariableVarying : public CqShaderVariable
 			m_aValue.resize( 1 );
 		}
 
-		CqShaderVariableVarying( const char* strName, bool fParameter = false ) : CqShaderVariable( strName, fParameter )
+		CqShaderVariableVarying( const char* strName, EqStorage storage = Unknown ) : CqShaderVariable( strName, storage )
 		{
 			m_aValue.resize( 1 );
 		}
@@ -1264,7 +1264,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		CqShaderVariableVaryingFloat( ) : CqShaderVariableVarying<type_float, TqFloat>( )
 		{
 		}
-		CqShaderVariableVaryingFloat( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
+		CqShaderVariableVaryingFloat( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_float, TqFloat>( strName, storage )
 		{
 		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
@@ -1343,7 +1343,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		CqShaderVariableVaryingString( ) : CqShaderVariableVarying<type_string, CqString>( )
 		{
 		}
-		CqShaderVariableVaryingString( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
+		CqShaderVariableVaryingString( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_string, CqString>( strName, storage )
 		{
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
@@ -1414,7 +1414,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		CqShaderVariableVaryingPoint( ) : CqShaderVariableVarying<type_point, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingPoint( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingPoint( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, storage )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1524,7 +1524,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		CqShaderVariableVaryingVector( ) : CqShaderVariableVarying<type_vector, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingVector( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingVector( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, storage )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1634,7 +1634,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		CqShaderVariableVaryingNormal( ) : CqShaderVariableVarying<type_normal, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingNormal( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingNormal( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, storage )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1744,7 +1744,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		CqShaderVariableVaryingColor( ) : CqShaderVariableVarying<type_color, CqColor>( )
 		{
 		}
-		CqShaderVariableVaryingColor( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
+		CqShaderVariableVaryingColor( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_color, CqColor>( strName, storage )
 		{
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
@@ -1814,7 +1814,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		CqShaderVariableVaryingMatrix( ) : CqShaderVariableVarying<type_matrix, CqMatrix>( )
 		{
 		}
-		CqShaderVariableVaryingMatrix( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
+		CqShaderVariableVaryingMatrix( const char* strName, EqStorage storage = Unknown ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, storage )
 		{
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
@@ -1882,12 +1882,12 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 
 inline CqShaderVariable::CqShaderVariable()
 	: m_strName(),
-	m_fParameter(false)
+	m_storage(Unknown)
 {}
 
-inline CqShaderVariable::CqShaderVariable(const char* strName, bool fParameter)
+inline CqShaderVariable::CqShaderVariable(const char* strName, EqStorage storage)
 	: m_strName(strName),
-	m_fParameter(fParameter)
+	m_storage(storage)
 {}
 
 } // namespace Aqsis

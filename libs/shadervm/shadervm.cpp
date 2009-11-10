@@ -584,7 +584,7 @@ CqShaderVM::~CqShaderVM()
  *  Function to create a local variable for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fParameter, bool fOutput )
+IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, IqShaderData::EqStorage storage )
 {
 	// Create a VM specific shader variable, which implements the IqShaderData interface,
 	// based on the type and class specified.
@@ -597,9 +597,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingFloat( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingFloat( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformFloat( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformFloat( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -612,9 +612,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingPoint( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingPoint( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformPoint( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformPoint( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -627,9 +627,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingNormal( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingNormal( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformNormal( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformNormal( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -642,9 +642,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingVector( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingVector( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformVector( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformVector( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -657,9 +657,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingString( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingString( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformString( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformString( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -672,9 +672,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingColor( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingColor( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformColor( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformColor( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -693,9 +693,9 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 				switch ( Class )
 				{
 						case class_varying:
-						return ( new CqShaderVariableVaryingMatrix( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableVaryingMatrix( name.c_str(), storage ) );
 						case class_uniform:
-						return ( new CqShaderVariableUniformMatrix( name.c_str(), fParameter ) );
+						return ( new CqShaderVariableUniformMatrix( name.c_str(), storage ) );
 						default: // Clear up compiler warnings
 						break;
 				}
@@ -714,63 +714,63 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
  *  Function to create a local variable array for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, bool fParameter, bool fOutput )
+IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, IqShaderData::EqStorage storage )
 {
 	IqShaderData * pVar = 0;
 	switch ( VarType )
 	{
 			case type_float:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingFloat( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingFloat( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformFloat( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformFloat( name.c_str(), storage );
 			break;
 
 			case type_point:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingPoint( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingPoint( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformPoint( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformPoint( name.c_str(), storage );
 			break;
 
 			case type_normal:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingNormal( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingNormal( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformNormal( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformNormal( name.c_str(), storage );
 			break;
 
 			case type_vector:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingVector( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingVector( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformVector( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformVector( name.c_str(), storage );
 			break;
 
 			case type_color:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingColor( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingColor( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformColor( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformColor( name.c_str(), storage );
 			break;
 
 			case type_string:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingString( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingString( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformString( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformString( name.c_str(), storage );
 			break;
 
 			case type_matrix:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingMatrix( name.c_str(), fParameter );
+				pVar = new CqShaderVariableVaryingMatrix( name.c_str(), storage );
 			else
-				pVar = new CqShaderVariableUniformMatrix( name.c_str(), fParameter );
+				pVar = new CqShaderVariableUniformMatrix( name.c_str(), storage );
 			break;
 			default: // Clear up the warnings
 			break;
 	}
-	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count, fParameter );
+	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count, storage );
 	pArray->aVariables() [ 0 ] = pVar;
 	TqInt i;
 	for ( i = 1; i < Count; i++ )
@@ -787,7 +787,7 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 {
 	CqString strName( "__temporary__" );
-	return ( CreateVariable( type, _class, strName ) );
+	return ( CreateVariable( type, _class, strName, IqShaderData::Temporary ) );
 }
 
 
@@ -1015,8 +1015,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			EqVariableType VarType = type_invalid;
 			EqVariableClass VarClass = class_varying;
 			bool fVarArray = false;
-			bool fParameter = false;
-			bool fOutput = false;
+			IqShaderData::EqStorage varStorage = IqShaderData::Temporary;
 			switch ( Segment )
 			{
 				case Seg_Data:
@@ -1025,9 +1024,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					while ( VarType == type_invalid )
 					{
 						if ( ohash == htoken) // == "output"
-							fOutput = true;
+							varStorage = IqShaderData::OutputParameter;
 						else if ( phash == htoken) // == "param"
-							fParameter = true;
+						{
+							// "output" implies "param"; careful not to
+							// overwrite the "output" designation.
+							if ( varStorage != IqShaderData::OutputParameter)
+								varStorage = IqShaderData::Parameter;
+						}
 						else if ( vhash == htoken) // == "varying"
 							VarClass = class_varying;
 						else if ( uhash == htoken) // == "uniform"
@@ -1059,9 +1063,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						continue;
 
 					if ( fVarArray )
-						AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, fParameter, fOutput ) );
+						AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, varStorage ) );
 					else
-						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
+						AddLocalVariable( CreateVariable( VarType, VarClass, token, varStorage ) );
 					break;
 
 				case Seg_Init:

@@ -23,6 +23,7 @@
 
 #include	<aqsis/core/interfacefwd.h>
 #include	<aqsis/riutil/primvartype.h>
+#include	<aqsis/shadervm/ishaderdata.h>
 #include	<aqsis/util/exception.h>
 
 namespace Aqsis {
@@ -133,10 +134,10 @@ struct AQSIS_SHADERVM_SHARE IqShader
 	virtual	TqInt	Uses() const = 0;
 	/** Variable creation function.
 	 */
-	virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false ) = 0;
+	virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, IqShaderData::EqStorage storage = IqShaderData::Unknown ) = 0;
 	/** Variable array creation function.
 	 */
-	virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fArgument = false, bool fOutput = false  ) = 0;
+	virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, IqShaderData::EqStorage storage = IqShaderData::Unknown ) = 0;
 	/** Function to create some temporary storage which complies to the IqShaderData interface.
 	 */
 	virtual IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class ) = 0;

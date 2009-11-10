@@ -29,6 +29,16 @@ namespace Aqsis {
 
 struct IqShaderData
 {
+	/** \brief Storage type within the shader context
+ 	 */
+	enum EqStorage
+	{
+		Unknown,         ///< Don't know the storage
+		Temporary,       ///< An internal temporary variable
+		Parameter,       ///< A parameter to the shader
+		OutputParameter  ///< An output parameter for the shader
+	};
+
 	/// Virtual destructor so that derived classes get cleaned up properly.
 	virtual	~IqShaderData()
 	{}
@@ -257,10 +267,12 @@ struct IqShaderData
 	 * \return Read only reference to a CqString class.
 	 */
 	virtual	const CqString&	strName() const = 0;
-	/** Determine whether this data storage represents a shader argument.
-	 * \return True if a shader argument, false otherwise.
+	/** Get the storage type
+ 	 *
+	 * \return the storage type on the shader, that is, whether it's a
+	 * temporary, parameter, etc.
 	 */
-	virtual	bool	fParameter() const = 0;
+	virtual	EqStorage Storage() const = 0;
 
 	/** Pure virtual, prepare the variable for the SIMD size.
 	 * \param uGridRes The size of the SIMD grid in u.

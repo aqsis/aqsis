@@ -284,18 +284,18 @@ class CqLayeredShader : public IqShader
 			// Gather the uses from all layers as they are added.
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false  )
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, IqShaderData::EqStorage storage )
 		{
 			// Call CreateVariable on the first shader in the list, all layers must be the same type.
 			if(!m_Layers.empty())
-				return(m_Layers.front().second->CreateVariable(Type, Class, name, fArgument, fOutput));
+				return(m_Layers.front().second->CreateVariable(Type, Class, name, storage));
 			return ( NULL );
 		}
-		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fArgument = false, bool fOutput = false  )
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, IqShaderData::EqStorage storage )
 		{
 			// Call CreateVariableArray on the first shader in the list, all layers must be the same type.
 			if(!m_Layers.empty())
-				return(m_Layers.front().second->CreateVariableArray(Type, Class, name, Count, fArgument, fOutput));
+				return(m_Layers.front().second->CreateVariableArray(Type, Class, name, Count, storage));
 			return ( NULL );
 		}
 		virtual IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )

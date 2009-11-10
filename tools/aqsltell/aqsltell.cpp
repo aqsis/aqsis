@@ -151,9 +151,10 @@ int main( int argc, const char** argv )
 						if ( symPtr->svd_arraylen != 0 )
 							arrayLen = symPtr->svd_arraylen;
 
-						std::cout << "    \"" << symPtr->svd_name << "\" \"parameter " <<
-						SLX_DetailtoStr( symPtr->svd_detail ) << " " <<
-						SLX_TypetoStr( symPtr->svd_type );
+						std::cout << "    \"" << symPtr->svd_name << "\" \""
+							<< SLX_StortoStr( symPtr->svd_storage ) << " "
+							<< SLX_DetailtoStr( symPtr->svd_detail ) << " "
+							<< SLX_TypetoStr( symPtr->svd_type );
 
 						if ( symPtr->svd_arraylen != 0 )
 							std::cout << "[" << arrayLen << "]";

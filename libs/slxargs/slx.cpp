@@ -87,6 +87,7 @@ static const char * SLX_STOR_CONSTANT_STR = "constant";
 static const char * SLX_STOR_VARIABLE_STR = "variable";
 static const char * SLX_STOR_TEMPORARY_STR = "temporary";
 static const char * SLX_STOR_PARAMETER_STR = "parameter";
+static const char * SLX_STOR_OUTPUTPARAMETER_STR = "output parameter";
 static const char * SLX_STOR_GSTATE_STR = "gstate";
 
 static const char * SLX_DETAIL_UNKNOWN_STR = "unknown";
@@ -239,7 +240,8 @@ static void FreeArgRecStorage( SLX_VISSYMDEF * theShaderArgArray, int theShaderN
  * Store info in the shader arg record specified by index
 */
 static RtInt StoreShaderArgDef( SLX_VISSYMDEF * theArgsArray, int argsArrayIdx,
-                                char * varName, SLX_TYPE varType, char * spacename, char * defaultVal, int arrayLen )
+                                char * varName, SLX_TYPE varType, SLX_STORAGE storage,
+								char * spacename, char * defaultVal, int arrayLen )
 {
 	SLX_VISSYMDEF * theShaderArgRec;
 	RtInt result;
@@ -252,7 +254,7 @@ static RtInt StoreShaderArgDef( SLX_VISSYMDEF * theArgsArray, int argsArrayIdx,
 
 	theShaderArgRec->svd_type = varType;
 
-	theShaderArgRec->svd_storage = SLX_STOR_PARAMETER;
+	theShaderArgRec->svd_storage = storage;
 
 	theShaderArgRec->svd_detail = SLX_DETAIL_UNIFORM;
 
@@ -327,7 +329,21 @@ static void AddShaderVar( IqShaderData * shaderVar,
 	int	arrayLen = 0;
 	int	arrayIndex;
 
-	if ( shaderVar != NULL && shaderVar->fParameter() )
+	SLX_STORAGE storage = SLX_STOR_UNKNOWN;
+	switch(shaderVar->Storage())
+	{
+		case IqShaderData::Parameter:
+			storage = SLX_STOR_PARAMETER;
+			break;
+		case IqShaderData::OutputParameter:
+			storage = SLX_STOR_OUTPUTPARAMETER;
+			break;
+		default:
+			storage = SLX_STOR_UNKNOWN;
+			break;
+	}
+
+	if ( shaderVar != NULL && storage != SLX_STOR_UNKNOWN )
 	{
 		theType = shaderVar->Type();
 		theClass = shaderVar->Class();
@@ -370,7 +386,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					spacename = ( char * ) malloc( 1 );
 					*spacename = 0x0;	// NULL string
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -407,7 +423,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					spacename = ( char * ) malloc( 1 );
 					*spacename = 0x0;	// NULL string
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -447,7 +463,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -487,7 +503,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -527,7 +543,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -567,7 +583,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					strcpy( spacename, "rgb" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -633,7 +649,7 @@ static void AddShaderVar( IqShaderData * shaderVar,
 					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
-					                   spacename, defaultVal, arrayLen );
+					                   storage, spacename, defaultVal, arrayLen );
 					( *theNArgs ) ++;
 				}
 				break;
@@ -663,7 +679,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	{
 		try
 		{
-			boost::shared_ptr<IqShader> pShader = createShaderVM(0, slxFile, DSOPath);
+			boost::shared_ptr<IqShader> pShader = createShaderVM(0, slxFile, DSOPath ? DSOPath : "");
 			pShader->SetstrName( filePath );
 			pShader->PrepareDefArgs();
 
@@ -1336,6 +1352,9 @@ char *SLX_StortoStr ( SLX_STORAGE storage )
 			break;
 			case SLX_STOR_PARAMETER:
 			slxStorageStr = ( char * ) SLX_STOR_PARAMETER_STR;
+			break;
+			case SLX_STOR_OUTPUTPARAMETER:
+			slxStorageStr = ( char * ) SLX_STOR_OUTPUTPARAMETER_STR;
 			break;
 			case SLX_STOR_GSTATE:
 			slxStorageStr = ( char * ) SLX_STOR_GSTATE_STR;
