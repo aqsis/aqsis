@@ -247,7 +247,7 @@ static bool InitApplication(HINSTANCE hInstance)
 
 	// Initialize our global application data
 
-	memset(&g_Data, sizeof(AppData), 0);
+	memset(&g_Data, 0, sizeof(AppData));
 
 
 	// Save our instance handle.

@@ -169,7 +169,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 
    // Initialize our global resources
 
-	memset(&g_Data, sizeof(AppData), 0);
+	memset(&g_Data, 0, sizeof(AppData));
 
 	flagstuff->flags = PkDspyFlagsWantsScanLineOrder;
 
