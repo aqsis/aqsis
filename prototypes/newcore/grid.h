@@ -1,3 +1,6 @@
+#ifndef GRID_H_INCLUDED
+#define GRID_H_INCLUDED
+
 #include <vector>
 #include "util.h"
 
@@ -24,9 +27,23 @@ class Grid
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
 
-        Iterator begin() { return Iterator(*this); }
+        inline Iterator begin();
 
-        std::vector<Vec3>& P() { return m_P; }
+        Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
+
+        void project(Mat4 m)
+        {
+            for(int i = 0, iend = m_P.size(); i < iend; ++i)
+            {
+                // Project all points, but restore z afterward.
+                // TODO: This is rather specialized; maybe it shouldn't go in
+                // the Grid class at all?  How about allowing visitor functors
+                // which act on all the primvars held on a grid?
+                float z = m_P[i].z;
+                m_P[i] = m_P[i]*m;
+                m_P[i].z = z;
+            }
+        }
 
     private:
         int m_nu;
@@ -52,7 +69,7 @@ class Grid::Iterator
         Iterator& operator++()
         {
             ++m_u;
-            if(m_u > m_uEnd)
+            if(m_u >= m_uEnd)
             {
                 m_u = 0;
                 ++m_v;
@@ -62,10 +79,12 @@ class Grid::Iterator
 
         MicroQuad operator*() const
         {
-            return MicroQuad(m_grid.m_P[m_uEnd*m_v + m_u],
-                             m_grid.m_P[m_uEnd*m_v + m_u+1],
-                             m_grid.m_P[m_uEnd*(m_v+1) + m_u+1],
-                             m_grid.m_P[m_uEnd*(m_v+1) + m_u]);
+            int nu = m_grid->nu();
+             MicroQuad q(m_grid->m_P[nu*m_v + m_u],
+                             m_grid->m_P[nu*m_v + m_u+1],
+                             m_grid->m_P[nu*(m_v+1) + m_u+1],
+                             m_grid->m_P[nu*(m_v+1) + m_u]);
+             return q;
         }
 
     private:
@@ -76,6 +95,10 @@ class Grid::Iterator
         int m_vEnd;
 };
 
+Grid::Iterator Grid::begin()
+{
+    return Iterator(*this);
+}
 
 #if 0
 // Visitor-like pattern for resolving grid types
@@ -94,3 +117,5 @@ class QuadGrid : Grid
         }
 };
 #endif
+
+#endif // GRID_H_INCLUDED

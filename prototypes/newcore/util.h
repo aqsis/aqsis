@@ -1,12 +1,15 @@
 #ifndef UTIL_H_INCLUDED
 #define UTIL_H_INCLUDED
 
+#include <assert.h>
 #include <cfloat>
+#include <cmath>
 #include <vector>
 #include <iostream>
 
-#include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathBox.h>
+#include <OpenEXR/ImathMatrix.h>
+#include <OpenEXR/ImathVec.h>
 
 template<typename T>
 T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
@@ -17,6 +20,7 @@ const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
+typedef Imath::M44f Mat4;
 
 typedef Imath::Box3f Box;
 
@@ -24,6 +28,7 @@ typedef Imath::Box3f Box;
 std::ostream& operator<<(std::ostream& out, Box b)
 {
     out << "[" << b.min << " -- " << b.max << "]";
+    return out;
 }
 
 

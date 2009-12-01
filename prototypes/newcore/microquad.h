@@ -31,10 +31,10 @@ class PointInQuad
         }
 
 		// Set up edge equations for an "arrow head" non-convex microquad:
-		//    x
-		//   / \
-		//  /.x.\
-		// x'   'x
+		//      x       .
+		//     / \      .
+		//    /.x.\     .
+		//   x'   'x    .
 		void setupArrowEdgeEqs(Vec2 v[4], Vec2 e[4], int signs[4])
 		{
 			// Find index of concave vertex
@@ -60,10 +60,10 @@ class PointInQuad
 		}
 
 		// Set up edge equations for a "bow tie" non-convex microquad:
-		//  x--x
-		//   \/
-		//   /\
-		//  x--x
+		//   x--x     .
+		//    \/      .
+		//    /\      .
+		//   x--x     .
 		void setupBowtieEdgeEqns(Vec2 v[4], Vec2 e[4], int signs[4])
 		{
 			// Find an index i such that v[i] is > 180, but v[i+1] is < 180 deg.
@@ -190,12 +190,22 @@ class MicroQuad
             m_d = d;
         }
 
-        Box bound()
+        Box bound() const
         {
             Box bnd(m_a);
             bnd.extendBy(m_b);
             bnd.extendBy(m_c);
             bnd.extendBy(m_d);
+            return bnd;
+        }
+
+        float area() const
+        {
+            return 0.5*(
+                std::fabs(cross(vec2_cast(m_b) - vec2_cast(m_a),
+                                vec2_cast(m_d) - vec2_cast(m_a)))
+              + std::fabs(cross(vec2_cast(m_b) - vec2_cast(m_c),
+                                vec2_cast(m_d) - vec2_cast(m_c))) );
         }
 
         inline PointInQuad hitTest() const
@@ -205,6 +215,15 @@ class MicroQuad
         }
 
         float z() const { return m_a.z; }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                                        const MicroQuad& q)
+        {
+            out << "{" << q.m_a << "--" << q.m_b << " | "
+                << q.m_d << "--" << q.m_c << "}";
+            return out;
+        }
 };
+
 
 #endif // MICROQUAD_H_INCLUDED
