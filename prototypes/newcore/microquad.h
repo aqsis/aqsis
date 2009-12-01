@@ -170,4 +170,41 @@ class PointInQuad
 };
 
 
+class MicroQuad
+{
+    private:
+        Vec3 m_a;
+        Vec3 m_b;
+        Vec3 m_c;
+        Vec3 m_d;
+    public:
+        // Cyclic vertex order:
+        // a -- b
+        // |    |
+        // d -- c
+        MicroQuad(const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& d)
+        {
+            m_a = a;
+            m_b = b;
+            m_c = c;
+            m_d = d;
+        }
+
+        Box bound()
+        {
+            Box bnd(m_a);
+            bnd.extendBy(m_b);
+            bnd.extendBy(m_c);
+            bnd.extendBy(m_d);
+        }
+
+        inline PointInQuad hitTest() const
+        {
+            return PointInQuad(vec2_cast(m_a), vec2_cast(m_b),
+                               vec2_cast(m_c), vec2_cast(m_d));
+        }
+
+        float z() const { return m_a.z; }
+};
+
 #endif // MICROQUAD_H_INCLUDED

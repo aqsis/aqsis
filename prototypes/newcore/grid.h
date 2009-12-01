@@ -1,12 +1,16 @@
 #include <vector>
 #include "util.h"
 
+#include "microquad.h"
+
 /// A 2D grid of quadrilateral micro polygons
 class Grid
 {
     public:
+        class Iterator;
+
+        typedef PointInQuad HitTest;
         typedef MicroQuad UPoly;
-        class PolyIterator;
 
         Grid(int nu, int nv)
             : m_nu(nu),
@@ -20,7 +24,7 @@ class Grid
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
 
-        PolyIterator begin() { return PolyIterator(*this); }
+        Iterator begin() { return Iterator(*this); }
 
         std::vector<Vec3>& P() { return m_P; }
 
@@ -30,10 +34,11 @@ class Grid
         std::vector<Vec3> m_P;
 };
 
-class Grid::PolyIterator
+
+class Grid::Iterator
 {
     public:
-        PolyIterator(const Grid& grid)
+        Iterator(const Grid& grid)
             : m_grid(&grid),
             m_u(0),
             m_v(0),
@@ -44,7 +49,7 @@ class Grid::PolyIterator
 
         bool valid() { return m_v < m_vEnd; }
 
-        PolyIterator& operator++()
+        Iterator& operator++()
         {
             ++m_u;
             if(m_u > m_uEnd)
@@ -76,16 +81,16 @@ class Grid::PolyIterator
 // Visitor-like pattern for resolving grid types
 class Grid
 {
-	public:
-		virtual void rasterize(Renderer& renderer) const = 0;
+    public:
+        virtual void rasterize(Renderer& renderer) const = 0;
 };
 
 class QuadGrid : Grid
 {
-	public:
-		virtual void rasterize(Renderer& renderer) const
-		{
-			renderer.rasterize(*this);
-		}
+    public:
+        virtual void rasterize(Renderer& renderer) const
+        {
+            renderer.rasterize(*this);
+        }
 };
 #endif
