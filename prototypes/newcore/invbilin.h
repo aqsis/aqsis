@@ -86,97 +86,97 @@
  */
 class InvBilin
 {
-	public:
-		/// Construct a lookup functor with zeros for the vertices.
-		InvBilin();
+    public:
+        /// Construct a lookup functor with zeros for the vertices.
+        InvBilin();
 
-		/** Use the given vertices for inverse bilinear lookups.
-		 *
-		 * \see setVertices for the vertex ordering.
-		 */
-		InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
+        /** Use the given vertices for inverse bilinear lookups.
+         *
+         * \see setVertices for the vertex ordering.
+         */
+        InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
 
-		/** \brief Reset the micropolygon vertices.
-		 *
-		 * The ordering of vertices is as follows:
-		 *
-		 *   C---D
-		 *   |   |
-		 *   A---B
-		 */
-		void setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
+        /** \brief Reset the micropolygon vertices.
+         *
+         * The ordering of vertices is as follows:
+         *
+         *   C---D
+         *   |   |
+         *   A---B
+         */
+        void setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
 
-		/** \brief Perform the inverse bilinear mapping
-		 *
-		 * The mapping takes P = (x,y) and returns the original (u,v)
-		 * parameters of the bilinear patch which would map to P under the
-		 * usual bilinear interpolation scheme.
-		 */
-		Vec2 operator()(Vec2 P) const;
+        /** \brief Perform the inverse bilinear mapping
+         *
+         * The mapping takes P = (x,y) and returns the original (u,v)
+         * parameters of the bilinear patch which would map to P under the
+         * usual bilinear interpolation scheme.
+         */
+        Vec2 operator()(Vec2 P) const;
 
-	private:
-		template<bool unsafeInvert>
-		static Vec2 solve(Vec2 M1, Vec2 M2, Vec2 b);
+    private:
+        template<bool unsafeInvert>
+        static Vec2 solve(Vec2 M1, Vec2 M2, Vec2 b);
 
-		Vec2 bilinEval(Vec2 uv) const;
+        Vec2 bilinEval(Vec2 uv) const;
 
-		Vec2 m_A;
-		Vec2 m_E;
-		Vec2 m_F;
-		Vec2 m_G;
-		bool m_linear;
+        Vec2 m_A;
+        Vec2 m_E;
+        Vec2 m_F;
+        Vec2 m_G;
+        bool m_linear;
 };
 
 
 //==============================================================================
 // InvBilin implementation
 inline InvBilin::InvBilin()
-	: m_A(),
-	m_E(),
-	m_F(),
-	m_G(),
-	m_linear(false)
+    : m_A(),
+    m_E(),
+    m_F(),
+    m_G(),
+    m_linear(false)
 {}
 
 inline InvBilin::InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
-	: m_A(),
-	m_E(),
-	m_F(),
-	m_G(),
-	m_linear(false)
+    : m_A(),
+    m_E(),
+    m_F(),
+    m_G(),
+    m_linear(false)
 {
-	setVertices(A,B,C,D);
+    setVertices(A,B,C,D);
 }
 
 inline void InvBilin::setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
 {
-	m_A = A,
-	m_E = B-A;
-	m_F = C-A;
-	m_G = -m_E-C+D;
-	m_linear = false;
-	// Determine whether the micropolygon is almost-rectangular.  If it is, we
-	// set the m_linear flag as a hint to the solver that we only need to solve
-	// linear equations (requiring only one iteration of Newton's method).
-	TqFloat patchSize = max(maxNorm(m_F), maxNorm(m_E));
-	TqFloat irregularity = maxNorm(m_G);
-	if(irregularity < 1e-2*patchSize)
-		m_linear = true;
+    m_A = A,
+    m_E = B-A;
+    m_F = C-A;
+    m_G = -m_E-C+D;
+    m_linear = false;
+    // Determine whether the micropolygon is almost-rectangular.  If it is, we
+    // set the m_linear flag as a hint to the solver that we only need to solve
+    // linear equations (requiring only one iteration of Newton's method).
+    TqFloat patchSize = max(maxNorm(m_F), maxNorm(m_E));
+    TqFloat irregularity = maxNorm(m_G);
+    if(irregularity < 1e-2*patchSize)
+        m_linear = true;
 }
 
 inline Vec2 InvBilin::operator()(Vec2 P) const
 {
-	// Start at centre of the micropoly & do one or two iterations of Newton's
-	// method to solve for (u,v).
-	Vec2 uv(0.5, 0.5);
-	uv -= solve<true>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
-	if(!m_linear)
-	{
-		// The second iteration is only used if we know that the micropolygon
-		// is non-rectangular.
-		uv -= solve<false>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
-	}
-	return uv;
+    // Start at centre of the micropoly & do one or two iterations of Newton's
+    // method to solve for (u,v).
+    Vec2 uv(0.5, 0.5);
+    uv -= solve<true>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
+    if(!m_linear)
+    {
+        // The second iteration is only used if we know that the micropolygon
+        // is non-rectangular.
+        uv -= solve<false>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
+    }
+    return uv;
 }
 
 /** \brief Solve the linear equation M*x = b  with the matrix M = [M1 M2]
@@ -188,16 +188,16 @@ inline Vec2 InvBilin::operator()(Vec2 P) const
 template<bool unsafeInvert>
 inline Vec2 InvBilin::solve(Vec2 M1, Vec2 M2, Vec2 b)
 {
-	TqFloat det = cross(M1, M2);
-	if(unsafeInvert || det != 0) det = 1/det;
-	return det * Vec2(cross(b, M2), -cross(b, M1));
+    TqFloat det = cross(M1, M2);
+    if(unsafeInvert || det != 0) det = 1/det;
+    return det * Vec2(cross(b, M2), -cross(b, M1));
 }
 
 /// Evaluate the bilinear function at the coordinates (u,v)
 inline Vec2 InvBilin::bilinEval(Vec2 uv) const
 {
-	return m_A + m_E*uv.x + m_F*uv.y + m_G*uv.x*uv.y;
+    return m_A + m_E*uv.x + m_F*uv.y + m_G*uv.x*uv.y;
 }
 
 
-#endif	// INVBILIN_H_INCLUDED
+#endif // INVBILIN_H_INCLUDED

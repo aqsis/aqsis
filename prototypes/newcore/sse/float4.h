@@ -12,9 +12,9 @@ class bool4
     private:
         __m128 m_vec;
 
-		friend class float4;
+        friend class float4;
 
-	public:
+    public:
         STRONG_INLINE bool4() { /*uninitialized*/ }
         STRONG_INLINE bool4(bool b) { m_vec = (b ? _mm_set1_ps(0xFFFFFFFF) : _mm_setzero_ps()); }
         STRONG_INLINE bool4(__m128 b4) { m_vec = b4; }
@@ -24,10 +24,10 @@ class bool4
         STRONG_INLINE friend bool4 operator|(bool4 lhs, bool4 rhs) { return bool4 (_mm_or_ps  (lhs.m_vec, rhs.m_vec)); }
         STRONG_INLINE friend bool4 operator^(bool4 lhs, bool4 rhs) { return bool4 (_mm_xor_ps (lhs.m_vec, rhs.m_vec)); }
 
-		// get integer mask containing four packed bits
-		STRONG_INLINE int to_mask() const { return _mm_movemask_ps(m_vec); }
+        // get integer mask containing four packed bits
+        STRONG_INLINE int to_mask() const { return _mm_movemask_ps(m_vec); }
 
-		STRONG_INLINE __m128 get() const { return m_vec; }
+        STRONG_INLINE __m128 get() const { return m_vec; }
 };
 
 class float4
