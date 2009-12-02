@@ -46,8 +46,8 @@ class Patch : public Surface
 
             if(area <= maxArea)
             {
-                int uRes = 1 + lu/m_opts.shadingRate;
-                int vRes = 1 + lv/m_opts.shadingRate;
+                int uRes = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
+                int vRes = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
                 boost::shared_ptr<Grid> grid(new Grid(uRes, vRes));

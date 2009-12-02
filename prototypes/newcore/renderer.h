@@ -25,24 +25,7 @@ class Surface
         // storage class for the surface.
 //        virtual StorageCount storageCount() const = 0;
 
-#if 0
-        // Determine whether the surface is diceable from the point of view of
-        // the matrix m.  m is not necessarily a projection matrix onto the xy
-        // plane, though this is the usual case.
-        //
-        // Also determines (& stores internally) how the surface
-        // should be split if it is not diceable.
-        bool diceable(const Mat4& m) const = 0;
-
-        // Split the surface into smaller subsurfaces & add those to the
-        // renderer context.
-        void split(Renderer& renderer) const = 0;
-
-        // Create a grid of micropolygons from the surface.
-        //
-        /*?*/ void dice(/*?*/) const = 0;
-#endif
-
+        // Return the bounding box for the surface.
         virtual Box bound() const = 0;
 
         // Split or dice a surface & push it back into the renderer queue.
@@ -247,6 +230,8 @@ class Renderer
             // iterate over all micropolys in the grid & render each one.
             for(Grid::Iterator i = grid.begin(); i.valid(); ++i)
             {
+//                if(i.u() != 0 && i.v() != 0)
+//                    continue;
                 Grid::UPoly poly = *i;
 
                 Box bound = poly.bound();

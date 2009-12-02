@@ -87,6 +87,9 @@ class Grid::Iterator
              return q;
         }
 
+        int u() const { return m_u; }
+        int v() const { return m_v; }
+
     private:
         const Grid* m_grid;
         int m_u;
