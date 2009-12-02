@@ -111,6 +111,15 @@ class PointInQuad
                     //<< intentional case fallthrough
                 case 4: // convex, CCW
                     m_convex = true;
+//                    m_xmul[0] = e[0].y; m_ymul[0] = -e[0].x; m_offset[0] = cross(b,a);
+//                    m_xmul[1] = e[1].y; m_ymul[1] = -e[1].x; m_offset[1] = cross(c,b);
+//                    m_xmul[2] = e[2].y; m_ymul[2] = -e[2].x; m_offset[2] = cross(d,c);
+//                    m_xmul[3] = e[3].y; m_ymul[3] = -e[3].x; m_offset[3] = cross(a,d);
+//                    // TODO, Use centres of edges for ref point ??
+//                    setupEdgeEq(0, e[0], 0.5f*(a+b));
+//                    setupEdgeEq(1, e[1], 0.5f*(b+c));
+//                    setupEdgeEq(2, e[2], 0.5f*(c+d));
+//                    setupEdgeEq(3, e[3], 0.5f*(d+a));
                     setupEdgeEq(0, e[0], a);
                     setupEdgeEq(1, e[1], b);
                     setupEdgeEq(2, e[2], c);

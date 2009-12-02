@@ -46,10 +46,10 @@ class Patch : public Surface
 
             if(area <= maxArea)
             {
-                int uRes = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
-                int vRes = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
+                int uRes = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
+                int vRes = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
                 boost::shared_ptr<Grid> grid(new Grid(uRes, vRes));
                 float dv = 1.0f/(vRes-1);
                 float du = 1.0f/(uRes-1);
@@ -77,9 +77,9 @@ class Patch : public Surface
                     // c---d
                     Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                     Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    queue.push(boost::shared_ptr<Patch>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
                                     m_P[0], ab, m_P[2], cd)));
-                    queue.push(boost::shared_ptr<Patch>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
                                     ab, m_P[1], cd, m_P[3])));
                 }
                 else
@@ -90,12 +90,20 @@ class Patch : public Surface
                     // c---d
                     Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                     Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    queue.push(boost::shared_ptr<Patch>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
                                     m_P[0], m_P[1], ac, bd)));
-                    queue.push(boost::shared_ptr<Patch>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
                                     ac, bd, m_P[2], m_P[3])));
                 }
             }
+        }
+
+        virtual void transform(const Mat4& trans)
+        {
+            m_P[0] *= trans;
+            m_P[1] *= trans;
+            m_P[2] *= trans;
+            m_P[3] *= trans;
         }
 
         virtual Box bound() const

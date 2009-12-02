@@ -33,6 +33,9 @@ class Surface
         // dice it & push the resulting grids at the renderer.  If not, split
         // it & push the resulting smaller surfaces at the renderer.
         virtual void splitdice(const Mat4& proj, RenderQueue& renderer) const = 0;
+
+        // Transform the surface into a new coordinate system
+        virtual void transform(const Mat4& trans) = 0;
 };
 
 
