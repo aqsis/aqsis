@@ -92,4 +92,28 @@ inline T bilerp(T a, T b, T c, T d, Vec2 uv)
     return w0*a + w1*b + w2*c + w3*d;
 }
 
+float deg2rad(float d) { return (M_PI/180) * d; }
+float rad2deg(float r) { return (180/M_PI) * r; }
+
+Mat4 perspectiveProjection(float fov, float near, float far)
+{
+    float s = 1/std::tan(deg2rad(fov)/2);
+    float a = far/(far-near);
+    float b = -near*a;
+    return Mat4(s, 0, 0, 0,
+                0, s, 0, 0,
+                0, 0, a, 1,
+                0, 0, b, 0);
+}
+
+Mat4 screenWindow(float left, float right, float bottom, float top)
+{
+    float w = right-left;
+    float h = top-bottom;
+    return Mat4(2/w, 0, 0, 0,
+                0, 2/h, 0, 0,
+                0, 0,   1, 0,
+                -(right+left)/w, -(top+bottom)/h, 0, 1);
+}
+
 #endif // UTIL_H_INCLUDED

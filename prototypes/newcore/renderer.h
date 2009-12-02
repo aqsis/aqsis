@@ -86,7 +86,6 @@ class Renderer
                                     surface_order> SurfaceQueue;
 
         Options m_opts;
-
         SurfaceQueue m_surfaces;
         std::vector<Sample> m_samples;
         std::vector<float> m_image;
@@ -167,10 +166,19 @@ class Renderer
         }
 
     public:
-        Renderer(const Options& opts)
+        Renderer(const Options& opts, const Mat4& camToScreen = Mat4())
             : m_opts(opts),
-            m_samples()
-        { }
+            m_surfaces(),
+            m_samples(),
+            m_image(),
+            m_camToRas()
+        {
+            // Set up camera -> raster matrix
+            m_camToRas = camToScreen
+                * Mat4().setScale(Vec3(0.5,-0.5,0))
+                * Mat4().setTranslation(Vec3(0.5,0.5,0))
+                * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+        }
 
         // Add geometry
         void add(const boost::shared_ptr<Geometry>& geom)
@@ -182,16 +190,13 @@ class Renderer
         // Render all surfaces and save resulting image.
         void render()
         {
-            // Set up projection.  In this case it's an orthogonal projection.
-//            m_camToRas = Mat4(m_opts.xRes, 0, 0, 0,
-//                              0, m_opts.yRes, 0, 0,
-//                              0, 0,           0, 0,
-//                              0, 0,           0, 1);
-
-            m_camToRas = Mat4().setScale(Vec3(1,1,0))
-                * Mat4().setScale(Vec3(0.5,-0.5,0))
-                * Mat4().setTranslation(Vec3(0.5,0.5,0))
-                * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+            // Splitting transform.  Allowing this to be different from the
+            // projection matrix lets us examine a fixed set of grids
+            // independently of the viewpoint.
+            Mat4 splitTrans = m_camToRas;
+//                  Mat4().setScale(Vec3(0.5,-0.5,0))
+//                * Mat4().setTranslation(Vec3(0.5,0.5,0))
+//                * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
 
             initSamples();
             while(!m_surfaces.empty())
@@ -199,7 +204,7 @@ class Renderer
                 SurfaceHolder s = m_surfaces.top();
                 m_surfaces.pop();
                 RenderQueueImpl queue(*this, s.splitCount);
-                s.geom->splitdice(m_camToRas, queue);
+                s.geom->splitdice(splitTrans, queue);
             }
             saveImage("test.tif");
         }
@@ -221,7 +226,7 @@ class Renderer
 
                 // Bounding box for relevant samples, clamped to image extent.
                 const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
-                const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.yRes);
+                const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
                 const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
                 const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
 
