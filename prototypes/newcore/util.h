@@ -15,10 +15,10 @@
 #include <OpenEXR/ImathVec.h>
 
 template<typename T>
-T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
+inline T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 
 template<typename T>
-const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
+inline const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 
 
 typedef Imath::V3f Vec3;
@@ -28,7 +28,7 @@ typedef Imath::M44f Mat4;
 typedef Imath::Box3f Box;
 
 
-std::ostream& operator<<(std::ostream& out, Box b)
+inline std::ostream& operator<<(std::ostream& out, Box b)
 {
     out << "[" << b.min << " -- " << b.max << "]";
     return out;
@@ -36,13 +36,13 @@ std::ostream& operator<<(std::ostream& out, Box b)
 
 
 template<typename T>
-Imath::Vec2<T> vec2_cast(const Imath::Vec3<T>& v)
+inline Imath::Vec2<T> vec2_cast(const Imath::Vec3<T>& v)
 {
     return Imath::Vec2<T>(v.x, v.y);
 }
 
 template<typename T>
-T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
+inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
 {
     return a.x*b.y - b.x*a.y;
 }
@@ -55,7 +55,7 @@ max(const T a, const T b)
 }
 
 template<typename T>
-T maxNorm(Imath::Vec2<T> v)
+inline T maxNorm(Imath::Vec2<T> v)
 {
     return max(std::fabs(v.x), std::fabs(v.y));
 }
@@ -92,10 +92,10 @@ inline T bilerp(T a, T b, T c, T d, Vec2 uv)
     return w0*a + w1*b + w2*c + w3*d;
 }
 
-float deg2rad(float d) { return (M_PI/180) * d; }
-float rad2deg(float r) { return (180/M_PI) * r; }
+inline float deg2rad(float d) { return (M_PI/180) * d; }
+inline float rad2deg(float r) { return (180/M_PI) * r; }
 
-Mat4 perspectiveProjection(float fov, float near, float far)
+inline Mat4 perspectiveProjection(float fov, float near, float far)
 {
     float s = 1/std::tan(deg2rad(fov)/2);
     float a = far/(far-near);
@@ -106,7 +106,7 @@ Mat4 perspectiveProjection(float fov, float near, float far)
                 0, 0, b, 0);
 }
 
-Mat4 screenWindow(float left, float right, float bottom, float top)
+inline Mat4 screenWindow(float left, float right, float bottom, float top)
 {
     float w = right-left;
     float h = top-bottom;

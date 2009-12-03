@@ -52,7 +52,7 @@ class Patch : public Geometry
                 // dice the surface.
                 int uRes = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
                 int vRes = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
-                boost::shared_ptr<Grid> grid(new Grid(uRes, vRes));
+                boost::shared_ptr<QuadGrid> grid(new QuadGrid(uRes, vRes));
                 float dv = 1.0f/(vRes-1);
                 float du = 1.0f/(uRes-1);
                 for(int v = 0; v < vRes; ++v)

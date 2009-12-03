@@ -9,6 +9,12 @@ find_package(TIFF)
 
 include_directories(${ILMBASE_INCLUDE_DIR})
 
-add_executable(render main.cpp)
+set(srcs
+    main.cpp
+    renderer.cpp
+    grid.cpp
+)
+
+add_executable(render ${srcs})
 
 target_link_libraries(render ${TIFF_LIBRARIES})

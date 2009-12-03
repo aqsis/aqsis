@@ -40,8 +40,8 @@ class RenderQueueImpl : public RenderQueue
 class Renderer
 {
     private:
-        // RenderQueueImpl is a friend so that it can appropriately push() surfaces
-        // and grids into the renderer.
+        // RenderQueueImpl is a friend so that it can appropriately push()
+        // surfaces and grids into the renderer.
         friend class RenderQueueImpl;
 
         // Standard container for geometry metadata
@@ -51,8 +51,8 @@ class Renderer
             int splitCount; //< Number of times the geometry has been split
             Box bound;      //< Bound in camera coordinates
 
-            SurfaceHolder(const boost::shared_ptr<Geometry>& geom, int splitCount,
-                          Box bound)
+            SurfaceHolder(const boost::shared_ptr<Geometry>& geom,
+                          int splitCount, Box bound)
                 : geom(geom),
                 splitCount(splitCount),
                 bound(bound)
@@ -91,6 +91,7 @@ class Renderer
         std::vector<float> m_image;
         Mat4 m_camToRas;
 
+        /// Initialize the sample and image arrays.
         void initSamples()
         {
             // Initialize sample array
@@ -106,43 +107,7 @@ class Renderer
         }
 
         // Save image to a TIFF file.
-        void saveImage(const std::string& fileName)
-        {
-            TIFF* tif = TIFFOpen(fileName.c_str(), "w");
-            if(!tif)
-            {
-                std::cerr << "Could not open file!\n";
-                return;
-            }
-
-            // Write header
-            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, uint32(m_opts.xRes));
-            TIFFSetField(tif, TIFFTAG_IMAGELENGTH, uint32(m_opts.yRes));
-            TIFFSetField(tif, TIFFTAG_ORIENTATION, uint16(ORIENTATION_TOPLEFT));
-            TIFFSetField(tif, TIFFTAG_PLANARCONFIG, uint16(PLANARCONFIG_CONTIG));
-            TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, uint16(RESUNIT_NONE));
-            TIFFSetField(tif, TIFFTAG_XRESOLUTION, 1.0f);
-            TIFFSetField(tif, TIFFTAG_YRESOLUTION, 1.0f);
-            TIFFSetField(tif, TIFFTAG_COMPRESSION, uint16(COMPRESSION_LZW));
-            TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, uint16(1));
-            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, uint16(8*sizeof(float)));
-            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, uint16(PHOTOMETRIC_MINISBLACK));
-            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, uint16(SAMPLEFORMAT_IEEEFP));
-            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, 0));
-
-            // Write image data
-            int rowSize = m_opts.xRes*sizeof(float);
-            boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
-            for(int line = 0; line < m_opts.yRes; ++line)
-            {
-                std::memcpy(lineBuf.get(), &m_image[0] + line*m_opts.xRes,
-                            rowSize);
-                TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
-                                  uint32(line));
-            }
-
-            TIFFClose(tif);
-        }
+        void saveImage(const std::string& fileName);
 
         // Push geometry into the render queue
         void push(const boost::shared_ptr<Geometry>& geom, int splitCount)
@@ -162,8 +127,11 @@ class Renderer
         // Push a grid onto the render queue
         void push(const boost::shared_ptr<Grid>& grid)
         {
-            rasterize(*grid);
+            grid->render(*this);
         }
+
+        template<typename GridT>
+        void rasterize(GridT& grid);
 
     public:
         Renderer(const Options& opts, const Mat4& camToScreen = Mat4())
@@ -209,88 +177,87 @@ class Renderer
             saveImage("test.tif");
         }
 
-        // Render a grid by rasterizing each micropolygon.
-//        __attribute__((flatten))
-        void rasterize(Grid& grid)
-        {
-            // Project grid into raster coordinates.
-            grid.project(m_camToRas);
-            // iterate over all micropolys in the grid & render each one.
-            for(Grid::Iterator i = grid.begin(); i.valid(); ++i)
-            {
-//                if(i.u() != 0 && i.v() != 0)
-//                    continue;
-                Grid::UPoly poly = *i;
-
-                Box bound = poly.bound();
-
-                // Bounding box for relevant samples, clamped to image extent.
-                const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
-                const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
-                const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
-                const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
-
-                Grid::HitTest hitTest = poly.hitTest();
-                InvBilin invBilin;
-                if(m_opts.smoothShading)
-                {
-                    invBilin.init(vec2_cast(poly.a()), vec2_cast(poly.b()),
-                                  vec2_cast(poly.d()), vec2_cast(poly.c()));
-                }
-
-                // for each sample position in the bound
-                for(int ix = sx; ix < ex; ++ix)
-                {
-                    for(int iy = sy; iy < ey; ++iy)
-                    {
-                        int idx = m_opts.xRes*iy + ix;
-                        Sample& samp = m_samples[idx];
-//                        // Early out if definitely hidden
-//                        if(samp.z < bound.min.z)
-//                            continue;
-                        // Test whether sample hits the micropoly
-                        if(!hitTest(samp))
-                            continue;
-                        // Determine hit depth
-                        // Generate & store a fragment
-                        //
-                        // TODO: Abstract the smooth/constant shading handling
-                        // out of here & onto the grid or micropoly.
-                        float z;
-                        if(m_opts.smoothShading)
-                        {
-                            Vec2 uv = invBilin(samp.p);
-                            z = bilerp(poly.a().z, poly.b().z,
-                                       poly.d().z, poly.c().z, uv);
-                        }
-                        else
-                        {
-                            // constant shading
-                            z = poly.a().z;
-                        }
-                        if(samp.z < z)
-                        {
-                            // Ignore if hit is hidden
-                            continue;
-                        }
-                        samp.z = z;
-                        m_image[idx] = z;
-                    }
-                }
-            }
-        }
+        // Visitor pattern; 2nd half of double dispatch for render()
+        //
+        // Perhaps should be private, maybe through a thunk class similar to
+        // RenderQueue?
+        void render(QuadGrid& grid) { rasterize(grid); }
 };
 
 
 //==============================================================================
+// Renderer implementation.
 
-void RenderQueueImpl::push(const boost::shared_ptr<Geometry>& geom)
+// Render a grid by rasterizing each micropolygon.
+//__attribute__((flatten))
+template<typename GridT>
+void Renderer::rasterize(GridT& grid)
 {
-    m_renderer.push(geom, m_splitDepth+1);
-}
-void RenderQueueImpl::push(const boost::shared_ptr<Grid>& grid)
-{
-    m_renderer.push(grid);
+    // Project grid into raster coordinates.
+    grid.project(m_camToRas);
+    // iterate over all micropolys in the grid & render each one.
+    for(typename GridT::Iterator i = grid.begin(); i.valid(); ++i)
+    {
+//        if(i.u() != 0 && i.v() != 0)
+//            continue;
+        typename GridT::UPoly poly = *i;
+
+        Box bound = poly.bound();
+
+        // Bounding box for relevant samples, clamped to image extent.
+        const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
+        const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
+        const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
+        const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
+
+        typename GridT::HitTest hitTest = poly.hitTest();
+        InvBilin invBilin;
+        if(m_opts.smoothShading)
+        {
+            invBilin.init(vec2_cast(poly.a()), vec2_cast(poly.b()),
+                            vec2_cast(poly.d()), vec2_cast(poly.c()));
+        }
+
+        // for each sample position in the bound
+        for(int ix = sx; ix < ex; ++ix)
+        {
+            for(int iy = sy; iy < ey; ++iy)
+            {
+                int idx = m_opts.xRes*iy + ix;
+                Sample& samp = m_samples[idx];
+//                // Early out if definitely hidden
+//                if(samp.z < bound.min.z)
+//                    continue;
+                // Test whether sample hits the micropoly
+                if(!hitTest(samp))
+                    continue;
+                // Determine hit depth
+                // Generate & store a fragment
+                //
+                // TODO: Abstract the smooth/constant shading handling
+                // out of here & onto the grid or micropoly.
+                float z;
+                if(m_opts.smoothShading)
+                {
+                    Vec2 uv = invBilin(samp.p);
+                    z = bilerp(poly.a().z, poly.b().z,
+                                poly.d().z, poly.c().z, uv);
+                }
+                else
+                {
+                    // constant shading
+                    z = poly.a().z;
+                }
+                if(samp.z < z)
+                {
+                    // Ignore if hit is hidden
+                    continue;
+                }
+                samp.z = z;
+                m_image[idx] = z;
+            }
+        }
+    }
 }
 
 #endif // RENDERER_H_INCLUDED

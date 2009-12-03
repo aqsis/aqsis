@@ -6,8 +6,22 @@
 
 #include "microquad.h"
 
-/// A 2D grid of quadrilateral micro polygons
+class Renderer;
+
 class Grid
+{
+    public:
+        // Visitor pattern: 1st half of double dispatch
+        //
+        // This should just be used for type deduction; the individual grid
+        // subclasses should call back to Renderer::render()
+        virtual void render(Renderer& renderer) = 0;
+
+        virtual ~Grid() {}
+};
+
+/// A 2D grid of quadrilateral micro polygons
+class QuadGrid : public Grid
 {
     public:
         class Iterator;
@@ -15,11 +29,13 @@ class Grid
         typedef PointInQuad HitTest;
         typedef MicroQuad UPoly;
 
-        Grid(int nu, int nv)
+        QuadGrid(int nu, int nv)
             : m_nu(nu),
             m_nv(nv),
             m_P(nu*nv)
         { }
+
+        virtual void render(Renderer& renderer);
 
         Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
         Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
@@ -27,7 +43,7 @@ class Grid
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
 
-        inline Iterator begin();
+        Iterator begin();
 
         Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
 
@@ -52,10 +68,10 @@ class Grid
 };
 
 
-class Grid::Iterator
+class QuadGrid::Iterator
 {
     public:
-        Iterator(const Grid& grid)
+        Iterator(const QuadGrid& grid)
             : m_grid(&grid),
             m_u(0),
             m_v(0),
@@ -91,34 +107,16 @@ class Grid::Iterator
         int v() const { return m_v; }
 
     private:
-        const Grid* m_grid;
+        const QuadGrid* m_grid;
         int m_u;
         int m_v;
         int m_uEnd;
         int m_vEnd;
 };
 
-Grid::Iterator Grid::begin()
+inline QuadGrid::Iterator QuadGrid::begin()
 {
     return Iterator(*this);
 }
-
-#if 0
-// Visitor-like pattern for resolving grid types
-class Grid
-{
-    public:
-        virtual void rasterize(Renderer& renderer) const = 0;
-};
-
-class QuadGrid : Grid
-{
-    public:
-        virtual void rasterize(Renderer& renderer) const
-        {
-            renderer.rasterize(*this);
-        }
-};
-#endif
 
 #endif // GRID_H_INCLUDED
