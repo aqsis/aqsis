@@ -36,6 +36,8 @@ class Surface
 
         // Transform the surface into a new coordinate system
         virtual void transform(const Mat4& trans) = 0;
+
+        virtual ~Surface() {}
 };
 
 
@@ -169,12 +171,12 @@ class Renderer
         // Push a surface onto the render queue
         void push(const boost::shared_ptr<Surface>& surface, int splitCount)
         {
-            if(splitCount > m_opts.maxSplits)
+            Box bound = surface->bound();
+            if(bound.min.z < FLT_EPSILON && splitCount > m_opts.maxSplits)
             {
-                std::cerr << "max splits; surface discarded\n";
+                std::cerr << "Max eye splits encountered; surface discarded\n";
                 return;
             }
-            Box bound = surface->bound();
             if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
                 return;
             // TODO: Discard surface if outside of image.
@@ -226,6 +228,7 @@ class Renderer
         }
 
         // Render a grid by rasterizing each micropolygon.
+//        __attribute__((flatten))
         void rasterize(Grid& grid)
         {
             // Project grid into raster coordinates.
