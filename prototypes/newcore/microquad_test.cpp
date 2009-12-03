@@ -10,13 +10,14 @@ int main()
     Vec3 b = Vec3(0,5,0);
     Vec3 c = Vec3(-5,0,0);
     Vec3 d = Vec3(0,-5,0);
-    std::swap(c,d);  // make bow-tie.
+//    std::swap(c,d);  // make bow-tie.
 //    std::swap(b, d);  // make clockwise
+    c *= -0.5;// make arrow
     PointInQuad inQuad(vec2_cast(a), vec2_cast(b),
                        vec2_cast(c), vec2_cast(d));
 
-    int nx = 32;
-    int ny = 32;
+    const int nx = 32;
+    const int ny = 32;
 
     int counts[nx*ny];
     memset(counts, 0, nx*ny*sizeof(int));
