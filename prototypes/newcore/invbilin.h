@@ -92,7 +92,7 @@ class InvBilin
 
         /** Use the given vertices for inverse bilinear lookups.
          *
-         * \see setVertices for the vertex ordering.
+         * \see init for the vertex ordering.
          */
         InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
 
@@ -104,7 +104,7 @@ class InvBilin
          *   |   |
          *   A---B
          */
-        void setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
+        void init(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
 
         /** \brief Perform the inverse bilinear mapping
          *
@@ -145,10 +145,10 @@ inline InvBilin::InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
     m_G(),
     m_linear(false)
 {
-    setVertices(A,B,C,D);
+    init(A,B,C,D);
 }
 
-inline void InvBilin::setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
+inline void InvBilin::init(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
 {
     m_A = A,
     m_E = B-A;
@@ -158,8 +158,8 @@ inline void InvBilin::setVertices(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
     // Determine whether the micropolygon is almost-rectangular.  If it is, we
     // set the m_linear flag as a hint to the solver that we only need to solve
     // linear equations (requiring only one iteration of Newton's method).
-    TqFloat patchSize = max(maxNorm(m_F), maxNorm(m_E));
-    TqFloat irregularity = maxNorm(m_G);
+    float patchSize = max(maxNorm(m_F), maxNorm(m_E));
+    float irregularity = maxNorm(m_G);
     if(irregularity < 1e-2*patchSize)
         m_linear = true;
 }
@@ -188,7 +188,7 @@ inline Vec2 InvBilin::operator()(Vec2 P) const
 template<bool unsafeInvert>
 inline Vec2 InvBilin::solve(Vec2 M1, Vec2 M2, Vec2 b)
 {
-    TqFloat det = cross(M1, M2);
+    float det = cross(M1, M2);
     if(unsafeInvert || det != 0) det = 1/det;
     return det * Vec2(cross(b, M2), -cross(b, M1));
 }

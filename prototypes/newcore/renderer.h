@@ -9,6 +9,7 @@
 #include <boost/scoped_array.hpp>
 
 #include "grid.h"
+#include "invbilin.h"
 #include "options.h"
 #include "sample.h"
 #include "geometry.h"
@@ -225,6 +226,12 @@ class Renderer
                 const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
 
                 Grid::HitTest hitTest = poly.hitTest();
+                InvBilin invBilin;
+                if(m_opts.smoothShading)
+                {
+                    invBilin.init(vec2_cast(poly.a()), vec2_cast(poly.b()),
+                                  vec2_cast(poly.d()), vec2_cast(poly.c()));
+                }
 
                 // for each sample position in the bound
                 for(int ix = sx; ix < ex; ++ix)
@@ -233,11 +240,29 @@ class Renderer
                     {
                         int idx = m_opts.xRes*iy + ix;
                         Sample& samp = m_samples[idx];
+//                        // Early out if definitely hidden
+//                        if(samp.z < bound.min.z)
+//                            continue;
                         // Test whether sample hits the micropoly
                         if(!hitTest(samp))
                             continue;
+                        // Determine hit depth
                         // Generate & store a fragment
-                        float z = poly.z();
+                        //
+                        // TODO: Abstract the smooth/constant shading handling
+                        // out of here & onto the grid or micropoly.
+                        float z;
+                        if(m_opts.smoothShading)
+                        {
+                            Vec2 uv = invBilin(samp.p);
+                            z = bilerp(poly.a().z, poly.b().z,
+                                       poly.d().z, poly.c().z, uv);
+                        }
+                        else
+                        {
+                            // constant shading
+                            z = poly.a().z;
+                        }
                         if(samp.z < z)
                         {
                             // Ignore if hit is hidden
@@ -245,19 +270,6 @@ class Renderer
                         }
                         samp.z = z;
                         m_image[idx] = z;
-#if 0
-                        // Early out if definitely hidden
-                        if(samp.z < bound.min.z)
-                            continue;
-                        float z = 0;
-                        // Ignore if sample didn't hit the polygon
-                        if(!hitTest(samp, z))
-                            continue;
-                        // Ignore if sample is hidden
-                        if(z < 0 || z > samp.z)
-                            continue;
-                        // Generate & store a fragment
-#endif
                     }
                 }
             }

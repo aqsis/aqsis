@@ -4,13 +4,11 @@
 int main()
 {
     Options opts;
-    opts.maxSplits = 10;
     opts.xRes = 1024;
     opts.yRes = 1024;
     opts.gridSize = 8;
     opts.shadingRate = 1000;
-    opts.clipNear = 0;
-    opts.clipFar = FLT_MAX;
+    opts.smoothShading = false;
 
     Renderer r(opts);
 

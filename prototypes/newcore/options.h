@@ -8,9 +8,21 @@ struct Options
     int yRes;        ///< image y-resolution
     //Imath::V2i nsumSamples; ///< number of subsamples
     int gridSize;    ///< Desired grid side length.
-    int shadingRate; ///< Desired micropoly area
+    float shadingRate; ///< Desired micropoly area
     float clipNear;  ///< Near clipping plane (cam coords)
     float clipFar;   ///< Far clipping plane (cam coords)
+    bool smoothShading; ///< Type of shading interpolation
+
+    Options()
+        : maxSplits(20),
+        xRes(640),
+        yRes(480),
+        gridSize(16),
+        shadingRate(1),
+        clipNear(FLT_EPSILON),
+        clipFar(FLT_MAX),
+        smoothShading(true)
+    { }
 };
 
 #endif // OPTIONS_H_INCLUDED

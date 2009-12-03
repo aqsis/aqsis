@@ -247,7 +247,10 @@ class MicroQuad
                                vec2_cast(m_c), vec2_cast(m_d));
         }
 
-        float z() const { return m_a.z; }
+        Vec3 a() const { return m_a; }
+        Vec3 b() const { return m_b; }
+        Vec3 c() const { return m_c; }
+        Vec3 d() const { return m_d; }
 
         friend std::ostream& operator<<(std::ostream& out,
                                         const MicroQuad& q)
