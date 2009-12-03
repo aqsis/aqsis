@@ -1,9 +1,11 @@
 #ifndef SURFACES_H_INCLUDED
 #define SURFACES_H_INCLUDED
 
-#include "renderer.h"
+#include "options.h"
+#include "geometry.h"
+#include "util.h"
 
-class Patch : public Surface
+class Patch : public Geometry
 {
     private:
         // uv coordinates for corners of the base patch.
@@ -77,9 +79,9 @@ class Patch : public Surface
                     // c---d
                     Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                     Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new Patch(m_opts,
                                     m_P[0], ab, m_P[2], cd)));
-                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new Patch(m_opts,
                                     ab, m_P[1], cd, m_P[3])));
                 }
                 else
@@ -90,9 +92,9 @@ class Patch : public Surface
                     // c---d
                     Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                     Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new Patch(m_opts,
                                     m_P[0], m_P[1], ac, bd)));
-                    queue.push(boost::shared_ptr<Surface>(new Patch(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new Patch(m_opts,
                                     ac, bd, m_P[2], m_P[3])));
                 }
             }

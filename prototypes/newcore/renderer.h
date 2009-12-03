@@ -8,75 +8,51 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
-#include "util.h"
-#include "sample.h"
-#include "options.h"
 #include "grid.h"
+#include "options.h"
+#include "sample.h"
+#include "geometry.h"
+#include "util.h"
 
 #include "tiffio.h"
 
-class RenderQueue;
 class Renderer;
 
-class Surface
-{
-    public:
-        // Return the number of values required to represent a primvar of each
-        // storage class for the surface.
-//        virtual StorageCount storageCount() const = 0;
-
-        // Return the bounding box for the surface.
-        virtual Box bound() const = 0;
-
-        // Split or dice a surface & push it back into the renderer queue.
-        //
-        // dice it & push the resulting grids at the renderer.  If not, split
-        // it & push the resulting smaller surfaces at the renderer.
-        virtual void splitdice(const Mat4& proj, RenderQueue& renderer) const = 0;
-
-        // Transform the surface into a new coordinate system
-        virtual void transform(const Mat4& trans) = 0;
-
-        virtual ~Surface() {}
-};
-
-
 // Minimal wrapper around a renderer instance to provide control context for
-// when surfaces push split/diced objects back into the render queue on the
-// renderer.
-class RenderQueue
+// when surfaces push split/diced objects back into the render's queue.
+class RenderQueueImpl : public RenderQueue
 {
     private:
         Renderer& m_renderer;
         int m_splitDepth;
     public:
-        RenderQueue(Renderer& renderer, int splitDepth)
+        RenderQueueImpl(Renderer& renderer, int splitDepth)
             : m_renderer(renderer),
             m_splitDepth(splitDepth)
         { }
 
-        void push(const boost::shared_ptr<Surface>& s);
-        void push(const boost::shared_ptr<Grid>& g);
+        void push(const boost::shared_ptr<Geometry>& geom);
+        void push(const boost::shared_ptr<Grid>& grid);
 };
 
 
 class Renderer
 {
     private:
-        // RenderQueue is a friend so that it can appropriately push() surfaces
+        // RenderQueueImpl is a friend so that it can appropriately push() surfaces
         // and grids into the renderer.
-        friend class RenderQueue;
+        friend class RenderQueueImpl;
 
-        // Standard container for surface metadata
+        // Standard container for geometry metadata
         struct SurfaceHolder
         {
-            boost::shared_ptr<Surface> surface; //< Pointer to surface
-            int splitCount; //< Number of times the surface has been split
+            boost::shared_ptr<Geometry> geom; //< Pointer to geometry
+            int splitCount; //< Number of times the geometry has been split
             Box bound;      //< Bound in camera coordinates
 
-            SurfaceHolder(const boost::shared_ptr<Surface>& surface, int splitCount,
+            SurfaceHolder(const boost::shared_ptr<Geometry>& geom, int splitCount,
                           Box bound)
-                : surface(surface),
+                : geom(geom),
                 splitCount(splitCount),
                 bound(bound)
             { }
@@ -168,19 +144,19 @@ class Renderer
             TIFFClose(tif);
         }
 
-        // Push a surface onto the render queue
-        void push(const boost::shared_ptr<Surface>& surface, int splitCount)
+        // Push geometry into the render queue
+        void push(const boost::shared_ptr<Geometry>& geom, int splitCount)
         {
-            Box bound = surface->bound();
+            Box bound = geom->bound();
             if(bound.min.z < FLT_EPSILON && splitCount > m_opts.maxSplits)
             {
-                std::cerr << "Max eye splits encountered; surface discarded\n";
+                std::cerr << "Max eye splits encountered; geometry discarded\n";
                 return;
             }
             if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
                 return;
-            // TODO: Discard surface if outside of image.
-            m_surfaces.push(SurfaceHolder(surface, splitCount, bound));
+            // TODO: Discard geometry if outside of image.
+            m_surfaces.push(SurfaceHolder(geom, splitCount, bound));
         }
 
         // Push a grid onto the render queue
@@ -195,11 +171,11 @@ class Renderer
             m_samples()
         { }
 
-        // Add a surface
-        void add(const boost::shared_ptr<Surface>& surface)
+        // Add geometry
+        void add(const boost::shared_ptr<Geometry>& geom)
         {
-            // TODO: Transform to camera space
-            push(surface, 0);
+            // TODO: Transform to camera space?
+            push(geom, 0);
         }
 
         // Render all surfaces and save resulting image.
@@ -221,8 +197,8 @@ class Renderer
             {
                 SurfaceHolder s = m_surfaces.top();
                 m_surfaces.pop();
-                RenderQueue queue(*this, s.splitCount);
-                s.surface->splitdice(m_camToRas, queue);
+                RenderQueueImpl queue(*this, s.splitCount);
+                s.geom->splitdice(m_camToRas, queue);
             }
             saveImage("test.tif");
         }
@@ -291,13 +267,13 @@ class Renderer
 
 //==============================================================================
 
-void RenderQueue::push(const boost::shared_ptr<Surface>& s)
+void RenderQueueImpl::push(const boost::shared_ptr<Geometry>& geom)
 {
-    m_renderer.push(s, m_splitDepth+1);
+    m_renderer.push(geom, m_splitDepth+1);
 }
-void RenderQueue::push(const boost::shared_ptr<Grid>& g)
+void RenderQueueImpl::push(const boost::shared_ptr<Grid>& grid)
 {
-    m_renderer.push(g);
+    m_renderer.push(grid);
 }
 
 #endif // RENDERER_H_INCLUDED

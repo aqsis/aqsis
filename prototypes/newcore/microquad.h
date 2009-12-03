@@ -182,11 +182,11 @@ class PointInQuad
             }
             else
             {
-				// Use a pair of point-in-triangle tests for non-convex cases.
-				//
-				// TODO: The inequalities here aren't really consistent with
-				// the ones above, and therefore some inter-micropolygon
-				// cracking on the interior of a grid result.
+                // Use a pair of point-in-triangle tests for non-convex cases.
+                //
+                // TODO: The inequalities here aren't really consistent with
+                // the ones above, and therefore some inter-micropolygon
+                // cracking on the interior of a grid result.
                 return (   m_xmul[0]*x + m_ymul[0]*y >= m_offset[0]
                         && m_xmul[1]*x + m_ymul[1]*y >= m_offset[1]
                         && m_xmul[2]*x + m_ymul[2]*y >= m_offset[2])

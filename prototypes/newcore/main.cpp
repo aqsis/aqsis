@@ -14,7 +14,7 @@ int main()
 
     Renderer r(opts);
 
-    boost::shared_ptr<Surface> patch(
+    boost::shared_ptr<Geometry> patch(
            new Patch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
 //    patch->transform(Mat4().setTranslation(Vec3(-0.3,-0.3,0))
