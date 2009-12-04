@@ -95,11 +95,10 @@ class QuadGrid::Iterator
         MicroQuad operator*() const
         {
             int nu = m_grid->nu();
-             MicroQuad q(m_grid->m_P[nu*m_v + m_u],
+            return MicroQuad(m_grid->m_P[nu*m_v + m_u],
                              m_grid->m_P[nu*m_v + m_u+1],
                              m_grid->m_P[nu*(m_v+1) + m_u+1],
                              m_grid->m_P[nu*(m_v+1) + m_u]);
-             return q;
         }
 
         int u() const { return m_u; }
