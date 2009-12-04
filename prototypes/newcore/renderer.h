@@ -9,7 +9,6 @@
 #include <boost/scoped_array.hpp>
 
 #include "grid.h"
-#include "invbilin.h"
 #include "options.h"
 #include "sample.h"
 #include "geometry.h"
@@ -189,8 +188,8 @@ class Renderer
 // Renderer implementation.
 
 // Render a grid by rasterizing each micropolygon.
-//__attribute__((flatten))
 template<typename GridT>
+//__attribute__((flatten))
 void Renderer::rasterize(GridT& grid)
 {
     // Project grid into raster coordinates.
@@ -210,13 +209,8 @@ void Renderer::rasterize(GridT& grid)
         const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
         const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
 
-        typename GridT::HitTest hitTest = poly.hitTest();
-        InvBilin invBilin;
-        if(m_opts.smoothShading)
-        {
-            invBilin.init(vec2_cast(poly.a()), vec2_cast(poly.b()),
-                            vec2_cast(poly.d()), vec2_cast(poly.c()));
-        }
+        poly.initHitTest();
+        poly.initInterpolator(m_opts);
 
         // for each sample position in the bound
         for(int ix = sx; ix < ex; ++ix)
@@ -229,31 +223,15 @@ void Renderer::rasterize(GridT& grid)
 //                if(samp.z < bound.min.z)
 //                    continue;
                 // Test whether sample hits the micropoly
-                if(!hitTest(samp))
+                if(!poly.contains(samp))
                     continue;
                 // Determine hit depth
-                // Generate & store a fragment
-                //
-                // TODO: Abstract the smooth/constant shading handling
-                // out of here & onto the grid or micropoly.
-                float z;
-                if(m_opts.smoothShading)
-                {
-                    Vec2 uv = invBilin(samp.p);
-                    z = bilerp(poly.a().z, poly.b().z,
-                                poly.d().z, poly.c().z, uv);
-                }
-                else
-                {
-                    // constant shading
-                    z = poly.a().z;
-                }
+                poly.interpolateAt(samp);
+                float z = poly.interpolateZ();
                 if(samp.z < z)
-                {
-                    // Ignore if hit is hidden
-                    continue;
-                }
+                    continue; // Ignore if hit is hidden
                 samp.z = z;
+                // TODO: generate & store a fragment
                 m_image[idx] = z;
             }
         }

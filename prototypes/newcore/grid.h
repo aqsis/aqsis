@@ -26,7 +26,6 @@ class QuadGrid : public Grid
     public:
         class Iterator;
 
-        typedef PointInQuad HitTest;
         typedef MicroQuad UPoly;
 
         QuadGrid(int nu, int nv)
@@ -113,6 +112,9 @@ class QuadGrid::Iterator
         int m_uEnd;
         int m_vEnd;
 };
+
+
+//==============================================================================
 
 inline QuadGrid::Iterator QuadGrid::begin()
 {

@@ -3,8 +3,10 @@
 
 #include <cassert>
 
-#include "util.h"
+#include "invbilin.h"
+#include "options.h"
 #include "sample.h"
+#include "util.h"
 
 
 // Class for the point-in-quadrilateral test
@@ -108,11 +110,15 @@ class PointInQuad
         }
 
     public:
-        // Cyclic vertex order:
-        // a -- b
-        // |    |
-        // d -- c
-        PointInQuad(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
+        /// Initialize the edge equations.
+        //
+        // Uses a cyclic vertex order:
+        //
+        //   a -- b
+        //   |    |
+        //   d -- c
+        //
+        void init(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
         {
             // Vectors along edges.
             Vec2 e[4] = {b-a, c-b, d-c, a-d};
@@ -168,7 +174,16 @@ class PointInQuad
             }
         }
 
-        // point-in-polygon test
+        /// Do-nothing constructor.  Use init() to make the state valid.
+        PointInQuad() {}
+
+        /// Compute edge equations from the given vertices.
+        PointInQuad(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
+        {
+            init(a,b,c,d);
+        }
+
+        /// Point-in-polygon test
         inline bool operator()(const Sample& samp)
         {
             float x = samp.p.x;
@@ -186,7 +201,7 @@ class PointInQuad
                 //
                 // TODO: The inequalities here aren't really consistent with
                 // the ones above, and therefore some inter-micropolygon
-                // cracking on the interior of a grid result.
+                // cracking on the interior of a grid might result.
                 return (   m_xmul[0]*x + m_ymul[0]*y >= m_offset[0]
                         && m_xmul[1]*x + m_ymul[1]*y >= m_offset[1]
                         && m_xmul[2]*x + m_ymul[2]*y >= m_offset[2])
@@ -199,17 +214,28 @@ class PointInQuad
 
 
 
-// Simple quadrilateral micropolygon container.
+// Quadrilateral micropolygon sampler
 //
-// This is designed to be constructed just before sampling time, and can bound
-// itself or return a point-in-polygon testing functor.
+// This is designed to be constructed just before sampling time; it's not
+// memory efficient, so should not be a long-lived data structure.
 class MicroQuad
 {
     private:
+        // Vertex positions
         Vec3 m_a;
         Vec3 m_b;
         Vec3 m_c;
         Vec3 m_d;
+        // Point-in-polygon tests
+        PointInQuad m_hitTest;
+
+        // Shading interpolation
+        InvBilin m_invBilin;
+        // uv coordinates of current interpolation point
+        Vec2 m_uv;
+        // Whether to use smooth shading or not.
+        bool m_smoothShading;
+
     public:
         // Cyclic vertex order:
         // a -- b
@@ -241,16 +267,42 @@ class MicroQuad
                                 vec2_cast(m_d) - vec2_cast(m_c))) );
         }
 
-        inline PointInQuad hitTest() const
+        // Initialize the hit test
+        inline void initHitTest()
         {
-            return PointInQuad(vec2_cast(m_a), vec2_cast(m_b),
-                               vec2_cast(m_c), vec2_cast(m_d));
+            m_hitTest.init(vec2_cast(m_a), vec2_cast(m_b),
+                           vec2_cast(m_c), vec2_cast(m_d));
+        }
+        // Returns true if the sample is contained in the polygon
+        inline bool contains(const Sample& samp)
+        {
+            return m_hitTest(samp);
         }
 
-        Vec3 a() const { return m_a; }
-        Vec3 b() const { return m_b; }
-        Vec3 c() const { return m_c; }
-        Vec3 d() const { return m_d; }
+        // Initialize the shading interpolator
+        inline void initInterpolator(const Options& opts)
+        {
+            m_smoothShading = opts.smoothShading;
+            if(m_smoothShading)
+            {
+                m_invBilin.init(vec2_cast(m_a), vec2_cast(m_b),
+                                vec2_cast(m_d), vec2_cast(m_c));
+            }
+        }
+
+        inline void interpolateAt(const Sample& samp)
+        {
+            if(m_smoothShading)
+                m_uv = m_invBilin(samp.p);
+        }
+
+        inline float interpolateZ()
+        {
+            if(m_smoothShading)
+                return bilerp(m_a.z, m_b.z, m_d.z, m_c.z, m_uv);
+            else
+                return m_a.z;
+        }
 
         friend std::ostream& operator<<(std::ostream& out,
                                         const MicroQuad& q)
