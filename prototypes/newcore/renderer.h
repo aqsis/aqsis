@@ -123,14 +123,20 @@ class Renderer
             m_surfaces.push(SurfaceHolder(geom, splitCount, bound));
         }
 
+        template<typename GridT>
+        void rasterize(GridT& grid);
+
         // Push a grid onto the render queue
         void push(const boost::shared_ptr<Grid>& grid)
         {
-            grid->render(*this);
+            // For now, just rasterize it directly.
+            switch(grid->type())
+            {
+                case GridType_Quad:
+                    rasterize(static_cast<QuadGrid&>(*grid));
+                    break;
+            }
         }
-
-        template<typename GridT>
-        void rasterize(GridT& grid);
 
     public:
         Renderer(const Options& opts, const Mat4& camToScreen = Mat4())
@@ -175,12 +181,6 @@ class Renderer
             }
             saveImage("test.tif");
         }
-
-        // Visitor pattern; 2nd half of double dispatch for render()
-        //
-        // Perhaps should be private, maybe through a thunk class similar to
-        // RenderQueue?
-        void render(QuadGrid& grid) { rasterize(grid); }
 };
 
 

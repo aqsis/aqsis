@@ -6,16 +6,16 @@
 
 #include "microquad.h"
 
-class Renderer;
+enum GridType
+{
+    GridType_Quad
+};
 
 class Grid
 {
     public:
-        // Visitor pattern: 1st half of double dispatch
-        //
-        // This should just be used for type deduction; the individual grid
-        // subclasses should call back to Renderer::render()
-        virtual void render(Renderer& renderer) = 0;
+        /// Return the grid type.
+        virtual GridType type() = 0;
 
         virtual ~Grid() {}
 };
@@ -34,7 +34,7 @@ class QuadGrid : public Grid
             m_P(nu*nv)
         { }
 
-        virtual void render(Renderer& renderer);
+        virtual GridType type() { return GridType_Quad; }
 
         Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
         Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
@@ -83,6 +83,9 @@ class QuadGrid::Iterator
 
         Iterator& operator++()
         {
+//            if(m_v == 0) ++m_u;
+//            if(m_u >= m_uEnd || m_v > 0) { m_u = 0; ++m_v;}
+//            return *this;
             ++m_u;
             if(m_u >= m_uEnd)
             {

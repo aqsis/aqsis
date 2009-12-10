@@ -15,7 +15,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(srcs
     main.cpp
     renderer.cpp
-    grid.cpp
 )
 
 add_executable(render ${srcs})
