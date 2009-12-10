@@ -22,28 +22,33 @@
 // be true for points x which are inside a micropolygon with _counterclockwise_
 // ordering of the vertices a,b,c,d.
 //
-// For numerical robustness we need to choose p to be the edge midpoint,
-// p = 0.5(a+b), to try to ensure that the edge equations for adjacent
-// micropolygons on either side of an edge come out exactly the same.  If we
-// don't do this then samples might fall through the holes.  For this choice of
-// p, the edge equation becomes particularly simple:
+// For numerical robustness, we choose p to be equal to one of the edge
+// endpoints.  This choice is very important since it ensures that the given
+// endpoints of the line actually lie _on_ the line according to the resulting
+// edge equation.  Having this property helps avoid cracks and overlap at the
+// corners of adjacent micropolygons.  Finally, it ensures that bounding boxes
+// calculated from the positions of the vertices are correct.
 //
-//   cross(b-a, x) >= cross(b, a)   [CCW ordering, true inside]
+// With this choice, the edge equation for a,b is
 //
-// Convex quadrilaterals simply require four edge tests, while nonconvex quads
-// can be tested using a pair of point in triangle tests (three edge tests
-// each).
+//   cross(b-a, x-a) >= 0   [CCW ordering, true inside]
+//
+// Convex quadrilaterals simply require four such edge tests, while nonconvex
+// quads can be tested using a pair of point in triangle tests (three edge
+// tests each).
 //
 class PointInQuad
 {
     private:
-        // Edge equation coefficients
+        // Edge equation coefficients.  nx,ny is the edge normal; px,py is one
+        // of the edge endpoints.
         // 
         // coefficients 0-3 are for the edges of a convex quad.  For nonconvex
         // quads, coeffs 0-2 and 3-5 hold edge tests for a pair of triangles.
-        float m_xmul[6];
-        float m_ymul[6];
-        float m_offset[6];
+        float m_nx[6];
+        float m_ny[6];
+        float m_px[6];
+        float m_py[6];
 
         // Indicates whether the polygon is convex
         bool m_convex;
@@ -51,9 +56,12 @@ class PointInQuad
         inline void setupEdge(int i, Vec2 a, Vec2 b)
         {
             Vec2 e = b-a;
-            m_xmul[i] = -e.y;
-            m_ymul[i] = e.x;
-            m_offset[i] = cross(b, a);
+            m_nx[i] = -e.y;
+            m_ny[i] = e.x;
+            // Use the first end point as the point on the line.  Very
+            // important, as discussed above.
+            m_px[i] = a.x;
+            m_py[i] = a.y;
         }
 
         // Set up edge equations for an "arrow head" non-convex microquad
@@ -190,10 +198,10 @@ class PointInQuad
             float y = samp.p.y;
             if(m_convex)
             {
-                return  m_xmul[0]*x + m_ymul[0]*y >= m_offset[0]
-                     && m_xmul[1]*x + m_ymul[1]*y >= m_offset[1]
-                     && m_xmul[2]*x + m_ymul[2]*y >  m_offset[2]
-                     && m_xmul[3]*x + m_ymul[3]*y >  m_offset[3];
+                return m_nx[0]*(x - m_px[0]) + m_ny[0]*(y - m_py[0]) >= 0
+                    && m_nx[1]*(x - m_px[1]) + m_ny[1]*(y - m_py[1]) >= 0
+                    && m_nx[2]*(x - m_px[2]) + m_ny[2]*(y - m_py[2]) > 0
+                    && m_nx[3]*(x - m_px[3]) + m_ny[3]*(y - m_py[3]) > 0;
             }
             else
             {
@@ -202,12 +210,12 @@ class PointInQuad
                 // TODO: The inequalities here aren't really consistent with
                 // the ones above, and therefore some inter-micropolygon
                 // cracking on the interior of a grid might result.
-                return (   m_xmul[0]*x + m_ymul[0]*y >= m_offset[0]
-                        && m_xmul[1]*x + m_ymul[1]*y >= m_offset[1]
-                        && m_xmul[2]*x + m_ymul[2]*y >= m_offset[2])
-                    || (   m_xmul[3]*x + m_ymul[3]*y >  m_offset[3]
-                        && m_xmul[4]*x + m_ymul[4]*y >  m_offset[4]
-                        && m_xmul[5]*x + m_ymul[5]*y >  m_offset[5]);
+                return (   m_nx[0]*(x - m_px[0]) + m_ny[0]*(y - m_py[0]) >= 0
+                        && m_nx[1]*(x - m_px[1]) + m_ny[1]*(y - m_py[1]) >= 0
+                        && m_nx[2]*(x - m_px[2]) + m_ny[2]*(y - m_py[2]) >= 0 )
+                    || (   m_nx[3]*(x - m_px[3]) + m_ny[3]*(y - m_py[3]) >  0
+                        && m_nx[4]*(x - m_px[4]) + m_ny[4]*(y - m_py[4]) >  0
+                        && m_nx[5]*(x - m_px[5]) + m_ny[5]*(y - m_py[5]) >  0 );
             }
         }
 };
