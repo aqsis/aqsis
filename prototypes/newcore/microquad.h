@@ -9,34 +9,46 @@
 #include "util.h"
 
 
-// Class for the point-in-quadrilateral test
-//
-// Testing is done using the edge equations; an edge equation is a linear
-// function of position which is positive on one side of the line and negative
-// on the other.  If a and b are endpoints of an edge, the associated edge
-// equation is
-//
-//   cross(b-a, x-p) >= 0       [CCW ordering]
-//
-// for some point p on the edge.  The >= is chosen so that the condition will
-// be true for points x which are inside a micropolygon with _counterclockwise_
-// ordering of the vertices a,b,c,d.
-//
-// For numerical robustness, we choose p to be equal to one of the edge
-// endpoints.  This choice is very important since it ensures that the given
-// endpoints of the line actually lie _on_ the line according to the resulting
-// edge equation.  Having this property helps avoid cracks and overlap at the
-// corners of adjacent micropolygons.  Finally, it ensures that bounding boxes
-// calculated from the positions of the vertices are correct.
-//
-// With this choice, the edge equation for a,b is
-//
-//   cross(b-a, x-a) >= 0   [CCW ordering, true inside]
-//
-// Convex quadrilaterals simply require four such edge tests, while nonconvex
-// quads can be tested using a pair of point in triangle tests (three edge
-// tests each).
-//
+/// Class for the point-in-quadrilateral test
+///
+/// Testing is done using the edge equations; an edge equation is a linear
+/// function of position which is positive on one side of the line and negative
+/// on the other.  If a and b are endpoints of an edge, the associated edge
+/// equation is
+///
+///   cross(b-a, x-p) >= 0       [CCW ordering]
+///
+/// for some point p on the edge.  The >= is chosen so that the condition will
+/// be true for points x which are inside a micropolygon with _counterclockwise_
+/// ordering of the vertices a,b,c,d.
+///
+/// Convex quadrilaterals simply require four such edge tests, while nonconvex
+/// quads can be tested using a pair of point in triangle tests (three edge
+/// tests each).
+///
+/// For numerical robustness, we choose p to be equal to one of the edge
+/// endpoints.  This choice is very important since it ensures that the given
+/// endpoints of the line actually lie _on_ the line according to the resulting
+/// edge equation.  Having this property helps avoid cracks and overlap at the
+/// _corners_ of adjacent micropolygons.  Finally, it ensures that bounding
+/// boxes calculated from the positions of the vertices are correct.
+///
+/// Unfortunately, choosing p := a is not always exactly equivalent to p := b
+/// due to floating point errors, so one final adjustment is desirable to
+/// prevent cracks between adjacent micropolygons.  Consider the pair of
+/// micropolys:
+///
+///   c---b---f
+///   | 1 | 2 |
+///   d---a---e
+///
+/// With anticlockwise orientation, the vertices a,b are specified in opposite
+/// order: ab for micropoly 1 and ba for micropoly 2.  For the edge equation for
+/// ab to be consistent between micropolygons 1 and 2 we need to choose either a
+/// or b as the point on the line, and we need to make the same choice for 1 and
+/// 2.  This is the function of the "flipEnds" flag used in the setupEdge()
+/// function below.
+///
 class PointInQuad
 {
     private:
@@ -53,15 +65,28 @@ class PointInQuad
         // Indicates whether the polygon is convex
         bool m_convex;
 
-        inline void setupEdge(int i, Vec2 a, Vec2 b)
+        /// Set up the ith edge equation
+        ///
+        /// a and b are the edge endpoints.  If flipEnds is true, point a is
+        /// used as the edge equation "point on the line"; otherwise point b is
+        /// used.
+        inline void setupEdge(int i, Vec2 a, Vec2 b, bool flipEnds = true)
         {
             Vec2 e = b-a;
             m_nx[i] = -e.y;
             m_ny[i] = e.x;
-            // Use the first end point as the point on the line.  Very
-            // important, as discussed above.
-            m_px[i] = a.x;
-            m_py[i] = a.y;
+            // Use one of the end points of the line as the point on the line.
+            // Very important, as discussed above.
+            if(flipEnds)
+            {
+                m_px[i] = a.x;
+                m_py[i] = a.y;
+            }
+            else
+            {
+                m_px[i] = b.x;
+                m_py[i] = b.y;
+            }
         }
 
         // Set up edge equations for an "arrow head" non-convex microquad
@@ -80,7 +105,8 @@ class PointInQuad
                 ++i;
             }
             // Set up edge equations for two triangles, by cutting the arrow
-            // head in half down the middle.
+            // head in half down the middle.  Note, I haven't bothered with the
+            // "flipEnds" behaviour here.
             int i0 = i, i1 = (i+1)%4, i2 = (i+2)%4, i3 = (i+3)%4;
             setupEdge(0, v[i0], v[i1]);
             setupEdge(1, v[i1], v[i2]);
@@ -119,14 +145,19 @@ class PointInQuad
 
     public:
         /// Initialize the edge equations.
-        //
-        // Uses a cyclic vertex order:
-        //
-        //   a -- b
-        //   |    |
-        //   d -- c
-        //
-        void init(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
+        ///
+        /// Uses a cyclic vertex order:
+        ///
+        ///   d---c
+        ///   |   |
+        ///   a---b
+        ///
+        /// If flipEnds is true, the trailing vertex of each edge will be used
+        /// as the point on the edge, otherwise the leading vertex will be
+        /// used.  For robustness adjacent micropolygons should have opposite
+        /// flipEnds values.  (think black vs white squares in a checkerboard
+        /// pattern).
+        void init(Vec2 a, Vec2 b, Vec2 c, Vec2 d, bool flipEnds)
         {
             // Vectors along edges.
             Vec2 e[4] = {b-a, c-b, d-c, a-d};
@@ -143,17 +174,17 @@ class PointInQuad
             {
                 case 0: // convex, CW: flip edges to resemble CCW case.
                     m_convex = true;
-                    setupEdge(0, b, a);
-                    setupEdge(1, c, b);
-                    setupEdge(2, d, c);
-                    setupEdge(3, a, d);
+                    setupEdge(0, b, a, flipEnds);
+                    setupEdge(1, c, b, flipEnds);
+                    setupEdge(2, d, c, flipEnds);
+                    setupEdge(3, a, d, flipEnds);
                     break;
                 case 4: // convex, CCW
                     m_convex = true;
-                    setupEdge(0, a, b);
-                    setupEdge(1, b, c);
-                    setupEdge(2, c, d);
-                    setupEdge(3, d, a);
+                    setupEdge(0, a, b, flipEnds);
+                    setupEdge(1, b, c, flipEnds);
+                    setupEdge(2, c, d, flipEnds);
+                    setupEdge(3, d, a, flipEnds);
                     break;
                 case 2: // Bow-tie (self-intersecting).
                     m_convex = false;
@@ -185,10 +216,11 @@ class PointInQuad
         /// Do-nothing constructor.  Use init() to make the state valid.
         PointInQuad() {}
 
-        /// Compute edge equations from the given vertices.
-        PointInQuad(Vec2 a, Vec2 b, Vec2 c, Vec2 d)
+        /// Set up edge equations from the given vertices
+        /// \see init
+        PointInQuad(Vec2 a, Vec2 b, Vec2 c, Vec2 d, bool flipEnds)
         {
-            init(a,b,c,d);
+            init(a,b,c,d, flipEnds);
         }
 
         /// Point-in-polygon test
@@ -222,10 +254,10 @@ class PointInQuad
 
 
 
-// Quadrilateral micropolygon sampler
-//
-// This is designed to be constructed just before sampling time; it's not
-// memory efficient, so should not be a long-lived data structure.
+/// Quadrilateral micropolygon sampler
+///
+/// This is designed to be constructed just before sampling time; it's not
+/// memory efficient, so should not be a long-lived data structure.
 class MicroQuad
 {
     private:
@@ -244,12 +276,17 @@ class MicroQuad
         // Whether to use smooth shading or not.
         bool m_smoothShading;
 
+        // Which point-on-edge to use in edge tests
+        bool m_flipEnd;
+
     public:
         // Cyclic vertex order:
         // a -- b
         // |    |
         // d -- c
-        MicroQuad(const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& d)
+        MicroQuad(const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& d,
+                bool flipEnd)
+            : m_flipEnd(flipEnd)
         {
             m_a = a;
             m_b = b;
@@ -279,7 +316,7 @@ class MicroQuad
         inline void initHitTest()
         {
             m_hitTest.init(vec2_cast(m_a), vec2_cast(m_b),
-                           vec2_cast(m_c), vec2_cast(m_d));
+                           vec2_cast(m_c), vec2_cast(m_d), m_flipEnd);
         }
         // Returns true if the sample is contained in the polygon
         inline bool contains(const Sample& samp)

@@ -101,7 +101,8 @@ class QuadGrid::Iterator
             return MicroQuad(m_grid->m_P[nu*m_v + m_u],
                              m_grid->m_P[nu*m_v + m_u+1],
                              m_grid->m_P[nu*(m_v+1) + m_u+1],
-                             m_grid->m_P[nu*(m_v+1) + m_u]);
+                             m_grid->m_P[nu*(m_v+1) + m_u],
+                             (m_u+m_v)%2);
         }
 
         int u() const { return m_u; }
