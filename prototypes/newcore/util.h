@@ -116,4 +116,35 @@ inline Mat4 screenWindow(float left, float right, float bottom, float top)
                 -(right+left)/w, -(top+bottom)/h, 0, 1);
 }
 
+/// Transform a bounding box
+inline Box transformBound(const Box& bound, const Mat4& m)
+{
+    Vec3 v1 = bound.min;
+    Vec3 v2 = bound.max;
+    Box b(v1*m);
+    b.extendBy(Vec3(v2.x, v1.y, v1.z)*m);
+    b.extendBy(Vec3(v1.x, v2.y, v1.z)*m);
+    b.extendBy(Vec3(v1.x, v1.y, v2.z)*m);
+    b.extendBy(Vec3(v1.x, v2.y, v2.z)*m);
+    b.extendBy(Vec3(v2.x, v1.y, v2.z)*m);
+    b.extendBy(Vec3(v2.x, v2.y, v1.z)*m);
+    b.extendBy(v2*m);
+    return b;
+}
+
+/// Transform v into the "hybrid camera / raster" coordinate system
+///
+/// Hybrid coordinates are given by projecting the x and y coordinates of v,
+/// but leaving the z coordinate untouched.
+inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
+{
+    float x = v.x*m[0][0] + v.y*m[1][0] + v.z*m[2][0] + m[3][0];
+    float y = v.x*m[0][1] + v.y*m[1][1] + v.z*m[2][1] + m[3][1];
+    float w = v.x*m[0][3] + v.y*m[1][3] + v.z*m[2][3] + m[3][3];
+    float invW = 1/w;
+
+    return Vec3(x*invW, y*invW, v.z);
+}
+
+
 #endif // UTIL_H_INCLUDED

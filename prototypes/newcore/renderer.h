@@ -65,7 +65,7 @@ class Renderer
                 // desired bucket height in camera coordinates
                 float m_bucketHeight;
             public:
-                surface_order() : m_bucketHeight(0.1) {}
+                surface_order() : m_bucketHeight(16) {}
 
                 bool operator()(const SurfaceHolder& a,
                                 const SurfaceHolder& b) const
@@ -111,15 +111,32 @@ class Renderer
         // Push geometry into the render queue
         void push(const boost::shared_ptr<Geometry>& geom, int splitCount)
         {
+            // Get bound in camera space.
             Box bound = geom->bound();
             if(bound.min.z < FLT_EPSILON && splitCount > m_opts.maxSplits)
             {
                 std::cerr << "Max eye splits encountered; geometry discarded\n";
                 return;
             }
+            // Cull if outside near/far clipping range
             if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
                 return;
-            // TODO: Discard geometry if outside of image.
+            // Transform bound to raster space.  TODO: The need to do this
+            // here seems undesirable somehow; perhaps use objects in world
+            // space + arbitrary spatial bounding computation?
+            float minz = bound.min.z;
+            float maxz = bound.min.z;
+            bound = transformBound(bound, m_camToRas);
+            bound.min.z = minz;
+            bound.max.z = maxz;
+            // Cull if outside xy extent of image
+            if(   bound.max.x < 0 || bound.min.x > m_opts.xRes
+               || bound.max.y < 0 || bound.min.y > m_opts.yRes )
+            {
+                return;
+            }
+            // If we get to here the surface should be rendered, so push it
+            // onto the queue.
             m_surfaces.push(SurfaceHolder(geom, splitCount, bound));
         }
 
