@@ -32,12 +32,36 @@
 #include <string>
 
 #include "export.h"
-#include "thread.h"
+//#include "thread.h"
 #include "strutil.h"
 #include "hash.h"
 
 #include "ustring.h"
 
+// CJF: Stuff culled from OIIO's thread.h
+// {
+
+/// Null mutex that can be substituted for a real one to test how much
+/// overhead is associated with a particular mutex.
+class null_mutex {
+public:
+    null_mutex () { }
+    ~null_mutex () { }
+    void lock () { }
+    void unlock () { }
+    void lock_shared () { }
+    void unlock_shared () { }
+};
+
+/// Null lock that can be substituted for a real one to test how much
+/// overhead is associated with a particular lock.
+template<typename T>
+class null_lock {
+public:
+    null_lock (T &m) { }
+};
+
+// }
 
 #if 0
 // Use reader/writer locks
@@ -49,7 +73,7 @@ typedef unique_lock ustring_write_lock_t;
 typedef mutex ustring_mutex_t;
 typedef lock_guard ustring_read_lock_t;
 typedef lock_guard ustring_write_lock_t;
-#elif 1
+#elif 0
 // Use spin locks
 typedef spin_mutex ustring_mutex_t;
 typedef spin_lock ustring_read_lock_t;
