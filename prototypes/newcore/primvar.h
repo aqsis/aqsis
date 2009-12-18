@@ -6,10 +6,34 @@
 #include "util.h"
 #include "fixedstrings.h"
 
-struct StorageCount;
+struct IclassStorage;
 
-struct VarSpec
+/// Full type specification for a primitive variable
+///
+/// In general, a primitive variable (primvar) is a named, spatially dependent
+/// field attached to the surface of a geometric primitive.  That is, it's a
+/// variable which has a value dependent on position on the surface.  Typically
+/// a primvar is attached to the vertices of a primitive and interpolated to
+/// arbitrary positions on the surface using one of several interpolation
+/// rules, as specified by the variable's interpolation class or "iclass":
+///
+///   - Constant: constant over the entire primitive
+///   - Uniform: constant over geometry-defined elements of the primitive
+///   - Varying: linearly interpolated over elements
+///   - Vertex: interpolated using the same rules as the position primvar
+///   - FaceVarying: linearly interpolated over elements (faces), but is
+///                  specified per-face so may be discontinuous at face
+///                  boundaries
+///   - FaceVertex: interpolated the same as Vertex when continuous across
+///                 faces.  When discontinuous use some geometry-specific rule
+///                 to behave more like FaceVarying.
+///
+struct PrimvarSpec
 {
+    /// Variable interpolation class.
+    ///
+    /// This determines how the variable is interpolated across the surface of
+    /// the geometry.
     enum Iclass
     {
         Constant,
@@ -20,6 +44,7 @@ struct VarSpec
         FaceVertex
     };
 
+    /// Variable type.
     enum Type
     {
         Float,
@@ -28,9 +53,19 @@ struct VarSpec
         Vector,
         Normal,
         Color,
-        Matrix
+        Matrix,
+        String
     };
 
+    Iclass   iclass;     ///< Interpolation class
+    Type     type;       ///< Variable type
+    int      arraySize;  ///< Array size
+    ustring  name;       ///< Variable name
+
+    PrimvarSpec(Iclass iclass, Type type, int arraySize, ustring name)
+        : iclass(iclass), type(type), arraySize(arraySize), name(name) {}
+
+    /// Get number of scalar values required for the given type
     static int scalarSize(Type type)
     {
         switch(type)
@@ -42,28 +77,30 @@ struct VarSpec
             case Normal: return 3;
             case Color:  return 3;
             case Matrix: return 16;
+            case String: return 1;
         }
     }
 
-    // Description of the variable
-    Iclass   iclass;
-    Type     type;
-    int      count;
-    ustring  name;
-
-    VarSpec(Iclass iclass, Type type, int count, ustring name)
-        : iclass(iclass), type(type), count(count), name(name) {}
-
+    /// Get number of scalar values required for the variable
+    ///
+    /// Each element of the variable requires a number of scalar values to
+    /// represent it; these are floats, except in the case of strings.
     int scalarSize() const
     {
-        return scalarSize(type)*count;
+        return scalarSize(type)*arraySize;
     }
 
-    int storageSize(const StorageCount& storCount) const;
+    /// Return the number of scalar values required for the variable
+    int storageSize(const IclassStorage& storCount) const;
 };
 
 
-struct StorageCount
+/// Storage requirements for various interpolation classes
+///
+/// The number of elements of a Primvar required for each interpolation class
+/// depends on the type of geometry.  This struct holds such numbers in a
+/// geometry-neutral format.
+struct IclassStorage
 {
     int uniform;
     int varying;
@@ -71,7 +108,7 @@ struct StorageCount
     int facevarying;
     int facevertex;
 
-    StorageCount(int uniform, int varying, int vertex, int facevarying, int facevertex)
+    IclassStorage(int uniform, int varying, int vertex, int facevarying, int facevertex)
         : uniform(uniform),
         varying(varying),
         vertex(vertex),
@@ -79,24 +116,25 @@ struct StorageCount
         facevertex(facevertex)
     { }
 
-    int operator[](VarSpec::Iclass iclass) const
+    int storage(PrimvarSpec::Iclass iclass) const
     {
         switch(iclass)
         {
-            case VarSpec::Constant:    return 1;
-            case VarSpec::Uniform:     return uniform;
-            case VarSpec::Varying:     return varying;
-            case VarSpec::Vertex:      return vertex;
-            case VarSpec::FaceVarying: return facevarying;
-            case VarSpec::FaceVertex:  return facevertex;
+            case PrimvarSpec::Constant:    return 1;
+            case PrimvarSpec::Uniform:     return uniform;
+            case PrimvarSpec::Varying:     return varying;
+            case PrimvarSpec::Vertex:      return vertex;
+            case PrimvarSpec::FaceVarying: return facevarying;
+            case PrimvarSpec::FaceVertex:  return facevertex;
         }
+        assert(0); return -1; // Kill bogus compiler warning.
     }
 };
 
 
-int VarSpec::storageSize(const StorageCount& storCount) const
+int PrimvarSpec::storageSize(const IclassStorage& storCount) const
 {
-    return storCount[iclass]*scalarSize();
+    return storCount.storage(iclass)*scalarSize();
 }
 
 
@@ -128,25 +166,26 @@ class DataView
 };
 
 
-class VarList
+/// A list of primitive variables
+class PrimvarList
 {
     private:
-        std::vector<VarSpec> m_varSpecs;
+        std::vector<PrimvarSpec> m_varSpecs;
         int m_P_idx;
 
     public:
-        VarList()
+        PrimvarList()
             : m_varSpecs(),
             m_P_idx(-1)
         { }
 
         /// Add a variable, and return the associated variable offset
-        int add(const VarSpec& var)
+        int add(const PrimvarSpec& var)
         {
             int index = m_varSpecs.size();
             if(var.name == Str::P)
             {
-                if(var.type != VarSpec::Point || var.iclass != VarSpec::Vertex || var.count != 1)
+                if(var.type != PrimvarSpec::Point || var.iclass != PrimvarSpec::Vertex || var.arraySize != 1)
                     throw std::runtime_error("Wrong type for variable \"P\"");
                 m_P_idx = index;
             }
@@ -156,7 +195,7 @@ class VarList
 
         int size() const { return m_varSpecs.size(); }
 
-        const VarSpec& operator[](int i) const
+        const PrimvarSpec& operator[](int i) const
         {
             assert(i >= 0 && i < m_varSpecs.size());
             return m_varSpecs[i];
@@ -169,21 +208,21 @@ class VarList
 class PrimvarStorage
 {
     private:
-        StorageCount m_storCount;
+        IclassStorage m_storCount;
         std::vector<float> m_storage;
         std::vector<int> m_offsets;
-        boost::shared_ptr<VarList> m_vars;
+        boost::shared_ptr<PrimvarList> m_vars;
 
     public:
-        PrimvarStorage(const StorageCount& storCount)
+        PrimvarStorage(const IclassStorage& storCount)
             : m_storCount(storCount),
             m_storage(),
             m_offsets(),
-            m_vars(new VarList())
+            m_vars(new PrimvarList())
         { }
 
-        PrimvarStorage(const StorageCount& storCount,
-                    const boost::shared_ptr<VarList>& vars)
+        PrimvarStorage(const IclassStorage& storCount,
+                    const boost::shared_ptr<PrimvarList>& vars)
             : m_storCount(storCount),
             m_storage(),
             m_offsets(),
@@ -198,7 +237,7 @@ class PrimvarStorage
             m_storage.resize(storageTot, 0);
         }
 
-        int add(const VarSpec& var, float* data, int srcLength)
+        int add(const PrimvarSpec& var, float* data, int srcLength)
         {
             int index = m_vars->add(var);
             int length = var.storageSize(m_storCount);
@@ -253,7 +292,7 @@ class PrimvarStorage
 
 
 #if 0
-PrimvarList* createPrimvarList(const StorageCount& storageSize, int count,
+PrimvarList* createPrimvarList(const IclassStorage& storageSize, int count,
                                RtToken* tokens, RtPointer* values)
 {
     // An array to hold the tokens identifying the primvars
