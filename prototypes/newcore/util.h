@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <alloca.h>
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
@@ -92,6 +93,12 @@ inline T bilerp(T a, T b, T c, T d, Vec2 uv)
     return w0*a + w1*b + w2*c + w3*d;
 }
 
+template<typename T>
+inline T lerp(T a, T b, float t)
+{
+    return (1-t)*a + t*b;
+}
+
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
 
@@ -146,5 +153,9 @@ inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
     return Vec3(x*invW, y*invW, v.z);
 }
 
+#define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))
+#define FALLOCA(len) ALLOCA(float, len)
+
+inline void nullDeleter(const void*) { }
 
 #endif // UTIL_H_INCLUDED

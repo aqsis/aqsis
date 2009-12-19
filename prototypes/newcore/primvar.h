@@ -5,6 +5,7 @@
 
 #include "util.h"
 #include "fixedstrings.h"
+#include "arrayview.h"
 
 struct IclassStorage;
 
@@ -138,34 +139,6 @@ int PrimvarSpec::storageSize(const IclassStorage& storCount) const
 }
 
 
-/// View of a float array as an array of a different type.
-///
-/// Very quick & dirty implementation.  The well-defined way to do this is to
-/// implement reference versions of our classes T.
-template<typename T>
-class DataView
-{
-    private:
-        float* m_storage;
-        int m_stride;
-    public:
-        DataView(float* storage, int stride = sizeof(T)/sizeof(float))
-            : m_storage(storage),
-            m_stride(stride)
-        {}
-
-        /// Indexing operators.
-        ///
-        /// The casting here is undefined behaviour, but provided T is a plain
-        /// aggregate of floats, it's hard to imagine how this could be
-        /// undefined behaviour in a sane implementation.  Perhaps we could
-        /// have some troubles with strict aliasing in rather unusual
-        /// circumstances.
-        T& operator[](int i) { return *((T*)(m_storage + m_stride*i)); }
-        const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
-};
-
-
 /// A list of primitive variables
 class PrimvarList
 {
@@ -197,7 +170,7 @@ class PrimvarList
 
         const PrimvarSpec& operator[](int i) const
         {
-            assert(i >= 0 && i < m_varSpecs.size());
+            assert(i >= 0 && i < (int)m_varSpecs.size());
             return m_varSpecs[i];
         }
 
@@ -210,55 +183,49 @@ class PrimvarStorage
     private:
         IclassStorage m_storCount;
         std::vector<float> m_storage;
-        std::vector<int> m_offsets;
+        struct VarInfo
+        {
+            int offset;
+            int stride;
+            VarInfo(int offset, int stride) : offset(offset), stride(stride) {}
+        };
+        std::vector<VarInfo> m_varInfo;
         boost::shared_ptr<PrimvarList> m_vars;
 
     public:
         PrimvarStorage(const IclassStorage& storCount)
             : m_storCount(storCount),
             m_storage(),
-            m_offsets(),
+            m_varInfo(),
             m_vars(new PrimvarList())
         { }
-
-        PrimvarStorage(const IclassStorage& storCount,
-                    const boost::shared_ptr<PrimvarList>& vars)
-            : m_storCount(storCount),
-            m_storage(),
-            m_offsets(),
-            m_vars(vars)
-        {
-            // Allocate space for the variables
-            int nvars = m_vars->size();
-            m_offsets.resize(nvars, 0);
-            int storageTot = 0;
-            for(int i = 0; i < nvars; ++i)
-                storageTot += (*m_vars)[i].storageSize(m_storCount);
-            m_storage.resize(storageTot, 0);
-        }
 
         int add(const PrimvarSpec& var, float* data, int srcLength)
         {
             int index = m_vars->add(var);
             int length = var.storageSize(m_storCount);
             if(srcLength != length)
-                throw std::runtime_error("Wrong number of floats for primitive variable!");
-            m_offsets.push_back(m_storage.size());
+                throw std::runtime_error("Wrong number of floats for "
+                                         "primitive variable!");
+            m_varInfo.push_back(VarInfo(m_storage.size(), var.scalarSize()));
             m_storage.insert(m_storage.end(), data, data+length);
             return index;
         }
 
-        float* get(int idx)
+        FvecView get(int i)
         {
-            assert(idx >= 0 && idx < m_offsets.size());
-            return &m_storage[m_offsets[idx]];
+            assert(i >= 0 && i < (int)m_varInfo.size());
+            return FvecView(&m_storage[m_varInfo[i].offset],
+                              m_varInfo[i].stride);
         }
+
+        const PrimvarList& varList() const { return *m_vars; }
 
         // Get a view of the vertex position data
         DataView<Vec3> P()
         {
             assert(m_vars->P() >= 0);
-            return DataView<Vec3>(&m_storage[m_offsets[m_vars->P()]]);
+            return DataView<Vec3>(&m_storage[m_varInfo[m_vars->P()].offset]);
         }
 };
 

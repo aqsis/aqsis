@@ -1,4 +1,7 @@
+#include <iomanip>
+
 #include "primvar.h"
+#include "gridvar.h"
 
 #define ARRLEN(ar) sizeof(ar)/sizeof(ar[0])
 
@@ -26,55 +29,128 @@ namespace Var
 int main()
 {
     IclassStorage bilinPatchCount(1, 4, 4, 4, 4);
-    PrimvarStorage stor(bilinPatchCount);
+    PrimvarStorage pvarStorage(bilinPatchCount);
 
     // Put some stuff into the primvar list.
+    {
+        float st[] = {
+            0, 0,
+            1, 0,
+            0, 1,
+            1, 1
+        };
+        pvarStorage.add(Var::st, st, ARRLEN(st));
 
-    float st[] = {
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-    };
-    stor.add(Var::st, st, ARRLEN(st));
+        float P[] = {
+            0, 0, 0,
+            0, 1, 0,
+            1, 0, 0,
+            1, 1, 0
+        };
+        pvarStorage.add(Var::P, P, ARRLEN(P));
 
-    float P[] = {
-        0, 0, 0,
-        0, 1, 0,
-        1, 0, 0,
-        1, 1, 0
-    };
-    stor.add(Var::P, P, ARRLEN(P));
+        float asdf[] = {42};
+        pvarStorage.add(PrimvarSpec(PrimvarSpec::Uniform, PrimvarSpec::Float,
+                                    1, ustring("asdf")), asdf, ARRLEN(asdf));
+    }
 
-    float asdf[] = {42};
-    stor.add(PrimvarSpec(PrimvarSpec::Uniform, PrimvarSpec::Float, 1,
-                         ustring("asdf")), asdf, ARRLEN(asdf));
 
-    // Check that we can access the position data using the correct type.
-    DataView<Vec3> v = stor.P();
-    std::cout << v[0] << " "
-        << v[1] << " "
-        << v[2] << " "
-        << v[3] << "\n";
+    {
+        // Check that we can access the position data using the correct type.
+        DataView<Vec3> P = pvarStorage.P();
+        std::cout << "Primvar P = "
+            << P[0] << " "
+            << P[1] << " "
+            << P[2] << " "
+            << P[3] << "\n";
+    }
 
     // Now simulate the dicing stage of the pipeline.
-//    GridvarList gvarList(stor.varList());
-//    int nu = 10, nv = 10;
-//    Grid grid(nu, nv, gvarList);
-//
-//    for(int ivar = 0; ivar < grid.nVars(); ++ivar)
-//    {
-//        const GridvarSpec& gvar = gvarList[ivar];
-//        int size = gvar.storageSize();
-//        for(int v = 0; v < nv; ++v)
-//        {
-//            for(int u = 0; u < nu; ++u)
-//            {
-//            }
-//        }
-//    }
-//
-//    DataView<Vec3> P = grid.storage().P();
+    GridvarList gvarList(pvarStorage.varList());
+    const int nu = 5, nv = 5;
+    GridvarStorage gvarStorage(boost::shared_ptr<GridvarList>(
+                                &gvarList, nullDeleter), nu*nv);
+
+    // Create some space to store the variable temporaries.
+    int maxAgg = gvarList.maxAggregateSize();
+    float* aMin = FALLOCA(maxAgg);
+    float* aMax = FALLOCA(maxAgg);
+
+    float dv = 1.0/(nv-1);
+    float du = 1.0/(nu-1);
+
+    for(int ivar = 0; ivar < gvarList.size(); ++ivar)
+    {
+        ConstFvecView pvar = pvarStorage.get(ivar);
+        FvecView gvar = gvarStorage.get(ivar);
+        int size = gvar.size();
+
+        if(gvarList[ivar].uniform)
+        {
+            // Uniform, no interpolation.
+            float* out = gvar[0];
+            const float* in = pvar[0];
+            for(int i = 0; i < size; ++i)
+                out[i] = in[i];
+        }
+        else
+        {
+            // Varying class, linear interpolation
+            const float* a1 = pvar[0];
+            const float* a2 = pvar[1];
+            const float* a3 = pvar[2];
+            const float* a4 = pvar[3];
+            for(int v = 0; v < nv; ++v)
+            {
+                float fv = dv*v;
+                // Get endpoints of current segment via linear interpolation
+                for(int i = 0; i < size; ++i)
+                {
+                    aMin[i] = lerp(a1[i], a3[i], fv);
+                    aMax[i] = lerp(a2[i], a4[i], fv);
+                }
+                // Interpolate between endpoints
+                for(int u = 0; u < nu; ++u)
+                {
+                    float fu = du*u;
+                    float* out = gvar[u];
+                    for(int i = 0; i < size; ++i)
+                        out[i] = lerp(aMin[i], aMax[i], fu);
+                }
+                gvar += nv;
+            }
+        }
+    }
+
+    // Print out the resulting values on the grid.
+    for(int ivar = 0; ivar < gvarList.size(); ++ivar)
+    {
+        std::cout << "\nGridvar "
+            << gvarStorage.varList()[ivar].name << " = \n";
+        ConstFvecView gvar = gvarStorage.get(ivar);
+        if(gvarStorage.varList()[ivar].uniform)
+        {
+            const float* f = gvar[0];
+            for(int i = 0; i < gvar.size(); ++i)
+                std::cout << std::setprecision(2) << std::fixed << f[i] << " ";
+            std::cout << "\n";
+        }
+        else
+        {
+            for(int v = 0; v < nv; ++v)
+            {
+                for(int u = 0; u < nu; ++u)
+                {
+                    const float* f = gvar[u];
+                    for(int i = 0; i < gvar.size(); ++i)
+                        std::cout << std::setprecision(2) << std::fixed << f[i] << " ";
+                    std::cout << "  ";
+                }
+                std::cout << "\n";
+                gvar += nv;
+            }
+        }
+    }
 
     return 0;
 }
