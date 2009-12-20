@@ -84,13 +84,18 @@ inline T maxNorm(Imath::Vec2<T> v)
  * \param uv - Parametric (u,v) coordinates, should be in the interval [0,1]
  */
 template<typename T>
+inline T bilerp(T a, T b, T c, T d, float u, float v)
+{
+    float w0 = (1-v)*(1-u);
+    float w1 = (1-v)*u;
+    float w2 = v*(1-u);
+    float w3 = v*u;
+    return w0*a + w1*b + w2*c + w3*d;
+}
+template<typename T>
 inline T bilerp(T a, T b, T c, T d, Vec2 uv)
 {
-    float w0 = (1-uv.y)*(1-uv.x);
-    float w1 = (1-uv.y)*uv.x;
-    float w2 = uv.y*(1-uv.x);
-    float w3 = uv.y*uv.x;
-    return w0*a + w1*b + w2*c + w3*d;
+    return bilerp(a,b,c,d, uv.x, uv.y);
 }
 
 template<typename T>

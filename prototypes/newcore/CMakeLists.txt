@@ -18,6 +18,7 @@ set(srcs
     renderer.cpp
     ustring/ustring.cpp
     fixedstrings.cpp
+    primvar.cpp
 )
 
 add_executable(render ${srcs})
@@ -26,6 +27,8 @@ add_executable(render ${srcs})
 add_executable(primvar_test
     primvar_test.cpp
     ustring/ustring.cpp
-    fixedstrings.cpp)
+    fixedstrings.cpp
+    primvar.cpp
+)
 
 target_link_libraries(render ${TIFF_LIBRARIES})

@@ -1,14 +1,14 @@
 #ifndef GRID_H_INCLUDED
 #define GRID_H_INCLUDED
 
-#include <vector>
-#include "util.h"
-
+#include "gridvar.h"
 #include "microquad.h"
+#include "util.h"
 
 enum GridType
 {
-    GridType_Quad
+    GridType_Quad,
+    GridType_QuadSimple
 };
 
 class Grid
@@ -20,35 +20,41 @@ class Grid
         virtual ~Grid() {}
 };
 
+
+//------------------------------------------------------------------------------
 /// A 2D grid of quadrilateral micro polygons
 class QuadGrid : public Grid
 {
+    private:
+        int m_nu;
+        int m_nv;
+        GridvarStorage m_storage;
+
     public:
         class Iterator;
 
         typedef MicroQuad UPoly;
 
-        QuadGrid(int nu, int nv)
+        QuadGrid(int nu, int nv, boost::shared_ptr<GridvarList> vars)
             : m_nu(nu),
             m_nv(nv),
-            m_P(nu*nv)
+            m_storage(vars, nu*nv)
         { }
 
         virtual GridType type() { return GridType_Quad; }
 
-        Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
-        Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
-
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
 
-        Iterator begin();
+        Iterator begin() const;
 
-        Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
+        GridvarStorage& storage() { return m_storage; }
+        const GridvarStorage& storage() const { return m_storage; }
 
         void project(Mat4 m)
         {
-            for(int i = 0, iend = m_P.size(); i < iend; ++i)
+            DataView<Vec3> P = m_storage.P();
+            for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)
             {
                 // Project all points, but restore z afterward.  TODO: This
                 // can be done a little more efficiently.
@@ -56,16 +62,11 @@ class QuadGrid : public Grid
                 // TODO: This is rather specialized; maybe it shouldn't go in
                 // the Grid class at all?  How about allowing visitor functors
                 // which act on all the primvars held on a grid?
-                float z = m_P[i].z;
-                m_P[i] = m_P[i]*m;
-                m_P[i].z = z;
+                float z = P[i].z;
+                P[i] = P[i]*m;
+                P[i].z = z;
             }
         }
-
-    private:
-        int m_nu;
-        int m_nv;
-        std::vector<Vec3> m_P;
 };
 
 
@@ -100,11 +101,9 @@ class QuadGrid::Iterator
         MicroQuad operator*() const
         {
             int nu = m_grid->nu();
-            return MicroQuad(m_grid->m_P[nu*m_v + m_u],
-                             m_grid->m_P[nu*m_v + m_u+1],
-                             m_grid->m_P[nu*(m_v+1) + m_u+1],
-                             m_grid->m_P[nu*(m_v+1) + m_u],
-                             (m_u+m_v)%2);
+            return MicroQuad(nu*m_v + m_u,       nu*m_v + m_u+1,
+                             nu*(m_v+1) + m_u+1, nu*(m_v+1) + m_u,
+                             m_grid->storage(), (m_u+m_v)%2);
         }
 
         int u() const { return m_u; }
@@ -121,7 +120,7 @@ class QuadGrid::Iterator
 
 //==============================================================================
 
-inline QuadGrid::Iterator QuadGrid::begin()
+inline QuadGrid::Iterator QuadGrid::begin() const
 {
     return Iterator(*this);
 }

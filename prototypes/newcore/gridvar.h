@@ -5,7 +5,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include "arrayview.h"
+#include "primvar.h"
 #include "util.h"
+#include "ustring.h"
 
 struct GridvarSpec
 {
@@ -57,7 +59,7 @@ struct GridvarSpec
 };
 
 
-GridvarSpec::Type pvarToGvarType(PrimvarSpec::Type type)
+inline GridvarSpec::Type pvarToGvarType(PrimvarSpec::Type type)
 {
     switch(type)
     {
@@ -79,8 +81,12 @@ class GridvarList
 {
     private:
         std::vector<GridvarSpec> m_vars;
+        StdVarIndices m_stdIndices;
+
     public:
         GridvarList(const PrimvarList& primVars)
+            : m_vars(),
+            m_stdIndices(primVars.stdIndices())
         {
             int nvars = primVars.size();
             m_vars.reserve(nvars);
@@ -121,6 +127,8 @@ class GridvarList
             assert(i >= 0 && i < (int)m_vars.size());
             return m_vars[i];
         }
+
+        const StdVarIndices& stdIndices() const { return m_stdIndices; }
 };
 
 
@@ -168,14 +176,15 @@ class GridvarStorage
 
         DataView<Vec3> P()
         {
-            // Search for the P variable.
-            const int nvars = m_vars->size();
-            for(int i = 0; i < nvars; ++i)
-            {
-                if((*m_vars)[i].name == "P")
-                    return DataView<Vec3>(&m_storage[m_varInfo[i].offset]);
-            }
-            assert(0); return DataView<Vec3>(0);
+            int Pidx = m_vars->stdIndices().P;
+            assert(Pidx >= 0);
+            return DataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
+        }
+        ConstDataView<Vec3> P() const
+        {
+            int Pidx = m_vars->stdIndices().P;
+            assert(Pidx >= 0);
+            return ConstDataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
         }
 };
 

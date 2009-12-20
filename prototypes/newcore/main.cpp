@@ -1,12 +1,23 @@
 #include "renderer.h"
 #include "surfaces.h"
+#include "simple.h"
+
+#define ARRLEN(ar) sizeof(ar)/sizeof(ar[0])
 
 boost::shared_ptr<Geometry> createPatch(const Options& opts,
                                        const Vec3& a, const Vec3& b,
                                        const Vec3& c, const Vec3& d,
                                        const Mat4& trans = Mat4())
 {
-    boost::shared_ptr<Geometry> patch(new Patch(opts, a,b,c,d));
+    IclassStorage storReq(1,4,4,4,4);
+    boost::shared_ptr<PrimvarStorage> vars(new PrimvarStorage(storReq));
+    float P[] = {
+        a.x, a.y, a.z,  b.x, b.y, b.z,
+        c.x, c.y, c.z,  d.x, d.y, d.z,
+    };
+    vars->add(StdVar::P, P, ARRLEN(P));
+    boost::shared_ptr<Geometry> patch(new Patch(opts, vars));
+//    boost::shared_ptr<Geometry> patch(new PatchSimple(opts, a,b,c,d));
     patch->transform(trans);
     return patch;
 }

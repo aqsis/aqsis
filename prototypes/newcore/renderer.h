@@ -13,6 +13,7 @@
 #include "sample.h"
 #include "geometry.h"
 #include "util.h"
+#include "simple.h"
 
 #include "tiffio.h"
 
@@ -149,6 +150,9 @@ class Renderer
             // For now, just rasterize it directly.
             switch(grid->type())
             {
+                case GridType_QuadSimple:
+                    rasterize(static_cast<QuadGridSimple&>(*grid));
+                    break;
                 case GridType_Quad:
                     rasterize(static_cast<QuadGrid&>(*grid));
                     break;
@@ -214,8 +218,6 @@ void Renderer::rasterize(GridT& grid)
     // iterate over all micropolys in the grid & render each one.
     for(typename GridT::Iterator i = grid.begin(); i.valid(); ++i)
     {
-//        if(i.u() != 0 && i.v() != 0)
-//            continue;
         typename GridT::UPoly poly = *i;
 
         Box bound = poly.bound();

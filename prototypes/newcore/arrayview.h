@@ -11,6 +11,7 @@ class DataView
     private:
         float* m_storage;
         int m_stride;
+        template<typename> friend class ConstDataView;
     public:
         DataView(float* storage, int stride = sizeof(T)/sizeof(float))
             : m_storage(storage),
@@ -29,6 +30,30 @@ class DataView
 
         DataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
 };
+
+
+template<typename T>
+class ConstDataView
+{
+    private:
+        const float* m_storage;
+        int m_stride;
+    public:
+        ConstDataView(const float* storage, int stride = sizeof(T)/sizeof(float))
+            : m_storage(storage),
+            m_stride(stride)
+        {}
+
+        ConstDataView(const DataView<T>& view)
+            : m_storage(view.m_storage),
+            m_stride(view.m_stride)
+        {}
+
+        const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
+
+        ConstDataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
+};
+
 
 
 /// Strided view of a float array as an array of shorter float vectors

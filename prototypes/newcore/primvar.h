@@ -1,3 +1,6 @@
+#ifndef PRIMVAR_H_INCLUDED
+#define PRIMVAR_H_INCLUDED
+
 #include <vector>
 #include <stdexcept>
 
@@ -96,6 +99,15 @@ struct PrimvarSpec
 };
 
 
+/// Standard primitive variable names
+namespace StdVar
+{
+    extern const PrimvarSpec P;
+    extern const PrimvarSpec Cs;
+    extern const PrimvarSpec st;
+}
+
+
 /// Storage requirements for various interpolation classes
 ///
 /// The number of elements of a Primvar required for each interpolation class
@@ -133,10 +145,31 @@ struct IclassStorage
 };
 
 
-int PrimvarSpec::storageSize(const IclassStorage& storCount) const
+inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
 {
     return storCount.storage(iclass)*scalarSize();
 }
+
+
+struct StdVarIndices
+{
+    int P;
+    int Cs;
+
+    StdVarIndices() : P(-1), Cs(-1) {}
+
+    void add(int index, const PrimvarSpec& var)
+    {
+        if(var.name == Str::P)
+        {
+            if(var.type != PrimvarSpec::Point ||
+               var.iclass != PrimvarSpec::Vertex ||
+               var.arraySize != 1)
+                throw std::runtime_error("Wrong type for variable \"P\"");
+            P = index;
+        }
+    }
+};
 
 
 /// A list of primitive variables
@@ -144,24 +177,19 @@ class PrimvarList
 {
     private:
         std::vector<PrimvarSpec> m_varSpecs;
-        int m_P_idx;
+        StdVarIndices m_stdIndices;
 
     public:
         PrimvarList()
             : m_varSpecs(),
-            m_P_idx(-1)
+            m_stdIndices()
         { }
 
         /// Add a variable, and return the associated variable offset
         int add(const PrimvarSpec& var)
         {
             int index = m_varSpecs.size();
-            if(var.name == Str::P)
-            {
-                if(var.type != PrimvarSpec::Point || var.iclass != PrimvarSpec::Vertex || var.arraySize != 1)
-                    throw std::runtime_error("Wrong type for variable \"P\"");
-                m_P_idx = index;
-            }
+            m_stdIndices.add(index, var);
             m_varSpecs.push_back(var);
             return index;
         }
@@ -174,7 +202,7 @@ class PrimvarList
             return m_varSpecs[i];
         }
 
-        int P() const { return m_P_idx; }
+        const StdVarIndices& stdIndices() const { return m_stdIndices; }
 };
 
 
@@ -224,8 +252,53 @@ class PrimvarStorage
         // Get a view of the vertex position data
         DataView<Vec3> P()
         {
-            assert(m_vars->P() >= 0);
-            return DataView<Vec3>(&m_storage[m_varInfo[m_vars->P()].offset]);
+            int Pidx = m_vars->stdIndices().P;
+            assert(Pidx >= 0);
+            return DataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
+        }
+
+        // Get a view of the vertex position data
+        ConstDataView<Vec3> P() const
+        {
+            int Pidx = m_vars->stdIndices().P;
+            assert(Pidx >= 0);
+            return ConstDataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
+        }
+
+        void transform(const Mat4& m)
+        {
+            // Iterate over all primvars & transform as appropriate.
+            for(int ivar = 0, nvars = m_vars->size(); ivar < nvars; ++ivar)
+            {
+                const PrimvarSpec& spec = (*m_vars)[ivar];
+                switch(spec.type)
+                {
+                    case PrimvarSpec::Float:
+                    case PrimvarSpec::Color:
+                    case PrimvarSpec::String:
+                        // No need to transform these.
+                        break;
+                    case PrimvarSpec::Point:
+                        {
+                            int aSize = spec.arraySize;
+                            int nElems = m_storCount.storage(spec.iclass);
+                            FvecView v = get(ivar);
+                            for(int j = 0; j < nElems; ++j)
+                            {
+                                DataView<Vec3> p(v[j]);
+                                for(int i = 0; i < aSize; ++i)
+                                    p[i] *= m;
+                            }
+                        }
+                        break;
+                    case PrimvarSpec::Vector:
+                    case PrimvarSpec::Normal:
+                    case PrimvarSpec::Hpoint:
+                    case PrimvarSpec::Matrix:
+                        assert(0 && "Transform not yet implemented!");
+                        break;
+                }
+            }
         }
 };
 
@@ -316,3 +389,4 @@ PrimvarList* createPrimvarList(const IclassStorage& storageSize, int count,
 }
 #endif
 
+#endif // PRIMVAR_H_INCLUDED
