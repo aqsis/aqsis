@@ -165,13 +165,18 @@ class GridvarStorage
             m_storage.reset(new float[totStorage]);
         }
 
-        const GridvarList& varList() { return *m_vars; }
+        const GridvarList& varList() const { return *m_vars; }
 
         /// Get allocated storage for the ith variable
         FvecView get(int i)
         {
             return FvecView(&m_storage[m_varInfo[i].offset],
                             m_varInfo[i].stride);
+        }
+        ConstFvecView get(int i) const
+        {
+            return ConstFvecView(&m_storage[m_varInfo[i].offset],
+                                 m_varInfo[i].stride);
         }
 
         DataView<Vec3> P()

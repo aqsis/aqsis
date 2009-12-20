@@ -103,7 +103,7 @@ class Renderer
                     m_samples[j*m_opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
             }
             // Initialize image array
-            m_image.resize(m_opts.xRes*m_opts.yRes, FLT_MAX);
+            m_image.resize(3*m_opts.xRes*m_opts.yRes, 0);
         }
 
         // Save image to a TIFF file.
@@ -250,8 +250,9 @@ void Renderer::rasterize(GridT& grid)
                 if(samp.z < z)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
-                // TODO: generate & store a fragment
-                m_image[idx] = z;
+                // Generate & store a fragment
+                poly.interpolateColor(&m_image[3*idx]);
+                //m_image[idx] = z;
             }
         }
     }

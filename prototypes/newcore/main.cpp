@@ -16,6 +16,10 @@ boost::shared_ptr<Geometry> createPatch(const Options& opts,
         c.x, c.y, c.z,  d.x, d.y, d.z,
     };
     vars->add(StdVar::P, P, ARRLEN(P));
+    float Cs[] = {
+        1, 0, 0,  0, 1, 0,  0, 0, 1,  1, 1, 1
+    };
+    vars->add(StdVar::Cs, Cs, ARRLEN(Cs));
     boost::shared_ptr<Geometry> patch(new Patch(opts, vars));
 //    boost::shared_ptr<Geometry> patch(new PatchSimple(opts, a,b,c,d));
     patch->transform(trans);
@@ -68,8 +72,8 @@ int main()
     // Cube geometry
 //    addCube(opts, r,
 //        Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45)) *
-////        Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45)) *
-//        Mat4().setTranslation(Vec3(0,0,1.4))
+//        Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45)) *
+//        Mat4().setTranslation(Vec3(0,0,3))
 //    );
 
     r.render();

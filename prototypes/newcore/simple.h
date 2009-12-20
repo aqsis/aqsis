@@ -94,12 +94,20 @@ class MicroQuadSimple
                 m_uv = m_invBilin(samp.p);
         }
 
-        inline float interpolateZ()
+        inline float interpolateZ() const
         {
             if(m_smoothShading)
                 return bilerp(m_a.z, m_b.z, m_d.z, m_c.z, m_uv);
             else
                 return m_a.z;
+        }
+
+        inline void interpolateColor(float* col) const
+        {
+            // We can't support this with the simple grid type!
+            col[0] = interpolateZ();
+            col[1] = 0;
+            col[2] = 0;
         }
 
         friend std::ostream& operator<<(std::ostream& out,

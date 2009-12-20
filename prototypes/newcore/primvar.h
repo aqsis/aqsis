@@ -168,6 +168,13 @@ struct StdVarIndices
                 throw std::runtime_error("Wrong type for variable \"P\"");
             P = index;
         }
+        else if(var.name == Str::Cs)
+        {
+            if(var.type != PrimvarSpec::Color ||
+               var.arraySize != 1)
+                throw std::runtime_error("Wrong type for variable \"Cs\"");
+            Cs = index;
+        }
     }
 };
 

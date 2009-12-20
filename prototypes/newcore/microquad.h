@@ -343,7 +343,7 @@ class MicroQuad
                 m_uv = m_invBilin(samp.p);
         }
 
-        inline float interpolateZ()
+        inline float interpolateZ() const
         {
             if(m_smoothShading)
                 return bilerp(m_P[m_a].z, m_P[m_b].z,
@@ -352,13 +352,31 @@ class MicroQuad
                 return m_P[m_a].z;
         }
 
-//        friend std::ostream& operator<<(std::ostream& out,
-//                                        const MicroQuad& q)
-//        {
-//            out << "{" << q.m_a << "--" << q.m_b << " | "
-//                << q.m_d << "--" << q.m_c << "}";
-//            return out;
-//        }
+        inline void interpolateColor(float* col) const
+        {
+            int CsIdx = m_storage.varList().stdIndices().Cs;
+            assert(CsIdx >= 0);
+            ConstFvecView Cs = m_storage.get(CsIdx);
+            if(m_smoothShading)
+            {
+                for(int i = 0; i < 3; ++i)
+                    col[i] = bilerp(Cs[m_a][i], Cs[m_b][i],
+                                    Cs[m_d][i], Cs[m_c][i], m_uv);
+            }
+            else
+            {
+                for(int i = 0; i < 3; ++i)
+                    col[i] = Cs[m_a][i];
+            }
+        }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                                        const MicroQuad& q)
+        {
+            out << "{" << q.m_P[q.m_a] << "--" << q.m_P[q.m_b] << " | "
+                << q.m_P[q.m_d] << "--" << q.m_P[q.m_c] << "}";
+            return out;
+        }
 };
 
 
