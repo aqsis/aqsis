@@ -2,7 +2,6 @@
 #define GRID_H_INCLUDED
 
 #include "gridvar.h"
-#include "microquad.h"
 #include "util.h"
 
 enum GridType
@@ -32,8 +31,6 @@ class QuadGrid : public Grid
 
     public:
         class Iterator;
-
-        typedef MicroQuad UPoly;
 
         QuadGrid(int nu, int nv, boost::shared_ptr<GridvarList> vars)
             : m_nu(nu),
@@ -70,6 +67,17 @@ class QuadGrid : public Grid
 };
 
 
+struct MicroQuadInd
+{
+    int a;
+    int b;
+    int c;
+    int d;
+
+    MicroQuadInd(int a, int b, int c, int d) : a(a), b(b), c(c), d(d) {}
+};
+
+
 class QuadGrid::Iterator
 {
     public:
@@ -98,16 +106,16 @@ class QuadGrid::Iterator
             return *this;
         }
 
-        MicroQuad operator*() const
+        MicroQuadInd operator*() const
         {
             int nu = m_grid->nu();
-            return MicroQuad(nu*m_v + m_u,       nu*m_v + m_u+1,
-                             nu*(m_v+1) + m_u+1, nu*(m_v+1) + m_u,
-                             m_grid->storage(), (m_u+m_v)%2);
+            return MicroQuadInd(nu*m_v + m_u,       nu*m_v + m_u+1,
+                                nu*(m_v+1) + m_u+1, nu*(m_v+1) + m_u);
         }
 
         int u() const { return m_u; }
         int v() const { return m_v; }
+        const QuadGrid& grid() const { return *m_grid; }
 
     private:
         const QuadGrid* m_grid;

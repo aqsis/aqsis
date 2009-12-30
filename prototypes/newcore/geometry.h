@@ -1,9 +1,10 @@
 #ifndef GEOMETRY_H_INCLUDED
 #define GEOMETRY_H_INCLUDED
 
+#include "util.h"
+
 class Grid;
 class Geometry;
-
 
 /// Destination queue for split or diced geometry
 ///

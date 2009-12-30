@@ -1,10 +1,6 @@
-#ifndef MICROQUAD_H_INCLUDED
-#define MICROQUAD_H_INCLUDED
+#ifndef POINTINQUAD_H_INCLUDED
+#define POINTINQUAD_H_INCLUDED
 
-#include <cassert>
-
-#include "invbilin.h"
-#include "options.h"
 #include "sample.h"
 #include "util.h"
 
@@ -54,7 +50,7 @@ class PointInQuad
     private:
         // Edge equation coefficients.  nx,ny is the edge normal; px,py is one
         // of the edge endpoints.
-        // 
+        //
         // coefficients 0-3 are for the edges of a convex quad.  For nonconvex
         // quads, coeffs 0-2 and 3-5 hold edge tests for a pair of triangles.
         float m_nx[6];
@@ -253,131 +249,4 @@ class PointInQuad
 };
 
 
-
-/// Quadrilateral micropolygon sampler
-///
-/// This is designed to be constructed just before sampling time; it's not
-/// memory efficient, so should not be a long-lived data structure.
-class MicroQuad
-{
-    private:
-        // Grid indices for vertices
-        int m_a;
-        int m_b;
-        int m_c;
-        int m_d;
-        // Point-in-polygon tests
-        PointInQuad m_hitTest;
-        // Storage for the micropoly data
-        const GridvarStorage& m_storage;
-        ConstDataView<Vec3> m_P;
-
-        // Shading interpolation
-        InvBilin m_invBilin;
-        // uv coordinates of current interpolation point
-        Vec2 m_uv;
-        // Whether to use smooth shading or not.
-        bool m_smoothShading;
-
-        // Which point-on-edge to use in edge tests
-        bool m_flipEnd;
-
-    public:
-        // Cyclic vertex order:
-        // a -- b
-        // |    |
-        // d -- c
-        MicroQuad(int a, int b, int c, int d, const GridvarStorage& storage,
-                  bool flipEnd)
-            : m_a(a), m_b(b), m_c(c), m_d(d),
-            m_storage(storage),
-            m_P(storage.P()),
-            m_flipEnd(flipEnd)
-        { }
-
-        Box bound() const
-        {
-            Box bnd(m_P[m_a]);
-            bnd.extendBy(m_P[m_b]);
-            bnd.extendBy(m_P[m_c]);
-            bnd.extendBy(m_P[m_d]);
-            return bnd;
-        }
-
-//        float area() const
-//        {
-//            return 0.5*(
-//                std::fabs(cross(vec2_cast(m_b) - vec2_cast(m_a),
-//                                vec2_cast(m_d) - vec2_cast(m_a)))
-//              + std::fabs(cross(vec2_cast(m_b) - vec2_cast(m_c),
-//                                vec2_cast(m_d) - vec2_cast(m_c))) );
-//        }
-
-        // Initialize the hit test
-        inline void initHitTest()
-        {
-            m_hitTest.init(vec2_cast(m_P[m_a]), vec2_cast(m_P[m_b]),
-                           vec2_cast(m_P[m_c]), vec2_cast(m_P[m_d]),
-                           m_flipEnd);
-        }
-        // Returns true if the sample is contained in the polygon
-        inline bool contains(const Sample& samp)
-        {
-            return m_hitTest(samp);
-        }
-
-        // Initialize the shading interpolator
-        inline void initInterpolator(const Options& opts)
-        {
-            m_smoothShading = opts.smoothShading;
-            if(m_smoothShading)
-            {
-                m_invBilin.init(vec2_cast(m_P[m_a]), vec2_cast(m_P[m_b]),
-                                vec2_cast(m_P[m_d]), vec2_cast(m_P[m_c]));
-            }
-        }
-
-        inline void interpolateAt(const Sample& samp)
-        {
-            if(m_smoothShading)
-                m_uv = m_invBilin(samp.p);
-        }
-
-        inline float interpolateZ() const
-        {
-            if(m_smoothShading)
-                return bilerp(m_P[m_a].z, m_P[m_b].z,
-                              m_P[m_d].z, m_P[m_c].z, m_uv);
-            else
-                return m_P[m_a].z;
-        }
-
-        inline void interpolateColor(float* col) const
-        {
-            int CsIdx = m_storage.varList().stdIndices().Cs;
-            assert(CsIdx >= 0);
-            ConstFvecView Cs = m_storage.get(CsIdx);
-            if(m_smoothShading)
-            {
-                for(int i = 0; i < 3; ++i)
-                    col[i] = bilerp(Cs[m_a][i], Cs[m_b][i],
-                                    Cs[m_d][i], Cs[m_c][i], m_uv);
-            }
-            else
-            {
-                for(int i = 0; i < 3; ++i)
-                    col[i] = Cs[m_a][i];
-            }
-        }
-
-        friend std::ostream& operator<<(std::ostream& out,
-                                        const MicroQuad& q)
-        {
-            out << "{" << q.m_P[q.m_a] << "--" << q.m_P[q.m_b] << " | "
-                << q.m_P[q.m_d] << "--" << q.m_P[q.m_c] << "}";
-            return out;
-        }
-};
-
-
-#endif // MICROQUAD_H_INCLUDED
+#endif // POINTINQUAD_H_INCLUDED

@@ -1,7 +1,7 @@
 #ifndef UTIL_H_INCLUDED
 #define UTIL_H_INCLUDED
 
-#include <assert.h>
+#include <cassert>
 #include <cfloat>
 #include <cmath>
 #include <vector>

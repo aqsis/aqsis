@@ -7,6 +7,7 @@
 
 #include "primvar.h"
 #include "gridvar.h"
+#include "grid.h"
 
 
 class Patch : public Geometry

@@ -2,7 +2,9 @@
 #define SIMPLE_H_INCLUDED
 
 #include "geometry.h"
+#include "invbilin.h"
 #include "options.h"
+#include "pointinquad.h"
 #include "util.h"
 
 //------------------------------------------------------------------------------
@@ -11,7 +13,7 @@
 ///
 /// This is designed to be constructed just before sampling time; it's not
 /// memory efficient, so should not be a long-lived data structure.
-class MicroQuadSimple
+class MicroQuadSamplerSimple
 {
     private:
         // Vertex positions
@@ -37,7 +39,7 @@ class MicroQuadSimple
         // a -- b
         // |    |
         // d -- c
-        MicroQuadSimple(const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& d,
+        MicroQuadSamplerSimple(const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& d,
                 bool flipEnd)
             : m_flipEnd(flipEnd)
         {
@@ -109,14 +111,6 @@ class MicroQuadSimple
             col[1] = 0;
             col[2] = 0;
         }
-
-        friend std::ostream& operator<<(std::ostream& out,
-                                        const MicroQuadSimple& q)
-        {
-            out << "{" << q.m_a << "--" << q.m_b << " | "
-                << q.m_d << "--" << q.m_c << "}";
-            return out;
-        }
 };
 
 
@@ -125,10 +119,6 @@ class MicroQuadSimple
 class QuadGridSimple : public Grid
 {
     public:
-        class Iterator;
-
-        typedef MicroQuadSimple UPoly;
-
         QuadGridSimple(int nu, int nv)
             : m_nu(nu),
             m_nv(nv),
@@ -142,8 +132,6 @@ class QuadGridSimple : public Grid
 
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
-
-        Iterator begin();
 
         Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
 
@@ -167,56 +155,6 @@ class QuadGridSimple : public Grid
         int m_nu;
         int m_nv;
         std::vector<Vec3> m_P;
-};
-
-
-class QuadGridSimple::Iterator
-{
-    public:
-        Iterator(const QuadGridSimple& grid)
-            : m_grid(&grid),
-            m_u(0),
-            m_v(0),
-            m_uEnd(grid.nu()-1),
-            m_vEnd(grid.nv()-1)
-            // go up to one less than the end in u & v.
-        { }
-
-        bool valid() { return m_v < m_vEnd; }
-
-        Iterator& operator++()
-        {
-//            if(m_v == 0) ++m_u;
-//            if(m_u >= m_uEnd || m_v > 0) { m_u = 0; ++m_v;}
-//            return *this;
-            ++m_u;
-            if(m_u >= m_uEnd)
-            {
-                m_u = 0;
-                ++m_v;
-            }
-            return *this;
-        }
-
-        MicroQuadSimple operator*() const
-        {
-            int nu = m_grid->nu();
-            return MicroQuadSimple(m_grid->m_P[nu*m_v + m_u],
-                             m_grid->m_P[nu*m_v + m_u+1],
-                             m_grid->m_P[nu*(m_v+1) + m_u+1],
-                             m_grid->m_P[nu*(m_v+1) + m_u],
-                             (m_u+m_v)%2);
-        }
-
-        int u() const { return m_u; }
-        int v() const { return m_v; }
-
-    private:
-        const QuadGridSimple* m_grid;
-        int m_u;
-        int m_v;
-        int m_uEnd;
-        int m_vEnd;
 };
 
 
@@ -330,10 +268,5 @@ class PatchSimple : public Geometry
         }
 };
 
-
-inline QuadGridSimple::Iterator QuadGridSimple::begin()
-{
-    return Iterator(*this);
-}
 
 #endif // SIMPLE_H_INCLUDED

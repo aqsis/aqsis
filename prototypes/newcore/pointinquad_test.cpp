@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "microquad.h"
+#include "pointinquad.h"
 
 int main()
 {

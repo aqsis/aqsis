@@ -1,6 +1,8 @@
 #ifndef OPTIONS_H_INCLUDED
 #define OPTIONS_H_INCLUDED
 
+#include <cfloat>
+
 struct Options
 {
     int maxSplits;   ///< maximum number of splits before discarding a surface
