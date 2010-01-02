@@ -15,12 +15,16 @@
 class MicroQuadSampler
 {
     private:
+        // Grid being sampled.
+        const QuadGrid& m_grid;
+        // Iterator for the current micropoly
+        QuadGrid::Iterator m_curr;
+
         // Grid indices for vertices
         MicroQuadInd m_ind;
         // Point-in-polygon tests
         PointInQuad m_hitTest;
         // Storage for the micropoly data
-        const GridvarStorage& m_storage;
         ConstDataView<Vec3> m_P;
 
         // Shading interpolation
@@ -30,21 +34,32 @@ class MicroQuadSampler
         // Whether to use smooth shading or not.
         bool m_smoothShading;
 
-        // Which point-on-edge to use in edge tests
-        bool m_flipEnd;
-
     public:
         // Cyclic vertex order:
         // a -- b
         // |    |
         // d -- c
-        MicroQuadSampler(const QuadGrid::Iterator& i)
-            : m_ind(*i),
+        MicroQuadSampler(const QuadGrid& grid, const Options& opts)
+            : m_grid(grid),
+            m_curr(grid.begin()),
+            m_ind(*m_curr),
             m_hitTest(),
-            m_storage(i.grid().storage()),
-            m_P(m_storage.P()),
-            m_flipEnd((i.u() + i.v()) % 2 )
+            m_P(grid.storage().P()),
+            m_uv(0.0f),
+            m_smoothShading(opts.smoothShading)
         { }
+
+        /// Advance to next micropolygon.
+        void next()
+        {
+            ++m_curr;
+            m_ind = *m_curr;
+        }
+
+        bool valid()
+        {
+            return m_curr.valid();
+        }
 
         Box bound() const
         {
@@ -60,7 +75,7 @@ class MicroQuadSampler
         {
             m_hitTest.init(vec2_cast(m_P[m_ind.a]), vec2_cast(m_P[m_ind.b]),
                            vec2_cast(m_P[m_ind.c]), vec2_cast(m_P[m_ind.d]),
-                           m_flipEnd);
+                           (m_curr.u() + m_curr.v()) % 2);
         }
         // Returns true if the sample is contained in the polygon
         inline bool contains(const Sample& samp)
@@ -69,9 +84,8 @@ class MicroQuadSampler
         }
 
         // Initialize the shading interpolator
-        inline void initInterpolator(const Options& opts)
+        inline void initInterpolator()
         {
-            m_smoothShading = opts.smoothShading;
             if(m_smoothShading)
             {
                 m_invBilin.init(
@@ -97,9 +111,9 @@ class MicroQuadSampler
 
         inline void interpolateColor(float* col) const
         {
-            int CsIdx = m_storage.varList().stdIndices().Cs;
+            int CsIdx = m_grid.storage().varList().stdIndices().Cs;
             assert(CsIdx >= 0);
-            ConstFvecView Cs = m_storage.get(CsIdx);
+            ConstFvecView Cs = m_grid.storage().get(CsIdx);
             if(m_smoothShading)
             {
                 for(int i = 0; i < 3; ++i)
@@ -113,24 +127,6 @@ class MicroQuadSampler
             }
         }
 };
-
-
-//class MicroQuadSampler
-//{
-//    private:
-//        const QuadGrid& m_grid;
-//
-//    public:
-//        MicroQuadSampler(const QuadGrid& grid)
-//            : m_grid(grid)
-//        { }
-//
-//        /// Advance to the next quad in the grid.
-//        void nextQuad()
-//        {
-//        }
-//};
-
 
 
 #endif // QUADRASTERIZER_H_INCLUDED

@@ -90,12 +90,6 @@ class InvBilin
         /// Construct a lookup functor with zeros for the vertices.
         InvBilin();
 
-        /** Use the given vertices for inverse bilinear lookups.
-         *
-         * \see init for the vertex ordering.
-         */
-        InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
-
         /** \brief Reset the micropolygon vertices.
          *
          * The ordering of vertices is as follows:
@@ -129,24 +123,17 @@ class InvBilin
 
 
 //==============================================================================
-// InvBilin implementation
+// InvBilin implementation.
 inline InvBilin::InvBilin()
-    : m_A(),
-    m_E(),
-    m_F(),
-    m_G(),
+    // Note that we initialize m_A etc. to zero here only to avoid a bogus gcc
+    // compiler warning.  These should be properly initialized via the init()
+    // function.
+    : m_A(0),
+    m_E(0),
+    m_F(0),
+    m_G(0),
     m_linear(false)
 {}
-
-inline InvBilin::InvBilin(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
-    : m_A(),
-    m_E(),
-    m_F(),
-    m_G(),
-    m_linear(false)
-{
-    init(A,B,C,D);
-}
 
 inline void InvBilin::init(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
 {

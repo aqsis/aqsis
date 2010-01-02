@@ -185,8 +185,6 @@ void Renderer::render()
 }
 
 
-//#pragma GCC diagnostic ignored "-Wuninitialized"
-
 // Render a grid by rasterizing each micropolygon.
 template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
@@ -194,11 +192,11 @@ void Renderer::rasterize(GridT& grid)
 {
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
+    // Construct a sampler for the polygons in the grid
+    PolySamplerT poly(grid, m_opts);
     // iterate over all micropolys in the grid & render each one.
-    for(typename GridT::Iterator i = grid.begin(); i.valid(); ++i)
+    while(poly.valid())
     {
-        PolySamplerT poly(i);
-
         Box bound = poly.bound();
 
         // Bounding box for relevant samples, clamped to image extent.
@@ -206,9 +204,8 @@ void Renderer::rasterize(GridT& grid)
         const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
         const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
         const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
-
         poly.initHitTest();
-        poly.initInterpolator(m_opts);
+        poly.initInterpolator();
 
         // for each sample position in the bound
         for(int ix = sx; ix < ex; ++ix)
@@ -234,6 +231,7 @@ void Renderer::rasterize(GridT& grid)
                 //m_image[idx] = z;
             }
         }
+        poly.next();
     }
 }
 
@@ -242,16 +240,32 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
 {
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
+    const Vec3* P = grid.P(0);
+
+    // Point-in-polygon tester
+    PointInQuad hitTest;
+
+    // Shading interpolation
+    InvBilin invBilin;
+    // Whether to use smooth shading or not.
+    bool smoothShading = m_opts.smoothShading;
+    // Micropoly uv coordinates for smooth shading
+    Vec2 uv(0.0f);
+
     // iterate over all micropolys in the grid & render each one.
     for(int v = 0, nv = grid.nv(); v < nv-1; ++v)
     for(int u = 0, nu = grid.nu(); u < nu-1; ++u)
     {
-        const Vec3* P = grid.P(0);
-        MicroQuadSamplerSimple poly(P[nu*v + u],       P[nu*v + u+1],
-                                    P[nu*(v+1) + u+1], P[nu*(v+1) + u],
-                                    (u+v)%2 );
+        Vec3 a = P[nu*v + u];
+        Vec3 b = P[nu*v + u+1];
+        Vec3 c = P[nu*(v+1) + u+1];
+        Vec3 d = P[nu*(v+1) + u];
+        bool flipEnd = (u+v)%2;
 
-        Box bound = poly.bound();
+        Box bound(a);
+        bound.extendBy(b);
+        bound.extendBy(c);
+        bound.extendBy(d);
 
         // Bounding box for relevant samples, clamped to image extent.
         const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
@@ -259,8 +273,13 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
         const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
         const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
 
-        poly.initHitTest();
-        poly.initInterpolator(m_opts);
+        hitTest.init(vec2_cast(a), vec2_cast(b),
+                     vec2_cast(c), vec2_cast(d), flipEnd);
+        if(smoothShading)
+        {
+            invBilin.init(vec2_cast(a), vec2_cast(b),
+                          vec2_cast(d), vec2_cast(c));
+        }
 
         // for each sample position in the bound
         for(int ix = sx; ix < ex; ++ix)
@@ -273,17 +292,29 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
 //                if(samp.z < bound.min.z)
 //                    continue;
                 // Test whether sample hits the micropoly
-                if(!poly.contains(samp))
+                if(!hitTest(samp))
                     continue;
                 // Determine hit depth
-                poly.interpolateAt(samp);
-                float z = poly.interpolateZ();
+                float z;
+                if(smoothShading)
+                {
+                    uv = invBilin(samp.p);
+                    z = bilerp(a.z, b.z, d.z, c.z, uv);
+                }
+                else
+                {
+                    z = a.z;
+                }
                 if(samp.z < z)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
-                // Generate & store a fragment
-                poly.interpolateColor(&m_image[3*idx]);
+                // Store z value.
                 //m_image[idx] = z;
+                // Store color.  Actually, we can't do this with the
+                // super-simple sampler!
+                m_image[3*idx] = z;
+                m_image[3*idx] = 0;
+                m_image[3*idx] = 0;
             }
         }
     }

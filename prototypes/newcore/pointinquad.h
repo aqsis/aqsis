@@ -140,6 +140,18 @@ class PointInQuad
         }
 
     public:
+        /// Do-nothing constructor.  Use init() to make the state valid.
+        PointInQuad()
+        {
+            // Initialize m_nx etc. here to avoid bogus gcc compiler warnings.
+            //
+            // Note: this seems to have a small but measurable performance
+            // impact if a PointInQuad object is initialized once per poly.
+            // Initializing once per grid avoids this problem.
+            m_nx[4] = m_ny[4] = m_px[4] = m_py[4] = 0;
+            m_nx[5] = m_ny[5] = m_px[5] = m_py[5] = 0;
+        }
+
         /// Initialize the edge equations.
         ///
         /// Uses a cyclic vertex order:
@@ -207,16 +219,6 @@ class PointInQuad
                     }
                     break;
             }
-        }
-
-        /// Do-nothing constructor.  Use init() to make the state valid.
-        PointInQuad() {}
-
-        /// Set up edge equations from the given vertices
-        /// \see init
-        PointInQuad(Vec2 a, Vec2 b, Vec2 c, Vec2 d, bool flipEnds)
-        {
-            init(a,b,c,d, flipEnds);
         }
 
         /// Point-in-polygon test
