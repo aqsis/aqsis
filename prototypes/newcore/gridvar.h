@@ -8,74 +8,52 @@
 #include "primvar.h"
 #include "util.h"
 #include "ustring.h"
+#include "varspec.h"
 
-struct GridvarSpec
-{
-    enum Type
-    {
-        Float,
-        Point,
-        Vector,
-        Normal,
-        Color,
-        Matrix,
-        String
-    };
-
-    bool uniform; ///< True if the variable is constant over the grid
-    Type type;    ///< Variable type
-    int arraySize; ///< Array size
-    ustring name; ///< Variable name
-
-    GridvarSpec(bool uniform, Type type, int arraySize, ustring name)
-        : uniform(uniform), type(type), arraySize(arraySize), name(name) {}
-
-    /// Get number of scalar values required for the given type
-    static int scalarSize(Type type)
-    {
-        switch(type)
-        {
-            case Float:  return 1;
-            case Point:  return 3;
-            case Vector: return 3;
-            case Normal: return 3;
-            case Color:  return 3;
-            case Matrix: return 16;
-            case String: return 1;
-        }
-        assert(0); return 0;
-    }
-
-    int scalarSize() const
-    {
-        return scalarSize(type)*arraySize;
-    }
-
-    /// Get number of scalars for the variable on a grid with nVerts vertices.
-    int storageSize(int nVerts)
-    {
-        return (uniform ? 1 : nVerts) * scalarSize(type);
-    }
-};
-
-
-inline GridvarSpec::Type pvarToGvarType(PrimvarSpec::Type type)
+inline VarSpec::Type pvarToGvarType(PrimvarSpec::Type type)
 {
     switch(type)
     {
         // Following are the same.
-        case PrimvarSpec::Float:  return GridvarSpec::Float;
-        case PrimvarSpec::Point:  return GridvarSpec::Point;
-        case PrimvarSpec::Vector: return GridvarSpec::Vector;
-        case PrimvarSpec::Normal: return GridvarSpec::Normal;
-        case PrimvarSpec::Color:  return GridvarSpec::Color;
-        case PrimvarSpec::Matrix: return GridvarSpec::Matrix;
-        case PrimvarSpec::String: return GridvarSpec::String;
+        case PrimvarSpec::Float:  return VarSpec::Float;
+        case PrimvarSpec::Point:  return VarSpec::Point;
+        case PrimvarSpec::Vector: return VarSpec::Vector;
+        case PrimvarSpec::Normal: return VarSpec::Normal;
+        case PrimvarSpec::Color:  return VarSpec::Color;
+        case PrimvarSpec::Matrix: return VarSpec::Matrix;
+        case PrimvarSpec::String: return VarSpec::String;
         // Following are different
-        case PrimvarSpec::Hpoint: return GridvarSpec::Point;
+        case PrimvarSpec::Hpoint: return VarSpec::Point;
     }
 }
 
+
+struct GridvarSpec : public VarSpec
+{
+    bool uniform; ///< True if the variable is constant over the grid
+
+    GridvarSpec(bool uniform, Type type, int arraySize, ustring name)
+        : VarSpec(type, arraySize, name), uniform(uniform) {}
+    GridvarSpec(const PrimvarSpec& spec) { *this = spec; }
+
+    /// Get number of scalars for the variable on a grid with nVerts vertices.
+    int storageSize(int nVerts) const
+    {
+        return (uniform ? 1 : nVerts) * sizeForType(type);
+    }
+
+    /// Convert primvar spec to gridvar
+    GridvarSpec& operator=(const PrimvarSpec& var)
+    {
+        assert(var.type != PrimvarSpec::Hpoint); // no hpoints yet
+        type = pvarToGvarType(var.type);
+        arraySize = var.arraySize;
+        name = var.name;
+        uniform = var.iclass == PrimvarSpec::Constant ||
+                  var.iclass == PrimvarSpec::Uniform;
+        return *this;
+    }
+};
 
 class GridvarList
 {
@@ -104,6 +82,7 @@ class GridvarList
         int add(const GridvarSpec& var)
         {
             int index = m_vars.size();
+            m_stdIndices.add(index, var);
             m_vars.push_back(var);
             return index;
         }
@@ -131,65 +110,62 @@ class GridvarList
         const StdVarIndices& stdIndices() const { return m_stdIndices; }
 };
 
-
 class GridvarStorage
 {
     private:
         boost::scoped_array<float> m_storage;
-        struct VarInfo
-        {
-            int offset;
-            int stride;
-        };
-        boost::scoped_array<VarInfo> m_varInfo;
+        boost::scoped_array<FvecView> m_views;
         boost::shared_ptr<GridvarList> m_vars;
 
-    public:
-        GridvarStorage(boost::shared_ptr<GridvarList> vars, int nverts)
-            : m_storage(),
-            m_varInfo(),
-            m_vars(vars)
+        void initStorage(int nverts)
         {
             // Compute offsets for each variable into the shared storage, and
             // compute the total size of the storage array.
             const int nvars = m_vars->size();
-            m_varInfo.reset(new VarInfo[nvars]);
+            // Allocate storage for all grid vars.
             int totStorage = 0;
             for(int i = 0; i < nvars; ++i)
-            {
-                m_varInfo[i].offset = totStorage;
-                const int nfloats = (*m_vars)[i].scalarSize();
-                m_varInfo[i].stride = nfloats;
-                totStorage += nverts * nfloats;
-            }
+                totStorage += (*m_vars)[i].storageSize(nverts);
             m_storage.reset(new float[totStorage]);
+            // Cache views for individual vars.
+            m_views.reset(new FvecView[nvars]);
+            int offset = 0;
+            for(int i = 0; i < nvars; ++i)
+            {
+                const int nfloats = (*m_vars)[i].scalarSize();
+                m_views[i] = FvecView(&m_storage[0] + offset, nfloats);
+                offset += (*m_vars)[i].storageSize(nverts);
+            }
+        }
+
+    public:
+        GridvarStorage(boost::shared_ptr<GridvarList> vars, int nverts)
+            : m_storage(),
+            m_views(),
+            m_vars(vars)
+        {
+            initStorage(nverts);
         }
 
         const GridvarList& varList() const { return *m_vars; }
 
         /// Get allocated storage for the ith variable
-        FvecView get(int i)
-        {
-            return FvecView(&m_storage[m_varInfo[i].offset],
-                            m_varInfo[i].stride);
-        }
-        ConstFvecView get(int i) const
-        {
-            return ConstFvecView(&m_storage[m_varInfo[i].offset],
-                                 m_varInfo[i].stride);
-        }
+        FvecView get(int i) { return m_views[i]; }
+        ConstFvecView get(int i) const { return m_views[i]; }
 
         DataView<Vec3> P()
         {
             int Pidx = m_vars->stdIndices().P;
             assert(Pidx >= 0);
-            return DataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
+            return DataView<Vec3>(m_views[Pidx].base(),
+                                  m_views[Pidx].stride());
         }
         ConstDataView<Vec3> P() const
         {
             int Pidx = m_vars->stdIndices().P;
             assert(Pidx >= 0);
-            return ConstDataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
+            return ConstDataView<Vec3>(m_views[Pidx].base(),
+                                       m_views[Pidx].stride());
         }
 };
 

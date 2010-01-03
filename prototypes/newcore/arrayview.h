@@ -64,6 +64,8 @@ class FvecView
         int m_stride;
         friend class ConstFvecView;
     public:
+        FvecView() : m_storage(0), m_stride(0) {}
+
         FvecView(float* storage, int stride)
             : m_storage(storage),
             m_stride(stride)
@@ -71,8 +73,10 @@ class FvecView
 
         float* operator[](int i) { return m_storage + i*m_stride; }
         const float* operator[](int i) const { return m_storage + i*m_stride; }
-        float* operator*() { return m_storage; }
-        const float* operator*() const { return m_storage; }
+
+        float* base() { return m_storage; }
+        const float* base() const { return m_storage; }
+        int stride() const { return m_stride; }
 
         FvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         FvecView& operator++() { m_storage += m_stride; return *this;}
@@ -88,6 +92,8 @@ class ConstFvecView
         const float* m_storage;
         int m_stride;
     public:
+        ConstFvecView() : m_storage(0), m_stride(0) {}
+
         ConstFvecView(const float* storage, int stride)
             : m_storage(storage),
             m_stride(stride)
@@ -99,7 +105,9 @@ class ConstFvecView
         {}
 
         const float* operator[](int i) const { return m_storage + i*m_stride; }
-        const float* operator*() const { return m_storage; }
+
+        const float* base() const { return m_storage; }
+        int stride() const { return m_stride; }
 
         ConstFvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         ConstFvecView& operator++() { m_storage += m_stride; return *this;}

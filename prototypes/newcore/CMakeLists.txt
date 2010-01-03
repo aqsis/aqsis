@@ -22,7 +22,7 @@ set(srcs
 )
 
 add_executable(render ${srcs})
-
+target_link_libraries(render ${TIFF_LIBRARIES})
 
 add_executable(primvar_test
     primvar_test.cpp
@@ -31,4 +31,3 @@ add_executable(primvar_test
     primvar.cpp
 )
 
-target_link_libraries(render ${TIFF_LIBRARIES})

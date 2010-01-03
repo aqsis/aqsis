@@ -9,6 +9,7 @@
 #include "util.h"
 #include "fixedstrings.h"
 #include "arrayview.h"
+#include "varspec.h"
 
 struct IclassStorage;
 
@@ -32,7 +33,7 @@ struct IclassStorage;
 ///                 faces.  When discontinuous use some geometry-specific rule
 ///                 to behave more like FaceVarying.
 ///
-struct PrimvarSpec
+struct PrimvarSpec : public VarSpec
 {
     /// Variable interpolation class.
     ///
@@ -48,51 +49,10 @@ struct PrimvarSpec
         FaceVertex
     };
 
-    /// Variable type.
-    enum Type
-    {
-        Float,
-        Point,
-        Hpoint,
-        Vector,
-        Normal,
-        Color,
-        Matrix,
-        String
-    };
-
     Iclass   iclass;     ///< Interpolation class
-    Type     type;       ///< Variable type
-    int      arraySize;  ///< Array size
-    ustring  name;       ///< Variable name
 
     PrimvarSpec(Iclass iclass, Type type, int arraySize, ustring name)
-        : iclass(iclass), type(type), arraySize(arraySize), name(name) {}
-
-    /// Get number of scalar values required for the given type
-    static int scalarSize(Type type)
-    {
-        switch(type)
-        {
-            case Float:  return 1;
-            case Point:  return 3;
-            case Hpoint: return 4;
-            case Vector: return 3;
-            case Normal: return 3;
-            case Color:  return 3;
-            case Matrix: return 16;
-            case String: return 1;
-        }
-    }
-
-    /// Get number of scalar values required for the variable
-    ///
-    /// Each element of the variable requires a number of scalar values to
-    /// represent it; these are floats, except in the case of strings.
-    int scalarSize() const
-    {
-        return scalarSize(type)*arraySize;
-    }
+        : VarSpec(type, arraySize, name), iclass(iclass) {}
 
     /// Return the number of scalar values required for the variable
     int storageSize(const IclassStorage& storCount) const;
@@ -158,20 +118,17 @@ struct StdVarIndices
 
     StdVarIndices() : P(-1), Cs(-1) {}
 
-    void add(int index, const PrimvarSpec& var)
+    void add(int index, const VarSpec& var)
     {
         if(var.name == Str::P)
         {
-            if(var.type != PrimvarSpec::Point ||
-               var.iclass != PrimvarSpec::Vertex ||
-               var.arraySize != 1)
+            if(var.type != VarSpec::Point || var.arraySize != 1)
                 throw std::runtime_error("Wrong type for variable \"P\"");
             P = index;
         }
         else if(var.name == Str::Cs)
         {
-            if(var.type != PrimvarSpec::Color ||
-               var.arraySize != 1)
+            if(var.type != VarSpec::Color || var.arraySize != 1)
                 throw std::runtime_error("Wrong type for variable \"Cs\"");
             Cs = index;
         }
@@ -187,6 +144,8 @@ class PrimvarList
         StdVarIndices m_stdIndices;
 
     public:
+        typedef std::vector<PrimvarSpec>::const_iterator const_iterator;
+
         PrimvarList()
             : m_varSpecs(),
             m_stdIndices()
@@ -202,6 +161,9 @@ class PrimvarList
         }
 
         int size() const { return m_varSpecs.size(); }
+
+        const_iterator begin() const { return m_varSpecs.begin(); }
+        const_iterator end() const { return m_varSpecs.end(); }
 
         const PrimvarSpec& operator[](int i) const
         {
