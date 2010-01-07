@@ -12,8 +12,7 @@
 #include "options.h"
 #include "sample.h"
 #include "util.h"
-
-#include "tiffio.h"
+#include "varspec.h"
 
 class Renderer;
 class Grid;
@@ -36,6 +35,15 @@ class RenderQueueImpl : public RenderQueue
         void push(const boost::shared_ptr<Grid>& grid);
 };
 
+struct OutvarSpec : public VarSpec
+{
+    int offset;  ///< Offset
+
+    OutvarSpec(Type type, int arraySize, ustring name, int offset)
+        : VarSpec(type, arraySize, name), offset(offset) {}
+};
+
+typedef std::vector<OutvarSpec> OutvarList;
 
 class Renderer
 {
@@ -44,7 +52,7 @@ class Renderer
         // surfaces and grids into the renderer.
         friend class RenderQueueImpl;
 
-        // Standard container for geometry metadata
+        // Container for geometry and geometry metadata
         struct SurfaceHolder
         {
             boost::shared_ptr<Geometry> geom; //< Pointer to geometry
@@ -85,11 +93,12 @@ class Renderer
         typedef std::priority_queue<SurfaceHolder, std::vector<SurfaceHolder>,
                                     surface_order> SurfaceQueue;
 
-        Options m_opts;
-        SurfaceQueue m_surfaces;
-        std::vector<Sample> m_samples;
-        std::vector<float> m_image;
-        Mat4 m_camToRas;
+        Options m_opts;                ///< Render options
+        SurfaceQueue m_surfaces;       ///< Queue of surface to be rendered
+        std::vector<Sample> m_samples; ///< Array of sample info
+        OutvarList m_outVars;          ///< Output variable list
+        std::vector<float> m_image;    ///< Image data
+        Mat4 m_camToRas;               ///< Camera -> raster transformation
 
         void saveImage(const std::string& fileName);
 
@@ -107,9 +116,12 @@ class Renderer
             : m_opts(opts),
             m_surfaces(),
             m_samples(),
+            m_outVars(),
             m_image(),
             m_camToRas()
         {
+            // Set up output variables
+            m_outVars.push_back(OutvarSpec(VarSpec::Color, 1, ustring("Cs"), 0));
             // Set up camera -> raster matrix
             m_camToRas = camToScreen
                 * Mat4().setScale(Vec3(0.5,-0.5,0))

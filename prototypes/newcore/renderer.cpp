@@ -1,9 +1,11 @@
 #include "renderer.h"
 
-#include "grid.h"
+#include <cstring>
+#include <tiffio.h>
 
-#include "simple.h"
+#include "grid.h"
 #include "microquadsampler.h"
+#include "simple.h"
 
 //------------------------------------------------------------------------------
 // RenderQueueImpl implementation
@@ -193,7 +195,7 @@ void Renderer::rasterize(GridT& grid)
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
     // Construct a sampler for the polygons in the grid
-    PolySamplerT poly(grid, m_opts);
+    PolySamplerT poly(grid, m_opts, m_outVars);
     // iterate over all micropolys in the grid & render each one.
     while(poly.valid())
     {
@@ -227,7 +229,12 @@ void Renderer::rasterize(GridT& grid)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Generate & store a fragment
-                poly.interpolateColor(&m_image[3*idx]);
+                //
+                // TODO: Instead of memset() here, we should probably make a
+                // defaults buffer on the stack before the loop, and memcpy it
+                // in.  Some vars (eg, Oi) shouldn't be 0 by default.
+                std::memset(&m_image[3*idx], 0, 3*sizeof(float));
+                poly.interpolate(&m_image[3*idx]);
                 //m_image[idx] = z;
             }
         }
@@ -236,6 +243,10 @@ void Renderer::rasterize(GridT& grid)
 }
 
 
+// Simple rasterizer function for simple quad grids only!
+//
+// The purpose of this version rasterizer function is to provide a simple
+// version to benchmark against.
 void Renderer::rasterizeSimple(QuadGridSimple& grid)
 {
     // Project grid into raster coordinates.

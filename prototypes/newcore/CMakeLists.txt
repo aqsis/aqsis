@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_package(TIFF)
-find_package(Boost 1.36.0)
+find_package(Boost 1.36.0 COMPONENTS unit_test_framework)
 
 include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${ILMBASE_INCLUDE_DIR})
@@ -31,3 +31,4 @@ add_executable(primvar_test
     primvar.cpp
 )
 
+#target_link_libraries(varspec_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

@@ -2,7 +2,6 @@
 #define VARSPEC_H_INCLUDED
 
 #include "ustring.h"
-//#include "vset.h"
 
 struct VarSpec
 {
@@ -59,10 +58,14 @@ struct VarSpec
             && l.type < r.type
             && l.arraySize < r.arraySize;
     }
+
+    friend bool operator==(const VarSpec& l, const VarSpec& r)
+    {
+        return l.name == r.name
+            && l.type == r.type
+            && l.arraySize == r.arraySize;
+    }
 };
-
-
-//typedef VSet<VarSpec> VarSet;
 
 
 #endif // VARSPEC_H_INCLUDED

@@ -15,6 +15,17 @@
 class MicroQuadSampler
 {
     private:
+        /// Information about output variables.
+        struct OutVarInfo
+        {
+            ConstFvecView src;  // Source gridvar data
+            int outIdx; // start index of variable in output data
+
+            OutVarInfo(const ConstFvecView& src, int outIdx)
+                : src(src), outIdx(outIdx) {}
+        };
+        std::vector<OutVarInfo> m_outVarInfo;
+
         // Grid being sampled.
         const QuadGrid& m_grid;
         // Iterator for the current micropoly
@@ -39,7 +50,8 @@ class MicroQuadSampler
         // a -- b
         // |    |
         // d -- c
-        MicroQuadSampler(const QuadGrid& grid, const Options& opts)
+        MicroQuadSampler(const QuadGrid& grid, const Options& opts,
+                         const OutvarList& outVars)
             : m_grid(grid),
             m_curr(grid.begin()),
             m_ind(*m_curr),
@@ -47,7 +59,24 @@ class MicroQuadSampler
             m_P(grid.storage().P()),
             m_uv(0.0f),
             m_smoothShading(opts.smoothShading)
-        { }
+        {
+            // Cache the variables which need to be interpolated into
+            // fragment outputs.
+            const GridvarList& gridVars = grid.storage().varList();
+            for(int j = 0, jend = outVars.size(); j < jend; ++j)
+            {
+                // Simplistic linear search through grid variables for now.
+                // This only happens once per grid, so maybe it's not too bad?
+                for(int i = 0, iend = gridVars.size(); i < iend; ++i)
+                {
+                    if(gridVars[i] == outVars[j])
+                    {
+                        m_outVarInfo.push_back(OutVarInfo(
+                                m_grid.storage().get(i), outVars[j].offset) );
+                    }
+                }
+            }
+        }
 
         /// Advance to next micropolygon.
         void next()
@@ -55,12 +84,13 @@ class MicroQuadSampler
             ++m_curr;
             m_ind = *m_curr;
         }
-
+        /// Test whether we're referencing a valid micropoly
         bool valid()
         {
             return m_curr.valid();
         }
 
+        /// Get bound for current micropoly
         Box bound() const
         {
             Box bnd(m_P[m_ind.a]);
@@ -70,20 +100,20 @@ class MicroQuadSampler
             return bnd;
         }
 
-        // Initialize the hit test
+        /// Initialize the polygon hit tester
         inline void initHitTest()
         {
             m_hitTest.init(vec2_cast(m_P[m_ind.a]), vec2_cast(m_P[m_ind.b]),
                            vec2_cast(m_P[m_ind.c]), vec2_cast(m_P[m_ind.d]),
                            (m_curr.u() + m_curr.v()) % 2);
         }
-        // Returns true if the sample is contained in the polygon
+        /// Return true if the sample is contained in the polygon
         inline bool contains(const Sample& samp)
         {
             return m_hitTest(samp);
         }
 
-        // Initialize the shading interpolator
+        /// Initialize the shading interpolator
         inline void initInterpolator()
         {
             if(m_smoothShading)
@@ -93,13 +123,14 @@ class MicroQuadSampler
                     vec2_cast(m_P[m_ind.d]), vec2_cast(m_P[m_ind.c]) );
             }
         }
-
+        /// Specify interpolation point
         inline void interpolateAt(const Sample& samp)
         {
             if(m_smoothShading)
                 m_uv = m_invBilin(samp.p);
         }
 
+        /// Interpolate depth value at current point.
         inline float interpolateZ() const
         {
             if(m_smoothShading)
@@ -109,6 +140,7 @@ class MicroQuadSampler
                 return m_P[m_ind.a].z;
         }
 
+        /// Interpolate the colour
         inline void interpolateColor(float* col) const
         {
             int CsIdx = m_grid.storage().varList().stdIndices().Cs;
@@ -124,6 +156,48 @@ class MicroQuadSampler
             {
                 for(int i = 0; i < 3; ++i)
                     col[i] = Cs[m_ind.a][i];
+            }
+        }
+
+        /// Compute any output variables at the current hit.
+        inline void interpolate(float* samples) const
+        {
+            // Note: The existence of this loop has a measurable impact on
+            // performance; perhaps 10% slower than sampling colour directly
+            // (measured on a core2 machine)
+            //
+            // Such overhead could _possibly_ be eliminated by packing the
+            // gridvar storage together, but that potentially introduces
+            // overhead elsewhere.
+            for(int j = 0, jend = m_outVarInfo.size(); j < jend; ++j)
+            {
+                // Smooth shading is just bilinear interpolation across the
+                // face of the micropolygon.  It's written out in full here to
+                // make sure the coefficients are only computed once (maybe
+                // the optimizer would do this for us if we used the bilerp()
+                // function instead?)
+                ConstFvecView in = m_outVarInfo[j].src;
+                if(m_smoothShading)
+                {
+                    const float* in0 = in[m_ind.a];
+                    const float* in1 = in[m_ind.b];
+                    const float* in2 = in[m_ind.d];
+                    const float* in3 = in[m_ind.c];
+                    float w0 = (1-m_uv.y)*(1-m_uv.x);
+                    float w1 = (1-m_uv.y)*m_uv.x;
+                    float w2 = m_uv.y*(1-m_uv.x);
+                    float w3 = m_uv.y*m_uv.x;
+                    float* out = &samples[m_outVarInfo[j].outIdx];
+                    for(int i = 0, size = in.size(); i < size; ++i)
+                        out[i] = w0*in0[i] + w1*in1[i] + w2*in2[i] + w3*in3[i];
+                }
+                else
+                {
+                    const float* in0 = in[m_ind.a];
+                    float* out = &samples[m_outVarInfo[j].outIdx];
+                    for(int i = 0, size = in.size(); i < size; ++i)
+                        out[i] = in0[i];
+                }
             }
         }
 };
