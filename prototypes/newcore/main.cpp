@@ -68,6 +68,26 @@ int main()
 
     r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
                             Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
 
     // Cube geometry
 //    addCube(opts, r,
