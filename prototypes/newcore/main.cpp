@@ -15,11 +15,11 @@ boost::shared_ptr<Geometry> createPatch(const Options& opts,
         a.x, a.y, a.z,  b.x, b.y, b.z,
         c.x, c.y, c.z,  d.x, d.y, d.z,
     };
-    vars->add(StdVar::P, P, ARRLEN(P));
+    vars->add(Primvar::P, P, ARRLEN(P));
     float Cs[] = {
         1, 0, 0,  0, 1, 0,  0, 0, 1,  1, 1, 1
     };
-    vars->add(StdVar::Cs, Cs, ARRLEN(Cs));
+    vars->add(Primvar::Cs, Cs, ARRLEN(Cs));
     boost::shared_ptr<Geometry> patch(new Patch(opts, vars));
 //    boost::shared_ptr<Geometry> patch(new PatchSimple(opts, a,b,c,d));
     patch->transform(trans);
@@ -44,7 +44,7 @@ void addCube(const Options& opts, Renderer& r, const Mat4& otow)
                             Vec3(1,-1,1), Vec3(1,1,1), otow) );
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     Options opts;
     opts.xRes = 1024;
@@ -59,35 +59,27 @@ int main()
 //        perspectiveProjection(90, opts.clipNear, opts.clipFar);
         screenWindow(0,0.5, 0,0.5);
 
-    Renderer r(opts, camToScreen);
+    // Output variables.
+    std::vector<VarSpec> outVars;
+    outVars.push_back(Stdvar::Cs);
+    outVars.push_back(Stdvar::z);
+
+    Renderer r(opts, camToScreen, outVars);
 
 //    r.add(createPatch(opts, Vec3(-0.5,-0.5,0), Vec3(0.5,-0.5,0),
 //                            Vec3(-0.5,0.5,0), Vec3(0.5,0.5,0),
 //                            Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(50))
 //                            * Mat4().setTranslation(Vec3(0,0,1))));
 
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
-    r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                            Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    int numPatches = 1;
+    if(argc > 1)
+        numPatches = 10;
+
+    for(int i = 0; i < numPatches; ++i)
+    {
+        r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                                Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+    }
 
     // Cube geometry
 //    addCube(opts, r,

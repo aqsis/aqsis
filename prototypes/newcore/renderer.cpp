@@ -52,51 +52,107 @@ static void writeHeader(TIFF* tif, Options& opts, int nchans, bool useFloat)
     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, 0));
 }
 
-static void quantize(const float* in, uint8* out, int len)
+static void quantize(const float* in, int nPix, int nSamps, int pixStride,
+                     uint8* out)
 {
-    for(int i = 0; i < len; ++i)
-        out[i] = static_cast<uint8>(Imath::clamp(255*in[i], 0.0f, 255.0f));
+    for(int j = 0; j < nPix; ++j)
+    {
+        for(int i = 0; i < nSamps; ++i)
+            out[i] = static_cast<uint8>(Imath::clamp(255*in[i], 0.0f, 255.0f));
+        in += pixStride;
+        out += nSamps;
+    }
+}
+
+static void strided_memcpy(void* dest, const void* src, size_t nElems,
+                           size_t blockSize, size_t srcStride)
+{
+    char* d = reinterpret_cast<char*>(dest);
+    const char* s = reinterpret_cast<const char*>(src);
+    for(size_t j = 0; j < nElems; ++j)
+    {
+        std::memcpy(d, s, blockSize);
+        d += blockSize;
+        s += srcStride;
+    }
+}
+
+// TODO: Should probably be a member of OutvarList.
+static int samplesPerPixel(const OutvarList& outVars)
+{
+    int sampsPerPix = 0;
+    for(int i = 0, iend = outVars.size(); i < iend; ++i)
+        sampsPerPix += outVars[i].scalarSize();
+    return sampsPerPix;
 }
 
 // Save image to a TIFF file.
-void Renderer::saveImage(const std::string& fileName)
+void Renderer::saveImages(const std::string& baseFileName)
 {
-    TIFF* tif = TIFFOpen(fileName.c_str(), "w");
-    if(!tif)
+    int pixStride = samplesPerPixel(m_outVars);
+    for(int i = 0, nFiles = m_outVars.size(); i < nFiles; ++i)
     {
-        std::cerr << "Could not open file!\n";
-        return;
+        int nSamps = m_outVars[i].scalarSize();
+
+        std::string fileName = baseFileName;
+        fileName += "_";
+        fileName += m_outVars[i].name.c_str();
+        fileName += ".tif";
+
+        TIFF* tif = TIFFOpen(fileName.c_str(), "w");
+        if(!tif)
+        {
+            std::cerr << "Could not open file " << fileName << "\n";
+            continue;
+        }
+
+        // Don't quatize if we've got depth data.
+        bool doQuantize = m_outVars[i] != Stdvar::z;
+        writeHeader(tif, m_opts, nSamps, !doQuantize);
+
+        // Write RGB image data
+        int rowSize = nSamps*m_opts.xRes*(doQuantize ? 1 : sizeof(float));
+        boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
+        for(int line = 0; line < m_opts.yRes; ++line)
+        {
+            const float* src = &m_image[0] + pixStride*line*m_opts.xRes
+                               + m_outVars[i].offset;
+            if(doQuantize)
+            {
+                quantize(src, m_opts.xRes, nSamps, pixStride, lineBuf.get());
+            }
+            else
+            {
+                strided_memcpy(lineBuf.get(), src, m_opts.xRes,
+                               nSamps*sizeof(float), pixStride*sizeof(float));
+            }
+            TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
+                            uint32(line));
+        }
+
+        TIFFClose(tif);
     }
-
-    writeHeader(tif, m_opts, 3, false);
-
-    // Write RGB image data
-    int rowSize = 3*m_opts.xRes;
-    boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
-    for(int line = 0; line < m_opts.yRes; ++line)
-    {
-        quantize(&m_image[0] + 3*line*m_opts.xRes, lineBuf.get(), rowSize);
-        TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
-                          uint32(line));
-    }
-
-    // Write Z image data
-//    int rowSize = m_opts.xRes*sizeof(float);
-//    boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
-//    for(int line = 0; line < m_opts.yRes; ++line)
-//    {
-//        std::memcpy(lineBuf.get(), &m_image[0] + line*m_opts.xRes,
-//                    rowSize);
-//        TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
-//                          uint32(line));
-//    }
-
-    TIFFClose(tif);
 }
 
 
 //------------------------------------------------------------------------------
 // Guts of the renderer
+
+/// Fill a vector with the default no-hit fragment sample values
+void Renderer::defaultSamples(float* defaultSamps)
+{
+    // Determine index of depth output data, if any.
+    int zOffset = -1;
+    OutvarList::const_iterator zIter = std::find(m_outVars.begin(),
+                                                 m_outVars.end(), Stdvar::z);
+    if(zIter != m_outVars.end())
+        zOffset = zIter->offset;
+    int pixStride = samplesPerPixel(m_outVars);
+    // Set up default values for samples.
+    std::memset(defaultSamps, 0, pixStride*sizeof(float));
+    if(zOffset >= 0)
+        defaultSamps[zOffset] = FLT_MAX;
+}
 
 /// Initialize the sample and image arrays.
 void Renderer::initSamples()
@@ -109,8 +165,16 @@ void Renderer::initSamples()
         for(int i = 0; i < m_opts.xRes; ++i)
             m_samples[j*m_opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
     }
-    // Initialize image array
-    m_image.resize(3*m_opts.xRes*m_opts.yRes, 0);
+    // Initialize image array.
+    int sampsPerPix = samplesPerPixel(m_outVars);
+    m_defOutSamps.resize(sampsPerPix);
+    defaultSamples(&m_defOutSamps[0]);
+    m_image.resize(sampsPerPix*m_opts.xRes*m_opts.yRes);
+    for(int i = 0, nPix = m_opts.xRes*m_opts.yRes; i < nPix; ++i)
+    {
+        std::memcpy(&m_image[sampsPerPix*i], &m_defOutSamps[0],
+                    sampsPerPix*sizeof(float));
+    }
 }
 
 
@@ -163,6 +227,41 @@ void Renderer::push(const boost::shared_ptr<Grid>& grid)
     }
 }
 
+Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
+                   const std::vector<VarSpec>& outVars)
+    : m_opts(opts),
+    m_surfaces(),
+    m_samples(),
+    m_outVars(),
+    m_image(),
+    m_camToRas()
+{
+    // Set up output variables.  Default is to use Cs.
+    if(outVars.size() == 0)
+    {
+        m_outVars.push_back(OutvarSpec(Stdvar::Cs, 0));
+    }
+    else
+    {
+        int offset = 0;
+        for(int i = 0, iend = outVars.size(); i < iend; ++i)
+        {
+            m_outVars.push_back(OutvarSpec(outVars[i], offset));
+            offset += outVars[i].scalarSize();
+        }
+    }
+    // Set up camera -> raster matrix
+    m_camToRas = camToScreen
+        * Mat4().setScale(Vec3(0.5,-0.5,0))
+        * Mat4().setTranslation(Vec3(0.5,0.5,0))
+        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+}
+
+void Renderer::add(const boost::shared_ptr<Geometry>& geom)
+{
+    // TODO: Transform to camera space?
+    push(geom, 0);
+}
 
 // Render all surfaces and save resulting image.
 void Renderer::render()
@@ -183,7 +282,7 @@ void Renderer::render()
         RenderQueueImpl queue(*this, s.splitCount);
         s.geom->splitdice(splitTrans, queue);
     }
-    saveImage("test.tif");
+    saveImages("test");
 }
 
 
@@ -192,8 +291,17 @@ template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
 void Renderer::rasterize(GridT& grid)
 {
+    // Determine index of depth output data, if any.
+    int zOffset = -1;
+    OutvarList::const_iterator zIter = std::find(m_outVars.begin(),
+                                                 m_outVars.end(), Stdvar::z);
+    if(zIter != m_outVars.end())
+        zOffset = zIter->offset;
+    int pixStride = samplesPerPixel(m_outVars);
+
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
+
     // Construct a sampler for the polygons in the grid
     PolySamplerT poly(grid, m_opts, m_outVars);
     // iterate over all micropolys in the grid & render each one.
@@ -229,13 +337,13 @@ void Renderer::rasterize(GridT& grid)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Generate & store a fragment
-                //
-                // TODO: Instead of memset() here, we should probably make a
-                // defaults buffer on the stack before the loop, and memcpy it
-                // in.  Some vars (eg, Oi) shouldn't be 0 by default.
-                std::memset(&m_image[3*idx], 0, 3*sizeof(float));
-                poly.interpolate(&m_image[3*idx]);
-                //m_image[idx] = z;
+                float* out = &m_image[pixStride*idx];
+                // Initialize fragment data with the default value.
+                std::memcpy(out, &m_defOutSamps[0], pixStride*sizeof(float));
+                // Store interpolated fragment data
+                poly.interpolate(out);
+                if(zOffset >= 0)
+                    out[zOffset] = z;
             }
         }
         poly.next();
@@ -249,6 +357,8 @@ void Renderer::rasterize(GridT& grid)
 // version to benchmark against.
 void Renderer::rasterizeSimple(QuadGridSimple& grid)
 {
+    int pixStride = samplesPerPixel(m_outVars);
+
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
     const Vec3* P = grid.P(0);
@@ -320,12 +430,7 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Store z value.
-                //m_image[idx] = z;
-                // Store color.  Actually, we can't do this with the
-                // super-simple sampler!
-                m_image[3*idx] = z;
-                m_image[3*idx] = 0;
-                m_image[3*idx] = 0;
+                m_image[pixStride*idx] = z;
             }
         }
     }

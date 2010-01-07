@@ -65,7 +65,21 @@ struct VarSpec
             && l.type == r.type
             && l.arraySize == r.arraySize;
     }
+    friend bool operator!=(const VarSpec& l, const VarSpec& r)
+    {
+        return !(l == r);
+    }
 };
 
+
+namespace Stdvar {
+    extern const VarSpec P;
+    extern const VarSpec Cs;
+    extern const VarSpec Ci;
+    extern const VarSpec Os;
+    extern const VarSpec Oi;
+    extern const VarSpec st;
+    extern const VarSpec z;
+}
 
 #endif // VARSPEC_H_INCLUDED

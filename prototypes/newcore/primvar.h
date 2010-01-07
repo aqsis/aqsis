@@ -60,7 +60,7 @@ struct PrimvarSpec : public VarSpec
 
 
 /// Standard primitive variable names
-namespace StdVar
+namespace Primvar
 {
     extern const PrimvarSpec P;
     extern const PrimvarSpec Cs;

@@ -19,6 +19,7 @@ set(srcs
     ustring/ustring.cpp
     fixedstrings.cpp
     primvar.cpp
+    varspec.cpp
 )
 
 add_executable(render ${srcs})

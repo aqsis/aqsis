@@ -1,6 +1,6 @@
 #include "primvar.h"
 
-namespace StdVar
+namespace Primvar
 {
 #   define DEFINE_STD_VAR(iclass, type, count, name)              \
         const PrimvarSpec name(PrimvarSpec::iclass, PrimvarSpec::type,  \

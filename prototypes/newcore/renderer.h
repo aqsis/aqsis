@@ -41,12 +41,25 @@ struct OutvarSpec : public VarSpec
 
     OutvarSpec(Type type, int arraySize, ustring name, int offset)
         : VarSpec(type, arraySize, name), offset(offset) {}
+    OutvarSpec(const VarSpec& spec, int offset)
+        : VarSpec(spec), offset(offset) {}
 };
 
 typedef std::vector<OutvarSpec> OutvarList;
 
 class Renderer
 {
+    public:
+        Renderer(const Options& opts, const Mat4& camToScreen = Mat4(),
+                 const std::vector<VarSpec>& outVars = std::vector<VarSpec>());
+
+        /// Add geometry
+        void add(const boost::shared_ptr<Geometry>& geom);
+
+        /// Render all surfaces and save resulting image.
+        void render();
+
+
     private:
         // RenderQueueImpl is a friend so that it can appropriately push()
         // surfaces and grids into the renderer.
@@ -97,11 +110,13 @@ class Renderer
         SurfaceQueue m_surfaces;       ///< Queue of surface to be rendered
         std::vector<Sample> m_samples; ///< Array of sample info
         OutvarList m_outVars;          ///< Output variable list
+        std::vector<float> m_defOutSamps; ///< Default output samples
         std::vector<float> m_image;    ///< Image data
         Mat4 m_camToRas;               ///< Camera -> raster transformation
 
-        void saveImage(const std::string& fileName);
+        void saveImages(const std::string& baseFileName);
 
+        void defaultSamples(float* defaultSamps);
         void initSamples();
         void push(const boost::shared_ptr<Geometry>& geom, int splitCount);
         void push(const boost::shared_ptr<Grid>& grid);
@@ -110,34 +125,6 @@ class Renderer
         void rasterize(GridT& grid);
 
         void rasterizeSimple(QuadGridSimple& grid);
-
-    public:
-        Renderer(const Options& opts, const Mat4& camToScreen = Mat4())
-            : m_opts(opts),
-            m_surfaces(),
-            m_samples(),
-            m_outVars(),
-            m_image(),
-            m_camToRas()
-        {
-            // Set up output variables
-            m_outVars.push_back(OutvarSpec(VarSpec::Color, 1, ustring("Cs"), 0));
-            // Set up camera -> raster matrix
-            m_camToRas = camToScreen
-                * Mat4().setScale(Vec3(0.5,-0.5,0))
-                * Mat4().setTranslation(Vec3(0.5,0.5,0))
-                * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
-        }
-
-        // Add geometry
-        void add(const boost::shared_ptr<Geometry>& geom)
-        {
-            // TODO: Transform to camera space?
-            push(geom, 0);
-        }
-
-        // Render all surfaces and save resulting image.
-        void render();
 };
 
 
