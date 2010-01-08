@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
         screenWindow(0,0.5, 0,0.5);
 
     // Output variables.
-    std::vector<VarSpec> outVars;
+    VarList outVars;
     outVars.push_back(Stdvar::Cs);
     outVars.push_back(Stdvar::z);
 

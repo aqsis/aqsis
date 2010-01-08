@@ -51,7 +51,7 @@ class Renderer
 {
     public:
         Renderer(const Options& opts, const Mat4& camToScreen = Mat4(),
-                 const std::vector<VarSpec>& outVars = std::vector<VarSpec>());
+                 const VarList& outVars = VarList());
 
         /// Add geometry
         void add(const boost::shared_ptr<Geometry>& geom);

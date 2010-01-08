@@ -1,6 +1,8 @@
 #ifndef VARSPEC_H_INCLUDED
 #define VARSPEC_H_INCLUDED
 
+#include <vector>
+
 #include "ustring.h"
 
 struct VarSpec
@@ -72,6 +74,9 @@ struct VarSpec
 };
 
 
+typedef std::vector<VarSpec> VarList;
+
+
 namespace Stdvar {
     extern const VarSpec P;
     extern const VarSpec Cs;
@@ -79,6 +84,9 @@ namespace Stdvar {
     extern const VarSpec Os;
     extern const VarSpec Oi;
     extern const VarSpec st;
+    extern const VarSpec I;
+    extern const VarSpec N;
+
     extern const VarSpec z;
 }
 

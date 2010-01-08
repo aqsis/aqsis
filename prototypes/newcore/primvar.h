@@ -104,34 +104,43 @@ struct IclassStorage
     }
 };
 
-
 inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
 {
     return storCount.storage(iclass)*scalarSize();
 }
 
-
 struct StdVarIndices
 {
     int P;
     int Cs;
+    int Ci;
+    int Os;
+    int Oi;
+    int st;
+    int I;
+    int N;
 
-    StdVarIndices() : P(-1), Cs(-1) {}
+    StdVarIndices()
+        : P(-1), Cs(-1), Ci(-1), Os(-1), Oi(-1), st(-1), I(-1), N(-1) {}
 
     void add(int index, const VarSpec& var)
     {
-        if(var.name == Str::P)
-        {
-            if(var.type != VarSpec::Point || var.arraySize != 1)
-                throw std::runtime_error("Wrong type for variable \"P\"");
+        if(var == Stdvar::P)
             P = index;
-        }
-        else if(var.name == Str::Cs)
-        {
-            if(var.type != VarSpec::Color || var.arraySize != 1)
-                throw std::runtime_error("Wrong type for variable \"Cs\"");
+        else if(var == Stdvar::Cs)
             Cs = index;
-        }
+        else if(var == Stdvar::Ci)
+            Ci = index;
+        else if(var == Stdvar::Os)
+            Os = index;
+        else if(var == Stdvar::Oi)
+            Oi = index;
+        else if(var == Stdvar::st)
+            st = index;
+        else if(var == Stdvar::I)
+            I = index;
+        else if(var == Stdvar::N)
+            N = index;
     }
 };
 

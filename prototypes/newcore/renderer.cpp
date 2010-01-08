@@ -228,7 +228,7 @@ void Renderer::push(const boost::shared_ptr<Grid>& grid)
 }
 
 Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
-                   const std::vector<VarSpec>& outVars)
+                   const VarList& outVars)
     : m_opts(opts),
     m_surfaces(),
     m_samples(),

@@ -14,6 +14,7 @@
 #include <OpenEXR/ImathBox.h>
 #include <OpenEXR/ImathMatrix.h>
 #include <OpenEXR/ImathVec.h>
+#include <OpenEXR/ImathColor.h>
 
 template<typename T>
 inline T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
@@ -25,6 +26,7 @@ inline const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
 typedef Imath::M44f Mat4;
+typedef Imath::C3f Color;
 
 typedef Imath::Box3f Box;
 

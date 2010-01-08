@@ -30,6 +30,7 @@ add_executable(primvar_test
     ustring/ustring.cpp
     fixedstrings.cpp
     primvar.cpp
+    varspec.cpp
 )
 
 #target_link_libraries(varspec_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
