@@ -1,0 +1,58 @@
+Display "test_aq.tif" "zfile" "z" "compression" "lzw"
+#Display "+test_aq.tif" "framebuffer" "z"
+
+#Format 512 512 1
+Format 1024 1024 1
+
+Hider "hidden" "jitter" 0
+PixelSamples 1 1
+PixelFilter "box" 1 1
+
+ShadingRate 1
+
+Projection "orthographic"
+
+ScreenWindow 0 0.5 0 0.5
+
+WorldBegin
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+    Patch "bilinear" "P" [
+        0.2 0.2 5   0.5 -0.5 1
+        -0.5 0.5 1    0.5 0.5 5
+    ]
+WorldEnd
