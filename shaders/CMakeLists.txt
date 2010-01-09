@@ -62,8 +62,11 @@ foreach(dir ${shader_dirs})
 		DESTINATION ${shaders_install_dir}
 		COMPONENT main
 	)
-	set(shader_search_path
-		"${shader_search_path}:${shaders_searchpath_dir}/${dir}")
+	if(shader_search_path)
+		set(shader_search_path "${shader_search_path}:${shaders_searchpath_dir}/${dir}")
+	else()
+		set(shader_search_path "${shaders_searchpath_dir}/${dir}")
+	endif()
 endforeach()
 set(shader_search_path ${shader_search_path} PARENT_SCOPE)
 

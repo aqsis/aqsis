@@ -1665,8 +1665,6 @@ inline static std::string mtorPathFudge(const std::string& originalPath)
 static std::string expandSearchPath(const std::string& newPath,
 		const std::string& oldPath, const std::string& defaultPath)
 {
-	// Get the old value for use in escape replacement
-	Aqsis::log() << debug << "Old searchpath = " << oldPath << std::endl;
 	// Build the string, checking for & and @ characters  and replace with old
 	// and default string, respectively.
 	std::string::size_type strt = 0;
@@ -1710,7 +1708,6 @@ static std::string expandSearchPath(const std::string& newPath,
 		}
 	}
 	expandedPath = mtorPathFudge(expandedPath);
-	Aqsis::log() << debug << "New searchpath = " << expandedPath << std::endl;
 	return expandedPath;
 }
 
@@ -1787,13 +1784,22 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 				{
 					if ( strcmp( name, "searchpath" ) == 0 )
 					{
+						// Get the default string for use in escape replacement
 						const CqString* pDefSearch
 							= QGetRenderContext()->poptWriteCurrent()
 							->GetStringOption("defaultsearchpath", undecoratedName);
 						std::string defaultSearch;
 						if(pDefSearch)
 							defaultSearch = *pDefSearch;
+						Aqsis::log() << debug << "Old " << undecoratedName << " searchpath = " << pOpt[j] << std::endl;
 						pOpt[j] = expandSearchPath(ps[j], pOpt[j], defaultSearch);
+						Aqsis::log() << debug << "New " << undecoratedName << " searchpath = " << pOpt[j] << std::endl;
+					}
+					else if ( strcmp( name, "defaultsearchpath" ) == 0 )
+					{
+						Aqsis::log() << debug << "Old " << undecoratedName << " defaultsearchpath = " << pOpt[j] << std::endl;
+						pOpt[j] = expandSearchPath(ps[j], pOpt[j], std::string());
+						Aqsis::log() << debug << "New " << undecoratedName << " defaultsearchpath = " << pOpt[j] << std::endl;
 					}
 					else
 						pOpt[j] = ps[j];
