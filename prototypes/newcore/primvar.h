@@ -212,7 +212,9 @@ class PrimvarStorage
         {
             int offset;
             int stride;
-            VarInfo(int offset, int stride) : offset(offset), stride(stride) {}
+            int elSize;
+            VarInfo(int offset, int stride, int elSize)
+                : offset(offset), stride(stride), elSize(elSize) {}
         };
         std::vector<VarInfo> m_varInfo;
         boost::shared_ptr<PrimvarList> m_vars;
@@ -229,10 +231,14 @@ class PrimvarStorage
         {
             int index = m_vars->add(var);
             int length = var.storageSize(m_storCount);
-            if(srcLength != length)
-                throw std::runtime_error("Wrong number of floats for "
+            if(srcLength < length)
+                throw std::runtime_error("Not enough floats for "
                                          "primitive variable!");
-            m_varInfo.push_back(VarInfo(m_storage.size(), var.scalarSize()));
+            else if(srcLength > length)
+                std::cerr << "Warning: excess floats in "
+                             "primitive variable array\n";
+            int elSize = var.scalarSize();
+            m_varInfo.push_back(VarInfo(m_storage.size(), elSize, elSize));
             m_storage.insert(m_storage.end(), data, data+length);
             return index;
         }
@@ -241,7 +247,7 @@ class PrimvarStorage
         {
             assert(i >= 0 && i < (int)m_varInfo.size());
             return FvecView(&m_storage[m_varInfo[i].offset],
-                              m_varInfo[i].stride);
+                              m_varInfo[i].stride, m_varInfo[i].elSize);
         }
 
         const PrimvarList& varList() const { return *m_vars; }

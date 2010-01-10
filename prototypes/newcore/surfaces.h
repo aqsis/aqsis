@@ -58,7 +58,7 @@ class Patch : public Geometry
             {
                 ConstFvecView pvar = m_vars->get(ivar);
                 FvecView gvar = grid->storage().get(ivar);
-                int size = gvar.size();
+                int size = gvar.elSize();
 
                 if((*gvarList)[ivar].uniform)
                 {

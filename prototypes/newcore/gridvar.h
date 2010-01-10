@@ -58,7 +58,7 @@ struct GridvarSpec : public VarSpec
     /// Get number of scalars for the variable on a grid with nVerts vertices.
     int storageSize(int nVerts) const
     {
-        return (uniform ? 1 : nVerts) * sizeForType(type);
+        return (uniform ? 1 : nVerts) * scalarSize();
     }
 
     /// Convert primvar spec to gridvar
@@ -151,9 +151,11 @@ class GridvarStorage
             int offset = 0;
             for(int i = 0; i < nvars; ++i)
             {
-                const int nfloats = (*m_vars)[i].scalarSize();
-                m_views[i] = FvecView(&m_storage[0] + offset, nfloats);
-                offset += (*m_vars)[i].storageSize(nverts);
+                const GridvarSpec& var = (*m_vars)[i];
+                const int len = var.scalarSize();
+                const int stride = var.uniform ? 0 : len;
+                m_views[i] = FvecView(&m_storage[0] + offset, stride, len);
+                offset += var.storageSize(nverts);
             }
         }
 
@@ -176,14 +178,14 @@ class GridvarStorage
         {
             int Pidx = m_vars->stdIndices().P;
             assert(Pidx >= 0);
-            return DataView<Vec3>(m_views[Pidx].base(),
+            return DataView<Vec3>(m_views[Pidx].storage(),
                                   m_views[Pidx].stride());
         }
         ConstDataView<Vec3> P() const
         {
             int Pidx = m_vars->stdIndices().P;
             assert(Pidx >= 0);
-            return ConstDataView<Vec3>(m_views[Pidx].base(),
+            return ConstDataView<Vec3>(m_views[Pidx].storage(),
                                        m_views[Pidx].stride());
         }
 };

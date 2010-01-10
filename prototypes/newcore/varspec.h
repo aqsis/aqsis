@@ -21,6 +21,7 @@
 #define VARSPEC_H_INCLUDED
 
 #include <vector>
+#include <iostream>
 
 #include "ustring.h"
 
@@ -72,26 +73,40 @@ struct VarSpec
     {
         return sizeForType(type)*arraySize;
     }
-
-    friend bool operator<(const VarSpec& l, const VarSpec& r)
-    {
-        return l.name < r.name
-            && l.type < r.type
-            && l.arraySize < r.arraySize;
-    }
-
-    friend bool operator==(const VarSpec& l, const VarSpec& r)
-    {
-        return l.name == r.name
-            && l.type == r.type
-            && l.arraySize == r.arraySize;
-    }
-    friend bool operator!=(const VarSpec& l, const VarSpec& r)
-    {
-        return !(l == r);
-    }
 };
 
+
+// Comparison operators for sorting VarSpecs.
+inline bool operator<(const VarSpec& l, const VarSpec& r)
+{
+    return l.name < r.name
+        && l.type < r.type
+        && l.arraySize < r.arraySize;
+}
+
+inline bool operator==(const VarSpec& l, const VarSpec& r)
+{
+    return l.name == r.name
+        && l.type == r.type
+        && l.arraySize == r.arraySize;
+}
+
+inline bool operator!=(const VarSpec& l, const VarSpec& r)
+{
+    return !(l == r);
+}
+
+inline std::ostream& operator<<(std::ostream& out, const VarSpec& var)
+{
+    const char* typeNames[] = {
+        "float", "point", "hpoint", "vector",
+        "normal", "color", "matrix", "string"
+    };
+    out << typeNames[var.type] << " " << var.name;
+    if(var.arraySize != 1)
+        out << "[" << var.arraySize << "]";
+    return out;
+}
 
 typedef std::vector<VarSpec> VarList;
 

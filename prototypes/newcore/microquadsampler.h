@@ -92,6 +92,7 @@ class MicroQuadSampler
                     {
                         m_outVarInfo.push_back(OutVarInfo(
                                 m_grid.storage().get(i), outVars[j].offset) );
+                        break;
                     }
                 }
             }
@@ -207,14 +208,14 @@ class MicroQuadSampler
                     float w2 = m_uv.y*(1-m_uv.x);
                     float w3 = m_uv.y*m_uv.x;
                     float* out = &samples[m_outVarInfo[j].outIdx];
-                    for(int i = 0, size = in.size(); i < size; ++i)
+                    for(int i = 0, size = in.elSize(); i < size; ++i)
                         out[i] = w0*in0[i] + w1*in1[i] + w2*in2[i] + w3*in3[i];
                 }
                 else
                 {
                     const float* in0 = in[m_ind.a];
                     float* out = &samples[m_outVarInfo[j].outIdx];
-                    for(int i = 0, size = in.size(); i < size; ++i)
+                    for(int i = 0, size = in.elSize(); i < size; ++i)
                         out[i] = in0[i];
                 }
             }

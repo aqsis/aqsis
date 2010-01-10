@@ -102,7 +102,7 @@ int main()
     {
         ConstFvecView pvar = pvarStorage.get(ivar);
         FvecView gvar = gvarStorage.get(ivar);
-        int size = gvar.size();
+        int size = gvar.elSize();
 
         if(gvarList[ivar].uniform)
         {
@@ -150,7 +150,7 @@ int main()
         if(gvarStorage.varList()[ivar].uniform)
         {
             const float* f = gvar[0];
-            for(int i = 0; i < gvar.size(); ++i)
+            for(int i = 0; i < gvar.elSize(); ++i)
                 std::cout << std::setprecision(2) << std::fixed << f[i] << " ";
             std::cout << "\n";
         }
@@ -161,7 +161,7 @@ int main()
                 for(int u = 0; u < nu; ++u)
                 {
                     const float* f = gvar[u];
-                    for(int i = 0; i < gvar.size(); ++i)
+                    for(int i = 0; i < gvar.elSize(); ++i)
                         std::cout << std::setprecision(2) << std::fixed << f[i] << " ";
                     std::cout << "  ";
                 }

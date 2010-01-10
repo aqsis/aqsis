@@ -75,63 +75,67 @@ class ConstDataView
 
 
 
-/// Strided view of a float array as an array of shorter float vectors
+/// Strided view of a float array as an array of short float vectors
 class FvecView
 {
     private:
         float* m_storage;
         int m_stride;
-        friend class ConstFvecView;
-    public:
-        FvecView() : m_storage(0), m_stride(0) {}
+        int m_elSize;
 
-        FvecView(float* storage, int stride)
+    public:
+        FvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
+
+        FvecView(float* storage, int stride, int elSize)
             : m_storage(storage),
-            m_stride(stride)
+            m_stride(stride),
+            m_elSize(elSize)
         {}
 
         float* operator[](int i) { return m_storage + i*m_stride; }
         const float* operator[](int i) const { return m_storage + i*m_stride; }
 
-        float* base() { return m_storage; }
-        const float* base() const { return m_storage; }
+        float* storage() { return m_storage; }
+        const float* storage() const { return m_storage; }
         int stride() const { return m_stride; }
+        int elSize() const { return m_elSize; }
 
         FvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         FvecView& operator++() { m_storage += m_stride; return *this;}
-
-        /// Return the length of the contained float vectors
-        int size() const { return m_stride; }
 };
 
 
+/// Const version of FvecView
 class ConstFvecView
 {
     private:
         const float* m_storage;
         int m_stride;
-    public:
-        ConstFvecView() : m_storage(0), m_stride(0) {}
+        int m_elSize;
 
-        ConstFvecView(const float* storage, int stride)
+    public:
+        ConstFvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
+
+        ConstFvecView(const float* storage, int stride, int elSize)
             : m_storage(storage),
-            m_stride(stride)
+            m_stride(stride),
+            m_elSize(elSize)
         {}
 
         ConstFvecView(const FvecView& view)
-            : m_storage(view.m_storage),
-            m_stride(view.m_stride)
+            : m_storage(view.storage()),
+            m_stride(view.stride()),
+            m_elSize(view.elSize())
         {}
 
         const float* operator[](int i) const { return m_storage + i*m_stride; }
 
-        const float* base() const { return m_storage; }
+        const float* storage() const { return m_storage; }
         int stride() const { return m_stride; }
+        int elSize() const { return m_elSize; }
 
         ConstFvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         ConstFvecView& operator++() { m_storage += m_stride; return *this;}
-
-        int size() const { return m_stride; }
 };
 
 #endif // ARRAYVIEW_H_INCLUDED
