@@ -39,6 +39,7 @@ boost::shared_ptr<Geometry> createPatch(const Options& opts,
         1, 0, 0,  0, 1, 0,  0, 0, 1,  1, 1, 1
     };
     vars->add(Primvar::Cs, Cs, ARRLEN(Cs));
+    //vars->add(PrimvarSpec(PrimvarSpec::Uniform, PrimvarSpec::Color, 1, ustring("Cs")), Cs, ARRLEN(Cs));
     boost::shared_ptr<Geometry> patch(new Patch(opts, vars));
 //    boost::shared_ptr<Geometry> patch(new PatchSimple(opts, a,b,c,d));
     patch->transform(trans);

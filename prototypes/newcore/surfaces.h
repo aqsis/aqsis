@@ -62,11 +62,8 @@ class Patch : public Geometry
 
                 if((*gvarList)[ivar].uniform)
                 {
-                    // Uniform, no interpolation.
-                    float* out = gvar[0];
-                    const float* in = pvar[0];
-                    for(int i = 0; i < size; ++i)
-                        out[i] = in[i];
+                    // Uniform, no interpolation, just copy.
+                    std::memcpy(gvar[0], pvar[0], size*sizeof(float));
                 }
                 else
                 {
