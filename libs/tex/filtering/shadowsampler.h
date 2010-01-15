@@ -62,12 +62,11 @@ class AQSIS_TEX_SHARE CqShadowSampler : public IqShadowSampler
 				const CqShadowSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		virtual const CqShadowSampleOptions& defaultSampleOptions() const;
 	private:
-		/// transformation: current -> light coordinates
-		CqMatrix m_currToLight;
-		/// transformation: current -> raster coordinates ( [0,1]x[0,1] )
-		CqMatrix m_currToTexture;
-		/// Pixel data for shadow map.
-		boost::shared_ptr<CqTileArray<TqFloat> > m_pixelBuf;
+		class CqShadowView;
+		typedef std::vector<boost::shared_ptr<CqShadowView> > TqViewVec;
+
+		/// List of map views, used for point shadows, which have 6 subimages.
+		TqViewVec m_maps;
 		/// Default shadow sampling options.
 		CqShadowSampleOptions m_defaultSampleOptions;
 };
