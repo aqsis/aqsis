@@ -267,6 +267,9 @@ struct IqShaderData
 	 * \return Read only reference to a CqString class.
 	 */
 	virtual	const CqString&	strName() const = 0;
+
+	virtual	TqUlong	strNameHash() const = 0;
+
 	/** Get the storage type
  	 *
 	 * \return the storage type on the shader, that is, whether it's a

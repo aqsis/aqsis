@@ -91,6 +91,11 @@ class CqShaderVariable : public IqShaderData
 			return ( m_strName );
 		}
 
+		virtual TqUlong strNameHash() const
+		{
+			return ( m_strNameHash );
+		}
+
 		/** Determine if this variable is storage for a shader argument.
 		 */
 		virtual EqStorage Storage() const
@@ -120,6 +125,7 @@ class CqShaderVariable : public IqShaderData
 
 	protected:
 		CqString	m_strName;		///< Name of this variable.
+		TqUlong  m_strNameHash;
 		EqStorage m_storage;	///< variable storage: temporary, shader parameter, etc
 }
 ;
@@ -1881,12 +1887,12 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 //==============================================================================
 
 inline CqShaderVariable::CqShaderVariable()
-	: m_strName(),
+	: m_strName(), m_strNameHash(CqString::hash(m_strName.c_str ())),
 	m_storage(Unknown)
 {}
 
 inline CqShaderVariable::CqShaderVariable(const char* strName, EqStorage storage)
-	: m_strName(strName),
+	: m_strName(strName), m_strNameHash(CqString::hash(m_strName.c_str ())),
 	m_storage(storage)
 {}
 

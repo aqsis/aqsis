@@ -305,11 +305,11 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 			TqUlong hash = CqString::hash(strName);
 
 			for ( ; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
-				if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash )
+				if ( m_LocalVars[ m_LocalIndex ] ->strNameHash() == hash )
 					return ( m_LocalIndex );
 
 			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
-				if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash )
+				if ( m_LocalVars[ m_LocalIndex ] ->strNameHash() == hash )
 					return ( m_LocalIndex );
 			return ( -1 );
 		}
@@ -322,7 +322,7 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 			TqUlong hash = CqString::hash(strName);
 
 			for ( TqUint m = 0; m < m_LocalVars.size(); m++ )
-				if ( CqString::hash(m_LocalVars[ m ] ->strName().c_str()) == hash )
+				if ( m_LocalVars[ m ] ->strNameHash() == hash )
 					return ( m );
 			return ( -1 );
 		}
