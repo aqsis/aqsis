@@ -481,6 +481,8 @@ void SetDefaultRiOptions( void )
 	CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
 	const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 	rootPath = pathPtr;
+	CFRelease(macPath);
+	CFRelease(pluginRef);
 #else
 	// Minty: Need to work out the executable path here.
 	rootPath = AQSIS_XSTR(DEFAULT_RC_PATH);
