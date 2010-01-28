@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "ustring.h"
 //#include "vset.h"
@@ -76,21 +77,27 @@ struct VarSpec
     {
         return sizeForType(type)*arraySize;
     }
-
-    friend bool operator<(const VarSpec& l, const VarSpec& r)
-    {
-        return l.name < r.name
-            && l.type < r.type
-            && l.arraySize < r.arraySize;
-    }
-
-    friend bool operator==(const VarSpec& l, const VarSpec& r)
-    {
-        return l.name == r.name
-            && l.type == r.type
-            && l.arraySize == r.arraySize;
-    }
 };
+
+bool operator<(const VarSpec& l, const VarSpec& r)
+{
+    return l.name < r.name
+        && l.type < r.type
+        && l.arraySize < r.arraySize;
+}
+
+inline bool operator==(const VarSpec& l, const VarSpec& r)
+{
+    return l.name == r.name
+        && l.type == r.type
+        && l.arraySize == r.arraySize;
+}
+
+inline bool operator!=(const VarSpec& l, const VarSpec& r)
+{
+    return !(l == r);
+}
+
 
 /// Hash function for use with boost::hash
 std::size_t hash_value(const VarSpec& var)
@@ -185,6 +192,39 @@ class VarTable
         {
             assert(id);
             return m_idToVar[id.m_id];
+        }
+};
+
+
+
+
+class UVarSpec
+{
+    private:
+        const VarSpec* m_spec;
+
+        static const VarSpec* makeUnique(const VarSpec& var)
+        {
+            typedef boost::unordered_set<VarSpec> VarSet;
+            static VarSet globalVars;
+            return &*globalVars.insert(var).first;
+        }
+
+    public:
+        UVarSpec() : m_spec(0) {}
+
+        explicit UVarSpec(const VarSpec& var) : m_spec(makeUnique(var)) {}
+
+        const VarSpec* operator->() const { return m_spec; }
+        const VarSpec& operator*() const { return *m_spec; }
+
+        bool operator==(const UVarSpec& rhs) const
+        {
+            return m_spec == rhs.m_spec;
+        }
+        bool operator!=(const UVarSpec& rhs) const
+        {
+            return m_spec != rhs.m_spec;
         }
 };
 
