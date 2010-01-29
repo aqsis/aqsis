@@ -25,15 +25,29 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#ifndef WIN32
 #include <alloca.h>
+#endif
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
 
+// The distinction here is only due to the layout of the 
+// win32libs copy of OpenEXR.
+// Ideally, we should modify the win32libs structure to 
+// properly match OpenEXR and drop this.
+#ifndef WIN32
 #include <OpenEXR/ImathBox.h>
 #include <OpenEXR/ImathMatrix.h>
 #include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathColor.h>
+#else
+#include <ImathBox.h>
+#include <ImathMatrix.h>
+#include <ImathVec.h>
+#include <ImathColor.h>
+#endif
+
 
 template<typename T>
 inline T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }

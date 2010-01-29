@@ -22,7 +22,28 @@ set(srcs
     varspec.cpp
 )
 
-add_executable(render ${srcs})
+set(hdrs
+	arrayview.h
+	fixedstrings.h
+	geometry.h
+	grid.h
+	gridvar.h
+	invbilin.h
+	microquadsampler.h
+	options.h
+	pointinquad.h
+	primvar.h
+	renderer.h
+	sample.h
+	simple.h
+	surfaces.h
+	util.h
+	varspec.h
+)
+
+source_group("Header Files" FILES ${hdrs})
+
+add_executable(render ${srcs} ${hdrs})
 target_link_libraries(render ${TIFF_LIBRARIES})
 
 add_executable(primvar_test
@@ -32,5 +53,10 @@ add_executable(primvar_test
     primvar.cpp
     varspec.cpp
 )
+
+if(WIN32)
+    set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
+    set_property(TARGET render PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
+endif(WIN32)
 
 #target_link_libraries(varspec_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
