@@ -97,7 +97,7 @@ static void strided_memcpy(void* dest, const void* src, size_t nElems,
 }
 
 // TODO: Should probably be a member of OutvarList.
-static int samplesPerPixel(const OutvarList& outVars)
+static int numOutChans(const OutvarList& outVars)
 {
     int sampsPerPix = 0;
     for(int i = 0, iend = outVars.size(); i < iend; ++i)
@@ -108,7 +108,7 @@ static int samplesPerPixel(const OutvarList& outVars)
 // Save image to a TIFF file.
 void Renderer::saveImages(const std::string& baseFileName)
 {
-    int pixStride = samplesPerPixel(m_outVars);
+    int pixStride = numOutChans(m_outVars);
     for(int i = 0, nFiles = m_outVars.size(); i < nFiles; ++i)
     {
         int nSamps = m_outVars[i].scalarSize();
@@ -166,7 +166,7 @@ void Renderer::defaultSamples(float* defaultSamps)
                                                  m_outVars.end(), Stdvar::z);
     if(zIter != m_outVars.end())
         zOffset = zIter->offset;
-    int pixStride = samplesPerPixel(m_outVars);
+    int pixStride = numOutChans(m_outVars);
     // Set up default values for samples.
     std::memset(defaultSamps, 0, pixStride*sizeof(float));
     if(zOffset >= 0)
@@ -185,14 +185,14 @@ void Renderer::initSamples()
             m_samples[j*m_opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
     }
     // Initialize image array.
-    int sampsPerPix = samplesPerPixel(m_outVars);
-    m_defOutSamps.resize(sampsPerPix);
+    int nOutChans = numOutChans(m_outVars);
+    m_defOutSamps.resize(nOutChans);
     defaultSamples(&m_defOutSamps[0]);
-    m_image.resize(sampsPerPix*m_opts.xRes*m_opts.yRes);
+    m_image.resize(nOutChans*m_opts.xRes*m_opts.yRes);
     for(int i = 0, nPix = m_opts.xRes*m_opts.yRes; i < nPix; ++i)
     {
-        std::memcpy(&m_image[sampsPerPix*i], &m_defOutSamps[0],
-                    sampsPerPix*sizeof(float));
+        std::memcpy(&m_image[nOutChans*i], &m_defOutSamps[0],
+                    nOutChans*sizeof(float));
     }
 }
 
@@ -316,7 +316,7 @@ void Renderer::rasterize(GridT& grid)
                                                  m_outVars.end(), Stdvar::z);
     if(zIter != m_outVars.end())
         zOffset = zIter->offset;
-    int pixStride = samplesPerPixel(m_outVars);
+    int pixStride = numOutChans(m_outVars);
 
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
@@ -376,7 +376,7 @@ void Renderer::rasterize(GridT& grid)
 // version to benchmark against.
 void Renderer::rasterizeSimple(QuadGridSimple& grid)
 {
-    int pixStride = samplesPerPixel(m_outVars);
+    int pixStride = numOutChans(m_outVars);
 
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
