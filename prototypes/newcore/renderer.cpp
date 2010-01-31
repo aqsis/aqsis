@@ -29,6 +29,11 @@
 //------------------------------------------------------------------------------
 // RenderQueueImpl implementation
 
+Options& RenderQueueImpl::options()
+{
+    return m_renderer.m_opts;
+}
+
 void RenderQueueImpl::push(const boost::shared_ptr<Geometry>& geom)
 {
     m_renderer.push(geom, m_splitDepth+1);
@@ -388,7 +393,7 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
     // Shading interpolation
     InvBilin invBilin;
     // Whether to use smooth shading or not.
-    bool smoothShading = m_opts.smoothShading;
+    bool smoothShading = grid.attributes().smoothShading;
     // Micropoly uv coordinates for smooth shading
     Vec2 uv(0.0f);
 

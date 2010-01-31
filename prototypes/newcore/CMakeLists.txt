@@ -24,6 +24,7 @@ set(srcs
 
 set(hdrs
 	arrayview.h
+    attributes.h
 	fixedstrings.h
 	geometry.h
 	grid.h

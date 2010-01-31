@@ -20,6 +20,7 @@
 #ifndef SIMPLE_H_INCLUDED
 #define SIMPLE_H_INCLUDED
 
+#include "attributes.h"
 #include "geometry.h"
 #include "invbilin.h"
 #include "options.h"
@@ -31,13 +32,12 @@
 class QuadGridSimple : public Grid
 {
     public:
-        QuadGridSimple(int nu, int nv)
-            : m_nu(nu),
+        QuadGridSimple(int nu, int nv, const Attributes& attrs)
+            : Grid(GridType_QuadSimple, attrs),
+            m_nu(nu),
             m_nv(nv),
             m_P(nu*nv)
         { }
-
-        virtual GridType type() { return GridType_QuadSimple; }
 
         Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
         Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
@@ -76,12 +76,12 @@ class PatchSimple : public Geometry
 {
     private:
         Vec3 m_P[4];
-        const Options& m_opts;
+        const Attributes& m_attrs;
 
     public:
 
-        PatchSimple(const Options& opts, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
-            : m_opts(opts)
+        PatchSimple(const Attributes& attrs, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
+            : m_attrs(attrs)
         {
             m_P[0] = a; m_P[1] = b;
             m_P[2] = c; m_P[3] = d;
@@ -100,8 +100,9 @@ class PatchSimple : public Geometry
             float area = 0.5 * (  ((b-a)%(c-a)).length()
                                 + ((b-d)%(c-d)).length() );
 
-            const float maxArea = m_opts.gridSize*m_opts.gridSize
-                                  * m_opts.shadingRate;
+            Options& opts = queue.options();
+            const float maxArea = opts.gridSize*opts.gridSize
+                                  * m_attrs.shadingRate;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((b-a).length() + (d-c).length());
@@ -112,9 +113,9 @@ class PatchSimple : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int uRes = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
-                int vRes = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
-                boost::shared_ptr<QuadGridSimple> grid(new QuadGridSimple(uRes, vRes));
+                int uRes = 1 + Imath::floor(lu/std::sqrt(m_attrs.shadingRate));
+                int vRes = 1 + Imath::floor(lv/std::sqrt(m_attrs.shadingRate));
+                boost::shared_ptr<QuadGridSimple> grid(new QuadGridSimple(uRes, vRes, m_attrs));
                 float dv = 1.0f/(vRes-1);
                 float du = 1.0f/(uRes-1);
                 for(int v = 0; v < vRes; ++v)
@@ -141,9 +142,9 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                     Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     m_P[0], ab, m_P[2], cd)));
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     ab, m_P[1], cd, m_P[3])));
                 }
                 else
@@ -154,9 +155,9 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                     Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     m_P[0], m_P[1], ac, bd)));
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_opts,
+                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     ac, bd, m_P[2], m_P[3])));
                 }
             }

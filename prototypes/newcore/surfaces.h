@@ -20,6 +20,7 @@
 #ifndef SURFACES_H_INCLUDED
 #define SURFACES_H_INCLUDED
 
+#include "attributes.h"
 #include "geometry.h"
 #include "options.h"
 #include "util.h"
@@ -32,7 +33,7 @@
 class Patch : public Geometry
 {
     private:
-        const Options& m_opts;
+        const Attributes& m_attrs;
         boost::shared_ptr<PrimvarStorage> m_vars;
 
         // uv coordinates for corners of the base patch.
@@ -43,7 +44,7 @@ class Patch : public Geometry
         {
             boost::shared_ptr<GridvarList> gvarList(
                     new GridvarList(m_vars->varList()) );
-            boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, gvarList));
+            boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, gvarList, m_attrs));
 
             // Create some space to store the variable temporaries.
             int maxAgg = gvarList->maxAggregateSize();
@@ -107,17 +108,17 @@ class Patch : public Geometry
             d = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMax);
         }
 
-        Patch(const Options& opts, boost::shared_ptr<PrimvarStorage> vars,
+        Patch(const Attributes& attrs, boost::shared_ptr<PrimvarStorage> vars,
                 float uMin, float uMax, float vMin, float vMax)
-            : m_opts(opts),
+            : m_attrs(attrs),
             m_vars(vars),
             m_uMin(uMin), m_uMax(uMax),
             m_vMin(vMin), m_vMax(vMax)
         { }
 
     public:
-        Patch(const Options& opts, boost::shared_ptr<PrimvarStorage> vars)
-            : m_opts(opts),
+        Patch(const Attributes& attrs, boost::shared_ptr<PrimvarStorage> vars)
+            : m_attrs(attrs),
             m_vars(vars),
             m_uMin(0), m_uMax(1),
             m_vMin(0), m_vMax(1)
@@ -139,8 +140,9 @@ class Patch : public Geometry
             float area = 0.5 * (  ((bSpl-aSpl)%(cSpl-aSpl)).length()
                                 + ((bSpl-dSpl)%(cSpl-dSpl)).length() );
 
-            const float maxArea = m_opts.gridSize*m_opts.gridSize
-                                  * m_opts.shadingRate;
+            Options& opts = queue.options();
+            const float maxArea = opts.gridSize*opts.gridSize
+                                  * m_attrs.shadingRate;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((bSpl-aSpl).length() + (dSpl-cSpl).length());
@@ -151,8 +153,8 @@ class Patch : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int nu = 1 + Imath::floor(lu/std::sqrt(m_opts.shadingRate));
-                int nv = 1 + Imath::floor(lv/std::sqrt(m_opts.shadingRate));
+                int nu = 1 + Imath::floor(lu/std::sqrt(m_attrs.shadingRate));
+                int nv = 1 + Imath::floor(lv/std::sqrt(m_attrs.shadingRate));
                 dice(queue, nu, nv);
             }
             else
@@ -169,9 +171,9 @@ class Patch : public Geometry
                     // c---d
                     float uMid = 0.5*(m_uMin + m_uMax);
                     queue.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_opts, m_vars, m_uMin, uMid, m_vMin, m_vMax)));
+                                new Patch(m_attrs, m_vars, m_uMin, uMid, m_vMin, m_vMax)));
                     queue.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_opts, m_vars, uMid, m_uMax, m_vMin, m_vMax)));
+                                new Patch(m_attrs, m_vars, uMid, m_uMax, m_vMin, m_vMax)));
                 }
                 else
                 {
@@ -181,9 +183,9 @@ class Patch : public Geometry
                     // c---d
                     float vMid = 0.5*(m_vMin + m_vMax);
                     queue.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_opts, m_vars, m_uMin, m_uMax, m_vMin, vMid)));
+                                new Patch(m_attrs, m_vars, m_uMin, m_uMax, m_vMin, vMid)));
                     queue.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_opts, m_vars, m_uMin, m_uMax, vMid, m_vMax)));
+                                new Patch(m_attrs, m_vars, m_uMin, m_uMax, vMid, m_vMax)));
                 }
             }
         }

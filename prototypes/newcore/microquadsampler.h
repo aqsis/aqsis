@@ -77,7 +77,7 @@ class MicroQuadSampler
             m_hitTest(),
             m_P(grid.storage().P()),
             m_uv(0.0f),
-            m_smoothShading(opts.smoothShading)
+            m_smoothShading(grid.attributes().smoothShading)
         {
             // Cache the variables which need to be interpolated into
             // fragment outputs.

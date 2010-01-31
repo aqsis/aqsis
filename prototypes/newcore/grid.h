@@ -20,6 +20,7 @@
 #ifndef GRID_H_INCLUDED
 #define GRID_H_INCLUDED
 
+#include "attributes.h"
 #include "gridvar.h"
 #include "util.h"
 
@@ -31,9 +32,18 @@ enum GridType
 
 class Grid
 {
+    private:
+        GridType m_type;
+        const Attributes& m_attrs;
     public:
+        Grid(GridType type, const Attributes& attrs)
+            : m_type(type), m_attrs(attrs) {}
+
         /// Return the grid type.
-        virtual GridType type() = 0;
+        GridType type() const { return m_type; }
+
+        /// Return the grid attribute state
+        const Attributes& attributes() const { return m_attrs; }
 
         virtual ~Grid() {}
 };
@@ -51,13 +61,13 @@ class QuadGrid : public Grid
     public:
         class Iterator;
 
-        QuadGrid(int nu, int nv, boost::shared_ptr<GridvarList> vars)
-            : m_nu(nu),
+        QuadGrid(int nu, int nv, boost::shared_ptr<GridvarList> vars,
+                 const Attributes& attrs)
+            : Grid(GridType_Quad, attrs),
+            m_nu(nu),
             m_nv(nv),
             m_storage(vars, nu*nv)
         { }
-
-        virtual GridType type() { return GridType_Quad; }
 
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }

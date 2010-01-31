@@ -24,6 +24,7 @@
 
 class Grid;
 class Geometry;
+class Options;
 
 /// Destination queue for split or diced geometry
 ///
@@ -32,6 +33,9 @@ class Geometry;
 class RenderQueue
 {
     public:
+        /// Return the renderer option state
+        virtual Options& options() = 0;
+
         /// Push a surface onto the render pipeline.
         ///
         /// The results from splitting operations go here.

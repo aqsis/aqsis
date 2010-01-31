@@ -17,30 +17,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef OPTIONS_H_INCLUDED
-#define OPTIONS_H_INCLUDED
+#ifndef ATTRIBUTES_H_INCLUDED
+#define ATTRIBUTES_H_INCLUDED
 
-#include <cfloat>
-
-/// Renderer options.
-struct Options
+/// Surface attribute state.
+struct Attributes
 {
-    int maxSplits;   ///< maximum number of splits before discarding a surface
-    int xRes;        ///< image x-resolution
-    int yRes;        ///< image y-resolution
-    //Imath::V2i nsumSamples; ///< number of subsamples
-    int gridSize;    ///< Desired grid side length.
-    float clipNear;  ///< Near clipping plane (cam coords)
-    float clipFar;   ///< Far clipping plane (cam coords)
+    float shadingRate;  ///< Desired micropoly area
+    bool smoothShading; ///< Type of shading interpolation
 
-    Options()
-        : maxSplits(20),
-        xRes(640),
-        yRes(480),
-        gridSize(16),
-        clipNear(FLT_EPSILON),
-        clipFar(FLT_MAX)
+    Attributes()
+        : shadingRate(1),
+        smoothShading(true)
     { }
 };
 
-#endif // OPTIONS_H_INCLUDED
+#endif // ATTRIBUTES_H_INCLUDED

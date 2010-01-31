@@ -50,6 +50,8 @@ class RenderQueueImpl : public RenderQueue
             m_splitDepth(splitDepth)
         { }
 
+        virtual Options& options();
+
         void push(const boost::shared_ptr<Geometry>& geom);
         void push(const boost::shared_ptr<Grid>& grid);
 };

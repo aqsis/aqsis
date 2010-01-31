@@ -23,7 +23,7 @@
 
 #define ARRLEN(ar) sizeof(ar)/sizeof(ar[0])
 
-boost::shared_ptr<Geometry> createPatch(const Options& opts,
+boost::shared_ptr<Geometry> createPatch(const Attributes& attrs,
                                        const Vec3& a, const Vec3& b,
                                        const Vec3& c, const Vec3& d,
                                        const Mat4& trans = Mat4())
@@ -40,28 +40,28 @@ boost::shared_ptr<Geometry> createPatch(const Options& opts,
     };
     vars->add(Primvar::Cs, Cs, ARRLEN(Cs));
     //vars->add(PrimvarSpec(PrimvarSpec::Uniform, PrimvarSpec::Color, 1, ustring("Cs")), Cs, ARRLEN(Cs));
-    boost::shared_ptr<Geometry> patch(new Patch(opts, vars));
-//    boost::shared_ptr<Geometry> patch(new PatchSimple(opts, a,b,c,d));
+    boost::shared_ptr<Geometry> patch(new Patch(attrs, vars));
+//    boost::shared_ptr<Geometry> patch(new PatchSimple(attrs, a,b,c,d));
     patch->transform(trans);
     return patch;
 }
 
-void addCube(const Options& opts, Renderer& r, const Mat4& otow)
+void addCube(const Attributes& attrs, Renderer& r, const Mat4& otow)
 {
-    r.add(createPatch(opts, Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                            Vec3(-1,1,-1), Vec3(-1,1,1), otow) );
-    r.add(createPatch(opts, Vec3(1,-1,-1), Vec3(1,-1,1),
-                            Vec3(1,1,-1), Vec3(1,1,1), otow) );
+    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,-1,1),
+                             Vec3(-1,1,-1), Vec3(-1,1,1), otow) );
+    r.add(createPatch(attrs, Vec3(1,-1,-1), Vec3(1,-1,1),
+                             Vec3(1,1,-1), Vec3(1,1,1), otow) );
 
-    r.add(createPatch(opts, Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                            Vec3(1,-1,-1), Vec3(1,-1,1), otow) );
-    r.add(createPatch(opts, Vec3(-1,1,-1), Vec3(-1,1,1),
-                            Vec3(1,1,-1), Vec3(1,1,1), otow) );
+    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,-1,1),
+                             Vec3(1,-1,-1), Vec3(1,-1,1), otow) );
+    r.add(createPatch(attrs, Vec3(-1,1,-1), Vec3(-1,1,1),
+                             Vec3(1,1,-1), Vec3(1,1,1), otow) );
 
-    r.add(createPatch(opts, Vec3(-1,-1,-1), Vec3(-1,1,-1),
-                            Vec3(1,-1,-1), Vec3(1,1,-1), otow) );
-    r.add(createPatch(opts, Vec3(-1,-1,1), Vec3(-1,1,1),
-                            Vec3(1,-1,1), Vec3(1,1,1), otow) );
+    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,1,-1),
+                             Vec3(1,-1,-1), Vec3(1,1,-1), otow) );
+    r.add(createPatch(attrs, Vec3(-1,-1,1), Vec3(-1,1,1),
+                             Vec3(1,-1,1), Vec3(1,1,1), otow) );
 }
 
 int main(int argc, char* argv[])
@@ -70,9 +70,11 @@ int main(int argc, char* argv[])
     opts.xRes = 1024;
     opts.yRes = 1024;
     opts.gridSize = 8;
-    opts.shadingRate = 1;
-    opts.smoothShading = true;
     opts.clipNear = 0.1;
+
+    Attributes attrs;
+    attrs.shadingRate = 1;
+    attrs.smoothShading = true;
 
     Mat4 camToScreen =
 //        Mat4();
@@ -86,7 +88,7 @@ int main(int argc, char* argv[])
 
     Renderer r(opts, camToScreen, outVars);
 
-//    r.add(createPatch(opts, Vec3(-0.5,-0.5,0), Vec3(0.5,-0.5,0),
+//    r.add(createPatch(attrs, Vec3(-0.5,-0.5,0), Vec3(0.5,-0.5,0),
 //                            Vec3(-0.5,0.5,0), Vec3(0.5,0.5,0),
 //                            Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(50))
 //                            * Mat4().setTranslation(Vec3(0,0,1))));
@@ -97,12 +99,12 @@ int main(int argc, char* argv[])
 
     for(int i = 0; i < numPatches; ++i)
     {
-        r.add(createPatch(opts, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+        r.add(createPatch(attrs, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
                                 Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
     }
 
     // Cube geometry
-//    addCube(opts, r,
+//    addCube(attrs, r,
 //        Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45)) *
 //        Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45)) *
 //        Mat4().setTranslation(Vec3(0,0,3))
