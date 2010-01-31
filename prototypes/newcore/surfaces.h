@@ -42,12 +42,14 @@ class Patch : public Geometry
 
         void dice(RenderQueue& queue, int nu, int nv) const
         {
-            boost::shared_ptr<GridvarList> gvarList(
-                    new GridvarList(m_vars->varList()) );
-            boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, gvarList, m_attrs));
+            GridStorageBuilder& builder = queue.gridStorageBuilder();
+            // Add all the primvars to the grid
+            builder.add(m_vars->varList());
+            boost::shared_ptr<GridStorage> storage = builder.build(nu*nv);
+            boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, storage, m_attrs));
 
             // Create some space to store the variable temporaries.
-            int maxAgg = gvarList->maxAggregateSize();
+            int maxAgg = storage->maxAggregateSize();
             float* aMin = FALLOCA(maxAgg);
             float* aMax = FALLOCA(maxAgg);
 
@@ -58,12 +60,12 @@ class Patch : public Geometry
                 ivar < nvars; ++ivar)
             {
                 ConstFvecView pvar = m_vars->get(ivar);
-                FvecView gvar = grid->storage().get(ivar);
+                FvecView gvar = storage->get(m_vars->varList()[ivar]);
                 int size = gvar.elSize();
 
-                if((*gvarList)[ivar].uniform)
+                if(gvar.uniform())
                 {
-                    // Uniform, no interpolation, just copy.
+                    // Uniform - no interpolation, just copy.
                     std::memcpy(gvar[0], pvar[0], size*sizeof(float));
                 }
                 else

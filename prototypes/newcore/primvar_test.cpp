@@ -85,13 +85,13 @@ int main()
     }
 
     // Now simulate the dicing stage of the pipeline.
-    GridvarList gvarList(pvarStorage.varList());
+    GridStorageBuilder gridBuilder;
+    GridvarList gvarSet(pvarStorage.varList());
     const int nu = 5, nv = 5;
-    GridvarStorage gvarStorage(boost::shared_ptr<GridvarList>(
-                                &gvarList, nullDeleter), nu*nv);
+    boost::shared_ptr<GridStorage> gvarStorage = gridBuilder.build(nu*nv);
 
     // Create some space to store the variable temporaries.
-    int maxAgg = gvarList.maxAggregateSize();
+    int maxAgg = gvarStorage.maxAggregateSize();
     float* aMin = FALLOCA(maxAgg);
     float* aMax = FALLOCA(maxAgg);
 

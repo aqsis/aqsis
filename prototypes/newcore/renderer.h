@@ -36,25 +36,7 @@
 class Renderer;
 class Grid;
 class QuadGridSimple;
-
-// Minimal wrapper around a renderer instance to provide control context for
-// when surfaces push split/diced objects back into the render's queue.
-class RenderQueueImpl : public RenderQueue
-{
-    private:
-        Renderer& m_renderer;
-        int m_splitDepth;
-    public:
-        RenderQueueImpl(Renderer& renderer, int splitDepth)
-            : m_renderer(renderer),
-            m_splitDepth(splitDepth)
-        { }
-
-        virtual Options& options();
-
-        void push(const boost::shared_ptr<Geometry>& geom);
-        void push(const boost::shared_ptr<Grid>& grid);
-};
+class RenderQueueImpl;
 
 struct OutvarSpec : public VarSpec
 {

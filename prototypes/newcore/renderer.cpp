@@ -23,11 +23,36 @@
 #include <tiffio.h>
 
 #include "grid.h"
+#include "gridvar.h"
 #include "microquadsampler.h"
 #include "simple.h"
 
 //------------------------------------------------------------------------------
-// RenderQueueImpl implementation
+// Minimal wrapper around a renderer instance to provide control context for
+// when surfaces push split/diced objects back into the render's queue.
+class RenderQueueImpl : public RenderQueue
+{
+    private:
+        Renderer& m_renderer;
+        int m_splitDepth;
+        // TODO: avoid constructing one of these for each split/dice
+        GridStorageBuilder m_builder;
+    public:
+        RenderQueueImpl(Renderer& renderer, int splitDepth)
+            : m_renderer(renderer),
+            m_splitDepth(splitDepth)
+        { }
+
+        virtual Options& options();
+
+        virtual void push(const boost::shared_ptr<Geometry>& geom);
+        virtual void push(const boost::shared_ptr<Grid>& grid);
+
+        virtual GridStorageBuilder& gridStorageBuilder()
+        {
+            return m_builder;
+        }
+};
 
 Options& RenderQueueImpl::options()
 {

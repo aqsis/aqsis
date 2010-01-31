@@ -23,10 +23,11 @@
 #include "util.h"
 
 class Grid;
+class GridStorageBuilder;
 class Geometry;
 class Options;
 
-/// Destination queue for split or diced geometry
+/// Tessellation context and destination queue for split or diced geometry
 ///
 /// Geometry pushes split/diced subobjects back into the render queue via this
 /// interface, from which it gets forwarded to the renderer.
@@ -36,7 +37,7 @@ class RenderQueue
         /// Return the renderer option state
         virtual Options& options() = 0;
 
-        /// Push a surface onto the render pipeline.
+        /// Push some geometry into the render pipeline.
         ///
         /// The results from splitting operations go here.
         virtual void push(const boost::shared_ptr<Geometry>& geom) = 0;
@@ -44,6 +45,8 @@ class RenderQueue
         ///
         /// The results from geometry dicing go here.
         virtual void push(const boost::shared_ptr<Grid>& grid) = 0;
+
+        virtual GridStorageBuilder& gridStorageBuilder() = 0;
 
         virtual ~RenderQueue() {};
 };
@@ -58,10 +61,13 @@ class Geometry
 //        virtual StorageCount storageCount() const = 0;
 
         /// Return a bounding box for the geometry.
+        ///
+        /// This will only be called once by the renderer for each piece of
+        /// geometry - there's no need to cache the results internally or
+        /// anything.
         virtual Box bound() const = 0;
 
-        /// Split or tesselate the geometry & push it back into the renderer
-        /// pipeline
+        /// Split/tesselate geometry & push it back at the renderer pipeline
         ///
         /// This function is an abstraction around the "split" and "dice"
         /// parts of the reyes pipeline.  If the geometry is "small enough" it
@@ -75,5 +81,6 @@ class Geometry
 
         virtual ~Geometry() {}
 };
+
 
 #endif // GEOMETRY_H_INCLUDED

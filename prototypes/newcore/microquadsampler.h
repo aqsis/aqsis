@@ -81,7 +81,7 @@ class MicroQuadSampler
         {
             // Cache the variables which need to be interpolated into
             // fragment outputs.
-            const GridvarList& gridVars = grid.storage().varList();
+            const VarSet& gridVars = grid.storage().varSet();
             for(int j = 0, jend = outVars.size(); j < jend; ++j)
             {
                 // Simplistic linear search through grid variables for now.
@@ -163,7 +163,7 @@ class MicroQuadSampler
         /// Interpolate the colour
         inline void interpolateColor(float* col) const
         {
-            int CsIdx = m_grid.storage().varList().stdIndices().Cs;
+            int CsIdx = m_grid.storage().varSet().stdIndices().Cs;
             assert(CsIdx >= 0);
             ConstFvecView Cs = m_grid.storage().get(CsIdx);
             if(m_smoothShading)

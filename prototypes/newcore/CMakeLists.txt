@@ -14,6 +14,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ustring)
 include_directories(.)
 
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "-Werror")
+endif()
+
 set(srcs
     main.cpp
     renderer.cpp
@@ -26,23 +30,24 @@ set(srcs
 )
 
 set(hdrs
-	arrayview.h
+    arrayview.h
     attributes.h
-	fixedstrings.h
-	geometry.h
-	grid.h
-	gridvar.h
-	invbilin.h
-	microquadsampler.h
-	options.h
-	pointinquad.h
-	primvar.h
-	renderer.h
-	sample.h
-	simple.h
-	surfaces.h
-	util.h
-	varspec.h
+    fixedstrings.h
+    geometry.h
+    grid.h
+    gridvar.h
+    invbilin.h
+    microquadsampler.h
+    options.h
+    pointinquad.h
+    primvar.h
+    renderer.h
+    sample.h
+    scenes/scenes.h
+    simple.h
+    surfaces.h
+    util.h
+    varspec.h
 )
 
 source_group("Header Files" FILES ${hdrs})
@@ -50,17 +55,35 @@ source_group("Header Files" FILES ${hdrs})
 add_executable(render ${srcs} ${hdrs})
 target_link_libraries(render ${TIFF_LIBRARIES})
 
-add_executable(primvar_test
-    primvar_test.cpp
+
+#------------------------------------------------------------
+# Testing:
+
+macro(testcase testname)
+    add_executable(${testname} ${ARGN})
+    target_link_libraries(${testname} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+endmacro()
+
+testcase(ustring_test
+    ustring/ustring.cpp
+    ustring/ustring_test.cpp
+)
+
+set(varspec_srcs
     ustring/ustring.cpp
     fixedstrings.cpp
-    primvar.cpp
     varspec.cpp
 )
+
+#add_executable(primvar_test ${varspec_srcs} primvar_test.cpp primvar.cpp)
+
+testcase(varspec_test ${varspec_srcs} varspec_test.cpp)
+
+testcase(gridstorage_test ${varspec_srcs} gridstorage_test.cpp)
 
 if(WIN32)
     set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
     set_property(TARGET render PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
-endif(WIN32)
+endif()
 
 #target_link_libraries(varspec_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

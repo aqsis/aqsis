@@ -128,48 +128,12 @@ inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
     return storCount.storage(iclass)*scalarSize();
 }
 
-struct StdVarIndices
-{
-    int P;
-    int Cs;
-    int Ci;
-    int Os;
-    int Oi;
-    int st;
-    int I;
-    int N;
-
-    StdVarIndices()
-        : P(-1), Cs(-1), Ci(-1), Os(-1), Oi(-1), st(-1), I(-1), N(-1) {}
-
-    void add(int index, const VarSpec& var)
-    {
-        if(var == Stdvar::P)
-            P = index;
-        else if(var == Stdvar::Cs)
-            Cs = index;
-        else if(var == Stdvar::Ci)
-            Ci = index;
-        else if(var == Stdvar::Os)
-            Os = index;
-        else if(var == Stdvar::Oi)
-            Oi = index;
-        else if(var == Stdvar::st)
-            st = index;
-        else if(var == Stdvar::I)
-            I = index;
-        else if(var == Stdvar::N)
-            N = index;
-    }
-};
-
-
 /// A list of primitive variables
 class PrimvarList
 {
     private:
         std::vector<PrimvarSpec> m_varSpecs;
-        StdVarIndices m_stdIndices;
+        StdvarIndices m_stdIndices;
 
     public:
         typedef std::vector<PrimvarSpec>::const_iterator const_iterator;
@@ -199,7 +163,7 @@ class PrimvarList
             return m_varSpecs[i];
         }
 
-        const StdVarIndices& stdIndices() const { return m_stdIndices; }
+        const StdvarIndices& stdIndices() const { return m_stdIndices; }
 };
 
 

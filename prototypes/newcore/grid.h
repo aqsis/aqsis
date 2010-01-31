@@ -56,17 +56,17 @@ class QuadGrid : public Grid
     private:
         int m_nu;
         int m_nv;
-        GridvarStorage m_storage;
+        boost::shared_ptr<GridStorage> m_storage;
 
     public:
         class Iterator;
 
-        QuadGrid(int nu, int nv, boost::shared_ptr<GridvarList> vars,
+        QuadGrid(int nu, int nv, boost::shared_ptr<GridStorage> storage,
                  const Attributes& attrs)
             : Grid(GridType_Quad, attrs),
             m_nu(nu),
             m_nv(nv),
-            m_storage(vars, nu*nv)
+            m_storage(storage)
         { }
 
         int nu() const { return m_nu; }
@@ -74,12 +74,12 @@ class QuadGrid : public Grid
 
         Iterator begin() const;
 
-        GridvarStorage& storage() { return m_storage; }
-        const GridvarStorage& storage() const { return m_storage; }
+        GridStorage& storage() { return *m_storage; }
+        const GridStorage& storage() const { return *m_storage; }
 
         void project(Mat4 m)
         {
-            DataView<Vec3> P = m_storage.P();
+            DataView<Vec3> P = m_storage->P();
             for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)
             {
                 // Project all points, but restore z afterward.  TODO: This
@@ -98,10 +98,7 @@ class QuadGrid : public Grid
 
 struct MicroQuadInd
 {
-    int a;
-    int b;
-    int c;
-    int d;
+    int a,b,c,d;
 
     MicroQuadInd(int a, int b, int c, int d) : a(a), b(b), c(c), d(d) {}
 };

@@ -37,6 +37,10 @@ class DataView
             m_stride(stride)
         {}
 
+        /// Test whether the view points to valid data.
+        /// For use in boolean contexts only.
+        operator const void*() const { return m_storage; }
+
         /// Indexing operators.
         ///
         /// The casting here is undefined behaviour, but provided T is a plain
@@ -68,6 +72,10 @@ class ConstDataView
             m_stride(view.m_stride)
         {}
 
+        /// Test whether the view points to valid data.
+        /// For use in boolean contexts only.
+        operator const void*() const { return m_storage; }
+
         const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
 
         ConstDataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
@@ -92,6 +100,13 @@ class FvecView
             m_elSize(elSize)
         {}
 
+        /// Test whether the view points to valid data.
+        /// For use in boolean contexts only.
+        operator const void*() const { return m_storage; }
+
+        int uniform() const { return m_stride == 0; }
+
+        /// Element access
         float* operator[](int i) { return m_storage + i*m_stride; }
         const float* operator[](int i) const { return m_storage + i*m_stride; }
 
@@ -128,6 +143,13 @@ class ConstFvecView
             m_elSize(view.elSize())
         {}
 
+        /// Test whether the view points to valid data.
+        /// For use in boolean contexts only.
+        operator const void*() const { return m_storage; }
+
+        int uniform() const { return m_stride == 0; }
+
+        /// Element access
         const float* operator[](int i) const { return m_storage + i*m_stride; }
 
         const float* storage() const { return m_storage; }
