@@ -17,22 +17,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#include <string>
+void renderTenPatchScene();
+void renderDefaultScene();
 
-#include "scenes/scenes.h"
-
-int main(int argc, char* argv[])
-{
-    std::string sceneName;
-    if(argc >= 2)
-    {
-        sceneName = argv[argc-1];
-    }
-
-    if(sceneName == "tenpatch")
-        renderTenPatchScene();
-    else
-        renderDefaultScene();
-
-    return 0;
-}

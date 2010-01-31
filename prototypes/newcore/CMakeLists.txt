@@ -12,6 +12,7 @@ include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${ILMBASE_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ustring)
+include_directories(.)
 
 set(srcs
     main.cpp
@@ -20,6 +21,8 @@ set(srcs
     fixedstrings.cpp
     primvar.cpp
     varspec.cpp
+    scenes/tenpatch.cpp
+    scenes/default.cpp
 )
 
 set(hdrs
