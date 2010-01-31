@@ -44,10 +44,6 @@
 #include <string>
 #include <cstring>
 
-#ifdef _WIN32
-#include "hash.h"
-#endif
-
 #include "export.h"
 
 #ifndef OPENIMAGEIO_PRINTF_ARGS
@@ -122,30 +118,18 @@ strhash (const char *s)
 
 
 
-/// C++ functor wrapper class for using strhash for hash_map or hash_set.
-/// The way this is used, in conjunction with StringEqual, to build an
-/// efficient hash_map for char*'s is as follows:
+/// C++ functor wrapper class for using strhash for unordered_map or
+/// unordered_set.  The way this is used, in conjunction with StringEqual, to
+/// build an efficient unordered_map for char*'s is as follows:
 /// \code
-///   #ifdef _WIN32
-///    hash_map <const char *, Key, Strutil::StringHash>
-///   #else
-///    hash_map <const char *, Key, Strutil::StringHash, Strutil::StringEqual>
-///   #endif
+///   unordered_map <const char *, Key, Strutil::StringHash, Strutil::StringEqual>
 /// \endcode
 class StringHash
-#ifdef _WIN32
-    : public hash_compare<const char*>
-#endif
 {
 public:
     size_t operator() (const char *s) const {
         return (size_t)Strutil::strhash(s);
     }
-#ifdef _WIN32
-    bool operator() (const char *a, const char *b) {
-        return strcmp (a, b) < 0;
-    }
-#endif
 };
 
 
@@ -154,7 +138,7 @@ public:
 /// strings.
 class StringEqual {
 public:
-    bool operator() (const char *a, const char *b) {
+    bool operator() (const char *a, const char *b) const {
         return strcmp (a, b) == 0;
     }
 };

@@ -28,38 +28,63 @@
   (This is the Modified BSD License)
 */
 
+#include "ustring.h"
 
-/// \file
-///
-/// Wrapper so that hash_map and hash_set mean what we want regardless
-/// of the compiler.
-///
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/auto_unit_test.hpp>
 
-#ifndef OPENIMAGEIO_HASH_H
-#define OPENIMAGEIO_HASH_H
+BOOST_AUTO_TEST_CASE(ustring_cmp_test)
+{
+    // Test comparisons between strings
+    ustring blah("blah");
+    ustring asdf("asdf");
+    BOOST_CHECK_EQUAL(blah, "blah");
+    BOOST_CHECK_LT(asdf, blah);
+    BOOST_CHECK_NE(asdf, blah);
+}
 
-#ifdef __GNUC__
+BOOST_AUTO_TEST_CASE(ustring_container_test)
+{
+    // Check correctness of container-like operations
+    ustring s("blah");
+    BOOST_CHECK_EQUAL(s[0], 'b');
+    BOOST_CHECK_EQUAL(s[3], 'h');
+    BOOST_CHECK_EQUAL(s.size(), 4);
+    // check iterators
+    {
+        std::string extract(s.begin(), s.end());
+        BOOST_CHECK_EQUAL(extract, "blah");
+    }
+    {
+        std::string extract(s.rbegin(), s.rend());
+        BOOST_CHECK_EQUAL(extract, "halb");
+    }
+}
 
-#include <ext/hash_map>
-#include <ext/hash_set>
-using __gnu_cxx::hash_map;
-using __gnu_cxx::hash_set;
+BOOST_AUTO_TEST_CASE(ustring_empty_test)
+{
+    ustring emptystr;
+    BOOST_CHECK_EQUAL(emptystr, "");
+    BOOST_CHECK(emptystr.empty());
+}
 
-#else
+BOOST_AUTO_TEST_CASE(ustring_unique_test)
+{
+    // Use two copies to make sure the compiler can't coalesce the identicle
+    // string constants
+    char s1[] = "a string";
+    char s2[] = "a string";
+    // For good measure, prove to ourselves that the pointers really are
+    // different
+    BOOST_CHECK_NE((void*)s1, (void*)s2);
+    ustring us1(s1);
+    ustring us2(s2);
+    // Now check that the strings have been correctly uniqueified
+    BOOST_CHECK_EQUAL(us1, us2);
+}
 
-#include <hash_map>
-#include <hash_set>
 
-#ifdef _WIN32
-using stdext::hash_map;
-using stdext::hash_set;
-using stdext::hash_compare;
-#else
-using std::hash_map;
-using std::hash_set;
-#endif
+// FIXME: When threading is enabled, import some ustring threading tests from
+// OIIO.
 
-#endif
-
-
-#endif // OPENIMAGEIO_HASH_H

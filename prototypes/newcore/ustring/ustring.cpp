@@ -30,11 +30,13 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
+
+#include <boost/unordered_map.hpp>
 
 #include "export.h"
 //#include "thread.h"
 #include "strutil.h"
-#include "hash.h"
 
 #include "ustring.h"
 
@@ -86,11 +88,7 @@ typedef null_lock<null_mutex> ustring_write_lock_t;
 #endif
 
 
-#ifdef _WIN32
-typedef hash_map <const char *, ustring::TableRep *, Strutil::StringHash> UstringTable;
-#else
-typedef hash_map <const char *, ustring::TableRep *, Strutil::StringHash, Strutil::StringEqual> UstringTable;
-#endif
+typedef boost::unordered_map<const char*, ustring::TableRep*, Strutil::StringHash, Strutil::StringEqual> UstringTable;
 
 std::string ustring::empty_std_string ("");
 
