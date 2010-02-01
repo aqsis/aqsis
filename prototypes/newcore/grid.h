@@ -21,7 +21,7 @@
 #define GRID_H_INCLUDED
 
 #include "attributes.h"
-#include "gridvar.h"
+#include "gridstorage.h"
 #include "util.h"
 
 enum GridType

@@ -23,7 +23,7 @@
 #include <tiffio.h>
 
 #include "grid.h"
-#include "gridvar.h"
+#include "gridstorage.h"
 #include "microquadsampler.h"
 #include "simple.h"
 

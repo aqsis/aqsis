@@ -35,7 +35,7 @@ set(hdrs
     fixedstrings.h
     geometry.h
     grid.h
-    gridvar.h
+    gridstorage.h
     invbilin.h
     microquadsampler.h
     options.h

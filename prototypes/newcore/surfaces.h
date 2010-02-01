@@ -26,7 +26,7 @@
 #include "util.h"
 
 #include "primvar.h"
-#include "gridvar.h"
+#include "gridstorage.h"
 #include "grid.h"
 
 

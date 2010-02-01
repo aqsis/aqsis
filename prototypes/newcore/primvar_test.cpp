@@ -20,7 +20,7 @@
 #include <iomanip>
 
 #include "primvar.h"
-#include "gridvar.h"
+#include "gridstorage.h"
 
 #define ARRLEN(ar) sizeof(ar)/sizeof(ar[0])
 
