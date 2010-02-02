@@ -123,11 +123,6 @@ struct IclassStorage
     }
 };
 
-inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
-{
-    return storCount.storage(iclass)*scalarSize();
-}
-
 /// A list of primitive variables
 class PrimvarList
 {
@@ -207,6 +202,7 @@ class PrimvarStorage
             return index;
         }
 
+        /// Get storage for variable at index i
         FvecView get(int i)
         {
             assert(i >= 0 && i < (int)m_varInfo.size());
@@ -216,15 +212,14 @@ class PrimvarStorage
 
         const PrimvarList& varList() const { return *m_vars; }
 
-        // Get a view of the vertex position data
+        /// Get a view of the vertex position data
         DataView<Vec3> P()
         {
             int Pidx = m_vars->stdIndices().P;
             assert(Pidx >= 0);
             return DataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
         }
-
-        // Get a view of the vertex position data
+        /// Get a const view of the vertex position data
         ConstDataView<Vec3> P() const
         {
             int Pidx = m_vars->stdIndices().P;
@@ -232,6 +227,7 @@ class PrimvarStorage
             return ConstDataView<Vec3>(&m_storage[m_varInfo[Pidx].offset]);
         }
 
+        /// Transform primitive variables via the matrix m.
         void transform(const Mat4& m)
         {
             // Iterate over all primvars & transform as appropriate.
@@ -270,9 +266,16 @@ class PrimvarStorage
 };
 
 
+//==============================================================================
+// Implementation details
 
-// shader required primvar list
-// AOV required primvar list
+inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
+{
+    return storCount.storage(iclass)*scalarSize();
+}
+
+
+// Some random musings...
 
 // For the purposes of shaders and AOVs, a "primvar" needs to be a combination
 // of name, type and array length.  (interpolation class is irrelevant)

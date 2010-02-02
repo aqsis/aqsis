@@ -30,6 +30,12 @@
 #include "varspec.h"
 
 
+/// Storage space for variables attached to a grid.
+///
+/// GridStorage stores a bunch of grid variables together, and allows for fast
+/// access to each variable storage based on the index within the grid.  In
+/// order to allow for efficient allocation, GridStorage should be constructed
+/// via the specialized GridStorageBuilder object.
 class GridStorage
 {
     private:
@@ -75,7 +81,7 @@ class GridStorage
         }
 
     public:
-
+        /// Get the set of contained variables
         const VarSet& varSet() const { return m_vars; }
 
         /// Get allocated storage for the ith variable
@@ -103,6 +109,16 @@ class GridStorage
                 return get(i);
         }
 
+        /// Get maximum number of floats to store any variable on this grid.
+        ///
+        /// Eg, if the following were attached to the grid
+        ///
+        ///   vector   - 3 floats
+        ///   color[2] - 6 floats
+        ///   matrix   - 16 floats
+        ///
+        /// then maxAggregateSize() would return 16.  This function is needed
+        /// for convenient allocation of temporary storage during dicing.
         int maxAggregateSize() const
         {
             int maxSize = 0;
@@ -115,7 +131,7 @@ class GridStorage
             return maxSize;
         }
 
-        /// Get storage for standard position variable
+        /// Convenient access to storage for standard position variable
         DataView<Vec3> P()
         {
             int Pidx = m_vars.stdIndices().P;
@@ -133,6 +149,12 @@ class GridStorage
 };
 
 
+/// Object to collect arguments necessary to build a GridStorage object.
+///
+/// GridStorage holds an arbitrary number of variables, and we'd like to
+/// allocate storage for all of those at the same time.  GridStorageBuilder is
+/// designed to collect and sort all variables before passing them to the
+/// GridStorage constructor.
 class GridStorageBuilder : boost::noncopyable
 {
     private:

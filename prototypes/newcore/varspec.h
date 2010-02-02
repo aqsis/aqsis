@@ -177,14 +177,16 @@ struct StdvarIndices
 };
 
 
-class VarSet
+template<typename SpecT>
+class BasicVarSet
 {
     private:
-        VarList m_vars;
+        typedef std::vector<SpecT> VarVec;
+        VarVec m_vars;
         StdvarIndices m_stdIndices;
 
         /// Return true if the list of vars is sorted
-        static bool isSorted(const VarList& vars)
+        static bool isSorted(const VarVec& vars)
         {
             bool sorted = true;
             for(int i = 0, iend = vars.size()-1; i < iend; ++i)
@@ -200,11 +202,11 @@ class VarSet
         }
 
     public:
-        typedef VarList::const_iterator const_iterator;
+        typedef typename VarVec::const_iterator const_iterator;
         static const int npos = -1;
 
         template<typename VarIterT>
-        VarSet(VarIterT b, VarIterT e)
+        BasicVarSet(VarIterT b, VarIterT e)
             : m_vars(b, e)
         {
             assert(isSorted(m_vars));
@@ -217,9 +219,13 @@ class VarSet
         const_iterator begin() const { return m_vars.begin(); }
         const_iterator end() const { return m_vars.end(); }
         int size() const { return m_vars.size(); }
-        const VarSpec& operator[](int i) const { return m_vars[i]; }
+        const SpecT& operator[](int i) const
+        {
+            assert(i >= 0 && i < static_cast<int>(m_vars.size()));
+            return m_vars[i];
+        }
 
-        int find(const VarSpec& var) const
+        int find(const SpecT& var) const
         {
             const_iterator i = std::lower_bound(m_vars.begin(),
                                                 m_vars.end(), var);
@@ -229,11 +235,21 @@ class VarSet
                 return npos;
         }
 
-        bool contains(const VarSpec& var) const
+        bool contains(const SpecT& var) const
         {
             return std::binary_search(m_vars.begin(), m_vars.end(), var);
         }
 };
 
+typedef BasicVarSet<VarSpec> VarSet;
+
+
+//==============================================================================
+// It's necessary to define VarSet::npos here to force the compiler to make
+// actual storage space for npos.  Otherwise it can't be bound to a const
+// reference if necessary, eg, using VarSet::npos in BOOST_CHECK_EQUAL won't
+// work.  Duh!
+template<typename SpecT>
+const int BasicVarSet<SpecT>::npos;
 
 #endif // VARSPEC_H_INCLUDED

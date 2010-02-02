@@ -41,8 +41,3 @@ namespace Stdvar
 #undef DEFINE_STD_VAR
 }
 
-// It's necessary to define VarSet::npos here to force the compiler to make
-// actual storage space for npos.  Otherwise it can't be bound to a const
-// reference if necessary, eg, using VarSet::npos in BOOST_CHECK_EQUAL won't
-// work.  Duh!
-const int VarSet::npos;
