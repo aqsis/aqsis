@@ -27,6 +27,7 @@
 
 #include "ustring.h"
 
+//------------------------------------------------------------------------------
 struct VarSpec
 {
     /// Variable type.
@@ -138,6 +139,12 @@ namespace Stdvar {
 }
 
 
+//------------------------------------------------------------------------------
+/// Collection of indices for the renderer standard variables.
+///
+/// This can be used to shortcut any variable lookup when getting the standard
+/// variables on a grid.  TODO: Is it overkill to have *all* the standard
+/// variables here?  Maybe we only need some of the more important ones?
 struct StdvarIndices
 {
     int P;
@@ -177,6 +184,12 @@ struct StdvarIndices
 };
 
 
+//------------------------------------------------------------------------------
+/// An immutable set of variables, represented as a sorted vector.
+///
+/// This class is designed for fast lookup and compact representation, not
+/// insertion/removal (in fact, the set is immutable so variables can't be
+/// inserted or removed dynamcially).
 template<typename SpecT>
 class BasicVarSet
 {

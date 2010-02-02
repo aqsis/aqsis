@@ -30,6 +30,7 @@
 #include "varspec.h"
 
 
+//------------------------------------------------------------------------------
 /// Storage space for variables attached to a grid.
 ///
 /// GridStorage stores a bunch of grid variables together, and allows for fast
@@ -59,15 +60,13 @@ class GridStorage
             m_views(),
             m_vars(varBegin, varEnd)
         {
-            // Compute offsets for each variable into the shared storage, and
-            // compute the total size of the storage array.
             const int nvars = m_vars.size();
-            // Allocate storage for all grid vars.
+            // Compute the total size of the storage array & allocate
             int totStorage = 0;
             for(GinitvarIterT i = varBegin; i != varEnd; ++i)
                 totStorage += i->storageSize(nverts);
             m_storage.reset(new float[totStorage]);
-            // Cache views for individual vars.
+            // Cache views for each variable.
             m_views.reset(new FvecView[nvars]);
             int offset = 0;
             GinitvarIterT var = varBegin;
@@ -149,6 +148,7 @@ class GridStorage
 };
 
 
+//------------------------------------------------------------------------------
 /// Object to collect arguments necessary to build a GridStorage object.
 ///
 /// GridStorage holds an arbitrary number of variables, and we'd like to
@@ -210,7 +210,7 @@ class GridStorageBuilder : boost::noncopyable
         {
             m_vars.push_back(GvarInitSpec(spec, m_fromGeom));
         }
-        void add(const PrimvarList& primVars)
+        void add(const PrimvarSet& primVars)
         {
             for(int i = 0, nvars = primVars.size(); i < nvars; ++i)
                 add(primVars[i]);

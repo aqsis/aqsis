@@ -44,7 +44,7 @@ class Patch : public Geometry
         {
             GridStorageBuilder& builder = queue.gridStorageBuilder();
             // Add all the primvars to the grid
-            builder.add(m_vars->varList());
+            builder.add(m_vars->varSet());
             boost::shared_ptr<GridStorage> storage = builder.build(nu*nv);
             boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, storage, m_attrs));
 
@@ -56,11 +56,11 @@ class Patch : public Geometry
             float du = (m_uMax-m_uMin)/(nu-1);
             float dv = (m_vMax-m_vMin)/(nv-1);
 
-            for(int ivar = 0, nvars = m_vars->varList().size();
+            for(int ivar = 0, nvars = m_vars->varSet().size();
                 ivar < nvars; ++ivar)
             {
                 ConstFvecView pvar = m_vars->get(ivar);
-                FvecView gvar = storage->get(m_vars->varList()[ivar]);
+                FvecView gvar = storage->get(m_vars->varSet()[ivar]);
                 int size = gvar.elSize();
 
                 if(gvar.uniform())

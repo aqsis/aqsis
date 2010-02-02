@@ -198,4 +198,6 @@ inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
 
 inline void nullDeleter(const void*) { }
 
+template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
+
 #endif // UTIL_H_INCLUDED
