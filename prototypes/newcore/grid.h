@@ -39,6 +39,9 @@ class Grid
         /// Return the grid type.
         GridType type() const { return m_type; }
 
+        /// Get a ref to the grid storage.
+        virtual GridStorage& storage() = 0;
+
         virtual ~Grid() {}
 };
 
@@ -62,13 +65,13 @@ class QuadGrid : public Grid
             m_storage(storage)
         { }
 
+        virtual GridStorage& storage() { return *m_storage; }
+        virtual const GridStorage& storage() const { return *m_storage; }
+
         int nu() const { return m_nu; }
         int nv() const { return m_nv; }
 
         Iterator begin() const;
-
-        GridStorage& storage() { return *m_storage; }
-        const GridStorage& storage() const { return *m_storage; }
 
         void project(Mat4 m)
         {

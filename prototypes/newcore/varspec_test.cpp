@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_CASE(VarSet_test)
     BOOST_CHECK(vars.contains(Stdvar::Ci));
     BOOST_CHECK(vars.contains(myVar));
 
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::P), vars.stdIndices().P);
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::I), vars.stdIndices().I);
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::Cs), vars.stdIndices().Cs);
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::Ci), vars.stdIndices().Ci);
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::P), vars.stdIndices().get(StdIndices::P));
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::I), vars.stdIndices().get(StdIndices::I));
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::Cs), vars.stdIndex(StdIndices::Cs));
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::Ci), vars.stdIndex(StdIndices::Ci));
 
     BOOST_CHECK_NE(vars.find(myVar), VarSet::npos);
     BOOST_CHECK_EQUAL(vars.find(VarSpec(VarSpec::Point, 2, ustring("blah"))),

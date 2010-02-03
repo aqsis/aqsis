@@ -39,6 +39,8 @@ class Grid;
 class QuadGridSimple;
 class TessellationContextImpl;
 
+
+//-----------------------------------------------------------------------------
 struct OutvarSpec : public VarSpec
 {
     int offset;  ///< Offset in output image pixel channels
@@ -48,9 +50,10 @@ struct OutvarSpec : public VarSpec
     OutvarSpec(const VarSpec& spec, int offset)
         : VarSpec(spec), offset(offset) {}
 };
-
 typedef std::vector<OutvarSpec> OutvarList;
 
+
+//-----------------------------------------------------------------------------
 class Renderer
 {
     public:

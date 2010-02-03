@@ -39,6 +39,11 @@ class QuadGridSimple : public Grid
             m_P(nu*nv)
         { }
 
+        virtual GridStorage& storage()
+        {
+            return *m_storage;
+        }
+
         Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
         Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
 
@@ -67,6 +72,8 @@ class QuadGridSimple : public Grid
         int m_nu;
         int m_nv;
         std::vector<Vec3> m_P;
+        static GridStorage* m_storage; ///< Incredibly bogus, but necessary to
+                                       ///  fulfil full grid interface!
 };
 
 

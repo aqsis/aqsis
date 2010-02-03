@@ -15,7 +15,8 @@ include_directories(ustring)
 include_directories(.)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "-Werror")
+    set(CMAKE_CXX_FLAGS "-Wall -Werror" CACHE STRING
+        "Flags used by the compiler during all build types." FORCE)
 endif()
 
 set(srcs

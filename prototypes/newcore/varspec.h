@@ -133,6 +133,7 @@ namespace Stdvar {
     extern const VarSpec t;
     extern const VarSpec I;
     extern const VarSpec N;
+    extern const VarSpec Ng;
 
     extern const VarSpec st;
     extern const VarSpec z;
@@ -145,42 +146,43 @@ namespace Stdvar {
 /// This can be used to shortcut any variable lookup when getting the standard
 /// variables on a grid.  TODO: Is it overkill to have *all* the standard
 /// variables here?  Maybe we only need some of the more important ones?
-struct StdvarIndices
+class StdIndices
 {
-    int P;
-    int Cs;
-    int Ci;
-    int Os;
-    int Oi;
-    int s;
-    int t;
-    int I;
-    int N;
+    public:
+        enum Id
+        {
+            P,
+            Cs, Ci,
+            Os, Oi,
+            s, t,
+            I,
+            N, Ng,
+            VAR_LAST
+        };
 
-    StdvarIndices()
-        : P(-1), Cs(-1), Ci(-1), Os(-1), Oi(-1), s(-1), t(-1), I(-1), N(-1) {}
+        StdIndices()
+        {
+            for(int i = 0; i < VAR_LAST; ++i)
+                m_indices[i] = -1;
+        }
 
-    void add(int index, const VarSpec& var)
-    {
-        if(var == Stdvar::P)
-            P = index;
-        else if(var == Stdvar::Cs)
-            Cs = index;
-        else if(var == Stdvar::Ci)
-            Ci = index;
-        else if(var == Stdvar::Os)
-            Os = index;
-        else if(var == Stdvar::Oi)
-            Oi = index;
-        else if(var == Stdvar::s)
-            s = index;
-        else if(var == Stdvar::t)
-            t = index;
-        else if(var == Stdvar::I)
-            I = index;
-        else if(var == Stdvar::N)
-            N = index;
-    }
+        void add(int index, const VarSpec& var)
+        {
+            if(var == Stdvar::P)        m_indices[P]  = index;
+            else if(var == Stdvar::Cs)  m_indices[Cs] = index;
+            else if(var == Stdvar::Ci)  m_indices[Ci] = index;
+            else if(var == Stdvar::Os)  m_indices[Os] = index;
+            else if(var == Stdvar::Oi)  m_indices[Oi] = index;
+            else if(var == Stdvar::s)   m_indices[s]  = index;
+            else if(var == Stdvar::t)   m_indices[t]  = index;
+            else if(var == Stdvar::I)   m_indices[I]  = index;
+            else if(var == Stdvar::N)   m_indices[N]  = index;
+            else if(var == Stdvar::Ng)  m_indices[Ng] = index;
+        }
+
+        int get(Id id) const { return m_indices[id]; }
+    private:
+        int m_indices[VAR_LAST];
 };
 
 
@@ -196,7 +198,7 @@ class BasicVarSet
     private:
         typedef std::vector<SpecT> VarVec;
         VarVec m_vars;
-        StdvarIndices m_stdIndices;
+        StdIndices m_stdIndices;
 
         /// Return true if the list of vars is sorted
         static bool isSorted(const VarVec& vars)
@@ -218,6 +220,10 @@ class BasicVarSet
         typedef typename VarVec::const_iterator const_iterator;
         static const int npos = -1;
 
+        /// Make an empty varset
+        BasicVarSet() : m_vars() { }
+
+        /// Construct a set from a _sorted_ sequence of vars.
         template<typename VarIterT>
         BasicVarSet(VarIterT b, VarIterT e)
             : m_vars(b, e)
@@ -226,7 +232,17 @@ class BasicVarSet
             updateStdIndices();
         }
 
-        const StdvarIndices& stdIndices() const { return m_stdIndices; }
+        /// Assign a set of _unsorted_ variables to the set.
+        template<typename VarIterT>
+        void assign(VarIterT b, VarIterT e)
+        {
+            m_vars.assign(b, e);
+            std::sort(m_vars.begin(), m_vars.end());
+            updateStdIndices();
+        }
+
+        const StdIndices& stdIndices() const { return m_stdIndices; }
+        int stdIndex(StdIndices::Id id) const { return m_stdIndices.get(id); }
 
         /// Iterator access and indexing.
         const_iterator begin() const { return m_vars.begin(); }

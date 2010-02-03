@@ -40,8 +40,8 @@ class TessellationContextImpl : public TessellationContext
     public:
         TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
-            m_parentSurface(0),
-            m_builder()
+            m_builder(),
+            m_parentSurface(0)
         { }
 
         void setParent(Renderer::SurfaceHolder& parent)
@@ -78,6 +78,16 @@ class TessellationContextImpl : public TessellationContext
             //m_builder.setFromGeom();
             //m_builder.add(Stdvar::Cs, 
             m_builder.clear();
+//            if(m_parentSurface.attrs.surfaceShader)
+//            {
+//                const Shader& shader = *m_parentSurface.attrs.surfaceShader;
+//                VarSet& inVars = shader->inputVars();
+//                for(int i = 0; i < inVars.size(); ++i)
+//                {
+//                    if(inVars)
+//                    m_builder.add
+//                }
+//            }
             return m_builder;
         }
 };

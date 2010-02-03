@@ -133,14 +133,14 @@ class GridStorage
         /// Convenient access to storage for standard position variable
         DataView<Vec3> P()
         {
-            int Pidx = m_vars.stdIndices().P;
+            int Pidx = m_vars.stdIndex(StdIndices::P);
             assert(Pidx >= 0);
             return DataView<Vec3>(m_views[Pidx].storage(),
                                   m_views[Pidx].stride());
         }
         ConstDataView<Vec3> P() const
         {
-            int Pidx = m_vars.stdIndices().P;
+            int Pidx = m_vars.stdIndex(StdIndices::P);
             assert(Pidx >= 0);
             return ConstDataView<Vec3>(m_views[Pidx].storage(),
                                        m_views[Pidx].stride());

@@ -183,14 +183,14 @@ class PrimvarStorage
         /// Get a view of the vertex position data
         DataView<Vec3> P()
         {
-            int Pidx = m_vars.stdIndices().P;
+            int Pidx = m_vars.stdIndex(StdIndices::P);
             assert(Pidx >= 0);
             return DataView<Vec3>(m_views[Pidx]);
         }
         /// Get a const view of the vertex position data
         ConstDataView<Vec3> P() const
         {
-            int Pidx = m_vars.stdIndices().P;
+            int Pidx = m_vars.stdIndex(StdIndices::P);
             assert(Pidx >= 0);
             return ConstDataView<Vec3>(m_views[Pidx]);
         }
