@@ -59,9 +59,12 @@ target_link_libraries(render ${TIFF_LIBRARIES})
 #------------------------------------------------------------
 # Testing:
 
+enable_testing()
+
 macro(testcase testname)
     add_executable(${testname} ${ARGN})
     target_link_libraries(${testname} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    add_test(${testname} ${testname})
 endmacro()
 
 testcase(ustring_test

@@ -40,9 +40,9 @@ class Patch : public Geometry
         const float m_uMin, m_uMax;
         const float m_vMin, m_vMax;
 
-        void dice(RenderQueue& queue, int nu, int nv) const
+        void dice(TessellationContext& tessCtx, int nu, int nv) const
         {
-            GridStorageBuilder& builder = queue.gridStorageBuilder();
+            GridStorageBuilder& builder = tessCtx.gridStorageBuilder();
             // Add all the primvars to the grid
             builder.add(m_vars->varSet());
             boost::shared_ptr<GridStorage> storage = builder.build(nu*nv);
@@ -98,7 +98,7 @@ class Patch : public Geometry
                     }
                 }
             }
-            queue.push(grid);
+            tessCtx.push(grid);
         }
 
         void getCorners(Vec3& a, Vec3& b, Vec3& c, Vec3& d) const
@@ -126,7 +126,8 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
-        virtual void splitdice(const Mat4& splitTrans, RenderQueue& queue) const
+        virtual void splitdice(const Mat4& splitTrans,
+                               TessellationContext& tessCtx) const
         {
             Vec3 a,b,c,d;
             getCorners(a,b,c,d);
@@ -142,7 +143,7 @@ class Patch : public Geometry
             float area = 0.5 * (  ((bSpl-aSpl)%(cSpl-aSpl)).length()
                                 + ((bSpl-dSpl)%(cSpl-dSpl)).length() );
 
-            Options& opts = queue.options();
+            Options& opts = tessCtx.options();
             const float maxArea = opts.gridSize*opts.gridSize
                                   * m_attrs.shadingRate;
 
@@ -157,7 +158,7 @@ class Patch : public Geometry
                 // dice the surface.
                 int nu = 1 + Imath::floor(lu/std::sqrt(m_attrs.shadingRate));
                 int nv = 1 + Imath::floor(lv/std::sqrt(m_attrs.shadingRate));
-                dice(queue, nu, nv);
+                dice(tessCtx, nu, nv);
             }
             else
             {
@@ -172,9 +173,9 @@ class Patch : public Geometry
                     // | | |
                     // c---d
                     float uMid = 0.5*(m_uMin + m_uMax);
-                    queue.push(boost::shared_ptr<Geometry>(
+                    tessCtx.push(boost::shared_ptr<Geometry>(
                                 new Patch(m_attrs, m_vars, m_uMin, uMid, m_vMin, m_vMax)));
-                    queue.push(boost::shared_ptr<Geometry>(
+                    tessCtx.push(boost::shared_ptr<Geometry>(
                                 new Patch(m_attrs, m_vars, uMid, m_uMax, m_vMin, m_vMax)));
                 }
                 else
@@ -184,9 +185,9 @@ class Patch : public Geometry
                     // |---|
                     // c---d
                     float vMid = 0.5*(m_vMin + m_vMax);
-                    queue.push(boost::shared_ptr<Geometry>(
+                    tessCtx.push(boost::shared_ptr<Geometry>(
                                 new Patch(m_attrs, m_vars, m_uMin, m_uMax, m_vMin, vMid)));
-                    queue.push(boost::shared_ptr<Geometry>(
+                    tessCtx.push(boost::shared_ptr<Geometry>(
                                 new Patch(m_attrs, m_vars, m_uMin, m_uMax, vMid, m_vMax)));
                 }
             }

@@ -27,28 +27,34 @@ class GridStorageBuilder;
 class Geometry;
 class Options;
 
-/// Tessellation context and destination queue for split or diced geometry
+/// Tessellation context for geometric split/dice
 ///
-/// Geometry pushes split/diced subobjects back into the render queue via this
-/// interface, from which it gets forwarded to the renderer.
-class RenderQueue
+/// The split/dice part of an reyes pipeline is an exercise in generating a
+/// fine, uniform, adaptive tesselation of the geometry to be rendered.  The
+/// uniformity of the tesselation is usually measured with respect to raster
+/// space.
+///
+/// During tessellation, geometry needs to know how finely to split itself up,
+/// and the results have to be placed somewhere.  TessellationContext fulfils
+/// these needs.
+class TessellationContext
 {
     public:
-        /// Return the renderer option state
-        virtual Options& options() = 0;
-
         /// Push some geometry into the render pipeline.
-        ///
         /// The results from splitting operations go here.
         virtual void push(const boost::shared_ptr<Geometry>& geom) = 0;
-        /// Push a grid into the render pipeline
-        ///
+
+        /// Push a grid into the render pipeline.
         /// The results from geometry dicing go here.
         virtual void push(const boost::shared_ptr<Grid>& grid) = 0;
 
+        /// Return the renderer option state
+        virtual Options& options() = 0;
+
+        /// Get a builder for storage which will hold dicing results.
         virtual GridStorageBuilder& gridStorageBuilder() = 0;
 
-        virtual ~RenderQueue() {};
+        virtual ~TessellationContext() {};
 };
 
 
@@ -67,14 +73,14 @@ class Geometry
         /// anything.
         virtual Box bound() const = 0;
 
-        /// Split/tesselate geometry & push it back at the renderer pipeline
+        /// Split/dice geometry & push it back at the tessellation context
         ///
         /// This function is an abstraction around the "split" and "dice"
         /// parts of the reyes pipeline.  If the geometry is "small enough" it
         /// should be diced (tesselated) into grids of micropolygons.  If not,
         /// it should be split into smaller pieces and pushed back into the
         /// queue.
-        virtual void splitdice(const Mat4& proj, RenderQueue& queue) const = 0;
+        virtual void splitdice(const Mat4& proj, TessellationContext& tessCtx) const = 0;
 
         // Transform the surface into a new coordinate system.
         virtual void transform(const Mat4& trans) = 0;

@@ -36,7 +36,7 @@
 class Renderer;
 class Grid;
 class QuadGridSimple;
-class RenderQueueImpl;
+class TessellationContextImpl;
 
 struct OutvarSpec : public VarSpec
 {
@@ -64,9 +64,9 @@ class Renderer
 
 
     private:
-        // RenderQueueImpl is a friend so that it can appropriately push()
-        // surfaces and grids into the renderer.
-        friend class RenderQueueImpl;
+        // TessellationContextImpl is a friend so that it can appropriately
+        // push() surfaces and grids into the renderer.
+        friend class TessellationContextImpl;
 
         // Container for geometry and geometry metadata
         struct SurfaceHolder

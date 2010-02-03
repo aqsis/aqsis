@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 // Minimal wrapper around a renderer instance to provide control context for
 // when surfaces push split/diced objects back into the render's queue.
-class RenderQueueImpl : public RenderQueue
+class TessellationContextImpl : public TessellationContext
 {
     private:
         Renderer& m_renderer;
@@ -38,36 +38,30 @@ class RenderQueueImpl : public RenderQueue
         // TODO: avoid constructing one of these for each split/dice
         GridStorageBuilder m_builder;
     public:
-        RenderQueueImpl(Renderer& renderer, int splitDepth)
+        TessellationContextImpl(Renderer& renderer, int splitDepth)
             : m_renderer(renderer),
             m_splitDepth(splitDepth)
         { }
 
-        virtual Options& options();
+        virtual Options& options()
+        {
+            return m_renderer.m_opts;
+        }
 
-        virtual void push(const boost::shared_ptr<Geometry>& geom);
-        virtual void push(const boost::shared_ptr<Grid>& grid);
+        virtual void push(const boost::shared_ptr<Geometry>& geom)
+        {
+            m_renderer.push(geom, m_splitDepth+1);
+        }
+        virtual void push(const boost::shared_ptr<Grid>& grid)
+        {
+            m_renderer.push(grid);
+        }
 
         virtual GridStorageBuilder& gridStorageBuilder()
         {
             return m_builder;
         }
 };
-
-Options& RenderQueueImpl::options()
-{
-    return m_renderer.m_opts;
-}
-
-void RenderQueueImpl::push(const boost::shared_ptr<Geometry>& geom)
-{
-    m_renderer.push(geom, m_splitDepth+1);
-}
-
-void RenderQueueImpl::push(const boost::shared_ptr<Grid>& grid)
-{
-    m_renderer.push(grid);
-}
 
 
 //------------------------------------------------------------------------------
@@ -328,7 +322,7 @@ void Renderer::render()
     {
         SurfaceHolder s = m_surfaces.top();
         m_surfaces.pop();
-        RenderQueueImpl queue(*this, s.splitCount);
+        TessellationContextImpl queue(*this, s.splitCount);
         s.geom->splitdice(splitTrans, queue);
     }
     saveImages("test");

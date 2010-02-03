@@ -87,7 +87,8 @@ class PatchSimple : public Geometry
             m_P[2] = c; m_P[3] = d;
         }
 
-        virtual void splitdice(const Mat4& splitTrans, RenderQueue& queue) const
+        virtual void splitdice(const Mat4& splitTrans,
+                               TessellationContext& tessCtx) const
         {
             // Project points into "splitting coordinates"
             Vec3 a = m_P[0] * splitTrans;
@@ -100,7 +101,7 @@ class PatchSimple : public Geometry
             float area = 0.5 * (  ((b-a)%(c-a)).length()
                                 + ((b-d)%(c-d)).length() );
 
-            Options& opts = queue.options();
+            Options& opts = tessCtx.options();
             const float maxArea = opts.gridSize*opts.gridSize
                                   * m_attrs.shadingRate;
 
@@ -126,7 +127,7 @@ class PatchSimple : public Geometry
                     for(int u = 0; u < uRes; ++u)
                         row[u] = Imath::lerp(Pmin, Pmax, u*du);
                 }
-                queue.push(grid);
+                tessCtx.push(grid);
             }
             else
             {
@@ -142,9 +143,9 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                     Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
+                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     m_P[0], ab, m_P[2], cd)));
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
+                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     ab, m_P[1], cd, m_P[3])));
                 }
                 else
@@ -155,9 +156,9 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                     Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
+                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     m_P[0], m_P[1], ac, bd)));
-                    queue.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
+                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
                                     ac, bd, m_P[2], m_P[3])));
                 }
             }
