@@ -35,13 +35,16 @@ class TessellationContextImpl : public TessellationContext
     private:
         Renderer& m_renderer;
         int m_splitDepth;
-        // TODO: avoid constructing one of these for each split/dice
         GridStorageBuilder m_builder;
+
     public:
-        TessellationContextImpl(Renderer& renderer, int splitDepth)
+        TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
-            m_splitDepth(splitDepth)
+            m_splitDepth(0),
+            m_builder()
         { }
+
+        void reset(int splitDepth) { m_splitDepth = splitDepth; }
 
         virtual Options& options()
         {
@@ -59,6 +62,7 @@ class TessellationContextImpl : public TessellationContext
 
         virtual GridStorageBuilder& gridStorageBuilder()
         {
+            m_builder.clear();
             return m_builder;
         }
 };
@@ -317,13 +321,16 @@ void Renderer::render()
 //        * Mat4().setTranslation(Vec3(0.5,0.5,0))
 //        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
 
+    // Use the same tessellation context for all split/dice events
+    TessellationContextImpl tessContext(*this);
+
     initSamples();
     while(!m_surfaces.empty())
     {
         SurfaceHolder s = m_surfaces.top();
         m_surfaces.pop();
-        TessellationContextImpl queue(*this, s.splitCount);
-        s.geom->splitdice(splitTrans, queue);
+        tessContext.reset(s.splitCount);
+        s.geom->splitdice(splitTrans, tessContext);
     }
     saveImages("test");
 }
