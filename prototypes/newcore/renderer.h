@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
+#include "attributes.h"
 #include "geometry.h"
 #include "options.h"
 #include "sample.h"
@@ -40,7 +41,7 @@ class TessellationContextImpl;
 
 struct OutvarSpec : public VarSpec
 {
-    int offset;  ///< Offset
+    int offset;  ///< Offset in output image pixel channels
 
     OutvarSpec(Type type, int arraySize, ustring name, int offset)
         : VarSpec(type, arraySize, name), offset(offset) {}
@@ -57,7 +58,7 @@ class Renderer
                  const VarList& outVars = VarList());
 
         /// Add geometry
-        void add(const boost::shared_ptr<Geometry>& geom);
+        void add(const boost::shared_ptr<Geometry>& geom, Attributes& attrs);
 
         /// Render all surfaces and save resulting image.
         void render();
@@ -71,15 +72,17 @@ class Renderer
         // Container for geometry and geometry metadata
         struct SurfaceHolder
         {
-            boost::shared_ptr<Geometry> geom; //< Pointer to geometry
-            int splitCount; //< Number of times the geometry has been split
-            Box bound;      //< Bound in camera coordinates
+            boost::shared_ptr<Geometry> geom; ///< Pointer to geometry
+            int splitCount; ///< Number of times the geometry has been split
+            Box bound;      ///< Bound in camera coordinates
+            Attributes* attrs; ///< Surface attribute state
 
             SurfaceHolder(const boost::shared_ptr<Geometry>& geom,
-                          int splitCount, Box bound)
+                          int splitCount, Box bound, Attributes* attrs)
                 : geom(geom),
                 splitCount(splitCount),
-                bound(bound)
+                bound(bound),
+                attrs(attrs)
             { }
         };
 
@@ -121,13 +124,15 @@ class Renderer
 
         void defaultSamples(float* defaultSamps);
         void initSamples();
-        void push(const boost::shared_ptr<Geometry>& geom, int splitCount);
-        void push(const boost::shared_ptr<Grid>& grid);
+        void push(const boost::shared_ptr<Geometry>& geom,
+                  const SurfaceHolder& parentSurface);
+        void push(const boost::shared_ptr<Grid>& grid,
+                  const SurfaceHolder& parentSurface);
 
         template<typename GridT, typename PolySamplerT>
-        void rasterize(GridT& grid);
+        void rasterize(GridT& grid, const Attributes& attrs);
 
-        void rasterizeSimple(QuadGridSimple& grid);
+        void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);
 };
 
 

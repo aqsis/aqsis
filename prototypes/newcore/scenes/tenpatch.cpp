@@ -22,10 +22,9 @@
 #include "simple.h"
 
 static
-boost::shared_ptr<Geometry> createPatch(const Attributes& attrs,
-                                       const Vec3& a, const Vec3& b,
-                                       const Vec3& c, const Vec3& d,
-                                       const Mat4& trans = Mat4())
+boost::shared_ptr<Geometry> createPatch(const Vec3& a, const Vec3& b,
+                                        const Vec3& c, const Vec3& d,
+                                        const Mat4& trans = Mat4())
 {
     PrimvarStorageBuilder builder;
     float P[] = {
@@ -34,8 +33,8 @@ boost::shared_ptr<Geometry> createPatch(const Attributes& attrs,
     };
     builder.add(Primvar::P, P, array_len(P));
     IclassStorage storReq(1,4,4,4,4);
-    boost::shared_ptr<Geometry> patch(new Patch(attrs, builder.build(storReq)));
-//    boost::shared_ptr<Geometry> patch(new PatchSimple(attrs, a,b,c,d));
+    boost::shared_ptr<Geometry> patch(new Patch(builder.build(storReq)));
+//    boost::shared_ptr<Geometry> patch(new PatchSimple(a,b,c,d));
     patch->transform(trans);
     return patch;
 }
@@ -63,8 +62,8 @@ void renderTenPatchScene()
 
     for(int i = 0; i < 10; ++i)
     {
-        r.add(createPatch(attrs, Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                                 Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)) );
+        r.add(createPatch(Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
+                          Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)), attrs);
     }
 
     r.render();

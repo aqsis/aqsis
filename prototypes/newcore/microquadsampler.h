@@ -20,8 +20,8 @@
 #ifndef QUADRASTERIZER_H_INCLUDED
 #define QUADRASTERIZER_H_INCLUDED
 
+#include "attributes.h"
 #include "invbilin.h"
-#include "options.h"
 #include "sample.h"
 #include "util.h"
 #include "pointinquad.h"
@@ -69,7 +69,7 @@ class MicroQuadSampler
         // a -- b
         // |    |
         // d -- c
-        MicroQuadSampler(const QuadGrid& grid, const Options& opts,
+        MicroQuadSampler(const QuadGrid& grid, const Attributes& attrs,
                          const OutvarList& outVars)
             : m_grid(grid),
             m_curr(grid.begin()),
@@ -77,7 +77,7 @@ class MicroQuadSampler
             m_hitTest(),
             m_P(grid.storage().P()),
             m_uv(0.0f),
-            m_smoothShading(grid.attributes().smoothShading)
+            m_smoothShading(attrs.smoothShading)
         {
             // Cache the variables which need to be interpolated into
             // fragment outputs.

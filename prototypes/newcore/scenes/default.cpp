@@ -22,10 +22,9 @@
 #include "simple.h"
 
 static
-boost::shared_ptr<Geometry> createPatch(const Attributes& attrs,
-                                       const Vec3& a, const Vec3& b,
-                                       const Vec3& c, const Vec3& d,
-                                       const Mat4& trans = Mat4())
+boost::shared_ptr<Geometry> createPatch(const Vec3& a, const Vec3& b,
+                                        const Vec3& c, const Vec3& d,
+                                        const Mat4& trans = Mat4())
 {
     PrimvarStorageBuilder builder;
     float P[] = {
@@ -38,28 +37,28 @@ boost::shared_ptr<Geometry> createPatch(const Attributes& attrs,
     };
     builder.add(Primvar::Cs, Cs, array_len(Cs));
     IclassStorage storReq(1,4,4,4,4);
-    boost::shared_ptr<Geometry> patch(new Patch(attrs, builder.build(storReq)));
+    boost::shared_ptr<Geometry> patch(new Patch(builder.build(storReq)));
     patch->transform(trans);
     return patch;
 }
 
 static
-void addCube(const Attributes& attrs, Renderer& r, const Mat4& otow)
+void addCube(Attributes& attrs, Renderer& r, const Mat4& otow)
 {
-    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                             Vec3(-1,1,-1), Vec3(-1,1,1), otow) );
-    r.add(createPatch(attrs, Vec3(1,-1,-1), Vec3(1,-1,1),
-                             Vec3(1,1,-1), Vec3(1,1,1), otow) );
+    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,-1,1),
+                      Vec3(-1,1,-1), Vec3(-1,1,1), otow), attrs);
+    r.add(createPatch(Vec3(1,-1,-1), Vec3(1,-1,1),
+                      Vec3(1,1,-1), Vec3(1,1,1), otow), attrs);
 
-    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                             Vec3(1,-1,-1), Vec3(1,-1,1), otow) );
-    r.add(createPatch(attrs, Vec3(-1,1,-1), Vec3(-1,1,1),
-                             Vec3(1,1,-1), Vec3(1,1,1), otow) );
+    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,-1,1),
+                      Vec3(1,-1,-1), Vec3(1,-1,1), otow), attrs);
+    r.add(createPatch(Vec3(-1,1,-1), Vec3(-1,1,1),
+                      Vec3(1,1,-1), Vec3(1,1,1), otow), attrs);
 
-    r.add(createPatch(attrs, Vec3(-1,-1,-1), Vec3(-1,1,-1),
-                             Vec3(1,-1,-1), Vec3(1,1,-1), otow) );
-    r.add(createPatch(attrs, Vec3(-1,-1,1), Vec3(-1,1,1),
-                             Vec3(1,-1,1), Vec3(1,1,1), otow) );
+    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,1,-1),
+                      Vec3(1,-1,-1), Vec3(1,1,-1), otow), attrs);
+    r.add(createPatch(Vec3(-1,-1,1), Vec3(-1,1,1),
+                             Vec3(1,-1,1), Vec3(1,1,1), otow), attrs);
 }
 
 void renderDefaultScene()

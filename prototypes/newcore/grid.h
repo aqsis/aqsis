@@ -20,7 +20,6 @@
 #ifndef GRID_H_INCLUDED
 #define GRID_H_INCLUDED
 
-#include "attributes.h"
 #include "gridstorage.h"
 #include "util.h"
 
@@ -34,16 +33,11 @@ class Grid
 {
     private:
         GridType m_type;
-        const Attributes& m_attrs;
     public:
-        Grid(GridType type, const Attributes& attrs)
-            : m_type(type), m_attrs(attrs) {}
+        Grid(GridType type) : m_type(type) {}
 
         /// Return the grid type.
         GridType type() const { return m_type; }
-
-        /// Return the grid attribute state
-        const Attributes& attributes() const { return m_attrs; }
 
         virtual ~Grid() {}
 };
@@ -61,9 +55,8 @@ class QuadGrid : public Grid
     public:
         class Iterator;
 
-        QuadGrid(int nu, int nv, boost::shared_ptr<GridStorage> storage,
-                 const Attributes& attrs)
-            : Grid(GridType_Quad, attrs),
+        QuadGrid(int nu, int nv, boost::shared_ptr<GridStorage> storage)
+            : Grid(GridType_Quad),
             m_nu(nu),
             m_nv(nv),
             m_storage(storage)

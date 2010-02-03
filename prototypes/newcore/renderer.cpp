@@ -34,34 +34,49 @@ class TessellationContextImpl : public TessellationContext
 {
     private:
         Renderer& m_renderer;
-        int m_splitDepth;
         GridStorageBuilder m_builder;
+        const Renderer::SurfaceHolder* m_parentSurface;
 
     public:
         TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
-            m_splitDepth(0),
+            m_parentSurface(0),
             m_builder()
         { }
 
-        void reset(int splitDepth) { m_splitDepth = splitDepth; }
+        void setParent(Renderer::SurfaceHolder& parent)
+        {
+            m_parentSurface = &parent;
+        }
 
-        virtual Options& options()
+        virtual const Options& options()
         {
             return m_renderer.m_opts;
+        }
+        virtual const Attributes& attributes()
+        {
+            return *(m_parentSurface->attrs);
         }
 
         virtual void push(const boost::shared_ptr<Geometry>& geom)
         {
-            m_renderer.push(geom, m_splitDepth+1);
+            m_renderer.push(geom, *m_parentSurface);
         }
         virtual void push(const boost::shared_ptr<Grid>& grid)
         {
-            m_renderer.push(grid);
+            m_renderer.push(grid, *m_parentSurface);
         }
 
         virtual GridStorageBuilder& gridStorageBuilder()
         {
+            // Add required stdvars for sampling & shader input.  These are the
+            // vars which can be deduced from other primvars (eg, Ng is deduced
+            // from P), from the attribute state (eg, Cs) or otherwise.
+            //
+            // Also add storage for required shader output vars, eg N.
+            //m_builder.add(m_renderer.);
+            //m_builder.setFromGeom();
+            //m_builder.add(Stdvar::Cs, 
             m_builder.clear();
             return m_builder;
         }
@@ -226,8 +241,10 @@ void Renderer::initSamples()
 
 
 /// Push geometry into the render queue
-void Renderer::push(const boost::shared_ptr<Geometry>& geom, int splitCount)
+void Renderer::push(const boost::shared_ptr<Geometry>& geom,
+                    const SurfaceHolder& parentSurface)
 {
+    int splitCount = parentSurface.splitCount + 1;
     // Get bound in camera space.
     Box bound = geom->bound();
     if(bound.min.z < FLT_EPSILON && splitCount > m_opts.maxSplits)
@@ -254,22 +271,25 @@ void Renderer::push(const boost::shared_ptr<Geometry>& geom, int splitCount)
     }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
-    m_surfaces.push(SurfaceHolder(geom, splitCount, bound));
+    m_surfaces.push(SurfaceHolder(geom, splitCount, bound,
+                                  parentSurface.attrs));
 }
 
 
 // Push a grid onto the render queue
-void Renderer::push(const boost::shared_ptr<Grid>& grid)
+void Renderer::push(const boost::shared_ptr<Grid>& grid,
+                    const SurfaceHolder& parentSurface)
 {
     // For now, just rasterize it directly.
     switch(grid->type())
     {
         case GridType_QuadSimple:
-            rasterizeSimple(static_cast<QuadGridSimple&>(*grid));
+            rasterizeSimple(static_cast<QuadGridSimple&>(*grid),
+                            *parentSurface.attrs);
             break;
         case GridType_Quad:
             rasterize<QuadGrid, MicroQuadSampler>(
-                    static_cast<QuadGrid&>(*grid));
+                    static_cast<QuadGrid&>(*grid), *parentSurface.attrs);
             break;
     }
 }
@@ -304,10 +324,15 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
 }
 
-void Renderer::add(const boost::shared_ptr<Geometry>& geom)
+void Renderer::add(const boost::shared_ptr<Geometry>& geom,
+                   Attributes& attrs)
 {
     // TODO: Transform to camera space?
-    push(geom, 0);
+    //
+    // We need a dummy holder here for the "parent" surface; it's only
+    // really required to pass the attributes and split count on.
+    SurfaceHolder fakeParent(boost::shared_ptr<Geometry>(), -1, Box(), &attrs);
+    push(geom, fakeParent);
 }
 
 // Render all surfaces and save resulting image.
@@ -329,7 +354,7 @@ void Renderer::render()
     {
         SurfaceHolder s = m_surfaces.top();
         m_surfaces.pop();
-        tessContext.reset(s.splitCount);
+        tessContext.setParent(s);
         s.geom->splitdice(splitTrans, tessContext);
     }
     saveImages("test");
@@ -339,7 +364,7 @@ void Renderer::render()
 // Render a grid by rasterizing each micropolygon.
 template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
-void Renderer::rasterize(GridT& grid)
+void Renderer::rasterize(GridT& grid, const Attributes& attrs)
 {
     // Determine index of depth output data, if any.
     int zOffset = -1;
@@ -353,7 +378,7 @@ void Renderer::rasterize(GridT& grid)
     grid.project(m_camToRas);
 
     // Construct a sampler for the polygons in the grid
-    PolySamplerT poly(grid, m_opts, m_outVars);
+    PolySamplerT poly(grid, attrs, m_outVars);
     // iterate over all micropolys in the grid & render each one.
     while(poly.valid())
     {
@@ -405,7 +430,7 @@ void Renderer::rasterize(GridT& grid)
 //
 // The purpose of this version rasterizer function is to provide a simple
 // version to benchmark against.
-void Renderer::rasterizeSimple(QuadGridSimple& grid)
+void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
 {
     int pixStride = numOutChans(m_outVars);
 
@@ -419,7 +444,7 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid)
     // Shading interpolation
     InvBilin invBilin;
     // Whether to use smooth shading or not.
-    bool smoothShading = grid.attributes().smoothShading;
+    bool smoothShading = attrs.smoothShading;
     // Micropoly uv coordinates for smooth shading
     Vec2 uv(0.0f);
 

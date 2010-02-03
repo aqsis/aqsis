@@ -26,6 +26,7 @@ class Grid;
 class GridStorageBuilder;
 class Geometry;
 class Options;
+class Attributes;
 
 /// Tessellation context for geometric split/dice
 ///
@@ -49,7 +50,9 @@ class TessellationContext
         virtual void push(const boost::shared_ptr<Grid>& grid) = 0;
 
         /// Return the renderer option state
-        virtual Options& options() = 0;
+        virtual const Options& options() = 0;
+        /// Return the current surface options state
+        virtual const Attributes& attributes() = 0;
 
         /// Get a builder for storage which will hold dicing results.
         virtual GridStorageBuilder& gridStorageBuilder() = 0;

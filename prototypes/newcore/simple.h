@@ -32,8 +32,8 @@
 class QuadGridSimple : public Grid
 {
     public:
-        QuadGridSimple(int nu, int nv, const Attributes& attrs)
-            : Grid(GridType_QuadSimple, attrs),
+        QuadGridSimple(int nu, int nv)
+            : Grid(GridType_QuadSimple),
             m_nu(nu),
             m_nv(nv),
             m_P(nu*nv)
@@ -76,12 +76,10 @@ class PatchSimple : public Geometry
 {
     private:
         Vec3 m_P[4];
-        const Attributes& m_attrs;
 
     public:
 
-        PatchSimple(const Attributes& attrs, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
-            : m_attrs(attrs)
+        PatchSimple(Vec3 a, Vec3 b, Vec3 c, Vec3 d)
         {
             m_P[0] = a; m_P[1] = b;
             m_P[2] = c; m_P[3] = d;
@@ -101,9 +99,10 @@ class PatchSimple : public Geometry
             float area = 0.5 * (  ((b-a)%(c-a)).length()
                                 + ((b-d)%(c-d)).length() );
 
-            Options& opts = tessCtx.options();
+            const Options& opts = tessCtx.options();
+            const Attributes& attrs = tessCtx.attributes();
             const float maxArea = opts.gridSize*opts.gridSize
-                                  * m_attrs.shadingRate;
+                                  * attrs.shadingRate;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((b-a).length() + (d-c).length());
@@ -114,9 +113,10 @@ class PatchSimple : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int uRes = 1 + Imath::floor(lu/std::sqrt(m_attrs.shadingRate));
-                int vRes = 1 + Imath::floor(lv/std::sqrt(m_attrs.shadingRate));
-                boost::shared_ptr<QuadGridSimple> grid(new QuadGridSimple(uRes, vRes, m_attrs));
+                int uRes = 1 + Imath::floor(lu/std::sqrt(attrs.shadingRate));
+                int vRes = 1 + Imath::floor(lv/std::sqrt(attrs.shadingRate));
+                boost::shared_ptr<QuadGridSimple>
+                    grid(new QuadGridSimple(uRes, vRes));
                 float dv = 1.0f/(vRes-1);
                 float du = 1.0f/(uRes-1);
                 for(int v = 0; v < vRes; ++v)
@@ -143,10 +143,10 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                     Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
-                                    m_P[0], ab, m_P[2], cd)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
-                                    ab, m_P[1], cd, m_P[3])));
+                    tessCtx.push(boost::shared_ptr<Geometry>(
+                                new PatchSimple(m_P[0], ab, m_P[2], cd)));
+                    tessCtx.push(boost::shared_ptr<Geometry>(
+                                new PatchSimple(ab, m_P[1], cd, m_P[3])));
                 }
                 else
                 {
@@ -156,10 +156,10 @@ class PatchSimple : public Geometry
                     // c---d
                     Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                     Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
-                                    m_P[0], m_P[1], ac, bd)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(new PatchSimple(m_attrs,
-                                    ac, bd, m_P[2], m_P[3])));
+                    tessCtx.push(boost::shared_ptr<Geometry>(
+                                new PatchSimple( m_P[0], m_P[1], ac, bd)));
+                    tessCtx.push(boost::shared_ptr<Geometry>(
+                                new PatchSimple( ac, bd, m_P[2], m_P[3])));
                 }
             }
         }
