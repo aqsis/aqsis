@@ -66,6 +66,7 @@ struct VarSpec
             case Matrix: return 16;
             case String: return 1;
         }
+        assert(0 && "Unknown type"); return 0;
     }
 
     /// Get number of scalar values required for the variable

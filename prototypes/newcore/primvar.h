@@ -28,7 +28,6 @@
 #include <boost/scoped_array.hpp>
 
 #include "util.h"
-#include "fixedstrings.h"
 #include "arrayview.h"
 #include "varspec.h"
 

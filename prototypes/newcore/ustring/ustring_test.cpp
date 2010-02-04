@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(ustring_container_test)
     ustring s("blah");
     BOOST_CHECK_EQUAL(s[0], 'b');
     BOOST_CHECK_EQUAL(s[3], 'h');
-    BOOST_CHECK_EQUAL(s.size(), 4);
+    BOOST_CHECK_EQUAL(s.size(), size_t(4));
     // check iterators
     {
         std::string extract(s.begin(), s.end());

@@ -15,15 +15,16 @@ include_directories(ustring)
 include_directories(.)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "-Wall -Werror" CACHE STRING
-        "Flags used by the compiler during all build types." FORCE)
+    if("${CMAKE_CXX_FLAGS}" STREQUAL "")
+        set(CMAKE_CXX_FLAGS "-Wall -Werror" CACHE STRING
+            "Flags used by the compiler during all build types." FORCE)
+    endif()
 endif()
 
 set(srcs
     main.cpp
     renderer.cpp
     ustring/ustring.cpp
-    fixedstrings.cpp
     primvar.cpp
     varspec.cpp
     scenes/tenpatch.cpp
@@ -33,7 +34,6 @@ set(srcs
 set(hdrs
     arrayview.h
     attributes.h
-    fixedstrings.h
     geometry.h
     grid.h
     gridstorage.h
@@ -75,7 +75,6 @@ testcase(ustring_test
 
 set(varspec_srcs
     ustring/ustring.cpp
-    fixedstrings.cpp
     varspec.cpp
 )
 
