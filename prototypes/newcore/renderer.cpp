@@ -64,6 +64,19 @@ class TessellationContextImpl : public TessellationContext
         }
         virtual void push(const boost::shared_ptr<Grid>& grid)
         {
+            // Fill in any grid data which didn't get filled in by the surface
+            // during the dicing stage.
+            GridStorage& stor = grid->storage();
+            if(stor.varSet().contains(StdIndices::N))
+                grid->calculateNormals(stor.N(), stor.P());
+            if(stor.varSet().contains(StdIndices::I))
+            {
+                // In shading coordinates, I is just equal to P for
+                // perspective projections.  (TODO: orthographic)
+                copy(stor.get(StdIndices::I), stor.get(StdIndices::P),
+                     stor.nverts());
+            }
+            // Push the grid into the render pipeline
             m_renderer.push(grid, *m_parentSurface);
         }
 
@@ -74,20 +87,43 @@ class TessellationContextImpl : public TessellationContext
             // from P), from the attribute state (eg, Cs) or otherwise.
             //
             // Also add storage for required shader output vars, eg N.
-            //m_builder.add(m_renderer.);
-            //m_builder.setFromGeom();
-            //m_builder.add(Stdvar::Cs, 
+            //
+            // TODO: Perhaps this messy logic can be done once & cached in the
+            // surface holder?
             m_builder.clear();
-//            if(m_parentSurface.attrs.surfaceShader)
-//            {
-//                const Shader& shader = *m_parentSurface.attrs.surfaceShader;
-//                VarSet& inVars = shader->inputVars();
-//                for(int i = 0; i < inVars.size(); ++i)
-//                {
-//                    if(inVars)
-//                    m_builder.add
-//                }
-//            }
+            if(m_parentSurface->attrs->surfaceShader)
+            {
+                const Shader& shader = *m_parentSurface->attrs->surfaceShader;
+                const VarSet& inVars = shader.inputVars();
+                // Always need P; just add it.
+                m_builder.add(Stdvar::P,  GridStorage::Varying);
+                // Need Cs, Os,s,t,I,Ng if the shader needs them (TODO: or the
+                // AOVs!)
+                if(inVars.contains(StdIndices::Cs))
+                    m_builder.add(Stdvar::Cs, GridStorage::Uniform);
+                if(inVars.contains(StdIndices::Os))
+                    m_builder.add(Stdvar::Os, GridStorage::Uniform);
+                if(inVars.contains(StdIndices::s))
+                    m_builder.add(Stdvar::s,  GridStorage::Varying);
+                if(inVars.contains(StdIndices::t))
+                    m_builder.add(Stdvar::t,  GridStorage::Varying);
+                if(inVars.contains(StdIndices::I))
+                    m_builder.add(Stdvar::I,  GridStorage::Varying);
+                // Special case for Ng.  Ng is needed when we need it for
+                // deducing the shading normal, N.
+                if(inVars.contains(StdIndices::N) || inVars.contains(StdIndices::Ng))
+                    m_builder.add(Stdvar::Ng, GridStorage::Varying);
+                // TODO: Sort out this mess between N & Ng.
+                if(inVars.contains(StdIndices::N))
+                    m_builder.add(Stdvar::N, GridStorage::Varying);
+
+                const VarSet& outVars = shader.outputVars();
+                if(outVars.contains(StdIndices::Ci))
+                    m_builder.add(Stdvar::Ci, GridStorage::Varying);
+                if(outVars.contains(StdIndices::Oi))
+                    m_builder.add(Stdvar::Oi, GridStorage::Varying);
+            }
+            m_builder.setFromGeom();
             return m_builder;
         }
 };
@@ -298,6 +334,8 @@ void Renderer::push(const boost::shared_ptr<Grid>& grid,
                             *parentSurface.attrs);
             break;
         case GridType_Quad:
+            if(parentSurface.attrs->surfaceShader)
+                parentSurface.attrs->surfaceShader->shade(*grid);
             rasterize<QuadGrid, MicroQuadSampler>(
                     static_cast<QuadGrid&>(*grid), *parentSurface.attrs);
             break;

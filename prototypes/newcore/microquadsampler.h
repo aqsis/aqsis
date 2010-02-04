@@ -166,7 +166,7 @@ class MicroQuadSampler
         /// Interpolate the colour
         inline void interpolateColor(float* col) const
         {
-            int CsIdx = m_storage.varSet().stdIndex(StdIndices::Cs);
+            int CsIdx = m_storage.varSet().find(StdIndices::Cs);
             assert(CsIdx >= 0);
             ConstFvecView Cs = m_storage.get(CsIdx);
             if(m_smoothShading)

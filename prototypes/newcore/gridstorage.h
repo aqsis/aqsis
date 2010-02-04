@@ -43,6 +43,7 @@ class GridStorage
         boost::scoped_array<float> m_storage;
         boost::scoped_array<FvecView> m_views;
         VarSet m_vars;
+        int m_nverts;
 
         friend class GridStorageBuilder;
 
@@ -58,7 +59,8 @@ class GridStorage
         GridStorage(GinitvarIterT varBegin, GinitvarIterT varEnd, int nverts)
             : m_storage(),
             m_views(),
-            m_vars(varBegin, varEnd)
+            m_vars(varBegin, varEnd),
+            m_nverts(nverts)
         {
             const int nvars = m_vars.size();
             // Compute the total size of the storage array & allocate
@@ -72,16 +74,25 @@ class GridStorage
             GinitvarIterT var = varBegin;
             for(int i = 0; i < nvars; ++i, ++var)
             {
-                const int len = var->scalarSize();
-                const int stride = var->uniform ? 0 : len;
-                m_views[i] = FvecView(&m_storage[0] + offset, stride, len);
+                const int elSize = var->scalarSize();
+                const int stride = var->uniform ? 0 : elSize;
+                m_views[i] = FvecView(&m_storage[0] + offset, elSize, stride);
                 offset += var->storageSize(nverts);
             }
         }
 
     public:
+        enum StorClass
+        {
+            Uniform,
+            Varying
+        };
+
         /// Get the set of contained variables
         const VarSet& varSet() const { return m_vars; }
+
+        /// Return the number of shading points
+        int nverts() const { return m_nverts; }
 
         /// Get allocated storage for the ith variable
         FvecView get(int i) { return m_views[i]; }
@@ -106,6 +117,11 @@ class GridStorage
                 return ConstFvecView();
             else
                 return get(i);
+        }
+        FvecView get(StdIndices::Id id)
+        {
+            assert(m_vars.contains(id));
+            return get(m_vars.find(id));
         }
 
         /// Get maximum number of floats to store any variable on this grid.
@@ -133,17 +149,18 @@ class GridStorage
         /// Convenient access to storage for standard position variable
         DataView<Vec3> P()
         {
-            int Pidx = m_vars.stdIndex(StdIndices::P);
-            assert(Pidx >= 0);
-            return DataView<Vec3>(m_views[Pidx].storage(),
-                                  m_views[Pidx].stride());
+            int i = m_vars.find(StdIndices::P); assert(i >= 0);
+            return DataView<Vec3>(m_views[i]);
         }
         ConstDataView<Vec3> P() const
         {
-            int Pidx = m_vars.stdIndex(StdIndices::P);
-            assert(Pidx >= 0);
-            return ConstDataView<Vec3>(m_views[Pidx].storage(),
-                                       m_views[Pidx].stride());
+            int i = m_vars.find(StdIndices::P); assert(i >= 0);
+            return ConstDataView<Vec3>(m_views[i]);
+        }
+        DataView<Vec3> N()
+        {
+            int i = m_vars.find(StdIndices::N); assert(i >= 0);
+            return DataView<Vec3>(m_views[i]);
         }
 };
 
@@ -202,9 +219,10 @@ class GridStorageBuilder : boost::noncopyable
         /// Set  the precedence for incoming variable specs.
         void setFromGeom() { m_fromGeom = true; }
 
-        void add(const VarSpec& spec, bool uniform)
+        void add(const VarSpec& spec, GridStorage::StorClass gridStorClass)
         {
-            m_vars.push_back(GvarInitSpec(spec, uniform, m_fromGeom));
+            m_vars.push_back(GvarInitSpec(spec,
+                        gridStorClass == GridStorage::Uniform, m_fromGeom));
         }
         void add(const PrimvarSpec& spec)
         {

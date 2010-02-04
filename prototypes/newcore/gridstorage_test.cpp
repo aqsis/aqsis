@@ -26,11 +26,11 @@
 BOOST_AUTO_TEST_CASE(GridStorageBuilder_unique_test)
 {
     GridStorageBuilder builder;
-    builder.add(Stdvar::P, true);
-    builder.add(Stdvar::Cs, true);
-    builder.add(Stdvar::P, true);
-    builder.add(Stdvar::Ci, true);
-    builder.add(Stdvar::P, true);
+    builder.add(Stdvar::P, GridStorage::Uniform);
+    builder.add(Stdvar::Cs, GridStorage::Uniform);
+    builder.add(Stdvar::P, GridStorage::Uniform);
+    builder.add(Stdvar::Ci, GridStorage::Uniform);
+    builder.add(Stdvar::P, GridStorage::Uniform);
 
     boost::shared_ptr<GridStorage> stor = builder.build(10);
     BOOST_CHECK_EQUAL(stor->varSet().size(), 3);
@@ -44,10 +44,10 @@ BOOST_AUTO_TEST_CASE(GridStorageBuilder_precedence_test)
     {
         GridStorageBuilder builder;
         // Add P as uniform
-        builder.add(Stdvar::P, true);
+        builder.add(Stdvar::P, GridStorage::Uniform);
         builder.setFromGeom();
         // then as varying, which should override the uniform case.
-        builder.add(Stdvar::P, false);
+        builder.add(Stdvar::P, GridStorage::Varying);
         boost::shared_ptr<GridStorage> stor = builder.build(10);
         BOOST_REQUIRE_EQUAL(stor->varSet().size(), 1);
         BOOST_CHECK(!stor->get(0).uniform());
@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE(GridStorageBuilder_precedence_test)
     {
         GridStorageBuilder builder;
         // Add P as varying
-        builder.add(Stdvar::P, false);
+        builder.add(Stdvar::P, GridStorage::Varying);
         builder.setFromGeom();
         // then as uniform, which should override the varying case.
-        builder.add(Stdvar::P, true);
+        builder.add(Stdvar::P, GridStorage::Uniform);
         boost::shared_ptr<GridStorage> stor = builder.build(10);
         BOOST_REQUIRE_EQUAL(stor->varSet().size(), 1);
         BOOST_CHECK(stor->get(0).uniform());
@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(GridStorageBuilder_precedence_test)
 BOOST_AUTO_TEST_CASE(GridStorage_maxAggregateSize_test)
 {
     GridStorageBuilder builder;
-    builder.add(Stdvar::P, false);
-    builder.add(VarSpec(VarSpec::Float, 42, ustring("f")), false);
+    builder.add(Stdvar::P, GridStorage::Varying);
+    builder.add(VarSpec(VarSpec::Float, 42, ustring("f")), GridStorage::Varying);
     boost::shared_ptr<GridStorage> stor = builder.build(10);
 
     BOOST_CHECK_EQUAL(stor->maxAggregateSize(), 42);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(GridStorage_maxAggregateSize_test)
 BOOST_AUTO_TEST_CASE(GridStorage_P_test)
 {
     GridStorageBuilder builder;
-    builder.add(Stdvar::P, false);
+    builder.add(Stdvar::P, GridStorage::Varying);
     boost::shared_ptr<GridStorage> stor = builder.build(10);
     // Check that P is present.
     BOOST_CHECK(stor->P());
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(GridStorage_P_test)
 BOOST_AUTO_TEST_CASE(GridStorage_get_test)
 {
     GridStorageBuilder builder;
-    builder.add(Stdvar::P, false);
+    builder.add(Stdvar::P, GridStorage::Varying);
     VarSpec f(VarSpec::Float, 42, ustring("f"));
-    builder.add(f, false);
+    builder.add(f, GridStorage::Varying);
     boost::shared_ptr<GridStorage> stor = builder.build(10);
     // Check that P and f are present
     BOOST_CHECK(stor->get(Stdvar::P));

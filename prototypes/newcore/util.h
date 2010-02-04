@@ -59,7 +59,7 @@ inline const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
 typedef Imath::M44f Mat4;
-typedef Imath::C3f Color;
+typedef Imath::C3f Col3;
 
 typedef Imath::Box3f Box;
 
@@ -82,6 +82,12 @@ inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
 {
     return a.x*b.y - b.x*a.y;
 }
+
+inline float dot(Vec3 a, Vec3 b)
+{
+    return a.dot(b);
+}
+
 
 template<typename T>
 inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type

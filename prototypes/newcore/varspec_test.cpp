@@ -48,18 +48,24 @@ BOOST_AUTO_TEST_CASE(VarSet_test)
 
     BOOST_CHECK_EQUAL(vars.size(), 5);
 
-    BOOST_CHECK(vars.contains(Stdvar::P));
-    BOOST_CHECK(vars.contains(Stdvar::I));
+    // Check the the expected variables are present.
+    // 1) Check the call with StdIndices::Id id's
+    BOOST_CHECK(vars.contains(StdIndices::P));
+    BOOST_CHECK(vars.contains(StdIndices::I));
+    // 2) Check the call with VarSpec id's
     BOOST_CHECK(vars.contains(Stdvar::Cs));
     BOOST_CHECK(vars.contains(Stdvar::Ci));
     BOOST_CHECK(vars.contains(myVar));
 
+    // Check that the indices of standard vars are correctly cached.
     BOOST_CHECK_EQUAL(vars.find(Stdvar::P), vars.stdIndices().get(StdIndices::P));
     BOOST_CHECK_EQUAL(vars.find(Stdvar::I), vars.stdIndices().get(StdIndices::I));
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::Cs), vars.stdIndex(StdIndices::Cs));
-    BOOST_CHECK_EQUAL(vars.find(Stdvar::Ci), vars.stdIndex(StdIndices::Ci));
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::Cs), vars.find(StdIndices::Cs));
+    BOOST_CHECK_EQUAL(vars.find(Stdvar::Ci), vars.find(StdIndices::Ci));
 
+    // Check that the myVar index is present
     BOOST_CHECK_NE(vars.find(myVar), VarSet::npos);
+    // Check that some random var is reported as not-found.
     BOOST_CHECK_EQUAL(vars.find(VarSpec(VarSpec::Point, 2, ustring("blah"))),
                       VarSet::npos);
 }

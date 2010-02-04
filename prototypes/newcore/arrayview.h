@@ -20,6 +20,11 @@
 #ifndef ARRAYVIEW_H_INCLUDED
 #define ARRAYVIEW_H_INCLUDED
 
+#include <cassert>
+#include <cstring> // for memcpy
+
+// TODO: Figure out how to implement FvecView & DataView together in the same
+// class
 
 /// Strided view of a float array as an array of short float vectors
 class FvecView
@@ -32,9 +37,14 @@ class FvecView
     public:
         FvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
 
-        FvecView(float* storage, int stride, int elSize)
+        FvecView(float* storage, int elSize, int stride)
             : m_storage(storage),
             m_stride(stride),
+            m_elSize(elSize)
+        {}
+        FvecView(float* storage, int elSize)
+            : m_storage(storage),
+            m_stride(elSize),
             m_elSize(elSize)
         {}
 
@@ -45,13 +55,14 @@ class FvecView
         int uniform() const { return m_stride == 0; }
 
         /// Element access
-        float* operator[](int i) { return m_storage + i*m_stride; }
-        const float* operator[](int i) const { return m_storage + i*m_stride; }
+        float* operator[](int i) const { return m_storage + i*m_stride; }
 
-        float* storage() { return m_storage; }
-        const float* storage() const { return m_storage; }
+        float* storage() const { return m_storage; }
         int stride() const { return m_stride; }
         int elSize() const { return m_elSize; }
+        /// Determine whether consecutive elements are consecutive in memory.
+        /// The view is "dense" when there's no space between elements.
+        bool isDense() const { return m_stride == m_elSize; }
 
         FvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         FvecView& operator++() { m_storage += m_stride; return *this;}
@@ -69,9 +80,14 @@ class ConstFvecView
     public:
         ConstFvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
 
-        ConstFvecView(const float* storage, int stride, int elSize)
+        ConstFvecView(const float* storage, int elSize, int stride)
             : m_storage(storage),
             m_stride(stride),
+            m_elSize(elSize)
+        {}
+        ConstFvecView(const float* storage, int elSize)
+            : m_storage(storage),
+            m_stride(elSize),
             m_elSize(elSize)
         {}
 
@@ -93,6 +109,9 @@ class ConstFvecView
         const float* storage() const { return m_storage; }
         int stride() const { return m_stride; }
         int elSize() const { return m_elSize; }
+        /// Determine whether consecutive elements are consecutive in memory.
+        /// The view is "dense" when there's no space between elements.
+        bool isDense() const { return m_stride == m_elSize; }
 
         ConstFvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
         ConstFvecView& operator++() { m_storage += m_stride; return *this;}
@@ -112,31 +131,39 @@ class DataView
         int m_stride;
         template<typename> friend class ConstDataView;
     public:
-        DataView(float* storage, int stride = sizeof(T)/sizeof(float))
+        /// Number of floats used for each element
+        enum { elementSize = sizeof(T)/sizeof(float) };
+
+        DataView(float* storage, int stride = elementSize)
             : m_storage(storage),
             m_stride(stride)
         {}
 
-        DataView(FvecView& view)
+        DataView(FvecView view)
             : m_storage(view.storage()),
             m_stride(view.stride())
         {
-            assert(view.elSize() == sizeof(T)/sizeof(float));
+            assert(view.elSize() == elementSize);
         }
 
         /// Test whether the view points to valid data.
         /// For use in boolean contexts only.
         operator const void*() const { return m_storage; }
 
-        /// Indexing operators.
+        /// Indexing operator.
         ///
         /// The casting here is undefined behaviour, but provided T is a plain
         /// aggregate of floats, it's hard to imagine how this could be
         /// undefined behaviour in a sane implementation.  Perhaps we could
         /// have some troubles with strict aliasing in rather unusual
         /// circumstances.
-        T& operator[](int i) { return *((T*)(m_storage + m_stride*i)); }
-        const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
+        T& operator[](int i) const { return *((T*)(m_storage + m_stride*i)); }
+
+        float* storage() const { return m_storage; }
+        int stride() const { return m_stride; }
+        /// Determine whether consecutive elements are consecutive in memory.
+        /// The view is "dense" when there's no space between elements.
+        bool isDense() const { return m_stride == elementSize; }
 
         DataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
 };
@@ -148,8 +175,12 @@ class ConstDataView
     private:
         const float* m_storage;
         int m_stride;
+
     public:
-        ConstDataView(const float* storage, int stride = sizeof(T)/sizeof(float))
+        /// Number of floats used for each element
+        enum { elementSize = sizeof(T)/sizeof(float) };
+
+        ConstDataView(const float* storage, int stride = elementSize)
             : m_storage(storage),
             m_stride(stride)
         {}
@@ -163,13 +194,13 @@ class ConstDataView
             : m_storage(view.storage()),
             m_stride(view.stride())
         {
-            assert(view.elSize() == sizeof(T)/sizeof(float));
+            assert(view.elSize() == elementSize);
         }
         ConstDataView(const ConstFvecView& view)
             : m_storage(view.storage()),
             m_stride(view.stride())
         {
-            assert(view.elSize() == sizeof(T)/sizeof(float));
+            assert(view.elSize() == elementSize);
         }
 
         /// Test whether the view points to valid data.
@@ -178,8 +209,62 @@ class ConstDataView
 
         const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
 
+        /// Get the base storage for this view
+        const float* storage() const { return m_storage; }
+        /// Get the stride of the base storage between elements
+        int stride() const { return m_stride; }
+        /// Determine whether consecutive elements are consecutive in memory.
+        /// The view is "dense" when there's no space between elements.
+        bool isDense() const { return m_stride == elementSize; }
+
         ConstDataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
 };
 
+
+//------------------------------------------------------------------------------
+// Utility functions for dealing with data views.
+
+/// Copy one float vec view into another.  Arguments order is like memcpy.
+inline void copy(FvecView dest, ConstFvecView src, int nelems)
+{
+    assert(dest.elSize() == src.elSize());
+    if(dest.isDense() && src.isDense())
+    {
+        // If the data is densely packed, can just memcpy it.
+        std::memcpy(dest.storage(), src.storage(),
+                    sizeof(float)*dest.elSize()*nelems);
+    }
+    else
+    {
+        // Otherwise, we need to use a loop.
+        for(int i = 0; i < nelems; ++i)
+            std::memcpy(dest[i], src[i], sizeof(float)*dest.elSize());
+    }
+}
+
+
+/// Copy one data view into another.  Arguments order is like memcpy.
+template<typename T>
+inline void copy(DataView<T> dest, ConstDataView<T> src, int nelems)
+{
+    if(dest.isDense() && src.isDense())
+    {
+        // If the data is densely packed, can just memcpy it.
+        std::memcpy(dest.storage(), src.storage(),
+                    sizeof(float)*dest.elementSize*nelems);
+    }
+    else
+    {
+        // Otherwise, we need to use a loop.
+        for(int i = 0; i < nelems; ++i)
+            dest[i] = src[i];
+    }
+}
+
+template<typename T>
+inline void copy(DataView<T> dest, DataView<T> src, int nelems)
+{
+    copy(dest, ConstDataView<T>(src), nelems);
+}
 
 #endif // ARRAYVIEW_H_INCLUDED

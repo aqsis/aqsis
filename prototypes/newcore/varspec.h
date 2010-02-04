@@ -132,6 +132,8 @@ namespace Stdvar {
     extern const VarSpec Oi;
     extern const VarSpec s;
     extern const VarSpec t;
+    extern const VarSpec u;
+    extern const VarSpec v;
     extern const VarSpec I;
     extern const VarSpec N;
     extern const VarSpec Ng;
@@ -156,6 +158,7 @@ class StdIndices
             Cs, Ci,
             Os, Oi,
             s, t,
+            u, v,
             I,
             N, Ng,
             VAR_LAST
@@ -176,12 +179,16 @@ class StdIndices
             else if(var == Stdvar::Oi)  m_indices[Oi] = index;
             else if(var == Stdvar::s)   m_indices[s]  = index;
             else if(var == Stdvar::t)   m_indices[t]  = index;
+            else if(var == Stdvar::u)   m_indices[u]  = index;
+            else if(var == Stdvar::v)   m_indices[v]  = index;
             else if(var == Stdvar::I)   m_indices[I]  = index;
             else if(var == Stdvar::N)   m_indices[N]  = index;
             else if(var == Stdvar::Ng)  m_indices[Ng] = index;
         }
 
         int get(Id id) const { return m_indices[id]; }
+        bool contains(Id id) const { return m_indices[id] != -1; }
+
     private:
         int m_indices[VAR_LAST];
 };
@@ -243,7 +250,6 @@ class BasicVarSet
         }
 
         const StdIndices& stdIndices() const { return m_stdIndices; }
-        int stdIndex(StdIndices::Id id) const { return m_stdIndices.get(id); }
 
         /// Iterator access and indexing.
         const_iterator begin() const { return m_vars.begin(); }
@@ -264,10 +270,15 @@ class BasicVarSet
             else
                 return npos;
         }
+        int find(StdIndices::Id id) const { return m_stdIndices.get(id); }
 
         bool contains(const SpecT& var) const
         {
             return std::binary_search(m_vars.begin(), m_vars.end(), var);
+        }
+        bool contains(StdIndices::Id id) const
+        {
+            return m_stdIndices.contains(id);
         }
 };
 

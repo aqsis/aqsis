@@ -58,7 +58,7 @@ void addCube(Attributes& attrs, Renderer& r, const Mat4& otow)
     r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,1,-1),
                       Vec3(1,-1,-1), Vec3(1,1,-1), otow), attrs);
     r.add(createPatch(Vec3(-1,-1,1), Vec3(-1,1,1),
-                             Vec3(1,-1,1), Vec3(1,1,1), otow), attrs);
+                      Vec3(1,-1,1), Vec3(1,1,1), otow), attrs);
 }
 
 void renderDefaultScene()
@@ -72,6 +72,7 @@ void renderDefaultScene()
     Attributes attrs;
     attrs.shadingRate = 1;
     attrs.smoothShading = true;
+    attrs.surfaceShader = createShader("test");
 
     Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
 
@@ -79,12 +80,14 @@ void renderDefaultScene()
     VarList outVars;
     outVars.push_back(Stdvar::Cs);
     outVars.push_back(Stdvar::z);
+    outVars.push_back(Stdvar::Ci);
 
     Renderer r(opts, camToScreen, outVars);
 
     // Cube geometry
     addCube(attrs, r,
         Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45)) *
+        Mat4().setAxisAngle(Vec3(0,0,1), deg2rad(10)) *
         Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45)) *
         Mat4().setTranslation(Vec3(0,0,3))
     );

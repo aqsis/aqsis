@@ -29,15 +29,18 @@ namespace Stdvar
     DEFINE_STD_VAR(Color, 1, Ci);
     DEFINE_STD_VAR(Color, 1, Os);
     DEFINE_STD_VAR(Color, 1, Oi);
-    DEFINE_STD_VAR(Float, 2, st);
     DEFINE_STD_VAR(Float, 1, s);
     DEFINE_STD_VAR(Float, 1, t);
+    DEFINE_STD_VAR(Float, 1, u);
+    DEFINE_STD_VAR(Float, 1, v);
     DEFINE_STD_VAR(Vector, 1, I);
     DEFINE_STD_VAR(Normal, 1, N);
     DEFINE_STD_VAR(Normal, 1, Ng);
 
+    DEFINE_STD_VAR(Float, 2, st);
     DEFINE_STD_VAR(Float, 1, z);
 
 #undef DEFINE_STD_VAR
 }
+
 

@@ -17,23 +17,32 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef ATTRIBUTES_H_INCLUDED
-#define ATTRIBUTES_H_INCLUDED
+#ifndef SHADER_H_INCLUDED
+#define SHADER_H_INCLUDED
 
-#include "shader.h"
+#include "varspec.h"
 
-/// Surface attribute state.
-struct Attributes
+#include <boost/shared_ptr.hpp>
+
+class Grid;
+
+/// A simplistic shader interface
+class Shader
 {
-    float shadingRate;  ///< Desired micropoly area
-    bool smoothShading; ///< Type of shading interpolation
-    boost::shared_ptr<Shader> surfaceShader;  ///< surface shader
+    public:
+        /// Get the set of input variables used by the shader.
+        virtual const VarSet& inputVars() const = 0;
+        /// Get the set of output variables set by the shader.
+        virtual const VarSet& outputVars() const = 0;
 
-    Attributes()
-        : shadingRate(1),
-        smoothShading(true),
-        surfaceShader()
-    { }
+        /// Execute the shader on the given grid.
+        virtual void shade(Grid& grid) = 0;
+
+        virtual ~Shader() {}
 };
 
-#endif // ATTRIBUTES_H_INCLUDED
+// Create one of the builtin shaders.
+boost::shared_ptr<Shader> createShader(const char* name);
+
+
+#endif // SHADER_H_INCLUDED

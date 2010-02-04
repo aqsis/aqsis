@@ -26,6 +26,7 @@ set(srcs
     renderer.cpp
     ustring/ustring.cpp
     primvar.cpp
+    shader.cpp
     varspec.cpp
     scenes/tenpatch.cpp
     scenes/default.cpp
@@ -45,6 +46,7 @@ set(hdrs
     renderer.h
     sample.h
     scenes/scenes.h
+    shader.h
     simple.h
     surfaces.h
     util.h
@@ -83,6 +85,8 @@ set(varspec_srcs
 testcase(varspec_test ${varspec_srcs} varspec_test.cpp)
 
 testcase(gridstorage_test ${varspec_srcs} gridstorage_test.cpp)
+
+testcase(arrayview_test arrayview_test.cpp)
 
 if(WIN32)
     set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)

@@ -44,6 +44,10 @@ class QuadGridSimple : public Grid
             return *m_storage;
         }
 
+        virtual void calculateNormals(DataView<Vec3> N,
+                                      ConstDataView<Vec3> P) const
+        { }
+
         Vec3& vertex(int u, int v) { return m_P[m_nu*v + u]; }
         Vec3 vertex(int u, int v) const { return m_P[m_nu*v + u]; }
 
