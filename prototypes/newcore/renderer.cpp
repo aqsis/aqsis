@@ -185,8 +185,8 @@ static void strided_memcpy(void* dest, const void* src, size_t nElems,
     }
 }
 
-// TODO: Should probably be a member of OutvarList.
-static int numOutChans(const OutvarList& outVars)
+// TODO: Should probably be elsewhere?
+static int numOutChans(const OutvarSet& outVars)
 {
     int sampsPerPix = 0;
     for(int i = 0, iend = outVars.size(); i < iend; ++i)
@@ -251,10 +251,9 @@ void Renderer::defaultSamples(float* defaultSamps)
 {
     // Determine index of depth output data, if any.
     int zOffset = -1;
-    OutvarList::const_iterator zIter = std::find(m_outVars.begin(),
-                                                 m_outVars.end(), Stdvar::z);
-    if(zIter != m_outVars.end())
-        zOffset = zIter->offset;
+    int zIdx = m_outVars.find(StdOutInd::z);
+    if(zIdx != OutvarSet::npos)
+        zOffset = m_outVars[zIdx].offset;
     int pixStride = numOutChans(m_outVars);
     // Set up default values for samples.
     std::memset(defaultSamps, 0, pixStride*sizeof(float));
@@ -352,19 +351,21 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_camToRas()
 {
     // Set up output variables.  Default is to use Cs.
+    std::vector<OutvarSpec> outVarsInit;
     if(outVars.size() == 0)
     {
-        m_outVars.push_back(OutvarSpec(Stdvar::Cs, 0));
+        outVarsInit.push_back(OutvarSpec(Stdvar::Cs, 0));
     }
     else
     {
         int offset = 0;
         for(int i = 0, iend = outVars.size(); i < iend; ++i)
         {
-            m_outVars.push_back(OutvarSpec(outVars[i], offset));
+            outVarsInit.push_back(OutvarSpec(outVars[i], offset));
             offset += outVars[i].scalarSize();
         }
     }
+    m_outVars.assign(outVarsInit.begin(), outVarsInit.end());
     // Set up camera -> raster matrix
     m_camToRas = camToScreen
         * Mat4().setScale(Vec3(0.5,-0.5,0))
@@ -416,10 +417,9 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
 {
     // Determine index of depth output data, if any.
     int zOffset = -1;
-    OutvarList::const_iterator zIter = std::find(m_outVars.begin(),
-                                                 m_outVars.end(), Stdvar::z);
-    if(zIter != m_outVars.end())
-        zOffset = zIter->offset;
+    int zIdx = m_outVars.find(StdOutInd::z);
+    if(zIdx != OutvarSet::npos)
+        zOffset = m_outVars[zIdx].offset;
     int pixStride = numOutChans(m_outVars);
 
     // Project grid into raster coordinates.

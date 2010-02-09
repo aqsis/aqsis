@@ -24,18 +24,31 @@ namespace Stdvar
 #   define DEFINE_STD_VAR(type, count, name)                          \
         const VarSpec name(VarSpec::type, count, ustring(#name))
 
-    DEFINE_STD_VAR(Point, 1, P);
-    DEFINE_STD_VAR(Color, 1, Cs);
+    DEFINE_STD_VAR(Float, 1, alpha);
     DEFINE_STD_VAR(Color, 1, Ci);
-    DEFINE_STD_VAR(Color, 1, Os);
+    DEFINE_STD_VAR(Color, 1, Cl);
+    DEFINE_STD_VAR(Color, 1, Cs);
+    DEFINE_STD_VAR(Vector, 1, dPdu);
+    DEFINE_STD_VAR(Vector, 1, dPdv);
+    DEFINE_STD_VAR(Float, 1, du);
+    DEFINE_STD_VAR(Float, 1, dv);
+    DEFINE_STD_VAR(Point, 1, E);
+    DEFINE_STD_VAR(Vector, 1, I);
+    DEFINE_STD_VAR(Vector, 1, L);
+    DEFINE_STD_VAR(Float, 1, ncomps);
+    DEFINE_STD_VAR(Normal, 1, Ng);
+    DEFINE_STD_VAR(Normal, 1, Ns);
+    DEFINE_STD_VAR(Normal, 1, N);
     DEFINE_STD_VAR(Color, 1, Oi);
+    DEFINE_STD_VAR(Color, 1, Ol);
+    DEFINE_STD_VAR(Color, 1, Os);
+    DEFINE_STD_VAR(Point, 1, P);
+    DEFINE_STD_VAR(Point, 1, Ps);
     DEFINE_STD_VAR(Float, 1, s);
     DEFINE_STD_VAR(Float, 1, t);
+    DEFINE_STD_VAR(Float, 1, time);
     DEFINE_STD_VAR(Float, 1, u);
     DEFINE_STD_VAR(Float, 1, v);
-    DEFINE_STD_VAR(Vector, 1, I);
-    DEFINE_STD_VAR(Normal, 1, N);
-    DEFINE_STD_VAR(Normal, 1, Ng);
 
     DEFINE_STD_VAR(Float, 2, st);
     DEFINE_STD_VAR(Float, 1, z);

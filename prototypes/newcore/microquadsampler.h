@@ -72,7 +72,7 @@ class MicroQuadSampler
         // |    |
         // d -- c
         MicroQuadSampler(const QuadGrid& grid, const Attributes& attrs,
-                         const OutvarList& outVars)
+                         const OutvarSet& outVars)
             : m_grid(grid),
             m_curr(grid.begin()),
             m_ind(*m_curr),

@@ -88,7 +88,7 @@ namespace Primvar
 }
 
 
-typedef BasicVarSet<PrimvarSpec> PrimvarSet;
+typedef BasicVarSet<PrimvarSpec, StdIndices> PrimvarSet;
 
 
 //------------------------------------------------------------------------------

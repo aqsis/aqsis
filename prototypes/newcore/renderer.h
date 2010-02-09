@@ -50,7 +50,31 @@ struct OutvarSpec : public VarSpec
     OutvarSpec(const VarSpec& spec, int offset)
         : VarSpec(spec), offset(offset) {}
 };
-typedef std::vector<OutvarSpec> OutvarList;
+
+class StdOutInd
+{
+    public:
+        enum Id
+        {
+            z
+        };
+
+        StdOutInd() : m_zInd(-1) { }
+
+        void add(int index, const VarSpec& var)
+        {
+            if(var == Stdvar::z)
+                m_zInd = index;
+        }
+
+        int get(Id id) const { return m_zInd; }
+        int contains(Id id) const { return m_zInd != -1; }
+
+    private:
+        int m_zInd;
+};
+
+typedef BasicVarSet<OutvarSpec, StdOutInd> OutvarSet;
 
 
 //-----------------------------------------------------------------------------
@@ -118,7 +142,7 @@ class Renderer
         Options m_opts;                ///< Render options
         SurfaceQueue m_surfaces;       ///< Queue of surface to be rendered
         std::vector<Sample> m_samples; ///< Array of sample info
-        OutvarList m_outVars;          ///< Output variable list
+        OutvarSet m_outVars;           ///< Set of output variables
         std::vector<float> m_defOutSamps; ///< Default output samples
         std::vector<float> m_image;    ///< Image data
         Mat4 m_camToRas;               ///< Camera -> raster transformation

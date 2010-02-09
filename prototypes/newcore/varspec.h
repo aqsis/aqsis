@@ -124,20 +124,36 @@ inline std::ostream& operator<<(std::ostream& out, const VarSpec& var)
 typedef std::vector<VarSpec> VarList;
 
 
-namespace Stdvar {
-    extern const VarSpec P;
-    extern const VarSpec Cs;
-    extern const VarSpec Ci;
-    extern const VarSpec Os;
-    extern const VarSpec Oi;
-    extern const VarSpec s;
-    extern const VarSpec t;
-    extern const VarSpec u;
-    extern const VarSpec v;
-    extern const VarSpec I;
-    extern const VarSpec N;
-    extern const VarSpec Ng;
+namespace Stdvar
+{
+    // Standard environment variables for shader execution
+    extern const VarSpec alpha;  ///< Fractional pixel coverage.
+    extern const VarSpec Ci;     ///< Incident color.
+    extern const VarSpec Cl;     ///< Light color.
+    extern const VarSpec Cs;     ///< Surface color.
+    extern const VarSpec dPdu;   ///< Surface derivative dP/du
+    extern const VarSpec dPdv;   ///< Surface derivative dP/dv
+    extern const VarSpec du;     ///< First derivative in u.
+    extern const VarSpec dv;     ///< First derivative in v.
+    extern const VarSpec E;      ///< Viewpoint position.
+    extern const VarSpec I;      ///< Incident ray direction.
+    extern const VarSpec L;      ///< Incoming light direction.
+    extern const VarSpec ncomps; ///< Number of color components.
+    extern const VarSpec Ng;     ///< Geometric normal.
+    extern const VarSpec Ns;     ///< Normal at point being lit.
+    extern const VarSpec N;      ///< Surface normal.
+    extern const VarSpec Oi;     ///< Incident opacity.
+    extern const VarSpec Ol;     ///< Light opacity.
+    extern const VarSpec Os;     ///< Surface opacity.
+    extern const VarSpec P;      ///< Point being shaded.
+    extern const VarSpec Ps;     ///< Point being lit.
+    extern const VarSpec s;      ///< Texture s coordinate.
+    extern const VarSpec time;   ///< Frame time.
+    extern const VarSpec t;      ///< Texture t coordinate.
+    extern const VarSpec u;      ///< Surface u coordinate.
+    extern const VarSpec v;      ///< Surface v coordinate.
 
+    /// Standard vars used elsewhere in the pipeline.
     extern const VarSpec st;
     extern const VarSpec z;
 }
@@ -200,13 +216,13 @@ class StdIndices
 /// This class is designed for fast lookup and compact representation, not
 /// insertion/removal (in fact, the set is immutable so variables can't be
 /// inserted or removed dynamcially).
-template<typename SpecT>
+template<typename SpecT, typename StdIndT>
 class BasicVarSet
 {
     private:
         typedef std::vector<SpecT> VarVec;
         VarVec m_vars;
-        StdIndices m_stdIndices;
+        StdIndT m_stdIndices;
 
         /// Return true if the list of vars is sorted
         static bool isSorted(const VarVec& vars)
@@ -249,7 +265,7 @@ class BasicVarSet
             updateStdIndices();
         }
 
-        const StdIndices& stdIndices() const { return m_stdIndices; }
+        const StdIndT& stdIndices() const { return m_stdIndices; }
 
         /// Iterator access and indexing.
         const_iterator begin() const { return m_vars.begin(); }
@@ -270,19 +286,19 @@ class BasicVarSet
             else
                 return npos;
         }
-        int find(StdIndices::Id id) const { return m_stdIndices.get(id); }
+        int find(typename StdIndT::Id id) const { return m_stdIndices.get(id); }
 
         bool contains(const SpecT& var) const
         {
             return std::binary_search(m_vars.begin(), m_vars.end(), var);
         }
-        bool contains(StdIndices::Id id) const
+        bool contains(typename StdIndT::Id id) const
         {
             return m_stdIndices.contains(id);
         }
 };
 
-typedef BasicVarSet<VarSpec> VarSet;
+typedef BasicVarSet<VarSpec, StdIndices> VarSet;
 
 
 //==============================================================================
@@ -290,7 +306,7 @@ typedef BasicVarSet<VarSpec> VarSet;
 // actual storage space for npos.  Otherwise it can't be bound to a const
 // reference if necessary, eg, using VarSet::npos in BOOST_CHECK_EQUAL won't
 // work.  Duh!
-template<typename SpecT>
-const int BasicVarSet<SpecT>::npos;
+template<typename SpecT, typename StdIndT>
+const int BasicVarSet<SpecT, StdIndT>::npos;
 
 #endif // VARSPEC_H_INCLUDED
