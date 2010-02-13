@@ -120,8 +120,11 @@ class GridStorage
         }
         FvecView get(StdIndices::Id id)
         {
-            assert(m_vars.contains(id));
-            return get(m_vars.find(id));
+            int i = m_vars.find(id);
+            if(i == VarSet::npos)
+                return FvecView();
+            else
+                return get(i);
         }
 
         /// Get maximum number of floats to store any variable on this grid.
@@ -201,32 +204,41 @@ class GridStorageBuilder : boost::noncopyable
             }
         };
         std::vector<GvarInitSpec> m_vars;
-        bool m_fromGeom;
+        int m_precedence;
 
     public:
         GridStorageBuilder()
             : m_vars(),
-            m_fromGeom(false)
+            m_precedence(0)
         {}
 
         /// Clear variables & reset builder.  Should NOT be called by geometry!
         void clear()
         {
             m_vars.clear();
-            m_fromGeom = false;
+            m_precedence = 0;
         }
 
         /// Set  the precedence for incoming variable specs.
-        void setFromGeom() { m_fromGeom = true; }
+        void setFromGeom() { m_precedence = 1; }
 
+        /// Determine whether the index'th variable was diced by the geometry.
+        bool dicedByGeom(const GridStorage& stor, StdIndices::Id id)
+        {
+            int index = stor.varSet().find(id);
+            assert(index > 0);
+            return m_vars[index].precedence > 0;
+        }
+
+        /// Add a variable to the grid
         void add(const VarSpec& spec, GridStorage::StorClass gridStorClass)
         {
             m_vars.push_back(GvarInitSpec(spec,
-                        gridStorClass == GridStorage::Uniform, m_fromGeom));
+                        gridStorClass == GridStorage::Uniform, m_precedence));
         }
         void add(const PrimvarSpec& spec)
         {
-            m_vars.push_back(GvarInitSpec(spec, m_fromGeom));
+            m_vars.push_back(GvarInitSpec(spec, m_precedence));
         }
         void add(const PrimvarSet& primVars)
         {
@@ -234,6 +246,7 @@ class GridStorageBuilder : boost::noncopyable
                 add(primVars[i]);
         }
 
+        /// Build the grid storage using the current set of variables.
         boost::shared_ptr<GridStorage> build(int nverts)
         {
             std::sort(m_vars.begin(), m_vars.end());

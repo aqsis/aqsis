@@ -48,6 +48,7 @@ class DefaultSurface : public Shader
             m_Ka(Ka)
         {
             VarSpec inVars[] = {
+                Stdvar::P,
                 Stdvar::N,
                 Stdvar::I,
                 Stdvar::Cs
@@ -83,7 +84,7 @@ class DefaultSurface : public Shader
 
 
 //------------------------------------------------------------------------------
-/// A crazy test shader.
+/// A crazy test shader (combined surface + displacement for now)
 class TestShader : public Shader
 {
     private:
@@ -94,13 +95,16 @@ class TestShader : public Shader
         TestShader()
         {
             VarSpec inVars[] = {
+                Stdvar::P,
                 Stdvar::N,
                 Stdvar::I,
                 Stdvar::Cs
             };
             m_inputVars.assign(inVars, boost::end(inVars));
             VarSpec outVars[] = {
-                Stdvar::Ci
+                Stdvar::Ci,
+                Stdvar::P,
+                Stdvar::N
             };
             m_outputVars.assign(outVars, boost::end(outVars));
         }
@@ -111,17 +115,21 @@ class TestShader : public Shader
         {
             GridStorage& stor = grid.storage();
 
+            int nshad = stor.nverts();
+
+            // Bind variables to the storage.  Most of these are guarenteed to
+            // be present on the grid.
             DataView<Vec3> N = stor.get(StdIndices::N);
             ConstDataView<Vec3> I = stor.get(StdIndices::I);
             ConstDataView<Col3> Cs = stor.get(StdIndices::Cs);
             DataView<Col3> Ci = stor.get(StdIndices::Ci);
+            if(!Ci)
+                Ci = DataView<Col3>(FALLOCA(3*nshad));
             DataView<Vec3> P = stor.P();
-
-            int nshad = stor.nverts();
 
             for(int i = 0; i < nshad; ++i)
             {
-                float amp = 0.01*(std::sin(30*P[i].x) + std::sin(30*P[i].y));
+                float amp = 0.05*(std::sin(10*P[i].x) + std::sin(30*P[i].y) + std::sin(20*P[i].z));
                 P[i] += amp*N[i].normalized();
             }
             grid.calculateNormals(N, P);

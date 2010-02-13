@@ -59,6 +59,7 @@ inline const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
 typedef Imath::M44f Mat4;
+typedef Imath::M33f Mat3;
 typedef Imath::C3f Col3;
 
 typedef Imath::Box3f Box;
@@ -168,6 +169,24 @@ inline Mat4 screenWindow(float left, float right, float bottom, float top)
                 0, 0,   1, 0,
                 -(right+left)/w, -(top+bottom)/h, 0, 1);
 }
+
+/// Get the vector transformation associated with the point transformation, m
+inline Mat3 vectorTransform(const Mat4& m)
+{
+    return Mat3(m[0][0], m[0][1], m[0][2],
+                m[1][0], m[1][1], m[1][2],
+                m[2][0], m[2][1], m[2][2]);
+}
+
+/// Get the normal transformation associated with the point transformation, m
+inline Mat3 normalTransform(const Mat4& m)
+{
+    Mat3 nTrans = vectorTransform(m);
+    nTrans.invert();
+    nTrans.transpose();
+    return nTrans;
+}
+
 
 /// Transform a bounding box
 inline Box transformBound(const Box& bound, const Mat4& m)

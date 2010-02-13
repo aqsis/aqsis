@@ -22,43 +22,100 @@
 #include "simple.h"
 
 static
-boost::shared_ptr<Geometry> createPatch(const Vec3& a, const Vec3& b,
-                                        const Vec3& c, const Vec3& d,
-                                        const Mat4& trans = Mat4())
+void addQuadMesh(Attributes& attrs, Renderer& r, const Mat4& otow,
+                 int nfaces, int vertices[],
+                 float P_in[], float N_in[] = 0, float Cs_in[] = 0)
 {
-    PrimvarStorageBuilder builder;
-    float P[] = {
-        a.x, a.y, a.z,  b.x, b.y, b.z,
-        c.x, c.y, c.z,  d.x, d.y, d.z,
-    };
-    builder.add(Primvar::P, P, array_len(P));
-    float Cs[] = {
-        1, 0, 0,  0, 1, 0,  0, 0, 1,  1, 1, 1
-    };
-    builder.add(Primvar::Cs, Cs, array_len(Cs));
-    IclassStorage storReq(1,4,4,4,4);
-    boost::shared_ptr<Geometry> patch(new Patch(builder.build(storReq)));
-    patch->transform(trans);
-    return patch;
+    DataView<Vec3> P(P_in);
+    DataView<Vec3> N(N_in);
+    DataView<Col3> Cs(Cs_in);
+    float P_stor[12];
+    float N_stor[12];
+    float Cs_stor[12];
+    for(int face = 0; face < nfaces; ++face)
+    {
+        PrimvarStorageBuilder builder;
+#       define COPYVAR(dest, src) \
+            dest[0] = src[vertices[0]]; dest[1] = src[vertices[1]]; \
+            dest[2] = src[vertices[3]]; dest[3] = src[vertices[2]];
+        {
+            DataView<Vec3> view(P_stor);
+            COPYVAR(view, P);
+            builder.add(Primvar::P, P_stor, 12);
+        }
+        if(N)
+        {
+            DataView<Vec3> view(N_stor);
+            COPYVAR(view, N);
+            builder.add(Primvar::N, N_stor, 12);
+        }
+        if(Cs)
+        {
+            DataView<Col3> view(Cs_stor);
+            COPYVAR(view, Cs);
+            builder.add(Primvar::Cs, Cs_stor, 12);
+        }
+        else
+        {
+            float Cs_in[] = {1, 1, 1};
+            DataView<Col3> Cs(Cs_in, 0);
+            DataView<Col3> view(Cs_stor);
+            COPYVAR(view, Cs);
+            builder.add(Primvar::Cs, Cs_stor, 12);
+        }
+        IclassStorage storReq(1,4,4,4,4);
+        boost::shared_ptr<Geometry> patch(new Patch(builder.build(storReq)));
+        patch->transform(otow);
+        r.add(patch, attrs);
+        vertices += 4;
+    }
 }
+
 
 static
 void addCube(Attributes& attrs, Renderer& r, const Mat4& otow)
 {
-    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                      Vec3(-1,1,-1), Vec3(-1,1,1), otow), attrs);
-    r.add(createPatch(Vec3(1,-1,-1), Vec3(1,-1,1),
-                      Vec3(1,1,-1), Vec3(1,1,1), otow), attrs);
+    float P[] = {
+        -1, -1, -1,
+         1, -1, -1,
+        -1,  1, -1,
+         1,  1, -1,
+        -1, -1,  1,
+         1, -1,  1,
+        -1,  1,  1,
+         1,  1,  1
+    };
+    float N[] = {
+        -1, -1, -1,
+         1, -1, -1,
+        -1,  1, -1,
+         1,  1, -1,
+        -1, -1,  1,
+         1, -1,  1,
+        -1,  1,  1,
+         1,  1,  1
+    };
+    float c = 0.2;
+    float Cs[] = {
+        c, c, c,
+        1, c, c,
+        c, 1, c,
+        1, 1, c,
+        c, c, c,
+        1, c, c,
+        c, 1, c,
+        1, 1, c,
+    };
+    int vertices[] = {
+        0, 2, 3, 1,
+        0, 1, 5, 4,
+        1, 3, 7, 5,
+        3, 2, 6, 7,
+        2, 0, 4, 6,
+        4, 5, 7, 6,
+    };
 
-    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,-1,1),
-                      Vec3(1,-1,-1), Vec3(1,-1,1), otow), attrs);
-    r.add(createPatch(Vec3(-1,1,-1), Vec3(-1,1,1),
-                      Vec3(1,1,-1), Vec3(1,1,1), otow), attrs);
-
-    r.add(createPatch(Vec3(-1,-1,-1), Vec3(-1,1,-1),
-                      Vec3(1,-1,-1), Vec3(1,1,-1), otow), attrs);
-    r.add(createPatch(Vec3(-1,-1,1), Vec3(-1,1,1),
-                      Vec3(1,-1,1), Vec3(1,1,1), otow), attrs);
+    addQuadMesh(attrs, r, otow, 6, vertices, P, N, Cs);
 }
 
 void renderDefaultScene()

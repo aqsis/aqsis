@@ -62,19 +62,37 @@ class TessellationContextImpl : public TessellationContext
         {
             m_renderer.push(geom, *m_parentSurface);
         }
+
         virtual void push(const boost::shared_ptr<Grid>& grid)
         {
             // Fill in any grid data which didn't get filled in by the surface
             // during the dicing stage.
+            //
+            // TODO: Alias optimization:
+            //  - For perspective projections I may be aliased to P rather
+            //    than copied
+            //  - N may sometimes be aliased to Ng
+            //
             GridStorage& stor = grid->storage();
-            if(stor.varSet().contains(StdIndices::N))
-                grid->calculateNormals(stor.N(), stor.P());
-            if(stor.varSet().contains(StdIndices::I))
+            DataView<Vec3> P = stor.get(StdIndices::P);
+            // Deal with normals N & Ng
+            DataView<Vec3> Ng = stor.get(StdIndices::Ng);
+            DataView<Vec3> N = stor.get(StdIndices::N);
+            if(Ng)
+                grid->calculateNormals(Ng, P);
+            if(N && !m_builder.dicedByGeom(stor, StdIndices::N))
+            {
+                if(Ng)
+                    copy(N, Ng, stor.nverts());
+                else
+                    grid->calculateNormals(N, P);
+            }
+            // Deal with view direction.
+            if(DataView<Vec3> I = stor.get(StdIndices::I))
             {
                 // In shading coordinates, I is just equal to P for
                 // perspective projections.  (TODO: orthographic)
-                copy(stor.get(StdIndices::I), stor.get(StdIndices::P),
-                     stor.nverts());
+                copy(I, P, stor.nverts());
             }
             // Push the grid into the render pipeline
             m_renderer.push(grid, *m_parentSurface);
@@ -82,46 +100,96 @@ class TessellationContextImpl : public TessellationContext
 
         virtual GridStorageBuilder& gridStorageBuilder()
         {
-            // Add required stdvars for sampling & shader input.  These are the
-            // vars which can be deduced from other primvars (eg, Ng is deduced
-            // from P), from the attribute state (eg, Cs) or otherwise.
+            // Add required stdvars for sampling, shader input & output.
             //
-            // Also add storage for required shader output vars, eg N.
+            // TODO: Perhaps some of this messy logic can be done once & cached
+            // in the surface holder?
             //
-            // TODO: Perhaps this messy logic can be done once & cached in the
-            // surface holder?
             m_builder.clear();
+            // TODO: AOV stuff shouldn't be conditional on surfaceShader
+            // existing.
             if(m_parentSurface->attrs->surfaceShader)
             {
+                // Renderer arbitrary output vars
+                const OutvarSet& aoVars = m_renderer.m_outVars;
                 const Shader& shader = *m_parentSurface->attrs->surfaceShader;
                 const VarSet& inVars = shader.inputVars();
-                // Always need P; just add it.
+                // P is guaranteed to be dice by the geometry.
                 m_builder.add(Stdvar::P,  GridStorage::Varying);
-                // Need Cs, Os,s,t,I,Ng if the shader needs them (TODO: or the
-                // AOVs!)
-                if(inVars.contains(StdIndices::Cs))
-                    m_builder.add(Stdvar::Cs, GridStorage::Uniform);
-                if(inVars.contains(StdIndices::Os))
-                    m_builder.add(Stdvar::Os, GridStorage::Uniform);
-                if(inVars.contains(StdIndices::s))
-                    m_builder.add(Stdvar::s,  GridStorage::Varying);
-                if(inVars.contains(StdIndices::t))
-                    m_builder.add(Stdvar::t,  GridStorage::Varying);
-                if(inVars.contains(StdIndices::I))
+                // Add stdvars computed by the renderer if they're needed in
+                // the shader or AOVs.  These are:
+                //
+                //   I - computed from P
+                //   du, dv - compute from u,v
+                //   E - eye position is always 0
+                //   ncomps - computed from options
+                //   time - always 0 (?)
+                if(inVars.contains(StdIndices::I) || aoVars.contains(Stdvar::I))
                     m_builder.add(Stdvar::I,  GridStorage::Varying);
-                // Special case for Ng.  Ng is needed when we need it for
-                // deducing the shading normal, N.
-                if(inVars.contains(StdIndices::N) || inVars.contains(StdIndices::Ng))
-                    m_builder.add(Stdvar::Ng, GridStorage::Varying);
-                // TODO: Sort out this mess between N & Ng.
-                if(inVars.contains(StdIndices::N))
-                    m_builder.add(Stdvar::N, GridStorage::Varying);
+                // TODO: du, dv, E, ncomps, time
 
+                // Some geometric stdvars - dPdu, dPdv, Ng - may in principle
+                // be filled in by the geometry.  For now we just estimate
+                // these in the renderer core using derivatives of P.
+                //
+                // TODO: dPdu, dPdv
+                if(inVars.contains(Stdvar::Ng) || aoVars.contains(Stdvar::Ng))
+                    m_builder.add(Stdvar::Ng,  GridStorage::Varying);
+                // N is a tricky case; it may inherit a value from Ng if it's
+                // not set explicitly, but only if Ng is never assigned to by
+                // the shaders (implicitly via P).
+                //
+                // Thoughts about variable flow for N:
+                //
+                // How can N differ from Ng??
+                // - If it's a primvar
+                // - If N is changed in the displacement shader
+                // - If P is changed in the displacement shader (implies Ng is
+                //   too)
+                //
+                // 1) Add N if contained in inVars or outVars or AOVs
+                // 2) Add if it's in the primvar list
+                // 3) Allocate if N can differ from Ng, *and* both N & Ng are
+                //    in the list.
+                // 4) Dice if it's a primvar
+                // 5) Alias to Ng if N & Ng can't differ, else memcpy.
+                //
+                // Lesson: N and Ng should be the same, unless N is specified
+                // by the user (ie, is a primvar) or N & Ng diverge during
+                // displacement (ie, N is set or P is set)
+                if(inVars.contains(Stdvar::N) || aoVars.contains(Stdvar::N))
+                    m_builder.add(Stdvar::N,  GridStorage::Varying);
+
+                // Stdvars which should be attached at geometry creation:
+                // Cs, Os - from attributes state
+                // u, v
+                // s, t - copy u,v ?
+                //
+                // Stdvars which must be filled in by the geometry:
+                // P
+                //
+                // Stdvars which can be filled in by either geometry or
+                // renderer.  Here's how you'd do them with the renderer:
+                // N - computed from Ng
+                // dPdu, dPdv - computed from P
+                // Ng - computed from P
+
+                // Add shader outputs
                 const VarSet& outVars = shader.outputVars();
-                if(outVars.contains(StdIndices::Ci))
+                if(outVars.contains(StdIndices::Ci) && aoVars.contains(Stdvar::Ci))
                     m_builder.add(Stdvar::Ci, GridStorage::Varying);
-                if(outVars.contains(StdIndices::Oi))
+                if(outVars.contains(StdIndices::Oi) && aoVars.contains(Stdvar::Oi))
                     m_builder.add(Stdvar::Oi, GridStorage::Varying);
+                // TODO: Replace the limited stuff above with the following:
+                /*
+                for(var in outVars)
+                {
+                    // TODO: signal somehow that these vars are to be retained
+                    // after shading.
+                    if(aovs.contains(var))
+                        m_builder.add(var);
+                }
+                */
             }
             m_builder.setFromGeom();
             return m_builder;
@@ -358,11 +426,18 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     }
     else
     {
+        for(int i = 0, iend = outVars.size(); i < iend; ++i)
+            outVarsInit.push_back(OutvarSpec(outVars[i], 0));
+        std::sort(outVarsInit.begin(), outVarsInit.end());
+        // Generate the output offsets after sorting, so that the order of
+        // outVars is the same as the order in the output image.  This isn't
+        // strictly necessary, but (1) in-order iteration during sampling seems
+        // like a good idea, and (2) it's less confusing outside this init step.
         int offset = 0;
         for(int i = 0, iend = outVars.size(); i < iend; ++i)
         {
-            outVarsInit.push_back(OutvarSpec(outVars[i], offset));
-            offset += outVars[i].scalarSize();
+            outVarsInit[i].offset = offset;
+            offset += outVarsInit[i].scalarSize();
         }
     }
     m_outVars.assign(outVarsInit.begin(), outVarsInit.end());

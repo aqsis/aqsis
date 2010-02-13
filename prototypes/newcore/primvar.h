@@ -83,6 +83,7 @@ struct PrimvarSpec : public VarSpec
 namespace Primvar
 {
     extern const PrimvarSpec P;
+    extern const PrimvarSpec N;
     extern const PrimvarSpec Cs;
     extern const PrimvarSpec st;
 }
@@ -194,13 +195,17 @@ class PrimvarStorage
             return ConstDataView<Vec3>(m_views[Pidx]);
         }
 
-        /// Transform primitive variables via the matrix m.
-        void transform(const Mat4& m)
+        /// Transform primitive variables via the matrix trans.
+        void transform(const Mat4& trans)
         {
+            Mat3 vecTrans = vectorTransform(trans);
+            Mat3 norTrans = normalTransform(trans);
             // Iterate over all primvars & transform as appropriate.
             for(int ivar = 0, nvars = m_vars.size(); ivar < nvars; ++ivar)
             {
                 const PrimvarSpec& spec = m_vars[ivar];
+                int nValues = m_storCount.storage(spec.iclass)
+                              * spec.arraySize;
                 switch(spec.type)
                 {
                     case PrimvarSpec::Float:
@@ -210,19 +215,28 @@ class PrimvarStorage
                         break;
                     case PrimvarSpec::Point:
                         {
-                            int aSize = spec.arraySize;
-                            int nElems = m_storCount.storage(spec.iclass);
-                            FvecView v = m_views[ivar];
-                            for(int j = 0; j < nElems; ++j)
-                            {
-                                DataView<Vec3> p(v[j]);
-                                for(int i = 0; i < aSize; ++i)
-                                    p[i] *= m;
-                            }
+                            DataView<Vec3> p = m_views[ivar];
+                            assert(p.isDense());
+                            for(int i = 0; i < nValues; ++i)
+                                p[i] *= trans;
                         }
                         break;
                     case PrimvarSpec::Vector:
+                        {
+                            DataView<Vec3> v = m_views[ivar];
+                            assert(v.isDense());
+                            for(int i = 0; i < nValues; ++i)
+                                v[i] *= vecTrans;
+                        }
+                        break;
                     case PrimvarSpec::Normal:
+                        {
+                            DataView<Vec3> n = m_views[ivar];
+                            assert(n.isDense());
+                            for(int i = 0; i < nValues; ++i)
+                                n[i] *= norTrans;
+                        }
+                        break;
                     case PrimvarSpec::Hpoint:
                     case PrimvarSpec::Matrix:
                         assert(0 && "Transform not yet implemented!");
@@ -278,6 +292,14 @@ class PrimvarStorageBuilder
             }
             // TODO: Have some way to flag primvars that won't be used for
             // deletion.
+            //
+            // TODO: Figure out a way to add required stdvars if they're not
+            // present.  Primvars to be added by the renderer:
+            //
+            //   Cs, Os,
+            //   u, v,
+            //   s, t
+            //
             std::sort(m_vars.begin(), m_vars.end());
             return boost::shared_ptr<PrimvarStorage>(
                 new PrimvarStorage(m_vars.begin(), m_vars.end(), storCount));

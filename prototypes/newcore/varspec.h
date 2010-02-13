@@ -277,7 +277,7 @@ class BasicVarSet
             return m_vars[i];
         }
 
-        int find(const SpecT& var) const
+        int find(const VarSpec& var) const
         {
             const_iterator i = std::lower_bound(m_vars.begin(),
                                                 m_vars.end(), var);
@@ -288,7 +288,7 @@ class BasicVarSet
         }
         int find(typename StdIndT::Id id) const { return m_stdIndices.get(id); }
 
-        bool contains(const SpecT& var) const
+        bool contains(const VarSpec& var) const
         {
             return std::binary_search(m_vars.begin(), m_vars.end(), var);
         }
