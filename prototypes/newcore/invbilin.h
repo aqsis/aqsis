@@ -163,6 +163,16 @@ inline Vec2 InvBilin::operator()(Vec2 P) const
         // is non-rectangular.
         uv -= solve<false>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
     }
+    // TODO: Investigate exact solution for InvBilin again!  Newton's method
+    // can fail to produce the right results sometimes, hence the clamping
+    // below.
+    //
+    // Note that the clamping below has a measurable performance effect (a few
+    // percent) when rendering z-buffers.
+    if(uv.x < 0) uv.x = 0;
+    if(uv.x > 1) uv.x = 1;
+    if(uv.y < 0) uv.y = 0;
+    if(uv.y > 1) uv.y = 1;
     return uv;
 }
 
