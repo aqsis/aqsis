@@ -26,18 +26,18 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 
-#include "attributes.h"
-#include "geometry.h"
 #include "options.h"
-#include "sample.h"
 #include "util.h"
 #include "varspec.h"
 
-class Renderer;
+class Attributes;
+class Geometry;
 class Grid;
 class QuadGridSimple;
 class TessellationContextImpl;
+struct Sample;
 
 
 //-----------------------------------------------------------------------------
@@ -78,11 +78,17 @@ typedef BasicVarSet<OutvarSpec, StdOutInd> OutvarSet;
 
 
 //-----------------------------------------------------------------------------
+/// Main renderer interface.
+///
+/// Renderer is intended to have a minimal, stateless interface, designed so
+/// that more convenient interfaces like the RI can be layered on top.
 class Renderer
 {
     public:
         Renderer(const Options& opts, const Mat4& camToScreen = Mat4(),
                  const VarList& outVars = VarList());
+
+        ~Renderer();
 
         /// Add geometry
         void add(const boost::shared_ptr<Geometry>& geom, Attributes& attrs);
@@ -96,51 +102,13 @@ class Renderer
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
 
-        // Container for geometry and geometry metadata
-        struct SurfaceHolder
-        {
-            boost::shared_ptr<Geometry> geom; ///< Pointer to geometry
-            int splitCount; ///< Number of times the geometry has been split
-            Box bound;      ///< Bound in camera coordinates
-            Attributes* attrs; ///< Surface attribute state
-
-            SurfaceHolder(const boost::shared_ptr<Geometry>& geom,
-                          int splitCount, Box bound, Attributes* attrs)
-                : geom(geom),
-                splitCount(splitCount),
-                bound(bound),
-                attrs(attrs)
-            { }
-        };
-
-        // Ordering functor for surfaces in the render queue
-        class surface_order
-        {
-            private:
-                // desired bucket height in camera coordinates
-                float m_bucketHeight;
-            public:
-                surface_order() : m_bucketHeight(16) {}
-
-                bool operator()(const SurfaceHolder& a,
-                                const SurfaceHolder& b) const
-                {
-                    float ya = a.bound.min.y;
-                    float yb = b.bound.min.y;
-                    if(ya < yb - m_bucketHeight)
-                        return true;
-                    else if(yb < ya - m_bucketHeight)
-                        return false;
-                    else
-                        return a.bound.min.x < b.bound.min.x;
-                }
-        };
-
+        struct SurfaceHolder;
+        class SurfaceOrder;
         typedef std::priority_queue<SurfaceHolder, std::vector<SurfaceHolder>,
-                                    surface_order> SurfaceQueue;
+                                    SurfaceOrder> SurfaceQueue;
 
         Options m_opts;                ///< Render options
-        SurfaceQueue m_surfaces;       ///< Queue of surface to be rendered
+        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
         std::vector<Sample> m_samples; ///< Array of sample info
         OutvarSet m_outVars;           ///< Set of output variables
         std::vector<float> m_defOutSamps; ///< Default output samples

@@ -143,7 +143,7 @@ class DataView
             : m_storage(view.storage()),
             m_stride(view.stride())
         {
-            assert(view.elSize() == elementSize);
+            assert(view.elSize() == elementSize || !m_storage);
         }
 
         /// Test whether the view points to valid data.

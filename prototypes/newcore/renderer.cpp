@@ -22,10 +22,53 @@
 #include <cstring>
 #include <tiffio.h>
 
+#include "attributes.h"
 #include "grid.h"
 #include "gridstorage.h"
 #include "microquadsampler.h"
 #include "simple.h"
+
+
+/// Container for geometry and geometry metadata
+struct Renderer::SurfaceHolder
+{
+    boost::shared_ptr<Geometry> geom; ///< Pointer to geometry
+    int splitCount; ///< Number of times the geometry has been split
+    Box bound;      ///< Bound in camera coordinates
+    Attributes* attrs; ///< Surface attribute state
+
+    SurfaceHolder(const boost::shared_ptr<Geometry>& geom,
+                    int splitCount, Box bound, Attributes* attrs)
+        : geom(geom),
+        splitCount(splitCount),
+        bound(bound),
+        attrs(attrs)
+    { }
+};
+
+/// Ordering functor for surfaces in the render queue
+class Renderer::SurfaceOrder
+{
+    private:
+        // desired bucket height in camera coordinates
+        float m_bucketHeight;
+    public:
+        SurfaceOrder() : m_bucketHeight(16) {}
+
+        bool operator()(const SurfaceHolder& a,
+                        const SurfaceHolder& b) const
+        {
+            float ya = a.bound.min.y;
+            float yb = b.bound.min.y;
+            if(ya < yb - m_bucketHeight)
+                return true;
+            else if(yb < ya - m_bucketHeight)
+                return false;
+            else
+                return a.bound.min.x < b.bound.min.x;
+        }
+};
+
 
 //------------------------------------------------------------------------------
 // Minimal wrapper around a renderer instance to provide control context for
@@ -384,8 +427,8 @@ void Renderer::push(const boost::shared_ptr<Geometry>& geom,
     }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
-    m_surfaces.push(SurfaceHolder(geom, splitCount, bound,
-                                  parentSurface.attrs));
+    m_surfaces->push(SurfaceHolder(geom, splitCount, bound,
+                                   parentSurface.attrs));
 }
 
 
@@ -412,7 +455,7 @@ void Renderer::push(const boost::shared_ptr<Grid>& grid,
 Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
-    m_surfaces(),
+    m_surfaces(new SurfaceQueue()),
     m_samples(),
     m_outVars(),
     m_image(),
@@ -448,6 +491,15 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
 }
 
+// Trivial destructor.  Only here to prevent renderer implementation details
+// leaking (SurfaceQueue destructor is called implicitly)
+Renderer::~Renderer()
+{
+    // For some bizarre reason, putting this destructor here has performance
+    // implications on the order of 5% for the tenpatch test (WHY!?!).  This
+    // appears to have something to do with destroying the surface queue...
+}
+
 void Renderer::add(const boost::shared_ptr<Geometry>& geom,
                    Attributes& attrs)
 {
@@ -474,10 +526,10 @@ void Renderer::render()
     TessellationContextImpl tessContext(*this);
 
     initSamples();
-    while(!m_surfaces.empty())
+    while(!m_surfaces->empty())
     {
-        SurfaceHolder s = m_surfaces.top();
-        m_surfaces.pop();
+        SurfaceHolder s = m_surfaces->top();
+        m_surfaces->pop();
         tessContext.setParent(s);
         s.geom->splitdice(splitTrans, tessContext);
     }
