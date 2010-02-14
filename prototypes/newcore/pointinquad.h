@@ -256,9 +256,9 @@ class PointInQuad
             {
                 // Use a pair of point-in-triangle tests for non-convex cases.
                 //
-                // TODO: The inequalities here aren't really consistent with
+                // Note: The inequalities here aren't really consistent with
                 // the ones above, and therefore some inter-micropolygon
-                // cracking on the interior of a grid might result.
+                // cracking on the interior of a grid might result (todo?)
                 return (   m_nx[0]*(x - m_px[0]) + m_ny[0]*(y - m_py[0]) >= 0
                         && m_nx[1]*(x - m_px[1]) + m_ny[1]*(y - m_py[1]) >= 0
                         && m_nx[2]*(x - m_px[2]) + m_ny[2]*(y - m_py[2]) >= 0 )

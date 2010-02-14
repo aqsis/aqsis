@@ -60,12 +60,6 @@ class QuadGridSimple : public Grid
         {
             for(int i = 0, iend = m_P.size(); i < iend; ++i)
             {
-                // Project all points, but restore z afterward.  TODO: This
-                // can be done a little more efficiently.
-                //
-                // TODO: This is rather specialized; maybe it shouldn't go in
-                // the Grid class at all?  How about allowing visitor functors
-                // which act on all the primvars held on a grid?
                 float z = m_P[i].z;
                 m_P[i] = m_P[i]*m;
                 m_P[i].z = z;

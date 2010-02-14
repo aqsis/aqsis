@@ -1,19 +1,39 @@
 Some things which should be done:
+---------------------------------
 
-* Handle primvars and AOVs
-* Implement a basic shader interface
-* Supersampling and output image filtering
-* Tile-based allocation for sample points
-* Efficient Motion Blur and Depth of Field sampling
-* Transparency - deep fragment buffer
-* Grid crack solution via stitching
-* Bucket rendering
-* Occlusion culling
+    * Sampling
+        - Supersampling and output image filtering
+        - Tile-based allocation for sample points
+        - Motion Blur sampling
+        - Depth of field sampling
+        - Transparency - deep fragment buffer
+    * Filtering
+        - Image output filtering
+    * Grid crack solution via stitching
+    * Bucket rendering
+    * Occlusion culling
+    * Implement proper API (RI + RIB)
+    * Variable flow
+        - Make sure correct all standard vars are diced when necessary
+        - Allow geometry to fill in Ng, dPdu, dPdv if desired
+        - Make sure unneeded primvars are deleted
+        - Investigate performance benefits of unique VarSpec's when lots of
+          variables are present
+    * Investigate more robust inverse bilinear lookup (use exact method?)
 
 
-Things which are more or less speculative / require research
+    (The following are not present in aqsis, but should be kept in mind & done
+     at some stage)
 
-* Arbitrary bucket orders
-* Multithreaded bucket rendering
-* Output of deep data
-* Raytracer prototype
+    * Point-based occlusion & colour bleeding
+    * Arbitrary bucket orders
+    * Multithreaded bucket rendering
+    * Output of deep data
+    * Raytracer prototype
+
+
+Done:
+-----
+    * Handle general primvars
+    * Handle AOVs
+    * Implement a basic shader interface
