@@ -37,7 +37,7 @@ class Geometry;
 class Grid;
 class QuadGridSimple;
 class TessellationContextImpl;
-struct Sample;
+class SampleStorage;
 
 
 //-----------------------------------------------------------------------------
@@ -109,15 +109,12 @@ class Renderer
 
         Options m_opts;                ///< Render options
         boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
-        std::vector<Sample> m_samples; ///< Array of sample info
         OutvarSet m_outVars;           ///< Set of output variables
-        std::vector<float> m_defOutSamps; ///< Default output samples
-        std::vector<float> m_image;    ///< Image data
+        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
         Mat4 m_camToRas;               ///< Camera -> raster transformation
 
         void saveImages(const std::string& baseFileName);
 
-        void defaultSamples(float* defaultSamps);
         void initSamples();
         void push(const boost::shared_ptr<Geometry>& geom,
                   const SurfaceHolder& parentSurface);

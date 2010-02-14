@@ -26,6 +26,7 @@
 #include "grid.h"
 #include "gridstorage.h"
 #include "microquadsampler.h"
+#include "sample.h"
 #include "simple.h"
 
 
@@ -241,6 +242,140 @@ class TessellationContextImpl : public TessellationContext
 
 
 //------------------------------------------------------------------------------
+// Storage for samples positions and output fragments
+class SampleStorage
+{
+    private:
+        int m_fragRowStride; ///< length of a row of samples.
+        int m_fragSize;      ///< number of floats in a fragment
+        int m_xRes;
+
+        std::vector<Sample> m_samples;        ///< sample positions
+
+        std::vector<float> m_defaultFragment; ///< Default fragment channels
+        std::vector<float> m_fragments;       ///< array of fragments
+
+        /// Fill an array with the default no-hit fragment sample values
+        static void fillDefault(std::vector<float>& defaultFrag,
+                                const OutvarSet& outVars)
+        {
+            int nchans = 0;
+            for(int i = 0, iend = outVars.size(); i < iend; ++i)
+                nchans += outVars[i].scalarSize();
+            // Set up default values for samples.
+            defaultFrag.assign(nchans, 0.0f);
+            // Fill in default depth if relevant
+            int zIdx = outVars.find(StdOutInd::z);
+            if(zIdx != OutvarSet::npos)
+            {
+                int zOffset = outVars[zIdx].offset;
+                defaultFrag[zOffset] = FLT_MAX;
+            }
+        }
+
+    public:
+        SampleStorage(const OutvarSet& outVars, const Options& opts)
+            : m_fragRowStride(0),
+            m_fragSize(0),
+            m_xRes(opts.xRes),
+            m_samples(),
+            m_defaultFragment(),
+            m_fragments()
+        {
+            int npixels = opts.xRes*opts.yRes;
+            // Initialize sample array
+            m_samples.resize(npixels);
+            for(int j = 0; j < opts.yRes; ++j)
+            {
+                for(int i = 0; i < opts.xRes; ++i)
+                    m_samples[j*opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
+            }
+            // Initialize default fragment
+            fillDefault(m_defaultFragment, outVars);
+            m_fragSize = m_defaultFragment.size();
+            m_fragRowStride = opts.xRes*m_fragSize;
+            // Initialize fragment array
+            m_fragments.resize(m_fragSize*npixels);
+            const float* defFrag = &m_defaultFragment[0];
+            for(int i = 0; i < npixels; ++i)
+            {
+                std::memcpy(&m_fragments[m_fragSize*i], defFrag,
+                            m_fragSize*sizeof(float));
+            }
+        }
+
+//        class Iterator
+//        {
+//            private:
+//                int m_sx;
+//                int m_ex;
+//                int m_ey;
+//                int m_x;
+//                int m_y;
+//
+//                Sample* m_sample;
+//                float* m_fragment;
+//            public:
+//                Iterator(int sx, int ex, int sy, int ey, SampleStorage)
+//                    : m_sx(sx),
+//                    m_ex(ex),
+//                    m_ey(ey),
+//                    m_x(sx),
+//                    m_y(sx < ex ? sy : ey)
+//                { }
+//
+//                Iterator& operator++()
+//                {
+//                    ++m_x;
+//                    ++m_sample;
+//                    m_fragment += m_storage.m_fragSize;
+//                    if(m_x == m_ex)
+//                    {
+//                        // Advance to next row.
+//                        m_x = m_sx;
+//                        ++m_y;
+//                        m_sample +=
+//                    }
+//                    return *this;
+//                }
+//
+//                bool valid()
+//                {
+//                    return m_y < m_ey;
+//                }
+//
+//                Sample& sample() { return *m_sample; }
+//                float* fragment() { return *m_fragment; }
+//        };
+//
+//        Iterator begin(int startx, int endx, int starty, int endy)
+//        {
+//            return Iterator(startx, endx, starty, endy, *this);
+//        }
+
+        /// Get a sample at the given index
+        Sample& sample(int ix, int iy)
+        {
+            return m_samples[iy*m_xRes + ix];
+        }
+
+        float* fragment(int ix, int iy)
+        {
+            return &m_fragments[(iy*m_xRes + ix)*m_fragSize];
+        }
+
+        /// Get a scanline of the output image.
+        const float* outputScanline(int line) const
+        {
+            return &m_fragments[0] + line*m_fragRowStride;
+        }
+
+        int fragmentSize() const { return m_defaultFragment.size(); }
+        const float* defaultFragment() const { return &m_defaultFragment[0]; }
+};
+
+
+//------------------------------------------------------------------------------
 // Renderer implementation, utility stuff.
 
 static void writeHeader(TIFF* tif, Options& opts, int nchans, bool useFloat)
@@ -296,19 +431,10 @@ static void strided_memcpy(void* dest, const void* src, size_t nElems,
     }
 }
 
-// TODO: Should probably be elsewhere?
-static int numOutChans(const OutvarSet& outVars)
-{
-    int sampsPerPix = 0;
-    for(int i = 0, iend = outVars.size(); i < iend; ++i)
-        sampsPerPix += outVars[i].scalarSize();
-    return sampsPerPix;
-}
-
 // Save image to a TIFF file.
 void Renderer::saveImages(const std::string& baseFileName)
 {
-    int pixStride = numOutChans(m_outVars);
+    int pixStride = m_sampStorage->fragmentSize();
     for(int i = 0, nFiles = m_outVars.size(); i < nFiles; ++i)
     {
         int nSamps = m_outVars[i].scalarSize();
@@ -329,12 +455,12 @@ void Renderer::saveImages(const std::string& baseFileName)
         bool doQuantize = m_outVars[i] != Stdvar::z;
         writeHeader(tif, m_opts, nSamps, !doQuantize);
 
-        // Write RGB image data
+        // Write image data
         int rowSize = nSamps*m_opts.xRes*(doQuantize ? 1 : sizeof(float));
         boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
         for(int line = 0; line < m_opts.yRes; ++line)
         {
-            const float* src = &m_image[0] + pixStride*line*m_opts.xRes
+            const float* src = m_sampStorage->outputScanline(line)
                                + m_outVars[i].offset;
             if(doQuantize)
             {
@@ -357,42 +483,9 @@ void Renderer::saveImages(const std::string& baseFileName)
 //------------------------------------------------------------------------------
 // Guts of the renderer
 
-/// Fill a vector with the default no-hit fragment sample values
-void Renderer::defaultSamples(float* defaultSamps)
-{
-    // Determine index of depth output data, if any.
-    int zOffset = -1;
-    int zIdx = m_outVars.find(StdOutInd::z);
-    if(zIdx != OutvarSet::npos)
-        zOffset = m_outVars[zIdx].offset;
-    int pixStride = numOutChans(m_outVars);
-    // Set up default values for samples.
-    std::memset(defaultSamps, 0, pixStride*sizeof(float));
-    if(zOffset >= 0)
-        defaultSamps[zOffset] = FLT_MAX;
-}
-
 /// Initialize the sample and image arrays.
 void Renderer::initSamples()
 {
-    // Initialize sample array
-    m_samples.resize(m_opts.xRes*m_opts.yRes);
-    // Initialize sample positions to contain
-    for(int j = 0; j < m_opts.yRes; ++j)
-    {
-        for(int i = 0; i < m_opts.xRes; ++i)
-            m_samples[j*m_opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
-    }
-    // Initialize image array.
-    int nOutChans = numOutChans(m_outVars);
-    m_defOutSamps.resize(nOutChans);
-    defaultSamples(&m_defOutSamps[0]);
-    m_image.resize(nOutChans*m_opts.xRes*m_opts.yRes);
-    for(int i = 0, nPix = m_opts.xRes*m_opts.yRes; i < nPix; ++i)
-    {
-        std::memcpy(&m_image[nOutChans*i], &m_defOutSamps[0],
-                    nOutChans*sizeof(float));
-    }
 }
 
 
@@ -456,9 +549,8 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
     m_surfaces(new SurfaceQueue()),
-    m_samples(),
     m_outVars(),
-    m_image(),
+    m_sampStorage(),
     m_camToRas()
 {
     // Set up output variables.  Default is to use Cs.
@@ -493,12 +585,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
 
 // Trivial destructor.  Only here to prevent renderer implementation details
 // leaking (SurfaceQueue destructor is called implicitly)
-Renderer::~Renderer()
-{
-    // For some bizarre reason, putting this destructor here has performance
-    // implications on the order of 5% for the tenpatch test (WHY!?!).  This
-    // appears to have something to do with destroying the surface queue...
-}
+Renderer::~Renderer() { }
 
 void Renderer::add(const boost::shared_ptr<Geometry>& geom,
                    Attributes& attrs)
@@ -514,6 +601,7 @@ void Renderer::add(const boost::shared_ptr<Geometry>& geom,
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
+    m_sampStorage.reset(new SampleStorage(m_outVars, m_opts));
     // Splitting transform.  Allowing this to be different from the
     // projection matrix lets us examine a fixed set of grids
     // independently of the viewpoint.
@@ -547,7 +635,8 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
     int zIdx = m_outVars.find(StdOutInd::z);
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
-    int pixStride = numOutChans(m_outVars);
+    int fragSize = m_sampStorage->fragmentSize();
+    const float* defaultFrag = m_sampStorage->defaultFragment();
 
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
@@ -568,12 +657,11 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
         poly.initInterpolator();
 
         // for each sample position in the bound
-        for(int ix = sx; ix < ex; ++ix)
+        for(int iy = sy; iy < ey; ++iy)
         {
-            for(int iy = sy; iy < ey; ++iy)
+            for(int ix = sx; ix < ex; ++ix)
             {
-                int idx = m_opts.xRes*iy + ix;
-                Sample& samp = m_samples[idx];
+                Sample& samp = m_sampStorage->sample(ix, iy);
 //                // Early out if definitely hidden
 //                if(samp.z < bound.min.z)
 //                    continue;
@@ -587,9 +675,9 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Generate & store a fragment
-                float* out = &m_image[pixStride*idx];
+                float* out = m_sampStorage->fragment(ix, iy);
                 // Initialize fragment data with the default value.
-                std::memcpy(out, &m_defOutSamps[0], pixStride*sizeof(float));
+                std::memcpy(out, defaultFrag, fragSize*sizeof(float));
                 // Store interpolated fragment data
                 poly.interpolate(out);
                 if(zOffset >= 0)
@@ -607,8 +695,6 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
 // version to benchmark against.
 void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
 {
-    int pixStride = numOutChans(m_outVars);
-
     // Project grid into raster coordinates.
     grid.project(m_camToRas);
     const Vec3* P = grid.P(0);
@@ -653,12 +739,11 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
         }
 
         // for each sample position in the bound
-        for(int ix = sx; ix < ex; ++ix)
+        for(int iy = sy; iy < ey; ++iy)
         {
-            for(int iy = sy; iy < ey; ++iy)
+            for(int ix = sx; ix < ex; ++ix)
             {
-                int idx = m_opts.xRes*iy + ix;
-                Sample& samp = m_samples[idx];
+                Sample& samp = m_sampStorage->sample(ix, iy);
 //                // Early out if definitely hidden
 //                if(samp.z < bound.min.z)
 //                    continue;
@@ -680,7 +765,7 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Store z value.
-                m_image[pixStride*idx] = z;
+                m_sampStorage->fragment(ix, iy)[0] = z;
             }
         }
     }
