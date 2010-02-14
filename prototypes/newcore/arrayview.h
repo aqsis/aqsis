@@ -158,6 +158,7 @@ class DataView
         /// have some troubles with strict aliasing in rather unusual
         /// circumstances.
         T& operator[](int i) const { return *((T*)(m_storage + m_stride*i)); }
+        T& operator*() const { return *((T*)(m_storage)); }
 
         float* storage() const { return m_storage; }
         int stride() const { return m_stride; }
@@ -166,6 +167,11 @@ class DataView
         bool isDense() const { return m_stride == elementSize; }
 
         DataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
+        DataView& operator++() { m_storage += m_stride; return *this; }
+        DataView operator+(int i) const
+        {
+            return DataView(m_storage + i*m_stride, m_stride);
+        }
 };
 
 
@@ -208,6 +214,7 @@ class ConstDataView
         operator const void*() const { return m_storage; }
 
         const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
+        const T& operator*() const { return *((const T*)(m_storage)); }
 
         /// Get the base storage for this view
         const float* storage() const { return m_storage; }
@@ -218,11 +225,89 @@ class ConstDataView
         bool isDense() const { return m_stride == elementSize; }
 
         ConstDataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
+        ConstDataView& operator++() { m_storage += m_stride; return *this; }
+
+        ConstDataView operator+(int i) const
+        {
+            return ConstDataView(m_storage + i*m_stride, m_stride);
+        }
 };
 
 
 //------------------------------------------------------------------------------
 // Utility functions for dealing with data views.
+
+/// Create a strided view of an existing view.
+template<typename T>
+inline DataView<T> slice(DataView<T> d, int strideMult)
+{
+    return DataView<T>(d.storage(), d.stride()*strideMult);
+}
+template<typename T>
+inline ConstDataView<T> slice(ConstDataView<T> d, int strideMult)
+{
+    return ConstDataView<T>(d.storage(), d.stride()*strideMult);
+}
+
+/// Compute the first difference on a grid; general strided version
+///
+/// This function computes the first difference (the "difference between
+/// adjacent grid points") using a symmetrical centred difference scheme if
+/// possible and useCentred is true.  It falls back to 2nd order accurate one
+/// sided differences at the grid edges.  If all else fails (or useCentred is
+/// false) it uses one-sided 1st order accurate differences.
+///
+/// \param data - View of values from which to compute the difference.  It is
+///               assumed that data[0] is the correct grid point at which to
+///               compute the differences.
+/// \param n - Index for one-sided checks.  One-sided differences will be used
+///            if n == 0 or n == length-1.
+/// \param length - number of data points along the dimension
+/// \param useCentred - if true, use a centred difference scheme,
+///                     if false use one-sided.
+///
+/// For computing derivatives on a 2D grid, the data should simply be
+template<typename T>
+inline T diff(ConstDataView<T> data, int n, int length,
+              bool useCentred = true)
+{
+    if(useCentred && length > 2)
+    {
+        // 2nd order difference scheme, appropriate for use with smooth
+        // shading interpolation.  A symmetric centred difference is
+        // used where possible, with second order 3-point stencils at
+        // the edges of the grids.
+        //
+        // Using a second order scheme like this is very important to
+        // avoid artifacts when neighbouring grids have u and v
+        // increasing in different directions, which this is
+        // unavoidable for some surface types like SDS.
+        if(n == 0)
+            return -1.5f*data[0] + 2.0f*data[1] - 0.5f*data[2];
+        else if(n == length-1)
+            return 1.5f*data[0] - 2.0f*data[-1] + 0.5f*data[-2];
+        else
+            return 0.5f*(data[1] - data[-1]);
+    }
+    else
+    {
+        // Use 1st order one-sided difference scheme.  This is
+        // appropriate for use with constant shading interpolation:
+        // The one-sided difference may be thought of as a centred
+        // differece *between* grid points, which corresponds to
+        // micropolygons centres.
+        if(n == length-1)
+            return data[0] - data[-1];
+        else
+            return data[1] - data[0];
+    }
+}
+template<typename T>
+inline T diff(DataView<T> data, int n, int length, bool useCentred = true)
+{
+    return diff(ConstDataView<T>(data), n, length, useCentred);
+}
+
 
 /// Copy one float vec view into another.  Arguments order is like memcpy.
 inline void copy(FvecView dest, ConstFvecView src, int nelems)

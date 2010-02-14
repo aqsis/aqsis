@@ -128,3 +128,25 @@ BOOST_AUTO_TEST_CASE(DataView_copy_test)
     BOOST_CHECK_EQUAL(a[2], c[1]);
     BOOST_CHECK_EQUAL(a[3], b[3]);
 }
+
+BOOST_AUTO_TEST_CASE(DataView_diff_test)
+{
+    float data[] = {
+        // ---> "u-direction"
+        1,1,1, 2,2,2, 3,3,3, 0,0,0,  //  |
+        2,2,2, 3,3,3, 4,4,4, 0,0,0,  //  |  "v-direction"
+        0,0,0, 2,2,2, 0,0,0, 0,0,0   //  v
+    };
+    ConstDataView<Vec3> P(data);
+
+    // Derivatives in u-direction
+    BOOST_CHECK_EQUAL(diff(P+1, 1, 4), Vec3(1,1,1));
+    BOOST_CHECK_EQUAL(diff(P+1, 1, 2), Vec3(1,1,1));
+    BOOST_CHECK_EQUAL(diff(P, 0, 2), Vec3(1,1,1));
+
+    // Derivatives in v-direction using a slice
+    ConstDataView<Vec3> Pv = slice(P+1, 4);
+    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 3), Vec3(0,0,0));
+    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 2), Vec3(1,1,1));
+    BOOST_CHECK_EQUAL(diff(Pv, 0, 2), Vec3(1,1,1));
+}

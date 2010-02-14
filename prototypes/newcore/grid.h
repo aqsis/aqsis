@@ -75,32 +75,9 @@ class QuadGrid : public Grid
         virtual void calculateNormals(DataView<Vec3> N,
                                       ConstDataView<Vec3> P) const
         {
-            // Crude one-sided derivative calculation...
             for(int v = 0; v < m_nv; ++v)
-            {
-                int v1 = v;
-                int v2 = v+1;
-                if(v == m_nv-1)
-                {
-                    v1 = v-1;
-                    v2 = v;
-                }
-                for(int u = 0; u < m_nu; ++u)
-                {
-                    int u1 = u;
-                    int u2 = u+1;
-                    if(u == m_nu-1)
-                    {
-                        u1 = u-1;
-                        u2 = u;
-                    }
-                    int idx = v*m_nu + u;
-                    int idx0 = v1*m_nu + u1;
-                    int idx1 = v1*m_nu + u2;
-                    int idx2 = v2*m_nu + u1;
-                    N[idx] = (P[idx1] - P[idx0]) % (P[idx2] - P[idx0]);
-                }
-            }
+                for(int u = 0; u < m_nu; ++u, ++P, ++N)
+                    *N = diff(P, u, m_nu) % diff(slice(P, m_nu), v, m_nv);
         }
 
         int nu() const { return m_nu; }
