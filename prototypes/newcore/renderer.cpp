@@ -247,8 +247,8 @@ class SampleStorage
 {
     private:
         int m_fragRowStride; ///< length of a row of samples.
-        int m_fragSize;      ///< number of floats in a fragment
         int m_xRes;
+        int m_yRes;
 
         std::vector<Sample> m_samples;        ///< sample positions
 
@@ -276,8 +276,8 @@ class SampleStorage
     public:
         SampleStorage(const OutvarSet& outVars, const Options& opts)
             : m_fragRowStride(0),
-            m_fragSize(0),
             m_xRes(opts.xRes),
+            m_yRes(opts.yRes),
             m_samples(),
             m_defaultFragment(),
             m_fragments()
@@ -292,76 +292,93 @@ class SampleStorage
             }
             // Initialize default fragment
             fillDefault(m_defaultFragment, outVars);
-            m_fragSize = m_defaultFragment.size();
-            m_fragRowStride = opts.xRes*m_fragSize;
+            int fragSize = m_defaultFragment.size();
+            m_fragRowStride = opts.xRes*fragSize;
             // Initialize fragment array
-            m_fragments.resize(m_fragSize*npixels);
+            m_fragments.resize(fragSize*npixels);
             const float* defFrag = &m_defaultFragment[0];
             for(int i = 0; i < npixels; ++i)
             {
-                std::memcpy(&m_fragments[m_fragSize*i], defFrag,
-                            m_fragSize*sizeof(float));
+                std::memcpy(&m_fragments[fragSize*i], defFrag,
+                            fragSize*sizeof(float));
             }
         }
 
-//        class Iterator
-//        {
-//            private:
-//                int m_sx;
-//                int m_ex;
-//                int m_ey;
-//                int m_x;
-//                int m_y;
-//
-//                Sample* m_sample;
-//                float* m_fragment;
-//            public:
-//                Iterator(int sx, int ex, int sy, int ey, SampleStorage)
-//                    : m_sx(sx),
-//                    m_ex(ex),
-//                    m_ey(ey),
-//                    m_x(sx),
-//                    m_y(sx < ex ? sy : ey)
-//                { }
-//
-//                Iterator& operator++()
-//                {
-//                    ++m_x;
-//                    ++m_sample;
-//                    m_fragment += m_storage.m_fragSize;
-//                    if(m_x == m_ex)
-//                    {
-//                        // Advance to next row.
-//                        m_x = m_sx;
-//                        ++m_y;
-//                        m_sample +=
-//                    }
-//                    return *this;
-//                }
-//
-//                bool valid()
-//                {
-//                    return m_y < m_ey;
-//                }
-//
-//                Sample& sample() { return *m_sample; }
-//                float* fragment() { return *m_fragment; }
-//        };
-//
-//        Iterator begin(int startx, int endx, int starty, int endy)
-//        {
-//            return Iterator(startx, endx, starty, endy, *this);
-//        }
-
-        /// Get a sample at the given index
-        Sample& sample(int ix, int iy)
+        /// Iterator over a rectangular region of samples.
+        ///
+        /// Note that the implementation here is quite performance critical,
+        /// since it's inside one of the inner sampling loops.
+        ///
+        class Iterator
         {
-            return m_samples[iy*m_xRes + ix];
-        }
+            private:
+                int m_startx;
+                int m_endx;
+                int m_endy;
+                int m_x;
+                int m_y;
 
-        float* fragment(int ix, int iy)
+                int m_rowStride;   ///< stride between end of one row & beginning of next.
+                int m_fragSize;    ///< number of floats in a fragment
+                Sample* m_sample;  ///< current sample data
+                float* m_fragment; ///< current fragment data
+
+            public:
+                Iterator(const Box& bound, SampleStorage& storage)
+                {
+                    // Bounding box for relevant samples, clamped to image
+                    // extent.
+                    m_startx = clamp(floor(bound.min.x), 0, storage.m_xRes);
+                    m_endx = clamp(floor(bound.max.x)+1, 0, storage.m_xRes+1);
+                    int starty = clamp(floor(bound.min.y), 0, storage.m_yRes);
+                    m_endy = clamp(floor(bound.max.y)+1, 0, storage.m_yRes+1);
+
+                    m_x = m_startx;
+                    m_y = starty;
+                    // ensure !valid() if bound is empty in x-direction
+                    if(m_startx >= m_endx)
+                        m_y = m_endy;
+
+                    if(valid())
+                    {
+                        m_rowStride = storage.m_xRes - (m_endx - m_startx);
+                        m_fragSize = storage.fragmentSize();
+
+                        int idx = m_y*storage.m_xRes + m_x;
+                        m_sample = &storage.m_samples[idx];
+                        m_fragment = &storage.m_fragments[m_fragSize*idx];
+                    }
+                }
+
+                /// Advance to next sample
+                Iterator& operator++()
+                {
+                    ++m_x;
+                    ++m_sample;
+                    m_fragment += m_fragSize;
+                    if(m_x == m_endx)
+                    {
+                        // Advance to next row.
+                        m_x = m_startx;
+                        ++m_y;
+                        m_sample += m_rowStride;
+                        m_fragment += m_rowStride*m_fragSize;
+                    }
+                    return *this;
+                }
+
+                /// Determine whether current sample is in the bound
+                bool valid() const { return m_y < m_endy; }
+
+                /// Get current sample data
+                Sample& sample() const { return *m_sample; }
+                /// Get current fragment storage
+                float* fragment() const { return m_fragment; }
+        };
+
+        Iterator begin(const Box& bound)
         {
-            return &m_fragments[(iy*m_xRes + ix)*m_fragSize];
+            return Iterator(bound, *this);
         }
 
         /// Get a scanline of the output image.
@@ -412,7 +429,7 @@ static void quantize(const float* in, int nPix, int nSamps, int pixStride,
     for(int j = 0; j < nPix; ++j)
     {
         for(int i = 0; i < nSamps; ++i)
-            out[i] = static_cast<uint8>(Imath::clamp(255*in[i], 0.0f, 255.0f));
+            out[i] = static_cast<uint8>(clamp(255*in[i], 0.0f, 255.0f));
         in += pixStride;
         out += nSamps;
     }
@@ -648,41 +665,34 @@ void Renderer::rasterize(GridT& grid, const Attributes& attrs)
     {
         Box bound = poly.bound();
 
-        // Bounding box for relevant samples, clamped to image extent.
-        const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
-        const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
-        const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
-        const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
         poly.initHitTest();
         poly.initInterpolator();
 
         // for each sample position in the bound
-        for(int iy = sy; iy < ey; ++iy)
+        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
+            sampi.valid(); ++sampi)
         {
-            for(int ix = sx; ix < ex; ++ix)
-            {
-                Sample& samp = m_sampStorage->sample(ix, iy);
-//                // Early out if definitely hidden
-//                if(samp.z < bound.min.z)
-//                    continue;
-                // Test whether sample hits the micropoly
-                if(!poly.contains(samp))
-                    continue;
-                // Determine hit depth
-                poly.interpolateAt(samp);
-                float z = poly.interpolateZ();
-                if(samp.z < z)
-                    continue; // Ignore if hit is hidden
-                samp.z = z;
-                // Generate & store a fragment
-                float* out = m_sampStorage->fragment(ix, iy);
-                // Initialize fragment data with the default value.
-                std::memcpy(out, defaultFrag, fragSize*sizeof(float));
-                // Store interpolated fragment data
-                poly.interpolate(out);
-                if(zOffset >= 0)
-                    out[zOffset] = z;
-            }
+            Sample& samp = sampi.sample();
+//           // Early out if definitely hidden
+//           if(samp.z < bound.min.z)
+//               continue;
+            // Test whether sample hits the micropoly
+            if(!poly.contains(samp))
+                continue;
+            // Determine hit depth
+            poly.interpolateAt(samp);
+            float z = poly.interpolateZ();
+            if(samp.z < z)
+                continue; // Ignore if hit is hidden
+            samp.z = z;
+            // Generate & store a fragment
+            float* out = sampi.fragment();
+            // Initialize fragment data with the default value.
+            std::memcpy(out, defaultFrag, fragSize*sizeof(float));
+            // Store interpolated fragment data
+            poly.interpolate(out);
+            if(zOffset >= 0)
+                out[zOffset] = z;
         }
         poly.next();
     }
@@ -724,12 +734,6 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
         bound.extendBy(c);
         bound.extendBy(d);
 
-        // Bounding box for relevant samples, clamped to image extent.
-        const int sx = Imath::clamp(Imath::floor(bound.min.x), 0, m_opts.xRes);
-        const int ex = Imath::clamp(Imath::floor(bound.max.x)+1, 0, m_opts.xRes);
-        const int sy = Imath::clamp(Imath::floor(bound.min.y), 0, m_opts.yRes);
-        const int ey = Imath::clamp(Imath::floor(bound.max.y)+1, 0, m_opts.yRes);
-
         hitTest.init(vec2_cast(a), vec2_cast(b),
                      vec2_cast(c), vec2_cast(d), flipEnd);
         if(smoothShading)
@@ -739,34 +743,32 @@ void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
         }
 
         // for each sample position in the bound
-        for(int iy = sy; iy < ey; ++iy)
+        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
+            sampi.valid(); ++sampi)
         {
-            for(int ix = sx; ix < ex; ++ix)
+            Sample& samp = sampi.sample();
+//           // Early out if definitely hidden
+//           if(samp.z < bound.min.z)
+//               continue;
+            // Test whether sample hits the micropoly
+            if(!hitTest(samp))
+                continue;
+            // Determine hit depth
+            float z;
+            if(smoothShading)
             {
-                Sample& samp = m_sampStorage->sample(ix, iy);
-//                // Early out if definitely hidden
-//                if(samp.z < bound.min.z)
-//                    continue;
-                // Test whether sample hits the micropoly
-                if(!hitTest(samp))
-                    continue;
-                // Determine hit depth
-                float z;
-                if(smoothShading)
-                {
-                    uv = invBilin(samp.p);
-                    z = bilerp(a.z, b.z, d.z, c.z, uv);
-                }
-                else
-                {
-                    z = a.z;
-                }
-                if(samp.z < z)
-                    continue; // Ignore if hit is hidden
-                samp.z = z;
-                // Store z value.
-                m_sampStorage->fragment(ix, iy)[0] = z;
+                uv = invBilin(samp.p);
+                z = bilerp(a.z, b.z, d.z, c.z, uv);
             }
+            else
+            {
+                z = a.z;
+            }
+            if(samp.z < z)
+                continue; // Ignore if hit is hidden
+            samp.z = z;
+            // Store z value.
+            sampi.fragment()[0] = z;
         }
     }
 }

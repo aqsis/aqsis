@@ -146,6 +146,22 @@ inline T lerp(T a, T b, float t)
     return (1-t)*a + t*b;
 }
 
+template<typename T>
+inline T clamp(T x, T low, T high)
+{
+    return (x < low) ? low : ((x > high) ? high : x);
+}
+
+template<typename T>
+inline int floor(T x)
+{
+    int ix = static_cast<int>(x);
+    if(x >= 0)
+        return ix;
+    else
+        return ix - (x != ix);
+}
+
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
 

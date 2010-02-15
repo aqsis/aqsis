@@ -118,8 +118,8 @@ class PatchSimple : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int uRes = 1 + Imath::floor(lu/std::sqrt(attrs.shadingRate));
-                int vRes = 1 + Imath::floor(lv/std::sqrt(attrs.shadingRate));
+                int uRes = 1 + floor(lu/std::sqrt(attrs.shadingRate));
+                int vRes = 1 + floor(lv/std::sqrt(attrs.shadingRate));
                 boost::shared_ptr<QuadGridSimple>
                     grid(new QuadGridSimple(uRes, vRes));
                 float dv = 1.0f/(vRes-1);

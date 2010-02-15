@@ -154,8 +154,8 @@ class Patch : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int nu = 1 + Imath::floor(lu/std::sqrt(attrs.shadingRate));
-                int nv = 1 + Imath::floor(lv/std::sqrt(attrs.shadingRate));
+                int nu = 1 + floor(lu/std::sqrt(attrs.shadingRate));
+                int nv = 1 + floor(lv/std::sqrt(attrs.shadingRate));
                 dice(tessCtx, nu, nv);
             }
             else
