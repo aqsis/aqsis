@@ -329,9 +329,9 @@ class SampleStorage
                     // Bounding box for relevant samples, clamped to image
                     // extent.
                     m_startx = clamp(floor(bound.min.x), 0, storage.m_xRes);
-                    m_endx = clamp(floor(bound.max.x)+1, 0, storage.m_xRes+1);
+                    m_endx = clamp(floor(bound.max.x)+1, 0, storage.m_xRes);
                     int starty = clamp(floor(bound.min.y), 0, storage.m_yRes);
-                    m_endy = clamp(floor(bound.max.y)+1, 0, storage.m_yRes+1);
+                    m_endy = clamp(floor(bound.max.y)+1, 0, storage.m_yRes);
 
                     m_x = m_startx;
                     m_y = starty;
