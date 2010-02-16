@@ -65,7 +65,11 @@
 # todo: add some smarts to support other rman renderers
 # eg. (prman, 3delight, pixie, air)
 #
-set(RSL_COMPILER aqsl)
+# The compiler is found by first looking in the variable RSL_COMPILER; if
+# that's empty, we attempt to fill it in by looking in the path for a program
+# called RSL_COMPILER_NAME
+#
+set(RSL_COMPILER_NAME aqsl)
 set(RSL_OUTPUT_EXTENSION slx)
 set(RSL_COMPILE_FLAGS -DAQSIS)
 
@@ -120,11 +124,9 @@ MACRO(add_rslshaders RSL_TARGET)
     set(_rslshaders_debug OFF)
 
     # find the shader compiler
-    if(IS_ABSOLUTE ${RSL_COMPILER})
-      set(CRSL ${RSL_COMPILER})
-    else(IS_ABSOLUTE ${RSL_COMPILER})
-      find_program(CRSL ${RSL_COMPILER})
-    endif(IS_ABSOLUTE ${RSL_COMPILER})
+    if(NOT RSL_COMPILER)
+      find_program(RSL_COMPILER ${RSL_COMPILER_NAME})
+    endif()
 
     # merge the user compile flags with the build systems ones
     set(RSL_COMPILE_FLAGS ${RSL_COMPILE_FLAGS} ${RSL_USER_COMPILE_FLAGS})
@@ -166,7 +168,7 @@ MACRO(add_rslshaders RSL_TARGET)
         add_custom_command(
             OUTPUT ${RSL_SHADER}
             # add RSLFLAGS, DEFINES
-            COMMAND ${CRSL} ${RSL_COMPILE_FLAGS} ${RSL_DEPEND_FLAGS}
+            COMMAND ${RSL_COMPILER} ${RSL_COMPILE_FLAGS} ${RSL_DEPEND_FLAGS}
                 -o ${RSL_SHADER} ${RSL_SOURCE}
             DEPENDS ${RSL_USER_DEPENDS}
             COMMENT "Compiling RSL shader ${RSL_SHADER}"

@@ -13,7 +13,7 @@ if(WIN32 AND MSVC_IDE)
 endif()
 
 # compile and install all shaders
-set(RSL_COMPILER ${CMAKE_BINARY_DIR}/tools/aqsl/aqsl)
+set(RSL_COMPILER aqsl)
 set(RSL_SETUP_VERBOSE OFF)
 #
 set(RSL_TARGETS)
