@@ -23,231 +23,297 @@
 #include <cassert>
 #include <cstring> // for memcpy
 
-// TODO: Figure out how to implement FvecView & DataView together in the same
-// class
+#include <boost/type_traits/remove_cv.hpp>
+#include <boost/type_traits/is_same.hpp>
+#include <boost/utility/enable_if.hpp>
 
-/// Strided view of a float array as an array of short float vectors
-class FvecView
+//------------------------------------------------------------------------------
+/// Utility metafunction to determine whether two types are the same after
+/// stripping the const & volatile qualifiers
+template<typename T1, typename T2>
+struct is_same_nocv
+    : boost::is_same<
+        typename boost::remove_cv<T1>::type,
+        typename boost::remove_cv<T2>::type
+      >
+{};
+
+
+//------------------------------------------------------------------------------
+/// View of an array as an array of different type.
+///
+/// This class should be used a base class in the Curiously Recurring Template
+/// Pattern (CRTP) mixin class.  That is, to represent some particular array
+/// view, a derived class should be created which inherits from ArrayView,
+/// templated on the derived type, for example,
+///
+/// \code
+///     class Vec3View : public ArrayView<Vec3View, float, Vec3&>
+///     {
+///         //...
+///     }
+/// \endcode
+///
+/// Template parameters:
+///
+/// DerivedT is a class derived from ArrayView which should provide the
+/// following methods.  (Note that these should be const or static.)
+///
+/// int elSize() const;
+/// ElementRefT convertToElement(StorateType*) const;
+///
+/// StorageT is the type held in the underlying storage array.
+///
+/// ElementRefT is a reference to the type we're pretending the array is
+/// made up of.  It is returned when indexing with operator[] or otherwise
+/// getting at individual elements.
+template<typename DerivedT, typename StorageT, typename ElementRefT>
+class ArrayView
 {
     private:
-        float* m_storage;
-        int m_stride;
-        int m_elSize;
+        StorageT* m_storage;  ///< ref to underlying storage
+        int m_stride;            ///< stride between elements
 
     public:
-        FvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
+        ArrayView() : m_storage(0), m_stride(0) {}
 
-        FvecView(float* storage, int elSize, int stride)
-            : m_storage(storage),
-            m_stride(stride),
-            m_elSize(elSize)
-        {}
-        FvecView(float* storage, int elSize)
-            : m_storage(storage),
-            m_stride(elSize),
-            m_elSize(elSize)
-        {}
+        ArrayView(StorageT* storage, int stride)
+            : m_storage(storage), m_stride(stride) {}
+
+        template<typename OtherDerived, typename OtherStorage, typename OtherRef>
+        ArrayView(const ArrayView<OtherDerived, OtherStorage, OtherRef>& view,
+                  typename boost::enable_if<
+                      is_same_nocv<StorageT, OtherStorage>,
+                      void*>::type = 0
+                  )
+            : m_storage(view.storage()), m_stride(view.stride()) {}
 
         /// Test whether the view points to valid data.
         /// For use in boolean contexts only.
         operator const void*() const { return m_storage; }
 
+        /// Determine whether this view represents a single element
         int uniform() const { return m_stride == 0; }
 
-        /// Element access
-        float* operator[](int i) const { return m_storage + i*m_stride; }
+        /// Get a pointer to the underlying storage
+        StorageT* storage() const { return m_storage; }
 
-        float* storage() const { return m_storage; }
+        /// Get the stride between elements of underlying storage
         int stride() const { return m_stride; }
-        int elSize() const { return m_elSize; }
+
         /// Determine whether consecutive elements are consecutive in memory.
         /// The view is "dense" when there's no space between elements.
-        bool isDense() const { return m_stride == m_elSize; }
+        bool isDense() const { return m_stride == derived().elSize(); }
 
-        FvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
-        FvecView& operator++() { m_storage += m_stride; return *this;}
+        ElementRefT operator[](int i) const { return derived().convertToElement(m_storage + i*m_stride); }
+        ElementRefT operator*() const { return derived().convertToElement(m_storage); }
+
+        DerivedT& operator+=(int i) { m_storage += i*m_stride; return derived();}
+        DerivedT& operator++() { m_storage += m_stride; return derived();}
+        DerivedT operator+(int i) const { DerivedT d = derived(); d += i; return d; }
+
+        /// Slice the view to select a regular subset of the values
+        DerivedT slice(int strideMult) const
+        {
+            DerivedT d = derived();
+            d.m_stride *= strideMult;
+            return d;
+        }
+
+        /// Get the derived view type.
+        ///
+        /// End users probably shouldn't really need to use this.
+        inline DerivedT& derived()
+        {
+            return static_cast<DerivedT&>(*this);
+        }
+        inline const DerivedT& derived() const
+        {
+            return static_cast<const DerivedT&>(*this);
+        }
 };
 
 
-/// Const version of FvecView
-class ConstFvecView
+/// Create a sliced strided view of an existing view.
+template<typename DerivedViewT, typename StorageT, typename ElementRefT>
+inline DerivedViewT slice(
+        const ArrayView<DerivedViewT, StorageT, ElementRefT>& view,
+        int strideMult)
+{
+    return view.slice(strideMult);
+}
+
+
+/// Perform a deep copy of numElements from the source to dest view
+template<typename DestViewT, typename DestStorageT, typename DestRefT,
+         typename SrcViewT, typename SrcStorageT, typename SrcRefT>
+inline
+typename boost::enable_if< is_same_nocv<DestStorageT, SrcStorageT> >::type
+copy(const ArrayView<DestViewT, DestStorageT, DestRefT>& dest,
+     const ArrayView<SrcViewT, SrcStorageT, SrcRefT>& src,
+     int numElements)
+{
+    int elSize = dest.derived().elSize();
+    assert(elSize == src.derived().elSize());
+    int elBytes = sizeof(DestStorageT)*elSize;
+    if(dest.isDense() && src.isDense())
+    {
+        // If the data is densely packed, can just memcpy it.
+        std::memcpy(dest.storage(), src.storage(), elBytes*numElements);
+    }
+    else
+    {
+        DestStorageT* d = dest.storage();
+        int destStride = dest.stride();
+        SrcStorageT* s = src.storage();
+        int srcStride = src.stride();
+        // Otherwise, we need to use a loop.
+        for(int i = 0; i < numElements; ++i, d += destStride, s += srcStride)
+            std::memcpy(d, s, elBytes);
+    }
+}
+
+
+//------------------------------------------------------------------------------
+/// View of an array as a set of shorter fixed length arrays of the same type.
+template<typename T>
+class BasicVecView : public ArrayView<BasicVecView<T>, T, T*>
 {
     private:
-        const float* m_storage;
-        int m_stride;
         int m_elSize;
 
+        typedef ArrayView<BasicVecView<T>, T, T*> BaseView;
+        friend class ArrayView<BasicVecView<T>, T, T*>;
+
+        static T* convertToElement(T* p) { return p; }
+
     public:
-        ConstFvecView() : m_storage(0), m_stride(0), m_elSize(0) {}
+        BasicVecView() : BaseView(), m_elSize(0) {}
 
-        ConstFvecView(const float* storage, int elSize, int stride)
-            : m_storage(storage),
-            m_stride(stride),
+        BasicVecView(T* storage, int elSize, int stride)
+            : BaseView(storage, stride),
             m_elSize(elSize)
         {}
-        ConstFvecView(const float* storage, int elSize)
-            : m_storage(storage),
-            m_stride(elSize),
+        BasicVecView(T* storage, int elSize)
+            : BaseView(storage, elSize),
             m_elSize(elSize)
         {}
 
-        ConstFvecView(const FvecView& view)
-            : m_storage(view.storage()),
-            m_stride(view.stride()),
+        int elSize() const { return m_elSize; }
+};
+
+
+/// Const version of BasicVecView
+template<typename T>
+class ConstBasicVecView : public ArrayView<BasicVecView<const T>, const T, const T*>
+{
+    private:
+        int m_elSize;
+
+        typedef ArrayView<BasicVecView<const T>, const T, const T*> BaseView;
+        friend class ArrayView<BasicVecView<const T>, const T, const T*>;
+
+        static const T* convertToElement(const T* p) { return p; }
+
+    public:
+        ConstBasicVecView() : BaseView(), m_elSize(0) {}
+
+        ConstBasicVecView(const T* storage, int elSize, int stride)
+            : BaseView(storage, stride),
+            m_elSize(elSize)
+        {}
+        ConstBasicVecView(const T* storage, int elSize)
+            : BaseView(storage, elSize),
+            m_elSize(elSize)
+        {}
+        ConstBasicVecView(const BasicVecView<T>& view)
+            : BaseView(view),
             m_elSize(view.elSize())
         {}
 
-        /// Test whether the view points to valid data.
-        /// For use in boolean contexts only.
-        operator const void*() const { return m_storage; }
-
-        int uniform() const { return m_stride == 0; }
-
-        /// Element access
-        const float* operator[](int i) const { return m_storage + i*m_stride; }
-
-        const float* storage() const { return m_storage; }
-        int stride() const { return m_stride; }
         int elSize() const { return m_elSize; }
-        /// Determine whether consecutive elements are consecutive in memory.
-        /// The view is "dense" when there's no space between elements.
-        bool isDense() const { return m_stride == m_elSize; }
-
-        ConstFvecView& operator+=(int i) { m_storage += i*m_stride; return *this;}
-        ConstFvecView& operator++() { m_storage += m_stride; return *this;}
 };
+
+typedef BasicVecView<float> FvecView;
+typedef ConstBasicVecView<float> ConstFvecView;
 
 
 //------------------------------------------------------------------------------
 /// View of a float array as an array of a different type.
 ///
-/// Very quick & dirty implementation.  The well-defined way to do this is to
+/// Rather dirty implementation.  The well-defined way to do this would be to
 /// implement reference versions of our classes T.
 template<typename T>
-class DataView
+class DataView : public ArrayView<DataView<T>, float, T&>
 {
     private:
-        float* m_storage;
-        int m_stride;
-        template<typename> friend class ConstDataView;
-    public:
-        /// Number of floats used for each element
+        typedef ArrayView<DataView<T>, float, T&> BaseView;
+        friend class ArrayView<DataView<T>, float, T&>;
+
+        // Number of floats used for each element
         enum { elementSize = sizeof(T)/sizeof(float) };
 
+        // The casting here is undefined behaviour, but provided T is a plain
+        // aggregate of floats, it's hard to imagine how this could lead to
+        // incorrect results in a sane implementation.  Perhaps we could have
+        // some troubles with strict aliasing in rather unusual circumstances.
+        static T& convertToElement(float* p) { return *reinterpret_cast<T*>(p); }
+
+    public:
         DataView(float* storage, int stride = elementSize)
-            : m_storage(storage),
-            m_stride(stride)
-        {}
+            : BaseView(storage, stride) {}
 
-        DataView(FvecView view)
-            : m_storage(view.storage()),
-            m_stride(view.stride())
+        DataView(const FvecView& view)
+            : BaseView(view)
         {
-            assert(view.elSize() == elementSize || !m_storage);
+            assert(view.elSize() == elementSize || !this->storage());
         }
 
-        /// Test whether the view points to valid data.
-        /// For use in boolean contexts only.
-        operator const void*() const { return m_storage; }
-
-        /// Indexing operator.
-        ///
-        /// The casting here is undefined behaviour, but provided T is a plain
-        /// aggregate of floats, it's hard to imagine how this could be
-        /// undefined behaviour in a sane implementation.  Perhaps we could
-        /// have some troubles with strict aliasing in rather unusual
-        /// circumstances.
-        T& operator[](int i) const { return *((T*)(m_storage + m_stride*i)); }
-        T& operator*() const { return *((T*)(m_storage)); }
-
-        float* storage() const { return m_storage; }
-        int stride() const { return m_stride; }
-        /// Determine whether consecutive elements are consecutive in memory.
-        /// The view is "dense" when there's no space between elements.
-        bool isDense() const { return m_stride == elementSize; }
-
-        DataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
-        DataView& operator++() { m_storage += m_stride; return *this; }
-        DataView operator+(int i) const
-        {
-            return DataView(m_storage + i*m_stride, m_stride);
-        }
+        static int elSize() { return elementSize; }
 };
 
 
+/// Const version of DataView
 template<typename T>
-class ConstDataView
+class ConstDataView : public ArrayView<ConstDataView<T>, const float, const T&>
 {
     private:
-        const float* m_storage;
-        int m_stride;
+        typedef ArrayView<ConstDataView<T>, const float, const T&> BaseView;
+        friend class ArrayView<ConstDataView<T>, const float, const T&>;
 
-    public:
-        /// Number of floats used for each element
+        // Number of floats used for each element
         enum { elementSize = sizeof(T)/sizeof(float) };
 
+        // Ugh, casting here is dodgy; see comments in DataView
+        static const T& convertToElement(const float* p) {
+            return *reinterpret_cast<const T*>(p);
+        }
+
+    public:
         ConstDataView(const float* storage, int stride = elementSize)
-            : m_storage(storage),
-            m_stride(stride)
-        {}
+            : BaseView(storage, stride) {}
 
         ConstDataView(const DataView<T>& view)
-            : m_storage(view.m_storage),
-            m_stride(view.m_stride)
-        {}
+            : BaseView(view.storage(), view.stride()) {}
 
         ConstDataView(const FvecView& view)
-            : m_storage(view.storage()),
-            m_stride(view.stride())
+            : BaseView(view)
         {
-            assert(view.elSize() == elementSize);
+            assert(view.elSize() == elementSize || !this->storage());
         }
+
         ConstDataView(const ConstFvecView& view)
-            : m_storage(view.storage()),
-            m_stride(view.stride())
+            : BaseView(view)
         {
-            assert(view.elSize() == elementSize);
+            assert(view.elSize() == elementSize || !this->storage());
         }
 
-        /// Test whether the view points to valid data.
-        /// For use in boolean contexts only.
-        operator const void*() const { return m_storage; }
-
-        const T& operator[](int i) const { return *((const T*)(m_storage + m_stride*i)); }
-        const T& operator*() const { return *((const T*)(m_storage)); }
-
-        /// Get the base storage for this view
-        const float* storage() const { return m_storage; }
-        /// Get the stride of the base storage between elements
-        int stride() const { return m_stride; }
-        /// Determine whether consecutive elements are consecutive in memory.
-        /// The view is "dense" when there's no space between elements.
-        bool isDense() const { return m_stride == elementSize; }
-
-        ConstDataView& operator+=(int i) { m_storage += i*m_stride; return *this; }
-        ConstDataView& operator++() { m_storage += m_stride; return *this; }
-
-        ConstDataView operator+(int i) const
-        {
-            return ConstDataView(m_storage + i*m_stride, m_stride);
-        }
+        static int elSize() { return elementSize; }
 };
 
 
 //------------------------------------------------------------------------------
 // Utility functions for dealing with data views.
-
-/// Create a strided view of an existing view.
-template<typename T>
-inline DataView<T> slice(DataView<T> d, int strideMult)
-{
-    return DataView<T>(d.storage(), d.stride()*strideMult);
-}
-template<typename T>
-inline ConstDataView<T> slice(ConstDataView<T> d, int strideMult)
-{
-    return ConstDataView<T>(d.storage(), d.stride()*strideMult);
-}
 
 /// Compute the first difference on a grid; general strided version
 ///
@@ -268,7 +334,7 @@ inline ConstDataView<T> slice(ConstDataView<T> d, int strideMult)
 ///
 /// For computing derivatives on a 2D grid, the data should simply be
 template<typename T>
-inline T diff(ConstDataView<T> data, int n, int length,
+inline T diff(const ConstDataView<T>& data, int n, int length,
               bool useCentred = true)
 {
     if(useCentred && length > 2)
@@ -303,53 +369,10 @@ inline T diff(ConstDataView<T> data, int n, int length,
     }
 }
 template<typename T>
-inline T diff(DataView<T> data, int n, int length, bool useCentred = true)
+inline T diff(const DataView<T>& data, int n, int length, bool useCentred = true)
 {
     return diff(ConstDataView<T>(data), n, length, useCentred);
 }
 
-
-/// Copy one float vec view into another.  Arguments order is like memcpy.
-inline void copy(FvecView dest, ConstFvecView src, int nelems)
-{
-    assert(dest.elSize() == src.elSize());
-    if(dest.isDense() && src.isDense())
-    {
-        // If the data is densely packed, can just memcpy it.
-        std::memcpy(dest.storage(), src.storage(),
-                    sizeof(float)*dest.elSize()*nelems);
-    }
-    else
-    {
-        // Otherwise, we need to use a loop.
-        for(int i = 0; i < nelems; ++i)
-            std::memcpy(dest[i], src[i], sizeof(float)*dest.elSize());
-    }
-}
-
-
-/// Copy one data view into another.  Arguments order is like memcpy.
-template<typename T>
-inline void copy(DataView<T> dest, ConstDataView<T> src, int nelems)
-{
-    if(dest.isDense() && src.isDense())
-    {
-        // If the data is densely packed, can just memcpy it.
-        std::memcpy(dest.storage(), src.storage(),
-                    sizeof(float)*dest.elementSize*nelems);
-    }
-    else
-    {
-        // Otherwise, we need to use a loop.
-        for(int i = 0; i < nelems; ++i)
-            dest[i] = src[i];
-    }
-}
-
-template<typename T>
-inline void copy(DataView<T> dest, DataView<T> src, int nelems)
-{
-    copy(dest, ConstDataView<T>(src), nelems);
-}
 
 #endif // ARRAYVIEW_H_INCLUDED

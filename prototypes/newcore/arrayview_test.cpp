@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(FvecView_copy_test)
 BOOST_AUTO_TEST_CASE(DataView_copy_test)
 {
     const int nvals = 4;
-    const int v3Size = DataView<Vec3>::elementSize;
+    const int v3Size = DataView<Vec3>::elSize();
     float aData[v3Size*nvals];
     float bData[v3Size*nvals];
 
