@@ -41,6 +41,25 @@ class BoxFilter : public Filter
 };
 
 
+class DiscFilter : public Filter
+{
+    public:
+        DiscFilter(const Vec2& width) : Filter(width) {}
+
+        virtual float operator()(float x, float y) const
+        {
+            x /= width().x;
+            y /= width().y;
+            float r2 = x*x + y*y;
+            if(r2 <= 1)
+                return 1;
+            return 0;
+        }
+
+        virtual bool isSeparable() const { return false; }
+};
+
+
 class GaussianFilter : public Filter
 {
     public:
@@ -86,6 +105,11 @@ FilterPtr makeBoxFilter(const Vec2& width)
 {
     assert(width.x >= 1 && width.y >= 1);
     return FilterPtr(new BoxFilter(width));
+}
+FilterPtr makeDiscFilter(const Vec2& width)
+{
+    assert(width.x >= 1 && width.y >= 1);
+    return FilterPtr(new DiscFilter(width));
 }
 FilterPtr makeGaussianFilter(const Vec2& width)
 {

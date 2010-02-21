@@ -63,6 +63,7 @@ typedef boost::shared_ptr<Filter> FilterPtr;
 
 
 FilterPtr makeBoxFilter(const Vec2& width);
+FilterPtr makeDiscFilter(const Vec2& width);
 FilterPtr makeGaussianFilter(const Vec2& width);
 FilterPtr makeSincFilter(const Vec2& width);
 

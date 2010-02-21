@@ -51,10 +51,21 @@ class SampleStorage
     private:
         static void fillDefault(std::vector<float>& defaultFrag,
                                 const OutvarSet& outVars);
+
+        const float* filterNonSeparable(int row) const;
+        const float* filterSeparable(int row) const;
+
         static void filterSize(float radius, int sampsPerPix, int& size,
                                int& offset);
         static void cacheFilter(std::vector<float>& filter, const Options& opts,
-                                Imath::V2i& offset, Imath::V2i& disWidth);
+                                bool& useSeparable, Imath::V2i& offset,
+                                Imath::V2i& filtWidth);
+        static void cacheFilterSeparable(std::vector<float>& filter,
+                                         const Options& opts,
+                                         Imath::V2i& filtWidth);
+        static void cacheFilterNonSeparable(std::vector<float>& filter,
+                                            const Options& opts,
+                                            Imath::V2i& filtWidth);
 
         // Stuff describing size of sample area
         const Options& m_opts; ///< options structure
@@ -74,10 +85,12 @@ class SampleStorage
 
         // Cached filter info
         bool m_doFilter;         ///< perform filtering ?
+        bool m_useSeparable;     ///< use separable filtering optimization ?
         Imath::V2i m_filtExpand; ///< num samples to expand by for filter.
-        Imath::V2i m_disWidth;   ///< discrete filter width
+        Imath::V2i m_filtWidth;  ///< width of filter _in subpixels_
         std::vector<float> m_filter;
 };
+
 
 /// Iterator over a rectangular region of samples.
 ///
