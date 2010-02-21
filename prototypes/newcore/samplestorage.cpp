@@ -19,6 +19,7 @@
 
 #include "samplestorage.h"
 #include "arrayview.h"
+#include "util.h"
 
 
 SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
@@ -116,3 +117,90 @@ Imath::V2i SampleStorage::outputSize()
     else
         return Imath::V2i(m_xSampRes, m_ySampRes);
 }
+
+
+//------------------------------------------------------------------------------
+// Private SampleStorage methods
+
+/// Fill an array with the default no-hit fragment sample values
+void SampleStorage::fillDefault(std::vector<float>& defaultFrag,
+                                const OutvarSet& outVars)
+{
+    int nchans = 0;
+    for(int i = 0, iend = outVars.size(); i < iend; ++i)
+        nchans += outVars[i].scalarSize();
+    // Set up default values for samples.
+    defaultFrag.assign(nchans, 0.0f);
+    // Fill in default depth if relevant
+    int zIdx = outVars.find(StdOutInd::z);
+    if(zIdx != OutvarSet::npos)
+    {
+        int zOffset = outVars[zIdx].offset;
+        defaultFrag[zOffset] = FLT_MAX;
+    }
+}
+
+/// Compute the discrete filter size in sample widths
+///
+/// The floating point filter radius implies a discrete filter size
+void SampleStorage::filterSize(float radius, int sampsPerPix, int& size,
+                               int& offset)
+{
+    // Separate cases for even & odd numbers of samples per pixel.
+    if(sampsPerPix%2 == 0)
+    {
+        int discreteRadius = floor(radius*sampsPerPix + 0.5);
+        size = 2*discreteRadius;
+        offset = discreteRadius - sampsPerPix/2;
+    }
+    else
+    {
+        int discreteRadius = floor(radius*sampsPerPix);
+        size = 2*discreteRadius + 1;
+        offset = discreteRadius - sampsPerPix/2;
+    }
+}
+
+// Cache filter coefficients for efficiency
+//
+// \param offset - Offset between top left sample in pixel & top-left
+//                 sample in the filter region.
+// \param disWidth - Discrete filter width in number of supersamples
+void SampleStorage::cacheFilter(std::vector<float>& filter, const Options& opts,
+                                Imath::V2i& offset, Imath::V2i& disWidth)
+{
+    filterSize(opts.pixelFilter->width().x/2, opts.superSamp.x,
+               disWidth.x, offset.x);
+    filterSize(opts.pixelFilter->width().y/2, opts.superSamp.x,
+               disWidth.y, offset.y);
+    // Compute filter
+    filter.resize(disWidth.x*disWidth.y);
+    float* f = &filter[0];
+    float totWeight = 0;
+    for(int j = 0; j < disWidth.y; ++j)
+    {
+        float y = (j-(disWidth.y-1)/2.0f)/opts.superSamp.y;
+        for(int i = 0; i < disWidth.x; ++i, ++f)
+        {
+            float x = (i-(disWidth.x-1)/2.0f)/opts.superSamp.x;
+            float w = (*opts.pixelFilter)(x, y);
+            *f = w;
+            totWeight += w;
+        }
+    }
+    // Normalize total weight to 1.
+    float renorm = 1/totWeight;
+    for(int i = 0, iend = disWidth.y*disWidth.x; i < iend; ++i)
+        filter[i] *= renorm;
+#if 0
+    // Debug: Dump filter coefficients
+    f = &filter[0];
+    for(int j = 0; j < disWidth.y; ++j)
+    {
+        for(int i = 0; i < disWidth.x; ++i, ++f)
+            std::cout << *f << ",  ";
+        std::cout << "\n";
+    }
+#endif
+}
+
