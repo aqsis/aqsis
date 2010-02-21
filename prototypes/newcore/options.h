@@ -23,6 +23,8 @@
 #include <cfloat>
 #include <OpenEXR/ImathVec.h>
 
+#include "filters.h"
+
 /// Renderer options.
 struct Options
 {
@@ -35,8 +37,8 @@ struct Options
     // Output options
     int xRes;         ///< image x-resolution
     int yRes;         ///< image y-resolution
-    Imath::V2i superSamp;   ///< supersampling resolution
-    Imath::V2f filterWidth; ///< filter width
+    Imath::V2i superSamp;  ///< supersampling resolution
+    FilterPtr pixelFilter; ///< pixel filter functor
     bool doFilter;    ///< If false, turn off filtering & return raw samples
 
     Options()
@@ -47,7 +49,7 @@ struct Options
         xRes(640),
         yRes(480),
         superSamp(2,2),
-        filterWidth(2,2),
+        pixelFilter(makeGaussianFilter(Vec2(2,2))),
         doFilter(true)
     { }
 };

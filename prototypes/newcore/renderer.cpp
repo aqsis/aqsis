@@ -324,8 +324,6 @@ void Renderer::sanitizeOptions(Options& opts)
     CLAMP_OPT_BELOW(yRes, 1);
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
-    CLAMP_OPT_BELOW(filterWidth.x, 1.0f);
-    CLAMP_OPT_BELOW(filterWidth.y, 1.0f);
 }
 
 // Save image to a TIFF file.

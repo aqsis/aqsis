@@ -24,20 +24,22 @@ if(UNIX)
 endif()
 
 set(srcs
+    filters.cpp
     main.cpp
-    renderer.cpp
-    ustring/ustring.cpp
     primvar.cpp
+    renderer.cpp
     samplestorage.cpp
-    shader.cpp
-    varspec.cpp
     scenes/tenpatch.cpp
     scenes/default.cpp
+    shader.cpp
+    ustring/ustring.cpp
+    varspec.cpp
 )
 
 set(hdrs
     arrayview.h
     attributes.h
+    filters.h
     geometry.h
     grid.h
     gridstorage.h

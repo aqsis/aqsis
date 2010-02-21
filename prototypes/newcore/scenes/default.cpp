@@ -126,7 +126,7 @@ void renderDefaultScene()
     opts.gridSize = 8;
     opts.clipNear = 0.1;
     opts.superSamp = Imath::V2i(2,2);
-    opts.filterWidth = Vec2(2,2);
+    opts.pixelFilter = makeSincFilter(Vec2(3.0,3.0));
 
     Attributes attrs;
     attrs.shadingRate = 1;
@@ -153,3 +153,4 @@ void renderDefaultScene()
 
     r.render();
 }
+

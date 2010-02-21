@@ -48,7 +48,7 @@ void renderTenPatchScene()
     opts.gridSize = 8;
     opts.clipNear = 0.1;
     opts.superSamp = Imath::V2i(1,1);
-    opts.filterWidth = Vec2(1,1);
+    opts.pixelFilter = makeBoxFilter(Vec2(1,1));
 
     Attributes attrs;
     attrs.shadingRate = 1;

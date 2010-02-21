@@ -110,15 +110,7 @@ class SampleStorage
             }
         }
 
-        static float pixelFilter(float x, float y, float xwidth, float ywidth)
-        {
-            // Use a gaussian filter for now...
-            x /= xwidth;
-            y /= ywidth;
-            return std::exp(-8*(x*x + y*y));
-        }
-
-        // Cache filter coefficients
+        // Cache filter coefficients for efficiency
         //
         // \param offset - Offset between top left sample in pixel & top-left
         //                 sample in the filter region.
@@ -126,8 +118,10 @@ class SampleStorage
         static void cacheFilter(std::vector<float>& filter, const Options& opts,
                                 Imath::V2i& offset, Imath::V2i& disWidth)
         {
-            filterSize(opts.filterWidth.x/2, opts.superSamp.x, disWidth.x, offset.x);
-            filterSize(opts.filterWidth.y/2, opts.superSamp.x, disWidth.y, offset.y);
+            filterSize(opts.pixelFilter->width().x/2, opts.superSamp.x,
+                       disWidth.x, offset.x);
+            filterSize(opts.pixelFilter->width().y/2, opts.superSamp.x,
+                       disWidth.y, offset.y);
             // Compute filter
             filter.resize(disWidth.x*disWidth.y);
             float* f = &filter[0];
@@ -138,8 +132,7 @@ class SampleStorage
                 for(int i = 0; i < disWidth.x; ++i, ++f)
                 {
                     float x = (i-(disWidth.x-1)/2.0f)/opts.superSamp.x;
-                    float w = pixelFilter(x, y, opts.filterWidth.x,
-                                                opts.filterWidth.y);
+                    float w = (*opts.pixelFilter)(x, y);
                     *f = w;
                     totWeight += w;
                 }
@@ -148,6 +141,16 @@ class SampleStorage
             float renorm = 1/totWeight;
             for(int i = 0, iend = disWidth.y*disWidth.x; i < iend; ++i)
                 filter[i] *= renorm;
+#if 0
+            // Debug: Dump filter coefficients
+            f = &filter[0];
+            for(int j = 0; j < disWidth.y; ++j)
+            {
+                for(int i = 0; i < disWidth.x; ++i, ++f)
+                    std::cout << *f << ",  ";
+                std::cout << "\n";
+            }
+#endif
         }
 };
 
