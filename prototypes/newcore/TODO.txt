@@ -2,13 +2,10 @@ Some things which should be done:
 ---------------------------------
 
     * Sampling
-        - Supersampling and output image filtering
         - Tile-based allocation for sample points
         - Motion Blur sampling
         - Depth of field sampling
         - Transparency - deep fragment buffer
-    * Filtering
-        - Image output filtering
     * Grid crack solution via stitching
     * Bucket rendering
     * Occlusion culling
@@ -37,3 +34,6 @@ Done:
     * Handle general primvars
     * Handle AOVs
     * Implement a basic shader interface
+    * Sampling
+        - Supersampling
+        - Image output filtering

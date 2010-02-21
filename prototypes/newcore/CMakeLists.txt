@@ -28,6 +28,7 @@ set(srcs
     renderer.cpp
     ustring/ustring.cpp
     primvar.cpp
+    samplestorage.cpp
     shader.cpp
     varspec.cpp
     scenes/tenpatch.cpp
@@ -47,6 +48,7 @@ set(hdrs
     primvar.h
     renderer.h
     sample.h
+    samplestorage.h
     scenes/scenes.h
     shader.h
     simple.h

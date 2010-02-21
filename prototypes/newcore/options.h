@@ -21,25 +21,34 @@
 #define OPTIONS_H_INCLUDED
 
 #include <cfloat>
+#include <OpenEXR/ImathVec.h>
 
 /// Renderer options.
 struct Options
 {
+    // Reyes options
     int maxSplits;   ///< maximum number of splits before discarding a surface
-    int xRes;        ///< image x-resolution
-    int yRes;        ///< image y-resolution
-    //Imath::V2i nsumSamples; ///< number of subsamples
     int gridSize;    ///< Desired grid side length.
     float clipNear;  ///< Near clipping plane (cam coords)
     float clipFar;   ///< Far clipping plane (cam coords)
 
+    // Output options
+    int xRes;         ///< image x-resolution
+    int yRes;         ///< image y-resolution
+    Imath::V2i superSamp;   ///< supersampling resolution
+    Imath::V2f filterWidth; ///< filter width
+    bool doFilter;    ///< If false, turn off filtering & return raw samples
+
     Options()
         : maxSplits(20),
-        xRes(640),
-        yRes(480),
         gridSize(16),
         clipNear(FLT_EPSILON),
-        clipFar(FLT_MAX)
+        clipFar(FLT_MAX),
+        xRes(640),
+        yRes(480),
+        superSamp(2,2),
+        filterWidth(2,2),
+        doFilter(true)
     { }
 };
 

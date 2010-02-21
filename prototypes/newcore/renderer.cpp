@@ -27,6 +27,7 @@
 #include "gridstorage.h"
 #include "microquadsampler.h"
 #include "sample.h"
+#include "samplestorage.h"
 #include "simple.h"
 
 
@@ -242,160 +243,10 @@ class TessellationContextImpl : public TessellationContext
 
 
 //------------------------------------------------------------------------------
-// Storage for samples positions and output fragments
-class SampleStorage
-{
-    private:
-        int m_fragRowStride; ///< length of a row of samples.
-        int m_xRes;
-        int m_yRes;
-
-        std::vector<Sample> m_samples;        ///< sample positions
-
-        std::vector<float> m_defaultFragment; ///< Default fragment channels
-        std::vector<float> m_fragments;       ///< array of fragments
-
-        /// Fill an array with the default no-hit fragment sample values
-        static void fillDefault(std::vector<float>& defaultFrag,
-                                const OutvarSet& outVars)
-        {
-            int nchans = 0;
-            for(int i = 0, iend = outVars.size(); i < iend; ++i)
-                nchans += outVars[i].scalarSize();
-            // Set up default values for samples.
-            defaultFrag.assign(nchans, 0.0f);
-            // Fill in default depth if relevant
-            int zIdx = outVars.find(StdOutInd::z);
-            if(zIdx != OutvarSet::npos)
-            {
-                int zOffset = outVars[zIdx].offset;
-                defaultFrag[zOffset] = FLT_MAX;
-            }
-        }
-
-    public:
-        SampleStorage(const OutvarSet& outVars, const Options& opts)
-            : m_fragRowStride(0),
-            m_xRes(opts.xRes),
-            m_yRes(opts.yRes),
-            m_samples(),
-            m_defaultFragment(),
-            m_fragments()
-        {
-            int npixels = opts.xRes*opts.yRes;
-            // Initialize sample array
-            m_samples.resize(npixels);
-            for(int j = 0; j < opts.yRes; ++j)
-            {
-                for(int i = 0; i < opts.xRes; ++i)
-                    m_samples[j*opts.xRes + i] = Sample(Vec2(i+0.5f, j+0.5f));
-            }
-            // Initialize default fragment
-            fillDefault(m_defaultFragment, outVars);
-            int fragSize = m_defaultFragment.size();
-            m_fragRowStride = opts.xRes*fragSize;
-            // Initialize fragment array
-            m_fragments.resize(fragSize*npixels);
-            const float* defFrag = &m_defaultFragment[0];
-            for(int i = 0; i < npixels; ++i)
-            {
-                std::memcpy(&m_fragments[fragSize*i], defFrag,
-                            fragSize*sizeof(float));
-            }
-        }
-
-        /// Iterator over a rectangular region of samples.
-        ///
-        /// Note that the implementation here is quite performance critical,
-        /// since it's inside one of the inner sampling loops.
-        ///
-        class Iterator
-        {
-            private:
-                int m_startx;
-                int m_endx;
-                int m_endy;
-                int m_x;
-                int m_y;
-
-                int m_rowStride;   ///< stride between end of one row & beginning of next.
-                int m_fragSize;    ///< number of floats in a fragment
-                Sample* m_sample;  ///< current sample data
-                float* m_fragment; ///< current fragment data
-
-            public:
-                Iterator(const Box& bound, SampleStorage& storage)
-                {
-                    // Bounding box for relevant samples, clamped to image
-                    // extent.
-                    m_startx = clamp(floor(bound.min.x), 0, storage.m_xRes);
-                    m_endx = clamp(floor(bound.max.x)+1, 0, storage.m_xRes);
-                    int starty = clamp(floor(bound.min.y), 0, storage.m_yRes);
-                    m_endy = clamp(floor(bound.max.y)+1, 0, storage.m_yRes);
-
-                    m_x = m_startx;
-                    m_y = starty;
-                    // ensure !valid() if bound is empty in x-direction
-                    if(m_startx >= m_endx)
-                        m_y = m_endy;
-
-                    if(valid())
-                    {
-                        m_rowStride = storage.m_xRes - (m_endx - m_startx);
-                        m_fragSize = storage.fragmentSize();
-
-                        int idx = m_y*storage.m_xRes + m_x;
-                        m_sample = &storage.m_samples[idx];
-                        m_fragment = &storage.m_fragments[m_fragSize*idx];
-                    }
-                }
-
-                /// Advance to next sample
-                Iterator& operator++()
-                {
-                    ++m_x;
-                    ++m_sample;
-                    m_fragment += m_fragSize;
-                    if(m_x == m_endx)
-                    {
-                        // Advance to next row.
-                        m_x = m_startx;
-                        ++m_y;
-                        m_sample += m_rowStride;
-                        m_fragment += m_rowStride*m_fragSize;
-                    }
-                    return *this;
-                }
-
-                /// Determine whether current sample is in the bound
-                bool valid() const { return m_y < m_endy; }
-
-                /// Get current sample data
-                Sample& sample() const { return *m_sample; }
-                /// Get current fragment storage
-                float* fragment() const { return m_fragment; }
-        };
-
-        Iterator begin(const Box& bound)
-        {
-            return Iterator(bound, *this);
-        }
-
-        /// Get a scanline of the output image.
-        const float* outputScanline(int line) const
-        {
-            return &m_fragments[0] + line*m_fragRowStride;
-        }
-
-        int fragmentSize() const { return m_defaultFragment.size(); }
-        const float* defaultFragment() const { return &m_defaultFragment[0]; }
-};
-
-
-//------------------------------------------------------------------------------
 // Renderer implementation, utility stuff.
 
-static void writeHeader(TIFF* tif, Options& opts, int nchans, bool useFloat)
+static void writeHeader(TIFF* tif, const Imath::V2i& imageSize,
+                        int nchans, bool useFloat)
 {
     uint16 bitsPerSample = 8;
     uint16 photometric = PHOTOMETRIC_RGB;
@@ -408,8 +259,8 @@ static void writeHeader(TIFF* tif, Options& opts, int nchans, bool useFloat)
     if(nchans == 1)
         photometric = PHOTOMETRIC_MINISBLACK;
     // Write TIFF header
-    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, uint32(opts.xRes));
-    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, uint32(opts.yRes));
+    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, uint32(imageSize.x));
+    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, uint32(imageSize.y));
     TIFFSetField(tif, TIFFTAG_ORIENTATION, uint16(ORIENTATION_TOPLEFT));
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, uint16(PLANARCONFIG_CONTIG));
     TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, uint16(RESUNIT_NONE));
@@ -448,10 +299,40 @@ static void strided_memcpy(void* dest, const void* src, size_t nElems,
     }
 }
 
+namespace {
+template<typename T>
+void clampOptBelow(T& val, const char* name, const T& minVal)
+{
+    if(val < minVal)
+    {
+        std::cerr << "Warning: Option " << name << " = " << val
+                  << " is too small.  Clamping to " << minVal << "\n";
+        val = minVal;
+    }
+}
+} // anon namespace
+
+void Renderer::sanitizeOptions(Options& opts)
+{
+#define CLAMP_OPT_BELOW(optname, minVal) \
+    clampOptBelow(opts.optname, #optname, minVal)
+    CLAMP_OPT_BELOW(maxSplits, 0);
+    CLAMP_OPT_BELOW(gridSize, 1);
+    CLAMP_OPT_BELOW(clipNear, FLT_EPSILON);
+    CLAMP_OPT_BELOW(clipFar, opts.clipNear);
+    CLAMP_OPT_BELOW(xRes, 1);
+    CLAMP_OPT_BELOW(yRes, 1);
+    CLAMP_OPT_BELOW(superSamp.x, 1);
+    CLAMP_OPT_BELOW(superSamp.y, 1);
+    CLAMP_OPT_BELOW(filterWidth.x, 1.0f);
+    CLAMP_OPT_BELOW(filterWidth.y, 1.0f);
+}
+
 // Save image to a TIFF file.
 void Renderer::saveImages(const std::string& baseFileName)
 {
     int pixStride = m_sampStorage->fragmentSize();
+    Imath::V2i imageSize = m_sampStorage->outputSize();
     for(int i = 0, nFiles = m_outVars.size(); i < nFiles; ++i)
     {
         int nSamps = m_outVars[i].scalarSize();
@@ -470,22 +351,22 @@ void Renderer::saveImages(const std::string& baseFileName)
 
         // Don't quatize if we've got depth data.
         bool doQuantize = m_outVars[i] != Stdvar::z;
-        writeHeader(tif, m_opts, nSamps, !doQuantize);
+        writeHeader(tif, imageSize, nSamps, !doQuantize);
 
         // Write image data
-        int rowSize = nSamps*m_opts.xRes*(doQuantize ? 1 : sizeof(float));
+        int rowSize = nSamps*imageSize.x*(doQuantize ? 1 : sizeof(float));
         boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
-        for(int line = 0; line < m_opts.yRes; ++line)
+        for(int line = 0; line < imageSize.y; ++line)
         {
             const float* src = m_sampStorage->outputScanline(line)
                                + m_outVars[i].offset;
             if(doQuantize)
             {
-                quantize(src, m_opts.xRes, nSamps, pixStride, lineBuf.get());
+                quantize(src, imageSize.x, nSamps, pixStride, lineBuf.get());
             }
             else
             {
-                strided_memcpy(lineBuf.get(), src, m_opts.xRes,
+                strided_memcpy(lineBuf.get(), src, imageSize.x,
                                nSamps*sizeof(float), pixStride*sizeof(float));
             }
             TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
@@ -499,12 +380,6 @@ void Renderer::saveImages(const std::string& baseFileName)
 
 //------------------------------------------------------------------------------
 // Guts of the renderer
-
-/// Initialize the sample and image arrays.
-void Renderer::initSamples()
-{
-}
-
 
 /// Push geometry into the render queue
 void Renderer::push(const boost::shared_ptr<Geometry>& geom,
@@ -570,6 +445,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_sampStorage(),
     m_camToRas()
 {
+    sanitizeOptions(m_opts);
     // Set up output variables.  Default is to use Cs.
     std::vector<OutvarSpec> outVarsInit;
     if(outVars.size() == 0)
@@ -630,7 +506,6 @@ void Renderer::render()
     // Use the same tessellation context for all split/dice events
     TessellationContextImpl tessContext(*this);
 
-    initSamples();
     while(!m_surfaces->empty())
     {
         SurfaceHolder s = m_surfaces->top();

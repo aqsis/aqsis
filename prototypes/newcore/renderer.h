@@ -113,9 +113,10 @@ class Renderer
         boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
         Mat4 m_camToRas;               ///< Camera -> raster transformation
 
+        static void sanitizeOptions(Options& opts);
+
         void saveImages(const std::string& baseFileName);
 
-        void initSamples();
         void push(const boost::shared_ptr<Geometry>& geom,
                   const SurfaceHolder& parentSurface);
         void push(const boost::shared_ptr<Grid>& grid,

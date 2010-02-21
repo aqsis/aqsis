@@ -110,6 +110,7 @@ std::ostream& operator<<(std::ostream& out, float4 f4)
 {
     out << "(" << f4[0] << " " << f4[1] << " "
                << f4[2] << " " << f4[3] << ")";
+    return out;
 }
 
 #endif // FLOAT4_H_INCLUDED

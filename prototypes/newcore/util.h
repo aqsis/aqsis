@@ -162,6 +162,16 @@ inline int floor(T x)
         return ix - (x != ix);
 }
 
+template<typename T>
+inline int ceil(T x)
+{
+    int ix = static_cast<int>(x);
+    if(x <= 0)
+        return ix;
+    else
+        return ix + (x != ix);
+}
+
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
 
@@ -232,6 +242,12 @@ inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
     float invW = 1/w;
 
     return Vec3(x*invW, y*invW, v.z);
+}
+
+template<typename T>
+inline Imath::V2i floor(const Imath::Vec2<T>& v)
+{
+    return Imath::V2i(floor(v.x), floor(v.y));
 }
 
 #define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))
