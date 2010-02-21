@@ -27,6 +27,8 @@ class GridStorageBuilder;
 class Geometry;
 class Options;
 class Attributes;
+class TessControl;
+
 
 /// Tessellation context for geometric split/dice
 ///
@@ -41,6 +43,10 @@ class Attributes;
 class TessellationContext
 {
     public:
+        /// Invoke the tessellator object with the current geometry being
+        /// processed as the argument.
+        virtual void invokeTessellator(TessControl& tessControl) = 0;
+
         /// Push some geometry into the render pipeline.
         /// The results from splitting operations go here.
         virtual void push(const boost::shared_ptr<Geometry>& geom) = 0;
@@ -74,21 +80,91 @@ class Geometry
         /// This will only be called once by the renderer for each piece of
         /// geometry - there's no need to cache the results internally or
         /// anything.
+        ///
         virtual Box bound() const = 0;
 
-        /// Split/dice geometry & push it back at the tessellation context
+        /// Create tessellation control object "split/dice decision"
         ///
-        /// This function is an abstraction around the "split" and "dice"
-        /// parts of the reyes pipeline.  If the geometry is "small enough" it
-        /// should be diced (tesselated) into grids of micropolygons.  If not,
-        /// it should be split into smaller pieces and pushed back into the
-        /// queue.
-        virtual void splitdice(const Mat4& proj, TessellationContext& tessCtx) const = 0;
+        /// In reyes language, this function determines whether the surface
+        /// should be split or diced, and pushes a decision object to the
+        /// tessellation context via the invokeTessellator() function.
+        ///
+        /// \param trans - Transform into "dice decision coordinates".  The
+        ///                geometry should transform vertices into this space
+        ///                to determine how large the object is.  The geometry
+        ///                should *not* assume this is a projection which
+        ///                removes the z-coordinate.  Instead, it should
+        ///                measure the size of the resulting object in 3D
+        ///                space.
+        ///
+        virtual void tessellate(const Mat4& trans,
+                                TessellationContext& tessCtx) const = 0;
 
-        // Transform the surface into a new coordinate system.
+        /// Transform the surface into a new coordinate system.
+        ///
+        /// TODO: Remove this.
         virtual void transform(const Mat4& trans) = 0;
 
         virtual ~Geometry() {}
+};
+
+
+/// Control geometric tessellation (eg, know whether to split or dice)
+///
+/// Each Geometry class should have an associated TessControl class which can
+/// hold the tessellation decision determined by Geometry::tessellate().
+/// Normally the "tessellation decision" will be a split/dice decision, along
+/// with associated split direction or dice resolution.
+class TessControl
+{
+    public:
+        /// Tessellate the geometry & push the results back to the context.
+        virtual void tessellate(Geometry& geom,
+                                TessellationContext& tessContext) const = 0;
+
+        virtual ~TessControl() {};
+};
+
+
+//------------------------------------------------------------------------------
+// Tessellator control objects for the usual reyes-style split/dice
+// tessellation of 2D surfaces:
+
+/// Tessellator control for dicing 2D surfaces.
+template<typename GeomT>
+class SurfaceDicer : public TessControl
+{
+    private:
+        int m_nu;
+        int m_nv;
+    public:
+        SurfaceDicer(int nu, int nv) : m_nu(nu), m_nv(nv) {}
+
+        virtual void tessellate(Geometry& geom,
+                                TessellationContext& tessContext) const
+        {
+            GeomT& g = static_cast<GeomT&>(geom);
+            g.dice(m_nu, m_nv, tessContext);
+        }
+};
+
+
+/// Tessellator control for splitting 2D surfaces.
+template<typename GeomT>
+class SurfaceSplitter : public TessControl
+{
+    private:
+        bool m_splitDirectionU;
+    public:
+        SurfaceSplitter(bool splitDirectionU)
+            : m_splitDirectionU(splitDirectionU) {}
+
+        virtual void tessellate(Geometry& geom,
+                                TessellationContext& tessContext) const
+        {
+            GeomT& g = static_cast<GeomT&>(geom);
+            g.split(m_splitDirectionU, tessContext);
+        }
 };
 
 

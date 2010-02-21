@@ -94,13 +94,9 @@ class TessellationContextImpl : public TessellationContext
             m_parentSurface = &parent;
         }
 
-        virtual const Options& options()
+        virtual void invokeTessellator(TessControl& tessControl)
         {
-            return m_renderer.m_opts;
-        }
-        virtual const Attributes& attributes()
-        {
-            return *(m_parentSurface->attrs);
+            tessControl.tessellate(*(m_parentSurface->geom), *this);
         }
 
         virtual void push(const boost::shared_ptr<Geometry>& geom)
@@ -141,6 +137,15 @@ class TessellationContextImpl : public TessellationContext
             }
             // Push the grid into the render pipeline
             m_renderer.push(grid, *m_parentSurface);
+        }
+
+        virtual const Options& options()
+        {
+            return m_renderer.m_opts;
+        }
+        virtual const Attributes& attributes()
+        {
+            return *(m_parentSurface->attrs);
         }
 
         virtual GridStorageBuilder& gridStorageBuilder()
@@ -509,7 +514,7 @@ void Renderer::render()
         SurfaceHolder s = m_surfaces->top();
         m_surfaces->pop();
         tessContext.setParent(s);
-        s.geom->splitdice(splitTrans, tessContext);
+        s.geom->tessellate(splitTrans, tessContext);
     }
     saveImages("test");
 }

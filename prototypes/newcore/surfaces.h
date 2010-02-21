@@ -39,7 +39,10 @@ class Patch : public Geometry
         const float m_uMin, m_uMax;
         const float m_vMin, m_vMax;
 
-        void dice(TessellationContext& tessCtx, int nu, int nv) const
+        friend class SurfaceSplitter<Patch>;
+        friend class SurfaceDicer<Patch>;
+
+        void dice(int nu, int nv, TessellationContext& tessCtx) const
         {
             GridStorageBuilder& builder = tessCtx.gridStorageBuilder();
             // Add all the primvars to the grid
@@ -100,6 +103,35 @@ class Patch : public Geometry
             tessCtx.push(grid);
         }
 
+        void split(bool splitInU, TessellationContext& tessCtx)
+        {
+            // Split
+            if(splitInU)
+            {
+                // split in the middle of the a-b and c-d sides.
+                // a---b
+                // | | |
+                // c---d
+                float uMid = 0.5*(m_uMin + m_uMax);
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new Patch(m_vars, m_uMin, uMid, m_vMin, m_vMax)));
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new Patch(m_vars, uMid, m_uMax, m_vMin, m_vMax)));
+            }
+            else
+            {
+                // split in the middle of the a-c and b-d sides.
+                // a---b
+                // |---|
+                // c---d
+                float vMid = 0.5*(m_vMin + m_vMax);
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new Patch(m_vars, m_uMin, m_uMax, m_vMin, vMid)));
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new Patch(m_vars, m_uMin, m_uMax, vMid, m_vMax)));
+            }
+        }
+
         void getCorners(Vec3& a, Vec3& b, Vec3& c, Vec3& d) const
         {
             ConstDataView<Vec3> P = m_vars->P();
@@ -123,8 +155,8 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
-        virtual void splitdice(const Mat4& splitTrans,
-                               TessellationContext& tessCtx) const
+        virtual void tessellate(const Mat4& splitTrans,
+                                TessellationContext& tessCtx) const
         {
             Vec3 a,b,c,d;
             getCorners(a,b,c,d);
@@ -156,38 +188,16 @@ class Patch : public Geometry
                 // dice the surface.
                 int nu = 1 + floor(lu/std::sqrt(attrs.shadingRate));
                 int nv = 1 + floor(lv/std::sqrt(attrs.shadingRate));
-                dice(tessCtx, nu, nv);
+                SurfaceDicer<Patch> dicer(nu, nv);
+                tessCtx.invokeTessellator(dicer);
             }
             else
             {
                 // Otherwise, split the surface.  The splitting direction is
                 // the shortest edge.
-
-                // Split
-                if(lu > lv)
-                {
-                    // split in the middle of the a-b and c-d sides.
-                    // a---b
-                    // | | |
-                    // c---d
-                    float uMid = 0.5*(m_uMin + m_uMax);
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_vars, m_uMin, uMid, m_vMin, m_vMax)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_vars, uMid, m_uMax, m_vMin, m_vMax)));
-                }
-                else
-                {
-                    // split in the middle of the a-c and b-d sides.
-                    // a---b
-                    // |---|
-                    // c---d
-                    float vMid = 0.5*(m_vMin + m_vMax);
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_vars, m_uMin, m_uMax, m_vMin, vMid)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new Patch(m_vars, m_uMin, m_uMax, vMid, m_vMax)));
-                }
+                bool splitDirectionU = lu > lv;
+                SurfaceSplitter<Patch> splitter(splitDirectionU);
+                tessCtx.invokeTessellator(splitter);
             }
         }
 

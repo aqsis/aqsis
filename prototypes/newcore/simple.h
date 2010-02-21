@@ -82,16 +82,65 @@ class PatchSimple : public Geometry
     private:
         Vec3 m_P[4];
 
-    public:
+        friend class SurfaceSplitter<PatchSimple>;
+        friend class SurfaceDicer<PatchSimple>;
 
+        void dice(int uRes, int vRes, TessellationContext& tessCtx)
+        {
+            boost::shared_ptr<QuadGridSimple>
+                grid(new QuadGridSimple(uRes, vRes));
+            float dv = 1.0f/(vRes-1);
+            float du = 1.0f/(uRes-1);
+            for(int v = 0; v < vRes; ++v)
+            {
+                Vec3 Pmin = Imath::lerp(m_P[0], m_P[2], v*dv);
+                Vec3 Pmax = Imath::lerp(m_P[1], m_P[3], v*dv);
+                Vec3* row = grid->P(v);
+                for(int u = 0; u < uRes; ++u)
+                    row[u] = Imath::lerp(Pmin, Pmax, u*du);
+            }
+            tessCtx.push(grid);
+        }
+
+        void split(bool splitInU, TessellationContext& tessCtx)
+        {
+            if(splitInU)
+            {
+                // split in the middle of the a-b and c-d sides.
+                // a---b
+                // | | |
+                // c---d
+                Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
+                Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new PatchSimple(m_P[0], ab, m_P[2], cd)));
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new PatchSimple(ab, m_P[1], cd, m_P[3])));
+            }
+            else
+            {
+                // split in the middle of the a-c and b-d sides.
+                // a---b
+                // |---|
+                // c---d
+                Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
+                Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new PatchSimple( m_P[0], m_P[1], ac, bd)));
+                tessCtx.push(boost::shared_ptr<Geometry>(
+                            new PatchSimple( ac, bd, m_P[2], m_P[3])));
+            }
+        }
+
+    public:
         PatchSimple(Vec3 a, Vec3 b, Vec3 c, Vec3 d)
         {
             m_P[0] = a; m_P[1] = b;
             m_P[2] = c; m_P[3] = d;
         }
 
-        virtual void splitdice(const Mat4& splitTrans,
-                               TessellationContext& tessCtx) const
+        virtual void tessellate(const Mat4& splitTrans,
+                                TessellationContext& tessCtx) const
         {
             // Project points into "splitting coordinates"
             Vec3 a = m_P[0] * splitTrans;
@@ -120,52 +169,15 @@ class PatchSimple : public Geometry
                 // dice the surface.
                 int uRes = 1 + floor(lu/std::sqrt(attrs.shadingRate));
                 int vRes = 1 + floor(lv/std::sqrt(attrs.shadingRate));
-                boost::shared_ptr<QuadGridSimple>
-                    grid(new QuadGridSimple(uRes, vRes));
-                float dv = 1.0f/(vRes-1);
-                float du = 1.0f/(uRes-1);
-                for(int v = 0; v < vRes; ++v)
-                {
-                    Vec3 Pmin = Imath::lerp(m_P[0], m_P[2], v*dv);
-                    Vec3 Pmax = Imath::lerp(m_P[1], m_P[3], v*dv);
-                    Vec3* row = grid->P(v);
-                    for(int u = 0; u < uRes; ++u)
-                        row[u] = Imath::lerp(Pmin, Pmax, u*du);
-                }
-                tessCtx.push(grid);
+                SurfaceDicer<PatchSimple> dicer(uRes, vRes);
+                tessCtx.invokeTessellator(dicer);
             }
             else
             {
                 // Otherwise, split the surface.  The splitting direction is
                 // the shortest edge.
-
-                // Split
-                if(lu > lv)
-                {
-                    // split in the middle of the a-b and c-d sides.
-                    // a---b
-                    // | | |
-                    // c---d
-                    Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
-                    Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new PatchSimple(m_P[0], ab, m_P[2], cd)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new PatchSimple(ab, m_P[1], cd, m_P[3])));
-                }
-                else
-                {
-                    // split in the middle of the a-c and b-d sides.
-                    // a---b
-                    // |---|
-                    // c---d
-                    Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
-                    Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new PatchSimple( m_P[0], m_P[1], ac, bd)));
-                    tessCtx.push(boost::shared_ptr<Geometry>(
-                                new PatchSimple( ac, bd, m_P[2], m_P[3])));
-                }
+                SurfaceSplitter<PatchSimple> splitter(lu > lv);
+                tessCtx.invokeTessellator(splitter);
             }
         }
 
