@@ -167,8 +167,8 @@ class PatchSimple : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int uRes = 1 + floor(lu/std::sqrt(attrs.shadingRate));
-                int vRes = 1 + floor(lv/std::sqrt(attrs.shadingRate));
+                int uRes = 1 + ifloor(lu/std::sqrt(attrs.shadingRate));
+                int vRes = 1 + ifloor(lv/std::sqrt(attrs.shadingRate));
                 SurfaceDicer<PatchSimple> dicer(uRes, vRes);
                 tessCtx.invokeTessellator(dicer);
             }

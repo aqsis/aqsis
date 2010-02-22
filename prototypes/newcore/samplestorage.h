@@ -115,9 +115,9 @@ class SampleStorage::Iterator
         Iterator(const Box& bound, SampleStorage& storage)
         {
             // Bounding box for relevant samples, clamped to image extent.
-            Imath::V2i bndMin = floor(vec2_cast(bound.min)
+            Imath::V2i bndMin = ifloor(vec2_cast(bound.min)
                     *storage.m_opts.superSamp) + storage.m_filtExpand;
-            Imath::V2i bndMax = floor(vec2_cast(bound.max)
+            Imath::V2i bndMax = ifloor(vec2_cast(bound.max)
                     *storage.m_opts.superSamp) + storage.m_filtExpand;
             m_startx = clamp(bndMin.x, 0, storage.m_xSampRes);
             m_endx = clamp(bndMax.x+1, 0, storage.m_xSampRes);

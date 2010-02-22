@@ -153,7 +153,7 @@ inline T clamp(T x, T low, T high)
 }
 
 template<typename T>
-inline int floor(T x)
+inline int ifloor(T x)
 {
     int ix = static_cast<int>(x);
     if(x >= 0)
@@ -163,7 +163,7 @@ inline int floor(T x)
 }
 
 template<typename T>
-inline int ceil(T x)
+inline int iceil(T x)
 {
     int ix = static_cast<int>(x);
     if(x <= 0)
@@ -245,9 +245,9 @@ inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
 }
 
 template<typename T>
-inline Imath::V2i floor(const Imath::Vec2<T>& v)
+inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
 {
-    return Imath::V2i(floor(v.x), floor(v.y));
+    return Imath::V2i(ifloor(v.x), ifloor(v.y));
 }
 
 #define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))

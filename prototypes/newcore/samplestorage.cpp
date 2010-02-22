@@ -197,13 +197,13 @@ void SampleStorage::filterSize(float radius, int sampsPerPix, int& size,
     // Separate cases for even & odd numbers of samples per pixel.
     if(sampsPerPix%2 == 0)
     {
-        int discreteRadius = floor(radius*sampsPerPix + 0.5);
+        int discreteRadius = ifloor(radius*sampsPerPix + 0.5);
         size = 2*discreteRadius;
         offset = discreteRadius - sampsPerPix/2;
     }
     else
     {
-        int discreteRadius = floor(radius*sampsPerPix);
+        int discreteRadius = ifloor(radius*sampsPerPix);
         size = 2*discreteRadius + 1;
         offset = discreteRadius - sampsPerPix/2;
     }
