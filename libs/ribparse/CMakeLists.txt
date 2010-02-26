@@ -9,6 +9,7 @@ set(ribparse_srcs
 	ribinputbuffer.cpp
 	riblexer.cpp
 	ribparser.cpp
+	ribsema.cpp
 )
 
 set(ribparse_hdrs
