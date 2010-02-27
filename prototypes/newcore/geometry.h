@@ -119,7 +119,7 @@ class TessControl
 {
     public:
         /// Tessellate the geometry & push the results back to the context.
-        virtual void tessellate(Geometry& geom,
+        virtual void tessellate(const Geometry& geom,
                                 TessellationContext& tessContext) const = 0;
 
         virtual ~TessControl() {};
@@ -140,10 +140,10 @@ class SurfaceDicer : public TessControl
     public:
         SurfaceDicer(int nu, int nv) : m_nu(nu), m_nv(nv) {}
 
-        virtual void tessellate(Geometry& geom,
+        virtual void tessellate(const Geometry& geom,
                                 TessellationContext& tessContext) const
         {
-            GeomT& g = static_cast<GeomT&>(geom);
+            const GeomT& g = static_cast<const GeomT&>(geom);
             g.dice(m_nu, m_nv, tessContext);
         }
 };
@@ -159,10 +159,10 @@ class SurfaceSplitter : public TessControl
         SurfaceSplitter(bool splitDirectionU)
             : m_splitDirectionU(splitDirectionU) {}
 
-        virtual void tessellate(Geometry& geom,
+        virtual void tessellate(const Geometry& geom,
                                 TessellationContext& tessContext) const
         {
-            GeomT& g = static_cast<GeomT&>(geom);
+            const GeomT& g = static_cast<const GeomT&>(geom);
             g.split(m_splitDirectionU, tessContext);
         }
 };

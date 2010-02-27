@@ -31,6 +31,7 @@
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 // The distinction here is only due to the layout of the 
 // win32libs copy of OpenEXR.
@@ -47,13 +48,6 @@
 #include <ImathVec.h>
 #include <ImathColor.h>
 #endif
-
-
-template<typename T>
-inline T* get(std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
-
-template<typename T>
-inline const T* get(const std::vector<T>& v) { return v.empty() ? 0 : v[0]; }
 
 
 typedef Imath::V3f Vec3;
@@ -253,8 +247,45 @@ inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
 #define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))
 #define FALLOCA(len) ALLOCA(float, len)
 
+template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
+
+
+/// Reference counting machinary.
+
 inline void nullDeleter(const void*) { }
 
-template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
+/// Reference counted base for use with boost::intrusive_ptr.
+///
+/// This is a non-virtual implementation for maximum efficiency.
+class RefCounted
+{
+    private:
+        mutable int m_refCount;
+    public:
+        int refCount() const { return m_refCount; }
+        int incRef() const   { return ++m_refCount; }
+        int decRef() const   { return --m_refCount; }
+};
+
+
+/// Add a reference to a RefCounted object.
+inline void intrusive_ptr_add_ref(RefCounted* p)
+{
+    p->incRef();
+}
+
+/// Release a reference to a RefCounted object.
+///
+/// Note that this function *must* be a template, because RefCounted does not
+/// have a virtual destructor.  (Therefore, if we just took p as type
+/// RefCounted*, the wrong destructor would get called!)
+template<typename T>
+inline typename boost::enable_if<boost::is_base_of<RefCounted, T> >::type
+intrusive_ptr_release(T* p)
+{
+    if(p->decRef() == 0)
+        delete p;
+}
+
 
 #endif // UTIL_H_INCLUDED

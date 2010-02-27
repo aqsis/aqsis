@@ -32,21 +32,39 @@
 
 
 /// Container for geometry and geometry metadata
-struct Renderer::SurfaceHolder
+class Renderer::GeomHolder : public RefCounted
 {
-    boost::shared_ptr<Geometry> geom; ///< Pointer to geometry
-    int splitCount; ///< Number of times the geometry has been split
-    Box bound;      ///< Bound in camera coordinates
-    Attributes* attrs; ///< Surface attribute state
+    private:
+        boost::shared_ptr<Geometry> m_geom; ///< Pointer to geometry
+        int m_splitCount; ///< Number of times the geometry has been split
+        Box m_bound;      ///< Bound in camera coordinates
+        Attributes* m_attrs; ///< Surface attribute state
 
-    SurfaceHolder(const boost::shared_ptr<Geometry>& geom,
-                    int splitCount, Box bound, Attributes* attrs)
-        : geom(geom),
-        splitCount(splitCount),
-        bound(bound),
-        attrs(attrs)
-    { }
+    public:
+        GeomHolder(const boost::shared_ptr<Geometry>& geom, Attributes* attrs)
+            : m_geom(geom),
+            m_splitCount(0),
+            m_bound(geom->bound()),
+            m_attrs(attrs)
+        { }
+
+        GeomHolder(const boost::shared_ptr<Geometry>& geom,
+                   const GeomHolder& parent)
+            : m_geom(geom),
+            m_splitCount(parent.m_splitCount+1),
+            m_bound(geom->bound()),
+            m_attrs(parent.m_attrs)
+        { }
+
+        Geometry& geom()          { return *m_geom; }
+        const Geometry& geom() const { return *m_geom; }
+        //bool isDeforming() const { return true; }
+        int splitCount() const    { return m_splitCount; }
+        Box& bound() { return m_bound; }
+        Attributes& attrs()       { return *m_attrs; }
+        const Attributes& attrs() const { return *m_attrs; }
 };
+
 
 /// Ordering functor for surfaces in the render queue
 class Renderer::SurfaceOrder
@@ -57,17 +75,17 @@ class Renderer::SurfaceOrder
     public:
         SurfaceOrder() : m_bucketHeight(16) {}
 
-        bool operator()(const SurfaceHolder& a,
-                        const SurfaceHolder& b) const
+        bool operator()(const GeomHolderPtr& a,
+                        const GeomHolderPtr& b) const
         {
-            float ya = a.bound.min.y;
-            float yb = b.bound.min.y;
+            float ya = a->bound().min.y;
+            float yb = b->bound().min.y;
             if(ya < yb - m_bucketHeight)
                 return true;
             else if(yb < ya - m_bucketHeight)
                 return false;
             else
-                return a.bound.min.x < b.bound.min.x;
+                return a->bound().min.x < b->bound().min.x;
         }
 };
 
@@ -80,28 +98,30 @@ class TessellationContextImpl : public TessellationContext
     private:
         Renderer& m_renderer;
         GridStorageBuilder m_builder;
-        const Renderer::SurfaceHolder* m_parentSurface;
+        const Renderer::GeomHolder* m_parentGeom;
 
     public:
         TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
             m_builder(),
-            m_parentSurface(0)
+            m_parentGeom(0)
         { }
 
-        void setParent(Renderer::SurfaceHolder& parent)
+        void setParent(const Renderer::GeomHolder& parent)
         {
-            m_parentSurface = &parent;
+            m_parentGeom = &parent;
         }
 
         virtual void invokeTessellator(TessControl& tessControl)
         {
-            tessControl.tessellate(*(m_parentSurface->geom), *this);
+            tessControl.tessellate(m_parentGeom->geom(), *this);
         }
 
         virtual void push(const boost::shared_ptr<Geometry>& geom)
         {
-            m_renderer.push(geom, *m_parentSurface);
+            Renderer::GeomHolderPtr holder(
+                    new Renderer::GeomHolder(geom, *m_parentGeom));
+            m_renderer.push(holder);
         }
 
         virtual void push(const boost::shared_ptr<Grid>& grid)
@@ -136,7 +156,7 @@ class TessellationContextImpl : public TessellationContext
                 copy(I, P, stor.nverts());
             }
             // Push the grid into the render pipeline
-            m_renderer.push(grid, *m_parentSurface);
+            m_renderer.push(grid, *m_parentGeom);
         }
 
         virtual const Options& options()
@@ -145,7 +165,7 @@ class TessellationContextImpl : public TessellationContext
         }
         virtual const Attributes& attributes()
         {
-            return *(m_parentSurface->attrs);
+            return m_parentGeom->attrs();
         }
 
         virtual GridStorageBuilder& gridStorageBuilder()
@@ -158,11 +178,11 @@ class TessellationContextImpl : public TessellationContext
             m_builder.clear();
             // TODO: AOV stuff shouldn't be conditional on surfaceShader
             // existing.
-            if(m_parentSurface->attrs->surfaceShader)
+            if(m_parentGeom->attrs().surfaceShader)
             {
                 // Renderer arbitrary output vars
                 const OutvarSet& aoVars = m_renderer.m_outVars;
-                const Shader& shader = *m_parentSurface->attrs->surfaceShader;
+                const Shader& shader = *m_parentGeom->attrs().surfaceShader;
                 const VarSet& inVars = shader.inputVars();
                 // P is guaranteed to be dice by the geometry.
                 m_builder.add(Stdvar::P,  GridStorage::Varying);
@@ -385,13 +405,11 @@ void Renderer::saveImages(const std::string& baseFileName)
 // Guts of the renderer
 
 /// Push geometry into the render queue
-void Renderer::push(const boost::shared_ptr<Geometry>& geom,
-                    const SurfaceHolder& parentSurface)
+void Renderer::push(const GeomHolderPtr& geom)
 {
-    int splitCount = parentSurface.splitCount + 1;
     // Get bound in camera space.
-    Box bound = geom->bound();
-    if(bound.min.z < FLT_EPSILON && splitCount > m_opts.maxSplits)
+    Box& bound = geom->bound();
+    if(bound.min.z < FLT_EPSILON && geom->splitCount() > m_opts.maxSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
         return;
@@ -415,27 +433,26 @@ void Renderer::push(const boost::shared_ptr<Geometry>& geom,
     }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
-    m_surfaces->push(SurfaceHolder(geom, splitCount, bound,
-                                   parentSurface.attrs));
+    m_surfaces->push(geom);
 }
 
 
 // Push a grid onto the render queue
 void Renderer::push(const boost::shared_ptr<Grid>& grid,
-                    const SurfaceHolder& parentSurface)
+                    const GeomHolder& parentSurface)
 {
     // For now, just rasterize it directly.
     switch(grid->type())
     {
         case GridType_QuadSimple:
             rasterizeSimple(static_cast<QuadGridSimple&>(*grid),
-                            *parentSurface.attrs);
+                            parentSurface.attrs());
             break;
         case GridType_Quad:
-            if(parentSurface.attrs->surfaceShader)
-                parentSurface.attrs->surfaceShader->shade(*grid);
+            if(parentSurface.attrs().surfaceShader)
+                parentSurface.attrs().surfaceShader->shade(*grid);
             rasterize<QuadGrid, MicroQuadSampler>(
-                    static_cast<QuadGrid&>(*grid), *parentSurface.attrs);
+                    static_cast<QuadGrid&>(*grid), parentSurface.attrs());
             break;
     }
 }
@@ -487,11 +504,8 @@ void Renderer::add(const boost::shared_ptr<Geometry>& geom,
                    Attributes& attrs)
 {
     // TODO: Transform to camera space?
-    //
-    // We need a dummy holder here for the "parent" surface; it's only
-    // really required to pass the attributes and split count on.
-    SurfaceHolder fakeParent(boost::shared_ptr<Geometry>(), -1, Box(), &attrs);
-    push(geom, fakeParent);
+    GeomHolderPtr holder(new GeomHolder(geom, &attrs));
+    push(holder);
 }
 
 // Render all surfaces and save resulting image.
@@ -511,10 +525,10 @@ void Renderer::render()
 
     while(!m_surfaces->empty())
     {
-        SurfaceHolder s = m_surfaces->top();
+        GeomHolderPtr s = m_surfaces->top();
         m_surfaces->pop();
-        tessContext.setParent(s);
-        s.geom->tessellate(splitTrans, tessContext);
+        tessContext.setParent(*s);
+        s->geom().tessellate(splitTrans, tessContext);
     }
     saveImages("test");
 }

@@ -103,7 +103,7 @@ class Patch : public Geometry
             tessCtx.push(grid);
         }
 
-        void split(bool splitInU, TessellationContext& tessCtx)
+        void split(bool splitInU, TessellationContext& tessCtx) const
         {
             // Split
             if(splitInU)

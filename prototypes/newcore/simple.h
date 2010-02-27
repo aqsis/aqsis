@@ -85,7 +85,7 @@ class PatchSimple : public Geometry
         friend class SurfaceSplitter<PatchSimple>;
         friend class SurfaceDicer<PatchSimple>;
 
-        void dice(int uRes, int vRes, TessellationContext& tessCtx)
+        void dice(int uRes, int vRes, TessellationContext& tessCtx) const
         {
             boost::shared_ptr<QuadGridSimple>
                 grid(new QuadGridSimple(uRes, vRes));
@@ -102,7 +102,7 @@ class PatchSimple : public Geometry
             tessCtx.push(grid);
         }
 
-        void split(bool splitInU, TessellationContext& tessCtx)
+        void split(bool splitInU, TessellationContext& tessCtx) const
         {
             if(splitInU)
             {

@@ -24,6 +24,7 @@
 #include <queue>
 #include <vector>
 
+#include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -102,9 +103,10 @@ class Renderer
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
 
-        struct SurfaceHolder;
+        class GeomHolder;
+        typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
         class SurfaceOrder;
-        typedef std::priority_queue<SurfaceHolder, std::vector<SurfaceHolder>,
+        typedef std::priority_queue<GeomHolder, std::vector<GeomHolderPtr>,
                                     SurfaceOrder> SurfaceQueue;
 
         Options m_opts;                ///< Render options
@@ -117,10 +119,9 @@ class Renderer
 
         void saveImages(const std::string& baseFileName);
 
-        void push(const boost::shared_ptr<Geometry>& geom,
-                  const SurfaceHolder& parentSurface);
+        void push(const GeomHolderPtr& geom);
         void push(const boost::shared_ptr<Grid>& grid,
-                  const SurfaceHolder& parentSurface);
+                  const GeomHolder& parentSurface);
 
         template<typename GridT, typename PolySamplerT>
         void rasterize(GridT& grid, const Attributes& attrs);
