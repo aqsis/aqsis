@@ -64,7 +64,7 @@ void addQuadMesh(Attributes& attrs, Renderer& r, const Mat4& otow,
             builder.add(Primvar::Cs, Cs_stor, 12);
         }
         IclassStorage storReq(1,4,4,4,4);
-        boost::shared_ptr<Geometry> patch(new Patch(builder.build(storReq)));
+        GeometryPtr patch(new Patch(builder.build(storReq)));
         patch->transform(otow);
         r.add(patch, attrs);
         vertices += 4;

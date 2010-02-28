@@ -87,7 +87,7 @@ class PatchSimple : public Geometry
 
         void dice(int uRes, int vRes, TessellationContext& tessCtx) const
         {
-            boost::shared_ptr<QuadGridSimple>
+            boost::intrusive_ptr<QuadGridSimple>
                 grid(new QuadGridSimple(uRes, vRes));
             float dv = 1.0f/(vRes-1);
             float du = 1.0f/(uRes-1);
@@ -112,9 +112,9 @@ class PatchSimple : public Geometry
                 // c---d
                 Vec3 ab = 0.5f*(m_P[0] + m_P[1]);
                 Vec3 cd = 0.5f*(m_P[2] + m_P[3]);
-                tessCtx.push(boost::shared_ptr<Geometry>(
+                tessCtx.push(GeometryPtr(
                             new PatchSimple(m_P[0], ab, m_P[2], cd)));
-                tessCtx.push(boost::shared_ptr<Geometry>(
+                tessCtx.push(GeometryPtr(
                             new PatchSimple(ab, m_P[1], cd, m_P[3])));
             }
             else
@@ -125,10 +125,10 @@ class PatchSimple : public Geometry
                 // c---d
                 Vec3 ac = 0.5f*(m_P[0] + m_P[2]);
                 Vec3 bd = 0.5f*(m_P[1] + m_P[3]);
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new PatchSimple( m_P[0], m_P[1], ac, bd)));
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new PatchSimple( ac, bd, m_P[2], m_P[3])));
+                tessCtx.push(GeometryPtr(
+                            new PatchSimple(m_P[0], m_P[1], ac, bd)));
+                tessCtx.push(GeometryPtr(
+                            new PatchSimple(ac, bd, m_P[2], m_P[3])));
             }
         }
 

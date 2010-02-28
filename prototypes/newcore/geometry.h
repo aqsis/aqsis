@@ -29,6 +29,8 @@ class Options;
 class Attributes;
 class TessControl;
 
+typedef boost::intrusive_ptr<Geometry> GeometryPtr;
+typedef boost::intrusive_ptr<Grid> GridPtr;
 
 /// Tessellation context for geometric split/dice
 ///
@@ -49,11 +51,11 @@ class TessellationContext
 
         /// Push some geometry into the render pipeline.
         /// The results from splitting operations go here.
-        virtual void push(const boost::shared_ptr<Geometry>& geom) = 0;
+        virtual void push(const GeometryPtr& geom) = 0;
 
         /// Push a grid into the render pipeline.
         /// The results from geometry dicing go here.
-        virtual void push(const boost::shared_ptr<Grid>& grid) = 0;
+        virtual void push(const GridPtr& grid) = 0;
 
         /// Return the renderer option state
         virtual const Options& options() = 0;
@@ -68,7 +70,7 @@ class TessellationContext
 
 
 /// Abstract piece of geometry to be rendered
-class Geometry
+class Geometry : public RefCounted
 {
     public:
         // Return the number of values required to represent a primvar of each

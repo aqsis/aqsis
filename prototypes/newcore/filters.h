@@ -22,12 +22,10 @@
 
 #include "util.h"  // for Vec2
 
-#include <boost/shared_ptr.hpp>
-
 /// Filter functor class
 ///
 /// Includes information about the width & separability of the filter.
-class Filter
+class Filter : public RefCounted
 {
     private:
         Vec2 m_width;
@@ -59,7 +57,7 @@ class Filter
 };
 
 
-typedef boost::shared_ptr<Filter> FilterPtr;
+typedef boost::intrusive_ptr<Filter> FilterPtr;
 
 
 FilterPtr makeBoxFilter(const Vec2& width);

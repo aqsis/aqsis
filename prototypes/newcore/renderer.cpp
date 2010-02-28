@@ -35,20 +35,20 @@
 class Renderer::GeomHolder : public RefCounted
 {
     private:
-        boost::shared_ptr<Geometry> m_geom; ///< Pointer to geometry
+        GeometryPtr m_geom; ///< Pointer to geometry
         int m_splitCount; ///< Number of times the geometry has been split
         Box m_bound;      ///< Bound in camera coordinates
         Attributes* m_attrs; ///< Surface attribute state
 
     public:
-        GeomHolder(const boost::shared_ptr<Geometry>& geom, Attributes* attrs)
+        GeomHolder(const GeometryPtr& geom, Attributes* attrs)
             : m_geom(geom),
             m_splitCount(0),
             m_bound(geom->bound()),
             m_attrs(attrs)
         { }
 
-        GeomHolder(const boost::shared_ptr<Geometry>& geom,
+        GeomHolder(const GeometryPtr& geom,
                    const GeomHolder& parent)
             : m_geom(geom),
             m_splitCount(parent.m_splitCount+1),
@@ -117,14 +117,14 @@ class TessellationContextImpl : public TessellationContext
             tessControl.tessellate(m_parentGeom->geom(), *this);
         }
 
-        virtual void push(const boost::shared_ptr<Geometry>& geom)
+        virtual void push(const GeometryPtr& geom)
         {
             Renderer::GeomHolderPtr holder(
                     new Renderer::GeomHolder(geom, *m_parentGeom));
             m_renderer.push(holder);
         }
 
-        virtual void push(const boost::shared_ptr<Grid>& grid)
+        virtual void push(const GridPtr& grid)
         {
             // Fill in any grid data which didn't get filled in by the surface
             // during the dicing stage.
@@ -438,8 +438,7 @@ void Renderer::push(const GeomHolderPtr& geom)
 
 
 // Push a grid onto the render queue
-void Renderer::push(const boost::shared_ptr<Grid>& grid,
-                    const GeomHolder& parentSurface)
+void Renderer::push(const GridPtr& grid, const GeomHolder& parentSurface)
 {
     // For now, just rasterize it directly.
     switch(grid->type())
@@ -500,7 +499,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
 // leaking (SurfaceQueue destructor is called implicitly)
 Renderer::~Renderer() { }
 
-void Renderer::add(const boost::shared_ptr<Geometry>& geom,
+void Renderer::add(const GeometryPtr& geom,
                    Attributes& attrs)
 {
     // TODO: Transform to camera space?

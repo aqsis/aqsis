@@ -29,7 +29,7 @@ enum GridType
     GridType_QuadSimple
 };
 
-class Grid
+class Grid : public RefCounted
 {
     private:
         GridType m_type;
@@ -49,6 +49,8 @@ class Grid
         virtual ~Grid() {}
 };
 
+typedef boost::intrusive_ptr<Grid> GridPtr;
+
 
 //------------------------------------------------------------------------------
 /// A 2D grid of quadrilateral micro polygons
@@ -57,12 +59,12 @@ class QuadGrid : public Grid
     private:
         int m_nu;
         int m_nv;
-        boost::shared_ptr<GridStorage> m_storage;
+        GridStoragePtr m_storage;
 
     public:
         class Iterator;
 
-        QuadGrid(int nu, int nv, boost::shared_ptr<GridStorage> storage)
+        QuadGrid(int nu, int nv, const GridStoragePtr& storage)
             : Grid(GridType_Quad),
             m_nu(nu),
             m_nv(nv),

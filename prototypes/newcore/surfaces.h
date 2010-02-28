@@ -33,7 +33,7 @@
 class Patch : public Geometry
 {
     private:
-        boost::shared_ptr<PrimvarStorage> m_vars;
+        PrimvarStoragePtr m_vars;
 
         // uv coordinates for corners of the base patch.
         const float m_uMin, m_uMax;
@@ -47,8 +47,8 @@ class Patch : public Geometry
             GridStorageBuilder& builder = tessCtx.gridStorageBuilder();
             // Add all the primvars to the grid
             builder.add(m_vars->varSet());
-            boost::shared_ptr<GridStorage> storage = builder.build(nu*nv);
-            boost::shared_ptr<QuadGrid> grid(new QuadGrid(nu, nv, storage));
+            GridStoragePtr storage = builder.build(nu*nv);
+            boost::intrusive_ptr<QuadGrid> grid(new QuadGrid(nu, nv, storage));
 
             // Create some space to store the variable temporaries.
             int maxAgg = storage->maxAggregateSize();
@@ -113,10 +113,10 @@ class Patch : public Geometry
                 // | | |
                 // c---d
                 float uMid = 0.5*(m_uMin + m_uMax);
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new Patch(m_vars, m_uMin, uMid, m_vMin, m_vMax)));
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new Patch(m_vars, uMid, m_uMax, m_vMin, m_vMax)));
+                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
+                                                   uMid, m_vMin, m_vMax)));
+                tessCtx.push(GeometryPtr(new Patch(m_vars, uMid,
+                                                   m_uMax, m_vMin, m_vMax)));
             }
             else
             {
@@ -125,10 +125,10 @@ class Patch : public Geometry
                 // |---|
                 // c---d
                 float vMid = 0.5*(m_vMin + m_vMax);
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new Patch(m_vars, m_uMin, m_uMax, m_vMin, vMid)));
-                tessCtx.push(boost::shared_ptr<Geometry>(
-                            new Patch(m_vars, m_uMin, m_uMax, vMid, m_vMax)));
+                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
+                                                   m_uMax, m_vMin, vMid)));
+                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
+                                                   m_uMax, vMid, m_vMax)));
             }
         }
 
@@ -141,7 +141,7 @@ class Patch : public Geometry
             d = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMax);
         }
 
-        Patch(boost::shared_ptr<PrimvarStorage> vars,
+        Patch(const PrimvarStoragePtr& vars,
               float uMin, float uMax, float vMin, float vMax)
             : m_vars(vars),
             m_uMin(uMin), m_uMax(uMax),
@@ -149,7 +149,7 @@ class Patch : public Geometry
         { }
 
     public:
-        Patch(boost::shared_ptr<PrimvarStorage> vars)
+        Patch(const PrimvarStoragePtr& vars)
             : m_vars(vars),
             m_uMin(0), m_uMax(1),
             m_vMin(0), m_vMax(1)

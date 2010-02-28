@@ -32,6 +32,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
 #include <boost/type_traits/is_base_of.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 // The distinction here is only due to the layout of the 
 // win32libs copy of OpenEXR.
@@ -254,7 +255,7 @@ template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
 
 inline void nullDeleter(const void*) { }
 
-/// Reference counted base for use with boost::intrusive_ptr.
+/// Reference counted base mixin for use with boost::intrusive_ptr.
 ///
 /// This is a non-virtual implementation for maximum efficiency.
 class RefCounted
@@ -262,7 +263,13 @@ class RefCounted
     private:
         mutable int m_refCount;
     public:
-        int refCount() const { return m_refCount; }
+        RefCounted() : m_refCount(0) {}
+
+        /// Copying does *not* copy the reference count!
+        RefCounted(const RefCounted& /*r*/) : m_refCount(0) {}
+        RefCounted& operator=(const RefCounted& /*r*/) { return *this; }
+
+        int useCount() const { return m_refCount; }
         int incRef() const   { return ++m_refCount; }
         int decRef() const   { return --m_refCount; }
 };

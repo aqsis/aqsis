@@ -21,7 +21,6 @@
 #define GRIDVAR_H_INCLUDED
 
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "arrayview.h"
@@ -37,7 +36,7 @@
 /// access to each variable storage based on the index within the grid.  In
 /// order to allow for efficient allocation, GridStorage should be constructed
 /// via the specialized GridStorageBuilder object.
-class GridStorage
+class GridStorage : public RefCounted
 {
     private:
         boost::scoped_array<float> m_storage;
@@ -167,6 +166,8 @@ class GridStorage
         }
 };
 
+typedef boost::intrusive_ptr<GridStorage> GridStoragePtr;
+
 
 //------------------------------------------------------------------------------
 /// Object to collect arguments necessary to build a GridStorage object.
@@ -247,7 +248,7 @@ class GridStorageBuilder : boost::noncopyable
         }
 
         /// Build the grid storage using the current set of variables.
-        boost::shared_ptr<GridStorage> build(int nverts)
+        GridStoragePtr build(int nverts)
         {
             std::sort(m_vars.begin(), m_vars.end());
             // Uniqueify the vars.  Any duplicates coming from the geometry
@@ -281,7 +282,7 @@ class GridStorageBuilder : boost::noncopyable
             }
             // Ok, now that we have all our vars, it's possible to create the
             // storage space.
-            return boost::shared_ptr<GridStorage>(
+            return GridStoragePtr(
                     new GridStorage(m_vars.begin(), m_vars.end(), nverts));
         }
 };

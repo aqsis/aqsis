@@ -88,7 +88,7 @@ int main()
     GridStorageBuilder gridBuilder;
     GridvarList gvarSet(pvarStorage.varList());
     const int nu = 5, nv = 5;
-    boost::shared_ptr<GridStorage> gvarStorage = gridBuilder.build(nu*nv);
+    GridStoragePtr gvarStorage = gridBuilder.build(nu*nv);
 
     // Create some space to store the variable temporaries.
     int maxAgg = gvarStorage.maxAggregateSize();

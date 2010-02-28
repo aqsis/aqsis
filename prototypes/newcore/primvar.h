@@ -24,7 +24,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
 #include "util.h"
@@ -131,7 +130,7 @@ struct IclassStorage
 
 
 //------------------------------------------------------------------------------
-class PrimvarStorage
+class PrimvarStorage : public RefCounted
 {
     private:
         boost::scoped_array<float> m_storage;
@@ -246,6 +245,8 @@ class PrimvarStorage
         }
 };
 
+typedef boost::intrusive_ptr<PrimvarStorage> PrimvarStoragePtr;
+
 
 //------------------------------------------------------------------------------
 class PrimvarStorageBuilder
@@ -275,7 +276,7 @@ class PrimvarStorageBuilder
             m_vars.push_back(PvarInitSpec(var, data, srcLength));
         }
 
-        boost::shared_ptr<PrimvarStorage> build(const IclassStorage& storCount)
+        PrimvarStoragePtr build(const IclassStorage& storCount)
         {
             for(int i = 0, nvars = m_vars.size(); i < nvars; ++i)
             {
@@ -301,7 +302,7 @@ class PrimvarStorageBuilder
             //   s, t
             //
             std::sort(m_vars.begin(), m_vars.end());
-            return boost::shared_ptr<PrimvarStorage>(
+            return PrimvarStoragePtr(
                 new PrimvarStorage(m_vars.begin(), m_vars.end(), storCount));
         }
 };

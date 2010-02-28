@@ -24,8 +24,6 @@
 #include <queue>
 #include <vector>
 
-#include <boost/intrusive_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -40,6 +38,8 @@ class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
 
+typedef boost::intrusive_ptr<Geometry> GeometryPtr;
+typedef boost::intrusive_ptr<Grid> GridPtr;
 
 //-----------------------------------------------------------------------------
 struct OutvarSpec : public VarSpec
@@ -92,7 +92,7 @@ class Renderer
         ~Renderer();
 
         /// Add geometry
-        void add(const boost::shared_ptr<Geometry>& geom, Attributes& attrs);
+        void add(const GeometryPtr& geom, Attributes& attrs);
 
         /// Render all surfaces and save resulting image.
         void render();
@@ -120,7 +120,7 @@ class Renderer
         void saveImages(const std::string& baseFileName);
 
         void push(const GeomHolderPtr& geom);
-        void push(const boost::shared_ptr<Grid>& grid,
+        void push(const GridPtr& grid,
                   const GeomHolder& parentSurface);
 
         template<typename GridT, typename PolySamplerT>

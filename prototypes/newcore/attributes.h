@@ -27,7 +27,7 @@ struct Attributes
 {
     float shadingRate;  ///< Desired micropoly area
     bool smoothShading; ///< Type of shading interpolation
-    boost::shared_ptr<Shader> surfaceShader;  ///< surface shader
+    ShaderPtr surfaceShader;  ///< surface shader
 
     Attributes()
         : shadingRate(1),

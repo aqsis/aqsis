@@ -22,12 +22,12 @@
 
 #include "varspec.h"
 
-#include <boost/shared_ptr.hpp>
+#include "util.h"
 
 class Grid;
 
 /// A simplistic shader interface
-class Shader
+class Shader : public RefCounted
 {
     public:
         /// Get the set of input variables used by the shader.
@@ -41,8 +41,10 @@ class Shader
         virtual ~Shader() {}
 };
 
+typedef boost::intrusive_ptr<Shader> ShaderPtr;
+
 // Create one of the builtin shaders.
-boost::shared_ptr<Shader> createShader(const char* name);
+ShaderPtr createShader(const char* name);
 
 
 #endif // SHADER_H_INCLUDED

@@ -257,14 +257,14 @@ class ShowPolys : public IOVarHolder
 
 
 //------------------------------------------------------------------------------
-boost::shared_ptr<Shader> createShader(const char* name)
+ShaderPtr createShader(const char* name)
 {
     if(name == std::string("test"))
-        return boost::shared_ptr<Shader>(new TestShader());
+        return ShaderPtr(new TestShader());
     else if(name == std::string("showgrids"))
-        return boost::shared_ptr<Shader>(new ShowGrids());
+        return ShaderPtr(new ShowGrids());
     else if(name == std::string("showpolys"))
-        return boost::shared_ptr<Shader>(new ShowPolys());
-    return boost::shared_ptr<Shader>(new DefaultSurface());
+        return ShaderPtr(new ShowPolys());
+    return ShaderPtr(new DefaultSurface());
 }
 
