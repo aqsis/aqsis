@@ -260,8 +260,6 @@ inline void nullDeleter(const void*) { }
 /// This is a non-virtual implementation for maximum efficiency.
 class RefCounted
 {
-    private:
-        mutable int m_refCount;
     public:
         RefCounted() : m_refCount(0) {}
 
@@ -272,6 +270,13 @@ class RefCounted
         int useCount() const { return m_refCount; }
         int incRef() const   { return ++m_refCount; }
         int decRef() const   { return --m_refCount; }
+
+    protected:
+        /// Protected so users can't delete RefCounted directly.
+        ~RefCounted() {}
+
+    private:
+        mutable int m_refCount;
 };
 
 
