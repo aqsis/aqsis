@@ -31,18 +31,30 @@
 #include "simple.h"
 
 
+//------------------------------------------------------------------------------
 /// Container for geometry and geometry metadata
-class Renderer::GeomHolder : public RefCounted
+class GeomHolder : public RefCounted
 {
     private:
-        GeometryPtr m_geom; ///< Pointer to geometry
-        int m_splitCount; ///< Number of times the geometry has been split
-        Box m_bound;      ///< Bound in camera coordinates
+        GeometryPtr m_geom;  ///< Main geometry (first key for deformation)
+        GeometryKeys m_geomKeys; ///< Extra geometry keys
+        int m_splitCount;    ///< Number of times the geometry has been split
+        Box m_bound;         ///< Bound in camera coordinates
         Attributes* m_attrs; ///< Surface attribute state
 
+        void initKeys(GeometryPtr* begin, GeometryPtr* end, int stride)
+        {
+            m_geomKeys.reserve((begin - end)/stride - 1);
+            while((begin += stride) < end)
+            {
+                m_geomKeys.push_back(*begin);
+                m_bound.extendBy((*begin)->bound());
+            }
+        }
     public:
         GeomHolder(const GeometryPtr& geom, Attributes* attrs)
             : m_geom(geom),
+            m_geomKeys(),
             m_splitCount(0),
             m_bound(geom->bound()),
             m_attrs(attrs)
@@ -51,14 +63,41 @@ class Renderer::GeomHolder : public RefCounted
         GeomHolder(const GeometryPtr& geom,
                    const GeomHolder& parent)
             : m_geom(geom),
+            m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
             m_bound(geom->bound()),
             m_attrs(parent.m_attrs)
         { }
 
+        GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
+                   Attributes* attrs)
+            : m_geom(*keysBegin),
+            m_geomKeys(),
+            m_splitCount(0),
+            m_bound(m_geom->bound()),
+            m_attrs(attrs)
+        {
+            initKeys(keysBegin, keysEnd, 1);
+        }
+
+        GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
+                   int keysStride, const GeomHolder& parent)
+            : m_geom(*keysBegin),
+            m_geomKeys(),
+            m_splitCount(parent.m_splitCount+1),
+            m_bound(m_geom->bound()),
+            m_attrs(parent.m_attrs)
+        {
+            initKeys(keysBegin, keysEnd, keysStride);
+        }
+
         Geometry& geom()          { return *m_geom; }
         const Geometry& geom() const { return *m_geom; }
-        //bool isDeforming() const { return true; }
+
+        const GeometryKeys& extraKeys() const { return m_geomKeys; }
+        const int numGeomKeys() const { return m_geomKeys.size() + 1; }
+
+        bool isDeforming() const { return !m_geomKeys.empty(); }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
         Attributes& attrs()       { return *m_attrs; }
@@ -66,6 +105,60 @@ class Renderer::GeomHolder : public RefCounted
 };
 
 
+
+//------------------------------------------------------------------------------
+typedef std::vector<GridPtr> GridKeys;
+
+class GridHolder : public RefCounted
+{
+    private:
+        GridPtr m_firstGrid;       ///< Main grid (first key for deformation)
+        GridKeys m_extraGrids;     ///< Extra grid key frames
+        const Attributes* m_attrs; ///< Attribute state
+
+        void shade(Grid& grid) const
+        {
+            // Special case: can't shade simple grids.
+            if(grid.type() == GridType_QuadSimple)
+                return;
+            if(m_attrs->surfaceShader)
+                m_attrs->surfaceShader->shade(grid);
+        }
+
+    public:
+        GridHolder(const GridPtr& grid, const Attributes* attrs)
+            : m_firstGrid(grid),
+            m_extraGrids(),
+            m_attrs(attrs)
+        { }
+
+        template<typename GridPtrIterT>
+        GridHolder(GridPtrIterT begin, GridPtrIterT end, const Attributes* attrs)
+            : m_firstGrid(*begin),
+            m_extraGrids(begin+1, end),
+            m_attrs(attrs)
+        { }
+
+        bool isDeforming() const { return !m_extraGrids.empty(); }
+        Grid& grid() { return *m_firstGrid; }
+        GridKeys& extraGrids() { return m_extraGrids; }
+
+        const Attributes& attrs() const { return *m_attrs; }
+
+        /// Shade all grids held
+        void shade()
+        {
+            shade(*m_firstGrid);
+            for(GridKeys::iterator i = m_extraGrids.begin(),
+                end = m_extraGrids.end(); i != end; ++i)
+            {
+                shade(**i);
+            }
+        }
+};
+
+
+//------------------------------------------------------------------------------
 /// Ordering functor for surfaces in the render queue
 class Renderer::SurfaceOrder
 {
@@ -75,8 +168,7 @@ class Renderer::SurfaceOrder
     public:
         SurfaceOrder() : m_bucketHeight(16) {}
 
-        bool operator()(const GeomHolderPtr& a,
-                        const GeomHolderPtr& b) const
+        bool operator()(const GeomHolderPtr& a, const GeomHolderPtr& b) const
         {
             float ya = a->bound().min.y;
             float yb = b->bound().min.y;
@@ -98,7 +190,75 @@ class TessellationContextImpl : public TessellationContext
     private:
         Renderer& m_renderer;
         GridStorageBuilder m_builder;
-        const Renderer::GeomHolder* m_parentGeom;
+        const GeomHolder* m_parentGeom;
+
+        /// Collecter for splits of deforming surfaces
+        class DeformCollector
+        {
+            private:
+                std::vector<GeometryPtr> m_splits;
+                int m_splitsPerKey;
+                std::vector<GridPtr> m_grids;
+
+            public:
+                void reset()
+                {
+                    m_splits.clear();
+                    m_splitsPerKey = 0;
+                    m_grids.clear();
+                }
+
+                void firstKeyDone()
+                {
+                    m_splitsPerKey = m_splits.size();
+                }
+
+                void push(const GeometryPtr& geom)
+                {
+                    m_splits.push_back(geom);
+                }
+
+                void push(const GridPtr& grid)
+                {
+                    m_grids.push_back(grid);
+                }
+
+                void pushResults(const GeomHolder& parentGeom,
+                                 Renderer& renderer)
+                {
+                    if(!m_splits.empty())
+                    {
+                        // Construct holder for each deforming child surface &
+                        // push it back to the renderer.
+                        assert((m_splits.size()/m_splitsPerKey)*m_splitsPerKey
+                                == m_splits.size());
+                        int nGeom = parentGeom.numGeomKeys();
+                        assert(nGeom > 1);
+                        for(int i = 0; i < nGeom; ++i)
+                        {
+                            GeomHolderPtr holder(
+                                new GeomHolder(
+                                    &*m_splits.begin() + i,
+                                    &*m_splits.end() + i,
+                                    m_splitsPerKey, parentGeom
+                                )
+                            );
+                            renderer.push(holder);
+                        }
+                    }
+                    if(!m_grids.empty())
+                    {
+                        // Construct deforming child grids
+                        renderer.push( GridHolderPtr(
+                                new GridHolder(
+                                    m_grids.begin(), m_grids.end(),
+                                    &parentGeom.attrs()
+                                )
+                        ));
+                    }
+                }
+        };
+        DeformCollector m_deformCollector;
 
     public:
         TessellationContextImpl(Renderer& renderer)
@@ -107,21 +267,39 @@ class TessellationContextImpl : public TessellationContext
             m_parentGeom(0)
         { }
 
-        void setParent(const Renderer::GeomHolder& parent)
+        void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
         {
-            m_parentGeom = &parent;
+            m_parentGeom = holder.get();
+            holder->geom().tessellate(splitTrans, *this);
         }
 
         virtual void invokeTessellator(TessControl& tessControl)
         {
-            tessControl.tessellate(m_parentGeom->geom(), *this);
+            if(m_parentGeom->isDeforming())
+            {
+                // Collect the split/dice results in m_deformCollector if the
+                // surface is involved in deformation motion blur.
+                m_deformCollector.reset();
+                tessControl.tessellate(m_parentGeom->geom(), *this);
+                m_deformCollector.firstKeyDone();
+                const GeometryKeys& keys = m_parentGeom->extraKeys();
+                for(int i = 1, nkeys = keys.size(); i < nkeys; ++i)
+                    tessControl.tessellate(*keys[i], *this);
+                m_deformCollector.pushResults(*m_parentGeom, m_renderer);
+            }
+            else
+                tessControl.tessellate(m_parentGeom->geom(), *this);
         }
 
         virtual void push(const GeometryPtr& geom)
         {
-            Renderer::GeomHolderPtr holder(
-                    new Renderer::GeomHolder(geom, *m_parentGeom));
-            m_renderer.push(holder);
+            if(m_parentGeom->isDeforming())
+                m_deformCollector.push(geom);
+            else
+            {
+                GeomHolderPtr holder(new GeomHolder(geom, *m_parentGeom));
+                m_renderer.push(holder);
+            }
         }
 
         virtual void push(const GridPtr& grid)
@@ -155,8 +333,13 @@ class TessellationContextImpl : public TessellationContext
                 // perspective projections.  (TODO: orthographic)
                 copy(I, P, stor.nverts());
             }
-            // Push the grid into the render pipeline
-            m_renderer.push(grid, *m_parentGeom);
+            if(m_parentGeom->isDeforming())
+                m_deformCollector.push(grid);
+            else
+            {
+                m_renderer.push(GridHolderPtr(
+                    new GridHolder(grid, &m_parentGeom->attrs()) ));
+            }
         }
 
         virtual const Options& options()
@@ -405,11 +588,11 @@ void Renderer::saveImages(const std::string& baseFileName)
 // Guts of the renderer
 
 /// Push geometry into the render queue
-void Renderer::push(const GeomHolderPtr& geom)
+void Renderer::push(const GeomHolderPtr& holder)
 {
     // Get bound in camera space.
-    Box& bound = geom->bound();
-    if(bound.min.z < FLT_EPSILON && geom->splitCount() > m_opts.maxSplits)
+    Box& bound = holder->bound();
+    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts.maxSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
         return;
@@ -433,26 +616,42 @@ void Renderer::push(const GeomHolderPtr& geom)
     }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
-    m_surfaces->push(geom);
+    m_surfaces->push(holder);
 }
 
 
 // Push a grid onto the render queue
-void Renderer::push(const GridPtr& grid, const GeomHolder& parentSurface)
+void Renderer::push(const GridHolderPtr& holder)
 {
-    // For now, just rasterize it directly.
-    switch(grid->type())
+    holder->shade();
+    // Rasterize grids right away, never store them.
+    Grid& grid = holder->grid();
+    if(holder->isDeforming())
     {
-        case GridType_QuadSimple:
-            rasterizeSimple(static_cast<QuadGridSimple&>(*grid),
-                            parentSurface.attrs());
-            break;
-        case GridType_Quad:
-            if(parentSurface.attrs().surfaceShader)
-                parentSurface.attrs().surfaceShader->shade(*grid);
-            rasterize<QuadGrid, MicroQuadSampler>(
-                    static_cast<QuadGrid&>(*grid), parentSurface.attrs());
-            break;
+        // Sample with motion blur.
+        switch(grid.type())
+        {
+            case GridType_QuadSimple:
+                assert(0 && "motion blur not implemented for simple grid");
+                break;
+            case GridType_Quad:
+//                motionRasterize<QuadGrid, MicroQuadSampler>(holder);
+                break;
+        }
+    }
+    else
+    {
+        // Sample without motion blur.
+        switch(grid.type())
+        {
+            case GridType_QuadSimple:
+                rasterizeSimple(static_cast<QuadGridSimple&>(grid),
+                                holder->attrs());
+                break;
+            case GridType_Quad:
+                rasterize<QuadGrid, MicroQuadSampler>(grid, holder->attrs());
+                break;
+        }
     }
 }
 
@@ -499,11 +698,17 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
 // leaking (SurfaceQueue destructor is called implicitly)
 Renderer::~Renderer() { }
 
-void Renderer::add(const GeometryPtr& geom,
-                   Attributes& attrs)
+void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
 {
     // TODO: Transform to camera space?
     GeomHolderPtr holder(new GeomHolder(geom, &attrs));
+    push(holder);
+}
+
+void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
+{
+    GeomHolderPtr holder(new GeomHolder(&*deformingGeom.begin(),
+                                        &*deformingGeom.end(), &attrs));
     push(holder);
 }
 
@@ -524,10 +729,9 @@ void Renderer::render()
 
     while(!m_surfaces->empty())
     {
-        GeomHolderPtr s = m_surfaces->top();
+        GeomHolderPtr g = m_surfaces->top();
         m_surfaces->pop();
-        tessContext.setParent(*s);
-        s->geom().tessellate(splitTrans, tessContext);
+        tessContext.tessellate(splitTrans, g);
     }
     saveImages("test");
 }
@@ -536,8 +740,9 @@ void Renderer::render()
 // Render a grid by rasterizing each micropolygon.
 template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
-void Renderer::rasterize(GridT& grid, const Attributes& attrs)
+void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
 {
+    GridT& grid = static_cast<GridT&>(inGrid);
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);

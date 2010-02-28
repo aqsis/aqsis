@@ -38,6 +38,11 @@ class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
 
+class GeomHolder;
+typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
+class GridHolder;
+typedef boost::intrusive_ptr<GridHolder> GridHolderPtr;
+
 typedef boost::intrusive_ptr<Geometry> GeometryPtr;
 typedef boost::intrusive_ptr<Grid> GridPtr;
 
@@ -77,6 +82,7 @@ class StdOutInd
 
 typedef BasicVarSet<OutvarSpec, StdOutInd> OutvarSet;
 
+typedef std::vector<GeometryPtr> GeometryKeys;
 
 //-----------------------------------------------------------------------------
 /// Main renderer interface.
@@ -93,6 +99,8 @@ class Renderer
 
         /// Add geometry
         void add(const GeometryPtr& geom, Attributes& attrs);
+        /// Add key frames of deforming geometry
+        void add(GeometryKeys& deformingGeom, Attributes& attrs);
 
         /// Render all surfaces and save resulting image.
         void render();
@@ -103,8 +111,6 @@ class Renderer
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
 
-        class GeomHolder;
-        typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
         class SurfaceOrder;
         typedef std::priority_queue<GeomHolder, std::vector<GeomHolderPtr>,
                                     SurfaceOrder> SurfaceQueue;
@@ -120,11 +126,10 @@ class Renderer
         void saveImages(const std::string& baseFileName);
 
         void push(const GeomHolderPtr& geom);
-        void push(const GridPtr& grid,
-                  const GeomHolder& parentSurface);
+        void push(const GridHolderPtr& grid);
 
         template<typename GridT, typename PolySamplerT>
-        void rasterize(GridT& grid, const Attributes& attrs);
+        void rasterize(Grid& inGrid, const Attributes& attrs);
 
         void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);
 };
