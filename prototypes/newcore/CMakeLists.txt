@@ -29,8 +29,9 @@ set(srcs
     primvar.cpp
     renderer.cpp
     samplestorage.cpp
-    scenes/tenpatch.cpp
     scenes/default.cpp
+    scenes/simpledeformation.cpp
+    scenes/tenpatch.cpp
     shader.cpp
     ustring/ustring.cpp
     varspec.cpp

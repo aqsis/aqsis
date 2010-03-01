@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef QUADRASTERIZER_H_INCLUDED
-#define QUADRASTERIZER_H_INCLUDED
+#ifndef MICROQUADSAMPLER_H_INCLUDED
+#define MICROQUADSAMPLER_H_INCLUDED
 
 #include "attributes.h"
 #include "invbilin.h"
@@ -226,4 +226,4 @@ class MicroQuadSampler
 };
 
 
-#endif // QUADRASTERIZER_H_INCLUDED
+#endif // MICROQUADSAMPLER_H_INCLUDED

@@ -19,7 +19,6 @@
 
 #include "renderer.h"
 #include "surfaces.h"
-#include "simple.h"
 
 static GeometryPtr createPatch(const Vec3& a, const Vec3& b,
                                const Vec3& c, const Vec3& d,
@@ -33,13 +32,11 @@ static GeometryPtr createPatch(const Vec3& a, const Vec3& b,
     builder.add(Primvar::P, P, array_len(P));
     IclassStorage storReq(1,4,4,4,4);
     GeometryPtr patch(new Patch(builder.build(storReq)));
-//    GeometryPtr patch(new PatchSimple(a,b,c,d));
     patch->transform(trans);
     return patch;
 }
 
-
-void renderTenPatchScene()
+void renderSimpleDeformationScene()
 {
     Options opts;
     opts.xRes = 1024;
@@ -47,25 +44,30 @@ void renderTenPatchScene()
     opts.gridSize = 8;
     opts.clipNear = 0.1;
     opts.superSamp = Imath::V2i(1,1);
-    opts.pixelFilter = makeBoxFilter(Vec2(1,1));
+    opts.pixelFilter = makeBoxFilter(Vec2(1.0,1.0));
+    opts.shutterMax = 0.5;
 
     Attributes attrs;
     attrs.shadingRate = 1;
     attrs.smoothShading = true;
+//    attrs.surfaceShader = createShader("default");
 
-    Mat4 camToScreen = screenWindow(0,0.5, 0,0.5);
+//    Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
+    Mat4 camToScreen = screenWindow(-1,2, -1,2);
 
     // Output variables.
     VarList outVars;
     outVars.push_back(Stdvar::z);
 
-    Renderer r(opts, camToScreen, outVars);
+    Renderer renderer(opts, camToScreen, outVars);
 
-    for(int i = 0; i < 10; ++i)
-    {
-        r.add(createPatch(Vec3(0.2,0.2,5), Vec3(0.5,-0.5,1),
-                          Vec3(-0.5,0.5,1), Vec3(0.5,0.5,5)), attrs);
-    }
+    GeometryKeys keys;
+    keys.push_back(createPatch(Vec3(0,0,1), Vec3(1,0,2),
+                               Vec3(0,1,1), Vec3(1,1,2)));
+    keys.push_back(createPatch(Vec3(0.6,0.6,1), Vec3(0.9,0,2),
+                               Vec3(0,0.9,0.9), Vec3(0.9,0.9,2)));
+    renderer.add(keys, attrs);
 
-    r.render();
+    renderer.render();
 }
+

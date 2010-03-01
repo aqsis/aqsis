@@ -44,7 +44,7 @@ class GeomHolder : public RefCounted
 
         void initKeys(GeometryPtr* begin, GeometryPtr* end, int stride)
         {
-            m_geomKeys.reserve((begin - end)/stride - 1);
+            m_geomKeys.reserve((end - begin)/stride - 1);
             while((begin += stride) < end)
             {
                 m_geomKeys.push_back(*begin);
@@ -149,6 +149,7 @@ class GridHolder : public RefCounted
         void shade()
         {
             shade(*m_firstGrid);
+            // TODO: Only run displacement shaders for extra grids.
             for(GridKeys::iterator i = m_extraGrids.begin(),
                 end = m_extraGrids.end(); i != end; ++i)
             {
@@ -283,7 +284,7 @@ class TessellationContextImpl : public TessellationContext
                 tessControl.tessellate(m_parentGeom->geom(), *this);
                 m_deformCollector.firstKeyDone();
                 const GeometryKeys& keys = m_parentGeom->extraKeys();
-                for(int i = 1, nkeys = keys.size(); i < nkeys; ++i)
+                for(int i = 0, nkeys = keys.size(); i < nkeys; ++i)
                     tessControl.tessellate(*keys[i], *this);
                 m_deformCollector.pushResults(*m_parentGeom, m_renderer);
             }
@@ -532,6 +533,7 @@ void Renderer::sanitizeOptions(Options& opts)
     CLAMP_OPT_BELOW(yRes, 1);
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
+    CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
 }
 
 // Save image to a TIFF file.
@@ -635,7 +637,7 @@ void Renderer::push(const GridHolderPtr& holder)
                 assert(0 && "motion blur not implemented for simple grid");
                 break;
             case GridType_Quad:
-//                motionRasterize<QuadGrid, MicroQuadSampler>(holder);
+                motionRasterize<QuadGrid, MicroQuadSampler>(*holder);
                 break;
         }
     }
@@ -724,7 +726,6 @@ void Renderer::render()
 //        * Mat4().setTranslation(Vec3(0.5,0.5,0))
 //        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
 
-    // Use the same tessellation context for all split/dice events
     TessellationContextImpl tessContext(*this);
 
     while(!m_surfaces->empty())
@@ -734,6 +735,79 @@ void Renderer::render()
         tessContext.tessellate(splitTrans, g);
     }
     saveImages("test");
+}
+
+template<typename GridT, typename PolySamplerT>
+void Renderer::motionRasterize(GridHolder& holder)
+{
+    GridT& grid1 = static_cast<GridT&>(holder.grid());
+    GridT& grid2 = static_cast<GridT&>(*holder.extraGrids()[0]);
+
+    // Determine index of depth output data, if any.
+    int zOffset = -1;
+    int zIdx = m_outVars.find(StdOutInd::z);
+    if(zIdx != OutvarSet::npos)
+        zOffset = m_outVars[zIdx].offset;
+    int fragSize = m_sampStorage->fragmentSize();
+    const float* defaultFrag = m_sampStorage->defaultFragment();
+
+    // Project grids into raster coordinates.
+    grid1.project(m_camToRas);
+    grid2.project(m_camToRas);
+
+    const GridStorage& stor1 = grid1.storage();
+    const GridStorage& stor2 = grid2.storage();
+    ConstDataView<Vec3> P1 = stor1.P();
+    ConstDataView<Vec3> P2 = stor2.P();
+
+    PointInQuad hitTest;
+    InvBilin invBilin;
+
+    // Fixed time, in betwen 0 & 1
+    const float time = m_opts.shutterMax;
+
+    // For each micropoly
+    for(int v = 0, nv = grid1.nv(); v < nv-1; ++v)
+    for(int u = 0, nu = grid1.nu(); u < nu-1; ++u)
+    {
+        MicroQuadInd ind(nu*v + u,        nu*v + u+1,
+                         nu*(v+1) + u+1,  nu*(v+1) + u);
+        // Interpolate to current time
+        Vec3 Pa = lerp(P1[ind.a], P2[ind.a], time);
+        Vec3 Pb = lerp(P1[ind.b], P2[ind.b], time);
+        Vec3 Pc = lerp(P1[ind.c], P2[ind.c], time);
+        Vec3 Pd = lerp(P1[ind.d], P2[ind.d], time);
+        // Compute bound
+        Box bound(Pa);
+        bound.extendBy(Pb);
+        bound.extendBy(Pc);
+        bound.extendBy(Pd);
+        // Init hit tester
+        hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
+                     vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
+        invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
+                      vec2_cast(Pd), vec2_cast(Pc));
+        // Iterate over samples in bound
+        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
+            sampi.valid(); ++sampi)
+        {
+            Sample& samp = sampi.sample();
+            if(!hitTest(samp))
+                continue;
+            Vec2 uv = invBilin(samp.p);
+            float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
+            if(samp.z < z)
+                continue; // Ignore if hit is hidden
+            samp.z = z;
+            // Generate & store a fragment
+            float* out = sampi.fragment();
+            // Initialize fragment data with the default value.
+            std::memcpy(out, defaultFrag, fragSize*sizeof(float));
+            // Store interpolated fragment data
+            if(zOffset >= 0)
+                out[zOffset] = z;
+        }
+    }
 }
 
 

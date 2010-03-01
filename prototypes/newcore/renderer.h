@@ -129,6 +129,9 @@ class Renderer
         void push(const GridHolderPtr& grid);
 
         template<typename GridT, typename PolySamplerT>
+        void motionRasterize(GridHolder& holder);
+
+        template<typename GridT, typename PolySamplerT>
         void rasterize(Grid& inGrid, const Attributes& attrs);
 
         void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);

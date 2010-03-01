@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
 
     if(sceneName == "tenpatch")
         renderTenPatchScene();
+    else if(sceneName == "simpledeform")
+        renderSimpleDeformationScene();
     else
         renderDefaultScene();
 

@@ -34,10 +34,14 @@ struct Options
     float clipNear;  ///< Near clipping plane (cam coords)
     float clipFar;   ///< Far clipping plane (cam coords)
 
-    // Output options
+    // Sampling options
     int xRes;         ///< image x-resolution
     int yRes;         ///< image y-resolution
     Imath::V2i superSamp;  ///< supersampling resolution
+    float shutterMin; ///< shutter start time for motion blur
+    float shutterMax; ///< shutter end time for motion blur
+
+    // Filtering options
     FilterPtr pixelFilter; ///< pixel filter functor
     bool doFilter;    ///< If false, turn off filtering & return raw samples
 
@@ -49,6 +53,8 @@ struct Options
         xRes(640),
         yRes(480),
         superSamp(2,2),
+        shutterMin(0),
+        shutterMax(0),
         pixelFilter(makeGaussianFilter(Vec2(2,2))),
         doFilter(true)
     { }
