@@ -62,10 +62,10 @@ void renderSimpleDeformationScene()
     Renderer renderer(opts, camToScreen, outVars);
 
     GeometryKeys keys;
-    keys.push_back(createPatch(Vec3(0,0,1), Vec3(1,0,2),
-                               Vec3(0,1,1), Vec3(1,1,2)));
-    keys.push_back(createPatch(Vec3(0.6,0.6,1), Vec3(0.9,0,2),
-                               Vec3(0,0.9,0.9), Vec3(0.9,0.9,2)));
+    keys.push_back(GeometryKey(0, createPatch(Vec3(0,0,1), Vec3(1,0,2),
+                                              Vec3(0,1,1), Vec3(1,1,2))));
+    keys.push_back(GeometryKey(1, createPatch(Vec3(0.6,0.6,1), Vec3(0.9,0,2),
+                                              Vec3(0,0.9,0.9), Vec3(0.9,0.9,2))));
     renderer.add(keys, attrs);
 
     renderer.render();

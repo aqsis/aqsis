@@ -42,16 +42,17 @@ class GeomHolder : public RefCounted
         Box m_bound;         ///< Bound in camera coordinates
         Attributes* m_attrs; ///< Surface attribute state
 
-        void initKeys(GeometryPtr* begin, GeometryPtr* end, int stride)
+        /// Get the bound from a set of geometry keys
+        static Box boundFromKeys(const GeometryKeys& keys)
         {
-            m_geomKeys.reserve((end - begin)/stride - 1);
-            while((begin += stride) < end)
-            {
-                m_geomKeys.push_back(*begin);
-                m_bound.extendBy((*begin)->bound());
-            }
+            Box bound = keys[0].value->bound();
+            for(int i = 1, iend = keys.size(); i < iend; ++i)
+                bound.extendBy(keys[i].value->bound());
+            return bound;
         }
+
     public:
+        /// Create initial non-deforming geometry (no parent surface)
         GeomHolder(const GeometryPtr& geom, Attributes* attrs)
             : m_geom(geom),
             m_geomKeys(),
@@ -59,9 +60,8 @@ class GeomHolder : public RefCounted
             m_bound(geom->bound()),
             m_attrs(attrs)
         { }
-
-        GeomHolder(const GeometryPtr& geom,
-                   const GeomHolder& parent)
+        /// Create geometry resulting from splitting (has a parent surface)
+        GeomHolder(const GeometryPtr& geom, const GeomHolder& parent)
             : m_geom(geom),
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
@@ -69,35 +69,43 @@ class GeomHolder : public RefCounted
             m_attrs(parent.m_attrs)
         { }
 
-        GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
-                   Attributes* attrs)
-            : m_geom(*keysBegin),
-            m_geomKeys(),
+        /// Create initial deforming geometry (no parent surface)
+        GeomHolder(GeometryKeys& keys, Attributes* attrs)
+            : m_geom(),
+            m_geomKeys(keys),
             m_splitCount(0),
-            m_bound(m_geom->bound()),
+            m_bound(boundFromKeys(m_geomKeys)),
             m_attrs(attrs)
-        {
-            initKeys(keysBegin, keysEnd, 1);
-        }
-
+        { }
+        /// Create deforming geometry resulting from splitting
         GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
                    int keysStride, const GeomHolder& parent)
-            : m_geom(*keysBegin),
+            : m_geom(),
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
-            m_bound(m_geom->bound()),
+            m_bound(),
             m_attrs(parent.m_attrs)
         {
-            initKeys(keysBegin, keysEnd, keysStride);
+            // Init geom keys, taking every keysStride'th geometry
+            assert(static_cast<int>(parent.geomKeys().size())
+                   == (keysEnd-keysBegin)/keysStride);
+            m_geomKeys.reserve(parent.geomKeys().size());
+            GeometryKeys::const_iterator oldKey = parent.geomKeys().begin();
+            for(; keysBegin < keysEnd; keysBegin += keysStride, ++oldKey)
+                m_geomKeys.push_back(GeometryKey(oldKey->time, *keysBegin));
+            m_bound = boundFromKeys(m_geomKeys);
         }
 
-        Geometry& geom()          { return *m_geom; }
-        const Geometry& geom() const { return *m_geom; }
+        /// Get non-deforming geometry or first key frame
+        const Geometry& geom() const
+        {
+            return m_geom ? *m_geom : *m_geomKeys[0].value;
+        }
 
-        const GeometryKeys& extraKeys() const { return m_geomKeys; }
-        const int numGeomKeys() const { return m_geomKeys.size() + 1; }
+        /// Get deforming geometry key frames.  Empty if non-moving.
+        const GeometryKeys& geomKeys() const { return m_geomKeys; }
 
-        bool isDeforming() const { return !m_geomKeys.empty(); }
+        bool isDeforming() const { return !m_geom; }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
         Attributes& attrs()       { return *m_attrs; }
@@ -107,13 +115,14 @@ class GeomHolder : public RefCounted
 
 
 //------------------------------------------------------------------------------
-typedef std::vector<GridPtr> GridKeys;
+typedef MotionKey<GridPtr> GridKey;
+typedef std::vector<GridKey> GridKeys;
 
 class GridHolder : public RefCounted
 {
     private:
-        GridPtr m_firstGrid;       ///< Main grid (first key for deformation)
-        GridKeys m_extraGrids;     ///< Extra grid key frames
+        GridPtr m_grid;            ///< Non-deforming grid
+        GridKeys m_gridKeys;       ///< Grid keys for motion blur
         const Attributes* m_attrs; ///< Attribute state
 
         void shade(Grid& grid) const
@@ -127,34 +136,55 @@ class GridHolder : public RefCounted
 
     public:
         GridHolder(const GridPtr& grid, const Attributes* attrs)
-            : m_firstGrid(grid),
-            m_extraGrids(),
+            : m_grid(grid),
+            m_gridKeys(),
             m_attrs(attrs)
         { }
 
         template<typename GridPtrIterT>
-        GridHolder(GridPtrIterT begin, GridPtrIterT end, const Attributes* attrs)
-            : m_firstGrid(*begin),
-            m_extraGrids(begin+1, end),
-            m_attrs(attrs)
-        { }
+        GridHolder(GridPtrIterT begin, GridPtrIterT end,
+                   const GeomHolder& parentGeom)
+            : m_grid(),
+            m_gridKeys(),
+            m_attrs(&parentGeom.attrs())
+        {
+            GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
+            m_gridKeys.reserve(end - begin);
+            for(;begin != end; ++begin, ++oldKey)
+                m_gridKeys.push_back(GridKey(oldKey->time, *begin));
+        }
 
-        bool isDeforming() const { return !m_extraGrids.empty(); }
-        Grid& grid() { return *m_firstGrid; }
-        GridKeys& extraGrids() { return m_extraGrids; }
+        bool isDeforming() const { return !m_grid; }
+        Grid& grid() { return m_grid ? *m_grid : *m_gridKeys[0].value; }
+        GridKeys& gridKeys() { return m_gridKeys; }
 
         const Attributes& attrs() const { return *m_attrs; }
 
-        /// Shade all grids held
+        /// Shade all grids
         void shade()
         {
-            shade(*m_firstGrid);
-            // TODO: Only run displacement shaders for extra grids.
-            for(GridKeys::iterator i = m_extraGrids.begin(),
-                end = m_extraGrids.end(); i != end; ++i)
+            if(isDeforming())
             {
-                shade(**i);
+                // TODO: Run displacement shaders only on extra grids
+                // TODO: Fill in time variable on the grid before shading
+                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
+                    shade(*m_gridKeys[i].value);
             }
+            else
+                shade(*m_grid);
+        }
+
+        /// Project all grids, assuming type GridT
+        template<typename GridT>
+        void project(const Mat4& camToRas)
+        {
+            if(isDeforming())
+            {
+                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
+                    static_cast<GridT&>(*m_gridKeys[i].value).project(camToRas);
+            }
+            else
+                static_cast<GridT&>(*m_grid).project(camToRas);
         }
 };
 
@@ -233,9 +263,7 @@ class TessellationContextImpl : public TessellationContext
                         // push it back to the renderer.
                         assert((m_splits.size()/m_splitsPerKey)*m_splitsPerKey
                                 == m_splits.size());
-                        int nGeom = parentGeom.numGeomKeys();
-                        assert(nGeom > 1);
-                        for(int i = 0; i < nGeom; ++i)
+                        for(int i = 0; i < m_splitsPerKey; ++i)
                         {
                             GeomHolderPtr holder(
                                 new GeomHolder(
@@ -253,7 +281,7 @@ class TessellationContextImpl : public TessellationContext
                         renderer.push( GridHolderPtr(
                                 new GridHolder(
                                     m_grids.begin(), m_grids.end(),
-                                    &parentGeom.attrs()
+                                    parentGeom
                                 )
                         ));
                     }
@@ -281,11 +309,11 @@ class TessellationContextImpl : public TessellationContext
                 // Collect the split/dice results in m_deformCollector if the
                 // surface is involved in deformation motion blur.
                 m_deformCollector.reset();
-                tessControl.tessellate(m_parentGeom->geom(), *this);
+                const GeometryKeys& keys = m_parentGeom->geomKeys();
+                tessControl.tessellate(*keys[0].value, *this);
                 m_deformCollector.firstKeyDone();
-                const GeometryKeys& keys = m_parentGeom->extraKeys();
-                for(int i = 0, nkeys = keys.size(); i < nkeys; ++i)
-                    tessControl.tessellate(*keys[i], *this);
+                for(int i = 1, nkeys = keys.size(); i < nkeys; ++i)
+                    tessControl.tessellate(*keys[i].value, *this);
                 m_deformCollector.pushResults(*m_parentGeom, m_renderer);
             }
             else
@@ -709,8 +737,7 @@ void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
 
 void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 {
-    GeomHolderPtr holder(new GeomHolder(&*deformingGeom.begin(),
-                                        &*deformingGeom.end(), &attrs));
+    GeomHolderPtr holder(new GeomHolder(deformingGeom, &attrs));
     push(holder);
 }
 
@@ -740,8 +767,8 @@ void Renderer::render()
 template<typename GridT, typename PolySamplerT>
 void Renderer::motionRasterize(GridHolder& holder)
 {
-    GridT& grid1 = static_cast<GridT&>(holder.grid());
-    GridT& grid2 = static_cast<GridT&>(*holder.extraGrids()[0]);
+    // Project grids into raster coordinates.
+    holder.project<GridT>(m_camToRas);
 
     // Determine index of depth output data, if any.
     int zOffset = -1;
@@ -751,10 +778,30 @@ void Renderer::motionRasterize(GridHolder& holder)
     int fragSize = m_sampStorage->fragmentSize();
     const float* defaultFrag = m_sampStorage->defaultFragment();
 
-    // Project grids into raster coordinates.
-    grid1.project(m_camToRas);
-    grid2.project(m_camToRas);
-
+    // Interpolate at this time:
+    const float time = m_opts.shutterMax;
+    // Determine which pair of grids our time interval lies between.
+    const GridKeys& grids = holder.gridKeys();
+    int nKeys = grids.size();
+    int interval = 0;
+    if(grids[nKeys-1].time <= time)
+        interval = nKeys-2;
+    else
+    {
+        for(int i = 1; i < nKeys; ++i)
+        {
+            if(grids[i].time >= time)
+            {
+                interval = i-1;
+                break;
+            }
+        }
+    }
+    float t1 = grids[interval].time;
+    float t2 = grids[interval+1].time;
+    float interp = (time - t1)/(t2-t1);
+    const GridT& grid1 = static_cast<GridT&>(*grids[interval].value);
+    const GridT& grid2 = static_cast<GridT&>(*grids[interval+1].value);
     const GridStorage& stor1 = grid1.storage();
     const GridStorage& stor2 = grid2.storage();
     ConstDataView<Vec3> P1 = stor1.P();
@@ -763,9 +810,6 @@ void Renderer::motionRasterize(GridHolder& holder)
     PointInQuad hitTest;
     InvBilin invBilin;
 
-    // Fixed time, in betwen 0 & 1
-    const float time = m_opts.shutterMax;
-
     // For each micropoly
     for(int v = 0, nv = grid1.nv(); v < nv-1; ++v)
     for(int u = 0, nu = grid1.nu(); u < nu-1; ++u)
@@ -773,10 +817,10 @@ void Renderer::motionRasterize(GridHolder& holder)
         MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                          nu*(v+1) + u+1,  nu*(v+1) + u);
         // Interpolate to current time
-        Vec3 Pa = lerp(P1[ind.a], P2[ind.a], time);
-        Vec3 Pb = lerp(P1[ind.b], P2[ind.b], time);
-        Vec3 Pc = lerp(P1[ind.c], P2[ind.c], time);
-        Vec3 Pd = lerp(P1[ind.d], P2[ind.d], time);
+        Vec3 Pa = lerp(P1[ind.a], P2[ind.a], interp);
+        Vec3 Pb = lerp(P1[ind.b], P2[ind.b], interp);
+        Vec3 Pc = lerp(P1[ind.c], P2[ind.c], interp);
+        Vec3 Pd = lerp(P1[ind.d], P2[ind.d], interp);
         // Compute bound
         Box bound(Pa);
         bound.extendBy(Pb);

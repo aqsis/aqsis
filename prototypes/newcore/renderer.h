@@ -82,7 +82,18 @@ class StdOutInd
 
 typedef BasicVarSet<OutvarSpec, StdOutInd> OutvarSet;
 
-typedef std::vector<GeometryPtr> GeometryKeys;
+
+template<typename T>
+struct MotionKey
+{
+    float time;
+    T value;
+
+    MotionKey(float time, const T& value)
+        : time(time), value(value) {}
+};
+typedef MotionKey<GeometryPtr> GeometryKey;
+typedef std::vector<GeometryKey> GeometryKeys;
 
 //-----------------------------------------------------------------------------
 /// Main renderer interface.
