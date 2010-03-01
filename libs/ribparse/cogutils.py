@@ -84,8 +84,7 @@ def formalArg(arg):
     name = arg.findtext('Name')
     if type is None:
         return name
-    type = type.replace('RtToken', 'RtConstToken')
-    type = type.replace('RtString', 'RtConstString')
+    type = re.sub('Rt(Token|String|Color|Point(?!er)|Matrix|Bound)', r'RtConst\1', type)
     if type.endswith('Array'):
         return 'const Array<%s>& %s' % (type[:-5], name)
     return '%s %s' % (type, name)

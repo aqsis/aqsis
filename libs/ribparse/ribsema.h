@@ -42,7 +42,7 @@ namespace Aqsis
 class RibSema : public IqRibRequestHandler
 {
     public:
-        RibSema();
+        RibSema(Ri::Renderer& renderer);
 
         virtual void handleRequest(const std::string& requestName,
                 IqRibParser& parser);
@@ -186,7 +186,9 @@ class RibSema : public IqRibRequestHandler
         void handleVersion(IqRibParser& parser);
 
         //--------------------------------------------------
-        // Instance data
+        /// Renderer instance to which requests will be forwarded
+        Ri::Renderer& m_renderer;
+
         /// Request name -> handler mapping.
         HandlerMap m_requestHandlerMap;
 
