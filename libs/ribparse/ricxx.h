@@ -28,6 +28,7 @@ typedef const char* RtConstToken;
 typedef const float RtConstColor[3];
 typedef const float RtConstPoint[3];
 typedef const float RtConstMatrix[4][4];
+typedef const float RtConstBasis[4][4];
 typedef const float RtConstBound[6];
 
 
@@ -43,6 +44,7 @@ struct Array
     const T* p;
     size_t length;
 
+    Array() : p(0), length(0) {}
     Array(const T* p, size_t length) : p(p), length(length) {}
 };
 
@@ -254,8 +256,8 @@ class Renderer
                             const Array<RtInt>& verts,
                             const ParamList& pList) = 0;
         // ----------------------------- Patches -----------------------------
-        virtual RtVoid Basis(RtBasis ubasis, RtInt ustep, RtBasis vbasis,
-                            RtInt vstep) = 0;
+        virtual RtVoid Basis(RtConstBasis ubasis, RtInt ustep,
+                            RtConstBasis vbasis, RtInt vstep) = 0;
         virtual RtVoid Patch(RtConstToken type, const ParamList& pList) = 0;
         virtual RtVoid PatchMesh(RtConstToken type, RtInt nu,
                             RtConstToken uwrap, RtInt nv, RtConstToken vwrap,
@@ -371,10 +373,10 @@ class Renderer
         /// what the standard bases etc. are, and (2) the parser doesn't need
         /// to provide symbols which resolve to these itself.
         virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const = 0;
-        virtual const RtBasis*   GetBasis(RtConstToken name) const = 0;
+        virtual RtConstBasis*    GetBasis(RtConstToken name) const = 0;
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const = 0;
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const = 0;
-        virtual RtProcFreeFunc   GetProcFreeFunc(RtConstToken name) const = 0;
+        virtual RtProcFreeFunc   GetProcFreeFunc() const = 0;
 
         // TODO: Rif API?
 

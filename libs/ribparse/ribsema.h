@@ -62,9 +62,14 @@ class RibSema : public IqRibRequestHandler
         typedef RtLightHandle (*LightSourceVFunc)(RtToken shadername,
                     RtInt count, RtToken tokens[], RtPointer values[]);
 
-        //--------------------------------------------------
-        /// Helpers for handler methods
-        static RtBasis* getBasis(IqRibParser& parser);
+        // Utilities for handlers
+		/// Function pointer compatible with {Area}LightSource
+		typedef RtLightHandle (Ri::Renderer::*LightSourceFunc)(
+                RtConstToken shadername, const Ri::ParamList&);
+        /// Combined handler for LightSource & AreaLightSource
+        void handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
+                                      IqRibParser& parser);
+        RtConstBasis& getBasis(IqRibParser& parser) const;
 
         //--------------------------------------------------
         /// Handler methods definitions

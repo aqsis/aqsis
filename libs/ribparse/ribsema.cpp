@@ -333,6 +333,49 @@ const T& toFloatBasedType(const std::vector<RtFloat>& v,
 
 } // anon. namespace
 
+
+/// Retrieve a spline basis array from the parser
+///
+/// A spline basis array can be specified in two ways in a RIB stream: as an
+/// array of 16 floats, or as a string indicating one of the standard bases.
+/// This function returns the appropriate basis array, translating the string
+/// representation into one of the standard bases if necessary.
+///
+/// \param parser - read input from here.
+///
+RtConstBasis& RibSema::getBasis(IqRibParser& parser) const
+{
+    switch(parser.peekNextType())
+    {
+        case IqRibParser::Tok_Array:
+            {
+                const IqRibParser::TqFloatArray& basis = parser.getFloatArray();
+                if(basis.size() != 16)
+                    AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+                        "basis array must be of length 16");
+                // Ugly, but should be safe except unless a compiler fails to
+                // lay out float[4][4] the same as float[16]
+                return *reinterpret_cast<RtConstBasis*>(get(basis));
+            }
+        case IqRibParser::Tok_String:
+            {
+                std::string name = parser.getString();
+                RtConstBasis* basis = m_renderer.GetBasis(name.c_str());
+                if(!basis)
+                {
+                    AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+                        "unknown basis \"" << name << "\"");
+                }
+                return *basis;
+            }
+        default:
+            AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
+                "expected string or float array for basis");
+            static RtConstBasis dummy = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+            return dummy; // Kill compiler warnings
+    }
+}
+
 //--------------------------------------------------
 // Hand-written handler implementations.  Mostly these are hard to autogenerate.
 
@@ -348,50 +391,263 @@ void RibSema::handleVersion(IqRibParser& parser)
 
 void RibSema::handleDeclare(IqRibParser& parser)
 {
+    // Collect arguments from parser.
+    StringHolder name = parser.getString();
+    StringHolder declaration = parser.getString();
+
+    // TODO: Refactor so we don't need m_tokenDict.
+    m_tokenDict.insert(CqPrimvarToken(declaration, name));
+
+    m_renderer.Declare(name, declaration);
 }
 
 void RibSema::handleDepthOfField(IqRibParser& parser)
 {
+    if(parser.peekNextType() == IqRibParser::Tok_RequestEnd)
+    {
+        // If called without arguments, reset to the default pinhole camera.
+        m_renderer.DepthOfField(FLT_MAX, FLT_MAX, FLT_MAX);
+    }
+    else
+    {
+        // Collect arguments from parser.
+        RtFloat fstop = parser.getFloat();
+        RtFloat focallength = parser.getFloat();
+        RtFloat focaldistance = parser.getFloat();
+
+        m_renderer.DepthOfField(fstop, focallength, focaldistance);
+    }
 }
 
 void RibSema::handleColorSamples(IqRibParser& parser)
 {
+    // Collect arguments from parser.
+    Ri::Array<RtFloat> nRGB = toRiArray(parser.getFloatArray());
+    Ri::Array<RtFloat> RGBn = toRiArray(parser.getFloatArray());
+
+    m_renderer.ColorSamples(nRGB, RGBn);
+    m_numColorComps = nRGB.length/3;
+}
+
+/// Handle either LightSource or AreaLightSource
+///
+/// Both of these share the same RIB arguments and handler requirements, so the
+/// code is consolidated in this function.
+///
+/// \param lightSourceFunc - Interface function to LightSource or AreaLightSource
+/// \param parser - parser from which to read the arguments
+///
+void RibSema::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
+                                       IqRibParser& parser)
+{
+    // Collect arguments from parser.
+    StringHolder name = parser.getString();
+
+    int sequencenumber = 0;
+    // The RISpec says that lights are identified by a 'sequence number', but
+    // string identifiers are also allowed in common implementations.
+    std::string lightName;
+    bool useLightName = false;
+    if(parser.peekNextType() == IqRibParser::Tok_String)
+    {
+        lightName = parser.getString();
+        useLightName = true;
+    }
+    else
+        sequencenumber = parser.getInt();
+
+    // Extract the parameter list
+    ParamAccumulator paramList(m_tokenDict);
+    parser.getParamList(paramList);
+
+    // Call through to renderer
+    RtLightHandle lightHandle = (m_renderer.*lightSourceFunc)(name, paramList);
+
+    // associate handle with the sequence number/name.
+    if(lightHandle)
+    {
+        if(useLightName)
+            m_namedLightMap[lightName] = lightHandle;
+        else
+            m_lightMap[sequencenumber] = lightHandle;
+    }
 }
 
 void RibSema::handleLightSource(IqRibParser& parser)
 {
+    handleLightSourceGeneral(&Ri::Renderer::LightSource, parser);
 }
 
 void RibSema::handleAreaLightSource(IqRibParser& parser)
 {
+    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, parser);
 }
 
 void RibSema::handleIlluminate(IqRibParser& parser)
 {
-}
+    // Collect arguments from parser.
+    RtLightHandle lightHandle = 0;
+    if(parser.peekNextType() == IqRibParser::Tok_String)
+    {
+        // Handle string light names
+        std::string name = parser.getString();
+        NamedLightMap::const_iterator pos = m_namedLightMap.find(name);
+        if(pos == m_namedLightMap.end())
+            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                                "undeclared light name \"" << name << "\"");
+        lightHandle = pos->second;
+    }
+    else
+    {
+        // Handle integer sequence numbers
+        int sequencenumber = parser.getInt();
+        LightMap::const_iterator pos = m_lightMap.find(sequencenumber);
+        if(pos == m_lightMap.end())
+            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                                "undeclared light number " << sequencenumber);
+        lightHandle = pos->second;
+    }
+    RtInt onoff = parser.getInt();
 
-void RibSema::handleBasis(IqRibParser& parser)
-{
+    // Call through to renderer
+    RiIlluminate(lightHandle, onoff);
 }
 
 void RibSema::handleSubdivisionMesh(IqRibParser& parser)
 {
+    // Collect arguments from parser.
+    StringHolder scheme = parser.getString();
+    Ri::Array<RtInt> nvertices = toRiArray(parser.getIntArray());
+    Ri::Array<RtInt> vertices  = toRiArray(parser.getIntArray());
+
+    if(parser.peekNextType() == IqRibParser::Tok_Array)
+    {
+        // Handle the four optional arguments.
+        StringArrayHolder  tags      = parser.getStringArray();
+        Ri::Array<RtInt>   nargs     = toRiArray(parser.getIntArray());
+        Ri::Array<RtInt>   intargs   = toRiArray(parser.getIntArray());
+        Ri::Array<RtFloat> floatargs = toRiArray(parser.getFloatArray());
+        // Extract parameter list
+        ParamAccumulator paramList(m_tokenDict);
+        parser.getParamList(paramList);
+        // Call through to renderer
+        m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
+                                   tags, nargs, intargs, floatargs,
+                                   paramList);
+    }
+    else
+    {
+        // Else call version with empty optional args.
+        Ri::Array<RtConstString>  tags;
+        Ri::Array<RtInt>          nargs;
+        Ri::Array<RtInt>          intargs;
+        Ri::Array<RtFloat>        floatargs;
+        // Extract parameter list
+        ParamAccumulator paramList(m_tokenDict);
+        parser.getParamList(paramList);
+        // Call through to renderer
+        m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
+                                   tags, nargs, intargs, floatargs,
+                                   paramList);
+    }
 }
 
 void RibSema::handleHyperboloid(IqRibParser& parser)
 {
+    // Collect required args as an array
+    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(7);
+    RtConstPoint& point1 = *reinterpret_cast<RtConstPoint*>(&allArgs[0]);
+    RtConstPoint& point2 = *reinterpret_cast<RtConstPoint*>(&allArgs[3]);
+    RtFloat thetamax = allArgs[6];
+    // Extract the parameter list
+    ParamAccumulator paramList(m_tokenDict);
+    parser.getParamList(paramList);
+    // Call through to renderer
+    m_renderer.Hyperboloid(point1, point2, thetamax, paramList);
 }
 
 void RibSema::handleProcedural(IqRibParser& parser)
 {
+    // get procedural subdivision function
+    std::string procName = parser.getString();
+    RtProcSubdivFunc subdivideFunc = m_renderer.GetProcSubdivFunc(procName.c_str());
+    if(!subdivideFunc)
+    {
+        AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+                            "unknown procedural function \"" << procName << "\"");
+    }
+
+    // get argument string array.
+    const IqRibParser::TqStringArray& args = parser.getStringArray();
+    // Convert the string array to something passable as data arguments to the
+    // builtin procedurals.
+    //
+    // We jump through a few hoops to meet the spec here.  The data argument to
+    // the builtin procedurals should be interpretable as an array of RtString,
+    // which we somehow also want to be free()'able.  If we choose to use
+    // RiProcFree(), we must allocate it in one big lump.  Ugh.
+    size_t dataSize = 0;
+    TqInt numArgs = args.size();
+    for(TqInt i = 0; i < numArgs; ++i)
+    {
+        dataSize += sizeof(RtString);   // one pointer for this entry
+        dataSize += args[i].size() + 1; // and space for the string
+    }
+    RtPointer procData = reinterpret_cast<RtPointer>(malloc(dataSize));
+    RtString stringstart = reinterpret_cast<RtString>(
+            reinterpret_cast<RtString*>(procData) + numArgs);
+    for(TqInt i = 0; i < numArgs; ++i)
+    {
+        reinterpret_cast<RtString*>(procData)[i] = stringstart;
+        std::strcpy(stringstart, args[i].c_str());
+        stringstart += args[i].size() + 1;
+    }
+
+    // get the procedural bound
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(parser.getFloatArray(),
+                                                         "bound", 6);
+
+    m_renderer.Procedural(procData, bound, subdivideFunc, m_renderer.GetProcFreeFunc());
 }
 
 void RibSema::handleObjectBegin(IqRibParser& parser)
 {
+    // The RIB identifier is an integer according to the RISpec, but it's
+    // common to also allow string identifiers, hence the branch here.
+    if(parser.peekNextType() == IqRibParser::Tok_String)
+    {
+        std::string lightName = parser.getString();
+        if(RtObjectHandle handle = m_renderer.ObjectBegin())
+            m_namedObjectMap[lightName] = handle;
+    }
+    else
+    {
+        int sequenceNumber = parser.getInt();
+        if(RtObjectHandle handle = m_renderer.ObjectBegin())
+            m_objectMap[sequenceNumber] = handle;
+    }
 }
 
 void RibSema::handleObjectInstance(IqRibParser& parser)
 {
+    if(parser.peekNextType() == IqRibParser::Tok_String)
+    {
+        std::string name = parser.getString();
+        NamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);
+        if(pos == m_namedObjectMap.end())
+            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                    "undeclared object name \"" << name << "\"");
+        m_renderer.ObjectInstance(pos->second);
+    }
+    else
+    {
+        int sequencenumber = parser.getInt();
+        ObjectMap::const_iterator pos = m_objectMap.find(sequencenumber);
+        if(pos == m_objectMap.end())
+            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                    "undeclared object number " << sequencenumber);
+        m_renderer.ObjectInstance(pos->second);
+    }
 }
 
 
@@ -423,10 +679,11 @@ getterStatements = {
     'RtFilterFunc':  'RtFilterFunc %s = m_renderer.GetFilterFunc(parser.getString().c_str());',
     'RtArchiveCallback': 'RtArchiveCallback %s = 0;',
     'RtErrorFunc':   'RtErrorFunc %s = m_renderer.GetErrorFunc(parser.getString().c_str());',
+    'RtBasis':       'RtConstBasis& %s = getBasis(parser);',
 }
 
 customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
-                  'AreaLightSource', 'Illuminate', 'Basis', 'SubdivisionMesh',
+                  'AreaLightSource', 'Illuminate', 'SubdivisionMesh',
                   'Hyperboloid', 'Procedural', 'ObjectBegin', 'ObjectInstance'])
 
 # Ignore procs which have custom implementations.
@@ -965,6 +1222,15 @@ void RibSema::handlePointsGeneralPolygons(IqRibParser& parser)
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
     m_renderer.PointsGeneralPolygons(nloops, nverts, verts, paramList);
+}
+
+void RibSema::handleBasis(IqRibParser& parser)
+{
+    RtConstBasis& ubasis = getBasis(parser);
+    RtInt ustep = parser.getInt();
+    RtConstBasis& vbasis = getBasis(parser);
+    RtInt vstep = parser.getInt();
+    m_renderer.Basis(ubasis, ustep, vbasis, vstep);
 }
 
 void RibSema::handlePatch(IqRibParser& parser)
