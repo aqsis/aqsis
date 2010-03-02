@@ -25,11 +25,10 @@
 
 #include "ribsema.h"
 
+#include <cfloat>
 #include <cstring>  // for strcpy
 
 #include <boost/shared_ptr.hpp>
-
-#include <aqsis/ri/ri.h>
 
 namespace Aqsis
 {
@@ -288,7 +287,7 @@ class StringHolder
 };
 
 /// A conversion class, converting IqRibParser::TqStringArray to
-/// Ri::Array<RtConstToken>
+/// Ri::TokenArray
 class StringArrayHolder
 {
     private:
@@ -308,9 +307,9 @@ class StringArrayHolder
         }
 
         // Conversion to the associated Ri::Array type
-        operator Ri::Array<RtConstToken>()
+        operator Ri::TokenArray()
         {
-            return Ri::Array<RtConstToken>(get(m_strings), m_strings.size());
+            return Ri::TokenArray(get(m_strings), m_strings.size());
         }
 };
 
@@ -422,8 +421,8 @@ void RibSema::handleDepthOfField(IqRibParser& parser)
 void RibSema::handleColorSamples(IqRibParser& parser)
 {
     // Collect arguments from parser.
-    Ri::Array<RtFloat> nRGB = toRiArray(parser.getFloatArray());
-    Ri::Array<RtFloat> RGBn = toRiArray(parser.getFloatArray());
+    Ri::FloatArray nRGB = toRiArray(parser.getFloatArray());
+    Ri::FloatArray RGBn = toRiArray(parser.getFloatArray());
 
     m_renderer.ColorSamples(nRGB, RGBn);
     m_numColorComps = nRGB.length/3;
@@ -510,23 +509,23 @@ void RibSema::handleIlluminate(IqRibParser& parser)
     RtInt onoff = parser.getInt();
 
     // Call through to renderer
-    RiIlluminate(lightHandle, onoff);
+    m_renderer.Illuminate(lightHandle, onoff);
 }
 
 void RibSema::handleSubdivisionMesh(IqRibParser& parser)
 {
     // Collect arguments from parser.
     StringHolder scheme = parser.getString();
-    Ri::Array<RtInt> nvertices = toRiArray(parser.getIntArray());
-    Ri::Array<RtInt> vertices  = toRiArray(parser.getIntArray());
+    Ri::IntArray nvertices = toRiArray(parser.getIntArray());
+    Ri::IntArray vertices  = toRiArray(parser.getIntArray());
 
     if(parser.peekNextType() == IqRibParser::Tok_Array)
     {
         // Handle the four optional arguments.
         StringArrayHolder  tags      = parser.getStringArray();
-        Ri::Array<RtInt>   nargs     = toRiArray(parser.getIntArray());
-        Ri::Array<RtInt>   intargs   = toRiArray(parser.getIntArray());
-        Ri::Array<RtFloat> floatargs = toRiArray(parser.getFloatArray());
+        Ri::IntArray   nargs     = toRiArray(parser.getIntArray());
+        Ri::IntArray   intargs   = toRiArray(parser.getIntArray());
+        Ri::FloatArray floatargs = toRiArray(parser.getFloatArray());
         // Extract parameter list
         ParamAccumulator paramList(m_tokenDict);
         parser.getParamList(paramList);
@@ -538,10 +537,10 @@ void RibSema::handleSubdivisionMesh(IqRibParser& parser)
     else
     {
         // Else call version with empty optional args.
-        Ri::Array<RtConstString>  tags;
-        Ri::Array<RtInt>          nargs;
-        Ri::Array<RtInt>          intargs;
-        Ri::Array<RtFloat>        floatargs;
+        Ri::StringArray  tags;
+        Ri::IntArray          nargs;
+        Ri::IntArray          intargs;
+        Ri::FloatArray        floatargs;
         // Extract parameter list
         ParamAccumulator paramList(m_tokenDict);
         parser.getParamList(paramList);
@@ -665,9 +664,9 @@ riXml = parseXmlTree('ri.xml')
 getterStatements = {
     'RtBoolean':     'RtInt %s = parser.getInt();',
     'RtInt':         'RtInt %s = parser.getInt();',
-    'RtIntArray':    'Ri::Array<RtInt> %s = toRiArray(parser.getIntArray());',
+    'RtIntArray':    'Ri::IntArray %s = toRiArray(parser.getIntArray());',
     'RtFloat':       'RtFloat %s = parser.getFloat();',
-    'RtFloatArray':  'Ri::Array<RtFloat> %s = toRiArray(parser.getFloatArray());',
+    'RtFloatArray':  'Ri::FloatArray %s = toRiArray(parser.getFloatArray());',
     'RtString':      'StringHolder %s = parser.getString();',
     'RtStringArray': 'StringArrayHolder %s = parser.getStringArray();',
     'RtToken':       'StringHolder %s = parser.getString();',
@@ -1199,7 +1198,7 @@ void RibSema::handlePolygon(IqRibParser& parser)
 
 void RibSema::handleGeneralPolygon(IqRibParser& parser)
 {
-    Ri::Array<RtInt> nverts = toRiArray(parser.getIntArray());
+    Ri::IntArray nverts = toRiArray(parser.getIntArray());
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
     m_renderer.GeneralPolygon(nverts, paramList);
@@ -1207,8 +1206,8 @@ void RibSema::handleGeneralPolygon(IqRibParser& parser)
 
 void RibSema::handlePointsPolygons(IqRibParser& parser)
 {
-    Ri::Array<RtInt> nverts = toRiArray(parser.getIntArray());
-    Ri::Array<RtInt> verts = toRiArray(parser.getIntArray());
+    Ri::IntArray nverts = toRiArray(parser.getIntArray());
+    Ri::IntArray verts = toRiArray(parser.getIntArray());
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
     m_renderer.PointsPolygons(nverts, verts, paramList);
@@ -1216,9 +1215,9 @@ void RibSema::handlePointsPolygons(IqRibParser& parser)
 
 void RibSema::handlePointsGeneralPolygons(IqRibParser& parser)
 {
-    Ri::Array<RtInt> nloops = toRiArray(parser.getIntArray());
-    Ri::Array<RtInt> nverts = toRiArray(parser.getIntArray());
-    Ri::Array<RtInt> verts = toRiArray(parser.getIntArray());
+    Ri::IntArray nloops = toRiArray(parser.getIntArray());
+    Ri::IntArray nverts = toRiArray(parser.getIntArray());
+    Ri::IntArray verts = toRiArray(parser.getIntArray());
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
     m_renderer.PointsGeneralPolygons(nloops, nverts, verts, paramList);
@@ -1257,12 +1256,12 @@ void RibSema::handleNuPatch(IqRibParser& parser)
 {
     RtInt nu = parser.getInt();
     RtInt uorder = parser.getInt();
-    Ri::Array<RtFloat> uknot = toRiArray(parser.getFloatArray());
+    Ri::FloatArray uknot = toRiArray(parser.getFloatArray());
     RtFloat umin = parser.getFloat();
     RtFloat umax = parser.getFloat();
     RtInt nv = parser.getInt();
     RtInt vorder = parser.getInt();
-    Ri::Array<RtFloat> vknot = toRiArray(parser.getFloatArray());
+    Ri::FloatArray vknot = toRiArray(parser.getFloatArray());
     RtFloat vmin = parser.getFloat();
     RtFloat vmax = parser.getFloat();
     ParamAccumulator paramList(m_tokenDict);
@@ -1272,15 +1271,15 @@ void RibSema::handleNuPatch(IqRibParser& parser)
 
 void RibSema::handleTrimCurve(IqRibParser& parser)
 {
-    Ri::Array<RtInt> ncurves = toRiArray(parser.getIntArray());
-    Ri::Array<RtInt> order = toRiArray(parser.getIntArray());
-    Ri::Array<RtFloat> knot = toRiArray(parser.getFloatArray());
-    Ri::Array<RtFloat> min = toRiArray(parser.getFloatArray());
-    Ri::Array<RtFloat> max = toRiArray(parser.getFloatArray());
-    Ri::Array<RtInt> n = toRiArray(parser.getIntArray());
-    Ri::Array<RtFloat> u = toRiArray(parser.getFloatArray());
-    Ri::Array<RtFloat> v = toRiArray(parser.getFloatArray());
-    Ri::Array<RtFloat> w = toRiArray(parser.getFloatArray());
+    Ri::IntArray ncurves = toRiArray(parser.getIntArray());
+    Ri::IntArray order = toRiArray(parser.getIntArray());
+    Ri::FloatArray knot = toRiArray(parser.getFloatArray());
+    Ri::FloatArray min = toRiArray(parser.getFloatArray());
+    Ri::FloatArray max = toRiArray(parser.getFloatArray());
+    Ri::IntArray n = toRiArray(parser.getIntArray());
+    Ri::FloatArray u = toRiArray(parser.getFloatArray());
+    Ri::FloatArray v = toRiArray(parser.getFloatArray());
+    Ri::FloatArray w = toRiArray(parser.getFloatArray());
     m_renderer.TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
@@ -1365,7 +1364,7 @@ void RibSema::handlePoints(IqRibParser& parser)
 void RibSema::handleCurves(IqRibParser& parser)
 {
     StringHolder type = parser.getString();
-    Ri::Array<RtInt> nvertices = toRiArray(parser.getIntArray());
+    Ri::IntArray nvertices = toRiArray(parser.getIntArray());
     StringHolder wrap = parser.getString();
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
@@ -1375,8 +1374,8 @@ void RibSema::handleCurves(IqRibParser& parser)
 void RibSema::handleBlobby(IqRibParser& parser)
 {
     RtInt nleaf = parser.getInt();
-    Ri::Array<RtInt> code = toRiArray(parser.getIntArray());
-    Ri::Array<RtFloat> flt = toRiArray(parser.getFloatArray());
+    Ri::IntArray code = toRiArray(parser.getIntArray());
+    Ri::FloatArray flt = toRiArray(parser.getFloatArray());
     StringArrayHolder str = parser.getStringArray();
     ParamAccumulator paramList(m_tokenDict);
     parser.getParamList(paramList);
@@ -1409,7 +1408,7 @@ void RibSema::handleObjectEnd(IqRibParser& parser)
 
 void RibSema::handleMotionBegin(IqRibParser& parser)
 {
-    Ri::Array<RtFloat> times = toRiArray(parser.getFloatArray());
+    Ri::FloatArray times = toRiArray(parser.getFloatArray());
     m_renderer.MotionBegin(times);
 }
 

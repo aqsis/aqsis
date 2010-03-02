@@ -33,6 +33,7 @@ set(ribparse_test_srcs
 	ribinputbuffer_test.cpp
 	riblexer_test.cpp
 	ribparser_test.cpp
+	ribsema_test.cpp
 )
 
 aqsis_add_tests(${ribparse_test_srcs} LINK_LIBRARIES aqsis_ribparse)
