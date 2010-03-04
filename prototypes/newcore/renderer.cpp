@@ -174,17 +174,16 @@ class GridHolder : public RefCounted
                 shade(*m_grid);
         }
 
-        /// Project all grids, assuming type GridT
-        template<typename GridT>
+        /// Project all grids held by the holder
         void project(const Mat4& camToRas)
         {
             if(isDeforming())
             {
                 for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
-                    static_cast<GridT&>(*m_gridKeys[i].value).project(camToRas);
+                    m_gridKeys[i].value->project(camToRas);
             }
             else
-                static_cast<GridT&>(*m_grid).project(camToRas);
+                m_grid->project(camToRas);
         }
 };
 
@@ -764,92 +763,172 @@ void Renderer::render()
     saveImages("test");
 }
 
+
+/// TODO: Clean up & abstract the parts of motionRasterize so it can correctly
+/// take any GridT, and so that it actually uses PolySamplerT.
+struct OutVarInfo
+{
+    ConstFvecView src;
+    int outIdx;
+
+    OutVarInfo(const ConstFvecView& src, int outIdx)
+        : src(src), outIdx(outIdx) {}
+};
+
+/// Dirty implementation of motion blur sampling.  Won't work unless GridT is
+/// a quad grid!
 template<typename GridT, typename PolySamplerT>
 void Renderer::motionRasterize(GridHolder& holder)
 {
     // Project grids into raster coordinates.
-    holder.project<GridT>(m_camToRas);
+    holder.project(m_camToRas);
 
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
-    int fragSize = m_sampStorage->fragmentSize();
-    const float* defaultFrag = m_sampStorage->defaultFragment();
 
-    // Interpolate at this time:
-    const float time = m_opts.shutterMax;
-    // Determine which pair of grids our time interval lies between.
-    const GridKeys& grids = holder.gridKeys();
-    int nKeys = grids.size();
-    int interval = 0;
-    if(grids[nKeys-1].time <= time)
-        interval = nKeys-2;
-    else
+    // Cache the variables which need to be interpolated into
+    // fragment outputs.
+    std::vector<OutVarInfo> outVarInfo;
+    const GridStorage& stor = holder.gridKeys()[0].value->storage();
+    const VarSet& gridVars = stor.varSet();
+    for(int j = 0, jend = m_outVars.size(); j < jend; ++j)
     {
-        for(int i = 1; i < nKeys; ++i)
+        // Simplistic linear search through grid variables for now.
+        // This only happens once per grid, so maybe it's not too bad?
+        for(int i = 0, iend = gridVars.size(); i < iend; ++i)
         {
-            if(grids[i].time >= time)
+            if(gridVars[i] == m_outVars[j])
             {
-                interval = i-1;
+                outVarInfo.push_back(OutVarInfo(
+                        stor.get(i), m_outVars[j].offset) );
                 break;
             }
         }
     }
-    float t1 = grids[interval].time;
-    float t2 = grids[interval+1].time;
-    float interp = (time - t1)/(t2-t1);
-    const GridT& grid1 = static_cast<GridT&>(*grids[interval].value);
-    const GridT& grid2 = static_cast<GridT&>(*grids[interval+1].value);
-    const GridStorage& stor1 = grid1.storage();
-    const GridStorage& stor2 = grid2.storage();
-    ConstDataView<Vec3> P1 = stor1.P();
-    ConstDataView<Vec3> P2 = stor2.P();
+
+    int fragSize = m_sampStorage->fragmentSize();
+    const float* defaultFrag = m_sampStorage->defaultFragment();
+
+    const GridKeys& gridKeys = holder.gridKeys();
+
+    // sample times
+    const int ntimes = m_sampStorage->m_sampleTimes.size();
+    float* times = &m_sampStorage->m_sampleTimes[0];
+    // Pre-compute interpolation info for all time indices
+    int* intervals = ALLOCA(int, ntimes);
+    const int maxIntervalIdx = gridKeys.size()-2;
+    float* interpWeights = ALLOCA(float, ntimes);
+    for(int i = 0, interval = 0; i < ntimes; ++i)
+    {
+        // Search forward through grid time intervals to find the interval
+        // which contains the i'th sample time.
+        while(interval < maxIntervalIdx && gridKeys[interval+1].time < times[i])
+            ++interval;
+        intervals[i] = interval;
+        interpWeights[i] = (times[i] - gridKeys[interval].time) /
+                    (gridKeys[interval+1].time - gridKeys[interval].time);
+    }
+
+    Imath::V2i tileSize = m_sampStorage->m_tileSize;
+    Vec2 tileBoundMult = Vec2(1.0)/Vec2(tileSize);
+    Imath::V2i nTiles = Imath::V2i(m_sampStorage->m_xSampRes-1,
+                        m_sampStorage->m_ySampRes-1) / tileSize
+                        + Imath::V2i(1);
 
     PointInQuad hitTest;
     InvBilin invBilin;
 
-    // For each micropoly
-    for(int v = 0, nv = grid1.nv(); v < nv-1; ++v)
-    for(int u = 0, nu = grid1.nu(); u < nu-1; ++u)
+    int nv = 0;
+    int nu = 0;
+    {
+        const GridT& g = static_cast<GridT&>(*gridKeys[0].value);
+        nv = g.nv();
+        nu = g.nu();
+    }
+
+    // For each micropoly.
+    for(int v = 0; v < nv-1; ++v)
+    for(int u = 0; u < nu-1; ++u)
     {
         MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                          nu*(v+1) + u+1,  nu*(v+1) + u);
-        // Interpolate to current time
-        Vec3 Pa = lerp(P1[ind.a], P2[ind.a], interp);
-        Vec3 Pb = lerp(P1[ind.b], P2[ind.b], interp);
-        Vec3 Pc = lerp(P1[ind.c], P2[ind.c], interp);
-        Vec3 Pd = lerp(P1[ind.d], P2[ind.d], interp);
-        // Compute bound
-        Box bound(Pa);
-        bound.extendBy(Pb);
-        bound.extendBy(Pc);
-        bound.extendBy(Pd);
-        // Init hit tester
-        hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
-                     vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
-        invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
-                      vec2_cast(Pd), vec2_cast(Pc));
-        // Iterate over samples in bound
-        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
-            sampi.valid(); ++sampi)
+        // For each possible sample time
+        for(int itime = 0; itime < ntimes; ++itime)
         {
-            Sample& samp = sampi.sample();
-            if(!hitTest(samp))
-                continue;
-            Vec2 uv = invBilin(samp.p);
-            float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
-            if(samp.z < z)
-                continue; // Ignore if hit is hidden
-            samp.z = z;
-            // Generate & store a fragment
-            float* out = sampi.fragment();
-            // Initialize fragment data with the default value.
-            std::memcpy(out, defaultFrag, fragSize*sizeof(float));
-            // Store interpolated fragment data
-            if(zOffset >= 0)
-                out[zOffset] = z;
+            int interval = intervals[itime];
+            const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
+            const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
+            // Interpolate micropoly to the current time
+            float interp = interpWeights[itime];
+            ConstDataView<Vec3> P1 = grid1.storage().P();
+            ConstDataView<Vec3> P2 = grid2.storage().P();
+            Vec3 Pa = lerp(P1[ind.a], P2[ind.a], interp);
+            Vec3 Pb = lerp(P1[ind.b], P2[ind.b], interp);
+            Vec3 Pc = lerp(P1[ind.c], P2[ind.c], interp);
+            Vec3 Pd = lerp(P1[ind.d], P2[ind.d], interp);
+            hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
+                         vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
+            invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
+                         vec2_cast(Pd), vec2_cast(Pc));
+            // Compute bound
+            Box bound(Pa);
+            bound.extendBy(Pb);
+            bound.extendBy(Pc);
+            bound.extendBy(Pd);
+
+            // Iterate over samples at current time which come from tiles
+            // which cross the bound.
+            Imath::V2i bndMin = ifloor((vec2_cast(bound.min)*m_opts.superSamp
+                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
+            Imath::V2i bndMax = ifloor((vec2_cast(bound.max)*m_opts.superSamp
+                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
+            int startx = clamp(bndMin.x,   0, nTiles.x);
+            int endx   = clamp(bndMax.x+1, 0, nTiles.x);
+            int starty = clamp(bndMin.y,   0, nTiles.y);
+            int endy   = clamp(bndMax.y+1, 0, nTiles.y);
+            // For each tile in the bound
+            for(int ty = starty; ty < endy; ++ty)
+            for(int tx = startx; tx < endx; ++tx)
+            {
+                int tileInd = (ty*nTiles.x + tx);
+                // Index of which sample in the tile is considered to be at
+                // itime.
+                int shuffIdx = m_sampStorage->m_tileShuffleIndices[
+                                tileInd*ntimes + itime ];
+                Sample& samp = m_sampStorage->m_samples[shuffIdx];
+                if(!hitTest(samp))
+                    continue;
+                Vec2 uv = invBilin(samp.p);
+                float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
+                if(samp.z < z)
+                    continue; // Ignore if hit is hidden
+                samp.z = z;
+                // Generate & store a fragment
+                float* samples = &m_sampStorage->m_fragments[shuffIdx*fragSize];
+                // Initialize fragment data with the default value.
+                std::memcpy(samples, defaultFrag, fragSize*sizeof(float));
+                // Store interpolated fragment data
+                for(int j = 0, jend = outVarInfo.size(); j < jend; ++j)
+                {
+                    ConstFvecView in = outVarInfo[j].src;
+                    const float* in0 = in[ind.a];
+                    const float* in1 = in[ind.b];
+                    const float* in2 = in[ind.d];
+                    const float* in3 = in[ind.c];
+                    float w0 = (1-uv.y)*(1-uv.x);
+                    float w1 = (1-uv.y)*uv.x;
+                    float w2 = uv.y*(1-uv.x);
+                    float w3 = uv.y*uv.x;
+                    float* out = &samples[outVarInfo[j].outIdx];
+                    for(int i = 0, size = in.elSize(); i < size; ++i)
+                        out[i] = w0*in0[i] + w1*in1[i] + w2*in2[i] + w3*in3[i];
+                }
+                if(zOffset >= 0)
+                    samples[zOffset] = z;
+            }
         }
     }
 }

@@ -67,6 +67,8 @@ class SampleStorage
                                             const Options& opts,
                                             Imath::V2i& filtWidth);
 
+    // TODO: Clean up so that member data can be private again!
+    public:
         // Stuff describing size of sample area
         const Options& m_opts; ///< options structure
         int m_fragSize;        ///< length of single fragment storage
@@ -75,6 +77,12 @@ class SampleStorage
 
         // Stuff describing samples
         std::vector<Sample> m_samples;        ///< sample positions
+
+        // Info for interleaved sampling
+        Imath::V2i m_tileSize;  ///< tile size for interleaved sampling
+        Imath::V2i m_nTiles;    ///< number of tiles
+        std::vector<int> m_tileShuffleIndices; ///< Indices into m_sampleTimes
+        std::vector<float> m_sampleTimes;      ///< Fixed times for all samples
 
         // Stuff describing fragments
         std::vector<float> m_defaultFragment; ///< Default fragment channels

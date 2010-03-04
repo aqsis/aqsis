@@ -56,7 +56,7 @@ class QuadGridSimple : public Grid
 
         Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
 
-        void project(Mat4 m)
+        virtual void project(const Mat4& m)
         {
             for(int i = 0, iend = m_P.size(); i < iend; ++i)
             {

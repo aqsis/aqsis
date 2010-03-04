@@ -21,6 +21,21 @@
 #include "arrayview.h"
 #include "util.h"
 
+#include <cstdlib>  // for rand()
+
+/// In place Fisher-Yates shuffle
+static void shuffle(int* v, int N)
+{
+    int i = N;
+    while(i > 1)
+    {
+        // TODO: Use something better than std::rand()
+        int i2 = std::rand() % i;
+        --i;
+        std::swap(v[i], v[i2]);
+    }
+}
+
 
 SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
     : m_opts(opts),
@@ -62,6 +77,36 @@ SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
                                + Vec2(0.5f) );
             m_samples[j*m_xSampRes + i] = Sample(pos);
         }
+    }
+
+    // Initialize interleaved sampling info
+    m_tileSize = Imath::V2i(8,8);
+    m_nTiles = Imath::V2i(m_xSampRes-1, m_ySampRes-1)/m_tileSize + Imath::V2i(1);
+    // Make shuffled tile indices
+    int sampsPerTile = m_tileSize.x*m_tileSize.y;
+    m_tileShuffleIndices.resize(sampsPerTile*m_nTiles.x*m_nTiles.y, 0);
+    for(int ty = 0, shuffStart = 0; ty < m_ySampRes; ty += m_tileSize.y)
+    {
+        for(int tx = 0; tx < m_xSampRes;
+            tx += m_tileSize.x, shuffStart += sampsPerTile)
+        {
+            int* tileInd = &m_tileShuffleIndices[shuffStart];
+            int k = 0;
+            // Initialize tile indices
+            for(int j = ty, jend = ty+m_tileSize.y; j < jend; ++j)
+                for(int i = tx, iend = tx+m_tileSize.x; i < iend; ++i, ++k)
+                    tileInd[k] = j*m_xSampRes + i;
+            // Randomly shuffle the indices in the tile
+            shuffle(tileInd, sampsPerTile);
+        }
+    }
+    // Initialize jittered time samples
+    m_sampleTimes.resize(sampsPerTile);
+    float shutterDelta = (opts.shutterMax-opts.shutterMin)/sampsPerTile;
+    for(int i = 0; i < sampsPerTile; ++i)
+    {
+        m_sampleTimes[i] = opts.shutterMin + shutterDelta *
+                                             (i + float(rand())/RAND_MAX);
     }
 
     // Initialize fragment array using default fragment.
