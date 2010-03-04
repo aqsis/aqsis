@@ -425,7 +425,7 @@ void RibSema::handleColorSamples(IqRibParser& parser)
     Ri::FloatArray RGBn = toRiArray(parser.getFloatArray());
 
     m_renderer.ColorSamples(nRGB, RGBn);
-    m_numColorComps = nRGB.length/3;
+    m_numColorComps = nRGB.size()/3;
 }
 
 /// Handle either LightSource or AreaLightSource

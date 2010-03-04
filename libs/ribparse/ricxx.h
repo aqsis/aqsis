@@ -38,14 +38,28 @@ typedef float RtFloat;
 typedef int RtInt;
 typedef const char* RtConstToken;
 
+/// An minimal, immutable array type.
 template<typename T>
-struct Array
+class Array
 {
-    const T* p;
-    size_t length;
+    private:
+        const T* m_data;
+        size_t m_size;
 
-    Array() : p(0), length(0) {}
-    Array(const T* p, size_t length) : p(p), length(length) {}
+    public:
+        Array() : m_data(0), m_size(0) {}
+        Array(const T* data, size_t size) : m_data(data), m_size(size) {}
+
+        // Note, compiler generated assignment & copy construction.
+
+        /// Iterators to beginning & end of array.
+        const T* begin() const { return m_data; }
+        const T* end() const { return m_data + m_size; }
+        /// Get length of the array
+        size_t size() const { return m_size; }
+
+        /// Element access
+        const T& operator[](size_t i) const { return m_data[i]; }
 };
 
 typedef Array<RtInt> IntArray;
@@ -58,28 +72,30 @@ class Param
     private:
         CqPrimvarToken m_spec;
         const void* m_data;
-        size_t m_length;
+        size_t m_size;
+
     public:
-        Param(const CqPrimvarToken& spec, const RtFloat* data, size_t length)
-            : m_spec(spec), m_data(data), m_length(length) {}
-        Param(const CqPrimvarToken& spec, const RtInt* data, size_t length)
-            : m_spec(spec), m_data(data), m_length(length) {}
-        Param(const CqPrimvarToken& spec, const RtConstToken* data, size_t length)
-            : m_spec(spec), m_data(data), m_length(length) {}
+        Param(const CqPrimvarToken& spec, const RtFloat* data, size_t size)
+            : m_spec(spec), m_data(data), m_size(size) {}
+        Param(const CqPrimvarToken& spec, const RtInt* data, size_t size)
+            : m_spec(spec), m_data(data), m_size(size) {}
+        Param(const CqPrimvarToken& spec, const RtConstToken* data, size_t size)
+            : m_spec(spec), m_data(data), m_size(size) {}
 
         const CqPrimvarToken& spec() const { return m_spec; }
+        const void* data() const { return m_data; }
 
         FloatArray getFloatArray() const
         {
-            return FloatArray(static_cast<const RtFloat*>(m_data), m_length);
+            return FloatArray(static_cast<const RtFloat*>(m_data), m_size);
         }
         IntArray getIntArray() const
         {
-            return IntArray(static_cast<const RtInt*>(m_data), m_length);
+            return IntArray(static_cast<const RtInt*>(m_data), m_size);
         }
         StringArray getStringArray() const
         {
-            return StringArray(static_cast<const RtConstToken*>(m_data), m_length);
+            return StringArray(static_cast<const RtConstToken*>(m_data), m_size);
         }
 };
 

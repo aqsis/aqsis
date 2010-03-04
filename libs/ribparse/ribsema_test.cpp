@@ -25,6 +25,7 @@
 
 #include "ribsema.h"
 
+#include <cfloat>
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
@@ -32,8 +33,8 @@
 #include <boost/assign/std/vector.hpp>
 
 #include <aqsis/math/math.h>
-#include <aqsis/ri/ri.h>
 #include <aqsis/ribparser.h>
+#include <aqsis/riutil/tokendictionary.h>
 
 using namespace boost::assign; // necessary for container initialisation operators.
 
@@ -71,6 +72,7 @@ struct Req
 
 namespace printer_funcs
 {
+    // Printer functions for use with boost.test test tools
     // We put these operator<<() in a namespace so that they can be introduced
     // into namespace boost in a controllable way.
 
@@ -89,6 +91,27 @@ namespace printer_funcs
         return out;
     }
 
+    // Print a Ri::Array
+    template<typename T>
+    std::ostream& operator<<(std::ostream& out, const Ri::Array<T>& v)
+    {
+        out << "[";
+        for(int i = 0, end = v.size(); i < end; ++i)
+        {
+            out << v[i];
+            if(i != end-1)
+                out << " ";
+        }
+        out << "]";
+        return out;
+    }
+
+    std::ostream& operator<<(std::ostream& out, const Ri::Param& p)
+    {
+        out << p.spec();
+        return out;
+    }
+
     // Insert a Req into a stream.
     std::ostream& operator<<(std::ostream& out, const Req& r)
     {
@@ -97,11 +120,15 @@ namespace printer_funcs
     }
 }
 
-// Introduce the printer funcs into both the global and boost namespaces so
-// that lookup can find them.
-namespace boost {
+// Introduce the printer funcs into the necessary namespaces so that lookup can
+// find them (ugh, is there a better way to do this?)  One alternative would be
+// to just disable printing using something like
+//
+//   BOOST_TEST_DONT_PRINT_LOG_VALUE(Ri::Param);
+//
+namespace Aqsis { namespace Ri {
     using printer_funcs::operator<<;
-}
+}}
 using printer_funcs::operator<<;
 
 
@@ -160,6 +187,12 @@ class MockRibToken
             : m_type(Type_FloatArray), m_floats(v) { }
         MockRibToken(const IqRibParser::TqStringArray& v)
             : m_type(Type_StringArray), m_strings(v) { }
+        MockRibToken(const Ri::IntArray& v)
+            : m_type(Type_IntArray), m_ints(v.begin(), v.end()) { }
+        MockRibToken(const Ri::FloatArray& v)
+            : m_type(Type_FloatArray), m_floats(v.begin(), v.end()) { }
+        MockRibToken(const Ri::StringArray& v)
+            : m_type(Type_StringArray), m_strings(v.begin(), v.end()) { }
         MockRibToken(const IgnoreParam&)
             : m_type(Type_Ignore) { }
 
@@ -193,14 +226,14 @@ class MockRibToken
                 return false;
             switch(m_type)
             {
-                case Type_Int:            return getInt() == rhs.getInt();
-                case Type_Float:        return getFloat() == rhs.getFloat();
-                case Type_String:        return getString() == rhs.getString();
-                case Type_IntArray:        return getIntArray() == rhs.getIntArray();
-                case Type_FloatArray:    return getFloatArray() == rhs.getFloatArray();
-                case Type_StringArray:    return getStringArray() == rhs.getStringArray();
-                case Type_Request:        return getReq() == rhs.getReq();
-                case Type_Ignore:        return true;
+                case Type_Int:         return getInt() == rhs.getInt();
+                case Type_Float:       return getFloat() == rhs.getFloat();
+                case Type_String:      return getString() == rhs.getString();
+                case Type_IntArray:    return getIntArray() == rhs.getIntArray();
+                case Type_FloatArray:  return getFloatArray() == rhs.getFloatArray();
+                case Type_StringArray: return getStringArray() == rhs.getStringArray();
+                case Type_Request:     return getReq() == rhs.getReq();
+                case Type_Ignore:      return true;
             }
             BOOST_REQUIRE(0 && "unrecognised type??");
             return false;
@@ -226,13 +259,14 @@ std::ostream& operator<<(std::ostream& out, const MockRibToken& tok)
 
 // Compare the contents of a std::vector to a raw C array containing the same
 // type.
-template<typename T>
-bool arrayEqual(const std::vector<T>& v1, const void* v2)
+template<typename T1, typename T2>
+bool operator==(const std::vector<T1>& v1, const Ri::Array<T2>& v2)
 {
-    const T* v2T = reinterpret_cast<const T*>(v2);
+    if(v1.size() != v2.size())
+        return false;
     for(int i = 0, end = v1.size(); i < end; ++i)
     {
-        if(v1[i] != v2T[i])
+        if(v1[i] != v2[i])
             return false;
     }
     return true;
@@ -241,13 +275,13 @@ bool arrayEqual(const std::vector<T>& v1, const void* v2)
 // Compare a token containing an array to a raw C array.
 //
 // assert if the token doesn't contain an array.
-bool tokenVoidCompareEqual(const MockRibToken& lhs, const void* rhs)
+bool operator==(const MockRibToken& lhs, const Ri::Param& rhs)
 {
     switch(lhs.type())
     {
-        case Type_IntArray:        return arrayEqual(lhs.getIntArray(), rhs);
-        case Type_FloatArray:    return arrayEqual(lhs.getFloatArray(), rhs);
-        case Type_StringArray:    return arrayEqual(lhs.getStringArray(), rhs);
+        case Type_IntArray:    return lhs.getIntArray() == rhs.getIntArray();
+        case Type_FloatArray:  return lhs.getFloatArray() == rhs.getFloatArray();
+        case Type_StringArray: return lhs.getStringArray() == rhs.getStringArray();
         default:
             BOOST_REQUIRE(0 && "MockRibToken void* compare not implemented for type");
     }
@@ -426,6 +460,19 @@ class MockParser : public IqRibParser
         }
 };
 
+
+// Some dummy symbols returned by MockRenderer.
+static RtConstBasis g_mockBasis = {{1,0,0,0}, {0,2,0,0}, {0,0,3,0}, {0,0,0,4}};
+
+static RtVoid mockProcFree(RtPointer data)
+{}
+static RtVoid mockProcSubdivFunc( RtPointer data, RtFloat detail )
+{}
+static RtFloat mockFilterFunc(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
+{
+	return 1;
+}
+
 class MockRenderer : public Ri::Renderer
 {
     public:
@@ -461,7 +508,6 @@ class MockRenderer : public Ri::Renderer
             'ObjectInstance',
             'MotionBegin',
             'MakeOcclusion',
-            'ErrorHandler',
         ])
 
         for p in riXml.findall('Procedures/Procedure'):
@@ -672,8 +718,7 @@ class MockRenderer : public Ri::Renderer
         // MakeOcclusion is tested
         virtual RtVoid MakeOcclusion(const StringArray& picfiles,
                             RtConstString shadowfile, const ParamList& pList);
-        // ErrorHandler is tested
-        virtual RtVoid ErrorHandler(RtErrorFunc handler);
+        virtual RtVoid ErrorHandler(RtErrorFunc handler) {}
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList) {}
@@ -683,11 +728,11 @@ class MockRenderer : public Ri::Renderer
         virtual RtPoint* TransformPoints(RtConstToken fromspace, RtConstToken tospace,
                             RtInt npoints, RtPoint points[]) const {return 0;}
 
-        virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const {return 0;}
-        virtual RtConstBasis*    GetBasis(RtConstToken name) const {return 0;}
+        virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const {return &mockFilterFunc;}
+        virtual RtConstBasis*    GetBasis(RtConstToken name) const {return &g_mockBasis;}
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const {return 0;}
-        virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const {return 0;}
-        virtual RtProcFreeFunc   GetProcFreeFunc() const {return 0;}
+        virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const {return &mockProcSubdivFunc;}
+        virtual RtProcFreeFunc   GetProcFreeFunc() const {return &mockProcFree;}
 };
 
 
@@ -796,23 +841,15 @@ class Insert
 };
 
 
-// struct used to hold a param list for insertion into a CheckParams() sequence.
-struct ParamList
-{
-    int count;
-    RtToken* tokens;
-    RtPointer* values;
-    ParamList(int count, RtToken tokens[], RtPointer values[])
-        : count(count), tokens(tokens), values(values)
-    {}
-};
-
 // Checker class for checking parameters passed to an RI function against the
 // initial values provided to MockParser.
 class CheckParams
 {
     private:
         TokenVec::const_iterator m_currParam;
+
+		// Dictionary of standard tokens.
+		static CqTokenDictionary m_tokenDict;
 
     public:
         CheckParams() : m_currParam()
@@ -838,18 +875,30 @@ class CheckParams
             return *this;
         }
 
-        CheckParams& operator<<(const ParamList& pList)
+        CheckParams& operator<<(const Ri::ParamList& pList)
         {
-            for(int i = 0; i < pList.count; ++i)
+            for(int i = 0; i < int(pList.size()); ++i)
             {
-                BOOST_CHECK_EQUAL((m_currParam++)->getString(), pList.tokens[i]);
-                BOOST_CHECK_PREDICATE(tokenVoidCompareEqual,
-                        (*(m_currParam++)) (pList.values[i]) );
+				try
+				{
+					CqPrimvarToken tok = m_tokenDict.parseAndLookup(
+							m_currParam->getString());
+					BOOST_CHECK_EQUAL(tok, pList[i].spec());
+				}
+				catch(XqValidation& /*e*/)
+				{
+					// Intentionally blank for now, since it's tricky to test
+					// the custom-defined tokens.
+				}
+                ++m_currParam;
+                BOOST_CHECK_EQUAL(*m_currParam, pList[i]);
+                ++m_currParam;
             }
             return *this;
         }
 };
 
+CqTokenDictionary CheckParams::m_tokenDict;
 
 //==============================================================================
 // The actual test cases follow below.
@@ -905,66 +954,24 @@ BOOST_AUTO_TEST_CASE(RIB_version_test)
 }
 
 
-RtToken MockRenderer::Declare(RtConstString name, RtConstString declaration) {return 0;}
-RtVoid MockRenderer::DepthOfField(RtFloat fstop, RtFloat focallength,
-                                  RtFloat focaldistance) {}
-RtVoid MockRenderer::PixelFilter(RtFilterFunc function, RtFloat xwidth,
-                                 RtFloat ywidth) {}
-RtVoid MockRenderer::ColorSamples(const FloatArray& nRGB,
-                                  const FloatArray& RGBn) {}
-RtVoid MockRenderer::Option(RtConstToken name, const ParamList& pList) {}
-RtVoid MockRenderer::Color(RtConstColor Cq) {}
-RtLightHandle MockRenderer::LightSource(RtConstToken name,
-                                        const ParamList& pList) {return 0;}
-RtVoid MockRenderer::Illuminate(RtLightHandle light, RtBoolean onoff) {}
-RtVoid MockRenderer::Transform(RtConstMatrix transform) {}
-RtVoid MockRenderer::Basis(RtConstBasis ubasis, RtInt ustep,
-                           RtConstBasis vbasis, RtInt vstep) {}
-RtVoid MockRenderer::SubdivisionMesh(RtConstToken scheme,
-                                     const IntArray& nvertices,
-                                     const IntArray& vertices,
-                                     const TokenArray& tags,
-                                     const IntArray& nargs,
-                                     const IntArray& intargs,
-                                     const FloatArray& floatargs,
-                                     const ParamList& pList) {}
-RtVoid MockRenderer::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
-                            RtFloat thetamax, const ParamList& pList) {}
-RtVoid MockRenderer::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
-                                 RtFloat thetamax, const ParamList& pList) {}
-RtVoid MockRenderer::Points(const ParamList& pList) {}
-RtVoid MockRenderer::Procedural(RtPointer data, RtConstBound bound,
-                                RtProcSubdivFunc refineproc,
-                                RtProcFreeFunc freeproc) {}
-RtObjectHandle MockRenderer::ObjectBegin() {return 0;}
-RtVoid MockRenderer::ObjectInstance(RtObjectHandle handle) {}
-RtVoid MockRenderer::MotionBegin(const FloatArray& times) {}
-RtVoid MockRenderer::MakeOcclusion(const StringArray& picfiles,
-                                   RtConstString shadowfile,
-                                   const ParamList& pList) {}
-RtVoid MockRenderer::ErrorHandler(RtErrorFunc handler) {}
-
-
-#if 0
-
 //--------------------------------------------------
 RtToken MockRenderer::Declare(RtConstString name, RtConstString declaration)
 {
     CheckParams() << Req("Declare") << name << declaration;
-    g_fixture->hasBeenChecked = true;
     return 0;
 }
 BOOST_AUTO_TEST_CASE(Declare_handler_test)
 {
     RequestHandlerFixture f;
     Insert(f.parser) << Req("Declare") << "asdf" << "uniform float";
+    // Note: this test depends on MockRenderer::Sphere as well.
     Insert(f.parser) << Req("Sphere") << 1.0f << -1.0f << 1.0f << 360.0f
                         << "asdf" << IqRibParser::TqFloatArray(1, 42.0f);
 }
 
-
 //--------------------------------------------------
-RtVoid MockRenderer::DepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
+RtVoid MockRenderer::DepthOfField(RtFloat fstop, RtFloat focallength,
+                                  RtFloat focaldistance)
 {
     if(fstop == FLT_MAX)
     {
@@ -991,11 +998,10 @@ BOOST_AUTO_TEST_CASE(DepthOfField_no_args_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::ColorSamples(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
+RtVoid MockRenderer::ColorSamples(const FloatArray& nRGB,
+                                  const FloatArray& RGBn)
 {
-    CheckParams() << Req("ColorSamples")
-        << IqRibParser::TqFloatArray(nRGB, nRGB + 3*N)
-        << IqRibParser::TqFloatArray(RGBn, RGBn + 3*N);
+    CheckParams() << Req("ColorSamples") << nRGB << RGBn;
 }
 BOOST_AUTO_TEST_CASE(ColorSamples_handler_test)
 {
@@ -1006,10 +1012,10 @@ BOOST_AUTO_TEST_CASE(ColorSamples_handler_test)
 
 
 //--------------------------------------------------
-RtLightHandle MockRenderer::LightSource(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+RtLightHandle MockRenderer::LightSource(RtConstToken name,
+                                        const ParamList& pList)
 {
-    CheckParams() << Req("LightSource") << name << IgnoreParam()
-        << ParamList(count, tokens, values);
+    CheckParams() << Req("LightSource") << name << IgnoreParam() << pList;
     return g_fixture->handleManager.insertHandle(g_fixture->parser.currParams()[2]);
 }
 BOOST_AUTO_TEST_CASE(LightSource_integer_id_test)
@@ -1063,10 +1069,11 @@ BOOST_AUTO_TEST_CASE(Illuminate_bad_string_handle_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::Basis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
+RtVoid MockRenderer::Basis(RtConstBasis ubasis, RtInt ustep,
+                           RtConstBasis vbasis, RtInt vstep)
 {
-    BOOST_CHECK_EQUAL(::RiBSplineBasis, ubasis);
-    float* vbStart = reinterpret_cast<float*>(vbasis);
+    BOOST_CHECK_EQUAL(g_mockBasis, ubasis);
+    const float* vbStart = reinterpret_cast<const float*>(vbasis);
     CheckParams() << Req("Basis")
         << IgnoreParam() << ustep <<
         IqRibParser::TqFloatArray(vbStart, vbStart+16) << vstep;
@@ -1080,38 +1087,18 @@ BOOST_AUTO_TEST_CASE(Basis_handler_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::SubdivisionMesh(RtToken scheme, RtInt nfaces, RtInt nvertices[],
-        RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[],
-        RtInt intargs[], RtFloat floatargs[],
-        RtInt count, RtToken tokens[], RtPointer values[])
+RtVoid MockRenderer::SubdivisionMesh(RtConstToken scheme,
+                                     const IntArray& nvertices,
+                                     const IntArray& vertices,
+                                     const TokenArray& tags,
+                                     const IntArray& nargs,
+                                     const IntArray& intargs,
+                                     const FloatArray& floatargs,
+                                     const ParamList& pList)
 {
-    // total number of distinct vertices (number in "P" array)
-    int totVertices = 0;
-    // total number of face vertices (size of vertices[])
-    int vertNum = 0;
-    for(int face = 0; face < nfaces; ++face)
-    {
-        for(int i = 0; i < nvertices[face]; ++i)
-        {
-            totVertices = max(vertices[vertNum], totVertices);
-            ++vertNum;
-        }
-    }
-    int numIntArgs = 0;
-    int numFloatArgs = 0;
-    for(int tag = 0; tag < ntags; ++tag)
-    {
-        numIntArgs += nargs[2*tag];
-        numFloatArgs += nargs[2*tag + 1];
-    }
-    CheckParams() << Req("SubdivisionMesh") << scheme
-        << IqRibParser::TqIntArray(nvertices, nvertices + nfaces)
-        << IqRibParser::TqIntArray(vertices, vertices + vertNum)
-        << IqRibParser::TqStringArray(tags, tags + ntags)
-        << IqRibParser::TqIntArray(nargs, nargs + 2*ntags)
-        << IqRibParser::TqIntArray(intargs, intargs + numIntArgs)
-        << IqRibParser::TqFloatArray(floatargs, floatargs + numFloatArgs)
-        << ParamList(count, tokens, values);
+    CheckParams() << Req("SubdivisionMesh")
+		<< scheme << nvertices << vertices
+		<< tags << nargs << intargs << floatargs << pList;
 }
 
 BOOST_AUTO_TEST_CASE(SubdivisionMesh_full_form_test)
@@ -1167,14 +1154,14 @@ BOOST_AUTO_TEST_CASE(SubdivisionMesh_abbreviated_form_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::Hyperboloid(RtPoint point1, RtPoint point2, RtFloat thetamax,
-        RtInt count, RtToken tokens[], RtPointer values[])
+RtVoid MockRenderer::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
+                                 RtFloat thetamax, const ParamList& pList)
 {
     CheckParams() << Req("Hyperboloid") << point1[0] << point1[1] << point1[2]
         << point2[0] << point2[1] << point2[2] << thetamax
-        << ParamList(count, tokens, values);
+        << pList;
 }
-BOOST_AUTO_TEST_CASE(HyperboloidV_handler_test)
+BOOST_AUTO_TEST_CASE(Hyperboloid_handler_test)
 {
     RequestHandlerFixture f;
     Insert(f.parser) << Req("Hyperboloid") << 1.0f << 2.0f << 3.0f
@@ -1183,17 +1170,19 @@ BOOST_AUTO_TEST_CASE(HyperboloidV_handler_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::Procedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
+RtVoid MockRenderer::Procedural(RtPointer data, RtConstBound bound,
+                                RtProcSubdivFunc refineproc,
+                                RtProcFreeFunc freeproc)
 {
-    // All the standard procedurals should have RiProcFree
-    BOOST_CHECK_EQUAL(freeproc, RiProcFree);
+    // All the standard procedurals should have mockProcFree
+    BOOST_CHECK_EQUAL(freeproc, mockProcFree);
 
     // The following checking is specific to the ProcRunProgram procedural.
-    BOOST_CHECK_EQUAL(refineproc, RiProcRunProgram);
+    BOOST_CHECK_EQUAL(refineproc, mockProcSubdivFunc);
 
     // The following checking is valid for ProcRunProgram and ProcDynamicLoad
-    char** dataArray = reinterpret_cast<char**>(data);
-    float* boundArray = reinterpret_cast<float*>(bound);
+    const char** dataArray = reinterpret_cast<const char**>(data);
+    const float* boundArray = reinterpret_cast<const float*>(bound);
     CheckParams() << Req("Procedural") << IgnoreParam()
         << IqRibParser::TqStringArray(dataArray, dataArray+2)
         << IqRibParser::TqFloatArray(boundArray, boundArray+6);
@@ -1204,15 +1193,6 @@ BOOST_AUTO_TEST_CASE(Procedural_handler_test)
     IqRibParser::TqStringArray args; args += "progname", "some arg string";
     Insert(f.parser) << Req("Procedural") << "RunProgram"
         << args << IqRibParser::TqFloatArray(6,1.0f);
-}
-BOOST_AUTO_TEST_CASE(Procedural_unknown_procedural_test)
-{
-    RequestHandlerFixture f;
-    BOOST_CHECK_THROW(
-        Insert(f.parser) << Req("Procedural") << "SomeNonexistantProcName"
-            << IqRibParser::TqStringArray(1,"asdf") << IqRibParser::TqFloatArray(6,1.0f),
-        XqParseError
-    );
 }
 
 
@@ -1281,13 +1261,12 @@ BOOST_AUTO_TEST_CASE(ObjectInstance_undeclared_error_test)
 // request handler has to do something special or unusual.
 
 //--------------------------------------------------
-RtVoid MockRenderer::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
-        RtInt count, RtToken tokens[], RtPointer values[])
+RtVoid MockRenderer::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
+                            RtFloat thetamax, const ParamList& pList)
 {
-    CheckParams() << Req("Sphere") << radius << zmin << zmax << thetamax
-        << ParamList(count, tokens, values);
+    CheckParams() << Req("Sphere") << radius << zmin << zmax << thetamax << pList;
 }
-BOOST_AUTO_TEST_CASE(SphereV_handler_test)
+BOOST_AUTO_TEST_CASE(Sphere_handler_test)
 {
     // Test RiSphere; also test the handling of valid parameter lists.
     RequestHandlerFixture f;
@@ -1298,7 +1277,7 @@ BOOST_AUTO_TEST_CASE(SphereV_handler_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::Color(RtColor col)
+RtVoid MockRenderer::Color(RtConstColor col)
 {
     CheckParams() << Req("Color") << col[0] << col[1] << col[2];
 }
@@ -1310,9 +1289,10 @@ BOOST_AUTO_TEST_CASE(Color_handler_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::PixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
+RtVoid MockRenderer::PixelFilter(RtFilterFunc function, RtFloat xwidth,
+                                 RtFloat ywidth)
 {
-    BOOST_CHECK_EQUAL(function, RiSincFilter);
+    BOOST_CHECK_EQUAL(function, mockFilterFunc);
     CheckParams() << Req("PixelFilter") << IgnoreParam() << xwidth << ywidth;
 }
 BOOST_AUTO_TEST_CASE(PixelFilter_handler_test)
@@ -1320,41 +1300,12 @@ BOOST_AUTO_TEST_CASE(PixelFilter_handler_test)
     RequestHandlerFixture f;
     Insert(f.parser) << Req("PixelFilter") << "sinc" << 7.0f << 7.5f;
 }
-BOOST_AUTO_TEST_CASE(PixelFilter_bad_filter_name)
-{
-    RequestHandlerFixture f;
-    BOOST_CHECK_THROW(
-        Insert(f.parser) << Req("PixelFilter") << "nonexistent" << 7.0f << 7.5f,
-        XqParseError
-    );
-}
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::ErrorHandler(RtErrorFunc handler)
+RtVoid MockRenderer::Transform(RtConstMatrix transform)
 {
-    BOOST_CHECK_EQUAL(handler, RiErrorAbort);
-    CheckParams() << Req("ErrorHandler");
-}
-BOOST_AUTO_TEST_CASE(ErrorFunc_handler_test)
-{
-    RequestHandlerFixture f;
-    Insert(f.parser) << Req("ErrorHandler") << "abort";
-}
-BOOST_AUTO_TEST_CASE(ErrorFunc_bad_error_handler_name)
-{
-    RequestHandlerFixture f;
-    BOOST_CHECK_THROW(
-        Insert(f.parser) << Req("ErrorHandler") << "bogus",
-        XqParseError
-    );
-}
-
-
-//--------------------------------------------------
-RtVoid MockRenderer::Transform(RtMatrix transform)
-{
-    float* trans = reinterpret_cast<float*>(transform);
+    const float* trans = reinterpret_cast<const float*>(transform);
     CheckParams() << Req("Transform")
         << IqRibParser::TqFloatArray(trans, trans+16);
 }
@@ -1372,11 +1323,11 @@ BOOST_AUTO_TEST_CASE(Transform_handler_test)
         << IqRibParser::TqFloatArray(trans, trans+16);
 }
 
-RtVoid MockRenderer::Points(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[])
+
+//--------------------------------------------------
+RtVoid MockRenderer::Points(const ParamList& pList)
 {
-    // This check will only work for the specific case below
-    BOOST_CHECK_EQUAL(npoints, 4);
-    CheckParams() << Req("Points") << ParamList(count, tokens, values);
+    CheckParams() << Req("Points") << pList;
 }
 BOOST_AUTO_TEST_CASE(Points_handler_test)
 {
@@ -1385,22 +1336,12 @@ BOOST_AUTO_TEST_CASE(Points_handler_test)
         << "Cs" << IqRibParser::TqFloatArray(12, 0.5f)
         << "P" << IqRibParser::TqFloatArray(12, 1.5f);
 }
-BOOST_AUTO_TEST_CASE(Points_missing_P_variable)
-{
-    RequestHandlerFixture f;
-    BOOST_CHECK_THROW(
-        Insert(f.parser) << Req("Points")
-            << "Cs" << IqRibParser::TqFloatArray(12, 0.5f),
-        XqParseError
-    );
-}
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::MotionBegin(RtInt N, RtFloat times[])
+RtVoid MockRenderer::MotionBegin(const FloatArray& times)
 {
-    CheckParams() << Req("MotionBegin")
-        << IqRibParser::TqFloatArray(times, times+N);
+    CheckParams() << Req("MotionBegin") << times;
 }
 BOOST_AUTO_TEST_CASE(MotionBegin_handler_test)
 {
@@ -1412,12 +1353,11 @@ BOOST_AUTO_TEST_CASE(MotionBegin_handler_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::MakeOcclusion(RtInt npics, RtString picfiles[], RtString shadowfile,
-        RtInt count, RtToken tokens[], RtPointer values[])
+RtVoid MockRenderer::MakeOcclusion(const StringArray& picfiles,
+                                   RtConstString shadowfile,
+                                   const ParamList& pList)
 {
-    CheckParams() << Req("MakeOcclusion")
-        << IqRibParser::TqStringArray(picfiles, picfiles+npics)
-        << shadowfile << ParamList(count, tokens, values);
+    CheckParams() << Req("MakeOcclusion") << picfiles << shadowfile << pList;
 }
 BOOST_AUTO_TEST_CASE(MakeOcclusion_handler_test)
 {
@@ -1431,13 +1371,14 @@ BOOST_AUTO_TEST_CASE(MakeOcclusion_handler_test)
 //------------------------------------------------------------------------------
 // Test for parameter list handling, using RiOption as a proxy.
 //
-RtVoid MockRenderer::Option(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+RtVoid MockRenderer::Option(RtConstToken name, const ParamList& pList)
 {
-    CheckParams() << Req("Option") << name << ParamList(count, tokens, values);
+    CheckParams() << Req("Option") << name << pList;
     // Check that the parameter list token count is correct.  Note that the
     // formula used below assumes there's only one Req in the token stream.
-    BOOST_CHECK_EQUAL(2*count, static_cast<int>(g_fixture->parser.params().size()) - 2);
+    BOOST_CHECK_EQUAL(2*pList.size(), g_fixture->parser.params().size() - 2);
 }
+
 
 BOOST_AUTO_TEST_CASE(paramlist_int_array_value_test)
 {
@@ -1504,4 +1445,3 @@ BOOST_AUTO_TEST_CASE(invalid_paramlist_missing_token)
     );
 }
 
-#endif
