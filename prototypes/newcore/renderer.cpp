@@ -655,9 +655,9 @@ void Renderer::push(const GridHolderPtr& holder)
     holder->shade();
     // Rasterize grids right away, never store them.
     Grid& grid = holder->grid();
-    if(holder->isDeforming())
+    if(holder->isDeforming() || m_opts.fstop != FLT_MAX)
     {
-        // Sample with motion blur.
+        // Sample with motion blur or depth of field
         switch(grid.type())
         {
             case GridType_QuadSimple:
@@ -670,7 +670,7 @@ void Renderer::push(const GridHolderPtr& holder)
     }
     else
     {
-        // Sample without motion blur.
+        // No motion blur or depth of field
         switch(grid.type())
         {
             case GridType_QuadSimple:
@@ -775,6 +775,38 @@ struct OutVarInfo
         : src(src), outIdx(outIdx) {}
 };
 
+
+/// Class for dealing with circles of confusion
+class CircleOfConfusion
+{
+    private:
+        float m_cocMult;
+        float m_cocOffset;
+    public:
+        CircleOfConfusion(float fstop, float focalLength, float focalDistance,
+                          const Mat4& camToRaster)
+        {
+            m_cocMult = 0.5*focalLength/fstop * focalDistance*focalLength
+                                              / (focalDistance - focalLength);
+            // Get multiplier into raster units.
+            m_cocMult *= camToRaster[0][0];
+            m_cocOffset = m_cocMult/focalDistance;
+        }
+
+        /// Shift the vertex P on the circle of confusion.
+        ///
+        /// P is updated to position it would have if viewed with a pinhole
+        /// camera at the position lensPos.
+        ///
+        void lensShift(Vec3& P, const Vec2& lensPos) const
+        {
+            float cocSize = std::fabs(m_cocMult/P.z - m_cocOffset);
+            P.x -= lensPos.x * cocSize;
+            P.y -= lensPos.y * cocSize;
+        }
+};
+
+
 /// Dirty implementation of motion blur sampling.  Won't work unless GridT is
 /// a quad grid!
 template<typename GridT, typename PolySamplerT>
@@ -789,11 +821,15 @@ void Renderer::motionRasterize(GridHolder& holder)
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
 
+    bool motionBlur = holder.isDeforming();
+    bool depthOfField = m_opts.fstop != FLT_MAX;
+
     // Cache the variables which need to be interpolated into
     // fragment outputs.
     std::vector<OutVarInfo> outVarInfo;
-    const GridStorage& stor = holder.gridKeys()[0].value->storage();
-    const VarSet& gridVars = stor.varSet();
+    const GridT& mainGrid = static_cast<GridT&>(holder.grid());
+    const GridStorage& mainStor = mainGrid.storage();
+    const VarSet& gridVars = mainStor.varSet();
     for(int j = 0, jend = m_outVars.size(); j < jend; ++j)
     {
         // Simplistic linear search through grid variables for now.
@@ -803,7 +839,7 @@ void Renderer::motionRasterize(GridHolder& holder)
             if(gridVars[i] == m_outVars[j])
             {
                 outVarInfo.push_back(OutVarInfo(
-                        stor.get(i), m_outVars[j].offset) );
+                        mainStor.get(i), m_outVars[j].offset) );
                 break;
             }
         }
@@ -812,68 +848,95 @@ void Renderer::motionRasterize(GridHolder& holder)
     int fragSize = m_sampStorage->fragmentSize();
     const float* defaultFrag = m_sampStorage->defaultFragment();
 
-    const GridKeys& gridKeys = holder.gridKeys();
-
-    // sample times
-    const int ntimes = m_sampStorage->m_sampleTimes.size();
-    float* times = &m_sampStorage->m_sampleTimes[0];
-    // Pre-compute interpolation info for all time indices
-    int* intervals = ALLOCA(int, ntimes);
-    const int maxIntervalIdx = gridKeys.size()-2;
-    float* interpWeights = ALLOCA(float, ntimes);
-    for(int i = 0, interval = 0; i < ntimes; ++i)
-    {
-        // Search forward through grid time intervals to find the interval
-        // which contains the i'th sample time.
-        while(interval < maxIntervalIdx && gridKeys[interval+1].time < times[i])
-            ++interval;
-        intervals[i] = interval;
-        interpWeights[i] = (times[i] - gridKeys[interval].time) /
-                    (gridKeys[interval+1].time - gridKeys[interval].time);
-    }
-
+    // Interleaved sampling info
     Imath::V2i tileSize = m_sampStorage->m_tileSize;
     Vec2 tileBoundMult = Vec2(1.0)/Vec2(tileSize);
     Imath::V2i nTiles = Imath::V2i(m_sampStorage->m_xSampRes-1,
                         m_sampStorage->m_ySampRes-1) / tileSize
                         + Imath::V2i(1);
+    const int sampsPerTile = tileSize.x*tileSize.y;
+    // time/lens position of samples
+    const SampleStorage::TimeLens* extraDims = &m_sampStorage->m_extraDims[0];
 
-    PointInQuad hitTest;
-    InvBilin invBilin;
-
-    int nv = 0;
-    int nu = 0;
+    // Info for motion interpolation
+    int* intervals = 0;
+    float* interpWeights = 0;
+    if(motionBlur)
     {
-        const GridT& g = static_cast<GridT&>(*gridKeys[0].value);
-        nv = g.nv();
-        nu = g.nu();
+        const GridKeys& gridKeys = holder.gridKeys();
+
+        // Pre-compute interpolation info for all time indices
+        intervals = ALLOCA(int, sampsPerTile);
+        const int maxIntervalIdx = gridKeys.size()-2;
+        interpWeights = ALLOCA(float, sampsPerTile);
+        for(int i = 0, interval = 0; i < sampsPerTile; ++i)
+        {
+            // Search forward through grid time intervals to find the interval
+            // which contains the i'th sample time.
+            while(interval < maxIntervalIdx
+                && gridKeys[interval+1].time < extraDims[i].time)
+                ++interval;
+            intervals[i] = interval;
+            interpWeights[i] = (extraDims[i].time - gridKeys[interval].time) /
+                        (gridKeys[interval+1].time - gridKeys[interval].time);
+        }
     }
 
+    // Helper objects for hit testing
+    PointInQuad hitTest;
+    InvBilin invBilin;
+    CircleOfConfusion coc(m_opts.fstop, m_opts.focalLength,
+                          m_opts.focalDistance, m_camToRas);
+
     // For each micropoly.
-    for(int v = 0; v < nv-1; ++v)
-    for(int u = 0; u < nu-1; ++u)
+    for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
+    for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
     {
         MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                          nu*(v+1) + u+1,  nu*(v+1) + u);
         // For each possible sample time
-        for(int itime = 0; itime < ntimes; ++itime)
+        for(int itime = 0; itime < sampsPerTile; ++itime)
         {
-            int interval = intervals[itime];
-            const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
-            const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
-            // Interpolate micropoly to the current time
-            float interp = interpWeights[itime];
-            ConstDataView<Vec3> P1 = grid1.storage().P();
-            ConstDataView<Vec3> P2 = grid2.storage().P();
-            Vec3 Pa = lerp(P1[ind.a], P2[ind.a], interp);
-            Vec3 Pb = lerp(P1[ind.b], P2[ind.b], interp);
-            Vec3 Pc = lerp(P1[ind.c], P2[ind.c], interp);
-            Vec3 Pd = lerp(P1[ind.d], P2[ind.d], interp);
+            // Compute vertices of micropolygon
+            Vec3 Pa, Pb, Pc, Pd;
+            if(motionBlur)
+            {
+                int interval = intervals[itime];
+                const GridKeys& gridKeys = holder.gridKeys();
+                const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
+                const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
+                // Interpolate micropoly to the current time
+                float interp = interpWeights[itime];
+                ConstDataView<Vec3> P1 = grid1.storage().P();
+                ConstDataView<Vec3> P2 = grid2.storage().P();
+                Pa = lerp(P1[ind.a], P2[ind.a], interp);
+                Pb = lerp(P1[ind.b], P2[ind.b], interp);
+                Pc = lerp(P1[ind.c], P2[ind.c], interp);
+                Pd = lerp(P1[ind.d], P2[ind.d], interp);
+            }
+            else
+            {
+                ConstDataView<Vec3> P = mainStor.P();
+                Pa = P[ind.a];
+                Pb = P[ind.b];
+                Pc = P[ind.c];
+                Pd = P[ind.d];
+            }
+
+            // Offset vertices with lens position for depth of field.
+            if(depthOfField)
+            {
+                Vec2 lensPos = extraDims[itime].lens;
+                coc.lensShift(Pa, lensPos);
+                coc.lensShift(Pb, lensPos);
+                coc.lensShift(Pc, lensPos);
+                coc.lensShift(Pd, lensPos);
+            }
             hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
                          vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
             invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
-                         vec2_cast(Pd), vec2_cast(Pc));
-            // Compute bound
+                          vec2_cast(Pd), vec2_cast(Pc));
+            // Compute tight bound
             Box bound(Pa);
             bound.extendBy(Pb);
             bound.extendBy(Pc);
@@ -897,7 +960,7 @@ void Renderer::motionRasterize(GridHolder& holder)
                 // Index of which sample in the tile is considered to be at
                 // itime.
                 int shuffIdx = m_sampStorage->m_tileShuffleIndices[
-                                tileInd*ntimes + itime ];
+                                tileInd*sampsPerTile + itime ];
                 Sample& samp = m_sampStorage->m_samples[shuffIdx];
                 if(!hitTest(samp))
                     continue;

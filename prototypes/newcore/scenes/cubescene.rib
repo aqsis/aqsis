@@ -5,18 +5,22 @@ Display "cubescene_Ci.tif" "file" "rgb" "compression" "lzw"
 
 Format 1024 1024 1
 
-Hider "hidden" "jitter" 0
-PixelSamples 1 1
-PixelFilter "box" 1 1
+#Hider "hidden" "jitter" 0
+PixelSamples 4 4
+PixelFilter "sinc" 3 3
 
 ShadingRate 1
 
 Projection "perspective" "fov" 90
 
+#GeometricApproximation "focusfactor" 0
+
 Translate 0 0 3
 Rotate 45 1 0 0
 Rotate 10 0 0 1
 Rotate 45 0 1 0
+
+DepthOfField 1 0.5 2
 
 WorldBegin
     Attribute "displacementbound" "sphere" 0.05

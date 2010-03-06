@@ -78,11 +78,18 @@ class SampleStorage
         // Stuff describing samples
         std::vector<Sample> m_samples;        ///< sample positions
 
+        /// Time and Lens positions
+        struct TimeLens
+        {
+            float time;
+            Vec2 lens;
+        };
+
         // Info for interleaved sampling
         Imath::V2i m_tileSize;  ///< tile size for interleaved sampling
         Imath::V2i m_nTiles;    ///< number of tiles
-        std::vector<int> m_tileShuffleIndices; ///< Indices into m_sampleTimes
-        std::vector<float> m_sampleTimes;      ///< Fixed times for all samples
+        std::vector<int> m_tileShuffleIndices; ///< Indices into m_extraDims
+        std::vector<TimeLens> m_extraDims;     ///< times & lens positions
 
         // Stuff describing fragments
         std::vector<float> m_defaultFragment; ///< Default fragment channels

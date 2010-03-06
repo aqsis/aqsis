@@ -40,6 +40,9 @@ struct Options
     Imath::V2i superSamp;  ///< supersampling resolution
     float shutterMin; ///< shutter start time for motion blur
     float shutterMax; ///< shutter end time for motion blur
+    float fstop;      ///< focalLength/lensDiameter
+    float focalLength;   ///< lens focal length
+    float focalDistance; ///< distance at which lens is focussed
 
     // Filtering options
     FilterPtr pixelFilter; ///< pixel filter functor
@@ -55,6 +58,9 @@ struct Options
         superSamp(2,2),
         shutterMin(0),
         shutterMax(0),
+        fstop(FLT_MAX),
+        focalLength(FLT_MAX),
+        focalDistance(FLT_MAX),
         pixelFilter(makeGaussianFilter(Vec2(2,2))),
         doFilter(true)
     { }

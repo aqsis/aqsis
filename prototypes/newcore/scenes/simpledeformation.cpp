@@ -41,7 +41,7 @@ void renderSimpleDeformationScene()
     opts.gridSize = 8;
     opts.clipNear = 0.1;
     opts.superSamp = Imath::V2i(4,4);
-    opts.pixelFilter = makeBoxFilter(Vec2(1.0,1.0));
+    opts.pixelFilter = makeSincFilter(Vec2(3.0,3.0));
     opts.shutterMin = 0;
     opts.shutterMax = 2;
 

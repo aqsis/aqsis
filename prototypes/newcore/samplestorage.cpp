@@ -100,13 +100,32 @@ SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
             shuffle(tileInd, sampsPerTile);
         }
     }
+
     // Initialize jittered time samples
-    m_sampleTimes.resize(sampsPerTile);
+    m_extraDims.resize(sampsPerTile);
     float shutterDelta = (opts.shutterMax-opts.shutterMin)/sampsPerTile;
     for(int i = 0; i < sampsPerTile; ++i)
     {
-        m_sampleTimes[i] = opts.shutterMin + shutterDelta *
-                                             (i + float(rand())/RAND_MAX);
+        m_extraDims[i].time = opts.shutterMin
+            + shutterDelta * (i + float(rand())/RAND_MAX);
+    }
+
+    // Initialize jittered lens samples
+    int* dofShuffle = ALLOCA(int, sampsPerTile);
+    for(int i = 0; i < sampsPerTile; ++i)
+        dofShuffle[i] = i;
+    shuffle(dofShuffle, sampsPerTile);
+    float dtheta = 2*M_PI/m_tileSize.x;
+    float dr = 1.0/m_tileSize.y;
+    for(int j = 0, idx = 0; j < m_tileSize.y; ++j)
+    {
+        for(int i = 0; i < m_tileSize.x; ++i, ++idx)
+        {
+            float theta = dtheta*(i + float(rand())/RAND_MAX);
+            float r = std::sqrt(dr*(j + float(rand())/RAND_MAX));
+            m_extraDims[dofShuffle[idx]].lens.x = r*std::cos(theta);
+            m_extraDims[dofShuffle[idx]].lens.y = r*std::sin(theta);
+        }
     }
 
     // Initialize fragment array using default fragment.
