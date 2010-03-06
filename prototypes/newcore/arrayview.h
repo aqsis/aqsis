@@ -205,13 +205,13 @@ class BasicVecView : public ArrayView<BasicVecView<T>, T, T*>
 
 /// Const version of BasicVecView
 template<typename T>
-class ConstBasicVecView : public ArrayView<BasicVecView<const T>, const T, const T*>
+class ConstBasicVecView : public ArrayView<ConstBasicVecView<T>, const T, const T*>
 {
     private:
         int m_elSize;
 
-        typedef ArrayView<BasicVecView<const T>, const T, const T*> BaseView;
-        friend class ArrayView<BasicVecView<const T>, const T, const T*>;
+        typedef ArrayView<ConstBasicVecView<T>, const T, const T*> BaseView;
+        friend class ArrayView<ConstBasicVecView<T>, const T, const T*>;
 
         static const T* convertToElement(const T* p) { return p; }
 
