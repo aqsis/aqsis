@@ -298,7 +298,8 @@ class TessellationContextImpl : public TessellationContext
         void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
         {
             m_parentGeom = holder.get();
-            holder->geom().tessellate(splitTrans, *this);
+            float polyLength = std::sqrt(m_parentGeom->attrs().shadingRate);
+            holder->geom().tessellate(splitTrans, polyLength, *this);
         }
 
         virtual void invokeTessellator(TessControl& tessControl)

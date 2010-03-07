@@ -3,9 +3,8 @@ Some things which should be done:
 
     * Sampling
         - Tile-based allocation for sample points
-        - Motion Blur sampling
-        - Depth of field sampling
         - Transparency - deep fragment buffer
+        - Effective stratification
     * Grid crack solution via stitching
     * Bucket rendering
     * Occlusion culling
@@ -17,6 +16,9 @@ Some things which should be done:
         - Investigate performance benefits of unique VarSpec's when lots of
           variables are present
     * Investigate more robust inverse bilinear lookup (use exact method?)
+    * Surface tessellation
+        - Transformation motion blur
+        - focusfactor & motionfactor approximations
 
 
     (The following are not present in aqsis, but should be kept in mind & done
@@ -37,3 +39,9 @@ Done:
     * Sampling
         - Supersampling
         - Image output filtering
+        - Motion Blur sampling
+        - Depth of field sampling
+    * Surface tessellation
+        - Reyes split/dice pipeline
+        - Deforming surfaces
+
