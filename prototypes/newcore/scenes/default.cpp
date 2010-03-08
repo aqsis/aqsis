@@ -135,6 +135,7 @@ void renderDefaultScene()
     attrs.shadingRate = 1;
     attrs.smoothShading = true;
     attrs.surfaceShader = createShader("test");
+    attrs.displacementBound = 0.15;
 
     Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
 

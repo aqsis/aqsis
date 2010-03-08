@@ -37,6 +37,7 @@ class Grid;
 class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
+class CircleOfConfusion;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -45,6 +46,7 @@ typedef boost::intrusive_ptr<GridHolder> GridHolderPtr;
 
 typedef boost::intrusive_ptr<Geometry> GeometryPtr;
 typedef boost::intrusive_ptr<Grid> GridPtr;
+
 
 //-----------------------------------------------------------------------------
 struct OutvarSpec : public VarSpec
@@ -126,12 +128,6 @@ class Renderer
         typedef std::priority_queue<GeomHolder, std::vector<GeomHolderPtr>,
                                     SurfaceOrder> SurfaceQueue;
 
-        Options m_opts;                ///< Render options
-        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
-        OutvarSet m_outVars;           ///< Set of output variables
-        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
-        Mat4 m_camToRas;               ///< Camera -> raster transformation
-
         static void sanitizeOptions(Options& opts);
 
         void saveImages(const std::string& baseFileName);
@@ -146,6 +142,14 @@ class Renderer
         void rasterize(Grid& inGrid, const Attributes& attrs);
 
         void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);
+
+
+        Options m_opts;                ///< Render options
+        boost::scoped_ptr<CircleOfConfusion> m_coc; ///< depth of field info
+        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
+        OutvarSet m_outVars;           ///< Set of output variables
+        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
+        Mat4 m_camToRas;               ///< Camera -> raster transformation
 };
 
 

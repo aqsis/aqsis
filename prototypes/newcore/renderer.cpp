@@ -32,6 +32,54 @@
 
 
 //------------------------------------------------------------------------------
+/// Circle of confusion class for depth of field
+class CircleOfConfusion
+{
+    private:
+        float m_focalDistance;
+        float m_cocMult;
+        float m_cocOffset;
+
+    public:
+        CircleOfConfusion(float fstop, float focalLength, float focalDistance,
+                          const Mat4& camToRaster)
+        {
+            m_focalDistance = focalDistance;
+            m_cocMult = 0.5*focalLength/fstop * focalDistance*focalLength
+                                              / (focalDistance - focalLength);
+            // Get multiplier into raster units.
+            m_cocMult *= camToRaster[0][0];
+            m_cocOffset = m_cocMult/focalDistance;
+        }
+
+        /// Shift the vertex P on the circle of confusion.
+        ///
+        /// P is updated to position it would have if viewed with a pinhole
+        /// camera at the position lensPos.
+        ///
+        void lensShift(Vec3& P, const Vec2& lensPos) const
+        {
+            float cocSize = std::fabs(m_cocMult/P.z - m_cocOffset);
+            P.x -= lensPos.x * cocSize;
+            P.y -= lensPos.y * cocSize;
+        }
+
+        /// Compute the minimum lensShift inside the interval [z1,z2]
+        float minShiftForBound(float z1, float z2) const
+        {
+            // First check whether the bound spans the focal plane.
+            if((z1 <= m_focalDistance && z2 >= m_focalDistance) ||
+               (z1 >= m_focalDistance && z2 <= m_focalDistance))
+                return 0;
+            // Otherwise, the minimum focal blur is achieved at one of the
+            // z-extents of the bound.
+            return std::min(std::fabs(m_cocMult/z1 - m_cocOffset),
+                            std::fabs(m_cocMult/z2 - m_cocOffset));
+        }
+};
+
+
+//------------------------------------------------------------------------------
 /// Container for geometry and geometry metadata
 class GeomHolder : public RefCounted
 {
@@ -288,6 +336,47 @@ class TessellationContextImpl : public TessellationContext
         };
         DeformCollector m_deformCollector;
 
+        /// Adjust desired micropolygon width based on focal or motion blurring.
+        static float micropolyBlurWidth(const GeomHolderPtr& holder,
+                                        const CircleOfConfusion* coc)
+        {
+            const Attributes& attrs = holder->attrs();
+            float polyLength = std::sqrt(attrs.shadingRate);
+            if(coc)
+            {
+                // Adjust shading rate proportionally with the CoC area.  This
+                // ensures that we don't waste time rendering high resolution
+                // micropolygons in parts of the scene which are very blurry.
+                // Depending on the sampling algorithm, it can also make things
+                // asymptotically faster.
+                //
+                // We need a factor which decides the desired ratio of the
+                // diameter of the circle of confusion to the width of a
+                // micropolygon.  The factor lengthRatio = 0.16 was chosen by
+                // some experiments demanding that using focusFactor = 1 yield
+                // results almost visually indistingushable from focusFactor = 0.
+                //
+                // Two main experiments were used to get lengthRatio:
+                //   1) Randomly coloured micropolygons: with an input of
+                //      ShadingRate = 1 and focusFactor = 1, randomly coloured
+                //      micropolys (Ci = random()) should all blend together
+                //      with no large regions of colour, even in image regions
+                //      with lots of focal blur.
+                //   2) A scene with multiple strong specular highlights (a
+                //      bilinear patch with displacement shader P +=
+                //      0.1*sin(40*v)*cos(20*u) * normalize(N); ): This should
+                //      look indistingushable from the result obtained with
+                //      focusFactor = 1, regardless of the amount of focal
+                //      blur.
+                //
+                const float minCoC = coc->minShiftForBound(
+                        holder->bound().min.z, holder->bound().max.z);
+                const float lengthRatio = 0.16;
+                polyLength *= max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
+            }
+            return polyLength;
+        }
+
     public:
         TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
@@ -298,7 +387,7 @@ class TessellationContextImpl : public TessellationContext
         void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
         {
             m_parentGeom = holder.get();
-            float polyLength = std::sqrt(m_parentGeom->attrs().shadingRate);
+            float polyLength = micropolyBlurWidth(holder, m_renderer.m_coc.get());
             holder->geom().tessellate(splitTrans, polyLength, *this);
         }
 
@@ -630,11 +719,13 @@ void Renderer::push(const GeomHolderPtr& holder)
     // Cull if outside near/far clipping range
     if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
         return;
-    // Transform bound to raster space.  TODO: The need to do this
-    // here seems undesirable somehow; perhaps use objects in world
-    // space + arbitrary spatial bounding computation?
+    // Transform bound to raster space.
+    //
+    // TODO: Support arbitrary coordinate systems for the displacement bound
+    bound.min -= Vec3(holder->attrs().displacementBound);
+    bound.max += Vec3(holder->attrs().displacementBound);
     float minz = bound.min.z;
-    float maxz = bound.min.z;
+    float maxz = bound.max.z;
     bound = transformBound(bound, m_camToRas);
     bound.min.z = minz;
     bound.max.z = maxz;
@@ -688,6 +779,7 @@ void Renderer::push(const GridHolderPtr& holder)
 Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
+    m_coc(),
     m_surfaces(new SurfaceQueue()),
     m_outVars(),
     m_sampStorage(),
@@ -722,6 +814,12 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         * Mat4().setScale(Vec3(0.5,-0.5,0))
         * Mat4().setTranslation(Vec3(0.5,0.5,0))
         * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+
+    if(opts.fstop != FLT_MAX)
+    {
+        m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
+                                          opts.focalDistance, m_camToRas));
+    }
 }
 
 // Trivial destructor.  Only here to prevent renderer implementation details
@@ -777,37 +875,6 @@ struct OutVarInfo
 };
 
 
-/// Class for dealing with circles of confusion
-class CircleOfConfusion
-{
-    private:
-        float m_cocMult;
-        float m_cocOffset;
-    public:
-        CircleOfConfusion(float fstop, float focalLength, float focalDistance,
-                          const Mat4& camToRaster)
-        {
-            m_cocMult = 0.5*focalLength/fstop * focalDistance*focalLength
-                                              / (focalDistance - focalLength);
-            // Get multiplier into raster units.
-            m_cocMult *= camToRaster[0][0];
-            m_cocOffset = m_cocMult/focalDistance;
-        }
-
-        /// Shift the vertex P on the circle of confusion.
-        ///
-        /// P is updated to position it would have if viewed with a pinhole
-        /// camera at the position lensPos.
-        ///
-        void lensShift(Vec3& P, const Vec2& lensPos) const
-        {
-            float cocSize = std::fabs(m_cocMult/P.z - m_cocOffset);
-            P.x -= lensPos.x * cocSize;
-            P.y -= lensPos.y * cocSize;
-        }
-};
-
-
 /// Dirty implementation of motion blur sampling.  Won't work unless GridT is
 /// a quad grid!
 template<typename GridT, typename PolySamplerT>
@@ -823,7 +890,6 @@ void Renderer::motionRasterize(GridHolder& holder)
         zOffset = m_outVars[zIdx].offset;
 
     bool motionBlur = holder.isDeforming();
-    bool depthOfField = m_opts.fstop != FLT_MAX;
 
     // Cache the variables which need to be interpolated into
     // fragment outputs.
@@ -886,8 +952,6 @@ void Renderer::motionRasterize(GridHolder& holder)
     // Helper objects for hit testing
     PointInQuad hitTest;
     InvBilin invBilin;
-    CircleOfConfusion coc(m_opts.fstop, m_opts.focalLength,
-                          m_opts.focalDistance, m_camToRas);
 
     // For each micropoly.
     for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
@@ -925,13 +989,13 @@ void Renderer::motionRasterize(GridHolder& holder)
             }
 
             // Offset vertices with lens position for depth of field.
-            if(depthOfField)
+            if(m_coc)
             {
                 Vec2 lensPos = extraDims[itime].lens;
-                coc.lensShift(Pa, lensPos);
-                coc.lensShift(Pb, lensPos);
-                coc.lensShift(Pc, lensPos);
-                coc.lensShift(Pd, lensPos);
+                m_coc->lensShift(Pa, lensPos);
+                m_coc->lensShift(Pb, lensPos);
+                m_coc->lensShift(Pc, lensPos);
+                m_coc->lensShift(Pd, lensPos);
             }
             hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
                          vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
