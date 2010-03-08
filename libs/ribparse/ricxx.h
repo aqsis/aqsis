@@ -23,13 +23,13 @@
 namespace Aqsis {
 
 /// Const versions of common Ri typedefs
-typedef const char* RtConstString;
-typedef const char* RtConstToken;
-typedef const float RtConstColor[3];
-typedef const float RtConstPoint[3];
-typedef const float RtConstMatrix[4][4];
 typedef const float RtConstBasis[4][4];
 typedef const float RtConstBound[6];
+typedef const float RtConstColor[3];
+typedef const float RtConstMatrix[4][4];
+typedef const float RtConstPoint[3];
+typedef const char* RtConstString;
+typedef const char* RtConstToken;
 
 
 namespace Ri {
@@ -384,8 +384,6 @@ class Renderer
         /// Oddball functions which are not part of the RIB binding, but are
         /// present for backward compatibility with the C API.
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) = 0;
-        virtual RtPoint* TransformPoints(RtConstToken fromspace, RtConstToken tospace,
-                            RtInt npoints, RtPoint points[]) const = 0;
 
         /// Functions returning pointers to standard filters, bases, etc.
         ///
@@ -399,6 +397,9 @@ class Renderer
         virtual RtProcFreeFunc   GetProcFreeFunc() const = 0;
 
         // TODO: Rif API?
+        //
+        // TODO: Some way to get at the named transformation matrices so we can
+        // implement RiTransformPoints
 
         virtual ~Renderer() {};
 };

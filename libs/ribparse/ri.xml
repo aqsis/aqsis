@@ -755,7 +755,7 @@
 				<Argument>
 					<Name>N</Name>
 					<Type>RtInt</Type>
-					<RibValue>nRGB.size()/3</RibValue>
+					<RibValue>size(nRGB)/3</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nRGB</Name>
@@ -1861,7 +1861,7 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtInt</Type>
-					<RibValue>paramList.countP()</RibValue>
+					<RibValue>countP(pList)</RibValue>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -1889,7 +1889,7 @@
 				<Argument>
 					<Name>nloops</Name>
 					<Type>RtInt</Type>
-					<RibValue>nverts.size()</RibValue>
+					<RibValue>size(nverts)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nverts</Name>
@@ -1929,7 +1929,7 @@
 				<Argument>
 					<Name>npolys</Name>
 					<Type>RtInt</Type>
-					<RibValue>nverts.size()</RibValue>
+					<RibValue>size(nverts)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nverts</Name>
@@ -1988,7 +1988,7 @@
 				<Argument>
 					<Name>npolys</Name>
 					<Type>RtInt</Type>
-					<RibValue>nloops.size()</RibValue>
+					<RibValue>size(nloops)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nloops</Name>
@@ -2268,7 +2268,7 @@
 				<Argument>
 					<Name>nloops</Name>
 					<Type>RtInt</Type>
-					<RibValue>ncurves.size()</RibValue>
+					<RibValue>size(ncurves)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>ncurves</Name>
@@ -2373,7 +2373,7 @@
 				<Argument>
 					<Name>nfaces</Name>
 					<Type>RtInt</Type>
-					<RibValue>nvertices.size()</RibValue>
+					<RibValue>size(nvertices)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nvertices</Name>
@@ -2397,7 +2397,7 @@
 				<Argument>
 					<Name>ntags</Name>
 					<Type>RtInt</Type>
-					<RibValue>tags.size()</RibValue>
+					<RibValue>size(tags)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>tags</Name>
@@ -2750,7 +2750,7 @@
 				<Argument>
 					<Name>npoints</Name>
 					<Type>RtInt</Type>
-					<RibValue>paramList.countP()</RibValue>
+					<RibValue>countP(pList)</RibValue>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -2782,7 +2782,7 @@
 				<Argument>
 					<Name>ncurves</Name>
 					<Type>RtInt</Type>
-					<RibValue>nvertices.size()</RibValue>
+					<RibValue>size(nvertices)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>nvertices</Name>
@@ -2854,7 +2854,7 @@
 				<Argument>
 					<Name>ncode</Name>
 					<Type>RtInt</Type>
-					<RibValue>code.size()</RibValue>
+					<RibValue>size(code)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>code</Name>
@@ -2866,7 +2866,7 @@
 				<Argument>
 					<Name>nflt</Name>
 					<Type>RtInt</Type>
-					<RibValue>flt.size()</RibValue>
+					<RibValue>size(flt)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>flt</Name>
@@ -2878,7 +2878,7 @@
 				<Argument>
 					<Name>nstr</Name>
 					<Type>RtInt</Type>
-					<RibValue>str.size()</RibValue>
+					<RibValue>size(str)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>str</Name>
@@ -3131,7 +3131,7 @@
 				<Argument>
 					<Name>N</Name>
 					<Type>RtInt</Type>
-					<RibValue>times.size()</RibValue>
+					<RibValue>size(times)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>times</Name>
@@ -3369,7 +3369,7 @@
 				<Argument>
 					<Name>npics</Name>
 					<Type>RtInt</Type>
-					<RibValue>picfiles.size()</RibValue>
+					<RibValue>size(picfiles)</RibValue>
 				</Argument>
 				<Argument>
 					<Name>picfiles</Name>

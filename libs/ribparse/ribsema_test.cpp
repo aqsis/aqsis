@@ -470,7 +470,7 @@ static RtVoid mockProcSubdivFunc( RtPointer data, RtFloat detail )
 {}
 static RtFloat mockFilterFunc(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 {
-	return 1;
+    return 1;
 }
 
 class MockRenderer : public Ri::Renderer
@@ -480,9 +480,6 @@ class MockRenderer : public Ri::Renderer
 
         // Define all methods, except those which are tested.
         /*[[[cog
-        import cog
-        import sys, os
-        sys.path.append(os.getcwd())
         from cogutils import *
 
         riXml = parseXmlTree('ri.xml')
@@ -725,8 +722,6 @@ class MockRenderer : public Ri::Renderer
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) {}
-        virtual RtPoint* TransformPoints(RtConstToken fromspace, RtConstToken tospace,
-                            RtInt npoints, RtPoint points[]) const {return 0;}
 
         virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const {return &mockFilterFunc;}
         virtual RtConstBasis*    GetBasis(RtConstToken name) const {return &g_mockBasis;}
@@ -848,8 +843,8 @@ class CheckParams
     private:
         TokenVec::const_iterator m_currParam;
 
-		// Dictionary of standard tokens.
-		static CqTokenDictionary m_tokenDict;
+        // Dictionary of standard tokens.
+        static CqTokenDictionary m_tokenDict;
 
     public:
         CheckParams() : m_currParam()
@@ -879,17 +874,17 @@ class CheckParams
         {
             for(int i = 0; i < int(pList.size()); ++i)
             {
-				try
-				{
-					CqPrimvarToken tok = m_tokenDict.parseAndLookup(
-							m_currParam->getString());
-					BOOST_CHECK_EQUAL(tok, pList[i].spec());
-				}
-				catch(XqValidation& /*e*/)
-				{
-					// Intentionally blank for now, since it's tricky to test
-					// the custom-defined tokens.
-				}
+                try
+                {
+                    CqPrimvarToken tok = m_tokenDict.parseAndLookup(
+                            m_currParam->getString());
+                    BOOST_CHECK_EQUAL(tok, pList[i].spec());
+                }
+                catch(XqValidation& /*e*/)
+                {
+                    // Intentionally blank for now, since it's tricky to test
+                    // the custom-defined tokens.
+                }
                 ++m_currParam;
                 BOOST_CHECK_EQUAL(*m_currParam, pList[i]);
                 ++m_currParam;
@@ -1097,8 +1092,8 @@ RtVoid MockRenderer::SubdivisionMesh(RtConstToken scheme,
                                      const ParamList& pList)
 {
     CheckParams() << Req("SubdivisionMesh")
-		<< scheme << nvertices << vertices
-		<< tags << nargs << intargs << floatargs << pList;
+        << scheme << nvertices << vertices
+        << tags << nargs << intargs << floatargs << pList;
 }
 
 BOOST_AUTO_TEST_CASE(SubdivisionMesh_full_form_test)
