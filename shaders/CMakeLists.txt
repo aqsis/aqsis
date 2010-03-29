@@ -9,7 +9,7 @@ if(WIN32 AND MSVC_IDE)
 	file(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path_windows)
 	file(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path_windows)
 	set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_MSVCIDE_RUN_PATH}" "${aqsis_util_path_windows}" "${aqsis_slcomp_path_windows}"
-		CACHE STATIC "MSVC IDE Run path" FORCE)
+	CACHE STATIC "MSVC IDE Run path" FORCE)
 endif()
 
 # compile and install all shaders
@@ -18,7 +18,6 @@ set(RSL_SETUP_VERBOSE OFF)
 #
 set(RSL_TARGETS)
 foreach(dir ${shader_dirs})
-
   # setup rsl target
   file(GLOB rsl_src "${dir}/*.sl")
   set(RSL_TARGET RSL_${dir})

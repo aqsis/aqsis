@@ -21,6 +21,7 @@ if(AQSIS_USE_OPENEXR)
     add_definitions(-DUSE_OPENEXR)
 	list(APPEND linklibs ${AQSIS_OPENEXR_LIBRARIES})
 endif()
+list(APPEND linklibs ${AQSIS_ZLIB_LIBRARIES})
 
 aqsis_add_library(aqsis_tex ${tex_srcs} ${tex_hdrs}
 	COMPILE_DEFINITIONS AQSIS_TEX_EXPORTS

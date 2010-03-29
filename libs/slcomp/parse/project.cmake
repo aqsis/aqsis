@@ -13,7 +13,8 @@ set(_parser_cpp_name ${parse_BINARY_DIR}/parser.cpp)
 set(_parser_hpp_name ${parse_BINARY_DIR}/parser.hpp)
 add_custom_command(
 	OUTPUT ${_parser_cpp_name} ${_parser_hpp_name}
-	COMMAND ${AQSIS_BISON_EXECUTABLE}
+	COMMAND ${AQSIS_BISON_EXECUTABLE} 
+		${AQSIS_BISON_ARGUMENTS}
 		-d -o ${_parser_cpp_name} ${parse_SOURCE_DIR}/parser.yy 
 	MAIN_DEPENDENCY ${parse_SOURCE_DIR}/parser.yy
 )

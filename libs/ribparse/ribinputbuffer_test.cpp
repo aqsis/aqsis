@@ -28,6 +28,7 @@
 #define BOOST_TEST_DYN_LINK
 #endif //AQSIS_SYSTEM_WIN32
 
+#include <stdio.h>
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>

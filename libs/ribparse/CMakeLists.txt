@@ -21,7 +21,7 @@ source_group("Header Files" FILES ${ribparse_hdrs})
 
 aqsis_add_library(aqsis_ribparse ${ribparse_srcs} ${ribparse_hdrs}
 	COMPILE_DEFINITIONS AQSIS_RIBPARSER_EXPORTS USE_GZIPPED_RIB
-	LINK_LIBRARIES aqsis_riutil ${Boost_IOSTREAMS_LIBRARY}
+	LINK_LIBRARIES aqsis_riutil ${Boost_IOSTREAMS_LIBRARY} ${Boost_ZLIB_LIBRARY}
 )
 
 aqsis_install_targets(aqsis_ribparse)

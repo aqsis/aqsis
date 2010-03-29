@@ -10,7 +10,7 @@ set(eqsl_srcs
 	${eqsl_FLTK_UI_SRCS} 
 )
 
-if(WIN32)
+if(WIN32 AND NOT MINGW)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 endif()
 
