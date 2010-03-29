@@ -165,14 +165,32 @@ MACRO(add_rslshaders RSL_TARGET)
         set(RSL_SHADER "${RSL_STAGE_PREFIX}/${RSL_BASENAME}.${RSL_OUTPUT_EXTENSION}")
         list(APPEND ${RSL_TARGET}_OUTPUT ${RSL_SHADER})
         # Add a command to compile the shader
-        add_custom_command(
-            OUTPUT ${RSL_SHADER}
-            # add RSLFLAGS, DEFINES
-            COMMAND ${RSL_COMPILER} ${RSL_COMPILE_FLAGS} ${RSL_DEPEND_FLAGS}
-                -o ${RSL_SHADER} ${RSL_SOURCE}
-            DEPENDS ${RSL_USER_DEPENDS}
-            COMMENT "Compiling RSL shader ${RSL_SHADER}"
-        )
+		if(NOT MINGW)
+			add_custom_command(
+				OUTPUT ${RSL_SHADER}
+				COMMAND ${RSL_COMPILER} ${RSL_COMPILE_FLAGS} ${RSL_DEPEND_FLAGS}
+					-o ${RSL_SHADER} ${RSL_SOURCE}
+				DEPENDS ${RSL_SHADER_DEPENDS} 
+				COMMENT "Compiling RSL shader ${RSL_SHADER}"
+			)
+		else()
+			file(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path)
+			file(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path)
+			set(shared_lib_path "${aqsis_util_path}" "${aqsis_slcomp_path}")
+			get_target_property(aqsl_command aqsl LOCATION)
+			add_custom_command(
+				OUTPUT ${RSL_SHADER}
+				COMMAND ${CMAKE_COMMAND} -Daqsl_command=${RSL_COMPILER}
+										 -Dshader_output_name=${RSL_SHADER} 
+										 -Dshader_include_path=${RSL_COMPILE_FLAGS}
+										 -Dshader_name=${RSL_SOURCE}
+										 -Dutil_path="${aqsis_util_path}"
+										 -Dslcomp_path="${aqsis_slcomp_path}"
+										 -P ${CMAKE_SOURCE_DIR}/cmake/aqslcompile.cmake VERBOSE=1
+				DEPENDS ${RSL_SHADER_DEPENDS}
+				COMMENT "Compiling RSL shader ${RSL_SHADER}"
+			)
+		endif()
         if(RSL_SETUP_VERBOSE)
           message(STATUS "  ${RSL_SOURCE}")
         endif(RSL_SETUP_VERBOSE)
