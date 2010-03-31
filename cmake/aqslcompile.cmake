@@ -1,2 +1,5 @@
 set(ENV{PATH} "$ENV{PATH};${util_path};${slcomp_path}")
-execute_process(COMMAND ${aqsl_command} -o ${shader_output_name} -I ${shader_include_path} ${shader_name})
+separate_arguments(RSL_COMPILE_FLAGS)
+execute_process(COMMAND ${RSL_COMPILER} ${RSL_COMPILE_FLAGS} ${RSL_DEPEND_FLAGS} 
+										-o ${RSL_SHADER} 
+										${RSL_SOURCE})

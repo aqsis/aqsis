@@ -180,13 +180,14 @@ MACRO(add_rslshaders RSL_TARGET)
 			get_target_property(aqsl_command aqsl LOCATION)
 			add_custom_command(
 				OUTPUT ${RSL_SHADER}
-				COMMAND ${CMAKE_COMMAND} -Daqsl_command=${RSL_COMPILER}
-										 -Dshader_output_name=${RSL_SHADER} 
-										 -Dshader_include_path=${RSL_COMPILE_FLAGS}
-										 -Dshader_name=${RSL_SOURCE}
+				COMMAND ${CMAKE_COMMAND} -DRSL_COMPILER="${RSL_COMPILER}"
+										 -DRSL_SHADER="${RSL_SHADER}" 
+										 -DRSL_COMPILE_FLAGS="${RSL_COMPILE_FLAGS}"
+										 -DRSL_DEPEND_FLAGS="${RSL_DEPEND_FLAGS}"
+										 -DRSL_SOURCE="${RSL_SOURCE}"
 										 -Dutil_path="${aqsis_util_path}"
 										 -Dslcomp_path="${aqsis_slcomp_path}"
-										 -P ${CMAKE_SOURCE_DIR}/cmake/aqslcompile.cmake VERBOSE=1
+										 -P ${CMAKE_SOURCE_DIR}/cmake/aqslcompile.cmake
 				DEPENDS ${RSL_SHADER_DEPENDS}
 				COMMENT "Compiling RSL shader ${RSL_SHADER}"
 			)

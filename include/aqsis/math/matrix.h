@@ -483,7 +483,7 @@ inline CqMatrix::CqMatrix( TqFloat f )
 
 //------------------------------------------------------------------------------
 // Special-case identity handling
-inline void CqMatrix::Identity()
+AQSIS_MATH_SHARE inline void CqMatrix::Identity()
 {
 	m_fIdentity = true;
 
