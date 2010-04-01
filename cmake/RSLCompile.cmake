@@ -177,10 +177,10 @@ MACRO(add_rslshaders RSL_TARGET)
 			file(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path)
 			file(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path)
 			set(shared_lib_path "${aqsis_util_path}" "${aqsis_slcomp_path}")
-			get_target_property(aqsl_command aqsl LOCATION)
+			get_target_property(aqsl_command ${RSL_COMPILER} LOCATION)
 			add_custom_command(
 				OUTPUT ${RSL_SHADER}
-				COMMAND ${CMAKE_COMMAND} -DRSL_COMPILER="${RSL_COMPILER}"
+				COMMAND ${CMAKE_COMMAND} -DRSL_COMPILER="${aqsl_command}"
 										 -DRSL_SHADER="${RSL_SHADER}" 
 										 -DRSL_COMPILE_FLAGS="${RSL_COMPILE_FLAGS}"
 										 -DRSL_DEPEND_FLAGS="${RSL_DEPEND_FLAGS}"
