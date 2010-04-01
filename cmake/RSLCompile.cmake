@@ -116,7 +116,6 @@ MACRO(add_rslshaders RSL_TARGET)
 
     # get the list of sources from the args
     set(RSL_SOURCES ${RSL_USER_DEFAULT_ARGS})
-    list(REMOVE_AT RSL_SOURCES 0)
 
     if(RSL_SETUP_VERBOSE)
       message(STATUS "Setting up RSL target [${RSL_TARGET}]")
