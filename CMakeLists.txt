@@ -74,14 +74,19 @@ else()
 	set(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install")
 endif()
 
-set(Boost_ADDITIONAL_VERSIONS "1.42" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37")
+set(Boost_ADDITIONAL_VERSIONS "1.42.0" "1.42" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37")
 find_package(Boost 1.34.1)
 # The following is a workaround because Boost versions > 1.35.0 need the
 # system library. CMake versions >2.6.4 should fix this properly.
 set(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
 if(local_boost_version VERSION_LESS "1.35")
-    find_package(Boost 1.34.1
+    if(WIN32)
+        find_package(Boost 1.34.1
 		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib)
+    else()
+        find_package(Boost 1.34.1
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+    endif()
 else()
     find_package(Boost 1.34.1
 		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib)
