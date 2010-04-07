@@ -88,8 +88,13 @@ if(local_boost_version VERSION_LESS "1.35")
 		COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
     endif()
 else()
-    find_package(Boost 1.34.1
+    if(WIN32)
+        find_package(Boost 1.34.1
 		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib)
+    else()
+        find_package(Boost 1.34.1
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system)
+    endif()
 endif()
 
 link_directories(${Boost_LIBRARY_DIRS})
