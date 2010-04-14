@@ -37,15 +37,17 @@ def emptyTileIndex(width):
     return -1 + zeros((width,width), np.int)
 
 
-def fillTilePeriodic(times, ind, r, activeRegion=None):
+def fillTilePeriodic(times, ind, r, falloff, activeRegion=None):
     '''
     Fill up a tile with well-distributed time samples.
 
-    times is the set of times to be indexed by the array ind.  ind is the
+    *times* is the set of times to be indexed by the array ind.  *ind* is the
     array which will be filled with time indices.  Elements of ind which are
-    equal to -1 will be filled with a valid index before returning.  r is the
-    distribution quality radius (we aim for all samples in rectangles of size
-    2*r+1 square to be well-distributed).  activeRegion is a slice tuple
+    equal to -1 will be filled with a valid index before returning.  *r* is
+    the distribution quality radius (we aim for all samples in rectangles of
+    size 2*r+1 square to be well-distributed).  *falloff* also controls the
+    distribution quality, determining how quickly the "repulsion" between
+    sample times falls off spatially.  *activeRegion* is a slice tuple
     indicating the region of ind which is to be touched with the filling
     algorithm.
     '''
@@ -67,7 +69,7 @@ def fillTilePeriodic(times, ind, r, activeRegion=None):
     # Indices into times for positions which have already been placed
     # neighbour indices
     nbhy, nbhx = indices((2*r+1, 2*r+1)) - r
-    weights = exp(-0.5*(nbhx**2 + nbhy**2))
+    weights = exp(-falloff*(nbhx**2 + nbhy**2))
     for py, px in toFill:
         # Find list neighbour samples which already have valid sample indices
         # assigned
@@ -90,7 +92,7 @@ def fillTilePeriodic(times, ind, r, activeRegion=None):
         remainingInds = delete(remainingInds, find(remainingInds == i))
 
 
-def makeTileSet(times, r=2):
+def makeTileSet(times, r=2, falloff=0.7):
     '''
     Create a complete corner tile set with two colours.
 
@@ -105,7 +107,7 @@ def makeTileSet(times, r=2):
     cWidth = 2*r + eWidth
 
     cornerInit = emptyTileIndex(width)
-    fillTilePeriodic(times, cornerInit, r)
+    fillTilePeriodic(times, cornerInit, r, falloff)
 
     # Chop sections out of the tile to represent the corners
     corners = [
@@ -137,14 +139,14 @@ def makeTileSet(times, r=2):
         ind[:cWidth,:cWidth//2] = corners[c1][:,cWidth//2:]
         ind[:cWidth,-cWidth//2:] = corners[c2][:,:cWidth//2]
         # Optimize the tile & extract edge
-        fillTilePeriodic(times, ind, r)
+        fillTilePeriodic(times, ind, r, falloff)
         horizEdges[c1,c2] = ind[r:r+eWidth,cWidth//2:-cWidth//2]
 
         # Same thing for vertical edge
         ind = emptyTileIndex(width)
         ind[:cWidth//2,:cWidth] = corners[c1][cWidth//2:,:]
         ind[-cWidth//2:,:cWidth] = corners[c2][:cWidth//2,:]
-        fillTilePeriodic(times, ind, r)
+        fillTilePeriodic(times, ind, r, falloff)
         vertEdges[c1,c2] = ind[cWidth//2:-cWidth//2,r:r+eWidth]
 
     # We have generated a consistent set of two colour corners and all possible
@@ -175,6 +177,16 @@ def makeTileSet(times, r=2):
         # left, right
         ind[cw:-cw,:eWidth]  = vertEdges[c1,c3]
         ind[cw:-cw,-eWidth:] = vertEdges[c2,c4]
+        #
+        # Now have something like:
+        #
+        # CCeeeeeeCC
+        # C--------C
+        # e--------e
+        # e--------e
+        # C--------C
+        # CCeeeeeeCC
+        #
 
         activeRegion = (slice(eWidth//2,-eWidth//2), )*2
         # Remove duplicate indices by choosing next closest avaliable time.
@@ -193,9 +205,18 @@ def makeTileSet(times, r=2):
                 unusedIndSet.remove(iNew)
         ind[activeRegion] = indActive
 
-        fillTilePeriodic(times, ind, r, activeRegion=activeRegion)
+        candidates = []
+        E = []
+        for candidateNum in range(1):
+            indCurr = ind.copy()
+            fillTilePeriodic(times, indCurr, r, falloff, \
+                             activeRegion=activeRegion)
 
-        tileSet[c1,c2,c3,c4] = ind[activeRegion]
+            E.append(sum(sampleQuality(times[indCurr], r)))
+            candidates.append(indCurr[activeRegion])
+
+        #print 'tile %d done' % (tileInd,)
+        tileSet[c1,c2,c3,c4] = candidates[argmin(E)]
 
     return tileSet
 
@@ -300,7 +321,7 @@ def findGoodHashPerm(tableSize):
 #------------------------------------------------------------------------------
 # Stuff for visualizing tile quality
 
-def sampleQuality(times, r):
+def sampleQuality(times, r, falloff=0.7):
     '''
     Show the quality of the provided sample times as a function of space.
 
@@ -313,7 +334,7 @@ def sampleQuality(times, r):
         for i in range(-r,r):
             if i == 0 and j == 0:
                 continue
-            w = exp(-0.5*(i**2 + j**2))
+            w = exp(-falloff*(i**2 + j**2))
             dist = times - roll(roll(times, i, 0), j, 1)
             E += w/abs(dist)
     return E
@@ -326,8 +347,8 @@ def showTileQuality(times, tileSet, r):
             for c3 in range(0,2):
                 for c4 in range(0,2):
                     subplot(4, 4, ((c1*2+c2)*2+c3)*2+c4 + 1)
-                    imshow(energyBadness(times[tileSet[c1][c2][c3][c4]], r), 
-                           interpolation='nearest', vmax=100)
+                    imshow(sampleQuality(times[tileSet[c1][c2][c3][c4]], r), 
+                           interpolation='nearest', vmax=100, cmap=cm.gray)
 
 
 #------------------------------------------------------------------------------
