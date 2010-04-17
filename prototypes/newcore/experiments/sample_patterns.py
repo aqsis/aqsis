@@ -16,6 +16,48 @@ show()
 '''
 
 
+def scatter3D(*args, **kwargs):
+    '''Convenience function to plot 3D scatter diagrams'''
+    from mpl_toolkits.mplot3d import Axes3D
+    ax = Axes3D(gcf())
+    ax.scatter(*args, **kwargs)
+
+def centred_figimage(image, *args, **kwargs):
+    '''
+    Show an image in the centre of a figure at natural (unscaled) resolution.
+    '''
+    bound = gcf().get_window_extent()
+    xo = (bound.width - image.shape[0])//2
+    yo = (bound.height - image.shape[1])//2
+    figimage(image, *args, xo=xo, yo=yo, **kwargs)
+
+def figimages(images, *args, **kwargs):
+    '''
+    Show two unscaled images evenly laid out horizontally in the figure.
+    '''
+    bound = gcf().get_window_extent()
+    wf = bound.width
+    wh = bound.height
+    w = images[0].shape[1]
+    h = images[0].shape[0]
+    n = len(images)
+    hgap = (wf - w*n)/(n+1)
+    yo = (wh - h)//2
+    figimage(images[0], *args, xo=hgap, yo=yo, **kwargs)
+    figimage(images[1], *args, xo=2*hgap+w, yo=yo, **kwargs)
+
+
+def eucDist(a, b):
+    '''
+    Get the Euclidian distance between a and b
+
+    a and b may be arrays, in which case the sum is taken along the last
+    dimension.
+    '''
+    return sqrt(sum((a-b)**2, axis=-1))
+
+
+
 def primes(N):
     '''Find all primes less than or equal to N'''
     isprime = repeat(True, N+1)
@@ -25,6 +67,34 @@ def primes(N):
         if isprime[i]:
             isprime[2*i::i] = False
     return find(isprime)
+
+
+def radicalInverse(n, b):
+    '''
+    Compute the radical inverse of n in base b.  This is handy for
+    constructing low-discrepency sequences of sample positions.
+    '''
+    r = 0.0
+    i = 1
+    while n != 0:
+        d = n % b
+        n = n // b
+        r += float(d)/b**i
+        i += 1
+    return r
+
+
+def radicalInverseSeq(n, b):
+    '''Radical inverses of the first n integers starting at 0'''
+    return array([radicalInverse(i,b) for i in range(0,n)])
+
+
+def rinvTuvSamples(n):
+    '''time and lens position samples using radical inverse sequence'''
+    t = radicalInverseSeq(n, 2)
+    r = sqrt(radicalInverseSeq(n, 3))
+    theta = 2*pi*radicalInverseSeq(n, 5)
+    return array([t, r*cos(theta), r*sin(theta)]).T
 
 
 def jitteredSamp(n):
@@ -37,19 +107,39 @@ def emptyTileIndex(width):
     return -1 + zeros((width,width), np.int)
 
 
-def fillTilePeriodic(times, ind, r, falloff, activeRegion=None):
+def sampleDist(tuv1, tuv2):
+    '''
+    Get the distance between (t,u,v) tuples when optimizing.
+
+    Optimizing involves choosing a (t,u,v) triple which is well separated
+    from the other triples in the spatial neighbourhood.  This function
+    determines what "well-separated" means.
+
+    tuv1 and tuv2 should be arrays which are broadcastable to the same shape,
+    with (t,u,v) triples in the last dimension.
+    '''
+    tDist = fabs(tuv1[...,0] - tuv2[...,0])
+    uvDist = eucDist(tuv1[...,1:],tuv2[...,1:])
+    return 2*tDist + uvDist
+    #return eucDist(tuv1, tuv2)
+    #return uvDist
+    #return fmin(tDist, uvDist)
+    #return sqrt(sum((tuv1-tuv2)**2, axis=-1))
+
+
+def fillTilePeriodic(tuv, ind, r, falloff, activeRegion=None):
     '''
     Fill up a tile with well-distributed time samples.
 
-    *times* is the set of times to be indexed by the array ind.  *ind* is the
-    array which will be filled with time indices.  Elements of ind which are
-    equal to -1 will be filled with a valid index before returning.  *r* is
-    the distribution quality radius (we aim for all samples in rectangles of
-    size 2*r+1 square to be well-distributed).  *falloff* also controls the
-    distribution quality, determining how quickly the "repulsion" between
-    sample times falls off spatially.  *activeRegion* is a slice tuple
-    indicating the region of ind which is to be touched with the filling
-    algorithm.
+    *tuv* is the set of time and lens offsets to be indexed by the array ind.
+    *ind* is the array which will be filled with time indices.  Elements of
+    ind which are equal to -1 will be filled with a valid index before
+    returning.  *r* is the distribution quality radius (we aim for all samples
+    in rectangles of size 2*r+1 square to be well-distributed).  *falloff*
+    also controls the distribution quality, determining how quickly the
+    "repulsion" between sample time/lens offset falls off spatially.
+    *activeRegion* is a slice tuple indicating the region of ind which is to
+    be touched with the filling algorithm.
     '''
     width = ind.shape[0]
     assert(ind.shape[1] == width and len(ind.shape) == 2)
@@ -78,11 +168,11 @@ def fillTilePeriodic(times, ind, r, falloff, activeRegion=None):
         nbhInds = ind[y, x]
         w = weights[nbhInds >= 0].ravel()
         nbhInds = nbhInds[nbhInds >= 0].ravel()
-        unusedTimes = times[remainingInds]
+        unusedTuv = tuv[remainingInds]
         if nbhInds.size > 0:
             # Choose time sample which minimizes energy
-            E = sum(w[:,newaxis]/fabs(  times[nbhInds][:,newaxis]
-                                      - unusedTimes[newaxis,:]), 0)
+            E = sum(w[:,newaxis]/sampleDist(tuv[nbhInds][:,newaxis],
+                                            unusedTuv[newaxis,:]), axis=0)
             i = remainingInds[argmin(E)]
         else:
             # Choose time sample at random if none are within the radius
@@ -92,7 +182,7 @@ def fillTilePeriodic(times, ind, r, falloff, activeRegion=None):
         remainingInds = delete(remainingInds, find(remainingInds == i))
 
 
-def makeTileSet(times, r=2, falloff=0.7):
+def makeTileSet(tuv, r=2, falloff=0.7):
     '''
     Create a complete corner tile set with two colours.
 
@@ -100,14 +190,14 @@ def makeTileSet(times, r=2, falloff=0.7):
     Tiles: Colored Edges versus Colored Corners" by A. Lagae and P. Dutre,
     with some modifications for our specific circumstances.
     '''
-    width = int(sqrt(times.size))
-    assert(width**2 == times.size)
+    width = int(sqrt(tuv.shape[0]))
+    assert(width**2 == tuv.shape[0])
 
     eWidth = r + r%2
     cWidth = 2*r + eWidth
 
     cornerInit = emptyTileIndex(width)
-    fillTilePeriodic(times, cornerInit, r, falloff)
+    fillTilePeriodic(tuv, cornerInit, r, falloff)
 
     # Chop sections out of the tile to represent the corners
     corners = [
@@ -139,14 +229,14 @@ def makeTileSet(times, r=2, falloff=0.7):
         ind[:cWidth,:cWidth//2] = corners[c1][:,cWidth//2:]
         ind[:cWidth,-cWidth//2:] = corners[c2][:,:cWidth//2]
         # Optimize the tile & extract edge
-        fillTilePeriodic(times, ind, r, falloff)
+        fillTilePeriodic(tuv, ind, r, falloff)
         horizEdges[c1,c2] = ind[r:r+eWidth,cWidth//2:-cWidth//2]
 
         # Same thing for vertical edge
         ind = emptyTileIndex(width)
         ind[:cWidth//2,:cWidth] = corners[c1][cWidth//2:,:]
         ind[-cWidth//2:,:cWidth] = corners[c2][:cWidth//2,:]
-        fillTilePeriodic(times, ind, r, falloff)
+        fillTilePeriodic(tuv, ind, r, falloff)
         vertEdges[c1,c2] = ind[cWidth//2:-cWidth//2,r:r+eWidth]
 
     # We have generated a consistent set of two colour corners and all possible
@@ -200,7 +290,7 @@ def makeTileSet(times, r=2, falloff=0.7):
             i = ind1d[indSorted[n-1]]
             if i != -1 and ind1d[indSorted[n]] == i:
                 unusedInds = array(list(unusedIndSet))
-                iNew = unusedInds[argmin(fabs(times[i] - times[unusedInds]))]
+                iNew = unusedInds[argmin(sampleDist(tuv[i], tuv[unusedInds]))]
                 ind1d[indSorted[n-1]] = iNew
                 unusedIndSet.remove(iNew)
         ind[activeRegion] = indActive
@@ -209,10 +299,10 @@ def makeTileSet(times, r=2, falloff=0.7):
         E = []
         for candidateNum in range(1):
             indCurr = ind.copy()
-            fillTilePeriodic(times, indCurr, r, falloff, \
+            fillTilePeriodic(tuv, indCurr, r, falloff, \
                              activeRegion=activeRegion)
 
-            E.append(sum(sampleQuality(times[indCurr], r)))
+            E.append(sum(sampleQuality(tuv[indCurr], r)))
             candidates.append(indCurr[activeRegion])
 
         #print 'tile %d done' % (tileInd,)
@@ -283,9 +373,11 @@ def applyTileSet(width, tileSet, cornerHash):
             c2 = cornerHash(tx+1, ty)
             c3 = cornerHash(tx, ty+1)
             c4 = cornerHash(tx+1, ty+1)
+            tile = tileSet[c1,c2,c3,c4]
+#            tile = tileSet[c1,c2,c3,c4].copy()
+#            shuffle(tile.ravel())
             # Compute the appropriate tile using a spatial hash.
-            samps[ty*tWidth:(ty+1)*tWidth, tx*tWidth:(tx+1)*tWidth] \
-                = tileSet[c1,c2,c3,c4]
+            samps[ty*tWidth:(ty+1)*tWidth, tx*tWidth:(tx+1)*tWidth] = tile
     return samps
 
 
@@ -321,9 +413,10 @@ def findGoodHashPerm(tableSize):
 #------------------------------------------------------------------------------
 # Stuff for visualizing tile quality
 
-def sampleQuality(times, r, falloff=0.7):
+def sampleQuality(tuv, r, falloff=0.7):
     '''
-    Show the quality of the provided sample times as a function of space.
+    Show the quality of the provided sample times/lens offsets as a function
+    of space.
 
     Poor quality samples will show up as large values in the per-sample
     "energy" which is computed by this function.  Note that periodic boundary
@@ -335,19 +428,19 @@ def sampleQuality(times, r, falloff=0.7):
             if i == 0 and j == 0:
                 continue
             w = exp(-falloff*(i**2 + j**2))
-            dist = times - roll(roll(times, i, 0), j, 1)
+            dist = tuv - roll(roll(tuv, i, 0), j, 1)
             E += w/abs(dist)
     return E
 
 
-def showTileQuality(times, tileSet, r):
+def showTileQuality(tuv, tileSet, r):
     '''Show the quality of all tiles in a 2-colour set'''
     for c1 in range(0,2):
         for c2 in range(0,2):
             for c3 in range(0,2):
                 for c4 in range(0,2):
                     subplot(4, 4, ((c1*2+c2)*2+c3)*2+c4 + 1)
-                    imshow(sampleQuality(times[tileSet[c1][c2][c3][c4]], r), 
+                    imshow(sampleQuality(tuv[tileSet[c1][c2][c3][c4]], r), 
                            interpolation='nearest', vmax=100, cmap=cm.gray)
 
 
@@ -389,7 +482,42 @@ def boxKer(N):
     k = ones((N,N))
     return k/sum(k)
 
-def showFiltered(samples, cutTime, kernel, step):
+
+def showFilteredDof(tuv, kernel, step, diskRad=0.25, dofRad=0.15):
+    '''
+    Simulation of the DoF sampling process for a constant depth disk.
+    '''
+    pos = indices(tuv.shape[0:2]).swapaxes(0,2)/float(tuv.shape[0])
+    diskPos = array([0.5,0.5])
+    # Compute sampled result
+    imRaw = sqrt(sum((pos - diskPos + dofRad*tuv[...,1:])**2, axis=-1)) < diskRad
+    imFilt = applyFilter(imRaw, kernel, step)
+    # Compute exact result
+    imExactRaw = zeros(imRaw.shape)
+    # Three regions in exact image:
+    # 1) filter entirely not in disk (yeilds black)
+    # 2) filter entirely in disk (yeilds white)
+    dist = eucDist(pos, diskPos)
+    imExactRaw[dist <= (diskRad - dofRad)] = 1
+    # 2) partial overlap between filter & disk
+    partial = (dist > (diskRad - dofRad)) & (dist < (diskRad + dofRad))
+    d = dist[partial]
+    a = d/2 * (1 + (dofRad/d)**2 - (diskRad/d)**2)
+    b = d/2 * (1 + (diskRad/d)**2 - (dofRad/d)**2)
+    h = sqrt(dofRad**2 - a**2)
+    imExactRaw[partial] = (dofRad**2*arctan2(h,a) + \
+                           diskRad**2*arctan2(h,b) - (a+b)*h) / (pi*dofRad**2)
+    imExact = applyFilter(imExactRaw, kernel, step)
+    stddev = std(imFilt.ravel() - imExact.ravel())
+    print
+    print "std deviation =", stddev
+    # Plot results.
+    #figimage(imExact, vmin=0, vmax=1, cmap=cm.gray)
+    #centred_figimage(abs(imExact-imFilt), vmin=0, vmax=1, cmap=cm.gray)
+    figimages([imFilt, abs(imExact-imFilt)], vmin=0, vmax=1, cmap=cm.gray)
+
+
+def showFilteredMb(tuv, kernel, step, cutTime=lambda x,y:x):
     '''
     Cheap simulation of the sampling process, followed by filtering & display.
 
@@ -399,12 +527,12 @@ def showFiltered(samples, cutTime, kernel, step):
     cutoff are coloured black.  The results are then filtered with the
     provided kernel and step, by passing to applyFilter().
     '''
-    y,x = mgrid[0:samples.shape[0], 0:samples.shape[1]]
-    x = x/float(samples.shape[1])
-    y = y/float(samples.shape[0])
+    y,x = mgrid[0:tuv.shape[0], 0:tuv.shape[1]]
+    x = x/float(tuv.shape[1])
+    y = y/float(tuv.shape[0])
     cutTime = cutTime(x,y)
     # Compute filtered & exact images, difference & std deviation
-    imFilt = applyFilter(samples < cutTime, kernel, step)
+    imFilt = applyFilter(tuv[...,0] < cutTime, kernel, step)
     imExact = applyFilter(cutTime, kernel, step)
     stddev = std(imFilt.ravel() - imExact.ravel())
     subplot(1, 2, 1)
