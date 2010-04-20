@@ -182,7 +182,7 @@ def fillTilePeriodic(tuv, ind, r, falloff, activeRegion=None):
         remainingInds = delete(remainingInds, find(remainingInds == i))
 
 
-def makeTileSet(tuv, r=2, falloff=0.7):
+def makeTileSet(tuv, r=2, ncol=2, falloff=0.7):
     '''
     Create a complete corner tile set with two colours.
 
@@ -192,6 +192,7 @@ def makeTileSet(tuv, r=2, falloff=0.7):
     '''
     width = int(sqrt(tuv.shape[0]))
     assert(width**2 == tuv.shape[0])
+    assert(ncol <= 3)
 
     eWidth = r + r%2
     cWidth = 2*r + eWidth
@@ -204,6 +205,9 @@ def makeTileSet(tuv, r=2, falloff=0.7):
         cornerInit[0:cWidth,0:cWidth],
         cornerInit[width//2:width//2+cWidth, width//2:width//2+cWidth]
     ]
+    if ncol == 3:
+        corners.append(cornerInit[0:cWidth, width//2:width//2+cWidth])
+
     for c in corners:
         c[:r,:r]   = -1
         c[-r:,:r]  = -1
@@ -211,11 +215,11 @@ def makeTileSet(tuv, r=2, falloff=0.7):
         c[-r:,-r:] = -1
 
     # Create all edges
-    horizEdges = zeros((2,2), dtype=object)
-    vertEdges = zeros((2,2), dtype=object)
-    for edgeInd in range(4):
-        c1 = edgeInd % 2
-        c2 = (edgeInd//2) % 2
+    horizEdges = zeros((ncol,ncol), dtype=object)
+    vertEdges = zeros((ncol,ncol), dtype=object)
+    for edgeInd in range(ncol**2):
+        c1 = edgeInd % ncol
+        c2 = (edgeInd//ncol) % ncol
         # Insert corner samples into top left and top right of tile
         #
         # +--------------+
@@ -243,12 +247,12 @@ def makeTileSet(tuv, r=2, falloff=0.7):
     # associated edges.  Next we fill in the tiles themselves using these
     # corners & edges as the boundaries
 
-    tileSet = zeros((2,2,2,2), dtype=object)
-    for tileInd in range(16):
-        c1 = tileInd % 2
-        c2 = (tileInd//2) % 2
-        c3 = (tileInd//4) % 2
-        c4 = (tileInd//8) % 2
+    tileSet = zeros((ncol,ncol,ncol,ncol), dtype=object)
+    for tileInd in range(ncol**4):
+        c1 = tileInd % ncol
+        c2 = (tileInd//ncol) % ncol
+        c3 = (tileInd//(ncol**2)) % ncol
+        c4 = (tileInd//(ncol**3)) % ncol
         # Make tile with corners:
         # c1--c2
         # |   |
@@ -295,9 +299,11 @@ def makeTileSet(tuv, r=2, falloff=0.7):
                 unusedIndSet.remove(iNew)
         ind[activeRegion] = indActive
 
+        # generate a bunch of candidate tile interiors & take the best one.
+        ncandidates = 1
         candidates = []
         E = []
-        for candidateNum in range(1):
+        for candidateNum in range(ncandidates):
             indCurr = ind.copy()
             fillTilePeriodic(tuv, indCurr, r, falloff, \
                              activeRegion=activeRegion)
@@ -321,7 +327,7 @@ class SpatialHash:
     The method used is successive permutations via a permutation table, (see,
     for example, Ken Perlin's paper "Improved Noise", 2002).
     '''
-    def __init__(self, ncolors=2, tableSize=None):
+    def __init__(self, tableSize=None, ncolors=2):
         if tableSize is None:
             self.N = 256
             # Relatively "nice" permutation table for ncolors=2 generated with
@@ -374,7 +380,7 @@ def applyTileSet(width, tileSet, cornerHash):
             c3 = cornerHash(tx, ty+1)
             c4 = cornerHash(tx+1, ty+1)
             tile = tileSet[c1,c2,c3,c4]
-#            tile = tileSet[c1,c2,c3,c4].copy()
+#            tile = tile.copy()
 #            shuffle(tile.ravel())
             # Compute the appropriate tile using a spatial hash.
             samps[ty*tWidth:(ty+1)*tWidth, tx*tWidth:(tx+1)*tWidth] = tile
@@ -392,13 +398,13 @@ def hashTilingInds(width, hash):
             hash(tx+1,ty+1)
 
 
-def findGoodHashPerm(tableSize):
+def findGoodHashPerm(tableSize, ncol):
     '''
     Find a hash function permutation table which is "nice" in the sense that
     it results in few adjacent repititions of the same tile.
     '''
     while True:
-        h = SpatialHash(tableSize=tableSize)
+        h = SpatialHash(tableSize=tableSize, ncolors=ncol)
         ind = hashTilingInds(tableSize, h)
         goodness0 = sum(diff(ind, axis=0) == 0) / float(ind.size)
         goodness1 = sum(diff(ind, axis=1) == 0) / float(ind.size)
@@ -428,8 +434,7 @@ def sampleQuality(tuv, r, falloff=0.7):
             if i == 0 and j == 0:
                 continue
             w = exp(-falloff*(i**2 + j**2))
-            dist = tuv - roll(roll(tuv, i, 0), j, 1)
-            E += w/abs(dist)
+            E += w/sampleDist(tuv, roll(roll(tuv, i, 0), j, 1))
     return E
 
 
@@ -489,6 +494,7 @@ def showFilteredDof(tuv, kernel, step, diskRad=0.25, dofRad=0.15):
     '''
     pos = indices(tuv.shape[0:2]).swapaxes(0,2)/float(tuv.shape[0])
     diskPos = array([0.5,0.5])
+    #diskPos = multiply.outer(tuv[...,0], array([1,1])) # combined DoF & MB
     # Compute sampled result
     imRaw = sqrt(sum((pos - diskPos + dofRad*tuv[...,1:])**2, axis=-1)) < diskRad
     imFilt = applyFilter(imRaw, kernel, step)
