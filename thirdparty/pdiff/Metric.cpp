@@ -19,6 +19,7 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #include "RGBAImage.h"
 #include "LPyramid.h"
 #include <math.h>
+#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265f
