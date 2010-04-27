@@ -327,32 +327,31 @@ class SpatialHash:
     The method used is successive permutations via a permutation table, (see,
     for example, Ken Perlin's paper "Improved Noise", 2002).
     '''
-    def __init__(self, tableSize=None, ncolors=2):
+    def __init__(self, ncolors, tableSize=None):
         if tableSize is None:
             self.N = 256
-            # Relatively "nice" permutation table for ncolors=2 generated with
-            # findGoodHashPerm()
-            self.P = array(
-            [221, 248,  55,  65, 162, 184,  16, 217, 141,  24,  78,  34, 131,
-             164,  98, 127, 128, 229, 142,  70, 176, 192,  51,   1, 230, 235,
-             232, 124, 121,   6, 107,  85, 233, 175, 144, 202, 122, 200, 254,
-             167,   8, 196, 158,  63,  88, 102, 153, 170, 120, 149,  29,  13,
-             183,   7, 194, 241, 255,  15, 112, 126, 173, 216, 195,  93,  23,
-              95, 220,  18,  14, 251,  22, 137, 191, 111,  99, 223,  75, 250,
-             160, 106, 156, 119, 227,  45, 166, 165,  33,  84, 169,  25,   0,
-             214, 101,  96,  56,  47, 159, 139, 253,  46,  52, 177,  60, 116,
-              28, 105, 140, 108,  41, 178,  53,  77,  69, 136,  73,  68, 103,
-              19,  76,  61, 147, 113, 240,  32, 201, 129, 222,  48, 209,  67,
-             190, 238,  83,  54, 115,  49,  26, 231, 110, 148, 208, 145,  97,
-              44,   4, 249,   9, 239, 205,  40, 104,  59,  10, 236,  35,  11,
-             134,  94,  27,  72, 212,  30,  57, 133, 245,  64,  20, 180, 246,
-              12, 210,  81, 168, 219, 125,  79, 155,  58, 252, 243, 215, 179,
-             146,  86, 211, 188, 204,  82,  80, 242,   3,  31, 218,  74,  71,
-             109, 234,   2, 185, 157, 163, 224,  38, 237, 193, 152, 228,  92,
-             150, 199, 123, 197, 207, 100, 203, 182, 226, 225,  87,   5, 154,
-             151,  62, 174, 247,  66, 244, 117, 130, 143,  37, 114, 138, 181,
-             189,  89, 206, 172,  17,  91, 118, 186,  50, 198, 213, 187,  21,
-             135,  43,  39,  90, 132, 161, 171,  42,  36])
+            # A particular permutation for definiteness
+            self.P = array([
+               41,  52, 248, 166, 162,  92,  95,  11,   3,  94, 219, 198, 170,
+              165,  80, 231,  75,  19,  20, 240, 169, 105,  15,  51,  45,  84,
+               85, 157, 232,  23,  97,  14, 174,   0,  82,  42, 145,  69, 111,
+              178, 158, 138,  17,  70, 238, 137, 179,  64, 172,  61,  53, 177,
+               91,  73, 234,  18, 148, 223,  68, 187, 123,   7,   8,  12,   2,
+               27, 133,  66, 194, 160, 189, 142, 253,  81,  87, 212, 193, 102,
+              210, 154,  28,  21,  24, 101, 192, 249, 168,  71, 233, 237,  98,
+               79, 119, 152, 183, 116, 211, 217,  29, 184, 220,  54,  31, 163,
+              134, 120,  78, 245, 195, 204,  56, 140, 180,  99, 112,  57, 146,
+              228, 201, 106, 197, 115, 250,  47, 122,  40, 203, 132,  33,  89,
+              225, 196,  83,  58, 182,  34, 218, 205,  50,  10, 206,  88,  49,
+                1, 109, 254,  67, 144, 150, 230, 235, 213, 181, 242, 208, 246,
+               86, 236, 190,  13, 188,  59, 209,  48,  74, 214, 175, 215,  77,
+              114,  35, 252, 227, 118,  72, 167, 153, 129, 121, 164, 244, 243,
+              226, 125,  44,  62, 239, 136, 151, 173, 171,   5, 110,  96, 216,
+              222, 113, 229, 161, 155, 221, 124, 103,   6, 255, 108, 126, 147,
+               32,  93, 135, 200, 100,  43, 251, 141, 130, 117,  39,  60, 185,
+              149,  38,  26, 143,  55,  36, 127, 128,   4,  16, 207, 139, 159,
+               22, 191,  25, 156, 131,  46,  30, 224, 176,  65,  90, 202, 186,
+              104, 107,   9, 247,  63, 199,  37, 241,  76])
         else:
             # Generate a new table
             self.N = tableSize
@@ -363,6 +362,15 @@ class SpatialHash:
         return self.P[(self.P[x%self.N] + y)%self.N] % self.ncolors
 
 
+class SpatialPsudoHash:
+    '''A spatial "hash" which really uses psuedo random values
+    (not a hash at all!)'''
+    def __init__(self, ncols=2):
+        self.ncolors = ncols
+    def __call__(self, x, y):
+        return int_(rand(*array(x).shape)*self.ncolors)
+
+
 def applyTileSet(width, tileSet, cornerHash):
     '''
     Use a set of tiles to tile the plane.
@@ -371,20 +379,34 @@ def applyTileSet(width, tileSet, cornerHash):
     cornerHash represents a spatial hash function with which to compute colors
     for the tile corners; this determines the particular tile placement used.
     '''
+    y,x = indices((width+1, width+1))
+    h = cornerHash(x,y)
     tWidth = tileSet[0,0,0,0].shape[0]
     samps = zeros((tWidth*width, tWidth*width), dtype=np.int)
     for ty in range(0,width):
         for tx in range(0,width):
-            c1 = cornerHash(tx, ty)
-            c2 = cornerHash(tx+1, ty)
-            c3 = cornerHash(tx, ty+1)
-            c4 = cornerHash(tx+1, ty+1)
+            c1 = h[tx, ty]
+            c2 = h[tx+1, ty]
+            c3 = h[tx, ty+1]
+            c4 = h[tx+1, ty+1]
             tile = tileSet[c1,c2,c3,c4]
 #            tile = tile.copy()
 #            shuffle(tile.ravel())
             # Compute the appropriate tile using a spatial hash.
             samps[ty*tWidth:(ty+1)*tWidth, tx*tWidth:(tx+1)*tWidth] = tile
     return samps
+
+
+def saveTileSet(fileName, tuv, tileSet):
+    out = open(fileName, 'w')
+    #out.write('AQSF\n')
+    out.write('%d %d\n' % tileSet[0,0,0,0].shape)
+    tuv.tofile(out, sep=' ')
+    out.write('\n')
+    for tile in tileSet.flat:
+        tile.tofile(out, sep=' ')
+        out.write('\n')
+    out.close()
 
 
 def hashTilingInds(width, hash):
@@ -402,9 +424,13 @@ def findGoodHashPerm(tableSize, ncol):
     '''
     Find a hash function permutation table which is "nice" in the sense that
     it results in few adjacent repititions of the same tile.
+
+    WARNING: Actually, this function doesn't really do a good job; it results
+    in permutations which have fewer adjacencies overall, but some regions
+    which locally have a lot of repitition.
     '''
     while True:
-        h = SpatialHash(tableSize=tableSize, ncolors=ncol)
+        h = SpatialHash(ncol, tableSize=tableSize)
         ind = hashTilingInds(tableSize, h)
         goodness0 = sum(diff(ind, axis=0) == 0) / float(ind.size)
         goodness1 = sum(diff(ind, axis=1) == 0) / float(ind.size)
