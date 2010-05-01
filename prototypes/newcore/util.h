@@ -251,6 +251,36 @@ inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
 template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
 
 
+/// Radical inverse function for low-discrepancy sequences.
+///
+/// The radical inverse of n in base b is the base b digits of n reversed and
+/// placed to the right of the radix point:
+///
+///     n = d1d2d3d4d5 |->  0.d5d4d3d2d1 = radicalInverse(n)
+///
+/// These are great for easily building sequences in D dimensions with nice
+/// distribution properties; just construct tuples like
+///
+/// [radicalInverse(n, 2), radicalInverse(n, 3), ..., radicalInverse(n, p_D)]
+///
+/// where p_D is the D'th prime number.  Note that p_D can't be too large, or
+/// the sequences start looking rather non-uniform.
+inline float radicalInverse(int n, int base = 2)
+{
+    double r = 0;
+    double invBase = 1.0/base;
+    double digitMult = invBase;
+    while(n != 0)
+    {
+        r += digitMult*(n % base);
+        n /= base;
+        digitMult *= invBase;
+    }
+    return r;
+}
+
+
+//------------------------------------------------------------------------------
 /// Reference counting machinary.
 
 inline void nullDeleter(const void*) { }
