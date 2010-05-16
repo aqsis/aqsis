@@ -28,9 +28,11 @@ set(srcs
     main.cpp
     primvar.cpp
     renderer.cpp
+    samplegen.cpp
     samplestorage.cpp
     scenes/default.cpp
     scenes/simpledeformation.cpp
+    scenes/mbnoisetest.cpp
     scenes/tenpatch.cpp
     shader.cpp
     ustring/ustring.cpp
@@ -51,6 +53,7 @@ set(hdrs
     primvar.h
     renderer.h
     sample.h
+    samplegen.h
     samplestorage.h
     scenes/scenes.h
     shader.h
@@ -94,6 +97,10 @@ testcase(varspec_test ${varspec_srcs} varspec_test.cpp)
 testcase(gridstorage_test ${varspec_srcs} gridstorage_test.cpp)
 
 testcase(arrayview_test arrayview_test.cpp)
+
+testcase(util_test util_test.cpp)
+
+testcase(samplegen_test samplegen.cpp samplegen_test.cpp)
 
 if(WIN32)
     set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)

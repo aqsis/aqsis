@@ -66,6 +66,19 @@ inline std::ostream& operator<<(std::ostream& out, Box b)
     return out;
 }
 
+template<typename T>
+inline T* get(std::vector<T>& v)
+{
+    assert(v.size() > 0);
+    return &v[0];
+}
+template<typename T>
+inline const T* get(const std::vector<T>& v)
+{
+    assert(v.size() > 0);
+    return &v[0];
+}
+
 
 template<typename T>
 inline Imath::Vec2<T> vec2_cast(const Imath::Vec3<T>& v)

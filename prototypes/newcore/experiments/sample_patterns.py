@@ -118,9 +118,14 @@ def sampleDist(tuv1, tuv2):
     tuv1 and tuv2 should be arrays which are broadcastable to the same shape,
     with (t,u,v) triples in the last dimension.
     '''
-    tDist = fabs(tuv1[...,0] - tuv2[...,0])
-    uvDist = eucDist(tuv1[...,1:],tuv2[...,1:])
-    return 2*tDist + uvDist
+    dt = tuv1[...,0] - tuv2[...,0]
+    du = tuv1[...,1] - tuv2[...,1]
+    dv = tuv1[...,2] - tuv2[...,2]
+    return sqrt(4*dt*dt + du*du + dv*dv)
+    # Some other possibilities...
+    #tDist = fabs(tuv1[...,0] - tuv2[...,0])
+    #uvDist = eucDist(tuv1[...,1:],tuv2[...,1:])
+    #return 2*tDist + uvDist
     #return eucDist(tuv1, tuv2)
     #return uvDist
     #return fmin(tDist, uvDist)

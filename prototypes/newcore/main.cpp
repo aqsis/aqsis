@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
         renderTenPatchScene();
     else if(sceneName == "simpledeform")
         renderSimpleDeformationScene();
+    else if(sceneName == "mbnoisetest")
+        renderMbNoiseTestScene();
     else
         renderDefaultScene();
 

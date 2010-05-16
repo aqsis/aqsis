@@ -20,4 +20,5 @@
 void renderTenPatchScene();
 void renderDefaultScene();
 void renderSimpleDeformationScene();
+void renderMbNoiseTestScene();
 

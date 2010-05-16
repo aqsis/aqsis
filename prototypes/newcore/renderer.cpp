@@ -1026,6 +1026,8 @@ void Renderer::motionRasterize(GridHolder& holder)
                 // itime.
                 int shuffIdx = m_sampStorage->m_tileShuffleIndices[
                                 tileInd*sampsPerTile + itime ];
+                if(shuffIdx < 0)
+                    continue;
                 Sample& samp = m_sampStorage->m_samples[shuffIdx];
                 if(!hitTest(samp))
                     continue;

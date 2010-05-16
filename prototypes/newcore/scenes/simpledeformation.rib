@@ -1,0 +1,46 @@
+Display "simpledeformation_Ci.tif" "file" "rgb" "compression" "lzw"
+Display "+simpledeformation_Ci.tif" "framebuffer" "rgb"
+
+Format 1024 1024 1
+
+Hider "hidden" "jitter" 1
+PixelSamples 4 4
+PixelFilter "gaussian" 2 2
+
+Shutter 0 2
+
+ShadingRate 1
+
+GeometricApproximation "motionfactor" 0
+
+Projection "perspective" "fov" 90
+
+#Translate 0 0 1
+
+DepthOfField 1 0.5 1.5
+
+WorldBegin
+    Color 1 1 1
+    MotionBegin [0 2]
+        Patch "bilinear" "P" [
+            -0.4 -0.4 1   -0.4 -0.3 1
+            -0.3 -0.4 1   -0.3 -0.3 1
+        ]
+        Patch "bilinear" "P" [
+            -0.1 -0.1 1   -0.1 0.1 1
+            0.1 -0.1 1   0.1 0.1 1
+        ]
+    MotionEnd
+
+    Color 0.6 0.4 0.4
+    MotionBegin [0 2]
+        Patch "bilinear" "P" [
+            1 0 2   0 1.1 2
+            0 -1.1 2   -1 0 2
+        ]
+        Patch "bilinear" "P" [
+            1.5 0 2   0 0.8 2
+            0 -0.8 2   -1.5 0 2
+        ]
+    MotionEnd
+WorldEnd
