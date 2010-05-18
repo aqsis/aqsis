@@ -71,8 +71,15 @@ void canonicalTimeLensSamps(std::vector<float>& tuv, int nsamps);
 ///                above.
 /// \param width - desired tile width in number of samples
 /// \param tuv - time and lens offsets in the format [t1 u1 v1  t2 u2 v2 ...]
+/// \param timeStratQuality - How important stratification in the time
+///              dimension is relative to stratification in the lens dimension.
+///              The value should be between 0 and 1, with 1 indicating that
+///              only time is included in the stratification quality estimate.
+///              The default of 0.5 indicates roughly equal importance between
+///              time and lens.
 ///
-void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv);
+void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
+                 float timeStratQuality = 0.5f);
 
 
 
@@ -84,5 +91,5 @@ void findRemainingInds(const int* tile, int fullwidth, int width,
 
 int getMinCostIdx(const int* remainingInds, int nRemain,
                   const int* validNeighbours, const float* validWeights,
-                  int nvalid, const float* tuv);
+                  int nvalid, const float* tuv, float timeStratQuality);
 

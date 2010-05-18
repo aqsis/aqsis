@@ -157,11 +157,21 @@ SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
         }
     }
 
+    bool hasMotion = opts.shutterMin != opts.shutterMax;
+    bool hasDof = opts.fstop != FLT_MAX;
+    float timeStratQuality = 0;
+    if(hasMotion && hasDof)
+        timeStratQuality = 0.5;
+    else if(hasMotion)
+        timeStratQuality = 1;
+    else if(hasDof)
+        timeStratQuality = 0;
+    // TODO: Avoid running makeTileSet entirely if hasMotion is false.
     int tileWidth = 13;
     std::vector<int> tiles;
     std::vector<float> tuv;
     canonicalTimeLensSamps(tuv, tileWidth*tileWidth);
-    makeTileSet(tiles, tileWidth, tuv);
+    makeTileSet(tiles, tileWidth, tuv, timeStratQuality);
     m_extraDims.resize(tileWidth*tileWidth);
     for(int i = 0, iend=m_extraDims.size(); i < iend; ++i)
     {

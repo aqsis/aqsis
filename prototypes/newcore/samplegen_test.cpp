@@ -100,12 +100,12 @@ BOOST_AUTO_TEST_CASE(getMinCostIdx_test)
     int nvalid = array_len(validNeighbours);
     BOOST_CHECK_EQUAL(2, 
         getMinCostIdx(remainingInds, nremain, validNeighbours,
-                      validWeights, nvalid, tuv));
+                      validWeights, nvalid, tuv, 0.5));
 
     validWeights[3] = 1000;
     BOOST_CHECK_EQUAL(1, 
         getMinCostIdx(remainingInds, nremain, validNeighbours,
-                      validWeights, nvalid, tuv));
+                      validWeights, nvalid, tuv, 0.5));
 }
 
 

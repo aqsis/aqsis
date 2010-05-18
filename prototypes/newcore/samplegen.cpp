@@ -81,10 +81,14 @@ void findRemainingInds(const int* tile, int fullwidth, int width,
 // tuv is the time and lens sample positions.
 int getMinCostIdx(const int* remainingInds, int nremain,
                   const int* validNeighbours, const float* validWeights,
-                  int nvalid, const float* tuv)
+                  int nvalid, const float* tuv, float timeStratQuality)
 {
     int minCostIdx = 0;
     float minCost = FLT_MAX;
+    // Use an extra scaling for tWeight of 4=2*2 here by default since du and
+    // dv are in [-1,1] which is 2x the range of dt in [0,1].
+    float tWeight = 4*timeStratQuality;
+    float uvWeight = 1 - timeStratQuality;
     for(int j = 0; j < nremain; ++j)
     {
         // Compute cost function for j'th remaining sample
@@ -106,9 +110,7 @@ int getMinCostIdx(const int* remainingInds, int nremain,
             float dt = t - tuv[3*idx2];
             float du = u - tuv[3*idx2+1];
             float dv = v - tuv[3*idx2+2];
-            // Use a weight of 4=2*2 here since du and dv are in [-1,1] which
-            // is 2x the range of dt in [0,1].
-            float d = std::sqrt(4*dt*dt + du*du + dv*dv);
+            float d = std::sqrt(tWeight*dt*dt + uvWeight*(du*du + dv*dv));
             cost += validWeights[i]/d;
         }
         if(cost < minCost)
@@ -133,7 +135,8 @@ int getMinCostIdx(const int* remainingInds, int nremain,
 /// \param width - width of the central section to fill
 /// \param r - neighbourhood radius
 /// \param tuv - time & lens sample positions
-void fillTile(int* tile, int fullwidth, int width, int r, const float* tuv)
+void fillTile(int* tile, int fullwidth, int width, int r, const float* tuv,
+              float timeStratQuality)
 {
     // Determine which indices into tuv remain to be placed, and which
     // positions in the tile they should go.
@@ -197,7 +200,8 @@ void fillTile(int* tile, int fullwidth, int width, int r, const float* tuv)
         else
         {
             minCostIdx = getMinCostIdx(remainingInds, nremain, validNeighbours,
-                                       validWeights, nvalid, tuv);
+                                       validWeights, nvalid, tuv,
+                                       timeStratQuality);
         }
 
         // Install selected index into tile
@@ -244,8 +248,10 @@ class IndirectLessFunctor
 }
 
 
-void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
+void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
+                 float timeStratQuality)
 {
+    assert(timeStratQuality >= 0 && timeStratQuality <= 1);
     assert(width >= 12); // TODO: Remove this restriction!
     assert((int)tuv.size() == 3*width*width);
     // Radius of region over which to evenly distribute samples
@@ -265,7 +271,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
 
     // First, create corner tiles
     // --------------------------
-    fillTile(tile, width, width, r, get(tuv));
+    fillTile(tile, width, width, r, get(tuv), timeStratQuality);
     int cSize = cWidth*cWidth;
     std::vector<int> cornerStor(cSize*3,-1);
     int* corners[] = { &cornerStor[0],
@@ -322,7 +328,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
         copyBlock2d(tile, width, corners[c2], cWidth,
                     width-cw2,0, 0,0, cw2,cWidth);
         // optimize tile & extract newly optimized edge
-        fillTile(tile, width, width, r, get(tuv));
+        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
         copyBlock2d(horizEdges[iedge], eLen, tile, width,
                     0,0, cw2,r, eLen,eWidth);
 
@@ -332,7 +338,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
                     0,0, 0,cw2, cWidth,cw2);
         copyBlock2d(tile, width, corners[c2], cWidth,
                     0,width-cw2, 0,0, cWidth,cw2);
-        fillTile(tile, width, width, r, get(tuv));
+        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
         copyBlock2d(vertEdges[iedge], eWidth, tile, width,
                     0,0, r,cw2, eWidth,eLen);
     }
@@ -411,6 +417,8 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
                 float t = tuv[3*currSamp];
                 float u = tuv[3*currSamp+1];
                 float v = tuv[3*currSamp+2];
+                float tWeight = 4*timeStratQuality;
+                float uvWeight = 1 - timeStratQuality;
                 float minDist2 = FLT_MAX;
                 int bestReplacement = -1;
                 for(int isamp = 0; isamp < nsamps; ++isamp)
@@ -420,7 +428,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
                     float dt = t - tuv[3*isamp];
                     float du = u - tuv[3*isamp+1];
                     float dv = v - tuv[3*isamp+2];
-                    float dist2 = 4*dt*dt + du*du + dv*dv;
+                    float dist2 = tWeight*dt*dt + uvWeight*(du*du + dv*dv);
                     if(dist2 < minDist2)
                     {
                         // isamp looks promising out of the ones we've tried
@@ -450,7 +458,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv)
         }
 
         // Optimize tile & save the result
-        fillTile(tile, fullwidth, width, r, get(tuv));
+        fillTile(tile, fullwidth, width, r, get(tuv), timeStratQuality);
         copyBlock2d(&tiles[nsamps*itile], width, tile, fullwidth,
                     0,0, eWidth/2,eWidth/2, width,width);
     }

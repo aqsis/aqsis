@@ -822,8 +822,9 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     }
 }
 
-// Trivial destructor.  Only here to prevent renderer implementation details
-// leaking (SurfaceQueue destructor is called implicitly)
+// Trivial destructor.  Only defined here to prevent renderer implementation
+// details leaking out of the interface (SurfaceQueue destructor is called
+// implicitly)
 Renderer::~Renderer() { }
 
 void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
