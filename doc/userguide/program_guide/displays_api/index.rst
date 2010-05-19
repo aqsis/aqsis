@@ -36,7 +36,9 @@ All functions are explained in detail in the `API Reference`_.
 Example
 -------
 
-The following is an example display driver that just dumps the functions with their arguments to stdout:: 
+The following is an example display driver that just dumps the functions with their arguments to stdout 
+
+.. code-block:: cpp
 
     /*
       Demo Display Driver that just dumps all the data to stdout.
@@ -280,7 +282,9 @@ Types
 """""
 .. _UserParameter:
 
-UserParameter::
+UserParameter
+
+.. code-block:: cpp
 
     typedef struct
     {
@@ -310,7 +314,9 @@ nbytes
 
 .. _PtDspyDevFormat:
 
-PtDspyDevFormat::
+PtDspyDevFormat
+
+.. code-block:: cpp
 
     typedef struct
     {
@@ -361,7 +367,9 @@ A set of integer constants is defined to specify the output pixel format type.  
 
 .. _PtFlagStuff:
 
-PtFlagStuff::
+PtFlagStuff
+
+.. code-block:: cpp
 
     typedef struct
     {
@@ -415,7 +423,9 @@ Types
 
 .. _PtDspyQueryType:
 
-PtDspyQueryType::
+PtDspyQueryType
+
+.. code-block:: cpp
 
     typedef enum
     {
@@ -430,7 +440,9 @@ These are the query types that may be encountered by the driver in DspyImageQuer
 
 .. _PtDspySizeInfo:
 
-PtDspySizeInfo::
+PtDspySizeInfo
+
+.. code-block:: cpp
 
     typedef struct
     {
@@ -454,7 +466,9 @@ aspectRatio
 
 .. _PtDspyOverwriteInfo:
 
-PtDspyOverwriteInfo::
+PtDspyOverwriteInfo
+
+.. code-block:: cpp
 
     typedef struct
     {
@@ -521,7 +535,9 @@ The following additional types are defined by the display API.
 
 .. _PtDspyError:
 
-PtDspyError::
+PtDspyError
+
+.. code-block:: cpp
 
     typedef enum
     {
@@ -552,7 +568,9 @@ All functions from the display driver interface are required to return a value o
 
 .. _PtDspyImageHandle:
 
-PtDspyImageHandle::
+PtDspyImageHandle
+
+.. code-block:: cpp
 
     typedef void* PtDspyImageHandle;
 
