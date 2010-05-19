@@ -2,6 +2,8 @@
 
 .. _aqsis:
 
+.. index:: aqsis
+
 ===============
 Renderer: aqsis
 ===============
@@ -25,6 +27,8 @@ Most other options to aqsis, such as the output file name and its format, are no
 
 More introductory information on using aqsis itself can be found in the [[guide:first_steps|first steps tutorial]].
 
+
+.. index:: aqsis; command line options
 
 Options
 -------
@@ -102,6 +106,8 @@ Progress Format
 	+--------+-----------------------------------------------+
 
 
+.. index:: aqsis; verbosity, verbosity, verbose
+
 Verbosity
 	The verbosity level that determines how much text output Aqsis generates while it is running. Possible values are:
 
@@ -131,6 +137,8 @@ No Color
 Options
 	This option can be used to inject RIB commands into the stream just before WorldBegin. The string must be a complete RIB command that is valid in the option block where the global options for a frame are specified. For example, you could set a new display device using ''-option="Display \"myname.tif\" \"file\" \"rgba\""'' which is more flexible than the ''-type'' and ''-mode'' options because it also allows you to set a new output file name. The option can be used multiple times to issue several RIB commands.
 
+
+.. index:: aqsis; configuration 
 
 Configuration
 -------------

@@ -2,6 +2,8 @@
 Getting Started
 ***************
 
+.. index:: support
+
 .. toctree::
 
     installation

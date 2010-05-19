@@ -39,6 +39,7 @@ Improvements include faster texturing operations, EWA filtering, correct anisotr
 More information on the aqsistex library can be found here_. 
 
 
+.. index:: Smooth shading interpolation
 
 Smooth Shading Interpolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,6 +59,8 @@ This feature can be accessed by using the following RIB statement::
 Since *Aqsis* 1.6, smooth shading also supports the motion blur and depth of field features.
 
 
+.. index:: Grid Crack Bypass
+
 Grid Crack Bypass
 ^^^^^^^^^^^^^^^^^
 
@@ -76,6 +79,8 @@ This feature can be accessed by using the following RIB statement::
 .. warning:: Semi-opaque surfaces and shadows using either depthfilter or midpoint are not currently supported by this method.
 
 
+.. index:: Massive
+
 Massive Support
 ^^^^^^^^^^^^^^^
 
@@ -84,6 +89,9 @@ The RunProgram procedural plugin supplied with Massive on both Linux and Windows
 .. figure:: /images/massive-cloth.png
 
 .. note:: The DynamicLoad procedural plugin is not currently supported, though Massive Software have confirmed that the performance difference is negligible between the two methods.
+
+
+.. index:: Simbiont
 
 Simbiont Support
 ^^^^^^^^^^^^^^^^
@@ -99,6 +107,9 @@ Improved DBO Support
 Support for the 'Dynamic Blob Op' procedural used within AIR was improved with version 1.4, with Aqsis automatically checking known locations of the plugin.
 
 
+
+.. index:: Mac OSX; Bundle
+
 OS X Distribution
 ^^^^^^^^^^^^^^^^^
 
@@ -111,6 +122,8 @@ Executing Aqsis.app will launch eqsl and automatically configure the current/per
 
 We support OS X 10.4 (Tiger) and above, providing binaries for both PPC and Intel architectures.
 
+
+.. index:: Linux; Desktop Integration
 
 Linux Desktop Integration
 ^^^^^^^^^^^^^^^^^^^^^^^^^

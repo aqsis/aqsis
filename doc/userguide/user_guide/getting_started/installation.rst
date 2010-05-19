@@ -6,9 +6,13 @@
 
 .. _installation:
 
+.. index:: install 
+
 ============
 Installation
 ============
+
+.. index:: install; Windows, Windows; install
 
 Windows
 -------
@@ -27,6 +31,8 @@ Start Menu Folder
 .. note:: The installer version of |Aqsis| is built with the MicroSoft Visual Studio tools, it might be necessary to install the appropriate `runtime libraries`_ if you don't already have them installed.
 
 
+.. index:: install; Mac OSX, Mac OSX; install, Mac OSX; Universal binary, Universal binary
+
 OSX
 ---
 
@@ -36,6 +42,8 @@ Once the disk image (\*.dmg) is mounted you can launch the |Aqsis| application, 
 
 .. note:: The Aqsis shell updates the session **PATH** and **AQSISHOME** environment variables on each execution, meaning the application bundle can be safely moved around your system without breaking functionality.
 
+
+.. index:: install; Linux, Linux; install
 
 Linux
 -----
