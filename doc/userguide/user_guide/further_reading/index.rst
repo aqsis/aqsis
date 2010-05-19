@@ -1,0 +1,7 @@
+***************
+Further Reading
+***************
+
+.. toctree::
+
+    books

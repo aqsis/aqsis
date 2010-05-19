@@ -1,0 +1,1 @@
+.. |Aqsis| replace:: *Aqsis*
