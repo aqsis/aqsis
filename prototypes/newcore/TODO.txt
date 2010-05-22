@@ -4,13 +4,12 @@ Some things which should be done:
     * Sampling
         - Tile-based allocation for sample points
         - Transparency - deep fragment buffer
-        - Effective stratification
-    * Grid crack solution via stitching
     * Bucket rendering
     * Occlusion culling
     * Implement proper API (RI + RIB)
     * Variable flow
-        - Make sure correct all standard vars are diced when necessary
+        - Investigate copying architecture
+        - Make sure all standard vars are diced when necessary
         - Allow geometry to fill in Ng, dPdu, dPdv if desired
         - Make sure unneeded primvars are deleted
         - Investigate performance benefits of unique VarSpec's when lots of
@@ -18,12 +17,13 @@ Some things which should be done:
     * Investigate more robust inverse bilinear lookup (use exact method?)
     * Surface tessellation
         - Transformation motion blur
-        - focusfactor & motionfactor approximations
+        - motionfactor approximation
 
 
     (The following are not present in aqsis, but should be kept in mind & done
      at some stage)
 
+    * Grid crack solution via stitching
     * Point-based occlusion & colour bleeding
     * Arbitrary bucket orders
     * Multithreaded bucket rendering
@@ -41,7 +41,9 @@ Done:
         - Image output filtering
         - Motion Blur sampling
         - Depth of field sampling
+        - Effective stratification
     * Surface tessellation
         - Reyes split/dice pipeline
         - Deforming surfaces
+        - focusfactor approximation
 

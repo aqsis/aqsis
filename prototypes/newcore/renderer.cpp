@@ -848,6 +848,12 @@ void Renderer::render()
     // projection matrix lets us examine a fixed set of grids
     // independently of the viewpoint.
     Mat4 splitTrans = m_camToRas;
+    // Make sure that the z-component comes out as zero when splitting based on
+    // projected size
+    splitTrans[0][2] = 0;
+    splitTrans[1][2] = 0;
+    splitTrans[2][2] = 0;
+    splitTrans[3][2] = 0;
 //            Mat4().setScale(Vec3(0.5,-0.5,0))
 //        * Mat4().setTranslation(Vec3(0.5,0.5,0))
 //        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
