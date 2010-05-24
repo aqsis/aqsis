@@ -1,3 +1,5 @@
+.. include:: common.rst
+
 .. _legal:
 
 =====
@@ -7,7 +9,7 @@ Legal
 Software License
 ----------------
 
-The Aqsis suite is Copyright (c) 2000 Paul C. Gregory.
+The Aqsis suite is Copyright |copy| 2000 Paul C. Gregory.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public
@@ -30,12 +32,12 @@ Copyrights & Trademarks
 
 Aqsis uses some third party libraries and tools, their respective copyrights are detailed below.
 
-  * *RenderMan* - The RenderMan Interface Procedures and Protocol are: Copyright (c) 1988, 1989, 2000, Pixar All Rights Reserved.
-  * *libtiff* - The TIFF I/O library used by Aqsis is Copyright (c) 1988-1997 Sam Leffler, Copyright (c) 1991-1997 Silicon Graphics, Inc. It is freely available and can be downloaded from http://www.libtiff.org. 
-  * *libjpeg* - The JPEG I/O library used by Aqsis is produced by the Independent JPEG Group and is Copyright (c) 1991-1998, Thomas G. Lane. It is freely available and can be downloaded from the IJG site http://www.ijg.org. 
+  * *RenderMan* - The RenderMan Interface Procedures and Protocol are: Copyright |copy| 1988, 1989, 2000, Pixar All Rights Reserved.
+  * *libtiff* - The TIFF I/O library used by Aqsis is Copyright |copy| 1988-1997 Sam Leffler, Copyright |copy| 1991-1997 Silicon Graphics, Inc. It is freely available and can be downloaded from http://www.libtiff.org. 
+  * *libjpeg* - The JPEG I/O library used by Aqsis is produced by the Independent JPEG Group and is Copyright |copy| 1991-1998, Thomas G. Lane. It is freely available and can be downloaded from the IJG site http://www.ijg.org. 
   * *Boost* - The Boost headers and libraries used by Aqsis are distributed under the Boost Software License, Version 1.0. http://www.boost.org/LICENSE_1_0.txt
-  * *OpenEXR* - The OpenEXR libraries used by Aqsis are Copyright (c) 2004, Industrial Light and Magic. They are freely available and can be downloaded from http://www.openexr.com
-  * *FLTK* - The FLTK (Fast Light Toolkit) used by Aqsis is Copyright (c) 1998-2005 Bill Spitzak and others. It is licensed under the GNU GPL v2 and available from http:://www.fltk.org
-  * *zlib* - The zlib library used by Aqsis is copyright © 1995-2005 Jean-loup Gailly and Mark Adler. It is freely available and can be downloaded from http://www.zlib.net 
-  * *TinyXML* - The TinyXML library used by Aqsis is copyright (c) 2000-2006 Lee Thomason. It is licensed under the zlib license, and can be freely downloaded from http://www.grinninglizard.com/tinyxml/
+  * *OpenEXR* - The OpenEXR libraries used by Aqsis are Copyright |copy| 2004, Industrial Light and Magic. They are freely available and can be downloaded from http://www.openexr.com
+  * *FLTK* - The FLTK (Fast Light Toolkit) used by Aqsis is Copyright |copy| 1998-2005 Bill Spitzak and others. It is licensed under the GNU GPL v2 and available from http:://www.fltk.org
+  * *zlib* - The zlib library used by Aqsis is copyright |copy| 1995-2005 Jean-loup Gailly and Mark Adler. It is freely available and can be downloaded from http://www.zlib.net 
+  * *TinyXML* - The TinyXML library used by Aqsis is copyright |copy| 2000-2006 Lee Thomason. It is licensed under the zlib license, and can be freely downloaded from http://www.grinninglizard.com/tinyxml/
 

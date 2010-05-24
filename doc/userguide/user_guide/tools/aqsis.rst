@@ -11,9 +11,9 @@ Renderer: aqsis
 Overview
 --------
 
-The aqsis executable is a command-line renderer which accepts RenderMan(tm) scene descriptions in the form of sequences of requests, known as the RenderMan(tm) Interface.  These requests are passed to the aqsis executable as a character stream known as the RenderMan Interface Bytestream (RIB).  When launched, aqsis processes the requests in the passed RIB stream, which in turn can force processing of other external assets such as compiled shaders and texture maps, to produce a final rendered image.  The output image data is presented via the standard *Dspy* interface to the appropriate display device.
+The aqsis executable is a command-line renderer which accepts |RenderMan| scene descriptions in the form of sequences of requests, known as the |RenderMan| Interface.  These requests are passed to the aqsis executable as a character stream known as the RenderMan Interface Bytestream (RIB).  When launched, aqsis processes the requests in the passed RIB stream, which in turn can force processing of other external assets such as compiled shaders and texture maps, to produce a final rendered image.  The output image data is presented via the standard *Dspy* interface to the appropriate display device.
 
-RIB streams can be in plain 7-bit ASCII or a binary encoding described as part of the RenderMan(tm) standard.  Either format can be zipped for further compression.  |Aqsis| includes a tool that can be used to encode RIB files in binary format, and apply compression, see miqser_ for more information.
+RIB streams can be in plain 7-bit ASCII or a binary encoding described as part of the |RenderMan| standard.  Either format can be zipped for further compression.  |Aqsis| includes a tool that can be used to encode RIB files in binary format, and apply compression, see miqser_ for more information.
 
 By default aqsis will take the RIB file to be processed as the final argument on the command line, such as::
 
