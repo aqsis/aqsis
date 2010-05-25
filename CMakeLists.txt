@@ -317,3 +317,12 @@ set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
 configure_file(aqsisrc.in.cmake ${aqsisrc_name})
 install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 
+#-------------------------------------------------------------------------------
+# Generate an AqsisConfig.cmake file, for use by projects that want to link
+# against in the build tree rather than after installation.
+#-------------------------------------------------------------------------------
+
+set(AQSISCONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR}/AqsisConfig.cmake)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AqsisConfig.cmake.in ${AQSISCONFIG_PATH})
+export(TARGETS aqsis_core aqsis_math aqsis_ribparse aqsis_shadervm aqsis_tex aqsis_util aqsis_riutil APPEND FILE ${AQSISCONFIG_PATH})
+

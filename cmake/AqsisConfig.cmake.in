@@ -1,0 +1,12 @@
+# This file contains exported build targets, for use by external projects via
+# the cmake find_package() command in "Config mode".
+
+set(Aqsis_VERSION_MAJOR @VERSION_MAJOR@)
+set(Aqsis_VERSION_MINOR @VERSION_MINOR@)
+set(Aqsis_VERSION_BUILD @VERSION_BUILD@)
+
+set(Aqsis_INCLUDE_DIRECTORIES
+	@CMAKE_CURRENT_BINARY_DIR@/include
+	@CMAKE_CURRENT_SOURCE_DIR@/include
+	)
+
