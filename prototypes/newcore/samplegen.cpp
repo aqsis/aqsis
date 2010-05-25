@@ -252,10 +252,12 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
                  float timeStratQuality)
 {
     assert(timeStratQuality >= 0 && timeStratQuality <= 1);
-    assert(width >= 12); // TODO: Remove this restriction!
+    assert(width >= 4);
     assert((int)tuv.size() == 3*width*width);
     // Radius of region over which to evenly distribute samples
-    const int r = 2;
+    int r = 2;
+    if(width < 8)
+        r = 1;
     // Number of tile colors
     const int ncol = 3;
 
@@ -271,16 +273,31 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
 
     // First, create corner tiles
     // --------------------------
-    fillTile(tile, width, width, r, get(tuv), timeStratQuality);
     int cSize = cWidth*cWidth;
     std::vector<int> cornerStor(cSize*3,-1);
     int* corners[] = { &cornerStor[0],
                        &cornerStor[cSize],
                        &cornerStor[2*cSize] };
-    assert(2*cWidth < width);
+    fillTile(tile, width, width, r, get(tuv), timeStratQuality);
     copyBlock2d(corners[0], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
-    copyBlock2d(corners[1], cWidth, tile, width, 0,0, width/2,0, cWidth,cWidth);
-    copyBlock2d(corners[2], cWidth, tile, width, 0,0, width/2,width/2, cWidth,cWidth);
+    if(2*cWidth <= width)
+    {
+        // cWidth is small enough that we can cut out two more corner tiles
+        // from the original tile
+        copyBlock2d(corners[1], cWidth, tile, width, 0,0, width/2,0, cWidth,cWidth);
+        copyBlock2d(corners[2], cWidth, tile, width, 0,0, width/2,width/2, cWidth,cWidth);
+    }
+    else
+    {
+        // else need to optimize a new tile to cut out each corner, to avoid
+        // duplication of sample patterns
+        tileStor.assign(tileStor.size(), -1);
+        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        copyBlock2d(corners[1], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
+        tileStor.assign(tileStor.size(), -1);
+        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        copyBlock2d(corners[2], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
+    }
     // Overwrite sections of the corner tiles with -1 (the invalid index) This
     // makes sure the corner tiles take up the minimum number of tuv indices
     // possible.

@@ -69,7 +69,8 @@ void canonicalTimeLensSamps(std::vector<float>& tuv, int nsamps);
 ///
 /// \param tiles - destination array for tiles, with tile ordering as discussed
 ///                above.
-/// \param width - desired tile width in number of samples
+/// \param width - desired tile width in number of samples.  Must have
+///                width >= 4 for the sample tile scheme to work correctly.
 /// \param tuv - time and lens offsets in the format [t1 u1 v1  t2 u2 v2 ...]
 /// \param timeStratQuality - How important stratification in the time
 ///              dimension is relative to stratification in the lens dimension.

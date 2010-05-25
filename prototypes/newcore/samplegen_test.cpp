@@ -109,6 +109,19 @@ BOOST_AUTO_TEST_CASE(getMinCostIdx_test)
 }
 
 
+// Check that the tile contains all sample indices from 1 to width*width.
+bool hasAllIndices(const int* tileIn, int width)
+{
+    const int nsamps = width*width;
+    std::vector<int> tile(tileIn, tileIn+nsamps);
+    std::sort(tile.begin(), tile.end());
+    for(int i = 0; i < nsamps; ++i)
+        if(tile[i] != i)
+            return false;
+    return true;
+}
+
+
 BOOST_AUTO_TEST_CASE(makeTileSet_test)
 {
     int width = 14;
@@ -123,14 +136,32 @@ BOOST_AUTO_TEST_CASE(makeTileSet_test)
     for(int i = 0; i < (int)tiles.size(); ++i)
         BOOST_CHECK_GE(tiles[i], 0);
 
-    // Check that each tile in the set contains all sample indices from 1 to
-    // nsamps.
-    int nsamps = width*width;
+    const int nsamps = width*width;
     for(int itile = 0; itile < 81; ++itile)
-    {
-        int* tile = &tiles[itile*nsamps];
-        std::sort(tile, tile+nsamps);
-        for(int i = 0; i < nsamps; ++i)
-            BOOST_CHECK_EQUAL(tile[i], i);
-    }
+        BOOST_CHECK(hasAllIndices(&tiles[itile*nsamps], width));
+}
+
+bool makeTileSetHasAllIndices(int width)
+{
+    std::vector<float> tuv;
+    canonicalTimeLensSamps(tuv, width*width);
+
+    std::vector<int> tiles;
+    makeTileSet(tiles, width, tuv);
+
+    const int nsamps = width*width;
+    for(int itile = 0; itile < 81; ++itile)
+        if(!hasAllIndices(&tiles[itile*nsamps], width))
+            return false;
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(makeTileSet_small_width_test)
+{
+    // Check that generation of small tiles works ok.
+    BOOST_CHECK(makeTileSetHasAllIndices(4));
+    BOOST_CHECK(makeTileSetHasAllIndices(5));
+    BOOST_CHECK(makeTileSetHasAllIndices(7));
+    BOOST_CHECK(makeTileSetHasAllIndices(8));
+    BOOST_CHECK(makeTileSetHasAllIndices(9));
 }
