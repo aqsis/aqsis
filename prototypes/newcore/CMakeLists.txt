@@ -31,6 +31,7 @@ set(srcs
     samplegen.cpp
     samplestorage.cpp
     scenes/default.cpp
+    scenes/dofamounttest.cpp
     scenes/simpledeformation.cpp
     scenes/mbnoisetest.cpp
     scenes/tenpatch.cpp

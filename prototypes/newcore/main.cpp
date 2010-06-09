@@ -35,6 +35,8 @@ int main(int argc, char* argv[])
         renderSimpleDeformationScene();
     else if(sceneName == "mbnoisetest")
         renderMbNoiseTestScene();
+    else if(sceneName == "dofamounttest")
+        renderDofAmountTest();
     else
         renderDefaultScene();
 
