@@ -29,6 +29,7 @@
 #include "sample.h"
 #include "samplestorage.h"
 #include "simple.h"
+#include "refcount.h"
 
 
 //------------------------------------------------------------------------------

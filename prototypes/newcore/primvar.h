@@ -26,8 +26,9 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "util.h"
 #include "arrayview.h"
+#include "refcount.h"
+#include "util.h"
 #include "varspec.h"
 
 struct IclassStorage;

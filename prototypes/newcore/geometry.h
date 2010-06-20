@@ -20,6 +20,7 @@
 #ifndef GEOMETRY_H_INCLUDED
 #define GEOMETRY_H_INCLUDED
 
+#include "refcount.h"
 #include "util.h"
 
 class Grid;

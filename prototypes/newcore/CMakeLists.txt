@@ -52,6 +52,7 @@ set(hdrs
     options.h
     pointinquad.h
     primvar.h
+    refcount.h
     renderer.h
     sample.h
     samplegen.h

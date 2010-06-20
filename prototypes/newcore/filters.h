@@ -20,6 +20,7 @@
 #ifndef FILTERS_H_INCLUDED
 #define FILTERS_H_INCLUDED
 
+#include "refcount.h"
 #include "util.h"  // for Vec2
 
 /// Filter functor class

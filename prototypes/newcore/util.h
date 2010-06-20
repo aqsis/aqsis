@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef UTIL_H_INCLUDED
-#define UTIL_H_INCLUDED
+#ifndef AQSIS_UTIL_H_INCLUDED
+#define AQSIS_UTIL_H_INCLUDED
 
 #include <cassert>
 #include <cfloat>
@@ -31,8 +31,6 @@
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/intrusive_ptr.hpp>
 
 // The distinction here is only due to the layout of the 
 // win32libs copy of OpenEXR.
@@ -293,54 +291,4 @@ inline float radicalInverse(int n, int base = 2)
 }
 
 
-//------------------------------------------------------------------------------
-/// Reference counting machinary.
-
-inline void nullDeleter(const void*) { }
-
-/// Reference counted base mixin for use with boost::intrusive_ptr.
-///
-/// This is a non-virtual implementation for maximum efficiency.
-class RefCounted
-{
-    public:
-        RefCounted() : m_refCount(0) {}
-
-        /// Copying does *not* copy the reference count!
-        RefCounted(const RefCounted& /*r*/) : m_refCount(0) {}
-        RefCounted& operator=(const RefCounted& /*r*/) { return *this; }
-
-        int useCount() const { return m_refCount; }
-        int incRef() const   { return ++m_refCount; }
-        int decRef() const   { return --m_refCount; }
-
-    protected:
-        /// Protected so users can't delete RefCounted directly.
-        ~RefCounted() {}
-
-    private:
-        mutable int m_refCount;
-};
-
-
-/// Add a reference to a RefCounted object.
-inline void intrusive_ptr_add_ref(RefCounted* p)
-{
-    p->incRef();
-}
-
-/// Release a reference to a RefCounted object.
-///
-/// Note that this function *must* be a template, because RefCounted does not
-/// have a virtual destructor.  (Therefore, if we just took p as type
-/// RefCounted*, the wrong destructor would get called!)
-template<typename T>
-inline typename boost::enable_if<boost::is_base_of<RefCounted, T> >::type
-intrusive_ptr_release(T* p)
-{
-    if(p->decRef() == 0)
-        delete p;
-}
-
-
-#endif // UTIL_H_INCLUDED
+#endif // AQSIS_UTIL_H_INCLUDED
