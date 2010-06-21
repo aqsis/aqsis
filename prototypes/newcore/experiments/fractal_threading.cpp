@@ -422,8 +422,9 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* fi
     FilterBlockContainer waitingBlocks(2*nftiles);
 
     // Render tiles left to right, top to bottom.
-    std::vector<uint8> colFilt(3*tileWidth*tileWidth, 0);
 #   pragma omp parallel
+    {
+    std::vector<uint8> colFilt(3*tileWidth*tileWidth, 0);
     for(int ty = 0; ty < ntiles; ++ty)
     {
         // The options here are very important for correct load balancing,
@@ -457,8 +458,7 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* fi
                 // Ignore filtering tiles outside image boundaries
                 if(p.x >= 0 && p.y >= 0 && p.x < nftiles && p.y < nftiles)
                 {
-                    // using omp critical here is rather lazy, we could
-                    // parallelize the filtering too.
+                    TileFilterBlock block;
 #                   pragma omp critical
                     {
                         FilterBlockContainer::iterator blockIt = waitingBlocks.find(p);
@@ -473,23 +473,27 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* fi
                         blockIt->second.tiles[1-j][1-i] = tile;
                         if(blockIt->second.readyForFilter())
                         {
-                            TileFilterBlock block = blockIt->second;
+                            block = blockIt->second;
                             waitingBlocks.erase(blockIt);
-                            // Filter, quantize & save result
-                            const float* toFilter[2][2] = {
-                                {block.tiles[0][0]->samps(), block.tiles[0][1]->samps()},
-                                {block.tiles[1][0]->samps(), block.tiles[1][1]->samps()},
-                            };
-                            filterAndQuantizeTile(&colFilt[0], toFilter, tileWidth,
-                                                  superSamp, &filter[0], filterWidth);
-                            TIFFWriteTile(tif, &colFilt[0], p.x*tileWidth,
-                                          p.y*tileWidth, 0, 0);
-                            // We're done with the block; remove it.
                         }
+                    }
+                    if(block.readyForFilter())
+                    {
+                        // Filter, quantize & save result.  This can be done in parallel.
+                        const float* toFilter[2][2] = {
+                            {block.tiles[0][0]->samps(), block.tiles[0][1]->samps()},
+                            {block.tiles[1][0]->samps(), block.tiles[1][1]->samps()},
+                        };
+                        filterAndQuantizeTile(&colFilt[0], toFilter, tileWidth,
+                                              superSamp, &filter[0], filterWidth);
+#                       pragma omp critical
+                        TIFFWriteTile(tif, &colFilt[0], p.x*tileWidth,
+                                      p.y*tileWidth, 0, 0);
                     }
                 }
             }
         }
+    }
     }
     assert(waitingBlocks.size() == 0);
 }
