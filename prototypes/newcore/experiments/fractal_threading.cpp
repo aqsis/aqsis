@@ -379,17 +379,18 @@ void renderImageTiled(TIFF* tif, int width, int superSamp, const float* filter,
 struct SampTile : public RefCounted
 {
     private:
-        int m_x;
-        int m_y;
+        Imath::V2i m_pos;
         boost::scoped_array<float> m_samps;
     public:
         SampTile(int x, int y, int width)
-            : m_x(x), m_y(y),
+            : m_pos(x,y),
             m_samps(new float[3*width*width])
         { }
 
         float* samps() { return m_samps.get(); }
         const float* samps() const { return m_samps.get(); }
+
+        const Imath::V2i& pos() const { return m_pos; }
 };
 typedef boost::intrusive_ptr<SampTile> SampTilePtr;
 
@@ -431,7 +432,6 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp,
     int ntiles = nftiles + 1;
 
     int sampTileWidth = superSamp*tileWidth;
-    int tileSize = sampTileWidth*sampTileWidth*3;
 
     typedef boost::unordered_map<Imath::V2i, TileFilterBlock> FilterBlockContainer;
     FilterBlockContainer waitingBlocks(2*nftiles);
@@ -514,6 +514,211 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp,
 }
 
 
+//------------------------------------------------------------------------------
+
+/// Collate sample tiles and filter them when ready
+class TileCollator
+{
+    public:
+        class SharedData
+        {
+            private:
+                typedef boost::unordered_map<Imath::V2i, TileFilterBlock> BlockContainer;
+                BlockContainer waitingBlocks;
+                boost::mutex waitingBlocksMutex;
+                int nfilterTiles;
+                int tileWidth;
+                int superSamp;
+                // Filter stuff
+                const float* filter;
+                int filterWidth;
+                // Output
+                TIFF* outFile;
+                boost::mutex tifMutex;
+                friend class TileCollator;
+            public:
+                SharedData(int ntiles, int tileWidth, int superSamp,
+                        const float* filter, int filterWidth, TIFF* outFile)
+                    : waitingBlocks(2*ntiles),
+                    nfilterTiles(ntiles-1),
+                    tileWidth(tileWidth),
+                    superSamp(superSamp),
+                    filter(filter),
+                    filterWidth(filterWidth),
+                    outFile(outFile)
+                { }
+        };
+
+    private:
+        SharedData& m_;
+        std::vector<uint8> m_colFilt;
+
+    public:
+        TileCollator(SharedData& sharedData)
+            : m_(sharedData),
+            m_colFilt(3*m_.tileWidth*m_.tileWidth)
+        { }
+
+        void push(const SampTilePtr& tile)
+        {
+            // The _sample_ tile with coordinates (tx,ty) overlaps the four
+            // _filtering_ tiles with coordinates:
+            //
+            //   (tx-1, ty-1)   (tx,ty-1)
+            //   (tx-1, ty)     (tx,ty)
+            //
+            // we insert the sample tile into each of these filtering tiles,
+            // ignoring filtering tile coordinates which lie outside the image
+            // boundaries.
+            for(int j = 0; j < 2; ++j)
+            for(int i = 0; i < 2; ++i)
+            {
+                // Position of filter tile
+                Imath::V2i p = tile->pos() + Imath::V2i(i-1,j-1);
+                // Ignore filtering tiles outside image boundaries
+                if(p.x >= 0 && p.y >= 0 && p.x < m_.nfilterTiles &&
+                                           p.y < m_.nfilterTiles)
+                {
+                    TileFilterBlock block;
+                    {
+                        boost::lock_guard<boost::mutex> lock(m_.waitingBlocksMutex);
+                        SharedData::BlockContainer::iterator blockIt =
+                                m_.waitingBlocks.find(p);
+                        if(blockIt == m_.waitingBlocks.end())
+                        {
+                            // Create blank block if it didn't exist
+                            std::pair<SharedData::BlockContainer::iterator, bool> insRes =
+                                m_.waitingBlocks.insert(std::make_pair(p, TileFilterBlock()));
+                            assert(insRes.second);
+                            blockIt = insRes.first;
+                        }
+                        blockIt->second.tiles[1-j][1-i] = tile;
+                        if(blockIt->second.readyForFilter())
+                        {
+                            block = blockIt->second;
+                            m_.waitingBlocks.erase(blockIt);
+                        }
+                    }
+                    if(block.readyForFilter())
+                    {
+                        // Filter, quantize & save result.  This can be done in parallel.
+                        const float* toFilter[2][2] = {
+                            {block.tiles[0][0]->samps(), block.tiles[0][1]->samps()},
+                            {block.tiles[1][0]->samps(), block.tiles[1][1]->samps()},
+                        };
+                        uint8* output = &m_colFilt[0];
+                        filterAndQuantizeTile(output, toFilter, m_.tileWidth,
+                                              m_.superSamp, m_.filter, m_.filterWidth);
+                        boost::lock_guard<boost::mutex> lock(m_.tifMutex);
+                        TIFFWriteTile(m_.outFile, output, p.x*m_.tileWidth,
+                                      p.y*m_.tileWidth, 0, 0);
+                    }
+                }
+            }
+        }
+};
+
+/// Define the tile ordering for sample tile rendering
+class TileScheduler
+{
+    private:
+        boost::mutex m_mutex;
+        int m_ntiles;
+        int m_tx;
+        int m_ty;
+
+    public:
+        TileScheduler(int ntiles)
+            : m_ntiles(ntiles),
+            m_tx(0),
+            m_ty(0)
+        {}
+
+        bool nextTile(int& tx, int& ty)
+        {
+            boost::lock_guard<boost::mutex> lock(m_mutex);
+            if(m_ty >= m_ntiles)
+                return false;
+            tx = m_tx;
+            ty = m_ty;
+            ++m_tx;
+            if(m_tx >= m_ntiles)
+            {
+                ++m_ty;
+                m_tx = 0;
+            }
+            return true;
+        }
+};
+
+
+/// Render thread functor for use with boost.thread
+class RenderThreadFunc
+{
+    private:
+        TileScheduler& m_scheduler;
+        TileCollator::SharedData& m_collatorShared;
+        int m_sampTileWidth;
+        Transform m_trans;
+        int m_maxIter;
+
+    public:
+        RenderThreadFunc(TileScheduler& scheduler,
+                         TileCollator::SharedData& collatorShared,
+                         int sampTileWidth, const Transform& trans,
+                         int maxIter)
+            : m_scheduler(scheduler),
+            m_collatorShared(collatorShared),
+            m_sampTileWidth(sampTileWidth),
+            m_trans(trans),
+            m_maxIter(maxIter)
+        { }
+
+        void operator()()
+        {
+            int tx = 0, ty = 0;
+            TileCollator collator(m_collatorShared);
+            while(m_scheduler.nextTile(tx, ty))
+            {
+                SampTilePtr tile = new SampTile(tx, ty, m_sampTileWidth);
+                renderTile(tile->samps(), m_sampTileWidth,
+                           m_trans.offset(m_sampTileWidth*tx,
+                                          m_sampTileWidth*ty), m_maxIter);
+                collator.push(tile);
+            }
+        }
+};
+
+
+/// Parallel tiled method using boost.thread
+noinline
+void renderImageParallel(TIFF* tif, int width, int superSamp, const float* filter,
+                         int filterWidth, const Transform& trans, int maxIter)
+{
+    const int tileWidth = 16;
+    writeHeader(tif, width, width, tileWidth);
+    // number of sample tiles over width of image
+    int ntiles = ceildiv(width, tileWidth) + 1;
+
+    TileScheduler scheduler(ntiles);
+    TileCollator::SharedData collatorShared(ntiles, tileWidth, superSamp,
+                                            filter, filterWidth, tif);
+    RenderThreadFunc threadFunc(scheduler, collatorShared,
+                                superSamp*tileWidth, trans, maxIter);
+
+    int nthreads = boost::thread::hardware_concurrency();
+    if(nthreads > 1)
+    {
+        boost::thread_group threads;
+        for(int i = 0; i < nthreads; ++i)
+            threads.create_thread(threadFunc);
+        threads.join_all();
+    }
+    else
+        threadFunc();
+}
+
+
 
 //------------------------------------------------------------------------------
 int main()
@@ -540,8 +745,10 @@ int main()
 //                      trans, maxIter);
 //    renderImageTiled(tif, width, superSamp, &filter[0], filterWidth,
 //                     trans, maxIter);
-    renderImageParallelOmp(tif, width, superSamp, &filter[0], filterWidth,
-                           trans, maxIter);
+//    renderImageParallelOmp(tif, width, superSamp, &filter[0], filterWidth,
+//                           trans, maxIter);
+    renderImageParallel(tif, width, superSamp, &filter[0], filterWidth,
+                        trans, maxIter);
 
     TIFFClose(tif);
 

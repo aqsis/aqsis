@@ -26,6 +26,15 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/utility/enable_if.hpp>
 
+inline boost::uint32_t atomic_inc32(volatile boost::uint32_t* i)
+{
+    return boost::interprocess::detail::atomic_inc32(i);
+}
+inline boost::uint32_t atomic_dec32(volatile boost::uint32_t* i)
+{
+    return boost::interprocess::detail::atomic_dec32(i);
+}
+
 //------------------------------------------------------------------------------
 /// Reference counted base mixin for use with boost::intrusive_ptr.
 ///
@@ -44,11 +53,11 @@ class RefCounted
 //        int decRef() const   { return --m_refCount; }
         int incRef() const
         {
-            return boost::interprocess::detail::atomic_inc32(&m_refCount) + 1;
+            return atomic_inc32(&m_refCount) + 1;
         }
         int decRef() const
         {
-            return boost::interprocess::detail::atomic_dec32(&m_refCount) - 1;
+            return atomic_dec32(&m_refCount) - 1;
         }
 
     protected:
@@ -57,7 +66,8 @@ class RefCounted
 
     private:
 //        mutable int m_refCount;
-        mutable boost::uint32_t m_refCount;
+        // todo: is volatile needed here?
+        mutable volatile boost::uint32_t m_refCount;
 };
 
 
