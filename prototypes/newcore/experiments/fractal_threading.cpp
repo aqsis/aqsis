@@ -526,6 +526,7 @@ class TileCollator
                 typedef boost::unordered_map<Imath::V2i, TileFilterBlock> BlockContainer;
                 BlockContainer waitingBlocks;
                 boost::mutex waitingBlocksMutex;
+                int maxWaitingBlocks;
                 int nfilterTiles;
                 int tileWidth;
                 int superSamp;
@@ -540,6 +541,7 @@ class TileCollator
                 SharedData(int ntiles, int tileWidth, int superSamp,
                         const float* filter, int filterWidth, TIFF* outFile)
                     : waitingBlocks(2*ntiles),
+                    maxWaitingBlocks(0),
                     nfilterTiles(ntiles-1),
                     tileWidth(tileWidth),
                     superSamp(superSamp),
@@ -547,6 +549,10 @@ class TileCollator
                     filterWidth(filterWidth),
                     outFile(outFile)
                 { }
+                ~SharedData()
+                {
+                    std::cout << "max waiting blocks = " << maxWaitingBlocks << "\n";
+                }
         };
 
     private:
@@ -593,6 +599,8 @@ class TileCollator
                             blockIt = insRes.first;
                         }
                         blockIt->second.tiles[1-j][1-i] = tile;
+                        m_.maxWaitingBlocks = std::max(m_.maxWaitingBlocks,
+                                                       (int)m_.waitingBlocks.size());
                         if(blockIt->second.readyForFilter())
                         {
                             block = blockIt->second;
@@ -621,6 +629,8 @@ class TileCollator
 /// Define the tile ordering for sample tile rendering
 class TileScheduler
 {
+#if 1
+    // Raster order
     private:
         boost::mutex m_mutex;
         int m_ntiles;
@@ -649,6 +659,37 @@ class TileScheduler
             }
             return true;
         }
+#else
+    // Random tile ordering
+    private:
+        boost::mutex m_mutex;
+        int m_ntiles;
+        int m_i;
+        std::vector<Imath::V2i> m_order;
+
+    public:
+        TileScheduler(int ntiles)
+            : m_ntiles(ntiles),
+            m_i(0),
+            m_order(ntiles*ntiles)
+        {
+            for(int j = 0; j < ntiles; ++j)
+                for(int i = 0; i < ntiles; ++i)
+                    m_order[j*ntiles+i] = Imath::V2i(i,j);
+            std::random_shuffle(m_order.begin(), m_order.end());
+        }
+
+        bool nextTile(int& tx, int& ty)
+        {
+            boost::lock_guard<boost::mutex> lock(m_mutex);
+            if(m_i >= (int)m_order.size())
+                return false;
+            tx = m_order[m_i].x;
+            ty = m_order[m_i].y;
+            ++m_i;
+            return true;
+        }
+#endif
 };
 
 
