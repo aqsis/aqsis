@@ -112,16 +112,33 @@ void mandelColor(float* rgb, double x, double y, int maxIter)
     colorMap(rgb, t, maxIter);
 }
 
+struct Transform
+{
+    double dx;
+    double x0;
+    double dy;
+    double y0;
+
+    Transform offset(int x, int y) const
+    {
+        Transform t = *this;
+        t.x0 += dx*x;
+        t.y0 += dy*y;
+        return t;
+    }
+};
+
+
 noinline
-void renderTile(float* rgb, int w, double x0, double y0, double dx, double dy,
+void renderTile(float* rgb, int w, const Transform& trans,
                 int maxIter)
 {
     for(int j = 0; j < w; ++j)
     {
-        double y = y0 + j*dy;
+        double y = trans.y0 + j*trans.dy;
         for(int i = 0; i < w; ++i)
         {
-            double x = x0 + i*dx;
+            double x = trans.x0 + i*trans.dx;
             mandelColor(&rgb[3*(w*j + i)], x, y, maxIter);
         }
     }
@@ -262,13 +279,12 @@ void writeHeader(TIFF* tif, int width, int height, int tileWidth = -1)
 /// Render a big buffer of samples, then filter those samples.
 noinline
 void renderImageSimple(TIFF* tif, int width, int superSamp, const float* filter,
-                       int filterWidth, double xoff, double xmult, double yoff,
-                       double ymult, int maxIter)
+                       int filterWidth, const Transform& trans, int maxIter)
 {
     writeHeader(tif, width, width);
     int fullWidth = superSamp*(width + filterWidth-1);
     std::vector<float> colVals(3*fullWidth*fullWidth, -1);
-    renderTile(&colVals[0], fullWidth, xoff, yoff, xmult, ymult, maxIter);
+    renderTile(&colVals[0], fullWidth, trans, maxIter);
 
     std::vector<uint8> colFilt(width*3, 0);
 
@@ -312,8 +328,7 @@ void renderImageSimple(TIFF* tif, int width, int superSamp, const float* filter,
 /// renderImageSimple().
 noinline
 void renderImageTiled(TIFF* tif, int width, int superSamp, const float* filter,
-                      int filterWidth, double xoff, double xmult, double yoff,
-                      double ymult, int maxIter)
+                      int filterWidth, const Transform& trans, int maxIter)
 {
     const int tileWidth = 16;
     writeHeader(tif, width, width, tileWidth);
@@ -337,8 +352,8 @@ void renderImageTiled(TIFF* tif, int width, int superSamp, const float* filter,
         for(int tx = 0; tx < ntiles; ++tx, ++poolPos)
         {
             float* stor = tilePool[poolPos % poolSize];
-            renderTile(stor, sampTileWidth, xoff + xmult*sampTileWidth*tx,
-                       yoff + ymult*sampTileWidth*ty, xmult, ymult, maxIter);
+            renderTile(stor, sampTileWidth, trans.offset(sampTileWidth*tx,
+                       sampTileWidth*ty), maxIter);
             if(ty > 0 && tx > 0)
             {
                 // When four adjacent tiles are rendered, filter the interior
@@ -404,9 +419,9 @@ std::size_t hash_value(Imath::V2i const& p)
 
 /// Parallel tiled method using OpenMP.
 noinline
-void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* filter,
-                         int filterWidth, double xoff, double xmult, double yoff,
-                         double ymult, int maxIter)
+void renderImageParallelOmp(TIFF* tif, int width, int superSamp,
+                            const float* filter, int filterWidth,
+                            const Transform& trans, int maxIter)
 {
     const int tileWidth = 16;
     writeHeader(tif, width, width, tileWidth);
@@ -440,8 +455,8 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* fi
         {
             SampTilePtr tile = new SampTile(tx, ty, sampTileWidth);
             float* stor = tile->samps();
-            renderTile(stor, sampTileWidth, xoff + xmult*sampTileWidth*tx,
-                       yoff + ymult*sampTileWidth*ty, xmult, ymult, maxIter);
+            renderTile(stor, sampTileWidth, trans.offset(sampTileWidth*tx,
+                       sampTileWidth*ty), maxIter);
             // The sample tile with coordinates (tx,ty) overlaps the
             // four filtering tiles with coordinates:
             //
@@ -485,7 +500,7 @@ void renderImageParallelOmp(TIFF* tif, int width, int superSamp, const float* fi
                             {block.tiles[1][0]->samps(), block.tiles[1][1]->samps()},
                         };
                         filterAndQuantizeTile(&colFilt[0], toFilter, tileWidth,
-                                              superSamp, &filter[0], filterWidth);
+                                              superSamp, filter, filterWidth);
 #                       pragma omp critical
                         TIFFWriteTile(tif, &colFilt[0], p.x*tileWidth,
                                       p.y*tileWidth, 0, 0);
@@ -509,10 +524,11 @@ int main()
     const int superSamp = 3;
 
     double scale = 0.01;
-    double xmult = scale/superSamp * 2.0/width;
-    double xoff =  -0.79 + scale * -1.0;
-    double ymult = -scale/superSamp * 2.0/width;
-    double yoff =  0.15 + scale * 1.0;
+    Transform trans;
+    trans.dx = scale/superSamp * 2.0/width;
+    trans.x0 =  -0.79 + scale * -1.0;
+    trans.dy = -scale/superSamp * 2.0/width;
+    trans.y0 =  0.15 + scale * 1.0;
 
     const int filterWidth = 3;
     std::vector<float> filter;
@@ -521,11 +537,11 @@ int main()
     TIFF* tif = TIFFOpen("mandel.tif", "w");
 
 //    renderImageSimple(tif, width, superSamp, &filter[0], filterWidth,
-//                      xoff, xmult, yoff, ymult, maxIter);
+//                      trans, maxIter);
 //    renderImageTiled(tif, width, superSamp, &filter[0], filterWidth,
-//                     xoff, xmult, yoff, ymult, maxIter);
+//                     trans, maxIter);
     renderImageParallelOmp(tif, width, superSamp, &filter[0], filterWidth,
-                           xoff, xmult, yoff, ymult, maxIter);
+                           trans, maxIter);
 
     TIFFClose(tif);
 
