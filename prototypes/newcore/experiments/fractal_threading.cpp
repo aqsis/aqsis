@@ -16,9 +16,17 @@
 #include "../refcount.h"
 //#include "omp.h"
 
+#ifdef USE_SSE
+#   include <emmintrin.h>
+#endif
+
 // A define to disable inlining so that selected functions show up in the
 // profile.
-#define noinline __attribute__((noinline))
+#ifdef __GNUC__
+#   define noinline __attribute__((noinline))
+#else
+#   define noinline
+#endif
 
 // Compute ceil(real(n)/d) using integers for positive n and d.
 template<typename T>
@@ -93,7 +101,6 @@ int mandelEscapetime(double cx, double cy, const int maxIter)
     return i;
 }
 
-
 void colorMap(float* rgb, int i, int maxIter)
 {
     if(i == maxIter)
@@ -111,6 +118,74 @@ void mandelColor(float* rgb, double x, double y, int maxIter)
     int t = mandelEscapetime(x, y, maxIter);
     colorMap(rgb, t, maxIter);
 }
+
+#ifdef USE_SSE
+/// SSE2 vectorized version of escape time algorithm.
+void mandelEscapetime(__m128d cx, __m128d cy, const int maxIter, int& i1, int& i2)
+{
+    __m128d x = _mm_setzero_pd();
+    __m128d y = _mm_setzero_pd();
+    __m128d pd4 = _mm_set1_pd(4);
+    __m128d pd2 = _mm_set1_pd(2);
+    __m128d xtmp;
+    __m128d xPrev;
+    __m128d yPrev;
+    int mask = 0x03;
+    int i = 0;
+    // This is the main loop.  It's unrolled by 8 iterations for speed.
+    while(mask == 0x3 && i < maxIter)
+    {
+        xPrev = x;
+        yPrev = y;
+#define ITERATE \
+        xtmp = x*x - y*y + cx; \
+        y = pd2*x*y + cy; \
+        x = xtmp;
+        ITERATE
+        ITERATE
+        ITERATE
+        ITERATE
+        ITERATE
+        ITERATE
+        ITERATE
+        ITERATE
+        mask = _mm_movemask_pd(_mm_cmplt_pd(x*x + y*y, pd4));
+        i += 8;
+    }
+    if(i >= maxIter)
+    {
+        i1 = maxIter;
+        i2 = maxIter;
+        return;
+    }
+    // The following are some auxilary iterations which nail down the exact
+    // time at which each point goes outside radius 2.  Including this helps
+    // bring out the fine detail in the gradients which would otherwise be
+    // quantized by a factor of 8, due to the loop unrolling above.
+    i1 = i-8;
+    i2 = i-8;
+    x = xPrev;
+    y = yPrev;
+    mask = 0x3;
+    while(mask && i1 < maxIter && i2 < maxIter)
+    {
+        xtmp = x*x - y*y + cx;
+        y = pd2*x*y + cy;
+        x = xtmp;
+        mask = _mm_movemask_pd(_mm_cmplt_pd(x*x + y*y, pd4));
+        i1 += mask >> 1;
+        i2 += mask & 1;
+    }
+}
+
+void mandelColor(float* rgb, double x1, double y1, double x2, double y2, int maxIter)
+{
+    int i1 = 0, i2 = 0;
+    mandelEscapetime(_mm_set_pd(x1,x2), _mm_set_pd(y1,y2), maxIter, i1, i2);
+    colorMap(rgb, i1, maxIter);
+    colorMap(rgb+3, i2, maxIter);
+}
+#endif  // USE_SSE
 
 struct Transform
 {
@@ -136,11 +211,20 @@ void renderTile(float* rgb, int w, const Transform& trans,
     for(int j = 0; j < w; ++j)
     {
         double y = trans.y0 + j*trans.dy;
+#ifdef USE_SSE
+        for(int i = 0; i < w; i+=2)
+        {
+            double x1 = trans.x0 + i*trans.dx;
+            double x2 = trans.x0 + (i+1)*trans.dx;
+            mandelColor(&rgb[3*(w*j + i)], x1, y, x2, y, maxIter);
+        }
+#else
         for(int i = 0; i < w; ++i)
         {
             double x = trans.x0 + i*trans.dx;
             mandelColor(&rgb[3*(w*j + i)], x, y, maxIter);
         }
+#endif
     }
 }
 
@@ -764,7 +848,7 @@ void renderImageParallel(TIFF* tif, int width, int superSamp, const float* filte
 //------------------------------------------------------------------------------
 int main()
 {
-    const int width = 800;
+    const int width = 1000;
     const int maxIter = 2000;
 
     const int superSamp = 3;
