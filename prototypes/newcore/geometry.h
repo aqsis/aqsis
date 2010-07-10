@@ -60,7 +60,7 @@ class TessellationContext
 
         /// Return the renderer option state
         virtual const Options& options() = 0;
-        /// Return the current surface options state
+        /// Return the current surface attributes state
         virtual const Attributes& attributes() = 0;
 
         /// Get a builder for storage which will hold dicing results.
