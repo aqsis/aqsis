@@ -125,7 +125,7 @@ class Renderer
         friend class TessellationContextImpl;
 
         class SurfaceOrder;
-        typedef std::priority_queue<GeomHolder, std::vector<GeomHolderPtr>,
+        typedef std::priority_queue<GeomHolderPtr, std::vector<GeomHolderPtr>,
                                     SurfaceOrder> SurfaceQueue;
 
         static void sanitizeOptions(Options& opts);
