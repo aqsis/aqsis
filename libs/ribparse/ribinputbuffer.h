@@ -63,14 +63,15 @@ struct SqSourcePos
 class AQSIS_RIBPARSER_SHARE CqRibInputBuffer : boost::noncopyable
 {
 	public:
-		/// "Character" type returned from the get() method.
-		typedef std::istream::int_type TqOutputType;
+		/// Character type returned from the get() method.
+		typedef unsigned char TqOutputType;
+		/// 255 is our helpful uchar-sized standin for EOF.  It is used as a
+		/// de-facto EOF in RIB streams, so might as well make the most of it.
+		static const TqOutputType eof = 255;
 
 		/** \brief Construct an input buffer.
 		 *
-		 * \param inStream - input stream from which to read.  The stream is
-		 *                   allowed to be null in which case the buffer
-		 *                   returns EOFs.
+		 * \param inStream - input stream from which to read.
 		 * \param streamName - name of the stream used in error messages.
 		 */
 		CqRibInputBuffer(std::istream& inStream,

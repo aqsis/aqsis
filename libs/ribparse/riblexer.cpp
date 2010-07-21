@@ -26,7 +26,6 @@
 
 #include <cctype>
 #include <cmath>
-#include <cstdio> // for EOF
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -181,9 +180,6 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				m_inBuf->unget();
 				readRequest(*m_inBuf, tok);
 				return;
-			case EOF:
-				tok = CqRibToken::ENDOFFILE;
-				return;
 
 			//------------------------------------------------------------
 			// Binary rib decoding
@@ -327,9 +323,10 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 			case 0374: case 0375: case 0376:
 				tok.error("reserved byte encountered");
 				return;
-			case 0377:
+			case CqRibInputBuffer::eof:  // == 0377
 				// 0377 signals the end of a RunProgram block when we're
-				// reading from a pipe.
+				// reading from a pipe.  It's also used as the handy byte-sized
+				// standin for EOF from our input buffer.
 				tok = CqRibToken::ENDOFFILE;
 				return;
 		}
@@ -527,7 +524,7 @@ void CqRibLexer::readString(CqRibInputBuffer& inBuf, CqRibToken& tok)
 					inBuf.unget();
 				outString += '\n';
 				break;
-			case EOF:
+			case CqRibInputBuffer::eof:
 				tok.error("End of file found while scanning string");
 				return;
 			default:
@@ -585,7 +582,7 @@ void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 	if(m_commentCallback)
 	{
 		std::string comment;
-		while(c != EOF && c != '\n' && c != '\r' && c != 0377)
+		while(c != '\n' && c != '\r' && c != CqRibInputBuffer::eof)
 		{
 			comment += c;
 			c = inBuf.get();
@@ -594,7 +591,7 @@ void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
 	}
 	else
 	{
-		while(c != EOF && c != '\n' && c != '\r' && c != 0377)
+		while(c != '\n' && c != '\r' && c != CqRibInputBuffer::eof)
 			c = inBuf.get();
 	}
 	inBuf.unget();

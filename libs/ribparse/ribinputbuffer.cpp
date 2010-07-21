@@ -93,14 +93,10 @@ void CqRibInputBuffer::bufferNextChars()
 	}
 	// Now fill the buffer with as many characters as possible using a
 	// non-blocking read with readsome().
-	char auxBuf[m_bufSize];
-	int numRead = m_inStream->readsome(auxBuf, m_bufSize - m_bufPos);
+	int numRead = m_inStream->readsome((char*)m_buffer + m_bufPos,
+									   m_bufSize - m_bufPos);
 	if(numRead > 0)
 	{
-		// copy the chars over as unsigned.  Ugly, but necessary if our
-		// buffer is going to accomodate holding EOFs.
-		for(int i = 0; i < numRead; ++i)
-			m_buffer[m_bufPos+i] = static_cast<unsigned char>(auxBuf[i]);
 		m_bufEnd = m_bufPos + numRead;
 	}
 	else
@@ -108,7 +104,9 @@ void CqRibInputBuffer::bufferNextChars()
 		// Else ugh: We failed to read a group of characters with the
 		// non-blocking read so we have to make an inefficient read of a single
 		// charater.  (Reading a single char may block, but that's acceptable.)
-		m_buffer[m_bufPos] = m_inStream->get();
+		std::istream::int_type c = m_inStream->get();
+		// translate EOFs
+		m_buffer[m_bufPos] = (c == EOF) ? eof : c;
 		m_bufEnd = m_bufPos + 1;
 	}
 }
@@ -117,9 +115,9 @@ void CqRibInputBuffer::bufferNextChars()
 bool CqRibInputBuffer::isGzippedStream(std::istream& in)
 {
 	bool isZipped = false;
-	TqOutputType c = in.get();
+	std::istream::int_type c = in.get();
 	// Check whether the magic number matches that for a gzip stream
-	const TqOutputType gzipMagic[] = {0x1f, 0x8b};
+	const std::istream::int_type gzipMagic[] = {0x1f, 0x8b};
 	if(c == gzipMagic[0])
 	{
 		if(in.peek() == gzipMagic[1])

@@ -28,7 +28,6 @@
 #define BOOST_TEST_DYN_LINK
 #endif //AQSIS_SYSTEM_WIN32
 
-#include <cstdio> // for EOF
 #include <sstream>
 
 #include <boost/test/auto_unit_test.hpp>
@@ -80,7 +79,7 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_gzip_test)
 
 	std::istream::int_type c = 0;
 	std::string extractedStr;
-	while((c = inBuf.get()) != EOF)
+	while((c = inBuf.get()) != CqRibInputBuffer::eof)
 		extractedStr += c;
 
 	BOOST_CHECK_EQUAL(extractedStr, "some rib\ncharacters\nhere\n");
@@ -102,7 +101,7 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_bufwrap_test)
 
 	std::istream::int_type c = 0;
 	std::string extractedStr;
-	while((c = inBuf.get()) != EOF)
+	while((c = inBuf.get()) != CqRibInputBuffer::eof)
 		extractedStr += c;
 
 	BOOST_CHECK_EQUAL(extractedStr, inStr);
