@@ -117,19 +117,28 @@ void CqRibLexer::popInput()
  * and binary decoding up.  It's slightly more natural to handle all the cases
  * at once.
  */
-CqRibToken CqRibLexer::scanNext()
+void CqRibLexer::scanNext(CqRibToken& tok)
 {
 	if(!m_inBuf)
-		return CqRibToken(CqRibToken::ENDOFFILE);
+	{
+		tok = CqRibToken::ENDOFFILE;
+		return;
+	}
 	if(m_arrayElementsRemaining >= 0)
 	{
 		// If we're currently decoding a float array, return the next element,
 		// or an array end token if we've reached the end.
 		--m_arrayElementsRemaining;
 		if(m_arrayElementsRemaining < 0)
-			return CqRibToken(CqRibToken::ARRAY_END);
+		{
+			tok = CqRibToken::ARRAY_END;
+			return;
+		}
 		else
-			return CqRibToken(decodeFloat32(*m_inBuf));
+		{
+			tok = decodeFloat32(*m_inBuf);
+			return;
+		}
 	}
 	// Else determine the next token.  The while loop is to ignore whitespace
 	// and comments.
@@ -155,20 +164,26 @@ CqRibToken CqRibLexer::scanNext()
 			case '5': case '6': case '7': case '8': case '9':
 			case '-': case '+': case '.':
 				m_inBuf->unget();
-				return readNumber(*m_inBuf);
+				readNumber(*m_inBuf, tok);
+				return;
 			case '"':
-				return readString(*m_inBuf);
+				readString(*m_inBuf, tok);
+				return;
 			case '[':
-				return CqRibToken(CqRibToken::ARRAY_BEGIN);
+				tok = CqRibToken::ARRAY_BEGIN;
+				return;
 			case ']':
-				return CqRibToken(CqRibToken::ARRAY_END);
+				tok = CqRibToken::ARRAY_END;
+				return;
 			default:
 				// If a character is nothing else, it's assumed to represent
 				// the start of a RI request.
 				m_inBuf->unget();
-				return readRequest(*m_inBuf);
+				readRequest(*m_inBuf, tok);
+				return;
 			case EOF:
-				return CqRibToken(CqRibToken::ENDOFFILE);
+				tok = CqRibToken::ENDOFFILE;
+				return;
 
 			//------------------------------------------------------------
 			// Binary rib decoding
@@ -179,7 +194,8 @@ CqRibToken CqRibLexer::scanNext()
 				// Decode integers - the encoded token has the form
 				//   0200 + w  |  <value>
 				// where <value> is w+1 bytes with MSB first.
-				return CqRibToken(static_cast<TqInt>(decodeInt(*m_inBuf, c - 0200 + 1)));
+				tok = static_cast<TqInt>(decodeInt(*m_inBuf, c - 0200 + 1));
+				return;
 			case 0204: case 0205: case 0206: case 0207: // .b to bbb.b
 			case 0210: case 0211: case 0212: case 0213: // ._b to bb.bb
 			case 0214: case 0215: case 0216: case 0217: // .__b to b.bbb
@@ -188,10 +204,11 @@ CqRibToken CqRibLexer::scanNext()
 				// where <value> is w+1 bytes specifying a fixed point
 				// number with the radix point ("decimal" point) located d
 				// bytes into the number from the right.
-				return CqRibToken(decodeFixedPoint(*m_inBuf,
+				tok = decodeFixedPoint(*m_inBuf,
 					((c - 0200) & 0x03) + 1,  // total bytes
 					((c - 0200) >> 2) & 0x03  // location of radix point
-				));
+				);
+				return;
 			case 0220: case 0221: case 0222: case 0223:
 			case 0224: case 0225: case 0226: case 0227:
 			case 0230: case 0231: case 0232: case 0233:
@@ -199,32 +216,36 @@ CqRibToken CqRibLexer::scanNext()
 				// Decode strings shorter than 16 bytes.  The encoded token has the form
 				//   0220 + w  |  <string>
 				// where <string> contains w bytes.
-				return CqRibToken(CqRibToken::STRING, decodeString(*m_inBuf, c - 0220));
+				decodeString(*m_inBuf, c - 0220, tok);
+				return;
 			case 0240: case 0241: case 0242: case 0243:
 				// Decode strings of length >= 16 bytes.  The encoded token has the form
 				//   0240 + l  |  <length>  |  <string>
 				// where <length> is l bytes long, 0 <= l <= 3, and <string> is
 				// of length l+1.
-				return CqRibToken(CqRibToken::STRING,
-						decodeString(*m_inBuf, decodeInt(*m_inBuf, c - 0240 + 1)));
+				decodeString(*m_inBuf, decodeInt(*m_inBuf, c - 0240 + 1), tok);
+				return;
 			case 0244:
 				// Decode a 32-bit floating point value.  The encoded token has the form
 				//   0244  |  <value>
 				// where <value> is 4 bytes in IEEE floating point format,
 				// transmitted from MSB to LSB
-				return CqRibToken(decodeFloat32(*m_inBuf));
+				tok = decodeFloat32(*m_inBuf);
+				return;
 			case 0245:
 				// Decode a 64-bit floating point value.  The encoded token has the form
 				//   0244  |  <value>
 				// where <value> is 8 bytes in IEEE floating point format,
 				// transmitted from MSB to LSB
-				return CqRibToken(static_cast<TqFloat>(decodeFloat64(*m_inBuf)));
+				tok = static_cast<TqFloat>(decodeFloat64(*m_inBuf));
+				return;
 			case 0246:
 				// Read encoded RI request.  The encoded token has the form
 				//   0246  |  <code>
 				// where <code> is a single byte indexing a previously encoded
 				// request.
-				return lookupEncodedRequest(static_cast<TqUint8>(m_inBuf->get()));
+				lookupEncodedRequest(static_cast<TqUint8>(m_inBuf->get()), tok);
+				return;
 			case 0247:
 			case 0250: case 0251: case 0252: case 0253:
 			case 0254: case 0255: case 0256: case 0257:
@@ -234,14 +255,16 @@ CqRibToken CqRibLexer::scanNext()
 			case 0274: case 0275: case 0276: case 0277:
 			case 0300: case 0301: case 0302: case 0303:
 			case 0304: case 0305: case 0306: case 0307:
-				return CqRibToken(CqRibToken::ERROR, "reserved byte encountered");
+				tok.error("reserved byte encountered");
+				return;
 			case 0310: case 0311: case 0312: case 0313:
 				// Decode an array of 32-bit floats.  The encoded token has the form
 				//   0310 + l  |  <length>  |  <array>
 				// where <length> is l+1 bytes long, 0 <= l <= 3, and <array> is
 				// an array of <length> 32-bit floating point values in IEEE format.
 				m_arrayElementsRemaining = decodeInt(*m_inBuf, c - 0310 + 1);
-				return CqRibToken(CqRibToken::ARRAY_BEGIN);
+				tok = CqRibToken::ARRAY_BEGIN;
+				return;
 			case 0314:
 				// Define encoded RI request.  The encoded token has the form
 				//   0314  |  <code>  |  <string>
@@ -250,18 +273,22 @@ CqRibToken CqRibLexer::scanNext()
 				// of the request.
 				{
 					TqUint8 code = static_cast<TqUint8>(m_inBuf->get());
-					CqRibToken requestNameTok = scanNext();
-					if(requestNameTok.type() != CqRibToken::STRING)
-						return CqRibToken(CqRibToken::ERROR,
-								"expected string missing from encoded "
-								"request definition");
-					else if(requestNameTok.stringVal().empty())
-						return CqRibToken(CqRibToken::ERROR,
-								"empty string not valid in encoded "
-								"request definition");
-					defineEncodedRequest(code, requestNameTok);
+					scanNext(tok);
+					if(tok.type() != CqRibToken::STRING)
+					{
+						tok.error("expected string missing from encoded "
+								  "request definition");
+						return;
+					}
+					else if(tok.stringVal().empty())
+					{
+						tok.error("empty string not valid in encoded "
+								  "request definition");
+						return;
+					}
+					m_encodedRequests[code] = tok.stringVal();
 				}
-				return scanNext();
+				break;
 			case 0315: case 0316:
 				// Define encoded string.  The encoded token has the form
 				//   0315 + w  |  <code>  |  <string>
@@ -269,20 +296,23 @@ CqRibToken CqRibLexer::scanNext()
 				// string in any format.
 				{
 					TqInt code = decodeInt(*m_inBuf, c - 0315 + 1);
-					CqRibToken stringNameTok = scanNext();
-					if(stringNameTok.type() != CqRibToken::STRING)
-						return CqRibToken(CqRibToken::ERROR,
-								"expected string missing from encoded "
-								"string definition");
-					defineEncodedString(code, stringNameTok);
+					scanNext(tok);
+					if(tok.type() != CqRibToken::STRING)
+					{
+						tok.error("expected string missing from encoded "
+								  "string definition");
+						return;
+					}
+					m_encodedStrings[code] = tok.stringVal();
 				}
-				return scanNext();
+				break;
 			case 0317: case 0320:
 				// Look up predefined string.  The encoded token has the form
 				//   0317 + w  |  <code>
 				// where <code> is a length w+1 unsigned integer representing
 				// the index of a previously defined string.
-				return lookupEncodedString(decodeInt(*m_inBuf, c - 0317 + 1));
+				lookupEncodedString(decodeInt(*m_inBuf, c - 0317 + 1), tok);
+				return;
 			case 0321: case 0322: case 0323:
 			case 0324: case 0325: case 0326: case 0327:
 			case 0330: case 0331: case 0332: case 0333:
@@ -295,17 +325,19 @@ CqRibToken CqRibLexer::scanNext()
 			case 0364: case 0365: case 0366: case 0367:
 			case 0370: case 0371: case 0372: case 0373:
 			case 0374: case 0375: case 0376:
-				return CqRibToken(CqRibToken::ERROR, "reserved byte encountered");
+				tok.error("reserved byte encountered");
+				return;
 			case 0377:
 				// 0377 signals the end of a RunProgram block when we're
 				// reading from a pipe.
-				return CqRibToken(CqRibToken::ENDOFFILE);
+				tok = CqRibToken::ENDOFFILE;
+				return;
 		}
 	}
 }
 
 /// Read in an ASCII number (integer or real)
-CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
+void CqRibLexer::readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok)
 {
 	CqRibInputBuffer::TqOutputType c = 0;
 	TqInt sign = 1;
@@ -344,8 +376,10 @@ CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 				// deal with digits to right of decimal point
 				c = inBuf.get();
 				if(!haveReadDigit && !std::isdigit(c))
-					return CqRibToken(CqRibToken::ERROR,
-							"Expected at least one digit in float");
+				{
+					tok.error("Expected at least one digit in float");
+					return;
+				}
 				TqFloat thisPlaceVal = 0.1;
 				while(std::isdigit(c))
 				{
@@ -357,7 +391,8 @@ CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 				if(c != 'e' && c != 'E')
 				{
 					inBuf.unget();
-					return CqRibToken(floatResult);
+					tok = floatResult;
+					return;
 				}
 			}
 			break;
@@ -369,10 +404,13 @@ CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 			// Number is an integer
 			intResult *= sign;
 			if(!haveReadDigit)
-				return CqRibToken(CqRibToken::ERROR, "Expected a digit");
+			{
+				tok.error("Expected a digit");
+				return;
+			}
 			inBuf.unget();
-			return CqRibToken(intResult);
-			break;
+			tok = intResult;
+			return;
 	}
 	// deal with the exponent
 	c = inBuf.get();
@@ -388,7 +426,10 @@ CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 			break;
 	}
 	if(!std::isdigit(c))
-		return CqRibToken(CqRibToken::ERROR, "Expected digits in float exponent");
+	{
+		tok.error("Expected digits in float exponent");
+		return;
+	}
 	TqInt exponent = 0;
 	while(std::isdigit(c))
 	{
@@ -399,19 +440,19 @@ CqRibToken CqRibLexer::readNumber(CqRibInputBuffer& inBuf)
 	exponent *= sign;
 	inBuf.unget();
 	floatResult *= std::pow(10.0,exponent);
-	return CqRibToken(floatResult);
+	tok = floatResult;
 }
 
 /** \brief Read in a string
  *
  * Assumes that the leading '"' has already been read.
  */
-CqRibToken CqRibLexer::readString(CqRibInputBuffer& inBuf)
+void CqRibLexer::readString(CqRibInputBuffer& inBuf, CqRibToken& tok)
 {
 	// Assume leading '"' has already been read.
-	CqRibToken outTok(CqRibToken::STRING, "");
-	std::string& outString = outTok.m_strVal;
-	outString.reserve(30);
+	tok = CqRibToken::STRING;
+	std::string& outString = tok.m_strVal;
+	outString.clear();
 	bool stringFinished = false;
 	while(!stringFinished)
 	{
@@ -487,23 +528,21 @@ CqRibToken CqRibLexer::readString(CqRibInputBuffer& inBuf)
 				outString += '\n';
 				break;
 			case EOF:
-				return CqRibToken(CqRibToken::ERROR,
-						"End of file found while scanning string");
-				break;
+				tok.error("End of file found while scanning string");
+				return;
 			default:
 				outString += c;
 				break;
 		}
 	}
-	return outTok;
 }
 
 /// Read in a RIB request
-CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
+void CqRibLexer::readRequest(CqRibInputBuffer& inBuf, CqRibToken& tok)
 {
-	CqRibToken outTok(CqRibToken::REQUEST, "");
-	std::string& name = outTok.m_strVal;
-	name.reserve(30);
+	tok = CqRibToken::REQUEST;
+	std::string& name = tok.m_strVal;
+	name.clear();
 	while(true)
 	{
 		CqRibInputBuffer::TqOutputType c = inBuf.get();
@@ -537,7 +576,6 @@ CqRibToken CqRibLexer::readRequest(CqRibInputBuffer& inBuf)
 			break;
 		}
 	}
-	return outTok;
 }
 
 /// Read in and discard a comment.
@@ -658,53 +696,40 @@ inline TqDouble CqRibLexer::decodeFloat64(CqRibInputBuffer& inBuf)
  * \param inBuf - bytes are read from this input buffer.
  * \param numBytes - number of bytes taken up by the string
  */
-std::string CqRibLexer::decodeString(CqRibInputBuffer& inBuf, TqInt numBytes)
+void CqRibLexer::decodeString(CqRibInputBuffer& inBuf, TqInt numBytes,
+							  CqRibToken& tok)
 {
-	std::string str;
-	str.reserve(numBytes);
+	tok = CqRibToken::STRING;
+	std::string& str = tok.m_strVal;
+	str.clear();
 	for(TqInt i = 0; i < numBytes; ++i)
 		str += static_cast<char>(inBuf.get());
-	return str;
-}
-
-/** \brief Associate a request name with a numeric code
- *
- * \param code - single byte which the request will be associated with.
- * \param requestNameTok - token holding the request name
- */
-inline void CqRibLexer::defineEncodedRequest(TqUint8 code,
-		const CqRibToken& requestNameTok)
-{
-	m_encodedRequests[code] = requestNameTok.stringVal();
 }
 
 /// Look up a previously defined encoded request.
-inline CqRibToken CqRibLexer::lookupEncodedRequest(TqUint8 code) const
+inline void CqRibLexer::lookupEncodedRequest(TqUint8 code, CqRibToken& tok) const
 {
 	const std::string& str = m_encodedRequests[code];
 	if(str.empty())
-		return CqRibToken(CqRibToken::ERROR,
-				"encoded request not previously defined");
+		tok.error("encoded request not previously defined");
 	else
-		return CqRibToken(CqRibToken::REQUEST, str);
-}
-
-/// Associate a string with a numeric code
-inline void CqRibLexer::defineEncodedString(TqInt code,
-		const CqRibToken& stringNameTok)
-{
-	m_encodedStrings[code] = stringNameTok.stringVal();
+	{
+		tok = CqRibToken::REQUEST;
+		tok.m_strVal = str;
+	}
 }
 
 /// Look up a previously defined encoded string.
-inline CqRibToken CqRibLexer::lookupEncodedString(TqInt code) const
+inline void CqRibLexer::lookupEncodedString(TqInt code, CqRibToken& tok) const
 {
 	TqEncodedStringMap::const_iterator pos = m_encodedStrings.find(code);
 	if(pos != m_encodedStrings.end())
-		return CqRibToken(CqRibToken::STRING, pos->second);
+	{
+		tok = CqRibToken::STRING;
+		tok.m_strVal = pos->second;
+	}
 	else
-		return CqRibToken(CqRibToken::ERROR,
-				"encoded string not previously defined");
+		tok.error("encoded string not previously defined");
 }
 
 } // namespace Aqsis

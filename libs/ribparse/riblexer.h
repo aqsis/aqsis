@@ -114,9 +114,9 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 		//--------------------------------------------------
 		/// \name ASCII RIB decoding functions
 		//@{
-		static CqRibToken readNumber(CqRibInputBuffer& inBuf);
-		static CqRibToken readString(CqRibInputBuffer& inBuf);
-		static CqRibToken readRequest(CqRibInputBuffer& inBuf);
+		static void readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok);
+		static void readString(CqRibInputBuffer& inBuf, CqRibToken& tok);
+		static void readRequest(CqRibInputBuffer& inBuf, CqRibToken& tok);
 		void readComment(CqRibInputBuffer& inBuf);
 		//@}
 
@@ -128,15 +128,14 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 				TqInt numBytes, TqInt radixPos);
 		static TqFloat decodeFloat32(CqRibInputBuffer& inBuf);
 		static TqDouble decodeFloat64(CqRibInputBuffer& inBuf);
-		static std::string decodeString(CqRibInputBuffer& inBuf, TqInt numBytes);
-		void defineEncodedRequest(TqUint8 code, const CqRibToken& requestNameTok);
-		CqRibToken lookupEncodedRequest(TqUint8 code) const;
-		void defineEncodedString(TqInt code, const CqRibToken& stringNameTok);
-		CqRibToken lookupEncodedString(TqInt code) const;
+		static void decodeString(CqRibInputBuffer& inBuf, TqInt numBytes,
+								 CqRibToken& tok);
+		void lookupEncodedRequest(TqUint8 code, CqRibToken& tok) const;
+		void lookupEncodedString(TqInt code, CqRibToken& tok) const;
 		//@}
 
 		// scan next token from underlying input stream.
-		CqRibToken scanNext();
+		void scanNext(CqRibToken& tok);
 
 		//--------------------------------------------------
 		// Member data
@@ -179,7 +178,7 @@ inline SqRibPos CqRibLexer::pos() const
 inline const CqRibToken& CqRibLexer::get()
 {
 	if(!m_haveNext)
-		m_nextTok = scanNext();
+		scanNext(m_nextTok);
 	m_haveNext = false;
 	m_currPos = m_nextPos;
 	return m_nextTok;
@@ -195,7 +194,7 @@ inline const CqRibToken& CqRibLexer::peek()
 {
 	if(!m_haveNext)
 	{
-		m_nextTok = scanNext();
+		scanNext(m_nextTok);
 		m_haveNext = true;
 	}
 	return m_nextTok;

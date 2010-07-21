@@ -55,7 +55,7 @@ class CqRibToken
 		//--------------------------------------------------
 		/// \name Constructors
 		//@{
-		/// Construct a token of the given type (default value)
+		/// Construct a token of the given type (default ERROR)
 		CqRibToken(EqType type = ERROR);
 		/// Construct a INTEGER token from the given integer value
 		CqRibToken(TqInt intVal);
@@ -64,6 +64,13 @@ class CqRibToken
 		/// Construct a token with a string as the token value
 		CqRibToken(EqType type, const std::string& strVal);
 		//@}
+
+		/// Assign to the given type
+		CqRibToken& operator=(EqType type);
+		CqRibToken& operator=(TqInt i);
+		CqRibToken& operator=(TqFloat f);
+		/// Set the token to the error type, with the given error message
+		void error(const char* message);
 
 		/** Equality operator (mostly for testing purposes)
 		 *
@@ -138,6 +145,32 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal
 		m_strVal(strVal)
 {
 	assert(type == STRING || type == REQUEST || type == ERROR);
+}
+
+inline CqRibToken& CqRibToken::operator=(EqType type)
+{
+	m_type = type;
+	return *this;
+}
+
+inline CqRibToken& CqRibToken::operator=(TqInt i)
+{
+	m_type = INTEGER;
+	m_intVal = i;
+	return *this;
+}
+
+inline CqRibToken& CqRibToken::operator=(TqFloat f)
+{
+	m_type = FLOAT;
+	m_floatVal = f;
+	return *this;
+}
+
+inline void CqRibToken::error(const char* message)
+{
+	m_type = ERROR;
+	m_strVal = message;
 }
 
 inline bool CqRibToken::operator==(const CqRibToken& rhs) const
