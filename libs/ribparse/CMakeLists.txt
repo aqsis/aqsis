@@ -8,6 +8,7 @@ endif()
 set(ribparse_srcs
 	ribinputbuffer.cpp
 	ribtokenizer.cpp
+	riblexer.cpp
 	ribparser.cpp
 	ribsema.cpp
 )
@@ -16,6 +17,8 @@ set(ribparse_hdrs
 	ribinputbuffer.h
 	ribtokenizer.h
 	ribparser_impl.h
+	riblexer_impl.h
+	riblexer.h
 	ribtoken.h
 )
 source_group("Header Files" FILES ${ribparse_hdrs})
@@ -33,6 +36,7 @@ set(ribparse_test_srcs
 	ribinputbuffer_test.cpp
 	ribtokenizer_test.cpp
 	ribparser_test.cpp
+	riblexer_test.cpp
 	ribsema_test.cpp
 )
 
