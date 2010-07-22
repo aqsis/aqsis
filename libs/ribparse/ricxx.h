@@ -17,8 +17,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef RIOBJ_H_INCLUDED
-#define RIOBJ_H_INCLUDED
+#ifndef AQSIS_RICXX_H_INCLUDED
+#define AQSIS_RICXX_H_INCLUDED
+
+#include <aqsis/riutil/primvartoken.h>
+#include <aqsis/ri/ritypes.h>
 
 namespace Aqsis {
 
@@ -38,7 +41,7 @@ typedef float RtFloat;
 typedef int RtInt;
 typedef const char* RtConstToken;
 
-/// An minimal, immutable array type.
+/// A minimal, immutable array reference type.
 template<typename T>
 class Array
 {
@@ -408,4 +411,4 @@ class Renderer
 } // namespace Ri
 } // namespace Aqsis
 
-#endif // RIOBJ_H_INCLUDED
+#endif // AQSIS_RICXX_H_INCLUDED

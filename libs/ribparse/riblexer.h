@@ -30,9 +30,10 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <boost/function.hpp>
+
+#include "ricxx.h" // for array types.
 
 #ifdef AQSIS_SYSTEM_WIN32
 #   ifdef AQSIS_STATIC_LINK
@@ -98,9 +99,9 @@ class AQSIS_RIBPARSER_SHARE RibLexer
 {
     public:
         // Array token types used by the lexer
-        typedef std::vector<int>         IntArray;
-        typedef std::vector<float>       FloatArray;
-        typedef std::vector<std::string> StringArray;
+        typedef Ri::IntArray     IntArray;
+        typedef Ri::FloatArray   FloatArray;
+        typedef Ri::StringArray  StringArray;
 
         /// Callback function type for passing comments.
         typedef boost::function<void (const std::string&)> CommentCallback;
@@ -220,7 +221,7 @@ class AQSIS_RIBPARSER_SHARE RibLexer
          * \return a reference to the array which is valid until parsing the
          * next request commences.
          */
-        virtual const IntArray& getIntArray() = 0;
+        virtual IntArray getIntArray() = 0;
         /** \brief Read an array of floats from the input
          *
          * The array can be in two formats.  The default is an array of
@@ -240,13 +241,13 @@ class AQSIS_RIBPARSER_SHARE RibLexer
          * \return a reference to the array which is valid until parsing the
          * next request commences.
          */
-        virtual const FloatArray& getFloatArray(int length = -1) = 0;
+        virtual FloatArray getFloatArray(int length = -1) = 0;
         /** \brief Read an array of strings from the input
          *
          * \return a reference to the array which is valid until parsing the
          * next request commences.
          */
-        virtual const StringArray& getStringArray() = 0;
+        virtual StringArray getStringArray() = 0;
 
         /** \brief Return the type of the next RIB token in the stream.
          *
@@ -261,11 +262,11 @@ class AQSIS_RIBPARSER_SHARE RibLexer
         virtual TokenType peekNextType() = 0;
 
         /// Read an integer or integer array from the input as an array
-        virtual const IntArray& getIntParam() = 0;
+        virtual IntArray getIntParam() = 0;
         /// Read an float or float array from the input as an array
-        virtual const FloatArray& getFloatParam() = 0;
+        virtual FloatArray getFloatParam() = 0;
         /// Read an string or string array from the input as an array
-        virtual const StringArray& getStringParam() = 0;
+        virtual StringArray getStringParam() = 0;
         //@}
 
         virtual ~RibLexer() {}

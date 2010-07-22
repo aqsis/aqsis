@@ -30,6 +30,19 @@
 
 namespace Aqsis {
 
+namespace {
+
+template<typename T>
+Ri::Array<T> toRiArray(const std::vector<T>& v)
+{
+    if(v.empty())
+        return Ri::Array<T>();
+    return Ri::Array<T>(&v[0], v.size());
+}
+
+}
+
+
 // RibLexerImpl implementation
 RibLexerImpl::RibLexerImpl()
     : m_tokenizer(),
@@ -137,13 +150,13 @@ const char* RibLexerImpl::getString()
  * After that we'd still be left with the float case in which it's acceptable
  * for the token to be *either* an integer *or* a float.
  */
-const RibLexerImpl::IntArray& RibLexerImpl::getIntArray()
+RibLexer::IntArray RibLexerImpl::getIntArray()
 {
     const RibToken& tok = m_tokenizer.get();
     if(tok.type() != RibToken::ARRAY_BEGIN)
         tokenError("integer array", tok);
 
-    IntArray& buf = m_intArrayPool.getBuf();
+    std::vector<int>& buf = m_intArrayPool.getBuf();
     bool parsing = true;
     while(parsing)
     {
@@ -161,12 +174,12 @@ const RibLexerImpl::IntArray& RibLexerImpl::getIntArray()
                 break;
         }
     }
-    return buf;
+    return toRiArray(buf);
 }
 
-const RibLexerImpl::FloatArray& RibLexerImpl::getFloatArray(int length)
+RibLexer::FloatArray RibLexerImpl::getFloatArray(int length)
 {
-    FloatArray& buf = m_floatArrayPool.getBuf();
+    std::vector<float>& buf = m_floatArrayPool.getBuf();
     if(m_tokenizer.peek().type() == RibToken::ARRAY_BEGIN)
     {
         // Read an array in [ num1 num2 ... num_n ] format
@@ -211,16 +224,16 @@ const RibLexerImpl::FloatArray& RibLexerImpl::getFloatArray(int length)
     {
         tokenError("float array", m_tokenizer.get());
     }
-    return buf;
+    return toRiArray(buf);
 }
 
-const RibLexerImpl::StringArray& RibLexerImpl::getStringArray()
+RibLexer::StringArray RibLexerImpl::getStringArray()
 {
     const RibToken& tok = m_tokenizer.get();
     if(tok.type() != RibToken::ARRAY_BEGIN)
         tokenError("string array", tok);
 
-    StringArray& buf = m_stringArrayPool.getBuf();
+    MultiStringBuffer& buf = m_stringArrayPool.getBuf();
     bool parsing = true;
     while(parsing)
     {
@@ -238,7 +251,7 @@ const RibLexerImpl::StringArray& RibLexerImpl::getStringArray()
                 break;
         }
     }
-    return buf;
+    return buf.toRiArray();
 }
 
 RibLexer::TokenType RibLexerImpl::peekNextType()
@@ -258,46 +271,46 @@ RibLexer::TokenType RibLexerImpl::peekNextType()
     }
 }
 
-const RibLexerImpl::IntArray& RibLexerImpl::getIntParam()
+RibLexer::IntArray RibLexerImpl::getIntParam()
 {
     if(m_tokenizer.peek().type() == RibToken::INTEGER)
     {
-        IntArray& buf = m_intArrayPool.getBuf();
+        std::vector<int>& buf = m_intArrayPool.getBuf();
         buf.push_back(m_tokenizer.get().intVal());
-        return buf;
+        return toRiArray(buf);
     }
     return getIntArray();
 }
 
-const RibLexerImpl::FloatArray& RibLexerImpl::getFloatParam()
+RibLexer::FloatArray RibLexerImpl::getFloatParam()
 {
     switch(m_tokenizer.peek().type())
     {
         case RibToken::INTEGER:
             {
-                FloatArray& buf = m_floatArrayPool.getBuf();
+                std::vector<float>& buf = m_floatArrayPool.getBuf();
                 buf.push_back(m_tokenizer.get().intVal());
-                return buf;
+                return toRiArray(buf);
             }
         case RibToken::FLOAT:
             {
-                FloatArray& buf = m_floatArrayPool.getBuf();
+                std::vector<float>& buf = m_floatArrayPool.getBuf();
                 buf.push_back(m_tokenizer.get().floatVal());
-                return buf;
+                return toRiArray(buf);
             }
         default:
             return getFloatArray();
     }
 }
 
-const RibLexerImpl::StringArray& RibLexerImpl::getStringParam()
+RibLexer::StringArray RibLexerImpl::getStringParam()
 {
     if(m_tokenizer.peek().type() == RibToken::STRING)
     {
         // special case where next token is a single string.
-        StringArray& buf = m_stringArrayPool.getBuf();
+        MultiStringBuffer& buf = m_stringArrayPool.getBuf();
         buf.push_back(m_tokenizer.get().stringVal());
-        return buf;
+        return buf.toRiArray();
     }
     return getStringArray();
 }

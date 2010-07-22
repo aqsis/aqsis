@@ -24,7 +24,7 @@
 
 #include <aqsis/aqsis.h>
 
-#ifndef    AQSIS_SYSTEM_WIN32
+#ifndef AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
 #endif //AQSIS_SYSTEM_WIN32
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getIntArray_test)
     Fixture f("[1 2 3 4] [] [1 1.1]");
 
     // check that we can read int arrays
-    const IqRibParser::TqIntArray& a1 = f.lex.getIntArray();
+    RibLexer::IntArray a1 = f.lex.getIntArray();
     BOOST_REQUIRE_EQUAL(a1.size(), 4U);
     BOOST_CHECK_EQUAL(a1[0], 1);
     BOOST_CHECK_EQUAL(a1[1], 2);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getIntArray_test)
     BOOST_CHECK_EQUAL(a1[3], 4);
 
     // check that we can read empty arrays
-    const IqRibParser::TqIntArray& a3 = f.lex.getIntArray();
+    RibLexer::IntArray a3 = f.lex.getIntArray();
     BOOST_CHECK_EQUAL(a3.size(), 0U);
 
     // check throw on reading a non-int array
@@ -89,10 +89,10 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getFloatArray_test)
 {
     Fixture f("[1 2.1 3.2 4] [-2.0e1 -4.1]  1 2.0  [1 2.0] [\"asdf\"]");
 
-    const TqFloat eps = 0.0001;
+    const float eps = 0.0001;
 
     // check that mixed ints and floats can be read as a float array.
-    const IqRibParser::TqFloatArray& a1 = f.lex.getFloatArray();
+    RibLexer::FloatArray a1 = f.lex.getFloatArray();
     BOOST_REQUIRE_EQUAL(a1.size(), 4U);
     BOOST_CHECK_CLOSE(a1[0], 1.0f, eps);
     BOOST_CHECK_CLOSE(a1[1], 2.1f, eps);
@@ -100,20 +100,20 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getFloatArray_test)
     BOOST_CHECK_CLOSE(a1[3], 4.0f, eps);
 
     // check that we can read a float array
-    const IqRibParser::TqFloatArray& a2 = f.lex.getFloatArray();
+    RibLexer::FloatArray a2 = f.lex.getFloatArray();
     BOOST_REQUIRE_EQUAL(a2.size(), 2U);
     BOOST_CHECK_CLOSE(a2[0], -2.0e1f, eps);
     BOOST_CHECK_CLOSE(a2[1], -4.1f, eps);
 
     // check that we can read a float array with fixed length in either format.
     {
-        const IqRibParser::TqFloatArray& a = f.lex.getFloatArray(2);
+        RibLexer::FloatArray a = f.lex.getFloatArray(2);
         BOOST_REQUIRE_EQUAL(a.size(), 2U);
         BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
         BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
     }
     {
-        const IqRibParser::TqFloatArray& a = f.lex.getFloatArray(2);
+        RibLexer::FloatArray a = f.lex.getFloatArray(2);
         BOOST_REQUIRE_EQUAL(a.size(), 2U);
         BOOST_CHECK_CLOSE(a[0], 1.0f, eps);
         BOOST_CHECK_CLOSE(a[1], 2.0f, eps);
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getStringArray_test)
     Fixture f("[\"asdf\" \"1234\" \"!@#$\"] 123");
 
     // Check that we can read string arrays
-    const IqRibParser::TqStringArray& a = f.lex.getStringArray();
+    RibLexer::StringArray a = f.lex.getStringArray();
     BOOST_REQUIRE_EQUAL(a.size(), 3U);
     BOOST_CHECK_EQUAL(a[0], "asdf");
     BOOST_CHECK_EQUAL(a[1], "1234");
@@ -142,11 +142,11 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getIntParam_test)
 {
     Fixture f("1 [2 3]");
 
-    const IqRibParser::TqIntArray& a1 = f.lex.getIntParam();
+    RibLexer::IntArray a1 = f.lex.getIntParam();
     BOOST_REQUIRE_EQUAL(a1.size(), 1U);
     BOOST_CHECK_EQUAL(a1[0], 1);
 
-    const IqRibParser::TqIntArray& a2 = f.lex.getIntParam();
+    RibLexer::IntArray a2 = f.lex.getIntParam();
     BOOST_REQUIRE_EQUAL(a2.size(), 2U);
     BOOST_CHECK_EQUAL(a2[0], 2);
     BOOST_CHECK_EQUAL(a2[1], 3);
@@ -156,15 +156,15 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getFloatParam_test)
 {
     Fixture f("1 2.0 [3.0 4]");
 
-    const IqRibParser::TqFloatArray& a1 = f.lex.getFloatParam();
+    RibLexer::FloatArray a1 = f.lex.getFloatParam();
     BOOST_REQUIRE_EQUAL(a1.size(), 1U);
     BOOST_CHECK_CLOSE(a1[0], 1.0f, 0.00001);
 
-    const IqRibParser::TqFloatArray& a2 = f.lex.getFloatParam();
+    RibLexer::FloatArray a2 = f.lex.getFloatParam();
     BOOST_REQUIRE_EQUAL(a2.size(), 1U);
     BOOST_CHECK_CLOSE(a2[0], 2.0f, 0.00001);
 
-    const IqRibParser::TqFloatArray& a3 = f.lex.getFloatParam();
+    RibLexer::FloatArray a3 = f.lex.getFloatParam();
     BOOST_REQUIRE_EQUAL(a3.size(), 2U);
     BOOST_CHECK_CLOSE(a3[0], 3.0f, 0.00001);
     BOOST_CHECK_CLOSE(a3[1], 4.0f, 0.00001);
@@ -174,11 +174,11 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_getStringParam_test)
 {
     Fixture f("\"aa\" [\"bb\" \"cc\"]");
 
-    const IqRibParser::TqStringArray& a1 = f.lex.getStringParam();
+    RibLexer::StringArray a1 = f.lex.getStringParam();
     BOOST_REQUIRE_EQUAL(a1.size(), 1U);
     BOOST_CHECK_EQUAL(a1[0], "aa");
 
-    const IqRibParser::TqStringArray& a2 = f.lex.getStringParam();
+    RibLexer::StringArray a2 = f.lex.getStringParam();
     BOOST_REQUIRE_EQUAL(a2.size(), 2U);
     BOOST_CHECK_EQUAL(a2[0], "bb");
     BOOST_CHECK_EQUAL(a2[1], "cc");
