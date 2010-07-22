@@ -114,21 +114,21 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 		//--------------------------------------------------
 		/// \name ASCII RIB decoding functions
 		//@{
-		static void readNumber(CqRibInputBuffer& inBuf, RibToken& tok);
-		static void readString(CqRibInputBuffer& inBuf, RibToken& tok);
-		static void readRequest(CqRibInputBuffer& inBuf, RibToken& tok);
-		void readComment(CqRibInputBuffer& inBuf);
+		static void readNumber(RibInputBuffer& inBuf, RibToken& tok);
+		static void readString(RibInputBuffer& inBuf, RibToken& tok);
+		static void readRequest(RibInputBuffer& inBuf, RibToken& tok);
+		void readComment(RibInputBuffer& inBuf);
 		//@}
 
 		//--------------------------------------------------
 		/// \name Binary RIB decoding functions
 		//@{
-		static TqUint32 decodeInt(CqRibInputBuffer& inBuf, int numBytes);
-		static float decodeFixedPoint(CqRibInputBuffer& inBuf,
+		static TqUint32 decodeInt(RibInputBuffer& inBuf, int numBytes);
+		static float decodeFixedPoint(RibInputBuffer& inBuf,
 				int numBytes, int radixPos);
-		static float decodeFloat32(CqRibInputBuffer& inBuf);
-		static double decodeFloat64(CqRibInputBuffer& inBuf);
-		static void decodeString(CqRibInputBuffer& inBuf, int numBytes,
+		static float decodeFloat32(RibInputBuffer& inBuf);
+		static double decodeFloat64(RibInputBuffer& inBuf);
+		static void decodeString(RibInputBuffer& inBuf, int numBytes,
 								 RibToken& tok);
 		void lookupEncodedRequest(TqUint8 code, RibToken& tok) const;
 		void lookupEncodedString(int code, RibToken& tok) const;
@@ -140,13 +140,13 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 		//--------------------------------------------------
 		// Member data
 		/// Input buffer from which characters are read.
-		CqRibInputBuffer* m_inBuf;
+		RibInputBuffer* m_inBuf;
 		/// Stack of input buffers.
 		std::stack<boost::shared_ptr<InputState> > m_inputStack;
 		/// source position of previous token in input stream
-		SqSourcePos m_currPos;
+		SourcePos m_currPos;
 		/// source position of latest token read from the input stream
-		SqSourcePos m_nextPos;
+		SourcePos m_nextPos;
 		/// next token, if already read.
 		RibToken m_nextTok;
 		/// flag indicating whether we've already got the next token.

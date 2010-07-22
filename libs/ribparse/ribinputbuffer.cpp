@@ -33,7 +33,7 @@
 
 namespace Aqsis {
 
-CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream, const std::string& streamName)
+RibInputBuffer::RibInputBuffer(std::istream& inStream, const std::string& streamName)
 	: m_inStream(&inStream),
 	m_streamName(streamName),
 	m_gzipStream(),
@@ -74,7 +74,7 @@ CqRibInputBuffer::CqRibInputBuffer(std::istream& inStream, const std::string& st
  * input stream.  The m_bufEnd index points to one after the last valid
  * character.  m_bufPos < m_bufEnd
  */
-void CqRibInputBuffer::bufferNextChars()
+void RibInputBuffer::bufferNextChars()
 {
 	// Precondition: m_bufPos is pointing to a one off the end of the valid
 	// characters in the buffer.
@@ -112,7 +112,7 @@ void CqRibInputBuffer::bufferNextChars()
 }
 
 /// Determine whether the given stream is gzipped.
-bool CqRibInputBuffer::isGzippedStream(std::istream& in)
+bool RibInputBuffer::isGzippedStream(std::istream& in)
 {
 	bool isZipped = false;
 	std::istream::int_type c = in.get();

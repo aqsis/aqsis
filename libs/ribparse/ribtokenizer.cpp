@@ -42,15 +42,15 @@ namespace Aqsis
  */
 struct RibTokenizer::InputState
 {
-	CqRibInputBuffer inBuf;
-	SqSourcePos currPos;
-	SqSourcePos nextPos;
+	RibInputBuffer inBuf;
+	SourcePos currPos;
+	SourcePos nextPos;
 	RibToken nextTok;
 	bool haveNext;
 	TqCommentCallback commentCallback;
 
 	InputState(std::istream& inStream, const std::string& streamName,
-			const SqSourcePos& currPos, const SqSourcePos& nextPos,
+			const SourcePos& currPos, const SourcePos& nextPos,
 			const RibToken& nextTok, bool haveNext,
 			const TqCommentCallback& callback)
 		: inBuf(inStream, streamName),
@@ -85,8 +85,8 @@ void RibTokenizer::pushInput(std::istream& inStream, const std::string& streamNa
 				new InputState(inStream, streamName, m_currPos, m_nextPos,
 					m_nextTok, m_haveNext, m_commentCallback)) );
 	m_inBuf = &m_inputStack.top()->inBuf;
-	m_currPos = SqSourcePos(1,1);
-	m_nextPos = SqSourcePos(1,1);
+	m_currPos = SourcePos(1,1);
+	m_nextPos = SourcePos(1,1);
 	m_haveNext = false;
 	m_commentCallback = callback;
 }
@@ -143,7 +143,7 @@ void RibTokenizer::scanNext(RibToken& tok)
 	// and comments.
 	while(true)
 	{
-		CqRibInputBuffer::TqOutputType c = m_inBuf->get();
+		RibInputBuffer::CharType c = m_inBuf->get();
 		m_nextPos = m_inBuf->pos();
 		switch(c)
 		{
@@ -323,7 +323,7 @@ void RibTokenizer::scanNext(RibToken& tok)
 			case 0374: case 0375: case 0376:
 				tok.error("reserved byte encountered");
 				return;
-			case CqRibInputBuffer::eof:  // == 0377
+			case RibInputBuffer::eof:  // == 0377
 				// 0377 signals the end of a RunProgram block when we're
 				// reading from a pipe.  It's also used as the handy byte-sized
 				// standin for EOF from our input buffer.
@@ -334,9 +334,9 @@ void RibTokenizer::scanNext(RibToken& tok)
 }
 
 /// Read in an ASCII number (integer or real)
-void RibTokenizer::readNumber(CqRibInputBuffer& inBuf, RibToken& tok)
+void RibTokenizer::readNumber(RibInputBuffer& inBuf, RibToken& tok)
 {
-	CqRibInputBuffer::TqOutputType c = 0;
+	RibInputBuffer::CharType c = 0;
 	int sign = 1;
 	int intResult = 0;
 	float floatResult = 0;
@@ -444,7 +444,7 @@ void RibTokenizer::readNumber(CqRibInputBuffer& inBuf, RibToken& tok)
  *
  * Assumes that the leading '"' has already been read.
  */
-void RibTokenizer::readString(CqRibInputBuffer& inBuf, RibToken& tok)
+void RibTokenizer::readString(RibInputBuffer& inBuf, RibToken& tok)
 {
 	// Assume leading '"' has already been read.
 	tok = RibToken::STRING;
@@ -453,7 +453,7 @@ void RibTokenizer::readString(CqRibInputBuffer& inBuf, RibToken& tok)
 	bool stringFinished = false;
 	while(!stringFinished)
 	{
-		CqRibInputBuffer::TqOutputType c = inBuf.get();
+		RibInputBuffer::CharType c = inBuf.get();
 		switch(c)
 		{
 			case '"':
@@ -524,7 +524,7 @@ void RibTokenizer::readString(CqRibInputBuffer& inBuf, RibToken& tok)
 					inBuf.unget();
 				outString += '\n';
 				break;
-			case CqRibInputBuffer::eof:
+			case RibInputBuffer::eof:
 				tok.error("End of file found while scanning string");
 				return;
 			default:
@@ -535,14 +535,14 @@ void RibTokenizer::readString(CqRibInputBuffer& inBuf, RibToken& tok)
 }
 
 /// Read in a RIB request
-void RibTokenizer::readRequest(CqRibInputBuffer& inBuf, RibToken& tok)
+void RibTokenizer::readRequest(RibInputBuffer& inBuf, RibToken& tok)
 {
 	tok = RibToken::REQUEST;
 	std::string& name = tok.m_strVal;
 	name.clear();
 	while(true)
 	{
-		CqRibInputBuffer::TqOutputType c = inBuf.get();
+		RibInputBuffer::CharType c = inBuf.get();
 		bool acceptChar = false;
 		// Check that
 		// 1. c is in the 7-bit ASCII character set.
@@ -576,13 +576,13 @@ void RibTokenizer::readRequest(CqRibInputBuffer& inBuf, RibToken& tok)
 }
 
 /// Read in and discard a comment.
-void RibTokenizer::readComment(CqRibInputBuffer& inBuf)
+void RibTokenizer::readComment(RibInputBuffer& inBuf)
 {
-	CqRibInputBuffer::TqOutputType c = inBuf.get();
+	RibInputBuffer::CharType c = inBuf.get();
 	if(m_commentCallback)
 	{
 		std::string comment;
-		while(c != '\n' && c != '\r' && c != CqRibInputBuffer::eof)
+		while(c != '\n' && c != '\r' && c != RibInputBuffer::eof)
 		{
 			comment += c;
 			c = inBuf.get();
@@ -591,7 +591,7 @@ void RibTokenizer::readComment(CqRibInputBuffer& inBuf)
 	}
 	else
 	{
-		while(c != '\n' && c != '\r' && c != CqRibInputBuffer::eof)
+		while(c != '\n' && c != '\r' && c != RibInputBuffer::eof)
 			c = inBuf.get();
 	}
 	inBuf.unget();
@@ -604,7 +604,7 @@ void RibTokenizer::readComment(CqRibInputBuffer& inBuf)
  * \param inBuf - bytes are read from this input buffer.
  * \param numBytes - number of bytes taken up by the integer
  */
-inline TqUint32 RibTokenizer::decodeInt(CqRibInputBuffer& inBuf, int numBytes)
+inline TqUint32 RibTokenizer::decodeInt(RibInputBuffer& inBuf, int numBytes)
 {
 	TqUint32 result = 0;
 	switch(numBytes)
@@ -639,7 +639,7 @@ inline TqUint32 RibTokenizer::decodeInt(CqRibInputBuffer& inBuf, int numBytes)
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline float RibTokenizer::decodeFixedPoint(CqRibInputBuffer& inBuf,
+inline float RibTokenizer::decodeFixedPoint(RibInputBuffer& inBuf,
 		int numBytes, int radixPos)
 {
 	assert(radixPos > 0);
@@ -654,7 +654,7 @@ inline float RibTokenizer::decodeFixedPoint(CqRibInputBuffer& inBuf,
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline float RibTokenizer::decodeFloat32(CqRibInputBuffer& inBuf)
+inline float RibTokenizer::decodeFloat32(RibInputBuffer& inBuf)
 {
 	// union to avoid illegal type-punning
 	union FloatInt32 {
@@ -672,7 +672,7 @@ inline float RibTokenizer::decodeFloat32(CqRibInputBuffer& inBuf)
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline double RibTokenizer::decodeFloat64(CqRibInputBuffer& inBuf)
+inline double RibTokenizer::decodeFloat64(RibInputBuffer& inBuf)
 {
 	// union to avoid illegal type-punning
 	union FloatInt64 {
@@ -693,7 +693,7 @@ inline double RibTokenizer::decodeFloat64(CqRibInputBuffer& inBuf)
  * \param inBuf - bytes are read from this input buffer.
  * \param numBytes - number of bytes taken up by the string
  */
-void RibTokenizer::decodeString(CqRibInputBuffer& inBuf, int numBytes,
+void RibTokenizer::decodeString(RibInputBuffer& inBuf, int numBytes,
 							  RibToken& tok)
 {
 	tok = RibToken::STRING;

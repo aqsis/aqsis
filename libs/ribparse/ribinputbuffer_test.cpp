@@ -34,15 +34,15 @@
 
 using namespace Aqsis;
 
-BOOST_AUTO_TEST_CASE(CqRibInputBuffer_sourcepos_test)
+BOOST_AUTO_TEST_CASE(RibInputBuffer_sourcepos_test)
 {
 	std::istringstream in("some rib\ncharacters\r\nhere");
-	CqRibInputBuffer inBuf(in);
+	RibInputBuffer inBuf(in);
 
 	for(int i = 0; i < 7; ++i)
 		inBuf.get();
 	BOOST_CHECK_EQUAL(inBuf.get(), 'b');
-	SqSourcePos pos = inBuf.pos();
+	SourcePos pos = inBuf.pos();
 	BOOST_CHECK_EQUAL(pos.line, 1);
 	BOOST_CHECK_EQUAL(pos.col, 8);
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_sourcepos_test)
 	BOOST_CHECK_EQUAL(pos.col, 0);
 }
 
-BOOST_AUTO_TEST_CASE(CqRibInputBuffer_gzip_test)
+BOOST_AUTO_TEST_CASE(RibInputBuffer_gzip_test)
 {
 	// Test automatic detection and ungzip'ping of an input stream.
 	//
@@ -75,17 +75,17 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_gzip_test)
 	};
 	std::string zipStr(zippedChars, zippedChars + sizeof(zippedChars));
 	std::istringstream in(zipStr);
-	CqRibInputBuffer inBuf(in);
+	RibInputBuffer inBuf(in);
 
 	std::istream::int_type c = 0;
 	std::string extractedStr;
-	while((c = inBuf.get()) != CqRibInputBuffer::eof)
+	while((c = inBuf.get()) != RibInputBuffer::eof)
 		extractedStr += c;
 
 	BOOST_CHECK_EQUAL(extractedStr, "some rib\ncharacters\nhere\n");
 }
 
-BOOST_AUTO_TEST_CASE(CqRibInputBuffer_bufwrap_test)
+BOOST_AUTO_TEST_CASE(RibInputBuffer_bufwrap_test)
 {
 	// Test that buffer wrapping works correctly.
 	std::string inStr(
@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE(CqRibInputBuffer_bufwrap_test)
 		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl"
 	);
 	std::istringstream in(inStr);
-	CqRibInputBuffer inBuf(in);
+	RibInputBuffer inBuf(in);
 
 	std::istream::int_type c = 0;
 	std::string extractedStr;
-	while((c = inBuf.get()) != CqRibInputBuffer::eof)
+	while((c = inBuf.get()) != RibInputBuffer::eof)
 		extractedStr += c;
 
 	BOOST_CHECK_EQUAL(extractedStr, inStr);

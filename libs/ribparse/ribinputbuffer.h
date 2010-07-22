@@ -38,11 +38,11 @@ namespace Aqsis
 {
 
 /// A holder for source code positions.
-struct SqSourcePos
+struct SourcePos
 {
-	TqInt line;
-	TqInt col;
-	SqSourcePos(TqInt line, TqInt col) : line(line), col(col) {}
+	int line;
+	int col;
+	SourcePos(int line, int col) : line(line), col(col) {}
 };
 
 
@@ -60,30 +60,30 @@ struct SqSourcePos
  * class therefore makes sure that any input buffering of a requested number of
  * characters is non-blocking.
  */
-class AQSIS_RIBPARSER_SHARE CqRibInputBuffer : boost::noncopyable
+class AQSIS_RIBPARSER_SHARE RibInputBuffer : boost::noncopyable
 {
 	public:
 		/// Character type returned from the get() method.
-		typedef unsigned char TqOutputType;
+		typedef unsigned char CharType;
 		/// 255 is our helpful uchar-sized standin for EOF.  It is used as a
 		/// de-facto EOF in RIB streams, so might as well make the most of it.
-		static const TqOutputType eof = 255;
+		static const CharType eof = 255;
 
 		/** \brief Construct an input buffer.
 		 *
 		 * \param inStream - input stream from which to read.
 		 * \param streamName - name of the stream used in error messages.
 		 */
-		CqRibInputBuffer(std::istream& inStream,
+		RibInputBuffer(std::istream& inStream,
 				const std::string& streamName = "unknown");
 
 		/// Get the next character from the input stream
-		TqOutputType get();
+		CharType get();
 		/// Put the last character back into the input stream
 		void unget();
 
 		/// Return the position of the previous character obtained with get()
-		SqSourcePos pos() const;
+		SourcePos pos() const;
 		/// Return the name of the input stream
 		const std::string& streamName() const;
 
@@ -99,32 +99,32 @@ class AQSIS_RIBPARSER_SHARE CqRibInputBuffer : boost::noncopyable
 		boost::scoped_ptr<std::istream> m_gzipStream;
 
 		/// Internal buffer size.
-		static const TqInt m_bufSize = 256;
+		static const int m_bufSize = 256;
 		/// Internal buffer of characters.
-		TqOutputType m_buffer[m_bufSize];
+		CharType m_buffer[m_bufSize];
 		/// Position of current character [ie, last char returned with get() ]
-		TqInt m_bufPos;
+		int m_bufPos;
 		/// Position of last valid character in input buffer.
-		TqInt m_bufEnd;
+		int m_bufEnd;
 
 		/// Current source location
-		SqSourcePos m_currPos;
+		SourcePos m_currPos;
 		/// Previous source location
-		SqSourcePos m_prevPos;
+		SourcePos m_prevPos;
 };
 
 
 //==============================================================================
 // Implementation details.
 //==============================================================================
-// CqRibInputBuffer implementation
-inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
+// RibInputBuffer implementation
+inline RibInputBuffer::CharType RibInputBuffer::get()
 {
 	// Get next character.
 	++m_bufPos;
 	if(m_bufPos >= m_bufEnd)
 		bufferNextChars();
-	TqOutputType c = m_buffer[m_bufPos];
+	CharType c = m_buffer[m_bufPos];
 
 	// Keep line and column numbers up to date.
 	m_prevPos = m_currPos;
@@ -139,7 +139,7 @@ inline CqRibInputBuffer::TqOutputType CqRibInputBuffer::get()
 	return c;
 }
 
-inline void CqRibInputBuffer::unget()
+inline void RibInputBuffer::unget()
 {
 	// Precondition: current buffer position is at least two chars into the
 	// buffer so that lookback can work.
@@ -148,12 +148,12 @@ inline void CqRibInputBuffer::unget()
 	m_currPos = m_prevPos;
 }
 
-inline SqSourcePos CqRibInputBuffer::pos() const
+inline SourcePos RibInputBuffer::pos() const
 {
 	return m_currPos;
 }
 
-inline const std::string& CqRibInputBuffer::streamName() const
+inline const std::string& RibInputBuffer::streamName() const
 {
 	return m_streamName;
 }
