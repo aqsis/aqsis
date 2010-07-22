@@ -54,18 +54,18 @@ bool CqRibParser::parseNextRequest()
 	m_floatArrayPool.markUnused();
 	m_intArrayPool.markUnused();
 	m_stringArrayPool.markUnused();
-	CqRibToken requestTok = m_lex.get();
+	RibToken requestTok = m_lex.get();
 	bool hadRequest = true;
 	try
 	{
 		// Get the next token, and make sure it's a request token.
 		switch(requestTok.type())
 		{
-			case CqRibToken::REQUEST:
+			case RibToken::REQUEST:
 				// Invoke the request handler.
 				m_requestHandler->handleRequest(requestTok.stringVal(), *this);
 				break;
-			case CqRibToken::ENDOFFILE:
+			case RibToken::ENDOFFILE:
 				return false;
 			default:
 				hadRequest = false;
@@ -79,8 +79,8 @@ bool CqRibParser::parseNextRequest()
 		SqRibPos errorPos = m_lex.pos();
 		// Recover from the error by reading and discarding tokens from the RIB
 		// stream up until the next request, as per the RISpec.
-		CqRibToken::EqType nextType = m_lex.peek().type();
-		while(nextType != CqRibToken::REQUEST && nextType != CqRibToken::ENDOFFILE)
+		RibToken::Type nextType = m_lex.peek().type();
+		while(nextType != RibToken::REQUEST && nextType != RibToken::ENDOFFILE)
 		{
 			m_lex.get();
 			nextType = m_lex.peek().type();
@@ -115,20 +115,20 @@ SqRibPos CqRibParser::streamPos()
 
 TqInt CqRibParser::getInt()
 {
-	CqRibToken tok = m_lex.get();
-	if(tok.type() != CqRibToken::INTEGER)
+	RibToken tok = m_lex.get();
+	if(tok.type() != RibToken::INTEGER)
 		tokenError("integer", tok);
 	return tok.intVal();
 }
 
 TqFloat CqRibParser::getFloat()
 {
-	CqRibToken tok = m_lex.get();
+	RibToken tok = m_lex.get();
 	switch(tok.type())
 	{
-		case CqRibToken::INTEGER:
+		case RibToken::INTEGER:
 			return tok.intVal();
-		case CqRibToken::FLOAT:
+		case RibToken::FLOAT:
 			return tok.floatVal();
 		default:
 			tokenError("float", tok);
@@ -138,8 +138,8 @@ TqFloat CqRibParser::getFloat()
 
 std::string CqRibParser::getString()
 {
-	CqRibToken tok = m_lex.get();
-	if(tok.type() != CqRibToken::STRING)
+	RibToken tok = m_lex.get();
+	if(tok.type() != RibToken::STRING)
 		tokenError("string", tok);
 	return tok.stringVal();
 }
@@ -158,21 +158,21 @@ std::string CqRibParser::getString()
  */
 const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 {
-	CqRibToken tok = m_lex.get();
-	if(tok.type() != CqRibToken::ARRAY_BEGIN)
+	RibToken tok = m_lex.get();
+	if(tok.type() != RibToken::ARRAY_BEGIN)
 		tokenError("integer array", tok);
 
 	TqIntArray& buf = m_intArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex.get();
+		RibToken tok = m_lex.get();
 		switch(tok.type())
 		{
-			case CqRibToken::INTEGER:
+			case RibToken::INTEGER:
 				buf.push_back(tok.intVal());
 				break;
-			case CqRibToken::ARRAY_END:
+			case RibToken::ARRAY_END:
 				parsing = false;
 				break;
 			default:
@@ -186,7 +186,7 @@ const CqRibParser::TqIntArray& CqRibParser::getIntArray()
 const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 {
 	TqFloatArray& buf = m_floatArrayPool.getBuf();
-	if(m_lex.peek().type() == CqRibToken::ARRAY_BEGIN)
+	if(m_lex.peek().type() == RibToken::ARRAY_BEGIN)
 	{
 		// Read an array in [ num1 num2 ... num_n ] format
 
@@ -194,16 +194,16 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 		bool parsing = true;
 		while(parsing)
 		{
-			CqRibToken tok = m_lex.get();
+			RibToken tok = m_lex.get();
 			switch(tok.type())
 			{
-				case CqRibToken::INTEGER:
+				case RibToken::INTEGER:
 					buf.push_back(tok.intVal());
 					break;
-				case CqRibToken::FLOAT:
+				case RibToken::FLOAT:
 					buf.push_back(tok.floatVal());
 					break;
-				case CqRibToken::ARRAY_END:
+				case RibToken::ARRAY_END:
 					parsing = false;
 					break;
 				default:
@@ -235,21 +235,21 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatArray(TqInt length)
 
 const CqRibParser::TqStringArray& CqRibParser::getStringArray()
 {
-	CqRibToken tok = m_lex.get();
-	if(tok.type() != CqRibToken::ARRAY_BEGIN)
+	RibToken tok = m_lex.get();
+	if(tok.type() != RibToken::ARRAY_BEGIN)
 		tokenError("string array", tok);
 
 	TqStringArray& buf = m_stringArrayPool.getBuf();
 	bool parsing = true;
 	while(parsing)
 	{
-		CqRibToken tok = m_lex.get();
+		RibToken tok = m_lex.get();
 		switch(tok.type())
 		{
-			case CqRibToken::STRING:
+			case RibToken::STRING:
 				buf.push_back(tok.stringVal());
 				break;
-			case CqRibToken::ARRAY_END:
+			case RibToken::ARRAY_END:
 				parsing = false;
 				break;
 			default:
@@ -266,12 +266,12 @@ void CqRibParser::getParamList(IqRibParamListHandler& paramHandler)
 	{
 		switch(m_lex.peek().type())
 		{
-			case CqRibToken::REQUEST:
-			case CqRibToken::ENDOFFILE:
+			case RibToken::REQUEST:
+			case RibToken::ENDOFFILE:
 				// If we get to the next request or end of file, return since
 				// we're done parsing the parameter list
 				return;
-			case CqRibToken::STRING:
+			case RibToken::STRING:
 				break;
 			default:
 				tokenError("parameter list token", m_lex.get());
@@ -289,13 +289,13 @@ IqRibParser::EqRibToken CqRibParser::peekNextType()
 {
 	switch(m_lex.peek().type())
 	{
-		case CqRibToken::ARRAY_BEGIN:
+		case RibToken::ARRAY_BEGIN:
 			return Tok_Array;
-		case CqRibToken::STRING:
+		case RibToken::STRING:
 			return Tok_String;
-		case CqRibToken::INTEGER:
+		case RibToken::INTEGER:
 			return Tok_Int;
-		case CqRibToken::FLOAT:
+		case RibToken::FLOAT:
 			return Tok_Float;
 		default:
 			return Tok_RequestEnd;
@@ -304,7 +304,7 @@ IqRibParser::EqRibToken CqRibParser::peekNextType()
 
 const CqRibParser::TqIntArray& CqRibParser::getIntParam()
 {
-	if(m_lex.peek().type() == CqRibToken::INTEGER)
+	if(m_lex.peek().type() == RibToken::INTEGER)
 	{
 		TqIntArray& buf = m_intArrayPool.getBuf();
 		buf.push_back(m_lex.get().intVal());
@@ -317,13 +317,13 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatParam()
 {
 	switch(m_lex.peek().type())
 	{
-		case CqRibToken::INTEGER:
+		case RibToken::INTEGER:
 			{
 				TqFloatArray& buf = m_floatArrayPool.getBuf();
 				buf.push_back(m_lex.get().intVal());
 				return buf;
 			}
-		case CqRibToken::FLOAT:
+		case RibToken::FLOAT:
 			{
 				TqFloatArray& buf = m_floatArrayPool.getBuf();
 				buf.push_back(m_lex.get().floatVal());
@@ -336,7 +336,7 @@ const CqRibParser::TqFloatArray& CqRibParser::getFloatParam()
 
 const CqRibParser::TqStringArray& CqRibParser::getStringParam()
 {
-	if(m_lex.peek().type() == CqRibToken::STRING)
+	if(m_lex.peek().type() == RibToken::STRING)
 	{
 		// special case where next token is a single string.
 		TqStringArray& buf = m_stringArrayPool.getBuf();
@@ -359,43 +359,43 @@ const CqRibParser::TqStringArray& CqRibParser::getStringParam()
  * \param expected - string describing the expected token
  * \param badTok - the problematic token which was actually obtained.
  */
-void CqRibParser::tokenError(const char* expected, const CqRibToken& badTok)
+void CqRibParser::tokenError(const char* expected, const RibToken& badTok)
 {
 	std::ostringstream msg;
 
 	msg << "expected " << expected << " before ";
 	switch(badTok.type())
 	{
-		case CqRibToken::ARRAY_BEGIN:
+		case RibToken::ARRAY_BEGIN:
 			msg << "'['";
 			break;
-		case CqRibToken::ARRAY_END:
+		case RibToken::ARRAY_END:
 			msg << "']'";
 			break;
-		case CqRibToken::ENDOFFILE:
+		case RibToken::ENDOFFILE:
 			msg << "end of file";
 			// Put ENDOFFILE back into the input, since not doing so may cause
 			// problems for streams which only provide a single ENDOFFILE
 			// token before blocking (eg, ProcRunProgram pipes).
 			m_lex.unget();
 			break;
-		case CqRibToken::INTEGER:
+		case RibToken::INTEGER:
 			msg << "integer [= " << badTok.intVal() << "]";
 			break;
-		case CqRibToken::FLOAT:
+		case RibToken::FLOAT:
 			msg << "float [= " << badTok.floatVal() << "]";
 			break;
-		case CqRibToken::STRING:
+		case RibToken::STRING:
 			msg << "string [= \"" << badTok.stringVal() << "\"]";
 			break;
-		case CqRibToken::REQUEST:
+		case RibToken::REQUEST:
 			msg << "request [= " << badTok.stringVal() << "]";
 			// For unexpected REQUEST tokens we back up by one token so that
 			// the next call to parseNextRequest() can start afresh with the
 			// new request.
 			m_lex.unget();
 			break;
-		case CqRibToken::ERROR:
+		case RibToken::ERROR:
 			msg << "bad token [" << badTok.stringVal() << "]";
 			break;
 	}

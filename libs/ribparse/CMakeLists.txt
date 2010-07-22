@@ -7,14 +7,14 @@ endif()
 
 set(ribparse_srcs
 	ribinputbuffer.cpp
-	riblexer.cpp
+	ribtokenizer.cpp
 	ribparser.cpp
 	ribsema.cpp
 )
 
 set(ribparse_hdrs
 	ribinputbuffer.h
-	riblexer.h
+	ribtokenizer.h
 	ribparser_impl.h
 	ribtoken.h
 )
@@ -31,7 +31,7 @@ aqsis_install_targets(aqsis_ribparse)
 # Testing
 set(ribparse_test_srcs
 	ribinputbuffer_test.cpp
-	riblexer_test.cpp
+	ribtokenizer_test.cpp
 	ribparser_test.cpp
 	ribsema_test.cpp
 )

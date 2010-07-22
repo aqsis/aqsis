@@ -36,7 +36,7 @@
 
 #include <aqsis/util/exception.h>
 #include <aqsis/ribparser.h>
-#include "riblexer.h"
+#include "ribtokenizer.h"
 
 namespace Aqsis {
 
@@ -83,7 +83,7 @@ class AQSIS_RIBPARSER_SHARE CqRibParser : public IqRibParser, private boost::non
 		virtual const TqStringArray& getStringParam();
 
 	private:
-		void tokenError(const char* expected, const CqRibToken& badTok); 
+		void tokenError(const char* expected, const RibToken& badTok);
 		/** \brief A pool of buffers into which RIB arrays will be read.
 		 *
 		 * The pool serves two purposes:
@@ -111,7 +111,7 @@ class AQSIS_RIBPARSER_SHARE CqRibParser : public IqRibParser, private boost::non
 		};
 
 		/// RIB lexer
-		CqRibLexer m_lex;
+		RibTokenizer m_lex;
 		/// RIB requests handler
 		boost::shared_ptr<IqRibRequestHandler> m_requestHandler;
 		/// pool of parsed float arrays for the current request.

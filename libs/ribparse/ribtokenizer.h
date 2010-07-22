@@ -22,8 +22,8 @@
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
-#ifndef RIBLEXER_H_INCLUDED
-#define RIBLEXER_H_INCLUDED
+#ifndef AQSIS_RIBTOKENIZER_H_INCLUDED
+#define AQSIS_RIBTOKENIZER_H_INCLUDED
 
 #include <aqsis/aqsis.h>
 
@@ -46,7 +46,7 @@ namespace Aqsis
 /** \brief A lexical analyser for the Renderman Interface Byetstream.
  *
  * The lexer translates input characters into a sequence of tokens of type
- * CqRibToken.  The input can be either in ASCII or binary RIB format.  In
+ * RibToken.  The input can be either in ASCII or binary RIB format.  In
  * addition the lexer supports decompression of a RIB stream from the gzip
  * format.
  *
@@ -57,7 +57,7 @@ namespace Aqsis
  * resulting in significantly poor lexer performance (measured to be
  * approximately a factor of two slower on linux/g++/amd64).
  */
-class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
+class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 {
 	public:
 		/// Comment callback function type
@@ -68,7 +68,7 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 		 * get() operations will return ENDOFFILE tokens until pushInput() is
 		 * called.
 		 */
-		CqRibLexer();
+		RibTokenizer();
 
 		/** \brief Push a stream onto the input stack
 		 *
@@ -92,13 +92,13 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 		/** \brief Get the next token.
 		 * \return The next token from the input stream.
 		 */
-		const CqRibToken& get();
+		const RibToken& get();
 		/// Put the previous token back into the input.
 		void unget();
 		/** \brief Look at but don't remove the next token from the input sequence
 		 * \return the next token from the input stream
 		 */
-		const CqRibToken& peek();
+		const RibToken& peek();
 
 		/** Return the position in the input file
 		 *
@@ -108,47 +108,47 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 		SqRibPos pos() const;
 
 	private:
-		typedef std::map<TqInt, std::string> TqEncodedStringMap;
-		struct SqInputState;
+		typedef std::map<int, std::string> EncodedStringMap;
+		struct InputState;
 
 		//--------------------------------------------------
 		/// \name ASCII RIB decoding functions
 		//@{
-		static void readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok);
-		static void readString(CqRibInputBuffer& inBuf, CqRibToken& tok);
-		static void readRequest(CqRibInputBuffer& inBuf, CqRibToken& tok);
+		static void readNumber(CqRibInputBuffer& inBuf, RibToken& tok);
+		static void readString(CqRibInputBuffer& inBuf, RibToken& tok);
+		static void readRequest(CqRibInputBuffer& inBuf, RibToken& tok);
 		void readComment(CqRibInputBuffer& inBuf);
 		//@}
 
 		//--------------------------------------------------
 		/// \name Binary RIB decoding functions
 		//@{
-		static TqUint32 decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes);
-		static TqFloat decodeFixedPoint(CqRibInputBuffer& inBuf,
-				TqInt numBytes, TqInt radixPos);
-		static TqFloat decodeFloat32(CqRibInputBuffer& inBuf);
-		static TqDouble decodeFloat64(CqRibInputBuffer& inBuf);
-		static void decodeString(CqRibInputBuffer& inBuf, TqInt numBytes,
-								 CqRibToken& tok);
-		void lookupEncodedRequest(TqUint8 code, CqRibToken& tok) const;
-		void lookupEncodedString(TqInt code, CqRibToken& tok) const;
+		static TqUint32 decodeInt(CqRibInputBuffer& inBuf, int numBytes);
+		static float decodeFixedPoint(CqRibInputBuffer& inBuf,
+				int numBytes, int radixPos);
+		static float decodeFloat32(CqRibInputBuffer& inBuf);
+		static double decodeFloat64(CqRibInputBuffer& inBuf);
+		static void decodeString(CqRibInputBuffer& inBuf, int numBytes,
+								 RibToken& tok);
+		void lookupEncodedRequest(TqUint8 code, RibToken& tok) const;
+		void lookupEncodedString(int code, RibToken& tok) const;
 		//@}
 
 		// scan next token from underlying input stream.
-		void scanNext(CqRibToken& tok);
+		void scanNext(RibToken& tok);
 
 		//--------------------------------------------------
 		// Member data
 		/// Input buffer from which characters are read.
 		CqRibInputBuffer* m_inBuf;
 		/// Stack of input buffers.
-		std::stack<boost::shared_ptr<SqInputState> > m_inputStack;
+		std::stack<boost::shared_ptr<InputState> > m_inputStack;
 		/// source position of previous token in input stream
 		SqSourcePos m_currPos;
 		/// source position of latest token read from the input stream
 		SqSourcePos m_nextPos;
 		/// next token, if already read.
-		CqRibToken m_nextTok;
+		RibToken m_nextTok;
 		/// flag indicating whether we've already got the next token.
 		bool m_haveNext;
 
@@ -158,24 +158,24 @@ class AQSIS_RIBPARSER_SHARE CqRibLexer : boost::noncopyable
 		/// Array of encoded requests for binary RIB decoding
 		std::vector<std::string> m_encodedRequests;
 		/// Map of encoded strings for binary RIB decoding
-		TqEncodedStringMap m_encodedStrings;
+		EncodedStringMap m_encodedStrings;
 
 		/// Number of array elements remaining in current encoded float array.
-		TqInt m_arrayElementsRemaining;
+		int m_arrayElementsRemaining;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-// CqRibLexer functions
-inline SqRibPos CqRibLexer::pos() const
+// RibTokenizer functions
+inline SqRibPos RibTokenizer::pos() const
 {
 	return SqRibPos(m_currPos.line, m_currPos.col,
 			m_inBuf ? m_inBuf->streamName().c_str() : "null");
 }
 
-inline const CqRibToken& CqRibLexer::get()
+inline const RibToken& RibTokenizer::get()
 {
 	if(!m_haveNext)
 		scanNext(m_nextTok);
@@ -184,13 +184,13 @@ inline const CqRibToken& CqRibLexer::get()
 	return m_nextTok;
 }
 
-inline void CqRibLexer::unget()
+inline void RibTokenizer::unget()
 {
 	assert(!m_haveNext);
 	m_haveNext = true;
 }
 
-inline const CqRibToken& CqRibLexer::peek()
+inline const RibToken& RibTokenizer::peek()
 {
 	if(!m_haveNext)
 	{
@@ -202,4 +202,4 @@ inline const CqRibToken& CqRibLexer::peek()
 
 } // namespace Aqsis
 
-#endif // RIBLEXER_H_INCLUDED
+#endif // AQSIS_RIBTOKENIZER_H_INCLUDED

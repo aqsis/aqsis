@@ -22,7 +22,7 @@
  * \author Chris Foster  [chris42f (at) gmail (dot) com]
  */
 
-#include "riblexer.h"
+#include "ribtokenizer.h"
 
 #include <cctype>
 #include <cmath>
@@ -40,18 +40,18 @@ namespace Aqsis
 /** Struct to save the input state of the lexer inside pushInput(), so that it
  * can be restored inside popInput()
  */
-struct CqRibLexer::SqInputState
+struct RibTokenizer::InputState
 {
 	CqRibInputBuffer inBuf;
 	SqSourcePos currPos;
 	SqSourcePos nextPos;
-	CqRibToken nextTok;
+	RibToken nextTok;
 	bool haveNext;
 	TqCommentCallback commentCallback;
 
-	SqInputState(std::istream& inStream, const std::string& streamName,
+	InputState(std::istream& inStream, const std::string& streamName,
 			const SqSourcePos& currPos, const SqSourcePos& nextPos,
-			const CqRibToken& nextTok, bool haveNext,
+			const RibToken& nextTok, bool haveNext,
 			const TqCommentCallback& callback)
 		: inBuf(inStream, streamName),
 		currPos(currPos),
@@ -63,9 +63,9 @@ struct CqRibLexer::SqInputState
 };
 
 //-------------------------------------------------------------------------------
-// CqRibLexer implementation
+// RibTokenizer implementation
 
-CqRibLexer::CqRibLexer()
+RibTokenizer::RibTokenizer()
 	: m_inBuf(0),
 	m_inputStack(),
 	m_currPos(1,1),
@@ -78,11 +78,11 @@ CqRibLexer::CqRibLexer()
 	m_arrayElementsRemaining(-1)
 { }
 
-void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName,
+void RibTokenizer::pushInput(std::istream& inStream, const std::string& streamName,
 		const TqCommentCallback& callback)
 {
-	m_inputStack.push( boost::shared_ptr<SqInputState>(
-				new SqInputState(inStream, streamName, m_currPos, m_nextPos,
+	m_inputStack.push( boost::shared_ptr<InputState>(
+				new InputState(inStream, streamName, m_currPos, m_nextPos,
 					m_nextTok, m_haveNext, m_commentCallback)) );
 	m_inBuf = &m_inputStack.top()->inBuf;
 	m_currPos = SqSourcePos(1,1);
@@ -91,11 +91,11 @@ void CqRibLexer::pushInput(std::istream& inStream, const std::string& streamName
 	m_commentCallback = callback;
 }
 
-void CqRibLexer::popInput()
+void RibTokenizer::popInput()
 {
 	assert(!m_inputStack.empty());
 	// Restore the current state to the state before the previous pushInput()
-	const SqInputState& restoreState = *m_inputStack.top();
+	const InputState& restoreState = *m_inputStack.top();
 	m_currPos = restoreState.currPos;
 	m_nextPos = restoreState.nextPos;
 	m_nextTok = restoreState.nextTok;
@@ -116,11 +116,11 @@ void CqRibLexer::popInput()
  * and binary decoding up.  It's slightly more natural to handle all the cases
  * at once.
  */
-void CqRibLexer::scanNext(CqRibToken& tok)
+void RibTokenizer::scanNext(RibToken& tok)
 {
 	if(!m_inBuf)
 	{
-		tok = CqRibToken::ENDOFFILE;
+		tok = RibToken::ENDOFFILE;
 		return;
 	}
 	if(m_arrayElementsRemaining >= 0)
@@ -130,7 +130,7 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 		--m_arrayElementsRemaining;
 		if(m_arrayElementsRemaining < 0)
 		{
-			tok = CqRibToken::ARRAY_END;
+			tok = RibToken::ARRAY_END;
 			return;
 		}
 		else
@@ -169,10 +169,10 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				readString(*m_inBuf, tok);
 				return;
 			case '[':
-				tok = CqRibToken::ARRAY_BEGIN;
+				tok = RibToken::ARRAY_BEGIN;
 				return;
 			case ']':
-				tok = CqRibToken::ARRAY_END;
+				tok = RibToken::ARRAY_END;
 				return;
 			default:
 				// If a character is nothing else, it's assumed to represent
@@ -190,7 +190,7 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				// Decode integers - the encoded token has the form
 				//   0200 + w  |  <value>
 				// where <value> is w+1 bytes with MSB first.
-				tok = static_cast<TqInt>(decodeInt(*m_inBuf, c - 0200 + 1));
+				tok = static_cast<int>(decodeInt(*m_inBuf, c - 0200 + 1));
 				return;
 			case 0204: case 0205: case 0206: case 0207: // .b to bbb.b
 			case 0210: case 0211: case 0212: case 0213: // ._b to bb.bb
@@ -233,7 +233,7 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				//   0244  |  <value>
 				// where <value> is 8 bytes in IEEE floating point format,
 				// transmitted from MSB to LSB
-				tok = static_cast<TqFloat>(decodeFloat64(*m_inBuf));
+				tok = static_cast<float>(decodeFloat64(*m_inBuf));
 				return;
 			case 0246:
 				// Read encoded RI request.  The encoded token has the form
@@ -259,7 +259,7 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				// where <length> is l+1 bytes long, 0 <= l <= 3, and <array> is
 				// an array of <length> 32-bit floating point values in IEEE format.
 				m_arrayElementsRemaining = decodeInt(*m_inBuf, c - 0310 + 1);
-				tok = CqRibToken::ARRAY_BEGIN;
+				tok = RibToken::ARRAY_BEGIN;
 				return;
 			case 0314:
 				// Define encoded RI request.  The encoded token has the form
@@ -270,7 +270,7 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				{
 					TqUint8 code = static_cast<TqUint8>(m_inBuf->get());
 					scanNext(tok);
-					if(tok.type() != CqRibToken::STRING)
+					if(tok.type() != RibToken::STRING)
 					{
 						tok.error("expected string missing from encoded "
 								  "request definition");
@@ -291,9 +291,9 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				// where <code> is a length w+1 integer, and <string> is a
 				// string in any format.
 				{
-					TqInt code = decodeInt(*m_inBuf, c - 0315 + 1);
+					int code = decodeInt(*m_inBuf, c - 0315 + 1);
 					scanNext(tok);
-					if(tok.type() != CqRibToken::STRING)
+					if(tok.type() != RibToken::STRING)
 					{
 						tok.error("expected string missing from encoded "
 								  "string definition");
@@ -327,19 +327,19 @@ void CqRibLexer::scanNext(CqRibToken& tok)
 				// 0377 signals the end of a RunProgram block when we're
 				// reading from a pipe.  It's also used as the handy byte-sized
 				// standin for EOF from our input buffer.
-				tok = CqRibToken::ENDOFFILE;
+				tok = RibToken::ENDOFFILE;
 				return;
 		}
 	}
 }
 
 /// Read in an ASCII number (integer or real)
-void CqRibLexer::readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok)
+void RibTokenizer::readNumber(CqRibInputBuffer& inBuf, RibToken& tok)
 {
 	CqRibInputBuffer::TqOutputType c = 0;
-	TqInt sign = 1;
-	TqInt intResult = 0;
-	TqFloat floatResult = 0;
+	int sign = 1;
+	int intResult = 0;
+	float floatResult = 0;
 	bool haveReadDigit = false;
 	c = inBuf.get();
 	// deal with optional sign
@@ -377,7 +377,7 @@ void CqRibLexer::readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok)
 					tok.error("Expected at least one digit in float");
 					return;
 				}
-				TqFloat thisPlaceVal = 0.1;
+				float thisPlaceVal = 0.1;
 				while(std::isdigit(c))
 				{
 					floatResult += (c - '0') * thisPlaceVal;
@@ -427,7 +427,7 @@ void CqRibLexer::readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok)
 		tok.error("Expected digits in float exponent");
 		return;
 	}
-	TqInt exponent = 0;
+	int exponent = 0;
 	while(std::isdigit(c))
 	{
 		exponent *= 10;
@@ -444,10 +444,10 @@ void CqRibLexer::readNumber(CqRibInputBuffer& inBuf, CqRibToken& tok)
  *
  * Assumes that the leading '"' has already been read.
  */
-void CqRibLexer::readString(CqRibInputBuffer& inBuf, CqRibToken& tok)
+void RibTokenizer::readString(CqRibInputBuffer& inBuf, RibToken& tok)
 {
 	// Assume leading '"' has already been read.
-	tok = CqRibToken::STRING;
+	tok = RibToken::STRING;
 	std::string& outString = tok.m_strVal;
 	outString.clear();
 	bool stringFinished = false;
@@ -496,7 +496,7 @@ void CqRibLexer::readString(CqRibInputBuffer& inBuf, CqRibToken& tok)
 							// read in a sequence of (up to) three octal digits
 							unsigned char octalChar = c - '0';
 							c = inBuf.get();
-							for(TqInt i = 0; i < 2 && std::isdigit(c); i++ )
+							for(int i = 0; i < 2 && std::isdigit(c); i++ )
 							{
 								octalChar = 8*octalChar + (c - '0');
 								c = inBuf.get();
@@ -535,9 +535,9 @@ void CqRibLexer::readString(CqRibInputBuffer& inBuf, CqRibToken& tok)
 }
 
 /// Read in a RIB request
-void CqRibLexer::readRequest(CqRibInputBuffer& inBuf, CqRibToken& tok)
+void RibTokenizer::readRequest(CqRibInputBuffer& inBuf, RibToken& tok)
 {
-	tok = CqRibToken::REQUEST;
+	tok = RibToken::REQUEST;
 	std::string& name = tok.m_strVal;
 	name.clear();
 	while(true)
@@ -576,7 +576,7 @@ void CqRibLexer::readRequest(CqRibInputBuffer& inBuf, CqRibToken& tok)
 }
 
 /// Read in and discard a comment.
-void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
+void RibTokenizer::readComment(CqRibInputBuffer& inBuf)
 {
 	CqRibInputBuffer::TqOutputType c = inBuf.get();
 	if(m_commentCallback)
@@ -604,7 +604,7 @@ void CqRibLexer::readComment(CqRibInputBuffer& inBuf)
  * \param inBuf - bytes are read from this input buffer.
  * \param numBytes - number of bytes taken up by the integer
  */
-inline TqUint32 CqRibLexer::decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes)
+inline TqUint32 RibTokenizer::decodeInt(CqRibInputBuffer& inBuf, int numBytes)
 {
 	TqUint32 result = 0;
 	switch(numBytes)
@@ -639,13 +639,13 @@ inline TqUint32 CqRibLexer::decodeInt(CqRibInputBuffer& inBuf, TqInt numBytes)
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline TqFloat CqRibLexer::decodeFixedPoint(CqRibInputBuffer& inBuf,
-		TqInt numBytes, TqInt radixPos)
+inline float RibTokenizer::decodeFixedPoint(CqRibInputBuffer& inBuf,
+		int numBytes, int radixPos)
 {
 	assert(radixPos > 0);
 	TqUint32 mag = decodeInt(inBuf, numBytes - radixPos);
 	TqUint32 frac = decodeInt(inBuf, min(radixPos, numBytes));
-	return mag + static_cast<TqFloat>(frac)/(1 << (8*radixPos));
+	return mag + static_cast<float>(frac)/(1 << (8*radixPos));
 }
 
 /** \brief Decode a 32-bit IEEE floating point number.
@@ -654,14 +654,14 @@ inline TqFloat CqRibLexer::decodeFixedPoint(CqRibInputBuffer& inBuf,
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline TqFloat CqRibLexer::decodeFloat32(CqRibInputBuffer& inBuf)
+inline float RibTokenizer::decodeFloat32(CqRibInputBuffer& inBuf)
 {
 	// union to avoid illegal type-punning
-	union UqFloatInt32 {
-		TqFloat f;
+	union FloatInt32 {
+		float f;
 		TqUint32 i;
 	};
-	UqFloatInt32 conv;
+	FloatInt32 conv;
 	conv.i = decodeInt(inBuf, 4);
 	return conv.f;
 }
@@ -672,14 +672,14 @@ inline TqFloat CqRibLexer::decodeFloat32(CqRibInputBuffer& inBuf)
  *
  * \param inBuf - bytes are read from this input buffer.
  */
-inline TqDouble CqRibLexer::decodeFloat64(CqRibInputBuffer& inBuf)
+inline double RibTokenizer::decodeFloat64(CqRibInputBuffer& inBuf)
 {
 	// union to avoid illegal type-punning
-	union UqFloatInt64 {
-		TqDouble d;
+	union FloatInt64 {
+		double d;
 		boost::uint64_t i;
 	};
-	UqFloatInt64 conv;
+	FloatInt64 conv;
 	conv.i = static_cast<boost::uint64_t>(decodeInt(inBuf, 4)) << 32;
 	conv.i += decodeInt(inBuf, 4);
 	return conv.d;
@@ -693,36 +693,36 @@ inline TqDouble CqRibLexer::decodeFloat64(CqRibInputBuffer& inBuf)
  * \param inBuf - bytes are read from this input buffer.
  * \param numBytes - number of bytes taken up by the string
  */
-void CqRibLexer::decodeString(CqRibInputBuffer& inBuf, TqInt numBytes,
-							  CqRibToken& tok)
+void RibTokenizer::decodeString(CqRibInputBuffer& inBuf, int numBytes,
+							  RibToken& tok)
 {
-	tok = CqRibToken::STRING;
+	tok = RibToken::STRING;
 	std::string& str = tok.m_strVal;
 	str.clear();
-	for(TqInt i = 0; i < numBytes; ++i)
+	for(int i = 0; i < numBytes; ++i)
 		str += static_cast<char>(inBuf.get());
 }
 
 /// Look up a previously defined encoded request.
-inline void CqRibLexer::lookupEncodedRequest(TqUint8 code, CqRibToken& tok) const
+inline void RibTokenizer::lookupEncodedRequest(TqUint8 code, RibToken& tok) const
 {
 	const std::string& str = m_encodedRequests[code];
 	if(str.empty())
 		tok.error("encoded request not previously defined");
 	else
 	{
-		tok = CqRibToken::REQUEST;
+		tok = RibToken::REQUEST;
 		tok.m_strVal = str;
 	}
 }
 
 /// Look up a previously defined encoded string.
-inline void CqRibLexer::lookupEncodedString(TqInt code, CqRibToken& tok) const
+inline void RibTokenizer::lookupEncodedString(int code, RibToken& tok) const
 {
-	TqEncodedStringMap::const_iterator pos = m_encodedStrings.find(code);
+	EncodedStringMap::const_iterator pos = m_encodedStrings.find(code);
 	if(pos != m_encodedStrings.end())
 	{
-		tok = CqRibToken::STRING;
+		tok = RibToken::STRING;
 		tok.m_strVal = pos->second;
 	}
 	else

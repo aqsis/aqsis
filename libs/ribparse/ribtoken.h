@@ -25,8 +25,6 @@
 #ifndef RIBTOKEN_H_INCLUDED
 #define RIBTOKEN_H_INCLUDED
 
-#include <aqsis/aqsis.h>
-
 #include <string>
 #include <iostream>
 
@@ -36,11 +34,11 @@ namespace Aqsis {
 
 /** \brief A class encapsulating a RIB token
  */
-class CqRibToken
+class RibToken
 {
 	public:
 		/// Rib token types
-		enum EqType
+		enum Type
 		{
 			ARRAY_BEGIN,
 			ARRAY_END,
@@ -56,19 +54,19 @@ class CqRibToken
 		/// \name Constructors
 		//@{
 		/// Construct a token of the given type (default ERROR)
-		CqRibToken(EqType type = ERROR);
+		RibToken(Type type = ERROR);
 		/// Construct a INTEGER token from the given integer value
-		CqRibToken(TqInt intVal);
+		RibToken(int intVal);
 		/// Construct a FLOAT token from the given float value
-		CqRibToken(TqFloat floatVal);
+		RibToken(float floatVal);
 		/// Construct a token with a string as the token value
-		CqRibToken(EqType type, const std::string& strVal);
+		RibToken(Type type, const std::string& strVal);
 		//@}
 
 		/// Assign to the given type
-		CqRibToken& operator=(EqType type);
-		CqRibToken& operator=(TqInt i);
-		CqRibToken& operator=(TqFloat f);
+		RibToken& operator=(Type type);
+		RibToken& operator=(int i);
+		RibToken& operator=(float f);
 		/// Set the token to the error type, with the given error message
 		void error(const char* message);
 
@@ -76,33 +74,33 @@ class CqRibToken
 		 *
 		 * \return true if the token type and data are the same.
 		 */
-		bool operator==(const CqRibToken& rhs) const;
+		bool operator==(const RibToken& rhs) const;
 		/// Format the token to an output stream.
-		friend std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok);
+		friend std::ostream& operator<<(std::ostream& outStream, const RibToken& tok);
 
 		//--------------------------------------------------
 		/// \name accessors
 		//@{
 		/// Get the token type.
-		EqType type() const;
+		Type type() const;
 		/// Get an integer value from the token
-		TqInt intVal() const;
+		int intVal() const;
 		/// Get a float value from the token
-		TqFloat floatVal() const;
+		float floatVal() const;
 		/// Get a string value from the token
 		const std::string& stringVal() const;
 		//@}
 
 	private:
-		friend class CqRibLexer;
+		friend class RibTokenizer;
 
 		/// Token type
-		EqType m_type;
+		Type m_type;
 
 		/// Integer value for token
-		TqInt m_intVal;
+		int m_intVal;
 		/// Float value for token
-		TqFloat m_floatVal;
+		float m_floatVal;
 		/// String value for token
 		std::string m_strVal;
 		// note: boost::variant was tried for the mutually exclusive values
@@ -116,29 +114,29 @@ class CqRibToken
 //==============================================================================
 // Implementation details
 //==============================================================================
-// CqRibToken implementation
-inline CqRibToken::CqRibToken(CqRibToken::EqType type)
+// RibToken implementation
+inline RibToken::RibToken(RibToken::Type type)
 		: m_type(type),
 		m_intVal(0),
 		m_floatVal(0),
 		m_strVal()
 { }
 
-inline CqRibToken::CqRibToken(TqInt intVal)
+inline RibToken::RibToken(int intVal)
 		: m_type(INTEGER),
 		m_intVal(intVal),
 		m_floatVal(0),
 		m_strVal()
 {}
 
-inline CqRibToken::CqRibToken(TqFloat floatVal)
+inline RibToken::RibToken(float floatVal)
 		: m_type(FLOAT),
 		m_intVal(0),
 		m_floatVal(floatVal),
 		m_strVal()
 {}
 
-inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal)
+inline RibToken::RibToken(RibToken::Type type, const std::string& strVal)
 		: m_type(type),
 		m_intVal(0),
 		m_floatVal(0),
@@ -147,33 +145,33 @@ inline CqRibToken::CqRibToken(CqRibToken::EqType type, const std::string& strVal
 	assert(type == STRING || type == REQUEST || type == ERROR);
 }
 
-inline CqRibToken& CqRibToken::operator=(EqType type)
+inline RibToken& RibToken::operator=(Type type)
 {
 	m_type = type;
 	return *this;
 }
 
-inline CqRibToken& CqRibToken::operator=(TqInt i)
+inline RibToken& RibToken::operator=(int i)
 {
 	m_type = INTEGER;
 	m_intVal = i;
 	return *this;
 }
 
-inline CqRibToken& CqRibToken::operator=(TqFloat f)
+inline RibToken& RibToken::operator=(float f)
 {
 	m_type = FLOAT;
 	m_floatVal = f;
 	return *this;
 }
 
-inline void CqRibToken::error(const char* message)
+inline void RibToken::error(const char* message)
 {
 	m_type = ERROR;
 	m_strVal = message;
 }
 
-inline bool CqRibToken::operator==(const CqRibToken& rhs) const
+inline bool RibToken::operator==(const RibToken& rhs) const
 {
 	if(m_type != rhs.m_type)
 		return false;
@@ -195,30 +193,30 @@ inline bool CqRibToken::operator==(const CqRibToken& rhs) const
 	}
 }
 
-inline CqRibToken::EqType CqRibToken::type() const
+inline RibToken::Type RibToken::type() const
 {
 	return m_type;
 }
 
-inline TqInt CqRibToken::intVal() const
+inline int RibToken::intVal() const
 {
 	assert(m_type == INTEGER);
 	return m_intVal;
 }
 
-inline TqFloat CqRibToken::floatVal() const
+inline float RibToken::floatVal() const
 {
 	assert(m_type == FLOAT);
 	return m_floatVal;
 }
 
-inline const std::string& CqRibToken::stringVal() const
+inline const std::string& RibToken::stringVal() const
 {
 	assert(m_type == STRING || m_type == REQUEST || m_type == ERROR);
 	return m_strVal;
 }
 
-inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
+inline std::ostream& operator<<(std::ostream& outStream, const RibToken& tok)
 {
 	static const char* tokenNames[] = {
 		"ARRAY_BEGIN",
@@ -233,21 +231,21 @@ inline std::ostream& operator<<(std::ostream& outStream, const CqRibToken& tok)
 	outStream << tokenNames[tok.m_type];
 	switch(tok.m_type)
 	{
-		case CqRibToken::ARRAY_BEGIN:
-		case CqRibToken::ARRAY_END:
-		case CqRibToken::ENDOFFILE:
+		case RibToken::ARRAY_BEGIN:
+		case RibToken::ARRAY_END:
+		case RibToken::ENDOFFILE:
 			break;
-		case CqRibToken::INTEGER:
+		case RibToken::INTEGER:
 			outStream << ": " << tok.m_intVal;
 			break;
-		case CqRibToken::FLOAT:
+		case RibToken::FLOAT:
 			outStream << ": " << tok.m_floatVal;
 			break;
-		case CqRibToken::STRING:
+		case RibToken::STRING:
 			outStream << ": \"" << tok.m_strVal << "\"";
 			break;
-		case CqRibToken::REQUEST:
-		case CqRibToken::ERROR:
+		case RibToken::REQUEST:
+		case RibToken::ERROR:
 			outStream << ": " << tok.m_strVal;
 			break;
 	}
