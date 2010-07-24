@@ -28,17 +28,19 @@
 #include <cfloat>
 #include <cstring>  // for strcpy
 
-#include <boost/shared_ptr.hpp>
+#include "riblexer.h"
 
 namespace Aqsis
 {
 
 //------------------------------------------------------------------------------
-// RibSema implementation
+// RibParser implementation
 
-RibSema::RibSema(Ri::Renderer& renderer)
+RibParser::RibParser(Ri::Renderer& renderer)
     : m_renderer(renderer),
+    m_lexer(RibLexer::create(), &RibLexer::destroy),
     m_requestHandlerMap(),
+    m_paramListStorage(),
     m_numColorComps(3),
     m_tokenDict(),
     m_lightMap(),
@@ -54,114 +56,114 @@ RibSema::RibSema(Ri::Renderer& renderer)
 
         for p in filter(lambda p: p.haschild('Rib'), riXml.findall('Procedures/Procedure')):
             name = p.findtext('Name')
-            cog.outl('MapValueType("%s", &RibSema::handle%s),' % (name, name))
+            cog.outl('MapValueType("%s", &RibParser::handle%s),' % (name, name))
         ]]]*/
-        MapValueType("Declare", &RibSema::handleDeclare),
-        MapValueType("FrameBegin", &RibSema::handleFrameBegin),
-        MapValueType("FrameEnd", &RibSema::handleFrameEnd),
-        MapValueType("WorldBegin", &RibSema::handleWorldBegin),
-        MapValueType("WorldEnd", &RibSema::handleWorldEnd),
-        MapValueType("IfBegin", &RibSema::handleIfBegin),
-        MapValueType("ElseIf", &RibSema::handleElseIf),
-        MapValueType("Else", &RibSema::handleElse),
-        MapValueType("IfEnd", &RibSema::handleIfEnd),
-        MapValueType("Format", &RibSema::handleFormat),
-        MapValueType("FrameAspectRatio", &RibSema::handleFrameAspectRatio),
-        MapValueType("ScreenWindow", &RibSema::handleScreenWindow),
-        MapValueType("CropWindow", &RibSema::handleCropWindow),
-        MapValueType("Projection", &RibSema::handleProjection),
-        MapValueType("Clipping", &RibSema::handleClipping),
-        MapValueType("ClippingPlane", &RibSema::handleClippingPlane),
-        MapValueType("DepthOfField", &RibSema::handleDepthOfField),
-        MapValueType("Shutter", &RibSema::handleShutter),
-        MapValueType("PixelVariance", &RibSema::handlePixelVariance),
-        MapValueType("PixelSamples", &RibSema::handlePixelSamples),
-        MapValueType("PixelFilter", &RibSema::handlePixelFilter),
-        MapValueType("Exposure", &RibSema::handleExposure),
-        MapValueType("Imager", &RibSema::handleImager),
-        MapValueType("Quantize", &RibSema::handleQuantize),
-        MapValueType("Display", &RibSema::handleDisplay),
-        MapValueType("Hider", &RibSema::handleHider),
-        MapValueType("ColorSamples", &RibSema::handleColorSamples),
-        MapValueType("RelativeDetail", &RibSema::handleRelativeDetail),
-        MapValueType("Option", &RibSema::handleOption),
-        MapValueType("AttributeBegin", &RibSema::handleAttributeBegin),
-        MapValueType("AttributeEnd", &RibSema::handleAttributeEnd),
-        MapValueType("Color", &RibSema::handleColor),
-        MapValueType("Opacity", &RibSema::handleOpacity),
-        MapValueType("TextureCoordinates", &RibSema::handleTextureCoordinates),
-        MapValueType("LightSource", &RibSema::handleLightSource),
-        MapValueType("AreaLightSource", &RibSema::handleAreaLightSource),
-        MapValueType("Illuminate", &RibSema::handleIlluminate),
-        MapValueType("Surface", &RibSema::handleSurface),
-        MapValueType("Displacement", &RibSema::handleDisplacement),
-        MapValueType("Atmosphere", &RibSema::handleAtmosphere),
-        MapValueType("Interior", &RibSema::handleInterior),
-        MapValueType("Exterior", &RibSema::handleExterior),
-        MapValueType("ShaderLayer", &RibSema::handleShaderLayer),
-        MapValueType("ConnectShaderLayers", &RibSema::handleConnectShaderLayers),
-        MapValueType("ShadingRate", &RibSema::handleShadingRate),
-        MapValueType("ShadingInterpolation", &RibSema::handleShadingInterpolation),
-        MapValueType("Matte", &RibSema::handleMatte),
-        MapValueType("Bound", &RibSema::handleBound),
-        MapValueType("Detail", &RibSema::handleDetail),
-        MapValueType("DetailRange", &RibSema::handleDetailRange),
-        MapValueType("GeometricApproximation", &RibSema::handleGeometricApproximation),
-        MapValueType("Orientation", &RibSema::handleOrientation),
-        MapValueType("ReverseOrientation", &RibSema::handleReverseOrientation),
-        MapValueType("Sides", &RibSema::handleSides),
-        MapValueType("Identity", &RibSema::handleIdentity),
-        MapValueType("Transform", &RibSema::handleTransform),
-        MapValueType("ConcatTransform", &RibSema::handleConcatTransform),
-        MapValueType("Perspective", &RibSema::handlePerspective),
-        MapValueType("Translate", &RibSema::handleTranslate),
-        MapValueType("Rotate", &RibSema::handleRotate),
-        MapValueType("Scale", &RibSema::handleScale),
-        MapValueType("Skew", &RibSema::handleSkew),
-        MapValueType("CoordinateSystem", &RibSema::handleCoordinateSystem),
-        MapValueType("CoordSysTransform", &RibSema::handleCoordSysTransform),
-        MapValueType("TransformBegin", &RibSema::handleTransformBegin),
-        MapValueType("TransformEnd", &RibSema::handleTransformEnd),
-        MapValueType("Resource", &RibSema::handleResource),
-        MapValueType("ResourceBegin", &RibSema::handleResourceBegin),
-        MapValueType("ResourceEnd", &RibSema::handleResourceEnd),
-        MapValueType("Attribute", &RibSema::handleAttribute),
-        MapValueType("Polygon", &RibSema::handlePolygon),
-        MapValueType("GeneralPolygon", &RibSema::handleGeneralPolygon),
-        MapValueType("PointsPolygons", &RibSema::handlePointsPolygons),
-        MapValueType("PointsGeneralPolygons", &RibSema::handlePointsGeneralPolygons),
-        MapValueType("Basis", &RibSema::handleBasis),
-        MapValueType("Patch", &RibSema::handlePatch),
-        MapValueType("PatchMesh", &RibSema::handlePatchMesh),
-        MapValueType("NuPatch", &RibSema::handleNuPatch),
-        MapValueType("TrimCurve", &RibSema::handleTrimCurve),
-        MapValueType("SubdivisionMesh", &RibSema::handleSubdivisionMesh),
-        MapValueType("Sphere", &RibSema::handleSphere),
-        MapValueType("Cone", &RibSema::handleCone),
-        MapValueType("Cylinder", &RibSema::handleCylinder),
-        MapValueType("Hyperboloid", &RibSema::handleHyperboloid),
-        MapValueType("Paraboloid", &RibSema::handleParaboloid),
-        MapValueType("Disk", &RibSema::handleDisk),
-        MapValueType("Torus", &RibSema::handleTorus),
-        MapValueType("Points", &RibSema::handlePoints),
-        MapValueType("Curves", &RibSema::handleCurves),
-        MapValueType("Blobby", &RibSema::handleBlobby),
-        MapValueType("Procedural", &RibSema::handleProcedural),
-        MapValueType("Geometry", &RibSema::handleGeometry),
-        MapValueType("SolidBegin", &RibSema::handleSolidBegin),
-        MapValueType("SolidEnd", &RibSema::handleSolidEnd),
-        MapValueType("ObjectBegin", &RibSema::handleObjectBegin),
-        MapValueType("ObjectEnd", &RibSema::handleObjectEnd),
-        MapValueType("ObjectInstance", &RibSema::handleObjectInstance),
-        MapValueType("MotionBegin", &RibSema::handleMotionBegin),
-        MapValueType("MotionEnd", &RibSema::handleMotionEnd),
-        MapValueType("MakeTexture", &RibSema::handleMakeTexture),
-        MapValueType("MakeLatLongEnvironment", &RibSema::handleMakeLatLongEnvironment),
-        MapValueType("MakeCubeFaceEnvironment", &RibSema::handleMakeCubeFaceEnvironment),
-        MapValueType("MakeShadow", &RibSema::handleMakeShadow),
-        MapValueType("MakeOcclusion", &RibSema::handleMakeOcclusion),
-        MapValueType("ErrorHandler", &RibSema::handleErrorHandler),
-        MapValueType("ReadArchive", &RibSema::handleReadArchive),
+        MapValueType("Declare", &RibParser::handleDeclare),
+        MapValueType("FrameBegin", &RibParser::handleFrameBegin),
+        MapValueType("FrameEnd", &RibParser::handleFrameEnd),
+        MapValueType("WorldBegin", &RibParser::handleWorldBegin),
+        MapValueType("WorldEnd", &RibParser::handleWorldEnd),
+        MapValueType("IfBegin", &RibParser::handleIfBegin),
+        MapValueType("ElseIf", &RibParser::handleElseIf),
+        MapValueType("Else", &RibParser::handleElse),
+        MapValueType("IfEnd", &RibParser::handleIfEnd),
+        MapValueType("Format", &RibParser::handleFormat),
+        MapValueType("FrameAspectRatio", &RibParser::handleFrameAspectRatio),
+        MapValueType("ScreenWindow", &RibParser::handleScreenWindow),
+        MapValueType("CropWindow", &RibParser::handleCropWindow),
+        MapValueType("Projection", &RibParser::handleProjection),
+        MapValueType("Clipping", &RibParser::handleClipping),
+        MapValueType("ClippingPlane", &RibParser::handleClippingPlane),
+        MapValueType("DepthOfField", &RibParser::handleDepthOfField),
+        MapValueType("Shutter", &RibParser::handleShutter),
+        MapValueType("PixelVariance", &RibParser::handlePixelVariance),
+        MapValueType("PixelSamples", &RibParser::handlePixelSamples),
+        MapValueType("PixelFilter", &RibParser::handlePixelFilter),
+        MapValueType("Exposure", &RibParser::handleExposure),
+        MapValueType("Imager", &RibParser::handleImager),
+        MapValueType("Quantize", &RibParser::handleQuantize),
+        MapValueType("Display", &RibParser::handleDisplay),
+        MapValueType("Hider", &RibParser::handleHider),
+        MapValueType("ColorSamples", &RibParser::handleColorSamples),
+        MapValueType("RelativeDetail", &RibParser::handleRelativeDetail),
+        MapValueType("Option", &RibParser::handleOption),
+        MapValueType("AttributeBegin", &RibParser::handleAttributeBegin),
+        MapValueType("AttributeEnd", &RibParser::handleAttributeEnd),
+        MapValueType("Color", &RibParser::handleColor),
+        MapValueType("Opacity", &RibParser::handleOpacity),
+        MapValueType("TextureCoordinates", &RibParser::handleTextureCoordinates),
+        MapValueType("LightSource", &RibParser::handleLightSource),
+        MapValueType("AreaLightSource", &RibParser::handleAreaLightSource),
+        MapValueType("Illuminate", &RibParser::handleIlluminate),
+        MapValueType("Surface", &RibParser::handleSurface),
+        MapValueType("Displacement", &RibParser::handleDisplacement),
+        MapValueType("Atmosphere", &RibParser::handleAtmosphere),
+        MapValueType("Interior", &RibParser::handleInterior),
+        MapValueType("Exterior", &RibParser::handleExterior),
+        MapValueType("ShaderLayer", &RibParser::handleShaderLayer),
+        MapValueType("ConnectShaderLayers", &RibParser::handleConnectShaderLayers),
+        MapValueType("ShadingRate", &RibParser::handleShadingRate),
+        MapValueType("ShadingInterpolation", &RibParser::handleShadingInterpolation),
+        MapValueType("Matte", &RibParser::handleMatte),
+        MapValueType("Bound", &RibParser::handleBound),
+        MapValueType("Detail", &RibParser::handleDetail),
+        MapValueType("DetailRange", &RibParser::handleDetailRange),
+        MapValueType("GeometricApproximation", &RibParser::handleGeometricApproximation),
+        MapValueType("Orientation", &RibParser::handleOrientation),
+        MapValueType("ReverseOrientation", &RibParser::handleReverseOrientation),
+        MapValueType("Sides", &RibParser::handleSides),
+        MapValueType("Identity", &RibParser::handleIdentity),
+        MapValueType("Transform", &RibParser::handleTransform),
+        MapValueType("ConcatTransform", &RibParser::handleConcatTransform),
+        MapValueType("Perspective", &RibParser::handlePerspective),
+        MapValueType("Translate", &RibParser::handleTranslate),
+        MapValueType("Rotate", &RibParser::handleRotate),
+        MapValueType("Scale", &RibParser::handleScale),
+        MapValueType("Skew", &RibParser::handleSkew),
+        MapValueType("CoordinateSystem", &RibParser::handleCoordinateSystem),
+        MapValueType("CoordSysTransform", &RibParser::handleCoordSysTransform),
+        MapValueType("TransformBegin", &RibParser::handleTransformBegin),
+        MapValueType("TransformEnd", &RibParser::handleTransformEnd),
+        MapValueType("Resource", &RibParser::handleResource),
+        MapValueType("ResourceBegin", &RibParser::handleResourceBegin),
+        MapValueType("ResourceEnd", &RibParser::handleResourceEnd),
+        MapValueType("Attribute", &RibParser::handleAttribute),
+        MapValueType("Polygon", &RibParser::handlePolygon),
+        MapValueType("GeneralPolygon", &RibParser::handleGeneralPolygon),
+        MapValueType("PointsPolygons", &RibParser::handlePointsPolygons),
+        MapValueType("PointsGeneralPolygons", &RibParser::handlePointsGeneralPolygons),
+        MapValueType("Basis", &RibParser::handleBasis),
+        MapValueType("Patch", &RibParser::handlePatch),
+        MapValueType("PatchMesh", &RibParser::handlePatchMesh),
+        MapValueType("NuPatch", &RibParser::handleNuPatch),
+        MapValueType("TrimCurve", &RibParser::handleTrimCurve),
+        MapValueType("SubdivisionMesh", &RibParser::handleSubdivisionMesh),
+        MapValueType("Sphere", &RibParser::handleSphere),
+        MapValueType("Cone", &RibParser::handleCone),
+        MapValueType("Cylinder", &RibParser::handleCylinder),
+        MapValueType("Hyperboloid", &RibParser::handleHyperboloid),
+        MapValueType("Paraboloid", &RibParser::handleParaboloid),
+        MapValueType("Disk", &RibParser::handleDisk),
+        MapValueType("Torus", &RibParser::handleTorus),
+        MapValueType("Points", &RibParser::handlePoints),
+        MapValueType("Curves", &RibParser::handleCurves),
+        MapValueType("Blobby", &RibParser::handleBlobby),
+        MapValueType("Procedural", &RibParser::handleProcedural),
+        MapValueType("Geometry", &RibParser::handleGeometry),
+        MapValueType("SolidBegin", &RibParser::handleSolidBegin),
+        MapValueType("SolidEnd", &RibParser::handleSolidEnd),
+        MapValueType("ObjectBegin", &RibParser::handleObjectBegin),
+        MapValueType("ObjectEnd", &RibParser::handleObjectEnd),
+        MapValueType("ObjectInstance", &RibParser::handleObjectInstance),
+        MapValueType("MotionBegin", &RibParser::handleMotionBegin),
+        MapValueType("MotionEnd", &RibParser::handleMotionEnd),
+        MapValueType("MakeTexture", &RibParser::handleMakeTexture),
+        MapValueType("MakeLatLongEnvironment", &RibParser::handleMakeLatLongEnvironment),
+        MapValueType("MakeCubeFaceEnvironment", &RibParser::handleMakeCubeFaceEnvironment),
+        MapValueType("MakeShadow", &RibParser::handleMakeShadow),
+        MapValueType("MakeOcclusion", &RibParser::handleMakeOcclusion),
+        MapValueType("ErrorHandler", &RibParser::handleErrorHandler),
+        MapValueType("ReadArchive", &RibParser::handleReadArchive),
         //[[[end]]]
     };
     m_requestHandlerMap.insert(
@@ -169,197 +171,140 @@ RibSema::RibSema(Ri::Renderer& renderer)
             handlerMapInit + sizeof(handlerMapInit)/sizeof(handlerMapInit[0])
     );
     // Add the special RIB-only "version" request to the list.
-    m_requestHandlerMap["version"] = &RibSema::handleVersion;
+    m_requestHandlerMap["version"] = &RibParser::handleVersion;
 }
 
-void RibSema::handleRequest(const std::string& requestName,
-        IqRibParser& parser)
-{
-    HandlerMap::const_iterator pos = m_requestHandlerMap.find(requestName);
-    if(pos == m_requestHandlerMap.end())
-        AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken, "unrecognized request");
-    RequestHandlerType handler = pos->second;
-    (this->*handler)(parser);
-}
-
-
-//--------------------------------------------------
-// Handler helper utilities.
 namespace {
-
-template<typename T>
-const T* get(const std::vector<T>& v) { return v.empty() ? 0 : &v[0]; }
-
-//------------------------------------------------------------------------------
-/// Implementation of IqRibParamListHandler to read in parameter lists
-///
-/// This implementation reads a parameter list from the parser and translates it
-/// into the (count, tokens, values) triple which is accepted by the Ri*V form
-/// of the renderman interface functions.
-///
-class ParamAccumulator : public IqRibParamListHandler
+/// Callback which sends errors to Ri::Renderer::ArchiveRecord
+class CommentCallback
 {
     private:
-        // Dictionary for looking up RiDeclare'd and standard tokens
-        const CqTokenDictionary& m_tokenDict;
-        std::vector<Ri::Param> m_params;
-        // Storage for vectors of strings
-        std::vector<boost::shared_ptr<std::vector<RtConstToken> > > m_stringValues;
-
-        const RtConstToken* cacheStringArray(const IqRibParser::TqStringArray& strings)
-        {
-            m_stringValues.push_back(
-                    boost::shared_ptr<std::vector<RtConstToken> >(
-                    new std::vector<RtConstToken>(strings.size(), 0)) );
-            std::vector<RtConstToken>& stringsDest = *m_stringValues.back();
-            for(TqInt i = 0, end = strings.size(); i < end; ++i)
-                stringsDest[i] = strings[i].c_str();
-            return get(stringsDest);
-        }
-
+        Ri::Renderer& m_renderer;
     public:
-        /// Construct an empty param list
-        ParamAccumulator(const CqTokenDictionary& tokenDict) :
-            m_tokenDict(tokenDict),
-            m_params(),
-            m_stringValues()
-        { }
-
-        /// Read in the next (token,value) pair from the parser
-        virtual void readParameter(const std::string& name, IqRibParser& parser)
+        CommentCallback(Ri::Renderer& renderer) : m_renderer(renderer) {}
+        void operator()(const std::string& error)
         {
-            CqPrimvarToken tok;
-            try
-            {
-                tok = m_tokenDict.parseAndLookup(name);
-            }
-            catch(XqValidation& e)
-            {
-                AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax, e.what());
-            }
-            switch(tok.storageType())
-            {
-                case type_integer:
-                    {
-                        const IqRibParser::TqIntArray& a = parser.getIntParam();
-                        m_params.push_back(Ri::Param(tok, get(a), a.size()));
-                    }
-                    break;
-                case type_float:
-                    {
-                        const IqRibParser::TqFloatArray& a = parser.getFloatParam();
-                        m_params.push_back(Ri::Param(tok, get(a), a.size()));
-                    }
-                    break;
-                case type_string:
-                    {
-                        const IqRibParser::TqStringArray& a = parser.getStringParam();
-                        m_params.push_back(Ri::Param(tok, cacheStringArray(a), a.size()));
-                    }
-                    break;
-                case type_invalid:
-                default:
-                    assert(0 && "Unknown storage type; we should never get here.");
-                    return;
-            }
-        }
-
-        operator Ri::ParamList()
-        {
-            return Ri::ParamList(get(m_params), m_params.size());
+            m_renderer.ArchiveRecord("comment", error.c_str());
         }
 };
+} // anon. namespace
 
-//--------------------------------------------------
-// Conversion helpers from the various types coming from the parser into types
-// which can be passed into Ri::Renderer
-class StringHolder
+void RibParser::parseStream(std::istream& ribStream,
+                            const std::string& streamName)
 {
-    private:
-        std::string m_string;
-    public:
-        StringHolder(const std::string& string) : m_string(string) {}
-
-        operator RtConstString()
+    m_lexer->pushInput(ribStream, streamName, CommentCallback(m_renderer));
+    while(true)
+    {
+        const char* requestName = 0;
+        try
         {
-            return m_string.c_str();
+            requestName = m_lexer->nextRequest();
+            if(!requestName)
+                break;  // end of stream
+            HandlerMap::const_iterator pos =
+                m_requestHandlerMap.find(requestName);
+            if(pos == m_requestHandlerMap.end())
+                AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+                                    "unrecognized request");
+            RequestHandlerType handler = pos->second;
+            (this->*handler)(*m_lexer);
         }
-};
-
-/// A conversion class, converting IqRibParser::TqStringArray to
-/// Ri::TokenArray
-class StringArrayHolder
-{
-    private:
-        std::vector<RtConstToken> m_strings;
-
-    public:
-        /// Extract a vector of RtToken pointers from a vector of std::strings,
-        /// storing them in the storage array.
-        StringArrayHolder(const std::vector<std::string>& strings)
+        catch(XqValidation& e)
         {
-            m_strings.reserve(strings.size());
-            for(IqRibParser::TqStringArray::const_iterator i = strings.begin(),
-                    end = strings.end(); i != end; ++i)
-            {
-                m_strings.push_back(i->c_str());
-            }
+            // Add information on the location (file,line etc) of the problem
+            // to the exception message and rethrow.
+            std::ostringstream msg;
+            msg << "Parse error at " << m_lexer->streamPos();
+            if(requestName)
+                msg << " while reading " << requestName;
+            msg << ": " << e.what();
+            m_renderer.Error(msg.str().c_str());
+            m_lexer->discardUntilRequest();
         }
-
-        // Conversion to the associated Ri::Array type
-        operator Ri::TokenArray()
+        catch(...)
         {
-            return Ri::TokenArray(get(m_strings), m_strings.size());
+            // Other errors should pass through, but we should make sure to pop
+            // the stream first!
+            m_lexer->popInput();
+            throw;
         }
-};
-
-template<typename T>
-Ri::Array<T> toRiArray(const std::vector<T>& v)
-{
-    return Ri::Array<T>(get(v), v.size());
+    }
+    m_lexer->popInput();
 }
 
+namespace { // Handler helpers
+
 template<typename T>
-const T& toFloatBasedType(const std::vector<RtFloat>& v,
+inline const T& toFloatBasedType(Ri::FloatArray a,
                           const char* desc = 0, size_t ncomps = 0)
 {
-    if(desc && ncomps != v.size())
+    if(desc && ncomps != a.size())
         AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
                             "wrong number of components for " << desc);
-    return *reinterpret_cast<const T*>(get(v));
+    return *reinterpret_cast<const T*>(a.begin());
 }
-
 
 } // anon. namespace
 
+/// Read in a renderman parameter list from the lexer.
+Ri::ParamList RibParser::readParamList(RibLexer& lex)
+{
+    m_paramListStorage.clear();
+    while(lex.peekNextType() != RibLexer::Tok_RequestEnd)
+    {
+        CqPrimvarToken tok;
+        tok = m_tokenDict.parseAndLookup(lex.getString());
+        switch(tok.storageType())
+        {
+            case type_integer:
+                m_paramListStorage.push_back(Ri::Param(tok, lex.getIntParam()));
+                break;
+            case type_float:
+                m_paramListStorage.push_back(Ri::Param(tok, lex.getFloatParam()));
+                break;
+            case type_string:
+                m_paramListStorage.push_back(Ri::Param(tok, lex.getStringParam()));
+                break;
+            case type_invalid:
+            default:
+                assert(0 && "Unknown storage type; we should never get here.");
+                break;
+        }
+    }
+    if(m_paramListStorage.empty())
+        return Ri::ParamList();
+    else
+        return Ri::ParamList(&m_paramListStorage[0], m_paramListStorage.size());
+}
 
-/// Retrieve a spline basis array from the parser
+
+/// Retrieve a spline basis array from the lexer
 ///
 /// A spline basis array can be specified in two ways in a RIB stream: as an
 /// array of 16 floats, or as a string indicating one of the standard bases.
 /// This function returns the appropriate basis array, translating the string
 /// representation into one of the standard bases if necessary.
 ///
-/// \param parser - read input from here.
+/// \param lex - read input from here.
 ///
-RtConstBasis& RibSema::getBasis(IqRibParser& parser) const
+RtConstBasis& RibParser::getBasis(RibLexer& lex) const
 {
-    switch(parser.peekNextType())
+    switch(lex.peekNextType())
     {
-        case IqRibParser::Tok_Array:
+        case RibLexer::Tok_Array:
             {
-                const IqRibParser::TqFloatArray& basis = parser.getFloatArray();
+                Ri::FloatArray basis = lex.getFloatArray();
                 if(basis.size() != 16)
                     AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
                         "basis array must be of length 16");
                 // Ugly, but should be safe except unless a compiler fails to
                 // lay out float[4][4] the same as float[16]
-                return *reinterpret_cast<RtConstBasis*>(get(basis));
+                return *reinterpret_cast<RtConstBasis*>(basis.begin());
             }
-        case IqRibParser::Tok_String:
+        case RibLexer::Tok_String:
             {
-                std::string name = parser.getString();
-                RtConstBasis* basis = m_renderer.GetBasis(name.c_str());
+                const char* name = lex.getString();
+                RtConstBasis* basis = m_renderer.GetBasis(name);
                 if(!basis)
                 {
                     AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
@@ -378,21 +323,19 @@ RtConstBasis& RibSema::getBasis(IqRibParser& parser) const
 //--------------------------------------------------
 // Hand-written handler implementations.  Mostly these are hard to autogenerate.
 
-
-void RibSema::handleVersion(IqRibParser& parser)
+void RibParser::handleVersion(RibLexer& lex)
 {
-    parser.getFloat();
+    lex.getFloat();
     // Don't do anything with the version number; just blunder on regardless.
     // Probably only worth supporting if Pixar started publishing new versions
     // of the standard again...
 }
 
-
-void RibSema::handleDeclare(IqRibParser& parser)
+void RibParser::handleDeclare(RibLexer& lex)
 {
-    // Collect arguments from parser.
-    StringHolder name = parser.getString();
-    StringHolder declaration = parser.getString();
+    // Collect arguments from lex.
+    const char* name = lex.getString();
+    const char* declaration = lex.getString();
 
     // TODO: Refactor so we don't need m_tokenDict.
     m_tokenDict.insert(CqPrimvarToken(declaration, name));
@@ -400,29 +343,29 @@ void RibSema::handleDeclare(IqRibParser& parser)
     m_renderer.Declare(name, declaration);
 }
 
-void RibSema::handleDepthOfField(IqRibParser& parser)
+void RibParser::handleDepthOfField(RibLexer& lex)
 {
-    if(parser.peekNextType() == IqRibParser::Tok_RequestEnd)
+    if(lex.peekNextType() == RibLexer::Tok_RequestEnd)
     {
         // If called without arguments, reset to the default pinhole camera.
         m_renderer.DepthOfField(FLT_MAX, FLT_MAX, FLT_MAX);
     }
     else
     {
-        // Collect arguments from parser.
-        RtFloat fstop = parser.getFloat();
-        RtFloat focallength = parser.getFloat();
-        RtFloat focaldistance = parser.getFloat();
+        // Collect arguments from lex.
+        RtFloat fstop = lex.getFloat();
+        RtFloat focallength = lex.getFloat();
+        RtFloat focaldistance = lex.getFloat();
 
         m_renderer.DepthOfField(fstop, focallength, focaldistance);
     }
 }
 
-void RibSema::handleColorSamples(IqRibParser& parser)
+void RibParser::handleColorSamples(RibLexer& lex)
 {
-    // Collect arguments from parser.
-    Ri::FloatArray nRGB = toRiArray(parser.getFloatArray());
-    Ri::FloatArray RGBn = toRiArray(parser.getFloatArray());
+    // Collect arguments from lex.
+    Ri::FloatArray nRGB = lex.getFloatArray();
+    Ri::FloatArray RGBn = lex.getFloatArray();
 
     m_renderer.ColorSamples(nRGB, RGBn);
     m_numColorComps = nRGB.size()/3;
@@ -434,30 +377,25 @@ void RibSema::handleColorSamples(IqRibParser& parser)
 /// code is consolidated in this function.
 ///
 /// \param lightSourceFunc - Interface function to LightSource or AreaLightSource
-/// \param parser - parser from which to read the arguments
+/// \param lex - lexer from which to read the arguments
 ///
-void RibSema::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
-                                       IqRibParser& parser)
+void RibParser::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
+                                         RibLexer& lex)
 {
-    // Collect arguments from parser.
-    StringHolder name = parser.getString();
+    // Collect arguments from lex.
+    const char* name = lex.getString();
 
     int sequencenumber = 0;
     // The RISpec says that lights are identified by a 'sequence number', but
     // string identifiers are also allowed in common implementations.
-    std::string lightName;
-    bool useLightName = false;
-    if(parser.peekNextType() == IqRibParser::Tok_String)
-    {
-        lightName = parser.getString();
-        useLightName = true;
-    }
+    const char* lightName = 0;
+    if(lex.peekNextType() == RibLexer::Tok_String)
+        lightName = lex.getString();
     else
-        sequencenumber = parser.getInt();
+        sequencenumber = lex.getInt();
 
     // Extract the parameter list
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
 
     // Call through to renderer
     RtLightHandle lightHandle = (m_renderer.*lightSourceFunc)(name, paramList);
@@ -465,31 +403,31 @@ void RibSema::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
     // associate handle with the sequence number/name.
     if(lightHandle)
     {
-        if(useLightName)
+        if(lightName)
             m_namedLightMap[lightName] = lightHandle;
         else
             m_lightMap[sequencenumber] = lightHandle;
     }
 }
 
-void RibSema::handleLightSource(IqRibParser& parser)
+void RibParser::handleLightSource(RibLexer& lex)
 {
-    handleLightSourceGeneral(&Ri::Renderer::LightSource, parser);
+    handleLightSourceGeneral(&Ri::Renderer::LightSource, lex);
 }
 
-void RibSema::handleAreaLightSource(IqRibParser& parser)
+void RibParser::handleAreaLightSource(RibLexer& lex)
 {
-    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, parser);
+    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, lex);
 }
 
-void RibSema::handleIlluminate(IqRibParser& parser)
+void RibParser::handleIlluminate(RibLexer& lex)
 {
-    // Collect arguments from parser.
+    // Collect arguments from lex.
     RtLightHandle lightHandle = 0;
-    if(parser.peekNextType() == IqRibParser::Tok_String)
+    if(lex.peekNextType() == RibLexer::Tok_String)
     {
         // Handle string light names
-        std::string name = parser.getString();
+        const char* name = lex.getString();
         NamedLightMap::const_iterator pos = m_namedLightMap.find(name);
         if(pos == m_namedLightMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
@@ -499,36 +437,35 @@ void RibSema::handleIlluminate(IqRibParser& parser)
     else
     {
         // Handle integer sequence numbers
-        int sequencenumber = parser.getInt();
+        int sequencenumber = lex.getInt();
         LightMap::const_iterator pos = m_lightMap.find(sequencenumber);
         if(pos == m_lightMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
                                 "undeclared light number " << sequencenumber);
         lightHandle = pos->second;
     }
-    RtInt onoff = parser.getInt();
+    RtInt onoff = lex.getInt();
 
     // Call through to renderer
     m_renderer.Illuminate(lightHandle, onoff);
 }
 
-void RibSema::handleSubdivisionMesh(IqRibParser& parser)
+void RibParser::handleSubdivisionMesh(RibLexer& lex)
 {
-    // Collect arguments from parser.
-    StringHolder scheme = parser.getString();
-    Ri::IntArray nvertices = toRiArray(parser.getIntArray());
-    Ri::IntArray vertices  = toRiArray(parser.getIntArray());
+    // Collect arguments from lex.
+    const char* scheme = lex.getString();
+    Ri::IntArray nvertices = lex.getIntArray();
+    Ri::IntArray vertices  = lex.getIntArray();
 
-    if(parser.peekNextType() == IqRibParser::Tok_Array)
+    if(lex.peekNextType() == RibLexer::Tok_Array)
     {
         // Handle the four optional arguments.
-        StringArrayHolder  tags      = parser.getStringArray();
-        Ri::IntArray   nargs     = toRiArray(parser.getIntArray());
-        Ri::IntArray   intargs   = toRiArray(parser.getIntArray());
-        Ri::FloatArray floatargs = toRiArray(parser.getFloatArray());
+        Ri::StringArray tags      = lex.getStringArray();
+        Ri::IntArray    nargs     = lex.getIntArray();
+        Ri::IntArray    intargs   = lex.getIntArray();
+        Ri::FloatArray  floatargs = lex.getFloatArray();
         // Extract parameter list
-        ParamAccumulator paramList(m_tokenDict);
-        parser.getParamList(paramList);
+        Ri::ParamList paramList = readParamList(lex);
         // Call through to renderer
         m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
                                    tags, nargs, intargs, floatargs,
@@ -538,12 +475,11 @@ void RibSema::handleSubdivisionMesh(IqRibParser& parser)
     {
         // Else call version with empty optional args.
         Ri::StringArray  tags;
-        Ri::IntArray          nargs;
-        Ri::IntArray          intargs;
-        Ri::FloatArray        floatargs;
+        Ri::IntArray     nargs;
+        Ri::IntArray     intargs;
+        Ri::FloatArray   floatargs;
         // Extract parameter list
-        ParamAccumulator paramList(m_tokenDict);
-        parser.getParamList(paramList);
+        Ri::ParamList paramList = readParamList(lex);
         // Call through to renderer
         m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
                                    tags, nargs, intargs, floatargs,
@@ -551,25 +487,24 @@ void RibSema::handleSubdivisionMesh(IqRibParser& parser)
     }
 }
 
-void RibSema::handleHyperboloid(IqRibParser& parser)
+void RibParser::handleHyperboloid(RibLexer& lex)
 {
     // Collect required args as an array
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(7);
+    Ri::FloatArray allArgs = lex.getFloatArray(7);
     RtConstPoint& point1 = *reinterpret_cast<RtConstPoint*>(&allArgs[0]);
     RtConstPoint& point2 = *reinterpret_cast<RtConstPoint*>(&allArgs[3]);
     RtFloat thetamax = allArgs[6];
     // Extract the parameter list
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     // Call through to renderer
     m_renderer.Hyperboloid(point1, point2, thetamax, paramList);
 }
 
-void RibSema::handleProcedural(IqRibParser& parser)
+void RibParser::handleProcedural(RibLexer& lex)
 {
     // get procedural subdivision function
-    std::string procName = parser.getString();
-    RtProcSubdivFunc subdivideFunc = m_renderer.GetProcSubdivFunc(procName.c_str());
+    const char* procName = lex.getString();
+    RtProcSubdivFunc subdivideFunc = m_renderer.GetProcSubdivFunc(procName);
     if(!subdivideFunc)
     {
         AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
@@ -577,7 +512,7 @@ void RibSema::handleProcedural(IqRibParser& parser)
     }
 
     // get argument string array.
-    const IqRibParser::TqStringArray& args = parser.getStringArray();
+    Ri::StringArray args = lex.getStringArray();
     // Convert the string array to something passable as data arguments to the
     // builtin procedurals.
     //
@@ -590,7 +525,7 @@ void RibSema::handleProcedural(IqRibParser& parser)
     for(TqInt i = 0; i < numArgs; ++i)
     {
         dataSize += sizeof(RtString);   // one pointer for this entry
-        dataSize += args[i].size() + 1; // and space for the string
+        dataSize += std::strlen(args[i]) + 1; // and space for the string
     }
     RtPointer procData = reinterpret_cast<RtPointer>(malloc(dataSize));
     RtString stringstart = reinterpret_cast<RtString>(
@@ -598,40 +533,40 @@ void RibSema::handleProcedural(IqRibParser& parser)
     for(TqInt i = 0; i < numArgs; ++i)
     {
         reinterpret_cast<RtString*>(procData)[i] = stringstart;
-        std::strcpy(stringstart, args[i].c_str());
-        stringstart += args[i].size() + 1;
+        std::strcpy(stringstart, args[i]);
+        stringstart += std::strlen(args[i]) + 1;
     }
 
     // get the procedural bound
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(parser.getFloatArray(),
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(),
                                                          "bound", 6);
 
     m_renderer.Procedural(procData, bound, subdivideFunc, m_renderer.GetProcFreeFunc());
 }
 
-void RibSema::handleObjectBegin(IqRibParser& parser)
+void RibParser::handleObjectBegin(RibLexer& lex)
 {
     // The RIB identifier is an integer according to the RISpec, but it's
     // common to also allow string identifiers, hence the branch here.
-    if(parser.peekNextType() == IqRibParser::Tok_String)
+    if(lex.peekNextType() == RibLexer::Tok_String)
     {
-        std::string lightName = parser.getString();
+        const char* lightName = lex.getString();
         if(RtObjectHandle handle = m_renderer.ObjectBegin())
             m_namedObjectMap[lightName] = handle;
     }
     else
     {
-        int sequenceNumber = parser.getInt();
+        int sequenceNumber = lex.getInt();
         if(RtObjectHandle handle = m_renderer.ObjectBegin())
             m_objectMap[sequenceNumber] = handle;
     }
 }
 
-void RibSema::handleObjectInstance(IqRibParser& parser)
+void RibParser::handleObjectInstance(RibLexer& lex)
 {
-    if(parser.peekNextType() == IqRibParser::Tok_String)
+    if(lex.peekNextType() == RibLexer::Tok_String)
     {
-        std::string name = parser.getString();
+        const char* name = lex.getString();
         NamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);
         if(pos == m_namedObjectMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
@@ -640,7 +575,7 @@ void RibSema::handleObjectInstance(IqRibParser& parser)
     }
     else
     {
-        int sequencenumber = parser.getInt();
+        int sequencenumber = lex.getInt();
         ObjectMap::const_iterator pos = m_objectMap.find(sequencenumber);
         if(pos == m_objectMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
@@ -660,25 +595,25 @@ from Cheetah.Template import Template
 
 riXml = parseXmlTree('ri.xml')
 
-# Map from RI types to strings which retrieve the value from the parser
+# Map from RI types to strings which retrieve the value from the lexer
 getterStatements = {
-    'RtBoolean':     'RtInt %s = parser.getInt();',
-    'RtInt':         'RtInt %s = parser.getInt();',
-    'RtIntArray':    'Ri::IntArray %s = toRiArray(parser.getIntArray());',
-    'RtFloat':       'RtFloat %s = parser.getFloat();',
-    'RtFloatArray':  'Ri::FloatArray %s = toRiArray(parser.getFloatArray());',
-    'RtString':      'StringHolder %s = parser.getString();',
-    'RtStringArray': 'StringArrayHolder %s = parser.getStringArray();',
-    'RtToken':       'StringHolder %s = parser.getString();',
-    'RtTokenArray':  'StringArrayHolder %s = parser.getStringArray();',
-    'RtColor':       'RtConstColor& %s = toFloatBasedType<RtConstColor>(parser.getFloatArray(m_numColorComps));',
-    'RtPoint':       'RtConstPoint& %s = toFloatBasedType<RtConstPoint>(parser.getFloatArray(), "Point", 3);',
-    'RtMatrix':      'RtConstMatrix& %s = toFloatBasedType<RtConstMatrix>(parser.getFloatArray(), "Matrix", 16);',
-    'RtBound':       'RtConstBound& %s = toFloatBasedType<RtConstBound>(parser.getFloatArray(6));',
-    'RtFilterFunc':  'RtFilterFunc %s = m_renderer.GetFilterFunc(parser.getString().c_str());',
+    'RtBoolean':     'RtInt %s = lex.getInt();',
+    'RtInt':         'RtInt %s = lex.getInt();',
+    'RtIntArray':    'Ri::IntArray %s = lex.getIntArray();',
+    'RtFloat':       'RtFloat %s = lex.getFloat();',
+    'RtFloatArray':  'Ri::FloatArray %s = lex.getFloatArray();',
+    'RtString':      'const char* %s = lex.getString();',
+    'RtStringArray': 'Ri::StringArray %s = lex.getStringArray();',
+    'RtToken':       'const char* %s = lex.getString();',
+    'RtTokenArray':  'Ri::StringArray %s = lex.getStringArray();',
+    'RtColor':       'RtConstColor& %s = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));',
+    'RtPoint':       'RtConstPoint& %s = toFloatBasedType<RtConstPoint>(lex.getFloatArray(), "Point", 3);',
+    'RtMatrix':      'RtConstMatrix& %s = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);',
+    'RtBound':       'RtConstBound& %s = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));',
+    'RtFilterFunc':  'RtFilterFunc %s = m_renderer.GetFilterFunc(lex.getString());',
     'RtArchiveCallback': 'RtArchiveCallback %s = 0;',
-    'RtErrorFunc':   'RtErrorFunc %s = m_renderer.GetErrorFunc(parser.getString().c_str());',
-    'RtBasis':       'RtConstBasis& %s = getBasis(parser);',
+    'RtErrorFunc':   'RtErrorFunc %s = m_renderer.GetErrorFunc(lex.getString());',
+    'RtBasis':       'RtConstBasis& %s = getBasis(lex);',
 }
 
 customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
@@ -694,24 +629,23 @@ handlerTemplate = '''
     #set $procName = $proc.findtext('Name')
     #set $args = filter(lambda a: not a.haschild('RibValue'), $proc.findall('Arguments/Argument'))
     ## 
-void RibSema::handle${procName}(IqRibParser& parser)
+void RibParser::handle${procName}(RibLexer& lex)
 {
     #if $proc.haschild('Arguments/RibArgsCanBeArray')
     ## Collect all args as an array
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(${len($args)});
+    Ri::FloatArray allArgs = lex.getFloatArray(${len($args)});
         #for $i, $arg in enumerate($args)
     RtFloat $arg.findtext('Name') = allArgs[$i];
         #end for
     #else
-    ## Collect individual arguments from parser
+    ## Collect individual arguments from lexer
         #for $arg in $args
     ${getterStatements[$arg.findtext('Type')] % ($arg.findtext('Name'),)}
         #end for
     #end if
     #if $proc.haschild('Arguments/ParamList')
     ## Extract parameter list
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     #end if
     ## Construct the argument list to the C++ interface binding call.
     #set $argList = []
@@ -731,66 +665,66 @@ cog.out(str(Template(handlerTemplate, searchList=locals())));
 
 ]]]*/
 
-void RibSema::handleFrameBegin(IqRibParser& parser)
+void RibParser::handleFrameBegin(RibLexer& lex)
 {
-    RtInt number = parser.getInt();
+    RtInt number = lex.getInt();
     m_renderer.FrameBegin(number);
 }
 
-void RibSema::handleFrameEnd(IqRibParser& parser)
+void RibParser::handleFrameEnd(RibLexer& lex)
 {
     m_renderer.FrameEnd();
 }
 
-void RibSema::handleWorldBegin(IqRibParser& parser)
+void RibParser::handleWorldBegin(RibLexer& lex)
 {
     m_renderer.WorldBegin();
 }
 
-void RibSema::handleWorldEnd(IqRibParser& parser)
+void RibParser::handleWorldEnd(RibLexer& lex)
 {
     m_renderer.WorldEnd();
 }
 
-void RibSema::handleIfBegin(IqRibParser& parser)
+void RibParser::handleIfBegin(RibLexer& lex)
 {
-    StringHolder condition = parser.getString();
+    const char* condition = lex.getString();
     m_renderer.IfBegin(condition);
 }
 
-void RibSema::handleElseIf(IqRibParser& parser)
+void RibParser::handleElseIf(RibLexer& lex)
 {
-    StringHolder condition = parser.getString();
+    const char* condition = lex.getString();
     m_renderer.ElseIf(condition);
 }
 
-void RibSema::handleElse(IqRibParser& parser)
+void RibParser::handleElse(RibLexer& lex)
 {
     m_renderer.Else();
 }
 
-void RibSema::handleIfEnd(IqRibParser& parser)
+void RibParser::handleIfEnd(RibLexer& lex)
 {
     m_renderer.IfEnd();
 }
 
-void RibSema::handleFormat(IqRibParser& parser)
+void RibParser::handleFormat(RibLexer& lex)
 {
-    RtInt xresolution = parser.getInt();
-    RtInt yresolution = parser.getInt();
-    RtFloat pixelaspectratio = parser.getFloat();
+    RtInt xresolution = lex.getInt();
+    RtInt yresolution = lex.getInt();
+    RtFloat pixelaspectratio = lex.getFloat();
     m_renderer.Format(xresolution, yresolution, pixelaspectratio);
 }
 
-void RibSema::handleFrameAspectRatio(IqRibParser& parser)
+void RibParser::handleFrameAspectRatio(RibLexer& lex)
 {
-    RtFloat frameratio = parser.getFloat();
+    RtFloat frameratio = lex.getFloat();
     m_renderer.FrameAspectRatio(frameratio);
 }
 
-void RibSema::handleScreenWindow(IqRibParser& parser)
+void RibParser::handleScreenWindow(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat left = allArgs[0];
     RtFloat right = allArgs[1];
     RtFloat bottom = allArgs[2];
@@ -798,9 +732,9 @@ void RibSema::handleScreenWindow(IqRibParser& parser)
     m_renderer.ScreenWindow(left, right, bottom, top);
 }
 
-void RibSema::handleCropWindow(IqRibParser& parser)
+void RibParser::handleCropWindow(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat xmin = allArgs[0];
     RtFloat xmax = allArgs[1];
     RtFloat ymin = allArgs[2];
@@ -808,142 +742,137 @@ void RibSema::handleCropWindow(IqRibParser& parser)
     m_renderer.CropWindow(xmin, xmax, ymin, ymax);
 }
 
-void RibSema::handleProjection(IqRibParser& parser)
+void RibParser::handleProjection(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Projection(name, paramList);
 }
 
-void RibSema::handleClipping(IqRibParser& parser)
+void RibParser::handleClipping(RibLexer& lex)
 {
-    RtFloat cnear = parser.getFloat();
-    RtFloat cfar = parser.getFloat();
+    RtFloat cnear = lex.getFloat();
+    RtFloat cfar = lex.getFloat();
     m_renderer.Clipping(cnear, cfar);
 }
 
-void RibSema::handleClippingPlane(IqRibParser& parser)
+void RibParser::handleClippingPlane(RibLexer& lex)
 {
-    RtFloat x = parser.getFloat();
-    RtFloat y = parser.getFloat();
-    RtFloat z = parser.getFloat();
-    RtFloat nx = parser.getFloat();
-    RtFloat ny = parser.getFloat();
-    RtFloat nz = parser.getFloat();
+    RtFloat x = lex.getFloat();
+    RtFloat y = lex.getFloat();
+    RtFloat z = lex.getFloat();
+    RtFloat nx = lex.getFloat();
+    RtFloat ny = lex.getFloat();
+    RtFloat nz = lex.getFloat();
     m_renderer.ClippingPlane(x, y, z, nx, ny, nz);
 }
 
-void RibSema::handleShutter(IqRibParser& parser)
+void RibParser::handleShutter(RibLexer& lex)
 {
-    RtFloat opentime = parser.getFloat();
-    RtFloat closetime = parser.getFloat();
+    RtFloat opentime = lex.getFloat();
+    RtFloat closetime = lex.getFloat();
     m_renderer.Shutter(opentime, closetime);
 }
 
-void RibSema::handlePixelVariance(IqRibParser& parser)
+void RibParser::handlePixelVariance(RibLexer& lex)
 {
-    RtFloat variance = parser.getFloat();
+    RtFloat variance = lex.getFloat();
     m_renderer.PixelVariance(variance);
 }
 
-void RibSema::handlePixelSamples(IqRibParser& parser)
+void RibParser::handlePixelSamples(RibLexer& lex)
 {
-    RtFloat xsamples = parser.getFloat();
-    RtFloat ysamples = parser.getFloat();
+    RtFloat xsamples = lex.getFloat();
+    RtFloat ysamples = lex.getFloat();
     m_renderer.PixelSamples(xsamples, ysamples);
 }
 
-void RibSema::handlePixelFilter(IqRibParser& parser)
+void RibParser::handlePixelFilter(RibLexer& lex)
 {
-    RtFilterFunc function = m_renderer.GetFilterFunc(parser.getString().c_str());
-    RtFloat xwidth = parser.getFloat();
-    RtFloat ywidth = parser.getFloat();
+    RtFilterFunc function = m_renderer.GetFilterFunc(lex.getString());
+    RtFloat xwidth = lex.getFloat();
+    RtFloat ywidth = lex.getFloat();
     m_renderer.PixelFilter(function, xwidth, ywidth);
 }
 
-void RibSema::handleExposure(IqRibParser& parser)
+void RibParser::handleExposure(RibLexer& lex)
 {
-    RtFloat gain = parser.getFloat();
-    RtFloat gamma = parser.getFloat();
+    RtFloat gain = lex.getFloat();
+    RtFloat gamma = lex.getFloat();
     m_renderer.Exposure(gain, gamma);
 }
 
-void RibSema::handleImager(IqRibParser& parser)
+void RibParser::handleImager(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Imager(name, paramList);
 }
 
-void RibSema::handleQuantize(IqRibParser& parser)
+void RibParser::handleQuantize(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    RtInt one = parser.getInt();
-    RtInt min = parser.getInt();
-    RtInt max = parser.getInt();
-    RtFloat ditheramplitude = parser.getFloat();
+    const char* type = lex.getString();
+    RtInt one = lex.getInt();
+    RtInt min = lex.getInt();
+    RtInt max = lex.getInt();
+    RtFloat ditheramplitude = lex.getFloat();
     m_renderer.Quantize(type, one, min, max, ditheramplitude);
 }
 
-void RibSema::handleDisplay(IqRibParser& parser)
+void RibParser::handleDisplay(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    StringHolder type = parser.getString();
-    StringHolder mode = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    const char* type = lex.getString();
+    const char* mode = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Display(name, type, mode, paramList);
 }
 
-void RibSema::handleHider(IqRibParser& parser)
+void RibParser::handleHider(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Hider(name, paramList);
 }
 
-void RibSema::handleRelativeDetail(IqRibParser& parser)
+void RibParser::handleRelativeDetail(RibLexer& lex)
 {
-    RtFloat relativedetail = parser.getFloat();
+    RtFloat relativedetail = lex.getFloat();
     m_renderer.RelativeDetail(relativedetail);
 }
 
-void RibSema::handleOption(IqRibParser& parser)
+void RibParser::handleOption(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Option(name, paramList);
 }
 
-void RibSema::handleAttributeBegin(IqRibParser& parser)
+void RibParser::handleAttributeBegin(RibLexer& lex)
 {
     m_renderer.AttributeBegin();
 }
 
-void RibSema::handleAttributeEnd(IqRibParser& parser)
+void RibParser::handleAttributeEnd(RibLexer& lex)
 {
     m_renderer.AttributeEnd();
 }
 
-void RibSema::handleColor(IqRibParser& parser)
+void RibParser::handleColor(RibLexer& lex)
 {
-    RtConstColor& Cq = toFloatBasedType<RtConstColor>(parser.getFloatArray(m_numColorComps));
+    RtConstColor& Cq = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));
     m_renderer.Color(Cq);
 }
 
-void RibSema::handleOpacity(IqRibParser& parser)
+void RibParser::handleOpacity(RibLexer& lex)
 {
-    RtConstColor& Os = toFloatBasedType<RtConstColor>(parser.getFloatArray(m_numColorComps));
+    RtConstColor& Os = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));
     m_renderer.Opacity(Os);
 }
 
-void RibSema::handleTextureCoordinates(IqRibParser& parser)
+void RibParser::handleTextureCoordinates(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(8);
+    Ri::FloatArray allArgs = lex.getFloatArray(8);
     RtFloat s1 = allArgs[0];
     RtFloat t1 = allArgs[1];
     RtFloat s2 = allArgs[2];
@@ -955,99 +884,93 @@ void RibSema::handleTextureCoordinates(IqRibParser& parser)
     m_renderer.TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
 }
 
-void RibSema::handleSurface(IqRibParser& parser)
+void RibParser::handleSurface(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Surface(name, paramList);
 }
 
-void RibSema::handleDisplacement(IqRibParser& parser)
+void RibParser::handleDisplacement(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Displacement(name, paramList);
 }
 
-void RibSema::handleAtmosphere(IqRibParser& parser)
+void RibParser::handleAtmosphere(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Atmosphere(name, paramList);
 }
 
-void RibSema::handleInterior(IqRibParser& parser)
+void RibParser::handleInterior(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Interior(name, paramList);
 }
 
-void RibSema::handleExterior(IqRibParser& parser)
+void RibParser::handleExterior(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Exterior(name, paramList);
 }
 
-void RibSema::handleShaderLayer(IqRibParser& parser)
+void RibParser::handleShaderLayer(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    StringHolder name = parser.getString();
-    StringHolder layername = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* type = lex.getString();
+    const char* name = lex.getString();
+    const char* layername = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.ShaderLayer(type, name, layername, paramList);
 }
 
-void RibSema::handleConnectShaderLayers(IqRibParser& parser)
+void RibParser::handleConnectShaderLayers(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    StringHolder layer1 = parser.getString();
-    StringHolder variable1 = parser.getString();
-    StringHolder layer2 = parser.getString();
-    StringHolder variable2 = parser.getString();
+    const char* type = lex.getString();
+    const char* layer1 = lex.getString();
+    const char* variable1 = lex.getString();
+    const char* layer2 = lex.getString();
+    const char* variable2 = lex.getString();
     m_renderer.ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
 }
 
-void RibSema::handleShadingRate(IqRibParser& parser)
+void RibParser::handleShadingRate(RibLexer& lex)
 {
-    RtFloat size = parser.getFloat();
+    RtFloat size = lex.getFloat();
     m_renderer.ShadingRate(size);
 }
 
-void RibSema::handleShadingInterpolation(IqRibParser& parser)
+void RibParser::handleShadingInterpolation(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
+    const char* type = lex.getString();
     m_renderer.ShadingInterpolation(type);
 }
 
-void RibSema::handleMatte(IqRibParser& parser)
+void RibParser::handleMatte(RibLexer& lex)
 {
-    RtInt onoff = parser.getInt();
+    RtInt onoff = lex.getInt();
     m_renderer.Matte(onoff);
 }
 
-void RibSema::handleBound(IqRibParser& parser)
+void RibParser::handleBound(RibLexer& lex)
 {
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(parser.getFloatArray(6));
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));
     m_renderer.Bound(bound);
 }
 
-void RibSema::handleDetail(IqRibParser& parser)
+void RibParser::handleDetail(RibLexer& lex)
 {
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(parser.getFloatArray(6));
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));
     m_renderer.Detail(bound);
 }
 
-void RibSema::handleDetailRange(IqRibParser& parser)
+void RibParser::handleDetailRange(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat offlow = allArgs[0];
     RtFloat onlow = allArgs[1];
     RtFloat onhigh = allArgs[2];
@@ -1055,81 +978,81 @@ void RibSema::handleDetailRange(IqRibParser& parser)
     m_renderer.DetailRange(offlow, onlow, onhigh, offhigh);
 }
 
-void RibSema::handleGeometricApproximation(IqRibParser& parser)
+void RibParser::handleGeometricApproximation(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    RtFloat value = parser.getFloat();
+    const char* type = lex.getString();
+    RtFloat value = lex.getFloat();
     m_renderer.GeometricApproximation(type, value);
 }
 
-void RibSema::handleOrientation(IqRibParser& parser)
+void RibParser::handleOrientation(RibLexer& lex)
 {
-    StringHolder orientation = parser.getString();
+    const char* orientation = lex.getString();
     m_renderer.Orientation(orientation);
 }
 
-void RibSema::handleReverseOrientation(IqRibParser& parser)
+void RibParser::handleReverseOrientation(RibLexer& lex)
 {
     m_renderer.ReverseOrientation();
 }
 
-void RibSema::handleSides(IqRibParser& parser)
+void RibParser::handleSides(RibLexer& lex)
 {
-    RtInt nsides = parser.getInt();
+    RtInt nsides = lex.getInt();
     m_renderer.Sides(nsides);
 }
 
-void RibSema::handleIdentity(IqRibParser& parser)
+void RibParser::handleIdentity(RibLexer& lex)
 {
     m_renderer.Identity();
 }
 
-void RibSema::handleTransform(IqRibParser& parser)
+void RibParser::handleTransform(RibLexer& lex)
 {
-    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(parser.getFloatArray(), "Matrix", 16);
+    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);
     m_renderer.Transform(transform);
 }
 
-void RibSema::handleConcatTransform(IqRibParser& parser)
+void RibParser::handleConcatTransform(RibLexer& lex)
 {
-    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(parser.getFloatArray(), "Matrix", 16);
+    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);
     m_renderer.ConcatTransform(transform);
 }
 
-void RibSema::handlePerspective(IqRibParser& parser)
+void RibParser::handlePerspective(RibLexer& lex)
 {
-    RtFloat fov = parser.getFloat();
+    RtFloat fov = lex.getFloat();
     m_renderer.Perspective(fov);
 }
 
-void RibSema::handleTranslate(IqRibParser& parser)
+void RibParser::handleTranslate(RibLexer& lex)
 {
-    RtFloat dx = parser.getFloat();
-    RtFloat dy = parser.getFloat();
-    RtFloat dz = parser.getFloat();
+    RtFloat dx = lex.getFloat();
+    RtFloat dy = lex.getFloat();
+    RtFloat dz = lex.getFloat();
     m_renderer.Translate(dx, dy, dz);
 }
 
-void RibSema::handleRotate(IqRibParser& parser)
+void RibParser::handleRotate(RibLexer& lex)
 {
-    RtFloat angle = parser.getFloat();
-    RtFloat dx = parser.getFloat();
-    RtFloat dy = parser.getFloat();
-    RtFloat dz = parser.getFloat();
+    RtFloat angle = lex.getFloat();
+    RtFloat dx = lex.getFloat();
+    RtFloat dy = lex.getFloat();
+    RtFloat dz = lex.getFloat();
     m_renderer.Rotate(angle, dx, dy, dz);
 }
 
-void RibSema::handleScale(IqRibParser& parser)
+void RibParser::handleScale(RibLexer& lex)
 {
-    RtFloat sx = parser.getFloat();
-    RtFloat sy = parser.getFloat();
-    RtFloat sz = parser.getFloat();
+    RtFloat sx = lex.getFloat();
+    RtFloat sy = lex.getFloat();
+    RtFloat sz = lex.getFloat();
     m_renderer.Scale(sx, sy, sz);
 }
 
-void RibSema::handleSkew(IqRibParser& parser)
+void RibParser::handleSkew(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(7);
+    Ri::FloatArray allArgs = lex.getFloatArray(7);
     RtFloat angle = allArgs[0];
     RtFloat dx1 = allArgs[1];
     RtFloat dy1 = allArgs[2];
@@ -1140,357 +1063,332 @@ void RibSema::handleSkew(IqRibParser& parser)
     m_renderer.Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
 }
 
-void RibSema::handleCoordinateSystem(IqRibParser& parser)
+void RibParser::handleCoordinateSystem(RibLexer& lex)
 {
-    StringHolder space = parser.getString();
+    const char* space = lex.getString();
     m_renderer.CoordinateSystem(space);
 }
 
-void RibSema::handleCoordSysTransform(IqRibParser& parser)
+void RibParser::handleCoordSysTransform(RibLexer& lex)
 {
-    StringHolder space = parser.getString();
+    const char* space = lex.getString();
     m_renderer.CoordSysTransform(space);
 }
 
-void RibSema::handleTransformBegin(IqRibParser& parser)
+void RibParser::handleTransformBegin(RibLexer& lex)
 {
     m_renderer.TransformBegin();
 }
 
-void RibSema::handleTransformEnd(IqRibParser& parser)
+void RibParser::handleTransformEnd(RibLexer& lex)
 {
     m_renderer.TransformEnd();
 }
 
-void RibSema::handleResource(IqRibParser& parser)
+void RibParser::handleResource(RibLexer& lex)
 {
-    StringHolder handle = parser.getString();
-    StringHolder type = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* handle = lex.getString();
+    const char* type = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Resource(handle, type, paramList);
 }
 
-void RibSema::handleResourceBegin(IqRibParser& parser)
+void RibParser::handleResourceBegin(RibLexer& lex)
 {
     m_renderer.ResourceBegin();
 }
 
-void RibSema::handleResourceEnd(IqRibParser& parser)
+void RibParser::handleResourceEnd(RibLexer& lex)
 {
     m_renderer.ResourceEnd();
 }
 
-void RibSema::handleAttribute(IqRibParser& parser)
+void RibParser::handleAttribute(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* name = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Attribute(name, paramList);
 }
 
-void RibSema::handlePolygon(IqRibParser& parser)
+void RibParser::handlePolygon(RibLexer& lex)
 {
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Polygon(paramList);
 }
 
-void RibSema::handleGeneralPolygon(IqRibParser& parser)
+void RibParser::handleGeneralPolygon(RibLexer& lex)
 {
-    Ri::IntArray nverts = toRiArray(parser.getIntArray());
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::IntArray nverts = lex.getIntArray();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.GeneralPolygon(nverts, paramList);
 }
 
-void RibSema::handlePointsPolygons(IqRibParser& parser)
+void RibParser::handlePointsPolygons(RibLexer& lex)
 {
-    Ri::IntArray nverts = toRiArray(parser.getIntArray());
-    Ri::IntArray verts = toRiArray(parser.getIntArray());
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::IntArray nverts = lex.getIntArray();
+    Ri::IntArray verts = lex.getIntArray();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.PointsPolygons(nverts, verts, paramList);
 }
 
-void RibSema::handlePointsGeneralPolygons(IqRibParser& parser)
+void RibParser::handlePointsGeneralPolygons(RibLexer& lex)
 {
-    Ri::IntArray nloops = toRiArray(parser.getIntArray());
-    Ri::IntArray nverts = toRiArray(parser.getIntArray());
-    Ri::IntArray verts = toRiArray(parser.getIntArray());
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::IntArray nloops = lex.getIntArray();
+    Ri::IntArray nverts = lex.getIntArray();
+    Ri::IntArray verts = lex.getIntArray();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.PointsGeneralPolygons(nloops, nverts, verts, paramList);
 }
 
-void RibSema::handleBasis(IqRibParser& parser)
+void RibParser::handleBasis(RibLexer& lex)
 {
-    RtConstBasis& ubasis = getBasis(parser);
-    RtInt ustep = parser.getInt();
-    RtConstBasis& vbasis = getBasis(parser);
-    RtInt vstep = parser.getInt();
+    RtConstBasis& ubasis = getBasis(lex);
+    RtInt ustep = lex.getInt();
+    RtConstBasis& vbasis = getBasis(lex);
+    RtInt vstep = lex.getInt();
     m_renderer.Basis(ubasis, ustep, vbasis, vstep);
 }
 
-void RibSema::handlePatch(IqRibParser& parser)
+void RibParser::handlePatch(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* type = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Patch(type, paramList);
 }
 
-void RibSema::handlePatchMesh(IqRibParser& parser)
+void RibParser::handlePatchMesh(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    RtInt nu = parser.getInt();
-    StringHolder uwrap = parser.getString();
-    RtInt nv = parser.getInt();
-    StringHolder vwrap = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* type = lex.getString();
+    RtInt nu = lex.getInt();
+    const char* uwrap = lex.getString();
+    RtInt nv = lex.getInt();
+    const char* vwrap = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.PatchMesh(type, nu, uwrap, nv, vwrap, paramList);
 }
 
-void RibSema::handleNuPatch(IqRibParser& parser)
+void RibParser::handleNuPatch(RibLexer& lex)
 {
-    RtInt nu = parser.getInt();
-    RtInt uorder = parser.getInt();
-    Ri::FloatArray uknot = toRiArray(parser.getFloatArray());
-    RtFloat umin = parser.getFloat();
-    RtFloat umax = parser.getFloat();
-    RtInt nv = parser.getInt();
-    RtInt vorder = parser.getInt();
-    Ri::FloatArray vknot = toRiArray(parser.getFloatArray());
-    RtFloat vmin = parser.getFloat();
-    RtFloat vmax = parser.getFloat();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    RtInt nu = lex.getInt();
+    RtInt uorder = lex.getInt();
+    Ri::FloatArray uknot = lex.getFloatArray();
+    RtFloat umin = lex.getFloat();
+    RtFloat umax = lex.getFloat();
+    RtInt nv = lex.getInt();
+    RtInt vorder = lex.getInt();
+    Ri::FloatArray vknot = lex.getFloatArray();
+    RtFloat vmin = lex.getFloat();
+    RtFloat vmax = lex.getFloat();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, paramList);
 }
 
-void RibSema::handleTrimCurve(IqRibParser& parser)
+void RibParser::handleTrimCurve(RibLexer& lex)
 {
-    Ri::IntArray ncurves = toRiArray(parser.getIntArray());
-    Ri::IntArray order = toRiArray(parser.getIntArray());
-    Ri::FloatArray knot = toRiArray(parser.getFloatArray());
-    Ri::FloatArray min = toRiArray(parser.getFloatArray());
-    Ri::FloatArray max = toRiArray(parser.getFloatArray());
-    Ri::IntArray n = toRiArray(parser.getIntArray());
-    Ri::FloatArray u = toRiArray(parser.getFloatArray());
-    Ri::FloatArray v = toRiArray(parser.getFloatArray());
-    Ri::FloatArray w = toRiArray(parser.getFloatArray());
+    Ri::IntArray ncurves = lex.getIntArray();
+    Ri::IntArray order = lex.getIntArray();
+    Ri::FloatArray knot = lex.getFloatArray();
+    Ri::FloatArray min = lex.getFloatArray();
+    Ri::FloatArray max = lex.getFloatArray();
+    Ri::IntArray n = lex.getIntArray();
+    Ri::FloatArray u = lex.getFloatArray();
+    Ri::FloatArray v = lex.getFloatArray();
+    Ri::FloatArray w = lex.getFloatArray();
     m_renderer.TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
-void RibSema::handleSphere(IqRibParser& parser)
+void RibParser::handleSphere(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat radius = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Sphere(radius, zmin, zmax, thetamax, paramList);
 }
 
-void RibSema::handleCone(IqRibParser& parser)
+void RibParser::handleCone(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(3);
+    Ri::FloatArray allArgs = lex.getFloatArray(3);
     RtFloat height = allArgs[0];
     RtFloat radius = allArgs[1];
     RtFloat thetamax = allArgs[2];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Cone(height, radius, thetamax, paramList);
 }
 
-void RibSema::handleCylinder(IqRibParser& parser)
+void RibParser::handleCylinder(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat radius = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Cylinder(radius, zmin, zmax, thetamax, paramList);
 }
 
-void RibSema::handleParaboloid(IqRibParser& parser)
+void RibParser::handleParaboloid(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(4);
+    Ri::FloatArray allArgs = lex.getFloatArray(4);
     RtFloat rmax = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Paraboloid(rmax, zmin, zmax, thetamax, paramList);
 }
 
-void RibSema::handleDisk(IqRibParser& parser)
+void RibParser::handleDisk(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(3);
+    Ri::FloatArray allArgs = lex.getFloatArray(3);
     RtFloat height = allArgs[0];
     RtFloat radius = allArgs[1];
     RtFloat thetamax = allArgs[2];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Disk(height, radius, thetamax, paramList);
 }
 
-void RibSema::handleTorus(IqRibParser& parser)
+void RibParser::handleTorus(RibLexer& lex)
 {
-    const IqRibParser::TqFloatArray& allArgs = parser.getFloatArray(5);
+    Ri::FloatArray allArgs = lex.getFloatArray(5);
     RtFloat majorrad = allArgs[0];
     RtFloat minorrad = allArgs[1];
     RtFloat phimin = allArgs[2];
     RtFloat phimax = allArgs[3];
     RtFloat thetamax = allArgs[4];
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Torus(majorrad, minorrad, phimin, phimax, thetamax, paramList);
 }
 
-void RibSema::handlePoints(IqRibParser& parser)
+void RibParser::handlePoints(RibLexer& lex)
 {
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Points(paramList);
 }
 
-void RibSema::handleCurves(IqRibParser& parser)
+void RibParser::handleCurves(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    Ri::IntArray nvertices = toRiArray(parser.getIntArray());
-    StringHolder wrap = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* type = lex.getString();
+    Ri::IntArray nvertices = lex.getIntArray();
+    const char* wrap = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Curves(type, nvertices, wrap, paramList);
 }
 
-void RibSema::handleBlobby(IqRibParser& parser)
+void RibParser::handleBlobby(RibLexer& lex)
 {
-    RtInt nleaf = parser.getInt();
-    Ri::IntArray code = toRiArray(parser.getIntArray());
-    Ri::FloatArray flt = toRiArray(parser.getFloatArray());
-    StringArrayHolder str = parser.getStringArray();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    RtInt nleaf = lex.getInt();
+    Ri::IntArray code = lex.getIntArray();
+    Ri::FloatArray flt = lex.getFloatArray();
+    Ri::StringArray str = lex.getStringArray();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Blobby(nleaf, code, flt, str, paramList);
 }
 
-void RibSema::handleGeometry(IqRibParser& parser)
+void RibParser::handleGeometry(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* type = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.Geometry(type, paramList);
 }
 
-void RibSema::handleSolidBegin(IqRibParser& parser)
+void RibParser::handleSolidBegin(RibLexer& lex)
 {
-    StringHolder type = parser.getString();
+    const char* type = lex.getString();
     m_renderer.SolidBegin(type);
 }
 
-void RibSema::handleSolidEnd(IqRibParser& parser)
+void RibParser::handleSolidEnd(RibLexer& lex)
 {
     m_renderer.SolidEnd();
 }
 
-void RibSema::handleObjectEnd(IqRibParser& parser)
+void RibParser::handleObjectEnd(RibLexer& lex)
 {
     m_renderer.ObjectEnd();
 }
 
-void RibSema::handleMotionBegin(IqRibParser& parser)
+void RibParser::handleMotionBegin(RibLexer& lex)
 {
-    Ri::FloatArray times = toRiArray(parser.getFloatArray());
+    Ri::FloatArray times = lex.getFloatArray();
     m_renderer.MotionBegin(times);
 }
 
-void RibSema::handleMotionEnd(IqRibParser& parser)
+void RibParser::handleMotionEnd(RibLexer& lex)
 {
     m_renderer.MotionEnd();
 }
 
-void RibSema::handleMakeTexture(IqRibParser& parser)
+void RibParser::handleMakeTexture(RibLexer& lex)
 {
-    StringHolder imagefile = parser.getString();
-    StringHolder texturefile = parser.getString();
-    StringHolder swrap = parser.getString();
-    StringHolder twrap = parser.getString();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(parser.getString().c_str());
-    RtFloat swidth = parser.getFloat();
-    RtFloat twidth = parser.getFloat();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* imagefile = lex.getString();
+    const char* texturefile = lex.getString();
+    const char* swrap = lex.getString();
+    const char* twrap = lex.getString();
+    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
+    RtFloat swidth = lex.getFloat();
+    RtFloat twidth = lex.getFloat();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, paramList);
 }
 
-void RibSema::handleMakeLatLongEnvironment(IqRibParser& parser)
+void RibParser::handleMakeLatLongEnvironment(RibLexer& lex)
 {
-    StringHolder imagefile = parser.getString();
-    StringHolder reflfile = parser.getString();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(parser.getString().c_str());
-    RtFloat swidth = parser.getFloat();
-    RtFloat twidth = parser.getFloat();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* imagefile = lex.getString();
+    const char* reflfile = lex.getString();
+    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
+    RtFloat swidth = lex.getFloat();
+    RtFloat twidth = lex.getFloat();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, paramList);
 }
 
-void RibSema::handleMakeCubeFaceEnvironment(IqRibParser& parser)
+void RibParser::handleMakeCubeFaceEnvironment(RibLexer& lex)
 {
-    StringHolder px = parser.getString();
-    StringHolder nx = parser.getString();
-    StringHolder py = parser.getString();
-    StringHolder ny = parser.getString();
-    StringHolder pz = parser.getString();
-    StringHolder nz = parser.getString();
-    StringHolder reflfile = parser.getString();
-    RtFloat fov = parser.getFloat();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(parser.getString().c_str());
-    RtFloat swidth = parser.getFloat();
-    RtFloat twidth = parser.getFloat();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* px = lex.getString();
+    const char* nx = lex.getString();
+    const char* py = lex.getString();
+    const char* ny = lex.getString();
+    const char* pz = lex.getString();
+    const char* nz = lex.getString();
+    const char* reflfile = lex.getString();
+    RtFloat fov = lex.getFloat();
+    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
+    RtFloat swidth = lex.getFloat();
+    RtFloat twidth = lex.getFloat();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, paramList);
 }
 
-void RibSema::handleMakeShadow(IqRibParser& parser)
+void RibParser::handleMakeShadow(RibLexer& lex)
 {
-    StringHolder picfile = parser.getString();
-    StringHolder shadowfile = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    const char* picfile = lex.getString();
+    const char* shadowfile = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.MakeShadow(picfile, shadowfile, paramList);
 }
 
-void RibSema::handleMakeOcclusion(IqRibParser& parser)
+void RibParser::handleMakeOcclusion(RibLexer& lex)
 {
-    StringArrayHolder picfiles = parser.getStringArray();
-    StringHolder shadowfile = parser.getString();
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::StringArray picfiles = lex.getStringArray();
+    const char* shadowfile = lex.getString();
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.MakeOcclusion(picfiles, shadowfile, paramList);
 }
 
-void RibSema::handleErrorHandler(IqRibParser& parser)
+void RibParser::handleErrorHandler(RibLexer& lex)
 {
-    RtErrorFunc handler = m_renderer.GetErrorFunc(parser.getString().c_str());
+    RtErrorFunc handler = m_renderer.GetErrorFunc(lex.getString());
     m_renderer.ErrorHandler(handler);
 }
 
-void RibSema::handleReadArchive(IqRibParser& parser)
+void RibParser::handleReadArchive(RibLexer& lex)
 {
-    StringHolder name = parser.getString();
+    const char* name = lex.getString();
     RtArchiveCallback callback = 0;
-    ParamAccumulator paramList(m_tokenDict);
-    parser.getParamList(paramList);
+    Ri::ParamList paramList = readParamList(lex);
     m_renderer.ReadArchive(name, callback, paramList);
 }
 
@@ -1500,3 +1398,4 @@ void RibSema::handleReadArchive(IqRibParser& parser)
 //--------------------------------------------------
 
 } // namespace Aqsis
+// vi: set et:

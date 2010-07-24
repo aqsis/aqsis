@@ -20,6 +20,8 @@
 #ifndef AQSIS_RICXX_H_INCLUDED
 #define AQSIS_RICXX_H_INCLUDED
 
+#include <cassert>
+
 #include <aqsis/riutil/primvartoken.h>
 #include <aqsis/ri/ritypes.h>
 
@@ -84,20 +86,26 @@ class Param
             : m_spec(spec), m_data(data), m_size(size) {}
         Param(const CqPrimvarToken& spec, const RtConstToken* data, size_t size)
             : m_spec(spec), m_data(data), m_size(size) {}
+        template<typename T>
+        Param(const CqPrimvarToken& spec, Array<T> value)
+            : m_spec(spec), m_data(value.begin()), m_size(value.size()) {}
 
         const CqPrimvarToken& spec() const { return m_spec; }
         const void* data() const { return m_data; }
 
-        FloatArray getFloatArray() const
+        FloatArray floatData() const
         {
+            assert(m_spec.storageType() == type_float);
             return FloatArray(static_cast<const RtFloat*>(m_data), m_size);
         }
-        IntArray getIntArray() const
+        IntArray intData() const
         {
+            assert(m_spec.storageType() == type_int);
             return IntArray(static_cast<const RtInt*>(m_data), m_size);
         }
-        StringArray getStringArray() const
+        StringArray stringData() const
         {
+            assert(m_spec.storageType() == type_string);
             return StringArray(static_cast<const RtConstToken*>(m_data), m_size);
         }
 };
@@ -388,6 +396,12 @@ class Renderer
         /// present for backward compatibility with the C API.
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) = 0;
 
+        /// Error handling callback, mainly for RIB parser.
+        ///
+        /// TODO: Think more about a cohesive error handling strategy.  Not
+        /// sure if this should really be here or not.
+        virtual RtVoid Error(const char* errorMessage) = 0;
+
         /// Functions returning pointers to standard filters, bases, etc.
         ///
         /// These are necessary so that (1) the interface can have control over
@@ -412,3 +426,4 @@ class Renderer
 } // namespace Aqsis
 
 #endif // AQSIS_RICXX_H_INCLUDED
+// vi: set et:
