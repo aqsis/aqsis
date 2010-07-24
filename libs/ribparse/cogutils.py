@@ -91,6 +91,14 @@ def formalArg(arg):
                       r'RtConst\1', type)
     return '%s %s' % (type, name)
 
+def formalArgC(arg):
+    type = arg.findtext('Type')
+    name = arg.findtext('Name')
+    if type.endswith('Array'):
+        return '%s %s[]' % (type[:-5], name)
+    else:
+        return '%s %s' % (type, name)
+
 def riCxxMethodDecl(procXml, className=None):
     args = [formalArg(arg) for arg in ribArgs(procXml.findall('Arguments/Argument'))]
     if procXml.haschild('Arguments/ParamList'):
@@ -100,3 +108,4 @@ def riCxxMethodDecl(procXml, className=None):
         procName = className + '::' + procName
     return '%s %s(%s)' % (procXml.findtext('ReturnType'), procName, ', '.join(args))
 
+# vi: set et:

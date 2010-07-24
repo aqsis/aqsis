@@ -17,6 +17,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+/// \file
+///
+/// \brief Realization of the RI in C++ objects
+/// \author Chris Foster [chris42f (at) g mail (d0t) com]
+///
+
 #ifndef AQSIS_RICXX_H_INCLUDED
 #define AQSIS_RICXX_H_INCLUDED
 
@@ -92,6 +98,7 @@ class Param
 
         const CqPrimvarToken& spec() const { return m_spec; }
         const void* data() const { return m_data; }
+        size_t size() const { return m_size; }
 
         FloatArray floatData() const
         {
@@ -100,7 +107,7 @@ class Param
         }
         IntArray intData() const
         {
-            assert(m_spec.storageType() == type_int);
+            assert(m_spec.storageType() == type_integer);
             return IntArray(static_cast<const RtInt*>(m_data), m_size);
         }
         StringArray stringData() const

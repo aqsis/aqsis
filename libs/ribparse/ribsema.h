@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief RIB request handler implementation for aqsis.
+ * \brief RIB parser implementation for aqsis
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
