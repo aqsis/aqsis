@@ -40,6 +40,11 @@ Ri::Array<T> toRiArray(const std::vector<T>& v)
     return Ri::Array<T>(&v[0], v.size());
 }
 
+Ri::StringArray toRiArray(MultiStringBuffer& buf)
+{
+    return toRiArray(buf.toCstringVec());
+}
+
 }
 
 
@@ -251,7 +256,7 @@ RibLexer::StringArray RibLexerImpl::getStringArray()
                 break;
         }
     }
-    return buf.toRiArray();
+    return toRiArray(buf);
 }
 
 RibLexer::TokenType RibLexerImpl::peekNextType()
@@ -310,7 +315,7 @@ RibLexer::StringArray RibLexerImpl::getStringParam()
         // special case where next token is a single string.
         MultiStringBuffer& buf = m_stringArrayPool.getBuf();
         buf.push_back(m_tokenizer.get().stringVal());
-        return buf.toRiArray();
+        return toRiArray(buf);
     }
     return getStringArray();
 }

@@ -133,7 +133,7 @@ namespace {
 using printer_funcs::operator<<;
 
 //------------------------------------------------------------------------------
-// Types for the current element of MockParser.
+// Types for MockRibToken
 enum MockTokType
 {
     Type_Int,
@@ -152,7 +152,7 @@ struct IgnoreType {};
 static IgnoreType IgnoreParam;
 
 
-// Cheap and nasty variant holding tokens for MockParser
+// Cheap and nasty variant holding RIB tokens
 //
 // Yeah, boost::variant would allow me to avoid implementing this class, but
 // the error messages are absolutely insane, to the point of making the code

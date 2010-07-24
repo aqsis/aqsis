@@ -30,6 +30,7 @@
 #include <vector>
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include "multistringbuffer.h"
 #include "ribtokenizer.h"
 
 namespace Aqsis {
@@ -101,54 +102,6 @@ class RibLexerImpl : public RibLexer
                 }
                 /// Mark all buffers in the pool as unused.
                 void markUnused() { m_next = 0; }
-        };
-
-        /// Holder for multiple C strings, all in the same big array.
-        class MultiStringBuffer
-        {
-            private:
-                /// Storage for all strings
-                std::vector<char> m_storage;
-                /// Offsets to starts of strings in m_storage.
-                std::vector<size_t> m_offsets;
-                /// References to start of strings.
-                std::vector<const char*> m_stringBegin;
-            public:
-                MultiStringBuffer()
-                    : m_storage(), m_offsets(), m_stringBegin() {}
-
-                /// Add str to the end of the string vector
-                void push_back(const std::string& str)
-                {
-                    m_offsets.push_back(m_storage.size());
-                    m_storage.insert(m_storage.end(), str.begin(), str.end());
-                    m_storage.push_back(0); // terminating null char.
-                }
-
-                /// Clear all strings
-                void clear()
-                {
-                    m_storage.clear();
-                    m_offsets.clear();
-                }
-
-                /// Convert to an Ri::StringArray.
-                Ri::StringArray toRiArray()
-                {
-                    if(m_offsets.empty())
-                        return Ri::StringArray();
-                    // iterate through offsets, getting a pointer for each
-                    // contained string.  We MUST build this once we know
-                    // we're done with adding things to m_storage, or the
-                    // pointers will become invalid when m_storage is resized.
-                    const char* first = &m_storage[0];
-                    m_stringBegin.clear();
-                    m_stringBegin.reserve(m_offsets.size());
-                    for(int i = 0, iend = m_offsets.size(); i < iend; ++i)
-                        m_stringBegin.push_back(first + m_offsets[i]);
-                    return Ri::StringArray(&m_stringBegin[0],
-                                           m_stringBegin.size());
-                }
         };
 
         void tokenError(const char* expected, const RibToken& badTok);
