@@ -202,6 +202,12 @@ if(FIRST_CMAKE_RUN)
 		)
 endif()
 
+# Make sure that CMAKE_INSTALL_PREFIX is absolute.  If we don't do this, it
+# seems that we get relative values for the RPATH (which making
+# CMAKE_INSTALL_RPATH absolute doesn't help??), which results in broken
+# binaries.
+get_filename_component(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} ABSOLUTE)
+
 # Set up the install rpath if desired.
 set(CMAKE_SKIP_RPATH OFF CACHE INTERNAL
 	"Disabled, since we need RPATHS to find aqsl during the build" FORCE)
