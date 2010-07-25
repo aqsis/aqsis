@@ -206,7 +206,10 @@ endif()
 # seems that we get relative values for the RPATH (which making
 # CMAKE_INSTALL_RPATH absolute doesn't help??), which results in broken
 # binaries.
-get_filename_component(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} ABSOLUTE)
+if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_PREFIX})
+	message(STATUS "Warning: CMAKE_INSTALL_PREFIX relative path interpreted relative to build directory location.")
+	set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}")
+endif()
 
 # Set up the install rpath if desired.
 set(CMAKE_SKIP_RPATH OFF CACHE INTERNAL
