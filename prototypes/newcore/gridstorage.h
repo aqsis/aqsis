@@ -25,6 +25,7 @@
 
 #include "arrayview.h"
 #include "primvar.h"
+#include "refcount.h"
 #include "ustring.h"
 #include "varspec.h"
 

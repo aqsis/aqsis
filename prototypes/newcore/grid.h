@@ -21,6 +21,7 @@
 #define GRID_H_INCLUDED
 
 #include "gridstorage.h"
+#include "refcount.h"
 #include "util.h"
 
 enum GridType
@@ -45,6 +46,9 @@ class Grid : public RefCounted
         /// Calculate normal values from P & store in N.
         virtual void calculateNormals(DataView<Vec3> N,
                                       ConstDataView<Vec3> P) const = 0;
+
+        /// Project positions into raster space.
+        virtual void project(const Mat4& toRaster) = 0;
 
         virtual ~Grid() {}
 };
@@ -87,7 +91,7 @@ class QuadGrid : public Grid
 
         Iterator begin() const;
 
-        void project(Mat4 m)
+        virtual void project(const Mat4& m)
         {
             DataView<Vec3> P = m_storage->P();
             for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)

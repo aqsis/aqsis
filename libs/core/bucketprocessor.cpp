@@ -431,6 +431,12 @@ void CqBucketProcessor::FilterBucket()
 		if(m_optCache.xFiltSize <= 16.0 || m_optCache.yFiltSize <= 16.0)
 			useSeperable = false;
 
+		// FIXME: Separable filters currently crash!  Additionally,
+		// * Some filter types are inherently unseparable (eg, disk, catmull-rom)
+		// * Separable filters are a lot faster where applicable.  The comment
+		//   & heuristic above appears to be incorrect.
+		useSeperable = false;
+
 		if(useSeperable)
 		{
 			// seperable filter. filtering by fx,fy is equivalent to filtering
@@ -462,7 +468,7 @@ void CqBucketProcessor::FilterBucket()
 						CqImagePixelPtr* pie2 = pie;
 						for ( TqInt fx = -xmax; fx <= xmax; fx++ )
 						{
-							TqInt index = ( ( ymax * lceil(m_optCache.xFiltSize) ) + ( fx + xmax ) ) * numSubPixels;
+							TqInt index = (ymax*(2*xmax + 1) + fx + xmax) * numSubPixels;
 							// Now go over each subsample within the pixel
 							TqInt sampleIndex = sy * m_optCache.xSamps;
 
@@ -516,7 +522,7 @@ void CqBucketProcessor::FilterBucket()
 					{
 						CqImagePixelPtr* pie2 = pie;
 
-						TqInt index = ( ( ( fy + ymax ) * lceil(m_optCache.xFiltSize) ) + xmax ) * numSubPixels;
+						TqInt index = ((fy + ymax)*(2*xmax + 1) + xmax) * numSubPixels;
 						// Now go over each y subsample within the pixel
 						TqInt sx = m_optCache.xSamps / 2; // use the samples in the centre of the pixel.
 						TqInt sy = 0;
@@ -593,7 +599,7 @@ void CqBucketProcessor::FilterBucket()
 						CqImagePixelPtr* pie2 = pie;
 						for (TqInt fx = -xmax; fx <= xmax; fx++, ++pie2 )
 						{
-							TqInt index = ((fy + ymax)*lceil(m_optCache.xFiltSize) + fx + xmax) * numSubPixels;
+							TqInt index = ((fy + ymax)*(2*xmax+1) + fx + xmax) * numSubPixels;
 							// Now go over each subsample within the pixel
 							TqInt sampleIndex = 0;
 							for (TqInt sy = 0; sy < m_optCache.ySamps; sy++ )
@@ -816,7 +822,6 @@ void CqBucketProcessor::InitialiseFilterValues()
 	TqInt ymax = m_DiscreteShiftY;
 	TqFloat xfwo2 = std::ceil(m_optCache.xFiltSize) * 0.5f;
 	TqFloat yfwo2 = std::ceil(m_optCache.yFiltSize) * 0.5f;
-	TqInt xfw = lceil(m_optCache.xFiltSize);
 
 	// Go over every pixel touched by the filter
 	for(TqInt py = -ymax; py <= ymax; py++)
@@ -824,7 +829,7 @@ void CqBucketProcessor::InitialiseFilterValues()
 		for(TqInt px = -xmax; px <= xmax; px++)
 		{
 			// index of the start of the filter storage for the pixel.
-			TqInt subPixelIndex = ((py + ymax)*xfw + px + xmax)*numSubPixels;
+			TqInt subPixelIndex = ((py + ymax)*(2*xmax+1) + px + xmax)*numSubPixels;
 			// Go over every subpixel in the pixel.
 			for (TqInt sy = 0; sy < m_optCache.ySamps; sy++ )
 			{

@@ -20,6 +20,7 @@
 #ifndef GEOMETRY_H_INCLUDED
 #define GEOMETRY_H_INCLUDED
 
+#include "refcount.h"
 #include "util.h"
 
 class Grid;
@@ -59,7 +60,7 @@ class TessellationContext
 
         /// Return the renderer option state
         virtual const Options& options() = 0;
-        /// Return the current surface options state
+        /// Return the current surface attributes state
         virtual const Attributes& attributes() = 0;
 
         /// Get a builder for storage which will hold dicing results.
@@ -70,6 +71,8 @@ class TessellationContext
 
 
 /// Abstract piece of geometry to be rendered
+///
+/// TODO: Need really good docs on how this works
 class Geometry : public RefCounted
 {
     public:
@@ -85,26 +88,36 @@ class Geometry : public RefCounted
         ///
         virtual Box bound() const = 0;
 
-        /// Create tessellation control object "split/dice decision"
+        /// Tessellation driver function; the "split/dice decision"
         ///
         /// In reyes language, this function determines whether the surface
-        /// should be split or diced, and pushes a decision object to the
-        /// tessellation context via the invokeTessellator() function.
+        /// should be split or diced.  It should then submit the resulting
+        /// decision object to the tessellation context via the
+        /// invokeTessellator() function.  (Avoiding doing the actual
+        /// splitting and dicing directly inside this function allows the
+        /// renderer to do the hard work when keeping track of deformation
+        /// motion blur.)
         ///
-        /// \param trans - Transform into "dice decision coordinates".  The
-        ///                geometry should transform vertices into this space
-        ///                to determine how large the object is.  The geometry
-        ///                should *not* assume this is a projection which
-        ///                removes the z-coordinate.  Instead, it should
-        ///                measure the size of the resulting object in 3D
-        ///                space.
+        /// \param trans - Transform into "dice coordinates".  The geometry
+        ///                should transform vertices into this space to
+        ///                determine how large the object will be in raster
+        ///                coordinates.  Note that in general trans is not a
+        ///                projection, and the geometry shouldn't neglect the
+        ///                z-coordinate when measuring the size.
         ///
-        virtual void tessellate(const Mat4& trans,
+        /// \param polyLength - The desired linear size ("edge length") of
+        ///                micropolygon pieces resulting from dicing, as
+        ///                measured in the trans coordinate system.
+        ///                diceLength is the square root of the reyes shading
+        ///                rate.
+        ///
+        virtual void tessellate(const Mat4& trans, float polyLength,
                                 TessellationContext& tessCtx) const = 0;
 
         /// Transform the surface into a new coordinate system.
         ///
-        /// TODO: Remove this.
+        /// TODO: Remove this; geometry should be immutable in the main part
+        /// of the pipeline.
         virtual void transform(const Mat4& trans) = 0;
 
         virtual ~Geometry() {}

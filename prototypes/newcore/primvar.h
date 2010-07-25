@@ -26,8 +26,9 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "util.h"
 #include "arrayview.h"
+#include "refcount.h"
+#include "util.h"
 #include "varspec.h"
 
 struct IclassStorage;
@@ -271,7 +272,7 @@ class PrimvarStorageBuilder
             : m_vars()
         { }
 
-        void add(const PrimvarSpec& var, float* data, int srcLength)
+        void add(const PrimvarSpec& var, const float* data, int srcLength)
         {
             m_vars.push_back(PvarInitSpec(var, data, srcLength));
         }

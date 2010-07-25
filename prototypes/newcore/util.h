@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef UTIL_H_INCLUDED
-#define UTIL_H_INCLUDED
+#ifndef AQSIS_UTIL_H_INCLUDED
+#define AQSIS_UTIL_H_INCLUDED
 
 #include <cassert>
 #include <cfloat>
@@ -31,8 +31,6 @@
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/arithmetic_traits.hpp>
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/intrusive_ptr.hpp>
 
 // The distinction here is only due to the layout of the 
 // win32libs copy of OpenEXR.
@@ -64,6 +62,19 @@ inline std::ostream& operator<<(std::ostream& out, Box b)
 {
     out << "[" << b.min << " -- " << b.max << "]";
     return out;
+}
+
+template<typename T>
+inline T* get(std::vector<T>& v)
+{
+    assert(v.size() > 0);
+    return &v[0];
+}
+template<typename T>
+inline const T* get(const std::vector<T>& v)
+{
+    assert(v.size() > 0);
+    return &v[0];
 }
 
 
@@ -251,53 +262,33 @@ inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
 template<typename T, size_t sz> int array_len(T (&a)[sz]) { return sz; }
 
 
-/// Reference counting machinary.
-
-inline void nullDeleter(const void*) { }
-
-/// Reference counted base mixin for use with boost::intrusive_ptr.
+/// Radical inverse function for low-discrepancy sequences.
 ///
-/// This is a non-virtual implementation for maximum efficiency.
-class RefCounted
-{
-    public:
-        RefCounted() : m_refCount(0) {}
-
-        /// Copying does *not* copy the reference count!
-        RefCounted(const RefCounted& /*r*/) : m_refCount(0) {}
-        RefCounted& operator=(const RefCounted& /*r*/) { return *this; }
-
-        int useCount() const { return m_refCount; }
-        int incRef() const   { return ++m_refCount; }
-        int decRef() const   { return --m_refCount; }
-
-    protected:
-        /// Protected so users can't delete RefCounted directly.
-        ~RefCounted() {}
-
-    private:
-        mutable int m_refCount;
-};
-
-
-/// Add a reference to a RefCounted object.
-inline void intrusive_ptr_add_ref(RefCounted* p)
-{
-    p->incRef();
-}
-
-/// Release a reference to a RefCounted object.
+/// The radical inverse of n in base b is the base b digits of n reversed and
+/// placed to the right of the radix point:
 ///
-/// Note that this function *must* be a template, because RefCounted does not
-/// have a virtual destructor.  (Therefore, if we just took p as type
-/// RefCounted*, the wrong destructor would get called!)
-template<typename T>
-inline typename boost::enable_if<boost::is_base_of<RefCounted, T> >::type
-intrusive_ptr_release(T* p)
+///     n = d1d2d3d4d5 |->  0.d5d4d3d2d1 = radicalInverse(n)
+///
+/// These are great for easily building sequences in D dimensions with nice
+/// distribution properties; just construct tuples like
+///
+/// [radicalInverse(n, 2), radicalInverse(n, 3), ..., radicalInverse(n, p_D)]
+///
+/// where p_D is the D'th prime number.  Note that p_D can't be too large, or
+/// the sequences start looking rather non-uniform.
+inline float radicalInverse(int n, int base = 2)
 {
-    if(p->decRef() == 0)
-        delete p;
+    double r = 0;
+    double invBase = 1.0/base;
+    double digitMult = invBase;
+    while(n != 0)
+    {
+        r += digitMult*(n % base);
+        n /= base;
+        digitMult *= invBase;
+    }
+    return r;
 }
 
 
-#endif // UTIL_H_INCLUDED
+#endif // AQSIS_UTIL_H_INCLUDED

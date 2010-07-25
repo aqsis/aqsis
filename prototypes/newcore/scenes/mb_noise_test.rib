@@ -1,0 +1,33 @@
+Display "mb_noise_test.tif" "file" "rgb" "compression" "lzw"
+Display "+mb_noise_test.tif" "framebuffer" "rgb"
+
+Format 256 256 1
+
+#Hider "hidden" "jitter" 1
+PixelSamples 4 4
+PixelFilter "gaussian" 2 2
+
+Shutter 0 1
+
+ShadingRate 1
+
+GeometricApproximation "motionfactor" 0
+
+Projection "orthographic"
+Translate 0 0 1
+ScreenWindow 0 1 0.01 0.99
+
+WorldBegin
+    Color 1 1 1
+    Surface "constant"
+    MotionBegin [0 1]
+        Patch "bilinear" "P" [
+            0 0 0  0 1 0
+            1 0 0  1 1 0
+        ]
+        Patch "bilinear" "P" [
+            1 0 0  1 1 0
+            2 0 0  2 1 0
+        ]
+    MotionEnd
+WorldEnd

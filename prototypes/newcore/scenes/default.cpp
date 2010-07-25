@@ -125,13 +125,17 @@ void renderDefaultScene()
     opts.yRes = 1024;
     opts.gridSize = 8;
     opts.clipNear = 0.1;
-    opts.superSamp = Imath::V2i(2,2);
+    opts.superSamp = Imath::V2i(4,4);
     opts.pixelFilter = makeSincFilter(Vec2(3.0,3.0));
+    opts.fstop = 1;
+    opts.focalLength = 0.5;
+    opts.focalDistance = 2;
 
     Attributes attrs;
     attrs.shadingRate = 1;
     attrs.smoothShading = true;
     attrs.surfaceShader = createShader("test");
+    attrs.displacementBound = 0.15;
 
     Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
 

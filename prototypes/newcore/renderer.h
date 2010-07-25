@@ -37,6 +37,7 @@ class Grid;
 class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
+class CircleOfConfusion;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -45,6 +46,7 @@ typedef boost::intrusive_ptr<GridHolder> GridHolderPtr;
 
 typedef boost::intrusive_ptr<Geometry> GeometryPtr;
 typedef boost::intrusive_ptr<Grid> GridPtr;
+
 
 //-----------------------------------------------------------------------------
 struct OutvarSpec : public VarSpec
@@ -82,7 +84,18 @@ class StdOutInd
 
 typedef BasicVarSet<OutvarSpec, StdOutInd> OutvarSet;
 
-typedef std::vector<GeometryPtr> GeometryKeys;
+
+template<typename T>
+struct MotionKey
+{
+    float time;
+    T value;
+
+    MotionKey(float time, const T& value)
+        : time(time), value(value) {}
+};
+typedef MotionKey<GeometryPtr> GeometryKey;
+typedef std::vector<GeometryKey> GeometryKeys;
 
 //-----------------------------------------------------------------------------
 /// Main renderer interface.
@@ -112,14 +125,8 @@ class Renderer
         friend class TessellationContextImpl;
 
         class SurfaceOrder;
-        typedef std::priority_queue<GeomHolder, std::vector<GeomHolderPtr>,
+        typedef std::priority_queue<GeomHolderPtr, std::vector<GeomHolderPtr>,
                                     SurfaceOrder> SurfaceQueue;
-
-        Options m_opts;                ///< Render options
-        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
-        OutvarSet m_outVars;           ///< Set of output variables
-        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
-        Mat4 m_camToRas;               ///< Camera -> raster transformation
 
         static void sanitizeOptions(Options& opts);
 
@@ -135,6 +142,14 @@ class Renderer
         void rasterize(Grid& inGrid, const Attributes& attrs);
 
         void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);
+
+
+        Options m_opts;                ///< Render options
+        boost::scoped_ptr<CircleOfConfusion> m_coc; ///< depth of field info
+        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
+        OutvarSet m_outVars;           ///< Set of output variables
+        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
+        Mat4 m_camToRas;               ///< Camera -> raster transformation
 };
 
 

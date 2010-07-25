@@ -20,16 +20,13 @@
 #include "renderer.h"
 #include "surfaces.h"
 
-static GeometryPtr createPatch(const Vec3& a, const Vec3& b,
-                               const Vec3& c, const Vec3& d,
+static GeometryPtr createPatch(const float P[12], const float Cs[3],
                                const Mat4& trans = Mat4())
 {
     PrimvarStorageBuilder builder;
-    float P[] = {
-        a.x, a.y, a.z,  b.x, b.y, b.z,
-        c.x, c.y, c.z,  d.x, d.y, d.z,
-    };
-    builder.add(Primvar::P, P, array_len(P));
+    builder.add(Primvar::P, P, 12);
+    builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1, ustring("Cs")),
+                Cs, 3);
     IclassStorage storReq(1,4,4,4,4);
     GeometryPtr patch(new Patch(builder.build(storReq)));
     patch->transform(trans);
@@ -43,30 +40,43 @@ void renderSimpleDeformationScene()
     opts.yRes = 1024;
     opts.gridSize = 8;
     opts.clipNear = 0.1;
-    opts.superSamp = Imath::V2i(1,1);
-    opts.pixelFilter = makeBoxFilter(Vec2(1.0,1.0));
-    opts.shutterMax = 0.5;
+    opts.superSamp = Imath::V2i(4,4);
+    opts.pixelFilter = makeSincFilter(Vec2(3.0,3.0));
+    opts.shutterMin = 0;
+    opts.shutterMax = 2;
 
     Attributes attrs;
     attrs.shadingRate = 1;
     attrs.smoothShading = true;
-//    attrs.surfaceShader = createShader("default");
+    attrs.surfaceShader = createShader("default");
 
-//    Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
-    Mat4 camToScreen = screenWindow(-1,2, -1,2);
+    Mat4 camToScreen = perspectiveProjection(90, opts.clipNear, opts.clipFar);
 
     // Output variables.
     VarList outVars;
-    outVars.push_back(Stdvar::z);
+    outVars.push_back(Stdvar::Ci);
 
     Renderer renderer(opts, camToScreen, outVars);
 
-    GeometryKeys keys;
-    keys.push_back(createPatch(Vec3(0,0,1), Vec3(1,0,2),
-                               Vec3(0,1,1), Vec3(1,1,2)));
-    keys.push_back(createPatch(Vec3(0.6,0.6,1), Vec3(0.9,0,2),
-                               Vec3(0,0.9,0.9), Vec3(0.9,0.9,2)));
-    renderer.add(keys, attrs);
+    {
+        float Cs[3] = {1,1,1};
+        GeometryKeys keys;
+        float P1[12] = {-0.4,-0.4,1,  -0.4,-0.3,1,  -0.3,-0.4,1,  -0.3,-0.3,1};
+        keys.push_back(GeometryKey(0, createPatch(P1,Cs)));
+        float P2[12] = {-0.1,-0.1,1,  -0.1,0.1,1,  0.1,-0.1,1,  0.1,0.1,1};
+        keys.push_back(GeometryKey(2, createPatch(P2,Cs)));
+        renderer.add(keys, attrs);
+    }
+
+    {
+        float Cs[3] = {0.6,0.4,0.4};
+        GeometryKeys keys;
+        float P1[12] = {1,0,2,  0,1.1,2,  0,-1.1,2,  -1,0,2};
+        keys.push_back(GeometryKey(0, createPatch(P1,Cs)));
+        float P2[12] = {1.5,0,2,  0,0.8,2,  0,-0.8,2,  -1.5,0,2};
+        keys.push_back(GeometryKey(2, createPatch(P2,Cs)));
+        renderer.add(keys, attrs);
+    }
 
     renderer.render();
 }

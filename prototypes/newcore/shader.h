@@ -20,9 +20,9 @@
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED
 
-#include "varspec.h"
-
+#include "refcount.h"
 #include "util.h"
+#include "varspec.h"
 
 class Grid;
 

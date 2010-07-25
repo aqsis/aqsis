@@ -18,9 +18,102 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "samplestorage.h"
+
+#include "samplegen.h"
 #include "arrayview.h"
 #include "util.h"
 
+#include <fstream>
+
+//static void loadTileSet(const std::string& fname,
+//                        std::vector<SampleStorage::TimeLens>& tuv,
+//                        std::vector<int>& tiles, int& tileWidth)
+//{
+//    std::ifstream in(fname.c_str());
+//    assert(in);
+//    int h=0, w=0;
+//    in >> h >> w;
+//    assert(h == w);
+//    tuv.resize(w*w);
+//    for(int i = 0, iend = tuv.size(); i < iend; ++i)
+//        in >> tuv[i].time >> tuv[i].lens.x >> tuv[i].lens.y;
+//    tiles.resize(81*w*w);
+//    for(int i = 0, iend = tiles.size(); i < iend; ++i)
+//        in >> tiles[i];
+//    tileWidth = w;
+//}
+
+//static void saveTileSet(const std::string& fname,
+//                        std::vector<SampleStorage::TimeLens>& tuv,
+//                        std::vector<int>& tiles, int& tileWidth)
+//{
+//    std::ofstream out(fname.c_str());
+//    assert(out);
+//    out << tileWidth << " " << tileWidth << "\n";
+//    for(int i = 0, iend = tuv.size(); i < iend; ++i)
+//        out << tuv[i].time << " " << tuv[i].lens.x << " " << tuv[i].lens.y << " ";
+//    out << "\n";
+//    int nsamps = tileWidth*tileWidth;
+//    for(int i = 0, iend = tiles.size(); i < iend; ++i)
+//    {
+//        out << tiles[i] << " ";
+//        if((i+1) % nsamps == 0)
+//            out << "\n";
+//    }
+//}
+
+class SpatialHash
+{
+    private:
+        std::vector<int> m_permTable;
+        int m_nColors;
+    public:
+        SpatialHash(int nColors, int tableSize = 0)
+            : m_permTable(tableSize),
+            m_nColors(nColors)
+        {
+            if(tableSize == 0)
+            {
+                // A particular permutation table for definiteness.  Having a
+                // fixed table is really useful when debugging.
+                int tableInit[] = {
+                 41,  52, 248, 166, 162,  92,  95,  11,   3,  94, 219, 198, 170,
+                165,  80, 231,  75,  19,  20, 240, 169, 105,  15,  51,  45,  84,
+                 85, 157, 232,  23,  97,  14, 174,   0,  82,  42, 145,  69, 111,
+                178, 158, 138,  17,  70, 238, 137, 179,  64, 172,  61,  53, 177,
+                 91,  73, 234,  18, 148, 223,  68, 187, 123,   7,   8,  12,   2,
+                 27, 133,  66, 194, 160, 189, 142, 253,  81,  87, 212, 193, 102,
+                210, 154,  28,  21,  24, 101, 192, 249, 168,  71, 233, 237,  98,
+                 79, 119, 152, 183, 116, 211, 217,  29, 184, 220,  54,  31, 163,
+                134, 120,  78, 245, 195, 204,  56, 140, 180,  99, 112,  57, 146,
+                228, 201, 106, 197, 115, 250,  47, 122,  40, 203, 132,  33,  89,
+                225, 196,  83,  58, 182,  34, 218, 205,  50,  10, 206,  88,  49,
+                  1, 109, 254,  67, 144, 150, 230, 235, 213, 181, 242, 208, 246,
+                 86, 236, 190,  13, 188,  59, 209,  48,  74, 214, 175, 215,  77,
+                114,  35, 252, 227, 118,  72, 167, 153, 129, 121, 164, 244, 243,
+                226, 125,  44,  62, 239, 136, 151, 173, 171,   5, 110,  96, 216,
+                222, 113, 229, 161, 155, 221, 124, 103,   6, 255, 108, 126, 147,
+                 32,  93, 135, 200, 100,  43, 251, 141, 130, 117,  39,  60, 185,
+                149,  38,  26, 143,  55,  36, 127, 128,   4,  16, 207, 139, 159,
+                 22, 191,  25, 156, 131,  46,  30, 224, 176,  65,  90, 202, 186,
+                104, 107,   9, 247,  63, 199,  37, 241,  76
+                };
+                m_permTable.assign(tableInit, tableInit+256);
+            }
+            else
+            {
+                for(int i = 0; i < tableSize; ++i)
+                    m_permTable[i] = i;
+                std::random_shuffle(m_permTable.begin(), m_permTable.end());
+            }
+        }
+        int operator()(int x, int y) const
+        {
+            assert(x >= 0 && y >= 0);
+            const int N = m_permTable.size();
+            return m_permTable[(m_permTable[x%N] + y)%N] % m_nColors;
+        }
+};
 
 SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
     : m_opts(opts),
@@ -63,6 +156,67 @@ SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
             m_samples[j*m_xSampRes + i] = Sample(pos);
         }
     }
+
+    bool hasMotion = opts.shutterMin != opts.shutterMax;
+    bool hasDof = opts.fstop != FLT_MAX;
+    float timeStratQuality = 0;
+    if(hasMotion && hasDof)
+        timeStratQuality = 0.5;
+    else if(hasMotion)
+        timeStratQuality = 1;
+    else if(hasDof)
+        timeStratQuality = 0;
+    // TODO: Avoid running makeTileSet entirely if hasMotion is false.
+    int tileWidth = 13;
+    std::vector<int> tiles;
+    std::vector<float> tuv;
+    canonicalTimeLensSamps(tuv, tileWidth*tileWidth);
+    makeTileSet(tiles, tileWidth, tuv, timeStratQuality);
+    m_extraDims.resize(tileWidth*tileWidth);
+    for(int i = 0, iend=m_extraDims.size(); i < iend; ++i)
+    {
+        m_extraDims[i].time = tuv[3*i];
+        m_extraDims[i].lens = Vec2(tuv[3*i+1], tuv[3*i+2]);
+    }
+//    saveTileSet("samples_cpp.txt", m_extraDims, tiles, tileWidth);
+
+//    loadTileSet("samples.txt", m_extraDims, tiles, tileWidth);
+
+    const int ncol = 3;
+    SpatialHash hash(ncol);
+    // Initialize interleaved sampling info
+    m_tileSize = Imath::V2i(tileWidth,tileWidth);
+    m_nTiles = Imath::V2i(m_xSampRes-1, m_ySampRes-1)/m_tileSize + Imath::V2i(1);
+    // Make shuffled tile indices
+    int sampsPerTile = m_tileSize.x*m_tileSize.y;
+    m_tileShuffleIndices.resize(sampsPerTile*m_nTiles.x*m_nTiles.y, -1);
+    for(int ty = 0, shuffStart = 0; ty < m_nTiles.y; ++ty)
+    {
+        for(int tx = 0; tx < m_nTiles.x; ++tx, shuffStart += sampsPerTile)
+        {
+            // Compute current tile using spatial hash function.
+            int c1 = hash(tx, ty);
+            int c2 = hash(tx+1, ty);
+            int c3 = hash(tx, ty+1);
+            int c4 = hash(tx+1, ty+1);
+            const int* inTile = &tiles[(((c4*ncol + c3)*ncol + c2)*ncol + c1) *
+                                       sampsPerTile];
+            // The suffle indices are the inverse of the mapping provided by
+            // inTile.
+            int* outTile = &m_tileShuffleIndices[shuffStart];
+            int k = 0;
+            const int tyend = std::min((ty+1)*m_tileSize.y, m_ySampRes);
+            const int txend = std::min((tx+1)*m_tileSize.x, m_xSampRes);
+            for(int j = ty*m_tileSize.y; j < tyend; ++j)
+                for(int i = tx*m_tileSize.x; i < txend; ++i, ++k)
+                    outTile[inTile[k]] = j*m_xSampRes + i;
+        }
+    }
+
+    // Rescale times
+    for(int i = 0; i < sampsPerTile; ++i)
+        m_extraDims[i].time = opts.shutterMin +
+                (opts.shutterMax-opts.shutterMin)*m_extraDims[i].time;
 
     // Initialize fragment array using default fragment.
     m_fragments.resize(m_fragSize*nsamples);

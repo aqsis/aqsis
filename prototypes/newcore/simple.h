@@ -56,7 +56,7 @@ class QuadGridSimple : public Grid
 
         Vec3* P(int v) { assert(v >= 0 && v < m_nv); return &m_P[m_nu*v]; }
 
-        void project(Mat4 m)
+        virtual void project(const Mat4& m)
         {
             for(int i = 0, iend = m_P.size(); i < iend; ++i)
             {
@@ -139,7 +139,7 @@ class PatchSimple : public Geometry
             m_P[2] = c; m_P[3] = d;
         }
 
-        virtual void tessellate(const Mat4& splitTrans,
+        virtual void tessellate(const Mat4& splitTrans, float polyLength,
                                 TessellationContext& tessCtx) const
         {
             // Project points into "splitting coordinates"
@@ -154,9 +154,8 @@ class PatchSimple : public Geometry
                                 + ((b-d)%(c-d)).length() );
 
             const Options& opts = tessCtx.options();
-            const Attributes& attrs = tessCtx.attributes();
             const float maxArea = opts.gridSize*opts.gridSize
-                                  * attrs.shadingRate;
+                                  * polyLength*polyLength;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((b-a).length() + (d-c).length());
@@ -167,8 +166,8 @@ class PatchSimple : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int uRes = 1 + ifloor(lu/std::sqrt(attrs.shadingRate));
-                int vRes = 1 + ifloor(lv/std::sqrt(attrs.shadingRate));
+                int uRes = 1 + ifloor(lu/polyLength);
+                int vRes = 1 + ifloor(lv/polyLength);
                 SurfaceDicer<PatchSimple> dicer(uRes, vRes);
                 tessCtx.invokeTessellator(dicer);
             }

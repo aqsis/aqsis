@@ -26,137 +26,100 @@
 #include "grid.h"
 #include "gridstorage.h"
 #include "microquadsampler.h"
+#include "refcount.h"
 #include "sample.h"
 #include "samplestorage.h"
 #include "simple.h"
+#include "tessellation.h"
 
 
 //------------------------------------------------------------------------------
-/// Container for geometry and geometry metadata
-class GeomHolder : public RefCounted
+/// Circle of confusion class for depth of field
+class CircleOfConfusion
 {
     private:
-        GeometryPtr m_geom;  ///< Main geometry (first key for deformation)
-        GeometryKeys m_geomKeys; ///< Extra geometry keys
-        int m_splitCount;    ///< Number of times the geometry has been split
-        Box m_bound;         ///< Bound in camera coordinates
-        Attributes* m_attrs; ///< Surface attribute state
+        float m_focalDistance;
+        float m_cocMult;
+        float m_cocOffset;
 
-        void initKeys(GeometryPtr* begin, GeometryPtr* end, int stride)
-        {
-            m_geomKeys.reserve((end - begin)/stride - 1);
-            while((begin += stride) < end)
-            {
-                m_geomKeys.push_back(*begin);
-                m_bound.extendBy((*begin)->bound());
-            }
-        }
     public:
-        GeomHolder(const GeometryPtr& geom, Attributes* attrs)
-            : m_geom(geom),
-            m_geomKeys(),
-            m_splitCount(0),
-            m_bound(geom->bound()),
-            m_attrs(attrs)
-        { }
-
-        GeomHolder(const GeometryPtr& geom,
-                   const GeomHolder& parent)
-            : m_geom(geom),
-            m_geomKeys(),
-            m_splitCount(parent.m_splitCount+1),
-            m_bound(geom->bound()),
-            m_attrs(parent.m_attrs)
-        { }
-
-        GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
-                   Attributes* attrs)
-            : m_geom(*keysBegin),
-            m_geomKeys(),
-            m_splitCount(0),
-            m_bound(m_geom->bound()),
-            m_attrs(attrs)
+        CircleOfConfusion(float fstop, float focalLength, float focalDistance,
+                          const Mat4& camToRaster)
         {
-            initKeys(keysBegin, keysEnd, 1);
+            m_focalDistance = focalDistance;
+            m_cocMult = 0.5*focalLength/fstop * focalDistance*focalLength
+                                              / (focalDistance - focalLength);
+            // Get multiplier into raster units.
+            m_cocMult *= camToRaster[0][0];
+            m_cocOffset = m_cocMult/focalDistance;
         }
 
-        GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
-                   int keysStride, const GeomHolder& parent)
-            : m_geom(*keysBegin),
-            m_geomKeys(),
-            m_splitCount(parent.m_splitCount+1),
-            m_bound(m_geom->bound()),
-            m_attrs(parent.m_attrs)
+        /// Shift the vertex P on the circle of confusion.
+        ///
+        /// P is updated to position it would have if viewed with a pinhole
+        /// camera at the position lensPos.
+        ///
+        void lensShift(Vec3& P, const Vec2& lensPos) const
         {
-            initKeys(keysBegin, keysEnd, keysStride);
+            float cocSize = std::fabs(m_cocMult/P.z - m_cocOffset);
+            P.x -= lensPos.x * cocSize;
+            P.y -= lensPos.y * cocSize;
         }
 
-        Geometry& geom()          { return *m_geom; }
-        const Geometry& geom() const { return *m_geom; }
-
-        const GeometryKeys& extraKeys() const { return m_geomKeys; }
-        const int numGeomKeys() const { return m_geomKeys.size() + 1; }
-
-        bool isDeforming() const { return !m_geomKeys.empty(); }
-        int splitCount() const    { return m_splitCount; }
-        Box& bound() { return m_bound; }
-        Attributes& attrs()       { return *m_attrs; }
-        const Attributes& attrs() const { return *m_attrs; }
+        /// Compute the minimum lensShift inside the interval [z1,z2]
+        float minShiftForBound(float z1, float z2) const
+        {
+            // First check whether the bound spans the focal plane.
+            if((z1 <= m_focalDistance && z2 >= m_focalDistance) ||
+               (z1 >= m_focalDistance && z2 <= m_focalDistance))
+                return 0;
+            // Otherwise, the minimum focal blur is achieved at one of the
+            // z-extents of the bound.
+            return std::min(std::fabs(m_cocMult/z1 - m_cocOffset),
+                            std::fabs(m_cocMult/z2 - m_cocOffset));
+        }
 };
 
-
-
-//------------------------------------------------------------------------------
-typedef std::vector<GridPtr> GridKeys;
-
-class GridHolder : public RefCounted
+/// Adjust desired micropolygon width based on focal or motion blurring.
+static float micropolyBlurWidth(const GeomHolderPtr& holder,
+                                const CircleOfConfusion* coc)
 {
-    private:
-        GridPtr m_firstGrid;       ///< Main grid (first key for deformation)
-        GridKeys m_extraGrids;     ///< Extra grid key frames
-        const Attributes* m_attrs; ///< Attribute state
-
-        void shade(Grid& grid) const
-        {
-            // Special case: can't shade simple grids.
-            if(grid.type() == GridType_QuadSimple)
-                return;
-            if(m_attrs->surfaceShader)
-                m_attrs->surfaceShader->shade(grid);
-        }
-
-    public:
-        GridHolder(const GridPtr& grid, const Attributes* attrs)
-            : m_firstGrid(grid),
-            m_extraGrids(),
-            m_attrs(attrs)
-        { }
-
-        template<typename GridPtrIterT>
-        GridHolder(GridPtrIterT begin, GridPtrIterT end, const Attributes* attrs)
-            : m_firstGrid(*begin),
-            m_extraGrids(begin+1, end),
-            m_attrs(attrs)
-        { }
-
-        bool isDeforming() const { return !m_extraGrids.empty(); }
-        Grid& grid() { return *m_firstGrid; }
-        GridKeys& extraGrids() { return m_extraGrids; }
-
-        const Attributes& attrs() const { return *m_attrs; }
-
-        /// Shade all grids held
-        void shade()
-        {
-            shade(*m_firstGrid);
-            // TODO: Only run displacement shaders for extra grids.
-            for(GridKeys::iterator i = m_extraGrids.begin(),
-                end = m_extraGrids.end(); i != end; ++i)
-            {
-                shade(**i);
-            }
-        }
-};
+    const Attributes& attrs = holder->attrs();
+    float polyLength = std::sqrt(attrs.shadingRate);
+    if(coc)
+    {
+        // Adjust shading rate proportionally with the CoC area.  This
+        // ensures that we don't waste time rendering high resolution
+        // micropolygons in parts of the scene which are very blurry.
+        // Depending on the sampling algorithm, it can also make things
+        // asymptotically faster.
+        //
+        // We need a factor which decides the desired ratio of the
+        // diameter of the circle of confusion to the width of a
+        // micropolygon.  The factor lengthRatio = 0.16 was chosen by
+        // some experiments demanding that using focusFactor = 1 yield
+        // results almost visually indistingushable from focusFactor = 0.
+        //
+        // Two main experiments were used to get lengthRatio:
+        //   1) Randomly coloured micropolygons: with an input of
+        //      ShadingRate = 1 and focusFactor = 1, randomly coloured
+        //      micropolys (Ci = random()) should all blend together
+        //      with no large regions of colour, even in image regions
+        //      with lots of focal blur.
+        //   2) A scene with multiple strong specular highlights (a
+        //      bilinear patch with displacement shader P +=
+        //      0.1*sin(40*v)*cos(20*u) * normalize(N); ): This should
+        //      look indistingushable from the result obtained with
+        //      focusFactor = 1, regardless of the amount of focal
+        //      blur.
+        //
+        const float minCoC = coc->minShiftForBound(
+                holder->bound().min.z, holder->bound().max.z);
+        const float lengthRatio = 0.16;
+        polyLength *= max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
+    }
+    return polyLength;
+}
 
 
 //------------------------------------------------------------------------------
@@ -179,274 +142,6 @@ class Renderer::SurfaceOrder
                 return false;
             else
                 return a->bound().min.x < b->bound().min.x;
-        }
-};
-
-
-//------------------------------------------------------------------------------
-// Minimal wrapper around a renderer instance to provide control context for
-// when surfaces push split/diced objects back into the render's queue.
-class TessellationContextImpl : public TessellationContext
-{
-    private:
-        Renderer& m_renderer;
-        GridStorageBuilder m_builder;
-        const GeomHolder* m_parentGeom;
-
-        /// Collecter for splits of deforming surfaces
-        class DeformCollector
-        {
-            private:
-                std::vector<GeometryPtr> m_splits;
-                int m_splitsPerKey;
-                std::vector<GridPtr> m_grids;
-
-            public:
-                void reset()
-                {
-                    m_splits.clear();
-                    m_splitsPerKey = 0;
-                    m_grids.clear();
-                }
-
-                void firstKeyDone()
-                {
-                    m_splitsPerKey = m_splits.size();
-                }
-
-                void push(const GeometryPtr& geom)
-                {
-                    m_splits.push_back(geom);
-                }
-
-                void push(const GridPtr& grid)
-                {
-                    m_grids.push_back(grid);
-                }
-
-                void pushResults(const GeomHolder& parentGeom,
-                                 Renderer& renderer)
-                {
-                    if(!m_splits.empty())
-                    {
-                        // Construct holder for each deforming child surface &
-                        // push it back to the renderer.
-                        assert((m_splits.size()/m_splitsPerKey)*m_splitsPerKey
-                                == m_splits.size());
-                        int nGeom = parentGeom.numGeomKeys();
-                        assert(nGeom > 1);
-                        for(int i = 0; i < nGeom; ++i)
-                        {
-                            GeomHolderPtr holder(
-                                new GeomHolder(
-                                    &*m_splits.begin() + i,
-                                    &*m_splits.end() + i,
-                                    m_splitsPerKey, parentGeom
-                                )
-                            );
-                            renderer.push(holder);
-                        }
-                    }
-                    if(!m_grids.empty())
-                    {
-                        // Construct deforming child grids
-                        renderer.push( GridHolderPtr(
-                                new GridHolder(
-                                    m_grids.begin(), m_grids.end(),
-                                    &parentGeom.attrs()
-                                )
-                        ));
-                    }
-                }
-        };
-        DeformCollector m_deformCollector;
-
-    public:
-        TessellationContextImpl(Renderer& renderer)
-            : m_renderer(renderer),
-            m_builder(),
-            m_parentGeom(0)
-        { }
-
-        void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
-        {
-            m_parentGeom = holder.get();
-            holder->geom().tessellate(splitTrans, *this);
-        }
-
-        virtual void invokeTessellator(TessControl& tessControl)
-        {
-            if(m_parentGeom->isDeforming())
-            {
-                // Collect the split/dice results in m_deformCollector if the
-                // surface is involved in deformation motion blur.
-                m_deformCollector.reset();
-                tessControl.tessellate(m_parentGeom->geom(), *this);
-                m_deformCollector.firstKeyDone();
-                const GeometryKeys& keys = m_parentGeom->extraKeys();
-                for(int i = 0, nkeys = keys.size(); i < nkeys; ++i)
-                    tessControl.tessellate(*keys[i], *this);
-                m_deformCollector.pushResults(*m_parentGeom, m_renderer);
-            }
-            else
-                tessControl.tessellate(m_parentGeom->geom(), *this);
-        }
-
-        virtual void push(const GeometryPtr& geom)
-        {
-            if(m_parentGeom->isDeforming())
-                m_deformCollector.push(geom);
-            else
-            {
-                GeomHolderPtr holder(new GeomHolder(geom, *m_parentGeom));
-                m_renderer.push(holder);
-            }
-        }
-
-        virtual void push(const GridPtr& grid)
-        {
-            // Fill in any grid data which didn't get filled in by the surface
-            // during the dicing stage.
-            //
-            // TODO: Alias optimization:
-            //  - For perspective projections I may be aliased to P rather
-            //    than copied
-            //  - N may sometimes be aliased to Ng
-            //
-            GridStorage& stor = grid->storage();
-            DataView<Vec3> P = stor.get(StdIndices::P);
-            // Deal with normals N & Ng
-            DataView<Vec3> Ng = stor.get(StdIndices::Ng);
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            if(Ng)
-                grid->calculateNormals(Ng, P);
-            if(N && !m_builder.dicedByGeom(stor, StdIndices::N))
-            {
-                if(Ng)
-                    copy(N, Ng, stor.nverts());
-                else
-                    grid->calculateNormals(N, P);
-            }
-            // Deal with view direction.
-            if(DataView<Vec3> I = stor.get(StdIndices::I))
-            {
-                // In shading coordinates, I is just equal to P for
-                // perspective projections.  (TODO: orthographic)
-                copy(I, P, stor.nverts());
-            }
-            if(m_parentGeom->isDeforming())
-                m_deformCollector.push(grid);
-            else
-            {
-                m_renderer.push(GridHolderPtr(
-                    new GridHolder(grid, &m_parentGeom->attrs()) ));
-            }
-        }
-
-        virtual const Options& options()
-        {
-            return m_renderer.m_opts;
-        }
-        virtual const Attributes& attributes()
-        {
-            return m_parentGeom->attrs();
-        }
-
-        virtual GridStorageBuilder& gridStorageBuilder()
-        {
-            // Add required stdvars for sampling, shader input & output.
-            //
-            // TODO: Perhaps some of this messy logic can be done once & cached
-            // in the surface holder?
-            //
-            m_builder.clear();
-            // TODO: AOV stuff shouldn't be conditional on surfaceShader
-            // existing.
-            if(m_parentGeom->attrs().surfaceShader)
-            {
-                // Renderer arbitrary output vars
-                const OutvarSet& aoVars = m_renderer.m_outVars;
-                const Shader& shader = *m_parentGeom->attrs().surfaceShader;
-                const VarSet& inVars = shader.inputVars();
-                // P is guaranteed to be dice by the geometry.
-                m_builder.add(Stdvar::P,  GridStorage::Varying);
-                // Add stdvars computed by the renderer if they're needed in
-                // the shader or AOVs.  These are:
-                //
-                //   I - computed from P
-                //   du, dv - compute from u,v
-                //   E - eye position is always 0
-                //   ncomps - computed from options
-                //   time - always 0 (?)
-                if(inVars.contains(StdIndices::I) || aoVars.contains(Stdvar::I))
-                    m_builder.add(Stdvar::I,  GridStorage::Varying);
-                // TODO: du, dv, E, ncomps, time
-
-                // Some geometric stdvars - dPdu, dPdv, Ng - may in principle
-                // be filled in by the geometry.  For now we just estimate
-                // these in the renderer core using derivatives of P.
-                //
-                // TODO: dPdu, dPdv
-                if(inVars.contains(Stdvar::Ng) || aoVars.contains(Stdvar::Ng))
-                    m_builder.add(Stdvar::Ng,  GridStorage::Varying);
-                // N is a tricky case; it may inherit a value from Ng if it's
-                // not set explicitly, but only if Ng is never assigned to by
-                // the shaders (implicitly via P).
-                //
-                // Thoughts about variable flow for N:
-                //
-                // How can N differ from Ng??
-                // - If it's a primvar
-                // - If N is changed in the displacement shader
-                // - If P is changed in the displacement shader (implies Ng is
-                //   too)
-                //
-                // 1) Add N if contained in inVars or outVars or AOVs
-                // 2) Add if it's in the primvar list
-                // 3) Allocate if N can differ from Ng, *and* both N & Ng are
-                //    in the list.
-                // 4) Dice if it's a primvar
-                // 5) Alias to Ng if N & Ng can't differ, else memcpy.
-                //
-                // Lesson: N and Ng should be the same, unless N is specified
-                // by the user (ie, is a primvar) or N & Ng diverge during
-                // displacement (ie, N is set or P is set)
-                if(inVars.contains(Stdvar::N) || aoVars.contains(Stdvar::N))
-                    m_builder.add(Stdvar::N,  GridStorage::Varying);
-
-                // Stdvars which should be attached at geometry creation:
-                // Cs, Os - from attributes state
-                // u, v
-                // s, t - copy u,v ?
-                //
-                // Stdvars which must be filled in by the geometry:
-                // P
-                //
-                // Stdvars which can be filled in by either geometry or
-                // renderer.  Here's how you'd do them with the renderer:
-                // N - computed from Ng
-                // dPdu, dPdv - computed from P
-                // Ng - computed from P
-
-                // Add shader outputs
-                const VarSet& outVars = shader.outputVars();
-                if(outVars.contains(StdIndices::Ci) && aoVars.contains(Stdvar::Ci))
-                    m_builder.add(Stdvar::Ci, GridStorage::Varying);
-                if(outVars.contains(StdIndices::Oi) && aoVars.contains(Stdvar::Oi))
-                    m_builder.add(Stdvar::Oi, GridStorage::Varying);
-                // TODO: Replace the limited stuff above with the following:
-                /*
-                for(var in outVars)
-                {
-                    // TODO: signal somehow that these vars are to be retained
-                    // after shading.
-                    if(aovs.contains(var))
-                        m_builder.add(var);
-                }
-                */
-            }
-            m_builder.setFromGeom();
-            return m_builder;
         }
 };
 
@@ -602,11 +297,13 @@ void Renderer::push(const GeomHolderPtr& holder)
     // Cull if outside near/far clipping range
     if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
         return;
-    // Transform bound to raster space.  TODO: The need to do this
-    // here seems undesirable somehow; perhaps use objects in world
-    // space + arbitrary spatial bounding computation?
+    // Transform bound to raster space.
+    //
+    // TODO: Support arbitrary coordinate systems for the displacement bound
+    bound.min -= Vec3(holder->attrs().displacementBound);
+    bound.max += Vec3(holder->attrs().displacementBound);
     float minz = bound.min.z;
-    float maxz = bound.min.z;
+    float maxz = bound.max.z;
     bound = transformBound(bound, m_camToRas);
     bound.min.z = minz;
     bound.max.z = maxz;
@@ -628,9 +325,9 @@ void Renderer::push(const GridHolderPtr& holder)
     holder->shade();
     // Rasterize grids right away, never store them.
     Grid& grid = holder->grid();
-    if(holder->isDeforming())
+    if(holder->isDeforming() || m_opts.fstop != FLT_MAX)
     {
-        // Sample with motion blur.
+        // Sample with motion blur or depth of field
         switch(grid.type())
         {
             case GridType_QuadSimple:
@@ -643,7 +340,7 @@ void Renderer::push(const GridHolderPtr& holder)
     }
     else
     {
-        // Sample without motion blur.
+        // No motion blur or depth of field
         switch(grid.type())
         {
             case GridType_QuadSimple:
@@ -660,6 +357,7 @@ void Renderer::push(const GridHolderPtr& holder)
 Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
+    m_coc(),
     m_surfaces(new SurfaceQueue()),
     m_outVars(),
     m_sampStorage(),
@@ -694,10 +392,17 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         * Mat4().setScale(Vec3(0.5,-0.5,0))
         * Mat4().setTranslation(Vec3(0.5,0.5,0))
         * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+
+    if(opts.fstop != FLT_MAX)
+    {
+        m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
+                                          opts.focalDistance, m_camToRas));
+    }
 }
 
-// Trivial destructor.  Only here to prevent renderer implementation details
-// leaking (SurfaceQueue destructor is called implicitly)
+// Trivial destructor.  Only defined here to prevent renderer implementation
+// details leaking out of the interface (SurfaceQueue destructor is called
+// implicitly)
 Renderer::~Renderer() { }
 
 void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
@@ -709,8 +414,7 @@ void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
 
 void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 {
-    GeomHolderPtr holder(new GeomHolder(&*deformingGeom.begin(),
-                                        &*deformingGeom.end(), &attrs));
+    GeomHolderPtr holder(new GeomHolder(deformingGeom, &attrs));
     push(holder);
 }
 
@@ -722,6 +426,12 @@ void Renderer::render()
     // projection matrix lets us examine a fixed set of grids
     // independently of the viewpoint.
     Mat4 splitTrans = m_camToRas;
+    // Make sure that the z-component comes out as zero when splitting based on
+    // projected size
+    splitTrans[0][2] = 0;
+    splitTrans[1][2] = 0;
+    splitTrans[2][2] = 0;
+    splitTrans[3][2] = 0;
 //            Mat4().setScale(Vec3(0.5,-0.5,0))
 //        * Mat4().setTranslation(Vec3(0.5,0.5,0))
 //        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
@@ -732,80 +442,209 @@ void Renderer::render()
     {
         GeomHolderPtr g = m_surfaces->top();
         m_surfaces->pop();
-        tessContext.tessellate(splitTrans, g);
+        float polyLength = micropolyBlurWidth(g, m_coc.get());
+        tessContext.tessellate(splitTrans, polyLength, g);
     }
     saveImages("test");
 }
 
+
+/// TODO: Clean up & abstract the parts of motionRasterize so it can correctly
+/// take any GridT, and so that it actually uses PolySamplerT.
+struct OutVarInfo
+{
+    ConstFvecView src;
+    int outIdx;
+
+    OutVarInfo(const ConstFvecView& src, int outIdx)
+        : src(src), outIdx(outIdx) {}
+};
+
+
+/// Dirty implementation of motion blur sampling.  Won't work unless GridT is
+/// a quad grid!
 template<typename GridT, typename PolySamplerT>
 void Renderer::motionRasterize(GridHolder& holder)
 {
-    GridT& grid1 = static_cast<GridT&>(holder.grid());
-    GridT& grid2 = static_cast<GridT&>(*holder.extraGrids()[0]);
+    // Project grids into raster coordinates.
+    holder.project(m_camToRas);
 
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
+
+    bool motionBlur = holder.isDeforming();
+
+    // Cache the variables which need to be interpolated into
+    // fragment outputs.
+    std::vector<OutVarInfo> outVarInfo;
+    const GridT& mainGrid = static_cast<GridT&>(holder.grid());
+    const GridStorage& mainStor = mainGrid.storage();
+    const VarSet& gridVars = mainStor.varSet();
+    for(int j = 0, jend = m_outVars.size(); j < jend; ++j)
+    {
+        // Simplistic linear search through grid variables for now.
+        // This only happens once per grid, so maybe it's not too bad?
+        for(int i = 0, iend = gridVars.size(); i < iend; ++i)
+        {
+            if(gridVars[i] == m_outVars[j])
+            {
+                outVarInfo.push_back(OutVarInfo(
+                        mainStor.get(i), m_outVars[j].offset) );
+                break;
+            }
+        }
+    }
+
     int fragSize = m_sampStorage->fragmentSize();
     const float* defaultFrag = m_sampStorage->defaultFragment();
 
-    // Project grids into raster coordinates.
-    grid1.project(m_camToRas);
-    grid2.project(m_camToRas);
+    // Interleaved sampling info
+    Imath::V2i tileSize = m_sampStorage->m_tileSize;
+    Vec2 tileBoundMult = Vec2(1.0)/Vec2(tileSize);
+    Imath::V2i nTiles = Imath::V2i(m_sampStorage->m_xSampRes-1,
+                        m_sampStorage->m_ySampRes-1) / tileSize
+                        + Imath::V2i(1);
+    const int sampsPerTile = tileSize.x*tileSize.y;
+    // time/lens position of samples
+    const SampleStorage::TimeLens* extraDims = &m_sampStorage->m_extraDims[0];
 
-    const GridStorage& stor1 = grid1.storage();
-    const GridStorage& stor2 = grid2.storage();
-    ConstDataView<Vec3> P1 = stor1.P();
-    ConstDataView<Vec3> P2 = stor2.P();
+    // Info for motion interpolation
+    int* intervals = 0;
+    float* interpWeights = 0;
+    if(motionBlur)
+    {
+        const GridKeys& gridKeys = holder.gridKeys();
 
+        // Pre-compute interpolation info for all time indices
+        intervals = ALLOCA(int, sampsPerTile);
+        const int maxIntervalIdx = gridKeys.size()-2;
+        interpWeights = ALLOCA(float, sampsPerTile);
+        for(int i = 0, interval = 0; i < sampsPerTile; ++i)
+        {
+            // Search forward through grid time intervals to find the interval
+            // which contains the i'th sample time.
+            while(interval < maxIntervalIdx
+                && gridKeys[interval+1].time < extraDims[i].time)
+                ++interval;
+            intervals[i] = interval;
+            interpWeights[i] = (extraDims[i].time - gridKeys[interval].time) /
+                        (gridKeys[interval+1].time - gridKeys[interval].time);
+        }
+    }
+
+    // Helper objects for hit testing
     PointInQuad hitTest;
     InvBilin invBilin;
 
-    // Fixed time, in betwen 0 & 1
-    const float time = m_opts.shutterMax;
-
-    // For each micropoly
-    for(int v = 0, nv = grid1.nv(); v < nv-1; ++v)
-    for(int u = 0, nu = grid1.nu(); u < nu-1; ++u)
+    // For each micropoly.
+    for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
+    for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
     {
         MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                          nu*(v+1) + u+1,  nu*(v+1) + u);
-        // Interpolate to current time
-        Vec3 Pa = lerp(P1[ind.a], P2[ind.a], time);
-        Vec3 Pb = lerp(P1[ind.b], P2[ind.b], time);
-        Vec3 Pc = lerp(P1[ind.c], P2[ind.c], time);
-        Vec3 Pd = lerp(P1[ind.d], P2[ind.d], time);
-        // Compute bound
-        Box bound(Pa);
-        bound.extendBy(Pb);
-        bound.extendBy(Pc);
-        bound.extendBy(Pd);
-        // Init hit tester
-        hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
-                     vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
-        invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
-                      vec2_cast(Pd), vec2_cast(Pc));
-        // Iterate over samples in bound
-        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
-            sampi.valid(); ++sampi)
+        // For each possible sample time
+        for(int itime = 0; itime < sampsPerTile; ++itime)
         {
-            Sample& samp = sampi.sample();
-            if(!hitTest(samp))
-                continue;
-            Vec2 uv = invBilin(samp.p);
-            float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
-            if(samp.z < z)
-                continue; // Ignore if hit is hidden
-            samp.z = z;
-            // Generate & store a fragment
-            float* out = sampi.fragment();
-            // Initialize fragment data with the default value.
-            std::memcpy(out, defaultFrag, fragSize*sizeof(float));
-            // Store interpolated fragment data
-            if(zOffset >= 0)
-                out[zOffset] = z;
+            // Compute vertices of micropolygon
+            Vec3 Pa, Pb, Pc, Pd;
+            if(motionBlur)
+            {
+                int interval = intervals[itime];
+                const GridKeys& gridKeys = holder.gridKeys();
+                const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
+                const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
+                // Interpolate micropoly to the current time
+                float interp = interpWeights[itime];
+                ConstDataView<Vec3> P1 = grid1.storage().P();
+                ConstDataView<Vec3> P2 = grid2.storage().P();
+                Pa = lerp(P1[ind.a], P2[ind.a], interp);
+                Pb = lerp(P1[ind.b], P2[ind.b], interp);
+                Pc = lerp(P1[ind.c], P2[ind.c], interp);
+                Pd = lerp(P1[ind.d], P2[ind.d], interp);
+            }
+            else
+            {
+                ConstDataView<Vec3> P = mainStor.P();
+                Pa = P[ind.a];
+                Pb = P[ind.b];
+                Pc = P[ind.c];
+                Pd = P[ind.d];
+            }
+
+            // Offset vertices with lens position for depth of field.
+            if(m_coc)
+            {
+                Vec2 lensPos = extraDims[itime].lens;
+                m_coc->lensShift(Pa, lensPos);
+                m_coc->lensShift(Pb, lensPos);
+                m_coc->lensShift(Pc, lensPos);
+                m_coc->lensShift(Pd, lensPos);
+            }
+            hitTest.init(vec2_cast(Pa), vec2_cast(Pb),
+                         vec2_cast(Pc), vec2_cast(Pd), (u + v) % 2);
+            invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
+                          vec2_cast(Pd), vec2_cast(Pc));
+            // Compute tight bound
+            Box bound(Pa);
+            bound.extendBy(Pb);
+            bound.extendBy(Pc);
+            bound.extendBy(Pd);
+
+            // Iterate over samples at current time which come from tiles
+            // which cross the bound.
+            Imath::V2i bndMin = ifloor((vec2_cast(bound.min)*m_opts.superSamp
+                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
+            Imath::V2i bndMax = ifloor((vec2_cast(bound.max)*m_opts.superSamp
+                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
+            int startx = clamp(bndMin.x,   0, nTiles.x);
+            int endx   = clamp(bndMax.x+1, 0, nTiles.x);
+            int starty = clamp(bndMin.y,   0, nTiles.y);
+            int endy   = clamp(bndMax.y+1, 0, nTiles.y);
+            // For each tile in the bound
+            for(int ty = starty; ty < endy; ++ty)
+            for(int tx = startx; tx < endx; ++tx)
+            {
+                int tileInd = (ty*nTiles.x + tx);
+                // Index of which sample in the tile is considered to be at
+                // itime.
+                int shuffIdx = m_sampStorage->m_tileShuffleIndices[
+                                tileInd*sampsPerTile + itime ];
+                if(shuffIdx < 0)
+                    continue;
+                Sample& samp = m_sampStorage->m_samples[shuffIdx];
+                if(!hitTest(samp))
+                    continue;
+                Vec2 uv = invBilin(samp.p);
+                float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
+                if(samp.z < z)
+                    continue; // Ignore if hit is hidden
+                samp.z = z;
+                // Generate & store a fragment
+                float* samples = &m_sampStorage->m_fragments[shuffIdx*fragSize];
+                // Initialize fragment data with the default value.
+                std::memcpy(samples, defaultFrag, fragSize*sizeof(float));
+                // Store interpolated fragment data
+                for(int j = 0, jend = outVarInfo.size(); j < jend; ++j)
+                {
+                    ConstFvecView in = outVarInfo[j].src;
+                    const float* in0 = in[ind.a];
+                    const float* in1 = in[ind.b];
+                    const float* in2 = in[ind.d];
+                    const float* in3 = in[ind.c];
+                    float w0 = (1-uv.y)*(1-uv.x);
+                    float w1 = (1-uv.y)*uv.x;
+                    float w2 = uv.y*(1-uv.x);
+                    float w3 = uv.y*uv.x;
+                    float* out = &samples[outVarInfo[j].outIdx];
+                    for(int i = 0, size = in.elSize(); i < size; ++i)
+                        out[i] = w0*in0[i] + w1*in1[i] + w2*in2[i] + w3*in3[i];
+                }
+                if(zOffset >= 0)
+                    samples[zOffset] = z;
+            }
         }
     }
 }

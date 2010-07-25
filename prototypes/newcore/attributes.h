@@ -26,12 +26,16 @@
 struct Attributes
 {
     float shadingRate;  ///< Desired micropoly area
+    float focusFactor;  ///< Control for enlarging focal blurred micropolys
     bool smoothShading; ///< Type of shading interpolation
+    float displacementBound;  ///< Maximum bound on displacement from shader
     ShaderPtr surfaceShader;  ///< surface shader
 
     Attributes()
         : shadingRate(1),
+        focusFactor(1),
         smoothShading(true),
+        displacementBound(0),
         surfaceShader()
     { }
 };
