@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 	}
 
 	{
-		// Check a special case kludge - integer types can be specified either
-		// with "int" or with "integer"
+		// Check a special case - integer types can be specified either with
+		// "int" or with "integer"
 		CqPrimvarToken tok("uniform int i");
 		BOOST_CHECK_EQUAL(tok.type(), type_integer);
 	}
@@ -95,10 +95,6 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 // tests for parsing invalid tokens.
 BOOST_AUTO_TEST_CASE(CqPrimvarToken_invalid_parse_test)
 {
-	// invalid tokens
-	BOOST_CHECK_THROW(CqPrimvarToken("#u"), XqParseError);
-	BOOST_CHECK_THROW(CqPrimvarToken("\"u"), XqParseError);
-
 	// invalid/incomplete token sequences
 	BOOST_CHECK_THROW(CqPrimvarToken("] u"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("[ u"), XqParseError);

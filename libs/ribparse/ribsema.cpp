@@ -42,7 +42,6 @@ RibParser::RibParser(Ri::Renderer& renderer)
     m_requestHandlerMap(),
     m_paramListStorage(),
     m_numColorComps(3),
-    m_tokenDict(),
     m_lightMap(),
     m_namedLightMap(),
     m_objectMap(),
@@ -244,28 +243,40 @@ inline const T& toFloatBasedType(Ri::FloatArray a,
     return *reinterpret_cast<const T*>(a.begin());
 }
 
+
 } // anon. namespace
+
 
 /// Read in a renderman parameter list from the lexer.
 Ri::ParamList RibParser::readParamList(RibLexer& lex)
 {
     m_paramListStorage.clear();
+    m_paramNameStorage.clear();
     while(lex.peekNextType() != RibLexer::Tok_RequestEnd)
     {
-        CqPrimvarToken tok;
-        tok = m_tokenDict.parseAndLookup(lex.getString());
-        switch(tok.storageType())
+        const char* name = 0;
+        const char* nameEnd = 0;
+        Ri::TypeSpec spec = m_renderer.GetDeclaration(lex.getString(),
+                                                      &name, &nameEnd);
+        if(*nameEnd != 0)
         {
-            case type_integer:
-                m_paramListStorage.push_back(Ri::Param(tok, lex.getIntParam()));
+            // Unusual case: name is valid but not properly null-terminated
+            // (eg, ends in whitespace).  We need to generate a copy so as to
+            // add the correct null termination.
+            m_paramNameStorage.push_back(std::string(name, nameEnd));
+            name = m_paramNameStorage.back().c_str();
+        }
+        switch(spec.storageType())
+        {
+            case Ri::TypeSpec::Integer:
+                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getIntParam()));
                 break;
-            case type_float:
-                m_paramListStorage.push_back(Ri::Param(tok, lex.getFloatParam()));
+            case Ri::TypeSpec::Float:
+                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getFloatParam()));
                 break;
-            case type_string:
-                m_paramListStorage.push_back(Ri::Param(tok, lex.getStringParam()));
+            case Ri::TypeSpec::String:
+                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getStringParam()));
                 break;
-            case type_invalid:
             default:
                 assert(0 && "Unknown storage type; we should never get here.");
                 break;
@@ -336,9 +347,6 @@ void RibParser::handleDeclare(RibLexer& lex)
     // Collect arguments from lex.
     const char* name = lex.getString();
     const char* declaration = lex.getString();
-
-    // TODO: Refactor so we don't need m_tokenDict.
-    m_tokenDict.insert(CqPrimvarToken(declaration, name));
 
     m_renderer.Declare(name, declaration);
 }

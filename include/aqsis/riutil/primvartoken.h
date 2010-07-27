@@ -32,8 +32,37 @@
 
 #include <aqsis/riutil/interpclasscounts.h>
 #include <aqsis/riutil/primvartype.h>
+#include "../../../libs/ribparse/ricxx.h"  // <FIXME!!
 
 namespace Aqsis {
+
+/// Parse type and name information from a string.
+///
+/// In the renderman interface, interface types come bundled together in a
+/// "token" string of format
+///
+///   [  [ class ]  type  [ '[' count ']' ]  ]   name
+///
+/// where the square brackets indicate optional components.  This function
+/// parses tokens of that form.  For parts of the token which aren't present,
+/// defaults are:
+///   * class = Uniform
+///   * type = Unknown
+///   * count = 1  (array size)
+///
+/// If nameEnd is non-null, it's considered an error for the name token not to
+/// be present; otherwise it is optional.  The name part of the token string is
+/// returned as the subrange [nameStart,nameEnd)
+///
+/// If an error is detected during parsing (ie., the token doesn't have the
+/// format described above), it is stored into the error string when the error
+/// parameter is non-null.  If error is null, an XqParseError is thrown
+/// instead.
+///
+Ri::TypeSpec parseDeclaration(const char* token,
+						      const char** nameStart = 0,
+						      const char** nameEnd = 0,
+						      const char** error = 0);
 
 //------------------------------------------------------------------------------
 /** \brief Class holding primitive variable name and type
@@ -52,7 +81,6 @@ namespace Aqsis {
 class AQSIS_RIUTIL_SHARE CqPrimvarToken
 {
 	public:
-
 		/** \brief Default constructor.
 		 * Equivalent to CqPrimvarToken(class_invalid, type_invalid, 0, "")
 		 */
@@ -60,29 +88,14 @@ class AQSIS_RIUTIL_SHARE CqPrimvarToken
 		/// Trivial constructor.
 		CqPrimvarToken(EqVariableClass Class, EqVariableType type,
 				TqInt count, const std::string& name);
-		/** \brief Parse type and name information from an RtToken string.
-		 *
-		 * In the renderman interface, strings come bundled together in an
-		 * "RtToken" of format
-		 *
-		 *   [  [ class ]  type  [ '[' count ']' ]  ]   name
-		 *
-		 * where the square brackets indicate optional components.  This
-		 * constructor parses tokens of that form.  For parts of the token
-		 * which aren't present, defaults are:
-		 *   * class = class_uniform  (or class_invaild if type == type_invalid)
-		 *   * type = type_invalid
-		 *   * count = 1  (array size)
-		 *
-		 * \throw XqParseError whenever the token fails to have the format
-		 * shown above.
-		 *
-		 * \param token - token string to parse.
-		 * \todo Cleanup this to use a const version of RtToken...
-		 */
+		/// Construct from the given typespec & name.
+		CqPrimvarToken(const Ri::TypeSpec& spec, const std::string& name);
+		/// Construct using type information from token
+		///
+		/// \see parseDeclaration
 		explicit CqPrimvarToken(const char* token);
 		/** \brief Parse type information from an RtToken string
-		 * 
+		 *
 		 * \throw XqParseError if typeToken fails to have the required form.
 		 *
 		 * \param typeToken has the form  [ [class]  type  [ '['array_size']' ] ]
@@ -150,17 +163,24 @@ class AQSIS_RIUTIL_SHARE CqPrimvarToken
 		 * Tokens are equal if their name, size and array counts are equal.
 		 */
 		bool operator==(const CqPrimvarToken& rhs) const;
+
 	private:
 		EqVariableClass m_class;
 		EqVariableType m_type;
 		TqInt m_count;
 		std::string m_name;
-
-		void parse(const char* token);
 };
 
 /// Stream insertion operator.
 inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok);
+
+
+/// Convert type portion of CqPrimvarToken to Ri::TypeSpec
+///
+/// This function exists for compatibility between the older CqPrimvarToken
+/// which is used internally and the public-interface Ri::TypeSpec.
+Ri::TypeSpec toTypeSpec(const CqPrimvarToken& tok);
+
 
 //==============================================================================
 // Implementation details

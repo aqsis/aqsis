@@ -208,6 +208,7 @@ class RibParser : boost::noncopyable
 
         // Storage for parameter list parsing
         std::vector<Ri::Param> m_paramListStorage;
+        std::vector<std::string> m_paramNameStorage;
 
         /// Number of color components
         int m_numColorComps;

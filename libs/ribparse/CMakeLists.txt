@@ -45,7 +45,7 @@ aqsis_add_tests(${ribparse_test_srcs} LINK_LIBRARIES aqsis_ribparse)
 if(aqsis_enable_testing)
 	# Speed test for parser
 	add_executable(ricxx2ri_speed_test ricxx2ri_speed_test.cpp ricxx2ri.cpp)
-	target_link_libraries(ricxx2ri_speed_test aqsis_ribparse)
+	target_link_libraries(ricxx2ri_speed_test aqsis_ribparse aqsis_core)
 	# Set the exports necessary to avoid incorrect linkage errors.
 	set_target_properties(ricxx2ri_speed_test PROPERTIES COMPILE_DEFINITIONS AQSIS_RI_EXPORTS)
 endif()

@@ -20,6 +20,8 @@
 #ifndef AQSIS_MULTISTRINGBUFFER_INCLUDED
 #define AQSIS_MULTISTRINGBUFFER_INCLUDED
 
+#include <cstring>
+#include <string>
 #include <vector>
 
 namespace Aqsis {
@@ -46,12 +48,22 @@ class MultiStringBuffer
         MultiStringBuffer()
             : m_storage(), m_offsets(), m_cStrings() {}
 
+        /// Add iterator range [begin,end) to the end of the string vector
+        template<typename IterT>
+        void push_back(IterT begin, IterT end)
+        {
+            m_offsets.push_back(m_storage.size());
+            m_storage.insert(m_storage.end(), begin, end);
+            m_storage.push_back(0); // terminating null char.
+        }
         /// Add str to the end of the string vector
         void push_back(const std::string& str)
         {
-            m_offsets.push_back(m_storage.size());
-            m_storage.insert(m_storage.end(), str.begin(), str.end());
-            m_storage.push_back(0); // terminating null char.
+            push_back(str.begin(), str.end());
+        }
+        void push_back(const char* str)
+        {
+            push_back(str, str+std::strlen(str));
         }
 
         /// Clear all strings

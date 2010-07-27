@@ -111,7 +111,7 @@ namespace printer_funcs
 
     std::ostream& operator<<(std::ostream& out, const Ri::Param& p)
     {
-        out << p.spec();
+        out << CqPrimvarToken(p.spec(), p.name());
         return out;
     }
 
@@ -302,6 +302,8 @@ RtFloat mockFilterFunc(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 // Mock implementation of Ri::Renderer.
 class MockRenderer : public Ri::Renderer
 {
+    private:
+        CqTokenDictionary m_tokenDict;
     public:
         MockRenderer() {}
 
@@ -557,6 +559,19 @@ class MockRenderer : public Ri::Renderer
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const {return 0;}
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const {return &mockProcSubdivFunc;}
         virtual RtProcFreeFunc   GetProcFreeFunc() const {return &mockProcFree;}
+
+        virtual TypeSpec GetDeclaration(RtConstToken token,
+                                const char** nameBegin = 0,
+                                const char** nameEnd = 0)
+        {
+            TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
+            if(spec.type == TypeSpec::Unknown)
+            {
+                // Yuck, ick, ew!  Double parsing here :/
+                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
+            }
+            return spec;
+        }
 };
 
 
@@ -679,7 +694,8 @@ struct CheckParams
                     CqPrimvarToken tok = m_tokenDict.parseAndLookup(
                             g_fixture->tokens.at(g_fixture->checkPos)
                             .getString());
-                    BOOST_CHECK_EQUAL(tok, pList[i].spec());
+                    BOOST_CHECK_EQUAL(tok, CqPrimvarToken(pList[i].spec(),
+                                                          pList[i].name()));
                 }
                 catch(XqValidation& /*e*/)
                 {
@@ -715,6 +731,7 @@ BOOST_AUTO_TEST_CASE(RIB_version_test)
 RtToken MockRenderer::Declare(RtConstString name, RtConstString declaration)
 {
     CheckParams() << Req("Declare") << name << declaration;
+    m_tokenDict.insert(CqPrimvarToken(declaration, name));
     return 0;
 }
 BOOST_AUTO_TEST_CASE(Declare_handler_test)

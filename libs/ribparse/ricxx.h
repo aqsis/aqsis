@@ -28,12 +28,12 @@
 
 #include <cassert>
 
-#include <aqsis/riutil/primvartoken.h>
 #include <aqsis/ri/ritypes.h>
 
-namespace Aqsis {
 
-/// Const versions of common Ri typedefs
+/// Const versions of common Ri typedefs.
+///
+/// In the global namespace to match RtFloat etc.  (Is this a good idea?)
 typedef const float RtConstBasis[4][4];
 typedef const float RtConstBound[6];
 typedef const float RtConstColor[3];
@@ -43,11 +43,14 @@ typedef const char* RtConstString;
 typedef const char* RtConstToken;
 
 
+namespace Aqsis {
+
+/// Namespace containing a C++ version of the RI, with associated types.
 namespace Ri {
 
-typedef float RtFloat;
-typedef int RtInt;
-typedef const char* RtConstToken;
+//------------------------------------------------------------------------------
+// Setup.
+
 
 /// A minimal, immutable array reference type.
 template<typename T>
@@ -78,41 +81,114 @@ typedef Array<RtFloat> FloatArray;
 typedef Array<RtConstString> StringArray;
 typedef Array<RtConstToken> TokenArray;
 
+
+/// Type specification for parameters.
+///
+/// In the traditional RI, interface types are represented using strings, for
+/// example "point", "uniform vector[1]", etc.  This struct is a non-string
+/// representation the three important pieces of information contained in such
+/// type strings.
+///   * Interpolation class - the method used for interpolating the value
+///     across the surface of a geometric primitive
+///   * Type - the basic type.
+///   * Array size - variables may be arrays of one or more elements of the
+///     basic type
+struct TypeSpec
+{
+    // note: order of IClass and Type should match the Rif interface,
+    // RifTokenDetail and RifTokenType.
+    enum IClass
+    {
+        Constant,
+        Uniform,
+        Varying,
+        Vertex,
+        FaceVarying,
+        FaceVertex,
+        NoClass = 128
+    };
+    enum Type
+    {
+        Float,
+        Point,
+        Color,
+        Integer,
+        String,
+        Vector,
+        Normal,
+        HPoint,
+        Matrix,
+        MPoint,
+        Unknown = 128
+    };
+
+    IClass iclass;
+    Type type;
+    int arraySize;
+
+    TypeSpec(Type type=Unknown, int arraySize=1)
+        : iclass(Uniform), type(type), arraySize(arraySize) {}
+    TypeSpec(IClass iclass, Type type, int arraySize=1)
+        : iclass(iclass), type(type), arraySize(arraySize) {}
+
+    /// Return the base type used for storage of this type.
+    ///
+    /// The current type is an aggregate of elements of the base type.
+    Type storageType() const
+    {
+        switch(type)
+        {
+            case Integer: case String: case Unknown:   return type;
+            default:                                   return Float;
+        }
+    }
+
+    bool operator==(const TypeSpec& rhs) const
+    {
+        return iclass == rhs.iclass && type == rhs.type &&
+               arraySize == rhs.arraySize;
+    }
+};
+
+
+/// Representation of a parameter for interface function parameter lists
 class Param
 {
     private:
-        CqPrimvarToken m_spec;
+        TypeSpec m_spec;
+        const char* m_name;
         const void* m_data;
         size_t m_size;
 
     public:
-        Param(const CqPrimvarToken& spec, const RtFloat* data, size_t size)
-            : m_spec(spec), m_data(data), m_size(size) {}
-        Param(const CqPrimvarToken& spec, const RtInt* data, size_t size)
-            : m_spec(spec), m_data(data), m_size(size) {}
-        Param(const CqPrimvarToken& spec, const RtConstToken* data, size_t size)
-            : m_spec(spec), m_data(data), m_size(size) {}
+        Param(const TypeSpec& spec, const char* name, const RtFloat* data, size_t size)
+            : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
+        Param(const TypeSpec& spec, const char* name, const RtInt* data, size_t size)
+            : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
+        Param(const TypeSpec& spec, const char* name, const RtConstToken* data, size_t size)
+            : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
         template<typename T>
-        Param(const CqPrimvarToken& spec, Array<T> value)
-            : m_spec(spec), m_data(value.begin()), m_size(value.size()) {}
+        Param(const TypeSpec& spec, const char* name, Array<T> value)
+            : m_spec(spec), m_name(name), m_data(value.begin()), m_size(value.size()) {}
 
-        const CqPrimvarToken& spec() const { return m_spec; }
+        const TypeSpec& spec() const { return m_spec; }
+        const char* name() const { return m_name; }
         const void* data() const { return m_data; }
         size_t size() const { return m_size; }
 
         FloatArray floatData() const
         {
-            assert(m_spec.storageType() == type_float);
+            assert(m_spec.storageType() == TypeSpec::Float);
             return FloatArray(static_cast<const RtFloat*>(m_data), m_size);
         }
         IntArray intData() const
         {
-            assert(m_spec.storageType() == type_integer);
+            assert(m_spec.storageType() == TypeSpec::Integer);
             return IntArray(static_cast<const RtInt*>(m_data), m_size);
         }
         StringArray stringData() const
         {
-            assert(m_spec.storageType() == type_string);
+            assert(m_spec.storageType() == TypeSpec::String);
             return StringArray(static_cast<const RtConstToken*>(m_data), m_size);
         }
 };
@@ -120,10 +196,11 @@ class Param
 typedef Array<Param> ParamList;
 
 
+//------------------------------------------------------------------------------
 /// Simple C++ version of the RenderMan interface
 ///
 /// The goal here is to provide a C++ version of the RenderMan interface which
-/// is similar to the RIB binding.  This interface is *not* intended to be used
+/// is similar to the RIB binding.  This interface is not intended to be used
 /// by end-users because it's fairly low-level and the call interface is not
 /// particularly convenient.
 ///
@@ -155,6 +232,7 @@ class Renderer
         typedef Ri::StringArray StringArray;
         typedef Ri::TokenArray TokenArray;
         typedef Ri::ParamList ParamList;
+        typedef Ri::TypeSpec TypeSpec;
 
         // Autogenerated method declarations
         /*[[[cog
@@ -420,8 +498,22 @@ class Renderer
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const = 0;
         virtual RtProcFreeFunc   GetProcFreeFunc() const = 0;
 
-        // TODO: Rif API?
-        //
+        /// Get a previously Declared token or parse inline declaration
+        ///
+        /// The parameter name is a subrange of the string "token", and as such
+        /// is returned as the range [nameBegin, nameEnd).
+        ///
+        /// Implementations should throw XqValidation on parse or lookup error.
+        ///
+        /// \param token - type declaration and parameter name, in a string.
+        /// \param nameBegin - return start of the name here if non-null
+        /// \param nameEnd   - return end of the name here if non-null
+        virtual TypeSpec GetDeclaration(RtConstToken token,
+                                        const char** nameBegin = 0,
+                                        const char** nameEnd = 0) = 0;
+
+        // TODO: More Rif API?
+
         // TODO: Some way to get at the named transformation matrices so we can
         // implement RiTransformPoints
 
