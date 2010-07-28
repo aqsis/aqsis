@@ -567,7 +567,7 @@ class MockRenderer : public Ri::Renderer
             TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
             if(spec.type == TypeSpec::Unknown)
             {
-                // Yuck, ick, ew!  Double parsing here :/
+                // FIXME: Yuck, ick, ew!  Double parsing here :/
                 spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
             }
             return spec;

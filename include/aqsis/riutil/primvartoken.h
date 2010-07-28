@@ -320,8 +320,10 @@ inline bool CqPrimvarToken::operator==(const CqPrimvarToken& rhs) const
 
 inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok)
 {
-	out << tok.Class() << " " << tok.type() << "[" << tok.count() << "] "
-		<< tok.name();
+	out << tok.Class() << " " << tok.type();
+	if(tok.count() != 1)
+		out << "[" << tok.count() << "]";
+	out << " " << tok.name();
 	return out;
 }
 

@@ -54,25 +54,29 @@ class ParamListConverter
             m_values.clear();
             for(int i = 0, nparams = pList.size(); i < nparams; ++i)
             {
-                const char* name = pList[i].name();
+                const Ri::Param& param = pList[i];
+                const char* name = param.name();
                 RifTokenType type;
                 RifTokenDetail detail;
                 int arraySize;
                 if(!RifGetDeclaration(const_cast<RtToken>(name),
-                                      &type, &detail, &arraySize))
+                                      &type, &detail, &arraySize) &&
+                    param.spec().type == static_cast<Ri::TypeSpec::Type>(type) &&
+                    param.spec().iclass == static_cast<Ri::TypeSpec::IClass>(detail) &&
+                    param.spec().arraySize == arraySize)
                 {
-                    // token has already been declared; can use the plain
-                    // name.
+                    // An identical token has already been declared; can use
+                    // the plain name.
                     m_tokens.push_back(name);
                 }
                 else
                 {
-                    // hum, inefficient!
+                    // Ugh, format the token back into an inline declaration
                     std::ostringstream fmt;
-                    fmt << CqPrimvarToken(pList[i].spec(), pList[i].name());
+                    fmt << CqPrimvarToken(param.spec(), param.name());
                     m_tokens.push_back(fmt.str());
                 }
-                m_values.push_back(const_cast<RtPointer>(pList[i].data()));
+                m_values.push_back(const_cast<RtPointer>(param.data()));
             }
         }
 

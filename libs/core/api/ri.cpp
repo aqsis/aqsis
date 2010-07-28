@@ -1104,10 +1104,10 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 		RtInt i;
 		for ( i = 0; i < count; ++i )
 		{
-			RtToken	token = tokens[ i ];
+			CqPrimvarToken token = QGetRenderContext()->tokenDict().parseAndLookup( tokens[ i ] );
 			RtPointer	value = values[ i ];
 
-			if ( strcmp( token, RI_FOV ) == 0 )
+			if ( token.name() == RI_FOV )
 				QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FOV" ) [ 0 ] = *( reinterpret_cast<RtFloat*>( value ) ) ;
 		}
 	}

@@ -829,8 +829,28 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 	std::map<std::string, void*>::iterator param;
 	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
 	{
+		CqPrimvarToken tok;
+		try
+		{
+			tok = QGetRenderContext()->tokenDict().parseAndLookup(param->first.c_str());
+		}
+		catch (XqValidation& e)
+		{
+			Aqsis::log() << error << e.what() << std::endl;
+			return;
+		}
+		// Check the parameter type is uniform, not valid for non-surface
+		// requests otherwise.
+		if ( tok.Class() != class_uniform )
+		{
+			Aqsis::log() << error << "ignoring non-uniform display parameter "
+						 << param->first << std::endl;
+			continue;
+		}
+
 		// First check if it is one of the recognised parameters that the renderer should handle.
-		if (param->first.compare("quantize")==0)
+		if (tok.name() == "quantize" && tok.type() == type_float &&
+			tok.count() == 4)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -840,7 +860,8 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			m_QuantizeMaxVal = floats[3];
 			m_QuantizeSpecified = true;
 		}
-		else if (param->first.compare("dither")==0)
+		else if (tok.name() == "dither" && tok.type() == type_float &&
+				 tok.count() == 1)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -850,23 +871,6 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 		else
 		{
 			// Otherwise, construct a UserParameter structure and fill in the details.
-			CqPrimvarToken tok;
-			try
-			{
-				tok = QGetRenderContext()->tokenDict().parseAndLookup(param->first.c_str());
-			}
-			catch (XqValidation& e)
-			{
-				Aqsis::log() << error << e.what() << std::endl;
-				return;
-			}
-
-			// Check the parameter type is uniform, not valid for non-surface requests otherwise.
-			if ( tok.Class() != class_uniform )
-			{
-				assert( false );
-				continue;
-			}
 
 			UserParameter parameter;
 			parameter.name = 0;
