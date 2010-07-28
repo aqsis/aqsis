@@ -217,8 +217,8 @@ void RibTokenizer::scanNext(RibToken& tok)
 			case 0240: case 0241: case 0242: case 0243:
 				// Decode strings of length >= 16 bytes.  The encoded token has the form
 				//   0240 + l  |  <length>  |  <string>
-				// where <length> is l bytes long, 0 <= l <= 3, and <string> is
-				// of length l+1.
+				// where <length> is l+1 bytes long, 0 <= l <= 3, and <string> is
+				// of length l.
 				decodeString(*m_inBuf, decodeInt(*m_inBuf, c - 0240 + 1), tok);
 				return;
 			case 0244:
@@ -282,6 +282,8 @@ void RibTokenizer::scanNext(RibToken& tok)
 								  "request definition");
 						return;
 					}
+					// FIXME: m_encodedRequests should be part of the
+					// pushed/popped state.
 					m_encodedRequests[code] = tok.stringVal();
 				}
 				break;

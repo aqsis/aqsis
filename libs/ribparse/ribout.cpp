@@ -19,6 +19,7 @@
 
 #include "ricxx2ri.h"
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -28,6 +29,7 @@
 #	include <boost/iostreams/filtering_stream.hpp>
 #	include <boost/iostreams/filter/gzip.hpp>
 #endif
+#include <boost/cstdint.hpp>
 
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/logging.h>
@@ -36,6 +38,7 @@ namespace Aqsis {
 
 namespace {
 
+//------------------------------------------------------------------------------
 /// A formatter object which turns a sequence of tokens into an ascii RIB
 /// stream.
 class AsciiFormatter
@@ -53,7 +56,8 @@ class AsciiFormatter
             m_indentStep(4),
             m_indentString()
         {
-            // set the precision for floats.
+            // set the precision for floats.  You need at >= 9 decimal digits
+            // to avoid loss of precision for 32 bit IEEE floats.
             m_out.precision(9);
         }
 
@@ -70,9 +74,6 @@ class AsciiFormatter
         }
 
         void whitespace()     { m_out << ' '; }
-        void print(RtInt i)   { m_out << i; }
-        void print(RtFloat f) { m_out << f; }
-        void print(RtConstString s) { m_out << '\"' << s << '\"'; }
 
         void beginRequest(const char* name)
         {
@@ -96,6 +97,42 @@ class AsciiFormatter
                 m_out << string;
         }
 
+        void print(RtInt i)   { m_out << i; }
+        void print(RtFloat f) { m_out << f; }
+
+        void print(RtConstString s)
+        {
+            m_out << '\"';
+            while(*s)
+            {
+                // Strings are more complicated than you might expect, since
+                // we need to escape any non-printable characters.
+                TqUint8 c = *s;
+                switch(c)
+                {
+                    case '"':  m_out << "\\\""; break;
+                    case '\n': m_out << "\\n";  break;
+                    case '\r': m_out << "\\r";  break;
+                    case '\t': m_out << "\\t";  break;
+                    case '\b': m_out << "\\b";  break;
+                    case '\f': m_out << "\\f";  break;
+                    case '\\': m_out << "\\\\"; break;
+                    default:
+                        if(c >= 32 && c <= 176)
+                            m_out.put(c);
+                        else
+                        {
+                            // encode unprintable ASCII with octal escape seq
+                            m_out << '\\';
+                            m_out << std::oct << int(c) << std::dec;
+                        }
+                        break;
+                }
+                ++s;
+            }
+            m_out << '\"';
+        }
+
         template<typename T>
         void print(const Ri::Array<T>& a)
         {
@@ -109,9 +146,10 @@ class AsciiFormatter
             m_out << ']';
         }
 
-        void printColor(const float* c)
+        // Print a float triple (color or point)
+        void printTriple(const float* f)
         {
-            m_out << c[0] << ' ' << c[1] << ' ' << c[2];
+            m_out << f[0] << ' ' << f[1] << ' ' << f[2];
         }
 
         void print(const Ri::Param& p)
@@ -137,6 +175,172 @@ class AsciiFormatter
 };
 
 
+/// Safe type punning through a union.
+template<typename T1, typename T2>
+T1 union_cast(T2 val)
+{
+    union {
+        T1 v1;
+        T2 v2;
+    } converter;
+    converter.v2 = val;
+    return converter.v1;
+}
+
+
+//------------------------------------------------------------------------------
+/// A formatter object which turns a sequence of tokens into a binary RIB
+/// stream.
+class BinaryFormatter
+{
+    private:
+        std::ostream& m_out;
+        typedef std::map<std::string, TqUint8> EncodedRequestMap;
+        EncodedRequestMap m_encodedRequests;
+        TqUint8 m_currRequestCode;
+
+        // Unpack MSB into c[0], down to LSB into c[3]
+        //
+        // Order chosen so that m_out.write(c) writes the bytes from MSB to LSB
+        static inline void unpack(TqUint32 i, char c[4])
+        {
+            // Unpack bytes with bitwise ops to avoid endianness issues.
+            c[0] = i >> 24;
+            c[1] = (i >> 16) & 0xFF;
+            c[2] = (i >> 8) & 0xFF;
+            c[3] = i & 0xFF;
+        }
+
+        // Get the highest byte index which is nonzero, where 3 is the MSB and
+        // 0 is the LSB (note, opposite to the index of c).
+        static inline int highestByteNonzero(const char c[4])
+        {
+            if(c[0]) return 3;
+            if(c[1]) return 2;
+            if(c[2]) return 1;
+            return 0;
+        }
+
+        // Encode an unsigned int32, i to the stream
+        //
+        // baseCode is the binary RIB prefix code to use.
+        void encodeInt32(TqUint32 i, TqUint8 baseCode)
+        {
+            char c[4];
+            unpack(i, c);
+            int high = highestByteNonzero(c);
+            m_out.put(baseCode + high);
+            m_out.write(c+3-high, high+1);
+        }
+
+    public:
+        BinaryFormatter(std::ostream& out)
+            : m_out(out), m_encodedRequests(), m_currRequestCode(0) { }
+
+        void increaseIndent() { }
+        void decreaseIndent() { }
+        void whitespace()     { }
+
+        void beginRequest(const char* name)
+        {
+            TqUint8 code = 0;
+            EncodedRequestMap::const_iterator i = m_encodedRequests.find(name);
+            if(i == m_encodedRequests.end())
+            {
+                // Request not yet associated with a code; do so now.
+                code = m_currRequestCode++;
+                m_encodedRequests[name] = code;
+                assert(m_currRequestCode != 0); // code shouldn't wrap around.
+                m_out.put(0314);
+                m_out.put(code);
+                print(name);
+            }
+            else
+                code = i->second;
+            m_out.put(0246);
+            m_out.put(code);
+        }
+        void endRequest() { }
+
+        void archiveRecord(RtConstToken type, const char* string) { }
+
+        void print(RtInt i)
+        {
+            encodeInt32(i, 0200);
+        }
+        void print(RtFloat f)
+        {
+            m_out.put(0244);
+            char c[4];
+            unpack(union_cast<TqUint32>(f), c);
+            m_out.write(c, 4);
+        }
+        void print(RtConstString s)
+        {
+            TqUint32 len = std::strlen(s);
+            if(len < 16)
+            {
+                // special short string encoding
+                m_out.put(0220 + len);
+                m_out.write(s, len);
+            }
+            else
+            {
+                encodeInt32(len, 0240);
+                m_out.write(s, len);
+            }
+        }
+
+        template<typename T>
+        void print(const Ri::Array<T>& a)
+        {
+            m_out.put('[');
+            for(size_t i = 0; i < a.size(); ++i)
+                print(a[i]);
+            m_out.put(']');
+        }
+
+        void print(const Ri::FloatArray& a)
+        {
+            encodeInt32(a.size(), 0310);
+            for(size_t i = 0; i < a.size(); ++i)
+            {
+                char c[4];
+                unpack(union_cast<TqUint32>(a[i]), c);
+                m_out.write(c, 4);
+            }
+        }
+
+        void printTriple(const float* f)
+        {
+            print(f[0]); print(f[1]); print(f[2]);
+        }
+
+        void print(const Ri::Param& p)
+        {
+            // TODO: abbreviate already Define()'d tokens
+            std::ostringstream fmt;
+            fmt << CqPrimvarToken(p.spec(), p.name());
+            print(fmt.str().c_str());
+            switch(p.spec().storageType())
+            {
+                case Ri::TypeSpec::Float:
+                    print(p.floatData());
+                    break;
+                case Ri::TypeSpec::Integer:
+                    print(p.intData());
+                    break;
+                case Ri::TypeSpec::String:
+                    print(p.stringData());
+                    break;
+                default:
+                    assert(0);
+            }
+        }
+};
+
+
+//------------------------------------------------------------------------------
 /// A bidirectional mapping between names and unique pointers
 ///
 /// This class generates a sequence of unique pointers for a set of provided
@@ -190,13 +394,55 @@ const char* errorFuncNames[] = { "ignore", "print", "abort" };
 const char* subdivFuncNames[] = {
     "DelayedReadArchive", "RunProgram", "DynamicLoad"
 };
-const char* basisNames[] = {
-    "bezier", "b-spline", "catmull-rom", "hermite", "power"
-};
+
+RtBasis g_bezierBasis =     {{ -1.0f,  3.0f, -3.0f,  1.0f},
+                             {  3.0f, -6.0f,  3.0f,  0.0f},
+                             { -3.0f,  3.0f,  0.0f,  0.0f},
+                             {  1.0f,  0.0f,  0.0f,  0.0f}};
+RtBasis g_bSplineBasis =    {{ -1.0f/6.0f,  0.5f,      -0.5f,      1.0f/6.0f},
+                             {  0.5f,       -1.0f,      0.5f,      0.0f},
+                             { -0.5f,        0.0f,      0.5f,      0.0f},
+                             {  1.0f/6.0f,   2.0f/3.0f, 1.0f/6.0f, 0.0f}};
+RtBasis g_catmullRomBasis = {{ -0.5f,  1.5f, -1.5f,  0.5f},
+                             {  1.0f, -2.5f,  2.0f, -0.5f},
+                             { -0.5f,  0.0f,  0.5f,  0.0f},
+                             {  0.0f,  1.0f,  0.0f,  0.0f}};
+RtBasis g_hermiteBasis =    {{  2.0f,  1.0f, -2.0f,  1.0f},
+                             { -3.0f, -2.0f,  3.0f, -1.0f},
+                             {  0.0f,  1.0f,  0.0f,  0.0f},
+                             {  1.0f,  0.0f,  0.0f,  0.0f}};
+RtBasis g_powerBasis =      {{  1.0f,  0.0f,  0.0f,  0.0f},
+                             {  0.0f,  1.0f,  0.0f,  0.0f},
+                             {  0.0f,  0.0f,  1.0f,  0.0f},
+                             {  0.0f,  0.0f,  0.0f,  1.0f}};
+
+// Compare two bases for equality.
+bool basisEqual(RtConstBasis b1, RtConstBasis b2)
+{
+    return std::equal(&**b1, &**b1 + 16, &**b2);
+}
+
+const char* basisName(RtConstBasis b)
+{
+    // Quickly check whether addresses of the first elements are equal
+    if(&**g_bezierBasis     == &**b) return "bezier";
+    if(&**g_bSplineBasis    == &**b) return "b-spline";
+    if(&**g_catmullRomBasis == &**b) return "catmull-rom";
+    if(&**g_hermiteBasis    == &**b) return "hermite";
+    if(&**g_powerBasis      == &**b) return "power";
+    // if not, check whether basis *values* are equal
+    if(basisEqual(g_bezierBasis, b))     return "bezier";
+    if(basisEqual(g_bSplineBasis, b))    return "b-spline";
+    if(basisEqual(g_catmullRomBasis, b)) return "catmull-rom";
+    if(basisEqual(g_hermiteBasis, b))    return "hermite";
+    if(basisEqual(g_powerBasis, b))      return "power";
+    // otherwise, dunno. It's nonstandard.
+    return 0;
+}
 
 } // anon. namespace
 
-
+//------------------------------------------------------------------------------
 /// Class which serializes Ri::Renderer calls to a RIB stream.
 ///
 /// The Formatter template argument specifies a formatting class which will do
@@ -215,7 +461,6 @@ class RibOut : public Ri::Renderer
         NamePtrMapping<RtFilterFunc> m_filterFuncMap;
         NamePtrMapping<RtErrorFunc> m_errorFuncMap;
         NamePtrMapping<RtProcSubdivFunc> m_subdivFuncMap;
-        NamePtrMapping<RtBasis*> m_basisNameMap;
         /// Sequence number generators for light/object handles.
         RtInt m_currLightHandle;
         RtInt m_currObjectHandle;
@@ -228,6 +473,17 @@ class RibOut : public Ri::Renderer
                 m_formatter.whitespace();
                 m_formatter.print(pList[i]);
             }
+        }
+
+        void printBasis(RtConstBasis basis)
+        {
+            const char* name = basisName(basis);
+            if(name)
+                m_formatter.print(name);
+            else
+                m_formatter.print(
+                    FloatArray(static_cast<const float*>(basis[0]),16)
+                );
         }
 
         /// Output formatting of LightSource/AreaLightSource
@@ -260,7 +516,6 @@ class RibOut : public Ri::Renderer
             m_filterFuncMap(filterFuncNames),
             m_errorFuncMap(errorFuncNames),
             m_subdivFuncMap(subdivFuncNames),
-            m_basisNameMap(basisNames),
             m_currLightHandle(0),
             m_currObjectHandle(0)
         { }
@@ -270,15 +525,35 @@ class RibOut : public Ri::Renderer
             m_formatter.archiveRecord(type, string);
         }
         virtual RtVoid Error(const char* errorMessage)
-            { Aqsis::log() << error << errorMessage << std::endl; }
+        {
+            Aqsis::log() << error << errorMessage << std::endl;
+        }
         virtual RtFilterFunc GetFilterFunc(RtConstToken name) const
-            { return m_filterFuncMap.find(name); }
+        {
+            return m_filterFuncMap.find(name);
+        }
         virtual RtConstBasis* GetBasis(RtConstToken name) const
-            { return m_basisNameMap.find(name); }
+        {
+            if     (!strcmp(name, "bezier"))      return &g_bezierBasis;
+            else if(!strcmp(name, "b-spline"))    return &g_bSplineBasis;
+            else if(!strcmp(name, "catmull-rom")) return &g_catmullRomBasis;
+            else if(!strcmp(name, "hermite"))     return &g_hermiteBasis;
+            else if(!strcmp(name, "power"))       return &g_powerBasis;
+            else
+            {
+                AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+                    "unknown basis \"" << name << "\"");
+                return 0;
+            }
+        }
         virtual RtErrorFunc GetErrorFunc(RtConstToken name) const
-            { return m_errorFuncMap.find(name); }
+        {
+            return m_errorFuncMap.find(name);
+        }
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const
-            { return m_subdivFuncMap.find(name); }
+        {
+            return m_subdivFuncMap.find(name);
+        }
         virtual TypeSpec GetDeclaration(RtConstToken token,
                                         const char** nameBegin,
                                         const char** nameEnd)
@@ -561,6 +836,8 @@ RtObjectHandle RibOut<Formatter>::ObjectBegin()
     return reinterpret_cast<RtObjectHandle>(m_currObjectHandle);
 }
 
+// TODO: ReadArchive interpolation.
+
 //------------------------------------------------------------------------------
 // Autogenerated method implementations
 
@@ -577,11 +854,11 @@ customImpl = set((
 ))
 
 formatterStatements = {
-    'RtColor':       'm_formatter.printColor(%s);',
-    'RtPoint':       'm_formatter.print(FloatArray(%s,3));',
+    'RtColor':       'm_formatter.printTriple(%s);',
+    'RtPoint':       'm_formatter.printTriple(%s);',
     'RtMatrix':      'm_formatter.print(FloatArray(static_cast<const float*>(%s[0]),16));',
     'RtBound':       'm_formatter.print(FloatArray(%s,6));',
-    'RtBasis':       'm_formatter.print(FloatArray(static_cast<const float*>(%s[0]),16));',
+    'RtBasis':       'printBasis(%s);',
     'RtFilterFunc':  'm_formatter.print(m_filterFuncMap.find(%s));',
     'RtErrorFunc':   'm_formatter.print(m_errorFuncMap.find(%s));',
     'RtProcSubdivFunc': 'm_formatter.print(m_subdivFuncMap.find(%s));',
@@ -979,7 +1256,7 @@ RtVoid RibOut<Formatter>::Color(RtConstColor Cq)
 {
     m_formatter.beginRequest("Color");
     m_formatter.whitespace();
-    m_formatter.printColor(Cq);
+    m_formatter.printTriple(Cq);
     m_formatter.endRequest();
 }
 
@@ -988,7 +1265,7 @@ RtVoid RibOut<Formatter>::Opacity(RtConstColor Os)
 {
     m_formatter.beginRequest("Opacity");
     m_formatter.whitespace();
-    m_formatter.printColor(Os);
+    m_formatter.printTriple(Os);
     m_formatter.endRequest();
 }
 
@@ -1442,11 +1719,11 @@ RtVoid RibOut<Formatter>::Basis(RtConstBasis ubasis, RtInt ustep,
 {
     m_formatter.beginRequest("Basis");
     m_formatter.whitespace();
-    m_formatter.print(FloatArray(static_cast<const float*>(ubasis[0]),16));
+    printBasis(ubasis);
     m_formatter.whitespace();
     m_formatter.print(ustep);
     m_formatter.whitespace();
-    m_formatter.print(FloatArray(static_cast<const float*>(vbasis[0]),16));
+    printBasis(vbasis);
     m_formatter.whitespace();
     m_formatter.print(vstep);
     m_formatter.endRequest();
@@ -1629,9 +1906,9 @@ RtVoid RibOut<Formatter>::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
 {
     m_formatter.beginRequest("Hyperboloid");
     m_formatter.whitespace();
-    m_formatter.print(FloatArray(point1,3));
+    m_formatter.printTriple(point1);
     m_formatter.whitespace();
-    m_formatter.print(FloatArray(point2,3));
+    m_formatter.printTriple(point2);
     m_formatter.whitespace();
     m_formatter.print(thetamax);
     printParamList(pList);
@@ -1938,9 +2215,15 @@ RtVoid RibOut<Formatter>::ReadArchive(RtConstToken name,
 
 //------------------------------------------------------------------------------
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out, bool useGzip)
+boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out, bool useBinary,
+        bool useGzip)
 {
-    return boost::shared_ptr<Ri::Renderer>(new RibOut<AsciiFormatter>(out, useGzip));
+    if(useBinary)
+        return boost::shared_ptr<Ri::Renderer>(
+                new RibOut<BinaryFormatter>(out, useGzip));
+    else
+        return boost::shared_ptr<Ri::Renderer>(
+                new RibOut<AsciiFormatter>(out, useGzip));
 }
 
 
