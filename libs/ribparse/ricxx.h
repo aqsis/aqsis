@@ -27,9 +27,9 @@
 #define AQSIS_RICXX_H_INCLUDED
 
 #include <cassert>
+#include <stddef.h> // for size_t
 
 #include <aqsis/ri/ritypes.h>
-
 
 /// Const versions of common Ri typedefs.
 ///
@@ -496,7 +496,6 @@ class Renderer
         virtual RtConstBasis*    GetBasis(RtConstToken name) const = 0;
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const = 0;
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const = 0;
-        virtual RtProcFreeFunc   GetProcFreeFunc() const = 0;
 
         /// Get a previously Declared token or parse inline declaration
         ///

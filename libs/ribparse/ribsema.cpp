@@ -508,6 +508,13 @@ void RibParser::handleHyperboloid(RibLexer& lex)
     m_renderer.Hyperboloid(point1, point2, thetamax, paramList);
 }
 
+// Equivalent of RiProcFree, but that's not accessible if we haven't linked
+// with the RI, so we just define our own version here.
+static void ProcFree(RtPointer p)
+{
+    free(p);
+}
+
 void RibParser::handleProcedural(RibLexer& lex)
 {
     // get procedural subdivision function
@@ -549,7 +556,7 @@ void RibParser::handleProcedural(RibLexer& lex)
     RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(),
                                                          "bound", 6);
 
-    m_renderer.Procedural(procData, bound, subdivideFunc, m_renderer.GetProcFreeFunc());
+    m_renderer.Procedural(procData, bound, subdivideFunc, &ProcFree);
 }
 
 void RibParser::handleObjectBegin(RibLexer& lex)

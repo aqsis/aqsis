@@ -29,6 +29,12 @@ namespace Aqsis {
 /// Create a translation object from the RiCxx interface to the traditional RI.
 boost::shared_ptr<Ri::Renderer> createRiCxxToRi();
 
+
+/// Create an object which serializes Ri::Renderer calls into a RIB stream.
+boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out,
+        bool useGzip = false);
+
+
 }
 
 #endif // AQSIS_RICXX2RI_INCLUDED

@@ -300,7 +300,6 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtConstBasis*    GetBasis(RtConstToken name) const;
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const;
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const;
-        virtual RtProcFreeFunc   GetProcFreeFunc() const;
 
         virtual TypeSpec GetDeclaration(RtConstToken token,
                                         const char** nameBegin = 0,
@@ -429,11 +428,6 @@ RtProcSubdivFunc RiCxxToRi::GetProcSubdivFunc(RtConstToken name) const
                     "unknown procedural function \"" << name << "\"");
         return 0;
     }
-}
-
-RtProcFreeFunc RiCxxToRi::GetProcFreeFunc() const
-{
-    return &::RiProcFree;
 }
 
 Ri::TypeSpec RiCxxToRi::GetDeclaration(RtConstToken token,

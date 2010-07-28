@@ -290,8 +290,6 @@ struct MockRendererError
 // Some dummy symbols returned by MockRenderer.
 RtConstBasis g_mockBasis = {{1,0,0,0}, {0,2,0,0}, {0,0,3,0}, {0,0,0,4}};
 
-RtVoid mockProcFree(RtPointer data)
-{}
 RtVoid mockProcSubdivFunc( RtPointer data, RtFloat detail )
 {}
 RtFloat mockFilterFunc(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
@@ -558,7 +556,6 @@ class MockRenderer : public Ri::Renderer
         virtual RtConstBasis*    GetBasis(RtConstToken name) const {return &g_mockBasis;}
         virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const {return 0;}
         virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const {return &mockProcSubdivFunc;}
-        virtual RtProcFreeFunc   GetProcFreeFunc() const {return &mockProcFree;}
 
         virtual TypeSpec GetDeclaration(RtConstToken token,
                                 const char** nameBegin = 0,
@@ -642,7 +639,7 @@ struct Fixture
         for(int i = 0; i < (int)tokens.size(); ++i)
             ribStream << tokens[i] << " ";
         parser.parseStream(ribStream, "test_stream");
-        BOOST_CHECK_EQUAL(checkPos, tokens.size());
+        BOOST_CHECK_EQUAL(checkPos, (int)tokens.size());
         g_fixture = 0;
     }
 
@@ -922,9 +919,6 @@ RtVoid MockRenderer::Procedural(RtPointer data, RtConstBound bound,
                                 RtProcSubdivFunc refineproc,
                                 RtProcFreeFunc freeproc)
 {
-    // All the standard procedurals should have mockProcFree
-    BOOST_CHECK_EQUAL(freeproc, mockProcFree);
-
     // The following checking is specific to the ProcRunProgram procedural.
     BOOST_CHECK_EQUAL(refineproc, mockProcSubdivFunc);
 

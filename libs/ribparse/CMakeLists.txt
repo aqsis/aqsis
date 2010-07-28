@@ -11,6 +11,7 @@ set(ribparse_srcs
 	riblexer.cpp
 	ribparser.cpp
 	ribsema.cpp
+	ribout.cpp
 )
 
 set(ribparse_hdrs
@@ -48,4 +49,7 @@ if(aqsis_enable_testing)
 	target_link_libraries(ricxx2ri_speed_test aqsis_ribparse aqsis_core)
 	# Set the exports necessary to avoid incorrect linkage errors.
 	set_target_properties(ricxx2ri_speed_test PROPERTIES COMPILE_DEFINITIONS AQSIS_RI_EXPORTS)
+
+	add_executable(ribout_test ribout_test.cpp)
+	target_link_libraries(ribout_test aqsis_ribparse)
 endif()
