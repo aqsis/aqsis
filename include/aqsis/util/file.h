@@ -69,6 +69,22 @@ AQSIS_UTIL_SHARE boostfs::path findFileNothrow(const std::string& fileName,
 		const std::string& searchPath);
 //@}
 
+/** \brief Expand special characters in a search path.
+ *
+ * Special characters are as follows:
+ *   - '&' is replaced by oldPath
+ *   - '@' is replaced by defaultPath
+ *   - '%someVar%' is replaced with the environment variable "someVar"
+ *
+ * \todo Expandion of ${someVar} and $someVar on posix to replace %someVar% syntax?
+ *
+ * \param newPath - Path to be expanded
+ * \param oldPath - Previous value of the path
+ * \param defaultPath - Default value for the path
+ */
+AQSIS_UTIL_SHARE std::string expandSearchPath(const std::string& newPath,
+											  const std::string& oldPath,
+											  const std::string& defaultPath = std::string());
 
 /** \brief expand a file pattern to a list of paths.
  *

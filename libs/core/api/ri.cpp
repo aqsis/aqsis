@@ -50,6 +50,7 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"procedural.h"
+#include	<aqsis/util/file.h>
 #include	<aqsis/util/logging.h>
 #include	<aqsis/util/logging_streambufs.h>
 #include	<aqsis/tex/maketexture.h>
@@ -1610,107 +1611,6 @@ RtVoid	RiOption( RtToken name, ... )
 	AQSIS_COLLECT_RI_PARAMETERS( name )
 
 	RiOptionV( name, AQSIS_PASS_RI_PARAMETERS );
-}
-
-/** \brief Fudge MTOR paths like //C/foo/bar into C:/foo/bar for windows
- *
- * This is a fudge for search paths produced by pixar's RAT on windows; MTOR
- * seems to produce paths like //C/foo/bar rather than the standard C:/foo/bar.
- * This function translates such paths.
- *
- * \param originalPath - previous value of the path.
- * \return A path with all instacnes of //<drive_letter>/ changed to
- *         <drive_letter>:/ on windows.  On posix, just return originalPath.
- */
-inline static std::string mtorPathFudge(const std::string& originalPath)
-{
-#	ifdef AQSIS_SYSTEM_WIN32
-	if(originalPath.find("//") != std::string::npos)
-	{
-		std::string fixedPath;
-		typedef boost::tokenizer<CqSearchPathsTokenFunc<std::string>,
-				std::string::const_iterator, std::string> TqPathsStrTokenizer;
-		TqPathsStrTokenizer paths(originalPath);
-		for(TqPathsStrTokenizer::iterator path = paths.begin(), end = paths.end();
-				path != end; ++path)
-		{
-			if(!fixedPath.empty())
-				fixedPath += ';'; // add a path separator.
-			if(path->find("//", 0, 2) == 0 && path->length() >= 4 && (*path)[3] == '/')
-			{
-				fixedPath += (*path)[2];
-				fixedPath += ":/";
-				fixedPath += path->substr(4);
-			}
-			else
-				fixedPath += *path;
-		}
-		return fixedPath;
-	}
-#	endif // AQSIS_SYSTEM_WIN32
-	return originalPath;
-}
-
-/** \brief Expand special characters in a search path.
- *
- * Special characters are as follows:
- *   - '&' is replaced by oldPath
- *   - '@' is replaced by defaultPath
- *   - '%someVar%' is replaced with the environment variable "someVar"
- *
- * \todo Expandion of ${someVar} and $someVar on posix to replace %someVar% syntax?
- *
- * \param newPath - Path to be expanded
- * \param oldPath - Previous value of the path
- * \param defaultPath - Default value for the path
- */
-static std::string expandSearchPath(const std::string& newPath,
-		const std::string& oldPath, const std::string& defaultPath)
-{
-	// Build the string, checking for & and @ characters  and replace with old
-	// and default string, respectively.
-	std::string::size_type strt = 0;
-	std::string::size_type match = 0;
-	std::string expandedPath;
-	while ( 1 )
-	{
-		if ( ( match = newPath.find_first_of("&@%", strt ) ) != std::string::npos )
-		{
-			expandedPath += newPath.substr( strt, (match-strt) );
-			if( newPath[match] == '&' )
-			{
-				// replace & with the old path
-				expandedPath += oldPath;
-				strt = match + 1;
-			}
-			else if( newPath[match] == '@' )
-			{
-				// replace @ with the default path
-				expandedPath += defaultPath;
-				strt = match + 1;
-			}
-			else if( newPath[match] == '%' )
-			{
-				// replace %var% with environment variable %var%
-				std::string::size_type envvarend = newPath.find('%', match + 1);
-				if( envvarend != std::string::npos )
-				{
-					std::string strEnv = newPath.substr(match + 1, (envvarend - (match + 1)));
-					const char* strVal = getenv(strEnv.c_str());
-					if(strVal)
-						expandedPath += strVal;
-					strt = envvarend + 1;
-				}
-			}
-		}
-		else 
-		{
-			expandedPath += newPath.substr(strt);
-			break;
-		}
-	}
-	expandedPath = mtorPathFudge(expandedPath);
-	return expandedPath;
 }
 
 //----------------------------------------------------------------------

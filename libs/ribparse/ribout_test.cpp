@@ -9,6 +9,7 @@ int main(int argc, char* argv[])
 {
     bool useGzip = false;
     bool useBinary = false;
+    bool interpolate = false;
     if(argc > 1)
     {
         char* c = argv[1];
@@ -19,6 +20,9 @@ int main(int argc, char* argv[])
             {
                 switch(*c)
                 {
+                    case 'a':
+                        interpolate = true;
+                        break;
                     case 'b':
                         useBinary = true;
                         break;
@@ -32,7 +36,7 @@ int main(int argc, char* argv[])
     }
 
     boost::shared_ptr<Ri::Renderer> renderer =
-        createRibOut(std::cout, useBinary, useGzip);
+        createRibOut(std::cout, interpolate, useBinary, useGzip);
     RibParser parser(*renderer);
     std::ios_base::sync_with_stdio(false);
     parser.parseStream(std::cin, "stdin");

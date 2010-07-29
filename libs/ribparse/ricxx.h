@@ -48,10 +48,9 @@ namespace Aqsis {
 /// Namespace containing a C++ version of the RI, with associated types.
 namespace Ri {
 
-//------------------------------------------------------------------------------
 // Setup.
 
-
+//------------------------------------------------------------------------------
 /// A minimal, immutable array reference type.
 template<typename T>
 class Array
@@ -82,6 +81,7 @@ typedef Array<RtConstString> StringArray;
 typedef Array<RtConstToken> TokenArray;
 
 
+//------------------------------------------------------------------------------
 /// Type specification for parameters.
 ///
 /// In the traditional RI, interface types are represented using strings, for
@@ -92,7 +92,7 @@ typedef Array<RtConstToken> TokenArray;
 ///     across the surface of a geometric primitive
 ///   * Type - the basic type.
 ///   * Array size - variables may be arrays of one or more elements of the
-///     basic type
+///     basic type.  Non-array variables are treated as arrays with length 1.
 struct TypeSpec
 {
     // note: order of IClass and Type should match the Rif interface,
@@ -126,7 +126,7 @@ struct TypeSpec
     Type type;
     int arraySize;
 
-    TypeSpec(Type type=Unknown, int arraySize=1)
+    explicit TypeSpec(Type type=Unknown, int arraySize=1)
         : iclass(Uniform), type(type), arraySize(arraySize) {}
     TypeSpec(IClass iclass, Type type, int arraySize=1)
         : iclass(iclass), type(type), arraySize(arraySize) {}
@@ -143,14 +143,23 @@ struct TypeSpec
         }
     }
 
-    bool operator==(const TypeSpec& rhs) const
-    {
-        return iclass == rhs.iclass && type == rhs.type &&
-               arraySize == rhs.arraySize;
-    }
 };
 
+/// Equality testing for TypeSpec's
+inline bool operator==(const TypeSpec& lhs, const TypeSpec& rhs)
+{
+    return lhs.iclass == rhs.iclass && lhs.type == rhs.type &&
+           lhs.arraySize == rhs.arraySize;
+}
+/// Compare TypeSpec to "uniform type[1]"
+inline bool operator==(const TypeSpec& lhs, TypeSpec::Type type)
+    { return lhs == TypeSpec(type); }
+/// Compare TypeSpec to "uniform type[1]"
+inline bool operator==(TypeSpec::Type type, const TypeSpec& rhs)
+    { return TypeSpec(type) == rhs; }
 
+
+//------------------------------------------------------------------------------
 /// Representation of a parameter for interface function parameter lists
 class Param
 {
