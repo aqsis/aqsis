@@ -12,6 +12,7 @@ set(ribparse_srcs
 	ribparser.cpp
 	ribsema.cpp
 	ribout.cpp
+	ricxx_validate.cpp
 )
 
 set(ribparse_hdrs

@@ -17,6 +17,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+/// \file
+/// \brief RIB writer implementation of Ri::Renderer
+/// \author Chris Foster [chris42f (at) g mail (d0t) com]
+
 #include "ricxx2ri.h"
 
 #include <algorithm>
