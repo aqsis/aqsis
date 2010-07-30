@@ -204,6 +204,7 @@ class Param
 
 typedef Array<Param> ParamList;
 
+class Filter;
 
 //------------------------------------------------------------------------------
 /// Simple C++ version of the RenderMan interface
@@ -526,6 +527,102 @@ class Renderer
         // implement RiTransformPoints
 
         virtual ~Renderer() {};
+
+        /// Register a filter with the interface
+        ///
+        /// This allows Renderer instances to be aware of any interface filter
+        /// pipelines which may be attached.
+        virtual void RegisterFilter(Filter* filter) {}
+};
+
+
+//------------------------------------------------------------------------------
+/// Filter for the Ri::Renderer interface.
+class Filter : public Renderer
+{
+    public:
+        Filter()
+            : m_input(0),
+            m_output(0),
+            m_outputIsFilter(false)
+        { }
+
+        /// Disconnect the filter from the pipeline.
+        void disconnectFilter()
+        {
+            if(m_input)
+            {
+                m_input->m_output = m_output;
+                m_input->m_outputIsFilter = m_outputIsFilter;
+                if(m_output)
+                    m_output->RegisterFilter(m_input);
+            }
+            else if(m_output)
+                m_output->RegisterFilter(0);
+        }
+
+        /// Register a filter as the output
+        void registerOutput(Filter* output)
+        {
+            if(m_output)
+                m_output->RegisterFilter(0);
+            output->m_input = this;
+            m_output = output;
+            m_outputIsFilter = true;
+            output->RegisterFilter(this);
+        }
+        void registerOutput(Renderer* output)
+        {
+            if(m_output)
+                m_output->RegisterFilter(0);
+            m_output = output;
+            m_outputIsFilter = false;
+            output->RegisterFilter(this);
+        }
+
+        /// Get the first filter in the pipeline
+        const Filter* firstFilter() const
+        {
+            const Filter* f = this;
+            while(f->m_input)
+                f = f->m_input;
+            return f;
+        }
+        Filter* firstFilter()
+        {
+            return const_cast<Filter*>(
+                    const_cast<const Filter*>(this)->firstFilter());
+        }
+
+        virtual void RegisterFilter(Filter* filter)
+        {
+            m_input = filter;
+        }
+
+        virtual ~Filter()
+        {
+            disconnectFilter();
+        }
+
+    protected:
+        /// Access to input filter for child classes
+        Filter* inputFilter()             { return m_input; }
+        const Filter* inputFilter() const { return m_input; }
+
+        /// Access to output filter for child classes
+        Filter* outputFilter()
+            { return m_outputIsFilter ? static_cast<Filter*>(m_output) : 0; }
+        const Filter* outputFilter() const
+            { return m_outputIsFilter ? static_cast<Filter*>(m_output) : 0; }
+
+        /// Acess to output interface
+        Renderer* outputInterface()             { return m_output; }
+        const Renderer* outputInterface() const { return m_output; }
+
+    private:
+        Filter* m_input;    //< input filter; source for API calls
+        Renderer* m_output; //< output interface; sink for API calls
+        bool m_outputIsFilter; //< if true, m_output is actually of type Filter*
 };
 
 

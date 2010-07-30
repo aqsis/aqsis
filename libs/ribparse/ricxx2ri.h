@@ -35,7 +35,7 @@ boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out,
         bool interpolateArchives = true, bool useBinary = false,
         bool useGzip = false);
 
-boost::shared_ptr<Ri::Renderer> createRiCxxValidate(Ri::Renderer* toWrap);
+boost::shared_ptr<Ri::Filter> createRiCxxValidate();
 
 }
 

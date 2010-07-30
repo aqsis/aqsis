@@ -45,9 +45,10 @@ int main(int argc, char* argv[])
 
     boost::shared_ptr<Ri::Renderer> renderer =
         createRibOut(std::cout, interpolate, useBinary, useGzip);
-    boost::shared_ptr<Ri::Renderer> validate =
-        createRiCxxValidate(renderer.get());
-    RibParser parser(*validate);
+    boost::shared_ptr<Ri::Filter> validator = createRiCxxValidate();
+    validator->registerOutput(renderer.get());
+
+    RibParser parser(*validator);
     parser.parseStream(std::cin, "stdin");
 
     return 0;
