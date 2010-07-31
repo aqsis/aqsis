@@ -356,11 +356,11 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 #if $doScopeCheck
     checkScope(ApiScope(${' | '.join($validScopeNames)}));
 #end if
-#if $pushScope is not None
-    m_scopeStack.push($pushScope);
+#if $procName.endswith('Begin') and $procName[:-5] not in $irrelevantScopes
+    m_scopeStack.push(Scope_$procName[:-5]);
 #end if
-#if $popScope is not None
-    assert(m_scopeStack.top() == $popScope);
+#if $procName.endswith('End') and $procName[:-3] not in $irrelevantScopes
+    assert(m_scopeStack.top() == Scope_$procName[:-3]);
     m_scopeStack.pop();
 #end if
 #for $arg in $args
@@ -398,16 +398,6 @@ for proc in riXml.findall('Procedures/Procedure'):
                                proc.findall('ValidScope/'+'*')
                                if s.tag not in irrelevantScopes])
         doScopeCheck = len(validScopeNames) > 0
-        pushScope = None
-        if procName.endswith('Begin'):
-            scopeName = procName[:-5]
-            if scopeName not in irrelevantScopes:
-                pushScope = 'Scope_' + scopeName
-        popScope = None
-        if procName.endswith('End'):
-            scopeName = procName[:-3]
-            if scopeName not in irrelevantScopes:
-                popScope = 'Scope_' + scopeName
         cog.out(str(Template(methodTemplate, searchList=locals())));
 
 ]]]*/
