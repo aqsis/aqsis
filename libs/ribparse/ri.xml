@@ -177,14 +177,17 @@
 				<Argument>
 					<Name>xresolution</Name>
 					<Type>RtInt</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>yresolution</Name>
 					<Type>RtInt</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>pixelaspectratio</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -201,6 +204,7 @@
 				<Argument>
 					<Name>frameratio</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -217,6 +221,7 @@
 				<Argument>
 					<Name>left</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>right</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>right</Name>
@@ -225,6 +230,7 @@
 				<Argument>
 					<Name>bottom</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>top</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>top</Name>
@@ -246,18 +252,22 @@
 				<Argument>
 					<Name>xmin</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge><lt>xmax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>xmax</Name>
 					<Type>RtFloat</Type>
+					<Range><le>1</le></Range>
 				</Argument>
 				<Argument>
 					<Name>ymin</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge><lt>ymax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>ymax</Name>
 					<Type>RtFloat</Type>
+					<Range><le>1</le></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 			</Arguments>
@@ -292,10 +302,12 @@
 				<Argument>
 					<Name>cnear</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>RI_EPSILON</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>cfar</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>cnear</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -344,14 +356,17 @@
 				<Argument>
 					<Name>fstop</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>focallength</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>focaldistance</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -368,6 +383,7 @@
 				<Argument>
 					<Name>opentime</Name>
 					<Type>RtFloat</Type>
+					<Range><le>closetime</le></Range>
 				</Argument>
 				<Argument>
 					<Name>closetime</Name>
@@ -390,6 +406,7 @@
 				<Argument>
 					<Name>variance</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -406,10 +423,12 @@
 				<Argument>
 					<Name>xsamples</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>ysamples</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -430,10 +449,12 @@
 				<Argument>
 					<Name>xwidth</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>ywidth</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -450,10 +471,12 @@
 				<Argument>
 					<Name>gain</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>gamma</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -491,10 +514,12 @@
 				<Argument>
 					<Name>one</Name>
 					<Type>RtInt</Type>
+					<Range><ge>0</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>min</Name>
 					<Type>RtInt</Type>
+					<Range><ge>max</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>max</Name>
@@ -503,6 +528,7 @@
 				<Argument>
 					<Name>ditheramplitude</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -760,14 +786,12 @@
 				<Argument>
 					<Name>nRGB</Name>
 					<Type>RtFloatArray</Type>
-				
 					<Length>		int __nRGB_length = N;
 </Length>
 				</Argument>
 				<Argument>
 					<Name>RGBn</Name>
 					<Type>RtFloatArray</Type>
-				
 					<Length>		int __RGBn_length = N;
 </Length>
 				</Argument>
@@ -786,6 +810,7 @@
 				<Argument>
 					<Name>relativedetail</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -1224,6 +1249,7 @@
 				<Argument>
 					<Name>size</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -1342,14 +1368,17 @@
 				<Argument>
 					<Name>offlow</Name>
 					<Type>RtFloat</Type>
+					<Range><le>onlow</le></Range>
 				</Argument>
 				<Argument>
 					<Name>onlow</Name>
 					<Type>RtFloat</Type>
+					<Range><le>onhigh</le></Range>
 				</Argument>
 				<Argument>
 					<Name>onhigh</Name>
 					<Type>RtFloat</Type>
+					<Range><le>offhigh</le></Range>
 				</Argument>
 				<Argument>
 					<Name>offhigh</Name>
@@ -1383,6 +1412,7 @@
 				<Argument>
 					<Name>value</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>0</ge></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -2065,6 +2095,7 @@
 				<Argument>
 					<Name>ustep</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>vbasis</Name>
@@ -2073,6 +2104,7 @@
 				<Argument>
 					<Name>vstep</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -2128,6 +2160,7 @@
 				<Argument>
 					<Name>nu</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>uwrap</Name>
@@ -2136,6 +2169,7 @@
 				<Argument>
 					<Name>nv</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>vwrap</Name>
@@ -2199,10 +2233,12 @@
 				<Argument>
 					<Name>nu</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>uorder</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>uknot</Name>
@@ -2214,6 +2250,7 @@
 				<Argument>
 					<Name>umin</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>umax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>umax</Name>
@@ -2222,10 +2259,12 @@
 				<Argument>
 					<Name>nv</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>vorder</Name>
 					<Type>RtInt</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>vknot</Name>
@@ -2237,6 +2276,7 @@
 				<Argument>
 					<Name>vmin</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>vmax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>vmax</Name>
@@ -2476,18 +2516,22 @@
 				<Argument>
 					<Name>radius</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>zmin</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>-abs(radius)</ge><lt>zmax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>zmax</Name>
 					<Type>RtFloat</Type>
+					<Range><le>abs(radius)</le></Range>
 				</Argument>
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2516,14 +2560,17 @@
 				<Argument>
 					<Name>height</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>radius</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2552,10 +2599,12 @@
 				<Argument>
 					<Name>radius</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>zmin</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>zmax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>zmax</Name>
@@ -2564,6 +2613,7 @@
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2600,6 +2650,7 @@
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2628,18 +2679,22 @@
 				<Argument>
 					<Name>rmax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>zmin</Name>
 					<Type>RtFloat</Type>
+					<Range><lt>zmax</lt></Range>
 				</Argument>
 				<Argument>
 					<Name>zmax</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2672,10 +2727,12 @@
 				<Argument>
 					<Name>radius</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -2704,14 +2761,17 @@
 				<Argument>
 					<Name>majorrad</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>minorrad</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>phimin</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>phimax</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>phimax</Name>
@@ -2720,6 +2780,7 @@
 				<Argument>
 					<Name>thetamax</Name>
 					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
 				<ParamList/>
@@ -3194,10 +3255,12 @@
 				<Argument>
 					<Name>swidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -3236,10 +3299,12 @@
 				<Argument>
 					<Name>swidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -3269,10 +3334,12 @@
 				<Argument>
 					<Name>swidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -3326,10 +3393,12 @@
 				<Argument>
 					<Name>swidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<Argument>
 					<Name>twidth</Name>
 					<Type>RtFloat</Type>
+					<Range><ge>1</ge></Range>
 				</Argument>
 				<ParamList/>
 			</Arguments>

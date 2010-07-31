@@ -95,12 +95,10 @@ class AsciiFormatter
         void archiveRecord(RtConstToken type, const char* string)
         {
             if(!strcmp(type, "comment"))
-            {
-                m_out << m_indentString;
-                m_out << '#' << string;
-                m_out << '\n';
-            }
-            else
+                m_out << m_indentString << "#" << string << '\n';
+            else if(!strcmp(type, "structure"))
+                m_out << m_indentString << "##" << string << '\n';
+            else if(!strcmp(type, "verbatim"))
                 m_out << string;
         }
 
@@ -269,7 +267,15 @@ class BinaryFormatter
         }
         void endRequest() { }
 
-        void archiveRecord(RtConstToken type, const char* string) { }
+        void archiveRecord(RtConstToken type, const char* string)
+        {
+            if(!strcmp(type, "comment"))
+                m_out << "#" << string << '\n';
+            else if(!strcmp(type, "structure"))
+                m_out << "##" << string << '\n';
+            else if(!strcmp(type, "verbatim"))
+                m_out << string;
+        }
 
         void print(RtInt i)
         {
