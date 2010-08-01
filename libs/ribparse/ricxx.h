@@ -143,6 +143,28 @@ struct TypeSpec
         }
     }
 
+    /// Return number of values of the base type needed per element.
+    ///
+    /// This depends on the type, and the array count.  For example, a vector
+    /// uses 3 floats per element, so the type vector[2] would need 3*2 = 6
+    /// float values per element.
+    ///
+    /// \param numColComps - The number of color components.
+    int storageCount(int nColComps = 3) const
+    {
+        int typeCount = 0;
+        switch(type)
+        {
+            case Float: case Integer: case String: typeCount = 1;  break;
+            case Point: case Normal:  case Vector: typeCount = 3;  break;
+            case Color:                            typeCount = nColComps; break;
+            case HPoint:                           typeCount = 4;  break;
+            case Matrix: case MPoint:              typeCount = 16; break;
+            default:
+                assert(0 && "storage length unknown for type"); break;
+        }
+        return typeCount*arraySize;
+    }
 };
 
 /// Equality testing for TypeSpec's

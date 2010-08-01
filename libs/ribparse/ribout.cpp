@@ -539,6 +539,7 @@ class RibOut : public Ri::Renderer
             m_currLightHandle(0),
             m_currObjectHandle(0),
             m_interpolateArchives(interpolateArchives),
+            m_archiveSearchPath("."),
             m_parser(),
             m_inputFilter(0)
         { }

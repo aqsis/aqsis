@@ -24,8 +24,13 @@
 #include "ricxx2ri.h"
 
 #include <cfloat>
+#include <climits>
+#include <cmath>
+#include <sstream>
 #include <stack>
+#include <string.h>
 
+#include <aqsis/riutil/interpclasscounts.h>
 #include <aqsis/util/exception.h>
 
 namespace Aqsis {
@@ -63,15 +68,25 @@ class RiCxxValidate : public Ri::Filter
             Scope_Resource   = 1<<8,
         };
         std::stack<ApiScope> m_scopeStack;
+        int m_basisUstep;
+        int m_basisVstep;
 
         /// Return a string corresponding to the given ApiScope
         static const char* scopeString(ApiScope s);
         /// Check that the current scope is in the set allowedScopes
         void checkScope(ApiScope allowedScopes) const;
 
+        void checkArraySize(int expectedSize, int actualSize,
+                            const char* name, const char* procName);
+        void checkParamListArraySizes(const Ri::ParamList& pList,
+                                      const SqInterpClassCounts& iclassCounts,
+                                      const char* procName);
+
     public:
         RiCxxValidate()
-            : m_scopeStack()
+            : m_scopeStack(),
+            m_basisUstep(3),
+            m_basisVstep(3)
         {
             m_scopeStack.push(Scope_BeginEnd);
         }
@@ -245,7 +260,7 @@ class RiCxxValidate : public Ri::Filter
         virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
                             RtConstToken wrap, const ParamList& pList);
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
-                            const FloatArray& flt, const TokenArray& str,
+                            const FloatArray& floats, const TokenArray& strings,
                             const ParamList& pList);
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,
                             RtProcSubdivFunc refineproc,
@@ -320,6 +335,117 @@ void RiCxxValidate::checkScope(ApiScope allowedScopes) const
 #   define RI_EPSILON FLT_EPSILON
 #endif
 
+namespace {
+
+inline int iclassCount(const SqInterpClassCounts& counts,
+                       Ri::TypeSpec::IClass iclass)
+{
+    switch(iclass)
+    {
+        case Ri::TypeSpec::Constant:    return 1;
+        case Ri::TypeSpec::Uniform:     return counts.uniform;
+        case Ri::TypeSpec::Varying:     return counts.varying;
+        case Ri::TypeSpec::Vertex:      return counts.vertex;
+        case Ri::TypeSpec::FaceVarying: return counts.facevarying;
+        case Ri::TypeSpec::FaceVertex:  return counts.facevertex;
+        default:
+            assert(0 && "Unknown interpolation class"); return 0;
+    }
+}
+
+void checkPointParamPresent(const Ri::ParamList& pList)
+{
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        if(!strcmp(pList[i].name(), "P") ||
+           !strcmp(pList[i].name(), "Pw"))
+            return;
+    }
+    AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
+        "expected \"P\" or \"Pw\" in parameter list");
+}
+
+int sum(const Ri::IntArray& a)
+{
+    int s = 0;
+    for(size_t i = 0; i < a.size(); ++i)
+        s += a[i];
+    return s;
+}
+
+int sum(const Ri::IntArray& a, int start, int step)
+{
+    int s = 0;
+    for(size_t i = start; i < a.size(); i+=step)
+        s += a[i];
+    return s;
+}
+
+int max(const Ri::IntArray& a)
+{
+    int m = INT_MIN;
+    for(size_t i = 0; i < a.size(); ++i)
+        if(m < a[i])
+            m = a[i];
+    return m;
+}
+
+template<typename T>
+inline int size(const Ri::Array<T>& a)
+{
+    return a.size();
+}
+
+// Count the length of the "P" array in the parameter list
+int countP(const Ri::ParamList& pList)
+{
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        if(!strcmp(pList[i].name(), "P"))
+            return pList[i].size()/3;
+        if(!strcmp(pList[i].name(), "Pw"))
+            return pList[i].size()/4;
+    }
+    AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
+            "\"P\" not found in parameter list");
+    return -1;
+}
+
+}
+
+inline void RiCxxValidate::checkArraySize(int expectedSize, int actualSize,
+                                         const char* name, const char* procName)
+{
+    if(actualSize < expectedSize)
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
+            "array \"" << name << "\" of length " << actualSize
+            << " too short (expected length " << expectedSize << ")");
+    }
+    else if(actualSize > expectedSize)
+    {
+        std::ostringstream fmt;
+        fmt << "Warning: array \"" << name << "\" of length " << actualSize
+            << " too long (expected length " << expectedSize << ")";
+        outputInterface()->Error(fmt.str().c_str());
+        // ^^ FIXME, should be able to give a warning flag to Error()!
+    }
+}
+
+void RiCxxValidate::checkParamListArraySizes(const Ri::ParamList& pList,
+                              const SqInterpClassCounts& iclassCounts,
+                              const char* procName)
+{
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        const Ri::TypeSpec& spec = pList[i].spec();
+        int expectedSize = iclassCount(iclassCounts, spec.iclass) *
+                             spec.storageCount();
+        checkArraySize(expectedSize, pList[i].size(), pList[i].name(),
+                       procName);
+    }
+}
+
 /*[[[cog
 from cogutils import *
 from Cheetah.Template import Template
@@ -327,6 +453,73 @@ import re
 
 customImpl = set((
 ))
+
+# Extra code snippets to be inserted into method implementations
+extraSnippets = {
+    'Basis': '''m_basisUstep = ustep; m_basisVstep = vstep;'''
+}
+
+# Determining iclass-depenedent parameter array sizes is too complicated to be
+# cleanly encoded in the XML in some cases.  Here they are as custom code
+# snippets, ugh:
+iclassCountSnippets = {
+    'PatchMesh':
+'''
+    bool uperiodic = strcmp(uwrap, "periodic") == 0;
+    bool vperiodic = strcmp(vwrap, "periodic") == 0;
+    if(strcmp(type, "bilinear")==0)
+    {
+        iclassCounts.uniform = (uperiodic ? nu : nu-1) *
+                               (vperiodic ? nv : nv-1);
+        iclassCounts.varying = nu*nv;
+    }
+    else
+    {
+        int nupatches = uperiodic ? nu/m_basisUstep : (nu-4)/m_basisUstep + 1;
+        int nvpatches = vperiodic ? nv/m_basisVstep : (nv-4)/m_basisVstep + 1;
+        iclassCounts.uniform = nupatches * nvpatches;
+        iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
+                               ((vperiodic ? 0 : 1) + nvpatches);
+    }
+    iclassCounts.vertex = nu*nv;
+    // TODO: are facevertex/facevarying valid for a patch mesh?
+    iclassCounts.facevarying = 1; //iclassCounts.uniform*4; //??
+    iclassCounts.facevertex = 1;
+''',
+    'Curves':
+'''
+    bool periodic = strcmp(wrap, "periodic") == 0;
+    int basisStep = m_basisVstep;
+    iclassCounts.uniform = size(nvertices);
+    iclassCounts.vertex = sum(nvertices);
+    if(strcmp(type, "cubic") == 0)
+    {
+        if(periodic)
+        {
+            int segmentCount = 0;
+            for(size_t i = 0; i < nvertices.size(); ++i)
+                segmentCount += nvertices[i]/basisStep;
+            iclassCounts.varying = segmentCount;
+        }
+        else
+        {
+            int segmentCount = 0;
+            for(size_t i = 0; i < nvertices.size(); ++i)
+                segmentCount += (nvertices[i]-4)/basisStep + 1;
+            iclassCounts.varying = segmentCount + size(nvertices);
+        }
+    }
+    else
+    {
+        // linear curves
+        iclassCounts.varying = iclassCounts.vertex;
+    }
+    // TODO: are facevertex/facevarying valid for curves?
+    iclassCounts.facevarying = 1;
+    iclassCounts.facevertex = 1;
+''',
+    'Geometry': ''
+}
 
 # scopes which are ignored during validation.
 irrelevantScopes = set((
@@ -350,9 +543,11 @@ rangeCheckOps = {
     'ne' : '!='
 }
 
-methodTemplate = '''
+
+methodTemplate = r'''
 $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 {
+## --------------- Scope checking -------------
 #if $doScopeCheck
     checkScope(ApiScope(${' | '.join($validScopeNames)}));
 #end if
@@ -363,18 +558,20 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
     assert(m_scopeStack.top() == Scope_$procName[:-3]);
     m_scopeStack.pop();
 #end if
+## --------------- Argument checking -------------------
 #for $arg in $args
+  #set $argName = $arg.findtext('Name')
+  ## ---------- Range check -----------
   #set $range = $arg.find('Range')
   #if $range is not None:
     #for $check in $range.getchildren()
-    #set $argName = $arg.findtext('Name')
     #set $op = $rangeCheckOps[$check.tag]
     #set $limit = $check.text
     #set $limitIsConst = $re.match('([0-9.]*|RI_EPSILON)$', $limit)
     if(!($argName $op $limit))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check $argName $op $limit failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"$argName $op $limit\" failed: "
     #if $limitIsConst
             "[$argName = " << $argName << "]"
     #else
@@ -384,7 +581,60 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
     }
     #end for
   #end if
+  ## ------------ Array length check ------------
+  #if $arg.haschild('Length')
+    checkArraySize($arg.findtext('Length'), ${argName}.size(),
+                   "$argName", "$procName");
+  #end if
 #end for
+## ------------ Param list check -----------
+#if $proc.haschild('Arguments/ParamList')
+ ## ----------- Param array length check --------
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+ #set $icLen = $proc.find('IClassLengths')
+ #if $icLen is not None
+  #if $icLen.haschild('ComplicatedCustomImpl')
+$iclassCountSnippets[$procName]
+  #else
+   #if $icLen.haschild('Uniform')
+    iclassCounts.uniform = $icLen.findtext('Uniform');
+   #end if
+   #if $icLen.haschild('Varying')
+    iclassCounts.varying = $icLen.findtext('Varying');
+   #end if
+   #if $icLen.haschild('Vertex')
+    iclassCounts.vertex = $icLen.findtext('Vertex');
+   #else
+    iclassCounts.vertex = iclassCounts.varying;
+   #end if
+   #if $icLen.haschild('FaceVarying')
+    iclassCounts.facevarying = $icLen.findtext('FaceVarying');
+   #else
+    iclassCounts.facevarying = iclassCounts.varying;
+   #end if
+   #if $icLen.haschild('FaceVertex')
+    iclassCounts.facevertex = $icLen.findtext('FaceVertex');
+   #else
+    iclassCounts.facevertex = iclassCounts.facevarying;
+   #end if
+  #end if
+ #end if
+    checkParamListArraySizes(pList, iclassCounts, "$procName");
+ ## ----------- Required param check --------
+ #set $requiredParams = $proc.findall('Arguments/ParamList/Param')
+ #if len($requiredParams) > 0
+  #for $p in $requiredParams
+   #if $p.text == 'P'
+    checkPointParamPresent(pList);
+   #else
+    Fixme_cant_handle_general_params
+   #end if
+  #end for
+ #end if
+#end if
+#if $extraSnippets.has_key($procName)
+    $extraSnippets[$procName]
+#end if
     return outputInterface()->${procName}(${', '.join($wrapperCallArgList($proc))});
 }
 '''
@@ -464,22 +714,22 @@ RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(xresolution != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xresolution != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xresolution != 0\" failed: "
             "[xresolution = " << xresolution << "]"
         );
     }
     if(!(yresolution != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check yresolution != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"yresolution != 0\" failed: "
             "[yresolution = " << yresolution << "]"
         );
     }
     if(!(pixelaspectratio != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check pixelaspectratio != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"pixelaspectratio != 0\" failed: "
             "[pixelaspectratio = " << pixelaspectratio << "]"
         );
     }
@@ -491,8 +741,8 @@ RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(frameratio > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check frameratio > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"frameratio > 0\" failed: "
             "[frameratio = " << frameratio << "]"
         );
     }
@@ -505,15 +755,15 @@ RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(left < right))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check left < right failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"left < right\" failed: "
             "[left = " << left << ", " << "right = " << right << "]";
         );
     }
     if(!(bottom < top))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check bottom < top failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"bottom < top\" failed: "
             "[bottom = " << bottom << ", " << "top = " << top << "]";
         );
     }
@@ -526,43 +776,43 @@ RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(xmin >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xmin >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xmin >= 0\" failed: "
             "[xmin = " << xmin << "]"
         );
     }
     if(!(xmin < xmax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xmin < xmax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xmin < xmax\" failed: "
             "[xmin = " << xmin << ", " << "xmax = " << xmax << "]";
         );
     }
     if(!(xmax <= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xmax <= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xmax <= 1\" failed: "
             "[xmax = " << xmax << "]"
         );
     }
     if(!(ymin >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ymin >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ymin >= 0\" failed: "
             "[ymin = " << ymin << "]"
         );
     }
     if(!(ymin < ymax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ymin < ymax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ymin < ymax\" failed: "
             "[ymin = " << ymin << ", " << "ymax = " << ymax << "]";
         );
     }
     if(!(ymax <= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ymax <= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ymax <= 1\" failed: "
             "[ymax = " << ymax << "]"
         );
     }
@@ -572,6 +822,8 @@ RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
 RtVoid RiCxxValidate::Projection(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Projection");
     return outputInterface()->Projection(name, pList);
 }
 
@@ -580,15 +832,15 @@ RtVoid RiCxxValidate::Clipping(RtFloat cnear, RtFloat cfar)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(cnear >= RI_EPSILON))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check cnear >= RI_EPSILON failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"cnear >= RI_EPSILON\" failed: "
             "[cnear = " << cnear << "]"
         );
     }
     if(!(cfar > cnear))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check cfar > cnear failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"cfar > cnear\" failed: "
             "[cfar = " << cfar << ", " << "cnear = " << cnear << "]";
         );
     }
@@ -607,22 +859,22 @@ RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(fstop > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check fstop > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"fstop > 0\" failed: "
             "[fstop = " << fstop << "]"
         );
     }
     if(!(focallength > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check focallength > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"focallength > 0\" failed: "
             "[focallength = " << focallength << "]"
         );
     }
     if(!(focaldistance > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check focaldistance > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"focaldistance > 0\" failed: "
             "[focaldistance = " << focaldistance << "]"
         );
     }
@@ -634,8 +886,8 @@ RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(opentime <= closetime))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check opentime <= closetime failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"opentime <= closetime\" failed: "
             "[opentime = " << opentime << ", " << "closetime = " << closetime << "]";
         );
     }
@@ -647,8 +899,8 @@ RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(variance >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check variance >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"variance >= 0\" failed: "
             "[variance = " << variance << "]"
         );
     }
@@ -660,15 +912,15 @@ RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(xsamples >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xsamples >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xsamples >= 1\" failed: "
             "[xsamples = " << xsamples << "]"
         );
     }
     if(!(ysamples >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ysamples >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ysamples >= 1\" failed: "
             "[ysamples = " << ysamples << "]"
         );
     }
@@ -681,15 +933,15 @@ RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(xwidth > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check xwidth > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"xwidth > 0\" failed: "
             "[xwidth = " << xwidth << "]"
         );
     }
     if(!(ywidth > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ywidth > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ywidth > 0\" failed: "
             "[ywidth = " << ywidth << "]"
         );
     }
@@ -701,15 +953,15 @@ RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(gain > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check gain > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"gain > 0\" failed: "
             "[gain = " << gain << "]"
         );
     }
     if(!(gamma > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check gamma > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"gamma > 0\" failed: "
             "[gamma = " << gamma << "]"
         );
     }
@@ -719,6 +971,8 @@ RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
 RtVoid RiCxxValidate::Imager(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Imager");
     return outputInterface()->Imager(name, pList);
 }
 
@@ -728,22 +982,22 @@ RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(one >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check one >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"one >= 0\" failed: "
             "[one = " << one << "]"
         );
     }
-    if(!(min >= max))
+    if(!(min <= max))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check min >= max failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"min <= max\" failed: "
             "[min = " << min << ", " << "max = " << max << "]";
         );
     }
     if(!(ditheramplitude >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ditheramplitude >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ditheramplitude >= 0\" failed: "
             "[ditheramplitude = " << ditheramplitude << "]"
         );
     }
@@ -754,12 +1008,16 @@ RtVoid RiCxxValidate::Display(RtConstToken name, RtConstToken type,
                               RtConstToken mode, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Display");
     return outputInterface()->Display(name, type, mode, pList);
 }
 
 RtVoid RiCxxValidate::Hider(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Hider");
     return outputInterface()->Hider(name, pList);
 }
 
@@ -767,6 +1025,8 @@ RtVoid RiCxxValidate::ColorSamples(const FloatArray& nRGB,
                                    const FloatArray& RGBn)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkArraySize(size(nRGB), RGBn.size(),
+                   "RGBn", "ColorSamples");
     return outputInterface()->ColorSamples(nRGB, RGBn);
 }
 
@@ -775,8 +1035,8 @@ RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(relativedetail >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check relativedetail >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"relativedetail >= 0\" failed: "
             "[relativedetail = " << relativedetail << "]"
         );
     }
@@ -786,6 +1046,8 @@ RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
 RtVoid RiCxxValidate::Option(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Option");
     return outputInterface()->Option(name, pList);
 }
 
@@ -828,6 +1090,8 @@ RtLightHandle RiCxxValidate::LightSource(RtConstToken name,
                                          const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "LightSource");
     return outputInterface()->LightSource(name, pList);
 }
 
@@ -835,6 +1099,8 @@ RtLightHandle RiCxxValidate::AreaLightSource(RtConstToken name,
                                              const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "AreaLightSource");
     return outputInterface()->AreaLightSource(name, pList);
 }
 
@@ -847,30 +1113,40 @@ RtVoid RiCxxValidate::Illuminate(RtLightHandle light, RtBoolean onoff)
 RtVoid RiCxxValidate::Surface(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Surface");
     return outputInterface()->Surface(name, pList);
 }
 
 RtVoid RiCxxValidate::Displacement(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Displacement");
     return outputInterface()->Displacement(name, pList);
 }
 
 RtVoid RiCxxValidate::Atmosphere(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Atmosphere");
     return outputInterface()->Atmosphere(name, pList);
 }
 
 RtVoid RiCxxValidate::Interior(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Interior");
     return outputInterface()->Interior(name, pList);
 }
 
 RtVoid RiCxxValidate::Exterior(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Exterior");
     return outputInterface()->Exterior(name, pList);
 }
 
@@ -879,6 +1155,8 @@ RtVoid RiCxxValidate::ShaderLayer(RtConstToken type, RtConstToken name,
                                   const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "ShaderLayer");
     return outputInterface()->ShaderLayer(type, name, layername, pList);
 }
 
@@ -896,8 +1174,8 @@ RtVoid RiCxxValidate::ShadingRate(RtFloat size)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     if(!(size > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check size > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"size > 0\" failed: "
             "[size = " << size << "]"
         );
     }
@@ -934,22 +1212,22 @@ RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     if(!(offlow <= onlow))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check offlow <= onlow failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"offlow <= onlow\" failed: "
             "[offlow = " << offlow << ", " << "onlow = " << onlow << "]";
         );
     }
     if(!(onlow <= onhigh))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check onlow <= onhigh failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"onlow <= onhigh\" failed: "
             "[onlow = " << onlow << ", " << "onhigh = " << onhigh << "]";
         );
     }
     if(!(onhigh <= offhigh))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check onhigh <= offhigh failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"onhigh <= offhigh\" failed: "
             "[onhigh = " << onhigh << ", " << "offhigh = " << offhigh << "]";
         );
     }
@@ -961,8 +1239,8 @@ RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     if(!(value >= 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check value >= 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"value >= 0\" failed: "
             "[value = " << value << "]"
         );
     }
@@ -1066,6 +1344,8 @@ RtVoid RiCxxValidate::TransformEnd()
 RtVoid RiCxxValidate::Resource(RtConstToken handle, RtConstToken type,
                                const ParamList& pList)
 {
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Resource");
     return outputInterface()->Resource(handle, type, pList);
 }
 
@@ -1082,12 +1362,21 @@ RtVoid RiCxxValidate::ResourceEnd()
 RtVoid RiCxxValidate::Attribute(RtConstToken name, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "Attribute");
     return outputInterface()->Attribute(name, pList);
 }
 
 RtVoid RiCxxValidate::Polygon(const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = countP(pList);
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Polygon");
+    checkPointParamPresent(pList);
     return outputInterface()->Polygon(pList);
 }
 
@@ -1095,6 +1384,13 @@ RtVoid RiCxxValidate::GeneralPolygon(const IntArray& nverts,
                                      const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = sum(nverts);
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "GeneralPolygon");
+    checkPointParamPresent(pList);
     return outputInterface()->GeneralPolygon(nverts, pList);
 }
 
@@ -1103,6 +1399,16 @@ RtVoid RiCxxValidate::PointsPolygons(const IntArray& nverts,
                                      const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkArraySize(sum(nverts), verts.size(),
+                   "verts", "PointsPolygons");
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.uniform = size(nverts);
+    iclassCounts.varying = max(verts)+1;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = sum(nverts);
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "PointsPolygons");
+    checkPointParamPresent(pList);
     return outputInterface()->PointsPolygons(nverts, verts, pList);
 }
 
@@ -1112,6 +1418,17 @@ RtVoid RiCxxValidate::PointsGeneralPolygons(const IntArray& nloops,
                                             const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkArraySize(sum(nloops), nverts.size(),
+                   "nverts", "PointsGeneralPolygons");
+    checkArraySize(sum(nverts), verts.size(),
+                   "verts", "PointsGeneralPolygons");
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.uniform = size(nloops);
+    iclassCounts.varying = max(verts)+1;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = sum(nverts);
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "PointsGeneralPolygons");
     return outputInterface()->PointsGeneralPolygons(nloops, nverts, verts, pList);
 }
 
@@ -1121,24 +1438,31 @@ RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     if(!(ustep > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check ustep > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"ustep > 0\" failed: "
             "[ustep = " << ustep << "]"
         );
     }
     if(!(vstep > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check vstep > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"vstep > 0\" failed: "
             "[vstep = " << vstep << "]"
         );
     }
+    m_basisUstep = ustep; m_basisVstep = vstep;
     return outputInterface()->Basis(ubasis, ustep, vbasis, vstep);
 }
 
 RtVoid RiCxxValidate::Patch(RtConstToken type, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = strcmp(type,"bilinear")==0 ? 4 : 16;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Patch");
     return outputInterface()->Patch(type, pList);
 }
 
@@ -1149,18 +1473,42 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(nu > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check nu > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"nu > 0\" failed: "
             "[nu = " << nu << "]"
         );
     }
     if(!(nv > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check nv > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"nv > 0\" failed: "
             "[nv = " << nv << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+
+    bool uperiodic = strcmp(uwrap, "periodic") == 0;
+    bool vperiodic = strcmp(vwrap, "periodic") == 0;
+    if(strcmp(type, "bilinear")==0)
+    {
+        iclassCounts.uniform = (uperiodic ? nu : nu-1) *
+                               (vperiodic ? nv : nv-1);
+        iclassCounts.varying = nu*nv;
+    }
+    else
+    {
+        int nupatches = uperiodic ? nu/m_basisUstep : (nu-4)/m_basisUstep + 1;
+        int nvpatches = vperiodic ? nv/m_basisVstep : (nv-4)/m_basisVstep + 1;
+        iclassCounts.uniform = nupatches * nvpatches;
+        iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
+                               ((vperiodic ? 0 : 1) + nvpatches);
+    }
+    iclassCounts.vertex = nu*nv;
+    // TODO: are facevertex/facevarying valid for a patch mesh?
+    iclassCounts.facevarying = 1; //iclassCounts.uniform*4; //??
+    iclassCounts.facevertex = 1;
+
+    checkParamListArraySizes(pList, iclassCounts, "PatchMesh");
     return outputInterface()->PatchMesh(type, nu, uwrap, nv, vwrap, pList);
 }
 
@@ -1173,46 +1521,57 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(nu > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check nu > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"nu > 0\" failed: "
             "[nu = " << nu << "]"
         );
     }
     if(!(uorder > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check uorder > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"uorder > 0\" failed: "
             "[uorder = " << uorder << "]"
         );
     }
+    checkArraySize(nu+uorder, uknot.size(),
+                   "uknot", "NuPatch");
     if(!(umin < umax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check umin < umax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"umin < umax\" failed: "
             "[umin = " << umin << ", " << "umax = " << umax << "]";
         );
     }
     if(!(nv > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check nv > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"nv > 0\" failed: "
             "[nv = " << nv << "]"
         );
     }
     if(!(vorder > 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check vorder > 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"vorder > 0\" failed: "
             "[vorder = " << vorder << "]"
         );
     }
+    checkArraySize(nv+vorder, vknot.size(),
+                   "vknot", "NuPatch");
     if(!(vmin < vmax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check vmin < vmax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"vmin < vmax\" failed: "
             "[vmin = " << vmin << ", " << "vmax = " << vmax << "]";
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.uniform = (1+nu-uorder+1)*(1+nv-vorder+1);
+    iclassCounts.varying = (1+nu-uorder+1)*(1+nv-vorder+1);
+    iclassCounts.vertex = nu*nv;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "NuPatch");
     return outputInterface()->NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
 }
 
@@ -1223,6 +1582,22 @@ RtVoid RiCxxValidate::TrimCurve(const IntArray& ncurves, const IntArray& order,
                                 const FloatArray& w)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkArraySize(sum(ncurves), order.size(),
+                   "order", "TrimCurve");
+    checkArraySize(sum(order)+sum(n), knot.size(),
+                   "knot", "TrimCurve");
+    checkArraySize(size(order), min.size(),
+                   "min", "TrimCurve");
+    checkArraySize(size(order), max.size(),
+                   "max", "TrimCurve");
+    checkArraySize(size(order), n.size(),
+                   "n", "TrimCurve");
+    checkArraySize(sum(n), u.size(),
+                   "u", "TrimCurve");
+    checkArraySize(size(u), v.size(),
+                   "v", "TrimCurve");
+    checkArraySize(size(u), w.size(),
+                   "w", "TrimCurve");
     return outputInterface()->TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
@@ -1236,6 +1611,21 @@ RtVoid RiCxxValidate::SubdivisionMesh(RtConstToken scheme,
                                       const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkArraySize(sum(nvertices), vertices.size(),
+                   "vertices", "SubdivisionMesh");
+    checkArraySize(2*size(tags), nargs.size(),
+                   "nargs", "SubdivisionMesh");
+    checkArraySize(sum(nargs,0,2), intargs.size(),
+                   "intargs", "SubdivisionMesh");
+    checkArraySize(sum(nargs,1,2), floatargs.size(),
+                   "floatargs", "SubdivisionMesh");
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.uniform = size(nvertices);
+    iclassCounts.varying = max(vertices)+1;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = sum(nvertices);
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "SubdivisionMesh");
     return outputInterface()->SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
 }
 
@@ -1245,39 +1635,31 @@ RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(radius != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check radius != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"radius != 0\" failed: "
             "[radius = " << radius << "]"
-        );
-    }
-    if(!(zmin >= -abs(radius)))
-    {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmin >= -abs(radius) failed: "
-            "[zmin = " << zmin << ", " << "-abs(radius) = " << -abs(radius) << "]";
         );
     }
     if(!(zmin < zmax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmin < zmax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"zmin < zmax\" failed: "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
-        );
-    }
-    if(!(zmax <= abs(radius)))
-    {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmax <= abs(radius) failed: "
-            "[zmax = " << zmax << ", " << "abs(radius) = " << abs(radius) << "]";
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Sphere");
     return outputInterface()->Sphere(radius, zmin, zmax, thetamax, pList);
 }
 
@@ -1285,27 +1667,26 @@ RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
                            const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
-    if(!(height != 0))
-    {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check height != 0 failed: "
-            "[height = " << height << "]"
-        );
-    }
     if(!(radius != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check radius != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"radius != 0\" failed: "
             "[radius = " << radius << "]"
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Cone");
     return outputInterface()->Cone(height, radius, thetamax, pList);
 }
 
@@ -1315,25 +1696,31 @@ RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(radius != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check radius != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"radius != 0\" failed: "
             "[radius = " << radius << "]"
         );
     }
-    if(!(zmin < zmax))
+    if(!(zmin != zmax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmin < zmax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"zmin != zmax\" failed: "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Cylinder");
     return outputInterface()->Cylinder(radius, zmin, zmax, thetamax, pList);
 }
 
@@ -1343,11 +1730,17 @@ RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Hyperboloid");
     return outputInterface()->Hyperboloid(point1, point2, thetamax, pList);
 }
 
@@ -1357,32 +1750,31 @@ RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(rmax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check rmax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"rmax != 0\" failed: "
             "[rmax = " << rmax << "]"
         );
     }
-    if(!(zmin < zmax))
+    if(!(zmin != zmax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmin < zmax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"zmin != zmax\" failed: "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
-        );
-    }
-    if(!(zmax > 0))
-    {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check zmax > 0 failed: "
-            "[zmax = " << zmax << "]"
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Paraboloid");
     return outputInterface()->Paraboloid(rmax, zmin, zmax, thetamax, pList);
 }
 
@@ -1392,18 +1784,24 @@ RtVoid RiCxxValidate::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(radius != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check radius != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"radius != 0\" failed: "
             "[radius = " << radius << "]"
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Disk");
     return outputInterface()->Disk(height, radius, thetamax, pList);
 }
 
@@ -1414,38 +1812,51 @@ RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     if(!(majorrad != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check majorrad != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"majorrad != 0\" failed: "
             "[majorrad = " << majorrad << "]"
         );
     }
     if(!(minorrad != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check minorrad != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"minorrad != 0\" failed: "
             "[minorrad = " << minorrad << "]"
         );
     }
     if(!(phimin != phimax))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check phimin != phimax failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"phimin != phimax\" failed: "
             "[phimin = " << phimin << ", " << "phimax = " << phimax << "]";
         );
     }
     if(!(thetamax != 0))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check thetamax != 0 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"thetamax != 0\" failed: "
             "[thetamax = " << thetamax << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = 4;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Torus");
     return outputInterface()->Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Points(const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = countP(pList);
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Points");
+    checkPointParamPresent(pList);
     return outputInterface()->Points(pList);
 }
 
@@ -1453,15 +1864,55 @@ RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
                              RtConstToken wrap, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+
+    bool periodic = strcmp(wrap, "periodic") == 0;
+    int basisStep = m_basisVstep;
+    iclassCounts.uniform = size(nvertices);
+    iclassCounts.vertex = sum(nvertices);
+    if(strcmp(type, "cubic") == 0)
+    {
+        if(periodic)
+        {
+            int segmentCount = 0;
+            for(size_t i = 0; i < nvertices.size(); ++i)
+                segmentCount += nvertices[i]/basisStep;
+            iclassCounts.varying = segmentCount;
+        }
+        else
+        {
+            int segmentCount = 0;
+            for(size_t i = 0; i < nvertices.size(); ++i)
+                segmentCount += (nvertices[i]-4)/basisStep + 1;
+            iclassCounts.varying = segmentCount + size(nvertices);
+        }
+    }
+    else
+    {
+        // linear curves
+        iclassCounts.varying = iclassCounts.vertex;
+    }
+    // TODO: are facevertex/facevarying valid for curves?
+    iclassCounts.facevarying = 1;
+    iclassCounts.facevertex = 1;
+
+    checkParamListArraySizes(pList, iclassCounts, "Curves");
+    checkPointParamPresent(pList);
     return outputInterface()->Curves(type, nvertices, wrap, pList);
 }
 
 RtVoid RiCxxValidate::Blobby(RtInt nleaf, const IntArray& code,
-                             const FloatArray& flt, const TokenArray& str,
-                             const ParamList& pList)
+                             const FloatArray& floats,
+                             const TokenArray& strings, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
-    return outputInterface()->Blobby(nleaf, code, flt, str, pList);
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    iclassCounts.varying = nleaf;
+    iclassCounts.vertex = iclassCounts.varying;
+    iclassCounts.facevarying = iclassCounts.varying;
+    iclassCounts.facevertex = iclassCounts.facevarying;
+    checkParamListArraySizes(pList, iclassCounts, "Blobby");
+    return outputInterface()->Blobby(nleaf, code, floats, strings, pList);
 }
 
 RtVoid RiCxxValidate::Procedural(RtPointer data, RtConstBound bound,
@@ -1475,6 +1926,9 @@ RtVoid RiCxxValidate::Procedural(RtPointer data, RtConstBound bound,
 RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+
+    checkParamListArraySizes(pList, iclassCounts, "Geometry");
     return outputInterface()->Geometry(type, pList);
 }
 
@@ -1538,18 +1992,20 @@ RtVoid RiCxxValidate::MakeTexture(RtConstString imagefile,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(swidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check swidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"swidth >= 1\" failed: "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check twidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"twidth >= 1\" failed: "
             "[twidth = " << twidth << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "MakeTexture");
     return outputInterface()->MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
 }
 
@@ -1562,18 +2018,20 @@ RtVoid RiCxxValidate::MakeLatLongEnvironment(RtConstString imagefile,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(swidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check swidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"swidth >= 1\" failed: "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check twidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"twidth >= 1\" failed: "
             "[twidth = " << twidth << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "MakeLatLongEnvironment");
     return outputInterface()->MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
 }
 
@@ -1592,18 +2050,20 @@ RtVoid RiCxxValidate::MakeCubeFaceEnvironment(RtConstString px,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     if(!(swidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check swidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"swidth >= 1\" failed: "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency,
-            "parameter check twidth >= 1 failed: "
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"twidth >= 1\" failed: "
             "[twidth = " << twidth << "]"
         );
     }
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "MakeCubeFaceEnvironment");
     return outputInterface()->MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
 }
 
@@ -1612,6 +2072,8 @@ RtVoid RiCxxValidate::MakeShadow(RtConstString picfile,
                                  const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "MakeShadow");
     return outputInterface()->MakeShadow(picfile, shadowfile, pList);
 }
 
@@ -1620,6 +2082,8 @@ RtVoid RiCxxValidate::MakeOcclusion(const StringArray& picfiles,
                                     const ParamList& pList)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "MakeOcclusion");
     return outputInterface()->MakeOcclusion(picfiles, shadowfile, pList);
 }
 
@@ -1632,6 +2096,8 @@ RtVoid RiCxxValidate::ErrorHandler(RtErrorFunc handler)
 RtVoid RiCxxValidate::ReadArchive(RtConstToken name, RtArchiveCallback callback,
                                   const ParamList& pList)
 {
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "ReadArchive");
     return outputInterface()->ReadArchive(name, callback, pList);
 }
 //[[[end]]]

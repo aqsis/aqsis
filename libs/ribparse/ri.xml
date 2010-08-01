@@ -519,7 +519,7 @@
 				<Argument>
 					<Name>min</Name>
 					<Type>RtInt</Type>
-					<Range><ge>max</ge></Range>
+					<Range><le>max</le></Range>
 				</Argument>
 				<Argument>
 					<Name>max</Name>
@@ -786,14 +786,11 @@
 				<Argument>
 					<Name>nRGB</Name>
 					<Type>RtFloatArray</Type>
-					<Length>		int __nRGB_length = N;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>RGBn</Name>
 					<Type>RtFloatArray</Type>
-					<Length>		int __RGBn_length = N;
-</Length>
+					<Length>size(nRGB)</Length>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -1780,9 +1777,6 @@
 				<Argument>
 					<Name>points</Name>
 					<Type>RtPointArray</Type>
-				
-					<Length>		int __points_length = npoints;
-</Length>
 				</Argument>
 			</Arguments>
 			<ValidScope>
@@ -1893,15 +1887,12 @@
 					<Type>RtInt</Type>
 					<RibValue>countP(pList)</RibValue>
 				</Argument>
-				<ParamList/>
+				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = nvertices;
-</VaryingSize>
-			<VertexSize>		vertex_size = nvertices;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = nvertices;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>countP(pList)</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -1924,24 +1915,13 @@
 				<Argument>
 					<Name>nverts</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nverts_length = nloops;
-</Length>
 				</Argument>
-				<ParamList/>
+				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 0;
-		{
-			int __i;
-			for(__i=0;__i&lt;nloops;__i++)
-				varying_size+=nverts[__i];
-		}
-</VaryingSize>
-			<VertexSize>		vertex_size = varying_size;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = varying_size;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>sum(nverts)</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -1964,43 +1944,20 @@
 				<Argument>
 					<Name>nverts</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nverts_length = npolys;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>verts</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __verts_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;npolys; __i++)
-				__verts_length+=nverts[__i];
-		}
-</Length>
+					<Length>sum(nverts)</Length>
 				</Argument>
-				<ParamList/>
+				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__verts_length; __i++)
-				if(verts[__i]&gt;varying_size)
-					varying_size=verts[__i];
-		}
-		varying_size+=1;
-</VaryingSize>
-			<VertexSize>		vertex_size=varying_size;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;npolys; __i++)
-				facevarying_size+=nverts[__i];
-		}
-</FaceVaryingSize>
+			<IClassLengths>
+				<Uniform>size(nverts)</Uniform>
+				<Varying>max(verts)+1</Varying>
+				<FaceVarying>sum(nverts)</FaceVarying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2023,55 +1980,25 @@
 				<Argument>
 					<Name>nloops</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nloops_length = npolys;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>nverts</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nverts_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;npolys; __i++)
-				__nverts_length+=nloops[__i];
-		}
-</Length>
+					<Length>sum(nloops)</Length>
 				</Argument>
 				<Argument>
 					<Name>verts</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __verts_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__nverts_length; __i++)
-				__verts_length+=nverts[__i];
-		}
-</Length>
+					<Length>sum(nverts)</Length>
 				</Argument>
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__verts_length; __i++)
-				if(verts[__i]&gt;varying_size)
-					varying_size=verts[__i];
-		}
-		varying_size+=1;
-</VaryingSize>
-			<VertexSize>		vertex_size=varying_size;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;npolys; __i++)
-				facevarying_size+=nverts[__i];
-		}
-</FaceVaryingSize>
+			<IClassLengths>
+				<Uniform>size(nloops)</Uniform>
+				<Varying>max(verts)+1</Varying>
+				<FaceVarying>sum(nverts)</FaceVarying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2131,14 +2058,10 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-		if(strcmp(type, "bicubic")==0)
-			vertex_size=16;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = varying_size;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+				<Vertex>strcmp(type,"bilinear")==0 ? 4 : 16</Vertex>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2178,44 +2101,9 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<UniformSize>
-		if(strcmp(type, "bilinear")==0)
-		{
-			if(strcmp(uwrap, "periodic")==0)
-				uniform_size = nu;
-			else
-				uniform_size = nu-1;
-			if(strcmp(vwrap, "periodic")==0)
-				uniform_size *= nv;
-			else
-				uniform_size *= nv-1;
-		}
-		else
-		{
-			int ustep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
-			int vstep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
-			if(strcmp(uwrap, "periodic")==0)
-				uniform_size = nu/ustep;
-			else
-				uniform_size = (nu-4)/ustep;
-			if(strcmp(vwrap, "periodic")==0)
-				uniform_size *= nv/vstep;
-			else
-				uniform_size *= (nv-4)/vstep;
-		}
-</UniformSize>
-			<VaryingSize>
-		if(strcmp(type, "bilinear")==0)
-			varying_size = nu*nv;
-		else
-		{
-			int ustep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
-			int vstep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
-			varying_size = (nu/ustep)*(nv/vstep);
-		}
-</VaryingSize>
-			<VertexSize>		vertex_size=nu*nv;
-</VertexSize>
+			<IClassLengths>
+				<ComplicatedCustomImpl/>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2243,9 +2131,7 @@
 				<Argument>
 					<Name>uknot</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __uknot_length = nu + uorder;
-</Length>
+					<Length>nu+uorder</Length>
 				</Argument>
 				<Argument>
 					<Name>umin</Name>
@@ -2269,9 +2155,7 @@
 				<Argument>
 					<Name>vknot</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __vknot_length = nv + vorder;
-</Length>
+					<Length>nv+vorder</Length>
 				</Argument>
 				<Argument>
 					<Name>vmin</Name>
@@ -2285,12 +2169,11 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<UniformSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
-</UniformSize>
-			<VaryingSize>		varying_size=(1+nu-uorder+1)*(1+nv-vorder+1);
-</VaryingSize>
-			<VertexSize>		vertex_size=nu*nv;
-</VertexSize>
+			<IClassLengths>
+				<Uniform>(1+nu-uorder+1)*(1+nv-vorder+1)</Uniform>
+				<Varying>(1+nu-uorder+1)*(1+nv-vorder+1)</Varying>
+				<Vertex>nu*nv</Vertex>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2313,80 +2196,46 @@
 				<Argument>
 					<Name>ncurves</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __ncurves_length = nloops;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>order</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __order_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;nloops; __i++)
-				__order_length+=ncurves[__i];
-		}
-</Length>
+					<Length>sum(ncurves)</Length>
 				</Argument>
 				<Argument>
 					<Name>knot</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __knot_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__order_length; __i++)
-				__knot_length+=order[__i]+n[__i];
-		}
-</Length>
+					<Length>sum(order)+sum(n)</Length>
 				</Argument>
 				<Argument>
 					<Name>min</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __min_length = __order_length;
-</Length>
+					<Length>size(order)</Length>
 				</Argument>
 				<Argument>
 					<Name>max</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __max_length = __order_length;
-</Length>
+					<Length>size(order)</Length>
 				</Argument>
 				<Argument>
 					<Name>n</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __n_length = __order_length;
-</Length>
+					<Length>size(order)</Length>
 				</Argument>
 				<Argument>
 					<Name>u</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __u_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__order_length; __i++)
-				__u_length+=n[__i];
-		}
-</Length>
+					<Length>sum(n)</Length>
 				</Argument>
 				<Argument>
 					<Name>v</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __v_length = __u_length;
-</Length>
+					<Length>size(u)</Length>
 				</Argument>
 				<Argument>
 					<Name>w</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __w_length = __u_length;
-</Length>
+					<Length>size(u)</Length>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -2418,21 +2267,11 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nvertices_length = nfaces;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>vertices</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __vertices_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;nfaces; __i++)
-				__vertices_length+=nvertices[__i];
-		}
-</Length>
+					<Length>sum(nvertices)</Length>
 				</Argument>
 				<Argument>
 					<Name>ntags</Name>
@@ -2442,61 +2281,30 @@
 				<Argument>
 					<Name>tags</Name>
 					<Type>RtTokenArray</Type>
-				
-					<Length>		int __tags_length = ntags;</Length>
 				</Argument>
 				<Argument>
 					<Name>nargs</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nargs_length = ntags*2;
-</Length>
+					<Length>2*size(tags)</Length>
 				</Argument>
 				<Argument>
 					<Name>intargs</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __intargs_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;ntags*2; __i+=2)
-				__intargs_length+=nargs[__i];
-		}
-</Length>
+					<Length>sum(nargs,0,2)</Length>
 				</Argument>
 				<Argument>
 					<Name>floatargs</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __floatargs_length = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;ntags*2; __i+=2)
-				__floatargs_length+=nargs[__i+1];
-		}
-</Length>
+					<Length>sum(nargs,1,2)</Length>
 				</Argument>
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__vertices_length; __i++)
-				if(vertices[__i]&gt;varying_size)
-					varying_size=vertices[__i];
-		}
-		varying_size+=1;
-</VaryingSize>
-			<VertexSize>		vertex_size=varying_size;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size=0;
-		{
-			int __i;
-			for(__i=0; __i&lt;nfaces; __i++)
-				facevarying_size+=nvertices[__i];
-		}
-</FaceVaryingSize>
+			<IClassLengths>
+				<Uniform>size(nvertices)</Uniform>
+				<Varying>max(vertices)+1</Varying>
+				<FaceVarying>sum(nvertices)</FaceVarying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2511,89 +2319,6 @@
 
 		<Procedure>
 			<Name>Sphere</Name>
-			<ReturnType>RtVoid</ReturnType>
-			<Arguments>
-				<Argument>
-					<Name>radius</Name>
-					<Type>RtFloat</Type>
-					<Range><ne>0</ne></Range>
-				</Argument>
-				<Argument>
-					<Name>zmin</Name>
-					<Type>RtFloat</Type>
-					<Range><ge>-abs(radius)</ge><lt>zmax</lt></Range>
-				</Argument>
-				<Argument>
-					<Name>zmax</Name>
-					<Type>RtFloat</Type>
-					<Range><le>abs(radius)</le></Range>
-				</Argument>
-				<Argument>
-					<Name>thetamax</Name>
-					<Type>RtFloat</Type>
-					<Range><ne>0</ne></Range>
-				</Argument>
-				<RibArgsCanBeArray/>
-				<ParamList/>
-			</Arguments>
-			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
-			<ValidScope>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object/>
-				<Motion/>
-			</ValidScope>
-		</Procedure>
-
-		<Procedure>
-			<Name>Cone</Name>
-			<ReturnType>RtVoid</ReturnType>
-			<Arguments>
-				<Argument>
-					<Name>height</Name>
-					<Type>RtFloat</Type>
-					<Range><ne>0</ne></Range>
-				</Argument>
-				<Argument>
-					<Name>radius</Name>
-					<Type>RtFloat</Type>
-					<Range><ne>0</ne></Range>
-				</Argument>
-				<Argument>
-					<Name>thetamax</Name>
-					<Type>RtFloat</Type>
-					<Range><ne>0</ne></Range>
-				</Argument>
-				<RibArgsCanBeArray/>
-				<ParamList/>
-			</Arguments>
-			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
-			<ValidScope>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object/>
-				<Motion/>
-			</ValidScope>
-		</Procedure>
-
-		<Procedure>
-			<Name>Cylinder</Name>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 				<Argument>
@@ -2619,12 +2344,84 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
+			<ValidScope>
+				<World/>
+				<Attribute/>
+				<Transform/>
+				<Solid/>
+				<Object/>
+				<Motion/>
+			</ValidScope>
+		</Procedure>
+
+		<Procedure>
+			<Name>Cone</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>height</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
+				</Argument>
+				<RibArgsCanBeArray/>
+				<ParamList/>
+			</Arguments>
+			<Rib/>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
+			<ValidScope>
+				<World/>
+				<Attribute/>
+				<Transform/>
+				<Solid/>
+				<Object/>
+				<Motion/>
+			</ValidScope>
+		</Procedure>
+
+		<Procedure>
+			<Name>Cylinder</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
+				</Argument>
+				<Argument>
+					<Name>zmin</Name>
+					<Type>RtFloat</Type>
+					<Range><ne>zmax</ne></Range>
+				</Argument>
+				<Argument>
+					<Name>zmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+					<Range><ne>0</ne></Range>
+				</Argument>
+				<RibArgsCanBeArray/>
+				<ParamList/>
+			</Arguments>
+			<Rib/>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2656,12 +2453,9 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2684,12 +2478,11 @@
 				<Argument>
 					<Name>zmin</Name>
 					<Type>RtFloat</Type>
-					<Range><lt>zmax</lt></Range>
+					<Range><ne>zmax</ne></Range>
 				</Argument>
 				<Argument>
 					<Name>zmax</Name>
 					<Type>RtFloat</Type>
-					<Range><gt>0</gt></Range>
 				</Argument>
 				<Argument>
 					<Name>thetamax</Name>
@@ -2700,12 +2493,9 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2738,12 +2528,9 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2786,12 +2573,9 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = 4;
-</VaryingSize>
-			<VertexSize>		vertex_size = 4;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = 4;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>4</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2813,15 +2597,12 @@
 					<Type>RtInt</Type>
 					<RibValue>countP(pList)</RibValue>
 				</Argument>
-				<ParamList/>
+				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
 			<Rib/>
-			<VaryingSize>		varying_size = npoints;
-</VaryingSize>
-			<VertexSize>		vertex_size = npoints;
-</VertexSize>
-			<FaceVaryingSize>		facevarying_size = npoints;
-</FaceVaryingSize>
+			<IClassLengths>
+				<Varying>countP(pList)</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2848,50 +2629,17 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __nvertices_length = ncurves;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>wrap</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
 			<Rib/>
-			<UniformSize>		uniform_size = ncurves;
-</UniformSize>
-			<VaryingSize>		varying_size = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;__nvertices_length; __i++)
-			{
-				if(strcmp(type, "cubic")==0)
-				{
-					int step = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
-					if(strcmp(wrap, "periodic")==0)
-						varying_size+=nvertices[__i]/step;
-					else
-						varying_size+=((nvertices[__i]-4)/step)+1;
-				}
-				else
-				{
-					if(strcmp(wrap, "periodic")==0)
-						varying_size+=nvertices[__i];
-					else
-						varying_size+=nvertices[__i]-1;
-				}
-				varying_size+=1;
-			}
-		}
-</VaryingSize>
-			<VertexSize>		vertex_size = 0;
-		{
-			int __i;
-			for(__i=0; __i&lt;ncurves; __i++)
-				vertex_size+=nvertices[__i];
-		}
-</VertexSize>
+			<IClassLengths>
+				<ComplicatedCustomImpl/>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -2920,37 +2668,31 @@
 				<Argument>
 					<Name>code</Name>
 					<Type>RtIntArray</Type>
-				
-					<Length>		int __code_length = ncode;
-</Length>
 				</Argument>
 				<Argument>
-					<Name>nflt</Name>
+					<Name>nfloats</Name>
 					<Type>RtInt</Type>
-					<RibValue>size(flt)</RibValue>
+					<RibValue>size(floats)</RibValue>
 				</Argument>
 				<Argument>
-					<Name>flt</Name>
+					<Name>floats</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __flt_length = nflt;
-</Length>
 				</Argument>
 				<Argument>
-					<Name>nstr</Name>
+					<Name>nstrings</Name>
 					<Type>RtInt</Type>
-					<RibValue>size(str)</RibValue>
+					<RibValue>size(strings)</RibValue>
 				</Argument>
 				<Argument>
-					<Name>str</Name>
+					<Name>strings</Name>
 					<Type>RtTokenArray</Type>
-				
-					<Length>		int __str_length = nstr;
-</Length>
 				</Argument>
 				<ParamList/>
 			</Arguments>
 			<Rib/>
+			<IClassLengths>
+				<Varying>nleaf</Varying>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -3068,6 +2810,10 @@
 				<ParamList/>
 			</Arguments>
 			<Rib/>
+			<IClassLengths>
+				<!-- can't validate this automatically. -->
+				<ComplicatedCustomImpl/>
+			</IClassLengths>
 			<ValidScope>
 				<World/>
 				<Attribute/>
@@ -3197,9 +2943,6 @@
 				<Argument>
 					<Name>times</Name>
 					<Type>RtFloatArray</Type>
-				
-					<Length>		int __times_length = N;
-</Length>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -3443,9 +3186,6 @@
 				<Argument>
 					<Name>picfiles</Name>
 					<Type>RtStringArray</Type>
-				
-					<Length>		int __picfiles_length = npics;
-</Length>
 				</Argument>
 				<Argument>
 					<Name>shadowfile</Name>

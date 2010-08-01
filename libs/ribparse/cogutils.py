@@ -108,4 +108,46 @@ def riCxxMethodDecl(procXml, className=None):
         procName = className + '::' + procName
     return '%s %s(%s)' % (procXml.findtext('ReturnType'), procName, ', '.join(args))
 
+
+#------------------------------------------------------------------------------
+# Renderman interface stuff
+paramDeclRegex = re.compile(
+'(uniform|constant|varying|vertex|facevarying|facevertex)? *\
+(float|point|color|integer|string|vector|normal|hpoint|matrix|mpoint)\
+(?:\[([0-9]+)\])? *([a-zA-Z]+)')
+
+def parseParamDecl(declString):
+    g = list(paramDeclRegex.match(declString).groups())
+    if g[0] is None:
+        g[0] = 'uniform'
+    if g[2] is None:
+        g[2] = '1'
+    return g
+
+def paramDeclStringToCxx(declString):
+    toks = parseParamDecl(declString)
+    iclassToCxxIClass = {
+        'uniform':     'Uniform',
+        'constant':    'Constant',
+        'varying':     'Varying',
+        'vertex':      'Vertex',
+        'facevarying': 'FaceVarying',
+        'facevertex':  'FaceVertex',
+    }
+    typeToCxxType = {
+        'float'   : 'Float',
+        'point'   : 'Point',
+        'color'   : 'Color',
+        'integer' : 'Integer',
+        'string'  : 'String',
+        'vector'  : 'Vector',
+        'normal'  : 'Normal',
+        'hpoint'  : 'HPoint',
+        'matrix'  : 'Matrix',
+        'mpoint'  : 'MPoint',
+    }
+    return ('Ri::TypeSpec(Ri::TypeSpec::%s, Ri::TypeSpec::%s, %s)' % \
+            (iclassToCxxIClass[toks[0]], typeToCxxType[toks[1]], toks[2]), \
+            toks[3])
+
 # vi: set et:
