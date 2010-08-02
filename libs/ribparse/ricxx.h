@@ -534,6 +534,8 @@ class Renderer
         /// The parameter name is a subrange of the string "token", and as such
         /// is returned as the range [nameBegin, nameEnd).
         ///
+        /// TODO: should this be const?
+        ///
         /// Implementations should throw XqValidation on parse or lookup error.
         ///
         /// \param token - type declaration and parameter name, in a string.

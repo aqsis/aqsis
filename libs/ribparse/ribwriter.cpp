@@ -157,25 +157,12 @@ class AsciiFormatter
             m_out << f[0] << ' ' << f[1] << ' ' << f[2];
         }
 
-        void print(const Ri::Param& p)
+        template<typename T>
+        void printParam(const char* token, const Ri::Array<T>& a)
         {
-            // TODO: abbreviate the already Define()'d tokens
-            m_out << '\"' << CqPrimvarToken(p.spec(), p.name()) << '\"';
+            print(token);
             whitespace();
-            switch(p.spec().storageType())
-            {
-                case Ri::TypeSpec::Float:
-                    print(p.floatData());
-                    break;
-                case Ri::TypeSpec::Integer:
-                    print(p.intData());
-                    break;
-                case Ri::TypeSpec::String:
-                    print(p.stringData());
-                    break;
-                default:
-                    assert(0);
-            }
+            print(a);
         }
 };
 
@@ -329,26 +316,11 @@ class BinaryFormatter
             print(f[0]); print(f[1]); print(f[2]);
         }
 
-        void print(const Ri::Param& p)
+        template<typename T>
+        void printParam(const char* token, const Ri::Array<T>& a)
         {
-            // TODO: abbreviate already Define()'d tokens
-            std::ostringstream fmt;
-            fmt << CqPrimvarToken(p.spec(), p.name());
-            print(fmt.str().c_str());
-            switch(p.spec().storageType())
-            {
-                case Ri::TypeSpec::Float:
-                    print(p.floatData());
-                    break;
-                case Ri::TypeSpec::Integer:
-                    print(p.intData());
-                    break;
-                case Ri::TypeSpec::String:
-                    print(p.stringData());
-                    break;
-                default:
-                    assert(0);
-            }
+            print(token);
+            print(a);
         }
 };
 
@@ -491,7 +463,40 @@ class RibWriter : public Ri::Renderer
             for(size_t i = 0; i < pList.size(); ++i)
             {
                 m_formatter.whitespace();
-                m_formatter.print(pList[i]);
+                const Ri::Param& param = pList[i];
+                // TODO try/catch for flow control is ugly - need to refactor
+                // token dict to avoid this...
+                bool useInlineDecl = true;
+                try
+                {
+                    CqPrimvarToken tok = m_tokenDict.parseAndLookup(param.name());
+                    if(param.spec() == toTypeSpec(tok))
+                        useInlineDecl = false;
+                }
+                catch(XqValidation&)
+                { }
+                const char* token = param.name();
+                std::ostringstream fmt;
+                if(useInlineDecl)
+                {
+                    // Format inline declarations.
+                    fmt << CqPrimvarToken(param.spec(), param.name());
+                    token = fmt.str().c_str();
+                }
+                switch(param.spec().storageType())
+                {
+                    case Ri::TypeSpec::Float:
+                        m_formatter.printParam(token, param.floatData());
+                        break;
+                    case Ri::TypeSpec::Integer:
+                        m_formatter.printParam(token, param.intData());
+                        break;
+                    case Ri::TypeSpec::String:
+                        m_formatter.printParam(token, param.stringData());
+                        break;
+                    default:
+                        assert(0);
+                }
             }
         }
 
