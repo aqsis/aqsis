@@ -11,7 +11,7 @@ set(ribparse_srcs
 	riblexer.cpp
 	ribparser.cpp
 	ribsema.cpp
-	ribout.cpp
+	ribwriter.cpp
 	ricxx_validate.cpp
 )
 
@@ -51,6 +51,6 @@ if(aqsis_enable_testing)
 	# Set the exports necessary to avoid incorrect linkage errors.
 	set_target_properties(ricxx2ri_speed_test PROPERTIES COMPILE_DEFINITIONS AQSIS_RI_EXPORTS)
 
-	add_executable(ribout_test ribout_test.cpp)
-	target_link_libraries(ribout_test aqsis_ribparse)
+	add_executable(ribwriter_test ribwriter_test.cpp)
+	target_link_libraries(ribwriter_test aqsis_ribparse)
 endif()

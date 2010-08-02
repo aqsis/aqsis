@@ -461,7 +461,7 @@ const char* basisName(RtConstBasis b)
 /// The Formatter template argument specifies a formatting class which will do
 /// the job of actually formatting the RIB tokens into output characters.
 template<typename Formatter>
-class RibOut : public Ri::Renderer
+class RibWriter : public Ri::Renderer
 {
     private:
 		/// gzip compressor for compressed output
@@ -530,7 +530,7 @@ class RibOut : public Ri::Renderer
         }
 
     public:
-        RibOut(std::ostream& out, bool interpolateArchives, bool useGzip)
+        RibWriter(std::ostream& out, bool interpolateArchives, bool useGzip)
             : m_gzipStream(setupGzipStream(out, useGzip)),
             m_formatter(useGzip ? *m_gzipStream : out),
             m_filterFuncMap(filterFuncNames),
@@ -747,7 +747,7 @@ class RibOut : public Ri::Renderer
         virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
                             RtConstToken wrap, const ParamList& pList);
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
-                            const FloatArray& flt, const TokenArray& str,
+                            const FloatArray& floats, const TokenArray& strings,
                             const ParamList& pList);
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,
                             RtProcSubdivFunc refineproc,
@@ -792,7 +792,7 @@ class RibOut : public Ri::Renderer
 // effect the state of the output object.
 
 template<typename Formatter>
-RtToken RibOut<Formatter>::Declare(RtConstString name, RtConstString declaration)
+RtToken RibWriter<Formatter>::Declare(RtConstString name, RtConstString declaration)
 {
     m_tokenDict.insert(CqPrimvarToken(declaration, name));
     m_formatter.beginRequest("Declare");
@@ -805,7 +805,7 @@ RtToken RibOut<Formatter>::Declare(RtConstString name, RtConstString declaration
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Procedural(RtPointer data, RtConstBound bound,
+RtVoid RibWriter<Formatter>::Procedural(RtPointer data, RtConstBound bound,
                                      RtProcSubdivFunc refineproc,
                                      RtProcFreeFunc freeproc)
 {
@@ -827,7 +827,7 @@ RtVoid RibOut<Formatter>::Procedural(RtPointer data, RtConstBound bound,
 }
 
 template<typename Formatter>
-RtLightHandle RibOut<Formatter>::lightSourceGeneral(RtConstToken requestName,
+RtLightHandle RibWriter<Formatter>::lightSourceGeneral(RtConstToken requestName,
                                                     RtConstToken name,
                                                     const ParamList& pList)
 {
@@ -842,21 +842,21 @@ RtLightHandle RibOut<Formatter>::lightSourceGeneral(RtConstToken requestName,
 }
 
 template<typename Formatter>
-RtLightHandle RibOut<Formatter>::LightSource(RtConstToken name,
+RtLightHandle RibWriter<Formatter>::LightSource(RtConstToken name,
                                              const ParamList& pList)
 {
     return lightSourceGeneral("LightSource", name, pList);
 }
 
 template<typename Formatter>
-RtLightHandle RibOut<Formatter>::AreaLightSource(RtConstToken name,
+RtLightHandle RibWriter<Formatter>::AreaLightSource(RtConstToken name,
                                                  const ParamList& pList)
 {
     return lightSourceGeneral("AreaLightSource", name, pList);
 }
 
 template<typename Formatter>
-RtObjectHandle RibOut<Formatter>::ObjectBegin()
+RtObjectHandle RibWriter<Formatter>::ObjectBegin()
 {
     m_formatter.beginRequest("ObjectBegin");
     m_formatter.whitespace();
@@ -867,7 +867,7 @@ RtObjectHandle RibOut<Formatter>::ObjectBegin()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Option(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Option(RtConstToken name, const ParamList& pList)
 {
     m_formatter.beginRequest("Option");
     m_formatter.whitespace();
@@ -892,7 +892,7 @@ RtVoid RibOut<Formatter>::Option(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ReadArchive(RtConstToken name,
+RtVoid RibWriter<Formatter>::ReadArchive(RtConstToken name,
                                       RtArchiveCallback callback,
                                       const ParamList& pList)
 {
@@ -977,7 +977,7 @@ returnExpressions = {
 
 methodTemplate = '''
 template<typename Formatter>
-$wrapDecl($riCxxMethodDecl($proc, className='RibOut<Formatter>'), 80)
+$wrapDecl($riCxxMethodDecl($proc, className='RibWriter<Formatter>'), 80)
 {
 #if $doDedent
     m_formatter.decreaseIndent();
@@ -1012,7 +1012,7 @@ for proc in riXml.findall('Procedures/Procedure'):
 ]]]*/
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::FrameBegin(RtInt number)
+RtVoid RibWriter<Formatter>::FrameBegin(RtInt number)
 {
     m_formatter.beginRequest("FrameBegin");
     m_formatter.whitespace();
@@ -1022,7 +1022,7 @@ RtVoid RibOut<Formatter>::FrameBegin(RtInt number)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::FrameEnd()
+RtVoid RibWriter<Formatter>::FrameEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("FrameEnd");
@@ -1030,7 +1030,7 @@ RtVoid RibOut<Formatter>::FrameEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::WorldBegin()
+RtVoid RibWriter<Formatter>::WorldBegin()
 {
     m_formatter.beginRequest("WorldBegin");
     m_formatter.endRequest();
@@ -1038,7 +1038,7 @@ RtVoid RibOut<Formatter>::WorldBegin()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::WorldEnd()
+RtVoid RibWriter<Formatter>::WorldEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("WorldEnd");
@@ -1046,7 +1046,7 @@ RtVoid RibOut<Formatter>::WorldEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::IfBegin(RtConstString condition)
+RtVoid RibWriter<Formatter>::IfBegin(RtConstString condition)
 {
     m_formatter.beginRequest("IfBegin");
     m_formatter.whitespace();
@@ -1056,7 +1056,7 @@ RtVoid RibOut<Formatter>::IfBegin(RtConstString condition)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ElseIf(RtConstString condition)
+RtVoid RibWriter<Formatter>::ElseIf(RtConstString condition)
 {
     m_formatter.beginRequest("ElseIf");
     m_formatter.whitespace();
@@ -1065,14 +1065,14 @@ RtVoid RibOut<Formatter>::ElseIf(RtConstString condition)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Else()
+RtVoid RibWriter<Formatter>::Else()
 {
     m_formatter.beginRequest("Else");
     m_formatter.endRequest();
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::IfEnd()
+RtVoid RibWriter<Formatter>::IfEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("IfEnd");
@@ -1080,8 +1080,8 @@ RtVoid RibOut<Formatter>::IfEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Format(RtInt xresolution, RtInt yresolution,
-                                 RtFloat pixelaspectratio)
+RtVoid RibWriter<Formatter>::Format(RtInt xresolution, RtInt yresolution,
+                                    RtFloat pixelaspectratio)
 {
     m_formatter.beginRequest("Format");
     m_formatter.whitespace();
@@ -1094,7 +1094,7 @@ RtVoid RibOut<Formatter>::Format(RtInt xresolution, RtInt yresolution,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::FrameAspectRatio(RtFloat frameratio)
+RtVoid RibWriter<Formatter>::FrameAspectRatio(RtFloat frameratio)
 {
     m_formatter.beginRequest("FrameAspectRatio");
     m_formatter.whitespace();
@@ -1103,8 +1103,8 @@ RtVoid RibOut<Formatter>::FrameAspectRatio(RtFloat frameratio)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ScreenWindow(RtFloat left, RtFloat right,
-                                       RtFloat bottom, RtFloat top)
+RtVoid RibWriter<Formatter>::ScreenWindow(RtFloat left, RtFloat right,
+                                          RtFloat bottom, RtFloat top)
 {
     m_formatter.beginRequest("ScreenWindow");
     m_formatter.whitespace();
@@ -1119,8 +1119,8 @@ RtVoid RibOut<Formatter>::ScreenWindow(RtFloat left, RtFloat right,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
-                                     RtFloat ymax)
+RtVoid RibWriter<Formatter>::CropWindow(RtFloat xmin, RtFloat xmax,
+                                        RtFloat ymin, RtFloat ymax)
 {
     m_formatter.beginRequest("CropWindow");
     m_formatter.whitespace();
@@ -1135,7 +1135,8 @@ RtVoid RibOut<Formatter>::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Projection(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Projection(RtConstToken name,
+                                        const ParamList& pList)
 {
     m_formatter.beginRequest("Projection");
     m_formatter.whitespace();
@@ -1145,7 +1146,7 @@ RtVoid RibOut<Formatter>::Projection(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Clipping(RtFloat cnear, RtFloat cfar)
+RtVoid RibWriter<Formatter>::Clipping(RtFloat cnear, RtFloat cfar)
 {
     m_formatter.beginRequest("Clipping");
     m_formatter.whitespace();
@@ -1156,8 +1157,8 @@ RtVoid RibOut<Formatter>::Clipping(RtFloat cnear, RtFloat cfar)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ClippingPlane(RtFloat x, RtFloat y, RtFloat z,
-                                        RtFloat nx, RtFloat ny, RtFloat nz)
+RtVoid RibWriter<Formatter>::ClippingPlane(RtFloat x, RtFloat y, RtFloat z,
+                                           RtFloat nx, RtFloat ny, RtFloat nz)
 {
     m_formatter.beginRequest("ClippingPlane");
     m_formatter.whitespace();
@@ -1176,8 +1177,8 @@ RtVoid RibOut<Formatter>::ClippingPlane(RtFloat x, RtFloat y, RtFloat z,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::DepthOfField(RtFloat fstop, RtFloat focallength,
-                                       RtFloat focaldistance)
+RtVoid RibWriter<Formatter>::DepthOfField(RtFloat fstop, RtFloat focallength,
+                                          RtFloat focaldistance)
 {
     m_formatter.beginRequest("DepthOfField");
     m_formatter.whitespace();
@@ -1190,7 +1191,7 @@ RtVoid RibOut<Formatter>::DepthOfField(RtFloat fstop, RtFloat focallength,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Shutter(RtFloat opentime, RtFloat closetime)
+RtVoid RibWriter<Formatter>::Shutter(RtFloat opentime, RtFloat closetime)
 {
     m_formatter.beginRequest("Shutter");
     m_formatter.whitespace();
@@ -1201,7 +1202,7 @@ RtVoid RibOut<Formatter>::Shutter(RtFloat opentime, RtFloat closetime)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PixelVariance(RtFloat variance)
+RtVoid RibWriter<Formatter>::PixelVariance(RtFloat variance)
 {
     m_formatter.beginRequest("PixelVariance");
     m_formatter.whitespace();
@@ -1210,7 +1211,7 @@ RtVoid RibOut<Formatter>::PixelVariance(RtFloat variance)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PixelSamples(RtFloat xsamples, RtFloat ysamples)
+RtVoid RibWriter<Formatter>::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
     m_formatter.beginRequest("PixelSamples");
     m_formatter.whitespace();
@@ -1221,8 +1222,8 @@ RtVoid RibOut<Formatter>::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PixelFilter(RtFilterFunc function, RtFloat xwidth,
-                                      RtFloat ywidth)
+RtVoid RibWriter<Formatter>::PixelFilter(RtFilterFunc function, RtFloat xwidth,
+                                         RtFloat ywidth)
 {
     m_formatter.beginRequest("PixelFilter");
     m_formatter.whitespace();
@@ -1235,7 +1236,7 @@ RtVoid RibOut<Formatter>::PixelFilter(RtFilterFunc function, RtFloat xwidth,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Exposure(RtFloat gain, RtFloat gamma)
+RtVoid RibWriter<Formatter>::Exposure(RtFloat gain, RtFloat gamma)
 {
     m_formatter.beginRequest("Exposure");
     m_formatter.whitespace();
@@ -1246,7 +1247,7 @@ RtVoid RibOut<Formatter>::Exposure(RtFloat gain, RtFloat gamma)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Imager(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Imager(RtConstToken name, const ParamList& pList)
 {
     m_formatter.beginRequest("Imager");
     m_formatter.whitespace();
@@ -1256,8 +1257,8 @@ RtVoid RibOut<Formatter>::Imager(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Quantize(RtConstToken type, RtInt one, RtInt min,
-                                   RtInt max, RtFloat ditheramplitude)
+RtVoid RibWriter<Formatter>::Quantize(RtConstToken type, RtInt one, RtInt min,
+                                      RtInt max, RtFloat ditheramplitude)
 {
     m_formatter.beginRequest("Quantize");
     m_formatter.whitespace();
@@ -1274,8 +1275,8 @@ RtVoid RibOut<Formatter>::Quantize(RtConstToken type, RtInt one, RtInt min,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Display(RtConstToken name, RtConstToken type,
-                                  RtConstToken mode, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Display(RtConstToken name, RtConstToken type,
+                                     RtConstToken mode, const ParamList& pList)
 {
     m_formatter.beginRequest("Display");
     m_formatter.whitespace();
@@ -1289,7 +1290,7 @@ RtVoid RibOut<Formatter>::Display(RtConstToken name, RtConstToken type,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Hider(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Hider(RtConstToken name, const ParamList& pList)
 {
     m_formatter.beginRequest("Hider");
     m_formatter.whitespace();
@@ -1299,8 +1300,8 @@ RtVoid RibOut<Formatter>::Hider(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ColorSamples(const FloatArray& nRGB,
-                                       const FloatArray& RGBn)
+RtVoid RibWriter<Formatter>::ColorSamples(const FloatArray& nRGB,
+                                          const FloatArray& RGBn)
 {
     m_formatter.beginRequest("ColorSamples");
     m_formatter.whitespace();
@@ -1311,7 +1312,7 @@ RtVoid RibOut<Formatter>::ColorSamples(const FloatArray& nRGB,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::RelativeDetail(RtFloat relativedetail)
+RtVoid RibWriter<Formatter>::RelativeDetail(RtFloat relativedetail)
 {
     m_formatter.beginRequest("RelativeDetail");
     m_formatter.whitespace();
@@ -1320,7 +1321,7 @@ RtVoid RibOut<Formatter>::RelativeDetail(RtFloat relativedetail)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::AttributeBegin()
+RtVoid RibWriter<Formatter>::AttributeBegin()
 {
     m_formatter.beginRequest("AttributeBegin");
     m_formatter.endRequest();
@@ -1328,7 +1329,7 @@ RtVoid RibOut<Formatter>::AttributeBegin()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::AttributeEnd()
+RtVoid RibWriter<Formatter>::AttributeEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("AttributeEnd");
@@ -1336,7 +1337,7 @@ RtVoid RibOut<Formatter>::AttributeEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Color(RtConstColor Cq)
+RtVoid RibWriter<Formatter>::Color(RtConstColor Cq)
 {
     m_formatter.beginRequest("Color");
     m_formatter.whitespace();
@@ -1345,7 +1346,7 @@ RtVoid RibOut<Formatter>::Color(RtConstColor Cq)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Opacity(RtConstColor Os)
+RtVoid RibWriter<Formatter>::Opacity(RtConstColor Os)
 {
     m_formatter.beginRequest("Opacity");
     m_formatter.whitespace();
@@ -1354,9 +1355,10 @@ RtVoid RibOut<Formatter>::Opacity(RtConstColor Os)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
-                                             RtFloat t2, RtFloat s3, RtFloat t3,
-                                             RtFloat s4, RtFloat t4)
+RtVoid RibWriter<Formatter>::TextureCoordinates(RtFloat s1, RtFloat t1,
+                                                RtFloat s2, RtFloat t2,
+                                                RtFloat s3, RtFloat t3,
+                                                RtFloat s4, RtFloat t4)
 {
     m_formatter.beginRequest("TextureCoordinates");
     m_formatter.whitespace();
@@ -1379,7 +1381,7 @@ RtVoid RibOut<Formatter>::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid RibWriter<Formatter>::Illuminate(RtLightHandle light, RtBoolean onoff)
 {
     m_formatter.beginRequest("Illuminate");
     m_formatter.whitespace();
@@ -1390,7 +1392,7 @@ RtVoid RibOut<Formatter>::Illuminate(RtLightHandle light, RtBoolean onoff)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Surface(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Surface(RtConstToken name, const ParamList& pList)
 {
     m_formatter.beginRequest("Surface");
     m_formatter.whitespace();
@@ -1400,8 +1402,8 @@ RtVoid RibOut<Formatter>::Surface(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Displacement(RtConstToken name,
-                                       const ParamList& pList)
+RtVoid RibWriter<Formatter>::Displacement(RtConstToken name,
+                                          const ParamList& pList)
 {
     m_formatter.beginRequest("Displacement");
     m_formatter.whitespace();
@@ -1411,7 +1413,8 @@ RtVoid RibOut<Formatter>::Displacement(RtConstToken name,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Atmosphere(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Atmosphere(RtConstToken name,
+                                        const ParamList& pList)
 {
     m_formatter.beginRequest("Atmosphere");
     m_formatter.whitespace();
@@ -1421,7 +1424,8 @@ RtVoid RibOut<Formatter>::Atmosphere(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Interior(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Interior(RtConstToken name,
+                                      const ParamList& pList)
 {
     m_formatter.beginRequest("Interior");
     m_formatter.whitespace();
@@ -1431,7 +1435,8 @@ RtVoid RibOut<Formatter>::Interior(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Exterior(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Exterior(RtConstToken name,
+                                      const ParamList& pList)
 {
     m_formatter.beginRequest("Exterior");
     m_formatter.whitespace();
@@ -1441,9 +1446,9 @@ RtVoid RibOut<Formatter>::Exterior(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ShaderLayer(RtConstToken type, RtConstToken name,
-                                      RtConstToken layername,
-                                      const ParamList& pList)
+RtVoid RibWriter<Formatter>::ShaderLayer(RtConstToken type, RtConstToken name,
+                                         RtConstToken layername,
+                                         const ParamList& pList)
 {
     m_formatter.beginRequest("ShaderLayer");
     m_formatter.whitespace();
@@ -1457,11 +1462,11 @@ RtVoid RibOut<Formatter>::ShaderLayer(RtConstToken type, RtConstToken name,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ConnectShaderLayers(RtConstToken type,
-                                              RtConstToken layer1,
-                                              RtConstToken variable1,
-                                              RtConstToken layer2,
-                                              RtConstToken variable2)
+RtVoid RibWriter<Formatter>::ConnectShaderLayers(RtConstToken type,
+                                                 RtConstToken layer1,
+                                                 RtConstToken variable1,
+                                                 RtConstToken layer2,
+                                                 RtConstToken variable2)
 {
     m_formatter.beginRequest("ConnectShaderLayers");
     m_formatter.whitespace();
@@ -1478,7 +1483,7 @@ RtVoid RibOut<Formatter>::ConnectShaderLayers(RtConstToken type,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ShadingRate(RtFloat size)
+RtVoid RibWriter<Formatter>::ShadingRate(RtFloat size)
 {
     m_formatter.beginRequest("ShadingRate");
     m_formatter.whitespace();
@@ -1487,7 +1492,7 @@ RtVoid RibOut<Formatter>::ShadingRate(RtFloat size)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ShadingInterpolation(RtConstToken type)
+RtVoid RibWriter<Formatter>::ShadingInterpolation(RtConstToken type)
 {
     m_formatter.beginRequest("ShadingInterpolation");
     m_formatter.whitespace();
@@ -1496,7 +1501,7 @@ RtVoid RibOut<Formatter>::ShadingInterpolation(RtConstToken type)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Matte(RtBoolean onoff)
+RtVoid RibWriter<Formatter>::Matte(RtBoolean onoff)
 {
     m_formatter.beginRequest("Matte");
     m_formatter.whitespace();
@@ -1505,7 +1510,7 @@ RtVoid RibOut<Formatter>::Matte(RtBoolean onoff)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Bound(RtConstBound bound)
+RtVoid RibWriter<Formatter>::Bound(RtConstBound bound)
 {
     m_formatter.beginRequest("Bound");
     m_formatter.whitespace();
@@ -1514,7 +1519,7 @@ RtVoid RibOut<Formatter>::Bound(RtConstBound bound)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Detail(RtConstBound bound)
+RtVoid RibWriter<Formatter>::Detail(RtConstBound bound)
 {
     m_formatter.beginRequest("Detail");
     m_formatter.whitespace();
@@ -1523,8 +1528,8 @@ RtVoid RibOut<Formatter>::Detail(RtConstBound bound)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::DetailRange(RtFloat offlow, RtFloat onlow,
-                                      RtFloat onhigh, RtFloat offhigh)
+RtVoid RibWriter<Formatter>::DetailRange(RtFloat offlow, RtFloat onlow,
+                                         RtFloat onhigh, RtFloat offhigh)
 {
     m_formatter.beginRequest("DetailRange");
     m_formatter.whitespace();
@@ -1539,8 +1544,8 @@ RtVoid RibOut<Formatter>::DetailRange(RtFloat offlow, RtFloat onlow,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::GeometricApproximation(RtConstToken type,
-                                                 RtFloat value)
+RtVoid RibWriter<Formatter>::GeometricApproximation(RtConstToken type,
+                                                    RtFloat value)
 {
     m_formatter.beginRequest("GeometricApproximation");
     m_formatter.whitespace();
@@ -1551,7 +1556,7 @@ RtVoid RibOut<Formatter>::GeometricApproximation(RtConstToken type,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Orientation(RtConstToken orientation)
+RtVoid RibWriter<Formatter>::Orientation(RtConstToken orientation)
 {
     m_formatter.beginRequest("Orientation");
     m_formatter.whitespace();
@@ -1560,14 +1565,14 @@ RtVoid RibOut<Formatter>::Orientation(RtConstToken orientation)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ReverseOrientation()
+RtVoid RibWriter<Formatter>::ReverseOrientation()
 {
     m_formatter.beginRequest("ReverseOrientation");
     m_formatter.endRequest();
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Sides(RtInt nsides)
+RtVoid RibWriter<Formatter>::Sides(RtInt nsides)
 {
     m_formatter.beginRequest("Sides");
     m_formatter.whitespace();
@@ -1576,14 +1581,14 @@ RtVoid RibOut<Formatter>::Sides(RtInt nsides)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Identity()
+RtVoid RibWriter<Formatter>::Identity()
 {
     m_formatter.beginRequest("Identity");
     m_formatter.endRequest();
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Transform(RtConstMatrix transform)
+RtVoid RibWriter<Formatter>::Transform(RtConstMatrix transform)
 {
     m_formatter.beginRequest("Transform");
     m_formatter.whitespace();
@@ -1592,7 +1597,7 @@ RtVoid RibOut<Formatter>::Transform(RtConstMatrix transform)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ConcatTransform(RtConstMatrix transform)
+RtVoid RibWriter<Formatter>::ConcatTransform(RtConstMatrix transform)
 {
     m_formatter.beginRequest("ConcatTransform");
     m_formatter.whitespace();
@@ -1601,7 +1606,7 @@ RtVoid RibOut<Formatter>::ConcatTransform(RtConstMatrix transform)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Perspective(RtFloat fov)
+RtVoid RibWriter<Formatter>::Perspective(RtFloat fov)
 {
     m_formatter.beginRequest("Perspective");
     m_formatter.whitespace();
@@ -1610,7 +1615,7 @@ RtVoid RibOut<Formatter>::Perspective(RtFloat fov)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
+RtVoid RibWriter<Formatter>::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
     m_formatter.beginRequest("Translate");
     m_formatter.whitespace();
@@ -1623,8 +1628,8 @@ RtVoid RibOut<Formatter>::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Rotate(RtFloat angle, RtFloat dx, RtFloat dy,
-                                 RtFloat dz)
+RtVoid RibWriter<Formatter>::Rotate(RtFloat angle, RtFloat dx, RtFloat dy,
+                                    RtFloat dz)
 {
     m_formatter.beginRequest("Rotate");
     m_formatter.whitespace();
@@ -1639,7 +1644,7 @@ RtVoid RibOut<Formatter>::Rotate(RtFloat angle, RtFloat dx, RtFloat dy,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
+RtVoid RibWriter<Formatter>::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
     m_formatter.beginRequest("Scale");
     m_formatter.whitespace();
@@ -1652,9 +1657,9 @@ RtVoid RibOut<Formatter>::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1,
-                               RtFloat dz1, RtFloat dx2, RtFloat dy2,
-                               RtFloat dz2)
+RtVoid RibWriter<Formatter>::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1,
+                                  RtFloat dz1, RtFloat dx2, RtFloat dy2,
+                                  RtFloat dz2)
 {
     m_formatter.beginRequest("Skew");
     m_formatter.whitespace();
@@ -1675,7 +1680,7 @@ RtVoid RibOut<Formatter>::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::CoordinateSystem(RtConstToken space)
+RtVoid RibWriter<Formatter>::CoordinateSystem(RtConstToken space)
 {
     m_formatter.beginRequest("CoordinateSystem");
     m_formatter.whitespace();
@@ -1684,7 +1689,7 @@ RtVoid RibOut<Formatter>::CoordinateSystem(RtConstToken space)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::CoordSysTransform(RtConstToken space)
+RtVoid RibWriter<Formatter>::CoordSysTransform(RtConstToken space)
 {
     m_formatter.beginRequest("CoordSysTransform");
     m_formatter.whitespace();
@@ -1693,7 +1698,7 @@ RtVoid RibOut<Formatter>::CoordSysTransform(RtConstToken space)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::TransformBegin()
+RtVoid RibWriter<Formatter>::TransformBegin()
 {
     m_formatter.beginRequest("TransformBegin");
     m_formatter.endRequest();
@@ -1701,7 +1706,7 @@ RtVoid RibOut<Formatter>::TransformBegin()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::TransformEnd()
+RtVoid RibWriter<Formatter>::TransformEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("TransformEnd");
@@ -1709,8 +1714,8 @@ RtVoid RibOut<Formatter>::TransformEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Resource(RtConstToken handle, RtConstToken type,
-                                   const ParamList& pList)
+RtVoid RibWriter<Formatter>::Resource(RtConstToken handle, RtConstToken type,
+                                      const ParamList& pList)
 {
     m_formatter.beginRequest("Resource");
     m_formatter.whitespace();
@@ -1722,7 +1727,7 @@ RtVoid RibOut<Formatter>::Resource(RtConstToken handle, RtConstToken type,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ResourceBegin()
+RtVoid RibWriter<Formatter>::ResourceBegin()
 {
     m_formatter.beginRequest("ResourceBegin");
     m_formatter.endRequest();
@@ -1730,7 +1735,7 @@ RtVoid RibOut<Formatter>::ResourceBegin()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ResourceEnd()
+RtVoid RibWriter<Formatter>::ResourceEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("ResourceEnd");
@@ -1738,7 +1743,8 @@ RtVoid RibOut<Formatter>::ResourceEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Attribute(RtConstToken name, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Attribute(RtConstToken name,
+                                       const ParamList& pList)
 {
     m_formatter.beginRequest("Attribute");
     m_formatter.whitespace();
@@ -1748,7 +1754,7 @@ RtVoid RibOut<Formatter>::Attribute(RtConstToken name, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Polygon(const ParamList& pList)
+RtVoid RibWriter<Formatter>::Polygon(const ParamList& pList)
 {
     m_formatter.beginRequest("Polygon");
     printParamList(pList);
@@ -1756,8 +1762,8 @@ RtVoid RibOut<Formatter>::Polygon(const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::GeneralPolygon(const IntArray& nverts,
-                                         const ParamList& pList)
+RtVoid RibWriter<Formatter>::GeneralPolygon(const IntArray& nverts,
+                                            const ParamList& pList)
 {
     m_formatter.beginRequest("GeneralPolygon");
     m_formatter.whitespace();
@@ -1767,9 +1773,9 @@ RtVoid RibOut<Formatter>::GeneralPolygon(const IntArray& nverts,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PointsPolygons(const IntArray& nverts,
-                                         const IntArray& verts,
-                                         const ParamList& pList)
+RtVoid RibWriter<Formatter>::PointsPolygons(const IntArray& nverts,
+                                            const IntArray& verts,
+                                            const ParamList& pList)
 {
     m_formatter.beginRequest("PointsPolygons");
     m_formatter.whitespace();
@@ -1781,10 +1787,10 @@ RtVoid RibOut<Formatter>::PointsPolygons(const IntArray& nverts,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PointsGeneralPolygons(const IntArray& nloops,
-                                                const IntArray& nverts,
-                                                const IntArray& verts,
-                                                const ParamList& pList)
+RtVoid RibWriter<Formatter>::PointsGeneralPolygons(const IntArray& nloops,
+                                                   const IntArray& nverts,
+                                                   const IntArray& verts,
+                                                   const ParamList& pList)
 {
     m_formatter.beginRequest("PointsGeneralPolygons");
     m_formatter.whitespace();
@@ -1798,8 +1804,8 @@ RtVoid RibOut<Formatter>::PointsGeneralPolygons(const IntArray& nloops,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Basis(RtConstBasis ubasis, RtInt ustep,
-                                RtConstBasis vbasis, RtInt vstep)
+RtVoid RibWriter<Formatter>::Basis(RtConstBasis ubasis, RtInt ustep,
+                                   RtConstBasis vbasis, RtInt vstep)
 {
     m_formatter.beginRequest("Basis");
     m_formatter.whitespace();
@@ -1814,7 +1820,7 @@ RtVoid RibOut<Formatter>::Basis(RtConstBasis ubasis, RtInt ustep,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Patch(RtConstToken type, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Patch(RtConstToken type, const ParamList& pList)
 {
     m_formatter.beginRequest("Patch");
     m_formatter.whitespace();
@@ -1824,9 +1830,10 @@ RtVoid RibOut<Formatter>::Patch(RtConstToken type, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::PatchMesh(RtConstToken type, RtInt nu,
-                                    RtConstToken uwrap, RtInt nv,
-                                    RtConstToken vwrap, const ParamList& pList)
+RtVoid RibWriter<Formatter>::PatchMesh(RtConstToken type, RtInt nu,
+                                       RtConstToken uwrap, RtInt nv,
+                                       RtConstToken vwrap,
+                                       const ParamList& pList)
 {
     m_formatter.beginRequest("PatchMesh");
     m_formatter.whitespace();
@@ -1844,11 +1851,11 @@ RtVoid RibOut<Formatter>::PatchMesh(RtConstToken type, RtInt nu,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::NuPatch(RtInt nu, RtInt uorder,
-                                  const FloatArray& uknot, RtFloat umin,
-                                  RtFloat umax, RtInt nv, RtInt vorder,
-                                  const FloatArray& vknot, RtFloat vmin,
-                                  RtFloat vmax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::NuPatch(RtInt nu, RtInt uorder,
+                                     const FloatArray& uknot, RtFloat umin,
+                                     RtFloat umax, RtInt nv, RtInt vorder,
+                                     const FloatArray& vknot, RtFloat vmin,
+                                     RtFloat vmax, const ParamList& pList)
 {
     m_formatter.beginRequest("NuPatch");
     m_formatter.whitespace();
@@ -1876,13 +1883,13 @@ RtVoid RibOut<Formatter>::NuPatch(RtInt nu, RtInt uorder,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::TrimCurve(const IntArray& ncurves,
-                                    const IntArray& order,
-                                    const FloatArray& knot,
-                                    const FloatArray& min,
-                                    const FloatArray& max, const IntArray& n,
-                                    const FloatArray& u, const FloatArray& v,
-                                    const FloatArray& w)
+RtVoid RibWriter<Formatter>::TrimCurve(const IntArray& ncurves,
+                                       const IntArray& order,
+                                       const FloatArray& knot,
+                                       const FloatArray& min,
+                                       const FloatArray& max, const IntArray& n,
+                                       const FloatArray& u, const FloatArray& v,
+                                       const FloatArray& w)
 {
     m_formatter.beginRequest("TrimCurve");
     m_formatter.whitespace();
@@ -1907,14 +1914,14 @@ RtVoid RibOut<Formatter>::TrimCurve(const IntArray& ncurves,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::SubdivisionMesh(RtConstToken scheme,
-                                          const IntArray& nvertices,
-                                          const IntArray& vertices,
-                                          const TokenArray& tags,
-                                          const IntArray& nargs,
-                                          const IntArray& intargs,
-                                          const FloatArray& floatargs,
-                                          const ParamList& pList)
+RtVoid RibWriter<Formatter>::SubdivisionMesh(RtConstToken scheme,
+                                             const IntArray& nvertices,
+                                             const IntArray& vertices,
+                                             const TokenArray& tags,
+                                             const IntArray& nargs,
+                                             const IntArray& intargs,
+                                             const FloatArray& floatargs,
+                                             const ParamList& pList)
 {
     m_formatter.beginRequest("SubdivisionMesh");
     m_formatter.whitespace();
@@ -1936,8 +1943,8 @@ RtVoid RibOut<Formatter>::SubdivisionMesh(RtConstToken scheme,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
-                                 RtFloat thetamax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
+                                    RtFloat thetamax, const ParamList& pList)
 {
     m_formatter.beginRequest("Sphere");
     m_formatter.whitespace();
@@ -1953,8 +1960,8 @@ RtVoid RibOut<Formatter>::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
-                               const ParamList& pList)
+RtVoid RibWriter<Formatter>::Cone(RtFloat height, RtFloat radius,
+                                  RtFloat thetamax, const ParamList& pList)
 {
     m_formatter.beginRequest("Cone");
     m_formatter.whitespace();
@@ -1968,8 +1975,9 @@ RtVoid RibOut<Formatter>::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
-                                   RtFloat thetamax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Cylinder(RtFloat radius, RtFloat zmin,
+                                      RtFloat zmax, RtFloat thetamax,
+                                      const ParamList& pList)
 {
     m_formatter.beginRequest("Cylinder");
     m_formatter.whitespace();
@@ -1985,8 +1993,9 @@ RtVoid RibOut<Formatter>::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
-                                      RtFloat thetamax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Hyperboloid(RtConstPoint point1,
+                                         RtConstPoint point2, RtFloat thetamax,
+                                         const ParamList& pList)
 {
     m_formatter.beginRequest("Hyperboloid");
     m_formatter.whitespace();
@@ -2000,8 +2009,9 @@ RtVoid RibOut<Formatter>::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
-                                     RtFloat thetamax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Paraboloid(RtFloat rmax, RtFloat zmin,
+                                        RtFloat zmax, RtFloat thetamax,
+                                        const ParamList& pList)
 {
     m_formatter.beginRequest("Paraboloid");
     m_formatter.whitespace();
@@ -2017,8 +2027,8 @@ RtVoid RibOut<Formatter>::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
-                               const ParamList& pList)
+RtVoid RibWriter<Formatter>::Disk(RtFloat height, RtFloat radius,
+                                  RtFloat thetamax, const ParamList& pList)
 {
     m_formatter.beginRequest("Disk");
     m_formatter.whitespace();
@@ -2032,9 +2042,9 @@ RtVoid RibOut<Formatter>::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Torus(RtFloat majorrad, RtFloat minorrad,
-                                RtFloat phimin, RtFloat phimax,
-                                RtFloat thetamax, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Torus(RtFloat majorrad, RtFloat minorrad,
+                                   RtFloat phimin, RtFloat phimax,
+                                   RtFloat thetamax, const ParamList& pList)
 {
     m_formatter.beginRequest("Torus");
     m_formatter.whitespace();
@@ -2052,7 +2062,7 @@ RtVoid RibOut<Formatter>::Torus(RtFloat majorrad, RtFloat minorrad,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Points(const ParamList& pList)
+RtVoid RibWriter<Formatter>::Points(const ParamList& pList)
 {
     m_formatter.beginRequest("Points");
     printParamList(pList);
@@ -2060,8 +2070,9 @@ RtVoid RibOut<Formatter>::Points(const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Curves(RtConstToken type, const IntArray& nvertices,
-                                 RtConstToken wrap, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Curves(RtConstToken type,
+                                    const IntArray& nvertices,
+                                    RtConstToken wrap, const ParamList& pList)
 {
     m_formatter.beginRequest("Curves");
     m_formatter.whitespace();
@@ -2075,9 +2086,10 @@ RtVoid RibOut<Formatter>::Curves(RtConstToken type, const IntArray& nvertices,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Blobby(RtInt nleaf, const IntArray& code,
-                                 const FloatArray& flt, const TokenArray& str,
-                                 const ParamList& pList)
+RtVoid RibWriter<Formatter>::Blobby(RtInt nleaf, const IntArray& code,
+                                    const FloatArray& floats,
+                                    const TokenArray& strings,
+                                    const ParamList& pList)
 {
     m_formatter.beginRequest("Blobby");
     m_formatter.whitespace();
@@ -2085,15 +2097,16 @@ RtVoid RibOut<Formatter>::Blobby(RtInt nleaf, const IntArray& code,
     m_formatter.whitespace();
     m_formatter.print(code);
     m_formatter.whitespace();
-    m_formatter.print(flt);
+    m_formatter.print(floats);
     m_formatter.whitespace();
-    m_formatter.print(str);
+    m_formatter.print(strings);
     printParamList(pList);
     m_formatter.endRequest();
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::Geometry(RtConstToken type, const ParamList& pList)
+RtVoid RibWriter<Formatter>::Geometry(RtConstToken type,
+                                      const ParamList& pList)
 {
     m_formatter.beginRequest("Geometry");
     m_formatter.whitespace();
@@ -2103,7 +2116,7 @@ RtVoid RibOut<Formatter>::Geometry(RtConstToken type, const ParamList& pList)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::SolidBegin(RtConstToken type)
+RtVoid RibWriter<Formatter>::SolidBegin(RtConstToken type)
 {
     m_formatter.beginRequest("SolidBegin");
     m_formatter.whitespace();
@@ -2113,7 +2126,7 @@ RtVoid RibOut<Formatter>::SolidBegin(RtConstToken type)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::SolidEnd()
+RtVoid RibWriter<Formatter>::SolidEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("SolidEnd");
@@ -2121,7 +2134,7 @@ RtVoid RibOut<Formatter>::SolidEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ObjectEnd()
+RtVoid RibWriter<Formatter>::ObjectEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("ObjectEnd");
@@ -2129,7 +2142,7 @@ RtVoid RibOut<Formatter>::ObjectEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ObjectInstance(RtObjectHandle handle)
+RtVoid RibWriter<Formatter>::ObjectInstance(RtObjectHandle handle)
 {
     m_formatter.beginRequest("ObjectInstance");
     m_formatter.whitespace();
@@ -2138,7 +2151,7 @@ RtVoid RibOut<Formatter>::ObjectInstance(RtObjectHandle handle)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MotionBegin(const FloatArray& times)
+RtVoid RibWriter<Formatter>::MotionBegin(const FloatArray& times)
 {
     m_formatter.beginRequest("MotionBegin");
     m_formatter.whitespace();
@@ -2148,7 +2161,7 @@ RtVoid RibOut<Formatter>::MotionBegin(const FloatArray& times)
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MotionEnd()
+RtVoid RibWriter<Formatter>::MotionEnd()
 {
     m_formatter.decreaseIndent();
     m_formatter.beginRequest("MotionEnd");
@@ -2156,11 +2169,12 @@ RtVoid RibOut<Formatter>::MotionEnd()
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MakeTexture(RtConstString imagefile,
-                                      RtConstString texturefile,
-                                      RtConstToken swrap, RtConstToken twrap,
-                                      RtFilterFunc filterfunc, RtFloat swidth,
-                                      RtFloat twidth, const ParamList& pList)
+RtVoid RibWriter<Formatter>::MakeTexture(RtConstString imagefile,
+                                         RtConstString texturefile,
+                                         RtConstToken swrap, RtConstToken twrap,
+                                         RtFilterFunc filterfunc,
+                                         RtFloat swidth, RtFloat twidth,
+                                         const ParamList& pList)
 {
     m_formatter.beginRequest("MakeTexture");
     m_formatter.whitespace();
@@ -2182,11 +2196,12 @@ RtVoid RibOut<Formatter>::MakeTexture(RtConstString imagefile,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MakeLatLongEnvironment(RtConstString imagefile,
-                                                 RtConstString reflfile,
-                                                 RtFilterFunc filterfunc,
-                                                 RtFloat swidth, RtFloat twidth,
-                                                 const ParamList& pList)
+RtVoid RibWriter<Formatter>::MakeLatLongEnvironment(RtConstString imagefile,
+                                                    RtConstString reflfile,
+                                                    RtFilterFunc filterfunc,
+                                                    RtFloat swidth,
+                                                    RtFloat twidth,
+                                                    const ParamList& pList)
 {
     m_formatter.beginRequest("MakeLatLongEnvironment");
     m_formatter.whitespace();
@@ -2204,18 +2219,18 @@ RtVoid RibOut<Formatter>::MakeLatLongEnvironment(RtConstString imagefile,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MakeCubeFaceEnvironment(RtConstString px,
-                                                  RtConstString nx,
-                                                  RtConstString py,
-                                                  RtConstString ny,
-                                                  RtConstString pz,
-                                                  RtConstString nz,
-                                                  RtConstString reflfile,
-                                                  RtFloat fov,
-                                                  RtFilterFunc filterfunc,
-                                                  RtFloat swidth,
-                                                  RtFloat twidth,
-                                                  const ParamList& pList)
+RtVoid RibWriter<Formatter>::MakeCubeFaceEnvironment(RtConstString px,
+                                                     RtConstString nx,
+                                                     RtConstString py,
+                                                     RtConstString ny,
+                                                     RtConstString pz,
+                                                     RtConstString nz,
+                                                     RtConstString reflfile,
+                                                     RtFloat fov,
+                                                     RtFilterFunc filterfunc,
+                                                     RtFloat swidth,
+                                                     RtFloat twidth,
+                                                     const ParamList& pList)
 {
     m_formatter.beginRequest("MakeCubeFaceEnvironment");
     m_formatter.whitespace();
@@ -2245,9 +2260,9 @@ RtVoid RibOut<Formatter>::MakeCubeFaceEnvironment(RtConstString px,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MakeShadow(RtConstString picfile,
-                                     RtConstString shadowfile,
-                                     const ParamList& pList)
+RtVoid RibWriter<Formatter>::MakeShadow(RtConstString picfile,
+                                        RtConstString shadowfile,
+                                        const ParamList& pList)
 {
     m_formatter.beginRequest("MakeShadow");
     m_formatter.whitespace();
@@ -2259,9 +2274,9 @@ RtVoid RibOut<Formatter>::MakeShadow(RtConstString picfile,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::MakeOcclusion(const StringArray& picfiles,
-                                        RtConstString shadowfile,
-                                        const ParamList& pList)
+RtVoid RibWriter<Formatter>::MakeOcclusion(const StringArray& picfiles,
+                                           RtConstString shadowfile,
+                                           const ParamList& pList)
 {
     m_formatter.beginRequest("MakeOcclusion");
     m_formatter.whitespace();
@@ -2273,7 +2288,7 @@ RtVoid RibOut<Formatter>::MakeOcclusion(const StringArray& picfiles,
 }
 
 template<typename Formatter>
-RtVoid RibOut<Formatter>::ErrorHandler(RtErrorFunc handler)
+RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
 {
     m_formatter.beginRequest("ErrorHandler");
     m_formatter.whitespace();
@@ -2285,18 +2300,18 @@ RtVoid RibOut<Formatter>::ErrorHandler(RtErrorFunc handler)
 
 //------------------------------------------------------------------------------
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out,
+boost::shared_ptr<Ri::Renderer> createRibWriter(std::ostream& out,
         bool interpolateArchives, bool useBinary, bool useGzip)
 {
     if(useBinary)
     {
         return boost::shared_ptr<Ri::Renderer>(
-            new RibOut<BinaryFormatter>(out, interpolateArchives, useGzip));
+            new RibWriter<BinaryFormatter>(out, interpolateArchives, useGzip));
     }
     else
     {
         return boost::shared_ptr<Ri::Renderer>(
-            new RibOut<AsciiFormatter>(out, interpolateArchives, useGzip));
+            new RibWriter<AsciiFormatter>(out, interpolateArchives, useGzip));
     }
 }
 

@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     //std::ios_base::sync_with_stdio(false);
 
     boost::shared_ptr<Ri::Renderer> renderer =
-        createRibOut(std::cout, interpolate, useBinary, useGzip);
+        createRibWriter(std::cout, interpolate, useBinary, useGzip);
     boost::shared_ptr<Ri::Filter> validator = createRiCxxValidate();
     validator->registerOutput(renderer.get());
 

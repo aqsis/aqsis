@@ -31,7 +31,7 @@ boost::shared_ptr<Ri::Renderer> createRiCxxToRi();
 
 
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::Renderer> createRibOut(std::ostream& out,
+boost::shared_ptr<Ri::Renderer> createRibWriter(std::ostream& out,
         bool interpolateArchives = true, bool useBinary = false,
         bool useGzip = false);
 
