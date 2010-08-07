@@ -428,6 +428,128 @@ const char* basisName(RtConstBasis b)
 } // anon. namespace
 
 //------------------------------------------------------------------------------
+class RibWriterServices : public Ri::RendererServices
+{
+    private:
+        /// Contained RIB writer interface
+        boost::shared_ptr<Ri::Renderer> m_writer;
+        /// Dictionary containing Declare()'d tokens
+        CqTokenDictionary m_tokenDict;
+        /// Mappings between standard function/basis names and pointers
+        NamePtrMapping<RtFilterFunc> m_filterFuncMap;
+        NamePtrMapping<RtErrorFunc> m_errorFuncMap;
+        NamePtrMapping<RtProcSubdivFunc> m_subdivFuncMap;
+        /// Parser for ReadArchive.  May be NULL (created on demand).
+        boost::shared_ptr<RibParser> m_parser;
+        /// Chain of filters
+        std::vector<boost::shared_ptr<Ri::Renderer> > m_filterChain;
+
+    public:
+        RibWriterServices()
+            : m_writer(),
+            m_filterFuncMap(filterFuncNames),
+            m_errorFuncMap(errorFuncNames),
+            m_subdivFuncMap(subdivFuncNames),
+            m_parser()
+        { }
+
+        //--------------------------------------------------
+        // utilities for RibWriter
+
+        // Set the contained RIB writer.  Only needed because
+        // RibWriterServices must be constructed first since RibWriter needs a
+        // ref to it.
+        void setWriter(const boost::shared_ptr<Ri::Renderer>& writer)
+            { m_writer = writer; }
+
+        void declare(RtConstString name, RtConstString declaration)
+            { m_tokenDict.insert(CqPrimvarToken(declaration, name)); }
+        const char* getFilterFuncName(RtFilterFunc f)
+            { return m_filterFuncMap.find(f); }
+        const char* getErrorFuncName(RtErrorFunc f)
+            { return m_errorFuncMap.find(f); }
+        const char* getSubdivFuncName(RtProcSubdivFunc f)
+            { return m_subdivFuncMap.find(f); }
+
+        //--------------------------------------------------
+        // methods from RendererServices.
+        virtual RtVoid error(const char* errorMessage)
+        {
+            Aqsis::log() << Aqsis::error << errorMessage << std::endl;
+        }
+        virtual RtFilterFunc getFilterFunc(RtConstToken name) const
+        {
+            return m_filterFuncMap.find(name);
+        }
+        virtual RtConstBasis* getBasis(RtConstToken name) const
+        {
+            if     (!strcmp(name, "bezier"))      return &g_bezierBasis;
+            else if(!strcmp(name, "b-spline"))    return &g_bSplineBasis;
+            else if(!strcmp(name, "catmull-rom")) return &g_catmullRomBasis;
+            else if(!strcmp(name, "hermite"))     return &g_hermiteBasis;
+            else if(!strcmp(name, "power"))       return &g_powerBasis;
+            else
+            {
+                AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+                    "unknown basis \"" << name << "\"");
+                return 0;
+            }
+        }
+        virtual RtErrorFunc getErrorFunc(RtConstToken name) const
+        {
+            return m_errorFuncMap.find(name);
+        }
+        virtual RtProcSubdivFunc getProcSubdivFunc(RtConstToken name) const
+        {
+            return m_subdivFuncMap.find(name);
+        }
+
+        virtual Ri::TypeSpec getDeclaration(RtConstToken token,
+                                        const char** nameBegin = 0,
+                                        const char** nameEnd = 0) const
+        {
+            Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
+            if(spec.type == Ri::TypeSpec::Unknown)
+            {
+                // FIXME: Yuck, ick, ew!  Double parsing here :/
+                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
+            }
+            return spec;
+        }
+
+        virtual Ri::Renderer& firstFilter()
+        {
+            if(!m_filterChain.empty())
+                return *m_filterChain.back();
+            return *m_writer;
+        }
+
+        virtual void addFilter(const char* name,
+                               const Ri::ParamList& filterParams)
+        {
+            if(!strcmp(name, "validate"))
+            {
+                m_filterChain.push_back(
+                        createRiCxxValidate(firstFilter(), *this));
+            }
+            else
+            {
+                AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+                        "filter \"" << name << "\" not found");
+            }
+        }
+
+        virtual void parseRib(std::istream& ribStream, const char* name,
+                              Ri::Renderer& context)
+        {
+            if(!m_parser)
+                m_parser.reset(new RibParser(*this));
+            m_parser->parseStream(ribStream, name, firstFilter());
+        }
+};
+
+
+//------------------------------------------------------------------------------
 /// Class which serializes Ri::Renderer calls to a RIB stream.
 ///
 /// The Formatter template argument specifies a formatting class which will do
@@ -440,22 +562,14 @@ class RibWriter : public Ri::Renderer
 		boost::shared_ptr<std::ostream> m_gzipStream;
         /// Formatting object
         Formatter m_formatter;
-        /// Dictionary containing Declare()'d tokens
-        CqTokenDictionary m_tokenDict;
-        /// Mappings between standard function/basis names and pointers
-        NamePtrMapping<RtFilterFunc> m_filterFuncMap;
-        NamePtrMapping<RtErrorFunc> m_errorFuncMap;
-        NamePtrMapping<RtProcSubdivFunc> m_subdivFuncMap;
         /// Sequence number generators for light/object handles.
         RtInt m_currLightHandle;
         RtInt m_currObjectHandle;
         /// Flag determining whether to read and insert RIB archives or not
         bool m_interpolateArchives;
         std::string m_archiveSearchPath;
-        /// Parser for ReadArchive.  May be NULL (created on demand).
-        boost::shared_ptr<RibParser> m_parser;
-        /// The input filter instance
-        Ri::Filter* m_inputFilter;
+        /// Renderer services for RIB writer.
+        RibWriterServices& m_services;
 
         /// Print a parameter list to the formatter
         void printParamList(const Ri::ParamList& pList)
@@ -469,8 +583,9 @@ class RibWriter : public Ri::Renderer
                 bool useInlineDecl = true;
                 try
                 {
-                    CqPrimvarToken tok = m_tokenDict.parseAndLookup(param.name());
-                    if(param.spec() == toTypeSpec(tok))
+                    Ri::TypeSpec definedSpec =
+                        m_services.getDeclaration(param.name());
+                    if(definedSpec == param.spec())
                         useInlineDecl = false;
                 }
                 catch(XqValidation&)
@@ -529,77 +644,23 @@ class RibWriter : public Ri::Renderer
             gzipStream->push(out);
             return gzipStream;
 #           else
-            Aqsis::log() << error << "Aqsis compiled without gzip support." << std::endl;
+            Aqsis::log() << Aqsis::error
+                << "Aqsis compiled without gzip support." << std::endl;
             return boost::shared_ptr<std::ostream>();
 #           endif
         }
 
     public:
-        RibWriter(std::ostream& out, bool interpolateArchives, bool useGzip)
+        RibWriter(RibWriterServices& services, std::ostream& out,
+                  bool interpolateArchives, bool useGzip)
             : m_gzipStream(setupGzipStream(out, useGzip)),
             m_formatter(useGzip ? *m_gzipStream : out),
-            m_filterFuncMap(filterFuncNames),
-            m_errorFuncMap(errorFuncNames),
-            m_subdivFuncMap(subdivFuncNames),
             m_currLightHandle(0),
             m_currObjectHandle(0),
             m_interpolateArchives(interpolateArchives),
             m_archiveSearchPath("."),
-            m_parser(),
-            m_inputFilter(0)
+            m_services(services)
         { }
-
-        virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
-        {
-            m_formatter.archiveRecord(type, string);
-        }
-        virtual RtVoid Error(const char* errorMessage)
-        {
-            Aqsis::log() << error << errorMessage << std::endl;
-        }
-        virtual RtFilterFunc GetFilterFunc(RtConstToken name) const
-        {
-            return m_filterFuncMap.find(name);
-        }
-        virtual RtConstBasis* GetBasis(RtConstToken name) const
-        {
-            if     (!strcmp(name, "bezier"))      return &g_bezierBasis;
-            else if(!strcmp(name, "b-spline"))    return &g_bSplineBasis;
-            else if(!strcmp(name, "catmull-rom")) return &g_catmullRomBasis;
-            else if(!strcmp(name, "hermite"))     return &g_hermiteBasis;
-            else if(!strcmp(name, "power"))       return &g_powerBasis;
-            else
-            {
-                AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
-                    "unknown basis \"" << name << "\"");
-                return 0;
-            }
-        }
-        virtual RtErrorFunc GetErrorFunc(RtConstToken name) const
-        {
-            return m_errorFuncMap.find(name);
-        }
-        virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const
-        {
-            return m_subdivFuncMap.find(name);
-        }
-        virtual TypeSpec GetDeclaration(RtConstToken token,
-                                        const char** nameBegin,
-                                        const char** nameEnd)
-        {
-            TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == TypeSpec::Unknown)
-            {
-                // FIXME: Yuck, ick, ew!  Double parsing here :/
-                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
-            }
-            return spec;
-        }
-
-        virtual void RegisterFilter(Ri::Filter* filter)
-        {
-            m_inputFilter = filter;
-        }
 
         // Code generator for autogenerated method declarations
         /*[[[cog
@@ -790,6 +851,11 @@ class RibWriter : public Ri::Renderer
                             RtArchiveCallback callback,
                             const ParamList& pList);
         //[[[end]]]
+
+        virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
+        {
+            m_formatter.archiveRecord(type, string);
+        }
 };
 
 //--------------------------------------------------
@@ -799,7 +865,7 @@ class RibWriter : public Ri::Renderer
 template<typename Formatter>
 RtToken RibWriter<Formatter>::Declare(RtConstString name, RtConstString declaration)
 {
-    m_tokenDict.insert(CqPrimvarToken(declaration, name));
+    m_services.declare(name, declaration);
     m_formatter.beginRequest("Declare");
     m_formatter.whitespace();
     m_formatter.print(name);
@@ -816,7 +882,7 @@ RtVoid RibWriter<Formatter>::Procedural(RtPointer data, RtConstBound bound,
 {
     m_formatter.beginRequest("Procedural");
     m_formatter.whitespace();
-    const char* name = m_subdivFuncMap.find(refineproc);
+    const char* name = m_services.getSubdivFuncName(refineproc);
     m_formatter.print(name);
     m_formatter.whitespace();
     if(!strcmp(name, "DelayedReadArchive"))
@@ -912,21 +978,13 @@ RtVoid RibWriter<Formatter>::ReadArchive(RtConstToken name,
             std::ifstream inputFile(path.file_string().c_str());
             if(inputFile)
             {
-                if(!m_parser)
-                {
-                    Renderer* interface = this;
-                    if(m_inputFilter)
-                        interface = m_inputFilter->firstFilter();
-                    m_parser.reset(new RibParser(*interface));
-                }
-                m_parser->parseStream(inputFile, name);
                 didRead = true;
             }
         }
         if(!didRead)
         {
-            Aqsis::log() << error << "could not ReadArchive file \"" << name
-                         << "\"" << std::endl;
+            Aqsis::log() << Aqsis::error << "could not ReadArchive file \""
+                         << name << "\"" << std::endl;
         }
     }
     if(!didRead)
@@ -962,9 +1020,8 @@ formatterStatements = {
     'RtMatrix':      'm_formatter.print(FloatArray(static_cast<const float*>(%s[0]),16));',
     'RtBound':       'm_formatter.print(FloatArray(%s,6));',
     'RtBasis':       'printBasis(%s);',
-    'RtFilterFunc':  'm_formatter.print(m_filterFuncMap.find(%s));',
-    'RtErrorFunc':   'm_formatter.print(m_errorFuncMap.find(%s));',
-    'RtProcSubdivFunc': 'm_formatter.print(m_subdivFuncMap.find(%s));',
+    'RtFilterFunc':  'm_formatter.print(m_services.getFilterFuncName(%s));',
+    'RtErrorFunc':   'm_formatter.print(m_services.getErrorFuncName(%s));',
     'RtLightHandle': 'm_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(%s)));',
     'RtObjectHandle': 'm_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(%s)));',
 }
@@ -1232,7 +1289,7 @@ RtVoid RibWriter<Formatter>::PixelFilter(RtFilterFunc function, RtFloat xwidth,
 {
     m_formatter.beginRequest("PixelFilter");
     m_formatter.whitespace();
-    m_formatter.print(m_filterFuncMap.find(function));
+    m_formatter.print(m_services.getFilterFuncName(function));
     m_formatter.whitespace();
     m_formatter.print(xwidth);
     m_formatter.whitespace();
@@ -2191,7 +2248,7 @@ RtVoid RibWriter<Formatter>::MakeTexture(RtConstString imagefile,
     m_formatter.whitespace();
     m_formatter.print(twrap);
     m_formatter.whitespace();
-    m_formatter.print(m_filterFuncMap.find(filterfunc));
+    m_formatter.print(m_services.getFilterFuncName(filterfunc));
     m_formatter.whitespace();
     m_formatter.print(swidth);
     m_formatter.whitespace();
@@ -2214,7 +2271,7 @@ RtVoid RibWriter<Formatter>::MakeLatLongEnvironment(RtConstString imagefile,
     m_formatter.whitespace();
     m_formatter.print(reflfile);
     m_formatter.whitespace();
-    m_formatter.print(m_filterFuncMap.find(filterfunc));
+    m_formatter.print(m_services.getFilterFuncName(filterfunc));
     m_formatter.whitespace();
     m_formatter.print(swidth);
     m_formatter.whitespace();
@@ -2255,7 +2312,7 @@ RtVoid RibWriter<Formatter>::MakeCubeFaceEnvironment(RtConstString px,
     m_formatter.whitespace();
     m_formatter.print(fov);
     m_formatter.whitespace();
-    m_formatter.print(m_filterFuncMap.find(filterfunc));
+    m_formatter.print(m_services.getFilterFuncName(filterfunc));
     m_formatter.whitespace();
     m_formatter.print(swidth);
     m_formatter.whitespace();
@@ -2297,7 +2354,7 @@ RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
 {
     m_formatter.beginRequest("ErrorHandler");
     m_formatter.whitespace();
-    m_formatter.print(m_errorFuncMap.find(handler));
+    m_formatter.print(m_services.getErrorFuncName(handler));
     m_formatter.endRequest();
 }
 //[[[end]]]
@@ -2305,19 +2362,19 @@ RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
 
 //------------------------------------------------------------------------------
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::Renderer> createRibWriter(std::ostream& out,
+boost::shared_ptr<Ri::RendererServices> createRibWriter(std::ostream& out,
         bool interpolateArchives, bool useBinary, bool useGzip)
 {
+    boost::shared_ptr<RibWriterServices> services(new RibWriterServices());
+    boost::shared_ptr<Ri::Renderer> writer;
     if(useBinary)
-    {
-        return boost::shared_ptr<Ri::Renderer>(
-            new RibWriter<BinaryFormatter>(out, interpolateArchives, useGzip));
-    }
+        writer.reset(new RibWriter<BinaryFormatter>(*services, out,
+                                            interpolateArchives, useGzip));
     else
-    {
-        return boost::shared_ptr<Ri::Renderer>(
-            new RibWriter<AsciiFormatter>(out, interpolateArchives, useGzip));
-    }
+        writer.reset(new RibWriter<AsciiFormatter>(*services, out,
+                                            interpolateArchives, useGzip));
+    services->setWriter(writer);
+    return services;
 }
 
 

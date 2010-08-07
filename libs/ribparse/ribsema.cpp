@@ -36,9 +36,9 @@ namespace Aqsis
 //------------------------------------------------------------------------------
 // RibParser implementation
 
-RibParser::RibParser(Ri::Renderer& renderer)
-    : m_renderer(renderer),
-    m_lexer(RibLexer::create(), &RibLexer::destroy),
+RibParser::RibParser(Ri::RendererServices& rendererServices)
+    : m_services(rendererServices),
+    m_lex(RibLexer::create(), &RibLexer::destroy),
     m_requestHandlerMap(),
     m_paramListStorage(),
     m_numColorComps(3),
@@ -189,15 +189,16 @@ class CommentCallback
 } // anon. namespace
 
 void RibParser::parseStream(std::istream& ribStream,
-                            const std::string& streamName)
+                            const std::string& streamName,
+                            Ri::Renderer& renderer)
 {
-    m_lexer->pushInput(ribStream, streamName, CommentCallback(m_renderer));
+    m_lex->pushInput(ribStream, streamName, CommentCallback(renderer));
     while(true)
     {
         const char* requestName = 0;
         try
         {
-            requestName = m_lexer->nextRequest();
+            requestName = m_lex->nextRequest();
             if(!requestName)
                 break;  // end of stream
             HandlerMap::const_iterator pos =
@@ -206,29 +207,29 @@ void RibParser::parseStream(std::istream& ribStream,
                 AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
                                     "unrecognized request");
             RequestHandlerType handler = pos->second;
-            (this->*handler)(*m_lexer);
+            (this->*handler)(renderer);
         }
         catch(XqValidation& e)
         {
             // Add information on the location (file,line etc) of the problem
             // to the exception message and rethrow.
             std::ostringstream msg;
-            msg << "Parse error at " << m_lexer->streamPos();
+            msg << "Parse error at " << m_lex->streamPos();
             if(requestName)
                 msg << " while reading " << requestName;
             msg << ": " << e.what();
-            m_renderer.Error(msg.str().c_str());
-            m_lexer->discardUntilRequest();
+            m_services.error(msg.str().c_str());
+            m_lex->discardUntilRequest();
         }
         catch(...)
         {
             // Other errors should pass through, but we should make sure to pop
             // the stream first!
-            m_lexer->popInput();
+            m_lex->popInput();
             throw;
         }
     }
-    m_lexer->popInput();
+    m_lex->popInput();
 }
 
 namespace { // Handler helpers
@@ -243,20 +244,19 @@ inline const T& toFloatBasedType(Ri::FloatArray a,
     return *reinterpret_cast<const T*>(a.begin());
 }
 
-
 } // anon. namespace
 
 
 /// Read in a renderman parameter list from the lexer.
-Ri::ParamList RibParser::readParamList(RibLexer& lex)
+Ri::ParamList RibParser::readParamList()
 {
     m_paramListStorage.clear();
     m_paramNameStorage.clear();
-    while(lex.peekNextType() != RibLexer::Tok_RequestEnd)
+    while(m_lex->peekNextType() != RibLexer::Tok_RequestEnd)
     {
         const char* name = 0;
         const char* nameEnd = 0;
-        Ri::TypeSpec spec = m_renderer.GetDeclaration(lex.getString(),
+        Ri::TypeSpec spec = m_services.getDeclaration(m_lex->getString(),
                                                       &name, &nameEnd);
         if(*nameEnd != 0)
         {
@@ -269,13 +269,13 @@ Ri::ParamList RibParser::readParamList(RibLexer& lex)
         switch(spec.storageType())
         {
             case Ri::TypeSpec::Integer:
-                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getIntParam()));
+                m_paramListStorage.push_back(Ri::Param(spec, name, m_lex->getIntParam()));
                 break;
             case Ri::TypeSpec::Float:
-                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getFloatParam()));
+                m_paramListStorage.push_back(Ri::Param(spec, name, m_lex->getFloatParam()));
                 break;
             case Ri::TypeSpec::String:
-                m_paramListStorage.push_back(Ri::Param(spec, name, lex.getStringParam()));
+                m_paramListStorage.push_back(Ri::Param(spec, name, m_lex->getStringParam()));
                 break;
             default:
                 assert(0 && "Unknown storage type; we should never get here.");
@@ -296,15 +296,13 @@ Ri::ParamList RibParser::readParamList(RibLexer& lex)
 /// This function returns the appropriate basis array, translating the string
 /// representation into one of the standard bases if necessary.
 ///
-/// \param lex - read input from here.
-///
-RtConstBasis& RibParser::getBasis(RibLexer& lex) const
+RtConstBasis& RibParser::getBasis()
 {
-    switch(lex.peekNextType())
+    switch(m_lex->peekNextType())
     {
         case RibLexer::Tok_Array:
             {
-                Ri::FloatArray basis = lex.getFloatArray();
+                Ri::FloatArray basis = m_lex->getFloatArray();
                 if(basis.size() != 16)
                     AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
                         "basis array must be of length 16");
@@ -314,8 +312,8 @@ RtConstBasis& RibParser::getBasis(RibLexer& lex) const
             }
         case RibLexer::Tok_String:
             {
-                const char* name = lex.getString();
-                RtConstBasis* basis = m_renderer.GetBasis(name);
+                const char* name = m_lex->getString();
+                RtConstBasis* basis = m_services.getBasis(name);
                 if(!basis)
                 {
                     AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
@@ -334,48 +332,48 @@ RtConstBasis& RibParser::getBasis(RibLexer& lex) const
 //--------------------------------------------------
 // Hand-written handler implementations.  Mostly these are hard to autogenerate.
 
-void RibParser::handleVersion(RibLexer& lex)
+void RibParser::handleVersion(Ri::Renderer& renderer)
 {
-    lex.getFloat();
+    m_lex->getFloat();
     // Don't do anything with the version number; just blunder on regardless.
     // Probably only worth supporting if Pixar started publishing new versions
     // of the standard again...
 }
 
-void RibParser::handleDeclare(RibLexer& lex)
+void RibParser::handleDeclare(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
-    const char* name = lex.getString();
-    const char* declaration = lex.getString();
+    const char* name = m_lex->getString();
+    const char* declaration = m_lex->getString();
 
-    m_renderer.Declare(name, declaration);
+    renderer.Declare(name, declaration);
 }
 
-void RibParser::handleDepthOfField(RibLexer& lex)
+void RibParser::handleDepthOfField(Ri::Renderer& renderer)
 {
-    if(lex.peekNextType() == RibLexer::Tok_RequestEnd)
+    if(m_lex->peekNextType() == RibLexer::Tok_RequestEnd)
     {
         // If called without arguments, reset to the default pinhole camera.
-        m_renderer.DepthOfField(FLT_MAX, FLT_MAX, FLT_MAX);
+        renderer.DepthOfField(FLT_MAX, FLT_MAX, FLT_MAX);
     }
     else
     {
         // Collect arguments from lex.
-        RtFloat fstop = lex.getFloat();
-        RtFloat focallength = lex.getFloat();
-        RtFloat focaldistance = lex.getFloat();
+        RtFloat fstop = m_lex->getFloat();
+        RtFloat focallength = m_lex->getFloat();
+        RtFloat focaldistance = m_lex->getFloat();
 
-        m_renderer.DepthOfField(fstop, focallength, focaldistance);
+        renderer.DepthOfField(fstop, focallength, focaldistance);
     }
 }
 
-void RibParser::handleColorSamples(RibLexer& lex)
+void RibParser::handleColorSamples(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
-    Ri::FloatArray nRGB = lex.getFloatArray();
-    Ri::FloatArray RGBn = lex.getFloatArray();
+    Ri::FloatArray nRGB = m_lex->getFloatArray();
+    Ri::FloatArray RGBn = m_lex->getFloatArray();
 
-    m_renderer.ColorSamples(nRGB, RGBn);
+    renderer.ColorSamples(nRGB, RGBn);
     m_numColorComps = nRGB.size()/3;
 }
 
@@ -385,28 +383,28 @@ void RibParser::handleColorSamples(RibLexer& lex)
 /// code is consolidated in this function.
 ///
 /// \param lightSourceFunc - Interface function to LightSource or AreaLightSource
-/// \param lex - lexer from which to read the arguments
+/// \param renderer - renderer from which to get light handles
 ///
 void RibParser::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
-                                         RibLexer& lex)
+                                         Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
-    const char* name = lex.getString();
+    const char* name = m_lex->getString();
 
     int sequencenumber = 0;
     // The RISpec says that lights are identified by a 'sequence number', but
     // string identifiers are also allowed in common implementations.
     const char* lightName = 0;
-    if(lex.peekNextType() == RibLexer::Tok_String)
-        lightName = lex.getString();
+    if(m_lex->peekNextType() == RibLexer::Tok_String)
+        lightName = m_lex->getString();
     else
-        sequencenumber = lex.getInt();
+        sequencenumber = m_lex->getInt();
 
     // Extract the parameter list
-    Ri::ParamList paramList = readParamList(lex);
+    Ri::ParamList paramList = readParamList();
 
     // Call through to renderer
-    RtLightHandle lightHandle = (m_renderer.*lightSourceFunc)(name, paramList);
+    RtLightHandle lightHandle = (renderer.*lightSourceFunc)(name, paramList);
 
     // associate handle with the sequence number/name.
     if(lightHandle)
@@ -418,24 +416,24 @@ void RibParser::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
     }
 }
 
-void RibParser::handleLightSource(RibLexer& lex)
+void RibParser::handleLightSource(Ri::Renderer& renderer)
 {
-    handleLightSourceGeneral(&Ri::Renderer::LightSource, lex);
+    handleLightSourceGeneral(&Ri::Renderer::LightSource, renderer);
 }
 
-void RibParser::handleAreaLightSource(RibLexer& lex)
+void RibParser::handleAreaLightSource(Ri::Renderer& renderer)
 {
-    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, lex);
+    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, renderer);
 }
 
-void RibParser::handleIlluminate(RibLexer& lex)
+void RibParser::handleIlluminate(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
     RtLightHandle lightHandle = 0;
-    if(lex.peekNextType() == RibLexer::Tok_String)
+    if(m_lex->peekNextType() == RibLexer::Tok_String)
     {
         // Handle string light names
-        const char* name = lex.getString();
+        const char* name = m_lex->getString();
         NamedLightMap::const_iterator pos = m_namedLightMap.find(name);
         if(pos == m_namedLightMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
@@ -445,37 +443,37 @@ void RibParser::handleIlluminate(RibLexer& lex)
     else
     {
         // Handle integer sequence numbers
-        int sequencenumber = lex.getInt();
+        int sequencenumber = m_lex->getInt();
         LightMap::const_iterator pos = m_lightMap.find(sequencenumber);
         if(pos == m_lightMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
                                 "undeclared light number " << sequencenumber);
         lightHandle = pos->second;
     }
-    RtInt onoff = lex.getInt();
+    RtInt onoff = m_lex->getInt();
 
     // Call through to renderer
-    m_renderer.Illuminate(lightHandle, onoff);
+    renderer.Illuminate(lightHandle, onoff);
 }
 
-void RibParser::handleSubdivisionMesh(RibLexer& lex)
+void RibParser::handleSubdivisionMesh(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
-    const char* scheme = lex.getString();
-    Ri::IntArray nvertices = lex.getIntArray();
-    Ri::IntArray vertices  = lex.getIntArray();
+    const char* scheme = m_lex->getString();
+    Ri::IntArray nvertices = m_lex->getIntArray();
+    Ri::IntArray vertices  = m_lex->getIntArray();
 
-    if(lex.peekNextType() == RibLexer::Tok_Array)
+    if(m_lex->peekNextType() == RibLexer::Tok_Array)
     {
         // Handle the four optional arguments.
-        Ri::StringArray tags      = lex.getStringArray();
-        Ri::IntArray    nargs     = lex.getIntArray();
-        Ri::IntArray    intargs   = lex.getIntArray();
-        Ri::FloatArray  floatargs = lex.getFloatArray();
+        Ri::StringArray tags      = m_lex->getStringArray();
+        Ri::IntArray    nargs     = m_lex->getIntArray();
+        Ri::IntArray    intargs   = m_lex->getIntArray();
+        Ri::FloatArray  floatargs = m_lex->getFloatArray();
         // Extract parameter list
-        Ri::ParamList paramList = readParamList(lex);
+        Ri::ParamList paramList = readParamList();
         // Call through to renderer
-        m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
+        renderer.SubdivisionMesh(scheme, nvertices, vertices,
                                    tags, nargs, intargs, floatargs,
                                    paramList);
     }
@@ -487,25 +485,25 @@ void RibParser::handleSubdivisionMesh(RibLexer& lex)
         Ri::IntArray     intargs;
         Ri::FloatArray   floatargs;
         // Extract parameter list
-        Ri::ParamList paramList = readParamList(lex);
+        Ri::ParamList paramList = readParamList();
         // Call through to renderer
-        m_renderer.SubdivisionMesh(scheme, nvertices, vertices,
+        renderer.SubdivisionMesh(scheme, nvertices, vertices,
                                    tags, nargs, intargs, floatargs,
                                    paramList);
     }
 }
 
-void RibParser::handleHyperboloid(RibLexer& lex)
+void RibParser::handleHyperboloid(Ri::Renderer& renderer)
 {
     // Collect required args as an array
-    Ri::FloatArray allArgs = lex.getFloatArray(7);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(7);
     RtConstPoint& point1 = *reinterpret_cast<RtConstPoint*>(&allArgs[0]);
     RtConstPoint& point2 = *reinterpret_cast<RtConstPoint*>(&allArgs[3]);
     RtFloat thetamax = allArgs[6];
     // Extract the parameter list
-    Ri::ParamList paramList = readParamList(lex);
+    Ri::ParamList paramList = readParamList();
     // Call through to renderer
-    m_renderer.Hyperboloid(point1, point2, thetamax, paramList);
+    renderer.Hyperboloid(point1, point2, thetamax, paramList);
 }
 
 // Equivalent of RiProcFree, but that's not accessible if we haven't linked
@@ -515,11 +513,11 @@ static void ProcFree(RtPointer p)
     free(p);
 }
 
-void RibParser::handleProcedural(RibLexer& lex)
+void RibParser::handleProcedural(Ri::Renderer& renderer)
 {
     // get procedural subdivision function
-    const char* procName = lex.getString();
-    RtProcSubdivFunc subdivideFunc = m_renderer.GetProcSubdivFunc(procName);
+    const char* procName = m_lex->getString();
+    RtProcSubdivFunc subdivideFunc = m_services.getProcSubdivFunc(procName);
     if(!subdivideFunc)
     {
         AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
@@ -527,7 +525,7 @@ void RibParser::handleProcedural(RibLexer& lex)
     }
 
     // get argument string array.
-    Ri::StringArray args = lex.getStringArray();
+    Ri::StringArray args = m_lex->getStringArray();
     // Convert the string array to something passable as data arguments to the
     // builtin procedurals.
     //
@@ -553,49 +551,49 @@ void RibParser::handleProcedural(RibLexer& lex)
     }
 
     // get the procedural bound
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(),
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(m_lex->getFloatArray(),
                                                          "bound", 6);
 
-    m_renderer.Procedural(procData, bound, subdivideFunc, &ProcFree);
+    renderer.Procedural(procData, bound, subdivideFunc, &ProcFree);
 }
 
-void RibParser::handleObjectBegin(RibLexer& lex)
+void RibParser::handleObjectBegin(Ri::Renderer& renderer)
 {
     // The RIB identifier is an integer according to the RISpec, but it's
     // common to also allow string identifiers, hence the branch here.
-    if(lex.peekNextType() == RibLexer::Tok_String)
+    if(m_lex->peekNextType() == RibLexer::Tok_String)
     {
-        const char* lightName = lex.getString();
-        if(RtObjectHandle handle = m_renderer.ObjectBegin())
+        const char* lightName = m_lex->getString();
+        if(RtObjectHandle handle = renderer.ObjectBegin())
             m_namedObjectMap[lightName] = handle;
     }
     else
     {
-        int sequenceNumber = lex.getInt();
-        if(RtObjectHandle handle = m_renderer.ObjectBegin())
+        int sequenceNumber = m_lex->getInt();
+        if(RtObjectHandle handle = renderer.ObjectBegin())
             m_objectMap[sequenceNumber] = handle;
     }
 }
 
-void RibParser::handleObjectInstance(RibLexer& lex)
+void RibParser::handleObjectInstance(Ri::Renderer& renderer)
 {
-    if(lex.peekNextType() == RibLexer::Tok_String)
+    if(m_lex->peekNextType() == RibLexer::Tok_String)
     {
-        const char* name = lex.getString();
+        const char* name = m_lex->getString();
         NamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);
         if(pos == m_namedObjectMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
                     "undeclared object name \"" << name << "\"");
-        m_renderer.ObjectInstance(pos->second);
+        renderer.ObjectInstance(pos->second);
     }
     else
     {
-        int sequencenumber = lex.getInt();
+        int sequencenumber = m_lex->getInt();
         ObjectMap::const_iterator pos = m_objectMap.find(sequencenumber);
         if(pos == m_objectMap.end())
             AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
                     "undeclared object number " << sequencenumber);
-        m_renderer.ObjectInstance(pos->second);
+        renderer.ObjectInstance(pos->second);
     }
 }
 
@@ -612,23 +610,23 @@ riXml = parseXmlTree('ri.xml')
 
 # Map from RI types to strings which retrieve the value from the lexer
 getterStatements = {
-    'RtBoolean':     'RtInt %s = lex.getInt();',
-    'RtInt':         'RtInt %s = lex.getInt();',
-    'RtIntArray':    'Ri::IntArray %s = lex.getIntArray();',
-    'RtFloat':       'RtFloat %s = lex.getFloat();',
-    'RtFloatArray':  'Ri::FloatArray %s = lex.getFloatArray();',
-    'RtString':      'const char* %s = lex.getString();',
-    'RtStringArray': 'Ri::StringArray %s = lex.getStringArray();',
-    'RtToken':       'const char* %s = lex.getString();',
-    'RtTokenArray':  'Ri::StringArray %s = lex.getStringArray();',
-    'RtColor':       'RtConstColor& %s = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));',
-    'RtPoint':       'RtConstPoint& %s = toFloatBasedType<RtConstPoint>(lex.getFloatArray(), "Point", 3);',
-    'RtMatrix':      'RtConstMatrix& %s = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);',
-    'RtBound':       'RtConstBound& %s = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));',
-    'RtFilterFunc':  'RtFilterFunc %s = m_renderer.GetFilterFunc(lex.getString());',
+    'RtBoolean':     'RtInt %s = m_lex->getInt();',
+    'RtInt':         'RtInt %s = m_lex->getInt();',
+    'RtIntArray':    'Ri::IntArray %s = m_lex->getIntArray();',
+    'RtFloat':       'RtFloat %s = m_lex->getFloat();',
+    'RtFloatArray':  'Ri::FloatArray %s = m_lex->getFloatArray();',
+    'RtString':      'const char* %s = m_lex->getString();',
+    'RtStringArray': 'Ri::StringArray %s = m_lex->getStringArray();',
+    'RtToken':       'const char* %s = m_lex->getString();',
+    'RtTokenArray':  'Ri::StringArray %s = m_lex->getStringArray();',
+    'RtColor':       'RtConstColor& %s = toFloatBasedType<RtConstColor>(m_lex->getFloatArray(m_numColorComps));',
+    'RtPoint':       'RtConstPoint& %s = toFloatBasedType<RtConstPoint>(m_lex->getFloatArray(), "Point", 3);',
+    'RtMatrix':      'RtConstMatrix& %s = toFloatBasedType<RtConstMatrix>(m_lex->getFloatArray(), "Matrix", 16);',
+    'RtBound':       'RtConstBound& %s = toFloatBasedType<RtConstBound>(m_lex->getFloatArray(6));',
+    'RtFilterFunc':  'RtFilterFunc %s = m_services.getFilterFunc(m_lex->getString());',
     'RtArchiveCallback': 'RtArchiveCallback %s = 0;',
-    'RtErrorFunc':   'RtErrorFunc %s = m_renderer.GetErrorFunc(lex.getString());',
-    'RtBasis':       'RtConstBasis& %s = getBasis(lex);',
+    'RtErrorFunc':   'RtErrorFunc %s = m_services.getErrorFunc(m_lex->getString());',
+    'RtBasis':       'RtConstBasis& %s = getBasis();',
 }
 
 customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
@@ -644,11 +642,11 @@ handlerTemplate = '''
     #set $procName = $proc.findtext('Name')
     #set $args = filter(lambda a: not a.haschild('RibValue'), $proc.findall('Arguments/Argument'))
     ## 
-void RibParser::handle${procName}(RibLexer& lex)
+void RibParser::handle${procName}(Ri::Renderer& renderer)
 {
     #if $proc.haschild('Arguments/RibArgsCanBeArray')
     ## Collect all args as an array
-    Ri::FloatArray allArgs = lex.getFloatArray(${len($args)});
+    Ri::FloatArray allArgs = m_lex->getFloatArray(${len($args)});
         #for $i, $arg in enumerate($args)
     RtFloat $arg.findtext('Name') = allArgs[$i];
         #end for
@@ -660,7 +658,7 @@ void RibParser::handle${procName}(RibLexer& lex)
     #end if
     #if $proc.haschild('Arguments/ParamList')
     ## Extract parameter list
-    Ri::ParamList paramList = readParamList(lex);
+    Ri::ParamList paramList = readParamList();
     #end if
     ## Construct the argument list to the C++ interface binding call.
     #set $argList = []
@@ -670,7 +668,7 @@ void RibParser::handle${procName}(RibLexer& lex)
     #if $proc.haschild('Arguments/ParamList')
         #set $argList += ['paramList']
     #end if
-    m_renderer.${procName}(${', '.join(argList)});
+    renderer.${procName}(${', '.join(argList)});
 }
 
 #end for
@@ -680,214 +678,214 @@ cog.out(str(Template(handlerTemplate, searchList=locals())));
 
 ]]]*/
 
-void RibParser::handleFrameBegin(RibLexer& lex)
+void RibParser::handleFrameBegin(Ri::Renderer& renderer)
 {
-    RtInt number = lex.getInt();
-    m_renderer.FrameBegin(number);
+    RtInt number = m_lex->getInt();
+    renderer.FrameBegin(number);
 }
 
-void RibParser::handleFrameEnd(RibLexer& lex)
+void RibParser::handleFrameEnd(Ri::Renderer& renderer)
 {
-    m_renderer.FrameEnd();
+    renderer.FrameEnd();
 }
 
-void RibParser::handleWorldBegin(RibLexer& lex)
+void RibParser::handleWorldBegin(Ri::Renderer& renderer)
 {
-    m_renderer.WorldBegin();
+    renderer.WorldBegin();
 }
 
-void RibParser::handleWorldEnd(RibLexer& lex)
+void RibParser::handleWorldEnd(Ri::Renderer& renderer)
 {
-    m_renderer.WorldEnd();
+    renderer.WorldEnd();
 }
 
-void RibParser::handleIfBegin(RibLexer& lex)
+void RibParser::handleIfBegin(Ri::Renderer& renderer)
 {
-    const char* condition = lex.getString();
-    m_renderer.IfBegin(condition);
+    const char* condition = m_lex->getString();
+    renderer.IfBegin(condition);
 }
 
-void RibParser::handleElseIf(RibLexer& lex)
+void RibParser::handleElseIf(Ri::Renderer& renderer)
 {
-    const char* condition = lex.getString();
-    m_renderer.ElseIf(condition);
+    const char* condition = m_lex->getString();
+    renderer.ElseIf(condition);
 }
 
-void RibParser::handleElse(RibLexer& lex)
+void RibParser::handleElse(Ri::Renderer& renderer)
 {
-    m_renderer.Else();
+    renderer.Else();
 }
 
-void RibParser::handleIfEnd(RibLexer& lex)
+void RibParser::handleIfEnd(Ri::Renderer& renderer)
 {
-    m_renderer.IfEnd();
+    renderer.IfEnd();
 }
 
-void RibParser::handleFormat(RibLexer& lex)
+void RibParser::handleFormat(Ri::Renderer& renderer)
 {
-    RtInt xresolution = lex.getInt();
-    RtInt yresolution = lex.getInt();
-    RtFloat pixelaspectratio = lex.getFloat();
-    m_renderer.Format(xresolution, yresolution, pixelaspectratio);
+    RtInt xresolution = m_lex->getInt();
+    RtInt yresolution = m_lex->getInt();
+    RtFloat pixelaspectratio = m_lex->getFloat();
+    renderer.Format(xresolution, yresolution, pixelaspectratio);
 }
 
-void RibParser::handleFrameAspectRatio(RibLexer& lex)
+void RibParser::handleFrameAspectRatio(Ri::Renderer& renderer)
 {
-    RtFloat frameratio = lex.getFloat();
-    m_renderer.FrameAspectRatio(frameratio);
+    RtFloat frameratio = m_lex->getFloat();
+    renderer.FrameAspectRatio(frameratio);
 }
 
-void RibParser::handleScreenWindow(RibLexer& lex)
+void RibParser::handleScreenWindow(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat left = allArgs[0];
     RtFloat right = allArgs[1];
     RtFloat bottom = allArgs[2];
     RtFloat top = allArgs[3];
-    m_renderer.ScreenWindow(left, right, bottom, top);
+    renderer.ScreenWindow(left, right, bottom, top);
 }
 
-void RibParser::handleCropWindow(RibLexer& lex)
+void RibParser::handleCropWindow(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat xmin = allArgs[0];
     RtFloat xmax = allArgs[1];
     RtFloat ymin = allArgs[2];
     RtFloat ymax = allArgs[3];
-    m_renderer.CropWindow(xmin, xmax, ymin, ymax);
+    renderer.CropWindow(xmin, xmax, ymin, ymax);
 }
 
-void RibParser::handleProjection(RibLexer& lex)
+void RibParser::handleProjection(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Projection(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Projection(name, paramList);
 }
 
-void RibParser::handleClipping(RibLexer& lex)
+void RibParser::handleClipping(Ri::Renderer& renderer)
 {
-    RtFloat cnear = lex.getFloat();
-    RtFloat cfar = lex.getFloat();
-    m_renderer.Clipping(cnear, cfar);
+    RtFloat cnear = m_lex->getFloat();
+    RtFloat cfar = m_lex->getFloat();
+    renderer.Clipping(cnear, cfar);
 }
 
-void RibParser::handleClippingPlane(RibLexer& lex)
+void RibParser::handleClippingPlane(Ri::Renderer& renderer)
 {
-    RtFloat x = lex.getFloat();
-    RtFloat y = lex.getFloat();
-    RtFloat z = lex.getFloat();
-    RtFloat nx = lex.getFloat();
-    RtFloat ny = lex.getFloat();
-    RtFloat nz = lex.getFloat();
-    m_renderer.ClippingPlane(x, y, z, nx, ny, nz);
+    RtFloat x = m_lex->getFloat();
+    RtFloat y = m_lex->getFloat();
+    RtFloat z = m_lex->getFloat();
+    RtFloat nx = m_lex->getFloat();
+    RtFloat ny = m_lex->getFloat();
+    RtFloat nz = m_lex->getFloat();
+    renderer.ClippingPlane(x, y, z, nx, ny, nz);
 }
 
-void RibParser::handleShutter(RibLexer& lex)
+void RibParser::handleShutter(Ri::Renderer& renderer)
 {
-    RtFloat opentime = lex.getFloat();
-    RtFloat closetime = lex.getFloat();
-    m_renderer.Shutter(opentime, closetime);
+    RtFloat opentime = m_lex->getFloat();
+    RtFloat closetime = m_lex->getFloat();
+    renderer.Shutter(opentime, closetime);
 }
 
-void RibParser::handlePixelVariance(RibLexer& lex)
+void RibParser::handlePixelVariance(Ri::Renderer& renderer)
 {
-    RtFloat variance = lex.getFloat();
-    m_renderer.PixelVariance(variance);
+    RtFloat variance = m_lex->getFloat();
+    renderer.PixelVariance(variance);
 }
 
-void RibParser::handlePixelSamples(RibLexer& lex)
+void RibParser::handlePixelSamples(Ri::Renderer& renderer)
 {
-    RtFloat xsamples = lex.getFloat();
-    RtFloat ysamples = lex.getFloat();
-    m_renderer.PixelSamples(xsamples, ysamples);
+    RtFloat xsamples = m_lex->getFloat();
+    RtFloat ysamples = m_lex->getFloat();
+    renderer.PixelSamples(xsamples, ysamples);
 }
 
-void RibParser::handlePixelFilter(RibLexer& lex)
+void RibParser::handlePixelFilter(Ri::Renderer& renderer)
 {
-    RtFilterFunc function = m_renderer.GetFilterFunc(lex.getString());
-    RtFloat xwidth = lex.getFloat();
-    RtFloat ywidth = lex.getFloat();
-    m_renderer.PixelFilter(function, xwidth, ywidth);
+    RtFilterFunc function = m_services.getFilterFunc(m_lex->getString());
+    RtFloat xwidth = m_lex->getFloat();
+    RtFloat ywidth = m_lex->getFloat();
+    renderer.PixelFilter(function, xwidth, ywidth);
 }
 
-void RibParser::handleExposure(RibLexer& lex)
+void RibParser::handleExposure(Ri::Renderer& renderer)
 {
-    RtFloat gain = lex.getFloat();
-    RtFloat gamma = lex.getFloat();
-    m_renderer.Exposure(gain, gamma);
+    RtFloat gain = m_lex->getFloat();
+    RtFloat gamma = m_lex->getFloat();
+    renderer.Exposure(gain, gamma);
 }
 
-void RibParser::handleImager(RibLexer& lex)
+void RibParser::handleImager(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Imager(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Imager(name, paramList);
 }
 
-void RibParser::handleQuantize(RibLexer& lex)
+void RibParser::handleQuantize(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    RtInt one = lex.getInt();
-    RtInt min = lex.getInt();
-    RtInt max = lex.getInt();
-    RtFloat ditheramplitude = lex.getFloat();
-    m_renderer.Quantize(type, one, min, max, ditheramplitude);
+    const char* type = m_lex->getString();
+    RtInt one = m_lex->getInt();
+    RtInt min = m_lex->getInt();
+    RtInt max = m_lex->getInt();
+    RtFloat ditheramplitude = m_lex->getFloat();
+    renderer.Quantize(type, one, min, max, ditheramplitude);
 }
 
-void RibParser::handleDisplay(RibLexer& lex)
+void RibParser::handleDisplay(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    const char* type = lex.getString();
-    const char* mode = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Display(name, type, mode, paramList);
+    const char* name = m_lex->getString();
+    const char* type = m_lex->getString();
+    const char* mode = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Display(name, type, mode, paramList);
 }
 
-void RibParser::handleHider(RibLexer& lex)
+void RibParser::handleHider(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Hider(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Hider(name, paramList);
 }
 
-void RibParser::handleRelativeDetail(RibLexer& lex)
+void RibParser::handleRelativeDetail(Ri::Renderer& renderer)
 {
-    RtFloat relativedetail = lex.getFloat();
-    m_renderer.RelativeDetail(relativedetail);
+    RtFloat relativedetail = m_lex->getFloat();
+    renderer.RelativeDetail(relativedetail);
 }
 
-void RibParser::handleOption(RibLexer& lex)
+void RibParser::handleOption(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Option(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Option(name, paramList);
 }
 
-void RibParser::handleAttributeBegin(RibLexer& lex)
+void RibParser::handleAttributeBegin(Ri::Renderer& renderer)
 {
-    m_renderer.AttributeBegin();
+    renderer.AttributeBegin();
 }
 
-void RibParser::handleAttributeEnd(RibLexer& lex)
+void RibParser::handleAttributeEnd(Ri::Renderer& renderer)
 {
-    m_renderer.AttributeEnd();
+    renderer.AttributeEnd();
 }
 
-void RibParser::handleColor(RibLexer& lex)
+void RibParser::handleColor(Ri::Renderer& renderer)
 {
-    RtConstColor& Cq = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));
-    m_renderer.Color(Cq);
+    RtConstColor& Cq = toFloatBasedType<RtConstColor>(m_lex->getFloatArray(m_numColorComps));
+    renderer.Color(Cq);
 }
 
-void RibParser::handleOpacity(RibLexer& lex)
+void RibParser::handleOpacity(Ri::Renderer& renderer)
 {
-    RtConstColor& Os = toFloatBasedType<RtConstColor>(lex.getFloatArray(m_numColorComps));
-    m_renderer.Opacity(Os);
+    RtConstColor& Os = toFloatBasedType<RtConstColor>(m_lex->getFloatArray(m_numColorComps));
+    renderer.Opacity(Os);
 }
 
-void RibParser::handleTextureCoordinates(RibLexer& lex)
+void RibParser::handleTextureCoordinates(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(8);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(8);
     RtFloat s1 = allArgs[0];
     RtFloat t1 = allArgs[1];
     RtFloat s2 = allArgs[2];
@@ -896,178 +894,178 @@ void RibParser::handleTextureCoordinates(RibLexer& lex)
     RtFloat t3 = allArgs[5];
     RtFloat s4 = allArgs[6];
     RtFloat t4 = allArgs[7];
-    m_renderer.TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
+    renderer.TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
 }
 
-void RibParser::handleSurface(RibLexer& lex)
+void RibParser::handleSurface(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Surface(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Surface(name, paramList);
 }
 
-void RibParser::handleDisplacement(RibLexer& lex)
+void RibParser::handleDisplacement(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Displacement(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Displacement(name, paramList);
 }
 
-void RibParser::handleAtmosphere(RibLexer& lex)
+void RibParser::handleAtmosphere(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Atmosphere(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Atmosphere(name, paramList);
 }
 
-void RibParser::handleInterior(RibLexer& lex)
+void RibParser::handleInterior(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Interior(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Interior(name, paramList);
 }
 
-void RibParser::handleExterior(RibLexer& lex)
+void RibParser::handleExterior(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Exterior(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Exterior(name, paramList);
 }
 
-void RibParser::handleShaderLayer(RibLexer& lex)
+void RibParser::handleShaderLayer(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    const char* name = lex.getString();
-    const char* layername = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.ShaderLayer(type, name, layername, paramList);
+    const char* type = m_lex->getString();
+    const char* name = m_lex->getString();
+    const char* layername = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.ShaderLayer(type, name, layername, paramList);
 }
 
-void RibParser::handleConnectShaderLayers(RibLexer& lex)
+void RibParser::handleConnectShaderLayers(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    const char* layer1 = lex.getString();
-    const char* variable1 = lex.getString();
-    const char* layer2 = lex.getString();
-    const char* variable2 = lex.getString();
-    m_renderer.ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
+    const char* type = m_lex->getString();
+    const char* layer1 = m_lex->getString();
+    const char* variable1 = m_lex->getString();
+    const char* layer2 = m_lex->getString();
+    const char* variable2 = m_lex->getString();
+    renderer.ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
 }
 
-void RibParser::handleShadingRate(RibLexer& lex)
+void RibParser::handleShadingRate(Ri::Renderer& renderer)
 {
-    RtFloat size = lex.getFloat();
-    m_renderer.ShadingRate(size);
+    RtFloat size = m_lex->getFloat();
+    renderer.ShadingRate(size);
 }
 
-void RibParser::handleShadingInterpolation(RibLexer& lex)
+void RibParser::handleShadingInterpolation(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    m_renderer.ShadingInterpolation(type);
+    const char* type = m_lex->getString();
+    renderer.ShadingInterpolation(type);
 }
 
-void RibParser::handleMatte(RibLexer& lex)
+void RibParser::handleMatte(Ri::Renderer& renderer)
 {
-    RtInt onoff = lex.getInt();
-    m_renderer.Matte(onoff);
+    RtInt onoff = m_lex->getInt();
+    renderer.Matte(onoff);
 }
 
-void RibParser::handleBound(RibLexer& lex)
+void RibParser::handleBound(Ri::Renderer& renderer)
 {
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));
-    m_renderer.Bound(bound);
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(m_lex->getFloatArray(6));
+    renderer.Bound(bound);
 }
 
-void RibParser::handleDetail(RibLexer& lex)
+void RibParser::handleDetail(Ri::Renderer& renderer)
 {
-    RtConstBound& bound = toFloatBasedType<RtConstBound>(lex.getFloatArray(6));
-    m_renderer.Detail(bound);
+    RtConstBound& bound = toFloatBasedType<RtConstBound>(m_lex->getFloatArray(6));
+    renderer.Detail(bound);
 }
 
-void RibParser::handleDetailRange(RibLexer& lex)
+void RibParser::handleDetailRange(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat offlow = allArgs[0];
     RtFloat onlow = allArgs[1];
     RtFloat onhigh = allArgs[2];
     RtFloat offhigh = allArgs[3];
-    m_renderer.DetailRange(offlow, onlow, onhigh, offhigh);
+    renderer.DetailRange(offlow, onlow, onhigh, offhigh);
 }
 
-void RibParser::handleGeometricApproximation(RibLexer& lex)
+void RibParser::handleGeometricApproximation(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    RtFloat value = lex.getFloat();
-    m_renderer.GeometricApproximation(type, value);
+    const char* type = m_lex->getString();
+    RtFloat value = m_lex->getFloat();
+    renderer.GeometricApproximation(type, value);
 }
 
-void RibParser::handleOrientation(RibLexer& lex)
+void RibParser::handleOrientation(Ri::Renderer& renderer)
 {
-    const char* orientation = lex.getString();
-    m_renderer.Orientation(orientation);
+    const char* orientation = m_lex->getString();
+    renderer.Orientation(orientation);
 }
 
-void RibParser::handleReverseOrientation(RibLexer& lex)
+void RibParser::handleReverseOrientation(Ri::Renderer& renderer)
 {
-    m_renderer.ReverseOrientation();
+    renderer.ReverseOrientation();
 }
 
-void RibParser::handleSides(RibLexer& lex)
+void RibParser::handleSides(Ri::Renderer& renderer)
 {
-    RtInt nsides = lex.getInt();
-    m_renderer.Sides(nsides);
+    RtInt nsides = m_lex->getInt();
+    renderer.Sides(nsides);
 }
 
-void RibParser::handleIdentity(RibLexer& lex)
+void RibParser::handleIdentity(Ri::Renderer& renderer)
 {
-    m_renderer.Identity();
+    renderer.Identity();
 }
 
-void RibParser::handleTransform(RibLexer& lex)
+void RibParser::handleTransform(Ri::Renderer& renderer)
 {
-    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);
-    m_renderer.Transform(transform);
+    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(m_lex->getFloatArray(), "Matrix", 16);
+    renderer.Transform(transform);
 }
 
-void RibParser::handleConcatTransform(RibLexer& lex)
+void RibParser::handleConcatTransform(Ri::Renderer& renderer)
 {
-    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(lex.getFloatArray(), "Matrix", 16);
-    m_renderer.ConcatTransform(transform);
+    RtConstMatrix& transform = toFloatBasedType<RtConstMatrix>(m_lex->getFloatArray(), "Matrix", 16);
+    renderer.ConcatTransform(transform);
 }
 
-void RibParser::handlePerspective(RibLexer& lex)
+void RibParser::handlePerspective(Ri::Renderer& renderer)
 {
-    RtFloat fov = lex.getFloat();
-    m_renderer.Perspective(fov);
+    RtFloat fov = m_lex->getFloat();
+    renderer.Perspective(fov);
 }
 
-void RibParser::handleTranslate(RibLexer& lex)
+void RibParser::handleTranslate(Ri::Renderer& renderer)
 {
-    RtFloat dx = lex.getFloat();
-    RtFloat dy = lex.getFloat();
-    RtFloat dz = lex.getFloat();
-    m_renderer.Translate(dx, dy, dz);
+    RtFloat dx = m_lex->getFloat();
+    RtFloat dy = m_lex->getFloat();
+    RtFloat dz = m_lex->getFloat();
+    renderer.Translate(dx, dy, dz);
 }
 
-void RibParser::handleRotate(RibLexer& lex)
+void RibParser::handleRotate(Ri::Renderer& renderer)
 {
-    RtFloat angle = lex.getFloat();
-    RtFloat dx = lex.getFloat();
-    RtFloat dy = lex.getFloat();
-    RtFloat dz = lex.getFloat();
-    m_renderer.Rotate(angle, dx, dy, dz);
+    RtFloat angle = m_lex->getFloat();
+    RtFloat dx = m_lex->getFloat();
+    RtFloat dy = m_lex->getFloat();
+    RtFloat dz = m_lex->getFloat();
+    renderer.Rotate(angle, dx, dy, dz);
 }
 
-void RibParser::handleScale(RibLexer& lex)
+void RibParser::handleScale(Ri::Renderer& renderer)
 {
-    RtFloat sx = lex.getFloat();
-    RtFloat sy = lex.getFloat();
-    RtFloat sz = lex.getFloat();
-    m_renderer.Scale(sx, sy, sz);
+    RtFloat sx = m_lex->getFloat();
+    RtFloat sy = m_lex->getFloat();
+    RtFloat sz = m_lex->getFloat();
+    renderer.Scale(sx, sy, sz);
 }
 
-void RibParser::handleSkew(RibLexer& lex)
+void RibParser::handleSkew(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(7);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(7);
     RtFloat angle = allArgs[0];
     RtFloat dx1 = allArgs[1];
     RtFloat dy1 = allArgs[2];
@@ -1075,336 +1073,336 @@ void RibParser::handleSkew(RibLexer& lex)
     RtFloat dx2 = allArgs[4];
     RtFloat dy2 = allArgs[5];
     RtFloat dz2 = allArgs[6];
-    m_renderer.Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
+    renderer.Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
 }
 
-void RibParser::handleCoordinateSystem(RibLexer& lex)
+void RibParser::handleCoordinateSystem(Ri::Renderer& renderer)
 {
-    const char* space = lex.getString();
-    m_renderer.CoordinateSystem(space);
+    const char* space = m_lex->getString();
+    renderer.CoordinateSystem(space);
 }
 
-void RibParser::handleCoordSysTransform(RibLexer& lex)
+void RibParser::handleCoordSysTransform(Ri::Renderer& renderer)
 {
-    const char* space = lex.getString();
-    m_renderer.CoordSysTransform(space);
+    const char* space = m_lex->getString();
+    renderer.CoordSysTransform(space);
 }
 
-void RibParser::handleTransformBegin(RibLexer& lex)
+void RibParser::handleTransformBegin(Ri::Renderer& renderer)
 {
-    m_renderer.TransformBegin();
+    renderer.TransformBegin();
 }
 
-void RibParser::handleTransformEnd(RibLexer& lex)
+void RibParser::handleTransformEnd(Ri::Renderer& renderer)
 {
-    m_renderer.TransformEnd();
+    renderer.TransformEnd();
 }
 
-void RibParser::handleResource(RibLexer& lex)
+void RibParser::handleResource(Ri::Renderer& renderer)
 {
-    const char* handle = lex.getString();
-    const char* type = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Resource(handle, type, paramList);
+    const char* handle = m_lex->getString();
+    const char* type = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Resource(handle, type, paramList);
 }
 
-void RibParser::handleResourceBegin(RibLexer& lex)
+void RibParser::handleResourceBegin(Ri::Renderer& renderer)
 {
-    m_renderer.ResourceBegin();
+    renderer.ResourceBegin();
 }
 
-void RibParser::handleResourceEnd(RibLexer& lex)
+void RibParser::handleResourceEnd(Ri::Renderer& renderer)
 {
-    m_renderer.ResourceEnd();
+    renderer.ResourceEnd();
 }
 
-void RibParser::handleAttribute(RibLexer& lex)
+void RibParser::handleAttribute(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Attribute(name, paramList);
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Attribute(name, paramList);
 }
 
-void RibParser::handlePolygon(RibLexer& lex)
+void RibParser::handlePolygon(Ri::Renderer& renderer)
 {
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Polygon(paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Polygon(paramList);
 }
 
-void RibParser::handleGeneralPolygon(RibLexer& lex)
+void RibParser::handleGeneralPolygon(Ri::Renderer& renderer)
 {
-    Ri::IntArray nverts = lex.getIntArray();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.GeneralPolygon(nverts, paramList);
+    Ri::IntArray nverts = m_lex->getIntArray();
+    Ri::ParamList paramList = readParamList();
+    renderer.GeneralPolygon(nverts, paramList);
 }
 
-void RibParser::handlePointsPolygons(RibLexer& lex)
+void RibParser::handlePointsPolygons(Ri::Renderer& renderer)
 {
-    Ri::IntArray nverts = lex.getIntArray();
-    Ri::IntArray verts = lex.getIntArray();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.PointsPolygons(nverts, verts, paramList);
+    Ri::IntArray nverts = m_lex->getIntArray();
+    Ri::IntArray verts = m_lex->getIntArray();
+    Ri::ParamList paramList = readParamList();
+    renderer.PointsPolygons(nverts, verts, paramList);
 }
 
-void RibParser::handlePointsGeneralPolygons(RibLexer& lex)
+void RibParser::handlePointsGeneralPolygons(Ri::Renderer& renderer)
 {
-    Ri::IntArray nloops = lex.getIntArray();
-    Ri::IntArray nverts = lex.getIntArray();
-    Ri::IntArray verts = lex.getIntArray();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.PointsGeneralPolygons(nloops, nverts, verts, paramList);
+    Ri::IntArray nloops = m_lex->getIntArray();
+    Ri::IntArray nverts = m_lex->getIntArray();
+    Ri::IntArray verts = m_lex->getIntArray();
+    Ri::ParamList paramList = readParamList();
+    renderer.PointsGeneralPolygons(nloops, nverts, verts, paramList);
 }
 
-void RibParser::handleBasis(RibLexer& lex)
+void RibParser::handleBasis(Ri::Renderer& renderer)
 {
-    RtConstBasis& ubasis = getBasis(lex);
-    RtInt ustep = lex.getInt();
-    RtConstBasis& vbasis = getBasis(lex);
-    RtInt vstep = lex.getInt();
-    m_renderer.Basis(ubasis, ustep, vbasis, vstep);
+    RtConstBasis& ubasis = getBasis();
+    RtInt ustep = m_lex->getInt();
+    RtConstBasis& vbasis = getBasis();
+    RtInt vstep = m_lex->getInt();
+    renderer.Basis(ubasis, ustep, vbasis, vstep);
 }
 
-void RibParser::handlePatch(RibLexer& lex)
+void RibParser::handlePatch(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Patch(type, paramList);
+    const char* type = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Patch(type, paramList);
 }
 
-void RibParser::handlePatchMesh(RibLexer& lex)
+void RibParser::handlePatchMesh(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    RtInt nu = lex.getInt();
-    const char* uwrap = lex.getString();
-    RtInt nv = lex.getInt();
-    const char* vwrap = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.PatchMesh(type, nu, uwrap, nv, vwrap, paramList);
+    const char* type = m_lex->getString();
+    RtInt nu = m_lex->getInt();
+    const char* uwrap = m_lex->getString();
+    RtInt nv = m_lex->getInt();
+    const char* vwrap = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.PatchMesh(type, nu, uwrap, nv, vwrap, paramList);
 }
 
-void RibParser::handleNuPatch(RibLexer& lex)
+void RibParser::handleNuPatch(Ri::Renderer& renderer)
 {
-    RtInt nu = lex.getInt();
-    RtInt uorder = lex.getInt();
-    Ri::FloatArray uknot = lex.getFloatArray();
-    RtFloat umin = lex.getFloat();
-    RtFloat umax = lex.getFloat();
-    RtInt nv = lex.getInt();
-    RtInt vorder = lex.getInt();
-    Ri::FloatArray vknot = lex.getFloatArray();
-    RtFloat vmin = lex.getFloat();
-    RtFloat vmax = lex.getFloat();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, paramList);
+    RtInt nu = m_lex->getInt();
+    RtInt uorder = m_lex->getInt();
+    Ri::FloatArray uknot = m_lex->getFloatArray();
+    RtFloat umin = m_lex->getFloat();
+    RtFloat umax = m_lex->getFloat();
+    RtInt nv = m_lex->getInt();
+    RtInt vorder = m_lex->getInt();
+    Ri::FloatArray vknot = m_lex->getFloatArray();
+    RtFloat vmin = m_lex->getFloat();
+    RtFloat vmax = m_lex->getFloat();
+    Ri::ParamList paramList = readParamList();
+    renderer.NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, paramList);
 }
 
-void RibParser::handleTrimCurve(RibLexer& lex)
+void RibParser::handleTrimCurve(Ri::Renderer& renderer)
 {
-    Ri::IntArray ncurves = lex.getIntArray();
-    Ri::IntArray order = lex.getIntArray();
-    Ri::FloatArray knot = lex.getFloatArray();
-    Ri::FloatArray min = lex.getFloatArray();
-    Ri::FloatArray max = lex.getFloatArray();
-    Ri::IntArray n = lex.getIntArray();
-    Ri::FloatArray u = lex.getFloatArray();
-    Ri::FloatArray v = lex.getFloatArray();
-    Ri::FloatArray w = lex.getFloatArray();
-    m_renderer.TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
+    Ri::IntArray ncurves = m_lex->getIntArray();
+    Ri::IntArray order = m_lex->getIntArray();
+    Ri::FloatArray knot = m_lex->getFloatArray();
+    Ri::FloatArray min = m_lex->getFloatArray();
+    Ri::FloatArray max = m_lex->getFloatArray();
+    Ri::IntArray n = m_lex->getIntArray();
+    Ri::FloatArray u = m_lex->getFloatArray();
+    Ri::FloatArray v = m_lex->getFloatArray();
+    Ri::FloatArray w = m_lex->getFloatArray();
+    renderer.TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
-void RibParser::handleSphere(RibLexer& lex)
+void RibParser::handleSphere(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat radius = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Sphere(radius, zmin, zmax, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Sphere(radius, zmin, zmax, thetamax, paramList);
 }
 
-void RibParser::handleCone(RibLexer& lex)
+void RibParser::handleCone(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(3);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(3);
     RtFloat height = allArgs[0];
     RtFloat radius = allArgs[1];
     RtFloat thetamax = allArgs[2];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Cone(height, radius, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Cone(height, radius, thetamax, paramList);
 }
 
-void RibParser::handleCylinder(RibLexer& lex)
+void RibParser::handleCylinder(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat radius = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Cylinder(radius, zmin, zmax, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Cylinder(radius, zmin, zmax, thetamax, paramList);
 }
 
-void RibParser::handleParaboloid(RibLexer& lex)
+void RibParser::handleParaboloid(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(4);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(4);
     RtFloat rmax = allArgs[0];
     RtFloat zmin = allArgs[1];
     RtFloat zmax = allArgs[2];
     RtFloat thetamax = allArgs[3];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Paraboloid(rmax, zmin, zmax, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Paraboloid(rmax, zmin, zmax, thetamax, paramList);
 }
 
-void RibParser::handleDisk(RibLexer& lex)
+void RibParser::handleDisk(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(3);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(3);
     RtFloat height = allArgs[0];
     RtFloat radius = allArgs[1];
     RtFloat thetamax = allArgs[2];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Disk(height, radius, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Disk(height, radius, thetamax, paramList);
 }
 
-void RibParser::handleTorus(RibLexer& lex)
+void RibParser::handleTorus(Ri::Renderer& renderer)
 {
-    Ri::FloatArray allArgs = lex.getFloatArray(5);
+    Ri::FloatArray allArgs = m_lex->getFloatArray(5);
     RtFloat majorrad = allArgs[0];
     RtFloat minorrad = allArgs[1];
     RtFloat phimin = allArgs[2];
     RtFloat phimax = allArgs[3];
     RtFloat thetamax = allArgs[4];
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Torus(majorrad, minorrad, phimin, phimax, thetamax, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Torus(majorrad, minorrad, phimin, phimax, thetamax, paramList);
 }
 
-void RibParser::handlePoints(RibLexer& lex)
+void RibParser::handlePoints(Ri::Renderer& renderer)
 {
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Points(paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.Points(paramList);
 }
 
-void RibParser::handleCurves(RibLexer& lex)
+void RibParser::handleCurves(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    Ri::IntArray nvertices = lex.getIntArray();
-    const char* wrap = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Curves(type, nvertices, wrap, paramList);
+    const char* type = m_lex->getString();
+    Ri::IntArray nvertices = m_lex->getIntArray();
+    const char* wrap = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Curves(type, nvertices, wrap, paramList);
 }
 
-void RibParser::handleBlobby(RibLexer& lex)
+void RibParser::handleBlobby(Ri::Renderer& renderer)
 {
-    RtInt nleaf = lex.getInt();
-    Ri::IntArray code = lex.getIntArray();
-    Ri::FloatArray flt = lex.getFloatArray();
-    Ri::StringArray str = lex.getStringArray();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Blobby(nleaf, code, flt, str, paramList);
+    RtInt nleaf = m_lex->getInt();
+    Ri::IntArray code = m_lex->getIntArray();
+    Ri::FloatArray floats = m_lex->getFloatArray();
+    Ri::StringArray strings = m_lex->getStringArray();
+    Ri::ParamList paramList = readParamList();
+    renderer.Blobby(nleaf, code, floats, strings, paramList);
 }
 
-void RibParser::handleGeometry(RibLexer& lex)
+void RibParser::handleGeometry(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.Geometry(type, paramList);
+    const char* type = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.Geometry(type, paramList);
 }
 
-void RibParser::handleSolidBegin(RibLexer& lex)
+void RibParser::handleSolidBegin(Ri::Renderer& renderer)
 {
-    const char* type = lex.getString();
-    m_renderer.SolidBegin(type);
+    const char* type = m_lex->getString();
+    renderer.SolidBegin(type);
 }
 
-void RibParser::handleSolidEnd(RibLexer& lex)
+void RibParser::handleSolidEnd(Ri::Renderer& renderer)
 {
-    m_renderer.SolidEnd();
+    renderer.SolidEnd();
 }
 
-void RibParser::handleObjectEnd(RibLexer& lex)
+void RibParser::handleObjectEnd(Ri::Renderer& renderer)
 {
-    m_renderer.ObjectEnd();
+    renderer.ObjectEnd();
 }
 
-void RibParser::handleMotionBegin(RibLexer& lex)
+void RibParser::handleMotionBegin(Ri::Renderer& renderer)
 {
-    Ri::FloatArray times = lex.getFloatArray();
-    m_renderer.MotionBegin(times);
+    Ri::FloatArray times = m_lex->getFloatArray();
+    renderer.MotionBegin(times);
 }
 
-void RibParser::handleMotionEnd(RibLexer& lex)
+void RibParser::handleMotionEnd(Ri::Renderer& renderer)
 {
-    m_renderer.MotionEnd();
+    renderer.MotionEnd();
 }
 
-void RibParser::handleMakeTexture(RibLexer& lex)
+void RibParser::handleMakeTexture(Ri::Renderer& renderer)
 {
-    const char* imagefile = lex.getString();
-    const char* texturefile = lex.getString();
-    const char* swrap = lex.getString();
-    const char* twrap = lex.getString();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
-    RtFloat swidth = lex.getFloat();
-    RtFloat twidth = lex.getFloat();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, paramList);
+    const char* imagefile = m_lex->getString();
+    const char* texturefile = m_lex->getString();
+    const char* swrap = m_lex->getString();
+    const char* twrap = m_lex->getString();
+    RtFilterFunc filterfunc = m_services.getFilterFunc(m_lex->getString());
+    RtFloat swidth = m_lex->getFloat();
+    RtFloat twidth = m_lex->getFloat();
+    Ri::ParamList paramList = readParamList();
+    renderer.MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, paramList);
 }
 
-void RibParser::handleMakeLatLongEnvironment(RibLexer& lex)
+void RibParser::handleMakeLatLongEnvironment(Ri::Renderer& renderer)
 {
-    const char* imagefile = lex.getString();
-    const char* reflfile = lex.getString();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
-    RtFloat swidth = lex.getFloat();
-    RtFloat twidth = lex.getFloat();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, paramList);
+    const char* imagefile = m_lex->getString();
+    const char* reflfile = m_lex->getString();
+    RtFilterFunc filterfunc = m_services.getFilterFunc(m_lex->getString());
+    RtFloat swidth = m_lex->getFloat();
+    RtFloat twidth = m_lex->getFloat();
+    Ri::ParamList paramList = readParamList();
+    renderer.MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, paramList);
 }
 
-void RibParser::handleMakeCubeFaceEnvironment(RibLexer& lex)
+void RibParser::handleMakeCubeFaceEnvironment(Ri::Renderer& renderer)
 {
-    const char* px = lex.getString();
-    const char* nx = lex.getString();
-    const char* py = lex.getString();
-    const char* ny = lex.getString();
-    const char* pz = lex.getString();
-    const char* nz = lex.getString();
-    const char* reflfile = lex.getString();
-    RtFloat fov = lex.getFloat();
-    RtFilterFunc filterfunc = m_renderer.GetFilterFunc(lex.getString());
-    RtFloat swidth = lex.getFloat();
-    RtFloat twidth = lex.getFloat();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, paramList);
+    const char* px = m_lex->getString();
+    const char* nx = m_lex->getString();
+    const char* py = m_lex->getString();
+    const char* ny = m_lex->getString();
+    const char* pz = m_lex->getString();
+    const char* nz = m_lex->getString();
+    const char* reflfile = m_lex->getString();
+    RtFloat fov = m_lex->getFloat();
+    RtFilterFunc filterfunc = m_services.getFilterFunc(m_lex->getString());
+    RtFloat swidth = m_lex->getFloat();
+    RtFloat twidth = m_lex->getFloat();
+    Ri::ParamList paramList = readParamList();
+    renderer.MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, paramList);
 }
 
-void RibParser::handleMakeShadow(RibLexer& lex)
+void RibParser::handleMakeShadow(Ri::Renderer& renderer)
 {
-    const char* picfile = lex.getString();
-    const char* shadowfile = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.MakeShadow(picfile, shadowfile, paramList);
+    const char* picfile = m_lex->getString();
+    const char* shadowfile = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.MakeShadow(picfile, shadowfile, paramList);
 }
 
-void RibParser::handleMakeOcclusion(RibLexer& lex)
+void RibParser::handleMakeOcclusion(Ri::Renderer& renderer)
 {
-    Ri::StringArray picfiles = lex.getStringArray();
-    const char* shadowfile = lex.getString();
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.MakeOcclusion(picfiles, shadowfile, paramList);
+    Ri::StringArray picfiles = m_lex->getStringArray();
+    const char* shadowfile = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.MakeOcclusion(picfiles, shadowfile, paramList);
 }
 
-void RibParser::handleErrorHandler(RibLexer& lex)
+void RibParser::handleErrorHandler(Ri::Renderer& renderer)
 {
-    RtErrorFunc handler = m_renderer.GetErrorFunc(lex.getString());
-    m_renderer.ErrorHandler(handler);
+    RtErrorFunc handler = m_services.getErrorFunc(m_lex->getString());
+    renderer.ErrorHandler(handler);
 }
 
-void RibParser::handleReadArchive(RibLexer& lex)
+void RibParser::handleReadArchive(Ri::Renderer& renderer)
 {
-    const char* name = lex.getString();
+    const char* name = m_lex->getString();
     RtArchiveCallback callback = 0;
-    Ri::ParamList paramList = readParamList(lex);
-    m_renderer.ReadArchive(name, callback, paramList);
+    Ri::ParamList paramList = readParamList();
+    renderer.ReadArchive(name, callback, paramList);
 }
 
 //[[[end]]]

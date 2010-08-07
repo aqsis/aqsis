@@ -27,6 +27,7 @@
 #define AQSIS_RICXX_H_INCLUDED
 
 #include <cassert>
+#include <iosfwd>
 #include <stddef.h> // for size_t
 
 #include <aqsis/ri/ritypes.h>
@@ -225,8 +226,6 @@ class Param
 };
 
 typedef Array<Param> ParamList;
-
-class Filter;
 
 //------------------------------------------------------------------------------
 /// Simple C++ version of the RenderMan interface
@@ -513,140 +512,71 @@ class Renderer
         /// present for backward compatibility with the C API.
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) = 0;
 
+        virtual ~Renderer() {};
+};
+
+
+/// Access to extra renderer state, interface filters, RIB parsing etc.
+///
+/// Roughly speaking, this class is a collection of the parts of Ri::Renderer
+/// which aren't filterable.  It's also a convenient place to manage filter
+/// chains from.
+class RendererServices
+{
+    public:
         /// Error handling callback, mainly for RIB parser.
         ///
         /// TODO: Think more about a cohesive error handling strategy.  Not
         /// sure if this should really be here or not.
-        virtual RtVoid Error(const char* errorMessage) = 0;
+        virtual RtVoid error(const char* errorMessage) = 0;
+        //virtual ErrorHandler& errorHandler() = 0;
 
         /// Functions returning pointers to standard filters, bases, etc.
         ///
         /// These are necessary so that (1) the interface can have control over
         /// what the standard bases etc. are, and (2) the parser doesn't need
         /// to provide symbols which resolve to these itself.
-        virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const = 0;
-        virtual RtConstBasis*    GetBasis(RtConstToken name) const = 0;
-        virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const = 0;
-        virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const = 0;
+        virtual RtFilterFunc     getFilterFunc(RtConstToken name) const = 0;
+        virtual RtConstBasis*    getBasis(RtConstToken name) const = 0;
+        virtual RtErrorFunc      getErrorFunc(RtConstToken name) const = 0;
+        virtual RtProcSubdivFunc getProcSubdivFunc(RtConstToken name) const = 0;
 
         /// Get a previously Declared token or parse inline declaration
         ///
         /// The parameter name is a subrange of the string "token", and as such
         /// is returned as the range [nameBegin, nameEnd).
         ///
-        /// TODO: should this be const?
-        ///
         /// Implementations should throw XqValidation on parse or lookup error.
         ///
         /// \param token - type declaration and parameter name, in a string.
         /// \param nameBegin - return start of the name here if non-null
         /// \param nameEnd   - return end of the name here if non-null
-        virtual TypeSpec GetDeclaration(RtConstToken token,
+        virtual TypeSpec getDeclaration(RtConstToken token,
                                         const char** nameBegin = 0,
-                                        const char** nameEnd = 0) = 0;
+                                        const char** nameEnd = 0) const = 0;
 
-        // TODO: More Rif API?
-
-        // TODO: Some way to get at the named transformation matrices so we can
-        // implement RiTransformPoints
-
-        virtual ~Renderer() {};
-
-        /// Register a filter with the interface
+        /// Get first filter in the chain, or the underlying renderer.
         ///
-        /// This allows Renderer instances to be aware of any interface filter
-        /// pipelines which may be attached.
-        virtual void RegisterFilter(Filter* filter) {}
-};
+        /// If there is no filters currently attached, return the Renderer
+        /// instance associated with this RendererServices object.
+        virtual Renderer& firstFilter() = 0;
 
+        /// Add a filter to the front of the filter chain
+        virtual void addFilter(const char* name,
+                               const ParamList& filterParams = ParamList()) = 0;
 
-//------------------------------------------------------------------------------
-/// Filter for the Ri::Renderer interface.
-class Filter : public Renderer
-{
-    public:
-        Filter()
-            : m_input(0),
-            m_output(0),
-            m_outputIsFilter(false)
-        { }
+        /// Parse a RIB stream
+        ///
+        /// Insert the resulting stream of commands into the given Renderer
+        /// context.
+        ///
+        /// \param ribStream - input RIB stream
+        /// \param name - name of RIB stream (for debugging purposes)
+        /// \param context - sink for parsed commands
+        virtual void parseRib(std::istream& ribStream, const char* name,
+                              Renderer& context) = 0;
 
-        /// Disconnect the filter from the pipeline.
-        void disconnectFilter()
-        {
-            if(m_input)
-            {
-                m_input->m_output = m_output;
-                m_input->m_outputIsFilter = m_outputIsFilter;
-                if(m_output)
-                    m_output->RegisterFilter(m_input);
-            }
-            else if(m_output)
-                m_output->RegisterFilter(0);
-        }
-
-        /// Register a filter as the output
-        void registerOutput(Filter* output)
-        {
-            if(m_output)
-                m_output->RegisterFilter(0);
-            output->m_input = this;
-            m_output = output;
-            m_outputIsFilter = true;
-            output->RegisterFilter(this);
-        }
-        void registerOutput(Renderer* output)
-        {
-            if(m_output)
-                m_output->RegisterFilter(0);
-            m_output = output;
-            m_outputIsFilter = false;
-            output->RegisterFilter(this);
-        }
-
-        /// Get the first filter in the pipeline
-        const Filter* firstFilter() const
-        {
-            const Filter* f = this;
-            while(f->m_input)
-                f = f->m_input;
-            return f;
-        }
-        Filter* firstFilter()
-        {
-            return const_cast<Filter*>(
-                    const_cast<const Filter*>(this)->firstFilter());
-        }
-
-        virtual void RegisterFilter(Filter* filter)
-        {
-            m_input = filter;
-        }
-
-        virtual ~Filter()
-        {
-            disconnectFilter();
-        }
-
-    protected:
-        /// Access to input filter for child classes
-        Filter* inputFilter()             { return m_input; }
-        const Filter* inputFilter() const { return m_input; }
-
-        /// Access to output filter for child classes
-        Filter* outputFilter()
-            { return m_outputIsFilter ? static_cast<Filter*>(m_output) : 0; }
-        const Filter* outputFilter() const
-            { return m_outputIsFilter ? static_cast<Filter*>(m_output) : 0; }
-
-        /// Acess to output interface
-        Renderer* outputInterface()             { return m_output; }
-        const Renderer* outputInterface() const { return m_output; }
-
-    private:
-        Filter* m_input;    //< input filter; source for API calls
-        Renderer* m_output; //< output interface; sink for API calls
-        bool m_outputIsFilter; //< if true, m_output is actually of type Filter*
+        virtual ~RendererServices() {}
 };
 
 

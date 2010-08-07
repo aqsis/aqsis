@@ -43,13 +43,10 @@ int main(int argc, char* argv[])
     // Faster buffering, but log colourization then fails:
     //std::ios_base::sync_with_stdio(false);
 
-    boost::shared_ptr<Ri::Renderer> renderer =
+    boost::shared_ptr<Ri::RendererServices> services =
         createRibWriter(std::cout, interpolate, useBinary, useGzip);
-    boost::shared_ptr<Ri::Filter> validator = createRiCxxValidate();
-    validator->registerOutput(renderer.get());
-
-    RibParser parser(*validator);
-    parser.parseStream(std::cin, "stdin");
+    services->addFilter("validate");
+    services->parseRib(std::cin, "stdin", services->firstFilter());
 
     return 0;
 }

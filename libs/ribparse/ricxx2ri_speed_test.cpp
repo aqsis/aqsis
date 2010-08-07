@@ -35,46 +35,56 @@
 #include <cstdlib>
 #include <fstream>
 
+#include <aqsis/ri/rif.h>
 #include <aqsis/util/exception.h>
 #include "ricxx2ri.h"
 #include "ribsema.h"
 
 Aqsis::RibParser* g_parser = 0;
+Aqsis::Ri::Renderer* g_renderer = 0;
 
-void readFile(const char* name, Aqsis::RibParser& parser)
+void readFile(const char* name)
 {
     std::ifstream archive(name);
     if(!archive)
         AQSIS_THROW_XQERROR(Aqsis::XqValidation, Aqsis::EqE_BadFile,
                 "could not open file " << name);
-    parser.parseStream(archive, name);
+    g_parser->parseStream(archive, name, *g_renderer);
 }
 
 int main(int argc, char* argv[])
 {
     if(argc < 2)
     {
-        std::cerr << "Usage: " << argv[0] << "file.rib\n";
+        std::cerr << "Usage: " << argv[0] << " file.rib\n";
         std::exit(1);
     }
 
-    boost::shared_ptr<Aqsis::Ri::Renderer> callbackInterface =
+    boost::shared_ptr<Aqsis::Ri::RendererServices> services =
         Aqsis::createRiCxxToRi();
     boost::shared_ptr<Aqsis::RibParser> parser(
-        new Aqsis::RibParser(*callbackInterface));
+        new Aqsis::RibParser(*services));
     g_parser = parser.get();
+    g_renderer = &services->firstFilter();
 
-    readFile(argv[1], *parser);
+    readFile(argv[1]);
 }
 
 
 extern "C" {
 
+AQSIS_RI_SHARE RtInt RifGetDeclaration(RtToken name, RifTokenType *tokType,
+		RifTokenDetail *tokDetail, RtInt *arrayLen)
+{
+    // FIXME!
+    return 1;
+}
+
 // ReadArchive without search path support.
 AQSIS_RI_SHARE RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count,
         RtToken tokens[], RtPointer values[])
 {
-    readFile(name, *g_parser);
+    readFile(name);
 }
 
 //==============================================================================

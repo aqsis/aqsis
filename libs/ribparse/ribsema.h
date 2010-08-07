@@ -46,14 +46,14 @@ class RibLexer;
 class RibParser : boost::noncopyable
 {
     public:
-        RibParser(Ri::Renderer& renderer);
+        RibParser(Ri::RendererServices& services);
 
         /// Parse a RIB stream, sending requests to the callback interface
         ///
         /// \param ribStream - RIB stream to be parsed.  May be gzipped.
         /// \param streamName - name of the stream, present in error messages
-        void parseStream(std::istream& ribStream,
-                         const std::string& streamName);
+        void parseStream(std::istream& ribStream, const std::string& streamName,
+                         Ri::Renderer& context);
 
     private:
         /// Object ID -> handle maps
@@ -63,7 +63,7 @@ class RibParser : boost::noncopyable
         typedef std::map<int, RtLightHandle> LightMap;
         typedef std::map<std::string, RtLightHandle> NamedLightMap;
         /// Request handler function type
-        typedef void (RibParser::*RequestHandlerType)(RibLexer& lex);
+        typedef void (RibParser::*RequestHandlerType)(Ri::Renderer& renderer);
         /// Request -> handler mapping type
         typedef std::map<std::string, RequestHandlerType> HandlerMap;
         /// Function pointer compatible with {Area}LightSource
@@ -71,11 +71,11 @@ class RibParser : boost::noncopyable
                 RtConstToken shadername, const Ri::ParamList&);
 
         // Utilities for handlers
-        Ri::ParamList readParamList(RibLexer& lex);
+        Ri::ParamList readParamList();
         /// Combined handler for LightSource & AreaLightSource
         void handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
-                                      RibLexer& lex);
-        RtConstBasis& getBasis(RibLexer& lex) const;
+                                      Ri::Renderer& renderer);
+        RtConstBasis& getBasis();
 
         //--------------------------------------------------
         /// Handler methods definitions
@@ -83,125 +83,125 @@ class RibParser : boost::noncopyable
         from cogutils import *
         riXml = parseXmlTree('ri.xml')
         for p in filter(lambda p: p.haschild('Rib'), riXml.findall('Procedures/Procedure')):
-            cog.outl('void handle%s(RibLexer& lex);' % (p.findtext('Name'),))
+            cog.outl('void handle%s(Ri::Renderer& renderer);' % (p.findtext('Name'),))
 
         ]]]*/
-        void handleDeclare(RibLexer& lex);
-        void handleFrameBegin(RibLexer& lex);
-        void handleFrameEnd(RibLexer& lex);
-        void handleWorldBegin(RibLexer& lex);
-        void handleWorldEnd(RibLexer& lex);
-        void handleIfBegin(RibLexer& lex);
-        void handleElseIf(RibLexer& lex);
-        void handleElse(RibLexer& lex);
-        void handleIfEnd(RibLexer& lex);
-        void handleFormat(RibLexer& lex);
-        void handleFrameAspectRatio(RibLexer& lex);
-        void handleScreenWindow(RibLexer& lex);
-        void handleCropWindow(RibLexer& lex);
-        void handleProjection(RibLexer& lex);
-        void handleClipping(RibLexer& lex);
-        void handleClippingPlane(RibLexer& lex);
-        void handleDepthOfField(RibLexer& lex);
-        void handleShutter(RibLexer& lex);
-        void handlePixelVariance(RibLexer& lex);
-        void handlePixelSamples(RibLexer& lex);
-        void handlePixelFilter(RibLexer& lex);
-        void handleExposure(RibLexer& lex);
-        void handleImager(RibLexer& lex);
-        void handleQuantize(RibLexer& lex);
-        void handleDisplay(RibLexer& lex);
-        void handleHider(RibLexer& lex);
-        void handleColorSamples(RibLexer& lex);
-        void handleRelativeDetail(RibLexer& lex);
-        void handleOption(RibLexer& lex);
-        void handleAttributeBegin(RibLexer& lex);
-        void handleAttributeEnd(RibLexer& lex);
-        void handleColor(RibLexer& lex);
-        void handleOpacity(RibLexer& lex);
-        void handleTextureCoordinates(RibLexer& lex);
-        void handleLightSource(RibLexer& lex);
-        void handleAreaLightSource(RibLexer& lex);
-        void handleIlluminate(RibLexer& lex);
-        void handleSurface(RibLexer& lex);
-        void handleDisplacement(RibLexer& lex);
-        void handleAtmosphere(RibLexer& lex);
-        void handleInterior(RibLexer& lex);
-        void handleExterior(RibLexer& lex);
-        void handleShaderLayer(RibLexer& lex);
-        void handleConnectShaderLayers(RibLexer& lex);
-        void handleShadingRate(RibLexer& lex);
-        void handleShadingInterpolation(RibLexer& lex);
-        void handleMatte(RibLexer& lex);
-        void handleBound(RibLexer& lex);
-        void handleDetail(RibLexer& lex);
-        void handleDetailRange(RibLexer& lex);
-        void handleGeometricApproximation(RibLexer& lex);
-        void handleOrientation(RibLexer& lex);
-        void handleReverseOrientation(RibLexer& lex);
-        void handleSides(RibLexer& lex);
-        void handleIdentity(RibLexer& lex);
-        void handleTransform(RibLexer& lex);
-        void handleConcatTransform(RibLexer& lex);
-        void handlePerspective(RibLexer& lex);
-        void handleTranslate(RibLexer& lex);
-        void handleRotate(RibLexer& lex);
-        void handleScale(RibLexer& lex);
-        void handleSkew(RibLexer& lex);
-        void handleCoordinateSystem(RibLexer& lex);
-        void handleCoordSysTransform(RibLexer& lex);
-        void handleTransformBegin(RibLexer& lex);
-        void handleTransformEnd(RibLexer& lex);
-        void handleResource(RibLexer& lex);
-        void handleResourceBegin(RibLexer& lex);
-        void handleResourceEnd(RibLexer& lex);
-        void handleAttribute(RibLexer& lex);
-        void handlePolygon(RibLexer& lex);
-        void handleGeneralPolygon(RibLexer& lex);
-        void handlePointsPolygons(RibLexer& lex);
-        void handlePointsGeneralPolygons(RibLexer& lex);
-        void handleBasis(RibLexer& lex);
-        void handlePatch(RibLexer& lex);
-        void handlePatchMesh(RibLexer& lex);
-        void handleNuPatch(RibLexer& lex);
-        void handleTrimCurve(RibLexer& lex);
-        void handleSubdivisionMesh(RibLexer& lex);
-        void handleSphere(RibLexer& lex);
-        void handleCone(RibLexer& lex);
-        void handleCylinder(RibLexer& lex);
-        void handleHyperboloid(RibLexer& lex);
-        void handleParaboloid(RibLexer& lex);
-        void handleDisk(RibLexer& lex);
-        void handleTorus(RibLexer& lex);
-        void handlePoints(RibLexer& lex);
-        void handleCurves(RibLexer& lex);
-        void handleBlobby(RibLexer& lex);
-        void handleProcedural(RibLexer& lex);
-        void handleGeometry(RibLexer& lex);
-        void handleSolidBegin(RibLexer& lex);
-        void handleSolidEnd(RibLexer& lex);
-        void handleObjectBegin(RibLexer& lex);
-        void handleObjectEnd(RibLexer& lex);
-        void handleObjectInstance(RibLexer& lex);
-        void handleMotionBegin(RibLexer& lex);
-        void handleMotionEnd(RibLexer& lex);
-        void handleMakeTexture(RibLexer& lex);
-        void handleMakeLatLongEnvironment(RibLexer& lex);
-        void handleMakeCubeFaceEnvironment(RibLexer& lex);
-        void handleMakeShadow(RibLexer& lex);
-        void handleMakeOcclusion(RibLexer& lex);
-        void handleErrorHandler(RibLexer& lex);
-        void handleReadArchive(RibLexer& lex);
+        void handleDeclare(Ri::Renderer& renderer);
+        void handleFrameBegin(Ri::Renderer& renderer);
+        void handleFrameEnd(Ri::Renderer& renderer);
+        void handleWorldBegin(Ri::Renderer& renderer);
+        void handleWorldEnd(Ri::Renderer& renderer);
+        void handleIfBegin(Ri::Renderer& renderer);
+        void handleElseIf(Ri::Renderer& renderer);
+        void handleElse(Ri::Renderer& renderer);
+        void handleIfEnd(Ri::Renderer& renderer);
+        void handleFormat(Ri::Renderer& renderer);
+        void handleFrameAspectRatio(Ri::Renderer& renderer);
+        void handleScreenWindow(Ri::Renderer& renderer);
+        void handleCropWindow(Ri::Renderer& renderer);
+        void handleProjection(Ri::Renderer& renderer);
+        void handleClipping(Ri::Renderer& renderer);
+        void handleClippingPlane(Ri::Renderer& renderer);
+        void handleDepthOfField(Ri::Renderer& renderer);
+        void handleShutter(Ri::Renderer& renderer);
+        void handlePixelVariance(Ri::Renderer& renderer);
+        void handlePixelSamples(Ri::Renderer& renderer);
+        void handlePixelFilter(Ri::Renderer& renderer);
+        void handleExposure(Ri::Renderer& renderer);
+        void handleImager(Ri::Renderer& renderer);
+        void handleQuantize(Ri::Renderer& renderer);
+        void handleDisplay(Ri::Renderer& renderer);
+        void handleHider(Ri::Renderer& renderer);
+        void handleColorSamples(Ri::Renderer& renderer);
+        void handleRelativeDetail(Ri::Renderer& renderer);
+        void handleOption(Ri::Renderer& renderer);
+        void handleAttributeBegin(Ri::Renderer& renderer);
+        void handleAttributeEnd(Ri::Renderer& renderer);
+        void handleColor(Ri::Renderer& renderer);
+        void handleOpacity(Ri::Renderer& renderer);
+        void handleTextureCoordinates(Ri::Renderer& renderer);
+        void handleLightSource(Ri::Renderer& renderer);
+        void handleAreaLightSource(Ri::Renderer& renderer);
+        void handleIlluminate(Ri::Renderer& renderer);
+        void handleSurface(Ri::Renderer& renderer);
+        void handleDisplacement(Ri::Renderer& renderer);
+        void handleAtmosphere(Ri::Renderer& renderer);
+        void handleInterior(Ri::Renderer& renderer);
+        void handleExterior(Ri::Renderer& renderer);
+        void handleShaderLayer(Ri::Renderer& renderer);
+        void handleConnectShaderLayers(Ri::Renderer& renderer);
+        void handleShadingRate(Ri::Renderer& renderer);
+        void handleShadingInterpolation(Ri::Renderer& renderer);
+        void handleMatte(Ri::Renderer& renderer);
+        void handleBound(Ri::Renderer& renderer);
+        void handleDetail(Ri::Renderer& renderer);
+        void handleDetailRange(Ri::Renderer& renderer);
+        void handleGeometricApproximation(Ri::Renderer& renderer);
+        void handleOrientation(Ri::Renderer& renderer);
+        void handleReverseOrientation(Ri::Renderer& renderer);
+        void handleSides(Ri::Renderer& renderer);
+        void handleIdentity(Ri::Renderer& renderer);
+        void handleTransform(Ri::Renderer& renderer);
+        void handleConcatTransform(Ri::Renderer& renderer);
+        void handlePerspective(Ri::Renderer& renderer);
+        void handleTranslate(Ri::Renderer& renderer);
+        void handleRotate(Ri::Renderer& renderer);
+        void handleScale(Ri::Renderer& renderer);
+        void handleSkew(Ri::Renderer& renderer);
+        void handleCoordinateSystem(Ri::Renderer& renderer);
+        void handleCoordSysTransform(Ri::Renderer& renderer);
+        void handleTransformBegin(Ri::Renderer& renderer);
+        void handleTransformEnd(Ri::Renderer& renderer);
+        void handleResource(Ri::Renderer& renderer);
+        void handleResourceBegin(Ri::Renderer& renderer);
+        void handleResourceEnd(Ri::Renderer& renderer);
+        void handleAttribute(Ri::Renderer& renderer);
+        void handlePolygon(Ri::Renderer& renderer);
+        void handleGeneralPolygon(Ri::Renderer& renderer);
+        void handlePointsPolygons(Ri::Renderer& renderer);
+        void handlePointsGeneralPolygons(Ri::Renderer& renderer);
+        void handleBasis(Ri::Renderer& renderer);
+        void handlePatch(Ri::Renderer& renderer);
+        void handlePatchMesh(Ri::Renderer& renderer);
+        void handleNuPatch(Ri::Renderer& renderer);
+        void handleTrimCurve(Ri::Renderer& renderer);
+        void handleSubdivisionMesh(Ri::Renderer& renderer);
+        void handleSphere(Ri::Renderer& renderer);
+        void handleCone(Ri::Renderer& renderer);
+        void handleCylinder(Ri::Renderer& renderer);
+        void handleHyperboloid(Ri::Renderer& renderer);
+        void handleParaboloid(Ri::Renderer& renderer);
+        void handleDisk(Ri::Renderer& renderer);
+        void handleTorus(Ri::Renderer& renderer);
+        void handlePoints(Ri::Renderer& renderer);
+        void handleCurves(Ri::Renderer& renderer);
+        void handleBlobby(Ri::Renderer& renderer);
+        void handleProcedural(Ri::Renderer& renderer);
+        void handleGeometry(Ri::Renderer& renderer);
+        void handleSolidBegin(Ri::Renderer& renderer);
+        void handleSolidEnd(Ri::Renderer& renderer);
+        void handleObjectBegin(Ri::Renderer& renderer);
+        void handleObjectEnd(Ri::Renderer& renderer);
+        void handleObjectInstance(Ri::Renderer& renderer);
+        void handleMotionBegin(Ri::Renderer& renderer);
+        void handleMotionEnd(Ri::Renderer& renderer);
+        void handleMakeTexture(Ri::Renderer& renderer);
+        void handleMakeLatLongEnvironment(Ri::Renderer& renderer);
+        void handleMakeCubeFaceEnvironment(Ri::Renderer& renderer);
+        void handleMakeShadow(Ri::Renderer& renderer);
+        void handleMakeOcclusion(Ri::Renderer& renderer);
+        void handleErrorHandler(Ri::Renderer& renderer);
+        void handleReadArchive(Ri::Renderer& renderer);
         //[[[end]]]
 
-        void handleVersion(RibLexer& lex);
+        void handleVersion(Ri::Renderer& renderer);
 
         //--------------------------------------------------
         /// Renderer instance to which requests will be forwarded
-        Ri::Renderer& m_renderer;
+        Ri::RendererServices& m_services;
 
         /// Lexer instance
-        boost::shared_ptr<RibLexer> m_lexer;
+        boost::shared_ptr<RibLexer> m_lex;
 
         /// Request name -> handler mapping.
         HandlerMap m_requestHandlerMap;

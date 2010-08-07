@@ -300,8 +300,6 @@ RtFloat mockFilterFunc(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 // Mock implementation of Ri::Renderer.
 class MockRenderer : public Ri::Renderer
 {
-    private:
-        CqTokenDictionary m_tokenDict;
     public:
         MockRenderer() {}
 
@@ -549,26 +547,49 @@ class MockRenderer : public Ri::Renderer
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) {}
+};
 
-        virtual RtVoid Error(const char* errorMessage) { throw MockRendererError(errorMessage); }
 
-        virtual RtFilterFunc     GetFilterFunc(RtConstToken name) const {return &mockFilterFunc;}
-        virtual RtConstBasis*    GetBasis(RtConstToken name) const {return &g_mockBasis;}
-        virtual RtErrorFunc      GetErrorFunc(RtConstToken name) const {return 0;}
-        virtual RtProcSubdivFunc GetProcSubdivFunc(RtConstToken name) const {return &mockProcSubdivFunc;}
+// Mock implementation of Ri::RendererServices
+class MockServices : public Ri::RendererServices
+{
+    private:
+        CqTokenDictionary m_tokenDict;
 
-        virtual TypeSpec GetDeclaration(RtConstToken token,
+        friend RtToken MockRenderer::Declare(RtConstString name,
+                RtConstString declaration);
+    public:
+        virtual RtVoid error(const char* errorMessage) { throw MockRendererError(errorMessage); }
+
+        virtual RtFilterFunc     getFilterFunc(RtConstToken name) const {return &mockFilterFunc;}
+        virtual RtConstBasis*    getBasis(RtConstToken name) const {return &g_mockBasis;}
+        virtual RtErrorFunc      getErrorFunc(RtConstToken name) const {return 0;}
+        virtual RtProcSubdivFunc getProcSubdivFunc(RtConstToken name) const {return &mockProcSubdivFunc;}
+
+        virtual Ri::TypeSpec getDeclaration(RtConstToken token,
                                 const char** nameBegin = 0,
-                                const char** nameEnd = 0)
+                                const char** nameEnd = 0) const
         {
-            TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == TypeSpec::Unknown)
+            Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
+            if(spec.type == Ri::TypeSpec::Unknown)
             {
                 // FIXME: Yuck, ick, ew!  Double parsing here :/
                 spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
             }
             return spec;
         }
+        void addFilter(const char* name, const Ri::ParamList& filterParams)
+        { }
+
+        Ri::Renderer& firstFilter()
+        {
+            // Wow, how awful!
+            return *(Ri::Renderer*)0;
+        }
+
+        void parseRib(std::istream& ribStream, const char* name,
+                      Ri::Renderer& context)
+        { }
 };
 
 
@@ -619,6 +640,7 @@ static Fixture* g_fixture = 0;
 struct Fixture
 {
     MockRenderer renderer;
+    MockServices services;
     TokenVec tokens;
     RibParser parser;  //< to test.
     int checkPos;
@@ -627,7 +649,7 @@ struct Fixture
     Fixture(int checkPosOffset = 0)
         : renderer(),
         tokens(),
-        parser(renderer),
+        parser(services),
         checkPos(checkPosOffset)
     {
         g_fixture = this;
@@ -638,7 +660,7 @@ struct Fixture
         std::stringstream ribStream;
         for(int i = 0; i < (int)tokens.size(); ++i)
             ribStream << tokens[i] << " ";
-        parser.parseStream(ribStream, "test_stream");
+        parser.parseStream(ribStream, "test_stream", renderer);
         BOOST_CHECK_EQUAL(checkPos, (int)tokens.size());
         g_fixture = 0;
     }
@@ -728,7 +750,8 @@ BOOST_AUTO_TEST_CASE(RIB_version_test)
 RtToken MockRenderer::Declare(RtConstString name, RtConstString declaration)
 {
     CheckParams() << Req("Declare") << name << declaration;
-    m_tokenDict.insert(CqPrimvarToken(declaration, name));
+    // UGH!
+    g_fixture->services.m_tokenDict.insert(CqPrimvarToken(declaration, name));
     return 0;
 }
 BOOST_AUTO_TEST_CASE(Declare_handler_test)
