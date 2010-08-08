@@ -13,15 +13,22 @@ set(ribparse_srcs
 	ribsema.cpp
 	ribwriter.cpp
 	ricxx_validate.cpp
+	framedrop_filter.cpp
+	onoff_filter.cpp
 )
 
 set(ribparse_hdrs
+	multistringbuffer.h
 	ribinputbuffer.h
-	ribtokenizer.h
-	ribparser_impl.h
-	riblexer_impl.h
 	riblexer.h
+	riblexer_impl.h
+	ribparser_impl.h
+	ribsema.h
 	ribtoken.h
+	ribtokenizer.h
+	ricxx.h
+	ricxx2ri.h
+	ricxx_filter.h
 )
 source_group("Header Files" FILES ${ribparse_hdrs})
 

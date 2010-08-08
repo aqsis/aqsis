@@ -29,6 +29,7 @@
 #include <cassert>
 #include <iosfwd>
 #include <stddef.h> // for size_t
+#include <string.h> // for strcmp
 
 #include <aqsis/ri/ritypes.h>
 
@@ -225,7 +226,33 @@ class Param
         }
 };
 
-typedef Array<Param> ParamList;
+
+/// A parameter list of type/name, value pairs.
+///
+/// This is just an Array of Ri::Param, augmented with a small amount of extra
+/// functionality for looking up parameters, etc.
+class ParamList : public Array<Param>
+{
+    public:
+        ParamList() : Array<Param>() {}
+        ParamList(const Param* data, size_t size) : Array<Param>(data, size) {}
+
+        /// Find a parameter with the given type and name in the list.
+        ///
+        /// \return the index of the found parameter, or -1 if it wasn't found
+        /// in the list.
+        int find(const TypeSpec& spec, const char* name) const
+        {
+            for(size_t i = 0; i < size(); ++i)
+            {
+                const Param& p = (*this)[i];
+                if(p.spec() == spec && !strcmp(p.name(), name))
+                    return i;
+            }
+            return -1;
+        }
+};
+
 
 //------------------------------------------------------------------------------
 /// Simple C++ version of the RenderMan interface

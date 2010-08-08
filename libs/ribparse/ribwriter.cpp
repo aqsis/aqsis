@@ -530,7 +530,12 @@ class RibWriterServices : public Ri::RendererServices
             if(!strcmp(name, "validate"))
             {
                 m_filterChain.push_back(
-                        createRiCxxValidate(firstFilter(), *this));
+                    createRiCxxValidate(firstFilter(), *this));
+            }
+            else if(!strcmp(name, "framedrop"))
+            {
+                m_filterChain.push_back(
+                    createFrameDropFilter(*this, firstFilter(), filterParams));
             }
             else
             {

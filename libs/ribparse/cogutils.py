@@ -109,6 +109,14 @@ def riCxxMethodDecl(procXml, className=None):
     return '%s %s(%s)' % (procXml.findtext('ReturnType'), procName, ', '.join(args))
 
 
+def wrapperCallArgList(procXml):
+    args = [arg.findtext('Name') for arg in
+            ribArgs(procXml.findall('Arguments/Argument'))]
+    if procXml.haschild('Arguments/ParamList'):
+        args += ['pList']
+    return args
+
+
 #------------------------------------------------------------------------------
 # Renderman interface stuff
 paramDeclRegex = re.compile(

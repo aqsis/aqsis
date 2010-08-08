@@ -8,6 +8,30 @@
 
 using namespace Aqsis;
 
+
+class ParamListBuilder
+{
+    private:
+        std::vector<Ri::Param> m_paramStorage;
+
+    public:
+        template<typename T, size_t size>
+        void push_back(const Ri::TypeSpec& spec, const char* name,
+                       T (&data)[size])
+        {
+            m_paramStorage.push_back(
+                    Ri::Param(spec, name, Ri::Array<T>(data, size)));
+        }
+
+        operator Ri::ParamList()
+        {
+            if(m_paramStorage.empty())
+                return Ri::ParamList();
+            return Ri::ParamList(&m_paramStorage[0], m_paramStorage.size());
+        }
+};
+
+
 int main(int argc, char* argv[])
 {
     bool useGzip = false;
@@ -45,7 +69,14 @@ int main(int argc, char* argv[])
 
     boost::shared_ptr<Ri::RendererServices> services =
         createRibWriter(std::cout, interpolate, useBinary, useGzip);
+//    // Drop frames
+//    ParamListBuilder frameDropParams;
+//    int desiredFrames[] = {1, 3, 4, 10};
+//    frameDropParams.push_back(Ri::TypeSpec(Ri::TypeSpec::Integer), "frames", desiredFrames);
+//    services->addFilter("framedrop", frameDropParams);
+    // Validate interface
     services->addFilter("validate");
+
     services->parseRib(std::cin, "stdin", services->firstFilter());
 
     return 0;
