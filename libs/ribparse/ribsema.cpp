@@ -42,10 +42,8 @@ RibParser::RibParser(Ri::RendererServices& rendererServices)
     m_requestHandlerMap(),
     m_paramListStorage(),
     m_numColorComps(3),
-    m_lightMap(),
-    m_namedLightMap(),
-    m_objectMap(),
-    m_namedObjectMap()
+    m_lightMaps(1),
+    m_objectMaps(1)
 {
     typedef HandlerMap::value_type MapValueType;
     MapValueType handlerMapInit[] = {
@@ -244,8 +242,44 @@ inline const T& toFloatBasedType(Ri::FloatArray a,
     return *reinterpret_cast<const T*>(a.begin());
 }
 
+// Get RIB name for a light or object
+//
+// The RISpec says that lights are identified by a 'sequence number', but
+// string identifiers are also allowed in common implementations.  For
+// simplicity, we convert int light/object identifiers into strings.  This
+// means that 1 is the same as "1".
+inline std::string getLightOrObjectName(RibLexer& lex)
+{
+    if(lex.peekNextType() == RibLexer::Tok_String)
+        return lex.getString();
+    else
+    {
+        std::ostringstream fmt;
+        fmt << lex.getInt();
+        return fmt.str();
+    }
+}
+
 } // anon. namespace
 
+// Search a stack of name->handle maps, for the given name.
+//
+// The first handle associated with the given name is returned in the handle
+// parameter, and true is returned.  If no handle is found, return false.
+bool RibParser::searchMapStack(const std::vector<LightMap>& maps,
+                               const std::string& name, RtPointer& handle)
+{
+    for(int i = maps.size()-1; i > 0; --i)
+    {
+        LightMap::const_iterator pos = maps[i].find(name);
+        if(pos != maps[i].end())
+        {
+            handle = pos->second;
+            return true;
+        }
+    }
+    return false;
+}
 
 /// Read in a renderman parameter list from the lexer.
 Ri::ParamList RibParser::readParamList()
@@ -349,6 +383,44 @@ void RibParser::handleDeclare(Ri::Renderer& renderer)
     renderer.Declare(name, declaration);
 }
 
+// The FrameBegin/End and WorldBegin/End scopes need pushing and popping of
+// the light and object name -> handle mappings.  If we don't do this,
+// the mapped names from one frame could flow over into another... trouble!
+void RibParser::handleFrameBegin(Ri::Renderer& renderer)
+{
+    RtInt number = m_lex->getInt();
+    renderer.FrameBegin(number);
+    m_lightMaps.push_back(LightMap());
+    m_objectMaps.push_back(ObjectMap());
+}
+
+void RibParser::handleFrameEnd(Ri::Renderer& renderer)
+{
+    renderer.FrameEnd();
+    if(m_lightMaps.size() > 1)
+    {
+        m_lightMaps.pop_back();
+        m_objectMaps.pop_back();
+    }
+}
+
+void RibParser::handleWorldBegin(Ri::Renderer& renderer)
+{
+    renderer.WorldBegin();
+    m_lightMaps.push_back(LightMap());
+    m_objectMaps.push_back(ObjectMap());
+}
+
+void RibParser::handleWorldEnd(Ri::Renderer& renderer)
+{
+    renderer.WorldEnd();
+    if(m_lightMaps.size() > 1)
+    {
+        m_lightMaps.pop_back();
+        m_objectMaps.pop_back();
+    }
+}
+
 void RibParser::handleDepthOfField(Ri::Renderer& renderer)
 {
     if(m_lex->peekNextType() == RibLexer::Tok_RequestEnd)
@@ -391,29 +463,14 @@ void RibParser::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
     // Collect arguments from lex.
     const char* name = m_lex->getString();
 
-    int sequencenumber = 0;
-    // The RISpec says that lights are identified by a 'sequence number', but
-    // string identifiers are also allowed in common implementations.
-    const char* lightName = 0;
-    if(m_lex->peekNextType() == RibLexer::Tok_String)
-        lightName = m_lex->getString();
-    else
-        sequencenumber = m_lex->getInt();
+    std::string lightName = getLightOrObjectName(*m_lex);
 
     // Extract the parameter list
     Ri::ParamList paramList = readParamList();
 
-    // Call through to renderer
-    RtLightHandle lightHandle = (renderer.*lightSourceFunc)(name, paramList);
-
-    // associate handle with the sequence number/name.
-    if(lightHandle)
-    {
-        if(lightName)
-            m_namedLightMap[lightName] = lightHandle;
-        else
-            m_lightMap[sequencenumber] = lightHandle;
-    }
+    // Call through to renderer & associate handle with the name
+    m_lightMaps.back()[lightName] =
+        (renderer.*lightSourceFunc)(name, paramList);
 }
 
 void RibParser::handleLightSource(Ri::Renderer& renderer)
@@ -430,26 +487,10 @@ void RibParser::handleIlluminate(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
     RtLightHandle lightHandle = 0;
-    if(m_lex->peekNextType() == RibLexer::Tok_String)
-    {
-        // Handle string light names
-        const char* name = m_lex->getString();
-        NamedLightMap::const_iterator pos = m_namedLightMap.find(name);
-        if(pos == m_namedLightMap.end())
-            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                                "undeclared light name \"" << name << "\"");
-        lightHandle = pos->second;
-    }
-    else
-    {
-        // Handle integer sequence numbers
-        int sequencenumber = m_lex->getInt();
-        LightMap::const_iterator pos = m_lightMap.find(sequencenumber);
-        if(pos == m_lightMap.end())
-            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                                "undeclared light number " << sequencenumber);
-        lightHandle = pos->second;
-    }
+    std::string lightName = getLightOrObjectName(*m_lex);
+    if(!searchMapStack(m_lightMaps, lightName, lightHandle))
+        AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                            "undeclared light \"" << lightName << "\"");
     RtInt onoff = m_lex->getInt();
 
     // Call through to renderer
@@ -561,40 +602,18 @@ void RibParser::handleObjectBegin(Ri::Renderer& renderer)
 {
     // The RIB identifier is an integer according to the RISpec, but it's
     // common to also allow string identifiers, hence the branch here.
-    if(m_lex->peekNextType() == RibLexer::Tok_String)
-    {
-        const char* lightName = m_lex->getString();
-        if(RtObjectHandle handle = renderer.ObjectBegin())
-            m_namedObjectMap[lightName] = handle;
-    }
-    else
-    {
-        int sequenceNumber = m_lex->getInt();
-        if(RtObjectHandle handle = renderer.ObjectBegin())
-            m_objectMap[sequenceNumber] = handle;
-    }
+    std::string objectName = getLightOrObjectName(*m_lex);
+    m_objectMaps.back()[objectName] = renderer.ObjectBegin();
 }
 
 void RibParser::handleObjectInstance(Ri::Renderer& renderer)
 {
-    if(m_lex->peekNextType() == RibLexer::Tok_String)
-    {
-        const char* name = m_lex->getString();
-        NamedObjectMap::const_iterator pos = m_namedObjectMap.find(name);
-        if(pos == m_namedObjectMap.end())
-            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                    "undeclared object name \"" << name << "\"");
-        renderer.ObjectInstance(pos->second);
-    }
-    else
-    {
-        int sequencenumber = m_lex->getInt();
-        ObjectMap::const_iterator pos = m_objectMap.find(sequencenumber);
-        if(pos == m_objectMap.end())
-            AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                    "undeclared object number " << sequencenumber);
-        renderer.ObjectInstance(pos->second);
-    }
+    std::string objectName = getLightOrObjectName(*m_lex);
+    RtObjectHandle handle = 0;
+    if(!searchMapStack(m_objectMaps, objectName, handle))
+        AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
+                "undeclared object \"" << objectName << "\"");
+    renderer.ObjectInstance(handle);
 }
 
 
@@ -631,7 +650,8 @@ getterStatements = {
 
 customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
                   'AreaLightSource', 'Illuminate', 'SubdivisionMesh',
-                  'Hyperboloid', 'Procedural', 'ObjectBegin', 'ObjectInstance'])
+                  'Hyperboloid', 'Procedural', 'ObjectBegin', 'ObjectInstance',
+                  'FrameBegin', 'FrameEnd', 'WorldBegin', 'WorldEnd'])
 
 # Ignore procs which have custom implementations.
 procs = filter(lambda p: p.haschild('Rib') and p.findtext('Name') not in customImpl,
@@ -677,27 +697,6 @@ void RibParser::handle${procName}(Ri::Renderer& renderer)
 cog.out(str(Template(handlerTemplate, searchList=locals())));
 
 ]]]*/
-
-void RibParser::handleFrameBegin(Ri::Renderer& renderer)
-{
-    RtInt number = m_lex->getInt();
-    renderer.FrameBegin(number);
-}
-
-void RibParser::handleFrameEnd(Ri::Renderer& renderer)
-{
-    renderer.FrameEnd();
-}
-
-void RibParser::handleWorldBegin(Ri::Renderer& renderer)
-{
-    renderer.WorldBegin();
-}
-
-void RibParser::handleWorldEnd(Ri::Renderer& renderer)
-{
-    renderer.WorldEnd();
-}
 
 void RibParser::handleIfBegin(Ri::Renderer& renderer)
 {

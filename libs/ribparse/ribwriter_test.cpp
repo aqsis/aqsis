@@ -69,11 +69,11 @@ int main(int argc, char* argv[])
 
     boost::shared_ptr<Ri::RendererServices> services =
         createRibWriter(std::cout, interpolate, useBinary, useGzip);
-//    // Drop frames
-//    ParamListBuilder frameDropParams;
-//    int desiredFrames[] = {1, 3, 4, 10};
-//    frameDropParams.push_back(Ri::TypeSpec(Ri::TypeSpec::Integer), "frames", desiredFrames);
-//    services->addFilter("framedrop", frameDropParams);
+    // Drop frames
+    ParamListBuilder frameDropParams;
+    int desiredFrames[] = {1, 3, 4, 10};
+    frameDropParams.push_back(Ri::TypeSpec(Ri::TypeSpec::Integer), "frames", desiredFrames);
+    services->addFilter("framedrop", frameDropParams);
     // Validate interface
     services->addFilter("validate");
 
