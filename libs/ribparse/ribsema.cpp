@@ -269,7 +269,7 @@ inline std::string getLightOrObjectName(RibLexer& lex)
 bool RibParser::searchMapStack(const std::vector<LightMap>& maps,
                                const std::string& name, RtPointer& handle)
 {
-    for(int i = maps.size()-1; i > 0; --i)
+    for(int i = maps.size()-1; i >= 0; --i)
     {
         LightMap::const_iterator pos = maps[i].find(name);
         if(pos != maps[i].end())
