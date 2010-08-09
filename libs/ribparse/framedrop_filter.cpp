@@ -21,8 +21,6 @@
 /// \brief Ri::Renderer frame dropping
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
-#include "ricxx2ri.h"
-
 #include <set>
 
 #include "ricxx_filter.h"

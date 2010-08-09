@@ -21,7 +21,7 @@
 /// \brief RIB writer implementation of Ri::Renderer
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
-#include "ricxx2ri.h"
+#include "ribwriter.h"
 #include "ricxx.h"
 #include "ricxx_filter.h"
 

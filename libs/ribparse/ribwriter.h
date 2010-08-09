@@ -17,8 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef AQSIS_RICXX2RI_INCLUDED
-#define AQSIS_RICXX2RI_INCLUDED
+#ifndef AQSIS_RIBWRITER_H_INCLUDED
+#define AQSIS_RIBWRITER_H_INCLUDED
 
 #include "ricxx.h"
 
@@ -26,10 +26,13 @@
 
 namespace Aqsis {
 
-/// Create a translation object from the RiCxx interface to the traditional RI.
-boost::shared_ptr<Ri::RendererServices> createRiCxxToRi();
+/// Create an object which serializes Ri::Renderer calls into a RIB stream.
+boost::shared_ptr<Ri::RendererServices> createRibWriter(
+        std::ostream& out, bool interpolateArchives, bool useBinary,
+        bool useGzip);
+
 
 }
 
-#endif // AQSIS_RICXX2RI_INCLUDED
+#endif // AQSIS_RIBWRITER_H_INCLUDED
 // vi: set et:

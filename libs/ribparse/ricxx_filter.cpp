@@ -22,7 +22,6 @@
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
 #include "ricxx_filter.h"
-#include "ricxx2ri.h"
 
 namespace Aqsis {
 //------------------------------------------------------------------------------

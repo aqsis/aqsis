@@ -3,7 +3,7 @@
 #include <aqsis/util/logging.h>
 #include <aqsis/util/logging_streambufs.h>
 
-#include "ricxx2ri.h"
+#include "ribwriter.h"
 #include "ribsema.h"
 
 using namespace Aqsis;
