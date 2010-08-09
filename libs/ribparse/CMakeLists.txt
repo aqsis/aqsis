@@ -47,6 +47,7 @@ set(ribparse_test_srcs
 	ribparser_test.cpp
 	riblexer_test.cpp
 	ribsema_test.cpp
+	errorhandler_test.cpp
 )
 
 aqsis_add_tests(${ribparse_test_srcs} LINK_LIBRARIES aqsis_ribparse)
