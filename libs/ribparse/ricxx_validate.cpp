@@ -2087,10 +2087,10 @@ RtVoid RiCxxValidate::ReadArchive(RtConstToken name, RtArchiveCallback callback,
 
 
 //------------------------------------------------------------------------------
-boost::shared_ptr<Ri::Renderer> createRiCxxValidate(Ri::Renderer& out,
-                                                    Ri::RendererServices& serv)
+Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
+                        Ri::Renderer& out, const Ri::ParamList& pList)
 {
-    return boost::shared_ptr<Ri::Renderer>(new RiCxxValidate(serv, out));
+    return new RiCxxValidate(services, out);
 }
 
 } // namespace Aqsis

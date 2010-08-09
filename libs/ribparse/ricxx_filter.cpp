@@ -18,13 +18,39 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /// \file
-/// \brief Ri::Renderer frame dropping
+/// \brief Implementation of filter utilities & base classes
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
 #include "ricxx_filter.h"
 #include "ricxx2ri.h"
 
 namespace Aqsis {
+//------------------------------------------------------------------------------
+
+// These filters are implemented elsewhere, declare the functions here for
+// simplicity.
+Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
+                        Ri::Renderer& out, const Ri::ParamList& pList);
+Ri::Renderer* createFrameDropFilter(Ri::RendererServices& services,
+                        Ri::Renderer& out, const Ri::ParamList& pList);
+
+
+Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
+                           Ri::Renderer& out, const Ri::ParamList& pList)
+{
+    if(!strcmp(name, "validate"))
+    {
+        return createValidateFilter(services, out, pList);
+    }
+    else if(!strcmp(name, "framedrop"))
+    {
+        return createFrameDropFilter(services, out, pList);
+    }
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+// OnOffFilter implementation
 
 OnOffFilter::OnOffFilter(Ri::RendererServices& services, Ri::Renderer& out)
     : Ri::Filter(services, out),

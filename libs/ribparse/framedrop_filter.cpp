@@ -58,15 +58,13 @@ class FrameDropFilter : public OnOffFilter
 };
 
 
-boost::shared_ptr<Ri::Renderer> createFrameDropFilter(
-                    Ri::RendererServices& serv, Ri::Renderer& out,
-                    const Ri::ParamList& pList)
+Ri::Renderer* createFrameDropFilter(Ri::RendererServices& serv,
+                    Ri::Renderer& out, const Ri::ParamList& pList)
 {
     int idx = pList.find(Ri::TypeSpec(Ri::TypeSpec::Integer), "frames");
     if(idx < 0)
-        return boost::shared_ptr<Ri::Renderer>();
-    return boost::shared_ptr<Ri::Renderer>(
-            new FrameDropFilter(serv, out, pList[idx].intData()));
+        return 0;
+    return new FrameDropFilter(serv, out, pList[idx].intData());
 }
 
 } // namespace Aqsis

@@ -53,6 +53,16 @@ class Filter : public Renderer
 
 }
 
+/// Create a filter with the given name.
+///
+/// \param name - filter name
+/// \param services - renderer services
+/// \param next - next interface in the filter chain
+/// \param pList - filter parameters.
+Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
+                           Ri::Renderer& next, const Ri::ParamList& pList);
+
+
 //------------------------------------------------------------------------------
 /// Simple boolean on/off filter
 ///
@@ -261,7 +271,6 @@ class OnOffFilter : public Ri::Filter
     private:
         bool m_isActive;
 };
-
 
 }
 

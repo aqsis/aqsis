@@ -37,13 +37,6 @@ boost::shared_ptr<Ri::RendererServices> createRibWriter(
         std::ostream& out, bool interpolateArchives, bool useBinary,
         bool useGzip);
 
-boost::shared_ptr<Ri::Renderer> createRiCxxValidate(Ri::Renderer& out,
-                                                    Ri::RendererServices& serv);
-
-boost::shared_ptr<Ri::Renderer> createFrameDropFilter(
-                        Ri::RendererServices& serv,
-                        Ri::Renderer& out,
-                        const Ri::ParamList& pList);
 
 }
 

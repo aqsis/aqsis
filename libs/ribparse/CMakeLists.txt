@@ -14,7 +14,7 @@ set(ribparse_srcs
 	ribwriter.cpp
 	ricxx_validate.cpp
 	framedrop_filter.cpp
-	onoff_filter.cpp
+	ricxx_filter.cpp
 )
 
 set(ribparse_hdrs

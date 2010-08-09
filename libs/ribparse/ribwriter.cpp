@@ -22,6 +22,8 @@
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
 #include "ricxx2ri.h"
+#include "ricxx.h"
+#include "ricxx_filter.h"
 
 #include <algorithm>
 #include <cstring>
@@ -531,16 +533,10 @@ class RibWriterServices : public Ri::RendererServices
         virtual void addFilter(const char* name,
                                const Ri::ParamList& filterParams)
         {
-            if(!strcmp(name, "validate"))
-            {
-                m_filterChain.push_back(
-                    createRiCxxValidate(firstFilter(), *this));
-            }
-            else if(!strcmp(name, "framedrop"))
-            {
-                m_filterChain.push_back(
-                    createFrameDropFilter(*this, firstFilter(), filterParams));
-            }
+            boost::shared_ptr<Ri::Renderer> filter(
+                    createFilter(name, *this, firstFilter(), filterParams));
+            if(filter)
+                m_filterChain.push_back(filter);
             else
             {
                 AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,

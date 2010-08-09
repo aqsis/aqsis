@@ -35,6 +35,7 @@
 #include "ricxx2ri.h"
 #include "multistringbuffer.h"
 #include "errorhandlerimpl.h"
+#include "ricxx_filter.h"
 
 namespace Aqsis {
 
@@ -1448,6 +1449,8 @@ class RiCxxToRiServices : public Ri::RendererServices
     private:
         RiCxxToRi m_renderer;
         AqsisLogErrorHandler m_errorHandler;
+        /// Chain of filters
+        std::vector<boost::shared_ptr<Ri::Renderer> > m_filterChain;
     public:
         RiCxxToRiServices()
             : m_renderer()
@@ -1557,7 +1560,10 @@ Ri::TypeSpec RiCxxToRiServices::getDeclaration(RtConstToken token,
 void RiCxxToRiServices::addFilter(const char* name,
                                   const Ri::ParamList& filterParams)
 {
-    // TODO.
+    boost::shared_ptr<Ri::Renderer> filter(
+            createFilter(name, *this, firstFilter(), filterParams));
+    if(filter)
+        m_filterChain.push_back(filter);
 }
 
 Ri::Renderer& RiCxxToRiServices::firstFilter()
