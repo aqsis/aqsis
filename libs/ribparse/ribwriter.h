@@ -29,7 +29,8 @@ namespace Aqsis {
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
 boost::shared_ptr<Ri::RendererServices> createRibWriter(
         std::ostream& out, bool interpolateArchives, bool useBinary,
-        bool useGzip);
+        bool useGzip, int indentStep, char indentChar,
+        const std::string& initialArchivePath);
 
 
 }
