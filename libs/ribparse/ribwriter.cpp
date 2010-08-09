@@ -40,6 +40,7 @@
 #include <aqsis/util/file.h>
 #include <aqsis/util/logging.h>
 #include "ribsema.h"
+#include "errorhandlerimpl.h"
 
 namespace Aqsis {
 
@@ -443,6 +444,8 @@ class RibWriterServices : public Ri::RendererServices
         boost::shared_ptr<RibParser> m_parser;
         /// Chain of filters
         std::vector<boost::shared_ptr<Ri::Renderer> > m_filterChain;
+        /// Error handler.
+        AqsisLogErrorHandler m_errorHandler;
 
     public:
         RibWriterServices()
@@ -450,7 +453,8 @@ class RibWriterServices : public Ri::RendererServices
             m_filterFuncMap(filterFuncNames),
             m_errorFuncMap(errorFuncNames),
             m_subdivFuncMap(subdivFuncNames),
-            m_parser()
+            m_parser(),
+            m_errorHandler()
         { }
 
         //--------------------------------------------------
@@ -473,9 +477,9 @@ class RibWriterServices : public Ri::RendererServices
 
         //--------------------------------------------------
         // methods from RendererServices.
-        virtual RtVoid error(const char* errorMessage)
+        virtual ErrorHandler& errorHandler()
         {
-            Aqsis::log() << Aqsis::error << errorMessage << std::endl;
+            return m_errorHandler;
         }
         virtual RtFilterFunc getFilterFunc(RtConstToken name) const
         {

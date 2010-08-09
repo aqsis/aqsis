@@ -39,6 +39,7 @@
 
 #include <aqsis/math/math.h>
 #include <aqsis/riutil/tokendictionary.h>
+#include "errorhandler.h"
 
 using namespace boost::assign; // necessary for container initialisation operators.
 
@@ -549,18 +550,30 @@ class MockRenderer : public Ri::Renderer
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) {}
 };
 
+/// An error handler which throws MockRendererError
+class MockErrorHandler : public Ri::ErrorHandler
+{
+    public:
+        MockErrorHandler() : ErrorHandler(Warning) { }
+
+    protected:
+        virtual void sendError(int code, const std::string& message)
+        {
+            throw MockRendererError(message);
+        }
+};
 
 // Mock implementation of Ri::RendererServices
 class MockServices : public Ri::RendererServices
 {
     private:
         CqTokenDictionary m_tokenDict;
+        MockErrorHandler m_errorHandler;
 
         friend RtToken MockRenderer::Declare(RtConstString name,
                 RtConstString declaration);
     public:
-        virtual RtVoid error(const char* errorMessage) { throw MockRendererError(errorMessage); }
-
+        virtual ErrorHandler& errorHandler() { return m_errorHandler; }
         virtual RtFilterFunc     getFilterFunc(RtConstToken name) const {return &mockFilterFunc;}
         virtual RtConstBasis*    getBasis(RtConstToken name) const {return &g_mockBasis;}
         virtual RtErrorFunc      getErrorFunc(RtConstToken name) const {return 0;}

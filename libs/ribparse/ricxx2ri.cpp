@@ -34,6 +34,7 @@
 #include "ricxx.h"
 #include "ricxx2ri.h"
 #include "multistringbuffer.h"
+#include "errorhandlerimpl.h"
 
 namespace Aqsis {
 
@@ -1446,12 +1447,13 @@ class RiCxxToRiServices : public Ri::RendererServices
 {
     private:
         RiCxxToRi m_renderer;
+        AqsisLogErrorHandler m_errorHandler;
     public:
         RiCxxToRiServices()
             : m_renderer()
         { }
 
-        virtual void error(const char* errorMessage);
+        virtual ErrorHandler& errorHandler() { return m_errorHandler; }
 
         virtual RtFilterFunc     getFilterFunc(RtConstToken name) const;
         virtual RtConstBasis*    getBasis(RtConstToken name) const;
@@ -1471,11 +1473,6 @@ class RiCxxToRiServices : public Ri::RendererServices
                               Ri::Renderer& context);
 };
 
-
-void RiCxxToRiServices::error(const char* errorMessage)
-{
-    Aqsis::log() << Aqsis::error << errorMessage << "\n";
-}
 
 RtFilterFunc RiCxxToRiServices::getFilterFunc(RtConstToken name) const
 {

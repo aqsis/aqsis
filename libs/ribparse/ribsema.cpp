@@ -29,6 +29,7 @@
 #include <cstring>  // for strcpy
 
 #include "riblexer.h"
+#include "errorhandler.h"
 
 namespace Aqsis
 {
@@ -211,12 +212,17 @@ void RibParser::parseStream(std::istream& ribStream,
         {
             // Add information on the location (file,line etc) of the problem
             // to the exception message and rethrow.
-            std::ostringstream msg;
-            msg << "Parse error at " << m_lex->streamPos();
             if(requestName)
-                msg << " while reading " << requestName;
-            msg << ": " << e.what();
-            m_services.error(msg.str().c_str());
+            {
+                AQSIS_LOG_ERROR(m_services.errorHandler(), e.code())
+                    << "Parse error at " << m_lex->streamPos()
+                    << " while reading " << requestName << ": " << e.what();
+            }
+            else
+            {
+                AQSIS_LOG_ERROR(m_services.errorHandler(), e.code())
+                    << "Parse error at " << m_lex->streamPos() << ": " << e.what();
+            }
             m_lex->discardUntilRequest();
         }
         catch(...)

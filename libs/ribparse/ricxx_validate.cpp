@@ -34,6 +34,7 @@
 #include <aqsis/util/exception.h>
 
 #include "ricxx_filter.h"
+#include "errorhandler.h"
 
 namespace Aqsis {
 
@@ -305,8 +306,8 @@ const char* RiCxxValidate::scopeString(ApiScope s)
         case Scope_Motion:     return "Motion";
         case Scope_Resource:   return "Resource";
     }
-    assert(0 && "unknown scope (FIXME)");
-    return "unknown scope (FIXME)";
+    assert(0 && "unknown scope (bug!)");
+    return "unknown scope (bug!)";
 }
 
 void RiCxxValidate::checkScope(ApiScope allowedScopes) const
@@ -415,11 +416,9 @@ inline void RiCxxValidate::checkArraySize(int expectedSize, int actualSize,
     }
     else if(actualSize > expectedSize)
     {
-        std::ostringstream fmt;
-        fmt << "Warning: array \"" << name << "\" of length " << actualSize
+        AQSIS_LOG_WARNING(services().errorHandler(), EqE_Consistency)
+            << "array \"" << name << "\" of length " << actualSize
             << " too long (expected length " << expectedSize << ")";
-//        nextFilter().Error(fmt.str().c_str());
-        // ^^ FIXME, should be able to give a warning flag to Error()!
     }
 }
 

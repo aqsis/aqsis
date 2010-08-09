@@ -542,6 +542,7 @@ class Renderer
         virtual ~Renderer() {};
 };
 
+class ErrorHandler;
 
 /// Access to extra renderer state, interface filters, RIB parsing etc.
 ///
@@ -551,12 +552,8 @@ class Renderer
 class RendererServices
 {
     public:
-        /// Error handling callback, mainly for RIB parser.
-        ///
-        /// TODO: Think more about a cohesive error handling strategy.  Not
-        /// sure if this should really be here or not.
-        virtual RtVoid error(const char* errorMessage) = 0;
-        //virtual ErrorHandler& errorHandler() = 0;
+        /// Get Error handler.
+        virtual ErrorHandler& errorHandler() = 0;
 
         /// Functions returning pointers to standard filters, bases, etc.
         ///
