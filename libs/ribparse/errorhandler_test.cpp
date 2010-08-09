@@ -31,11 +31,9 @@
 
 #include <boost/test/auto_unit_test.hpp>
 
-using namespace Aqsis::Ri;
-
 namespace {
 
-class ErrorHandlerTestImpl : public ErrorHandler
+class ErrorHandlerTestImpl : public Aqsis::Ri::ErrorHandler
 {
     public:
         ErrorHandlerTestImpl(ErrorCategory verbosity)
@@ -81,9 +79,9 @@ std::ostream& operator<<(std::ostream& out, const FormatLogger& l)
 
 BOOST_AUTO_TEST_CASE(ErrorHandler_test)
 {
-    ErrorHandlerTestImpl handler(ErrorHandler::Debug);
+    ErrorHandlerTestImpl handler(Aqsis::Ri::ErrorHandler::Debug);
 
-    handler(ErrorHandler::Warning, "blah blah");
+    handler(Aqsis::Ri::ErrorHandler::Warning, "blah blah");
 
     BOOST_CHECK_EQUAL(handler.lastError(), "WARNING: blah blah");
 
@@ -95,7 +93,7 @@ BOOST_AUTO_TEST_CASE(ErrorHandler_test)
 
 BOOST_AUTO_TEST_CASE(ErrorHandler_lazy_formatting_test)
 {
-    ErrorHandlerTestImpl handler(ErrorHandler::Error);
+    ErrorHandlerTestImpl handler(Aqsis::Ri::ErrorHandler::Error);
     {
         FormatLogger l;
         AQSIS_LOG_ERROR(handler,0) << l;

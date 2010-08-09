@@ -124,18 +124,18 @@ class ErrorHandler
 /// Log to the error handler with the Info message category
 /// \param handler - handler instance to log message to
 /// \param detail  - application defined error code
-#define AQSIS_LOG_INFO(handler, detail)    AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Info | detail)
+#define AQSIS_LOG_INFO(handler, detail)    AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Info | detail)
 /// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_WARNING(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Warning | detail)
+#define AQSIS_LOG_WARNING(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Warning | detail)
 /// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_ERROR(handler, detail)   AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Error | detail)
+#define AQSIS_LOG_ERROR(handler, detail)   AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Error | detail)
 /// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_SEVERE(handler, detail)  AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Severe | detail)
+#define AQSIS_LOG_SEVERE(handler, detail)  AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Severe | detail)
 /// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_MESSAGE(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Message | detail)
+#define AQSIS_LOG_MESSAGE(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Message | detail)
 
 #ifdef AQSIS_DEBUG
-#    define AQSIS_LOG_DEBUG(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, ErrorHandler::Debug | detail)
+#    define AQSIS_LOG_DEBUG(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Debug | detail)
 #else
 /// \see AQSIS_LOG_INFO
 #    define AQSIS_LOG_DEBUG(handler, detail)
@@ -176,7 +176,7 @@ inline int ErrorHandler::errorDetail(int code)
 if((handler).verbosity() > (code))                 \
     /*avoid formatting if verbosity is low*/;      \
 else                                               \
-    detail::ErrorFormatter(handler, code)
+    Aqsis::Ri::detail::ErrorFormatter(handler, code)
 
 namespace detail
 {
@@ -222,6 +222,9 @@ class ErrorFormatter
 }
 
 } // namespace Ri
+
+using Ri::ErrorHandler;
+
 } // namespace Aqsis
 
 #endif // AQSIS_ERRORHANDLER_H_INCLUDED
