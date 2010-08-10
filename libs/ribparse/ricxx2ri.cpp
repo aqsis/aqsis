@@ -259,7 +259,7 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
                             RtConstToken wrap, const ParamList& pList);
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
-                            const FloatArray& flt, const TokenArray& str,
+                            const FloatArray& floats, const TokenArray& strings,
                             const ParamList& pList);
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,
                             RtProcSubdivFunc refineproc,
@@ -1254,20 +1254,20 @@ RtVoid RiCxxToRi::Curves(RtConstToken type, const IntArray& nvertices,
 }
 
 RtVoid RiCxxToRi::Blobby(RtInt nleaf, const IntArray& code,
-                         const FloatArray& flt, const TokenArray& str,
+                         const FloatArray& floats, const TokenArray& strings,
                          const ParamList& pList)
 {
     m_pListConv.convertParamList(pList);
     RtInt ncode = size(code);
-    RtInt nflt = size(flt);
-    RtInt nstr = size(str);
+    RtInt nfloats = size(floats);
+    RtInt nstrings = size(strings);
     return ::RiBlobbyV(toRiType(nleaf),
             toRiType(ncode),
             toRiType(code),
-            toRiType(nflt),
-            toRiType(flt),
-            toRiType(nstr),
-            toRiType(str),
+            toRiType(nfloats),
+            toRiType(floats),
+            toRiType(nstrings),
+            toRiType(strings),
             m_pListConv.count(),
             m_pListConv.tokens(),
             m_pListConv.values()

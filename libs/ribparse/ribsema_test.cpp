@@ -502,7 +502,7 @@ class MockRenderer : public Ri::Renderer
         virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
                             RtConstToken wrap, const ParamList& pList) {}
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
-                            const FloatArray& flt, const TokenArray& str,
+                            const FloatArray& floats, const TokenArray& strings,
                             const ParamList& pList) {}
         // Procedural is tested
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,

@@ -480,7 +480,7 @@ class Renderer
                             RtConstToken wrap, const ParamList& pList) = 0;
         // --------------------- Blobby Implicit Surfaces --------------------
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
-                            const FloatArray& flt, const TokenArray& str,
+                            const FloatArray& floats, const TokenArray& strings,
                             const ParamList& pList) = 0;
         // ---------------------- Procedural Primitives ----------------------
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,

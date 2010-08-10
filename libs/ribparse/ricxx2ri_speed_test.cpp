@@ -254,7 +254,7 @@ AQSIS_RI_SHARE RtVoid RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, 
 AQSIS_RI_SHARE RtVoid RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) {}
 AQSIS_RI_SHARE RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[]) {}
 AQSIS_RI_SHARE RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[]) {}
-AQSIS_RI_SHARE RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[]) {}
+AQSIS_RI_SHARE RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nfloats, RtFloat floats[], RtInt nstrings, RtToken strings[], RtInt count, RtToken tokens[], RtPointer values[]) {}
 AQSIS_RI_SHARE RtVoid RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc) {}
 AQSIS_RI_SHARE RtVoid RiProcFree(RtPointer data) {}
 AQSIS_RI_SHARE RtVoid RiProcDelayedReadArchive(RtPointer data, RtFloat detail) {}
