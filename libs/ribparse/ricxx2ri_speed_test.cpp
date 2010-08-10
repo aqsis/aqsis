@@ -130,9 +130,9 @@ AQSIS_RI_SHARE RtBasis RiPowerBasis =
 // Empty implementations of all required Ri* functions.
 
 /*[[[cog
-from cogutils import *
+from codegenutils import *
 
-riXml = parseXmlTree('ri.xml')
+riXml = parseXmlTree(riXmlPath)
 
 exclude = set(('MotionBegin', 'ReadArchive'))
 

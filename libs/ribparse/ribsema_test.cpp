@@ -306,9 +306,9 @@ class MockRenderer : public Ri::Renderer
 
         // Define all methods, except those which are tested.
         /*[[[cog
-        from cogutils import *
+        from codegenutils import *
 
-        riXml = parseXmlTree('ri.xml')
+        riXml = parseXmlTree(riXmlPath)
 
         # Here's all methods which are currently tested:
         testedMethods = set([

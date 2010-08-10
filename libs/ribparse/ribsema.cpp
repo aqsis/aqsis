@@ -49,8 +49,8 @@ RibParser::RibParser(Ri::RendererServices& rendererServices)
     typedef HandlerMap::value_type MapValueType;
     MapValueType handlerMapInit[] = {
         /*[[[cog
-        from cogutils import *
-        riXml = parseXmlTree('ri.xml')
+        from codegenutils import *
+        riXml = parseXmlTree(riXmlPath)
 
         for p in filter(lambda p: p.haschild('Rib'), riXml.findall('Procedures/Procedure')):
             name = p.findtext('Name')
@@ -628,10 +628,10 @@ void RibParser::handleObjectInstance(Ri::Renderer& renderer)
 /*[[[cog
 import cog
 import sys, os
-from cogutils import *
+from codegenutils import *
 from Cheetah.Template import Template
 
-riXml = parseXmlTree('ri.xml')
+riXml = parseXmlTree(riXmlPath)
 
 # Map from RI types to strings which retrieve the value from the lexer
 getterStatements = {

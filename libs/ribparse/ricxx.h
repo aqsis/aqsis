@@ -297,9 +297,9 @@ class Renderer
         import cog
         import sys, os
         sys.path.append(os.getcwd())
-        from cogutils import *
+        from codegenutils import *
 
-        riXml = parseXmlTree('ri.xml')
+        riXml = parseXmlTree(riXmlPath)
 
         for p in riXml.findall('Procedures/' + '*'):
             if p.tag == 'Section':

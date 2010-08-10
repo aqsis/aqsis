@@ -80,8 +80,8 @@ class OnOffFilter : public Ri::Filter
         void setActive(bool state) { m_isActive = state; }
 
         /*[[[cog
-        from cogutils import *
-        riXml = parseXmlTree('ri.xml')
+        from codegenutils import *
+        riXml = parseXmlTree(riXmlPath)
         for p in riXml.findall('Procedures/Procedure'):
             if p.haschild('Rib'):
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)

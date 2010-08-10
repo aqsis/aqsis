@@ -80,8 +80,8 @@ class RibParser : boost::noncopyable
         //--------------------------------------------------
         /// Handler methods definitions
         /*[[[cog
-        from cogutils import *
-        riXml = parseXmlTree('ri.xml')
+        from codegenutils import *
+        riXml = parseXmlTree(riXmlPath)
         for p in filter(lambda p: p.haschild('Rib'), riXml.findall('Procedures/Procedure')):
             cog.outl('void handle%s(Ri::Renderer& renderer);' % (p.findtext('Name'),))
 
