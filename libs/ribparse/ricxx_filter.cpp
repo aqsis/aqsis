@@ -23,6 +23,8 @@
 
 #include "ricxx_filter.h"
 
+#include <aqsis/util/exception.h>
+
 namespace Aqsis {
 //------------------------------------------------------------------------------
 
@@ -45,7 +47,11 @@ Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
     {
         return createFrameDropFilter(services, out, pList);
     }
-    return 0;
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_System,
+            "could not find filter \"" << name << "\"");
+    }
 }
 
 //------------------------------------------------------------------------------

@@ -12,8 +12,6 @@ add_subproject(geometry)
 add_subproject(raytrace)
 add_subproject(texturing_old)
 
-include_subproject(rib2ri)
-
 set(core_srcs
 	attributes.cpp
 	bound.cpp
@@ -43,7 +41,7 @@ set(core_srcs
 	${geometry_srcs}
 	${raytrace_srcs}
 	${texturing_old_srcs}
-	${rib2ri_srcs}
+	../ribparse/ricxx2ri.cpp
 )
 
 set(core_hdrs
@@ -82,7 +80,6 @@ set(core_hdrs
 	${geometry_hdrs}
 	${raytrace_hdrs}
 	${texturing_old_hdrs}
-	${rib2ri_hdrs}
 )
 
 source_group("Header Files" FILES ${core_hdrs})

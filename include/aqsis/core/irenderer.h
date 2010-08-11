@@ -29,8 +29,6 @@ class CqObjectInstance;
 
 struct IqRenderer
 {
-	typedef boost::function<void (const std::string&)> TqRibCommentCallback;
-
 	virtual	~IqRenderer()
 	{}
 
@@ -93,11 +91,8 @@ struct IqRenderer
 	 *
 	 * \param inputStream - input stream in RIB format.
 	 * \param name - name of the stream for error reporting.
-	 * \param commentCallback - Function to be called whenever a comment is
-	 *                          encountered in the RIB stream.
 	 */
-	virtual void parseRibStream(std::istream& inputStream, const std::string& name,
-			const TqRibCommentCallback& commentCallback = TqRibCommentCallback()) = 0;
+	virtual void parseRibStream(std::istream& inputStream, const std::string& name) = 0;
 
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
 

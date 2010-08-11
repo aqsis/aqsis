@@ -180,9 +180,13 @@ class CommentCallback
         Ri::Renderer& m_renderer;
     public:
         CommentCallback(Ri::Renderer& renderer) : m_renderer(renderer) {}
-        void operator()(const std::string& error)
+        void operator()(const std::string& sstr)
         {
-            m_renderer.ArchiveRecord("comment", error.c_str());
+            const char* str = sstr.c_str();  // TODO change callback signature to use const char*.
+            if(str[0] == '#')
+                m_renderer.ArchiveRecord("structure", str+1);
+            else
+                m_renderer.ArchiveRecord("comment", str);
         }
 };
 } // anon. namespace

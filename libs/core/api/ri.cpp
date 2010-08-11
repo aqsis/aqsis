@@ -5618,9 +5618,15 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 			QGetRenderContext()->poptCurrent()->findRiFile(name, "archive"),
 			std::ios::binary);
 	// Construct a callback functor
-	IqRenderer::TqRibCommentCallback commentCallback;
+	CqRenderer::TqArchiveRecordCallback commentCallback;
 	if(callback)
-		commentCallback = CqArchiveCallbackAdaptor(callback);
+	{
+		// Ick, cast to the desired callback type, which differs only from
+		// RtArchiveCallback by constness of the two string params.  The
+		// alternative is to provide a wrapper class and use const_cast.
+		typedef void (*DesiredCallbackType)(const char*, const char*, ...);
+		commentCallback = reinterpret_cast<DesiredCallbackType>(callback);
+	}
 	// Parse the archive
 	QGetRenderContext()->parseRibStream(archiveFile, name, commentCallback);
 

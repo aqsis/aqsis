@@ -586,6 +586,8 @@ class RendererServices
         virtual Renderer& firstFilter() = 0;
 
         /// Add a filter to the front of the filter chain
+        ///
+        /// throw XqValidation when the filter can't be found.
         virtual void addFilter(const char* name,
                                const ParamList& filterParams = ParamList()) = 0;
 
@@ -599,6 +601,10 @@ class RendererServices
         /// \param context - sink for parsed commands
         virtual void parseRib(std::istream& ribStream, const char* name,
                               Renderer& context) = 0;
+
+        /// Parse a RIB stream using the first filter in the chain.
+        virtual void parseRib(std::istream& ribStream, const char* name)
+            { parseRib(ribStream, name, firstFilter()); }
 
         virtual ~RendererServices() {}
 };

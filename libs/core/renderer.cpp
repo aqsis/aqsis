@@ -42,9 +42,7 @@
 #include	<aqsis/shadervm/ishader.h>
 #include	"tiffio.h"
 #include	"objectinstance.h"
-
-#include	<aqsis/ribparser.h>
-#include	"ribrequesthandler.h"
+#include	"../ribparse/ricxx2ri.h"
 
 
 namespace Aqsis {
@@ -91,8 +89,7 @@ CqRenderer::CqRenderer()
 	m_pTransDefObj(new CqTransform()),
 	m_fWorldBegin(false),
 	m_tokenDict(),
-	m_ribParser(IqRibParser::create(boost::shared_ptr<IqRibRequestHandler>(
-					new CqRibRequestHandler()))),
+	m_ribParserToRi(new RiCxxToRiServices()),
 	m_DofMultiplier(0),
 	m_OneOverFocalDistance(FLT_MAX),
 	m_UsingDepthOfField(false),       // DoF for pinhole lens
@@ -122,6 +119,8 @@ CqRenderer::CqRenderer()
 
 	m_textureCache = IqTextureCache::create(
 			boost::bind(&CqRenderer::textureSearchPath, this));
+
+	m_ribParserToRi->addFilter("validate");
 
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems[ CoordSystem_Camera ].m_strName = "__camera__";
@@ -1446,22 +1445,9 @@ const char* CqRenderer::textureSearchPath()
 }
 
 void CqRenderer::parseRibStream(std::istream& inputStream, const std::string& name,
-		const IqRenderer::TqRibCommentCallback& commentCallback)
+		const TqArchiveRecordCallback& arCallback)
 {
-	m_ribParser->pushInput(inputStream, name, commentCallback);
-	bool parsing = true;
-	while(parsing)
-	{
-		try
-		{
-			parsing = m_ribParser->parseNextRequest();
-		}
-		catch(XqParseError& e)
-		{
-			Aqsis::log() << error << e.what() << "\n";
-		}
-	}
-	m_ribParser->popInput();
+	m_ribParserToRi->parseRib(inputStream, name.c_str(), arCallback);
 }
 
 bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )

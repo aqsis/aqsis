@@ -55,6 +55,8 @@ class Filter : public Renderer
 
 /// Create a filter with the given name.
 ///
+/// \throw XqValidation if the filter can't be created for some reason.
+///
 /// \param name - filter name
 /// \param services - renderer services
 /// \param next - next interface in the filter chain
