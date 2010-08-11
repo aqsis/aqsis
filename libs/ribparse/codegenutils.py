@@ -43,6 +43,9 @@ def commentBanner(str, width=70, fillchar='='):
     comment = '// '
     return comment + (' ' + str + ' ').center(width - len(comment), fillchar)
 
+def commentBannerC(str, width=70, fillchar='='):
+    return '/* ' + (' ' + str + ' ').center(width - 6, fillchar) + ' */'
+
 def wrapDecl(str, maxWidth, wrapIndent=None):
     '''Wrap a one-line declaration onto multiple lines.'''
     splits = re.split(', *', str);

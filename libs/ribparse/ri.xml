@@ -2902,10 +2902,10 @@
 
 		<Section>Motion</Section>
 
-		<!--
-		This one is so odd that we leave it out for now.
 		<Procedure>
 			<Name>MotionBegin</Name>
+			<ApiNote>The MotionBegin/MotionBeginV split doesn't imply a paramList
+			- instead it's an odd and ugly edge case in the spec.</ApiNote>
 			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
@@ -2928,11 +2928,10 @@
 				<Object/>
 			</ValidScope>
 		</Procedure>
-		-->
 
 		<Procedure>
 			<Name>MotionBegin</Name>
-			<CName>MotionBeginV</CName>
+			<CName>RiMotionBeginV</CName>
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 				<Argument>

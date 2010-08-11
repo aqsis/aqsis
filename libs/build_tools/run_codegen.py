@@ -16,10 +16,14 @@ import os
 import os.path
 import sys
 
-def findFilesToCog(basePaths):
+def findFilesToCog(basePaths, forceSelected=None):
     '''
     Search through all source files to find those that need processing with the
     cog code generator.
+
+    If forceSelected is not None, it is expected to be a list of file names
+    which should be found and cogged.  In this case, no files are searched for
+    cog tags.
     '''
     import re
     isSourcePattern = re.compile(r'.(h|cpp)$')
@@ -27,6 +31,10 @@ def findFilesToCog(basePaths):
     def walkCallback(cogList, dirname, fnames):
         for f in fnames:
             fileName = os.path.join(dirname,f)
+            if forceSelected is not None:
+                if f in forceSelected:
+                    cogList.append(fileName)
+                continue
             if os.path.isfile(fileName) and isSourcePattern.search(fileName) is not None:
                 file = open(fileName, 'r')
                 hasCogBlock = False
@@ -74,11 +82,12 @@ if cwd == prevwd:
     print 'Cannot find aqsis source root directory.  You must run the codgen from somewhere inside the tree.'
     sys.exit(1)
 
-
 print 'Searching for source files...'
-filesToCog = findFilesToCog(searchDirs)
+forceSelected = None
+if len(sys.argv) > 1:
+    forceSelected = sys.argv[1:]
+filesToCog = findFilesToCog(searchDirs, forceSelected)
 
-print 'Cogging...'
 for fileName in filesToCog:
     argv = ['run_codegen.py',
             '-r',                              # run in place
