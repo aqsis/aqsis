@@ -5,7 +5,7 @@
    anything else added to this page will not show up in the 
    printed output.
 
-Aqsis' documentation!
+The Aqsis User Manual
 =====================
 
 Contents:

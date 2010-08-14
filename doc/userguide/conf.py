@@ -38,7 +38,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Aqsis'
-copyright = u'2010, Paul Gregory'
+copyright = u'2010, The Aqsis Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -131,7 +131,9 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_sidebars = {
+	'**': ['localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html']
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -173,7 +175,7 @@ htmlhelp_basename = 'Aqsisdoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Aqsis.tex', u'Aqsis Documentation',
-   u'Paul Gregory', 'manual', True),
+   u'The Aqsis Team', 'manual', True),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
