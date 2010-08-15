@@ -2,19 +2,19 @@
 
 .. Image references declared here.
 .. |aqsis_1_2| image:: /images/texture_swirl_blur_oldtex.png
-    :width: 200px 
+    :width: 100% 
 .. |aqsis_1_4| image:: /images/texture_swirl_blur_newtex.png
-    :width: 200px 
+    :width: 100% 
 .. |3delight|  image:: /images/texture_swirl_blur_3delight7.png
-    :width: 200px
+    :width: 100% 
 .. |constant|  image:: /images/aqsis-shading_constant.png
-    :width: 200px
+    :width: 100%
 .. |smooth|    image:: /images/aqsis-shading_smooth.png
-    :width: 200px
+    :width: 100%
 .. |no_expandgrids| image:: /images/expandgrids-before.png
-    :width: 300px
+    :width: 100%
 .. |expandgrids| image:: /images/expandgrids-after.png
-    :width: 300px
+    :width: 100%
 .. |freedesktop| image:: /images/freedesktop-logo.png
     :target: http://www.freedesktop.org
 
@@ -118,7 +118,7 @@ OS X Distribution
 Executing Aqsis.app will launch eqsl and automatically configure the current/personal environment (PATH), allowing your system to always locate the relevant binaries:
 
 .. figure:: /images/aqsis-bundle.png
-    :scale: 50%
+    :width: 100%
 
 We support OS X 10.4 (Tiger) and above, providing binaries for both PPC and Intel architectures.
 
