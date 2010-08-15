@@ -87,6 +87,20 @@ AQSIS_RI_SHARE RtVoid RiBegin(RtToken name)
         outStream = &g_context->outFile;
     }
     // TODO: Allow these options to be controlled somehow!
+    //
+    // Here's the options that libri2rib previously allowed via a RiOption
+    // call, invoked before RiBegin.  The token was typeless and had to be
+    // given exactly as shown.
+    //
+    // RiOption("RI2RIB_Output", "Type", "Ascii");
+    // RiOption("RI2RIB_Output", "Type", "Binary");
+    // RiOption("RI2RIB_Output", "Compression", "None");
+    // RiOption("RI2RIB_Output", "Compression", "Gzip");
+    // RiOption("RI2RIB_Output", "PipeHandle", h); //< int h is an open file descriptor
+    // RiOption("RI2RIB_Indentation", "Type", "None");
+    // RiOption("RI2RIB_Indentation", "Type", "Space");
+    // RiOption("RI2RIB_Indentation", "Type", "Tab");
+    // RiOption("RI2RIB_Indentation", "Size", sz); //< int sz - chars per indent
     g_context->writerServices.reset(
         createRibWriter(*outStream, true, false, false, 4, ' ', ".") );
     g_context->writerServices->addFilter("validate");
