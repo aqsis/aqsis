@@ -536,9 +536,8 @@ class Renderer
                             const ParamList& pList) = 0;
         //[[[end]]]
 
-
-        /// Oddball functions which are not part of the RIB binding, but are
-        /// present for backward compatibility with the C API.
+        /// ArchiveRecord isn't part of the RIB binding, but a variant of it
+        /// here is included here for convenience in passing RIB comments.
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) = 0;
 
         virtual ~Renderer() {};
