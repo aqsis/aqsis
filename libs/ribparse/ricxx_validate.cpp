@@ -24,7 +24,6 @@
 #include "ricxx_filter.h"
 
 #include <cfloat>
-#include <climits>
 #include <cmath>
 #include <sstream>
 #include <stack>
@@ -34,6 +33,7 @@
 #include <aqsis/util/exception.h>
 
 #include "errorhandler.h"
+#include "ricxxutil.h"
 
 namespace Aqsis {
 
@@ -328,22 +328,6 @@ void RiCxxValidate::checkScope(ApiScope allowedScopes) const
 
 namespace {
 
-inline int iclassCount(const SqInterpClassCounts& counts,
-                       Ri::TypeSpec::IClass iclass)
-{
-    switch(iclass)
-    {
-        case Ri::TypeSpec::Constant:    return 1;
-        case Ri::TypeSpec::Uniform:     return counts.uniform;
-        case Ri::TypeSpec::Varying:     return counts.varying;
-        case Ri::TypeSpec::Vertex:      return counts.vertex;
-        case Ri::TypeSpec::FaceVarying: return counts.facevarying;
-        case Ri::TypeSpec::FaceVertex:  return counts.facevertex;
-        default:
-            assert(0 && "Unknown interpolation class"); return 0;
-    }
-}
-
 void checkPointParamPresent(const Ri::ParamList& pList)
 {
     for(size_t i = 0; i < pList.size(); ++i)
@@ -354,37 +338,6 @@ void checkPointParamPresent(const Ri::ParamList& pList)
     }
     AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
         "expected \"P\" or \"Pw\" in parameter list");
-}
-
-int sum(const Ri::IntArray& a)
-{
-    int s = 0;
-    for(size_t i = 0; i < a.size(); ++i)
-        s += a[i];
-    return s;
-}
-
-int sum(const Ri::IntArray& a, int start, int step)
-{
-    int s = 0;
-    for(size_t i = start; i < a.size(); i+=step)
-        s += a[i];
-    return s;
-}
-
-int max(const Ri::IntArray& a)
-{
-    int m = INT_MIN;
-    for(size_t i = 0; i < a.size(); ++i)
-        if(m < a[i])
-            m = a[i];
-    return m;
-}
-
-template<typename T>
-inline int size(const Ri::Array<T>& a)
-{
-    return a.size();
 }
 
 // Count the length of the "P" array in the parameter list
@@ -452,61 +405,8 @@ extraSnippets = {
 # cleanly encoded in the XML in some cases.  Here they are as custom code
 # snippets, ugh:
 iclassCountSnippets = {
-    'PatchMesh':
-'''
-    bool uperiodic = strcmp(uwrap, "periodic") == 0;
-    bool vperiodic = strcmp(vwrap, "periodic") == 0;
-    if(strcmp(type, "bilinear")==0)
-    {
-        iclassCounts.uniform = (uperiodic ? nu : nu-1) *
-                               (vperiodic ? nv : nv-1);
-        iclassCounts.varying = nu*nv;
-    }
-    else
-    {
-        int nupatches = uperiodic ? nu/m_basisUstep : (nu-4)/m_basisUstep + 1;
-        int nvpatches = vperiodic ? nv/m_basisVstep : (nv-4)/m_basisVstep + 1;
-        iclassCounts.uniform = nupatches * nvpatches;
-        iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
-                               ((vperiodic ? 0 : 1) + nvpatches);
-    }
-    iclassCounts.vertex = nu*nv;
-    // TODO: are facevertex/facevarying valid for a patch mesh?
-    iclassCounts.facevarying = 1; //iclassCounts.uniform*4; //??
-    iclassCounts.facevertex = 1;
-''',
-    'Curves':
-'''
-    bool periodic = strcmp(wrap, "periodic") == 0;
-    int basisStep = m_basisVstep;
-    iclassCounts.uniform = size(nvertices);
-    iclassCounts.vertex = sum(nvertices);
-    if(strcmp(type, "cubic") == 0)
-    {
-        if(periodic)
-        {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += nvertices[i]/basisStep;
-            iclassCounts.varying = segmentCount;
-        }
-        else
-        {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += (nvertices[i]-4)/basisStep + 1;
-            iclassCounts.varying = segmentCount + size(nvertices);
-        }
-    }
-    else
-    {
-        // linear curves
-        iclassCounts.varying = iclassCounts.vertex;
-    }
-    // TODO: are facevertex/facevarying valid for curves?
-    iclassCounts.facevarying = 1;
-    iclassCounts.facevertex = 1;
-''',
+    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_basisUstep, m_basisVstep);',
+    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_basisVstep);',
     'Geometry': ''
 }
 
@@ -576,7 +476,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
  #set $icLen = $proc.find('IClassLengths')
  #if $icLen is not None
   #if $icLen.haschild('ComplicatedCustomImpl')
-$iclassCountSnippets[$procName]
+    $iclassCountSnippets[$procName]
   #else
    #if $icLen.haschild('Uniform')
     iclassCounts.uniform = $icLen.findtext('Uniform');
@@ -1468,28 +1368,7 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
         );
     }
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-
-    bool uperiodic = strcmp(uwrap, "periodic") == 0;
-    bool vperiodic = strcmp(vwrap, "periodic") == 0;
-    if(strcmp(type, "bilinear")==0)
-    {
-        iclassCounts.uniform = (uperiodic ? nu : nu-1) *
-                               (vperiodic ? nv : nv-1);
-        iclassCounts.varying = nu*nv;
-    }
-    else
-    {
-        int nupatches = uperiodic ? nu/m_basisUstep : (nu-4)/m_basisUstep + 1;
-        int nvpatches = vperiodic ? nv/m_basisVstep : (nv-4)/m_basisVstep + 1;
-        iclassCounts.uniform = nupatches * nvpatches;
-        iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
-                               ((vperiodic ? 0 : 1) + nvpatches);
-    }
-    iclassCounts.vertex = nu*nv;
-    // TODO: are facevertex/facevarying valid for a patch mesh?
-    iclassCounts.facevarying = 1; //iclassCounts.uniform*4; //??
-    iclassCounts.facevertex = 1;
-
+    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_basisUstep, m_basisVstep);
     checkParamListArraySizes(pList, iclassCounts, "PatchMesh");
     return nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
 }
@@ -1847,37 +1726,7 @@ RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-
-    bool periodic = strcmp(wrap, "periodic") == 0;
-    int basisStep = m_basisVstep;
-    iclassCounts.uniform = size(nvertices);
-    iclassCounts.vertex = sum(nvertices);
-    if(strcmp(type, "cubic") == 0)
-    {
-        if(periodic)
-        {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += nvertices[i]/basisStep;
-            iclassCounts.varying = segmentCount;
-        }
-        else
-        {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += (nvertices[i]-4)/basisStep + 1;
-            iclassCounts.varying = segmentCount + size(nvertices);
-        }
-    }
-    else
-    {
-        // linear curves
-        iclassCounts.varying = iclassCounts.vertex;
-    }
-    // TODO: are facevertex/facevarying valid for curves?
-    iclassCounts.facevarying = 1;
-    iclassCounts.facevertex = 1;
-
+    iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_basisVstep);
     checkParamListArraySizes(pList, iclassCounts, "Curves");
     checkPointParamPresent(pList);
     return nextFilter().Curves(type, nvertices, wrap, pList);
@@ -1909,7 +1758,7 @@ RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-
+    
     checkParamListArraySizes(pList, iclassCounts, "Geometry");
     return nextFilter().Geometry(type, pList);
 }

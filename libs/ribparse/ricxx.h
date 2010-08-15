@@ -200,6 +200,8 @@ class Param
             : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
         Param(const TypeSpec& spec, const char* name, const RtConstToken* data, size_t size)
             : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
+        Param(const TypeSpec& spec, const char* name, const void* data, size_t size)
+            : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
         template<typename T>
         Param(const TypeSpec& spec, const char* name, Array<T> value)
             : m_spec(spec), m_name(name), m_data(value.begin()), m_size(value.size()) {}

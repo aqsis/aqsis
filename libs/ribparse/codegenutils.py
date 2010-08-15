@@ -94,11 +94,11 @@ def formalArg(arg):
                       r'RtConst\1', type)
     return '%s %s' % (type, name)
 
-def formalArgC(arg):
+def formalArgC(arg, arraySuffix=''):
     type = arg.findtext('Type')
     name = arg.findtext('Name')
     if type.endswith('Array'):
-        return '%s %s[]' % (type[:-5], name)
+        return '%s %s[]' % (type[:-5], name + arraySuffix)
     else:
         return '%s %s' % (type, name)
 

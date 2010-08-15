@@ -786,6 +786,7 @@
 				<Argument>
 					<Name>nRGB</Name>
 					<Type>RtFloatArray</Type>
+                    <RiLength>3*N</RiLength>
 				</Argument>
 				<Argument>
 					<Name>RGBn</Name>
@@ -1915,6 +1916,7 @@
 				<Argument>
 					<Name>nverts</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>nloops</RiLength>
 				</Argument>
 				<ParamList><Param>P</Param></ParamList>
 			</Arguments>
@@ -1944,6 +1946,7 @@
 				<Argument>
 					<Name>nverts</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>npolys</RiLength>
 				</Argument>
 				<Argument>
 					<Name>verts</Name>
@@ -1980,6 +1983,7 @@
 				<Argument>
 					<Name>nloops</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>npolys</RiLength>
 				</Argument>
 				<Argument>
 					<Name>nverts</Name>
@@ -2196,6 +2200,7 @@
 				<Argument>
 					<Name>ncurves</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>nloops</RiLength>
 				</Argument>
 				<Argument>
 					<Name>order</Name>
@@ -2267,6 +2272,7 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>nfaces</RiLength>
 				</Argument>
 				<Argument>
 					<Name>vertices</Name>
@@ -2281,6 +2287,7 @@
 				<Argument>
 					<Name>tags</Name>
 					<Type>RtTokenArray</Type>
+                    <RiLength>ntags</RiLength>
 				</Argument>
 				<Argument>
 					<Name>nargs</Name>
@@ -2629,6 +2636,7 @@
 				<Argument>
 					<Name>nvertices</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>ncurves</RiLength>
 				</Argument>
 				<Argument>
 					<Name>wrap</Name>
@@ -2668,6 +2676,7 @@
 				<Argument>
 					<Name>code</Name>
 					<Type>RtIntArray</Type>
+                    <RiLength>ncode</RiLength>
 				</Argument>
 				<Argument>
 					<Name>nfloats</Name>
@@ -2677,6 +2686,7 @@
 				<Argument>
 					<Name>floats</Name>
 					<Type>RtFloatArray</Type>
+                    <RiLength>nfloats</RiLength>
 				</Argument>
 				<Argument>
 					<Name>nstrings</Name>
@@ -2686,6 +2696,7 @@
 				<Argument>
 					<Name>strings</Name>
 					<Type>RtTokenArray</Type>
+                    <RiLength>nstrings</RiLength>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -2942,6 +2953,7 @@
 				<Argument>
 					<Name>times</Name>
 					<Type>RtFloatArray</Type>
+                    <RiLength>N</RiLength>
 				</Argument>
 			</Arguments>
 			<Rib/>
@@ -3185,6 +3197,7 @@
 				<Argument>
 					<Name>picfiles</Name>
 					<Type>RtStringArray</Type>
+                    <RiLength>npics</RiLength>
 				</Argument>
 				<Argument>
 					<Name>shadowfile</Name>
