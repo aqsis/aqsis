@@ -211,10 +211,10 @@ int main( int argc, const char** argv )
 	}
 
 	// Open writer
-	boost::shared_ptr<Ri::RendererServices> writer =
+	boost::shared_ptr<Ri::RendererServices> writer(
 		Aqsis::createRibWriter(*outStream, g_cl_readarchives,
 							   g_cl_binary, g_cl_compression,
-							   indentAmount, indentChar, g_cl_archive_path);
+							   indentAmount, indentChar, g_cl_archive_path) );
 	// Add frame filter if desired
 	std::string frameList = getFrameList();
 	if(!frameList.empty())

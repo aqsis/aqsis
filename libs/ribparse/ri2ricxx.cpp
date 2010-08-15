@@ -24,27 +24,81 @@
 ///
 
 #include <vector>
+#include <stack>
 #include <stdarg.h>
+#include <stdio.h> // for vsnprintf
 
 #include <aqsis/ri/ri.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/riutil/interpclasscounts.h>
-#include "errorhandlerimpl.h"
+#include "errorhandler.h"
+#include "ri2ricxx.h"
 #include "ricxx.h"
 #include "ricxxutil.h"
 
-namespace Aqsis {
-
-// Global context.
-extern Ri::Renderer* g_context;
-extern Ri::RendererServices* g_services;
-
-}
 
 using namespace Aqsis;
 typedef SqInterpClassCounts IClassCounts;
 
 namespace {
+struct AttrState
+{
+    int ustep;
+    int vstep;
+    AttrState(int ustep, int vstep) : ustep(ustep), vstep(vstep) {}
+};
+}
+
+typedef std::stack<AttrState> AttrStack;
+
+static Ri::Renderer* g_context = 0;
+static Ri::RendererServices* g_services = 0;
+static AttrStack* g_attrStack = 0;
+
+namespace Aqsis {
+
+void riToRiCxxBegin(Ri::RendererServices* services,
+                    boost::shared_ptr<void>& ourData)
+{
+    assert(services);
+    g_services = services;
+    g_context = &services->firstFilter();
+    g_attrStack = new AttrStack();
+    ourData.reset(g_attrStack);
+    g_attrStack->push(AttrState(3,3));
+}
+
+void riToRiCxxContext(Ri::RendererServices* services,
+                      boost::shared_ptr<void>& ourData)
+{
+    assert(services);
+    g_services = services;
+    g_context = &services->firstFilter();
+    g_attrStack = static_cast<AttrStack*>(ourData.get());
+}
+
+void riToRiCxxEnd()
+{
+    g_services = 0;
+    g_context = 0;
+    g_attrStack = 0;
+}
+
+} // namespace Aqsis
+
+namespace {
+
+void pushAttributes()
+{
+    assert(g_attrStack);
+    g_attrStack->push(g_attrStack->top());
+}
+void popAttributes()
+{
+    assert(g_attrStack);
+    if(g_attrStack->size() > 1)
+        g_attrStack->pop();
+}
 
 std::vector<Ri::Param> g_pList;
 std::vector<std::string> g_nameStorage;
@@ -124,20 +178,29 @@ Most of the complicated stuff here is in computing appropriate array lengths
 from the C API, which uses implicit array lengths everywhere.
 --------------------------------------------------------------------------------
 
-TODO: RiCurvesV and RiPointsV IClassLengths are wrong!!
-
 [[[cog
 
 from codegenutils import *
 from Cheetah.Template import Template
 riXml = parseXmlTree(riXmlPath)
 
-# FIXME: Use correct basisU/V steps below!
 iclassCountSnippets = {
-    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, 3, 3);',
-    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, 3);',
+    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_attrStack->top().ustep, g_attrStack->top().vstep);',
+    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_attrStack->top().vstep);',
     'Geometry': ''
 }
+
+# Extra code snippets to be inserted into method implementations
+def getExtraSnippet(procName):
+    ignoredScopes = set(('Transform', 'If'))
+    if procName == 'Basis':
+        return 'AttrState& attrs = g_attrStack->top(); attrs.ustep = ustep; attrs.vstep = vstep;'
+    elif procName.endswith('Begin') and procName[:-5] not in ignoredScopes:
+        return 'pushAttributes();'
+    elif procName.endswith('End') and procName[:-3] not in ignoredScopes:
+        return 'popAttributes();'
+    return None
+
 
 procTemplate = '''
 extern "C"
@@ -185,6 +248,9 @@ $returnType ${cProcName}($formals)
  #end if
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
 #end if
+#if $extraSnippet is not None
+    $extraSnippet
+#end if
     return g_context->${procName}($callArgs);
     EXCEPTION_CATCH_GUARD("$procName");
 #if $returnType != 'RtVoid'
@@ -222,6 +288,7 @@ for proc in riXml.findall('Procedures/Procedure'):
             formals += ['RtInt count', 'RtToken tokens[]','RtPointer values[]']
         callArgs = ', '.join(callArgs)
         formals = ', '.join(formals)
+        extraSnippet = getExtraSnippet(procName)
         cog.out(str(Template(procTemplate, searchList=locals())))
 
 ]]]*/
@@ -240,6 +307,7 @@ extern "C"
 RtVoid RiFrameBegin(RtInt number)
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->FrameBegin(number);
     EXCEPTION_CATCH_GUARD("FrameBegin");
 }
@@ -249,6 +317,7 @@ extern "C"
 RtVoid RiFrameEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->FrameEnd();
     EXCEPTION_CATCH_GUARD("FrameEnd");
 }
@@ -258,6 +327,7 @@ extern "C"
 RtVoid RiWorldBegin()
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->WorldBegin();
     EXCEPTION_CATCH_GUARD("WorldBegin");
 }
@@ -267,6 +337,7 @@ extern "C"
 RtVoid RiWorldEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->WorldEnd();
     EXCEPTION_CATCH_GUARD("WorldEnd");
 }
@@ -504,6 +575,7 @@ extern "C"
 RtVoid RiAttributeBegin()
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->AttributeBegin();
     EXCEPTION_CATCH_GUARD("AttributeBegin");
 }
@@ -513,6 +585,7 @@ extern "C"
 RtVoid RiAttributeEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->AttributeEnd();
     EXCEPTION_CATCH_GUARD("AttributeEnd");
 }
@@ -866,6 +939,7 @@ extern "C"
 RtVoid RiResourceBegin()
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->ResourceBegin();
     EXCEPTION_CATCH_GUARD("ResourceBegin");
 }
@@ -875,6 +949,7 @@ extern "C"
 RtVoid RiResourceEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->ResourceEnd();
     EXCEPTION_CATCH_GUARD("ResourceEnd");
 }
@@ -963,6 +1038,7 @@ extern "C"
 RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 {
     EXCEPTION_TRY_GUARD
+    AttrState& attrs = g_attrStack->top(); attrs.ustep = ustep; attrs.vstep = vstep;
     return g_context->Basis(ubasis, ustep, vbasis, vstep);
     EXCEPTION_CATCH_GUARD("Basis");
 }
@@ -988,7 +1064,7 @@ RtVoid RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 {
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, 3, 3);
+    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_attrStack->top().ustep, g_attrStack->top().vstep);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
     return g_context->PatchMesh(type, nu, uwrap, nv, vwrap, pList);
     EXCEPTION_CATCH_GUARD("PatchMesh");
@@ -1179,7 +1255,7 @@ RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices_in[], RtToken wrap
     EXCEPTION_TRY_GUARD
     Ri::IntArray nvertices(nvertices_in, ncurves);
     IClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = curvesIClassCounts(type, nvertices, wrap, 3);
+    iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_attrStack->top().vstep);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
     return g_context->Curves(type, nvertices, wrap, pList);
     EXCEPTION_CATCH_GUARD("Curves");
@@ -1229,6 +1305,7 @@ extern "C"
 RtVoid RiSolidBegin(RtToken type)
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->SolidBegin(type);
     EXCEPTION_CATCH_GUARD("SolidBegin");
 }
@@ -1238,6 +1315,7 @@ extern "C"
 RtVoid RiSolidEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->SolidEnd();
     EXCEPTION_CATCH_GUARD("SolidEnd");
 }
@@ -1247,6 +1325,7 @@ extern "C"
 RtObjectHandle RiObjectBegin()
 {
     EXCEPTION_TRY_GUARD
+    pushAttributes();
     return g_context->ObjectBegin();
     EXCEPTION_CATCH_GUARD("ObjectBegin");
     return 0;
@@ -1257,6 +1336,7 @@ extern "C"
 RtVoid RiObjectEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->ObjectEnd();
     EXCEPTION_CATCH_GUARD("ObjectEnd");
 }
@@ -1276,6 +1356,7 @@ RtVoid RiMotionBeginV(RtInt N, RtFloat times_in[])
 {
     EXCEPTION_TRY_GUARD
     Ri::FloatArray times(times_in, N);
+    pushAttributes();
     return g_context->MotionBegin(times);
     EXCEPTION_CATCH_GUARD("MotionBegin");
 }
@@ -1285,6 +1366,7 @@ extern "C"
 RtVoid RiMotionEnd()
 {
     EXCEPTION_TRY_GUARD
+    popAttributes();
     return g_context->MotionEnd();
     EXCEPTION_CATCH_GUARD("MotionEnd");
 }
@@ -1968,5 +2050,60 @@ RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback, ...)
 
 ///[[[end]]]
 // End varargs generated code.
+
+// This one is oh-so-odd.  Here's a custom implementation.
+extern "C"
+RtVoid RiMotionBegin(RtInt N, ...)
+{
+    va_list args;
+    va_start(args, N);
+    std::vector<RtFloat> times(N);
+    for(int i = 0; i < N; ++i)
+        times[i] = va_arg(args, double);
+    va_end(args);
+
+    return RiMotionBeginV(N, N == 0 ? 0 : &times[0]);
+}
+
+// ArchiveRecord is also an oddball.
+RtVoid RiArchiveRecord(RtToken type, char *format, ...)
+{
+	EXCEPTION_TRY_GUARD
+
+	int size = 256;
+	char* buffer = 0;
+	bool longEnough = false;
+	while(!longEnough)
+	{
+		delete[] buffer;
+		buffer = new char[size];
+		va_list args;
+		va_start( args, format );
+#		ifdef _MSC_VER
+		int len = _vsnprintf(buffer, size, format, args);
+		// msdn says that _vsnprintf() returns a negative number if the buffer
+		// wasn't long enough.  Add the extra (len < size) for safety in the
+		// case MSVC becomes standard-compliant at some stage in the future...
+		longEnough = len >= 0 && len < size;
+		size *= 2;
+#		else
+		int len = vsnprintf(buffer, size, format, args);
+		// According to the linux man pages, vsnprintf() returns a negative
+		// value on error, or a positive value indicating the number of chars
+		// which would have been written for an infinite-size buffer, not
+		// including the terminating '\0'.  This is claimed to be the
+		// C99-conforming behaviour.
+		if(len < 0)
+			return;
+		longEnough = len < size;
+		size = len+1;
+#		endif
+		va_end(args);
+	}
+	g_context->ArchiveRecord(type, buffer);
+
+	delete[] buffer;
+	EXCEPTION_CATCH_GUARD("ArchiveRecord")
+}
 
 /* vi: set et: */

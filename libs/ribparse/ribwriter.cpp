@@ -358,6 +358,12 @@ class NamePtrMapping
             }
         }
 
+        void insert(const char* name, PtrT p)
+        {
+            m_ptrToString[p] = name;
+            m_stringToPtr[name] = p;
+        }
+
         const char* find(PtrT p) const
         {
             typename MapTypePtoS::const_iterator i = m_ptrToString.find(p);
@@ -433,7 +439,7 @@ const char* basisName(RtConstBasis b)
 } // anon. namespace
 
 //------------------------------------------------------------------------------
-class RibWriterServices : public Ri::RendererServices
+class RibWriterServicesImpl : public RibWriterServices
 {
     private:
         /// Contained RIB writer interface
@@ -452,7 +458,7 @@ class RibWriterServices : public Ri::RendererServices
         AqsisLogErrorHandler m_errorHandler;
 
     public:
-        RibWriterServices()
+        RibWriterServicesImpl()
             : m_writer(),
             m_filterFuncMap(filterFuncNames),
             m_errorFuncMap(errorFuncNames),
@@ -465,8 +471,8 @@ class RibWriterServices : public Ri::RendererServices
         // utilities for RibWriter
 
         // Set the contained RIB writer.  Only needed because
-        // RibWriterServices must be constructed first since RibWriter needs a
-        // ref to it.
+        // RibWriterServicesImpl must be constructed first since RibWriter
+        // needs a ref to it.
         void setWriter(const boost::shared_ptr<Ri::Renderer>& writer)
             { m_writer = writer; }
 
@@ -478,6 +484,14 @@ class RibWriterServices : public Ri::RendererServices
             { return m_errorFuncMap.find(f); }
         const char* getSubdivFuncName(RtProcSubdivFunc f)
             { return m_subdivFuncMap.find(f); }
+
+        virtual void registerFilterFunc(RtConstString name, RtFilterFunc func)
+            { m_filterFuncMap.insert(name, func); }
+        virtual void registerProcSubdivFunc(RtConstString name,
+                                            RtProcSubdivFunc func)
+            { m_subdivFuncMap.insert(name, func); }
+        virtual void registerErrorFunc(RtConstString name, RtErrorFunc func)
+            { m_errorFuncMap.insert(name, func); }
 
         //--------------------------------------------------
         // methods from RendererServices.
@@ -577,7 +591,7 @@ class RibWriter : public Ri::Renderer
         /// Path in which to search for archive files
         std::string m_archiveSearchPath;
         /// Renderer services for RIB writer.
-        RibWriterServices& m_services;
+        RibWriterServicesImpl& m_services;
 
         /// Print a parameter list to the formatter
         void printParamList(const Ri::ParamList& pList)
@@ -659,7 +673,7 @@ class RibWriter : public Ri::Renderer
         }
 
     public:
-        RibWriter(RibWriterServices& services, std::ostream& out,
+        RibWriter(RibWriterServicesImpl& services, std::ostream& out,
                   bool interpolateArchives, bool useGzip, int indentStep,
                   char indentChar, const std::string& initialArchivePath)
             : m_gzipStream(setupGzipStream(out, useGzip)),
@@ -2372,11 +2386,11 @@ RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
 
 //------------------------------------------------------------------------------
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::RendererServices> createRibWriter(std::ostream& out,
+RibWriterServices* createRibWriter(std::ostream& out,
         bool interpolateArchives, bool useBinary, bool useGzip,
         int indentStep, char indentChar, const std::string& initialArchivePath)
 {
-    boost::shared_ptr<RibWriterServices> services(new RibWriterServices());
+    RibWriterServicesImpl* services = new RibWriterServicesImpl();
     boost::shared_ptr<Ri::Renderer> writer;
     if(useBinary)
         writer.reset(new RibWriter<BinaryFormatter>(*services, out,

@@ -26,14 +26,35 @@
 
 namespace Aqsis {
 
+/// RendererServices refinement to allow registration of custom functions.
+///
+/// The register*Func() methods allow the user define names for their own
+/// filter functions, etc, as output into the RIB file.  (Dummy function
+/// pointers come pre-registered so that get*Func() work for the default
+/// functions, but sometimes it's necessary to override these.)
+class RibWriterServices : public Ri::RendererServices
+{
+    public:
+        /// Register a name for a user-defined filter function.
+        virtual void registerFilterFunc(RtConstString name,
+                                        RtFilterFunc func) = 0;
+        /// Register a name for a user-defined subdivision function.
+        virtual void registerProcSubdivFunc(RtConstString name,
+                                            RtProcSubdivFunc func) = 0;
+        /// Register a name for a user-defined error function.
+        virtual void registerErrorFunc(RtConstString name,
+                                       RtErrorFunc func) = 0;
+};
+
+
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-boost::shared_ptr<Ri::RendererServices> createRibWriter(
+RibWriterServices* createRibWriter(
         std::ostream& out, bool interpolateArchives, bool useBinary,
         bool useGzip, int indentStep, char indentChar,
         const std::string& initialArchivePath);
 
 
-}
+} // namespace Aqsis
 
 #endif // AQSIS_RIBWRITER_H_INCLUDED
 // vi: set et:
