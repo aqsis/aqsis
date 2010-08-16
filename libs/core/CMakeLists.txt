@@ -41,8 +41,6 @@ set(core_srcs
 	${geometry_srcs}
 	${raytrace_srcs}
 	${texturing_old_srcs}
-	../ribparse/ricxx2ri.cpp
-	../ribparse/risyms.cpp
 )
 
 set(core_hdrs

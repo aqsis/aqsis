@@ -75,6 +75,10 @@ class ParamListBuilder
         ParamListBuilder& operator()(const Ri::TypeSpec& spec,
                                      const char* name,
                                      const std::vector<T>& v);
+        /// Add a parameter to the list
+        template<typename T>
+        ParamListBuilder& operator()(const Ri::Param& p);
+
 
         /// Implicity convert to Ri::ParamList
         operator Ri::ParamList();
@@ -102,6 +106,8 @@ int max(const Ri::IntArray& a);
 template<typename T>
 int size(const Ri::Array<T>& a);
 
+/// Count the length of the "P" array in the parameter list
+inline int countP(const Ri::ParamList& pList);
 
 /// Get the interpolation class counts for RiPatchMesh.
 SqInterpClassCounts patchMeshIClassCounts(const char* type, int nu,
@@ -163,6 +169,13 @@ inline ParamListBuilder& ParamListBuilder::operator()(const Ri::TypeSpec& spec,
     return *this;
 }
 
+template<typename T>
+ParamListBuilder& ParamListBuilder::operator()(const Ri::Param& p)
+{
+    m_paramStorage.push_back(p);
+    return *this;
+}
+
 inline ParamListBuilder::operator Ri::ParamList()
 {
     if(m_paramStorage.empty())
@@ -216,6 +229,20 @@ template<typename T>
 inline int size(const Ri::Array<T>& a)
 {
     return a.size();
+}
+
+inline int countP(const Ri::ParamList& pList)
+{
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        if(!strcmp(pList[i].name(), "P"))
+            return pList[i].size()/3;
+        if(!strcmp(pList[i].name(), "Pw"))
+            return pList[i].size()/4;
+    }
+    AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
+            "\"P\" not found in parameter list");
+    return -1;
 }
 
 

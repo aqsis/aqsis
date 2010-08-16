@@ -1661,7 +1661,12 @@ void CqRenderer::initialiseCropWindow()
 	m_cropWindowYMin = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, iYRes);
 	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
 }
-	
+
+RiCxxToRiServices& CqRenderer::getApiServices()
+{
+	return *m_ribParserToRi;
+}
+
 //---------------------------------------------------------------------
 
 } // namespace Aqsis

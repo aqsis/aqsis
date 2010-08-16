@@ -2,7 +2,6 @@ project(riutil)
 
 set(riutil_srcs
 	primvartoken.cpp
-	riparamlist.cpp
 	tokendictionary.cpp
 )
 

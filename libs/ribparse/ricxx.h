@@ -314,6 +314,7 @@ class Renderer
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
 
+        // FIXME: Declare should return RtConstToken.
 
         // ========== Relationship to the RenderMan Shading Language =========
         virtual RtToken Declare(RtConstString name,

@@ -356,21 +356,6 @@ void checkPointParamPresent(const Ri::ParamList& pList)
         "expected \"P\" or \"Pw\" in parameter list");
 }
 
-// Count the length of the "P" array in the parameter list
-int countP(const Ri::ParamList& pList)
-{
-    for(size_t i = 0; i < pList.size(); ++i)
-    {
-        if(!strcmp(pList[i].name(), "P"))
-            return pList[i].size()/3;
-        if(!strcmp(pList[i].name(), "Pw"))
-            return pList[i].size()/4;
-    }
-    AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
-            "\"P\" not found in parameter list");
-    return -1;
-}
-
 }
 
 inline void RiCxxValidate::checkArraySize(int expectedSize, int actualSize,

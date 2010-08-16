@@ -175,12 +175,19 @@ class AQSIS_RIUTIL_SHARE CqPrimvarToken
 inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok);
 
 
+/// Convert an Ri::TypeSpec to the types used in CqPrimvarToken
+void typeSpecToEqTypes(EqVariableClass& iclass, EqVariableType& type,
+					   int& count, const Ri::TypeSpec& spec);
+
 /// Convert type portion of CqPrimvarToken to Ri::TypeSpec
 ///
 /// This function exists for compatibility between the older CqPrimvarToken
 /// which is used internally and the public-interface Ri::TypeSpec.
 Ri::TypeSpec toTypeSpec(const CqPrimvarToken& tok);
 
+
+/// Get the token string corresponding to param.spec() and param.name()
+std::string tokenString(const Ri::Param& param);
 
 //==============================================================================
 // Implementation details

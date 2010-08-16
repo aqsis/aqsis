@@ -98,12 +98,12 @@ class AQSIS_MATH_SHARE CqMatrix
 		 *
 		 * \param from - 2D float array to copy data from.
 		 */
-		CqMatrix( TqFloat from[ 4 ][ 4 ] );
+		CqMatrix( const TqFloat from[ 4 ][ 4 ] );
 		/** \brief Constructor from a flattened array of matrix elements
 		 *
 		 * \param from - 1D float array to copy data from.
 		 */
-		CqMatrix( TqFloat from[ 16 ] );
+		CqMatrix( const TqFloat from[ 16 ] );
 		/** \brief Construct a scaled 4x4 identity from a float
 		 *
 		 * \param f - amount to scale the identity matrix by
@@ -291,11 +291,11 @@ class AQSIS_MATH_SHARE CqMatrix
 		/** \brief Copy function.
 		 * \param from - Renderman matrix to copy information from.
 		 */
-		CqMatrix& operator=( TqFloat from[ 4 ][ 4 ] );
+		CqMatrix& operator=( const TqFloat from[ 4 ][ 4 ] );
 		/** \brief Copy function.
 		 * \param from - Renderman matrix to copy information from.
 		 */
-		CqMatrix& operator=( TqFloat from[ 16 ] );
+		CqMatrix& operator=( const TqFloat from[ 16 ] );
 		/** \brief Add a given matrix to this matrix.
 		 * \param from - The matrix to add.
 		 */
@@ -458,12 +458,12 @@ inline CqMatrix::CqMatrix(
 	m_elements[ 3 ][ 3 ] = r4c4;
 }
 
-inline CqMatrix::CqMatrix( TqFloat from[ 4 ][ 4 ] )
+inline CqMatrix::CqMatrix( const TqFloat from[ 4 ][ 4 ] )
 {
 	*this = from;
 }
 
-inline CqMatrix::CqMatrix( TqFloat from[ 16 ] )
+inline CqMatrix::CqMatrix( const TqFloat from[ 16 ] )
 {
 	*this = from;
 }
@@ -823,7 +823,7 @@ inline CqMatrix &CqMatrix::operator=( const CqMatrix &from )
 	return *this;
 }
 
-inline CqMatrix &CqMatrix::operator=( TqFloat from[ 4 ][ 4 ] )
+inline CqMatrix &CqMatrix::operator=( const TqFloat from[ 4 ][ 4 ] )
 {
 	m_elements[ 0 ][ 0 ] = from[ 0 ][ 0 ];
 	m_elements[ 1 ][ 0 ] = from[ 1 ][ 0 ];
@@ -847,7 +847,7 @@ inline CqMatrix &CqMatrix::operator=( TqFloat from[ 4 ][ 4 ] )
 	return *this;
 }
 
-inline CqMatrix &CqMatrix::operator=( TqFloat from[ 16 ] )
+inline CqMatrix &CqMatrix::operator=( const TqFloat from[ 16 ] )
 {
 	m_elements[ 0 ][ 0 ] = from[ 0 ];
 	m_elements[ 0 ][ 1 ] = from[ 1 ];

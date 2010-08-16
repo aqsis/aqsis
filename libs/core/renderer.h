@@ -573,6 +573,8 @@ class CqRenderer : public IqRenderer
 			return m_cropWindowYMax;
 		}
 
+		RiCxxToRiServices& getApiServices();
+
 	private:
 		const SqOutputDataEntry* FindOutputDataEntry(const char* name);
 
