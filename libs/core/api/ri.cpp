@@ -57,8 +57,6 @@
 #include	"stats.h"
 #include	<aqsis/math/random.h>
 
-#include	"ri_cache.h"
-
 #include	"subdivision2.h"
 #include	"condition.h"
 
@@ -89,61 +87,15 @@ extern "C" __declspec(dllimport) void report_refcounts();
 
 #include	<aqsis/util/sstring.h>
 
-#include	"ri_validate.inl"
-
 using namespace Aqsis;
-
-#include	"ri_debug.h"
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
-bool	ValidateState(...);
 
+// TODO: Reinstate conditional testing.
 bool   IfOk = true;
-
-#define VALIDATE_CONDITIONAL \
-	{\
-	if (!IfOk) \
-		return;\
-	}
-
-#define VALIDATE_CONDITIONAL0 \
-	{\
-	if (!IfOk) \
-		return 0;\
-	}
-
-//---------------------------------------------------------------------
-/// Exception try guard to be inserted at the top of all Ri calls which intend
-//to catch exceptions.
-#define EXCEPTION_TRY_GUARD try {
-
-/// Exception catch guard to prevent exceptions propagating outside of Ri calls
-#define EXCEPTION_CATCH_GUARD(procName)                                        \
-}                                                                              \
-catch(const XqValidation& e)                                                   \
-{                                                                              \
-	Aqsis::log() << error << "ignoring invalid " << procName << ":\n"          \
-		<< error << e.what() << "\n";                                          \
-}                                                                              \
-catch(const XqException& e)                                                    \
-{                                                                              \
-	QGetRenderContext()->pErrorHandler()(e.code(),                             \
-										 EqE_Error,                            \
-										 const_cast<char*>(e.what()));         \
-}                                                                              \
-catch(const std::exception& e)                                                 \
-{                                                                              \
-	Aqsis::log() << error << "std::exception encountered in "                  \
-		<< procName << ": " << e.what() << "\n";                               \
-}                                                                              \
-catch(...)                                                                     \
-{                                                                              \
-	Aqsis::log() << error << "unknown exception encountered in "               \
-		<< procName << "\n";                                                   \
-}
 
 //---------------------------------------------------------------------
 // This file contains the interface functions which are published as the
@@ -151,132 +103,6 @@ catch(...)                                                                     \
 //
 
 CqRandom worldrand;
-
-//---------------------------------------------------------------------
-// Interface parameter token strings.
-
-
-RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
-RtToken RI_FILE             = tokenCast("file");
-RtToken RI_RGB              = tokenCast("rgb");
-RtToken RI_RGBA             = tokenCast("rgba");
-RtToken RI_RGBZ             = tokenCast("rgbz");
-RtToken RI_RGBAZ            = tokenCast("rgbaz");
-RtToken RI_A                = tokenCast("a");
-RtToken RI_Z                = tokenCast("z");
-RtToken RI_AZ               = tokenCast("az");
-RtToken RI_MERGE            = tokenCast("merge");
-RtToken RI_ORIGIN           = tokenCast("origin");
-RtToken RI_PERSPECTIVE      = tokenCast("perspective");
-RtToken RI_ORTHOGRAPHIC     = tokenCast("orthographic");
-RtToken RI_HIDDEN           = tokenCast("hidden");
-RtToken RI_PAINT            = tokenCast("paint");
-RtToken RI_CONSTANT         = tokenCast("constant");
-RtToken RI_SMOOTH           = tokenCast("smooth");
-RtToken RI_FLATNESS         = tokenCast("flatness");
-RtToken RI_FOV              = tokenCast("fov");
-
-RtToken RI_AMBIENTLIGHT     = tokenCast("ambientlight");
-RtToken RI_POINTLIGHT       = tokenCast("pointlight");
-RtToken RI_DISTANTLIGHT     = tokenCast("distantlight");
-RtToken RI_SPOTLIGHT        = tokenCast("spotlight");
-RtToken RI_INTENSITY        = tokenCast("intensity");
-RtToken RI_LIGHTCOLOR       = tokenCast("lightcolor");
-RtToken RI_FROM             = tokenCast("from");
-RtToken RI_TO               = tokenCast("to");
-RtToken RI_CONEANGLE        = tokenCast("coneangle");
-RtToken RI_CONEDELTAANGLE   = tokenCast("conedeltaangle");
-RtToken RI_BEAMDISTRIBUTION = tokenCast("beamdistribution");
-RtToken RI_MATTE            = tokenCast("matte");
-RtToken RI_METAL            = tokenCast("metal");
-RtToken RI_PLASTIC          = tokenCast("plastic");
-RtToken RI_PAINTEDPLASTIC   = tokenCast("paintedplastic");
-RtToken RI_KA               = tokenCast("Ka");
-RtToken RI_KD               = tokenCast("Kd");
-RtToken RI_KS               = tokenCast("Ks");
-RtToken RI_ROUGHNESS        = tokenCast("roughness");
-RtToken RI_SPECULARCOLOR    = tokenCast("specularcolor");
-RtToken RI_DEPTHCUE         = tokenCast("depthcue");
-RtToken RI_FOG              = tokenCast("fog");
-RtToken RI_BUMPY            = tokenCast("bumpy");
-RtToken RI_MINDISTANCE      = tokenCast("mindistance");
-RtToken RI_MAXDISTANCE      = tokenCast("maxdistance");
-RtToken RI_BACKGROUND       = tokenCast("background");
-RtToken RI_DISTANCE         = tokenCast("distance");
-
-RtToken RI_RASTER           = tokenCast("raster");
-RtToken RI_SCREEN           = tokenCast("screen");
-RtToken RI_CAMERA           = tokenCast("camera");
-RtToken RI_WORLD            = tokenCast("world");
-RtToken RI_OBJECT           = tokenCast("object");
-RtToken RI_INSIDE           = tokenCast("inside");
-RtToken RI_OUTSIDE          = tokenCast("outside");
-RtToken RI_LH               = tokenCast("lh");
-RtToken RI_RH               = tokenCast("rh");
-RtToken RI_P                = tokenCast("P");
-RtToken RI_PZ               = tokenCast("Pz");
-RtToken RI_PW               = tokenCast("Pw");
-RtToken RI_N                = tokenCast("N");
-RtToken RI_NP               = tokenCast("Np");
-RtToken RI_CS               = tokenCast("Cs");
-RtToken RI_OS               = tokenCast("Os");
-RtToken RI_S                = tokenCast("s");
-RtToken RI_T                = tokenCast("t");
-RtToken RI_ST               = tokenCast("st");
-RtToken RI_BILINEAR         = tokenCast("bilinear");
-RtToken RI_BICUBIC          = tokenCast("bicubic");
-RtToken RI_CUBIC            = tokenCast("cubic");
-RtToken RI_LINEAR           = tokenCast("linear");
-RtToken RI_PRIMITIVE        = tokenCast("primitive");
-RtToken RI_INTERSECTION     = tokenCast("intersection");
-RtToken RI_UNION            = tokenCast("union");
-RtToken RI_DIFFERENCE       = tokenCast("difference");
-RtToken RI_WRAP             = tokenCast("wrap");
-RtToken RI_NOWRAP           = tokenCast("nowrap");
-RtToken RI_PERIODIC         = tokenCast("periodic");
-RtToken RI_NONPERIODIC      = tokenCast("nonperiodic");
-RtToken RI_CLAMP            = tokenCast("clamp");
-RtToken RI_BLACK            = tokenCast("black");
-RtToken RI_IGNORE           = tokenCast("ignore");
-RtToken RI_PRINT            = tokenCast("print");
-RtToken RI_ABORT            = tokenCast("abort");
-RtToken RI_HANDLER          = tokenCast("handler");
-RtToken RI_IDENTIFIER       = tokenCast("identifier");
-RtToken RI_NAME             = tokenCast("name");
-RtToken RI_CURRENT          = tokenCast("current");
-RtToken RI_SHADER           = tokenCast("shader");
-RtToken RI_EYE              = tokenCast("eye");
-RtToken RI_NDC              = tokenCast("ndc");
-RtToken RI_AMPLITUDE        = tokenCast("amplitude");
-RtToken RI_COMMENT          = tokenCast("comment");
-RtToken RI_CONSTANTWIDTH    = tokenCast("constantwidth");
-RtToken RI_KR               = tokenCast("Kr");
-RtToken RI_SHINYMETAL       = tokenCast("shinymetal");
-RtToken RI_STRUCTURE        = tokenCast("structure");
-RtToken RI_TEXTURENAME      = tokenCast("texturename");
-RtToken RI_VERBATIM         = tokenCast("verbatim");
-RtToken RI_WIDTH            = tokenCast("width");
-
-RtBasis	RiBezierBasis	= {{ -1.0f,       3.0f,      -3.0f,       1.0f},
-                         {  3.0f,      -6.0f,       3.0f,       0.0f},
-                         { -3.0f,       3.0f,       0.0f,       0.0f},
-                         {  1.0f,       0.0f,       0.0f,       0.0f}};
-RtBasis	RiBSplineBasis	= {{ -1.0f/6.0f,  0.5f,      -0.5f,       1.0f/6.0f},
-                          {  0.5f,      -1.0f,       0.5f,       0.0f},
-                          { -0.5f,       0.0f,	      0.5f,       0.0f},
-                          {  1.0f/6.0f,  2.0f/3.0f,  1.0f/6.0f,  0.0f}};
-RtBasis	RiCatmullRomBasis={{ -0.5f,       1.5f,      -1.5f,       0.5f},
-                           {  1.0f,      -2.5f,       2.0f,      -0.5f},
-                           { -0.5f,       0.0f,       0.5f,       0.0f},
-                           {  0.0f,       1.0f,       0.0f,       0.0f}};
-RtBasis	RiHermiteBasis	= {{  2.0f,       1.0f,      -2.0f,       1.0f},
-                          { -3.0f,      -2.0f,       3.0f,      -1.0f},
-                          {  0.0f,       1.0f,       0.0f,       0.0f},
-                          {  1.0f,       0.0f,       0.0f,       0.0f}};
-RtBasis	RiPowerBasis	= {{  1.0f,       0.0f,       0.0f,       0.0f},
-                        {  0.0f,       1.0f,       0.0f,       0.0f},
-                        {  0.0f,       0.0f,       1.0f,       0.0f},
-                        {  0.0f,       0.0f,       0.0f,       1.0f}};
 
 enum RIL_POINTS
 {
@@ -319,115 +145,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 	CreateGPrim( boost::static_pointer_cast<CqSurface,T>( pSurface ) );
 }
 
-//--------------------------------------------------------------------------------
-// Procedure parameter constraints checking
-
-/** \param Check that a constraint on a variable is true.
- *
- * Checks that (val1 cmp val2), and if not throws an XqValidation.  The what()
- * string of the XqValidation contains relevant error information
- */
-#define PARAM_CONSTRAINT_CHECK(val1, cmp, val2) \
-	parameterConstraintCheck((val1) cmp (val2), val1, val2, #val1, #val2, #cmp)
-
-/** \brief check that a constraint is true
- *
- * Don't use this directly - it's designed to be used indirectly via the
- * PARAM_CONSTRAINT_CHECK macro.
- *
- * \throw XqValidation if the condition isn't true.
- *
- * The thrown error contains the relevant validation failure information in its
- * what() string.
- */
-template<typename T1, typename T2>
-void parameterConstraintCheck(bool condition, const T1& val1, const T2& val2,
-		const char* val1Str, const char* val2Str, const char* cmpStr)
-{
-	if(!condition)
-	{
-		std::ostringstream out;
-		out << "parameter check "
-			<< "\"" << val1Str << " " << cmpStr << " " << val2Str << "\""
-			<< " failed: [" << val1 << " not " << cmpStr << " " << val2 << "]";
-		AQSIS_THROW_XQERROR(XqValidation, EqE_Consistency, out.str());
-	}
-}
-
-//----------------------------------------------------------------------
-// ValidateState
-// Check that the currect graphics state is one of those specified.
-//
-bool	ValidateState(int count, ... )
-{
-	va_list	pArgs;
-	va_start( pArgs, count );
-
-	int currentState = Outside;
-	if(  QGetRenderContext() != NULL && QGetRenderContext()->pconCurrent() )
-		currentState = QGetRenderContext()->pconCurrent()->Type();
-
-	int i;
-	for(i=0; i<count; i++)
-	{
-		int state = va_arg( pArgs, int );
-		if( currentState == state )
-			return(true);
-	}
-	return(false);
-}
-
-
-//----------------------------------------------------------------------
-// GetStateAsString
-// Get a string representing the current state.
-//
-const char*	GetStateAsString()
-{
-	int currentState = Outside;
-	if( QGetRenderContext()->pconCurrent() )
-		currentState = QGetRenderContext()->pconCurrent()->Type();
-	switch( currentState )
-	{
-			case Outside:
-			return("Outside");
-			break;
-
-			case BeginEnd:
-			return("BeginEnd");
-			break;
-
-			case Frame:
-			return("Frame");
-			break;
-
-			case World:
-			return("World");
-			break;
-
-			case Attribute:
-			return("Attribute");
-			break;
-
-			case Transform:
-			return("Transform");
-			break;
-
-			case Solid:
-			return("Solid");
-			break;
-
-			case Object:
-			return("Object");
-			break;
-
-			case Motion:
-			return("Motion");
-			break;
-	}
-	return("");
-}
-
 
 //----------------------------------------------------------------------
 // RiDeclare
@@ -435,15 +152,6 @@ const char*	GetStateAsString()
 //
 RtToken	RiDeclare( RtString name, RtString declaration )
 {
-	VALIDATE_CONDITIONAL0
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDECLARE
-
-	VALIDATE_RIDECLARE
-
-	DEBUG_RIDECLARE
-
 	CqPrimvarToken tok;
 	if(declaration)
 		tok = CqPrimvarToken(declaration, name);
@@ -451,7 +159,6 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 		tok = CqPrimvarToken(class_invalid, type_invalid, 0, name);
 	QGetRenderContext()->tokenDict().insert(tok);
 
-	EXCEPTION_CATCH_GUARD("RiDeclare")
 	return ( 0 );
 }
 
@@ -460,7 +167,7 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 // SetDefaultRiOptions
 // Set some Default Options.
 //
-void SetDefaultRiOptions( void )
+void SetDefaultRiOptions()
 {
 	// Get the root path for the aqsis installation.
 	boost::filesystem::path rootPath;
@@ -636,11 +343,6 @@ void SetDefaultRiOptions( void )
 //
 RtVoid	RiBegin( RtToken name )
 {
-	EXCEPTION_TRY_GUARD
-	VALIDATE_RIBEGIN
-
-	DEBUG_RIBEGIN
-
 	// Create a new renderer
 	QSetRenderContext( new CqRenderer );
 
@@ -661,9 +363,6 @@ RtVoid	RiBegin( RtToken name )
 	// Setup the initial transformation.
 	//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( false );
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
-
-	EXCEPTION_CATCH_GUARD("RiBegin")
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -672,11 +371,6 @@ RtVoid	RiBegin( RtToken name )
 //
 RtVoid	RiEnd()
 {
-	EXCEPTION_TRY_GUARD
-	VALIDATE_RIEND
-
-	DEBUG_RIEND
-
 	QGetRenderContext() ->EndMainModeBlock();
 
 	// Clear the lightsources stack.
@@ -685,9 +379,6 @@ RtVoid	RiEnd()
 	// Delete the renderer
 	delete( QGetRenderContext() );
 	QSetRenderContext( 0 );
-
-	EXCEPTION_CATCH_GUARD("RiEnd")
-	return ;
 }
 
 
@@ -697,15 +388,6 @@ RtVoid	RiEnd()
 //
 RtVoid	RiFrameBegin( RtInt number )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIFRAMEBEGIN
-
-	VALIDATE_RIFRAMEBEGIN
-
-	DEBUG_RIFRAMEBEGIN
-
 	// Initialise the statistics variables. If the RIB doesn't contain
 	// a Frame-block the initialisation was previously done in CqStats::Initilise()
 	// which has to be called before a rendering session.
@@ -726,9 +408,6 @@ RtVoid	RiFrameBegin( RtInt number )
 
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
-
-	EXCEPTION_CATCH_GUARD("RiFrameBegin")
-	return ;
 }
 
 
@@ -738,20 +417,8 @@ RtVoid	RiFrameBegin( RtInt number )
 //
 RtVoid	RiFrameEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIFRAMEEND
-
-	VALIDATE_RIFRAMEEND
-
-	DEBUG_RIFRAMEEND
-
 	QGetRenderContext() ->EndFrameModeBlock();
 	QGetRenderContext() ->ClearDisplayRequests();
-
-	EXCEPTION_CATCH_GUARD("RiFrameEnd")
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -761,15 +428,6 @@ RtVoid	RiFrameEnd()
 //
 RtVoid	RiWorldBegin()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIWORLDBEGIN
-
-	VALIDATE_RIWORLDBEGIN
-
-	DEBUG_RIWORLDBEGIN
-
 	// Call any specified pre world function.
 	if ( QGetRenderContext()->pPreWorldFunction() != NULL )
 		( *QGetRenderContext()->pPreWorldFunction() ) ();
@@ -856,9 +514,6 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext()->pImage()->SetImage();
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
-
-	EXCEPTION_CATCH_GUARD("RiWorldBegin")
-	return ;
 }
 
 
@@ -869,15 +524,6 @@ RtVoid	RiWorldBegin()
 
 RtVoid	RiWorldEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIWORLDEND
-
-	VALIDATE_RIWORLDEND
-
-	DEBUG_RIWORLDEND
-
 	QGetRenderContext()->RenderAutoShadows();
 
 	bool fFailed = false;
@@ -921,20 +567,17 @@ RtVoid	RiWorldEnd()
 
 	if ( !fFailed )
 	{
-		// Get the verbosity level from the options...
+		// Get the verbosity level from the options..
 		TqInt verbosity = 0;
 		const TqInt* poptEndofframe = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "statistics", "endofframe" );
 		if ( poptEndofframe != 0 )
 			verbosity = poptEndofframe[ 0 ];
 
-		// ...and print the statistics.
+		// ..and print the statistics.
 		QGetRenderContext() ->Stats().PrintStats( verbosity );
 	}
 
 	QGetRenderContext()->SetWorldBegin(false);
-
-	EXCEPTION_CATCH_GUARD("RiWorldEnd")
-	return ;
 }
 
 
@@ -944,21 +587,9 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIFORMAT
-
-	VALIDATE_RIFORMAT
-
-	DEBUG_RIFORMAT
-
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = xresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
-
-	EXCEPTION_CATCH_GUARD("RiFormat")
-	return ;
 }
 
 
@@ -968,24 +599,10 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIFRAMEASPECTRATIO
-
-	VALIDATE_RIFRAMEASPECTRATIO
-
-	DEBUG_RIFRAMEASPECTRATIO
-
-	PARAM_CONSTRAINT_CHECK(frameratio, >, 0);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
 	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraFARSet;
-
-	EXCEPTION_CATCH_GUARD("RiFrameAspectRatio")
-	return ;
 }
 
 
@@ -996,15 +613,6 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 //
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISCREENWINDOW
-
-	VALIDATE_RISCREENWINDOW
-
-	DEBUG_RISCREENWINDOW
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = left ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = right ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = top ;
@@ -1012,9 +620,6 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
 	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraScreenWindowSet;
-
-	EXCEPTION_CATCH_GUARD("RiScreenWindow")
-	return ;
 }
 
 
@@ -1025,51 +630,10 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICROPWINDOW
-
-	VALIDATE_RICROPWINDOW
-
-	DEBUG_RICROPWINDOW
-
-	PARAM_CONSTRAINT_CHECK(xmin, >=, 0.0f);
-	PARAM_CONSTRAINT_CHECK(xmin, <=, 1.0f);
-	PARAM_CONSTRAINT_CHECK(xmax, >=, 0.0f);
-	PARAM_CONSTRAINT_CHECK(xmax, <=, 1.0f);
-	PARAM_CONSTRAINT_CHECK(ymin, >=, 0.0f);
-	PARAM_CONSTRAINT_CHECK(ymin, <=, 1.0f);
-	PARAM_CONSTRAINT_CHECK(ymax, >=, 0.0f);
-	PARAM_CONSTRAINT_CHECK(ymax, <=, 1.0f);
-	PARAM_CONSTRAINT_CHECK(xmin, <, xmax);
-	PARAM_CONSTRAINT_CHECK(ymin, <, ymax);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = xmin ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = xmax ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = ymin ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 3 ] = ymax ;
-
-	EXCEPTION_CATCH_GUARD("RiCropWindow")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiProjection
-// Set the camera projection to be used.
-//
-RtVoid	RiProjection( RtToken name, ... )
-{
-	if(NULL != name)
-	{
-		AQSIS_COLLECT_RI_PARAMETERS( name )
-		RiProjectionV( name, AQSIS_PASS_RI_PARAMETERS );
-	}
-	else
-	{
-		RiProjectionV( name, 0, NULL, NULL );
-	}
 }
 
 
@@ -1079,15 +643,6 @@ RtVoid	RiProjection( RtToken name, ... )
 //
 RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPROJECTION
-
-	VALIDATE_RIPROJECTION
-
-	DEBUG_RIPROJECTION
-
 	if(NULL != name)
 	{
 		if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
@@ -1115,9 +670,6 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
 	QGetRenderContext() ->SetpreProjectionTransform( QGetRenderContext() ->ptransCurrent() );
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
-
-	EXCEPTION_CATCH_GUARD("RiProjectionV")
-	return ;
 }
 
 
@@ -1127,23 +679,8 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICLIPPING
-
-	VALIDATE_RICLIPPING
-
-	DEBUG_RICLIPPING
-
-	PARAM_CONSTRAINT_CHECK(cnear, <, cfar);
-	PARAM_CONSTRAINT_CHECK(cnear, >=, RI_EPSILON);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar;
-
-	EXCEPTION_CATCH_GUARD("RiClipping")
-	return ;
 }
 
 
@@ -1153,24 +690,9 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDEPTHOFFIELD
-
-	VALIDATE_RIDEPTHOFFIELD
-
-	DEBUG_RIDEPTHOFFIELD
-
-	PARAM_CONSTRAINT_CHECK(fstop, >, 0.0f);
-	PARAM_CONSTRAINT_CHECK(focallength, >, 0.0f);
-	PARAM_CONSTRAINT_CHECK(focaldistance, >, 0.0f);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
-
-	EXCEPTION_CATCH_GUARD("RiDepthOfField")
 }
 
 
@@ -1180,20 +702,8 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISHUTTER
-
-	VALIDATE_RISHUTTER
-
-	DEBUG_RISHUTTER
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime;
-
-	EXCEPTION_CATCH_GUARD("RiShutter")
-	return ;
 }
 
 
@@ -1204,21 +714,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPIXELVARIANCE
-
-	VALIDATE_RIPIXELVARIANCE
-
-	DEBUG_RIPIXELVARIANCE
-
-	PARAM_CONSTRAINT_CHECK(variance, >=, 0.0f);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelVariance" ) [ 0 ] = variance ;
-
-	EXCEPTION_CATCH_GUARD("RiPixelVariance")
-	return ;
 }
 
 
@@ -1228,23 +724,8 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPIXELSAMPLES
-
-	VALIDATE_RIPIXELSAMPLES
-
-	DEBUG_RIPIXELSAMPLES
-
-	PARAM_CONSTRAINT_CHECK(xsamples, >=, 1.0f);
-	PARAM_CONSTRAINT_CHECK(ysamples, >=, 1.0f);
-
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = static_cast<TqInt>( xsamples ) ;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = static_cast<TqInt>( ysamples ) ;
-
-	EXCEPTION_CATCH_GUARD("RiPixelSamples")
-	return ;
 }
 
 
@@ -1254,25 +735,9 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 //
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	PARAM_CONSTRAINT_CHECK(function, !=, 0);
-	PARAM_CONSTRAINT_CHECK(xwidth, >, 0.0f);
-	PARAM_CONSTRAINT_CHECK(ywidth, >, 0.0f);
-
-	CACHE_RIPIXELFILTER
-
-	VALIDATE_RIPIXELFILTER
-
-	DEBUG_RIPIXELFILTER
-
 	QGetRenderContext() ->poptWriteCurrent()->SetfuncFilter( function );
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = xwidth ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = ywidth ;
-
-	EXCEPTION_CATCH_GUARD("RiPixelFilter")
-	return ;
 }
 
 
@@ -1282,50 +747,17 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 //
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIEXPOSURE
-
-	VALIDATE_RIEXPOSURE
-
-	DEBUG_RIEXPOSURE
-
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 0 ] = gain ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 1 ] = gamma ;
-
-	EXCEPTION_CATCH_GUARD("RiExposure")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiImager
-// Specify a prepocessing imager shader.
-//
-RtVoid	RiImager( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiImagerV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiImagerV
-// List based version of above.
+// Specify a prepocessing imager shader.
 //
 RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIIMAGER
-
-	VALIDATE_RIIMAGER
-
-	DEBUG_RIIMAGER
-
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadImager = QGetRenderContext()->CreateShader( name, Type_Imager );
 
@@ -1344,8 +776,6 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 		if(pMultipass && !pMultipass[0])
 			pshadImager->PrepareShaderForUse();
 	}
-	EXCEPTION_CATCH_GUARD("RiImagerV")
-	return ;
 }
 
 
@@ -1355,15 +785,6 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIQUANTIZE
-
-	VALIDATE_RIQUANTIZE
-
-	DEBUG_RIQUANTIZE
-
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
 		TqFloat* pColorQuantize = QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "Quantize", "Color" );
@@ -1388,39 +809,15 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 		quantOpt[2] = static_cast<TqFloat>( max );
 		quantOpt[3] = static_cast<TqFloat>( ditheramplitude );
 	}
-
-	EXCEPTION_CATCH_GUARD("RiQuantize")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiDisplay
-// Set the final output name and type.
-//
-RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( mode )
-
-	RiDisplayV( name, type, mode, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiDisplayV
-// List based version of above.
+// Set the final output name and type.
 //
 RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDISPLAY
-
-	VALIDATE_RIDISPLAY
-
-	DEBUG_RIDISPLAY
-
 	CqString strName( name );
 	CqString strType( type );
 
@@ -1492,37 +889,14 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 		// Add a display driver to the list of requested drivers.
 		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), dataName.c_str(), eValue, dataOffset, dataSize, mapOfArguments );
 	}
-	EXCEPTION_CATCH_GUARD("RiDisplayV")
-	return ;
-}
-
-//----------------------------------------------------------------------
-// RiHider
-// Specify a hidden surface calculation mode.
-//
-RtVoid	RiHider( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiHiderV( name, AQSIS_PASS_RI_PARAMETERS );
-
 }
 
 //----------------------------------------------------------------------
 // RiHiderV
-// List based version of above.
+// Specify a hidden surface calculation mode.
 //
 RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIHIDER
-
-	VALIDATE_RIHIDER
-
-	DEBUG_RIHIDER
-
 	if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
 	{
 		QGetRenderContext() ->poptWriteCurrent()->GetStringOptionWrite( "System", "Hider" ) [ 0 ] = name ;
@@ -1547,9 +921,6 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 		else if ( hash == RIH_JITTER )
 		  RiOption( tokenCast("Hider"), "jitter", ( RtFloat* ) values[ i ], NULL );
 	}
-
-	EXCEPTION_CATCH_GUARD("RiHiderV")
-	return ;
 }
 
 
@@ -1559,18 +930,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICOLORSAMPLES
-
-	VALIDATE_RICOLORSAMPLES
-
-	DEBUG_RICOLORSAMPLES
-
 	Aqsis::log() << warning << "RiColorSamples not supported" << std::endl;
-	EXCEPTION_CATCH_GUARD("RiColorSamples")
-	return ;
 }
 
 
@@ -1580,15 +940,6 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 //
 RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIRELATIVEDETAIL
-
-	VALIDATE_RIRELATIVEDETAIL
-
-	DEBUG_RIRELATIVEDETAIL
-
 	if ( relativedetail < 0.0f )
 	{
 		Aqsis::log() << error << "RiRelativeDetail < 0.0" << std::endl;
@@ -1597,37 +948,15 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 	{
 		QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "RelativeDetail" ) [ 0 ] = relativedetail;
 	}
-	EXCEPTION_CATCH_GUARD("RiRelativeDetail")
-	return ;
 }
 
-
-//----------------------------------------------------------------------
-// RiOption
-// Specify system specific option.
-//
-RtVoid	RiOption( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiOptionV( name, AQSIS_PASS_RI_PARAMETERS );
-}
 
 //----------------------------------------------------------------------
 // RiOptionV
-// List based version of above.
+// Specify system specific option.
 //
 RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIOPTION
-
-	VALIDATE_RIOPTION
-
-	DEBUG_RIOPTION
-
 	for ( TqInt i = 0; i < count; ++i )
 	{
 		RtToken	token = tokens[ i ];
@@ -1776,8 +1105,6 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			break;
 		}
 	}
-	EXCEPTION_CATCH_GUARD("RiOptionV")
-	return ;
 }
 
 
@@ -1787,19 +1114,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiAttributeBegin()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIATTRIBUTEBEGIN
-
-	VALIDATE_RIATTRIBUTEBEGIN
-
-	DEBUG_RIATTRIBUTEBEGIN
-
 	QGetRenderContext() ->BeginAttributeModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiAttributeBegin")
-	return ;
 }
 
 
@@ -1809,19 +1124,7 @@ RtVoid	RiAttributeBegin()
 //
 RtVoid	RiAttributeEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIATTRIBUTEEND
-
-	VALIDATE_RIATTRIBUTEEND
-
-	DEBUG_RIATTRIBUTEEND
-
 	QGetRenderContext() ->EndAttributeModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiAttributeEnd")
-	return ;
 }
 
 
@@ -1831,19 +1134,8 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor( RtColor Cq )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICOLOR
-
-	VALIDATE_RICOLOR
-
-	DEBUG_RICOLOR
-
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiColor")
-	return ;
 }
 
 
@@ -1853,19 +1145,8 @@ RtVoid	RiColor( RtColor Cq )
 //
 RtVoid	RiOpacity( RtColor Os )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIOPACITY
-
-	VALIDATE_RIOPACITY
-
-	DEBUG_RIOPACITY
-
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiOpacity")
-	return ;
 }
 
 
@@ -1878,15 +1159,6 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITEXTURECOORDINATES
-
-	VALIDATE_RITEXTURECOORDINATES
-
-	DEBUG_RITEXTURECOORDINATES
-
 	TqFloat * pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "TextureCoordinates" );
 
 	assert( NULL != pTC );
@@ -1900,39 +1172,15 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
 	pTC[ 6 ] = s4;
 	pTC[ 7 ] = t4;
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiTextureCoordinates")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiLightSource
-// Create a new light source at the current transformation.
-//
-RtLightHandle	RiLightSource( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	return ( RiLightSourceV( name, AQSIS_PASS_RI_PARAMETERS ) );
 }
 
 
 //----------------------------------------------------------------------
 // RiLightSourceV
-// List based version of above.
+// Create a new light source at the current transformation.
 //
 RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL0
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RILIGHTSOURCE
-
-	VALIDATE_RILIGHTSOURCE
-
-	DEBUG_RILIGHTSOURCE
-
 	// Find the lightsource shader.
 	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
 	if(!pShader)
@@ -1969,45 +1217,21 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
 		return ( reinterpret_cast<RtLightHandle>( pNew.get() ) );
 	}
-	EXCEPTION_CATCH_GUARD("RiLightSourceV")
-	return ( 0 );
-}
-
-
-//----------------------------------------------------------------------
-// RiAreaLightSource
-// Create a new area light source at the current transformation, all
-// geometric primitives until the next RiAttributeEnd, become part of this
-// area light source.
-//
-RtLightHandle	RiAreaLightSource( RtToken name, ... )
-{
-
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	return ( RiAreaLightSourceV( name, AQSIS_PASS_RI_PARAMETERS ) );
+	return 0;
 }
 
 
 //----------------------------------------------------------------------
 // RiAreaLightSourceV
-// List based version of above.
+// Create a new area light source at the current transformation, all
+// geometric primitives until the next RiAttributeEnd, become part of this
+// area light source.
 //
 RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL0
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIAREALIGHTSOURCE
-
-	VALIDATE_RIAREALIGHTSOURCE
-
-	DEBUG_RIAREALIGHTSOURCE
-
 	Aqsis::log() << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
-	EXCEPTION_CATCH_GUARD("RiAreaLightSourceV")
-	return ( RiLightSourceV( name, count, tokens, values ) );
+	return RiLightSourceV( name, count, tokens, values );
 }
 
 
@@ -2017,15 +1241,6 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIILLUMINATE
-
-	VALIDATE_RIILLUMINATE
-
-	DEBUG_RIILLUMINATE
-
 	// Check if we are turning the light on or off.
 	if ( light == NULL ) return ;
 
@@ -2035,39 +1250,15 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
 	else
 		QGetRenderContext() ->pattrWriteCurrent() ->RemoveLightsource( pL );
-	EXCEPTION_CATCH_GUARD("RiIlluminate")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiSurface
-// Set the current surface shader, used by geometric primitives.
-//
-RtVoid	RiSurface( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiSurfaceV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiSurfaceV
-// List based version of above.
+// Set the current surface shader, used by geometric primitives.
 //
 RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
-
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISURFACE
-
-	VALIDATE_RISURFACE
-
-	DEBUG_RISURFACE
-
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadSurface = QGetRenderContext()->CreateShader( name, Type_Surface );
 
@@ -2092,38 +1283,15 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
 	}
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiSurfaceV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiAtmosphere
-// Set the current atrmospheric shader.
-//
-RtVoid	RiAtmosphere( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiAtmosphereV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiAtmosphereV
-// List based version of above.
+// Set the current atrmospheric shader.
 //
 RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIATMOSPHERE
-
-	VALIDATE_RIATMOSPHERE
-
-	DEBUG_RIATMOSPHERE
-
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadAtmosphere = QGetRenderContext()->CreateShader( name, Type_Volume );
 
@@ -2147,72 +1315,26 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadAtmosphere( pshadAtmosphere, QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiAtmosphereV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiInterior
-// Set the current interior volumetric shader.
-//
-RtVoid	RiInterior( RtToken name, ... )
-{
-	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiInteriorV
-// List based version of above.
+// Set the current interior volumetric shader.
 //
 RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIINTERIOR
-
-	VALIDATE_RIINTERIOR
-
-	DEBUG_RIINTERIOR
-
 	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
-	EXCEPTION_CATCH_GUARD("RiInteriorV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiExterior
-// Set the current exterior volumetric shader.
-//
-RtVoid	RiExterior( RtToken name, ... )
-{
-	Aqsis::log() << warning << "RiExterior not supported" << std::endl;
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiExteriorV
-// List based version of above.
+// Set the current exterior volumetric shader.
 //
 RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIEXTERIOR
-
-	VALIDATE_RIEXTERIOR
-
-	DEBUG_RIEXTERIOR
-
 	Aqsis::log() << warning << "ExInterior not supported" << std::endl;
-	EXCEPTION_CATCH_GUARD("RiExteriorV")
-	return ;
 }
 
 
@@ -2222,22 +1344,8 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISHADINGRATE
-
-	VALIDATE_RISHADINGRATE
-
-	DEBUG_RISHADINGRATE
-
-	PARAM_CONSTRAINT_CHECK(size, >, 0.0f);
-
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiShadingRate")
-	return ;
 }
 
 
@@ -2247,15 +1355,6 @@ RtVoid	RiShadingRate( RtFloat size )
 //
 RtVoid	RiShadingInterpolation( RtToken type )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISHADINGINTERPOLATION
-
-	VALIDATE_RISHADINGINTERPOLATION
-
-	DEBUG_RISHADINGINTERPOLATION
-
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
 		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Constant;
 	else if ( strcmp( type, RI_SMOOTH ) == 0 )
@@ -2264,8 +1363,6 @@ RtVoid	RiShadingInterpolation( RtToken type )
 		Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiShadingInterpolation")
-	return ;
 }
 
 
@@ -2275,19 +1372,8 @@ RtVoid	RiShadingInterpolation( RtToken type )
 //
 RtVoid	RiMatte( RtBoolean onoff )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMATTE
-
-	VALIDATE_RIMATTE
-
-	DEBUG_RIMATTE
-
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff;
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiMatte")
-	return ;
 }
 
 
@@ -2297,20 +1383,8 @@ RtVoid	RiMatte( RtBoolean onoff )
 //
 RtVoid	RiBound( RtBound bound )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIBOUND
-
-	VALIDATE_RIBOUND
-
-	DEBUG_RIBOUND
-
 	// TODO: Need to add a "Bound" attribute here, and fill it in.
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiBound")
-	return ;
 }
 
 
@@ -2320,15 +1394,6 @@ RtVoid	RiBound( RtBound bound )
 //
 RtVoid	RiDetail( RtBound bound )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDETAIL
-
-	VALIDATE_RIDETAIL
-
-	DEBUG_RIDETAIL
-
 	CqBound Bound( bound );
 
 	TqFloat* boundAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LODBound" );
@@ -2338,9 +1403,6 @@ RtVoid	RiDetail( RtBound bound )
 	boundAttr[3] = bound[3];
 	boundAttr[4] = bound[4];
 	boundAttr[5] = bound[5];
-
-	EXCEPTION_CATCH_GUARD("RiDetail")
-	return ;
 }
 
 
@@ -2350,15 +1412,6 @@ RtVoid	RiDetail( RtBound bound )
 //
 RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDETAILRANGE
-
-	VALIDATE_RIDETAILRANGE
-
-	DEBUG_RIDETAILRANGE
-
 	if ( offlow > onlow || onhigh > offhigh )
 	{
 		Aqsis::log() << error << "RiDetailRange invalid range" << std::endl;
@@ -2370,8 +1423,6 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 	rangeAttr[1] = onlow;
 	rangeAttr[2] = onhigh;
 	rangeAttr[3] = offhigh;
-	EXCEPTION_CATCH_GUARD("RiDetailRange")
-	return ;
 }
 
 
@@ -2381,18 +1432,6 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIGEOMETRICAPPROXIMATION
-
-	VALIDATE_RIGEOMETRICAPPROXIMATION
-
-	DEBUG_RIGEOMETRICAPPROXIMATION
-
-	PARAM_CONSTRAINT_CHECK(type, !=, 0);
-	PARAM_CONSTRAINT_CHECK(value, >=, 0);
-
 	std::string typeStr = type;
 	if(typeStr == RI_FLATNESS)
 	{
@@ -2418,8 +1457,6 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 	{
 		Aqsis::log() << warning << "RiGeometricApproximation type not known\n";
 	}
-
-	EXCEPTION_CATCH_GUARD("RiGeometricApproximation")
 }
 
 
@@ -2429,15 +1466,6 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 //
 RtVoid	RiOrientation( RtToken orientation )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIORIENTATION
-
-	VALIDATE_RIORIENTATION
-
-	DEBUG_RIORIENTATION
-
 	if ( orientation != 0 )
 	{
 		if ( strstr( orientation, RI_RH ) != 0 )
@@ -2450,8 +1478,6 @@ RtVoid	RiOrientation( RtToken orientation )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
 	}
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiOrientation")
-	return ;
 }
 
 
@@ -2461,19 +1487,8 @@ RtVoid	RiOrientation( RtToken orientation )
 //
 RtVoid	RiReverseOrientation()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIREVERSEORIENTATION
-
-	VALIDATE_RIREVERSEORIENTATION
-
-	DEBUG_RIREVERSEORIENTATION
-
 	QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiReverseOrientation")
-	return ;
 }
 
 
@@ -2483,20 +1498,8 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides( RtInt nsides )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISIDES
-
-	VALIDATE_RISIDES
-
-	DEBUG_RISIDES
-
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Sides" ) [ 0 ] = nsides;
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiSides")
-	return ;
 }
 
 
@@ -2506,19 +1509,8 @@ RtVoid	RiSides( RtInt nsides )
 //
 RtVoid	RiIdentity()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIIDENTITY
-
-	VALIDATE_RIIDENTITY
-
-	DEBUG_RIIDENTITY
-
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiIdentity")
-	return ;
 }
 
 
@@ -2527,15 +1519,6 @@ RtVoid	RiIdentity()
 //
 RtVoid	RiTransform( RtMatrix transform )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITRANSFORM
-
-	VALIDATE_RITRANSFORM
-
-	DEBUG_RITRANSFORM
-
 	CqMatrix matTrans( transform );
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 	//        QGetRenderContext() ->ptransWriteCurrent() ->FlipHandedness( QGetRenderContext() ->Time() );
@@ -2552,9 +1535,6 @@ RtVoid	RiTransform( RtMatrix transform )
 	else
 		QGetRenderContext() ->ptransSetTime( matTrans );
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiTransform")
-	return ;
 }
 
 
@@ -2564,15 +1544,6 @@ RtVoid	RiTransform( RtMatrix transform )
 //
 RtVoid	RiConcatTransform( RtMatrix transform )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICONCATTRANSFORM
-
-	VALIDATE_RICONCATTRANSFORM
-
-	DEBUG_RICONCATTRANSFORM
-
 	// Check if this transformation results in a change in orientation.
 	CqMatrix matTrans( transform );
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -2580,8 +1551,6 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( CqMatrix( transform ) );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiConcatTransform")
-	return ;
 }
 
 
@@ -2591,15 +1560,6 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 //
 RtVoid	RiPerspective( RtFloat fov )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPERSPECTIVE
-
-	VALIDATE_RIPERSPECTIVE
-
-	DEBUG_RIPERSPECTIVE
-
 	if ( fov <= 0 )
 	{
 		Aqsis::log() << error << "RiPerspective invalid FOV" << std::endl;
@@ -2617,9 +1577,6 @@ RtVoid	RiPerspective( RtFloat fov )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matP );
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiPerspective")
-	return ;
 }
 
 
@@ -2629,15 +1586,6 @@ RtVoid	RiPerspective( RtFloat fov )
 //
 RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITRANSLATE
-
-	VALIDATE_RITRANSLATE
-
-	DEBUG_RITRANSLATE
-
 	CqMatrix	matTrans( CqVector3D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -2645,9 +1593,6 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matTrans );
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiTranslate")
-	return ;
 }
 
 
@@ -2657,15 +1602,6 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIROTATE
-
-	VALIDATE_RIROTATE
-
-	DEBUG_RIROTATE
-
 	CqMatrix	matRot( degToRad( angle ), CqVector3D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -2673,8 +1609,6 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matRot );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiRotate")
-	return ;
 }
 
 
@@ -2684,15 +1618,6 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISCALE
-
-	VALIDATE_RISCALE
-
-	DEBUG_RISCALE
-
 	CqMatrix	matScale( sx, sy, sz );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matScale.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -2700,8 +1625,6 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matScale );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiScale")
-	return ;
 }
 
 
@@ -2712,85 +1635,31 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISKEW
-
-	VALIDATE_RISKEW
-
-	DEBUG_RISKEW
-
 	CqMatrix	matSkew( degToRad( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
 
 	// This transformation can not change orientation.
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matSkew );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiSkew")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiDeformation
-// Specify a deformation shader to be included into the current transformation.
-//
-RtVoid	RiDeformation( RtToken name, ... )
-{
-	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiDeformationV
-// List based version of above.
+// Specify a deformation shader to be included into the current transformation.
 //
 RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDEFORMATION
-
-	VALIDATE_RIDEFORMATION
-
-	DEBUG_RIDEFORMATION
-
 	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
-	EXCEPTION_CATCH_GUARD("RiDeformationV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiDisplacement
-// Specify the current displacement shade used by geometric primitives.
-//
-RtVoid	RiDisplacement( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	RiDisplacementV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiDisplacementV
-// List based version of above.
+// Specify the current displacement shade used by geometric primitives.
 //
 RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDISPLACEMENT
-
-	VALIDATE_RIDISPLACEMENT
-
-	DEBUG_RIDISPLACEMENT
-
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
 
@@ -2814,8 +1683,6 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadDisplacement( pshadDisplacement, QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiDisplacementV")
-	return ;
 }
 
 
@@ -2825,21 +1692,9 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiCoordinateSystem( RtToken space )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICOORDINATESYSTEM
-
-	VALIDATE_RICOORDINATESYSTEM
-
-	DEBUG_RICOORDINATESYSTEM
-
 	// Insert the named coordinate system into the list help on the renderer.
 	QGetRenderContext() ->SetCoordSystem( space, QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
 	QGetRenderContext() ->AdvanceTime();
-
-	EXCEPTION_CATCH_GUARD("RiCoordinateSystem")
-	return ;
 }
 
 
@@ -2850,15 +1705,6 @@ RtVoid	RiCoordinateSystem( RtToken space )
 
 RtVoid	RiCoordSysTransform( RtToken space )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICOORDSYSTRANSFORM
-
-	VALIDATE_RICOORDSYSTRANSFORM
-
-	DEBUG_RICOORDSYSTRANSFORM
-
 	// Insert the named coordinate system into the list help on the renderer.
 	CqMatrix matSpaceToWorld;
 	QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time(), matSpaceToWorld ); 
@@ -2876,10 +1722,6 @@ RtVoid	RiCoordSysTransform( RtToken space )
 		QGetRenderContext() ->ptransSetCurrentTime( matSpaceToWorld );
 
 	QGetRenderContext() ->AdvanceTime();
-
-
-	EXCEPTION_CATCH_GUARD("RiCoordSysTransform")
-	return ;
 }
 
 
@@ -2889,12 +1731,6 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	CACHE_RITRANSFORMPOINTS
-
-	VALIDATE_RITRANSFORMPOINTS
-
-	DEBUG_RITRANSFORMPOINTS
-
 	CqMatrix matCToW;
 	if(QGetRenderContext() ->matSpaceToSpace( fromspace,
 	                   tospace, NULL, NULL, QGetRenderContextI()->Time(), matCToW ))
@@ -2913,7 +1749,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 
 		return ( points );
 	}
-	return(NULL);
+	return 0;
 }
 
 
@@ -2923,19 +1759,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 //
 RtVoid	RiTransformBegin()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITRANSFORMBEGIN
-
-	VALIDATE_RITRANSFORMBEGIN
-
-	DEBUG_RITRANSFORMBEGIN
-
 	QGetRenderContext() ->BeginTransformModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiTransformBegin")
-	return ;
 }
 
 
@@ -2945,60 +1769,16 @@ RtVoid	RiTransformBegin()
 //
 RtVoid	RiTransformEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITRANSFORMEND
-
-	VALIDATE_RITRANSFORMEND
-
-	DEBUG_RITRANSFORMEND
-
 	QGetRenderContext() ->EndTransformModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiTransformEnd")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiAttribute
-// Set a system specific attribute.
-//
-RtVoid	RiAttribute( RtToken name, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( name )
-
-	const TqUlong hash = CqString::hash(name);
-
-	if (hash == RIH_RENDER)
-		return;
-	if (hash == RIH_INDIRECT)
-		return;
-	if (hash == RIH_LIGHT)
-		return;
-	if (hash == RIH_VISIBILITY)
-		return;
-
-	RiAttributeV( name, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiAttributeV
-// List based version of above.
+// Set a system specific attribute.
 //
 RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIATTRIBUTE
-
-	VALIDATE_RIATTRIBUTE
-
-	DEBUG_RIATTRIBUTE
-
 	const TqUlong hash = CqString::hash(name);
 
 	if (hash == RIH_RENDER)
@@ -3108,37 +1888,15 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 					<< "\": unimplemented attribute type [" << token << "]\n";
 		}
 	}
-	EXCEPTION_CATCH_GUARD("RiAttributeV")
-}
-
-
-//----------------------------------------------------------------------
-// RiPolygon
-// Specify a coplanar, convex polygon.
-//
-RtVoid	RiPolygon( RtInt nvertices, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( nvertices )
-
-	RiPolygonV( nvertices, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiPolygonV
-// List based version of above.
+// Specify a coplanar, convex polygon.
 //
 RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPOLYGON
-
-	VALIDATE_RIPOLYGON
-
-	DEBUG_RIPOLYGON
-
 	// Create a new polygon surface primitive.
 	boost::shared_ptr<CqSurfacePolygon> pSurface( new CqSurfacePolygon( nvertices ) );
 
@@ -3161,39 +1919,15 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 			Aqsis::log() << error << "Found degenerate polygon" << std::endl;
 		}
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPolygonV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiGeneralPolygon
-// Specify a nonconvex coplanar polygon.
-//
-RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( nverts )
-
-	RiGeneralPolygonV( nloops, nverts, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiGeneralPolygonV
-// List based version of above.
+// Specify a nonconvex coplanar polygon.
 //
 RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIGENERALPOLYGON
-
-	VALIDATE_RIGENERALPOLYGON
-
-	DEBUG_RIGENERALPOLYGON
-
 	TqInt iloop;
 
 	// Calcualte how many points there are.
@@ -3321,36 +2055,12 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 
 		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
 	}
-	EXCEPTION_CATCH_GUARD("RiGeneralPolygonV")
-	return ;
-}
-
-RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
-                 RtInt nstrings, RtString strings[], ... )
-{
-
-	AQSIS_COLLECT_RI_PARAMETERS( strings )
-
-	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, AQSIS_PASS_RI_PARAMETERS );
-
-	return ;
 }
 
 //----------------------------------------------------------------------
-/** List based version of above.
- *
- *\return	nothing
- **/
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIBLOBBY
-
-	VALIDATE_RIBLOBBY
-
 	TqInt i;
 
 	// Initialize the blobby structure
@@ -3500,41 +2210,16 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	delete[] vertices;
 	delete[] points;
 	delete[] colors;
-
-	EXCEPTION_CATCH_GUARD("RiBlobbyV")
-	return ;
 }
+
 
 //----------------------------------------------------------------------
 /** Specify a small Points primitives
  *
  *\return	nothing
  **/
-RtVoid	RiPoints( RtInt nvertices, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( nvertices )
-
-	RiPointsV( nvertices, AQSIS_PASS_RI_PARAMETERS );
-
-	return ;
-}
-
-//----------------------------------------------------------------------
-/** List based version of above.
- *
- *\return	nothing
- **/
 RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPOINTS
-
-	VALIDATE_RIPOINTS
-
-	DEBUG_RIPOINTS
-
 	// Create a storage class for all the points.
 	boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( npoints, 1, npoints ) );
 
@@ -3592,10 +2277,8 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 			STATS_INC( GPR_created );
 		}
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPointsV")
-	return ;
 }
+
 
 //----------------------------------------------------------------------
 /** Specify a small line primitives
@@ -3606,32 +2289,8 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
  *\param	wrap could be "periodic" "nonperiodic"
  *\return	nothing
  **/
-
-RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( wrap )
-
-	RiCurvesV( type, ncurves, nvertices, wrap, AQSIS_PASS_RI_PARAMETERS );
-
-	return ;
-}
-
-//----------------------------------------------------------------------
-/** List based version of above.
- *
- *\return	nothing
- **/
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICURVES
-
-	VALIDATE_RICURVES
-
-	DEBUG_RICURVES
-
 	// find out whether the curve is periodic or non-periodic
 	bool periodic = false;
 	if ( strcmp( wrap, RI_PERIODIC ) == 0 )
@@ -3695,39 +2354,15 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the type of curve was neither "linear" nor "cubic"
 		Aqsis::log() << error << "RiCurves invalid type \"" << type << "\"" << std::endl;
 	}
-	EXCEPTION_CATCH_GUARD("RiCurvesV")
-}
-
-
-//----------------------------------------------------------------------
-// RiPointsPolygons
-// Specify a list of convex coplanar polygons and their shared vertices.
-//
-RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( verts )
-
-	RiPointsPolygonsV( npolys, nverts, verts, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiPointsPolygonsV
-// List based version of above.
+// Specify a list of convex coplanar polygons and their shared vertices.
 //
-
-
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPOINTSPOLYGONS
-
-	VALIDATE_RIPOINTSPOLYGONS
-
-	DEBUG_RIPOINTSPOLYGONS
-
 	// Calculate how many vertices there are.
 	RtInt cVerts = 0;
 	RtInt* pVerts = verts;
@@ -3759,41 +2394,15 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		pPointsClass->Transform( matOtoW, matNOtoW, matVOtoW);
 		CreateGPrim(pPsPs);
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPointsPolygonsV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiPointsGeneralPolygons
-// Specify a list of coplanar, non-convex polygons and their shared vertices.
-//
-RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( verts )
-
-	RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, AQSIS_PASS_RI_PARAMETERS );
-
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiPointsGeneralPolygonsV
-// List based version of above.
+// Specify a list of coplanar, non-convex polygons and their shared vertices.
 //
 RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPOINTSGENERALPOLYGONS
-
-	VALIDATE_RIPOINTSGENERALPOLYGONS
-
-	DEBUG_RIPOINTSGENERALPOLYGONS
-
 	TqUint ipoly;
 	TqUint iloop;
 	TqUint igloop = 0;
@@ -4022,9 +2631,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); ++iNewParam )
 			free( *iNewParam );
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPointsGeneralPolygonsV")
-	return ;
 }
 
 
@@ -4034,15 +2640,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 //
 RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIBASIS
-
-	VALIDATE_RIBASIS
-
-	DEBUG_RIBASIS
-
 	CqMatrix u;
 	CqMatrix v;
 
@@ -4084,38 +2681,15 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 0 ] = ustep;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 1 ] = vstep;
 	QGetRenderContext() ->AdvanceTime();
-	EXCEPTION_CATCH_GUARD("RiBasis")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiPatch
-// Specify a new patch primitive.
-//
-RtVoid	RiPatch( RtToken type, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( type )
-
-	RiPatchV( type, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiPatchV
-// List based version of above.
+// Specify a new patch primitive.
 //
 RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPATCH
-
-	VALIDATE_RIPATCH
-
-	DEBUG_RIPATCH
-
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
 		// Create a surface patch
@@ -4163,40 +2737,16 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 	{
 		Aqsis::log() << error << "RiPatch invalid patch type \"" << type << "\"" << std::endl;
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPatchV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiPatchMesh
-// Specify a quadrilaterla mesh of patches.
-//
-RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( vwrap )
-
-	RiPatchMeshV( type, nu, uwrap, nv, vwrap, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiPatchMeshV
-// List based version of above.
+// Specify a quadrilaterla mesh of patches.
 //
 
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPATCHMESH
-
-	VALIDATE_RIPATCHMESH
-
-	DEBUG_RIPATCHMESH
-
 	if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
 		Aqsis::log() << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
 
@@ -4261,41 +2811,16 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	{
 		Aqsis::log() << error << "RiPatchMesh invalid type \"" << type << "\"" << std::endl;
 	}
-
-	EXCEPTION_CATCH_GUARD("RiPatchMeshV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiNuPatch
-// Specify a new non uniform patch.
-//
-RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
-                  RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( vmax )
-
-	RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiNuPatchV
-// List based version of above.
+// Specify a new non uniform patch.
 //
 RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RINUPATCH
-
-	VALIDATE_RINUPATCH
-
-	DEBUG_RINUPATCH
-
 	// Create a NURBS patch
 	boost::shared_ptr<CqSurfaceNURBS> pSurface( new CqSurfaceNURBS() );
 	pSurface->SetfPatchMesh();
@@ -4329,9 +2854,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 		CreateGPrim( pSurface );
 	}
-
-	EXCEPTION_CATCH_GUARD("RiNuPatchV")
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -4340,15 +2862,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 //
 RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITRIMCURVE
-
-	VALIDATE_RITRIMCURVE
-
-	DEBUG_RITRIMCURVE
-
 	// Clear the current loop array.
 	QGetRenderContext() ->pattrWriteCurrent() ->TrimLoops().Clear();
 
@@ -4389,49 +2902,15 @@ RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[]
 		}
 		QGetRenderContext() ->pattrWriteCurrent() ->TrimLoops().aLoops().push_back( Loop );
 	}
-	EXCEPTION_CATCH_GUARD("RiTrimCurve")
-	return ;
-}
-
-
-
-//----------------------------------------------------------------------
-// RiSphere
-// Specify a sphere primitive.
-//
-RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiSphereV( radius, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiSphereV
-// List based version of above.
+// Specify a sphere primitive.
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISPHERE
-
-	VALIDATE_RISPHERE
-
-	DEBUG_RISPHERE
-
-	PARAM_CONSTRAINT_CHECK(radius, !=, 0);
-	TqFloat absRadius = fabs(radius);
-	PARAM_CONSTRAINT_CHECK(zmin, <=, absRadius);
-	PARAM_CONSTRAINT_CHECK(zmin, >=, -absRadius);
-	PARAM_CONSTRAINT_CHECK(zmax, <=, absRadius);
-	PARAM_CONSTRAINT_CHECK(zmax, >=, -absRadius);
-	PARAM_CONSTRAINT_CHECK(zmin, <, zmax);
-	/// \todo thetamax == 0 should probably log a warning rather than an error.
-	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
-
 	// Create a sphere
 	boost::shared_ptr<CqSphere> pSurface( new CqSphere( radius, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -4445,39 +2924,15 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiSphereV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiCone
-// Specify a cone primitive.
-//
-RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiConeV( height, radius, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiConeV
-// List based version of above.
+// Specify a cone primitive.
 //
 RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICONE
-
-	VALIDATE_RICONE
-
-	DEBUG_RICONE
-
 	/// \note This should be an exception and get caught further up.
 	if( thetamax == 0 )
 		return;
@@ -4495,39 +2950,15 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiConeV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiCylinder
-// Specify a culinder primitive.
-//
-RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiCylinderV( radius, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiCylinderV
-// List based version of above.
+// Specify a culinder primitive.
 //
 RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICYLINDER
-
-	VALIDATE_RICYLINDER
-
-	DEBUG_RICYLINDER
-
 	// Create a cylinder
 	boost::shared_ptr<CqCylinder> pSurface( new CqCylinder( radius, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -4541,39 +2972,15 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiCylinderV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiHyperboloid
-// Specify a hyperboloid primitive.
-//
-RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiHyperboloidV( point1, point2, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiHyperboloidV
-// List based version of above.
+// Specify a hyperboloid primitive.
 //
 RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIHYPERBOLOID
-
-	VALIDATE_RIHYPERBOLOID
-
-	DEBUG_RIHYPERBOLOID
-
 	// Create a hyperboloid
 	CqVector3D v0( point1[ 0 ], point1[ 1 ], point1[ 2 ] );
 	CqVector3D v1( point2[ 0 ], point2[ 1 ], point2[ 2 ] );
@@ -4589,39 +2996,15 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiHyperboloidV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiParaboloid
-// Specify a paraboloid primitive.
-//
-RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiParaboloidV( rmax, zmin, zmax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiParaboloidV
-// List based version of above.
+// Specify a paraboloid primitive.
 //
 RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPARABOLOID
-
-	VALIDATE_RIPARABOLOID
-
-	DEBUG_RIPARABOLOID
-
 	// Create a paraboloid
 	boost::shared_ptr<CqParaboloid> pSurface( new CqParaboloid( rmax, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -4635,39 +3018,15 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiParaboloidV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiDisk
-// Specify a disk primitive.
-//
-RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiDiskV( height, radius, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiDiskV
-// List based version of above.
+// Specify a disk primitive.
 //
 RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIDISK
-
-	VALIDATE_RIDISK
-
-	DEBUG_RIDISK
-
 	// Create a disk
 	boost::shared_ptr<CqDisk> pSurface( new CqDisk( height, 0, radius, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -4682,20 +3041,6 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiDiskV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-//
-//
-RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( thetamax )
-
-	RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -4705,20 +3050,6 @@ RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 //
 RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RITORUS
-
-	VALIDATE_RITORUS
-
-	DEBUG_RITORUS
-
-	PARAM_CONSTRAINT_CHECK(majorrad, !=, 0);
-	PARAM_CONSTRAINT_CHECK(minorrad, !=, 0);
-	PARAM_CONSTRAINT_CHECK(phimax, !=, phimin);
-	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
-
 	// Create a torus
 	boost::shared_ptr<CqTorus> pSurface( new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
@@ -4733,9 +3064,6 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 	pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
 
 	CreateGPrim( pSurface );
-
-	EXCEPTION_CATCH_GUARD("RiTorusV")
-	return ;
 }
 
 
@@ -4745,15 +3073,6 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 //
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIPROCEDURAL
-
-	VALIDATE_RIPROCEDURAL
-
-	DEBUG_RIPROCEDURAL
-
 	CqBound B(bound);
 
 	//printf("bound(%f %f %f %f %f %f)\n", bound[0], bound[1], bound[2], bound[3], bound[4], bound[5]);
@@ -4769,40 +3088,16 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	QGetRenderContext()->matVSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time, matVOtoW );
 	pProc->Transform( matOtoW, matNOtoW, matVOtoW);
 	CreateGPrim( pProc );
-
-	EXCEPTION_CATCH_GUARD("RiProcedural")
-	return ;
 }
 
-
-
-//----------------------------------------------------------------------
-// RiGeometry
-// Specify a special primitive.
-//
-RtVoid	RiGeometry( RtToken type, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( type )
-
-	RiGeometryV( type, AQSIS_PASS_RI_PARAMETERS );
-}
 
 
 //----------------------------------------------------------------------
 // RiGeometryV
-// List based version of above.
+// Specify a special primitive.
 //
 RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIGEOMETRY
-
-	VALIDATE_RIGEOMETRY
-
-	DEBUG_RIGEOMETRY
-
 	if ( strcmp( type, "teapot" ) == 0 )
 	{
 
@@ -4899,9 +3194,6 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	{
 		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
-
-	EXCEPTION_CATCH_GUARD("RiGeometryV")
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -4910,20 +3202,8 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 //
 RtVoid	RiSolidBegin( RtToken type )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISOLIDBEGIN
-
-	VALIDATE_RISOLIDBEGIN
-
-	DEBUG_RISOLIDBEGIN
-
 	CqString strType( type );
 	QGetRenderContext() ->BeginSolidModeBlock( strType );
-
-	EXCEPTION_CATCH_GUARD("RiSolidBegin")
-	return ;
 }
 
 
@@ -4933,19 +3213,7 @@ RtVoid	RiSolidBegin( RtToken type )
 //
 RtVoid	RiSolidEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISOLIDEND
-
-	VALIDATE_RISOLIDEND
-
-	DEBUG_RISOLIDEND
-
 	QGetRenderContext() ->EndSolidModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiSolidEnd")
-	return ;
 }
 
 
@@ -4955,21 +3223,10 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	VALIDATE_CONDITIONAL0
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIOBJECTBEGIN
-
-	VALIDATE_RIOBJECTBEGIN
-
-	DEBUG_RIOBJECTBEGIN
-
 	QGetRenderContext() ->BeginObjectModeBlock();
 	RtObjectHandle objectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
 
 	return objectHandle;
-	EXCEPTION_CATCH_GUARD("RiObjectBegin")
-	return 0;
 }
 
 
@@ -4979,20 +3236,8 @@ RtObjectHandle	RiObjectBegin()
 //
 RtVoid	RiObjectEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	VALIDATE_RIOBJECTEND
-
-	DEBUG_RIOBJECTEND
-
 	QGetRenderContext() ->EndObjectModeBlock();
 	QGetRenderContext() ->CloseObjectInstance();
-
-	CACHE_RIOBJECTEND
-
-	EXCEPTION_CATCH_GUARD("RiObjectEnd")
-	return ;
 }
 
 
@@ -5002,61 +3247,17 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIOBJECTINSTANCE
-
-	VALIDATE_RIOBJECTINSTANCE
-
-	DEBUG_RIOBJECTINSTANCE
-
 	QGetRenderContext() ->InstantiateObject( reinterpret_cast<CqObjectInstance*>( handle ) );
-	EXCEPTION_CATCH_GUARD("RiObjectInstance")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiMotionBegin
-// Begin the definition of the motion of an object for use by motion blur.
-//
-RtVoid	RiMotionBegin( RtInt N, ... )
-{
-	va_list	pArgs;
-	va_start( pArgs, N );
-
-	RtFloat* times = new RtFloat[ N ];
-	RtInt i;
-	for ( i = 0; i < N; ++i )
-		times[ i ] = va_arg( pArgs, double );
-
-	RiMotionBeginV( N, times );
-
-	delete[] ( times );
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiBeginMotionV
-// List based version of above.
+// Begin the definition of the motion of an object for use by motion blur.
 //
 RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMOTIONBEGINV
-
-	VALIDATE_RIMOTIONBEGINV
-
-	DEBUG_RIMOTIONBEGINV
-
 	QGetRenderContext() ->BeginMotionModeBlock( N, times );
-
-	EXCEPTION_CATCH_GUARD("RiMotionBeginV")
-	return ;
 }
 
 
@@ -5066,56 +3267,16 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 //
 RtVoid	RiMotionEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMOTIONEND
-
-	VALIDATE_RIMOTIONEND
-
-	DEBUG_RIMOTIONEND
-
 	QGetRenderContext() ->EndMotionModeBlock();
-
-	EXCEPTION_CATCH_GUARD("RiMotionEnd")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeTexture
-// Convert a picture to a texture.
-//
-RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( twidth )
-
-	RiMakeTextureV( pic, tex, swrap, twrap, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
-
 }
 
 
 //----------------------------------------------------------------------
 // RiMakeTextureV
-// List based version of above.
+// Convert a picture to a texture.
 //
 RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	PARAM_CONSTRAINT_CHECK(imagefile, !=, 0);
-	PARAM_CONSTRAINT_CHECK(texturefile, !=, 0);
-	PARAM_CONSTRAINT_CHECK(swrap, !=, 0);
-	PARAM_CONSTRAINT_CHECK(twrap, !=, 0);
-	PARAM_CONSTRAINT_CHECK(filterfunc, !=, 0);
-
-	CACHE_RIMAKETEXTURE
-
-	VALIDATE_RIMAKETEXTURE
-
-	DEBUG_RIMAKETEXTURE
-
 	AQSIS_TIME_SCOPE(Make_texture);
 
 	SqWrapModes wrapModes(enumCast<EqWrapMode>(swrap), enumCast<EqWrapMode>(twrap));
@@ -5123,71 +3284,25 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		= QGetRenderContext()->poptCurrent()->findRiFile(imagefile, "texture");
 	makeTexture(inFileName, texturefile, SqFilterInfo(filterfunc, swidth, twidth),
 			wrapModes, CqRiParamList(tokens, values, count));
-
-	EXCEPTION_CATCH_GUARD("RiMakeTextureV")
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeBump
-// Convert a picture to a bump map.
-//
-RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
-{
-	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiMakeBumpV
-// List based version of above.
+// Convert a picture to a bump map.
 //
 RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMAKEBUMP
-
-	VALIDATE_RIMAKEBUMP
-
-	DEBUG_RIMAKEBUMP
-
 	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
-	EXCEPTION_CATCH_GUARD("RiMakeBumpV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeLatLongEnvironment
-// Convert a picture to an environment map.
-//
-RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( twidth )
-
-	RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
-	return ;
 }
 
 
 //----------------------------------------------------------------------
 // RiMakeLatLongEnvironmentV
-// List based version of above.
+// Convert a picture to an environment map.
 //
 RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMAKELATLONGENVIRONMENT
-
-	VALIDATE_RIMAKELATLONGENVIRONMENT
-
-	DEBUG_RIMAKELATLONGENVIRONMENT
-
 	assert(imagefile != 0 && reflfile != 0 && filterfunc != 0);
 
 	AQSIS_TIME_SCOPE(Make_texture);
@@ -5196,9 +3311,6 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 		->findRiFile(imagefile, "texture");
 	makeLatLongEnvironment(inFileName, reflfile, SqFilterInfo(filterfunc,
 				swidth, twidth), CqRiParamList(tokens, values, count));
-
-	EXCEPTION_CATCH_GUARD("RiMakeLatLongEnvironmentV")
-	return ;
 }
 
 
@@ -5206,31 +3318,13 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 // RiMakeCubeFaceEnvironment
 // Convert a picture to a cubical environment map.
 //
-RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( twidth )
-
-	RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, AQSIS_PASS_RI_PARAMETERS );
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeCubeFaceEnvironment
-// List based version of above.
-//
 RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
 	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
 	        reflfile != 0 && filterfunc != 0 );
 
-	CACHE_RIMAKECUBEFACEENVIRONMENT
 
-	VALIDATE_RIMAKECUBEFACEENVIRONMENT
 
-	DEBUG_RIMAKECUBEFACEENVIRONMENT
 
 	AQSIS_TIME_SCOPE(Make_texture);
 
@@ -5243,39 +3337,15 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 		reflfile, fov, SqFilterInfo(filterfunc, swidth, twidth),
 		CqRiParamList(tokens, values, count)
 	);
-
-	EXCEPTION_CATCH_GUARD("RiMakeCubeFaceEnvironmentV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeShadow
-// Convert a depth map file to a shadow map.
-//
-RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( shadowfile )
-
-	RiMakeShadowV( picfile, shadowfile, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiMakeShadowV
-// List based version of above.
+// Convert a depth map file to a shadow map.
 //
 RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMAKESHADOW
-
-	VALIDATE_RIMAKESHADOW
-
-	DEBUG_RIMAKESHADOW
-
 	assert(picfile != 0 && shadowfile != 0);
 
 	AQSIS_TIME_SCOPE(Make_texture);
@@ -5283,39 +3353,15 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	boost::filesystem::path inFileName = QGetRenderContext()->poptCurrent()
 		->findRiFile(picfile, "texture");
 	makeShadow(inFileName, shadowfile, CqRiParamList(tokens, values, count));
-
-	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
-	return ;
-}
-
-
-//----------------------------------------------------------------------
-// RiMakeOcclusion
-// Convert a series of depth maps to an occlusion map.
-//
-RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( shadowfile )
-
-	RiMakeOcclusionV( npics, picfiles, shadowfile, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
 //----------------------------------------------------------------------
 // RiMakeOcclusionV
-// List based version of above.
+// Convert a series of depth maps to an occlusion map.
 //
 RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIMAKEOCCLUSION
-
-	VALIDATE_RIMAKEOCCLUSION
-
-	DEBUG_RIMAKEOCCLUSION
-
 	AQSIS_TIME_SCOPE(Make_texture);
 
 	std::vector<boost::filesystem::path> fileNames;
@@ -5326,9 +3372,6 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 			->findRiFile(picfiles[i], "texture") );
 	}
 	makeOcclusion(fileNames, shadowfile, CqRiParamList(tokens, values, count));
-
-	EXCEPTION_CATCH_GUARD("RiMakeOcclusionV")
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -5362,18 +3405,7 @@ RtVoid	RiIfEnd( )
 //
 RtVoid	RiErrorHandler( RtErrorFunc handler )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIERRORHANDLER
-
-	VALIDATE_RIERRORHANDLER
-
-	DEBUG_RIERRORHANDLER
-
 	QGetRenderContext()->SetpErrorHandler( handler );
-	EXCEPTION_CATCH_GUARD("RiErrorHandler")
-	return ;
 }
 
 
@@ -5390,8 +3422,6 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
 	RiLastError = code;
-	
-	return ;
 }
 
 /** RiErrorPrint
@@ -5409,8 +3439,6 @@ RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 	
 	// Print the error message
 	Aqsis::log() << error << "(" << code << ", " << severity << ") " << message << "\n";
-	
-	return ;
 }
 
 /** RiErrorPrint
@@ -5427,36 +3455,14 @@ RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 	
 	// Abort the engine
 	std::exit(code);
-	
-	return ;
-}
-
-//----------------------------------------------------------------------
-// RiSubdivisionMesh
-// Specify a subdivision surface hull with tagging.
-//
-RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( floatargs )
-
-	RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, AQSIS_PASS_RI_PARAMETERS );
 }
 
 //----------------------------------------------------------------------
 // RiSubdivisionMeshV
-// List based version of above.
+// Specify a subdivision surface hull with tagging.
 //
 RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISUBDIVISIONMESH
-
-	VALIDATE_RISUBDIVISIONMESH
-
-	DEBUG_RISUBDIVISIONMESH
-
 	// Calculate how many vertices there are.
 	RtInt cVerts = 0;
 	RtInt* pVerts = vertices;
@@ -5589,30 +3595,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			Aqsis::log() << error << "RiSubdivisionMesh invalid scheme \"" << scheme << "\"" << std::endl;
 		}
 	}
-
-	EXCEPTION_CATCH_GUARD("RiSubdivisionMeshV")
-	return ;
 }
 
-
-RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( callback )
-
-	RiReadArchiveV( name, callback, AQSIS_PASS_RI_PARAMETERS );
-}
 
 RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIREADARCHIVE
-
-	VALIDATE_RIREADARCHIVE
-
-	DEBUG_RIREADARCHIVE
-
 	// Open the archive file
 	boost::filesystem::ifstream archiveFile(
 			QGetRenderContext()->poptCurrent()->findRiFile(name, "archive"),
@@ -5629,52 +3616,25 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 	}
 	// Parse the archive
 	QGetRenderContext()->parseRibStream(archiveFile, name, commentCallback);
-
-	EXCEPTION_CATCH_GUARD("RiReadArchiveV")
 }
 
 
 RtVoid	RiArchiveRecord( RtToken type, char * format, ... )
 {
-	VALIDATE_RIARCHIVERECORD
-
-	DEBUG_RIARCHIVERECORD
 }
 
 RtContextHandle	RiGetContext( void )
 {
-	VALIDATE_RIGETCONTEXT
-
-	DEBUG_RIGETCONTEXT
-
-	return( NULL );
+	return 0;
 }
 
 RtVoid	RiContext( RtContextHandle handle )
 {
-	VALIDATE_RICONTEXT
-
-	DEBUG_RICONTEXT
 }
 
 RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz )
 {
-	VALIDATE_RICLIPPINGPLANE
-
-	DEBUG_RICLIPPINGPLANE
-
 	Aqsis::log() << warning << "Ignoring unimplemented interface call: RiClippingPlane\n";
-}
-
-
-//----------------------------------------------------------------------
-// RiResource
-//
-RtVoid	RiResource( RtToken handle, RtToken type, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( type )
-
-	RiResourceV( handle, type, AQSIS_PASS_RI_PARAMETERS );
 }
 
 
@@ -5683,17 +3643,6 @@ RtVoid	RiResource( RtToken handle, RtToken type, ... )
 //
 RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
 {
-
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIRESOURCE
-
-	VALIDATE_RIRESOURCE
-
-	DEBUG_RIRESOURCE
-
-	EXCEPTION_CATCH_GUARD("RiResourceV")
 	return;
 }
 
@@ -5703,17 +3652,6 @@ RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
 //
 RtVoid	RiResourceBegin()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIRESOURCEBEGIN
-
-	VALIDATE_RIRESOURCEBEGIN
-
-	DEBUG_RIRESOURCEBEGIN
-
-	EXCEPTION_CATCH_GUARD("RiResourceBegin")
-	return ;
 }
 
 
@@ -5722,38 +3660,11 @@ RtVoid	RiResourceBegin()
 //
 RtVoid	RiResourceEnd()
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RIRESOURCEEND
-
-	VALIDATE_RIRESOURCEEND
-
-	DEBUG_RIRESOURCEEND
-
-	EXCEPTION_CATCH_GUARD("RiResourceEnd")
-	return ;
 }
 
-
-RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
-{
-	AQSIS_COLLECT_RI_PARAMETERS( layername )
-
-	RiShaderLayerV( type, name, layername, AQSIS_PASS_RI_PARAMETERS );
-}
 
 RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RISHADERLAYER
-
-	VALIDATE_RISHADERLAYER
-
-	DEBUG_RISHADERLAYER
-
 	// If the current shader for the specified type is already a layer container, add this layer to it, if not,
 	// create one and add this layer as the first.
 
@@ -5828,20 +3739,10 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 		if(pMultipass && !pMultipass[0])
 			newlayer->PrepareShaderForUse();
 	}
-	EXCEPTION_CATCH_GUARD("RiShaderLayerV")
 }
 
 RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
 {
-	VALIDATE_CONDITIONAL
-	EXCEPTION_TRY_GUARD
-
-	CACHE_RICONNECTSHADERLAYERS
-
-	VALIDATE_RICONNECTSHADERLAYERS
-
-	DEBUG_RICONNECTSHADERLAYERS
-
 	// If the current shader for the specified type is a layer container, add this connection to it
 	CqString stringtype(type);
 	stringtype = stringtype.ToLower();
@@ -5859,7 +3760,6 @@ RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, R
 		// Just add this layer in
 		pcurr->AddConnection(layer1, variable1, layer2, variable2);
 	}
-	EXCEPTION_CATCH_GUARD("RiConnectShaderLayers")
 }
 
 
@@ -6131,8 +4031,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 		if(QGetRenderContext()->pRaytracer())
 			QGetRenderContext()->pRaytracer()->AddPrimitive(pSurface);
 	}
-
-	return ;
 }
 
 
@@ -6165,7 +4063,7 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 				( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
 		return ( true );
 	}
-	return ( false );
+	return false;
 }
 
 
@@ -6173,11 +4071,9 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 /** Set the function used to report progress.
  *	\param	handler	Pointer to the new function to use.
  */
-
 RtVoid	RiProgressHandler( RtProgressFunc handler )
 {
 	QGetRenderContext()->SetpProgressHandler( handler );
-	return ;
 }
 
 
@@ -6186,7 +4082,6 @@ RtVoid	RiProgressHandler( RtProgressFunc handler )
  	\param	function	Pointer to the new function to use.
  	\return	Pointer to the old function.
  */
-
 RtFunc	RiPreRenderFunction( RtFunc function )
 {
 	RtFunc pOldPreRenderFunction = QGetRenderContext()->pPreRenderFunction();
@@ -6199,7 +4094,6 @@ RtFunc	RiPreRenderFunction( RtFunc function )
  	\param	function	Pointer to the new function to use.
  	\return	Pointer to the old function.
  */
-
 RtFunc	RiPreWorldFunction( RtFunc function )
 {
 	RtFunc pOldPreWorldFunction = QGetRenderContext()->pPreWorldFunction();
