@@ -194,6 +194,7 @@ class Param
         size_t m_size;
 
     public:
+        Param() : m_spec(), m_name(""), m_data(0), m_size(0) {}
         Param(const TypeSpec& spec, const char* name, const RtFloat* data, size_t size)
             : m_spec(spec), m_name(name), m_data(data), m_size(size) {}
         Param(const TypeSpec& spec, const char* name, const RtInt* data, size_t size)
