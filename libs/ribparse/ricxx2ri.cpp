@@ -1552,6 +1552,8 @@ void RiCxxToRiServices::addFilter(const char* name,
 
 Ri::Renderer& RiCxxToRiServices::firstFilter()
 {
+    if(!m_filterChain.empty())
+        return *m_filterChain.back();
     return *m_renderer;
 }
 
