@@ -77,22 +77,6 @@ struct IqRenderer
 	virtual	IqTextureMapOld* GetLatLongMap( const CqString& fileName ) = 0;
 	//@}
 
-	/** \brief Parse a RIB stream and send the resulting commands to the renderer
-	 *
-	 * The stream should be opened in binary mode or unwanted end-of-line
-	 * translations may occurr.
-	 *
-	 * Note that std::cin is synchronised with the C stdio buffering facilities
-	 * by default, which makes reading inefficient.  Buffering in the C++ layer
-	 * makes reading the bytestream much faster so to encourage (but
-	 * unfortunately not force) this buffering, call the function
-	 * std::ios_base::sync_with_stdio(false).
-	 *
-	 * \param inputStream - input stream in RIB format.
-	 * \param name - name of the stream for error reporting.
-	 */
-	virtual void parseRibStream(std::istream& inputStream, const std::string& name) = 0;
-
 	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
 
 	virtual TqInt	RegisterOutputData( const char* name ) = 0;

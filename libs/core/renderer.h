@@ -53,7 +53,6 @@ namespace Aqsis {
 
 class CqImageBuffer;
 class CqModeBlock;
-namespace Ri { class RendererServices; }
 
 struct SqCoordSys
 {
@@ -214,9 +213,6 @@ class CqRenderer : public IqRenderer
 		 * the texture search path when necessary.
 		 */
 		const char* textureSearchPath();
-
-		virtual void parseRibStream(std::istream& inputStream,
-									const std::string& name);
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
@@ -545,8 +541,6 @@ class CqRenderer : public IqRenderer
 			return m_cropWindowYMax;
 		}
 
-		Ri::RendererServices& apiServices();
-
 	private:
 		const SqOutputDataEntry* FindOutputDataEntry(const char* name);
 
@@ -576,9 +570,6 @@ class CqRenderer : public IqRenderer
 		bool			m_fWorldBegin;
 		/// Renderman symbol table
 		CqTokenDictionary m_tokenDict;
-
-		/// Parser for RIB streams, converting to RI calls
-		boost::shared_ptr<Ri::RendererServices> m_coreApiServices;
 
 		/// Variables for depth of field.  \todo Move these to a DoF calculator object.
 		TqFloat			m_DofMultiplier;

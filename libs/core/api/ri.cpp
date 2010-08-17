@@ -400,7 +400,7 @@ void SetDefaultRiOptions()
 	{
 		Aqsis::log() << info
 			<< "Reading system config \"" << systemRcPath << "\"\n";
-		QGetRenderContext()->parseRibStream(rcFile, systemRcPath.file_string());
+		cxxRenderContext()->parseRib(rcFile, systemRcPath.file_string().c_str());
 		rcFile.close();
 	}
 	else
@@ -419,7 +419,7 @@ void SetDefaultRiOptions()
 		if(rcFile)
 		{
 			Aqsis::log() << info << "Reading user config \"" << homeRcPath << "\"\n";
-			QGetRenderContext()->parseRibStream(rcFile, homeRcPath.file_string());
+			cxxRenderContext()->parseRib(rcFile, homeRcPath.file_string().c_str());
 		}
 		else
 		{
@@ -430,7 +430,7 @@ void SetDefaultRiOptions()
 			if(rcFile)
 			{
 				Aqsis::log() << info << "Reading user config \"" << homeRcPath2 << "\"\n";
-				QGetRenderContext()->parseRibStream(rcFile, homeRcPath2.file_string());
+				cxxRenderContext()->parseRib(rcFile, homeRcPath2.file_string().c_str());
 			}
 			else
 			{
@@ -450,7 +450,7 @@ void SetDefaultRiOptions()
 	rcFile.open(currentRcPath.c_str(), std::ios::binary);
 	if(rcFile)
 	{
-		QGetRenderContext()->parseRibStream(rcFile, currentRcPath);
+		cxxRenderContext()->parseRib(rcFile, currentRcPath.c_str());
 		rcFile.close();
 		Aqsis::log() << info << "Reading project config \"" << currentRcPath << "\"\n";
 	}
@@ -461,7 +461,7 @@ void SetDefaultRiOptions()
 
 		if(rcFile)
 		{
-			QGetRenderContext()->parseRibStream(rcFile, currentRcPath);
+			cxxRenderContext()->parseRib(rcFile, currentRcPath.c_str());
 			rcFile.close();
 			Aqsis::log() << info << "Reading project config \"" << currentRcPath2 << "\"\n";
 		}
@@ -3860,16 +3860,25 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 class CoreRendererServices : public Ri::RendererServices
 {
 	public:
-		CoreRendererServices(CqRenderer& context)
-			: m_renderContext(context),
+		CoreRendererServices()
+			: m_renderContext(new CqRenderer()),
 			m_api(),
 			m_parser(),
 			m_filterChain(),
 			m_errorHandler()
 		{
 			m_api.reset(new RiCxxCore(*this));
+			addFilter("inlinearchive");
+			addFilter("validate");
 		}
 
+		CqRenderer& renderContext()
+		{
+			return *m_renderContext;
+		}
+
+		//--------------------------------------------------
+		// from Ri::RenderServices
 		virtual Ri::ErrorHandler& errorHandler()
 		{
 			return m_errorHandler;
@@ -3900,7 +3909,7 @@ class CoreRendererServices : public Ri::RendererServices
             if(spec.type == Ri::TypeSpec::Unknown)
             {
                 // FIXME: Yuck, ick!  Double parsing :-/
-                spec = toTypeSpec(m_renderContext.tokenDict().parseAndLookup(token));
+                spec = toTypeSpec(m_renderContext->tokenDict().parseAndLookup(token));
             }
             return spec;
 		}
@@ -3913,7 +3922,7 @@ class CoreRendererServices : public Ri::RendererServices
         }
 
         virtual void addFilter(const char* name,
-                               const Ri::ParamList& filterParams)
+                               const Ri::ParamList& filterParams = Ri::ParamList())
         {
             boost::shared_ptr<Ri::Renderer> filter(
                     createFilter(name, *this, firstFilter(), filterParams));
@@ -3936,7 +3945,7 @@ class CoreRendererServices : public Ri::RendererServices
 
 	private:
 		/// Core render context
-		CqRenderer& m_renderContext;
+		boost::shared_ptr<CqRenderer> m_renderContext;
 		/// Core renderer API
 		boost::shared_ptr<RiCxxCore> m_api;
         /// Parser for ReadArchive.  May be NULL (created on demand).
@@ -3946,13 +3955,6 @@ class CoreRendererServices : public Ri::RendererServices
         /// Error handler.
         AqsisLogErrorHandler m_errorHandler;
 };
-
-boost::shared_ptr<Ri::RendererServices> createCoreRendererServices(
-											CqRenderer& renderContext)
-{
-	return boost::shared_ptr<Ri::RendererServices>(
-			new CoreRendererServices(renderContext));
-}
 
 } // namespace Aqsis;
 
@@ -3967,13 +3969,8 @@ using namespace Aqsis;
 namespace {
 struct CoreContext
 {
-	boost::shared_ptr<CqRenderer> renderContext;
+	boost::shared_ptr<CoreRendererServices> apiServices;
 	boost::shared_ptr<void> riToRiCxxData;
-
-	Ri::RendererServices& apiServices()
-	{
-		return renderContext->apiServices();
-	}
 };
 }
 
@@ -3984,13 +3981,13 @@ static ContextList g_validContexts;
 
 RtVoid RiBegin(RtToken name)
 {
+	// Make a context
 	g_validContexts.push_back(new CoreContext());
 	g_context = g_validContexts.back();
-	g_context->renderContext.reset(new CqRenderer());
-	riToRiCxxBegin(&g_context->apiServices(), g_context->riToRiCxxData);
-
-	// Create a new renderer
-	QSetRenderContext(g_context->renderContext.get());
+	// Create new renderer
+	g_context->apiServices.reset(new CoreRendererServices());
+	riToRiCxxBegin(g_context->apiServices.get(), g_context->riToRiCxxData);
+	QSetRenderContext(&g_context->apiServices->renderContext());
 
 	QGetRenderContext() ->Initialise();
 	QGetRenderContext() ->BeginMainModeBlock();
@@ -4038,15 +4035,21 @@ RtVoid RiContext(RtContextHandle handle)
 										  g_validContexts.end(), newContext);
 	if(loc == g_validContexts.end())
 	{
-		AQSIS_LOG_ERROR(g_context->apiServices().errorHandler(), EqE_BadHandle)
+		AQSIS_LOG_ERROR(g_context->apiServices->errorHandler(), EqE_BadHandle)
 			<< "bad handle for RiContext";
 		return;
 	}
 	g_context = newContext;
-	riToRiCxxContext(&g_context->apiServices(), g_context->riToRiCxxData);
-	QSetRenderContext(g_context->renderContext.get());
+	riToRiCxxContext(g_context->apiServices.get(), g_context->riToRiCxxData);
+	QSetRenderContext(&g_context->apiServices->renderContext());
 }
 
+namespace Aqsis {
+Ri::RendererServices* cxxRenderContext()
+{
+	return g_context->apiServices.get();
+}
+}
 
 //----------------------------------------------------------------------
 // Standard Error Handlers

@@ -63,7 +63,7 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/version.h>
 #include <aqsis/util/exception.h>
-#include <aqsis/core/irenderer.h>
+#include "../../libs/core/api/ricxx_core.h"
 
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
@@ -378,7 +378,7 @@ RtVoid PreWorld()
 	for(TqInt i = 0, end = g_cl_options.size(); i < end; ++i)
 	{
 		std::istringstream inStream(g_cl_options[i]);
-		Aqsis::QGetRenderContextI()->parseRibStream(inStream, "command_line_option");
+		Aqsis::cxxRenderContext()->parseRib(inStream, "command_line_option");
 	}
 	return;
 }
@@ -626,7 +626,7 @@ int main( int argc, const char** argv )
 				// the aqsis logging facility as of svn r2804
 				//
 				//std::ios_base::sync_with_stdio(false);
-				Aqsis::QGetRenderContextI()->parseRibStream(std::cin, "stdin");
+				Aqsis::cxxRenderContext()->parseRib(std::cin, "stdin");
 			}
 			else
 			{
@@ -636,7 +636,7 @@ int main( int argc, const char** argv )
 					std::ifstream inFile(fileName->c_str());
 					if(inFile)
 					{
-						Aqsis::QGetRenderContextI()->parseRibStream(inFile, *fileName);
+						Aqsis::cxxRenderContext()->parseRib(inFile, fileName->c_str());
 						returnCode = RiLastError;
 					}
 					else

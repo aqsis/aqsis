@@ -28,15 +28,10 @@
 
 #include "../../ribparse/ricxx.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace Aqsis {
 
-class CqRenderer;
-
 /// Create an instance of the core renderer services object.
-boost::shared_ptr<Ri::RendererServices> createCoreRendererServices(
-		CqRenderer& renderContext);
+Ri::RendererServices* cxxRenderContext();
 
 }
 
