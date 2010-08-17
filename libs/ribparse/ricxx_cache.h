@@ -35,11 +35,16 @@ namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// A single cached RI call.
+///
+/// For every RI call, there's a derived class of this which caches the
+/// arguments, and is able to call the appropriate interface function again at
+/// a later time.  These live in the RiCache namespace; for example,
+/// RiCache::Sphere.
 class CachedRequest
 {
     public:
         /// Re-call the interface function on the given context.
-        virtual void reCall(Ri::Renderer& context) = 0;
+        virtual void reCall(Ri::Renderer& context) const = 0;
 
         virtual ~CachedRequest() {}
 
@@ -51,6 +56,8 @@ class CachedRequest
         typedef Ri::TokenArray TokenArray;
 };
 
+
+//------------------------------------------------------------------------------
 /// A stream of cached RI calls held in memory.
 ///
 /// The stream can be replayed into the provided context, streaming the
@@ -66,20 +73,29 @@ class CachedRiStream
         {
             m_requests.push_back(req);
         }
-        void replay(Ri::Renderer& context)
+        void replay(Ri::Renderer& context) const
         {
             for(int i = 0, iend = m_requests.size(); i < iend; ++i)
                 m_requests[i].reCall(context);
         }
 };
 
+
+
+//==============================================================================
+// Implementation details follow.
+
+//------------------------------------------------------------------------------
 /// Namespace for implementations of CachedRequest
 ///
 /// Also holds helpers for caching interface types.
 namespace RiCache {
 
-//------------------------------------------------------------------------------
 // Classes defining cache space for RI arguments.
+//
+// There's a class here for each argument type which is not a value-type.  (That
+// includes all arrays and strings, as well as tuples like colors.)
+
 class CachedString
 {
     private:
@@ -119,7 +135,7 @@ class CachedStringArray
             for(size_t i = 0; i < a.size(); ++i)
                 m_buf.push_back(a[i]);
         }
-        operator Ri::StringArray()
+        operator Ri::StringArray() const
         {
             const std::vector<const char*>& strings = m_buf.toCstringVec();
             if(strings.empty())
@@ -160,7 +176,7 @@ class CachedMatrix
         operator RtConstMatrix&() const { return m_data; }
 };
 
-// Cache a parameter list.
+// Cache for parameter lists.
 class CachedParamList
 {
     private:
@@ -179,10 +195,10 @@ class CachedParamList
             int floatCount = 0;
             int charCount = 0;
             int stringCount = 0;
-            // Scan the list, figure out how much storage we need
+            // First scan the list, figure out how much storage we need
             for(size_t i = 0; i < pList.size(); ++i)
             {
-                charCount += std::strlen(pList[i].name()); // storage for param name.
+                charCount += std::strlen(pList[i].name()) + 1;
                 switch(pList[i].spec().storageType())
                 {
                     case Ri::TypeSpec::Integer:
@@ -195,7 +211,7 @@ class CachedParamList
                         {
                             Ri::StringArray strings = pList[i].stringData();
                             for(size_t j = 0; j < strings.size(); ++j)
-                                charCount += std::strlen(strings[j])+1;
+                                charCount += std::strlen(strings[j]) + 1;
                             stringCount += strings.size();
                         }
                         break;
@@ -203,24 +219,27 @@ class CachedParamList
                         assert(0 && "unknown type");
                 }
             }
-            // allocate
+            // allocate storage
             if(intCount)    m_ints.reset(new RtInt[intCount]);
             if(floatCount)  m_floats.reset(new RtFloat[floatCount]);
             if(stringCount) m_strings.reset(new RtConstString[stringCount]);
+            if(charCount)   m_chars.reset(new char[charCount]);
+            // Finally, copy over the data
             intCount = 0;
             floatCount = 0;
             charCount = 0;
             stringCount = 0;
             m_pList.reserve(pList.size());
-            // Finally, copy over the data
             for(size_t i = 0; i < pList.size(); ++i)
             {
+                // Copy parameter name
                 const char* nameIn = pList[i].name();
                 int nameLen = std::strlen(nameIn) + 1;
                 char* paramName = m_chars.get() + charCount;
                 std::memcpy(paramName, nameIn, nameLen);
                 charCount += nameLen;
                 size_t size = pList[i].size();
+                // Copy parameter data
                 void* data = 0;
                 switch(pList[i].spec().storageType())
                 {
@@ -251,6 +270,7 @@ class CachedParamList
                     default:
                         assert(0 && "unknown type");
                 }
+                // Store parameter
                 m_pList.push_back(Ri::Param(pList[i].spec(), paramName, data, size));
             }
         }
@@ -262,6 +282,7 @@ class CachedParamList
             return Ri::ParamList(&m_pList[0], m_pList.size());
         }
 };
+
 
 /*
 --------------------------------------------------------------------------------
@@ -288,7 +309,7 @@ class ${procName} : public CachedRequest
 #end for
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.${procName}($callArgs);
         }
@@ -339,7 +360,7 @@ class Declare : public CachedRequest
             , m_declaration(declaration)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Declare(m_name, m_declaration);
         }
@@ -354,7 +375,7 @@ class FrameBegin : public CachedRequest
             : m_number(number)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.FrameBegin(m_number);
         }
@@ -367,7 +388,7 @@ class FrameEnd : public CachedRequest
         FrameEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.FrameEnd();
         }
@@ -380,7 +401,7 @@ class WorldBegin : public CachedRequest
         WorldBegin()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.WorldBegin();
         }
@@ -393,7 +414,7 @@ class WorldEnd : public CachedRequest
         WorldEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.WorldEnd();
         }
@@ -408,7 +429,7 @@ class IfBegin : public CachedRequest
             : m_condition(condition)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.IfBegin(m_condition);
         }
@@ -423,7 +444,7 @@ class ElseIf : public CachedRequest
             : m_condition(condition)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ElseIf(m_condition);
         }
@@ -436,7 +457,7 @@ class Else : public CachedRequest
         Else()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Else();
         }
@@ -449,7 +470,7 @@ class IfEnd : public CachedRequest
         IfEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.IfEnd();
         }
@@ -468,7 +489,7 @@ class Format : public CachedRequest
             , m_pixelaspectratio(pixelaspectratio)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Format(m_xresolution, m_yresolution, m_pixelaspectratio);
         }
@@ -483,7 +504,7 @@ class FrameAspectRatio : public CachedRequest
             : m_frameratio(frameratio)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.FrameAspectRatio(m_frameratio);
         }
@@ -504,7 +525,7 @@ class ScreenWindow : public CachedRequest
             , m_top(top)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ScreenWindow(m_left, m_right, m_bottom, m_top);
         }
@@ -525,7 +546,7 @@ class CropWindow : public CachedRequest
             , m_ymax(ymax)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.CropWindow(m_xmin, m_xmax, m_ymin, m_ymax);
         }
@@ -542,7 +563,7 @@ class Projection : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Projection(m_name, m_pList);
         }
@@ -559,7 +580,7 @@ class Clipping : public CachedRequest
             , m_cfar(cfar)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Clipping(m_cnear, m_cfar);
         }
@@ -584,7 +605,7 @@ class ClippingPlane : public CachedRequest
             , m_nz(nz)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ClippingPlane(m_x, m_y, m_z, m_nx, m_ny, m_nz);
         }
@@ -603,7 +624,7 @@ class DepthOfField : public CachedRequest
             , m_focaldistance(focaldistance)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.DepthOfField(m_fstop, m_focallength, m_focaldistance);
         }
@@ -620,7 +641,7 @@ class Shutter : public CachedRequest
             , m_closetime(closetime)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Shutter(m_opentime, m_closetime);
         }
@@ -635,7 +656,7 @@ class PixelVariance : public CachedRequest
             : m_variance(variance)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PixelVariance(m_variance);
         }
@@ -652,7 +673,7 @@ class PixelSamples : public CachedRequest
             , m_ysamples(ysamples)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PixelSamples(m_xsamples, m_ysamples);
         }
@@ -671,7 +692,7 @@ class PixelFilter : public CachedRequest
             , m_ywidth(ywidth)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PixelFilter(m_function, m_xwidth, m_ywidth);
         }
@@ -688,7 +709,7 @@ class Exposure : public CachedRequest
             , m_gamma(gamma)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Exposure(m_gain, m_gamma);
         }
@@ -705,7 +726,7 @@ class Imager : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Imager(m_name, m_pList);
         }
@@ -728,7 +749,7 @@ class Quantize : public CachedRequest
             , m_ditheramplitude(ditheramplitude)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Quantize(m_type, m_one, m_min, m_max, m_ditheramplitude);
         }
@@ -749,7 +770,7 @@ class Display : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Display(m_name, m_type, m_mode, m_pList);
         }
@@ -766,7 +787,7 @@ class Hider : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Hider(m_name, m_pList);
         }
@@ -783,7 +804,7 @@ class ColorSamples : public CachedRequest
             , m_RGBn(RGBn)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ColorSamples(m_nRGB, m_RGBn);
         }
@@ -798,7 +819,7 @@ class RelativeDetail : public CachedRequest
             : m_relativedetail(relativedetail)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.RelativeDetail(m_relativedetail);
         }
@@ -815,7 +836,7 @@ class Option : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Option(m_name, m_pList);
         }
@@ -828,7 +849,7 @@ class AttributeBegin : public CachedRequest
         AttributeBegin()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.AttributeBegin();
         }
@@ -841,7 +862,7 @@ class AttributeEnd : public CachedRequest
         AttributeEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.AttributeEnd();
         }
@@ -856,7 +877,7 @@ class Color : public CachedRequest
             : m_Cq(Cq)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Color(m_Cq);
         }
@@ -871,7 +892,7 @@ class Opacity : public CachedRequest
             : m_Os(Os)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Opacity(m_Os);
         }
@@ -900,7 +921,7 @@ class TextureCoordinates : public CachedRequest
             , m_t4(t4)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.TextureCoordinates(m_s1, m_t1, m_s2, m_t2, m_s3, m_t3, m_s4, m_t4);
         }
@@ -917,7 +938,7 @@ class LightSource : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.LightSource(m_name, m_pList);
         }
@@ -934,7 +955,7 @@ class AreaLightSource : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.AreaLightSource(m_name, m_pList);
         }
@@ -951,7 +972,7 @@ class Illuminate : public CachedRequest
             , m_onoff(onoff)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Illuminate(m_light, m_onoff);
         }
@@ -968,7 +989,7 @@ class Surface : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Surface(m_name, m_pList);
         }
@@ -985,7 +1006,7 @@ class Displacement : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Displacement(m_name, m_pList);
         }
@@ -1002,7 +1023,7 @@ class Atmosphere : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Atmosphere(m_name, m_pList);
         }
@@ -1019,7 +1040,7 @@ class Interior : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Interior(m_name, m_pList);
         }
@@ -1036,7 +1057,7 @@ class Exterior : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Exterior(m_name, m_pList);
         }
@@ -1057,7 +1078,7 @@ class ShaderLayer : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ShaderLayer(m_type, m_name, m_layername, m_pList);
         }
@@ -1080,7 +1101,7 @@ class ConnectShaderLayers : public CachedRequest
             , m_variable2(variable2)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ConnectShaderLayers(m_type, m_layer1, m_variable1, m_layer2, m_variable2);
         }
@@ -1095,7 +1116,7 @@ class ShadingRate : public CachedRequest
             : m_size(size)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ShadingRate(m_size);
         }
@@ -1110,7 +1131,7 @@ class ShadingInterpolation : public CachedRequest
             : m_type(type)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ShadingInterpolation(m_type);
         }
@@ -1125,7 +1146,7 @@ class Matte : public CachedRequest
             : m_onoff(onoff)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Matte(m_onoff);
         }
@@ -1140,7 +1161,7 @@ class Bound : public CachedRequest
             : m_bound(bound)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Bound(m_bound);
         }
@@ -1155,7 +1176,7 @@ class Detail : public CachedRequest
             : m_bound(bound)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Detail(m_bound);
         }
@@ -1176,7 +1197,7 @@ class DetailRange : public CachedRequest
             , m_offhigh(offhigh)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.DetailRange(m_offlow, m_onlow, m_onhigh, m_offhigh);
         }
@@ -1193,7 +1214,7 @@ class GeometricApproximation : public CachedRequest
             , m_value(value)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.GeometricApproximation(m_type, m_value);
         }
@@ -1208,7 +1229,7 @@ class Orientation : public CachedRequest
             : m_orientation(orientation)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Orientation(m_orientation);
         }
@@ -1221,7 +1242,7 @@ class ReverseOrientation : public CachedRequest
         ReverseOrientation()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ReverseOrientation();
         }
@@ -1236,7 +1257,7 @@ class Sides : public CachedRequest
             : m_nsides(nsides)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Sides(m_nsides);
         }
@@ -1249,7 +1270,7 @@ class Identity : public CachedRequest
         Identity()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Identity();
         }
@@ -1264,7 +1285,7 @@ class Transform : public CachedRequest
             : m_transform(transform)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Transform(m_transform);
         }
@@ -1279,7 +1300,7 @@ class ConcatTransform : public CachedRequest
             : m_transform(transform)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ConcatTransform(m_transform);
         }
@@ -1294,7 +1315,7 @@ class Perspective : public CachedRequest
             : m_fov(fov)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Perspective(m_fov);
         }
@@ -1313,7 +1334,7 @@ class Translate : public CachedRequest
             , m_dz(dz)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Translate(m_dx, m_dy, m_dz);
         }
@@ -1334,7 +1355,7 @@ class Rotate : public CachedRequest
             , m_dz(dz)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Rotate(m_angle, m_dx, m_dy, m_dz);
         }
@@ -1353,7 +1374,7 @@ class Scale : public CachedRequest
             , m_sz(sz)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Scale(m_sx, m_sy, m_sz);
         }
@@ -1380,7 +1401,7 @@ class Skew : public CachedRequest
             , m_dz2(dz2)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Skew(m_angle, m_dx1, m_dy1, m_dz1, m_dx2, m_dy2, m_dz2);
         }
@@ -1395,7 +1416,7 @@ class CoordinateSystem : public CachedRequest
             : m_space(space)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.CoordinateSystem(m_space);
         }
@@ -1410,7 +1431,7 @@ class CoordSysTransform : public CachedRequest
             : m_space(space)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.CoordSysTransform(m_space);
         }
@@ -1423,7 +1444,7 @@ class TransformBegin : public CachedRequest
         TransformBegin()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.TransformBegin();
         }
@@ -1436,7 +1457,7 @@ class TransformEnd : public CachedRequest
         TransformEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.TransformEnd();
         }
@@ -1455,7 +1476,7 @@ class Resource : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Resource(m_handle, m_type, m_pList);
         }
@@ -1468,7 +1489,7 @@ class ResourceBegin : public CachedRequest
         ResourceBegin()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ResourceBegin();
         }
@@ -1481,7 +1502,7 @@ class ResourceEnd : public CachedRequest
         ResourceEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ResourceEnd();
         }
@@ -1498,7 +1519,7 @@ class Attribute : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Attribute(m_name, m_pList);
         }
@@ -1513,7 +1534,7 @@ class Polygon : public CachedRequest
             : m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Polygon(m_pList);
         }
@@ -1530,7 +1551,7 @@ class GeneralPolygon : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.GeneralPolygon(m_nverts, m_pList);
         }
@@ -1549,7 +1570,7 @@ class PointsPolygons : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PointsPolygons(m_nverts, m_verts, m_pList);
         }
@@ -1570,7 +1591,7 @@ class PointsGeneralPolygons : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PointsGeneralPolygons(m_nloops, m_nverts, m_verts, m_pList);
         }
@@ -1591,7 +1612,7 @@ class Basis : public CachedRequest
             , m_vstep(vstep)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Basis(m_ubasis, m_ustep, m_vbasis, m_vstep);
         }
@@ -1608,7 +1629,7 @@ class Patch : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Patch(m_type, m_pList);
         }
@@ -1633,7 +1654,7 @@ class PatchMesh : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.PatchMesh(m_type, m_nu, m_uwrap, m_nv, m_vwrap, m_pList);
         }
@@ -1668,7 +1689,7 @@ class NuPatch : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.NuPatch(m_nu, m_uorder, m_uknot, m_umin, m_umax, m_nv, m_vorder, m_vknot, m_vmin, m_vmax, m_pList);
         }
@@ -1699,7 +1720,7 @@ class TrimCurve : public CachedRequest
             , m_w(w)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.TrimCurve(m_ncurves, m_order, m_knot, m_min, m_max, m_n, m_u, m_v, m_w);
         }
@@ -1728,7 +1749,7 @@ class SubdivisionMesh : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.SubdivisionMesh(m_scheme, m_nvertices, m_vertices, m_tags, m_nargs, m_intargs, m_floatargs, m_pList);
         }
@@ -1751,7 +1772,7 @@ class Sphere : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Sphere(m_radius, m_zmin, m_zmax, m_thetamax, m_pList);
         }
@@ -1772,7 +1793,7 @@ class Cone : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Cone(m_height, m_radius, m_thetamax, m_pList);
         }
@@ -1795,7 +1816,7 @@ class Cylinder : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Cylinder(m_radius, m_zmin, m_zmax, m_thetamax, m_pList);
         }
@@ -1816,7 +1837,7 @@ class Hyperboloid : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Hyperboloid(m_point1, m_point2, m_thetamax, m_pList);
         }
@@ -1839,7 +1860,7 @@ class Paraboloid : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Paraboloid(m_rmax, m_zmin, m_zmax, m_thetamax, m_pList);
         }
@@ -1860,7 +1881,7 @@ class Disk : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Disk(m_height, m_radius, m_thetamax, m_pList);
         }
@@ -1885,7 +1906,7 @@ class Torus : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Torus(m_majorrad, m_minorrad, m_phimin, m_phimax, m_thetamax, m_pList);
         }
@@ -1900,7 +1921,7 @@ class Points : public CachedRequest
             : m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Points(m_pList);
         }
@@ -1921,7 +1942,7 @@ class Curves : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Curves(m_type, m_nvertices, m_wrap, m_pList);
         }
@@ -1944,7 +1965,7 @@ class Blobby : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Blobby(m_nleaf, m_code, m_floats, m_strings, m_pList);
         }
@@ -1965,7 +1986,7 @@ class Procedural : public CachedRequest
             , m_freeproc(freeproc)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Procedural(m_data, m_bound, m_refineproc, m_freeproc);
         }
@@ -1982,7 +2003,7 @@ class Geometry : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.Geometry(m_type, m_pList);
         }
@@ -1997,7 +2018,7 @@ class SolidBegin : public CachedRequest
             : m_type(type)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.SolidBegin(m_type);
         }
@@ -2010,7 +2031,7 @@ class SolidEnd : public CachedRequest
         SolidEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.SolidEnd();
         }
@@ -2023,7 +2044,7 @@ class ObjectBegin : public CachedRequest
         ObjectBegin()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ObjectBegin();
         }
@@ -2036,7 +2057,7 @@ class ObjectEnd : public CachedRequest
         ObjectEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ObjectEnd();
         }
@@ -2051,7 +2072,7 @@ class ObjectInstance : public CachedRequest
             : m_handle(handle)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ObjectInstance(m_handle);
         }
@@ -2066,7 +2087,7 @@ class MotionBegin : public CachedRequest
             : m_times(times)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MotionBegin(m_times);
         }
@@ -2079,7 +2100,7 @@ class MotionEnd : public CachedRequest
         MotionEnd()
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MotionEnd();
         }
@@ -2108,7 +2129,7 @@ class MakeTexture : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MakeTexture(m_imagefile, m_texturefile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_pList);
         }
@@ -2133,7 +2154,7 @@ class MakeLatLongEnvironment : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MakeLatLongEnvironment(m_imagefile, m_reflfile, m_filterfunc, m_swidth, m_twidth, m_pList);
         }
@@ -2170,7 +2191,7 @@ class MakeCubeFaceEnvironment : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MakeCubeFaceEnvironment(m_px, m_nx, m_py, m_ny, m_pz, m_nz, m_reflfile, m_fov, m_filterfunc, m_swidth, m_twidth, m_pList);
         }
@@ -2189,7 +2210,7 @@ class MakeShadow : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MakeShadow(m_picfile, m_shadowfile, m_pList);
         }
@@ -2208,7 +2229,7 @@ class MakeOcclusion : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.MakeOcclusion(m_picfiles, m_shadowfile, m_pList);
         }
@@ -2223,7 +2244,7 @@ class ErrorHandler : public CachedRequest
             : m_handler(handler)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ErrorHandler(m_handler);
         }
@@ -2242,7 +2263,7 @@ class ReadArchive : public CachedRequest
             , m_pList(pList)
         { }
 
-        virtual void reCall(Ri::Renderer& context)
+        virtual void reCall(Ri::Renderer& context) const
         {
             context.ReadArchive(m_name, m_callback, m_pList);
         }

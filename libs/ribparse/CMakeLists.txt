@@ -15,6 +15,7 @@ set(ribparse_srcs
 	ricxx_validate.cpp
 	framedrop_filter.cpp
 	ricxx_filter.cpp
+	inlinearchive_filter.cpp
 )
 
 set(ribparse_hdrs

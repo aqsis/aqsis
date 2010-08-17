@@ -41,7 +41,6 @@
 #include	"texturemap_old.h"
 #include	<aqsis/shadervm/ishader.h>
 #include	"tiffio.h"
-#include	"objectinstance.h"
 #include	"../ribparse/ricxx2ri.h"
 
 
@@ -98,8 +97,6 @@ CqRenderer::CqRenderer()
 	m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 	m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
 	m_FrameNo(0),
-	m_ObjectInstances(),
-	m_bObjectOpen(false),
 	m_pErrorHandler(&RiErrorPrint),
 	m_pProgressHandler(0),
 	m_pPreRenderFunction(0),
@@ -120,6 +117,7 @@ CqRenderer::CqRenderer()
 	m_textureCache = IqTextureCache::create(
 			boost::bind(&CqRenderer::textureSearchPath, this));
 
+	m_ribParserToRi->addFilter("inlinearchive");
 	m_ribParserToRi->addFilter("validate");
 
 	// Initialise the array of coordinate systems.
@@ -163,12 +161,6 @@ CqRenderer::~CqRenderer()
 	delete m_pDDManager;
 
 	delete m_pRaytracer;
-
-	// Clear the ObjectInstance buffer
-	std::vector<CqObjectInstance*>::iterator i;
-	for(i=m_ObjectInstances.begin(); i!=m_ObjectInstances.end(); i++)
-		delete((*i));
-	m_ObjectInstances.clear();
 
 #ifdef _DEBUG
 	// Print information about any un-released CqRefCount objects
@@ -1603,25 +1595,6 @@ const CqRenderer::SqOutputDataEntry* CqRenderer::FindOutputDataEntry(const char*
 	}
 	return 0;
 }
-
-CqObjectInstance* CqRenderer::OpenNewObjectInstance()
-{
-	assert( !m_bObjectOpen );
-	m_bObjectOpen = true;
-	CqObjectInstance* pNew = new CqObjectInstance;
-	m_ObjectInstances.push_back(pNew);
-
-	return( pNew );
-}
-
-
-void CqRenderer::InstantiateObject( CqObjectInstance* handle )
-{
-	// Ensure that the object passed in is valid.
-	if( std::find(m_ObjectInstances.begin(), m_ObjectInstances.end(), handle ) != m_ObjectInstances.end() )
-		handle->RecallInstance();
-}
-
 
 void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {

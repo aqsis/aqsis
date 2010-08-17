@@ -34,6 +34,8 @@ Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
                         Ri::Renderer& out, const Ri::ParamList& pList);
 Ri::Renderer* createFrameDropFilter(Ri::RendererServices& services,
                         Ri::Renderer& out, const Ri::ParamList& pList);
+Ri::Renderer* createInlineArchiveFilter(Ri::RendererServices& services,
+                        Ri::Renderer& out, const Ri::ParamList& pList);
 
 
 Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
@@ -46,6 +48,10 @@ Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
     else if(!strcmp(name, "framedrop"))
     {
         return createFrameDropFilter(services, out, pList);
+    }
+    else if(!strcmp(name, "inlinearchive"))
+    {
+        return createInlineArchiveFilter(services, out, pList);
     }
     else
     {

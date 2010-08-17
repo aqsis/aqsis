@@ -43,7 +43,7 @@ class MultiStringBuffer
         /// Offsets to starts of strings in m_storage.
         std::vector<size_t> m_offsets;
         /// References to start of strings.
-        std::vector<const char*> m_cStrings;
+        mutable std::vector<const char*> m_cStrings;
     public:
         MultiStringBuffer()
             : m_storage(), m_offsets(), m_cStrings() {}
@@ -74,7 +74,7 @@ class MultiStringBuffer
         }
 
         /// Convert to an vector of C-strings
-        const std::vector<const char*>& toCstringVec()
+        const std::vector<const char*>& toCstringVec() const
         {
             // iterate through offsets, getting a pointer for each
             // contained string.  We MUST build this once we know

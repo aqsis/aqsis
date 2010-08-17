@@ -52,7 +52,6 @@
 namespace Aqsis {
 
 class CqImageBuffer;
-class CqObjectInstance;
 class CqModeBlock;
 class RiCxxToRiServices;
 
@@ -459,21 +458,6 @@ class CqRenderer : public IqRenderer
 			return( m_FrameNo );
 		}
 
-		virtual	CqObjectInstance*	pCurrentObject()
-		{
-			if( m_bObjectOpen )
-				return(m_ObjectInstances.back());
-			else
-				return(0);
-		}
-
-		virtual CqObjectInstance* OpenNewObjectInstance();
-		virtual void InstantiateObject( CqObjectInstance* handle );
-		virtual	void CloseObjectInstance()
-		{
-			m_bObjectOpen = false;
-		}
-
 		/** Get a pointer to the error handler function.
 		 */
 		RtErrorFunc	pErrorHandler()
@@ -623,8 +607,6 @@ class CqRenderer : public IqRenderer
 
 
 		TqInt	m_FrameNo;
-		std::vector<CqObjectInstance*>	m_ObjectInstances;
-		bool	m_bObjectOpen;
 
 		// Error Handling
 		RtErrorFunc m_pErrorHandler; ///< pointer to the error handling function

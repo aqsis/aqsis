@@ -25,7 +25,6 @@ namespace Aqsis {
 
 struct IqTextureMapOld;
 struct IqTextureCache;
-class CqObjectInstance;
 
 struct IqRenderer
 {
@@ -103,8 +102,6 @@ struct IqRenderer
 
 	virtual	void	SetCurrentFrame( TqInt FrameNo ) = 0;
 	virtual	TqInt	CurrentFrame() const = 0;
-
-	virtual	CqObjectInstance*	pCurrentObject() = 0;
 
 	virtual	TqFloat	Time() const = 0;
 

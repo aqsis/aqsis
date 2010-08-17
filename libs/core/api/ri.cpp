@@ -44,7 +44,6 @@
 #include	"teapot.h"
 #include	"bunny.h"
 #include	"shaders.h"
-#include	"objectinstance.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
@@ -60,6 +59,7 @@
 #include	"../../ribparse/ricxxutil.h"
 #include	"../../ribparse/ri2ricxx.h"
 #include	"../../ribparse/ricxx2ri.h"
+#include	"../../ribparse/errorhandler.h"
 
 #include	"subdivision2.h"
 #include	"condition.h"
@@ -3306,33 +3306,22 @@ RtVoid RiCxxCore::SolidEnd()
 
 
 //----------------------------------------------------------------------
-// Begin the definition of a stored object for use by RiObjectInstance.
-//
+// Object retention and instancing.
 RtObjectHandle RiCxxCore::ObjectBegin()
 {
-	QGetRenderContext() ->BeginObjectModeBlock();
-	RtObjectHandle objectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
-
-	return objectHandle;
+	AQSIS_LOG_ERROR(g_context->apiServices->errorHandler(), EqE_IllState)
+		<< "ObjectBegin should be handled by a filter\n";
+	return 0;
 }
-
-
-//----------------------------------------------------------------------
-// End the defintion of a stored object for use by RiObjectInstance.
-//
 RtVoid RiCxxCore::ObjectEnd()
 {
-	QGetRenderContext() ->EndObjectModeBlock();
-	QGetRenderContext() ->CloseObjectInstance();
+	AQSIS_LOG_ERROR(g_context->apiServices->errorHandler(), EqE_IllState)
+		<< "ObjectEnd should be handled by a filter\n";
 }
-
-
-//----------------------------------------------------------------------
-// Instantiate a copt of a pre-stored geometric object.
-//
 RtVoid RiCxxCore::ObjectInstance(RtObjectHandle handle)
 {
-	QGetRenderContext() ->InstantiateObject( reinterpret_cast<CqObjectInstance*>( handle ) );
+	AQSIS_LOG_ERROR(g_context->apiServices->errorHandler(), EqE_IllState)
+		<< "ObjectInstance should be handled by a filter\n";
 }
 
 
