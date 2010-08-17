@@ -22,8 +22,12 @@
 /// \brief Some standard symbol definitions for the RI
 /// \author Paul Gregory
 
-#include <aqsis/ri/ri.h>
+#include "risyms.h"
 
+#include <string.h>
+
+#include <aqsis/ri/ri.h>
+#include <aqsis/util/exception.h>
 
 RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
 RtToken RI_FILE             = tokenCast("file");
@@ -147,5 +151,68 @@ RtBasis RiPowerBasis =      {{  1.0f,  0.0f,  0.0f,  0.0f},
                              {  0.0f,  1.0f,  0.0f,  0.0f},
                              {  0.0f,  0.0f,  1.0f,  0.0f},
                              {  0.0f,  0.0f,  0.0f,  1.0f}};
+
+namespace Aqsis {
+
+RtFilterFunc getFilterFuncByName(const char* name)
+{
+    if     (!strcmp(name, "box"))         return &::RiBoxFilter;
+    else if(!strcmp(name, "gaussian"))    return &::RiGaussianFilter;
+    else if(!strcmp(name, "triangle"))    return &::RiTriangleFilter;
+    else if(!strcmp(name, "mitchell"))    return &::RiMitchellFilter;
+    else if(!strcmp(name, "catmull-rom")) return &::RiCatmullRomFilter;
+    else if(!strcmp(name, "sinc"))        return &::RiSincFilter;
+    else if(!strcmp(name, "bessel"))      return &::RiBesselFilter;
+    else if(!strcmp(name, "disk"))        return &::RiDiskFilter;
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+            "unknown filter function \"" << name << "\"");
+        return 0;
+    }
+}
+
+RtConstBasis* getBasisByName(const char* name)
+{
+    if     (!strcmp(name, "bezier"))      return &::RiBezierBasis;
+    else if(!strcmp(name, "b-spline"))    return &::RiBSplineBasis;
+    else if(!strcmp(name, "catmull-rom")) return &::RiCatmullRomBasis;
+    else if(!strcmp(name, "hermite"))     return &::RiHermiteBasis;
+    else if(!strcmp(name, "power"))       return &::RiPowerBasis;
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+            "unknown basis \"" << name << "\"");
+        return 0;
+    }
+}
+
+RtErrorFunc getErrorFuncByName(const char* name)
+{
+    if     (!strcmp(name, "ignore")) return &::RiErrorIgnore;
+    else if(!strcmp(name, "print"))  return &::RiErrorPrint;
+    else if(!strcmp(name, "abort"))  return &::RiErrorAbort;
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+            "unknown error handler function \"" << name << "\"");
+        return 0;
+    }
+}
+
+RtProcSubdivFunc getProcSubdivFuncByName(const char* name)
+{
+    if     (!strcmp(name, "DelayedReadArchive")) return &::RiProcDelayedReadArchive;
+    else if(!strcmp(name, "RunProgram"))         return &::RiProcRunProgram;
+    else if(!strcmp(name, "DynamicLoad"))        return &::RiProcDynamicLoad;
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+                    "unknown procedural function \"" << name << "\"");
+        return 0;
+    }
+}
+
+} // namespace Aqsis
 
 // vi: set et:

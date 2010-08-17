@@ -4,7 +4,6 @@ set(api_srcs
 	graphicsstate.cpp
 	ri.cpp
 	rif.cpp
-	../../ribparse/ricxx2ri.cpp
 	../../ribparse/risyms.cpp
 	../../ribparse/ri2ricxx.cpp
 )

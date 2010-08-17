@@ -53,7 +53,7 @@ namespace Aqsis {
 
 class CqImageBuffer;
 class CqModeBlock;
-class RiCxxToRiServices;
+namespace Ri { class RendererServices; }
 
 struct SqCoordSys
 {
@@ -111,8 +111,6 @@ extern CqRenderer* pCurrRenderer;
 class CqRenderer : public IqRenderer
 {
 	public:
-		typedef boost::function<void (const char*, const char*)> TqArchiveRecordCallback;
-
 		CqRenderer();
 		virtual	~CqRenderer();
 
@@ -217,18 +215,8 @@ class CqRenderer : public IqRenderer
 		 */
 		const char* textureSearchPath();
 
-		/** Parse a RIB stream
-		 *
-		 * \see IqRenderer::parseRibStream for more details.
-		 * \param commentCallback - Function to be called whenever a comment is
-		 *                          encountered in the RIB stream.
-		 */
-		void parseRibStream(std::istream& inputStream, const std::string& name,
-				const TqArchiveRecordCallback& arCallback);
-		virtual void parseRibStream(std::istream& inputStream, const std::string& name)
-		{
-			parseRibStream(inputStream, name, TqArchiveRecordCallback());
-		}
+		virtual void parseRibStream(std::istream& inputStream,
+									const std::string& name);
 
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
@@ -557,7 +545,7 @@ class CqRenderer : public IqRenderer
 			return m_cropWindowYMax;
 		}
 
-		RiCxxToRiServices& getApiServices();
+		Ri::RendererServices& apiServices();
 
 	private:
 		const SqOutputDataEntry* FindOutputDataEntry(const char* name);
@@ -590,7 +578,7 @@ class CqRenderer : public IqRenderer
 		CqTokenDictionary m_tokenDict;
 
 		/// Parser for RIB streams, converting to RI calls
-		boost::shared_ptr<RiCxxToRiServices> m_ribParserToRi;
+		boost::shared_ptr<Ri::RendererServices> m_coreApiServices;
 
 		/// Variables for depth of field.  \todo Move these to a DoF calculator object.
 		TqFloat			m_DofMultiplier;

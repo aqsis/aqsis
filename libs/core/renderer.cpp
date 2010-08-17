@@ -41,7 +41,7 @@
 #include	"texturemap_old.h"
 #include	<aqsis/shadervm/ishader.h>
 #include	"tiffio.h"
-#include	"../ribparse/ricxx2ri.h"
+#include	"api/ricxx_core.h"
 
 
 namespace Aqsis {
@@ -88,7 +88,7 @@ CqRenderer::CqRenderer()
 	m_pTransDefObj(new CqTransform()),
 	m_fWorldBegin(false),
 	m_tokenDict(),
-	m_ribParserToRi(new RiCxxToRiServices()),
+	m_coreApiServices(),
 	m_DofMultiplier(0),
 	m_OneOverFocalDistance(FLT_MAX),
 	m_UsingDepthOfField(false),       // DoF for pinhole lens
@@ -117,8 +117,9 @@ CqRenderer::CqRenderer()
 	m_textureCache = IqTextureCache::create(
 			boost::bind(&CqRenderer::textureSearchPath, this));
 
-	m_ribParserToRi->addFilter("inlinearchive");
-	m_ribParserToRi->addFilter("validate");
+	m_coreApiServices = createCoreRendererServices(*this);
+	m_coreApiServices->addFilter("inlinearchive");
+	m_coreApiServices->addFilter("validate");
 
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems[ CoordSystem_Camera ].m_strName = "__camera__";
@@ -1436,10 +1437,10 @@ const char* CqRenderer::textureSearchPath()
 		return "";
 }
 
-void CqRenderer::parseRibStream(std::istream& inputStream, const std::string& name,
-		const TqArchiveRecordCallback& arCallback)
+void CqRenderer::parseRibStream(std::istream& inputStream,
+								const std::string& name)
 {
-	m_ribParserToRi->parseRib(inputStream, name.c_str(), arCallback);
+	m_coreApiServices->parseRib(inputStream, name.c_str());
 }
 
 bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
@@ -1635,9 +1636,9 @@ void CqRenderer::initialiseCropWindow()
 	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
 }
 
-RiCxxToRiServices& CqRenderer::getApiServices()
+Ri::RendererServices& CqRenderer::apiServices()
 {
-	return *m_ribParserToRi;
+	return *m_coreApiServices;
 }
 
 //---------------------------------------------------------------------
