@@ -459,7 +459,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
     if(!($argName $op $limit))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"$argName $op $limit\" failed: "
+            "parameter check \"$argName $op $limit\" failed "
     #if $limitIsConst
             "[$argName = " << $argName << "]"
     #else
@@ -608,21 +608,21 @@ RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
     if(!(xresolution != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xresolution != 0\" failed: "
+            "parameter check \"xresolution != 0\" failed "
             "[xresolution = " << xresolution << "]"
         );
     }
     if(!(yresolution != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"yresolution != 0\" failed: "
+            "parameter check \"yresolution != 0\" failed "
             "[yresolution = " << yresolution << "]"
         );
     }
     if(!(pixelaspectratio != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"pixelaspectratio != 0\" failed: "
+            "parameter check \"pixelaspectratio != 0\" failed "
             "[pixelaspectratio = " << pixelaspectratio << "]"
         );
     }
@@ -635,7 +635,7 @@ RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
     if(!(frameratio > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"frameratio > 0\" failed: "
+            "parameter check \"frameratio > 0\" failed "
             "[frameratio = " << frameratio << "]"
         );
     }
@@ -649,14 +649,14 @@ RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
     if(!(left < right))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"left < right\" failed: "
+            "parameter check \"left < right\" failed "
             "[left = " << left << ", " << "right = " << right << "]";
         );
     }
     if(!(bottom < top))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"bottom < top\" failed: "
+            "parameter check \"bottom < top\" failed "
             "[bottom = " << bottom << ", " << "top = " << top << "]";
         );
     }
@@ -670,42 +670,42 @@ RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
     if(!(xmin >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xmin >= 0\" failed: "
+            "parameter check \"xmin >= 0\" failed "
             "[xmin = " << xmin << "]"
         );
     }
     if(!(xmin < xmax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xmin < xmax\" failed: "
+            "parameter check \"xmin < xmax\" failed "
             "[xmin = " << xmin << ", " << "xmax = " << xmax << "]";
         );
     }
     if(!(xmax <= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xmax <= 1\" failed: "
+            "parameter check \"xmax <= 1\" failed "
             "[xmax = " << xmax << "]"
         );
     }
     if(!(ymin >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ymin >= 0\" failed: "
+            "parameter check \"ymin >= 0\" failed "
             "[ymin = " << ymin << "]"
         );
     }
     if(!(ymin < ymax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ymin < ymax\" failed: "
+            "parameter check \"ymin < ymax\" failed "
             "[ymin = " << ymin << ", " << "ymax = " << ymax << "]";
         );
     }
     if(!(ymax <= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ymax <= 1\" failed: "
+            "parameter check \"ymax <= 1\" failed "
             "[ymax = " << ymax << "]"
         );
     }
@@ -726,14 +726,14 @@ RtVoid RiCxxValidate::Clipping(RtFloat cnear, RtFloat cfar)
     if(!(cnear >= RI_EPSILON))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"cnear >= RI_EPSILON\" failed: "
+            "parameter check \"cnear >= RI_EPSILON\" failed "
             "[cnear = " << cnear << "]"
         );
     }
     if(!(cfar > cnear))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"cfar > cnear\" failed: "
+            "parameter check \"cfar > cnear\" failed "
             "[cfar = " << cfar << ", " << "cnear = " << cnear << "]";
         );
     }
@@ -753,21 +753,21 @@ RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
     if(!(fstop > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"fstop > 0\" failed: "
+            "parameter check \"fstop > 0\" failed "
             "[fstop = " << fstop << "]"
         );
     }
     if(!(focallength > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"focallength > 0\" failed: "
+            "parameter check \"focallength > 0\" failed "
             "[focallength = " << focallength << "]"
         );
     }
     if(!(focaldistance > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"focaldistance > 0\" failed: "
+            "parameter check \"focaldistance > 0\" failed "
             "[focaldistance = " << focaldistance << "]"
         );
     }
@@ -780,7 +780,7 @@ RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
     if(!(opentime <= closetime))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"opentime <= closetime\" failed: "
+            "parameter check \"opentime <= closetime\" failed "
             "[opentime = " << opentime << ", " << "closetime = " << closetime << "]";
         );
     }
@@ -793,7 +793,7 @@ RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
     if(!(variance >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"variance >= 0\" failed: "
+            "parameter check \"variance >= 0\" failed "
             "[variance = " << variance << "]"
         );
     }
@@ -806,14 +806,14 @@ RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
     if(!(xsamples >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xsamples >= 1\" failed: "
+            "parameter check \"xsamples >= 1\" failed "
             "[xsamples = " << xsamples << "]"
         );
     }
     if(!(ysamples >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ysamples >= 1\" failed: "
+            "parameter check \"ysamples >= 1\" failed "
             "[ysamples = " << ysamples << "]"
         );
     }
@@ -827,14 +827,14 @@ RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
     if(!(xwidth > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"xwidth > 0\" failed: "
+            "parameter check \"xwidth > 0\" failed "
             "[xwidth = " << xwidth << "]"
         );
     }
     if(!(ywidth > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ywidth > 0\" failed: "
+            "parameter check \"ywidth > 0\" failed "
             "[ywidth = " << ywidth << "]"
         );
     }
@@ -847,14 +847,14 @@ RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
     if(!(gain > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"gain > 0\" failed: "
+            "parameter check \"gain > 0\" failed "
             "[gain = " << gain << "]"
         );
     }
     if(!(gamma > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"gamma > 0\" failed: "
+            "parameter check \"gamma > 0\" failed "
             "[gamma = " << gamma << "]"
         );
     }
@@ -876,21 +876,21 @@ RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
     if(!(one >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"one >= 0\" failed: "
+            "parameter check \"one >= 0\" failed "
             "[one = " << one << "]"
         );
     }
     if(!(min <= max))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"min <= max\" failed: "
+            "parameter check \"min <= max\" failed "
             "[min = " << min << ", " << "max = " << max << "]";
         );
     }
     if(!(ditheramplitude >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ditheramplitude >= 0\" failed: "
+            "parameter check \"ditheramplitude >= 0\" failed "
             "[ditheramplitude = " << ditheramplitude << "]"
         );
     }
@@ -929,7 +929,7 @@ RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
     if(!(relativedetail >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"relativedetail >= 0\" failed: "
+            "parameter check \"relativedetail >= 0\" failed "
             "[relativedetail = " << relativedetail << "]"
         );
     }
@@ -1070,7 +1070,7 @@ RtVoid RiCxxValidate::ShadingRate(RtFloat size)
     if(!(size > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"size > 0\" failed: "
+            "parameter check \"size > 0\" failed "
             "[size = " << size << "]"
         );
     }
@@ -1108,21 +1108,21 @@ RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
     if(!(offlow <= onlow))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"offlow <= onlow\" failed: "
+            "parameter check \"offlow <= onlow\" failed "
             "[offlow = " << offlow << ", " << "onlow = " << onlow << "]";
         );
     }
     if(!(onlow <= onhigh))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"onlow <= onhigh\" failed: "
+            "parameter check \"onlow <= onhigh\" failed "
             "[onlow = " << onlow << ", " << "onhigh = " << onhigh << "]";
         );
     }
     if(!(onhigh <= offhigh))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"onhigh <= offhigh\" failed: "
+            "parameter check \"onhigh <= offhigh\" failed "
             "[onhigh = " << onhigh << ", " << "offhigh = " << offhigh << "]";
         );
     }
@@ -1135,7 +1135,7 @@ RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
     if(!(value >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"value >= 0\" failed: "
+            "parameter check \"value >= 0\" failed "
             "[value = " << value << "]"
         );
     }
@@ -1336,14 +1336,14 @@ RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
     if(!(ustep > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"ustep > 0\" failed: "
+            "parameter check \"ustep > 0\" failed "
             "[ustep = " << ustep << "]"
         );
     }
     if(!(vstep > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"vstep > 0\" failed: "
+            "parameter check \"vstep > 0\" failed "
             "[vstep = " << vstep << "]"
         );
     }
@@ -1371,14 +1371,14 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
     if(!(nu > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"nu > 0\" failed: "
+            "parameter check \"nu > 0\" failed "
             "[nu = " << nu << "]"
         );
     }
     if(!(nv > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"nv > 0\" failed: "
+            "parameter check \"nv > 0\" failed "
             "[nv = " << nv << "]"
         );
     }
@@ -1398,14 +1398,14 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
     if(!(nu > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"nu > 0\" failed: "
+            "parameter check \"nu > 0\" failed "
             "[nu = " << nu << "]"
         );
     }
     if(!(uorder > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"uorder > 0\" failed: "
+            "parameter check \"uorder > 0\" failed "
             "[uorder = " << uorder << "]"
         );
     }
@@ -1414,21 +1414,21 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
     if(!(umin < umax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"umin < umax\" failed: "
+            "parameter check \"umin < umax\" failed "
             "[umin = " << umin << ", " << "umax = " << umax << "]";
         );
     }
     if(!(nv > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"nv > 0\" failed: "
+            "parameter check \"nv > 0\" failed "
             "[nv = " << nv << "]"
         );
     }
     if(!(vorder > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"vorder > 0\" failed: "
+            "parameter check \"vorder > 0\" failed "
             "[vorder = " << vorder << "]"
         );
     }
@@ -1437,7 +1437,7 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
     if(!(vmin < vmax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"vmin < vmax\" failed: "
+            "parameter check \"vmin < vmax\" failed "
             "[vmin = " << vmin << ", " << "vmax = " << vmax << "]";
         );
     }
@@ -1512,21 +1512,21 @@ RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"radius != 0\" failed: "
+            "parameter check \"radius != 0\" failed "
             "[radius = " << radius << "]"
         );
     }
     if(!(zmin < zmax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"zmin < zmax\" failed: "
+            "parameter check \"zmin < zmax\" failed "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1546,14 +1546,14 @@ RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"radius != 0\" failed: "
+            "parameter check \"radius != 0\" failed "
             "[radius = " << radius << "]"
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1573,21 +1573,21 @@ RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"radius != 0\" failed: "
+            "parameter check \"radius != 0\" failed "
             "[radius = " << radius << "]"
         );
     }
     if(!(zmin != zmax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"zmin != zmax\" failed: "
+            "parameter check \"zmin != zmax\" failed "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1607,7 +1607,7 @@ RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1627,21 +1627,21 @@ RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
     if(!(rmax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"rmax != 0\" failed: "
+            "parameter check \"rmax != 0\" failed "
             "[rmax = " << rmax << "]"
         );
     }
     if(!(zmin != zmax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"zmin != zmax\" failed: "
+            "parameter check \"zmin != zmax\" failed "
             "[zmin = " << zmin << ", " << "zmax = " << zmax << "]";
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1661,14 +1661,14 @@ RtVoid RiCxxValidate::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"radius != 0\" failed: "
+            "parameter check \"radius != 0\" failed "
             "[radius = " << radius << "]"
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1689,28 +1689,28 @@ RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
     if(!(majorrad != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"majorrad != 0\" failed: "
+            "parameter check \"majorrad != 0\" failed "
             "[majorrad = " << majorrad << "]"
         );
     }
     if(!(minorrad != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"minorrad != 0\" failed: "
+            "parameter check \"minorrad != 0\" failed "
             "[minorrad = " << minorrad << "]"
         );
     }
     if(!(phimin != phimax))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"phimin != phimax\" failed: "
+            "parameter check \"phimin != phimax\" failed "
             "[phimin = " << phimin << ", " << "phimax = " << phimax << "]";
         );
     }
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"thetamax != 0\" failed: "
+            "parameter check \"thetamax != 0\" failed "
             "[thetamax = " << thetamax << "]"
         );
     }
@@ -1845,14 +1845,14 @@ RtVoid RiCxxValidate::MakeTexture(RtConstString imagefile,
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"swidth >= 1\" failed: "
+            "parameter check \"swidth >= 1\" failed "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"twidth >= 1\" failed: "
+            "parameter check \"twidth >= 1\" failed "
             "[twidth = " << twidth << "]"
         );
     }
@@ -1871,14 +1871,14 @@ RtVoid RiCxxValidate::MakeLatLongEnvironment(RtConstString imagefile,
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"swidth >= 1\" failed: "
+            "parameter check \"swidth >= 1\" failed "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"twidth >= 1\" failed: "
+            "parameter check \"twidth >= 1\" failed "
             "[twidth = " << twidth << "]"
         );
     }
@@ -1903,14 +1903,14 @@ RtVoid RiCxxValidate::MakeCubeFaceEnvironment(RtConstString px,
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"swidth >= 1\" failed: "
+            "parameter check \"swidth >= 1\" failed "
             "[swidth = " << swidth << "]"
         );
     }
     if(!(twidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
-            "parameter check \"twidth >= 1\" failed: "
+            "parameter check \"twidth >= 1\" failed "
             "[twidth = " << twidth << "]"
         );
     }
