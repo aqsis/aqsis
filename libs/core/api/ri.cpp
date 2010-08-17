@@ -100,6 +100,9 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface * pSurface,
 										   const Ri::ParamList& pList);
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 
+#define IF_ELSE_TEST if(!m_ifOk) return;
+#define IF_ELSE_TEST0 if(!m_ifOk) return 0;
+
 //------------------------------------------------------------------------------
 /// API for the core renderer
 class RiCxxCore : public Ri::Renderer
@@ -107,11 +110,13 @@ class RiCxxCore : public Ri::Renderer
 	public:
 		RiCxxCore(Ri::RendererServices& apiServices)
 			: m_apiServices(apiServices),
-			m_archiveCallback(0)
+			m_archiveCallback(0),
+			m_ifOk(true)
 		{ }
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
 		{
+			IF_ELSE_TEST;
 			if(m_archiveCallback)
 				m_archiveCallback(const_cast<RtToken>(type),
 								  const_cast<char*>("%s"), string);
@@ -315,6 +320,7 @@ class RiCxxCore : public Ri::Renderer
 
 		Ri::RendererServices& m_apiServices;
 		RtArchiveCallback m_archiveCallback;
+		bool m_ifOk;
 };
 
 //------------------------------------------------------------------------------
@@ -349,6 +355,7 @@ RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 //
 RtToken RiCxxCore::Declare(RtConstString name, RtConstString declaration)
 {
+	IF_ELSE_TEST0;
 	CqPrimvarToken tok;
 	if(declaration)
 		tok = CqPrimvarToken(declaration, name);
@@ -539,6 +546,7 @@ void SetDefaultRiOptions()
 //
 RtVoid RiCxxCore::FrameBegin(RtInt number)
 {
+	IF_ELSE_TEST;
 	// Initialise the statistics variables. If the RIB doesn't contain
 	// a Frame-block the initialisation was previously done in CqStats::Initilise()
 	// which has to be called before a rendering session.
@@ -566,6 +574,7 @@ RtVoid RiCxxCore::FrameBegin(RtInt number)
 //
 RtVoid RiCxxCore::FrameEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->EndFrameModeBlock();
 	QGetRenderContext() ->ClearDisplayRequests();
 }
@@ -576,6 +585,7 @@ RtVoid RiCxxCore::FrameEnd()
 //
 RtVoid RiCxxCore::WorldBegin()
 {
+	IF_ELSE_TEST;
 	// Call any specified pre world function.
 	if ( QGetRenderContext()->pPreWorldFunction() != NULL )
 		( *QGetRenderContext()->pPreWorldFunction() ) ();
@@ -671,6 +681,7 @@ RtVoid RiCxxCore::WorldBegin()
 
 RtVoid RiCxxCore::WorldEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext()->RenderAutoShadows();
 
 	bool fFailed = false;
@@ -733,6 +744,7 @@ RtVoid RiCxxCore::WorldEnd()
 //
 RtVoid RiCxxCore::Format(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = xresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
@@ -744,6 +756,7 @@ RtVoid RiCxxCore::Format(RtInt xresolution, RtInt yresolution, RtFloat pixelaspe
 //
 RtVoid RiCxxCore::FrameAspectRatio(RtFloat frameratio)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
@@ -757,6 +770,7 @@ RtVoid RiCxxCore::FrameAspectRatio(RtFloat frameratio)
 //
 RtVoid RiCxxCore::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = left ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = right ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = top ;
@@ -773,6 +787,7 @@ RtVoid RiCxxCore::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFl
 //
 RtVoid RiCxxCore::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = xmin ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = xmax ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = ymin ;
@@ -785,6 +800,7 @@ RtVoid RiCxxCore::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat y
 //
 RtVoid RiCxxCore::Projection(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	if(NULL != name)
 	{
 		if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
@@ -814,6 +830,7 @@ RtVoid RiCxxCore::Projection(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Clipping(RtFloat cnear, RtFloat cfar)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar;
 }
@@ -824,6 +841,7 @@ RtVoid RiCxxCore::Clipping(RtFloat cnear, RtFloat cfar)
 //
 RtVoid RiCxxCore::DepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
@@ -835,6 +853,7 @@ RtVoid RiCxxCore::DepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focal
 //
 RtVoid RiCxxCore::Shutter(RtFloat opentime, RtFloat closetime)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime;
 }
@@ -846,6 +865,7 @@ RtVoid RiCxxCore::Shutter(RtFloat opentime, RtFloat closetime)
 //
 RtVoid RiCxxCore::PixelVariance(RtFloat variance)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelVariance" ) [ 0 ] = variance ;
 }
 
@@ -855,6 +875,7 @@ RtVoid RiCxxCore::PixelVariance(RtFloat variance)
 //
 RtVoid RiCxxCore::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = static_cast<TqInt>( xsamples ) ;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = static_cast<TqInt>( ysamples ) ;
 }
@@ -865,6 +886,7 @@ RtVoid RiCxxCore::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 //
 RtVoid RiCxxCore::PixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->SetfuncFilter( function );
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = xwidth ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = ywidth ;
@@ -876,6 +898,7 @@ RtVoid RiCxxCore::PixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywi
 //
 RtVoid RiCxxCore::Exposure(RtFloat gain, RtFloat gamma)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 0 ] = gain ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 1 ] = gamma ;
 }
@@ -886,6 +909,7 @@ RtVoid RiCxxCore::Exposure(RtFloat gain, RtFloat gamma)
 //
 RtVoid RiCxxCore::Imager(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadImager = QGetRenderContext()->CreateShader( name, Type_Imager );
 
@@ -905,6 +929,7 @@ RtVoid RiCxxCore::Imager(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude)
 {
+	IF_ELSE_TEST;
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
 		TqFloat* pColorQuantize = QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "Quantize", "Color" );
@@ -937,6 +962,7 @@ RtVoid RiCxxCore::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max, R
 //
 RtVoid RiCxxCore::Display(RtConstToken name, RtConstToken type, RtConstToken mode, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	CqString strName( name );
 	CqString strType( type );
 
@@ -1017,6 +1043,7 @@ RtVoid RiCxxCore::Display(RtConstToken name, RtConstToken type, RtConstToken mod
 //
 RtVoid RiCxxCore::Hider(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
 	{
 		QGetRenderContext() ->poptWriteCurrent()->GetStringOptionWrite( "System", "Hider" ) [ 0 ] = name ;
@@ -1046,6 +1073,7 @@ RtVoid RiCxxCore::Hider(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::ColorSamples(const FloatArray& nRGB, const FloatArray& RGBn)
 {
+	IF_ELSE_TEST;
 	Aqsis::log() << warning << "RiColorSamples not supported" << std::endl;
 }
 
@@ -1055,6 +1083,7 @@ RtVoid RiCxxCore::ColorSamples(const FloatArray& nRGB, const FloatArray& RGBn)
 //
 RtVoid RiCxxCore::RelativeDetail(RtFloat relativedetail)
 {
+	IF_ELSE_TEST;
 	if ( relativedetail < 0.0f )
 	{
 		Aqsis::log() << error << "RiRelativeDetail < 0.0" << std::endl;
@@ -1071,6 +1100,7 @@ RtVoid RiCxxCore::RelativeDetail(RtFloat relativedetail)
 //
 RtVoid RiCxxCore::Option(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	for(size_t i = 0; i < pList.size(); ++i)
 	{
 		const void* value = pList[i].data();
@@ -1207,6 +1237,7 @@ RtVoid RiCxxCore::Option(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::AttributeBegin()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->BeginAttributeModeBlock();
 }
 
@@ -1216,6 +1247,7 @@ RtVoid RiCxxCore::AttributeBegin()
 //
 RtVoid RiCxxCore::AttributeEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->EndAttributeModeBlock();
 }
 
@@ -1225,6 +1257,7 @@ RtVoid RiCxxCore::AttributeEnd()
 //
 RtVoid RiCxxCore::Color(RtConstColor Cq)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1235,6 +1268,7 @@ RtVoid RiCxxCore::Color(RtConstColor Cq)
 //
 RtVoid RiCxxCore::Opacity(RtConstColor Os)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1248,6 +1282,7 @@ RtVoid RiCxxCore::TextureCoordinates(RtFloat s1, RtFloat t1,
 									 RtFloat s3, RtFloat t3,
 									 RtFloat s4, RtFloat t4)
 {
+	IF_ELSE_TEST;
 	TqFloat * pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "TextureCoordinates" );
 
 	assert( NULL != pTC );
@@ -1269,6 +1304,7 @@ RtVoid RiCxxCore::TextureCoordinates(RtFloat s1, RtFloat t1,
 //
 RtLightHandle RiCxxCore::LightSource(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST0;
 	// Find the lightsource shader.
 	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
 	if(!pShader)
@@ -1309,6 +1345,7 @@ RtLightHandle RiCxxCore::LightSource(RtConstToken name, const ParamList& pList)
 //
 RtLightHandle RiCxxCore::AreaLightSource(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST0;
 	Aqsis::log() << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
 	return LightSource(name, pList);
@@ -1320,6 +1357,7 @@ RtLightHandle RiCxxCore::AreaLightSource(RtConstToken name, const ParamList& pLi
 //
 RtVoid RiCxxCore::Illuminate(RtLightHandle light, RtBoolean onoff)
 {
+	IF_ELSE_TEST;
 	// Check if we are turning the light on or off.
 	if ( light == NULL ) return ;
 
@@ -1337,6 +1375,7 @@ RtVoid RiCxxCore::Illuminate(RtLightHandle light, RtBoolean onoff)
 //
 RtVoid RiCxxCore::Surface(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadSurface = QGetRenderContext()->CreateShader( name, Type_Surface );
 
@@ -1362,6 +1401,7 @@ RtVoid RiCxxCore::Surface(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Atmosphere(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadAtmosphere = QGetRenderContext()->CreateShader( name, Type_Volume );
 
@@ -1386,6 +1426,7 @@ RtVoid RiCxxCore::Atmosphere(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Interior(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
 }
 
@@ -1395,6 +1436,7 @@ RtVoid RiCxxCore::Interior(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Exterior(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	Aqsis::log() << warning << "ExInterior not supported" << std::endl;
 }
 
@@ -1404,6 +1446,7 @@ RtVoid RiCxxCore::Exterior(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::ShadingRate(RtFloat size)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1414,6 +1457,7 @@ RtVoid RiCxxCore::ShadingRate(RtFloat size)
 //
 RtVoid RiCxxCore::ShadingInterpolation(RtConstToken type)
 {
+	IF_ELSE_TEST;
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
 		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingInterp_Constant;
 	else if ( strcmp( type, RI_SMOOTH ) == 0 )
@@ -1430,6 +1474,7 @@ RtVoid RiCxxCore::ShadingInterpolation(RtConstToken type)
 //
 RtVoid RiCxxCore::Matte(RtBoolean onoff)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff;
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1440,6 +1485,7 @@ RtVoid RiCxxCore::Matte(RtBoolean onoff)
 //
 RtVoid RiCxxCore::Bound(RtConstBound bound)
 {
+	IF_ELSE_TEST;
 	// TODO: Need to add a "Bound" attribute here, and fill it in.
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1450,6 +1496,7 @@ RtVoid RiCxxCore::Bound(RtConstBound bound)
 //
 RtVoid RiCxxCore::Detail(RtConstBound bound)
 {
+	IF_ELSE_TEST;
 	CqBound Bound( bound );
 
 	TqFloat* boundAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LODBound" );
@@ -1467,6 +1514,7 @@ RtVoid RiCxxCore::Detail(RtConstBound bound)
 //
 RtVoid RiCxxCore::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh)
 {
+	IF_ELSE_TEST;
 	if ( offlow > onlow || onhigh > offhigh )
 	{
 		Aqsis::log() << error << "RiDetailRange invalid range" << std::endl;
@@ -1486,6 +1534,7 @@ RtVoid RiCxxCore::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtF
 //
 RtVoid RiCxxCore::GeometricApproximation(RtConstToken type, RtFloat value)
 {
+	IF_ELSE_TEST;
 	std::string typeStr = type;
 	if(typeStr == RI_FLATNESS)
 	{
@@ -1519,6 +1568,7 @@ RtVoid RiCxxCore::GeometricApproximation(RtConstToken type, RtFloat value)
 //
 RtVoid RiCxxCore::Orientation(RtConstToken orientation)
 {
+	IF_ELSE_TEST;
 	if ( orientation != 0 )
 	{
 		if ( strstr( orientation, RI_RH ) != 0 )
@@ -1539,6 +1589,7 @@ RtVoid RiCxxCore::Orientation(RtConstToken orientation)
 //
 RtVoid RiCxxCore::ReverseOrientation()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1549,6 +1600,7 @@ RtVoid RiCxxCore::ReverseOrientation()
 //
 RtVoid RiCxxCore::Sides(RtInt nsides)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Sides" ) [ 0 ] = nsides;
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1559,6 +1611,7 @@ RtVoid RiCxxCore::Sides(RtInt nsides)
 //
 RtVoid RiCxxCore::Identity()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 	QGetRenderContext() ->AdvanceTime();
 }
@@ -1569,6 +1622,7 @@ RtVoid RiCxxCore::Identity()
 //
 RtVoid RiCxxCore::Transform(RtConstMatrix transform)
 {
+	IF_ELSE_TEST;
 	CqMatrix matTrans( transform );
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 	//        QGetRenderContext() ->ptransWriteCurrent() ->FlipHandedness( QGetRenderContext() ->Time() );
@@ -1593,6 +1647,7 @@ RtVoid RiCxxCore::Transform(RtConstMatrix transform)
 //
 RtVoid RiCxxCore::ConcatTransform(RtConstMatrix transform)
 {
+	IF_ELSE_TEST;
 	// Check if this transformation results in a change in orientation.
 	CqMatrix matTrans( transform );
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -1608,6 +1663,7 @@ RtVoid RiCxxCore::ConcatTransform(RtConstMatrix transform)
 //
 RtVoid RiCxxCore::Perspective(RtFloat fov)
 {
+	IF_ELSE_TEST;
 	if ( fov <= 0 )
 	{
 		Aqsis::log() << error << "RiPerspective invalid FOV" << std::endl;
@@ -1633,6 +1689,7 @@ RtVoid RiCxxCore::Perspective(RtFloat fov)
 //
 RtVoid RiCxxCore::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
+	IF_ELSE_TEST;
 	CqMatrix	matTrans( CqVector3D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -1648,6 +1705,7 @@ RtVoid RiCxxCore::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 //
 RtVoid RiCxxCore::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
+	IF_ELSE_TEST;
 	CqMatrix	matRot( degToRad( angle ), CqVector3D( dx, dy, dz ) );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -1663,6 +1721,7 @@ RtVoid RiCxxCore::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 //
 RtVoid RiCxxCore::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
+	IF_ELSE_TEST;
 	CqMatrix	matScale( sx, sy, sz );
 	// Check if this transformation results in a change in orientation.
 	//    if ( matScale.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
@@ -1678,6 +1737,7 @@ RtVoid RiCxxCore::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 //
 RtVoid RiCxxCore::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
+	IF_ELSE_TEST;
 	CqMatrix	matSkew( degToRad( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
 
 	// This transformation can not change orientation.
@@ -1692,6 +1752,7 @@ RtVoid RiCxxCore::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtF
 //
 RtVoid RiCxxCore::Displacement(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Find the shader.
 	boost::shared_ptr<IqShader> pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
 
@@ -1716,6 +1777,7 @@ RtVoid RiCxxCore::Displacement(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::CoordinateSystem(RtConstToken space)
 {
+	IF_ELSE_TEST;
 	// Insert the named coordinate system into the list help on the renderer.
 	QGetRenderContext() ->SetCoordSystem( space, QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
 	QGetRenderContext() ->AdvanceTime();
@@ -1728,6 +1790,7 @@ RtVoid RiCxxCore::CoordinateSystem(RtConstToken space)
 
 RtVoid RiCxxCore::CoordSysTransform(RtConstToken space)
 {
+	IF_ELSE_TEST;
 	// Insert the named coordinate system into the list help on the renderer.
 	CqMatrix matSpaceToWorld;
 	QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time(), matSpaceToWorld ); 
@@ -1753,6 +1816,7 @@ RtVoid RiCxxCore::CoordSysTransform(RtConstToken space)
 //
 RtVoid RiCxxCore::TransformBegin()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->BeginTransformModeBlock();
 }
 
@@ -1762,6 +1826,7 @@ RtVoid RiCxxCore::TransformBegin()
 //
 RtVoid RiCxxCore::TransformEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->EndTransformModeBlock();
 }
 
@@ -1771,6 +1836,7 @@ RtVoid RiCxxCore::TransformEnd()
 //
 RtVoid RiCxxCore::Attribute(RtConstToken name, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Find the parameter on the current options.
 	CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name ).get();
 
@@ -1861,6 +1927,7 @@ RtVoid RiCxxCore::Attribute(RtConstToken name, const ParamList& pList)
 //
 RtVoid RiCxxCore::Polygon(const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt nvertices = countP(pList);
 	// Create a new polygon surface primitive.
 	boost::shared_ptr<CqSurfacePolygon> pSurface( new CqSurfacePolygon( nvertices ) );
@@ -1892,6 +1959,7 @@ RtVoid RiCxxCore::Polygon(const ParamList& pList)
 //
 RtVoid RiCxxCore::GeneralPolygon(const IntArray& nverts, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt nloops = nverts.size();
 	TqInt iloop;
 
@@ -2026,6 +2094,7 @@ RtVoid RiCxxCore::GeneralPolygon(const IntArray& nverts, const ParamList& pList)
 //----------------------------------------------------------------------
 RtVoid RiCxxCore::Blobby(RtInt nleaf, const IntArray& code, const FloatArray& flt, const StringArray& strings, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	TqInt i;
 
 	// Initialize the blobby structure
@@ -2185,6 +2254,7 @@ RtVoid RiCxxCore::Blobby(RtInt nleaf, const IntArray& code, const FloatArray& fl
  **/
 RtVoid RiCxxCore::Points(const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt npoints = countP(pList);
 	// Create a storage class for all the points.
 	boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( npoints, 1, npoints ) );
@@ -2250,6 +2320,7 @@ RtVoid RiCxxCore::Points(const ParamList& pList)
 // Specify small line primitives
 RtVoid RiCxxCore::Curves(RtConstToken type, const IntArray& nvertices, RtConstToken wrap, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt ncurves = nvertices.size();
 	// find out whether the curve is periodic or non-periodic
 	bool periodic = false;
@@ -2324,6 +2395,7 @@ RtVoid RiCxxCore::Curves(RtConstToken type, const IntArray& nvertices, RtConstTo
 //
 RtVoid RiCxxCore::PointsPolygons(const IntArray& nverts, const IntArray& verts, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt npolys = nverts.size();
 	// Calculate how many vertices there are.
 	RtInt cVerts = 0;
@@ -2366,6 +2438,7 @@ RtVoid RiCxxCore::PointsPolygons(const IntArray& nverts, const IntArray& verts, 
 //
 RtVoid RiCxxCore::PointsGeneralPolygons(const IntArray& nloops, const IntArray& nverts, const IntArray& verts, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt npolys = nloops.size();
 
 	TqUint ipoly;
@@ -2591,6 +2664,7 @@ RtVoid RiCxxCore::PointsGeneralPolygons(const IntArray& nloops, const IntArray& 
 //
 RtVoid RiCxxCore::Basis(RtConstBasis ubasis, RtInt ustep, RtConstBasis vbasis, RtInt vstep)
 {
+	IF_ELSE_TEST;
 	CqMatrix u;
 	CqMatrix v;
 
@@ -2640,6 +2714,7 @@ RtVoid RiCxxCore::Basis(RtConstBasis ubasis, RtInt ustep, RtConstBasis vbasis, R
 //
 RtVoid RiCxxCore::Patch(RtConstToken type, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
 		// Create a surface patch
@@ -2696,6 +2771,7 @@ RtVoid RiCxxCore::Patch(RtConstToken type, const ParamList& pList)
 
 RtVoid RiCxxCore::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap, RtInt nv, RtConstToken vwrap, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
 		Aqsis::log() << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
 
@@ -2768,6 +2844,7 @@ RtVoid RiCxxCore::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap, RtI
 //
 RtVoid RiCxxCore::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot, RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, const FloatArray& vknot, RtFloat vmin, RtFloat vmax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a NURBS patch
 	boost::shared_ptr<CqSurfaceNURBS> pSurface( new CqSurfaceNURBS() );
 	pSurface->SetfPatchMesh();
@@ -2808,6 +2885,7 @@ RtVoid RiCxxCore::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot, RtFlo
 //
 RtVoid RiCxxCore::TrimCurve(const IntArray& ncurves, const IntArray& order, const FloatArray& knot, const FloatArray& min, const FloatArray& max, const IntArray& n, const FloatArray& u, const FloatArray& v, const FloatArray& w)
 {
+	IF_ELSE_TEST;
 	RtInt nloops = ncurves.size();
 	// Clear the current loop array.
 	QGetRenderContext() ->pattrWriteCurrent() ->TrimLoops().Clear();
@@ -2857,6 +2935,7 @@ RtVoid RiCxxCore::TrimCurve(const IntArray& ncurves, const IntArray& order, cons
 //
 RtVoid RiCxxCore::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a sphere
 	boost::shared_ptr<CqSphere> pSurface( new CqSphere( radius, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), pList );
@@ -2878,6 +2957,7 @@ RtVoid RiCxxCore::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat the
 //
 RtVoid RiCxxCore::Cone(RtFloat height, RtFloat radius, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	/// \note This should be an exception and get caught further up.
 	if( thetamax == 0 )
 		return;
@@ -2903,6 +2983,7 @@ RtVoid RiCxxCore::Cone(RtFloat height, RtFloat radius, RtFloat thetamax, const P
 //
 RtVoid RiCxxCore::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a cylinder
 	boost::shared_ptr<CqCylinder> pSurface( new CqCylinder( radius, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), pList );
@@ -2924,6 +3005,7 @@ RtVoid RiCxxCore::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat t
 //
 RtVoid RiCxxCore::Hyperboloid(RtConstPoint point1, RtConstPoint point2, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a hyperboloid
 	CqVector3D v0( point1[ 0 ], point1[ 1 ], point1[ 2 ] );
 	CqVector3D v1( point2[ 0 ], point2[ 1 ], point2[ 2 ] );
@@ -2947,6 +3029,7 @@ RtVoid RiCxxCore::Hyperboloid(RtConstPoint point1, RtConstPoint point2, RtFloat 
 //
 RtVoid RiCxxCore::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a paraboloid
 	boost::shared_ptr<CqParaboloid> pSurface( new CqParaboloid( rmax, zmin, zmax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), pList );
@@ -2968,6 +3051,7 @@ RtVoid RiCxxCore::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat t
 //
 RtVoid RiCxxCore::Disk(RtFloat height, RtFloat radius, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a disk
 	boost::shared_ptr<CqDisk> pSurface( new CqDisk( height, 0, radius, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), pList );
@@ -2990,6 +3074,7 @@ RtVoid RiCxxCore::Disk(RtFloat height, RtFloat radius, RtFloat thetamax, const P
 //
 RtVoid RiCxxCore::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Create a torus
 	boost::shared_ptr<CqTorus> pSurface( new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), pList );
@@ -3012,6 +3097,7 @@ RtVoid RiCxxCore::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFl
 //
 RtVoid RiCxxCore::Procedural(RtPointer data, RtConstBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
 {
+	IF_ELSE_TEST;
 	CqBound B(bound);
 	boost::shared_ptr<CqProcedural> pProc( new CqProcedural(data, B, refineproc, freeproc ) );
 	TqFloat time = QGetRenderContext()->Time();
@@ -3030,6 +3116,7 @@ RtVoid RiCxxCore::Procedural(RtPointer data, RtConstBound bound, RtProcSubdivFun
 //
 RtVoid RiCxxCore::Geometry(RtConstToken type, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	if ( strcmp( type, "teapot" ) == 0 )
 	{
 
@@ -3133,6 +3220,7 @@ RtVoid RiCxxCore::Geometry(RtConstToken type, const ParamList& pList)
 //
 RtVoid RiCxxCore::SolidBegin(RtConstToken type)
 {
+	IF_ELSE_TEST;
 	CqString strType( type );
 	QGetRenderContext() ->BeginSolidModeBlock( strType );
 }
@@ -3143,6 +3231,7 @@ RtVoid RiCxxCore::SolidBegin(RtConstToken type)
 //
 RtVoid RiCxxCore::SolidEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->EndSolidModeBlock();
 }
 
@@ -3151,17 +3240,20 @@ RtVoid RiCxxCore::SolidEnd()
 // Object retention and instancing.
 RtObjectHandle RiCxxCore::ObjectBegin()
 {
+	IF_ELSE_TEST0;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
 		<< "ObjectBegin should be handled by a filter\n";
 	return 0;
 }
 RtVoid RiCxxCore::ObjectEnd()
 {
+	IF_ELSE_TEST;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
 		<< "ObjectEnd should be handled by a filter\n";
 }
 RtVoid RiCxxCore::ObjectInstance(RtObjectHandle handle)
 {
+	IF_ELSE_TEST;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
 		<< "ObjectInstance should be handled by a filter\n";
 }
@@ -3172,6 +3264,7 @@ RtVoid RiCxxCore::ObjectInstance(RtObjectHandle handle)
 //
 RtVoid RiCxxCore::MotionBegin(const FloatArray& times)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->BeginMotionModeBlock( times.size(), const_cast<TqFloat*>(times.begin()) );
 }
 
@@ -3181,6 +3274,7 @@ RtVoid RiCxxCore::MotionBegin(const FloatArray& times)
 //
 RtVoid RiCxxCore::MotionEnd()
 {
+	IF_ELSE_TEST;
 	QGetRenderContext() ->EndMotionModeBlock();
 }
 
@@ -3189,6 +3283,7 @@ RtVoid RiCxxCore::MotionEnd()
 // Convert a picture to a texture.
 RtVoid RiCxxCore::MakeTexture(RtConstString imagefile, RtConstString texturefile, RtConstToken swrap, RtConstToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	AQSIS_TIME_SCOPE(Make_texture);
 
 	SqWrapModes wrapModes(enumCast<EqWrapMode>(swrap), enumCast<EqWrapMode>(twrap));
@@ -3204,6 +3299,7 @@ RtVoid RiCxxCore::MakeTexture(RtConstString imagefile, RtConstString texturefile
 //
 RtVoid RiCxxCore::MakeLatLongEnvironment(RtConstString imagefile, RtConstString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	assert(imagefile != 0 && reflfile != 0 && filterfunc != 0);
 
 	AQSIS_TIME_SCOPE(Make_texture);
@@ -3220,6 +3316,7 @@ RtVoid RiCxxCore::MakeLatLongEnvironment(RtConstString imagefile, RtConstString 
 //
 RtVoid RiCxxCore::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx, RtConstString py, RtConstString ny, RtConstString pz, RtConstString nz, RtConstString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
 	        reflfile != 0 && filterfunc != 0 );
 
@@ -3245,6 +3342,7 @@ RtVoid RiCxxCore::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx, Rt
 //
 RtVoid RiCxxCore::MakeShadow(RtConstString picfile, RtConstString shadowfile, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	assert(picfile != 0 && shadowfile != 0);
 
 	AQSIS_TIME_SCOPE(Make_texture);
@@ -3260,6 +3358,7 @@ RtVoid RiCxxCore::MakeShadow(RtConstString picfile, RtConstString shadowfile, co
 //
 RtVoid RiCxxCore::MakeOcclusion(const StringArray& picfiles, RtConstString shadowfile, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	AQSIS_TIME_SCOPE(Make_texture);
 
 	std::vector<boost::filesystem::path> fileNames;
@@ -3273,31 +3372,28 @@ RtVoid RiCxxCore::MakeOcclusion(const StringArray& picfiles, RtConstString shado
 }
 
 //----------------------------------------------------------------------
-// TODO: Reinstate conditional testing.
-bool   IfOk = true;
-
 /** Conditional handlers for 3.4 new RI Tokens
  * It calls TestCondition(); expect to modify the global variable IfOk.
  *	\param	condition
  */
 RtVoid RiCxxCore::IfBegin(RtConstString condition)
 {
-	IfOk = TestCondition(condition, "RiIfBegin");
+	m_ifOk = TestCondition(condition, "RiIfBegin");
 }
 
 RtVoid RiCxxCore::ElseIf(RtConstString condition)
 {
-	IfOk = TestCondition(condition, "RiElseIf");
+	m_ifOk = TestCondition(condition, "RiElseIf");
 }
 
 RtVoid RiCxxCore::Else()
 {
-	IfOk = !IfOk;
+	m_ifOk = !m_ifOk;
 }
 
 RtVoid RiCxxCore::IfEnd()
 {
-	IfOk = true;
+	m_ifOk = true;
 }
 
 //----------------------------------------------------------------------
@@ -3305,6 +3401,7 @@ RtVoid RiCxxCore::IfEnd()
 //
 RtVoid RiCxxCore::ErrorHandler(RtErrorFunc handler)
 {
+	IF_ELSE_TEST;
 	QGetRenderContext()->SetpErrorHandler( handler );
 }
 
@@ -3314,6 +3411,7 @@ RtVoid RiCxxCore::ErrorHandler(RtErrorFunc handler)
 //
 RtVoid RiCxxCore::SubdivisionMesh(RtConstToken scheme, const IntArray& nvertices, const IntArray& vertices, const TokenArray& tags, const IntArray& nargs, const IntArray& intargs, const FloatArray& floatargs, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	RtInt nfaces = nvertices.size();
 	RtInt ntags = tags.size();
 	// Calculate how many vertices there are.
@@ -3453,6 +3551,7 @@ RtVoid RiCxxCore::SubdivisionMesh(RtConstToken scheme, const IntArray& nvertices
 
 RtVoid RiCxxCore::ReadArchive(RtConstToken name, RtArchiveCallback callback, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// Open the archive file
 	boost::filesystem::ifstream archiveFile(
 			QGetRenderContext()->poptCurrent()->findRiFile(name, "archive"),
@@ -3467,6 +3566,7 @@ RtVoid RiCxxCore::ReadArchive(RtConstToken name, RtArchiveCallback callback, con
 
 RtVoid RiCxxCore::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz)
 {
+	IF_ELSE_TEST;
 	Aqsis::log() << warning << "Ignoring unimplemented interface call: RiClippingPlane\n";
 }
 
@@ -3475,6 +3575,7 @@ RtVoid RiCxxCore::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtF
 //
 RtVoid RiCxxCore::Resource(RtConstToken handle, RtConstToken type, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	return;
 }
 
@@ -3483,6 +3584,7 @@ RtVoid RiCxxCore::Resource(RtConstToken handle, RtConstToken type, const ParamLi
 //
 RtVoid RiCxxCore::ResourceBegin()
 {
+	IF_ELSE_TEST;
 }
 
 
@@ -3490,11 +3592,13 @@ RtVoid RiCxxCore::ResourceBegin()
 //
 RtVoid RiCxxCore::ResourceEnd()
 {
+	IF_ELSE_TEST;
 }
 
 
 RtVoid RiCxxCore::ShaderLayer(RtConstToken type, RtConstToken name, RtConstToken layername, const ParamList& pList)
 {
+	IF_ELSE_TEST;
 	// If the current shader for the specified type is already a layer container, add this layer to it, if not,
 	// create one and add this layer as the first.
 
@@ -3566,6 +3670,7 @@ RtVoid RiCxxCore::ShaderLayer(RtConstToken type, RtConstToken name, RtConstToken
 
 RtVoid RiCxxCore::ConnectShaderLayers(RtConstToken type, RtConstToken layer1, RtConstToken variable1, RtConstToken layer2, RtConstToken variable2)
 {
+	IF_ELSE_TEST;
 	// If the current shader for the specified type is a layer container, add this connection to it
 	CqString stringtype(type);
 	stringtype = stringtype.ToLower();
