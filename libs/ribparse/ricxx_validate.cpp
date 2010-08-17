@@ -439,13 +439,6 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 #if $doScopeCheck
     checkScope(ApiScope(${' | '.join($validScopeNames)}));
 #end if
-#if $procName.endswith('Begin') and $procName[:-5] not in $irrelevantScopes
-    m_scopeStack.push(Scope_$procName[:-5]);
-#end if
-#if $procName.endswith('End') and $procName[:-3] not in $irrelevantScopes
-    assert(m_scopeStack.top() == Scope_$procName[:-3]);
-    m_scopeStack.pop();
-#end if
 ## --------------- Argument checking -------------------
 #for $arg in $args
   #set $argName = $arg.findtext('Name')
@@ -523,7 +516,17 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 #if $extraSnippet is not None
     $extraSnippet
 #end if
-    return nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
+#if $procName.endswith('Begin') and $procName[:-5] not in $irrelevantScopes
+    m_scopeStack.push(Scope_$procName[:-5]);
+#end if
+#if $returnType != 'RtVoid'
+    return
+#end if
+    nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
+#if $procName.endswith('End') and $procName[:-3] not in $irrelevantScopes
+    assert(m_scopeStack.top() == Scope_$procName[:-3]);
+    m_scopeStack.pop();
+#end if
 }
 '''
 
@@ -537,6 +540,7 @@ for proc in riXml.findall('Procedures/Procedure'):
                                if s.tag not in irrelevantScopes])
         doScopeCheck = len(validScopeNames) > 0
         extraSnippet = getExtraSnippet(procName)
+        returnType = proc.findtext('ReturnType')
         cog.out(str(Template(methodTemplate, searchList=locals())));
 
 ]]]*/
@@ -544,61 +548,62 @@ for proc in riXml.findall('Procedures/Procedure'):
 RtToken RiCxxValidate::Declare(RtConstString name, RtConstString declaration)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Declare(name, declaration);
+    return
+    nextFilter().Declare(name, declaration);
 }
 
 RtVoid RiCxxValidate::FrameBegin(RtInt number)
 {
     checkScope(ApiScope(Scope_BeginEnd));
-    m_scopeStack.push(Scope_Frame);
     pushAttributes();
-    return nextFilter().FrameBegin(number);
+    m_scopeStack.push(Scope_Frame);
+    nextFilter().FrameBegin(number);
 }
 
 RtVoid RiCxxValidate::FrameEnd()
 {
     checkScope(ApiScope(Scope_Frame));
+    popAttributes();
+    nextFilter().FrameEnd();
     assert(m_scopeStack.top() == Scope_Frame);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().FrameEnd();
 }
 
 RtVoid RiCxxValidate::WorldBegin()
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
-    m_scopeStack.push(Scope_World);
     pushAttributes();
-    return nextFilter().WorldBegin();
+    m_scopeStack.push(Scope_World);
+    nextFilter().WorldBegin();
 }
 
 RtVoid RiCxxValidate::WorldEnd()
 {
     checkScope(ApiScope(Scope_World));
+    popAttributes();
+    nextFilter().WorldEnd();
     assert(m_scopeStack.top() == Scope_World);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().WorldEnd();
 }
 
 RtVoid RiCxxValidate::IfBegin(RtConstString condition)
 {
-    return nextFilter().IfBegin(condition);
+    nextFilter().IfBegin(condition);
 }
 
 RtVoid RiCxxValidate::ElseIf(RtConstString condition)
 {
-    return nextFilter().ElseIf(condition);
+    nextFilter().ElseIf(condition);
 }
 
 RtVoid RiCxxValidate::Else()
 {
-    return nextFilter().Else();
+    nextFilter().Else();
 }
 
 RtVoid RiCxxValidate::IfEnd()
 {
-    return nextFilter().IfEnd();
+    nextFilter().IfEnd();
 }
 
 RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
@@ -626,7 +631,7 @@ RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
             "[pixelaspectratio = " << pixelaspectratio << "]"
         );
     }
-    return nextFilter().Format(xresolution, yresolution, pixelaspectratio);
+    nextFilter().Format(xresolution, yresolution, pixelaspectratio);
 }
 
 RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
@@ -639,7 +644,7 @@ RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
             "[frameratio = " << frameratio << "]"
         );
     }
-    return nextFilter().FrameAspectRatio(frameratio);
+    nextFilter().FrameAspectRatio(frameratio);
 }
 
 RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
@@ -660,7 +665,7 @@ RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
             "[bottom = " << bottom << ", " << "top = " << top << "]";
         );
     }
-    return nextFilter().ScreenWindow(left, right, bottom, top);
+    nextFilter().ScreenWindow(left, right, bottom, top);
 }
 
 RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
@@ -709,7 +714,7 @@ RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
             "[ymax = " << ymax << "]"
         );
     }
-    return nextFilter().CropWindow(xmin, xmax, ymin, ymax);
+    nextFilter().CropWindow(xmin, xmax, ymin, ymax);
 }
 
 RtVoid RiCxxValidate::Projection(RtConstToken name, const ParamList& pList)
@@ -717,7 +722,7 @@ RtVoid RiCxxValidate::Projection(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Projection");
-    return nextFilter().Projection(name, pList);
+    nextFilter().Projection(name, pList);
 }
 
 RtVoid RiCxxValidate::Clipping(RtFloat cnear, RtFloat cfar)
@@ -737,13 +742,13 @@ RtVoid RiCxxValidate::Clipping(RtFloat cnear, RtFloat cfar)
             "[cfar = " << cfar << ", " << "cnear = " << cnear << "]";
         );
     }
-    return nextFilter().Clipping(cnear, cfar);
+    nextFilter().Clipping(cnear, cfar);
 }
 
 RtVoid RiCxxValidate::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
                                     RtFloat ny, RtFloat nz)
 {
-    return nextFilter().ClippingPlane(x, y, z, nx, ny, nz);
+    nextFilter().ClippingPlane(x, y, z, nx, ny, nz);
 }
 
 RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
@@ -771,7 +776,7 @@ RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
             "[focaldistance = " << focaldistance << "]"
         );
     }
-    return nextFilter().DepthOfField(fstop, focallength, focaldistance);
+    nextFilter().DepthOfField(fstop, focallength, focaldistance);
 }
 
 RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
@@ -784,7 +789,7 @@ RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
             "[opentime = " << opentime << ", " << "closetime = " << closetime << "]";
         );
     }
-    return nextFilter().Shutter(opentime, closetime);
+    nextFilter().Shutter(opentime, closetime);
 }
 
 RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
@@ -797,7 +802,7 @@ RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
             "[variance = " << variance << "]"
         );
     }
-    return nextFilter().PixelVariance(variance);
+    nextFilter().PixelVariance(variance);
 }
 
 RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
@@ -817,7 +822,7 @@ RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
             "[ysamples = " << ysamples << "]"
         );
     }
-    return nextFilter().PixelSamples(xsamples, ysamples);
+    nextFilter().PixelSamples(xsamples, ysamples);
 }
 
 RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
@@ -838,7 +843,7 @@ RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
             "[ywidth = " << ywidth << "]"
         );
     }
-    return nextFilter().PixelFilter(function, xwidth, ywidth);
+    nextFilter().PixelFilter(function, xwidth, ywidth);
 }
 
 RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
@@ -858,7 +863,7 @@ RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
             "[gamma = " << gamma << "]"
         );
     }
-    return nextFilter().Exposure(gain, gamma);
+    nextFilter().Exposure(gain, gamma);
 }
 
 RtVoid RiCxxValidate::Imager(RtConstToken name, const ParamList& pList)
@@ -866,7 +871,7 @@ RtVoid RiCxxValidate::Imager(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Imager");
-    return nextFilter().Imager(name, pList);
+    nextFilter().Imager(name, pList);
 }
 
 RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
@@ -894,7 +899,7 @@ RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
             "[ditheramplitude = " << ditheramplitude << "]"
         );
     }
-    return nextFilter().Quantize(type, one, min, max, ditheramplitude);
+    nextFilter().Quantize(type, one, min, max, ditheramplitude);
 }
 
 RtVoid RiCxxValidate::Display(RtConstToken name, RtConstToken type,
@@ -903,7 +908,7 @@ RtVoid RiCxxValidate::Display(RtConstToken name, RtConstToken type,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Display");
-    return nextFilter().Display(name, type, mode, pList);
+    nextFilter().Display(name, type, mode, pList);
 }
 
 RtVoid RiCxxValidate::Hider(RtConstToken name, const ParamList& pList)
@@ -911,7 +916,7 @@ RtVoid RiCxxValidate::Hider(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Hider");
-    return nextFilter().Hider(name, pList);
+    nextFilter().Hider(name, pList);
 }
 
 RtVoid RiCxxValidate::ColorSamples(const FloatArray& nRGB,
@@ -920,7 +925,7 @@ RtVoid RiCxxValidate::ColorSamples(const FloatArray& nRGB,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     checkArraySize(size(nRGB), RGBn.size(),
                    "RGBn", "ColorSamples");
-    return nextFilter().ColorSamples(nRGB, RGBn);
+    nextFilter().ColorSamples(nRGB, RGBn);
 }
 
 RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
@@ -933,7 +938,7 @@ RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
             "[relativedetail = " << relativedetail << "]"
         );
     }
-    return nextFilter().RelativeDetail(relativedetail);
+    nextFilter().RelativeDetail(relativedetail);
 }
 
 RtVoid RiCxxValidate::Option(RtConstToken name, const ParamList& pList)
@@ -941,36 +946,36 @@ RtVoid RiCxxValidate::Option(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Option");
-    return nextFilter().Option(name, pList);
+    nextFilter().Option(name, pList);
 }
 
 RtVoid RiCxxValidate::AttributeBegin()
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
-    m_scopeStack.push(Scope_Attribute);
     pushAttributes();
-    return nextFilter().AttributeBegin();
+    m_scopeStack.push(Scope_Attribute);
+    nextFilter().AttributeBegin();
 }
 
 RtVoid RiCxxValidate::AttributeEnd()
 {
     checkScope(ApiScope(Scope_Attribute));
+    popAttributes();
+    nextFilter().AttributeEnd();
     assert(m_scopeStack.top() == Scope_Attribute);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().AttributeEnd();
 }
 
 RtVoid RiCxxValidate::Color(RtConstColor Cq)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Color(Cq);
+    nextFilter().Color(Cq);
 }
 
 RtVoid RiCxxValidate::Opacity(RtConstColor Os)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Opacity(Os);
+    nextFilter().Opacity(Os);
 }
 
 RtVoid RiCxxValidate::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
@@ -978,7 +983,7 @@ RtVoid RiCxxValidate::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                                          RtFloat s4, RtFloat t4)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
+    nextFilter().TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
 }
 
 RtLightHandle RiCxxValidate::LightSource(RtConstToken name,
@@ -987,7 +992,8 @@ RtLightHandle RiCxxValidate::LightSource(RtConstToken name,
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "LightSource");
-    return nextFilter().LightSource(name, pList);
+    return
+    nextFilter().LightSource(name, pList);
 }
 
 RtLightHandle RiCxxValidate::AreaLightSource(RtConstToken name,
@@ -996,13 +1002,14 @@ RtLightHandle RiCxxValidate::AreaLightSource(RtConstToken name,
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "AreaLightSource");
-    return nextFilter().AreaLightSource(name, pList);
+    return
+    nextFilter().AreaLightSource(name, pList);
 }
 
 RtVoid RiCxxValidate::Illuminate(RtLightHandle light, RtBoolean onoff)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Illuminate(light, onoff);
+    nextFilter().Illuminate(light, onoff);
 }
 
 RtVoid RiCxxValidate::Surface(RtConstToken name, const ParamList& pList)
@@ -1010,7 +1017,7 @@ RtVoid RiCxxValidate::Surface(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Surface");
-    return nextFilter().Surface(name, pList);
+    nextFilter().Surface(name, pList);
 }
 
 RtVoid RiCxxValidate::Displacement(RtConstToken name, const ParamList& pList)
@@ -1018,7 +1025,7 @@ RtVoid RiCxxValidate::Displacement(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Displacement");
-    return nextFilter().Displacement(name, pList);
+    nextFilter().Displacement(name, pList);
 }
 
 RtVoid RiCxxValidate::Atmosphere(RtConstToken name, const ParamList& pList)
@@ -1026,7 +1033,7 @@ RtVoid RiCxxValidate::Atmosphere(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Atmosphere");
-    return nextFilter().Atmosphere(name, pList);
+    nextFilter().Atmosphere(name, pList);
 }
 
 RtVoid RiCxxValidate::Interior(RtConstToken name, const ParamList& pList)
@@ -1034,7 +1041,7 @@ RtVoid RiCxxValidate::Interior(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Interior");
-    return nextFilter().Interior(name, pList);
+    nextFilter().Interior(name, pList);
 }
 
 RtVoid RiCxxValidate::Exterior(RtConstToken name, const ParamList& pList)
@@ -1042,7 +1049,7 @@ RtVoid RiCxxValidate::Exterior(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Exterior");
-    return nextFilter().Exterior(name, pList);
+    nextFilter().Exterior(name, pList);
 }
 
 RtVoid RiCxxValidate::ShaderLayer(RtConstToken type, RtConstToken name,
@@ -1052,7 +1059,7 @@ RtVoid RiCxxValidate::ShaderLayer(RtConstToken type, RtConstToken name,
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "ShaderLayer");
-    return nextFilter().ShaderLayer(type, name, layername, pList);
+    nextFilter().ShaderLayer(type, name, layername, pList);
 }
 
 RtVoid RiCxxValidate::ConnectShaderLayers(RtConstToken type,
@@ -1061,7 +1068,7 @@ RtVoid RiCxxValidate::ConnectShaderLayers(RtConstToken type,
                                           RtConstToken layer2,
                                           RtConstToken variable2)
 {
-    return nextFilter().ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
+    nextFilter().ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
 }
 
 RtVoid RiCxxValidate::ShadingRate(RtFloat size)
@@ -1074,31 +1081,31 @@ RtVoid RiCxxValidate::ShadingRate(RtFloat size)
             "[size = " << size << "]"
         );
     }
-    return nextFilter().ShadingRate(size);
+    nextFilter().ShadingRate(size);
 }
 
 RtVoid RiCxxValidate::ShadingInterpolation(RtConstToken type)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().ShadingInterpolation(type);
+    nextFilter().ShadingInterpolation(type);
 }
 
 RtVoid RiCxxValidate::Matte(RtBoolean onoff)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Matte(onoff);
+    nextFilter().Matte(onoff);
 }
 
 RtVoid RiCxxValidate::Bound(RtConstBound bound)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Bound(bound);
+    nextFilter().Bound(bound);
 }
 
 RtVoid RiCxxValidate::Detail(RtConstBound bound)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Detail(bound);
+    nextFilter().Detail(bound);
 }
 
 RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
@@ -1126,7 +1133,7 @@ RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
             "[onhigh = " << onhigh << ", " << "offhigh = " << offhigh << "]";
         );
     }
-    return nextFilter().DetailRange(offlow, onlow, onhigh, offhigh);
+    nextFilter().DetailRange(offlow, onlow, onhigh, offhigh);
 }
 
 RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
@@ -1139,101 +1146,101 @@ RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
             "[value = " << value << "]"
         );
     }
-    return nextFilter().GeometricApproximation(type, value);
+    nextFilter().GeometricApproximation(type, value);
 }
 
 RtVoid RiCxxValidate::Orientation(RtConstToken orientation)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Orientation(orientation);
+    nextFilter().Orientation(orientation);
 }
 
 RtVoid RiCxxValidate::ReverseOrientation()
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().ReverseOrientation();
+    nextFilter().ReverseOrientation();
 }
 
 RtVoid RiCxxValidate::Sides(RtInt nsides)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Sides(nsides);
+    nextFilter().Sides(nsides);
 }
 
 RtVoid RiCxxValidate::Identity()
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Identity();
+    nextFilter().Identity();
 }
 
 RtVoid RiCxxValidate::Transform(RtConstMatrix transform)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Transform(transform);
+    nextFilter().Transform(transform);
 }
 
 RtVoid RiCxxValidate::ConcatTransform(RtConstMatrix transform)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().ConcatTransform(transform);
+    nextFilter().ConcatTransform(transform);
 }
 
 RtVoid RiCxxValidate::Perspective(RtFloat fov)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Perspective(fov);
+    nextFilter().Perspective(fov);
 }
 
 RtVoid RiCxxValidate::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Translate(dx, dy, dz);
+    nextFilter().Translate(dx, dy, dz);
 }
 
 RtVoid RiCxxValidate::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Rotate(angle, dx, dy, dz);
+    nextFilter().Rotate(angle, dx, dy, dz);
 }
 
 RtVoid RiCxxValidate::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Scale(sx, sy, sz);
+    nextFilter().Scale(sx, sy, sz);
 }
 
 RtVoid RiCxxValidate::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                            RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
+    nextFilter().Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
 }
 
 RtVoid RiCxxValidate::CoordinateSystem(RtConstToken space)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
-    return nextFilter().CoordinateSystem(space);
+    nextFilter().CoordinateSystem(space);
 }
 
 RtVoid RiCxxValidate::CoordSysTransform(RtConstToken space)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().CoordSysTransform(space);
+    nextFilter().CoordSysTransform(space);
 }
 
 RtVoid RiCxxValidate::TransformBegin()
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
     m_scopeStack.push(Scope_Transform);
-    return nextFilter().TransformBegin();
+    nextFilter().TransformBegin();
 }
 
 RtVoid RiCxxValidate::TransformEnd()
 {
     checkScope(ApiScope(Scope_Transform));
+    nextFilter().TransformEnd();
     assert(m_scopeStack.top() == Scope_Transform);
     m_scopeStack.pop();
-    return nextFilter().TransformEnd();
 }
 
 RtVoid RiCxxValidate::Resource(RtConstToken handle, RtConstToken type,
@@ -1241,19 +1248,19 @@ RtVoid RiCxxValidate::Resource(RtConstToken handle, RtConstToken type,
 {
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Resource");
-    return nextFilter().Resource(handle, type, pList);
+    nextFilter().Resource(handle, type, pList);
 }
 
 RtVoid RiCxxValidate::ResourceBegin()
 {
     pushAttributes();
-    return nextFilter().ResourceBegin();
+    nextFilter().ResourceBegin();
 }
 
 RtVoid RiCxxValidate::ResourceEnd()
 {
     popAttributes();
-    return nextFilter().ResourceEnd();
+    nextFilter().ResourceEnd();
 }
 
 RtVoid RiCxxValidate::Attribute(RtConstToken name, const ParamList& pList)
@@ -1261,7 +1268,7 @@ RtVoid RiCxxValidate::Attribute(RtConstToken name, const ParamList& pList)
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Attribute");
-    return nextFilter().Attribute(name, pList);
+    nextFilter().Attribute(name, pList);
 }
 
 RtVoid RiCxxValidate::Polygon(const ParamList& pList)
@@ -1274,7 +1281,7 @@ RtVoid RiCxxValidate::Polygon(const ParamList& pList)
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Polygon");
     checkPointParamPresent(pList);
-    return nextFilter().Polygon(pList);
+    nextFilter().Polygon(pList);
 }
 
 RtVoid RiCxxValidate::GeneralPolygon(const IntArray& nverts,
@@ -1288,7 +1295,7 @@ RtVoid RiCxxValidate::GeneralPolygon(const IntArray& nverts,
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "GeneralPolygon");
     checkPointParamPresent(pList);
-    return nextFilter().GeneralPolygon(nverts, pList);
+    nextFilter().GeneralPolygon(nverts, pList);
 }
 
 RtVoid RiCxxValidate::PointsPolygons(const IntArray& nverts,
@@ -1306,7 +1313,7 @@ RtVoid RiCxxValidate::PointsPolygons(const IntArray& nverts,
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "PointsPolygons");
     checkPointParamPresent(pList);
-    return nextFilter().PointsPolygons(nverts, verts, pList);
+    nextFilter().PointsPolygons(nverts, verts, pList);
 }
 
 RtVoid RiCxxValidate::PointsGeneralPolygons(const IntArray& nloops,
@@ -1326,7 +1333,7 @@ RtVoid RiCxxValidate::PointsGeneralPolygons(const IntArray& nloops,
     iclassCounts.facevarying = sum(nverts);
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "PointsGeneralPolygons");
-    return nextFilter().PointsGeneralPolygons(nloops, nverts, verts, pList);
+    nextFilter().PointsGeneralPolygons(nloops, nverts, verts, pList);
 }
 
 RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
@@ -1348,7 +1355,7 @@ RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
         );
     }
     AttrState& attrs = m_attrStack.top(); attrs.ustep = ustep; attrs.vstep = vstep;
-    return nextFilter().Basis(ubasis, ustep, vbasis, vstep);
+    nextFilter().Basis(ubasis, ustep, vbasis, vstep);
 }
 
 RtVoid RiCxxValidate::Patch(RtConstToken type, const ParamList& pList)
@@ -1360,7 +1367,7 @@ RtVoid RiCxxValidate::Patch(RtConstToken type, const ParamList& pList)
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Patch");
-    return nextFilter().Patch(type, pList);
+    nextFilter().Patch(type, pList);
 }
 
 RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
@@ -1385,7 +1392,7 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_attrStack.top().ustep, m_attrStack.top().vstep);
     checkParamListArraySizes(pList, iclassCounts, "PatchMesh");
-    return nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
+    nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
 }
 
 RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
@@ -1448,7 +1455,7 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "NuPatch");
-    return nextFilter().NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
+    nextFilter().NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
 }
 
 RtVoid RiCxxValidate::TrimCurve(const IntArray& ncurves, const IntArray& order,
@@ -1474,7 +1481,7 @@ RtVoid RiCxxValidate::TrimCurve(const IntArray& ncurves, const IntArray& order,
                    "v", "TrimCurve");
     checkArraySize(size(u), w.size(),
                    "w", "TrimCurve");
-    return nextFilter().TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
+    nextFilter().TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
 RtVoid RiCxxValidate::SubdivisionMesh(RtConstToken scheme,
@@ -1502,7 +1509,7 @@ RtVoid RiCxxValidate::SubdivisionMesh(RtConstToken scheme,
     iclassCounts.facevarying = sum(nvertices);
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "SubdivisionMesh");
-    return nextFilter().SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
+    nextFilter().SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
 }
 
 RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
@@ -1536,7 +1543,7 @@ RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Sphere");
-    return nextFilter().Sphere(radius, zmin, zmax, thetamax, pList);
+    nextFilter().Sphere(radius, zmin, zmax, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
@@ -1563,7 +1570,7 @@ RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Cone");
-    return nextFilter().Cone(height, radius, thetamax, pList);
+    nextFilter().Cone(height, radius, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
@@ -1597,7 +1604,7 @@ RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Cylinder");
-    return nextFilter().Cylinder(radius, zmin, zmax, thetamax, pList);
+    nextFilter().Cylinder(radius, zmin, zmax, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
@@ -1617,7 +1624,7 @@ RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Hyperboloid");
-    return nextFilter().Hyperboloid(point1, point2, thetamax, pList);
+    nextFilter().Hyperboloid(point1, point2, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
@@ -1651,7 +1658,7 @@ RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Paraboloid");
-    return nextFilter().Paraboloid(rmax, zmin, zmax, thetamax, pList);
+    nextFilter().Paraboloid(rmax, zmin, zmax, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
@@ -1678,7 +1685,7 @@ RtVoid RiCxxValidate::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Disk");
-    return nextFilter().Disk(height, radius, thetamax, pList);
+    nextFilter().Disk(height, radius, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
@@ -1720,7 +1727,7 @@ RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Torus");
-    return nextFilter().Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
+    nextFilter().Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
 }
 
 RtVoid RiCxxValidate::Points(const ParamList& pList)
@@ -1733,7 +1740,7 @@ RtVoid RiCxxValidate::Points(const ParamList& pList)
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Points");
     checkPointParamPresent(pList);
-    return nextFilter().Points(pList);
+    nextFilter().Points(pList);
 }
 
 RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
@@ -1744,7 +1751,7 @@ RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
     iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep);
     checkParamListArraySizes(pList, iclassCounts, "Curves");
     checkPointParamPresent(pList);
-    return nextFilter().Curves(type, nvertices, wrap, pList);
+    nextFilter().Curves(type, nvertices, wrap, pList);
 }
 
 RtVoid RiCxxValidate::Blobby(RtInt nleaf, const IntArray& code,
@@ -1758,7 +1765,7 @@ RtVoid RiCxxValidate::Blobby(RtInt nleaf, const IntArray& code,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     checkParamListArraySizes(pList, iclassCounts, "Blobby");
-    return nextFilter().Blobby(nleaf, code, floats, strings, pList);
+    nextFilter().Blobby(nleaf, code, floats, strings, pList);
 }
 
 RtVoid RiCxxValidate::Procedural(RtPointer data, RtConstBound bound,
@@ -1766,7 +1773,7 @@ RtVoid RiCxxValidate::Procedural(RtPointer data, RtConstBound bound,
                                  RtProcFreeFunc freeproc)
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
-    return nextFilter().Procedural(data, bound, refineproc, freeproc);
+    nextFilter().Procedural(data, bound, refineproc, freeproc);
 }
 
 RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
@@ -1775,64 +1782,65 @@ RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     
     checkParamListArraySizes(pList, iclassCounts, "Geometry");
-    return nextFilter().Geometry(type, pList);
+    nextFilter().Geometry(type, pList);
 }
 
 RtVoid RiCxxValidate::SolidBegin(RtConstToken type)
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
-    m_scopeStack.push(Scope_Solid);
     pushAttributes();
-    return nextFilter().SolidBegin(type);
+    m_scopeStack.push(Scope_Solid);
+    nextFilter().SolidBegin(type);
 }
 
 RtVoid RiCxxValidate::SolidEnd()
 {
     checkScope(ApiScope(Scope_Solid));
+    popAttributes();
+    nextFilter().SolidEnd();
     assert(m_scopeStack.top() == Scope_Solid);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().SolidEnd();
 }
 
 RtObjectHandle RiCxxValidate::ObjectBegin()
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
-    m_scopeStack.push(Scope_Object);
     pushAttributes();
-    return nextFilter().ObjectBegin();
+    m_scopeStack.push(Scope_Object);
+    return
+    nextFilter().ObjectBegin();
 }
 
 RtVoid RiCxxValidate::ObjectEnd()
 {
     checkScope(ApiScope(Scope_Object));
+    popAttributes();
+    nextFilter().ObjectEnd();
     assert(m_scopeStack.top() == Scope_Object);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().ObjectEnd();
 }
 
 RtVoid RiCxxValidate::ObjectInstance(RtObjectHandle handle)
 {
     checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
-    return nextFilter().ObjectInstance(handle);
+    nextFilter().ObjectInstance(handle);
 }
 
 RtVoid RiCxxValidate::MotionBegin(const FloatArray& times)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
-    m_scopeStack.push(Scope_Motion);
     pushAttributes();
-    return nextFilter().MotionBegin(times);
+    m_scopeStack.push(Scope_Motion);
+    nextFilter().MotionBegin(times);
 }
 
 RtVoid RiCxxValidate::MotionEnd()
 {
     checkScope(ApiScope(Scope_Motion));
+    popAttributes();
+    nextFilter().MotionEnd();
     assert(m_scopeStack.top() == Scope_Motion);
     m_scopeStack.pop();
-    popAttributes();
-    return nextFilter().MotionEnd();
 }
 
 RtVoid RiCxxValidate::MakeTexture(RtConstString imagefile,
@@ -1858,7 +1866,7 @@ RtVoid RiCxxValidate::MakeTexture(RtConstString imagefile,
     }
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeTexture");
-    return nextFilter().MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
+    nextFilter().MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid RiCxxValidate::MakeLatLongEnvironment(RtConstString imagefile,
@@ -1884,7 +1892,7 @@ RtVoid RiCxxValidate::MakeLatLongEnvironment(RtConstString imagefile,
     }
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeLatLongEnvironment");
-    return nextFilter().MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
+    nextFilter().MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid RiCxxValidate::MakeCubeFaceEnvironment(RtConstString px,
@@ -1916,7 +1924,7 @@ RtVoid RiCxxValidate::MakeCubeFaceEnvironment(RtConstString px,
     }
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeCubeFaceEnvironment");
-    return nextFilter().MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
+    nextFilter().MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid RiCxxValidate::MakeShadow(RtConstString picfile,
@@ -1926,7 +1934,7 @@ RtVoid RiCxxValidate::MakeShadow(RtConstString picfile,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeShadow");
-    return nextFilter().MakeShadow(picfile, shadowfile, pList);
+    nextFilter().MakeShadow(picfile, shadowfile, pList);
 }
 
 RtVoid RiCxxValidate::MakeOcclusion(const StringArray& picfiles,
@@ -1936,13 +1944,13 @@ RtVoid RiCxxValidate::MakeOcclusion(const StringArray& picfiles,
     checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeOcclusion");
-    return nextFilter().MakeOcclusion(picfiles, shadowfile, pList);
+    nextFilter().MakeOcclusion(picfiles, shadowfile, pList);
 }
 
 RtVoid RiCxxValidate::ErrorHandler(RtErrorFunc handler)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
-    return nextFilter().ErrorHandler(handler);
+    nextFilter().ErrorHandler(handler);
 }
 
 RtVoid RiCxxValidate::ReadArchive(RtConstToken name, RtArchiveCallback callback,
@@ -1950,7 +1958,7 @@ RtVoid RiCxxValidate::ReadArchive(RtConstToken name, RtArchiveCallback callback,
 {
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "ReadArchive");
-    return nextFilter().ReadArchive(name, callback, pList);
+    nextFilter().ReadArchive(name, callback, pList);
 }
 //[[[end]]]
 
