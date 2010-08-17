@@ -1,5 +1,3 @@
-# Generate API checking and object cache code etc using XSLT.
-
 set(api_srcs
 	condition.cpp
 	genpoly.cpp

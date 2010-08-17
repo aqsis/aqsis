@@ -19,7 +19,6 @@ set(CMAKE_MODULE_PATH
 include(UtilMacros)
 include(AqsisTesting)
 include(FirstCMakeRun)
-include(XslTransform)
 
 #-------------------------------------------------------------------------------
 # Build-time options which can be set from ccmake or the command line
@@ -143,11 +142,6 @@ endif()
 #-------------------------------------------------------------------------------
 # Find build tools
 #-----------------
-
-include(FindXsltproc)
-if(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
-	message(FATAL_ERROR "Aqsis requires xsltproc to build")
-endif()
 
 include(FindFlexBison)
 

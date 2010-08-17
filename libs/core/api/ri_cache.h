@@ -162,9 +162,6 @@ class RiCacheBase
 };
 
 
-#include	"ri_cache.inl"
-
-
 //-----------------------------------------------------------------------
 
 } // namespace Aqsis

@@ -63,7 +63,6 @@ set(core_hdrs
 	motion.h
 	mpdump.h
 	multijitter.h
-	objectinstance.h
 	occlusion.h
 	optioncache.h
 	options.h
