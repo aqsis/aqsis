@@ -545,6 +545,9 @@ class MockRenderer : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList) {}
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList) {return 0;}
+        virtual RtVoid ArchiveEnd() {}
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string) {}

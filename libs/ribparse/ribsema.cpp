@@ -162,6 +162,8 @@ RibParser::RibParser(Ri::RendererServices& rendererServices)
         MapValueType("MakeOcclusion", &RibParser::handleMakeOcclusion),
         MapValueType("ErrorHandler", &RibParser::handleErrorHandler),
         MapValueType("ReadArchive", &RibParser::handleReadArchive),
+        MapValueType("ArchiveBegin", &RibParser::handleArchiveBegin),
+        MapValueType("ArchiveEnd", &RibParser::handleArchiveEnd),
         //[[[end]]]
     };
     m_requestHandlerMap.insert(
@@ -1412,6 +1414,18 @@ void RibParser::handleReadArchive(Ri::Renderer& renderer)
     RtArchiveCallback callback = 0;
     Ri::ParamList paramList = readParamList();
     renderer.ReadArchive(name, callback, paramList);
+}
+
+void RibParser::handleArchiveBegin(Ri::Renderer& renderer)
+{
+    const char* name = m_lex->getString();
+    Ri::ParamList paramList = readParamList();
+    renderer.ArchiveBegin(name, paramList);
+}
+
+void RibParser::handleArchiveEnd(Ri::Renderer& renderer)
+{
+    renderer.ArchiveEnd();
 }
 
 //[[[end]]]

@@ -3315,5 +3315,25 @@
 			<Rib/>
 		</Procedure>
 
+		<Procedure>
+			<Name>ArchiveBegin</Name>
+			<ReturnType>RtArchiveHandle</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<ParamList/>
+			</Arguments>
+			<Rib/>
+		</Procedure>
+
+		<Procedure>
+			<Name>ArchiveEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments/>
+			<Rib/>
+		</Procedure>
+
 	</Procedures>
 </RiAPI>

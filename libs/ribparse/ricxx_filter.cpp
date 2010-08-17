@@ -812,6 +812,20 @@ RtVoid OnOffFilter::ReadArchive(RtConstToken name, RtArchiveCallback callback,
     if(m_isActive)
         return nextFilter().ReadArchive(name, callback, pList);
 }
+
+RtArchiveHandle OnOffFilter::ArchiveBegin(RtConstToken name,
+                                          const ParamList& pList)
+{
+    if(m_isActive)
+        return nextFilter().ArchiveBegin(name, pList);
+    return 0;
+}
+
+RtVoid OnOffFilter::ArchiveEnd()
+{
+    if(m_isActive)
+        return nextFilter().ArchiveEnd();
+}
 //[[[end]]]
 
 } // namespace Aqsis

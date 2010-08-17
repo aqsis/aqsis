@@ -533,6 +533,11 @@ AQSIS_RI_SHARE RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback,
 AQSIS_RI_SHARE RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback,
                                      RtInt count, RtToken tokens[],
                                      RtPointer values[]);
+AQSIS_RI_SHARE RtArchiveHandle RiArchiveBegin(RtToken name, ...);
+AQSIS_RI_SHARE RtArchiveHandle RiArchiveBeginV(RtToken name, RtInt count,
+                                               RtToken tokens[],
+                                               RtPointer values[]);
+AQSIS_RI_SHARE RtVoid RiArchiveEnd();
 /*[[[end]]]*/
 
 /* Specific to Aqsis */

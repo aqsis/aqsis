@@ -83,9 +83,6 @@ class InlineArchiveFilter : public Ri::Filter
                 delete m_objectInstances[i];
         }
 
-        // TODO - remove this!
-        typedef RtPointer RtArchiveHandle;
-
         virtual RtArchiveHandle ArchiveBegin(RtConstToken name, const ParamList& pList)
         {
             if(m_currCache)

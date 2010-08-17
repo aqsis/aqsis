@@ -266,6 +266,9 @@ class OnOffFilter : public Ri::Filter
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList);
+        virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string);

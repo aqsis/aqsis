@@ -2268,6 +2268,36 @@ class ReadArchive : public CachedRequest
             context.ReadArchive(m_name, m_callback, m_pList);
         }
 };
+
+class ArchiveBegin : public CachedRequest
+{
+    private:
+        CachedString m_name;
+        CachedParamList m_pList;
+    public:
+        ArchiveBegin(RtConstToken name, const Ri::ParamList& pList)
+            : m_name(name)
+            , m_pList(pList)
+        { }
+
+        virtual void reCall(Ri::Renderer& context) const
+        {
+            context.ArchiveBegin(m_name, m_pList);
+        }
+};
+
+class ArchiveEnd : public CachedRequest
+{
+    private:
+    public:
+        ArchiveEnd()
+        { }
+
+        virtual void reCall(Ri::Renderer& context) const
+        {
+            context.ArchiveEnd();
+        }
+};
 //[[[end]]]
 
 } // namespace RiCache

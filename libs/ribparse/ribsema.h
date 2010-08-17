@@ -192,6 +192,8 @@ class RibParser : boost::noncopyable
         void handleMakeOcclusion(Ri::Renderer& renderer);
         void handleErrorHandler(Ri::Renderer& renderer);
         void handleReadArchive(Ri::Renderer& renderer);
+        void handleArchiveBegin(Ri::Renderer& renderer);
+        void handleArchiveEnd(Ri::Renderer& renderer);
         //[[[end]]]
 
         void handleVersion(Ri::Renderer& renderer);

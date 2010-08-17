@@ -301,6 +301,9 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList);
+        virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string);
@@ -1445,6 +1448,23 @@ RtVoid RiCxxToRi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
             m_pListConv.count(),
             m_pListConv.tokens(),
             m_pListConv.values()
+    );
+}
+
+RtArchiveHandle RiCxxToRi::ArchiveBegin(RtConstToken name,
+                                        const ParamList& pList)
+{
+    m_pListConv.convertParamList(pList);
+    return ::RiArchiveBeginV(toRiType(name),
+            m_pListConv.count(),
+            m_pListConv.tokens(),
+            m_pListConv.values()
+    );
+}
+
+RtVoid RiCxxToRi::ArchiveEnd()
+{
+    return ::RiArchiveEnd(
     );
 }
 

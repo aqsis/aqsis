@@ -69,6 +69,7 @@ class RiCxxValidate : public Ri::Filter
             Scope_Object     = 1<<6,
             Scope_Motion     = 1<<7,
             Scope_Resource   = 1<<8,
+            Scope_Archive    = 1<<9,
         };
         std::stack<ApiScope> m_scopeStack;
 
@@ -299,6 +300,9 @@ class RiCxxValidate : public Ri::Filter
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList);
+        virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
@@ -320,6 +324,7 @@ const char* RiCxxValidate::scopeString(ApiScope s)
         case Scope_Object:     return "Object";
         case Scope_Motion:     return "Motion";
         case Scope_Resource:   return "Resource";
+        case Scope_Archive:    return "Archive";
     }
     assert(0 && "unknown scope (bug!)");
     return "unknown scope (bug!)";
@@ -539,6 +544,10 @@ for proc in riXml.findall('Procedures/Procedure'):
                                proc.findall('ValidScope/'+'*')
                                if s.tag not in irrelevantScopes])
         doScopeCheck = len(validScopeNames) > 0
+        if doScopeCheck:
+            # Everything is valid at Archive scope, so we treat it as
+            # a special case.
+            validScopeNames.add('Scope_Archive')
         extraSnippet = getExtraSnippet(procName)
         returnType = proc.findtext('ReturnType')
         cog.out(str(Template(methodTemplate, searchList=locals())));
@@ -547,14 +556,14 @@ for proc in riXml.findall('Procedures/Procedure'):
 
 RtToken RiCxxValidate::Declare(RtConstString name, RtConstString declaration)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     return
     nextFilter().Declare(name, declaration);
 }
 
 RtVoid RiCxxValidate::FrameBegin(RtInt number)
 {
-    checkScope(ApiScope(Scope_BeginEnd));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_Frame);
     nextFilter().FrameBegin(number);
@@ -562,7 +571,7 @@ RtVoid RiCxxValidate::FrameBegin(RtInt number)
 
 RtVoid RiCxxValidate::FrameEnd()
 {
-    checkScope(ApiScope(Scope_Frame));
+    checkScope(ApiScope(Scope_Frame | Scope_Archive));
     popAttributes();
     nextFilter().FrameEnd();
     assert(m_scopeStack.top() == Scope_Frame);
@@ -571,7 +580,7 @@ RtVoid RiCxxValidate::FrameEnd()
 
 RtVoid RiCxxValidate::WorldBegin()
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_World);
     nextFilter().WorldBegin();
@@ -579,7 +588,7 @@ RtVoid RiCxxValidate::WorldBegin()
 
 RtVoid RiCxxValidate::WorldEnd()
 {
-    checkScope(ApiScope(Scope_World));
+    checkScope(ApiScope(Scope_Archive | Scope_World));
     popAttributes();
     nextFilter().WorldEnd();
     assert(m_scopeStack.top() == Scope_World);
@@ -609,7 +618,7 @@ RtVoid RiCxxValidate::IfEnd()
 RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
                              RtFloat pixelaspectratio)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(xresolution != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -636,7 +645,7 @@ RtVoid RiCxxValidate::Format(RtInt xresolution, RtInt yresolution,
 
 RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(frameratio > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -650,7 +659,7 @@ RtVoid RiCxxValidate::FrameAspectRatio(RtFloat frameratio)
 RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                    RtFloat top)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(left < right))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -671,7 +680,7 @@ RtVoid RiCxxValidate::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
 RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
                                  RtFloat ymax)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(xmin >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -719,7 +728,7 @@ RtVoid RiCxxValidate::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
 
 RtVoid RiCxxValidate::Projection(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Projection");
     nextFilter().Projection(name, pList);
@@ -727,7 +736,7 @@ RtVoid RiCxxValidate::Projection(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Clipping(RtFloat cnear, RtFloat cfar)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(cnear >= RI_EPSILON))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -754,7 +763,7 @@ RtVoid RiCxxValidate::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
 RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
                                    RtFloat focaldistance)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(fstop > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -781,7 +790,7 @@ RtVoid RiCxxValidate::DepthOfField(RtFloat fstop, RtFloat focallength,
 
 RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(opentime <= closetime))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -794,7 +803,7 @@ RtVoid RiCxxValidate::Shutter(RtFloat opentime, RtFloat closetime)
 
 RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(variance >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -807,7 +816,7 @@ RtVoid RiCxxValidate::PixelVariance(RtFloat variance)
 
 RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(xsamples >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -828,7 +837,7 @@ RtVoid RiCxxValidate::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
                                   RtFloat ywidth)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(xwidth > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -848,7 +857,7 @@ RtVoid RiCxxValidate::PixelFilter(RtFilterFunc function, RtFloat xwidth,
 
 RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(gain > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -868,7 +877,7 @@ RtVoid RiCxxValidate::Exposure(RtFloat gain, RtFloat gamma)
 
 RtVoid RiCxxValidate::Imager(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Imager");
     nextFilter().Imager(name, pList);
@@ -877,7 +886,7 @@ RtVoid RiCxxValidate::Imager(RtConstToken name, const ParamList& pList)
 RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
                                RtInt max, RtFloat ditheramplitude)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(one >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -905,7 +914,7 @@ RtVoid RiCxxValidate::Quantize(RtConstToken type, RtInt one, RtInt min,
 RtVoid RiCxxValidate::Display(RtConstToken name, RtConstToken type,
                               RtConstToken mode, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Display");
     nextFilter().Display(name, type, mode, pList);
@@ -913,7 +922,7 @@ RtVoid RiCxxValidate::Display(RtConstToken name, RtConstToken type,
 
 RtVoid RiCxxValidate::Hider(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Hider");
     nextFilter().Hider(name, pList);
@@ -922,7 +931,7 @@ RtVoid RiCxxValidate::Hider(RtConstToken name, const ParamList& pList)
 RtVoid RiCxxValidate::ColorSamples(const FloatArray& nRGB,
                                    const FloatArray& RGBn)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     checkArraySize(size(nRGB), RGBn.size(),
                    "RGBn", "ColorSamples");
     nextFilter().ColorSamples(nRGB, RGBn);
@@ -930,7 +939,7 @@ RtVoid RiCxxValidate::ColorSamples(const FloatArray& nRGB,
 
 RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(relativedetail >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -943,7 +952,7 @@ RtVoid RiCxxValidate::RelativeDetail(RtFloat relativedetail)
 
 RtVoid RiCxxValidate::Option(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Option");
     nextFilter().Option(name, pList);
@@ -951,7 +960,7 @@ RtVoid RiCxxValidate::Option(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::AttributeBegin()
 {
-    checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_Attribute);
     nextFilter().AttributeBegin();
@@ -959,7 +968,7 @@ RtVoid RiCxxValidate::AttributeBegin()
 
 RtVoid RiCxxValidate::AttributeEnd()
 {
-    checkScope(ApiScope(Scope_Attribute));
+    checkScope(ApiScope(Scope_Archive | Scope_Attribute));
     popAttributes();
     nextFilter().AttributeEnd();
     assert(m_scopeStack.top() == Scope_Attribute);
@@ -968,13 +977,13 @@ RtVoid RiCxxValidate::AttributeEnd()
 
 RtVoid RiCxxValidate::Color(RtConstColor Cq)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Color(Cq);
 }
 
 RtVoid RiCxxValidate::Opacity(RtConstColor Os)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Opacity(Os);
 }
 
@@ -982,14 +991,14 @@ RtVoid RiCxxValidate::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                                          RtFloat t2, RtFloat s3, RtFloat t3,
                                          RtFloat s4, RtFloat t4)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
 }
 
 RtLightHandle RiCxxValidate::LightSource(RtConstToken name,
                                          const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "LightSource");
     return
@@ -999,7 +1008,7 @@ RtLightHandle RiCxxValidate::LightSource(RtConstToken name,
 RtLightHandle RiCxxValidate::AreaLightSource(RtConstToken name,
                                              const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "AreaLightSource");
     return
@@ -1008,13 +1017,13 @@ RtLightHandle RiCxxValidate::AreaLightSource(RtConstToken name,
 
 RtVoid RiCxxValidate::Illuminate(RtLightHandle light, RtBoolean onoff)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Illuminate(light, onoff);
 }
 
 RtVoid RiCxxValidate::Surface(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Surface");
     nextFilter().Surface(name, pList);
@@ -1022,7 +1031,7 @@ RtVoid RiCxxValidate::Surface(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Displacement(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Displacement");
     nextFilter().Displacement(name, pList);
@@ -1030,7 +1039,7 @@ RtVoid RiCxxValidate::Displacement(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Atmosphere(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Atmosphere");
     nextFilter().Atmosphere(name, pList);
@@ -1038,7 +1047,7 @@ RtVoid RiCxxValidate::Atmosphere(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Interior(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Interior");
     nextFilter().Interior(name, pList);
@@ -1046,7 +1055,7 @@ RtVoid RiCxxValidate::Interior(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Exterior(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Exterior");
     nextFilter().Exterior(name, pList);
@@ -1056,7 +1065,7 @@ RtVoid RiCxxValidate::ShaderLayer(RtConstToken type, RtConstToken name,
                                   RtConstToken layername,
                                   const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "ShaderLayer");
     nextFilter().ShaderLayer(type, name, layername, pList);
@@ -1073,7 +1082,7 @@ RtVoid RiCxxValidate::ConnectShaderLayers(RtConstToken type,
 
 RtVoid RiCxxValidate::ShadingRate(RtFloat size)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     if(!(size > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1086,32 +1095,32 @@ RtVoid RiCxxValidate::ShadingRate(RtFloat size)
 
 RtVoid RiCxxValidate::ShadingInterpolation(RtConstToken type)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().ShadingInterpolation(type);
 }
 
 RtVoid RiCxxValidate::Matte(RtBoolean onoff)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Matte(onoff);
 }
 
 RtVoid RiCxxValidate::Bound(RtConstBound bound)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Bound(bound);
 }
 
 RtVoid RiCxxValidate::Detail(RtConstBound bound)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Detail(bound);
 }
 
 RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
                                   RtFloat offhigh)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     if(!(offlow <= onlow))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1138,7 +1147,7 @@ RtVoid RiCxxValidate::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
 
 RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     if(!(value >= 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1151,93 +1160,93 @@ RtVoid RiCxxValidate::GeometricApproximation(RtConstToken type, RtFloat value)
 
 RtVoid RiCxxValidate::Orientation(RtConstToken orientation)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Orientation(orientation);
 }
 
 RtVoid RiCxxValidate::ReverseOrientation()
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().ReverseOrientation();
 }
 
 RtVoid RiCxxValidate::Sides(RtInt nsides)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Sides(nsides);
 }
 
 RtVoid RiCxxValidate::Identity()
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Identity();
 }
 
 RtVoid RiCxxValidate::Transform(RtConstMatrix transform)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Transform(transform);
 }
 
 RtVoid RiCxxValidate::ConcatTransform(RtConstMatrix transform)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().ConcatTransform(transform);
 }
 
 RtVoid RiCxxValidate::Perspective(RtFloat fov)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Perspective(fov);
 }
 
 RtVoid RiCxxValidate::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Translate(dx, dy, dz);
 }
 
 RtVoid RiCxxValidate::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Rotate(angle, dx, dy, dz);
 }
 
 RtVoid RiCxxValidate::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Scale(sx, sy, sz);
 }
 
 RtVoid RiCxxValidate::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                            RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
 }
 
 RtVoid RiCxxValidate::CoordinateSystem(RtConstToken space)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive));
     nextFilter().CoordinateSystem(space);
 }
 
 RtVoid RiCxxValidate::CoordSysTransform(RtConstToken space)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().CoordSysTransform(space);
 }
 
 RtVoid RiCxxValidate::TransformBegin()
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive));
     m_scopeStack.push(Scope_Transform);
     nextFilter().TransformBegin();
 }
 
 RtVoid RiCxxValidate::TransformEnd()
 {
-    checkScope(ApiScope(Scope_Transform));
+    checkScope(ApiScope(Scope_Transform | Scope_Archive));
     nextFilter().TransformEnd();
     assert(m_scopeStack.top() == Scope_Transform);
     m_scopeStack.pop();
@@ -1265,7 +1274,7 @@ RtVoid RiCxxValidate::ResourceEnd()
 
 RtVoid RiCxxValidate::Attribute(RtConstToken name, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "Attribute");
     nextFilter().Attribute(name, pList);
@@ -1273,7 +1282,7 @@ RtVoid RiCxxValidate::Attribute(RtConstToken name, const ParamList& pList)
 
 RtVoid RiCxxValidate::Polygon(const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts.varying = countP(pList);
     iclassCounts.vertex = iclassCounts.varying;
@@ -1287,7 +1296,7 @@ RtVoid RiCxxValidate::Polygon(const ParamList& pList)
 RtVoid RiCxxValidate::GeneralPolygon(const IntArray& nverts,
                                      const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts.varying = sum(nverts);
     iclassCounts.vertex = iclassCounts.varying;
@@ -1302,7 +1311,7 @@ RtVoid RiCxxValidate::PointsPolygons(const IntArray& nverts,
                                      const IntArray& verts,
                                      const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     checkArraySize(sum(nverts), verts.size(),
                    "verts", "PointsPolygons");
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
@@ -1321,7 +1330,7 @@ RtVoid RiCxxValidate::PointsGeneralPolygons(const IntArray& nloops,
                                             const IntArray& verts,
                                             const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     checkArraySize(sum(nloops), nverts.size(),
                    "nverts", "PointsGeneralPolygons");
     checkArraySize(sum(nverts), verts.size(),
@@ -1339,7 +1348,7 @@ RtVoid RiCxxValidate::PointsGeneralPolygons(const IntArray& nloops,
 RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
                             RtConstBasis vbasis, RtInt vstep)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     if(!(ustep > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1360,7 +1369,7 @@ RtVoid RiCxxValidate::Basis(RtConstBasis ubasis, RtInt ustep,
 
 RtVoid RiCxxValidate::Patch(RtConstToken type, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts.varying = 4;
     iclassCounts.vertex = strcmp(type,"bilinear")==0 ? 4 : 16;
@@ -1374,7 +1383,7 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
                                 RtInt nv, RtConstToken vwrap,
                                 const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(nu > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1401,7 +1410,7 @@ RtVoid RiCxxValidate::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
                               RtFloat vmin, RtFloat vmax,
                               const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(nu > 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1464,7 +1473,7 @@ RtVoid RiCxxValidate::TrimCurve(const IntArray& ncurves, const IntArray& order,
                                 const FloatArray& u, const FloatArray& v,
                                 const FloatArray& w)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     checkArraySize(sum(ncurves), order.size(),
                    "order", "TrimCurve");
     checkArraySize(sum(order)+sum(n), knot.size(),
@@ -1493,7 +1502,7 @@ RtVoid RiCxxValidate::SubdivisionMesh(RtConstToken scheme,
                                       const FloatArray& floatargs,
                                       const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     checkArraySize(sum(nvertices), vertices.size(),
                    "vertices", "SubdivisionMesh");
     checkArraySize(2*size(tags), nargs.size(),
@@ -1515,7 +1524,7 @@ RtVoid RiCxxValidate::SubdivisionMesh(RtConstToken scheme,
 RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
                              RtFloat thetamax, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1549,7 +1558,7 @@ RtVoid RiCxxValidate::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
 RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
                            const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1576,7 +1585,7 @@ RtVoid RiCxxValidate::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
 RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
                                RtFloat thetamax, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1610,7 +1619,7 @@ RtVoid RiCxxValidate::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
 RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
                                   RtFloat thetamax, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(thetamax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1630,7 +1639,7 @@ RtVoid RiCxxValidate::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
 RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
                                  RtFloat thetamax, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(rmax != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1664,7 +1673,7 @@ RtVoid RiCxxValidate::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
 RtVoid RiCxxValidate::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
                            const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(radius != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1692,7 +1701,7 @@ RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
                             RtFloat phimax, RtFloat thetamax,
                             const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     if(!(majorrad != 0))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1732,7 +1741,7 @@ RtVoid RiCxxValidate::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
 
 RtVoid RiCxxValidate::Points(const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts.varying = countP(pList);
     iclassCounts.vertex = iclassCounts.varying;
@@ -1746,7 +1755,7 @@ RtVoid RiCxxValidate::Points(const ParamList& pList)
 RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
                              RtConstToken wrap, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep);
     checkParamListArraySizes(pList, iclassCounts, "Curves");
@@ -1758,7 +1767,7 @@ RtVoid RiCxxValidate::Blobby(RtInt nleaf, const IntArray& code,
                              const FloatArray& floats,
                              const TokenArray& strings, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid));
+    checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     iclassCounts.varying = nleaf;
     iclassCounts.vertex = iclassCounts.varying;
@@ -1772,13 +1781,13 @@ RtVoid RiCxxValidate::Procedural(RtPointer data, RtConstBound bound,
                                  RtProcSubdivFunc refineproc,
                                  RtProcFreeFunc freeproc)
 {
-    checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive));
     nextFilter().Procedural(data, bound, refineproc, freeproc);
 }
 
 RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     
     checkParamListArraySizes(pList, iclassCounts, "Geometry");
@@ -1787,7 +1796,7 @@ RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
 
 RtVoid RiCxxValidate::SolidBegin(RtConstToken type)
 {
-    checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_Solid);
     nextFilter().SolidBegin(type);
@@ -1795,7 +1804,7 @@ RtVoid RiCxxValidate::SolidBegin(RtConstToken type)
 
 RtVoid RiCxxValidate::SolidEnd()
 {
-    checkScope(ApiScope(Scope_Solid));
+    checkScope(ApiScope(Scope_Solid | Scope_Archive));
     popAttributes();
     nextFilter().SolidEnd();
     assert(m_scopeStack.top() == Scope_Solid);
@@ -1804,7 +1813,7 @@ RtVoid RiCxxValidate::SolidEnd()
 
 RtObjectHandle RiCxxValidate::ObjectBegin()
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_Object);
     return
@@ -1813,7 +1822,7 @@ RtObjectHandle RiCxxValidate::ObjectBegin()
 
 RtVoid RiCxxValidate::ObjectEnd()
 {
-    checkScope(ApiScope(Scope_Object));
+    checkScope(ApiScope(Scope_Archive | Scope_Object));
     popAttributes();
     nextFilter().ObjectEnd();
     assert(m_scopeStack.top() == Scope_Object);
@@ -1822,13 +1831,13 @@ RtVoid RiCxxValidate::ObjectEnd()
 
 RtVoid RiCxxValidate::ObjectInstance(RtObjectHandle handle)
 {
-    checkScope(ApiScope(Scope_Transform | Scope_Solid | Scope_Attribute | Scope_World | Scope_Object));
+    checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive));
     nextFilter().ObjectInstance(handle);
 }
 
 RtVoid RiCxxValidate::MotionBegin(const FloatArray& times)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive));
     pushAttributes();
     m_scopeStack.push(Scope_Motion);
     nextFilter().MotionBegin(times);
@@ -1836,7 +1845,7 @@ RtVoid RiCxxValidate::MotionBegin(const FloatArray& times)
 
 RtVoid RiCxxValidate::MotionEnd()
 {
-    checkScope(ApiScope(Scope_Motion));
+    checkScope(ApiScope(Scope_Motion | Scope_Archive));
     popAttributes();
     nextFilter().MotionEnd();
     assert(m_scopeStack.top() == Scope_Motion);
@@ -1849,7 +1858,7 @@ RtVoid RiCxxValidate::MakeTexture(RtConstString imagefile,
                                   RtFloat swidth, RtFloat twidth,
                                   const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1875,7 +1884,7 @@ RtVoid RiCxxValidate::MakeLatLongEnvironment(RtConstString imagefile,
                                              RtFloat swidth, RtFloat twidth,
                                              const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1907,7 +1916,7 @@ RtVoid RiCxxValidate::MakeCubeFaceEnvironment(RtConstString px,
                                               RtFloat swidth, RtFloat twidth,
                                               const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     if(!(swidth >= 1))
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
@@ -1931,7 +1940,7 @@ RtVoid RiCxxValidate::MakeShadow(RtConstString picfile,
                                  RtConstString shadowfile,
                                  const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeShadow");
     nextFilter().MakeShadow(picfile, shadowfile, pList);
@@ -1941,7 +1950,7 @@ RtVoid RiCxxValidate::MakeOcclusion(const StringArray& picfiles,
                                     RtConstString shadowfile,
                                     const ParamList& pList)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_Frame | Scope_Archive));
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "MakeOcclusion");
     nextFilter().MakeOcclusion(picfiles, shadowfile, pList);
@@ -1949,7 +1958,7 @@ RtVoid RiCxxValidate::MakeOcclusion(const StringArray& picfiles,
 
 RtVoid RiCxxValidate::ErrorHandler(RtErrorFunc handler)
 {
-    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Motion));
+    checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion));
     nextFilter().ErrorHandler(handler);
 }
 
@@ -1959,6 +1968,25 @@ RtVoid RiCxxValidate::ReadArchive(RtConstToken name, RtArchiveCallback callback,
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     checkParamListArraySizes(pList, iclassCounts, "ReadArchive");
     nextFilter().ReadArchive(name, callback, pList);
+}
+
+RtArchiveHandle RiCxxValidate::ArchiveBegin(RtConstToken name,
+                                            const ParamList& pList)
+{
+    SqInterpClassCounts iclassCounts(1,1,1,1,1);
+    checkParamListArraySizes(pList, iclassCounts, "ArchiveBegin");
+    pushAttributes();
+    m_scopeStack.push(Scope_Archive);
+    return
+    nextFilter().ArchiveBegin(name, pList);
+}
+
+RtVoid RiCxxValidate::ArchiveEnd()
+{
+    popAttributes();
+    nextFilter().ArchiveEnd();
+    assert(m_scopeStack.top() == Scope_Archive);
+    m_scopeStack.pop();
 }
 //[[[end]]]
 

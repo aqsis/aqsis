@@ -873,6 +873,9 @@ class RibWriter : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList);
+        virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
@@ -1059,6 +1062,7 @@ returnExpressions = {
     'LightSource'      : 'reinterpret_cast<RtLightHandle>(++m_currLightHandle)',
     'AreaLightSource'  : 'reinterpret_cast<RtLightHandle>(++m_currLightHandle)',
     'ObjectBegin'      : 'reinterpret_cast<RtObjectHandle>(++m_currObjectHandle)',
+    'ArchiveBegin'     : 'const_cast<RtToken>(name)',
 }
 
 methodTemplate = '''
@@ -2379,6 +2383,27 @@ RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
     m_formatter.beginRequest("ErrorHandler");
     m_formatter.whitespace();
     m_formatter.print(m_services.getErrorFuncName(handler));
+    m_formatter.endRequest();
+}
+
+template<typename Formatter>
+RtArchiveHandle RibWriter<Formatter>::ArchiveBegin(RtConstToken name,
+                                                   const ParamList& pList)
+{
+    m_formatter.beginRequest("ArchiveBegin");
+    m_formatter.whitespace();
+    m_formatter.print(name);
+    printParamList(pList);
+    m_formatter.endRequest();
+    m_formatter.increaseIndent();
+    return const_cast<RtToken>(name);
+}
+
+template<typename Formatter>
+RtVoid RibWriter<Formatter>::ArchiveEnd()
+{
+    m_formatter.decreaseIndent();
+    m_formatter.beginRequest("ArchiveEnd");
     m_formatter.endRequest();
 }
 //[[[end]]]

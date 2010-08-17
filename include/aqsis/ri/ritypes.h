@@ -66,6 +66,7 @@ typedef	RtVoid	( *RtArchiveCallback ) ( RtToken, char *, ... );
 typedef	RtPointer	RtObjectHandle;
 typedef	RtPointer	RtLightHandle;
 typedef	RtPointer	RtContextHandle;
+typedef	RtPointer	RtArchiveHandle;
 
 
 /* Aqsis-specific typedefs */

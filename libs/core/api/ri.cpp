@@ -310,6 +310,9 @@ class RiCxxCore : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList);
+        virtual RtVoid ArchiveEnd();
 		//[[[end]]]
 
 	private:
@@ -3241,20 +3244,20 @@ RtVoid RiCxxCore::SolidEnd()
 RtObjectHandle RiCxxCore::ObjectBegin()
 {
 	IF_ELSE_TEST0;
-	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
+	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ObjectBegin should be handled by a filter\n";
 	return 0;
 }
 RtVoid RiCxxCore::ObjectEnd()
 {
 	IF_ELSE_TEST;
-	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
+	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ObjectEnd should be handled by a filter\n";
 }
 RtVoid RiCxxCore::ObjectInstance(RtObjectHandle handle)
 {
 	IF_ELSE_TEST;
-	AQSIS_LOG_ERROR(errorHandler(), EqE_IllState)
+	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ObjectInstance should be handled by a filter\n";
 }
 
@@ -3561,6 +3564,21 @@ RtVoid RiCxxCore::ReadArchive(RtConstToken name, RtArchiveCallback callback, con
 	m_archiveCallback = callback;
 	m_apiServices.parseRib(archiveFile, name);
 	m_archiveCallback = savedCallback;
+}
+
+RtArchiveHandle RiCxxCore::ArchiveBegin(RtConstToken name,
+										const ParamList& pList)
+{
+	IF_ELSE_TEST0;
+	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
+		<< "ArchiveBegin should be handled by a filter\n";
+}
+
+RtVoid RiCxxCore::ArchiveEnd()
+{
+	IF_ELSE_TEST;
+	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
+		<< "ArchiveEnd should have been handled by a filter\n";
 }
 
 

@@ -534,6 +534,9 @@ class Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList) = 0;
+        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+                            const ParamList& pList) = 0;
+        virtual RtVoid ArchiveEnd() = 0;
         //[[[end]]]
 
         /// ArchiveRecord isn't part of the RIB binding, but a variant of it

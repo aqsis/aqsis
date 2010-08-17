@@ -1447,6 +1447,29 @@ RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count, RtT
     EXCEPTION_CATCH_GUARD("ReadArchive");
 }
 
+
+extern "C"
+RtArchiveHandle RiArchiveBeginV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+{
+    EXCEPTION_TRY_GUARD
+    IClassCounts iclassCounts(1,1,1,1,1);
+    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
+    pushAttributes();
+    return g_context->ArchiveBegin(name, pList);
+    EXCEPTION_CATCH_GUARD("ArchiveBegin");
+    return 0;
+}
+
+
+extern "C"
+RtVoid RiArchiveEnd()
+{
+    EXCEPTION_TRY_GUARD
+    popAttributes();
+    return g_context->ArchiveEnd();
+    EXCEPTION_CATCH_GUARD("ArchiveEnd");
+}
+
 ///[[[end]]]
 // End main generated code
 //-----------------------------------------------------------------------------
@@ -2046,6 +2069,19 @@ RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback, ...)
     va_end(args);
 
     return RiReadArchiveV(name, callback, count, tokens, values);
+}
+
+
+extern "C"
+RtArchiveHandle RiArchiveBegin(RtToken name, ...)
+{
+    RtInt count; RtToken* tokens; RtPointer* values;
+    va_list args;
+    va_start(args, name);
+    buildParamList(args, count, tokens, values);
+    va_end(args);
+
+    return RiArchiveBeginV(name, count, tokens, values);
 }
 
 ///[[[end]]]
