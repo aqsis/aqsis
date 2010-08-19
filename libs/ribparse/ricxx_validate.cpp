@@ -524,7 +524,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 #if $procName.endswith('Begin') and $procName[:-5] not in $irrelevantScopes
     m_scopeStack.push(Scope_$procName[:-5]);
 #end if
-#if $returnType != 'RtVoid'
+#if $proc.findtext('ReturnType') != 'RtVoid'
     return
 #end if
     nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
@@ -544,12 +544,7 @@ for proc in riXml.findall('Procedures/Procedure'):
                                proc.findall('ValidScope/'+'*')
                                if s.tag not in irrelevantScopes])
         doScopeCheck = len(validScopeNames) > 0
-        if doScopeCheck:
-            # Everything is valid at Archive scope, so we treat it as
-            # a special case.
-            validScopeNames.add('Scope_Archive')
         extraSnippet = getExtraSnippet(procName)
-        returnType = proc.findtext('ReturnType')
         cog.out(str(Template(methodTemplate, searchList=locals())));
 
 ]]]*/
