@@ -301,7 +301,7 @@ class Renderer
         /*[[[cog
         from codegenutils import *
 
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
         for p in riXml.findall('Procedures/' + '*'):
             if p.tag == 'Section':
@@ -311,7 +311,7 @@ class Renderer
             if p.tag == 'SubSection':
                 cog.outl(commentBanner(p.text, fillchar='-'))
                 continue
-            if p.tag == 'Procedure' and p.haschild('Rib'):
+            if p.tag == 'Procedure' and p.findall('Rib'):
                 decl = 'virtual %s = 0;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/

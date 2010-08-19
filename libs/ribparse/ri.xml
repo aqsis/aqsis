@@ -2909,7 +2909,7 @@
 				</Argument>
 				<Argument>
 					<Name>...</Name>
-					<Type/>
+					<Type> </Type>
 				</Argument>
 			</Arguments>
 			<ValidScope>
@@ -3293,7 +3293,7 @@
 				</Argument>
 				<Argument>
 					<Name>...</Name>
-					<Type/>
+					<Type> </Type>
 				</Argument>
 			</Arguments>
 		</Procedure>

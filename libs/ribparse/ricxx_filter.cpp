@@ -78,7 +78,7 @@ RtVoid OnOffFilter::ArchiveRecord(RtConstToken type, const char* string)
 
 /*[[[cog
 from codegenutils import *
-riXml = parseXmlTree(riXmlPath)
+riXml = parseXml(riXmlPath)
 from Cheetah.Template import Template
 
 methodTemplate = r'''
@@ -93,7 +93,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='OnOffFilter'), 80)
 '''
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib'):
+    if proc.findall('Rib'):
         procName = proc.findtext('Name')
         cog.out(str(Template(methodTemplate, searchList=locals())));
 

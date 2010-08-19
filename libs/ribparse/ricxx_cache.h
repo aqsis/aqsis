@@ -292,7 +292,7 @@ Code generator for all CachedRequest implementations.
 [[[cog
 from codegenutils import *
 from Cheetah.Template import Template
-riXml = parseXmlTree(riXmlPath);
+riXml = parseXml(riXmlPath);
 
 cacheTemplate = \
 '''
@@ -333,13 +333,13 @@ def getMemberType(arg):
     return memberTypeMap.get(type, type)
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib'):
+    if proc.findall('Rib'):
         procName = proc.findtext('Name')
         argsXml = [a for a in proc.findall('Arguments/Argument')
-                   if not a.haschild('RibValue')]
+                   if not a.findall('RibValue')]
         formals = [formalArg(a) for a in argsXml]
         memberData = [(getMemberType(a), a.findtext('Name')) for a in argsXml]
-        hasPList = proc.haschild('Arguments/ParamList')
+        hasPList = proc.findall('Arguments/ParamList')
         if hasPList:
             memberData += [('CachedParamList', 'pList')]
             formals += ['const Ri::ParamList& pList']

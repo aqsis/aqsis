@@ -50,9 +50,9 @@ RibParser::RibParser(Ri::RendererServices& rendererServices)
     MapValueType handlerMapInit[] = {
         /*[[[cog
         from codegenutils import *
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
-        for p in filter(lambda p: p.haschild('Rib'), riXml.findall('Procedures/Procedure')):
+        for p in filter(lambda p: p.findall('Rib'), riXml.findall('Procedures/Procedure')):
             name = p.findtext('Name')
             cog.outl('MapValueType("%s", &RibParser::handle%s),' % (name, name))
         ]]]*/
@@ -637,7 +637,7 @@ import sys, os
 from codegenutils import *
 from Cheetah.Template import Template
 
-riXml = parseXmlTree(riXmlPath)
+riXml = parseXml(riXmlPath)
 
 # Map from RI types to strings which retrieve the value from the lexer
 getterStatements = {
@@ -666,17 +666,17 @@ customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
                   'FrameBegin', 'FrameEnd', 'WorldBegin', 'WorldEnd'])
 
 # Ignore procs which have custom implementations.
-procs = filter(lambda p: p.haschild('Rib') and p.findtext('Name') not in customImpl,
+procs = filter(lambda p: p.findall('Rib') and p.findtext('Name') not in customImpl,
                riXml.findall('Procedures/Procedure'))
 
 handlerTemplate = '''
 #for $proc in $procs
     #set $procName = $proc.findtext('Name')
-    #set $args = filter(lambda a: not a.haschild('RibValue'), $proc.findall('Arguments/Argument'))
+    #set $args = filter(lambda a: not a.findall('RibValue'), $proc.findall('Arguments/Argument'))
     ## 
 void RibParser::handle${procName}(Ri::Renderer& renderer)
 {
-    #if $proc.haschild('Arguments/RibArgsCanBeArray')
+    #if $proc.findall('Arguments/RibArgsCanBeArray')
     ## Collect all args as an array
     Ri::FloatArray allArgs = m_lex->getFloatArray(${len($args)});
         #for $i, $arg in enumerate($args)
@@ -688,7 +688,7 @@ void RibParser::handle${procName}(Ri::Renderer& renderer)
     ${getterStatements[$arg.findtext('Type')] % ($arg.findtext('Name'),)}
         #end for
     #end if
-    #if $proc.haschild('Arguments/ParamList')
+    #if $proc.findall('Arguments/ParamList')
     ## Extract parameter list
     Ri::ParamList paramList = readParamList();
     #end if
@@ -697,7 +697,7 @@ void RibParser::handle${procName}(Ri::Renderer& renderer)
     #for $arg in $args
         #set $argList += [$arg.findtext('Name')]
     #end for
-    #if $proc.haschild('Arguments/ParamList')
+    #if $proc.findall('Arguments/ParamList')
         #set $argList += ['paramList']
     #end if
     renderer.${procName}(${', '.join(argList)});

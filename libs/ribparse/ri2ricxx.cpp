@@ -182,7 +182,7 @@ from the C API, which uses implicit array lengths everywhere.
 
 from codegenutils import *
 from Cheetah.Template import Template
-riXml = parseXmlTree(riXmlPath)
+riXml = parseXml(riXmlPath)
 
 iclassCountSnippets = {
     'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_attrStack->top().ustep, g_attrStack->top().vstep);',
@@ -210,17 +210,17 @@ $returnType ${cProcName}($formals)
 #for $arg in $arrayArgs
     Ri::${arg.findtext('Type')[2:]} ${arg.findtext('Name')}(${arg.findtext('Name')}_in, $arrayLen(arg));
 #end for
-#if $proc.haschild('Arguments/ParamList')
+#if $proc.findall('Arguments/ParamList')
     IClassCounts iclassCounts(1,1,1,1,1);
  #set $icLen = $proc.find('IClassLengths')
  #if $icLen is not None
-  #if $icLen.haschild('ComplicatedCustomImpl')
+  #if $icLen.findall('ComplicatedCustomImpl')
     $iclassCountSnippets[$procName]
   #else
-   #if $icLen.haschild('Uniform')
+   #if $icLen.findall('Uniform')
     iclassCounts.uniform = $icLen.findtext('Uniform');
    #end if
-   #if $icLen.haschild('Varying')
+   #if $icLen.findall('Varying')
     #if $icLen.findtext('Varying') == 'countP(pList)'
     ## special case for RiPolygon and RiPoints
     #assert $args[0].findtext('RibValue') == 'countP(pList)'
@@ -229,17 +229,17 @@ $returnType ${cProcName}($formals)
     iclassCounts.varying = $icLen.findtext('Varying');
     #end if
    #end if
-   #if $icLen.haschild('Vertex')
+   #if $icLen.findall('Vertex')
     iclassCounts.vertex = $icLen.findtext('Vertex');
    #else
     iclassCounts.vertex = iclassCounts.varying;
    #end if
-   #if $icLen.haschild('FaceVarying')
+   #if $icLen.findall('FaceVarying')
     iclassCounts.facevarying = $icLen.findtext('FaceVarying');
    #else
     iclassCounts.facevarying = iclassCounts.varying;
    #end if
-   #if $icLen.haschild('FaceVertex')
+   #if $icLen.findall('FaceVertex')
     iclassCounts.facevertex = $icLen.findtext('FaceVertex');
    #else
     iclassCounts.facevertex = iclassCounts.facevarying;
@@ -262,17 +262,17 @@ $returnType ${cProcName}($formals)
 
 # Get the length expression for required array arguments
 def arrayLen(arg):
-    if arg.haschild('Length'):
+    if arg.findall('Length'):
         return arg.findtext('Length')
     else:
         return arg.findtext('RiLength')
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib'):
+    if proc.findall('Rib'):
         procName = proc.findtext('Name')
         args = proc.findall('Arguments/Argument')
         formals = [formalArgC(arg, arraySuffix='_in') for arg in args]
-        callArgsXml = [a for a in args if not a.haschild('RibValue')]
+        callArgsXml = [a for a in args if not a.findall('RibValue')]
         arrayArgs = [a for a in callArgsXml if
                      a.findtext('Type').endswith('Array')]
         # Ugh!  The length of 'knot' in trimcurve depends on 'n', so here's a
@@ -282,7 +282,7 @@ for proc in riXml.findall('Procedures/Procedure'):
         callArgs = [a.findtext('Name') for a in callArgsXml]
         returnType = proc.findtext('ReturnType')
         cProcName = cName(proc)
-        if proc.haschild('Arguments/ParamList'):
+        if proc.findall('Arguments/ParamList'):
             cProcName = cProcName + 'V'
             callArgs.append('pList')
             formals += ['RtInt count', 'RtToken tokens[]','RtPointer values[]']
@@ -1541,7 +1541,7 @@ $returnType ${procName}($formals, ...)
 '''
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib') and proc.haschild('Arguments/ParamList'):
+    if proc.findall('Rib') and proc.findall('Arguments/ParamList'):
         args = proc.findall('Arguments/Argument')
         formals = ', '.join([formalArgC(arg) for arg in args])
         callArgs = ', '.join([arg.findtext('Name') for arg in args])

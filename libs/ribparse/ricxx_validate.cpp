@@ -116,10 +116,10 @@ class RiCxxValidate : public Ri::Filter
         /*[[[cog
         from codegenutils import *
 
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
         for p in riXml.findall('Procedures/Procedure'):
-            if p.haschild('Rib'):
+            if p.findall('Rib'):
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
@@ -468,37 +468,37 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
     #end for
   #end if
   ## ------------ Array length check ------------
-  #if $arg.haschild('Length')
+  #if $arg.findall('Length')
     checkArraySize($arg.findtext('Length'), ${argName}.size(),
                    "$argName", "$procName");
   #end if
 #end for
 ## ------------ Param list check -----------
-#if $proc.haschild('Arguments/ParamList')
+#if $proc.findall('Arguments/ParamList')
  ## ----------- Param array length check --------
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
  #set $icLen = $proc.find('IClassLengths')
  #if $icLen is not None
-  #if $icLen.haschild('ComplicatedCustomImpl')
+  #if $icLen.findall('ComplicatedCustomImpl')
     $iclassCountSnippets[$procName]
   #else
-   #if $icLen.haschild('Uniform')
+   #if $icLen.findall('Uniform')
     iclassCounts.uniform = $icLen.findtext('Uniform');
    #end if
-   #if $icLen.haschild('Varying')
+   #if $icLen.findall('Varying')
     iclassCounts.varying = $icLen.findtext('Varying');
    #end if
-   #if $icLen.haschild('Vertex')
+   #if $icLen.findall('Vertex')
     iclassCounts.vertex = $icLen.findtext('Vertex');
    #else
     iclassCounts.vertex = iclassCounts.varying;
    #end if
-   #if $icLen.haschild('FaceVarying')
+   #if $icLen.findall('FaceVarying')
     iclassCounts.facevarying = $icLen.findtext('FaceVarying');
    #else
     iclassCounts.facevarying = iclassCounts.varying;
    #end if
-   #if $icLen.haschild('FaceVertex')
+   #if $icLen.findall('FaceVertex')
     iclassCounts.facevertex = $icLen.findtext('FaceVertex');
    #else
     iclassCounts.facevertex = iclassCounts.facevarying;
@@ -537,7 +537,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxValidate'), 80)
 
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib'):
+    if proc.findall('Rib'):
         args = ribArgs(proc.findall('Arguments/Argument'))
         procName = proc.findtext('Name')
         validScopeNames = set(['Scope_' + s.tag for s in

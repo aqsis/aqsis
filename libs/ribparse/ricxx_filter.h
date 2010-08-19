@@ -83,9 +83,9 @@ class OnOffFilter : public Ri::Filter
 
         /*[[[cog
         from codegenutils import *
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
         for p in riXml.findall('Procedures/Procedure'):
-            if p.haschild('Rib'):
+            if p.findall('Rib'):
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/

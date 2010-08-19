@@ -117,10 +117,10 @@ class RiCxxToRi : public Ri::Renderer
         /*[[[cog
         from codegenutils import *
 
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
         for p in riXml.findall('Procedures/Procedure'):
-            if p.haschild('Rib'):
+            if p.findall('Rib'):
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
@@ -383,17 +383,17 @@ customImpl = set((
     'MotionBegin',
 ))
 
-procs = filter(lambda p: p.haschild('Rib') and p.findtext('Name') not in customImpl,
+procs = filter(lambda p: p.findall('Rib') and p.findtext('Name') not in customImpl,
                riXml.findall('Procedures/Procedure'))
 
 methodTemplate = '''
 #for $proc in $procs
 #set $args = $proc.findall('Arguments/Argument')
-#set $deducedArgs = filter(lambda x: x.haschild('RibValue'), $args)
+#set $deducedArgs = filter(lambda x: x.findall('RibValue'), $args)
 #set $procName = 'Ri' + $proc.findtext('Name')
 $wrapDecl($riCxxMethodDecl($proc, className='RiCxxToRi'), 80)
 {
-    #if $proc.haschild('Arguments/ParamList')
+    #if $proc.findall('Arguments/ParamList')
     m_pListConv.convertParamList(pList);
     #end if
     #for $arg in $deducedArgs
@@ -404,7 +404,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RiCxxToRi'), 80)
     #for $arg in $args
         #set $argList += ['toRiType(%s)' % ($arg.findtext('Name'),)]
     #end for
-    #if $proc.haschild('Arguments/ParamList')
+    #if $proc.findall('Arguments/ParamList')
         #set $argList += ['m_pListConv.count()', 'm_pListConv.tokens()',
                           'm_pListConv.values()']
         #set $procName = $procName + 'V'

@@ -115,7 +115,7 @@ Sections correspond to the RISpec version 3.2, with some extensions.
 [[[cog
 from codegenutils import *
 
-riXml = parseXmlTree(riXmlPath)
+riXml = parseXml(riXmlPath)
 
 declTemplate = 'AQSIS_RI_SHARE %s %s(%s);'
 def printDecl(returnType, procName, args):
@@ -134,7 +134,7 @@ for p in riXml.findall('Procedures/'+'*'):
         args = [formalArgC(arg) for arg in p.findall('Arguments/Argument')]
         returnType = p.findtext('ReturnType')
         procName = cName(p)
-        if p.haschild('Arguments/ParamList'):
+        if p.findall('Arguments/ParamList'):
             printDecl(returnType, procName, args + ['...'])
             printDecl(returnType, procName + 'V', args +
                       ['RtInt count, RtToken tokens[], RtPointer values[]'])

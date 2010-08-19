@@ -689,10 +689,10 @@ class RibWriter : public Ri::Renderer
         /*[[[cog
         from codegenutils import *
 
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
         for p in riXml.findall('Procedures/Procedure'):
-            if p.haschild('Rib'):
+            if p.findall('Rib'):
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
@@ -1077,7 +1077,7 @@ $wrapDecl($riCxxMethodDecl($proc, className='RibWriter<Formatter>'), 80)
     m_formatter.whitespace();
     $formatterStatement($arg)
 #end for
-#if $proc.haschild('Arguments/ParamList')
+#if $proc.findall('Arguments/ParamList')
     printParamList(pList);
 #end if
     m_formatter.endRequest();
@@ -1091,9 +1091,9 @@ $wrapDecl($riCxxMethodDecl($proc, className='RibWriter<Formatter>'), 80)
 '''
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.haschild('Rib') and proc.findtext('Name') not in customImpl:
+    if proc.findall('Rib') and proc.findtext('Name') not in customImpl:
         args = [x for x in proc.findall('Arguments/Argument')
-                if not x.haschild('RibValue')]
+                if not x.findall('RibValue')]
         procName = proc.findtext('Name')
         doIndent = procName.endswith('Begin')
         doDedent = procName.endswith('End')

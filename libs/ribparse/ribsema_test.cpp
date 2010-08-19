@@ -308,7 +308,7 @@ class MockRenderer : public Ri::Renderer
         /*[[[cog
         from codegenutils import *
 
-        riXml = parseXmlTree(riXmlPath)
+        riXml = parseXml(riXmlPath)
 
         # Here's all methods which are currently tested:
         testedMethods = set([
@@ -334,7 +334,7 @@ class MockRenderer : public Ri::Renderer
         ])
 
         for p in riXml.findall('Procedures/Procedure'):
-            if p.haschild('Rib'):
+            if p.findall('Rib'):
                 decl = riCxxMethodDecl(p)
                 procName = p.findtext('Name')
                 if procName in testedMethods:

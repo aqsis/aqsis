@@ -3,38 +3,8 @@ import re
 import exceptions
 
 #-------------------------------------------------------------------------------
-# XML functions
-
-def patchEtreeElementClass():
-    '''Monky patch the etree interface to include some handy methods'''
-    # The element class type is left undefined in the docs, so we use the
-    # Element() factory function to get an instance & then retrive the exact
-    # element class for modification :-)
-    elementClass = etree.Element('dummy').__class__
-    def haschild(element, name):
-        return element.find(name) is not None
-    elementClass.haschild = haschild
-#    def elementGetAttr(element, name):
-#        if name.startswith('__'):
-#            raise AttributeError('special method?')
-#        elements = element.findall(name)
-#        if len(elements) == 0:
-#            raise AttributeError('element "%s" has no child named "%s"'
-#                                 % (element.tag, name))
-#        elif len(elements) == 1:
-#            return elements[0]
-#        else:
-#            return elements
-#    elementClass.__getattr__ = elementGetAttr
-
-# WARNING: Dynamically patching the Element class is a bit of an ugly hack, but
-# how else can we get methods attached to element objects?
-#
-# It does make the resulting code much nicer to read ;-)
-patchEtreeElementClass()
-
-def parseXmlTree(fileName):
-    return etree.ElementTree().parse(fileName)
+def parseXml(fileName):
+    return etree.parse(fileName)
 
 
 #-------------------------------------------------------------------------------
@@ -74,10 +44,10 @@ def wrapDecl(str, maxWidth, wrapIndent=None):
 # Code generation functions with etree objects as arguments.
 #
 def ribArgs(argList):
-    return filter(lambda arg: not arg.haschild('RibValue'), argList)
+    return filter(lambda arg: not arg.findall('RibValue'), argList)
 
 def cName(procXml):
-    if procXml.haschild('CName'):
+    if procXml.findall('CName'):
         return procXml.findtext('CName')
     else:
         return 'Ri' + procXml.findtext('Name')
@@ -104,7 +74,7 @@ def formalArgC(arg, arraySuffix=''):
 
 def riCxxMethodDecl(procXml, className=None):
     args = [formalArg(arg) for arg in ribArgs(procXml.findall('Arguments/Argument'))]
-    if procXml.haschild('Arguments/ParamList'):
+    if procXml.findall('Arguments/ParamList'):
         args += ['const ParamList& pList']
     procName = procXml.findtext('Name')
     if className is not None:
@@ -115,7 +85,7 @@ def riCxxMethodDecl(procXml, className=None):
 def wrapperCallArgList(procXml):
     args = [arg.findtext('Name') for arg in
             ribArgs(procXml.findall('Arguments/Argument'))]
-    if procXml.haschild('Arguments/ParamList'):
+    if procXml.findall('Arguments/ParamList'):
         args += ['pList']
     return args
 
