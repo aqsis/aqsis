@@ -37,8 +37,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Aqsis'
-copyright = u'2010, The Aqsis Team'
+project = u'Aqsis Renderer'
+copyright = u'2010, Aqsis Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -174,8 +174,8 @@ htmlhelp_basename = 'Aqsisdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Aqsis.tex', u'Aqsis Documentation',
-   u'The Aqsis Team', 'manual', True),
+  ('index', 'AqsisUserManual.tex', u'Aqsis User Manual',
+   u'Aqsis Team', 'manual', True),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
