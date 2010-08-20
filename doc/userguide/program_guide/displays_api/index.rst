@@ -227,7 +227,7 @@ All functions in the display interface return one of the possible [[#PtDspyError
 
 DspyImageOpen
 ^^^^^^^^^^^^^
-.. cfunction:: PtDspyError DspyImageOpen(PtDspayImageHandle* image, const char* drivername, const char* filename, int width, int height, int paramCount, const UserParameter* parameters, int formatCount, PtDspyDevFormat* format, PtFlagStuff* flagstuff)
+.. c:function:: PtDspyError DspyImageOpen(PtDspayImageHandle* image, const char* drivername, const char* filename, int width, int height, int paramCount, const UserParameter* parameters, int formatCount, PtDspyDevFormat* format, PtFlagStuff* flagstuff)
 
     DspyImageOpen is called by the renderer to open and initialize a display.  Typically this might involve allocating a memory buffer large enough to hold the image, opening a file or initializing a GUI to display the data directly.
 
@@ -390,7 +390,7 @@ flags
 
 DspyImageQuery
 ^^^^^^^^^^^^^^
-.. cfunction:: PtDspyError DspyImageQuery(PtDspyImageHandle image, PtDspyQueryType type, size_t size, void* data)
+.. c:function:: PtDspyError DspyImageQuery(PtDspyImageHandle image, PtDspyQueryType type, size_t size, void* data)
 
     This function is used by the renderer to obtain further information about the image or the display driver itself. |Aqsis| passes in the image handle that was initialised in the open function (or *NULL* if the query does not relate to a particular image), a query type that determines what kind of information is requested and a data block that has to be filled in by the driver with appropriate values.
 
@@ -489,7 +489,7 @@ interactive
 
 DspyImageData
 ^^^^^^^^^^^^^
-.. cfunction:: PtDspyError DspyImageData(PtDspyImageHandle image, int xmin, int xmaxplus1, int ymin, int ymaxplus1, int entrysize, const unsigned char* data)
+.. c:function:: PtDspyError DspyImageData(PtDspyImageHandle image, int xmin, int xmaxplus1, int ymin, int ymaxplus1, int entrysize, const unsigned char* data)
 
     DspyImageData passes image pixel data from the renderer to the display device.
 
@@ -512,7 +512,7 @@ DspyImageData
 
 DspyImageClose
 ^^^^^^^^^^^^^^
-.. cfunction:: PtDspyError DspyImageClose(PtDspyImageHandle image);
+.. c:function:: PtDspyError DspyImageClose(PtDspyImageHandle image);
 
     DspyImageClose closes the display and frees any associated resources such as memory or file handles.
 
@@ -523,7 +523,7 @@ DspyImageClose
 
 DspyImageDelayClose
 ^^^^^^^^^^^^^^^^^^^
-.. cfunction:: PtDspyError DspyImageDelayClose(PtDspyImageHandle image);
+.. c:function:: PtDspyError DspyImageDelayClose(PtDspyImageHandle image);
 
     This function is similar to DspyImageClose_ but it is executed in a separate process. This is useful for interactive display drivers that want to remain active even though the renderer has finished rendering the image.
 
