@@ -43,6 +43,13 @@ namespace Aqsis {
 
 namespace {
 
+FIXME
+// Yes, this file won't compile at the moment.  It's somewhat bit rotted since
+// it's no longer used actively for anything...
+//
+// Perhaps it would be better just to remove it.
+
+
 // Convert param lists from ricxx format into count,tokens,values for the RI
 class ParamListConverter
 {
@@ -124,7 +131,7 @@ class RiCxxToRi : public Ri::Renderer
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
-        virtual RtToken Declare(RtConstString name, RtConstString declaration);
+        virtual RtVoid Declare(RtConstString name, RtConstString declaration);
         virtual RtVoid FrameBegin(RtInt number);
         virtual RtVoid FrameEnd();
         virtual RtVoid WorldBegin();
@@ -169,11 +176,11 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtVoid TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4);
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList);
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList);
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff);
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList);
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff);
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList);
         virtual RtVoid Displacement(RtConstToken name, const ParamList& pList);
         virtual RtVoid Atmosphere(RtConstToken name, const ParamList& pList);
@@ -272,9 +279,9 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtVoid Geometry(RtConstToken type, const ParamList& pList);
         virtual RtVoid SolidBegin(RtConstToken type);
         virtual RtVoid SolidEnd();
-        virtual RtObjectHandle ObjectBegin();
+        virtual RtVoid ObjectBegin(RtConstToken name);
         virtual RtVoid ObjectEnd();
-        virtual RtVoid ObjectInstance(RtObjectHandle handle);
+        virtual RtVoid ObjectInstance(RtConstToken name);
         virtual RtVoid MotionBegin(const FloatArray& times);
         virtual RtVoid MotionEnd();
         virtual RtVoid MakeTexture(RtConstString imagefile,
@@ -301,8 +308,7 @@ class RiCxxToRi : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
-                            const ParamList& pList);
+        virtual RtVoid ArchiveBegin(RtConstToken name, const ParamList& pList);
         virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
@@ -388,8 +394,8 @@ procs = filter(lambda p: p.findall('Rib') and p.findtext('Name') not in customIm
 
 methodTemplate = '''
 #for $proc in $procs
-#set $args = $proc.findall('Arguments/Argument')
-#set $deducedArgs = filter(lambda x: x.findall('RibValue'), $args)
+#set $args = $cArgs($proc)
+#set $deducedArgs = [a for a in $args if a.findall('RibValue')]
 #set $procName = 'Ri' + $proc.findtext('Name')
 $wrapDecl($riCxxMethodDecl($proc, className='RiCxxToRi'), 80)
 {
@@ -421,7 +427,7 @@ cog.out(str(Template(methodTemplate, searchList=locals())));
 
 ]]]*/
 
-RtToken RiCxxToRi::Declare(RtConstString name, RtConstString declaration)
+RtVoid RiCxxToRi::Declare(RtConstString name, RtConstString declaration)
 {
     return ::RiDeclare(toRiType(name),
             toRiType(declaration)
@@ -693,29 +699,31 @@ RtVoid RiCxxToRi::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
     );
 }
 
-RtLightHandle RiCxxToRi::LightSource(RtConstToken name, const ParamList& pList)
+RtVoid RiCxxToRi::LightSource(RtConstToken shadername, RtConstToken name,
+                              const ParamList& pList)
 {
     m_pListConv.convertParamList(pList);
-    return ::RiLightSourceV(toRiType(name),
+    return ::RiLightSourceV(toRiType(shadername),
             m_pListConv.count(),
             m_pListConv.tokens(),
             m_pListConv.values()
     );
 }
 
-RtLightHandle RiCxxToRi::AreaLightSource(RtConstToken name,
-                                         const ParamList& pList)
+RtVoid RiCxxToRi::AreaLightSource(RtConstToken shadername, RtConstToken name,
+                                  const ParamList& pList)
 {
     m_pListConv.convertParamList(pList);
-    return ::RiAreaLightSourceV(toRiType(name),
+    return ::RiAreaLightSourceV(toRiType(shadername),
             m_pListConv.count(),
             m_pListConv.tokens(),
             m_pListConv.values()
     );
 }
 
-RtVoid RiCxxToRi::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid RiCxxToRi::Illuminate(RtConstToken name, RtBoolean onoff)
 {
+    RtLightHandle light = ;
     return ::RiIlluminate(toRiType(light),
             toRiType(onoff)
     );
@@ -1318,7 +1326,7 @@ RtVoid RiCxxToRi::SolidEnd()
     );
 }
 
-RtObjectHandle RiCxxToRi::ObjectBegin()
+RtVoid RiCxxToRi::ObjectBegin(RtConstToken name)
 {
     return ::RiObjectBegin(
     );
@@ -1330,8 +1338,9 @@ RtVoid RiCxxToRi::ObjectEnd()
     );
 }
 
-RtVoid RiCxxToRi::ObjectInstance(RtObjectHandle handle)
+RtVoid RiCxxToRi::ObjectInstance(RtConstToken name)
 {
+    RtObjectHandle handle = ;
     return ::RiObjectInstance(toRiType(handle)
     );
 }
@@ -1451,8 +1460,7 @@ RtVoid RiCxxToRi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
     );
 }
 
-RtArchiveHandle RiCxxToRi::ArchiveBegin(RtConstToken name,
-                                        const ParamList& pList)
+RtVoid RiCxxToRi::ArchiveBegin(RtConstToken name, const ParamList& pList)
 {
     m_pListConv.convertParamList(pList);
     return ::RiArchiveBeginV(toRiType(name),

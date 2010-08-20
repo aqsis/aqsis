@@ -988,8 +988,14 @@
 			<ReturnType>RtLightHandle</ReturnType>
 			<Arguments>
 				<Argument>
+					<Name>shadername</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
 					<Name>name</Name>
 					<Type>RtToken</Type>
+					<AltTypeInt/>
+					<RibOnly/>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -1011,8 +1017,14 @@
 			<ReturnType>RtLightHandle</ReturnType>
 			<Arguments>
 				<Argument>
+					<Name>shadername</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
 					<Name>name</Name>
 					<Type>RtToken</Type>
+					<AltTypeInt/>
+					<RibOnly/>
 				</Argument>
 				<ParamList/>
 			</Arguments>
@@ -1036,6 +1048,13 @@
 				<Argument>
 					<Name>light</Name>
 					<Type>RtLightHandle</Type>
+					<RibValue/>
+				</Argument>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+					<AltTypeInt/>
+					<RibOnly/>
 				</Argument>
 				<Argument>
 					<Name>onoff</Name>
@@ -2943,7 +2962,14 @@
 		<Procedure>
 			<Name>ObjectBegin</Name>
 			<ReturnType>RtObjectHandle</ReturnType>
-			<Arguments/>
+			<Arguments>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+					<AltTypeInt/>
+					<RibOnly/>
+				</Argument>
+			</Arguments>
 			<Rib/>
 			<ValidScope>
 				<BeginEnd/>
@@ -2974,6 +3000,13 @@
 				<Argument>
 					<Name>handle</Name>
 					<Type>RtObjectHandle</Type>
+					<RibValue/>
+				</Argument>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+					<AltTypeInt/>
+					<RibOnly/>
 				</Argument>
 			</Arguments>
 			<Rib/>

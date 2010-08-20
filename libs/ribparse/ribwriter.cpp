@@ -583,9 +583,6 @@ class RibWriter : public Ri::Renderer
 		boost::shared_ptr<std::ostream> m_gzipStream;
         /// Formatting object
         Formatter m_formatter;
-        /// Sequence number generators for light/object handles.
-        RtInt m_currLightHandle;
-        RtInt m_currObjectHandle;
         /// Flag determining whether to read and insert RIB archives or not
         bool m_interpolateArchives;
         /// Path in which to search for archive files
@@ -648,11 +645,6 @@ class RibWriter : public Ri::Renderer
                 );
         }
 
-        /// Output formatting of LightSource/AreaLightSource
-        RtLightHandle lightSourceGeneral(RtConstToken requestName,
-                                         RtConstToken name,
-                                         const ParamList& pList);
-
         /// Allocate a gzip stream filter, if desired.
         static boost::shared_ptr<std::ostream> setupGzipStream(std::ostream& out, bool useGzip)
         {
@@ -678,8 +670,6 @@ class RibWriter : public Ri::Renderer
                   char indentChar, const std::string& initialArchivePath)
             : m_gzipStream(setupGzipStream(out, useGzip)),
             m_formatter(useGzip ? *m_gzipStream : out, indentStep, indentChar),
-            m_currLightHandle(0),
-            m_currObjectHandle(0),
             m_interpolateArchives(interpolateArchives),
             m_archiveSearchPath(initialArchivePath),
             m_services(services)
@@ -696,7 +686,7 @@ class RibWriter : public Ri::Renderer
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
-        virtual RtToken Declare(RtConstString name, RtConstString declaration);
+        virtual RtVoid Declare(RtConstString name, RtConstString declaration);
         virtual RtVoid FrameBegin(RtInt number);
         virtual RtVoid FrameEnd();
         virtual RtVoid WorldBegin();
@@ -741,11 +731,11 @@ class RibWriter : public Ri::Renderer
         virtual RtVoid TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4);
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList);
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList);
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff);
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList);
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff);
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList);
         virtual RtVoid Displacement(RtConstToken name, const ParamList& pList);
         virtual RtVoid Atmosphere(RtConstToken name, const ParamList& pList);
@@ -844,9 +834,9 @@ class RibWriter : public Ri::Renderer
         virtual RtVoid Geometry(RtConstToken type, const ParamList& pList);
         virtual RtVoid SolidBegin(RtConstToken type);
         virtual RtVoid SolidEnd();
-        virtual RtObjectHandle ObjectBegin();
+        virtual RtVoid ObjectBegin(RtConstToken name);
         virtual RtVoid ObjectEnd();
-        virtual RtVoid ObjectInstance(RtObjectHandle handle);
+        virtual RtVoid ObjectInstance(RtConstToken name);
         virtual RtVoid MotionBegin(const FloatArray& times);
         virtual RtVoid MotionEnd();
         virtual RtVoid MakeTexture(RtConstString imagefile,
@@ -873,8 +863,7 @@ class RibWriter : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
-                            const ParamList& pList);
+        virtual RtVoid ArchiveBegin(RtConstToken name, const ParamList& pList);
         virtual RtVoid ArchiveEnd();
         //[[[end]]]
 
@@ -889,7 +878,7 @@ class RibWriter : public Ri::Renderer
 // effect the state of the output object.
 
 template<typename Formatter>
-RtToken RibWriter<Formatter>::Declare(RtConstString name, RtConstString declaration)
+RtVoid RibWriter<Formatter>::Declare(RtConstString name, RtConstString declaration)
 {
     m_services.declare(name, declaration);
     m_formatter.beginRequest("Declare");
@@ -898,7 +887,6 @@ RtToken RibWriter<Formatter>::Declare(RtConstString name, RtConstString declarat
     m_formatter.whitespace();
     m_formatter.print(declaration);
     m_formatter.endRequest();
-    return 0;
 }
 
 template<typename Formatter>
@@ -921,46 +909,6 @@ RtVoid RibWriter<Formatter>::Procedural(RtPointer data, RtConstBound bound,
     m_formatter.print(FloatArray(bound,6));
     m_formatter.endRequest();
     freeproc(data);
-}
-
-template<typename Formatter>
-RtLightHandle RibWriter<Formatter>::lightSourceGeneral(RtConstToken requestName,
-                                                    RtConstToken name,
-                                                    const ParamList& pList)
-{
-    m_formatter.beginRequest(requestName);
-    m_formatter.whitespace();
-    m_formatter.print(name);
-    m_formatter.whitespace();
-    m_formatter.print(++m_currLightHandle);
-    printParamList(pList);
-    m_formatter.endRequest();
-    return reinterpret_cast<RtLightHandle>(m_currLightHandle);
-}
-
-template<typename Formatter>
-RtLightHandle RibWriter<Formatter>::LightSource(RtConstToken name,
-                                             const ParamList& pList)
-{
-    return lightSourceGeneral("LightSource", name, pList);
-}
-
-template<typename Formatter>
-RtLightHandle RibWriter<Formatter>::AreaLightSource(RtConstToken name,
-                                                 const ParamList& pList)
-{
-    return lightSourceGeneral("AreaLightSource", name, pList);
-}
-
-template<typename Formatter>
-RtObjectHandle RibWriter<Formatter>::ObjectBegin()
-{
-    m_formatter.beginRequest("ObjectBegin");
-    m_formatter.whitespace();
-    m_formatter.print(++m_currObjectHandle);
-    m_formatter.endRequest();
-    m_formatter.increaseIndent();
-    return reinterpret_cast<RtObjectHandle>(m_currObjectHandle);
 }
 
 template<typename Formatter>
@@ -1034,9 +982,6 @@ from Cheetah.Template import Template
 customImpl = set((
     'Declare',
     'Procedural',
-    'LightSource',
-    'AreaLightSource',
-    'ObjectBegin',
     'ReadArchive',
     'Option',
 ))
@@ -1049,21 +994,12 @@ formatterStatements = {
     'RtBasis':       'printBasis(%s);',
     'RtFilterFunc':  'm_formatter.print(m_services.getFilterFuncName(%s));',
     'RtErrorFunc':   'm_formatter.print(m_services.getErrorFuncName(%s));',
-    'RtLightHandle': 'm_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(%s)));',
-    'RtObjectHandle': 'm_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(%s)));',
 }
 
 def formatterStatement(argXml):
     formatter = formatterStatements.get(argXml.findtext('Type'),
                                         'm_formatter.print(%s);')
     return formatter % (argXml.findtext('Name'),)
-
-returnExpressions = {
-    'LightSource'      : 'reinterpret_cast<RtLightHandle>(++m_currLightHandle)',
-    'AreaLightSource'  : 'reinterpret_cast<RtLightHandle>(++m_currLightHandle)',
-    'ObjectBegin'      : 'reinterpret_cast<RtObjectHandle>(++m_currObjectHandle)',
-    'ArchiveBegin'     : 'const_cast<RtToken>(name)',
-}
 
 methodTemplate = '''
 template<typename Formatter>
@@ -1083,9 +1019,6 @@ $wrapDecl($riCxxMethodDecl($proc, className='RibWriter<Formatter>'), 80)
     m_formatter.endRequest();
 #if $doIndent
     m_formatter.increaseIndent();
-#end if
-#if $proc.findtext('ReturnType') != 'RtVoid'
-    return $returnExpressions[$procName];
 #end if
 }
 '''
@@ -1471,11 +1404,39 @@ RtVoid RibWriter<Formatter>::TextureCoordinates(RtFloat s1, RtFloat t1,
 }
 
 template<typename Formatter>
-RtVoid RibWriter<Formatter>::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid RibWriter<Formatter>::LightSource(RtConstToken shadername,
+                                         RtConstToken name,
+                                         const ParamList& pList)
+{
+    m_formatter.beginRequest("LightSource");
+    m_formatter.whitespace();
+    m_formatter.print(shadername);
+    m_formatter.whitespace();
+    m_formatter.print(name);
+    printParamList(pList);
+    m_formatter.endRequest();
+}
+
+template<typename Formatter>
+RtVoid RibWriter<Formatter>::AreaLightSource(RtConstToken shadername,
+                                             RtConstToken name,
+                                             const ParamList& pList)
+{
+    m_formatter.beginRequest("AreaLightSource");
+    m_formatter.whitespace();
+    m_formatter.print(shadername);
+    m_formatter.whitespace();
+    m_formatter.print(name);
+    printParamList(pList);
+    m_formatter.endRequest();
+}
+
+template<typename Formatter>
+RtVoid RibWriter<Formatter>::Illuminate(RtConstToken name, RtBoolean onoff)
 {
     m_formatter.beginRequest("Illuminate");
     m_formatter.whitespace();
-    m_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(light)));
+    m_formatter.print(name);
     m_formatter.whitespace();
     m_formatter.print(onoff);
     m_formatter.endRequest();
@@ -2224,6 +2185,16 @@ RtVoid RibWriter<Formatter>::SolidEnd()
 }
 
 template<typename Formatter>
+RtVoid RibWriter<Formatter>::ObjectBegin(RtConstToken name)
+{
+    m_formatter.beginRequest("ObjectBegin");
+    m_formatter.whitespace();
+    m_formatter.print(name);
+    m_formatter.endRequest();
+    m_formatter.increaseIndent();
+}
+
+template<typename Formatter>
 RtVoid RibWriter<Formatter>::ObjectEnd()
 {
     m_formatter.decreaseIndent();
@@ -2232,11 +2203,11 @@ RtVoid RibWriter<Formatter>::ObjectEnd()
 }
 
 template<typename Formatter>
-RtVoid RibWriter<Formatter>::ObjectInstance(RtObjectHandle handle)
+RtVoid RibWriter<Formatter>::ObjectInstance(RtConstToken name)
 {
     m_formatter.beginRequest("ObjectInstance");
     m_formatter.whitespace();
-    m_formatter.print(static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(handle)));
+    m_formatter.print(name);
     m_formatter.endRequest();
 }
 
@@ -2387,8 +2358,8 @@ RtVoid RibWriter<Formatter>::ErrorHandler(RtErrorFunc handler)
 }
 
 template<typename Formatter>
-RtArchiveHandle RibWriter<Formatter>::ArchiveBegin(RtConstToken name,
-                                                   const ParamList& pList)
+RtVoid RibWriter<Formatter>::ArchiveBegin(RtConstToken name,
+                                          const ParamList& pList)
 {
     m_formatter.beginRequest("ArchiveBegin");
     m_formatter.whitespace();
@@ -2396,7 +2367,6 @@ RtArchiveHandle RibWriter<Formatter>::ArchiveBegin(RtConstToken name,
     printParamList(pList);
     m_formatter.endRequest();
     m_formatter.increaseIndent();
-    return const_cast<RtToken>(name);
 }
 
 template<typename Formatter>

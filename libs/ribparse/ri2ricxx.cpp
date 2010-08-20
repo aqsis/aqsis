@@ -24,9 +24,11 @@
 ///
 
 #include <vector>
+#include <set>
 #include <stack>
 #include <stdarg.h>
 #include <stdio.h> // for vsnprintf
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <aqsis/ri/ri.h>
 #include <aqsis/util/exception.h>
@@ -41,64 +43,144 @@ using namespace Aqsis;
 typedef SqInterpClassCounts IClassCounts;
 
 namespace {
+
 struct AttrState
 {
     int ustep;
     int vstep;
     AttrState(int ustep, int vstep) : ustep(ustep), vstep(vstep) {}
 };
-}
-
 typedef std::stack<AttrState> AttrStack;
 
-static Ri::Renderer* g_context = 0;
-static Ri::RendererServices* g_services = 0;
-static AttrStack* g_attrStack = 0;
+// Class managing a symbol table of handles.
+//
+// We assume that FrameBegin/FrameEnd and WorldBegin/WorldEnd invalidate any
+// handles on scope exit.  This class represents a stack of scopes; handles may
+// be added to the set at the top of the stack, and the whole stack may be
+// searched to determine whether a given handle is valid.
+class HandleSetStack
+{
+    private:
+        typedef std::set<std::string*> HSet;
+        boost::ptr_vector<HSet> m_handles;
+
+        static void deleteSetContents(HSet& set)
+        {
+            for(HSet::iterator i = set.begin(), iend = set.end(); i != iend; ++i)
+                delete *i;
+        }
+
+    public:
+        HandleSetStack()
+        {
+            pushScope();
+        }
+        ~HandleSetStack()
+        {
+            for(size_t i = 0; i < m_handles.size(); ++i)
+                deleteSetContents(m_handles[i]);
+        }
+
+        // Push a new handle scope onto the stack
+        void pushScope()
+        {
+            m_handles.push_back(new HSet());
+        }
+        // Pop a scope off the stack.
+        //
+        // The outer "global" scope is never popped.
+        void popScope()
+        {
+            if(m_handles.size() > 1)
+            {
+                deleteSetContents(m_handles.back());
+                m_handles.pop_back();
+            }
+        }
+
+        // Create a new handle in the inner scope
+        //
+        // Return the handle name, and store the handle itself in the handle
+        // parameter.
+        const char* newHandle(void*& handle)
+        {
+            std::string* name = new std::string();
+            handle = static_cast<void*>(name);
+            std::ostringstream fmt;
+            fmt << handle;
+            (*name) = fmt.str();
+            m_handles.back().insert(name);
+            return name->c_str();
+        }
+        // Find handle name in the current stack of valid scopes.
+        const char* findHandleName(void* handle) const
+        {
+            std::string* potentialName = static_cast<std::string*>(handle);
+            for(int j = m_handles.size()-1; j >= 0; --j)
+            {
+                HSet::const_iterator i = m_handles[j].find(potentialName);
+                if(i != m_handles[j].end())
+                    return (*i)->c_str();
+            }
+            AQSIS_THROW_XQERROR(XqValidation, EqE_BadHandle,
+                    "bad handle at " << handle);
+        }
+};
+
+// Context struct for the RI->RiCxx interface conversion
+struct RiToRiCxxContext
+{
+    AttrStack attrStack;
+    HandleSetStack handles;
+    Ri::RendererServices& services;
+    Ri::Renderer& api;
+
+    RiToRiCxxContext(Ri::RendererServices& services)
+        : attrStack(),
+        handles(),
+        services(services),
+        api(services.firstFilter())
+    {
+        attrStack.push(AttrState(3,3));
+    }
+
+    void pushAttributes()
+    {
+        attrStack.push(attrStack.top());
+    }
+    void popAttributes()
+    {
+        if(attrStack.size() > 1)
+            attrStack.pop();
+    }
+};
+
+}
+
+static RiToRiCxxContext* g_context = 0;
 
 namespace Aqsis {
 
-void riToRiCxxBegin(Ri::RendererServices* services,
-                    boost::shared_ptr<void>& ourData)
+void* riToRiCxxBegin(Ri::RendererServices& services)
 {
-    assert(services);
-    g_services = services;
-    g_context = &services->firstFilter();
-    g_attrStack = new AttrStack();
-    ourData.reset(g_attrStack);
-    g_attrStack->push(AttrState(3,3));
+    g_context = new RiToRiCxxContext(services);
+    return g_context;
 }
 
-void riToRiCxxContext(Ri::RendererServices* services,
-                      boost::shared_ptr<void>& ourData)
+void riToRiCxxContext(void* context)
 {
-    assert(services);
-    g_services = services;
-    g_context = &services->firstFilter();
-    g_attrStack = static_cast<AttrStack*>(ourData.get());
+    g_context = static_cast<RiToRiCxxContext*>(context);
 }
 
 void riToRiCxxEnd()
 {
-    g_services = 0;
+    delete g_context;
     g_context = 0;
-    g_attrStack = 0;
 }
 
 } // namespace Aqsis
 
 namespace {
-
-void pushAttributes()
-{
-    assert(g_attrStack);
-    g_attrStack->push(g_attrStack->top());
-}
-void popAttributes()
-{
-    assert(g_attrStack);
-    if(g_attrStack->size() > 1)
-        g_attrStack->pop();
-}
 
 std::vector<Ri::Param> g_pList;
 std::vector<std::string> g_nameStorage;
@@ -118,8 +200,8 @@ Ri::ParamList buildParamList(RtInt count, RtToken tokens[], RtPointer values[],
     {
         const char* nameBegin = 0;
         const char* nameEnd = 0;
-        Ri::TypeSpec spec = g_services->getDeclaration(tokens[i], &nameBegin,
-                                                       &nameEnd);
+        Ri::TypeSpec spec = g_context->services.getDeclaration(tokens[i],
+                                                    &nameBegin, &nameEnd);
         if(*nameEnd != '\0')
         {
             // Usually we don't have to allocate space for the name,
@@ -142,51 +224,150 @@ Ri::ParamList buildParamList(RtInt count, RtToken tokens[], RtPointer values[],
 // Exception catch guard to prevent exceptions propagating outside of Ri
 // calls.  This could be dumped directly into the generated code, but it
 // clutters it up a lot.
-#define EXCEPTION_CATCH_GUARD(procName)                                     \
-}                                                                           \
-catch(const XqValidation& e)                                                \
-{                                                                           \
-    AQSIS_LOG_ERROR(g_services->errorHandler(), e.code())                   \
-        << "ignoring invalid " procName ": " << e.what();                   \
-}                                                                           \
-catch(const XqException& e)                                                 \
-{                                                                           \
-    AQSIS_LOG_ERROR(g_services->errorHandler(), e.code()) << e.what();      \
-}                                                                           \
-catch(const std::exception& e)                                              \
-{                                                                           \
-    AQSIS_LOG_SEVERE(g_services->errorHandler(), EqE_Bug)                   \
-        << "std::exception encountered in " procName ": " << e.what();      \
-}                                                                           \
-catch(...)                                                                  \
-{                                                                           \
-    AQSIS_LOG_SEVERE(g_services->errorHandler(), EqE_Bug)                   \
-        << "unknown exception encountered in " procName;                    \
+#define EXCEPTION_CATCH_GUARD(procName)                                         \
+}                                                                               \
+catch(const XqValidation& e)                                                    \
+{                                                                               \
+    AQSIS_LOG_ERROR(g_context->services.errorHandler(), e.code())               \
+        << "ignoring invalid " procName ": " << e.what();                       \
+}                                                                               \
+catch(const XqException& e)                                                     \
+{                                                                               \
+    AQSIS_LOG_ERROR(g_context->services.errorHandler(), e.code()) << e.what();  \
+}                                                                               \
+catch(const std::exception& e)                                                  \
+{                                                                               \
+    AQSIS_LOG_SEVERE(g_context->services.errorHandler(), EqE_Bug)               \
+        << "std::exception encountered in " procName ": " << e.what();          \
+}                                                                               \
+catch(...)                                                                      \
+{                                                                               \
+    AQSIS_LOG_SEVERE(g_context->services.errorHandler(), EqE_Bug)               \
+        << "unknown exception encountered in " procName;                        \
 }
 
+
+
+// -----------------------------------------------------------------------------
+// C RI functions, forwarding to the C++ context object.
+//
+// We implement all the C interface functions as wrappers around the internal
+// C++ API.  These convert parameters from the C API to the C++ one, and call
+// through to the current C++ context object.  Any exceptions are caught at the
+// C API boundary and passed through to the current error handler.
+// -----------------------------------------------------------------------------
+
+// Custom implementations.  These are restricted to functions which return or
+// deal with handles.  The C++ API doesn't pass handles around - rather, it
+// names objects with strings just like RIB.  That means we've got to do some
+// extra messing around to get this right.
+
+extern "C"
+RtToken RiDeclare(RtString name, RtString declaration)
+{
+    EXCEPTION_TRY_GUARD
+    g_context->api.Declare(name, declaration);
+    // Don't do anything special with the return value here, just return the
+    // name again.
+    return name;
+    EXCEPTION_CATCH_GUARD("Declare")
+    return 0;
+}
+
+extern "C"
+RtObjectHandle RiObjectBegin()
+{
+    EXCEPTION_TRY_GUARD
+    g_context->pushAttributes();
+    void* handle = 0;
+    g_context->api.ObjectBegin(g_context->handles.newHandle(handle));
+    return handle;
+    EXCEPTION_CATCH_GUARD("ObjectBegin")
+    return 0;
+}
+
+extern "C"
+RtVoid RiObjectInstance(RtObjectHandle handle)
+{
+    EXCEPTION_TRY_GUARD
+    g_context->api.ObjectInstance(g_context->handles.findHandleName(handle));
+    EXCEPTION_CATCH_GUARD("ObjectInstance")
+}
+
+extern "C"
+RtLightHandle RiLightSourceV(RtToken shadername, RtInt count, RtToken tokens[], RtPointer values[])
+{
+    EXCEPTION_TRY_GUARD
+    IClassCounts iclassCounts(1,1,1,1,1);
+    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
+    void* handle = 0;
+    g_context->api.LightSource(shadername, g_context->handles.newHandle(handle), pList);
+    return handle;
+    EXCEPTION_CATCH_GUARD("LightSource")
+    return 0;
+}
+
+extern "C"
+RtLightHandle RiAreaLightSourceV(RtToken shadername, RtInt count, RtToken tokens[], RtPointer values[])
+{
+    EXCEPTION_TRY_GUARD
+    IClassCounts iclassCounts(1,1,1,1,1);
+    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
+    void* handle = 0;
+    g_context->api.AreaLightSource(shadername, g_context->handles.newHandle(handle), pList);
+    return handle;
+    EXCEPTION_CATCH_GUARD("AreaLightSource")
+    return 0;
+}
+
+extern "C"
+RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
+{
+    EXCEPTION_TRY_GUARD
+    g_context->api.Illuminate(g_context->handles.findHandleName(light), onoff);
+    EXCEPTION_CATCH_GUARD("Illuminate")
+}
+
+extern "C"
+RtArchiveHandle RiArchiveBeginV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+{
+    EXCEPTION_TRY_GUARD
+    IClassCounts iclassCounts(1,1,1,1,1);
+    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
+    g_context->pushAttributes();
+    g_context->api.ArchiveBegin(name, pList);
+    return name;
+    EXCEPTION_CATCH_GUARD("ArchiveBegin")
+    return 0;
+}
+
+// Autogenerated implementations.
+//
+// Most of the complicated stuff here is in computing appropriate array lengths
+// from the C API, which uses implicit array lengths everywhere.
 /*
-
---------------------------------------------------------------------------------
-C RI functions, forwarding to the C++ context object.
-
-We implement all the C interface functions as wrappers around the internal C++
-API.  These convert parameters from the C API to the C++ one, and call through
-to the current C++ context object.  Any exceptions are caught at the C API
-boundary and passed through to the current error handler.
-
-Most of the complicated stuff here is in computing appropriate array lengths
-from the C API, which uses implicit array lengths everywhere.
---------------------------------------------------------------------------------
-
 [[[cog
 
 from codegenutils import *
 from Cheetah.Template import Template
 riXml = parseXml(riXmlPath)
 
+customImpl = set((
+    'Declare',
+    'ObjectBegin',
+    'ObjectInstance',
+    'LightSource',
+    'AreaLightSource',
+    'Illuminate',
+    'ArchiveBegin',
+))
+
+pushHandleScopes = set(('FrameBegin', 'WorldBegin'))
+popHandleScopes = set(('FrameEnd', 'WorldEnd'))
+
 iclassCountSnippets = {
-    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_attrStack->top().ustep, g_attrStack->top().vstep);',
-    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_attrStack->top().vstep);',
+    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_context->attrStack.top().ustep, g_context->attrStack.top().vstep);',
+    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_context->attrStack.top().vstep);',
     'Geometry': ''
 }
 
@@ -194,11 +375,11 @@ iclassCountSnippets = {
 def getExtraSnippet(procName):
     ignoredScopes = set(('Transform', 'If'))
     if procName == 'Basis':
-        return 'AttrState& attrs = g_attrStack->top(); attrs.ustep = ustep; attrs.vstep = vstep;'
+        return 'AttrState& attrs = g_context->attrStack.top(); attrs.ustep = ustep; attrs.vstep = vstep;'
     elif procName.endswith('Begin') and procName[:-5] not in ignoredScopes:
-        return 'pushAttributes();'
+        return 'g_context->pushAttributes();'
     elif procName.endswith('End') and procName[:-3] not in ignoredScopes:
-        return 'popAttributes();'
+        return 'g_context->popAttributes();'
     return None
 
 
@@ -251,13 +432,15 @@ $returnType ${cProcName}($formals)
 #if $extraSnippet is not None
     $extraSnippet
 #end if
-    return g_context->${procName}($callArgs);
-    EXCEPTION_CATCH_GUARD("$procName");
-#if $returnType != 'RtVoid'
-    return 0;
+#if $procName in $pushHandleScopes
+    g_context->handles.pushScope();
 #end if
+    g_context->api.${procName}($callArgs);
+#if $procName in $popHandleScopes
+    g_context->handles.popScope();
+#end if
+    EXCEPTION_CATCH_GUARD("$procName")
 }
-
 '''
 
 # Get the length expression for required array arguments
@@ -268,9 +451,9 @@ def arrayLen(arg):
         return arg.findtext('RiLength')
 
 for proc in riXml.findall('Procedures/Procedure'):
-    if proc.findall('Rib'):
-        procName = proc.findtext('Name')
-        args = proc.findall('Arguments/Argument')
+    procName = proc.findtext('Name')
+    if proc.findall('Rib') and procName not in customImpl:
+        args = cArgs(proc)
         formals = [formalArgC(arg, arraySuffix='_in') for arg in args]
         callArgsXml = [a for a in args if not a.findall('RibValue')]
         arrayArgs = [a for a in callArgsXml if
@@ -294,126 +477,108 @@ for proc in riXml.findall('Procedures/Procedure'):
 ]]]*/
 
 extern "C"
-RtToken RiDeclare(RtString name, RtString declaration)
-{
-    EXCEPTION_TRY_GUARD
-    return g_context->Declare(name, declaration);
-    EXCEPTION_CATCH_GUARD("Declare");
-    return 0;
-}
-
-
-extern "C"
 RtVoid RiFrameBegin(RtInt number)
 {
     EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->FrameBegin(number);
-    EXCEPTION_CATCH_GUARD("FrameBegin");
+    g_context->pushAttributes();
+    g_context->handles.pushScope();
+    g_context->api.FrameBegin(number);
+    EXCEPTION_CATCH_GUARD("FrameBegin")
 }
-
 
 extern "C"
 RtVoid RiFrameEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->FrameEnd();
-    EXCEPTION_CATCH_GUARD("FrameEnd");
+    g_context->popAttributes();
+    g_context->api.FrameEnd();
+    g_context->handles.popScope();
+    EXCEPTION_CATCH_GUARD("FrameEnd")
 }
-
 
 extern "C"
 RtVoid RiWorldBegin()
 {
     EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->WorldBegin();
-    EXCEPTION_CATCH_GUARD("WorldBegin");
+    g_context->pushAttributes();
+    g_context->handles.pushScope();
+    g_context->api.WorldBegin();
+    EXCEPTION_CATCH_GUARD("WorldBegin")
 }
-
 
 extern "C"
 RtVoid RiWorldEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->WorldEnd();
-    EXCEPTION_CATCH_GUARD("WorldEnd");
+    g_context->popAttributes();
+    g_context->api.WorldEnd();
+    g_context->handles.popScope();
+    EXCEPTION_CATCH_GUARD("WorldEnd")
 }
-
 
 extern "C"
 RtVoid RiIfBegin(RtString condition)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->IfBegin(condition);
-    EXCEPTION_CATCH_GUARD("IfBegin");
+    g_context->api.IfBegin(condition);
+    EXCEPTION_CATCH_GUARD("IfBegin")
 }
-
 
 extern "C"
 RtVoid RiElseIf(RtString condition)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ElseIf(condition);
-    EXCEPTION_CATCH_GUARD("ElseIf");
+    g_context->api.ElseIf(condition);
+    EXCEPTION_CATCH_GUARD("ElseIf")
 }
-
 
 extern "C"
 RtVoid RiElse()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Else();
-    EXCEPTION_CATCH_GUARD("Else");
+    g_context->api.Else();
+    EXCEPTION_CATCH_GUARD("Else")
 }
-
 
 extern "C"
 RtVoid RiIfEnd()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->IfEnd();
-    EXCEPTION_CATCH_GUARD("IfEnd");
+    g_context->api.IfEnd();
+    EXCEPTION_CATCH_GUARD("IfEnd")
 }
-
 
 extern "C"
 RtVoid RiFormat(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Format(xresolution, yresolution, pixelaspectratio);
-    EXCEPTION_CATCH_GUARD("Format");
+    g_context->api.Format(xresolution, yresolution, pixelaspectratio);
+    EXCEPTION_CATCH_GUARD("Format")
 }
-
 
 extern "C"
 RtVoid RiFrameAspectRatio(RtFloat frameratio)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->FrameAspectRatio(frameratio);
-    EXCEPTION_CATCH_GUARD("FrameAspectRatio");
+    g_context->api.FrameAspectRatio(frameratio);
+    EXCEPTION_CATCH_GUARD("FrameAspectRatio")
 }
-
 
 extern "C"
 RtVoid RiScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ScreenWindow(left, right, bottom, top);
-    EXCEPTION_CATCH_GUARD("ScreenWindow");
+    g_context->api.ScreenWindow(left, right, bottom, top);
+    EXCEPTION_CATCH_GUARD("ScreenWindow")
 }
-
 
 extern "C"
 RtVoid RiCropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->CropWindow(xmin, xmax, ymin, ymax);
-    EXCEPTION_CATCH_GUARD("CropWindow");
+    g_context->api.CropWindow(xmin, xmax, ymin, ymax);
+    EXCEPTION_CATCH_GUARD("CropWindow")
 }
-
 
 extern "C"
 RtVoid RiProjectionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -421,82 +586,73 @@ RtVoid RiProjectionV(RtToken name, RtInt count, RtToken tokens[], RtPointer valu
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Projection(name, pList);
-    EXCEPTION_CATCH_GUARD("Projection");
+    g_context->api.Projection(name, pList);
+    EXCEPTION_CATCH_GUARD("Projection")
 }
-
 
 extern "C"
 RtVoid RiClipping(RtFloat cnear, RtFloat cfar)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Clipping(cnear, cfar);
-    EXCEPTION_CATCH_GUARD("Clipping");
+    g_context->api.Clipping(cnear, cfar);
+    EXCEPTION_CATCH_GUARD("Clipping")
 }
-
 
 extern "C"
 RtVoid RiClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ClippingPlane(x, y, z, nx, ny, nz);
-    EXCEPTION_CATCH_GUARD("ClippingPlane");
+    g_context->api.ClippingPlane(x, y, z, nx, ny, nz);
+    EXCEPTION_CATCH_GUARD("ClippingPlane")
 }
-
 
 extern "C"
 RtVoid RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->DepthOfField(fstop, focallength, focaldistance);
-    EXCEPTION_CATCH_GUARD("DepthOfField");
+    g_context->api.DepthOfField(fstop, focallength, focaldistance);
+    EXCEPTION_CATCH_GUARD("DepthOfField")
 }
-
 
 extern "C"
 RtVoid RiShutter(RtFloat opentime, RtFloat closetime)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Shutter(opentime, closetime);
-    EXCEPTION_CATCH_GUARD("Shutter");
+    g_context->api.Shutter(opentime, closetime);
+    EXCEPTION_CATCH_GUARD("Shutter")
 }
-
 
 extern "C"
 RtVoid RiPixelVariance(RtFloat variance)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->PixelVariance(variance);
-    EXCEPTION_CATCH_GUARD("PixelVariance");
+    g_context->api.PixelVariance(variance);
+    EXCEPTION_CATCH_GUARD("PixelVariance")
 }
-
 
 extern "C"
 RtVoid RiPixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->PixelSamples(xsamples, ysamples);
-    EXCEPTION_CATCH_GUARD("PixelSamples");
+    g_context->api.PixelSamples(xsamples, ysamples);
+    EXCEPTION_CATCH_GUARD("PixelSamples")
 }
-
 
 extern "C"
 RtVoid RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->PixelFilter(function, xwidth, ywidth);
-    EXCEPTION_CATCH_GUARD("PixelFilter");
+    g_context->api.PixelFilter(function, xwidth, ywidth);
+    EXCEPTION_CATCH_GUARD("PixelFilter")
 }
-
 
 extern "C"
 RtVoid RiExposure(RtFloat gain, RtFloat gamma)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Exposure(gain, gamma);
-    EXCEPTION_CATCH_GUARD("Exposure");
+    g_context->api.Exposure(gain, gamma);
+    EXCEPTION_CATCH_GUARD("Exposure")
 }
-
 
 extern "C"
 RtVoid RiImagerV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -504,19 +660,17 @@ RtVoid RiImagerV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Imager(name, pList);
-    EXCEPTION_CATCH_GUARD("Imager");
+    g_context->api.Imager(name, pList);
+    EXCEPTION_CATCH_GUARD("Imager")
 }
-
 
 extern "C"
 RtVoid RiQuantize(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Quantize(type, one, min, max, ditheramplitude);
-    EXCEPTION_CATCH_GUARD("Quantize");
+    g_context->api.Quantize(type, one, min, max, ditheramplitude);
+    EXCEPTION_CATCH_GUARD("Quantize")
 }
-
 
 extern "C"
 RtVoid RiDisplayV(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[])
@@ -524,10 +678,9 @@ RtVoid RiDisplayV(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Display(name, type, mode, pList);
-    EXCEPTION_CATCH_GUARD("Display");
+    g_context->api.Display(name, type, mode, pList);
+    EXCEPTION_CATCH_GUARD("Display")
 }
-
 
 extern "C"
 RtVoid RiHiderV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -535,10 +688,9 @@ RtVoid RiHiderV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Hider(name, pList);
-    EXCEPTION_CATCH_GUARD("Hider");
+    g_context->api.Hider(name, pList);
+    EXCEPTION_CATCH_GUARD("Hider")
 }
-
 
 extern "C"
 RtVoid RiColorSamples(RtInt N, RtFloat nRGB_in[], RtFloat RGBn_in[])
@@ -546,19 +698,17 @@ RtVoid RiColorSamples(RtInt N, RtFloat nRGB_in[], RtFloat RGBn_in[])
     EXCEPTION_TRY_GUARD
     Ri::FloatArray nRGB(nRGB_in, 3*N);
     Ri::FloatArray RGBn(RGBn_in, size(nRGB));
-    return g_context->ColorSamples(nRGB, RGBn);
-    EXCEPTION_CATCH_GUARD("ColorSamples");
+    g_context->api.ColorSamples(nRGB, RGBn);
+    EXCEPTION_CATCH_GUARD("ColorSamples")
 }
-
 
 extern "C"
 RtVoid RiRelativeDetail(RtFloat relativedetail)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->RelativeDetail(relativedetail);
-    EXCEPTION_CATCH_GUARD("RelativeDetail");
+    g_context->api.RelativeDetail(relativedetail);
+    EXCEPTION_CATCH_GUARD("RelativeDetail")
 }
-
 
 extern "C"
 RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -566,90 +716,51 @@ RtVoid RiOptionV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Option(name, pList);
-    EXCEPTION_CATCH_GUARD("Option");
+    g_context->api.Option(name, pList);
+    EXCEPTION_CATCH_GUARD("Option")
 }
-
 
 extern "C"
 RtVoid RiAttributeBegin()
 {
     EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->AttributeBegin();
-    EXCEPTION_CATCH_GUARD("AttributeBegin");
+    g_context->pushAttributes();
+    g_context->api.AttributeBegin();
+    EXCEPTION_CATCH_GUARD("AttributeBegin")
 }
-
 
 extern "C"
 RtVoid RiAttributeEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->AttributeEnd();
-    EXCEPTION_CATCH_GUARD("AttributeEnd");
+    g_context->popAttributes();
+    g_context->api.AttributeEnd();
+    EXCEPTION_CATCH_GUARD("AttributeEnd")
 }
-
 
 extern "C"
 RtVoid RiColor(RtColor Cq)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Color(Cq);
-    EXCEPTION_CATCH_GUARD("Color");
+    g_context->api.Color(Cq);
+    EXCEPTION_CATCH_GUARD("Color")
 }
-
 
 extern "C"
 RtVoid RiOpacity(RtColor Os)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Opacity(Os);
-    EXCEPTION_CATCH_GUARD("Opacity");
+    g_context->api.Opacity(Os);
+    EXCEPTION_CATCH_GUARD("Opacity")
 }
-
 
 extern "C"
 RtVoid RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
-    EXCEPTION_CATCH_GUARD("TextureCoordinates");
+    g_context->api.TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
+    EXCEPTION_CATCH_GUARD("TextureCoordinates")
 }
-
-
-extern "C"
-RtLightHandle RiLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
-{
-    EXCEPTION_TRY_GUARD
-    IClassCounts iclassCounts(1,1,1,1,1);
-    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->LightSource(name, pList);
-    EXCEPTION_CATCH_GUARD("LightSource");
-    return 0;
-}
-
-
-extern "C"
-RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
-{
-    EXCEPTION_TRY_GUARD
-    IClassCounts iclassCounts(1,1,1,1,1);
-    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->AreaLightSource(name, pList);
-    EXCEPTION_CATCH_GUARD("AreaLightSource");
-    return 0;
-}
-
-
-extern "C"
-RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff)
-{
-    EXCEPTION_TRY_GUARD
-    return g_context->Illuminate(light, onoff);
-    EXCEPTION_CATCH_GUARD("Illuminate");
-}
-
 
 extern "C"
 RtVoid RiSurfaceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -657,10 +768,9 @@ RtVoid RiSurfaceV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Surface(name, pList);
-    EXCEPTION_CATCH_GUARD("Surface");
+    g_context->api.Surface(name, pList);
+    EXCEPTION_CATCH_GUARD("Surface")
 }
-
 
 extern "C"
 RtVoid RiDisplacementV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -668,10 +778,9 @@ RtVoid RiDisplacementV(RtToken name, RtInt count, RtToken tokens[], RtPointer va
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Displacement(name, pList);
-    EXCEPTION_CATCH_GUARD("Displacement");
+    g_context->api.Displacement(name, pList);
+    EXCEPTION_CATCH_GUARD("Displacement")
 }
-
 
 extern "C"
 RtVoid RiAtmosphereV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -679,10 +788,9 @@ RtVoid RiAtmosphereV(RtToken name, RtInt count, RtToken tokens[], RtPointer valu
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Atmosphere(name, pList);
-    EXCEPTION_CATCH_GUARD("Atmosphere");
+    g_context->api.Atmosphere(name, pList);
+    EXCEPTION_CATCH_GUARD("Atmosphere")
 }
-
 
 extern "C"
 RtVoid RiInteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -690,10 +798,9 @@ RtVoid RiInteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Interior(name, pList);
-    EXCEPTION_CATCH_GUARD("Interior");
+    g_context->api.Interior(name, pList);
+    EXCEPTION_CATCH_GUARD("Interior")
 }
-
 
 extern "C"
 RtVoid RiExteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -701,10 +808,9 @@ RtVoid RiExteriorV(RtToken name, RtInt count, RtToken tokens[], RtPointer values
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Exterior(name, pList);
-    EXCEPTION_CATCH_GUARD("Exterior");
+    g_context->api.Exterior(name, pList);
+    EXCEPTION_CATCH_GUARD("Exterior")
 }
-
 
 extern "C"
 RtVoid RiShaderLayerV(RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[])
@@ -712,217 +818,193 @@ RtVoid RiShaderLayerV(RtToken type, RtToken name, RtToken layername, RtInt count
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->ShaderLayer(type, name, layername, pList);
-    EXCEPTION_CATCH_GUARD("ShaderLayer");
+    g_context->api.ShaderLayer(type, name, layername, pList);
+    EXCEPTION_CATCH_GUARD("ShaderLayer")
 }
-
 
 extern "C"
 RtVoid RiConnectShaderLayers(RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
-    EXCEPTION_CATCH_GUARD("ConnectShaderLayers");
+    g_context->api.ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
+    EXCEPTION_CATCH_GUARD("ConnectShaderLayers")
 }
-
 
 extern "C"
 RtVoid RiShadingRate(RtFloat size)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ShadingRate(size);
-    EXCEPTION_CATCH_GUARD("ShadingRate");
+    g_context->api.ShadingRate(size);
+    EXCEPTION_CATCH_GUARD("ShadingRate")
 }
-
 
 extern "C"
 RtVoid RiShadingInterpolation(RtToken type)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ShadingInterpolation(type);
-    EXCEPTION_CATCH_GUARD("ShadingInterpolation");
+    g_context->api.ShadingInterpolation(type);
+    EXCEPTION_CATCH_GUARD("ShadingInterpolation")
 }
-
 
 extern "C"
 RtVoid RiMatte(RtBoolean onoff)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Matte(onoff);
-    EXCEPTION_CATCH_GUARD("Matte");
+    g_context->api.Matte(onoff);
+    EXCEPTION_CATCH_GUARD("Matte")
 }
-
 
 extern "C"
 RtVoid RiBound(RtBound bound)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Bound(bound);
-    EXCEPTION_CATCH_GUARD("Bound");
+    g_context->api.Bound(bound);
+    EXCEPTION_CATCH_GUARD("Bound")
 }
-
 
 extern "C"
 RtVoid RiDetail(RtBound bound)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Detail(bound);
-    EXCEPTION_CATCH_GUARD("Detail");
+    g_context->api.Detail(bound);
+    EXCEPTION_CATCH_GUARD("Detail")
 }
-
 
 extern "C"
 RtVoid RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->DetailRange(offlow, onlow, onhigh, offhigh);
-    EXCEPTION_CATCH_GUARD("DetailRange");
+    g_context->api.DetailRange(offlow, onlow, onhigh, offhigh);
+    EXCEPTION_CATCH_GUARD("DetailRange")
 }
-
 
 extern "C"
 RtVoid RiGeometricApproximation(RtToken type, RtFloat value)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->GeometricApproximation(type, value);
-    EXCEPTION_CATCH_GUARD("GeometricApproximation");
+    g_context->api.GeometricApproximation(type, value);
+    EXCEPTION_CATCH_GUARD("GeometricApproximation")
 }
-
 
 extern "C"
 RtVoid RiOrientation(RtToken orientation)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Orientation(orientation);
-    EXCEPTION_CATCH_GUARD("Orientation");
+    g_context->api.Orientation(orientation);
+    EXCEPTION_CATCH_GUARD("Orientation")
 }
-
 
 extern "C"
 RtVoid RiReverseOrientation()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ReverseOrientation();
-    EXCEPTION_CATCH_GUARD("ReverseOrientation");
+    g_context->api.ReverseOrientation();
+    EXCEPTION_CATCH_GUARD("ReverseOrientation")
 }
-
 
 extern "C"
 RtVoid RiSides(RtInt nsides)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Sides(nsides);
-    EXCEPTION_CATCH_GUARD("Sides");
+    g_context->api.Sides(nsides);
+    EXCEPTION_CATCH_GUARD("Sides")
 }
-
 
 extern "C"
 RtVoid RiIdentity()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Identity();
-    EXCEPTION_CATCH_GUARD("Identity");
+    g_context->api.Identity();
+    EXCEPTION_CATCH_GUARD("Identity")
 }
-
 
 extern "C"
 RtVoid RiTransform(RtMatrix transform)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Transform(transform);
-    EXCEPTION_CATCH_GUARD("Transform");
+    g_context->api.Transform(transform);
+    EXCEPTION_CATCH_GUARD("Transform")
 }
-
 
 extern "C"
 RtVoid RiConcatTransform(RtMatrix transform)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ConcatTransform(transform);
-    EXCEPTION_CATCH_GUARD("ConcatTransform");
+    g_context->api.ConcatTransform(transform);
+    EXCEPTION_CATCH_GUARD("ConcatTransform")
 }
-
 
 extern "C"
 RtVoid RiPerspective(RtFloat fov)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Perspective(fov);
-    EXCEPTION_CATCH_GUARD("Perspective");
+    g_context->api.Perspective(fov);
+    EXCEPTION_CATCH_GUARD("Perspective")
 }
-
 
 extern "C"
 RtVoid RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Translate(dx, dy, dz);
-    EXCEPTION_CATCH_GUARD("Translate");
+    g_context->api.Translate(dx, dy, dz);
+    EXCEPTION_CATCH_GUARD("Translate")
 }
-
 
 extern "C"
 RtVoid RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Rotate(angle, dx, dy, dz);
-    EXCEPTION_CATCH_GUARD("Rotate");
+    g_context->api.Rotate(angle, dx, dy, dz);
+    EXCEPTION_CATCH_GUARD("Rotate")
 }
-
 
 extern "C"
 RtVoid RiScale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Scale(sx, sy, sz);
-    EXCEPTION_CATCH_GUARD("Scale");
+    g_context->api.Scale(sx, sy, sz);
+    EXCEPTION_CATCH_GUARD("Scale")
 }
-
 
 extern "C"
 RtVoid RiSkew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
-    EXCEPTION_CATCH_GUARD("Skew");
+    g_context->api.Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
+    EXCEPTION_CATCH_GUARD("Skew")
 }
-
 
 extern "C"
 RtVoid RiCoordinateSystem(RtToken space)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->CoordinateSystem(space);
-    EXCEPTION_CATCH_GUARD("CoordinateSystem");
+    g_context->api.CoordinateSystem(space);
+    EXCEPTION_CATCH_GUARD("CoordinateSystem")
 }
-
 
 extern "C"
 RtVoid RiCoordSysTransform(RtToken space)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->CoordSysTransform(space);
-    EXCEPTION_CATCH_GUARD("CoordSysTransform");
+    g_context->api.CoordSysTransform(space);
+    EXCEPTION_CATCH_GUARD("CoordSysTransform")
 }
-
 
 extern "C"
 RtVoid RiTransformBegin()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->TransformBegin();
-    EXCEPTION_CATCH_GUARD("TransformBegin");
+    g_context->api.TransformBegin();
+    EXCEPTION_CATCH_GUARD("TransformBegin")
 }
-
 
 extern "C"
 RtVoid RiTransformEnd()
 {
     EXCEPTION_TRY_GUARD
-    return g_context->TransformEnd();
-    EXCEPTION_CATCH_GUARD("TransformEnd");
+    g_context->api.TransformEnd();
+    EXCEPTION_CATCH_GUARD("TransformEnd")
 }
-
 
 extern "C"
 RtVoid RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
@@ -930,30 +1012,27 @@ RtVoid RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], 
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Resource(handle, type, pList);
-    EXCEPTION_CATCH_GUARD("Resource");
+    g_context->api.Resource(handle, type, pList);
+    EXCEPTION_CATCH_GUARD("Resource")
 }
-
 
 extern "C"
 RtVoid RiResourceBegin()
 {
     EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->ResourceBegin();
-    EXCEPTION_CATCH_GUARD("ResourceBegin");
+    g_context->pushAttributes();
+    g_context->api.ResourceBegin();
+    EXCEPTION_CATCH_GUARD("ResourceBegin")
 }
-
 
 extern "C"
 RtVoid RiResourceEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->ResourceEnd();
-    EXCEPTION_CATCH_GUARD("ResourceEnd");
+    g_context->popAttributes();
+    g_context->api.ResourceEnd();
+    EXCEPTION_CATCH_GUARD("ResourceEnd")
 }
-
 
 extern "C"
 RtVoid RiAttributeV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
@@ -961,10 +1040,9 @@ RtVoid RiAttributeV(RtToken name, RtInt count, RtToken tokens[], RtPointer value
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Attribute(name, pList);
-    EXCEPTION_CATCH_GUARD("Attribute");
+    g_context->api.Attribute(name, pList);
+    EXCEPTION_CATCH_GUARD("Attribute")
 }
-
 
 extern "C"
 RtVoid RiPolygonV(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[])
@@ -976,10 +1054,9 @@ RtVoid RiPolygonV(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer valu
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Polygon(pList);
-    EXCEPTION_CATCH_GUARD("Polygon");
+    g_context->api.Polygon(pList);
+    EXCEPTION_CATCH_GUARD("Polygon")
 }
-
 
 extern "C"
 RtVoid RiGeneralPolygonV(RtInt nloops, RtInt nverts_in[], RtInt count, RtToken tokens[], RtPointer values[])
@@ -992,10 +1069,9 @@ RtVoid RiGeneralPolygonV(RtInt nloops, RtInt nverts_in[], RtInt count, RtToken t
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->GeneralPolygon(nverts, pList);
-    EXCEPTION_CATCH_GUARD("GeneralPolygon");
+    g_context->api.GeneralPolygon(nverts, pList);
+    EXCEPTION_CATCH_GUARD("GeneralPolygon")
 }
-
 
 extern "C"
 RtVoid RiPointsPolygonsV(RtInt npolys, RtInt nverts_in[], RtInt verts_in[], RtInt count, RtToken tokens[], RtPointer values[])
@@ -1010,10 +1086,9 @@ RtVoid RiPointsPolygonsV(RtInt npolys, RtInt nverts_in[], RtInt verts_in[], RtIn
     iclassCounts.facevarying = sum(nverts);
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->PointsPolygons(nverts, verts, pList);
-    EXCEPTION_CATCH_GUARD("PointsPolygons");
+    g_context->api.PointsPolygons(nverts, verts, pList);
+    EXCEPTION_CATCH_GUARD("PointsPolygons")
 }
-
 
 extern "C"
 RtVoid RiPointsGeneralPolygonsV(RtInt npolys, RtInt nloops_in[], RtInt nverts_in[], RtInt verts_in[], RtInt count, RtToken tokens[], RtPointer values[])
@@ -1029,20 +1104,18 @@ RtVoid RiPointsGeneralPolygonsV(RtInt npolys, RtInt nloops_in[], RtInt nverts_in
     iclassCounts.facevarying = sum(nverts);
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->PointsGeneralPolygons(nloops, nverts, verts, pList);
-    EXCEPTION_CATCH_GUARD("PointsGeneralPolygons");
+    g_context->api.PointsGeneralPolygons(nloops, nverts, verts, pList);
+    EXCEPTION_CATCH_GUARD("PointsGeneralPolygons")
 }
-
 
 extern "C"
 RtVoid RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 {
     EXCEPTION_TRY_GUARD
-    AttrState& attrs = g_attrStack->top(); attrs.ustep = ustep; attrs.vstep = vstep;
-    return g_context->Basis(ubasis, ustep, vbasis, vstep);
-    EXCEPTION_CATCH_GUARD("Basis");
+    AttrState& attrs = g_context->attrStack.top(); attrs.ustep = ustep; attrs.vstep = vstep;
+    g_context->api.Basis(ubasis, ustep, vbasis, vstep);
+    EXCEPTION_CATCH_GUARD("Basis")
 }
-
 
 extern "C"
 RtVoid RiPatchV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1054,22 +1127,20 @@ RtVoid RiPatchV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Patch(type, pList);
-    EXCEPTION_CATCH_GUARD("Patch");
+    g_context->api.Patch(type, pList);
+    EXCEPTION_CATCH_GUARD("Patch")
 }
-
 
 extern "C"
 RtVoid RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[])
 {
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_attrStack->top().ustep, g_attrStack->top().vstep);
+    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, g_context->attrStack.top().ustep, g_context->attrStack.top().vstep);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->PatchMesh(type, nu, uwrap, nv, vwrap, pList);
-    EXCEPTION_CATCH_GUARD("PatchMesh");
+    g_context->api.PatchMesh(type, nu, uwrap, nv, vwrap, pList);
+    EXCEPTION_CATCH_GUARD("PatchMesh")
 }
-
 
 extern "C"
 RtVoid RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot_in[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot_in[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1084,10 +1155,9 @@ RtVoid RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot_in[], RtFloat umin, RtFl
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
-    EXCEPTION_CATCH_GUARD("NuPatch");
+    g_context->api.NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
+    EXCEPTION_CATCH_GUARD("NuPatch")
 }
-
 
 extern "C"
 RtVoid RiTrimCurve(RtInt nloops, RtInt ncurves_in[], RtInt order_in[], RtFloat knot_in[], RtFloat min_in[], RtFloat max_in[], RtInt n_in[], RtFloat u_in[], RtFloat v_in[], RtFloat w_in[])
@@ -1102,10 +1172,9 @@ RtVoid RiTrimCurve(RtInt nloops, RtInt ncurves_in[], RtInt order_in[], RtFloat k
     Ri::FloatArray u(u_in, sum(n));
     Ri::FloatArray v(v_in, size(u));
     Ri::FloatArray w(w_in, size(u));
-    return g_context->TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
-    EXCEPTION_CATCH_GUARD("TrimCurve");
+    g_context->api.TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
+    EXCEPTION_CATCH_GUARD("TrimCurve")
 }
-
 
 extern "C"
 RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices_in[], RtInt vertices_in[], RtInt ntags, RtToken tags_in[], RtInt nargs_in[], RtInt intargs_in[], RtFloat floatargs_in[], RtInt count, RtToken tokens[], RtPointer values[])
@@ -1124,10 +1193,9 @@ RtVoid RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices_in[], Rt
     iclassCounts.facevarying = sum(nvertices);
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
-    EXCEPTION_CATCH_GUARD("SubdivisionMesh");
+    g_context->api.SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
+    EXCEPTION_CATCH_GUARD("SubdivisionMesh")
 }
-
 
 extern "C"
 RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1139,10 +1207,9 @@ RtVoid RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, R
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Sphere(radius, zmin, zmax, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Sphere");
+    g_context->api.Sphere(radius, zmin, zmax, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Sphere")
 }
-
 
 extern "C"
 RtVoid RiConeV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1154,10 +1221,9 @@ RtVoid RiConeV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, Rt
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Cone(height, radius, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Cone");
+    g_context->api.Cone(height, radius, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Cone")
 }
-
 
 extern "C"
 RtVoid RiCylinderV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1169,10 +1235,9 @@ RtVoid RiCylinderV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Cylinder(radius, zmin, zmax, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Cylinder");
+    g_context->api.Cylinder(radius, zmin, zmax, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Cylinder")
 }
-
 
 extern "C"
 RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1184,10 +1249,9 @@ RtVoid RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt co
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Hyperboloid(point1, point2, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Hyperboloid");
+    g_context->api.Hyperboloid(point1, point2, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Hyperboloid")
 }
-
 
 extern "C"
 RtVoid RiParaboloidV(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1199,10 +1263,9 @@ RtVoid RiParaboloidV(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Paraboloid(rmax, zmin, zmax, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Paraboloid");
+    g_context->api.Paraboloid(rmax, zmin, zmax, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Paraboloid")
 }
-
 
 extern "C"
 RtVoid RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1214,10 +1277,9 @@ RtVoid RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, Rt
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Disk(height, radius, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Disk");
+    g_context->api.Disk(height, radius, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Disk")
 }
-
 
 extern "C"
 RtVoid RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1229,10 +1291,9 @@ RtVoid RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
-    EXCEPTION_CATCH_GUARD("Torus");
+    g_context->api.Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
+    EXCEPTION_CATCH_GUARD("Torus")
 }
-
 
 extern "C"
 RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1244,10 +1305,9 @@ RtVoid RiPointsV(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Points(pList);
-    EXCEPTION_CATCH_GUARD("Points");
+    g_context->api.Points(pList);
+    EXCEPTION_CATCH_GUARD("Points")
 }
-
 
 extern "C"
 RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices_in[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1255,12 +1315,11 @@ RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices_in[], RtToken wrap
     EXCEPTION_TRY_GUARD
     Ri::IntArray nvertices(nvertices_in, ncurves);
     IClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_attrStack->top().vstep);
+    iclassCounts = curvesIClassCounts(type, nvertices, wrap, g_context->attrStack.top().vstep);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Curves(type, nvertices, wrap, pList);
-    EXCEPTION_CATCH_GUARD("Curves");
+    g_context->api.Curves(type, nvertices, wrap, pList);
+    EXCEPTION_CATCH_GUARD("Curves")
 }
-
 
 extern "C"
 RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code_in[], RtInt nfloats, RtFloat floats_in[], RtInt nstrings, RtToken strings_in[], RtInt count, RtToken tokens[], RtPointer values[])
@@ -1275,19 +1334,17 @@ RtVoid RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code_in[], RtInt nfloats, RtFlo
     iclassCounts.facevarying = iclassCounts.varying;
     iclassCounts.facevertex = iclassCounts.facevarying;
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Blobby(nleaf, code, floats, strings, pList);
-    EXCEPTION_CATCH_GUARD("Blobby");
+    g_context->api.Blobby(nleaf, code, floats, strings, pList);
+    EXCEPTION_CATCH_GUARD("Blobby")
 }
-
 
 extern "C"
 RtVoid RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->Procedural(data, bound, refineproc, freeproc);
-    EXCEPTION_CATCH_GUARD("Procedural");
+    g_context->api.Procedural(data, bound, refineproc, freeproc);
+    EXCEPTION_CATCH_GUARD("Procedural")
 }
-
 
 extern "C"
 RtVoid RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1296,81 +1353,55 @@ RtVoid RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values
     IClassCounts iclassCounts(1,1,1,1,1);
     
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->Geometry(type, pList);
-    EXCEPTION_CATCH_GUARD("Geometry");
+    g_context->api.Geometry(type, pList);
+    EXCEPTION_CATCH_GUARD("Geometry")
 }
-
 
 extern "C"
 RtVoid RiSolidBegin(RtToken type)
 {
     EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->SolidBegin(type);
-    EXCEPTION_CATCH_GUARD("SolidBegin");
+    g_context->pushAttributes();
+    g_context->api.SolidBegin(type);
+    EXCEPTION_CATCH_GUARD("SolidBegin")
 }
-
 
 extern "C"
 RtVoid RiSolidEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->SolidEnd();
-    EXCEPTION_CATCH_GUARD("SolidEnd");
+    g_context->popAttributes();
+    g_context->api.SolidEnd();
+    EXCEPTION_CATCH_GUARD("SolidEnd")
 }
-
-
-extern "C"
-RtObjectHandle RiObjectBegin()
-{
-    EXCEPTION_TRY_GUARD
-    pushAttributes();
-    return g_context->ObjectBegin();
-    EXCEPTION_CATCH_GUARD("ObjectBegin");
-    return 0;
-}
-
 
 extern "C"
 RtVoid RiObjectEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->ObjectEnd();
-    EXCEPTION_CATCH_GUARD("ObjectEnd");
+    g_context->popAttributes();
+    g_context->api.ObjectEnd();
+    EXCEPTION_CATCH_GUARD("ObjectEnd")
 }
-
-
-extern "C"
-RtVoid RiObjectInstance(RtObjectHandle handle)
-{
-    EXCEPTION_TRY_GUARD
-    return g_context->ObjectInstance(handle);
-    EXCEPTION_CATCH_GUARD("ObjectInstance");
-}
-
 
 extern "C"
 RtVoid RiMotionBeginV(RtInt N, RtFloat times_in[])
 {
     EXCEPTION_TRY_GUARD
     Ri::FloatArray times(times_in, N);
-    pushAttributes();
-    return g_context->MotionBegin(times);
-    EXCEPTION_CATCH_GUARD("MotionBegin");
+    g_context->pushAttributes();
+    g_context->api.MotionBegin(times);
+    EXCEPTION_CATCH_GUARD("MotionBegin")
 }
-
 
 extern "C"
 RtVoid RiMotionEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->MotionEnd();
-    EXCEPTION_CATCH_GUARD("MotionEnd");
+    g_context->popAttributes();
+    g_context->api.MotionEnd();
+    EXCEPTION_CATCH_GUARD("MotionEnd")
 }
-
 
 extern "C"
 RtVoid RiMakeTextureV(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1378,10 +1409,9 @@ RtVoid RiMakeTextureV(RtString imagefile, RtString texturefile, RtToken swrap, R
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
-    EXCEPTION_CATCH_GUARD("MakeTexture");
+    g_context->api.MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
+    EXCEPTION_CATCH_GUARD("MakeTexture")
 }
-
 
 extern "C"
 RtVoid RiMakeLatLongEnvironmentV(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1389,10 +1419,9 @@ RtVoid RiMakeLatLongEnvironmentV(RtString imagefile, RtString reflfile, RtFilter
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
-    EXCEPTION_CATCH_GUARD("MakeLatLongEnvironment");
+    g_context->api.MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
+    EXCEPTION_CATCH_GUARD("MakeLatLongEnvironment")
 }
-
 
 extern "C"
 RtVoid RiMakeCubeFaceEnvironmentV(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1400,10 +1429,9 @@ RtVoid RiMakeCubeFaceEnvironmentV(RtString px, RtString nx, RtString py, RtStrin
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
-    EXCEPTION_CATCH_GUARD("MakeCubeFaceEnvironment");
+    g_context->api.MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
+    EXCEPTION_CATCH_GUARD("MakeCubeFaceEnvironment")
 }
-
 
 extern "C"
 RtVoid RiMakeShadowV(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1411,10 +1439,9 @@ RtVoid RiMakeShadowV(RtString picfile, RtString shadowfile, RtInt count, RtToken
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->MakeShadow(picfile, shadowfile, pList);
-    EXCEPTION_CATCH_GUARD("MakeShadow");
+    g_context->api.MakeShadow(picfile, shadowfile, pList);
+    EXCEPTION_CATCH_GUARD("MakeShadow")
 }
-
 
 extern "C"
 RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles_in[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1423,19 +1450,17 @@ RtVoid RiMakeOcclusionV(RtInt npics, RtString picfiles_in[], RtString shadowfile
     Ri::StringArray picfiles(picfiles_in, npics);
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->MakeOcclusion(picfiles, shadowfile, pList);
-    EXCEPTION_CATCH_GUARD("MakeOcclusion");
+    g_context->api.MakeOcclusion(picfiles, shadowfile, pList);
+    EXCEPTION_CATCH_GUARD("MakeOcclusion")
 }
-
 
 extern "C"
 RtVoid RiErrorHandler(RtErrorFunc handler)
 {
     EXCEPTION_TRY_GUARD
-    return g_context->ErrorHandler(handler);
-    EXCEPTION_CATCH_GUARD("ErrorHandler");
+    g_context->api.ErrorHandler(handler);
+    EXCEPTION_CATCH_GUARD("ErrorHandler")
 }
-
 
 extern "C"
 RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count, RtToken tokens[], RtPointer values[])
@@ -1443,33 +1468,18 @@ RtVoid RiReadArchiveV(RtToken name, RtArchiveCallback callback, RtInt count, RtT
     EXCEPTION_TRY_GUARD
     IClassCounts iclassCounts(1,1,1,1,1);
     Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    return g_context->ReadArchive(name, callback, pList);
-    EXCEPTION_CATCH_GUARD("ReadArchive");
+    g_context->api.ReadArchive(name, callback, pList);
+    EXCEPTION_CATCH_GUARD("ReadArchive")
 }
-
-
-extern "C"
-RtArchiveHandle RiArchiveBeginV(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
-{
-    EXCEPTION_TRY_GUARD
-    IClassCounts iclassCounts(1,1,1,1,1);
-    Ri::ParamList pList = buildParamList(count, tokens, values, iclassCounts);
-    pushAttributes();
-    return g_context->ArchiveBegin(name, pList);
-    EXCEPTION_CATCH_GUARD("ArchiveBegin");
-    return 0;
-}
-
 
 extern "C"
 RtVoid RiArchiveEnd()
 {
     EXCEPTION_TRY_GUARD
-    popAttributes();
-    return g_context->ArchiveEnd();
-    EXCEPTION_CATCH_GUARD("ArchiveEnd");
+    g_context->popAttributes();
+    g_context->api.ArchiveEnd();
+    EXCEPTION_CATCH_GUARD("ArchiveEnd")
 }
-
 ///[[[end]]]
 // End main generated code
 //-----------------------------------------------------------------------------
@@ -1512,6 +1522,12 @@ void buildParamList(va_list args, RtInt& count,
 
 } // anon. namespace
 
+#define COLLECT_VARARGS(lastNamedArg)                   \
+    RtInt count; RtToken* tokens; RtPointer* values;    \
+    va_list args;                                       \
+    va_start(args, lastNamedArg);                       \
+    buildParamList(args, count, tokens, values);        \
+    va_end(args)
 
 /*
 --------------------------------------------------------------------------------
@@ -1529,20 +1545,14 @@ varargsProcTemplate = '''
 extern "C"
 $returnType ${procName}($formals, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, ${args[-1].findtext('Name')});
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(${args[-1].findtext('Name')});
     return ${procName}V($callArgs, count, tokens, values);
 }
-
 '''
 
 for proc in riXml.findall('Procedures/Procedure'):
     if proc.findall('Rib') and proc.findall('Arguments/ParamList'):
-        args = proc.findall('Arguments/Argument')
+        args = cArgs(proc)
         formals = ', '.join([formalArgC(arg) for arg in args])
         callArgs = ', '.join([arg.findtext('Name') for arg in args])
         returnType = proc.findtext('ReturnType')
@@ -1555,535 +1565,289 @@ for proc in riXml.findall('Procedures/Procedure'):
 extern "C"
 RtVoid RiProjection(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiProjectionV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiImager(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiImagerV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiDisplay(RtToken name, RtToken type, RtToken mode, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, mode);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(mode);
     return RiDisplayV(name, type, mode, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiHider(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiHiderV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiOption(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiOptionV(name, count, tokens, values);
 }
 
-
 extern "C"
-RtLightHandle RiLightSource(RtToken name, ...)
+RtLightHandle RiLightSource(RtToken shadername, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
-    return RiLightSourceV(name, count, tokens, values);
+    COLLECT_VARARGS(shadername);
+    return RiLightSourceV(shadername, count, tokens, values);
 }
 
-
 extern "C"
-RtLightHandle RiAreaLightSource(RtToken name, ...)
+RtLightHandle RiAreaLightSource(RtToken shadername, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
-    return RiAreaLightSourceV(name, count, tokens, values);
+    COLLECT_VARARGS(shadername);
+    return RiAreaLightSourceV(shadername, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiSurface(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiSurfaceV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiDisplacement(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiDisplacementV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiAtmosphere(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiAtmosphereV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiInterior(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiInteriorV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiExterior(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiExteriorV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiShaderLayer(RtToken type, RtToken name, RtToken layername, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, layername);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(layername);
     return RiShaderLayerV(type, name, layername, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiResource(RtToken handle, RtToken type, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, type);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(type);
     return RiResourceV(handle, type, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiAttribute(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiAttributeV(name, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPolygon(RtInt nvertices, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, nvertices);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(nvertices);
     return RiPolygonV(nvertices, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiGeneralPolygon(RtInt nloops, RtInt nverts[], ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, nverts);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(nverts);
     return RiGeneralPolygonV(nloops, nverts, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPointsPolygons(RtInt npolys, RtInt nverts[], RtInt verts[], ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, verts);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(verts);
     return RiPointsPolygonsV(npolys, nverts, verts, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPointsGeneralPolygons(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, verts);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(verts);
     return RiPointsGeneralPolygonsV(npolys, nloops, nverts, verts, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPatch(RtToken type, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, type);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(type);
     return RiPatchV(type, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPatchMesh(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, vwrap);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(vwrap);
     return RiPatchMeshV(type, nu, uwrap, nv, vwrap, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiNuPatch(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, vmax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(vmax);
     return RiNuPatchV(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiSubdivisionMesh(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, floatargs);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(floatargs);
     return RiSubdivisionMeshV(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiSphereV(radius, zmin, zmax, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiCone(RtFloat height, RtFloat radius, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiConeV(height, radius, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiCylinder(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiCylinderV(radius, zmin, zmax, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiHyperboloid(RtPoint point1, RtPoint point2, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiHyperboloidV(point1, point2, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiParaboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiParaboloidV(rmax, zmin, zmax, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiDisk(RtFloat height, RtFloat radius, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiDiskV(height, radius, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiTorus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, thetamax);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(thetamax);
     return RiTorusV(majorrad, minorrad, phimin, phimax, thetamax, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiPoints(RtInt npoints, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, npoints);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(npoints);
     return RiPointsV(npoints, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, wrap);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(wrap);
     return RiCurvesV(type, ncurves, nvertices, wrap, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiBlobby(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nfloats, RtFloat floats[], RtInt nstrings, RtToken strings[], ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, strings);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(strings);
     return RiBlobbyV(nleaf, ncode, code, nfloats, floats, nstrings, strings, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiGeometry(RtToken type, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, type);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(type);
     return RiGeometryV(type, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiMakeTexture(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, twidth);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(twidth);
     return RiMakeTextureV(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiMakeLatLongEnvironment(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, twidth);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(twidth);
     return RiMakeLatLongEnvironmentV(imagefile, reflfile, filterfunc, swidth, twidth, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiMakeCubeFaceEnvironment(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, twidth);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(twidth);
     return RiMakeCubeFaceEnvironmentV(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiMakeShadow(RtString picfile, RtString shadowfile, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, shadowfile);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(shadowfile);
     return RiMakeShadowV(picfile, shadowfile, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiMakeOcclusion(RtInt npics, RtString picfiles[], RtString shadowfile, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, shadowfile);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(shadowfile);
     return RiMakeOcclusionV(npics, picfiles, shadowfile, count, tokens, values);
 }
-
 
 extern "C"
 RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, callback);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(callback);
     return RiReadArchiveV(name, callback, count, tokens, values);
 }
-
 
 extern "C"
 RtArchiveHandle RiArchiveBegin(RtToken name, ...)
 {
-    RtInt count; RtToken* tokens; RtPointer* values;
-    va_list args;
-    va_start(args, name);
-    buildParamList(args, count, tokens, values);
-    va_end(args);
-
+    COLLECT_VARARGS(name);
     return RiArchiveBeginV(name, count, tokens, values);
 }
-
 ///[[[end]]]
 // End varargs generated code.
 
@@ -2136,7 +1900,7 @@ RtVoid RiArchiveRecord(RtToken type, char *format, ...)
 #		endif
 		va_end(args);
 	}
-	g_context->ArchiveRecord(type, buffer);
+	g_context->api.ArchiveRecord(type, buffer);
 
 	delete[] buffer;
 	EXCEPTION_CATCH_GUARD("ArchiveRecord")

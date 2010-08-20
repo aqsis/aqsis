@@ -43,7 +43,7 @@ struct RiToRibContext
     std::ofstream outFile;
     boost::shared_ptr<RibWriterServices> writerServices;
     /// Opaque data for RI -> RiCxx
-    boost::shared_ptr<void> riToRiCxxData;
+    void* riToRiCxxData;
 };
 
 static RiToRibContext* g_context = 0;
@@ -105,7 +105,7 @@ AQSIS_RI_SHARE RtVoid RiBegin(RtToken name)
         createRibWriter(*outStream, true, false, false, 4, ' ', ".") );
     g_context->writerServices->addFilter("validate");
     registerStdFuncs(*g_context->writerServices);
-    riToRiCxxBegin(g_context->writerServices.get(), g_context->riToRiCxxData);
+    g_context->riToRiCxxData = riToRiCxxBegin(*g_context->writerServices);
 }
 
 extern "C"
@@ -126,7 +126,7 @@ extern "C"
 AQSIS_RI_SHARE RtVoid RiContext(RtContextHandle handle)
 {
     g_context = static_cast<RiToRibContext*>(handle);
-    riToRiCxxContext(g_context->writerServices.get(), g_context->riToRiCxxData);
+    riToRiCxxContext(g_context->riToRiCxxData);
 }
 
 

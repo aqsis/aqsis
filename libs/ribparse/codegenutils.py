@@ -43,8 +43,13 @@ def wrapDecl(str, maxWidth, wrapIndent=None):
 #-------------------------------------------------------------------------------
 # Code generation functions with etree objects as arguments.
 #
-def ribArgs(argList):
-    return filter(lambda arg: not arg.findall('RibValue'), argList)
+def ribArgs(procXml):
+    return [a for a in procXml.findall('Arguments/Argument')
+            if not a.findall('RibValue')]
+
+def cArgs(procXml):
+    return [a for a in procXml.findall('Arguments/Argument')
+            if not a.findall('RibOnly')]
 
 def cName(procXml):
     if procXml.findall('CName'):
@@ -57,6 +62,8 @@ def formalArg(arg):
     name = arg.findtext('Name')
     if type is None:
         return name
+    if type == 'RtTokenOrInt':
+        type = 'RtToken'
     if type.endswith('Array'):
         return 'const %sArray& %s' % (type[2:-5], name)
     else:
@@ -73,18 +80,17 @@ def formalArgC(arg, arraySuffix=''):
         return '%s %s' % (type, name)
 
 def riCxxMethodDecl(procXml, className=None):
-    args = [formalArg(arg) for arg in ribArgs(procXml.findall('Arguments/Argument'))]
+    args = [formalArg(arg) for arg in ribArgs(procXml)]
     if procXml.findall('Arguments/ParamList'):
         args += ['const ParamList& pList']
     procName = procXml.findtext('Name')
     if className is not None:
         procName = className + '::' + procName
-    return '%s %s(%s)' % (procXml.findtext('ReturnType'), procName, ', '.join(args))
+    return 'RtVoid %s(%s)' % (procName, ', '.join(args))
 
 
 def wrapperCallArgList(procXml):
-    args = [arg.findtext('Name') for arg in
-            ribArgs(procXml.findall('Arguments/Argument'))]
+    args = [arg.findtext('Name') for arg in ribArgs(procXml)]
     if procXml.findall('Arguments/ParamList'):
         args += ['pList']
     return args

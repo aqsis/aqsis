@@ -101,7 +101,6 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface * pSurface,
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 
 #define IF_ELSE_TEST if(!m_ifOk) return;
-#define IF_ELSE_TEST0 if(!m_ifOk) return 0;
 
 //------------------------------------------------------------------------------
 /// API for the core renderer
@@ -133,7 +132,7 @@ class RiCxxCore : public Ri::Renderer
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
-        virtual RtToken Declare(RtConstString name, RtConstString declaration);
+        virtual RtVoid Declare(RtConstString name, RtConstString declaration);
         virtual RtVoid FrameBegin(RtInt number);
         virtual RtVoid FrameEnd();
         virtual RtVoid WorldBegin();
@@ -178,11 +177,11 @@ class RiCxxCore : public Ri::Renderer
         virtual RtVoid TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4);
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList);
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList);
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff);
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList);
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff);
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList);
         virtual RtVoid Displacement(RtConstToken name, const ParamList& pList);
         virtual RtVoid Atmosphere(RtConstToken name, const ParamList& pList);
@@ -281,9 +280,9 @@ class RiCxxCore : public Ri::Renderer
         virtual RtVoid Geometry(RtConstToken type, const ParamList& pList);
         virtual RtVoid SolidBegin(RtConstToken type);
         virtual RtVoid SolidEnd();
-        virtual RtObjectHandle ObjectBegin();
+        virtual RtVoid ObjectBegin(RtConstToken name);
         virtual RtVoid ObjectEnd();
-        virtual RtVoid ObjectInstance(RtObjectHandle handle);
+        virtual RtVoid ObjectInstance(RtConstToken name);
         virtual RtVoid MotionBegin(const FloatArray& times);
         virtual RtVoid MotionEnd();
         virtual RtVoid MakeTexture(RtConstString imagefile,
@@ -310,8 +309,7 @@ class RiCxxCore : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
-                            const ParamList& pList);
+        virtual RtVoid ArchiveBegin(RtConstToken name, const ParamList& pList);
         virtual RtVoid ArchiveEnd();
 		//[[[end]]]
 
@@ -356,17 +354,15 @@ RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 //----------------------------------------------------------------------
 // Declare a new variable to be recognised by the system.
 //
-RtToken RiCxxCore::Declare(RtConstString name, RtConstString declaration)
+RtVoid RiCxxCore::Declare(RtConstString name, RtConstString declaration)
 {
-	IF_ELSE_TEST0;
+	IF_ELSE_TEST;
 	CqPrimvarToken tok;
 	if(declaration)
 		tok = CqPrimvarToken(declaration, name);
 	else // declaration is allowed to be RI_NULL
 		tok = CqPrimvarToken(class_invalid, type_invalid, 0, name);
 	QGetRenderContext()->tokenDict().insert(tok);
-
-	return ( 0 );
 }
 
 
@@ -1305,17 +1301,17 @@ RtVoid RiCxxCore::TextureCoordinates(RtFloat s1, RtFloat t1,
 //----------------------------------------------------------------------
 // Create a new light source at the current transformation.
 //
-RtLightHandle RiCxxCore::LightSource(RtConstToken name, const ParamList& pList)
+RtVoid RiCxxCore::LightSource(RtConstToken shadername, RtConstToken name, const ParamList& pList)
 {
-	IF_ELSE_TEST0;
+	IF_ELSE_TEST;
 	// Find the lightsource shader.
-	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
+	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( shadername, Type_Lightsource );
 	if(!pShader)
-		return 0;
+		return;
 
 	pShader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 	CqLightsourcePtr pNew( new CqLightsource( pShader, RI_TRUE ) );
-	Lightsource_stack.push_back(pNew);
+	QGetRenderContext()->registerLight(name, pNew);
 
 	// Execute the intiialisation code here, as we now have our shader context complete.
 	pShader->PrepareDefArgs();
@@ -1335,9 +1331,7 @@ RtLightHandle RiCxxCore::LightSource(RtConstToken name, const ParamList& pList)
 
 		// Add it as a Context light as well in case we are in a context that manages it's own lights.
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
-		return ( reinterpret_cast<RtLightHandle>( pNew.get() ) );
 	}
-	return 0;
 }
 
 
@@ -1346,25 +1340,22 @@ RtLightHandle RiCxxCore::LightSource(RtConstToken name, const ParamList& pList)
 // geometric primitives until the next RiAttributeEnd, become part of this
 // area light source.
 //
-RtLightHandle RiCxxCore::AreaLightSource(RtConstToken name, const ParamList& pList)
+RtVoid RiCxxCore::AreaLightSource(RtConstToken shadername, RtConstToken name, const ParamList& pList)
 {
-	IF_ELSE_TEST0;
+	IF_ELSE_TEST;
 	Aqsis::log() << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
-	return LightSource(name, pList);
+	LightSource(shadername, name, pList);
 }
 
 
 //----------------------------------------------------------------------
 // Set the current status of the specified light source.
 //
-RtVoid RiCxxCore::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid RiCxxCore::Illuminate(RtConstToken name, RtBoolean onoff)
 {
 	IF_ELSE_TEST;
-	// Check if we are turning the light on or off.
-	if ( light == NULL ) return ;
-
-	CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
+	CqLightsourcePtr pL = QGetRenderContext()->findLight(name);
 
 	if ( onoff )
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
@@ -3241,12 +3232,11 @@ RtVoid RiCxxCore::SolidEnd()
 
 //----------------------------------------------------------------------
 // Object retention and instancing.
-RtObjectHandle RiCxxCore::ObjectBegin()
+RtVoid RiCxxCore::ObjectBegin(RtConstToken name)
 {
-	IF_ELSE_TEST0;
+	IF_ELSE_TEST;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ObjectBegin should be handled by a filter\n";
-	return 0;
 }
 RtVoid RiCxxCore::ObjectEnd()
 {
@@ -3254,7 +3244,7 @@ RtVoid RiCxxCore::ObjectEnd()
 	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ObjectEnd should be handled by a filter\n";
 }
-RtVoid RiCxxCore::ObjectInstance(RtObjectHandle handle)
+RtVoid RiCxxCore::ObjectInstance(RtConstToken name)
 {
 	IF_ELSE_TEST;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
@@ -3566,10 +3556,9 @@ RtVoid RiCxxCore::ReadArchive(RtConstToken name, RtArchiveCallback callback, con
 	m_archiveCallback = savedCallback;
 }
 
-RtArchiveHandle RiCxxCore::ArchiveBegin(RtConstToken name,
-										const ParamList& pList)
+RtVoid RiCxxCore::ArchiveBegin(RtConstToken name, const ParamList& pList)
 {
-	IF_ELSE_TEST0;
+	IF_ELSE_TEST;
 	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
 		<< "ArchiveBegin should be handled by a filter\n";
 }
@@ -4093,7 +4082,7 @@ namespace {
 struct CoreContext
 {
 	boost::shared_ptr<CoreRendererServices> apiServices;
-	boost::shared_ptr<void> riToRiCxxData;
+	void* riToRiCxxData;
 };
 }
 
@@ -4109,15 +4098,13 @@ RtVoid RiBegin(RtToken name)
 	g_context = g_validContexts.back();
 	// Create new renderer
 	g_context->apiServices.reset(new CoreRendererServices());
-	riToRiCxxBegin(g_context->apiServices.get(), g_context->riToRiCxxData);
+	g_context->riToRiCxxData = riToRiCxxBegin(*g_context->apiServices);
 	QSetRenderContext(&g_context->apiServices->renderContext());
 
 	QGetRenderContext() ->Initialise();
 	QGetRenderContext() ->BeginMainModeBlock();
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 	QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
-	// Clear the lightsources stack.
-	Lightsource_stack.clear();
 
 	SetDefaultRiOptions();
 
@@ -4134,9 +4121,6 @@ RtVoid RiBegin(RtToken name)
 RtVoid RiEnd()
 {
 	QGetRenderContext() ->EndMainModeBlock();
-
-	// Clear the lightsources stack.
-	Lightsource_stack.clear();
 
 	// Delete the renderer
 	QSetRenderContext( 0 );
@@ -4163,7 +4147,7 @@ RtVoid RiContext(RtContextHandle handle)
 		return;
 	}
 	g_context = newContext;
-	riToRiCxxContext(g_context->apiServices.get(), g_context->riToRiCxxData);
+	riToRiCxxContext(g_context->riToRiCxxData);
 	QSetRenderContext(&g_context->apiServices->renderContext());
 }
 

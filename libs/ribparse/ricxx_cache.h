@@ -67,8 +67,12 @@ class CachedRiStream
 {
     private:
         boost::ptr_vector<CachedRequest> m_requests;
+        std::string m_name;
 
     public:
+        CachedRiStream(RtConstToken name)
+            : m_name(name)
+        { }
         void push_back(CachedRequest* req)
         {
             m_requests.push_back(req);
@@ -78,6 +82,7 @@ class CachedRiStream
             for(int i = 0, iend = m_requests.size(); i < iend; ++i)
                 m_requests[i].reCall(context);
         }
+        const std::string& name() const { return m_name; }
 };
 
 
@@ -930,51 +935,55 @@ class TextureCoordinates : public CachedRequest
 class LightSource : public CachedRequest
 {
     private:
+        CachedString m_shadername;
         CachedString m_name;
         CachedParamList m_pList;
     public:
-        LightSource(RtConstToken name, const Ri::ParamList& pList)
-            : m_name(name)
+        LightSource(RtConstToken shadername, RtConstToken name, const Ri::ParamList& pList)
+            : m_shadername(shadername)
+            , m_name(name)
             , m_pList(pList)
         { }
 
         virtual void reCall(Ri::Renderer& context) const
         {
-            context.LightSource(m_name, m_pList);
+            context.LightSource(m_shadername, m_name, m_pList);
         }
 };
 
 class AreaLightSource : public CachedRequest
 {
     private:
+        CachedString m_shadername;
         CachedString m_name;
         CachedParamList m_pList;
     public:
-        AreaLightSource(RtConstToken name, const Ri::ParamList& pList)
-            : m_name(name)
+        AreaLightSource(RtConstToken shadername, RtConstToken name, const Ri::ParamList& pList)
+            : m_shadername(shadername)
+            , m_name(name)
             , m_pList(pList)
         { }
 
         virtual void reCall(Ri::Renderer& context) const
         {
-            context.AreaLightSource(m_name, m_pList);
+            context.AreaLightSource(m_shadername, m_name, m_pList);
         }
 };
 
 class Illuminate : public CachedRequest
 {
     private:
-        RtLightHandle m_light;
+        CachedString m_name;
         RtBoolean m_onoff;
     public:
-        Illuminate(RtLightHandle light, RtBoolean onoff)
-            : m_light(light)
+        Illuminate(RtConstToken name, RtBoolean onoff)
+            : m_name(name)
             , m_onoff(onoff)
         { }
 
         virtual void reCall(Ri::Renderer& context) const
         {
-            context.Illuminate(m_light, m_onoff);
+            context.Illuminate(m_name, m_onoff);
         }
 };
 
@@ -2040,13 +2049,15 @@ class SolidEnd : public CachedRequest
 class ObjectBegin : public CachedRequest
 {
     private:
+        CachedString m_name;
     public:
-        ObjectBegin()
+        ObjectBegin(RtConstToken name)
+            : m_name(name)
         { }
 
         virtual void reCall(Ri::Renderer& context) const
         {
-            context.ObjectBegin();
+            context.ObjectBegin(m_name);
         }
 };
 
@@ -2066,15 +2077,15 @@ class ObjectEnd : public CachedRequest
 class ObjectInstance : public CachedRequest
 {
     private:
-        RtObjectHandle m_handle;
+        CachedString m_name;
     public:
-        ObjectInstance(RtObjectHandle handle)
-            : m_handle(handle)
+        ObjectInstance(RtConstToken name)
+            : m_name(name)
         { }
 
         virtual void reCall(Ri::Renderer& context) const
         {
-            context.ObjectInstance(m_handle);
+            context.ObjectInstance(m_name);
         }
 };
 

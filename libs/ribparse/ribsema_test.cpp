@@ -32,6 +32,7 @@
 #include "ribsema.h"
 
 #include <cfloat>
+#include <cstdlib>
 #include <sstream>
 
 #include <boost/assign/std/vector.hpp>
@@ -328,7 +329,6 @@ class MockRenderer : public Ri::Renderer
             'Points',
             'Procedural',
             'ObjectBegin',
-            'ObjectInstance',
             'MotionBegin',
             'MakeOcclusion',
         ])
@@ -341,14 +341,11 @@ class MockRenderer : public Ri::Renderer
                     cog.outl('// %s is tested' % (procName,))
                     decl = 'virtual %s;' % (decl,)
                 else:
-                    body = ''
-                    if p.findtext('ReturnType') != 'RtVoid':
-                        body = 'return 0;'
-                    decl = 'virtual %s {%s}' % (decl,body)
+                    decl = 'virtual %s {}' % (decl,)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
         // Declare is tested
-        virtual RtToken Declare(RtConstString name, RtConstString declaration);
+        virtual RtVoid Declare(RtConstString name, RtConstString declaration);
         virtual RtVoid FrameBegin(RtInt number) {}
         virtual RtVoid FrameEnd() {}
         virtual RtVoid WorldBegin() {}
@@ -399,12 +396,12 @@ class MockRenderer : public Ri::Renderer
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4) {}
         // LightSource is tested
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList);
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList) {return 0;}
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList) {}
         // Illuminate is tested
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff);
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff);
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList) {}
         virtual RtVoid Displacement(RtConstToken name,
                             const ParamList& pList) {}
@@ -512,10 +509,9 @@ class MockRenderer : public Ri::Renderer
         virtual RtVoid SolidBegin(RtConstToken type) {}
         virtual RtVoid SolidEnd() {}
         // ObjectBegin is tested
-        virtual RtObjectHandle ObjectBegin();
+        virtual RtVoid ObjectBegin(RtConstToken name);
         virtual RtVoid ObjectEnd() {}
-        // ObjectInstance is tested
-        virtual RtVoid ObjectInstance(RtObjectHandle handle);
+        virtual RtVoid ObjectInstance(RtConstToken name) {}
         // MotionBegin is tested
         virtual RtVoid MotionBegin(const FloatArray& times);
         virtual RtVoid MotionEnd() {}
@@ -545,8 +541,8 @@ class MockRenderer : public Ri::Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList) {}
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
-                            const ParamList& pList) {return 0;}
+        virtual RtVoid ArchiveBegin(RtConstToken name,
+                            const ParamList& pList) {}
         virtual RtVoid ArchiveEnd() {}
         //[[[end]]]
 
@@ -573,7 +569,7 @@ class MockServices : public Ri::RendererServices
         CqTokenDictionary m_tokenDict;
         MockErrorHandler m_errorHandler;
 
-        friend RtToken MockRenderer::Declare(RtConstString name,
+        friend RtVoid MockRenderer::Declare(RtConstString name,
                 RtConstString declaration);
     public:
         virtual ErrorHandler& errorHandler() { return m_errorHandler; }
@@ -609,44 +605,6 @@ class MockServices : public Ri::RendererServices
 };
 
 
-// Manage mappings from object or light handles to pointers for testing.
-//
-// If we want to check that the mapping is happening correctly we need to
-// record both the RIB object id and the returned pointer.
-//
-class HandleManager
-{
-    private:
-        int m_currHandle;
-        typedef std::vector<std::pair<MockRibToken, RtPointer> > HandleMap;
-        HandleMap m_handleMap;
-
-    public:
-        HandleManager()
-            : m_currHandle(0),
-            m_handleMap()
-        { }
-
-        RtPointer insertHandle(const MockRibToken& id)
-        {
-            BOOST_CHECK(id.type() == Type_Int || id.type() == Type_String);
-            RtPointer p = reinterpret_cast<RtPointer>(++m_currHandle);
-            m_handleMap.push_back(std::make_pair(id, p));
-            return p;
-        }
-        const MockRibToken& lookup(RtPointer handle) const
-        {
-            for(HandleMap::const_iterator i = m_handleMap.begin();
-                    i < m_handleMap.end(); ++i)
-            {
-                if(handle == i->second)
-                    return i->first;
-            }
-            throw std::runtime_error("sequence id not found");
-            return m_handleMap[0].first;
-        }
-};
-
 struct Fixture;
 static Fixture* g_fixture = 0;
 
@@ -660,7 +618,6 @@ struct Fixture
     TokenVec tokens;
     RibParser parser;  //< to test.
     int checkPos;
-    HandleManager handleManager;
 
     Fixture(int checkPosOffset = 0)
         : renderer(),
@@ -687,6 +644,12 @@ struct Fixture
         tokens.push_back(MockRibToken(tok));
         return *this;
     }
+};
+
+struct StringOrInt
+{
+    const char* str;
+    StringOrInt(const char* str) : str(str) {}
 };
 
 // A checker for request parameters
@@ -717,6 +680,16 @@ struct CheckParams
         {
             BOOST_CHECK_EQUAL(g_fixture->tokens.at(g_fixture->checkPos),
                               MockRibToken(tok));
+            nextParam();
+            return *this;
+        }
+        CheckParams& operator<<(const StringOrInt tok)
+        {
+            const MockRibToken t = g_fixture->tokens.at(g_fixture->checkPos);
+            if(t.type() == Type_Int)
+                BOOST_CHECK_EQUAL(MockRibToken(std::atoi(tok.str)), t);
+            else
+                BOOST_CHECK_EQUAL(MockRibToken(tok.str), t);
             nextParam();
             return *this;
         }
@@ -763,12 +736,11 @@ BOOST_AUTO_TEST_CASE(RIB_version_test)
 }
 
 //--------------------------------------------------
-RtToken MockRenderer::Declare(RtConstString name, RtConstString declaration)
+RtVoid MockRenderer::Declare(RtConstString name, RtConstString declaration)
 {
     CheckParams() << Req("Declare") << name << declaration;
     // UGH!
     g_fixture->services.m_tokenDict.insert(CqPrimvarToken(declaration, name));
-    return 0;
 }
 BOOST_AUTO_TEST_CASE(Declare_handler_test)
 {
@@ -817,14 +789,12 @@ BOOST_AUTO_TEST_CASE(ColorSamples_handler_test)
 
 
 //--------------------------------------------------
-RtLightHandle MockRenderer::LightSource(RtConstToken name,
+RtVoid MockRenderer::LightSource(RtConstToken shadername,
+                                        RtConstToken name,
                                         const ParamList& pList)
 {
-    CheckParams() << Req("LightSource") << name;
-    RtLightHandle handle = g_fixture->handleManager.insertHandle(
-            g_fixture->tokens[g_fixture->checkPos]);
-    CheckParams() << IgnoreParam << pList;
-    return handle;
+    CheckParams() << Req("LightSource") << shadername
+        << StringOrInt(name) << pList;
 }
 BOOST_AUTO_TEST_CASE(LightSource_integer_id_test)
 {
@@ -839,11 +809,9 @@ BOOST_AUTO_TEST_CASE(LightSource_string_id_test)
 
 
 //--------------------------------------------------
-RtVoid MockRenderer::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid MockRenderer::Illuminate(RtConstToken name, RtBoolean onoff)
 {
-    CheckParams()
-        << Req("Illuminate")
-        << g_fixture->handleManager.lookup(light)
+    CheckParams() << Req("Illuminate") << StringOrInt(name)
         << static_cast<int>(onoff);
 }
 BOOST_AUTO_TEST_CASE(Illuminate_handler_test)
@@ -855,19 +823,6 @@ BOOST_AUTO_TEST_CASE(Illuminate_handler_test)
         << Req("Illuminate")  << 11 << 1
         << Req("Illuminate")  << 10 << 0
         << Req("Illuminate")  << "handleName" << 0;
-}
-BOOST_AUTO_TEST_CASE(Illuminate_bad_light_handle_test)
-{
-    BOOST_CHECK_THROW(
-        Fixture() << Req("Illuminate") << 10 << 1,
-        MockRendererError
-    );
-    //Parse error at test_stream: 1 (col 12) while reading Illuminate: undeclared light number 10
-    BOOST_CHECK_THROW(
-        Fixture() << Req("Illuminate") << "asdf" << 1,
-        MockRendererError
-    );
-    //Parse error at test_stream: 1 (col 12) while reading Illuminate: undeclared light name "asdf"
 }
 
 
@@ -977,13 +932,10 @@ BOOST_AUTO_TEST_CASE(Procedural_handler_test)
 
 
 //--------------------------------------------------
-RtObjectHandle MockRenderer::ObjectBegin()
+RtVoid MockRenderer::ObjectBegin(RtConstToken name)
 {
-    CheckParams() << Req("ObjectBegin");
-    RtObjectHandle handle = g_fixture->handleManager.insertHandle(
-            g_fixture->tokens[g_fixture->checkPos]);
-    CheckParams() << IgnoreParam;
-    return handle;
+    CheckParams() << Req("ObjectBegin")
+        << StringOrInt(name);
 }
 BOOST_AUTO_TEST_CASE(ObjectBegin_integer_id_test)
 {
@@ -997,33 +949,6 @@ BOOST_AUTO_TEST_CASE(ObjectBegin_bad_float_id_test)
 {
     BOOST_CHECK_THROW(
         Fixture() << Req("ObjectBegin") << 42.5f,
-        MockRendererError
-    );
-}
-
-
-//--------------------------------------------------
-RtVoid MockRenderer::ObjectInstance(RtObjectHandle handle)
-{
-    CheckParams() << Req("ObjectInstance")
-        << g_fixture->handleManager.lookup(handle);
-}
-BOOST_AUTO_TEST_CASE(ObjectInstance_integer_id_lookup)
-{
-    Fixture() << Req("ObjectBegin") << 42
-              << Req("ObjectBegin") << 2
-              << Req("ObjectInstance") << 2
-              << Req("ObjectInstance") << 42;
-}
-BOOST_AUTO_TEST_CASE(ObjectInstance_string_id_lookup)
-{
-    Fixture() << Req("ObjectBegin") << "a_string_handle"
-              << Req("ObjectInstance") << "a_string_handle";
-}
-BOOST_AUTO_TEST_CASE(ObjectInstance_undeclared_error_test)
-{
-    BOOST_CHECK_THROW(
-        Fixture() << Req("ObjectInstance") << 1,
         MockRendererError
     );
 }

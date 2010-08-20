@@ -89,7 +89,7 @@ class OnOffFilter : public Ri::Filter
                 decl = 'virtual %s;' % (riCxxMethodDecl(p),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
-        virtual RtToken Declare(RtConstString name, RtConstString declaration);
+        virtual RtVoid Declare(RtConstString name, RtConstString declaration);
         virtual RtVoid FrameBegin(RtInt number);
         virtual RtVoid FrameEnd();
         virtual RtVoid WorldBegin();
@@ -134,11 +134,11 @@ class OnOffFilter : public Ri::Filter
         virtual RtVoid TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4);
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList);
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList);
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff);
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList);
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff);
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList);
         virtual RtVoid Displacement(RtConstToken name, const ParamList& pList);
         virtual RtVoid Atmosphere(RtConstToken name, const ParamList& pList);
@@ -237,9 +237,9 @@ class OnOffFilter : public Ri::Filter
         virtual RtVoid Geometry(RtConstToken type, const ParamList& pList);
         virtual RtVoid SolidBegin(RtConstToken type);
         virtual RtVoid SolidEnd();
-        virtual RtObjectHandle ObjectBegin();
+        virtual RtVoid ObjectBegin(RtConstToken name);
         virtual RtVoid ObjectEnd();
-        virtual RtVoid ObjectInstance(RtObjectHandle handle);
+        virtual RtVoid ObjectInstance(RtConstToken name);
         virtual RtVoid MotionBegin(const FloatArray& times);
         virtual RtVoid MotionEnd();
         virtual RtVoid MakeTexture(RtConstString imagefile,
@@ -266,8 +266,7 @@ class OnOffFilter : public Ri::Filter
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList);
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
-                            const ParamList& pList);
+        virtual RtVoid ArchiveBegin(RtConstToken name, const ParamList& pList);
         virtual RtVoid ArchiveEnd();
         //[[[end]]]
 

@@ -85,10 +85,7 @@ methodTemplate = r'''
 $wrapDecl($riCxxMethodDecl($proc, className='OnOffFilter'), 80)
 {
     if(m_isActive)
-        return nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
-    #if $proc.findtext('ReturnType') != 'RtVoid'
-    return 0;
-    #end if
+        nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
 }
 '''
 
@@ -99,212 +96,211 @@ for proc in riXml.findall('Procedures/Procedure'):
 
 ]]]*/
 
-RtToken OnOffFilter::Declare(RtConstString name, RtConstString declaration)
+RtVoid OnOffFilter::Declare(RtConstString name, RtConstString declaration)
 {
     if(m_isActive)
-        return nextFilter().Declare(name, declaration);
-    return 0;
+        nextFilter().Declare(name, declaration);
 }
 
 RtVoid OnOffFilter::FrameBegin(RtInt number)
 {
     if(m_isActive)
-        return nextFilter().FrameBegin(number);
+        nextFilter().FrameBegin(number);
 }
 
 RtVoid OnOffFilter::FrameEnd()
 {
     if(m_isActive)
-        return nextFilter().FrameEnd();
+        nextFilter().FrameEnd();
 }
 
 RtVoid OnOffFilter::WorldBegin()
 {
     if(m_isActive)
-        return nextFilter().WorldBegin();
+        nextFilter().WorldBegin();
 }
 
 RtVoid OnOffFilter::WorldEnd()
 {
     if(m_isActive)
-        return nextFilter().WorldEnd();
+        nextFilter().WorldEnd();
 }
 
 RtVoid OnOffFilter::IfBegin(RtConstString condition)
 {
     if(m_isActive)
-        return nextFilter().IfBegin(condition);
+        nextFilter().IfBegin(condition);
 }
 
 RtVoid OnOffFilter::ElseIf(RtConstString condition)
 {
     if(m_isActive)
-        return nextFilter().ElseIf(condition);
+        nextFilter().ElseIf(condition);
 }
 
 RtVoid OnOffFilter::Else()
 {
     if(m_isActive)
-        return nextFilter().Else();
+        nextFilter().Else();
 }
 
 RtVoid OnOffFilter::IfEnd()
 {
     if(m_isActive)
-        return nextFilter().IfEnd();
+        nextFilter().IfEnd();
 }
 
 RtVoid OnOffFilter::Format(RtInt xresolution, RtInt yresolution,
                            RtFloat pixelaspectratio)
 {
     if(m_isActive)
-        return nextFilter().Format(xresolution, yresolution, pixelaspectratio);
+        nextFilter().Format(xresolution, yresolution, pixelaspectratio);
 }
 
 RtVoid OnOffFilter::FrameAspectRatio(RtFloat frameratio)
 {
     if(m_isActive)
-        return nextFilter().FrameAspectRatio(frameratio);
+        nextFilter().FrameAspectRatio(frameratio);
 }
 
 RtVoid OnOffFilter::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                  RtFloat top)
 {
     if(m_isActive)
-        return nextFilter().ScreenWindow(left, right, bottom, top);
+        nextFilter().ScreenWindow(left, right, bottom, top);
 }
 
 RtVoid OnOffFilter::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
                                RtFloat ymax)
 {
     if(m_isActive)
-        return nextFilter().CropWindow(xmin, xmax, ymin, ymax);
+        nextFilter().CropWindow(xmin, xmax, ymin, ymax);
 }
 
 RtVoid OnOffFilter::Projection(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Projection(name, pList);
+        nextFilter().Projection(name, pList);
 }
 
 RtVoid OnOffFilter::Clipping(RtFloat cnear, RtFloat cfar)
 {
     if(m_isActive)
-        return nextFilter().Clipping(cnear, cfar);
+        nextFilter().Clipping(cnear, cfar);
 }
 
 RtVoid OnOffFilter::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
                                   RtFloat ny, RtFloat nz)
 {
     if(m_isActive)
-        return nextFilter().ClippingPlane(x, y, z, nx, ny, nz);
+        nextFilter().ClippingPlane(x, y, z, nx, ny, nz);
 }
 
 RtVoid OnOffFilter::DepthOfField(RtFloat fstop, RtFloat focallength,
                                  RtFloat focaldistance)
 {
     if(m_isActive)
-        return nextFilter().DepthOfField(fstop, focallength, focaldistance);
+        nextFilter().DepthOfField(fstop, focallength, focaldistance);
 }
 
 RtVoid OnOffFilter::Shutter(RtFloat opentime, RtFloat closetime)
 {
     if(m_isActive)
-        return nextFilter().Shutter(opentime, closetime);
+        nextFilter().Shutter(opentime, closetime);
 }
 
 RtVoid OnOffFilter::PixelVariance(RtFloat variance)
 {
     if(m_isActive)
-        return nextFilter().PixelVariance(variance);
+        nextFilter().PixelVariance(variance);
 }
 
 RtVoid OnOffFilter::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
     if(m_isActive)
-        return nextFilter().PixelSamples(xsamples, ysamples);
+        nextFilter().PixelSamples(xsamples, ysamples);
 }
 
 RtVoid OnOffFilter::PixelFilter(RtFilterFunc function, RtFloat xwidth,
                                 RtFloat ywidth)
 {
     if(m_isActive)
-        return nextFilter().PixelFilter(function, xwidth, ywidth);
+        nextFilter().PixelFilter(function, xwidth, ywidth);
 }
 
 RtVoid OnOffFilter::Exposure(RtFloat gain, RtFloat gamma)
 {
     if(m_isActive)
-        return nextFilter().Exposure(gain, gamma);
+        nextFilter().Exposure(gain, gamma);
 }
 
 RtVoid OnOffFilter::Imager(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Imager(name, pList);
+        nextFilter().Imager(name, pList);
 }
 
 RtVoid OnOffFilter::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max,
                              RtFloat ditheramplitude)
 {
     if(m_isActive)
-        return nextFilter().Quantize(type, one, min, max, ditheramplitude);
+        nextFilter().Quantize(type, one, min, max, ditheramplitude);
 }
 
 RtVoid OnOffFilter::Display(RtConstToken name, RtConstToken type,
                             RtConstToken mode, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Display(name, type, mode, pList);
+        nextFilter().Display(name, type, mode, pList);
 }
 
 RtVoid OnOffFilter::Hider(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Hider(name, pList);
+        nextFilter().Hider(name, pList);
 }
 
 RtVoid OnOffFilter::ColorSamples(const FloatArray& nRGB,
                                  const FloatArray& RGBn)
 {
     if(m_isActive)
-        return nextFilter().ColorSamples(nRGB, RGBn);
+        nextFilter().ColorSamples(nRGB, RGBn);
 }
 
 RtVoid OnOffFilter::RelativeDetail(RtFloat relativedetail)
 {
     if(m_isActive)
-        return nextFilter().RelativeDetail(relativedetail);
+        nextFilter().RelativeDetail(relativedetail);
 }
 
 RtVoid OnOffFilter::Option(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Option(name, pList);
+        nextFilter().Option(name, pList);
 }
 
 RtVoid OnOffFilter::AttributeBegin()
 {
     if(m_isActive)
-        return nextFilter().AttributeBegin();
+        nextFilter().AttributeBegin();
 }
 
 RtVoid OnOffFilter::AttributeEnd()
 {
     if(m_isActive)
-        return nextFilter().AttributeEnd();
+        nextFilter().AttributeEnd();
 }
 
 RtVoid OnOffFilter::Color(RtConstColor Cq)
 {
     if(m_isActive)
-        return nextFilter().Color(Cq);
+        nextFilter().Color(Cq);
 }
 
 RtVoid OnOffFilter::Opacity(RtConstColor Os)
 {
     if(m_isActive)
-        return nextFilter().Opacity(Os);
+        nextFilter().Opacity(Os);
 }
 
 RtVoid OnOffFilter::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
@@ -312,66 +308,64 @@ RtVoid OnOffFilter::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                                        RtFloat s4, RtFloat t4)
 {
     if(m_isActive)
-        return nextFilter().TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
+        nextFilter().TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
 }
 
-RtLightHandle OnOffFilter::LightSource(RtConstToken name,
-                                       const ParamList& pList)
+RtVoid OnOffFilter::LightSource(RtConstToken shadername, RtConstToken name,
+                                const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().LightSource(name, pList);
-    return 0;
+        nextFilter().LightSource(shadername, name, pList);
 }
 
-RtLightHandle OnOffFilter::AreaLightSource(RtConstToken name,
-                                           const ParamList& pList)
+RtVoid OnOffFilter::AreaLightSource(RtConstToken shadername, RtConstToken name,
+                                    const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().AreaLightSource(name, pList);
-    return 0;
+        nextFilter().AreaLightSource(shadername, name, pList);
 }
 
-RtVoid OnOffFilter::Illuminate(RtLightHandle light, RtBoolean onoff)
+RtVoid OnOffFilter::Illuminate(RtConstToken name, RtBoolean onoff)
 {
     if(m_isActive)
-        return nextFilter().Illuminate(light, onoff);
+        nextFilter().Illuminate(name, onoff);
 }
 
 RtVoid OnOffFilter::Surface(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Surface(name, pList);
+        nextFilter().Surface(name, pList);
 }
 
 RtVoid OnOffFilter::Displacement(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Displacement(name, pList);
+        nextFilter().Displacement(name, pList);
 }
 
 RtVoid OnOffFilter::Atmosphere(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Atmosphere(name, pList);
+        nextFilter().Atmosphere(name, pList);
 }
 
 RtVoid OnOffFilter::Interior(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Interior(name, pList);
+        nextFilter().Interior(name, pList);
 }
 
 RtVoid OnOffFilter::Exterior(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Exterior(name, pList);
+        nextFilter().Exterior(name, pList);
 }
 
 RtVoid OnOffFilter::ShaderLayer(RtConstToken type, RtConstToken name,
                                 RtConstToken layername, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().ShaderLayer(type, name, layername, pList);
+        nextFilter().ShaderLayer(type, name, layername, pList);
 }
 
 RtVoid OnOffFilter::ConnectShaderLayers(RtConstToken type, RtConstToken layer1,
@@ -380,179 +374,179 @@ RtVoid OnOffFilter::ConnectShaderLayers(RtConstToken type, RtConstToken layer1,
                                         RtConstToken variable2)
 {
     if(m_isActive)
-        return nextFilter().ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
+        nextFilter().ConnectShaderLayers(type, layer1, variable1, layer2, variable2);
 }
 
 RtVoid OnOffFilter::ShadingRate(RtFloat size)
 {
     if(m_isActive)
-        return nextFilter().ShadingRate(size);
+        nextFilter().ShadingRate(size);
 }
 
 RtVoid OnOffFilter::ShadingInterpolation(RtConstToken type)
 {
     if(m_isActive)
-        return nextFilter().ShadingInterpolation(type);
+        nextFilter().ShadingInterpolation(type);
 }
 
 RtVoid OnOffFilter::Matte(RtBoolean onoff)
 {
     if(m_isActive)
-        return nextFilter().Matte(onoff);
+        nextFilter().Matte(onoff);
 }
 
 RtVoid OnOffFilter::Bound(RtConstBound bound)
 {
     if(m_isActive)
-        return nextFilter().Bound(bound);
+        nextFilter().Bound(bound);
 }
 
 RtVoid OnOffFilter::Detail(RtConstBound bound)
 {
     if(m_isActive)
-        return nextFilter().Detail(bound);
+        nextFilter().Detail(bound);
 }
 
 RtVoid OnOffFilter::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
                                 RtFloat offhigh)
 {
     if(m_isActive)
-        return nextFilter().DetailRange(offlow, onlow, onhigh, offhigh);
+        nextFilter().DetailRange(offlow, onlow, onhigh, offhigh);
 }
 
 RtVoid OnOffFilter::GeometricApproximation(RtConstToken type, RtFloat value)
 {
     if(m_isActive)
-        return nextFilter().GeometricApproximation(type, value);
+        nextFilter().GeometricApproximation(type, value);
 }
 
 RtVoid OnOffFilter::Orientation(RtConstToken orientation)
 {
     if(m_isActive)
-        return nextFilter().Orientation(orientation);
+        nextFilter().Orientation(orientation);
 }
 
 RtVoid OnOffFilter::ReverseOrientation()
 {
     if(m_isActive)
-        return nextFilter().ReverseOrientation();
+        nextFilter().ReverseOrientation();
 }
 
 RtVoid OnOffFilter::Sides(RtInt nsides)
 {
     if(m_isActive)
-        return nextFilter().Sides(nsides);
+        nextFilter().Sides(nsides);
 }
 
 RtVoid OnOffFilter::Identity()
 {
     if(m_isActive)
-        return nextFilter().Identity();
+        nextFilter().Identity();
 }
 
 RtVoid OnOffFilter::Transform(RtConstMatrix transform)
 {
     if(m_isActive)
-        return nextFilter().Transform(transform);
+        nextFilter().Transform(transform);
 }
 
 RtVoid OnOffFilter::ConcatTransform(RtConstMatrix transform)
 {
     if(m_isActive)
-        return nextFilter().ConcatTransform(transform);
+        nextFilter().ConcatTransform(transform);
 }
 
 RtVoid OnOffFilter::Perspective(RtFloat fov)
 {
     if(m_isActive)
-        return nextFilter().Perspective(fov);
+        nextFilter().Perspective(fov);
 }
 
 RtVoid OnOffFilter::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
     if(m_isActive)
-        return nextFilter().Translate(dx, dy, dz);
+        nextFilter().Translate(dx, dy, dz);
 }
 
 RtVoid OnOffFilter::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
     if(m_isActive)
-        return nextFilter().Rotate(angle, dx, dy, dz);
+        nextFilter().Rotate(angle, dx, dy, dz);
 }
 
 RtVoid OnOffFilter::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
     if(m_isActive)
-        return nextFilter().Scale(sx, sy, sz);
+        nextFilter().Scale(sx, sy, sz);
 }
 
 RtVoid OnOffFilter::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                          RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
     if(m_isActive)
-        return nextFilter().Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
+        nextFilter().Skew(angle, dx1, dy1, dz1, dx2, dy2, dz2);
 }
 
 RtVoid OnOffFilter::CoordinateSystem(RtConstToken space)
 {
     if(m_isActive)
-        return nextFilter().CoordinateSystem(space);
+        nextFilter().CoordinateSystem(space);
 }
 
 RtVoid OnOffFilter::CoordSysTransform(RtConstToken space)
 {
     if(m_isActive)
-        return nextFilter().CoordSysTransform(space);
+        nextFilter().CoordSysTransform(space);
 }
 
 RtVoid OnOffFilter::TransformBegin()
 {
     if(m_isActive)
-        return nextFilter().TransformBegin();
+        nextFilter().TransformBegin();
 }
 
 RtVoid OnOffFilter::TransformEnd()
 {
     if(m_isActive)
-        return nextFilter().TransformEnd();
+        nextFilter().TransformEnd();
 }
 
 RtVoid OnOffFilter::Resource(RtConstToken handle, RtConstToken type,
                              const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Resource(handle, type, pList);
+        nextFilter().Resource(handle, type, pList);
 }
 
 RtVoid OnOffFilter::ResourceBegin()
 {
     if(m_isActive)
-        return nextFilter().ResourceBegin();
+        nextFilter().ResourceBegin();
 }
 
 RtVoid OnOffFilter::ResourceEnd()
 {
     if(m_isActive)
-        return nextFilter().ResourceEnd();
+        nextFilter().ResourceEnd();
 }
 
 RtVoid OnOffFilter::Attribute(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Attribute(name, pList);
+        nextFilter().Attribute(name, pList);
 }
 
 RtVoid OnOffFilter::Polygon(const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Polygon(pList);
+        nextFilter().Polygon(pList);
 }
 
 RtVoid OnOffFilter::GeneralPolygon(const IntArray& nverts,
                                    const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().GeneralPolygon(nverts, pList);
+        nextFilter().GeneralPolygon(nverts, pList);
 }
 
 RtVoid OnOffFilter::PointsPolygons(const IntArray& nverts,
@@ -560,7 +554,7 @@ RtVoid OnOffFilter::PointsPolygons(const IntArray& nverts,
                                    const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().PointsPolygons(nverts, verts, pList);
+        nextFilter().PointsPolygons(nverts, verts, pList);
 }
 
 RtVoid OnOffFilter::PointsGeneralPolygons(const IntArray& nloops,
@@ -569,20 +563,20 @@ RtVoid OnOffFilter::PointsGeneralPolygons(const IntArray& nloops,
                                           const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().PointsGeneralPolygons(nloops, nverts, verts, pList);
+        nextFilter().PointsGeneralPolygons(nloops, nverts, verts, pList);
 }
 
 RtVoid OnOffFilter::Basis(RtConstBasis ubasis, RtInt ustep, RtConstBasis vbasis,
                           RtInt vstep)
 {
     if(m_isActive)
-        return nextFilter().Basis(ubasis, ustep, vbasis, vstep);
+        nextFilter().Basis(ubasis, ustep, vbasis, vstep);
 }
 
 RtVoid OnOffFilter::Patch(RtConstToken type, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Patch(type, pList);
+        nextFilter().Patch(type, pList);
 }
 
 RtVoid OnOffFilter::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
@@ -590,7 +584,7 @@ RtVoid OnOffFilter::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
                               const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
+        nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
 }
 
 RtVoid OnOffFilter::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
@@ -599,7 +593,7 @@ RtVoid OnOffFilter::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
                             const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
+        nextFilter().NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, pList);
 }
 
 RtVoid OnOffFilter::TrimCurve(const IntArray& ncurves, const IntArray& order,
@@ -609,7 +603,7 @@ RtVoid OnOffFilter::TrimCurve(const IntArray& ncurves, const IntArray& order,
                               const FloatArray& w)
 {
     if(m_isActive)
-        return nextFilter().TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
+        nextFilter().TrimCurve(ncurves, order, knot, min, max, n, u, v, w);
 }
 
 RtVoid OnOffFilter::SubdivisionMesh(RtConstToken scheme,
@@ -622,49 +616,49 @@ RtVoid OnOffFilter::SubdivisionMesh(RtConstToken scheme,
                                     const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
+        nextFilter().SubdivisionMesh(scheme, nvertices, vertices, tags, nargs, intargs, floatargs, pList);
 }
 
 RtVoid OnOffFilter::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
                            RtFloat thetamax, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Sphere(radius, zmin, zmax, thetamax, pList);
+        nextFilter().Sphere(radius, zmin, zmax, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
                          const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Cone(height, radius, thetamax, pList);
+        nextFilter().Cone(height, radius, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
                              RtFloat thetamax, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Cylinder(radius, zmin, zmax, thetamax, pList);
+        nextFilter().Cylinder(radius, zmin, zmax, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
                                 RtFloat thetamax, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Hyperboloid(point1, point2, thetamax, pList);
+        nextFilter().Hyperboloid(point1, point2, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
                                RtFloat thetamax, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Paraboloid(rmax, zmin, zmax, thetamax, pList);
+        nextFilter().Paraboloid(rmax, zmin, zmax, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
                          const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Disk(height, radius, thetamax, pList);
+        nextFilter().Disk(height, radius, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
@@ -672,20 +666,20 @@ RtVoid OnOffFilter::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
                           const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
+        nextFilter().Torus(majorrad, minorrad, phimin, phimax, thetamax, pList);
 }
 
 RtVoid OnOffFilter::Points(const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Points(pList);
+        nextFilter().Points(pList);
 }
 
 RtVoid OnOffFilter::Curves(RtConstToken type, const IntArray& nvertices,
                            RtConstToken wrap, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Curves(type, nvertices, wrap, pList);
+        nextFilter().Curves(type, nvertices, wrap, pList);
 }
 
 RtVoid OnOffFilter::Blobby(RtInt nleaf, const IntArray& code,
@@ -693,7 +687,7 @@ RtVoid OnOffFilter::Blobby(RtInt nleaf, const IntArray& code,
                            const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Blobby(nleaf, code, floats, strings, pList);
+        nextFilter().Blobby(nleaf, code, floats, strings, pList);
 }
 
 RtVoid OnOffFilter::Procedural(RtPointer data, RtConstBound bound,
@@ -701,56 +695,55 @@ RtVoid OnOffFilter::Procedural(RtPointer data, RtConstBound bound,
                                RtProcFreeFunc freeproc)
 {
     if(m_isActive)
-        return nextFilter().Procedural(data, bound, refineproc, freeproc);
+        nextFilter().Procedural(data, bound, refineproc, freeproc);
 }
 
 RtVoid OnOffFilter::Geometry(RtConstToken type, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().Geometry(type, pList);
+        nextFilter().Geometry(type, pList);
 }
 
 RtVoid OnOffFilter::SolidBegin(RtConstToken type)
 {
     if(m_isActive)
-        return nextFilter().SolidBegin(type);
+        nextFilter().SolidBegin(type);
 }
 
 RtVoid OnOffFilter::SolidEnd()
 {
     if(m_isActive)
-        return nextFilter().SolidEnd();
+        nextFilter().SolidEnd();
 }
 
-RtObjectHandle OnOffFilter::ObjectBegin()
+RtVoid OnOffFilter::ObjectBegin(RtConstToken name)
 {
     if(m_isActive)
-        return nextFilter().ObjectBegin();
-    return 0;
+        nextFilter().ObjectBegin(name);
 }
 
 RtVoid OnOffFilter::ObjectEnd()
 {
     if(m_isActive)
-        return nextFilter().ObjectEnd();
+        nextFilter().ObjectEnd();
 }
 
-RtVoid OnOffFilter::ObjectInstance(RtObjectHandle handle)
+RtVoid OnOffFilter::ObjectInstance(RtConstToken name)
 {
     if(m_isActive)
-        return nextFilter().ObjectInstance(handle);
+        nextFilter().ObjectInstance(name);
 }
 
 RtVoid OnOffFilter::MotionBegin(const FloatArray& times)
 {
     if(m_isActive)
-        return nextFilter().MotionBegin(times);
+        nextFilter().MotionBegin(times);
 }
 
 RtVoid OnOffFilter::MotionEnd()
 {
     if(m_isActive)
-        return nextFilter().MotionEnd();
+        nextFilter().MotionEnd();
 }
 
 RtVoid OnOffFilter::MakeTexture(RtConstString imagefile,
@@ -760,7 +753,7 @@ RtVoid OnOffFilter::MakeTexture(RtConstString imagefile,
                                 const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
+        nextFilter().MakeTexture(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid OnOffFilter::MakeLatLongEnvironment(RtConstString imagefile,
@@ -770,7 +763,7 @@ RtVoid OnOffFilter::MakeLatLongEnvironment(RtConstString imagefile,
                                            const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
+        nextFilter().MakeLatLongEnvironment(imagefile, reflfile, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid OnOffFilter::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx,
@@ -782,14 +775,14 @@ RtVoid OnOffFilter::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx,
                                             const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
+        nextFilter().MakeCubeFaceEnvironment(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, pList);
 }
 
 RtVoid OnOffFilter::MakeShadow(RtConstString picfile, RtConstString shadowfile,
                                const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().MakeShadow(picfile, shadowfile, pList);
+        nextFilter().MakeShadow(picfile, shadowfile, pList);
 }
 
 RtVoid OnOffFilter::MakeOcclusion(const StringArray& picfiles,
@@ -797,34 +790,32 @@ RtVoid OnOffFilter::MakeOcclusion(const StringArray& picfiles,
                                   const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().MakeOcclusion(picfiles, shadowfile, pList);
+        nextFilter().MakeOcclusion(picfiles, shadowfile, pList);
 }
 
 RtVoid OnOffFilter::ErrorHandler(RtErrorFunc handler)
 {
     if(m_isActive)
-        return nextFilter().ErrorHandler(handler);
+        nextFilter().ErrorHandler(handler);
 }
 
 RtVoid OnOffFilter::ReadArchive(RtConstToken name, RtArchiveCallback callback,
                                 const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().ReadArchive(name, callback, pList);
+        nextFilter().ReadArchive(name, callback, pList);
 }
 
-RtArchiveHandle OnOffFilter::ArchiveBegin(RtConstToken name,
-                                          const ParamList& pList)
+RtVoid OnOffFilter::ArchiveBegin(RtConstToken name, const ParamList& pList)
 {
     if(m_isActive)
-        return nextFilter().ArchiveBegin(name, pList);
-    return 0;
+        nextFilter().ArchiveBegin(name, pList);
 }
 
 RtVoid OnOffFilter::ArchiveEnd()
 {
     if(m_isActive)
-        return nextFilter().ArchiveEnd();
+        nextFilter().ArchiveEnd();
 }
 //[[[end]]]
 

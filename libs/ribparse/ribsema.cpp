@@ -42,9 +42,7 @@ RibParser::RibParser(Ri::RendererServices& rendererServices)
     m_lex(RibLexer::create(), &RibLexer::destroy),
     m_requestHandlerMap(),
     m_paramListStorage(),
-    m_numColorComps(3),
-    m_lightMaps(1),
-    m_objectMaps(1)
+    m_numColorComps(3)
 {
     typedef HandlerMap::value_type MapValueType;
     MapValueType handlerMapInit[] = {
@@ -254,44 +252,39 @@ inline const T& toFloatBasedType(Ri::FloatArray a,
     return *reinterpret_cast<const T*>(a.begin());
 }
 
-// Get RIB name for a light or object
+
+// Holder of RIB name for a light or object
 //
 // The RISpec says that lights are identified by a 'sequence number', but
 // string identifiers are also allowed in common implementations.  For
 // simplicity, we convert int light/object identifiers into strings.  This
 // means that 1 is the same as "1".
-inline std::string getLightOrObjectName(RibLexer& lex)
+//
+// This class manages the storage, and has an implicit conversion to the
+// corresponding type expected by Ri::Renderer (ie, const char*)
+class StringOrIntHolder
 {
-    if(lex.peekNextType() == RibLexer::Tok_String)
-        return lex.getString();
-    else
-    {
-        std::ostringstream fmt;
-        fmt << lex.getInt();
-        return fmt.str();
-    }
-}
+    private:
+        std::string m_str;
+        const char* m_cstr;
+    public:
+        StringOrIntHolder(RibLexer& lex)
+        {
+            if(lex.peekNextType() == RibLexer::Tok_String)
+                m_cstr = lex.getString();
+            else
+            {
+                std::ostringstream fmt;
+                fmt << lex.getInt();
+                m_str = fmt.str();
+                m_cstr = m_str.c_str();
+            }
+        }
+
+        operator const char*() { return m_cstr; }
+};
 
 } // anon. namespace
-
-// Search a stack of name->handle maps, for the given name.
-//
-// The first handle associated with the given name is returned in the handle
-// parameter, and true is returned.  If no handle is found, return false.
-bool RibParser::searchMapStack(const std::vector<LightMap>& maps,
-                               const std::string& name, RtPointer& handle)
-{
-    for(int i = maps.size()-1; i >= 0; --i)
-    {
-        LightMap::const_iterator pos = maps[i].find(name);
-        if(pos != maps[i].end())
-        {
-            handle = pos->second;
-            return true;
-        }
-    }
-    return false;
-}
 
 /// Read in a renderman parameter list from the lexer.
 Ri::ParamList RibParser::readParamList()
@@ -386,53 +379,6 @@ void RibParser::handleVersion(Ri::Renderer& renderer)
     // of the standard again...
 }
 
-void RibParser::handleDeclare(Ri::Renderer& renderer)
-{
-    // Collect arguments from lex.
-    const char* name = m_lex->getString();
-    const char* declaration = m_lex->getString();
-
-    renderer.Declare(name, declaration);
-}
-
-// The FrameBegin/End and WorldBegin/End scopes need pushing and popping of
-// the light and object name -> handle mappings.  If we don't do this,
-// the mapped names from one frame could flow over into another... trouble!
-void RibParser::handleFrameBegin(Ri::Renderer& renderer)
-{
-    RtInt number = m_lex->getInt();
-    renderer.FrameBegin(number);
-    m_lightMaps.push_back(LightMap());
-    m_objectMaps.push_back(ObjectMap());
-}
-
-void RibParser::handleFrameEnd(Ri::Renderer& renderer)
-{
-    renderer.FrameEnd();
-    if(m_lightMaps.size() > 1)
-    {
-        m_lightMaps.pop_back();
-        m_objectMaps.pop_back();
-    }
-}
-
-void RibParser::handleWorldBegin(Ri::Renderer& renderer)
-{
-    renderer.WorldBegin();
-    m_lightMaps.push_back(LightMap());
-    m_objectMaps.push_back(ObjectMap());
-}
-
-void RibParser::handleWorldEnd(Ri::Renderer& renderer)
-{
-    renderer.WorldEnd();
-    if(m_lightMaps.size() > 1)
-    {
-        m_lightMaps.pop_back();
-        m_objectMaps.pop_back();
-    }
-}
-
 void RibParser::handleDepthOfField(Ri::Renderer& renderer)
 {
     if(m_lex->peekNextType() == RibLexer::Tok_RequestEnd)
@@ -461,54 +407,6 @@ void RibParser::handleColorSamples(Ri::Renderer& renderer)
     m_numColorComps = nRGB.size()/3;
 }
 
-/// Handle either LightSource or AreaLightSource
-///
-/// Both of these share the same RIB arguments and handler requirements, so the
-/// code is consolidated in this function.
-///
-/// \param lightSourceFunc - Interface function to LightSource or AreaLightSource
-/// \param renderer - renderer from which to get light handles
-///
-void RibParser::handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
-                                         Ri::Renderer& renderer)
-{
-    // Collect arguments from lex.
-    const char* name = m_lex->getString();
-
-    std::string lightName = getLightOrObjectName(*m_lex);
-
-    // Extract the parameter list
-    Ri::ParamList paramList = readParamList();
-
-    // Call through to renderer & associate handle with the name
-    m_lightMaps.back()[lightName] =
-        (renderer.*lightSourceFunc)(name, paramList);
-}
-
-void RibParser::handleLightSource(Ri::Renderer& renderer)
-{
-    handleLightSourceGeneral(&Ri::Renderer::LightSource, renderer);
-}
-
-void RibParser::handleAreaLightSource(Ri::Renderer& renderer)
-{
-    handleLightSourceGeneral(&Ri::Renderer::AreaLightSource, renderer);
-}
-
-void RibParser::handleIlluminate(Ri::Renderer& renderer)
-{
-    // Collect arguments from lex.
-    RtLightHandle lightHandle = 0;
-    std::string lightName = getLightOrObjectName(*m_lex);
-    if(!searchMapStack(m_lightMaps, lightName, lightHandle))
-        AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                            "undeclared light \"" << lightName << "\"");
-    RtInt onoff = m_lex->getInt();
-
-    // Call through to renderer
-    renderer.Illuminate(lightHandle, onoff);
-}
-
 void RibParser::handleSubdivisionMesh(Ri::Renderer& renderer)
 {
     // Collect arguments from lex.
@@ -516,34 +414,24 @@ void RibParser::handleSubdivisionMesh(Ri::Renderer& renderer)
     Ri::IntArray nvertices = m_lex->getIntArray();
     Ri::IntArray vertices  = m_lex->getIntArray();
 
+    // Else call version with empty optional args.
+    Ri::StringArray  tags;
+    Ri::IntArray     nargs;
+    Ri::IntArray     intargs;
+    Ri::FloatArray   floatargs;
     if(m_lex->peekNextType() == RibLexer::Tok_Array)
     {
         // Handle the four optional arguments.
-        Ri::StringArray tags      = m_lex->getStringArray();
-        Ri::IntArray    nargs     = m_lex->getIntArray();
-        Ri::IntArray    intargs   = m_lex->getIntArray();
-        Ri::FloatArray  floatargs = m_lex->getFloatArray();
-        // Extract parameter list
-        Ri::ParamList paramList = readParamList();
-        // Call through to renderer
-        renderer.SubdivisionMesh(scheme, nvertices, vertices,
-                                   tags, nargs, intargs, floatargs,
-                                   paramList);
+        tags      = m_lex->getStringArray();
+        nargs     = m_lex->getIntArray();
+        intargs   = m_lex->getIntArray();
+        floatargs = m_lex->getFloatArray();
     }
-    else
-    {
-        // Else call version with empty optional args.
-        Ri::StringArray  tags;
-        Ri::IntArray     nargs;
-        Ri::IntArray     intargs;
-        Ri::FloatArray   floatargs;
-        // Extract parameter list
-        Ri::ParamList paramList = readParamList();
-        // Call through to renderer
-        renderer.SubdivisionMesh(scheme, nvertices, vertices,
-                                   tags, nargs, intargs, floatargs,
-                                   paramList);
-    }
+    // Extract parameter list
+    Ri::ParamList paramList = readParamList();
+    // Call through to renderer
+    renderer.SubdivisionMesh(scheme, nvertices, vertices, tags, nargs,
+                             intargs, floatargs, paramList);
 }
 
 void RibParser::handleHyperboloid(Ri::Renderer& renderer)
@@ -610,24 +498,6 @@ void RibParser::handleProcedural(Ri::Renderer& renderer)
     renderer.Procedural(procData, bound, subdivideFunc, &ProcFree);
 }
 
-void RibParser::handleObjectBegin(Ri::Renderer& renderer)
-{
-    // The RIB identifier is an integer according to the RISpec, but it's
-    // common to also allow string identifiers, hence the branch here.
-    std::string objectName = getLightOrObjectName(*m_lex);
-    m_objectMaps.back()[objectName] = renderer.ObjectBegin();
-}
-
-void RibParser::handleObjectInstance(Ri::Renderer& renderer)
-{
-    std::string objectName = getLightOrObjectName(*m_lex);
-    RtObjectHandle handle = 0;
-    if(!searchMapStack(m_objectMaps, objectName, handle))
-        AQSIS_THROW_XQERROR(XqParseError, EqE_BadHandle,
-                "undeclared object \"" << objectName << "\"");
-    renderer.ObjectInstance(handle);
-}
-
 
 //--------------------------------------------------
 // Request handlers with autogenerated implementations.
@@ -659,21 +529,18 @@ getterStatements = {
     'RtErrorFunc':   'RtErrorFunc %s = m_services.getErrorFunc(m_lex->getString());',
     'RtBasis':       'RtConstBasis& %s = getBasis();',
 }
+def getterStatement(arg):
+    name = arg.findtext('Name')
+    type = arg.findtext('Type')
+    if arg.findall('AltTypeInt') and type == 'RtToken':
+        # Special case for an int which should be turned into a string.
+        return 'StringOrIntHolder %s(*m_lex);' % name
+    return getterStatements[type] % (name,)
 
-customImpl = set(['Declare', 'DepthOfField', 'ColorSamples', 'LightSource',
-                  'AreaLightSource', 'Illuminate', 'SubdivisionMesh',
-                  'Hyperboloid', 'Procedural', 'ObjectBegin', 'ObjectInstance',
-                  'FrameBegin', 'FrameEnd', 'WorldBegin', 'WorldEnd'])
-
-# Ignore procs which have custom implementations.
-procs = filter(lambda p: p.findall('Rib') and p.findtext('Name') not in customImpl,
-               riXml.findall('Procedures/Procedure'))
+customImpl = set(['DepthOfField', 'ColorSamples', 'SubdivisionMesh',
+                  'Hyperboloid', 'Procedural'])
 
 handlerTemplate = '''
-#for $proc in $procs
-    #set $procName = $proc.findtext('Name')
-    #set $args = filter(lambda a: not a.findall('RibValue'), $proc.findall('Arguments/Argument'))
-    ## 
 void RibParser::handle${procName}(Ri::Renderer& renderer)
 {
     #if $proc.findall('Arguments/RibArgsCanBeArray')
@@ -685,7 +552,7 @@ void RibParser::handle${procName}(Ri::Renderer& renderer)
     #else
     ## Collect individual arguments from lexer
         #for $arg in $args
-    ${getterStatements[$arg.findtext('Type')] % ($arg.findtext('Name'),)}
+    $getterStatement($arg)
         #end for
     #end if
     #if $proc.findall('Arguments/ParamList')
@@ -702,13 +569,44 @@ void RibParser::handle${procName}(Ri::Renderer& renderer)
     #end if
     renderer.${procName}(${', '.join(argList)});
 }
-
-#end for
 '''
 
-cog.out(str(Template(handlerTemplate, searchList=locals())));
+for proc in riXml.findall('Procedures/Procedure'):
+    if not (proc.findall('Rib') and proc.findtext('Name') not in customImpl):
+        continue
+    procName = proc.findtext('Name')
+    args = ribArgs(proc)
+    cog.out(str(Template(handlerTemplate, searchList=locals())));
 
 ]]]*/
+
+void RibParser::handleDeclare(Ri::Renderer& renderer)
+{
+    const char* name = m_lex->getString();
+    const char* declaration = m_lex->getString();
+    renderer.Declare(name, declaration);
+}
+
+void RibParser::handleFrameBegin(Ri::Renderer& renderer)
+{
+    RtInt number = m_lex->getInt();
+    renderer.FrameBegin(number);
+}
+
+void RibParser::handleFrameEnd(Ri::Renderer& renderer)
+{
+    renderer.FrameEnd();
+}
+
+void RibParser::handleWorldBegin(Ri::Renderer& renderer)
+{
+    renderer.WorldBegin();
+}
+
+void RibParser::handleWorldEnd(Ri::Renderer& renderer)
+{
+    renderer.WorldEnd();
+}
 
 void RibParser::handleIfBegin(Ri::Renderer& renderer)
 {
@@ -906,6 +804,29 @@ void RibParser::handleTextureCoordinates(Ri::Renderer& renderer)
     RtFloat s4 = allArgs[6];
     RtFloat t4 = allArgs[7];
     renderer.TextureCoordinates(s1, t1, s2, t2, s3, t3, s4, t4);
+}
+
+void RibParser::handleLightSource(Ri::Renderer& renderer)
+{
+    const char* shadername = m_lex->getString();
+    StringOrIntHolder name(*m_lex);
+    Ri::ParamList paramList = readParamList();
+    renderer.LightSource(shadername, name, paramList);
+}
+
+void RibParser::handleAreaLightSource(Ri::Renderer& renderer)
+{
+    const char* shadername = m_lex->getString();
+    StringOrIntHolder name(*m_lex);
+    Ri::ParamList paramList = readParamList();
+    renderer.AreaLightSource(shadername, name, paramList);
+}
+
+void RibParser::handleIlluminate(Ri::Renderer& renderer)
+{
+    StringOrIntHolder name(*m_lex);
+    RtInt onoff = m_lex->getInt();
+    renderer.Illuminate(name, onoff);
 }
 
 void RibParser::handleSurface(Ri::Renderer& renderer)
@@ -1329,9 +1250,21 @@ void RibParser::handleSolidEnd(Ri::Renderer& renderer)
     renderer.SolidEnd();
 }
 
+void RibParser::handleObjectBegin(Ri::Renderer& renderer)
+{
+    StringOrIntHolder name(*m_lex);
+    renderer.ObjectBegin(name);
+}
+
 void RibParser::handleObjectEnd(Ri::Renderer& renderer)
 {
     renderer.ObjectEnd();
+}
+
+void RibParser::handleObjectInstance(Ri::Renderer& renderer)
+{
+    StringOrIntHolder name(*m_lex);
+    renderer.ObjectInstance(name);
 }
 
 void RibParser::handleMotionBegin(Ri::Renderer& renderer)
@@ -1427,7 +1360,6 @@ void RibParser::handleArchiveEnd(Ri::Renderer& renderer)
 {
     renderer.ArchiveEnd();
 }
-
 //[[[end]]]
 
 

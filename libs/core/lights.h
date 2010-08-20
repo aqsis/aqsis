@@ -268,8 +268,6 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 }
 ;
 
-extern std::deque<CqLightsourcePtr>	Lightsource_stack;
-
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------

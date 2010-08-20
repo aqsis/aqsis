@@ -46,6 +46,7 @@
 #include	"iraytrace.h"
 #include	"iraytrace.h"
 #include	<aqsis/tex/filtering/itexturecache.h>
+#include	"lights.h"
 
 #include	"clippingvolume.h"
 
@@ -271,6 +272,11 @@ class CqRenderer : public IqRenderer
 		/** Prepare the shaders for rendering.
 		 */
 		virtual void	PrepareShaders();
+
+		/// Register a light source with the given name
+		void registerLight(const char* name, CqLightsourcePtr light);
+		/// Find the light associated with the given name
+		CqLightsourcePtr findLight(const char* name);
 
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface );
@@ -559,6 +565,9 @@ class CqRenderer : public IqRenderer
 		EqRenderMode	m_Mode;
 		TqShaderMap m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
+
+		typedef std::map<std::string, CqLightsourcePtr> TqLightMap;
+		TqLightMap m_lights;
 
 		boost::shared_ptr<IqTextureCache> m_textureCache; ///< Cache for aqsistex texture access.
 		 

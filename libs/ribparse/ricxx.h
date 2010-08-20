@@ -318,7 +318,7 @@ class Renderer
 
 
         // ========== Relationship to the RenderMan Shading Language =========
-        virtual RtToken Declare(RtConstString name,
+        virtual RtVoid Declare(RtConstString name,
                             RtConstString declaration) = 0;
 
 
@@ -371,11 +371,11 @@ class Renderer
         virtual RtVoid TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4) = 0;
-        virtual RtLightHandle LightSource(RtConstToken name,
+        virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
                             const ParamList& pList) = 0;
-        virtual RtLightHandle AreaLightSource(RtConstToken name,
-                            const ParamList& pList) = 0;
-        virtual RtVoid Illuminate(RtLightHandle light, RtBoolean onoff) = 0;
+        virtual RtVoid AreaLightSource(RtConstToken shadername,
+                            RtConstToken name, const ParamList& pList) = 0;
+        virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff) = 0;
         virtual RtVoid Surface(RtConstToken name, const ParamList& pList) = 0;
         virtual RtVoid Displacement(RtConstToken name,
                             const ParamList& pList) = 0;
@@ -494,9 +494,9 @@ class Renderer
         virtual RtVoid SolidBegin(RtConstToken type) = 0;
         virtual RtVoid SolidEnd() = 0;
         // ------------------------ Retained Geometry ------------------------
-        virtual RtObjectHandle ObjectBegin() = 0;
+        virtual RtVoid ObjectBegin(RtConstToken name) = 0;
         virtual RtVoid ObjectEnd() = 0;
-        virtual RtVoid ObjectInstance(RtObjectHandle handle) = 0;
+        virtual RtVoid ObjectInstance(RtConstToken name) = 0;
 
 
         // ============================== Motion =============================
@@ -534,7 +534,7 @@ class Renderer
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
                             const ParamList& pList) = 0;
-        virtual RtArchiveHandle ArchiveBegin(RtConstToken name,
+        virtual RtVoid ArchiveBegin(RtConstToken name,
                             const ParamList& pList) = 0;
         virtual RtVoid ArchiveEnd() = 0;
         //[[[end]]]

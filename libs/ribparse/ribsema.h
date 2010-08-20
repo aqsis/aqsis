@@ -56,25 +56,12 @@ class RibParser : boost::noncopyable
                          Ri::Renderer& context);
 
     private:
-        /// Object ID -> handle map
-        typedef std::map<std::string, RtObjectHandle> ObjectMap;
-        /// Light ID -> handle map
-        typedef std::map<std::string, RtLightHandle> LightMap;
         /// Request handler function type
         typedef void (RibParser::*RequestHandlerType)(Ri::Renderer& renderer);
         /// Request -> handler mapping type
         typedef std::map<std::string, RequestHandlerType> HandlerMap;
-        /// Function pointer compatible with {Area}LightSource
-        typedef RtLightHandle (Ri::Renderer::*LightSourceFunc)(
-                RtConstToken shadername, const Ri::ParamList&);
 
-        // Utilities for handlers
-        static bool searchMapStack(const std::vector<LightMap>& maps,
-                                   const std::string& name, RtPointer& handle);
         Ri::ParamList readParamList();
-        /// Combined handler for LightSource & AreaLightSource
-        void handleLightSourceGeneral(LightSourceFunc lightSourceFunc,
-                                      Ri::Renderer& renderer);
         RtConstBasis& getBasis();
 
         //--------------------------------------------------
@@ -216,12 +203,6 @@ class RibParser : boost::noncopyable
         int m_numColorComps;
         /// Dictionary of declared tokens
         CqTokenDictionary m_tokenDict;
-
-        /// Mapping from light numbers to handles
-        std::vector<LightMap> m_lightMaps;
-
-        /// Mapping from object numbers to handles
-        std::vector<ObjectMap> m_objectMaps;
 };
 
 } // namespace Aqsis

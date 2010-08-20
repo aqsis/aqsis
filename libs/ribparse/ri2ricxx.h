@@ -28,22 +28,21 @@
 
 #include "ricxx.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace Aqsis {
 
 /// Initialize the conversion interface.
 ///
-/// ourData is an opaque smart pointer in which conversion interface data
-/// should be held.
-void riToRiCxxBegin(Ri::RendererServices* services,
-                    boost::shared_ptr<void>& ourData);
+/// services provides error reporting and the callback api via
+/// services.firstFilter().
+///
+/// Returns an opaque pointer to data needed by the conversion interface.
+void* riToRiCxxBegin(Ri::RendererServices& services);
 
-/// Context switching to the given context and conversion interface state
-void riToRiCxxContext(Ri::RendererServices* services,
-                      boost::shared_ptr<void>& ourData);
+/// Switching to the given context, previously initialized with
+/// riToRiCxxBegin()
+void riToRiCxxContext(void* context);
 
-/// Reset the conversion interface to the initial state.
+/// Delete the current context.
 void riToRiCxxEnd();
 
 } // namespace Aqsis

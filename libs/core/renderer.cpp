@@ -81,6 +81,7 @@ CqRenderer::CqRenderer()
 	m_Mode(RenderMode_Image),
 	m_Shaders(),
 	m_InstancedShaders(),
+	m_lights(),
 	m_textureCache(),
 	m_fSaveGPrims(false),
 	m_pTransCamera(new CqTransform()),
@@ -714,10 +715,10 @@ void CqRenderer::RenderAutoShadows()
 	if(pMultipass && pMultipass[0])
 	{
 		// Check all the lightsources for any with an attribute indicating autoshadows.
-		TqUint ilight;
-		for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
+		for(TqLightMap::iterator ilight = m_lights.begin(),
+			lend = m_lights.end(); ilight != lend; ++ilight)
 		{
-			CqLightsourcePtr light = Lightsource_stack[ilight];
+			CqLightsourcePtr light = ilight->second;
 			const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
 			const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
 			if(NULL != pMapName)
@@ -1369,6 +1370,19 @@ void CqRenderer::PrepareShaders()
 	}
 }
 
+void CqRenderer::registerLight(const char* name, CqLightsourcePtr light)
+{
+	m_lights[name] = light;
+}
+
+CqLightsourcePtr CqRenderer::findLight(const char* name)
+{
+	TqLightMap::iterator i = m_lights.find(name);
+	if(i == m_lights.end())
+		AQSIS_THROW_XQERROR(XqValidation, EqE_BadHandle,
+				"unknown light \"" << name << "\" encountered");
+	return i->second;
+}
 
 //---------------------------------------------------------------------
 /** Add a new requested display driver to the list.

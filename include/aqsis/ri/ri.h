@@ -131,7 +131,7 @@ for p in riXml.findall('Procedures/'+'*'):
     elif p.tag == 'SubSubSection':
         cog.outl('/'+'* '+ p.text + ' *'+'/')
     else:
-        args = [formalArgC(arg) for arg in p.findall('Arguments/Argument')]
+        args = [formalArgC(arg) for arg in cArgs(p)]
         returnType = p.findtext('ReturnType')
         procName = cName(p)
         if p.findall('Arguments/ParamList'):
@@ -232,12 +232,12 @@ AQSIS_RI_SHARE RtVoid RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                                            RtFloat t2, RtFloat s3, RtFloat t3,
                                            RtFloat s4, RtFloat t4);
 /* Light sources */
-AQSIS_RI_SHARE RtLightHandle RiLightSource(RtToken name, ...);
-AQSIS_RI_SHARE RtLightHandle RiLightSourceV(RtToken name, RtInt count,
+AQSIS_RI_SHARE RtLightHandle RiLightSource(RtToken shadername, ...);
+AQSIS_RI_SHARE RtLightHandle RiLightSourceV(RtToken shadername, RtInt count,
                                             RtToken tokens[],
                                             RtPointer values[]);
-AQSIS_RI_SHARE RtLightHandle RiAreaLightSource(RtToken name, ...);
-AQSIS_RI_SHARE RtLightHandle RiAreaLightSourceV(RtToken name, RtInt count,
+AQSIS_RI_SHARE RtLightHandle RiAreaLightSource(RtToken shadername, ...);
+AQSIS_RI_SHARE RtLightHandle RiAreaLightSourceV(RtToken shadername, RtInt count,
                                                 RtToken tokens[],
                                                 RtPointer values[]);
 AQSIS_RI_SHARE RtVoid RiIlluminate(RtLightHandle light, RtBoolean onoff);
