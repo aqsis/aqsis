@@ -22,6 +22,9 @@
 /// \brief Converter from plain RI calls to the Ri::Renderer interface.
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 ///
+/// ri2ricxx is a conversion wrapper from plain RI calls to the Ri::Renderer
+/// interface.  It should be initialized via riToRiCxxBegin() with an object
+/// to which calls will be passed.
 
 #ifndef AQSIS_RI2RICXX_H_INCLUDED
 #define AQSIS_RI2RICXX_H_INCLUDED
@@ -32,7 +35,7 @@ namespace Aqsis {
 
 /// Initialize the conversion interface.
 ///
-/// services provides error reporting and the callback api via
+/// \param services provides error reporting and the callback api via
 /// services.firstFilter().
 ///
 /// Returns an opaque pointer to data needed by the conversion interface.
@@ -44,6 +47,14 @@ void riToRiCxxContext(void* context);
 
 /// Delete the current context.
 void riToRiCxxEnd();
+
+/// Function called when RiOption{V} is called before RiBegin.
+///
+/// The riToRiCxx calling code should define an appropriate implementation of
+/// this function (though it may be simply empty).  The arguments correspond
+/// directly to those of RiOptionV().
+void riToRiCxxOptionPreBegin(RtToken name, RtInt count, RtToken* tokens,
+                             RtPointer* values);
 
 } // namespace Aqsis
 

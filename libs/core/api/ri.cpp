@@ -4086,6 +4086,12 @@ struct CoreContext
 };
 }
 
+namespace Aqsis {
+void riToRiCxxOptionPreBegin(RtToken name, RtInt count, RtToken* tokens,
+							 RtPointer* values)
+{ }
+}
+
 /// RI context
 static CoreContext* g_context = 0;
 typedef std::vector<CoreContext*> ContextList;

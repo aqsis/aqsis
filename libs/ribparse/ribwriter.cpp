@@ -61,11 +61,11 @@ class AsciiFormatter
         std::string m_indentString;
 
     public:
-        AsciiFormatter(std::ostream& out, int indentStep, char indentChar)
+        AsciiFormatter(std::ostream& out, const RibWriterOptions& opts)
             : m_out(out),
             m_indent(0),
-            m_indentStep(indentStep),
-            m_indentChar(indentChar),
+            m_indentStep(opts.indentStep),
+            m_indentChar(opts.indentChar),
             m_indentString()
         {
             // set the precision for floats.  You need at >= 9 decimal digits
@@ -231,7 +231,7 @@ class BinaryFormatter
         }
 
     public:
-        BinaryFormatter(std::ostream& out, int indentStep, char indentChar)
+        BinaryFormatter(std::ostream& out, const RibWriterOptions& opts)
             : m_out(out), m_encodedRequests(), m_currRequestCode(0) { }
 
         void increaseIndent() { }
@@ -666,12 +666,11 @@ class RibWriter : public Ri::Renderer
 
     public:
         RibWriter(RibWriterServicesImpl& services, std::ostream& out,
-                  bool interpolateArchives, bool useGzip, int indentStep,
-                  char indentChar, const std::string& initialArchivePath)
-            : m_gzipStream(setupGzipStream(out, useGzip)),
-            m_formatter(useGzip ? *m_gzipStream : out, indentStep, indentChar),
-            m_interpolateArchives(interpolateArchives),
-            m_archiveSearchPath(initialArchivePath),
+                  const RibWriterOptions& opts)
+            : m_gzipStream(setupGzipStream(out, opts.useGzip)),
+            m_formatter(opts.useGzip ? *m_gzipStream : out, opts),
+            m_interpolateArchives(opts.interpolateArchives),
+            m_archiveSearchPath(opts.archivePath),
             m_services(services)
         { }
 
@@ -2382,21 +2381,14 @@ RtVoid RibWriter<Formatter>::ArchiveEnd()
 //------------------------------------------------------------------------------
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
 RibWriterServices* createRibWriter(std::ostream& out,
-        bool interpolateArchives, bool useBinary, bool useGzip,
-        int indentStep, char indentChar, const std::string& initialArchivePath)
+                                   const RibWriterOptions& opts)
 {
     RibWriterServicesImpl* services = new RibWriterServicesImpl();
     boost::shared_ptr<Ri::Renderer> writer;
-    if(useBinary)
-        writer.reset(new RibWriter<BinaryFormatter>(*services, out,
-                                            interpolateArchives, useGzip,
-                                            indentStep, indentChar,
-                                            initialArchivePath));
+    if(opts.useBinary)
+        writer.reset(new RibWriter<BinaryFormatter>(*services, out, opts));
     else
-        writer.reset(new RibWriter<AsciiFormatter>(*services, out,
-                                            interpolateArchives, useGzip,
-                                            indentStep, indentChar,
-                                            initialArchivePath));
+        writer.reset(new RibWriter<AsciiFormatter>(*services, out, opts));
     services->setWriter(writer);
     return services;
 }

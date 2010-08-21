@@ -22,6 +22,7 @@
 
 #include "ricxx.h"
 
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 namespace Aqsis {
@@ -46,13 +47,35 @@ class RibWriterServices : public Ri::RendererServices
                                        RtErrorFunc func) = 0;
 };
 
+/// Options for RibWriter
+struct RibWriterOptions
+{
+    /// Read and interpolate ReadArchive files into the RIB stream
+    bool interpolateArchives;
+    /// Produce binary RIB
+    bool useBinary;
+    /// Produce gzipped RIB
+    bool useGzip;
+    /// Number of chars per indent level
+    int indentStep;
+    /// Character to use for indenting (should be whitespace)
+    char indentChar;
+    /// Path for finding archive files
+    std::string archivePath;
+
+    RibWriterOptions()
+        : interpolateArchives(true),
+        useBinary(false),
+        useGzip(false),
+        indentStep(4),
+        indentChar(' '),
+        archivePath(".")
+    { }
+};
 
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
-RibWriterServices* createRibWriter(
-        std::ostream& out, bool interpolateArchives, bool useBinary,
-        bool useGzip, int indentStep, char indentChar,
-        const std::string& initialArchivePath);
-
+RibWriterServices* createRibWriter(std::ostream& out,
+                                   const RibWriterOptions& opts);
 
 } // namespace Aqsis
 

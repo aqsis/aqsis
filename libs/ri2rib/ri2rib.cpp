@@ -21,7 +21,6 @@
 ///
 /// \brief RI frontend for rib writer: context handling.
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
-///
 
 #include <aqsis/ri/ri.h>
 
@@ -68,14 +67,89 @@ void registerStdFuncs(RibWriterServices& writer)
     writer.registerErrorFunc("abort", RiErrorAbort);
 }
 
+RibWriterOptions g_writerOpts;
+std::ostream* g_ostream;
+
 }
 
+namespace Aqsis {
+// Collect any configuration arguments which happen to be passed before
+// RiBegin.
+//
+// Here are the supported configuration options:
+//
+// "RI2RIB_Output", "Type", "Ascii"
+// "RI2RIB_Output", "Type", "Binary"
+// "RI2RIB_Output", "Compression", "None"
+// "RI2RIB_Output", "Compression", "Gzip"
+// "RI2RIB_Indentation", "Type", "None"
+// "RI2RIB_Indentation", "Type", "Space"
+// "RI2RIB_Indentation", "Type", "Tab"
+// "RI2RIB_Indentation", "Size", sz  (sz = num chars per indent, an integer)
+//
+// Note that a previous version of libri2rib also supported the following
+// option:
+//
+//   RiOption("RI2RIB_Output", "PipeHandle", h);
+//
+// where the integer h was a open file descriptor.  So far this isn't supported
+// here, since the new "OStream" option is more general.  (By using
+// boost::iostream::file_descriptor_sink, it's possible to construct a
+// iostreams compatible stream which writes to a pipe.)
+void riToRiCxxOptionPreBegin(RtToken name, RtInt count, RtToken* tokens,
+                             RtPointer* values)
+{
+    for(int i = 0; i < count; ++i)
+    {
+        if(!strcmp(name, "RI2RIB_Output"))
+        {
+            if(!strcmp(tokens[i], "Type"))
+            {
+                const char* value = *static_cast<RtToken*>(values[i]);
+                if(!strcmp(value, "Ascii"))
+                    g_writerOpts.useBinary = false;
+                else if(!strcmp(value, "Binary"))
+                    g_writerOpts.useBinary = true;
+            }
+            else if(!strcmp(tokens[i], "Compression"))
+            {
+                const char* value = *static_cast<RtToken*>(values[i]);
+                if(!strcmp(value, "None"))
+                    g_writerOpts.useGzip = false;
+                else if(!strcmp(value, "Gzip"))
+                    g_writerOpts.useGzip = true;
+            }
+            else if(!strcmp(tokens[i], "OStream"))
+                g_ostream = static_cast<std::ostream*>(values[i]);
+        }
+        else if(!strcmp(name, "RI2RIB_Indentation"))
+        {
+            if(!strcmp(tokens[i], "Type"))
+            {
+                const char* value = *static_cast<RtToken*>(values[i]);
+                if(!strcmp(value, "None"))
+                    g_writerOpts.indentStep = 0;
+                else if(!strcmp(value, "Space"))
+                    g_writerOpts.indentChar = ' ';
+                else if(!strcmp(value, "Tab"))
+                    g_writerOpts.indentChar = '\t';
+            }
+            else if(!strcmp(tokens[i], "Size"))
+                g_writerOpts.indentStep = *static_cast<int*>(values[i]);
+        }
+    }
+}
+}
+
+//--------------------------------------------------
 // Ri* functions which deal with context handling
 extern "C"
 AQSIS_RI_SHARE RtVoid RiBegin(RtToken name)
 {
     g_context = new RiToRibContext();
     std::ostream* outStream = &std::cout;
+    if(g_ostream)
+        outStream = g_ostream;
     if(name && strcmp(name, "") != 0 && strcmp(name, "stdout") != 0)
     {
         g_context->outFile.open(name, std::ios::out | std::ios::binary);
@@ -86,23 +160,7 @@ AQSIS_RI_SHARE RtVoid RiBegin(RtToken name)
         }
         outStream = &g_context->outFile;
     }
-    // TODO: Allow these options to be controlled somehow!
-    //
-    // Here's the options that libri2rib previously allowed via a RiOption
-    // call, invoked before RiBegin.  The token was typeless and had to be
-    // given exactly as shown.
-    //
-    // RiOption("RI2RIB_Output", "Type", "Ascii");
-    // RiOption("RI2RIB_Output", "Type", "Binary");
-    // RiOption("RI2RIB_Output", "Compression", "None");
-    // RiOption("RI2RIB_Output", "Compression", "Gzip");
-    // RiOption("RI2RIB_Output", "PipeHandle", h); //< int h is an open file descriptor
-    // RiOption("RI2RIB_Indentation", "Type", "None");
-    // RiOption("RI2RIB_Indentation", "Type", "Space");
-    // RiOption("RI2RIB_Indentation", "Type", "Tab");
-    // RiOption("RI2RIB_Indentation", "Size", sz); //< int sz - chars per indent
-    g_context->writerServices.reset(
-        createRibWriter(*outStream, true, false, false, 4, ' ', ".") );
+    g_context->writerServices.reset(createRibWriter(*outStream, g_writerOpts));
     g_context->writerServices->addFilter("validate");
     registerStdFuncs(*g_context->writerServices);
     g_context->riToRiCxxData = riToRiCxxBegin(*g_context->writerServices);
@@ -130,6 +188,7 @@ AQSIS_RI_SHARE RtVoid RiContext(RtContextHandle handle)
 }
 
 
+//--------------------------------------------------
 // Dummy filter func implementations.
 //
 // Note that these should have distinct bodies:  MSVC7 has been observed to
@@ -144,6 +203,7 @@ extern "C" AQSIS_RI_SHARE RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwi
 extern "C" AQSIS_RI_SHARE RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return 7; }
 
 
+//--------------------------------------------------
 // Dummy procedural funcs
 extern "C"
 AQSIS_RI_SHARE RtVoid RiProcFree(RtPointer data)
@@ -167,6 +227,7 @@ AQSIS_RI_SHARE RtVoid RiProcDynamicLoad(RtPointer data, RtFloat detail)
 }
 
 
+//--------------------------------------------------
 // TODO: Make standard error handlers work!
 
 // More-or-less dummy error func implementations

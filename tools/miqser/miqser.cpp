@@ -62,16 +62,13 @@ ArgParse::apflag g_cl_outstandard = false;
 ArgParse::apflag g_cl_help = false;
 ArgParse::apflag g_cl_version = false;
 ArgParse::apint g_cl_verbose = 1;
-ArgParse::apstring g_cl_archive_path = ".";
 ArgParse::apflag g_cl_no_color = false;
 ArgParse::apstring g_cl_frameList = "";
 ArgParse::apintvec g_cl_frames;
 ArgParse::apstring g_cl_indentation = "space";
-ArgParse::apint g_cl_indentlevel = 4;
-ArgParse::apflag g_cl_binary = false;
 ArgParse::apint g_cl_compression = 0;	// Default None
 ArgParse::apstring g_cl_output = "";
-ArgParse::apflag g_cl_readarchives = true;
+Aqsis::RibWriterOptions g_writerOpts;
 #ifdef AQSIS_SYSTEM_POSIX
 ArgParse::apflag g_cl_syslog = false;
 #endif
@@ -119,12 +116,12 @@ int main( int argc, const char** argv )
 	              "\atab or 2", &g_cl_indentation );
 	ap.alias( "indentation", "i" );
 	ap.argInt( "indentlevel", "=integer\aSet the indetation amount "
-			   "(default %default)", &g_cl_indentlevel);
+			   "(default %default)", &g_writerOpts.indentStep);
 	ap.alias( "indentlevel", "l" );
 	ap.argInt( "compression", "=integer\aSet output compression type\n"
 	           "\a0 = none (default)\n"
 	           "\a1 = gzip", &g_cl_compression );
-	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_cl_binary );
+	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_writerOpts.useBinary );
 	ap.alias( "binary", "b" );
 	ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
 	ap.argString( "framelist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_frameList);
@@ -133,8 +130,8 @@ int main( int argc, const char** argv )
 #ifdef AQSIS_SYSTEM_POSIX
 	ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif
-	ap.argString( "archives", "=string\aOverride the initial archive searchpath(s) (default \"%default\")", &g_cl_archive_path );
-	ap.argFlag( "readarchives", "\aInterpolate all ReadArchive calls into the output", &g_cl_readarchives );
+	ap.argString( "archives", "=string\aOverride the initial archive searchpath(s) (default \"%default\")", &g_writerOpts.archivePath );
+	ap.argFlag( "readarchives", "\aInterpolate all ReadArchive calls into the output", &g_writerOpts.interpolateArchives );
 	ap.alias("readarchives", "ra");
 	ap.allowUnrecognizedOptions();
 
@@ -187,17 +184,17 @@ int main( int argc, const char** argv )
 	namespace Ri = Aqsis::Ri;
 
 	// get indentation
-	int indentAmount = std::max(0, g_cl_indentlevel);
-	char indentChar = ' ';
+	g_writerOpts.indentStep = std::max(0, g_writerOpts.indentStep);
 	// Accept 0/1/2 here for compatibility with <= v1.6
 	if(g_cl_indentation == "space" || g_cl_indentation == "1")
-		indentChar = ' ';
+		g_writerOpts.indentChar = ' ';
 	else if(g_cl_indentation == "tab" || g_cl_indentation == "2")
-		indentChar = '\t';
+		g_writerOpts.indentChar = '\t';
 	else if(g_cl_indentation == "0")
-		indentAmount = 0;
+		g_writerOpts.indentStep = 0;
 	else
 		Aqsis::log() << Aqsis::warning << "unknown indent character";
+	g_writerOpts.useGzip = g_cl_compression;
 
 	// Get output stream
 	std::ostream* outStream = &std::cout;
@@ -212,9 +209,7 @@ int main( int argc, const char** argv )
 
 	// Open writer
 	boost::shared_ptr<Ri::RendererServices> writer(
-		Aqsis::createRibWriter(*outStream, g_cl_readarchives,
-							   g_cl_binary, g_cl_compression,
-							   indentAmount, indentChar, g_cl_archive_path) );
+		Aqsis::createRibWriter(*outStream, g_writerOpts));
 	// Add frame filter if desired
 	std::string frameList = getFrameList();
 	if(!frameList.empty())
