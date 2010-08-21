@@ -29,6 +29,8 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/util/exception.h>
 
+#include "ribwriter.h"
+
 RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
 RtToken RI_FILE             = tokenCast("file");
 RtToken RI_RGB              = tokenCast("rgb");
@@ -211,6 +213,26 @@ RtProcSubdivFunc getProcSubdivFuncByName(const char* name)
                     "unknown procedural function \"" << name << "\"");
         return 0;
     }
+}
+
+void registerStdFuncs(RibWriterServices& writer)
+{
+    writer.registerFilterFunc("box", RiBoxFilter);
+    writer.registerFilterFunc("gaussian", RiGaussianFilter);
+    writer.registerFilterFunc("triangle", RiTriangleFilter);
+    writer.registerFilterFunc("mitchell", RiMitchellFilter);
+    writer.registerFilterFunc("catmull-rom", RiCatmullRomFilter);
+    writer.registerFilterFunc("sinc", RiSincFilter);
+    writer.registerFilterFunc("bessel", RiBesselFilter);
+    writer.registerFilterFunc("disk", RiDiskFilter);
+
+    writer.registerProcSubdivFunc("DelayedReadArchive", RiProcDelayedReadArchive);
+    writer.registerProcSubdivFunc("RunProgram", RiProcRunProgram);
+    writer.registerProcSubdivFunc("DynamicLoad", RiProcDynamicLoad);
+
+    writer.registerErrorFunc("ignore", RiErrorIgnore);
+    writer.registerErrorFunc("print", RiErrorPrint);
+    writer.registerErrorFunc("abort", RiErrorAbort);
 }
 
 } // namespace Aqsis

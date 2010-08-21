@@ -30,6 +30,8 @@
 
 namespace Aqsis {
 
+class RibWriterServices;
+
 /// Get a standard RI filter function from its name
 RtFilterFunc getFilterFuncByName(const char* name);
 /// Get a standard RI basis from its name
@@ -38,6 +40,13 @@ RtConstBasis* getBasisByName(const char* name);
 RtErrorFunc getErrorFuncByName(const char* name);
 /// Get a standard RI procedural subdivision function from its name
 RtProcSubdivFunc getProcSubdivFuncByName(const char* name);
+
+/// Register the standard RI functions with the given RIB writer.
+///
+/// This ensures that when the writer is passed a function handle - RiBoxFilter
+/// for example - it can turn that function handle into the correct string to
+/// be printed.
+void registerStdFuncs(RibWriterServices& writer);
 
 } // namespace Aqsis
 

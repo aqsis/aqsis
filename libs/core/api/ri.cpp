@@ -63,6 +63,7 @@
 #include	"../../ribparse/ribsema.h"
 #include	"../../ribparse/risyms.h"
 #include	"../../ribparse/ricxx_filter.h"
+#include	"../../ribparse/ribwriter.h"
 
 #include	"subdivision2.h"
 #include	"condition.h"
@@ -4081,8 +4082,35 @@ using namespace Aqsis;
 namespace {
 struct CoreContext
 {
-	boost::shared_ptr<CoreRendererServices> apiServices;
+	boost::shared_ptr<Ri::RendererServices> apiServices;
+	boost::shared_ptr<std::ofstream> writerOutput;
+	CqRenderer* renderContext;
 	void* riToRiCxxData;
+
+	CoreContext(RtToken name)
+		: apiServices(),
+		writerOutput(),
+		renderContext(0),
+		riToRiCxxData(0)
+	{
+		if(!name || *name == '\0')
+		{
+			// By default, create a core renderer object
+			CoreRendererServices* serv = new CoreRendererServices();
+			apiServices.reset(serv);
+			renderContext = &serv->renderContext();
+		}
+		else
+		{
+			// Note - would need std::ios::binary if we wanted to write binary
+			// RIB.
+			writerOutput.reset(new std::ofstream(name));
+			RibWriterServices* writer =
+				createRibWriter(*writerOutput, RibWriterOptions());
+			apiServices.reset(writer);
+			registerStdFuncs(*writer);
+		}
+	}
 };
 }
 
@@ -4100,33 +4128,35 @@ static ContextList g_validContexts;
 RtVoid RiBegin(RtToken name)
 {
 	// Make a context
-	g_validContexts.push_back(new CoreContext());
+	g_validContexts.push_back(new CoreContext(name));
 	g_context = g_validContexts.back();
-	// Create new renderer
-	g_context->apiServices.reset(new CoreRendererServices());
 	g_context->riToRiCxxData = riToRiCxxBegin(*g_context->apiServices);
-	QSetRenderContext(&g_context->apiServices->renderContext());
+	QSetRenderContext(g_context->renderContext);
 
-	QGetRenderContext() ->Initialise();
-	QGetRenderContext() ->BeginMainModeBlock();
-	QGetRenderContext() ->ptransSetTime( CqMatrix() );
-	QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
+	if(QGetRenderContext())
+	{
+		QGetRenderContext() ->Initialise();
+		QGetRenderContext() ->BeginMainModeBlock();
+		QGetRenderContext() ->ptransSetTime( CqMatrix() );
+		QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
 
-	SetDefaultRiOptions();
+		SetDefaultRiOptions();
 
-	// Setup a default surface shader
-	boost::shared_ptr<IqShader> pDefaultSurfaceShader =
-	    QGetRenderContext()->getDefaultSurfaceShader();
-	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pDefaultSurfaceShader, QGetRenderContext() ->Time() );
+		// Setup a default surface shader
+		boost::shared_ptr<IqShader> pDefaultSurfaceShader =
+			QGetRenderContext()->getDefaultSurfaceShader();
+		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pDefaultSurfaceShader, QGetRenderContext() ->Time() );
 
-	// Setup the initial transformation.
-	//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( false );
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
+		// Setup the initial transformation.
+		//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( false );
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
+	}
 }
 
 RtVoid RiEnd()
 {
-	QGetRenderContext() ->EndMainModeBlock();
+	if(QGetRenderContext())
+		QGetRenderContext() ->EndMainModeBlock();
 
 	// Delete the renderer
 	QSetRenderContext( 0 );
@@ -4154,7 +4184,7 @@ RtVoid RiContext(RtContextHandle handle)
 	}
 	g_context = newContext;
 	riToRiCxxContext(g_context->riToRiCxxData);
-	QSetRenderContext(&g_context->apiServices->renderContext());
+	QSetRenderContext(g_context->renderContext);
 }
 
 namespace Aqsis {

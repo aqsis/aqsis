@@ -30,6 +30,7 @@
 
 #include "../ribparse/ribwriter.h"
 #include "../ribparse/ri2ricxx.h"
+#include "../ribparse/risyms.h"
 
 using namespace Aqsis;
 
@@ -46,26 +47,6 @@ struct RiToRibContext
 };
 
 static RiToRibContext* g_context = 0;
-
-void registerStdFuncs(RibWriterServices& writer)
-{
-    writer.registerFilterFunc("box", RiBoxFilter);
-    writer.registerFilterFunc("gaussian", RiGaussianFilter);
-    writer.registerFilterFunc("triangle", RiTriangleFilter);
-    writer.registerFilterFunc("mitchell", RiMitchellFilter);
-    writer.registerFilterFunc("catmull-rom", RiCatmullRomFilter);
-    writer.registerFilterFunc("sinc", RiSincFilter);
-    writer.registerFilterFunc("bessel", RiBesselFilter);
-    writer.registerFilterFunc("disk", RiDiskFilter);
-
-    writer.registerProcSubdivFunc("DelayedReadArchive", RiProcDelayedReadArchive);
-    writer.registerProcSubdivFunc("RunProgram", RiProcRunProgram);
-    writer.registerProcSubdivFunc("DynamicLoad", RiProcDynamicLoad);
-
-    writer.registerErrorFunc("ignore", RiErrorIgnore);
-    writer.registerErrorFunc("print", RiErrorPrint);
-    writer.registerErrorFunc("abort", RiErrorAbort);
-}
 
 RibWriterOptions g_writerOpts;
 std::ostream* g_ostream;

@@ -30,10 +30,14 @@ int main()
                                "regarding %p somewhere here!", badHandle);
 
         RiFrameBegin(1);
+            RiDisplay((char*)"blah.tif", (char*)"framebuffer", (char*)"rgb",
+                      RI_NULL);
             RiBasis(RiBezierBasis, 3, RiCatmullRomBasis, 1);
             RiPixelFilter(RiGaussianFilter, 2, 2);
+            RiProjection((char*)"perspective", RI_NULL);
+            RiTranslate(0,0,5);
             RiWorldBegin();
-                RtLightHandle h = RiLightSource((char*)"blah_shader", RI_NULL);
+                RtLightHandle h = RiLightSource((char*)"pointlight", RI_NULL);
                 RiIlluminate(h, RI_FALSE);
                 RiIlluminate(badHandle, RI_TRUE); // Invalid handle!
                 float Cs[] = {1,0,0,  0,1,0,  0,0,1,  2,2,2};
