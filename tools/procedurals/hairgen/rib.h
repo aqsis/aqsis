@@ -10,8 +10,8 @@
 #include <aqsis/util/smartptr.h>
 #include <aqsis/riutil/errorhandler.h>
 #include <aqsis/riutil/ribparser.h>
+#include <aqsis/riutil/ricxxutil.h>
 #include <aqsis/riutil/tokendictionary.h>
-#include "../../../libs/ribparse/ricxxutil.h"
 
 #include "parenthairs.h"
 #include "primvar.h"

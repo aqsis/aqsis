@@ -23,6 +23,8 @@
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 ///
 
+#include <aqsis/riutil/ri2ricxx.h>
+
 #include <vector>
 #include <set>
 #include <stack>
@@ -34,9 +36,8 @@
 #include <aqsis/util/exception.h>
 #include <aqsis/riutil/interpclasscounts.h>
 #include <aqsis/riutil/ricxx.h>
+#include <aqsis/riutil/ricxxutil.h>
 #include <aqsis/riutil/errorhandler.h>
-#include "ri2ricxx.h"
-#include "ricxxutil.h"
 
 
 using namespace Aqsis;

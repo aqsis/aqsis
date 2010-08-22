@@ -26,7 +26,6 @@ set(ribparse_hdrs
 	ribtoken.h
 	ribtokenizer.h
 	ricxx2ri.h
-	ricxx_filter.h
 )
 source_group("Header Files" FILES ${ribparse_hdrs})
 

@@ -21,7 +21,7 @@
 /// \brief Ri::Renderer interface validation
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
-#include "ricxx_filter.h"
+#include <aqsis/riutil/ricxx_filter.h>
 
 #include <cfloat>
 #include <cmath>
@@ -29,11 +29,10 @@
 #include <stack>
 #include <string.h>
 
-#include <aqsis/riutil/interpclasscounts.h>
-#include <aqsis/util/exception.h>
-
 #include <aqsis/riutil/errorhandler.h>
-#include "ricxxutil.h"
+#include <aqsis/riutil/interpclasscounts.h>
+#include <aqsis/riutil/ricxxutil.h>
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

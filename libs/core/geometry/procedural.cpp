@@ -38,7 +38,7 @@
 
 #include "renderer.h"
 #include <aqsis/util/plugins.h>
-#include "../api/ricxx_core.h"
+#include <aqsis/core/corecontext.h>
 
 namespace Aqsis {
 

@@ -21,7 +21,7 @@
 /// \brief Ri::Renderer frame dropping
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 
-#include "ricxx_filter.h"
+#include <aqsis/riutil/ricxx_filter.h>
 
 #include <algorithm>
 #include <cstdlib>

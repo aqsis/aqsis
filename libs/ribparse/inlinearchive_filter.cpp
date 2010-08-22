@@ -21,7 +21,7 @@
 ///
 /// \author Chris Foster
 
-#include "ricxx_filter.h"
+#include <aqsis/riutil/ricxx_filter.h>
 
 #include <vector>
 

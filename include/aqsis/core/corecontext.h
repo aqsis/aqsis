@@ -23,16 +23,18 @@
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 ///
 
-#ifndef AQSIS_RICXX_CORE_H_INCLUDED
-#define AQSIS_RICXX_CORE_H_INCLUDED
+#ifndef AQSIS_CORECONTEXT_H_INCLUDED
+#define AQSIS_CORECONTEXT_H_INCLUDED
 
 #include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 
-/// Create an instance of the core renderer services object.
+/// Get the core renderer context object.
+///
+/// This must be called after RiBegin().
 Ri::RendererServices* cxxRenderContext();
 
 }
 
-#endif // AQSIS_RICXX_CORE_H_INCLUDED
+#endif // AQSIS_CORECONTEXT_H_INCLUDED

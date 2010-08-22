@@ -34,6 +34,7 @@
 
 #include <aqsis/riutil/primvartoken.h>
 #include <aqsis/riutil/interpclasscounts.h>
+#include <aqsis/util/exception.h>
 
 namespace Aqsis {
 

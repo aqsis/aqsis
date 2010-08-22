@@ -28,9 +28,9 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
+#include <aqsis/riutil/ri2ricxx.h>
 #include <aqsis/riutil/ribwriter.h>
-#include "../ribparse/ri2ricxx.h"
-#include "../ribparse/risyms.h"
+#include <aqsis/riutil/risyms.h>
 
 using namespace Aqsis;
 

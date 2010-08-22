@@ -52,8 +52,8 @@
 #include <aqsis/util/logging_streambufs.h>
 #include <aqsis/version.h>
 
+#include <aqsis/riutil/ricxxutil.h>
 #include <aqsis/riutil/ribwriter.h>
-#include "../../libs/ribparse/ricxxutil.h"
 
 
 // Command-line arguments

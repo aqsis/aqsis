@@ -23,7 +23,7 @@
 
 #include <aqsis/riutil/ribwriter.h>
 #include <aqsis/riutil/ricxx.h>
-#include "ricxx_filter.h"
+#include <aqsis/riutil/ricxx_filter.h>
 
 #include <algorithm>
 #include <cstring>

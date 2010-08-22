@@ -55,6 +55,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include <aqsis/core/corecontext.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/util/argparse.h>
 #include <aqsis/util/file.h>
@@ -63,7 +64,6 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/version.h>
 #include <aqsis/util/exception.h>
-#include "../../libs/core/api/ricxx_core.h"
 
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)

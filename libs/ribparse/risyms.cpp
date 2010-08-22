@@ -22,7 +22,7 @@
 /// \brief Some standard symbol definitions for the RI
 /// \author Paul Gregory
 
-#include "risyms.h"
+#include <aqsis/riutil/risyms.h>
 
 #include <string.h>
 

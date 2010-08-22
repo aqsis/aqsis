@@ -35,9 +35,9 @@
 #include "multistringbuffer.h"
 #include <aqsis/riutil/ribparser.h>
 #include <aqsis/riutil/ricxx.h>
-#include "ricxx2ri.h"
-#include "ricxx_filter.h"
-#include "risyms.h"
+#include <aqsis/riutil/ricxx2ri.h>
+#include <aqsis/riutil/ricxx_filter.h>
+#include <aqsis/riutil/risyms.h>
 
 namespace Aqsis {
 

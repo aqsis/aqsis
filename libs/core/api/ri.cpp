@@ -49,8 +49,12 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"procedural.h"
-#include	"ricxx_core.h"
+#include	<aqsis/core/corecontext.h>
+#include	<aqsis/riutil/ri2ricxx.h>
+#include	<aqsis/riutil/ricxxutil.h>
+#include	<aqsis/riutil/ricxx_filter.h>
 #include	<aqsis/riutil/ribparser.h>
+#include	<aqsis/riutil/risyms.h>
 #include	<aqsis/riutil/ribwriter.h>
 #include	<aqsis/util/file.h>
 #include	<aqsis/util/logging.h>
@@ -58,11 +62,7 @@
 #include	<aqsis/tex/maketexture.h>
 #include	"stats.h"
 #include	<aqsis/math/random.h>
-#include	"../../ribparse/ricxxutil.h"
-#include	"../../ribparse/ri2ricxx.h"
 #include	"../../ribparse/errorhandlerimpl.h"
-#include	"../../ribparse/risyms.h"
-#include	"../../ribparse/ricxx_filter.h"
 
 #include	"subdivision2.h"
 #include	"condition.h"

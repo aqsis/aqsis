@@ -29,6 +29,8 @@
 #ifndef AQSIS_RI2RICXX_H_INCLUDED
 #define AQSIS_RI2RICXX_H_INCLUDED
 
+#include <aqsis/ri/ritypes.h>
+
 namespace Aqsis {
 
 namespace Ri { class RendererServices; }
