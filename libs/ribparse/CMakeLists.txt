@@ -18,6 +18,7 @@ set(ribparse_srcs
 )
 
 set(ribparse_hdrs
+	errorhandlerimpl.h
 	multistringbuffer.h
 	ribinputbuffer.h
 	riblexer.h
@@ -26,6 +27,7 @@ set(ribparse_hdrs
 	ribtoken.h
 	ribtokenizer.h
 	ricxx2ri.h
+	ricxx_cache.h
 )
 source_group("Header Files" FILES ${ribparse_hdrs})
 
