@@ -35,7 +35,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <aqsis/ribparser.h> // for TqCommentCallback
+#include "riblexer.h" // for CommentCallback
 #include "ribinputbuffer.h"
 #include "ribtoken.h"
 
@@ -61,7 +61,7 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 {
 	public:
 		/// Comment callback function type
-		typedef IqRibParser::TqCommentCallback TqCommentCallback;
+		typedef RibLexer::CommentCallback CommentCallback;
 
 		/** Create a new lexer without input stream.
 		 *
@@ -81,7 +81,7 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 		 *                   comment token.
 		 */
 		void pushInput(std::istream& inStream, const std::string& streamName,
-				const TqCommentCallback& callback = TqCommentCallback());
+				const CommentCallback& callback = CommentCallback());
 		/** \brief Pop a stream off the input stack
 		 *
 		 * If the stream is the last on the input stack, the lexer reverts to
@@ -105,7 +105,7 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 		 * \return The position in the input file for the previous token
 		 *         obtained with get().
 		 */
-		SqRibPos pos() const;
+		std::string streamPos() const;
 
 	private:
 		typedef std::map<int, std::string> EncodedStringMap;
@@ -153,7 +153,7 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 		bool m_haveNext;
 
 		/// Pointer to callback function for handling comments
-		TqCommentCallback m_commentCallback;
+		CommentCallback m_commentCallback;
 
 		/// Array of encoded requests for binary RIB decoding
 		std::vector<std::string> m_encodedRequests;
@@ -169,12 +169,6 @@ class AQSIS_RIBPARSER_SHARE RibTokenizer : boost::noncopyable
 // Implementation details
 //==============================================================================
 // RibTokenizer functions
-inline SqRibPos RibTokenizer::pos() const
-{
-	return SqRibPos(m_currPos.line, m_currPos.col,
-			m_inBuf ? m_inBuf->streamName().c_str() : "null");
-}
-
 inline const RibToken& RibTokenizer::get()
 {
 	if(!m_haveNext)

@@ -317,15 +317,11 @@ BOOST_AUTO_TEST_CASE(RibTokenizer_position_test)
 	f.t.get();
 	f.t.get();
 	f.t.get();
-	SqRibPos pos = f.t.pos();
-	BOOST_CHECK_EQUAL(pos.line, 1);
-	BOOST_CHECK_EQUAL(pos.col, 7);
+	BOOST_CHECK_EQUAL("test_stream:1 (col 7)", f.t.streamPos());
 	f.t.get();
 	f.t.get();
 	f.t.get();
-	pos = f.t.pos();
-	BOOST_CHECK_EQUAL(pos.line, 2);
-	BOOST_CHECK_EQUAL(pos.col, 5);
+	BOOST_CHECK_EQUAL("test_stream:2 (col 5)", f.t.streamPos());
 }
 
 BOOST_AUTO_TEST_CASE(RibTokenizer_peek_test)
@@ -339,9 +335,7 @@ BOOST_AUTO_TEST_CASE(RibTokenizer_peek_test)
 	f.t.peek();
 	f.t.peek();
 
-	SqRibPos pos = f.t.pos();
-	BOOST_CHECK_EQUAL(pos.line, 1);
-	BOOST_CHECK_EQUAL(pos.col, 7);
+	BOOST_CHECK_EQUAL("test_stream:1 (col 7)", f.t.streamPos());
 	BOOST_CHECK_EQUAL(f.t.peek(), RibToken(1));
 	f.t.get();
 	f.t.get();
@@ -374,19 +368,18 @@ BOOST_AUTO_TEST_CASE(RibTokenizer_streamstack_test)
 	std::istringstream in1("Stream1Start Stream1End");
 	lex.pushInput(in1, "stream1");
 	BOOST_CHECK_EQUAL(lex.get(), RibToken(RibToken::REQUEST, "Stream1Start"));
-	BOOST_CHECK_EQUAL(lex.pos().name, "stream1");
+	BOOST_CHECK_EQUAL(lex.streamPos(), "stream1:1 (col 1)");
 
 	lex.peek();
 	std::istringstream in2("Stream2Start");
 	lex.pushInput(in2, "stream2");
 	BOOST_CHECK_EQUAL(lex.get(), RibToken(RibToken::REQUEST, "Stream2Start"));
-	BOOST_CHECK_EQUAL(lex.pos().name, "stream2");
+	BOOST_CHECK_EQUAL(lex.streamPos(), "stream2:1 (col 1)");
 	CHECK_EOF(lex);
 
 	lex.popInput();
 	BOOST_CHECK_EQUAL(lex.get(), RibToken(RibToken::REQUEST, "Stream1End"));
-	BOOST_CHECK_EQUAL(lex.pos().col, 14);
-	BOOST_CHECK_EQUAL(lex.pos().name, "stream1");
+	BOOST_CHECK_EQUAL(lex.streamPos(), "stream1:1 (col 14)");
 	CHECK_EOF(lex);
 
 	lex.popInput();

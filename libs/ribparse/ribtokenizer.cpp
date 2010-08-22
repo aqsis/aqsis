@@ -47,12 +47,12 @@ struct RibTokenizer::InputState
 	SourcePos nextPos;
 	RibToken nextTok;
 	bool haveNext;
-	TqCommentCallback commentCallback;
+	CommentCallback commentCallback;
 
 	InputState(std::istream& inStream, const std::string& streamName,
 			const SourcePos& currPos, const SourcePos& nextPos,
 			const RibToken& nextTok, bool haveNext,
-			const TqCommentCallback& callback)
+			const CommentCallback& callback)
 		: inBuf(inStream, streamName),
 		currPos(currPos),
 		nextPos(nextPos),
@@ -79,7 +79,7 @@ RibTokenizer::RibTokenizer()
 { }
 
 void RibTokenizer::pushInput(std::istream& inStream, const std::string& streamName,
-		const TqCommentCallback& callback)
+		const CommentCallback& callback)
 {
 	m_inputStack.push( boost::shared_ptr<InputState>(
 				new InputState(inStream, streamName, m_currPos, m_nextPos,
@@ -107,6 +107,14 @@ void RibTokenizer::popInput()
 		m_inBuf = &m_inputStack.top()->inBuf;
 	else
 		m_inBuf = 0;
+}
+
+std::string RibTokenizer::streamPos() const
+{
+    std::ostringstream msg;
+    msg << (m_inBuf ? m_inBuf->streamName() : "null") << ":"
+		<< m_currPos.line << " (col " << m_currPos.col << ")";
+    return msg.str();
 }
 
 /** \brief Scan the next token from the underlying input stream.

@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_error_recovery)
 
     BOOST_CHECK_THROW(f.lex.nextRequest(), XqParseError);
     // check that the error position correctly reflects the bad token
-    BOOST_CHECK_EQUAL(f.lex.streamPos(), "test_stream: 1 (col 1)");
+    BOOST_CHECK_EQUAL(f.lex.streamPos(), "test_stream:1 (col 1)");
     f.lex.discardUntilRequest();
     BOOST_CHECK_EQUAL(f.lex.nextRequest(), "SomeRequest");
 }

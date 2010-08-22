@@ -144,7 +144,7 @@ class AQSIS_RIBPARSER_SHARE RibLexer
          *
          * The current name and position of the RIB on top of the stream stack
          * is returned in the handy format
-         *     "<stream_name>: <line_number> (col <col_number>)"
+         *     "<stream_name>:<line_number> (col <col_number>)"
          * which is useful for error reporting.
          */
         virtual std::string streamPos() = 0;

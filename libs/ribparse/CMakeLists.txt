@@ -9,7 +9,6 @@ set(ribparse_srcs
 	ribinputbuffer.cpp
 	ribtokenizer.cpp
 	riblexer.cpp
-	ribparser.cpp
 	ribsema.cpp
 	ribwriter.cpp
 	ricxx_validate.cpp
@@ -23,7 +22,6 @@ set(ribparse_hdrs
 	ribinputbuffer.h
 	riblexer.h
 	riblexer_impl.h
-	ribparser_impl.h
 	ribsema.h
 	ribtoken.h
 	ribtokenizer.h
@@ -45,7 +43,6 @@ aqsis_install_targets(aqsis_ribparse)
 set(ribparse_test_srcs
 	ribinputbuffer_test.cpp
 	ribtokenizer_test.cpp
-	ribparser_test.cpp
 	riblexer_test.cpp
 	ribsema_test.cpp
 	errorhandler_test.cpp

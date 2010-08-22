@@ -69,10 +69,7 @@ void RibLexerImpl::discardUntilRequest()
 
 std::string RibLexerImpl::streamPos()
 {
-    SqRibPos pos = m_tokenizer.pos();
-    std::ostringstream msg;
-    msg << pos.name << ":" << pos.line << " (col " << pos.col << ")";
-    return msg.str();
+    return m_tokenizer.streamPos();
 }
 
 void RibLexerImpl::pushInput(std::istream& inStream, const std::string& streamName,
