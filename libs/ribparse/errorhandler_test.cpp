@@ -23,7 +23,7 @@
 /// \author Chris Foster [chris42f (at) g mail (d0t) com]
 ///
 
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 
 #ifndef AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK

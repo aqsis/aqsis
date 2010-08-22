@@ -25,7 +25,7 @@
 #ifndef AQSIS_ERRORHANDLER_IMPL_INCLUDED
 #define AQSIS_ERRORHANDLER_IMPL_INCLUDED
 
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 
 #include <aqsis/util/logging.h>
 

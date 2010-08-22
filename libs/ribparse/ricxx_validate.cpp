@@ -32,7 +32,7 @@
 #include <aqsis/riutil/interpclasscounts.h>
 #include <aqsis/util/exception.h>
 
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 #include "ricxxutil.h"
 
 namespace Aqsis {

@@ -40,7 +40,7 @@
 
 #include <aqsis/math/math.h>
 #include <aqsis/riutil/tokendictionary.h>
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 
 using namespace boost::assign; // necessary for container initialisation operators.
 

@@ -29,7 +29,7 @@
 #include <cstring>  // for strcpy
 
 #include "riblexer.h"
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 
 namespace Aqsis
 {

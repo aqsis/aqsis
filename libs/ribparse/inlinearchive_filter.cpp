@@ -27,7 +27,7 @@
 
 #include <aqsis/util/exception.h>
 #include "ricxx_cache.h"
-#include "errorhandler.h"
+#include <aqsis/riutil/errorhandler.h>
 
 namespace Aqsis {
 
