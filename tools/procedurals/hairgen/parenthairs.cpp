@@ -40,7 +40,7 @@ bool HairModifiers::parseParam(const std::string& name, std::istream& in)
 //------------------------------------------------------------------------------
 // ParentHairs implementation
 ParentHairs::ParentHairs(bool linear,
-		const IntArray& numVerts,
+		const Ri::IntArray& numVerts,
 		const boost::shared_ptr<PrimVars>& primVars,
 		const HairModifiers& modifiers)
 	: m_linear(linear),

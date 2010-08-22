@@ -31,19 +31,20 @@ struct TokValPair
 	/// name, type, etc of the primvar
 	Aqsis::CqPrimvarToken token;
 	/// array of values for the primvar.
-	boost::shared_ptr<T> value;
+	boost::shared_ptr<std::vector<T> > value;
 
 	/// constructor, *copying* the provided value.
-	TokValPair(const Aqsis::CqPrimvarToken& token, const T& value)
-		: token(token), value(new T(value)) {}
-	/// constructor creating a new empty value type.
-	TokValPair(const Aqsis::CqPrimvarToken& token)
-		: token(token), value(new T()) {}
+	template<typename ArrayT>
+	TokValPair(const Aqsis::CqPrimvarToken& token, const ArrayT& value)
+		: token(token),
+		value(new std::vector<T>(value.begin(), value.end()))
+	{ }
 };
 
 
 /// token value pairs with float arrays as the value.
-typedef TokValPair<FloatArray> TokFloatValPair;
+typedef TokValPair<float> TokFloatValPair;
+typedef std::vector<float> FloatArray;
 typedef std::vector<TokFloatValPair> FloatPrimVars;
 
 
@@ -56,6 +57,11 @@ typedef std::vector<TokFloatValPair> FloatPrimVars;
 class PrimVars
 {
 	public:
+		PrimVars() {}
+
+		// Copy primvars from the given param list.
+		PrimVars(const Ri::ParamList& pList);
+
 		/// Iterator types for primvars
 		typedef FloatPrimVars::const_iterator const_iterator;
 		typedef FloatPrimVars::iterator iterator;
@@ -134,7 +140,8 @@ class ParamList
 					<< i->token.name();
 				m_tokenStorage.push_back(out.str());
 				m_tokens.push_back(const_cast<RtToken>(m_tokenStorage.back().c_str()));
-				m_values.push_back(reinterpret_cast<RtPointer>(&(*i->value)[0]));
+				m_values.push_back(const_cast<RtPointer>(
+								   static_cast<const void*>(&(*i->value)[0])));
 			}
 		}
 
@@ -180,6 +187,19 @@ inline void PrimVars::append(const Aqsis::CqPrimvarToken& token,
 		const FloatArray& value)
 {
 	m_vars.push_back(TokFloatValPair(token, value));
+}
+
+inline PrimVars::PrimVars(const Ri::ParamList& pList)
+{
+	for(size_t i = 0; i < pList.size(); ++i)
+	{
+		if(pList[i].spec().storageType() == Ri::TypeSpec::Float)
+		{
+			m_vars.push_back(TokFloatValPair(
+					Aqsis::CqPrimvarToken(pList[i].spec(), pList[i].name()),
+					pList[i].floatData()));
+		}
+	}
 }
 
 inline const FloatArray* PrimVars::findPtr(const std::string& name) const

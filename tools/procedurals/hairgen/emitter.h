@@ -38,7 +38,7 @@ class EmitterMesh
 		 *                std::runtime_error is thrown.
 		 * \param totParticles - Total number of particles to generate on the mesh.
 		 */
-		EmitterMesh(const IntArray& nverts, const IntArray& verts,
+		EmitterMesh(const Ri::IntArray& nverts, const Ri::IntArray& verts,
 				boost::shared_ptr<PrimVars> primVars, int totParticles);
 
 		/// Get the number of faces in the mesh
@@ -63,8 +63,8 @@ class EmitterMesh
 		float triangleArea(const int* v) const;
 		float faceArea(const MeshFace& face) const;
 		Vec3 faceNormal(const MeshFace& face) const;
-		void createFaceList(const IntArray& nverts,
-				const IntArray& verts, FaceVec& faces) const;
+		void createFaceList(const Ri::IntArray& nverts,
+				const Ri::IntArray& verts, FaceVec& faces) const;
 
 		/// Array of faces.
 		FaceVec m_faces;

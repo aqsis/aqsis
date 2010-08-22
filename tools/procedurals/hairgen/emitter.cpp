@@ -9,7 +9,7 @@
 // EmitterMesh Implementation
 
 EmitterMesh::EmitterMesh(
-		const IntArray& nverts, const IntArray& verts,
+		const Ri::IntArray& nverts, const Ri::IntArray& verts,
 		boost::shared_ptr<PrimVars> primVars, int totParticles)
 	: m_faces(),
 	m_P(),
@@ -68,8 +68,9 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 			else
 			{
 				int stride = i->token.storageCount();
-				interpVars->back().value->assign(i->value->begin() + stride*faceIdx,
-					i->value->begin() + stride*(faceIdx+1));
+				interpVars->back().value->assign(
+						i->value->begin() + stride*faceIdx,
+						i->value->begin() + stride*(faceIdx+1));
 			}
 		}
 		else
@@ -204,8 +205,8 @@ Vec3 EmitterMesh::faceNormal(const MeshFace& face) const
  * \param verts - concatenated array of vertex indices into the primvar arrays.
  * \param faces - newly initialised faces go here.
  */
-void EmitterMesh::createFaceList(const IntArray& nverts,
-		const IntArray& verts,
+void EmitterMesh::createFaceList(const Ri::IntArray& nverts,
+		const Ri::IntArray& verts,
 		FaceVec& faces) const
 {
 	// Create face list

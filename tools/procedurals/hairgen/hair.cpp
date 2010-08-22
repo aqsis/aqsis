@@ -37,7 +37,7 @@ std::ostream& g_errStream = std::cout;
  */
 void transformPrimVars(PrimVars& primVars, const Aqsis::CqMatrix& pointTrans)
 {
-	for(PrimVars::const_iterator var = primVars.begin(),
+	for(PrimVars::iterator var = primVars.begin(),
 			end = primVars.end(); var != end; ++var)
 	{
 		FloatArray& value = *var->value;
@@ -233,20 +233,23 @@ class HairProcedural
 			m_parentHairs(),
 			m_params(initialdata)
 		{
+			HairgenApiServices apiServices(m_emitter, m_params.numHairs,
+										   m_parentHairs,
+										   m_params.hairModifiers);
 			std::ifstream emitterStream(m_params.emitterFileName.c_str());
 			if(emitterStream)
-			{
-				PointsPolygonsRequestHandler requestHandler(m_emitter, m_params.numHairs);
-				parseStream(emitterStream, m_params.emitterFileName, requestHandler);
-			}
+				apiServices.parseRib(emitterStream,
+									 m_params.emitterFileName.c_str());
 			if(!m_emitter)
-				throw std::runtime_error("Could not find PointsPolygons emitter mesh in file");
+				throw std::runtime_error("Could not find PointsPolygons "
+										 "emitter mesh in file");
 
-			std::ifstream curveStream(m_params.hairFileName.c_str());
-			if(curveStream)
+			if(m_params.hairFileName != m_params.emitterFileName)
 			{
-				CurvesRequestHandler requestHandler(m_parentHairs, m_params.hairModifiers);
-				parseStream(curveStream, m_params.hairFileName, requestHandler);
+				std::ifstream curveStream(m_params.hairFileName.c_str());
+				if(curveStream)
+					apiServices.parseRib(curveStream,
+										 m_params.hairFileName.c_str());
 			}
 			if(!m_parentHairs)
 				throw std::runtime_error("Could not find parent Curves in file");
@@ -292,13 +295,15 @@ class HairProcedural
 				ParamList pList(*faceVars);
 
 				int numCurves = faceVars->find("P_emit").size()/3;
-				IntArray nVerts(numCurves, m_parentHairs->vertsPerCurve());
+				std::vector<int> nVerts(numCurves,
+										m_parentHairs->vertsPerCurve());
 
 				RtToken linearStr = const_cast<RtToken>(
 						m_parentHairs->linear() ? "linear" : "cubic");
 
-				RiCurvesV(linearStr, numCurves, &nVerts[0], "nonperiodic",
-						pList.count(), pList.tokens(), pList.values());
+				RiCurvesV(linearStr, numCurves, &nVerts[0],
+						  (char*)"nonperiodic",
+						  pList.count(), pList.tokens(), pList.values());
 			}
 			if(m_params.verbose)
 				std::cout << "hairgen: Hair generation done.\n";

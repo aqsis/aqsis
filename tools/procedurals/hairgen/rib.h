@@ -8,159 +8,128 @@
 #include <string>
 
 #include <aqsis/util/smartptr.h>
-#include <aqsis/ribparser.h>
 #include <aqsis/riutil/tokendictionary.h>
+#include "../../../libs/ribparse/ricxxutil.h"
+#include "../../../libs/ribparse/ribsema.h"
+#include "../../../libs/ribparse/errorhandler.h"
 
 #include "parenthairs.h"
 #include "primvar.h"
 #include "util.h"
 
-//------------------------------------------------------------------------------
-/** RIB parameter collection from libribparse --> PrimVars container.
- *
- * This class collects primvars as they are parsed by Aqsis::IqRibParser, and
- * stuffs them into a PrimVars container.  As such, it currently supports only
- * float primvars.
- */
-class PrimVarInserter : public Aqsis::IqRibParamListHandler
-{
-	private:
-		PrimVars& m_primVars;
-		const Aqsis::CqTokenDictionary& m_tokenDict;
-	public:
-		PrimVarInserter(PrimVars& primVars, const Aqsis::CqTokenDictionary& tokenDict)
-			: m_primVars(primVars),
-			m_tokenDict(tokenDict)
-		{ }
-
-		// inherited
-		virtual void readParameter(const std::string& name, Aqsis::IqRibParser& parser)
-		{
-			Aqsis::CqPrimvarToken token;
-			try
-			{
-				token = m_tokenDict.parseAndLookup(name);
-			}
-			catch(Aqsis::XqValidation& e)
-			{
-				g_errStream << "hairgen: " << e.what() << "\n";
-			}
-			if(token.storageType() == Aqsis::type_float)
-				m_primVars.append(token, parser.getFloatParam());
-			else
-				g_errStream << "hairgen: primvar not handled: " << token.name() << " discarded\n";
-		}
-};
-
-
-//------------------------------------------------------------------------------
-/** Handler for RiPointsPolygons requests.
- *
- * Grabs the PointsPolygons data, and puts it into a EmitterMesh object.
- */
-class PointsPolygonsRequestHandler : public Aqsis::IqRibRequestHandler
+/// Extracts Curves and Polygons data from a RIB stream.
+///
+/// The Curves data gets put into a ParentHairs object.
+/// The PointsPolygons data gets put into an EmitterMesh object.
+class HairgenApi : public Aqsis::StubRenderer
 {
 	private:
 		boost::shared_ptr<EmitterMesh>& m_emitter;
-		TqInt m_numHairs;
-		Aqsis::CqTokenDictionary m_tokenDict;
-	public:
-		PointsPolygonsRequestHandler(boost::shared_ptr<EmitterMesh>& emitter, int numHairs)
-			: m_emitter(emitter),
-			m_numHairs(numHairs),
-			m_tokenDict(true)
-		{ }
-
-		void handleRequest(const std::string& name, Aqsis::IqRibParser& parser)
-		{
-			if(name != "PointsPolygons")
-				return;
-			// number of verts per polygon
-			const IntArray& numVerts = parser.getIntArray();
-			// indices for vertice into the primvars of type vertex or varying
-			const IntArray& vertIndices = parser.getIntArray();
-			// Handle all primvars
-			boost::shared_ptr<PrimVars> primVars(new PrimVars());
-			PrimVarInserter pList(*primVars, m_tokenDict);
-			parser.getParamList(pList);
-
-			m_emitter.reset(new EmitterMesh(numVerts, vertIndices,
-						primVars, m_numHairs));
-		}
-};
-
-//------------------------------------------------------------------------------
-/** Handler for RiCurves requests.
- *
- * Grabs the Curves data, and puts it into a ParentHairs object.
- */
-class CurvesRequestHandler : public Aqsis::IqRibRequestHandler
-{
-	private:
+		int m_numHairs;
 		boost::shared_ptr<ParentHairs>& m_hairs;
 		const HairModifiers& m_hairModifiers;
-		Aqsis::CqTokenDictionary m_tokenDict;
 	public:
-		CurvesRequestHandler(boost::shared_ptr<ParentHairs>& hairs,
-				const HairModifiers& hairModifiers)
-			: m_hairs(hairs),
-			m_hairModifiers(hairModifiers),
-			m_tokenDict(true)
+		HairgenApi(boost::shared_ptr<EmitterMesh>& emitter,
+				   int numHairs, boost::shared_ptr<ParentHairs>& hairs,
+				   const HairModifiers& hairModifiers)
+			: m_emitter(emitter),
+			m_numHairs(numHairs),
+			m_hairs(hairs),
+			m_hairModifiers(hairModifiers)
 		{ }
 
-		void handleRequest(const std::string& name, Aqsis::IqRibParser& parser)
+		virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
+							  RtConstToken wrap, const ParamList& pList)
 		{
-			if(name != "Curves")
-				return;
-			// Curve type - "linear" or "cubic"
-			std::string typeStr = parser.getString();
-			bool linear = typeStr == "linear";
-			// Number of verts per curve
-			const IntArray& numVerts = parser.getIntArray();
-			// periodic curves - "periodic" or "nonperiodic"
-			std::string periodicStr = parser.getString();
-			bool periodic = periodicStr == "periodic";
-			// Handle all primvars
-			boost::shared_ptr<PrimVars> primVars(new PrimVars());
-			PrimVarInserter pList(*primVars, m_tokenDict);
-			parser.getParamList(pList);
-
 			// We can't deal with periodic curves or interpolate when there's
-			// less that four parents.
-			if(periodic || static_cast<int>(numVerts.size()) <
-					ParentHairs::m_parentsPerChild)
+			// less than a certian number of parent hairs.
+			if((int)nvertices.size() < ParentHairs::m_parentsPerChild
+			   || strcmp(wrap, "periodic")==0)
 				return;
+			bool linear = strcmp(type, "linear") == 0;
+			boost::shared_ptr<PrimVars> params(new PrimVars(pList));
+			m_hairs.reset(new ParentHairs(linear, nvertices,
+										  params, m_hairModifiers));
+		}
 
-			m_hairs.reset(new ParentHairs(linear, numVerts, primVars, m_hairModifiers));
+		virtual RtVoid PointsPolygons(const IntArray& nverts,
+									  const IntArray& verts,
+									  const ParamList& pList)
+		{
+			// Handle all primvars
+			boost::shared_ptr<PrimVars> params(new PrimVars(pList));
+			m_emitter.reset(new EmitterMesh(nverts, verts,
+						params, m_numHairs));
 		}
 };
 
-
-//------------------------------------------------------------------------------
-/** Parse a RIB stream using the provided set of request handlers.
- *
- * \param ribStream - RIB input stream.
- * \param requests - A set of RI request handlers to be invoked by the RIB
- *                   parser.  Only handlers for the particular requests of
- *                   interest should be included.
- */
-inline void parseStream(std::istream& ribStream, const std::string& streamName,
-		Aqsis::IqRibRequestHandler& requestHandler)
+class HairgenApiServices : public Aqsis::StubRendererServices
 {
-	boost::shared_ptr<Aqsis::IqRibParser> parser = Aqsis::IqRibParser::create(
-		boost::shared_ptr<Aqsis::IqRibRequestHandler>(&requestHandler, Aqsis::nullDeleter) );
+	private:
+		HairgenApi m_api;
+		Aqsis::CqTokenDictionary m_tokenDict;
+		boost::shared_ptr<Aqsis::RibParser> m_parser;
 
-	parser->pushInput(ribStream, streamName);
-	bool parsing = true;
-	while(parsing)
-	{
-		try
+		class ErrorHandler : public Ri::ErrorHandler
 		{
-			parsing = parser->parseNextRequest();
-		}
-		catch(Aqsis::XqParseError& e)
+			public:
+				ErrorHandler() : Ri::ErrorHandler(Warning) {}
+			protected:
+				virtual void sendError(int code, const std::string& message)
+				{
+					std::ostream& out = g_errStream;
+					switch(errorCategory(code))
+					{
+						case Debug:   out << "DEBUG: ";    break;
+						case Info:    out << "INFO: ";     break;
+						case Warning: out << "WARNING: ";  break;
+						case Error:   out << "ERROR: ";    break;
+						case Severe:  out << "CRITICAL: "; break;
+						case Message: out << "INFO: ";     break;
+					}
+					out << message << std::endl;
+				}
+		};
+		ErrorHandler m_errHandler;
+
+	public:
+		HairgenApiServices(boost::shared_ptr<EmitterMesh>& emitter,
+				   int numHairs, boost::shared_ptr<ParentHairs>& hairs,
+				   const HairModifiers& hairModifiers)
+			: m_api(emitter, numHairs, hairs, hairModifiers),
+			m_tokenDict(true)
 		{
-			g_errStream << "hairgen: " << e << "\n";
+			m_parser.reset(new Aqsis::RibParser(*this));
 		}
-	}
-}
+
+		virtual Ri::ErrorHandler& errorHandler()
+		{
+			return m_errHandler;
+		}
+
+        virtual Ri::TypeSpec getDeclaration(RtConstToken token,
+                                        const char** nameBegin = 0,
+                                        const char** nameEnd = 0) const
+		{
+            Ri::TypeSpec spec = Aqsis::parseDeclaration(token, nameBegin, nameEnd);
+            if(spec.type == Ri::TypeSpec::Unknown)
+            {
+                // FIXME: Yuck, ick, ew!  Double parsing here :/
+                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
+            }
+            return spec;
+		}
+
+		virtual Ri::Renderer& firstFilter()
+		{
+			return m_api;
+		}
+
+		virtual void parseRib(std::istream& ribStream, const char* name,
+							  Ri::Renderer& context)
+		{
+			m_parser->parseStream(ribStream, name, context);
+		}
+		using Ri::RendererServices::parseRib;
+};
+
