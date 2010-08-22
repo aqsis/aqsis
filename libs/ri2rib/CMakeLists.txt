@@ -1,14 +1,14 @@
 project(ri2rib)
 
 set(ri2rib_srcs
-	../ribparse/ri2ricxx.cpp
-	../ribparse/risyms.cpp
+	../riutil/ri2ricxx.cpp
+	../riutil/risyms.cpp
 	ri2rib.cpp
 )
 
 aqsis_add_library(aqsis_ri2rib ${ri2rib_srcs}
 	COMPILE_DEFINITIONS AQSIS_RI_EXPORTS
-	LINK_LIBRARIES aqsis_riutil aqsis_ribparse
+	LINK_LIBRARIES aqsis_riutil
 )
 
 aqsis_install_targets(aqsis_ri2rib)

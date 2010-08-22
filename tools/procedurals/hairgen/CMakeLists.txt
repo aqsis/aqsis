@@ -7,7 +7,7 @@ set(hairgen_srcs
 	kdtree/kdtree2.cpp
 )
 
-set(linklibs aqsis_math aqsis_util aqsis_ribparse)
+set(linklibs aqsis_math aqsis_util aqsis_riutil)
 if(NOT UNIX OR APPLE)
 	# We need to explicitly link to aqsis_core for the Ri* functions, except
 	# on most unix platforms which find the unresolved symbols at load time.

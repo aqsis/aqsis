@@ -4,8 +4,8 @@ set(api_srcs
 	graphicsstate.cpp
 	ri.cpp
 	rif.cpp
-	../../ribparse/risyms.cpp
-	../../ribparse/ri2ricxx.cpp
+	../../riutil/risyms.cpp
+	../../riutil/ri2ricxx.cpp
 )
 make_absolute(api_srcs ${api_SOURCE_DIR})
 
