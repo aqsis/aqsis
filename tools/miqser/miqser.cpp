@@ -52,7 +52,7 @@
 #include <aqsis/util/logging_streambufs.h>
 #include <aqsis/version.h>
 
-#include "../../libs/ribparse/ribwriter.h"
+#include <aqsis/riutil/ribwriter.h>
 #include "../../libs/ribparse/ricxxutil.h"
 
 

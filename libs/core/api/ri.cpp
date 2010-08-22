@@ -51,6 +51,7 @@
 #include	"procedural.h"
 #include	"ricxx_core.h"
 #include	<aqsis/riutil/ribparser.h>
+#include	<aqsis/riutil/ribwriter.h>
 #include	<aqsis/util/file.h>
 #include	<aqsis/util/logging.h>
 #include	<aqsis/util/logging_streambufs.h>
@@ -62,7 +63,6 @@
 #include	"../../ribparse/errorhandlerimpl.h"
 #include	"../../ribparse/risyms.h"
 #include	"../../ribparse/ricxx_filter.h"
-#include	"../../ribparse/ribwriter.h"
 
 #include	"subdivision2.h"
 #include	"condition.h"

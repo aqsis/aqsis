@@ -29,7 +29,7 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/util/exception.h>
 
-#include "ribwriter.h"
+#include <aqsis/riutil/ribwriter.h>
 
 RtToken RI_FRAMEBUFFER      = tokenCast("framebuffer");
 RtToken RI_FILE             = tokenCast("file");

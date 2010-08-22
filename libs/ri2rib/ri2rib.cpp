@@ -28,7 +28,7 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
-#include "../ribparse/ribwriter.h"
+#include <aqsis/riutil/ribwriter.h>
 #include "../ribparse/ri2ricxx.h"
 #include "../ribparse/risyms.h"
 
