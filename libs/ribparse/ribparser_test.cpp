@@ -29,7 +29,7 @@
 #define BOOST_TEST_DYN_LINK
 #endif //AQSIS_SYSTEM_WIN32
 
-#include "ribsema.h"
+#include "ribparser_impl.h"
 
 #include <cfloat>
 #include <cstdlib>

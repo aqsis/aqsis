@@ -23,7 +23,7 @@
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
-#include "ribsema.h"
+#include "ribparser_impl.h"
 
 #include <cfloat>
 #include <cstring>  // for strcpy

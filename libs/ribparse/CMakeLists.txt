@@ -9,7 +9,7 @@ set(ribparse_srcs
 	ribinputbuffer.cpp
 	ribtokenizer.cpp
 	riblexer.cpp
-	ribsema.cpp
+	ribparser.cpp
 	ribwriter.cpp
 	ricxx_validate.cpp
 	framedrop_filter.cpp
@@ -22,7 +22,7 @@ set(ribparse_hdrs
 	ribinputbuffer.h
 	riblexer.h
 	riblexer_impl.h
-	ribsema.h
+	ribparser_impl.h
 	ribtoken.h
 	ribtokenizer.h
 	ricxx.h
@@ -44,7 +44,7 @@ set(ribparse_test_srcs
 	ribinputbuffer_test.cpp
 	ribtokenizer_test.cpp
 	riblexer_test.cpp
-	ribsema_test.cpp
+	ribparser_test.cpp
 	errorhandler_test.cpp
 )
 

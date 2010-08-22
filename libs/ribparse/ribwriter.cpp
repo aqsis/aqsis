@@ -41,7 +41,7 @@
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/file.h>
 #include <aqsis/util/logging.h>
-#include "ribsema.h"
+#include "ribparser_impl.h"
 #include "errorhandlerimpl.h"
 
 namespace Aqsis {

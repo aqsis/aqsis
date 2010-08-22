@@ -33,7 +33,7 @@
 
 #include "errorhandlerimpl.h"
 #include "multistringbuffer.h"
-#include "ribsema.h"
+#include "ribparser_impl.h"
 #include "ricxx.h"
 #include "ricxx2ri.h"
 #include "ricxx_filter.h"

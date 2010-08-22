@@ -10,7 +10,7 @@
 #include <aqsis/util/smartptr.h>
 #include <aqsis/riutil/tokendictionary.h>
 #include "../../../libs/ribparse/ricxxutil.h"
-#include "../../../libs/ribparse/ribsema.h"
+#include "../../../libs/ribparse/ribparser_impl.h"
 #include "../../../libs/ribparse/errorhandler.h"
 
 #include "parenthairs.h"

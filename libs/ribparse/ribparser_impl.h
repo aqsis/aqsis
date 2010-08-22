@@ -23,8 +23,8 @@
  * \author Chris Foster [chris42f (at) g mail (d0t) com]
  */
 
-#ifndef RIBREQUESTHANDLER_H_INCLUDED
-#define RIBREQUESTHANDLER_H_INCLUDED
+#ifndef AQSIS_RIBPARSERIMPL_H_INCLUDED
+#define AQSIS_RIBPARSERIMPL_H_INCLUDED
 
 #include <aqsis/aqsis.h>
 
@@ -207,5 +207,5 @@ class RibParser : boost::noncopyable
 
 } // namespace Aqsis
 
-#endif // RIBREQUESTHANDLER_H_INCLUDED
+#endif // AQSIS_RIBPARSERIMPL_H_INCLUDED
 // vi: set et:

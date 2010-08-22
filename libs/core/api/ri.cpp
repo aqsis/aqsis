@@ -60,7 +60,7 @@
 #include	"../../ribparse/ricxxutil.h"
 #include	"../../ribparse/ri2ricxx.h"
 #include	"../../ribparse/errorhandlerimpl.h"
-#include	"../../ribparse/ribsema.h"
+#include	"../../ribparse/ribparser_impl.h"
 #include	"../../ribparse/risyms.h"
 #include	"../../ribparse/ricxx_filter.h"
 #include	"../../ribparse/ribwriter.h"
