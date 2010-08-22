@@ -9,8 +9,8 @@
 
 #include <aqsis/util/smartptr.h>
 #include <aqsis/riutil/tokendictionary.h>
+#include <aqsis/riutil/ribparser.h>
 #include "../../../libs/ribparse/ricxxutil.h"
-#include "../../../libs/ribparse/ribparser_impl.h"
 #include "../../../libs/ribparse/errorhandler.h"
 
 #include "parenthairs.h"
@@ -99,7 +99,7 @@ class HairgenApiServices : public Aqsis::StubRendererServices
 			: m_api(emitter, numHairs, hairs, hairModifiers),
 			m_tokenDict(true)
 		{
-			m_parser.reset(new Aqsis::RibParser(*this));
+			m_parser.reset(Aqsis::RibParser::create(*this));
 		}
 
 		virtual Ri::ErrorHandler& errorHandler()

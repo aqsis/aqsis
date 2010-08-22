@@ -50,6 +50,7 @@
 #include	"curves.h"
 #include	"procedural.h"
 #include	"ricxx_core.h"
+#include	<aqsis/riutil/ribparser.h>
 #include	<aqsis/util/file.h>
 #include	<aqsis/util/logging.h>
 #include	<aqsis/util/logging_streambufs.h>
@@ -60,7 +61,6 @@
 #include	"../../ribparse/ricxxutil.h"
 #include	"../../ribparse/ri2ricxx.h"
 #include	"../../ribparse/errorhandlerimpl.h"
-#include	"../../ribparse/ribparser_impl.h"
 #include	"../../ribparse/risyms.h"
 #include	"../../ribparse/ricxx_filter.h"
 #include	"../../ribparse/ribwriter.h"
@@ -4052,7 +4052,7 @@ class CoreRendererServices : public Ri::RendererServices
                               Ri::Renderer& context)
         {
             if(!m_parser)
-                m_parser.reset(new RibParser(*this));
+                m_parser.reset(RibParser::create(*this));
             m_parser->parseStream(ribStream, name, context);
         }
 

@@ -32,6 +32,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <aqsis/ri/ritypes.h>
+#include <aqsis/riutil/ribparser.h>
 #include <aqsis/riutil/tokendictionary.h>
 
 #include "ricxx.h"
@@ -43,21 +44,18 @@ class RibLexer;
 
 //------------------------------------------------------------------------------
 /// Parser for standard RIB streams
-class RibParser : boost::noncopyable
+class RibParserImpl : public RibParser
 {
     public:
-        RibParser(Ri::RendererServices& services);
+        RibParserImpl(Ri::RendererServices& services);
 
-        /// Parse a RIB stream, sending requests to the callback interface
-        ///
-        /// \param ribStream - RIB stream to be parsed.  May be gzipped.
-        /// \param streamName - name of the stream, present in error messages
-        void parseStream(std::istream& ribStream, const std::string& streamName,
-                         Ri::Renderer& context);
+        virtual void parseStream(std::istream& ribStream,
+                                 const std::string& streamName,
+                                 Ri::Renderer& context);
 
     private:
         /// Request handler function type
-        typedef void (RibParser::*RequestHandlerType)(Ri::Renderer& renderer);
+        typedef void (RibParserImpl::*RequestHandlerType)(Ri::Renderer& renderer);
         /// Request -> handler mapping type
         typedef std::map<std::string, RequestHandlerType> HandlerMap;
 

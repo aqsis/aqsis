@@ -616,7 +616,7 @@ struct Fixture
     MockRenderer renderer;
     MockServices services;
     TokenVec tokens;
-    RibParser parser;  //< to test.
+    RibParserImpl parser;  //< to test.
     int checkPos;
 
     Fixture(int checkPosOffset = 0)

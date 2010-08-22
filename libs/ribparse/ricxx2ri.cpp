@@ -33,7 +33,7 @@
 
 #include "errorhandlerimpl.h"
 #include "multistringbuffer.h"
-#include "ribparser_impl.h"
+#include <aqsis/riutil/ribparser.h>
 #include "ricxx.h"
 #include "ricxx2ri.h"
 #include "ricxx_filter.h"
@@ -1563,7 +1563,7 @@ void RiCxxToRiServices::parseRib(std::istream& ribStream, const char* name,
                                  Ri::Renderer& context)
 {
     if(!m_parser)
-        m_parser.reset(new RibParser(*this));
+        m_parser.reset(RibParser::create(*this));
     m_parser->parseStream(ribStream, name, context);
 }
 

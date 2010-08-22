@@ -38,10 +38,10 @@
 #endif
 #include <boost/cstdint.hpp>
 
+#include <aqsis/riutil/ribparser.h>
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/file.h>
 #include <aqsis/util/logging.h>
-#include "ribparser_impl.h"
 #include "errorhandlerimpl.h"
 
 namespace Aqsis {
@@ -564,7 +564,7 @@ class RibWriterServicesImpl : public RibWriterServices
                               Ri::Renderer& context)
         {
             if(!m_parser)
-                m_parser.reset(new RibParser(*this));
+                m_parser.reset(RibParser::create(*this));
             m_parser->parseStream(ribStream, name, context);
         }
 };
