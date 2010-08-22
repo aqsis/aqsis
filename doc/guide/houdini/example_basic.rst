@@ -8,7 +8,7 @@ Rendering a Torus
 The purpose of this example is to demonstrate the steps required for rendering a Houdini scene with Aqsis:
 
 .. figure:: _static/houdini-interface_torus.png
-   :scale: 50
+   :scale: 75
    :align: center
 
    The Houdini scene.
@@ -36,7 +36,7 @@ Using the main-menu:
 2. Navigate to the **Main** tab and ensure the **Render Target** is set as **Aqsis** and the Command field is set as ``aqsis``:
 
 .. figure:: _static/houdini-render_settings.png
-   :scale: 50
+   :scale: 75
    :align: center
 
    Houdini's "Render" settings.
@@ -44,7 +44,7 @@ Using the main-menu:
 3. Select **Render** > **Start Render** > **rib1**, which will result in Aqsis being opened and the scene being rendered to the `Framebuffer`_:
 
 .. figure:: _static/houdini-render_torus.png
-   :scale: 50
+   :scale: 75
    :align: center
 
    The Aqsis render.

@@ -11,7 +11,9 @@
 Aqsis Renderer for Houdini |HOUDINI_VERSION|
 ============================================
 
-.. include:: ../../common/project.rst
+:download:`PDF version of Houdini guide <AqsisHoudiniGuide.pdf>`
+
+.. include:: ../../common/bsd.txt
 
 
 What's New
@@ -67,7 +69,7 @@ Acknowledgements
 ================
 
 * Contributors
-* Legal
+* :doc:`Legal <../../common/license>`
 * Other
 
 

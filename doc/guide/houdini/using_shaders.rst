@@ -8,7 +8,7 @@ Materials
 1. Navigate to the **Shop** network and press the **Tab** key, then select the **RenderMan Surface** > **RMan Plastic shader**:
 
 .. figure:: _static/houdini-renderman_surface_shader.png
-   :scale: 50
+   :scale: 75
    :align: center
 
    Houdini's "SHOP" dialog.
@@ -16,7 +16,7 @@ Materials
 2. The shader parameters are now available and can be edited, if necessary:
 
 .. figure:: _static/houdini-renderman_surface_parameters.png
-   :scale: 50
+   :scale: 75
    :align: center
 
    Houdini's "Shader" parameters.
