@@ -26,7 +26,7 @@
 #ifndef AQSIS_RICXX_CORE_H_INCLUDED
 #define AQSIS_RICXX_CORE_H_INCLUDED
 
-#include "../../ribparse/ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 

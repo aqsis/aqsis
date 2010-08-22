@@ -33,7 +33,7 @@
 #include <string>
 
 #include <aqsis/ri/ritypes.h>
-#include "../../../libs/ribparse/ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 

@@ -32,7 +32,7 @@
 
 #include <aqsis/riutil/interpclasscounts.h>
 #include <aqsis/riutil/primvartype.h>
-#include "../../../libs/ribparse/ricxx.h"  // <FIXME!!
+#include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 

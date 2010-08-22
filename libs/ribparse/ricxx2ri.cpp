@@ -34,7 +34,7 @@
 #include "errorhandlerimpl.h"
 #include "multistringbuffer.h"
 #include <aqsis/riutil/ribparser.h>
-#include "ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 #include "ricxx2ri.h"
 #include "ricxx_filter.h"
 #include "risyms.h"

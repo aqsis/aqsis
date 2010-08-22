@@ -26,7 +26,7 @@
 #ifndef AQSIS_RICXXUTIL_H_INCLUDED
 #define AQSIS_RICXXUTIL_H_INCLUDED
 
-#include "ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 #include <cassert>
 #include <climits>

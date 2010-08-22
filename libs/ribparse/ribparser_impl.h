@@ -33,9 +33,8 @@
 
 #include <aqsis/ri/ritypes.h>
 #include <aqsis/riutil/ribparser.h>
+#include <aqsis/riutil/ricxx.h>
 #include <aqsis/riutil/tokendictionary.h>
-
-#include "ricxx.h"
 
 namespace Aqsis
 {

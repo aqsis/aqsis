@@ -10,7 +10,7 @@
 #include <iosfwd>
 
 #include <aqsis/math/vector3d.h>
-#include "../../../libs/ribparse/ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 namespace Ri = Aqsis::Ri;
 

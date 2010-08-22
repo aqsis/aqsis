@@ -24,7 +24,7 @@
 #ifndef AQSIS_RICXX_FILTER_INCLUDED
 #define AQSIS_RICXX_FILTER_INCLUDED
 
-#include "ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 

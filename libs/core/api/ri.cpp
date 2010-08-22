@@ -57,7 +57,6 @@
 #include	<aqsis/tex/maketexture.h>
 #include	"stats.h"
 #include	<aqsis/math/random.h>
-#include	"../../ribparse/ricxx.h"
 #include	"../../ribparse/ricxxutil.h"
 #include	"../../ribparse/ri2ricxx.h"
 #include	"../../ribparse/errorhandlerimpl.h"

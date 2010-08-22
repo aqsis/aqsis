@@ -33,7 +33,7 @@
 
 #include <boost/function.hpp>
 
-#include "ricxx.h" // for array types.
+#include <aqsis/riutil/ricxx.h> // for array types.
 
 #ifdef AQSIS_SYSTEM_WIN32
 #   ifdef AQSIS_STATIC_LINK

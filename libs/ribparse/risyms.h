@@ -26,7 +26,7 @@
 #define AQSIS_RISYMS_H_INCLUDED
 
 #include <aqsis/ri/ritypes.h>
-#include "ricxx.h" // for RtConstBasis
+#include <aqsis/riutil/ricxx.h> // for RtConstBasis
 
 namespace Aqsis {
 

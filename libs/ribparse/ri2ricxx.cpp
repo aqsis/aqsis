@@ -33,9 +33,9 @@
 #include <aqsis/ri/ri.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/riutil/interpclasscounts.h>
+#include <aqsis/riutil/ricxx.h>
 #include "errorhandler.h"
 #include "ri2ricxx.h"
-#include "ricxx.h"
 #include "ricxxutil.h"
 
 

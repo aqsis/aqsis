@@ -20,7 +20,7 @@
 #ifndef AQSIS_RICXX2RI_INCLUDED
 #define AQSIS_RICXX2RI_INCLUDED
 
-#include "ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 #include <string>
 #include <vector>

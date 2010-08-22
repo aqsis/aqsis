@@ -25,7 +25,6 @@ set(ribparse_hdrs
 	ribparser_impl.h
 	ribtoken.h
 	ribtokenizer.h
-	ricxx.h
 	ricxx2ri.h
 	ricxx_filter.h
 )

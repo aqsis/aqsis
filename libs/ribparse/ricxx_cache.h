@@ -24,7 +24,7 @@
 #ifndef AQSIS_API_CACHE_H_INCLUDED
 #define AQSIS_API_CACHE_H_INCLUDED
 
-#include "ricxx.h"
+#include <aqsis/riutil/ricxx.h>
 
 #include <cstring>
 #include <boost/ptr_container/ptr_vector.hpp>
