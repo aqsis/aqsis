@@ -62,7 +62,7 @@
 #include	<aqsis/tex/maketexture.h>
 #include	"stats.h"
 #include	<aqsis/math/random.h>
-#include	"../../ribparse/errorhandlerimpl.h"
+#include	"../../riutil/errorhandlerimpl.h"
 
 #include	"subdivision2.h"
 #include	"condition.h"
@@ -89,7 +89,6 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #endif
 
 #include	<aqsis/ri/ri.h>
-#include    <aqsis/riutil/ri_convenience.h>
 
 #include	<aqsis/util/sstring.h>
 
@@ -3200,7 +3199,9 @@ RtVoid RiCxxCore::Geometry(RtConstToken type, const ParamList& pList)
 	                    params,
 	                    0,
 	                    0,
-	                    AQSIS_PASS_RI_PARAMETERS );
+	                    count,
+	                    aTokens.size()>0?&aTokens[0]:0,
+	                    aValues.size()>0?&aValues[0]:0 );
 	RiAttributeEnd();
 
 	} else
