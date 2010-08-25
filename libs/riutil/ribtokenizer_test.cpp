@@ -26,9 +26,7 @@
 
 #include "ribtokenizer.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 
@@ -57,6 +55,8 @@ struct TokenizerFixture
 //------------------------------------------------------------------------------
 // Test cases for ASCII RIB parsing
 //------------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(rib_tokenizer_tests)
 
 BOOST_AUTO_TEST_CASE(RibTokenizer_strings_test)
 {
@@ -433,3 +433,5 @@ BOOST_AUTO_TEST_CASE(RibTokenizer_end_of_file_test)
 	BOOST_CHECK_EQUAL(f.t.get(), RibToken(RibToken::REQUEST, "Rq3"));
 	BOOST_CHECK_EQUAL(f.t.get(), RibToken(RibToken::ENDOFFILE));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

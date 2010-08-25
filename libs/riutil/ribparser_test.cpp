@@ -25,9 +25,7 @@
 
 #include <aqsis/aqsis.h>
 
-#ifndef AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include "ribparser_impl.h"
 
@@ -45,7 +43,6 @@
 using namespace boost::assign; // necessary for container initialisation operators.
 
 using namespace Aqsis;
-
 
 //------------------------------------------------------------------------------
 // Test setup.  Unfortunately we need a LOT of this :(
@@ -136,6 +133,10 @@ namespace printer_funcs
 namespace Aqsis { namespace Ri {
     using printer_funcs::operator<<;
 }}
+
+// Note that BOOST_AUTO_TEST_SUITE uses a namespace as implementation, so we
+// need to take care when mixing it with our own namespaces.
+BOOST_AUTO_TEST_SUITE(rib_parser_tests)
 
 namespace {
 using printer_funcs::operator<<;
@@ -722,7 +723,6 @@ CqTokenDictionary CheckParams::m_tokenDict;
 
 } // anon. namespace
 
-
 //------------------------------------------------------------------------------
 // Actual test cases
 //------------------------------------------------------------------------------
@@ -1132,5 +1132,7 @@ BOOST_AUTO_TEST_CASE(invalid_paramlist_missing_token)
         MockRendererError
     );
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 // vi: set et:

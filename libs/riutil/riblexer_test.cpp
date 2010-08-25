@@ -24,9 +24,7 @@
 
 #include <aqsis/aqsis.h>
 
-#ifndef AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <sstream>
 #include <cctype>
@@ -54,6 +52,8 @@ struct Fixture
         lex.pushInput(in, "test_stream");
     }
 };
+
+BOOST_AUTO_TEST_SUITE(rib_lexer_tests)
 
 BOOST_AUTO_TEST_CASE(RibLexerImpl_get_scalar_tests)
 {
@@ -219,5 +219,7 @@ BOOST_AUTO_TEST_CASE(RibLexerImpl_EOF_immediate_stop)
     // Check that the next read fails with an exception.
     BOOST_CHECK_THROW(f.lex.nextRequest(), XqParseError);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 // vi: set et:

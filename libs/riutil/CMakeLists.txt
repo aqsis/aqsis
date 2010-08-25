@@ -19,6 +19,15 @@ set(riutil_srcs
 	tokendictionary.cpp
 )
 
+set(riutil_test_srcs
+	errorhandler_test.cpp
+	primvartoken_test.cpp
+	ribinputbuffer_test.cpp
+	riblexer_test.cpp
+	ribparser_test.cpp
+	ribtokenizer_test.cpp
+)
+
 set(riutil_hdrs
 	errorhandlerimpl.h
 	multistringbuffer.h
@@ -35,21 +44,9 @@ source_group("Header Files" FILES ${riutil_hdrs})
 
 # TODO: Fix EXPORTS stuff!
 aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
+	TEST_SOURCES ${riutil_test_srcs}
 	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS AQSIS_RIBPARSER_EXPORTS USE_GZIPPED_RIB
 	LINK_LIBRARIES aqsis_util ${Boost_IOSTREAMS_LIBRARY} ${Boost_ZLIB_LIBRARY}
 )
 
 aqsis_install_targets(aqsis_riutil)
-
-#--------------------------------------------------
-# Testing
-set(riutil_test_srcs
-	errorhandler_test.cpp
-	primvartoken_test.cpp
-	ribinputbuffer_test.cpp
-	riblexer_test.cpp
-	ribparser_test.cpp
-	ribtokenizer_test.cpp
-)
-
-aqsis_add_tests(${riutil_test_srcs} LINK_LIBRARIES aqsis_riutil)

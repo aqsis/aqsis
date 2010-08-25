@@ -25,11 +25,10 @@
 
 #include <aqsis/riutil/errorhandler.h>
 
-#ifndef AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(errorhandler_tests)
 
 namespace {
 
@@ -109,5 +108,8 @@ BOOST_AUTO_TEST_CASE(ErrorHandler_lazy_formatting_test)
         BOOST_CHECK_EQUAL(handler.lastError(), "ERROR: ");
     }
 }
+
+
+BOOST_AUTO_TEST_SUITE_END()
 
 // vi: set et:

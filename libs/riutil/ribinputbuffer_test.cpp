@@ -24,9 +24,7 @@
 
 #include "ribinputbuffer.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <stdio.h>
 #include <sstream>
@@ -34,6 +32,8 @@
 #include <boost/test/auto_unit_test.hpp>
 
 using namespace Aqsis;
+
+BOOST_AUTO_TEST_SUITE(rib_input_buffer_tests)
 
 BOOST_AUTO_TEST_CASE(RibInputBuffer_sourcepos_test)
 {
@@ -107,3 +107,5 @@ BOOST_AUTO_TEST_CASE(RibInputBuffer_bufwrap_test)
 
 	BOOST_CHECK_EQUAL(extractedStr, inStr);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -26,15 +26,15 @@
 
 #include <aqsis/riutil/primvartoken.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 
 #include <aqsis/util/exception.h>
 
 using namespace Aqsis;
+
+BOOST_AUTO_TEST_SUITE(primvartoken_tests)
 
 BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 {
@@ -107,3 +107,5 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_invalid_parse_test)
 	BOOST_CHECK_THROW(CqPrimvarToken("P Cs"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("P", "Cs"), XqParseError);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
