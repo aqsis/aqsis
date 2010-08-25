@@ -4025,7 +4025,7 @@ class CoreRendererServices : public Ri::RendererServices
                 spec = toTypeSpec(m_renderContext->tokenDict().parseAndLookup(token));
             }
             return spec;
-		}
+        }
 
         virtual Ri::Renderer& firstFilter()
         {
@@ -4037,8 +4037,26 @@ class CoreRendererServices : public Ri::RendererServices
         virtual void addFilter(const char* name,
                                const Ri::ParamList& filterParams = Ri::ParamList())
         {
-            boost::shared_ptr<Ri::Renderer> filter(
-                    createFilter(name, *this, firstFilter(), filterParams));
+            boost::shared_ptr<Ri::Renderer> filter;
+            if(!strcmp(name, "echorib"))
+            {
+                if(!m_echoRibWriter)
+                {
+                    RibWriterOptions opts;
+                    m_echoRibWriter.reset(createRibWriter(std::cout, opts));
+                    // We need to kill off all ReadArchive calls, otherwise we
+                    // get them _twice_ in the output stream, since the
+                    // renderer reads the archive into the start of the filter
+                    // chain.
+                    m_echoRibWriter->addFilter("ignorearchives");
+                    registerStdFuncs(*m_echoRibWriter);
+                }
+                filter.reset(createTeeFilter(*this, firstFilter(),
+                                             m_echoRibWriter->firstFilter()));
+            }
+            else
+                filter.reset(createFilter(name, *this, firstFilter(),
+                                          filterParams));
             if(filter)
                 m_filterChain.push_back(filter);
             else
@@ -4056,11 +4074,13 @@ class CoreRendererServices : public Ri::RendererServices
             m_parser->parseStream(ribStream, name, context);
         }
 
-	private:
-		/// Core render context
-		boost::shared_ptr<CqRenderer> m_renderContext;
-		/// Core renderer API
-		boost::shared_ptr<RiCxxCore> m_api;
+    private:
+        /// Core render context
+        boost::shared_ptr<CqRenderer> m_renderContext;
+        /// Core renderer API
+        boost::shared_ptr<RiCxxCore> m_api;
+        /// RIB writer for the echo API filter
+        boost::shared_ptr<RibWriterServices> m_echoRibWriter;
         /// Parser for ReadArchive.  May be NULL (created on demand).
         boost::shared_ptr<RibParser> m_parser;
         /// Chain of filters

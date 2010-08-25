@@ -64,6 +64,12 @@ class Filter : public Renderer
 Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
                            Ri::Renderer& next, const Ri::ParamList& pList);
 
+/// Create a "tee junction" in a filter pipeline.
+///
+/// The the input calls to this filter are directed to both of two interface
+/// objects "next" and "branch".
+Ri::Renderer* createTeeFilter(Ri::RendererServices& services,
+                              Ri::Renderer& next, Ri::Renderer& branch);
 
 //------------------------------------------------------------------------------
 /// Simple boolean on/off filter

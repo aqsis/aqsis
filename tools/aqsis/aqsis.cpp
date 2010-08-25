@@ -315,7 +315,7 @@ void aqsisSignalHandler(int sig)
 	std::fputs("\033[0m", stderr);
 
 	// Calling signal() is explicitly allowed by the standard.  We reset the
-	// handler to to the default before raising the signal once more.
+	// handler to the default before raising the signal once more.
 	std::signal(sig, SIG_DFL);
 	// Calling raise() is undefined, but is at least legal on POSIX according
 	// to the man pages.  Calling exit() is, OTOH not legal on POSIX.
@@ -366,7 +366,6 @@ RtVoid PreWorld()
 	}
 
 #	if ENABLE_MPDUMP
-	// Pass the statistics option onto Aqsis.
 	if ( g_cl_mpdump )
 	{
 		RtInt enabled = 1;
@@ -452,10 +451,7 @@ static void setPriority(int priority)
 void setupOptions()
 {
 	if ( g_cl_echoapi )
-	{
-		RtInt echoapi = 1;
-		RiOption( tokenCast("statistics"), "echoapi", &echoapi, RI_NULL );
-	}
+		Aqsis::cxxRenderContext()->addFilter("echorib");
 	
 	// Allow any command line arguments to override system/env settings
 	Aqsis::log() << Aqsis::info
@@ -516,7 +512,7 @@ int main( int argc, const char** argv )
 		           "\a2 = information\n"
 		           "\a3 = debug", &g_cl_verbose );
 		ap.alias( "verbose", "v" );
-		ap.argFlag( "echoapi", "\aEcho all RI API calls to the log output (experimental)", &g_cl_echoapi);
+		ap.argFlag( "echoapi", "\aEcho all RI API calls to stdout as RIB", &g_cl_echoapi);
 
 		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
 			"\a0 = idle\n"

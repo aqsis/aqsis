@@ -893,9 +893,9 @@ RtVoid RibWriter<Formatter>::Procedural(RtPointer data, RtConstBound bound,
                                      RtProcSubdivFunc refineproc,
                                      RtProcFreeFunc freeproc)
 {
+    const char* name = m_services.getSubdivFuncName(refineproc);
     m_formatter.beginRequest("Procedural");
     m_formatter.whitespace();
-    const char* name = m_services.getSubdivFuncName(refineproc);
     m_formatter.print(name);
     m_formatter.whitespace();
     if(!strcmp(name, "DelayedReadArchive"))

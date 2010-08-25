@@ -28,6 +28,24 @@
 namespace Aqsis {
 //------------------------------------------------------------------------------
 
+/// A filter to ignore all ReadArchive calls
+class IgnoreArchiveFilter : public OnOffFilter
+{
+    public:
+        IgnoreArchiveFilter(Ri::RendererServices& services, Ri::Renderer& out)
+            : OnOffFilter(services, out)
+        { }
+
+        // Deep-six all ReadArchive calls.
+
+        virtual void ReadArchive(RtConstToken name, RtArchiveCallback callback,
+                                 const ParamList& pList)
+        { }
+};
+
+
+//------------------------------------------------------------------------------
+
 // These filters are implemented elsewhere, declare the functions here for
 // simplicity.
 Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
@@ -35,6 +53,8 @@ Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
 Ri::Renderer* createFrameDropFilter(Ri::RendererServices& services,
                         Ri::Renderer& out, const Ri::ParamList& pList);
 Ri::Renderer* createInlineArchiveFilter(Ri::RendererServices& services,
+                        Ri::Renderer& out, const Ri::ParamList& pList);
+Ri::Renderer* createRibTeeFilter(Ri::RendererServices& services,
                         Ri::Renderer& out, const Ri::ParamList& pList);
 
 
@@ -52,6 +72,10 @@ Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
     else if(!strcmp(name, "inlinearchive"))
     {
         return createInlineArchiveFilter(services, out, pList);
+    }
+    else if(!strcmp(name, "ignorearchives"))
+    {
+        return new IgnoreArchiveFilter(services, out);
     }
     else
     {

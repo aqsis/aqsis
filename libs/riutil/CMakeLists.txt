@@ -8,6 +8,7 @@ endif()
 set(riutil_srcs
 	framedrop_filter.cpp
 	inlinearchive_filter.cpp
+	tee_filter.cpp
 	primvartoken.cpp
 	ribinputbuffer.cpp
 	riblexer.cpp
