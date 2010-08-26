@@ -27,12 +27,14 @@
 #define AQSIS_CORECONTEXT_H_INCLUDED
 
 #include <aqsis/riutil/ricxx.h>
+#include <aqsis/config.h>
 
 namespace Aqsis {
 
 /// Get the core renderer context object.
 ///
 /// This must be called after RiBegin().
+AQSIS_CORE_SHARE
 Ri::RendererServices* cxxRenderContext();
 
 }

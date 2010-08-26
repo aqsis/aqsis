@@ -36,8 +36,7 @@ class IgnoreArchiveFilter : public OnOffFilter
             : OnOffFilter(services, out)
         { }
 
-        // Deep-six all ReadArchive calls.
-
+        // Throw away all ReadArchive calls.
         virtual void ReadArchive(RtConstToken name, RtArchiveCallback callback,
                                  const ParamList& pList)
         { }

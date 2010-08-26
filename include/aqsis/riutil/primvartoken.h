@@ -59,6 +59,7 @@ namespace Aqsis {
 /// parameter is non-null.  If error is null, an XqParseError is thrown
 /// instead.
 ///
+AQSIS_RIUTIL_SHARE
 Ri::TypeSpec parseDeclaration(const char* token,
 						      const char** nameStart = 0,
 						      const char** nameEnd = 0,
@@ -176,6 +177,7 @@ inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok);
 
 
 /// Convert an Ri::TypeSpec to the types used in CqPrimvarToken
+AQSIS_RIUTIL_SHARE
 void typeSpecToEqTypes(EqVariableClass& iclass, EqVariableType& type,
 					   int& count, const Ri::TypeSpec& spec);
 
@@ -183,10 +185,12 @@ void typeSpecToEqTypes(EqVariableClass& iclass, EqVariableType& type,
 ///
 /// This function exists for compatibility between the older CqPrimvarToken
 /// which is used internally and the public-interface Ri::TypeSpec.
+AQSIS_RIUTIL_SHARE
 Ri::TypeSpec toTypeSpec(const CqPrimvarToken& tok);
 
 
 /// Get the token string corresponding to param.spec() and param.name()
+AQSIS_RIUTIL_SHARE
 std::string tokenString(const Ri::Param& param);
 
 //==============================================================================

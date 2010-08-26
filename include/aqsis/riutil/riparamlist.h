@@ -50,7 +50,7 @@ namespace Aqsis {
  * \deprecated Use the more recent Ri::ParamList instead.  This is just a
  * wrapper for now.
  */
-class AQSIS_RIUTIL_SHARE CqRiParamList
+class CqRiParamList
 {
 	public:
 		/** \brief Construct the parameter list from the associated C-interface types.
