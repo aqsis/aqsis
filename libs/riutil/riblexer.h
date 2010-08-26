@@ -26,28 +26,12 @@
 #ifndef AQSIS_RIBLEXER_H_INCLUDED
 #define AQSIS_RIBLEXER_H_INCLUDED
 
-#include <aqsis/config.h>
-
 #include <iostream>
 #include <string>
 
 #include <boost/function.hpp>
 
 #include <aqsis/riutil/ricxx.h> // for array types.
-
-#ifdef AQSIS_SYSTEM_WIN32
-#   ifdef AQSIS_STATIC_LINK
-#       define AQSIS_RIBPARSER_SHARE
-#   else
-#       ifdef AQSIS_RIBPARSER_EXPORTS
-#           define AQSIS_RIBPARSER_SHARE __declspec(dllexport)
-#       else
-#           define AQSIS_RIBPARSER_SHARE __declspec(dllimport)
-#       endif
-#   endif
-#else
-#   define AQSIS_RIBPARSER_SHARE
-#endif
 
 namespace Aqsis {
 
@@ -95,7 +79,7 @@ namespace Aqsis {
  * functions like ReadArchive and RiProcRunProgram which require the input
  * context to be changed between requests.
  */
-class AQSIS_RIBPARSER_SHARE RibLexer
+class RibLexer
 {
     public:
         // Array token types used by the lexer

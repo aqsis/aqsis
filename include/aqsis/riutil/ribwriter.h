@@ -20,6 +20,7 @@
 #ifndef AQSIS_RIBWRITER_H_INCLUDED
 #define AQSIS_RIBWRITER_H_INCLUDED
 
+#include <aqsis/config.h>
 #include <aqsis/riutil/ricxx.h>
 
 #include <string>
@@ -74,6 +75,7 @@ struct RibWriterOptions
 };
 
 /// Create an object which serializes Ri::Renderer calls into a RIB stream.
+AQSIS_RIUTIL_SHARE
 RibWriterServices* createRibWriter(std::ostream& out,
                                    const RibWriterOptions& opts);
 

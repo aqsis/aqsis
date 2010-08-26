@@ -46,7 +46,7 @@ source_group("Header Files" FILES ${riutil_hdrs})
 # TODO: Fix EXPORTS stuff!
 aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
 	TEST_SOURCES ${riutil_test_srcs}
-	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS AQSIS_RIBPARSER_EXPORTS USE_GZIPPED_RIB
+	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS USE_GZIPPED_RIB
 	LINK_LIBRARIES aqsis_util ${Boost_IOSTREAMS_LIBRARY} ${Boost_ZLIB_LIBRARY}
 )
 

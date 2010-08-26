@@ -24,6 +24,7 @@
 #ifndef AQSIS_RICXX_FILTER_INCLUDED
 #define AQSIS_RICXX_FILTER_INCLUDED
 
+#include <aqsis/config.h>
 #include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
@@ -61,6 +62,7 @@ class Filter : public Renderer
 /// \param services - renderer services
 /// \param next - next interface in the filter chain
 /// \param pList - filter parameters.
+AQSIS_RIUTIL_SHARE
 Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
                            Ri::Renderer& next, const Ri::ParamList& pList);
 
@@ -68,6 +70,7 @@ Ri::Renderer* createFilter(const char* name, Ri::RendererServices& services,
 ///
 /// The the input calls to this filter are directed to both of two interface
 /// objects "next" and "branch".
+AQSIS_RIUTIL_SHARE
 Ri::Renderer* createTeeFilter(Ri::RendererServices& services,
                               Ri::Renderer& next, Ri::Renderer& branch);
 
@@ -77,7 +80,7 @@ Ri::Renderer* createTeeFilter(Ri::RendererServices& services,
 /// This filter either passes interface calls through or blocks them,
 /// depending on whether it's active or not.  Use it as a base class for more
 /// complicated filter types.
-class OnOffFilter : public Ri::Filter
+class AQSIS_RIUTIL_SHARE OnOffFilter : public Ri::Filter
 {
     public:
         OnOffFilter(Ri::RendererServices& services, Ri::Renderer& out);

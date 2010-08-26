@@ -26,7 +26,7 @@
 #ifndef AQSIS_RIBPARSER_H_INCLUDED
 #define AQSIS_RIBPARSER_H_INCLUDED
 
-#include <aqsis/aqsis.h>
+#include <aqsis/config.h>
 
 namespace Aqsis
 {
@@ -38,7 +38,7 @@ namespace Ri { class Renderer; class RendererServices; }
 ///
 /// An instance of RibParser parses a RIB stream, sending all encountered
 /// interface function calls to the supplied callback interface.
-class RibParser
+class AQSIS_RIUTIL_SHARE RibParser
 {
     public:
         /// Create RIB parser instance
