@@ -13,8 +13,6 @@ Aqsis Renderer for Houdini |HOUDINI_VERSION|
 
 :download:`PDF version of Houdini guide <AqsisHoudiniGuide.pdf>`
 
-.. include:: ../../common/bsd.txt
-
 
 What's New
 ==========
