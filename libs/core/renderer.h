@@ -416,11 +416,10 @@ class CqRenderer : public IqRenderer
 
 		struct SqOutputDataEntry
 		{
-			SqOutputDataEntry() : m_Offset(0), m_NumSamples(0), m_Type(type_void) {}
-			SqOutputDataEntry(TqInt off, TqInt num, TqInt type) : m_Offset(off), m_NumSamples(num), m_Type(type) {}
+			SqOutputDataEntry() : m_Offset(0), m_NumSamples(0) {}
+			SqOutputDataEntry(TqInt off, TqInt num, TqInt type) : m_Offset(off), m_NumSamples(num) {}
 			TqInt	m_Offset;
 			TqInt	m_NumSamples;
-			TqInt	m_Type;
 		};
 		TqInt	RegisterOutputData( const char* name );
 		TqInt	OutputDataIndex( const char* name );
