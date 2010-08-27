@@ -36,50 +36,46 @@
 namespace Aqsis
 {
 
-//------------------------------------------------------------------------------
-/** \brief A dictionary in which to look up primitive variables.
- */
-class AQSIS_RIUTIL_SHARE CqTokenDictionary
+/// A dictionary associating variable names with types.
+class AQSIS_RIUTIL_SHARE TokenDict
 {
-	public:
-		/** \brief Construct a token dictionary
-		 *
-		 * \param useDefaultVars - if true, fill the dictionary with the set of
-		 * default primvars as returned by the standardPrimvars() function.
-		 * If false, construct an empty dictionary.
-		 */
-		CqTokenDictionary(bool useDefaultVars = true);
+    public:
+        /// Construct token dict, with all the standard variables pre-declared.
+        TokenDict();
 
-		/** \brief Insert the token into the dictionary
-		 *
-		 * \note that this function *replaces* any existing primvar with the
-		 * same name in the dictionary.
-		 */
-		void insert(const CqPrimvarToken& token);
+        /// Associate a variable name with a type string
+        ///
+        /// The type string should be in the format
+        ///   [ class ]  type  [ '[' count ']' ]
+        void declare(const char* name, const char* type);
+        /// Associate a variable name with the given type
+        void declare(const char* name, const Ri::TypeSpec& type);
 
-		/// Remove all defined tokens from the dictionary
-		void clear();
+        /// Parse a token string, extracting the type and name.
+        ///
+        /// If token is an "inline declaration" containing the type, that type
+        /// is returned.  Otherwise the name is looked up in the dictionary to
+        /// find the type.  If the name isn't found, an XqValidation exception
+        /// is thrown.
+        ///
+        /// If the optional parameters nameBegin and nameEnd are non-null, on
+        /// return they delimit the variable name stored in the token string.
+        Ri::TypeSpec lookup(const char* token,
+                            const char** nameBegin = 0,
+                            const char** nameEnd = 0) const;
 
-		/** \brief Parse the token string and look up the type if necessary.
-		 *
-		 * The input token string is parsed according to the rules definied for
-		 * renderman tokens (see CqPrimvarToken).  If the resulting token is
-		 * not fully type-qualified according to CqPrimvarToken::hasType() then
-		 * it is further looked up in the dictionary.
-		 *
-		 * \throw XqValidation If the primvar has no type and cannot be found
-		 *                     in the dictionary.
-		 *
-		 * \return the primvar, or 0 if the given name is not in the
-		 * dictionary.
-		 */
-		CqPrimvarToken parseAndLookup(const std::string& tokenStr) const;
-	private:
-		typedef std::map<std::string, CqPrimvarToken> TqPrimvarMap;
-		// TODO: Decide on whether there might be a better container to use
-		// here - a hash map for instance.
-		TqPrimvarMap m_dict;
+        /// Parse token string, extract type and name.
+        ///
+        /// This is a more convenient version of lookup(), to be used when
+        /// you're going to convert the name to a std::string (and hence may
+        /// allocate memory, in contrast to the alternative version).
+        Ri::TypeSpec lookup(const char* token, std::string* name) const;
+
+    private:
+        typedef std::map<std::string, Ri::TypeSpec> Dict;
+        Dict m_dict;
 };
+
 
 /** \brief Get the list of standard predefined primitive variables.
  *
@@ -98,37 +94,7 @@ class AQSIS_RIUTIL_SHARE CqTokenDictionary
 AQSIS_RIUTIL_SHARE const std::vector<CqPrimvarToken>& standardPrimvars();
 
 
-//==============================================================================
-// Implementation details.
-//==============================================================================
-inline void CqTokenDictionary::insert(const CqPrimvarToken& token)
-{
-	m_dict[token.name()] = token;
-}
-
-inline void CqTokenDictionary::clear()
-{
-	m_dict.clear();
-}
-
-inline CqPrimvarToken CqTokenDictionary::parseAndLookup(
-		const std::string& tokenStr) const
-{
-	CqPrimvarToken token(tokenStr.c_str());
-	if(!token.hasType())
-	{
-		TqPrimvarMap::const_iterator pos = m_dict.find(token.name());
-		if(pos != m_dict.end())
-			token = pos->second;
-		else
-		{
-			AQSIS_THROW_XQERROR(XqValidation, EqE_Syntax,
-				"undeclared token \"" << tokenStr << "\" encountered");
-		}
-	}
-	return token;
-}
-
 } // namespace Aqsis
 
 #endif // TOKENDICTIONARY_H_INCLUDED
+// vi: set et:

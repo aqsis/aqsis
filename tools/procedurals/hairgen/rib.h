@@ -67,7 +67,7 @@ class HairgenApiServices : public Aqsis::StubRendererServices
 {
 	private:
 		HairgenApi m_api;
-		Aqsis::CqTokenDictionary m_tokenDict;
+		Aqsis::TokenDict m_tokenDict;
 		boost::shared_ptr<Aqsis::RibParser> m_parser;
 
 		class ErrorHandler : public Ri::ErrorHandler
@@ -97,7 +97,7 @@ class HairgenApiServices : public Aqsis::StubRendererServices
 				   int numHairs, boost::shared_ptr<ParentHairs>& hairs,
 				   const HairModifiers& hairModifiers)
 			: m_api(emitter, numHairs, hairs, hairModifiers),
-			m_tokenDict(true)
+			m_tokenDict()
 		{
 			m_parser.reset(Aqsis::RibParser::create(*this));
 		}
@@ -111,13 +111,7 @@ class HairgenApiServices : public Aqsis::StubRendererServices
                                         const char** nameBegin = 0,
                                         const char** nameEnd = 0) const
 		{
-            Ri::TypeSpec spec = Aqsis::parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == Ri::TypeSpec::Unknown)
-            {
-                // FIXME: Yuck, ick, ew!  Double parsing here :/
-                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
-            }
-            return spec;
+			return m_tokenDict.lookup(token, nameBegin, nameEnd);
 		}
 
 		virtual Ri::Renderer& firstFilter()

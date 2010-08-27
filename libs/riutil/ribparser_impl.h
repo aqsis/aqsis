@@ -198,8 +198,6 @@ class RibParserImpl : public RibParser
 
         /// Number of color components
         int m_numColorComps;
-        /// Dictionary of declared tokens
-        CqTokenDictionary m_tokenDict;
 };
 
 } // namespace Aqsis

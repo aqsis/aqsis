@@ -82,7 +82,6 @@ struct IqRenderer
 	virtual TqInt	RegisterOutputData( const char* name ) = 0;
 	virtual TqInt	OutputDataIndex( const char* name ) = 0;
 	virtual TqInt	OutputDataSamples( const char* name ) = 0;
-	virtual TqInt	OutputDataType( const char* name ) = 0;
 
 	virtual	void	SetCurrentFrame( TqInt FrameNo ) = 0;
 	virtual	TqInt	CurrentFrame() const = 0;

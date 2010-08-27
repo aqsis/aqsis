@@ -445,7 +445,7 @@ class RibWriterServicesImpl : public RibWriterServices
         /// Contained RIB writer interface
         boost::shared_ptr<Ri::Renderer> m_writer;
         /// Dictionary containing Declare()'d tokens
-        CqTokenDictionary m_tokenDict;
+        TokenDict m_tokenDict;
         /// Mappings between standard function/basis names and pointers
         NamePtrMapping<RtFilterFunc> m_filterFuncMap;
         NamePtrMapping<RtErrorFunc> m_errorFuncMap;
@@ -477,7 +477,7 @@ class RibWriterServicesImpl : public RibWriterServices
             { m_writer = writer; }
 
         void declare(RtConstString name, RtConstString declaration)
-            { m_tokenDict.insert(CqPrimvarToken(declaration, name)); }
+            { m_tokenDict.declare(name, declaration); }
         const char* getFilterFuncName(RtFilterFunc f)
             { return m_filterFuncMap.find(f); }
         const char* getErrorFuncName(RtErrorFunc f)
@@ -530,13 +530,7 @@ class RibWriterServicesImpl : public RibWriterServices
                                         const char** nameBegin = 0,
                                         const char** nameEnd = 0) const
         {
-            Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == Ri::TypeSpec::Unknown)
-            {
-                // FIXME: Yuck, ick, ew!  Double parsing here :/
-                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
-            }
-            return spec;
+            return m_tokenDict.lookup(token, nameBegin, nameEnd);
         }
 
         virtual Ri::Renderer& firstFilter()

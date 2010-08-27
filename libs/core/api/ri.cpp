@@ -332,8 +332,7 @@ void setShaderArguments(const boost::shared_ptr<IqShader>& pShader,
 	{
 		EqVariableClass iclass;
 		EqVariableType type;
-		int arraySize;
-		typeSpecToEqTypes(iclass, type, arraySize, pList[i].spec());
+		typeSpecToEqTypes(&iclass, &type, pList[i].spec());
 		pShader->SetArgument(pList[i].name(), type, "", const_cast<void*>(pList[i].data()));
 	}
 }
@@ -356,12 +355,10 @@ RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 RtVoid RiCxxCore::Declare(RtConstString name, RtConstString declaration)
 {
 	IF_ELSE_TEST;
-	CqPrimvarToken tok;
 	if(declaration)
-		tok = CqPrimvarToken(declaration, name);
+		QGetRenderContext()->tokenDict().declare(name, declaration);
 	else // declaration is allowed to be RI_NULL
-		tok = CqPrimvarToken(class_invalid, type_invalid, 0, name);
-	QGetRenderContext()->tokenDict().insert(tok);
+		QGetRenderContext()->tokenDict().declare(name, Ri::TypeSpec());
 }
 
 
@@ -1004,8 +1001,8 @@ RtVoid RiCxxCore::Display(RtConstToken name, RtConstToken type, RtConstToken mod
 	{
 		dataOffset = QGetRenderContext()->RegisterOutputData( mode );
 		dataSize = QGetRenderContext()->OutputDataSamples( mode );
-		CqPrimvarToken tok = QGetRenderContext()->tokenDict().parseAndLookup(mode);
-		dataName = tok.name();
+		// Strip off any inline-declared types from dataName
+		QGetRenderContext()->tokenDict().lookup(mode, &dataName);
 	}
 
 	// Check if the display request is valid.
@@ -4018,13 +4015,8 @@ class CoreRendererServices : public Ri::RendererServices
 										const char** nameBegin = 0,
 										const char** nameEnd = 0) const
 		{
-            Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == Ri::TypeSpec::Unknown)
-            {
-                // FIXME: Yuck, ick!  Double parsing :-/
-                spec = toTypeSpec(m_renderContext->tokenDict().parseAndLookup(token));
-            }
-            return spec;
+			return m_renderContext->tokenDict().lookup(token, nameBegin,
+													   nameEnd);
         }
 
         virtual Ri::Renderer& firstFilter()

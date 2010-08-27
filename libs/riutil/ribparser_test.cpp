@@ -114,6 +114,15 @@ namespace printer_funcs
         return out;
     }
 
+    std::ostream& operator<<(std::ostream& out, const Ri::TypeSpec& spec)
+    {
+        CqPrimvarToken tok(spec, "");
+        out << tok.Class() << " " << tok.type();
+        if(tok.count() != 1)
+            out << "[" << tok.count() << "]";
+        return out;
+    }
+
     // Insert a Req into a stream.
     std::ostream& operator<<(std::ostream& out, const Req& r)
     {
@@ -567,7 +576,7 @@ class MockErrorHandler : public Ri::ErrorHandler
 class MockServices : public Ri::RendererServices
 {
     private:
-        CqTokenDictionary m_tokenDict;
+        TokenDict m_tokenDict;
         MockErrorHandler m_errorHandler;
 
         friend RtVoid MockRenderer::Declare(RtConstString name,
@@ -583,13 +592,7 @@ class MockServices : public Ri::RendererServices
                                 const char** nameBegin = 0,
                                 const char** nameEnd = 0) const
         {
-            Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
-            if(spec.type == Ri::TypeSpec::Unknown)
-            {
-                // FIXME: Yuck, ick, ew!  Double parsing here :/
-                spec = toTypeSpec(m_tokenDict.parseAndLookup(token));
-            }
-            return spec;
+            return m_tokenDict.lookup(token, nameBegin, nameEnd);
         }
         void addFilter(const char* name, const Ri::ParamList& filterParams)
         { }
@@ -661,7 +664,7 @@ struct CheckParams
 {
     private:
         // Dictionary of standard tokens.
-        static CqTokenDictionary m_tokenDict;
+        static TokenDict m_tokenDict;
 
         void nextParam() { ++g_fixture->checkPos; }
 
@@ -700,11 +703,12 @@ struct CheckParams
             {
                 try
                 {
-                    CqPrimvarToken tok = m_tokenDict.parseAndLookup(
+                    const char* name = 0;
+                    Ri::TypeSpec spec = m_tokenDict.lookup(
                             g_fixture->tokens.at(g_fixture->checkPos)
-                            .getString());
-                    BOOST_CHECK_EQUAL(tok, CqPrimvarToken(pList[i].spec(),
-                                                          pList[i].name()));
+                            .getString().c_str(), &name);
+                    BOOST_CHECK_EQUAL(spec, pList[i].spec());
+                    BOOST_CHECK_EQUAL(name, pList[i].name());
                 }
                 catch(XqValidation& /*e*/)
                 {
@@ -719,7 +723,7 @@ struct CheckParams
             return *this;
         }
 };
-CqTokenDictionary CheckParams::m_tokenDict;
+TokenDict CheckParams::m_tokenDict;
 
 } // anon. namespace
 
@@ -740,7 +744,7 @@ RtVoid MockRenderer::Declare(RtConstString name, RtConstString declaration)
 {
     CheckParams() << Req("Declare") << name << declaration;
     // UGH!
-    g_fixture->services.m_tokenDict.insert(CqPrimvarToken(declaration, name));
+    g_fixture->services.m_tokenDict.declare(name, declaration);
 }
 BOOST_AUTO_TEST_CASE(Declare_handler_test)
 {

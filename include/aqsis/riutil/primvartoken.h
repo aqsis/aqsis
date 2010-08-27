@@ -177,9 +177,13 @@ inline std::ostream& operator<<(std::ostream& out, const CqPrimvarToken& tok);
 
 
 /// Convert an Ri::TypeSpec to the types used in CqPrimvarToken
+///
+/// iclass and type are used to return the associated EqVariableClass and
+/// EqVariableType respectively.  Both of these are optional; they are ignored
+/// if they're NULL.
 AQSIS_RIUTIL_SHARE
-void typeSpecToEqTypes(EqVariableClass& iclass, EqVariableType& type,
-					   int& count, const Ri::TypeSpec& spec);
+void typeSpecToEqTypes(EqVariableClass* iclass, EqVariableType* type,
+					   const Ri::TypeSpec& spec);
 
 /// Convert type portion of CqPrimvarToken to Ri::TypeSpec
 ///

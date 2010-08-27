@@ -252,9 +252,9 @@ class CqRenderer : public IqRenderer
 		}
 
 		/// Return the current dictionary of declared tokens.
-		CqTokenDictionary& tokenDict();
+		TokenDict& tokenDict();
 		/// Return the current dictionary of declared tokens.
-		const CqTokenDictionary& tokenDict() const;
+		const TokenDict& tokenDict() const;
 
 		/** Get the list of currently registered shaders.
 		 * \return A reference to a list of CqShaderRegister classes.
@@ -578,7 +578,7 @@ class CqRenderer : public IqRenderer
 		CqTransformPtr	m_preProjectionTransform;	///< The transformation that was applied prior to projection.
 		bool			m_fWorldBegin;
 		/// Renderman symbol table
-		CqTokenDictionary m_tokenDict;
+		TokenDict m_tokenDict;
 
 		/// Variables for depth of field.  \todo Move these to a DoF calculator object.
 		TqFloat			m_DofMultiplier;
@@ -634,12 +634,12 @@ void	QSetRenderContext( CqRenderer* pRenderer );
 // Implementation details
 //==============================================================================
 
-inline CqTokenDictionary& CqRenderer::tokenDict()
+inline TokenDict& CqRenderer::tokenDict()
 {
 	return m_tokenDict;
 }
 
-inline const CqTokenDictionary& CqRenderer::tokenDict() const
+inline const TokenDict& CqRenderer::tokenDict() const
 {
 	return m_tokenDict;
 }

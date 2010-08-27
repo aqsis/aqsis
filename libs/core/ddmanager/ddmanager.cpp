@@ -829,10 +829,12 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 	std::map<std::string, void*>::iterator param;
 	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
 	{
-		CqPrimvarToken tok;
+		std::string paramName;
+		Ri::TypeSpec spec;
 		try
 		{
-			tok = QGetRenderContext()->tokenDict().parseAndLookup(param->first.c_str());
+			spec = QGetRenderContext()->tokenDict().lookup(
+					param->first.c_str(), &paramName);
 		}
 		catch (XqValidation& e)
 		{
@@ -841,7 +843,7 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 		}
 		// Check the parameter type is uniform, not valid for non-surface
 		// requests otherwise.
-		if ( tok.Class() != class_uniform )
+		if ( spec.iclass != Ri::TypeSpec::Uniform )
 		{
 			Aqsis::log() << error << "ignoring non-uniform display parameter "
 						 << param->first << std::endl;
@@ -849,8 +851,7 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 		}
 
 		// First check if it is one of the recognised parameters that the renderer should handle.
-		if (tok.name() == "quantize" && tok.type() == type_float &&
-			tok.count() == 4)
+		if (paramName == "quantize" && spec == Ri::TypeSpec(Ri::TypeSpec::Float, 4))
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -860,8 +861,7 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			m_QuantizeMaxVal = floats[3];
 			m_QuantizeSpecified = true;
 		}
-		else if (tok.name() == "dither" && tok.type() == type_float &&
-				 tok.count() == 1)
+		else if (paramName == "dither" && spec == Ri::TypeSpec::Float)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -879,26 +879,26 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			parameter.vcount = 0;
 			parameter.nbytes = 0;
 
-			switch ( tok.type() )
+			switch ( spec.type )
 			{
-				case type_string:
+				case Ri::TypeSpec::String:
 				{
 					const char** strings = static_cast<const char**>( param->second );
-					ConstructStringsParameter(tok.name().c_str(), strings, tok.count(), parameter);
+					ConstructStringsParameter(paramName.c_str(), strings, spec.arraySize, parameter);
 				}
 				break;
 
-				case type_float:
+				case Ri::TypeSpec::Float:
 				{
 					const RtFloat* floats = static_cast<RtFloat*>( param->second );
-					ConstructFloatsParameter(tok.name().c_str(), floats, tok.count(), parameter);
+					ConstructFloatsParameter(paramName.c_str(), floats, spec.arraySize, parameter);
 				}
 				break;
 
-				case type_integer:
+				case Ri::TypeSpec::Integer:
 				{
 					const RtInt* ints = static_cast<RtInt*>( param->second );
-					ConstructIntsParameter(tok.name().c_str(), ints, tok.count(), parameter);
+					ConstructIntsParameter(paramName.c_str(), ints, spec.arraySize, parameter);
 				}
 				break;
 				default:

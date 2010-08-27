@@ -209,7 +209,8 @@ CqPrimvarToken::CqPrimvarToken(const Ri::TypeSpec& spec,
 	m_count(-1),
 	m_name(name)
 {
-	typeSpecToEqTypes(m_class, m_type, m_count, spec);
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* token)
@@ -223,7 +224,8 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 	const char* endName = 0;
 	Ri::TypeSpec spec = parseDeclaration(token, &beginName, &endName);
 	m_name.assign(beginName, endName);
-	typeSpecToEqTypes(m_class, m_type, m_count, spec);
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
@@ -240,38 +242,44 @@ CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
 			"invalid token: unexpected name \"" << beginName << "\" in type string \""
 			<< typeToken << "\"");
 	m_name = name;
-	typeSpecToEqTypes(m_class, m_type, m_count, spec);
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
 }
 
 
 //------------------------------------------------------------------------------
-void typeSpecToEqTypes(EqVariableClass& iclass, EqVariableType& type,
-					   int& count, const Ri::TypeSpec& spec)
+void typeSpecToEqTypes(EqVariableClass* iclass, EqVariableType* type,
+                       const Ri::TypeSpec& spec)
 {
-    switch(spec.type)
+    if(type)
     {
-        case Ri::TypeSpec::Float:   type = type_float;   break;
-        case Ri::TypeSpec::Point:   type = type_point;   break;
-        case Ri::TypeSpec::Vector:  type = type_vector;  break;
-        case Ri::TypeSpec::Normal:  type = type_normal;  break;
-        case Ri::TypeSpec::HPoint:  type = type_hpoint;  break;
-        case Ri::TypeSpec::Matrix:  type = type_matrix;  break;
-        case Ri::TypeSpec::Color:   type = type_color;   break;
-        case Ri::TypeSpec::Integer: type = type_integer; break;
-        case Ri::TypeSpec::String:  type = type_string;  break;
-        default:                    type = type_invalid; break;
+        switch(spec.type)
+        {
+            case Ri::TypeSpec::Float:   *type = type_float;   break;
+            case Ri::TypeSpec::Point:   *type = type_point;   break;
+            case Ri::TypeSpec::Vector:  *type = type_vector;  break;
+            case Ri::TypeSpec::Normal:  *type = type_normal;  break;
+            case Ri::TypeSpec::HPoint:  *type = type_hpoint;  break;
+            case Ri::TypeSpec::Matrix:  *type = type_matrix;  break;
+            case Ri::TypeSpec::Color:   *type = type_color;   break;
+            case Ri::TypeSpec::Integer: *type = type_integer; break;
+            case Ri::TypeSpec::String:  *type = type_string;  break;
+            default:                    *type = type_invalid; break;
+        }
     }
-    switch(spec.iclass)
+    if(iclass)
     {
-        case Ri::TypeSpec::Constant:    iclass = class_constant;    break;
-        case Ri::TypeSpec::Uniform:     iclass = class_uniform;     break;
-        case Ri::TypeSpec::Varying:     iclass = class_varying;     break;
-        case Ri::TypeSpec::Vertex:      iclass = class_vertex;      break;
-        case Ri::TypeSpec::FaceVarying: iclass = class_facevarying; break;
-        case Ri::TypeSpec::FaceVertex:  iclass = class_facevertex;  break;
-		default:                        iclass = class_invalid;     break;
+        switch(spec.iclass)
+        {
+            case Ri::TypeSpec::Constant:    *iclass = class_constant;    break;
+            case Ri::TypeSpec::Uniform:     *iclass = class_uniform;     break;
+            case Ri::TypeSpec::Varying:     *iclass = class_varying;     break;
+            case Ri::TypeSpec::Vertex:      *iclass = class_vertex;      break;
+            case Ri::TypeSpec::FaceVarying: *iclass = class_facevarying; break;
+            case Ri::TypeSpec::FaceVertex:  *iclass = class_facevertex;  break;
+            default:                        *iclass = class_invalid;     break;
+        }
     }
-	count = spec.arraySize;
 }
 
 Ri::TypeSpec toTypeSpec(const CqPrimvarToken& tok)
