@@ -9,12 +9,16 @@ find_library(ILMBASE_IEX_LIBRARY Iex)
 
 find_package(TIFF)
 find_package(Boost 1.36.0 COMPONENTS unit_test_framework)
+# Assumes aqsis has been built into the directory path/to/src/../build.  Can be
+# overridden using Aqsis_DIR.
+find_package(Aqsis PATHS ../../../build/)
 
 include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${ILMBASE_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ustring)
 include_directories(.)
+include_directories(${Aqsis_INCLUDE_DIRECTORIES})
 
 if(UNIX)
     if("${CMAKE_CXX_FLAGS}" STREQUAL "")
@@ -24,6 +28,7 @@ if(UNIX)
 endif()
 
 set(srcs
+    api.cpp
     filters.cpp
     main.cpp
     primvar.cpp
@@ -68,7 +73,8 @@ set(hdrs
 source_group("Header Files" FILES ${hdrs})
 
 add_executable(render ${srcs} ${hdrs})
-target_link_libraries(render ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY})
+target_link_libraries(render ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
+                      aqsis_riutil)
 
 
 #------------------------------------------------------------

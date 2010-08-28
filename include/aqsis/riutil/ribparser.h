@@ -28,6 +28,8 @@
 
 #include <aqsis/config.h>
 
+#include <iosfwd>
+
 namespace Aqsis
 {
 

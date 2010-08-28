@@ -65,7 +65,7 @@ except ImportError, err:
 # Paths are relative to aqsis root directory
 riXmlPath = 'libs/riutil/ri.xml'
 cogUtilsPath = 'libs/riutil'
-searchDirs = ['libs', 'include']
+searchDirs = ['libs', 'include', 'prototypes']
 
 
 # Find the aqsis root directory by going up a directory until we find a
