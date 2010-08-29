@@ -1,5 +1,4 @@
-.. _RenderMan interface standard: http://renderman.pixar.com
-.. _Pixar Animation Studios: http://www.pixar.com
+.. include:: external.rst
 
 
 Aqsis Renderer is a cross-platform photorealistic 3D rendering solution, adhering to the `RenderMan interface standard`_ defined by `Pixar Animation Studios`_.

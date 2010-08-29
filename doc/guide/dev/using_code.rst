@@ -1,5 +1,4 @@
-.. _Hungarian Notation: http://en.wikipedia.org/wiki/Hungarian_notation
-.. _Artistic Style: http://astyle.sourceforge.net
+.. include:: ../../common/external.rst
 
 
 ====================
@@ -79,6 +78,7 @@ Indenting, bracket placement
 The Aqsis code base uses a custom `Artistic Style`_ settings file in an attempt to ensure that the coding style remains constant throughout:
 
 .. include:: astylerc
+   :literal:
 
 Please use this program to adapt your personal coding style (in particular, indenting type/style and bracket placement) to our accepted style before committing changes to the codebase.
 
