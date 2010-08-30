@@ -65,7 +65,7 @@ struct RibWriterOptions
     std::string archivePath;
 
     RibWriterOptions()
-        : interpolateArchives(true),
+        : interpolateArchives(false),
         useBinary(false),
         useGzip(false),
         indentStep(4),
