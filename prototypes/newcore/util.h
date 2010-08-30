@@ -192,6 +192,16 @@ inline Mat4 perspectiveProjection(float fov, float near, float far)
                 0, 0, b, 0);
 }
 
+inline Mat4 orthographicProjection(float near, float far)
+{
+    float a = 2/(far-near);
+    float b = -(far+near)/(far-near);
+    return Mat4(1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, a, 0,
+                0, 0, b, 1);
+}
+
 inline Mat4 screenWindow(float left, float right, float bottom, float top)
 {
     float w = right-left;

@@ -24,7 +24,6 @@
 #include <aqsis/riutil/ricxx.h>
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace Aqsis {
 

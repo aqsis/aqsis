@@ -67,6 +67,8 @@ class Array
 
         // Note, compiler generated assignment & copy construction.
 
+        /// Conversion to void* for boolean context testing
+        operator const void*() const { return m_data; }
         /// Iterators to beginning & end of array.
         const T* begin() const { return m_data; }
         const T* end() const { return m_data + m_size; }
@@ -128,7 +130,7 @@ struct TypeSpec
     Type type;
     int arraySize;
 
-    explicit TypeSpec(Type type=Unknown, int arraySize=1)
+    TypeSpec(Type type=Unknown, int arraySize=1)
         : iclass(Uniform), type(type), arraySize(arraySize) {}
     TypeSpec(IClass iclass, Type type, int arraySize=1)
         : iclass(iclass), type(type), arraySize(arraySize) {}
@@ -177,10 +179,14 @@ inline bool operator==(const TypeSpec& lhs, const TypeSpec& rhs)
 }
 /// Compare TypeSpec to "uniform type[1]"
 inline bool operator==(const TypeSpec& lhs, TypeSpec::Type type)
-    { return lhs == TypeSpec(type); }
+{
+    return lhs == TypeSpec(type);
+}
 /// Compare TypeSpec to "uniform type[1]"
 inline bool operator==(TypeSpec::Type type, const TypeSpec& rhs)
-    { return TypeSpec(type) == rhs; }
+{
+    return TypeSpec(type) == rhs;
+}
 
 
 //------------------------------------------------------------------------------
@@ -253,6 +259,43 @@ class ParamList : public Array<Param>
                     return i;
             }
             return -1;
+        }
+        /// Find a float-storage parameter with the given type and name.
+        ///
+        /// \return A pointer to the float data.  A null array is returned if
+        /// the parameter isn't found, or has a storage type which isn't float.
+        FloatArray findFloatData(const TypeSpec& spec, const char* name) const
+        {
+            int idx = find(spec, name);
+            if(idx < 0 || spec.storageType() != TypeSpec::Float)
+                return FloatArray();
+            else
+                return (*this)[idx].floatData();
+        }
+        /// Find a int-storage parameter with the given type and name.
+        ///
+        /// \return A pointer to the float data.  A null array is returned if
+        /// the parameter isn't found, or has a storage type which isn't int.
+        IntArray findIntData(const TypeSpec& spec, const char* name) const
+        {
+            int idx = find(spec, name);
+            if(idx < 0 || spec.storageType() != TypeSpec::Integer)
+                return IntArray();
+            else
+                return (*this)[idx].intData();
+        }
+        /// Find a string-storage parameter with the given type and name.
+        ///
+        /// \return A pointer to the float data.  A null array is returned if
+        /// the parameter isn't found, or has a storage type which isn't
+        /// string.
+        StringArray findStringData(const TypeSpec& spec, const char* name) const
+        {
+            int idx = find(spec, name);
+            if(idx < 0 || spec.storageType() != TypeSpec::String)
+                return StringArray();
+            else
+                return (*this)[idx].stringData();
         }
 };
 

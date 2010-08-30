@@ -17,18 +17,35 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#include <string>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
 
-#include "scenes/scenes.h"
+#include <boost/shared_ptr.hpp>
+
+#include "api.h"
+
+using namespace Aqsis;
 
 int main(int argc, char* argv[])
 {
-    std::string sceneName;
-    if(argc >= 2)
+    if(argc < 2)
     {
-        sceneName = argv[argc-1];
+        std::cerr << "Usage: " << argv[0] << " scene.rib\n";
+        return EXIT_SUCCESS;
+    }
+    const char* fileName = argv[1];
+    std::ifstream sceneFile(fileName, std::ios::in | std::ios::binary);
+    if(!sceneFile)
+    {
+        std::cerr << "Could not open scene file\n";
+        return EXIT_FAILURE;
     }
 
+    boost::shared_ptr<Ri::RendererServices> renderer(createRenderer());
+    renderer->parseRib(sceneFile, fileName);
+
+#if 0
     if(sceneName == "tenpatch")
         renderTenPatchScene();
     else if(sceneName == "simpledeform")
@@ -39,6 +56,8 @@ int main(int argc, char* argv[])
         renderDofAmountTest();
     else
         renderDefaultScene();
+#endif
 
     return 0;
 }
+

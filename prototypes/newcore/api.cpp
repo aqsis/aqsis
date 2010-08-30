@@ -21,27 +21,31 @@
 /// \author Chris Foster
 
 #include <vector>
+#include <fstream>
 
 #include <boost/shared_ptr.hpp>
 
+#include <aqsis/riutil/errorhandler.h>
 #include <aqsis/riutil/ribparser.h>
 #include <aqsis/riutil/ricxx.h>
 #include <aqsis/riutil/ricxx_filter.h>
 #include <aqsis/riutil/tokendictionary.h>
-#include <../../libs/riutil/errorhandlerimpl.h>
+#include <aqsis/util/exception.h>
 
 #include "renderer.h"
 #include "surfaces.h"
+#include "util.h"
 
 namespace Aqsis {
 
+namespace {
 
 /// An error handler which just sends errors to the Aqsis::log() stream.
 class PrintErrorHandler : public Ri::ErrorHandler
 {
     public:
-        explicit PrintErrorHandler(ErrorCategory verbosity = Warning)
-            : ErrorHandler(verbosity)
+        explicit PrintErrorHandler(ErrorCategory verbosity = Debug)
+            : Ri::ErrorHandler(verbosity)
         { }
 
     protected:
@@ -60,7 +64,6 @@ class PrintErrorHandler : public Ri::ErrorHandler
             out << message << "\033[0m" << std::endl;
         }
 };
-
 
 class ApiServices : public Ri::RendererServices
 {
@@ -81,6 +84,11 @@ class ApiServices : public Ri::RendererServices
 
         virtual RtFilterFunc getFilterFunc(RtConstToken name) const
         {
+            // TODO: Something less crap!
+            if(!strcmp(name, "box"))      return (RtFilterFunc)1;
+            if(!strcmp(name, "gaussian")) return (RtFilterFunc)2;
+            if(!strcmp(name, "sinc"))     return (RtFilterFunc)3;
+            if(!strcmp(name, "disc"))     return (RtFilterFunc)4;
             return 0;
             //return getFilterFuncByName(name);
         }
@@ -137,6 +145,7 @@ class ApiServices : public Ri::RendererServices
                 m_parser.reset(RibParser::create(*this));
             m_parser->parseStream(ribStream, name, context);
         }
+        using Ri::RendererServices::parseRib;
 
     private:
         /// Renderer API
@@ -153,17 +162,52 @@ class ApiServices : public Ri::RendererServices
 
 
 //------------------------------------------------------------------------------
+struct CameraInfo
+{
+    enum Type {
+        Orthographic,
+        Perspective,
+        User
+    };
+    Type type; ///< Camera type
+    float fov; ///< field of view for perspective cameras
+    float left, right, bottom, top; ///< ScreenWindow parameters
+
+    CameraInfo()
+        : type(Orthographic),
+        fov(90),
+        left(-4.0f/3.0f),
+        right(4.0f/3.0f),
+        bottom(-1.0f),
+        top(1.0f)
+    { }
+
+    Mat4 camToScreenMatrix(const Options& opts) const
+    {
+        Mat4 proj;
+        switch(type)
+        {
+            case Orthographic:
+                proj = orthographicProjection(opts.clipNear, opts.clipFar);
+                break;
+            case Perspective:
+                proj = perspectiveProjection(fov, opts.clipNear, opts.clipFar);
+                break;
+            case User:
+                // TODO!
+                break;
+        }
+        return screenWindow(left, right, bottom, top) * proj;
+    }
+};
+
+
+//------------------------------------------------------------------------------
+/// The renderer API.
 class RenderApi : public Ri::Renderer
 {
-    private:
-        ApiServices& m_services;
-        Options m_opts;
-        Attributes m_attrs;
-
     public:
-        RenderApi(ApiServices& services)
-            : m_services(services)
-        { }
+        RenderApi(ApiServices& services);
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
         { }
@@ -359,8 +403,30 @@ class RenderApi : public Ri::Renderer
         virtual RtVoid ArchiveBegin(RtConstToken name, const ParamList& pList);
         virtual RtVoid ArchiveEnd();
         ///[[[end]]]
+
+    private:
+        Ri::ErrorHandler& ehandler() { return m_services.errorHandler(); }
+
+        ApiServices& m_services;
+        Options m_opts;
+        Attributes m_attrs;
+        Mat4 m_currTransform;
+        CameraInfo m_camInfo;
+        VarList m_outVars;
+        boost::shared_ptr< ::Renderer> m_renderer;
 };
 
+
+RenderApi::RenderApi(ApiServices& services)
+    : m_services(services),
+    m_opts(),
+    m_attrs(),
+    m_currTransform(),
+    m_camInfo(),
+    m_outVars(),
+    m_renderer()
+{
+}
 
 //------------------------------------------------------------------------------
 /*
@@ -372,8 +438,8 @@ from Cheetah.Template import Template
 methodTmpl = '''
 $wrapDecl($riCxxMethodDecl($proc, className='RenderApi'), 80)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "$procName not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "$procName not implemented"; // Todo
 }
 '''
 
@@ -392,8 +458,7 @@ for proc in riXml.findall('Procedures/'+'*'):
 
 RtVoid RenderApi::Declare(RtConstString name, RtConstString declaration)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Declare not implemented";
+    m_services.declare(name, declaration);
 }
 
 //------------------------------------------------------------
@@ -401,26 +466,25 @@ RtVoid RenderApi::Declare(RtConstString name, RtConstString declaration)
 
 RtVoid RenderApi::FrameBegin(RtInt number)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "FrameBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "FrameBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::FrameEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "FrameEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "FrameEnd not implemented"; // Todo
 }
 
 RtVoid RenderApi::WorldBegin()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "WorldBegin not implemented";
+    Mat4 camToScreen = m_camInfo.camToScreenMatrix(m_opts);
+    m_renderer.reset(new ::Renderer(m_opts, camToScreen, m_outVars));
 }
 
 RtVoid RenderApi::WorldEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "WorldEnd not implemented";
+    m_renderer->render();
 }
 
 //------------------------------------------------------------
@@ -428,26 +492,26 @@ RtVoid RenderApi::WorldEnd()
 
 RtVoid RenderApi::IfBegin(RtConstString condition)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "IfBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "IfBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::ElseIf(RtConstString condition)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ElseIf not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ElseIf not implemented"; // Todo
 }
 
 RtVoid RenderApi::Else()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Else not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Else not implemented"; // Todo
 }
 
 RtVoid RenderApi::IfEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "IfEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "IfEnd not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -456,129 +520,196 @@ RtVoid RenderApi::IfEnd()
 RtVoid RenderApi::Format(RtInt xresolution, RtInt yresolution,
                          RtFloat pixelaspectratio)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Format not implemented";
+    m_opts.xRes = xresolution;
+    m_opts.yRes = yresolution;
+    float frameAspect = xresolution * pixelaspectratio / yresolution;
+    // TODO: previously specified ScreenWindow or FrameAspectRatio should
+    // modify this calculation.
+    if(frameAspect >= 1)
+    {
+        m_camInfo.left = -frameAspect;
+        m_camInfo.right = frameAspect;
+        m_camInfo.bottom = -1;
+        m_camInfo.top = 1;
+    }
+    else
+    {
+        m_camInfo.left = -1;
+        m_camInfo.right = 1;
+        m_camInfo.bottom = -frameAspect;
+        m_camInfo.top = frameAspect;
+    }
 }
 
 RtVoid RenderApi::FrameAspectRatio(RtFloat frameratio)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "FrameAspectRatio not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "FrameAspectRatio not implemented"; // Todo
 }
 
 RtVoid RenderApi::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                RtFloat top)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ScreenWindow not implemented";
+    m_camInfo.left = left;
+    m_camInfo.right = right;
+    m_camInfo.bottom = bottom;
+    m_camInfo.top = top;
 }
 
 RtVoid RenderApi::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
                              RtFloat ymax)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "CropWindow not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "CropWindow not implemented"; // Todo
 }
 
 RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Projection not implemented";
+    if(!name)
+    {
+        m_camInfo.type = CameraInfo::User;
+    }
+    else if(strcmp(name, "perspective") == 0)
+    {
+        m_camInfo.type = CameraInfo::Perspective;
+        FloatArray fov = pList.findFloatData(Ri::TypeSpec::Float, "fov");
+        if(fov)
+            m_camInfo.fov = fov[0];
+    }
+    else if(strcmp(name, "orthographic") == 0)
+    {
+        m_camInfo.type = CameraInfo::Orthographic;
+    }
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+            "Unknown projection type " << name);
+    }
 }
 
 RtVoid RenderApi::Clipping(RtFloat cnear, RtFloat cfar)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Clipping not implemented";
+    m_opts.clipNear = cnear;
+    m_opts.clipFar = cfar;
 }
 
 RtVoid RenderApi::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
                                 RtFloat ny, RtFloat nz)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ClippingPlane not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ClippingPlane not implemented"; // Todo
 }
 
 RtVoid RenderApi::DepthOfField(RtFloat fstop, RtFloat focallength,
                                RtFloat focaldistance)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "DepthOfField not implemented";
+    m_opts.fstop = fstop;
+    m_opts.focalLength = focallength;
+    m_opts.focalDistance = focaldistance;
 }
 
 RtVoid RenderApi::Shutter(RtFloat opentime, RtFloat closetime)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Shutter not implemented";
+    m_opts.shutterMin = opentime;
+    m_opts.shutterMax = closetime;
 }
 
 RtVoid RenderApi::PixelVariance(RtFloat variance)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PixelVariance not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "PixelVariance not implemented"; // Todo
 }
 
 RtVoid RenderApi::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PixelSamples not implemented";
+    m_opts.superSamp = Imath::V2i(xsamples, ysamples);
 }
 
 RtVoid RenderApi::PixelFilter(RtFilterFunc function, RtFloat xwidth,
                               RtFloat ywidth)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PixelFilter not implemented";
+    if((RtFilterFunc)1 == function)
+        m_opts.pixelFilter = makeBoxFilter(Vec2(xwidth,ywidth));
+    else if((RtFilterFunc)2 == function)
+        m_opts.pixelFilter = makeGaussianFilter(Vec2(xwidth,ywidth));
+    else if((RtFilterFunc)3 == function)
+        m_opts.pixelFilter = makeSincFilter(Vec2(xwidth,ywidth));
+    else if((RtFilterFunc)4 == function)
+        m_opts.pixelFilter = makeDiscFilter(Vec2(xwidth,ywidth));
+    else
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Unimplemented pixel filter function";
 }
 
 RtVoid RenderApi::Exposure(RtFloat gain, RtFloat gamma)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Exposure not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Exposure not implemented"; // Todo
 }
 
 RtVoid RenderApi::Imager(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Imager not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Imager not implemented"; // Todo
 }
 
 RtVoid RenderApi::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max,
                            RtFloat ditheramplitude)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Quantize not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Quantize not implemented"; // Todo
 }
 
 RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
                           RtConstToken mode, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Display not implemented";
+    if(name[0] != '+')
+        m_outVars.clear();
+    if(strcmp(mode, "rgb") == 0)
+    {
+        m_outVars.push_back(Stdvar::Ci);
+    }
+    else if(strcmp(mode, "rgba") == 0)
+    {
+        // TODO
+        m_outVars.push_back(Stdvar::Ci);
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "rgba output unimplemented, using rgb.";
+    }
+    else if(strcmp(mode, "z") == 0)
+    {
+        m_outVars.push_back(Stdvar::z);
+    }
+    else
+    {
+        // TODO
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Display not implemented for mode " << mode;
+    }
 }
 
 RtVoid RenderApi::Hider(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Hider not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Hider not implemented"; // Todo
 }
 
 RtVoid RenderApi::ColorSamples(const FloatArray& nRGB, const FloatArray& RGBn)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ColorSamples not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ColorSamples not implemented"; // Todo
 }
 
 RtVoid RenderApi::RelativeDetail(RtFloat relativedetail)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "RelativeDetail not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "RelativeDetail not implemented"; // Todo
 }
 
 RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Option not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Option not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -586,91 +717,100 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
 
 RtVoid RenderApi::AttributeBegin()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "AttributeBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "AttributeBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::AttributeEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "AttributeEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "AttributeEnd not implemented"; // Todo
 }
 
 RtVoid RenderApi::Color(RtConstColor Cq)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Color not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Color not implemented"; // Todo
 }
 
 RtVoid RenderApi::Opacity(RtConstColor Os)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Opacity not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Opacity not implemented"; // Todo
 }
 
 RtVoid RenderApi::TextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2,
                                      RtFloat t2, RtFloat s3, RtFloat t3,
                                      RtFloat s4, RtFloat t4)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "TextureCoordinates not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "TextureCoordinates not implemented"; // Todo
 }
 
 RtVoid RenderApi::LightSource(RtConstToken shadername, RtConstToken name,
                               const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "LightSource not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "LightSource not implemented"; // Todo
 }
 
 RtVoid RenderApi::AreaLightSource(RtConstToken shadername, RtConstToken name,
                                   const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "AreaLightSource not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "AreaLightSource not implemented"; // Todo
 }
 
 RtVoid RenderApi::Illuminate(RtConstToken name, RtBoolean onoff)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Illuminate not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Illuminate not implemented"; // Todo
 }
 
 RtVoid RenderApi::Surface(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Surface not implemented";
+    if(strcmp(name, "null") == 0)
+    {
+        m_attrs.surfaceShader.reset();
+        return;
+    }
+    m_attrs.surfaceShader = createShader(name);
+    if(!m_attrs.surfaceShader)
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "unimplemented shader \"" << name <<"\"";
+    }
 }
 
 RtVoid RenderApi::Displacement(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Displacement not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Displacement not implemented"; // Todo
 }
 
 RtVoid RenderApi::Atmosphere(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Atmosphere not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Atmosphere not implemented"; // Todo
 }
 
 RtVoid RenderApi::Interior(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Interior not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Interior not implemented"; // Todo
 }
 
 RtVoid RenderApi::Exterior(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Exterior not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Exterior not implemented"; // Todo
 }
 
 RtVoid RenderApi::ShaderLayer(RtConstToken type, RtConstToken name,
                               RtConstToken layername, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ShaderLayer not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ShaderLayer not implemented"; // Todo
 }
 
 RtVoid RenderApi::ConnectShaderLayers(RtConstToken type, RtConstToken layer1,
@@ -678,69 +818,85 @@ RtVoid RenderApi::ConnectShaderLayers(RtConstToken type, RtConstToken layer1,
                                       RtConstToken layer2,
                                       RtConstToken variable2)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ConnectShaderLayers not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ConnectShaderLayers not implemented"; // Todo
 }
 
 RtVoid RenderApi::ShadingRate(RtFloat size)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ShadingRate not implemented";
+    m_attrs.shadingRate = size;
 }
 
 RtVoid RenderApi::ShadingInterpolation(RtConstToken type)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ShadingInterpolation not implemented";
+    if(strcmp(type, "constant") == 0)
+        m_attrs.smoothShading = false;
+    else
+    {
+        if(strcmp(type, "smooth") != 0)
+        {
+            AQSIS_LOG_WARNING(ehandler(), EqE_BadToken)
+                << "unrecognized shading interpolation type \""
+                << type << "\", using smooth";
+        }
+        m_attrs.smoothShading = true;
+    }
 }
 
 RtVoid RenderApi::Matte(RtBoolean onoff)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Matte not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Matte not implemented"; // Todo
 }
 
 RtVoid RenderApi::Bound(RtConstBound bound)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Bound not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Bound not implemented"; // Todo
 }
 
 RtVoid RenderApi::Detail(RtConstBound bound)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Detail not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Detail not implemented"; // Todo
 }
 
 RtVoid RenderApi::DetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh,
                               RtFloat offhigh)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "DetailRange not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "DetailRange not implemented"; // Todo
 }
 
 RtVoid RenderApi::GeometricApproximation(RtConstToken type, RtFloat value)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "GeometricApproximation not implemented";
+    if(strcmp(type, "focusfactor") == 0)
+    {
+        m_attrs.focusFactor = value;
+    }
+    else
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Unknown GeometricApproximation type \"" << type << "\"";
+    }
 }
 
 RtVoid RenderApi::Orientation(RtConstToken orientation)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Orientation not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Orientation not implemented"; // Todo
 }
 
 RtVoid RenderApi::ReverseOrientation()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ReverseOrientation not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ReverseOrientation not implemented"; // Todo
 }
 
 RtVoid RenderApi::Sides(RtInt nsides)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Sides not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Sides not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -748,75 +904,75 @@ RtVoid RenderApi::Sides(RtInt nsides)
 
 RtVoid RenderApi::Identity()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Identity not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Identity not implemented"; // Todo
 }
 
 RtVoid RenderApi::Transform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Transform not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Transform not implemented"; // Todo
 }
 
 RtVoid RenderApi::ConcatTransform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ConcatTransform not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ConcatTransform not implemented"; // Todo
 }
 
 RtVoid RenderApi::Perspective(RtFloat fov)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Perspective not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Perspective not implemented"; // Todo
 }
 
 RtVoid RenderApi::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Translate not implemented";
+    m_currTransform = Mat4().setTranslation(Vec3(dx,dy,dz))
+                      * m_currTransform;
 }
 
 RtVoid RenderApi::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Rotate not implemented";
+    m_currTransform = Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle))
+                      * m_currTransform;
 }
 
 RtVoid RenderApi::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Scale not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Scale not implemented"; // Todo
 }
 
 RtVoid RenderApi::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                        RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Skew not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Skew not implemented"; // Todo
 }
 
 RtVoid RenderApi::CoordinateSystem(RtConstToken space)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "CoordinateSystem not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "CoordinateSystem not implemented"; // Todo
 }
 
 RtVoid RenderApi::CoordSysTransform(RtConstToken space)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "CoordSysTransform not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "CoordSysTransform not implemented"; // Todo
 }
 
 RtVoid RenderApi::TransformBegin()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "TransformBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "TransformBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::TransformEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "TransformEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "TransformEnd not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -825,20 +981,20 @@ RtVoid RenderApi::TransformEnd()
 RtVoid RenderApi::Resource(RtConstToken handle, RtConstToken type,
                            const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Resource not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Resource not implemented"; // Todo
 }
 
 RtVoid RenderApi::ResourceBegin()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ResourceBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ResourceBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::ResourceEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ResourceEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ResourceEnd not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -846,8 +1002,12 @@ RtVoid RenderApi::ResourceEnd()
 
 RtVoid RenderApi::Attribute(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Attribute not implemented";
+    if(strcmp(name, "displacementbound") == 0)
+    {
+        if(FloatArray s = pList.findFloatData(Ri::TypeSpec::Float, "sphere"))
+            m_attrs.displacementBound = s[0];
+        // TODO Arbitrary coordinate systems
+    }
 }
 
 //------------------------------------------------------------
@@ -858,22 +1018,68 @@ RtVoid RenderApi::Attribute(RtConstToken name, const ParamList& pList)
 
 RtVoid RenderApi::Polygon(const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Polygon not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Polygon not implemented"; // Todo
 }
 
 RtVoid RenderApi::GeneralPolygon(const IntArray& nverts,
                                  const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "GeneralPolygon not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "GeneralPolygon not implemented"; // Todo
 }
 
 RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
                                  const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PointsPolygons not implemented";
+    ConstDataView<Vec3> P(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P").begin());
+    ConstDataView<Vec3> N(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Normal), "N").begin());
+    ConstDataView<Col3> Cs(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Color), "Cs").begin());
+    float P_stor[12];
+    float N_stor[12];
+    float Cs_stor[12];
+    for(size_t face = 0; face < nverts.size(); ++face)
+    {
+        if(nverts[face] != 4)
+        {
+            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+                << "Ignoring non-quad face in PointsPolygons";
+            continue;
+        }
+        PrimvarStorageBuilder builder;
+#       define COPYVAR(dest, src) \
+            dest[0] = src[verts[4*face+0]]; dest[1] = src[verts[4*face+1]]; \
+            dest[2] = src[verts[4*face+3]]; dest[3] = src[verts[4*face+2]];
+        {
+            DataView<Vec3> view(P_stor);
+            COPYVAR(view, P);
+            builder.add(Primvar::P, P_stor, 12);
+        }
+        if(N)
+        {
+            DataView<Vec3> view(N_stor);
+            COPYVAR(view, N);
+            builder.add(Primvar::N, N_stor, 12);
+        }
+        if(Cs)
+        {
+            DataView<Col3> view(Cs_stor);
+            COPYVAR(view, Cs);
+            builder.add(Primvar::Cs, Cs_stor, 12);
+        }
+        else
+        {
+            float Cs_in[] = {1, 1, 1};
+            DataView<Col3> Cs(Cs_in, 0);
+            DataView<Col3> view(Cs_stor);
+            COPYVAR(view, Cs);
+            builder.add(Primvar::Cs, Cs_stor, 12);
+        }
+        IclassStorage storReq(1,4,4,4,4);
+        GeometryPtr patch(new ::Patch(builder.build(storReq)));
+        patch->transform(m_currTransform);
+        m_renderer->add(patch, m_attrs);
+    }
 }
 
 RtVoid RenderApi::PointsGeneralPolygons(const IntArray& nloops,
@@ -881,8 +1087,8 @@ RtVoid RenderApi::PointsGeneralPolygons(const IntArray& nloops,
                                         const IntArray& verts,
                                         const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PointsGeneralPolygons not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "PointsGeneralPolygons not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -891,22 +1097,42 @@ RtVoid RenderApi::PointsGeneralPolygons(const IntArray& nloops,
 RtVoid RenderApi::Basis(RtConstBasis ubasis, RtInt ustep, RtConstBasis vbasis,
                         RtInt vstep)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Basis not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Basis not implemented"; // Todo
 }
 
 RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Patch not implemented";
+    if(strcmp(type, "bilinear") == 0)
+    {
+        FloatArray P = pList.findFloatData(
+                Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P");
+        assert(P.begin());
+        PrimvarStorageBuilder builder;
+        builder.add(Primvar::P, P.begin(), P.size());
+        IclassStorage storReq(1,4,4,4,4);
+        GeometryPtr patch(new ::Patch(builder.build(storReq)));
+        patch->transform(m_currTransform);
+        m_renderer->add(patch, m_attrs);
+    }
+    else if(strcmp(type, "bicubic") == 0)
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Cubic patches not implemented";
+    }
+    else
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+            "Unknown patch type \"" << type << "\"");
+    }
 }
 
 RtVoid RenderApi::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
                             RtInt nv, RtConstToken vwrap,
                             const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "PatchMesh not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "PatchMesh not implemented"; // Todo
 }
 
 RtVoid RenderApi::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
@@ -914,8 +1140,8 @@ RtVoid RenderApi::NuPatch(RtInt nu, RtInt uorder, const FloatArray& uknot,
                           const FloatArray& vknot, RtFloat vmin, RtFloat vmax,
                           const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "NuPatch not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "NuPatch not implemented"; // Todo
 }
 
 RtVoid RenderApi::TrimCurve(const IntArray& ncurves, const IntArray& order,
@@ -924,8 +1150,8 @@ RtVoid RenderApi::TrimCurve(const IntArray& ncurves, const IntArray& order,
                             const FloatArray& u, const FloatArray& v,
                             const FloatArray& w)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "TrimCurve not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "TrimCurve not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -939,8 +1165,8 @@ RtVoid RenderApi::SubdivisionMesh(RtConstToken scheme,
                                   const FloatArray& floatargs,
                                   const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "SubdivisionMesh not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "SubdivisionMesh not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -949,51 +1175,51 @@ RtVoid RenderApi::SubdivisionMesh(RtConstToken scheme,
 RtVoid RenderApi::Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
                          RtFloat thetamax, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Sphere not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Sphere not implemented"; // Todo
 }
 
 RtVoid RenderApi::Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
                        const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Cone not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Cone not implemented"; // Todo
 }
 
 RtVoid RenderApi::Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
                            RtFloat thetamax, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Cylinder not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Cylinder not implemented"; // Todo
 }
 
 RtVoid RenderApi::Hyperboloid(RtConstPoint point1, RtConstPoint point2,
                               RtFloat thetamax, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Hyperboloid not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Hyperboloid not implemented"; // Todo
 }
 
 RtVoid RenderApi::Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
                              RtFloat thetamax, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Paraboloid not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Paraboloid not implemented"; // Todo
 }
 
 RtVoid RenderApi::Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
                        const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Disk not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Disk not implemented"; // Todo
 }
 
 RtVoid RenderApi::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
                         RtFloat phimax, RtFloat thetamax,
                         const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Torus not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Torus not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1001,15 +1227,15 @@ RtVoid RenderApi::Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
 
 RtVoid RenderApi::Points(const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Points not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Points not implemented"; // Todo
 }
 
 RtVoid RenderApi::Curves(RtConstToken type, const IntArray& nvertices,
                          RtConstToken wrap, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Curves not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Curves not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1019,8 +1245,8 @@ RtVoid RenderApi::Blobby(RtInt nleaf, const IntArray& code,
                          const FloatArray& floats, const TokenArray& strings,
                          const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Blobby not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Blobby not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1030,8 +1256,8 @@ RtVoid RenderApi::Procedural(RtPointer data, RtConstBound bound,
                              RtProcSubdivFunc refineproc,
                              RtProcFreeFunc freeproc)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Procedural not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Procedural not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1039,8 +1265,8 @@ RtVoid RenderApi::Procedural(RtPointer data, RtConstBound bound,
 
 RtVoid RenderApi::Geometry(RtConstToken type, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "Geometry not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "Geometry not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1048,14 +1274,14 @@ RtVoid RenderApi::Geometry(RtConstToken type, const ParamList& pList)
 
 RtVoid RenderApi::SolidBegin(RtConstToken type)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "SolidBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "SolidBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::SolidEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "SolidEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "SolidEnd not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1063,20 +1289,20 @@ RtVoid RenderApi::SolidEnd()
 
 RtVoid RenderApi::ObjectBegin(RtConstToken name)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ObjectBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ObjectBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::ObjectEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ObjectEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ObjectEnd not implemented"; // Todo
 }
 
 RtVoid RenderApi::ObjectInstance(RtConstToken name)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ObjectInstance not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ObjectInstance not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1084,14 +1310,14 @@ RtVoid RenderApi::ObjectInstance(RtConstToken name)
 
 RtVoid RenderApi::MotionBegin(const FloatArray& times)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MotionBegin not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MotionBegin not implemented"; // Todo
 }
 
 RtVoid RenderApi::MotionEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MotionEnd not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MotionEnd not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1106,8 +1332,8 @@ RtVoid RenderApi::MakeTexture(RtConstString imagefile,
                               RtFloat swidth, RtFloat twidth,
                               const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MakeTexture not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MakeTexture not implemented"; // Todo
 }
 
 RtVoid RenderApi::MakeLatLongEnvironment(RtConstString imagefile,
@@ -1116,8 +1342,8 @@ RtVoid RenderApi::MakeLatLongEnvironment(RtConstString imagefile,
                                          RtFloat swidth, RtFloat twidth,
                                          const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MakeLatLongEnvironment not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MakeLatLongEnvironment not implemented"; // Todo
 }
 
 RtVoid RenderApi::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx,
@@ -1128,23 +1354,23 @@ RtVoid RenderApi::MakeCubeFaceEnvironment(RtConstString px, RtConstString nx,
                                           RtFloat swidth, RtFloat twidth,
                                           const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MakeCubeFaceEnvironment not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MakeCubeFaceEnvironment not implemented"; // Todo
 }
 
 RtVoid RenderApi::MakeShadow(RtConstString picfile, RtConstString shadowfile,
                              const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MakeShadow not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MakeShadow not implemented"; // Todo
 }
 
 RtVoid RenderApi::MakeOcclusion(const StringArray& picfiles,
                                 RtConstString shadowfile,
                                 const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "MakeOcclusion not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "MakeOcclusion not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1152,8 +1378,8 @@ RtVoid RenderApi::MakeOcclusion(const StringArray& picfiles,
 
 RtVoid RenderApi::ErrorHandler(RtErrorFunc handler)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ErrorHandler not implemented";
+    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+        << "ErrorHandler not implemented"; // Todo
 }
 
 //------------------------------------------------------------
@@ -1162,23 +1388,30 @@ RtVoid RenderApi::ErrorHandler(RtErrorFunc handler)
 RtVoid RenderApi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
                               const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ReadArchive not implemented";
+    // TODO: Search path handling
+    std::ifstream archive(name, std::ios::in | std::ios::binary);
+    if(!name)
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadFile,
+            "Cound not open archive file " << name);
+    }
+    m_services.parseRib(archive, name);
 }
 
 RtVoid RenderApi::ArchiveBegin(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ArchiveBegin not implemented";
+    AQSIS_LOG_ERROR(ehandler(), EqE_Unimplement)
+        << "ArchiveBegin should be handled by a filter";
 }
 
 RtVoid RenderApi::ArchiveEnd()
 {
-    AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_Unimplement)
-        << "ArchiveEnd not implemented";
+    AQSIS_LOG_ERROR(ehandler(), EqE_Unimplement)
+        << "ArchiveEnd should be handled by a filter";
 }
 
 
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 ApiServices::ApiServices()
     : m_api(),
@@ -1191,6 +1424,7 @@ ApiServices::ApiServices()
     addFilter("validate");
 }
 
+} // anon. namespace
 
 //--------------------------------------------------
 Ri::RendererServices* createRenderer()

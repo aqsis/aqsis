@@ -104,10 +104,10 @@ class DefaultSurface : public IOVarHolder
 
 //------------------------------------------------------------------------------
 /// A crazy test shader (combined surface + displacement for now)
-class TestShader : public IOVarHolder
+class LumpySin : public IOVarHolder
 {
     public:
-        TestShader()
+        LumpySin()
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -259,12 +259,15 @@ class ShowPolys : public IOVarHolder
 //------------------------------------------------------------------------------
 ShaderPtr createShader(const char* name)
 {
-    if(name == std::string("test"))
-        return ShaderPtr(new TestShader());
+    if(name == std::string("lumpy_sin"))
+        return ShaderPtr(new LumpySin());
     else if(name == std::string("showgrids"))
         return ShaderPtr(new ShowGrids());
     else if(name == std::string("showpolys"))
         return ShaderPtr(new ShowPolys());
-    return ShaderPtr(new DefaultSurface());
+    else if(name == std::string("default"))
+        return ShaderPtr(new DefaultSurface());
+    else
+        return ShaderPtr();
 }
 
