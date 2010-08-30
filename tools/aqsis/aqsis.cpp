@@ -56,6 +56,7 @@
 #include <memory>
 
 #include <aqsis/core/corecontext.h>
+#include <aqsis/riutil/ricxxutil.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/util/argparse.h>
 #include <aqsis/util/file.h>
@@ -119,6 +120,8 @@ ArgParse::apflag g_cl_fb = 0;
 ArgParse::apflag g_cl_progress = 0;
 ArgParse::apflag g_cl_Progress = 0;
 ArgParse::apflag g_cl_no_color = 0;
+ArgParse::apstring g_cl_frameList = "";
+ArgParse::apintvec g_cl_frames;
 ArgParse::apflag g_cl_beep = 0;
 ArgParse::apint g_cl_verbose = 1;
 ArgParse::apflag g_cl_echoapi = 0;
@@ -289,6 +292,24 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	std:: cout << std::flush;
 }
 
+// Get list of frames, as a string
+std::string getFrameList()
+{
+	std::string frameList;
+	if(g_cl_frames.size() == 2)
+	{
+		std::ostringstream fmt;
+		fmt << g_cl_frames[0] << "-" << g_cl_frames[1];
+		frameList = fmt.str();
+	}
+	if(!g_cl_frameList.empty())
+	{
+		if(!frameList.empty())
+			frameList += ',';
+		frameList += g_cl_frameList;
+	}
+	return frameList;
+}
 
 /** \brief Event handler to restore the color for the console when catching an
  * asyncronous interruption.
@@ -452,7 +473,15 @@ void setupOptions()
 {
 	if ( g_cl_echoapi )
 		Aqsis::cxxRenderContext()->addFilter("echorib");
-	
+
+	std::string frameList = getFrameList();
+	if(!frameList.empty())
+	{
+		const char* frames = frameList.c_str();
+		Aqsis::cxxRenderContext()->addFilter("framedrop",
+				Aqsis::ParamListBuilder()("string frames", &frames) );
+	}
+
 	// Allow any command line arguments to override system/env settings
 	Aqsis::log() << Aqsis::info
 		<< "Applying search paths provided at the command line\n";
@@ -528,6 +557,8 @@ int main( int argc, const char** argv )
 		ap.alias( "fb", "d" );
 		ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cl_cropWindow, ArgParse::SEP_ARGV, 4);
 		ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
+		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
+		ap.argString( "framelist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_frameList);
 		ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
 		ap.alias( "nocolor", "nc" );
 		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
