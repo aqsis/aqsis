@@ -217,8 +217,11 @@ void RibParserImpl::parseStream(std::istream& ribStream,
             RequestHandlerType handler = pos->second;
             (this->*handler)(renderer);
         }
-        catch(XqValidation& e)
+        catch(XqException& e)
         {
+            // TODO: ^^ Think about exception heirarchy, and whether we want to
+            // catch something more specific than XqException.
+
             // Add information on the location (file,line etc) of the problem
             // to the exception message and rethrow.
             if(requestName)
