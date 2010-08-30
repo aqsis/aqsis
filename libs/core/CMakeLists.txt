@@ -12,8 +12,6 @@ add_subproject(geometry)
 add_subproject(raytrace)
 add_subproject(texturing_old)
 
-include_subproject(rib2ri)
-
 set(core_srcs
 	attributes.cpp
 	bound.cpp
@@ -43,7 +41,6 @@ set(core_srcs
 	${geometry_srcs}
 	${raytrace_srcs}
 	${texturing_old_srcs}
-	${rib2ri_srcs}
 )
 
 set(core_hdrs
@@ -66,7 +63,6 @@ set(core_hdrs
 	motion.h
 	mpdump.h
 	multijitter.h
-	objectinstance.h
 	occlusion.h
 	optioncache.h
 	options.h
@@ -82,7 +78,6 @@ set(core_hdrs
 	${geometry_hdrs}
 	${raytrace_hdrs}
 	${texturing_old_hdrs}
-	${rib2ri_hdrs}
 )
 
 source_group("Header Files" FILES ${core_hdrs})
@@ -111,7 +106,7 @@ endif()
 # Add library & install
 aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
 	COMPILE_DEFINITIONS ${defs}
-	LINK_LIBRARIES aqsis_math aqsis_ribparse aqsis_shadervm
+	LINK_LIBRARIES aqsis_math aqsis_riutil aqsis_shadervm
 		aqsis_tex aqsis_util aqsis_riutil
 		${AQSIS_TIFF_LIBRARIES} ${Boost_THREAD_LIBRARY} ${CARBON_LIBRARY}
 	DEPENDS ri_inl

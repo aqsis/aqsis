@@ -10,14 +10,12 @@
 #include <iosfwd>
 
 #include <aqsis/math/vector3d.h>
-#include <aqsis/ribparser.h>
+#include <aqsis/riutil/ricxx.h>
+
+namespace Ri = Aqsis::Ri;
 
 /// Alias for the longwinded Aqsis::CqVector3D
 typedef Aqsis::CqVector3D Vec3;
-
-/// Alias for longwinded Aqsis::IqRibParser::TqBlahArray
-typedef Aqsis::IqRibParser::TqFloatArray FloatArray;
-typedef Aqsis::IqRibParser::TqIntArray IntArray;
 
 /// Uniform random numbers on [0,1).  Could use Aqsis::CqRandom instead after a cleanup.
 inline float uRand()

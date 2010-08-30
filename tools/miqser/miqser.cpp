@@ -35,63 +35,65 @@
 #	endif
 #endif
 
+#include <algorithm>
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <memory>
 #include <cstring>
 #include <cstdlib>
-#include <time.h>
+
+#include <boost/shared_ptr.hpp>
 
 #include <aqsis/util/argparse.h>
 #include <aqsis/util/exception.h>
-#include <aqsis/util/file.h>
-#include <aqsis/ribparser.h>
 #include <aqsis/util/logging.h>
 #include <aqsis/util/logging_streambufs.h>
-#include <aqsis/ri/ri.h>
-#include <aqsis/riutil/ri_convenience.h>
-#include "ribrequesthandler.h"
 #include <aqsis/version.h>
 
+#include <aqsis/riutil/ricxxutil.h>
+#include <aqsis/riutil/ribwriter.h>
 
-//------------------------------------------------------------------------------
-// Forward declarations
-void setupOutputFormat();
-void processFiles(const ArgParse::apstringvec& fileNames);
-void parseAndFormat(std::istream& ribStream, const std::string& name);
-void parseRibStream(std::istream& ribStream, const std::string& name);
 
 // Command-line arguments
-ArgParse::apflag g_cl_pause;
-ArgParse::apflag g_cl_outstandard = 0;
-ArgParse::apflag g_cl_help = 0;
-ArgParse::apflag g_cl_version = 0;
+ArgParse::apflag g_cl_pause = false;
+ArgParse::apflag g_cl_outstandard = false;
+ArgParse::apflag g_cl_help = false;
+ArgParse::apflag g_cl_version = false;
 ArgParse::apint g_cl_verbose = 1;
-ArgParse::apstring g_cl_archive_path = "";
-ArgParse::apflag g_cl_no_color = 0;
-ArgParse::apint g_cl_indentation = 0;	// Default None
-ArgParse::apint g_cl_indentlevel = 0;
-ArgParse::apflag g_cl_binary = 0;
+ArgParse::apflag g_cl_no_color = false;
+ArgParse::apstring g_cl_frameList = "";
+ArgParse::apintvec g_cl_frames;
+ArgParse::apstring g_cl_indentation = "space";
 ArgParse::apint g_cl_compression = 0;	// Default None
 ArgParse::apstring g_cl_output = "";
-
-RtToken g_indentNone      = tokenCast("None");
-RtToken g_indentSpace     = tokenCast("Space");
-RtToken g_indentTab       = tokenCast("Tab");
-RtToken g_typeBinary      = tokenCast("Binary");
-RtToken g_compressionNone = tokenCast("None");
-RtToken g_compressionGzip = tokenCast("Gzip");
-
-#ifdef	AQSIS_SYSTEM_POSIX
-ArgParse::apflag g_cl_syslog = 0;
-#endif	// AQSIS_SYSTEM_POSIX
+Aqsis::RibWriterOptions g_writerOpts;
+#ifdef AQSIS_SYSTEM_POSIX
+ArgParse::apflag g_cl_syslog = false;
+#endif
 
 
-//------------------------------------------------------------------------------
+// Get list of frames, as a string
+std::string getFrameList()
+{
+	std::string frameList;
+	if(g_cl_frames.size() == 2)
+	{
+		std::ostringstream fmt;
+		fmt << g_cl_frames[0] << "-" << g_cl_frames[1];
+		frameList = fmt.str();
+	}
+	if(!g_cl_frameList.empty())
+	{
+		if(!frameList.empty())
+			frameList += ',';
+		frameList += g_cl_frameList;
+	}
+	return frameList;
+}
+
+
 int main( int argc, const char** argv )
 {
 	ArgParse ap;
@@ -109,45 +111,45 @@ int main( int argc, const char** argv )
 	           "\a2 = information\n"
 	           "\a3 = debug", &g_cl_verbose );
 	ap.alias( "verbose", "v" );
-	ap.argInt( "indentation", "=integer\aSet output indentation type\n"
-	           "\a0 = none (default)\n"
-	           "\a1 = space\n"
-	           "\a2 = tab", &g_cl_indentation );
+	ap.argString( "indentation", "=string\aSet output indentation type\n"
+	              "\aspace or 1 (default)\n"
+	              "\atab or 2", &g_cl_indentation );
 	ap.alias( "indentation", "i" );
-	ap.argInt( "indentlevel", "=integer\aSet the indetation amount", &g_cl_indentlevel);
+	ap.argInt( "indentlevel", "=integer\aSet the indetation amount "
+			   "(default %default)", &g_writerOpts.indentStep);
 	ap.alias( "indentlevel", "l" );
 	ap.argInt( "compression", "=integer\aSet output compression type\n"
 	           "\a0 = none (default)\n"
 	           "\a1 = gzip", &g_cl_compression );
-	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_cl_binary );
+	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_writerOpts.useBinary );
 	ap.alias( "binary", "b" );
+	ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
+	ap.argString( "framelist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_frameList);
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
 	ap.alias( "nocolor", "nc" );
-#ifdef	AQSIS_SYSTEM_POSIX
-
+#ifdef AQSIS_SYSTEM_POSIX
 	ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
-#endif	// AQSIS_SYSTEM_POSIX
-
-	ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
+#endif
+	ap.argString( "archives", "=string\aOverride the initial archive searchpath(s) (default \"%default\")", &g_writerOpts.archivePath );
+	ap.argFlag( "readarchives", "\aInterpolate all ReadArchive calls into the output", &g_writerOpts.interpolateArchives );
+	ap.alias("readarchives", "ra");
 	ap.allowUnrecognizedOptions();
-
-	//_crtBreakAlloc = 1305;
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
 		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
-		exit( 1 );
+		return EXIT_FAILURE;
 	}
 
 	if ( g_cl_help )
 	{
-		std::cout << ap.usagemsg();
-		exit( 0 );
+		std::cerr << ap.usagemsg();
+		return EXIT_SUCCESS;
 	}
 
 	if ( g_cl_version )
 	{
-		std::cout << "miqser version " << AQSIS_VERSION_STR_FULL
+		std::cerr << "miqser version " << AQSIS_VERSION_STR_FULL
 #ifdef _DEBUG
 		<< " (debug build)"
 #endif
@@ -156,20 +158,15 @@ int main( int argc, const char** argv )
 		exit( 0 );
 	}
 
-#ifdef	AQSIS_SYSTEM_WIN32
-	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
+#ifdef AQSIS_SYSTEM_WIN32
+	Aqsis::ansi_buf ansi(Aqsis::log());
 #endif
-
-	std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
-	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
-	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(Aqsis::log()) );
-	std::auto_ptr<std::streambuf> color_level;
+	Aqsis::reset_level_buf reset_level(Aqsis::log());
+//	Aqsis::fold_duplicates_buf fold_duplicates(Aqsis::log());
+	boost::shared_ptr<std::streambuf> color_level;
 	if(!g_cl_no_color)
-	{
-		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(Aqsis::log()) );
-		color_level = temp_color_level;
-	}
-	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+		color_level.reset(new Aqsis::color_level_buf(Aqsis::log()));
+	Aqsis::show_level_buf show_level(Aqsis::log());
 	Aqsis::log_level_t level = Aqsis::ERROR;
 	if( g_cl_verbose > 0 )
 		level = Aqsis::WARNING;
@@ -177,146 +174,80 @@ int main( int argc, const char** argv )
 		level = Aqsis::INFO;
 	if( g_cl_verbose > 2 )
 		level = Aqsis::DEBUG;
-	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
-#ifdef	AQSIS_SYSTEM_POSIX
-
+	Aqsis::filter_by_level_buf filter_level(level, Aqsis::log());
+#ifdef AQSIS_SYSTEM_POSIX
+	boost::shared_ptr<std::streambuf> use_syslog;
 	if( g_cl_syslog )
-		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
-#endif	// AQSIS_SYSTEM_POSIX
+		use_syslog.reset(new Aqsis::syslog_buf(Aqsis::log()));
+#endif
 
-	setupOutputFormat();
-	processFiles(ap.leftovers());
+	namespace Ri = Aqsis::Ri;
 
-	if(g_cl_pause)
+	// get indentation
+	g_writerOpts.indentStep = std::max(0, g_writerOpts.indentStep);
+	// Accept 0/1/2 here for compatibility with <= v1.6
+	if(g_cl_indentation == "space" || g_cl_indentation == "1")
+		g_writerOpts.indentChar = ' ';
+	else if(g_cl_indentation == "tab" || g_cl_indentation == "2")
+		g_writerOpts.indentChar = '\t';
+	else if(g_cl_indentation == "0")
+		g_writerOpts.indentStep = 0;
+	else
+		Aqsis::log() << Aqsis::warning << "unknown indent character";
+	g_writerOpts.useGzip = g_cl_compression;
+
+	// Get output stream
+	std::ostream* outStream = &std::cout;
+	std::ofstream outFile;
+	if(!g_cl_output.empty())
 	{
-		std::cout << "Press any key..." << std::ends;
-		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
+		outFile.open(g_cl_output.c_str(), std::ios::binary);
+		if(!outFile)
+			return EXIT_FAILURE;
+		outStream = &outFile;
 	}
 
-	return ( 0 );
-}
-
-
-//------------------------------------------------------------------------------
-/** \brief Set up the output formatting, compression etc for libri2rib.
- */
-void setupOutputFormat()
-{
-	// Setup the indentation if specified
-	if(g_cl_indentation > 0)
+	// Open writer
+	boost::shared_ptr<Ri::RendererServices> writer(
+		Aqsis::createRibWriter(*outStream, g_writerOpts));
+	// Add frame filter if desired
+	std::string frameList = getFrameList();
+	if(!frameList.empty())
 	{
-		RtToken itype[1];
-		if(g_cl_indentation == 1)
-			itype[0] = g_indentSpace;
-		else if(g_cl_indentation == 2)
-			itype[0] = g_indentTab;
-		else
-			itype[0] = g_indentNone;
-		RiOption(tokenCast("RI2RIB_Indentation"), "Type", &itype, RI_NULL);
-		// Output indentation level if specified
-		if(g_cl_indentlevel > 0)
-		{
-			RtInt isize[1];
-			isize[0] = g_cl_indentlevel;
-			RiOption(tokenCast("RI2RIB_Indentation"), "Size", &isize, RI_NULL);
-		}
+		const char* frames = frameList.c_str();
+		writer->addFilter("framedrop",
+			Aqsis::ParamListBuilder()("string frames", &frames)
+		);
 	}
+	// Add interface validation
+	writer->addFilter("validate");
 
-	// Set the output type to binary if specified.
-	if(g_cl_binary)
-	{
-		RtToken itype[1];
-		itype[0] = g_typeBinary;
-		RiOption(tokenCast("RI2RIB_Output"), "Type", &itype, RI_NULL);
-	}
-
-	// Setup the compression if specified
-	if(g_cl_compression > 0)
-	{
-		RtToken itype[1];
-		if(g_cl_compression == 1)
-			itype[0] = g_compressionGzip;
-		else
-			itype[0] = g_compressionNone;
-		RiOption(tokenCast("RI2RIB_Output"), "Compression", &itype, RI_NULL);
-	}
-}
-
-
-//------------------------------------------------------------------------------
-/** \brief Process all RIB files.
- */
-void processFiles(const ArgParse::apstringvec& fileNames)
-{
-	if ( fileNames.empty() )
+	// Parse files
+	const ArgParse::apstringvec& fileNames = ap.leftovers();
+	if(fileNames.empty())
 	{
 		// If no files specified, take input from stdin.
-		parseAndFormat(std::cin, "stdin");
+		writer->parseRib(std::cin, "stdin", writer->firstFilter());
 	}
 	else
 	{
-		for ( ArgParse::apstringvec::const_iterator e = fileNames.begin(); e != fileNames.end(); e++ )
+		for(ArgParse::apstringvec::const_iterator fileName = fileNames.begin();
+			fileName != fileNames.end(); ++fileName)
 		{
-			std::ifstream file(e->c_str(), std::ios::binary);
-			if ( file != NULL )
-				parseAndFormat(file, *e);
+			std::ifstream file(fileName->c_str(), std::ios::binary);
+			if(file)
+				writer->parseRib(file, fileName->c_str(),
+								 writer->firstFilter());
 			else
-				std::cout << "Warning: Cannot open file \"" << *e << "\"\n";
+				std::cerr << "Warning: Cannot open file \""
+						  << *fileName << "\"\n";
 		}
 	}
-}
 
-
-//------------------------------------------------------------------------------
-/** \brief Parse the RIB file and format the result with libri2rib
- */
-void parseAndFormat(std::istream& ribStream, const std::string& name)
-{
-	try
+	if(g_cl_pause)
 	{
-		if(g_cl_output != "")
-			RiBegin(tokenCast(g_cl_output.c_str()));
-		else
-			RiBegin(RI_NULL);
-
-		const char* popt[1];
-		if(!g_cl_archive_path.empty())
-		{
-			popt[0] = g_cl_archive_path.c_str();
-			RiOption( tokenCast("searchpath"), "archive", &popt, RI_NULL );
-		}
-
-		parseRibStream(ribStream, name);
-
-		RiEnd();
+		std::cerr << "Press any key..." << std::ends;
+		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 	}
-	catch(Aqsis::XqException& x)
-	{
-		Aqsis::log() << Aqsis::error << x.what() << std::endl;
-	}
-}
-
-
-/** Parse an open RIB stream, sending all the commands to the current RI context.
- */
-void parseRibStream(std::istream& ribStream, const std::string& name)
-{
-	boost::shared_ptr<Aqsis::IqRibParser> ribParser =
-		Aqsis::IqRibParser::create( boost::shared_ptr<Aqsis::IqRibRequestHandler>(
-				new Aqsis::CqRibRequestHandler()) );
-	ribParser->pushInput(ribStream, name,
-			Aqsis::CqArchiveCallbackAdaptor(RiArchiveRecord));
-	bool parsing = true;
-	while(parsing)
-	{
-		try
-		{
-			parsing = ribParser->parseNextRequest();
-		}
-		catch(Aqsis::XqParseError& e)
-		{
-			Aqsis::log() << Aqsis::error << e.what() << "\n";
-		}
-	}
-	ribParser->popInput();
+	return EXIT_SUCCESS;
 }

@@ -41,10 +41,6 @@
 #include	"texturemap_old.h"
 #include	<aqsis/shadervm/ishader.h>
 #include	"tiffio.h"
-#include	"objectinstance.h"
-
-#include	<aqsis/ribparser.h>
-#include	"ribrequesthandler.h"
 
 
 namespace Aqsis {
@@ -85,14 +81,13 @@ CqRenderer::CqRenderer()
 	m_Mode(RenderMode_Image),
 	m_Shaders(),
 	m_InstancedShaders(),
+	m_lights(),
 	m_textureCache(),
 	m_fSaveGPrims(false),
 	m_pTransCamera(new CqTransform()),
 	m_pTransDefObj(new CqTransform()),
 	m_fWorldBegin(false),
 	m_tokenDict(),
-	m_ribParser(IqRibParser::create(boost::shared_ptr<IqRibRequestHandler>(
-					new CqRibRequestHandler()))),
 	m_DofMultiplier(0),
 	m_OneOverFocalDistance(FLT_MAX),
 	m_UsingDepthOfField(false),       // DoF for pinhole lens
@@ -101,8 +96,6 @@ CqRenderer::CqRenderer()
 	m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 	m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
 	m_FrameNo(0),
-	m_ObjectInstances(),
-	m_bObjectOpen(false),
 	m_pErrorHandler(&RiErrorPrint),
 	m_pProgressHandler(0),
 	m_pPreRenderFunction(0),
@@ -164,12 +157,6 @@ CqRenderer::~CqRenderer()
 	delete m_pDDManager;
 
 	delete m_pRaytracer;
-
-	// Clear the ObjectInstance buffer
-	std::vector<CqObjectInstance*>::iterator i;
-	for(i=m_ObjectInstances.begin(); i!=m_ObjectInstances.end(); i++)
-		delete((*i));
-	m_ObjectInstances.clear();
 
 #ifdef _DEBUG
 	// Print information about any un-released CqRefCount objects
@@ -728,10 +715,10 @@ void CqRenderer::RenderAutoShadows()
 	if(pMultipass && pMultipass[0])
 	{
 		// Check all the lightsources for any with an attribute indicating autoshadows.
-		TqUint ilight;
-		for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
+		for(TqLightMap::iterator ilight = m_lights.begin(),
+			lend = m_lights.end(); ilight != lend; ++ilight)
 		{
-			CqLightsourcePtr light = Lightsource_stack[ilight];
+			CqLightsourcePtr light = ilight->second;
 			const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
 			const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
 			if(NULL != pMapName)
@@ -1383,6 +1370,19 @@ void CqRenderer::PrepareShaders()
 	}
 }
 
+void CqRenderer::registerLight(const char* name, CqLightsourcePtr light)
+{
+	m_lights[name] = light;
+}
+
+CqLightsourcePtr CqRenderer::findLight(const char* name)
+{
+	TqLightMap::iterator i = m_lights.find(name);
+	if(i == m_lights.end())
+		AQSIS_THROW_XQERROR(XqValidation, EqE_BadHandle,
+				"unknown light \"" << name << "\" encountered");
+	return i->second;
+}
 
 //---------------------------------------------------------------------
 /** Add a new requested display driver to the list.
@@ -1443,25 +1443,6 @@ const char* CqRenderer::textureSearchPath()
 		return pathPtr->c_str();
 	else
 		return "";
-}
-
-void CqRenderer::parseRibStream(std::istream& inputStream, const std::string& name,
-		const IqRenderer::TqRibCommentCallback& commentCallback)
-{
-	m_ribParser->pushInput(inputStream, name, commentCallback);
-	bool parsing = true;
-	while(parsing)
-	{
-		try
-		{
-			parsing = m_ribParser->parseNextRequest();
-		}
-		catch(XqParseError& e)
-		{
-			Aqsis::log() << error << e.what() << "\n";
-		}
-	}
-	m_ribParser->popInput();
 }
 
 bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
@@ -1544,25 +1525,25 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	if( ( offset = OutputDataIndex( name ) ) != -1 )
 		return(offset);
 
-	CqPrimvarToken tok = m_tokenDict.parseAndLookup(name);
-	if(tok.type() == type_invalid || tok.type() == type_string)
+	std::string baseName;
+	Ri::TypeSpec spec = m_tokenDict.lookup(name, &baseName);
+	if(spec.type == Ri::TypeSpec::Unknown || spec.type == Ri::TypeSpec::String)
 		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
-			"Cannot use \"" << tok << "\" as an AOV");
-	if( tok.count() != 1 )
+			"Cannot use \"" << name << "\" as an AOV");
+	if(spec.arraySize != 1)
 		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
-			"Cannot use an array as an AOV [" << tok << "]");
+			"Cannot use array \"" << name << "\" as an AOV");
 
-	TqInt NumSamples = tok.storageCount();
+	TqInt NumSamples = spec.storageCount();
 	SqOutputDataEntry DataEntry;
 
 	DataEntry.m_Offset = m_OutputDataOffset;
 	DataEntry.m_NumSamples = NumSamples;
-	DataEntry.m_Type = tok.type();
 	m_OutputDataOffset += NumSamples;
 	m_OutputDataTotalSize += NumSamples;
 
 	// Add the new entry to the map, using the token name as the key.
-	m_OutputDataEntries[tok.name()] = DataEntry;
+	m_OutputDataEntries[baseName] = DataEntry;
 
 	return DataEntry.m_Offset;
 }
@@ -1583,14 +1564,6 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	return entry->m_NumSamples;
 }
 
-TqInt CqRenderer::OutputDataType( const char* name )
-{
-	const SqOutputDataEntry* entry = FindOutputDataEntry(name);
-	if(!entry)
-		return 0;
-	return entry->m_Type;
-}
-
 /** \brief Found the AOV data entry corresponding to the given name
  *
  * \param name - name of the AOV data
@@ -1598,44 +1571,23 @@ TqInt CqRenderer::OutputDataType( const char* name )
  */
 const CqRenderer::SqOutputDataEntry* CqRenderer::FindOutputDataEntry(const char* name)
 {
-	CqPrimvarToken tok;
+	std::string baseName;
+	Ri::TypeSpec spec;
 	try
 	{
-		tok = m_tokenDict.parseAndLookup(name);
+		spec = m_tokenDict.lookup(name, &baseName);
 	}
 	catch(XqValidation& e)
 	{
 		Aqsis::log() << error << e.what() << std::endl;
 		return 0;
 	}
-	if( tok.type() != type_invalid )
-	{
-		std::map<std::string, SqOutputDataEntry>::iterator entry
-			= m_OutputDataEntries.find( tok.name() );
-		if( entry != m_OutputDataEntries.end() )
-			return &entry->second;
-	}
+	std::map<std::string, SqOutputDataEntry>::iterator entry
+		= m_OutputDataEntries.find(baseName);
+	if( entry != m_OutputDataEntries.end() )
+		return &entry->second;
 	return 0;
 }
-
-CqObjectInstance* CqRenderer::OpenNewObjectInstance()
-{
-	assert( !m_bObjectOpen );
-	m_bObjectOpen = true;
-	CqObjectInstance* pNew = new CqObjectInstance;
-	m_ObjectInstances.push_back(pNew);
-
-	return( pNew );
-}
-
-
-void CqRenderer::InstantiateObject( CqObjectInstance* handle )
-{
-	// Ensure that the object passed in is valid.
-	if( std::find(m_ObjectInstances.begin(), m_ObjectInstances.end(), handle ) != m_ObjectInstances.end() )
-		handle->RecallInstance();
-}
-
 
 void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {
@@ -1675,7 +1627,7 @@ void CqRenderer::initialiseCropWindow()
 	m_cropWindowYMin = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, iYRes);
 	m_cropWindowYMax = clamp<TqInt>(lceil( iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, iYRes);
 }
-	
+
 //---------------------------------------------------------------------
 
 } // namespace Aqsis

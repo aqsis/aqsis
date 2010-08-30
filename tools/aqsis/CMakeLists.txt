@@ -9,6 +9,6 @@ if(AQSIS_ENABLE_MPDUMP)
 endif()
 
 aqsis_add_executable(aqsis ${aqsis_srcs}
-	LINK_LIBRARIES aqsis_core aqsis_util aqsis_ribparse)
+	LINK_LIBRARIES aqsis_core aqsis_util)
 
 aqsis_install_targets(aqsis)

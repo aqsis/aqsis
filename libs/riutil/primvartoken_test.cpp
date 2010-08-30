@@ -26,15 +26,15 @@
 
 #include <aqsis/riutil/primvartoken.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 
 #include <aqsis/util/exception.h>
 
 using namespace Aqsis;
+
+BOOST_AUTO_TEST_SUITE(primvartoken_tests)
 
 BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 {
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_test)
 	}
 
 	{
-		// Check a special case kludge - integer types can be specified either
-		// with "int" or with "integer"
+		// Check a special case - integer types can be specified either with
+		// "int" or with "integer"
 		CqPrimvarToken tok("uniform int i");
 		BOOST_CHECK_EQUAL(tok.type(), type_integer);
 	}
@@ -95,10 +95,6 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_parse_defaults_test)
 // tests for parsing invalid tokens.
 BOOST_AUTO_TEST_CASE(CqPrimvarToken_invalid_parse_test)
 {
-	// invalid tokens
-	BOOST_CHECK_THROW(CqPrimvarToken("#u"), XqParseError);
-	BOOST_CHECK_THROW(CqPrimvarToken("\"u"), XqParseError);
-
 	// invalid/incomplete token sequences
 	BOOST_CHECK_THROW(CqPrimvarToken("] u"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("[ u"), XqParseError);
@@ -111,3 +107,5 @@ BOOST_AUTO_TEST_CASE(CqPrimvarToken_invalid_parse_test)
 	BOOST_CHECK_THROW(CqPrimvarToken("P Cs"), XqParseError);
 	BOOST_CHECK_THROW(CqPrimvarToken("P", "Cs"), XqParseError);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

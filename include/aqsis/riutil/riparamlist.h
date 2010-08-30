@@ -33,6 +33,7 @@
 #include <string>
 
 #include <aqsis/ri/ritypes.h>
+#include <aqsis/riutil/ricxx.h>
 
 namespace Aqsis {
 
@@ -46,11 +47,10 @@ namespace Aqsis {
  * options between renderman interface calls and the non-core libraries such as
  * aqsistex.
  *
- * \todo This class should be aware of the type of a renderman token - it
- * should hold parsed token information taken from the renderman symbol table
- * rather than plain old strings.
+ * \deprecated Use the more recent Ri::ParamList instead.  This is just a
+ * wrapper for now.
  */
-class AQSIS_RIUTIL_SHARE CqRiParamList
+class CqRiParamList
 {
 	public:
 		/** \brief Construct the parameter list from the associated C-interface types.
@@ -59,7 +59,7 @@ class AQSIS_RIUTIL_SHARE CqRiParamList
 		 * \param values - array of value pointers for the parameters
 		 * \param count - length of the tokens and values arrays.
 		 */
-		CqRiParamList(RtToken tokens[], RtPointer values[], TqInt count);
+		CqRiParamList(const Ri::ParamList& pList);
 
 		/** \brief Find a pointer for the given token name
 		 *
@@ -80,19 +80,7 @@ class AQSIS_RIUTIL_SHARE CqRiParamList
 		const T& find(const std::string& name, const T& defVal) const;
 
 	private:
-		/** \brief Extract token names from a token array.
-		 *
-		 * \param tokNames - extracted token names are placed here.
-		 * \param tokens - full tokens (may be type and class qualified)
-		 * \param tokCount - number of tokens.
-		 */
-		static void extractTokenNames(std::vector<std::string>& tokNames,
-				RtToken* tokens, TqInt tokCount);
-		/// token name array
-		std::vector<std::string> m_tokenNames;
-		/// 
-		const RtPointer* m_values;
-		TqInt m_count;
+		const Ri::ParamList& m_pList;
 };
 
 
@@ -100,22 +88,26 @@ class AQSIS_RIUTIL_SHARE CqRiParamList
 // Implementation details
 //==============================================================================
 // Implementation of CqRiParamList
-inline CqRiParamList::CqRiParamList(RtToken tokens[],
-		RtPointer values[], TqInt count)
-	: m_tokenNames(),
-	m_values(values),
-	m_count(count)
+inline CqRiParamList::CqRiParamList(const Ri::ParamList& pList)
+	: m_pList(pList)
+{ }
+
+namespace detail
 {
-	extractTokenNames(m_tokenNames, tokens, count);
+	template<typename T> struct TypeToRiSpecType { };
+	template<> struct TypeToRiSpecType<RtFloat>      { static const Ri::TypeSpec::Type value = Ri::TypeSpec::Float; };
+	template<> struct TypeToRiSpecType<RtInt>        { static const Ri::TypeSpec::Type value = Ri::TypeSpec::Integer; };
+	template<> struct TypeToRiSpecType<RtConstToken> { static const Ri::TypeSpec::Type value = Ri::TypeSpec::String; };
 }
 
 template<typename T>
 inline const T* CqRiParamList::find(const std::string& name) const
 {
-	for(TqInt i = 0; i < m_count; ++i)
+	for(size_t i = 0; i < m_pList.size(); ++i)
 	{
-		if(name == m_tokenNames[i])
-			return reinterpret_cast<T*>(m_values[i]);
+		if(name == m_pList[i].name() &&
+		   m_pList[i].spec().storageType() == detail::TypeToRiSpecType<T>::value)
+			return reinterpret_cast<const T*>(m_pList[i].data());
 	}
 	return 0;
 }

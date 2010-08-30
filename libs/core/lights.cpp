@@ -30,8 +30,6 @@
 
 namespace Aqsis {
 
-std::deque<CqLightsourcePtr>	Lightsource_stack;
-
 //---------------------------------------------------------------------
 /** Default constructor.
  */

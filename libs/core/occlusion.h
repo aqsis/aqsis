@@ -153,7 +153,7 @@ class CqOcclusionTree
 	public:
 		/// Class to expose private functions for testing.
 		//TODO: refactor so that we don't need this!
-		class Test;
+		struct Test;
 };
 
 

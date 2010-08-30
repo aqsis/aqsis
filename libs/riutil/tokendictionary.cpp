@@ -28,16 +28,62 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-// CqTokenDictionary implementation
-CqTokenDictionary::CqTokenDictionary(bool useDefaultVars)
-	: m_dict()
+TokenDict::TokenDict()
 {
-	if(useDefaultVars)
+	const std::vector<CqPrimvarToken>& vars = standardPrimvars();
+	for(int i = 0, end = vars.size(); i < end; ++i)
+		m_dict.insert(Dict::value_type(vars[i].name(), toTypeSpec(vars[i])));
+}
+
+void TokenDict::declare(const char* name, const char* type)
+{
+	const char* nameInType = 0;
+	Ri::TypeSpec spec = parseDeclaration(type, &nameInType);
+	if(nameInType)
 	{
-		const std::vector<CqPrimvarToken>& vars = standardPrimvars();
-		for(int i = 0, end = vars.size(); i < end; ++i)
-			m_dict.insert(TqPrimvarMap::value_type(vars[i].name(), vars[i]));
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+			"bad token type \"" << type << "\"");
 	}
+	if(spec.type == Ri::TypeSpec::Unknown)
+	{
+		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
+			"type not specified in string \"" << type << "\"");
+	}
+	m_dict[name] = spec;
+}
+
+void TokenDict::declare(const char* name, const Ri::TypeSpec& spec)
+{
+	m_dict[name] = spec;
+}
+
+Ri::TypeSpec TokenDict::lookup(const char* token, const char** nameBegin,
+							   const char** nameEnd) const
+{
+	const char* nb = 0;
+	const char* ne = 0;
+	if(!nameBegin) nameBegin = &nb;
+	if(!nameEnd) nameEnd = &ne;
+	Ri::TypeSpec spec = parseDeclaration(token, nameBegin, nameEnd);
+	if(spec.type != Ri::TypeSpec::Unknown)
+		return spec;
+	Dict::const_iterator i
+		= m_dict.find(std::string(*nameBegin, *nameEnd));
+	if(i == m_dict.end())
+	{
+		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+			"undeclared token \"" << token << "\"");
+	}
+	return i->second;
+}
+
+Ri::TypeSpec TokenDict::lookup(const char* token, std::string* name) const
+{
+	const char* nameBegin = 0;
+	const char* nameEnd = 0;
+	Ri::TypeSpec spec = lookup(token, &nameBegin, &nameEnd);
+	name->assign(nameBegin, nameEnd);
+	return spec;
 }
 
 

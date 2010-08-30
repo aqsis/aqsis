@@ -19,7 +19,6 @@ set(CMAKE_MODULE_PATH
 include(UtilMacros)
 include(AqsisTesting)
 include(FirstCMakeRun)
-include(XslTransform)
 
 #-------------------------------------------------------------------------------
 # Build-time options which can be set from ccmake or the command line
@@ -73,8 +72,9 @@ if(WIN32)
 else()
 	set(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install")
 endif()
-
-set(Boost_ADDITIONAL_VERSIONS "1.42.0" "1.42" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37")
+set(Boost_ADDITIONAL_VERSIONS "1.45.0" "1.45" "1.44.0" "1.44"
+	"1.43.0" "1.43" "1.42.0" "1.42" "1.41.0" "1.41"
+	"1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37")
 find_package(Boost 1.34.1)
 # The following is a workaround because Boost versions > 1.35.0 need the
 # system library. CMake versions >2.6.4 should fix this properly.
@@ -142,11 +142,6 @@ endif()
 #-------------------------------------------------------------------------------
 # Find build tools
 #-----------------
-
-include(FindXsltproc)
-if(NOT AQSIS_XSLTPROC_EXECUTABLE_FOUND)
-	message(FATAL_ERROR "Aqsis requires xsltproc to build")
-endif()
 
 include(FindFlexBison)
 
@@ -259,14 +254,12 @@ add_subdirectory(libs/math)
 add_subdirectory(libs/util)
 get_directory_property(aqsis_util_location DIRECTORY libs/util DEFINITION aqsis_util_location)
 add_subdirectory(libs/riutil)
-add_subdirectory(libs/ribparse)
 add_subdirectory(libs/slcomp)
 get_directory_property(aqsis_slcomp_location DIRECTORY libs/slcomp DEFINITION aqsis_slcomp_location)
 add_subdirectory(libs/tex)
 add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
-add_subdirectory(libs/rib2ri)
 add_subdirectory(libs/core)
 
 # Build executable tools
@@ -333,5 +326,5 @@ install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 
 set(AQSISCONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR}/AqsisConfig.cmake)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AqsisConfig.cmake.in ${AQSISCONFIG_PATH})
-export(TARGETS aqsis_core aqsis_math aqsis_ribparse aqsis_shadervm aqsis_tex aqsis_util aqsis_riutil APPEND FILE ${AQSISCONFIG_PATH})
+export(TARGETS aqsis_core aqsis_math aqsis_shadervm aqsis_tex aqsis_util aqsis_riutil APPEND FILE ${AQSISCONFIG_PATH})
 

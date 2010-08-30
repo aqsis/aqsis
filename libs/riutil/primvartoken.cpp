@@ -26,9 +26,7 @@
 
 #include <aqsis/riutil/primvartoken.h>
 
-#include <cstdio> // For EOF
-
-#include <boost/algorithm/string/case_conv.hpp>
+#include <cstring>
 
 #include <aqsis/util/exception.h>
 
@@ -36,146 +34,184 @@ namespace Aqsis {
 
 namespace {
 
-/** Tokenizer class for primvar class/type/arraysize tokens.
- */
-class CqPrimvarTokenizer
+// Get the next token from in the string "begin"
+//
+// On entry, end should hold the start of the string in which to search, begin
+// is ignored.
+//
+// On return, the range [begin,end) holds the next token, which is a substring
+// delimited by whitespace, or the characters '[' ']'.  The delimiter
+// characters [ and ] are considered tokens themselves, and returned when
+// found.
+//
+// Return true if the token is valid, indicating a nonempty returned range.
+bool nextToken(const char*& begin, const char*& end)
 {
-	private:
-		const char* m_currPos;
-	public:
-		CqPrimvarTokenizer(const char* tokenStr)
-			: m_currPos(tokenStr)
-		{ }
-		/** \brief Get the next token.
-		 *
-		 *
-		 * \return The next token.  These consist of pretty much anything other
-		 * than whitespace or the two characters "# .  The characters [ and ]
-		 * are treated as tokens in their own right.
-		 */
-		std::string get()
-		{
-			const char* m_wordBegin = m_currPos;
-			while(true)
-			{
-				switch(*m_currPos)
-				{
-					case ' ': case '\t': case '\n':
-						if(m_wordBegin < m_currPos)
-							return std::string(m_wordBegin, m_currPos);
-						m_wordBegin = m_currPos + 1;
-						break;
-					case 0:
-						return std::string(m_wordBegin, m_currPos);
-					case '#': case '"':
-						AQSIS_THROW_XQERROR(XqParseError, EqE_Syntax,
-							"invalid character '" << *m_currPos
-							<< "' in primvar type declaration");
-						break;
-					case '[': case ']':
-						if(m_wordBegin < m_currPos)
-						{
-							// return the token which was ended by '[' or ']'
-							return std::string(m_wordBegin, m_currPos);
-						}
-						else
-						{
-							// [ and ] are "kept delimiters" - return one of them.
-							++m_currPos;
-							return std::string(m_currPos-1, m_currPos);
-						}
-					default:
-						break;
-				}
-				++m_currPos;
-			}
-		}
-};
-
-/// Convert a token to lower case before passing it to enumCast.
-template<typename EnumT>
-EnumT lowercaseEnumCast(std::string tok)
-{
-	boost::to_lower(tok);
-	return enumCast<EnumT>(tok);
+	const char* c = end;
+	while(*c && std::strchr(" \t\n", *c)) ++c; // skip whitespace
+	begin = c;
+	if(*c == '[' || *c == ']')
+		++c; // '[' and ']' are "kept delimiters"
+	else
+		while(*c && !std::strchr(" []\t\n", *c)) ++c; // skip to end of token
+	end = c;
+	return begin != end;
 }
+
+// Could use std::tolower... but it's nice that this is inline & we don't care
+// about locales for RIB.
+inline char tolower(char c)
+{
+	if(c >= 65 && c < 91) c += 32;
+	return c;
+}
+
+// Return true if the lowercase version of the string range [s1,s1end) is equal
+// to the string s2.
+bool lowerCaseEqual(const char* s1, const char* s1end, const char* s2)
+{
+	while(s1 < s1end && *s2)
+	{
+		if(tolower(*s1) != *s2)
+			return false;
+		++s1; ++s2;
+	}
+	return s1 == s1end && *s2 == 0;
+}
+
+// Get the Ri::TypeSpec interpolation class from the given string range [begin,end)
+bool parseIClass(const char* begin, const char* end, Ri::TypeSpec::IClass& iclass)
+{
+	     if(lowerCaseEqual(begin, end, "constant"))    iclass = Ri::TypeSpec::Constant;
+	else if(lowerCaseEqual(begin, end, "uniform"))     iclass = Ri::TypeSpec::Uniform;
+	else if(lowerCaseEqual(begin, end, "varying"))     iclass = Ri::TypeSpec::Varying;
+	else if(lowerCaseEqual(begin, end, "vertex"))      iclass = Ri::TypeSpec::Vertex;
+	else if(lowerCaseEqual(begin, end, "facevarying")) iclass = Ri::TypeSpec::FaceVarying;
+	else if(lowerCaseEqual(begin, end, "facevertex"))  iclass = Ri::TypeSpec::FaceVertex;
+	else
+		return false;
+	return true;
+}
+
+// Get the Ri::TypeSpec type from the given string range [begin,end)
+bool parseType(const char* begin, const char* end, Ri::TypeSpec::Type& type)
+{
+	     if(lowerCaseEqual(begin, end, "float"))    type = Ri::TypeSpec::Float;
+	else if(lowerCaseEqual(begin, end, "point"))    type = Ri::TypeSpec::Point;
+	else if(lowerCaseEqual(begin, end, "color"))    type = Ri::TypeSpec::Color;
+	else if(lowerCaseEqual(begin, end, "integer"))  type = Ri::TypeSpec::Integer;
+	else if(lowerCaseEqual(begin, end, "int"))      type = Ri::TypeSpec::Integer;
+	else if(lowerCaseEqual(begin, end, "string"))   type = Ri::TypeSpec::String;
+	else if(lowerCaseEqual(begin, end, "vector"))   type = Ri::TypeSpec::Vector;
+	else if(lowerCaseEqual(begin, end, "normal"))   type = Ri::TypeSpec::Normal;
+	else if(lowerCaseEqual(begin, end, "hpoint"))   type = Ri::TypeSpec::HPoint;
+	else if(lowerCaseEqual(begin, end, "matrix"))   type = Ri::TypeSpec::Matrix;
+	else if(lowerCaseEqual(begin, end, "mpoint"))   type = Ri::TypeSpec::MPoint;
+	else
+		return false;
+	return true;
+}
+
 
 } // unnamed namespace
 
 
-// Helper for uniformly formatted errors.
-#define PARSE_ERROR(token, message)                               \
-	AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,    \
-		"invalid token \"" << token << "\": " << message)
+//------------------------------------------------------------------------------
+// public stuff
 
-/** Parse a primitive variable token
- *
- * m_class, m_type, m_count and m_name will be extracted if present
- * and in the correct order.  m_class and m_type will be set to invalid
- * if not present.
- */
-void CqPrimvarToken::parse(const char* tokenStr)
+#define PARSE_ERROR(token, message)                            \
+	AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,            \
+		"invalid token \"" << token << "\": " << message)      \
+
+Ri::TypeSpec parseDeclaration(const char* token, const char** nameStart,
+						      const char** nameEnd, const char** error)
 {
-	CqPrimvarTokenizer tokenizer(tokenStr);
-	std::string tok;
-
-#define NEXT_OR_END if((tok = tokenizer.get()) == "") return
+	const char* begin = 0;
+	const char* end = token;  // setup for nextToken.
 
 	// The tokens should have the form
 	//
 	// class type '[' array_size ']' name
 	//
 	// where each of the four parts is optional.
+	Ri::TypeSpec spec;
 
-	// (1) attempt to parse class
+#	define RETURN_ERROR(message) do {                                  \
+		if(error)                                                      \
+		{                                                              \
+			*error = message;                                          \
+			return spec;                                               \
+		}                                                              \
+		else                                                           \
+			PARSE_ERROR(token, message);                               \
+	} while(false)
+
+	bool parsedClass = false;
+	bool parsedType = false;
+	bool parsedArraylen = false;
+
+#	define NEXT_OR_END do {                                            \
+	if(!nextToken(begin, end))                                         \
+	{                                                                  \
+		if(nameEnd)                                                    \
+			RETURN_ERROR("expected token name");                       \
+		if(!parsedType && (parsedClass || parsedArraylen))             \
+			RETURN_ERROR("type expected");                             \
+		return spec;                                                   \
+	} } while(false)
+
 	NEXT_OR_END;
-	m_class = lowercaseEnumCast<EqVariableClass>(tok);
-	if(m_class != class_invalid)
+	// (1) attempt to parse class
+	parsedClass = parseIClass(begin, end, spec.iclass);
+	if(parsedClass)
 		NEXT_OR_END;
 	// (2) attempt to parse type
-	m_type = lowercaseEnumCast<EqVariableType>(tok);
-	if(m_type != type_invalid)
-	{
+	parsedType = parseType(begin, end, spec.type);
+	if(parsedType)
 		NEXT_OR_END;
-	}
-	else if(tok == "int")
-	{
-		// Kludge - support "int" for type_integer, even though it's not
-		// standard since some content expects it.
-		m_type = type_integer;
-		NEXT_OR_END;
-	}
 	// (3) attempt to parse array size
-	if(tok == "[")
+	if(*begin == '[')
 	{
-		tok = tokenizer.get();
-		if(tok == "")
-			PARSE_ERROR(tokenStr, "expected array size after '['");
-		// Convert to integer.
-		std::istringstream in(tok);
-		in >> m_count;
-		// check array size is positive and nothing is left over in the token.
-		if(m_count <= 0 || in.get() != EOF)
-			PARSE_ERROR(tokenStr, "array size must be a positive integer");
+		if(!nextToken(begin, end))
+			RETURN_ERROR("expected array size after '['");
+		char* convEnd = 0;
+		spec.arraySize = std::strtol(begin, &convEnd, 10);
+		if(convEnd != end)
+			RETURN_ERROR("array size must be an integer");
 		// Consume a "]" token
-		if(tokenizer.get() != "]")
-			PARSE_ERROR(tokenStr, "expected ']' after array size");
+		if(!nextToken(begin, end) || *begin != ']')
+			RETURN_ERROR("expected ']' after array size");
+		parsedArraylen = true;
 		NEXT_OR_END;
 	}
-	if(tok == "]")
-		PARSE_ERROR(tokenStr, "']' is not a valid name");
+	if(*begin == ']')
+		RETURN_ERROR("unexpected ]");
 	// (4) anything remaining corresponds to the name.
-	m_name = tok;
-
-#undef NEXT_OR_END
+	if(nameStart)
+		*nameStart = begin;
+	if(nameEnd)
+		*nameEnd = end;
+	if(!parsedType && (parsedClass || parsedArraylen))
+		RETURN_ERROR("type expected");
 
 	// Finally check that we've run out of tokens.
-	if(tokenizer.get() != "")
-		PARSE_ERROR(tokenStr, "too many words in token");
+	if(nextToken(begin, end))
+		RETURN_ERROR("too many words in token");
+	return spec;
+#undef NEXT_OR_END
+#undef RETURN_ERROR
 }
 
-//-----------------------------------------
-// public methods
+CqPrimvarToken::CqPrimvarToken(const Ri::TypeSpec& spec,
+							   const std::string& name)
+	: m_class(class_invalid),
+	m_type(type_invalid),
+	m_count(-1),
+	m_name(name)
+{
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
+}
 
 CqPrimvarToken::CqPrimvarToken(const char* token)
 	: m_class(class_invalid),
@@ -184,24 +220,12 @@ CqPrimvarToken::CqPrimvarToken(const char* token)
 	m_name()
 {
 	assert(token != 0);
-	parse(token);
-	if(m_name == "")
-		PARSE_ERROR(token, "expected token name");
-	if(m_type == type_invalid)
-	{
-		if(m_class != class_invalid || m_count != -1)
-		{
-			// If the type isn't found, neither should be the class or array size,
-			PARSE_ERROR(token, "is incomplete - expected a type");
-		}
-	}
-	else
-	{
-		if(m_class == class_invalid)
-			m_class = class_uniform;
-	}
-	if(m_count == -1)
-		m_count = 1;
+	const char* beginName = 0;
+	const char* endName = 0;
+	Ri::TypeSpec spec = parseDeclaration(token, &beginName, &endName);
+	m_name.assign(beginName, endName);
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
 }
 
 CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
@@ -211,14 +235,88 @@ CqPrimvarToken::CqPrimvarToken(const char* typeToken, const char* name)
 	m_name()
 {
 	assert(typeToken != 0);
-	parse(typeToken);
-	if(m_name != "")
+	const char* beginName = 0;
+	Ri::TypeSpec spec = parseDeclaration(typeToken, &beginName);
+	if(beginName)
 		AQSIS_THROW_XQERROR(XqParseError, EqE_BadToken,
-			"invalid token: unexpected name \"" << m_name << "\" in type string \""
+			"invalid token: unexpected name \"" << beginName << "\" in type string \""
 			<< typeToken << "\"");
 	m_name = name;
-	if(m_type != type_invalid && m_class == class_invalid)
-		m_class = class_uniform;
+	typeSpecToEqTypes(&m_class, &m_type, spec);
+	m_count = spec.arraySize;
+}
+
+
+//------------------------------------------------------------------------------
+void typeSpecToEqTypes(EqVariableClass* iclass, EqVariableType* type,
+                       const Ri::TypeSpec& spec)
+{
+    if(type)
+    {
+        switch(spec.type)
+        {
+            case Ri::TypeSpec::Float:   *type = type_float;   break;
+            case Ri::TypeSpec::Point:   *type = type_point;   break;
+            case Ri::TypeSpec::Vector:  *type = type_vector;  break;
+            case Ri::TypeSpec::Normal:  *type = type_normal;  break;
+            case Ri::TypeSpec::HPoint:  *type = type_hpoint;  break;
+            case Ri::TypeSpec::Matrix:  *type = type_matrix;  break;
+            case Ri::TypeSpec::Color:   *type = type_color;   break;
+            case Ri::TypeSpec::Integer: *type = type_integer; break;
+            case Ri::TypeSpec::String:  *type = type_string;  break;
+            default:                    *type = type_invalid; break;
+        }
+    }
+    if(iclass)
+    {
+        switch(spec.iclass)
+        {
+            case Ri::TypeSpec::Constant:    *iclass = class_constant;    break;
+            case Ri::TypeSpec::Uniform:     *iclass = class_uniform;     break;
+            case Ri::TypeSpec::Varying:     *iclass = class_varying;     break;
+            case Ri::TypeSpec::Vertex:      *iclass = class_vertex;      break;
+            case Ri::TypeSpec::FaceVarying: *iclass = class_facevarying; break;
+            case Ri::TypeSpec::FaceVertex:  *iclass = class_facevertex;  break;
+            default:                        *iclass = class_invalid;     break;
+        }
+    }
+}
+
+Ri::TypeSpec toTypeSpec(const CqPrimvarToken& tok)
+{
+    Ri::TypeSpec spec;
+    switch(tok.type())
+    {
+        case type_float:   spec.type = Ri::TypeSpec::Float;   break;
+        case type_point:   spec.type = Ri::TypeSpec::Point;   break;
+        case type_vector:  spec.type = Ri::TypeSpec::Vector;  break;
+        case type_normal:  spec.type = Ri::TypeSpec::Normal;  break;
+        case type_hpoint:  spec.type = Ri::TypeSpec::HPoint;  break;
+        case type_matrix:  spec.type = Ri::TypeSpec::Matrix;  break;
+        case type_color:   spec.type = Ri::TypeSpec::Color;   break;
+        case type_integer: spec.type = Ri::TypeSpec::Integer; break;
+        case type_string:  spec.type = Ri::TypeSpec::String;  break;
+        default:           spec.type = Ri::TypeSpec::Unknown; break;
+    }
+    switch(tok.Class())
+    {
+        case class_constant:    spec.iclass = Ri::TypeSpec::Constant; break;
+        case class_uniform:     spec.iclass = Ri::TypeSpec::Uniform;  break;
+        case class_varying:     spec.iclass = Ri::TypeSpec::Varying;  break;
+        case class_vertex:      spec.iclass = Ri::TypeSpec::Vertex;   break;
+        case class_facevarying: spec.iclass = Ri::TypeSpec::FaceVarying; break;
+        case class_facevertex:  spec.iclass = Ri::TypeSpec::FaceVertex;  break;
+        default:                spec.type = Ri::TypeSpec::Unknown;    break;
+    }
+    spec.arraySize = tok.count();
+    return spec;
+}
+
+std::string tokenString(const Ri::Param& param)
+{
+	std::ostringstream oss;
+	oss << CqPrimvarToken(param.spec(), param.name());
+	return oss.str();
 }
 
 } // namespace Aqsis

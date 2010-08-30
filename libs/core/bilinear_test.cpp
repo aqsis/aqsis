@@ -133,7 +133,8 @@ struct UVFixture
 			1-e, 0.5,
 		};
 		// Exclude potentially problematic regions in u and v.
-		for(int i = 0; i < sizeof(uvInInit)/sizeof(TqFloat); i += 2)
+		int nuvInit = sizeof(uvInInit)/sizeof(TqFloat);
+		for(int i = 0; i < nuvInit; i += 2)
 		{
 			TqFloat u = uvInInit[i];
 			TqFloat v = uvInInit[i+1];

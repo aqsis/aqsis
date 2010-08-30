@@ -38,6 +38,7 @@
 
 #include "renderer.h"
 #include <aqsis/util/plugins.h>
+#include <aqsis/core/corecontext.h>
 
 namespace Aqsis {
 
@@ -364,7 +365,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			// Push in the procedural arguments
 			(*pipe) << detail << " " << args[1] << "\n" << std::flush;
 			// And parse the resulting RIB from the pipe.
-			QGetRenderContext()->parseRibStream(*pipe, "[" + command + "]");
+			cxxRenderContext()->parseRib(*pipe, ("[" + command + "]").c_str());
 			STATS_INC( GEO_prc_created_prp );
 		}
 		catch(std::ios_base::failure& /*e*/)

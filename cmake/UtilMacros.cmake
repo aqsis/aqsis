@@ -128,22 +128,35 @@ endmacro()
 # Usage:
 #
 #    aqsis_add_library( target_name  source1  [source2 ...]
+#                       [TEST_SOURCES test_source1 ...]
 #                       [COMPILE_DEFINITIONS def1 ...]
 #                       [DEPENDS dep1 ...]
 #                       [LINK_LIBRARIES lib1 ...]
-#                       [MODULE] )
+#                       [PLUGIN] )
 #
 # Specifying the PLUGIN option causes the library to be compiled as a loadable
 # module (see the cmake add_library documentation regarding the MODULE library
 # type).  In addition, PLUGIN causes any prefix which would normally to be
 # added to the library name ("lib" on unix) to be left off.
+#
+# If the TEST_SOURCES option is non-empty and testing is enabled, then the
+# provided test source files are compiled into the library, and a test runner
+# executable is created.  The test runner is added to the list of tests
+# maintained by cmake.
 macro(aqsis_add_library target_name)
-	parse_arguments(aal "COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES" "PLUGIN" ${ARGN})
+	parse_arguments(aal
+		"COMPILE_DEFINITIONS;DEPENDS;LINK_LIBRARIES;TEST_SOURCES"
+		"PLUGIN" ${ARGN}
+	)
 	set(aal_lib_type SHARED)
 	if(aal_PLUGIN)
 		set(aal_lib_type MODULE)
 	endif()
-	add_library(${target_name} ${aal_lib_type} ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
+	set(aal_lib_srcs ${aal_DEFAULT_ARGS} ${INFORES_SRCS})
+	if(aqsis_enable_testing)
+		list(APPEND aal_lib_srcs ${aal_TEST_SOURCES})
+	endif()
+	add_library(${target_name} ${aal_lib_type} ${aal_lib_srcs})
 	get_target_property(aal_name ${target_name} LOCATION)
 	get_filename_component(aal_name ${aal_name} PATH)
 	# Set the variables to be picked up if this library is needed during build, for
@@ -170,6 +183,19 @@ macro(aqsis_add_library target_name)
 		set_target_properties(${target_name} PROPERTIES
 			SOVERSION ${VERSION_MAJOR}
 			VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
+	endif()
+	if(aqsis_enable_testing AND aal_TEST_SOURCES)
+		# Make sure the library is linked against the unit test framework
+		target_link_libraries(${target_name}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+		# Create an executable test runner, and link it to the library.
+		set(_aal_testexe_name ${target_name}_test)
+		add_executable(${_aal_testexe_name}
+			${aqsis_all_SOURCE_DIR}/libs/build_tools/testmain.cpp)
+		set_target_properties(${_aal_testexe_name} PROPERTIES
+			COMPILE_DEFINITIONS "BOOST_TEST_MODULE=${target_name}_tests")
+		target_link_libraries(${_aal_testexe_name} ${target_name})
+		add_test(${target_name}_unit_tests ${_aal_testexe_name})
 	endif()
 endmacro()
 

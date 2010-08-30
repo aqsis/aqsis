@@ -138,7 +138,11 @@ OptionHandler* ArgParseInternalData::findOption(ArgParse::apstring name,
 	// If not found, see if we can find it by stripping "no"
 	if (newname.substr(0, 2) == "no")
 	{
-		foundoption = options.find(newname.substr(2));
+		newname = newname.substr(2);
+		foundalias = aliases.find(newname);
+		if (foundalias != aliases.end())
+			newname = foundalias->second;
+		foundoption = options.find(newname);
 		if (foundoption != options.end())
 		{
 			// We found it, but is "no" legal for this option?

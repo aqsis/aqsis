@@ -31,39 +31,40 @@ using namespace Aqsis;
 
 namespace {
 
-RifTokenType mapTokType(EqVariableType type)
+RifTokenType mapTokType(Ri::TypeSpec::Type type)
 {
 	// This mapping is written as switch() rather than an array since it's more
 	// robust to changes of the order of associated enums.
 	switch(type)
 	{
-		case type_float:   return k_RifFloat;
-		case type_integer: return k_RifInteger;
-		case type_point:   return k_RifPoint;
-		case type_string:  return k_RifString;
-		case type_color:   return k_RifColor;
-		case type_hpoint:  return k_RifHPoint;
-		case type_normal:  return k_RifNormal;
-		case type_vector:  return k_RifVector;
-		case type_matrix:  return k_RifMatrix;
+		case Ri::TypeSpec::Float:   return k_RifFloat;
+		case Ri::TypeSpec::Integer: return k_RifInteger;
+		case Ri::TypeSpec::Point:   return k_RifPoint;
+		case Ri::TypeSpec::String:  return k_RifString;
+		case Ri::TypeSpec::Color:   return k_RifColor;
+		case Ri::TypeSpec::HPoint:  return k_RifHPoint;
+		case Ri::TypeSpec::Normal:  return k_RifNormal;
+		case Ri::TypeSpec::Vector:  return k_RifVector;
+		case Ri::TypeSpec::Matrix:  return k_RifMatrix;
+		case Ri::TypeSpec::MPoint:  return k_RifMPoint;
 		default:
 			assert(0);
 			return k_RifFloat;
 	}
 }
 
-RifTokenDetail mapTokClass(EqVariableClass Class)
+RifTokenDetail mapTokClass(Ri::TypeSpec::IClass iclass)
 {
 	// This mapping is written as switch() rather than an array since it's more
 	// robust to changes of the order of associated enums.
-	switch(Class)
+	switch(iclass)
 	{
-		case class_constant: return k_RifConstant;
-		case class_uniform: return k_RifUniform;
-		case class_varying: return k_RifVarying;
-		case class_vertex: return k_RifVertex;
-		case class_facevarying: return k_RifFaceVarying;
-		case class_facevertex: return k_RifFaceVertex;
+		case Ri::TypeSpec::Constant:    return k_RifConstant;
+		case Ri::TypeSpec::Uniform:     return k_RifUniform;
+		case Ri::TypeSpec::Varying:     return k_RifVarying;
+		case Ri::TypeSpec::Vertex:      return k_RifVertex;
+		case Ri::TypeSpec::FaceVarying: return k_RifFaceVarying;
+		case Ri::TypeSpec::FaceVertex:  return k_RifFaceVertex;
 		default:
 			assert(0);
 			return k_RifConstant;
@@ -77,22 +78,21 @@ extern "C" RtInt RifGetDeclaration(RtToken name, RifTokenType *tokType,
 {
 	try
 	{
-		CqPrimvarToken tok;
+		Ri::TypeSpec spec;
+		// Use the current context dictionary if it exists, otherwise try to
+		// parse as an inline declaration.
 		if(QGetRenderContext())
-		{
-			// Use the current context dictionary if it exists.
-			tok = QGetRenderContext()->tokenDict().parseAndLookup(name);
-		}
+			spec = QGetRenderContext()->tokenDict().lookup(name);
 		else
-		{
-			// Else just try to parse as an inline declaration.
-			tok = CqPrimvarToken(name);
-			if(tok.type() == type_invalid)
-				return 1; // Couldn't parse as an inline decl.
-		}
-		*tokType = mapTokType(tok.type());
-		*tokDetail = mapTokClass(tok.Class());
-		*arrayLen = tok.count();
+			spec = parseDeclaration(name);
+		if(spec.type == Ri::TypeSpec::Unknown)
+			return 1;
+		if(tokType)
+			*tokType = mapTokType(spec.type);
+		if(tokDetail)
+			*tokDetail = mapTokClass(spec.iclass);
+		if(arrayLen)
+			*arrayLen = spec.arraySize;
 		return 0;
 	}
 	catch(XqValidation&)

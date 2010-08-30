@@ -92,7 +92,7 @@ class ParentHairs
 		 *                   thrown.
 		 * \param primVars - Set of primvars for parent curves.
 		 */
-		ParentHairs(bool linear, const IntArray& numVerts,
+		ParentHairs(bool linear, const Ri::IntArray& numVerts,
 				const boost::shared_ptr<PrimVars>& primVars,
 				const HairModifiers& modifiers);
 

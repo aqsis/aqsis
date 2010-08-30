@@ -46,15 +46,14 @@
 #include	"iraytrace.h"
 #include	"iraytrace.h"
 #include	<aqsis/tex/filtering/itexturecache.h>
+#include	"lights.h"
 
 #include	"clippingvolume.h"
 
 namespace Aqsis {
 
 class CqImageBuffer;
-class CqObjectInstance;
 class CqModeBlock;
-class IqRibParser;
 
 struct SqCoordSys
 {
@@ -216,9 +215,6 @@ class CqRenderer : public IqRenderer
 		 */
 		const char* textureSearchPath();
 
-		virtual void parseRibStream(std::istream& inputStream, const std::string& name,
-				const TqRibCommentCallback& commentCallback = TqRibCommentCallback());
-
 		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
 
@@ -256,9 +252,9 @@ class CqRenderer : public IqRenderer
 		}
 
 		/// Return the current dictionary of declared tokens.
-		CqTokenDictionary& tokenDict();
+		TokenDict& tokenDict();
 		/// Return the current dictionary of declared tokens.
-		const CqTokenDictionary& tokenDict() const;
+		const TokenDict& tokenDict() const;
 
 		/** Get the list of currently registered shaders.
 		 * \return A reference to a list of CqShaderRegister classes.
@@ -276,6 +272,11 @@ class CqRenderer : public IqRenderer
 		/** Prepare the shaders for rendering.
 		 */
 		virtual void	PrepareShaders();
+
+		/// Register a light source with the given name
+		void registerLight(const char* name, CqLightsourcePtr light);
+		/// Find the light associated with the given name
+		CqLightsourcePtr findLight(const char* name);
 
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface );
@@ -447,21 +448,6 @@ class CqRenderer : public IqRenderer
 			return( m_FrameNo );
 		}
 
-		virtual	CqObjectInstance*	pCurrentObject()
-		{
-			if( m_bObjectOpen )
-				return(m_ObjectInstances.back());
-			else
-				return(0);
-		}
-
-		virtual CqObjectInstance* OpenNewObjectInstance();
-		virtual void InstantiateObject( CqObjectInstance* handle );
-		virtual	void CloseObjectInstance()
-		{
-			m_bObjectOpen = false;
-		}
-
 		/** Get a pointer to the error handler function.
 		 */
 		RtErrorFunc	pErrorHandler()
@@ -580,6 +566,9 @@ class CqRenderer : public IqRenderer
 		TqShaderMap m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
+		typedef std::map<std::string, CqLightsourcePtr> TqLightMap;
+		TqLightMap m_lights;
+
 		boost::shared_ptr<IqTextureCache> m_textureCache; ///< Cache for aqsistex texture access.
 		 
 
@@ -589,10 +578,7 @@ class CqRenderer : public IqRenderer
 		CqTransformPtr	m_preProjectionTransform;	///< The transformation that was applied prior to projection.
 		bool			m_fWorldBegin;
 		/// Renderman symbol table
-		CqTokenDictionary m_tokenDict;
-
-		/// RIB parser, sending parsed commands to the RI.
-		boost::shared_ptr<IqRibParser> m_ribParser;
+		TokenDict m_tokenDict;
 
 		/// Variables for depth of field.  \todo Move these to a DoF calculator object.
 		TqFloat			m_DofMultiplier;
@@ -609,8 +595,6 @@ class CqRenderer : public IqRenderer
 
 
 		TqInt	m_FrameNo;
-		std::vector<CqObjectInstance*>	m_ObjectInstances;
-		bool	m_bObjectOpen;
 
 		// Error Handling
 		RtErrorFunc m_pErrorHandler; ///< pointer to the error handling function
@@ -650,12 +634,12 @@ void	QSetRenderContext( CqRenderer* pRenderer );
 // Implementation details
 //==============================================================================
 
-inline CqTokenDictionary& CqRenderer::tokenDict()
+inline TokenDict& CqRenderer::tokenDict()
 {
 	return m_tokenDict;
 }
 
-inline const CqTokenDictionary& CqRenderer::tokenDict() const
+inline const TokenDict& CqRenderer::tokenDict() const
 {
 	return m_tokenDict;
 }
