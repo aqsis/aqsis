@@ -11,15 +11,6 @@ set(math_srcs
 	spline.cpp
 )
 
-aqsis_add_library(aqsis_math ${math_srcs} ${math_hdrs}
-	COMPILE_DEFINITIONS AQSIS_MATH_EXPORTS
-)
-
-
-aqsis_install_targets(aqsis_math)
-
-#--------------------------------------------------
-# Testing
 set(math_test_srcs
 	cellnoise_test.cpp
 	color_test.cpp
@@ -34,4 +25,9 @@ set(math_test_srcs
 	vector4d_test.cpp
 )
 
-aqsis_add_tests(${math_test_srcs} LINK_LIBRARIES aqsis_math)
+aqsis_add_library(aqsis_math ${math_srcs} ${math_hdrs}
+	TEST_SOURCES ${math_test_srcs}
+	COMPILE_DEFINITIONS AQSIS_MATH_EXPORTS
+)
+
+aqsis_install_targets(aqsis_math)

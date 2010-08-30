@@ -26,11 +26,10 @@
 
 #include <aqsis/tex/buffers/channellist.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(channellist_tests)
 
 //------------------------------------------------------------------------------
 // CqChannelList test cases
@@ -115,3 +114,5 @@ BOOST_AUTO_TEST_CASE(CqChannelList_addUnnamedChannels)
 	BOOST_CHECK_EQUAL(channelList[0].type, Aqsis::Channel_Unsigned8);
 	BOOST_CHECK_EQUAL(channelList[4].name, "?05");
 }
+
+BOOST_AUTO_TEST_SUITE_END()

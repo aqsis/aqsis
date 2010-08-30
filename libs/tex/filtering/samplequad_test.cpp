@@ -24,13 +24,11 @@
  */
 #include <aqsis/tex/filtering/samplequad.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+BOOST_AUTO_TEST_SUITE(samplequad_tests)
 
 //------------------------------------------------------------------------------
 // CqTextureSampleOptions unit tests
@@ -57,3 +55,4 @@ BOOST_AUTO_TEST_CASE(SqSampleQuad_scaleWidth_test)
 	BOOST_CHECK_CLOSE(quad.v4.y(), 0.55f, 0.01f);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

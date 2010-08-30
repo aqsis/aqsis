@@ -29,14 +29,12 @@
 #include <sstream>
 #include <cstring> // for std::memset()
 
-#ifndef AQSIS_SYSTEM_WIN32
-#	define BOOST_TEST_DYN_LINK
-#endif
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 
 #include <aqsis/util/exception.h>
 
-
+BOOST_AUTO_TEST_SUITE(popen_tests)
 using namespace Aqsis;
 
 //------------------------------------------------------------------------------
@@ -162,3 +160,5 @@ BOOST_AUTO_TEST_CASE(CqPopenDevice_notfound_test)
 		XqEnvironment
 	);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

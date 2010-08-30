@@ -26,12 +26,9 @@
 
 #include <aqsis/util/enum.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
-#define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <sstream>
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 
 // Days of the week test enum.
@@ -63,6 +60,8 @@ AQSIS_ENUM_INFO_BEGIN(Day, Unknown)
 AQSIS_ENUM_INFO_END
 }
 
+
+BOOST_AUTO_TEST_SUITE(enum_tests)
 using namespace Aqsis;
 
 
@@ -98,3 +97,4 @@ BOOST_AUTO_TEST_CASE(CqEnum_stream_extract_test)
 	BOOST_CHECK_EQUAL(d, Thursday);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

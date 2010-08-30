@@ -27,11 +27,10 @@
 #include <vector>
 #include <cfloat>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(bilinear_tests)
 
 using namespace Aqsis;
 
@@ -269,3 +268,4 @@ BOOST_AUTO_TEST_CASE(InvBilinear_parallel_adjacent_edges)
 //	checkLookup(uvIn, A, B, C, D);
 //}
 
+BOOST_AUTO_TEST_SUITE_END()

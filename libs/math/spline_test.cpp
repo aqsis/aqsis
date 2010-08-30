@@ -25,13 +25,12 @@
 
 #include <aqsis/math/spline.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+BOOST_AUTO_TEST_SUITE(spline_tests)
 
 BOOST_AUTO_TEST_CASE(CqCubicSpline_pushBack_test)
 {
@@ -72,3 +71,5 @@ BOOST_AUTO_TEST_CASE(CqCubicSpline_Linear_evaluate_test)
 	BOOST_CHECK_CLOSE(spline.evaluate(0.75f), 3.5f, 1e-5f);
 	BOOST_CHECK_CLOSE(spline.evaluate(0.875f), 3.75f, 1e-5f);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -195,7 +195,7 @@ macro(aqsis_add_library target_name)
 		set_target_properties(${_aal_testexe_name} PROPERTIES
 			COMPILE_DEFINITIONS "BOOST_TEST_MODULE=${target_name}_tests")
 		target_link_libraries(${_aal_testexe_name} ${target_name})
-		add_test(${target_name}_unit_tests ${_aal_testexe_name})
+		add_test(${_aal_testexe_name} ${_aal_testexe_name})
 	endif()
 endmacro()
 

@@ -25,13 +25,12 @@
 
 #include <aqsis/math/noise1234.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+BOOST_AUTO_TEST_SUITE(noise1234_tests)
 
 const TqFloat epsilon = 0.1f; 
 
@@ -92,3 +91,5 @@ BOOST_AUTO_TEST_CASE(CqNoise1234_4D_float_Perlin_periodic_noise_test)
 	
 	BOOST_CHECK_CLOSE(noise.pnoise(1.5f, -0.2f, 0.7f, 3.0f, 2, 5, -2, 3), -0.369483441f, epsilon);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

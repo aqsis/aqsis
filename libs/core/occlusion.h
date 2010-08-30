@@ -130,7 +130,7 @@ class CqOcclusionTree
 	private:
 		void propagateDepths();
 
-		AQSIS_CORE_SHARE static TqInt treeIndexForPoint(TqInt treeDepth, bool splitXFirst,
+		static TqInt treeIndexForPoint(TqInt treeDepth, bool splitXFirst,
 				TqInt x, TqInt y);
 
 		/// Number of bits in which to store the sample subindex within a leaf.

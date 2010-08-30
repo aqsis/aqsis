@@ -27,13 +27,12 @@
 #include <aqsis/math/vector3d.h>
 #include <aqsis/math/color.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+BOOST_AUTO_TEST_SUITE(noise_tests)
 
 const TqFloat epsilon = 0.1f; 
 
@@ -216,3 +215,5 @@ BOOST_AUTO_TEST_CASE(CqNoise_4D_color_Perlin_periodic_noise_test)
 	
 	BOOST_CHECK_PREDICATE(colEquals, (noise.CGPNoise4(Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f, Aqsis::CqVector3D(1.0f, 2.0f, 3.0f), 2.0f))(Aqsis::CqColor(0.5f, 0.62703f, 0.349767f)));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -28,14 +28,12 @@
 
 #include <aqsis/math/vector4d.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-
+BOOST_AUTO_TEST_SUITE(vector4d_tests)
 
 static bool equal(const Aqsis::CqVector4D& a, const Aqsis::CqVector4D& b)
 {
@@ -158,7 +156,7 @@ BOOST_AUTO_TEST_CASE(vector4d_operator_less_or_equal)
 	BOOST_CHECK(vec1 >= vec3);
 }
 
-BOOST_AUTO_TEST_CASE(CqVector3D_isClose)
+BOOST_AUTO_TEST_CASE(CqVector4D_isClose)
 {
 	// Remeber that these are homogenous vectors, hence the 1 always in the
 	// last place!
@@ -186,3 +184,4 @@ BOOST_AUTO_TEST_CASE(CqVector3D_isClose)
 	BOOST_CHECK(isClose(CqVector4D(0,0,0,1), CqVector4D(0,0,0,1)));
 }
 
+BOOST_AUTO_TEST_SUITE_END()

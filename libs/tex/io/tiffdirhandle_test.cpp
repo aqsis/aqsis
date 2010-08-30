@@ -27,19 +27,27 @@
 #include "tiffdirhandle.h"
 #include "tifffile_test.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
-#define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <sstream>
+#include <stdio.h>
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 
+BOOST_AUTO_TEST_SUITE(tiffdirhandle_tests)
 //------------------------------------------------------------------------------
 // Test cases for CqTiffFileHandle
 
+// Print TIFF errors to boost test log.
+void tiffErrorHandler(const char* mdl, const char* fmt, va_list va)
+{
+	char err_string[384];
+	vsprintf( err_string, fmt, va );
+	BOOST_MESSAGE(err_string);
+}
+
 BOOST_AUTO_TEST_CASE(CqTiffFileHandle_test_constructor)
 {
+	TIFFSetErrorHandler(&tiffErrorHandler);
 	BOOST_CHECK_THROW(Aqsis::CqTiffFileHandle("nonexistant_file.tif", "r"),
 			Aqsis::XqInternal);
 	BOOST_MESSAGE("Unit test note: Expect a libtiff error about nonexistant_file.tif above ^^");
@@ -167,3 +175,4 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
 	}
 }
 
+BOOST_AUTO_TEST_SUITE_END()

@@ -26,12 +26,12 @@
 #include <aqsis/math/math.h>
 #include "limits.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+BOOST_AUTO_TEST_SUITE(base_math_tests)
 
 BOOST_AUTO_TEST_CASE(lfloor_test)
 {
@@ -138,3 +138,4 @@ BOOST_AUTO_TEST_CASE(isClose_test)
 	BOOST_CHECK(Aqsis::isClose(f1, f1 - eps, 1e-4));
 }
 
+BOOST_AUTO_TEST_SUITE_END()

@@ -26,11 +26,15 @@
 #include <aqsis/ri/rif.h>
 #include <aqsis/ri/ri.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(rif_tests)
+
+inline char* tok(const char* str)
+{
+	return const_cast<char*>(str);
+}
 
 BOOST_AUTO_TEST_CASE(RifGetDeclaration_test)
 {
@@ -41,7 +45,7 @@ BOOST_AUTO_TEST_CASE(RifGetDeclaration_test)
 
 	// Check that inline declarations are parsed correctly in the absence of a
 	// context.
-	ret = RifGetDeclaration("constant color[3] myCol",
+	ret = RifGetDeclaration(tok("constant color[3] myCol"),
 			&tokType, &tokDetail, &arrayLen);
 	BOOST_CHECK_EQUAL(ret, 0);
 	BOOST_CHECK_EQUAL(tokType, k_RifColor);
@@ -49,30 +53,31 @@ BOOST_AUTO_TEST_CASE(RifGetDeclaration_test)
 	BOOST_CHECK_EQUAL(arrayLen, 3);
 
 	// Check that without a context, we can't look up "P"
-	ret = RifGetDeclaration("P", &tokType, &tokDetail, &arrayLen);
+	ret = RifGetDeclaration(tok("P"), &tokType, &tokDetail, &arrayLen);
 	BOOST_CHECK_EQUAL(ret, 1);
 
 	// Now initialise a context.
 	RiBegin(RI_NULL);
 	// Check that declaring and then looking up the decl works.
-	RiDeclare("myMat", "facevertex matrix");
-	ret = RifGetDeclaration("myMat", &tokType, &tokDetail, &arrayLen);
+	RiDeclare(tok("myMat"), tok("facevertex matrix"));
+	ret = RifGetDeclaration(tok("myMat"), &tokType, &tokDetail, &arrayLen);
 	BOOST_CHECK_EQUAL(ret, 0);
 	BOOST_CHECK_EQUAL(tokType, k_RifMatrix);
 	BOOST_CHECK_EQUAL(tokDetail, k_RifFaceVertex);
 	BOOST_CHECK_EQUAL(arrayLen, 1);
 
 	// Check that inbuilt decls can be found.
-	ret = RifGetDeclaration("P", &tokType, &tokDetail, &arrayLen);
+	ret = RifGetDeclaration(tok("P"), &tokType, &tokDetail, &arrayLen);
 	BOOST_CHECK_EQUAL(ret, 0);
 	BOOST_CHECK_EQUAL(tokType, k_RifPoint);
 	BOOST_CHECK_EQUAL(tokDetail, k_RifVertex);
 	BOOST_CHECK_EQUAL(arrayLen, 1);
 
 	// Check that non-declared primvars can't be found.
-	ret = RifGetDeclaration("nonexistant", &tokType, &tokDetail, &arrayLen);
+	ret = RifGetDeclaration(tok("nonexistant"), &tokType, &tokDetail, &arrayLen);
 	BOOST_CHECK_EQUAL(ret, 1);
 
 	RiEnd();
 }
 
+BOOST_AUTO_TEST_SUITE_END()

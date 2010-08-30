@@ -28,12 +28,12 @@
 
 #include <aqsis/math/color.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
+BOOST_AUTO_TEST_SUITE(color_tests)
 
 using Aqsis::CqColor;
 
@@ -105,6 +105,8 @@ BOOST_AUTO_TEST_CASE(color_isClose)
 	BOOST_CHECK(isClose(c1, c1 + cEps2, 1e-4));
 	BOOST_CHECK(isClose(c1, c1 - cEps2, 1e-4));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 //------------------------------------------------------------------------------
 #else // AQSIS_OPTIMIZATION_TEST

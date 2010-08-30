@@ -27,16 +27,15 @@
 
 #include "tiffinputfile.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <sstream>
 
 #include <aqsis/tex/buffers/texturebuffer.h>
 #include "tifffile_test.h"
+
+BOOST_AUTO_TEST_SUITE(tiffinputfile_tests)
 
 // note: header stuff is tested elsewhere, in tiffdirhandle_test.
 
@@ -104,3 +103,4 @@ BOOST_AUTO_TEST_CASE(CqTiffInputFile_imageIndex_test)
 	BOOST_CHECK_EQUAL(inFile.numSubImages(), 2);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

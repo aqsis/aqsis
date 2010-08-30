@@ -25,11 +25,10 @@
 
 #include <aqsis/tex/io/texfileheader.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE(texfileheader_tests)
 
 // tag types for header testing
 AQSIS_IMAGE_ATTR_TAG(TestAttr, TqInt);
@@ -83,3 +82,4 @@ BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 	BOOST_CHECK_EQUAL(channelList.numChannels(), 0);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

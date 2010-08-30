@@ -25,13 +25,8 @@
 
 #include "occlusion.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
-
-using namespace Aqsis;
 
 namespace Aqsis
 {
@@ -45,6 +40,10 @@ struct CqOcclusionTree::Test
 	}
 };
 }
+
+BOOST_AUTO_TEST_SUITE(occlusion_tests)
+
+using namespace Aqsis;
 
 BOOST_AUTO_TEST_CASE(treeIndexForPoint_test)
 {
@@ -129,3 +128,4 @@ BOOST_AUTO_TEST_CASE(treeIndexForPoint_test)
     BOOST_CHECK_EQUAL(Test::treeIndexForPoint(4, false, 1, 3), 14);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

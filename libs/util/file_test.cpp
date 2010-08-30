@@ -26,9 +26,7 @@
 
 #include <aqsis/util/file.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 #include <boost/test/auto_unit_test.hpp>
 
 #include <boost/filesystem.hpp>
@@ -36,6 +34,7 @@
 
 #include <aqsis/util/exception.h>
 
+BOOST_AUTO_TEST_SUITE(file_tests)
 using namespace Aqsis;
 
 //------------------------------------------------------------------------------
@@ -135,3 +134,4 @@ BOOST_AUTO_TEST_CASE(TqPathsTokenizer_drive_letter_test)
 }
 #endif // AQSIS_SYSTEM_WIN32
 
+BOOST_AUTO_TEST_SUITE_END()

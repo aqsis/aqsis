@@ -26,14 +26,13 @@
  */
 #include "magicnumber.h"
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <boost/test/auto_unit_test.hpp>
 #include <sstream>
 
 #include "tifffile_test.h"
+
+BOOST_AUTO_TEST_SUITE(magicnumber_tests)
 
 BOOST_AUTO_TEST_CASE(tiffMagicNumber_test)
 {
@@ -77,3 +76,4 @@ BOOST_AUTO_TEST_CASE(bakeMagicNumber_test)
 	BOOST_CHECK(Aqsis::guessFileType(inStream) == Aqsis::ImageFile_AqsisBake);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

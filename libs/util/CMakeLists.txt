@@ -31,6 +31,12 @@ elseif(WIN32)
 	)
 endif()
 
+set(util_test_srcs
+	enum_test.cpp
+	file_test.cpp
+)
+#argparse_test.cpp  # <-- TODO: make into a unit test
+
 set(linklibs ${Boost_FILESYSTEM_LIBRARY})
 if(UNIX)
 	list(APPEND linklibs dl)
@@ -42,6 +48,7 @@ if(Boost_SYSTEM_FOUND)
 endif()
 
 aqsis_add_library(aqsis_util ${util_srcs} ${util_hdrs}
+	TEST_SOURCES ${util_test_srcs}
 	COMPILE_DEFINITIONS AQSIS_UTIL_EXPORTS
 	DEPENDS 
 	LINK_LIBRARIES ${linklibs}
@@ -49,19 +56,14 @@ aqsis_add_library(aqsis_util ${util_srcs} ${util_hdrs}
 
 aqsis_install_targets(aqsis_util)
 
-
-#--------------------------------------------------
-# Testing
-set(util_test_srcs
-	enum_test.cpp
-	file_test.cpp
-	popen_test.cpp
-)
-#argparse_test.cpp  # <-- TODO: make into a unit test
-
-aqsis_add_tests(${util_test_srcs} LINK_LIBRARIES aqsis_util)
-
 if(aqsis_enable_testing)
+	# Special case for popen testing...  This is slightly painful to embed in
+	# the library so it hasn't been done as yet.
+	add_executable(popen_test popen_test.cpp)
+	target_link_libraries(popen_test aqsis_util)
+	set_target_properties(popen_test PROPERTIES
+		COMPILE_DEFINITIONS "BOOST_TEST_MODULE=popen_tests")
+	add_test(popen_test popen_test)
 	# A helper executable for popen_test.cpp
 	add_executable(pipethrough popen_pipethrough_helper_test.cpp)
 	add_dependencies(popen_test pipethrough)

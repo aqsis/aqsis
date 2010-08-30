@@ -26,13 +26,12 @@
 #include <aqsis/math/cellnoise.h>
 #include <aqsis/math/vector3d.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
 #define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+BOOST_AUTO_TEST_SUITE(cellnoise_tests)
 
 const TqFloat epsilon = 0.1f; 
 
@@ -105,3 +104,4 @@ BOOST_AUTO_TEST_CASE(CqCellNoise_4D_point_cellnoise_test)
 			Aqsis::CqVector3D(0.67021f, 0.930112f, 0.82147f));
 }
 
+BOOST_AUTO_TEST_SUITE_END()

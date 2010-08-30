@@ -43,6 +43,12 @@ set(core_srcs
 	${texturing_old_srcs}
 )
 
+set(core_test_srcs
+	${api_test_srcs}
+	occlusion_test.cpp
+	bilinear_test.cpp
+)
+
 set(core_hdrs
 	attributes.h
 	bilinear.h
@@ -105,6 +111,7 @@ endif()
 
 # Add library & install
 aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
+	TEST_SOURCES ${core_test_srcs}
 	COMPILE_DEFINITIONS ${defs}
 	LINK_LIBRARIES aqsis_math aqsis_riutil aqsis_shadervm
 		aqsis_tex aqsis_util aqsis_riutil
@@ -114,13 +121,3 @@ aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
 
 aqsis_install_targets(aqsis_core)
 
-
-#--------------------------------------------------
-# Testing
-set(core_test_srcs
-	${api_test_srcs}
-	occlusion_test.cpp
-	bilinear_test.cpp
-)
-
-aqsis_add_tests(${core_test_srcs} LINK_LIBRARIES aqsis_core)

@@ -25,12 +25,9 @@
 
 #include <aqsis/tex/buffers/mixedimagebuffer.h>
 
-#ifndef	AQSIS_SYSTEM_WIN32
-#define BOOST_TEST_DYN_LINK
-#endif //AQSIS_SYSTEM_WIN32
-
 #include <sstream>
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -39,6 +36,8 @@
 
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer test cases
+
+BOOST_AUTO_TEST_SUITE(mixedimagebuffer_tests)
 
 BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_clear)
 {
@@ -136,3 +135,4 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_mixed_channels_test)
 			std::numeric_limits<TqInt16>::max());
 }
 
+BOOST_AUTO_TEST_SUITE_END()
