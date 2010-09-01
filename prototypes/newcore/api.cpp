@@ -165,45 +165,91 @@ class ApiServices : public Ri::RendererServices
 
 
 //------------------------------------------------------------------------------
-/// Class holding camera information supplied to the interface.
-struct CameraInfo
+/// Class holding camera information supplied through the interface.
+class CameraInfo
 {
-    enum Type {
-        Orthographic,
-        Perspective,
-        User
-    };
-    Type type; ///< Camera type
-    float fov; ///< field of view for perspective cameras
-    float left, right, bottom, top; ///< ScreenWindow parameters
+    public:
+        enum Type {
+            Orthographic,
+            Perspective,
+            UserDefined
+        };
 
-    CameraInfo()
-        : type(Orthographic),
-        fov(90),
-        left(-4.0f/3.0f),
-        right(4.0f/3.0f),
-        bottom(-1.0f),
-        top(1.0f)
-    { }
+        /// Construct camera with default parameters
+        CameraInfo()
+            : m_type(Orthographic),
+            m_fov(90),
+            m_userFrameAspect(false),
+            m_userScreenWindow(false),
+            m_left(-4.0f/3.0f),
+            m_right(4.0f/3.0f),
+            m_bottom(-1.0f),
+            m_top(1.0f)
+        { }
 
-    /// Get the camera->screen matrix specified by this camera info.
-    Mat4 camToScreenMatrix(const Options& opts) const
-    {
-        Mat4 proj;
-        switch(type)
+        /// Set the camera type
+        void setType(Type type) { m_type = type; }
+        /// Set the field of view for the perspective camera type
+        void setFov(float fov)  { m_fov = fov; }
+
+        /// Set the screen window
+        void setScreenWindow(float left, float right, float bottom, float top)
         {
-            case Orthographic:
-                proj = orthographicProjection(opts.clipNear, opts.clipFar);
-                break;
-            case Perspective:
-                proj = perspectiveProjection(fov, opts.clipNear, opts.clipFar);
-                break;
-            case User:
-                // TODO!
-                break;
+            m_userFrameAspect = true;
+            m_left = left;
+            m_right = right;
+            m_bottom = bottom;
+            m_top = top;
         }
-        return screenWindow(left, right, bottom, top) * proj;
-    }
+
+        /// Set the frame aspect ratio.
+        void setFrameAspect(float aspect, bool setByUser)
+        {
+            if(m_userScreenWindow)
+                return;
+            if(m_userFrameAspect && !setByUser)
+                return;
+            if(aspect >= 1)
+            {
+                m_left = -aspect;
+                m_right = aspect;
+                m_bottom = -1;
+                m_top = 1;
+            }
+            else
+            {
+                m_left = -1;
+                m_right = 1;
+                m_bottom = -aspect;
+                m_top = aspect;
+            }
+        }
+
+        /// Get the camera->screen matrix specified by this camera info.
+        Mat4 camToScreenMatrix(const Options& opts) const
+        {
+            Mat4 proj;
+            switch(m_type)
+            {
+                case Orthographic:
+                    proj = orthographicProjection(opts.clipNear, opts.clipFar);
+                    break;
+                case Perspective:
+                    proj = perspectiveProjection(m_fov, opts.clipNear, opts.clipFar);
+                    break;
+                case UserDefined:
+                    // TODO!
+                    break;
+            }
+            return screenWindow(m_left, m_right, m_bottom, m_top) * proj;
+        }
+
+    private:
+        Type m_type; ///< Camera type
+        float m_fov; ///< field of view for perspective cameras
+        bool m_userFrameAspect;  ///< True if user set the frame aspect ratio
+        bool m_userScreenWindow; ///< True if user set the screen window
+        float m_left, m_right, m_bottom, m_top; ///< ScreenWindow parameters
 };
 
 
@@ -569,38 +615,18 @@ RtVoid RenderApi::Format(RtInt xresolution, RtInt yresolution,
 {
     m_opts.xRes = xresolution;
     m_opts.yRes = yresolution;
-    float frameAspect = xresolution * pixelaspectratio / yresolution;
-    // TODO: previously specified ScreenWindow or FrameAspectRatio should
-    // modify this calculation.
-    if(frameAspect >= 1)
-    {
-        m_camInfo.left = -frameAspect;
-        m_camInfo.right = frameAspect;
-        m_camInfo.bottom = -1;
-        m_camInfo.top = 1;
-    }
-    else
-    {
-        m_camInfo.left = -1;
-        m_camInfo.right = 1;
-        m_camInfo.bottom = -frameAspect;
-        m_camInfo.top = frameAspect;
-    }
+    m_camInfo.setFrameAspect(pixelaspectratio*xresolution/yresolution, false);
 }
 
 RtVoid RenderApi::FrameAspectRatio(RtFloat frameratio)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "FrameAspectRatio not implemented"; // Todo
+    m_camInfo.setFrameAspect(frameratio, true);
 }
 
 RtVoid RenderApi::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                RtFloat top)
 {
-    m_camInfo.left = left;
-    m_camInfo.right = right;
-    m_camInfo.bottom = bottom;
-    m_camInfo.top = top;
+    m_camInfo.setScreenWindow(left, right, bottom, top);
 }
 
 RtVoid RenderApi::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
@@ -614,18 +640,18 @@ RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
 {
     if(!name)
     {
-        m_camInfo.type = CameraInfo::User;
+        m_camInfo.setType(CameraInfo::UserDefined);
     }
     else if(strcmp(name, "perspective") == 0)
     {
-        m_camInfo.type = CameraInfo::Perspective;
+        m_camInfo.setType(CameraInfo::Perspective);
         FloatArray fov = pList.findFloatData(Ri::TypeSpec::Float, "fov");
         if(fov)
-            m_camInfo.fov = fov[0];
+            m_camInfo.setFov(fov[0]);
     }
     else if(strcmp(name, "orthographic") == 0)
     {
-        m_camInfo.type = CameraInfo::Orthographic;
+        m_camInfo.setType(CameraInfo::Orthographic);
     }
     else
     {
