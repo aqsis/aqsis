@@ -20,8 +20,9 @@
 /// \file Renderer interface implementation
 /// \author Chris Foster
 
-#include <vector>
 #include <fstream>
+#include <stack>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -40,7 +41,9 @@ namespace Aqsis {
 
 namespace {
 
-/// An error handler which just sends errors to the Aqsis::log() stream.
+/// An error handler which just sends errors to stderr
+///
+/// (TODO: Make the errors go to a user-specified error handler?)
 class PrintErrorHandler : public Ri::ErrorHandler
 {
     public:
@@ -162,6 +165,7 @@ class ApiServices : public Ri::RendererServices
 
 
 //------------------------------------------------------------------------------
+/// Class holding camera information supplied to the interface.
 struct CameraInfo
 {
     enum Type {
@@ -182,6 +186,7 @@ struct CameraInfo
         top(1.0f)
     { }
 
+    /// Get the camera->screen matrix specified by this camera info.
     Mat4 camToScreenMatrix(const Options& opts) const
     {
         Mat4 proj;
@@ -199,6 +204,44 @@ struct CameraInfo
         }
         return screenWindow(left, right, bottom, top) * proj;
     }
+};
+
+
+//------------------------------------------------------------------------------
+/// Class managing the transformation stack
+class TransformStack
+{
+    public:
+        TransformStack()
+            : m_transforms()
+        {
+            m_transforms.push(Mat4());
+        }
+
+        void push()
+        {
+            m_transforms.push(m_transforms.top());
+        }
+        void pop()
+        {
+            m_transforms.pop();
+        }
+        const Mat4& top() const
+        {
+            return m_transforms.top();
+        }
+
+        void concat(const Mat4& trans)
+        {
+            m_transforms.top() = trans * m_transforms.top();
+        }
+        void set(const Mat4& trans)
+        {
+            m_transforms.top() = trans;
+        }
+
+    private:
+        std::stack<Mat4> m_transforms;
 };
 
 
@@ -410,7 +453,7 @@ class RenderApi : public Ri::Renderer
         ApiServices& m_services;
         Options m_opts;
         Attributes m_attrs;
-        Mat4 m_currTransform;
+        TransformStack m_transStack;
         CameraInfo m_camInfo;
         VarList m_outVars;
         boost::shared_ptr< ::Renderer> m_renderer;
@@ -421,7 +464,7 @@ RenderApi::RenderApi(ApiServices& services)
     : m_services(services),
     m_opts(),
     m_attrs(),
-    m_currTransform(),
+    m_transStack(),
     m_camInfo(),
     m_outVars(),
     m_renderer()
@@ -468,23 +511,27 @@ RtVoid RenderApi::FrameBegin(RtInt number)
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "FrameBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::FrameEnd()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "FrameEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_camInfo.camToScreenMatrix(m_opts);
     m_renderer.reset(new ::Renderer(m_opts, camToScreen, m_outVars));
+    m_transStack.push();
 }
 
 RtVoid RenderApi::WorldEnd()
 {
     m_renderer->render();
+    m_transStack.pop();
 }
 
 //------------------------------------------------------------
@@ -719,12 +766,14 @@ RtVoid RenderApi::AttributeBegin()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "AttributeBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::AttributeEnd()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "AttributeEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 RtVoid RenderApi::Color(RtConstColor Cq)
@@ -904,44 +953,44 @@ RtVoid RenderApi::Sides(RtInt nsides)
 
 RtVoid RenderApi::Identity()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Identity not implemented"; // Todo
+    m_transStack.set(Mat4());
 }
 
 RtVoid RenderApi::Transform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Transform not implemented"; // Todo
+    m_transStack.set(Mat4(transform));
 }
 
 RtVoid RenderApi::ConcatTransform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "ConcatTransform not implemented"; // Todo
+    m_transStack.concat(Mat4(transform));
 }
 
 RtVoid RenderApi::Perspective(RtFloat fov)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Perspective not implemented"; // Todo
+    float s = std::tan(deg2rad(fov/2));
+    // Old core notes: "This matches PRMan 3.9 in testing, but not BMRT 2.6's
+    // rgl and rendrib."
+    Mat4 p(1, 0,  0, 0,
+           0, 1,  0, 0,
+           0, 0,  s, s,
+           0, 0, -s, 0);
+    m_transStack.concat(p);
 }
 
 RtVoid RenderApi::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_currTransform = Mat4().setTranslation(Vec3(dx,dy,dz))
-                      * m_currTransform;
+    m_transStack.concat(Mat4().setTranslation(Vec3(dx,dy,dz)));
 }
 
 RtVoid RenderApi::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_currTransform = Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle))
-                      * m_currTransform;
+    m_transStack.concat(Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle)));
 }
 
 RtVoid RenderApi::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Scale not implemented"; // Todo
+    m_transStack.concat(Mat4().setScale(Vec3(sx,sy,sz)));
 }
 
 RtVoid RenderApi::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
@@ -965,14 +1014,12 @@ RtVoid RenderApi::CoordSysTransform(RtConstToken space)
 
 RtVoid RenderApi::TransformBegin()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "TransformBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::TransformEnd()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "TransformEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 //------------------------------------------------------------
@@ -1077,7 +1124,7 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
         }
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
-        patch->transform(m_currTransform);
+        patch->transform(m_transStack.top());
         m_renderer->add(patch, m_attrs);
     }
 }
@@ -1112,7 +1159,7 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
         builder.add(Primvar::P, P.begin(), P.size());
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
-        patch->transform(m_currTransform);
+        patch->transform(m_transStack.top());
         m_renderer->add(patch, m_attrs);
     }
     else if(strcmp(type, "bicubic") == 0)
