@@ -1654,12 +1654,6 @@ RtVoid RiCxxCore::ConcatTransform(RtConstMatrix transform)
 RtVoid RiCxxCore::Perspective(RtFloat fov)
 {
 	IF_ELSE_TEST;
-	if ( fov <= 0 )
-	{
-		Aqsis::log() << error << "RiPerspective invalid FOV" << std::endl;
-		return ;
-	}
-
 	fov = tan( degToRad( fov / 2 ) );
 
 	// This matches PRMan 3.9 in testing, but not BMRT 2.6's rgl and rendrib.

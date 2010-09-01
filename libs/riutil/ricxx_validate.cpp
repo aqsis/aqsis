@@ -1213,6 +1213,13 @@ RtVoid RiCxxValidate::ConcatTransform(RtConstMatrix transform)
 RtVoid RiCxxValidate::Perspective(RtFloat fov)
 {
     checkScope(ApiScope(Scope_BeginEnd | Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Frame | Scope_Archive | Scope_Motion), "Perspective");
+    if(!(fov > 0))
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_Range,
+            "parameter check \"fov > 0\" failed "
+            "[fov = " << fov << "]"
+        );
+    }
     nextFilter().Perspective(fov);
 }
 
