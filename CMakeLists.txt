@@ -36,9 +36,8 @@ option(AQSIS_ENABLE_MPDUMP "Enable micropolygon dumping code" OFF)
 option(AQSIS_ENABLE_MASSIVE "Enable Massive support" ON)
 option(AQSIS_ENABLE_SIMBIONT "Enable Simbiont(RM) support" ON)
 option(AQSIS_ENABLE_THREADING "Enable multi-threading (EXPERIMENTAL)" OFF)
-option(AQSIS_ENABLE_DOCS "Enable documentation generation" OFF)
-mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT
-	AQSIS_ENABLE_DOCS)
+option(AQSIS_ENABLE_DOCS "Enable documentation generation" ON)
+mark_as_advanced(AQSIS_ENABLE_MPDUMP AQSIS_ENABLE_MASSIVE AQSIS_ENABLE_SIMBIONT)
 
 option(AQSIS_USE_RPATH "Enable runtime path for installed libs" ON)
 mark_as_advanced(AQSIS_USE_RPATH)
@@ -158,6 +157,30 @@ include(FindNSIS)
 include(FindOsacompile)
 include(FindXcodebuild)
 include(FindResource)
+
+
+#-------------------------------------------------------------------------------
+# Find documentation tools
+#-------------------------
+
+if(AQSIS_ENABLE_DOCS)
+	include(FindSphinx)
+
+	find_package(Doxygen)
+
+	if(NOT AQSIS_SPHINX_EXECUTABLE_FOUND)
+                message("** Cannot find Sphinx - building without generating relevant documentation")
+        endif()
+
+	if(NOT DOXYGEN_FOUND)
+		message("** Cannot find Doxygen - building without generating relevant documentation")
+	endif()
+
+	if(NOT AQSIS_SPHINX_EXECUTABLE_FOUND AND NOT DOXYGEN_FOUND)
+		set(AQSIS_ENABLE_DOCS OFF)
+	endif()
+endif()
+
 
 #-------------------------------------------------------------------------------
 # Set program version numbers

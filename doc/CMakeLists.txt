@@ -4,23 +4,23 @@ project(documentation)
 #set(docs_install_dir ${share_install_dir}/${docs_reldir})
 set(docs_install_dir ${DOCSDIR})
 
-find_package(Doxygen)
+if(AQSIS_SPHINX_EXECUTABLE)
+	add_custom_target(devguide make BUILDDIR="${PROJECT_BINARY_DIR}/guide/dev" html latexpdf
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/guide/dev")
+	add_custom_target(houdiniguide make BUILDDIR="${PROJECT_BINARY_DIR}/guide/houdini" html latexpdf
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/guide/houdini")
+	add_custom_target(usermanual make BUILDDIR="${PROJECT_BINARY_DIR}/manual/user" html latexpdf
+		WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/manual/user")
+endif()
 
 if(DOXYGEN_EXECUTABLE)
+	configure_file("${PROJECT_SOURCE_DIR}/manual/dev/Doxyfile.in.cmake" "${PROJECT_BINARY_DIR}/manual/dev/Doxyfile" @ONLY)
 
-	set(doxyfile_in  "${PROJECT_SOURCE_DIR}/manual/dev/Doxyfile.in.cmake")
-	set(doxyfile_out "${PROJECT_BINARY_DIR}/manual/dev/Doxyfile")
+	add_custom_target(devmanual ${DOXYGEN_EXECUTABLE}
+		WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/manual/dev")
+endif()
 
-	# Create the doxygen config file
-	message(STATUS "Create ${doxyfile_out} from ${doxyfile_in}")
-	configure_file(${doxyfile_in} ${doxyfile_out} @ONLY)
-
-	# Setup the doc build target
-	add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${doxyfile_out})
-
-endif(DOXYGEN_EXECUTABLE)
-
-install(DIRECTORY guide manual
+install(DIRECTORY ${PROJECT_BINARY_DIR}/guide/dev/latex/ ${PROJECT_BINARY_DIR}/guide/houdini/latex/ ${PROJECT_BINARY_DIR}/manual/dev/latex/ ${PROJECT_BINARY_DIR}/manual/user/latex/
 	DESTINATION ${docs_install_dir}
 	COMPONENT docs
 	FILES_MATCHING PATTERN "*.pdf")
