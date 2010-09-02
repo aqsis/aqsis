@@ -20,8 +20,9 @@
 /// \file Renderer interface implementation
 /// \author Chris Foster
 
-#include <vector>
 #include <fstream>
+#include <stack>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -40,7 +41,9 @@ namespace Aqsis {
 
 namespace {
 
-/// An error handler which just sends errors to the Aqsis::log() stream.
+/// An error handler which just sends errors to stderr
+///
+/// (TODO: Make the errors go to a user-specified error handler?)
 class PrintErrorHandler : public Ri::ErrorHandler
 {
     public:
@@ -162,43 +165,129 @@ class ApiServices : public Ri::RendererServices
 
 
 //------------------------------------------------------------------------------
-struct CameraInfo
+/// Class holding camera information supplied through the interface.
+class CameraInfo
 {
-    enum Type {
-        Orthographic,
-        Perspective,
-        User
-    };
-    Type type; ///< Camera type
-    float fov; ///< field of view for perspective cameras
-    float left, right, bottom, top; ///< ScreenWindow parameters
+    public:
+        enum Type {
+            Orthographic,
+            Perspective,
+            UserDefined
+        };
 
-    CameraInfo()
-        : type(Orthographic),
-        fov(90),
-        left(-4.0f/3.0f),
-        right(4.0f/3.0f),
-        bottom(-1.0f),
-        top(1.0f)
-    { }
+        /// Construct camera with default parameters
+        CameraInfo()
+            : m_type(Orthographic),
+            m_fov(90),
+            m_userFrameAspect(false),
+            m_userScreenWindow(false),
+            m_left(-4.0f/3.0f),
+            m_right(4.0f/3.0f),
+            m_bottom(-1.0f),
+            m_top(1.0f)
+        { }
 
-    Mat4 camToScreenMatrix(const Options& opts) const
-    {
-        Mat4 proj;
-        switch(type)
+        /// Set the camera type
+        void setType(Type type) { m_type = type; }
+        /// Set the field of view for the perspective camera type
+        void setFov(float fov)  { m_fov = fov; }
+
+        /// Set the screen window
+        void setScreenWindow(float left, float right, float bottom, float top)
         {
-            case Orthographic:
-                proj = orthographicProjection(opts.clipNear, opts.clipFar);
-                break;
-            case Perspective:
-                proj = perspectiveProjection(fov, opts.clipNear, opts.clipFar);
-                break;
-            case User:
-                // TODO!
-                break;
+            m_userFrameAspect = true;
+            m_left = left;
+            m_right = right;
+            m_bottom = bottom;
+            m_top = top;
         }
-        return screenWindow(left, right, bottom, top) * proj;
-    }
+
+        /// Set the frame aspect ratio.
+        void setFrameAspect(float aspect, bool setByUser)
+        {
+            if(m_userScreenWindow)
+                return;
+            if(m_userFrameAspect && !setByUser)
+                return;
+            if(aspect >= 1)
+            {
+                m_left = -aspect;
+                m_right = aspect;
+                m_bottom = -1;
+                m_top = 1;
+            }
+            else
+            {
+                m_left = -1;
+                m_right = 1;
+                m_bottom = -aspect;
+                m_top = aspect;
+            }
+        }
+
+        /// Get the camera->screen matrix specified by this camera info.
+        Mat4 camToScreenMatrix(const Options& opts) const
+        {
+            Mat4 proj;
+            switch(m_type)
+            {
+                case Orthographic:
+                    proj = orthographicProjection(opts.clipNear, opts.clipFar);
+                    break;
+                case Perspective:
+                    proj = perspectiveProjection(m_fov, opts.clipNear, opts.clipFar);
+                    break;
+                case UserDefined:
+                    // TODO!
+                    break;
+            }
+            return screenWindow(m_left, m_right, m_bottom, m_top) * proj;
+        }
+
+    private:
+        Type m_type; ///< Camera type
+        float m_fov; ///< field of view for perspective cameras
+        bool m_userFrameAspect;  ///< True if user set the frame aspect ratio
+        bool m_userScreenWindow; ///< True if user set the screen window
+        float m_left, m_right, m_bottom, m_top; ///< ScreenWindow parameters
+};
+
+
+//------------------------------------------------------------------------------
+/// Class managing the transformation stack
+class TransformStack
+{
+    public:
+        TransformStack()
+            : m_transforms()
+        {
+            m_transforms.push(Mat4());
+        }
+
+        void push()
+        {
+            m_transforms.push(m_transforms.top());
+        }
+        void pop()
+        {
+            m_transforms.pop();
+        }
+        const Mat4& top() const
+        {
+            return m_transforms.top();
+        }
+
+        void concat(const Mat4& trans)
+        {
+            m_transforms.top() = trans * m_transforms.top();
+        }
+        void set(const Mat4& trans)
+        {
+            m_transforms.top() = trans;
+        }
+
+    private:
+        std::stack<Mat4> m_transforms;
 };
 
 
@@ -410,7 +499,7 @@ class RenderApi : public Ri::Renderer
         ApiServices& m_services;
         Options m_opts;
         Attributes m_attrs;
-        Mat4 m_currTransform;
+        TransformStack m_transStack;
         CameraInfo m_camInfo;
         VarList m_outVars;
         boost::shared_ptr< ::Renderer> m_renderer;
@@ -421,7 +510,7 @@ RenderApi::RenderApi(ApiServices& services)
     : m_services(services),
     m_opts(),
     m_attrs(),
-    m_currTransform(),
+    m_transStack(),
     m_camInfo(),
     m_outVars(),
     m_renderer()
@@ -468,23 +557,27 @@ RtVoid RenderApi::FrameBegin(RtInt number)
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "FrameBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::FrameEnd()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "FrameEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_camInfo.camToScreenMatrix(m_opts);
     m_renderer.reset(new ::Renderer(m_opts, camToScreen, m_outVars));
+    m_transStack.push();
 }
 
 RtVoid RenderApi::WorldEnd()
 {
     m_renderer->render();
+    m_transStack.pop();
 }
 
 //------------------------------------------------------------
@@ -522,38 +615,18 @@ RtVoid RenderApi::Format(RtInt xresolution, RtInt yresolution,
 {
     m_opts.xRes = xresolution;
     m_opts.yRes = yresolution;
-    float frameAspect = xresolution * pixelaspectratio / yresolution;
-    // TODO: previously specified ScreenWindow or FrameAspectRatio should
-    // modify this calculation.
-    if(frameAspect >= 1)
-    {
-        m_camInfo.left = -frameAspect;
-        m_camInfo.right = frameAspect;
-        m_camInfo.bottom = -1;
-        m_camInfo.top = 1;
-    }
-    else
-    {
-        m_camInfo.left = -1;
-        m_camInfo.right = 1;
-        m_camInfo.bottom = -frameAspect;
-        m_camInfo.top = frameAspect;
-    }
+    m_camInfo.setFrameAspect(pixelaspectratio*xresolution/yresolution, false);
 }
 
 RtVoid RenderApi::FrameAspectRatio(RtFloat frameratio)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "FrameAspectRatio not implemented"; // Todo
+    m_camInfo.setFrameAspect(frameratio, true);
 }
 
 RtVoid RenderApi::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                RtFloat top)
 {
-    m_camInfo.left = left;
-    m_camInfo.right = right;
-    m_camInfo.bottom = bottom;
-    m_camInfo.top = top;
+    m_camInfo.setScreenWindow(left, right, bottom, top);
 }
 
 RtVoid RenderApi::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
@@ -567,18 +640,18 @@ RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
 {
     if(!name)
     {
-        m_camInfo.type = CameraInfo::User;
+        m_camInfo.setType(CameraInfo::UserDefined);
     }
     else if(strcmp(name, "perspective") == 0)
     {
-        m_camInfo.type = CameraInfo::Perspective;
+        m_camInfo.setType(CameraInfo::Perspective);
         FloatArray fov = pList.findFloatData(Ri::TypeSpec::Float, "fov");
         if(fov)
-            m_camInfo.fov = fov[0];
+            m_camInfo.setFov(fov[0]);
     }
     else if(strcmp(name, "orthographic") == 0)
     {
-        m_camInfo.type = CameraInfo::Orthographic;
+        m_camInfo.setType(CameraInfo::Orthographic);
     }
     else
     {
@@ -719,12 +792,14 @@ RtVoid RenderApi::AttributeBegin()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "AttributeBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::AttributeEnd()
 {
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "AttributeEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 RtVoid RenderApi::Color(RtConstColor Cq)
@@ -904,44 +979,44 @@ RtVoid RenderApi::Sides(RtInt nsides)
 
 RtVoid RenderApi::Identity()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Identity not implemented"; // Todo
+    m_transStack.set(Mat4());
 }
 
 RtVoid RenderApi::Transform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Transform not implemented"; // Todo
+    m_transStack.set(Mat4(transform));
 }
 
 RtVoid RenderApi::ConcatTransform(RtConstMatrix transform)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "ConcatTransform not implemented"; // Todo
+    m_transStack.concat(Mat4(transform));
 }
 
 RtVoid RenderApi::Perspective(RtFloat fov)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Perspective not implemented"; // Todo
+    float s = std::tan(deg2rad(fov/2));
+    // Old core notes: "This matches PRMan 3.9 in testing, but not BMRT 2.6's
+    // rgl and rendrib."
+    Mat4 p(1, 0,  0, 0,
+           0, 1,  0, 0,
+           0, 0,  s, s,
+           0, 0, -s, 0);
+    m_transStack.concat(p);
 }
 
 RtVoid RenderApi::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_currTransform = Mat4().setTranslation(Vec3(dx,dy,dz))
-                      * m_currTransform;
+    m_transStack.concat(Mat4().setTranslation(Vec3(dx,dy,dz)));
 }
 
 RtVoid RenderApi::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_currTransform = Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle))
-                      * m_currTransform;
+    m_transStack.concat(Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle)));
 }
 
 RtVoid RenderApi::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Scale not implemented"; // Todo
+    m_transStack.concat(Mat4().setScale(Vec3(sx,sy,sz)));
 }
 
 RtVoid RenderApi::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
@@ -965,14 +1040,12 @@ RtVoid RenderApi::CoordSysTransform(RtConstToken space)
 
 RtVoid RenderApi::TransformBegin()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "TransformBegin not implemented"; // Todo
+    m_transStack.push();
 }
 
 RtVoid RenderApi::TransformEnd()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "TransformEnd not implemented"; // Todo
+    m_transStack.pop();
 }
 
 //------------------------------------------------------------
@@ -1077,7 +1150,7 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
         }
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
-        patch->transform(m_currTransform);
+        patch->transform(m_transStack.top());
         m_renderer->add(patch, m_attrs);
     }
 }
@@ -1112,7 +1185,7 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
         builder.add(Primvar::P, P.begin(), P.size());
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
-        patch->transform(m_currTransform);
+        patch->transform(m_transStack.top());
         m_renderer->add(patch, m_attrs);
     }
     else if(strcmp(type, "bicubic") == 0)

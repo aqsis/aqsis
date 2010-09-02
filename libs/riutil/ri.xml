@@ -1620,6 +1620,7 @@
 				<Argument>
 					<Name>fov</Name>
 					<Type>RtFloat</Type>
+					<Range><gt>0</gt></Range>
 				</Argument>
 			</Arguments>
 			<Rib/>
