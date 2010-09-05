@@ -116,9 +116,8 @@ inline bool Condition(const T& A, const T& B, TqUlong comp)
  *                IfBegin "$user:pass == 'beauty'" or 
  *                ElseIf  "$user:pass != 'shadow'" or
  *                IfBegin "$limits:bgcolor == [0.2 0.2 0.4]"
- * \param   where  it is from IfBegin, ElseIf for printfs debugging.
  */
-bool TestCondition(const char* condition, const char* where)
+bool TestCondition(const char* condition)
 {
 
 	char StringA[80];
@@ -248,13 +247,6 @@ bool TestCondition(const char* condition, const char* where)
 			}
 			break;
 	}
-
-#ifdef _DEBUG
-	if (Ok == false  )
-		Aqsis::log() << info << where << ": " << condition << " is false" << std::endl;
-	else
-		Aqsis::log() << info << where << ": " << condition << " is true" << std::endl;
-#endif
 
 	return Ok;
 

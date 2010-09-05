@@ -31,7 +31,7 @@
 
 namespace Aqsis {
 
-bool TestCondition(const char* condition, const char* where);
+bool TestCondition(const char* condition);
 
 //-----------------------------------------------------------------------
 

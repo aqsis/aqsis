@@ -29,6 +29,7 @@
 #include <aqsis/riutil/errorhandler.h>
 #include <aqsis/riutil/ribparser.h>
 #include <aqsis/riutil/ricxx.h>
+#include <aqsis/riutil/ricxxutil.h>
 #include <aqsis/riutil/ricxx_filter.h>
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/exception.h>
@@ -1493,7 +1494,8 @@ ApiServices::ApiServices()
     m_errorHandler()
 {
     m_api.reset(new RenderApi(*this));
-    addFilter("inlinearchive");
+    m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(
+        createRenderUtilFilter(*this, firstFilter()) ));
     addFilter("validate");
 }
 

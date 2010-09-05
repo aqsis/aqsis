@@ -7,7 +7,7 @@ endif()
 
 set(riutil_srcs
 	framedrop_filter.cpp
-	inlinearchive_filter.cpp
+	renderutil_filter.cpp
 	tee_filter.cpp
 	primvartoken.cpp
 	ribinputbuffer.cpp
