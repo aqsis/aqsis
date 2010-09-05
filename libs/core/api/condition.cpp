@@ -116,6 +116,9 @@ inline bool Condition(const T& A, const T& B, TqUlong comp)
  *                IfBegin "$user:pass == 'beauty'" or 
  *                ElseIf  "$user:pass != 'shadow'" or
  *                IfBegin "$limits:bgcolor == [0.2 0.2 0.4]"
+ *
+ *  \todo TODO: This function needs a _lot_ of work to make it compatible with
+ *  other implementations of the same thing.
  */
 bool TestCondition(const char* condition)
 {
@@ -127,27 +130,48 @@ bool TestCondition(const char* condition)
 	bool Ok = true;
 	TqInt n;
 
-	// If the left side is not the right parameter than return true
+	// If the left side is not the right parameter then return true
 	if ((strstr(condition, "$") == 0) || (strstr(condition, ":") == 0))
+	{
+		Aqsis::log() << error << "Could not parse conditional \""
+			<< condition << "\"" << std::endl;
 		return true;
+	}
 
 	n = sscanf(condition,"$%s %s", StringA, Compare);
 
 	// If the left side is ill formed return true
 	if (n != 2)
+	{
+		Aqsis::log() << error << "Could not parse conditional \""
+			<< condition << "\"" << std::endl;
 		return true;
+	}
 
 
 	const TqUlong comp = CqString::hash(Compare);
 
 	char *A, *B;
+	char* C = 0;
 	A = strtok(StringA, ":");
+	if(strcmp(A, "Attribute") == 0 || strcmp(A, "Option") == 0)
+	{
+		C = A;
+		A = strtok(NULL, ":");
+	}
 	B = strtok(NULL, ":");
 
-	EqVariableType paramType = QGetRenderContext()->poptCurrent()->getParameterType(A,B);
+	const CqParameter* var = 0;
+	if(!C || (C && strcmp(C, "Attribute") == 0))
+		var = QGetRenderContext()->pattrCurrent()->pParameter(A,B);
+	else if(C && strcmp(C, "Option") == 0)
+	{
+		var = static_cast<CqOptions&>(*QGetRenderContext()->poptCurrent())
+				.pParameter(A,B);
+	}
 
 	// If the left side is not known for now return true
-	if (paramType == type_invalid)
+	if (!var)
 	{
 		Aqsis::log() << warning << "Unknown parameter: " << A << ":" << B << std::endl;
 		return true;
@@ -155,13 +179,13 @@ bool TestCondition(const char* condition)
 
 	// At this point the condition must be true; otherwise the return value will be false
 	Ok = false;
-	switch (paramType)
+	switch (var->Type())
 	{
 			case type_integer:
 			{
 				TqInt IntC;
 
-				const TqInt *pInt = QGetRenderContext() ->poptCurrent()->GetIntegerOption( A, B);
+				const TqInt *pInt = static_cast<const CqParameterTyped<TqInt,TqFloat>*>(var)->pValue();
 
 				n = sscanf(condition,"$%s %s %d", StringA, Compare, &IntC);
 				if (pInt && (n == 3) )
@@ -176,7 +200,7 @@ bool TestCondition(const char* condition)
 			{
 				TqFloat FloatC;
 
-				const TqFloat *pFloat = QGetRenderContext() ->poptCurrent()->GetFloatOption( A, B);
+				const TqFloat *pFloat = static_cast<const CqParameterTyped<TqFloat,TqFloat>*>(var)->pValue();
 
 				n = sscanf(condition,"$%s %s %f", StringA, Compare, &FloatC);
 				if (pFloat && (n == 3) )
@@ -194,7 +218,7 @@ bool TestCondition(const char* condition)
 				TqFloat ArrayA[3], ArrayC[3];
 
 
-				const TqFloat *pVector = QGetRenderContext() ->poptCurrent()->GetFloatOption( A, B);
+				const TqFloat *pVector = static_cast<const CqParameterTyped<TqFloat,TqFloat>*>(var)->pValue();
 
 				n = sscanf(condition,"$%s %s [%f %f %f]", StringA, Compare, &ArrayC[0], &ArrayC[1], &ArrayC[2]);
 				if (pVector && (n == 5) )
@@ -213,7 +237,7 @@ bool TestCondition(const char* condition)
 			{
 				char StringC[80];
 
-				const CqString *pString = QGetRenderContext() ->poptCurrent()->GetStringOption( A, B);
+				const CqString *pString = static_cast<const CqParameterTyped<CqString,CqString>*>(var)->pValue();
 
 				n = sscanf(condition,"$%s %s %s", StringA, Compare, StringC);
 				if ((pString) && (n == 3) )
