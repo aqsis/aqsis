@@ -54,6 +54,40 @@ class RenderUtilFilter : public Ri::Filter
         bool m_ifInactive;
 #       define IF_ELSE_TEST if(m_ifInactive) return;
 
+        // Find a cached stream in a given cache.
+        //
+        // Return -1 if not found.
+        static int findCachedStream(std::vector<CachedRiStream*>& cache, const char* name)
+        {
+            for(int i = 0, iend = cache.size(); i < iend; ++i)
+                if(cache[i]->name() == name)
+                    return i;
+            return -1;
+        }
+
+        // Create a new cache stream, insert into given cache and return it.
+        //
+        // If a stream with the same name already exists, the new stream
+        // replaces the old one.
+        static CachedRiStream* newCachedStream(std::vector<CachedRiStream*>& cache,
+                                   const char* name)
+        {
+            // First search to make sure we haven't already defined a stream
+            // with the same name.  If so, the new stream replaces the old one.
+            int index = findCachedStream(cache, name);
+            if(index >= 0)
+            {
+                delete cache[index];
+                cache[index] = new CachedRiStream(name);
+                return cache[index];
+            }
+            else
+            {
+                cache.push_back(new CachedRiStream(name));
+                return cache.back();
+            }
+        }
+
     public:
         RenderUtilFilter(Ri::RendererServices& services, Ri::Renderer& out,
                          const IfElseTestCallback& conditionTest)
@@ -86,10 +120,9 @@ class RenderUtilFilter : public Ri::Filter
             {
                 ++m_nested;
                 m_currCache->push_back(new RiCache::ArchiveBegin(name, pList));
-                return;
             }
-            m_archives.push_back(new CachedRiStream(name));
-            m_currCache = m_archives.back();
+            else
+                m_currCache = newCachedStream(m_archives, name);
         }
 
         virtual RtVoid ArchiveEnd()
@@ -105,7 +138,7 @@ class RenderUtilFilter : public Ri::Filter
         }
 
         virtual RtVoid ReadArchive(RtConstToken name, RtArchiveCallback callback,
-                            const ParamList& pList)
+                                   const ParamList& pList)
         {
             IF_ELSE_TEST;
             if(m_currCache)
@@ -114,19 +147,15 @@ class RenderUtilFilter : public Ri::Filter
                 return;
             }
             // Search for the archive name in the cached archives.
-            for(int i = 0, iend = m_archives.size(); i < iend; ++i)
+            int index = findCachedStream(m_archives, name);
+            if(index >= 0)
+                m_archives[index]->replay(services().firstFilter());
+            else
             {
-                if(m_archives[i]->name() == name)
-                {
-                    // If we find it, replay the archive into the start of the
-                    // filter chain.
-                    m_archives[i]->replay(services().firstFilter());
-                    return;
-                }
+                // If not found in our archive list it's probably on-disk, so
+                // we let subsequent layers handle it.
+                nextFilter().ReadArchive(name, callback, pList);
             }
-            // If not found in our archive list it's probably on-disk, so we
-            // let subsequent layers handle it.
-            nextFilter().ReadArchive(name, callback, pList);
         }
 
         //--------------------------------------------------
@@ -143,8 +172,7 @@ class RenderUtilFilter : public Ri::Filter
             else
             {
                 // If not currently in an archive, instantiate the object.
-                m_objectInstances.push_back(new CachedRiStream(name));
-                m_currCache = m_objectInstances.back();
+                m_currCache = newCachedStream(m_objectInstances, name);
                 m_inObject = true;
             }
         }
@@ -177,17 +205,15 @@ class RenderUtilFilter : public Ri::Filter
                 return;
             }
             // Search for the object instance name
-            for(int i = 0, iend = m_objectInstances.size(); i < iend; ++i)
+            int index = findCachedStream(m_objectInstances, name);
+            if(index >= 0)
+                m_objectInstances[index]->replay(services().firstFilter());
+            else
             {
-                if(m_objectInstances[i]->name() == name)
-                {
-                    m_objectInstances[i]->replay(services().firstFilter());
-                    return;
-                }
+                // If we didn't find it, error
+                AQSIS_LOG_ERROR(services().errorHandler(), EqE_BadHandle)
+                    << "Bad object name \"" << name << "\"";
             }
-            // If we didn't find it, error
-            AQSIS_LOG_ERROR(services().errorHandler(), EqE_BadHandle)
-                << "Bad object name \"" << name << "\"";
         }
 
         //--------------------------------------------------
