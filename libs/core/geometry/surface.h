@@ -37,7 +37,6 @@
 #include	<aqsis/ri/ri.h>
 #include	"transform.h"
 #include	<aqsis/util/list.h>
-#include	<aqsis/util/refcount.h>
 #include	<aqsis/math/matrix.h>
 #include	"parameters.h"
 #include	"bound.h"

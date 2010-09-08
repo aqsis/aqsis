@@ -42,7 +42,7 @@
 #include	<aqsis/shadervm/ishaderdata.h>
 #include	"motion.h"
 #include	"csgtree.h"
-#include	<aqsis/util/refcount.h>
+#include	"refcount.h"
 #include	<aqsis/util/logging.h>
 #include	"imagepixel.h"
 

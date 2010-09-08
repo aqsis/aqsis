@@ -30,7 +30,6 @@
 #include <aqsis/aqsis.h>
 #include "lath.h"
 #include <aqsis/math/vector3d.h>
-#include <aqsis/util/refcount.h>
 #include "surface.h"
 #include "polygon.h"
 

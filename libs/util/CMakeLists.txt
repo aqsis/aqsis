@@ -13,7 +13,6 @@ set(util_srcs
 	logging.cpp
 	plugins.cpp
 	popen.cpp
-	refcount.cpp
 	sstring.cpp
 )
 if(UNIX)

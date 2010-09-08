@@ -27,6 +27,7 @@ set(core_srcs
 	micropolygon.cpp
 	mpdump.cpp
 	multijitter.cpp
+	refcount.cpp
 	occlusion.cpp
 	optioncache.cpp
 	options.cpp
