@@ -1,6 +1,8 @@
 Aqsis Renderer "General" License
 ================================
 
+Aqsis Renderer and all code, unless explicitly stated, are:
+
 .. include:: bsd.txt
 
 
