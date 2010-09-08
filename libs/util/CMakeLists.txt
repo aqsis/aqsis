@@ -11,7 +11,6 @@ set(util_srcs
 	exception.cpp
 	file.cpp
 	logging.cpp
-	memorysentry.cpp
 	plugins.cpp
 	popen.cpp
 	refcount.cpp
