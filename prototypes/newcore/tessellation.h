@@ -116,6 +116,8 @@ class GeomHolder : public RefCounted
         /// Get deforming geometry key frames.  Empty if non-moving.
         const GeometryKeys& geomKeys() const { return m_geomKeys; }
 
+        /// True if the holder no longer holds valid geometry
+        bool expired() const { return !m_geom && m_geomKeys.empty(); }
         bool isDeforming() const { return !m_geom; }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
