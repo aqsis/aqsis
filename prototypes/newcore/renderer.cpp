@@ -40,6 +40,7 @@
 #include "sample.h"
 #include "samplestorage.h"
 #include "simple.h"
+#include "splitstore.h"
 #include "tessellation.h"
 
 
@@ -133,30 +134,6 @@ static float micropolyBlurWidth(const GeomHolderPtr& holder,
 
 
 //------------------------------------------------------------------------------
-/// Ordering functor for surfaces in the render queue
-class Renderer::SurfaceOrder
-{
-    private:
-        // desired bucket height in camera coordinates
-        float m_bucketHeight;
-    public:
-        SurfaceOrder() : m_bucketHeight(16) {}
-
-        bool operator()(const GeomHolderPtr& a, const GeomHolderPtr& b) const
-        {
-            float ya = a->bound().min.y;
-            float yb = b->bound().min.y;
-            if(ya < yb - m_bucketHeight)
-                return true;
-            else if(yb < ya - m_bucketHeight)
-                return false;
-            else
-                return a->bound().min.x < b->bound().min.x;
-        }
-};
-
-
-//------------------------------------------------------------------------------
 // Renderer implementation, utility stuff.
 
 static void writeHeader(TIFF* tif, const Imath::V2i& imageSize,
@@ -236,6 +213,7 @@ void Renderer::sanitizeOptions(Options& opts)
     CLAMP_OPT_BELOW(clipFar, opts.clipNear);
     CLAMP_OPT_BELOW(xRes, 1);
     CLAMP_OPT_BELOW(yRes, 1);
+    CLAMP_OPT_BELOW(bucketSize, 0);
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
     CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
@@ -325,7 +303,7 @@ void Renderer::push(const GeomHolderPtr& holder)
     }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
-    m_surfaces->push(holder);
+    m_surfaces->insert(holder);
 }
 
 
@@ -368,7 +346,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
     m_coc(),
-    m_surfaces(new SurfaceQueue()),
+    m_surfaces(),
     m_outVars(),
     m_sampStorage(),
     m_camToRas()
@@ -408,6 +386,16 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
                                           opts.focalDistance, m_camToRas));
     }
+
+    // Set up storage for samples.
+    m_sampStorage.reset(new SampleStorage(m_outVars, m_opts));
+    // Set up storage for split surfaces
+    //
+    // TODO: This doesn't take into account filter width expansion.
+    Imath::Box2f storeBound(Vec2(0,0), Vec2(m_opts.xRes, m_opts.yRes));
+    int nxbuckets = ceildiv(m_opts.xRes, m_opts.bucketSize);
+    int nybuckets = ceildiv(m_opts.yRes, m_opts.bucketSize);
+    m_surfaces.reset(new SplitStore(nxbuckets, nybuckets, storeBound));
 }
 
 // Trivial destructor.  Only defined here to prevent renderer implementation
@@ -431,7 +419,6 @@ void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
-    m_sampStorage.reset(new SampleStorage(m_outVars, m_opts));
     // Splitting transform.  Allowing this to be different from the
     // projection matrix lets us examine a fixed set of grids
     // independently of the viewpoint.
@@ -448,12 +435,17 @@ void Renderer::render()
 
     TessellationContextImpl tessContext(*this);
 
-    while(!m_surfaces->empty())
+    // Loop over all buckets
+    for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
+    for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
-        GeomHolderPtr g = m_surfaces->top();
-        m_surfaces->pop();
-        float polyLength = micropolyBlurWidth(g, m_coc.get());
-        tessContext.tessellate(splitTrans, polyLength, g);
+        int bucketId = m_surfaces->getBucketId(i,j);
+        while(GeomHolderPtr g = m_surfaces->pop(bucketId))
+        {
+            float polyLength = micropolyBlurWidth(g, m_coc.get());
+            tessContext.tessellate(splitTrans, polyLength, g);
+            g->releaseGeometry();
+        }
     }
     saveImages("test");
 }

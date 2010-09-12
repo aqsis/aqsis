@@ -129,8 +129,6 @@ class SplitStore
         }
 
     public:
-        typedef int NodeId;
-
         /// Create a storage structure with nleafx x nleafy buckets, and given
         /// spatial bound
         SplitStore(int nleafx, int nleafy, const Imath::Box2f& bound)
@@ -145,7 +143,7 @@ class SplitStore
         }
 
         /// Get identifier for leaf bucket at position x,y
-        NodeId getNodeId(int x, int y) const
+        int getBucketId(int x, int y) const
         {
             assert(x >= 0 && x < m_nleafx);
             assert(y >= 0 && y < m_nleafy);
@@ -153,22 +151,22 @@ class SplitStore
         }
 
         /// Get number of active leaf nodes in the x-direction
-        int nleafx() const { return m_nleafx; }
+        int nxBuckets() const { return m_nleafx; }
         /// Get number of active leaf nodes in the y-direction
-        int nleafy() const { return m_nleafy; }
+        int nyBuckets() const { return m_nleafy; }
 
         /// Grab the top surface for the given bucket id
         ///
         /// If there are no surfaces present in the node, return null.
-        GeomHolderPtr pop(NodeId leaf)
+        GeomHolderPtr pop(int leaf)
         {
             // Search from leaf node down to the root, finding the geometry
             // closest to the camera.
             assert(leaf >= quadTreeNumNodes(m_treeDepth-1));
             assert(leaf < quadTreeNumNodes(m_treeDepth));
             float zmin = FLT_MAX;
-            NodeId nodeIdToPop = -1;
-            NodeId id = leaf;
+            int nodeIdToPop = -1;
+            int id = leaf;
             while(true)
             {
                 std::vector<GeomHolderPtr>& queue = m_nodes[id].queue;
@@ -242,25 +240,6 @@ class SplitStore
         }
 };
 
-
-/*
-void processBuckets()
-{
-    for(i in (left,right))
-    {
-        for(j in (top, bottom))
-        {
-            GeomStore::NodeId id = geomStore.getId(i,j);
-            GeomStore::NodeId holderLoc;
-            GeomHolderPtr g;
-            while(g = geomStore.pop(id, &holderLoc))
-            {
-                geomStore.insert(g.split());
-            }
-        }
-    }
-}
-*/
 
 // 2D BSP tree, packed array storage.
 //

@@ -48,6 +48,7 @@ class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
 class CircleOfConfusion;
+class SplitStore;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -134,10 +135,6 @@ class Renderer
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
 
-        class SurfaceOrder;
-        typedef std::priority_queue<GeomHolderPtr, std::vector<GeomHolderPtr>,
-                                    SurfaceOrder> SurfaceQueue;
-
         static void sanitizeOptions(Options& opts);
 
         void saveImages(const std::string& baseFileName);
@@ -156,7 +153,7 @@ class Renderer
 
         Options m_opts;                ///< Render options
         boost::scoped_ptr<CircleOfConfusion> m_coc; ///< depth of field info
-        boost::scoped_ptr<SurfaceQueue> m_surfaces; ///< Pending surface queue
+        boost::scoped_ptr<SplitStore> m_surfaces; ///< Pending surface queue
         OutvarSet m_outVars;           ///< Set of output variables
         boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
         Mat4 m_camToRas;               ///< Camera -> raster transformation

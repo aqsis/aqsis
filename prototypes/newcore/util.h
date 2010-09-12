@@ -188,6 +188,13 @@ inline int iceil(T x)
         return ix + (x != ix);
 }
 
+// Compute ceil(real(n)/d) using integers for positive n and d.
+template<typename T>
+inline T ceildiv(T n, T d)
+{
+    return (n-1)/d + 1;
+}
+
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
 

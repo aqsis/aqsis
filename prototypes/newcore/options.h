@@ -47,6 +47,7 @@ struct Options
     // Sampling options
     int xRes;         ///< image x-resolution
     int yRes;         ///< image y-resolution
+    int bucketSize;   ///< linear edge length of bucket in pixels
     Imath::V2i superSamp;  ///< supersampling resolution
     float shutterMin; ///< shutter start time for motion blur
     float shutterMax; ///< shutter end time for motion blur
@@ -65,6 +66,7 @@ struct Options
         clipFar(FLT_MAX),
         xRes(640),
         yRes(480),
+        bucketSize(16),
         superSamp(2,2),
         shutterMin(0),
         shutterMax(0),

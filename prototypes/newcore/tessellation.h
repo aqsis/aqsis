@@ -118,6 +118,8 @@ class GeomHolder : public RefCounted
 
         /// True if the holder no longer holds valid geometry
         bool expired() const { return !m_geom && m_geomKeys.empty(); }
+        /// Delete held geometry
+        void releaseGeometry() { m_geom.reset(); m_geomKeys.clear(); }
         bool isDeforming() const { return !m_geom; }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
