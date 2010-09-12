@@ -62,6 +62,39 @@ BOOST_AUTO_TEST_CASE(bspTreeNodeIndex_test)
     BOOST_CHECK_EQUAL(14, bspTreeNodeIndex(3, 1, 3));
 }
 
+BOOST_AUTO_TEST_CASE(quadTreeNodeIndex_test)
+{
+    // depth 0.
+    BOOST_CHECK_EQUAL(0, quadTreeNodeIndex(0, 0, 0));
+
+    // depth 1
+    BOOST_CHECK_EQUAL(1, quadTreeNodeIndex(0, 0, 1));
+    BOOST_CHECK_EQUAL(2, quadTreeNodeIndex(1, 0, 1));
+    BOOST_CHECK_EQUAL(3, quadTreeNodeIndex(0, 1, 1));
+    BOOST_CHECK_EQUAL(4, quadTreeNodeIndex(1, 1, 1));
+
+    // depth 2
+    BOOST_CHECK_EQUAL(5, quadTreeNodeIndex(0, 0, 2));
+    BOOST_CHECK_EQUAL(6, quadTreeNodeIndex(1, 0, 2));
+    BOOST_CHECK_EQUAL(7, quadTreeNodeIndex(0, 1, 2));
+    BOOST_CHECK_EQUAL(8, quadTreeNodeIndex(1, 1, 2));
+
+    BOOST_CHECK_EQUAL(9 , quadTreeNodeIndex(2, 0, 2));
+    BOOST_CHECK_EQUAL(10, quadTreeNodeIndex(3, 0, 2));
+    BOOST_CHECK_EQUAL(11, quadTreeNodeIndex(2, 1, 2));
+    BOOST_CHECK_EQUAL(12, quadTreeNodeIndex(3, 1, 2));
+
+    BOOST_CHECK_EQUAL(13, quadTreeNodeIndex(0, 2, 2));
+    BOOST_CHECK_EQUAL(14, quadTreeNodeIndex(1, 2, 2));
+    BOOST_CHECK_EQUAL(15, quadTreeNodeIndex(0, 3, 2));
+    BOOST_CHECK_EQUAL(16, quadTreeNodeIndex(1, 3, 2));
+
+    BOOST_CHECK_EQUAL(17, quadTreeNodeIndex(2, 2, 2));
+    BOOST_CHECK_EQUAL(18, quadTreeNodeIndex(3, 2, 2));
+    BOOST_CHECK_EQUAL(19, quadTreeNodeIndex(2, 3, 2));
+    BOOST_CHECK_EQUAL(20, quadTreeNodeIndex(3, 3, 2));
+}
+
 
 class MockGeom : public Geometry
 {
@@ -192,9 +225,9 @@ BOOST_AUTO_TEST_CASE(splitstore_nonpower_of_two)
 {
     // Check that non-power of two sizes work fine
     Fixture f(5, 7, Vec2(0,0), Vec2(1,1));
-    f.insert(Vec3(0,0,0), Vec3(0.1,0.1,0));
+    f.insert(Vec3(0, 0, 0), Vec3(0.1, 0.1, 0));
     BOOST_CHECK(f.stor.pop(f.stor.getNodeId(0,0)));
-    f.insert(Vec3(0.9,0,0), Vec3(1,0.1,0));
+    f.insert(Vec3(0.9, 0, 0), Vec3(1, 0.1, 0));
     BOOST_CHECK(f.stor.pop(f.stor.getNodeId(4,0)));
 }
 
