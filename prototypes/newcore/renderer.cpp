@@ -439,8 +439,7 @@ void Renderer::render()
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
-        int bucketId = m_surfaces->getBucketId(i,j);
-        while(GeomHolderPtr g = m_surfaces->pop(bucketId))
+        while(GeomHolderPtr g = m_surfaces->pop(i,j))
         {
             float polyLength = micropolyBlurWidth(g, m_coc.get());
             tessContext.tessellate(splitTrans, polyLength, g);

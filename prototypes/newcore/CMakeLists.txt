@@ -112,6 +112,8 @@ testcase(samplegen_test samplegen.cpp samplegen_test.cpp)
 
 testcase(splitstore_test splitstore_test.cpp)
 
+testcase(treearraystorage_test treearraystorage_test.cpp)
+
 if(WIN32)
     set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
     set_property(TARGET render PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
