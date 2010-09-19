@@ -52,6 +52,29 @@ namespace Aqsis {
 
 namespace {
 
+VarSpec typeSpecToVarSpec(const Ri::TypeSpec& spec)
+{
+    VarSpec out;
+    switch(spec.type)
+    {
+        case Ri::TypeSpec::Float:  out.type = VarSpec::Float;  break;
+        case Ri::TypeSpec::Point:  out.type = VarSpec::Point;  break;
+        case Ri::TypeSpec::Color:  out.type = VarSpec::Color;  break;
+        case Ri::TypeSpec::String: out.type = VarSpec::String; break;
+        case Ri::TypeSpec::Vector: out.type = VarSpec::Vector; break;
+        case Ri::TypeSpec::Normal: out.type = VarSpec::Normal; break;
+        case Ri::TypeSpec::HPoint: out.type = VarSpec::Hpoint; break;
+        case Ri::TypeSpec::Matrix: out.type = VarSpec::Matrix; break;
+        case Ri::TypeSpec::Integer:
+        case Ri::TypeSpec::MPoint:
+        case Ri::TypeSpec::Unknown:
+            AQSIS_THROW_XQERROR(XqValidation, EqE_Bug,
+                                "No VarSpec for TypeSpec type");
+    }
+    out.arraySize = spec.arraySize;
+    return out;
+}
+
 /// An error handler which just sends errors to stderr
 ///
 /// (TODO: Make the errors go to a user-specified error handler?)
@@ -766,9 +789,12 @@ RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
     }
     else
     {
-        // TODO
-        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-            << "Display not implemented for mode " << mode;
+        const char* nameBegin = 0;
+        const char* nameEnd = 0;
+        VarSpec var = typeSpecToVarSpec(m_services.getDeclaration(mode,
+                                                       &nameBegin, &nameEnd));
+        var.name.assign(std::string(nameBegin, nameEnd));
+        m_outVars.push_back(var);
     }
 }
 
