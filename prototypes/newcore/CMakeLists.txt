@@ -29,6 +29,7 @@ endif()
 
 set(srcs
     api.cpp
+    displaymanager.cpp
     filters.cpp
     main.cpp
     primvar.cpp

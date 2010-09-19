@@ -30,9 +30,9 @@
 #include "renderer.h"
 
 #include <cstring>
-#include <tiffio.h>
 
 #include "attributes.h"
+#include "displaymanager.h"
 #include "grid.h"
 #include "gridstorage.h"
 #include "microquadsampler.h"
@@ -136,60 +136,6 @@ static float micropolyBlurWidth(const GeomHolderPtr& holder,
 //------------------------------------------------------------------------------
 // Renderer implementation, utility stuff.
 
-static void writeHeader(TIFF* tif, const Imath::V2i& imageSize,
-                        int nchans, bool useFloat)
-{
-    uint16 bitsPerSample = 8;
-    uint16 photometric = PHOTOMETRIC_RGB;
-    uint16 sampleFormat = SAMPLEFORMAT_UINT;
-    if(useFloat)
-    {
-        bitsPerSample = 8*sizeof(float);
-        sampleFormat = SAMPLEFORMAT_IEEEFP;
-    }
-    if(nchans == 1)
-        photometric = PHOTOMETRIC_MINISBLACK;
-    // Write TIFF header
-    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, uint32(imageSize.x));
-    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, uint32(imageSize.y));
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, uint16(ORIENTATION_TOPLEFT));
-    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, uint16(PLANARCONFIG_CONTIG));
-    TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, uint16(RESUNIT_NONE));
-    TIFFSetField(tif, TIFFTAG_XRESOLUTION, 1.0f);
-    TIFFSetField(tif, TIFFTAG_YRESOLUTION, 1.0f);
-    TIFFSetField(tif, TIFFTAG_COMPRESSION, uint16(COMPRESSION_LZW));
-    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, uint16(nchans));
-    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
-    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
-    TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleFormat);
-    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, 0));
-}
-
-static void quantize(const float* in, int nPix, int nSamps, int pixStride,
-                     uint8* out)
-{
-    for(int j = 0; j < nPix; ++j)
-    {
-        for(int i = 0; i < nSamps; ++i)
-            out[i] = static_cast<uint8>(clamp(255*in[i], 0.0f, 255.0f));
-        in += pixStride;
-        out += nSamps;
-    }
-}
-
-static void strided_memcpy(void* dest, const void* src, size_t nElems,
-                           size_t blockSize, size_t srcStride)
-{
-    char* d = reinterpret_cast<char*>(dest);
-    const char* s = reinterpret_cast<const char*>(src);
-    for(size_t j = 0; j < nElems; ++j)
-    {
-        std::memcpy(d, s, blockSize);
-        d += blockSize;
-        s += srcStride;
-    }
-}
-
 namespace {
 template<typename T>
 void clampOptBelow(T& val, const char* name, const T& minVal)
@@ -220,52 +166,14 @@ void Renderer::sanitizeOptions(Options& opts)
 }
 
 // Save image to a TIFF file.
-void Renderer::saveImages(const std::string& baseFileName)
+void Renderer::saveImages()
 {
-    int pixStride = m_sampStorage->fragmentSize();
     Imath::V2i imageSize = m_sampStorage->outputSize();
-    for(int i = 0, nFiles = m_outVars.size(); i < nFiles; ++i)
-    {
-        int nSamps = m_outVars[i].scalarSize();
-
-        std::string fileName = baseFileName;
-        fileName += "_";
-        fileName += m_outVars[i].name.c_str();
-        fileName += ".tif";
-
-        TIFF* tif = TIFFOpen(fileName.c_str(), "w");
-        if(!tif)
-        {
-            std::cerr << "Could not open file " << fileName << "\n";
-            continue;
-        }
-
-        // Don't quatize if we've got depth data.
-        bool doQuantize = m_outVars[i] != Stdvar::z;
-        writeHeader(tif, imageSize, nSamps, !doQuantize);
-
-        // Write image data
-        int rowSize = nSamps*imageSize.x*(doQuantize ? 1 : sizeof(float));
-        boost::scoped_array<uint8> lineBuf(new uint8[rowSize]);
-        for(int line = 0; line < imageSize.y; ++line)
-        {
-            const float* src = m_sampStorage->outputScanline(line)
-                               + m_outVars[i].offset;
-            if(doQuantize)
-            {
-                quantize(src, imageSize.x, nSamps, pixStride, lineBuf.get());
-            }
-            else
-            {
-                strided_memcpy(lineBuf.get(), src, imageSize.x,
-                               nSamps*sizeof(float), pixStride*sizeof(float));
-            }
-            TIFFWriteScanline(tif, reinterpret_cast<tdata_t>(lineBuf.get()),
-                            uint32(line));
-        }
-
-        TIFFClose(tif);
-    }
+    DisplayManager dispManager(imageSize, V2i(imageSize.x,1), m_outVars);
+    for(int line = 0; line < imageSize.y; ++line)
+        dispManager.writeTile(V2i(0,line),
+                              m_sampStorage->outputScanline(line));
+    dispManager.writeFiles();
 }
 
 
@@ -446,7 +354,7 @@ void Renderer::render()
             g->releaseGeometry();
         }
     }
-    saveImages("test");
+    saveImages();
 }
 
 

@@ -137,7 +137,7 @@ class Renderer
 
         static void sanitizeOptions(Options& opts);
 
-        void saveImages(const std::string& baseFileName);
+        void saveImages();
 
         void push(const GeomHolderPtr& geom);
         void push(const GridHolderPtr& grid);

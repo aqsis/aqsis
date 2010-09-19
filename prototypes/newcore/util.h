@@ -61,6 +61,7 @@
 
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
+typedef Imath::V2i V2i;
 typedef Imath::M44f Mat4;
 typedef Imath::M33f Mat3;
 typedef Imath::C3f Col3;
