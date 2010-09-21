@@ -286,11 +286,10 @@ class TessellationContextImpl : public TessellationContext
             m_parentGeom(0)
         { }
 
-        void tessellate(const Mat4& splitTrans, float polyLength,
-                        const GeomHolderPtr& holder)
+        void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
         {
             m_parentGeom = holder.get();
-            holder->geom().tessellate(splitTrans, polyLength, *this);
+            holder->geom().tessellate(splitTrans, *this);
         }
 
         virtual void invokeTessellator(TessControl& tessControl)

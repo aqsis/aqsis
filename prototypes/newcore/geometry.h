@@ -108,20 +108,19 @@ class Geometry : public RefCounted
         /// renderer to do the hard work when keeping track of deformation
         /// motion blur.)
         ///
-        /// \param trans - Transform into "dice coordinates".  The geometry
-        ///                should transform vertices into this space to
-        ///                determine how large the object will be in raster
-        ///                coordinates.  Note that in general trans is not a
-        ///                projection, and the geometry shouldn't neglect the
-        ///                z-coordinate when measuring the size.
+        /// \param tessCoords - Transformation from object coordinates into
+        ///   "tessellation coordinates".  Geometry classes should try to
+        ///   ensure that the micropolygons (or other geometric pieces)
+        ///   resulting from tessellation have area not greater than 1.0 in
+        ///   tessellation coordinates.  When rasterizing, tessCoords will be a
+        ///   projection into raster coordinates, but note that this is not
+        ///   always the case.
         ///
-        /// \param polyLength - The desired linear size ("edge length") of
-        ///                micropolygon pieces resulting from dicing, as
-        ///                measured in the trans coordinate system.
-        ///                diceLength is the square root of the reyes shading
-        ///                rate.
+        /// TODO: Maybe we should break with tradition, and try to put a bound
+        /// on the *linear* dimensions of the diced pieces, rather than the
+        /// area?  Needs thought.
         ///
-        virtual void tessellate(const Mat4& trans, float polyLength,
+        virtual void tessellate(const Mat4& tessCoords,
                                 TessellationContext& tessCtx) const = 0;
 
         /// Transform the surface into a new coordinate system.

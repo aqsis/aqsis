@@ -46,7 +46,7 @@ class MockGeom : public Geometry
 
         virtual Box bound() const { return m_bound; }
 
-        virtual void tessellate(const Mat4& trans, float polyLength,
+        virtual void tessellate(const Mat4& trans,
                                 TessellationContext& tessCtx) const {}
 
         virtual void transform(const Mat4& trans) {}

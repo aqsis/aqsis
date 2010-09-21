@@ -327,19 +327,14 @@ void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
-    // Splitting transform.  Allowing this to be different from the
-    // projection matrix lets us examine a fixed set of grids
-    // independently of the viewpoint.
-    Mat4 splitTrans = m_camToRas;
-    // Make sure that the z-component comes out as zero when splitting based on
-    // projected size
-    splitTrans[0][2] = 0;
-    splitTrans[1][2] = 0;
-    splitTrans[2][2] = 0;
-    splitTrans[3][2] = 0;
-//            Mat4().setScale(Vec3(0.5,-0.5,0))
-//        * Mat4().setTranslation(Vec3(0.5,0.5,0))
-//        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
+    // Coordinate system for tessellation resolution calculation.
+    Mat4 tessCoords = m_camToRas;
+    // Make sure that the z-component is ignored when tessellating based on the
+    // 2D projected object size:
+    tessCoords[0][2] = 0;
+    tessCoords[1][2] = 0;
+    tessCoords[2][2] = 0;
+    tessCoords[3][2] = 0;
 
     TessellationContextImpl tessContext(*this);
 
@@ -349,8 +344,10 @@ void Renderer::render()
     {
         while(GeomHolderPtr g = m_surfaces->pop(i,j))
         {
+            // Scale dicing coordinates to account for shading rate.
             float polyLength = micropolyBlurWidth(g, m_coc.get());
-            tessContext.tessellate(splitTrans, polyLength, g);
+            Mat4 scaledTessCoords = tessCoords * Mat4().setScale(1/polyLength);
+            tessContext.tessellate(scaledTessCoords, g);
             g->releaseGeometry();
         }
     }

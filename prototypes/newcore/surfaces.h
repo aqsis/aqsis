@@ -165,7 +165,7 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
-        virtual void tessellate(const Mat4& splitTrans, float polyLength,
+        virtual void tessellate(const Mat4& splitTrans,
                                 TessellationContext& tessCtx) const
         {
             Vec3 a,b,c,d;
@@ -183,8 +183,7 @@ class Patch : public Geometry
                                 + ((bSpl-dSpl)%(cSpl-dSpl)).length() );
 
             const Options& opts = tessCtx.options();
-            const float maxArea = opts.gridSize*opts.gridSize
-                                  * polyLength*polyLength;
+            const float maxArea = opts.gridSize*opts.gridSize;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((bSpl-aSpl).length() + (dSpl-cSpl).length());
@@ -195,8 +194,8 @@ class Patch : public Geometry
             {
                 // When the area (in number of micropolys) is small enough,
                 // dice the surface.
-                int nu = 1 + ifloor(lu/polyLength);
-                int nv = 1 + ifloor(lv/polyLength);
+                int nu = 1 + ifloor(lu);
+                int nv = 1 + ifloor(lv);
                 SurfaceDicer<Patch> dicer(nu, nv);
                 tessCtx.invokeTessellator(dicer);
             }
