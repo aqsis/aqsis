@@ -65,7 +65,6 @@ set(hdrs
     samplestorage.h
     scenes/scenes.h
     shader.h
-    simple.h
     surfaces.h
     util.h
     varspec.h
