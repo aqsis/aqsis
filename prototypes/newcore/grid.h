@@ -36,8 +36,7 @@
 
 enum GridType
 {
-    GridType_Quad,
-    GridType_QuadSimple
+    GridType_Quad
 };
 
 class Grid : public RefCounted

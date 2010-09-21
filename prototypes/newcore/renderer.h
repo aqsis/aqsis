@@ -44,7 +44,6 @@
 class Attributes;
 class Geometry;
 class Grid;
-class QuadGridSimple;
 class TessellationContextImpl;
 class SampleStorage;
 class CircleOfConfusion;
@@ -147,8 +146,6 @@ class Renderer
 
         template<typename GridT, typename PolySamplerT>
         void rasterize(Grid& inGrid, const Attributes& attrs);
-
-        void rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs);
 
 
         Options m_opts;                ///< Render options

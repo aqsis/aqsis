@@ -29,7 +29,6 @@
 
 #include "renderer.h"
 #include "surfaces.h"
-#include "simple.h"
 
 static
 void addQuadMesh(Attributes& attrs, Renderer& r, const Mat4& otow,

@@ -39,7 +39,6 @@
 #include "refcount.h"
 #include "sample.h"
 #include "samplestorage.h"
-#include "simple.h"
 #include "splitstore.h"
 #include "tessellation.h"
 
@@ -226,9 +225,6 @@ void Renderer::push(const GridHolderPtr& holder)
         // Sample with motion blur or depth of field
         switch(grid.type())
         {
-            case GridType_QuadSimple:
-                assert(0 && "motion blur not implemented for simple grid");
-                break;
             case GridType_Quad:
                 motionRasterize<QuadGrid, MicroQuadSampler>(*holder);
                 break;
@@ -239,10 +235,6 @@ void Renderer::push(const GridHolderPtr& holder)
         // No motion blur or depth of field
         switch(grid.type())
         {
-            case GridType_QuadSimple:
-                rasterizeSimple(static_cast<QuadGridSimple&>(grid),
-                                holder->attrs());
-                break;
             case GridType_Quad:
                 rasterize<QuadGrid, MicroQuadSampler>(grid, holder->attrs());
                 break;
@@ -610,81 +602,6 @@ void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
                 out[zOffset] = z;
         }
         poly.next();
-    }
-}
-
-
-// Simple rasterizer function for simple quad grids only!
-//
-// The purpose of this version rasterizer function is to provide a simple
-// version to benchmark against.
-void Renderer::rasterizeSimple(QuadGridSimple& grid, const Attributes& attrs)
-{
-    // Project grid into raster coordinates.
-    grid.project(m_camToRas);
-    const Vec3* P = grid.P(0);
-
-    // Point-in-polygon tester
-    PointInQuad hitTest;
-
-    // Shading interpolation
-    InvBilin invBilin;
-    // Whether to use smooth shading or not.
-    bool smoothShading = attrs.smoothShading;
-    // Micropoly uv coordinates for smooth shading
-    Vec2 uv(0.0f);
-
-    // iterate over all micropolys in the grid & render each one.
-    for(int v = 0, nv = grid.nv(); v < nv-1; ++v)
-    for(int u = 0, nu = grid.nu(); u < nu-1; ++u)
-    {
-        Vec3 a = P[nu*v + u];
-        Vec3 b = P[nu*v + u+1];
-        Vec3 c = P[nu*(v+1) + u+1];
-        Vec3 d = P[nu*(v+1) + u];
-        bool flipEnd = (u+v)%2;
-
-        Box bound(a);
-        bound.extendBy(b);
-        bound.extendBy(c);
-        bound.extendBy(d);
-
-        hitTest.init(vec2_cast(a), vec2_cast(b),
-                     vec2_cast(c), vec2_cast(d), flipEnd);
-        if(smoothShading)
-        {
-            invBilin.init(vec2_cast(a), vec2_cast(b),
-                          vec2_cast(d), vec2_cast(c));
-        }
-
-        // for each sample position in the bound
-        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
-            sampi.valid(); ++sampi)
-        {
-            Sample& samp = sampi.sample();
-//           // Early out if definitely hidden
-//           if(samp.z < bound.min.z)
-//               continue;
-            // Test whether sample hits the micropoly
-            if(!hitTest(samp))
-                continue;
-            // Determine hit depth
-            float z;
-            if(smoothShading)
-            {
-                uv = invBilin(samp.p);
-                z = bilerp(a.z, b.z, d.z, c.z, uv);
-            }
-            else
-            {
-                z = a.z;
-            }
-            if(samp.z < z)
-                continue; // Ignore if hit is hidden
-            samp.z = z;
-            // Store z value.
-            sampi.fragment()[0] = z;
-        }
     }
 }
 

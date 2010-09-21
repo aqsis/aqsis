@@ -29,7 +29,6 @@
 
 #include "renderer.h"
 #include "surfaces.h"
-#include "simple.h"
 
 static GeometryPtr createPatch(const Vec3& a, const Vec3& b,
                                const Vec3& c, const Vec3& d,
@@ -43,7 +42,6 @@ static GeometryPtr createPatch(const Vec3& a, const Vec3& b,
     builder.add(Primvar::P, P, array_len(P));
     IclassStorage storReq(1,4,4,4,4);
     GeometryPtr patch(new Patch(builder.build(storReq)));
-//    GeometryPtr patch(new PatchSimple(a,b,c,d));
     patch->transform(trans);
     return patch;
 }

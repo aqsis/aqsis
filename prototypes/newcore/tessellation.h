@@ -142,9 +142,6 @@ class GridHolder : public RefCounted
 
         void shade(Grid& grid) const
         {
-            // Special case: can't shade simple grids.
-            if(grid.type() == GridType_QuadSimple)
-                return;
             if(m_attrs->surfaceShader)
                 m_attrs->surfaceShader->shade(grid);
         }
