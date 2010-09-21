@@ -64,9 +64,17 @@ class SplitStore
         /// Grab the top surface for the given bucket
         ///
         /// If there are no surfaces present in the bucket, return null.
-        GeomHolderPtr pop(int x, int y)
+        GeomHolderPtr popSurface(int x, int y)
         {
-            return getBucket(x,y).pop();
+            return getBucket(x,y).popSurface();
+        }
+
+        /// Grab the top grid for the given bucket
+        ///
+        /// If there are no grids present in the bucket, return null.
+        GridHolderPtr popGrid(int x, int y)
+        {
+            return getBucket(x,y).popGrid();
         }
 
         /// Insert geometry into the data structure
@@ -75,29 +83,47 @@ class SplitStore
         /// into.
         void insert(const GeomHolderPtr& geom)
         {
-            Box& b = geom->bound();
-            if(!m_bound.intersects(Imath::Box2f(vec2_cast(b.min),
-                                                vec2_cast(b.max))))
+            int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
+            if(!bucketRangeForBound(geom->bound(), x0, x1, y0, y1))
                 return;
-            float width = m_bound.max.x - m_bound.min.x;
-            float height = m_bound.max.y - m_bound.min.y;
-            // Compute integer (x,y) coordinates of the nodes which the
-            // geometry bound touches at the computed insertion depth
-            int x0 = (clamp(int(m_nxBuckets*(b.min.x - m_bound.min.x)/width),
-                            0, m_nxBuckets-1));
-            int x1 = (clamp(int(m_nxBuckets*(b.max.x - m_bound.min.x)/width),
-                            0, m_nxBuckets-1));
-            int y0 = (clamp(int(m_nyBuckets*(b.min.y - m_bound.min.y)/height),
-                            0, m_nyBuckets-1));
-            int y1 = (clamp(int(m_nyBuckets*(b.max.y - m_bound.min.y)/height),
-                            0, m_nyBuckets-1));
             // Place geometry into nodes which it touches.
             for(int j = y0; j <= y1; ++j)
                 for(int i = x0; i <= x1; ++i)
                     getBucket(i,j).insert(geom);
         }
 
+        void insert(const GridHolderPtr& grid)
+        {
+            int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
+            if(!bucketRangeForBound(grid->bound(), x0, x1, y0, y1))
+                return;
+            for(int j = y0; j <= y1; ++j)
+                for(int i = x0; i <= x1; ++i)
+                    getBucket(i,j).insert(grid);
+        }
+
     private:
+        bool bucketRangeForBound(const Box& bnd, int& x0, int& x1,
+                                 int& y0, int& y1) const
+        {
+            if(!m_bound.intersects(Imath::Box2f(vec2_cast(bnd.min),
+                                                vec2_cast(bnd.max))))
+                return false;
+            float width = m_bound.max.x - m_bound.min.x;
+            float height = m_bound.max.y - m_bound.min.y;
+            // Compute integer (x,y) coordinates of the nodes which the
+            // geometry bound touches at the computed insertion depth
+            x0 = clamp(int(m_nxBuckets*(bnd.min.x - m_bound.min.x)/width),
+                       0, m_nxBuckets-1);
+            x1 = clamp(int(m_nxBuckets*(bnd.max.x - m_bound.min.x)/width),
+                       0, m_nxBuckets-1);
+            y0 = clamp(int(m_nyBuckets*(bnd.min.y - m_bound.min.y)/height),
+                       0, m_nyBuckets-1);
+            y1 = clamp(int(m_nyBuckets*(bnd.max.y - m_bound.min.y)/height),
+                       0, m_nyBuckets-1);
+            return true;
+        }
+
         /// Queued geometry storage
         class Bucket
         {
@@ -113,18 +139,20 @@ class SplitStore
                 }
 
                 std::vector<GeomHolderPtr> m_queue; ///< geometry queue
+                std::vector<GridHolderPtr> m_grids; ///< grid queue
                 bool m_isHeap;     ///< true if m_queue is a heap
                 int m_expireCheck; ///< position in m_queue to check for expired geoms
 
             public:
                 Bucket()
                     : m_queue(),
+                    m_grids(),
                     m_isHeap(false),
                     m_expireCheck(0)
-                {}
+                { }
 
                 /// Grab top piece of geometry from bucket.
-                GeomHolderPtr pop()
+                GeomHolderPtr popSurface()
                 {
                     if(!m_isHeap)
                     {
@@ -151,6 +179,16 @@ class SplitStore
                     m_queue.pop_back();
                     assert(!result->expired());
                     return result;
+                }
+
+                /// Grab most recent grid from bucket
+                GridHolderPtr popGrid()
+                {
+                    if(m_grids.empty())
+                        return GridHolderPtr();
+                    GridHolderPtr g = m_grids.back();
+                    m_grids.pop_back();
+                    return g;
                 }
 
                 /// Insert geometry into bucket
@@ -182,6 +220,10 @@ class SplitStore
                         }
                         m_queue.push_back(geom);
                     }
+                }
+                void insert(const GridHolderPtr& grid)
+                {
+                    m_grids.push_back(grid);
                 }
         };
 

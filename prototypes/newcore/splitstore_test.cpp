@@ -74,7 +74,7 @@ bool storeEmpty(SplitStore& stor)
 {
     for(int j = 0; j < stor.nyBuckets(); ++j)
         for(int i = 0; i < stor.nxBuckets(); ++i)
-            if(stor.pop(i,j))
+            if(stor.popSurface(i,j))
                 return false;
     return true;
 }
@@ -84,17 +84,17 @@ BOOST_AUTO_TEST_CASE(splitstore_small_geom_test)
     Fixture f(2, Vec2(0,0), Vec2(1,1));
     // Insert into bucket 0,0 - trying to grab it from other buckets should fail.
     f.insert(Vec3(0.1, 0.1, 0), Vec3(0.4, 0.4, 0));
-    BOOST_CHECK(!f.stor.pop(1,0));
-    BOOST_CHECK(!f.stor.pop(0,1));
-    BOOST_CHECK(!f.stor.pop(1,1));
-    BOOST_CHECK(f.stor.pop(0,0));
+    BOOST_CHECK(!f.stor.popSurface(1,0));
+    BOOST_CHECK(!f.stor.popSurface(0,1));
+    BOOST_CHECK(!f.stor.popSurface(1,1));
+    BOOST_CHECK(f.stor.popSurface(0,0));
 
     // Insert into bucket 1,1 - trying to grab it from other buckets should fail.
     f.insert(Vec3(0.6, 0.6, 0), Vec3(0.9, 0.9, 0));
-    BOOST_CHECK(!f.stor.pop(0,0));
-    BOOST_CHECK(!f.stor.pop(1,0));
-    BOOST_CHECK(!f.stor.pop(0,1));
-    BOOST_CHECK(f.stor.pop(1,1));
+    BOOST_CHECK(!f.stor.popSurface(0,0));
+    BOOST_CHECK(!f.stor.popSurface(1,0));
+    BOOST_CHECK(!f.stor.popSurface(0,1));
+    BOOST_CHECK(f.stor.popSurface(1,1));
 }
 
 BOOST_AUTO_TEST_CASE(splitstore_multinsert_test)
@@ -102,10 +102,10 @@ BOOST_AUTO_TEST_CASE(splitstore_multinsert_test)
     Fixture f(2, Vec2(0,0), Vec2(1,1));
     // Insert into all buckets, since it's small, but straddles the centre
     f.insert(Vec3(0.45, 0.3, 0), Vec3(0.55, 0.7, 0));
-    BOOST_CHECK(f.stor.pop(0,0));
-    BOOST_CHECK(f.stor.pop(1,0));
-    BOOST_CHECK(f.stor.pop(0,1));
-    BOOST_CHECK(f.stor.pop(1,1));
+    BOOST_CHECK(f.stor.popSurface(0,0));
+    BOOST_CHECK(f.stor.popSurface(1,0));
+    BOOST_CHECK(f.stor.popSurface(0,1));
+    BOOST_CHECK(f.stor.popSurface(1,1));
     BOOST_CHECK(storeEmpty(f.stor));
 }
 
@@ -114,9 +114,9 @@ BOOST_AUTO_TEST_CASE(splitstore_bound_test)
     // Test funny-shaped and -located bound
     Fixture f(2, Vec2(-2,10), Vec2(0,15));
     f.insert(Vec3(-1.5,14,0), Vec3(-1.1,14.5,0));
-    BOOST_CHECK(f.stor.pop(0,1));
+    BOOST_CHECK(f.stor.popSurface(0,1));
     f.insert(Vec3(-0.5,9,0), Vec3(-0.1,11,0));
-    BOOST_CHECK(f.stor.pop(1,0));
+    BOOST_CHECK(f.stor.popSurface(1,0));
 }
 
 BOOST_AUTO_TEST_CASE(splitstore_order_test)
@@ -128,10 +128,10 @@ BOOST_AUTO_TEST_CASE(splitstore_order_test)
     f.insert(Vec3(0, 0, 3), Vec3(1, 1, 3));
     f.insert(Vec3(0, 0, 1), Vec3(1, 1, 1));
     f.insert(Vec3(0.6, 0.6, 2), Vec3(1, 1, 2));
-    BOOST_CHECK_EQUAL(1, f.stor.pop(3,3)->bound().min.z);
-    BOOST_CHECK_EQUAL(2, f.stor.pop(3,3)->bound().min.z);
-    BOOST_CHECK_EQUAL(3, f.stor.pop(3,3)->bound().min.z);
-    BOOST_CHECK_EQUAL(4, f.stor.pop(3,3)->bound().min.z);
+    BOOST_CHECK_EQUAL(1, f.stor.popSurface(3,3)->bound().min.z);
+    BOOST_CHECK_EQUAL(2, f.stor.popSurface(3,3)->bound().min.z);
+    BOOST_CHECK_EQUAL(3, f.stor.popSurface(3,3)->bound().min.z);
+    BOOST_CHECK_EQUAL(4, f.stor.popSurface(3,3)->bound().min.z);
 }
 
 BOOST_AUTO_TEST_CASE(splitstore_outside_bound_test)
@@ -150,9 +150,9 @@ BOOST_AUTO_TEST_CASE(splitstore_nonpower_of_two)
     // Check that non-power of two sizes work fine
     Fixture f(5, 7, Vec2(0,0), Vec2(1,1));
     f.insert(Vec3(0, 0, 0), Vec3(0.1, 0.1, 0));
-    BOOST_CHECK(f.stor.pop(0,0));
+    BOOST_CHECK(f.stor.popSurface(0,0));
     f.insert(Vec3(0.9, 0, 0), Vec3(1, 0.1, 0));
-    BOOST_CHECK(f.stor.pop(4,0));
+    BOOST_CHECK(f.stor.popSurface(4,0));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

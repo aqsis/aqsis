@@ -218,28 +218,8 @@ void Renderer::push(const GeomHolderPtr& holder)
 void Renderer::push(const GridHolderPtr& holder)
 {
     holder->shade();
-    // Rasterize grids right away, never store them.
-    Grid& grid = holder->grid();
-    if(holder->isDeforming() || m_opts.fstop != FLT_MAX)
-    {
-        // Sample with motion blur or depth of field
-        switch(grid.type())
-        {
-            case GridType_Quad:
-                motionRasterize<QuadGrid, MicroQuadSampler>(*holder);
-                break;
-        }
-    }
-    else
-    {
-        // No motion blur or depth of field
-        switch(grid.type())
-        {
-            case GridType_Quad:
-                rasterize<QuadGrid, MicroQuadSampler>(grid, holder->attrs());
-                break;
-        }
-    }
+    holder->project(m_camToRas);
+    m_surfaces->insert(holder);
 }
 
 Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
@@ -334,16 +314,65 @@ void Renderer::render()
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
-        while(GeomHolderPtr g = m_surfaces->pop(i,j))
+        // Process all surfaces and grids in the bucket.
+        while(true)
         {
-            // Scale dicing coordinates to account for shading rate.
-            float polyLength = micropolyBlurWidth(g, m_coc.get());
-            Mat4 scaledTessCoords = tessCoords * Mat4().setScale(1/polyLength);
-            tessContext.tessellate(scaledTessCoords, g);
-            g->releaseGeometry();
+            // Render any waiting grids.
+            while(GridHolderPtr grid = m_surfaces->popGrid(i,j))
+            {
+                if(!grid->done)
+                {
+                    rasterize(*grid);
+                    grid->done = true;
+                }
+            }
+            // Tessellate waiting surfaces
+            if(GeomHolderPtr geom = m_surfaces->popSurface(i,j))
+            {
+                // Scale dicing coordinates to account for shading rate.
+                Mat4 scaledTessCoords = tessCoords *
+                    Mat4().setScale(1/micropolyBlurWidth(geom, m_coc.get()));
+                // Note that invoking the tessellator causes surfaces and
+                // grids to be push()ed back to the renderer behind the
+                // scenes.
+                tessContext.tessellate(scaledTessCoords, geom);
+                geom->releaseGeometry();
+            }
+            else
+                break;
         }
     }
     saveImages();
+}
+
+
+/// Rasterizer driver function for grids.
+///
+/// Determines which rasterizer function to use, depending on the type of grid
+/// and current options.
+void Renderer::rasterize(GridHolder& holder)
+{
+    Grid& grid = holder.grid();
+    if(holder.isDeforming() || m_opts.fstop != FLT_MAX)
+    {
+        // Sample with motion blur or depth of field
+        switch(grid.type())
+        {
+            case GridType_Quad:
+                motionRasterize<QuadGrid, MicroQuadSampler>(holder);
+                break;
+        }
+    }
+    else
+    {
+        // No motion blur or depth of field
+        switch(grid.type())
+        {
+            case GridType_Quad:
+                rasterize<QuadGrid, MicroQuadSampler>(grid, holder.attrs());
+                break;
+        }
+    }
 }
 
 
@@ -358,15 +387,11 @@ struct OutVarInfo
         : src(src), outIdx(outIdx) {}
 };
 
-
 /// Dirty implementation of motion blur sampling.  Won't work unless GridT is
 /// a quad grid!
 template<typename GridT, typename PolySamplerT>
 void Renderer::motionRasterize(GridHolder& holder)
 {
-    // Project grids into raster coordinates.
-    holder.project(m_camToRas);
-
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
@@ -561,9 +586,6 @@ void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
         zOffset = m_outVars[zIdx].offset;
     int fragSize = m_sampStorage->fragmentSize();
     const float* defaultFrag = m_sampStorage->defaultFragment();
-
-    // Project grid into raster coordinates.
-    grid.project(m_camToRas);
 
     // Construct a sampler for the polygons in the grid
     PolySamplerT poly(grid, attrs, m_outVars);

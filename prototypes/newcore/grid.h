@@ -59,6 +59,9 @@ class Grid : public RefCounted
         /// Project positions into raster space.
         virtual void project(const Mat4& toRaster) = 0;
 
+        /// Compute the bounding box for the grid
+        virtual Box bound() const = 0;
+
         virtual ~Grid() {}
 };
 
@@ -115,6 +118,15 @@ class QuadGrid : public Grid
                 P[i] = P[i]*m;
                 P[i].z = z;
             }
+        }
+
+        virtual Box bound() const
+        {
+            Box bound;
+            ConstDataView<Vec3> P = m_storage->P();
+            for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)
+                bound.extendBy(P[i]);
+            return bound;
         }
 };
 

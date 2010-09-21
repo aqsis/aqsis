@@ -139,6 +139,7 @@ class GridHolder : public RefCounted
         GridPtr m_grid;            ///< Non-deforming grid
         GridKeys m_gridKeys;       ///< Grid keys for motion blur
         const Attributes* m_attrs; ///< Attribute state
+        Box m_bound;               ///< Grid bounding box in raster coords.
 
         void shade(Grid& grid) const
         {
@@ -147,10 +148,13 @@ class GridHolder : public RefCounted
         }
 
     public:
+        bool done; ///< FIXME: temporary hack, remove asap.
+
         GridHolder(const GridPtr& grid, const Attributes* attrs)
             : m_grid(grid),
             m_gridKeys(),
-            m_attrs(attrs)
+            m_attrs(attrs),
+            done(false)
         { }
 
         template<typename GridPtrIterT>
@@ -158,7 +162,8 @@ class GridHolder : public RefCounted
                    const GeomHolder& parentGeom)
             : m_grid(),
             m_gridKeys(),
-            m_attrs(&parentGeom.attrs())
+            m_attrs(&parentGeom.attrs()),
+            done(false)
         {
             GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
             m_gridKeys.reserve(end - begin);
@@ -169,6 +174,7 @@ class GridHolder : public RefCounted
         bool isDeforming() const { return !m_grid; }
         Grid& grid() { return m_grid ? *m_grid : *m_gridKeys[0].value; }
         GridKeys& gridKeys() { return m_gridKeys; }
+        const Box& bound() const { return m_bound; }
 
         const Attributes& attrs() const { return *m_attrs; }
 
@@ -192,10 +198,16 @@ class GridHolder : public RefCounted
             if(isDeforming())
             {
                 for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
+                {
                     m_gridKeys[i].value->project(camToRas);
+                    m_bound.extendBy(m_gridKeys[i].value->bound());
+                }
             }
             else
+            {
                 m_grid->project(camToRas);
+                m_bound.extendBy(m_grid->bound());
+            }
         }
 };
 

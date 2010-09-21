@@ -141,6 +141,8 @@ class Renderer
         void push(const GeomHolderPtr& geom);
         void push(const GridHolderPtr& grid);
 
+        void rasterize(GridHolder& holder);
+
         template<typename GridT, typename PolySamplerT>
         void motionRasterize(GridHolder& holder);
 
