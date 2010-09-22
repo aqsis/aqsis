@@ -133,6 +133,7 @@ class Renderer
         // TessellationContextImpl is a friend so that it can appropriately
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
+        class Stats;
 
         static void sanitizeOptions(Options& opts);
 
@@ -156,6 +157,7 @@ class Renderer
         OutvarSet m_outVars;           ///< Set of output variables
         boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
         Mat4 m_camToRas;               ///< Camera -> raster transformation
+        boost::scoped_ptr<Stats> m_stats; ///< Render statistics
 };
 
 

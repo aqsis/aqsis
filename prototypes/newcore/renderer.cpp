@@ -42,6 +42,7 @@
 #include "splitstore.h"
 #include "tessellation.h"
 
+#include "stats.h"
 
 //------------------------------------------------------------------------------
 /// Circle of confusion class for depth of field
@@ -130,6 +131,27 @@ static float micropolyBlurWidth(const GeomHolderPtr& holder,
     }
     return polyLength;
 }
+
+
+const bool useStats=true;
+
+struct Renderer::Stats
+{
+    SimpleCounterStat<useStats>  gridsRasterized;
+    SimpleCounterStat<useStats>  samplesTested;
+    SimpleCounterStat<useStats>  samplesHit;
+    MinMaxMeanStat<float, useStats> averagePolyArea;
+
+    friend std::ostream& operator<<(std::ostream& out, Stats& s)
+    {
+        out << "average micropoly area = " << s.averagePolyArea << "\n";
+        out << "grids rasterized       = " << s.gridsRasterized << "\n";
+        out << "samples tested         = " << s.samplesTested
+            << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
+            << "% hit)\n";
+        return out;
+    }
+};
 
 
 //------------------------------------------------------------------------------
@@ -229,7 +251,8 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_surfaces(),
     m_outVars(),
     m_sampStorage(),
-    m_camToRas()
+    m_camToRas(),
+    m_stats(new Stats())
 {
     sanitizeOptions(m_opts);
     // Set up output variables.  Default is to use Cs.
@@ -278,10 +301,11 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_surfaces.reset(new SplitStore(nxbuckets, nybuckets, storeBound));
 }
 
-// Trivial destructor.  Only defined here to prevent renderer implementation
-// details leaking out of the interface (SurfaceQueue destructor is called
-// implicitly)
-Renderer::~Renderer() { }
+Renderer::~Renderer()
+{
+    if(m_opts.statsVerbosity > 0)
+        std::cout << *m_stats;
+}
 
 void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
 {
@@ -352,6 +376,7 @@ void Renderer::render()
 /// and current options.
 void Renderer::rasterize(GridHolder& holder)
 {
+    ++m_stats->gridsRasterized;
     Grid& grid = holder.grid();
     if(holder.isDeforming() || m_opts.fstop != FLT_MAX)
     {
@@ -516,6 +541,9 @@ void Renderer::motionRasterize(GridHolder& holder)
             bound.extendBy(Pc);
             bound.extendBy(Pd);
 
+            m_stats->averagePolyArea += std::abs(vec2_cast(Pa-Pc) %
+                                                 vec2_cast(Pb-Pd));
+
             // Iterate over samples at current time which come from tiles
             // which cross the bound.
             Imath::V2i bndMin = ifloor((vec2_cast(bound.min)*m_opts.superSamp
@@ -538,8 +566,10 @@ void Renderer::motionRasterize(GridHolder& holder)
                 if(shuffIdx < 0)
                     continue;
                 Sample& samp = m_sampStorage->m_samples[shuffIdx];
+                ++m_stats->samplesTested;
                 if(!hitTest(samp))
                     continue;
+                ++m_stats->samplesHit;
                 Vec2 uv = invBilin(samp.p);
                 float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
                 if(samp.z < z)
@@ -593,6 +623,7 @@ void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
     while(poly.valid())
     {
         Box bound = poly.bound();
+        m_stats->averagePolyArea += poly.area();
 
         poly.initHitTest();
         poly.initInterpolator();
@@ -606,8 +637,10 @@ void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
 //           if(samp.z < bound.min.z)
 //               continue;
             // Test whether sample hits the micropoly
+            ++m_stats->samplesTested;
             if(!poly.contains(samp))
                 continue;
+            ++m_stats->samplesHit;
             // Determine hit depth
             poly.interpolateAt(samp);
             float z = poly.interpolateZ();

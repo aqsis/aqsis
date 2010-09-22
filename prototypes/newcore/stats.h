@@ -27,18 +27,28 @@
 //
 // (This is the New BSD license)
 
+/// \file Statistics helper classes
+/// \author Chris Foster chris42f (at) gmail (dot) com
+///
+/// The idea here is to provide classes which help in the gathering of
+/// statistics about program operation.  The stats classes have a bool
+/// template parameter which can be set to false when the stat is declared to
+/// disable statistic collection at compile time.
+
 #ifndef AQSIS_STATS_H_INCLUDED
 #define AQSIS_STATS_H_INCLUDED
 
 #include <iostream>
 #include <string>
+#include <limits>
+
 
 /// Class for quick and dirty statistics reporting.
 ///
 /// Example to print the number of calls to a function foo() at the end of
 /// execution:
 ///
-///   static SimpleStat<int> nFooCalls("number of foo() calls");
+///   static StatReporter<int> nFooCalls("number of foo() calls");
 ///
 ///   void foo(poly)
 ///   {
@@ -46,18 +56,18 @@
 ///   }
 ///
 template<typename T>
-class SimpleStat
+class StatReporter
 {
     public:
-        SimpleStat(const std::string& statName, const T& value = T())
+        StatReporter(const std::string& statName, const T& value = T())
             : m_name(statName),
             m_value(value)
         { }
 
-        /// Implicit conversion to the value type.
-        operator T&() { return m_value; }
+        /// Get the underlying statistic
+        T& stat() { return m_value; }
 
-        ~SimpleStat()
+        ~StatReporter()
         {
             std::cout << m_name << " = " << m_value << std::endl;
         }
@@ -65,6 +75,96 @@ class SimpleStat
     private:
         std::string m_name;
         T m_value;
+};
+
+
+/// Statistic class computing a min, max and average over a set of values.
+template<typename T, bool enabled=true>
+class MinMaxMeanStat
+{
+    public:
+        MinMaxMeanStat()
+            : m_count(0),
+            m_sum(0),
+            m_min(std::numeric_limits<T>::max()),
+            m_max(std::numeric_limits<T>::min()),
+            m_scale(1)
+        { }
+
+        /// Set a value to scale the final statistic by before reporting.
+        void setScale(const T& scale)
+        {
+            m_scale = scale;
+        }
+
+        /// Add a value to the average.
+        void operator+=(const T& v)
+        {
+            if(enabled)
+            {
+                if(v > m_max)
+                    m_max = v;
+                if(v < m_min)
+                    m_min = v;
+                m_sum += v;
+                ++m_count;
+            }
+        }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                                        const MinMaxMeanStat& s)
+        {
+            if(enabled)
+            {
+                if(s.m_count == 0)
+                    out << "-";
+                else
+                    out << s.m_scale * s.m_sum/s.m_count
+                        << "  (range [" << s.m_scale * s.m_min
+                        << ", " << s.m_scale * s.m_max << "])";
+            }
+            else
+                out << "-";
+            return out;
+        }
+
+    private:
+        long long m_count;
+        T m_sum;
+        T m_min;
+        T m_max;
+        T m_scale;
+};
+
+
+/// Really basic counter stat.
+template<bool enabled=true>
+class SimpleCounterStat
+{
+    public:
+        SimpleCounterStat() : m_count(0) { }
+
+        SimpleCounterStat& operator++()
+        {
+            if(enabled)
+                ++m_count;
+            return *this;
+        }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                                        const SimpleCounterStat& s)
+        {
+            if(enabled)
+                out << s.m_count;
+            else
+                out << "-";
+            return out;
+        }
+
+        long long value() const { return m_count; }
+
+    private:
+        long long m_count;
 };
 
 

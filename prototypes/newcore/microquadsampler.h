@@ -133,6 +133,15 @@ class MicroQuadSampler
             return bnd;
         }
 
+        /// Get area for current micropoly
+        float area() const
+        {
+            // This is the sum of the (oriented) areas of the two triangles
+            // making up the micropoly.
+            return std::abs(vec2_cast(m_P[m_ind.a] - m_P[m_ind.c]) %
+                            vec2_cast(m_P[m_ind.b] - m_P[m_ind.d]));
+        }
+
         /// Initialize the polygon hit tester
         inline void initHitTest()
         {

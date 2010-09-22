@@ -59,6 +59,9 @@ struct Options
     FilterPtr pixelFilter; ///< pixel filter functor
     bool doFilter;    ///< If false, turn off filtering & return raw samples
 
+    // Other options
+    int statsVerbosity; ///< Verbosity for render statistics reporting
+
     Options()
         : maxSplits(20),
         gridSize(16),
@@ -74,7 +77,8 @@ struct Options
         focalLength(FLT_MAX),
         focalDistance(FLT_MAX),
         pixelFilter(makeGaussianFilter(Vec2(2,2))),
-        doFilter(true)
+        doFilter(true),
+        statsVerbosity(1)
     { }
 };
 
