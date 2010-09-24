@@ -50,19 +50,19 @@ class CircleOfConfusion
 {
     private:
         float m_focalDistance;
-        float m_cocMult;
-        float m_cocOffset;
+        Vec2  m_cocMult;
+        float m_invFocalDist;
 
     public:
         CircleOfConfusion(float fstop, float focalLength, float focalDistance,
                           const Mat4& camToRaster)
         {
             m_focalDistance = focalDistance;
-            m_cocMult = 0.5*focalLength/fstop * focalDistance*focalLength
-                                              / (focalDistance - focalLength);
+            float mult = 0.5*focalLength/fstop * focalDistance*focalLength
+                                               / (focalDistance - focalLength);
             // Get multiplier into raster units.
-            m_cocMult *= camToRaster[0][0];
-            m_cocOffset = m_cocMult/focalDistance;
+            m_cocMult = mult*Vec2(fabs(camToRaster[0][0]), fabs(camToRaster[1][1]));
+            m_invFocalDist = 1/focalDistance;
         }
 
         /// Shift the vertex P on the circle of confusion.
@@ -72,28 +72,50 @@ class CircleOfConfusion
         ///
         void lensShift(Vec3& P, const Vec2& lensPos) const
         {
-            float cocSize = std::fabs(m_cocMult/P.z - m_cocOffset);
-            P.x -= lensPos.x * cocSize;
-            P.y -= lensPos.y * cocSize;
+            Vec2 v = lensPos*m_cocMult*std::fabs(1/P.z - m_invFocalDist);
+            P.x -= v.x;
+            P.y -= v.y;
         }
 
         /// Compute the minimum lensShift inside the interval [z1,z2]
-        float minShiftForBound(float z1, float z2) const
+        Vec2 minShiftForBound(float z1, float z2) const
         {
             // First check whether the bound spans the focal plane.
             if((z1 <= m_focalDistance && z2 >= m_focalDistance) ||
                (z1 >= m_focalDistance && z2 <= m_focalDistance))
-                return 0;
+                return Vec2(0);
             // Otherwise, the minimum focal blur is achieved at one of the
             // z-extents of the bound.
-            return std::min(std::fabs(m_cocMult/z1 - m_cocOffset),
-                            std::fabs(m_cocMult/z2 - m_cocOffset));
+            return m_cocMult*std::min(std::fabs(1/z1 - m_invFocalDist),
+                                      std::fabs(1/z2 - m_invFocalDist));
         }
 };
 
+
+const bool useStats=true;
+
+struct Renderer::Stats
+{
+    SimpleCounterStat<useStats>  gridsRasterized;
+    SimpleCounterStat<useStats>  samplesTested;
+    SimpleCounterStat<useStats>  samplesHit;
+    MinMaxMeanStat<float, useStats> averagePolyArea;
+
+    friend std::ostream& operator<<(std::ostream& out, Stats& s)
+    {
+        out << "average micropoly area = " << s.averagePolyArea << "\n";
+        out << "grids rasterized       = " << s.gridsRasterized << "\n";
+        out << "samples tested         = " << s.samplesTested
+            << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
+            << "% hit)\n";
+        return out;
+    }
+};
+
+
 /// Adjust desired micropolygon width based on focal or motion blurring.
-static float micropolyBlurWidth(const GeomHolderPtr& holder,
-                                const CircleOfConfusion* coc)
+float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
+                                   const CircleOfConfusion* coc) const
 {
     const Attributes& attrs = holder->attrs();
     float polyLength = std::sqrt(attrs.shadingRate);
@@ -124,35 +146,19 @@ static float micropolyBlurWidth(const GeomHolderPtr& holder,
         //      focusFactor = 1, regardless of the amount of focal
         //      blur.
         //
-        const float minCoC = coc->minShiftForBound(
-                holder->bound().min.z, holder->bound().max.z);
+        Vec2 cocScale = coc->minShiftForBound(holder->bound().min.z,
+                                              holder->bound().max.z);
+        // The CoC shift is in the sraster coordinate system, so divide by
+        // superSamp to get it into pixel-based raster coords.  pixel-based
+        // raster is the relevant coordinates which determine the size of
+        // details which will be visible after filtering.
+        cocScale /= Vec2(m_opts.superSamp);
+        float minCoC = std::min(cocScale.x, cocScale.y);
         const float lengthRatio = 0.16;
         polyLength *= max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
     }
     return polyLength;
 }
-
-
-const bool useStats=true;
-
-struct Renderer::Stats
-{
-    SimpleCounterStat<useStats>  gridsRasterized;
-    SimpleCounterStat<useStats>  samplesTested;
-    SimpleCounterStat<useStats>  samplesHit;
-    MinMaxMeanStat<float, useStats> averagePolyArea;
-
-    friend std::ostream& operator<<(std::ostream& out, Stats& s)
-    {
-        out << "average micropoly area = " << s.averagePolyArea << "\n";
-        out << "grids rasterized       = " << s.gridsRasterized << "\n";
-        out << "samples tested         = " << s.samplesTested
-            << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
-            << "% hit)\n";
-        return out;
-    }
-};
-
 
 //------------------------------------------------------------------------------
 // Renderer implementation, utility stuff.
@@ -221,12 +227,12 @@ void Renderer::push(const GeomHolderPtr& holder)
     bound.max += Vec3(holder->attrs().displacementBound);
     float minz = bound.min.z;
     float maxz = bound.max.z;
-    bound = transformBound(bound, m_camToRas);
+    bound = transformBound(bound, m_camToSRaster);
     bound.min.z = minz;
     bound.max.z = maxz;
     // Cull if outside xy extent of image
-    if(   bound.max.x < 0 || bound.min.x > m_opts.xRes
-       || bound.max.y < 0 || bound.min.y > m_opts.yRes )
+    if(   bound.max.x < 0 || bound.min.x > m_sampStorage->m_xSampRes
+       || bound.max.y < 0 || bound.min.y > m_sampStorage->m_ySampRes )
     {
         return;
     }
@@ -240,7 +246,7 @@ void Renderer::push(const GeomHolderPtr& holder)
 void Renderer::push(const GridHolderPtr& holder)
 {
     holder->shade();
-    holder->project(m_camToRas);
+    holder->project(m_camToSRaster);
     m_surfaces->insert(holder);
 }
 
@@ -251,7 +257,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_surfaces(),
     m_outVars(),
     m_sampStorage(),
-    m_camToRas(),
+    m_camToSRaster(),
     m_stats(new Stats())
 {
     sanitizeOptions(m_opts);
@@ -278,27 +284,44 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
         }
     }
     m_outVars.assign(outVarsInit.begin(), outVarsInit.end());
-    // Set up camera -> raster matrix
-    m_camToRas = camToScreen
-        * Mat4().setScale(Vec3(0.5,-0.5,0))
-        * Mat4().setTranslation(Vec3(0.5,0.5,0))
-        * Mat4().setScale(Vec3(m_opts.xRes, m_opts.yRes, 1));
-
-    if(opts.fstop != FLT_MAX)
-    {
-        m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
-                                          opts.focalDistance, m_camToRas));
-    }
 
     // Set up storage for samples.
     m_sampStorage.reset(new SampleStorage(m_outVars, m_opts));
     // Set up storage for split surfaces
     //
     // TODO: This doesn't take into account filter width expansion.
-    Imath::Box2f storeBound(Vec2(0,0), Vec2(m_opts.xRes, m_opts.yRes));
+    Imath::Box2f storeBound(Vec2(0,0), Vec2(m_sampStorage->m_xSampRes,
+                                            m_sampStorage->m_ySampRes));
     int nxbuckets = ceildiv(m_opts.xRes, m_opts.bucketSize);
     int nybuckets = ceildiv(m_opts.yRes, m_opts.bucketSize);
     m_surfaces.reset(new SplitStore(nxbuckets, nybuckets, storeBound));
+
+    // Set up camera -> sample raster matrix.
+    //
+    // "sraster" is a special raster coordinate system where the unit of length
+    // is the distance between adjacent *samples*.  This is different from the
+    // usual raster coordinates where the unit of length is the distance
+    // between *pixels* after filtering.  Using sraster rather than raster
+    // simplifies the sampling code.
+    //
+    // The origin of the sraster coordinate system is the top left of the
+    // filtering region for the top left pixel.
+    m_camToSRaster = camToScreen
+        * Mat4().setScale(Vec3(0.5,-0.5,0))
+        * Mat4().setTranslation(Vec3(0.5,0.5,0))
+        * Mat4().setScale(Vec3(m_opts.xRes*m_opts.superSamp.x,
+                               m_opts.yRes*m_opts.superSamp.y, 1))
+        * Mat4().setTranslation(Vec3(m_sampStorage->m_filtExpand.x,
+                                     m_sampStorage->m_filtExpand.y, 0));
+
+    if(opts.fstop != FLT_MAX)
+    {
+        m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
+                                          opts.focalDistance, m_camToSRaster));
+    }
+
+    m_stats->averagePolyArea.setScale(
+            1.0/(m_opts.superSamp.x*m_opts.superSamp.y));
 }
 
 Renderer::~Renderer()
@@ -324,7 +347,9 @@ void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 void Renderer::render()
 {
     // Coordinate system for tessellation resolution calculation.
-    Mat4 tessCoords = m_camToRas;
+    Mat4 tessCoords = m_camToSRaster
+        * Mat4().setScale(Vec3(1.0/m_opts.superSamp.x,
+                               1.0/m_opts.superSamp.y, 1));
     // Make sure that the z-component is ignored when tessellating based on the
     // 2D projected object size:
     tessCoords[0][2] = 0;
@@ -546,10 +571,8 @@ void Renderer::motionRasterize(GridHolder& holder)
 
             // Iterate over samples at current time which come from tiles
             // which cross the bound.
-            Imath::V2i bndMin = ifloor((vec2_cast(bound.min)*m_opts.superSamp
-                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
-            Imath::V2i bndMax = ifloor((vec2_cast(bound.max)*m_opts.superSamp
-                                + Vec2(m_sampStorage->m_filtExpand))*tileBoundMult);
+            Imath::V2i bndMin = ifloor(vec2_cast(bound.min)*tileBoundMult);
+            Imath::V2i bndMax = ifloor(vec2_cast(bound.max)*tileBoundMult);
             int startx = clamp(bndMin.x,   0, nTiles.x);
             int endx   = clamp(bndMax.x+1, 0, nTiles.x);
             int starty = clamp(bndMin.y,   0, nTiles.y);

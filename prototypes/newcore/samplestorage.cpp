@@ -156,16 +156,9 @@ SampleStorage::SampleStorage(const OutvarSet& outVars, const Options& opts)
     // Initialize sample array.  Non-jittered for now.
     int nsamples = m_xSampRes*m_ySampRes;
     m_samples.resize(nsamples);
-    Vec2 invRes = Vec2(1.0f/opts.superSamp.x, 1.0f/opts.superSamp.y);
     for(int j = 0; j < m_ySampRes; ++j)
-    {
         for(int i = 0; i < m_xSampRes; ++i)
-        {
-            Vec2 pos = invRes*(  Vec2(i, j) - Vec2(m_filtExpand)
-                               + Vec2(0.5f) );
-            m_samples[j*m_xSampRes + i] = Sample(pos);
-        }
-    }
+            m_samples[j*m_xSampRes + i] = Sample(Vec2(i, j) + Vec2(0.5f));
 
     bool hasMotion = opts.shutterMin != opts.shutterMax;
     bool hasDof = opts.fstop != FLT_MAX;

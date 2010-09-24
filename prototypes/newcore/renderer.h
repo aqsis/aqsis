@@ -135,6 +135,9 @@ class Renderer
         friend class TessellationContextImpl;
         class Stats;
 
+        float micropolyBlurWidth(const GeomHolderPtr& holder,
+                                 const CircleOfConfusion* coc) const;
+
         static void sanitizeOptions(Options& opts);
 
         void saveImages();
@@ -156,8 +159,8 @@ class Renderer
         boost::scoped_ptr<SplitStore> m_surfaces; ///< Pending surface queue
         OutvarSet m_outVars;           ///< Set of output variables
         boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
-        Mat4 m_camToRas;               ///< Camera -> raster transformation
-        boost::scoped_ptr<Stats> m_stats; ///< Render statistics
+        Mat4 m_camToSRaster;           ///< Camera -> sample raster transformation
+        mutable boost::scoped_ptr<Stats> m_stats; ///< Render statistics
 };
 
 
