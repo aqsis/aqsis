@@ -95,6 +95,13 @@ inline Imath::Vec2<T> vec2_cast(const Imath::Vec3<T>& v)
     return Imath::Vec2<T>(v.x, v.y);
 }
 
+/// Product of vector components.
+template<typename T>
+inline T prod(const Imath::Vec2<T>& v)
+{
+    return v.x*v.y;
+}
+
 template<typename T>
 inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
 {

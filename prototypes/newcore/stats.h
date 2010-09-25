@@ -41,6 +41,9 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <vector>
+
+#include <boost/format.hpp>
 
 
 /// Class for quick and dirty statistics reporting.
@@ -136,6 +139,83 @@ class MinMaxMeanStat
         T m_scale;
 };
 
+
+/// Compute a histogram over a set of values
+template<typename T, bool enabled=true>
+class HistogramStat
+{
+    private:
+        typedef long long Counter;
+
+    public:
+        HistogramStat(const T& min, const T& max, int nbuckets)
+            : m_min(min),
+            m_delta(nbuckets/double(max-min)),
+            m_scale(1),
+            m_buckets(nbuckets+1)
+        { }
+
+        /// Set a scaling factor for the incoming values.
+        void setScale(const T& scale)
+        {
+            m_delta *= scale/m_scale;
+            m_scale = scale;
+        }
+
+        /// Add a value to the histogram
+        void operator+=(const T& val)
+        {
+            if(enabled)
+            {
+                int offset = ifloor(m_delta*(val - m_min));
+                if(offset >= 0 && offset < (int)m_buckets.size())
+                    ++m_buckets[offset];
+                else
+                    ++m_buckets.back();
+            }
+        }
+
+        friend std::ostream& operator<<(std::ostream& out, const HistogramStat& s)
+        {
+            if(!enabled)
+            {
+                out << "-";
+                return out;
+            }
+            Counter bucketMax = 0;
+            Counter totSamples = 0;
+            int nbuckets = s.m_buckets.size();
+            for(int i = 0; i < nbuckets; ++i)
+            {
+                bucketMax = std::max(bucketMax, s.m_buckets[i]);
+                totSamples += s.m_buckets[i];
+            }
+            if(totSamples == 0)
+            {
+                bucketMax = 1;
+                totSamples = 1;
+            }
+            double rowLenMult = 50.0/bucketMax;
+            for(int i = 0; i < nbuckets; ++i)
+            {
+                double percent = 100.0*s.m_buckets[i]/totSamples;
+                double bucketStart = s.m_min + i/s.m_delta;
+                Counter rowLen = Counter(rowLenMult*s.m_buckets[i]);
+                out << boost::format("%2.1f | %2.0f%% |") % bucketStart % percent;
+                for(int j = 0; j < rowLen; ++j)
+                    out << '=';
+                if(i < nbuckets-1)
+                    out << "\n";
+            }
+            return out;
+        }
+
+    private:
+        T m_min;
+        double m_delta;
+        T m_scale;
+        std::vector<Counter> m_buckets;
+};
 
 /// Really basic counter stat.
 template<bool enabled=true>

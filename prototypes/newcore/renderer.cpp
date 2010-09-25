@@ -320,8 +320,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
                                           opts.focalDistance, m_camToSRaster));
     }
 
-    m_stats->averagePolyArea.setScale(
-            1.0/(m_opts.superSamp.x*m_opts.superSamp.y));
+    m_stats->averagePolyArea.setScale(1.0/prod(m_opts.superSamp));
 }
 
 Renderer::~Renderer()
@@ -566,8 +565,8 @@ void Renderer::motionRasterize(GridHolder& holder)
             bound.extendBy(Pc);
             bound.extendBy(Pd);
 
-            m_stats->averagePolyArea += std::abs(vec2_cast(Pa-Pc) %
-                                                 vec2_cast(Pb-Pd));
+            m_stats->averagePolyArea += 0.5*std::abs(vec2_cast(Pa-Pc) %
+                                                     vec2_cast(Pb-Pd));
 
             // Iterate over samples at current time which come from tiles
             // which cross the bound.
