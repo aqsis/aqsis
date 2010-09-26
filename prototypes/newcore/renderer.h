@@ -37,8 +37,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "options.h"
 #include "util.h"
+#include "options.h"
 #include "varspec.h"
 
 class Attributes;
@@ -119,7 +119,7 @@ typedef std::vector<GeometryKey> GeometryKeys;
 class Renderer
 {
     public:
-        Renderer(const Options& opts, const Mat4& camToScreen = Mat4(),
+        Renderer(const OptionsPtr& opts, const Mat4& camToScreen = Mat4(),
                  const VarList& outVars = VarList());
 
         ~Renderer();
@@ -156,7 +156,7 @@ class Renderer
         void staticRasterize(SampleTile& tile, const GridHolder& holder);
 
 
-        Options m_opts;                ///< Render options
+        OptionsPtr m_opts;             ///< Render options
         boost::scoped_ptr<CircleOfConfusion> m_coc; ///< depth of field info
         boost::scoped_ptr<SplitStore> m_surfaces; ///< Pending surface queue
         OutvarSet m_outVars;           ///< Set of output variables

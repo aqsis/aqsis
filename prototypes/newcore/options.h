@@ -33,10 +33,11 @@
 #include <cfloat>
 
 #include "filters.h"
+#include "refcount.h"
 #include "util.h"
 
 /// Renderer options.
-struct Options
+struct Options : public RefCounted
 {
     // Reyes options
     int eyeSplits;   ///< maximum number of splits before discarding a surface
@@ -79,5 +80,7 @@ struct Options
         statsVerbosity(1)
     { }
 };
+
+typedef boost::intrusive_ptr<Options> OptionsPtr;
 
 #endif // OPTIONS_H_INCLUDED

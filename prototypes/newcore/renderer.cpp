@@ -177,7 +177,7 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
         // superSamp to get it into pixel-based raster coords.  pixel-based
         // raster is the relevant coordinates which determine the size of
         // details which will be visible after filtering.
-        cocScale /= Vec2(m_opts.superSamp);
+        cocScale /= Vec2(m_opts->superSamp);
         float minCoC = std::min(cocScale.x, cocScale.y);
         const float lengthRatio = 0.16;
         polyLength *= max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
@@ -228,13 +228,13 @@ void Renderer::push(const GeomHolderPtr& holder)
     ++m_stats->geometryInFlight;
     // Get bound in camera space.
     Box& bound = holder->bound();
-    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts.eyeSplits)
+    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts->eyeSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
         return;
     }
     // Cull if outside near/far clipping range
-    if(bound.max.z < m_opts.clipNear || bound.min.z > m_opts.clipFar)
+    if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return;
     // Transform bound to raster space.
     //
@@ -267,7 +267,7 @@ void Renderer::push(const GridHolderPtr& holder)
     m_surfaces->insert(holder);
 }
 
-Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
+Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                    const VarList& outVars)
     : m_opts(opts),
     m_coc(),
@@ -276,7 +276,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_camToSRaster(),
     m_stats(new Stats())
 {
-    sanitizeOptions(m_opts);
+    sanitizeOptions(*m_opts);
     // Set up output variables.  Default is to use Cs.
     std::vector<OutvarSpec> outVarsInit;
     if(outVars.size() == 0)
@@ -305,29 +305,29 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
 
 
     // Cache the pixel filter.
-    m_pixelFilter.reset(new CachedFilter(*m_opts.pixelFilter,
-                                         m_opts.superSamp));
+    m_pixelFilter.reset(new CachedFilter(*m_opts->pixelFilter,
+                                         m_opts->superSamp));
 
     // Set up display manager
-    m_displayManager.reset( new DisplayManager(m_opts.resolution,
-                                               m_opts.bucketSize,
+    m_displayManager.reset( new DisplayManager(m_opts->resolution,
+                                               m_opts->bucketSize,
                                                m_outVars) );
 
-    V2i nbuckets(ceildiv(m_opts.resolution.x, m_opts.bucketSize.x) + 1,
-                 ceildiv(m_opts.resolution.y, m_opts.bucketSize.y) + 1);
+    V2i nbuckets(ceildiv(m_opts->resolution.x, m_opts->bucketSize.x) + 1,
+                 ceildiv(m_opts->resolution.y, m_opts->bucketSize.y) + 1);
 
     // Set up filtering object
     Imath::Box2i outTileRange(V2i(0), nbuckets);
     m_filterProcessor.reset(
             new FilterProcessor(*m_displayManager, outTileRange,
-                                *m_pixelFilter, m_opts.superSamp) );
+                                *m_pixelFilter, m_opts->superSamp) );
 
     // Area to sample, in sraster coords.
     m_samplingArea = Imath::Box2f(Vec2(-m_pixelFilter->offset()),
-                                  Vec2(m_opts.resolution*m_opts.superSamp +
+                                  Vec2(m_opts->resolution*m_opts->superSamp +
                                        m_pixelFilter->offset()));
 
-    V2i sampTileSize = m_opts.superSamp*m_opts.bucketSize;
+    V2i sampTileSize = m_opts->superSamp*m_opts->bucketSize;
     Vec2 sampTileOffset(sampTileSize/2);
     Imath::Box2f bucketArea(-sampTileOffset, Vec2(nbuckets * sampTileSize
                                                   - sampTileSize/2));
@@ -348,21 +348,22 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_camToSRaster = camToScreen
         * Mat4().setScale(Vec3(0.5,-0.5,0))
         * Mat4().setTranslation(Vec3(0.5,0.5,0))
-        * Mat4().setScale(Vec3(m_opts.resolution.x*m_opts.superSamp.x,
-                               m_opts.resolution.y*m_opts.superSamp.y, 1));
+        * Mat4().setScale(Vec3(m_opts->resolution.x*m_opts->superSamp.x,
+                               m_opts->resolution.y*m_opts->superSamp.y, 1));
 
-    if(opts.fstop != FLT_MAX)
+    if(m_opts->fstop != FLT_MAX)
     {
-        m_coc.reset(new CircleOfConfusion(opts.fstop, opts.focalLength,
-                                          opts.focalDistance, m_camToSRaster));
+        m_coc.reset(new CircleOfConfusion(m_opts->fstop, m_opts->focalLength,
+                                          m_opts->focalDistance,
+                                          m_camToSRaster));
     }
 
-    m_stats->averagePolyArea.setScale(1.0/prod(m_opts.superSamp));
+    m_stats->averagePolyArea.setScale(1.0/prod(m_opts->superSamp));
 }
 
 Renderer::~Renderer()
 {
-    if(m_opts.statsVerbosity > 0)
+    if(m_opts->statsVerbosity > 0)
         std::cout << *m_stats;
 }
 
@@ -384,8 +385,8 @@ void Renderer::render()
 {
     // Coordinate system for tessellation resolution calculation.
     Mat4 tessCoords = m_camToSRaster
-        * Mat4().setScale(Vec3(1.0/m_opts.superSamp.x,
-                               1.0/m_opts.superSamp.y, 1));
+        * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
+                               1.0/m_opts->superSamp.y, 1));
     // Make sure that the z-component is ignored when tessellating based on the
     // 2D projected object size:
     tessCoords[0][2] = 0;
@@ -395,7 +396,7 @@ void Renderer::render()
 
     TessellationContextImpl tessContext(*this);
 
-    V2i tileSize(m_opts.bucketSize*m_opts.superSamp);
+    V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
     // Loop over all buckets
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
@@ -446,7 +447,7 @@ void Renderer::render()
 /// and current options.
 void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
 {
-    if(holder.isDeforming() || m_opts.fstop != FLT_MAX)
+    if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
     {
         // Sample with motion blur or depth of field
         switch(holder.grid().type())

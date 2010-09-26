@@ -370,7 +370,7 @@ class TessellationContextImpl : public TessellationContext
 
         virtual const Options& options()
         {
-            return m_renderer.m_opts;
+            return *m_renderer.m_opts;
         }
         virtual const Attributes& attributes()
         {

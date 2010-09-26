@@ -327,6 +327,30 @@ class TransformStack
 
 
 //------------------------------------------------------------------------------
+struct AllOptions;
+typedef boost::intrusive_ptr<AllOptions> AllOptionsPtr;
+
+/// A container for all option-like parts of the renderman state
+struct AllOptions : public RefCounted
+{
+    OptionsPtr opts;
+    CameraInfo camInfo;
+    VarList outVars;
+
+    AllOptions() : opts(new Options()) {}
+
+    AllOptionsPtr clone()
+    {
+        AllOptionsPtr o = new AllOptions(*this);
+        o->opts = new Options(*opts);
+        return o;
+    }
+};
+
+typedef boost::intrusive_ptr<AllOptions> AllOptionsPtr;
+
+
+//------------------------------------------------------------------------------
 /// The renderer API.
 class RenderApi : public Ri::Renderer
 {
@@ -532,25 +556,22 @@ class RenderApi : public Ri::Renderer
         Ri::ErrorHandler& ehandler() { return m_services.errorHandler(); }
 
         ApiServices& m_services;
-        Options m_opts;
+        AllOptionsPtr m_opts;
+        AllOptionsPtr m_savedOpts;
         Attributes m_attrs;
         TransformStack m_transStack;
-        CameraInfo m_camInfo;
-        VarList m_outVars;
         boost::shared_ptr< ::Renderer> m_renderer;
 };
 
 
 RenderApi::RenderApi(ApiServices& services)
     : m_services(services),
-    m_opts(),
+    m_opts(new AllOptions()),
+    m_savedOpts(),
     m_attrs(),
     m_transStack(),
-    m_camInfo(),
-    m_outVars(),
     m_renderer()
-{
-}
+{ }
 
 //------------------------------------------------------------------------------
 /*
@@ -590,22 +611,24 @@ RtVoid RenderApi::Declare(RtConstString name, RtConstString declaration)
 
 RtVoid RenderApi::FrameBegin(RtInt number)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "FrameBegin not implemented"; // Todo
+    // Clone options
+    m_savedOpts = m_opts;
+    m_opts = m_opts->clone();
+    // Save transformation
     m_transStack.push();
 }
 
 RtVoid RenderApi::FrameEnd()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "FrameEnd not implemented"; // Todo
+    assert(m_savedOpts);
+    m_opts = m_savedOpts;
     m_transStack.pop();
 }
 
 RtVoid RenderApi::WorldBegin()
 {
-    Mat4 camToScreen = m_camInfo.camToScreenMatrix(m_opts);
-    m_renderer.reset(new ::Renderer(m_opts, camToScreen, m_outVars));
+    Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
+    m_renderer.reset(new ::Renderer(m_opts->opts, camToScreen, m_opts->outVars));
     m_transStack.push();
 }
 
@@ -648,19 +671,19 @@ RtVoid RenderApi::IfEnd()
 RtVoid RenderApi::Format(RtInt xresolution, RtInt yresolution,
                          RtFloat pixelaspectratio)
 {
-    m_opts.resolution = V2i(xresolution, yresolution);
-    m_camInfo.setFrameAspect(pixelaspectratio*xresolution/yresolution, false);
+    m_opts->opts->resolution = V2i(xresolution, yresolution);
+    m_opts->camInfo.setFrameAspect(pixelaspectratio*xresolution/yresolution, false);
 }
 
 RtVoid RenderApi::FrameAspectRatio(RtFloat frameratio)
 {
-    m_camInfo.setFrameAspect(frameratio, true);
+    m_opts->camInfo.setFrameAspect(frameratio, true);
 }
 
 RtVoid RenderApi::ScreenWindow(RtFloat left, RtFloat right, RtFloat bottom,
                                RtFloat top)
 {
-    m_camInfo.setScreenWindow(left, right, bottom, top);
+    m_opts->camInfo.setScreenWindow(left, right, bottom, top);
 }
 
 RtVoid RenderApi::CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
@@ -674,18 +697,18 @@ RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
 {
     if(!name)
     {
-        m_camInfo.setType(CameraInfo::UserDefined);
+        m_opts->camInfo.setType(CameraInfo::UserDefined);
     }
     else if(strcmp(name, "perspective") == 0)
     {
-        m_camInfo.setType(CameraInfo::Perspective);
+        m_opts->camInfo.setType(CameraInfo::Perspective);
         FloatArray fov = pList.findFloatData(Ri::TypeSpec::Float, "fov");
         if(fov)
-            m_camInfo.setFov(fov[0]);
+            m_opts->camInfo.setFov(fov[0]);
     }
     else if(strcmp(name, "orthographic") == 0)
     {
-        m_camInfo.setType(CameraInfo::Orthographic);
+        m_opts->camInfo.setType(CameraInfo::Orthographic);
     }
     else
     {
@@ -696,8 +719,8 @@ RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
 
 RtVoid RenderApi::Clipping(RtFloat cnear, RtFloat cfar)
 {
-    m_opts.clipNear = cnear;
-    m_opts.clipFar = cfar;
+    m_opts->opts->clipNear = cnear;
+    m_opts->opts->clipFar = cfar;
 }
 
 RtVoid RenderApi::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
@@ -710,15 +733,15 @@ RtVoid RenderApi::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx,
 RtVoid RenderApi::DepthOfField(RtFloat fstop, RtFloat focallength,
                                RtFloat focaldistance)
 {
-    m_opts.fstop = fstop;
-    m_opts.focalLength = focallength;
-    m_opts.focalDistance = focaldistance;
+    m_opts->opts->fstop = fstop;
+    m_opts->opts->focalLength = focallength;
+    m_opts->opts->focalDistance = focaldistance;
 }
 
 RtVoid RenderApi::Shutter(RtFloat opentime, RtFloat closetime)
 {
-    m_opts.shutterMin = opentime;
-    m_opts.shutterMax = closetime;
+    m_opts->opts->shutterMin = opentime;
+    m_opts->opts->shutterMax = closetime;
 }
 
 RtVoid RenderApi::PixelVariance(RtFloat variance)
@@ -729,20 +752,20 @@ RtVoid RenderApi::PixelVariance(RtFloat variance)
 
 RtVoid RenderApi::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-    m_opts.superSamp = Imath::V2i(xsamples, ysamples);
+    m_opts->opts->superSamp = Imath::V2i(xsamples, ysamples);
 }
 
 RtVoid RenderApi::PixelFilter(RtFilterFunc function, RtFloat xwidth,
                               RtFloat ywidth)
 {
     if((RtFilterFunc)1 == function)
-        m_opts.pixelFilter = makeBoxFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeBoxFilter(Vec2(xwidth,ywidth));
     else if((RtFilterFunc)2 == function)
-        m_opts.pixelFilter = makeGaussianFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeGaussianFilter(Vec2(xwidth,ywidth));
     else if((RtFilterFunc)3 == function)
-        m_opts.pixelFilter = makeSincFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeSincFilter(Vec2(xwidth,ywidth));
     else if((RtFilterFunc)4 == function)
-        m_opts.pixelFilter = makeDiscFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeDiscFilter(Vec2(xwidth,ywidth));
     else
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
             << "Unimplemented pixel filter function";
@@ -776,22 +799,23 @@ RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
             << "Unimplemented display type \"" << type << "\"";
         return;
     }
+    VarList& outVars = m_opts->outVars;
     if(name[0] != '+')
-        m_outVars.clear();
+        outVars.clear();
     if(strcmp(mode, "rgb") == 0)
     {
-        m_outVars.push_back(Stdvar::Ci);
+        outVars.push_back(Stdvar::Ci);
     }
     else if(strcmp(mode, "rgba") == 0)
     {
         // TODO
-        m_outVars.push_back(Stdvar::Ci);
+        outVars.push_back(Stdvar::Ci);
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
             << "rgba output unimplemented, using rgb.";
     }
     else if(strcmp(mode, "z") == 0)
     {
-        m_outVars.push_back(Stdvar::z);
+        outVars.push_back(Stdvar::z);
     }
     else
     {
@@ -800,7 +824,7 @@ RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
         VarSpec var = typeSpecToVarSpec(m_services.getDeclaration(mode,
                                                        &nameBegin, &nameEnd));
         var.name.assign(std::string(nameBegin, nameEnd));
-        m_outVars.push_back(var);
+        outVars.push_back(var);
     }
 }
 
@@ -814,7 +838,7 @@ RtVoid RenderApi::Hider(RtConstToken name, const ParamList& pList)
     }
     ParamListUsage params(pList);
     if(IntArray subpixel = params.findIntData(Ri::TypeSpec::Int, "subpixel"))
-        m_opts.doFilter = subpixel[0];
+        m_opts->opts->doFilter = subpixel[0];
     if(params.hasUnusedParams())
     {
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
@@ -842,11 +866,11 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
     {
         if(IntArray bs = params.findIntData(
                         Ri::TypeSpec(Ri::TypeSpec::Int, 2), "bucketsize"))
-            m_opts.bucketSize = Vec2(bs[0], bs[1]);
+            m_opts->opts->bucketSize = Vec2(bs[0], bs[1]);
         if(IntArray gs = params.findIntData(Ri::TypeSpec::Int, "gridsize"))
-            m_opts.gridSize = ifloor(sqrt(gs[0]));
+            m_opts->opts->gridSize = ifloor(sqrt(gs[0]));
         if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
-            m_opts.eyeSplits = es[0];
+            m_opts->opts->eyeSplits = es[0];
     }
     if(params.hasUnusedParams())
     {
