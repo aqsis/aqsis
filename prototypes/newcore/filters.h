@@ -45,9 +45,6 @@ class Filter : public RefCounted
         Filter(const Vec2& width) : m_width(width) {}
 
         /// Evaluate the filter at position x,y
-        ///
-        /// TODO: should we pass the widths in here, or expect them to be part
-        /// of the filter definition?
         virtual float operator()(float x, float y) const = 0;
 
         /// Return true if the filter is separable

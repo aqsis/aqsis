@@ -33,6 +33,7 @@
 
 #include "attributes.h"
 #include "displaymanager.h"
+#include "filterprocessor.h"
 #include "grid.h"
 #include "gridstorage.h"
 #include "microquadsampler.h"
@@ -43,6 +44,7 @@
 #include "tessellation.h"
 
 #include "stats.h"
+
 
 //------------------------------------------------------------------------------
 /// Circle of confusion class for depth of field
@@ -93,25 +95,48 @@ class CircleOfConfusion
 
 
 const bool useStats=true;
-
+//------------------------------------------------------------------------------
+/// Renderer statistics
 struct Renderer::Stats
 {
-    SimpleCounterStat<useStats>  gridsRasterized;
-    SimpleCounterStat<useStats>  samplesTested;
-    SimpleCounterStat<useStats>  samplesHit;
+    ResourceCounterStat<useStats> gridsInFlight;
+    ResourceCounterStat<useStats> geometryInFlight;
+    SimpleCounterStat<useStats>   samplesTested;
+    SimpleCounterStat<useStats>   samplesHit;
     MinMaxMeanStat<float, useStats> averagePolyArea;
 
     friend std::ostream& operator<<(std::ostream& out, Stats& s)
     {
-        out << "average micropoly area = " << s.averagePolyArea << "\n";
-        out << "grids rasterized       = " << s.gridsRasterized << "\n";
-        out << "samples tested         = " << s.samplesTested
-            << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
-            << "% hit)\n";
+        out << "grids                 : " << s.gridsInFlight << "\n";
+        out << "geometric pieces      : " << s.geometryInFlight << "\n";
+        out << "average micropoly area: " << s.averagePolyArea << "\n";
+        out << "samples tested        : " << s.samplesTested;
+        if(s.samplesTested.value() > 0)
+            out << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
+                << "% hit)";
+        out << "\n";
         return out;
     }
 };
 
+namespace {
+/// Fill an array with the default no-hit fragment sample values
+void fillDefaultFrag(std::vector<float>& defaultFrag, const OutvarSet& outVars)
+{
+    int nchans = 0;
+    for(int i = 0, iend = outVars.size(); i < iend; ++i)
+        nchans += outVars[i].scalarSize();
+    // Set up default values for samples.
+    defaultFrag.assign(nchans, 0.0f);
+    // Fill in default depth if relevant
+    int zIdx = outVars.find(StdOutInd::z);
+    if(zIdx != OutvarSet::npos)
+    {
+        int zOffset = outVars[zIdx].offset;
+        defaultFrag[zOffset] = FLT_MAX;
+    }
+}
+}
 
 /// Adjust desired micropolygon width based on focal or motion blurring.
 float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
@@ -192,17 +217,6 @@ void Renderer::sanitizeOptions(Options& opts)
     CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
 }
 
-// Save image to a TIFF file.
-void Renderer::saveImages()
-{
-    Imath::V2i imageSize = m_sampStorage->outputSize();
-    DisplayManager dispManager(imageSize, V2i(imageSize.x,1), m_outVars);
-    for(int line = 0; line < imageSize.y; ++line)
-        dispManager.writeTile(V2i(0,line),
-                              m_sampStorage->outputScanline(line));
-    dispManager.writeFiles();
-}
-
 
 //------------------------------------------------------------------------------
 // Guts of the renderer
@@ -210,6 +224,7 @@ void Renderer::saveImages()
 /// Push geometry into the render queue
 void Renderer::push(const GeomHolderPtr& holder)
 {
+    ++m_stats->geometryInFlight;
     // Get bound in camera space.
     Box& bound = holder->bound();
     if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts.maxSplits)
@@ -231,11 +246,11 @@ void Renderer::push(const GeomHolderPtr& holder)
     bound.min.z = minz;
     bound.max.z = maxz;
     // Cull if outside xy extent of image
-    if(   bound.max.x < 0 || bound.min.x > m_sampStorage->m_xSampRes
-       || bound.max.y < 0 || bound.min.y > m_sampStorage->m_ySampRes )
-    {
+    if(bound.max.x < m_samplingArea.min.x ||
+       bound.min.x > m_samplingArea.max.x ||
+       bound.max.y < m_samplingArea.min.y ||
+       bound.min.y > m_samplingArea.max.y)
         return;
-    }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
     m_surfaces->insert(holder);
@@ -245,6 +260,7 @@ void Renderer::push(const GeomHolderPtr& holder)
 // Push a grid onto the render queue
 void Renderer::push(const GridHolderPtr& holder)
 {
+    ++m_stats->gridsInFlight;
     holder->shade();
     holder->project(m_camToSRaster);
     m_surfaces->insert(holder);
@@ -256,7 +272,6 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_coc(),
     m_surfaces(),
     m_outVars(),
-    m_sampStorage(),
     m_camToSRaster(),
     m_stats(new Stats())
 {
@@ -285,16 +300,40 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     }
     m_outVars.assign(outVarsInit.begin(), outVarsInit.end());
 
-    // Set up storage for samples.
-    m_sampStorage.reset(new SampleStorage(m_outVars, m_opts));
+    fillDefaultFrag(m_defaultFrag, m_outVars);
+
+
+    // Cache the pixel filter.
+    m_pixelFilter.reset(new CachedFilter(*m_opts.pixelFilter,
+                                         m_opts.superSamp));
+
+    V2i res(m_opts.xRes,m_opts.yRes);
+
+    // Set up display manager
+    m_displayManager.reset(
+            new DisplayManager(res, V2i(m_opts.bucketSize), m_outVars) );
+
+    V2i nbuckets(ceildiv(res.x, m_opts.bucketSize) + 1,
+                 ceildiv(res.y, m_opts.bucketSize) + 1);
+
+    // Set up filtering object
+    Imath::Box2i outTileRange(V2i(0), nbuckets);
+    m_filterProcessor.reset(
+            new FilterProcessor(*m_displayManager, outTileRange,
+                                *m_pixelFilter, m_opts.superSamp) );
+
+    // Area to sample, in sraster coords.
+    m_samplingArea = Imath::Box2f(Vec2(-m_pixelFilter->offset()),
+                                  Vec2(res*m_opts.superSamp +
+                                       m_pixelFilter->offset()));
+
+    V2i sampTileSize = m_opts.superSamp*m_opts.bucketSize;
+    Vec2 sampTileOffset(sampTileSize/2);
+    Imath::Box2f bucketArea(-sampTileOffset, Vec2(nbuckets * sampTileSize
+                                                  - sampTileSize/2));
     // Set up storage for split surfaces
-    //
-    // TODO: This doesn't take into account filter width expansion.
-    Imath::Box2f storeBound(Vec2(0,0), Vec2(m_sampStorage->m_xSampRes,
-                                            m_sampStorage->m_ySampRes));
-    int nxbuckets = ceildiv(m_opts.xRes, m_opts.bucketSize);
-    int nybuckets = ceildiv(m_opts.yRes, m_opts.bucketSize);
-    m_surfaces.reset(new SplitStore(nxbuckets, nybuckets, storeBound));
+    m_surfaces.reset(new SplitStore(nbuckets.x, nbuckets.y,
+                                    bucketArea));
 
     // Set up camera -> sample raster matrix.
     //
@@ -309,10 +348,8 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_camToSRaster = camToScreen
         * Mat4().setScale(Vec3(0.5,-0.5,0))
         * Mat4().setTranslation(Vec3(0.5,0.5,0))
-        * Mat4().setScale(Vec3(m_opts.xRes*m_opts.superSamp.x,
-                               m_opts.yRes*m_opts.superSamp.y, 1))
-        * Mat4().setTranslation(Vec3(m_sampStorage->m_filtExpand.x,
-                                     m_sampStorage->m_filtExpand.y, 0));
+        * Mat4().setScale(Vec3(res.x*m_opts.superSamp.x,
+                               res.y*m_opts.superSamp.y, 1));
 
     if(opts.fstop != FLT_MAX)
     {
@@ -358,21 +395,27 @@ void Renderer::render()
 
     TessellationContextImpl tessContext(*this);
 
+    V2i tileSize(m_opts.bucketSize*m_opts.superSamp);
     // Loop over all buckets
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
+        V2i tilePos(i,j);
+        V2i sampleOffset = tilePos*tileSize - tileSize/2;
+        // Create sample points and fragment storage
+        SampleTilePtr tile(new SampleTile(tilePos, tileSize, sampleOffset,
+                                          &m_defaultFrag[0],
+                                          m_defaultFrag.size()));
+
         // Process all surfaces and grids in the bucket.
         while(true)
         {
             // Render any waiting grids.
             while(GridHolderPtr grid = m_surfaces->popGrid(i,j))
             {
-                if(!grid->done)
-                {
-                    rasterize(*grid);
-                    grid->done = true;
-                }
+                rasterize(*tile, *grid);
+                if(grid->useCount() == 1)
+                    --m_stats->gridsInFlight;
             }
             // Tessellate waiting surfaces
             if(GeomHolderPtr geom = m_surfaces->popSurface(i,j))
@@ -385,12 +428,15 @@ void Renderer::render()
                 // scenes.
                 tessContext.tessellate(scaledTessCoords, geom);
                 geom->releaseGeometry();
+                --m_stats->geometryInFlight;
             }
             else
                 break;
         }
+        // Filter the tile
+        m_filterProcessor->insert(tile);
     }
-    saveImages();
+    m_displayManager->writeFiles();
 }
 
 
@@ -398,27 +444,25 @@ void Renderer::render()
 ///
 /// Determines which rasterizer function to use, depending on the type of grid
 /// and current options.
-void Renderer::rasterize(GridHolder& holder)
+void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
 {
-    ++m_stats->gridsRasterized;
-    Grid& grid = holder.grid();
     if(holder.isDeforming() || m_opts.fstop != FLT_MAX)
     {
         // Sample with motion blur or depth of field
-        switch(grid.type())
+        switch(holder.grid().type())
         {
             case GridType_Quad:
-                motionRasterize<QuadGrid, MicroQuadSampler>(holder);
+                mbdofRasterize<QuadGrid, MicroQuadSampler>(tile, holder);
                 break;
         }
     }
     else
     {
         // No motion blur or depth of field
-        switch(grid.type())
+        switch(holder.grid().type())
         {
             case GridType_Quad:
-                rasterize<QuadGrid, MicroQuadSampler>(grid, holder.attrs());
+                staticRasterize<QuadGrid, MicroQuadSampler>(tile, holder);
                 break;
         }
     }
@@ -436,11 +480,12 @@ struct OutVarInfo
         : src(src), outIdx(outIdx) {}
 };
 
-/// Dirty implementation of motion blur sampling.  Won't work unless GridT is
-/// a quad grid!
+/// Dirty implementation of motion blur / depth of field sampling.  Won't work
+/// unless GridT is a quad grid!
 template<typename GridT, typename PolySamplerT>
-void Renderer::motionRasterize(GridHolder& holder)
+void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
 {
+    /*
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
@@ -452,7 +497,7 @@ void Renderer::motionRasterize(GridHolder& holder)
     // Cache the variables which need to be interpolated into
     // fragment outputs.
     std::vector<OutVarInfo> outVarInfo;
-    const GridT& mainGrid = static_cast<GridT&>(holder.grid());
+    const GridT& mainGrid = static_cast<const GridT&>(holder.grid());
     const GridStorage& mainStor = mainGrid.storage();
     const VarSet& gridVars = mainStor.varSet();
     for(int j = 0, jend = m_outVars.size(); j < jend; ++j)
@@ -572,6 +617,7 @@ void Renderer::motionRasterize(GridHolder& holder)
             // which cross the bound.
             Imath::V2i bndMin = ifloor(vec2_cast(bound.min)*tileBoundMult);
             Imath::V2i bndMax = ifloor(vec2_cast(bound.max)*tileBoundMult);
+
             int startx = clamp(bndMin.x,   0, nTiles.x);
             int endx   = clamp(bndMax.x+1, 0, nTiles.x);
             int starty = clamp(bndMin.y,   0, nTiles.y);
@@ -600,7 +646,8 @@ void Renderer::motionRasterize(GridHolder& holder)
                 // Generate & store a fragment
                 float* samples = &m_sampStorage->m_fragments[shuffIdx*fragSize];
                 // Initialize fragment data with the default value.
-                std::memcpy(samples, defaultFrag, fragSize*sizeof(float));
+                for(int i = 0; i < fragSize; ++i)
+                    samples[i] = defaultFrag[i];
                 // Store interpolated fragment data
                 for(int j = 0, jend = outVarInfo.size(); j < jend; ++j)
                 {
@@ -622,42 +669,55 @@ void Renderer::motionRasterize(GridHolder& holder)
             }
         }
     }
+    */
 }
 
 
-// Render a grid by rasterizing each micropolygon.
+/// Rasterize a non-moving grid without depth of field.
 template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
-void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
+void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
 {
-    GridT& grid = static_cast<GridT&>(inGrid);
+    const GridT grid = static_cast<const GridT&>(holder.grid());
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
-    int fragSize = m_sampStorage->fragmentSize();
-    const float* defaultFrag = m_sampStorage->defaultFragment();
+    int fragSize = m_defaultFrag.size();
+    const float* defaultFrag = &m_defaultFrag[0];
+
+    V2i tileSize = tile.size();
 
     // Construct a sampler for the polygons in the grid
-    PolySamplerT poly(grid, attrs, m_outVars);
+    PolySamplerT poly(grid, holder.attrs(), m_outVars);
     // iterate over all micropolys in the grid & render each one.
-    while(poly.valid())
+    for(;poly.valid(); poly.next())
     {
+        // TODO: Optimize this so that we don't recompute this stuff for each
+        // and every bucket
         Box bound = poly.bound();
+        // Compute subsample coordinates on the current sample tile.
+        V2i bndMin = ifloor(vec2_cast(bound.min)) - tile.sampleOffset();
+        V2i bndMax = ifloor(vec2_cast(bound.max)) - tile.sampleOffset();
+        // Go to next micropoly if current is entirely outside the bucket.
+        if(bndMax.x < 0 || bndMax.y < 0 ||
+           bndMin.x >= tileSize.x || bndMin.y >= tileSize.y)
+            continue;
+
         m_stats->averagePolyArea += poly.area();
 
         poly.initHitTest();
         poly.initInterpolator();
-
-        // for each sample position in the bound
-        for(SampleStorage::Iterator sampi = m_sampStorage->begin(bound);
-            sampi.valid(); ++sampi)
+        int beginx = clamp(bndMin.x,   0, tileSize.x);
+        int endx   = clamp(bndMax.x+1, 0, tileSize.x);
+        int beginy = clamp(bndMin.y,   0, tileSize.y);
+        int endy   = clamp(bndMax.y+1, 0, tileSize.y);
+        // Iterate over each sample in the bound
+        for(int sy = beginy; sy < endy; ++sy)
+        for(int sx = beginx; sx < endx; ++sx)
         {
-            Sample& samp = sampi.sample();
-//           // Early out if definitely hidden
-//           if(samp.z < bound.min.z)
-//               continue;
+            Sample& samp = tile.sample(sx,sy);
             // Test whether sample hits the micropoly
             ++m_stats->samplesTested;
             if(!poly.contains(samp))
@@ -670,15 +730,15 @@ void Renderer::rasterize(Grid& inGrid, const Attributes& attrs)
                 continue; // Ignore if hit is hidden
             samp.z = z;
             // Generate & store a fragment
-            float* out = sampi.fragment();
+            float* out = tile.fragment(sx,sy);
             // Initialize fragment data with the default value.
-            std::memcpy(out, defaultFrag, fragSize*sizeof(float));
+            for(int i = 0; i < fragSize; ++i)
+                out[i] = defaultFrag[i];
             // Store interpolated fragment data
             poly.interpolate(out);
             if(zOffset >= 0)
                 out[zOffset] = z;
         }
-        poly.next();
     }
 }
 

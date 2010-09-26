@@ -224,11 +224,10 @@ class SimpleCounterStat
     public:
         SimpleCounterStat() : m_count(0) { }
 
-        SimpleCounterStat& operator++()
+        void operator++()
         {
             if(enabled)
                 ++m_count;
-            return *this;
         }
 
         friend std::ostream& operator<<(std::ostream& out,
@@ -245,6 +244,68 @@ class SimpleCounterStat
 
     private:
         long long m_count;
+};
+
+
+/// Counter for pipeline resources
+///
+/// Reports number created, max in flight, average in flight.
+template<bool enabled=true>
+class ResourceCounterStat
+{
+    public:
+        ResourceCounterStat()
+            : m_current(0),
+            m_sum(0),
+            m_max(0),
+            m_nevents(0),
+            m_ncreated(0)
+        { }
+
+        /// Increment current resource count
+        void operator++()
+        {
+            if(enabled)
+                ++m_current;
+            m_sum += m_current;
+            ++m_nevents;
+            ++m_ncreated;
+            if(m_current > m_max)
+                m_max = m_current;
+        }
+
+        /// Decrement current resource count
+        void operator--()
+        {
+            if(enabled)
+                --m_current;
+            m_sum += m_current;
+            ++m_nevents;
+        }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                                        const ResourceCounterStat& s)
+        {
+            if(enabled)
+            {
+                out << "created " << s.m_ncreated;
+                if(s.m_ncreated > 0)
+                {
+                    out << " (average " << s.m_sum/s.m_nevents
+                        << ", max " << s.m_max << ")";
+                }
+            }
+            else
+                out << "-";
+            return out;
+        }
+
+    private:
+        long long m_current;  ///< Current number of resources
+        long long m_sum;      ///< Sum of current numbers
+        long long m_max;      ///< Max instantaneous resources
+        long long m_nevents;  ///< Number of creation/deletion events
+        long long m_ncreated; ///< Total number of resources created
 };
 
 

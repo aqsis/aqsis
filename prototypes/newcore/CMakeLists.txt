@@ -30,17 +30,17 @@ endif()
 set(srcs
     api.cpp
     displaymanager.cpp
+    filterprocessor.cpp
     filters.cpp
     main.cpp
     primvar.cpp
     renderer.cpp
     samplegen.cpp
-    samplestorage.cpp
-    scenes/default.cpp
-    scenes/dofamounttest.cpp
-    scenes/simpledeformation.cpp
-    scenes/mbnoisetest.cpp
-    scenes/tenpatch.cpp
+    #scenes/default.cpp
+    #scenes/dofamounttest.cpp
+    #scenes/simpledeformation.cpp
+    #scenes/mbnoisetest.cpp
+    #scenes/tenpatch.cpp
     shader.cpp
     ustring/ustring.cpp
     varspec.cpp
@@ -50,6 +50,7 @@ set(hdrs
     arrayview.h
     attributes.h
     filters.h
+    filterprocessor.h
     geometry.h
     grid.h
     gridstorage.h
@@ -62,7 +63,6 @@ set(hdrs
     renderer.h
     sample.h
     samplegen.h
-    samplestorage.h
     scenes/scenes.h
     shader.h
     surfaces.h

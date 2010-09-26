@@ -148,13 +148,10 @@ class GridHolder : public RefCounted
         }
 
     public:
-        bool done; ///< FIXME: temporary hack, remove asap.
-
         GridHolder(const GridPtr& grid, const Attributes* attrs)
             : m_grid(grid),
             m_gridKeys(),
-            m_attrs(attrs),
-            done(false)
+            m_attrs(attrs)
         { }
 
         template<typename GridPtrIterT>
@@ -162,8 +159,7 @@ class GridHolder : public RefCounted
                    const GeomHolder& parentGeom)
             : m_grid(),
             m_gridKeys(),
-            m_attrs(&parentGeom.attrs()),
-            done(false)
+            m_attrs(&parentGeom.attrs())
         {
             GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
             m_gridKeys.reserve(end - begin);
@@ -173,7 +169,9 @@ class GridHolder : public RefCounted
 
         bool isDeforming() const { return !m_grid; }
         Grid& grid() { return m_grid ? *m_grid : *m_gridKeys[0].value; }
+        const Grid& grid() const { return m_grid ? *m_grid : *m_gridKeys[0].value; }
         GridKeys& gridKeys() { return m_gridKeys; }
+        const GridKeys& gridKeys() const { return m_gridKeys; }
         const Box& bound() const { return m_bound; }
 
         const Attributes& attrs() const { return *m_attrs; }

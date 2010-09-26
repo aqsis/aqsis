@@ -42,12 +42,16 @@
 #include "varspec.h"
 
 class Attributes;
+class CachedFilter;
 class Geometry;
 class Grid;
 class TessellationContextImpl;
 class SampleStorage;
 class CircleOfConfusion;
 class SplitStore;
+class SampleTile;
+class FilterProcessor;
+class DisplayManager;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -140,26 +144,28 @@ class Renderer
 
         static void sanitizeOptions(Options& opts);
 
-        void saveImages();
-
         void push(const GeomHolderPtr& geom);
         void push(const GridHolderPtr& grid);
 
-        void rasterize(GridHolder& holder);
+        void rasterize(SampleTile& tile, GridHolder& holder);
 
         template<typename GridT, typename PolySamplerT>
-        void motionRasterize(GridHolder& holder);
+        void mbdofRasterize(SampleTile& tile, const GridHolder& holder);
 
         template<typename GridT, typename PolySamplerT>
-        void rasterize(Grid& inGrid, const Attributes& attrs);
+        void staticRasterize(SampleTile& tile, const GridHolder& holder);
 
 
         Options m_opts;                ///< Render options
         boost::scoped_ptr<CircleOfConfusion> m_coc; ///< depth of field info
         boost::scoped_ptr<SplitStore> m_surfaces; ///< Pending surface queue
         OutvarSet m_outVars;           ///< Set of output variables
-        boost::scoped_ptr<SampleStorage> m_sampStorage; ///< Samples & fragments
+        boost::scoped_ptr<CachedFilter> m_pixelFilter;
+        boost::scoped_ptr<FilterProcessor> m_filterProcessor;
+        boost::scoped_ptr<DisplayManager> m_displayManager;
         Mat4 m_camToSRaster;           ///< Camera -> sample raster transformation
+        Imath::Box2f m_samplingArea;   ///< Area to sample in sraster coords
+        std::vector<float> m_defaultFrag; ///< Default fragment samples
         mutable boost::scoped_ptr<Stats> m_stats; ///< Render statistics
 };
 
