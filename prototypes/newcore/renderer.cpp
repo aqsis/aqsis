@@ -434,6 +434,7 @@ void Renderer::render()
             else
                 break;
         }
+        m_surfaces->setFinished(i,j);
         // Filter the tile
         m_filterProcessor->insert(tile);
     }

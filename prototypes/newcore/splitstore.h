@@ -77,6 +77,15 @@ class SplitStore
             return getBucket(x,y).popGrid();
         }
 
+        /// Indicate that the bucket at (x,y) is rendered.
+        ///
+        /// This means that any geometry or grids ending up in the bucket
+        /// should be discarded.
+        void setFinished(int x, int y)
+        {
+            getBucket(x,y).setFinished();
+        }
+
         /// Insert geometry into the data structure
         ///
         /// The geometric bound is used to determine which buckets to insert
@@ -142,13 +151,15 @@ class SplitStore
                 std::vector<GridHolderPtr> m_grids; ///< grid queue
                 bool m_isHeap;     ///< true if m_queue is a heap
                 int m_expireCheck; ///< position in m_queue to check for expired geoms
+                bool m_isFinished; ///< true if bucket is finished
 
             public:
                 Bucket()
                     : m_queue(),
                     m_grids(),
                     m_isHeap(false),
-                    m_expireCheck(0)
+                    m_expireCheck(0),
+                    m_isFinished(false)
                 { }
 
                 /// Grab top piece of geometry from bucket.
@@ -223,7 +234,16 @@ class SplitStore
                 }
                 void insert(const GridHolderPtr& grid)
                 {
+                    if(m_isFinished)
+                        return;
                     m_grids.push_back(grid);
+                }
+
+                void setFinished()
+                {
+                    assert(m_grids.empty());
+                    assert(m_queue.empty());
+                    m_isFinished = true;
                 }
         };
 
