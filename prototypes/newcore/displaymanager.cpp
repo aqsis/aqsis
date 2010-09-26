@@ -116,10 +116,15 @@ DisplayManager::DisplayManager(const V2i& imageSize, const V2i& tileSize,
 void DisplayManager::writeTile(V2i pos, const float* data)
 {
     int tileRowSize = m_totChans*m_tileSize.x;
-    ConstFvecView srcRows(data, tileRowSize);
-    FvecView destRows(&m_imageData[0] + tileRowSize*pos.x, tileRowSize,
-                      m_totChans*m_imageSize.x);
-    copy(destRows + m_tileSize.y*pos.y, srcRows, m_tileSize.y);
+    // Clamp output tile size to extent of image.
+    V2i outTileEnd = min((pos+V2i(1))*m_tileSize, m_imageSize);
+    V2i outTileSize = outTileEnd - pos*m_tileSize;
+    int outTileRowSize = m_totChans*outTileSize.x;
+    // Copy data
+    ConstFvecView srcRows(data, outTileRowSize, tileRowSize);
+    FvecView destRows = FvecView(&m_imageData[0] + tileRowSize*pos.x,
+                                 outTileRowSize, m_totChans*m_imageSize.x);
+    copy(destRows + m_tileSize.y*pos.y, srcRows, outTileSize.y);
 }
 
 void DisplayManager::writeFiles()

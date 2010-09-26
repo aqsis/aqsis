@@ -103,6 +103,12 @@ inline T prod(const Imath::Vec2<T>& v)
 }
 
 template<typename T>
+inline Imath::Vec2<T> min(const Imath::Vec2<T>& a, const Imath::Vec2<T>& b)
+{
+    return Imath::Vec2<T>(std::min(a.x, b.x), std::min(a.y,b.y));
+}
+
+template<typename T>
 inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
 {
     return a.x*b.y - b.x*a.y;
