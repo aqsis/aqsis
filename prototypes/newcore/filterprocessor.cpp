@@ -174,7 +174,8 @@ void FilterProcessor::insert(const SampleTilePtr& tile)
         {
             // Filter, quantize & save result.
             filter(m_outTileWorkspace, block);
-            m_displayManager.writeTile(p, &m_outTileWorkspace[0]);
+            const V2i outTileSize = block.tiles[0][0]->size()/m_filterStride;
+            m_displayManager.writeTile(p*outTileSize, &m_outTileWorkspace[0]);
             m_waitingTiles.erase(blocki);
         }
     }

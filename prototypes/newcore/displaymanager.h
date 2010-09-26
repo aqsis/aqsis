@@ -32,6 +32,8 @@
 
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "renderer.h" // for OutvarSpec
 #include "util.h"
 
@@ -49,17 +51,25 @@ class DisplayManager
                        const OutvarSet& outVars);
 
         /// Write a tile of filtered data at the given position 
+        ///
+        /// pos is the position of the pixel at the top left of the tile.
         void writeTile(V2i pos, const float* data);
 
         /// Write images to files
-        void writeFiles();
+        void closeFiles();
 
     private:
+        void* tmpStorage(size_t size);
+
+        class ImageFile;
+
         V2i m_imageSize;
         V2i m_tileSize;
         OutvarSet m_outVars;
         int m_totChans;      ///< number of channels per pixel
-        std::vector<float> m_imageData; ///< flat buffer of image data
+
+        std::vector<boost::shared_ptr<ImageFile> > m_files; ///< Image files
+        std::vector<char> m_tileTmpStorage; ///< Storage for writing to files
 };
 
 

@@ -438,7 +438,7 @@ void Renderer::render()
         // Filter the tile
         m_filterProcessor->insert(tile);
     }
-    m_displayManager->writeFiles();
+    m_displayManager->closeFiles();
 }
 
 
