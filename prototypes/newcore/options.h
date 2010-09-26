@@ -31,24 +31,23 @@
 #define OPTIONS_H_INCLUDED
 
 #include <cfloat>
-#include <OpenEXR/ImathVec.h>
 
 #include "filters.h"
+#include "util.h"
 
 /// Renderer options.
 struct Options
 {
     // Reyes options
-    int maxSplits;   ///< maximum number of splits before discarding a surface
+    int eyeSplits;   ///< maximum number of splits before discarding a surface
     int gridSize;    ///< Desired grid side length.
     float clipNear;  ///< Near clipping plane (cam coords)
     float clipFar;   ///< Far clipping plane (cam coords)
 
     // Sampling options
-    int xRes;         ///< image x-resolution
-    int yRes;         ///< image y-resolution
-    int bucketSize;   ///< linear edge length of bucket in pixels
-    Imath::V2i superSamp;  ///< supersampling resolution
+    V2i resolution;   ///< image resolution
+    V2i bucketSize;   ///< linear edge length of bucket in pixels
+    V2i superSamp;    ///< supersampling resolution
     float shutterMin; ///< shutter start time for motion blur
     float shutterMax; ///< shutter end time for motion blur
     float fstop;      ///< focalLength/lensDiameter
@@ -63,12 +62,11 @@ struct Options
     int statsVerbosity; ///< Verbosity for render statistics reporting
 
     Options()
-        : maxSplits(20),
+        : eyeSplits(20),
         gridSize(16),
         clipNear(FLT_EPSILON),
         clipFar(FLT_MAX),
-        xRes(640),
-        yRes(480),
+        resolution(640,480),
         bucketSize(16),
         superSamp(2,2),
         shutterMin(0),

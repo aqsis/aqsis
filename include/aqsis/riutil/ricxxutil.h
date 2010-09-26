@@ -50,6 +50,7 @@
 
 namespace Aqsis {
 
+//------------------------------------------------------------------------------
 /// A class for convenient building of Ri::ParamList instances
 ///
 /// Example:
@@ -101,7 +102,46 @@ class ParamListBuilder
 };
 
 
-//--------------------------------------------------
+//------------------------------------------------------------------------------
+/// Class for making sure that all parameters in a param list are used.
+///
+/// As each parameter is extracted from the list using one of the find()
+/// methods, the parameter is marked as used.  The usued parameters can then
+/// be extracted and the user warned that they are ignored.
+class ParamListUsage
+{
+    public:
+        ParamListUsage(const Ri::ParamList& pList);
+
+        /// Find a parameter, and mark it as used.
+        ///
+        /// \see Ri::ParaList::find
+        template<typename T>
+        Ri::Array<T> find(const Ri::TypeSpec& spec, const char* name);
+
+        Ri::FloatArray findFloatData(const Ri::TypeSpec& spec,
+                                     const char* name);
+        Ri::IntArray findIntData(const Ri::TypeSpec& spec,
+                                 const char* name);
+        Ri::StringArray findStringData(const Ri::TypeSpec& spec,
+                                       const char* name);
+
+        /// Return true if some parameters are yet to be used via find*()
+        bool hasUnusedParams();
+
+        /// Return a string containing the unhandled parameter names
+        ///
+        /// Since this is designed for error reporting a simple string is used
+        /// rather than a vector of strings.
+        std::string unusedParams();
+
+    private:
+        const Ri::ParamList& m_pList;
+        std::vector<bool> m_handled;
+};
+
+
+//------------------------------------------------------------------------------
 /// Get the array size from counts corresponding to iclass.
 int iclassCount(const SqInterpClassCounts& counts,
                        Ri::TypeSpec::IClass iclass);
@@ -400,6 +440,66 @@ class StubRendererServices : public Ri::RendererServices
 
 //==============================================================================
 // implementation details
+
+inline ParamListUsage::ParamListUsage(const Ri::ParamList& pList)
+    : m_pList(pList),
+    m_handled(pList.size(), false)
+{ }
+
+template<typename T>
+inline Ri::Array<T> ParamListUsage::find(const Ri::TypeSpec& spec,
+                                           const char* name)
+{
+    assert(spec.storageType() == Ri::toTypeSpecType<T>::value);
+    int idx = m_pList.find(spec, name);
+    if(idx < 0)
+        return Ri::Array<T>();
+    m_handled[idx] = true;
+    return m_pList[idx].data<T>();
+}
+
+inline Ri::FloatArray ParamListUsage::findFloatData(const Ri::TypeSpec& spec,
+                                                      const char* name)
+{
+    return find<RtFloat>(spec, name);
+}
+inline Ri::IntArray ParamListUsage::findIntData(const Ri::TypeSpec& spec,
+                                                  const char* name)
+{
+    return find<RtInt>(spec, name);
+}
+inline Ri::StringArray ParamListUsage::findStringData(const Ri::TypeSpec& spec,
+                                                        const char* name)
+{
+    return find<RtConstString>(spec, name);
+}
+
+inline bool ParamListUsage::hasUnusedParams()
+{
+    for(int i = 0; i < (int)m_handled.size(); ++i)
+        if(!m_handled[i])
+            return true;
+    return false;
+}
+
+inline std::string ParamListUsage::unusedParams()
+{
+    std::string unhandled;
+    for(int i = 0; i < (int)m_handled.size(); ++i)
+    {
+        if(!m_handled[i])
+        {
+            if(!unhandled.empty())
+                unhandled += ", ";
+            unhandled += m_pList[i].name();
+        }
+    }
+    return unhandled;
+}
+
+
+//--------------------------------------------------
+
 
 template<typename T>
 inline ParamListBuilder& ParamListBuilder::operator()(const char* token, T* v)

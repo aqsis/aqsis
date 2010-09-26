@@ -205,13 +205,14 @@ void Renderer::sanitizeOptions(Options& opts)
 {
 #define CLAMP_OPT_BELOW(optname, minVal) \
     clampOptBelow(opts.optname, #optname, minVal)
-    CLAMP_OPT_BELOW(maxSplits, 0);
+    CLAMP_OPT_BELOW(eyeSplits, 0);
     CLAMP_OPT_BELOW(gridSize, 1);
     CLAMP_OPT_BELOW(clipNear, FLT_EPSILON);
     CLAMP_OPT_BELOW(clipFar, opts.clipNear);
-    CLAMP_OPT_BELOW(xRes, 1);
-    CLAMP_OPT_BELOW(yRes, 1);
-    CLAMP_OPT_BELOW(bucketSize, 0);
+    CLAMP_OPT_BELOW(resolution.x, 1);
+    CLAMP_OPT_BELOW(resolution.y, 1);
+    CLAMP_OPT_BELOW(bucketSize.x, 1);
+    CLAMP_OPT_BELOW(bucketSize.y, 1);
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
     CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
@@ -227,7 +228,7 @@ void Renderer::push(const GeomHolderPtr& holder)
     ++m_stats->geometryInFlight;
     // Get bound in camera space.
     Box& bound = holder->bound();
-    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts.maxSplits)
+    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts.eyeSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
         return;
@@ -307,14 +308,13 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_pixelFilter.reset(new CachedFilter(*m_opts.pixelFilter,
                                          m_opts.superSamp));
 
-    V2i res(m_opts.xRes,m_opts.yRes);
-
     // Set up display manager
-    m_displayManager.reset(
-            new DisplayManager(res, V2i(m_opts.bucketSize), m_outVars) );
+    m_displayManager.reset( new DisplayManager(m_opts.resolution,
+                                               m_opts.bucketSize,
+                                               m_outVars) );
 
-    V2i nbuckets(ceildiv(res.x, m_opts.bucketSize) + 1,
-                 ceildiv(res.y, m_opts.bucketSize) + 1);
+    V2i nbuckets(ceildiv(m_opts.resolution.x, m_opts.bucketSize.x) + 1,
+                 ceildiv(m_opts.resolution.y, m_opts.bucketSize.y) + 1);
 
     // Set up filtering object
     Imath::Box2i outTileRange(V2i(0), nbuckets);
@@ -324,7 +324,7 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
 
     // Area to sample, in sraster coords.
     m_samplingArea = Imath::Box2f(Vec2(-m_pixelFilter->offset()),
-                                  Vec2(res*m_opts.superSamp +
+                                  Vec2(m_opts.resolution*m_opts.superSamp +
                                        m_pixelFilter->offset()));
 
     V2i sampTileSize = m_opts.superSamp*m_opts.bucketSize;
@@ -348,8 +348,8 @@ Renderer::Renderer(const Options& opts, const Mat4& camToScreen,
     m_camToSRaster = camToScreen
         * Mat4().setScale(Vec3(0.5,-0.5,0))
         * Mat4().setTranslation(Vec3(0.5,0.5,0))
-        * Mat4().setScale(Vec3(res.x*m_opts.superSamp.x,
-                               res.y*m_opts.superSamp.y, 1));
+        * Mat4().setScale(Vec3(m_opts.resolution.x*m_opts.superSamp.x,
+                               m_opts.resolution.y*m_opts.superSamp.y, 1));
 
     if(opts.fstop != FLT_MAX)
     {

@@ -133,7 +133,8 @@ struct TypeSpec
         HPoint,
         Matrix,
         MPoint,
-        Unknown = 128
+        Unknown = 128,
+        Int=Integer,
     };
 
     IClass iclass;
@@ -198,6 +199,15 @@ inline bool operator==(TypeSpec::Type type, const TypeSpec& rhs)
     return TypeSpec(type) == rhs;
 }
 
+/// Metafunction converting from a C++ type to a TypeSpec storage type
+template<typename T> struct toTypeSpecType { };
+#define AQSIS_DEFINE_TO_TYPESPEC(cppType, tsType)              \
+template<> struct toTypeSpecType<cppType>                      \
+    { static const TypeSpec::Type value = TypeSpec::tsType; }
+AQSIS_DEFINE_TO_TYPESPEC(RtFloat, Float);
+AQSIS_DEFINE_TO_TYPESPEC(RtInt, Integer);
+AQSIS_DEFINE_TO_TYPESPEC(RtConstString, String);
+#undef AQSIS_DEFINE_TO_TYPESPEC
 
 //------------------------------------------------------------------------------
 /// Representation of a parameter for interface function parameter lists
@@ -228,21 +238,15 @@ class Param
         const void* data() const { return m_data; }
         size_t size() const { return m_size; }
 
-        FloatArray floatData() const
+        template<typename T>
+        Ri::Array<T> data() const
         {
-            assert(m_spec.storageType() == TypeSpec::Float);
-            return FloatArray(static_cast<const RtFloat*>(m_data), m_size);
+            assert(m_spec.storageType() == toTypeSpecType<T>::value);
+            return Ri::Array<T>(static_cast<const T*>(m_data), m_size);
         }
-        IntArray intData() const
-        {
-            assert(m_spec.storageType() == TypeSpec::Integer);
-            return IntArray(static_cast<const RtInt*>(m_data), m_size);
-        }
-        StringArray stringData() const
-        {
-            assert(m_spec.storageType() == TypeSpec::String);
-            return StringArray(static_cast<const RtConstToken*>(m_data), m_size);
-        }
+        FloatArray floatData()   const { return data<RtFloat>(); }
+        IntArray   intData()     const { return data<RtInt>(); }
+        StringArray stringData() const { return data<RtConstString>(); }
 };
 
 
@@ -270,43 +274,36 @@ class ParamList : public Array<Param>
             }
             return -1;
         }
+
         /// Find a float-storage parameter with the given type and name.
         ///
-        /// \return A pointer to the float data.  A null array is returned if
-        /// the parameter isn't found, or has a storage type which isn't float.
-        FloatArray findFloatData(const TypeSpec& spec, const char* name) const
-        {
-            int idx = find(spec, name);
-            if(idx < 0 || spec.storageType() != TypeSpec::Float)
-                return FloatArray();
-            else
-                return (*this)[idx].floatData();
-        }
-        /// Find a int-storage parameter with the given type and name.
-        ///
-        /// \return A pointer to the float data.  A null array is returned if
-        /// the parameter isn't found, or has a storage type which isn't int.
-        IntArray findIntData(const TypeSpec& spec, const char* name) const
-        {
-            int idx = find(spec, name);
-            if(idx < 0 || spec.storageType() != TypeSpec::Integer)
-                return IntArray();
-            else
-                return (*this)[idx].intData();
-        }
-        /// Find a string-storage parameter with the given type and name.
-        ///
-        /// \return A pointer to the float data.  A null array is returned if
+        /// \return An array of the float data.  A null array is returned if
         /// the parameter isn't found, or has a storage type which isn't
-        /// string.
-        StringArray findStringData(const TypeSpec& spec, const char* name) const
+        /// float.
+        template<typename T>
+        Array<T> find(const TypeSpec& spec, const char* name) const
         {
+            if(spec.storageType() != toTypeSpecType<T>::value)
+            {
+                assert(0 && "ParamList::find<T> for T incompatible "
+                            "with spec type");
+                return Array<T>();
+            }
             int idx = find(spec, name);
-            if(idx < 0 || spec.storageType() != TypeSpec::String)
-                return StringArray();
+            if(idx < 0)
+                return Array<T>();
             else
-                return (*this)[idx].stringData();
+                return (*this)[idx].data<T>();
         }
+        /// Find a float-storage parameter with the given type and name.
+        FloatArray findFloatData(const TypeSpec& spec, const char* name) const
+            { return find<RtFloat>(spec, name); }
+        /// Find a int-storage parameter with the given type and name.
+        IntArray findIntData(const TypeSpec& spec, const char* name) const
+            { return find<RtInt>(spec, name); }
+        /// Find a string-storage parameter with the given type and name.
+        StringArray findStringData(const TypeSpec& spec, const char* name) const
+            { return find<RtConstString>(spec, name); }
 };
 
 

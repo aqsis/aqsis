@@ -647,8 +647,7 @@ RtVoid RenderApi::IfEnd()
 RtVoid RenderApi::Format(RtInt xresolution, RtInt yresolution,
                          RtFloat pixelaspectratio)
 {
-    m_opts.xRes = xresolution;
-    m_opts.yRes = yresolution;
+    m_opts.resolution = V2i(xresolution, yresolution);
     m_camInfo.setFrameAspect(pixelaspectratio*xresolution/yresolution, false);
 }
 
@@ -800,8 +799,21 @@ RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
 
 RtVoid RenderApi::Hider(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Hider not implemented"; // Todo
+    if(strcmp(name, "hidden") != 0)
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Hider " << name << " not implemented";
+        return;
+    }
+    ParamListUsage params(pList);
+    if(IntArray subpixel = params.findIntData(Ri::TypeSpec::Int, "subpixel"))
+        m_opts.doFilter = subpixel[0];
+    if(params.hasUnusedParams())
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Unrecognized parameters to Hider: "
+            << params.unusedParams();
+    }
 }
 
 RtVoid RenderApi::ColorSamples(const FloatArray& nRGB, const FloatArray& RGBn)
@@ -818,8 +830,24 @@ RtVoid RenderApi::RelativeDetail(RtFloat relativedetail)
 
 RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Option not implemented"; // Todo
+    ParamListUsage params(pList);
+    if(strcmp(name, "limits") == 0)
+    {
+        if(IntArray bs = params.findIntData(
+                        Ri::TypeSpec(Ri::TypeSpec::Int, 2), "bucketsize"))
+            m_opts.bucketSize = Vec2(bs[0], bs[1]);
+        if(IntArray gs = params.findIntData(Ri::TypeSpec::Int, "gridsize"))
+            m_opts.gridSize = ifloor(sqrt(gs[0]));
+        if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
+            m_opts.eyeSplits = es[0];
+    }
+    if(params.hasUnusedParams())
+    {
+        // Complain if we failed to handle at least one option.
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Unrecognized parameters to Option \"" << name << "\": "
+            << params.unusedParams();
+    }
 }
 
 //------------------------------------------------------------
