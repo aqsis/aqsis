@@ -229,7 +229,7 @@ class CameraInfo
         /// Set the screen window
         void setScreenWindow(float left, float right, float bottom, float top)
         {
-            m_userFrameAspect = true;
+            m_userScreenWindow = true;
             m_left = left;
             m_right = right;
             m_bottom = bottom;
@@ -243,6 +243,7 @@ class CameraInfo
                 return;
             if(m_userFrameAspect && !setByUser)
                 return;
+            m_userFrameAspect = setByUser;
             if(aspect >= 1)
             {
                 m_left = -aspect;
@@ -254,8 +255,8 @@ class CameraInfo
             {
                 m_left = -1;
                 m_right = 1;
-                m_bottom = -aspect;
-                m_top = aspect;
+                m_bottom = -1/aspect;
+                m_top = 1/aspect;
             }
         }
 
@@ -769,6 +770,12 @@ RtVoid RenderApi::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max,
 RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
                           RtConstToken mode, const ParamList& pList)
 {
+    if(strcmp(type, "file") != 0 && strcmp(type, "zfile") != 0)
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Unimplemented display type \"" << type << "\"";
+        return;
+    }
     if(name[0] != '+')
         m_outVars.clear();
     if(strcmp(mode, "rgb") == 0)
