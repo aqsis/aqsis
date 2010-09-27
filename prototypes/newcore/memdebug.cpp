@@ -30,39 +30,36 @@
 /// \file Memory profiling tools
 /// \author Chris Foster  chris42f (at) gmail (dot) com
 
-#ifndef AQSIS_MEMDEBUG_H_INCLUDED
-#define AQSIS_MEMDEBUG_H_INCLUDED
+#include "memdebug.h"
 
-#include <fstream>
 
-/// Simple class for logging the amount of heap memory used to a file.
-///
-/// This class is a no-op unless AQSIS_MEMORY_DEBUGGING is enabled when the
-/// associated source file is compiled.  (Note that obtaining a log record
-/// from the allocator is a relatively time hungry operation.)
-class MemoryLog
+#ifdef AQSIS_MEMORY_DEBUGGING
+
+#include <malloc.h> //< Won't work on windows, I guess?
+
+MemoryLog::MemoryLog(const char* fileName)
+    : m_outFile(fileName)
+{ }
+
+void MemoryLog::log()
 {
-    public:
-        /// Create a log file with the given name
-        explicit MemoryLog(const char* fileName = "mallinfo.txt");
+    struct mallinfo m = mallinfo();
+    m_outFile
+        << m.arena    << " "
+        << m.ordblks  << " "
+        << m.hblks    << " "
+        << m.hblkhd   << " "
+        << m.uordblks << " "
+        << m.fordblks << " "
+        << m.keepcost << "\n";
+}
 
-        /// Save current memory usage to the file
-        ///
-        /// According to malloc.h, fields in the output are:
-        ///
-        /// arena     - non-mmapped space allocated from system
-        /// ordblks   - number of free chunks
-        /// hblks     - number of mmapped regions
-        /// hblkhd    - space in mmapped regions
-        /// uordblks  - total allocated space
-        /// fordblks  - total free space
-        /// keepcost  - top-most, releasable (via malloc_trim) space
-        ///
-        /// The fields of most interest seem to be arena, uordblks, fordblks.
-        void log();
+#else
 
-    private:
-        std::ofstream m_outFile;
-};
 
-#endif // AQSIS_MEMDEBUG_H_INCLUDED
+// Dummy implementations when AQSIS_MEMORY_DEBUGGING isn't defined.
+MemoryLog::MemoryLog(const char* fileName) {}
+void MemoryLog::log() {}
+
+
+#endif

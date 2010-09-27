@@ -36,6 +36,7 @@
 #include "filterprocessor.h"
 #include "grid.h"
 #include "gridstorage.h"
+#include "memdebug.h"
 #include "microquadsampler.h"
 #include "refcount.h"
 #include "sample.h"
@@ -380,6 +381,7 @@ void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
     push(holder);
 }
 
+
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
@@ -396,11 +398,13 @@ void Renderer::render()
 
     TessellationContextImpl tessContext(*this);
 
+    MemoryLog memLog;
     V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
     // Loop over all buckets
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
+        memLog.log();
         V2i tilePos(i,j);
         V2i sampleOffset = tilePos*tileSize - tileSize/2;
         // Create sample points and fragment storage
@@ -438,6 +442,7 @@ void Renderer::render()
         // Filter the tile
         m_filterProcessor->insert(tile);
     }
+    memLog.log();
     m_displayManager->closeFiles();
 }
 

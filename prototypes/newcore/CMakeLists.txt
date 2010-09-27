@@ -4,6 +4,9 @@ project(raster)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+set(aqsis_enable_testing TRUE CACHE BOOL "Enable unit testing")
+set(aqsis_memory_debugging FALSE CACHE BOOL "Enable memory debugging")
+
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
 
@@ -33,6 +36,7 @@ set(srcs
     filterprocessor.cpp
     filters.cpp
     main.cpp
+    memdebug.cpp
     primvar.cpp
     renderer.cpp
     samplegen.cpp
@@ -45,6 +49,11 @@ set(srcs
     ustring/ustring.cpp
     varspec.cpp
 )
+
+if(aqsis_memory_debugging)
+    set_property(SOURCE memdebug.cpp
+        PROPERTY COMPILE_DEFINITIONS AQSIS_MEMORY_DEBUGGING)
+endif()
 
 set(hdrs
     arrayview.h
@@ -79,6 +88,8 @@ target_link_libraries(render ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
 
 #------------------------------------------------------------
 # Testing:
+
+if(aqsis_enable_testing)
 
 enable_testing()
 
@@ -118,5 +129,7 @@ if(WIN32)
     set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
     set_property(TARGET render PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
 endif()
+
+endif(aqsis_enable_testing)
 
 #target_link_libraries(varspec_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
