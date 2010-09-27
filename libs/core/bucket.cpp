@@ -53,9 +53,17 @@ namespace Aqsis {
 
 
 //----------------------------------------------------------------------
-CqBucket::CqBucket() : m_bProcessed(false)
-{
-}
+CqBucket::CqBucket()
+	: m_bProcessed(false),
+	m_col(0),
+	m_row(0),
+	m_xPosition(0),
+	m_yPosition(0),
+	m_xSize(0),
+	m_ySize(0),
+	m_micropolygons(),
+	m_gPrims()
+{ }
 
 //----------------------------------------------------------------------
 TqInt CqBucket::getCol() const
@@ -88,6 +96,14 @@ void CqBucket::SetProcessed( bool bProc )
 {
 	assert( !bProc || (bProc && !hasPendingSurfaces()) );
 	m_bProcessed = bProc;
+	if(bProc)
+	{
+		// Deallocate memory held implicitly in std containers.  Apart from
+		// anything else, this seems to help avoid persistent small pieces of
+		// memory which fragment the heap.
+		TqPolyStorage().swap(m_micropolygons);
+		TqSurfaceQueue().swap(m_gPrims);
+	}
 }
 
 //----------------------------------------------------------------------

@@ -30,8 +30,8 @@
 
 #include	<aqsis/aqsis.h>
 
+#include	<algorithm>
 #include	<vector>
-#include	<queue>
 #include	<deque>
 #include	<boost/shared_ptr.hpp>
 #include	<boost/array.hpp>
@@ -82,7 +82,9 @@ class CqBucket
 		 */
 		void	AddGPrim( const boost::shared_ptr<CqSurface>& pGPrim )
 		{
-			m_gPrims.push(pGPrim);
+			m_gPrims.push_back(pGPrim);
+			std::push_heap(m_gPrims.begin(), m_gPrims.end(),
+						   closest_surface());
 		}
 
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
@@ -91,7 +93,7 @@ class CqBucket
 		{
 			if (!m_gPrims.empty())
 			{
-				return m_gPrims.top();
+				return m_gPrims.front();
 			}
 			else
 			{
@@ -102,7 +104,12 @@ class CqBucket
 		 */
 		void popSurface()
 		{
-			m_gPrims.pop();
+			if (!m_gPrims.empty())
+			{
+				std::pop_heap(m_gPrims.begin(), m_gPrims.end(),
+							  closest_surface());
+				m_gPrims.pop_back();
+			}
 		}
 		/** Get a count of deferred GPrims.
 		 */
@@ -185,10 +192,17 @@ class CqBucket
 		TqInt m_ySize;
 
 		/// Vector of vectors of waiting micropolygons in this bucket
-		std::vector<boost::shared_ptr<CqMicroPolygon> > m_micropolygons;
+		typedef std::vector<boost::shared_ptr<CqMicroPolygon> > TqPolyStorage;
+		TqPolyStorage m_micropolygons;
 
 		/// A sorted list of primitives for this bucket
-		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
+		///
+		/// Beware - we use a plain std::vector here and use the heap
+		/// operations directly rather than using std::priority_queue.  This
+		/// is so that we can make sure the underlying container storage is
+		/// completely deallocated when the bucket is done.
+		typedef std::vector<boost::shared_ptr<CqSurface> > TqSurfaceQueue;
+		TqSurfaceQueue m_gPrims;
 
 		TqCache m_cacheSegments;
 };
