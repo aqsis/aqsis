@@ -243,6 +243,16 @@ class SplitStore
                 {
                     assert(m_grids.empty());
                     assert(m_queue.empty());
+                    // Force vectors to clear memory.
+                    //
+                    // Note that this is _very_ important - failing to do so
+                    // will result in terrible memory fragmentation, with a
+                    // degradation in total memory use which is much worse than
+                    // the small amount of memory held here.
+                    std::vector<GeomHolderPtr> emptyQueue;
+                    m_queue.swap(emptyQueue);
+                    std::vector<GridHolderPtr> emptyGrids;
+                    m_grids.swap(emptyGrids);
                     m_isFinished = true;
                 }
         };
