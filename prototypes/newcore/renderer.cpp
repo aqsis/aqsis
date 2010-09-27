@@ -317,7 +317,7 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                  ceildiv(m_opts->resolution.y, m_opts->bucketSize.y) + 1);
 
     // Set up filtering object
-    Imath::Box2i outTileRange(V2i(0), nbuckets);
+    Imath::Box2i outTileRange(V2i(0), nbuckets - V2i(1));
     m_filterProcessor.reset(
             new FilterProcessor(*m_displayManager, outTileRange,
                                 *m_pixelFilter, m_opts->superSamp) );
