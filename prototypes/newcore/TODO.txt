@@ -2,11 +2,12 @@ Some things which should be done:
 ---------------------------------
 
     * Sampling
-        - Tile-based allocation for sample points
         - Transparency - deep fragment buffer
-    * Bucket rendering
+        - MB & DoF for bucket rendering
+    * API
+        - attribute stack
+        - motion
     * Occlusion culling
-    * Implement proper API (RI + RIB)
     * Variable flow
         - Investigate copying architecture
         - Make sure all standard vars are diced when necessary
@@ -33,15 +34,20 @@ Some things which should be done:
 
 Done:
 -----
+    * Bucket rendering
     * Handle general primvars
     * Handle AOVs
     * Implement a basic shader interface
+    * API
+        - basic RIB input
+        - transform stack
     * Sampling
         - Supersampling
         - Image output filtering
         - Motion Blur sampling
         - Depth of field sampling
         - Effective stratification
+        - Tile-based allocation for sample points
     * Surface tessellation
         - Reyes split/dice pipeline
         - Deforming surfaces
