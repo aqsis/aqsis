@@ -249,10 +249,8 @@ class SplitStore
                     // will result in terrible memory fragmentation, with a
                     // degradation in total memory use which is much worse than
                     // the small amount of memory held here.
-                    std::vector<GeomHolderPtr> emptyQueue;
-                    m_queue.swap(emptyQueue);
-                    std::vector<GridHolderPtr> emptyGrids;
-                    m_grids.swap(emptyGrids);
+                    vectorFree(m_queue);
+                    vectorFree(m_grids);
                     m_isFinished = true;
                 }
         };

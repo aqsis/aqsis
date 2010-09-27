@@ -88,6 +88,18 @@ inline const T* get(const std::vector<T>& v)
     return &v[0];
 }
 
+/// Free all memory held by a std::vector.
+///
+/// A std::vector implementation usually keeps the allocated memory around even
+/// after the size decreases to zero (or perhaps even if reserve(0) is called).
+/// Often this is what we want, but sometimes we really need to deallocate the
+/// memory held by the vector entirely, hence this function.
+template<typename T>
+inline void vectorFree(std::vector<T>& v)
+{
+    std::vector<T> emptyVec;
+    v.swap(emptyVec);
+}
 
 template<typename T>
 inline Imath::Vec2<T> vec2_cast(const Imath::Vec3<T>& v)
