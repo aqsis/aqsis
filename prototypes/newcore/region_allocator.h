@@ -40,6 +40,21 @@
 #include <limits>
 #include <cassert>
 
+#include <sys/mman.h>
+
+/// Allocate a block of memory using mmap()
+inline void* mmap_alloc(size_t size)
+{
+    return mmap(NULL, size, PROT_READ | PROT_WRITE,
+                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
+/// Deallocate a block of memory using munmap()
+inline void mmap_free(void* p, size_t size)
+{
+    munmap(p, size);
+}
+
 //------------------------------------------------------------------------------
 /// A region-based memory manager with page recycling and O(1) page-location
 /// cost when deallocating a pointer.
@@ -57,6 +72,11 @@
 ///   No attempt is made to reuse the memory inside a page while live objects
 ///   still exist within the page.
 ///
+///   RegionAllocator gets pages of memory directly from the OS using mmap();
+///   we can then release this memory back to the system directly with munmap()
+///   when we're finished with each page.  This prevents the pages from
+///   contributing to memory fragmentation on the system heap.
+///
 /// Deallocation:
 ///   Memory is deallocated by finding the page in which the pointer lives by
 ///   reading the memory just preceding the given point, and decrementing the
@@ -72,8 +92,8 @@ class RegionAllocator
         class MemPage
         {
             private:
-                unsigned char* const m_basePtr;
-                unsigned char* m_currPtr;
+                char* const m_basePtr;
+                char* m_currPtr;
                 const size_t m_pageSize;
                 int m_refCount;
 
@@ -82,7 +102,7 @@ class RegionAllocator
                 MemPage* m_prevPage;
             public:
                 MemPage(size_t pageSize)
-                    : m_basePtr(new unsigned char[pageSize+sizeof(MemPage*)]),
+                    : m_basePtr(static_cast<char*>(mmap_alloc(pageSize+sizeof(MemPage*)))),
                     m_currPtr(m_basePtr),
                     m_pageSize(pageSize),
                     m_refCount(0),
@@ -91,7 +111,7 @@ class RegionAllocator
                 { }
                 ~MemPage()
                 {
-                    delete[] m_basePtr;
+                    mmap_free(m_basePtr, m_pageSize+sizeof(MemPage*));
                 }
                 /// Reset the page for memory recycling.
                 void reset()
