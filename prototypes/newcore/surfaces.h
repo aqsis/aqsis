@@ -177,23 +177,18 @@ class Patch : public Geometry
             Vec3 cSpl = c * splitTrans;
             Vec3 dSpl = d * splitTrans;
 
-            // Diceable test: Estimate area as the sum of the areas of two
-            // triangles which make up the patch.
-            float area = 0.5 * (  ((bSpl-aSpl)%(cSpl-aSpl)).length()
-                                + ((bSpl-dSpl)%(cSpl-dSpl)).length() );
-
             const Options& opts = tessCtx.options();
-            const float maxArea = opts.gridSize*opts.gridSize;
 
             // estimate length in a-b, c-d direction
             float lu = 0.5*((bSpl-aSpl).length() + (dSpl-cSpl).length());
             // estimate length in a-c, b-d direction
             float lv = 0.5*((cSpl-aSpl).length() + (dSpl-bSpl).length());
 
-            if(area <= maxArea)
+            // Diceable test: Compare the number of vertices in the resulting
+            // grid to the desired maximum grid size
+            if(lu*lv <= opts.gridSize*opts.gridSize)
             {
-                // When the area (in number of micropolys) is small enough,
-                // dice the surface.
+                // Dice the surface when number of verts is small enough.
                 int nu = 1 + ifloor(lu);
                 int nv = 1 + ifloor(lv);
                 SurfaceDicer<Patch> dicer(nu, nv);
