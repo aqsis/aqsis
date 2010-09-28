@@ -31,6 +31,7 @@
 #define FILTERPROCESSOR_H_INCLUDED
 
 #include <boost/unordered_map.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "arrayview.h"
 #include "refcount.h"
@@ -39,8 +40,19 @@
 #include "util.h"
 
 //------------------------------------------------------------------------------
-/// Sample position and fragment storage
-class SampleTile : public RefCounted
+/// Storage for fragments generated during sampling.
+///
+/// A "fragment" is here taken to be the array of surface data generated when
+/// a sample point hits a micropolygon.  For instance, if we're rendering
+/// colour, opacity and depth, a fragment is a short 7-element array of
+/// floats, something like
+///
+///   [ R G B OR OG OB Z ]
+///
+/// (Note that the ordering of the channels in the fragment isn't fixed and is
+/// defined by the output variable set, but ordering is irrelevant to the
+/// FramentTile class anyway.)
+class FragmentTile : public RefCounted
 {
     public:
         /// Create an empty sample tile
@@ -49,26 +61,18 @@ class SampleTile : public RefCounted
         /// size - size of tile in samples
         /// sampleOffset - position of top left sample
         /// defaultFrag  - initialize all fragments with these samples
-        /// fragSize     - number of samples in defaultFrag
-        SampleTile(const V2i& pos, const V2i& size, const V2i& sampleOffset,
-                   const float* defaultFrag, int fragSize)
+        /// fragSize     - number of samples in each fragment
+        FragmentTile(const V2i& pos, const V2i& size, const V2i& sampleOffset,
+                     const float* defaultFrag, int fragSize)
             : m_size(size),
             m_position(pos),
             m_sampleOffset(sampleOffset),
-            m_samples(prod(m_size)),
-            m_fragments(m_samples.size()*fragSize),
+            m_fragments(new float[prod(m_size)*fragSize]),
             m_fragSize(fragSize)
         {
-            for(int j = 0; j < m_size.y; ++j)
-            for(int i = 0; i < m_size.x; ++i)
-            {
-                m_samples[m_size.x*j + i] = Sample(
-                    Vec2(i,j) + Vec2(m_sampleOffset) + Vec2(0.5f));
-            }
             copy(FvecView(&m_fragments[0], fragSize),
                  ConstFvecView(defaultFrag, fragSize, 0), prod(m_size));
         }
-
 
         /// Get fragment relative to (0,0) in upper-left of tile.
         float* fragment(int x, int y)
@@ -79,11 +83,6 @@ class SampleTile : public RefCounted
         {
             return &m_fragments[m_fragSize*(m_size.x*y + x)];
         }
-        /// Get sample position relative to (0,0) in upper-left of tile.
-        Sample& sample(int x, int y)
-        {
-            return m_samples[m_size.x*y + x];
-        }
 
         /// Get position of the tile in tile coordinates
         V2i position() const { return m_position; }
@@ -91,7 +90,7 @@ class SampleTile : public RefCounted
         /// Get size of tile in samples
         V2i size() const { return m_size; }
 
-        /// NUmber of floats in a fragment
+        /// Number of floats in a fragment
         int fragSize() const { return m_fragSize; }
 
         /// Get position of top-left of tile in sraster coordinates.
@@ -101,12 +100,11 @@ class SampleTile : public RefCounted
         V2i m_size;
         V2i m_position;
         V2i m_sampleOffset;
-        std::vector<Sample> m_samples;
-        std::vector<float> m_fragments;
+        boost::scoped_array<float> m_fragments;
         int m_fragSize;
 };
 
-typedef boost::intrusive_ptr<SampleTile> SampleTilePtr;
+typedef boost::intrusive_ptr<FragmentTile> FragmentTilePtr;
 
 
 //------------------------------------------------------------------------------
@@ -229,13 +227,13 @@ class FilterProcessor
                         const V2i& filterStride);
 
         /// Insert a finished sample tile
-        void insert(const SampleTilePtr& tile);
+        void insert(const FragmentTilePtr& tile);
 
     private:
         /// 2x2 block of sample tiles, as needed for an output tile.
         struct FilterBlock
         {
-            SampleTilePtr tiles[2][2];
+            FragmentTilePtr tiles[2][2];
 
             bool readyForFilter() const { return tiles[0][0] && tiles[0][1]
                                               && tiles[1][0] && tiles[1][1]; }

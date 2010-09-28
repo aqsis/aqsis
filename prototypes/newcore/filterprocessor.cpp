@@ -139,7 +139,7 @@ FilterProcessor::FilterProcessor(DisplayManager& displayManager,
     m_filter(cachedFilter)
 { }
 
-void FilterProcessor::insert(const SampleTilePtr& tile)
+void FilterProcessor::insert(const FragmentTilePtr& tile)
 {
     // The sample tile with coordinates (tx,ty) overlaps the four
     // filtering tiles with coordinates:

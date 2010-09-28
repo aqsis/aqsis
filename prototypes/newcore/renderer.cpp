@@ -46,6 +46,64 @@
 
 #include "stats.h"
 
+//------------------------------------------------------------------------------
+/// Tile of sample positions
+class SampleTile
+{
+    public:
+        /// Create empty sample tile.
+        ///
+        /// The tile is invalid until reset() has been called.
+        SampleTile()
+            : m_size(-1),
+            m_samples(),
+            m_fragmentTile(0)
+        { }
+
+        /// Reset sample positions to match the given fragment tile.
+        ///
+        /// Note that SampleTile does hold a pointer to the fragments, but
+        /// doesn't control the fragment tile lifetime.
+        void reset(FragmentTile& fragTile)
+        {
+            m_fragmentTile = &fragTile;
+            // Allocate samples if necessary
+            if(fragTile.size() != m_size)
+            {
+                m_size = fragTile.size();
+                m_samples.reset(new Sample[prod(m_size)]);
+            }
+            // Initialize sample positions
+            Vec2 offset = Vec2(fragTile.sampleOffset()) + Vec2(0.5f);
+            for(int j = 0; j < m_size.y; ++j)
+            for(int i = 0; i < m_size.x; ++i)
+                m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
+        }
+
+        /// Get sample position relative to (0,0) in upper-left of tile.
+        Sample& sample(int x, int y)
+        {
+            return m_samples[m_size.x*y + x];
+        }
+
+        /// Get a fragment from the associated fragment tile.
+        float* fragment(int x, int y)
+        {
+            return m_fragmentTile->fragment(x,y);
+        }
+
+        /// Get size of tile in samples
+        V2i size() const { return m_size; }
+
+        /// Get position of top-left of tile in sraster coordinates.
+        V2i sampleOffset() const { return m_fragmentTile->sampleOffset(); }
+
+    private:
+        V2i m_size;
+        boost::scoped_array<Sample> m_samples;
+        FragmentTile* m_fragmentTile;
+};
+
 
 //------------------------------------------------------------------------------
 /// Circle of confusion class for depth of field
@@ -385,6 +443,8 @@ void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
+    MemoryLog memLog;
+
     // Coordinate system for tessellation resolution calculation.
     Mat4 tessCoords = m_camToSRaster
         * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
@@ -398,7 +458,8 @@ void Renderer::render()
 
     TessellationContextImpl tessContext(*this);
 
-    MemoryLog memLog;
+    SampleTile samples;
+
     V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
     // Loop over all buckets
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
@@ -407,10 +468,11 @@ void Renderer::render()
         memLog.log();
         V2i tilePos(i,j);
         V2i sampleOffset = tilePos*tileSize - tileSize/2;
-        // Create sample points and fragment storage
-        SampleTilePtr tile(new SampleTile(tilePos, tileSize, sampleOffset,
-                                          &m_defaultFrag[0],
-                                          m_defaultFrag.size()));
+        // Create new tile for fragment storage
+        FragmentTilePtr fragments =
+            new FragmentTile(tilePos, tileSize, sampleOffset,
+                             &m_defaultFrag[0], m_defaultFrag.size());
+        samples.reset(*fragments);
 
         // Process all surfaces and grids in the bucket.
         while(true)
@@ -418,7 +480,7 @@ void Renderer::render()
             // Render any waiting grids.
             while(GridHolderPtr grid = m_surfaces->popGrid(i,j))
             {
-                rasterize(*tile, *grid);
+                rasterize(samples, *grid);
                 if(grid->useCount() == 1)
                     --m_stats->gridsInFlight;
             }
@@ -440,7 +502,7 @@ void Renderer::render()
         }
         m_surfaces->setFinished(i,j);
         // Filter the tile
-        m_filterProcessor->insert(tile);
+        m_filterProcessor->insert(fragments);
     }
     memLog.log();
     m_displayManager->closeFiles();
