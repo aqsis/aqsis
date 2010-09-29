@@ -55,41 +55,49 @@
 class FragmentTile : public RefCounted
 {
     public:
-        /// Create an empty sample tile
+        /// Create an empty fragment tile.
         ///
-        /// pos  - discrete tile coordinates
         /// size - size of tile in samples
         /// sampleOffset - position of top left sample
         /// defaultFrag  - initialize all fragments with these samples
         /// fragSize     - number of samples in each fragment
-        FragmentTile(const V2i& pos, const V2i& size, const V2i& sampleOffset,
+        FragmentTile(const V2i& size, const V2i& sampleOffset,
                      const float* defaultFrag, int fragSize)
             : m_size(size),
-            m_position(pos),
             m_sampleOffset(sampleOffset),
-            m_fragments(new float[prod(m_size)*fragSize]),
+            m_fragments(),
+            m_defaultFrag(defaultFrag),
             m_fragSize(fragSize)
-        {
-            copy(FvecView(&m_fragments[0], fragSize),
-                 ConstFvecView(defaultFrag, fragSize, 0), prod(m_size));
-        }
+        { }
 
         /// Get fragment relative to (0,0) in upper-left of tile.
         float* fragment(int x, int y)
         {
+            if(!m_fragments)
+            {
+                // Deferred allocation for memory efficiency.
+                m_fragments.reset(new float[prod(m_size)*m_fragSize]);
+                copy(FvecView(&m_fragments[0], m_fragSize),
+                    ConstFvecView(m_defaultFrag, m_fragSize, 0), prod(m_size));
+            }
             return &m_fragments[m_fragSize*(m_size.x*y + x)];
         }
         const float* fragment(int x, int y) const
         {
+            assert(m_fragments);
             return &m_fragments[m_fragSize*(m_size.x*y + x)];
         }
-
-        /// Get position of the tile in tile coordinates
-        V2i position() const { return m_position; }
 
         /// Get size of tile in samples
         V2i size() const { return m_size; }
 
+        /// Return true if the tile contains any samples
+        ///
+        /// (If the tile has no samples, filtering is trivial.)
+        bool hasSamples() { return m_fragments; }
+
+        /// Get default fragment
+        const float* defaultFrag() { return m_defaultFrag; }
         /// Number of floats in a fragment
         int fragSize() const { return m_fragSize; }
 
@@ -98,9 +106,9 @@ class FragmentTile : public RefCounted
 
     private:
         V2i m_size;
-        V2i m_position;
         V2i m_sampleOffset;
         boost::scoped_array<float> m_fragments;
+        const float* m_defaultFrag;
         int m_fragSize;
 };
 
@@ -226,17 +234,22 @@ class FilterProcessor
                         const CachedFilter& cachedFilter,
                         const V2i& filterStride);
 
-        /// Insert a finished sample tile
-        void insert(const FragmentTilePtr& tile);
+        /// Insert a finished tile of fragments at the given position
+        void insert(V2i position, const FragmentTilePtr& tile);
 
     private:
-        /// 2x2 block of sample tiles, as needed for an output tile.
+        /// 2x2 block of sample tiles, as needed for generating an output tile
         struct FilterBlock
         {
             FragmentTilePtr tiles[2][2];
 
             bool readyForFilter() const { return tiles[0][0] && tiles[0][1]
                                               && tiles[1][0] && tiles[1][1]; }
+            bool hasSamples() const
+            {
+                return tiles[0][0]->hasSamples() || tiles[0][1]->hasSamples()
+                    || tiles[1][0]->hasSamples() || tiles[1][1]->hasSamples();
+            }
         };
 
         typedef boost::unordered_map<V2i, FilterBlock> FilterBlockMap;

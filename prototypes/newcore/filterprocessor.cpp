@@ -139,7 +139,7 @@ FilterProcessor::FilterProcessor(DisplayManager& displayManager,
     m_filter(cachedFilter)
 { }
 
-void FilterProcessor::insert(const FragmentTilePtr& tile)
+void FilterProcessor::insert(V2i position, const FragmentTilePtr& tile)
 {
     // The sample tile with coordinates (tx,ty) overlaps the four
     // filtering tiles with coordinates:
@@ -154,7 +154,7 @@ void FilterProcessor::insert(const FragmentTilePtr& tile)
     for(int i = 0; i < 2; ++i)
     {
         // p is position of the output tile
-        V2i p = tile->position() + V2i(i-1,j-1);
+        V2i p = position + V2i(i-1,j-1);
         // Ignore filtering tiles outside image boundaries
         if(p.x < m_outTileRange.min.x || p.y < m_outTileRange.min.y ||
            p.x >= m_outTileRange.max.x || p.y >= m_outTileRange.max.y)
@@ -188,17 +188,26 @@ void FilterProcessor::filter(std::vector<float>& output,
     // Input tile size before filtering
     const V2i tileSize = block.tiles[0][0]->size();
     const int nChans = block.tiles[0][0]->fragSize();
-    output.resize(nChans*prod(tileSize));
-    std::memset(&output[0], '\0', sizeof(float)*nChans*prod(tileSize));
+    const float* defaultFrag = block.tiles[0][0]->defaultFrag();
+    const V2i outSize = tileSize/m_filterStride;
+    if(!block.hasSamples())
+    {
+        // If there's no samples, we don't need to filter, we only need to
+        // assign the default fragment to every pixel.
+        output.resize(nChans*prod(outSize));
+        copy(FvecView(&output[0], nChans),
+             ConstFvecView(defaultFrag, nChans, 0), prod(outSize));
+        return;
+    }
+    output.assign(nChans*prod(outSize), 0);
     const V2i offset = tileSize/2 - m_filter.offset();
-    const V2i outWidth = tileSize/m_filterStride;
     // Loop over every pixel in the output
-    for(int iy = 0; iy < outWidth.y; ++iy)
-    for(int ix = 0; ix < outWidth.x; ++ix)
+    for(int iy = 0; iy < outSize.y; ++iy)
+    for(int ix = 0; ix < outSize.x; ++ix)
     {
         // Filter pixel at (ix,iy).  The filter support can lie across any or
         // all of the 2x2 block of input tiles.
-        float* samps = &output[0] + (outWidth.x*iy + ix)*nChans;
+        float* samps = &output[0] + (outSize.x*iy + ix)*nChans;
         for(int j = 0; j < m_filter.size().y; ++j)
         for(int i = 0; i < m_filter.size().x; ++i)
         {
@@ -208,8 +217,10 @@ void FilterProcessor::filter(std::vector<float>& output,
             int y = m_filterStride.y*iy + offset.y + j;
             int tx = x >= tileSize.x;
             int ty = y >= tileSize.y;
-            const float* c = block.tiles[ty][tx]->fragment(x - tx*tileSize.x,
-                                                           y - ty*tileSize.y);
+            const float* c = defaultFrag;
+            if(block.tiles[ty][tx]->hasSamples())
+                c = block.tiles[ty][tx]->fragment(x - tx*tileSize.x,
+                                                  y - ty*tileSize.y);
             float w = m_filter(i,j);
             for(int k = 0; k < nChans; ++k)
                 samps[k] += w*c[k];

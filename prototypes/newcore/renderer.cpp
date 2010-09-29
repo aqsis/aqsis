@@ -57,27 +57,44 @@ class SampleTile
         SampleTile()
             : m_size(-1),
             m_samples(),
+            m_samplesSetup(false),
             m_fragmentTile(0)
         { }
 
-        /// Reset sample positions to match the given fragment tile.
+        /// Set up sample info for next region
         ///
         /// Note that SampleTile does hold a pointer to the fragments, but
         /// doesn't control the fragment tile lifetime.
         void reset(FragmentTile& fragTile)
         {
             m_fragmentTile = &fragTile;
-            // Allocate samples if necessary
+            // Allocate samples if necessary, but defer initialization until
+            // we're sure it's necessary.
             if(fragTile.size() != m_size)
             {
                 m_size = fragTile.size();
                 m_samples.reset(new Sample[prod(m_size)]);
             }
-            // Initialize sample positions
-            Vec2 offset = Vec2(fragTile.sampleOffset()) + Vec2(0.5f);
-            for(int j = 0; j < m_size.y; ++j)
-            for(int i = 0; i < m_size.x; ++i)
-                m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
+            m_samplesSetup = false;
+        }
+
+        /// Ensure sample positions are set up
+        ///
+        /// This initialization step is deferred rather than performed inside
+        /// reset(), since some tiles may not have any geometry.  We'd like to
+        /// avoid the computational expense of processing such tiles when they
+        /// don't even have any samples present.
+        void ensureSampleInit()
+        {
+            if(!m_samplesSetup)
+            {
+                // Initialize sample positions
+                Vec2 offset = Vec2(m_fragmentTile->sampleOffset()) + Vec2(0.5f);
+                for(int j = 0; j < m_size.y; ++j)
+                for(int i = 0; i < m_size.x; ++i)
+                    m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
+                m_samplesSetup = true;
+            }
         }
 
         /// Get sample position relative to (0,0) in upper-left of tile.
@@ -101,6 +118,7 @@ class SampleTile
     private:
         V2i m_size;
         boost::scoped_array<Sample> m_samples;
+        bool m_samplesSetup;
         FragmentTile* m_fragmentTile;
 };
 
@@ -470,7 +488,7 @@ void Renderer::render()
         V2i sampleOffset = tilePos*tileSize - tileSize/2;
         // Create new tile for fragment storage
         FragmentTilePtr fragments =
-            new FragmentTile(tilePos, tileSize, sampleOffset,
+            new FragmentTile(tileSize, sampleOffset,
                              &m_defaultFrag[0], m_defaultFrag.size());
         samples.reset(*fragments);
 
@@ -480,6 +498,7 @@ void Renderer::render()
             // Render any waiting grids.
             while(GridHolderPtr grid = m_surfaces->popGrid(i,j))
             {
+                samples.ensureSampleInit();
                 rasterize(samples, *grid);
                 if(grid->useCount() == 1)
                     --m_stats->gridsInFlight;
@@ -502,7 +521,7 @@ void Renderer::render()
         }
         m_surfaces->setFinished(i,j);
         // Filter the tile
-        m_filterProcessor->insert(fragments);
+        m_filterProcessor->insert(tilePos, fragments);
     }
     memLog.log();
     m_displayManager->closeFiles();
