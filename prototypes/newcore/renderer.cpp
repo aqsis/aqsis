@@ -455,16 +455,16 @@ Renderer::~Renderer()
         std::cout << *m_stats;
 }
 
-void Renderer::add(const GeometryPtr& geom, Attributes& attrs)
+void Renderer::add(const GeometryPtr& geom, const ConstAttributesPtr& attrs)
 {
-    // TODO: Transform to camera space?
-    GeomHolderPtr holder(new GeomHolder(geom, &attrs));
+    GeomHolderPtr holder(new GeomHolder(geom, attrs));
     push(holder);
 }
 
-void Renderer::add(GeometryKeys& deformingGeom, Attributes& attrs)
+void Renderer::add(GeometryKeys& deformingGeom,
+                   const ConstAttributesPtr& attrs)
 {
-    GeomHolderPtr holder(new GeomHolder(deformingGeom, &attrs));
+    GeomHolderPtr holder(new GeomHolder(deformingGeom, attrs));
     push(holder);
 }
 

@@ -51,7 +51,7 @@ class GeomHolder : public RefCounted
         GeometryKeys m_geomKeys; ///< Extra geometry keys
         int m_splitCount;    ///< Number of times the geometry has been split
         Box m_bound;         ///< Bound in camera coordinates
-        Attributes* m_attrs; ///< Surface attribute state
+        ConstAttributesPtr m_attrs; ///< Surface attribute state
 
         /// Get the bound from a set of geometry keys
         static Box boundFromKeys(const GeometryKeys& keys)
@@ -64,7 +64,7 @@ class GeomHolder : public RefCounted
 
     public:
         /// Create initial non-deforming geometry (no parent surface)
-        GeomHolder(const GeometryPtr& geom, Attributes* attrs)
+        GeomHolder(const GeometryPtr& geom, const ConstAttributesPtr& attrs)
             : m_geom(geom),
             m_geomKeys(),
             m_splitCount(0),
@@ -81,7 +81,7 @@ class GeomHolder : public RefCounted
         { }
 
         /// Create initial deforming geometry (no parent surface)
-        GeomHolder(GeometryKeys& keys, Attributes* attrs)
+        GeomHolder(GeometryKeys& keys, const ConstAttributesPtr& attrs)
             : m_geom(),
             m_geomKeys(keys),
             m_splitCount(0),
@@ -123,7 +123,6 @@ class GeomHolder : public RefCounted
         bool isDeforming() const { return !m_geom; }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
-        Attributes& attrs()       { return *m_attrs; }
         const Attributes& attrs() const { return *m_attrs; }
 };
 
@@ -136,10 +135,10 @@ typedef std::vector<GridKey> GridKeys;
 class GridHolder : public RefCounted
 {
     private:
-        GridPtr m_grid;            ///< Non-deforming grid
-        GridKeys m_gridKeys;       ///< Grid keys for motion blur
-        const Attributes* m_attrs; ///< Attribute state
-        Box m_bound;               ///< Grid bounding box in raster coords.
+        GridPtr m_grid;             ///< Non-deforming grid
+        GridKeys m_gridKeys;        ///< Grid keys for motion blur
+        ConstAttributesPtr m_attrs; ///< Attribute state
+        Box m_bound;                ///< Grid bounding box in raster coords.
 
         void shade(Grid& grid) const
         {
@@ -148,7 +147,7 @@ class GridHolder : public RefCounted
         }
 
     public:
-        GridHolder(const GridPtr& grid, const Attributes* attrs)
+        GridHolder(const GridPtr& grid, const ConstAttributesPtr& attrs)
             : m_grid(grid),
             m_gridKeys(),
             m_attrs(attrs)

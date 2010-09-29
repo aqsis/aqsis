@@ -82,7 +82,7 @@ class RefCounted
 
 
 /// Add a reference to a RefCounted object.
-inline void intrusive_ptr_add_ref(RefCounted* p)
+inline void intrusive_ptr_add_ref(const RefCounted* p)
 {
     p->incRef();
 }
@@ -94,7 +94,7 @@ inline void intrusive_ptr_add_ref(RefCounted* p)
 /// RefCounted*, the wrong destructor would get called!)
 template<typename T>
 inline typename boost::enable_if<boost::is_base_of<RefCounted, T> >::type
-intrusive_ptr_release(T* p)
+intrusive_ptr_release(const T* p)
 {
     if(p->decRef() == 0)
         delete p;

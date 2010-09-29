@@ -37,11 +37,11 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "util.h"
+#include "attributes.h"
 #include "options.h"
 #include "varspec.h"
+#include "util.h"
 
-class Attributes;
 class CachedFilter;
 class Geometry;
 class Grid;
@@ -125,9 +125,9 @@ class Renderer
         ~Renderer();
 
         /// Add geometry
-        void add(const GeometryPtr& geom, Attributes& attrs);
+        void add(const GeometryPtr& geom, const ConstAttributesPtr& attrs);
         /// Add key frames of deforming geometry
-        void add(GeometryKeys& deformingGeom, Attributes& attrs);
+        void add(GeometryKeys& deformingGeom, const ConstAttributesPtr& attrs);
 
         /// Render all surfaces and save resulting image.
         void render();

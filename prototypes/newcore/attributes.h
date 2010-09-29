@@ -30,10 +30,11 @@
 #ifndef ATTRIBUTES_H_INCLUDED
 #define ATTRIBUTES_H_INCLUDED
 
+#include "refcount.h"
 #include "shader.h"
 
 /// Surface attribute state.
-struct Attributes
+struct Attributes : public RefCounted
 {
     float shadingRate;  ///< Desired micropoly area
     float focusFactor;  ///< Control for enlarging focal blurred micropolys
@@ -46,8 +47,11 @@ struct Attributes
         focusFactor(1),
         smoothShading(true),
         displacementBound(0),
-        surfaceShader()
+        surfaceShader(createShader("default"))
     { }
 };
+
+typedef boost::intrusive_ptr<Attributes> AttributesPtr;
+typedef boost::intrusive_ptr<const Attributes> ConstAttributesPtr;
 
 #endif // ATTRIBUTES_H_INCLUDED

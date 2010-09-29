@@ -325,6 +325,65 @@ class TransformStack
         std::stack<Mat4> m_transforms;
 };
 
+/// Class managing the attributes stack.
+class AttributesStack
+{
+    public:
+        AttributesStack()
+            : m_stack()
+        {
+            m_stack.push(new Attributes());
+        }
+
+        /// Create an additional ref of top attribute on the stack top
+        void push()
+        {
+            assert(!m_stack.empty());
+            m_stack.push(m_stack.top());
+        }
+        /// Pop off the top attribute from the stack
+        void pop()
+        {
+            if(m_stack.empty())
+            {
+                assert(0 && "Attribute stack empty - can't pop!");
+                return;
+            }
+            m_stack.pop();
+        }
+
+        /// Get a writable pointer to the top attribute on the stack
+        ///
+        /// If the attributes are already referenced elsewhere (eg, by a piece
+        /// of geometry which has already passed into the pipeline), then the
+        /// top of the stack is cloned so that it can be written to without
+        /// disturbing the externally held attribute state.
+        const AttributesPtr& attrsWrite()
+        {
+            assert(!m_stack.empty());
+            if(m_stack.top()->useCount() == 1)
+                return m_stack.top();
+            else
+            {
+                // Clone the top of the stack if the attributes are held
+                // elsewhere.
+                AttributesPtr oldTop = m_stack.top();
+                m_stack.pop();
+                m_stack.push(new Attributes(*oldTop));
+                return m_stack.top();
+            }
+        }
+        /// Get a read-only pointer to the top attribute
+        ConstAttributesPtr attrsRead() const
+        {
+            assert(!m_stack.empty());
+            ConstAttributesPtr p(m_stack.top());
+            return p;
+        }
+
+    private:
+        std::stack<AttributesPtr> m_stack;
+};
 
 //------------------------------------------------------------------------------
 struct AllOptions;
@@ -555,10 +614,13 @@ class RenderApi : public Ri::Renderer
     private:
         Ri::ErrorHandler& ehandler() { return m_services.errorHandler(); }
 
+        const AttributesPtr& attrsWrite() { return m_attrStack.attrsWrite(); }
+        ConstAttributesPtr attrsRead() const { return m_attrStack.attrsRead(); }
+
         ApiServices& m_services;
         AllOptionsPtr m_opts;
         AllOptionsPtr m_savedOpts;
-        Attributes m_attrs;
+        AttributesStack m_attrStack;
         TransformStack m_transStack;
         boost::shared_ptr< ::Renderer> m_renderer;
 };
@@ -568,7 +630,7 @@ RenderApi::RenderApi(ApiServices& services)
     : m_services(services),
     m_opts(new AllOptions()),
     m_savedOpts(),
-    m_attrs(),
+    m_attrStack(),
     m_transStack(),
     m_renderer()
 { }
@@ -616,6 +678,7 @@ RtVoid RenderApi::FrameBegin(RtInt number)
     m_opts = m_opts->clone();
     // Save transformation
     m_transStack.push();
+    m_attrStack.push();
 }
 
 RtVoid RenderApi::FrameEnd()
@@ -623,12 +686,14 @@ RtVoid RenderApi::FrameEnd()
     assert(m_savedOpts);
     m_opts = m_savedOpts;
     m_transStack.pop();
+    m_attrStack.pop();
 }
 
 RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
     m_renderer.reset(new ::Renderer(m_opts->opts, camToScreen, m_opts->outVars));
+    m_attrStack.push();
     m_transStack.push();
 }
 
@@ -636,6 +701,7 @@ RtVoid RenderApi::WorldEnd()
 {
     m_renderer->render();
     m_transStack.pop();
+    m_attrStack.pop();
 }
 
 //------------------------------------------------------------
@@ -886,15 +952,13 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
 
 RtVoid RenderApi::AttributeBegin()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "AttributeBegin not implemented"; // Todo
+    m_attrStack.push();
     m_transStack.push();
 }
 
 RtVoid RenderApi::AttributeEnd()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "AttributeEnd not implemented"; // Todo
+    m_attrStack.pop();
     m_transStack.pop();
 }
 
@@ -942,11 +1006,11 @@ RtVoid RenderApi::Surface(RtConstToken name, const ParamList& pList)
 {
     if(strcmp(name, "null") == 0)
     {
-        m_attrs.surfaceShader.reset();
+        attrsWrite()->surfaceShader.reset();
         return;
     }
-    m_attrs.surfaceShader = createShader(name);
-    if(!m_attrs.surfaceShader)
+    attrsWrite()->surfaceShader = createShader(name);
+    if(!attrsRead()->surfaceShader)
     {
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
             << "unimplemented shader \"" << name <<"\"";
@@ -995,13 +1059,13 @@ RtVoid RenderApi::ConnectShaderLayers(RtConstToken type, RtConstToken layer1,
 
 RtVoid RenderApi::ShadingRate(RtFloat size)
 {
-    m_attrs.shadingRate = size;
+    attrsWrite()->shadingRate = size;
 }
 
 RtVoid RenderApi::ShadingInterpolation(RtConstToken type)
 {
     if(strcmp(type, "constant") == 0)
-        m_attrs.smoothShading = false;
+        attrsWrite()->smoothShading = false;
     else
     {
         if(strcmp(type, "smooth") != 0)
@@ -1010,7 +1074,7 @@ RtVoid RenderApi::ShadingInterpolation(RtConstToken type)
                 << "unrecognized shading interpolation type \""
                 << type << "\", using smooth";
         }
-        m_attrs.smoothShading = true;
+        attrsWrite()->smoothShading = true;
     }
 }
 
@@ -1043,7 +1107,7 @@ RtVoid RenderApi::GeometricApproximation(RtConstToken type, RtFloat value)
 {
     if(strcmp(type, "focusfactor") == 0)
     {
-        m_attrs.focusFactor = value;
+        attrsWrite()->focusFactor = value;
     }
     else
     {
@@ -1174,7 +1238,7 @@ RtVoid RenderApi::Attribute(RtConstToken name, const ParamList& pList)
     if(strcmp(name, "displacementbound") == 0)
     {
         if(FloatArray s = pList.findFloatData(Ri::TypeSpec::Float, "sphere"))
-            m_attrs.displacementBound = s[0];
+            attrsWrite()->displacementBound = s[0];
         // TODO Arbitrary coordinate systems
     }
 }
@@ -1247,7 +1311,7 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
         patch->transform(m_transStack.top());
-        m_renderer->add(patch, m_attrs);
+        m_renderer->add(patch, attrsRead());
     }
 }
 
@@ -1282,7 +1346,7 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
         IclassStorage storReq(1,4,4,4,4);
         GeometryPtr patch(new ::Patch(builder.build(storReq)));
         patch->transform(m_transStack.top());
-        m_renderer->add(patch, m_attrs);
+        m_renderer->add(patch, attrsRead());
     }
     else if(strcmp(type, "bicubic") == 0)
     {
