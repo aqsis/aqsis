@@ -573,6 +573,7 @@ struct OutVarInfo
 template<typename GridT, typename PolySamplerT>
 void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
 {
+    std::cerr << "Warning: MB & DoF are temporarily broken\n";
     /*
     // Determine index of depth output data, if any.
     int zOffset = -1;

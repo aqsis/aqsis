@@ -158,10 +158,24 @@ class CachedFilter
         /// Get filter size in samples
         const V2i& size()   const { return m_size; }
 
-        /// Get cached filter coefficient
-        float operator()(int x, int y) const { return m_weights[m_size.x*y + x]; }
-        float xweight1d(int x) const { return m_weights[x]; }
-        float yweight1d(int y) const { return m_weights[m_size.x + y]; }
+        /// Get cached filter coefficient for a non-separable filter
+        float operator()(int x, int y) const
+        {
+            assert(!m_isSeparable);
+            return m_weights[m_size.x*y + x];
+        }
+        /// Get cached x filter coefficient for a separable filter
+        float xweight1d(int x) const
+        {
+            assert(m_isSeparable);
+            return m_weights[x];
+        }
+        /// Get cached y filter coefficient for a separable filter
+        float yweight1d(int y) const
+        {
+            assert(m_isSeparable);
+            return m_weights[m_size.x + y];
+        }
 
         /// Return true if filter is separable.
         bool isSeparable() const { return m_isSeparable; }
@@ -169,11 +183,15 @@ class CachedFilter
     private:
         static void filterSize(float radius, int sampsPerPix,
                                int& size, int& offset);
-
+        static void cacheFilterSeparable(std::vector<float>& cache,
+                                         const Filter& filterFunc,
+                                         const V2i& superSamp,
+                                         Imath::V2i& filtSize);
         static void cacheFilterNonSeparable(std::vector<float>& cache,
                                             const Filter& filterFunc,
                                             const V2i& superSamp,
                                             Imath::V2i& filtSize);
+        static void normalizeFilter(float* weights, int nWeights);
 
         V2i m_offset; ///< Sample offset for top left of filter
         V2i m_size;   ///< Size of the filter support
@@ -254,8 +272,12 @@ class FilterProcessor
 
         typedef boost::unordered_map<V2i, FilterBlock> FilterBlockMap;
 
-        void filter(std::vector<float>& output, const FilterBlock& block);
-
+        void filter(std::vector<float>& output,
+                    const FilterBlock& block) const;
+        void filterNonSeparable(std::vector<float>& output,
+                                const FilterBlock& block) const;
+        void filterSeparable(std::vector<float>& output,
+                             const FilterBlock& block) const;
 
         DisplayManager& m_displayManager; ///< Filtered tiles go here.
         FilterBlockMap m_waitingTiles; ///< Storage for waiting sampled tiles
