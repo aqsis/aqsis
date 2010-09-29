@@ -288,7 +288,7 @@ class ResourceCounterStat
         {
             if(enabled)
             {
-                out << "created " << s.m_ncreated;
+                out << s.m_ncreated;
                 if(s.m_ncreated > 0)
                 {
                     out << " (average " << s.m_sum/s.m_nevents

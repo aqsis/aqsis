@@ -139,6 +139,7 @@ class GridHolder : public RefCounted
         GridKeys m_gridKeys;        ///< Grid keys for motion blur
         ConstAttributesPtr m_attrs; ///< Attribute state
         Box m_bound;                ///< Grid bounding box in raster coords.
+        bool m_rasterized;          ///< True if the grid was rasterized
 
         void shade(Grid& grid) const
         {
@@ -150,7 +151,8 @@ class GridHolder : public RefCounted
         GridHolder(const GridPtr& grid, const ConstAttributesPtr& attrs)
             : m_grid(grid),
             m_gridKeys(),
-            m_attrs(attrs)
+            m_attrs(attrs),
+            m_rasterized(false)
         { }
 
         template<typename GridPtrIterT>
@@ -158,7 +160,8 @@ class GridHolder : public RefCounted
                    const GeomHolder& parentGeom)
             : m_grid(),
             m_gridKeys(),
-            m_attrs(&parentGeom.attrs())
+            m_attrs(&parentGeom.attrs()),
+            m_rasterized(false)
         {
             GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
             m_gridKeys.reserve(end - begin);
@@ -174,6 +177,9 @@ class GridHolder : public RefCounted
         const Box& bound() const { return m_bound; }
 
         const Attributes& attrs() const { return *m_attrs; }
+
+        void setRasterized() { m_rasterized = true; }
+        bool rasterized() const { return m_rasterized; }
 
         /// Shade all grids
         void shade()

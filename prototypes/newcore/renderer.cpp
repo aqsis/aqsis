@@ -115,6 +115,30 @@ class SampleTile
         /// Get position of top-left of tile in sraster coordinates.
         V2i sampleOffset() const { return m_fragmentTile->sampleOffset(); }
 
+        /// Determine whether the bound is entirely occluded by the samples.
+        bool isOccluded(const Box& bound)
+        {
+            // transform bound into integer coords (inclusive end)
+            V2i bndMin = ifloor(vec2_cast(bound.min)) - sampleOffset();
+            V2i bndMax = ifloor(vec2_cast(bound.max)) - sampleOffset();
+            // clamp geometry bound to extent of sample region
+            int beginx = clamp(bndMin.x,   0, m_size.x);
+            int endx   = clamp(bndMax.x+1, 0, m_size.x);
+            int beginy = clamp(bndMin.y,   0, m_size.y);
+            int endy   = clamp(bndMax.y+1, 0, m_size.y);
+            float zmin = bound.min.z;
+            // Iterate over all the pixels the bound crosses.  This is a
+            // pretty braindead way of doing it, but simple things first!
+            for(int iy = beginy; iy < endy; ++iy)
+            for(int ix = beginx; ix < endx; ++ix)
+            {
+                // If geom bound is closer than the sample, it's not occluded.
+                if(zmin < m_samples[m_size.x*iy + ix].z)
+                    return false;
+            }
+            return true;
+        }
+
     private:
         V2i m_size;
         boost::scoped_array<Sample> m_samples;
@@ -176,18 +200,25 @@ const bool useStats=true;
 /// Renderer statistics
 struct Renderer::Stats
 {
-    ResourceCounterStat<useStats> gridsInFlight;
+    // Geometry stats
     ResourceCounterStat<useStats> geometryInFlight;
+    SimpleCounterStat<useStats>   geometryOccluded;
+    // Grid stats
+    ResourceCounterStat<useStats> gridsInFlight;
+    SimpleCounterStat<useStats>   gridsOccluded;
+    MinMaxMeanStat<float, useStats> averagePolyArea;
+    // Sampling stats
     SimpleCounterStat<useStats>   samplesTested;
     SimpleCounterStat<useStats>   samplesHit;
-    MinMaxMeanStat<float, useStats> averagePolyArea;
 
     friend std::ostream& operator<<(std::ostream& out, Stats& s)
     {
-        out << "grids                 : " << s.gridsInFlight << "\n";
-        out << "geometric pieces      : " << s.geometryInFlight << "\n";
-        out << "average micropoly area: " << s.averagePolyArea << "\n";
-        out << "samples tested        : " << s.samplesTested;
+        out << "geometry : allocated            : " << s.geometryInFlight << "\n"
+            << "geometry : occlusion culled     : " << s.geometryOccluded << "\n";
+        out << "grids : allocated               : " << s.gridsInFlight << "\n"
+            << "grids : occlusion culled        : " << s.gridsOccluded << "\n";
+        out << "micropolygons : area            : " << s.averagePolyArea << "\n";
+        out << "sampling : point in poly tests  : " << s.samplesTested;
         if(s.samplesTested.value() > 0)
             out << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
                 << "% hit)";
@@ -319,11 +350,15 @@ void Renderer::push(const GeomHolderPtr& holder)
     if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts->eyeSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
+        --m_stats->geometryInFlight;
         return;
     }
     // Cull if outside near/far clipping range
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
+    {
+        --m_stats->geometryInFlight;
         return;
+    }
     // Transform bound to raster space.
     //
     // TODO: Support arbitrary coordinate systems for the displacement bound
@@ -339,7 +374,10 @@ void Renderer::push(const GeomHolderPtr& holder)
        bound.min.x > m_samplingArea.max.x ||
        bound.max.y < m_samplingArea.min.y ||
        bound.min.y > m_samplingArea.max.y)
+    {
+        --m_stats->geometryInFlight;
         return;
+    }
     // If we get to here the surface should be rendered, so push it
     // onto the queue.
     m_surfaces->insert(holder);
@@ -507,25 +545,39 @@ void Renderer::render()
         while(true)
         {
             // Render any waiting grids.
-            while(GridHolderPtr grid = m_surfaces->popGrid(i,j))
+            while(GridHolderPtr gridh = m_surfaces->popGrid(i,j))
             {
                 samples.ensureSampleInit();
-                rasterize(samples, *grid);
-                if(grid->useCount() == 1)
+                if(!samples.isOccluded(gridh->bound()))
+                    rasterize(samples, *gridh);
+                else if(gridh->useCount() == 1 && !gridh->rasterized())
+                    ++m_stats->gridsOccluded;
+                if(gridh->useCount() == 1)
                     --m_stats->gridsInFlight;
             }
             // Tessellate waiting surfaces
-            if(GeomHolderPtr geom = m_surfaces->popSurface(i,j))
+            if(GeomHolderPtr geomh = m_surfaces->popSurface(i,j))
             {
-                // Scale dicing coordinates to account for shading rate.
-                Mat4 scaledTessCoords = tessCoords *
-                    Mat4().setScale(1/micropolyBlurWidth(geom, m_coc.get()));
-                // Note that invoking the tessellator causes surfaces and
-                // grids to be push()ed back to the renderer behind the
-                // scenes.
-                tessContext.tessellate(scaledTessCoords, geom);
-                geom->releaseGeometry();
-                --m_stats->geometryInFlight;
+                samples.ensureSampleInit();
+                if(!samples.isOccluded(geomh->bound()))
+                {
+                    // Scale dicing coordinates to account for shading rate.
+                    Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
+                            1/micropolyBlurWidth(geomh, m_coc.get()));
+                    // Note that invoking the tessellator causes surfaces and
+                    // grids to be push()ed back to the renderer behind the
+                    // scenes.
+                    tessContext.tessellate(scaledTessCoords, geomh);
+                    geomh->releaseGeometry();
+                    --m_stats->geometryInFlight;
+                }
+                else if(geomh->useCount() == 1)
+                {
+                    // Occluded geometry with a use count of one will be
+                    // discarded entirely.
+                    --m_stats->geometryInFlight;
+                    ++m_stats->geometryOccluded;
+                }
             }
             else
                 break;
@@ -545,6 +597,7 @@ void Renderer::render()
 /// and current options.
 void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
 {
+    holder.setRasterized();
     if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
     {
         // Sample with motion blur or depth of field
