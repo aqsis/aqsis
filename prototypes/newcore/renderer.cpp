@@ -45,6 +45,7 @@
 #include "tessellation.h"
 
 #include "stats.h"
+#include "timer.h"
 
 //------------------------------------------------------------------------------
 /// Tile of sample positions
@@ -116,8 +117,9 @@ class SampleTile
         V2i sampleOffset() const { return m_fragmentTile->sampleOffset(); }
 
         /// Determine whether the bound is entirely occluded by the samples.
-        bool isOccluded(const Box& bound)
+        bool isOccluded(const Box& bound, Timer& occlTime)
         {
+            TIME_SCOPE(occlTime);
             // transform bound into integer coords (inclusive end)
             V2i bndMin = ifloor(vec2_cast(bound.min)) - sampleOffset();
             V2i bndMax = ifloor(vec2_cast(bound.max)) - sampleOffset();
@@ -211,21 +213,57 @@ struct Renderer::Stats
     SimpleCounterStat<useStats>   samplesTested;
     SimpleCounterStat<useStats>   samplesHit;
 
-    friend std::ostream& operator<<(std::ostream& out, Stats& s)
+    // Timers
+    Timer occlTime;
+    Timer splitDiceTime;
+    Timer rasterizeTime;
+    Timer filteringTime;
+    Timer shadingTime;
+    Timer frameTime;
+
+    // Only a friend so it can use Renderer::Stats
+    friend std::ostream& operator<<(std::ostream& out, Renderer::Stats& s)
     {
-        out << "geometry : allocated            : " << s.geometryInFlight << "\n"
-            << "geometry : occlusion culled     : " << s.geometryOccluded << "\n";
-        out << "grids : allocated               : " << s.gridsInFlight << "\n"
-            << "grids : occlusion culled        : " << s.gridsOccluded << "\n";
-        out << "micropolygons : area            : " << s.averagePolyArea << "\n";
-        out << "sampling : point in poly tests  : " << s.samplesTested;
+        // Output stats
+        out << "geometry: allocated            : " << s.geometryInFlight << "\n"
+            << "geometry: occlusion culled     : " << s.geometryOccluded << "\n"
+            << "grids: allocated               : " << s.gridsInFlight    << "\n"
+            << "grids: occlusion culled        : " << s.gridsOccluded    << "\n"
+            << "micropolygons: area            : " << s.averagePolyArea  << "\n";
+        out << "sampling: point in poly tests  : " << s.samplesTested;
         if(s.samplesTested.value() > 0)
             out << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
                 << "% hit)";
         out << "\n";
+
+        // Output timings
+        double frameTime = s.frameTime();
+        double inPercent = 100/frameTime;
+#       define FORMAT_TIME(description, timerName) boost::format(          \
+            "time: %-14s :%7.3fs  (%4.1f%% of frame)\n")                   \
+            % description % s.timerName() % (inPercent*s.timerName())
+        out << "\n"
+            << boost::format("time: frame          :%7.3fs\n") % frameTime
+            << FORMAT_TIME("occlusion cull", occlTime)
+            << FORMAT_TIME("split/dice", splitDiceTime)
+            << FORMAT_TIME("sampling", rasterizeTime)
+            << FORMAT_TIME("filtering", filteringTime)
+            << FORMAT_TIME("shading", shadingTime);
+#       undef FORMAT_TIME
+
         return out;
     }
+
+    Stats(bool doTimings=true)
+        : occlTime(doTimings),
+        splitDiceTime(doTimings),
+        rasterizeTime(doTimings),
+        filteringTime(doTimings),
+        shadingTime(doTimings),
+        frameTime(doTimings)
+    { }
 };
+
 
 namespace {
 /// Fill an array with the default no-hit fragment sample values
@@ -387,6 +425,8 @@ void Renderer::push(const GeomHolderPtr& holder)
 // Push a grid onto the render queue
 void Renderer::push(const GridHolderPtr& holder)
 {
+    DISABLE_TIMER_FOR_SCOPE(m_stats->splitDiceTime);
+    TIME_SCOPE(m_stats->shadingTime);
     ++m_stats->gridsInFlight;
     holder->shade();
     holder->project(m_camToSRaster);
@@ -510,6 +550,7 @@ void Renderer::add(GeometryKeys& deformingGeom,
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
+    TIME_SCOPE(m_stats->frameTime);
     MemoryLog memLog;
 
     // Coordinate system for tessellation resolution calculation.
@@ -548,7 +589,7 @@ void Renderer::render()
             while(GridHolderPtr gridh = m_surfaces->popGrid(i,j))
             {
                 samples.ensureSampleInit();
-                if(!samples.isOccluded(gridh->bound()))
+                if(!samples.isOccluded(gridh->bound(), m_stats->occlTime))
                     rasterize(samples, *gridh);
                 else if(gridh->useCount() == 1 && !gridh->rasterized())
                     ++m_stats->gridsOccluded;
@@ -559,8 +600,9 @@ void Renderer::render()
             if(GeomHolderPtr geomh = m_surfaces->popSurface(i,j))
             {
                 samples.ensureSampleInit();
-                if(!samples.isOccluded(geomh->bound()))
+                if(!samples.isOccluded(geomh->bound(), m_stats->occlTime))
                 {
+                    TIME_SCOPE(m_stats->splitDiceTime);
                     // Scale dicing coordinates to account for shading rate.
                     Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
                             1/micropolyBlurWidth(geomh, m_coc.get()));
@@ -584,6 +626,7 @@ void Renderer::render()
         }
         m_surfaces->setFinished(i,j);
         // Filter the tile
+        TIME_SCOPE(m_stats->filteringTime);
         m_filterProcessor->insert(tilePos, fragments);
     }
     memLog.log();
@@ -597,6 +640,7 @@ void Renderer::render()
 /// and current options.
 void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
 {
+    TIME_SCOPE(m_stats->rasterizeTime);
     holder.setRasterized();
     if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
     {
