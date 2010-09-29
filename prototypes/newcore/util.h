@@ -121,6 +121,12 @@ inline Imath::Vec2<T> min(const Imath::Vec2<T>& a, const Imath::Vec2<T>& b)
 }
 
 template<typename T>
+inline Imath::Vec2<T> max(const Imath::Vec2<T>& a, const Imath::Vec2<T>& b)
+{
+    return Imath::Vec2<T>(std::max(a.x, b.x), std::max(a.y,b.y));
+}
+
+template<typename T>
 inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
 {
     return a.x*b.y - b.x*a.y;
@@ -318,6 +324,12 @@ template<typename T>
 inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
 {
     return Imath::V2i(ifloor(v.x), ifloor(v.y));
+}
+
+template<typename T>
+inline Imath::V2i iceil(const Imath::Vec2<T>& v)
+{
+    return Imath::V2i(iceil(v.x), iceil(v.y));
 }
 
 #define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))

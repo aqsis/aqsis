@@ -267,12 +267,16 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
 
 namespace {
 template<typename T>
-void clampOptBelow(T& val, const char* name, const T& minVal)
+void clampOptBelow(T& val, const char* name, const T& minVal,
+                   const char* reason = 0)
 {
     if(val < minVal)
     {
         std::cerr << "Warning: Option " << name << " = " << val
-                  << " is too small.  Clamping to " << minVal << "\n";
+                  << " is too small";
+        if(reason)
+            std::cerr << " (" << reason << ")";
+        std::cerr << ".  Clamping to " << minVal << ".\n";
         val = minVal;
     }
 }
@@ -290,6 +294,13 @@ void Renderer::sanitizeOptions(Options& opts)
     CLAMP_OPT_BELOW(resolution.y, 1);
     CLAMP_OPT_BELOW(bucketSize.x, 1);
     CLAMP_OPT_BELOW(bucketSize.y, 1);
+    // Filter width can't be larger than bucket size due to implementation
+    // choices.
+    V2i minBucketSize = iceil(opts.pixelFilter->width());
+    clampOptBelow(opts.bucketSize.x, "bucketsize.x", minBucketSize.x,
+                  "must be greater than filter size");
+    clampOptBelow(opts.bucketSize.y, "bucketsize.y", minBucketSize.y,
+                  "must be greater than filter size");
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
     CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
