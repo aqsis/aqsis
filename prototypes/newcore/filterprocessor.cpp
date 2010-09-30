@@ -243,6 +243,7 @@ void FilterProcessor::filter(std::vector<float>& output,
         //
         // Filter support is a single point, so no filtering is necessary;
         // just copy the samples over in four blocks.
+        float* defaultRowStore = 0;
         int rowLen = outSize.x*fragSize;
         int halfRowLen = outSize.x/2*fragSize;
         for(int j = 0; j < 2; ++j)
@@ -250,14 +251,28 @@ void FilterProcessor::filter(std::vector<float>& output,
         {
             FvecView dest = FvecView(&output[0] + i*halfRowLen,
                                      halfRowLen, rowLen) + j*outSize.y/2;
-            ConstFvecView src(defaultFrag, fragSize, 0);
             if(block.tiles[j][i]->hasSamples())
             {
-                src = ConstFvecView(block.tiles[j][i]->fragment(0,0)
-                                    + (1-i)*halfRowLen, halfRowLen, rowLen)
-                      + (1-j)*outSize.y/2;
+                ConstFvecView src = ConstFvecView(
+                        block.tiles[j][i]->fragment(0,0) + (1-i)*halfRowLen,
+                        halfRowLen, rowLen) + (1-j)*outSize.y/2;
+                copy(dest, src, outSize.y/2);
             }
-            copy(dest, src, outSize.y/2);
+            else
+            {
+                // No source samples to copy!  Fill the tile quater in with
+                // default fragments instead.
+                if(!defaultRowStore)
+                {
+                    // Construct a row of duplicate pixels from defaultFrag.
+                    defaultRowStore = FALLOCA(halfRowLen);
+                    copy(FvecView(defaultRowStore, fragSize),
+                         ConstFvecView(defaultFrag, fragSize, 0),
+                         outSize.x/2);
+                }
+                copy(dest, ConstFvecView(defaultRowStore, halfRowLen, 0),
+                     outSize.y/2);
+            }
         }
     }
     else if(m_filter.isSeparable())
