@@ -31,7 +31,10 @@
 #include <fstream>
 #include <cstdlib>
 
+#include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <aqsis/riutil/ricxxutil.h>
 
 #include "api.h"
 
@@ -39,21 +42,54 @@ using namespace Aqsis;
 
 int main(int argc, char* argv[])
 {
-    if(argc < 2)
+    typedef std::vector<std::string> StringVec;
+    namespace po = boost::program_options;
+    // optional options
+    po::options_description optionsDesc("options");
+    optionsDesc.add_options()
+        ("help,h", "help message")
+        ("stats,s", po::value<int>()->default_value(1),
+         "frame statistics verbosity")
+    ;
+    // options + positional parameters
+    po::options_description allArgs("All arguments");
+    allArgs.add(optionsDesc);
+    allArgs.add_options()
+        ("rib_files", po::value<StringVec>(), "RIB files to render")
+    ;
+    po::positional_options_description params;
+    params.add("rib_files", -1);
+    // Parse options
+    po::variables_map opts;
+    po::store(po::command_line_parser(argc, argv)
+              .options(allArgs).positional(params).run(), opts);
+    po::notify(opts);
+
+    if(opts.count("help") || opts.count("rib_files") == 0)
     {
-        std::cerr << "Usage: " << argv[0] << " scene.rib\n";
-        return EXIT_SUCCESS;
-    }
-    const char* fileName = argv[1];
-    std::ifstream sceneFile(fileName, std::ios::in | std::ios::binary);
-    if(!sceneFile)
-    {
-        std::cerr << "Could not open scene file\n";
-        return EXIT_FAILURE;
+        std::cout
+            << "Usage: " << argv[0] << " [options] scene.rib\n\n"
+            << optionsDesc;
+        return 0;
     }
 
     boost::shared_ptr<Ri::RendererServices> renderer(createRenderer());
-    renderer->parseRib(sceneFile, fileName);
+
+    renderer->firstFilter().Option("statistics", ParamListBuilder()
+                            ("int endofframe", &opts["stats"].as<int>()));
+
+    const StringVec& ribFiles = opts["rib_files"].as<StringVec>();
+    for(int ifile = 0; ifile < (int)ribFiles.size(); ++ifile)
+    {
+        const char* fileName = ribFiles[ifile].c_str();
+        std::ifstream sceneFile(fileName, std::ios::in | std::ios::binary);
+        if(!sceneFile)
+        {
+            std::cerr << "Could not open file \"" << fileName << "\"\n";
+            return 1;
+        }
+        renderer->parseRib(sceneFile, fileName);
+    }
 
 #if 0
     if(sceneName == "tenpatch")

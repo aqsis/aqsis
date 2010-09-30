@@ -197,11 +197,24 @@ class CircleOfConfusion
 };
 
 
-const bool useStats=true;
 //------------------------------------------------------------------------------
 /// Renderer statistics
 struct Renderer::Stats
 {
+    /// Flag to allow stats to be disabled completely at compile time.
+    static const bool useStats=true;
+    /// Flag to indicate that expensive statistics should be collected.
+    ///
+    /// Statistics which have a measurable performance impact should only be
+    /// collected if this flag is enabled.
+    bool collectExpensiveStats;
+    /// Stats verbosity level
+    ///
+    /// 0 = no stats
+    /// 1 = simple things
+    /// 2 = include potentially expensive stats
+    int verbosity;
+
     // Geometry stats
     ResourceCounterStat<useStats> geometryInFlight;
     SimpleCounterStat<useStats>   geometryOccluded;
@@ -214,55 +227,65 @@ struct Renderer::Stats
     SimpleCounterStat<useStats>   samplesHit;
 
     // Timers
+    Timer frameTime;
     Timer occlTime;
     Timer splitDiceTime;
     Timer rasterizeTime;
     Timer filteringTime;
     Timer shadingTime;
-    Timer frameTime;
 
-    // Only a friend so it can use Renderer::Stats
-    friend std::ostream& operator<<(std::ostream& out, Renderer::Stats& s)
+    /// Print the statistics to the given stream.
+    void printStats(std::ostream& out);
+
+    Stats(int verbosity)
+        : collectExpensiveStats(verbosity >= 2),
+        verbosity(verbosity),
+        frameTime     (verbosity >= 1),
+        occlTime      (verbosity >= 2),
+        splitDiceTime (verbosity >= 2),
+        rasterizeTime (verbosity >= 2),
+        filteringTime (verbosity >= 2),
+        shadingTime   (verbosity >= 2)
+    { }
+};
+
+void Renderer::Stats::printStats(std::ostream& out)
+{
+    // Output stats
+    if(verbosity >= 1)
     {
-        // Output stats
-        out << "geometry: allocated            : " << s.geometryInFlight << "\n"
-            << "geometry: occlusion culled     : " << s.geometryOccluded << "\n"
-            << "grids: allocated               : " << s.gridsInFlight    << "\n"
-            << "grids: occlusion culled        : " << s.gridsOccluded    << "\n"
-            << "micropolygons: area            : " << s.averagePolyArea  << "\n";
-        out << "sampling: point in poly tests  : " << s.samplesTested;
-        if(s.samplesTested.value() > 0)
-            out << "  (" << 100.0*s.samplesHit.value()/s.samplesTested.value()
+        out << "geometry: allocated            : " << geometryInFlight << "\n"
+            << "geometry: occlusion culled     : " << geometryOccluded << "\n"
+            << "grids: allocated               : " << gridsInFlight    << "\n"
+            << "grids: occlusion culled        : " << gridsOccluded    << "\n";
+        if(verbosity >= 2)
+            out << "micropolygons: area            : " << averagePolyArea  << "\n";
+        out << "sampling: point in poly tests  : " << samplesTested;
+        if(samplesTested.value() > 0)
+            out << "  (" << 100.0*samplesHit.value()/samplesTested.value()
                 << "% hit)";
         out << "\n";
 
         // Output timings
-        double frameTime = s.frameTime();
-        double inPercent = 100/frameTime;
-#       define FORMAT_TIME(description, timerName) boost::format(          \
-            "time: %-14s :%7.3fs  (%4.1f%% of frame)\n")                   \
-            % description % s.timerName() % (inPercent*s.timerName())
+        double frame = frameTime();
         out << "\n"
-            << boost::format("time: frame          :%7.3fs\n") % frameTime
-            << FORMAT_TIME("occlusion cull", occlTime)
-            << FORMAT_TIME("split/dice", splitDiceTime)
-            << FORMAT_TIME("sampling", rasterizeTime)
-            << FORMAT_TIME("filtering", filteringTime)
-            << FORMAT_TIME("shading", shadingTime);
-#       undef FORMAT_TIME
+            << boost::format("time: frame          :%7.3fs\n") % frame;
 
-        return out;
+        if(verbosity >= 2)
+        {
+            double inPercent = 100/frame;
+#           define FORMAT_TIME(description, timerName) boost::format(  \
+                "time: %-14s :%7.3fs  (%4.1f%% of frame)\n")               \
+                % description % timerName() % (inPercent*timerName())
+            out << FORMAT_TIME("occlusion cull", occlTime)
+                << FORMAT_TIME("split/dice", splitDiceTime)
+                << FORMAT_TIME("sampling", rasterizeTime)
+                << FORMAT_TIME("filtering", filteringTime)
+                << FORMAT_TIME("shading", shadingTime);
+#           undef FORMAT_TIME
+        }
     }
-
-    Stats(bool doTimings=true)
-        : occlTime(doTimings),
-        splitDiceTime(doTimings),
-        rasterizeTime(doTimings),
-        filteringTime(doTimings),
-        shadingTime(doTimings),
-        frameTime(doTimings)
-    { }
-};
+}
 
 
 namespace {
@@ -440,7 +463,7 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
     m_surfaces(),
     m_outVars(),
     m_camToSRaster(),
-    m_stats(new Stats())
+    m_stats(new Stats(m_opts->statsVerbosity))
 {
     sanitizeOptions(*m_opts);
     // Set up output variables.  Default is to use Cs.
@@ -529,8 +552,7 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
 
 Renderer::~Renderer()
 {
-    if(m_opts->statsVerbosity > 0)
-        std::cout << *m_stats;
+    m_stats->printStats(std::cout);
 }
 
 void Renderer::add(const GeometryPtr& geom, const ConstAttributesPtr& attrs)
@@ -902,7 +924,8 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
            bndMin.x >= tileSize.x || bndMin.y >= tileSize.y)
             continue;
 
-        m_stats->averagePolyArea += poly.area();
+        if(m_stats->collectExpensiveStats)
+            m_stats->averagePolyArea += poly.area();
 
         poly.initHitTest();
         poly.initInterpolator();

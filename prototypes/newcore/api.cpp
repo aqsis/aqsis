@@ -938,6 +938,11 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
         if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
             m_opts->opts->eyeSplits = es[0];
     }
+    if(strcmp(name, "statistics") == 0)
+    {
+        if(IntArray i = params.findIntData(Ri::TypeSpec::Int, "endofframe"))
+            m_opts->opts->statsVerbosity = i[0];
+    }
     if(params.hasUnusedParams())
     {
         // Complain if we failed to handle at least one option.

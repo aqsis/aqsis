@@ -11,7 +11,7 @@ find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
 
 find_package(TIFF)
-find_package(Boost 1.36.0 COMPONENTS unit_test_framework)
+find_package(Boost 1.36.0 COMPONENTS unit_test_framework program_options)
 # Assumes aqsis has been built into the directory path/to/src/../build.  Can be
 # overridden using Aqsis_DIR.
 find_package(Aqsis PATHS ../../../build/)
@@ -83,7 +83,7 @@ source_group("Header Files" FILES ${hdrs})
 
 add_executable(render ${srcs} ${hdrs})
 target_link_libraries(render ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
-                      aqsis_riutil)
+                      ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_riutil)
 
 
 #------------------------------------------------------------

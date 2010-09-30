@@ -77,7 +77,7 @@ struct Options : public RefCounted
         focalDistance(FLT_MAX),
         pixelFilter(makeGaussianFilter(Vec2(2,2))),
         doFilter(true),
-        statsVerbosity(1)
+        statsVerbosity(0)
     { }
 };
 
