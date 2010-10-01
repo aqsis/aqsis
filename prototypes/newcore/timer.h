@@ -223,6 +223,9 @@ private:
     }
 };
 
+/// The usual stupid trick to force macro expansion before concatentation
+#define AQSIS_TOKEN_CONCAT(a,b) AQSIS_TOKEN_CONCAT_IMPL(a,b)
+#define AQSIS_TOKEN_CONCAT_IMPL(a,b) a ## b
 
 /// Time a scope with the given timer.
 ///
@@ -236,11 +239,11 @@ private:
 ///     // ... code to time
 /// }
 #define TIME_SCOPE(timer) ScopeTimer \
-    _timer_scope_guard_ ## __LINE__(timer)
+    AQSIS_TOKEN_CONCAT(_timer_scope_guard_,__LINE__)(timer)
 
 /// Turn off a currently running timer inside the given scope
 #define DISABLE_TIMER_FOR_SCOPE(timer) ScopeTimerDisable \
-    _disable_timer_scope_guard_ ## __LINE__(timer)
+    AQSIS_TOKEN_CONCAT(_disable_timer_scope_guard_,__LINE__)(timer)
 
 
 /// Scope guard class to enable a timer and disable on scope exit
