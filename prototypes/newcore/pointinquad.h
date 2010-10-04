@@ -30,7 +30,6 @@
 #ifndef POINTINQUAD_H_INCLUDED
 #define POINTINQUAD_H_INCLUDED
 
-#include "sample.h"
 #include "util.h"
 
 
@@ -251,10 +250,10 @@ class PointInQuad
         }
 
         /// Point-in-polygon test
-        inline bool operator()(const Sample& samp)
+        inline bool operator()(Vec2 p)
         {
-            float x = samp.p.x;
-            float y = samp.p.y;
+            float x = p.x;
+            float y = p.y;
             if(m_convex)
             {
                 return m_nx[0]*(x - m_px[0]) + m_ny[0]*(y - m_py[0]) >= 0

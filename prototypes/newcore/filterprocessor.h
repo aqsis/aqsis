@@ -35,7 +35,6 @@
 
 #include "arrayview.h"
 #include "refcount.h"
-#include "sample.h"
 #include "displaymanager.h"
 #include "util.h"
 

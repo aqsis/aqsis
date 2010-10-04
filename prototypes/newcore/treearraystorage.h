@@ -79,6 +79,12 @@ inline int quadTreeParentNode(int index)
     return (index - 1) >> 2;
 }
 
+/// Get first sibling of a node from the given node index.
+inline int quadTreeFirstSibling(int index)
+{
+    return ((index-1) & 0xFFFFFFFC) + 1;
+}
+
 /// Get the array index of a quad tree node at position x,y and given depth.
 inline int quadTreeNodeIndex(int x, int y, int depth)
 {

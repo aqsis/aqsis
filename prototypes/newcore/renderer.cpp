@@ -940,11 +940,11 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
             Sample& samp = tile.sample(sx,sy);
             // Test whether sample hits the micropoly
             ++m_stats->samplesTested;
-            if(!poly.contains(samp))
+            if(!poly.contains(samp.p))
                 continue;
             ++m_stats->samplesHit;
             // Determine hit depth
-            poly.interpolateAt(samp);
+            poly.interpolateAt(samp.p);
             float z = poly.interpolateZ();
             if(samp.z < z)
                 continue; // Ignore if hit is hidden

@@ -32,7 +32,6 @@
 
 #include "attributes.h"
 #include "invbilin.h"
-#include "sample.h"
 #include "util.h"
 #include "pointinquad.h"
 
@@ -150,9 +149,9 @@ class MicroQuadSampler
                            (m_curr.u() + m_curr.v()) % 2);
         }
         /// Return true if the sample is contained in the polygon
-        inline bool contains(const Sample& samp)
+        inline bool contains(Vec2 p)
         {
-            return m_hitTest(samp);
+            return m_hitTest(p);
         }
 
         /// Initialize the shading interpolator
@@ -166,10 +165,10 @@ class MicroQuadSampler
             }
         }
         /// Specify interpolation point
-        inline void interpolateAt(const Sample& samp)
+        inline void interpolateAt(Vec2 p)
         {
             if(m_smoothShading)
-                m_uv = m_invBilin(samp.p);
+                m_uv = m_invBilin(p);
         }
 
         /// Interpolate depth value at current point.
