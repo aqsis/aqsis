@@ -908,20 +908,19 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
 
     V2i tileSize = tile.size();
 
+    Vec2 bucketMin = Vec2(tile.sampleOffset());
+    Vec2 bucketMax = Vec2(tile.sampleOffset() + tileSize);
+
     // Construct a sampler for the polygons in the grid
     PolySamplerT poly(grid, holder.attrs(), m_outVars);
     // iterate over all micropolys in the grid & render each one.
     for(;poly.valid(); poly.next())
     {
-        // TODO: Optimize this so that we don't recompute this stuff for each
-        // and every bucket
+        // TODO: Is it worth precomputing and storing the bound?
         Box bound = poly.bound();
-        // Compute subsample coordinates on the current sample tile.
-        V2i bndMin = ifloor(vec2_cast(bound.min)) - tile.sampleOffset();
-        V2i bndMax = ifloor(vec2_cast(bound.max)) - tile.sampleOffset();
         // Go to next micropoly if current is entirely outside the bucket.
-        if(bndMax.x < 0 || bndMax.y < 0 ||
-           bndMin.x >= tileSize.x || bndMin.y >= tileSize.y)
+        if(bound.max.x <  bucketMin.x || bound.max.y <  bucketMin.y ||
+           bound.min.x >= bucketMax.x || bound.min.y >= bucketMax.y)
             continue;
 
         if(m_stats->collectExpensiveStats)
@@ -929,6 +928,9 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
 
         poly.initHitTest();
         poly.initInterpolator();
+        // Compute subsample coordinates on the current sample tile.
+        V2i bndMin = ifloor(vec2_cast(bound.min)) - tile.sampleOffset();
+        V2i bndMax = ifloor(vec2_cast(bound.max)) - tile.sampleOffset();
         int beginx = clamp(bndMin.x,   0, tileSize.x);
         int endx   = clamp(bndMax.x+1, 0, tileSize.x);
         int beginy = clamp(bndMin.y,   0, tileSize.y);

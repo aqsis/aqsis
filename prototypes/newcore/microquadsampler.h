@@ -35,7 +35,6 @@
 #include "util.h"
 #include "pointinquad.h"
 
-
 /// Quadrilateral micropolygon sampler
 ///
 /// This is designed to be constructed just before sampling time; it's not
@@ -97,7 +96,8 @@ class MicroQuadSampler
             for(int j = 0, jend = outVars.size(); j < jend; ++j)
             {
                 // Simplistic linear search through grid variables for now.
-                // This only happens once per grid, so maybe it's not too bad?
+                // This only happens a few times per grid, so maybe it's not
+                // too bad?
                 for(int i = 0, iend = gridVars.size(); i < iend; ++i)
                 {
                     if(gridVars[i] == outVars[j])
@@ -125,11 +125,17 @@ class MicroQuadSampler
         /// Get bound for current micropoly
         Box bound() const
         {
-            Box bnd(m_P[m_ind.a]);
-            bnd.extendBy(m_P[m_ind.b]);
-            bnd.extendBy(m_P[m_ind.c]);
-            bnd.extendBy(m_P[m_ind.d]);
-            return bnd;
+            const Vec3& Pa = m_P[m_ind.a];
+            const Vec3& Pb = m_P[m_ind.b];
+            const Vec3& Pc = m_P[m_ind.c];
+            const Vec3& Pd = m_P[m_ind.d];
+            Vec3 bndMin(std::min(std::min(Pa.x, Pb.x), std::min(Pc.x, Pd.x)),
+                        std::min(std::min(Pa.y, Pb.y), std::min(Pc.y, Pd.y)),
+                        std::min(std::min(Pa.z, Pb.z), std::min(Pc.z, Pd.z)));
+            Vec3 bndMax(std::max(std::max(Pa.x, Pb.x), std::max(Pc.x, Pd.x)),
+                        std::max(std::max(Pa.y, Pb.y), std::max(Pc.y, Pd.y)),
+                        std::max(std::max(Pa.z, Pb.z), std::max(Pc.z, Pd.z)));
+            return Box(bndMin, bndMax);
         }
 
         /// Get area for current micropoly
@@ -179,25 +185,6 @@ class MicroQuadSampler
                               m_P[m_ind.d].z, m_P[m_ind.c].z, m_uv);
             else
                 return m_P[m_ind.a].z;
-        }
-
-        /// Interpolate the colour
-        inline void interpolateColor(float* col) const
-        {
-            int CsIdx = m_storage.varSet().find(StdIndices::Cs);
-            assert(CsIdx >= 0);
-            ConstFvecView Cs = m_storage.get(CsIdx);
-            if(m_smoothShading)
-            {
-                for(int i = 0; i < 3; ++i)
-                    col[i] = bilerp(Cs[m_ind.a][i], Cs[m_ind.b][i],
-                                    Cs[m_ind.d][i], Cs[m_ind.c][i], m_uv);
-            }
-            else
-            {
-                for(int i = 0; i < 3; ++i)
-                    col[i] = Cs[m_ind.a][i];
-            }
         }
 
         /// Compute any output variables at the current hit.
