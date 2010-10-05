@@ -276,7 +276,7 @@ class CameraInfo
                     // TODO!
                     break;
             }
-            return screenWindow(m_left, m_right, m_bottom, m_top) * proj;
+            return proj * screenWindow(m_left, m_right, m_bottom, m_top);
         }
 
     private:
