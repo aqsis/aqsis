@@ -114,6 +114,9 @@ class float4
         STRONG_INLINE static float4 loadu(const float* f) { return float4(_mm_loadu_ps(f)); }
         STRONG_INLINE static void store(float* f, float4 rhs) { _mm_store_ps(f, rhs.m_vec); }
         STRONG_INLINE static void storeu(float* f, float4 rhs) { _mm_storeu_ps(f, rhs.m_vec); }
+
+        friend float4 min(float4 a, float4 b) { return float4(_mm_min_ps(a.m_vec, b.m_vec)); }
+        friend float4 max(float4 a, float4 b) { return float4(_mm_max_ps(a.m_vec, b.m_vec)); }
 };
 
 std::ostream& operator<<(std::ostream& out, float4 f4)
