@@ -586,12 +586,19 @@ void Renderer::render()
     tessCoords[2][2] = 0;
     tessCoords[3][2] = 0;
 
+#ifdef AQSIS_USE_THREADS
+#   pragma omp parallel
+#endif
+    {
     TessellationContextImpl tessContext(*this);
 
     SampleTile samples;
 
     V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
     // Loop over all buckets
+#ifdef AQSIS_USE_THREADS
+#   pragma omp for schedule(dynamic,4) nowait
+#endif
     for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
     for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
     {
@@ -632,7 +639,6 @@ void Renderer::render()
                     // grids to be push()ed back to the renderer behind the
                     // scenes.
                     tessContext.tessellate(scaledTessCoords, geomh);
-                    geomh->releaseGeometry();
                     --m_stats->geometryInFlight;
                 }
                 else if(geomh->useCount() == 1)
@@ -650,6 +656,7 @@ void Renderer::render()
         // Filter the tile
         TIME_SCOPE(m_stats->filteringTime);
         m_filterProcessor->insert(tilePos, fragments);
+    }
     }
     memLog.log();
     m_displayManager->closeFiles();

@@ -39,6 +39,7 @@
 #include "options.h"
 #include "refcount.h"
 #include "renderer.h"
+#include "thread.h"
 #include "util.h"
 #include "varspec.h"
 
@@ -52,6 +53,8 @@ class GeomHolder : public RefCounted
         int m_splitCount;    ///< Number of times the geometry has been split
         Box m_bound;         ///< Bound in camera coordinates
         ConstAttributesPtr m_attrs; ///< Surface attribute state
+        bool m_expired;
+        mutable Mutex m_mutex; ///< Mutex used when splitting
 
         /// Get the bound from a set of geometry keys
         static Box boundFromKeys(const GeometryKeys& keys)
@@ -69,7 +72,8 @@ class GeomHolder : public RefCounted
             m_geomKeys(),
             m_splitCount(0),
             m_bound(geom->bound()),
-            m_attrs(attrs)
+            m_attrs(attrs),
+            m_expired(false)
         { }
         /// Create geometry resulting from splitting (has a parent surface)
         GeomHolder(const GeometryPtr& geom, const GeomHolder& parent)
@@ -77,7 +81,8 @@ class GeomHolder : public RefCounted
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
             m_bound(geom->bound()),
-            m_attrs(parent.m_attrs)
+            m_attrs(parent.m_attrs),
+            m_expired(false)
         { }
 
         /// Create initial deforming geometry (no parent surface)
@@ -86,7 +91,8 @@ class GeomHolder : public RefCounted
             m_geomKeys(keys),
             m_splitCount(0),
             m_bound(boundFromKeys(m_geomKeys)),
-            m_attrs(attrs)
+            m_attrs(attrs),
+            m_expired(false)
         { }
         /// Create deforming geometry resulting from splitting
         GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
@@ -95,7 +101,8 @@ class GeomHolder : public RefCounted
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
             m_bound(),
-            m_attrs(parent.m_attrs)
+            m_attrs(parent.m_attrs),
+            m_expired(false)
         {
             // Init geom keys, taking every keysStride'th geometry
             assert(static_cast<int>(parent.geomKeys().size())
@@ -117,13 +124,24 @@ class GeomHolder : public RefCounted
         const GeometryKeys& geomKeys() const { return m_geomKeys; }
 
         /// True if the holder no longer holds valid geometry
-        bool expired() const { return !m_geom && m_geomKeys.empty(); }
+        bool expired() const { return m_expired; }
         /// Delete held geometry
-        void releaseGeometry() { m_geom.reset(); m_geomKeys.clear(); }
+        void releaseGeometry()
+        {
+            m_expired = true;
+#           ifndef AQSIS_USE_THREADS
+            // FIXME!  This deallocation should clearly happen with threads
+            // too!
+            m_geom.reset();
+            m_geomKeys.clear();
+#           endif
+        }
         bool isDeforming() const { return !m_geom; }
         int splitCount() const    { return m_splitCount; }
         Box& bound() { return m_bound; }
         const Attributes& attrs() const { return *m_attrs; }
+
+        Mutex& mutex() const { return m_mutex; }
 };
 
 
@@ -221,116 +239,114 @@ class GridHolder : public RefCounted
 class TessellationContextImpl : public TessellationContext
 {
     private:
-        Renderer& m_renderer;
-        GridStorageBuilder m_builder;
-        const GeomHolder* m_parentGeom;
+        Renderer& m_renderer;         ///< Renderer instance
+        GridStorageBuilder m_builder; ///< Grid allocator
+        GeomHolder* m_currGeom;       ///< Geometry currently being split
 
-        /// Collecter for splits of deforming surfaces
-        class DeformCollector
-        {
-            private:
-                std::vector<GeometryPtr> m_splits;
-                int m_splitsPerKey;
-                std::vector<GridPtr> m_grids;
-
-            public:
-                void reset()
-                {
-                    m_splits.clear();
-                    m_splitsPerKey = 0;
-                    m_grids.clear();
-                }
-
-                void firstKeyDone()
-                {
-                    m_splitsPerKey = m_splits.size();
-                }
-
-                void push(const GeometryPtr& geom)
-                {
-                    m_splits.push_back(geom);
-                }
-
-                void push(const GridPtr& grid)
-                {
-                    m_grids.push_back(grid);
-                }
-
-                void pushResults(const GeomHolder& parentGeom,
-                                 Renderer& renderer)
-                {
-                    if(!m_splits.empty())
-                    {
-                        // Construct holder for each deforming child surface &
-                        // push it back to the renderer.
-                        assert((m_splits.size()/m_splitsPerKey)*m_splitsPerKey
-                                == m_splits.size());
-                        for(int i = 0; i < m_splitsPerKey; ++i)
-                        {
-                            GeomHolderPtr holder(
-                                new GeomHolder(
-                                    &*m_splits.begin() + i,
-                                    &*m_splits.end() + i,
-                                    m_splitsPerKey, parentGeom
-                                )
-                            );
-                            renderer.push(holder);
-                        }
-                    }
-                    if(!m_grids.empty())
-                    {
-                        // Construct deforming child grids
-                        renderer.push( GridHolderPtr(
-                                new GridHolder(
-                                    m_grids.begin(), m_grids.end(),
-                                    parentGeom
-                                )
-                        ));
-                    }
-                }
-        };
-        DeformCollector m_deformCollector;
+        // Storage for partly tessellated
+        std::vector<GeometryPtr> m_splits;
+        std::vector<GridPtr> m_grids;
 
     public:
         TessellationContextImpl(Renderer& renderer)
             : m_renderer(renderer),
             m_builder(),
-            m_parentGeom(0)
+            m_currGeom(0)
         { }
 
         void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder)
         {
-            m_parentGeom = holder.get();
+            m_currGeom = holder.get();
             holder->geom().tessellate(splitTrans, *this);
         }
 
         virtual void invokeTessellator(TessControl& tessControl)
         {
-            if(m_parentGeom->isDeforming())
+            // Collect the split/dice results in m_splits/m_grids.
+            m_splits.clear();
+            m_grids.clear();
+            int splitsPerKey = 0;
+            // First, do the actual tessellation by invoking the tessellator
+            // control object on the geometry.
+            if(m_currGeom->isDeforming())
             {
-                // Collect the split/dice results in m_deformCollector if the
-                // surface is involved in deformation motion blur.
-                m_deformCollector.reset();
-                const GeometryKeys& keys = m_parentGeom->geomKeys();
+                const GeometryKeys& keys = m_currGeom->geomKeys();
                 tessControl.tessellate(*keys[0].value, *this);
-                m_deformCollector.firstKeyDone();
+                splitsPerKey = m_splits.size();
                 for(int i = 1, nkeys = keys.size(); i < nkeys; ++i)
                     tessControl.tessellate(*keys[i].value, *this);
-                m_deformCollector.pushResults(*m_parentGeom, m_renderer);
             }
             else
-                tessControl.tessellate(m_parentGeom->geom(), *this);
+            {
+                // Non-deforming case.
+                tessControl.tessellate(m_currGeom->geom(), *this);
+            }
+            // Grab an exclusive lock for the current geometry so that the set
+            // of results can be sent back to the renderer atomically.
+            LockGuard lk(m_currGeom->mutex());
+            if(m_currGeom->expired())
+            {
+                // Oops, another thread has already split/diced the geometry;
+                // discard any split/dice results generated by the current
+                // thread.
+                return;
+            }
+            if(m_currGeom->isDeforming())
+            {
+                // Deforming case - gather together the split/dice results
+                // produced by the current deforming surface set
+                if(!m_splits.empty())
+                {
+                    assert((m_splits.size()/splitsPerKey)*splitsPerKey
+                            == m_splits.size());
+                    for(int i = 0; i < splitsPerKey; ++i)
+                    {
+                        GeomHolderPtr holder(new GeomHolder(
+                                        &*m_splits.begin() + i,
+                                        &*m_splits.end() + i,
+                                        splitsPerKey, *m_currGeom));
+                        m_renderer.push(holder);
+                    }
+                }
+                if(!m_grids.empty())
+                {
+                    m_renderer.push(GridHolderPtr(new GridHolder(
+                                                            m_grids.begin(),
+                                                            m_grids.end(),
+                                                            *m_currGeom)));
+                }
+            }
+            else
+            {
+                // Static non-deforming case.
+                if(!m_splits.empty())
+                {
+                    // Push surfaces back to the renderer
+                    for(int i = 0, iend = m_splits.size(); i < iend; ++i)
+                    {
+                        GeomHolderPtr holder(new GeomHolder(m_splits[i],
+                                                            *m_currGeom));
+                        m_renderer.push(holder);
+                    }
+                }
+                if(!m_grids.empty())
+                {
+                    // Push grids back to the renderer
+                    for(int i = 0, iend = m_grids.size(); i < iend; ++i)
+                    {
+                        GridHolderPtr holder(new GridHolder(m_grids[i],
+                                                        &m_currGeom->attrs()));
+                        m_renderer.push(holder);
+                    }
+                }
+            }
+            // Release geometry, since it's been tessellated now.
+            m_currGeom->releaseGeometry();
         }
 
         virtual void push(const GeometryPtr& geom)
         {
-            if(m_parentGeom->isDeforming())
-                m_deformCollector.push(geom);
-            else
-            {
-                GeomHolderPtr holder(new GeomHolder(geom, *m_parentGeom));
-                m_renderer.push(holder);
-            }
+            m_splits.push_back(geom);
         }
 
         virtual void push(const GridPtr& grid)
@@ -364,13 +380,7 @@ class TessellationContextImpl : public TessellationContext
                 // perspective projections.  (TODO: orthographic)
                 copy(I, P, stor.nverts());
             }
-            if(m_parentGeom->isDeforming())
-                m_deformCollector.push(grid);
-            else
-            {
-                m_renderer.push(GridHolderPtr(
-                    new GridHolder(grid, &m_parentGeom->attrs()) ));
-            }
+            m_grids.push_back(grid);
         }
 
         virtual const Options& options()
@@ -379,7 +389,7 @@ class TessellationContextImpl : public TessellationContext
         }
         virtual const Attributes& attributes()
         {
-            return m_parentGeom->attrs();
+            return m_currGeom->attrs();
         }
 
         virtual GridStorageBuilder& gridStorageBuilder()
@@ -392,11 +402,11 @@ class TessellationContextImpl : public TessellationContext
             m_builder.clear();
             // TODO: AOV stuff shouldn't be conditional on surfaceShader
             // existing.
-            if(m_parentGeom->attrs().surfaceShader)
+            if(m_currGeom->attrs().surfaceShader)
             {
                 // Renderer arbitrary output vars
                 const OutvarSet& aoVars = m_renderer.m_outVars;
-                const Shader& shader = *m_parentGeom->attrs().surfaceShader;
+                const Shader& shader = *m_currGeom->attrs().surfaceShader;
                 const VarSet& inVars = shader.inputVars();
                 // P is guaranteed to be dice by the geometry.
                 m_builder.add(Stdvar::P,  GridStorage::Varying);

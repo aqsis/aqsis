@@ -36,6 +36,7 @@
 #include <cassert>
 
 #include "tessellation.h"
+#include "thread.h"
 #include "util.h"
 
 
@@ -47,8 +48,8 @@
 class SplitStore
 {
     public:
-        /// Create a storage structure with nxBuckets x nyBuckets buckets, and given
-        /// spatial bound
+        /// Create a storage structure with nxBuckets x nyBuckets buckets, and
+        /// given spatial bound
         SplitStore(int nxBuckets, int nyBuckets, const Imath::Box2f& bound)
             : m_buckets(nxBuckets*nyBuckets),
             m_nxBuckets(nxBuckets),
@@ -66,6 +67,7 @@ class SplitStore
         /// If there are no surfaces present in the bucket, return null.
         GeomHolderPtr popSurface(int x, int y)
         {
+            LockGuard lock(m_mutex);
             return getBucket(x,y).popSurface();
         }
 
@@ -74,6 +76,7 @@ class SplitStore
         /// If there are no grids present in the bucket, return null.
         GridHolderPtr popGrid(int x, int y)
         {
+            LockGuard lock(m_mutex);
             return getBucket(x,y).popGrid();
         }
 
@@ -83,6 +86,7 @@ class SplitStore
         /// should be discarded.
         void setFinished(int x, int y)
         {
+            LockGuard lock(m_mutex);
             getBucket(x,y).setFinished();
         }
 
@@ -92,6 +96,7 @@ class SplitStore
         /// into.
         void insert(const GeomHolderPtr& geom)
         {
+            LockGuard lock(m_mutex);
             int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
             if(!bucketRangeForBound(geom->bound(), x0, x1, y0, y1))
                 return;
@@ -103,6 +108,7 @@ class SplitStore
 
         void insert(const GridHolderPtr& grid)
         {
+            LockGuard lock(m_mutex);
             int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
             if(!bucketRangeForBound(grid->bound(), x0, x1, y0, y1))
                 return;
@@ -265,6 +271,7 @@ class SplitStore
         int m_nxBuckets;      ///< number of buckets in x-direction
         int m_nyBuckets;      ///< number of buckets in y-direction
         Imath::Box2f m_bound; ///< Bounding box
+        Mutex m_mutex;
 };
 
 
