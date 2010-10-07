@@ -35,6 +35,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "renderer.h" // for OutvarSpec
+#include "thread.h"
 #include "util.h"
 
 /// Manager for image output to displays
@@ -52,7 +53,11 @@ class DisplayManager
 
         /// Write a tile of filtered data at the given position 
         ///
-        /// pos is the position of the pixel at the top left of the tile.
+        /// pos - the position of the pixel at the top left of the tile
+        /// data - a tile of filtered data, with size and channels as described
+        ///        to the DisplayManager constructor.
+        ///
+        /// This function is threadsafe.
         void writeTile(V2i pos, const float* data);
 
         /// Write images to files
@@ -69,7 +74,8 @@ class DisplayManager
         int m_totChans;      ///< number of channels per pixel
 
         std::vector<boost::shared_ptr<ImageFile> > m_files; ///< Image files
-        std::vector<char> m_tileTmpStorage; ///< Storage for writing to files
+        ThreadSpecificPtr<std::vector<char> >::type m_tileTmpStorage;
+                                            ///< Storage for writing to files
 };
 
 

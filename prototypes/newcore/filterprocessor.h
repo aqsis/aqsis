@@ -34,8 +34,9 @@
 #include <boost/scoped_array.hpp>
 
 #include "arrayview.h"
-#include "refcount.h"
 #include "displaymanager.h"
+#include "refcount.h"
+#include "thread.h"
 #include "util.h"
 
 //------------------------------------------------------------------------------
@@ -252,6 +253,12 @@ class FilterProcessor
                         const V2i& filterStride);
 
         /// Insert a finished tile of fragments at the given position
+        ///
+        /// position - location of the sample tile, in "tile coordinates" from
+        ///            the top left of the image.
+        /// tile - holder for sample data.
+        ///
+        /// This function is threadsafe.
         void insert(V2i position, const FragmentTilePtr& tile);
 
     private:
@@ -280,9 +287,11 @@ class FilterProcessor
 
         DisplayManager& m_displayManager; ///< Filtered tiles go here.
         FilterBlockMap m_waitingTiles; ///< Storage for waiting sampled tiles
+        Mutex m_waitingTilesMutex;     ///< Protection for m_waitingTiles
         Imath::Box2i m_outTileRange;   ///< Generate output tiles in here
 
-        std::vector<float> m_outTileWorkspace; ///< Output tile working space
+        /// Output tile working space
+        ThreadSpecificPtr<std::vector<float> >::type m_outTileWorkspace;
         V2i m_filterStride; ///< Stride in samples between adjacent pixels
         const CachedFilter& m_filter; ///< cached filter coeffs
 };

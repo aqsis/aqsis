@@ -118,11 +118,12 @@ class DisplayManager::ImageFile
             TIFFClose(m_tif);
         }
 
-        /// Write tile data at position pos to the file
+        /// Write tile data at position pos to the file.  Threadsafe.
         void writeTile(const V2i& pos, void* data)
         {
             if(!m_tif)
                 return;
+            LockGuard lock(m_tifMutex);
             if(m_tiled)
             {
                 TIFFWriteTile(m_tif, data, pos.x, pos.y, 0, 0);
@@ -142,6 +143,7 @@ class DisplayManager::ImageFile
 
     private:
         TIFF* m_tif;
+        Mutex m_tifMutex;
         bool m_tiled;
         bool m_doQuantize;
 };
@@ -203,7 +205,13 @@ void DisplayManager::closeFiles()
 /// Get temporary storage of size bytes
 void* DisplayManager::tmpStorage(size_t size)
 {
-    if(m_tileTmpStorage.size() < size)
-        m_tileTmpStorage.resize(size);
-    return &m_tileTmpStorage[0];
+    std::vector<char>* store = m_tileTmpStorage.get();
+    if(!store)
+    {
+        store = new std::vector<char>(size);
+        m_tileTmpStorage.reset(store);
+    }
+    if(store->size() < size)
+        store->resize(size);
+    return &(*store)[0];
 }

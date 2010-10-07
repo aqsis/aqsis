@@ -176,6 +176,10 @@ FilterProcessor::FilterProcessor(DisplayManager& displayManager,
 
 void FilterProcessor::insert(V2i position, const FragmentTilePtr& tile)
 {
+    // Get working space for filter.
+    if(!m_outTileWorkspace.get())
+        m_outTileWorkspace.reset(new std::vector<float>());
+    std::vector<float>& outTileWorkspace = *m_outTileWorkspace;
     // The sample tile with coordinates (tx,ty) overlaps the four
     // filtering tiles with coordinates:
     //
@@ -194,24 +198,33 @@ void FilterProcessor::insert(V2i position, const FragmentTilePtr& tile)
         if(p.x < m_outTileRange.min.x || p.y < m_outTileRange.min.y ||
            p.x >= m_outTileRange.max.x || p.y >= m_outTileRange.max.y)
             continue;
-        FilterBlockMap::iterator blocki = m_waitingTiles.find(p);
-        if(blocki == m_waitingTiles.end())
+        FilterBlock blockToFilter;
         {
-            // Create new block if it didn't exist yet
-            std::pair<FilterBlockMap::iterator, bool> insRes =
-                m_waitingTiles.insert(std::make_pair(p, FilterBlock()));
-            assert(insRes.second);
-            blocki = insRes.first;
+            // Look up the filter block in the map, and add the current tile.
+            LockGuard lock(m_waitingTilesMutex);
+            FilterBlockMap::iterator blocki = m_waitingTiles.find(p);
+            if(blocki == m_waitingTiles.end())
+            {
+                // Create new block if it didn't exist yet
+                std::pair<FilterBlockMap::iterator, bool> insRes =
+                    m_waitingTiles.insert(std::make_pair(p, FilterBlock()));
+                assert(insRes.second);
+                blocki = insRes.first;
+            }
+            blocki->second.tiles[1-j][1-i] = tile;
+            if(blocki->second.readyForFilter())
+            {
+                // If the block is complete, grab a copy and delete from map
+                blockToFilter = blocki->second;
+                m_waitingTiles.erase(blocki);
+            }
         }
-        FilterBlock& block = blocki->second;
-        block.tiles[1-j][1-i] = tile;
-        if(block.readyForFilter())
+        if(blockToFilter.readyForFilter())
         {
             // Filter, quantize & save result.
-            filter(m_outTileWorkspace, block);
-            const V2i outTileSize = block.tiles[0][0]->size()/m_filterStride;
-            m_displayManager.writeTile(p*outTileSize, &m_outTileWorkspace[0]);
-            m_waitingTiles.erase(blocki);
+            filter(outTileWorkspace, blockToFilter);
+            const V2i outTileSize = blockToFilter.tiles[0][0]->size()/m_filterStride;
+            m_displayManager.writeTile(p*outTileSize, &outTileWorkspace[0]);
         }
     }
 }
