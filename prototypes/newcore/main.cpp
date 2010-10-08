@@ -50,6 +50,8 @@ int main(int argc, char* argv[])
         ("help,h", "help message")
         ("stats,s", po::value<int>()->default_value(1),
          "frame statistics verbosity")
+        ("threads,t", po::value<int>()->default_value(-1),
+         "number of threads to use (-1 = auto)")
     ;
     // options + positional parameters
     po::options_description allArgs("All arguments");
@@ -77,6 +79,9 @@ int main(int argc, char* argv[])
 
     renderer->firstFilter().Option("statistics", ParamListBuilder()
                             ("int endofframe", &opts["stats"].as<int>()));
+    renderer->firstFilter().Option("limits", ParamListBuilder()
+                            ("int threads", &opts["threads"].as<int>()));
+
 
     const StringVec& ribFiles = opts["rib_files"].as<StringVec>();
     for(int ifile = 0; ifile < (int)ribFiles.size(); ++ifile)

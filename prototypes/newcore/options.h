@@ -61,6 +61,7 @@ struct Options : public RefCounted
 
     // Other options
     int statsVerbosity; ///< Verbosity for render statistics reporting
+    int nthreads;       ///< Number of threads to use
 
     Options()
         : eyeSplits(20),
@@ -77,7 +78,8 @@ struct Options : public RefCounted
         focalDistance(FLT_MAX),
         pixelFilter(makeGaussianFilter(Vec2(2,2))),
         doFilter(true),
-        statsVerbosity(0)
+        statsVerbosity(0),
+        nthreads(-1)
     { }
 };
 

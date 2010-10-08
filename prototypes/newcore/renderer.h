@@ -42,6 +42,7 @@
 #include "varspec.h"
 #include "util.h"
 
+class BucketScheduler;
 class CachedFilter;
 class Geometry;
 class Grid;
@@ -146,6 +147,8 @@ class Renderer
 
         void push(const GeomHolderPtr& geom);
         void push(const GridHolderPtr& grid);
+
+        void renderBuckets(BucketScheduler& bucketScheduler);
 
         void rasterize(SampleTile& tile, GridHolder& holder);
 

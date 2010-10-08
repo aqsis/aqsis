@@ -937,6 +937,8 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
             m_opts->opts->gridSize = ifloor(sqrt(gs[0]));
         if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
             m_opts->opts->eyeSplits = es[0];
+        if(IntArray t = params.findIntData(Ri::TypeSpec::Int, "threads"))
+            m_opts->opts->nthreads = t[0];
     }
     if(strcmp(name, "statistics") == 0)
     {

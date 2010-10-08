@@ -30,8 +30,10 @@
 #include "renderer.h"
 
 #include <cstring>
+#include <functional>
 
 #include "attributes.h"
+#include "bucketscheduler.h"
 #include "displaymanager.h"
 #include "filterprocessor.h"
 #include "grid.h"
@@ -202,7 +204,12 @@ class CircleOfConfusion
 struct Renderer::Stats
 {
     /// Flag to allow stats to be disabled completely at compile time.
+#ifdef AQSIS_USE_THREADS
+    // FIXME!
+    static const bool useStats=false;
+#else
     static const bool useStats=true;
+#endif
     /// Flag to indicate that expensive statistics should be collected.
     ///
     /// Statistics which have a measurable performance impact should only be
@@ -573,8 +580,36 @@ void Renderer::add(GeometryKeys& deformingGeom,
 void Renderer::render()
 {
     TIME_SCOPE(m_stats->frameTime);
-    MemoryLog memLog;
+    //MemoryLog memLog;  // FIXME
 
+    BucketScheduler scheduler(V2i(m_surfaces->nxBuckets(),
+                                  m_surfaces->nyBuckets()));
+
+#   ifdef AQSIS_USE_THREADS
+    int nthreads = m_opts->nthreads;
+    if(nthreads <= 0)
+        nthreads = boost::thread::hardware_concurrency();
+    if(nthreads > 1)
+    {
+        boost::thread_group threads;
+        for(int i = 0; i < nthreads; ++i)
+            threads.add_thread(new boost::thread(
+                            std::mem_fun(&Renderer::renderBuckets),
+                            this, boost::ref(scheduler)));
+        threads.join_all();
+    }
+    else
+        renderBuckets(scheduler);
+#else
+    renderBuckets(scheduler);
+#endif // AQSIS_USE_THREADS
+
+    m_displayManager->closeFiles();
+}
+
+
+void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
+{
     // Coordinate system for tessellation resolution calculation.
     Mat4 tessCoords = m_camToSRaster
         * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
@@ -586,24 +621,17 @@ void Renderer::render()
     tessCoords[2][2] = 0;
     tessCoords[3][2] = 0;
 
-#ifdef AQSIS_USE_THREADS
-#   pragma omp parallel
-#endif
-    {
-    TessellationContextImpl tessContext(*this);
+    V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
 
+    // Per-thread data structures:
+    TessellationContextImpl tessContext(*this);
     SampleTile samples;
 
-    V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
     // Loop over all buckets
-#ifdef AQSIS_USE_THREADS
-#   pragma omp for schedule(dynamic,4) nowait
-#endif
-    for(int j = 0; j < m_surfaces->nyBuckets(); ++j)
-    for(int i = 0; i < m_surfaces->nxBuckets(); ++i)
+    V2i tilePos;
+    while(bucketScheduler.nextBucket(tilePos))
     {
-        memLog.log();
-        V2i tilePos(i,j);
+        // memLog.log(); // FIXME
         V2i sampleOffset = tilePos*tileSize - tileSize/2;
         // Create new tile for fragment storage
         FragmentTilePtr fragments =
@@ -615,7 +643,7 @@ void Renderer::render()
         while(true)
         {
             // Render any waiting grids.
-            while(GridHolderPtr gridh = m_surfaces->popGrid(i,j))
+            while(GridHolderPtr gridh = m_surfaces->popGrid(tilePos.x,tilePos.y))
             {
                 samples.ensureSampleInit();
                 if(!samples.isOccluded(gridh->bound(), m_stats->occlTime))
@@ -626,7 +654,7 @@ void Renderer::render()
                     --m_stats->gridsInFlight;
             }
             // Tessellate waiting surfaces
-            if(GeomHolderPtr geomh = m_surfaces->popSurface(i,j))
+            if(GeomHolderPtr geomh = m_surfaces->popSurface(tilePos.x,tilePos.y))
             {
                 samples.ensureSampleInit();
                 if(!samples.isOccluded(geomh->bound(), m_stats->occlTime))
@@ -652,14 +680,11 @@ void Renderer::render()
             else
                 break;
         }
-        m_surfaces->setFinished(i,j);
+        m_surfaces->setFinished(tilePos.x,tilePos.y);
         // Filter the tile
         TIME_SCOPE(m_stats->filteringTime);
         m_filterProcessor->insert(tilePos, fragments);
     }
-    }
-    memLog.log();
-    m_displayManager->closeFiles();
 }
 
 
