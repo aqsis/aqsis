@@ -45,6 +45,10 @@
 
 //------------------------------------------------------------------------------
 /// Container for single geometry piece and associated metadata
+///
+/// This is the place to put everything about a piece of geometry which is
+/// independent from the geometry type and needs to be cached for rendering
+/// efficiency.
 class GeomHolder : public RefCounted
 {
     private:
@@ -53,8 +57,10 @@ class GeomHolder : public RefCounted
         int m_splitCount;    ///< Number of times the geometry has been split
         Box m_bound;         ///< Bound in camera coordinates
         ConstAttributesPtr m_attrs; ///< Surface attribute state
-        bool m_expired;
-        mutable Mutex m_mutex; ///< Mutex used when splitting
+        bool m_hasChildren;  ///< True if child geometry/grid exists
+        std::vector<GeomHolderPtr> m_childGeoms; ///< Child geometry
+        GridHolderPtr m_childGrid;  ///< Child grid
+        Mutex m_mutex;       ///< Mutex used when splitting
 
         /// Get the bound from a set of geometry keys
         static Box boundFromKeys(const GeometryKeys& keys)
@@ -73,8 +79,9 @@ class GeomHolder : public RefCounted
             m_splitCount(0),
             m_bound(geom->bound()),
             m_attrs(attrs),
-            m_expired(false)
+            m_hasChildren(false)
         { }
+
         /// Create geometry resulting from splitting (has a parent surface)
         GeomHolder(const GeometryPtr& geom, const GeomHolder& parent)
             : m_geom(geom),
@@ -82,7 +89,7 @@ class GeomHolder : public RefCounted
             m_splitCount(parent.m_splitCount+1),
             m_bound(geom->bound()),
             m_attrs(parent.m_attrs),
-            m_expired(false)
+            m_hasChildren(false)
         { }
 
         /// Create initial deforming geometry (no parent surface)
@@ -92,8 +99,9 @@ class GeomHolder : public RefCounted
             m_splitCount(0),
             m_bound(boundFromKeys(m_geomKeys)),
             m_attrs(attrs),
-            m_expired(false)
+            m_hasChildren(false)
         { }
+
         /// Create deforming geometry resulting from splitting
         GeomHolder(GeometryPtr* keysBegin, GeometryPtr* keysEnd,
                    int keysStride, const GeomHolder& parent)
@@ -102,7 +110,7 @@ class GeomHolder : public RefCounted
             m_splitCount(parent.m_splitCount+1),
             m_bound(),
             m_attrs(parent.m_attrs),
-            m_expired(false)
+            m_hasChildren(false)
         {
             // Init geom keys, taking every keysStride'th geometry
             assert(static_cast<int>(parent.geomKeys().size())
@@ -124,24 +132,47 @@ class GeomHolder : public RefCounted
         const GeometryKeys& geomKeys() const { return m_geomKeys; }
 
         /// True if the holder no longer holds valid geometry
-        bool expired() const { return m_expired; }
-        /// Delete held geometry
-        void releaseGeometry()
+        bool isDeforming() const { return !m_geom; }
+        int splitCount() const    { return m_splitCount; }
+        Box& bound() { return m_bound; }
+        const Attributes& attrs() const { return *m_attrs; }
+
+        /// Has the geometry already been split/diced?
+        bool hasChildren() const { return m_hasChildren; }
+        /// Add some child geometry to the set of splitting results.
+        void addChild(const GeomHolderPtr& childGeom)
         {
-            m_expired = true;
+            m_childGeoms.push_back(childGeom);
+        }
+        /// Set the child grid as the result of dicing.
+        void addChild(GridHolderPtr childGrid)
+        {
+            assert(!m_childGrid);
+            m_childGrid = childGrid;
+        }
+
+        /// Clean up after tessellation is done.
+        ///
+        /// This should disassociate any held geometry, and set the flag
+        /// indicating that child geometry is present.
+        void tessellateFinished()
+        {
 #           ifndef AQSIS_USE_THREADS
             // FIXME!  This deallocation should clearly happen with threads
             // too!
             m_geom.reset();
             m_geomKeys.clear();
 #           endif
+            m_hasChildren = true;
         }
-        bool isDeforming() const { return !m_geom; }
-        int splitCount() const    { return m_splitCount; }
-        Box& bound() { return m_bound; }
-        const Attributes& attrs() const { return *m_attrs; }
 
-        Mutex& mutex() const { return m_mutex; }
+        /// Get child grid if tessellation resulted in dicing.
+        const GridHolderPtr& childGrid()        { return m_childGrid; }
+        /// Get child geometry if tessellation resulted in splitting.
+        std::vector<GeomHolderPtr>& childGeoms() { return m_childGeoms; }
+
+        /// Get mutex used to protect setting of tessellated children.
+        Mutex& mutex() { return m_mutex; }
 };
 
 
@@ -150,6 +181,13 @@ class GeomHolder : public RefCounted
 typedef MotionKey<GridPtr> GridKey;
 typedef std::vector<GridKey> GridKeys;
 
+
+/// Class to hold a grid of microgeometry, caching various properties.
+///
+/// This is the place to put everything about a grid which is independent from
+/// the grid type and needs to be cached for rendering efficiency.  For
+/// example, the raster bound is cached here rather than being recomputed by
+/// the grid each time it's needed.
 class GridHolder : public RefCounted
 {
     private:
@@ -165,13 +203,26 @@ class GridHolder : public RefCounted
                 m_attrs->surfaceShader->shade(grid);
         }
 
+        void cacheBound()
+        {
+            if(isDeforming())
+            {
+                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
+                    m_bound.extendBy(m_gridKeys[i].value->bound());
+            }
+            else
+                m_bound.extendBy(m_grid->bound());
+        }
+
     public:
-        GridHolder(const GridPtr& grid, const ConstAttributesPtr& attrs)
+        GridHolder(const GridPtr& grid, const GeomHolder& parentGeom)
             : m_grid(grid),
             m_gridKeys(),
-            m_attrs(attrs),
+            m_attrs(&parentGeom.attrs()),
             m_rasterized(false)
-        { }
+        {
+            cacheBound();
+        }
 
         template<typename GridPtrIterT>
         GridHolder(GridPtrIterT begin, GridPtrIterT end,
@@ -185,6 +236,7 @@ class GridHolder : public RefCounted
             m_gridKeys.reserve(end - begin);
             for(;begin != end; ++begin, ++oldKey)
                 m_gridKeys.push_back(GridKey(oldKey->time, *begin));
+            cacheBound();
         }
 
         bool isDeforming() const { return !m_grid; }
@@ -198,38 +250,6 @@ class GridHolder : public RefCounted
 
         void setRasterized() { m_rasterized = true; }
         bool rasterized() const { return m_rasterized; }
-
-        /// Shade all grids
-        void shade()
-        {
-            if(isDeforming())
-            {
-                // TODO: Run displacement shaders only on extra grids
-                // TODO: Fill in time variable on the grid before shading
-                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
-                    shade(*m_gridKeys[i].value);
-            }
-            else
-                shade(*m_grid);
-        }
-
-        /// Project all grids held by the holder
-        void project(const Mat4& camToRas)
-        {
-            if(isDeforming())
-            {
-                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
-                {
-                    m_gridKeys[i].value->project(camToRas);
-                    m_bound.extendBy(m_gridKeys[i].value->bound());
-                }
-            }
-            else
-            {
-                m_grid->project(camToRas);
-                m_bound.extendBy(m_grid->bound());
-            }
-        }
 };
 
 
@@ -281,10 +301,22 @@ class TessellationContextImpl : public TessellationContext
                 // Non-deforming case.
                 tessControl.tessellate(m_currGeom->geom(), *this);
             }
+            if(!m_grids.empty())
+            {
+                // Shade grids
+                if(Shader* shader = m_currGeom->attrs().surfaceShader.get())
+                {
+                    for(int i = 0; i < (int)m_grids.size(); ++i)
+                        shader->shade(*m_grids[i]);
+                }
+                // Project grids
+                for(int i = 0; i < (int)m_grids.size(); ++i)
+                    m_grids[i]->project(m_renderer.m_camToSRaster);
+            }
             // Grab an exclusive lock for the current geometry so that the set
             // of results can be sent back to the renderer atomically.
             LockGuard lk(m_currGeom->mutex());
-            if(m_currGeom->expired())
+            if(m_currGeom->hasChildren())
             {
                 // Oops, another thread has already split/diced the geometry;
                 // discard any split/dice results generated by the current
@@ -297,23 +329,21 @@ class TessellationContextImpl : public TessellationContext
                 // produced by the current deforming surface set
                 if(!m_splits.empty())
                 {
-                    assert((m_splits.size()/splitsPerKey)*splitsPerKey
-                            == m_splits.size());
+                    assert(m_splits.size() % splitsPerKey == 0);
                     for(int i = 0; i < splitsPerKey; ++i)
                     {
                         GeomHolderPtr holder(new GeomHolder(
                                         &*m_splits.begin() + i,
                                         &*m_splits.end() + i,
                                         splitsPerKey, *m_currGeom));
-                        m_renderer.push(holder);
+                        m_currGeom->addChild(holder);
                     }
                 }
                 if(!m_grids.empty())
                 {
-                    m_renderer.push(GridHolderPtr(new GridHolder(
-                                                            m_grids.begin(),
-                                                            m_grids.end(),
-                                                            *m_currGeom)));
+                    m_currGeom->addChild(new GridHolder(m_grids.begin(),
+                                                        m_grids.end(),
+                                                        *m_currGeom));
                 }
             }
             else
@@ -326,22 +356,19 @@ class TessellationContextImpl : public TessellationContext
                     {
                         GeomHolderPtr holder(new GeomHolder(m_splits[i],
                                                             *m_currGeom));
-                        m_renderer.push(holder);
+                        if(!m_renderer.rasterCull(*holder))
+                            m_currGeom->addChild(holder);
                     }
                 }
                 if(!m_grids.empty())
                 {
-                    // Push grids back to the renderer
-                    for(int i = 0, iend = m_grids.size(); i < iend; ++i)
-                    {
-                        GridHolderPtr holder(new GridHolder(m_grids[i],
-                                                        &m_currGeom->attrs()));
-                        m_renderer.push(holder);
-                    }
+                    // TODO: Do we want to allow more than one grid here?
+                    assert(m_grids.size() == 1);
+                    m_currGeom->addChild(new GridHolder(m_grids[0],
+                                                        *m_currGeom));
                 }
+                m_currGeom->tessellateFinished();
             }
-            // Release geometry, since it's been tessellated now.
-            m_currGeom->releaseGeometry();
         }
 
         virtual void push(const GeometryPtr& geom)

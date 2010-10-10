@@ -106,7 +106,7 @@ public:
 
     /// Constructor -- reset at zero, and start timing unless optional
     /// 'startnow' argument is false.
-    Timer (bool enabled=true, bool startnow=true)
+    explicit Timer (bool startnow=true, bool enabled=true)
         : m_enabled(enabled),
         m_ticking(false),
         m_elapsed(0)

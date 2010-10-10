@@ -119,8 +119,10 @@ class SampleTile
         V2i sampleOffset() const { return m_fragmentTile->sampleOffset(); }
 
         /// Determine whether the bound is entirely occluded by the samples.
-        bool isOccluded(const Box& bound, Timer& occlTime)
+        bool occludes(const Box& bound, Timer& occlTime)
         {
+            if(!m_samplesSetup)
+                return false;
             TIME_SCOPE(occlTime);
             // transform bound into integer coords (inclusive end)
             V2i bndMin = ifloor(vec2_cast(bound.min)) - sampleOffset();
@@ -130,9 +132,9 @@ class SampleTile
             int endx   = clamp(bndMax.x+1, 0, m_size.x);
             int beginy = clamp(bndMin.y,   0, m_size.y);
             int endy   = clamp(bndMax.y+1, 0, m_size.y);
-            float zmin = bound.min.z;
             // Iterate over all the pixels the bound crosses.  This is a
             // pretty braindead way of doing it, but simple things first!
+            float zmin = bound.min.z;
             for(int iy = beginy; iy < endy; ++iy)
             for(int ix = beginx; ix < endx; ++ix)
             {
@@ -247,12 +249,12 @@ struct Renderer::Stats
     Stats(int verbosity)
         : collectExpensiveStats(verbosity >= 2),
         verbosity(verbosity),
-        frameTime     (verbosity >= 1),
-        occlTime      (verbosity >= 2),
-        splitDiceTime (verbosity >= 2),
-        rasterizeTime (verbosity >= 2),
-        filteringTime (verbosity >= 2),
-        shadingTime   (verbosity >= 2)
+        frameTime     (false, verbosity >= 1),
+        occlTime      (false, verbosity >= 2),
+        splitDiceTime (false, verbosity >= 2),
+        rasterizeTime (false, verbosity >= 2),
+        filteringTime (false, verbosity >= 2),
+        shadingTime   (false, verbosity >= 2)
     { }
 };
 
@@ -409,29 +411,23 @@ void Renderer::sanitizeOptions(Options& opts)
 //------------------------------------------------------------------------------
 // Guts of the renderer
 
-/// Push geometry into the render queue
-void Renderer::push(const GeomHolderPtr& holder)
+bool Renderer::rasterCull(GeomHolder& holder)
 {
-    ++m_stats->geometryInFlight;
     // Get bound in camera space.
-    Box& bound = holder->bound();
-    if(bound.min.z < FLT_EPSILON && holder->splitCount() > m_opts->eyeSplits)
+    Box& bound = holder.bound();
+    if(bound.min.z < FLT_EPSILON && holder.splitCount() > m_opts->eyeSplits)
     {
         std::cerr << "Max eye splits encountered; geometry discarded\n";
-        --m_stats->geometryInFlight;
-        return;
+        return true;
     }
     // Cull if outside near/far clipping range
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
-    {
-        --m_stats->geometryInFlight;
-        return;
-    }
+        return true;
     // Transform bound to raster space.
     //
     // TODO: Support arbitrary coordinate systems for the displacement bound
-    bound.min -= Vec3(holder->attrs().displacementBound);
-    bound.max += Vec3(holder->attrs().displacementBound);
+    bound.min -= Vec3(holder.attrs().displacementBound);
+    bound.max += Vec3(holder.attrs().displacementBound);
     float minz = bound.min.z;
     float maxz = bound.max.z;
     bound = transformBound(bound, m_camToSRaster);
@@ -442,26 +438,10 @@ void Renderer::push(const GeomHolderPtr& holder)
        bound.min.x > m_samplingArea.max.x ||
        bound.max.y < m_samplingArea.min.y ||
        bound.min.y > m_samplingArea.max.y)
-    {
-        --m_stats->geometryInFlight;
-        return;
-    }
-    // If we get to here the surface should be rendered, so push it
-    // onto the queue.
-    m_surfaces->insert(holder);
+        return true;
+    return false;
 }
 
-
-// Push a grid onto the render queue
-void Renderer::push(const GridHolderPtr& holder)
-{
-    DISABLE_TIMER_FOR_SCOPE(m_stats->splitDiceTime);
-    TIME_SCOPE(m_stats->shadingTime);
-    ++m_stats->gridsInFlight;
-    holder->shade();
-    holder->project(m_camToSRaster);
-    m_surfaces->insert(holder);
-}
 
 Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                    const VarList& outVars)
@@ -562,17 +542,23 @@ Renderer::~Renderer()
     m_stats->printStats(std::cout);
 }
 
+/// Push geometry into the render queue
+void Renderer::add(const GeomHolderPtr& holder)
+{
+    if(rasterCull(*holder))
+        return;
+    m_surfaces->insert(holder);
+}
+
 void Renderer::add(const GeometryPtr& geom, const ConstAttributesPtr& attrs)
 {
-    GeomHolderPtr holder(new GeomHolder(geom, attrs));
-    push(holder);
+    add(new GeomHolder(geom, attrs));
 }
 
 void Renderer::add(GeometryKeys& deformingGeom,
                    const ConstAttributesPtr& attrs)
 {
-    GeomHolderPtr holder(new GeomHolder(deformingGeom, attrs));
-    push(holder);
+    add(new GeomHolder(deformingGeom, attrs));
 }
 
 
@@ -631,6 +617,7 @@ void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
     V2i tilePos;
     while(bucketScheduler.nextBucket(tilePos))
     {
+        SplitStore::Bucket& bucket = m_surfaces->getBucket(tilePos);
         // memLog.log(); // FIXME
         V2i sampleOffset = tilePos*tileSize - tileSize/2;
         // Create new tile for fragment storage
@@ -640,47 +627,57 @@ void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
         samples.reset(*fragments);
 
         // Process all surfaces and grids in the bucket.
-        while(true)
+        while(GeomHolder* geomh = bucket.popSurface())
         {
-            // Render any waiting grids.
-            while(GridHolderPtr gridh = m_surfaces->popGrid(tilePos.x,tilePos.y))
+            if(!geomh->hasChildren())
             {
-                samples.ensureSampleInit();
-                if(!samples.isOccluded(gridh->bound(), m_stats->occlTime))
+                if(samples.occludes(geomh->bound(), m_stats->occlTime))
+                {
+                    // If occluded, discard from the bucket.
+                    if(geomh->useCount() == 1)
+                    {
+                        // Occluded geometry with a use count of one will be
+                        // discarded entirely.
+//                        --m_stats->geometryInFlight;
+//                        ++m_stats->geometryOccluded;
+                    }
+                    continue;
+                }
+                // If no children and not occluded then split/dice:
+                TIME_SCOPE(m_stats->splitDiceTime);
+                // Scale dicing coordinates to account for shading rate.
+                Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
+                        1/micropolyBlurWidth(geomh, m_coc.get()));
+                // Note that invoking the tessellator causes surfaces and
+                // grids to be push()ed back to the renderer behind the
+                // scenes.
+                tessContext.tessellate(scaledTessCoords, geomh);
+//                --m_stats->geometryInFlight;
+            }
+            // If we get here, the surface has children.
+            if(GridHolder* gridh = geomh->childGrid().get())
+            {
+                // If it has grids, render those.
+                if(!samples.occludes(gridh->bound(), m_stats->occlTime))
                     rasterize(samples, *gridh);
+                /* FIXME stats
                 else if(gridh->useCount() == 1 && !gridh->rasterized())
                     ++m_stats->gridsOccluded;
                 if(gridh->useCount() == 1)
                     --m_stats->gridsInFlight;
-            }
-            // Tessellate waiting surfaces
-            if(GeomHolderPtr geomh = m_surfaces->popSurface(tilePos.x,tilePos.y))
-            {
-                samples.ensureSampleInit();
-                if(!samples.isOccluded(geomh->bound(), m_stats->occlTime))
-                {
-                    TIME_SCOPE(m_stats->splitDiceTime);
-                    // Scale dicing coordinates to account for shading rate.
-                    Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
-                            1/micropolyBlurWidth(geomh, m_coc.get()));
-                    // Note that invoking the tessellator causes surfaces and
-                    // grids to be push()ed back to the renderer behind the
-                    // scenes.
-                    tessContext.tessellate(scaledTessCoords, geomh);
-                    --m_stats->geometryInFlight;
-                }
-                else if(geomh->useCount() == 1)
-                {
-                    // Occluded geometry with a use count of one will be
-                    // discarded entirely.
-                    --m_stats->geometryInFlight;
-                    ++m_stats->geometryOccluded;
-                }
+                */
             }
             else
-                break;
+            {
+                // Else it has surface children - push them back into the
+                // queue.
+                std::vector<GeomHolderPtr>& childGeoms = geomh->childGeoms();
+                for(int i = 0, iend = childGeoms.size(); i < iend; ++i)
+                    bucket.pushSurface(childGeoms[i].get());
+            }
         }
-        m_surfaces->setFinished(tilePos.x,tilePos.y);
+//        std::cout << tilePos << "\n";
+        bucket.setFinished();
         // Filter the tile
         TIME_SCOPE(m_stats->filteringTime);
         m_filterProcessor->insert(tilePos, fragments);
@@ -695,6 +692,7 @@ void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
 void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
 {
     TIME_SCOPE(m_stats->rasterizeTime);
+    tile.ensureSampleInit();
     holder.setRasterized();
     if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
     {

@@ -28,6 +28,7 @@
 // (This is the New BSD license)
 
 /// \file Data structure for geometry storage
+/// \author Chris Foster [chris42f (at) gmail (d0t) com]
 
 #ifndef AQSIS_SPLITSTORE_H_INCLUDED
 #define AQSIS_SPLITSTORE_H_INCLUDED
@@ -35,8 +36,9 @@
 #include <algorithm>
 #include <cassert>
 
+#include <boost/scoped_array.hpp>
+
 #include "tessellation.h"
-#include "thread.h"
 #include "util.h"
 
 
@@ -51,44 +53,27 @@ class SplitStore
         /// Create a storage structure with nxBuckets x nyBuckets buckets, and
         /// given spatial bound
         SplitStore(int nxBuckets, int nyBuckets, const Imath::Box2f& bound)
-            : m_buckets(nxBuckets*nyBuckets),
+            : m_buckets(new Bucket[nxBuckets*nyBuckets]),
             m_nxBuckets(nxBuckets),
             m_nyBuckets(nyBuckets),
             m_bound(bound)
-        { }
+        {
+            Vec2 bucketSize = (m_bound.max - m_bound.min) /
+                              Vec2(nxBuckets, nyBuckets);
+            for(int j = 0; j < nyBuckets; ++j)
+            for(int i = 0; i < nxBuckets; ++i)
+            {
+                Vec2 bucketMin = m_bound.min + bucketSize*Vec2(i,j);
+                Vec2 bucketMax = m_bound.min + bucketSize*Vec2(i+1,j+1);
+                getBucket(V2i(i,j)).bound() =
+                    Imath::Box2f(bucketMin, bucketMax);
+            }
+        }
 
         /// Get number of buckets in the x-direction
         int nxBuckets() const { return m_nxBuckets; }
         /// Get number of buckets in the y-direction
         int nyBuckets() const { return m_nyBuckets; }
-
-        /// Grab the top surface for the given bucket
-        ///
-        /// If there are no surfaces present in the bucket, return null.
-        GeomHolderPtr popSurface(int x, int y)
-        {
-            LockGuard lock(m_mutex);
-            return getBucket(x,y).popSurface();
-        }
-
-        /// Grab the top grid for the given bucket
-        ///
-        /// If there are no grids present in the bucket, return null.
-        GridHolderPtr popGrid(int x, int y)
-        {
-            LockGuard lock(m_mutex);
-            return getBucket(x,y).popGrid();
-        }
-
-        /// Indicate that the bucket at (x,y) is rendered.
-        ///
-        /// This means that any geometry or grids ending up in the bucket
-        /// should be discarded.
-        void setFinished(int x, int y)
-        {
-            LockGuard lock(m_mutex);
-            getBucket(x,y).setFinished();
-        }
 
         /// Insert geometry into the data structure
         ///
@@ -96,28 +81,114 @@ class SplitStore
         /// into.
         void insert(const GeomHolderPtr& geom)
         {
-            LockGuard lock(m_mutex);
             int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
             if(!bucketRangeForBound(geom->bound(), x0, x1, y0, y1))
                 return;
             // Place geometry into nodes which it touches.
             for(int j = y0; j <= y1; ++j)
                 for(int i = x0; i <= x1; ++i)
-                    getBucket(i,j).insert(geom);
+                    getBucket(V2i(i,j)).insert(geom);
         }
 
-        void insert(const GridHolderPtr& grid)
+        /// Geometry storage for a bucket.
+        class Bucket
         {
-            LockGuard lock(m_mutex);
-            int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
-            if(!bucketRangeForBound(grid->bound(), x0, x1, y0, y1))
-                return;
-            for(int j = y0; j <= y1; ++j)
-                for(int i = x0; i <= x1; ++i)
-                    getBucket(i,j).insert(grid);
+            public:
+                Bucket() : m_queue(), m_queueInit(false), m_bound() { }
+
+                /// Grab the top surface for the given bucket
+                ///
+                /// If there are no surfaces present in the bucket, return
+                /// null.
+                GeomHolder* popSurface()
+                {
+                    if(!m_queueInit)
+                    {
+                        // Initialize priority queue with _raw_ pointers
+                        // extracted from the geometry list.  Using raw
+                        // pointers rather than reference counted ones here is
+                        // very important for performance of the queue
+                        // operations!
+                        m_queue.reserve(m_geoms.size());
+                        for(int i = 0, iend = m_geoms.size(); i < iend; ++i)
+                            m_queue.push_back(m_geoms[i].get());
+                        std::make_heap(m_queue.begin(), m_queue.end(),
+                                       geomHeapOrder);
+                        m_queueInit = true;
+                    }
+                    if(m_queue.empty())
+                        return 0;
+                    std::pop_heap(m_queue.begin(), m_queue.end(),
+                                  geomHeapOrder);
+                    GeomHolder* result = m_queue.back();
+                    m_queue.pop_back();
+                    return result;
+                }
+
+                /// Push surface back onto bucket, after checking the bound.
+                void pushSurface(GeomHolder* geom)
+                {
+                    Box& gbnd = geom->bound();
+                    if(gbnd.min.x < m_bound.max.x  &&
+                       gbnd.min.y < m_bound.max.y  &&
+                       gbnd.max.x >= m_bound.min.x &&
+                       gbnd.max.y >= m_bound.min.y)
+                    {
+                        m_queue.push_back(geom);
+                        std::push_heap(m_queue.begin(), m_queue.end(),
+                                        geomHeapOrder);
+                    }
+                }
+
+                /// Indicate that the bucket is rendered.
+                ///
+                /// This deallocates bucket resources.
+                void setFinished()
+                {
+                    assert(m_queue.empty());
+                    // Force vector to clear memory.  Note that this is
+                    // important - failing to do so can result in memory
+                    // fragmentation due to the small but long-lived chunk of
+                    // memory wasted here.
+                    vectorFree(m_queue);
+                    vectorFree(m_geoms);
+                }
+
+            private:
+                friend class SplitStore;
+
+                /// Insert geometry unconditionally into the bucket.
+                void insert(const GeomHolderPtr& geom)
+                {
+                    m_geoms.push_back(geom);
+                }
+
+                /// Get bucket bound
+                Imath::Box2f& bound() { return m_bound; }
+
+                static bool geomHeapOrder(GeomHolder* a, GeomHolder* b)
+                {
+                    return a->bound().min.z > b->bound().min.z;
+                }
+
+                /// Storage for initial geometry provided through the API
+                std::vector<GeomHolderPtr> m_geoms;
+                /// geometry queue.  We avoid priority_queue here in favour of
+                /// std::vector so that we can force the held memory to be
+                /// freed.
+                std::vector<GeomHolder*> m_queue;
+                bool m_queueInit;     ///< true if m_queue is initialized
+                Imath::Box2f m_bound; ///< Raster bound for the bucket
+        };
+
+        /// Get identifier for leaf bucket at position pos.
+        Bucket& getBucket(V2i pos)
+        {
+            return m_buckets[pos.y*m_nxBuckets + pos.x];
         }
 
     private:
+        /// Get range of buckets for the given bound.
         bool bucketRangeForBound(const Box& bnd, int& x0, int& x1,
                                  int& y0, int& y1) const
         {
@@ -139,139 +210,10 @@ class SplitStore
             return true;
         }
 
-        /// Queued geometry storage
-        class Bucket
-        {
-            private:
-                static bool isExpired(const GeomHolderPtr& g)
-                {
-                    return g->expired();
-                }
-                static bool geomHeapOrder(const GeomHolderPtr& a,
-                                        const GeomHolderPtr& b)
-                {
-                    return a->bound().min.z > b->bound().min.z;
-                }
-
-                std::vector<GeomHolderPtr> m_queue; ///< geometry queue
-                std::vector<GridHolderPtr> m_grids; ///< grid queue
-                bool m_isHeap;     ///< true if m_queue is a heap
-                int m_expireCheck; ///< position in m_queue to check for expired geoms
-                bool m_isFinished; ///< true if bucket is finished
-
-            public:
-                Bucket()
-                    : m_queue(),
-                    m_grids(),
-                    m_isHeap(false),
-                    m_expireCheck(0),
-                    m_isFinished(false)
-                { }
-
-                /// Grab top piece of geometry from bucket.
-                GeomHolderPtr popSurface()
-                {
-                    if(!m_isHeap)
-                    {
-                        // Discard all expired refs in one sweep of array, and
-                        // subsequently make into a heap
-                        m_queue.erase(std::remove_if(m_queue.begin(), m_queue.end(),
-                                                     &isExpired), m_queue.end());
-                        std::make_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
-                        m_isHeap = true;
-                    }
-                    else
-                    {
-                        // Discard any invalid geometry refs
-                        while(!m_queue.empty() && m_queue[0]->expired())
-                        {
-                            std::pop_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
-                            m_queue.pop_back();
-                        }
-                    }
-                    if(m_queue.empty())
-                        return GeomHolderPtr();
-                    std::pop_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
-                    GeomHolderPtr result = m_queue.back();
-                    m_queue.pop_back();
-                    assert(!result->expired());
-                    return result;
-                }
-
-                /// Grab most recent grid from bucket
-                GridHolderPtr popGrid()
-                {
-                    if(m_grids.empty())
-                        return GridHolderPtr();
-                    GridHolderPtr g = m_grids.back();
-                    m_grids.pop_back();
-                    return g;
-                }
-
-                /// Insert geometry into bucket
-                void insert(const GeomHolderPtr& geom)
-                {
-                    if(m_isHeap)
-                    {
-                        // If currently a heap (that is, we want to be able top
-                        // pop() at any time), insert and maintain heap
-                        // structure.
-                        m_queue.push_back(geom);
-                        std::push_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
-                    }
-                    else
-                    {
-                        // If m_queue has no special structure, do a quick
-                        // check to find a storage location which has already
-                        // expired, and use that if possible.
-                        if(!m_queue.empty())
-                        {
-                            ++m_expireCheck;
-                            if(m_expireCheck >= (int)m_queue.size())
-                                m_expireCheck = 0;
-                            if(m_queue[m_expireCheck]->expired())
-                            {
-                                m_queue[m_expireCheck] = geom;
-                                return;
-                            }
-                        }
-                        m_queue.push_back(geom);
-                    }
-                }
-                void insert(const GridHolderPtr& grid)
-                {
-                    if(m_isFinished)
-                        return;
-                    m_grids.push_back(grid);
-                }
-
-                void setFinished()
-                {
-                    assert(m_grids.empty());
-                    assert(m_queue.empty());
-                    // Force vectors to clear memory.
-                    //
-                    // Note that this is _very_ important - failing to do so
-                    // will result in terrible memory fragmentation, with a
-                    // degradation in total memory use which is much worse than
-                    // the small amount of memory held here.
-                    vectorFree(m_queue);
-                    vectorFree(m_grids);
-                    m_isFinished = true;
-                }
-        };
-
-        /// Get identifier for leaf bucket at position x,y
-        Bucket& getBucket(int x, int y)
-        {
-            return m_buckets[y*m_nxBuckets + x];
-        }
-
-        std::vector<Bucket> m_buckets; ///< geometry storage
+        boost::scoped_array<Bucket> m_buckets; ///< geometry storage
         int m_nxBuckets;      ///< number of buckets in x-direction
         int m_nyBuckets;      ///< number of buckets in y-direction
         Imath::Box2f m_bound; ///< Bounding box
-        Mutex m_mutex;
 };
 
 
