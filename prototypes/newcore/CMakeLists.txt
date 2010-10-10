@@ -50,6 +50,7 @@ set(srcs
     #scenes/mbnoisetest.cpp
     #scenes/tenpatch.cpp
     shader.cpp
+    tessellation.cpp
     ustring/ustring.cpp
     varspec.cpp
 )
