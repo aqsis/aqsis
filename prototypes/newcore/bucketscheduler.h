@@ -42,7 +42,7 @@ class BucketScheduler
     public:
         BucketScheduler(V2i nbuckets)
             : m_nbuckets(nbuckets),
-            m_pos(0)
+            m_pos(V2i(-1,0))
         { }
 
         /// Get the next bucket in the ordering.
