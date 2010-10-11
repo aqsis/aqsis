@@ -42,10 +42,10 @@
 
 struct SqShadeOp
 {
-	char *m_opspec;
-	char *m_init;
-	char *m_shutdown;
-} ;
+	const char *m_opspec;
+	const char *m_init;
+	const char *m_shutdown;
+};
 
 typedef struct _STRING_DESC
 {
@@ -58,7 +58,11 @@ STRING_DESC;
 #define SHADEOP_SPEC struct SqShadeOp
 
 /** Utility macro for declaring a table of shader operations */
-#define SHADEOP_TABLE(opname) struct SqShadeOp AQSIS_EXPORT  opname ## _shadeops []
+/* The extra extern "C" declaration here is to prevent name mangling as usual,
+   but is in a separate statement to avoid a spurious gcc warning. */
+#define SHADEOP_TABLE(opname)                                        \
+    EXTERN_C struct SqShadeOp AQSIS_EXPORT opname ## _shadeops [];   \
+    struct SqShadeOp AQSIS_EXPORT  opname ## _shadeops []
 
 /** Utility macro for declaring a shadeop method */
 #define SHADEOP(method) EXTERN_C AQSIS_EXPORT int method (void *initdata, int argc, void **argv)
