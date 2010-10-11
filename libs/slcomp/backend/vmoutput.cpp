@@ -84,6 +84,10 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 		exit( 1 );
 	}
 
+	// Set the precision for floats.  We need at >= 9 decimal digits to avoid
+	// loss of precision for 32 bit IEEE floats.
+	m_slxFile.precision(9);
+
 	std::cout << "... " << strOutName().c_str() << std::endl;
 
 	m_slxFile << S.strShaderType() << std::endl;
