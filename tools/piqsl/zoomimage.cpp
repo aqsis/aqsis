@@ -33,6 +33,27 @@
 
 namespace Aqsis {
 
+/// Clamp the scale so that the resulting image size isn't too large for FLTK.
+///
+/// Unfortunately FLTK uses short integers to store the width, height and
+/// position of widgets, so we can't make the image size any larger than
+/// SHRT_MAX or we'll get overflow.  (In fact, it seems like we've got to use
+/// a limit somewhat smaller than this, probably because the width has the
+/// widget position added to it at some place inside FLTK which can cause
+/// additional overflow.)
+///
+static int clampScale(const boost::shared_ptr<CqImage>& image, int scale)
+{
+	if(!image)
+		return scale;
+	int imageSize = std::max(image->frameWidth(), image->frameHeight());
+	const int maxSize = SHRT_MAX/2;
+	if(imageSize*scale < maxSize)
+		return scale;
+	else
+		return maxSize/imageSize;
+}
+
 CqZoomImage::CqZoomImage(int x, int y)
 	: Fl_Widget(x,y,1,1,0),
 	m_scale(1)
@@ -72,8 +93,9 @@ void CqZoomImage::updateImage()
 
 void CqZoomImage::setScale(int newScale)
 {
-	if(newScale >= 1 && newScale < 100)
+	if(newScale >= 1)
 	{
+		newScale = clampScale(m_image, newScale);
 		int scaleCenterX = Fl::event_x();
 		int scaleCenterY = Fl::event_y();
 		double ratio = double(newScale)/m_scale;
@@ -138,6 +160,7 @@ int CqZoomImage::handle(int event)
 void CqZoomImage::setImage(const boost::shared_ptr<CqImage>& image)
 {
 	m_image = image;
+	m_scale = clampScale(m_image, m_scale);
 	updateImage();
 }
 
