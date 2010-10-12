@@ -160,12 +160,8 @@ class GeomHolder : public RefCounted
         /// indicating that child geometry is present.
         void tessellateFinished()
         {
-#           ifndef AQSIS_USE_THREADS
-            // FIXME!  This deallocation should clearly happen with threads
-            // too!
             m_geom.reset();
             m_geomKeys.clear();
-#           endif
             m_hasChildren = true;
         }
 
