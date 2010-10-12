@@ -132,6 +132,45 @@ class NullThreadSpecificPtr
 };
 
 
+//------------------------------------------------------------------------------
+/// Assign a thread to a fixed cpu.
+///
+/// If we've got a fixed set of worker threads, equal to the number of cores,
+/// it can be useful to pin the threads to the cores, ensuring that the kernel
+/// scheduler doesn't move them.  This can result in speedups because it makes
+/// more efficient use of the highest levels of the cache heirarchy.  (Each
+/// time a process is moved to a different core, the per-core cache becomes
+/// invalidated.)
+///
+/// Note that core 0 sometimes seems to have OS services pinned to it, so it
+/// might be best to use other cores first.
+///
+/// thread - set the affinity of this thread.
+/// coreid - pin the thread to this core (0 <= coreid < hardware_concurrency())
+///
+/// Returns true if successful.
+inline bool setThreadAffinity(boost::thread& thread, int coreid)
+{
+#ifdef AQSIS_USE_THREADS
+#ifdef __GNUC__
+    // Use pthread_setaffinity_np if using glibc
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(coreid, &cpuset);
+    return !pthread_setaffinity_np(thread.native_handle(), sizeof(cpuset),
+                                   &cpuset);
+#elif defined(_WIN32)
+    // From MSDN... not yet tested!
+    return !SetThreadAffinityMask(thread.native_handle(), 1 << coreid);
+#else
+#   warning "setThreadAffinity() not implemented yet on this platform"
+#endif
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// Handy typedefs
 #ifdef AQSIS_USE_THREADS
 typedef boost::mutex Mutex;
 

@@ -573,15 +573,26 @@ void Renderer::render()
 
 #   ifdef AQSIS_USE_THREADS
     int nthreads = m_opts->nthreads;
+    int ncpus = boost::thread::hardware_concurrency();
     if(nthreads <= 0)
-        nthreads = boost::thread::hardware_concurrency();
+        nthreads = ncpus;
     if(nthreads > 1)
     {
         boost::thread_group threads;
         for(int i = 0; i < nthreads; ++i)
-            threads.add_thread(new boost::thread(
-                            std::mem_fun(&Renderer::renderBuckets),
-                            this, boost::ref(scheduler)));
+        {
+            boost::thread* thread = new boost::thread(
+                boost::mem_fn(&Renderer::renderBuckets),
+                this, boost::ref(scheduler));
+            if(nthreads <= ncpus)
+            {
+                // Fill up the machine from the last core first (core 0 seems
+                // to sometimes be used preferentially for OS processes... not
+                // sure how common this is?)
+                setThreadAffinity(*thread, ncpus-1-i);
+            }
+            threads.add_thread(thread);
+        }
         threads.join_all();
     }
     else
