@@ -24,6 +24,7 @@
 #include "zoomimage.h"
 
 #include <float.h>
+#include <limits.h>
 
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
