@@ -36,13 +36,35 @@
 #include "thread.h"
 #include "util.h"
 
+/// Bucket scheduler data shared between threads
+class BucketSchedulerShared
+{
+    public:
+        BucketSchedulerShared(V2i nbuckets, int nthreads)
+            : nbuckets(nbuckets),
+            pos(0),
+            nthreads(nthreads)
+        { }
+
+    private:
+        friend class BucketScheduler;
+
+        V2i nbuckets;
+        V2i pos;
+        int nthreads;
+        Mutex mutex;
+};
+
+
 /// Scheduler for bucket ordering.
 class BucketScheduler
 {
     public:
-        BucketScheduler(V2i nbuckets)
-            : m_nbuckets(nbuckets),
-            m_pos(V2i(-1,0))
+        BucketScheduler(BucketSchedulerShared& shared)
+            : m_shared(shared),
+            m_pos(0),
+            m_begin(0),
+            m_end(0)
         { }
 
         /// Get the next bucket in the ordering.
@@ -52,22 +74,40 @@ class BucketScheduler
         /// This function is threadsafe.
         virtual bool nextBucket(V2i& pos)
         {
-            LockGuard lk(m_mutex);
             ++m_pos.x;
-            if(m_pos.x >= m_nbuckets.x)
+            if(m_pos.x >= m_end.x)
             {
-                m_pos.x = 0;
                 ++m_pos.y;
+                m_pos.x = m_begin.x;
+                if(m_pos.y >= m_end.y)
+                {
+                    {
+                        LockGuard lk(m_shared.mutex);
+                        m_begin = m_shared.pos;
+                        m_shared.pos.x += m_blockSize;
+                        if(m_shared.pos.x >= m_shared.nbuckets.x)
+                        {
+                            m_shared.pos.x = 0;
+                            m_shared.pos.y += m_blockSize;
+                        }
+                    }
+                    m_pos = m_begin;
+                    m_end = min(m_begin + V2i(m_blockSize),
+                                m_shared.nbuckets);
+                }
             }
-            if(m_pos.y >= m_nbuckets.y)
+            if(m_pos.y >= m_shared.nbuckets.y)
                 return false;
             pos = m_pos;
             return true;
         }
 
     private:
-        V2i m_nbuckets;
+        static const int m_blockSize = 2;
+        BucketSchedulerShared& m_shared;
         V2i m_pos;
+        V2i m_begin;
+        V2i m_end;
         Mutex m_mutex;
 };
 

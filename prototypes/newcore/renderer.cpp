@@ -568,14 +568,15 @@ void Renderer::render()
     TIME_SCOPE(m_stats->frameTime);
     //MemoryLog memLog;  // FIXME
 
-    BucketScheduler scheduler(V2i(m_surfaces->nxBuckets(),
-                                  m_surfaces->nyBuckets()));
 
 #   ifdef AQSIS_USE_THREADS
     int nthreads = m_opts->nthreads;
     int ncpus = boost::thread::hardware_concurrency();
     if(nthreads <= 0)
         nthreads = ncpus;
+
+    BucketSchedulerShared scheduler(V2i(m_surfaces->nxBuckets(),
+                                        m_surfaces->nyBuckets()), nthreads);
     if(nthreads > 1)
     {
         boost::thread_group threads;
@@ -605,8 +606,9 @@ void Renderer::render()
 }
 
 
-void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
+void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
 {
+    BucketScheduler bucketScheduler(schedulerShared);
     // Coordinate system for tessellation resolution calculation.
     Mat4 tessCoords = m_camToSRaster
         * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
@@ -687,7 +689,6 @@ void Renderer::renderBuckets(BucketScheduler& bucketScheduler)
                     bucket.pushSurface(childGeoms[i].get());
             }
         }
-//        std::cout << tilePos << "\n";
         bucket.setFinished();
         // Filter the tile
         TIME_SCOPE(m_stats->filteringTime);

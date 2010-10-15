@@ -42,7 +42,7 @@
 #include "varspec.h"
 #include "util.h"
 
-class BucketScheduler;
+class BucketSchedulerShared;
 class CachedFilter;
 class Geometry;
 class Grid;
@@ -148,7 +148,7 @@ class Renderer
         bool rasterCull(GeomHolder& holder);
         void add(const GeomHolderPtr& geom);
 
-        void renderBuckets(BucketScheduler& bucketScheduler);
+        void renderBuckets(BucketSchedulerShared& bucketScheduler);
 
         void rasterize(SampleTile& tile, GridHolder& holder);
 
