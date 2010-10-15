@@ -203,15 +203,12 @@ class CircleOfConfusion
 
 //------------------------------------------------------------------------------
 /// Renderer statistics
-struct Renderer::Stats
+///
+/// TODO: Split this stats structure up into managable bits.
+struct RenderStats
 {
     /// Flag to allow stats to be disabled completely at compile time.
-#ifdef AQSIS_USE_THREADS
-    // FIXME!
-    static const bool useStats=false;
-#else
     static const bool useStats=true;
-#endif
     /// Flag to indicate that expensive statistics should be collected.
     ///
     /// Statistics which have a measurable performance impact should only be
@@ -224,12 +221,12 @@ struct Renderer::Stats
     /// 2 = include potentially expensive stats
     int verbosity;
 
-    // Geometry stats
-    ResourceCounterStat<useStats> geometryInFlight;
-    SimpleCounterStat<useStats>   geometryOccluded;
-    // Grid stats
-    ResourceCounterStat<useStats> gridsInFlight;
-    SimpleCounterStat<useStats>   gridsOccluded;
+//    // Geometry stats
+//    ResourceCounterStat<useStats> geometryInFlight;
+//    SimpleCounterStat<useStats>   geometryOccluded;
+//    // Grid stats
+//    ResourceCounterStat<useStats> gridsInFlight;
+//    SimpleCounterStat<useStats>   gridsOccluded;
     MinMaxMeanStat<float, useStats> averagePolyArea;
     // Sampling stats
     SimpleCounterStat<useStats>   samplesTested;
@@ -243,10 +240,32 @@ struct Renderer::Stats
     Timer filteringTime;
     Timer shadingTime;
 
+    /// Merge the given stats into this one.
+    void merge(RenderStats& other)
+    {
+        static Mutex mutex;
+        LockGuard lk(mutex);
+        // merge counters
+        //geometryInFlight.merge(other.geometryInFlight);
+        //geometryOccluded.merge(other.geometryOccluded);
+        //gridsInFlight.merge(other.gridsInFlight);
+        //gridsOccluded.merge(other.gridsOccluded);
+        averagePolyArea.merge(other.averagePolyArea);
+        samplesTested.merge(other.samplesTested);
+        samplesHit.merge(other.samplesHit);
+        // merge timers
+        frameTime.merge(other.frameTime);
+        occlTime.merge(other.occlTime);
+        splitDiceTime.merge(other.splitDiceTime);
+        rasterizeTime.merge(other.rasterizeTime);
+        filteringTime.merge(other.filteringTime);
+        shadingTime.merge(other.shadingTime);
+    }
+
     /// Print the statistics to the given stream.
     void printStats(std::ostream& out);
 
-    Stats(int verbosity)
+    RenderStats(int verbosity)
         : collectExpensiveStats(verbosity >= 2),
         verbosity(verbosity),
         frameTime     (false, verbosity >= 1),
@@ -258,15 +277,17 @@ struct Renderer::Stats
     { }
 };
 
-void Renderer::Stats::printStats(std::ostream& out)
+void RenderStats::printStats(std::ostream& out)
 {
     // Output stats
     if(verbosity >= 1)
     {
+        /*
         out << "geometry: allocated            : " << geometryInFlight << "\n"
             << "geometry: occlusion culled     : " << geometryOccluded << "\n"
             << "grids: allocated               : " << gridsInFlight    << "\n"
             << "grids: occlusion culled        : " << gridsOccluded    << "\n";
+        */
         if(verbosity >= 2)
             out << "micropolygons: area            : " << averagePolyArea  << "\n";
         out << "sampling: point in poly tests  : " << samplesTested;
@@ -449,8 +470,7 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
     m_coc(),
     m_surfaces(),
     m_outVars(),
-    m_camToSRaster(),
-    m_stats(new Stats(m_opts->statsVerbosity))
+    m_camToSRaster()
 {
     sanitizeOptions(*m_opts);
     // Set up output variables.  Default is to use Cs.
@@ -534,12 +554,10 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                                           m_camToSRaster));
     }
 
-    m_stats->averagePolyArea.setScale(1.0/prod(m_opts->superSamp));
 }
 
 Renderer::~Renderer()
 {
-    m_stats->printStats(std::cout);
 }
 
 /// Push geometry into the render queue
@@ -565,9 +583,12 @@ void Renderer::add(GeometryKeys& deformingGeom,
 // Render all surfaces and save resulting image.
 void Renderer::render()
 {
-    TIME_SCOPE(m_stats->frameTime);
-    //MemoryLog memLog;  // FIXME
+    // Statistics for all threads
+    RenderStats frameStats(m_opts->statsVerbosity);
+    frameStats.averagePolyArea.setScale(1.0/prod(m_opts->superSamp));
 
+    TIME_SCOPE(frameStats.frameTime);
+    //MemoryLog memLog;  // FIXME
 
 #   ifdef AQSIS_USE_THREADS
     int nthreads = m_opts->nthreads;
@@ -584,7 +605,8 @@ void Renderer::render()
         {
             boost::thread* thread = new boost::thread(
                 boost::mem_fn(&Renderer::renderBuckets),
-                this, boost::ref(scheduler));
+                this, boost::ref(scheduler),
+                boost::ref(frameStats));
             if(nthreads <= ncpus)
             {
                 // Fill up the machine from the last core first (core 0 seems
@@ -597,18 +619,23 @@ void Renderer::render()
         threads.join_all();
     }
     else
-        renderBuckets(scheduler);
-#else
-    renderBuckets(scheduler);
 #endif // AQSIS_USE_THREADS
+    {
+        renderBuckets(scheduler, frameStats);
+    }
 
     m_displayManager->closeFiles();
+
+    frameStats.printStats(std::cout);
 }
 
 
-void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
+void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
+                             RenderStats& frameStats)
 {
     BucketScheduler bucketScheduler(schedulerShared);
+    RenderStats stats(frameStats.verbosity);
+    stats.averagePolyArea.setScale(1.0/prod(m_opts->superSamp));
     // Coordinate system for tessellation resolution calculation.
     Mat4 tessCoords = m_camToSRaster
         * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
@@ -644,20 +671,20 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
         {
             if(!geomh->hasChildren())
             {
-                if(samples.occludes(geomh->bound(), m_stats->occlTime))
+                if(samples.occludes(geomh->bound(), stats.occlTime))
                 {
                     // If occluded, discard from the bucket.
                     if(geomh->useCount() == 1)
                     {
                         // Occluded geometry with a use count of one will be
                         // discarded entirely.
-//                        --m_stats->geometryInFlight;
-//                        ++m_stats->geometryOccluded;
+//                        --stats.geometryInFlight;
+//                        ++stats.geometryOccluded;
                     }
                     continue;
                 }
                 // If no children and not occluded then split/dice:
-                TIME_SCOPE(m_stats->splitDiceTime);
+                TIME_SCOPE(stats.splitDiceTime);
                 // Scale dicing coordinates to account for shading rate.
                 Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
                         1/micropolyBlurWidth(geomh, m_coc.get()));
@@ -665,19 +692,19 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
                 // grids to be push()ed back to the renderer behind the
                 // scenes.
                 tessContext.tessellate(scaledTessCoords, geomh);
-//                --m_stats->geometryInFlight;
+//                --stats.geometryInFlight;
             }
             // If we get here, the surface has children.
             if(GridHolder* gridh = geomh->childGrid().get())
             {
                 // If it has grids, render those.
-                if(!samples.occludes(gridh->bound(), m_stats->occlTime))
-                    rasterize(samples, *gridh);
+                if(!samples.occludes(gridh->bound(), stats.occlTime))
+                    rasterize(samples, *gridh, stats);
                 /* FIXME stats
                 else if(gridh->useCount() == 1 && !gridh->rasterized())
-                    ++m_stats->gridsOccluded;
+                    ++stats.gridsOccluded;
                 if(gridh->useCount() == 1)
-                    --m_stats->gridsInFlight;
+                    --stats.gridsInFlight;
                 */
             }
             else
@@ -691,9 +718,10 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
         }
         bucket.setFinished();
         // Filter the tile
-        TIME_SCOPE(m_stats->filteringTime);
+        TIME_SCOPE(stats.filteringTime);
         m_filterProcessor->insert(tilePos, fragments);
     }
+    frameStats.merge(stats);
 }
 
 
@@ -701,9 +729,10 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared)
 ///
 /// Determines which rasterizer function to use, depending on the type of grid
 /// and current options.
-void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
+void Renderer::rasterize(SampleTile& tile, GridHolder& holder,
+                         RenderStats& stats)
 {
-    TIME_SCOPE(m_stats->rasterizeTime);
+    TIME_SCOPE(stats.rasterizeTime);
     tile.ensureSampleInit();
     holder.setRasterized();
     if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
@@ -712,7 +741,7 @@ void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
         switch(holder.grid().type())
         {
             case GridType_Quad:
-                mbdofRasterize<QuadGrid, MicroQuadSampler>(tile, holder);
+                mbdofRasterize<QuadGrid, MicroQuadSampler>(tile, holder, stats);
                 break;
         }
     }
@@ -722,7 +751,7 @@ void Renderer::rasterize(SampleTile& tile, GridHolder& holder)
         switch(holder.grid().type())
         {
             case GridType_Quad:
-                staticRasterize<QuadGrid, MicroQuadSampler>(tile, holder);
+                staticRasterize<QuadGrid, MicroQuadSampler>(tile, holder, stats);
                 break;
         }
     }
@@ -743,7 +772,8 @@ struct OutVarInfo
 /// Dirty implementation of motion blur / depth of field sampling.  Won't work
 /// unless GridT is a quad grid!
 template<typename GridT, typename PolySamplerT>
-void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
+void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
+                              RenderStats& stats)
 {
     std::cerr << "Warning: MB & DoF are temporarily broken\n";
     /*
@@ -871,7 +901,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
             bound.extendBy(Pc);
             bound.extendBy(Pd);
 
-            m_stats->averagePolyArea += 0.5*std::abs(vec2_cast(Pa-Pc) %
+            stats.averagePolyArea += 0.5*std::abs(vec2_cast(Pa-Pc) %
                                                      vec2_cast(Pb-Pd));
 
             // Iterate over samples at current time which come from tiles
@@ -895,10 +925,10 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
                 if(shuffIdx < 0)
                     continue;
                 Sample& samp = m_sampStorage->m_samples[shuffIdx];
-                ++m_stats->samplesTested;
+                ++stats.samplesTested;
                 if(!hitTest(samp))
                     continue;
-                ++m_stats->samplesHit;
+                ++stats.samplesHit;
                 Vec2 uv = invBilin(samp.p);
                 float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
                 if(samp.z < z)
@@ -937,7 +967,8 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder)
 /// Rasterize a non-moving grid without depth of field.
 template<typename GridT, typename PolySamplerT>
 //__attribute__((flatten))
-void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
+void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
+                               RenderStats& stats)
 {
     const GridT grid = static_cast<const GridT&>(holder.grid());
     // Determine index of depth output data, if any.
@@ -965,8 +996,8 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
            bound.min.x >= bucketMax.x || bound.min.y >= bucketMax.y)
             continue;
 
-        if(m_stats->collectExpensiveStats)
-            m_stats->averagePolyArea += poly.area();
+        if(stats.collectExpensiveStats)
+            stats.averagePolyArea += poly.area();
 
         poly.initHitTest();
         poly.initInterpolator();
@@ -983,10 +1014,10 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder)
         {
             Sample& samp = tile.sample(sx,sy);
             // Test whether sample hits the micropoly
-            ++m_stats->samplesTested;
+            ++stats.samplesTested;
             if(!poly.contains(samp.p))
                 continue;
-            ++m_stats->samplesHit;
+            ++stats.samplesHit;
             // Determine hit depth
             poly.interpolateAt(samp.p);
             float z = poly.interpolateZ();

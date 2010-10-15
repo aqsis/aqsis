@@ -176,6 +176,12 @@ public:
         }
     }
 
+    /// Merge elapsed time from another timer into the current timer.
+    void merge (Timer& t)
+    {
+        m_elapsed += t.m_elapsed;
+    }
+
 private:
     bool m_enabled;       ///< Switch to turn off timing
     bool m_ticking;       ///< Are we currently ticking?

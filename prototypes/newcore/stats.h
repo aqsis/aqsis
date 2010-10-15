@@ -38,6 +38,7 @@
 #ifndef AQSIS_STATS_H_INCLUDED
 #define AQSIS_STATS_H_INCLUDED
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <limits>
@@ -46,6 +47,7 @@
 #include <boost/format.hpp>
 
 
+//------------------------------------------------------------------------------
 /// Class for quick and dirty statistics reporting.
 ///
 /// Example to print the number of calls to a function foo() at the end of
@@ -81,6 +83,7 @@ class StatReporter
 };
 
 
+//------------------------------------------------------------------------------
 /// Statistic class computing a min, max and average over a set of values.
 template<typename T, bool enabled=true>
 class MinMaxMeanStat
@@ -114,6 +117,15 @@ class MinMaxMeanStat
             }
         }
 
+        /// Merge samples from the given stat into this one.
+        void merge(const MinMaxMeanStat& s)
+        {
+            m_count += s.m_count;
+            m_sum += s.m_sum;
+            m_max = std::max(m_max, s.m_max);
+            m_min = std::min(m_min, s.m_min);
+        }
+
         friend std::ostream& operator<<(std::ostream& out,
                                         const MinMaxMeanStat& s)
         {
@@ -132,14 +144,15 @@ class MinMaxMeanStat
         }
 
     private:
-        long long m_count;
-        T m_sum;
-        T m_min;
-        T m_max;
-        T m_scale;
+        long long m_count; ///< Number of samples
+        T m_sum;    ///< Sum of samples
+        T m_min;    ///< Min of samples
+        T m_max;    ///< Max of samples
+        T m_scale;  ///< Amount to scale values by
 };
 
 
+//------------------------------------------------------------------------------
 /// Compute a histogram over a set of values
 template<typename T, bool enabled=true>
 class HistogramStat
@@ -173,6 +186,17 @@ class HistogramStat
                 else
                     ++m_buckets.back();
             }
+        }
+
+        /// Merge samples from the given stat into this one.
+        void merge(const HistogramStat& s)
+        {
+            assert(m_scale == s.m_scale);
+            assert(m_min == s.m_min);
+            assert(m_delta == s.m_delta);
+            assert(m_buckets.size() == s.m_buckets.size());
+            for(int i = 0; i < (int)m_buckets.size(); ++i)
+                m_buckets[i] += s.m_buckets[i];
         }
 
         friend std::ostream& operator<<(std::ostream& out, const HistogramStat& s)
@@ -217,6 +241,8 @@ class HistogramStat
         std::vector<Counter> m_buckets;
 };
 
+
+//------------------------------------------------------------------------------
 /// Really basic counter stat.
 template<bool enabled=true>
 class SimpleCounterStat
@@ -228,6 +254,12 @@ class SimpleCounterStat
         {
             if(enabled)
                 ++m_count;
+        }
+
+        /// Merge samples from the given stat into this one.
+        void merge(const SimpleCounterStat& s)
+        {
+            m_count += s.m_count;
         }
 
         friend std::ostream& operator<<(std::ostream& out,
@@ -247,6 +279,7 @@ class SimpleCounterStat
 };
 
 
+//------------------------------------------------------------------------------
 /// Counter for pipeline resources
 ///
 /// Reports number created, max in flight, average in flight.
@@ -282,6 +315,15 @@ class ResourceCounterStat
             m_sum += m_current;
             ++m_nevents;
         }
+
+        /// Merge samples from the given stat into this one.
+//        void merge(const ResourceCounterStat& s)
+//        {
+//            m_nevents += s.m_nevents;
+//            m_ncreated += s.m_ncreated;
+//            m_sum += s.m_sum;
+//            // TODO: Merging m_sum and m_max isn't really very sensible.
+//        }
 
         friend std::ostream& operator<<(std::ostream& out,
                                         const ResourceCounterStat& s)

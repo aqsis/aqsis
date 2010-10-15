@@ -53,6 +53,7 @@ class SplitStore;
 class SampleTile;
 class FilterProcessor;
 class DisplayManager;
+class RenderStats;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -138,7 +139,6 @@ class Renderer
         // TessellationContextImpl is a friend so that it can appropriately
         // push() surfaces and grids into the renderer.
         friend class TessellationContextImpl;
-        class Stats;
 
         float micropolyBlurWidth(const GeomHolderPtr& holder,
                                  const CircleOfConfusion* coc) const;
@@ -148,15 +148,19 @@ class Renderer
         bool rasterCull(GeomHolder& holder);
         void add(const GeomHolderPtr& geom);
 
-        void renderBuckets(BucketSchedulerShared& bucketScheduler);
+        void renderBuckets(BucketSchedulerShared& bucketScheduler,
+                           RenderStats& stats);
 
-        void rasterize(SampleTile& tile, GridHolder& holder);
+        void rasterize(SampleTile& tile, GridHolder& holder,
+                       RenderStats& stats);
 
         template<typename GridT, typename PolySamplerT>
-        void mbdofRasterize(SampleTile& tile, const GridHolder& holder);
+        void mbdofRasterize(SampleTile& tile, const GridHolder& holder,
+                            RenderStats& stats);
 
         template<typename GridT, typename PolySamplerT>
-        void staticRasterize(SampleTile& tile, const GridHolder& holder);
+        void staticRasterize(SampleTile& tile, const GridHolder& holder,
+                             RenderStats& stats);
 
 
         OptionsPtr m_opts;             ///< Render options
@@ -169,7 +173,6 @@ class Renderer
         Mat4 m_camToSRaster;           ///< Camera -> sample raster transformation
         Imath::Box2f m_samplingArea;   ///< Area to sample in sraster coords
         std::vector<float> m_defaultFrag; ///< Default fragment samples
-        mutable boost::scoped_ptr<Stats> m_stats; ///< Render statistics
 };
 
 
