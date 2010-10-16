@@ -165,6 +165,8 @@ inline bool setThreadAffinity(boost::thread& thread, int coreid)
 #else
 #   warning "setThreadAffinity() not implemented yet on this platform"
 #endif
+#else
+    return true;
 #endif
 }
 

@@ -64,6 +64,7 @@ class GeomHolder : public RefCounted
         std::vector<GeomHolderPtr> m_childGeoms; ///< Child geometry
         GridHolderPtr m_childGrid;  ///< Child grid
         Mutex m_mutex;       ///< Mutex used when splitting
+        boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this geometry.  atomic.
 
         /// Get the bound from a set of geometry keys
         static Box boundFromKeys(const GeometryKeys& keys)
@@ -82,7 +83,8 @@ class GeomHolder : public RefCounted
             m_splitCount(0),
             m_bound(geom->bound()),
             m_attrs(attrs),
-            m_hasChildren(false)
+            m_hasChildren(false),
+            m_bucketRefs(0)
         { }
 
         /// Create geometry resulting from splitting (has a parent surface)
@@ -92,7 +94,8 @@ class GeomHolder : public RefCounted
             m_splitCount(parent.m_splitCount+1),
             m_bound(geom->bound()),
             m_attrs(parent.m_attrs),
-            m_hasChildren(false)
+            m_hasChildren(false),
+            m_bucketRefs(0)
         { }
 
         /// Create initial deforming geometry (no parent surface)
@@ -102,7 +105,8 @@ class GeomHolder : public RefCounted
             m_splitCount(0),
             m_bound(boundFromKeys(m_geomKeys)),
             m_attrs(attrs),
-            m_hasChildren(false)
+            m_hasChildren(false),
+            m_bucketRefs(0)
         { }
 
         /// Create deforming geometry resulting from splitting
@@ -113,7 +117,8 @@ class GeomHolder : public RefCounted
             m_splitCount(parent.m_splitCount+1),
             m_bound(),
             m_attrs(parent.m_attrs),
-            m_hasChildren(false)
+            m_hasChildren(false),
+            m_bucketRefs(0)
         {
             // Init geom keys, taking every keysStride'th geometry
             assert(static_cast<int>(parent.geomKeys().size())
@@ -169,6 +174,24 @@ class GeomHolder : public RefCounted
         const GridHolderPtr& childGrid()        { return m_childGrid; }
         /// Get child geometry if tessellation resulted in splitting.
         std::vector<GeomHolderPtr>& childGeoms() { return m_childGeoms; }
+
+        /// Set the number of bucket references.
+        ///
+        /// Should happen directly after construction, before other threads
+        /// have a chance to touch *this.
+        void setBucketRefs(boost::uint32_t nrefs)
+        {
+            m_bucketRefs = nrefs;
+        }
+
+        /// Release a bucket reference, returning true if the count decreased
+        /// to zero.
+        ///
+        /// This is intended to be a threadsafe atomic operation.
+        bool releaseBucketRef()
+        {
+            return atomic_dec32(&m_bucketRefs) - 1 == 0;
+        }
 
         /// Get mutex used to protect setting of tessellated children.
         Mutex& mutex() { return m_mutex; }
@@ -256,15 +279,6 @@ class GridHolder : public RefCounted
 // Tessellation driver for rasterization
 class TessellationContextImpl : public TessellationContext
 {
-    private:
-        Renderer& m_renderer;         ///< Renderer instance
-        GridStorageBuilder m_builder; ///< Grid allocator
-        GeomHolder* m_currGeom;       ///< Geometry currently being split
-
-        // Storage for partly tessellated
-        std::vector<GeometryPtr> m_splits;
-        std::vector<GridPtr> m_grids;
-
     public:
         TessellationContextImpl(Renderer& renderer);
 
@@ -281,6 +295,15 @@ class TessellationContextImpl : public TessellationContext
         virtual const Attributes& attributes();
 
         virtual GridStorageBuilder& gridStorageBuilder();
+
+    private:
+        Renderer& m_renderer;         ///< Renderer instance
+        GridStorageBuilder m_builder; ///< Grid allocator
+        GeomHolder* m_currGeom;       ///< Geometry currently being split
+
+        // Storage for partly tessellated
+        std::vector<GeometryPtr> m_splits;
+        std::vector<GridPtr> m_grids;
 };
 
 

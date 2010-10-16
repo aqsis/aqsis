@@ -460,6 +460,9 @@ bool Renderer::rasterCull(GeomHolder& holder)
        bound.max.y < m_samplingArea.min.y ||
        bound.min.y > m_samplingArea.max.y)
         return true;
+    int beginx = 0, endx = 0, beginy = 0, endy = 0;
+    m_surfaces->bucketRangeForBound(bound, beginx, endx, beginy, endy);
+    holder.setBucketRefs((endx-beginx)*(endy-beginy));
     return false;
 }
 
@@ -651,15 +654,16 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
 
     // Per-thread data structures:
     TessellationContextImpl tessContext(*this);
+    GeometryQueue queue;
     SampleTile samples;
 
     // Loop over all buckets
-    V2i tilePos;
-    while(bucketScheduler.nextBucket(tilePos))
+    V2i bucketPos;
+    while(bucketScheduler.nextBucket(bucketPos))
     {
-        SplitStore::Bucket& bucket = m_surfaces->getBucket(tilePos);
+        m_surfaces->enqueueGeometry(queue, bucketPos);
         // memLog.log(); // FIXME
-        V2i sampleOffset = tilePos*tileSize - tileSize/2;
+        V2i sampleOffset = bucketPos*tileSize - tileSize/2;
         // Create new tile for fragment storage
         FragmentTilePtr fragments =
             new FragmentTile(tileSize, sampleOffset,
@@ -667,7 +671,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
         samples.reset(*fragments);
 
         // Process all surfaces and grids in the bucket.
-        while(GeomHolder* geomh = bucket.popSurface())
+        while(GeomHolder* geomh = queue.pop())
         {
             if(!geomh->hasChildren())
             {
@@ -713,13 +717,13 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                 // queue.
                 std::vector<GeomHolderPtr>& childGeoms = geomh->childGeoms();
                 for(int i = 0, iend = childGeoms.size(); i < iend; ++i)
-                    bucket.pushSurface(childGeoms[i].get());
+                    queue.push(childGeoms[i]);
             }
         }
-        bucket.setFinished();
+        queue.releaseBucket();
         // Filter the tile
         TIME_SCOPE(stats.filteringTime);
-        m_filterProcessor->insert(tilePos, fragments);
+        m_filterProcessor->insert(bucketPos, fragments);
     }
     frameStats.merge(stats);
 }

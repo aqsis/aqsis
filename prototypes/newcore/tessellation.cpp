@@ -101,7 +101,8 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
                                 &*m_splits.begin() + i,
                                 &*m_splits.end() + i,
                                 splitsPerKey, *m_currGeom));
-                m_currGeom->addChild(holder);
+                if(!m_renderer.rasterCull(*holder))
+                    m_currGeom->addChild(holder);
             }
         }
         if(!m_grids.empty())
@@ -280,3 +281,4 @@ GridStorageBuilder& TessellationContextImpl::gridStorageBuilder()
     m_builder.setFromGeom();
     return m_builder;
 }
+
