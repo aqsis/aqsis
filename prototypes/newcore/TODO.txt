@@ -6,8 +6,7 @@ Some things which should be done:
         - MB & DoF for bucket rendering
     * API
         - motion
-        - CropWindow support
-    * Occlusion culling
+    * CropWindow support
     * Variable flow
         - Investigate copying architecture
         - Make sure all standard vars are diced when necessary
@@ -19,6 +18,13 @@ Some things which should be done:
     * Surface tessellation
         - Transformation motion blur
         - motionfactor approximation
+    * Arbitrary attribute & option support
+
+
+    (The following need to happen after the core is solid)
+
+    * More geometry types
+    * Programmable shading
 
 
     (The following are not present in aqsis, but should be kept in mind & done
@@ -26,8 +32,6 @@ Some things which should be done:
 
     * Grid crack solution via stitching
     * Point-based occlusion & colour bleeding
-    * Arbitrary bucket orders
-    * Multithreaded bucket rendering
     * Output of deep data
     * Raytracer prototype
 
@@ -53,4 +57,7 @@ Done:
         - Reyes split/dice pipeline
         - Deforming surfaces
         - focusfactor approximation
+    * Arbitrary bucket orders
+    * Multithreaded bucket rendering
+    * Occlusion culling
 
