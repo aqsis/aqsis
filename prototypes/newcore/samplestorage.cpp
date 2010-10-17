@@ -35,6 +35,8 @@
 
 #include <fstream>
 
+namespace Aqsis {
+
 //static void loadTileSet(const std::string& fname,
 //                        std::vector<SampleStorage::TimeLens>& tuv,
 //                        std::vector<int>& tiles, int& tileWidth)
@@ -470,3 +472,4 @@ void SampleStorage::cacheFilterNonSeparable(std::vector<float>& filter,
 #endif
 }
 
+} // namespace Aqsis

@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef RENDERER_H_INCLUDED
-#define RENDERER_H_INCLUDED
+#ifndef AQSIS_RENDERER_H_INCLUDED
+#define AQSIS_RENDERER_H_INCLUDED
 
 #include <cstring>
 #include <queue>
@@ -41,6 +41,8 @@
 #include "options.h"
 #include "varspec.h"
 #include "util.h"
+
+namespace Aqsis {
 
 class BucketSchedulerShared;
 class CachedFilter;
@@ -176,4 +178,5 @@ class Renderer
 };
 
 
-#endif // RENDERER_H_INCLUDED
+} // namespace Aqsis
+#endif // AQSIS_RENDERER_H_INCLUDED

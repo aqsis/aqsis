@@ -27,13 +27,15 @@
 //
 // (This is the New BSD license)
 
-#ifndef SAMPLESTORAGE_H_INCLUDED
-#define SAMPLESTORAGE_H_INCLUDED
+#ifndef AQSIS_SAMPLESTORAGE_H_INCLUDED
+#define AQSIS_SAMPLESTORAGE_H_INCLUDED
 
 #include <vector>
 
 #include "renderer.h"  // For OutvarSet.
 #include "sample.h"
+
+namespace Aqsis {
 
 
 /// Storage for samples positions and output fragments
@@ -195,4 +197,6 @@ inline SampleStorage::Iterator SampleStorage::begin(const Box& bound)
     return Iterator(bound, *this);
 }
 
-#endif // SAMPLESTORAGE_H_INCLUDED
+
+} // namespace Aqsis
+#endif // AQSIS_SAMPLESTORAGE_H_INCLUDED

@@ -49,6 +49,8 @@
 #include "stats.h"
 #include "timer.h"
 
+namespace Aqsis {
+
 //------------------------------------------------------------------------------
 /// Tile of sample positions
 class SampleTile
@@ -1041,3 +1043,4 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     }
 }
 
+} // namespace Aqsis

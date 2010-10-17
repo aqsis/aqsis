@@ -41,6 +41,8 @@
 #include "tessellation.h"
 #include "util.h"
 
+namespace Aqsis {
+
 class GeometryQueue;
 
 //------------------------------------------------------------------------------
@@ -253,6 +255,7 @@ void SplitStore::enqueueGeometry(GeometryQueue& queue, const V2i& bucketPos)
     queue.enqueueBucket(getBucket(bucketPos));
 }
 
+} // namespace Aqsis
 #endif // AQSIS_SPLITSTORE_H_INCLUDED
 
 // vi:set et:

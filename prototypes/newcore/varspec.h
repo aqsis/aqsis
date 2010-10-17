@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef VARSPEC_H_INCLUDED
-#define VARSPEC_H_INCLUDED
+#ifndef AQSIS_VARSPEC_H_INCLUDED
+#define AQSIS_VARSPEC_H_INCLUDED
 
 #include <algorithm>
 #include <cassert>
@@ -36,6 +36,8 @@
 #include <vector>
 
 #include "ustring.h"
+
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 struct VarSpec
@@ -319,4 +321,6 @@ typedef BasicVarSet<VarSpec, StdIndices> VarSet;
 template<typename SpecT, typename StdIndT>
 const int BasicVarSet<SpecT, StdIndT>::npos;
 
-#endif // VARSPEC_H_INCLUDED
+
+} // namespace Aqsis
+#endif // AQSIS_VARSPEC_H_INCLUDED

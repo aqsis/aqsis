@@ -27,13 +27,15 @@
 //
 // (This is the New BSD license)
 
-#ifndef MICROQUADSAMPLER_H_INCLUDED
-#define MICROQUADSAMPLER_H_INCLUDED
+#ifndef AQSIS_MICROQUADSAMPLER_H_INCLUDED
+#define AQSIS_MICROQUADSAMPLER_H_INCLUDED
 
 #include "attributes.h"
 #include "invbilin.h"
 #include "util.h"
 #include "pointinquad.h"
+
+namespace Aqsis {
 
 /// Quadrilateral micropolygon sampler
 ///
@@ -231,4 +233,6 @@ class MicroQuadSampler
 };
 
 
-#endif // MICROQUADSAMPLER_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_MICROQUADSAMPLER_H_INCLUDED

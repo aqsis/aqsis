@@ -35,6 +35,7 @@
 
 #include <boost/thread.hpp>
 
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Dummy mutex implementation for compiling without threads
@@ -192,4 +193,6 @@ struct ThreadSpecificPtr { typedef NullThreadSpecificPtr<T> type; };
 
 typedef boost::lock_guard<Mutex> LockGuard;
 
+
+} // namespace Aqsis
 #endif // AQSIS_THREAD_H_INCLUDED

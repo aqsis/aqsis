@@ -34,6 +34,8 @@
 
 #include "util.h"
 
+using namespace Aqsis;
+
 BOOST_AUTO_TEST_CASE(radicalInverse_test)
 {
     const float e = 1e-5; // percentage tolerance.

@@ -27,12 +27,14 @@
 //
 // (This is the New BSD license)
 
-#ifndef GRID_H_INCLUDED
-#define GRID_H_INCLUDED
+#ifndef AQSIS_GRID_H_INCLUDED
+#define AQSIS_GRID_H_INCLUDED
 
 #include "gridstorage.h"
 #include "refcount.h"
 #include "util.h"
+
+namespace Aqsis {
 
 enum GridType
 {
@@ -194,4 +196,7 @@ inline QuadGrid::Iterator QuadGrid::begin() const
     return Iterator(*this);
 }
 
-#endif // GRID_H_INCLUDED
+
+} // namespace Aqsis
+
+#endif // AQSIS_GRID_H_INCLUDED

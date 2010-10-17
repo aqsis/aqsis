@@ -35,6 +35,8 @@
 
 #include <fstream>
 
+namespace Aqsis {
+
 /// Simple class for logging the amount of heap memory used to a file.
 ///
 /// This class is a no-op unless AQSIS_MEMORY_DEBUGGING is enabled when the
@@ -64,5 +66,8 @@ class MemoryLog
     private:
         std::ofstream m_outFile;
 };
+
+
+} // namespace Aqsis
 
 #endif // AQSIS_MEMDEBUG_H_INCLUDED

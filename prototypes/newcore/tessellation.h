@@ -46,6 +46,8 @@
 #include "util.h"
 #include "varspec.h"
 
+namespace Aqsis {
+
 //------------------------------------------------------------------------------
 /// Container for single geometry piece and associated metadata
 ///
@@ -307,4 +309,5 @@ class TessellationContextImpl : public TessellationContext
 };
 
 
+} // namespace Aqsis
 #endif // AQSIS_TESSELLATION_H_INCLUDED

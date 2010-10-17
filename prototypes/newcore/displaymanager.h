@@ -38,6 +38,8 @@
 #include "thread.h"
 #include "util.h"
 
+namespace Aqsis {
+
 /// Manager for image output to displays
 class DisplayManager
 {
@@ -78,5 +80,7 @@ class DisplayManager
                                             ///< Storage for writing to files
 };
 
+
+} // namespace Aqsis
 
 #endif // AQSIS_DISPLAYMANAGER_H_INCLUDED

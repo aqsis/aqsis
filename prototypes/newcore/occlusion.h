@@ -38,6 +38,8 @@
 #include "treearraystorage.h"
 #include "util.h"
 
+namespace Aqsis {
+
 /// Balanced quad tree of sample depths.
 ///
 /// The basic task is that we have a 2D array of sample points, and we want to
@@ -243,5 +245,7 @@ class OcclusionTree
         boost::scoped_array<float> m_z; ///< array-based quadtree of z values
 };
 
+
+} // namespace Aqsis
 
 #endif // AQSIS_OCCLUSION_H_INCLUDED

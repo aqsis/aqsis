@@ -622,7 +622,7 @@ class RenderApi : public Ri::Renderer
         AllOptionsPtr m_savedOpts;
         AttributesStack m_attrStack;
         TransformStack m_transStack;
-        boost::shared_ptr< ::Renderer> m_renderer;
+        boost::shared_ptr< Aqsis::Renderer> m_renderer;
 };
 
 
@@ -692,7 +692,7 @@ RtVoid RenderApi::FrameEnd()
 RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
-    m_renderer.reset(new ::Renderer(m_opts->opts, camToScreen, m_opts->outVars));
+    m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen, m_opts->outVars));
     m_attrStack.push();
     m_transStack.push();
 }
@@ -1316,7 +1316,7 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
             builder.add(Primvar::Cs, Cs_stor, 12);
         }
         IclassStorage storReq(1,4,4,4,4);
-        GeometryPtr patch(new ::Patch(builder.build(storReq)));
+        GeometryPtr patch(new Aqsis::Patch(builder.build(storReq)));
         patch->transform(m_transStack.top());
         m_renderer->add(patch, attrsRead());
     }
@@ -1351,7 +1351,7 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
         PrimvarStorageBuilder builder;
         builder.add(Primvar::P, P.begin(), P.size());
         IclassStorage storReq(1,4,4,4,4);
-        GeometryPtr patch(new ::Patch(builder.build(storReq)));
+        GeometryPtr patch(new Aqsis::Patch(builder.build(storReq)));
         patch->transform(m_transStack.top());
         m_renderer->add(patch, attrsRead());
     }

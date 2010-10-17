@@ -33,6 +33,8 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 
+using namespace Aqsis;
+
 BOOST_AUTO_TEST_SUITE(treearraystorage_tests)
 
 BOOST_AUTO_TEST_CASE(bspTreeNodeIndex_test)

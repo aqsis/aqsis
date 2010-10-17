@@ -27,11 +27,12 @@
 //
 // (This is the New BSD license)
 
-#ifndef POINTINQUAD_H_INCLUDED
-#define POINTINQUAD_H_INCLUDED
+#ifndef AQSIS_POINTINQUAD_H_INCLUDED
+#define AQSIS_POINTINQUAD_H_INCLUDED
 
 #include "util.h"
 
+namespace Aqsis {
 
 /// Class for the point-in-quadrilateral test
 ///
@@ -279,4 +280,6 @@ class PointInQuad
 };
 
 
-#endif // POINTINQUAD_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_POINTINQUAD_H_INCLUDED

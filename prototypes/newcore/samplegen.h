@@ -27,8 +27,12 @@
 //
 // (This is the New BSD license)
 
+#ifndef AQSIS_SAMPLEGEN_H_INCLUDED
+#define AQSIS_SAMPLEGEN_H_INCLUDED
+
 #include <vector>
 
+namespace Aqsis {
 
 /// Make a set of well-distributed time and lens samples.
 ///
@@ -104,3 +108,6 @@ int getMinCostIdx(const int* remainingInds, int nRemain,
                   const int* validNeighbours, const float* validWeights,
                   int nvalid, const float* tuv, float timeStratQuality);
 
+} // namespace Aqsis
+
+#endif // AQSIS_SAMPLEGEN_H_INCLUDED

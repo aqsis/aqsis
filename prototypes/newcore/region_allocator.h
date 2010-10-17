@@ -42,6 +42,8 @@
 
 #include <sys/mman.h>
 
+namespace Aqsis {
+
 /// Allocate a block of memory using mmap()
 inline void* mmap_alloc(size_t size)
 {
@@ -338,5 +340,7 @@ class RegionAllocator
             }
         }
 };
+
+} // namespace Aqsis
 
 #endif // AQSIS_REGION_ALLOCATOR_H_INCLUDED

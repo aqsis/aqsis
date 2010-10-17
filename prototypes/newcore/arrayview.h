@@ -30,8 +30,8 @@
 /// \file
 /// \author Chris Foster
 
-#ifndef ARRAYVIEW_H_INCLUDED
-#define ARRAYVIEW_H_INCLUDED
+#ifndef AQSIS_ARRAYVIEW_H_INCLUDED
+#define AQSIS_ARRAYVIEW_H_INCLUDED
 
 #include <cassert>
 #include <cstring> // for memcpy
@@ -39,6 +39,8 @@
 #include <boost/type_traits/remove_cv.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
+
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Utility metafunction to determine whether two types are the same after
@@ -388,4 +390,6 @@ inline T diff(const DataView<T>& data, int n, int length, bool useCentred = true
 }
 
 
-#endif // ARRAYVIEW_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_ARRAYVIEW_H_INCLUDED

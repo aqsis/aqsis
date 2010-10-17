@@ -27,11 +27,13 @@
 //
 // (This is the New BSD license)
 
-#ifndef ATTRIBUTES_H_INCLUDED
-#define ATTRIBUTES_H_INCLUDED
+#ifndef AQSIS_ATTRIBUTES_H_INCLUDED
+#define AQSIS_ATTRIBUTES_H_INCLUDED
 
 #include "refcount.h"
 #include "shader.h"
+
+namespace Aqsis {
 
 /// Surface attribute state.
 struct Attributes : public RefCounted
@@ -54,4 +56,6 @@ struct Attributes : public RefCounted
 typedef boost::intrusive_ptr<Attributes> AttributesPtr;
 typedef boost::intrusive_ptr<const Attributes> ConstAttributesPtr;
 
-#endif // ATTRIBUTES_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_ATTRIBUTES_H_INCLUDED

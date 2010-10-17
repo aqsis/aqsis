@@ -29,6 +29,8 @@
 
 #include "varspec.h"
 
+namespace Aqsis {
+
 namespace Stdvar
 {
 #   define DEFINE_STD_VAR(type, count, name)                          \
@@ -67,3 +69,4 @@ namespace Stdvar
 }
 
 
+} // namespace Aqsis

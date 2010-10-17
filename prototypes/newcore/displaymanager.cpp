@@ -33,6 +33,7 @@
 
 #include "arrayview.h"
 
+namespace Aqsis {
 
 /// Write TIFF header
 static void writeHeader(TIFF* tif, const V2i& imageSize,
@@ -215,3 +216,5 @@ void* DisplayManager::tmpStorage(size_t size)
         store->resize(size);
     return &(*store)[0];
 }
+
+} // namespace Aqsis

@@ -27,11 +27,13 @@
 //
 // (This is the New BSD license)
 
-#ifndef GEOMETRY_H_INCLUDED
-#define GEOMETRY_H_INCLUDED
+#ifndef AQSIS_GEOMETRY_H_INCLUDED
+#define AQSIS_GEOMETRY_H_INCLUDED
 
 #include "refcount.h"
 #include "util.h"
+
+namespace Aqsis {
 
 class Grid;
 class GridStorageBuilder;
@@ -191,5 +193,6 @@ class SurfaceSplitter : public TessControl
         }
 };
 
+} // namespace Aqsis
 
-#endif // GEOMETRY_H_INCLUDED
+#endif // AQSIS_GEOMETRY_H_INCLUDED

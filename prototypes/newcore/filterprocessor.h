@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef FILTERPROCESSOR_H_INCLUDED
-#define FILTERPROCESSOR_H_INCLUDED
+#ifndef AQSIS_FILTERPROCESSOR_H_INCLUDED
+#define AQSIS_FILTERPROCESSOR_H_INCLUDED
 
 #include <boost/unordered_map.hpp>
 #include <boost/scoped_array.hpp>
@@ -38,6 +38,8 @@
 #include "refcount.h"
 #include "thread.h"
 #include "util.h"
+
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Storage for fragments generated during sampling.
@@ -297,4 +299,6 @@ class FilterProcessor
 };
 
 
-#endif // FILTERPROCESSOR_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_FILTERPROCESSOR_H_INCLUDED

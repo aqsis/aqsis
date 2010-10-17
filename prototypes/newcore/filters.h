@@ -27,11 +27,13 @@
 //
 // (This is the New BSD license)
 
-#ifndef FILTERS_H_INCLUDED
-#define FILTERS_H_INCLUDED
+#ifndef AQSIS_FILTERS_H_INCLUDED
+#define AQSIS_FILTERS_H_INCLUDED
 
 #include "refcount.h"
 #include "util.h"  // for Vec2
+
+namespace Aqsis {
 
 /// Filter functor class
 ///
@@ -74,4 +76,6 @@ FilterPtr makeGaussianFilter(const Vec2& width);
 FilterPtr makeSincFilter(const Vec2& width);
 
 
-#endif // FILTERS_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_FILTERS_H_INCLUDED

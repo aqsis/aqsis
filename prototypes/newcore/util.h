@@ -59,6 +59,8 @@
 #endif
 
 
+namespace Aqsis {
+
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
 typedef Imath::V2i V2i;
@@ -236,8 +238,8 @@ inline float rad2deg(float r) { return (180/M_PI) * r; }
 /// log2() as a C99 math function isn't avaliable on windows.
 inline float log2(float x)
 {
-	// log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
-	return 1.4426950408889633 * std::log(x);
+    // log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
+    return 1.4426950408889633 * std::log(x);
 }
 #endif
 
@@ -367,4 +369,5 @@ inline float radicalInverse(int n, int base = 2)
 }
 
 
+} // namespace Aqsis
 #endif // AQSIS_UTIL_H_INCLUDED

@@ -35,6 +35,8 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+using namespace Aqsis;
+
 BOOST_AUTO_TEST_CASE(findRemainingInds_test)
 {
     const int width = 20;

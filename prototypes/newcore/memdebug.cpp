@@ -34,8 +34,13 @@
 
 
 #ifdef AQSIS_MEMORY_DEBUGGING
+#   include <malloc.h> //< Won't work on windows, I guess?
+#endif
 
-#include <malloc.h> //< Won't work on windows, I guess?
+
+namespace Aqsis {
+
+#ifdef AQSIS_MEMORY_DEBUGGING
 
 MemoryLog::MemoryLog(const char* fileName)
     : m_outFile(fileName)
@@ -56,10 +61,10 @@ void MemoryLog::log()
 
 #else
 
-
 // Dummy implementations when AQSIS_MEMORY_DEBUGGING isn't defined.
 MemoryLog::MemoryLog(const char* fileName) {}
 void MemoryLog::log() {}
 
-
 #endif
+
+} // namespace Aqsis

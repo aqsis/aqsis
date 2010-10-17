@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef GRIDVAR_H_INCLUDED
-#define GRIDVAR_H_INCLUDED
+#ifndef AQSIS_GRIDVAR_H_INCLUDED
+#define AQSIS_GRIDVAR_H_INCLUDED
 
 #include <boost/scoped_array.hpp>
 #include <boost/noncopyable.hpp>
@@ -39,6 +39,7 @@
 #include "ustring.h"
 #include "varspec.h"
 
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Storage space for variables attached to a grid.
@@ -298,4 +299,6 @@ class GridStorageBuilder : boost::noncopyable
         }
 };
 
-#endif // GRIDVAR_H_INCLUDED
+
+} // namespace Aqsis
+#endif // AQSIS_GRIDVAR_H_INCLUDED

@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef PRIMVAR_H_INCLUDED
-#define PRIMVAR_H_INCLUDED
+#ifndef AQSIS_PRIMVAR_H_INCLUDED
+#define AQSIS_PRIMVAR_H_INCLUDED
 
 #include <algorithm>
 #include <stdexcept>
@@ -40,6 +40,8 @@
 #include "refcount.h"
 #include "util.h"
 #include "varspec.h"
+
+namespace Aqsis {
 
 struct IclassStorage;
 
@@ -326,4 +328,6 @@ inline int PrimvarSpec::storageSize(const IclassStorage& storCount) const
     return storCount.storage(iclass)*scalarSize();
 }
 
-#endif // PRIMVAR_H_INCLUDED
+
+} // namespace Aqsis
+#endif // AQSIS_PRIMVAR_H_INCLUDED

@@ -32,6 +32,19 @@
 
 #include <boost/functional/hash.hpp>
 
+namespace Imath // [namespace needed to allow ADL to find hash_value :-( ]
+{
+/// Hash function for 2D points, as in boost docs.
+std::size_t hash_value(V2i const& p)
+{
+    std::size_t seed = 0;
+    boost::hash_combine(seed, p.x);
+    boost::hash_combine(seed, p.y);
+    return seed;
+}
+}
+
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // Cached filter implementation
@@ -149,18 +162,6 @@ void CachedFilter::normalizeFilter(float* weights, int nWeights)
 
 //------------------------------------------------------------------------------
 // FilterProcessor implementation
-
-namespace Imath // [namespace needed to allow ADL to find hash_value :-( ]
-{
-/// Hash function for 2D points, as in boost docs.
-std::size_t hash_value(V2i const& p)
-{
-    std::size_t seed = 0;
-    boost::hash_combine(seed, p.x);
-    boost::hash_combine(seed, p.y);
-    return seed;
-}
-}
 
 FilterProcessor::FilterProcessor(DisplayManager& displayManager,
                                  const Imath::Box2i& outTileRange,
@@ -415,3 +416,4 @@ void FilterProcessor::filterSeparable(std::vector<float>& output,
     }
 }
 
+} // namespace Aqsis

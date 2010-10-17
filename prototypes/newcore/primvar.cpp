@@ -29,6 +29,8 @@
 
 #include "primvar.h"
 
+namespace Aqsis {
+
 namespace Primvar
 {
 #   define DEFINE_STD_VAR(iclass, type, count, name)              \
@@ -42,3 +44,5 @@ namespace Primvar
 
 #undef DEFINE_STD_VAR
 }
+
+} // namespace Aqsis

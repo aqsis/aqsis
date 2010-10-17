@@ -36,6 +36,8 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/utility/enable_if.hpp>
 
+namespace Aqsis {
+
 inline boost::uint32_t atomic_inc32(volatile boost::uint32_t* i)
 {
     return boost::interprocess::detail::atomic_inc32(i);
@@ -104,5 +106,8 @@ intrusive_ptr_release(const T* p)
 //------------------------------------------------------------------------------
 /// Null deleter util for use with boost::shared_ptr
 inline void nullDeleter(const void*) { }
+
+
+} // namespace Aqsis
 
 #endif // AQSIS_REFCOUNT_H_INCLUDED

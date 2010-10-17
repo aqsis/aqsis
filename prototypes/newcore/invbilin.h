@@ -27,10 +27,12 @@
 //
 // (This is the New BSD license)
 
-#ifndef INVBILIN_H_INCLUDED
-#define INVBILIN_H_INCLUDED
+#ifndef AQSIS_INVBILIN_H_INCLUDED
+#define AQSIS_INVBILIN_H_INCLUDED
 
 #include "util.h"
+
+namespace Aqsis {
 
 /** \brief Functor for inverse bilinear mapping
  *
@@ -207,4 +209,6 @@ inline Vec2 InvBilin::bilinEval(Vec2 uv) const
 }
 
 
-#endif // INVBILIN_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_INVBILIN_H_INCLUDED

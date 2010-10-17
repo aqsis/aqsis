@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <cassert>
 
+namespace Aqsis {
+
 //------------------------------------------------------------------------------
 // Quad tree utilities for indexing array-based node storage.
 //
@@ -148,4 +150,6 @@ inline int bspTreeNodeIndex(int x, int y, int depth)
     return index + ((1 << depth) - 1);
 }
 
+
+} // namespace Aqsis
 #endif // AQSIS_TREEARRAYSTORAGE_H_INCLUDED

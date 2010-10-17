@@ -27,12 +27,14 @@
 //
 // (This is the New BSD license)
 
-#ifndef SAMPLE_H_INCLUDED
-#define SAMPLE_H_INCLUDED
+#ifndef AQSIS_SAMPLE_H_INCLUDED
+#define AQSIS_SAMPLE_H_INCLUDED
 
 #include <cfloat>
 
 #include "util.h"
+
+namespace Aqsis {
 
 struct Sample
 {
@@ -43,4 +45,6 @@ struct Sample
     Sample(const Vec2& p) : p(p), z(FLT_MAX) {}
 };
 
-#endif // SAMPLE_H_INCLUDED
+} // namespace Aqsis
+
+#endif // AQSIS_SAMPLE_H_INCLUDED

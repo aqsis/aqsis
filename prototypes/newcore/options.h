@@ -27,14 +27,16 @@
 //
 // (This is the New BSD license)
 
-#ifndef OPTIONS_H_INCLUDED
-#define OPTIONS_H_INCLUDED
+#ifndef AQSIS_OPTIONS_H_INCLUDED
+#define AQSIS_OPTIONS_H_INCLUDED
 
 #include <cfloat>
 
 #include "filters.h"
 #include "refcount.h"
 #include "util.h"
+
+namespace Aqsis {
 
 /// Renderer options.
 struct Options : public RefCounted
@@ -85,4 +87,7 @@ struct Options : public RefCounted
 
 typedef boost::intrusive_ptr<Options> OptionsPtr;
 
-#endif // OPTIONS_H_INCLUDED
+
+} // namespace Aqsis
+
+#endif // AQSIS_OPTIONS_H_INCLUDED

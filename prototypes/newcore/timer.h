@@ -73,6 +73,8 @@
 #include <sys/time.h>
 #endif
 
+namespace Aqsis {
+
 
 /// Simple timer class.
 ///
@@ -272,4 +274,6 @@ class ScopeTimerDisable
         Timer& m_timer;
 };
 
+
+} // namespace Aqsis
 #endif // AQSIS_TIMER_H_INCLUDED

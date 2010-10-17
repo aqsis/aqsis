@@ -27,10 +27,12 @@
 //
 // (This is the New BSD license)
 
-#include "tessellation.h"
-
 /// \file Tessellation context implementation and grid/geom holders
 /// \author Chris Foster [chris42f (at) gmail (d0t) com]
+
+#include "tessellation.h"
+
+namespace Aqsis {
 
 TessellationContextImpl::TessellationContextImpl(Renderer& renderer)
     : m_renderer(renderer),
@@ -282,3 +284,4 @@ GridStorageBuilder& TessellationContextImpl::gridStorageBuilder()
     return m_builder;
 }
 
+} // namespace Aqsis

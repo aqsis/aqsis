@@ -33,6 +33,8 @@
 
 #include <boost/math/special_functions/sinc.hpp>
 
+namespace Aqsis {
+
 
 class BoxFilter : public Filter
 {
@@ -132,3 +134,4 @@ FilterPtr makeSincFilter(const Vec2& width)
     return FilterPtr(new SincFilter(width));
 }
 
+} // namespace Aqsis

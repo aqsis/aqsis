@@ -32,6 +32,8 @@
 
 #include "pointinquad.h"
 
+using namespace Aqsis;
+
 int main()
 {
     // CCW

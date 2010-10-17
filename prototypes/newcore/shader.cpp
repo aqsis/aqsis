@@ -39,6 +39,7 @@
 #include "util.h"
 #include "varspec.h"
 
+namespace Aqsis {
 
 /// Uniform random numbers in the interval [0,1]
 inline float randf() { return float(std::rand())/RAND_MAX; }
@@ -281,3 +282,4 @@ ShaderPtr createShader(const char* name)
         return ShaderPtr();
 }
 
+} // namespace Aqsis

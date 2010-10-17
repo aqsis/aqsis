@@ -36,6 +36,8 @@
 #include "thread.h"
 #include "util.h"
 
+namespace Aqsis {
+
 /// Bucket scheduler data shared between threads
 class BucketSchedulerShared
 {
@@ -111,5 +113,6 @@ class BucketScheduler
         Mutex m_mutex;
 };
 
+} // namespace Aqsis
 
 #endif // AQSIS_BUCKETSCHEDULER_H_INCLUDED

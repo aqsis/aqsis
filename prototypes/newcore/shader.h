@@ -27,12 +27,14 @@
 //
 // (This is the New BSD license)
 
-#ifndef SHADER_H_INCLUDED
-#define SHADER_H_INCLUDED
+#ifndef AQSIS_SHADER_H_INCLUDED
+#define AQSIS_SHADER_H_INCLUDED
 
 #include "refcount.h"
 #include "util.h"
 #include "varspec.h"
+
+namespace Aqsis {
 
 class Grid;
 
@@ -57,4 +59,5 @@ typedef boost::intrusive_ptr<Shader> ShaderPtr;
 ShaderPtr createShader(const char* name);
 
 
-#endif // SHADER_H_INCLUDED
+} // namespace Aqsis
+#endif // AQSIS_SHADER_H_INCLUDED

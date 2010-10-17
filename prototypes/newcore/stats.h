@@ -46,6 +46,7 @@
 
 #include <boost/format.hpp>
 
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /// Class for quick and dirty statistics reporting.
@@ -351,4 +352,5 @@ class ResourceCounterStat
 };
 
 
+} // namespace Aqsis
 #endif // AQSIS_STATS_H_INCLUDED

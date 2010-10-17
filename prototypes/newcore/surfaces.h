@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef SURFACES_H_INCLUDED
-#define SURFACES_H_INCLUDED
+#ifndef AQSIS_SURFACES_H_INCLUDED
+#define AQSIS_SURFACES_H_INCLUDED
 
 #include "attributes.h"
 #include "geometry.h"
@@ -39,6 +39,7 @@
 #include "gridstorage.h"
 #include "grid.h"
 
+namespace Aqsis {
 
 class Patch : public Geometry
 {
@@ -221,4 +222,6 @@ class Patch : public Geometry
         }
 };
 
-#endif // SURFACES_H_INCLUDED
+
+} // namespace Aqsis
+#endif // AQSIS_SURFACES_H_INCLUDED

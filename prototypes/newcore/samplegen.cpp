@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <cstring> // for memcpy
 
+namespace Aqsis {
+
 void canonicalTimeLensSamps(std::vector<float>& tuv, int nsamps)
 {
     tuv.resize(3*nsamps, FLT_MAX);
@@ -491,4 +493,4 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
     }
 }
 
-
+} // namespace Aqsis

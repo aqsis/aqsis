@@ -34,6 +34,8 @@
 
 #define ARRLEN(ar) sizeof(ar)/sizeof(ar[0])
 
+using namespace Aqsis;
+
 namespace Var
 {
 #   define MAKE_STD_VAR(iclass, type, count, name)                 \
