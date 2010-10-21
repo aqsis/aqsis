@@ -35,6 +35,8 @@
 
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "attributes.h"
 #include "geometry.h"
 #include "grid.h"
@@ -67,6 +69,9 @@ class GeomHolder : public RefCounted
         GridHolderPtr m_childGrid;  ///< Child grid
         Mutex m_mutex;       ///< Mutex used when splitting
         boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this geometry.  atomic.
+        V2i m_bboundStart;   ///< First bucket which the bound touches
+        V2i m_bboundSize;    ///< Number of buckets the bound touches
+        boost::dynamic_bitset<> m_occludedBuckets; ///< Buckets in which the geometry was occluded.
 
         /// Get the bound from a set of geometry keys
         static Box boundFromKeys(const GeometryKeys& keys)
@@ -75,6 +80,18 @@ class GeomHolder : public RefCounted
             for(int i = 1, iend = keys.size(); i < iend; ++i)
                 bound.extendBy(keys[i].value->bound());
             return bound;
+        }
+
+        /// Return true if all children have been deleted.
+        ///
+        /// (This is a debug tool.)
+        bool childrenDeleted() const
+        {
+            bool deleted = true;
+            for(int i = 0, nchildren = m_childGeoms.size(); i < nchildren; ++i)
+                deleted &= !m_childGeoms[i];
+            // TODO: Also check grid.
+            return deleted;
         }
 
     public:
@@ -132,6 +149,16 @@ class GeomHolder : public RefCounted
             m_bound = boundFromKeys(m_geomKeys);
         }
 
+        ~GeomHolder()
+        {
+            // Check that all split children have already been deleted.  If
+            // this check fails, it means that we are failing to delete the
+            // leaves of the split tree as soon as possible.
+            assert(!m_hasChildren || m_hasChildren && childrenDeleted());
+        }
+
+        //------------------------------------------------------------
+
         /// Get non-deforming geometry or first key frame
         const Geometry& geom() const
         {
@@ -141,49 +168,50 @@ class GeomHolder : public RefCounted
         /// Get deforming geometry key frames.  Empty if non-moving.
         const GeometryKeys& geomKeys() const { return m_geomKeys; }
 
-        /// True if the holder no longer holds valid geometry
+        /// Return true if this holds deforming geometry
         bool isDeforming() const { return !m_geom; }
-        int splitCount() const    { return m_splitCount; }
+
+        /// Return the number of times the geometry has been split
+        int splitCount() const   { return m_splitCount; }
+
+        /// Return the geometry bound.
+        ///
+        /// This is initially in world space, but is transformed to combined
+        /// sraster/camera z space before inserting into the split tree.
         Box& bound() { return m_bound; }
+
+        /// Return the attribute state associated with the geometry.  Threadsafe.
         const Attributes& attrs() const { return *m_attrs; }
 
-        /// Has the geometry already been split/diced?
+        /// Has the geometry already been split/diced?  Threadsafe.
         bool hasChildren() const { return m_hasChildren; }
-        /// Add some child geometry to the set of splitting results.
-        void addChild(const GeomHolderPtr& childGeom)
-        {
-            m_childGeoms.push_back(childGeom);
-        }
-        /// Set the child grid as the result of dicing.
-        void addChild(GridHolderPtr childGrid)
-        {
-            assert(!m_childGrid);
-            m_childGrid = childGrid;
-        }
 
-        /// Clean up after tessellation is done.
-        ///
-        /// This should disassociate any held geometry, and set the flag
-        /// indicating that child geometry is present.
-        void tessellateFinished()
-        {
-            m_geom.reset();
-            m_geomKeys.clear();
-            m_hasChildren = true;
-        }
-
-        /// Get child grid if tessellation resulted in dicing.
+        /// Get child grid if tessellation resulted in dicing.  Threadsafe.
         const GridHolderPtr& childGrid()        { return m_childGrid; }
+
         /// Get child geometry if tessellation resulted in splitting.
+        ///
+        /// Threadsafe, provided hasChildren() returns true.
         std::vector<GeomHolderPtr>& childGeoms() { return m_childGeoms; }
 
-        /// Set the number of bucket references.
+        /// Set flag indicating that the geometry was occluded in the given bucket.
         ///
-        /// Should happen directly after construction, before other threads
-        /// have a chance to touch *this.
-        void setBucketRefs(boost::uint32_t nrefs)
+        /// pos - position of bucket.
+        ///
+        /// Returns true if the flag was successfully set.  A return value of
+        /// false indicates that the geometry was already split.
+        ///
+        /// Threadsafe.
+        bool setOccludedInBucket(V2i pos)
         {
-            m_bucketRefs = nrefs;
+            LockGuard lk(m_mutex);
+            if(m_hasChildren)
+                return false;
+            if(m_occludedBuckets.empty())
+                m_occludedBuckets.resize(prod(m_bboundSize));
+            m_occludedBuckets[m_bboundSize.x*(pos.y - m_bboundStart.y) +
+                              pos.x - m_bboundStart.x] = true;
+            return true;
         }
 
         /// Release a bucket reference, returning true if the count decreased
@@ -195,8 +223,88 @@ class GeomHolder : public RefCounted
             return atomic_dec32(&m_bucketRefs) - 1 == 0;
         }
 
+        //------------------------------------------------------------
+        /// \group Tessellation utilities
+        ///
+        /// These functions should be called only by the tessellation context.
+        //@{
+
         /// Get mutex used to protect setting of tessellated children.
         Mutex& mutex() { return m_mutex; }
+
+        /// Add some child geometry to the set of splitting results.
+        ///
+        /// The geometry mutex must be locked before calling this function.
+        void addChild(const GeomHolderPtr& childGeom)
+        {
+            m_childGeoms.push_back(childGeom);
+        }
+
+        /// Set the child grid as the result of dicing.
+        ///
+        /// The geometry mutex must be locked before calling this function.
+        void addChild(GridHolderPtr childGrid)
+        {
+            assert(!m_childGrid);
+            m_childGrid = childGrid;
+        }
+
+        /// Clean up after tessellation is done.
+        ///
+        /// This should disassociate any held geometry, and set the flag
+        /// indicating that child geometry is present.
+        ///
+        /// The geometry mutex must be locked before calling this function.
+        void tessellateFinished()
+        {
+            m_geom.reset();
+            vectorFree(m_geomKeys);
+            // Free the memory held by the occlusion record bitset
+            boost::dynamic_bitset<>().swap(m_occludedBuckets);
+            m_hasChildren = true;
+        }
+
+        /// Set the number of bucket references.
+        ///
+        /// Should happen directly after construction, before other threads
+        /// have a chance to touch *this.
+        void initBucketRefs(V2i bucketBegin, V2i bucketEnd)
+        {
+            m_bboundStart = bucketBegin;
+            m_bboundSize = bucketEnd - bucketBegin;
+            m_bucketRefs = prod(m_bboundSize);
+        }
+
+        /// Copy the occlusion record of the parent geometry.
+        ///
+        /// The occlusion record is an array of bits, one for each bucket
+        /// which the geometry bound touches.  Each time a piece of geometry is
+        /// occluded in a bucket, we set the appropriate bit.  This is
+        /// necessary so that when splitting the child geometry can get the
+        /// correct reference count
+        ///
+        /// parent - geometry from which to copy the occlusion record.  The
+        ///          parent bound must be larger than (or equal to) the size of
+        ///          the current bound.
+        bool copyOcclusionRecord(GeomHolder& parent)
+        {
+            if(parent.m_occludedBuckets.empty())
+                return true;
+            m_occludedBuckets.resize(prod(m_bboundSize));
+            V2i offset = m_bboundStart - parent.m_bboundStart;
+            // Note that this loop could probably be a lot more efficient if we
+            // copied blocks rather than individual bits.
+            for(int j = 0; j < m_bboundSize.y; ++j)
+            for(int i = 0; i < m_bboundSize.x; ++i)
+            {
+                m_occludedBuckets[j*m_bboundSize.x + i] = parent.m_occludedBuckets[
+                        parent.m_bboundSize.x*(j + offset.y) + i + offset.x];
+            }
+            assert(m_bucketRefs >= m_occludedBuckets.count());
+            m_bucketRefs -= m_occludedBuckets.count();
+            return m_bucketRefs != 0;
+        }
+        //@}
 };
 
 
@@ -220,6 +328,7 @@ class GridHolder : public RefCounted
         ConstAttributesPtr m_attrs; ///< Attribute state
         Box m_bound;                ///< Grid bounding box in raster coords.
         bool m_rasterized;          ///< True if the grid was rasterized
+        // TODO: Add bucket reference count.
 
         void shade(Grid& grid) const
         {
@@ -299,6 +408,9 @@ class TessellationContextImpl : public TessellationContext
         virtual GridStorageBuilder& gridStorageBuilder();
 
     private:
+        void addChildGeometry(GeomHolder& parent,
+                              const GeomHolderPtr& child) const;
+
         Renderer& m_renderer;         ///< Renderer instance
         GridStorageBuilder m_builder; ///< Grid allocator
         GeomHolder* m_currGeom;       ///< Geometry currently being split

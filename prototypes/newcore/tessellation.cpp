@@ -57,6 +57,24 @@ void TessellationContextImpl::tessellate(const Mat4& splitTrans,
     m_currGeom->tessellateFinished();
 }
 
+
+/// Add child geometry to a parent's split results list if it can't be culled.
+void TessellationContextImpl::addChildGeometry(GeomHolder& parent,
+                                               const GeomHolderPtr& child) const
+{
+    // First check to see whether the child can be culled completely
+    if(!m_renderer.rasterCull(*child))
+    {
+        // Copy over the occlusion record from the parent
+        if(child->copyOcclusionRecord(parent))
+        {
+            // Only add if child bound was partially unoccluded according to
+            // parent geometry occlusion record.
+            parent.addChild(child);
+        }
+    }
+}
+
 void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
 {
     // Collect the split/dice results in m_splits/m_grids.
@@ -103,8 +121,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
                                 &*m_splits.begin() + i,
                                 &*m_splits.end() + i,
                                 splitsPerKey, *m_currGeom));
-                if(!m_renderer.rasterCull(*holder))
-                    m_currGeom->addChild(holder);
+                addChildGeometry(*m_currGeom, holder);
             }
         }
         if(!m_grids.empty())
@@ -124,8 +141,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
             {
                 GeomHolderPtr holder(new GeomHolder(m_splits[i],
                                                     *m_currGeom));
-                if(!m_renderer.rasterCull(*holder))
-                    m_currGeom->addChild(holder);
+                addChildGeometry(*m_currGeom, holder);
             }
         }
         if(!m_grids.empty())

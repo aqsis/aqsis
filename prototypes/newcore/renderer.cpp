@@ -462,9 +462,9 @@ bool Renderer::rasterCull(GeomHolder& holder)
        bound.max.y < m_samplingArea.min.y ||
        bound.min.y > m_samplingArea.max.y)
         return true;
-    int beginx = 0, endx = 0, beginy = 0, endy = 0;
-    m_surfaces->bucketRangeForBound(bound, beginx, endx, beginy, endy);
-    holder.setBucketRefs((endx-beginx)*(endy-beginy));
+    V2i begin, end;
+    m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);
+    holder.initBucketRefs(begin, end);
     return false;
 }
 
@@ -679,26 +679,37 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
             {
                 if(samples.occludes(geomh->bound(), stats.occlTime))
                 {
-                    // If occluded, discard from the bucket.
-                    if(geomh->useCount() == 1)
+                    // If the geometry *is* occluded in this bucket, try to set
+                    // the occlusion flag.  This will fail if the geometry has
+                    // been split by another thread in the meantime.  In that
+                    // case, we need to process the children to properly
+                    // decrement their bucket reference counts, so we fall
+                    // through to the next bit of code.
+                    if(geomh->setOccludedInBucket(bucketPos))
                     {
-                        // Occluded geometry with a use count of one will be
-                        // discarded entirely.
-//                        --stats.geometryInFlight;
-//                        ++stats.geometryOccluded;
+//                        if(geomh->useCount() == 1)
+//                        {
+//                            // Occluded geometry with a use count of one will be
+//                            // discarded entirely.
+//                            --stats.geometryInFlight;
+//                            ++stats.geometryOccluded;
+//                        }
+                        continue;
                     }
-                    continue;
                 }
-                // If no children and not occluded then split/dice:
-                TIME_SCOPE(stats.splitDiceTime);
-                // Scale dicing coordinates to account for shading rate.
-                Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
-                        1/micropolyBlurWidth(geomh, m_coc.get()));
-                // Note that invoking the tessellator causes surfaces and
-                // grids to be push()ed back to the renderer behind the
-                // scenes.
-                tessContext.tessellate(scaledTessCoords, geomh);
-//                --stats.geometryInFlight;
+                else
+                {
+                    // If not occluded and not split yet, do the split/dice:
+                    TIME_SCOPE(stats.splitDiceTime);
+                    // Scale dicing coordinates to account for shading rate.
+                    Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
+                            1/micropolyBlurWidth(geomh, m_coc.get()));
+                    // Note that invoking the tessellator causes surfaces and
+                    // grids to be push()ed back to the renderer behind the
+                    // scenes.
+                    tessContext.tessellate(scaledTessCoords, geomh);
+//                    --stats.geometryInFlight;
+                }
             }
             // If we get here, the surface has children.
             if(GridHolder* gridh = geomh->childGrid().get())
