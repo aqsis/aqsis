@@ -434,6 +434,12 @@ void Renderer::sanitizeOptions(Options& opts)
 //------------------------------------------------------------------------------
 // Guts of the renderer
 
+/// Determine whether the given geometry may be visibility culled.
+///
+/// This function also transforms the geometry bound into sraster space.
+///
+/// TODO: Clean this function up - it does several unrelated things in a
+/// somewhat confusing manner.
 bool Renderer::rasterCull(GeomHolder& holder)
 {
     // Get bound in camera space.
@@ -462,12 +468,31 @@ bool Renderer::rasterCull(GeomHolder& holder)
        bound.max.y < m_samplingArea.min.y ||
        bound.min.y > m_samplingArea.max.y)
         return true;
+    // Set initial reference count.
     V2i begin, end;
     m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);
     holder.initBucketRefs(begin, end);
     return false;
 }
 
+bool Renderer::rasterCull(GridHolder& gridh)
+{
+    const Box& bound = gridh.bound();
+    // Cull if outside clipping planes
+    if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
+        return true;
+    // Cull if outside xy extent of image
+    if(bound.max.x < m_samplingArea.min.x ||
+       bound.min.x > m_samplingArea.max.x ||
+       bound.max.y < m_samplingArea.min.y ||
+       bound.min.y > m_samplingArea.max.y)
+        return true;
+    // Set initial reference count.
+    V2i begin, end;
+    m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);
+    gridh.initBucketRefs(prod(end-begin));
+    return false;
+}
 
 Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                    const VarList& outVars)
@@ -714,9 +739,16 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
             // If we get here, the surface has children.
             if(GridHolder* gridh = geomh->childGrid().get())
             {
-                // If it has grids, render those.
-                if(!samples.occludes(gridh->bound(), stats.occlTime))
-                    rasterize(samples, *gridh, stats);
+                // It has a grid; render that.
+                if(queue.boundIntersects(gridh->bound()))
+                {
+                    if(!samples.occludes(gridh->bound(), stats.occlTime))
+                        rasterize(samples, *gridh, stats);
+                    // Release the grid if this was the last bucket it
+                    // touches.
+                    if(gridh->releaseBucketRef())
+                        geomh->childGrid().reset();
+                }
                 /* FIXME stats
                 else if(gridh->useCount() == 1 && !gridh->rasterized())
                     ++stats.gridsOccluded;

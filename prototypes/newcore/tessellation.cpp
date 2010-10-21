@@ -126,9 +126,10 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         }
         if(!m_grids.empty())
         {
-            m_currGeom->addChild(new GridHolder(m_grids.begin(),
-                                                m_grids.end(),
-                                                *m_currGeom));
+            GridHolderPtr gridh(new GridHolder(m_grids.begin(), m_grids.end(),
+                                               *m_currGeom));
+            if(!m_renderer.rasterCull(*gridh))
+                m_currGeom->addChild(gridh);
         }
     }
     else
@@ -139,8 +140,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
             // Push surfaces back to the renderer
             for(int i = 0, iend = m_splits.size(); i < iend; ++i)
             {
-                GeomHolderPtr holder(new GeomHolder(m_splits[i],
-                                                    *m_currGeom));
+                GeomHolderPtr holder(new GeomHolder(m_splits[i], *m_currGeom));
                 addChildGeometry(*m_currGeom, holder);
             }
         }
@@ -148,8 +148,9 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         {
             // TODO: Do we want to allow more than one grid here?
             assert(m_grids.size() == 1);
-            m_currGeom->addChild(new GridHolder(m_grids[0],
-                                                *m_currGeom));
+            GridHolderPtr gridh(new GridHolder(m_grids[0], *m_currGeom));
+            if(!m_renderer.rasterCull(*gridh))
+                m_currGeom->addChild(gridh);
         }
     }
 }

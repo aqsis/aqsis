@@ -147,7 +147,8 @@ class Renderer
 
         static void sanitizeOptions(Options& opts);
 
-        bool rasterCull(GeomHolder& holder);
+        bool rasterCull(GeomHolder& geom);
+        bool rasterCull(GridHolder& grid);
         void add(const GeomHolderPtr& geom);
 
         void renderBuckets(BucketSchedulerShared& bucketScheduler,

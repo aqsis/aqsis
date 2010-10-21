@@ -197,6 +197,14 @@ class GeometryQueue
             return result;
         }
 
+        /// Return true if the bound intersects the active bucket
+        bool boundIntersects(const Box& bound) const
+        {
+            const Imath::Box2f& bbnd = m_bucket->bound;
+            return bound.min.x <  bbnd.max.x && bound.min.y <  bbnd.max.y &&
+                   bound.max.x >= bbnd.min.x && bound.max.y >= bbnd.min.y;
+        }
+
         /// Push geometry back onto the queue, after checking the bound.
         ///
         /// If the bound touches the current bucket, the geometry is added to
@@ -206,10 +214,7 @@ class GeometryQueue
         {
             if(!geom)
                 return;
-            const Imath::Box2f& bbnd = m_bucket->bound;
-            Box& gbnd = geom->bound();
-            if(gbnd.min.x < bbnd.max.x  && gbnd.min.y < bbnd.max.y  &&
-               gbnd.max.x >= bbnd.min.x && gbnd.max.y >= bbnd.min.y)
+            if(boundIntersects(geom->bound()))
             {
                 m_queue.push_back(geom.get());
                 std::push_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
@@ -250,7 +255,8 @@ class GeometryQueue
 };
 
 
-void SplitStore::enqueueGeometry(GeometryQueue& queue, const V2i& bucketPos)
+inline void SplitStore::enqueueGeometry(GeometryQueue& queue,
+                                        const V2i& bucketPos)
 {
     queue.enqueueBucket(getBucket(bucketPos));
 }

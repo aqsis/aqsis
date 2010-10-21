@@ -64,11 +64,11 @@ class GeomHolder : public RefCounted
         int m_splitCount;    ///< Number of times the geometry has been split
         Box m_bound;         ///< Bound in camera coordinates
         ConstAttributesPtr m_attrs; ///< Surface attribute state
-        bool m_hasChildren;  ///< True if child geometry/grid exists
+        volatile bool m_hasChildren;  ///< True if child geometry/grid exists
         std::vector<GeomHolderPtr> m_childGeoms; ///< Child geometry
         GridHolderPtr m_childGrid;  ///< Child grid
         Mutex m_mutex;       ///< Mutex used when splitting
-        boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this geometry.  atomic.
+        volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this geometry.  atomic.
         V2i m_bboundStart;   ///< First bucket which the bound touches
         V2i m_bboundSize;    ///< Number of buckets the bound touches
         boost::dynamic_bitset<> m_occludedBuckets; ///< Buckets in which the geometry was occluded.
@@ -154,7 +154,7 @@ class GeomHolder : public RefCounted
             // Check that all split children have already been deleted.  If
             // this check fails, it means that we are failing to delete the
             // leaves of the split tree as soon as possible.
-            assert(!m_hasChildren || m_hasChildren && childrenDeleted());
+            assert(!m_hasChildren || (m_hasChildren && childrenDeleted()));
         }
 
         //------------------------------------------------------------
@@ -187,7 +187,8 @@ class GeomHolder : public RefCounted
         bool hasChildren() const { return m_hasChildren; }
 
         /// Get child grid if tessellation resulted in dicing.  Threadsafe.
-        const GridHolderPtr& childGrid()        { return m_childGrid; }
+        const GridHolderPtr& childGrid() const { return m_childGrid; }
+        GridHolderPtr& childGrid()             { return m_childGrid; }
 
         /// Get child geometry if tessellation resulted in splitting.
         ///
@@ -328,7 +329,7 @@ class GridHolder : public RefCounted
         ConstAttributesPtr m_attrs; ///< Attribute state
         Box m_bound;                ///< Grid bounding box in raster coords.
         bool m_rasterized;          ///< True if the grid was rasterized
-        // TODO: Add bucket reference count.
+        volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
 
         void shade(Grid& grid) const
         {
@@ -336,6 +337,10 @@ class GridHolder : public RefCounted
                 m_attrs->surfaceShader->shade(grid);
         }
 
+        /// Cache the grid bounds.
+        ///
+        /// We expect the grids to be already projected into sraster
+        /// coordinates.
         void cacheBound()
         {
             if(isDeforming())
@@ -352,7 +357,8 @@ class GridHolder : public RefCounted
             : m_grid(grid),
             m_gridKeys(),
             m_attrs(&parentGeom.attrs()),
-            m_rasterized(false)
+            m_rasterized(false),
+            m_bucketRefs(0)
         {
             cacheBound();
         }
@@ -363,7 +369,8 @@ class GridHolder : public RefCounted
             : m_grid(),
             m_gridKeys(),
             m_attrs(&parentGeom.attrs()),
-            m_rasterized(false)
+            m_rasterized(false),
+            m_bucketRefs(0)
         {
             GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
             m_gridKeys.reserve(end - begin);
@@ -383,6 +390,19 @@ class GridHolder : public RefCounted
 
         void setRasterized() { m_rasterized = true; }
         bool rasterized() const { return m_rasterized; }
+
+        /// Initialize the number of bucket references.
+        void initBucketRefs(int nrefs)
+        {
+            m_bucketRefs = nrefs;
+        }
+
+        /// Release a bucket reference, returning true if the count decreased
+        /// to zero.  Threadsafe.
+        bool releaseBucketRef()
+        {
+            return atomic_dec32(&m_bucketRefs) - 1 == 0;
+        }
 };
 
 
