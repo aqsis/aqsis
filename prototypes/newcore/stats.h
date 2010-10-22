@@ -300,21 +300,25 @@ class ResourceCounterStat
         void operator++()
         {
             if(enabled)
+            {
                 ++m_current;
-            m_sum += m_current;
-            ++m_nevents;
-            ++m_ncreated;
-            if(m_current > m_max)
-                m_max = m_current;
+                m_sum += m_current;
+                ++m_nevents;
+                ++m_ncreated;
+                if(m_current > m_max)
+                    m_max = m_current;
+            }
         }
 
         /// Decrement current resource count
         void operator--()
         {
             if(enabled)
+            {
                 --m_current;
-            m_sum += m_current;
-            ++m_nevents;
+                m_sum += m_current;
+                ++m_nevents;
+            }
         }
 
         /// Merge samples from the given stat into this one.
