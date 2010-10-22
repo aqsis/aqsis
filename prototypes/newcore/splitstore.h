@@ -228,7 +228,8 @@ class GeometryQueue
         /// recently used bucket.  It also decrements the reference counts of
         /// any internal nodes in the splitting tree and deletes them if
         /// they fall to zero.
-        void releaseBucket()
+        void releaseBucket(ResourceCounterStat<>& geomsInFlight,
+                           SimpleCounterStat<>& geometryOccluded)
         {
             // Release references to all surfaces which touched this bucket.
             // Note that the order is important here!  The split tree is
@@ -237,7 +238,12 @@ class GeometryQueue
             for(int i = (int)m_toRelease.size() - 1; i >= 0; --i)
             {
                 if((*m_toRelease[i])->releaseBucketRef())
+                {
+                    --geomsInFlight;
+                    if(!(*m_toRelease[i])->hasChildren())
+                        ++geometryOccluded;
                     m_toRelease[i]->reset();
+                }
             }
             m_bucket->setFinished();
         }

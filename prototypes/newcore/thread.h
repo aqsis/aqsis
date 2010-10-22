@@ -35,6 +35,10 @@
 
 #include <boost/thread.hpp>
 
+// While we're waiting for std::atomic<> to become widespread,
+// use the atomic header from Intel's TBB.
+#include "tbb/atomic.h"
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -191,8 +195,35 @@ struct ThreadSpecificPtr { typedef NullThreadSpecificPtr<T> type; };
 #endif
 
 
+/// Lock types
 typedef boost::lock_guard<Mutex> LockGuard;
 
+
+//------------------------------------------------------------------------------
+// Atomic types and operations
+
+// Typedefs for atomic types.  These are names from the C++0x standard.
+//
+// (Unfortunately the details of the TBB interface differ from the upcoming
+// standard however.)
+typedef tbb::atomic<bool> atomic_flag;
+typedef tbb::atomic<int> atomic_int;
+typedef tbb::atomic<long long> atomic_llong;
+
+
+/// Perform the operation a = max(a,x) atomically.
+template<typename T>
+inline T atomicAssignMax(tbb::atomic<T>& a, T x)
+{
+    while(true)
+    {
+        T b = a;
+        if(b >= x)
+            return b;
+        if(b == a.compare_and_swap(x, b))
+            return x;
+    }
+}
 
 } // namespace Aqsis
 #endif // AQSIS_THREAD_H_INCLUDED

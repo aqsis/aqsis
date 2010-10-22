@@ -46,6 +46,8 @@
 
 #include <boost/format.hpp>
 
+#include <thread.h>
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -281,7 +283,7 @@ class SimpleCounterStat
 
 
 //------------------------------------------------------------------------------
-/// Counter for pipeline resources
+/// Threadsafe counter for pipeline resources.
 ///
 /// Reports number created, max in flight, average in flight.
 template<bool enabled=true>
@@ -289,24 +291,29 @@ class ResourceCounterStat
 {
     public:
         ResourceCounterStat()
-            : m_current(0),
-            m_sum(0),
-            m_max(0),
-            m_nevents(0),
-            m_ncreated(0)
-        { }
+        {
+            m_current = 0;
+            m_sum = 0;
+            m_max = 0;
+            m_nevents = 0;
+            m_ncreated = 0;
+        }
 
         /// Increment current resource count
+        //
+        // Performance note: it may actually be much better to use a spinlock
+        // here, because in the uncontended case this requires only a single
+        // atomic op or so, rather than the several we have here.  Would be
+        // worth trying if performance is an issue.
         void operator++()
         {
             if(enabled)
             {
-                ++m_current;
-                m_sum += m_current;
+                long long current = ++m_current;
+                m_sum += current;
                 ++m_nevents;
                 ++m_ncreated;
-                if(m_current > m_max)
-                    m_max = m_current;
+                atomicAssignMax(m_max, current);
             }
         }
 
@@ -315,8 +322,8 @@ class ResourceCounterStat
         {
             if(enabled)
             {
-                --m_current;
-                m_sum += m_current;
+                long long current = --m_current;
+                m_sum += current;
                 ++m_nevents;
             }
         }
@@ -348,11 +355,11 @@ class ResourceCounterStat
         }
 
     private:
-        long long m_current;  ///< Current number of resources
-        long long m_sum;      ///< Sum of current numbers
-        long long m_max;      ///< Max instantaneous resources
-        long long m_nevents;  ///< Number of creation/deletion events
-        long long m_ncreated; ///< Total number of resources created
+        atomic_llong m_current;  ///< Current number of resources
+        atomic_llong m_sum;      ///< Sum of current numbers
+        atomic_llong m_max;      ///< Max instantaneous resources
+        atomic_llong m_nevents;  ///< Number of creation/deletion events
+        atomic_llong m_ncreated; ///< Total number of resources created
 };
 
 

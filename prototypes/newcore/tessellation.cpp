@@ -34,8 +34,12 @@
 
 namespace Aqsis {
 
-TessellationContextImpl::TessellationContextImpl(Renderer& renderer)
+TessellationContextImpl::TessellationContextImpl(Renderer& renderer,
+                                ResourceCounterStat<>& geomsInFlight,
+                                ResourceCounterStat<>& gridsInFlight)
     : m_renderer(renderer),
+    m_geomsInFlight(geomsInFlight),
+    m_gridsInFlight(gridsInFlight),
     m_builder(),
     m_currGeom(0)
 { }
@@ -68,6 +72,7 @@ void TessellationContextImpl::addChildGeometry(GeomHolder& parent,
         // Copy over the occlusion record from the parent
         if(child->copyOcclusionRecord(parent))
         {
+            ++m_geomsInFlight;
             // Only add if child bound was partially unoccluded according to
             // parent geometry occlusion record.
             parent.addChild(child);
@@ -129,7 +134,10 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
             GridHolderPtr gridh(new GridHolder(m_grids.begin(), m_grids.end(),
                                                *m_currGeom));
             if(!m_renderer.rasterCull(*gridh))
+            {
+                ++m_gridsInFlight;
                 m_currGeom->addChild(gridh);
+            }
         }
     }
     else
@@ -150,7 +158,10 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
             assert(m_grids.size() == 1);
             GridHolderPtr gridh(new GridHolder(m_grids[0], *m_currGeom));
             if(!m_renderer.rasterCull(*gridh))
+            {
+                ++m_gridsInFlight;
                 m_currGeom->addChild(gridh);
+            }
         }
     }
 }

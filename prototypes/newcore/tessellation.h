@@ -44,6 +44,7 @@
 #include "options.h"
 #include "refcount.h"
 #include "renderer.h"
+#include "stats.h"
 #include "thread.h"
 #include "util.h"
 #include "varspec.h"
@@ -411,7 +412,9 @@ class GridHolder : public RefCounted
 class TessellationContextImpl : public TessellationContext
 {
     public:
-        TessellationContextImpl(Renderer& renderer);
+        TessellationContextImpl(Renderer& renderer,
+                                ResourceCounterStat<>& geomsInFlight,
+                                ResourceCounterStat<>& gridsInFlight);
 
         void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder);
 
@@ -432,6 +435,8 @@ class TessellationContextImpl : public TessellationContext
                               const GeomHolderPtr& child) const;
 
         Renderer& m_renderer;         ///< Renderer instance
+        mutable ResourceCounterStat<>& m_geomsInFlight;
+        mutable ResourceCounterStat<>& m_gridsInFlight;
         GridStorageBuilder m_builder; ///< Grid allocator
         GeomHolder* m_currGeom;       ///< Geometry currently being split
 

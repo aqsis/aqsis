@@ -223,13 +223,14 @@ struct RenderStats
     /// 2 = include potentially expensive stats
     int verbosity;
 
-//    // Geometry stats
-//    ResourceCounterStat<useStats> geometryInFlight;
-//    SimpleCounterStat<useStats>   geometryOccluded;
-//    // Grid stats
-//    ResourceCounterStat<useStats> gridsInFlight;
-//    SimpleCounterStat<useStats>   gridsOccluded;
+    // Geometry stats
+    ResourceCounterStat<useStats> geometryInFlight;
+    SimpleCounterStat<useStats>   geometryOccluded;
+    // Grid stats
+    ResourceCounterStat<useStats> gridsInFlight;
+    SimpleCounterStat<useStats>   gridsOccluded;
     MinMaxMeanStat<float, useStats> averagePolyArea;
+
     // Sampling stats
     SimpleCounterStat<useStats>   samplesTested;
     SimpleCounterStat<useStats>   samplesHit;
@@ -248,10 +249,8 @@ struct RenderStats
         static Mutex mutex;
         LockGuard lk(mutex);
         // merge counters
-        //geometryInFlight.merge(other.geometryInFlight);
-        //geometryOccluded.merge(other.geometryOccluded);
-        //gridsInFlight.merge(other.gridsInFlight);
-        //gridsOccluded.merge(other.gridsOccluded);
+        geometryOccluded.merge(other.geometryOccluded);
+        gridsOccluded.merge(other.gridsOccluded);
         averagePolyArea.merge(other.averagePolyArea);
         samplesTested.merge(other.samplesTested);
         samplesHit.merge(other.samplesHit);
@@ -284,12 +283,10 @@ void RenderStats::printStats(std::ostream& out)
     // Output stats
     if(verbosity >= 1)
     {
-        /*
         out << "geometry: allocated            : " << geometryInFlight << "\n"
             << "geometry: occlusion culled     : " << geometryOccluded << "\n"
             << "grids: allocated               : " << gridsInFlight    << "\n"
             << "grids: occlusion culled        : " << gridsOccluded    << "\n";
-        */
         if(verbosity >= 2)
             out << "micropolygons: area            : " << averagePolyArea  << "\n";
         out << "sampling: point in poly tests  : " << samplesTested;
@@ -680,7 +677,8 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
     V2i tileSize(m_opts->bucketSize*m_opts->superSamp);
 
     // Per-thread data structures:
-    TessellationContextImpl tessContext(*this);
+    TessellationContextImpl tessContext(*this, frameStats.geometryInFlight,
+                                        frameStats.gridsInFlight);
     GeometryQueue queue;
     SampleTile samples;
 
@@ -711,16 +709,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                     // decrement their bucket reference counts, so we fall
                     // through to the next bit of code.
                     if(geomh->setOccludedInBucket(bucketPos))
-                    {
-//                        if(geomh->useCount() == 1)
-//                        {
-//                            // Occluded geometry with a use count of one will be
-//                            // discarded entirely.
-//                            --stats.geometryInFlight;
-//                            ++stats.geometryOccluded;
-//                        }
                         continue;
-                    }
                 }
                 else
                 {
@@ -733,7 +722,6 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                     // grids to be push()ed back to the renderer behind the
                     // scenes.
                     tessContext.tessellate(scaledTessCoords, geomh);
-//                    --stats.geometryInFlight;
                 }
             }
             // If we get here, the surface has children.
@@ -747,14 +735,13 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                     // Release the grid if this was the last bucket it
                     // touches.
                     if(gridh->releaseBucketRef())
+                    {
+                        --frameStats.gridsInFlight;
+                        if(!gridh->rasterized())
+                            ++stats.gridsOccluded;
                         geomh->childGrid().reset();
+                    }
                 }
-                /* FIXME stats
-                else if(gridh->useCount() == 1 && !gridh->rasterized())
-                    ++stats.gridsOccluded;
-                if(gridh->useCount() == 1)
-                    --stats.gridsInFlight;
-                */
             }
             else
             {
@@ -765,7 +752,8 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                     queue.push(childGeoms[i]);
             }
         }
-        queue.releaseBucket();
+        queue.releaseBucket(frameStats.geometryInFlight,
+                            stats.geometryOccluded);
         // Filter the tile
         TIME_SCOPE(stats.filteringTime);
         m_filterProcessor->insert(bucketPos, fragments);
