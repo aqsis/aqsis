@@ -99,10 +99,12 @@ class FltkDisplay : public Aqsis::Display
 //------------------------------------------------------------------------------
 class InteractiveRender : public Fl_Widget
 {
-	public:
-		InteractiveRender(int x, int y, V2i imageSize,
+    public:
+        InteractiveRender(int x, int y, V2i imageSize,
                           Ri::RendererServices& renderer)
-			: Fl_Widget(x,y, imageSize.x,imageSize.y, 0),
+            : Fl_Widget(x,y, imageSize.x,imageSize.y, 0),
+            m_prev_x(0),
+            m_prev_y(0),
             m_theta(0),
             m_phi(0),
             m_dist(5),
@@ -110,8 +112,8 @@ class InteractiveRender : public Fl_Widget
             m_image(),
             m_renderer(renderer),
             m_display(m_image)
-		{
-            resizeImage(imageSize);
+        {
+            m_image.assign(3*prod(m_imageSize), 0);
             Display* disp = &m_display;
 
             // Kick off a render
@@ -122,68 +124,82 @@ class InteractiveRender : public Fl_Widget
 
             ri.Format(imageSize.x, imageSize.y, 1);
 
+            renderImage();
+        }
+
+        virtual void draw()
+        {
+            fl_draw_image(&m_image[0], x(),y(), m_imageSize.x, m_imageSize.y);
+        }
+
+        virtual int handle(int event)
+        {
+            switch(event)
+            {
+                case FL_FOCUS:
+                    return 1;
+                case FL_UNFOCUS:
+                    return 1;
+                case FL_KEYDOWN:
+                    {
+//                        int key = Fl::event_key();
+//                        switch(key)
+//                        {
+//                            case '1':
+//                        }
+                    }
+                    break;
+                case FL_MOUSEWHEEL:
+                    {
+                        m_dist *= std::pow(0.9, -Fl::event_dy());
+                        renderImage();
+                        return 1;
+                    }
+                    break;
+                case FL_PUSH:
+                    {
+                        m_prev_x = Fl::event_x();
+                        m_prev_y = Fl::event_y();
+                    }
+                    return 1;
+                case FL_DRAG:
+                    {
+                        m_theta += 0.5*(m_prev_x - Fl::event_x());
+                        m_phi   += 0.5*(m_prev_y - Fl::event_y());
+                        m_prev_x = Fl::event_x();
+                        m_prev_y = Fl::event_y();
+                        renderImage();
+                        return 1;
+                    }
+                    break;
+            }
+            return Fl_Widget::handle(event);
+        }
+
+    private:
+        void renderImage()
+        {
+            Ri::Renderer& ri = m_renderer.firstFilter();
+
+            ri.FrameBegin(1);
+            // Viewing transformation
+            float fov = 90;
+            ri.Projection("perspective",
+                          ParamListBuilder()("float fov", &fov));
+            ri.Translate(0, 0, m_dist);
+            ri.Rotate(m_phi, 1, 0, 0);
+            ri.Rotate(m_theta, 0, 1, 0);
+
             ri.WorldBegin();
             ri.ReadArchive("retained_model", 0, ParamListBuilder());
             ri.WorldEnd();
+            ri.FrameEnd();
+
+            damage(FL_DAMAGE_ALL);
         }
 
-		virtual void draw()
-		{
-            fl_draw_image(&m_image[0], x(),y(), m_imageSize.x, m_imageSize.y);
-		}
-
-		virtual int handle(int event)
-		{
-			switch(event)
-			{
-				case FL_FOCUS:
-					return 1;
-				case FL_UNFOCUS:
-					return 1;
-				case FL_KEYDOWN:
-					{
-//						int key = Fl::event_key();
-//						switch(key)
-//						{
-//							case '1':
-//							case '2':
-//							case '3':
-//							case '4':
-//							case '5':
-//							case '6':
-//							case '7':
-//							case '8':
-//							case '9':
-//								setScale(key - '1' + 1);
-//								return 1;
-//							case '-':
-//								incScale(-1);
-//								return 1;
-//							case '=':
-//								incScale(1);
-//								return 1;
-//						}
-					}
-					break;
-				case FL_MOUSEWHEEL:
-					{
-						return 1;
-					}
-					break;
-			}
-			return Fl_Widget::handle(event);
-		}
-
-	private:
-        void resizeImage(V2i newSize)
-        {
-            m_imageSize = newSize;
-            m_image.assign(3*prod(m_imageSize), 0);
-        }
-
-        void renderImage()
-        {
-        }
+        int m_prev_x;
+        int m_prev_y;
 
         float m_theta;
         float m_phi;
@@ -199,13 +215,12 @@ class InteractiveRender : public Fl_Widget
 class RenderWindow : public Fl_Double_Window
 {
     public:
-		RenderWindow(int w, int h, const char* title,
+        RenderWindow(int w, int h, const char* title,
                      Ri::RendererServices& renderer)
-			: Fl_Double_Window(w, h, title)
+            : Fl_Double_Window(w, h, title)
         {
             m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h),
                                                    renderer);
-            //resizeable(m_renderWidget);
             end();
         }
 
@@ -287,14 +302,6 @@ int main(int argc, char* argv[])
         }
         renderer->parseRib(optFile, optFileName);
     }
-
-    // Viewing transformation
-    float fov = 90;
-    ri.Projection("perspective", ParamListBuilder()("float fov", &fov));
-    ri.Translate(0, 0, 3);
-    ri.Rotate(45, 1, 0, 0);
-    ri.Rotate(10, 0, 0, 1);
-    ri.Rotate(45, 0, 1, 0);
 
     ri.ArchiveBegin("retained_model", ParamListBuilder());
     renderer->parseRib(modelFile, modelFileName);
