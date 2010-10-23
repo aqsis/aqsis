@@ -56,6 +56,7 @@ class SampleTile;
 class FilterProcessor;
 class DisplayManager;
 class RenderStats;
+class DisplayList;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -71,6 +72,7 @@ struct OutvarSpec : public VarSpec
 {
     int offset;  ///< Offset in output image pixel channels
 
+    OutvarSpec() : VarSpec(), offset(-1) {}
     OutvarSpec(Type type, int arraySize, ustring name, int offset)
         : VarSpec(type, arraySize, name), offset(offset) {}
     OutvarSpec(const VarSpec& spec, int offset)
@@ -123,8 +125,8 @@ typedef std::vector<GeometryKey> GeometryKeys;
 class Renderer
 {
     public:
-        Renderer(const OptionsPtr& opts, const Mat4& camToScreen = Mat4(),
-                 const VarList& outVars = VarList());
+        Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
+                 const DisplayList& displays);
 
         ~Renderer();
 

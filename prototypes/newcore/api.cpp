@@ -44,6 +44,7 @@
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/exception.h>
 
+#include "displaymanager.h"
 #include "renderer.h"
 #include "surfaces.h"
 #include "util.h"
@@ -394,7 +395,7 @@ struct AllOptions : public RefCounted
 {
     OptionsPtr opts;
     CameraInfo camInfo;
-    VarList outVars;
+    DisplayList displays;
 
     AllOptions() : opts(new Options()) {}
 
@@ -692,7 +693,8 @@ RtVoid RenderApi::FrameEnd()
 RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
-    m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen, m_opts->outVars));
+    m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen,
+                                         m_opts->displays));
     m_attrStack.push();
     m_transStack.push();
 }
@@ -700,6 +702,7 @@ RtVoid RenderApi::WorldBegin()
 RtVoid RenderApi::WorldEnd()
 {
     m_renderer->render();
+    m_renderer.reset();
     m_transStack.pop();
     m_attrStack.pop();
 }
@@ -859,38 +862,41 @@ RtVoid RenderApi::Quantize(RtConstToken type, RtInt one, RtInt min, RtInt max,
 RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
                           RtConstToken mode, const ParamList& pList)
 {
-    if(strcmp(type, "file") != 0 && strcmp(type, "zfile") != 0)
-    {
-        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-            << "Unimplemented display type \"" << type << "\"";
-        return;
-    }
-    VarList& outVars = m_opts->outVars;
-    if(name[0] != '+')
-        outVars.clear();
+    // Determine which output variable name to use
+    VarSpec outVar;
     if(strcmp(mode, "rgb") == 0)
-    {
-        outVars.push_back(Stdvar::Ci);
-    }
+        outVar = Stdvar::Ci;
     else if(strcmp(mode, "rgba") == 0)
     {
         // TODO
-        outVars.push_back(Stdvar::Ci);
+        outVar = Stdvar::Ci;
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
             << "rgba output unimplemented, using rgb.";
     }
     else if(strcmp(mode, "z") == 0)
-    {
-        outVars.push_back(Stdvar::z);
-    }
+        outVar = Stdvar::z;
     else
     {
         const char* nameBegin = 0;
         const char* nameEnd = 0;
-        VarSpec var = typeSpecToVarSpec(m_services.getDeclaration(mode,
-                                                       &nameBegin, &nameEnd));
-        var.name.assign(std::string(nameBegin, nameEnd));
-        outVars.push_back(var);
+        outVar = typeSpecToVarSpec(m_services.getDeclaration(mode, &nameBegin,
+                                                             &nameEnd));
+        outVar.name.assign(std::string(nameBegin, nameEnd));
+    }
+
+    // Display names starting with '+' indicate appending a display to the
+    // current list.  If '+' is not present, clear the display list instead.
+    if(name[0] == '+')
+        ++name;
+    else
+        m_opts->displays.clear();
+
+    // Create the display object
+    if(!m_opts->displays.addDisplay(name, type, outVar, pList))
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "Could not open display type \"" << type << "\"";
+        return;
     }
 }
 

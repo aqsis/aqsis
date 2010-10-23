@@ -29,11 +29,15 @@
 
 #include "displaymanager.h"
 
+#include <algorithm>
+#include <set>
+
 #include <tiffio.h>
 
-#include "arrayview.h"
-
 namespace Aqsis {
+
+//------------------------------------------------------------------------------
+// TIFF output implementation
 
 /// Write TIFF header
 static void writeHeader(TIFF* tif, const V2i& imageSize,
@@ -63,6 +67,7 @@ static void writeHeader(TIFF* tif, const V2i& imageSize,
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
     TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleFormat);
+    TIFFSetField(tif, TIFFTAG_SOFTWARE, "Aqsis-2.0 (aka newcore)");
     if(tiled)
     {
         TIFFSetField(tif, TIFFTAG_TILEWIDTH, tileSize.x);
@@ -72,120 +77,159 @@ static void writeHeader(TIFF* tif, const V2i& imageSize,
         TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tif, 0));
 }
 
-/// Quantize float pixels down to uint8
-static void quantize(ConstFvecView src, int nPix, uint8* out)
-{
-    int nSamps = src.elSize();
-    for(int j = 0; j < nPix; ++j)
-    {
-        const float* in = src[j];
-        for(int i = 0; i < nSamps; ++i)
-            out[i] = static_cast<uint8>(clamp(255*in[i], 0.0f, 255.0f));
-        out += nSamps;
-    }
-}
-
-
-//------------------------------------------------------------------------------
 /// Simple TIFF image output interface.
-class DisplayManager::ImageFile
+class TiffDisplay : public Display
 {
     public:
         /// Open TIFF file & write header
-        ImageFile(const std::string& fileName, const V2i& imageSize,
-                  const V2i& tileSize, const VarSpec& varSpec)
+        TiffDisplay()
             : m_tif(0),
-            m_tiled(tileSize.x % 16 == 0  &&  tileSize.y % 16 == 0),
-            m_doQuantize(varSpec != Stdvar::z)
+            m_tiled(false)
+        { }
+
+        /// Close file
+        ~TiffDisplay()
         {
+            close();
+        }
+
+        virtual bool open(const std::string& fileName, const V2i& imageSize,
+                          const V2i& tileSize, const VarSpec& varSpec)
+        {
+            m_tiled = (tileSize.x % 16 == 0) && (tileSize.y % 16 == 0);
+            if(!m_tiled)
+            {
+                std::cerr << "Non mutiple of 16 output image tiles, "
+                             "not implemented!!\n";  // TODO
+                return false;
+            }
             m_tif = TIFFOpen(fileName.c_str(), "w");
             if(!m_tif)
             {
                 std::cerr << "Could not open file " << fileName << "\n";
-                return;
+                return false;
             }
-            if(!m_tiled)
-                std::cerr << "Non mutiple of 16 output image tiles, "
-                             "not implemented!!\n";  // TODO
-            writeHeader(m_tif, imageSize, varSpec.scalarSize(), !m_doQuantize,
-                        m_tiled, tileSize);
+            // FIXME - Think about how channel format info is going to work -
+            // don't want to generate the quantize flag in two different
+            // places.
+            writeHeader(m_tif, imageSize, varSpec.scalarSize(),
+                        varSpec == Stdvar::z, m_tiled, tileSize);
+            return true;
         }
 
-        /// Close file
-        ~ImageFile()
+        virtual bool close()
         {
             if(!m_tif)
-                return;
+                return false;
             TIFFClose(m_tif);
+            m_tif = 0;
+            return true;
         }
 
         /// Write tile data at position pos to the file.  Threadsafe.
-        void writeTile(const V2i& pos, void* data)
+        virtual bool writeTile(const V2i& pos, void* data)
         {
             if(!m_tif)
-                return;
-            LockGuard lock(m_tifMutex);
+                return false;
             if(m_tiled)
             {
-                TIFFWriteTile(m_tif, data, pos.x, pos.y, 0, 0);
+                return TIFFWriteTile(m_tif, data, pos.x, pos.y, 0, 0) != -1;
             }
             else
             {
                 // TODO: Do some buffering or something
                 // TIFFWriteScanline(tif, buf, lineNum);
+                return false;
             }
-        }
-
-        /// Return true if we want quantized channels as input to writeTile()
-        bool doQuantize() const
-        {
-            return m_doQuantize;
         }
 
     private:
         TIFF* m_tif;
-        Mutex m_tifMutex;
         bool m_tiled;
-        bool m_doQuantize;
 };
 
 
 //------------------------------------------------------------------------------
+// DisplayList implementation
+bool DisplayList::addDisplay(const char* name, const char* type,
+                             const VarSpec& outVar,
+                             const Ri::ParamList& pList)
+{
+    DisplayInfo info;
+    info.name = name;
+    info.outputVar = outVar;
+    if(strcmp(type, "file") == 0 || strcmp(type, "zfile") == 0)
+        info.display.reset(new TiffDisplay());
+    else
+        return false;
+    assert(info.display);
+    m_displayInfo.push_back(info);
+    return true;
+}
+
+VarList DisplayList::requiredVars() const
+{
+    typedef std::set<VarSpec> VSet;
+    VSet allVars;
+    for(int i = 0; i < (int)m_displayInfo.size(); ++i)
+        allVars.insert(m_displayInfo[i].outputVar);
+    VarList out;
+    std::copy(allVars.begin(), allVars.end(), std::back_inserter(out));
+    return out;
+}
+
+//------------------------------------------------------------------------------
+// DisplayManager implementation
 DisplayManager::DisplayManager(const V2i& imageSize, const V2i& tileSize,
-                               const OutvarSet& outVars)
+                               const OutvarSet& outVars,
+                               const DisplayList& displays)
     : m_imageSize(imageSize),
     m_tileSize(tileSize),
-    m_outVars(outVars),
-    m_totChans(0)
+    m_totChans(0),
+    m_displayInfo()
 {
-    for(int i = 0; i < m_outVars.size(); ++i)
-        m_totChans += m_outVars[i].scalarSize();
-    for(int i = 0; i < m_outVars.size(); ++i)
+    // Compute number of channels coming from renderer
+    for(int i = 0; i < outVars.size(); ++i)
+        m_totChans += outVars[i].scalarSize();
+    // Set up displays
+    for(int i = 0; i < displays.size(); ++i)
     {
-        std::string fileName = "test_";
-        fileName += m_outVars[i].name.c_str();
-        fileName += ".tif";
-        m_files.push_back(boost::shared_ptr<ImageFile>(
-            new ImageFile(fileName, imageSize, tileSize, m_outVars[i])
-        ));
+        DisplayData dispInfo;
+        int outIndex = outVars.find(displays[i].outputVar);
+        assert(outIndex >= 0);
+        dispInfo.var = outVars[outIndex];
+        dispInfo.display = displays[i].display;
+        dispInfo.quantize = dispInfo.var != Stdvar::z;
+        if(!dispInfo.display->open(displays[i].name, m_imageSize, m_tileSize,
+                                   dispInfo.var))
+            continue;
+        m_displayInfo.push_back(dispInfo);
     }
+}
+
+DisplayManager::~DisplayManager()
+{
+    // Close the displays
+    for(int i = 0; i < (int)m_displayInfo.size(); ++i)
+        m_displayInfo[i].display->close();
 }
 
 void DisplayManager::writeTile(V2i pos, const float* data)
 {
     int nPixels = prod(m_tileSize);
-    for(int ifile = 0; ifile < m_outVars.size(); ++ifile)
+    for(int idisp = 0; idisp < (int)m_displayInfo.size(); ++idisp)
     {
-        int nChans = m_outVars[ifile].scalarSize();
-        ConstFvecView src(data + m_outVars[ifile].offset, nChans, m_totChans);
-        ImageFile& file = *m_files[ifile];
-        if(file.doQuantize())
+        DisplayData& dispInfo = m_displayInfo[idisp];
+        int nChans = dispInfo.var.scalarSize();
+        ConstFvecView src(data + dispInfo.var.offset, nChans, m_totChans);
+        if(dispInfo.quantize)
         {
             // Quantize into temporary buffer
             uint8* tmpTile = static_cast<uint8*>(
                     tmpStorage(nChans*nPixels*sizeof(uint8)));
             quantize(src, prod(m_tileSize), tmpTile);
-            file.writeTile(pos, tmpTile);
+            LockGuard lk(m_mutex);
+            dispInfo.display->writeTile(pos, tmpTile);
         }
         else
         {
@@ -193,17 +237,13 @@ void DisplayManager::writeTile(V2i pos, const float* data)
             float* tmpTile = static_cast<float*>(
                     tmpStorage(nChans*nPixels*sizeof(float)));
             copy(FvecView(tmpTile, nChans), src, nPixels);
-            file.writeTile(pos, tmpTile);
+            LockGuard lk(m_mutex);
+            dispInfo.display->writeTile(pos, tmpTile);
         }
     }
 }
 
-void DisplayManager::closeFiles()
-{
-    m_files.clear();
-}
-
-/// Get temporary storage of size bytes
+/// Get per-thread temporary storage space of size bytes
 void* DisplayManager::tmpStorage(size_t size)
 {
     std::vector<char>* store = m_tileTmpStorage.get();
@@ -215,6 +255,19 @@ void* DisplayManager::tmpStorage(size_t size)
     if(store->size() < size)
         store->resize(size);
     return &(*store)[0];
+}
+
+/// Quantize float pixels down to uint8
+void DisplayManager::quantize(ConstFvecView src, int nPix, unsigned char* out)
+{
+    int nSamps = src.elSize();
+    for(int j = 0; j < nPix; ++j)
+    {
+        const float* in = src[j];
+        for(int i = 0; i < nSamps; ++i)
+            out[i] = static_cast<uint8>(clamp(255*in[i], 0.0f, 255.0f));
+        out += nSamps;
+    }
 }
 
 } // namespace Aqsis

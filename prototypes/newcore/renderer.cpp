@@ -492,7 +492,7 @@ bool Renderer::rasterCull(GridHolder& gridh)
 }
 
 Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                   const VarList& outVars)
+                   const DisplayList& displays)
     : m_opts(opts),
     m_coc(),
     m_surfaces(),
@@ -500,41 +500,33 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
     m_camToSRaster()
 {
     sanitizeOptions(*m_opts);
-    // Set up output variables.  Default is to use Cs.
+    // Set up output variables.
     std::vector<OutvarSpec> outVarsInit;
-    if(outVars.size() == 0)
+    for(int i = 0; i < displays.size(); ++i)
+        outVarsInit.push_back(OutvarSpec(displays[i].outputVar, 0));
+    std::sort(outVarsInit.begin(), outVarsInit.end());
+    // Generate the output offsets after sorting, so that the order of
+    // outVars is the same as the order in the output image.  This isn't
+    // strictly necessary, but in-order iteration during sampling seems
+    // like a good idea.
+    int offset = 0;
+    for(int i = 0, iend = outVarsInit.size(); i < iend; ++i)
     {
-        outVarsInit.push_back(OutvarSpec(Stdvar::Cs, 0));
-    }
-    else
-    {
-        for(int i = 0, iend = outVars.size(); i < iend; ++i)
-            outVarsInit.push_back(OutvarSpec(outVars[i], 0));
-        std::sort(outVarsInit.begin(), outVarsInit.end());
-        // Generate the output offsets after sorting, so that the order of
-        // outVars is the same as the order in the output image.  This isn't
-        // strictly necessary, but (1) in-order iteration during sampling seems
-        // like a good idea, and (2) it's less confusing outside this init step.
-        int offset = 0;
-        for(int i = 0, iend = outVars.size(); i < iend; ++i)
-        {
-            outVarsInit[i].offset = offset;
-            offset += outVarsInit[i].scalarSize();
-        }
+        outVarsInit[i].offset = offset;
+        offset += outVarsInit[i].scalarSize();
     }
     m_outVars.assign(outVarsInit.begin(), outVarsInit.end());
 
     fillDefaultFrag(m_defaultFrag, m_outVars);
-
 
     // Cache the pixel filter.
     m_pixelFilter.reset(new CachedFilter(*m_opts->pixelFilter,
                                          m_opts->superSamp));
 
     // Set up display manager
-    m_displayManager.reset( new DisplayManager(m_opts->resolution,
-                                               m_opts->bucketSize,
-                                               m_outVars) );
+    m_displayManager.reset(new DisplayManager(m_opts->resolution,
+                                              m_opts->bucketSize,
+                                              m_outVars, displays));
 
     V2i nbuckets(ceildiv(m_opts->resolution.x, m_opts->bucketSize.x) + 1,
                  ceildiv(m_opts->resolution.y, m_opts->bucketSize.y) + 1);
@@ -650,8 +642,6 @@ void Renderer::render()
     {
         renderBuckets(scheduler, frameStats);
     }
-
-    m_displayManager->closeFiles();
 
     frameStats.printStats(std::cout);
 }
