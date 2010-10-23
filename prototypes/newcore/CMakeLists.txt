@@ -7,10 +7,12 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(aqsis_enable_testing TRUE CACHE BOOL "Enable unit testing")
 set(aqsis_memory_debugging FALSE CACHE BOOL "Enable memory debugging")
 set(aqsis_use_threads FALSE CACHE BOOL "Enable threading")
+set(aqsis_interactive_demo FALSE CACHE BOOL "Build interactive demo program")
 
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
 
+find_package(FLTK)
 find_package(TIFF)
 find_package(Boost 1.36.0 COMPONENTS
     unit_test_framework
@@ -26,6 +28,9 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ustring)
 include_directories(.)
 include_directories(${Aqsis_INCLUDE_DIRECTORIES})
+if(aqsis_interactive_demo)
+    include_directories(${FLTK_INCLUDE_DIR})
+endif()
 
 if(UNIX)
     if("${CMAKE_CXX_FLAGS}" STREQUAL "")
@@ -39,7 +44,6 @@ set(srcs
     displaymanager.cpp
     filterprocessor.cpp
     filters.cpp
-    main.cpp
     memdebug.cpp
     primvar.cpp
     renderer.cpp
@@ -86,7 +90,7 @@ set(hdrs
 
 source_group("Header Files" FILES ${hdrs})
 
-add_executable(render ${srcs} ${hdrs})
+add_executable(render main.cpp ${srcs} ${hdrs})
 
 set(render_link_libs ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
                      ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_riutil)
@@ -95,6 +99,11 @@ if(aqsis_use_threads)
     list(APPEND render_link_libs ${Boost_THREAD_LIBRARY})
 endif()
 target_link_libraries(render ${render_link_libs})
+
+if(aqsis_interactive_demo)
+    add_executable(interactive interactive.cpp ${srcs} ${hdrs})
+    target_link_libraries(interactive ${render_link_libs} ${FLTK_LIBRARIES})
+endif()
 
 
 #------------------------------------------------------------

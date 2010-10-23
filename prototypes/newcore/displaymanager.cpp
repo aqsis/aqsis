@@ -160,6 +160,17 @@ bool DisplayList::addDisplay(const char* name, const char* type,
     info.outputVar = outVar;
     if(strcmp(type, "file") == 0 || strcmp(type, "zfile") == 0)
         info.display.reset(new TiffDisplay());
+    else if(strcmp(type, "__Display_instance__") == 0)
+    {
+        // FIXME: Make a type, Ri::TypeSpec::Pointer, to allow pointer data to
+        // be transmitted safely via the API.  The awful hack below will fail
+        // if an attempt is made to cache the "int" array.
+        int index = pList.find(Ri::TypeSpec::Int, "instance");
+        if(index < 0)
+            return false;
+        info.display.reset(*reinterpret_cast<Display* const*>(pList[index].data()),
+                           nullDeleter);
+    }
     else
         return false;
     assert(info.display);
