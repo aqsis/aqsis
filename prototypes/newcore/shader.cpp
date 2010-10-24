@@ -159,10 +159,14 @@ class DefaultSurface : public IOVarHolder
         float m_Ka;
 
     public:
-        DefaultSurface(float Kd = 0.8, float Ka = 0.2)
-            : m_Kd(Kd),
-            m_Ka(Ka)
+        DefaultSurface(const Ri::ParamList& pList)
+            : m_Kd(0.7),
+            m_Ka(0.2)
         {
+            if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
+                m_Kd = Kd[0];
+            if(Ri::FloatArray Ka = pList.findFloatData(Ri::TypeSpec::Float, "Ka"))
+                m_Ka = Ka[0];
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
@@ -201,7 +205,7 @@ class DefaultSurface : public IOVarHolder
 class LumpySin : public IOVarHolder
 {
     public:
-        LumpySin()
+        LumpySin(const Ri::ParamList& pList)
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -252,7 +256,7 @@ class LumpySin : public IOVarHolder
 class LumpyPhong : public IOVarHolder
 {
     public:
-        LumpyPhong()
+        LumpyPhong(const Ri::ParamList& pList)
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -328,7 +332,7 @@ class LumpyPhong : public IOVarHolder
 class ShowGrids : public IOVarHolder
 {
     public:
-        ShowGrids()
+        ShowGrids(const Ri::ParamList& pList)
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -393,7 +397,7 @@ class ShowGrids : public IOVarHolder
 class ShowPolys : public IOVarHolder
 {
     public:
-        ShowPolys()
+        ShowPolys(const Ri::ParamList& pList)
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -433,7 +437,7 @@ class ShowPolys : public IOVarHolder
 class Asteroid : public IOVarHolder
 {
     public:
-        Asteroid()
+        Asteroid(const Ri::ParamList& pList)
         {
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -492,20 +496,20 @@ class Asteroid : public IOVarHolder
 
 
 //------------------------------------------------------------------------------
-ShaderPtr createShader(const char* name)
+ShaderPtr createShader(const char* name, const Ri::ParamList& pList)
 {
     if(name == std::string("lumpy_sin"))
-        return ShaderPtr(new LumpySin());
+        return ShaderPtr(new LumpySin(pList));
     else if(name == std::string("lumpy_phong"))
-        return ShaderPtr(new LumpyPhong());
+        return ShaderPtr(new LumpyPhong(pList));
     else if(name == std::string("asteroid"))
-        return ShaderPtr(new Asteroid());
+        return ShaderPtr(new Asteroid(pList));
     else if(name == std::string("showgrids"))
-        return ShaderPtr(new ShowGrids());
+        return ShaderPtr(new ShowGrids(pList));
     else if(name == std::string("showpolys"))
-        return ShaderPtr(new ShowPolys());
+        return ShaderPtr(new ShowPolys(pList));
     else if(name == std::string("default"))
-        return ShaderPtr(new DefaultSurface());
+        return ShaderPtr(new DefaultSurface(pList));
     else
         return ShaderPtr();
 }

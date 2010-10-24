@@ -1023,7 +1023,7 @@ RtVoid RenderApi::Surface(RtConstToken name, const ParamList& pList)
         attrsWrite()->surfaceShader.reset();
         return;
     }
-    attrsWrite()->surfaceShader = createShader(name);
+    attrsWrite()->surfaceShader = createShader(name, pList);
     if(!attrsRead()->surfaceShader)
     {
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)

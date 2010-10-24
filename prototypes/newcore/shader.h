@@ -34,6 +34,8 @@
 #include "util.h"
 #include "varspec.h"
 
+#include <aqsis/riutil/ricxx.h>
+
 #include <boost/random/linear_congruential.hpp>
 
 namespace Aqsis {
@@ -60,7 +62,8 @@ class Shader : public RefCounted
 typedef boost::intrusive_ptr<Shader> ShaderPtr;
 
 // Create one of the builtin shaders.
-ShaderPtr createShader(const char* name);
+ShaderPtr createShader(const char* name,
+                       const Ri::ParamList& pList = Ri::ParamList());
 
 
 //------------------------------------------------------------------------------
