@@ -43,13 +43,15 @@ struct Attributes : public RefCounted
     bool smoothShading; ///< Type of shading interpolation
     float displacementBound;  ///< Maximum bound on displacement from shader
     ShaderPtr surfaceShader;  ///< surface shader
+    ShaderPtr displacementShader;  ///< displacement shader
 
     Attributes()
         : shadingRate(1),
         focusFactor(1),
         smoothShading(true),
         displacementBound(0),
-        surfaceShader(createShader("default"))
+        surfaceShader(createShader("default")),
+        displacementShader()
     { }
 };
 

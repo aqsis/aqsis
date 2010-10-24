@@ -1,5 +1,6 @@
 Attribute "displacementbound" "sphere" 0.2
-Surface "lumpy_sin"
+Displacement "lumpy_sin"
+Surface "plastic" "Ks" 0.5 "Kd" 0.5 "Ka" 0
 PointsPolygons [4 4 4 4 4 4]
 [
     0  2  3  1

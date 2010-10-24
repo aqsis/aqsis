@@ -168,7 +168,6 @@ class DefaultSurface : public IOVarHolder
             if(Ri::FloatArray Ka = pList.findFloatData(Ri::TypeSpec::Float, "Ka"))
                 m_Ka = Ka[0];
             VarSpec inVars[] = {
-                Stdvar::P,
                 Stdvar::N,
                 Stdvar::I,
                 Stdvar::Cs
@@ -206,16 +205,17 @@ class LumpySin : public IOVarHolder
 {
     public:
         LumpySin(const Ri::ParamList& pList)
+            : m_useCameraCoords(false)
         {
+            Ri::IntArray useCam = pList.findIntData(Ri::TypeSpec::Int,
+                                                    "use_cam_coords");
+            m_useCameraCoords = useCam && useCam[0] != 0;
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
-                Stdvar::I,
-                Stdvar::Cs
             };
             setInputVars(inVars);
             VarSpec outVars[] = {
-                Stdvar::Ci,
                 Stdvar::P,
                 Stdvar::N
             };
@@ -231,33 +231,59 @@ class LumpySin : public IOVarHolder
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
             DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            ConstDataView<Col3> Cs = stor.get(StdIndices::Cs);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
-            if(!Ci)
-                Ci = DataView<Col3>(FALLOCA(3*nshad));
             DataView<Vec3> P = stor.P();
+
+            Mat4 shaderCoords = ctx.getTransform("world")
+                            * Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45))
+                            * Mat4().setAxisAngle(Vec3(0,0,1), deg2rad(10))
+                            * Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45));
 
             for(int i = 0; i < nshad; ++i)
             {
-                float amp = 0.05*(std::sin(10*P[i].x) + std::sin(30*P[i].y)
-                                  + std::sin(20*P[i].z));
+                Vec3 p = P[i];
+                if(!m_useCameraCoords)
+                    p = p*shaderCoords;
+                float amp =
+                    0.05*(std::sin(10*p.x) +
+                          std::sin(30*p.y) +
+                          std::sin(20*p.z));
+//                    0.1*(triangleWave(1*p.x, 1) +
+//                         triangleWave(3*p.y, 1) +
+//                         triangleWave(2*p.z, 1));
+//                    0.005*(std::sin(100*p.x) +
+//                           std::sin(300*p.y) +
+//                           std::sin(200*p.z));
                 P[i] += amp*N[i].normalized();
             }
             grid.calculateNormals(N, P);
-            for(int i = 0; i < nshad; ++i)
-                Ci[i] = Cs[i] * fabs(I[i].normalized().dot(N[i].normalized()));
         }
+
+    private:
+        bool m_useCameraCoords;
 };
 
 
 //------------------------------------------------------------------------------
 /// A lumpy displacement shader with phong lighting.
-class LumpyPhong : public IOVarHolder
+class Plastic : public IOVarHolder
 {
+    private:
+        float m_Ka;
+        float m_Kd;
+        float m_Ks;
+
     public:
-        LumpyPhong(const Ri::ParamList& pList)
+        Plastic(const Ri::ParamList& pList)
+            : m_Ka(0.2),
+            m_Kd(0.5),
+            m_Ks(0.5)
         {
+            if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
+                m_Kd = Kd[0];
+            if(Ri::FloatArray Ka = pList.findFloatData(Ri::TypeSpec::Float, "Ka"))
+                m_Ka = Ka[0];
+            if(Ri::FloatArray Ks = pList.findFloatData(Ri::TypeSpec::Float, "Ks"))
+                m_Ks = Ks[0];
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
@@ -278,11 +304,6 @@ class LumpyPhong : public IOVarHolder
             GridStorage& stor = grid.storage();
 
             int nshad = stor.nverts();
-
-            Mat4 currentToWorld = ctx.getTransform("world")
-                            * Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45))
-                            * Mat4().setAxisAngle(Vec3(0,0,1), deg2rad(10))
-                            * Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45));
 
             Vec3 lightPos = Vec3(2,2,2) * ctx.getTransform("world").inverse();
 
@@ -298,29 +319,13 @@ class LumpyPhong : public IOVarHolder
 
             for(int i = 0; i < nshad; ++i)
             {
-                Vec3 Pworld = P[i]*currentToWorld;
-                float amp =
-                    0.05*(std::sin(10*Pworld.x) +
-                          std::sin(30*Pworld.y) +
-                          std::sin(20*Pworld.z));
-//                    0.1*(triangleWave(1*Pworld.x, 1) +
-//                         triangleWave(3*Pworld.y, 1) +
-//                         triangleWave(2*Pworld.z, 1));
-//                    0.005*(std::sin(100*Pworld.x) +
-//                           std::sin(300*Pworld.y) +
-//                           std::sin(200*Pworld.z));
-                P[i] += amp*N[i].normalized();
-            }
-            grid.calculateNormals(N, P);
-            for(int i = 0; i < nshad; ++i)
-            {
                 Vec3 nI = I[i].normalized();
                 Vec3 nN = N[i].normalized();
                 Vec3 nL = (P[i] - lightPos).normalized();
                 Vec3 R = reflect(nN, nI);
-                Ci[i] = Cs[i] * (0.3*std::abs(nI^nN) +
-                                 0.5*std::abs(nL^nN) +
-                                 0.5*std::pow(std::max(0.0f, -R^nI), 20));
+                Ci[i] = Cs[i] * (m_Ka + m_Kd*std::abs(nI^nN) +
+                                 m_Kd*std::abs(nL^nN) +
+                                 m_Ks*std::pow(std::max(0.0f, -R^nI), 20));
                                  //0.7*std::max(nL^nN, 0.0f));
             }
         }
@@ -368,18 +373,6 @@ class ShowGrids : public IOVarHolder
                 nu = static_cast<QuadGrid&>(grid).nu();
                 nv = static_cast<QuadGrid&>(grid).nv();
             }
-
-            /*
-            // Debug: Some displacement stuff.
-            DataView<Vec3> P = stor.P();
-            for(int i = 0; i < nshad; ++i)
-            {
-                float amp = 0.05*(std::sin(10*P[i].x) + std::sin(30*P[i].y)
-                                  + std::sin(20*P[i].z));
-                P[i] += amp*N[i].normalized();
-            }
-            grid.calculateNormals(N, P);
-            */
 
             for(int i = 0; i < nshad; ++i)
             {
@@ -442,12 +435,9 @@ class Asteroid : public IOVarHolder
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
-                Stdvar::I,
-                Stdvar::Cs
             };
             setInputVars(inVars);
             VarSpec outVars[] = {
-                Stdvar::Ci,
                 Stdvar::P,
                 Stdvar::N
             };
@@ -465,11 +455,6 @@ class Asteroid : public IOVarHolder
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
             DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            ConstDataView<Col3> Cs = stor.get(StdIndices::Cs);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
-            if(!Ci)
-                Ci = DataView<Col3>(FALLOCA(3*nshad));
             DataView<Vec3> P = stor.P();
 
             // Displacement
@@ -484,13 +469,6 @@ class Asteroid : public IOVarHolder
                 P[i] += amp*N[i].normalized();
             }
             grid.calculateNormals(N, P);
-            // Lighting calculations
-            for(int i = 0; i < nshad; ++i)
-            {
-                Vec3 nI = I[i].normalized();
-                Vec3 nN = N[i].normalized();
-                Ci[i] = Col3(std::abs(nI^nN));
-            }
         }
 };
 
@@ -500,8 +478,8 @@ ShaderPtr createShader(const char* name, const Ri::ParamList& pList)
 {
     if(name == std::string("lumpy_sin"))
         return ShaderPtr(new LumpySin(pList));
-    else if(name == std::string("lumpy_phong"))
-        return ShaderPtr(new LumpyPhong(pList));
+    else if(name == std::string("plastic"))
+        return ShaderPtr(new Plastic(pList));
     else if(name == std::string("asteroid"))
         return ShaderPtr(new Asteroid(pList));
     else if(name == std::string("showgrids"))

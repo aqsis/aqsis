@@ -27,7 +27,8 @@ Rotate 45 0 1 0
 
 WorldBegin
     Attribute "displacementbound" "sphere" 0.2
-    Surface "lumpy_sin"
+    Displacement "lumpy_sin"
+    Surface "default" "Ka" 0 "Kd" 1
     PointsPolygons [4 4 4 4 4 4]
     [
         0  2  3  1

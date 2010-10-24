@@ -1027,14 +1027,23 @@ RtVoid RenderApi::Surface(RtConstToken name, const ParamList& pList)
     if(!attrsRead()->surfaceShader)
     {
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-            << "unimplemented shader \"" << name <<"\"";
+            << "unimplemented surface shader \"" << name <<"\"";
     }
 }
 
 RtVoid RenderApi::Displacement(RtConstToken name, const ParamList& pList)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Displacement not implemented"; // Todo
+    if(strcmp(name, "null") == 0)
+    {
+        attrsWrite()->displacementShader.reset();
+        return;
+    }
+    attrsWrite()->displacementShader = createShader(name, pList);
+    if(!attrsRead()->displacementShader)
+    {
+        AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+            << "unimplemented displacement shader \"" << name <<"\"";
+    }
 }
 
 RtVoid RenderApi::Atmosphere(RtConstToken name, const ParamList& pList)

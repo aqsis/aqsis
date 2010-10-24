@@ -105,10 +105,17 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
     if(!m_grids.empty())
     {
         // Shade grids
-        if(Shader* shader = m_currGeom->attrs().surfaceShader.get())
+        Shader* dispShader = m_currGeom->attrs().displacementShader.get();
+        Shader* surfShader = m_currGeom->attrs().surfaceShader.get();
+        if(dispShader || surfShader)
         {
             for(int i = 0; i < (int)m_grids.size(); ++i)
-                shader->shade(m_shadingContext, *m_grids[i]);
+            {
+                if(dispShader)
+                    dispShader->shade(m_shadingContext, *m_grids[i]);
+                if(surfShader)
+                    surfShader->shade(m_shadingContext, *m_grids[i]);
+            }
         }
         // Project grids
         for(int i = 0; i < (int)m_grids.size(); ++i)
@@ -231,6 +238,7 @@ GridStorageBuilder& TessellationContextImpl::gridStorageBuilder()
         // Renderer arbitrary output vars
         const OutvarSet& aoVars = m_renderer.m_outVars;
         const Shader& shader = *m_currGeom->attrs().surfaceShader;
+        // TODO: Need to also consider displacement shader vars
         const VarSet& inVars = shader.inputVars();
         // P is guaranteed to be dice by the geometry.
         m_builder.add(Stdvar::P,  GridStorage::Varying);
