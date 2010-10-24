@@ -108,28 +108,33 @@ class InteractiveRender : public Fl_Widget
             m_theta(0),
             m_phi(0),
             m_dist(5),
-            m_imageSize(imageSize),
+            m_imageSize(V2i(0)),
             m_image(),
             m_renderer(renderer),
             m_display(m_image)
         {
-            m_image.assign(3*prod(m_imageSize), 0);
-            Display* disp = &m_display;
+            setImageSize(imageSize);
 
-            // Kick off a render
             Ri::Renderer& ri = renderer.firstFilter();
+            // Set up the display
+            Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
                        ParamListBuilder()("int instance",
                                           reinterpret_cast<int*>(&disp)));
-
-            ri.Format(imageSize.x, imageSize.y, 1);
-
+            // Kick off initial render
             renderImage();
         }
 
         virtual void draw()
         {
             fl_draw_image(&m_image[0], x(),y(), m_imageSize.x, m_imageSize.y);
+        }
+
+        virtual void resize(int x, int y, int w, int h)
+        {
+            setImageSize(V2i(w,h));
+            renderImage();
+            Fl_Widget::resize(x,y, w,h);
         }
 
         virtual int handle(int event)
@@ -177,11 +182,20 @@ class InteractiveRender : public Fl_Widget
         }
 
     private:
+        void setImageSize(V2i imageSize)
+        {
+            m_imageSize = imageSize;
+            m_image.assign(3*prod(m_imageSize), 0);
+        }
+
         void renderImage()
         {
             Ri::Renderer& ri = m_renderer.firstFilter();
 
             ri.FrameBegin(1);
+
+            ri.Format(m_imageSize.x, m_imageSize.y, 1);
+
             // Viewing transformation
             float fov = 90;
             ri.Projection("perspective",
@@ -221,6 +235,7 @@ class RenderWindow : public Fl_Double_Window
         {
             m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h),
                                                    renderer);
+            resizable(m_renderWidget);
             end();
         }
 
