@@ -694,7 +694,7 @@ RtVoid RenderApi::WorldBegin()
 {
     Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
     m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen,
-                                         m_transStack.top(),
+                                         m_transStack.top().inverse(),
                                          m_opts->displays));
     m_attrStack.push();
     m_transStack.push();

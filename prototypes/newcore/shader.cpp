@@ -288,7 +288,7 @@ ShadingContext::ShadingContext(const Mat4& camToWorld)
 
 Mat4 ShadingContext::getTransform(const char* toSpace)
 {
-    if(strcmp(toSpace, "world"))
+    if(strcmp(toSpace, "world") == 0)
     {
         return m_camToWorld;
     }
