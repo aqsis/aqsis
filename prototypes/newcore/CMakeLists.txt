@@ -57,6 +57,7 @@ set(srcs
     tessellation.cpp
     ustring/ustring.cpp
     varspec.cpp
+    tbb/tbb_misc.cpp
 )
 
 if(aqsis_memory_debugging)
@@ -91,7 +92,6 @@ set(hdrs
 source_group("Header Files" FILES ${hdrs})
 
 add_library(newcore STATIC ${srcs} ${hdrs})
-
 add_executable(render main.cpp)
 
 set(render_link_libs newcore ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}

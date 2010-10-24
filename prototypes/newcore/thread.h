@@ -158,12 +158,16 @@ inline bool setThreadAffinity(boost::thread& thread, int coreid)
 {
 #ifdef AQSIS_USE_THREADS
 #ifdef __GNUC__
+#ifndef __APPLE__
     // Use pthread_setaffinity_np if using glibc
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(coreid, &cpuset);
     return !pthread_setaffinity_np(thread.native_handle(), sizeof(cpuset),
                                    &cpuset);
+#else
+	return true;
+#endif
 #elif defined(_WIN32)
     // From MSDN... not yet tested!
     return !SetThreadAffinityMask(thread.native_handle(), 1 << coreid);
