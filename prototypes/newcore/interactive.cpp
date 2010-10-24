@@ -290,6 +290,8 @@ int main(int argc, char* argv[])
     ri.PixelSamples(2, 2);
     ri.PixelFilter(renderer->getFilterFunc("sinc"), 3, 3);
     ri.ShadingRate(1);
+    int eyesplits = 6;
+    ri.Option("limits", ParamListBuilder()("int eyesplits", &eyesplits));
 
     if(opts.count("opts"))
     {
