@@ -42,10 +42,9 @@ namespace Aqsis {
 class BucketSchedulerShared
 {
     public:
-        BucketSchedulerShared(V2i nbuckets, int nthreads)
+        BucketSchedulerShared(V2i nbuckets)
             : nbuckets(nbuckets),
-            pos(0),
-            nthreads(nthreads)
+            pos(0)
         { }
 
     private:
@@ -53,7 +52,6 @@ class BucketSchedulerShared
 
         V2i nbuckets;
         V2i pos;
-        int nthreads;
         Mutex mutex;
 };
 

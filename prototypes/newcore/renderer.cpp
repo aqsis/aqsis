@@ -610,14 +610,13 @@ void Renderer::render()
     TIME_SCOPE(frameStats.frameTime);
     //MemoryLog memLog;  // FIXME
 
+    BucketSchedulerShared scheduler(V2i(m_surfaces->nxBuckets(),
+                                        m_surfaces->nyBuckets()));
 #   ifdef AQSIS_USE_THREADS
     int nthreads = m_opts->nthreads;
     int ncpus = boost::thread::hardware_concurrency();
     if(nthreads <= 0)
         nthreads = ncpus;
-
-    BucketSchedulerShared scheduler(V2i(m_surfaces->nxBuckets(),
-                                        m_surfaces->nyBuckets()), nthreads);
     if(nthreads > 1)
     {
         boost::thread_group threads;

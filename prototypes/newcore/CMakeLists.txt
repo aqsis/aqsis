@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 set(aqsis_enable_testing TRUE CACHE BOOL "Enable unit testing")
 set(aqsis_memory_debugging FALSE CACHE BOOL "Enable memory debugging")
-set(aqsis_use_threads FALSE CACHE BOOL "Enable threading")
+set(aqsis_use_threads TRUE CACHE BOOL "Enable threading")
 set(aqsis_interactive_demo FALSE CACHE BOOL "Build interactive demo program")
 
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
