@@ -30,6 +30,7 @@
 #ifndef AQSIS_UTIL_H_INCLUDED
 #define AQSIS_UTIL_H_INCLUDED
 
+#include <algorithm>
 #include <cassert>
 #include <cfloat>
 #include <cmath>
@@ -38,9 +39,6 @@
 #ifndef WIN32
 #include <alloca.h>
 #endif
-
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/arithmetic_traits.hpp>
 
 // The distinction here is only due to the layout of the 
 // win32libs copy of OpenEXR.
@@ -139,18 +137,10 @@ inline float dot(Vec3 a, Vec3 b)
     return a.dot(b);
 }
 
-
-template<typename T>
-inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type
-max(const T a, const T b)
-{
-    return (a < b) ? b : a;
-}
-
 template<typename T>
 inline T maxNorm(Imath::Vec2<T> v)
 {
-    return max(std::fabs(v.x), std::fabs(v.y));
+    return std::max(std::fabs(v.x), std::fabs(v.y));
 }
 
 /** \brief Bilinear interpolation.

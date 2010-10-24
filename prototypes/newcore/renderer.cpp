@@ -378,7 +378,7 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
         cocScale /= Vec2(m_opts->superSamp);
         float minCoC = std::min(cocScale.x, cocScale.y);
         const float lengthRatio = 0.16;
-        polyLength *= max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
+        polyLength *= std::max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
     }
     return polyLength;
 }

@@ -95,7 +95,7 @@ add_library(newcore STATIC ${srcs} ${hdrs})
 add_executable(render main.cpp)
 
 set(render_link_libs newcore ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
-                     ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_riutil)
+                     ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_riutil aqsis_math)
 if(aqsis_use_threads)
     add_definitions(-DAQSIS_USE_THREADS)
     list(APPEND render_link_libs ${Boost_THREAD_LIBRARY})
