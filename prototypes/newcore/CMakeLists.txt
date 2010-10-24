@@ -8,6 +8,8 @@ set(aqsis_enable_testing TRUE CACHE BOOL "Enable unit testing")
 set(aqsis_memory_debugging FALSE CACHE BOOL "Enable memory debugging")
 set(aqsis_use_threads TRUE CACHE BOOL "Enable threading")
 set(aqsis_interactive_demo FALSE CACHE BOOL "Build interactive demo program")
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+    "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
 
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
