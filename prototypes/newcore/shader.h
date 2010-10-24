@@ -34,10 +34,14 @@
 #include "util.h"
 #include "varspec.h"
 
+#include <boost/random/linear_congruential.hpp>
+
 namespace Aqsis {
 
 class Grid;
+class ShadingContext;
 
+//------------------------------------------------------------------------------
 /// A simplistic shader interface
 class Shader : public RefCounted
 {
@@ -48,7 +52,7 @@ class Shader : public RefCounted
         virtual const VarSet& outputVars() const = 0;
 
         /// Execute the shader on the given grid.
-        virtual void shade(Grid& grid) = 0;
+        virtual void shade(ShadingContext& ctx, Grid& grid) = 0;
 
         virtual ~Shader() {}
 };
@@ -57,6 +61,30 @@ typedef boost::intrusive_ptr<Shader> ShaderPtr;
 
 // Create one of the builtin shaders.
 ShaderPtr createShader(const char* name);
+
+
+//------------------------------------------------------------------------------
+/// Context for shader execution.
+class ShadingContext
+{
+    public:
+        ShadingContext(const Mat4& camToWorld);
+
+        /// Transformation handling
+        Mat4 getTransform(const char* toSpace);
+        //Mat4 getTransform(const char* fromSpace, const char* toSpace);
+
+        /// Get a uniform random number between 0 and 1
+        float rand();
+
+    private:
+        typedef boost::rand48 RngType;
+
+        RngType m_rand;
+        float m_randScale;
+
+        Mat4 m_camToWorld;
+};
 
 
 } // namespace Aqsis

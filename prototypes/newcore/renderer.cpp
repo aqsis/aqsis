@@ -492,12 +492,13 @@ bool Renderer::rasterCull(GridHolder& gridh)
 }
 
 Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                   const DisplayList& displays)
+                   const Mat4& camToWorld, const DisplayList& displays)
     : m_opts(opts),
     m_coc(),
     m_surfaces(),
     m_outVars(),
-    m_camToSRaster()
+    m_camToSRaster(),
+    m_camToWorld(camToWorld)
 {
     sanitizeOptions(*m_opts);
     // Set up output variables.

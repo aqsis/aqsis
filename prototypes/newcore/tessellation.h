@@ -332,12 +332,6 @@ class GridHolder : public RefCounted
         bool m_rasterized;          ///< True if the grid was rasterized
         volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
 
-        void shade(Grid& grid) const
-        {
-            if(m_attrs->surfaceShader)
-                m_attrs->surfaceShader->shade(grid);
-        }
-
         /// Cache the grid bounds.
         ///
         /// We expect the grids to be already projected into sraster
@@ -434,6 +428,7 @@ class TessellationContextImpl : public TessellationContext
         void addChildGeometry(GeomHolder& parent,
                               const GeomHolderPtr& child) const;
 
+        ShadingContext m_shadingContext;
         Renderer& m_renderer;         ///< Renderer instance
         mutable ResourceCounterStat<>& m_geomsInFlight;
         mutable ResourceCounterStat<>& m_gridsInFlight;

@@ -30,7 +30,6 @@
 #include "shader.h"
 
 #include <string>
-#include <cstdlib> // for rand()
 
 #include <boost/range/end.hpp>
 
@@ -40,9 +39,6 @@
 #include "varspec.h"
 
 namespace Aqsis {
-
-/// Uniform random numbers in the interval [0,1]
-inline float randf() { return float(std::rand())/RAND_MAX; }
 
 
 // Helper mixin class to hold shader input/output variables.
@@ -93,7 +89,7 @@ class DefaultSurface : public IOVarHolder
             setOutputVars(outVars);
         }
 
-        virtual void shade(Grid& grid)
+        virtual void shade(ShadingContext& ctx, Grid& grid)
         {
             GridStorage& stor = grid.storage();
 
@@ -135,7 +131,7 @@ class LumpySin : public IOVarHolder
             setOutputVars(outVars);
         }
 
-        virtual void shade(Grid& grid)
+        virtual void shade(ShadingContext& ctx, Grid& grid)
         {
             GridStorage& stor = grid.storage();
 
@@ -182,7 +178,7 @@ class ShowGrids : public IOVarHolder
             };
             setOutputVars(outVars);
         }
-        virtual void shade(Grid& grid)
+        virtual void shade(ShadingContext& ctx, Grid& grid)
         {
             GridStorage& stor = grid.storage();
 
@@ -190,7 +186,7 @@ class ShowGrids : public IOVarHolder
             ConstDataView<Vec3> I = stor.get(StdIndices::I);
             DataView<Col3> Ci = stor.get(StdIndices::Ci);
 
-            Col3 Cs(randf(), randf(), randf());
+            Col3 Cs(ctx.rand(), ctx.rand(), ctx.rand());
 
             float Kd = 0.8;
             float Ka = 0.2;
@@ -245,7 +241,7 @@ class ShowPolys : public IOVarHolder
             };
             setOutputVars(outVars);
         }
-        virtual void shade(Grid& grid)
+        virtual void shade(ShadingContext& ctx, Grid& grid)
         {
             GridStorage& stor = grid.storage();
 
@@ -259,7 +255,7 @@ class ShowPolys : public IOVarHolder
 
             for(int i = 0; i < nshad; ++i)
             {
-                Col3 Cs(randf(), randf(), randf());
+                Col3 Cs(ctx.rand(), ctx.rand(), ctx.rand());
                 float d = dot(I[i].normalized(), N[i].normalized());
                 Ci[i] = Cs * (Ka + Kd*d*d);
             }
@@ -280,6 +276,33 @@ ShaderPtr createShader(const char* name)
         return ShaderPtr(new DefaultSurface());
     else
         return ShaderPtr();
+}
+
+
+//------------------------------------------------------------------------------
+ShadingContext::ShadingContext(const Mat4& camToWorld)
+    : m_camToWorld(camToWorld)
+{
+    m_randScale = 1.0f/(m_rand.max() - m_rand.min());
+}
+
+Mat4 ShadingContext::getTransform(const char* toSpace)
+{
+    if(strcmp(toSpace, "world"))
+    {
+        return m_camToWorld;
+    }
+    else
+    {
+        // TODO
+        assert(0);
+        return Mat4();
+    }
+}
+
+float ShadingContext::rand()
+{
+    return m_randScale*(m_rand() - m_rand.min());
 }
 
 } // namespace Aqsis

@@ -126,7 +126,7 @@ class Renderer
 {
     public:
         Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                 const DisplayList& displays);
+                 const Mat4& camToWorld, const DisplayList& displays);
 
         ~Renderer();
 
@@ -176,6 +176,7 @@ class Renderer
         boost::scoped_ptr<FilterProcessor> m_filterProcessor;
         boost::scoped_ptr<DisplayManager> m_displayManager;
         Mat4 m_camToSRaster;           ///< Camera -> sample raster transformation
+        Mat4 m_camToWorld;             ///< Camera -> world transformation
         Imath::Box2f m_samplingArea;   ///< Area to sample in sraster coords
         std::vector<float> m_defaultFrag; ///< Default fragment samples
 };

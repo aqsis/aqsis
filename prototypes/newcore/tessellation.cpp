@@ -37,7 +37,8 @@ namespace Aqsis {
 TessellationContextImpl::TessellationContextImpl(Renderer& renderer,
                                 ResourceCounterStat<>& geomsInFlight,
                                 ResourceCounterStat<>& gridsInFlight)
-    : m_renderer(renderer),
+    : m_shadingContext(renderer.m_camToWorld),
+    m_renderer(renderer),
     m_geomsInFlight(geomsInFlight),
     m_gridsInFlight(gridsInFlight),
     m_builder(),
@@ -107,7 +108,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         if(Shader* shader = m_currGeom->attrs().surfaceShader.get())
         {
             for(int i = 0; i < (int)m_grids.size(); ++i)
-                shader->shade(*m_grids[i]);
+                shader->shade(m_shadingContext, *m_grids[i]);
         }
         // Project grids
         for(int i = 0; i < (int)m_grids.size(); ++i)
