@@ -90,9 +90,11 @@ set(hdrs
 
 source_group("Header Files" FILES ${hdrs})
 
-add_executable(render main.cpp ${srcs} ${hdrs})
+add_library(newcore STATIC ${srcs} ${hdrs})
 
-set(render_link_libs ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
+add_executable(render main.cpp)
+
+set(render_link_libs newcore ${TIFF_LIBRARIES} ${ILMBASE_IEX_LIBRARY}
                      ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_riutil)
 if(aqsis_use_threads)
     add_definitions(-DAQSIS_USE_THREADS)
@@ -101,7 +103,7 @@ endif()
 target_link_libraries(render ${render_link_libs})
 
 if(aqsis_interactive_demo)
-    add_executable(interactive interactive.cpp ${srcs} ${hdrs})
+    add_executable(interactive interactive.cpp)
     target_link_libraries(interactive ${render_link_libs} ${FLTK_LIBRARIES})
 endif()
 
