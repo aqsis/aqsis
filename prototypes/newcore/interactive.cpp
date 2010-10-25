@@ -108,6 +108,7 @@ class InteractiveRender : public Fl_Widget
             m_theta(0),
             m_phi(0),
             m_dist(5),
+            m_centre(0,0,0),
             m_imageSize(V2i(0)),
             m_image(),
             m_renderer(renderer),
@@ -169,10 +170,21 @@ class InteractiveRender : public Fl_Widget
                     return 1;
                 case FL_DRAG:
                     {
-                        m_theta += 0.5*(m_prev_x - Fl::event_x());
-                        m_phi   += 0.5*(m_prev_y - Fl::event_y());
+                        int dx = m_prev_x - Fl::event_x();
+                        int dy = m_prev_y - Fl::event_y();
                         m_prev_x = Fl::event_x();
                         m_prev_y = Fl::event_y();
+                        if(Fl::event_ctrl())
+                        {
+                            m_centre.y +=  m_dist/h()*dy;
+                            m_centre.x += -m_dist/w()*dx*std::cos(deg2rad(m_phi));
+                            m_centre.z += -m_dist/w()*dx*std::sin(deg2rad(m_phi));
+                        }
+                        else
+                        {
+                            m_theta += 0.5*dy;
+                            m_phi   += 0.5*dx;
+                        }
                         renderImage();
                         return 1;
                     }
@@ -201,8 +213,9 @@ class InteractiveRender : public Fl_Widget
             ri.Projection("perspective",
                           ParamListBuilder()("float fov", &fov));
             ri.Translate(0, 0, m_dist);
-            ri.Rotate(m_phi, 1, 0, 0);
-            ri.Rotate(m_theta, 0, 1, 0);
+            ri.Rotate(m_theta, 1, 0, 0);
+            ri.Rotate(m_phi, 0, 1, 0);
+            ri.Translate(m_centre.x, m_centre.y, m_centre.z);
 
             ri.WorldBegin();
             ri.ReadArchive("retained_model", 0, ParamListBuilder());
@@ -218,6 +231,7 @@ class InteractiveRender : public Fl_Widget
         float m_theta;
         float m_phi;
         float m_dist;
+        Vec3 m_centre;
         V2i m_imageSize;
         std::vector<uchar> m_image;
         Ri::RendererServices& m_renderer;
