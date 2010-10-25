@@ -190,8 +190,8 @@ class Patch : public Geometry
             if(lu*lv <= opts.gridSize*opts.gridSize)
             {
                 // Dice the surface when number of verts is small enough.
-                int nu = 1 + ifloor(lu);
-                int nv = 1 + ifloor(lv);
+                int nu = 2 + ifloor(lu);
+                int nv = 2 + ifloor(lv);
                 SurfaceDicer<Patch> dicer(nu, nv);
                 tessCtx.invokeTessellator(dicer);
             }
