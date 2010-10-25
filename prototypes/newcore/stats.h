@@ -301,19 +301,20 @@ class ResourceCounterStat
 
         /// Increment current resource count
         //
-        // Performance note: it may actually be much better to use a spinlock
-        // here, because in the uncontended case this requires only a single
-        // atomic op or so, rather than the several we have here.  Would be
-        // worth trying if performance is an issue.
+        // Performance note: it's probably better to use a spinlock here,
+        // because the function is so short.  (However, we'd need a portable
+        // spinlock implementation.)
         void operator++()
         {
             if(enabled)
             {
+                LockGuard lk(m_mutex);
                 long long current = ++m_current;
                 m_sum += current;
                 ++m_nevents;
                 ++m_ncreated;
-                atomicAssignMax(m_max, current);
+                if(m_max < current)
+                    m_max = current;
             }
         }
 
@@ -322,20 +323,12 @@ class ResourceCounterStat
         {
             if(enabled)
             {
+                LockGuard lk(m_mutex);
                 long long current = --m_current;
                 m_sum += current;
                 ++m_nevents;
             }
         }
-
-        /// Merge samples from the given stat into this one.
-//        void merge(const ResourceCounterStat& s)
-//        {
-//            m_nevents += s.m_nevents;
-//            m_ncreated += s.m_ncreated;
-//            m_sum += s.m_sum;
-//            // TODO: Merging m_sum and m_max isn't really very sensible.
-//        }
 
         friend std::ostream& operator<<(std::ostream& out,
                                         const ResourceCounterStat& s)
@@ -355,11 +348,12 @@ class ResourceCounterStat
         }
 
     private:
-        atomic_llong m_current;  ///< Current number of resources
-        atomic_llong m_sum;      ///< Sum of current numbers
-        atomic_llong m_max;      ///< Max instantaneous resources
-        atomic_llong m_nevents;  ///< Number of creation/deletion events
-        atomic_llong m_ncreated; ///< Total number of resources created
+        Mutex m_mutex;
+        long long m_current;  ///< Current number of resources
+        long long m_sum;      ///< Sum of current numbers
+        long long m_max;      ///< Max instantaneous resources
+        long long m_nevents;  ///< Number of creation/deletion events
+        long long m_ncreated; ///< Total number of resources created
 };
 
 

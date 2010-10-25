@@ -37,7 +37,9 @@
 
 // While we're waiting for std::atomic<> to become widespread,
 // use the atomic header from Intel's TBB.
-#include "tbb/atomic.h"
+//
+// Commented out for now, because of portability issues.
+//#include "tbb/atomic.h"
 
 namespace Aqsis {
 
@@ -206,6 +208,7 @@ typedef boost::lock_guard<Mutex> LockGuard;
 //------------------------------------------------------------------------------
 // Atomic types and operations
 
+#if 0
 // Typedefs for atomic types.  These are names from the C++0x standard.
 //
 // (Unfortunately the details of the TBB interface differ from the upcoming
@@ -228,6 +231,7 @@ inline T atomicAssignMax(tbb::atomic<T>& a, T x)
             return x;
     }
 }
+#endif
 
 } // namespace Aqsis
 #endif // AQSIS_THREAD_H_INCLUDED

@@ -59,7 +59,7 @@ set(srcs
     tessellation.cpp
     ustring/ustring.cpp
     varspec.cpp
-    tbb/tbb_misc.cpp
+    #tbb/tbb_misc.cpp
 )
 
 if(aqsis_memory_debugging)
