@@ -941,7 +941,7 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
                         Ri::TypeSpec(Ri::TypeSpec::Int, 2), "bucketsize"))
             m_opts->opts->bucketSize = Vec2(bs[0], bs[1]);
         if(IntArray gs = params.findIntData(Ri::TypeSpec::Int, "gridsize"))
-            m_opts->opts->gridSize = ifloor(sqrt(gs[0]));
+            m_opts->opts->gridSize = ifloor(sqrt((float)gs[0]));
         if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
             m_opts->opts->eyeSplits = es[0];
         if(IntArray t = params.findIntData(Ri::TypeSpec::Int, "threads"))

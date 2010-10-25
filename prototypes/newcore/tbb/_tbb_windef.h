@@ -73,12 +73,12 @@ namespace std {
 #define __TBB_NO_IMPLICIT_LINKAGE 1
 #endif
 
-#if _MSC_VER
-    #if !__TBB_NO_IMPLICIT_LINKAGE
-        #ifdef _DEBUG
-            #pragma comment(lib, "tbb_debug.lib")
-        #else
-            #pragma comment(lib, "tbb.lib")
-        #endif
-    #endif
-#endif
+//#if _MSC_VER
+//    #if !__TBB_NO_IMPLICIT_LINKAGE
+//        #ifdef _DEBUG
+//            #pragma comment(lib, "tbb_debug.lib")
+//        #else
+//            #pragma comment(lib, "tbb.lib")
+//        #endif
+//    #endif
+//#endif

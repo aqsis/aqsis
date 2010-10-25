@@ -157,7 +157,7 @@ inline void InvBilin::init(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
     // Determine whether the micropolygon is almost-rectangular.  If it is, we
     // set the m_linear flag as a hint to the solver that we only need to solve
     // linear equations (requiring only one iteration of Newton's method).
-    float patchSize = std::max(maxNorm(m_F), maxNorm(m_E));
+    float patchSize = std::max<float>(maxNorm(m_F), maxNorm(m_E));
     float irregularity = maxNorm(m_G);
     if(irregularity < 1e-2*patchSize)
         m_linear = true;

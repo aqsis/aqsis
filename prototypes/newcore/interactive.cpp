@@ -34,13 +34,11 @@
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Double_Window.H>
-#include <FL/fl_draw.H>
+#include <QtGui>
 
 #include <aqsis/riutil/ricxxutil.h>
 
+#include "interactive.h"
 #include "api.h"
 #include "displaymanager.h"
 
@@ -48,219 +46,10 @@ using namespace Aqsis;
 
 
 //------------------------------------------------------------------------------
-class FltkDisplay : public Aqsis::Display
-{
-    public:
-        FltkDisplay(std::vector<uchar>& image)
-            : m_image(image)
-        { }
-
-        virtual bool open(const std::string& fileName, const V2i& imageSize,
-                          const V2i& tileSize, const VarSpec& varSpec)
-        {
-            m_imageSize = imageSize;
-            m_tileSize = tileSize;
-            return true;
-        }
-
-        virtual bool writeTile(const V2i& pos, void* data)
-        {
-            int nchans = 3;
-            int tileRowSize = nchans*m_tileSize.x;
-            // Clamp output tile size to extent of image.
-            V2i outTileEnd = min(pos + m_tileSize, m_imageSize);
-            V2i outTileSize = outTileEnd - pos;
-            int outTileRowSize = sizeof(uchar)*nchans*outTileSize.x;
-            // Copy data
-            const uchar* src = (const uchar*)data;
-            uchar* dest = &m_image[0] + nchans*(m_imageSize.x * pos.y + pos.x);
-            for(int i = 0; i < outTileSize.y; ++i)
-            {
-                std::memcpy(dest, src, outTileRowSize);
-                dest += nchans*m_imageSize.x;
-                src += tileRowSize;
-            }
-            return true;
-        }
-
-        virtual bool close()
-        {
-            return true;
-        }
-
-    private:
-        V2i m_imageSize;
-        V2i m_tileSize;
-        std::vector<uchar>& m_image;
-};
-
-
-
-//------------------------------------------------------------------------------
-class InteractiveRender : public Fl_Widget
-{
-    public:
-        InteractiveRender(int x, int y, V2i imageSize,
-                          Ri::RendererServices& renderer)
-            : Fl_Widget(x,y, imageSize.x,imageSize.y, 0),
-            m_prev_x(0),
-            m_prev_y(0),
-            m_theta(0),
-            m_phi(0),
-            m_dist(5),
-            m_centre(0,0,0),
-            m_imageSize(V2i(0)),
-            m_image(),
-            m_renderer(renderer),
-            m_display(m_image)
-        {
-            setImageSize(imageSize);
-
-            Ri::Renderer& ri = renderer.firstFilter();
-            // Set up the display
-            Display* disp = &m_display;
-            ri.Display("Ci.tif", "__Display_instance__", "rgb",
-                       ParamListBuilder()("int instance",
-                                          reinterpret_cast<int*>(&disp)));
-            // Kick off initial render
-            renderImage();
-        }
-
-        virtual void draw()
-        {
-            fl_draw_image(&m_image[0], x(),y(), m_imageSize.x, m_imageSize.y);
-        }
-
-        virtual void resize(int x, int y, int w, int h)
-        {
-            setImageSize(V2i(w,h));
-            renderImage();
-            Fl_Widget::resize(x,y, w,h);
-        }
-
-        virtual int handle(int event)
-        {
-            switch(event)
-            {
-                case FL_FOCUS:
-                    return 1;
-                case FL_UNFOCUS:
-                    return 1;
-                case FL_KEYDOWN:
-                    {
-//                        int key = Fl::event_key();
-//                        switch(key)
-//                        {
-//                            case '1':
-//                        }
-                    }
-                    break;
-                case FL_MOUSEWHEEL:
-                    {
-                        m_dist *= std::pow(0.9, -Fl::event_dy());
-                        renderImage();
-                        return 1;
-                    }
-                    break;
-                case FL_PUSH:
-                    {
-                        m_prev_x = Fl::event_x();
-                        m_prev_y = Fl::event_y();
-                    }
-                    return 1;
-                case FL_DRAG:
-                    {
-                        int dx = m_prev_x - Fl::event_x();
-                        int dy = m_prev_y - Fl::event_y();
-                        m_prev_x = Fl::event_x();
-                        m_prev_y = Fl::event_y();
-                        if(Fl::event_ctrl())
-                        {
-                            m_centre.y +=  m_dist/h()*dy;
-                            m_centre.x += -m_dist/w()*dx*std::cos(deg2rad(m_phi));
-                            m_centre.z += -m_dist/w()*dx*std::sin(deg2rad(m_phi));
-                        }
-                        else
-                        {
-                            m_theta += 0.5*dy;
-                            m_phi   += 0.5*dx;
-                        }
-                        renderImage();
-                        return 1;
-                    }
-                    break;
-            }
-            return Fl_Widget::handle(event);
-        }
-
-    private:
-        void setImageSize(V2i imageSize)
-        {
-            m_imageSize = imageSize;
-            m_image.assign(3*prod(m_imageSize), 0);
-        }
-
-        void renderImage()
-        {
-            Ri::Renderer& ri = m_renderer.firstFilter();
-
-            ri.FrameBegin(1);
-
-            ri.Format(m_imageSize.x, m_imageSize.y, 1);
-
-            // Viewing transformation
-            float fov = 90;
-            ri.Projection("perspective",
-                          ParamListBuilder()("float fov", &fov));
-            ri.Translate(0, 0, m_dist);
-            ri.Rotate(m_theta, 1, 0, 0);
-            ri.Rotate(m_phi, 0, 1, 0);
-            ri.Translate(m_centre.x, m_centre.y, m_centre.z);
-
-            ri.WorldBegin();
-            ri.ReadArchive("retained_model", 0, ParamListBuilder());
-            ri.WorldEnd();
-            ri.FrameEnd();
-
-            damage(FL_DAMAGE_ALL);
-        }
-
-        int m_prev_x;
-        int m_prev_y;
-
-        float m_theta;
-        float m_phi;
-        float m_dist;
-        Vec3 m_centre;
-        V2i m_imageSize;
-        std::vector<uchar> m_image;
-        Ri::RendererServices& m_renderer;
-        FltkDisplay m_display;
-};
-
-
-//------------------------------------------------------------------------------
-class RenderWindow : public Fl_Double_Window
-{
-    public:
-        RenderWindow(int w, int h, const char* title,
-                     Ri::RendererServices& renderer)
-            : Fl_Double_Window(w, h, title)
-        {
-            m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h),
-                                                   renderer);
-            resizable(m_renderWidget);
-            end();
-        }
-
-    private:
-        InteractiveRender* m_renderWidget;
-};
-
-
-//------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
+	QApplication app(argc, argv);
+
     typedef std::vector<std::string> StringVec;
     namespace po = boost::program_options;
     // optional options
@@ -338,17 +127,13 @@ int main(int argc, char* argv[])
     renderer->parseRib(modelFile, modelFileName);
     ri.ArchiveEnd();
 
-    Fl::lock();
-
     RenderWindow win(640, 480, "Aqsis-2.0 interactive demo", *renderer);
-    win.show();
-    while(Fl::wait());
-//    {
-//        if(Fl::thread_message())
-//        {
-//        }
-//    }
 
-    return 0;
+	QObject::connect(&win, SIGNAL(exitApplication()), &app, SLOT(quit()));
+
+    win.show();
+	win.adjustSize();
+
+    return app.exec();
 }
 

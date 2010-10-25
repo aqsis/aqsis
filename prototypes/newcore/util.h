@@ -143,6 +143,12 @@ inline T maxNorm(Imath::Vec2<T> v)
     return std::max(std::fabs(v.x), std::fabs(v.y));
 }
 
+template<typename T>
+inline bool operator < (Imath::Vec2<T> a, Imath::Vec2<T> b)
+{
+	return (a.x < b.x) && (a.y < b.y);
+}
+
 /** \brief Bilinear interpolation.
  *
  * Bilinear interpolation over a "quadrilateral" of values arranged in the
@@ -221,17 +227,6 @@ inline T ceildiv(T n, T d)
 
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
-
-#ifdef _WIN32
-/// Calculate the base-2 logarithm of a number.
-///
-/// log2() as a C99 math function isn't avaliable on windows.
-inline float log2(float x)
-{
-    // log2(x) = log(x)/log(2) ~= 1.4426950408889633 * log(x)
-    return 1.4426950408889633 * std::log(x);
-}
-#endif
 
 inline Mat4 perspectiveProjection(float fov, float near, float far)
 {

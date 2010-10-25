@@ -66,7 +66,7 @@
 
 
 #ifdef _WIN32
-# include "osdep.h"
+//# include "osdep.h"
 #elif defined(__APPLE__)
 # include <mach/mach_time.h>
 #else

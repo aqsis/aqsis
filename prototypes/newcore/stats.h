@@ -95,8 +95,8 @@ class MinMaxMeanStat
         MinMaxMeanStat()
             : m_count(0),
             m_sum(0),
-            m_min(std::numeric_limits<T>::max()),
-            m_max(std::numeric_limits<T>::min()),
+            m_min((std::numeric_limits<T>::max)()),
+            m_max((std::numeric_limits<T>::min)()),
             m_scale(1)
         { }
 
@@ -125,8 +125,8 @@ class MinMaxMeanStat
         {
             m_count += s.m_count;
             m_sum += s.m_sum;
-            m_max = std::max(m_max, s.m_max);
-            m_min = std::min(m_min, s.m_min);
+            m_max = std::max<float>(m_max, s.m_max);
+            m_min = std::min<float>(m_min, s.m_min);
         }
 
         friend std::ostream& operator<<(std::ostream& out,

@@ -14,12 +14,40 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
 
-find_package(FLTK)
+find_package(Qt4)
 find_package(TIFF)
-find_package(Boost 1.36.0 COMPONENTS
-    unit_test_framework
-    program_options
-    thread)
+# Find boost.
+if(WIN32)
+	set(BOOST_ROOT "${AQSIS_DEPENDENCIES}" CACHE PATH "Root location of the boost install")
+	set(Boost_USE_STATIC_LIBS ON)
+else()
+	set(BOOST_ROOT "$ENV{BOOST_ROOT}" CACHE PATH "Root location of the Boost install")
+endif()
+set(Boost_ADDITIONAL_VERSIONS "1.45.0" "1.45" "1.44.0" "1.44"
+	"1.43.0" "1.43" "1.42.0" "1.42" "1.41.0" "1.41"
+	"1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37")
+find_package(Boost 1.34.1)
+# The following is a workaround because Boost versions > 1.35.0 need the
+# system library. CMake versions >2.6.4 should fix this properly.
+set(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
+if(local_boost_version VERSION_LESS "1.35")
+    if(WIN32)
+        find_package(Boost 1.34.1
+		COMPONENTS unit_test_framework program_options thread)
+    else()
+        find_package(Boost 1.34.1
+		COMPONENTS unit_test_framework program_options thread)
+    endif()
+else()
+    if(WIN32)
+        find_package(Boost 1.34.1
+		COMPONENTS unit_test_framework program_options thread system)
+    else()
+        find_package(Boost 1.34.1
+		COMPONENTS unit_test_framework program_options thread system)
+    endif()
+endif()
+
 # Assumes aqsis has been built into the directory path/to/src/../build.  Can be
 # overridden using Aqsis_DIR.
 find_package(Aqsis PATHS ../../../build/)
@@ -31,7 +59,7 @@ include_directories(ustring)
 include_directories(.)
 include_directories(${Aqsis_INCLUDE_DIRECTORIES})
 if(aqsis_interactive_demo)
-    include_directories(${FLTK_INCLUDE_DIR})
+	include_directories(${QT_INCLUDES})
 endif()
 
 if(UNIX)
@@ -105,8 +133,14 @@ endif()
 target_link_libraries(render ${render_link_libs})
 
 if(aqsis_interactive_demo)
-    add_executable(interactive interactive.cpp)
-    target_link_libraries(interactive ${render_link_libs} ${FLTK_LIBRARIES})
+	INCLUDE(${QT_USE_FILE})
+
+	if(QT_FOUND)
+		set(interactive_moc_hdrs interactive.h)
+		QT4_WRAP_CPP(interactive_moc_srcs ${interactive_moc_hdrs})
+		add_executable(interactive ${interactive_moc_srcs} interactive.cpp)
+		target_link_libraries(interactive ${render_link_libs} ${QT_LIBRARIES})
+	endif()
 endif()
 
 
@@ -151,8 +185,9 @@ testcase(samplegen_test samplegen.cpp samplegen_test.cpp)
 testcase(treearraystorage_test treearraystorage_test.cpp)
 
 if(WIN32)
-    set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
+	#set_property(TARGET primvar_test PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
     set_property(TARGET render PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
+    set_property(TARGET newcore PROPERTY COMPILE_DEFINITIONS OpenImageIO_EXPORTS)
 endif()
 
 endif(aqsis_enable_testing)
