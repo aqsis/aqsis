@@ -205,7 +205,7 @@ class DefaultSurface : public IOVarHolder
 
 
 //------------------------------------------------------------------------------
-/// A crazy test shader (combined surface + displacement for now)
+/// Displace along normal with a set of sinusoids.
 class LumpySin : public IOVarHolder
 {
     public:
@@ -265,6 +265,61 @@ class LumpySin : public IOVarHolder
 
     private:
         bool m_useCameraCoords;
+};
+
+
+//------------------------------------------------------------------------------
+// Spirals in the y-direction with given amplitude and frequency.
+class Helix : public IOVarHolder
+{
+    public:
+        Helix(const Ri::ParamList& pList)
+            : m_frequency(10),
+            m_amplitude(0.02)
+        {
+            if(Ri::FloatArray f = pList.findFloatData(Ri::TypeSpec::Float, "frequency"))
+                m_frequency = f[0];
+            if(Ri::FloatArray a = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
+                m_amplitude = a[0];
+            VarSpec inVars[] = {
+                Stdvar::P,
+                Stdvar::N,
+            };
+            setInputVars(inVars);
+            VarSpec outVars[] = {
+                Stdvar::P,
+                Stdvar::N
+            };
+            setOutputVars(outVars);
+        }
+
+        virtual void shade(ShadingContext& ctx, Grid& grid)
+        {
+            GridStorage& stor = grid.storage();
+
+            int nshad = stor.nverts();
+
+            // Bind variables to the storage.  Most of these are guarenteed to
+            // be present on the grid.
+            DataView<Vec3> N = stor.get(StdIndices::N);
+            DataView<Vec3> P = stor.P();
+
+            Mat4 shaderCoords = ctx.getTransform("world");
+            Mat4 scinv = shaderCoords.inverse();
+
+            for(int i = 0; i < nshad; ++i)
+            {
+                Vec3 p = P[i]*shaderCoords;
+                p += m_amplitude*Vec3(std::cos(m_frequency*p.y + p.x), 0,
+                                      std::sin(m_frequency*p.y + p.x));
+                P[i] = p*scinv;
+            }
+            grid.calculateNormals(N, P);
+        }
+
+    private:
+        float m_frequency;
+        float m_amplitude;
 };
 
 
@@ -490,6 +545,8 @@ ShaderPtr createShader(const char* name, const Ri::ParamList& pList)
 {
     if(name == std::string("lumpy_sin"))
         return ShaderPtr(new LumpySin(pList));
+    if(name == std::string("helix"))
+        return ShaderPtr(new Helix(pList));
     else if(name == std::string("plastic"))
         return ShaderPtr(new Plastic(pList));
     else if(name == std::string("asteroid"))
