@@ -126,6 +126,11 @@ float crater(Vec3 p, float jitter, float overlap, float sharpness)
     return amp;
 }
 
+inline float specular(Vec3 N, Vec3 V, Vec3 L, float roughness)
+{
+    Vec3 H = (L + V).normalized();
+    return std::pow(std::max(0.0f, N^H), 8.0f/roughness);
+}
 
 //------------------------------------------------------------------------------
 // Helper mixin class to hold shader input/output variables.
@@ -271,12 +276,16 @@ class Plastic : public IOVarHolder
         float m_Ka;
         float m_Kd;
         float m_Ks;
+        float m_roughness;
+        Col3 m_lightColor;
 
     public:
         Plastic(const Ri::ParamList& pList)
             : m_Ka(0.2),
             m_Kd(0.5),
-            m_Ks(0.5)
+            m_Ks(0.5),
+            m_roughness(0.1),
+            m_lightColor(Vec3(1))
         {
             if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
                 m_Kd = Kd[0];
@@ -284,6 +293,10 @@ class Plastic : public IOVarHolder
                 m_Ka = Ka[0];
             if(Ri::FloatArray Ks = pList.findFloatData(Ri::TypeSpec::Float, "Ks"))
                 m_Ks = Ks[0];
+            if(Ri::FloatArray r = pList.findFloatData(Ri::TypeSpec::Float, "roughness"))
+                m_roughness = r[0];
+            if(Ri::FloatArray col = pList.findFloatData(Ri::TypeSpec::Color, "lightcolor"))
+                m_lightColor = Col3(col[0], col[1], col[2]);
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
@@ -305,7 +318,7 @@ class Plastic : public IOVarHolder
 
             int nshad = stor.nverts();
 
-            Vec3 lightPos = Vec3(2,2,2) * ctx.getTransform("world").inverse();
+            //Vec3 lightPos = Vec3(2,2,2) * ctx.getTransform("world").inverse();
 
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
@@ -321,12 +334,11 @@ class Plastic : public IOVarHolder
             {
                 Vec3 nI = I[i].normalized();
                 Vec3 nN = N[i].normalized();
-                Vec3 nL = (P[i] - lightPos).normalized();
+                //Vec3 nL = (P[i] - lightPos).normalized();
                 Vec3 R = reflect(nN, nI);
-                Ci[i] = Cs[i] * (m_Ka + m_Kd*std::abs(nI^nN) +
-                                 m_Kd*std::abs(nL^nN) +
-                                 m_Ks*std::pow(std::max(0.0f, -R^nI), 20));
-                                 //0.7*std::max(nL^nN, 0.0f));
+                Ci[i] = Cs[i] * (m_Ka // ambient
+                                 + m_Kd*std::abs(nI^nN)) // diffuse
+                        + m_lightColor*m_Ks*specular(nN, nI, nI, m_roughness); // specular
             }
         }
 };
