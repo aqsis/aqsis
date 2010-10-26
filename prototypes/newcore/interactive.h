@@ -120,7 +120,7 @@ class InteractiveRender : public QWidget
 
             Ri::Renderer& ri = renderer.firstFilter();
             // Set up the display
-            Display* disp = &m_display;
+            Aqsis::Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
                        ParamListBuilder()("int instance",
                                           reinterpret_cast<int*>(&disp)));

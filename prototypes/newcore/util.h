@@ -143,12 +143,6 @@ inline T maxNorm(Imath::Vec2<T> v)
     return std::max(std::fabs(v.x), std::fabs(v.y));
 }
 
-template<typename T>
-inline bool operator < (Imath::Vec2<T> a, Imath::Vec2<T> b)
-{
-	return (a.x < b.x) && (a.y < b.y);
-}
-
 /** \brief Bilinear interpolation.
  *
  * Bilinear interpolation over a "quadrilateral" of values arranged in the
