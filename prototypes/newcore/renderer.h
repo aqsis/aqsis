@@ -30,6 +30,25 @@
 #ifndef AQSIS_RENDERER_H_INCLUDED
 #define AQSIS_RENDERER_H_INCLUDED
 
+#ifdef _WIN32
+/* Make sure that including windows.h doesn't define the min and max macros,
+ * which conflict with other uses of min and max (Aqsis::min, std::min etc.) */
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+/* Make sure that the math constants from math.h are defined - that is, M_PI
+ * etc.
+ */
+#ifndef _USE_MATH_DEFINES
+#   define _USE_MATH_DEFINES
+#endif
+
+/* Faster windows compilation, and less bloat */
+#define WIN32_LEAN_AND_MEAN
+
+#endif
+
 #include <cstring>
 #include <queue>
 #include <vector>

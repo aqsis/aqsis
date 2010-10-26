@@ -197,7 +197,7 @@ class CircleOfConfusion
                 return Vec2(0);
             // Otherwise, the minimum focal blur is achieved at one of the
             // z-extents of the bound.
-            return m_cocMult*std::min<float>(std::fabs(1/z1 - m_invFocalDist),
+            return m_cocMult*std::min(std::fabs(1/z1 - m_invFocalDist),
                                       std::fabs(1/z2 - m_invFocalDist));
         }
 };
@@ -376,9 +376,9 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
         // raster is the relevant coordinates which determine the size of
         // details which will be visible after filtering.
         cocScale /= Vec2(m_opts->superSamp);
-        float minCoC = std::min<float>(cocScale.x, cocScale.y);
+        float minCoC = std::min(cocScale.x, cocScale.y);
         const float lengthRatio = 0.16;
-        polyLength *= std::max<float>(1.0f, lengthRatio*attrs.focusFactor*minCoC);
+        polyLength *= std::max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
     }
     return polyLength;
 }

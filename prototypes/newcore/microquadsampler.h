@@ -131,12 +131,12 @@ class MicroQuadSampler
             const Vec3& Pb = m_P[m_ind.b];
             const Vec3& Pc = m_P[m_ind.c];
             const Vec3& Pd = m_P[m_ind.d];
-            Vec3 bndMin(std::min<float>(std::min<float>(Pa.x, Pb.x), std::min<float>(Pc.x, Pd.x)),
-                        std::min<float>(std::min<float>(Pa.y, Pb.y), std::min<float>(Pc.y, Pd.y)),
-                        std::min<float>(std::min<float>(Pa.z, Pb.z), std::min<float>(Pc.z, Pd.z)));
-            Vec3 bndMax(std::max<float>(std::max<float>(Pa.x, Pb.x), std::max<float>(Pc.x, Pd.x)),
-                        std::max<float>(std::max<float>(Pa.y, Pb.y), std::max<float>(Pc.y, Pd.y)),
-                        std::max<float>(std::max<float>(Pa.z, Pb.z), std::max<float>(Pc.z, Pd.z)));
+            Vec3 bndMin(std::min(std::min(Pa.x, Pb.x), std::min(Pc.x, Pd.x)),
+                        std::min(std::min(Pa.y, Pb.y), std::min(Pc.y, Pd.y)),
+                        std::min(std::min(Pa.z, Pb.z), std::min(Pc.z, Pd.z)));
+            Vec3 bndMax(std::max(std::max(Pa.x, Pb.x), std::max(Pc.x, Pd.x)),
+                        std::max(std::max(Pa.y, Pb.y), std::max(Pc.y, Pd.y)),
+                        std::max(std::max(Pa.z, Pb.z), std::max(Pc.z, Pd.z)));
             return Box(bndMin, bndMax);
         }
 

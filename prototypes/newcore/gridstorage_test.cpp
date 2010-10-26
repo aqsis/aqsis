@@ -30,7 +30,9 @@
 #include "gridstorage.h"
 
 #define BOOST_TEST_MAIN
+#ifndef _WIN32
 #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/auto_unit_test.hpp>
 
 using namespace Aqsis;

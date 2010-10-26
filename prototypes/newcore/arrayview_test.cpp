@@ -31,7 +31,9 @@
 #include "util.h"
 
 #define BOOST_TEST_MAIN
+#ifndef _WIN32
 #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/auto_unit_test.hpp>
 
 using namespace Aqsis;
@@ -123,8 +125,8 @@ BOOST_AUTO_TEST_CASE(DataView_copy_test)
 
     // Create c & initialize to something else
     const int skip = 2;
-    float cData[v3Size*nvals/skip];
-    DataView<Vec3> c(cData);
+    std::vector<float> cData(v3Size*nvals/skip);
+	DataView<Vec3> c(&cData[0]);
     for(int i = 0; i < nvals/skip; ++i)
         c[i] = Vec3(-1,-1,-1);
 

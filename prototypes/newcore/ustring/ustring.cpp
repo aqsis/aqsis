@@ -90,7 +90,7 @@ typedef null_lock<null_mutex> ustring_write_lock_t;
 
 typedef boost::unordered_map<const char*, ustring::TableRep*, Strutil::StringHash, Strutil::StringEqual> UstringTable;
 
-DLLEXPORT std::string ustring::empty_std_string ("");
+std::string ustring::empty_std_string ("");
 
 
 

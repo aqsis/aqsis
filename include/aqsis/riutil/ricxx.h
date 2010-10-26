@@ -41,6 +41,7 @@
 #include <stddef.h> // for size_t
 #include <string.h> // for strcmp
 
+#include <aqsis/config.h>
 #include <aqsis/ri/ritypes.h>
 
 /// Const versions of common Ri typedefs.
@@ -333,7 +334,7 @@ class ParamList : public Array<Param>
 ///     compilers complain bitterly when casting string literals to non-const
 ///     char*
 ///
-class Renderer
+class AQSIS_RIUTIL_SHARE Renderer
 {
     public:
         /// Bring Ri types into the Renderer class for convenience when

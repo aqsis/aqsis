@@ -31,7 +31,9 @@
 #include "util.h"
 
 #define BOOST_TEST_MAIN
+#ifndef _WIN32
 #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 

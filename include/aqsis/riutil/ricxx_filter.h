@@ -43,7 +43,7 @@ namespace Ri {
 
 /// Ri::Renderer functions can be filtered by deriving from this convenience
 /// clas.
-class Filter : public Renderer
+class AQSIS_RIUTIL_SHARE Filter : public Renderer
 {
     public:
         Filter(RendererServices& services, Ri::Renderer& nextFilter)
