@@ -101,11 +101,11 @@ BOOST_AUTO_TEST_CASE(DataView_copy_test)
 {
     const int nvals = 4;
     const int v3Size = DataView<Vec3>::elSize();
-    float aData[v3Size*nvals];
-    float bData[v3Size*nvals];
+    std::vector<float> aData(v3Size*nvals);
+    std::vector<float> bData(v3Size*nvals);
 
-    DataView<Vec3> a(aData);
-    DataView<Vec3> b(bData);
+    DataView<Vec3> a(&aData[0]);
+    DataView<Vec3> b(&bData[0]);
 
     // initialize b
     for(int i = 0; i < nvals; ++i)
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(DataView_copy_test)
         c[i] = Vec3(-1,-1,-1);
 
     // Now make a view onto a that only includes every second element
-    DataView<Vec3> a2(aData, skip*v3Size);
+    DataView<Vec3> a2(&aData[0], skip*v3Size);
     // Copy c into every second element of a.
     copy(a2, c, nvals/skip);
 
