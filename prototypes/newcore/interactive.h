@@ -47,7 +47,7 @@ using namespace Aqsis;
 class QtDisplay : public Aqsis::Display
 {
     public:
-        QtDisplay(uchar* image)
+        QtDisplay(QImage& image)
             : m_image(image)
         { }
 
@@ -61,24 +61,21 @@ class QtDisplay : public Aqsis::Display
 
         virtual bool writeTile(const V2i& pos, void* data)
         {
-			if(NULL != m_image)
-			{
-				int nchans = 3;
-				int tileRowSize = nchans*m_tileSize.x;
-				// Clamp output tile size to extent of image.
-				V2i outTileEnd = min(pos + m_tileSize, m_imageSize);
-				V2i outTileSize = outTileEnd - pos;
-				int outTileRowSize = sizeof(uchar)*nchans*outTileSize.x;
-				// Copy data
-				const uchar* src = (const uchar*)data;
-				uchar* dest = &m_image[0] + nchans*(m_imageSize.x * pos.y + pos.x);
-				for(int i = 0; i < outTileSize.y; ++i)
-				{
-					std::memcpy(dest, src, outTileRowSize);
-					dest += nchans*m_imageSize.x;
-					src += tileRowSize;
-				}
-			}
+            int nchans = 3;
+            int tileRowSize = nchans*m_tileSize.x;
+            // Clamp output tile size to extent of image.
+            V2i outTileEnd = min(pos + m_tileSize, m_imageSize);
+            V2i outTileSize = outTileEnd - pos;
+            int outTileRowSize = sizeof(uchar)*nchans*outTileSize.x;
+            // Copy data.  Note that QImage aligns scanlines to 32-bit
+            // boundaries, so adjacent scanlines may have padding between them.
+            const uchar* src = (const uchar*)data;
+            for(int i = 0; i < outTileSize.y; ++i)
+            {
+                uchar* dest = m_image.scanLine(i + pos.y) + nchans*pos.x;
+                std::memcpy(dest, src, outTileRowSize);
+                src += tileRowSize;
+            }
             return true;
         }
 
@@ -87,15 +84,10 @@ class QtDisplay : public Aqsis::Display
             return true;
         }
 
-		void setImage(uchar* image)
-		{
-			m_image = image;
-		}
-
     private:
         V2i m_imageSize;
         V2i m_tileSize;
-        uchar* m_image;
+        QImage& m_image;
 };
 
 //------------------------------------------------------------------------------
@@ -113,8 +105,9 @@ class InteractiveRender : public QWidget
             m_dist(5),
             m_centre(0,0,0),
             m_imageSize(V2i(0)),
+            m_qtImage(),
             m_renderer(renderer),
-            m_display(NULL)
+            m_display(m_qtImage)
         {
             setImageSize(imageSize);
 
@@ -188,7 +181,6 @@ class InteractiveRender : public QWidget
             m_imageSize = imageSize;
 			m_qtImage = QImage(imageSize.x, imageSize.y, QImage::Format_RGB888);
 			m_qtImage.fill(0xFF0000);
-			m_display.setImage(m_qtImage.bits());
         }
 
         void renderImage()
@@ -238,14 +230,13 @@ class RenderWindow : public QMainWindow
 	Q_OBJECT
 
     public:
-        RenderWindow(int w, int h, const char* title,
-                     Ri::RendererServices& renderer)
+        RenderWindow(int w, int h, Ri::RendererServices& renderer)
         {
             m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h), renderer);
-			m_renderWidget->setMaximumSize(QSize(w, h));
-			m_renderWidget->setMinimumSize(QSize(w, h));
-			setCentralWidget(m_renderWidget);
-		}
+            m_renderWidget->setMinimumSize(QSize(w, h));
+            setCentralWidget(m_renderWidget);
+            setWindowTitle("Aqsis-2.0 demo");
+        }
 
 	signals:
 		void exitApplication();

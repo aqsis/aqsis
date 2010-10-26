@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     renderer->parseRib(modelFile, modelFileName);
     ri.ArchiveEnd();
 
-    RenderWindow win(640, 480, "Aqsis-2.0 interactive demo", *renderer);
+    RenderWindow win(640, 480, *renderer);
 
 	QObject::connect(&win, SIGNAL(exitApplication()), &app, SLOT(quit()));
 
