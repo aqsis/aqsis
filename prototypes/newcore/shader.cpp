@@ -132,6 +132,14 @@ inline float specular(Vec3 N, Vec3 V, Vec3 L, float roughness)
     return std::pow(std::max(0.0f, N^H), 8.0f/roughness);
 }
 
+inline Vec3 faceforward(Vec3 N, Vec3 I)
+{
+    if((I^N) < 0)  // Should use Ng here
+        return -N;
+    else
+        return N;
+}
+
 //------------------------------------------------------------------------------
 // Helper mixin class to hold shader input/output variables.
 class IOVarHolder : public Shader
@@ -388,7 +396,7 @@ class Plastic : public IOVarHolder
             for(int i = 0; i < nshad; ++i)
             {
                 Vec3 nI = I[i].normalized();
-                Vec3 nN = N[i].normalized();
+                Vec3 nN = faceforward(N[i].normalized(), I[i]);
                 //Vec3 nL = (P[i] - lightPos).normalized();
                 Vec3 R = reflect(nN, nI);
                 Ci[i] = Cs[i] * (m_Ka // ambient
