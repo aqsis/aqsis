@@ -58,7 +58,11 @@ void TessellationContextImpl::tessellate(const Mat4& splitTrans,
         // nothing to do here.
         return;
     }
-    holder->geom().tessellate(splitTrans, *this);
+    int forceSplit = 0;
+    // Force split rather than dice if the bound spans the epsilon plane.
+    if(holder->bound().min.z < FLT_EPSILON)
+        forceSplit = holder->splitCount();
+    holder->geom().tessellate(splitTrans, forceSplit, *this);
     m_currGeom->tessellateFinished();
 }
 

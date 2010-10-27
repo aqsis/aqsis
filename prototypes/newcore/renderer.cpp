@@ -441,30 +441,59 @@ bool Renderer::rasterCull(GeomHolder& holder)
 {
     // Get bound in camera space.
     Box& bound = holder.bound();
-    if(bound.min.z < FLT_EPSILON && holder.splitCount() > m_opts->eyeSplits)
-    {
-        std::cerr << "Max eye splits encountered; geometry discarded\n";
-        return true;
-    }
-    // Cull if outside near/far clipping range
-    if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
-        return true;
-    // Transform bound to raster space.
-    //
+    // Expand bound for displacement (TODO: and DoF)
     // TODO: Support arbitrary coordinate systems for the displacement bound
     bound.min -= Vec3(holder.attrs().displacementBound);
     bound.max += Vec3(holder.attrs().displacementBound);
-    float minz = bound.min.z;
-    float maxz = bound.max.z;
-    bound = transformBound(bound, m_camToSRaster);
-    bound.min.z = minz;
-    bound.max.z = maxz;
-    // Cull if outside xy extent of image
-    if(bound.max.x < m_samplingArea.min.x ||
-       bound.min.x > m_samplingArea.max.x ||
-       bound.max.y < m_samplingArea.min.y ||
-       bound.min.y > m_samplingArea.max.y)
+    // Cull if outside near/far clipping range
+    if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return true;
+    if(bound.min.z < FLT_EPSILON)
+    {
+        // Special case for geometry which spans the epsilon plane.  This is a
+        // problem because it's hard to compute a useful raster space bound
+        // from the camera space bounding box because of the projective divide.
+        // In fact, a piece of geometry spanning the epsilon plane formally
+        // projects to a half-infinite or infinite bounding "box".  There's two
+        // measures taken to protect against this:
+        if(holder.splitCount() > m_opts->eyeSplits)
+        {
+            // Measure 1:  We have a limit on the number of times an object
+            // crossing the epsilon plane can be split to avoid infinite
+            // recursion.  Such split events are known as "eye splits", and if
+            // the limit is reached, we discard the object.
+            std::cerr << "Max eye splits encountered; geometry discarded\n";
+            return true;
+        }
+        else
+        {
+            // Measure 2: Any object with an offending bounding box has the
+            // bound adjusted so that it spans all buckets.  This isn't the
+            // best we can do for all objects, since some bounds are only
+            // half-infinite.  However, getting the special cases right might
+            // be tricky, so we do the simple thing for now.
+            bound.max.x = m_samplingArea.max.x;
+            bound.max.y = m_samplingArea.max.y;
+            bound.min.x = m_samplingArea.min.x;
+            bound.min.y = m_samplingArea.min.y;
+        }
+    }
+    else
+    {
+        // Transform bound to raster space.
+        //
+        float minz = bound.min.z;
+        float maxz = bound.max.z;
+        bound = transformBound(bound, m_camToSRaster);
+        bound.min.z = minz;
+        bound.max.z = maxz;
+        // Cull if outside xy extent of image
+        if(bound.max.x < m_samplingArea.min.x ||
+           bound.min.x > m_samplingArea.max.x ||
+           bound.max.y < m_samplingArea.min.y ||
+           bound.min.y > m_samplingArea.max.y)
+            return true;
+    }
     // Set initial reference count.
     V2i begin, end;
     m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);

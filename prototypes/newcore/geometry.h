@@ -122,7 +122,21 @@ class Geometry : public RefCounted
         /// on the *linear* dimensions of the diced pieces, rather than the
         /// area?  Needs thought.
         ///
-        virtual void tessellate(const Mat4& tessCoords,
+        /// \param forceSplit - If this is greater than zero, it indicates
+        ///   that the geometry cannot be diced into micropolygons because it
+        ///   has a bound which spans the perspective divide defined by
+        ///   tessCoords.  Instead the geometry should be split.  To ensure
+        ///   that splitting makes progress, forceSplit contains the number of
+        ///   forced splittings that the surface has already undergone.  The
+        ///   geometry should use this information to alternate the splitting
+        ///   in complimentary directions, because measuring lengths with
+        ///   tessCoords is unreliable in this case.
+        ///
+        /// \param tessCtx - context in which to tessellate, holding the
+        ///   options and attributes, etc.  tessellate should generate output
+        ///   by calling tessCtx.invokeTessellator().
+        ///
+        virtual void tessellate(const Mat4& tessCoords, int forceSplit,
                                 TessellationContext& tessCtx) const = 0;
 
         /// Transform the surface into a new coordinate system.

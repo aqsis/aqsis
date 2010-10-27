@@ -166,9 +166,17 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
-        virtual void tessellate(const Mat4& splitTrans,
+        virtual void tessellate(const Mat4& splitTrans, int forceSplit,
                                 TessellationContext& tessCtx) const
         {
+            if(forceSplit)
+            {
+                // Forced split.  if this is an eye split.  We alternate split
+                // direction to try to resolve eye splits.
+                SurfaceSplitter<Patch> splitter(forceSplit % 2 == 0);
+                tessCtx.invokeTessellator(splitter);
+                return;
+            }
             Vec3 a,b,c,d;
             getCorners(a,b,c,d);
 

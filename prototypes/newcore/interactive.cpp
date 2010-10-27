@@ -27,9 +27,10 @@
 //
 // (This is the New BSD license)
 
+#include <cfloat>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
@@ -110,6 +111,7 @@ int main(int argc, char* argv[])
     ri.ShadingRate(1);
     int eyesplits = 6;
     ri.Option("limits", ParamListBuilder()("int eyesplits", &eyesplits));
+    ri.Clipping(0.3, FLT_MAX);
 
     if(opts.count("opts"))
     {

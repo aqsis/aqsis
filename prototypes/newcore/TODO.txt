@@ -19,6 +19,7 @@ Some things which should be done:
         - Transformation motion blur
         - motionfactor approximation
     * Arbitrary attribute & option support
+    * Use ErrorHandler for error and message reporting
 
 
     (The following need to happen after the core is solid)
