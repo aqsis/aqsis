@@ -200,7 +200,7 @@ class InteractiveRender : public QWidget
             ri.Translate(m_centre.x, m_centre.y, m_centre.z);
 
             ri.WorldBegin();
-            ri.ReadArchive("retained_model", 0, ParamListBuilder());
+            ri.ReadArchive("retained_model", 0);
             ri.WorldEnd();
             ri.FrameEnd();
 

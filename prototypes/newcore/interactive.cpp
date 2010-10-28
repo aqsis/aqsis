@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
         renderer->parseRib(optFile, optFileName);
     }
 
-    ri.ArchiveBegin("retained_model", ParamListBuilder());
+    ri.ArchiveBegin("retained_model");
     renderer->parseRib(modelFile, modelFileName);
     ri.ArchiveEnd();
 
