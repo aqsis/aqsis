@@ -96,7 +96,7 @@ class InteractiveRender : public QWidget
 	Q_OBJECT
 
     public:
-        InteractiveRender(int x, int y, V2i imageSize, Ri::RendererServices& renderer)
+		InteractiveRender(int x, int y, V2i imageSize, Ri::RendererServices& renderer, std::vector<std::string>& retainedModels)
 		:	m_prev_x(0),
             m_prev_y(0),
 			m_mouseDrag(false),
@@ -107,7 +107,9 @@ class InteractiveRender : public QWidget
             m_imageSize(V2i(0)),
             m_qtImage(),
             m_renderer(renderer),
-            m_display(m_qtImage)
+            m_display(m_qtImage),
+			m_retainedModels(retainedModels),
+			m_rm(m_retainedModels.begin())
         {
             setImageSize(imageSize);
 
@@ -116,6 +118,9 @@ class InteractiveRender : public QWidget
             Aqsis::Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
                        ParamListBuilder()("pointer instance", &disp));
+			QTimer *timer = new QTimer(this);
+			connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
+			timer->start(40);
             // Kick off initial render
             renderImage();
         }
@@ -174,6 +179,15 @@ class InteractiveRender : public QWidget
 			renderImage();
 		}
 
+	public slots:
+		void tick()
+		{
+			++m_rm;
+			if(m_rm == m_retainedModels.end())
+				m_rm = m_retainedModels.begin();
+			renderImage();
+		}
+
     private:
         void setImageSize(V2i imageSize)
         {
@@ -200,7 +214,7 @@ class InteractiveRender : public QWidget
             ri.Translate(m_centre.x, m_centre.y, m_centre.z);
 
             ri.WorldBegin();
-            ri.ReadArchive("retained_model", 0);
+            ri.ReadArchive(m_rm->c_str(), 0, ParamListBuilder());
             ri.WorldEnd();
             ri.FrameEnd();
 
@@ -220,6 +234,9 @@ class InteractiveRender : public QWidget
 
         Ri::RendererServices& m_renderer;
         QtDisplay m_display;
+
+		std::vector<std::string> m_retainedModels;
+		std::vector<std::string>::iterator m_rm;
 };
 
 
@@ -229,9 +246,9 @@ class RenderWindow : public QMainWindow
 	Q_OBJECT
 
     public:
-        RenderWindow(int w, int h, Ri::RendererServices& renderer)
+		RenderWindow(int w, int h, Ri::RendererServices& renderer, std::vector<std::string>& retainedModels)
         {
-            m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h), renderer);
+            m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h), renderer, retainedModels);
             m_renderWidget->setMinimumSize(QSize(w, h));
             setCentralWidget(m_renderWidget);
             setWindowTitle("Aqsis-2.0 demo");

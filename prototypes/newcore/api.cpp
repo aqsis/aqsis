@@ -630,6 +630,7 @@ class RenderApi : public Ri::Renderer
         AllOptionsPtr m_savedOpts;
         AttributesStack m_attrStack;
         TransformStack m_transStack;
+		std::stack<std::string>	m_pathStack;
         boost::shared_ptr< Aqsis::Renderer> m_renderer;
 };
 
@@ -1658,15 +1659,24 @@ RtVoid RenderApi::ErrorHandler(RtErrorFunc handler)
 RtVoid RenderApi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
                               const ParamList& pList)
 {
-    boostfs::path location = findFileNothrow(name, m_opts->archiveSearchPath);
-    std::ifstream archive(location.file_string().c_str(),
+	boostfs::path location;
+	if(!m_pathStack.empty())
+		location = findFileNothrow(name, m_pathStack.top());
+	if(location.empty())
+		location = findFileNothrow(name, m_opts->archiveSearchPath);
+    
+	std::ifstream archive(location.file_string().c_str(),
                           std::ios::in | std::ios::binary);
     if(!archive)
     {
-        AQSIS_THROW_XQERROR(XqValidation, EqE_BadFile,
-            "Cound not open archive file " << name);
+		std::cout << "Could not open archive file " << location.file_string().c_str() << std::endl;
+        //AQSIS_THROW_XQERROR(XqValidation, EqE_BadFile,
+        //    "Cound not open archive file " << name);
     }
+	std::string parentPath = location.parent_path().directory_string();
+	m_pathStack.push(parentPath);
     m_services.parseRib(archive, name);
+	m_pathStack.pop();
 }
 
 RtVoid RenderApi::ArchiveBegin(RtConstToken name, const ParamList& pList)

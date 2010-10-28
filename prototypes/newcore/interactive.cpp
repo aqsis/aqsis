@@ -38,6 +38,7 @@
 #include <QtGui>
 
 #include <aqsis/riutil/ricxxutil.h>
+#include <aqsis/util/file.h>
 
 #include "interactive.h"
 #include "api.h"
@@ -95,16 +96,6 @@ int main(int argc, char* argv[])
     ri.Option("limits", ParamListBuilder()
               ("int threads", &opts["threads"].as<int>()));
 
-    // Open model file.
-    const StringVec& ribFiles = opts["rib_files"].as<StringVec>();
-    const char* modelFileName = ribFiles[0].c_str();
-    std::ifstream modelFile(modelFileName, std::ios::in | std::ios::binary);
-    if(!modelFile)
-    {
-        std::cerr << "Error - could not open \"" << modelFileName << "\"\n";
-        return 0;
-    }
-
     // Default hard-coded frame options.
     ri.PixelSamples(2, 2);
     ri.PixelFilter(renderer->getFilterFunc("sinc"), 3, 3);
@@ -125,11 +116,38 @@ int main(int argc, char* argv[])
         renderer->parseRib(optFile, optFileName);
     }
 
-    ri.ArchiveBegin("retained_model");
-    renderer->parseRib(modelFile, modelFileName);
-    ri.ArchiveEnd();
+	// Build a list of all ribFiles specified, expanding wildcards where necessary
+	StringVec allFiles;
+	const StringVec& ribFiles = opts["rib_files"].as<StringVec>();
+	for(StringVec::const_iterator rf = ribFiles.begin(), rfEnd = ribFiles.end(); rf != rfEnd; ++rf)
+	{
+		std::vector<std::string> files = cliGlob(*rf);
+		for(std::vector<std::string>::iterator f = files.begin(), fend = files.end(); f != fend; ++f)
+			allFiles.push_back(*f);
+	}
 
-    RenderWindow win(640, 480, *renderer);
+	// Load each file, recording the retained model name in the list.
+	int frame = 0;
+	StringVec retainedModels;
+	for(std::vector<std::string>::iterator f = allFiles.begin(), fend = allFiles.end(); f != fend; ++f, ++frame)
+	{
+		std::ifstream modelFile(f->c_str(), std::ios::in | std::ios::binary);
+		if(!modelFile)
+		{
+			std::cerr << "Error - could not open \"" << *f << "\"\n";
+			return 0;
+		}
+		modelFile.close();
+		std::stringstream rmName; 
+		rmName << "retained_model" << std::setw(4) << std::setfill('0') << frame;
+		retainedModels.push_back(rmName.str());
+		ri.ArchiveBegin(rmName.str().c_str(), ParamListBuilder());
+		ri.ReadArchive(f->c_str(), 0);
+		//renderer->parseRib(modelFile, f->c_str());
+		ri.ArchiveEnd();
+	}
+
+    RenderWindow win(640, 480, *renderer, retainedModels);
 
 	QObject::connect(&win, SIGNAL(exitApplication()), &app, SLOT(quit()));
 
