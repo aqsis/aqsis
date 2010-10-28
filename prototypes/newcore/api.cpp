@@ -43,6 +43,7 @@
 #include <aqsis/riutil/ricxx_filter.h>
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/exception.h>
+#include <aqsis/util/file.h>
 
 #include "displaymanager.h"
 #include "renderer.h"
@@ -397,6 +398,11 @@ struct AllOptions : public RefCounted
     OptionsPtr opts;
     CameraInfo camInfo;
     DisplayList displays;
+
+    /// TODO: Having the archive search path here is a quick hack.  Perhaps it
+    /// should be part of the arbitrary options storage when such a thing has
+    /// been implemented?
+    std::string archiveSearchPath;
 
     AllOptions() : opts(new Options()) {}
 
@@ -948,10 +954,17 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
         if(IntArray t = params.findIntData(Ri::TypeSpec::Int, "threads"))
             m_opts->opts->nthreads = t[0];
     }
-    if(strcmp(name, "statistics") == 0)
+    else if(strcmp(name, "statistics") == 0)
     {
         if(IntArray i = params.findIntData(Ri::TypeSpec::Int, "endofframe"))
             m_opts->opts->statsVerbosity = i[0];
+    }
+    else if(strcmp(name, "searchpath") == 0)
+    {
+        // TODO: Other search paths, default search path support.
+        if(StringArray a = params.findStringData(Ri::TypeSpec::String, "archive"))
+            m_opts->archiveSearchPath =
+                expandSearchPath(a[0], m_opts->archiveSearchPath);
     }
     if(params.hasUnusedParams())
     {
@@ -1645,9 +1658,10 @@ RtVoid RenderApi::ErrorHandler(RtErrorFunc handler)
 RtVoid RenderApi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
                               const ParamList& pList)
 {
-    // TODO: Search path handling
-    std::ifstream archive(name, std::ios::in | std::ios::binary);
-    if(!name)
+    boostfs::path location = findFileNothrow(name, m_opts->archiveSearchPath);
+    std::ifstream archive(location.file_string().c_str(),
+                          std::ios::in | std::ios::binary);
+    if(!archive)
     {
         AQSIS_THROW_XQERROR(XqValidation, EqE_BadFile,
             "Cound not open archive file " << name);
