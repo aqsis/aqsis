@@ -218,11 +218,14 @@ class LumpySin : public IOVarHolder
 {
     public:
         LumpySin(const Ri::ParamList& pList)
-            : m_useCameraCoords(false)
+            : m_useCameraCoords(false),
+            m_amplitude(0.15)
         {
             Ri::IntArray useCam = pList.findIntData(Ri::TypeSpec::Int,
                                                     "use_cam_coords");
             m_useCameraCoords = useCam && useCam[0] != 0;
+            if(Ri::FloatArray a = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
+                m_amplitude = a[0];
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
@@ -256,10 +259,8 @@ class LumpySin : public IOVarHolder
                 Vec3 p = P[i];
                 if(!m_useCameraCoords)
                     p = p*shaderCoords;
-                float amp =
-                    0.05*(std::sin(10*p.x) +
-                          std::sin(30*p.y) +
-                          std::sin(20*p.z));
+                float amp = m_amplitude/3 *
+                    (std::sin(10*p.x) + std::sin(30*p.y) + std::sin(20*p.z));
 //                    0.1*(triangleWave(1*p.x, 1) +
 //                         triangleWave(3*p.y, 1) +
 //                         triangleWave(2*p.z, 1));
@@ -273,6 +274,7 @@ class LumpySin : public IOVarHolder
 
     private:
         bool m_useCameraCoords;
+        float m_amplitude;
 };
 
 
