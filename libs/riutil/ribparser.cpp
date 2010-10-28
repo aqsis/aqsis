@@ -334,6 +334,11 @@ Ri::ParamList RibParserImpl::readParamList()
             case Ri::TypeSpec::String:
                 m_paramListStorage.push_back(Ri::Param(spec, name, m_lex->getStringParam()));
                 break;
+            case Ri::TypeSpec::Pointer:
+                AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
+                                    "Pointer token \"" << name << "\" "
+                                    "invalid in RIB stream.");
+                break;
             default:
                 assert(0 && "Unknown storage type; we should never get here.");
                 break;

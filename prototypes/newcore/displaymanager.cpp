@@ -162,14 +162,10 @@ bool DisplayList::addDisplay(const char* name, const char* type,
         info.display.reset(new TiffDisplay());
     else if(strcmp(type, "__Display_instance__") == 0)
     {
-        // FIXME: Make a type, Ri::TypeSpec::Pointer, to allow pointer data to
-        // be transmitted safely via the API.  The awful hack below will fail
-        // if an attempt is made to cache the "int" array.
-        int index = pList.find(Ri::TypeSpec::Int, "instance");
-        if(index < 0)
+        Ri::PtrArray inst = pList.findPtrData(Ri::TypeSpec::Pointer, "instance");
+        if(!inst)
             return false;
-        info.display.reset(*reinterpret_cast<Display* const*>(pList[index].data()),
-                           nullDeleter);
+        info.display.reset(static_cast<Display*>(inst[0]), nullDeleter);
     }
     else
         return false;

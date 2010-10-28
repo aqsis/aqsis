@@ -2517,6 +2517,7 @@ RtVoid RiCxxCore::PointsGeneralPolygons(const IntArray& nloops, const IntArray& 
 				case Ri::TypeSpec::Float:   elem_bytes *= sizeof(RtFloat);       break;
 				case Ri::TypeSpec::Integer: elem_bytes *= sizeof(RtInt);         break;
 				case Ri::TypeSpec::String:  elem_bytes *= sizeof(RtConstString); break;
+				case Ri::TypeSpec::Pointer: break;
 				default: assert(0); break;
 			}
 

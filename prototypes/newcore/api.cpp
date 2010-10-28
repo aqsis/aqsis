@@ -68,6 +68,7 @@ VarSpec typeSpecToVarSpec(const Ri::TypeSpec& spec)
         case Ri::TypeSpec::Matrix: out.type = VarSpec::Matrix; break;
         case Ri::TypeSpec::Integer:
         case Ri::TypeSpec::MPoint:
+        case Ri::TypeSpec::Pointer:
         case Ri::TypeSpec::Unknown:
             AQSIS_THROW_XQERROR(XqValidation, EqE_Bug,
                                 "No VarSpec for TypeSpec type");

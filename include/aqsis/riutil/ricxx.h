@@ -94,6 +94,7 @@ typedef Array<RtInt> IntArray;
 typedef Array<RtFloat> FloatArray;
 typedef Array<RtConstString> StringArray;
 typedef Array<RtConstToken> TokenArray;
+typedef Array<void*> PtrArray;
 
 
 //------------------------------------------------------------------------------
@@ -134,6 +135,7 @@ struct TypeSpec
         HPoint,
         Matrix,
         MPoint,
+        Pointer,
         Unknown = 128,
         Int=Integer,
     };
@@ -154,8 +156,9 @@ struct TypeSpec
     {
         switch(type)
         {
-            case Integer: case String: case Unknown:   return type;
-            default:                                   return Float;
+            case Integer: case String:
+            case Unknown: case Pointer:    return type;
+            default:                       return Float;
         }
     }
 
@@ -172,6 +175,7 @@ struct TypeSpec
         switch(type)
         {
             case Float: case Integer: case String: typeCount = 1;  break;
+            case Pointer:                          typeCount = 1;  break;
             case Point: case Normal:  case Vector: typeCount = 3;  break;
             case Color:                            typeCount = nColComps; break;
             case HPoint:                           typeCount = 4;  break;
@@ -208,6 +212,7 @@ template<> struct toTypeSpecType<cppType>                      \
 AQSIS_DEFINE_TO_TYPESPEC(RtFloat, Float);
 AQSIS_DEFINE_TO_TYPESPEC(RtInt, Integer);
 AQSIS_DEFINE_TO_TYPESPEC(RtConstString, String);
+AQSIS_DEFINE_TO_TYPESPEC(void*, Pointer);
 #undef AQSIS_DEFINE_TO_TYPESPEC
 
 //------------------------------------------------------------------------------
@@ -248,6 +253,7 @@ class Param
         FloatArray floatData()   const { return data<RtFloat>(); }
         IntArray   intData()     const { return data<RtInt>(); }
         StringArray stringData() const { return data<RtConstString>(); }
+        PtrArray   ptrData()     const { return data<void*>(); }
 };
 
 
@@ -305,6 +311,9 @@ class ParamList : public Array<Param>
         /// Find a string-storage parameter with the given type and name.
         StringArray findStringData(const TypeSpec& spec, const char* name) const
             { return find<RtConstString>(spec, name); }
+        /// Find a string-storage parameter with the given type and name.
+        PtrArray findPtrData(const TypeSpec& spec, const char* name) const
+            { return find<void*>(spec, name); }
 };
 
 

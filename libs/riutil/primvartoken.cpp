@@ -115,6 +115,7 @@ bool parseType(const char* begin, const char* end, Ri::TypeSpec::Type& type)
 	else if(lowerCaseEqual(begin, end, "vector"))   type = Ri::TypeSpec::Vector;
 	else if(lowerCaseEqual(begin, end, "normal"))   type = Ri::TypeSpec::Normal;
 	else if(lowerCaseEqual(begin, end, "hpoint"))   type = Ri::TypeSpec::HPoint;
+	else if(lowerCaseEqual(begin, end, "pointer"))  type = Ri::TypeSpec::Pointer;
 	else if(lowerCaseEqual(begin, end, "matrix"))   type = Ri::TypeSpec::Matrix;
 	else if(lowerCaseEqual(begin, end, "mpoint"))   type = Ri::TypeSpec::MPoint;
 	else

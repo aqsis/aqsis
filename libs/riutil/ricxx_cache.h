@@ -197,6 +197,7 @@ class CachedParamList
     private:
         boost::scoped_array<RtInt> m_ints;
         boost::scoped_array<RtFloat> m_floats;
+        boost::scoped_array<RtPointer> m_pointers;
         boost::scoped_array<char> m_chars;
         boost::scoped_array<RtConstString> m_strings;
         std::vector<Ri::Param> m_pList;
@@ -208,6 +209,7 @@ class CachedParamList
                 return;
             int intCount = 0;
             int floatCount = 0;
+            int ptrCount = 0;
             int charCount = 0;
             int stringCount = 0;
             // First scan the list, figure out how much storage we need
@@ -221,6 +223,9 @@ class CachedParamList
                         break;
                     case Ri::TypeSpec::Float:
                         floatCount += pList[i].size();
+                        break;
+                    case Ri::TypeSpec::Pointer:
+                        ptrCount += pList[i].size();
                         break;
                     case Ri::TypeSpec::String:
                         {
@@ -237,11 +242,13 @@ class CachedParamList
             // allocate storage
             if(intCount)    m_ints.reset(new RtInt[intCount]);
             if(floatCount)  m_floats.reset(new RtFloat[floatCount]);
+            if(ptrCount)  m_pointers.reset(new RtPointer[ptrCount]);
             if(stringCount) m_strings.reset(new RtConstString[stringCount]);
             if(charCount)   m_chars.reset(new char[charCount]);
             // Finally, copy over the data
             intCount = 0;
             floatCount = 0;
+            ptrCount = 0;
             charCount = 0;
             stringCount = 0;
             m_pList.reserve(pList.size());
@@ -267,6 +274,11 @@ class CachedParamList
                         data = m_floats.get() + floatCount;
                         std::memcpy(data, pList[i].data(), size*sizeof(RtFloat));
                         floatCount += size;
+                        break;
+                    case Ri::TypeSpec::Pointer:
+                        data = m_pointers.get() + ptrCount;
+                        std::memcpy(data, pList[i].data(), size*sizeof(RtPointer));
+                        ptrCount += pList[i].size();
                         break;
                     case Ri::TypeSpec::String:
                         {

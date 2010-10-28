@@ -85,7 +85,10 @@ extern "C" RtInt RifGetDeclaration(RtToken name, RifTokenType *tokType,
 			spec = QGetRenderContext()->tokenDict().lookup(name);
 		else
 			spec = parseDeclaration(name);
-		if(spec.type == Ri::TypeSpec::Unknown)
+		// Unknown indicates a parse problem.  Pointer is a nonstandard aqsis
+		// extension which has no equivalent k_Rif type (should we add one?).
+		if(spec.type == Ri::TypeSpec::Unknown ||
+		   spec.type == Ri::TypeSpec::Pointer)
 			return 1;
 		if(tokType)
 			*tokType = mapTokType(spec.type);
