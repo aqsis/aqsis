@@ -115,8 +115,7 @@ class InteractiveRender : public QWidget
             // Set up the display
             Aqsis::Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
-                       ParamListBuilder()("int instance",
-                                          reinterpret_cast<int*>(&disp)));
+                       ParamListBuilder()("pointer instance", &disp));
             // Kick off initial render
             renderImage();
         }
