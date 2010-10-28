@@ -293,7 +293,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -509,7 +509,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -571,7 +571,7 @@
 					<Name>mode</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -775,7 +775,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -997,7 +997,7 @@
 					<AltTypeInt/>
 					<RibOnly/>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1026,7 +1026,7 @@
 					<AltTypeInt/>
 					<RibOnly/>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1085,7 +1085,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1111,7 +1111,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<ValidScope>
 				<BeginEnd/>
@@ -1134,7 +1134,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1159,7 +1159,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1183,7 +1183,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1207,7 +1207,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -1241,7 +1241,7 @@
 					<Name>layername</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -2431,7 +2431,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2467,7 +2467,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2508,7 +2508,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2543,7 +2543,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2584,7 +2584,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2620,7 +2620,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2666,7 +2666,7 @@
 					<Range><ne>0</ne></Range>
 				</Argument>
 				<RibArgsCanBeArray/>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2790,7 +2790,7 @@
 					<Type>RtTokenArray</Type>
                     <RiLength>nstrings</RiLength>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -2908,7 +2908,7 @@
 					<Name>type</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<IClassLengths>
@@ -3128,7 +3128,7 @@
 					<Type>RtFloat</Type>
 					<Range><ge>1</ge></Range>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -3173,7 +3173,7 @@
 					<Type>RtFloat</Type>
 					<Range><ge>1</ge></Range>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<ValidScope>
 				<BeginEnd/>
@@ -3209,7 +3209,7 @@
 					<Type>RtFloat</Type>
 					<Range><ge>1</ge></Range>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -3269,7 +3269,7 @@
 					<Type>RtFloat</Type>
 					<Range><ge>1</ge></Range>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -3292,7 +3292,7 @@
 					<Name>shadowfile</Name>
 					<Type>RtString</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -3320,7 +3320,7 @@
 					<Name>shadowfile</Name>
 					<Type>RtString</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 			<ValidScope>
@@ -3446,7 +3446,7 @@
 					<Name>callback</Name>
 					<Type>RtArchiveCallback</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 		</Procedure>
@@ -3459,7 +3459,7 @@
 					<Name>name</Name>
 					<Type>RtToken</Type>
 				</Argument>
-				<ParamList/>
+				<ParamList><Optional/></ParamList>
 			</Arguments>
 			<Rib/>
 		</Procedure>

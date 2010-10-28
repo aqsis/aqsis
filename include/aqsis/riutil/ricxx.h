@@ -363,7 +363,7 @@ class AQSIS_RIUTIL_SHARE Renderer
                 cog.outl(commentBanner(p.text, fillchar='-'))
                 continue
             if p.tag == 'Procedure' and p.findall('Rib'):
-                decl = 'virtual %s = 0;' % (riCxxMethodDecl(p),)
+                decl = 'virtual %s = 0;' % (riCxxMethodDecl(p, useDefaults=True),)
                 cog.outl(wrapDecl(decl, 72, wrapIndent=20))
         ]]]*/
 
@@ -392,7 +392,7 @@ class AQSIS_RIUTIL_SHARE Renderer
         virtual RtVoid CropWindow(RtFloat xmin, RtFloat xmax, RtFloat ymin,
                             RtFloat ymax) = 0;
         virtual RtVoid Projection(RtConstToken name,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Clipping(RtFloat cnear, RtFloat cfar) = 0;
         virtual RtVoid ClippingPlane(RtFloat x, RtFloat y, RtFloat z,
                             RtFloat nx, RtFloat ny, RtFloat nz) = 0;
@@ -404,12 +404,15 @@ class AQSIS_RIUTIL_SHARE Renderer
         virtual RtVoid PixelFilter(RtFilterFunc function, RtFloat xwidth,
                             RtFloat ywidth) = 0;
         virtual RtVoid Exposure(RtFloat gain, RtFloat gamma) = 0;
-        virtual RtVoid Imager(RtConstToken name, const ParamList& pList) = 0;
+        virtual RtVoid Imager(RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Quantize(RtConstToken type, RtInt one, RtInt min,
                             RtInt max, RtFloat ditheramplitude) = 0;
         virtual RtVoid Display(RtConstToken name, RtConstToken type,
-                            RtConstToken mode, const ParamList& pList) = 0;
-        virtual RtVoid Hider(RtConstToken name, const ParamList& pList) = 0;
+                            RtConstToken mode,
+                            const ParamList& pList = ParamList()) = 0;
+        virtual RtVoid Hider(RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid ColorSamples(const FloatArray& nRGB,
                             const FloatArray& RGBn) = 0;
         virtual RtVoid RelativeDetail(RtFloat relativedetail) = 0;
@@ -423,20 +426,24 @@ class AQSIS_RIUTIL_SHARE Renderer
                             RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4,
                             RtFloat t4) = 0;
         virtual RtVoid LightSource(RtConstToken shadername, RtConstToken name,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid AreaLightSource(RtConstToken shadername,
-                            RtConstToken name, const ParamList& pList) = 0;
+                            RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Illuminate(RtConstToken name, RtBoolean onoff) = 0;
-        virtual RtVoid Surface(RtConstToken name, const ParamList& pList) = 0;
+        virtual RtVoid Surface(RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Displacement(RtConstToken name,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Atmosphere(RtConstToken name,
-                            const ParamList& pList) = 0;
-        virtual RtVoid Interior(RtConstToken name, const ParamList& pList) = 0;
-        virtual RtVoid Exterior(RtConstToken name, const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
+        virtual RtVoid Interior(RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
+        virtual RtVoid Exterior(RtConstToken name,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid ShaderLayer(RtConstToken type, RtConstToken name,
                             RtConstToken layername,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid ConnectShaderLayers(RtConstToken type,
                             RtConstToken layer1, RtConstToken variable1,
                             RtConstToken layer2, RtConstToken variable2) = 0;
@@ -513,20 +520,24 @@ class AQSIS_RIUTIL_SHARE Renderer
                             const ParamList& pList) = 0;
         // ----------------------------- Quadrics ----------------------------
         virtual RtVoid Sphere(RtFloat radius, RtFloat zmin, RtFloat zmax,
-                            RtFloat thetamax, const ParamList& pList) = 0;
+                            RtFloat thetamax,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Cone(RtFloat height, RtFloat radius, RtFloat thetamax,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Cylinder(RtFloat radius, RtFloat zmin, RtFloat zmax,
-                            RtFloat thetamax, const ParamList& pList) = 0;
+                            RtFloat thetamax,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Hyperboloid(RtConstPoint point1, RtConstPoint point2,
-                            RtFloat thetamax, const ParamList& pList) = 0;
+                            RtFloat thetamax,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Paraboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax,
-                            RtFloat thetamax, const ParamList& pList) = 0;
+                            RtFloat thetamax,
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Disk(RtFloat height, RtFloat radius, RtFloat thetamax,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid Torus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin,
                             RtFloat phimax, RtFloat thetamax,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         // ------------------- Points and Curve Primitives -------------------
         virtual RtVoid Points(const ParamList& pList) = 0;
         virtual RtVoid Curves(RtConstToken type, const IntArray& nvertices,
@@ -534,13 +545,14 @@ class AQSIS_RIUTIL_SHARE Renderer
         // --------------------- Blobby Implicit Surfaces --------------------
         virtual RtVoid Blobby(RtInt nleaf, const IntArray& code,
                             const FloatArray& floats, const TokenArray& strings,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         // ---------------------- Procedural Primitives ----------------------
         virtual RtVoid Procedural(RtPointer data, RtConstBound bound,
                             RtProcSubdivFunc refineproc,
                             RtProcFreeFunc freeproc) = 0;
         // ----------- Implementation-specific Geometric Primitives ----------
-        virtual RtVoid Geometry(RtConstToken type, const ParamList& pList) = 0;
+        virtual RtVoid Geometry(RtConstToken type,
+                            const ParamList& pList = ParamList()) = 0;
         // ----------------- Soids and Spatial Set Operations ----------------
         virtual RtVoid SolidBegin(RtConstToken type) = 0;
         virtual RtVoid SolidEnd() = 0;
@@ -561,32 +573,32 @@ class AQSIS_RIUTIL_SHARE Renderer
                             RtConstString texturefile, RtConstToken swrap,
                             RtConstToken twrap, RtFilterFunc filterfunc,
                             RtFloat swidth, RtFloat twidth,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid MakeLatLongEnvironment(RtConstString imagefile,
                             RtConstString reflfile, RtFilterFunc filterfunc,
                             RtFloat swidth, RtFloat twidth,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid MakeCubeFaceEnvironment(RtConstString px,
                             RtConstString nx, RtConstString py,
                             RtConstString ny, RtConstString pz,
                             RtConstString nz, RtConstString reflfile,
                             RtFloat fov, RtFilterFunc filterfunc,
                             RtFloat swidth, RtFloat twidth,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid MakeShadow(RtConstString picfile,
                             RtConstString shadowfile,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid MakeOcclusion(const StringArray& picfiles,
                             RtConstString shadowfile,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         // ------------------------------ Errors -----------------------------
         virtual RtVoid ErrorHandler(RtErrorFunc handler) = 0;
         // -------------------------- Archive Files --------------------------
         virtual RtVoid ReadArchive(RtConstToken name,
                             RtArchiveCallback callback,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid ArchiveBegin(RtConstToken name,
-                            const ParamList& pList) = 0;
+                            const ParamList& pList = ParamList()) = 0;
         virtual RtVoid ArchiveEnd() = 0;
         //[[[end]]]
 

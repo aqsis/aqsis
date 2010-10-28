@@ -79,10 +79,13 @@ def formalArgC(arg, arraySuffix=''):
     else:
         return '%s %s' % (type, name)
 
-def riCxxMethodDecl(procXml, className=None):
+def riCxxMethodDecl(procXml, className=None, useDefaults=False):
     args = [formalArg(arg) for arg in ribArgs(procXml)]
     if procXml.findall('Arguments/ParamList'):
-        args += ['const ParamList& pList']
+        if procXml.findall('Arguments/ParamList/Optional') and useDefaults:
+            args += ['const ParamList& pList = ParamList()']
+        else:
+            args += ['const ParamList& pList']
     procName = procXml.findtext('Name')
     if className is not None:
         procName = className + '::' + procName
