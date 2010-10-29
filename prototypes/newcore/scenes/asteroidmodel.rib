@@ -1,7 +1,7 @@
 AttributeBegin
     Attribute "displacementbound" "sphere" 0.05
     Displacement "asteroid"
-    Surface "default" "Kd" 1 "Ka" 0
+    Surface "default"
     PointsPolygons [4 4 4 4 4 4]
     [
         0  2  3  1
