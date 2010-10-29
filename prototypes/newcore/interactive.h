@@ -119,8 +119,9 @@ class InteractiveRender : public QWidget
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
                        ParamListBuilder()("pointer instance", &disp));
 			QTimer *timer = new QTimer(this);
-			connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
-			timer->start(40);
+			connect(timer, SIGNAL(timeout()), this, SLOT(nextFrame()));
+            if(retainedModels.size() > 1)
+                timer->start(40);
             // Kick off initial render
             renderImage();
         }
@@ -180,7 +181,7 @@ class InteractiveRender : public QWidget
 		}
 
 	public slots:
-		void tick()
+		void nextFrame()
 		{
 			++m_rm;
 			if(m_rm == m_retainedModels.end())
@@ -214,7 +215,7 @@ class InteractiveRender : public QWidget
             ri.Translate(m_centre.x, m_centre.y, m_centre.z);
 
             ri.WorldBegin();
-            ri.ReadArchive(m_rm->c_str(), 0, ParamListBuilder());
+            ri.ReadArchive(m_rm->c_str(), 0);
             ri.WorldEnd();
             ri.FrameEnd();
 

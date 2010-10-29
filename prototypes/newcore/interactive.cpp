@@ -138,10 +138,10 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 		modelFile.close();
-		std::stringstream rmName; 
+		std::stringstream rmName;
 		rmName << "retained_model" << std::setw(4) << std::setfill('0') << frame;
 		retainedModels.push_back(rmName.str());
-		ri.ArchiveBegin(rmName.str().c_str(), ParamListBuilder());
+		ri.ArchiveBegin(rmName.str().c_str());
 		ri.ReadArchive(f->c_str(), 0);
 		//renderer->parseRib(modelFile, f->c_str());
 		ri.ArchiveEnd();

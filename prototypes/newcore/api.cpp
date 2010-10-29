@@ -404,7 +404,10 @@ struct AllOptions : public RefCounted
     /// been implemented?
     std::string archiveSearchPath;
 
-    AllOptions() : opts(new Options()) {}
+    AllOptions()
+        : opts(new Options()),
+        archiveSearchPath(".")
+    {}
 
     AllOptionsPtr clone()
     {
@@ -1664,14 +1667,14 @@ RtVoid RenderApi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
 		location = findFileNothrow(name, m_pathStack.top());
 	if(location.empty())
 		location = findFileNothrow(name, m_opts->archiveSearchPath);
-    
+
 	std::ifstream archive(location.file_string().c_str(),
                           std::ios::in | std::ios::binary);
     if(!archive)
     {
-		std::cout << "Could not open archive file " << location.file_string().c_str() << std::endl;
-        //AQSIS_THROW_XQERROR(XqValidation, EqE_BadFile,
-        //    "Cound not open archive file " << name);
+        AQSIS_LOG_ERROR(ehandler(), EqE_BadFile)
+            << "Cound not open archive file \"" << name << "\"";
+        return;
     }
 	std::string parentPath = location.parent_path().directory_string();
 	m_pathStack.push(parentPath);
