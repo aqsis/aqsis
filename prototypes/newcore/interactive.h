@@ -99,7 +99,6 @@ class InteractiveRender : public QWidget
 		InteractiveRender(int x, int y, V2i imageSize, Ri::RendererServices& renderer, std::vector<std::string>& retainedModels)
 		:	m_prev_x(0),
             m_prev_y(0),
-			m_mouseDrag(false),
             m_theta(0),
             m_phi(0),
             m_dist(5),
@@ -111,6 +110,8 @@ class InteractiveRender : public QWidget
 			m_retainedModels(retainedModels),
 			m_rm(m_retainedModels.begin())
         {
+            setFocusPolicy(Qt::StrongFocus);
+
             setImageSize(imageSize);
 
             Ri::Renderer& ri = renderer.firstFilter();
@@ -118,10 +119,11 @@ class InteractiveRender : public QWidget
             Aqsis::Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
                        ParamListBuilder()("pointer instance", &disp));
-			QTimer *timer = new QTimer(this);
-			connect(timer, SIGNAL(timeout()), this, SLOT(nextFrame()));
-            if(retainedModels.size() > 1)
-                timer->start(40);
+			m_frameTimer = new QTimer(this);
+            m_frameTimer->setInterval(40);
+			connect(m_frameTimer, SIGNAL(timeout()), this, SLOT(nextFrame()));
+            if(m_retainedModels.size() > 1)
+                m_frameTimer->start();
             // Kick off initial render
             renderImage();
         }
@@ -140,16 +142,27 @@ class InteractiveRender : public QWidget
 			renderImage();
 		}
 
+		void keyPressEvent(QKeyEvent* event)
+		{
+			if(event->key() == Qt::Key_Space)
+            {
+                if(m_retainedModels.size() > 1)
+                {
+                    // Toggle animation timer active state
+                    if(m_frameTimer->isActive())
+                        m_frameTimer->stop();
+                    else
+                        m_frameTimer->start();
+                }
+            }
+            else
+                event->ignore();
+		}
+
 		void mousePressEvent(QMouseEvent* event)
 		{
 			m_prev_x = event->x();
 			m_prev_y = event->y();
-			m_mouseDrag = true;
-		}
-
-		void mouseReleaseEvent(QMouseEvent* event)
-		{
-			m_mouseDrag = false;
 		}
 
 		void mouseMoveEvent(QMouseEvent* event)
@@ -169,7 +182,8 @@ class InteractiveRender : public QWidget
 				m_theta += 0.5*dy;
 				m_phi   += 0.5*dx;
 			}
-			renderImage();
+            if(!m_frameTimer->isActive())
+                renderImage();
 		}
 
 		void wheelEvent(QWheelEvent* event)
@@ -177,7 +191,8 @@ class InteractiveRender : public QWidget
 			double degrees = event->delta()/8.0;
 			double steps = degrees / 15.0;
 			m_dist *= std::pow(0.9, steps);
-			renderImage();
+            if(!m_frameTimer->isActive())
+                renderImage();
 		}
 
 	public slots:
@@ -224,7 +239,6 @@ class InteractiveRender : public QWidget
 
         int m_prev_x;
         int m_prev_y;
-		bool m_mouseDrag;
 
         float m_theta;
         float m_phi;
@@ -238,6 +252,8 @@ class InteractiveRender : public QWidget
 
 		std::vector<std::string> m_retainedModels;
 		std::vector<std::string>::iterator m_rm;
+
+        QTimer* m_frameTimer;
 };
 
 
