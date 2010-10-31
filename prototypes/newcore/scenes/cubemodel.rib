@@ -1,6 +1,18 @@
+#Displacement "lumpy_sin" "float amplitude" 0.0
+
+Displacement "lumpy_sin" "float amplitude" 0.2
 Attribute "displacementbound" "sphere" 0.2
-Displacement "lumpy_sin"
+
+#Displacement "lumpy_sin" "float amplitude" 0.2 "float frequency" 0.5
+#Attribute "displacementbound" "sphere" 0.2
+
+#Displacement "lumpy_sin" "float amplitude" 1
+#Attribute "displacementbound" "sphere" 1
+#ShadingRate 0.2
+
 Surface "plastic" "Ks" 0.5 "Kd" 0.5 "Ka" 0
+#Surface "showgrids"
+#Surface "showpolys"
 PointsPolygons [4 4 4 4 4 4]
 [
     0  2  3  1
