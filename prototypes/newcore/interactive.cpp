@@ -126,28 +126,7 @@ int main(int argc, char* argv[])
 			allFiles.push_back(*f);
 	}
 
-	// Load each file, recording the retained model name in the list.
-	int frame = 0;
-	StringVec retainedModels;
-	for(std::vector<std::string>::iterator f = allFiles.begin(), fend = allFiles.end(); f != fend; ++f, ++frame)
-	{
-		std::ifstream modelFile(f->c_str(), std::ios::in | std::ios::binary);
-		if(!modelFile)
-		{
-			std::cerr << "Error - could not open \"" << *f << "\"\n";
-			return 0;
-		}
-		modelFile.close();
-		std::stringstream rmName;
-		rmName << "retained_model" << std::setw(4) << std::setfill('0') << frame;
-		retainedModels.push_back(rmName.str());
-		ri.ArchiveBegin(rmName.str().c_str());
-		ri.ReadArchive(f->c_str(), 0);
-		//renderer->parseRib(modelFile, f->c_str());
-		ri.ArchiveEnd();
-	}
-
-    RenderWindow win(640, 480, *renderer, retainedModels);
+    RenderWindow win(640, 480, *renderer, allFiles);
 
 	QObject::connect(&win, SIGNAL(exitApplication()), &app, SLOT(quit()));
 

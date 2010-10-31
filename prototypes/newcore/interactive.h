@@ -96,7 +96,9 @@ class InteractiveRender : public QWidget
 	Q_OBJECT
 
     public:
-		InteractiveRender(int x, int y, V2i imageSize, Ri::RendererServices& renderer, std::vector<std::string>& retainedModels)
+		InteractiveRender(int x, int y, V2i imageSize,
+                          Ri::RendererServices& renderer,
+                          std::vector<std::string>& ribFiles)
 		:	m_prev_x(0),
             m_prev_y(0),
             m_theta(0),
@@ -107,8 +109,8 @@ class InteractiveRender : public QWidget
             m_qtImage(),
             m_renderer(renderer),
             m_display(m_qtImage),
-			m_retainedModels(retainedModels),
-			m_rm(m_retainedModels.begin())
+			m_ribFiles(ribFiles),
+			m_currRib(m_ribFiles.begin())
         {
             setFocusPolicy(Qt::StrongFocus);
 
@@ -122,7 +124,7 @@ class InteractiveRender : public QWidget
 			m_frameTimer = new QTimer(this);
             m_frameTimer->setInterval(40);
 			connect(m_frameTimer, SIGNAL(timeout()), this, SLOT(nextFrame()));
-            if(m_retainedModels.size() > 1)
+            if(m_ribFiles.size() > 1)
                 m_frameTimer->start();
             // Kick off initial render
             renderImage();
@@ -146,7 +148,7 @@ class InteractiveRender : public QWidget
 		{
 			if(event->key() == Qt::Key_Space)
             {
-                if(m_retainedModels.size() > 1)
+                if(m_ribFiles.size() > 1)
                 {
                     // Toggle animation timer active state
                     if(m_frameTimer->isActive())
@@ -198,9 +200,9 @@ class InteractiveRender : public QWidget
 	public slots:
 		void nextFrame()
 		{
-			++m_rm;
-			if(m_rm == m_retainedModels.end())
-				m_rm = m_retainedModels.begin();
+			++m_currRib;
+			if(m_currRib == m_ribFiles.end())
+				m_currRib = m_ribFiles.begin();
 			renderImage();
 		}
 
@@ -230,7 +232,7 @@ class InteractiveRender : public QWidget
             ri.Translate(m_centre.x, m_centre.y, m_centre.z);
 
             ri.WorldBegin();
-            ri.ReadArchive(m_rm->c_str(), 0);
+            ri.ReadArchive(m_currRib->c_str(), 0);
             ri.WorldEnd();
             ri.FrameEnd();
 
@@ -250,8 +252,8 @@ class InteractiveRender : public QWidget
         Ri::RendererServices& m_renderer;
         QtDisplay m_display;
 
-		std::vector<std::string> m_retainedModels;
-		std::vector<std::string>::iterator m_rm;
+		std::vector<std::string> m_ribFiles;
+		std::vector<std::string>::iterator m_currRib;
 
         QTimer* m_frameTimer;
 };
