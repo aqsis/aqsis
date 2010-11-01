@@ -90,8 +90,10 @@ class MultiStringBuffer
             // contained string.  We MUST build this once we know
             // we're done with adding things to m_storage, or the
             // pointers will become invalid when m_storage is resized.
-            const char* first = &m_storage[0];
             m_cStrings.resize(m_offsets.size());
+            if(m_offsets.empty())
+                return m_cStrings;
+            const char* first = &m_storage[0];
             for(int i = 0, iend = m_offsets.size(); i < iend; ++i)
                 m_cStrings[i] = first + m_offsets[i];
             return m_cStrings;
