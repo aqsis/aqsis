@@ -30,6 +30,7 @@
 
 #include	<aqsis/aqsis.h>
 #include	<aqsis/util/sstring.h>
+#include	<aqsis/util/exception.h>
 #include	<list>
 
 namespace Aqsis {
@@ -101,6 +102,14 @@ class CqSimplePlugin : public CqPluginBase
 	private:
 	protected:
 } ;
+
+
+/** \class XqPluginError
+ * \brief Errors related to plugin loading and usage
+ * Errors which should be signalled by XqPluginError include trying to open
+ * non-existant plugin, and trying to use a plugin incorrectly.
+ */
+AQSIS_DECLARE_XQEXCEPTION(XqPluginError, XqInternal);
 
 //-----------------------------------------------------------------------
 

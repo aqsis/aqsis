@@ -135,41 +135,41 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 	for ( itPathEntry = m_DSOPathList.begin() ; itPathEntry != m_DSOPathList.end() ; itPathEntry++ )
 	{
 		Aqsis::log() << debug << "Looking in shared library : " << itPathEntry->c_str() << std::endl;
-		void *handle = DLOpen( &(*itPathEntry) );
+		
+        try
+        {
+            void *handle = DLOpen( &(*itPathEntry) );
+            // If we got here, the DLOpen didn't throw, so we've got a valid handle.
+            Aqsis::log() << info << "Found a suitable DSO candidate in \"" << *itPathEntry << "\"" << std::endl; 
 
-		if( handle != NULL )
-		{
-			pTableSymbol = (SqShadeOp*) DLSym( handle, &strTableSymbol );
+            pTableSymbol = (SqShadeOp*) DLSym( handle, &strTableSymbol );
+		    if ( pTableSymbol != NULL )
+		    {
+			    //We have an appropriate named shadeop table
+			    SqShadeOp *pShadeOp = (SqShadeOp*) pTableSymbol;
+			    while( ( pShadeOp->m_opspec )[0] != (char) NULL )
+			    {
+				    SqDSOExternalCall *pDSOCall = NULL;
+				    pDSOCall = parseShadeOpTableEntry( handle, pShadeOp );
+				    if ( pDSOCall != NULL )
+					    oplist->push_back( pDSOCall );
 
-			if ( pTableSymbol != NULL )
-			{
-				//We have an appropriate named shadeop table
-				SqShadeOp *pShadeOp = (SqShadeOp*) pTableSymbol;
-				while( ( pShadeOp->m_opspec )[0] != (char) NULL )
-				{
-					SqDSOExternalCall *pDSOCall = NULL;
-					pDSOCall = parseShadeOpTableEntry( handle, pShadeOp );
-					if ( pDSOCall != NULL )
-						oplist->push_back( pDSOCall );
+				    pShadeOp++;
+			    }
+		    }
+        }
+        catch(XqPluginError& e)
+        {
+            Aqsis::log() << info << e << std::endl;
+        }
+	}
 
-					pShadeOp++;
-				};
-			};
-
-			// Failure here does not neccesarily mean anything since
-		}
-		else
-		{
-			CqString strError = DLError();
-			Aqsis::log() << error << "DLOpen: " << strError.c_str() << std::endl;
-		};
-	};
 	std::stringstream resultStr;
 	if(oplist->empty())
 		resultStr << "(none found)";
 	else
 		resultStr << "(found " << oplist->size() << " possibilities)";
-	Aqsis::log() << debug << "Finished looking for DSO candidates "<< resultStr.str().c_str() << std::endl;
+	Aqsis::log() << info << "Finished looking for DSO candidates "<< resultStr.str().c_str() << std::endl;
 	return ( oplist->empty() ? NULL : oplist );
 };
 

@@ -85,7 +85,8 @@ CqPluginBase::DLOpen( CqString *library )
 		 * here.  For now we report the error, but perhaps it would be better
 		 * to throw an exception and let the calling code handle the problem.
 		 */
-		Aqsis::log() << error << "Error loading plugin: \"" << DLError() << "\"\n";
+		//Aqsis::log() << error << "Error loading plugin: \"" << *library << "\" \"" << DLError() << "\"\n";
+		AQSIS_THROW_XQERROR(XqPluginError, EqE_NoFile, "Error loading plugin: \"" << *library << "\" \"" << DLError() << "\"\n");
 	return handle;
 }
 

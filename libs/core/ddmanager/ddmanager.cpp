@@ -350,9 +350,9 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		
 		// Load the dynamic object and locate the relevant symbols.
 		CqString strDriverPathAndFile = displayPath.file_string();
-		m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
-		if ( m_DriverHandle != NULL )
-		{
+		try
+        {
+            m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
 			m_isLoaded = true;
 
 			m_OpenMethod = (DspyImageOpenMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strOpenMethod );
@@ -390,7 +390,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				m_DelayCloseMethod = (DspyImageDelayCloseMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strDelayCloseMethod );
 			}
 		}
-		else
+		catch(XqPluginError &e)
 		{
 			if (dspNo == 0)
 			{

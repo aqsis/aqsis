@@ -157,27 +157,34 @@ class CqRiProceduralPlugin : CqPluginBase
 				return;
 			}
 			CqString strRealName = dsoPath.file_string();
-			void *handle = DLOpen( &strRealName );
+			
+            try
+            {
+                void *handle = DLOpen( &strRealName );
+			    if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
+			    {
+				    m_Error = DLError();
+				    return;
+			    }
 
-			if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
-			{
-				m_Error = DLError();
-				return;
-			}
+			    if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
+			    {
+				    m_Error = DLError();
+				    return;
+			    }
 
-			if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
-			{
-				m_Error = DLError();
-				return;
-			}
+			    if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
+			    {
+				    m_Error = DLError();
+				    return;
+			    }
 
-			if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
-			{
-				m_Error = DLError();
-				return;
-			}
-
-			m_bIsValid = true ;
+			    m_bIsValid = true ;
+            }
+            catch(XqPluginError& e)
+            {
+                Aqsis::log() << error << e << std::endl;
+            }
 		};
 
 		void ConvertParameters(char* opdata)
