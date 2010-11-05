@@ -923,6 +923,8 @@ RtVoid RenderApi::Hider(RtConstToken name, const ParamList& pList)
     ParamListUsage params(pList);
     if(IntArray subpixel = params.findIntData(Ri::TypeSpec::Int, "subpixel"))
         m_opts->opts->doFilter = subpixel[0];
+    if(IntArray w = params.findIntData(Ri::TypeSpec::Int, "interleavewidth"))
+        m_opts->opts->interleaveWidth = w[0];
     if(params.hasUnusedParams())
     {
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)

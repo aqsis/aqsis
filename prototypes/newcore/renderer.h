@@ -58,6 +58,7 @@
 
 #include "attributes.h"
 #include "options.h"
+#include "thread.h"
 #include "varspec.h"
 #include "util.h"
 
@@ -76,6 +77,7 @@ class FilterProcessor;
 class DisplayManager;
 class RenderStats;
 class DisplayList;
+class DofMbTileSet;
 
 class GeomHolder;
 typedef boost::intrusive_ptr<GeomHolder> GeomHolderPtr;
@@ -198,6 +200,10 @@ class Renderer
         Mat4 m_camToWorld;             ///< Camera -> world transformation
         Imath::Box2f m_samplingArea;   ///< Area to sample in sraster coords
         std::vector<float> m_defaultFrag; ///< Default fragment samples
+
+        Mutex m_dofMbTileInit;  ///< Mutex for m_dofMbTileSet init
+        /// Cached DoF/MB sampling setup data.
+        boost::scoped_ptr<const DofMbTileSet> m_dofMbTileSet;
 };
 
 

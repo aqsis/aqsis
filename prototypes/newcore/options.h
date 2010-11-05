@@ -51,6 +51,7 @@ struct Options : public RefCounted
     V2i resolution;   ///< image resolution
     V2i bucketSize;   ///< linear edge length of bucket in pixels
     V2i superSamp;    ///< supersampling resolution
+    int interleaveWidth; ///< Width of interleaved sampling tiles
     float shutterMin; ///< shutter start time for motion blur
     float shutterMax; ///< shutter end time for motion blur
     float fstop;      ///< focalLength/lensDiameter
@@ -73,6 +74,7 @@ struct Options : public RefCounted
         resolution(640,480),
         bucketSize(16),
         superSamp(2,2),
+        interleaveWidth(6),
         shutterMin(0),
         shutterMax(0),
         fstop(FLT_MAX),

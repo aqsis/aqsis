@@ -59,8 +59,11 @@
 
 namespace Aqsis {
 
+// TODO: Remove Vec3 & Vec2 typedefs in favour of the standard OpenEXR
+// abbreviations.
 typedef Imath::V3f Vec3;
 typedef Imath::V2f Vec2;
+typedef Imath::V2f V2f;
 typedef Imath::V2i V2i;
 typedef Imath::M44f Mat4;
 typedef Imath::M33f Mat3;
@@ -216,7 +219,7 @@ inline int iceil(T x)
 template<typename T>
 inline T ceildiv(T n, T d)
 {
-    return (n-1)/d + 1;
+    return (n-T(1))/d + T(1);
 }
 
 inline float deg2rad(float d) { return (M_PI/180) * d; }

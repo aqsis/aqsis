@@ -68,7 +68,7 @@ namespace Aqsis {
 /// simple as a single comparison with the root node depth.
 ///
 /// Note that the simple approach to occlusion here degrades in quality in the
-/// prescense of motion blur and depth of field.  The paper "Space-Time
+/// presence of motion blur and depth of field.  The paper "Space-Time
 /// Hierarchical Occlusion Culling for Micropolygon Rendering with Motion Blur"
 /// by Boulos et al. is probably worth checking out in this regard.
 ///

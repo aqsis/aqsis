@@ -75,6 +75,11 @@ class FragmentTile : public RefCounted
         /// Get fragment relative to (0,0) in upper-left of tile.
         float* fragment(int x, int y)
         {
+            return fragment(m_size.x*y + x);
+        }
+        /// Get fragment at index, assuming row-major fragment storage.
+        float* fragment(int index)
+        {
             if(!m_fragments)
             {
                 // Deferred allocation for memory efficiency.
@@ -82,7 +87,7 @@ class FragmentTile : public RefCounted
                 copy(FvecView(&m_fragments[0], m_fragSize),
                     ConstFvecView(m_defaultFrag, m_fragSize, 0), prod(m_size));
             }
-            return &m_fragments[m_fragSize*(m_size.x*y + x)];
+            return &m_fragments[m_fragSize*(index)];
         }
         const float* fragment(int x, int y) const
         {

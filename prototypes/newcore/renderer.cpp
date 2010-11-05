@@ -42,7 +42,7 @@
 #include "microquadsampler.h"
 #include "refcount.h"
 #include "sample.h"
-#include "samplestorage.h"
+#include "samplegen.h"
 #include "splitstore.h"
 #include "tessellation.h"
 
@@ -63,6 +63,7 @@ class SampleTile
             : m_size(-1),
             m_samples(),
             m_samplesSetup(false),
+            m_dofMbSetup(false),
             m_fragmentTile(0)
         { }
 
@@ -81,6 +82,7 @@ class SampleTile
                 m_samples.reset(new Sample[prod(m_size)]);
             }
             m_samplesSetup = false;
+            m_dofMbSetup = false;
         }
 
         /// Ensure sample positions are set up
@@ -89,17 +91,32 @@ class SampleTile
         /// reset(), since some tiles may not have any geometry.  We'd like to
         /// avoid the computational expense of processing such tiles when they
         /// don't even have any samples present.
-        void ensureSampleInit()
+        void ensureSamplesSetup();
+
+        /// Ensure depth of field/motion blur indices are setup
+        ///
+        /// This setup needs to be performed after every reset() if you want to
+        /// do MB or DoF sampling.  As with ensureSamplesSetup(), the setup is
+        /// deferred until necessary so that we can avoid the expense if
+        /// possible.
+        void ensureDofMbSetup(const DofMbTileSet& tileSet);
+
+        /// Get range of DoF/MB tiles to iterate over for the given bound.
+        void dofMbTileRange(const Vec2& boundMin, const Vec2& boundMax,
+                            int& startx, int& endx, int& starty, int& endy)
         {
-            if(!m_samplesSetup)
-            {
-                // Initialize sample positions
-                Vec2 offset = Vec2(m_fragmentTile->sampleOffset()) + Vec2(0.5f);
-                for(int j = 0; j < m_size.y; ++j)
-                for(int i = 0; i < m_size.x; ++i)
-                    m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
-                m_samplesSetup = true;
-            }
+            V2i bndMin = ifloor((boundMin - m_tileBoundOffset)*m_tileBoundMult);
+            V2i bndMax = ifloor((boundMax - m_tileBoundOffset)*m_tileBoundMult);
+            startx = clamp(bndMin.x,   0, m_dofMbNumTiles.x);
+            endx   = clamp(bndMax.x+1, 0, m_dofMbNumTiles.x);
+            starty = clamp(bndMin.y,   0, m_dofMbNumTiles.y);
+            endy   = clamp(bndMax.y+1, 0, m_dofMbNumTiles.y);
+        }
+
+        int dofMbTileIndex(int tx, int ty, int itime)
+        {
+            return m_dofMbIndices[(ty*m_dofMbNumTiles.x + tx)*m_sampsPerTile
+                                  + itime];
         }
 
         /// Get sample position relative to (0,0) in upper-left of tile.
@@ -107,11 +124,19 @@ class SampleTile
         {
             return m_samples[m_size.x*y + x];
         }
+        Sample& sample(int index)
+        {
+            return m_samples[index];
+        }
 
         /// Get a fragment from the associated fragment tile.
         float* fragment(int x, int y)
         {
             return m_fragmentTile->fragment(x,y);
+        }
+        float* fragment(int index)
+        {
+            return m_fragmentTile->fragment(index);
         }
 
         /// Get size of tile in samples
@@ -148,12 +173,91 @@ class SampleTile
         }
 
     private:
-        V2i m_size;
-        boost::scoped_array<Sample> m_samples;
-        bool m_samplesSetup;
-        FragmentTile* m_fragmentTile;
+        static const SpatialHash m_spatialHash;
+
+        // Sample positions
+        V2i m_size;          ///< Number of samples
+        boost::scoped_array<Sample> m_samples; ///< Sample positions
+        bool m_samplesSetup; ///< True if samples have been setup for bucket
+
+        // Depth of field / Motion blur sample info
+        std::vector<int> m_dofMbIndices;
+        V2f m_tileBoundMult;
+        V2f m_tileBoundOffset;
+        int m_sampsPerTile;
+        V2i m_dofMbNumTiles;
+        bool m_dofMbSetup;
+
+        // Fragments
+        FragmentTile* m_fragmentTile; ///< Set of fragments for the bucket
 };
 
+const SpatialHash SampleTile::m_spatialHash(3);
+
+void SampleTile::ensureSamplesSetup()
+{
+    if(!m_samplesSetup)
+    {
+        Vec2 offset = Vec2(m_fragmentTile->sampleOffset()) + Vec2(0.5f);
+        for(int j = 0; j < m_size.y; ++j)
+        for(int i = 0; i < m_size.x; ++i)
+            m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
+        m_samplesSetup = true;
+    }
+}
+
+void SampleTile::ensureDofMbSetup(const DofMbTileSet& tileSet)
+{
+    if(!m_dofMbSetup)
+    {
+        // TODO: Need some more explanation here, in the event that this
+        // sampling method actually survives.
+        V2i dofMbSize = tileSet.tileSize();
+        m_sampsPerTile = prod(dofMbSize);
+        m_tileBoundMult = Vec2(1.0)/dofMbSize;
+        V2i sampStart = sampleOffset();
+        V2i sampEnd = sampStart + m_size;
+        V2i tileStart = sampStart/dofMbSize;
+        V2i tileEnd   = ceildiv(sampEnd, dofMbSize);
+        // Initialize all indices to invalid == -1.
+        m_dofMbNumTiles = tileEnd - tileStart;
+        m_dofMbIndices.assign(prod(m_dofMbNumTiles)*m_sampsPerTile, -1);
+        for(int ty = tileStart.y; ty < tileEnd.y; ++ty)
+        for(int tx = tileStart.x; tx < tileEnd.x; ++tx)
+        {
+            // Compute current tile using spatial hash function.
+            // Get the tile from the tile set with the four corner colors
+            // calculated using the spatial hash function.
+            //
+            // TODO: Check somehow that the tiles are being correctly pieced
+            // together.
+            const int* inTile = tileSet.getTile(
+                    m_spatialHash(tx, ty),   m_spatialHash(tx+1, ty),
+                    m_spatialHash(tx, ty+1), m_spatialHash(tx+1, ty+1));
+            int outTileStart = (m_dofMbNumTiles.x*(ty - tileStart.y)
+                              + (tx - tileStart.x)) * m_sampsPerTile;
+            assert(outTileStart >= 0);
+            assert(outTileStart + prod(dofMbSize) <= (int)m_dofMbIndices.size());
+            int* outTile = &m_dofMbIndices[outTileStart];
+            // Copy inverse mapping of input tile into output.  This means
+            // that when we index outTile at index n, we get the index
+            // into the sample position array which corresponds to the n'th
+            // time/lens offset.
+            V2i tPos = V2i(tx,ty);
+            V2i start = max(dofMbSize*tPos, sampStart);
+            V2i end   = min(dofMbSize*(tPos + V2i(1)), sampEnd);
+            for(int j = start.y; j < end.y; ++j)
+            for(int i = start.x; i < end.x; ++i)
+            {
+                int timeIdx = (j-start.y)*dofMbSize.x + i-start.x;
+                int samplePosIdx = (j-sampStart.y)*m_size.x + (i-sampStart.x);
+                outTile[inTile[timeIdx]] = samplePosIdx;
+            }
+        }
+        m_tileBoundOffset = tileStart*dofMbSize;
+        m_dofMbSetup = true;
+    }
+}
 
 //------------------------------------------------------------------------------
 /// Circle of confusion class for depth of field
@@ -198,6 +302,13 @@ class CircleOfConfusion
             // Otherwise, the minimum focal blur is achieved at one of the
             // z-extents of the bound.
             return m_cocMult*std::min(std::fabs(1/z1 - m_invFocalDist),
+                                      std::fabs(1/z2 - m_invFocalDist));
+        }
+
+        /// Compute the maximum lensShift inside the interval [z1,z2]
+        Vec2 maxShiftForBound(float z1, float z2) const
+        {
+            return m_cocMult*std::max(std::fabs(1/z1 - m_invFocalDist),
                                       std::fabs(1/z2 - m_invFocalDist));
         }
 };
@@ -383,9 +494,6 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
     return polyLength;
 }
 
-//------------------------------------------------------------------------------
-// Renderer implementation, utility stuff.
-
 namespace {
 template<typename T>
 void clampOptBelow(T& val, const char* name, const T& minVal,
@@ -424,12 +532,9 @@ void Renderer::sanitizeOptions(Options& opts)
                   "must be greater than filter size");
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
+    CLAMP_OPT_BELOW(interleaveWidth, 4);
     CLAMP_OPT_BELOW(shutterMax, opts.shutterMin);
 }
-
-
-//------------------------------------------------------------------------------
-// Guts of the renderer
 
 /// Determine whether the given geometry may be visibility culled.
 ///
@@ -481,12 +586,20 @@ bool Renderer::rasterCull(GeomHolder& holder)
     else
     {
         // Transform bound to raster space.
-        //
         float minz = bound.min.z;
         float maxz = bound.max.z;
         bound = transformBound(bound, m_camToSRaster);
         bound.min.z = minz;
         bound.max.z = maxz;
+        if(m_coc)
+        {
+            // Expand bound for depth of field.
+            V2f maxLensShift = m_coc->maxShiftForBound(minz, maxz);
+            bound.min.x -= maxLensShift.x;
+            bound.min.y -= maxLensShift.y;
+            bound.max.x += maxLensShift.x;
+            bound.max.y += maxLensShift.y;
+        }
         // Cull if outside xy extent of image
         if(bound.max.x < m_samplingArea.min.x ||
            bound.min.x > m_samplingArea.max.x ||
@@ -503,10 +616,19 @@ bool Renderer::rasterCull(GeomHolder& holder)
 
 bool Renderer::rasterCull(GridHolder& gridh)
 {
-    const Box& bound = gridh.bound();
+    Box& bound = gridh.bound();
     // Cull if outside clipping planes
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return true;
+    if(m_coc)
+    {
+        // Expand bound for depth of field.
+        V2f maxLensShift = m_coc->maxShiftForBound(bound.min.z, bound.max.z);
+        bound.min.x -= maxLensShift.x;
+        bound.min.y -= maxLensShift.y;
+        bound.max.x += maxLensShift.x;
+        bound.max.y += maxLensShift.y;
+    }
     // Cull if outside xy extent of image
     if(bound.max.x < m_samplingArea.min.x ||
        bound.min.x > m_samplingArea.max.x ||
@@ -706,7 +828,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
     while(bucketScheduler.nextBucket(bucketPos))
     {
         m_surfaces->enqueueGeometry(queue, bucketPos);
-        // memLog.log(); // FIXME
+        // TODO: Does this work when tileSize is not a multiple of 2?
         V2i sampleOffset = bucketPos*tileSize - tileSize/2;
         // Create new tile for fragment storage
         FragmentTilePtr fragments =
@@ -789,10 +911,21 @@ void Renderer::rasterize(SampleTile& tile, GridHolder& holder,
                          RenderStats& stats)
 {
     TIME_SCOPE(stats.rasterizeTime);
-    tile.ensureSampleInit();
+    tile.ensureSamplesSetup();
     holder.setRasterized();
     if(holder.isDeforming() || m_opts->fstop != FLT_MAX)
     {
+        {
+            TIME_SCOPE(stats.shadingTime);
+            LockGuard lk(m_dofMbTileInit);
+            // Initialize the tile set of DoF/MB indices if it hasn't been
+            // initialized yet.  After initialization it's const.
+            //
+            // TODO: Only do this once if using multiple frames.
+            if(!m_dofMbTileSet)
+                m_dofMbTileSet.reset(new DofMbTileSet(m_opts->interleaveWidth));
+        }
+        tile.ensureDofMbSetup(*m_dofMbTileSet);
         // Sample with motion blur or depth of field
         switch(holder.grid().type())
         {
@@ -831,8 +964,6 @@ template<typename GridT, typename PolySamplerT>
 void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                               RenderStats& stats)
 {
-    std::cerr << "Warning: MB & DoF are temporarily broken\n";
-    /*
     // Determine index of depth output data, if any.
     int zOffset = -1;
     int zIdx = m_outVars.find(StdOutInd::z);
@@ -840,6 +971,10 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
         zOffset = m_outVars[zIdx].offset;
 
     bool motionBlur = holder.isDeforming();
+
+    V2i tileSize = tile.size();
+    Vec2 bucketMin = Vec2(tile.sampleOffset());
+    Vec2 bucketMax = Vec2(tile.sampleOffset() + tileSize);
 
     // Cache the variables which need to be interpolated into
     // fragment outputs.
@@ -862,19 +997,14 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
         }
     }
 
-    int fragSize = m_sampStorage->fragmentSize();
-    const float* defaultFrag = m_sampStorage->defaultFragment();
+    int fragSize = m_defaultFrag.size();
+    const float* defaultFrag = &m_defaultFrag[0];
 
-    // Interleaved sampling info
-    Imath::V2i tileSize = m_sampStorage->m_tileSize;
-    Vec2 tileBoundMult = Vec2(1.0)/Vec2(tileSize);
-    Imath::V2i nTiles = Imath::V2i(m_sampStorage->m_xSampRes-1,
-                        m_sampStorage->m_ySampRes-1) / tileSize
-                        + Imath::V2i(1);
-    const int sampsPerTile = tileSize.x*tileSize.y;
     // time/lens position of samples
-    const SampleStorage::TimeLens* extraDims = &m_sampStorage->m_extraDims[0];
+    const std::vector<TimeLens>& timeLens = m_dofMbTileSet->timeLensPositions();
+    const int nTimeLens = timeLens.size();
 
+    // TODO: Put this into the itime loop.
     // Info for motion interpolation
     int* intervals = 0;
     float* interpWeights = 0;
@@ -883,18 +1013,18 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
         const GridKeys& gridKeys = holder.gridKeys();
 
         // Pre-compute interpolation info for all time indices
-        intervals = ALLOCA(int, sampsPerTile);
+        intervals = ALLOCA(int, nTimeLens);
         const int maxIntervalIdx = gridKeys.size()-2;
-        interpWeights = ALLOCA(float, sampsPerTile);
-        for(int i = 0, interval = 0; i < sampsPerTile; ++i)
+        interpWeights = ALLOCA(float, nTimeLens);
+        for(int i = 0, interval = 0; i < nTimeLens; ++i)
         {
             // Search forward through grid time intervals to find the interval
             // which contains the i'th sample time.
             while(interval < maxIntervalIdx
-                && gridKeys[interval+1].time < extraDims[i].time)
+                && gridKeys[interval+1].time < timeLens[i].time)
                 ++interval;
             intervals[i] = interval;
-            interpWeights[i] = (extraDims[i].time - gridKeys[interval].time) /
+            interpWeights[i] = (timeLens[i].time - gridKeys[interval].time) /
                         (gridKeys[interval+1].time - gridKeys[interval].time);
         }
     }
@@ -903,15 +1033,38 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     PointInQuad hitTest;
     InvBilin invBilin;
 
-    // For each micropoly.
-    for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
-    for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
+    // For each possible sample time
+    for(int itime = 0; itime < nTimeLens; ++itime)
     {
-        MicroQuadInd ind(nu*v + u,        nu*v + u+1,
-                         nu*(v+1) + u+1,  nu*(v+1) + u);
-        // For each possible sample time
-        for(int itime = 0; itime < sampsPerTile; ++itime)
+        Box gbound = holder.tightBound();
+        // FIXME: Motion interpolation for grid bound.
+        if(m_coc)
         {
+            Vec2 lensPos = timeLens[itime].lens;
+            // Max distance a micropoly inside the bound can move.
+            V2f maxLensShift = lensPos*m_coc->maxShiftForBound(
+                                            gbound.min.z, gbound.max.z);
+            // Min distance a micropoly inside the bound can move.
+            V2f minLensShift = lensPos*m_coc->minShiftForBound(
+                                            gbound.min.z, gbound.max.z);
+            if(lensPos.x > 0)
+                std::swap(maxLensShift.x, minLensShift.x);
+            if(lensPos.y > 0)
+                std::swap(maxLensShift.y, minLensShift.y);
+            gbound.min.x -= minLensShift.x;
+            gbound.min.y -= minLensShift.y;
+            gbound.max.x -= maxLensShift.x;
+            gbound.max.y -= maxLensShift.y;
+        }
+        if(gbound.max.x <  bucketMin.x || gbound.max.y <  bucketMin.y ||
+           gbound.min.x >= bucketMax.x || gbound.min.y >= bucketMax.y)
+            continue;
+        // For each micropoly.
+        for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
+        for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
+        {
+            MicroQuadInd ind(nu*v + u,        nu*v + u+1,
+                             nu*(v+1) + u+1,  nu*(v+1) + u);
             // Compute vertices of micropolygon
             Vec3 Pa, Pb, Pc, Pd;
             if(motionBlur)
@@ -941,7 +1094,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             // Offset vertices with lens position for depth of field.
             if(m_coc)
             {
-                Vec2 lensPos = extraDims[itime].lens;
+                Vec2 lensPos = timeLens[itime].lens;
                 m_coc->lensShift(Pa, lensPos);
                 m_coc->lensShift(Pb, lensPos);
                 m_coc->lensShift(Pc, lensPos);
@@ -957,32 +1110,27 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             bound.extendBy(Pc);
             bound.extendBy(Pd);
 
-            stats.averagePolyArea += 0.5*std::abs(vec2_cast(Pa-Pc) %
-                                                     vec2_cast(Pb-Pd));
+            if(stats.collectExpensiveStats)
+                stats.averagePolyArea += 0.5*std::abs(vec2_cast(Pa-Pc) %
+                                                      vec2_cast(Pb-Pd));
 
             // Iterate over samples at current time which come from tiles
             // which cross the bound.
-            Imath::V2i bndMin = ifloor(vec2_cast(bound.min)*tileBoundMult);
-            Imath::V2i bndMax = ifloor(vec2_cast(bound.max)*tileBoundMult);
 
-            int startx = clamp(bndMin.x,   0, nTiles.x);
-            int endx   = clamp(bndMax.x+1, 0, nTiles.x);
-            int starty = clamp(bndMin.y,   0, nTiles.y);
-            int endy   = clamp(bndMax.y+1, 0, nTiles.y);
+            int startx, endx, starty, endy;
+            tile.dofMbTileRange(vec2_cast(bound.min), vec2_cast(bound.max),
+                                startx, endx, starty, endy);
             // For each tile in the bound
             for(int ty = starty; ty < endy; ++ty)
             for(int tx = startx; tx < endx; ++tx)
             {
-                int tileInd = (ty*nTiles.x + tx);
-                // Index of which sample in the tile is considered to be at
-                // itime.
-                int shuffIdx = m_sampStorage->m_tileShuffleIndices[
-                                tileInd*sampsPerTile + itime ];
-                if(shuffIdx < 0)
+                // Index of the sample inside the current tile at itime.
+                int sampIndex = tile.dofMbTileIndex(tx, ty, itime);
+                if(sampIndex < 0)
                     continue;
-                Sample& samp = m_sampStorage->m_samples[shuffIdx];
+                Sample& samp = tile.sample(sampIndex);
                 ++stats.samplesTested;
-                if(!hitTest(samp))
+                if(!hitTest(samp.p))
                     continue;
                 ++stats.samplesHit;
                 Vec2 uv = invBilin(samp.p);
@@ -991,10 +1139,10 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                     continue; // Ignore if hit is hidden
                 samp.z = z;
                 // Generate & store a fragment
-                float* samples = &m_sampStorage->m_fragments[shuffIdx*fragSize];
+                float* fragment = tile.fragment(sampIndex);
                 // Initialize fragment data with the default value.
                 for(int i = 0; i < fragSize; ++i)
-                    samples[i] = defaultFrag[i];
+                    fragment[i] = defaultFrag[i];
                 // Store interpolated fragment data
                 for(int j = 0, jend = outVarInfo.size(); j < jend; ++j)
                 {
@@ -1007,16 +1155,15 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                     float w1 = (1-uv.y)*uv.x;
                     float w2 = uv.y*(1-uv.x);
                     float w3 = uv.y*uv.x;
-                    float* out = &samples[outVarInfo[j].outIdx];
+                    float* out = &fragment[outVarInfo[j].outIdx];
                     for(int i = 0, size = in.elSize(); i < size; ++i)
                         out[i] = w0*in0[i] + w1*in1[i] + w2*in2[i] + w3*in3[i];
                 }
                 if(zOffset >= 0)
-                    samples[zOffset] = z;
+                    fragment[zOffset] = z;
             }
         }
     }
-    */
 }
 
 
@@ -1035,6 +1182,7 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     int fragSize = m_defaultFrag.size();
     const float* defaultFrag = &m_defaultFrag[0];
 
+    // TODO: Rename SampleTile to BucketSamples ?
     V2i tileSize = tile.size();
 
     Vec2 bucketMin = Vec2(tile.sampleOffset());

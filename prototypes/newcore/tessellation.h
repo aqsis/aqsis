@@ -328,7 +328,8 @@ class GridHolder : public RefCounted
         GridPtr m_grid;             ///< Non-deforming grid
         GridKeys m_gridKeys;        ///< Grid keys for motion blur
         ConstAttributesPtr m_attrs; ///< Attribute state
-        Box m_bound;                ///< Grid bounding box in raster coords.
+        Box m_bound;                ///< Raster bounding box including CoC expansion
+        Box m_tightBound;           ///< Geometric raster bounding box
         bool m_rasterized;          ///< True if the grid was rasterized
         volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
 
@@ -345,6 +346,7 @@ class GridHolder : public RefCounted
             }
             else
                 m_bound.extendBy(m_grid->bound());
+            m_tightBound = m_bound;
         }
 
     public:
@@ -380,6 +382,9 @@ class GridHolder : public RefCounted
         GridKeys& gridKeys() { return m_gridKeys; }
         const GridKeys& gridKeys() const { return m_gridKeys; }
         const Box& bound() const { return m_bound; }
+        Box& bound() { return m_bound; }
+        /// Get pure geometric bound, without expansion for depth of field.
+        const Box& tightBound() const { return m_tightBound; }
 
         const Attributes& attrs() const { return *m_attrs; }
 
