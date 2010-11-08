@@ -1044,11 +1044,11 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
         if(m_coc)
         {
             // Max distance a micropoly inside the bound can move.
-            V2f maxLensShift = lensPos*m_coc->maxShiftForBound(
-                                            gbound.min.z, gbound.max.z);
+            maxLensShift = lensPos*m_coc->maxShiftForBound(gbound.min.z,
+                                                           gbound.max.z);
             // Min distance a micropoly inside the bound can move.
-            V2f minLensShift = lensPos*m_coc->minShiftForBound(
-                                            gbound.min.z, gbound.max.z);
+            minLensShift = lensPos*m_coc->minShiftForBound(gbound.min.z,
+                                                           gbound.max.z);
             if(lensPos.x > 0)
                 std::swap(maxLensShift.x, minLensShift.x);
             if(lensPos.y > 0)
