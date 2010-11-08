@@ -6,6 +6,7 @@ Display "cubescene_Ci.tif" "file" "rgb" "compression" "lzw"
 Format 1024 1024 1
 
 #Hider "hidden" "jitter" 0
+Hider "hidden" "int interleavewidth" 12
 PixelSamples 4 4
 PixelFilter "sinc" 3 3
 
@@ -15,16 +16,19 @@ Projection "perspective" "fov" 90
 
 #GeometricApproximation "focusfactor" 0
 
+#Option "limits" "bucketsize" [32 32]
+
 Translate 0 0 3
 Rotate 45 1 0 0
 Rotate 10 0 0 1
 Rotate 45 0 1 0
 
-DepthOfField 1 0.5 2
+DepthOfField 0.7 0.5 2
 
 WorldBegin
     Attribute "displacementbound" "sphere" 0.2
-    Surface "lumpy_sin"
+    Displacement "lumpy_sin"
+    Surface "default"
     PointsPolygons [4 4 4 4 4 4]
     [
         0  2  3  1
