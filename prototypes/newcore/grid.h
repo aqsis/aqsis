@@ -61,6 +61,9 @@ class Grid : public RefCounted
         /// Project positions into raster space.
         virtual void project(const Mat4& toRaster) = 0;
 
+        /// Cache bounds for the micropolygons comprising the grid.
+        virtual void cacheBounds(std::vector<Box>& bounds) = 0;
+
         /// Compute the bounding box for the grid
         virtual Box bound() const = 0;
 
@@ -119,6 +122,21 @@ class QuadGrid : public Grid
                 float z = P[i].z;
                 P[i] = P[i]*m;
                 P[i].z = z;
+            }
+        }
+
+        virtual void cacheBounds(std::vector<Box>& bounds)
+        {
+            DataView<Vec3> P = m_storage->P();
+            bounds.resize((m_nv-1)*(m_nu-1));
+            for(int v = 0; v < m_nv-1; ++v)
+            for(int u = 0; u < m_nu-1; ++u)
+            {
+                Box& b = bounds[v*(m_nu-1) + u];
+                b.extendBy(P[v*m_nu + u]);
+                b.extendBy(P[(v+1)*m_nu + u]);
+                b.extendBy(P[v*m_nu + u+1]);
+                b.extendBy(P[(v+1)*m_nu + u+1]);
             }
         }
 

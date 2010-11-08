@@ -332,6 +332,7 @@ class GridHolder : public RefCounted
         Box m_tightBound;           ///< Geometric raster bounding box
         bool m_rasterized;          ///< True if the grid was rasterized
         volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
+        std::vector<Box> m_cachedBounds;  ///< Cached micropolygon bounds
 
         /// Cache the grid bounds.
         ///
@@ -347,6 +348,7 @@ class GridHolder : public RefCounted
             else
                 m_bound.extendBy(m_grid->bound());
             m_tightBound = m_bound;
+            m_grid->cacheBounds(m_cachedBounds);
         }
 
     public:
@@ -385,6 +387,7 @@ class GridHolder : public RefCounted
         Box& bound() { return m_bound; }
         /// Get pure geometric bound, without expansion for depth of field.
         const Box& tightBound() const { return m_tightBound; }
+        const std::vector<Box>& cachedBounds() const { return m_cachedBounds; }
 
         const Attributes& attrs() const { return *m_attrs; }
 

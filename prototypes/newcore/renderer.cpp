@@ -1038,9 +1038,11 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     {
         Box gbound = holder.tightBound();
         // FIXME: Motion interpolation for grid bound.
+        V2f maxLensShift(0);
+        V2f minLensShift(0);
+        Vec2 lensPos = timeLens[itime].lens;
         if(m_coc)
         {
-            Vec2 lensPos = timeLens[itime].lens;
             // Max distance a micropoly inside the bound can move.
             V2f maxLensShift = lensPos*m_coc->maxShiftForBound(
                                             gbound.min.z, gbound.max.z);
@@ -1063,17 +1065,36 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
         for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
         for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
         {
+            // First, get a quick guess at the micropoly bound for the current
+            // lens/time position.  This allows us to quickly determine whether
+            // the polygon could be visible in the current bucket at the
+            // current time/lens position; if not we cull it.  The quick bound
+            // may be slightly larger than the exact bound, the important thing
+            // here is speed.
+            Box quickBnd = holder.cachedBounds()[(nu-1)*v + u];
+            if(m_coc)
+            {
+                quickBnd.min.x -= minLensShift.x;
+                quickBnd.min.y -= minLensShift.y;
+                quickBnd.max.x -= maxLensShift.x;
+                quickBnd.max.y -= maxLensShift.y;
+            }
+            if(quickBnd.max.x <  bucketMin.x || quickBnd.max.y <  bucketMin.y ||
+               quickBnd.min.x >= bucketMax.x || quickBnd.min.y >= bucketMax.y)
+                continue;
+            // If the micropolygon is probably visible, we need to compute the
+            // exact position of its vertices.
             MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                              nu*(v+1) + u+1,  nu*(v+1) + u);
             // Compute vertices of micropolygon
             Vec3 Pa, Pb, Pc, Pd;
             if(motionBlur)
             {
+                // Interpolate micropoly to the current time
                 int interval = intervals[itime];
                 const GridKeys& gridKeys = holder.gridKeys();
                 const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
                 const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
-                // Interpolate micropoly to the current time
                 float interp = interpWeights[itime];
                 ConstDataView<Vec3> P1 = grid1.storage().P();
                 ConstDataView<Vec3> P2 = grid2.storage().P();
@@ -1090,11 +1111,9 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                 Pc = P[ind.c];
                 Pd = P[ind.d];
             }
-
-            // Offset vertices with lens position for depth of field.
             if(m_coc)
             {
-                Vec2 lensPos = timeLens[itime].lens;
+                // Offset vertices with lens position for depth of field.
                 m_coc->lensShift(Pa, lensPos);
                 m_coc->lensShift(Pb, lensPos);
                 m_coc->lensShift(Pc, lensPos);
@@ -1193,7 +1212,7 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     // iterate over all micropolys in the grid & render each one.
     for(;poly.valid(); poly.next())
     {
-        // TODO: Is it worth precomputing and storing the bound?
+        // TODO: Make use of the cached micropolygon bound!
         Box bound = poly.bound();
         // Go to next micropoly if current is entirely outside the bucket.
         if(bound.max.x <  bucketMin.x || bound.max.y <  bucketMin.y ||
