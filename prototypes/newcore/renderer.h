@@ -56,6 +56,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include <aqsis/riutil/errorhandler.h>
+
 #include "attributes.h"
 #include "options.h"
 #include "thread.h"
@@ -86,6 +88,22 @@ typedef boost::intrusive_ptr<GridHolder> GridHolderPtr;
 
 typedef boost::intrusive_ptr<Geometry> GeometryPtr;
 typedef boost::intrusive_ptr<Grid> GridPtr;
+
+
+//-----------------------------------------------------------------------------
+/// Renderer error codes.
+///
+/// The relationship between these errors and the RIE_* or corresponding EqE_*
+/// versions needs thought.  At the least they should have distinct error
+/// codes!
+struct ErrorCode
+{
+    enum Code
+    {
+        BadOption,
+        MaxEyeSplits,
+    };
+};
 
 
 //-----------------------------------------------------------------------------
@@ -147,7 +165,8 @@ class Renderer
 {
     public:
         Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                 const Mat4& camToWorld, const DisplayList& displays);
+                 const Mat4& camToWorld, const DisplayList& displays,
+                 ErrorHandler& errorHandler);
 
         ~Renderer();
 
@@ -168,7 +187,7 @@ class Renderer
         float micropolyBlurWidth(const GeomHolderPtr& holder,
                                  const CircleOfConfusion* coc) const;
 
-        static void sanitizeOptions(Options& opts);
+        void sanitizeOptions(Options& opts);
 
         bool rasterCull(GeomHolder& geom);
         bool rasterCull(GridHolder& grid);
@@ -204,6 +223,8 @@ class Renderer
         Mutex m_dofMbTileInit;  ///< Mutex for m_dofMbTileSet init
         /// Cached DoF/MB sampling setup data.
         boost::scoped_ptr<const DofMbTileSet> m_dofMbTileSet;
+        /// Handler for renderer error messages.
+        ErrorHandler& m_errorHandler;
 };
 
 

@@ -497,15 +497,16 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
 namespace {
 template<typename T>
 void clampOptBelow(T& val, const char* name, const T& minVal,
-                   const char* reason = 0)
+                   ErrorHandler& errorHandler, const char* reason = 0)
 {
     if(val < minVal)
     {
-        std::cerr << "Warning: Option " << name << " = " << val
-                  << " is too small";
-        if(reason)
-            std::cerr << " (" << reason << ")";
-        std::cerr << ".  Clamping to " << minVal << ".\n";
+        AQSIS_LOG_ERROR(errorHandler, ErrorCode::BadOption)
+            << "Option " << name << " = " << val << " is too small"
+            << (reason ? " (" : "")
+            << (reason ? reason : "")
+            << (reason ? ")" : "")
+            << ".  Clamping to " << minVal << ".";
         val = minVal;
     }
 }
@@ -514,7 +515,7 @@ void clampOptBelow(T& val, const char* name, const T& minVal,
 void Renderer::sanitizeOptions(Options& opts)
 {
 #define CLAMP_OPT_BELOW(optname, minVal) \
-    clampOptBelow(opts.optname, #optname, minVal)
+    clampOptBelow(opts.optname, #optname, minVal, m_errorHandler)
     CLAMP_OPT_BELOW(eyeSplits, 0);
     CLAMP_OPT_BELOW(gridSize, 1);
     CLAMP_OPT_BELOW(clipNear, FLT_EPSILON);
@@ -527,9 +528,9 @@ void Renderer::sanitizeOptions(Options& opts)
     // choices.
     V2i minBucketSize = iceil(opts.pixelFilter->width());
     clampOptBelow(opts.bucketSize.x, "bucketsize.x", minBucketSize.x,
-                  "must be greater than filter size");
+                  m_errorHandler, "must be greater than filter size");
     clampOptBelow(opts.bucketSize.y, "bucketsize.y", minBucketSize.y,
-                  "must be greater than filter size");
+                  m_errorHandler, "must be greater than filter size");
     CLAMP_OPT_BELOW(superSamp.x, 1);
     CLAMP_OPT_BELOW(superSamp.y, 1);
     CLAMP_OPT_BELOW(interleaveWidth, 4);
@@ -567,7 +568,8 @@ bool Renderer::rasterCull(GeomHolder& holder)
             // crossing the epsilon plane can be split to avoid infinite
             // recursion.  Such split events are known as "eye splits", and if
             // the limit is reached, we discard the object.
-            std::cerr << "Max eye splits encountered; geometry discarded\n";
+            AQSIS_LOG_WARNING(m_errorHandler, ErrorCode::MaxEyeSplits)
+                << "Max eye splits encountered; geometry discarded";
             return true;
         }
         else
@@ -643,13 +645,15 @@ bool Renderer::rasterCull(GridHolder& gridh)
 }
 
 Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                   const Mat4& camToWorld, const DisplayList& displays)
+                   const Mat4& camToWorld, const DisplayList& displays,
+                   ErrorHandler& errorHandler)
     : m_opts(opts),
     m_coc(),
     m_surfaces(),
     m_outVars(),
     m_camToSRaster(),
-    m_camToWorld(camToWorld)
+    m_camToWorld(camToWorld),
+    m_errorHandler(errorHandler)
 {
     sanitizeOptions(*m_opts);
     // Set up output variables.

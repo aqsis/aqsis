@@ -49,6 +49,7 @@
 #include "renderer.h"
 #include "surfaces.h"
 #include "util.h"
+#include "thread.h"
 
 namespace Aqsis {
 
@@ -85,13 +86,40 @@ class PrintErrorHandler : public Ri::ErrorHandler
 {
     public:
         explicit PrintErrorHandler(ErrorCategory verbosity = Debug)
-            : Ri::ErrorHandler(verbosity)
+            : Ri::ErrorHandler(verbosity),
+            m_prevCode(-1),
+            m_prevMessage(),
+            m_repeatCount(0)
         { }
 
+        ~PrintErrorHandler()
+        {
+            reportRepeatCount();
+        }
+
     protected:
+        void reportRepeatCount()
+        {
+            std::cerr << "(previous message repeated " << m_repeatCount
+                      << " times)\n";
+        }
+
         virtual void sendError(int code, const std::string& message)
         {
+            LockGuard lk(m_cerrMutex);
             std::ostream& out = std::cerr;
+            // Fold repeated messages so that they don't spam the screen too
+            // much.
+            if(code == m_prevCode && message == m_prevMessage)
+            {
+                ++m_repeatCount;
+                return;
+            }
+            else if(m_repeatCount != 0)
+            {
+                reportRepeatCount();
+                m_repeatCount = 0;
+            }
             switch(errorCategory(code))
             {
                 case Debug:   out << "\033[32m"   "DEBUG: "   ; break;
@@ -102,7 +130,16 @@ class PrintErrorHandler : public Ri::ErrorHandler
                 default: break;
             }
             out << message << "\033[0m" << std::endl;
+            m_prevCode = code;
+            m_prevMessage = message;
         }
+
+    private:
+        int m_prevCode;
+        std::string m_prevMessage;
+        int m_repeatCount;
+
+        Mutex m_cerrMutex;
 };
 
 class ApiServices : public Ri::RendererServices
@@ -706,7 +743,7 @@ RtVoid RenderApi::WorldBegin()
     Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
     m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen,
                                          m_transStack.top().inverse(),
-                                         m_opts->displays));
+                                         m_opts->displays, ehandler()));
     m_attrStack.push();
     m_transStack.push();
 }
