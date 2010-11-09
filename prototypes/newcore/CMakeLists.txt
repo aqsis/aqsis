@@ -4,12 +4,26 @@ project(raster)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# Determine whether this is the first cmake run.
+if(NOT aqsis_not_first_cmake_run)
+    SET(first_cmake_run ON)
+    SET(aqsis_not_first_cmake_run ON CACHE INTERNAL
+        "Indicate that this is not the first CMake run" FORCE)
+else()
+    SET(first_cmake_run OFF)
+endif()
+
 set(aqsis_enable_testing TRUE CACHE BOOL "Enable unit testing")
 set(aqsis_memory_debugging FALSE CACHE BOOL "Enable memory debugging")
 set(aqsis_use_threads TRUE CACHE BOOL "Enable threading")
 set(aqsis_interactive_demo FALSE CACHE BOOL "Build interactive demo program")
-set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
+if(first_cmake_run AND CMAKE_BUILD_TYPE STREQUAL "")
+    # Make sure we build with the Release configuration by default.
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+        "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+        FORCE
+    )
+endif()
 
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 find_library(ILMBASE_IEX_LIBRARY Iex)
