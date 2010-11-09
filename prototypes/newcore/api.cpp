@@ -129,7 +129,11 @@ class PrintErrorHandler : public Ri::ErrorHandler
                 case Severe:  out << "\033[1;31m" "SEVERE: "  ; break;
                 default: break;
             }
-            out << message << "\033[0m" << std::endl;
+            out << message;
+            // Output a newline only if necessary.
+            if(!message.empty() && *(message.end()-1) != '\n')
+                out << "\n";
+            out << "\033[0m" << std::flush;
             m_prevCode = code;
             m_prevMessage = message;
         }

@@ -798,7 +798,10 @@ void Renderer::render()
         renderBuckets(scheduler, frameStats);
     }
 
-    frameStats.printStats(std::cout);
+    // Format stats and send to message log.
+    std::ostringstream statsStr;
+    frameStats.printStats(statsStr);
+    AQSIS_LOG_MESSAGE(m_errorHandler, 0) << statsStr.str();
 }
 
 
