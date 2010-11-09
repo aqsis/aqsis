@@ -100,8 +100,12 @@ class PrintErrorHandler : public Ri::ErrorHandler
     protected:
         void reportRepeatCount()
         {
-            std::cerr << "(previous message repeated " << m_repeatCount
-                      << " times)\n";
+            if(m_repeatCount != 0)
+            {
+                std::cerr << "(previous log message repeated "
+                          << m_repeatCount << " times)\n";
+                m_repeatCount = 0;
+            }
         }
 
         virtual void sendError(int code, const std::string& message)
@@ -115,11 +119,7 @@ class PrintErrorHandler : public Ri::ErrorHandler
                 ++m_repeatCount;
                 return;
             }
-            else if(m_repeatCount != 0)
-            {
-                reportRepeatCount();
-                m_repeatCount = 0;
-            }
+            reportRepeatCount();
             switch(errorCategory(code))
             {
                 case Debug:   out << "\033[32m"   "DEBUG: "   ; break;
