@@ -30,10 +30,10 @@
 #ifndef AQSIS_MICROQUADSAMPLER_H_INCLUDED
 #define AQSIS_MICROQUADSAMPLER_H_INCLUDED
 
-#include "attributes.h"
 #include "invbilin.h"
 #include "util.h"
 #include "pointinquad.h"
+#include "tessellation.h"  // For GridHolder
 
 namespace Aqsis {
 
@@ -59,6 +59,8 @@ class MicroQuadSampler
         const QuadGrid& m_grid;
         // Iterator for the current micropoly
         QuadGrid::Iterator m_curr;
+        // Cached micropoly bounds
+        const Box* m_cachedBounds;
 
         // Grid indices for vertices
         MicroQuadInd m_ind;
@@ -81,16 +83,17 @@ class MicroQuadSampler
         // a -- b
         // |    |
         // d -- c
-        MicroQuadSampler(const QuadGrid& grid, const Attributes& attrs,
+        MicroQuadSampler(const QuadGrid& grid, const GridHolder& holder,
                          const OutvarSet& outVars)
             : m_grid(grid),
             m_curr(grid.begin()),
+            m_cachedBounds(&holder.cachedBounds()[0]),
             m_ind(*m_curr),
             m_hitTest(),
             m_storage(grid.storage()),
             m_P(m_storage.P()),
             m_uv(0.0f),
-            m_smoothShading(attrs.smoothShading)
+            m_smoothShading(holder.attrs().smoothShading)
         {
             // Cache the variables which need to be interpolated into
             // fragment outputs.
@@ -116,6 +119,7 @@ class MicroQuadSampler
         void next()
         {
             ++m_curr;
+            ++m_cachedBounds;
             m_ind = *m_curr;
         }
         /// Test whether we're referencing a valid micropoly
@@ -125,19 +129,9 @@ class MicroQuadSampler
         }
 
         /// Get bound for current micropoly
-        Box bound() const
+        const Box& bound() const
         {
-            const Vec3& Pa = m_P[m_ind.a];
-            const Vec3& Pb = m_P[m_ind.b];
-            const Vec3& Pc = m_P[m_ind.c];
-            const Vec3& Pd = m_P[m_ind.d];
-            Vec3 bndMin(std::min(std::min(Pa.x, Pb.x), std::min(Pc.x, Pd.x)),
-                        std::min(std::min(Pa.y, Pb.y), std::min(Pc.y, Pd.y)),
-                        std::min(std::min(Pa.z, Pb.z), std::min(Pc.z, Pd.z)));
-            Vec3 bndMax(std::max(std::max(Pa.x, Pb.x), std::max(Pc.x, Pd.x)),
-                        std::max(std::max(Pa.y, Pb.y), std::max(Pc.y, Pd.y)),
-                        std::max(std::max(Pa.z, Pb.z), std::max(Pc.z, Pd.z)));
-            return Box(bndMin, bndMax);
+            return *m_cachedBounds;
         }
 
         /// Get area for current micropoly

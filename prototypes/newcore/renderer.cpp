@@ -1208,12 +1208,12 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     Vec2 bucketMax = Vec2(tile.sampleOffset() + tileSize);
 
     // Construct a sampler for the polygons in the grid
-    PolySamplerT poly(grid, holder.attrs(), m_outVars);
+    PolySamplerT poly(grid, holder, m_outVars);
     // iterate over all micropolys in the grid & render each one.
     for(;poly.valid(); poly.next())
     {
         // TODO: Make use of the cached micropolygon bound!
-        Box bound = poly.bound();
+        const Box& bound = poly.bound();
         // Go to next micropoly if current is entirely outside the bucket.
         if(bound.max.x <  bucketMin.x || bound.max.y <  bucketMin.y ||
            bound.min.x >= bucketMax.x || bound.min.y >= bucketMax.y)
