@@ -139,12 +139,6 @@ class Geometry : public RefCounted
         virtual void tessellate(const Mat4& tessCoords, int forceSplit,
                                 TessellationContext& tessCtx) const = 0;
 
-        /// Transform the surface into a new coordinate system.
-        ///
-        /// TODO: Remove this; geometry should be immutable in the main part
-        /// of the pipeline.
-        virtual void transform(const Mat4& trans) = 0;
-
         virtual ~Geometry() {}
 };
 

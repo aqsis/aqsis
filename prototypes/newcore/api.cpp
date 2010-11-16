@@ -1393,8 +1393,9 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
             builder.add(Primvar::Cs, Cs_stor, 12);
         }
         IclassStorage storReq(1,4,4,4,4);
-        GeometryPtr patch(new Aqsis::Patch(builder.build(storReq)));
-        patch->transform(m_transStack.top());
+        PrimvarStoragePtr primVars = builder.build(storReq);
+        primVars->transform(m_transStack.top());
+        GeometryPtr patch(new Aqsis::Patch(primVars));
         m_renderer->add(patch, attrsRead());
     }
 }
@@ -1428,8 +1429,9 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
         PrimvarStorageBuilder builder;
         builder.add(Primvar::P, P.begin(), P.size());
         IclassStorage storReq(1,4,4,4,4);
-        GeometryPtr patch(new Aqsis::Patch(builder.build(storReq)));
-        patch->transform(m_transStack.top());
+        PrimvarStoragePtr primVars = builder.build(storReq);
+        primVars->transform(m_transStack.top());
+        GeometryPtr patch(new Aqsis::Patch(primVars));
         m_renderer->add(patch, attrsRead());
     }
     else if(strcmp(type, "bicubic") == 0)

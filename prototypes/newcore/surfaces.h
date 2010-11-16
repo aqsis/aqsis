@@ -213,11 +213,6 @@ class Patch : public Geometry
             }
         }
 
-        virtual void transform(const Mat4& trans)
-        {
-            m_vars->transform(trans);
-        }
-
         virtual Box bound() const
         {
             Vec3 a,b,c,d;
