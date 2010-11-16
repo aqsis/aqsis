@@ -799,9 +799,12 @@ void Renderer::render()
     }
 
     // Format stats and send to message log.
-    std::ostringstream statsStr;
-    frameStats.printStats(statsStr);
-    AQSIS_LOG_MESSAGE(m_errorHandler, 0) << statsStr.str();
+    if(frameStats.verbosity > 0)
+    {
+        std::ostringstream statsStr;
+        frameStats.printStats(statsStr);
+        AQSIS_LOG_MESSAGE(m_errorHandler, 0) << statsStr.str();
+    }
 }
 
 
