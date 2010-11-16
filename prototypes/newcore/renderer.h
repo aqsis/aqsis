@@ -164,8 +164,8 @@ typedef std::vector<GeometryKey> GeometryKeys;
 class Renderer
 {
     public:
-        Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                 const Mat4& camToWorld, const DisplayList& displays,
+        Renderer(const OptionsPtr& opts, const M44f& camToScreen,
+                 const M44f& camToWorld, const DisplayList& displays,
                  ErrorHandler& errorHandler);
 
         ~Renderer();
@@ -215,9 +215,9 @@ class Renderer
         boost::scoped_ptr<CachedFilter> m_pixelFilter;
         boost::scoped_ptr<FilterProcessor> m_filterProcessor;
         boost::scoped_ptr<DisplayManager> m_displayManager;
-        Mat4 m_camToSRaster;           ///< Camera -> sample raster transformation
-        Mat4 m_camToWorld;             ///< Camera -> world transformation
-        Imath::Box2f m_samplingArea;   ///< Area to sample in sraster coords
+        M44f m_camToSRaster;           ///< Camera -> sample raster transformation
+        M44f m_camToWorld;             ///< Camera -> world transformation
+        Box2f m_samplingArea;   ///< Area to sample in sraster coords
         std::vector<float> m_defaultFrag; ///< Default fragment samples
 
         Mutex m_dofMbTileInit;  ///< Mutex for m_dofMbTileSet init

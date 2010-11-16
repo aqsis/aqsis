@@ -55,17 +55,17 @@ class Grid : public RefCounted
         virtual GridStorage& storage() = 0;
 
         /// Calculate normal values from P & store in N.
-        virtual void calculateNormals(DataView<Vec3> N,
-                                      ConstDataView<Vec3> P) const = 0;
+        virtual void calculateNormals(DataView<V3f> N,
+                                      ConstDataView<V3f> P) const = 0;
 
         /// Project positions into raster space.
-        virtual void project(const Mat4& toRaster) = 0;
+        virtual void project(const M44f& toRaster) = 0;
 
         /// Cache bounds for the micropolygons comprising the grid.
-        virtual void cacheBounds(std::vector<Box>& bounds) = 0;
+        virtual void cacheBounds(std::vector<Box3f>& bounds) = 0;
 
         /// Compute the bounding box for the grid
-        virtual Box bound() const = 0;
+        virtual Box3f bound() const = 0;
 
         virtual ~Grid() {}
 };
@@ -95,8 +95,8 @@ class QuadGrid : public Grid
         virtual GridStorage& storage() { return *m_storage; }
         virtual const GridStorage& storage() const { return *m_storage; }
 
-        virtual void calculateNormals(DataView<Vec3> N,
-                                      ConstDataView<Vec3> P) const
+        virtual void calculateNormals(DataView<V3f> N,
+                                      ConstDataView<V3f> P) const
         {
             for(int v = 0; v < m_nv; ++v)
                 for(int u = 0; u < m_nu; ++u, ++P, ++N)
@@ -108,9 +108,9 @@ class QuadGrid : public Grid
 
         Iterator begin() const;
 
-        virtual void project(const Mat4& m)
+        virtual void project(const M44f& m)
         {
-            DataView<Vec3> P = m_storage->P();
+            DataView<V3f> P = m_storage->P();
             for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)
             {
                 // Project all points, but restore z afterward.  TODO: This
@@ -125,14 +125,14 @@ class QuadGrid : public Grid
             }
         }
 
-        virtual void cacheBounds(std::vector<Box>& bounds)
+        virtual void cacheBounds(std::vector<Box3f>& bounds)
         {
-            DataView<Vec3> P = m_storage->P();
+            DataView<V3f> P = m_storage->P();
             bounds.resize((m_nv-1)*(m_nu-1));
             for(int v = 0; v < m_nv-1; ++v)
             for(int u = 0; u < m_nu-1; ++u)
             {
-                Box& b = bounds[v*(m_nu-1) + u];
+                Box3f& b = bounds[v*(m_nu-1) + u];
                 b.extendBy(P[v*m_nu + u]);
                 b.extendBy(P[(v+1)*m_nu + u]);
                 b.extendBy(P[v*m_nu + u+1]);
@@ -140,10 +140,10 @@ class QuadGrid : public Grid
             }
         }
 
-        virtual Box bound() const
+        virtual Box3f bound() const
         {
-            Box bound;
-            ConstDataView<Vec3> P = m_storage->P();
+            Box3f bound;
+            ConstDataView<V3f> P = m_storage->P();
             for(int i = 0, iend = m_nu*m_nv; i < iend; ++i)
                 bound.extendBy(P[i]);
             return bound;

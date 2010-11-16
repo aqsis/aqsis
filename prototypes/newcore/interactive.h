@@ -245,7 +245,7 @@ class InteractiveRender : public QWidget
         float m_theta;
         float m_phi;
         float m_dist;
-        Vec3 m_centre;
+        V3f m_centre;
         V2i m_imageSize;
 		QImage m_qtImage;
 

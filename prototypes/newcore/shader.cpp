@@ -55,7 +55,7 @@ inline float sawWave(float x, float w)
     return x - w*std::floor(x/w);
 }
 
-inline Vec3 reflect(Vec3 N, Vec3 I)
+inline V3f reflect(V3f N, V3f I)
 {
     return I - 2*(N^I) * N;
 }
@@ -63,26 +63,26 @@ inline Vec3 reflect(Vec3 N, Vec3 I)
 static CqNoise g_noise;
 static CqCellNoise g_cellnoise;
 
-inline float f_noise(const Vec3& p)
+inline float f_noise(const V3f& p)
 {
     return g_noise.FGNoise3(CqVector3D(p.x, p.y, p.z));
 }
 
-inline Vec3 v_noise(const Vec3& p)
+inline V3f v_noise(const V3f& p)
 {
     CqVector3D v = g_noise.PGNoise3(CqVector3D(p.x, p.y, p.z));
-    return Vec3(v.x(), v.y(), v.z());
+    return V3f(v.x(), v.y(), v.z());
 }
 
-inline float f_cellnoise(const Vec3& p)
+inline float f_cellnoise(const V3f& p)
 {
     return g_cellnoise.FCellNoise3(CqVector3D(p.x, p.y, p.z));
 }
 
-inline Vec3 v_cellnoise(const Vec3& p)
+inline V3f v_cellnoise(const V3f& p)
 {
     CqVector3D n = g_cellnoise.PCellNoise3(CqVector3D(p.x, p.y, p.z));
-    return Vec3(n.x(), n.y(), n.z());
+    return V3f(n.x(), n.y(), n.z());
 }
 
 inline float smoothstep(float min, float max, float x)
@@ -95,7 +95,7 @@ inline float smoothstep(float min, float max, float x)
     return x*x*(3 - 2*x);
 }
 
-float turbulence(Vec3 pos, int octaves, float lambda, float omega)
+float turbulence(V3f pos, int octaves, float lambda, float omega)
 {
     float value = 0;
     float l = 1;
@@ -109,16 +109,16 @@ float turbulence(Vec3 pos, int octaves, float lambda, float omega)
     return value;
 }
 
-float crater(Vec3 p, float jitter, float overlap, float sharpness)
+float crater(V3f p, float jitter, float overlap, float sharpness)
 {
-    Vec3 centre(floor(p.x + 0.5), floor(p.y + 0.5), floor(p.z + 0.5));
+    V3f centre(floor(p.x + 0.5), floor(p.y + 0.5), floor(p.z + 0.5));
     float amp = 0;
     for(int i = -1; i <= 1; i += 1)
     for(int j = -1; j <= 1; j += 1)
     for(int k = -1; k <= 1; k += 1)
     {
-        Vec3 cellCentreIjk = centre + Vec3(i,j,k);
-        cellCentreIjk += jitter * v_cellnoise(cellCentreIjk) - Vec3(0.5);
+        V3f cellCentreIjk = centre + V3f(i,j,k);
+        cellCentreIjk += jitter * v_cellnoise(cellCentreIjk) - V3f(0.5);
         float rad = 0.5*overlap*f_cellnoise(cellCentreIjk);
         float d = (p - cellCentreIjk).length();
         amp = std::min(amp, smoothstep(sharpness*rad, rad, d) - 1);
@@ -126,13 +126,13 @@ float crater(Vec3 p, float jitter, float overlap, float sharpness)
     return amp;
 }
 
-inline float specular(Vec3 N, Vec3 V, Vec3 L, float roughness)
+inline float specular(V3f N, V3f V, V3f L, float roughness)
 {
-    Vec3 H = (L + V).normalized();
+    V3f H = (L + V).normalized();
     return std::pow(std::max(0.0f, N^H), 8.0f/roughness);
 }
 
-inline Vec3 faceforward(Vec3 N, Vec3 I)
+inline V3f faceforward(V3f N, V3f I)
 {
     if((I^N) < 0)  // Should use Ng here
         return -N;
@@ -196,10 +196,10 @@ class DefaultSurface : public IOVarHolder
         {
             GridStorage& stor = grid.storage();
 
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            ConstDataView<Col3> Cs = stor.get(StdIndices::Cs);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
+            DataView<V3f> N = stor.get(StdIndices::N);
+            ConstDataView<V3f> I = stor.get(StdIndices::I);
+            ConstDataView<C3f> Cs = stor.get(StdIndices::Cs);
+            DataView<C3f> Ci = stor.get(StdIndices::Ci);
 
             int nshad = stor.nverts();
 
@@ -249,17 +249,17 @@ class LumpySin : public IOVarHolder
 
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            DataView<Vec3> P = stor.P();
+            DataView<V3f> N = stor.get(StdIndices::N);
+            DataView<V3f> P = stor.P();
 
-            Mat4 shaderCoords = ctx.getTransform("world")
-                            * Mat4().setAxisAngle(Vec3(1,0,0), deg2rad(45))
-                            * Mat4().setAxisAngle(Vec3(0,0,1), deg2rad(10))
-                            * Mat4().setAxisAngle(Vec3(0,1,0), deg2rad(45));
+            M44f shaderCoords = ctx.getTransform("world")
+                            * M44f().setAxisAngle(V3f(1,0,0), deg2rad(45))
+                            * M44f().setAxisAngle(V3f(0,0,1), deg2rad(10))
+                            * M44f().setAxisAngle(V3f(0,1,0), deg2rad(45));
 
             for(int i = 0; i < nshad; ++i)
             {
-                Vec3 p = P[i];
+                V3f p = P[i];
                 if(!m_useCameraCoords)
                     p = p*shaderCoords;
                 float amp = m_amplitude/3 *
@@ -317,16 +317,16 @@ class Helix : public IOVarHolder
 
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            DataView<Vec3> P = stor.P();
+            DataView<V3f> N = stor.get(StdIndices::N);
+            DataView<V3f> P = stor.P();
 
-            Mat4 shaderCoords = ctx.getTransform("world");
-            Mat4 scinv = shaderCoords.inverse();
+            M44f shaderCoords = ctx.getTransform("world");
+            M44f scinv = shaderCoords.inverse();
 
             for(int i = 0; i < nshad; ++i)
             {
-                Vec3 p = P[i]*shaderCoords;
-                p += m_amplitude*Vec3(std::cos(m_frequency*p.y + p.x), 0,
+                V3f p = P[i]*shaderCoords;
+                p += m_amplitude*V3f(std::cos(m_frequency*p.y + p.x), 0,
                                       std::sin(m_frequency*p.y + p.x));
                 P[i] = p*scinv;
             }
@@ -348,7 +348,7 @@ class Plastic : public IOVarHolder
         float m_Kd;
         float m_Ks;
         float m_roughness;
-        Col3 m_lightColor;
+        C3f m_lightColor;
 
     public:
         Plastic(const Ri::ParamList& pList)
@@ -356,7 +356,7 @@ class Plastic : public IOVarHolder
             m_Kd(0.5),
             m_Ks(0.5),
             m_roughness(0.1),
-            m_lightColor(Vec3(1))
+            m_lightColor(V3f(1))
         {
             if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
                 m_Kd = Kd[0];
@@ -367,7 +367,7 @@ class Plastic : public IOVarHolder
             if(Ri::FloatArray r = pList.findFloatData(Ri::TypeSpec::Float, "roughness"))
                 m_roughness = r[0];
             if(Ri::FloatArray col = pList.findFloatData(Ri::TypeSpec::Color, "lightcolor"))
-                m_lightColor = Col3(col[0], col[1], col[2]);
+                m_lightColor = C3f(col[0], col[1], col[2]);
             VarSpec inVars[] = {
                 Stdvar::P,
                 Stdvar::N,
@@ -389,24 +389,24 @@ class Plastic : public IOVarHolder
 
             int nshad = stor.nverts();
 
-            //Vec3 lightPos = Vec3(2,2,2) * ctx.getTransform("world").inverse();
+            //V3f lightPos = V3f(2,2,2) * ctx.getTransform("world").inverse();
 
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            ConstDataView<Col3> Cs = stor.get(StdIndices::Cs);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
+            DataView<V3f> N = stor.get(StdIndices::N);
+            ConstDataView<V3f> I = stor.get(StdIndices::I);
+            ConstDataView<C3f> Cs = stor.get(StdIndices::Cs);
+            DataView<C3f> Ci = stor.get(StdIndices::Ci);
             if(!Ci)
-                Ci = DataView<Col3>(FALLOCA(3*nshad));
-            DataView<Vec3> P = stor.P();
+                Ci = DataView<C3f>(FALLOCA(3*nshad));
+            DataView<V3f> P = stor.P();
 
             for(int i = 0; i < nshad; ++i)
             {
-                Vec3 nI = I[i].normalized();
-                Vec3 nN = faceforward(N[i].normalized(), I[i]);
-                //Vec3 nL = (P[i] - lightPos).normalized();
-                Vec3 R = reflect(nN, nI);
+                V3f nI = I[i].normalized();
+                V3f nN = faceforward(N[i].normalized(), I[i]);
+                //V3f nL = (P[i] - lightPos).normalized();
+                V3f R = reflect(nN, nI);
                 Ci[i] = Cs[i] * (m_Ka // ambient
                                  + m_Kd*std::abs(nI^nN)) // diffuse
                         + m_lightColor*m_Ks*specular(nN, nI, nI, m_roughness); // specular
@@ -437,11 +437,11 @@ class ShowGrids : public IOVarHolder
         {
             GridStorage& stor = grid.storage();
 
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
+            DataView<V3f> N = stor.get(StdIndices::N);
+            ConstDataView<V3f> I = stor.get(StdIndices::I);
+            DataView<C3f> Ci = stor.get(StdIndices::Ci);
 
-            Col3 Cs(ctx.rand(), ctx.rand(), ctx.rand());
+            C3f Cs(ctx.rand(), ctx.rand(), ctx.rand());
 
             float Kd = 0.8;
             float Ka = 0.2;
@@ -490,9 +490,9 @@ class ShowPolys : public IOVarHolder
         {
             GridStorage& stor = grid.storage();
 
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            ConstDataView<Vec3> I = stor.get(StdIndices::I);
-            DataView<Col3> Ci = stor.get(StdIndices::Ci);
+            DataView<V3f> N = stor.get(StdIndices::N);
+            ConstDataView<V3f> I = stor.get(StdIndices::I);
+            DataView<C3f> Ci = stor.get(StdIndices::Ci);
 
             float Kd = 0.8;
             float Ka = 0.2;
@@ -500,7 +500,7 @@ class ShowPolys : public IOVarHolder
 
             for(int i = 0; i < nshad; ++i)
             {
-                Col3 Cs(ctx.rand(), ctx.rand(), ctx.rand());
+                C3f Cs(ctx.rand(), ctx.rand(), ctx.rand());
                 float d = dot(I[i].normalized(), N[i].normalized());
                 Ci[i] = Cs * (Ka + Kd*d*d);
             }
@@ -533,17 +533,17 @@ class Asteroid : public IOVarHolder
 
             int nshad = stor.nverts();
 
-            Mat4 currentToWorld = ctx.getTransform("world");
+            M44f currentToWorld = ctx.getTransform("world");
 
             // Bind variables to the storage.  Most of these are guarenteed to
             // be present on the grid.
-            DataView<Vec3> N = stor.get(StdIndices::N);
-            DataView<Vec3> P = stor.P();
+            DataView<V3f> N = stor.get(StdIndices::N);
+            DataView<V3f> P = stor.P();
 
             // Displacement
             for(int i = 0; i < nshad; ++i)
             {
-                Vec3 Pobj = P[i]*currentToWorld;
+                V3f Pobj = P[i]*currentToWorld;
                 float amp = 0.2*(
                     0.3*crater(2.0f*Pobj + 0.1f*v_noise(4.0f*Pobj), 0.5, 1, 0.5)
                     + 0.1*crater(5.0f*Pobj + 0.2f*v_noise(7.0f*Pobj), 1, 1, 0.6)
@@ -580,13 +580,13 @@ ShaderPtr createShader(const char* name, const Ri::ParamList& pList)
 
 //------------------------------------------------------------------------------
 // ShadingContext implementation.
-ShadingContext::ShadingContext(const Mat4& camToWorld)
+ShadingContext::ShadingContext(const M44f& camToWorld)
     : m_camToWorld(camToWorld)
 {
     m_randScale = 1.0f/(m_rand.max() - m_rand.min());
 }
 
-Mat4 ShadingContext::getTransform(const char* toSpace)
+M44f ShadingContext::getTransform(const char* toSpace)
 {
     if(strcmp(toSpace, "world") == 0)
     {
@@ -596,7 +596,7 @@ Mat4 ShadingContext::getTransform(const char* toSpace)
     {
         // TODO
         assert(0);
-        return Mat4();
+        return M44f();
     }
 }
 

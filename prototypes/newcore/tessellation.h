@@ -63,7 +63,7 @@ class GeomHolder : public RefCounted
         GeometryPtr m_geom;  ///< Main geometry (first key for deformation)
         GeometryKeys m_geomKeys; ///< Extra geometry keys
         int m_splitCount;    ///< Number of times the geometry has been split
-        Box m_bound;         ///< Bound in camera coordinates
+        Box3f m_bound;         ///< Bound in camera coordinates
         ConstAttributesPtr m_attrs; ///< Surface attribute state
         volatile bool m_hasChildren;  ///< True if child geometry/grid exists
         std::vector<GeomHolderPtr> m_childGeoms; ///< Child geometry
@@ -75,9 +75,9 @@ class GeomHolder : public RefCounted
         boost::dynamic_bitset<> m_occludedBuckets; ///< Buckets in which the geometry was occluded.
 
         /// Get the bound from a set of geometry keys
-        static Box boundFromKeys(const GeometryKeys& keys)
+        static Box3f boundFromKeys(const GeometryKeys& keys)
         {
-            Box bound = keys[0].value->bound();
+            Box3f bound = keys[0].value->bound();
             for(int i = 1, iend = keys.size(); i < iend; ++i)
                 bound.extendBy(keys[i].value->bound());
             return bound;
@@ -179,7 +179,7 @@ class GeomHolder : public RefCounted
         ///
         /// This is initially in world space, but is transformed to combined
         /// sraster/camera z space before inserting into the split tree.
-        Box& bound() { return m_bound; }
+        Box3f& bound() { return m_bound; }
 
         /// Return the attribute state associated with the geometry.  Threadsafe.
         const Attributes& attrs() const { return *m_attrs; }
@@ -328,11 +328,11 @@ class GridHolder : public RefCounted
         GridPtr m_grid;             ///< Non-deforming grid
         GridKeys m_gridKeys;        ///< Grid keys for motion blur
         ConstAttributesPtr m_attrs; ///< Attribute state
-        Box m_bound;                ///< Raster bounding box including CoC expansion
-        Box m_tightBound;           ///< Geometric raster bounding box
+        Box3f m_bound;                ///< Raster bounding box including CoC expansion
+        Box3f m_tightBound;           ///< Geometric raster bounding box
         bool m_rasterized;          ///< True if the grid was rasterized
         volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
-        std::vector<Box> m_cachedBounds;  ///< Cached micropolygon bounds
+        std::vector<Box3f> m_cachedBounds;  ///< Cached micropolygon bounds
 
         /// Cache the grid bounds.
         ///
@@ -383,11 +383,11 @@ class GridHolder : public RefCounted
         const Grid& grid() const { return m_grid ? *m_grid : *m_gridKeys[0].value; }
         GridKeys& gridKeys() { return m_gridKeys; }
         const GridKeys& gridKeys() const { return m_gridKeys; }
-        const Box& bound() const { return m_bound; }
-        Box& bound() { return m_bound; }
+        const Box3f& bound() const { return m_bound; }
+        Box3f& bound() { return m_bound; }
         /// Get pure geometric bound, without expansion for depth of field.
-        const Box& tightBound() const { return m_tightBound; }
-        const std::vector<Box>& cachedBounds() const { return m_cachedBounds; }
+        const Box3f& tightBound() const { return m_tightBound; }
+        const std::vector<Box3f>& cachedBounds() const { return m_cachedBounds; }
 
         const Attributes& attrs() const { return *m_attrs; }
 
@@ -418,7 +418,7 @@ class TessellationContextImpl : public TessellationContext
                                 ResourceCounterStat<>& geomsInFlight,
                                 ResourceCounterStat<>& gridsInFlight);
 
-        void tessellate(const Mat4& splitTrans, const GeomHolderPtr& holder);
+        void tessellate(const M44f& splitTrans, const GeomHolderPtr& holder);
 
 
         // From TessellationContext:

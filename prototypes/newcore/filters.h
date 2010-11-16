@@ -31,7 +31,7 @@
 #define AQSIS_FILTERS_H_INCLUDED
 
 #include "refcount.h"
-#include "util.h"  // for Vec2
+#include "util.h"  // for V2f
 
 namespace Aqsis {
 
@@ -41,10 +41,10 @@ namespace Aqsis {
 class Filter : public RefCounted
 {
     private:
-        Vec2 m_width;
+        V2f m_width;
 
     public:
-        Filter(const Vec2& width) : m_width(width) {}
+        Filter(const V2f& width) : m_width(width) {}
 
         /// Evaluate the filter at position x,y
         virtual float operator()(float x, float y) const = 0;
@@ -61,7 +61,7 @@ class Filter : public RefCounted
         ///
         /// The filter support is assumed to be nonzero only on the box
         /// with corners -width()/2 and width()/2.
-        const Vec2& width() const { return m_width; }
+        const V2f& width() const { return m_width; }
 
         virtual ~Filter() {}
 };
@@ -70,10 +70,10 @@ class Filter : public RefCounted
 typedef boost::intrusive_ptr<Filter> FilterPtr;
 
 
-FilterPtr makeBoxFilter(const Vec2& width);
-FilterPtr makeDiscFilter(const Vec2& width);
-FilterPtr makeGaussianFilter(const Vec2& width);
-FilterPtr makeSincFilter(const Vec2& width);
+FilterPtr makeBoxFilter(const V2f& width);
+FilterPtr makeDiscFilter(const V2f& width);
+FilterPtr makeGaussianFilter(const V2f& width);
+FilterPtr makeSincFilter(const V2f& width);
 
 
 } // namespace Aqsis

@@ -143,9 +143,9 @@ class Patch : public Geometry
             }
         }
 
-        void getCorners(Vec3& a, Vec3& b, Vec3& c, Vec3& d) const
+        void getCorners(V3f& a, V3f& b, V3f& c, V3f& d) const
         {
-            ConstDataView<Vec3> P = m_vars->P();
+            ConstDataView<V3f> P = m_vars->P();
             a = bilerp(P[0], P[1], P[2], P[3], m_uMin, m_vMin);
             b = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMin);
             c = bilerp(P[0], P[1], P[2], P[3], m_uMin, m_vMax);
@@ -166,7 +166,7 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
-        virtual void tessellate(const Mat4& splitTrans, int forceSplit,
+        virtual void tessellate(const M44f& splitTrans, int forceSplit,
                                 TessellationContext& tessCtx) const
         {
             if(forceSplit)
@@ -177,14 +177,14 @@ class Patch : public Geometry
                 tessCtx.invokeTessellator(splitter);
                 return;
             }
-            Vec3 a,b,c,d;
+            V3f a,b,c,d;
             getCorners(a,b,c,d);
 
             // Transform points into "splitting coordinates"
-            Vec3 aSpl = a * splitTrans;
-            Vec3 bSpl = b * splitTrans;
-            Vec3 cSpl = c * splitTrans;
-            Vec3 dSpl = d * splitTrans;
+            V3f aSpl = a * splitTrans;
+            V3f bSpl = b * splitTrans;
+            V3f cSpl = c * splitTrans;
+            V3f dSpl = d * splitTrans;
 
             const Options& opts = tessCtx.options();
 
@@ -213,11 +213,11 @@ class Patch : public Geometry
             }
         }
 
-        virtual Box bound() const
+        virtual Box3f bound() const
         {
-            Vec3 a,b,c,d;
+            V3f a,b,c,d;
             getCorners(a,b,c,d);
-            Box bnd(a);
+            Box3f bnd(a);
             bnd.extendBy(b);
             bnd.extendBy(c);
             bnd.extendBy(d);

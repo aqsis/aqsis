@@ -71,11 +71,11 @@ ShaderPtr createShader(const char* name,
 class ShadingContext
 {
     public:
-        ShadingContext(const Mat4& camToWorld);
+        ShadingContext(const M44f& camToWorld);
 
         /// Transformation handling
-        Mat4 getTransform(const char* toSpace);
-        //Mat4 getTransform(const char* fromSpace, const char* toSpace);
+        M44f getTransform(const char* toSpace);
+        //M44f getTransform(const char* fromSpace, const char* toSpace);
 
         /// Get a uniform random number between 0 and 1
         float rand();
@@ -86,7 +86,7 @@ class ShadingContext
         RngType m_rand;
         float m_randScale;
 
-        Mat4 m_camToWorld;
+        M44f m_camToWorld;
 };
 
 

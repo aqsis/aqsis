@@ -63,7 +63,7 @@ struct is_same_nocv
 /// templated on the derived type, for example,
 ///
 /// \code
-///     class Vec3View : public ArrayView<Vec3View, float, Vec3&>
+///     class Vec3View : public ArrayView<Vec3View, float, V3f&>
 ///     {
 ///         //...
 ///     }

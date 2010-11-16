@@ -103,14 +103,14 @@ class OcclusionTree
         ///
         /// bound - object bounding box
         /// zmin - minimum depth of the object
-        bool isOccluded(Imath::Box2i bound, float zmin)
+        bool isOccluded(Box2i bound, float zmin)
         {
             // clamp geometry bound to extent of sample region
             bound.min = V2i(clamp(bound.min.x, 0, m_nleaves.x),
                             clamp(bound.min.y, 0, m_nleaves.y));
             bound.max = V2i(clamp(bound.max.x, 0, m_nleaves.x),
                             clamp(bound.max.y, 0, m_nleaves.y));
-            Imath::Box2i rootBound(V2i(0), V2i(m_nleavesFull));
+            Box2i rootBound(V2i(0), V2i(m_nleavesFull));
             return isOccluded(bound, zmin, rootBound, 0, 0);
         }
 
@@ -180,8 +180,8 @@ class OcclusionTree
         }
 
         /// Determine whether a given node is occluded.
-        bool isOccluded(const Imath::Box2i& geomBound, float geomZ,
-                        const Imath::Box2i& nodeBound, int nodeIndex,
+        bool isOccluded(const Box2i& geomBound, float geomZ,
+                        const Box2i& nodeBound, int nodeIndex,
                         int nodeDepth)
         {
             // If geometry bound is outside the current node bound, just
@@ -204,12 +204,12 @@ class OcclusionTree
 
             // Bounds for the four child nodes.
             // For child node ordering, see treearraystorage.h
-            Imath::Box2i bound1(nodeBound.min, V2i(midx,midy));
-            Imath::Box2i bound2(V2i(midx, nodeBound.min.y),
+            Box2i bound1(nodeBound.min, V2i(midx,midy));
+            Box2i bound2(V2i(midx, nodeBound.min.y),
                                 V2i(nodeBound.max.x, midy));
-            Imath::Box2i bound3(V2i(nodeBound.min.x, midy),
+            Box2i bound3(V2i(nodeBound.min.x, midy),
                                 V2i(midx,nodeBound.max.y));
-            Imath::Box2i bound4(V2i(midx,midy), nodeBound.max);
+            Box2i bound4(V2i(midx,midy), nodeBound.max);
 
             return isOccluded(geomBound, geomZ, bound1,
                               4*nodeIndex + 1, nodeDepth + 1) &&

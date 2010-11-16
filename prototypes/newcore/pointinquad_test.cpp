@@ -37,10 +37,10 @@ using namespace Aqsis;
 int main()
 {
     // CCW
-    Vec3 a = Vec3(5,0,0);
-    Vec3 b = Vec3(0,5,0);
-    Vec3 c = Vec3(-5,0,0);
-    Vec3 d = Vec3(0,-5,0);
+    V3f a = V3f(5,0,0);
+    V3f b = V3f(0,5,0);
+    V3f c = V3f(-5,0,0);
+    V3f d = V3f(0,-5,0);
 //    std::swap(c,d);  // make bow-tie.
 //    std::swap(b, d);  // make clockwise
     c *= -0.5;// make arrow
@@ -70,7 +70,7 @@ int main()
             for(int i = 0; i < nx; ++i)
             {
                 float x = minx + dx*i;
-                Sample samp(Vec2(x, y));
+                Sample samp(V2f(x, y));
                 counts[j*nx + i] += inQuad(samp);
             }
         }

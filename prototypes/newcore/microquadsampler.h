@@ -60,7 +60,7 @@ class MicroQuadSampler
         // Iterator for the current micropoly
         QuadGrid::Iterator m_curr;
         // Cached micropoly bounds
-        const Box* m_cachedBounds;
+        const Box3f* m_cachedBounds;
 
         // Grid indices for vertices
         MicroQuadInd m_ind;
@@ -69,12 +69,12 @@ class MicroQuadSampler
         // Grid storage.
         const GridStorage& m_storage;
         // Storage for the micropoly data
-        ConstDataView<Vec3> m_P;
+        ConstDataView<V3f> m_P;
 
         // Shading interpolation
         InvBilin m_invBilin;
         // uv coordinates of current interpolation point
-        Vec2 m_uv;
+        V2f m_uv;
         // Whether to use smooth shading or not.
         bool m_smoothShading;
 
@@ -129,7 +129,7 @@ class MicroQuadSampler
         }
 
         /// Get bound for current micropoly
-        const Box& bound() const
+        const Box3f& bound() const
         {
             return *m_cachedBounds;
         }
@@ -151,7 +151,7 @@ class MicroQuadSampler
                            (m_curr.u() + m_curr.v()) % 2);
         }
         /// Return true if the sample is contained in the polygon
-        inline bool contains(Vec2 p)
+        inline bool contains(V2f p)
         {
             return m_hitTest(p);
         }
@@ -167,7 +167,7 @@ class MicroQuadSampler
             }
         }
         /// Specify interpolation point
-        inline void interpolateAt(Vec2 p)
+        inline void interpolateAt(V2f p)
         {
             if(m_smoothShading)
                 m_uv = m_invBilin(p);

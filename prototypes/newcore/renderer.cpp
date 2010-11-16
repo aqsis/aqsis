@@ -102,7 +102,7 @@ class SampleTile
         void ensureDofMbSetup(const DofMbTileSet& tileSet);
 
         /// Get range of DoF/MB tiles to iterate over for the given bound.
-        void dofMbTileRange(const Vec2& boundMin, const Vec2& boundMax,
+        void dofMbTileRange(const V2f& boundMin, const V2f& boundMax,
                             int& startx, int& endx, int& starty, int& endy)
         {
             V2i bndMin = ifloor((boundMin - m_tileBoundOffset)*m_tileBoundMult);
@@ -146,7 +146,7 @@ class SampleTile
         V2i sampleOffset() const { return m_fragmentTile->sampleOffset(); }
 
         /// Determine whether the bound is entirely occluded by the samples.
-        bool occludes(const Box& bound, Timer& occlTime)
+        bool occludes(const Box3f& bound, Timer& occlTime)
         {
             if(!m_samplesSetup)
                 return false;
@@ -198,10 +198,10 @@ void SampleTile::ensureSamplesSetup()
 {
     if(!m_samplesSetup)
     {
-        Vec2 offset = Vec2(m_fragmentTile->sampleOffset()) + Vec2(0.5f);
+        V2f offset = V2f(m_fragmentTile->sampleOffset()) + V2f(0.5f);
         for(int j = 0; j < m_size.y; ++j)
         for(int i = 0; i < m_size.x; ++i)
-            m_samples[m_size.x*j + i] = Sample(Vec2(i,j) + offset);
+            m_samples[m_size.x*j + i] = Sample(V2f(i,j) + offset);
         m_samplesSetup = true;
     }
 }
@@ -214,7 +214,7 @@ void SampleTile::ensureDofMbSetup(const DofMbTileSet& tileSet)
         // sampling method actually survives.
         V2i dofMbSize = tileSet.tileSize();
         m_sampsPerTile = prod(dofMbSize);
-        m_tileBoundMult = Vec2(1.0)/dofMbSize;
+        m_tileBoundMult = V2f(1.0)/dofMbSize;
         V2i sampStart = sampleOffset();
         V2i sampEnd = sampStart + m_size;
         V2i tileStart = sampStart/dofMbSize;
@@ -265,18 +265,18 @@ class CircleOfConfusion
 {
     private:
         float m_focalDistance;
-        Vec2  m_cocMult;
+        V2f  m_cocMult;
         float m_invFocalDist;
 
     public:
         CircleOfConfusion(float fstop, float focalLength, float focalDistance,
-                          const Mat4& camToRaster)
+                          const M44f& camToRaster)
         {
             m_focalDistance = focalDistance;
             float mult = 0.5*focalLength/fstop * focalDistance*focalLength
                                                / (focalDistance - focalLength);
             // Get multiplier into raster units.
-            m_cocMult = mult*Vec2(fabs(camToRaster[0][0]), fabs(camToRaster[1][1]));
+            m_cocMult = mult*V2f(fabs(camToRaster[0][0]), fabs(camToRaster[1][1]));
             m_invFocalDist = 1/focalDistance;
         }
 
@@ -285,20 +285,20 @@ class CircleOfConfusion
         /// P is updated to position it would have if viewed with a pinhole
         /// camera at the position lensPos.
         ///
-        void lensShift(Vec3& P, const Vec2& lensPos) const
+        void lensShift(V3f& P, const V2f& lensPos) const
         {
-            Vec2 v = lensPos*m_cocMult*std::fabs(1/P.z - m_invFocalDist);
+            V2f v = lensPos*m_cocMult*std::fabs(1/P.z - m_invFocalDist);
             P.x -= v.x;
             P.y -= v.y;
         }
 
         /// Compute the minimum lensShift inside the interval [z1,z2]
-        Vec2 minShiftForBound(float z1, float z2) const
+        V2f minShiftForBound(float z1, float z2) const
         {
             // First check whether the bound spans the focal plane.
             if((z1 <= m_focalDistance && z2 >= m_focalDistance) ||
                (z1 >= m_focalDistance && z2 <= m_focalDistance))
-                return Vec2(0);
+                return V2f(0);
             // Otherwise, the minimum focal blur is achieved at one of the
             // z-extents of the bound.
             return m_cocMult*std::min(std::fabs(1/z1 - m_invFocalDist),
@@ -306,7 +306,7 @@ class CircleOfConfusion
         }
 
         /// Compute the maximum lensShift inside the interval [z1,z2]
-        Vec2 maxShiftForBound(float z1, float z2) const
+        V2f maxShiftForBound(float z1, float z2) const
         {
             return m_cocMult*std::max(std::fabs(1/z1 - m_invFocalDist),
                                       std::fabs(1/z2 - m_invFocalDist));
@@ -480,13 +480,13 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
         //      focusFactor = 1, regardless of the amount of focal
         //      blur.
         //
-        Vec2 cocScale = coc->minShiftForBound(holder->bound().min.z,
+        V2f cocScale = coc->minShiftForBound(holder->bound().min.z,
                                               holder->bound().max.z);
         // The CoC shift is in the sraster coordinate system, so divide by
         // superSamp to get it into pixel-based raster coords.  pixel-based
         // raster is the relevant coordinates which determine the size of
         // details which will be visible after filtering.
-        cocScale /= Vec2(m_opts->superSamp);
+        cocScale /= V2f(m_opts->superSamp);
         float minCoC = std::min(cocScale.x, cocScale.y);
         const float lengthRatio = 0.16;
         polyLength *= std::max(1.0f, lengthRatio*attrs.focusFactor*minCoC);
@@ -546,11 +546,11 @@ void Renderer::sanitizeOptions(Options& opts)
 bool Renderer::rasterCull(GeomHolder& holder)
 {
     // Get bound in camera space.
-    Box& bound = holder.bound();
-    // Expand bound for displacement (TODO: and DoF)
+    Box3f& bound = holder.bound();
+    // Expand bound for displacement
     // TODO: Support arbitrary coordinate systems for the displacement bound
-    bound.min -= Vec3(holder.attrs().displacementBound);
-    bound.max += Vec3(holder.attrs().displacementBound);
+    bound.min -= V3f(holder.attrs().displacementBound);
+    bound.max += V3f(holder.attrs().displacementBound);
     // Cull if outside near/far clipping range
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return true;
@@ -618,7 +618,7 @@ bool Renderer::rasterCull(GeomHolder& holder)
 
 bool Renderer::rasterCull(GridHolder& gridh)
 {
-    Box& bound = gridh.bound();
+    Box3f& bound = gridh.bound();
     // Cull if outside clipping planes
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return true;
@@ -644,8 +644,8 @@ bool Renderer::rasterCull(GridHolder& gridh)
     return false;
 }
 
-Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
-                   const Mat4& camToWorld, const DisplayList& displays,
+Renderer::Renderer(const OptionsPtr& opts, const M44f& camToScreen,
+                   const M44f& camToWorld, const DisplayList& displays,
                    ErrorHandler& errorHandler)
     : m_opts(opts),
     m_coc(),
@@ -688,19 +688,19 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
                  ceildiv(m_opts->resolution.y, m_opts->bucketSize.y) + 1);
 
     // Set up filtering object
-    Imath::Box2i outTileRange(V2i(0), nbuckets - V2i(1));
+    Box2i outTileRange(V2i(0), nbuckets - V2i(1));
     m_filterProcessor.reset(
             new FilterProcessor(*m_displayManager, outTileRange,
                                 *m_pixelFilter, m_opts->superSamp) );
 
     // Area to sample, in sraster coords.
-    m_samplingArea = Imath::Box2f(Vec2(-m_pixelFilter->offset()),
-                                  Vec2(m_opts->resolution*m_opts->superSamp +
+    m_samplingArea = Box2f(V2f(-m_pixelFilter->offset()),
+                                  V2f(m_opts->resolution*m_opts->superSamp +
                                        m_pixelFilter->offset()));
 
     V2i sampTileSize = m_opts->superSamp*m_opts->bucketSize;
-    Vec2 sampTileOffset(sampTileSize/2);
-    Imath::Box2f bucketArea(-sampTileOffset, Vec2(nbuckets * sampTileSize
+    V2f sampTileOffset(sampTileSize/2);
+    Box2f bucketArea(-sampTileOffset, V2f(nbuckets * sampTileSize
                                                   - sampTileSize/2));
     // Set up storage for split surfaces
     m_surfaces.reset(new SplitStore(nbuckets.x, nbuckets.y,
@@ -717,9 +717,9 @@ Renderer::Renderer(const OptionsPtr& opts, const Mat4& camToScreen,
     // The origin of the sraster coordinate system is the top left of the
     // filtering region for the top left pixel.
     m_camToSRaster = camToScreen
-        * Mat4().setScale(Vec3(0.5,-0.5,0))
-        * Mat4().setTranslation(Vec3(0.5,0.5,0))
-        * Mat4().setScale(Vec3(m_opts->resolution.x*m_opts->superSamp.x,
+        * M44f().setScale(V3f(0.5,-0.5,0))
+        * M44f().setTranslation(V3f(0.5,0.5,0))
+        * M44f().setScale(V3f(m_opts->resolution.x*m_opts->superSamp.x,
                                m_opts->resolution.y*m_opts->superSamp.y, 1));
 
     if(m_opts->fstop != FLT_MAX)
@@ -815,8 +815,8 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
     RenderStats stats(frameStats.verbosity);
     stats.averagePolyArea.setScale(1.0/prod(m_opts->superSamp));
     // Coordinate system for tessellation resolution calculation.
-    Mat4 tessCoords = m_camToSRaster
-        * Mat4().setScale(Vec3(1.0/m_opts->superSamp.x,
+    M44f tessCoords = m_camToSRaster
+        * M44f().setScale(V3f(1.0/m_opts->superSamp.x,
                                1.0/m_opts->superSamp.y, 1));
     // Make sure that the z-component is ignored when tessellating based on the
     // 2D projected object size:
@@ -867,7 +867,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
                     // If not occluded and not split yet, do the split/dice:
                     TIME_SCOPE(stats.splitDiceTime);
                     // Scale dicing coordinates to account for shading rate.
-                    Mat4 scaledTessCoords = tessCoords * Mat4().setScale(
+                    M44f scaledTessCoords = tessCoords * M44f().setScale(
                             1/micropolyBlurWidth(geomh, m_coc.get()));
                     // Note that invoking the tessellator causes surfaces and
                     // grids to be push()ed back to the renderer behind the
@@ -983,8 +983,8 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     bool motionBlur = holder.isDeforming();
 
     V2i tileSize = tile.size();
-    Vec2 bucketMin = Vec2(tile.sampleOffset());
-    Vec2 bucketMax = Vec2(tile.sampleOffset() + tileSize);
+    V2f bucketMin = V2f(tile.sampleOffset());
+    V2f bucketMax = V2f(tile.sampleOffset() + tileSize);
 
     // Cache the variables which need to be interpolated into
     // fragment outputs.
@@ -1046,11 +1046,11 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     // For each possible sample time
     for(int itime = 0; itime < nTimeLens; ++itime)
     {
-        Box gbound = holder.tightBound();
+        Box3f gbound = holder.tightBound();
         // FIXME: Motion interpolation for grid bound.
         V2f maxLensShift(0);
         V2f minLensShift(0);
-        Vec2 lensPos = timeLens[itime].lens;
+        V2f lensPos = timeLens[itime].lens;
         if(m_coc)
         {
             // Max distance a micropoly inside the bound can move.
@@ -1081,7 +1081,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             // current time/lens position; if not we cull it.  The quick bound
             // may be slightly larger than the exact bound, the important thing
             // here is speed.
-            Box quickBnd = holder.cachedBounds()[(nu-1)*v + u];
+            Box3f quickBnd = holder.cachedBounds()[(nu-1)*v + u];
             if(m_coc)
             {
                 quickBnd.min.x -= minLensShift.x;
@@ -1097,7 +1097,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                              nu*(v+1) + u+1,  nu*(v+1) + u);
             // Compute vertices of micropolygon
-            Vec3 Pa, Pb, Pc, Pd;
+            V3f Pa, Pb, Pc, Pd;
             if(motionBlur)
             {
                 // Interpolate micropoly to the current time
@@ -1106,8 +1106,8 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                 const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
                 const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
                 float interp = interpWeights[itime];
-                ConstDataView<Vec3> P1 = grid1.storage().P();
-                ConstDataView<Vec3> P2 = grid2.storage().P();
+                ConstDataView<V3f> P1 = grid1.storage().P();
+                ConstDataView<V3f> P2 = grid2.storage().P();
                 Pa = lerp(P1[ind.a], P2[ind.a], interp);
                 Pb = lerp(P1[ind.b], P2[ind.b], interp);
                 Pc = lerp(P1[ind.c], P2[ind.c], interp);
@@ -1115,7 +1115,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             }
             else
             {
-                ConstDataView<Vec3> P = mainStor.P();
+                ConstDataView<V3f> P = mainStor.P();
                 Pa = P[ind.a];
                 Pb = P[ind.b];
                 Pc = P[ind.c];
@@ -1134,7 +1134,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             invBilin.init(vec2_cast(Pa), vec2_cast(Pb),
                           vec2_cast(Pd), vec2_cast(Pc));
             // Compute tight bound
-            Box bound(Pa);
+            Box3f bound(Pa);
             bound.extendBy(Pb);
             bound.extendBy(Pc);
             bound.extendBy(Pd);
@@ -1162,7 +1162,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                 if(!hitTest(samp.p))
                     continue;
                 ++stats.samplesHit;
-                Vec2 uv = invBilin(samp.p);
+                V2f uv = invBilin(samp.p);
                 float z = bilerp(Pa.z, Pb.z, Pd.z, Pc.z, uv);
                 if(samp.z < z)
                     continue; // Ignore if hit is hidden
@@ -1214,16 +1214,15 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     // TODO: Rename SampleTile to BucketSamples ?
     V2i tileSize = tile.size();
 
-    Vec2 bucketMin = Vec2(tile.sampleOffset());
-    Vec2 bucketMax = Vec2(tile.sampleOffset() + tileSize);
+    V2f bucketMin = V2f(tile.sampleOffset());
+    V2f bucketMax = V2f(tile.sampleOffset() + tileSize);
 
     // Construct a sampler for the polygons in the grid
     PolySamplerT poly(grid, holder, m_outVars);
     // iterate over all micropolys in the grid & render each one.
     for(;poly.valid(); poly.next())
     {
-        // TODO: Make use of the cached micropolygon bound!
-        const Box& bound = poly.bound();
+        const Box3f& bound = poly.bound();
         // Go to next micropoly if current is entirely outside the bucket.
         if(bound.max.x <  bucketMin.x || bound.max.y <  bucketMin.y ||
            bound.min.x >= bucketMax.x || bound.min.y >= bucketMax.y)

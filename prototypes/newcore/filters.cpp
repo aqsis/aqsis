@@ -39,7 +39,7 @@ namespace Aqsis {
 class BoxFilter : public Filter
 {
     public:
-        BoxFilter(const Vec2& width) : Filter(width) {}
+        BoxFilter(const V2f& width) : Filter(width) {}
 
         virtual float operator()(float x, float y) const
         {
@@ -56,7 +56,7 @@ class BoxFilter : public Filter
 class DiscFilter : public Filter
 {
     public:
-        DiscFilter(const Vec2& width) : Filter(width) {}
+        DiscFilter(const V2f& width) : Filter(width) {}
 
         virtual float operator()(float x, float y) const
         {
@@ -75,7 +75,7 @@ class DiscFilter : public Filter
 class GaussianFilter : public Filter
 {
     public:
-        GaussianFilter(const Vec2& width) : Filter(width) {}
+        GaussianFilter(const V2f& width) : Filter(width) {}
 
         virtual float operator()(float x, float y) const
         {
@@ -102,7 +102,7 @@ class SincFilter : public Filter
         }
 
     public:
-        SincFilter(const Vec2& width) : Filter(width) {}
+        SincFilter(const V2f& width) : Filter(width) {}
 
         virtual float operator()(float x, float y) const
         {
@@ -113,22 +113,22 @@ class SincFilter : public Filter
 };
 
 
-FilterPtr makeBoxFilter(const Vec2& width)
+FilterPtr makeBoxFilter(const V2f& width)
 {
     assert(width.x >= 1 && width.y >= 1);
     return FilterPtr(new BoxFilter(width));
 }
-FilterPtr makeDiscFilter(const Vec2& width)
+FilterPtr makeDiscFilter(const V2f& width)
 {
     assert(width.x >= 1 && width.y >= 1);
     return FilterPtr(new DiscFilter(width));
 }
-FilterPtr makeGaussianFilter(const Vec2& width)
+FilterPtr makeGaussianFilter(const V2f& width)
 {
     assert(width.x >= 1 && width.y >= 1);
     return FilterPtr(new GaussianFilter(width));
 }
-FilterPtr makeSincFilter(const Vec2& width)
+FilterPtr makeSincFilter(const V2f& width)
 {
     assert(width.x >= 1 && width.y >= 1);
     return FilterPtr(new SincFilter(width));

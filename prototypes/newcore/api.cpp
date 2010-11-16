@@ -305,9 +305,9 @@ class CameraInfo
         }
 
         /// Get the camera->screen matrix specified by this camera info.
-        Mat4 camToScreenMatrix(const Options& opts) const
+        M44f camToScreenMatrix(const Options& opts) const
         {
-            Mat4 proj;
+            M44f proj;
             switch(m_type)
             {
                 case Orthographic:
@@ -340,7 +340,7 @@ class TransformStack
         TransformStack()
             : m_transforms()
         {
-            m_transforms.push(Mat4());
+            m_transforms.push(M44f());
         }
 
         void push()
@@ -351,22 +351,22 @@ class TransformStack
         {
             m_transforms.pop();
         }
-        const Mat4& top() const
+        const M44f& top() const
         {
             return m_transforms.top();
         }
 
-        void concat(const Mat4& trans)
+        void concat(const M44f& trans)
         {
             m_transforms.top() = trans * m_transforms.top();
         }
-        void set(const Mat4& trans)
+        void set(const M44f& trans)
         {
             m_transforms.top() = trans;
         }
 
     private:
-        std::stack<Mat4> m_transforms;
+        std::stack<M44f> m_transforms;
 };
 
 /// Class managing the attributes stack.
@@ -744,7 +744,7 @@ RtVoid RenderApi::FrameEnd()
 
 RtVoid RenderApi::WorldBegin()
 {
-    Mat4 camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
+    M44f camToScreen = m_opts->camInfo.camToScreenMatrix(*m_opts->opts);
     m_renderer.reset(new Aqsis::Renderer(m_opts->opts, camToScreen,
                                          m_transStack.top().inverse(),
                                          m_opts->displays, ehandler()));
@@ -874,20 +874,20 @@ RtVoid RenderApi::PixelVariance(RtFloat variance)
 
 RtVoid RenderApi::PixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-    m_opts->opts->superSamp = Imath::V2i(xsamples, ysamples);
+    m_opts->opts->superSamp = V2i(xsamples, ysamples);
 }
 
 RtVoid RenderApi::PixelFilter(RtFilterFunc function, RtFloat xwidth,
                               RtFloat ywidth)
 {
     if((RtFilterFunc)1 == function)
-        m_opts->opts->pixelFilter = makeBoxFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeBoxFilter(V2f(xwidth,ywidth));
     else if((RtFilterFunc)2 == function)
-        m_opts->opts->pixelFilter = makeGaussianFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeGaussianFilter(V2f(xwidth,ywidth));
     else if((RtFilterFunc)3 == function)
-        m_opts->opts->pixelFilter = makeSincFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeSincFilter(V2f(xwidth,ywidth));
     else if((RtFilterFunc)4 == function)
-        m_opts->opts->pixelFilter = makeDiscFilter(Vec2(xwidth,ywidth));
+        m_opts->opts->pixelFilter = makeDiscFilter(V2f(xwidth,ywidth));
     else
         AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
             << "Unimplemented pixel filter function";
@@ -993,7 +993,7 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
     {
         if(IntArray bs = params.findIntData(
                         Ri::TypeSpec(Ri::TypeSpec::Int, 2), "bucketsize"))
-            m_opts->opts->bucketSize = Vec2(bs[0], bs[1]);
+            m_opts->opts->bucketSize = V2f(bs[0], bs[1]);
         if(IntArray gs = params.findIntData(Ri::TypeSpec::Int, "gridsize"))
             m_opts->opts->gridSize = ifloor(sqrt((float)gs[0]));
         if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
@@ -1223,17 +1223,17 @@ RtVoid RenderApi::Sides(RtInt nsides)
 
 RtVoid RenderApi::Identity()
 {
-    m_transStack.set(Mat4());
+    m_transStack.set(M44f());
 }
 
 RtVoid RenderApi::Transform(RtConstMatrix transform)
 {
-    m_transStack.set(Mat4(transform));
+    m_transStack.set(M44f(transform));
 }
 
 RtVoid RenderApi::ConcatTransform(RtConstMatrix transform)
 {
-    m_transStack.concat(Mat4(transform));
+    m_transStack.concat(M44f(transform));
 }
 
 RtVoid RenderApi::Perspective(RtFloat fov)
@@ -1241,7 +1241,7 @@ RtVoid RenderApi::Perspective(RtFloat fov)
     float s = std::tan(deg2rad(fov/2));
     // Old core notes: "This matches PRMan 3.9 in testing, but not BMRT 2.6's
     // rgl and rendrib."
-    Mat4 p(1, 0,  0, 0,
+    M44f p(1, 0,  0, 0,
            0, 1,  0, 0,
            0, 0,  s, s,
            0, 0, -s, 0);
@@ -1250,17 +1250,17 @@ RtVoid RenderApi::Perspective(RtFloat fov)
 
 RtVoid RenderApi::Translate(RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_transStack.concat(Mat4().setTranslation(Vec3(dx,dy,dz)));
+    m_transStack.concat(M44f().setTranslation(V3f(dx,dy,dz)));
 }
 
 RtVoid RenderApi::Rotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 {
-    m_transStack.concat(Mat4().setAxisAngle(Vec3(dx,dy,dz), deg2rad(angle)));
+    m_transStack.concat(M44f().setAxisAngle(V3f(dx,dy,dz), deg2rad(angle)));
 }
 
 RtVoid RenderApi::Scale(RtFloat sx, RtFloat sy, RtFloat sz)
 {
-    m_transStack.concat(Mat4().setScale(Vec3(sx,sy,sz)));
+    m_transStack.concat(M44f().setScale(V3f(sx,sy,sz)));
 }
 
 RtVoid RenderApi::Skew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
@@ -1349,9 +1349,9 @@ RtVoid RenderApi::GeneralPolygon(const IntArray& nverts,
 RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
                                  const ParamList& pList)
 {
-    ConstDataView<Vec3> P(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P").begin());
-    ConstDataView<Vec3> N(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Normal), "N").begin());
-    ConstDataView<Col3> Cs(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Color), "Cs").begin());
+    ConstDataView<V3f> P(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P").begin());
+    ConstDataView<V3f> N(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Normal), "N").begin());
+    ConstDataView<C3f> Cs(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Color), "Cs").begin());
     float P_stor[12];
     float N_stor[12];
     float Cs_stor[12];
@@ -1368,27 +1368,27 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
             dest[0] = src[verts[4*face+0]]; dest[1] = src[verts[4*face+1]]; \
             dest[2] = src[verts[4*face+3]]; dest[3] = src[verts[4*face+2]];
         {
-            DataView<Vec3> view(P_stor);
+            DataView<V3f> view(P_stor);
             COPYVAR(view, P);
             builder.add(Primvar::P, P_stor, 12);
         }
         if(N)
         {
-            DataView<Vec3> view(N_stor);
+            DataView<V3f> view(N_stor);
             COPYVAR(view, N);
             builder.add(Primvar::N, N_stor, 12);
         }
         if(Cs)
         {
-            DataView<Col3> view(Cs_stor);
+            DataView<C3f> view(Cs_stor);
             COPYVAR(view, Cs);
             builder.add(Primvar::Cs, Cs_stor, 12);
         }
         else
         {
             float Cs_in[] = {1, 1, 1};
-            DataView<Col3> Cs(Cs_in, 0);
-            DataView<Col3> view(Cs_stor);
+            DataView<C3f> Cs(Cs_in, 0);
+            DataView<C3f> view(Cs_stor);
             COPYVAR(view, Cs);
             builder.add(Primvar::Cs, Cs_stor, 12);
         }

@@ -95,7 +95,7 @@ void CachedFilter::filterSize(float radius, int sampsPerPix,
 void CachedFilter::cacheFilterSeparable(std::vector<float>& cache,
                                          const Filter& filterFunc,
                                          const V2i& superSamp,
-                                         Imath::V2i& filtSize)
+                                         V2i& filtSize)
 {
     cache.resize(filtSize.x + filtSize.y);
     // Compute filter coefficients along x-direction.
@@ -125,7 +125,7 @@ void CachedFilter::cacheFilterSeparable(std::vector<float>& cache,
 void CachedFilter::cacheFilterNonSeparable(std::vector<float>& cache,
                                            const Filter& filterFunc,
                                            const V2i& superSamp,
-                                           Imath::V2i& filtSize)
+                                           V2i& filtSize)
 {
     cache.resize(filtSize.x*filtSize.y);
     float* f = cbegin(cache);
@@ -164,7 +164,7 @@ void CachedFilter::normalizeFilter(float* weights, int nWeights)
 // FilterProcessor implementation
 
 FilterProcessor::FilterProcessor(DisplayManager& displayManager,
-                                 const Imath::Box2i& outTileRange,
+                                 const Box2i& outTileRange,
                                  const CachedFilter& cachedFilter,
                                  const V2i& filterStride)
     : m_displayManager(displayManager),

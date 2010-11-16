@@ -102,17 +102,17 @@ BOOST_AUTO_TEST_CASE(FvecView_copy_test)
 BOOST_AUTO_TEST_CASE(DataView_copy_test)
 {
     const int nvals = 4;
-    const int v3Size = DataView<Vec3>::elSize();
+    const int v3Size = DataView<V3f>::elSize();
     std::vector<float> aData(v3Size*nvals);
     std::vector<float> bData(v3Size*nvals);
 
-    DataView<Vec3> a(cbegin(aData));
-    DataView<Vec3> b(cbegin(bData));
+    DataView<V3f> a(cbegin(aData));
+    DataView<V3f> b(cbegin(bData));
 
     // initialize b
     for(int i = 0; i < nvals; ++i)
-        b[i] = Vec3(1,2,3);
-    b[nvals-1] = Vec3(3,2,1);
+        b[i] = V3f(1,2,3);
+    b[nvals-1] = V3f(3,2,1);
 
     // Copy b into a.
     copy(a, b, nvals);
@@ -126,12 +126,12 @@ BOOST_AUTO_TEST_CASE(DataView_copy_test)
     // Create c & initialize to something else
     const int skip = 2;
     std::vector<float> cData(v3Size*nvals/skip);
-	DataView<Vec3> c(cbegin(cData));
+	DataView<V3f> c(cbegin(cData));
     for(int i = 0; i < nvals/skip; ++i)
-        c[i] = Vec3(-1,-1,-1);
+        c[i] = V3f(-1,-1,-1);
 
     // Now make a view onto a that only includes every second element
-    DataView<Vec3> a2(cbegin(aData), skip*v3Size);
+    DataView<V3f> a2(cbegin(aData), skip*v3Size);
     // Copy c into every second element of a.
     copy(a2, c, nvals/skip);
 
@@ -150,16 +150,16 @@ BOOST_AUTO_TEST_CASE(DataView_diff_test)
         2,2,2, 3,3,3, 4,4,4, 0,0,0,  //  |  "v-direction"
         0,0,0, 2,2,2, 0,0,0, 0,0,0   //  v
     };
-    ConstDataView<Vec3> P(data);
+    ConstDataView<V3f> P(data);
 
     // Derivatives in u-direction
-    BOOST_CHECK_EQUAL(diff(P+1, 1, 4), Vec3(1,1,1));
-    BOOST_CHECK_EQUAL(diff(P+1, 1, 2), Vec3(1,1,1));
-    BOOST_CHECK_EQUAL(diff(P, 0, 2), Vec3(1,1,1));
+    BOOST_CHECK_EQUAL(diff(P+1, 1, 4), V3f(1,1,1));
+    BOOST_CHECK_EQUAL(diff(P+1, 1, 2), V3f(1,1,1));
+    BOOST_CHECK_EQUAL(diff(P, 0, 2), V3f(1,1,1));
 
     // Derivatives in v-direction using a slice
-    ConstDataView<Vec3> Pv = slice(P+1, 4);
-    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 3), Vec3(0,0,0));
-    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 2), Vec3(1,1,1));
-    BOOST_CHECK_EQUAL(diff(Pv, 0, 2), Vec3(1,1,1));
+    ConstDataView<V3f> Pv = slice(P+1, 4);
+    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 3), V3f(0,0,0));
+    BOOST_CHECK_EQUAL(diff(Pv+1, 1, 2), V3f(1,1,1));
+    BOOST_CHECK_EQUAL(diff(Pv, 0, 2), V3f(1,1,1));
 }

@@ -98,7 +98,7 @@ class Geometry : public RefCounted
         /// geometry - there's no need to cache the results internally or
         /// anything.
         ///
-        virtual Box bound() const = 0;
+        virtual Box3f bound() const = 0;
 
         /// Tessellation driver function; the "split/dice decision"
         ///
@@ -136,7 +136,7 @@ class Geometry : public RefCounted
         ///   options and attributes, etc.  tessellate should generate output
         ///   by calling tessCtx.invokeTessellator().
         ///
-        virtual void tessellate(const Mat4& tessCoords, int forceSplit,
+        virtual void tessellate(const M44f& tessCoords, int forceSplit,
                                 TessellationContext& tessCtx) const = 0;
 
         virtual ~Geometry() {}

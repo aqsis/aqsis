@@ -193,11 +193,11 @@ class CachedFilter
         static void cacheFilterSeparable(std::vector<float>& cache,
                                          const Filter& filterFunc,
                                          const V2i& superSamp,
-                                         Imath::V2i& filtSize);
+                                         V2i& filtSize);
         static void cacheFilterNonSeparable(std::vector<float>& cache,
                                             const Filter& filterFunc,
                                             const V2i& superSamp,
-                                            Imath::V2i& filtSize);
+                                            V2i& filtSize);
         static void normalizeFilter(float* weights, int nWeights);
 
         V2i m_offset; ///< Sample offset for top left of filter
@@ -255,7 +255,7 @@ class FilterProcessor
         /// cachedFilter - cached filter coefficients
         /// filterStride - number of samples between pixels
         FilterProcessor(DisplayManager& displayManager,
-                        const Imath::Box2i& outTileRange,
+                        const Box2i& outTileRange,
                         const CachedFilter& cachedFilter,
                         const V2i& filterStride);
 
@@ -295,7 +295,7 @@ class FilterProcessor
         DisplayManager& m_displayManager; ///< Filtered tiles go here.
         FilterBlockMap m_waitingTiles; ///< Storage for waiting sampled tiles
         Mutex m_waitingTilesMutex;     ///< Protection for m_waitingTiles
-        Imath::Box2i m_outTileRange;   ///< Generate output tiles in here
+        Box2i m_outTileRange;   ///< Generate output tiles in here
 
         /// Output tile working space
         ThreadSpecificPtr<std::vector<float> >::type m_outTileWorkspace;

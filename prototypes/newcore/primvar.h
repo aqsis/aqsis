@@ -193,25 +193,25 @@ class PrimvarStorage : public RefCounted
         ConstFvecView get(int i) const { return m_views[i]; }
 
         /// Get a view of the vertex position data
-        DataView<Vec3> P()
+        DataView<V3f> P()
         {
             int Pidx = m_vars.find(StdIndices::P);
             assert(Pidx >= 0);
-            return DataView<Vec3>(m_views[Pidx]);
+            return DataView<V3f>(m_views[Pidx]);
         }
         /// Get a const view of the vertex position data
-        ConstDataView<Vec3> P() const
+        ConstDataView<V3f> P() const
         {
             int Pidx = m_vars.find(StdIndices::P);
             assert(Pidx >= 0);
-            return ConstDataView<Vec3>(m_views[Pidx]);
+            return ConstDataView<V3f>(m_views[Pidx]);
         }
 
         /// Transform primitive variables via the matrix trans.
-        void transform(const Mat4& trans)
+        void transform(const M44f& trans)
         {
-            Mat3 vecTrans = vectorTransform(trans);
-            Mat3 norTrans = normalTransform(trans);
+            M33f vecTrans = vectorTransform(trans);
+            M33f norTrans = normalTransform(trans);
             // Iterate over all primvars & transform as appropriate.
             for(int ivar = 0, nvars = m_vars.size(); ivar < nvars; ++ivar)
             {
@@ -227,7 +227,7 @@ class PrimvarStorage : public RefCounted
                         break;
                     case PrimvarSpec::Point:
                         {
-                            DataView<Vec3> p = m_views[ivar];
+                            DataView<V3f> p = m_views[ivar];
                             assert(p.isDense());
                             for(int i = 0; i < nValues; ++i)
                                 p[i] *= trans;
@@ -235,7 +235,7 @@ class PrimvarStorage : public RefCounted
                         break;
                     case PrimvarSpec::Vector:
                         {
-                            DataView<Vec3> v = m_views[ivar];
+                            DataView<V3f> v = m_views[ivar];
                             assert(v.isDense());
                             for(int i = 0; i < nValues; ++i)
                                 v[i] *= vecTrans;
@@ -243,7 +243,7 @@ class PrimvarStorage : public RefCounted
                         break;
                     case PrimvarSpec::Normal:
                         {
-                            DataView<Vec3> n = m_views[ivar];
+                            DataView<V3f> n = m_views[ivar];
                             assert(n.isDense());
                             for(int i = 0; i < nValues; ++i)
                                 n[i] *= norTrans;

@@ -56,21 +56,21 @@ class SplitStore
     public:
         /// Create a storage structure with nxBuckets x nyBuckets buckets, and
         /// given spatial bound
-        SplitStore(int nxBuckets, int nyBuckets, const Imath::Box2f& bound)
+        SplitStore(int nxBuckets, int nyBuckets, const Box2f& bound)
             : m_buckets(new Bucket[nxBuckets*nyBuckets]),
             m_nxBuckets(nxBuckets),
             m_nyBuckets(nyBuckets),
             m_bound(bound)
         {
-            Vec2 bucketSize = (m_bound.max - m_bound.min) /
-                              Vec2(nxBuckets, nyBuckets);
+            V2f bucketSize = (m_bound.max - m_bound.min) /
+                              V2f(nxBuckets, nyBuckets);
             for(int j = 0; j < nyBuckets; ++j)
             for(int i = 0; i < nxBuckets; ++i)
             {
-                Vec2 bucketMin = m_bound.min + bucketSize*Vec2(i,j);
-                Vec2 bucketMax = m_bound.min + bucketSize*Vec2(i+1,j+1);
+                V2f bucketMin = m_bound.min + bucketSize*V2f(i,j);
+                V2f bucketMax = m_bound.min + bucketSize*V2f(i+1,j+1);
                 getBucket(V2i(i,j)).bound =
-                    Imath::Box2f(bucketMin, bucketMax);
+                    Box2f(bucketMin, bucketMax);
             }
         }
 
@@ -86,8 +86,8 @@ class SplitStore
         /// to associate root nodes in the splitting tree with buckets.
         void insert(const GeomHolderPtr& geom)
         {
-            const Box& bnd = geom->bound();
-            if(!m_bound.intersects(Imath::Box2f(vec2_cast(bnd.min),
+            const Box3f& bnd = geom->bound();
+            if(!m_bound.intersects(Box2f(vec2_cast(bnd.min),
                                                 vec2_cast(bnd.max))))
                 return;
             int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
@@ -99,7 +99,7 @@ class SplitStore
         }
 
         /// Get range of buckets for the given bound.
-        void bucketRangeForBound(const Box& bnd, int& x0, int& x1,
+        void bucketRangeForBound(const Box3f& bnd, int& x0, int& x1,
                                  int& y0, int& y1) const
         {
             float width = m_bound.max.x - m_bound.min.x;
@@ -140,7 +140,7 @@ class SplitStore
 
             /// Storage for initial geometry provided through the API
             std::vector<GeomHolderPtr> geoms;
-            Imath::Box2f bound; ///< Raster bound for the bucket
+            Box2f bound; ///< Raster bound for the bucket
         };
 
         /// Get identifier for leaf bucket at position pos.
@@ -152,7 +152,7 @@ class SplitStore
         boost::scoped_array<Bucket> m_buckets; ///< geometry storage
         int m_nxBuckets;      ///< number of buckets in x-direction
         int m_nyBuckets;      ///< number of buckets in y-direction
-        Imath::Box2f m_bound; ///< Bounding box
+        Box2f m_bound; ///< Bounding box
 };
 
 
@@ -198,9 +198,9 @@ class GeometryQueue
         }
 
         /// Return true if the bound intersects the active bucket
-        bool boundIntersects(const Box& bound) const
+        bool boundIntersects(const Box3f& bound) const
         {
-            const Imath::Box2f& bbnd = m_bucket->bound;
+            const Box2f& bbnd = m_bucket->bound;
             return bound.min.x <  bbnd.max.x && bound.min.y <  bbnd.max.y &&
                    bound.max.x >= bbnd.min.x && bound.max.y >= bbnd.min.y;
         }

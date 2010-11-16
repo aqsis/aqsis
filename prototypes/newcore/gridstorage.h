@@ -161,20 +161,20 @@ class GridStorage : public RefCounted
         }
 
         /// Convenient access to storage for standard position variable
-        DataView<Vec3> P()
+        DataView<V3f> P()
         {
             int i = m_vars.find(StdIndices::P); assert(i >= 0);
-            return DataView<Vec3>(m_views[i]);
+            return DataView<V3f>(m_views[i]);
         }
-        ConstDataView<Vec3> P() const
+        ConstDataView<V3f> P() const
         {
             int i = m_vars.find(StdIndices::P); assert(i >= 0);
-            return ConstDataView<Vec3>(m_views[i]);
+            return ConstDataView<V3f>(m_views[i]);
         }
-        DataView<Vec3> N()
+        DataView<V3f> N()
         {
             int i = m_vars.find(StdIndices::N); assert(i >= 0);
-            return DataView<Vec3>(m_views[i]);
+            return DataView<V3f>(m_views[i]);
         }
 };
 

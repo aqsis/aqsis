@@ -95,9 +95,9 @@ class PointInQuad
         /// a and b are the edge endpoints.  If flipEnds is true, point a is
         /// used as the edge equation "point on the line"; otherwise point b is
         /// used.
-        inline void setupEdge(int i, Vec2 a, Vec2 b, bool flipEnds = true)
+        inline void setupEdge(int i, V2f a, V2f b, bool flipEnds = true)
         {
-            Vec2 e = b-a;
+            V2f e = b-a;
             m_nx[i] = -e.y;
             m_ny[i] = e.x;
             // Use one of the end points of the line as the point on the line.
@@ -115,7 +115,7 @@ class PointInQuad
         }
 
         // Set up edge equations for an "arrow head" non-convex microquad
-        void setupArrowEdgeEqs(Vec2 v[4], int signs[4])
+        void setupArrowEdgeEqs(V2f v[4], int signs[4])
         {
             // Find index, i of the concave vertex
             //      2       .
@@ -142,7 +142,7 @@ class PointInQuad
         }
 
         // Set up edge equations for a "bow tie" non-convex microquad
-        void setupBowtieEdgeEqns(Vec2 v[4], int signs[4])
+        void setupBowtieEdgeEqns(V2f v[4], int signs[4])
         {
             // Find the index i such that v[i] is > 180, but v[i+1] is < 180 deg.
             int i = 0;
@@ -194,10 +194,10 @@ class PointInQuad
         /// used.  For robustness adjacent micropolygons should have opposite
         /// flipEnds values.  (think black vs white squares in a checkerboard
         /// pattern).
-        void init(Vec2 a, Vec2 b, Vec2 c, Vec2 d, bool flipEnds)
+        void init(V2f a, V2f b, V2f c, V2f d, bool flipEnds)
         {
             // Vectors along edges.
-            Vec2 e[4] = {b-a, c-b, d-c, a-d};
+            V2f e[4] = {b-a, c-b, d-c, a-d};
 
             // The signs of cross products between edges indicate clockwise (-)
             // vs counter-clockwise (+) rotation at the vertex between them
@@ -226,7 +226,7 @@ class PointInQuad
                 case 2: // Bow-tie (self-intersecting).
                     m_convex = false;
                     {
-                        Vec2 v[4] = {a,b,c,d};
+                        V2f v[4] = {a,b,c,d};
                         setupBowtieEdgeEqns(v, s);
                     }
                     break;
@@ -234,7 +234,7 @@ class PointInQuad
                     m_convex = false;
                     {
                         // Reorder verts & signs into CCW order.
-                        Vec2 vccw[4] = {a,d,c,b};
+                        V2f vccw[4] = {a,d,c,b};
                         int sccw[4] = {!s[0], !s[3], !s[2], !s[1]};
                         setupArrowEdgeEqs(vccw, sccw);
                     }
@@ -243,7 +243,7 @@ class PointInQuad
                     // CCW arrow head.
                     m_convex = false;
                     {
-                        Vec2 v[4] = {a,b,c,d};
+                        V2f v[4] = {a,b,c,d};
                         setupArrowEdgeEqs(v, s);
                     }
                     break;
@@ -251,7 +251,7 @@ class PointInQuad
         }
 
         /// Point-in-polygon test
-        inline bool operator()(Vec2 p)
+        inline bool operator()(V2f p)
         {
             float x = p.x;
             float y = p.y;

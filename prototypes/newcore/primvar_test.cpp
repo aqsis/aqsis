@@ -88,7 +88,7 @@ int main()
 
     {
         // Check that we can access the position data using the correct type.
-        DataView<Vec3> P = pvarStorage.P();
+        DataView<V3f> P = pvarStorage.P();
         std::cout << "Primvar P = "
             << P[0] << " "
             << P[1] << " "

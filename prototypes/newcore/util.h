@@ -59,20 +59,21 @@
 
 namespace Aqsis {
 
-// TODO: Remove Vec3 & Vec2 typedefs in favour of the standard OpenEXR
-// abbreviations.
-typedef Imath::V3f Vec3;
-typedef Imath::V2f Vec2;
-typedef Imath::V2f V2f;
-typedef Imath::V2i V2i;
-typedef Imath::M44f Mat4;
-typedef Imath::M33f Mat3;
-typedef Imath::C3f Col3;
+// Import a bunch of extremely handy vector, matrix color and bound types from
+// the Imath namespace.  It's worth having short names for these because they
+// are used quite a lot.
+using Imath::V3f;
+using Imath::V2f;
+using Imath::V2i;
+using Imath::M44f;
+using Imath::M33f;
+using Imath::C3f;
+using Imath::Box3f;
+using Imath::Box2f;
+using Imath::Box2i;
 
-typedef Imath::Box3f Box;
 
-
-inline std::ostream& operator<<(std::ostream& out, Box b)
+inline std::ostream& operator<<(std::ostream& out, Box3f b)
 {
     out << "[" << b.min << " -- " << b.max << "]";
     return out;
@@ -144,7 +145,7 @@ inline T cross(Imath::Vec2<T> a, Imath::Vec2<T> b)
     return a.x*b.y - b.x*a.y;
 }
 
-inline float dot(Vec3 a, Vec3 b)
+inline float dot(V3f a, V3f b)
 {
     return a.dot(b);
 }
@@ -187,7 +188,7 @@ inline T bilerp(T a, T b, T c, T d, float u, float v)
     return w0*a + w1*b + w2*c + w3*d;
 }
 template<typename T>
-inline T bilerp(T a, T b, T c, T d, Vec2 uv)
+inline T bilerp(T a, T b, T c, T d, V2f uv)
 {
     return bilerp(a,b,c,d, uv.x, uv.y);
 }
@@ -234,49 +235,49 @@ inline T ceildiv(T n, T d)
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 inline float rad2deg(float r) { return (180/M_PI) * r; }
 
-inline Mat4 perspectiveProjection(float fov, float near, float far)
+inline M44f perspectiveProjection(float fov, float near, float far)
 {
     float s = 1/std::tan(deg2rad(fov)/2);
     float a = far/(far-near);
     float b = -near*a;
-    return Mat4(s, 0, 0, 0,
+    return M44f(s, 0, 0, 0,
                 0, s, 0, 0,
                 0, 0, a, 1,
                 0, 0, b, 0);
 }
 
-inline Mat4 orthographicProjection(float near, float far)
+inline M44f orthographicProjection(float near, float far)
 {
     float a = 2/(far-near);
     float b = -(far+near)/(far-near);
-    return Mat4(1, 0, 0, 0,
+    return M44f(1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, a, 0,
                 0, 0, b, 1);
 }
 
-inline Mat4 screenWindow(float left, float right, float bottom, float top)
+inline M44f screenWindow(float left, float right, float bottom, float top)
 {
     float w = right-left;
     float h = top-bottom;
-    return Mat4(2/w, 0, 0, 0,
+    return M44f(2/w, 0, 0, 0,
                 0, 2/h, 0, 0,
                 0, 0,   1, 0,
                 -(right+left)/w, -(top+bottom)/h, 0, 1);
 }
 
 /// Get the vector transformation associated with the point transformation, m
-inline Mat3 vectorTransform(const Mat4& m)
+inline M33f vectorTransform(const M44f& m)
 {
-    return Mat3(m[0][0], m[0][1], m[0][2],
+    return M33f(m[0][0], m[0][1], m[0][2],
                 m[1][0], m[1][1], m[1][2],
                 m[2][0], m[2][1], m[2][2]);
 }
 
 /// Get the normal transformation associated with the point transformation, m
-inline Mat3 normalTransform(const Mat4& m)
+inline M33f normalTransform(const M44f& m)
 {
-    Mat3 nTrans = vectorTransform(m);
+    M33f nTrans = vectorTransform(m);
     nTrans.invert();
     nTrans.transpose();
     return nTrans;
@@ -284,17 +285,17 @@ inline Mat3 normalTransform(const Mat4& m)
 
 
 /// Transform a bounding box
-inline Box transformBound(const Box& bound, const Mat4& m)
+inline Box3f transformBound(const Box3f& bound, const M44f& m)
 {
-    Vec3 v1 = bound.min;
-    Vec3 v2 = bound.max;
-    Box b(v1*m);
-    b.extendBy(Vec3(v2.x, v1.y, v1.z)*m);
-    b.extendBy(Vec3(v1.x, v2.y, v1.z)*m);
-    b.extendBy(Vec3(v1.x, v1.y, v2.z)*m);
-    b.extendBy(Vec3(v1.x, v2.y, v2.z)*m);
-    b.extendBy(Vec3(v2.x, v1.y, v2.z)*m);
-    b.extendBy(Vec3(v2.x, v2.y, v1.z)*m);
+    V3f v1 = bound.min;
+    V3f v2 = bound.max;
+    Box3f b(v1*m);
+    b.extendBy(V3f(v2.x, v1.y, v1.z)*m);
+    b.extendBy(V3f(v1.x, v2.y, v1.z)*m);
+    b.extendBy(V3f(v1.x, v1.y, v2.z)*m);
+    b.extendBy(V3f(v1.x, v2.y, v2.z)*m);
+    b.extendBy(V3f(v2.x, v1.y, v2.z)*m);
+    b.extendBy(V3f(v2.x, v2.y, v1.z)*m);
     b.extendBy(v2*m);
     return b;
 }
@@ -303,26 +304,26 @@ inline Box transformBound(const Box& bound, const Mat4& m)
 ///
 /// Hybrid coordinates are given by projecting the x and y coordinates of v,
 /// but leaving the z coordinate untouched.
-inline Vec3 hybridRasterTransform(const Vec3& v, const Mat4& m)
+inline V3f hybridRasterTransform(const V3f& v, const M44f& m)
 {
     float x = v.x*m[0][0] + v.y*m[1][0] + v.z*m[2][0] + m[3][0];
     float y = v.x*m[0][1] + v.y*m[1][1] + v.z*m[2][1] + m[3][1];
     float w = v.x*m[0][3] + v.y*m[1][3] + v.z*m[2][3] + m[3][3];
     float invW = 1/w;
 
-    return Vec3(x*invW, y*invW, v.z);
+    return V3f(x*invW, y*invW, v.z);
 }
 
 template<typename T>
-inline Imath::V2i ifloor(const Imath::Vec2<T>& v)
+inline V2i ifloor(const Imath::Vec2<T>& v)
 {
-    return Imath::V2i(ifloor(v.x), ifloor(v.y));
+    return V2i(ifloor(v.x), ifloor(v.y));
 }
 
 template<typename T>
-inline Imath::V2i iceil(const Imath::Vec2<T>& v)
+inline V2i iceil(const Imath::Vec2<T>& v)
 {
-    return Imath::V2i(iceil(v.x), iceil(v.y));
+    return V2i(iceil(v.x), iceil(v.y));
 }
 
 #define ALLOCA(type, len) static_cast<type*>(alloca(len*sizeof(type)))

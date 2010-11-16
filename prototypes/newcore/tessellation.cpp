@@ -45,7 +45,7 @@ TessellationContextImpl::TessellationContextImpl(Renderer& renderer,
     m_currGeom(0)
 { }
 
-void TessellationContextImpl::tessellate(const Mat4& splitTrans,
+void TessellationContextImpl::tessellate(const M44f& splitTrans,
                                          const GeomHolderPtr& holder)
 {
     m_currGeom = holder.get();
@@ -166,7 +166,6 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         }
         if(!m_grids.empty())
         {
-            // TODO: Do we want to allow more than one grid here?
             assert(m_grids.size() == 1);
             GridHolderPtr gridh(new GridHolder(m_grids[0], *m_currGeom));
             if(!m_renderer.rasterCull(*gridh))
@@ -194,10 +193,10 @@ void TessellationContextImpl::push(const GridPtr& grid)
     //  - N may sometimes be aliased to Ng
     //
     GridStorage& stor = grid->storage();
-    DataView<Vec3> P = stor.get(StdIndices::P);
+    DataView<V3f> P = stor.get(StdIndices::P);
     // Deal with normals N & Ng
-    DataView<Vec3> Ng = stor.get(StdIndices::Ng);
-    DataView<Vec3> N = stor.get(StdIndices::N);
+    DataView<V3f> Ng = stor.get(StdIndices::Ng);
+    DataView<V3f> N = stor.get(StdIndices::N);
     if(Ng)
         grid->calculateNormals(Ng, P);
     if(N && !m_builder.dicedByGeom(stor, StdIndices::N))
@@ -208,7 +207,7 @@ void TessellationContextImpl::push(const GridPtr& grid)
             grid->calculateNormals(N, P);
     }
     // Deal with view direction.
-    if(DataView<Vec3> I = stor.get(StdIndices::I))
+    if(DataView<V3f> I = stor.get(StdIndices::I))
     {
         // In shading coordinates, I is just equal to P for
         // perspective projections.  (TODO: orthographic)

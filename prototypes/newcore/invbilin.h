@@ -110,7 +110,7 @@ class InvBilin
          *   |   |
          *   A---B
          */
-        void init(Vec2 A, Vec2 B, Vec2 C, Vec2 D);
+        void init(V2f A, V2f B, V2f C, V2f D);
 
         /** \brief Perform the inverse bilinear mapping
          *
@@ -118,18 +118,18 @@ class InvBilin
          * parameters of the bilinear patch which would map to P under the
          * usual bilinear interpolation scheme.
          */
-        Vec2 operator()(Vec2 P) const;
+        V2f operator()(V2f P) const;
 
     private:
         template<bool unsafeInvert>
-        static Vec2 solve(Vec2 M1, Vec2 M2, Vec2 b);
+        static V2f solve(V2f M1, V2f M2, V2f b);
 
-        Vec2 bilinEval(Vec2 uv) const;
+        V2f bilinEval(V2f uv) const;
 
-        Vec2 m_A;
-        Vec2 m_E;
-        Vec2 m_F;
-        Vec2 m_G;
+        V2f m_A;
+        V2f m_E;
+        V2f m_F;
+        V2f m_G;
         bool m_linear;
 };
 
@@ -147,7 +147,7 @@ inline InvBilin::InvBilin()
     m_linear(false)
 {}
 
-inline void InvBilin::init(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
+inline void InvBilin::init(V2f A, V2f B, V2f C, V2f D)
 {
     m_A = A,
     m_E = B-A;
@@ -163,11 +163,11 @@ inline void InvBilin::init(Vec2 A, Vec2 B, Vec2 C, Vec2 D)
         m_linear = true;
 }
 
-inline Vec2 InvBilin::operator()(Vec2 P) const
+inline V2f InvBilin::operator()(V2f P) const
 {
     // Start at centre of the micropoly & do one or two iterations of Newton's
     // method to solve for (u,v).
-    Vec2 uv(0.5, 0.5);
+    V2f uv(0.5, 0.5);
     uv -= solve<true>(m_E + m_G*uv.y, m_F + m_G*uv.x, bilinEval(uv)-P);
     if(!m_linear)
     {
@@ -195,15 +195,15 @@ inline Vec2 InvBilin::operator()(Vec2 P) const
  * vector.
  */
 template<bool unsafeInvert>
-inline Vec2 InvBilin::solve(Vec2 M1, Vec2 M2, Vec2 b)
+inline V2f InvBilin::solve(V2f M1, V2f M2, V2f b)
 {
     float det = cross(M1, M2);
     if(unsafeInvert || det != 0) det = 1/det;
-    return det * Vec2(cross(b, M2), -cross(b, M1));
+    return det * V2f(cross(b, M2), -cross(b, M1));
 }
 
 /// Evaluate the bilinear function at the coordinates (u,v)
-inline Vec2 InvBilin::bilinEval(Vec2 uv) const
+inline V2f InvBilin::bilinEval(V2f uv) const
 {
     return m_A + m_E*uv.x + m_F*uv.y + m_G*uv.x*uv.y;
 }

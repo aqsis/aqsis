@@ -80,7 +80,7 @@ struct Options : public RefCounted
         fstop(FLT_MAX),
         focalLength(FLT_MAX),
         focalDistance(FLT_MAX),
-        pixelFilter(makeGaussianFilter(Vec2(2,2))),
+        pixelFilter(makeGaussianFilter(V2f(2,2))),
         doFilter(true),
         statsVerbosity(0),
         nthreads(-1)

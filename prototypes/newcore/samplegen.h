@@ -103,7 +103,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
 struct TimeLens
 {
     float time;  ///< sample time
-    Vec2 lens;   ///< position of sample on lens
+    V2f lens;   ///< position of sample on lens
 };
 
 /// Storage for a tile set as described in the makeTileSet() docs.
@@ -121,7 +121,7 @@ class DofMbTileSet
             for(int i = 0, iend=m_tuv.size(); i < iend; ++i)
             {
                 m_tuv[i].time = tuv[3*i];
-                m_tuv[i].lens = Vec2(tuv[3*i+1], tuv[3*i+2]);
+                m_tuv[i].lens = V2f(tuv[3*i+1], tuv[3*i+2]);
             }
             float timeStratQuality = 0;
             /* FIXME!
