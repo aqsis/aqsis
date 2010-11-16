@@ -175,7 +175,7 @@ class PrimvarStorage : public RefCounted
             {
                 // Copy the data over
                 const int size = var->storageSize(storCount);
-                float* data = &m_storage[0] + offset;
+                float* data = m_storage.get() + offset;
                 std::memcpy(data, var->data, size*sizeof(float));
                 // Record a view of the data
                 const int elSize = var->scalarSize();

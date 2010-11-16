@@ -78,16 +78,25 @@ inline std::ostream& operator<<(std::ostream& out, Box b)
     return out;
 }
 
+/// Return a C-pointer to the beginning of a std::vector
+///
+/// If the vector is empty, return 0.  It's a good idea to make use of this
+/// function rather than the idiom &v[0], because this idiom fails on windows
+/// when the vector is empty.
 template<typename T>
-inline T* get(std::vector<T>& v)
+inline T* cbegin(std::vector<T>& v)
 {
-    assert(v.size() > 0);
+    if(v.empty())
+        return 0;
     return &v[0];
 }
+/// Return a C-pointer to the start of a std::vector
+/// \see cbegin non-const version
 template<typename T>
-inline const T* get(const std::vector<T>& v)
+inline const T* cbegin(const std::vector<T>& v)
 {
-    assert(v.size() > 0);
+    if(v.empty())
+        return 0;
     return &v[0];
 }
 

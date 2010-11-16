@@ -99,7 +99,7 @@ void CachedFilter::cacheFilterSeparable(std::vector<float>& cache,
 {
     cache.resize(filtSize.x + filtSize.y);
     // Compute filter coefficients along x-direction.
-    float* fx = &cache[0];
+    float* fx = cbegin(cache);
     for(int i = 0; i < filtSize.x; ++i)
     {
         float x = (i-(filtSize.x-1)/2.0f)/superSamp.x;
@@ -128,7 +128,7 @@ void CachedFilter::cacheFilterNonSeparable(std::vector<float>& cache,
                                            Imath::V2i& filtSize)
 {
     cache.resize(filtSize.x*filtSize.y);
-    float* f = &cache[0];
+    float* f = cbegin(cache);
     float totWeight = 0;
     for(int j = 0; j < filtSize.y; ++j)
     {
@@ -141,7 +141,7 @@ void CachedFilter::cacheFilterNonSeparable(std::vector<float>& cache,
             totWeight += w;
         }
     }
-    normalizeFilter(&cache[0], cache.size());
+    normalizeFilter(cbegin(cache), cache.size());
 }
 
 /// Normalize filter weights so that they add to one.
@@ -225,7 +225,7 @@ void FilterProcessor::insert(V2i position, const FragmentTilePtr& tile)
             // Filter, quantize & save result.
             filter(outTileWorkspace, blockToFilter);
             const V2i outTileSize = blockToFilter.tiles[0][0]->size()/m_filterStride;
-            m_displayManager.writeTile(p*outTileSize, &outTileWorkspace[0]);
+            m_displayManager.writeTile(p*outTileSize, cbegin(outTileWorkspace));
         }
     }
 }
@@ -248,7 +248,7 @@ void FilterProcessor::filter(std::vector<float>& output,
         //
         // If there's no samples, we don't need to filter, we only need to
         // assign the default fragment to every pixel.
-        copy(FvecView(&output[0], fragSize),
+        copy(FvecView(cbegin(output), fragSize),
              ConstFvecView(defaultFrag, fragSize, 0), prod(outSize));
     }
     else if(m_filter.size() == V2i(1) /*todo: or filtering turned off*/)
@@ -263,7 +263,7 @@ void FilterProcessor::filter(std::vector<float>& output,
         for(int j = 0; j < 2; ++j)
         for(int i = 0; i < 2; ++i)
         {
-            FvecView dest = FvecView(&output[0] + i*halfRowLen,
+            FvecView dest = FvecView(cbegin(output) + i*halfRowLen,
                                      halfRowLen, rowLen) + j*outSize.y/2;
             if(block.tiles[j][i]->hasSamples())
             {
@@ -321,7 +321,7 @@ void FilterProcessor::filterNonSeparable(std::vector<float>& output,
     {
         // Filter pixel at (ix,iy).  The filter support can lie across any
         // or all of the 2x2 block of input tiles.
-        float* out = &output[0] + (outSize.x*iy + ix)*fragSize;
+        float* out = cbegin(output) + (outSize.x*iy + ix)*fragSize;
         for(int j = 0; j < m_filter.size().y; ++j)
         for(int i = 0; i < m_filter.size().x; ++i)
         {
@@ -403,7 +403,7 @@ void FilterProcessor::filterSeparable(std::vector<float>& output,
         // Next, filter the partial buffer in x to get the output pixels.
         for(int ix = 0; ix < outSize.x; ++ix)
         {
-            float* out = &output[0] + (outSize.x*iy + ix)*fragSize;
+            float* out = cbegin(output) + (outSize.x*iy + ix)*fragSize;
             const float* c = partial + m_filterStride.x*fragSize*ix;
             for(int i = 0; i < m_filter.size().x; ++i)
             {

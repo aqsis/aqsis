@@ -843,7 +843,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
         // Create new tile for fragment storage
         FragmentTilePtr fragments =
             new FragmentTile(tileSize, sampleOffset,
-                             &m_defaultFrag[0], m_defaultFrag.size());
+                             cbegin(m_defaultFrag), m_defaultFrag.size());
         samples.reset(*fragments);
 
         // Process all surfaces and grids in the bucket.
@@ -1008,7 +1008,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     }
 
     int fragSize = m_defaultFrag.size();
-    const float* defaultFrag = &m_defaultFrag[0];
+    const float* defaultFrag = cbegin(m_defaultFrag);
 
     // time/lens position of samples
     const std::vector<TimeLens>& timeLens = m_dofMbTileSet->timeLensPositions();
@@ -1209,7 +1209,7 @@ void Renderer::staticRasterize(SampleTile& tile, const GridHolder& holder,
     if(zIdx != OutvarSet::npos)
         zOffset = m_outVars[zIdx].offset;
     int fragSize = m_defaultFrag.size();
-    const float* defaultFrag = &m_defaultFrag[0];
+    const float* defaultFrag = cbegin(m_defaultFrag);
 
     // TODO: Rename SampleTile to BucketSamples ?
     V2i tileSize = tile.size();

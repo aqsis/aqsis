@@ -281,16 +281,16 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
     int fullwidth = width + eWidth;
     // Working space for computing tiles.
     std::vector<int> tileStor(fullwidth*fullwidth, -1);
-    int* tile = &tileStor[0];
+    int* tile = cbegin(tileStor);
 
     // First, create corner tiles
     // --------------------------
     int cSize = cWidth*cWidth;
     std::vector<int> cornerStor(cSize*3,-1);
-    int* corners[] = { &cornerStor[0],
-                       &cornerStor[cSize],
-                       &cornerStor[2*cSize] };
-    fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+    int* corners[] = { cbegin(cornerStor),
+                       cbegin(cornerStor) + cSize,
+                       cbegin(cornerStor) + 2*cSize };
+    fillTile(tile, width, width, r, cbegin(tuv), timeStratQuality);
     copyBlock2d(corners[0], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
     if(2*cWidth <= width)
     {
@@ -304,10 +304,10 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
         // else need to optimize a new tile to cut out each corner, to avoid
         // duplication of sample patterns
         tileStor.assign(tileStor.size(), -1);
-        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        fillTile(tile, width, width, r, cbegin(tuv), timeStratQuality);
         copyBlock2d(corners[1], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
         tileStor.assign(tileStor.size(), -1);
-        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        fillTile(tile, width, width, r, cbegin(tuv), timeStratQuality);
         copyBlock2d(corners[2], cWidth, tile, width, 0,0, 0,0, cWidth,cWidth);
     }
     // Overwrite sections of the corner tiles with -1 (the invalid index) This
@@ -357,7 +357,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
         copyBlock2d(tile, width, corners[c2], cWidth,
                     width-cw2,0, 0,0, cw2,cWidth);
         // optimize tile & extract newly optimized edge
-        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        fillTile(tile, width, width, r, cbegin(tuv), timeStratQuality);
         copyBlock2d(horizEdges[iedge], eLen, tile, width,
                     0,0, cw2,r, eLen,eWidth);
 
@@ -367,7 +367,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
                     0,0, 0,cw2, cWidth,cw2);
         copyBlock2d(tile, width, corners[c2], cWidth,
                     0,width-cw2, 0,0, cWidth,cw2);
-        fillTile(tile, width, width, r, get(tuv), timeStratQuality);
+        fillTile(tile, width, width, r, cbegin(tuv), timeStratQuality);
         copyBlock2d(vertEdges[iedge], eWidth, tile, width,
                     0,0, r,cw2, eWidth,eLen);
     }
@@ -487,7 +487,7 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
         }
 
         // Optimize tile & save the result
-        fillTile(tile, fullwidth, width, r, get(tuv), timeStratQuality);
+        fillTile(tile, fullwidth, width, r, cbegin(tuv), timeStratQuality);
         copyBlock2d(&tiles[nsamps*itile], width, tile, fullwidth,
                     0,0, eWidth/2,eWidth/2, width,width);
     }

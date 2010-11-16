@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(findRemainingInds_test)
     std::vector<int> toPlace(nsamps, -1);
     std::vector<int> remainingInds(nsamps, -1);
     int nToPlace = 0;
-    findRemainingInds(&tile[0], width, width, &toPlace[0],
-                      nToPlace, &remainingInds[0]);
+    findRemainingInds(cbegin(tile), width, width, cbegin(toPlace),
+                      nToPlace, cbegin(remainingInds));
     BOOST_CHECK_EQUAL(nToPlace, nsamps-2);
 
     toPlace.resize(nToPlace);
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE(findRemainingIndsWithBdry_test)
     std::vector<int> toPlace(nsamps, -1);
     std::vector<int> remainingInds(nsamps, -1);
     int nToPlace = 0;
-    findRemainingInds(&tile[0], width, width-2*r, &toPlace[0],
-                      nToPlace, &remainingInds[0]);
+    findRemainingInds(cbegin(tile), width, width-2*r, cbegin(toPlace),
+                      nToPlace, cbegin(remainingInds));
     BOOST_CHECK_EQUAL(nToPlace, (width-2*r)*(width-2*r) - 1);
     // Boundary shouldn't be present
     BOOST_CHECK(std::find(toPlace.begin(), toPlace.end(), width/2) ==

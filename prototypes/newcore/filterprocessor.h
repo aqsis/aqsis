@@ -84,7 +84,7 @@ class FragmentTile : public RefCounted
             {
                 // Deferred allocation for memory efficiency.
                 m_fragments.reset(new float[prod(m_size)*m_fragSize]);
-                copy(FvecView(&m_fragments[0], m_fragSize),
+                copy(FvecView(m_fragments.get(), m_fragSize),
                     ConstFvecView(m_defaultFrag, m_fragSize, 0), prod(m_size));
             }
             return &m_fragments[m_fragSize*(index)];

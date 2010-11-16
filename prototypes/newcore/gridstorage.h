@@ -87,7 +87,7 @@ class GridStorage : public RefCounted
             {
                 const int elSize = var->scalarSize();
                 const int stride = var->uniform ? 0 : elSize;
-                m_views[i] = FvecView(&m_storage[0] + offset, elSize, stride);
+                m_views[i] = FvecView(m_storage.get() + offset, elSize, stride);
                 offset += var->storageSize(nverts);
             }
         }
