@@ -108,19 +108,15 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
     }
     if(!m_grids.empty())
     {
-        // Shade grids
-        Shader* dispShader = m_currGeom->attrs().displacementShader.get();
-        Shader* surfShader = m_currGeom->attrs().surfaceShader.get();
-        if(dispShader || surfShader)
+        if(Shader* dispShader = m_currGeom->attrs().displacementShader.get())
         {
+            // Shade all grids with the displacement shader
             for(int i = 0; i < (int)m_grids.size(); ++i)
-            {
-                if(dispShader)
-                    dispShader->shade(m_shadingContext, *m_grids[i]);
-                if(surfShader)
-                    surfShader->shade(m_shadingContext, *m_grids[i]);
-            }
+                dispShader->shade(m_shadingContext, *m_grids[i]);
         }
+        // Shade only the primary motion grid using the surface shader.
+        if(Shader* surfShader = m_currGeom->attrs().surfaceShader.get())
+            surfShader->shade(m_shadingContext, *m_grids[0]);
         // Project grids
         for(int i = 0; i < (int)m_grids.size(); ++i)
             m_grids[i]->project(m_renderer.m_camToSRaster);

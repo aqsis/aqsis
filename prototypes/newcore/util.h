@@ -156,6 +156,12 @@ inline T maxNorm(Imath::Vec2<T> v)
     return std::max(std::fabs(v.x), std::fabs(v.y));
 }
 
+template<typename T>
+inline Imath::Box<T> lerp(Imath::Box<T> a, Imath::Box<T> b, float t)
+{
+    return Imath::Box<T>(lerp(a.min, b.min, t), lerp(a.max, b.max, t));
+}
+
 /** \brief Bilinear interpolation.
  *
  * Bilinear interpolation over a "quadrilateral" of values arranged in the

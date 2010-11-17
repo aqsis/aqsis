@@ -1046,8 +1046,17 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     // For each possible sample time
     for(int itime = 0; itime < nTimeLens; ++itime)
     {
-        Box3f gbound = holder.tightBound();
-        // FIXME: Motion interpolation for grid bound.
+        Box3f gbound;
+        if(motionBlur)
+        {
+            // Motion interpolation for grid bound.
+            int interval = intervals[itime];
+            const GridKeys& gridKeys = holder.gridKeys();
+            gbound = lerp(gridKeys[interval].bound, gridKeys[interval+1].bound,
+                          interpWeights[itime]);
+        }
+        else
+           gbound = holder.tightBound();
         V2f maxLensShift(0);
         V2f minLensShift(0);
         V2f lensPos = timeLens[itime].lens;
@@ -1081,7 +1090,18 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             // current time/lens position; if not we cull it.  The quick bound
             // may be slightly larger than the exact bound, the important thing
             // here is speed.
-            Box3f quickBnd = holder.cachedBounds()[(nu-1)*v + u];
+            Box3f quickBnd;
+            int bndIndex = (nu-1)*v + u;
+            if(motionBlur)
+            {
+                int interval = intervals[itime];
+                const GridKeys& gridKeys = holder.gridKeys();
+                quickBnd = lerp(gridKeys[interval].cachedBounds[bndIndex],
+                                gridKeys[interval+1].cachedBounds[bndIndex],
+                            interpWeights[itime]);
+            }
+            else
+                quickBnd = holder.cachedBounds()[bndIndex];
             if(m_coc)
             {
                 quickBnd.min.x -= minLensShift.x;
@@ -1103,8 +1123,8 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                 // Interpolate micropoly to the current time
                 int interval = intervals[itime];
                 const GridKeys& gridKeys = holder.gridKeys();
-                const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].value);
-                const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].value);
+                const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].grid);
+                const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].grid);
                 float interp = interpWeights[itime];
                 ConstDataView<V3f> P1 = grid1.storage().P();
                 ConstDataView<V3f> P2 = grid2.storage().P();

@@ -123,7 +123,7 @@ class DofMbTileSet
                 m_tuv[i].time = tuv[3*i];
                 m_tuv[i].lens = V2f(tuv[3*i+1], tuv[3*i+2]);
             }
-            float timeStratQuality = 0;
+            float timeStratQuality = 0.5;
             /* FIXME!
             if(hasMotion && hasDof)
                 timeStratQuality = 0.5;

@@ -312,7 +312,13 @@ class GeomHolder : public RefCounted
 
 
 //------------------------------------------------------------------------------
-typedef MotionKey<GridPtr> GridKey;
+struct GridKey
+{
+    float time;
+    Box3f bound;
+    std::vector<Box3f> cachedBounds;
+    GridPtr grid;
+};
 typedef std::vector<GridKey> GridKeys;
 
 
@@ -328,28 +334,11 @@ class GridHolder : public RefCounted
         GridPtr m_grid;             ///< Non-deforming grid
         GridKeys m_gridKeys;        ///< Grid keys for motion blur
         ConstAttributesPtr m_attrs; ///< Attribute state
-        Box3f m_bound;                ///< Raster bounding box including CoC expansion
-        Box3f m_tightBound;           ///< Geometric raster bounding box
+        Box3f m_bound;              ///< Raster bounding box including CoC expansion
+        Box3f m_tightBound;         ///< Geometric raster bounding box
         bool m_rasterized;          ///< True if the grid was rasterized
         volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
         std::vector<Box3f> m_cachedBounds;  ///< Cached micropolygon bounds
-
-        /// Cache the grid bounds.
-        ///
-        /// We expect the grids to be already projected into sraster
-        /// coordinates.
-        void cacheBound()
-        {
-            if(isDeforming())
-            {
-                for(int i = 0, iend = m_gridKeys.size(); i < iend; ++i)
-                    m_bound.extendBy(m_gridKeys[i].value->bound());
-            }
-            else
-                m_bound.extendBy(m_grid->bound());
-            m_tightBound = m_bound;
-            m_grid->cacheBounds(m_cachedBounds);
-        }
 
     public:
         GridHolder(const GridPtr& grid, const GeomHolder& parentGeom)
@@ -359,7 +348,9 @@ class GridHolder : public RefCounted
             m_rasterized(false),
             m_bucketRefs(0)
         {
-            cacheBound();
+            m_bound.extendBy(m_grid->bound());
+            m_tightBound = m_bound;
+            m_grid->cacheBounds(m_cachedBounds);
         }
 
         template<typename GridPtrIterT>
@@ -372,15 +363,21 @@ class GridHolder : public RefCounted
             m_bucketRefs(0)
         {
             GeometryKeys::const_iterator oldKey = parentGeom.geomKeys().begin();
-            m_gridKeys.reserve(end - begin);
-            for(;begin != end; ++begin, ++oldKey)
-                m_gridKeys.push_back(GridKey(oldKey->time, *begin));
-            cacheBound();
+            m_gridKeys.resize(end - begin);
+            for(int i = 0; begin != end; ++begin, ++oldKey, ++i)
+            {
+                m_gridKeys[i].time = oldKey->time;
+                m_gridKeys[i].grid = *begin;
+                m_gridKeys[i].bound = (*begin)->bound();
+                m_bound.extendBy(m_gridKeys[i].bound);
+                (*begin)->cacheBounds(m_gridKeys[i].cachedBounds);
+            }
+            m_tightBound = m_bound;
         }
 
         bool isDeforming() const { return !m_grid; }
-        Grid& grid() { return m_grid ? *m_grid : *m_gridKeys[0].value; }
-        const Grid& grid() const { return m_grid ? *m_grid : *m_gridKeys[0].value; }
+        Grid& grid() { return m_grid ? *m_grid : *m_gridKeys[0].grid; }
+        const Grid& grid() const { return m_grid ? *m_grid : *m_gridKeys[0].grid; }
         GridKeys& gridKeys() { return m_gridKeys; }
         const GridKeys& gridKeys() const { return m_gridKeys; }
         const Box3f& bound() const { return m_bound; }

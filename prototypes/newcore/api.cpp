@@ -1582,8 +1582,38 @@ RtVoid RenderApi::Procedural(RtPointer data, RtConstBound bound,
 //------------------------------------------------------------
 // Implementation-specific Geometric Primitives
 
+static GeometryPtr createPatch(const float P[12], const float Cs[3],
+                               const M44f& trans = M44f())
+{
+    PrimvarStorageBuilder builder;
+    builder.add(Primvar::P, P, 12);
+    builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1, ustring("Cs")),
+                Cs, 3);
+    IclassStorage storReq(1,4,4,4,4);
+    PrimvarStoragePtr primVars = builder.build(storReq);
+    primVars->transform(trans);
+    GeometryPtr patch(new Aqsis::Patch(primVars));
+    return patch;
+}
+
 RtVoid RenderApi::Geometry(RtConstToken type, const ParamList& pList)
 {
+    if(strcmp(type, "motion_test") == 0)
+    {
+        float Cs[3] = {1,1,1};
+        GeometryKeys keys;
+        float d = 0.4;
+        if(FloatArray amp = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
+            d = amp[0];
+//        float P1[12] = {-1, -d, -1,  -1, d, 1,  1, d, -1,  1, -d, 1};
+//        float P2[12] = {-1, d, -1,  -1, -d, 1,  1, -d, -1,  1, d, 1};
+        float P1[12] = {-1, -d, -1,  -1, -d, 1,  1, 0, -1,  1, 0, 1};
+        float P2[12] = {-1, d, -1,  -1, d, 1,  1, 0, -1,  1, 0, 1};
+        keys.push_back(GeometryKey(0, createPatch(P1,Cs, m_transStack.top())));
+        keys.push_back(GeometryKey(1, createPatch(P2,Cs, m_transStack.top())));
+        m_renderer->add(keys, attrsRead());
+    }
+    else
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "Geometry not implemented"; // Todo
 }
