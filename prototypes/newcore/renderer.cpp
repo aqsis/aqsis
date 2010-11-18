@@ -249,7 +249,7 @@ void SampleTile::ensureDofMbSetup(const DofMbTileSet& tileSet)
             for(int j = start.y; j < end.y; ++j)
             for(int i = start.x; i < end.x; ++i)
             {
-                int timeIdx = (j-start.y)*dofMbSize.x + i-start.x;
+                int timeIdx = (j-dofMbSize.y*ty)*dofMbSize.x + i-dofMbSize.x*tx;
                 int samplePosIdx = (j-sampStart.y)*m_size.x + (i-sampStart.x);
                 outTile[inTile[timeIdx]] = samplePosIdx;
             }
