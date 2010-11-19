@@ -110,7 +110,8 @@ struct TimeLens
 class DofMbTileSet
 {
     public:
-        DofMbTileSet(int tileWidth)
+        DofMbTileSet(int tileWidth, float timeStratQuality, float shutterMin,
+                     float shutterMax)
             : m_tileWidth(tileWidth)
         {
             // Generate time and lens samples, and copy them into a convenient
@@ -120,18 +121,9 @@ class DofMbTileSet
             m_tuv.resize(tileWidth*tileWidth);
             for(int i = 0, iend=m_tuv.size(); i < iend; ++i)
             {
-                m_tuv[i].time = tuv[3*i];
+                m_tuv[i].time = lerp(shutterMin, shutterMax, tuv[3*i]);
                 m_tuv[i].lens = V2f(tuv[3*i+1], tuv[3*i+2]);
             }
-            float timeStratQuality = 0.5;
-            /* FIXME!
-            if(hasMotion && hasDof)
-                timeStratQuality = 0.5;
-            else if(hasMotion)
-                timeStratQuality = 1;
-            else if(hasDof)
-                timeStratQuality = 0;
-            */
             makeTileSet(m_tileIndices, tileWidth, tuv, timeStratQuality);
         }
 

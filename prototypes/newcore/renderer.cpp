@@ -933,7 +933,24 @@ void Renderer::rasterize(SampleTile& tile, GridHolder& holder,
             //
             // TODO: Only do this once if using multiple frames.
             if(!m_dofMbTileSet)
-                m_dofMbTileSet.reset(new DofMbTileSet(m_opts->interleaveWidth));
+            {
+                // Compute quality of time sample stratification relative to
+                // lens sample stratification, depending on whether we have
+                // motion blur, depth of field, or both in the scene.
+                bool hasMotion = m_opts->shutterMin < m_opts->shutterMax;
+                bool hasDof = m_coc;
+                float timeStratQuality = 0;
+                if(hasMotion && hasDof)
+                    timeStratQuality = 0.5;
+                else if(hasMotion)
+                    timeStratQuality = 1;
+                else if(hasDof)
+                    timeStratQuality = 0;
+                m_dofMbTileSet.reset(new DofMbTileSet(m_opts->interleaveWidth,
+                                                      timeStratQuality,
+                                                      m_opts->shutterMin,
+                                                      m_opts->shutterMax));
+            }
         }
         tile.ensureDofMbSetup(*m_dofMbTileSet);
         // Sample with motion blur or depth of field
@@ -1014,54 +1031,47 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     const std::vector<TimeLens>& timeLens = m_dofMbTileSet->timeLensPositions();
     const int nTimeLens = timeLens.size();
 
-    // TODO: Put this into the itime loop.
-    // Info for motion interpolation
-    int* intervals = 0;
-    float* interpWeights = 0;
-    if(motionBlur)
-    {
-        const GridKeys& gridKeys = holder.gridKeys();
-
-        // Pre-compute interpolation info for all time indices
-        intervals = ALLOCA(int, nTimeLens);
-        const int maxIntervalIdx = gridKeys.size()-2;
-        interpWeights = ALLOCA(float, nTimeLens);
-        for(int i = 0, interval = 0; i < nTimeLens; ++i)
-        {
-            // Search forward through grid time intervals to find the interval
-            // which contains the i'th sample time.
-            while(interval < maxIntervalIdx
-                && gridKeys[interval+1].time < timeLens[i].time)
-                ++interval;
-            intervals[i] = interval;
-            interpWeights[i] = (timeLens[i].time - gridKeys[interval].time) /
-                        (gridKeys[interval+1].time - gridKeys[interval].time);
-        }
-    }
-
     // Helper objects for hit testing
     PointInQuad hitTest;
     InvBilin invBilin;
 
+    // Motion interpolation information.  Not used if we've only got depth of
+    // field.
+    const GridKeys& gridKeys = holder.gridKeys();
+    const int maxIntervalIdx = gridKeys.size()-2;
+    int interval = 0;
+    float interpWeight = 0;
+
     // For each possible sample time
     for(int itime = 0; itime < nTimeLens; ++itime)
     {
+        // First, compute the grid bound at the current time.
         Box3f gbound;
         if(motionBlur)
         {
+            // Search forward through grid time intervals to find the interval
+            // which contains the itime'th sample time.
+            //
+            // FIXME: [gridKeys[i].time] aren't in order, so this is probably
+            // wrong for more than one time interval!!
+            while(interval < maxIntervalIdx && gridKeys[interval+1].time
+                                                     < timeLens[itime].time)
+                ++interval;
+            interpWeight = (timeLens[itime].time - gridKeys[interval].time) /
+                        (gridKeys[interval+1].time - gridKeys[interval].time);
             // Motion interpolation for grid bound.
-            int interval = intervals[itime];
-            const GridKeys& gridKeys = holder.gridKeys();
             gbound = lerp(gridKeys[interval].bound, gridKeys[interval+1].bound,
-                          interpWeights[itime]);
+                          interpWeight);
         }
         else
            gbound = holder.tightBound();
+        // Now, dispalace the grid bound by the lens offset if necessary.
         V2f maxLensShift(0);
         V2f minLensShift(0);
-        V2f lensPos = timeLens[itime].lens;
+        V2f lensPos(0);
         if(m_coc)
         {
+            lensPos = timeLens[itime].lens;
             // Max distance a micropoly inside the bound can move.
             maxLensShift = lensPos*m_coc->maxShiftForBound(gbound.min.z,
                                                            gbound.max.z);
@@ -1077,10 +1087,13 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             gbound.max.x -= maxLensShift.x;
             gbound.max.y -= maxLensShift.y;
         }
+        // We now have a bound for the grid at the current time and lens
+        // offset.  We test it against the bucket bound to reject the entire
+        // grid where possible.
         if(gbound.max.x <  bucketMin.x || gbound.max.y <  bucketMin.y ||
            gbound.min.x >= bucketMax.x || gbound.min.y >= bucketMax.y)
             continue;
-        // For each micropoly.
+        // If we get here, we need to sample each micropolygon.
         for(int v = 0, nv = mainGrid.nv(); v < nv-1; ++v)
         for(int u = 0, nu = mainGrid.nu(); u < nu-1; ++u)
         {
@@ -1094,11 +1107,9 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             int bndIndex = (nu-1)*v + u;
             if(motionBlur)
             {
-                int interval = intervals[itime];
-                const GridKeys& gridKeys = holder.gridKeys();
                 quickBnd = lerp(gridKeys[interval].cachedBounds[bndIndex],
                                 gridKeys[interval+1].cachedBounds[bndIndex],
-                            interpWeights[itime]);
+                                interpWeight);
             }
             else
                 quickBnd = holder.cachedBounds()[bndIndex];
@@ -1112,8 +1123,8 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             if(quickBnd.max.x <  bucketMin.x || quickBnd.max.y <  bucketMin.y ||
                quickBnd.min.x >= bucketMax.x || quickBnd.min.y >= bucketMax.y)
                 continue;
-            // If the micropolygon is probably visible, we need to compute the
-            // exact position of its vertices.
+            // If the micropolygon is probably visible according to the quick
+            // bound, we need to compute the exact position of its vertices.
             MicroQuadInd ind(nu*v + u,        nu*v + u+1,
                              nu*(v+1) + u+1,  nu*(v+1) + u);
             // Compute vertices of micropolygon
@@ -1121,17 +1132,16 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             if(motionBlur)
             {
                 // Interpolate micropoly to the current time
-                int interval = intervals[itime];
-                const GridKeys& gridKeys = holder.gridKeys();
+                // TODO: Abstract this out of the function and into GridT
+                // somehow.
                 const GridT& grid1 = static_cast<GridT&>(*gridKeys[interval].grid);
                 const GridT& grid2 = static_cast<GridT&>(*gridKeys[interval+1].grid);
-                float interp = interpWeights[itime];
                 ConstDataView<V3f> P1 = grid1.storage().P();
                 ConstDataView<V3f> P2 = grid2.storage().P();
-                Pa = lerp(P1[ind.a], P2[ind.a], interp);
-                Pb = lerp(P1[ind.b], P2[ind.b], interp);
-                Pc = lerp(P1[ind.c], P2[ind.c], interp);
-                Pd = lerp(P1[ind.d], P2[ind.d], interp);
+                Pa = lerp(P1[ind.a], P2[ind.a], interpWeight);
+                Pb = lerp(P1[ind.b], P2[ind.b], interpWeight);
+                Pc = lerp(P1[ind.c], P2[ind.c], interpWeight);
+                Pd = lerp(P1[ind.d], P2[ind.d], interpWeight);
             }
             else
             {
@@ -1169,7 +1179,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
             int startx, endx, starty, endy;
             tile.dofMbTileRange(vec2_cast(bound.min), vec2_cast(bound.max),
                                 startx, endx, starty, endy);
-            // For each tile in the bound
+            // For each tile in the micropolygon bound
             for(int ty = starty; ty < endy; ++ty)
             for(int tx = startx; tx < endx; ++tx)
             {
