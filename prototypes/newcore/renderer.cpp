@@ -1039,23 +1039,27 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
     // field.
     const GridKeys& gridKeys = holder.gridKeys();
     const int maxIntervalIdx = gridKeys.size()-2;
-    int interval = 0;
-    float interpWeight = 0;
 
     // For each possible sample time
     for(int itime = 0; itime < nTimeLens; ++itime)
     {
         // First, compute the grid bound at the current time.
         Box3f gbound;
+        int interval = 0;
+        float interpWeight = 0;
         if(motionBlur)
         {
-            // Search forward through grid time intervals to find the interval
-            // which contains the itime'th sample time.
-            //
-            // FIXME: [gridKeys[i].time] aren't in order, so this is probably
-            // wrong for more than one time interval!!
-            while(interval < maxIntervalIdx && gridKeys[interval+1].time
-                                                     < timeLens[itime].time)
+            // time of current sample
+            float time = timeLens[itime].time;
+            // If the current sample time is outside of the time interval
+            // defined by the grid keys, the grid is invisible for these
+            // samples and we can cull it.
+            if(time < gridKeys.front().time || time > gridKeys.back().time)
+                continue;
+            // Search forward through the grid time intervals to find the
+            // interval which contains the itime'th sample time.
+            while(interval < maxIntervalIdx &&
+                  gridKeys[interval+1].time < time)
                 ++interval;
             interpWeight = (timeLens[itime].time - gridKeys[interval].time) /
                         (gridKeys[interval+1].time - gridKeys[interval].time);
