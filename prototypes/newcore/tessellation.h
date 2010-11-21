@@ -63,7 +63,7 @@ class GeomHolder : public RefCounted
         GeometryPtr m_geom;  ///< Main geometry (first key for deformation)
         GeometryKeys m_geomKeys; ///< Extra geometry keys
         int m_splitCount;    ///< Number of times the geometry has been split
-        Box3f m_bound;         ///< Bound in camera coordinates
+        Box3f m_rasterBound; ///< Bound in camera coordinates
         ConstAttributesPtr m_attrs; ///< Surface attribute state
         volatile bool m_hasChildren;  ///< True if child geometry/grid exists
         std::vector<GeomHolderPtr> m_childGeoms; ///< Child geometry
@@ -101,7 +101,7 @@ class GeomHolder : public RefCounted
             : m_geom(geom),
             m_geomKeys(),
             m_splitCount(0),
-            m_bound(geom->bound()),
+            m_rasterBound(geom->bound()),
             m_attrs(attrs),
             m_hasChildren(false),
             m_bucketRefs(0)
@@ -112,7 +112,7 @@ class GeomHolder : public RefCounted
             : m_geom(geom),
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
-            m_bound(geom->bound()),
+            m_rasterBound(geom->bound()),
             m_attrs(parent.m_attrs),
             m_hasChildren(false),
             m_bucketRefs(0)
@@ -123,7 +123,7 @@ class GeomHolder : public RefCounted
             : m_geom(),
             m_geomKeys(keys),
             m_splitCount(0),
-            m_bound(boundFromKeys(m_geomKeys)),
+            m_rasterBound(boundFromKeys(m_geomKeys)),
             m_attrs(attrs),
             m_hasChildren(false),
             m_bucketRefs(0)
@@ -135,7 +135,7 @@ class GeomHolder : public RefCounted
             : m_geom(),
             m_geomKeys(),
             m_splitCount(parent.m_splitCount+1),
-            m_bound(),
+            m_rasterBound(),
             m_attrs(parent.m_attrs),
             m_hasChildren(false),
             m_bucketRefs(0)
@@ -147,7 +147,7 @@ class GeomHolder : public RefCounted
             GeometryKeys::const_iterator oldKey = parent.geomKeys().begin();
             for(; keysBegin < keysEnd; keysBegin += keysStride, ++oldKey)
                 m_geomKeys.push_back(GeometryKey(oldKey->time, *keysBegin));
-            m_bound = boundFromKeys(m_geomKeys);
+            m_rasterBound = boundFromKeys(m_geomKeys);
         }
 
         ~GeomHolder()
@@ -178,8 +178,20 @@ class GeomHolder : public RefCounted
         /// Return the geometry bound.
         ///
         /// This is initially in world space, but is transformed to combined
-        /// sraster/camera z space before inserting into the split tree.
-        Box3f& bound() { return m_bound; }
+        /// sraster/camera z space immediately after creation.
+        const Box3f& rasterBound() const { return m_rasterBound; }
+        /// Cache the raster bound for later use.
+        void setRasterBound(Box3f bnd) { m_rasterBound = bnd; }
+
+        /// Get discrete bucket bound for the geometry (exclusive end!)
+        ///
+        /// The bucket bound is the bound of the geometry as transformed into
+        /// discrete bucket coordinates.  This is only valid after
+        /// initBucketRefs() has been called.
+        Box2i bucketBound() const
+        {
+            return Box2i(m_bboundStart, m_bboundStart + m_bboundSize);
+        }
 
         /// Return the attribute state associated with the geometry.  Threadsafe.
         const Attributes& attrs() const { return *m_attrs; }
@@ -334,11 +346,12 @@ class GridHolder : public RefCounted
         GridPtr m_grid;             ///< Non-deforming grid
         GridKeys m_gridKeys;        ///< Grid keys for motion blur
         ConstAttributesPtr m_attrs; ///< Attribute state
-        Box3f m_bound;              ///< Raster bounding box including CoC expansion
+        Box3f m_rasterBound;        ///< Raster bounding box including CoC expansion
         Box3f m_tightBound;         ///< Geometric raster bounding box
         bool m_rasterized;          ///< True if the grid was rasterized
-        volatile boost::uint32_t m_bucketRefs;  ///< Number of buckets referencing this grid.  atomic.
-        std::vector<Box3f> m_cachedBounds;  ///< Cached micropolygon bounds
+        volatile boost::uint32_t m_bucketRefs; ///< Number of buckets referencing this grid.  must be atomic.
+        Box2i m_bucketBound;        ///< Bound in bucket coordinates.
+        std::vector<Box3f> m_cachedBounds; ///< Cached micropolygon bounds
 
     public:
         GridHolder(const GridPtr& grid, const GeomHolder& parentGeom)
@@ -348,8 +361,7 @@ class GridHolder : public RefCounted
             m_rasterized(false),
             m_bucketRefs(0)
         {
-            m_bound.extendBy(m_grid->bound());
-            m_tightBound = m_bound;
+            m_tightBound = m_grid->bound();
             m_grid->cacheBounds(m_cachedBounds);
         }
 
@@ -369,10 +381,9 @@ class GridHolder : public RefCounted
                 m_gridKeys[i].time = oldKey->time;
                 m_gridKeys[i].grid = *begin;
                 m_gridKeys[i].bound = (*begin)->bound();
-                m_bound.extendBy(m_gridKeys[i].bound);
+                m_tightBound.extendBy(m_gridKeys[i].bound);
                 (*begin)->cacheBounds(m_gridKeys[i].cachedBounds);
             }
-            m_tightBound = m_bound;
         }
 
         bool isDeforming() const { return !m_grid; }
@@ -380,10 +391,10 @@ class GridHolder : public RefCounted
         const Grid& grid() const { return m_grid ? *m_grid : *m_gridKeys[0].grid; }
         GridKeys& gridKeys() { return m_gridKeys; }
         const GridKeys& gridKeys() const { return m_gridKeys; }
-        const Box3f& bound() const { return m_bound; }
-        Box3f& bound() { return m_bound; }
-        /// Get pure geometric bound, without expansion for depth of field.
-        const Box3f& tightBound() const { return m_tightBound; }
+        /// Get the bound in sraster space.
+        const Box3f& rasterBound() const { return m_rasterBound; }
+        /// Get the tight bound in sraster space (no expansion for depth of field).
+        const Box3f& tightRasterBound() const { return m_tightBound; }
         const std::vector<Box3f>& cachedBounds() const { return m_cachedBounds; }
 
         const Attributes& attrs() const { return *m_attrs; }
@@ -392,9 +403,23 @@ class GridHolder : public RefCounted
         bool rasterized() const { return m_rasterized; }
 
         /// Initialize the number of bucket references.
-        void initBucketRefs(int nrefs)
+        void initBucketRefs(V2i bucketBegin, V2i bucketEnd)
         {
-            m_bucketRefs = nrefs;
+            m_bucketBound = Box2i(bucketBegin, bucketEnd);
+            m_bucketRefs = prod(bucketEnd - bucketBegin);
+        }
+
+        /// Cache the raster bound for later use.
+        void setRasterBound(Box3f bnd) { m_rasterBound = bnd; }
+
+        /// Get discrete bucket bound for the geometry (exclusive end!)
+        ///
+        /// The bucket bound indicates which buckets the bound of the grid
+        /// touches.  This is only valid after initBucketRefs() has been
+        /// called.
+        Box2i bucketBound() const
+        {
+            return m_bucketBound;
         }
 
         /// Release a bucket reference, returning true if the count decreased

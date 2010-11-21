@@ -189,8 +189,8 @@ class Renderer
 
         void sanitizeOptions(Options& opts);
 
-        bool rasterCull(GeomHolder& geom);
-        bool rasterCull(GridHolder& grid);
+        bool rasterCull(GeomHolder& geom, const Box2i* parentBucketBound);
+        bool rasterCull(GridHolder& grid, const Box2i& parentBucketBound);
         void add(const GeomHolderPtr& geom);
 
         void renderBuckets(BucketSchedulerShared& bucketScheduler,

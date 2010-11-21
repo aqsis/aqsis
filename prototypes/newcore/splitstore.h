@@ -62,16 +62,9 @@ class SplitStore
             m_nyBuckets(nyBuckets),
             m_bound(bound)
         {
-            V2f bucketSize = (m_bound.max - m_bound.min) /
-                              V2f(nxBuckets, nyBuckets);
             for(int j = 0; j < nyBuckets; ++j)
             for(int i = 0; i < nxBuckets; ++i)
-            {
-                V2f bucketMin = m_bound.min + bucketSize*V2f(i,j);
-                V2f bucketMax = m_bound.min + bucketSize*V2f(i+1,j+1);
-                getBucket(V2i(i,j)).bound =
-                    Box2f(bucketMin, bucketMax);
-            }
+                getBucket(V2i(i,j)).pos = V2i(i,j);
         }
 
         /// Get number of buckets in the x-direction
@@ -86,15 +79,10 @@ class SplitStore
         /// to associate root nodes in the splitting tree with buckets.
         void insert(const GeomHolderPtr& geom)
         {
-            const Box3f& bnd = geom->bound();
-            if(!m_bound.intersects(Box2f(vec2_cast(bnd.min),
-                                                vec2_cast(bnd.max))))
-                return;
-            int x0 = 0, x1 = 0, y0 = 0, y1 = 0;
-            bucketRangeForBound(bnd, x0, x1, y0, y1);
+            const Box2i& bucketBound = geom->bucketBound();
             // Place geometry into nodes which it touches.
-            for(int j = y0; j < y1; ++j)
-                for(int i = x0; i < x1; ++i)
+            for(int j = bucketBound.min.y; j < bucketBound.max.y; ++j)
+                for(int i = bucketBound.min.x; i < bucketBound.max.x; ++i)
                     getBucket(V2i(i,j)).geoms.push_back(geom);
         }
 
@@ -140,7 +128,7 @@ class SplitStore
 
             /// Storage for initial geometry provided through the API
             std::vector<GeomHolderPtr> geoms;
-            Box2f bound; ///< Raster bound for the bucket
+            V2i pos;     ///< Position of the bucket (in "bucket coordinates")
         };
 
         /// Get identifier for leaf bucket at position pos.
@@ -198,11 +186,11 @@ class GeometryQueue
         }
 
         /// Return true if the bound intersects the active bucket
-        bool boundIntersects(const Box3f& bound) const
+        bool boundIntersects(const Box2i& bound) const
         {
-            const Box2f& bbnd = m_bucket->bound;
-            return bound.min.x <  bbnd.max.x && bound.min.y <  bbnd.max.y &&
-                   bound.max.x >= bbnd.min.x && bound.max.y >= bbnd.min.y;
+            V2i pos = m_bucket->pos;
+            return pos.x >= bound.min.x && pos.y >= bound.min.y &&
+                   pos.x < bound.max.x && pos.y < bound.max.y;
         }
 
         /// Push geometry back onto the queue, after checking the bound.
@@ -214,7 +202,7 @@ class GeometryQueue
         {
             if(!geom)
                 return;
-            if(boundIntersects(geom->bound()))
+            if(boundIntersects(geom->bucketBound()))
             {
                 m_queue.push_back(geom.get());
                 std::push_heap(m_queue.begin(), m_queue.end(), geomHeapOrder);
@@ -252,7 +240,7 @@ class GeometryQueue
         /// Ordering functor for surface rendering priority
         static bool geomHeapOrder(GeomHolder* a, GeomHolder* b)
         {
-            return a->bound().min.z > b->bound().min.z;
+            return a->rasterBound().min.z > b->rasterBound().min.z;
         }
 
         SplitStore::Bucket* m_bucket;

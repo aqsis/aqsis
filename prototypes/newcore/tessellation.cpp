@@ -60,7 +60,7 @@ void TessellationContextImpl::tessellate(const M44f& splitTrans,
     }
     int forceSplit = 0;
     // Force split rather than dice if the bound spans the epsilon plane.
-    if(holder->bound().min.z < FLT_EPSILON)
+    if(holder->rasterBound().min.z < FLT_EPSILON)
         forceSplit = holder->splitCount();
     holder->geom().tessellate(splitTrans, forceSplit, *this);
     m_currGeom->tessellateFinished();
@@ -72,7 +72,8 @@ void TessellationContextImpl::addChildGeometry(GeomHolder& parent,
                                                const GeomHolderPtr& child) const
 {
     // First check to see whether the child can be culled completely
-    if(!m_renderer.rasterCull(*child))
+    const Box2i parentBound = parent.bucketBound();
+    if(!m_renderer.rasterCull(*child, &parentBound))
     {
         // Copy over the occlusion record from the parent
         if(child->copyOcclusionRecord(parent))
@@ -141,7 +142,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         {
             GridHolderPtr gridh(new GridHolder(m_grids.begin(), m_grids.end(),
                                                *m_currGeom));
-            if(!m_renderer.rasterCull(*gridh))
+            if(!m_renderer.rasterCull(*gridh, m_currGeom->bucketBound()))
             {
                 ++m_gridsInFlight;
                 m_currGeom->addChild(gridh);
@@ -164,7 +165,7 @@ void TessellationContextImpl::invokeTessellator(TessControl& tessControl)
         {
             assert(m_grids.size() == 1);
             GridHolderPtr gridh(new GridHolder(m_grids[0], *m_currGeom));
-            if(!m_renderer.rasterCull(*gridh))
+            if(!m_renderer.rasterCull(*gridh, m_currGeom->bucketBound()))
             {
                 ++m_gridsInFlight;
                 m_currGeom->addChild(gridh);

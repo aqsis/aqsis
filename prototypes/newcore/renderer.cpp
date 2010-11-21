@@ -480,8 +480,8 @@ float Renderer::micropolyBlurWidth(const GeomHolderPtr& holder,
         //      focusFactor = 1, regardless of the amount of focal
         //      blur.
         //
-        V2f cocScale = coc->minShiftForBound(holder->bound().min.z,
-                                              holder->bound().max.z);
+        V2f cocScale = coc->minShiftForBound(holder->rasterBound().min.z,
+                                             holder->rasterBound().max.z);
         // The CoC shift is in the sraster coordinate system, so divide by
         // superSamp to get it into pixel-based raster coords.  pixel-based
         // raster is the relevant coordinates which determine the size of
@@ -543,10 +543,11 @@ void Renderer::sanitizeOptions(Options& opts)
 ///
 /// TODO: Clean this function up - it does several unrelated things in a
 /// somewhat confusing manner.
-bool Renderer::rasterCull(GeomHolder& holder)
+bool Renderer::rasterCull(GeomHolder& holder, const Box2i* parentBucketBound)
 {
-    // Get bound in camera space.
-    Box3f& bound = holder.bound();
+    // Get bound.  This is actually in camera space to begin with, and we
+    // transform it to raster space here.
+    Box3f bound = holder.rasterBound();
     // Expand bound for displacement
     // TODO: Support arbitrary coordinate systems for the displacement bound
     bound.min -= V3f(holder.attrs().displacementBound);
@@ -612,13 +613,23 @@ bool Renderer::rasterCull(GeomHolder& holder)
     // Set initial reference count.
     V2i begin, end;
     m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);
+    if(parentBucketBound)
+    {
+        // If the geometry is the child of a split, we need to make sure its
+        // bucket bound is strictly contained within the parent geometry
+        // bound.  Sometimes this may not be the case due to floating point
+        // precision errors.
+        begin = max(begin, parentBucketBound->min);
+        end = min(end, parentBucketBound->max);
+    }
+    holder.setRasterBound(bound);
     holder.initBucketRefs(begin, end);
     return false;
 }
 
-bool Renderer::rasterCull(GridHolder& gridh)
+bool Renderer::rasterCull(GridHolder& gridh, const Box2i& parentBucketBound)
 {
-    Box3f& bound = gridh.bound();
+    Box3f bound = gridh.tightRasterBound();
     // Cull if outside clipping planes
     if(bound.max.z < m_opts->clipNear || bound.min.z > m_opts->clipFar)
         return true;
@@ -640,7 +651,13 @@ bool Renderer::rasterCull(GridHolder& gridh)
     // Set initial reference count.
     V2i begin, end;
     m_surfaces->bucketRangeForBound(bound, begin.x, end.x, begin.y, end.y);
-    gridh.initBucketRefs(prod(end-begin));
+    // We need to make sure the grid bound is strictly contained within the
+    // parent geometry bound.  Sometimes this may not be the case due to
+    // floating point errors (even if the geometry is coded correctly!).
+    begin = max(begin, parentBucketBound.min);
+    end = min(end, parentBucketBound.max);
+    gridh.setRasterBound(bound);
+    gridh.initBucketRefs(begin, end);
     return false;
 }
 
@@ -738,7 +755,7 @@ Renderer::~Renderer()
 /// Push geometry into the render queue
 void Renderer::add(const GeomHolderPtr& holder)
 {
-    if(rasterCull(*holder))
+    if(rasterCull(*holder, 0))
         return;
     m_surfaces->insert(holder);
 }
@@ -851,7 +868,7 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
         {
             if(!geomh->hasChildren())
             {
-                if(samples.occludes(geomh->bound(), stats.occlTime))
+                if(samples.occludes(geomh->rasterBound(), stats.occlTime))
                 {
                     // If the geometry *is* occluded in this bucket, try to set
                     // the occlusion flag.  This will fail if the geometry has
@@ -879,9 +896,9 @@ void Renderer::renderBuckets(BucketSchedulerShared& schedulerShared,
             if(GridHolder* gridh = geomh->childGrid().get())
             {
                 // It has a grid; render that.
-                if(queue.boundIntersects(gridh->bound()))
+                if(queue.boundIntersects(gridh->bucketBound()))
                 {
-                    if(!samples.occludes(gridh->bound(), stats.occlTime))
+                    if(!samples.occludes(gridh->rasterBound(), stats.occlTime))
                         rasterize(samples, *gridh, stats);
                     // Release the grid if this was the last bucket it
                     // touches.
@@ -1068,7 +1085,7 @@ void Renderer::mbdofRasterize(SampleTile& tile, const GridHolder& holder,
                           interpWeight);
         }
         else
-           gbound = holder.tightBound();
+           gbound = holder.tightRasterBound();
         // Now, dispalace the grid bound by the lens offset if necessary.
         V2f maxLensShift(0);
         V2f minLensShift(0);
