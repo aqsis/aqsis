@@ -110,22 +110,19 @@ struct TimeLens
 class DofMbTileSet
 {
     public:
-        DofMbTileSet(int tileWidth, float timeStratQuality, float shutterMin,
-                     float shutterMax)
-            : m_tileWidth(tileWidth)
-        {
-            // Generate time and lens samples, and copy them into a convenient
-            // format.
-            std::vector<float> tuv;
-            canonicalTimeLensSamps(tuv, tileWidth*tileWidth);
-            m_tuv.resize(tileWidth*tileWidth);
-            for(int i = 0, iend=m_tuv.size(); i < iend; ++i)
-            {
-                m_tuv[i].time = lerp(shutterMin, shutterMax, tuv[3*i]);
-                m_tuv[i].lens = V2f(tuv[3*i+1], tuv[3*i+2]);
-            }
-            makeTileSet(m_tileIndices, tileWidth, tuv, timeStratQuality);
-        }
+        DofMbTileSet(int tileWidth, float timeStratQuality,
+                     float shutterMin, float shutterMax);
+
+        /// Construct tile set, first looking in a cache for efficiency.
+        ///
+        /// Use this instead of the constructor to avoid the tile set creation
+        /// costs where possible.  Creating tile sets with large tileWidth
+        /// using makeTileSet can be expensive!
+        ///
+        /// This function is threadsafe.
+        static const DofMbTileSet& create(int tileWidth,
+                                          float timeStratQuality,
+                                          float shutterMin, float shutterMax);
 
         /// Get tile with given corner colour indices.
         ///

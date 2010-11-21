@@ -195,6 +195,7 @@ testcase(arrayview_test arrayview_test.cpp)
 testcase(util_test util_test.cpp)
 
 testcase(samplegen_test samplegen.cpp samplegen_test.cpp)
+target_link_libraries(samplegen_test ${Boost_THREAD_LIBRARY})
 
 #testcase(splitstore_test splitstore_test.cpp)
 #target_link_libraries(splitstore_test ${Boost_THREAD_LIBRARY})

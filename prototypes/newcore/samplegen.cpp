@@ -27,9 +27,17 @@
 //
 // (This is the New BSD license)
 
-#include "util.h"
+#include "samplegen.h"
+
 #include <algorithm>
+#include <map>
 #include <cstring> // for memcpy
+
+#include <boost/shared_ptr.hpp>
+
+#include "thread.h"
+#include "util.h"
+
 
 namespace Aqsis {
 
@@ -491,6 +499,89 @@ void makeTileSet(std::vector<int>& tiles, int width, std::vector<float>& tuv,
         copyBlock2d(&tiles[nsamps*itile], width, tile, fullwidth,
                     0,0, eWidth/2,eWidth/2, width,width);
     }
+}
+
+
+//------------------------------------------------------------------------------
+// DofMbTileSet implementation.
+DofMbTileSet::DofMbTileSet(int tileWidth, float timeStratQuality,
+                           float shutterMin, float shutterMax)
+    : m_tileWidth(tileWidth)
+{
+    // Generate time and lens samples, and copy them into a convenient
+    // format.
+    std::vector<float> tuv;
+    canonicalTimeLensSamps(tuv, tileWidth*tileWidth);
+    m_tuv.resize(tileWidth*tileWidth);
+    for(int i = 0, iend=m_tuv.size(); i < iend; ++i)
+    {
+        m_tuv[i].time = lerp(shutterMin, shutterMax, tuv[3*i]);
+        m_tuv[i].lens = V2f(tuv[3*i+1], tuv[3*i+2]);
+    }
+    makeTileSet(m_tileIndices, tileWidth, tuv, timeStratQuality);
+}
+
+struct TileSetKey
+{
+    int tileWidth;
+    float timeStratQuality;
+    float shutterMin;
+    float shutterMax;
+
+    TileSetKey(int tileWidth, float timeStratQuality,
+               float shutterMin, float shutterMax)
+        : tileWidth(tileWidth),
+        timeStratQuality(timeStratQuality),
+        shutterMin(shutterMin),
+        shutterMax(shutterMax)
+    { }
+
+    // "Lexical" ordering of tile set keys.
+    bool operator<(const TileSetKey& other) const
+    {
+        // Yikes, what a mess...
+        if(tileWidth < other.tileWidth)
+            return true;
+        else if(tileWidth > other.tileWidth)
+            return false;
+
+        if(timeStratQuality < other.timeStratQuality)
+            return true;
+        else if(timeStratQuality > other.timeStratQuality)
+            return false;
+
+        if(shutterMin < other.shutterMin)
+            return true;
+        else if(shutterMin > other.shutterMin)
+            return false;
+
+        if(shutterMax < other.shutterMax)
+            return true;
+        else if(shutterMax > other.shutterMax)
+            return false;
+
+        return false;
+    }
+};
+
+const DofMbTileSet& DofMbTileSet::create(int tileWidth, float timeStratQuality,
+                                         float shutterMin, float shutterMax)
+{
+    static Mutex tileCacheMutex;
+    typedef std::map<TileSetKey, boost::shared_ptr<DofMbTileSet> > TileCacheMap;
+    static TileCacheMap tileCache;
+    LockGuard lk(tileCacheMutex);
+
+    TileSetKey key(tileWidth, timeStratQuality, shutterMin, shutterMax);
+
+    TileCacheMap::iterator pos = tileCache.find(key);
+    if(pos != tileCache.end())
+        return *(pos->second);
+    boost::shared_ptr<DofMbTileSet> newTileSet(
+                            new DofMbTileSet(tileWidth, timeStratQuality,
+                                             shutterMin, shutterMax) );
+    tileCache[key] = newTileSet;
+    return *newTileSet;
 }
 
 } // namespace Aqsis

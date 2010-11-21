@@ -670,6 +670,7 @@ Renderer::Renderer(const OptionsPtr& opts, const M44f& camToScreen,
     m_outVars(),
     m_camToSRaster(),
     m_camToWorld(camToWorld),
+    m_dofMbTileSet(0),
     m_errorHandler(errorHandler)
 {
     sanitizeOptions(*m_opts);
@@ -963,10 +964,10 @@ void Renderer::rasterize(SampleTile& tile, GridHolder& holder,
                     timeStratQuality = 1;
                 else if(hasDof)
                     timeStratQuality = 0;
-                m_dofMbTileSet.reset(new DofMbTileSet(m_opts->interleaveWidth,
-                                                      timeStratQuality,
-                                                      m_opts->shutterMin,
-                                                      m_opts->shutterMax));
+                m_dofMbTileSet = &DofMbTileSet::create(m_opts->interleaveWidth,
+                                                       timeStratQuality,
+                                                       m_opts->shutterMin,
+                                                       m_opts->shutterMax);
             }
         }
         tile.ensureDofMbSetup(*m_dofMbTileSet);

@@ -222,7 +222,7 @@ class Renderer
 
         Mutex m_dofMbTileInit;  ///< Mutex for m_dofMbTileSet init
         /// Cached DoF/MB sampling setup data.
-        boost::scoped_ptr<const DofMbTileSet> m_dofMbTileSet;
+        const DofMbTileSet* m_dofMbTileSet;
         /// Handler for renderer error messages.
         ErrorHandler& m_errorHandler;
 };
