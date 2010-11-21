@@ -98,6 +98,7 @@ class InteractiveRender : public QWidget
     public:
 		InteractiveRender(int x, int y, V2i imageSize,
                           Ri::RendererServices& renderer,
+                          const std::string& optionFile,
                           std::vector<std::string>& ribFiles)
 		:	m_prev_x(0),
             m_prev_y(0),
@@ -109,6 +110,7 @@ class InteractiveRender : public QWidget
             m_qtImage(),
             m_renderer(renderer),
             m_display(m_qtImage),
+            m_optionFile(optionFile),
 			m_ribFiles(ribFiles),
 			m_currRib(m_ribFiles.begin())
         {
@@ -220,6 +222,9 @@ class InteractiveRender : public QWidget
 
             ri.FrameBegin(1);
 
+            if(!m_optionFile.empty())
+                ri.ReadArchive(m_optionFile.c_str(), 0);
+
             ri.Format(m_imageSize.x, m_imageSize.y, 1);
 
             // Viewing transformation
@@ -252,6 +257,7 @@ class InteractiveRender : public QWidget
         Ri::RendererServices& m_renderer;
         QtDisplay m_display;
 
+		std::string m_optionFile;
 		std::vector<std::string> m_ribFiles;
 		std::vector<std::string>::iterator m_currRib;
 
@@ -262,12 +268,16 @@ class InteractiveRender : public QWidget
 //------------------------------------------------------------------------------
 class RenderWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
     public:
-		RenderWindow(int w, int h, Ri::RendererServices& renderer, std::vector<std::string>& retainedModels)
+        RenderWindow(int w, int h, Ri::RendererServices& renderer,
+                     const std::string& optionFile,
+                     std::vector<std::string>& ribFiles)
         {
-            m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h), renderer, retainedModels);
+            m_renderWidget = new InteractiveRender(x(), y(), V2i(w,h),
+                                                   renderer, optionFile,
+                                                   ribFiles);
             m_renderWidget->setMinimumSize(QSize(w, h));
             setCentralWidget(m_renderWidget);
             setWindowTitle("Aqsis-2.0 demo");

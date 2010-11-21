@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
          "frame statistics verbosity")
         ("threads,t", po::value<int>()->default_value(-1),
          "number of threads to use (-1 = auto)")
-        ("opts", po::value<std::string>(),
+        ("opts", po::value<std::string>()->default_value(""),
          "frame render options")
     ;
     // options + positional parameters
@@ -104,18 +104,6 @@ int main(int argc, char* argv[])
     ri.Option("limits", ParamListBuilder()("int eyesplits", &eyesplits));
     ri.Clipping(0.3, FLT_MAX);
 
-    if(opts.count("opts"))
-    {
-        const char* optFileName = opts["opts"].as<std::string>().c_str();
-        std::ifstream optFile(optFileName, std::ios::in | std::ios::binary);
-        if(!optFile)
-        {
-            std::cerr << "Error - could not open \"" << optFileName << "\"\n";
-            return 0;
-        }
-        renderer->parseRib(optFile, optFileName);
-    }
-
 	// Build a list of all ribFiles specified, expanding wildcards where necessary
 	StringVec allFiles;
 	const StringVec& ribFiles = opts["rib_files"].as<StringVec>();
@@ -126,7 +114,8 @@ int main(int argc, char* argv[])
 			allFiles.push_back(*f);
 	}
 
-    RenderWindow win(640, 480, *renderer, allFiles);
+    RenderWindow win(640, 480, *renderer, opts["opts"].as<std::string>(),
+                     allFiles);
 
 	QObject::connect(&win, SIGNAL(exitApplication()), &app, SLOT(quit()));
 
