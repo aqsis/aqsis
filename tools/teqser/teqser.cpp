@@ -314,7 +314,7 @@ int main( int argc, const char** argv )
 
 		RiMakeTexture( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(),
 		               ( char* ) g_swrap.c_str(), ( char* ) g_twrap.c_str(), filterfunc,
-		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, "bake", &bake, RI_NULL );
+		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, "float bake", &bake, RI_NULL );
 	}
 
 	RiEnd();
