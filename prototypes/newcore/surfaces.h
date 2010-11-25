@@ -166,6 +166,16 @@ class Patch : public Geometry
             m_vMin(0), m_vMax(1)
         { }
 
+        virtual bool motionCompatible(Geometry& geom)
+        {
+            Patch* patch = dynamic_cast<Patch*>(&geom);
+            if(!patch)
+                return false;
+            // Any two bilinear patches are automatically compatible, so
+            // if the cast succeeds there's nothing else to check.
+            return true;
+        }
+
         virtual void tessellate(const M44f& splitTrans, int forceSplit,
                                 TessellationContext& tessCtx) const
         {

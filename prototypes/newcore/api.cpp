@@ -55,9 +55,11 @@ namespace Aqsis {
 
 namespace {
 
-VarSpec typeSpecToVarSpec(const Ri::TypeSpec& spec)
+static ustring g_ustring_Cs("Cs");
+
+/// Copy type and arraySize from a Ri::TypeSpec into a VarSpec
+void typeSpecToVarSpec(VarSpec& out, const Ri::TypeSpec& spec)
 {
-    VarSpec out;
     switch(spec.type)
     {
         case Ri::TypeSpec::Float:  out.type = VarSpec::Float;  break;
@@ -76,7 +78,40 @@ VarSpec typeSpecToVarSpec(const Ri::TypeSpec& spec)
                                 "No VarSpec for TypeSpec type");
     }
     out.arraySize = spec.arraySize;
+}
+
+/// Copy iclass, type, arraySize and name from an Ri::Param into a PrimvarSpec
+PrimvarSpec riParamToPrimvarSpec(const Ri::Param& param)
+{
+    PrimvarSpec out;
+    // Copy type and array size
+    typeSpecToVarSpec(out, param.spec());
+    // Copy iclass
+    switch(param.spec().iclass)
+    {
+        case Ri::TypeSpec::Constant: out.iclass = PrimvarSpec::Constant; break;
+        case Ri::TypeSpec::Uniform:  out.iclass = PrimvarSpec::Uniform;  break;
+        case Ri::TypeSpec::Varying:  out.iclass = PrimvarSpec::Varying;  break;
+        case Ri::TypeSpec::Vertex:   out.iclass = PrimvarSpec::Vertex;   break;
+        case Ri::TypeSpec::FaceVarying: out.iclass = PrimvarSpec::FaceVarying; break;
+        case Ri::TypeSpec::FaceVertex:  out.iclass = PrimvarSpec::FaceVertex;  break;
+        case Ri::TypeSpec::NoClass:
+            AQSIS_THROW_XQERROR(XqValidation, EqE_Bug,
+                                "Unexpected TypeSpec iclass");
+    }
+    out.name = param.name();
     return out;
+}
+
+/// Find the index of a variable in an Ri::ParamList with the given name.
+///
+/// Return -1 if the variable is not found.
+int findVarByName(const Ri::ParamList& pList, const char* name)
+{
+    for(size_t i = 0; i < pList.size(); ++i)
+        if(strcmp(pList[i].name(), name) == 0)
+            return i;
+    return -1;
 }
 
 /// An error handler which just sends errors to stderr
@@ -664,28 +699,70 @@ class RenderApi : public Ri::Renderer
         ///[[[end]]]
 
     private:
-        Ri::ErrorHandler& ehandler() { return m_services.errorHandler(); }
+        /// Enum to record the current motion state.
+        ///
+        /// All RI procedures inside a MotionBegin/End scope must be
+        /// "compatible"; there's an element in this enum for each class of
+        /// procedures which are mutually compatible.  Note that for some
+        /// classes (eg, geometry) the compatibility requirement is more
+        /// complex than can be a simple enum value and additional measures
+        /// are needed.
+        enum MotionState
+        {
+            Motion_None,    ///< Outside motion block
+            Motion_Begin,   ///< Inside MotionBegin, next request not yet read
+            /// Set current transform (Identity / Transform)
+            Motion_Transform,
+            /// ConcatTransform, Perspective, Translate, Rotate, Scale, Skew
+            Motion_ConcatTransform,
+            /// Geometry is futher checked using Geometry::motionCompatible()
+            Motion_Geometry,
+        };
 
+        PrimvarStoragePtr preparePrimvars(const ParamList& pList,
+                                          const IclassStorage& storageCounts);
+        void addGeometry(const GeometryPtr& geom);
+
+        /// Convenience function - get error handler
+        Ri::ErrorHandler& ehandler() { return m_services.errorHandler(); }
+        /// Convenience function - get writable attributes ptr
         const AttributesPtr& attrsWrite() { return m_attrStack.attrsWrite(); }
+        /// Convenience function - get read only attributes ptr
         ConstAttributesPtr attrsRead() const { return m_attrStack.attrsRead(); }
 
         ApiServices& m_services;
+        boost::shared_ptr<Aqsis::Renderer> m_renderer;
+
+        // API state handling
+        /// Option stack
         AllOptionsPtr m_opts;
         AllOptionsPtr m_savedOpts;
+        /// Attribute stack
         AttributesStack m_attrStack;
+        /// Transform stack
         TransformStack m_transStack;
+
+        /// Path handling for ReadArchive
 		std::stack<std::string>	m_pathStack;
-        boost::shared_ptr< Aqsis::Renderer> m_renderer;
+
+        // Motion block handling
+        MotionState m_motionState;
+        std::vector<float> m_motionTimes;
+        std::vector<GeometryPtr> m_motionGeometry;
 };
 
 
 RenderApi::RenderApi(ApiServices& services)
     : m_services(services),
+    m_renderer(),
     m_opts(new AllOptions()),
     m_savedOpts(),
     m_attrStack(),
     m_transStack(),
-    m_renderer()
+    m_pathStack(),
+    m_motionState(Motion_None),
+    m_motionTimes(),
+    m_motionGeometry()
 { }
 
 //------------------------------------------------------------------------------
@@ -932,8 +1009,8 @@ RtVoid RenderApi::Display(RtConstToken name, RtConstToken type,
     {
         const char* nameBegin = 0;
         const char* nameEnd = 0;
-        outVar = typeSpecToVarSpec(m_services.getDeclaration(mode, &nameBegin,
-                                                             &nameEnd));
+        typeSpecToVarSpec(outVar, m_services.getDeclaration(mode, &nameBegin,
+                                                            &nameEnd));
         outVar.name.assign(std::string(nameBegin, nameEnd));
     }
 
@@ -1039,8 +1116,7 @@ RtVoid RenderApi::AttributeEnd()
 
 RtVoid RenderApi::Color(RtConstColor Cq)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "Color not implemented"; // Todo
+    attrsWrite()->color = C3f(Cq[0], Cq[1], Cq[2]);
 }
 
 RtVoid RenderApi::Opacity(RtConstColor Os)
@@ -1423,16 +1499,9 @@ RtVoid RenderApi::Patch(RtConstToken type, const ParamList& pList)
 {
     if(strcmp(type, "bilinear") == 0)
     {
-        FloatArray P = pList.findFloatData(
-                Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P");
-        assert(P.begin());
-        PrimvarStorageBuilder builder;
-        builder.add(Primvar::P, P.begin(), P.size());
-        IclassStorage storReq(1,4,4,4,4);
-        PrimvarStoragePtr primVars = builder.build(storReq);
-        primVars->transform(m_transStack.top());
-        GeometryPtr patch(new Aqsis::Patch(primVars));
-        m_renderer->add(patch, attrsRead());
+        PrimvarStoragePtr primVars =
+            preparePrimvars(pList, IclassStorage(1,4,4,4,4));
+        addGeometry(new Aqsis::Patch(primVars));
     }
     else if(strcmp(type, "bicubic") == 0)
     {
@@ -1582,38 +1651,8 @@ RtVoid RenderApi::Procedural(RtPointer data, RtConstBound bound,
 //------------------------------------------------------------
 // Implementation-specific Geometric Primitives
 
-static GeometryPtr createPatch(const float P[12], const float Cs[3],
-                               const M44f& trans = M44f())
-{
-    PrimvarStorageBuilder builder;
-    builder.add(Primvar::P, P, 12);
-    builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1, ustring("Cs")),
-                Cs, 3);
-    IclassStorage storReq(1,4,4,4,4);
-    PrimvarStoragePtr primVars = builder.build(storReq);
-    primVars->transform(trans);
-    GeometryPtr patch(new Aqsis::Patch(primVars));
-    return patch;
-}
-
 RtVoid RenderApi::Geometry(RtConstToken type, const ParamList& pList)
 {
-    if(strcmp(type, "motion_test") == 0)
-    {
-        float Cs[3] = {1,1,1};
-        GeometryKeys keys;
-        float d = 0.4;
-        if(FloatArray amp = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
-            d = amp[0];
-//        float P1[12] = {-1, -d, -1,  -1, d, 1,  1, d, -1,  1, -d, 1};
-//        float P2[12] = {-1, d, -1,  -1, -d, 1,  1, -d, -1,  1, d, 1};
-        float P1[12] = {-1, -d, -1,  -1, -d, 1,  1, 0, -1,  1, 0, 1};
-        float P2[12] = {-1, d, -1,  -1, d, 1,  1, 0, -1,  1, 0, 1};
-        keys.push_back(GeometryKey(0, createPatch(P1,Cs, m_transStack.top())));
-        keys.push_back(GeometryKey(1, createPatch(P2,Cs, m_transStack.top())));
-        m_renderer->add(keys, attrsRead());
-    }
-    else
     AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
         << "Geometry not implemented"; // Todo
 }
@@ -1659,14 +1698,53 @@ RtVoid RenderApi::ObjectInstance(RtConstToken name)
 
 RtVoid RenderApi::MotionBegin(const FloatArray& times)
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "MotionBegin not implemented"; // Todo
+    m_motionState = Motion_Begin;
+    m_motionTimes.assign(times.begin(), times.end());
+    m_motionGeometry.clear();
+    if(times.size() <= 1)
+    {
+        AQSIS_LOG_ERROR(ehandler(), EqE_BadMotion)
+            << "motion blocks must provide two or more key times";
+    }
 }
 
 RtVoid RenderApi::MotionEnd()
 {
-    AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-        << "MotionEnd not implemented"; // Todo
+    // Reset motion state to begin with so that the function exits cleanly
+    // in all circumstances.
+    MotionState motionState = m_motionState;
+    m_motionState = Motion_None;
+    if(m_motionTimes.size() <= 1)
+        return;
+    switch(motionState)
+    {
+        case Motion_Transform:
+        case Motion_ConcatTransform:
+            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+                << "Transformation motion blur not implemented (TODO)";
+            break;
+        case Motion_Geometry:
+            if(m_motionGeometry.size() != m_motionTimes.size())
+            {
+                AQSIS_LOG_ERROR(ehandler(), EqE_BadMotion)
+                    << "Number of motion objects fails to match "
+                       "number of key frame times";
+            }
+            else
+            {
+                GeometryKeys keys;
+                for(size_t i = 0; i < m_motionGeometry.size(); ++i)
+                    keys.push_back(GeometryKey(m_motionTimes[i],
+                                               m_motionGeometry[i]));
+                m_renderer->add(keys, attrsRead());
+            }
+            break;
+        case Motion_None:
+        case Motion_Begin:
+            AQSIS_THROW_XQERROR(XqValidation, EqE_BadMotion,
+                                "unexpected MotionEnd");
+            break;
+    }
 }
 
 //------------------------------------------------------------
@@ -1767,6 +1845,81 @@ RtVoid RenderApi::ArchiveEnd()
 {
     AQSIS_LOG_ERROR(ehandler(), EqE_Unimplement)
         << "ArchiveEnd should be handled by a filter";
+}
+
+//------------------------------------------------------------------------------
+// Private RenderApi methods
+
+/// Copy and prepare primitive variables for use by internal geometry classes.
+///
+/// This involves:
+/// - Checking for required variables (eg, "P")
+/// - Copying each variable from the ParamList to the internal PrimvarStorage
+///   representation, checking lengths as required.
+/// - Filling in variables like the color ("Cs") from the attributes state if
+///   necessary
+/// - Transforming the variables into the current coordinate system (at time 0)
+PrimvarStoragePtr RenderApi::preparePrimvars(const ParamList& pList,
+                                             const IclassStorage& storageCounts)
+{
+    // Check that position data is present.
+    // TODO: Check not required for quadrics, also consider Pw, Pz.
+    if(pList.find(Ri::TypeSpec(Ri::TypeSpec::Vertex,
+                               Ri::TypeSpec::Point), "P") == -1)
+    {
+        AQSIS_THROW_XQERROR(XqValidation, EqE_MissingData,
+                            "could not find position \"P\" in param list");
+    }
+    PrimvarStorageBuilder builder;
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        const Ri::Param& param = pList[i];
+        if(param.spec().storageType() != Ri::TypeSpec::Float)
+        {
+            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+                << "Parameter \"" << param.name()
+                << "\" ignored due to unimplemented type";
+            continue;
+        }
+        FloatArray data = param.floatData();
+        builder.add(riParamToPrimvarSpec(param), data.begin(), data.size());
+    }
+    // Fill in Color (TODO: and Opacity) if they're not present.
+    if(findVarByName(pList, "Cs") == -1)
+    {
+        builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1,
+                                g_ustring_Cs), (float*)&attrsRead()->color, 3);
+    }
+    PrimvarStoragePtr primVars = builder.build(storageCounts);
+    primVars->transform(m_transStack.top());
+    return primVars;
+}
+
+/// Add geometry to the renderer.
+///
+/// If outside a motion block, the geometry is added directly.  If inside a
+/// motion block, it's checked for compatibility and added to the list of
+/// deforming geometry key frames.
+void RenderApi::addGeometry(const GeometryPtr& geom)
+{
+    if(m_motionState == Motion_None)
+    {
+        // No motion case; simply pass geometry directly on to renderer.
+        m_renderer->add(geom, attrsRead());
+        return;
+    }
+    // Check that the geometry is compatible with previous geometry type
+    // specified in the motion block.
+    if(m_motionState == Motion_Begin)
+        m_motionState = Motion_Geometry;
+    else if(m_motionState != Motion_Geometry)
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadMotion,
+                            "incompatible API call in motion block");
+    else if(!m_motionGeometry[0]->motionCompatible(*geom))
+        AQSIS_THROW_XQERROR(XqValidation, EqE_BadMotion,
+                            "incompatible geometry in motion block");
+    // Save the geometry for later use.
+    m_motionGeometry.push_back(geom);
 }
 
 

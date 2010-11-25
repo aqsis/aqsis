@@ -83,6 +83,8 @@ struct PrimvarSpec : public VarSpec
 
     Iclass iclass;
 
+    PrimvarSpec() : VarSpec(), iclass(Uniform) {}
+
     PrimvarSpec(Iclass iclass, Type type, int arraySize, ustring name)
         : VarSpec(type, arraySize, name), iclass(iclass) {}
 

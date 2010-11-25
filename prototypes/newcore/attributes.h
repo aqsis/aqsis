@@ -32,12 +32,14 @@
 
 #include "refcount.h"
 #include "shader.h"
+#include "util.h"
 
 namespace Aqsis {
 
 /// Surface attribute state.
 struct Attributes : public RefCounted
 {
+    C3f color;          ///< Surface base color
     float shadingRate;  ///< Desired micropoly area
     float focusFactor;  ///< Control for enlarging focal blurred micropolys
     bool smoothShading; ///< Type of shading interpolation
@@ -46,7 +48,8 @@ struct Attributes : public RefCounted
     ShaderPtr displacementShader;  ///< displacement shader
 
     Attributes()
-        : shadingRate(1),
+        : color(1.0f),
+        shadingRate(1),
         focusFactor(1),
         smoothShading(true),
         displacementBound(0),
