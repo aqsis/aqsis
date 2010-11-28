@@ -165,6 +165,7 @@ class InteractiveRender : public QWidget
 
 		void mousePressEvent(QMouseEvent* event)
 		{
+            m_zooming = event->button() == Qt::RightButton;
 			m_prev_x = event->x();
 			m_prev_y = event->y();
 		}
@@ -175,17 +176,24 @@ class InteractiveRender : public QWidget
 			int dy = m_prev_y - event->y();
 			m_prev_x = event->x();
 			m_prev_y = event->y();
-			if(event->modifiers() & Qt::ControlModifier)
-			{
-				m_centre.y +=  m_dist/height()*dy;
-				m_centre.x += -m_dist/width()*dx*std::cos(deg2rad(m_phi));
-				m_centre.z += -m_dist/width()*dx*std::sin(deg2rad(m_phi));
-			}
-			else
-			{
-				m_theta += 0.5*dy;
-				m_phi   += 0.5*dx;
-			}
+            if(m_zooming)
+            {
+                m_dist *= std::pow(0.9, 30*double(dy)/height());
+            }
+            else
+            {
+                if(event->modifiers() & Qt::ControlModifier)
+                {
+                    m_centre.y +=  m_dist/height()*dy;
+                    m_centre.x += -m_dist/width()*dx*std::cos(deg2rad(m_phi));
+                    m_centre.z += -m_dist/width()*dx*std::sin(deg2rad(m_phi));
+                }
+                else
+                {
+                    m_theta += 0.5*dy;
+                    m_phi   += 0.5*dx;
+                }
+            }
             if(!m_frameTimer->isActive())
                 renderImage();
 		}
@@ -246,6 +254,7 @@ class InteractiveRender : public QWidget
 
         int m_prev_x;
         int m_prev_y;
+        bool m_zooming;
 
         float m_theta;
         float m_phi;
