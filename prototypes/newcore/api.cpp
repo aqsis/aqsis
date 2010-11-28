@@ -1425,13 +1425,28 @@ RtVoid RenderApi::GeneralPolygon(const IntArray& nverts,
 RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
                                  const ParamList& pList)
 {
-    ConstDataView<V3f> P(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Vertex, Ri::TypeSpec::Point), "P").begin());
-    ConstDataView<V3f> N(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Normal), "N").begin());
-    ConstDataView<C3f> Cs(pList.findFloatData(Ri::TypeSpec(Ri::TypeSpec::Varying, Ri::TypeSpec::Color), "Cs").begin());
-    float P_stor[12];
-    float N_stor[12];
-    float Cs_stor[12];
-    for(size_t face = 0; face < nverts.size(); ++face)
+    std::vector<PrimvarSpec> varSpecs;
+    std::vector<Ri::FloatArray> varData;
+    std::vector<std::vector<float> > paramStorage;
+    IclassStorage patchStoreCounts(1,4,4,4,4);
+    // Copy float parameters
+    for(size_t i = 0; i < pList.size(); ++i)
+    {
+        const Ri::Param& param = pList[i];
+        if(param.spec().storageType() != Ri::TypeSpec::Float)
+        {
+            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
+                << "Parameter \"" << param.name()
+                << "\" ignored due to unimplemented type";
+            continue;
+        }
+        varSpecs.push_back(riParamToPrimvarSpec(param));
+        paramStorage.push_back(std::vector<float>(
+                varSpecs.back().storageSize(patchStoreCounts)));
+        varData.push_back(param.floatData());
+    }
+    for(size_t face = 0, vertsIdx = 0; face < nverts.size();
+        vertsIdx += nverts[face], ++face)
     {
         if(nverts[face] != 4)
         {
@@ -1440,36 +1455,52 @@ RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
             continue;
         }
         PrimvarStorageBuilder builder;
-#       define COPYVAR(dest, src) \
-            dest[0] = src[verts[4*face+0]]; dest[1] = src[verts[4*face+1]]; \
-            dest[2] = src[verts[4*face+3]]; dest[3] = src[verts[4*face+2]];
+        for(size_t i = 0; i < varSpecs.size(); ++i)
         {
-            DataView<V3f> view(P_stor);
-            COPYVAR(view, P);
-            builder.add(Primvar::P, P_stor, 12);
+            int varSize = varSpecs[i].scalarSize();
+            bool vertexVar = false;
+            switch(varSpecs[i].iclass)
+            {
+                case PrimvarSpec::Constant:
+                    std::copy(varData[i].begin(), varData[i].end(),
+                            cbegin(paramStorage[i]));
+                    break;
+                case PrimvarSpec::Uniform:
+                    std::copy(varData[i].begin() + varSize*face,
+                            varData[i].begin() + varSize*(face+1),
+                            cbegin(paramStorage[i]));
+                    break;
+                case PrimvarSpec::Varying:
+                case PrimvarSpec::Vertex:
+                    vertexVar = true;
+                    // intentional fallthrough
+                case PrimvarSpec::FaceVarying:
+                case PrimvarSpec::FaceVertex:
+                    {
+                        int reorder[4] = {0, 1, 3, 2};
+                        // For each vertex in face
+                        for(int j = 0; j < 4; ++j)
+                        {
+                            int start = vertsIdx + reorder[j];
+                            if(vertexVar)
+                                start = verts[start];
+                            std::copy(varData[i].begin() + varSize*start,
+                                    varData[i].begin() + varSize*(start+1),
+                                    cbegin(paramStorage[i]) + varSize*j);
+                        }
+                    }
+                    break;
+            }
+            builder.add(varSpecs[i], cbegin(paramStorage[i]),
+                        paramStorage[i].size());
         }
-        if(N)
+        // Fill in Color (TODO: and Opacity) if they're not present.
+        if(findVarByName(pList, "Cs") == -1)
         {
-            DataView<V3f> view(N_stor);
-            COPYVAR(view, N);
-            builder.add(Primvar::N, N_stor, 12);
+            builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1,
+                                    g_ustring_Cs), (float*)&attrsRead()->color, 3);
         }
-        if(Cs)
-        {
-            DataView<C3f> view(Cs_stor);
-            COPYVAR(view, Cs);
-            builder.add(Primvar::Cs, Cs_stor, 12);
-        }
-        else
-        {
-            float Cs_in[] = {1, 1, 1};
-            DataView<C3f> Cs(Cs_in, 0);
-            DataView<C3f> view(Cs_stor);
-            COPYVAR(view, Cs);
-            builder.add(Primvar::Cs, Cs_stor, 12);
-        }
-        IclassStorage storReq(1,4,4,4,4);
-        PrimvarStoragePtr primVars = builder.build(storReq);
+        PrimvarStoragePtr primVars = builder.build(patchStoreCounts);
         primVars->transform(m_transStack.top());
         GeometryPtr patch(new Aqsis::Patch(primVars));
         m_renderer->add(patch, attrsRead());

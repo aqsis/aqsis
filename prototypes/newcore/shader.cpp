@@ -398,7 +398,7 @@ class Plastic : public IOVarHolder
             ConstDataView<C3f> Cs = stor.get(StdIndices::Cs);
             DataView<C3f> Ci = stor.get(StdIndices::Ci);
             if(!Ci)
-                Ci = DataView<C3f>(FALLOCA(3*nshad));
+                return;
             DataView<V3f> P = stor.P();
 
             for(int i = 0; i < nshad; ++i)
