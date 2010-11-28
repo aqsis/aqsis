@@ -146,22 +146,28 @@ class InteractiveRender : public QWidget
 			renderImage();
 		}
 
-		void keyPressEvent(QKeyEvent* event)
-		{
-			if(event->key() == Qt::Key_Space)
+        void keyPressEvent(QKeyEvent* event)
+        {
+            switch(event->key())
             {
-                if(m_ribFiles.size() > 1)
-                {
-                    // Toggle animation timer active state
-                    if(m_frameTimer->isActive())
-                        m_frameTimer->stop();
-                    else
-                        m_frameTimer->start();
-                }
+                case Qt::Key_Space:
+                    if(m_ribFiles.size() > 1)
+                    {
+                        // Toggle animation timer active state
+                        if(m_frameTimer->isActive())
+                            m_frameTimer->stop();
+                        else
+                            m_frameTimer->start();
+                    }
+                    break;
+                case Qt::Key_R:
+                    // force re-render
+                    renderImage();
+                    break;
+                default:
+                    event->ignore();
             }
-            else
-                event->ignore();
-		}
+        }
 
 		void mousePressEvent(QMouseEvent* event)
 		{
