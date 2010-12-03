@@ -98,6 +98,7 @@ set(srcs
     #scenes/mbnoisetest.cpp
     #scenes/tenpatch.cpp
     shader.cpp
+    surfaces.cpp
     tessellation.cpp
     ustring/ustring.cpp
     varspec.cpp

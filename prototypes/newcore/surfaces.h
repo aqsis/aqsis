@@ -41,198 +41,57 @@
 
 namespace Aqsis {
 
-class Patch : public Geometry
+/// Bilinear patch surface type.
+///
+/// The bilinear patch is defined by bilinear interpolation between four corner
+/// vertices:
+///
+///   P(u,v) = lerp(lerp(P1, P2, u), lerp(P3, P4, u), v)
+///
+/// where the vertices P1 to P4 are laid out in the standard "patch order",
+///
+/// P1 -- P2
+/// |     |
+/// |     |
+/// P3 -- P4
+///
+/// (note that this is different from the usual cyclic ordering of vertices
+/// used for polygons)
+///
+/// For the bilinear patch, all the variable interpolation classes vertex,
+/// varying, facevertex and facevarying are the same, and use the bilinear
+/// vertex interpolation rule discussed above.  The uniform and constant
+/// classes are constant across the patch.
+///
+class BilinearPatch : public Geometry
 {
-    private:
-        PrimvarStoragePtr m_vars;
+    public:
+        BilinearPatch(const PrimvarStoragePtr& vars);
 
+        virtual bool motionCompatible(Geometry& geom);
+
+        virtual void tessellate(const M44f& splitTrans, int forceSplit,
+                                TessellationContext& tessCtx) const;
+
+        virtual Box3f bound() const;
+
+    private:
+        friend class SurfaceSplitter<BilinearPatch>;
+        friend class SurfaceDicer<BilinearPatch>;
+
+        BilinearPatch(const PrimvarStoragePtr& vars,
+                      float uMin, float uMax, float vMin, float vMax);
+
+        void dice(int nu, int nv, TessellationContext& tessCtx) const;
+
+        void split(bool splitInU, TessellationContext& tessCtx) const;
+
+        void getCorners(V3f& a, V3f& b, V3f& c, V3f& d) const;
+
+        PrimvarStoragePtr m_vars;
         // uv coordinates for corners of the base patch.
         const float m_uMin, m_uMax;
         const float m_vMin, m_vMax;
-
-        friend class SurfaceSplitter<Patch>;
-        friend class SurfaceDicer<Patch>;
-
-        void dice(int nu, int nv, TessellationContext& tessCtx) const
-        {
-            GridStorageBuilder& builder = tessCtx.gridStorageBuilder();
-            // Add all the primvars to the grid
-            builder.add(m_vars->varSet());
-            GridStoragePtr storage = builder.build(nu*nv);
-            boost::intrusive_ptr<QuadGrid> grid(new QuadGrid(nu, nv, storage));
-
-            // Create some space to store the variable temporaries.
-            int maxAgg = storage->maxAggregateSize();
-            float* aMin = FALLOCA(maxAgg);
-            float* aMax = FALLOCA(maxAgg);
-
-            float du = (m_uMax-m_uMin)/(nu-1);
-            float dv = (m_vMax-m_vMin)/(nv-1);
-
-            for(int ivar = 0, nvars = m_vars->varSet().size();
-                ivar < nvars; ++ivar)
-            {
-                ConstFvecView pvar = m_vars->get(ivar);
-                FvecView gvar = storage->get(m_vars->varSet()[ivar]);
-                int size = gvar.elSize();
-
-                if(gvar.uniform())
-                {
-                    // Uniform - no interpolation, just copy.
-                    std::memcpy(gvar[0], pvar[0], size*sizeof(float));
-                }
-                else
-                {
-                    // linear interpolation for Varying, Vertex, FaceVarying,
-                    // FaceVertex.
-                    const float* a1 = pvar[0];
-                    const float* a2 = pvar[1];
-                    const float* a3 = pvar[2];
-                    const float* a4 = pvar[3];
-                    for(int v = 0; v < nv; ++v)
-                    {
-                        float fv = m_vMin + dv*v;
-                        // Get endpoints of current segment via linear
-                        // interpolation
-                        for(int i = 0; i < size; ++i)
-                        {
-                            aMin[i] = lerp(a1[i], a3[i], fv);
-                            aMax[i] = lerp(a2[i], a4[i], fv);
-                        }
-                        // Interpolate between endpoints
-                        for(int u = 0; u < nu; ++u)
-                        {
-                            float fu = m_uMin + du*u;
-                            float* out = gvar[u];
-                            for(int i = 0; i < size; ++i)
-                                out[i] = lerp(aMin[i], aMax[i], fu);
-                        }
-                        gvar += nu;
-                    }
-                }
-            }
-            tessCtx.push(grid);
-        }
-
-        void split(bool splitInU, TessellationContext& tessCtx) const
-        {
-            // Split
-            if(splitInU)
-            {
-                // split in the middle of the a-b and c-d sides.
-                // a---b
-                // | | |
-                // c---d
-                float uMid = 0.5*(m_uMin + m_uMax);
-                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
-                                                   uMid, m_vMin, m_vMax)));
-                tessCtx.push(GeometryPtr(new Patch(m_vars, uMid,
-                                                   m_uMax, m_vMin, m_vMax)));
-            }
-            else
-            {
-                // split in the middle of the a-c and b-d sides.
-                // a---b
-                // |---|
-                // c---d
-                float vMid = 0.5*(m_vMin + m_vMax);
-                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
-                                                   m_uMax, m_vMin, vMid)));
-                tessCtx.push(GeometryPtr(new Patch(m_vars, m_uMin,
-                                                   m_uMax, vMid, m_vMax)));
-            }
-        }
-
-        void getCorners(V3f& a, V3f& b, V3f& c, V3f& d) const
-        {
-            ConstDataView<V3f> P = m_vars->P();
-            a = bilerp(P[0], P[1], P[2], P[3], m_uMin, m_vMin);
-            b = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMin);
-            c = bilerp(P[0], P[1], P[2], P[3], m_uMin, m_vMax);
-            d = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMax);
-        }
-
-        Patch(const PrimvarStoragePtr& vars,
-              float uMin, float uMax, float vMin, float vMax)
-            : m_vars(vars),
-            m_uMin(uMin), m_uMax(uMax),
-            m_vMin(vMin), m_vMax(vMax)
-        { }
-
-    public:
-        Patch(const PrimvarStoragePtr& vars)
-            : m_vars(vars),
-            m_uMin(0), m_uMax(1),
-            m_vMin(0), m_vMax(1)
-        { }
-
-        virtual bool motionCompatible(Geometry& geom)
-        {
-            Patch* patch = dynamic_cast<Patch*>(&geom);
-            if(!patch)
-                return false;
-            // Any two bilinear patches are automatically compatible, so
-            // if the cast succeeds there's nothing else to check.
-            return true;
-        }
-
-        virtual void tessellate(const M44f& splitTrans, int forceSplit,
-                                TessellationContext& tessCtx) const
-        {
-            if(forceSplit)
-            {
-                // Forced split.  if this is an eye split.  We alternate split
-                // direction to try to resolve eye splits.
-                SurfaceSplitter<Patch> splitter(forceSplit % 2 == 0);
-                tessCtx.invokeTessellator(splitter);
-                return;
-            }
-            V3f a,b,c,d;
-            getCorners(a,b,c,d);
-
-            // Transform points into "splitting coordinates"
-            V3f aSpl = a * splitTrans;
-            V3f bSpl = b * splitTrans;
-            V3f cSpl = c * splitTrans;
-            V3f dSpl = d * splitTrans;
-
-            const Options& opts = tessCtx.options();
-
-            // estimate length in a-b, c-d direction
-            float lu = 0.5*((bSpl-aSpl).length() + (dSpl-cSpl).length());
-            // estimate length in a-c, b-d direction
-            float lv = 0.5*((cSpl-aSpl).length() + (dSpl-bSpl).length());
-
-            // Diceable test: Compare the number of vertices in the resulting
-            // grid to the desired maximum grid size
-            if(lu*lv <= opts.gridSize*opts.gridSize)
-            {
-                // Dice the surface when number of verts is small enough.
-                int nu = 2 + ifloor(lu);
-                int nv = 2 + ifloor(lv);
-                SurfaceDicer<Patch> dicer(nu, nv);
-                tessCtx.invokeTessellator(dicer);
-            }
-            else
-            {
-                // Otherwise, split the surface.  The splitting direction is
-                // the shortest edge.
-                bool splitDirectionU = lu > lv;
-                SurfaceSplitter<Patch> splitter(splitDirectionU);
-                tessCtx.invokeTessellator(splitter);
-            }
-        }
-
-        virtual Box3f bound() const
-        {
-            V3f a,b,c,d;
-            getCorners(a,b,c,d);
-            Box3f bnd(a);
-            bnd.extendBy(b);
-            bnd.extendBy(c);
-            bnd.extendBy(d);
-            return bnd;
-        }
 };
 
 
