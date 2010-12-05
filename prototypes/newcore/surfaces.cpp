@@ -112,7 +112,6 @@ Box3f BilinearPatch::bound() const
 }
 
 
-//------------------------------------------------------------------------------
 inline BilinearPatch::BilinearPatch(const PrimvarStoragePtr& vars,
                         float uMin, float uMax, float vMin, float vMax)
     : m_vars(vars),
@@ -221,6 +220,103 @@ inline void BilinearPatch::getCorners(V3f& a, V3f& b, V3f& c, V3f& d) const
     b = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMin);
     c = bilerp(P[0], P[1], P[2], P[3], m_uMin, m_vMax);
     d = bilerp(P[0], P[1], P[2], P[3], m_uMax, m_vMax);
+}
+
+
+//------------------------------------------------------------------------------
+// ConvexPolyMesh implementation
+
+ConvexPolyMesh::ConvexPolyMesh(int nFaces, const int* vertsPerFace,
+                               int nVertexIndices, const int* vertexIndices,
+                               const PrimvarStoragePtr& vars)
+    : m_vars(vars),
+    m_nfaces(nFaces),
+    m_vertsPerFace(new int[m_nfaces]),
+    m_nverts(nVertexIndices),
+    m_vertIndices(new int[m_nverts])
+{
+    std::memcpy(m_vertsPerFace.get(), vertsPerFace, sizeof(int)*m_nfaces);
+    std::memcpy(m_vertIndices.get(), vertexIndices, sizeof(int)*m_nverts);
+}
+
+bool ConvexPolyMesh::motionCompatible(Geometry& geom)
+{
+    ConvexPolyMesh* mesh = dynamic_cast<ConvexPolyMesh*>(&geom);
+    if(!mesh)
+        return false;
+    // Ok, the other geometry is a mesh.  Also need to check that the
+    // number of verts per face are the same for both meshes.
+    if(m_nfaces != mesh->m_nfaces)
+        return false;
+    for(int i = 0; i < m_nfaces; ++i)
+        if(m_vertsPerFace[i] != mesh->m_vertsPerFace[i])
+            return false;
+    return true;
+}
+
+struct ConvexPolyMesh::Splitter : public TessControl
+{
+    virtual void tessellate(const Geometry& geom,
+                            TessellationContext& tessContext) const
+    {
+        static_cast<const ConvexPolyMesh&>(geom).split(tessContext);
+    }
+};
+
+void ConvexPolyMesh::tessellate(const M44f& splitTrans, int forceSplit,
+                        TessellationContext& tessCtx) const
+{
+    Splitter splitter;
+    tessCtx.invokeTessellator(splitter);
+}
+
+Box3f ConvexPolyMesh::bound() const
+{
+    Box3f bnd;
+    ConstDataView<V3f> P = m_vars->P();
+    int numVerts = m_vars->iclassStorage().vertex;
+    for(int i = 0; i < numVerts; ++i)
+        bnd.extendBy(P[i]);
+    return bnd;
+}
+
+/// Split the mesh into a piece of geometry for each face
+///
+/// TODO: For good performance this should be much more sophisticated!
+void ConvexPolyMesh::split(TessellationContext& tessCtx) const
+{
+    const PrimvarSet& varSpecs = m_vars->varSet();
+    // Copy parameters from the mesh to each patch.
+    PrimvarStorageBuilder builder;
+    for(int face = 0, vertsIdx = 0; face < m_nfaces;
+        vertsIdx += m_vertsPerFace[face], ++face)
+    {
+        if(m_vertsPerFace[face] != 4)
+        {
+            // TODO: Non-quad faces need to be supported!
+            continue;
+        }
+        // Construct arrays holding the indices for the current patch in the
+        // mesh privar arrays.
+        const int constantIndices[] = {0};
+        const int uniformIndices[] = {face};
+        const int fvertexIndices[] = {vertsIdx, vertsIdx + 1,
+                                      vertsIdx + 3, vertsIdx + 2};
+        const int vertexIndices[] = {
+            m_vertIndices[fvertexIndices[0]], m_vertIndices[fvertexIndices[1]],
+            m_vertIndices[fvertexIndices[2]], m_vertIndices[fvertexIndices[3]]
+        };
+        const int* allIndices[] = {constantIndices, uniformIndices,
+                                   vertexIndices, vertexIndices,
+                                   fvertexIndices, fvertexIndices};
+        for(int i = 0; i < varSpecs.size(); ++i)
+        {
+            builder.add(varSpecs[i], m_vars->get(i),
+                        allIndices[varSpecs[i].iclass]);
+        }
+        PrimvarStoragePtr primVars = builder.build(IclassStorage(1,4,4,4,4));
+        tessCtx.push(new BilinearPatch(primVars));
+    }
 }
 
 }

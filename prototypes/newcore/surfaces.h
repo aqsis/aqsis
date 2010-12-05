@@ -95,5 +95,44 @@ class BilinearPatch : public Geometry
 };
 
 
+//------------------------------------------------------------------------------
+/// A mesh of convex polygons.
+///
+/// This class corresponds to the PointsPolygons API call.
+///
+/// TODO: This is a work in progress, there are several major caveats:
+///   - Only quad faces are supported
+///   - Small polygons will be very inefficiently handled because a separate
+///     piece of geometry is made for each face.
+///   - The split tree is very broad, since splitting ConvexPolyMesh
+///     immediately results in a piece of geometry for each face.  This will
+///     bog down the geometry handling part of the pipeline.
+class ConvexPolyMesh : public Geometry
+{
+    public:
+        ConvexPolyMesh(int nFaces, const int* vertsPerFace,
+                       int nVertexIndices, const int* vertexIndices,
+                       const PrimvarStoragePtr& vars);
+
+        virtual bool motionCompatible(Geometry& geom);
+
+        virtual void tessellate(const M44f& splitTrans, int forceSplit,
+                                TessellationContext& tessCtx) const;
+
+        virtual Box3f bound() const;
+
+    private:
+        struct Splitter;
+
+        void split(TessellationContext& tessCtx) const;
+
+        PrimvarStoragePtr m_vars;
+        int m_nfaces;
+        boost::scoped_array<int> m_vertsPerFace;
+        int m_nverts;
+        boost::scoped_array<int> m_vertIndices;
+};
+
+
 } // namespace Aqsis
 #endif // AQSIS_SURFACES_H_INCLUDED

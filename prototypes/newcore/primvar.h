@@ -175,13 +175,27 @@ class PrimvarStorage : public RefCounted
             VarIterT var = varBegin;
             for(int i = 0; i < nvars; ++i, ++var)
             {
-                // Copy the data over
-                const int size = var->storageSize(storCount);
-                float* data = m_storage.get() + offset;
-                std::memcpy(data, var->data, size*sizeof(float));
                 // Record a view of the data
-                const int elSize = var->scalarSize();
-                m_views[i] = FvecView(data, elSize);
+                float* dest = m_storage.get() + offset;
+                const int elSize = var->data.elSize();
+                m_views[i] = FvecView(dest, elSize);
+                // Copy the data for the i'th variable over
+                const int size = var->storageSize(storCount);
+                if(var->dataIndexBegin)
+                {
+                    const int* dataIndexEnd = var->dataIndexBegin +
+                                              storCount.storage(var->iclass);
+                    for(const int* idx = var->dataIndexBegin;
+                        idx < dataIndexEnd; ++idx)
+                    {
+                        const float* src = var->data[*idx];
+                        for(int k = 0; k < elSize; ++k)
+                            dest[k] = src[k];
+                        dest += elSize;
+                    }
+                }
+                else
+                    std::memcpy(dest, var->data.storage(), size*sizeof(float));
                 offset += size;
             }
         }
@@ -189,6 +203,9 @@ class PrimvarStorage : public RefCounted
     public:
         /// Get the set of contained variables
         const PrimvarSet& varSet() const { return m_vars; }
+
+        /// Get storage amount used for each interpolation class
+        const IclassStorage& iclassStorage() { return m_storCount; }
 
         /// Get allocated storage for the ith variable
         FvecView get(int i) { return m_views[i]; }
@@ -269,42 +286,76 @@ class PrimvarStorageBuilder
     private:
         struct PvarInitSpec : public PrimvarSpec
         {
-            const float* data; ///< data storage
-            int srcLength;     ///< length of data storage
-            PvarInitSpec(const PrimvarSpec& spec, const float* data,
-                         int srcLength)
+            ConstFvecView data; ///< data storage
+            int dataLength;     ///< length of data storage (-1 == don't check)
+            const int* dataIndexBegin;  /// Indices into data (null if indices are consecutive)
+            PvarInitSpec(const PrimvarSpec& spec, ConstFvecView data,
+                         int dataLength, const int* dataIndexBegin)
                 : PrimvarSpec(spec),
                 data(data),
-                srcLength(srcLength)
+                dataLength(dataLength),
+                dataIndexBegin(dataIndexBegin)
             { }
         };
-        typedef std::vector<PvarInitSpec> InitSpecVec;
-        InitSpecVec m_vars;
+        std::vector<PvarInitSpec> m_vars;
 
     public:
         PrimvarStorageBuilder()
             : m_vars()
         { }
 
-        void add(const PrimvarSpec& var, const float* data, int srcLength)
+        /// Add a variable to be used during build()
+        ///
+        /// \param var - variable type and name
+        /// \param data - flat array of values for var.  *Must* remain valid
+        ///               until after build() has been called!
+        /// \param dataLength - length of data array
+        void add(const PrimvarSpec& var, const float* data, int dataLength)
         {
-            m_vars.push_back(PvarInitSpec(var, data, srcLength));
+            int len = var.scalarSize();
+            m_vars.push_back(PvarInitSpec(var, ConstFvecView(data, len),
+                                          dataLength, 0));
         }
 
+        /// Add a variable to be used during build()
+        ///
+        /// The i'th element of var is copied from the dest array by indexing
+        /// dest as follows: dest[ dataIndexBegin[i] ]
+        ///
+        /// \param var - variable type and name
+        /// \param data - array view of values for var.  *Must* remain valid
+        ///               until after build() has been called!
+        /// \param dataIndexBegin - array of indices into data
+        void add(const PrimvarSpec& var, ConstFvecView data,
+                 const int* dataIndexBegin)
+        {
+            m_vars.push_back(PvarInitSpec(var, data, -1, dataIndexBegin));
+        }
+
+        /// Build a PrimvarStorage object from add()'ed variables.
+        ///
+        /// After building, the builder object is reset to remove all added
+        /// variables, ready for reuse if desired.  For allocation efficiency
+        /// it's good to reuse the same builder object if you're going to be
+        /// creating multiple PrimvarStorage objects at the same time.
+        ///
         PrimvarStoragePtr build(const IclassStorage& storCount)
         {
             for(int i = 0, nvars = m_vars.size(); i < nvars; ++i)
             {
-                int length = m_vars[i].storageSize(storCount);
-                int srcLength = m_vars[i].srcLength;
-                if(srcLength < length)
+                int dataLength = m_vars[i].dataLength;
+                if(dataLength >= 0)
                 {
-                    throw std::runtime_error("Not enough floats for "
-                                            "primitive variable!");
+                    int desiredLength = m_vars[i].storageSize(storCount);
+                    if(dataLength < desiredLength)
+                    {
+                        throw std::runtime_error("Not enough floats for "
+                                                "primitive variable!");
+                    }
+                    else if(dataLength > desiredLength)
+                        std::cerr << "Warning: excess floats in "
+                                    "primitive variable array\n";
                 }
-                else if(srcLength > length)
-                    std::cerr << "Warning: excess floats in "
-                                "primitive variable array\n";
             }
             // TODO: Have some way to flag primvars that won't be used for
             // deletion.
@@ -317,8 +368,10 @@ class PrimvarStorageBuilder
             //   s, t
             //
             std::sort(m_vars.begin(), m_vars.end());
-            return PrimvarStoragePtr(
+            PrimvarStoragePtr storage(
                 new PrimvarStorage(m_vars.begin(), m_vars.end(), storCount));
+            m_vars.clear();
+            return storage;
         }
 };
 

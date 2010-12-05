@@ -1425,86 +1425,18 @@ RtVoid RenderApi::GeneralPolygon(const IntArray& nverts,
 RtVoid RenderApi::PointsPolygons(const IntArray& nverts, const IntArray& verts,
                                  const ParamList& pList)
 {
-    std::vector<PrimvarSpec> varSpecs;
-    std::vector<Ri::FloatArray> varData;
-    std::vector<std::vector<float> > paramStorage;
-    IclassStorage patchStoreCounts(1,4,4,4,4);
-    // Copy float parameters
-    for(size_t i = 0; i < pList.size(); ++i)
-    {
-        const Ri::Param& param = pList[i];
-        if(param.spec().storageType() != Ri::TypeSpec::Float)
-        {
-            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-                << "Parameter \"" << param.name()
-                << "\" ignored due to unimplemented type";
-            continue;
-        }
-        varSpecs.push_back(riParamToPrimvarSpec(param));
-        paramStorage.push_back(std::vector<float>(
-                varSpecs.back().storageSize(patchStoreCounts)));
-        varData.push_back(param.floatData());
-    }
-    for(size_t face = 0, vertsIdx = 0; face < nverts.size();
-        vertsIdx += nverts[face], ++face)
-    {
-        if(nverts[face] != 4)
-        {
-            AQSIS_LOG_WARNING(ehandler(), EqE_Unimplement)
-                << "Ignoring non-quad face in PointsPolygons";
-            continue;
-        }
-        PrimvarStorageBuilder builder;
-        for(size_t i = 0; i < varSpecs.size(); ++i)
-        {
-            int varSize = varSpecs[i].scalarSize();
-            bool vertexVar = false;
-            switch(varSpecs[i].iclass)
-            {
-                case PrimvarSpec::Constant:
-                    std::copy(varData[i].begin(), varData[i].end(),
-                            cbegin(paramStorage[i]));
-                    break;
-                case PrimvarSpec::Uniform:
-                    std::copy(varData[i].begin() + varSize*face,
-                            varData[i].begin() + varSize*(face+1),
-                            cbegin(paramStorage[i]));
-                    break;
-                case PrimvarSpec::Varying:
-                case PrimvarSpec::Vertex:
-                    vertexVar = true;
-                    // intentional fallthrough
-                case PrimvarSpec::FaceVarying:
-                case PrimvarSpec::FaceVertex:
-                    {
-                        int reorder[4] = {0, 1, 3, 2};
-                        // For each vertex in face
-                        for(int j = 0; j < 4; ++j)
-                        {
-                            int start = vertsIdx + reorder[j];
-                            if(vertexVar)
-                                start = verts[start];
-                            std::copy(varData[i].begin() + varSize*start,
-                                    varData[i].begin() + varSize*(start+1),
-                                    cbegin(paramStorage[i]) + varSize*j);
-                        }
-                    }
-                    break;
-            }
-            builder.add(varSpecs[i], cbegin(paramStorage[i]),
-                        paramStorage[i].size());
-        }
-        // Fill in Color (TODO: and Opacity) if they're not present.
-        if(findVarByName(pList, "Cs") == -1)
-        {
-            builder.add(PrimvarSpec(PrimvarSpec::Constant, PrimvarSpec::Color, 1,
-                                    g_ustring_Cs), (float*)&attrsRead()->color, 3);
-        }
-        PrimvarStoragePtr primVars = builder.build(patchStoreCounts);
-        primVars->transform(m_transStack.top());
-        GeometryPtr patch(new BilinearPatch(primVars));
-        m_renderer->add(patch, attrsRead());
-    }
+    int faceVaryingSize = 0;
+    for(size_t i = 0; i < nverts.size(); ++i)
+        faceVaryingSize += nverts[i];
+    int varyingSize = 0;
+    for(size_t i = 0; i < verts.size(); ++i)
+        varyingSize = std::max(varyingSize, verts[i]);
+    varyingSize += 1;
+    IclassStorage storeCounts(nverts.size(), varyingSize, varyingSize,
+                              faceVaryingSize, faceVaryingSize);
+    PrimvarStoragePtr primVars = preparePrimvars(pList, storeCounts);
+    addGeometry(new ConvexPolyMesh(nverts.size(), nverts.begin(),
+                                   verts.size(), verts.begin(), primVars));
 }
 
 RtVoid RenderApi::PointsGeneralPolygons(const IntArray& nloops,
