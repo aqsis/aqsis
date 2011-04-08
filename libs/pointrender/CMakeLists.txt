@@ -7,5 +7,11 @@ set(CMAKE_BUILD_TYPE Release)
 
 qt4_wrap_cpp(moc_srcs ptview.h)
 
-add_executable(ptview ptview.cpp ${moc_srcs})
+set(srcs
+	${moc_srcs}
+	cornellbox.cpp
+	ptview.cpp
+)
+
+add_executable(ptview ${srcs})
 target_link_libraries(ptview ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})

@@ -31,6 +31,7 @@
 #include <QtGui/QApplication>
 
 #include "ptview.h"
+#include "cornellbox.h"
 
 
 //------------------------------------------------------------------------------
@@ -112,11 +113,16 @@ void PointViewport::paintGL()
     glEnd();
 
     // Draw points
-    // TODO
-    glPointSize(10);
+    std::vector<float> ptData;
+    cornellBoxPoints(ptData, 5);
+    glPointSize(1);
     glColor3f(1,1,1);
+    glLoadIdentity();
+    glTranslatef(-2.5, -2.5, -2.5);
+    glScalef(0.01, 0.01, 0.01);
     glBegin(GL_POINTS);
-        glVertex3f(0,0,0);
+        for(int i = 0; i < ptData.size(); i += 7)
+            glVertex3f(ptData[i], ptData[i+1], ptData[i+2]);
     glEnd();
 }
 
