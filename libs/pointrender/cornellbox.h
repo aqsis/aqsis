@@ -32,7 +32,7 @@
 #define AQSIS_CORNELLBOX_H_INCLUDED
 
 
-void cornellBoxPoints(std::vector<float>& data, float spatialRes);
+void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes);
 
 
 #endif // AQSIS_CORNELLBOX_H_INCLUDED

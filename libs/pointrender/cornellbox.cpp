@@ -36,7 +36,7 @@
 using Imath::V3f;
 
 
-inline V3f ptov3(float* d)
+inline V3f ptov3(const float* d)
 {
     return V3f(d[0], d[1], d[2]);
 }
@@ -50,14 +50,15 @@ inline T bilerp(float u, float v, T x1, T x2, T x3, T x4)
 
 
 /// Generate a set of points from a bilinear patch
-static void makeBilinearPatch(std::vector<float>& outData, float* patchData,
-							  int dataLen, float spatialRes)
+static void makeBilinearPatch(std::vector<float>& outData,
+							  const float* patchData, int dataLen,
+							  float spatialRes)
 {
     // Get positions of points
-    float* d1 = patchData;
-    float* d2 = patchData + dataLen;
-    float* d3 = patchData + 2*dataLen;
-    float* d4 = patchData + 3*dataLen;
+    const float* d1 = patchData;
+    const float* d2 = patchData + dataLen;
+    const float* d3 = patchData + 2*dataLen;
+    const float* d4 = patchData + 3*dataLen;
     V3f p1 = ptov3(d1); V3f p2 = ptov3(d2);
     V3f p3 = ptov3(d3); V3f p4 = ptov3(d4);
     int nu = int(std::max((p1 - p2).length(), (p3 - p4).length()) / spatialRes);
@@ -96,11 +97,12 @@ static void makeBilinearPatch(std::vector<float>& outData, float* patchData,
 ///
 /// \param data - output point data is stored here as [P1 N1 r1 P2 N2 r2 ...]
 /// \param spatialRes - the desired spatial distance between adjacent points.
-void cornellBoxPoints(std::vector<float>& data, float spatialRes)
+void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes)
 {
     data.clear();
-    int userDataLen = 0;
-    int dataLen = userDataLen + 3;
+    const int userDataLen = 3;
+	stride = 7 + userDataLen;
+    const int dataLen = userDataLen + 3;
 #define PATCH_BEGIN                                          \
     {                                                        \
         float d[] = {
@@ -113,106 +115,106 @@ void cornellBoxPoints(std::vector<float>& data, float spatialRes)
     // Container
     // floor
     PATCH_BEGIN
-        552.8, 0, 0,
-        0,     0, 0,
-        549.6, 0, 559.2,
-        0,     0, 559.2
+        552.8, 0, 0,          1,1,1,
+        0,     0, 0,          1,1,1,
+        549.6, 0, 559.2,      1,1,1,
+        0,     0, 559.2,      1,1,1
     PATCH_END
     // ceiling
     PATCH_BEGIN
-        556.0, 548.8, 0,
-        556.0, 548.8, 559.2,
-        0,     548.8, 0.0,
-        0,     548.8, 559.2
+        556.0, 548.8, 0,      1,1,1,
+        556.0, 548.8, 559.2,  1,1,1,
+        0,     548.8, 0.0,    1,1,1,
+        0,     548.8, 559.2,  1,1,1
     PATCH_END
     // Back wall
     PATCH_BEGIN
-        549.6, 0, 559.2,
-        0,     0, 559.2,
-        556.0, 548.8, 559.2,
-        0,     548.8, 559.2
+        549.6, 0, 559.2,      1,1,1,
+        0,     0, 559.2,      1,1,1,
+        556.0, 548.8, 559.2,  1,1,1,
+        0,     548.8, 559.2,  1,1,1
     PATCH_END
     // Left wall
     // Color [0.64 0.15 0.1]
     PATCH_BEGIN
-        552.8, 0,     0,
-        549.6, 0,     559.2,
-        556,   548.8, 0,
-        556,   548.8, 559.2
+        552.8, 0,     0,      0.64, 0.15, 0.1,
+        549.6, 0,     559.2,  0.64, 0.15, 0.1,
+        556,   548.8, 0,      0.64, 0.15, 0.1,
+        556,   548.8, 559.2,  0.64, 0.15, 0.1,
     PATCH_END
     // Right wall
     // Color [0.15 0.5 0.15]
     PATCH_BEGIN
-        0, 0,     559.2,
-        0, 0,     0,
-        0, 548.8, 559.2,
-        0, 548.8, 0
+        0, 0,     559.2,      0.15, 0.5, 0.15,
+        0, 0,     0,          0.15, 0.5, 0.15,
+        0, 548.8, 559.2,      0.15, 0.5, 0.15,
+        0, 548.8, 0,          0.15, 0.5, 0.15
     PATCH_END
 
     //--------------------------------------------------
     // Tall block
     PATCH_BEGIN
-        423.0, 330.0, 247.0,
-        265.0, 330.0, 296.0,
-        472.0, 330.0, 406.0,
-        314.0, 330.0, 456.0
+        423.0, 330.0, 247.0,    1,1,1,
+        265.0, 330.0, 296.0,    1,1,1,
+        472.0, 330.0, 406.0,    1,1,1,
+        314.0, 330.0, 456.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        423.0,   0.0, 247.0,
-        423.0, 330.0, 247.0,
-        472.0,   0.0, 406.0,
-        472.0, 330.0, 406.0
+        423.0,   0.0, 247.0,    1,1,1,
+        423.0, 330.0, 247.0,    1,1,1,
+        472.0,   0.0, 406.0,    1,1,1,
+        472.0, 330.0, 406.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        472.0,   0.0, 406.0,
-        472.0, 330.0, 406.0,
-        314.0,   0.0, 456.0,
-        314.0, 330.0, 456.0
+        472.0,   0.0, 406.0,    1,1,1,
+        472.0, 330.0, 406.0,    1,1,1,
+        314.0,   0.0, 456.0,    1,1,1,
+        314.0, 330.0, 456.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        314.0,   0.0, 456.0,
-        314.0, 330.0, 456.0,
-        265.0,   0.0, 296.0,
-        265.0, 330.0, 296.0
+        314.0,   0.0, 456.0,    1,1,1,
+        314.0, 330.0, 456.0,    1,1,1,
+        265.0,   0.0, 296.0,    1,1,1,
+        265.0, 330.0, 296.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        265.0,   0.0, 296.0,
-        265.0, 330.0, 296.0,
-        423.0,   0.0, 247.0,
-        423.0, 330.0, 247.0
+        265.0,   0.0, 296.0,    1,1,1,
+        265.0, 330.0, 296.0,    1,1,1,
+        423.0,   0.0, 247.0,    1,1,1,
+        423.0, 330.0, 247.0,    1,1,1
     PATCH_END
 
     //--------------------------------------------------
     // Short block
     PATCH_BEGIN
-        130.0, 165.0,  65.0,
-         82.0, 165.0, 225.0,
-        290.0, 165.0, 114.0,
-        240.0, 165.0, 272.0
+        130.0, 165.0,  65.0,    1,1,1,
+         82.0, 165.0, 225.0,    1,1,1,
+        290.0, 165.0, 114.0,    1,1,1,
+        240.0, 165.0, 272.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        290.0,   0.0, 114.0,
-        290.0, 165.0, 114.0,
-        240.0,   0.0, 272.0,
-        240.0, 165.0, 272.0
+        290.0,   0.0, 114.0,    1,1,1,
+        290.0, 165.0, 114.0,    1,1,1,
+        240.0,   0.0, 272.0,    1,1,1,
+        240.0, 165.0, 272.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        130.0,   0.0,  65.0,
-        130.0, 165.0,  65.0,
-        290.0,   0.0, 114.0,
-        290.0, 165.0, 114.0
+        130.0,   0.0,  65.0,    1,1,1,
+        130.0, 165.0,  65.0,    1,1,1,
+        290.0,   0.0, 114.0,    1,1,1,
+        290.0, 165.0, 114.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-         82.0,   0.0, 225.0,
-         82.0, 165.0, 225.0,
-        130.0,   0.0,  65.0,
-        130.0, 165.0,  65.0
+         82.0,   0.0, 225.0,    1,1,1,
+         82.0, 165.0, 225.0,    1,1,1,
+        130.0,   0.0,  65.0,    1,1,1,
+        130.0, 165.0,  65.0,    1,1,1
     PATCH_END
     PATCH_BEGIN
-        240.0,   0.0, 272.0,
-        240.0, 165.0, 272.0,
-         82.0,   0.0, 225.0,
-         82.0, 165.0, 225.0
+        240.0,   0.0, 272.0,    1,1,1,
+        240.0, 165.0, 272.0,    1,1,1,
+         82.0,   0.0, 225.0,    1,1,1,
+         82.0, 165.0, 225.0,    1,1,1
     PATCH_END
 }
 

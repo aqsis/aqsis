@@ -28,6 +28,8 @@
 // (This is the New BSD license)
 
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <QtGui/QApplication>
 
 #include "ptview.h"
@@ -51,11 +53,6 @@ PointViewport::PointViewport(QWidget *parent)
 
 void PointViewport::initializeGL()
 {
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_POINT_SMOOTH);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
     // background colour
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 
@@ -70,6 +67,15 @@ void PointViewport::resizeGL(int w, int h)
 {
     // Draw on full window
     glViewport(0, 0, w, h);
+    // Set camera projection
+    glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        const float n = 0.1f;
+        const float hOn2 = 0.5f*n;
+        const float wOn2 = hOn2*width()/height();
+        glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
+        glScalef(1, 1, -1);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -77,20 +83,16 @@ void PointViewport::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Set camera projection
-    glMatrixMode(GL_PROJECTION);
-        glLoadIdentity( );
-        const float n = 0.1f;
-        const float hOn2 = 0.5f*n;
-        const float wOn2 = hOn2*width()/height();
-        glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
-        glScalef(1, 1, -1);
-        glTranslatef(0, 0, m_dist);
-        glRotatef(m_theta, 1, 0, 0);
-        glRotatef(m_phi, 0, 1, 0);
-        glTranslatef(m_centre.x, m_centre.y, m_centre.z);
-    glMatrixMode(GL_MODELVIEW);
+    // Camera -> world transform.  Need to do this here rather than in
+    // GL_PROJECTION mode, otherwise the point size scaling won't work
+    // correctly.  (Standard GL practise?)
     glLoadIdentity();
+    glTranslatef(0, 0, m_dist);
+    glRotatef(m_theta, 1, 0, 0);
+    glRotatef(m_phi, 0, 1, 0);
+    glTranslatef(m_centre.x, m_centre.y, m_centre.z);
+
+    glEnable(GL_MULTISAMPLE);
 
     // Draw axes
     glColor3f(1.0,0.0,1.0);
@@ -112,18 +114,30 @@ void PointViewport::paintGL()
         glVertex3f(0, 0, 1);
     glEnd();
 
-    // Draw points
+    // Generate points.  TODO - store these as instance data
     std::vector<float> ptData;
-    cornellBoxPoints(ptData, 5);
-    glPointSize(1);
+    int ptStride;
+    cornellBoxPoints(ptData, ptStride, 5);
+
+    // Draw points
+    glPointSize(10);
     glColor3f(1,1,1);
-    glLoadIdentity();
+    // Set distance attenuation for points, following the usual 1/z law.
+    GLfloat attenParams[3] = {0, 0, 1};
+    glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenParams);
+    glPointParameterf(GL_POINT_SIZE_MIN, 0);
+    glPointParameterf(GL_POINT_SIZE_MAX, 100);
+    // Scale down model - the Cornell box is measured in mm.
     glTranslatef(-2.5, -2.5, -2.5);
     glScalef(0.01, 0.01, 0.01);
-    glBegin(GL_POINTS);
-        for(int i = 0; i < ptData.size(); i += 7)
-            glVertex3f(ptData[i], ptData[i+1], ptData[i+2]);
-    glEnd();
+    // Draw all points at once using vertex arrays.
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glVertexPointer(3, GL_FLOAT, ptStride*sizeof(float), &ptData[0]);
+    glColorPointer(3, GL_FLOAT, ptStride*sizeof(float), &ptData[0]+7);
+    glDrawArrays(GL_POINTS, 0, ptData.size()/ptStride);
+
+    glDisable(GL_MULTISAMPLE);
 }
 
 
@@ -182,6 +196,12 @@ void PointViewport::keyPressEvent(QKeyEvent *event)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    // Turn on multisampled antialiasing - this makes rendered point clouds
+    // look much nicer.
+    QGLFormat f = QGLFormat::defaultFormat();
+    f.setSampleBuffers(true);
+    QGLFormat::setDefaultFormat(f);
 
     PointViewerWindow window;
     window.show();
