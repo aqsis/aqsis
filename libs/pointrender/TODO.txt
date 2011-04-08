@@ -1,0 +1,13 @@
+Implementation steps:
+
+* Simple OpenGL ptc viewer application, generate Cornell box point cloud.
+
+* Render depth of points in a point cloud to a cube face microbuffer, visualize in viewer.
+
+* Use depth microbuffer to compute AO for each point
+
+* Crude octree acceleration structure with aggregates represented simply by points
+
+* Render colour (AOVs?) into microbuffer, integrate with BXDFs for colour bleeding
+
+* Improved acceleration structure; better treatment for aggregates
