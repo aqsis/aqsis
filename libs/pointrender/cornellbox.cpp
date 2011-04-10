@@ -52,24 +52,25 @@ inline T bilerp(float u, float v, T x1, T x2, T x3, T x4)
 /// Generate a set of points from a bilinear patch
 static void makeBilinearPatch(std::vector<float>& outData,
 							  const float* patchData, int dataLen,
-							  float spatialRes)
+							  float spatialRes, float scale)
 {
     // Get positions of points
     const float* d1 = patchData;
     const float* d2 = patchData + dataLen;
     const float* d3 = patchData + 2*dataLen;
     const float* d4 = patchData + 3*dataLen;
-    V3f p1 = ptov3(d1); V3f p2 = ptov3(d2);
-    V3f p3 = ptov3(d3); V3f p4 = ptov3(d4);
+    V3f p1 = scale*ptov3(d1); V3f p2 = scale*ptov3(d2);
+    V3f p3 = scale*ptov3(d3); V3f p4 = scale*ptov3(d4);
+	spatialRes *= scale;
     int nu = int(std::max((p1 - p2).length(), (p3 - p4).length()) / spatialRes);
     int nv = int(std::max((p1 - p3).length(), (p2 - p4).length()) / spatialRes);
-    float du = 1.0f/(nu-1);
-    float dv = 1.0f/(nv-1);
+    float du = 1.0f/nu;
+    float dv = 1.0f/nv;
     for(int j = 0; j < nv; ++j)
     for(int i = 0; i < nu; ++i)
     {
-        float u = i*du;
-        float v = j*dv;
+        float u = (0.5f + i)*du;
+        float v = (0.5f + j)*dv;
         // Compute position
         V3f p = bilerp(u,v, p1, p2, p3, p4);
         // Compute normal - dp/du x dp/dv
@@ -101,6 +102,7 @@ void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes)
 {
     data.clear();
     const int userDataLen = 3;
+	const float scale = 0.01;
 	stride = 7 + userDataLen;
     const int dataLen = userDataLen + 3;
 #define PATCH_BEGIN                                          \
@@ -108,7 +110,7 @@ void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes)
         float d[] = {
 #define PATCH_END                                            \
         };                                                   \
-        makeBilinearPatch(data, d, dataLen, spatialRes);     \
+        makeBilinearPatch(data, d, dataLen, spatialRes, scale); \
     }
 
     //--------------------------------------------------

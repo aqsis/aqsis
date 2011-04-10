@@ -43,14 +43,45 @@ using Imath::V3f;
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 
 
+/// TODO: Make into a class, etc.
+struct PointCloud
+{
+    int stride;
+    std::vector<float> data;
+
+    // Get centroid of point cloud.
+    V3f centroid() const
+    {
+        V3f sum(0);
+        for(std::vector<float>::const_iterator p = data.begin();
+            p < data.end(); p += stride)
+        {
+            sum += V3f(p[0], p[1], p[2]);
+        }
+        return (1.0f/data.size()*stride) * sum;
+    }
+};
+
+
 //------------------------------------------------------------------------------
-/// OpenGL-based viewer widget for point clouds.
-class PointViewport : public QGLWidget
+/// OpenGL-based viewer widget for point clouds (or more precisely, clouds of
+/// disk-like surface elements).
+class PointView : public QGLWidget
 {
     Q_OBJECT
 
     public:
-        PointViewport(QWidget *parent = NULL);
+        /// Point (surface element) visualization mode
+        enum VisMode
+        {
+            Vis_Points,  ///< Draw surfels using GL_POINTS
+            Vis_Disks    ///< Draw surfels as disks
+        };
+
+        PointView(QWidget *parent = NULL);
+
+        /// Set points to be rendered
+        void setPoints(const PointCloud* points);
 
     protected:
         // Qt OpenGL callbacks
@@ -65,7 +96,10 @@ class PointViewport : public QGLWidget
         void keyPressEvent(QKeyEvent *event);
 
     private:
-        // Mouse-based view positioning
+        /// Draw point cloud using OpenGL
+        static void drawPoints(const PointCloud& points, VisMode visMode);
+
+        /// Mouse-based camera positioning
         int m_prev_x;
         int m_prev_y;
         bool m_zooming;
@@ -73,6 +107,11 @@ class PointViewport : public QGLWidget
         float m_phi;
         float m_dist;
         V3f m_centre;
+        /// Type of visualization
+        VisMode m_visMode;
+        /// Point cloud data
+        const PointCloud* m_points;
+        V3f m_cloudCenter;
 };
 
 
@@ -85,11 +124,13 @@ class PointViewerWindow : public QMainWindow
     public:
         PointViewerWindow()
         {
-            m_pointViewport = new PointViewport();
-            m_pointViewport->setMinimumSize(QSize(640, 480));
-            setCentralWidget(m_pointViewport);
+            m_pointView = new PointView();
+            m_pointView->setMinimumSize(QSize(640, 480));
+            setCentralWidget(m_pointView);
             setWindowTitle("Aqsis point cloud viewer");
         }
+
+        PointView& pointView() { return *m_pointView; }
 
     protected:
         void keyReleaseEvent(QKeyEvent* event)
@@ -99,7 +140,7 @@ class PointViewerWindow : public QMainWindow
         }
 
     private:
-        PointViewport* m_pointViewport;
+        PointView* m_pointView;
 };
 
 
