@@ -31,8 +31,24 @@
 #ifndef AQSIS_CORNELLBOX_H_INCLUDED
 #define AQSIS_CORNELLBOX_H_INCLUDED
 
+#include <boost/shared_ptr.hpp>
 
-void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes);
+class PointArray;
+
+
+/// Generate a pointcloud representing the cornell box.
+///
+/// Cornell box data from
+/// http://www.graphics.cornell.edu/online/box/data.html
+/// Approximate RGB colors from RIB version of data found online.
+///
+/// \param spatialRes - the desired spatial distance between adjacent points.
+///        (The full box is roughly of size 550.)
+///
+/// \return Discretized cornell box as an array of points
+boost::shared_ptr<PointArray> cornellBoxPoints(float spatialRes);
 
 
 #endif // AQSIS_CORNELLBOX_H_INCLUDED
+
+// vi: set et:

@@ -3,7 +3,14 @@ find_package(Qt4 COMPONENTS QtGui QtOpenGL REQUIRED)
 find_path(ILMBASE_INCLUDE_DIR OpenEXR/ImathBox.h)
 include_directories(${QT_INCLUDES} ${ILMBASE_INCLUDE_DIR})
 
-set(CMAKE_BUILD_TYPE Release)
+if(UNIX)
+    if("${CMAKE_CXX_FLAGS}" STREQUAL "")
+        set(CMAKE_CXX_FLAGS "-Wall -Werror" CACHE STRING
+            "Flags used by the compiler during all build types." FORCE)
+    endif()
+endif()
+
+#set(CMAKE_BUILD_TYPE Release)
 
 qt4_wrap_cpp(moc_srcs ptview.h)
 

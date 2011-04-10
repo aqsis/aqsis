@@ -38,29 +38,12 @@
 
 #include <OpenEXR/ImathVec.h>
 
+#include "pointcloud.h"
+
+
 using Imath::V3f;
 
 inline float deg2rad(float d) { return (M_PI/180) * d; }
-
-
-/// TODO: Make into a class, etc.
-struct PointCloud
-{
-    int stride;
-    std::vector<float> data;
-
-    // Get centroid of point cloud.
-    V3f centroid() const
-    {
-        V3f sum(0);
-        for(std::vector<float>::const_iterator p = data.begin();
-            p < data.end(); p += stride)
-        {
-            sum += V3f(p[0], p[1], p[2]);
-        }
-        return (1.0f/data.size()*stride) * sum;
-    }
-};
 
 
 //------------------------------------------------------------------------------
@@ -81,7 +64,7 @@ class PointView : public QGLWidget
         PointView(QWidget *parent = NULL);
 
         /// Set points to be rendered
-        void setPoints(const PointCloud* points);
+        void setPoints(const boost::shared_ptr<const PointArray>& points);
 
     protected:
         // Qt OpenGL callbacks
@@ -97,7 +80,7 @@ class PointView : public QGLWidget
 
     private:
         /// Draw point cloud using OpenGL
-        static void drawPoints(const PointCloud& points, VisMode visMode);
+        static void drawPoints(const PointArray& points, VisMode visMode);
 
         /// Mouse-based camera positioning
         int m_prev_x;
@@ -110,7 +93,7 @@ class PointView : public QGLWidget
         /// Type of visualization
         VisMode m_visMode;
         /// Point cloud data
-        const PointCloud* m_points;
+        boost::shared_ptr<const PointArray> m_points;
         V3f m_cloudCenter;
 };
 

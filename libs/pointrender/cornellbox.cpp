@@ -32,6 +32,7 @@
 #include <OpenEXR/ImathVec.h>
 
 #include "cornellbox.h"
+#include "pointcloud.h"
 
 using Imath::V3f;
 
@@ -51,8 +52,8 @@ inline T bilerp(float u, float v, T x1, T x2, T x3, T x4)
 
 /// Generate a set of points from a bilinear patch
 static void makeBilinearPatch(std::vector<float>& outData,
-							  const float* patchData, int dataLen,
-							  float spatialRes, float scale)
+                              const float* patchData, int dataLen,
+                              float spatialRes, float scale)
 {
     // Get positions of points
     const float* d1 = patchData;
@@ -61,7 +62,7 @@ static void makeBilinearPatch(std::vector<float>& outData,
     const float* d4 = patchData + 3*dataLen;
     V3f p1 = scale*ptov3(d1); V3f p2 = scale*ptov3(d2);
     V3f p3 = scale*ptov3(d3); V3f p4 = scale*ptov3(d4);
-	spatialRes *= scale;
+    spatialRes *= scale;
     int nu = int(std::max((p1 - p2).length(), (p3 - p4).length()) / spatialRes);
     int nv = int(std::max((p1 - p3).length(), (p2 - p4).length()) / spatialRes);
     float du = 1.0f/nu;
@@ -90,27 +91,19 @@ static void makeBilinearPatch(std::vector<float>& outData,
 }
 
 
-/// Generate a pointcloud representing the cornell box.
-///
-/// Cornell box data from
-/// http://www.graphics.cornell.edu/online/box/data.html
-/// Approximate RGB colors from RIB version of data found online.
-///
-/// \param data - output point data is stored here as [P1 N1 r1 P2 N2 r2 ...]
-/// \param spatialRes - the desired spatial distance between adjacent points.
-void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes)
+boost::shared_ptr<PointArray> cornellBoxPoints(float spatialRes)
 {
-    data.clear();
+    boost::shared_ptr<PointArray> points(new PointArray());
     const int userDataLen = 3;
-	const float scale = 0.01;
-	stride = 7 + userDataLen;
+    const float scale = 0.01;
+    points->stride = 7 + userDataLen;
     const int dataLen = userDataLen + 3;
 #define PATCH_BEGIN                                          \
     {                                                        \
         float d[] = {
 #define PATCH_END                                            \
         };                                                   \
-        makeBilinearPatch(data, d, dataLen, spatialRes, scale); \
+        makeBilinearPatch(points->data, d, dataLen, spatialRes, scale); \
     }
 
     //--------------------------------------------------
@@ -218,7 +211,9 @@ void cornellBoxPoints(std::vector<float>& data, int& stride, float spatialRes)
          82.0,   0.0, 225.0,    1,1,1,
          82.0, 165.0, 225.0,    1,1,1
     PATCH_END
+
+    return points;
 }
 
 
-// vi: set et
+// vi: set et:

@@ -56,14 +56,14 @@ PointView::PointView(QWidget *parent)
     m_dist(5),
     m_centre(0),
     m_visMode(Vis_Points),
-    m_points(0),
+    m_points(),
     m_cloudCenter(0)
 {
     setFocusPolicy(Qt::StrongFocus);
 }
 
 
-void PointView::setPoints(const PointCloud* points)
+void PointView::setPoints(const boost::shared_ptr<const PointArray>& points)
 {
     m_points = points;
     if(m_points)
@@ -228,7 +228,7 @@ void PointView::keyPressEvent(QKeyEvent *event)
         event->ignore();
 }
 
-void PointView::drawPoints(const PointCloud& points, VisMode visMode)
+void PointView::drawPoints(const PointArray& points, VisMode visMode)
 {
     int ptStride = points.stride;
     int npoints = points.data.size()/ptStride;
@@ -322,14 +322,8 @@ int main(int argc, char *argv[])
     f.setSampleBuffers(true);
     QGLFormat::setDefaultFormat(f);
 
-    // Generate points.
-    PointCloud points;
-    cornellBoxPoints(points.data, points.stride, 5);
-    // Translate the model
-    //glTranslatef(-2.5, -2.5, -2.5);
-
     PointViewerWindow window;
-    window.pointView().setPoints(&points);
+    window.pointView().setPoints(cornellBoxPoints(5));
     window.show();
 
     return app.exec();
