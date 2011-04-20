@@ -77,9 +77,11 @@ class PointView : public QGLWidget
         void mouseMoveEvent(QMouseEvent* event);
         void wheelEvent(QWheelEvent* event);
         void keyPressEvent(QKeyEvent *event);
+        void keyReleaseEvent(QKeyEvent *event);
 
     private:
-        /// Draw point cloud using OpenGL
+        static void drawAxes();
+        static void drawLightProbe(const V3f& P);
         static void drawPoints(const PointArray& points, VisMode visMode);
 
         /// Mouse-based camera positioning
@@ -90,6 +92,9 @@ class PointView : public QGLWidget
         float m_phi;
         float m_dist;
         V3f m_centre;
+        /// Light probe position
+        V3f m_probePos;
+        bool m_probeMoveMode;
         /// Type of visualization
         VisMode m_visMode;
         /// Point cloud data

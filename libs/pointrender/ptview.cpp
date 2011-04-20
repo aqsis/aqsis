@@ -45,6 +45,11 @@ inline float rad2deg(float r)
     return r*180/M_PI;
 }
 
+inline float dot(V3f a, V3f b)
+{
+    return a^b;
+}
+
 //------------------------------------------------------------------------------
 PointView::PointView(QWidget *parent)
     : QGLWidget(parent),
@@ -55,6 +60,8 @@ PointView::PointView(QWidget *parent)
     m_phi(0),
     m_dist(5),
     m_centre(0),
+    m_probePos(0),
+    m_probeMoveMode(false),
     m_visMode(Vis_Points),
     m_points(),
     m_cloudCenter(0)
@@ -67,7 +74,10 @@ void PointView::setPoints(const boost::shared_ptr<const PointArray>& points)
 {
     m_points = points;
     if(m_points)
+    {
         m_cloudCenter = m_points->centroid();
+        m_probePos = m_cloudCenter;
+    }
 }
 
 
@@ -126,19 +136,19 @@ void PointView::resizeGL(int w, int h)
         const float hOn2 = 0.5f*n;
         const float wOn2 = hOn2*width()/height();
         glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
-        glScalef(1, 1, -1);
     glMatrixMode(GL_MODELVIEW);
 }
 
 
 void PointView::paintGL()
 {
+    //--------------------------------------------------
+    // Draw main scene
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Camera -> world transform.  Need to do this here rather than in
-    // GL_PROJECTION mode, otherwise the point size scaling won't work
-    // correctly.  (Hmm, maybe this is standard GL practise?)
+    // Camera -> world transform.
     glLoadIdentity();
+    glScalef(1, 1, -1);
     glTranslatef(0, 0, m_dist);
     glRotatef(m_theta, 1, 0, 0);
     glRotatef(m_phi, 0, 1, 0);
@@ -146,28 +156,51 @@ void PointView::paintGL()
     // Center on the point cloud
     glTranslate(-m_cloudCenter);
 
-    // Draw axes
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(1);
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINES);
-        glVertex3f(0, 0, 0);
-        glVertex3f(1, 0, 0);
-    glEnd();
-    glColor3f(0.0, 1.0, 0.0);
-    glBegin(GL_LINES);
-        glVertex3f(0, 0, 0);
-        glVertex3f(0, 1, 0);
-    glEnd();
-    glColor3f(0.0, 0.0, 1.0);
-    glBegin(GL_LINES);
-        glVertex3f(0, 0, 0);
-        glVertex3f(0, 0, 1);
-    glEnd();
-
-    // Draw point cloud
+    // Geometry
+    drawAxes();
+    drawLightProbe(m_probePos);
     if(m_points)
         drawPoints(*m_points, m_visMode);
+
+    //--------------------------------------------------
+    // Draw scene from position of light probe.
+    // Clear area of framebuffer.
+    glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT);
+    glPushMatrix();
+
+    // Set up & clear viewport
+    glEnable(GL_SCISSOR_TEST);
+    GLuint viewSize = 300;
+    glScissor(0, 0, viewSize, viewSize);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, viewSize, viewSize);
+
+    // Projection
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    const float n = 0.01f;
+    const float wOn2 = 0.5f*n;
+    glFrustum(-wOn2, wOn2, -wOn2, wOn2, n, 1000);
+    glMatrixMode(GL_MODELVIEW);
+
+    // Camera transform
+    glLoadIdentity();
+    glScalef(1, 1, -1);
+    glRotatef(m_theta, 1, 0, 0);
+    glRotatef(m_phi, 0, 1, 0);
+    glTranslate(-m_probePos);
+
+    // Geometry
+    if(m_points)
+        drawPoints(*m_points, m_visMode);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopAttrib();
 }
 
 
@@ -181,26 +214,45 @@ void PointView::mousePressEvent(QMouseEvent* event)
 
 void PointView::mouseMoveEvent(QMouseEvent* event)
 {
-    int dx = m_prev_x - event->x();
-    int dy = m_prev_y - event->y();
+    float dx = float(m_prev_x - event->x())/width();
+    float dy = float(m_prev_y - event->y())/height();
     m_prev_x = event->x();
     m_prev_y = event->y();
-    if(m_zooming)
+    if(m_probeMoveMode)
     {
-        m_dist *= std::pow(0.9, 30*double(dy)/height());
+        // Modify the position of the light probe.
+        V3f camDir = V3f(cos(deg2rad(m_theta))*cos(deg2rad(m_phi+90)),
+                         sin(deg2rad(m_theta)),
+                         cos(deg2rad(m_theta))*sin(deg2rad(m_phi+90)));
+        V3f camPos = -m_dist*camDir + m_centre - m_cloudCenter;
+        V3f v = m_probePos - camPos;
+        V3f up = V3f(cos(deg2rad(m_theta+90))*cos(deg2rad(m_phi+90)),
+                     sin(deg2rad(m_theta+90)),
+                     cos(deg2rad(m_theta+90))*sin(deg2rad(m_phi+90)));
+        V3f right = camDir % up;
+        // Distance along view direction to light probe
+        float d = dot(v, camDir);
+        if(m_zooming)
+            m_probePos += dy*d*camDir;
+        else
+            m_probePos += dy*d*up + dx*d*right;
+    }
+    else if(m_zooming)
+    {
+        m_dist *= std::pow(0.9, 30*dy);
     }
     else
     {
         if(event->modifiers() & Qt::ControlModifier)
         {
-            m_centre.y +=  m_dist/height()*dy;
-            m_centre.x += -m_dist/width()*dx*std::cos(deg2rad(m_phi));
-            m_centre.z += -m_dist/width()*dx*std::sin(deg2rad(m_phi));
+            m_centre.y +=  m_dist*dy;
+            m_centre.x += -m_dist*dx*std::cos(deg2rad(m_phi));
+            m_centre.z += -m_dist*dx*std::sin(deg2rad(m_phi));
         }
         else
         {
-            m_theta += 0.5*dy;
-            m_phi   += 0.5*dx;
+            m_theta += 400*dy;
+            m_phi   += 400*dx;
         }
     }
     repaint();
@@ -224,10 +276,88 @@ void PointView::keyPressEvent(QKeyEvent *event)
         initializeGL();
         repaint();
     }
+    else if(event->key() == Qt::Key_Z)
+        m_probeMoveMode = true;
     else
         event->ignore();
 }
 
+void PointView::keyReleaseEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Z)
+        m_probeMoveMode = false;
+    else
+        event->ignore();
+}
+
+/// Draw a set of axes
+void PointView::drawAxes()
+{
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1);
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINES);
+        glVertex3f(0, 0, 0);
+        glVertex3f(1, 0, 0);
+    glEnd();
+    glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_LINES);
+        glVertex3f(0, 0, 0);
+        glVertex3f(0, 1, 0);
+    glEnd();
+    glColor3f(0.0, 0.0, 1.0);
+    glBegin(GL_LINES);
+        glVertex3f(0, 0, 0);
+        glVertex3f(0, 0, 1);
+    glEnd();
+}
+
+/// Draw position of the light probe
+void PointView::drawLightProbe(const V3f& P)
+{
+    glColor3f(0.7,0.7,1);
+    glPointSize(100);
+    // Draw point at probe position
+    glBegin(GL_POINTS);
+        glVertex(P);
+    glEnd();
+    // Draw axis-aligned box around point
+    float r = 0.1;
+    glBegin(GL_LINE_LOOP);
+        glVertex(P + r*V3f(1,-1,1));
+        glVertex(P + r*V3f(1,-1,-1));
+        glVertex(P + r*V3f(-1,-1,-1));
+        glVertex(P + r*V3f(-1,-1,1));
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+        glVertex(P + r*V3f(1,1,1));
+        glVertex(P + r*V3f(1,1,-1));
+        glVertex(P + r*V3f(-1,1,-1));
+        glVertex(P + r*V3f(-1,1,1));
+    glEnd();
+    glBegin(GL_LINES);
+        glVertex(P + r*(V3f(1,1,1)));
+        glVertex(P + r*(V3f(1,-1,1)));
+        glVertex(P + r*(V3f(-1,1,1)));
+        glVertex(P + r*(V3f(-1,-1,1)));
+        glVertex(P + r*(V3f(1,1,-1)));
+        glVertex(P + r*(V3f(1,-1,-1)));
+        glVertex(P + r*(V3f(-1,1,-1)));
+        glVertex(P + r*(V3f(-1,-1,-1)));
+    glEnd();
+    // Draw lines from origin to point
+    glBegin(GL_LINE_STRIP);
+        glVertex3f(P.x, P.y, P.z);
+        glVertex3f(P.x, 0, P.z);
+        glVertex3f(0, 0, P.z);
+    glEnd();
+    glBegin(GL_LINES);
+        glVertex3f(0, 0, P.z);
+        glVertex3f(0, 0, 0);
+    glEnd();
+}
+
+/// Draw point cloud using OpenGL
 void PointView::drawPoints(const PointArray& points, VisMode visMode)
 {
     int ptStride = points.stride;

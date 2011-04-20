@@ -54,7 +54,10 @@ struct PointArray
     int stride;
     std::vector<float> data;
 
-    // Get centroid of point cloud.
+    /// Get number of points in cloud
+    size_t size() const { return data.size()/stride; }
+
+    /// Get centroid of point cloud.
     V3f centroid() const
     {
         V3f sum(0);
