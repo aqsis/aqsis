@@ -37,18 +37,138 @@
 
 #include "ptview.h"
 #include "cornellbox.h"
+#include "microbuffer.h"
 
 using Imath::V3f;
+using Imath::V2f;
 
 inline float rad2deg(float r)
 {
     return r*180/M_PI;
 }
 
-inline float dot(V3f a, V3f b)
+/// Get max and min of depth buffer, ignoring any depth > FLT_MAX/2
+///
+/// \param z - depth array
+/// \param size - length of z array
+/// \param zMin - returned min z value
+/// \param zMax - returned max z value
+static void depthRange(const float* z, int size, float& zMin, float& zMax)
 {
-    return a^b;
+    zMin = FLT_MAX;
+    zMax = -FLT_MAX;
+    for(int i = 0; i < size; ++i)
+    {
+        if(zMin > z[i])
+            zMin = z[i];
+        if(zMax < z[i] && z[i] < FLT_MAX/2)
+            zMax = z[i];
+    }
 }
+
+
+/// Convert depth buffer to grayscale color
+///
+/// \param z - depth buffer
+/// \param size - length of z array
+/// \param col - storage for output RGB tripls color data
+static void depthToColor(const float* z, int size, GLubyte* col,
+                         float zMin, float zMax)
+{
+    float zRangeInv = 1.0f/(zMax - zMin);
+    for(int i = 0; i < size; ++i)
+    {
+        GLubyte c = Imath::clamp(int(255*(1 - zRangeInv*(z[i] - zMin))),
+                                 0, 255);
+        col[3*i] = c;
+        col[3*i+1] = c;
+        col[3*i+2] = c;
+    }
+}
+
+
+/// Draw face of a cube environment map.
+///
+/// \param p - origin of 1x1 quad
+/// \param cols - square texture of RGB triples of size width*width
+/// \param width - side length of cols texture
+static void drawCubeEnvFace(Imath::V2f p, GLubyte* cols, int colsWidth)
+{
+	// Set up texture
+    GLuint texName = 0;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glGenTextures(1, &texName);
+    glBindTexture(GL_TEXTURE_2D, texName);
+    // Set texture wrap modes to clamp
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    // Set filtering to nearest neighbour
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // Send texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, colsWidth, colsWidth, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, cols);
+    // Enable texturing
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, texName);
+	// Draw quad
+    glPushMatrix();
+    glTranslatef(p.x, p.y, 0);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(0, 0);
+        glTexCoord2f(1, 0); glVertex2f(1, 0);
+        glTexCoord2f(1, 1); glVertex2f(1, 1);
+        glTexCoord2f(0, 1); glVertex2f(0, 1);
+    glEnd();
+    glPopMatrix();
+    glDeleteTextures(1, &texName);
+}
+
+
+/// Draw a micro depth environment buffer using OpenGL
+///
+/// The cube faces are laid out on screen as follows:
+///
+///         +---+
+///         |+y |
+/// +---+---+---+---+
+/// |-z |-x |+z |+x |
+/// +---+---+---+---+
+///         |-y |
+///         +---+
+///
+static void drawMicroBuf(const MicroBuf& envBuf)
+{
+    // Make new array of texels.
+    int res = envBuf.res();
+    int npix = res*res;
+    int faceSize = npix*3;
+    boost::scoped_array<GLubyte> colBuf(new GLubyte[faceSize*6]);
+    float zMin = 0;
+    float zMax = 0;
+    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, zMin, zMax);
+    // Convert each face to 8-bit colour texels
+    for(int face = 0; face < 6; ++face)
+        depthToColor(envBuf.face(face), npix, &colBuf[faceSize*face],
+                     zMin, zMax);
+    // Set up coordinates so we render on a 4x3 grid
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(-1, -1, 0);
+    glScalef(0.5f, 2.0f/3.0f, 1);
+
+    // Render the six faces in a cross.
+    drawCubeEnvFace(V2f(0,1), &colBuf[faceSize*MicroBuf::Face_zn], res);
+    drawCubeEnvFace(V2f(1,1), &colBuf[faceSize*MicroBuf::Face_xn], res);
+    drawCubeEnvFace(V2f(2,1), &colBuf[faceSize*MicroBuf::Face_zp], res);
+    drawCubeEnvFace(V2f(3,1), &colBuf[faceSize*MicroBuf::Face_xp], res);
+    drawCubeEnvFace(V2f(2,0), &colBuf[faceSize*MicroBuf::Face_yn], res);
+    drawCubeEnvFace(V2f(2,2), &colBuf[faceSize*MicroBuf::Face_yp], res);
+}
+
 
 //------------------------------------------------------------------------------
 PointView::PointView(QWidget *parent)
@@ -63,6 +183,7 @@ PointView::PointView(QWidget *parent)
     m_probePos(0),
     m_probeMoveMode(false),
     m_visMode(Vis_Points),
+    m_lighting(false),
     m_points(),
     m_cloudCenter(0)
 {
@@ -104,19 +225,29 @@ void PointView::initializeGL()
         {
             // Materials
             glShadeModel(GL_SMOOTH);
-            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-            glEnable(GL_COLOR_MATERIAL);
-            // Lighting
-            // light0
-            GLfloat lightPos[] = {0, 0, 0, 1};
-            GLfloat whiteCol[] = {1, 1, 1, 1};
-            glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteCol);
-            // whole-scene ambient
-            GLfloat ambientCol[] = {0.1, 0.1, 0.1, 1};
-            glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientCol);
-            glEnable(GL_LIGHT0);
-            glEnable(GL_RESCALE_NORMAL);
+            if(m_lighting)
+            {
+                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+                glEnable(GL_COLOR_MATERIAL);
+                // Lighting
+                // light0
+                GLfloat lightPos[] = {0, 0, 0, 1};
+                GLfloat whiteCol[] = {1, 1, 1, 1};
+                glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+                glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteCol);
+                glEnable(GL_LIGHT0);
+                // whole-scene ambient intensity scaling
+                GLfloat ambientCol[] = {0.1, 0.1, 0.1, 1};
+                glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientCol);
+                // whole-scene diffuse intensity
+                //GLfloat diffuseCol[] = {0.05, 0.05, 0.05, 1};
+                //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseCol);
+                // two-sided lighting.
+                // TODO: Why doesn't this work?? (handedness problems?)
+                //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+                // rescaling of normals
+                glEnable(GL_RESCALE_NORMAL);
+            }
         }
         break;
     }
@@ -131,17 +262,22 @@ void PointView::resizeGL(int w, int h)
     glViewport(0, 0, w, h);
     // Set camera projection
     glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        const float n = 0.1f;
-        const float hOn2 = 0.5f*n;
-        const float wOn2 = hOn2*width()/height();
-        glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
+    glLoadIdentity();
+    const float n = 0.1f;
+    const float hOn2 = 0.5f*n;
+    const float wOn2 = hOn2*width()/height();
+    glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
     glMatrixMode(GL_MODELVIEW);
 }
 
 
 void PointView::paintGL()
 {
+    const int uwidth = 20;
+    MicroBuf microBuf(uwidth);
+    if(m_points)
+        microRasterize(microBuf, m_probePos, V3f(0,0,1), -1, *m_points);
+
     //--------------------------------------------------
     // Draw main scene
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -158,19 +294,20 @@ void PointView::paintGL()
 
     // Geometry
     drawAxes();
-    drawLightProbe(m_probePos);
+    drawLightProbe(m_probePos, 1 - occlusion(microBuf, V3f(0,0,1)));
     if(m_points)
-        drawPoints(*m_points, m_visMode);
+        drawPoints(*m_points, m_visMode, m_lighting);
+
 
     //--------------------------------------------------
-    // Draw scene from position of light probe.
-    // Clear area of framebuffer.
     glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT);
     glPushMatrix();
+    //--------------------------------------------------
+    // Draw scene from position of light probe.
 
     // Set up & clear viewport
     glEnable(GL_SCISSOR_TEST);
-    GLuint viewSize = 300;
+    GLuint viewSize = 200;
     glScissor(0, 0, viewSize, viewSize);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -181,20 +318,25 @@ void PointView::paintGL()
     glPushMatrix();
     glLoadIdentity();
     const float n = 0.01f;
-    const float wOn2 = 0.5f*n;
-    glFrustum(-wOn2, wOn2, -wOn2, wOn2, n, 1000);
+    glFrustum(-n, n, -n, n, n, 1000);
     glMatrixMode(GL_MODELVIEW);
 
     // Camera transform
     glLoadIdentity();
     glScalef(1, 1, -1);
-    glRotatef(m_theta, 1, 0, 0);
-    glRotatef(m_phi, 0, 1, 0);
     glTranslate(-m_probePos);
 
     // Geometry
     if(m_points)
-        drawPoints(*m_points, m_visMode);
+        drawPoints(*m_points, m_visMode, m_lighting);
+
+    //--------------------------------------------------
+    // Draw image of rendered microbuffer
+    glScissor(width() - viewSize, 0, viewSize, viewSize*3/4);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(width() - viewSize, 0, viewSize, viewSize*3/4);
+
+    drawMicroBuf(microBuf);
 
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
@@ -239,10 +381,12 @@ void PointView::mouseMoveEvent(QMouseEvent* event)
     }
     else if(m_zooming)
     {
+        // Zoom distance to camera pivot point
         m_dist *= std::pow(0.9, 30*dy);
     }
     else
     {
+        // Modify position of centre
         if(event->modifiers() & Qt::ControlModifier)
         {
             m_centre.y +=  m_dist*dy;
@@ -251,6 +395,7 @@ void PointView::mouseMoveEvent(QMouseEvent* event)
         }
         else
         {
+            // rotate camera
             m_theta += 400*dy;
             m_phi   += 400*dx;
         }
@@ -278,6 +423,12 @@ void PointView::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_Z)
         m_probeMoveMode = true;
+    else if(event->key() == Qt::Key_L)
+    {
+        m_lighting = !m_lighting;
+        initializeGL();
+        repaint();
+    }
     else
         event->ignore();
 }
@@ -313,14 +464,15 @@ void PointView::drawAxes()
 }
 
 /// Draw position of the light probe
-void PointView::drawLightProbe(const V3f& P)
+void PointView::drawLightProbe(const V3f& P, float intensity)
 {
-    glColor3f(0.7,0.7,1);
+    glColor3f(intensity, intensity, intensity);
     glPointSize(100);
     // Draw point at probe position
     glBegin(GL_POINTS);
         glVertex(P);
     glEnd();
+    glColor3f(0.7,0.7,1);
     // Draw axis-aligned box around point
     float r = 0.1;
     glBegin(GL_LINE_LOOP);
@@ -345,7 +497,7 @@ void PointView::drawLightProbe(const V3f& P)
         glVertex(P + r*(V3f(-1,1,-1)));
         glVertex(P + r*(V3f(-1,-1,-1)));
     glEnd();
-    // Draw lines from origin to point
+    // Draw lines from origin to point along axis directions
     glBegin(GL_LINE_STRIP);
         glVertex3f(P.x, P.y, P.z);
         glVertex3f(P.x, 0, P.z);
@@ -358,7 +510,8 @@ void PointView::drawLightProbe(const V3f& P)
 }
 
 /// Draw point cloud using OpenGL
-void PointView::drawPoints(const PointArray& points, VisMode visMode)
+void PointView::drawPoints(const PointArray& points, VisMode visMode,
+                           bool useLighting)
 {
     int ptStride = points.stride;
     int npoints = points.data.size()/ptStride;
@@ -405,12 +558,18 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode)
                     glVertex3f(scale*cos(angle), scale*sin(angle), 0);
                 }
                 glEnd();
+                // Disk normal
+                //glBegin(GL_LINES);
+                //    glVertex(V3f(0));
+                //    glVertex(diskNormal);
+                //glEnd();
             glEndList();
             // Draw points as disks.
             // TODO: Doing this in immediate mode is really slow!  Using
             // vertex shaders would probably be a much better method, or
             // perhaps just compile into a display list?
-            glEnable(GL_LIGHTING);
+            if(useLighting)
+                glEnable(GL_LIGHTING);
             for(int i = 0; i < npoints; ++i)
             {
                 const float* data = ptData + i*ptStride;
@@ -435,7 +594,8 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode)
                 glPopMatrix();
             }
             glDeleteLists(disk, 1);
-            glDisable(GL_LIGHTING);
+            if(useLighting)
+                glDisable(GL_LIGHTING);
         }
         break;
     }
@@ -453,7 +613,9 @@ int main(int argc, char *argv[])
     QGLFormat::setDefaultFormat(f);
 
     PointViewerWindow window;
-    window.pointView().setPoints(cornellBoxPoints(5));
+    boost::shared_ptr<PointArray> points = cornellBoxPoints(20);
+    bakeOcclusion(*points);
+    window.pointView().setPoints(points);
     window.show();
 
     return app.exec();

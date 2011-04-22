@@ -81,8 +81,9 @@ class PointView : public QGLWidget
 
     private:
         static void drawAxes();
-        static void drawLightProbe(const V3f& P);
-        static void drawPoints(const PointArray& points, VisMode visMode);
+        static void drawLightProbe(const V3f& P, float intensity);
+        static void drawPoints(const PointArray& points, VisMode visMode,
+                               bool useLighting);
 
         /// Mouse-based camera positioning
         int m_prev_x;
@@ -97,6 +98,8 @@ class PointView : public QGLWidget
         bool m_probeMoveMode;
         /// Type of visualization
         VisMode m_visMode;
+        /// Flag for whether to use OpenGL lighting or not
+        bool m_lighting;
         /// Point cloud data
         boost::shared_ptr<const PointArray> m_points;
         V3f m_cloudCenter;
