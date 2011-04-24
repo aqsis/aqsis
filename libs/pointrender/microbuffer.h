@@ -187,7 +187,7 @@ class MicroBuf
         /// Get direction vector for position on a given face.
         ///
         /// Roughly speaking, this is the opposite of the faceCoords function
-        V3f direction(int faceIdx, float u, float v) const
+        static V3f direction(int faceIdx, float u, float v)
         {
             switch(faceIdx)
             {
@@ -220,6 +220,57 @@ class MicroBuf
 };
 
 
+/// Render a disk into the microbuffer using raytracing
+///
+/// When two surfaces meet at a sharp angle, the visibility of surfels on
+/// the adjacent surface needs to be computed more carefully than with the
+/// approximate rasterization method.  If not, disturbing artifacts will appear
+/// where the surfaces join.  This function solves the problem by resolving
+/// visibility of a disk using ray tracing.
+///
+/// \param p - position of disk center relative to microbuffer
+/// \param n - disk normal
+/// \param r - disk radius
+void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
+{
+    int faceRes = microBuf.res();
+    float plength = p.length();
+    // Raytrace the disk if it's "close" as compared to the disk
+    // radius.
+    for(int iface = 0; iface < 6; ++iface)
+    {
+        float faceNormalDotP = p[iface%3]/plength *
+                                ((iface < 3) ? 1.0f : -1.0f);
+        // Cull face if we know the bounding cone of the face lies outside the
+        // bounding cone of the disk.  TODO: More efficient raster bounding!
+        if(faceNormalDotP < -1.0f/sqrt(3.0f))
+            continue;
+        float* face = microBuf.face(iface);
+        for(int iv = 0; iv < faceRes; ++iv)
+        for(int iu = 0; iu < faceRes; ++iu)
+        {
+            // d = ray through the pixel.
+            V3f d = MicroBuf::direction(iface,
+                            (0.5f + iu)/faceRes*2.0f - 1.0f,
+                            (0.5f + iv)/faceRes*2.0f - 1.0f);
+            // Intersect ray with plane containing disk.
+            float t = dot(p, n)/dot(d, n);
+            // Expand the disk just a little, to make the cracks a bit smaller.
+            // We can't do this too much, or sharp convex edges will be
+            // overoccluded (TODO: Adjust for best results!  Maybe the "too
+            // large" problem could be worked around using a tracing offset?)
+            const float extraRadius2 = 1.5f;
+            if(t > 0 && (t*d - p).length2() < extraRadius2*r*r)
+            {
+                // The ray hit the disk, record the hit.
+                int pixelIndex = 2*(iv*faceRes + iu);
+                face[pixelIndex+1] = 1;
+            }
+        }
+    }
+}
+
+
 /// Render points into a micro environment buffer.
 ///
 /// \param microBuf - destination environment buffer
@@ -241,6 +292,16 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         // position of current point relative to shading point
         V3f p = V3f(data[0], data[1], data[2]) - P;
         float plen = p.length();
+        float r = data[6];
+        // FIXME: should be 8*r (or so) here, but adjusted down for the time
+        // being until efficiency is improved.
+        if(plen < 2*r)
+        {
+            // Resolve visibility of very close surfels using ray tracing.
+            // This is necessary to avoid artifacts where surfaces meet.
+            raytraceDisk(microBuf, p, n, r);
+            continue;
+        }
         // TODO: what about disks sticking out from just below the horizon?
         if(dot(p, N) < plen*dotCut)
             continue;
@@ -251,7 +312,6 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         // Compute the area of the surfel when projected onto the env face.
         // This depends on several things:
         // 1) The original disk
-        float r = data[6];
         float origArea = M_PI*r*r;
         // 2) The angles between the disk normal n, viewing vector p, and face
         // normal.  This is the viewed area before projection.
@@ -262,6 +322,7 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         float distFactor = 1.0f/(pDotFaceN*pDotFaceN);
         // Putting these together gives the projected area
         float projArea = origArea * angleFactor * distFactor;
+//        float solidAngle = origArea * fabs(dot(p,n)) * distFactor;
         // Half-width of a square with area projArea
         float wOn2 = sqrt(projArea)*0.5f;
         // Transform width and position to face raster coords.
@@ -407,7 +468,7 @@ float occlusion(const MicroBuf& depthBuf, const V3f& N)
         {
             float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
             float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
-            float d = dot(depthBuf.direction(f, u, v), N);
+            float d = dot(MicroBuf::direction(f, u, v), N);
             // FIXME: Add in weight due to texel distance from origin.
             if(d > 0)
             {
@@ -433,7 +494,7 @@ void occlWeight(MicroBuf& depthBuf, const V3f& N)
         {
             float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
             float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
-            float d = dot(depthBuf.direction(f, u, v), N);
+            float d = dot(MicroBuf::direction(f, u, v), N);
             if(d > 0)
                 face[1] = d*(1.0f - face[1]);
             else
@@ -446,7 +507,7 @@ void occlWeight(MicroBuf& depthBuf, const V3f& N)
 /// Bake occlusion from point array back into point array.
 void bakeOcclusion(PointArray& points, int faceRes)
 {
-    float eps = 0.0001;
+    const float eps = 0.1;
     MicroBuf depthBuf(faceRes, 2);
     for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
     {
@@ -457,8 +518,9 @@ void bakeOcclusion(PointArray& points, int faceRes)
         V3f N = V3f(data[3], data[4], data[5]);
         // position of current point relative to shading point
         V3f P = V3f(data[0], data[1], data[2]);
+        float r = data[6];
         depthBuf.reset();
-        microRasterize(depthBuf, P + N*eps, N, 0, points);
+        microRasterize(depthBuf, P + N*r*eps, N, 0, points);
         float occl = occlusion(depthBuf, N);
         data[7] = data[8] = data[9] = 1 - occl;
     }
