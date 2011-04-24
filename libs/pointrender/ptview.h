@@ -65,6 +65,8 @@ class PointView : public QGLWidget
 
         /// Set points to be rendered
         void setPoints(const boost::shared_ptr<const PointArray>& points);
+        /// Set properties for rendering probe environment map
+        void setProbeParams(int cubeFaceRes);
 
     protected:
         // Qt OpenGL callbacks
@@ -96,6 +98,7 @@ class PointView : public QGLWidget
         /// Light probe position
         V3f m_probePos;
         bool m_probeMoveMode;
+        int m_probeRes;
         /// Type of visualization
         VisMode m_visMode;
         /// Flag for whether to use OpenGL lighting or not

@@ -41,7 +41,15 @@ inline float dot(V3f a, V3f b)
 ///
 /// The orientation of the faces is
 ///
-/// TODO
+///              +---+
+///   ^          |+y |
+///   |  +---+---+---+---+
+///  v|  |-z |-x |+z |+x |
+///   |  +---+---+---+---+
+///   |          |-y |
+///   |          +---+
+///   |     u
+///   +-------->
 ///
 class MicroBuf
 {
@@ -59,20 +67,26 @@ class MicroBuf
             Face_begin = Face_xp
         };
 
-        MicroBuf(int faceRes)
+        MicroBuf(int faceRes, int nchans = 1)
             : m_res(faceRes),
-            m_faceSize(faceRes*faceRes),
+            m_nchans(nchans),
+            m_faceSize(nchans*faceRes*faceRes),
             m_pixels()
         {
-            m_pixels.reset(new float[faceRes*faceRes*Face_end]);
+            m_pixels.reset(new float[m_faceSize*Face_end]);
             reset();
         }
 
         /// Reset buffer to default (non-rendered) state.
+        ///
+        /// TODO: Reset for non-z data.
         void reset()
         {
             for(int i = 0, iend = size(); i < iend; ++i)
-                m_pixels[i] = FLT_MAX;
+            {
+                m_pixels[2*i] = FLT_MAX;
+                m_pixels[2*i + 1] = 0;
+            }
         }
 
         /// Get raw data store for face
@@ -87,13 +101,95 @@ class MicroBuf
             return &m_pixels[0] + which*m_faceSize;
         }
 
-        // Get direction vector for position on a given face.
-        V3f direction(int whichFace, int iu, int iv) const
+        /// Get index of face which direction p sits inside.
+        static Face faceIndex(V3f p)
         {
-            // TODO: Cache these coefficients to get (iu*scale + offset);
-            float u = (0.5f + iu)/m_res*2.0f - 1.0f;
-            float v = (0.5f + iv)/m_res*2.0f - 1.0f;
-            switch(whichFace)
+            V3f absp = V3f(fabs(p.x), fabs(p.y), fabs(p.z));
+            if(absp.x >= absp.y && absp.x >= absp.z)
+                return (p.x > 0) ? MicroBuf::Face_xp : MicroBuf::Face_xn;
+            else if(absp.y >= absp.x && absp.y >= absp.z)
+                return (p.y > 0) ? MicroBuf::Face_yp : MicroBuf::Face_yn;
+            else
+            {
+                assert(absp.z >= absp.x && absp.z >= absp.y);
+                return (p.z > 0) ? MicroBuf::Face_zp : MicroBuf::Face_zn;
+            }
+        }
+
+        /// Get a neighbouring face in u direction
+        ///
+        /// \param faceIdx - current face index
+        /// \param side - which side to look (0 == left, 1 == right)
+        ///
+        // +---+---+---+  +---+---+---+  +---+---+---+
+        // |+z |+x |-z |  |-x |+y |+x |  |-x |+z |+x |
+        // +---+---+---+  +---+---+---+  +---+---+---+
+        //
+        // +---+---+---+  +---+---+---+  +---+---+---+
+        // |-z |-x |+z |  |-x |-y |+x |  |+x |-z |-x |
+        // +---+---+---+  +---+---+---+  +---+---+---+
+        //
+        static Face neighbourU(int faceIdx, int side)
+        {
+            static Face neighbourArray[6][2] = {
+                {Face_zp, Face_zn}, {Face_xn, Face_xp}, {Face_xn, Face_xp},
+                {Face_zn, Face_zp}, {Face_xn, Face_xp}, {Face_xp, Face_xn}
+            };
+            return neighbourArray[faceIdx][side];
+        }
+
+        /// Get a neighbouring face in v direction
+        ///
+        /// \param faceIdx - current face index
+        /// \param side - which side to look (0 == bottom, 1 == top)
+        ///
+        // +---+   +---+   +---+   +---+   +---+   +---+
+        // |+y |   |-z |   |+y |   |+y |   |+z |   |+y |
+        // +---+   +---+   +---+   +---+   +---+   +---+
+        // |+x |   |+y |   |+z |   |-x |   |-y |   |-z |
+        // +---+   +---+   +---+   +---+   +---+   +---+
+        // |-y |   |+z |   |-y |   |-y |   |-z |   |-y |
+        // +---+   +---+   +---+   +---+   +---+   +---+
+        static Face neighbourV(int faceIdx, int side)
+        {
+            static Face neighbourArray[6][2] = {
+                {Face_yn, Face_yp}, {Face_zp, Face_zn}, {Face_yn, Face_yp},
+                {Face_yn, Face_yp}, {Face_zn, Face_zp}, {Face_yn, Face_yp}
+            };
+            return neighbourArray[faceIdx][side];
+        }
+
+        /// Get coordinates on face
+        ///
+        /// The coordinates are in the range -1 <= u,v <= 1, if faceIdx is
+        /// obtained using the faceIndex function.  Coordinates outside this
+        /// range are legal, as long as p has nonzero component in the
+        /// direction of the normal of the face.
+        ///
+        /// \param faceIdx - index of current face
+        /// \param p - position (may lie outside cone of current face)
+        static void faceCoords(int faceIdx, V3f p, float& u, float& v)
+        {
+            switch(faceIdx)
+            {
+                case Face_xp: u = -p.z/p.x;  v =  p.y/p.x; break;
+                case Face_xn: u = -p.z/p.x;  v = -p.y/p.x; break;
+                case Face_yp: u =  p.x/p.y;  v = -p.z/p.y; break;
+                case Face_yn: u = -p.x/p.y;  v = -p.z/p.y; break;
+                case Face_zp: u =  p.x/p.z;  v =  p.y/p.z; break;
+                case Face_zn: u =  p.x/p.z;  v = -p.y/p.z; break;
+                default:
+                    assert(0 && "invalid face");
+                    break;
+            }
+        }
+
+        /// Get direction vector for position on a given face.
+        ///
+        /// Roughly speaking, this is the opposite of the faceCoords function
+        V3f direction(int faceIdx, float u, float v) const
+        {
+            switch(faceIdx)
             {
                 case Face_xp: return V3f( 1, v,-u).normalized();
                 case Face_yp: return V3f( u, 1,-v).normalized();
@@ -107,12 +203,16 @@ class MicroBuf
 
         /// Face side resolution
         int res() const { return m_res; }
+        /// Number of channels per pixel
+        int nchans() const { return m_nchans; }
         /// Total size of all faces in number of texels
         int size() const { return Face_end*m_res*m_res; }
 
     private:
         // Square faces
         int m_res;
+        /// Number of channels per pixel
+        int m_nchans;
         // Number of floats needed to store a face
         int m_faceSize;
         // Pixel face storage order:  +x -x +y -y +z -z
@@ -144,50 +244,27 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         // TODO: what about disks sticking out from just below the horizon?
         if(dot(p, N) < plen*dotCut)
             continue;
-        float u = 0;
-        float v = 0;
         // Figure out which face we're on and get u,v coordinates on that face,
-        // along with a pointer to the face data.
-        // The coordinates have the range -1 <= u,v <= 1.
-        V3f absp = V3f(fabs(p.x), fabs(p.y), fabs(p.z));
-        MicroBuf::Face faceIndex = MicroBuf::Face_xp;
-        if(absp.x >= absp.y && absp.x >= absp.z) // x faces
-        {
-            u = -p.z/p.x;
-            v = p.y/absp.x;
-            faceIndex = (p.x > 0) ? MicroBuf::Face_xp : MicroBuf::Face_xn;
-        }
-        else if(absp.y >= absp.x && absp.y >= absp.z) // y faces
-        {
-            u = p.x/absp.y;
-            v = -p.z/p.y;
-            faceIndex = (p.y > 0) ? MicroBuf::Face_yp : MicroBuf::Face_yn;
-        }
-        else // z faces
-        {
-            assert(absp.z >= absp.x && absp.z >= absp.y);
-            u = p.x/p.z;
-            v = p.y/absp.z;
-            faceIndex = (p.z > 0) ? MicroBuf::Face_zp : MicroBuf::Face_zn;
-        }
-        float* face = microBuf.face(faceIndex);
-        // Compute the area of the surfel when projected onto the env face:
-        // The disk radius
+        MicroBuf::Face faceIndex = MicroBuf::faceIndex(p);
+        float u = 0, v = 0;
+        MicroBuf::faceCoords(faceIndex, p, u, v);
+        // Compute the area of the surfel when projected onto the env face.
+        // This depends on several things:
+        // 1) The original disk
         float r = data[6];
         float origArea = M_PI*r*r;
-        // The angle between the disk normal and viewing vector (note that
-        // p/plen is normalized)
-        float angleFactor = fabs(dot(p, n)/plen);
-        // Distance to the surfel vs distance to face
-        float faceDist2 = 1 + u*u + v*v;
-        float distFactor = faceDist2/(plen*plen);
-        // Projected area
+        // 2) The angles between the disk normal n, viewing vector p, and face
+        // normal.  This is the viewed area before projection.
+        float pDotFaceN = p[faceIndex % 3];
+        float angleFactor = fabs(dot(p, n)/pDotFaceN);
+        // 3) Ratio of distance to the surfel vs distance to projected point
+        // on the face.
+        float distFactor = 1.0f/(pDotFaceN*pDotFaceN);
+        // Putting these together gives the projected area
         float projArea = origArea * angleFactor * distFactor;
-        // Half-width of a square with area projArea:
-        // FIXME: Remove factor of 2.
-        float wOn2 = 2* sqrt(projArea)*0.5f;
-        // TODO: detect overlap onto other faces:  if(u-wOn2 < -1) etc
-        // Next, transform to face raster coords.
+        // Half-width of a square with area projArea
+        float wOn2 = sqrt(projArea)*0.5f;
+        // Transform width and position to face raster coords.
         u = rasterScale*(u + 1.0f);
         v = rasterScale*(v + 1.0f);
         wOn2 *= rasterScale;
@@ -196,17 +273,117 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         // it's much cheaper!  Note that points which are proxies for clusters
         // of smaller points aren't going to be accurately resolved no matter
         // what we do.
-        int ustart = Imath::clamp(int(u - wOn2 + 0.5f), 0, faceRes);
-        int uend   = Imath::clamp(int(u + wOn2 + 0.5f), 0, faceRes);
-        int vstart = Imath::clamp(int(v - wOn2 + 0.5f), 0, faceRes);
-        int vend   = Imath::clamp(int(v + wOn2 + 0.5f), 0, faceRes);
-        for(int iv = vstart; iv < vend; ++iv)
-        for(int iu = ustart; iu < uend; ++iu)
+        struct BoundData
         {
-            int pixelIndex = iv*faceRes + iu;
-            float d = face[pixelIndex];
-            if(plen < d)
-                face[pixelIndex] = plen;
+            MicroBuf::Face faceIndex;
+            float ubegin, uend;
+            float vbegin, vend;
+        };
+        // The current surfel can cross up to three faces.
+        int nfaces = 1;
+        BoundData boundData[3];
+        BoundData& bd0 = boundData[0];
+        bd0.faceIndex = faceIndex;
+        bd0.ubegin = u - wOn2;   bd0.uend = u + wOn2;
+        bd0.vbegin = v - wOn2;   bd0.vend = v + wOn2;
+        // Detect & handle overlap onto adjacent faces
+        //
+        // We assume that wOn2 is the same on the adjacent face, an assumption
+        // which is true when the surfel is close the the corner of the cube.
+        // We also assume that a surfel touches at most three faces.  This is
+        // true as long as the surfels don't have a massive solid angle; for
+        // such cases the axis-aligned box isn't going to be accurate anyway.
+        if(bd0.ubegin < 0)
+        {
+            // left neighbour
+            BoundData& b = boundData[nfaces++];
+            b.faceIndex = MicroBuf::neighbourU(faceIndex, 0);
+            MicroBuf::faceCoords(b.faceIndex, p, u, v);
+            u = rasterScale*(u + 1.0f);
+            v = rasterScale*(v + 1.0f);
+            b.ubegin = u - wOn2;  b.uend = u + wOn2;
+            b.vbegin = v - wOn2;  b.vend = v + wOn2;
+        }
+        else if(bd0.uend > faceRes)
+        {
+            // right neighbour
+            BoundData& b = boundData[nfaces++];
+            b.faceIndex = MicroBuf::neighbourU(faceIndex, 1);
+            MicroBuf::faceCoords(b.faceIndex, p, u, v);
+            u = rasterScale*(u + 1.0f);
+            v = rasterScale*(v + 1.0f);
+            b.ubegin = u - wOn2;  b.uend = u + wOn2;
+            b.vbegin = v - wOn2;  b.vend = v + wOn2;
+        }
+        if(bd0.vbegin < 0)
+        {
+            // bottom neighbour
+            BoundData& b = boundData[nfaces++];
+            b.faceIndex = MicroBuf::neighbourV(faceIndex, 0);
+            MicroBuf::faceCoords(b.faceIndex, p, u, v);
+            u = rasterScale*(u + 1.0f);
+            v = rasterScale*(v + 1.0f);
+            b.ubegin = u - wOn2;  b.uend = u + wOn2;
+            b.vbegin = v - wOn2;  b.vend = v + wOn2;
+        }
+        else if(bd0.vend > faceRes)
+        {
+            // top neighbour
+            BoundData& b = boundData[nfaces++];
+            b.faceIndex = MicroBuf::neighbourV(faceIndex, 1);
+            MicroBuf::faceCoords(b.faceIndex, p, u, v);
+            u = rasterScale*(u + 1.0f);
+            v = rasterScale*(v + 1.0f);
+            b.ubegin = u - wOn2;  b.uend = u + wOn2;
+            b.vbegin = v - wOn2;  b.vend = v + wOn2;
+        }
+        for(int iface = 0; iface < nfaces; ++iface)
+        {
+            BoundData& bd = boundData[iface];
+            // Range of pixels which the box touches (note, exclusive end)
+            int ubeginRas = Imath::clamp(int(bd.ubegin),   0, faceRes);
+            int uendRas   = Imath::clamp(int(bd.uend) + 1, 0, faceRes);
+            int vbeginRas = Imath::clamp(int(bd.vbegin),   0, faceRes);
+            int vendRas   = Imath::clamp(int(bd.vend) + 1, 0, faceRes);
+            float* face = microBuf.face(bd.faceIndex);
+            for(int iv = vbeginRas; iv < vendRas; ++iv)
+            for(int iu = ubeginRas; iu < uendRas; ++iu)
+            {
+                int pixelIndex = 2*(iv*faceRes + iu);
+                assert(pixelIndex < 2*faceRes*faceRes);
+                // calculate coverage
+                float urange = std::min<float>(iu+1, bd.uend) -
+                               std::max<float>(iu,   bd.ubegin);
+                float vrange = std::min<float>(iv+1, bd.vend) -
+                               std::max<float>(iv,   bd.vbegin);
+                // Need to combine these two opacities:
+                float o1 = urange*vrange;
+                float o2 = face[pixelIndex+1];
+                // There's more than one way to combine the coverage.
+                //
+                // 1) The usual method of compositing.  This assumes
+                // that successive layers of geometry are uncorrellated so
+                // that each attenuates the layer before, but a bunch of
+                // semi-covered layers never result in full opacity.
+                //
+                // face[pixelIndex+1] = 1 - (1 - o1)*(1 - o2);
+                //
+                // 2) Add the opacities and clamp.  This is more appropriate
+                // if we assume that we have adjacent non-overlapping surfels.
+                face[pixelIndex+1] = std::min(1.0f, o1 + o2);
+                //
+                // 3) Plain old point sampling.  This has more noise than the
+                // above, but is also probably more well-founded.
+                //
+                //if((iu + 0.5f) > bd.ubegin && (iu + 0.5f) < bd.uend &&
+                //   (iv + 0.5f) > bd.vbegin && (iv + 0.5f) < bd.vend)
+                //    face[pixelIndex+1] = 1;
+                float d = face[pixelIndex];
+                if(plen < d)
+                {
+                    face[pixelIndex] = plen;
+                }
+            }
         }
     }
 }
@@ -224,16 +401,18 @@ float occlusion(const MicroBuf& depthBuf, const V3f& N)
     float totWeight = 0;
     for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
     {
-        const float* depth = depthBuf.face(f);
+        const float* face = depthBuf.face(f);
         for(int iv = 0; iv < depthBuf.res(); ++iv)
-        for(int iu = 0; iu < depthBuf.res(); ++iu, ++depth)
+        for(int iu = 0; iu < depthBuf.res(); ++iu, face += 2)
         {
-            float d = dot(depthBuf.direction(f, iu, iv), N);
+            float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
+            float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
+            float d = dot(depthBuf.direction(f, u, v), N);
+            // FIXME: Add in weight due to texel distance from origin.
             if(d > 0)
             {
                 // Accumulate light coming from infinity.
-                if(depth[0] == FLT_MAX)
-                    illum += d;
+                illum += d*(1.0f - face[1]);
                 totWeight += d;
             }
         }
@@ -242,53 +421,37 @@ float occlusion(const MicroBuf& depthBuf, const V3f& N)
     return 1 - illum;
 }
 
-#if 0
-void getDirection(MicroBuf& depthBuf, int comp)
+
+/// Visualize sources of light in occlusion calculation (for debugging)
+void occlWeight(MicroBuf& depthBuf, const V3f& N)
 {
     for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
     {
-        float* z = depthBuf.face(f);
+        float* face = depthBuf.face(f);
         for(int iv = 0; iv < depthBuf.res(); ++iv)
-        for(int iu = 0; iu < depthBuf.res(); ++iu, ++z)
+        for(int iu = 0; iu < depthBuf.res(); ++iu, face += 2)
         {
-            *z = depthBuf.direction(f, iu, iv)[comp];
+            float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
+            float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
+            float d = dot(depthBuf.direction(f, u, v), N);
+            if(d > 0)
+                face[1] = d*(1.0f - face[1]);
+            else
+                face[1] = 0;
         }
     }
-}
-#endif
-
-
-/// Compute total radient energy at a position
-///
-/// (Fluence is the radient energy integrated over all solid angles.)
-float radiantFluence(const MicroBuf& depthBuf)
-{
-    float illum = 0;
-    for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
-    {
-        const float* depth = depthBuf.face(f);
-        for(int iv = 0; iv < depthBuf.res(); ++iv)
-        for(int iu = 0; iu < depthBuf.res(); ++iu, ++depth)
-        {
-            // Accumulate light coming from infinity.
-            if(depth[0] == FLT_MAX)
-                ++illum;
-        }
-    }
-    illum /= depthBuf.size();
-    return illum;
 }
 
 
 /// Bake occlusion from point array back into point array.
-void bakeOcclusion(PointArray& points)
+void bakeOcclusion(PointArray& points, int faceRes)
 {
-    const int faceRes = 20;
-    float eps = 0.02;
-    MicroBuf depthBuf(faceRes);
+    float eps = 0.0001;
+    MicroBuf depthBuf(faceRes, 2);
     for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
     {
-        std::cout << 100.0f*pIdx/points.size() << "%\n";
+        if(pIdx % 100 == 0)
+            std::cout << 100.0f*pIdx/points.size() << "%\n";
         float* data = &points.data[pIdx*points.stride];
         // normal of current point
         V3f N = V3f(data[3], data[4], data[5]);

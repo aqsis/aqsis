@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <OpenEXR/ImathVec.h>
+#include <OpenEXR/ImathMatrix.h>
 
 #include "cornellbox.h"
 #include "pointcloud.h"
@@ -62,6 +63,8 @@ static void makeBilinearPatch(std::vector<float>& outData,
     const float* d4 = patchData + 3*dataLen;
     V3f p1 = scale*ptov3(d1); V3f p2 = scale*ptov3(d2);
     V3f p3 = scale*ptov3(d3); V3f p4 = scale*ptov3(d4);
+//    Imath::M44f xform; xform.setAxisAngle(V3f(0,1,0), 0.2f);
+//    p1*=xform; p2*=xform; p3*=xform; p4*=xform;
     spatialRes *= scale;
     int nu = int(std::max((p1 - p2).length(), (p3 - p4).length()) / spatialRes);
     int nv = int(std::max((p1 - p3).length(), (p2 - p4).length()) / spatialRes);
@@ -79,7 +82,9 @@ static void makeBilinearPatch(std::vector<float>& outData,
         V3f dpdv = (1-u)*(p3-p1) + u*(p4-p2);
         V3f n = (dpdu % dpdv).normalized();
         // Radius: half length of microquad diagonal
-        float r = 0.5f*(dpdu*du + dpdv*dv).length();
+        //float r = 0.5f*(dpdu*du + dpdv*dv).length();
+        // Radius of a disk with area of the parallelogram
+        float r = sqrt(du*dv*(dpdu % dpdv).length()/M_PI);
         // Save data
         outData.push_back(p.x); outData.push_back(p.y); outData.push_back(p.z);
         outData.push_back(n.x); outData.push_back(n.y); outData.push_back(n.z);

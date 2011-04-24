@@ -32,6 +32,8 @@
 
 #include <QtGui/QApplication>
 
+#include <boost/program_options.hpp>
+
 #include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathGL.h>
 
@@ -47,6 +49,7 @@ inline float rad2deg(float r)
     return r*180/M_PI;
 }
 
+#if 0
 /// Get max and min of depth buffer, ignoring any depth > FLT_MAX/2
 ///
 /// \param z - depth array
@@ -85,7 +88,19 @@ static void depthToColor(const float* z, int size, GLubyte* col,
         col[3*i+2] = c;
     }
 }
+#endif
 
+/// Convert coverage grayscale color
+static void coverageToColor(const float* face, int size, GLubyte* col)
+{
+    for(int i = 0; i < size; ++i)
+    {
+        GLubyte c = Imath::clamp(int(255*(face[2*i+1])), 0, 255);
+        col[3*i] = c;
+        col[3*i+1] = c;
+        col[3*i+2] = c;
+    }
+}
 
 /// Draw face of a cube environment map.
 ///
@@ -94,7 +109,7 @@ static void depthToColor(const float* z, int size, GLubyte* col,
 /// \param width - side length of cols texture
 static void drawCubeEnvFace(Imath::V2f p, GLubyte* cols, int colsWidth)
 {
-	// Set up texture
+    // Set up texture
     GLuint texName = 0;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glGenTextures(1, &texName);
@@ -112,7 +127,7 @@ static void drawCubeEnvFace(Imath::V2f p, GLubyte* cols, int colsWidth)
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, texName);
-	// Draw quad
+    // Draw quad
     glPushMatrix();
     glTranslatef(p.x, p.y, 0);
     glBegin(GL_QUADS);
@@ -145,13 +160,12 @@ static void drawMicroBuf(const MicroBuf& envBuf)
     int npix = res*res;
     int faceSize = npix*3;
     boost::scoped_array<GLubyte> colBuf(new GLubyte[faceSize*6]);
-    float zMin = 0;
-    float zMax = 0;
-    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, zMin, zMax);
+//    float zMin = 0;
+//    float zMax = 0;
+//    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, zMin, zMax);
     // Convert each face to 8-bit colour texels
     for(int face = 0; face < 6; ++face)
-        depthToColor(envBuf.face(face), npix, &colBuf[faceSize*face],
-                     zMin, zMax);
+        coverageToColor(envBuf.face(face), npix, &colBuf[faceSize*face]);
     // Set up coordinates so we render on a 4x3 grid
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -182,6 +196,7 @@ PointView::PointView(QWidget *parent)
     m_centre(0),
     m_probePos(0),
     m_probeMoveMode(false),
+    m_probeRes(10),
     m_visMode(Vis_Points),
     m_lighting(false),
     m_points(),
@@ -199,6 +214,11 @@ void PointView::setPoints(const boost::shared_ptr<const PointArray>& points)
         m_cloudCenter = m_points->centroid();
         m_probePos = m_cloudCenter;
     }
+}
+
+void PointView::setProbeParams(int cubeFaceRes)
+{
+    m_probeRes = cubeFaceRes;
 }
 
 
@@ -273,10 +293,9 @@ void PointView::resizeGL(int w, int h)
 
 void PointView::paintGL()
 {
-    const int uwidth = 20;
-    MicroBuf microBuf(uwidth);
+    MicroBuf microBuf(m_probeRes, 2);
     if(m_points)
-        microRasterize(microBuf, m_probePos, V3f(0,0,1), -1, *m_points);
+        microRasterize(microBuf, m_probePos, V3f(0,0,-1), -1, *m_points);
 
     //--------------------------------------------------
     // Draw main scene
@@ -294,28 +313,33 @@ void PointView::paintGL()
 
     // Geometry
     drawAxes();
-    drawLightProbe(m_probePos, 1 - occlusion(microBuf, V3f(0,0,1)));
+    drawLightProbe(m_probePos, 1 - occlusion(microBuf, V3f(0,0,-1)));
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
+
+//    occlWeight(microBuf, V3f(0,0,-1));
 
 
     //--------------------------------------------------
     glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT);
     glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glEnable(GL_SCISSOR_TEST);
     //--------------------------------------------------
     // Draw scene from position of light probe.
+    GLuint miniBufWidth = width()/3;
 
+#if 0
     // Set up & clear viewport
-    glEnable(GL_SCISSOR_TEST);
-    GLuint viewSize = 200;
-    glScissor(0, 0, viewSize, viewSize);
+    glScissor(0, 0, miniBufWidth, miniBufWidth);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glViewport(0, 0, viewSize, viewSize);
+    glViewport(0, 0, miniBufWidth, miniBufWidth);
 
     // Projection
     glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
     glLoadIdentity();
     const float n = 0.01f;
     glFrustum(-n, n, -n, n, n, 1000);
@@ -324,17 +348,19 @@ void PointView::paintGL()
     // Camera transform
     glLoadIdentity();
     glScalef(1, 1, -1);
+    glRotatef(180, 0, 1, 0);
     glTranslate(-m_probePos);
 
     // Geometry
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
+#endif
 
     //--------------------------------------------------
     // Draw image of rendered microbuffer
-    glScissor(width() - viewSize, 0, viewSize, viewSize*3/4);
+    glScissor(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(width() - viewSize, 0, viewSize, viewSize*3/4);
+    glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
 
     drawMicroBuf(microBuf);
 
@@ -575,7 +601,7 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
                 const float* data = ptData + i*ptStride;
                 V3f p(data[0], data[1], data[2]);
                 V3f n(data[3], data[4], data[5]);
-                float r = data[6];
+                float r = M_SQRT2*data[6];
                 glColor3f(data[7], data[8], data[9]);
                 glPushMatrix();
                 // Translate disk to point location and scale
@@ -606,6 +632,34 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    typedef std::vector<std::string> StringVec;
+    namespace po = boost::program_options;
+    // optional options
+    po::options_description optionsDesc("options");
+    optionsDesc.add_options()
+        ("help,h", "help message")
+        ("envres,e", po::value<int>()->default_value(10),
+         "resolution of micro environment raster faces for baking")
+        ("proberes,p", po::value<int>(),
+         "resolution of micro environment raster for viewing")
+        ("cloudres,c", po::value<float>()->default_value(20),
+         "resolution of point cloud")
+        ("radiusmult,r", po::value<float>()->default_value(1),
+         "multiplying factor for surfel radius")
+    ;
+    // Parse options
+    po::variables_map opts;
+    po::store(po::command_line_parser(app.argc(), app.argv())
+              .options(optionsDesc).run(), opts);
+    po::notify(opts);
+
+    if(opts.count("help"))
+    {
+        std::cout << "Usage: " << argv[0] << " [options]\n\n"
+                  << optionsDesc;
+        return 0;
+    }
+
     // Turn on multisampled antialiasing - this makes rendered point clouds
     // look much nicer.
     QGLFormat f = QGLFormat::defaultFormat();
@@ -613,9 +667,16 @@ int main(int argc, char *argv[])
     QGLFormat::setDefaultFormat(f);
 
     PointViewerWindow window;
-    boost::shared_ptr<PointArray> points = cornellBoxPoints(20);
-    bakeOcclusion(*points);
+    boost::shared_ptr<PointArray> points = cornellBoxPoints(
+                                                opts["cloudres"].as<float>());
+    int envRes = opts["envres"].as<int>();
+    bakeOcclusion(*points, envRes);
     window.pointView().setPoints(points);
+    int probeRes = envRes;
+    if(opts.count("proberes") != 0)
+        probeRes = opts["proberes"].as<int>();
+    window.pointView().setProbeParams(probeRes);
+
     window.show();
 
     return app.exec();
