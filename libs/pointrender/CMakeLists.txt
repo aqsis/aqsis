@@ -20,6 +20,7 @@ set(srcs
 	${moc_srcs}
 	cornellbox.cpp
 	ptview.cpp
+	microbuffer.cpp
 )
 
 add_executable(ptview ${srcs})

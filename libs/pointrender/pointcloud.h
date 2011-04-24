@@ -32,6 +32,7 @@
 #define AQSIS_POINTCLOUD_H_INCLUDED
 
 #include <cassert>
+#include <vector>
 
 #include <OpenEXR/ImathVec.h>
 #include <boost/shared_ptr.hpp>
