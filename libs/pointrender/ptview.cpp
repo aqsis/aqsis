@@ -644,6 +644,7 @@ int main(int argc, char *argv[])
          "resolution of micro environment raster for viewing")
         ("cloudres,c", po::value<float>()->default_value(20),
          "resolution of point cloud")
+        ("bakeonly,b", "Only bake, don't display (useful for timing)")
         ("radiusmult,r", po::value<float>()->default_value(1),
          "multiplying factor for surfel radius")
     ;
@@ -671,6 +672,9 @@ int main(int argc, char *argv[])
                                                 opts["cloudres"].as<float>());
     int envRes = opts["envres"].as<int>();
     bakeOcclusion(*points, envRes);
+    if(opts.count("bakeonly"))
+        return 0;
+
     window.pointView().setPoints(points);
     int probeRes = envRes;
     if(opts.count("proberes") != 0)
