@@ -287,10 +287,10 @@ class MicroBuf
 /// \param microBuf - destination environment buffer
 /// \param P - position of light probe
 /// \param N - normal for light probe (should be normalized)
-/// \param dotCut - defines cone angle of interest about N
-///                 (cos(angle) = dotCut).
+/// \param coneAngle - defines cone about N: coneAngle = max angle of interest
+///                    between N and the incoming light.
 /// \param points - point cloud to render
-void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
+void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
                     const PointArray& points);
 
 

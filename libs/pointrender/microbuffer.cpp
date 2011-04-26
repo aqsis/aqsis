@@ -32,6 +32,62 @@
 #include <OpenEXR/ImathFun.h>
 
 
+/// Determine whether a sphere is wholly outside a cone.
+///
+/// This is used to cull disks - the sphere is the bounding sphere of the
+/// disk, and the cone is the cone of incoming light of interest.
+///
+/// Getting an expression which is both correct and efficient (ie, not
+/// involving special functions) is tricky.  The simple version of it is when
+/// the radius is zero, in which case we just need to compute
+///
+///     cosConeAngle > dot(p/plen, N)
+///
+/// In the general case of spheres with nonzero radius the condition to check
+/// is that
+///
+///     coneAngle + boundingSphereAngle < coneNormalToSphereCenterAngle
+///
+/// After some algebra, this reduces to the expression
+///
+///     sqrt(dot(p,p) - r*r)*cosConeAngle - r*sinConeAngle > dot(p, n);
+///
+/// which is valid as long as the sum of the sphere angle and cone angle are
+/// less than pi:
+///
+///     sqrt(1 - r*r/dot(p,p)) < -cosConeAngle
+///
+/// in which case the sphere must intersect the cone.
+///
+/// \param p - center of sphere
+/// \param plen2 - length of p
+/// \param r - sphere radius
+/// \param n - cone normal
+/// \param cosConeAngle - cos(theta) where theta = cone angle from N
+/// \param sinConeAngle - sin(theta)
+inline bool sphereOutsideCone(V3f p, float plen2, float r,
+                              V3f n, float cosConeAngle, float sinConeAngle)
+{
+    // The actual expressions used here are an optimized version which does
+    // the same thing, but avoids calling sqrt().  This makes a difference
+    // when this is the primary culling test and you're iterating over lots of
+    // points - you need to reject invalid points as fast as possible.
+    float x = plen2 - r*r;
+    // special case - if the sphere covers the origin, it must intersect the
+    // cone.
+    if(x < 0)
+        return false;
+    // Special case - if sphere angle and cone angle add to pi, the sphere and
+    // cone must intersect.
+    if(cosConeAngle < 0 && x < plen2*cosConeAngle*cosConeAngle)
+        return false;
+    // General case
+    float lhs = x*cosConeAngle*cosConeAngle;
+    float rhs = dot(p, n) + r*sinConeAngle;
+    return copysignf(lhs, cosConeAngle) > copysignf(rhs*rhs, rhs);
+}
+
+
 /// Render a disk into the microbuffer using raytracing
 ///
 /// When two surfaces meet at a sharp angle, the visibility of surfels on
@@ -80,11 +136,13 @@ static void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
 }
 
 
-void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
+void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
                     const PointArray& points)
 {
     int faceRes = microBuf.res();
     float rasterScale = 0.5f*microBuf.res();
+    float sinConeAngle = sin(coneAngle);
+    float cosConeAngle = cos(coneAngle);
     for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
     {
         const float* data = &points.data[pIdx*points.stride];
@@ -92,21 +150,22 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         V3f n = V3f(data[3], data[4], data[5]);
         // position of current point relative to shading point
         V3f p = V3f(data[0], data[1], data[2]) - P;
-        float plen = p.length();
+        float plen2 = p.length2();
         float r = data[6];
-        // If distance_to_point / radius is less than raytraceCutoff, raytrace
-        // the surfel rather than rasterize.
-        const float raytraceCutoff = 8.0f;
-        if(plen < raytraceCutoff*r)
+        // Cull points which lie outside the cone of interest.
+        if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
+            continue;
+        float plen = sqrt(plen2);
+        // If distance_to_point / radius is less than exactRenderCutoff,
+        // raytrace the surfel rather than rasterize.
+        const float exactRenderCutoff = 8.0f;
+        if(plen < exactRenderCutoff*r)
         {
             // Resolve visibility of very close surfels using ray tracing.
             // This is necessary to avoid artifacts where surfaces meet.
             raytraceDisk(microBuf, p, n, r);
             continue;
         }
-        // TODO: what about disks sticking out from just below the horizon?
-        if(dot(p, N) < plen*dotCut)
-            continue;
         // Figure out which face we're on and get u,v coordinates on that face,
         MicroBuf::Face faceIndex = MicroBuf::faceIndex(p);
         float u = 0, v = 0;
@@ -311,7 +370,7 @@ void bakeOcclusion(PointArray& points, int faceRes)
         V3f P = V3f(data[0], data[1], data[2]);
         float r = data[6];
         depthBuf.reset();
-        microRasterize(depthBuf, P + N*r*eps, N, 0, points);
+        microRasterize(depthBuf, P + N*r*eps, N, M_PI_2, points);
         float occl = occlusion(depthBuf, N);
         data[7] = data[8] = data[9] = 1 - occl;
     }

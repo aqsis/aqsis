@@ -295,7 +295,7 @@ void PointView::paintGL()
 {
     MicroBuf microBuf(m_probeRes, 2);
     if(m_points)
-        microRasterize(microBuf, m_probePos, V3f(0,0,-1), -1, *m_points);
+        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI, *m_points);
 
     //--------------------------------------------------
     // Draw main scene
