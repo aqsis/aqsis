@@ -69,7 +69,10 @@ inline float dot(V3f a, V3f b)
 ///
 /// where the x's represent the positions at which point sampling will occur.
 ///
-/// The orientation of the faces is
+/// The orientation of the faces is chosen so that they have a consistent
+/// coordinate system when laid out in the following unfolded net of faces,
+/// viewed from the inside of the cube.  (NB that for other possible nets the
+/// coordinates of neighbouring faces won't be consistent.)
 ///
 ///              +---+
 ///   ^          |+y |
@@ -104,6 +107,20 @@ class MicroBuf
             m_pixels()
         {
             m_pixels.reset(new float[m_faceSize*Face_end]);
+            m_directions.reset(new V3f[Face_end*faceRes*faceRes]);
+            // Cache direction vectors
+            for(int face = 0; face < Face_end; ++face)
+            {
+                for(int iv = 0; iv < m_res; ++iv)
+                for(int iu = 0; iu < m_res; ++iu)
+                {
+                    // directions of pixels go through pixel centers
+                    float u = (0.5f + iu)/faceRes*2.0f - 1.0f;
+                    float v = (0.5f + iv)/faceRes*2.0f - 1.0f;
+                    m_directions[(face*m_res + iv)*m_res + iu] =
+                        direction(face, u, v);
+                }
+            }
             reset();
         }
 
@@ -214,6 +231,19 @@ class MicroBuf
             }
         }
 
+        /// Compute dot product of vec with face normal on given face
+        static float dotFaceNormal(int faceIdx, V3f vec)
+        {
+            assert(faceIdx < Face_end && faceIdx >= Face_begin);
+            return (faceIdx < 3) ? vec[faceIdx] : -vec[faceIdx-3];
+        }
+
+        /// Get direction vector for pixel on given face.
+        V3f rayDirection(int faceIdx, int u, int v) const
+        {
+            return m_directions[(faceIdx*m_res + v)*m_res + u];
+        }
+
         /// Get direction vector for position on a given face.
         ///
         /// Roughly speaking, this is the opposite of the faceCoords function
@@ -245,8 +275,10 @@ class MicroBuf
         int m_nchans;
         // Number of floats needed to store a face
         int m_faceSize;
-        // Pixel face storage order:  +x -x +y -y +z -z
+        // Pixel face storage
         boost::scoped_array<float> m_pixels;
+        // Storage for pixel ray directions
+        boost::scoped_array<V3f> m_directions;
 };
 
 

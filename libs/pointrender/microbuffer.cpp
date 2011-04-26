@@ -51,8 +51,7 @@ static void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
     // radius.
     for(int iface = 0; iface < 6; ++iface)
     {
-        float faceNormalDotP = p[iface%3]/plength *
-                                ((iface < 3) ? 1.0f : -1.0f);
+        float faceNormalDotP = MicroBuf::dotFaceNormal(iface, p) / plength;
         // Cull face if we know the bounding cone of the face lies outside the
         // bounding cone of the disk.  TODO: More efficient raster bounding!
         if(faceNormalDotP < -1.0f/sqrt(3.0f))
@@ -62,17 +61,15 @@ static void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
         for(int iu = 0; iu < faceRes; ++iu)
         {
             // d = ray through the pixel.
-            V3f d = MicroBuf::direction(iface,
-                            (0.5f + iu)/faceRes*2.0f - 1.0f,
-                            (0.5f + iv)/faceRes*2.0f - 1.0f);
+            V3f d = microBuf.rayDirection(iface, iu, iv);
             // Intersect ray with plane containing disk.
             float t = dot(p, n)/dot(d, n);
             // Expand the disk just a little, to make the cracks a bit smaller.
             // We can't do this too much, or sharp convex edges will be
             // overoccluded (TODO: Adjust for best results!  Maybe the "too
             // large" problem could be worked around using a tracing offset?)
-            const float extraRadius2 = 1.5f;
-            if(t > 0 && (t*d - p).length2() < extraRadius2*r*r)
+            const float extraRadiusSqrt = 1.5f;
+            if(t > 0 && (t*d - p).length2() < extraRadiusSqrt*r*r)
             {
                 // The ray hit the disk, record the hit.
                 int pixelIndex = 2*(iv*faceRes + iu);
@@ -97,9 +94,10 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         V3f p = V3f(data[0], data[1], data[2]) - P;
         float plen = p.length();
         float r = data[6];
-        // FIXME: should be 8*r (or so) here, but adjusted down for the time
-        // being until efficiency is improved.
-        if(plen < 2*r)
+        // If distance_to_point / radius is less than raytraceCutoff, raytrace
+        // the surfel rather than rasterize.
+        const float raytraceCutoff = 8.0f;
+        if(plen < raytraceCutoff*r)
         {
             // Resolve visibility of very close surfels using ray tracing.
             // This is necessary to avoid artifacts where surfaces meet.
@@ -120,7 +118,7 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float dotCut,
         // 2) The angles between the disk normal n, viewing vector p, and face
         // normal.  This is the area projected onto a plane parallel to the env
         // map face, and through the centre of the disk.
-        float pDotFaceN = p[faceIndex % 3];
+        float pDotFaceN = MicroBuf::dotFaceNormal(faceIndex, p);
         float angleFactor = fabs(dot(p, n)/pDotFaceN);
         // 3) Ratio of distance to the surfel vs distance to projected point on
         // the face.
@@ -265,9 +263,7 @@ float occlusion(const MicroBuf& depthBuf, const V3f& N)
         for(int iv = 0; iv < depthBuf.res(); ++iv)
         for(int iu = 0; iu < depthBuf.res(); ++iu, face += 2)
         {
-            float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
-            float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
-            float d = dot(MicroBuf::direction(f, u, v), N);
+            float d = dot(depthBuf.rayDirection(f, iu, iv), N);
             // FIXME: Add in weight due to texel distance from origin.
             if(d > 0)
             {
@@ -290,9 +286,7 @@ void occlWeight(MicroBuf& depthBuf, const V3f& N)
         for(int iv = 0; iv < depthBuf.res(); ++iv)
         for(int iu = 0; iu < depthBuf.res(); ++iu, face += 2)
         {
-            float u = (0.5f + iu)/depthBuf.res()*2.0f - 1.0f;
-            float v = (0.5f + iv)/depthBuf.res()*2.0f - 1.0f;
-            float d = dot(MicroBuf::direction(f, u, v), N);
+            float d = dot(depthBuf.rayDirection(f, iu, iv), N);
             if(d > 0)
                 face[1] = d*(1.0f - face[1]);
             else
@@ -323,3 +317,4 @@ void bakeOcclusion(PointArray& points, int faceRes)
     }
 }
 
+// vi: set et:
