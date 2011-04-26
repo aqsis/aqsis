@@ -217,18 +217,11 @@ class MicroBuf
         /// \param p - position (may lie outside cone of current face)
         static void faceCoords(int faceIdx, V3f p, float& u, float& v)
         {
-            switch(faceIdx)
-            {
-                case Face_xp: u = -p.z/p.x;  v =  p.y/p.x; break;
-                case Face_xn: u = -p.z/p.x;  v = -p.y/p.x; break;
-                case Face_yp: u =  p.x/p.y;  v = -p.z/p.y; break;
-                case Face_yn: u = -p.x/p.y;  v = -p.z/p.y; break;
-                case Face_zp: u =  p.x/p.z;  v =  p.y/p.z; break;
-                case Face_zn: u =  p.x/p.z;  v = -p.y/p.z; break;
-                default:
-                    assert(0 && "invalid face");
-                    break;
-            }
+            p = canonicalFaceCoords(faceIdx, p);
+            assert(p.z != 0);
+            float zinv = 1.0/p.z;
+            u = p.x*zinv;
+            v = p.y*zinv;
         }
 
         /// Compute dot product of vec with face normal on given face
@@ -238,12 +231,50 @@ class MicroBuf
             return (faceIdx < 3) ? vec[faceIdx] : -vec[faceIdx-3];
         }
 
+        /// Compute face normal
+        static V3f faceNormal(int faceIdx)
+        {
+            static V3f normals[6] = {
+                V3f(1,0,0), V3f(0,1,0), V3f(0,0,1),
+                V3f(-1,0,0), V3f(0,-1,0), V3f(0,0,-1)
+            };
+            return normals[faceIdx];
+        }
+
         /// Get direction vector for pixel on given face.
         V3f rayDirection(int faceIdx, int u, int v) const
         {
             return m_directions[(faceIdx*m_res + v)*m_res + u];
         }
 
+        /// Reorder vector components into "canonical face coordinates".
+        ///
+        /// The canonical coordinates correspond to the coordinates on the +z
+        /// face.  If we let the returned vector be q then (q.x, q.y)
+        /// correspond to the face (u, v) coordinates, and q.z corresponds to
+        /// the signed depth out from the face.
+        static V3f canonicalFaceCoords(int faceIdx, V3f p)
+        {
+            switch(faceIdx)
+            {
+                case Face_xp: return V3f(-p.z,  p.y, p.x);
+                case Face_xn: return V3f(-p.z, -p.y, p.x);
+                case Face_yp: return V3f( p.x, -p.z, p.y);
+                case Face_yn: return V3f(-p.x, -p.z, p.y);
+                case Face_zp: return V3f( p.x,  p.y, p.z);
+                case Face_zn: return V3f( p.x, -p.y, p.z);
+                default: assert(0 && "invalid face"); return V3f();
+            }
+        }
+
+        /// Face side resolution
+        int res() const { return m_res; }
+        /// Number of channels per pixel
+        int nchans() const { return m_nchans; }
+        /// Total size of all faces in number of texels
+        int size() const { return Face_end*m_res*m_res; }
+
+    private:
         /// Get direction vector for position on a given face.
         ///
         /// Roughly speaking, this is the opposite of the faceCoords function
@@ -261,14 +292,6 @@ class MicroBuf
             }
         }
 
-        /// Face side resolution
-        int res() const { return m_res; }
-        /// Number of channels per pixel
-        int nchans() const { return m_nchans; }
-        /// Total size of all faces in number of texels
-        int size() const { return Face_end*m_res*m_res; }
-
-    private:
         // Square faces
         int m_res;
         /// Number of channels per pixel

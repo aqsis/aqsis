@@ -88,31 +88,147 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
 }
 
 
-/// Render a disk into the microbuffer using raytracing
+/// Utility to solve the quadratic equation
+inline void solveQuadratic(float a, float b, float c,
+                           float& lowRoot, float& highRoot)
+{
+    float det = b*b - 4*a*c;
+    assert(det > 0);
+    float firstTerm = -b/(2*a);
+    float secondTerm = sqrtf(det)/(2*a);
+    lowRoot = firstTerm - secondTerm;
+    highRoot = firstTerm + secondTerm;
+}
+
+/// Render a disk into the microbuffer using exact visibility testing
 ///
-/// When two surfaces meet at a sharp angle, the visibility of surfels on
-/// the adjacent surface needs to be computed more carefully than with the
-/// approximate rasterization method.  If not, disturbing artifacts will appear
-/// where the surfaces join.  This function solves the problem by resolving
-/// visibility of a disk using ray tracing.
+/// When two surfaces meet at a sharp angle, the visibility of surfels on the
+/// adjacent surface needs to be computed more carefully than with the
+/// approximate square-based rasterization method.  If not, disturbing
+/// artifacts will appear where the surfaces join.  This function solves the
+/// problem by resolving visibility of a disk using ray tracing.
 ///
+/// \param microBuf - buffer to render into.
 /// \param p - position of disk center relative to microbuffer
 /// \param n - disk normal
 /// \param r - disk radius
-static void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
+static void renderDiskExact(MicroBuf& microBuf, V3f p, V3f n, float r)
 {
     int faceRes = microBuf.res();
-    float plength = p.length();
-    // Raytrace the disk if it's "close" as compared to the disk
-    // radius.
+    float plen2 = p.length2();
+    if(plen2 == 0) // Sanity check
+        return;
+    // Angle from face normal to edge is acos(1/sqrt(3)).
+    static float cosFaceAngle = 1.0f/sqrt(3);
+    static float sinFaceAngle = sqrt(2.0f/3.0f);
     for(int iface = 0; iface < 6; ++iface)
     {
-        float faceNormalDotP = MicroBuf::dotFaceNormal(iface, p) / plength;
-        // Cull face if we know the bounding cone of the face lies outside the
-        // bounding cone of the disk.  TODO: More efficient raster bounding!
-        if(faceNormalDotP < -1.0f/sqrt(3.0f))
-            continue;
         float* face = microBuf.face(iface);
+        // Avoid rendering to the current face if the disk definitely doesn't
+        // touch it.  First check the cone angle
+        if(sphereOutsideCone(p, plen2, r, MicroBuf::faceNormal(iface),
+                             cosFaceAngle, sinFaceAngle))
+            continue;
+        // Also check whether the disk is on the opposite face.
+        if(MicroBuf::dotFaceNormal(iface, p) < 0 &&
+           fabs(MicroBuf::dotFaceNormal(iface, n)) > cosFaceAngle)
+            continue;
+        // Here we compute components of a quadratic function
+        //
+        //   q(u,v) = a0*u*u + b0*u*v + c0*v*v + d0*u + e0*v + f0
+        //
+        // such that the disk lies in the region satisfying f(u,v) < 0.  Start
+        // with the implicit definition of the disk on the plane,
+        //
+        //   norm(dot(p,n)/dot(V,n) * V - p)^2 - r^2 < 0
+        //
+        // and compute coefficients A,B,C such that
+        //
+        //   A*dot(V,V) + B*dot(V,n)*dot(p,V) + C < 0
+        //
+        float dot_pn = dot(p,n);
+        float A = dot_pn*dot_pn;
+        float B = -2*dot_pn;
+        float C = plen2 - r*r;
+        // Next, project this onto the current face to compute the
+        // coefficients a0 through to f0.
+        V3f pp = MicroBuf::canonicalFaceCoords(iface, p);
+        V3f nn = MicroBuf::canonicalFaceCoords(iface, n);
+        float a0 = A + B*nn.x*pp.x + C*nn.x*nn.x;
+        float b0 = B*(nn.x*pp.y + nn.y*pp.x) + 2*C*nn.x*nn.y;
+        float c0 = A + B*nn.y*pp.y + C*nn.y*nn.y;
+        float d0 = (B*(nn.x*pp.z + nn.z*pp.x) + 2*C*nn.x*nn.z);
+        float e0 = (B*(nn.y*pp.z + nn.z*pp.y) + 2*C*nn.y*nn.z);
+        float f0 = (A + B*nn.z*pp.z + C*nn.z*nn.z);
+        // Finally, transform the coefficients so that they define the
+        // implicit function in raster face coordinates, (iu, iv)
+        float scale = 2.0f/faceRes;
+        float scale2 = scale*scale;
+        float off = 0.5f*scale - 1.0f;
+        float a = scale2*a0;
+        float b = scale2*b0;
+        float c = scale2*c0;
+        float d = ((2*a0 + b0)*off + d0)*scale;
+        float e = ((2*c0 + b0)*off + e0)*scale;
+        float f = (a0 + b0 + c0)*off*off + (d0 + e0)*off + f0;
+        // The coefficients a,b,c,d,e,f may represent an ellipse or a
+        // hyperbola in the face's raster coordinates, determine which.
+        float det = 4*a*c - b*b;
+        if(det > 0)
+        {
+            // If the coefficients represent an ellipse, we may construct a
+            // tight bound.
+            int ubegin = 0, uend = faceRes;
+            int vbegin = 0, vend = faceRes;
+            float ub = 0, ue = 0;
+            solveQuadratic(det, 4*d*c - 2*b*e, 4*c*f - e*e, ub, ue);
+            ubegin = std::max(0, Imath::ceil(ub));
+            uend   = std::min(faceRes, Imath::ceil(ue));
+            float vb = 0, ve = 0;
+            solveQuadratic(det, 4*a*e - 2*b*d, 4*a*f - d*d, vb, ve);
+            vbegin = std::max(0, Imath::ceil(vb));
+            vend   = std::min(faceRes, Imath::ceil(ve));
+            // By the time we get here, we've expended perhaps 120 FLOPS +
+            // 2 sqrts.  The setup is expensive, but the bound is optimal so
+            // it will be worthwhile unless the raster faces are very small.
+            for(int iv = vbegin; iv < vend; ++iv)
+            for(int iu = ubegin; iu < uend; ++iu)
+            {
+                float q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
+                if(q < 0)
+                {
+                    int pixelIndex = 2*(iv*faceRes + iu);
+                    face[pixelIndex+1] = 1;
+                }
+            }
+        }
+        else
+        {
+            // Else, the coefficients do not represent an ellipse (ie, they
+            // are hyperbolic or parabolic.)  This is a perfectly valid option
+            // which occurs when a disk spans the perspective divide.  In any
+            // case, just give up and rasterize the entire face.  It's
+            // probably hyperbolic so we must be quite careful to render only
+            // the valid branch of the hyperbola.
+            for(int iv = 0; iv < faceRes; ++iv)
+            for(int iu = 0; iu < faceRes; ++iu)
+            {
+                if(dot_pn*dot(microBuf.rayDirection(iface, iu, iv), n) < 0)
+                    continue;
+                float q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
+                if(q < 0)
+                {
+                    // The ray hit the disk, record the hit.
+                    int pixelIndex = 2*(iv*faceRes + iu);
+                    face[pixelIndex+1] = 1;
+                }
+            }
+        }
+        // For reference, all of the tricky rasterization rubbish above could
+        // be replaced by the following ray tracing code.  This conceptually
+        // simple code would probably be efficient enough if I only knew a
+        // good way to compute the tight raster bound!
+#if 0
         for(int iv = 0; iv < faceRes; ++iv)
         for(int iu = 0; iu < faceRes; ++iu)
         {
@@ -120,18 +236,14 @@ static void raytraceDisk(MicroBuf& microBuf, V3f p, V3f n, float r)
             V3f d = microBuf.rayDirection(iface, iu, iv);
             // Intersect ray with plane containing disk.
             float t = dot(p, n)/dot(d, n);
-            // Expand the disk just a little, to make the cracks a bit smaller.
-            // We can't do this too much, or sharp convex edges will be
-            // overoccluded (TODO: Adjust for best results!  Maybe the "too
-            // large" problem could be worked around using a tracing offset?)
-            const float extraRadiusSqrt = 1.5f;
-            if(t > 0 && (t*d - p).length2() < extraRadiusSqrt*r*r)
+            if(t > 0 && (t*d - p).length2() < r*r)
             {
                 // The ray hit the disk, record the hit.
                 int pixelIndex = 2*(iv*faceRes + iu);
                 face[pixelIndex+1] = 1;
             }
         }
+#endif
     }
 }
 
@@ -157,13 +269,20 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
             continue;
         float plen = sqrt(plen2);
         // If distance_to_point / radius is less than exactRenderCutoff,
-        // raytrace the surfel rather than rasterize.
+        // resolve the visibility exactly rather than using a cheap approx.
+        //
+        // TODO: Adjust exactRenderCutoff for best results!
         const float exactRenderCutoff = 8.0f;
         if(plen < exactRenderCutoff*r)
         {
+            // Multiplier for radius to make the cracks a bit smaller.  We
+            // can't do this too much, or sharp convex edges will be
+            // overoccluded (TODO: Adjust for best results!  Maybe the "too
+            // large" problem could be worked around using a tracing offset?)
+            const float radiusMultiplier = M_SQRT2;
             // Resolve visibility of very close surfels using ray tracing.
             // This is necessary to avoid artifacts where surfaces meet.
-            raytraceDisk(microBuf, p, n, r);
+            renderDiskExact(microBuf, p, n, radiusMultiplier*r);
             continue;
         }
         // Figure out which face we're on and get u,v coordinates on that face,
