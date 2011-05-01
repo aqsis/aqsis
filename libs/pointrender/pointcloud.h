@@ -136,6 +136,32 @@ class PointOctree
                 bound.extendBy(V3f(p[0], p[1], p[2]));
                 workspace[i] = &points.data[i*m_dataSize];
             }
+            // We make octree bound cubic rather than fitting the point cloud
+            // tightly.  This improves the distribution of points in the octree
+            // nodes and reduces artifacts when groups of points are aggregated
+            // in the internal nodes.
+            //
+            // If we *don't* do this and we have a rectangular (non-cubic)
+            // bound, we end up with a lot more points in one direction inside
+            // a node than another.  This means the aggregated averaged point -
+            // intended to represent the collection - is in the middle, but
+            // with lots of room on either side:
+            //
+            // +-----------+   ----->    +----/^\----+
+            // | o o o o o |  aggregate  |   | . |   |
+            // +-----------+             +----\_/----+
+            //
+            //   <------->                   <--->
+            // even distribution           all in middle :(
+            //
+            // That is, there will be large gaps between neighbouring disks,
+            // which gives large transparent gaps in the microrendered surface.
+            // Obviously a bad thing!
+            V3f d = bound.size();
+            V3f c = bound.center();
+            float maxDim2 = std::max(std::max(d.x, d.y), d.z) / 2;
+            bound.min = c - V3f(maxDim2);
+            bound.max = c + V3f(maxDim2);
             m_root = makeTree(&workspace[0], npoints, m_dataSize, bound);
         }
 

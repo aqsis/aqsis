@@ -73,6 +73,7 @@ static void depthRange(const float* z, int size, int stride,
 
 
 #if 0
+static void drawBound(const Box3f& b);
 static void drawDisk(V3f p, V3f n, float r)
 {
     // Radius 1 disk primitive, translated & scaled into position.
