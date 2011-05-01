@@ -49,25 +49,99 @@ inline float rad2deg(float r)
     return r*180/M_PI;
 }
 
-#if 0
 /// Get max and min of depth buffer, ignoring any depth > FLT_MAX/2
 ///
 /// \param z - depth array
 /// \param size - length of z array
+/// \param stride - stride between values in z array
 /// \param zMin - returned min z value
 /// \param zMax - returned max z value
-static void depthRange(const float* z, int size, float& zMin, float& zMax)
+static void depthRange(const float* z, int size, int stride,
+                       float& zMin, float& zMax)
 {
     zMin = FLT_MAX;
     zMax = -FLT_MAX;
     for(int i = 0; i < size; ++i)
     {
-        if(zMin > z[i])
-            zMin = z[i];
-        if(zMax < z[i] && z[i] < FLT_MAX/2)
-            zMax = z[i];
+        float zi = z[i*stride];
+        if(zMin > zi)
+            zMin = zi;
+        if(zMax < zi && zi < FLT_MAX/2)
+            zMax = zi;
     }
 }
+
+
+#if 0
+static void drawDisk(V3f p, V3f n, float r)
+{
+    // Radius 1 disk primitive, translated & scaled into position.
+    V3f p0(0);
+    V3f t1(1,0,0);
+    V3f t2(0,1,0);
+    V3f diskNormal(0,0,1);
+    glPushMatrix();
+    // Translate disk to point location and scale
+    glTranslate(p);
+    glScalef(r,r,r);
+    // Transform the disk normal (0,0,1) into the correct normal
+    // direction for the current point.  The appropriate transform
+    // is a rotation about a direction perpendicular to both
+    // normals:
+    V3f v = diskNormal % n;
+    // via the angle given by the dot product:
+    float angle = rad2deg(acosf(diskNormal^n));
+    glRotatef(angle, v.x, v.y, v.z);
+    glColor3f(1, 0, 0);
+    glBegin(GL_LINE_LOOP);
+        const int nSegs = 20;
+        // Scale so that _min_ radius of polygon approx is 1.
+        float scale = 1/cos(M_PI/nSegs);
+        for(int i = 0; i < nSegs; ++i)
+        {
+            float angle = 2*M_PI*float(i)/nSegs;
+            glVertex3f(scale*cos(angle), scale*sin(angle), 0);
+        }
+    glEnd();
+    glPopMatrix();
+}
+
+
+/// Debug: visualize tree splitting
+static void splitNode(V3f P, float maxSolidAngle, int dataSize,
+                      const PointOctree::Node* node)
+{
+    glColor3f(0.3, 0.5, 0.3);
+    drawBound(node->bound);
+    if(node->npoints != 0)
+    {
+        // Render each point.
+        for(int i = 0; i < node->npoints; ++i)
+        {
+            const float* data = &node->data[i*dataSize];
+            V3f p = V3f(data[0], data[1], data[2]);
+            V3f n = V3f(data[3], data[4], data[5]);
+            float r = data[6];
+            drawDisk(p, n, r);
+        }
+    }
+    for(int i = 0; i < 8; ++i)
+    {
+        PointOctree::Node* child = node->children[i];
+        if(!child)
+            continue;
+        // Check size of the child node
+        float rbnd = child->aggR;
+        V3f pbnd = child->aggP - P;
+        float pbnd2 = pbnd.length2();
+        float solidAngle = M_PI*rbnd*rbnd / pbnd2;
+        if(solidAngle < maxSolidAngle)
+            drawDisk(child->aggP, child->aggN, child->aggR);
+        else
+            splitNode(P, maxSolidAngle, dataSize, child);
+    }
+}
+#endif
 
 
 /// Convert depth buffer to grayscale color
@@ -75,20 +149,19 @@ static void depthRange(const float* z, int size, float& zMin, float& zMax)
 /// \param z - depth buffer
 /// \param size - length of z array
 /// \param col - storage for output RGB tripls color data
-static void depthToColor(const float* z, int size, GLubyte* col,
+static void depthToColor(const float* z, int size, int stride, GLubyte* col,
                          float zMin, float zMax)
 {
     float zRangeInv = 1.0f/(zMax - zMin);
     for(int i = 0; i < size; ++i)
     {
-        GLubyte c = Imath::clamp(int(255*(1 - zRangeInv*(z[i] - zMin))),
+        GLubyte c = Imath::clamp(int(255*(1 - zRangeInv*(z[stride*i] - zMin))),
                                  0, 255);
         col[3*i] = c;
         col[3*i+1] = c;
         col[3*i+2] = c;
     }
 }
-#endif
 
 /// Convert coverage grayscale color
 static void coverageToColor(const float* face, int size, GLubyte* col)
@@ -160,12 +233,22 @@ static void drawMicroBuf(const MicroBuf& envBuf)
     int npix = res*res;
     int faceSize = npix*3;
     boost::scoped_array<GLubyte> colBuf(new GLubyte[faceSize*6]);
-//    float zMin = 0;
-//    float zMax = 0;
-//    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, zMin, zMax);
-    // Convert each face to 8-bit colour texels
-    for(int face = 0; face < 6; ++face)
-        coverageToColor(envBuf.face(face), npix, &colBuf[faceSize*face]);
+    float zMin = 0;
+    float zMax = 0;
+    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, 2, zMin, zMax);
+    if(false)
+    {
+        // Convert each face to 8-bit colour texels
+        for(int face = 0; face < 6; ++face)
+            depthToColor(envBuf.face(face), npix, 2, &colBuf[faceSize*face],
+                         zMin, zMax);
+    }
+    else
+    {
+        // Convert each face to 8-bit colour texels
+        for(int face = 0; face < 6; ++face)
+            coverageToColor(envBuf.face(face), npix, &colBuf[faceSize*face]);
+    }
     // Set up coordinates so we render on a 4x3 grid
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -193,20 +276,23 @@ PointView::PointView(QWidget *parent)
     m_theta(0),
     m_phi(0),
     m_dist(5),
-    m_centre(0),
+    m_center(0),
     m_probePos(0),
     m_probeMoveMode(false),
     m_probeRes(10),
+    m_probeMaxSolidAngle(0),
     m_visMode(Vis_Points),
     m_lighting(false),
     m_points(),
+    m_pointTree(0),
     m_cloudCenter(0)
 {
     setFocusPolicy(Qt::StrongFocus);
 }
 
 
-void PointView::setPoints(const boost::shared_ptr<const PointArray>& points)
+void PointView::setPoints(const boost::shared_ptr<const PointArray>& points,
+                          const PointOctree* pointTree)
 {
     m_points = points;
     if(m_points)
@@ -214,19 +300,19 @@ void PointView::setPoints(const boost::shared_ptr<const PointArray>& points)
         m_cloudCenter = m_points->centroid();
         m_probePos = m_cloudCenter;
     }
+    m_pointTree = pointTree;
 }
 
-void PointView::setProbeParams(int cubeFaceRes)
+void PointView::setProbeParams(int cubeFaceRes, float maxSolidAngle)
 {
     m_probeRes = cubeFaceRes;
+    m_probeMaxSolidAngle = maxSolidAngle;
 }
 
 
 void PointView::initializeGL()
 {
     glLoadIdentity();
-    // background colour
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 
     // set up Z buffer
     glClearDepth(1.0f);
@@ -291,14 +377,45 @@ void PointView::resizeGL(int w, int h)
 }
 
 
+static void drawBound(const Box3f& b)
+{
+    glBegin(GL_LINE_LOOP);
+        glVertex3f(b.min.x, b.min.y, b.min.z);
+        glVertex3f(b.min.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.min.z);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+        glVertex3f(b.min.x, b.max.y, b.min.z);
+        glVertex3f(b.min.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.min.z);
+    glEnd();
+    glBegin(GL_LINES);
+        glVertex3f(b.min.x, b.min.y, b.min.z);
+        glVertex3f(b.min.x, b.max.y, b.min.z);
+        glVertex3f(b.min.x, b.min.y, b.max.z);
+        glVertex3f(b.min.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.min.z);
+        glVertex3f(b.max.x, b.max.y, b.min.z);
+    glEnd();
+}
+
+
 void PointView::paintGL()
 {
     MicroBuf microBuf(m_probeRes, 2);
-    if(m_points)
-        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI, *m_points);
+//    if(m_points)
+//        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI, *m_points);
+    if(m_pointTree)
+        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI,
+                       m_probeMaxSolidAngle, *m_pointTree);
 
     //--------------------------------------------------
     // Draw main scene
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Camera -> world transform.
@@ -307,7 +424,7 @@ void PointView::paintGL()
     glTranslatef(0, 0, m_dist);
     glRotatef(m_theta, 1, 0, 0);
     glRotatef(m_phi, 0, 1, 0);
-    glTranslate(m_centre);
+    glTranslate(m_center);
     // Center on the point cloud
     glTranslate(-m_cloudCenter);
 
@@ -316,6 +433,9 @@ void PointView::paintGL()
     drawLightProbe(m_probePos, 1 - occlusion(microBuf, V3f(0,0,-1)));
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
+//    if(m_pointTree)
+//        splitNode(m_probePos, m_probeMaxSolidAngle, m_pointTree->dataSize(),
+//                  m_pointTree->root());
 
 //    occlWeight(microBuf, V3f(0,0,-1));
 
@@ -359,7 +479,6 @@ void PointView::paintGL()
     //--------------------------------------------------
     // Draw image of rendered microbuffer
     glScissor(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
 
     drawMicroBuf(microBuf);
@@ -392,7 +511,7 @@ void PointView::mouseMoveEvent(QMouseEvent* event)
         V3f camDir = V3f(cos(deg2rad(m_theta))*cos(deg2rad(m_phi+90)),
                          sin(deg2rad(m_theta)),
                          cos(deg2rad(m_theta))*sin(deg2rad(m_phi+90)));
-        V3f camPos = -m_dist*camDir + m_centre - m_cloudCenter;
+        V3f camPos = -m_dist*camDir + m_center - m_cloudCenter;
         V3f v = m_probePos - camPos;
         V3f up = V3f(cos(deg2rad(m_theta+90))*cos(deg2rad(m_phi+90)),
                      sin(deg2rad(m_theta+90)),
@@ -415,9 +534,9 @@ void PointView::mouseMoveEvent(QMouseEvent* event)
         // Modify position of centre
         if(event->modifiers() & Qt::ControlModifier)
         {
-            m_centre.y +=  m_dist*dy;
-            m_centre.x += -m_dist*dx*std::cos(deg2rad(m_phi));
-            m_centre.z += -m_dist*dx*std::sin(deg2rad(m_phi));
+            m_center.y +=  m_dist*dy;
+            m_center.x += -m_dist*dx*std::cos(deg2rad(m_phi));
+            m_center.z += -m_dist*dx*std::sin(deg2rad(m_phi));
         }
         else
         {
@@ -455,6 +574,12 @@ void PointView::keyPressEvent(QKeyEvent *event)
         initializeGL();
         repaint();
     }
+    else if(event->key() == Qt::Key_C)
+    {
+        // FIXME: Coord system is a bit screwy here.
+        m_center = m_cloudCenter - m_probePos;
+        repaint();
+    }
     else
         event->ignore();
 }
@@ -489,6 +614,7 @@ void PointView::drawAxes()
     glEnd();
 }
 
+
 /// Draw position of the light probe
 void PointView::drawLightProbe(const V3f& P, float intensity)
 {
@@ -501,28 +627,7 @@ void PointView::drawLightProbe(const V3f& P, float intensity)
     glColor3f(0.7,0.7,1);
     // Draw axis-aligned box around point
     float r = 0.1;
-    glBegin(GL_LINE_LOOP);
-        glVertex(P + r*V3f(1,-1,1));
-        glVertex(P + r*V3f(1,-1,-1));
-        glVertex(P + r*V3f(-1,-1,-1));
-        glVertex(P + r*V3f(-1,-1,1));
-    glEnd();
-    glBegin(GL_LINE_LOOP);
-        glVertex(P + r*V3f(1,1,1));
-        glVertex(P + r*V3f(1,1,-1));
-        glVertex(P + r*V3f(-1,1,-1));
-        glVertex(P + r*V3f(-1,1,1));
-    glEnd();
-    glBegin(GL_LINES);
-        glVertex(P + r*(V3f(1,1,1)));
-        glVertex(P + r*(V3f(1,-1,1)));
-        glVertex(P + r*(V3f(-1,1,1)));
-        glVertex(P + r*(V3f(-1,-1,1)));
-        glVertex(P + r*(V3f(1,1,-1)));
-        glVertex(P + r*(V3f(1,-1,-1)));
-        glVertex(P + r*(V3f(-1,1,-1)));
-        glVertex(P + r*(V3f(-1,-1,-1)));
-    glEnd();
+    drawBound(Box3f(P - r*V3f(1), P + r*V3f(1)));
     // Draw lines from origin to point along axis directions
     glBegin(GL_LINE_STRIP);
         glVertex3f(P.x, P.y, P.z);
@@ -534,6 +639,7 @@ void PointView::drawLightProbe(const V3f& P, float intensity)
         glVertex3f(0, 0, 0);
     glEnd();
 }
+
 
 /// Draw point cloud using OpenGL
 void PointView::drawPoints(const PointArray& points, VisMode visMode,
@@ -566,6 +672,8 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
         break;
         case Vis_Disks:
         {
+            //glCullFace(GL_BACK);
+            //glEnable(GL_CULL_FACE);
             // Compile radius 1 disk primitive
             V3f p0(0);
             V3f t1(1,0,0);
@@ -640,6 +748,8 @@ int main(int argc, char *argv[])
         ("help,h", "help message")
         ("envres,e", po::value<int>()->default_value(10),
          "resolution of micro environment raster faces for baking")
+        ("maxsolidangle,a", po::value<float>()->default_value(0.02),
+         "max solid angle used for aggreates in point hierarchy during rendering")
         ("proberes,p", po::value<int>(),
          "resolution of micro environment raster for viewing")
         ("cloudres,c", po::value<float>()->default_value(20),
@@ -668,18 +778,26 @@ int main(int argc, char *argv[])
     QGLFormat::setDefaultFormat(f);
 
     PointViewerWindow window;
+
+    std::cout << "Creating point cloud...\n";
     boost::shared_ptr<PointArray> points = cornellBoxPoints(
                                                 opts["cloudres"].as<float>());
+
+    std::cout << "Building point hierarchy...\n";
+    PointOctree octree(*points);
+
     int envRes = opts["envres"].as<int>();
-    bakeOcclusion(*points, envRes);
+    float maxSolidAngle = opts["maxsolidangle"].as<float>();
+    std::cout << "Baking occlusion...\n";
+    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
     if(opts.count("bakeonly"))
         return 0;
 
-    window.pointView().setPoints(points);
+    window.pointView().setPoints(points, &octree);
     int probeRes = envRes;
     if(opts.count("proberes") != 0)
         probeRes = opts["proberes"].as<int>();
-    window.pointView().setProbeParams(probeRes);
+    window.pointView().setProbeParams(probeRes, maxSolidAngle);
 
     window.show();
 

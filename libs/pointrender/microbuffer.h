@@ -317,6 +317,20 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
                     const PointArray& points);
 
 
+/// Render points into a micro environment buffer.
+///
+/// \param microBuf - destination environment buffer
+/// \param P - position of light probe
+/// \param N - normal for light probe (should be normalized)
+/// \param coneAngle - defines cone about N: coneAngle = max angle of interest
+///                    between N and the incoming light.
+/// \param maxSolidAngle - Maximum solid angle allowed for points in interior
+///                    tree nodes.
+/// \param points - point cloud to render
+void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
+                    float maxSolidAngle, const PointOctree& points);
+
+
 /// Compute ambient occlusion based on depths held in a micro env buffer.
 ///
 /// This is one minus the zero-bounce light coming from infinity to the point.
@@ -333,6 +347,16 @@ void occlWeight(MicroBuf& depthBuf, const V3f& N);
 /// Bake occlusion from point array back into point array.
 void bakeOcclusion(PointArray& points, int faceRes);
 
+
+/// Bake occlusion from point hierarchy tree into point cloud.
+///
+/// \param points - output array of surfels
+/// \param tree - hierarchical point-based representation of scene
+/// \param faceRes - resolution of microbuffer to use
+/// \param maxSolidAngle - Maximum solid angle allowed for points in interior
+///                        tree nodes.
+void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
+                   float maxSolidAngle);
 
 
 #endif // AQSIS_MICROBUFFER_H_INCLUDED

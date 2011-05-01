@@ -88,25 +88,30 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
 }
 
 
-/// Utility to solve the quadratic equation
+/// Find real solutions of the quadratic equation a*x^2 + b*x + c = 0.
+///
+/// The equation is assumed to have real-valued solutions; if they are in fact
+/// complex only the real parts are returned.
 inline void solveQuadratic(float a, float b, float c,
                            float& lowRoot, float& highRoot)
 {
-    float det = b*b - 4*a*c;
-    assert(det > 0);
+    // Avoid NaNs when determinant is negative by clamping to zero.  This is
+    // the right thing to do when det would otherwise be zero to within
+    // numerical precision.
+    float det = std::max(0.0f, b*b - 4*a*c);
     float firstTerm = -b/(2*a);
     float secondTerm = sqrtf(det)/(2*a);
     lowRoot = firstTerm - secondTerm;
     highRoot = firstTerm + secondTerm;
 }
 
+
 /// Render a disk into the microbuffer using exact visibility testing
 ///
 /// When two surfaces meet at a sharp angle, the visibility of surfels on the
 /// adjacent surface needs to be computed more carefully than with the
 /// approximate square-based rasterization method.  If not, disturbing
-/// artifacts will appear where the surfaces join.  This function solves the
-/// problem by resolving visibility of a disk using ray tracing.
+/// artifacts will appear where the surfaces join.
 ///
 /// \param microBuf - buffer to render into.
 /// \param p - position of disk center relative to microbuffer
@@ -199,51 +204,218 @@ static void renderDiskExact(MicroBuf& microBuf, V3f p, V3f n, float r)
                 {
                     int pixelIndex = 2*(iv*faceRes + iu);
                     face[pixelIndex+1] = 1;
+                    V3f d = microBuf.rayDirection(iface, iu, iv);
+                    float z = dot_pn/dot(d, n);
+                    if(z < face[pixelIndex])
+                        face[pixelIndex] = z;
                 }
             }
         }
         else
         {
             // Else, the coefficients do not represent an ellipse (ie, they
-            // are hyperbolic or parabolic.)  This is a perfectly valid option
-            // which occurs when a disk spans the perspective divide.  In any
-            // case, just give up and rasterize the entire face.  It's
-            // probably hyperbolic so we must be quite careful to render only
-            // the valid branch of the hyperbola.
+            // are hyperbolic or possibly parabolic.)  This is a perfectly
+            // valid option which occurs when a disk spans the perspective
+            // divide.  In this case, just give up and raytrace the disk over
+            // the entire face.  It's possible to rasterize this case using the
+            // quadratic form but we would need to compute the signed distance
+            // t so that we render only the valid branch of the hyperbola.
+            // This is probably more work than just doing the raytracing, which
+            // is quite cheap anyway.
+            //
+            // All of the tricky rasterization rubbish above could be replaced
+            // by the following ray tracing code.  This conceptually simple
+            // code would probably be efficient enough if I only knew a good
+            // way to compute the tight raster bound!
             for(int iv = 0; iv < faceRes; ++iv)
             for(int iu = 0; iu < faceRes; ++iu)
             {
-                if(dot_pn*dot(microBuf.rayDirection(iface, iu, iv), n) < 0)
-                    continue;
-                float q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
-                if(q < 0)
+                // V = ray through the pixel
+                V3f V = microBuf.rayDirection(iface, iu, iv);
+                // Signed distance to plane containing disk
+                float t = dot(p, n)/dot(V, n);
+                if(t > 0 && (t*V - p).length2() < r*r)
                 {
-                    // The ray hit the disk, record the hit.
+                    // The ray hit the disk, record the hit
                     int pixelIndex = 2*(iv*faceRes + iu);
                     face[pixelIndex+1] = 1;
+                    if(t < face[pixelIndex])
+                        face[pixelIndex] = t;
                 }
             }
         }
-        // For reference, all of the tricky rasterization rubbish above could
-        // be replaced by the following ray tracing code.  This conceptually
-        // simple code would probably be efficient enough if I only knew a
-        // good way to compute the tight raster bound!
-#if 0
-        for(int iv = 0; iv < faceRes; ++iv)
-        for(int iu = 0; iu < faceRes; ++iu)
+    }
+}
+
+
+static void renderDisk(MicroBuf& microBuf, V3f N, V3f p, V3f n, float r,
+                       float cosConeAngle, float sinConeAngle)
+{
+    float plen2 = p.length2();
+    // Cull points which lie outside the cone of interest.
+    if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
+        return;
+    float plen = sqrt(plen2);
+    // If solid angle of bounding sphere is greater than exactRenderAngle,
+    // resolve the visibility exactly rather than using a cheap approx.
+    //
+    // TODO: Adjust exactRenderAngle for best results!
+    const float exactRenderAngle = 0.05f;
+    float origArea = M_PI*r*r;
+    // Solid angle of the bound
+    if(exactRenderAngle*plen2 < origArea)
+    {
+        // Multiplier for radius to make the cracks a bit smaller.  We
+        // can't do this too much, or sharp convex edges will be
+        // overoccluded (TODO: Adjust for best results!  Maybe the "too
+        // large" problem could be worked around using a tracing offset?)
+        const float radiusMultiplier = M_SQRT2;
+        // Resolve visibility of very close surfels using ray tracing.
+        // This is necessary to avoid artifacts where surfaces meet.
+        renderDiskExact(microBuf, p, n, radiusMultiplier*r);
+        return;
+    }
+    // Figure out which face we're on and get u,v coordinates on that face,
+    MicroBuf::Face faceIndex = MicroBuf::faceIndex(p);
+    float u = 0, v = 0;
+    MicroBuf::faceCoords(faceIndex, p, u, v);
+    // Compute the area of the surfel when projected onto the env face.
+    // This depends on several things:
+    // 1) The area of the original disk
+    // 2) The angles between the disk normal n, viewing vector p, and face
+    // normal.  This is the area projected onto a plane parallel to the env
+    // map face, and through the centre of the disk.
+    float pDotFaceN = MicroBuf::dotFaceNormal(faceIndex, p);
+    float angleFactor = fabs(dot(p, n)/pDotFaceN);
+    // 3) Ratio of distance to the surfel vs distance to projected point on
+    // the face.
+    float distFactor = 1.0f/(pDotFaceN*pDotFaceN);
+    // Putting these together gives the projected area
+    float projArea = origArea * angleFactor * distFactor;
+    // Half-width of a square with area projArea
+    float wOn2 = sqrt(projArea)*0.5f;
+    // Transform width and position to face raster coords.
+    float rasterScale = 0.5f*microBuf.res();
+    u = rasterScale*(u + 1.0f);
+    v = rasterScale*(v + 1.0f);
+    wOn2 *= rasterScale;
+    // Construct square box with the correct area.  This shape isn't
+    // anything like the true projection of a disk onto the raster, but
+    // it's much cheaper!  Note that points which are proxies for clusters
+    // of smaller points aren't going to be accurately resolved no matter
+    // what we do.
+    struct BoundData
+    {
+        MicroBuf::Face faceIndex;
+        float ubegin, uend;
+        float vbegin, vend;
+    };
+    // The current surfel can cross up to three faces.
+    int nfaces = 1;
+    BoundData boundData[3];
+    BoundData& bd0 = boundData[0];
+    bd0.faceIndex = faceIndex;
+    bd0.ubegin = u - wOn2;   bd0.uend = u + wOn2;
+    bd0.vbegin = v - wOn2;   bd0.vend = v + wOn2;
+    // Detect & handle overlap onto adjacent faces
+    //
+    // We assume that wOn2 is the same on the adjacent face, an assumption
+    // which is true when the surfel is close the the corner of the cube.
+    // We also assume that a surfel touches at most three faces.  This is
+    // true as long as the surfels don't have a massive solid angle; for
+    // such cases the axis-aligned box isn't going to be accurate anyway.
+    int faceRes = microBuf.res();
+    if(bd0.ubegin < 0)
+    {
+        // left neighbour
+        BoundData& b = boundData[nfaces++];
+        b.faceIndex = MicroBuf::neighbourU(faceIndex, 0);
+        MicroBuf::faceCoords(b.faceIndex, p, u, v);
+        u = rasterScale*(u + 1.0f);
+        v = rasterScale*(v + 1.0f);
+        b.ubegin = u - wOn2;  b.uend = u + wOn2;
+        b.vbegin = v - wOn2;  b.vend = v + wOn2;
+    }
+    else if(bd0.uend > faceRes)
+    {
+        // right neighbour
+        BoundData& b = boundData[nfaces++];
+        b.faceIndex = MicroBuf::neighbourU(faceIndex, 1);
+        MicroBuf::faceCoords(b.faceIndex, p, u, v);
+        u = rasterScale*(u + 1.0f);
+        v = rasterScale*(v + 1.0f);
+        b.ubegin = u - wOn2;  b.uend = u + wOn2;
+        b.vbegin = v - wOn2;  b.vend = v + wOn2;
+    }
+    if(bd0.vbegin < 0)
+    {
+        // bottom neighbour
+        BoundData& b = boundData[nfaces++];
+        b.faceIndex = MicroBuf::neighbourV(faceIndex, 0);
+        MicroBuf::faceCoords(b.faceIndex, p, u, v);
+        u = rasterScale*(u + 1.0f);
+        v = rasterScale*(v + 1.0f);
+        b.ubegin = u - wOn2;  b.uend = u + wOn2;
+        b.vbegin = v - wOn2;  b.vend = v + wOn2;
+    }
+    else if(bd0.vend > faceRes)
+    {
+        // top neighbour
+        BoundData& b = boundData[nfaces++];
+        b.faceIndex = MicroBuf::neighbourV(faceIndex, 1);
+        MicroBuf::faceCoords(b.faceIndex, p, u, v);
+        u = rasterScale*(u + 1.0f);
+        v = rasterScale*(v + 1.0f);
+        b.ubegin = u - wOn2;  b.uend = u + wOn2;
+        b.vbegin = v - wOn2;  b.vend = v + wOn2;
+    }
+    for(int iface = 0; iface < nfaces; ++iface)
+    {
+        BoundData& bd = boundData[iface];
+        // Range of pixels which the box touches (note, exclusive end)
+        int ubeginRas = Imath::clamp(int(bd.ubegin),   0, faceRes);
+        int uendRas   = Imath::clamp(int(bd.uend) + 1, 0, faceRes);
+        int vbeginRas = Imath::clamp(int(bd.vbegin),   0, faceRes);
+        int vendRas   = Imath::clamp(int(bd.vend) + 1, 0, faceRes);
+        float* face = microBuf.face(bd.faceIndex);
+        for(int iv = vbeginRas; iv < vendRas; ++iv)
+        for(int iu = ubeginRas; iu < uendRas; ++iu)
         {
-            // d = ray through the pixel.
-            V3f d = microBuf.rayDirection(iface, iu, iv);
-            // Intersect ray with plane containing disk.
-            float t = dot(p, n)/dot(d, n);
-            if(t > 0 && (t*d - p).length2() < r*r)
+            int pixelIndex = 2*(iv*faceRes + iu);
+            assert(pixelIndex < 2*faceRes*faceRes);
+            // calculate coverage
+            float urange = std::min<float>(iu+1, bd.uend) -
+                           std::max<float>(iu,   bd.ubegin);
+            float vrange = std::min<float>(iv+1, bd.vend) -
+                           std::max<float>(iv,   bd.vbegin);
+            // Need to combine these two opacities:
+            float o1 = urange*vrange;
+            float o2 = face[pixelIndex+1];
+            // There's more than one way to combine the coverage.
+            //
+            // 1) The usual method of compositing.  This assumes
+            // that successive layers of geometry are uncorrellated so
+            // that each attenuates the layer before, but a bunch of
+            // semi-covered layers never result in full opacity.
+            //
+            // face[pixelIndex+1] = 1 - (1 - o1)*(1 - o2);
+            //
+            // 2) Add the opacities and clamp.  This is more appropriate
+            // if we assume that we have adjacent non-overlapping surfels.
+            face[pixelIndex+1] = std::min(1.0f, o1 + o2);
+            //
+            // 3) Plain old point sampling.  This has more noise than the
+            // above, but is also probably more well-founded.
+            //
+            //if((iu + 0.5f) > bd.ubegin && (iu + 0.5f) < bd.uend &&
+            //   (iv + 0.5f) > bd.vbegin && (iv + 0.5f) < bd.vend)
+            //    face[pixelIndex+1] = 1;
+            float d = face[pixelIndex];
+            if(plen < d)
             {
-                // The ray hit the disk, record the hit.
-                int pixelIndex = 2*(iv*faceRes + iu);
-                face[pixelIndex+1] = 1;
+                face[pixelIndex] = plen;
             }
         }
-#endif
     }
 }
 
@@ -251,183 +423,83 @@ static void renderDiskExact(MicroBuf& microBuf, V3f p, V3f n, float r)
 void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
                     const PointArray& points)
 {
-    int faceRes = microBuf.res();
-    float rasterScale = 0.5f*microBuf.res();
-    float sinConeAngle = sin(coneAngle);
     float cosConeAngle = cos(coneAngle);
+    float sinConeAngle = sin(coneAngle);
     for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
     {
         const float* data = &points.data[pIdx*points.stride];
-        // normal of current point
-        V3f n = V3f(data[3], data[4], data[5]);
         // position of current point relative to shading point
         V3f p = V3f(data[0], data[1], data[2]) - P;
-        float plen2 = p.length2();
+        // normal of current point
+        V3f n = V3f(data[3], data[4], data[5]);
+        // radius of point
         float r = data[6];
-        // Cull points which lie outside the cone of interest.
-        if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
-            continue;
-        float plen = sqrt(plen2);
-        // If distance_to_point / radius is less than exactRenderCutoff,
-        // resolve the visibility exactly rather than using a cheap approx.
-        //
-        // TODO: Adjust exactRenderCutoff for best results!
-        const float exactRenderCutoff = 8.0f;
-        if(plen < exactRenderCutoff*r)
+        renderDisk(microBuf, N, p, n, r, cosConeAngle, sinConeAngle);
+    }
+}
+
+
+/// Recursively render point hierarchy into microbuffer.
+///
+/// TODO: Check whether making this into an iterative traversal makes it
+/// faster.
+static void renderNode(MicroBuf& microBuf, V3f P, V3f N, float cosConeAngle,
+                       float sinConeAngle, float maxSolidAngle, int dataSize,
+                       const PointOctree::Node* node)
+{
+    // Examine node bound and cull if possible
+    float r = node->aggR;
+    V3f p = node->aggP - P;
+    float plen2 = p.length2();
+    if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
+        return;
+    // Examine solid angle of interior node bounding sphere to see whether we
+    // can render it directly or not.
+    //
+    // TODO: Can we use the solid angle of the disk rather than the bound?
+    float solidAngle = M_PI*r*r / plen2;
+    if(solidAngle < maxSolidAngle)
+        renderDisk(microBuf, N, p, node->aggN, r, cosConeAngle, sinConeAngle);
+    else
+    {
+        // If the solid angle is too large consider child nodes or child
+        // points.
+        if(node->npoints != 0)
         {
-            // Multiplier for radius to make the cracks a bit smaller.  We
-            // can't do this too much, or sharp convex edges will be
-            // overoccluded (TODO: Adjust for best results!  Maybe the "too
-            // large" problem could be worked around using a tracing offset?)
-            const float radiusMultiplier = M_SQRT2;
-            // Resolve visibility of very close surfels using ray tracing.
-            // This is necessary to avoid artifacts where surfaces meet.
-            renderDiskExact(microBuf, p, n, radiusMultiplier*r);
-            continue;
-        }
-        // Figure out which face we're on and get u,v coordinates on that face,
-        MicroBuf::Face faceIndex = MicroBuf::faceIndex(p);
-        float u = 0, v = 0;
-        MicroBuf::faceCoords(faceIndex, p, u, v);
-        // Compute the area of the surfel when projected onto the env face.
-        // This depends on several things:
-        // 1) The area of the original disk
-        float origArea = M_PI*r*r;
-        // 2) The angles between the disk normal n, viewing vector p, and face
-        // normal.  This is the area projected onto a plane parallel to the env
-        // map face, and through the centre of the disk.
-        float pDotFaceN = MicroBuf::dotFaceNormal(faceIndex, p);
-        float angleFactor = fabs(dot(p, n)/pDotFaceN);
-        // 3) Ratio of distance to the surfel vs distance to projected point on
-        // the face.
-        float distFactor = 1.0f/(pDotFaceN*pDotFaceN);
-        // Putting these together gives the projected area
-        float projArea = origArea * angleFactor * distFactor;
-//        float solidAngle = origArea * fabs(dot(p,n)) * distFactor;
-        // Half-width of a square with area projArea
-        float wOn2 = sqrt(projArea)*0.5f;
-        // Transform width and position to face raster coords.
-        u = rasterScale*(u + 1.0f);
-        v = rasterScale*(v + 1.0f);
-        wOn2 *= rasterScale;
-        // Construct square box with the correct area.  This shape isn't
-        // anything like the true projection of a disk onto the raster, but
-        // it's much cheaper!  Note that points which are proxies for clusters
-        // of smaller points aren't going to be accurately resolved no matter
-        // what we do.
-        struct BoundData
-        {
-            MicroBuf::Face faceIndex;
-            float ubegin, uend;
-            float vbegin, vend;
-        };
-        // The current surfel can cross up to three faces.
-        int nfaces = 1;
-        BoundData boundData[3];
-        BoundData& bd0 = boundData[0];
-        bd0.faceIndex = faceIndex;
-        bd0.ubegin = u - wOn2;   bd0.uend = u + wOn2;
-        bd0.vbegin = v - wOn2;   bd0.vend = v + wOn2;
-        // Detect & handle overlap onto adjacent faces
-        //
-        // We assume that wOn2 is the same on the adjacent face, an assumption
-        // which is true when the surfel is close the the corner of the cube.
-        // We also assume that a surfel touches at most three faces.  This is
-        // true as long as the surfels don't have a massive solid angle; for
-        // such cases the axis-aligned box isn't going to be accurate anyway.
-        if(bd0.ubegin < 0)
-        {
-            // left neighbour
-            BoundData& b = boundData[nfaces++];
-            b.faceIndex = MicroBuf::neighbourU(faceIndex, 0);
-            MicroBuf::faceCoords(b.faceIndex, p, u, v);
-            u = rasterScale*(u + 1.0f);
-            v = rasterScale*(v + 1.0f);
-            b.ubegin = u - wOn2;  b.uend = u + wOn2;
-            b.vbegin = v - wOn2;  b.vend = v + wOn2;
-        }
-        else if(bd0.uend > faceRes)
-        {
-            // right neighbour
-            BoundData& b = boundData[nfaces++];
-            b.faceIndex = MicroBuf::neighbourU(faceIndex, 1);
-            MicroBuf::faceCoords(b.faceIndex, p, u, v);
-            u = rasterScale*(u + 1.0f);
-            v = rasterScale*(v + 1.0f);
-            b.ubegin = u - wOn2;  b.uend = u + wOn2;
-            b.vbegin = v - wOn2;  b.vend = v + wOn2;
-        }
-        if(bd0.vbegin < 0)
-        {
-            // bottom neighbour
-            BoundData& b = boundData[nfaces++];
-            b.faceIndex = MicroBuf::neighbourV(faceIndex, 0);
-            MicroBuf::faceCoords(b.faceIndex, p, u, v);
-            u = rasterScale*(u + 1.0f);
-            v = rasterScale*(v + 1.0f);
-            b.ubegin = u - wOn2;  b.uend = u + wOn2;
-            b.vbegin = v - wOn2;  b.vend = v + wOn2;
-        }
-        else if(bd0.vend > faceRes)
-        {
-            // top neighbour
-            BoundData& b = boundData[nfaces++];
-            b.faceIndex = MicroBuf::neighbourV(faceIndex, 1);
-            MicroBuf::faceCoords(b.faceIndex, p, u, v);
-            u = rasterScale*(u + 1.0f);
-            v = rasterScale*(v + 1.0f);
-            b.ubegin = u - wOn2;  b.uend = u + wOn2;
-            b.vbegin = v - wOn2;  b.vend = v + wOn2;
-        }
-        for(int iface = 0; iface < nfaces; ++iface)
-        {
-            BoundData& bd = boundData[iface];
-            // Range of pixels which the box touches (note, exclusive end)
-            int ubeginRas = Imath::clamp(int(bd.ubegin),   0, faceRes);
-            int uendRas   = Imath::clamp(int(bd.uend) + 1, 0, faceRes);
-            int vbeginRas = Imath::clamp(int(bd.vbegin),   0, faceRes);
-            int vendRas   = Imath::clamp(int(bd.vend) + 1, 0, faceRes);
-            float* face = microBuf.face(bd.faceIndex);
-            for(int iv = vbeginRas; iv < vendRas; ++iv)
-            for(int iu = ubeginRas; iu < uendRas; ++iu)
+            // Leaf node: simply render each child point.
+            for(int i = 0; i < node->npoints; ++i)
             {
-                int pixelIndex = 2*(iv*faceRes + iu);
-                assert(pixelIndex < 2*faceRes*faceRes);
-                // calculate coverage
-                float urange = std::min<float>(iu+1, bd.uend) -
-                               std::max<float>(iu,   bd.ubegin);
-                float vrange = std::min<float>(iv+1, bd.vend) -
-                               std::max<float>(iv,   bd.vbegin);
-                // Need to combine these two opacities:
-                float o1 = urange*vrange;
-                float o2 = face[pixelIndex+1];
-                // There's more than one way to combine the coverage.
-                //
-                // 1) The usual method of compositing.  This assumes
-                // that successive layers of geometry are uncorrellated so
-                // that each attenuates the layer before, but a bunch of
-                // semi-covered layers never result in full opacity.
-                //
-                // face[pixelIndex+1] = 1 - (1 - o1)*(1 - o2);
-                //
-                // 2) Add the opacities and clamp.  This is more appropriate
-                // if we assume that we have adjacent non-overlapping surfels.
-                face[pixelIndex+1] = std::min(1.0f, o1 + o2);
-                //
-                // 3) Plain old point sampling.  This has more noise than the
-                // above, but is also probably more well-founded.
-                //
-                //if((iu + 0.5f) > bd.ubegin && (iu + 0.5f) < bd.uend &&
-                //   (iv + 0.5f) > bd.vbegin && (iv + 0.5f) < bd.vend)
-                //    face[pixelIndex+1] = 1;
-                float d = face[pixelIndex];
-                if(plen < d)
-                {
-                    face[pixelIndex] = plen;
-                }
+                const float* data = &node->data[i*dataSize];
+                V3f p = V3f(data[0], data[1], data[2]) - P;
+                V3f n = V3f(data[3], data[4], data[5]);
+                float r = data[6];
+                renderDisk(microBuf, N, p, n, r, cosConeAngle, sinConeAngle);
+            }
+            return;
+        }
+        else
+        {
+            // Interior node: render each non-null child.
+            for(int i = 0; i < 8; ++i)
+            {
+                PointOctree::Node* child = node->children[i];
+                if(!child)
+                    continue;
+                renderNode(microBuf, P, N, cosConeAngle, sinConeAngle,
+                        maxSolidAngle, dataSize, child);
             }
         }
     }
+}
+
+
+void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
+                    float maxSolidAngle, const PointOctree& points)
+{
+    float cosConeAngle = cos(coneAngle);
+    float sinConeAngle = sin(coneAngle);
+    renderNode(microBuf, P, N, cosConeAngle, sinConeAngle,
+               maxSolidAngle, points.dataSize(), points.root());
 }
 
 
@@ -481,7 +553,7 @@ void bakeOcclusion(PointArray& points, int faceRes)
     for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
     {
         if(pIdx % 100 == 0)
-            std::cout << 100.0f*pIdx/points.size() << "%\n";
+            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
         float* data = &points.data[pIdx*points.stride];
         // normal of current point
         V3f N = V3f(data[3], data[4], data[5]);
@@ -494,5 +566,30 @@ void bakeOcclusion(PointArray& points, int faceRes)
         data[7] = data[8] = data[9] = 1 - occl;
     }
 }
+
+
+void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
+                   float maxSolidAngle)
+{
+    // FIXME: Code duplication with bakeOcclusion above.
+    const float eps = 0.1;
+    MicroBuf depthBuf(faceRes, 2);
+    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
+    {
+        if(pIdx % 400 == 0)
+            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
+        float* data = &points.data[pIdx*points.stride];
+        // normal of current point
+        V3f N = V3f(data[3], data[4], data[5]);
+        // position of current point relative to shading point
+        V3f P = V3f(data[0], data[1], data[2]);
+        float r = data[6];
+        depthBuf.reset();
+        microRasterize(depthBuf, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
+        float occl = occlusion(depthBuf, N);
+        data[7] = data[8] = data[9] = 1 - occl;
+    }
+}
+
 
 // vi: set et:

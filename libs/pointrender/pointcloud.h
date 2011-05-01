@@ -32,12 +32,17 @@
 #define AQSIS_POINTCLOUD_H_INCLUDED
 
 #include <cassert>
+#include <cmath>
 #include <vector>
 
 #include <OpenEXR/ImathVec.h>
-#include <boost/shared_ptr.hpp>
+#include <OpenEXR/ImathBox.h>
+
+#include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using Imath::V3f;
+using Imath::Box3f;
 
 /// Array of surface elements
 ///
@@ -70,6 +75,181 @@ struct PointArray
         return (1.0f/data.size()*stride) * sum;
     }
 };
+
+
+/// Naive octree for storing a point hierarchy
+class PointOctree
+{
+    public:
+        /// Tree node
+        ///
+        /// Leaf nodes have npoints > 0, specifying the number of child points
+        /// contained.
+        struct Node
+        {
+            Node()
+                : bound(),
+                center(0),
+                boundRadius(0),
+                aggP(0),
+                aggN(0),
+                aggR(0),
+                npoints(0),
+                data()
+            {
+                children[0] = children[1] = children[2] = children[3] = 0;
+                children[4] = children[5] = children[6] = children[7] = 0;
+            }
+
+            /// Data derived from octree bounding box
+            Box3f bound;
+            V3f center;
+            float boundRadius;
+            // Crude aggregate values for position, normal and radius
+            V3f aggP;
+            V3f aggN;
+            float aggR;
+            // Child nodes, to be indexed as children[z][y][x]
+            Node* children[8];
+            // bool used;
+            /// Number of child points for the leaf node case
+            int npoints;
+            // Collection of points in leaf.
+            boost::scoped_array<float> data;
+        };
+
+        /// Construct tree from array of points.
+        PointOctree(const PointArray& points)
+            : m_root(0),
+            m_dataSize(points.stride)
+        {
+            size_t npoints = points.size();
+            // Super naive, recursive top-down construction.
+            //
+            // TODO: Investigate bottom-up construction based on sorting in
+            // order of space filling curve.
+            Box3f bound;
+            std::vector<const float*> workspace(npoints);
+            for(size_t i = 0; i < npoints; ++i)
+            {
+                const float* p = &points.data[i*m_dataSize];
+                bound.extendBy(V3f(p[0], p[1], p[2]));
+                workspace[i] = &points.data[i*m_dataSize];
+            }
+            m_root = makeTree(&workspace[0], npoints, m_dataSize, bound);
+        }
+
+        ~PointOctree()
+        {
+            deleteTree(m_root);
+        }
+
+        /// Get root node of tree
+        const Node* root() const { return m_root; }
+
+        /// Get size of point data
+        int dataSize() const { return m_dataSize; }
+
+    private:
+        static Node* makeTree(const float** points, size_t npoints,
+                              int dataSize, const Box3f& bound)
+        {
+            assert(npoints != 0);
+            Node* node = new Node;
+            node->bound = bound;
+            V3f c = bound.center();
+            node->center = c;
+            V3f diag = bound.size();
+            node->boundRadius = diag.length()/2.0f;
+            node->npoints = 0;
+            size_t pointsPerLeaf = 8;
+            if(npoints <= pointsPerLeaf)
+            {
+                // Small number of child points: make this a leaf node and
+                // store the points directly in the data member.
+                node->npoints = npoints;
+                // Copy over data into node.
+                node->data.reset(new float[npoints*dataSize]);
+                V3f sumP(0);
+                V3f sumN(0);
+                float sumr2 = 0;
+                for(size_t j = 0; j < npoints; ++j)
+                {
+                    const float* p = points[j];
+                    // copy extra data
+                    for(int i = 0; i < dataSize; ++i)
+                        node->data[j*dataSize + i] = p[i];
+                    // compute averages
+                    sumP += V3f(p[0], p[1], p[2]);
+                    sumN += V3f(p[3], p[4], p[5]);
+                    sumr2 += p[6]*p[6];
+                }
+                node->aggP = (1.0f/npoints)*sumP;
+                node->aggN = sumN.normalized();
+                node->aggR = sqrtf(sumr2);
+                return node;
+            }
+
+            // allocate extra workspace for storing child points (ugh!)
+            std::vector<const float*> workspace(8*npoints);
+            const float** w = &workspace[0];
+            const float** P[8] = {
+                w,             w + npoints,   w + 2*npoints, w + 3*npoints,
+                w + 4*npoints, w + 5*npoints, w + 6*npoints, w + 7*npoints
+            };
+            // Partition points into the eight child nodes
+            size_t np[8] = {0};
+            for(size_t i = 0; i < npoints; ++i)
+            {
+                const float* p = points[i];
+                int cellIndex = 4*(p[2] > c.z) + 2*(p[1] > c.y) + (p[0] > c.x);
+                P[cellIndex][np[cellIndex]++] = p;
+            }
+
+            // Recursively generate child nodes and compute position, normal
+            // and radius for the current node.
+            V3f sumP(0);
+            V3f sumN(0);
+            float sumr2 = 0;
+            for(int i = 0; i < 8; ++i)
+            {
+                if(np[i] == 0)
+                    continue;
+                Box3f bnd;
+                bnd.min.x = (i     % 2 == 0) ? bound.min.x : c.x;
+                bnd.min.y = ((i/2) % 2 == 0) ? bound.min.y : c.y;
+                bnd.min.z = ((i/4) % 2 == 0) ? bound.min.z : c.z;
+                bnd.max.x = (i     % 2 == 0) ? c.x : bound.max.x;
+                bnd.max.y = ((i/2) % 2 == 0) ? c.y : bound.max.y;
+                bnd.max.z = ((i/4) % 2 == 0) ? c.z : bound.max.z;
+                Node* child = makeTree(P[i], np[i], dataSize, bnd);
+                node->children[i] = child;
+                // Need to weight the P and N averages according to the number
+                // of points in the child nodes.
+                sumP += float(np[i]) * child->aggP;
+                sumN += float(np[i]) * child->aggN;
+                sumr2 += child->aggR * child->aggR;
+            }
+            node->aggP = 1.0f/npoints*sumP;
+            node->aggN = sumN.normalized();
+            node->aggR = sqrtf(sumr2);
+
+            return node;
+        }
+
+        /// Recursively delete tree, depth first.
+        static void deleteTree(Node* n)
+        {
+            if(!n) return;
+            for(int i = 0; i < 8; ++i)
+                deleteTree(n->children[i]);
+            delete n;
+        }
+
+        Node* m_root;
+        int m_dataSize;
+};
+
 
 
 //------------------------------------------------------------------------------

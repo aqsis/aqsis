@@ -32,6 +32,8 @@
 
 #include <cmath>
 
+#include <boost/shared_ptr.hpp>
+
 #include <QtGui/QMainWindow>
 #include <QtGui/QKeyEvent>
 #include <QtOpenGL/QGLWidget>
@@ -64,9 +66,10 @@ class PointView : public QGLWidget
         PointView(QWidget *parent = NULL);
 
         /// Set points to be rendered
-        void setPoints(const boost::shared_ptr<const PointArray>& points);
+        void setPoints(const boost::shared_ptr<const PointArray>& points,
+                       const PointOctree* tree);
         /// Set properties for rendering probe environment map
-        void setProbeParams(int cubeFaceRes);
+        void setProbeParams(int cubeFaceRes, float maxSolidAngle);
 
     protected:
         // Qt OpenGL callbacks
@@ -94,17 +97,19 @@ class PointView : public QGLWidget
         float m_theta;
         float m_phi;
         float m_dist;
-        V3f m_centre;
+        V3f m_center;
         /// Light probe position
         V3f m_probePos;
         bool m_probeMoveMode;
         int m_probeRes;
+        float m_probeMaxSolidAngle;
         /// Type of visualization
         VisMode m_visMode;
         /// Flag for whether to use OpenGL lighting or not
         bool m_lighting;
         /// Point cloud data
         boost::shared_ptr<const PointArray> m_points;
+        const PointOctree* m_pointTree;
         V3f m_cloudCenter;
 };
 
