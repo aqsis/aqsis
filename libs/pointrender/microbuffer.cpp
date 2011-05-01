@@ -251,6 +251,13 @@ static void renderDiskExact(MicroBuf& microBuf, V3f p, V3f n, float r)
 static void renderDisk(MicroBuf& microBuf, V3f N, V3f p, V3f n, float r,
                        float cosConeAngle, float sinConeAngle)
 {
+    float dot_pn = dot(p, n);
+    // Cull back-facing points.  In conjunction with the oddball composition
+    // rule below, this is very important for smoothness of the result:  If we
+    // don't cull the back faces, coverage will be overestimated in every
+    // microbuffer pixel which contains an edge.
+    if(dot_pn > 0)
+        return;
     float plen2 = p.length2();
     // Cull points which lie outside the cone of interest.
     if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
@@ -286,7 +293,7 @@ static void renderDisk(MicroBuf& microBuf, V3f N, V3f p, V3f n, float r,
     // normal.  This is the area projected onto a plane parallel to the env
     // map face, and through the centre of the disk.
     float pDotFaceN = MicroBuf::dotFaceNormal(faceIndex, p);
-    float angleFactor = fabs(dot(p, n)/pDotFaceN);
+    float angleFactor = fabs(dot_pn/pDotFaceN);
     // 3) Ratio of distance to the surfel vs distance to projected point on
     // the face.
     float distFactor = 1.0f/(pDotFaceN*pDotFaceN);
