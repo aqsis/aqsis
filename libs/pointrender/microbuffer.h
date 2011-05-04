@@ -121,18 +121,19 @@ class MicroBuf
                         direction(face, u, v);
                 }
             }
-            reset();
         }
 
         /// Reset buffer to default (non-rendered) state.
         ///
-        /// TODO: Reset for non-z data.
-        void reset()
+        /// \param defaultPix - reset every pixel in the buffer to the channels
+        ///                     given in the defaultPix array
+        void reset(const float* defaultPix)
         {
             for(int i = 0, iend = size(); i < iend; ++i)
             {
-                m_pixels[2*i] = FLT_MAX;
-                m_pixels[2*i + 1] = 0;
+                float* pix = &m_pixels[m_nchans*i];
+                for(int c = 0; c < m_nchans; ++c)
+                    pix[c] = defaultPix[c];
             }
         }
 
@@ -305,21 +306,132 @@ class MicroBuf
 };
 
 
+//------------------------------------------------------------------------------
+/// Integrator for ambient occlusion.
+///
+/// The job of an integrator class is to save the microrasterized data
+/// somewhere (presumably in a microbuffer) and integrate it at the end of the
+/// rasterization to give the final illumination value.
+class OcclusionIntegrator
+{
+    public:
+        /// Create integrator with given resolution of the environment map
+        /// faces.
+        OcclusionIntegrator(int faceRes)
+            : m_buf(faceRes, 1),
+            m_face(0)
+        {
+            clear();
+        }
+
+        /// Get direction of the ray
+        V3f rayDirection(int iface, int u, int v)
+        {
+            return m_buf.rayDirection(iface, u, v);
+        }
+
+        /// Get at the underlying buffer
+        const MicroBuf& microBuf()
+        {
+            return m_buf;
+        }
+
+        /// Get desired resolution of environment map faces
+        int res()
+        {
+            return m_buf.res();
+        }
+
+        /// Reset buffer to default state
+        void clear()
+        {
+            float defaultPixel[1] = {0};
+            m_buf.reset(defaultPixel);
+        };
+
+        /// Set the face to which subsequent calls of addSample will apply
+        void setFace(int iface)
+        {
+            m_face = m_buf.face(iface);
+        };
+
+        /// Add a rasterized sample to the current face
+        ///
+        /// \param u,v - coordinates of face
+        /// \param distance - distance to sample
+        /// \param coverage - estimate of pixel coverage due to this sample
+        void addSample(int u, int v, float distance, float coverage)
+        {
+            float* pix = m_face + (v*m_buf.res() + u) * m_buf.nchans();
+            // There's more than one way to combine the coverage.
+            //
+            // 1) The usual method of compositing.  This assumes that
+            // successive layers of geometry are uncorrellated so that each
+            // attenuates the layer before, but a bunch of semi-covered layers
+            // never result in full opacity.
+            //
+            // 1 - (1 - o1)*(1 - o2);
+            //
+            // 2) Add the opacities (and clamp to 1 at the end).  This is more
+            // appropriate if we assume that we have adjacent non-overlapping
+            // surfels.
+            pix[0] += coverage;
+        }
+
+        /// Compute ambient occlusion based on previously sampled scene.
+        ///
+        /// This is one minus the zero-bounce light coming from infinity to the
+        /// point.
+        ///
+        /// \param N - normal at point
+        float occlusion(V3f N)
+        {
+            // Integrate over face to get occlusion.
+            float illum = 0;
+            float totWeight = 0;
+            for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
+            {
+                const float* face = m_buf.face(f);
+                for(int iv = 0; iv < m_buf.res(); ++iv)
+                for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
+                {
+                    float d = dot(m_buf.rayDirection(f, iu, iv), N);
+                    // FIXME: Add in weight due to texel distance from origin.
+                    if(d > 0)
+                    {
+                        // Accumulate light coming from infinity.
+                        illum += d*(1.0f - std::min(1.0f, face[0]));
+                        totWeight += d;
+                    }
+                }
+            }
+            illum /= totWeight;
+            return 1 - illum;
+        }
+
+    private:
+        MicroBuf m_buf;
+        float* m_face;
+};
+
+
+//------------------------------------------------------------------------------
 /// Render points into a micro environment buffer.
 ///
-/// \param microBuf - destination environment buffer
+/// \param integrator - integrator for incoming geometry/lighting information
 /// \param P - position of light probe
 /// \param N - normal for light probe (should be normalized)
 /// \param coneAngle - defines cone about N: coneAngle = max angle of interest
 ///                    between N and the incoming light.
 /// \param points - point cloud to render
-void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
+template<typename IntegratorT>
+void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
                     const PointArray& points);
 
 
 /// Render points into a micro environment buffer.
 ///
-/// \param microBuf - destination environment buffer
+/// \param integrator - integrator for incoming geometry/lighting information
 /// \param P - position of light probe
 /// \param N - normal for light probe (should be normalized)
 /// \param coneAngle - defines cone about N: coneAngle = max angle of interest
@@ -327,17 +439,9 @@ void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
 /// \param maxSolidAngle - Maximum solid angle allowed for points in interior
 ///                    tree nodes.
 /// \param points - point cloud to render
-void microRasterize(MicroBuf& microBuf, V3f P, V3f N, float coneAngle,
+template<typename IntegratorT>
+void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
                     float maxSolidAngle, const PointOctree& points);
-
-
-/// Compute ambient occlusion based on depths held in a micro env buffer.
-///
-/// This is one minus the zero-bounce light coming from infinity to the point.
-///
-/// \param depthBuf - environment buffer of depths at a point
-/// \param N - normal at point
-float occlusion(const MicroBuf& depthBuf, const V3f& N);
 
 
 /// Visualize sources of light in occlusion calculation (for debugging)

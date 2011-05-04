@@ -165,11 +165,11 @@ static void depthToColor(const float* z, int size, int stride, GLubyte* col,
 }
 
 /// Convert coverage grayscale color
-static void coverageToColor(const float* face, int size, GLubyte* col)
+static void coverageToColor(const float* face, int size, int stride, GLubyte* col)
 {
     for(int i = 0; i < size; ++i)
     {
-        GLubyte c = Imath::clamp(int(255*(face[2*i+1])), 0, 255);
+        GLubyte c = Imath::clamp(int(255*(face[stride*i])), 0, 255);
         col[3*i] = c;
         col[3*i+1] = c;
         col[3*i+2] = c;
@@ -234,21 +234,22 @@ static void drawMicroBuf(const MicroBuf& envBuf)
     int npix = res*res;
     int faceSize = npix*3;
     boost::scoped_array<GLubyte> colBuf(new GLubyte[faceSize*6]);
-    float zMin = 0;
-    float zMax = 0;
-    depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, 2, zMin, zMax);
+    // Convert each face to 8-bit colour texels
     if(false)
     {
-        // Convert each face to 8-bit colour texels
+        float zMin = 0;
+        float zMax = 0;
+        depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, envBuf.nchans(),
+                   zMin, zMax);
         for(int face = 0; face < 6; ++face)
-            depthToColor(envBuf.face(face), npix, 2, &colBuf[faceSize*face],
-                         zMin, zMax);
+            depthToColor(envBuf.face(face), npix, envBuf.nchans(),
+                         &colBuf[faceSize*face], zMin, zMax);
     }
     else
     {
-        // Convert each face to 8-bit colour texels
         for(int face = 0; face < 6; ++face)
-            coverageToColor(envBuf.face(face), npix, &colBuf[faceSize*face]);
+            coverageToColor(envBuf.face(face), npix, envBuf.nchans(),
+                            &colBuf[faceSize*face]);
     }
     // Set up coordinates so we render on a 4x3 grid
     glMatrixMode(GL_PROJECTION);
@@ -407,11 +408,11 @@ static void drawBound(const Box3f& b)
 
 void PointView::paintGL()
 {
-    MicroBuf microBuf(m_probeRes, 2);
+    OcclusionIntegrator integrator(m_probeRes);
 //    if(m_points)
-//        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI, *m_points);
+//        microRasterize(integrator, m_probePos, V3f(0,0,-1), M_PI, *m_points);
     if(m_pointTree)
-        microRasterize(microBuf, m_probePos, V3f(0,0,-1), M_PI,
+        microRasterize(integrator, m_probePos, V3f(0,0,-1), M_PI,
                        m_probeMaxSolidAngle, *m_pointTree);
 
     //--------------------------------------------------
@@ -431,14 +432,12 @@ void PointView::paintGL()
 
     // Geometry
     drawAxes();
-    drawLightProbe(m_probePos, 1 - occlusion(microBuf, V3f(0,0,-1)));
+    drawLightProbe(m_probePos, 1 - integrator.occlusion(V3f(0,0,-1)));
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
 //    if(m_pointTree)
 //        splitNode(m_probePos, m_probeMaxSolidAngle, m_pointTree->dataSize(),
 //                  m_pointTree->root());
-
-//    occlWeight(microBuf, V3f(0,0,-1));
 
 
     //--------------------------------------------------
@@ -482,7 +481,7 @@ void PointView::paintGL()
     glScissor(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
     glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
 
-    drawMicroBuf(microBuf);
+    drawMicroBuf(integrator.microBuf());
 
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
