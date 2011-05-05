@@ -86,7 +86,7 @@ class PointView : public QGLWidget
 
     private:
         static void drawAxes();
-        static void drawLightProbe(const V3f& P, float intensity);
+        static void drawLightProbe(const V3f& P, const C3f& col);
         static void drawPoints(const PointArray& points, VisMode visMode,
                                bool useLighting);
 

@@ -416,6 +416,7 @@ void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
         V3f n = V3f(data[3], data[4], data[5]);
         // radius of point
         float r = data[6];
+        integrator.setPointData(data+7);
         renderDisk(integrator, N, p, n, r, cosConeAngle, sinConeAngle);
     }
 }
@@ -442,7 +443,10 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
     // TODO: Can we use the solid angle of the disk rather than the bound?
     float solidAngle = M_PI*r*r / plen2;
     if(solidAngle < maxSolidAngle)
+    {
+        integrator.setPointData(reinterpret_cast<const float*>(&node->aggCol));
         renderDisk(integrator, N, p, node->aggN, r, cosConeAngle, sinConeAngle);
+    }
     else
     {
         // If the solid angle is too large consider child nodes or child
@@ -456,6 +460,7 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
                 V3f p = V3f(data[0], data[1], data[2]) - P;
                 V3f n = V3f(data[3], data[4], data[5]);
                 float r = data[6];
+                integrator.setPointData(data+7);
                 renderDisk(integrator, N, p, n, r, cosConeAngle, sinConeAngle);
             }
             return;
@@ -549,10 +554,33 @@ void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
 }
 
 
+void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
+                   float maxSolidAngle)
+{
+    const float eps = 0.1;
+    RadiosityIntegrator integrator(faceRes);
+    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
+    {
+        if(pIdx % 400 == 0)
+            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
+        float* data = &points.data[pIdx*points.stride];
+        // normal of current point
+        V3f N = V3f(data[3], data[4], data[5]);
+        // position of current point relative to shading point
+        V3f P = V3f(data[0], data[1], data[2]);
+        float r = data[6];
+        integrator.clear();
+        microRasterize(integrator, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
+        *reinterpret_cast<C3f*>(data+7) = integrator.radiosity(N);
+    }
+}
+
 
 // Explicit instantiations
 template void microRasterize<OcclusionIntegrator>(
         OcclusionIntegrator&, V3f, V3f, float, float, const PointOctree&);
+template void microRasterize<RadiosityIntegrator>(
+        RadiosityIntegrator&, V3f, V3f, float, float, const PointOctree&);
 
 
 // vi: set et:

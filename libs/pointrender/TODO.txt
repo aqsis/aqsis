@@ -1,18 +1,21 @@
 Todo:
 
-	* Crude octree acceleration structure with aggregates represented simply
-	  by points
+	* More BRDFs for colour bleeding (glossy BRDF?)
+	* IBL via environment map lookup
+	* Improve point access interface
 	* Improved acceleration structure; better treatment for aggregates
-	* Render colour (AOVs?) into microbuffer, integrate with BXDFs for colour
-	  bleeding
 	* Make old core to produce world space point clouds
 	* Implement shadeops in shaderVM
+	* Octree node cache and LRU rejection for improved memory footprint
 	* Subsurface scattering integrator
 
 Done:
+	* Render colour into microbuffer for radiosity
 	* Simple OpenGL ptc viewer application
 	* Cornell box point cloud for testing
 	* Render depth of points in a point cloud to a cube face microbuffer,
 	  visualize in viewer.
 	* Use depth microbuffer to compute AO for each point
+	* Crude octree acceleration structure with aggregates represented simply
+	  by points
 

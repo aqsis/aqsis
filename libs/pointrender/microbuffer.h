@@ -349,6 +349,10 @@ class OcclusionIntegrator
             m_buf.reset(defaultPixel);
         };
 
+        /// Set extra data (eg, radiosity) associated with the current point
+        /// being shaded.
+        void setPointData(const float*) { }
+
         /// Set the face to which subsequent calls of addSample will apply
         void setFace(int iface)
         {
@@ -384,7 +388,7 @@ class OcclusionIntegrator
         /// point.
         ///
         /// \param N - normal at point
-        float occlusion(V3f N)
+        float occlusion(V3f N) const
         {
             // Integrate over face to get occlusion.
             float illum = 0;
@@ -412,6 +416,115 @@ class OcclusionIntegrator
     private:
         MicroBuf m_buf;
         float* m_face;
+};
+
+
+//------------------------------------------------------------------------------
+/// Microbuffer integrator for radiosity
+class RadiosityIntegrator
+{
+    public:
+        /// Create integrator with given resolution of the environment map
+        /// faces.
+        RadiosityIntegrator(int faceRes)
+            : m_buf(faceRes, 8),
+            m_face(0),
+            m_currRadiosity(0)
+        {
+            clear();
+        }
+
+        /// Get direction of the ray
+        V3f rayDirection(int iface, int u, int v)
+        {
+            return m_buf.rayDirection(iface, u, v);
+        }
+
+        /// Get at the underlying buffer
+        const MicroBuf& microBuf()
+        {
+            return m_buf;
+        }
+
+        /// Get desired resolution of environment map faces
+        int res()
+        {
+            return m_buf.res();
+        }
+
+        /// Reset buffer to default state
+        void clear()
+        {
+            // depth, foreground_coverage, foreground_rgb, background_rgb
+            float defaultPixel[] = {FLT_MAX, 0, 0, 0, 0, 0, 0, 0};
+            m_buf.reset(defaultPixel);
+        };
+
+        /// Set extra data (eg, radiosity) associated with the current point
+        /// being shaded.
+        void setPointData(const float* radiosity)
+        {
+            m_currRadiosity = C3f(radiosity[0], radiosity[1], radiosity[2]);
+        }
+
+        /// Set the face to which subsequent calls of addSample will apply
+        void setFace(int iface)
+        {
+            m_face = m_buf.face(iface);
+        };
+
+        /// Add a rasterized sample to the current face
+        ///
+        /// \param u,v - coordinates of face
+        /// \param distance - distance to sample
+        /// \param coverage - estimate of pixel coverage due to this sample
+        void addSample(int u, int v, float distance, float coverage)
+        {
+            float* pix = m_face + (v*m_buf.res() + u) * m_buf.nchans();
+            float& currDist = pix[0];
+            float& currCover = pix[1];
+            C3f& radiosity = *reinterpret_cast<C3f*>(pix + 2);
+            if(distance < currDist)
+            {
+                currDist = distance;
+                radiosity = m_currRadiosity;
+            }
+            currCover += coverage;
+        }
+
+        /// Integrate radiosity based on previously sampled scene.
+        ///
+        /// \param N - normal at point
+        C3f radiosity(V3f N) const
+        {
+            // Integrate incoming light with cosine weighting to get outgoing
+            // radiosity
+            C3f rad(0);
+            float totWeight = 0;
+            for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
+            {
+                const float* face = m_buf.face(f);
+                for(int iv = 0; iv < m_buf.res(); ++iv)
+                for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
+                {
+                    float d = dot(m_buf.rayDirection(f, iu, iv), N);
+                    // FIXME: Add in weight due to texel distance from origin.
+                    if(d > 0)
+                    {
+                        float coverage = face[1];
+                        C3f& radiosity = *(C3f*)(face + 2);
+                        rad += d*std::min(1.0f, coverage)*radiosity;
+                        totWeight += d;
+                    }
+                }
+            }
+            return 1.0f/totWeight * rad;
+        }
+
+    private:
+        MicroBuf m_buf;
+        float* m_face;
+        C3f m_currRadiosity;
 };
 
 
@@ -462,6 +575,15 @@ void bakeOcclusion(PointArray& points, int faceRes);
 void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
                    float maxSolidAngle);
 
+/// Bake radiosity from point hierarchy into point cloud.
+///
+/// \param points - output array of surfels
+/// \param tree - hierarchical point-based representation of scene
+/// \param faceRes - resolution of microbuffer to use
+/// \param maxSolidAngle - Maximum solid angle allowed for points in interior
+///                        tree nodes.
+void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
+                   float maxSolidAngle);
 
 #endif // AQSIS_MICROBUFFER_H_INCLUDED
 

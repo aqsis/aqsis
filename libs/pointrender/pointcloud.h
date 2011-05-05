@@ -37,12 +37,14 @@
 
 #include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathBox.h>
+#include <OpenEXR/ImathColor.h>
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
 using Imath::V3f;
 using Imath::Box3f;
+using Imath::C3f;
 
 /// Array of surface elements
 ///
@@ -94,6 +96,7 @@ class PointOctree
                 aggP(0),
                 aggN(0),
                 aggR(0),
+                aggCol(0),
                 npoints(0),
                 data()
             {
@@ -109,6 +112,7 @@ class PointOctree
             V3f aggP;
             V3f aggN;
             float aggR;
+            C3f aggCol;
             // Child nodes, to be indexed as children[z][y][x]
             Node* children[8];
             // bool used;
@@ -196,23 +200,27 @@ class PointOctree
                 node->npoints = npoints;
                 // Copy over data into node.
                 node->data.reset(new float[npoints*dataSize]);
+                float sumA = 0;
                 V3f sumP(0);
                 V3f sumN(0);
-                float sumr2 = 0;
+                C3f sumCol(0);
                 for(size_t j = 0; j < npoints; ++j)
                 {
                     const float* p = points[j];
                     // copy extra data
                     for(int i = 0; i < dataSize; ++i)
                         node->data[j*dataSize + i] = p[i];
-                    // compute averages
-                    sumP += V3f(p[0], p[1], p[2]);
-                    sumN += V3f(p[3], p[4], p[5]);
-                    sumr2 += p[6]*p[6];
+                    // compute averages (area weighted)
+                    float A = p[6]*p[6];
+                    sumA += A;
+                    sumP += A*V3f(p[0], p[1], p[2]);
+                    sumN += A*V3f(p[3], p[4], p[5]);
+                    sumCol += A*C3f(p[7], p[8], p[9]);
                 }
-                node->aggP = (1.0f/npoints)*sumP;
+                node->aggP = 1.0f/sumA * sumP;
                 node->aggN = sumN.normalized();
-                node->aggR = sqrtf(sumr2);
+                node->aggR = sqrtf(sumA);
+                node->aggCol = 1.0f/sumA * sumCol;
                 return node;
             }
 
@@ -234,9 +242,10 @@ class PointOctree
 
             // Recursively generate child nodes and compute position, normal
             // and radius for the current node.
+            float sumA = 0;
             V3f sumP(0);
             V3f sumN(0);
-            float sumr2 = 0;
+            C3f sumCol(0);
             for(int i = 0; i < 8; ++i)
             {
                 if(np[i] == 0)
@@ -250,15 +259,17 @@ class PointOctree
                 bnd.max.z = ((i/4) % 2 == 0) ? c.z : bound.max.z;
                 Node* child = makeTree(P[i], np[i], dataSize, bnd);
                 node->children[i] = child;
-                // Need to weight the P and N averages according to the number
-                // of points in the child nodes.
-                sumP += float(np[i]) * child->aggP;
-                sumN += float(np[i]) * child->aggN;
-                sumr2 += child->aggR * child->aggR;
+                // Weighted average with weight = disk surface area.
+                float A = child->aggR * child->aggR;
+                sumA += A;
+                sumP += A * child->aggP;
+                sumN += A * child->aggN;
+                sumCol += A * child->aggCol;
             }
-            node->aggP = 1.0f/npoints*sumP;
+            node->aggP = 1.0f/sumA * sumP;
             node->aggN = sumN.normalized();
-            node->aggR = sqrtf(sumr2);
+            node->aggR = sqrtf(sumA);
+            node->aggCol = 1.0f/sumA * sumCol;
 
             return node;
         }

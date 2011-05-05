@@ -176,6 +176,16 @@ static void coverageToColor(const float* face, int size, int stride, GLubyte* co
     }
 }
 
+static void floatColToColor(const float* face, int size, int stride, GLubyte* col)
+{
+    for(int i = 0; i < size; ++i)
+    {
+        col[3*i]   = Imath::clamp(int(255*(face[stride*i])), 0, 255);
+        col[3*i+1] = Imath::clamp(int(255*(face[stride*i+1])), 0, 255);
+        col[3*i+2] = Imath::clamp(int(255*(face[stride*i+2])), 0, 255);
+    }
+}
+
 /// Draw face of a cube environment map.
 ///
 /// \param p - origin of 1x1 quad
@@ -245,10 +255,17 @@ static void drawMicroBuf(const MicroBuf& envBuf)
             depthToColor(envBuf.face(face), npix, envBuf.nchans(),
                          &colBuf[faceSize*face], zMin, zMax);
     }
-    else
+    else if(false)
     {
         for(int face = 0; face < 6; ++face)
             coverageToColor(envBuf.face(face), npix, envBuf.nchans(),
+                            &colBuf[faceSize*face]);
+    }
+    else
+    {
+        // Convert float face color into 8-bit color texels for OpenGL
+        for(int face = 0; face < 6; ++face)
+            floatColToColor(envBuf.face(face) + 2, npix, envBuf.nchans(),
                             &colBuf[faceSize*face]);
     }
     // Set up coordinates so we render on a 4x3 grid
@@ -408,7 +425,7 @@ static void drawBound(const Box3f& b)
 
 void PointView::paintGL()
 {
-    OcclusionIntegrator integrator(m_probeRes);
+    RadiosityIntegrator integrator(m_probeRes);
 //    if(m_points)
 //        microRasterize(integrator, m_probePos, V3f(0,0,-1), M_PI, *m_points);
     if(m_pointTree)
@@ -432,7 +449,8 @@ void PointView::paintGL()
 
     // Geometry
     drawAxes();
-    drawLightProbe(m_probePos, 1 - integrator.occlusion(V3f(0,0,-1)));
+//    drawLightProbe(m_probePos, 1 - integrator.occlusion(V3f(0,0,-1)));
+    drawLightProbe(m_probePos, integrator.radiosity(V3f(0,0,-1)));
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
 //    if(m_pointTree)
@@ -616,9 +634,9 @@ void PointView::drawAxes()
 
 
 /// Draw position of the light probe
-void PointView::drawLightProbe(const V3f& P, float intensity)
+void PointView::drawLightProbe(const V3f& P, const C3f& col)
 {
-    glColor3f(intensity, intensity, intensity);
+    glColor(col);
     glPointSize(100);
     // Draw point at probe position
     glBegin(GL_POINTS);
@@ -789,7 +807,8 @@ int main(int argc, char *argv[])
     int envRes = opts["envres"].as<int>();
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
     std::cout << "Baking occlusion...\n";
-    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
+    //bakeOcclusion(*points, octree, envRes, maxSolidAngle);
+    bakeRadiosity(*points, octree, envRes, maxSolidAngle);
     if(opts.count("bakeonly"))
         return 0;
 
