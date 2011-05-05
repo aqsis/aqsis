@@ -297,7 +297,7 @@ TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurfa
 /** Determine whether or not the patch is diceable
  */
 
-bool	CqSurfacePatchBicubic::Diceable()
+bool	CqSurfacePatchBicubic::Diceable(const CqMatrix& matCtoR)
 {
 	assert( NULL != P() );
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
@@ -306,8 +306,6 @@ bool	CqSurfacePatchBicubic::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	CqMatrix matCtoR;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 16 ];
@@ -670,7 +668,7 @@ TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurf
 /** Determine whether or not the patch is diceable
  */
 
-bool	CqSurfacePatchBilinear::Diceable()
+bool	CqSurfacePatchBilinear::Diceable(const CqMatrix& matCtoR)
 {
 	assert( NULL != P() );
 
@@ -680,8 +678,6 @@ bool	CqSurfacePatchBilinear::Diceable()
 		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-	CqMatrix matCtoR;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];

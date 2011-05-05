@@ -1646,7 +1646,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits
 /** Return whether or not the patch is diceable
  */
 
-bool	CqSurfaceNURBS::Diceable()
+bool	CqSurfaceNURBS::Diceable(const CqMatrix& matCtoR)
 {
 	assert( NULL != P() );
 
@@ -1670,8 +1670,6 @@ bool	CqSurfaceNURBS::Diceable()
 	if (gs >= 1.0)
 		gridsize = gs * gs;
 
-	CqMatrix matCtoR;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time(), matCtoR );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
 

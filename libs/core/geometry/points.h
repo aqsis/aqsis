@@ -124,7 +124,7 @@ class CqPoints : public CqSurface
 		}
 		// Overrides from CqSurface
 		virtual	CqMicroPolyGridBase* Dice();
-		virtual bool	Diceable();
+		virtual bool	Diceable(const CqMatrix& matCtoR);
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 

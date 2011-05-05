@@ -87,7 +87,7 @@ class CqCurve : public CqSurface
 		 * At the moment, no Curves are directly diceable since they're
 		 * converted to patches just prior to rendering.
 		 */
-		virtual bool Diceable();
+		virtual bool Diceable(const CqMatrix& matCtoR);
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.

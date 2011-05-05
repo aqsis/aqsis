@@ -555,9 +555,18 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		}
 
 		/**
+		 * Decide whether the geometry is diceable in the given coordinate system.
+		 *
+		 * \param diceCoords - The transformation into "dicing coordinates".
+		 *                     In normal operation, dicing coordinates are
+		 *                     given by the camera->raster transform, but may
+		 *                     be something else in special cases, for example,
+		 *                     baking to a point cloud where we want to dice in
+		 *                     world coordinates.
+		 *
 		 * \todo Review: Could this be const?
 		 */
-		virtual bool	Diceable()
+		virtual bool	Diceable(const CqMatrix& diceCoords)
 		{
 			return(false);
 		}
@@ -687,9 +696,9 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		 * determines the dicing rate, which is then copied to the other times.
 		 * \return Boolean indicating GPrim is diceable.
 		 */
-		virtual bool	Diceable()
+		virtual bool	Diceable(const CqMatrix& matCtoR)
 		{
-			bool f = GetMotionObject( Time( 0 ) ) ->Diceable();
+			bool f = GetMotionObject( Time( 0 ) ) ->Diceable(matCtoR);
 			// Copy the split info so that at each time slot, the gprims split the same.
 			TqInt i;
 			for ( i = 1; i < cTimes(); i++ )

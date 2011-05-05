@@ -956,7 +956,10 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 	bool fDiceable = false;
 	{
 		AQSIS_TIME_SCOPE(Dicable_check);
-		fDiceable = surface->Diceable();
+		CqMatrix camToRas;
+		QGetRenderContext()->matSpaceToSpace("camera", "raster", NULL, NULL,
+											 QGetRenderContextI()->Time(), camToRas);
+		fDiceable = surface->Diceable(camToRas);
 	}
 
 	// Dice & shade the surface if it's small enough...

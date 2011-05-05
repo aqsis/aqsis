@@ -220,7 +220,7 @@ void CqCurve::PopulateWidth()
 }
 
 
-bool CqCurve::Diceable()
+bool CqCurve::Diceable(const CqMatrix& matCtoR)
 {
 	// OK, here the CqCubicCurveSegment line has two options:
 	//  1. split into two more lines
@@ -250,13 +250,6 @@ bool CqCurve::Diceable()
 		// i reckon this is best.
 		//m_splitDecision = Split_Patch;
 
-		CqMatrix matCtoR;
-		QGetRenderContext() ->matSpaceToSpace(
-									"camera", "raster",
-									NULL, NULL,
-									QGetRenderContextI()->Time(),
-									matCtoR
-									);
 		// control hull
 		CqVector2D hull[2] = {
 			vectorCast<CqVector2D>(matCtoR * P()->pValue(0)[0]),

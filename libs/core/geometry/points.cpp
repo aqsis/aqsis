@@ -326,7 +326,7 @@ void CqPoints::NaturalDice(CqParameter* pParam, TqInt uDiceSize, TqInt vDiceSize
 /** Determine whether the quadric is suitable for dicing.
  */
 
-bool	CqPoints::Diceable()
+bool	CqPoints::Diceable(const CqMatrix& /* matCtoR */)
 {
 	TqUint gridsize = 256;
 

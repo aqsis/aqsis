@@ -68,7 +68,7 @@ class CqProcedural : public CqSurface
 		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/*  We have no actual geometry to dice.
 		 */
-		virtual bool Diceable()
+		virtual bool Diceable(const CqMatrix& /*matCtoR*/)
 		{
 			return false;
 		}
