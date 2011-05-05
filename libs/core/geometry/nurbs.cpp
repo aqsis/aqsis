@@ -1657,7 +1657,7 @@ bool	CqSurfaceNURBS::Diceable(const CqMatrix& matCtoR)
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	// Convert the control hull to raster space.
-	CqVector2D * avecHull = new CqVector2D[ m_cuVerts * m_cvVerts ];
+	CqVector3D * avecHull = new CqVector3D[ m_cuVerts * m_cvVerts ];
 	TqUint i;
 
 	TqFloat gs = 16.0f;
@@ -1671,7 +1671,7 @@ bool	CqSurfaceNURBS::Diceable(const CqMatrix& matCtoR)
 		gridsize = gs * gs;
 
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
-		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
+		avecHull[i] = vectorCast<CqVector3D>(matCtoR * P()->pValue(i)[0]);
 
 	// Now work out the longest continuous line in raster space for u and v.
 	TqFloat uLen = 0;
@@ -1684,7 +1684,7 @@ bool	CqSurfaceNURBS::Diceable(const CqMatrix& matCtoR)
 	{
 		TqUint u;
 		for ( u = 0; u < m_cuVerts - 1; u++ )
-			uLen += CqVector2D( avecHull[ ( v * m_cuVerts ) + u + 1 ] - avecHull[ ( v * m_cuVerts ) + u ] ).Magnitude();
+			uLen += (avecHull[ ( v * m_cuVerts ) + u + 1 ] - avecHull[ ( v * m_cuVerts ) + u ]).Magnitude();
 		if ( uLen > MaxuLen )
 			MaxuLen = uLen;
 		uLen = 0;
@@ -1694,7 +1694,7 @@ bool	CqSurfaceNURBS::Diceable(const CqMatrix& matCtoR)
 	for ( u = 0; u < m_cuVerts; u++ )
 	{
 		for ( v = 0; v < m_cvVerts - 1; v++ )
-			vLen += CqVector2D( avecHull[ ( ( v + 1 ) * m_cuVerts ) + u ] - avecHull[ ( v * m_cuVerts ) + u ] ).Magnitude();
+			vLen += (avecHull[ ( ( v + 1 ) * m_cuVerts ) + u ] - avecHull[ ( v * m_cuVerts ) + u ]).Magnitude();
 		if ( vLen > MaxvLen )
 			MaxvLen = vLen;
 		vLen = 0;

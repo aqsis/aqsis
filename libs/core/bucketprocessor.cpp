@@ -959,6 +959,9 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 		CqMatrix camToRas;
 		QGetRenderContext()->matSpaceToSpace("camera", "raster", NULL, NULL,
 											 QGetRenderContextI()->Time(), camToRas);
+		// Zero out z-components of camToRas, since we don't want it to effect
+		// the dice resolution.
+		camToRas[0][2] = camToRas[1][2] = camToRas[2][2] = camToRas[3][2] = 0;
 		fDiceable = surface->Diceable(camToRas);
 	}
 

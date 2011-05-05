@@ -317,11 +317,8 @@ TqUlong CqQuadric::EstimateGridSize(const CqMatrix& matCtoR)
 			// If we are on row two or above, calculate the mp size.
 			if ( v >= 1 && u >= 1 )
 			{
-				udist = ( p.x() - pum1.x() ) * ( p.x() - pum1.x() ) +
-				        ( p.y() - pum1.y() ) * ( p.y() - pum1.y() );
-				vdist = ( pvm1[ u - 1 ].x() - pum1.x() ) * ( pvm1[ u - 1 ].x() - pum1.x() ) +
-				        ( pvm1[ u - 1 ].y() - pum1.y() ) * ( pvm1[ u - 1 ].y() - pum1.y() );
-
+				udist = (p - pum1).Magnitude2();
+				vdist = (pvm1[u-1] - pum1).Magnitude2();
 				maxusize = max( maxusize, udist );
 				maxvsize = max( maxvsize, vdist );
 			}

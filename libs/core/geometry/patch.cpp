@@ -308,19 +308,19 @@ bool	CqSurfacePatchBicubic::Diceable(const CqMatrix& matCtoR)
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 
 	// Convert the control hull to raster space.
-	CqVector2D	avecHull[ 16 ];
+	CqVector3D	avecHull[ 16 ];
 
 	for (TqInt i = 0; i < 16; i++ )
-		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
+		avecHull[i] = vectorCast<CqVector3D>(matCtoR * P()->pValue(i)[0]);
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
 
 	for (TqInt u = 0; u < 16; u += 4 )
 	{
-		CqVector2D	Vec1 = avecHull[ u + 1 ] - avecHull[ u ];
-		CqVector2D	Vec2 = avecHull[ u + 2 ] - avecHull[ u + 1 ];
-		CqVector2D	Vec3 = avecHull[ u + 3 ] - avecHull[ u + 2 ];
+		CqVector3D	Vec1 = avecHull[ u + 1 ] - avecHull[ u ];
+		CqVector3D	Vec2 = avecHull[ u + 2 ] - avecHull[ u + 1 ];
+		CqVector3D	Vec3 = avecHull[ u + 3 ] - avecHull[ u + 2 ];
 		if ( Vec1.Magnitude2() > uLen )
 			uLen = Vec1.Magnitude2();
 		if ( Vec2.Magnitude2() > uLen )
@@ -330,9 +330,9 @@ bool	CqSurfacePatchBicubic::Diceable(const CqMatrix& matCtoR)
 	}
 	for (TqInt v = 0; v < 4; v++ )
 	{
-		CqVector2D	Vec1 = avecHull[ v + 4 ] - avecHull[ v ];
-		CqVector2D	Vec2 = avecHull[ v + 8 ] - avecHull[ v + 4 ];
-		CqVector2D	Vec3 = avecHull[ v + 12 ] - avecHull[ v + 8 ];
+		CqVector3D	Vec1 = avecHull[ v + 4 ] - avecHull[ v ];
+		CqVector3D	Vec2 = avecHull[ v + 8 ] - avecHull[ v + 4 ];
+		CqVector3D	Vec3 = avecHull[ v + 12 ] - avecHull[ v + 8 ];
 		if ( Vec1.Magnitude2() > vLen )
 			vLen = Vec1.Magnitude2();
 		if ( Vec2.Magnitude2() > vLen )
@@ -680,17 +680,17 @@ bool	CqSurfacePatchBilinear::Diceable(const CqMatrix& matCtoR)
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 
 	// Convert the control hull to raster space.
-	CqVector2D	avecHull[ 4 ];
+	CqVector3D	avecHull[ 4 ];
 	TqInt i;
 
 	for ( i = 0; i < 4; i++ )
-		avecHull[i] = vectorCast<CqVector2D>(matCtoR * P()->pValue(i)[0]);
+		avecHull[i] = vectorCast<CqVector3D>(matCtoR * P()->pValue(i)[0]);
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
 
-	CqVector2D	Vec1 = avecHull[ 1 ] - avecHull[ 0 ];
-	CqVector2D	Vec2 = avecHull[ 3 ] - avecHull[ 2 ];
+	CqVector3D	Vec1 = avecHull[ 1 ] - avecHull[ 0 ];
+	CqVector3D	Vec2 = avecHull[ 3 ] - avecHull[ 2 ];
 	uLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
 	Vec1 = avecHull[ 2 ] - avecHull[ 0 ];
@@ -703,7 +703,6 @@ bool	CqSurfacePatchBilinear::Diceable(const CqMatrix& matCtoR)
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
-	// TODO: Should ensure powers of half to prevent cracking.
 	uLen = max<TqInt>(lround(uLen), 1);
 	vLen = max<TqInt>(lround(vLen), 1);
 

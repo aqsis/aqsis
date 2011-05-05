@@ -2521,9 +2521,9 @@ bool CqSurfaceSubdivisionPatch::Diceable(const CqMatrix& matCtoR)
 	// Instead, we've got to compute the positions of the vertices on the limit
 	// surface:
 
-	CqVector2D	hull[ 4 ];
+	CqVector3D	hull[4];
 	for (TqInt i = 0; i < 4; i++ )
-		hull[i] = vectorCast<CqVector2D>( matCtoR*pTopology()->limitPoint(aQfv[i]) );
+		hull[i] = matCtoR*pTopology()->limitPoint(aQfv[i]);
 
 	TqFloat uLen = max(
 			(hull[1] - hull[0]).Magnitude2(),
