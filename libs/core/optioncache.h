@@ -54,6 +54,7 @@ struct SqOptionCache
 
 	TqFloat clipNear;   ///< Depth of the near clipping plane
 	TqFloat clipFar;    ///< Depth of the far clipping plane
+	TqInt projectionType; ///< Type for the camera->raster transform
 
 	TqFloat shutterOpen;  ///< Camera shutter open time
 	TqFloat shutterClose; ///< Camera shutter close time

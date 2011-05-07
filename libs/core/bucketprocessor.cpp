@@ -956,13 +956,55 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 	bool fDiceable = false;
 	{
 		AQSIS_TIME_SCOPE(Dicable_check);
-		CqMatrix camToRas;
+		CqMatrix diceCoords;
 		QGetRenderContext()->matSpaceToSpace("camera", "raster", NULL, NULL,
-											 QGetRenderContextI()->Time(), camToRas);
-		// Zero out z-components of camToRas, since we don't want it to effect
-		// the dice resolution.
-		camToRas[0][2] = camToRas[1][2] = camToRas[2][2] = camToRas[3][2] = 0;
-		fDiceable = surface->Diceable(camToRas);
+											 QGetRenderContextI()->Time(),
+											 diceCoords);
+		const TqInt* rasterOrient = surface->pAttributes()->
+								GetIntegerAttribute("dice", "rasterorient");
+		if(rasterOrient && *rasterOrient == 0)
+		{
+			// Non raster-oriented dicing: dice the object as if all parts of
+			// the surface face the camera.  When dicing in raster space, the
+			// object dimension along the view direction is neglected from the
+			// calculation.  In contrast, here we measure the dice size in a
+			// scaled version of camera space, so the dimension along the view
+			// direction is equally important.
+			//
+			// Assuming the standard camera model (TODO: What about nonstandard
+			// projections?), xscale and yscale are the scaling factors for
+			// raster space, before projection.
+			TqFloat xscale = diceCoords[0][0];
+			TqFloat yscale = diceCoords[1][1];
+			if(m_optCache.projectionType == ProjectionPerspective)
+			{
+				// For perspective projections, the amount of scaling depends
+				// on the distance of the object from the origin in camera
+				// space, just as for dicing in raster space.  To approximate
+				// extra scaling due to projection, we use the z coordinate at
+				// the centre of the object's bounding box.
+				//
+				// TODO: It's not nice recomputing the bound here.  Perhaps it
+				// would be better to cache it (along with the cached raster
+				// bound?)
+				CqBound bound;
+				surface->Bound(&bound);
+				TqFloat midz = 0.5f*(bound.vecMin().z() + bound.vecMax().z());
+				xscale /= midz;
+				yscale /= midz;
+			}
+			TqFloat zscale = std::max(fabs(xscale), fabs(yscale));
+			diceCoords = CqMatrix(xscale, yscale, zscale);
+		}
+		else
+		{
+			// Else dice happens in raster space: Zero out z-components of
+			// the transformation, since we don't want it to effect the dice
+			// resolution.
+			diceCoords[0][2] = diceCoords[1][2] = 0;
+			diceCoords[2][2] = diceCoords[3][2] = 0;
+		}
+		fDiceable = surface->Diceable(diceCoords);
 	}
 
 	// Dice & shade the surface if it's small enough...

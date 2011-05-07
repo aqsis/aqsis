@@ -34,6 +34,7 @@ SqOptionCache::SqOptionCache()
 	ySamps(1),
 	clipNear(0),
 	clipFar(0),
+	projectionType(ProjectionPerspective),
 	shutterOpen(0),
 	shutterClose(0),
 	xBucketSize(16),
@@ -63,6 +64,9 @@ void SqOptionCache::cacheOptions(const IqOptions& opts)
 	assert(clipLoc);
 	clipNear = clipLoc[0];
 	clipFar = clipLoc[1];
+
+	// Type of projection
+	projectionType = opts.GetIntegerOption("System", "Projection")[0];
 
 	// Shutter times.
 	const TqFloat* shutterTimes = opts.GetFloatOption("System", "Shutter");
