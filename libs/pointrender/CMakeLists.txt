@@ -12,6 +12,7 @@ if(AQSIS_USE_OPENEXR AND QT4_FOUND)
 		cornellbox.cpp
 		ptview.cpp
 		microbuffer.cpp
+		pointcontainer.cpp
 	)
 
 	add_executable(ptview ${srcs})
