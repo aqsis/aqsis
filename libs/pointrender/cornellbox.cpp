@@ -35,6 +35,8 @@
 #include "cornellbox.h"
 #include "pointcontainer.h"
 
+namespace Aqsis {
+
 using Imath::V3f;
 
 
@@ -220,5 +222,6 @@ boost::shared_ptr<PointArray> cornellBoxPoints(float spatialRes)
     return points;
 }
 
+} // namespace Aqsis
 
 // vi: set et:

@@ -41,6 +41,9 @@
 #include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathMath.h>
 
+
+namespace Aqsis {
+
 using Imath::V3f;
 
 inline float dot(V3f a, V3f b)
@@ -584,6 +587,9 @@ void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
 ///                        tree nodes.
 void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
                    float maxSolidAngle);
+
+
+} // namespace Aqsis
 
 #endif // AQSIS_MICROBUFFER_H_INCLUDED
 

@@ -41,9 +41,7 @@
 #include "cornellbox.h"
 #include "microbuffer.h"
 
-using Imath::V3f;
-using Imath::V2f;
-
+namespace Aqsis {
 
 inline float rad2deg(float r)
 {
@@ -754,9 +752,15 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
     }
 }
 
+
+} // namespace Aqsis
+
+
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+    using namespace Aqsis;
+
     QApplication app(argc, argv);
 
     typedef std::vector<std::string> StringVec;
@@ -830,5 +834,6 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
 
 // vi: set et:

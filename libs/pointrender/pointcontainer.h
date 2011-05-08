@@ -40,6 +40,9 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
+
+namespace Aqsis {
+
 using Imath::V3f;
 using Imath::Box3f;
 using Imath::C3f;
@@ -230,6 +233,8 @@ class PointArray
 };
 #endif
 
+
+} // namespace Aqsis
 
 #endif // AQSIS_POINTCONTAINER_H_INCLUDED
 

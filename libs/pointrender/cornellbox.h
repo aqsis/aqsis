@@ -33,6 +33,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+namespace Aqsis {
+
 class PointArray;
 
 
@@ -48,6 +50,8 @@ class PointArray;
 /// \return Discretized cornell box as an array of points
 boost::shared_ptr<PointArray> cornellBoxPoints(float spatialRes);
 
+
+} // namespace Aqsis
 
 #endif // AQSIS_CORNELLBOX_H_INCLUDED
 

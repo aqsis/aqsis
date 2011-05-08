@@ -32,6 +32,8 @@
 #include <OpenEXR/ImathFun.h>
 
 
+namespace Aqsis {
+
 /// Determine whether a sphere is wholly outside a cone.
 ///
 /// This is used to cull disks - the sphere is the bounding sphere of the
@@ -582,5 +584,7 @@ template void microRasterize<OcclusionIntegrator>(
 template void microRasterize<RadiosityIntegrator>(
         RadiosityIntegrator&, V3f, V3f, float, float, const PointOctree&);
 
+
+} // namespace Aqsis
 
 // vi: set et:

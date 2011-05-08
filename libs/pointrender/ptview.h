@@ -43,7 +43,10 @@
 #include "pointcontainer.h"
 
 
+namespace Aqsis {
+
 using Imath::V3f;
+using Imath::V2f;
 
 inline float deg2rad(float d) { return (M_PI/180) * d; }
 
@@ -143,6 +146,7 @@ class PointViewerWindow : public QMainWindow
 };
 
 
+} // namespace Aqsis
 
 #endif // AQSIS_PTVIEW_H_INCLUDED
 
