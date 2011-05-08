@@ -31,8 +31,6 @@
 #ifndef AQSIS_POINTCONTAINER_H_INCLUDED
 #define AQSIS_POINTCONTAINER_H_INCLUDED
 
-#include <cassert>
-#include <cmath>
 #include <vector>
 
 #include <OpenEXR/ImathVec.h>
@@ -40,7 +38,7 @@
 #include <OpenEXR/ImathColor.h>
 
 #include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 using Imath::V3f;
 using Imath::Box3f;
@@ -79,6 +77,15 @@ struct PointArray
 };
 
 
+/// Load in point array from aqsis point cloud file format
+///
+/// The point cloud file must at a minimum include a float attribute "_area".
+/// The position, normal, area and optionally radiosity ("_radiosity") will be
+/// loaded into the PointArray.
+boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName);
+
+
+//------------------------------------------------------------------------------
 /// Naive octree for storing a point hierarchy
 class PointOctree
 {
