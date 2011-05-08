@@ -33,7 +33,7 @@
 #include <OpenEXR/ImathMatrix.h>
 
 #include "cornellbox.h"
-#include "pointcloud.h"
+#include "pointcontainer.h"
 
 using Imath::V3f;
 

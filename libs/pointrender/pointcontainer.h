@@ -28,8 +28,8 @@
 // (This is the New BSD license)
 
 
-#ifndef AQSIS_POINTCLOUD_H_INCLUDED
-#define AQSIS_POINTCLOUD_H_INCLUDED
+#ifndef AQSIS_POINTCONTAINER_H_INCLUDED
+#define AQSIS_POINTCONTAINER_H_INCLUDED
 
 #include <cassert>
 #include <cmath>
@@ -367,6 +367,6 @@ class PointArray
 #endif
 
 
-#endif // AQSIS_POINTCLOUD_H_INCLUDED
+#endif // AQSIS_POINTCONTAINER_H_INCLUDED
 
 // vi: set et:

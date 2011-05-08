@@ -31,7 +31,7 @@
 #ifndef AQSIS_MICROBUFFER_H_INCLUDED
 #define AQSIS_MICROBUFFER_H_INCLUDED
 
-#include "pointcloud.h"
+#include "pointcontainer.h"
 
 #include <cfloat>
 #include <cmath>
