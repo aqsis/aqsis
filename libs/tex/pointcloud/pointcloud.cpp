@@ -368,7 +368,7 @@ extern "C" int PtcReadDataPoint ( PtcPointCloud pointcloud, float *point, float*
 			}
 			if (radius != NULL)
 			{
-				*radius =  ptc->key[ptc->seek].radius;
+				*radius =  ptc->key[seek].radius;
 			}
 		}
 
@@ -429,7 +429,7 @@ extern "C" int PtcFindDataPoint ( PtcPointCloud pointcloud, float *point, float*
 			}
 			if (radius != NULL)
 			{
-				*radius =  ptc->key[ptc->seek].radius;
+				*radius =  ptc->key[seek].radius;
 			}
 		}
 
