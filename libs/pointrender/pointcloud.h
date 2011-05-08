@@ -166,7 +166,7 @@ class PointOctree
             float maxDim2 = std::max(std::max(d.x, d.y), d.z) / 2;
             bound.min = c - V3f(maxDim2);
             bound.max = c + V3f(maxDim2);
-            m_root = makeTree(&workspace[0], npoints, m_dataSize, bound);
+            m_root = makeTree(0, &workspace[0], npoints, m_dataSize, bound);
         }
 
         ~PointOctree()
@@ -181,7 +181,7 @@ class PointOctree
         int dataSize() const { return m_dataSize; }
 
     private:
-        static Node* makeTree(const float** points, size_t npoints,
+        static Node* makeTree(int depth, const float** points, size_t npoints,
                               int dataSize, const Box3f& bound)
         {
             assert(npoints != 0);
@@ -193,7 +193,13 @@ class PointOctree
             node->boundRadius = diag.length()/2.0f;
             node->npoints = 0;
             size_t pointsPerLeaf = 8;
-            if(npoints <= pointsPerLeaf)
+            // Limit max depth of tree to prevent infinite recursion when
+            // greater than pointsPerLeaf points lie at the same position in
+            // space.  floats effectively have 24 bit of precision in the
+            // significand, so there's never any point splitting more than 24
+            // times.
+            int maxDepth = 24;
+            if(npoints <= pointsPerLeaf || depth >= maxDepth)
             {
                 // Small number of child points: make this a leaf node and
                 // store the points directly in the data member.
@@ -257,7 +263,7 @@ class PointOctree
                 bnd.max.x = (i     % 2 == 0) ? c.x : bound.max.x;
                 bnd.max.y = ((i/2) % 2 == 0) ? c.y : bound.max.y;
                 bnd.max.z = ((i/4) % 2 == 0) ? c.z : bound.max.z;
-                Node* child = makeTree(P[i], np[i], dataSize, bnd);
+                Node* child = makeTree(depth+1, P[i], np[i], dataSize, bnd);
                 node->children[i] = child;
                 // Weighted average with weight = disk surface area.
                 float A = child->aggR * child->aggR;
