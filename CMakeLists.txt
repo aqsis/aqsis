@@ -81,18 +81,18 @@ set(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
 if(local_boost_version VERSION_LESS "1.35")
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib program_options)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex program_options)
     endif()
 else()
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib program_options)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system program_options)
     endif()
 endif()
 
@@ -284,6 +284,7 @@ add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
 add_subdirectory(libs/core)
+add_subdirectory(libs/pointrender)
 
 # Build executable tools
 add_subdirectory(tools/aqsl)

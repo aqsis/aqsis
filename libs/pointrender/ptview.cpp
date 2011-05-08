@@ -41,8 +41,75 @@
 #include "cornellbox.h"
 #include "microbuffer.h"
 
+#include <aqsis/ri/pointcloud.h>
+
 using Imath::V3f;
 using Imath::V2f;
+
+
+/// Load in point cloud from aqsis point cloud file format
+boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName)
+{
+    // Use aqsis point API for now.
+    int nvars = 0;
+    // Having a max number of vars is totally bogus, but we'll probably migrate
+    // away from this code shortly.
+    const int maxVars = 20;
+    const char* vartypes[maxVars] = {0};
+    const char* varnames[maxVars] = {0};
+    PtcPointCloud cloud = PtcOpenPointCloudFile(fileName.c_str(), &nvars,
+                                                vartypes, varnames);
+    // If nvars > maxVars we've probably crashed already!  Ugh, what an API :(
+    assert(nvars <= maxVars);
+    if(!cloud)
+        return boost::shared_ptr<PointArray>();
+    float P[3] = {0};
+    float N[3] = {0};
+    float extras[maxVars*3] = {0};
+    // Extract offsets for radiosity and area
+    const float* area = 0;
+    const float defaultRadiosity[3] = {1, 1, 1};
+    const float* radiosity = defaultRadiosity;
+    for(int i = 0, offset = 0; i < nvars; ++i)
+    {
+        if(strcmp(varnames[i], "_area") == 0 &&
+           strcmp(vartypes[i], "float") == 0)
+        {
+            area = extras + offset;
+        }
+        else if(strcmp(varnames[i], "_radiosity") == 0 &&
+                strcmp(vartypes[i], "color") == 0)
+        {
+            radiosity = extras + offset;
+        }
+        if(strcmp(vartypes[i], "float") == 0)       offset += 1;
+        else if(strcmp(vartypes[i], "color") == 0)  offset += 3;
+        else if(strcmp(vartypes[i], "normal") == 0) offset += 3;
+        else if(strcmp(vartypes[i], "vector") == 0) offset += 3;
+        else if(strcmp(vartypes[i], "point") == 0)  offset += 3;
+        else if(strcmp(vartypes[i], "matrix") == 0) offset += 16;
+        else
+            assert(0 && "unknown type");
+    }
+    if(!area)
+        return boost::shared_ptr<PointArray>();
+    // Ok, file contains the necessary info.  Read in the points.
+    boost::shared_ptr<PointArray> points(new PointArray());
+    points->stride = 10;
+    std::vector<float>& data = points->data;
+    while(PtcReadDataPoint(cloud, P, N, 0, extras))
+    {
+        data.push_back(P[0]); data.push_back(P[1]); data.push_back(P[2]);
+        data.push_back(N[0]); data.push_back(N[1]); data.push_back(N[2]);
+        data.push_back(sqrtf(*area/M_PI));
+        data.push_back(radiosity[0]);
+        data.push_back(radiosity[1]);
+        data.push_back(radiosity[2]);
+    }
+    PtcClosePointCloudFile(cloud);
+    return points;
+}
+
 
 inline float rad2deg(float r)
 {
@@ -672,7 +739,7 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
         case Vis_Points:
         {
             // Draw points
-            glPointSize(10);
+            glPointSize(1);
             glColor3f(1,1,1);
             // Set distance attenuation for points, following the usual 1/z
             // law.
@@ -775,16 +842,19 @@ int main(int argc, char *argv[])
         ("bakeonly,b", "Only bake, don't display (useful for timing)")
         ("radiusmult,r", po::value<float>()->default_value(1),
          "multiplying factor for surfel radius")
+        ("point_file", po::value<std::string>(), "file to display")
     ;
     // Parse options
     po::variables_map opts;
+    po::positional_options_description positionalOpts;
+    positionalOpts.add("point_file", 1);
     po::store(po::command_line_parser(app.argc(), app.argv())
-              .options(optionsDesc).run(), opts);
+              .options(optionsDesc).positional(positionalOpts).run(), opts);
     po::notify(opts);
 
     if(opts.count("help"))
     {
-        std::cout << "Usage: " << argv[0] << " [options]\n\n"
+        std::cout << "Usage: " << argv[0] << " [options] file.ptc\n\n"
                   << optionsDesc;
         return 0;
     }
@@ -797,17 +867,21 @@ int main(int argc, char *argv[])
 
     PointViewerWindow window;
 
-    std::cout << "Creating point cloud...\n";
-    boost::shared_ptr<PointArray> points = cornellBoxPoints(
-                                                opts["cloudres"].as<float>());
+    std::cout << "Reading point cloud...  " << std::flush;
+    boost::shared_ptr<PointArray> points;
+    if(opts.count("point_file") != 0)
+        points = loadPointFile(opts["point_file"].as<std::string>());
+    else
+        points = cornellBoxPoints(opts["cloudres"].as<float>());
+    std::cout << "npoints = " << points->size() << "\n";
 
     std::cout << "Building point hierarchy...\n";
     PointOctree octree(*points);
 
     int envRes = opts["envres"].as<int>();
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
-    std::cout << "Baking occlusion...\n";
-    //bakeOcclusion(*points, octree, envRes, maxSolidAngle);
+    std::cout << "Baking...\n";
+//    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
     bakeRadiosity(*points, octree, envRes, maxSolidAngle);
     if(opts.count("bakeonly"))
         return 0;
