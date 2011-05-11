@@ -329,6 +329,7 @@ CqFuncDef	gStandardFuncs[] = {
 
                                  CqFuncDef( Type_Float, "occlusion", "occlusion", "spnf*" ),
                                  CqFuncDef( Type_Float, "occlusion", "occlusion_rt", "pnf*" ),
+                                 CqFuncDef( Type_Color, "indirectdiffuse", "indirectdiffuse", "pnf*" ),
                                  CqFuncDef( Type_Float, "bake3d", "bake3d", "sspn*" ),
                                  CqFuncDef( Type_Float, "texture3d", "texture3d", "spn*" ),
                              };

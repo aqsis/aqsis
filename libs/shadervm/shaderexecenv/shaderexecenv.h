@@ -607,6 +607,7 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		virtual STD_SO	SO_external( DSOMethod method, void* initData, DEFPARAMVAR );
 		virtual STD_SO	SO_occlusion( STRINGVAL occlmap, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
 		virtual STD_SO	SO_occlusion_rt( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
+		virtual STD_SO	SO_indirectdiffuse( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
 		virtual STD_SO	SO_rayinfo( STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
 		virtual STD_SO	SO_bake3d( STRINGVAL ptc, STRINGVAL channels, POINTVAL P, NORMALVAL N, DEFPARAMVAR );
 		virtual STD_SO	SO_texture3d( STRINGVAL ptc, POINTVAL P, NORMALVAL N, DEFPARAMVAR );

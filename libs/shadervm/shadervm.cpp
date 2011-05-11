@@ -462,6 +462,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
 
         {"occlusion", 0, &CqShaderVM::SO_occlusion, 0, {0}},
         {"occlusion_rt", 0, &CqShaderVM::SO_occlusion_rt, 0, {0}},
+        {"indirectdiffuse", 0, &CqShaderVM::SO_indirectdiffuse, 0, {0}},
 
         {"rayinfo", 0, &CqShaderVM::SO_rayinfo, 1, {type_invalid}},
 

@@ -1103,6 +1103,35 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
 
+
+//----------------------------------------------------------------------
+// indirectdiffuse(P, N, samples, ...)
+void CqShaderExecEnv::SO_indirectdiffuse(IqShaderData* P, IqShaderData* N,
+										 IqShaderData* samples,
+										 IqShaderData* Result,
+										 IqShader* pShader, int cParams,
+										 IqShaderData** apParams)
+{
+	bool varying;
+	TqUint igrid;
+
+	if ( !getRenderContext() )
+		return ;
+
+	varying = Result->Class() == class_varying;
+	igrid = 0;
+	const CqBitVector& RS = RunningState();
+	do
+	{
+		if(!varying || RS.Value( igrid ) )
+		{
+			Result->SetColor(CqColor(0.0f),igrid);
+		}
+	}
+	while( ( ++igrid < shadingPointCount() ) && varying);
+}
+
+
 //----------------------------------------------------------------------
 // rayinfo
 //

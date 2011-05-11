@@ -1666,6 +1666,12 @@ void CqShaderVM::SO_occlusion_rt()
 	FUNC3( type_float, m_pEnv->SO_occlusion_rt );
 }
 
+void CqShaderVM::SO_indirectdiffuse()
+{
+	VARFUNC;
+	FUNC3PLUS( type_color, m_pEnv->SO_indirectdiffuse );
+}
+
 void CqShaderVM::SO_rayinfo()
 {
 	AUTOFUNC;
