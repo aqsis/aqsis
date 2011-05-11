@@ -761,7 +761,6 @@ void CqShaderVM::SO_trace()
 // Macros for declaring the texture shadeops
 #define	TEXTURE(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						TqFloat fc; \
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
@@ -775,7 +774,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,pResult,this,cParams,aParams); \
+							func(name,pResult,this,cParams,aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -785,11 +784,9 @@ void CqShaderVM::SO_trace()
 						delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
-						RELEASE(name); \
-						RELEASE(channel);
+						RELEASE(name);
 #define	TEXTURE1(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						POPV(R); /* point */\
 						TqFloat fc; \
 						count->GetFloat( fc ); \
@@ -804,7 +801,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,R,pResult,this, cParams, aParams); \
+							func(name,R,pResult,this, cParams, aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -815,11 +812,9 @@ void CqShaderVM::SO_trace()
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
-						RELEASE(channel); \
 						RELEASE(R);
 #define	TEXTURE3(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						POPV(P); /* point */\
 						POPV(N); /* normal */\
 						POPV(samples); /* samples */\
@@ -836,7 +831,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
+							func(name,P,N,samples,pResult,this, cParams, aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -847,13 +842,11 @@ void CqShaderVM::SO_trace()
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
-						RELEASE(channel); \
 						RELEASE(P); \
 						RELEASE(N); \
 						RELEASE(samples);
 #define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						POPV(s1); /* s */\
 						POPV(t1); /* t */\
 						TqFloat fc; \
@@ -869,7 +862,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,s1,t1,pResult,this, cParams, aParams); \
+							func(name,s1,t1,pResult,this, cParams, aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -880,12 +873,10 @@ void CqShaderVM::SO_trace()
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
-						RELEASE(channel); \
 						RELEASE(s1); \
 						RELEASE(t1);
 #define	TEXTURE4(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						POPV(R1); /* R1 */\
 						POPV(R2); /* R2 */\
 						POPV(R3); /* R3 */\
@@ -903,7 +894,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
+							func(name,R1,R2,R3,R4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -914,14 +905,12 @@ void CqShaderVM::SO_trace()
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
-						RELEASE(channel); \
 						RELEASE(R1); \
 						RELEASE(R2); \
 						RELEASE(R3); \
 						RELEASE(R4);
 #define	TEXTURE8(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
-						POPV(channel); /* channel */\
 						POPV(s1); /* s1 */\
 						POPV(t1); /* t1 */\
 						POPV(s2); /* s2 */\
@@ -943,7 +932,7 @@ void CqShaderVM::SO_trace()
 						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						if(m_pEnv->IsRunning()) \
-							func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
+							func(name,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
 						iP=0; \
 						while(iP!=cParams)	{\
@@ -954,7 +943,6 @@ void CqShaderVM::SO_trace()
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
-						RELEASE(channel); \
 						RELEASE(s1); \
 						RELEASE(t1); \
 						RELEASE(s2); \

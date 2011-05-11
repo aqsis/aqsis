@@ -2017,6 +2017,50 @@ class CqParseNodeDeclaration : public CqParseNode
 		bool	m_Output;
 };
 
+///----------------------------------------------------------------------
+/// CqParseNodeTextureNameWithChannel
+/// Parsenode specifying a texture name including channel number.
+
+class CqParseNodeTextureNameWithChannel : public CqParseNode
+{
+	public:
+		CqParseNodeTextureNameWithChannel( const CqParseNodeTextureNameWithChannel& from ) :
+				CqParseNode( from )
+		{}
+		CqParseNodeTextureNameWithChannel() :
+				CqParseNode()
+		{ }
+		virtual	~CqParseNodeTextureNameWithChannel()
+		{}
+
+		virtual	TqInt	NodeType() const
+		{
+			return ( IqParseNodeTextureNameWithChannel::m_ID );
+		}
+		virtual	TqInt	ResType() const
+		{
+		// For typechecking purposes, return the type of the texture name expression
+			if ( m_pChild == 0 )
+				return ( Type_Nil );
+			else
+				return ( m_pChild->ResType() );
+		}
+		virtual	void	Accept( IqParseNodeVisitor &V)
+		{
+			V.Visit(*this);
+		}
+
+		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
+		{
+			CqParseNodeTextureNameWithChannel * pNew = new CqParseNodeTextureNameWithChannel( *this );
+			if ( m_pChild )
+				pNew->m_pChild = m_pChild->Clone( pNew );
+			pNew->m_pParent = pParent;
+			return ( pNew );
+		}
+	protected:
+};
+
 
 //-----------------------------------------------------------------------
 

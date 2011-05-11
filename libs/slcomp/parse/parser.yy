@@ -1800,12 +1800,29 @@ procedurecall
 								$$ = $1;
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg = $3->pFirstChild();
-								$$->AddLastChild($3->pFirstChild());
-								if(pArg->pFirstChild())
-									$$->AddLastChild(pArg->pFirstChild());
-								else
-									$$->AddLastChild(new CqParseNodeFloatConst(0));
-								while($3->pFirstChild()!=0)	$$->AddLastChild($3->pFirstChild());
+								CqParseNode* pNameWithChannel = 0;
+
+								while(pArg!=0)
+								{
+									if(pArg->NodeType() == ParseNode_TextureNameWithChannel)
+									{
+										pNameWithChannel = pArg;
+										$$->AddLastChild(pArg->pFirstChild());
+										pArg = static_cast<CqParseNode*>(pArg->pNextSibling());
+									}
+									else
+									{
+										CqParseNode *pNextArg = static_cast<CqParseNode*>(pArg->pNextSibling());
+										$$->AddLastChild(pArg);
+										pArg = pNextArg;
+									}
+								}
+								if(NULL != pNameWithChannel)
+								{
+									CqParseNodeStringConst *cname = new CqParseNodeStringConst("channel");
+									$$->AddLastChild(cname);
+									$$->AddLastChild(pNameWithChannel->pFirstChild());
+								}
 							}
 	;
 
@@ -1852,8 +1869,10 @@ proc_argument
 	:	expression		
 	|	expression '[' expression ']'
 							{
-								$$ = $1;
-								$$->AddLastChild($3);
+								CqParseNodeTextureNameWithChannel *pNameChannel = new CqParseNodeTextureNameWithChannel();
+								pNameChannel->AddFirstChild($1);
+								pNameChannel->AddLastChild($3);
+								$$ = pNameChannel;
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	;

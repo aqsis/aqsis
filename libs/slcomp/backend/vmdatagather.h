@@ -81,6 +81,7 @@ class CqCodeGenDataGather : public IqParseNodeVisitor
 		virtual	void Visit( IqParseNodeTriple& );
 		virtual	void Visit( IqParseNodeSixteenTuple& );
 		virtual	void Visit( IqParseNodeMessagePassingFunction& );
+		virtual	void Visit( IqParseNodeTextureNameWithChannel& );
 
 		TqInt	VariableUsage() const
 		{

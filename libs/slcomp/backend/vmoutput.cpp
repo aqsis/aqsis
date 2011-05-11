@@ -35,7 +35,6 @@
 #include	<numeric>
 #include	<cstdlib>
 
-#include	<aqsis/version.h>
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
@@ -93,7 +92,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile << S.strShaderType() << std::endl;
 
 	// Output version information.
-	m_slxFile << "AQSIS_V " << AQSIS_VERSION_STR << std::endl;
+	m_slxFile << "AQSIS_V " << AQSIS_XSTR(AQSIS_SLX_VERSION) << std::endl;
 	m_slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 	// Now that we have this information, work out which standard vars are used.
@@ -984,6 +983,10 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 	}
 }
 
+void CqCodeGenOutput::Visit( IqParseNodeTextureNameWithChannel& MPF )
+{
+	// Note: This node type is used internally in the parser only, it should never be output.
+}
 
 ///---------------------------------------------------------------------
 /// OutputLocalVariable

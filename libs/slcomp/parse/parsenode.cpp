@@ -116,6 +116,7 @@ const EqParseNodeType IqParseNodeTypeCast::m_ID = ParseNode_TypeCast;
 const EqParseNodeType IqParseNodeTriple::m_ID = ParseNode_Triple;
 const EqParseNodeType IqParseNodeSixteenTuple::m_ID = ParseNode_SixteenTuple;
 const EqParseNodeType IqParseNodeMessagePassingFunction::m_ID = ParseNode_MessagePassingFunction;
+const EqParseNodeType IqParseNodeTextureNameWithChannel::m_ID = ParseNode_TextureNameWithChannel;
 
 
 ///---------------------------------------------------------------------

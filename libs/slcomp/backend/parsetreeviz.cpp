@@ -377,6 +377,12 @@ void CqParseTreeViz::Visit(IqParseNodeMessagePassingFunction& node)
 	visitChildren(node);
 }
 
+void CqParseTreeViz::Visit(IqParseNodeTextureNameWithChannel& node)
+{
+	setNodeProperty(node, "label", "TextureNameWithChannel");
+	visitChildren(node);
+}
+
 //-----------------------------------------------------------------------
 // Private functions
 
