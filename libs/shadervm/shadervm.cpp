@@ -1756,10 +1756,16 @@ void CqShaderVM::InitialiseParameters( )
 		CqString _strSpace( "shader" );
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
-		CqMatrix matTrans;
+		CqMatrix pointTrans;
+		CqMatrix vectorTrans;
+		CqMatrix normalTrans;
 
 		if (getTransform())
-			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), matTrans );
+		{
+			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), pointTrans );
+			m_pRenderContext ->matVSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), vectorTrans );
+			m_pRenderContext ->matNSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), normalTrans );
+		}
 
 		while ( count-- > 0 )
 		{
@@ -1771,25 +1777,25 @@ void CqShaderVM::InitialiseParameters( )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetPoint( p, 0 );
-				pVMVal->SetPoint( matTrans * p );
+				pVMVal->SetPoint( pointTrans * p );
 			}
 			else if ( pVMVal->Type() == type_normal )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetNormal( p, 0 );
-				pVMVal->SetNormal( matTrans * p );
+				pVMVal->SetNormal( normalTrans * p );
 			}
 			else if ( pVMVal->Type() == type_vector )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetVector( p, 0 );
-				pVMVal->SetVector( matTrans * p );
+				pVMVal->SetVector( vectorTrans * p );
 			}
 			else if ( pVMVal->Type() == type_matrix )
 			{
 				CqMatrix m;
 				m_StoredArguments[i].m_Value->GetMatrix( m, 0 );
-				pVMVal->SetMatrix( matTrans * m );
+				pVMVal->SetMatrix( pointTrans * m );
 			}
 			else
 			{
