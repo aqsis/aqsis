@@ -192,15 +192,6 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		static	void ShutdownShaderEngine();
 
 
-		/** \brief Load a compiled shader program from the given stream
-		 *
-		 * \throw XqBadShader If the program was compiled with a different
-		 *   version of aqsis, or is invalid in any other way.
-		 */
-		void	LoadProgram( std::istream* pFile );
-		void	Execute( IqShaderExecEnv* pEnv );
-		void	ExecuteInit();
-
 		virtual const std::vector<IqShaderData*>& GetArguments() const;
 		void SetType(EqShaderType type);
 
@@ -215,6 +206,19 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
 	private:
+		/** \brief Load a compiled shader program from the given stream
+		 *
+		 * \throw XqBadShader If the program was compiled with a different
+		 *   version of aqsis, or is invalid in any other way.
+		 */
+		void	LoadProgram( std::istream* pFile );
+		void	Execute( IqShaderExecEnv* pEnv );
+		void	ExecuteInit();
+
+		// Allow createShaderVM to call LoadProgram:
+		friend boost::shared_ptr<IqShader> createShaderVM(
+				IqRenderer* renderContext, std::istream& programFile,
+				const std::string& dsoPath);
 
 		struct SqArgumentRecord
 		{
@@ -232,6 +236,7 @@ class AQSIS_SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, p
 		IqTransformPtr m_pTransform;    ///< Pointer to the transformation at the time the shader was instantiated.
 
 		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
+		std::vector<IqShaderData*>	m_InstancedParams;	///< Array of (instance parameter,local var) pairs.  Includes default params.
 		std::vector<SqArgumentRecord>	m_StoredArguments;		///< Array of arguments specified during construction.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
