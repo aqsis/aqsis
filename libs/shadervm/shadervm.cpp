@@ -500,6 +500,7 @@ CqShaderVM::CqShaderVM(IqRenderer* pRenderContext)
 	m_pEnv(0),
 	m_pTransform(),
 	m_LocalVars(),
+	m_InstancedParams(),
 	m_StoredArguments(),
 	m_ProgramInit(),
 	m_Program(),
@@ -562,6 +563,13 @@ CqShaderVM::~CqShaderVM()
 {
 	// Delete the local variables.
 	for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
+	{
+		delete *i;
+	}
+	// Delete the cached instance params (note that every second one is the
+	// corresponding local var)
+	for( std::vector<IqShaderData*>::iterator i = m_InstancedParams.begin();
+		 i < m_InstancedParams.end(); i+=2 )
 	{
 		delete *i;
 	}
@@ -1474,6 +1482,14 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt s
 	for ( i = m_LocalVars.size() - 1; i >= 0;
 	        i-- )
 		m_LocalVars[ i ] ->Initialise( shadingPointCount );
+	// Copy instance parameters over from persistent cache (these may have
+	// been overwritten by primitive variables the previous time the shader
+	// was executed).
+	for( std::vector<IqShaderData*>::iterator i = m_InstancedParams.begin();
+		 i < m_InstancedParams.end(); i+=2 )
+	{
+		(*(i+1))->SetValueFromVariable(*i);
+	}
 
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
@@ -1758,10 +1774,16 @@ void CqShaderVM::InitialiseParameters( )
 		CqString _strSpace( "shader" );
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
-		CqMatrix matTrans;
+		CqMatrix pointTrans;
+		CqMatrix vectorTrans;
+		CqMatrix normalTrans;
 
 		if (getTransform())
-			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), matTrans );
+		{
+			m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), pointTrans );
+			m_pRenderContext ->matVSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), vectorTrans );
+			m_pRenderContext ->matNSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time(), normalTrans );
+		}
 
 		while ( count-- > 0 )
 		{
@@ -1773,25 +1795,25 @@ void CqShaderVM::InitialiseParameters( )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetPoint( p, 0 );
-				pVMVal->SetPoint( matTrans * p );
+				pVMVal->SetPoint( pointTrans * p );
 			}
 			else if ( pVMVal->Type() == type_normal )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetNormal( p, 0 );
-				pVMVal->SetNormal( matTrans * p );
+				pVMVal->SetNormal( normalTrans * p );
 			}
 			else if ( pVMVal->Type() == type_vector )
 			{
 				CqVector3D p;
 				m_StoredArguments[i].m_Value->GetVector( p, 0 );
-				pVMVal->SetVector( matTrans * p );
+				pVMVal->SetVector( vectorTrans * p );
 			}
 			else if ( pVMVal->Type() == type_matrix )
 			{
 				CqMatrix m;
 				m_StoredArguments[i].m_Value->GetMatrix( m, 0 );
-				pVMVal->SetMatrix( matTrans * m );
+				pVMVal->SetMatrix( pointTrans * m );
 			}
 			else
 			{
@@ -1809,6 +1831,33 @@ void CqShaderVM::InitialiseParameters( )
 			else
 				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
 			DeleteTemporaryStorage(pVMVal);
+		}
+	}
+	// Create persistent storage for the shader parameter defaults as
+	// overridden by the per-instance parameters above.  Also store the
+	// corresponding local vars so we can reinitialise the local vars later as
+	// necessary.
+	if(!m_InstancedParams.empty())
+	{
+		// TODO: Does it make sense that InitialiseParameters() is called more
+		// than once per shader by the aqsis core?
+		for( std::vector<IqShaderData*>::iterator i = m_InstancedParams.begin();
+			i < m_InstancedParams.end(); i+=2 )
+		{
+			delete *i;
+		}
+		m_InstancedParams.clear();
+	}
+	for( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin();
+		 i != m_LocalVars.end(); ++i )
+	{
+		IqShaderData::EqStorage storeType = (*i)->Storage();
+		if( storeType == IqShaderData::Parameter ||
+			storeType == IqShaderData::OutputParameter )
+		{
+			// Record shader parameters only, not temporary vars
+			m_InstancedParams.push_back((*i)->Clone());
+			m_InstancedParams.push_back((*i));
 		}
 	}
 }
