@@ -1663,7 +1663,7 @@ void CqShaderVM::SO_occlusion()
 void CqShaderVM::SO_occlusion_rt()
 {
 	VARFUNC;
-	FUNC3( type_float, m_pEnv->SO_occlusion_rt );
+	FUNC3PLUS( type_float, m_pEnv->SO_occlusion_rt );
 }
 
 void CqShaderVM::SO_indirectdiffuse()
