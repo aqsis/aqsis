@@ -71,8 +71,8 @@ static void depthRange(const float* z, int size, int stride,
 }
 
 
-#if 0
 static void drawBound(const Box3f& b);
+
 static void drawDisk(V3f p, V3f n, float r)
 {
     // Radius 1 disk primitive, translated & scaled into position.
@@ -109,39 +109,49 @@ static void drawDisk(V3f p, V3f n, float r)
 
 /// Debug: visualize tree splitting
 static void splitNode(V3f P, float maxSolidAngle, int dataSize,
-                      const PointOctree::Node* node)
+                       const PointOctree::Node* node)
 {
-    glColor3f(0.3, 0.5, 0.3);
-    drawBound(node->bound);
-    if(node->npoints != 0)
+    // Examine node bound and cull if possible
+    float r = node->aggR;
+    V3f p = node->aggP - P;
+    float plen2 = p.length2();
+    // Examine solid angle of interior node bounding sphere to see whether we
+    // can render it directly or not.
+    float solidAngle = M_PI*r*r / plen2;
+    if(solidAngle < maxSolidAngle)
     {
-        // Render each point.
-        for(int i = 0; i < node->npoints; ++i)
+        drawDisk(node->aggP, node->aggN, r);
+    }
+    else
+    {
+        // If the solid angle is too large consider child nodes or child
+        // points.
+        if(node->npoints != 0)
         {
-            const float* data = &node->data[i*dataSize];
-            V3f p = V3f(data[0], data[1], data[2]);
-            V3f n = V3f(data[3], data[4], data[5]);
-            float r = data[6];
-            drawDisk(p, n, r);
+            // Leaf node: simply render each child point.
+            for(int i = 0; i < node->npoints; ++i)
+            {
+                const float* data = &node->data[i*dataSize];
+                V3f p = V3f(data[0], data[1], data[2]);
+                V3f n = V3f(data[3], data[4], data[5]);
+                float r = data[6];
+                drawDisk(p, n, r);
+            }
+            return;
+        }
+        else
+        {
+            // Interior node: render each non-null child.
+            for(int i = 0; i < 8; ++i)
+            {
+                PointOctree::Node* child = node->children[i];
+                if(!child)
+                    continue;
+                splitNode(P, maxSolidAngle, dataSize, child);
+            }
         }
     }
-    for(int i = 0; i < 8; ++i)
-    {
-        PointOctree::Node* child = node->children[i];
-        if(!child)
-            continue;
-        // Check size of the child node
-        float rbnd = child->aggR;
-        V3f pbnd = child->aggP - P;
-        float pbnd2 = pbnd.length2();
-        float solidAngle = M_PI*rbnd*rbnd / pbnd2;
-        if(solidAngle < maxSolidAngle)
-            drawDisk(child->aggP, child->aggN, child->aggR);
-        else
-            splitNode(P, maxSolidAngle, dataSize, child);
-    }
 }
-#endif
 
 
 /// Convert depth buffer to grayscale color
@@ -820,7 +830,7 @@ int main(int argc, char *argv[])
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
     std::cout << "Baking...\n";
 //    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
-    bakeRadiosity(*points, octree, envRes, maxSolidAngle);
+//    bakeRadiosity(*points, octree, envRes, maxSolidAngle);
     if(opts.count("bakeonly"))
         return 0;
 
