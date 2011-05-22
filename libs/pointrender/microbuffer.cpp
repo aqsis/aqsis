@@ -122,6 +122,9 @@ inline void solveQuadratic(float a, float b, float c,
 template<typename IntegratorT>
 static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
 {
+    // TODO: Configurable bias!
+    float bias = 0.01f;
+    p -= bias*r*n;
     int faceRes = integrator.res();
     float plen2 = p.length2();
     if(plen2 == 0) // Sanity check
@@ -437,12 +440,15 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
     float r = node->aggR;
     V3f p = node->aggP - P;
     float plen2 = p.length2();
+    // TODO: Is this check somewhat redundent with the one inside renderDisk?
     if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
         return;
     // Examine solid angle of interior node bounding sphere to see whether we
     // can render it directly or not.
     //
-    // TODO: Can we use the solid angle of the disk rather than the bound?
+    // TODO: Would be nice to use dot(node->aggN, p.normalized()) in the solid
+    // angle estimation.  However, we get bad artifacts if we do this naively.
+    // Perhaps with spherical harmoics it'll be better.
     float solidAngle = M_PI*r*r / plen2;
     if(solidAngle < maxSolidAngle)
     {
@@ -476,7 +482,7 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
                 if(!child)
                     continue;
                 renderNode(integrator, P, N, cosConeAngle, sinConeAngle,
-                        maxSolidAngle, dataSize, child);
+                           maxSolidAngle, dataSize, child);
             }
         }
     }

@@ -11,6 +11,8 @@ set(shadervm_srcs
 	shadervm.cpp
 	shadervm1.cpp
 	shadervm2.cpp
+	../pointrender/microbuffer.cpp
+	../pointrender/pointcontainer.cpp
 )
 
 set(shadervm_hdrs

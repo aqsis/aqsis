@@ -31,6 +31,8 @@
 #include	"shaderexecenv.h"
 #include	<aqsis/core/ilightsource.h>
 
+#include	"../../pointrender/microbuffer.h"
+
 namespace Aqsis {
 
 //----------------------------------------------------------------------
@@ -1080,27 +1082,102 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 }
 
 
+// FIXME: It's pretty ugly to have a global cache here!
+//
+// Missing cache features:
+// * Clear at end of frame
+// * Ri search paths
+static PointOctreeCache g_pointOctreeCache;
+
 //----------------------------------------------------------------------
 // occlusion(P,N,samples)
 void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	bool __fVarying;
-	TqUint __iGrid;
+	if(!getRenderContext())
+		return;
 
-	if ( !getRenderContext() )
-		return ;
-
-	__fVarying = true;
-	__iGrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
+	// Get face resolution.  We're using the "samples" parameter for this at
+	// the moment... not sure if this is a good idea or not.
+	int faceRes = 10;
 	{
-		if(!__fVarying || RS.Value( __iGrid ) )
-		{
-			(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
-		}
+		float f = 0; samples->GetFloat(f);
+		if(f >= 1)
+			faceRes = static_cast<int>(f);
 	}
-	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+	// Extract options
+	CqString paramName;
+	const PointOctree* pointTree = 0;
+	float maxSolidAngle = 0.03;
+	float coneAngle = M_PI_2;
+	for(int i = 0; i < cParams; i+=2)
+	{
+		apParams[i]->GetString(paramName, 0);
+		IqShaderData* paramValue = apParams[i+1];
+		if(paramName == "coneangle")
+		{
+			if(paramValue->Type() == type_float)
+				paramValue->GetFloat(coneAngle);
+		}
+		else if(paramName == "filename")
+		{
+			if(paramValue->Type() == type_string)
+			{
+				CqString fileName;
+				paramValue->GetString(fileName, 0);
+				pointTree = g_pointOctreeCache.find(fileName);
+			}
+		}
+		else if(paramName == "maxsolidangle")
+		{
+			if(paramValue->Type() == type_float)
+				paramValue->GetFloat(maxSolidAngle);
+		}
+		// Interesting arguments which could be implemented:
+		//   "hitsides"    - sidedness culling: "front", "back", "both"
+		//   "coordsystem" - coordinate system of points, default "world"
+		//   "falloff", "falloffmode" - falloff of occlusion with distance
+		//   "bias" - offset bias for point
+		//   ... more!
+		//
+		// Other arguments we may not bother with:
+		//   "pointbased"  - we don't support any other method...
+	}
+
+	bool varying = Result->Class() == class_varying;
+	TqUint igrid = 0;
+	const CqBitVector& RS = RunningState();
+	if(pointTree)
+	{
+		// Compute occlusion for each point
+		OcclusionIntegrator integrator(faceRes);
+		do
+		{
+			if(!varying || RS.Value(igrid))
+			{
+				CqVector3D Pval;   P->GetVector(Pval, igrid);
+				CqVector3D Nval;   N->GetVector(Nval, igrid);
+				V3f Pval2(Pval.x(), Pval.y(), Pval.z());
+				V3f Nval2(Nval.x(), Nval.y(), Nval.z());
+				integrator.clear();
+				microRasterize(integrator, Pval2, Nval2, coneAngle,
+							   maxSolidAngle, *pointTree);
+				Result->SetFloat(integrator.occlusion(Nval2), igrid);
+			}
+		}
+		while( ( ++igrid < shadingPointCount() ) && varying);
+	}
+	else
+	{
+		// Couldn't find point cloud, set result to zero.
+		do
+		{
+			if(!varying || RS.Value(igrid))
+			{
+				Result->SetFloat(0.0f,igrid);
+			}
+		}
+		while( ( ++igrid < shadingPointCount() ) && varying);
+	}
 }
 
 

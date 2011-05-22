@@ -31,6 +31,7 @@
 #ifndef AQSIS_POINTCONTAINER_H_INCLUDED
 #define AQSIS_POINTCONTAINER_H_INCLUDED
 
+#include <map>
 #include <vector>
 
 #include <OpenEXR/ImathVec.h>
@@ -158,6 +159,28 @@ class PointOctree
 
         Node* m_root;
         int m_dataSize;
+};
+
+
+
+//------------------------------------------------------------------------------
+/// Cache for previously loaded point clouds
+class PointOctreeCache
+{
+    public:
+        /// Find a cached point octree by file name
+        ///
+        /// Returns a null pointer if the file couldn't be found or opened.
+        ///
+        /// TODO: Search path handling.
+        const PointOctree* find(const std::string& fileName);
+
+        /// Clear all trees from the cache
+        void clear();
+
+    private:
+        typedef std::map<std::string, boost::shared_ptr<PointOctree> > MapType;
+        MapType m_cache;
 };
 
 
