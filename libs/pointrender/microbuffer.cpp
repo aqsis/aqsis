@@ -122,9 +122,6 @@ inline void solveQuadratic(float a, float b, float c,
 template<typename IntegratorT>
 static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
 {
-    // TODO: Configurable bias!
-    float bias = 0.01f;
-    p -= bias*r*n;
     int faceRes = integrator.res();
     float plen2 = p.length2();
     if(plen2 == 0) // Sanity check

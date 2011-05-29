@@ -401,10 +401,30 @@ void	CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
                 PtcManager.SaveCloudWrite(_aq_ptc.c_str(), MyCloudWrite);
             }
 
+            // Here we interpolate between vertices so that the output points
+            // are at the middle of micropolygons.  This improves the point
+            // cloud quality for point based lighting because it avoids
+            // repeated overlapping disks at every grid border.
+            //
+            // TODO: 1) Turn on/off with "interpolate" param.
+            // 2) Interpolate other variables, not just position.
+            int uSize = m_uGridRes+1;
+            int vSize = m_vGridRes+1;
+            int v = __iGrid / uSize;
+            int u = __iGrid - v*uSize;
+            if(v == vSize - 1 || u == uSize - 1)
+                continue;
+
+            CqVector3D avgP = _aq_point;
+            (point)->GetPoint(_aq_point, (v+1)*uSize + u);   avgP += _aq_point;
+            (point)->GetPoint(_aq_point, v*uSize + u+1);     avgP += _aq_point;
+            (point)->GetPoint(_aq_point, (v+1)*uSize + u+1); avgP += _aq_point;
+            avgP *= 0.25f;
+
             TqFloat pointf[3];
-            pointf[0] = _aq_point[0];
-            pointf[1] = _aq_point[1];
-            pointf[2] = _aq_point[2];
+            pointf[0] = avgP.x();
+            pointf[1] = avgP.y();
+            pointf[2] = avgP.z();
 
             TqFloat normalf[3];
             normalf[0] = _aq_normal[0];

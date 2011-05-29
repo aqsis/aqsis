@@ -372,6 +372,35 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		template<typename T>
 		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
 
+		/// Turn 1D iteration into 2D grid indices
+		///
+		/// u is the fast changing index; v is slow changing.
+		class GridIterator2D
+		{
+			public:
+				/// \param uend - number of vertices in u direction
+				GridIterator2D(int uend)
+					: m_uend(uend), m_u(0), m_v(0) { }
+
+				/// Go to next 2D grid position
+				void operator++()
+				{
+					++m_u;
+					if(m_u >= m_uend)
+					{
+						m_u = 0;
+						++m_v;
+					}
+				}
+
+				int u() const { return m_u; }
+				int v() const { return m_v; }
+
+			private:
+				int m_uend;
+				int m_u;
+				int m_v;
+		};
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
