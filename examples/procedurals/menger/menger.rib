@@ -12,9 +12,41 @@ Rotate 20 0 1 0
 
 WorldBegin
 	# the argument string for the procedural consists of the fractal the
-	# subdivision level followed by the bounding box:
+	# subdivision level followed by the bounding box and motif:
 	#
-	#   "level  xmin xmax  ymin ymax  zmin zmax"
+	#   "level  xmin xmax  ymin ymax  zmin zmax  motif"
 	#
-	Procedural "DynamicLoad" ["menger" "4  -1 1  -1 1  -1 1"] [-1 1  -1 1  -1 1]
+	# The motif is a length 27 array of ones and zeros; any data trailing this
+	# is ignored.
+	#
+	Procedural "DynamicLoad"
+		["menger" "4  -1 1  -1 1  -1 1
+
+			1 1 1  1 0 1  1 1 1
+			1 0 1  0 0 0  1 0 1
+			1 1 1  1 0 1  1 1 1
+
+			Other patterns to try:
+
+			0 1 0  0 1 0  0 0 0
+			1 0 1  1 1 1  0 1 0
+			0 1 0  0 1 0  0 0 0
+
+			1 1 1  1 0 1  1 0 1
+			1 1 1  0 1 0  0 0 0
+			1 1 1  1 0 1  1 0 1
+
+			0 1 0  1 0 1  0 1 0
+			1 0 1  0 1 0  1 0 1
+			0 1 0  1 0 1  0 1 0
+
+			1 0 1  0 1 0  1 0 1
+			0 1 0  1 0 1  0 1 0
+			1 0 1  0 1 0  1 0 1
+
+			1 1 1  0 0 0  0 0 0
+			1 1 1  0 1 0  0 1 0
+			1 1 1  0 0 0  0 0 0
+
+		 "] [-1 1  -1 1  -1 1]
 WorldEnd
