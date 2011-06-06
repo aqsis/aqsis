@@ -6,7 +6,7 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
 # Disallow in-source build
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" aqsis_in_source)
 if(aqsis_in_source)
-	message(FATAL_ERROR "Aqsis requires an out of source build. Please create a separate build directory and run 'cmake path_to_source [options]' there.")
+	message(FATAL_ERROR "Aqsis requires an out of source build.  Please clean any cmake-generated files from the source directory, create a separate build directory and run 'cmake path_to_source [options]' there.")
 endif()
 
 
