@@ -25,12 +25,15 @@
 
 
 #ifdef AQSIS_SYSTEM_WIN32
-#include	<io.h>
+#include <io.h>
 #endif
 
-#include	<cstring>
+#include <cstring>
 
-#include	"shaderexecenv.h"
+#include "shaderexecenv.h"
+
+#include <aqsis/util/autobuffer.h>
+#include <aqsis/util/logging.h>
 
 namespace Aqsis
 {
@@ -232,6 +235,7 @@ protected:
 #include <aqsis/ri/pointcloud.h>
 
 //------------------------------------------------------------------------------
+namespace {
 /** \brief Singleton plain manager of PointCloud files; they are split in two
  * kind the one to write and the one to read from.
  */
@@ -281,6 +285,35 @@ public:
             }
         }
         return 0;
+    }
+
+    /// Open a new point cloud file for writing.
+    ///
+    /// \param name - name of the point cloud
+    /// \param outVarNames - names of user-defined variables
+    /// \param outVarTypes - types of user-defined variables
+    /// \return point cloud, ready for writing to.
+    PtcPointCloud OpenPointCloudWrite(const char* name,
+                                  const std::vector<std::string>& outVarNames,
+                                  const std::vector<std::string>& outVarTypes)
+    {
+        int nUserVars = outVarNames.size();
+        boost::scoped_array<const char*> nameCstrs(new const char*[nUserVars]);
+        boost::scoped_array<const char*> typeCstrs(new const char*[nUserVars]);
+        for(int i = 0; i < nUserVars; ++i)
+        {
+            nameCstrs[i] = outVarNames[i].c_str();
+            typeCstrs[i] = outVarTypes[i].c_str();
+        }
+        // The following are dummy values for eye2ndc, eye2world, and format.
+        // TODO: Do we want these to be sensibly settable?
+        float format[3] = { 800.0f, 600.0f, 1.0f };
+        float ident[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
+        PtcPointCloud newCloud = PtcCreatePointCloudFile(name, nUserVars,
+                                    typeCstrs.get(), nameCstrs.get(),
+                                    ident, ident, format);
+        SaveCloudWrite(name, newCloud);
+        return newCloud;
     }
 
     void SaveCloud(const char *s, PtcPointCloud File)
@@ -342,167 +375,296 @@ public:
         free(MyList.pList);
         MyList.pList = 0;
     };
-} ;
+};
+}
 
 PtcFileManager PtcManager;
 
 
+// Utils for bake3d() shadeop.
+namespace {
+struct UserVar
+{
+    const IqShaderData* value;
+    EqVariableType type;
+};
+}
+
+
+/// Extract float data from variables to be baked.
+///
+/// \param out - all output variables are squashed together into this array.
+///              The ordering is P[3] N[3] userdata[...]
+/// \param igrid - grid index at which to retrieve the data
+/// \param position - position array
+/// \param normal - normal array
+/// \param userVars - array of shader data and associated types
+/// \param nUserVars - length of userVars array.
+static void extractBakeVars(float* out, int igrid, IqShaderData* position,
+                            IqShaderData* normal, UserVar* userVars,
+                            int nUserVars)
+{
+    // Temp vars for extracting data from IqShaderData
+    TqFloat f;
+    CqVector3D p;
+    CqColor c;
+    CqMatrix m;
+
+    // Extract position and normal; always required
+    position->GetPoint(p, igrid);
+    *out++ = p.x(); *out++ = p.y(); *out++ = p.z();
+    normal->GetNormal(p, igrid);
+    *out++ = p.x(); *out++ = p.y(); *out++ = p.z();
+
+    // Get all user-defined parameters and assemble them together into array
+    // of floats to pass to Ptc API.
+    for(int i = 0; i < nUserVars; ++i)
+    {
+        const UserVar& var = userVars[i];
+        switch(var.type)
+        {
+            case type_float:
+                var.value->GetFloat(f, igrid);
+                *out++ = f;
+                break;
+            case type_point:
+                var.value->GetPoint(p, igrid);
+                *out++ = p.x(); *out++ = p.y(); *out++ = p.z();
+                break;
+            case type_normal:
+                var.value->GetNormal(p, igrid);
+                *out++ = p.x(); *out++ = p.y(); *out++ = p.z();
+                break;
+            case type_vector:
+                var.value->GetVector(p, igrid);
+                *out++ = p.x(); *out++ = p.y(); *out++ = p.z();
+                break;
+            case type_color:
+                var.value->GetColor(c, igrid);
+                *out++ = c.r(); *out++ = c.g(); *out++ = c.b();
+                break;
+            case type_matrix:
+                var.value->GetMatrix(m, igrid);
+                for(int k = 0; k < 4; ++k)
+                for(int h = 0; h < 4; ++h)
+                    *out++ = m[k][h];
+                break;
+            default:
+                assert(0 && "unexpected type");
+                break;
+        }
+    }
+}
+
+
 //------------------------------------------------------------------------------
-/** \brief Shadeops "bake3d" to save any parameter in one pointcloud file refer.
- *  \param ptc the name of the pointcloud file
- *  \param format the format size w,h,ratio 
- *  \param point  the P
- *  \param normat its normal
- *  \result result 0 or 1
- *  \param pShader shaderexecenv
- *  \param cParams number of remaining user parameters.
- *  \param aqParams list of user parameters (to save to ptc)
- */
-void	CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
-                                 IqShaderData* format,
-                                 IqShaderData* point,
+/// Shadeop to bake vertices to point cloud
+///
+/// bake3d(fileName, P, N, format, ...)
+///
+/// \param ptc      - the name of the pointcloud file
+/// \param channels - not used.  For PRMan compatibility.)
+/// \param position - vertex position
+/// \param normal   - normal at vertex
+/// \result result  - 0 or 1 for failure or success
+/// \param pShader  - unused
+/// \param cParams  - number of extra user parameters.
+/// \param apParams - list of extra parameters to control output or save to ptc.
+///
+void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
+                                 IqShaderData* channels,
+                                 IqShaderData* position,
                                  IqShaderData* normal,
                                  IqShaderData* Result,
                                  IqShader* pShader,
                                  TqInt cParams, IqShaderData** apParams )
 {
-    bool __fVarying;
-    TqUint __iGrid;
-
-    __fVarying=(point)->Class()==class_varying;
-    __fVarying=(normal)->Class()==class_varying||__fVarying;
-    __fVarying=(Result)->Class()==class_varying||__fVarying;
-
-    __iGrid = 0;
     const CqBitVector& RS = RunningState();
-    CqString _aq_ptc;
-    (ptc)->GetString(_aq_ptc,__iGrid);
-    PtcPointCloud MyCloudWrite = PtcManager.FindCloudWrite(_aq_ptc.c_str());
-    CqBake3DOptions     sampleOpts;
-    CqBake3DOptionsExtractor optExtractor(apParams, cParams, sampleOpts);
+    CqString ptcName;
+    ptc->GetString(ptcName);
+    PtcPointCloud pointFile = PtcManager.FindCloudWrite(ptcName.c_str());
 
-    TqInt i, size = 0;
-    size = sampleOpts.m_MaxSize;
-    TqFloat *userdata = (TqFloat*) new TqFloat[ size];
+    // Temporary storage for names and types, used for creating the point
+    // cloud if it doesn't exist yet.
+    std::vector<std::string> outVarNames;
+    std::vector<std::string> outVarTypes;
+    bool interpolate = false;
+    const IqShaderData* radius = 0;
+    const IqShaderData* radiusScale = 0;
+    // Extract list of output vars from arguments
+    CqAutoBuffer<UserVar, 10> userVars(cParams/2);
+    int nUserVars = 0;
+    CqString paramName;
+    int nOutFloats = 0;
+    for(int i = 0; i+1 < cParams; i+=2)
+    {
+        if(apParams[i]->Type() == type_string)
+        {
+            apParams[i]->GetString(paramName);
+            const IqShaderData* paramValue = apParams[i+1];
+            // Parameters with special meanings may be present in the varargs
+            // list, but shouldn't be saved to the output file, these include:
+            //
+            // TODO: also "coordsystem".
+            //
+            // TODO: What about "format", "eye2ndc", "eye2world" which were
+            // present in Michael's old code?
+            if(paramName == "interpolate")
+                paramValue->GetBool(interpolate);
+            else if(paramName == "radius")
+                radius = paramValue;
+            else if(paramName == "radiusscale")
+                radiusScale = paramValue;
+            else
+            {
+                // If none of the above special cases, we have an output
+                // variable which should be saved to the file.
+                UserVar& var = userVars[nUserVars++];
+                var.value = paramValue;
+                var.type = paramValue->Type();
+                switch(var.type)
+                {
+                    case type_float:    nOutFloats += 1;  break;
+                    case type_point:    nOutFloats += 3;  break;
+                    case type_color:    nOutFloats += 3;  break;
+                    case type_normal:   nOutFloats += 3;  break;
+                    case type_vector:   nOutFloats += 3;  break;
+                    case type_matrix:   nOutFloats += 16; break;
+                    default:
+                        Aqsis::log() << warning
+                            << "Can't save non-float argument \""
+                            << paramName << "\" in bake3d()\n";
+                        nUserVars--;
+                        break;
+                }
+                if(!pointFile)
+                {
+                    outVarNames.push_back(paramName);
+                    outVarTypes.push_back(enumString(var.type));
+                }
+            }
+        }
+        else
+            Aqsis::log() << "unexpected non-string for parameter name "
+                            "in bake3d()\n";
+    }
+    // Additional space for position and normal data.
+    nOutFloats += 6;
+    CqAutoBuffer<TqFloat, 100> allData(interpolate ?
+                                       2*nOutFloats : nOutFloats);
+
+    // Create point file if necessary
+    if(!pointFile)
+        pointFile = PtcManager.OpenPointCloudWrite(ptcName.c_str(),
+                                                   outVarNames, outVarTypes);
+
+    bool varying = position->Class() == class_varying ||
+                   normal->Class() == class_varying ||
+                   Result->Class() == class_varying;
+
+    // Number of vertices in the grid
+    int uSize = m_uGridRes+1;
+    int vSize = m_vGridRes+1;
+
+    TqUint igrid = 0;
     do
     {
-        if(RS.Value( __iGrid ) )
+        if(RS.Value( igrid ) )
         {
-            CqString _aq_format;
-            (format)->GetString(_aq_format,__iGrid);
-            CqVector3D _aq_point;
-            (point)->GetPoint(_aq_point,__iGrid);
-            CqVector3D _aq_normal;
-            (normal)->GetNormal(_aq_normal,__iGrid);
-
-            if (!MyCloudWrite && sampleOpts.m_Count < CqBake3DOptionsMaxParams)
+            int iu = 0, iv = 0;
+            if(interpolate)
             {
-                MyCloudWrite = PtcCreatePointCloudFile(_aq_ptc.c_str(), sampleOpts.m_Count, (const char**)sampleOpts.m_VarTypes, (const char**) sampleOpts.m_VarNames, sampleOpts.m_Eye2NDC, sampleOpts.m_Eye2World, sampleOpts.m_Format);
-                PtcManager.SaveCloudWrite(_aq_ptc.c_str(), MyCloudWrite);
+                // Get micropoly position on 2D grid.
+                iv = igrid / uSize;
+                iu = igrid - iv*uSize;
+                // Check whether we're off the edge (number of polys in each
+                // direction is one less than number of verts)
+                if(iv == vSize - 1 || iu == uSize - 1)
+                    continue;
             }
 
-            // Here we interpolate between vertices so that the output points
-            // are at the middle of micropolygons.  This improves the point
-            // cloud quality for point based lighting because it avoids
-            // repeated overlapping disks at every grid border.
-            //
-            // TODO: 1) Turn on/off with "interpolate" param.
-            // 2) Interpolate other variables, not just position.
-            int uSize = m_uGridRes+1;
-            int vSize = m_vGridRes+1;
-            int v = __iGrid / uSize;
-            int u = __iGrid - v*uSize;
-            if(v == vSize - 1 || u == uSize - 1)
-                continue;
+            // Extract all baking variables into allData.
+            extractBakeVars(allData.get(), igrid, position, normal,
+                            userVars.get(), nUserVars);
 
-            CqVector3D avgP = _aq_point;
-            (point)->GetPoint(_aq_point, (v+1)*uSize + u);   avgP += _aq_point;
-            (point)->GetPoint(_aq_point, v*uSize + u+1);     avgP += _aq_point;
-            (point)->GetPoint(_aq_point, (v+1)*uSize + u+1); avgP += _aq_point;
-            avgP *= 0.25f;
+            // Get radius if it's avaliable, otherwise compute automatically
+            // below.
+            float radiusVal = 0;
+            if(radius)
+                radius->GetFloat(radiusVal, igrid);
 
-            TqFloat pointf[3];
-            pointf[0] = avgP.x();
-            pointf[1] = avgP.y();
-            pointf[2] = avgP.z();
-
-            TqFloat normalf[3];
-            normalf[0] = _aq_normal[0];
-            normalf[1] = _aq_normal[1];
-            normalf[2] = _aq_normal[2];
-
-            TqInt where = 0;
-
-            // Convert all user paramters and assemble them together in userdata array of floats.
-            for (i=0; i< sampleOpts.m_Count; i++)
+            if(interpolate)
             {
-                if ( strcmp(sampleOpts.m_VarTypes[i], "float") == 0 ||
-                        strcmp(sampleOpts.m_VarTypes[i], "integer") == 0 ||
-                        strcmp(sampleOpts.m_VarTypes[i], "bool") == 0 )
+                int interpIndices[3] = {
+                    iv*uSize       + iu + 1,
+                    (iv + 1)*uSize + iu,
+                    (iv + 1)*uSize + iu + 1
+                };
+                float* tmpData = allData.get() + nOutFloats;
+                float* outData = allData.get();
+                CqVector3D P[4]; // current micropoly vertex positions.
+                P[0] = CqVector3D(outData);
+                // Extract data from the three other verts on the current
+                // micropolygon & merge into outData.
+                for(int i = 0; i < 3; ++i)
                 {
-                    TqFloat f;
-                    sampleOpts.m_UserData[ i ]->GetFloat( f, __iGrid);
-                    userdata[where] = f;
-                    where ++;
-                } else if ( strcmp(sampleOpts.m_VarTypes[i], "vector") == 0)
+                    extractBakeVars(tmpData, interpIndices[i], position, normal,
+                                    userVars.get(), nUserVars);
+                    for(int j = 0; j < nOutFloats; ++j)
+                        outData[j] += tmpData[j];
+                    P[i+1] = CqVector3D(tmpData);
+                }
+                // normalize
+                for(int j = 0; j < nOutFloats; ++j)
+                    outData[j] *= 0.25f;
+                if(!radius)
                 {
-                    CqVector3D v;
-                    sampleOpts.m_UserData[ i ]->GetVector( v, __iGrid);
-                    for (TqInt j=0; j < 3; j++)
-                    {
-                        userdata[where + j] = v[j];
-                    }
-                    where +=3;
-                } else if ( strcmp(sampleOpts.m_VarTypes[i], "color") == 0)
+                    CqVector3D Pmid = CqVector3D(outData);
+                    // Compute radius using vertex positions.  Radius is the
+                    // maximum distance from the centre of the micropolygon to
+                    // a vertex.
+                    radiusVal = (Pmid - P[0]).Magnitude2();
+                    for(int i = 1; i < 4; ++i)
+                        radiusVal = std::max(radiusVal,
+                                             (Pmid - P[i]).Magnitude2());
+                    radiusVal = std::sqrt(radiusVal);
+                }
+            }
+            else
+            {
+                if(!radius)
                 {
-                    CqColor c;
-                    sampleOpts.m_UserData[ i ]->GetColor( c, __iGrid);
-                    for (TqInt j=0; j < 3; j++)
-                    {
-                        userdata[where + j] = c[j];
-                    }
-                    where +=3;
-                } else if ( strcmp(sampleOpts.m_VarTypes[i], "point") == 0)
-                {
-                    CqVector3D p;
-                    sampleOpts.m_UserData[ i ]->GetPoint( p, __iGrid);
-                    for (TqInt j=0; j < 3; j++)
-                    {
-                        userdata[where + j] = p[j];
-                    }
-                    where +=3;
-                } else if ( strcmp(sampleOpts.m_VarTypes[i], "normal") == 0)
-                {
-                    CqVector3D n;
-                    sampleOpts.m_UserData[ i ]->GetNormal( n, __iGrid);
-                    for (TqInt j=0; j < 3; j++)
-                    {
-                        userdata[where + j] = n[j];
-                    }
-                    where +=3;
-                } else if ( strcmp(sampleOpts.m_VarTypes[i], "matrix") == 0)
-                {
-                    CqMatrix m;
-                    sampleOpts.m_UserData[ i ]->GetMatrix( m, __iGrid);
-                    for (TqInt j=0; j < 16; j++)
-                    {
-                        userdata[where + j] = m.pElements()[j];
-                    }
-
-                    where += 16;
+                    // Extract radius, non-interpolation case.
+                    CqVector3D e1 = diffU<CqVector3D>(position, igrid);
+                    CqVector3D e2 = diffV<CqVector3D>(position, igrid);
+                    // Distances from current vertex to diagonal neighbours.
+                    float d1 = (e1 + e2).Magnitude2();
+                    float d2 = (e1 - e2).Magnitude2();
+                    // Choose distance to furtherest diagonal neighbour so
+                    // that the disks just overlap to produce a surface
+                    // without holes.  The factor of 0.5 gives the radius
+                    // rather than diameter.
+                    radiusVal = 0.5f*std::sqrt(std::max(d1, d2));
                 }
             }
 
-            // Save all the information with PtcWriteDataPoint()
-            TqInt okay = PtcWriteDataPoint(MyCloudWrite, pointf, normalf, sampleOpts.m_Radius, userdata);
+            // Scale radius if desired.
+            if(radiusScale)
+            {
+                float scale = 1;
+                radiusScale->GetFloat(scale, igrid);
+                radiusVal *= scale;
+            }
 
-            TqFloat fRes = okay;
-            (Result)->SetFloat(fRes,__iGrid);
+            // Save current point data to the point file
+            float* d = &allData[0];
+            TqFloat ok = PtcWriteDataPoint(pointFile, d, d+3, radiusVal, d+6);
+            Result->SetFloat(ok, igrid);
         }
     }
-    while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-    delete [] userdata;
+    while( ( ++igrid < shadingPointCount() ) && varying);
 }
+
 
 //------------------------------------------------------------------------------
 /** \brief Shadeops "texture3d" to restore any parameter from one pointcloud file refer.
