@@ -528,8 +528,8 @@ void PointView::mousePressEvent(QMouseEvent* event)
 
 void PointView::mouseMoveEvent(QMouseEvent* event)
 {
-    float dx = float(m_prev_x - event->x())/width();
-    float dy = float(m_prev_y - event->y())/height();
+    float dx = 0.3f*float(m_prev_x - event->x())/width();
+    float dy = 0.3f*float(m_prev_y - event->y())/height();
     m_prev_x = event->x();
     m_prev_y = event->y();
     if(m_probeMoveMode)
@@ -605,6 +605,28 @@ void PointView::keyPressEvent(QKeyEvent *event)
     {
         // FIXME: Coord system is a bit screwy here.
         m_center = m_cloudCenter - m_probePos;
+        repaint();
+    }
+    else if(event->key() == Qt::Key_S)
+    {
+        // Snap probe to position of closest point.
+        int ptStride = m_points->stride;
+        int npoints = m_points->data.size()/ptStride;
+        const float* ptData = &m_points->data[0];
+        V3f newPos(0);
+        float nearestDist = FLT_MAX;
+        for(int i = 0; i < npoints; ++i)
+        {
+            const float* data = ptData + i*ptStride;
+            V3f p(data[0], data[1], data[2]);
+            float dist = (m_probePos - p).length2();
+            if(dist < nearestDist)
+            {
+                nearestDist = dist;
+                newPos = p;
+            }
+        }
+        m_probePos = newPos;
         repaint();
     }
     else
