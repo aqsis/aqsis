@@ -94,15 +94,15 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
 ///
 /// The equation is assumed to have real-valued solutions; if they are in fact
 /// complex only the real parts are returned.
-inline void solveQuadratic(double a, double b, double c,
-                           double& lowRoot, double& highRoot)
+inline void solveQuadratic(float a, float b, float c,
+                           float& lowRoot, float& highRoot)
 {
     // Avoid NaNs when determinant is negative by clamping to zero.  This is
     // the right thing to do when det would otherwise be zero to within
     // numerical precision.
-    double det = std::max(0.0, b*b - 4*a*c);
-    double firstTerm = -b/(2*a);
-    double secondTerm = sqrtf(det)/(2*a);
+    float det = std::max(0.0f, b*b - 4*a*c);
+    float firstTerm = -b/(2*a);
+    float secondTerm = sqrtf(det)/(2*a);
     lowRoot = firstTerm - secondTerm;
     highRoot = firstTerm + secondTerm;
 }
@@ -136,106 +136,25 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
         if(sphereOutsideCone(p, plen2, r, MicroBuf::faceNormal(iface),
                              cosFaceAngle, sinFaceAngle))
             continue;
-        // Also check whether the disk is on the opposite face.
-        if(MicroBuf::dotFaceNormal(iface, p) < 0 &&
-           fabs(MicroBuf::dotFaceNormal(iface, n)) > cosFaceAngle)
+        float dot_pFaceN = MicroBuf::dotFaceNormal(iface, p);
+        float dot_nFaceN = MicroBuf::dotFaceNormal(iface, n);
+        // If the disk is behind the camera and the disk normal is relatively
+        // aligned with the face normal (to within the face cone angle), the
+        // disk can't contribute to the face and may be culled.
+        if(dot_pFaceN < 0 && fabs(dot_nFaceN) > cosFaceAngle)
             continue;
-        // Here we compute components of a quadratic function
-        //
-        //   q(u,v) = a0*u*u + b0*u*v + c0*v*v + d0*u + e0*v + f0
-        //
-        // such that the disk lies in the region satisfying q(u,v) < 0.  Start
-        // with the implicit definition of the disk on the plane,
-        //
-        //   norm(dot(p,n)/dot(V,n) * V - p)^2 - r^2 < 0
-        //
-        // and compute coefficients A,B,C such that
-        //
-        //   A*dot(V,V) + B*dot(V,n)*dot(p,V) + C < 0
-        //
-        // NOTE the use of double precision.  This is used intentionally to
-        // avoid "surface acne" artifacts (looks much like classic shadow map
-        // self-shadowing).  The underlying cause is probably cancellation
-        // leading to catastrophic loss of precision, but it's much easier to
-        // patch the problem with doubles than analyze exactly where in the
-        // following mess of coefficients the problem ultimately happens!  Note
-        // that deferring to the simple raytracing code below also fixes the
-        // issue.
-        double dot_pn = dot(p,n);
-        double A = dot_pn*dot_pn;
-        double B = -2*dot_pn;
-        double C = plen2 - r*r;
-        // Next, project this onto the current face to compute the
-        // coefficients a0 through to f0 for q(u,v)
-        V3f pp = MicroBuf::canonicalFaceCoords(iface, p);
-        V3f nn = MicroBuf::canonicalFaceCoords(iface, n);
-        double a0 = A + B*nn.x*pp.x + C*nn.x*nn.x;
-        double b0 = B*(nn.x*pp.y + nn.y*pp.x) + 2*C*nn.x*nn.y;
-        double c0 = A + B*nn.y*pp.y + C*nn.y*nn.y;
-        double d0 = (B*(nn.x*pp.z + nn.z*pp.x) + 2*C*nn.x*nn.z);
-        double e0 = (B*(nn.y*pp.z + nn.z*pp.y) + 2*C*nn.y*nn.z);
-        double f0 = (A + B*nn.z*pp.z + C*nn.z*nn.z);
-        // Finally, transform the coefficients so that they define the
-        // implicit function in raster face coordinates, (iu, iv)
-        double scale = 2.0f/faceRes;
-        double scale2 = scale*scale;
-        double off = 0.5f*scale - 1.0f;
-        double a = scale2*a0;
-        double b = scale2*b0;
-        double c = scale2*c0;
-        double d = ((2*a0 + b0)*off + d0)*scale;
-        double e = ((2*c0 + b0)*off + e0)*scale;
-        double f = (a0 + b0 + c0)*off*off + (d0 + e0)*off + f0;
-        // The coefficients a,b,c,d,e,f may represent an ellipse or a
-        // hyperbola in the face's raster coordinates, determine which.
-        double det = 4*a*c - b*b;
-        if(det > 0)
+        // Check whether disk spans the perspective divide for the current
+        // face.  Note: sin^2(angle(n, faceN)) = (1 - dot_nFaceN*dot_nFaceN)
+        if((1 - dot_nFaceN*dot_nFaceN)*r*r >= dot_pFaceN*dot_pFaceN)
         {
-            // If the coefficients represent an ellipse, we may construct a
-            // tight bound.
-            int ubegin = 0, uend = faceRes;
-            int vbegin = 0, vend = faceRes;
-            double ub = 0, ue = 0;
-            solveQuadratic(det, 4*d*c - 2*b*e, 4*c*f - e*e, ub, ue);
-            ubegin = std::max(0, Imath::ceil(ub));
-            uend   = std::min(faceRes, Imath::ceil(ue));
-            double vb = 0, ve = 0;
-            solveQuadratic(det, 4*a*e - 2*b*d, 4*a*f - d*d, vb, ve);
-            vbegin = std::max(0, Imath::ceil(vb));
-            vend   = std::min(faceRes, Imath::ceil(ve));
-            // By the time we get here, we've expended perhaps 120 FLOPS +
-            // 2 sqrts.  The setup is expensive, but the bound is optimal so
-            // it will be worthwhile unless the raster faces are very small.
-            integrator.setFace(iface);
-            for(int iv = vbegin; iv < vend; ++iv)
-            for(int iu = ubegin; iu < uend; ++iu)
-            {
-                double q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
-                if(q < 0)
-                {
-                    V3f d = integrator.rayDirection(iface, iu, iv);
-                    // compute distance to hit point
-                    float z = dot_pn/dot(d, n);
-                    integrator.addSample(iu, iv, z, 1.0f);
-                }
-            }
-        }
-        else
-        {
-            // Else, the coefficients do not represent an ellipse (ie, they
-            // are hyperbolic or possibly parabolic.)  This is a perfectly
-            // valid option which occurs when a disk spans the perspective
-            // divide.  In this case, just give up and raytrace the disk over
-            // the entire face.  It's possible to rasterize this case using the
-            // quadratic form but we would need to compute the signed distance
-            // t so that we render only the valid branch of the hyperbola.
-            // This is probably more work than just doing the raytracing, which
-            // is quite cheap anyway.
+            // When the disk spans the perspective divide, the shape of the
+            // disk projected onto the face is a hyperbola.  Bounding a
+            // hyperbola is a pain, so the easiest thing to do is trace a ray
+            // for every pixel on the face and check whether it hits the disk.
             //
-            // All of the tricky rasterization rubbish above could be replaced
-            // by the following ray tracing code.  This conceptually simple
-            // code would probably be efficient enough if I only knew a good
-            // way to compute the tight raster bound!
+            // Note that all of the tricky rasterization rubbish further down
+            // could probably be replaced by the following ray tracing code if
+            // I knew a way to compute the tight raster bound.
             integrator.setFace(iface);
             for(int iv = 0; iv < faceRes; ++iv)
             for(int iu = 0; iu < faceRes; ++iu)
@@ -249,6 +168,88 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
                     // The ray hit the disk, record the hit
                     integrator.addSample(iu, iv, t, 1.0f);
                 }
+            }
+            continue;
+        }
+        // If the disk didn't span the perspective divide and is behind the
+        // camera, it may be culled.
+        if(dot_pFaceN < 0)
+            continue;
+        // Having gone through all the checks above, we know that the disk
+        // doesn't span the perspective divide, and that it is in front of the
+        // camera.  Therefore, the disk projected onto the current face is an
+        // ellipse, and we may compute a quadratic function
+        //
+        //   q(u,v) = a0*u*u + b0*u*v + c0*v*v + d0*u + e0*v + f0
+        //
+        // such that the disk lies in the region satisfying q(u,v) < 0.  To do
+        // this, start with the implicit definition of the disk on the plane,
+        //
+        //   norm(dot(p,n)/dot(V,n) * V - p)^2 - r^2 < 0
+        //
+        // and compute coefficients A,B,C such that
+        //
+        //   A*dot(V,V) + B*dot(V,n)*dot(p,V) + C < 0
+        float dot_pn = dot(p,n);
+        float A = dot_pn*dot_pn;
+        float B = -2*dot_pn;
+        float C = plen2 - r*r;
+        // Project onto the current face to compute the coefficients a0 through
+        // to f0 for q(u,v)
+        V3f pp = MicroBuf::canonicalFaceCoords(iface, p);
+        V3f nn = MicroBuf::canonicalFaceCoords(iface, n);
+        float a0 = A + B*nn.x*pp.x + C*nn.x*nn.x;
+        float b0 = B*(nn.x*pp.y + nn.y*pp.x) + 2*C*nn.x*nn.y;
+        float c0 = A + B*nn.y*pp.y + C*nn.y*nn.y;
+        float d0 = (B*(nn.x*pp.z + nn.z*pp.x) + 2*C*nn.x*nn.z);
+        float e0 = (B*(nn.y*pp.z + nn.z*pp.y) + 2*C*nn.y*nn.z);
+        float f0 = (A + B*nn.z*pp.z + C*nn.z*nn.z);
+        // Finally, transform the coefficients so that they define the
+        // quadratic function in *raster* face coordinates, (iu, iv)
+        float scale = 2.0f/faceRes;
+        float scale2 = scale*scale;
+        float off = 0.5f*scale - 1.0f;
+        float a = scale2*a0;
+        float b = scale2*b0;
+        float c = scale2*c0;
+        float d = ((2*a0 + b0)*off + d0)*scale;
+        float e = ((2*c0 + b0)*off + e0)*scale;
+        float f = (a0 + b0 + c0)*off*off + (d0 + e0)*off + f0;
+        // Construct a tight bound for the ellipse in raster coordinates.
+        int ubegin = 0, uend = faceRes;
+        int vbegin = 0, vend = faceRes;
+        float det = 4*a*c - b*b;
+        // Sanity check; a valid ellipse must have det > 0
+        if(det <= 0)
+        {
+            // If we get here, the disk is probably edge on (det == 0) or we
+            // have some hopefully small floating point errors (det < 0: the
+            // hyperbolic case we've already ruled out).  Cull in either case.
+            continue;
+        }
+        float ub = 0, ue = 0;
+        solveQuadratic(det, 4*d*c - 2*b*e, 4*c*f - e*e, ub, ue);
+        ubegin = std::max(0, Imath::ceil(ub));
+        uend   = std::min(faceRes, Imath::ceil(ue));
+        float vb = 0, ve = 0;
+        solveQuadratic(det, 4*a*e - 2*b*d, 4*a*f - d*d, vb, ve);
+        vbegin = std::max(0, Imath::ceil(vb));
+        vend   = std::min(faceRes, Imath::ceil(ve));
+        // By the time we get here, we've expended perhaps 120 FLOPS + 2 sqrts
+        // to set up the coefficients of q(iu,iv).  The setup is expensive, but
+        // the bound is optimal so it will be worthwhile vs raytracing, unless
+        // the raster faces are very small.
+        integrator.setFace(iface);
+        for(int iv = vbegin; iv < vend; ++iv)
+        for(int iu = ubegin; iu < uend; ++iu)
+        {
+            float q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
+            if(q < 0)
+            {
+                V3f V = integrator.rayDirection(iface, iu, iv);
+                // compute distance to hit point
+                float z = dot_pn/dot(V, n);
+                integrator.addSample(iu, iv, z, 1.0f);
             }
         }
     }
