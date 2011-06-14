@@ -1089,24 +1089,19 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 // * Ri search paths
 static PointOctreeCache g_pointOctreeCache;
 
-//----------------------------------------------------------------------
-// occlusion(P,N,samples)
-void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+
+template<typename IntegratorT>
+void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
+										  IqShaderData* result, int cParams,
+										  IqShaderData** apParams)
 {
 	if(!getRenderContext())
 		return;
 
-	// Get face resolution.  We're using the "samples" parameter for this at
-	// the moment... not sure if this is a good idea or not.
-	int faceRes = 10;
-	{
-		float f = 0; samples->GetFloat(f);
-		if(f >= 1)
-			faceRes = static_cast<int>(f);
-	}
 	// Extract options
 	CqString paramName;
 	const PointOctree* pointTree = 0;
+	int faceRes = 10;
 	float maxSolidAngle = 0.03;
 	float coneAngle = M_PI_2;
 	float bias = 0;
@@ -1138,6 +1133,15 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 			if(paramValue->Type() == type_float)
 				paramValue->GetFloat(bias);
 		}
+		else if(paramName == "microbufres")
+		{
+			if(paramValue->Type() == type_float)
+			{
+				float res = 10;
+				paramValue->GetFloat(res);
+				faceRes = std::max(1, static_cast<int>(res));
+			}
+		}
 		// Interesting arguments which could be implemented:
 		//   "hitsides"    - sidedness culling: "front", "back", "both"
 		//   "coordsystem" - coordinate system of points, default "world"
@@ -1148,14 +1152,18 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 		//   "pointbased"  - we don't support any other method...
 	}
 
-	bool varying = Result->Class() == class_varying;
+	// TODO: interpolation.  3delight uses Attribute "irradiance"
+	// "shadingrate" to control interpolation; PRMan uses the "maxvariation"
+	// parameter.
+
+	bool varying = result->Class() == class_varying;
 	TqUint igrid = 0;
 	const CqBitVector& RS = RunningState();
 	if(pointTree)
 	{
 		// Compute occlusion for each point
-		OcclusionIntegrator integrator(faceRes);
-		GridIterator2D gridIter2(m_uGridRes+1);
+		IntegratorT integrator(faceRes);
+		GridIterator2D gridIter2(m_uGridRes+1); // TODO: What about points?
 		do
 		{
 			if(!varying || RS.Value(igrid))
@@ -1177,7 +1185,7 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 				// slightly.
 				//
 				// TODO: Make adjustable?
-				const float edgeShrink = 0.01f;
+				const float edgeShrink = 0.2f;
 				if(u == 0)
 					uinterp = edgeShrink;
 				else if(u == m_uGridRes)
@@ -1219,7 +1227,7 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 				integrator.clear();
 				microRasterize(integrator, Pval2, Nval2, coneAngle,
 							   maxSolidAngle, *pointTree);
-				Result->SetFloat(integrator.occlusion(Nval2), igrid);
+				storeIntegratedResult(integrator, Nval2, result, igrid);
 			}
 			++gridIter2;
 		}
@@ -1232,7 +1240,7 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 		{
 			if(!varying || RS.Value(igrid))
 			{
-				Result->SetFloat(0.0f,igrid);
+				result->SetFloat(0.0f,igrid);
 			}
 		}
 		while( ( ++igrid < shadingPointCount() ) && varying);
@@ -1240,31 +1248,37 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 }
 
 
+
+//----------------------------------------------------------------------
+static void storeIntegratedResult(const OcclusionIntegrator& integrator,
+								  const V3f& N, IqShaderData* result, int igrid)
+{
+	result->SetFloat(integrator.occlusion(N), igrid);
+}
+
+// occlusion(P,N,samples)
+void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+{
+	pointCloudIntegrate<OcclusionIntegrator>(P, N, Result, cParams, apParams);
+}
+
+
 //----------------------------------------------------------------------
 // indirectdiffuse(P, N, samples, ...)
+static void storeIntegratedResult(const RadiosityIntegrator& integrator,
+								  const V3f& N, IqShaderData* result, int igrid)
+{
+	C3f col = integrator.radiosity(N);
+	result->SetColor(CqColor(col.x, col.y, col.z), igrid);
+}
+
 void CqShaderExecEnv::SO_indirectdiffuse(IqShaderData* P, IqShaderData* N,
 										 IqShaderData* samples,
 										 IqShaderData* Result,
 										 IqShader* pShader, int cParams,
 										 IqShaderData** apParams)
 {
-	bool varying;
-	TqUint igrid;
-
-	if ( !getRenderContext() )
-		return ;
-
-	varying = Result->Class() == class_varying;
-	igrid = 0;
-	const CqBitVector& RS = RunningState();
-	do
-	{
-		if(!varying || RS.Value( igrid ) )
-		{
-			Result->SetColor(CqColor(0.0f),igrid);
-		}
-	}
-	while( ( ++igrid < shadingPointCount() ) && varying);
+	pointCloudIntegrate<RadiosityIntegrator>(P, N, Result, cParams, apParams);
 }
 
 

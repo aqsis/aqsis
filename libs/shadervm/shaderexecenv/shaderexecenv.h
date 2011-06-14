@@ -372,6 +372,17 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		template<typename T>
 		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
 
+		/// Helper function for SO_occlusion_rt and SO_indirectdiffuse.
+		///
+		/// Integrates occlusion or radiosity data from a point cloud,
+		/// depending on the type of IntegratorT and the parameters in the
+		/// apParams list.  The resulting float or color data is stored in
+		/// result.
+		template<typename IntegratorT>
+		void pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
+								 IqShaderData* result, int cParams,
+								 IqShaderData** apParams);
+
 		/// Turn 1D iteration into 2D grid indices
 		///
 		/// u is the fast changing index; v is slow changing.
