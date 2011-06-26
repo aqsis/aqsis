@@ -1156,21 +1156,27 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 	// "shadingrate" to control interpolation; PRMan uses the "maxvariation"
 	// parameter.
 
+	// Number of vertices in u-direction of grid
+	int uSize = m_uGridRes+1;
+
 	bool varying = result->Class() == class_varying;
-	TqUint igrid = 0;
 	const CqBitVector& RS = RunningState();
 	if(pointTree)
 	{
+		int npoints = varying ? shadingPointCount() : 1;
+#pragma omp parallel
+		{
 		// Compute occlusion for each point
 		IntegratorT integrator(faceRes);
-		GridIterator2D gridIter2(m_uGridRes+1); // TODO: What about points?
-		do
+#pragma omp for
+		for(int igrid = 0; igrid < npoints; ++igrid)
 		{
 			if(!varying || RS.Value(igrid))
 			{
 				CqVector3D Pval;
-				int u = gridIter2.u();
-				int v = gridIter2.v();
+				// TODO: What about RiPoints?  They're not a 2D grid!
+				int v = igrid/uSize;
+				int u = igrid - v*uSize;
 				float uinterp = 0;
 				float vinterp = 0;
 				// Microgrids sometimes meet each other at an acute angle.
@@ -1229,13 +1235,13 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 							   maxSolidAngle, *pointTree);
 				storeIntegratedResult(integrator, Nval2, result, igrid);
 			}
-			++gridIter2;
 		}
-		while( ( ++igrid < shadingPointCount() ) && varying);
+		}
 	}
 	else
 	{
 		// Couldn't find point cloud, set result to zero.
+		TqUint igrid = 0;
 		do
 		{
 			if(!varying || RS.Value(igrid))
