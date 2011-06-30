@@ -111,6 +111,7 @@ class MicroBuf
         {
             m_pixels.reset(new float[m_faceSize*Face_end]);
             m_directions.reset(new V3f[Face_end*faceRes*faceRes]);
+            m_pixelSizes.reset(new float[m_faceSize]);
             // Cache direction vectors
             for(int face = 0; face < Face_end; ++face)
             {
@@ -123,6 +124,13 @@ class MicroBuf
                     m_directions[(face*m_res + iv)*m_res + iu] =
                         direction(face, u, v);
                 }
+            }
+            for(int iv = 0; iv < m_res; ++iv)
+            for(int iu = 0; iu < m_res; ++iu)
+            {
+                float u = (0.5f + iu)/faceRes*2.0f - 1.0f;
+                float v = (0.5f + iv)/faceRes*2.0f - 1.0f;
+                m_pixelSizes[iv*m_res + iu] = 1.0f/V3f(u,v,1).length2();
             }
         }
 
@@ -251,6 +259,18 @@ class MicroBuf
             return m_directions[(faceIdx*m_res + v)*m_res + u];
         }
 
+        /// Return relative size of pixel.
+        ///
+        /// Compared to a pixel in the middle of the cube face, pixels in the
+        /// corners of the cube have a smaller angular size.  We must take
+        /// this into account when integrating the radiosity.
+        ///
+        /// \param u,v - face coordinates
+        float pixelSize(int u, int v) const
+        {
+            return m_pixelSizes[m_res*v + u];
+        }
+
         /// Reorder vector components into "canonical face coordinates".
         ///
         /// The canonical coordinates correspond to the coordinates on the +z
@@ -296,16 +316,18 @@ class MicroBuf
             }
         }
 
-        // Square faces
+        /// Square face resolution
         int m_res;
         /// Number of channels per pixel
         int m_nchans;
-        // Number of floats needed to store a face
+        /// Number of floats needed to store a face
         int m_faceSize;
-        // Pixel face storage
+        /// Pixel face storage
         boost::scoped_array<float> m_pixels;
-        // Storage for pixel ray directions
+        /// Storage for pixel ray directions
         boost::scoped_array<V3f> m_directions;
+        /// Pixels on a unit cube are not all equal in angular size
+        boost::scoped_array<float> m_pixelSizes;
 };
 
 
@@ -403,9 +425,9 @@ class OcclusionIntegrator
                 for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
                 {
                     float d = dot(m_buf.rayDirection(f, iu, iv), N);
-                    // FIXME: Add in weight due to texel distance from origin.
                     if(d > 0)
                     {
+                        d *= m_buf.pixelSize(iu, iv);
                         // Accumulate light coming from infinity.
                         illum += d*(1.0f - std::min(1.0f, face[0]));
                         totWeight += d;
@@ -521,9 +543,9 @@ class RadiosityIntegrator
                 for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
                 {
                     float d = dot(m_buf.rayDirection(f, iu, iv), N);
-                    // FIXME: Add in weight due to texel distance from origin.
                     if(d > 0)
                     {
+                        d *= m_buf.pixelSize(iu, iv);
                         C3f& radiosity = *(C3f*)(face + 2);
                         rad += d*radiosity;
                         totWeight += d;
