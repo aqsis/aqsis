@@ -502,7 +502,7 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
                 PointOctree::Node* child = node->children[i];
                 if(!child)
                     continue;
-                children[nchildren].first = (child->aggP - P).length2();
+                children[nchildren].first = (child->center - P).length2();
                 children[nchildren].second = child;
                 ++nchildren;
             }
