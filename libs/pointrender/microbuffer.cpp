@@ -463,14 +463,27 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
     }
     else
     {
-        // If the solid angle is too large consider child nodes or child
-        // points.
+        // If we get here, the solid angle of the current node was too large
+        // so we must consider the children of the node.
+        //
+        // The render order is sorted so that points are rendered front to
+        // back.  This greatly improves the correctness of the hider.
         if(node->npoints != 0)
         {
             // Leaf node: simply render each child point.
+            std::pair<float, int> childOrder[8];
+            assert(node->npoints < 8);
             for(int i = 0; i < node->npoints; ++i)
             {
                 const float* data = &node->data[i*dataSize];
+                V3f p = V3f(data[0], data[1], data[2]) - P;
+                childOrder[i].first = p.length2();
+                childOrder[i].second = i;
+            }
+            std::sort(childOrder, childOrder + node->npoints);
+            for(int i = 0; i < node->npoints; ++i)
+            {
+                const float* data = &node->data[childOrder[i].second*dataSize];
                 V3f p = V3f(data[0], data[1], data[2]) - P;
                 V3f n = V3f(data[3], data[4], data[5]);
                 float r = data[6];
@@ -481,14 +494,24 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
         }
         else
         {
-            // Interior node: render each non-null child.
+            // Interior node: render children.
+            std::pair<float, PointOctree::Node*> children[8];
+            int nchildren = 0;
             for(int i = 0; i < 8; ++i)
             {
                 PointOctree::Node* child = node->children[i];
                 if(!child)
                     continue;
+                children[nchildren].first = (child->aggP - P).length2();
+                children[nchildren].second = child;
+                ++nchildren;
+            }
+            std::sort(children, children + nchildren);
+            // Interior node: render each non-null child.
+            for(int i = 0; i < nchildren; ++i)
+            {
                 renderNode(integrator, P, N, cosConeAngle, sinConeAngle,
-                           maxSolidAngle, dataSize, child);
+                           maxSolidAngle, dataSize, children[i].second);
             }
         }
     }

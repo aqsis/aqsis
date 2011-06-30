@@ -430,7 +430,7 @@ class RadiosityIntegrator
         /// Create integrator with given resolution of the environment map
         /// faces.
         RadiosityIntegrator(int faceRes)
-            : m_buf(faceRes, 8),
+            : m_buf(faceRes, 5),
             m_face(0),
             m_currRadiosity(0)
         {
@@ -484,15 +484,25 @@ class RadiosityIntegrator
         void addSample(int u, int v, float distance, float coverage)
         {
             float* pix = m_face + (v*m_buf.res() + u) * m_buf.nchans();
+            // TODO: Eventually remove dist if not needed
             float& currDist = pix[0];
             float& currCover = pix[1];
             C3f& radiosity = *reinterpret_cast<C3f*>(pix + 2);
             if(distance < currDist)
-            {
                 currDist = distance;
-                radiosity = m_currRadiosity;
+            if(currCover < 1)
+            {
+                if(currCover + coverage <= 1)
+                {
+                    radiosity += coverage*m_currRadiosity;
+                    currCover += coverage;
+                }
+                else
+                {
+                    radiosity += (1 - currCover)*m_currRadiosity;
+                    currCover = 1;
+                }
             }
-            currCover += coverage;
         }
 
         /// Integrate radiosity based on previously sampled scene.
@@ -514,9 +524,8 @@ class RadiosityIntegrator
                     // FIXME: Add in weight due to texel distance from origin.
                     if(d > 0)
                     {
-                        float coverage = face[1];
                         C3f& radiosity = *(C3f*)(face + 2);
-                        rad += d*std::min(1.0f, coverage)*radiosity;
+                        rad += d*radiosity;
                         totWeight += d;
                     }
                 }
