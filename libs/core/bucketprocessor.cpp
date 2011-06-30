@@ -944,6 +944,7 @@ void CqBucketProcessor::RenderSurface( boost::shared_ptr<CqSurface>& surface )
 	{
 		AQSIS_TIME_SCOPE(Occlusion_culling);
 		if ( surface->fCachedBound() &&
+			 ( surface->pAttributes()->GetIntegerAttributeDef( "cull", "hidden", 1 ) == 1 ) &&
 		     m_OcclusionTree.canCull(surface->GetCachedRasterBound()) )
 		{
 			m_imageBuf.RepostSurface(*m_bucket, surface);

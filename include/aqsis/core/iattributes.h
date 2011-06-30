@@ -66,6 +66,10 @@ struct IqAttributes
 	 */
 	virtual	const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const = 0;
 
+	/** Get a named integer attribute; if not found, return the default value provided.
+	 */
+	virtual const	TqInt	GetIntegerAttributeDef( const char* strName, const char* strParam, TqInt defaultVal) const = 0;
+
 	/** Get a named float attribute as writable
 	 */
 	virtual	TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam ) = 0;

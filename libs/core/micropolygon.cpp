@@ -429,7 +429,8 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
-	if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
+	if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode &&
+		 ( pAttributes() ->GetIntegerAttributeDef( "cull", "backfacing", 1 ) == 1 ) )
 	{
 		AQSIS_TIME_SCOPE(Backface_culling);
 
@@ -955,7 +956,8 @@ void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 	CqMatrix matCameraToRaster;
 	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCameraToRaster );
 	// Check to see if this surface is single sided, if so, we can do backface culling.
-	bool canBeBFCulled = ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !pGridA->usesCSG();
+	bool canBeBFCulled = ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !pGridA->usesCSG() &&
+						 ( pAttributes() ->GetIntegerAttributeDef( "cull", "backfacing", 1 ) == 1 );
 
 	ADDREF( pGridA );
 
