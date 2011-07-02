@@ -535,7 +535,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
                             << "Can't save non-float argument \""
                             << paramName << "\" in bake3d()\n";
                         nUserVars--;
-                        break;
+                        continue;
                 }
                 if(!pointFile)
                 {
