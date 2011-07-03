@@ -38,7 +38,6 @@
 #include <OpenEXR/ImathGL.h>
 
 #include "ptview.h"
-#include "cornellbox.h"
 #include "microbuffer.h"
 
 namespace Aqsis {
@@ -46,6 +45,25 @@ namespace Aqsis {
 inline float rad2deg(float r)
 {
     return r*180/M_PI;
+}
+
+inline QVector3D exr2qt(const Imath::V3f& v)
+{
+    return QVector3D(v.x, v.y, v.z);
+}
+
+inline Imath::V3f qt2exr(const QVector3D& v)
+{
+    return Imath::V3f(v.x(), v.y(), v.z());
+}
+
+inline Imath::M44f qt2exr(const QMatrix4x4& m)
+{
+    Imath::M44f mOut;
+    for(int j = 0; j < 4; ++j)
+    for(int i = 0; i < 4; ++i)
+        mOut[j][i] = m.constData()[4*j + i];
+    return mOut;
 }
 
 /// Get max and min of depth buffer, ignoring any depth > FLT_MAX/2
@@ -298,15 +316,10 @@ static void drawMicroBuf(const MicroBuf& envBuf)
 //------------------------------------------------------------------------------
 PointView::PointView(QWidget *parent)
     : QGLWidget(parent),
-    m_prev_x(0),
-    m_prev_y(0),
+    m_camera(true),
+    m_lastPos(0,0),
     m_zooming(false),
-    m_theta(0),
-    m_phi(0),
-    m_dist(5),
-    m_center(0),
-    m_probePos(0),
-    m_probeMoveMode(false),
+    m_cursorPos(0),
     m_probeRes(10),
     m_probeMaxSolidAngle(0),
     m_visMode(Vis_Points),
@@ -316,6 +329,9 @@ PointView::PointView(QWidget *parent)
     m_cloudCenter(0)
 {
     setFocusPolicy(Qt::StrongFocus);
+
+    connect(&m_camera, SIGNAL(projectionChanged()), this, SLOT(updateGL()));
+    connect(&m_camera, SIGNAL(viewChanged()), this, SLOT(updateGL()));
 }
 
 
@@ -326,7 +342,8 @@ void PointView::setPoints(const boost::shared_ptr<const PointArray>& points,
     if(m_points)
     {
         m_cloudCenter = m_points->centroid();
-        m_probePos = m_cloudCenter;
+        m_cursorPos = m_cloudCenter;
+        m_camera.setCenter(exr2qt(m_cloudCenter));
     }
     m_pointTree = pointTree;
 }
@@ -340,52 +357,6 @@ void PointView::setProbeParams(int cubeFaceRes, float maxSolidAngle)
 
 void PointView::initializeGL()
 {
-    glLoadIdentity();
-
-    // set up Z buffer
-    glClearDepth(1.0f);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    switch(m_visMode)
-    {
-        case Vis_Points:
-        {
-            glDisable(GL_COLOR_MATERIAL);
-            glDisable(GL_LIGHT0);
-        }
-        break;
-        case Vis_Disks:
-        {
-            // Materials
-            glShadeModel(GL_SMOOTH);
-            if(m_lighting)
-            {
-                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-                glEnable(GL_COLOR_MATERIAL);
-                // Lighting
-                // light0
-                GLfloat lightPos[] = {0, 0, 0, 1};
-                GLfloat whiteCol[] = {1, 1, 1, 1};
-                glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-                glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteCol);
-                glEnable(GL_LIGHT0);
-                // whole-scene ambient intensity scaling
-                GLfloat ambientCol[] = {0.1, 0.1, 0.1, 1};
-                glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientCol);
-                // whole-scene diffuse intensity
-                //GLfloat diffuseCol[] = {0.05, 0.05, 0.05, 1};
-                //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseCol);
-                // two-sided lighting.
-                // TODO: Why doesn't this work?? (handedness problems?)
-                //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-                // rescaling of normals
-                glEnable(GL_RESCALE_NORMAL);
-            }
-        }
-        break;
-    }
-
     glEnable(GL_MULTISAMPLE);
 }
 
@@ -394,14 +365,7 @@ void PointView::resizeGL(int w, int h)
 {
     // Draw on full window
     glViewport(0, 0, w, h);
-    // Set camera projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    const float n = 0.1f;
-    const float hOn2 = 0.5f*n;
-    const float wOn2 = hOn2*width()/height();
-    glFrustum(-wOn2, wOn2, -hOn2, hOn2, n, 1000);
-    glMatrixMode(GL_MODELVIEW);
+    m_camera.setViewport(geometry());
 }
 
 
@@ -436,34 +400,32 @@ void PointView::paintGL()
 {
     RadiosityIntegrator integrator(m_probeRes);
 //    if(m_points)
-//        microRasterize(integrator, m_probePos, V3f(0,0,-1), M_PI, *m_points);
+//        microRasterize(integrator, m_cursorPos, V3f(0,0,-1), M_PI, *m_points);
     if(m_pointTree)
-        microRasterize(integrator, m_probePos, V3f(0,0,-1), M_PI,
+        microRasterize(integrator, m_cursorPos, V3f(0,0,-1), M_PI,
                        m_probeMaxSolidAngle, *m_pointTree);
 
     //--------------------------------------------------
     // Draw main scene
+    // Set camera projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(qt2exr(m_camera.projectionMatrix()));
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrix(qt2exr(m_camera.viewMatrix()));
+
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Camera -> world transform.
-    glLoadIdentity();
-    glScalef(1, 1, -1);
-    glTranslatef(0, 0, m_dist);
-    glRotatef(m_theta, 1, 0, 0);
-    glRotatef(m_phi, 0, 1, 0);
-    glTranslate(m_center);
-    // Center on the point cloud
-    glTranslate(-m_cloudCenter);
+    // Draw geometry
 
-    // Geometry
-    drawAxes();
-//    drawLightProbe(m_probePos, 1 - integrator.occlusion(V3f(0,0,-1)));
-    drawLightProbe(m_probePos, integrator.radiosity(V3f(0,0,-1)));
+    //drawAxes();
     if(m_points)
         drawPoints(*m_points, m_visMode, m_lighting);
 //    if(m_pointTree)
-//        splitNode(m_probePos, m_probeMaxSolidAngle, m_pointTree->dataSize(),
+//        splitNode(m_cursorPos, m_probeMaxSolidAngle, m_pointTree->dataSize(),
 //                  m_pointTree->root());
 
 
@@ -474,37 +436,10 @@ void PointView::paintGL()
     glPushMatrix();
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_SCISSOR_TEST);
-    //--------------------------------------------------
-    // Draw scene from position of light probe.
-    GLuint miniBufWidth = width()/3;
-
-#if 0
-    // Set up & clear viewport
-    glScissor(0, 0, miniBufWidth, miniBufWidth);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glViewport(0, 0, miniBufWidth, miniBufWidth);
-
-    // Projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    const float n = 0.01f;
-    glFrustum(-n, n, -n, n, n, 1000);
-    glMatrixMode(GL_MODELVIEW);
-
-    // Camera transform
-    glLoadIdentity();
-    glScalef(1, 1, -1);
-    glRotatef(180, 0, 1, 0);
-    glTranslate(-m_probePos);
-
-    // Geometry
-    if(m_points)
-        drawPoints(*m_points, m_visMode, m_lighting);
-#endif
 
     //--------------------------------------------------
     // Draw image of rendered microbuffer
+    GLuint miniBufWidth = width()/3;
     glScissor(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
     glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
 
@@ -515,73 +450,39 @@ void PointView::paintGL()
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopAttrib();
+
+    // Draw overlay stuff, including cursor position.
+    drawCursor(m_cursorPos);
 }
 
 
 void PointView::mousePressEvent(QMouseEvent* event)
 {
     m_zooming = event->button() == Qt::RightButton;
-    m_prev_x = event->x();
-    m_prev_y = event->y();
+    m_lastPos = event->pos();
 }
 
 
 void PointView::mouseMoveEvent(QMouseEvent* event)
 {
-    float dx = 0.3f*float(m_prev_x - event->x())/width();
-    float dy = 0.3f*float(m_prev_y - event->y())/height();
-    m_prev_x = event->x();
-    m_prev_y = event->y();
-    if(m_probeMoveMode)
+    if(event->modifiers() & Qt::ControlModifier)
     {
-        // Modify the position of the light probe.
-        V3f camDir = V3f(cos(deg2rad(m_theta))*cos(deg2rad(m_phi+90)),
-                         sin(deg2rad(m_theta)),
-                         cos(deg2rad(m_theta))*sin(deg2rad(m_phi+90)));
-        V3f camPos = -m_dist*camDir + m_center - m_cloudCenter;
-        V3f v = m_probePos - camPos;
-        V3f up = V3f(cos(deg2rad(m_theta+90))*cos(deg2rad(m_phi+90)),
-                     sin(deg2rad(m_theta+90)),
-                     cos(deg2rad(m_theta+90))*sin(deg2rad(m_phi+90)));
-        V3f right = camDir % up;
-        // Distance along view direction to light probe
-        float d = dot(v, camDir);
-        if(m_zooming)
-            m_probePos += dy*d*camDir;
-        else
-            m_probePos += dy*d*up + dx*d*right;
-    }
-    else if(m_zooming)
-    {
-        // Zoom distance to camera pivot point
-        m_dist *= std::pow(0.9, 30*dy);
+        m_cursorPos = qt2exr(
+            m_camera.mouseMovePoint(exr2qt(m_cursorPos),
+                                    event->pos() - m_lastPos,
+                                    m_zooming) );
+        updateGL();
     }
     else
-    {
-        // Modify position of centre
-        if(event->modifiers() & Qt::ControlModifier)
-        {
-            m_center.y +=  m_dist*dy;
-            m_center.x += -m_dist*dx*std::cos(deg2rad(m_phi));
-            m_center.z += -m_dist*dx*std::sin(deg2rad(m_phi));
-        }
-        else
-        {
-            // rotate camera
-            m_theta += 400*dy;
-            m_phi   += 400*dx;
-        }
-    }
-    repaint();
+        m_camera.mouseDrag(m_lastPos, event->pos(), m_zooming);
+    m_lastPos = event->pos();
 }
 
 
 void PointView::wheelEvent(QWheelEvent* event)
 {
-    double degrees = event->delta()/8.0;
-    double steps = degrees / 15.0;
-    m_dist *= std::pow(0.9, steps);
-    repaint();
+    // Translate mouse wheel events into vertical dragging for simplicity.
+    m_camera.mouseDrag(QPoint(0,0), QPoint(0, -event->delta()/2), true);
 }
 
 
@@ -590,25 +491,21 @@ void PointView::keyPressEvent(QKeyEvent *event)
     if(event->key() == Qt::Key_V)
     {
         m_visMode = (m_visMode == Vis_Points) ? Vis_Disks : Vis_Points;
-        initializeGL();
-        repaint();
+        updateGL();
     }
-    else if(event->key() == Qt::Key_Z)
-        m_probeMoveMode = true;
     else if(event->key() == Qt::Key_L)
     {
         m_lighting = !m_lighting;
-        initializeGL();
-        repaint();
+        updateGL();
     }
     else if(event->key() == Qt::Key_C)
     {
-        // FIXME: Coord system is a bit screwy here.
-        m_center = m_cloudCenter - m_probePos;
-        repaint();
+        m_camera.setCenter(exr2qt(m_cursorPos));
     }
     else if(event->key() == Qt::Key_S)
     {
+        if(!m_points)
+            return;
         // Snap probe to position of closest point.
         int ptStride = m_points->stride;
         int npoints = m_points->data.size()/ptStride;
@@ -619,27 +516,20 @@ void PointView::keyPressEvent(QKeyEvent *event)
         {
             const float* data = ptData + i*ptStride;
             V3f p(data[0], data[1], data[2]);
-            float dist = (m_probePos - p).length2();
+            float dist = (m_cursorPos - p).length2();
             if(dist < nearestDist)
             {
                 nearestDist = dist;
                 newPos = p;
             }
         }
-        m_probePos = newPos;
-        repaint();
+        m_cursorPos = newPos;
+        updateGL();
     }
     else
         event->ignore();
 }
 
-void PointView::keyReleaseEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_Z)
-        m_probeMoveMode = false;
-    else
-        event->ignore();
-}
 
 /// Draw a set of axes
 void PointView::drawAxes()
@@ -664,29 +554,69 @@ void PointView::drawAxes()
 }
 
 
-/// Draw position of the light probe
-void PointView::drawLightProbe(const V3f& P, const C3f& col)
+/// Draw the 3D cursor
+void PointView::drawCursor(const V3f& p) const
 {
-    glColor(col);
-    glPointSize(100);
-    // Draw point at probe position
+    // Draw a point at the centre of the cursor.
+    glColor3f(1,1,1);
+    glPointSize(10);
     glBegin(GL_POINTS);
-        glVertex(P);
+        glVertex(m_cursorPos);
     glEnd();
-    glColor3f(0.7,0.7,1);
-    // Draw axis-aligned box around point
-    float r = 0.1;
-    drawBound(Box3f(P - r*V3f(1), P + r*V3f(1)));
-    // Draw lines from origin to point along axis directions
-    glBegin(GL_LINE_STRIP);
-        glVertex3f(P.x, P.y, P.z);
-        glVertex3f(P.x, 0, P.z);
-        glVertex3f(0, 0, P.z);
-    glEnd();
+
+    // Find position of cursor in screen space
+    V3f screenP3 = qt2exr(m_camera.projectionMatrix()*m_camera.viewMatrix() *
+                          exr2qt(m_cursorPos));
+    if(screenP3.z < 0)
+        return; // Cull if behind the camera.  TODO: doesn't work quite right
+
+    // Now draw a 2D overlay over the 3D scene to allow user to pinpoint the
+    // cursor, even when when it's behind something.
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0,width(), 0,height(), 0, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Position in ortho coord system
+    V2f p2 = 0.5f * V2f(width(), height()) *
+             (V2f(screenP3.x, screenP3.y) + V2f(1.0f));
+    float r = 10;
+    glLineWidth(3);
+    glColor3f(1,1,1);
+    // Crosshairs
     glBegin(GL_LINES);
-        glVertex3f(0, 0, P.z);
-        glVertex3f(0, 0, 0);
+        glVertex(p2 + V2f(r,   0));
+        glVertex(p2 + V2f(2*r, 0));
+        glVertex(p2 - V2f(r,   0));
+        glVertex(p2 - V2f(2*r, 0));
+        glVertex(p2 + V2f(0,   r));
+        glVertex(p2 + V2f(0, 2*r));
+        glVertex(p2 - V2f(0,   r));
+        glVertex(p2 - V2f(0, 2*r));
     glEnd();
+    glColor3f(0,0,0);
+    // Circle
+    glBegin(GL_LINES);
+    for(int i = 0; i < 20; ++i)
+    {
+        float t = 2*M_PI*i/20.0f;
+        glVertex(p2 + 0.8f*r * V2f(cos(t), sin(t)));
+        t = 2*M_PI*(i+1.1)/20.0f;
+        glVertex(p2 + 0.8f*r * V2f(cos(t), sin(t)));
+    }
+    glEnd();
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopAttrib();
 }
 
 
@@ -702,6 +632,8 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
     {
         case Vis_Points:
         {
+            glDisable(GL_COLOR_MATERIAL);
+            glDisable(GL_LIGHTING);
             // Draw points
             glPointSize(1);
             glColor3f(1,1,1);
@@ -721,6 +653,31 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
         break;
         case Vis_Disks:
         {
+            // Materials
+            glShadeModel(GL_SMOOTH);
+            if(useLighting)
+            {
+                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+                glEnable(GL_COLOR_MATERIAL);
+                // Lighting
+                // light0
+                GLfloat lightPos[] = {0, 0, 0, 1};
+                GLfloat whiteCol[] = {1, 1, 1, 1};
+                glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+                glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteCol);
+                glEnable(GL_LIGHT0);
+                // whole-scene ambient intensity scaling
+                GLfloat ambientCol[] = {0.1, 0.1, 0.1, 1};
+                glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientCol);
+                // whole-scene diffuse intensity
+                //GLfloat diffuseCol[] = {0.05, 0.05, 0.05, 1};
+                //glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuseCol);
+                // two-sided lighting.
+                // TODO: Why doesn't this work?? (handedness problems?)
+                //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+                // rescaling of normals
+                glEnable(GL_RESCALE_NORMAL);
+            }
             //glCullFace(GL_BACK);
             //glEnable(GL_CULL_FACE);
             // Compile radius 1 disk primitive
@@ -837,24 +794,27 @@ int main(int argc, char *argv[])
 
     PointViewerWindow window;
 
-    std::cout << "Reading point cloud...  " << std::flush;
     boost::shared_ptr<PointArray> points;
     if(opts.count("point_file") != 0)
         points = loadPointFile(opts["point_file"].as<std::string>());
-    else
-        points = cornellBoxPoints(opts["cloudres"].as<float>());
+    if(!points)
+    {
+        std::cerr << "Error: Couldn't open point file\n";
+        return 1;
+    }
+
     std::cout << "npoints = " << points->size() << "\n";
 
-    std::cout << "Building point hierarchy...\n";
+//    std::cout << "Building point hierarchy...\n";
     PointOctree octree(*points);
 
     int envRes = opts["envres"].as<int>();
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
-    std::cout << "Baking...\n";
+//    std::cout << "Baking...\n";
 //    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
 //    bakeRadiosity(*points, octree, envRes, maxSolidAngle);
-    if(opts.count("bakeonly"))
-        return 0;
+//    if(opts.count("bakeonly"))
+//        return 0;
 
     window.pointView().setPoints(points, &octree);
     int probeRes = envRes;

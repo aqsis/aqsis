@@ -5,11 +5,10 @@ find_package(Qt4 COMPONENTS QtGui QtOpenGL)
 if(AQSIS_USE_OPENEXR AND QT4_FOUND)
 	include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} ${QT_INCLUDES})
 
-	qt4_wrap_cpp(moc_srcs ptview.h)
+	qt4_wrap_cpp(moc_srcs ptview.h interactivecamera.h)
 
 	set(srcs
 		${moc_srcs}
-		cornellbox.cpp
 		ptview.cpp
 		microbuffer.cpp
 		pointcontainer.cpp

@@ -41,7 +41,7 @@
 #include <OpenEXR/ImathVec.h>
 
 #include "pointcontainer.h"
-
+#include "interactivecamera.h"
 
 namespace Aqsis {
 
@@ -85,25 +85,20 @@ class PointView : public QGLWidget
         void mouseMoveEvent(QMouseEvent* event);
         void wheelEvent(QWheelEvent* event);
         void keyPressEvent(QKeyEvent *event);
-        void keyReleaseEvent(QKeyEvent *event);
 
     private:
         static void drawAxes();
-        static void drawLightProbe(const V3f& P, const C3f& col);
+        void drawCursor(const V3f& P) const;
         static void drawPoints(const PointArray& points, VisMode visMode,
                                bool useLighting);
 
         /// Mouse-based camera positioning
-        int m_prev_x;
-        int m_prev_y;
+        InteractiveCamera m_camera;
+        QPoint m_lastPos;
         bool m_zooming;
-        float m_theta;
-        float m_phi;
-        float m_dist;
-        V3f m_center;
-        /// Light probe position
-        V3f m_probePos;
-        bool m_probeMoveMode;
+        /// Position of 3D cursor
+        V3f m_cursorPos;
+        /// Light probe resolution
         int m_probeRes;
         float m_probeMaxSolidAngle;
         /// Type of visualization
