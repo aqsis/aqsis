@@ -35,7 +35,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include <QtGui/QMainWindow>
-#include <QtGui/QKeyEvent>
 #include <QtOpenGL/QGLWidget>
 
 #include <OpenEXR/ImathVec.h>
@@ -68,11 +67,13 @@ class PointView : public QGLWidget
 
         PointView(QWidget *parent = NULL);
 
-        /// Set points to be rendered
-        void setPoints(const boost::shared_ptr<const PointArray>& points,
-                       const PointOctree* tree);
+        /// Load a point cloud from a file
+        void loadPointFile(const QString& fileName);
         /// Set properties for rendering probe environment map
         void setProbeParams(int cubeFaceRes, float maxSolidAngle);
+
+        /// Hint at an appropriate size
+        QSize sizeHint() const;
 
     protected:
         // Qt OpenGL callbacks
@@ -84,7 +85,7 @@ class PointView : public QGLWidget
         void mousePressEvent(QMouseEvent* event);
         void mouseMoveEvent(QMouseEvent* event);
         void wheelEvent(QWheelEvent* event);
-        void keyPressEvent(QKeyEvent *event);
+        void keyPressEvent(QKeyEvent* event);
 
     private:
         static void drawAxes();
@@ -107,34 +108,29 @@ class PointView : public QGLWidget
         bool m_lighting;
         /// Point cloud data
         boost::shared_ptr<const PointArray> m_points;
-        const PointOctree* m_pointTree;
+        boost::shared_ptr<const PointOctree> m_pointTree;
         V3f m_cloudCenter;
 };
 
 
 //------------------------------------------------------------------------------
 /// Main window for point cloud viewer application
-class PointViewerWindow : public QMainWindow
+class PointViewerMainWindow : public QMainWindow
 {
     Q_OBJECT
 
     public:
-        PointViewerWindow()
-        {
-            m_pointView = new PointView();
-            m_pointView->setMinimumSize(QSize(640, 480));
-            setCentralWidget(m_pointView);
-            setWindowTitle("Aqsis point cloud viewer");
-        }
+        PointViewerMainWindow(const QString& initialPointFileName = QString());
 
         PointView& pointView() { return *m_pointView; }
 
     protected:
-        void keyReleaseEvent(QKeyEvent* event)
-        {
-            if(event->key() == Qt::Key_Escape)
-                close();
-        }
+        void keyReleaseEvent(QKeyEvent* event);
+
+    private slots:
+        void openFile();
+        void helpDialog();
+        void aboutDialog();
 
     private:
         PointView* m_pointView;

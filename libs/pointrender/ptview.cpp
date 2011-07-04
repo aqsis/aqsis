@@ -31,6 +31,10 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <QtGui/QApplication>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMenuBar>
+#include <QtGui/QMessageBox>
+#include <QtGui/QFileDialog>
 
 #include <boost/program_options.hpp>
 
@@ -39,6 +43,8 @@
 
 #include "ptview.h"
 #include "microbuffer.h"
+
+#include <aqsis/version.h>
 
 namespace Aqsis {
 
@@ -325,7 +331,7 @@ PointView::PointView(QWidget *parent)
     m_visMode(Vis_Points),
     m_lighting(false),
     m_points(),
-    m_pointTree(0),
+    m_pointTree(),
     m_cloudCenter(0)
 {
     setFocusPolicy(Qt::StrongFocus);
@@ -335,23 +341,38 @@ PointView::PointView(QWidget *parent)
 }
 
 
-void PointView::setPoints(const boost::shared_ptr<const PointArray>& points,
-                          const PointOctree* pointTree)
+void PointView::loadPointFile(const QString& fileName)
 {
-    m_points = points;
-    if(m_points)
+    m_points.reset(); // free up memory before loading new file.
+    m_points = Aqsis::loadPointFile(fileName.toStdString());
+    if(!m_points)
     {
-        m_cloudCenter = m_points->centroid();
-        m_cursorPos = m_cloudCenter;
-        m_camera.setCenter(exr2qt(m_cloudCenter));
+        QMessageBox::critical(this, tr("Error"),
+                        tr("Couldn't open point file \"%1\"").arg(fileName));
+        return;
     }
-    m_pointTree = pointTree;
+    m_cloudCenter = m_points->centroid();
+    m_cursorPos = m_cloudCenter;
+    m_camera.setCenter(exr2qt(m_cloudCenter));
+    m_pointTree.reset(); // free up memory
+    m_pointTree = boost::shared_ptr<PointOctree>(new PointOctree(*m_points));
+    updateGL();
 }
+
 
 void PointView::setProbeParams(int cubeFaceRes, float maxSolidAngle)
 {
     m_probeRes = cubeFaceRes;
     m_probeMaxSolidAngle = maxSolidAngle;
+}
+
+
+QSize PointView::sizeHint() const
+{
+    // Size hint, mainly for getting the initial window size right.
+    // setMinimumSize() also sort of works for this, but doesn't allow the
+    // user to later make the window smaller.
+    return QSize(640,480);
 }
 
 
@@ -587,29 +608,32 @@ void PointView::drawCursor(const V3f& p) const
     V2f p2 = 0.5f * V2f(width(), height()) *
              (V2f(screenP3.x, screenP3.y) + V2f(1.0f));
     float r = 10;
-    glLineWidth(3);
+    glLineWidth(2);
     glColor3f(1,1,1);
-    // Crosshairs
+    // Combined white and black crosshairs, so they can be seen on any
+    // background.
+    glTranslatef(p2.x, p2.y, 0);
     glBegin(GL_LINES);
-        glVertex(p2 + V2f(r,   0));
-        glVertex(p2 + V2f(2*r, 0));
-        glVertex(p2 - V2f(r,   0));
-        glVertex(p2 - V2f(2*r, 0));
-        glVertex(p2 + V2f(0,   r));
-        glVertex(p2 + V2f(0, 2*r));
-        glVertex(p2 - V2f(0,   r));
-        glVertex(p2 - V2f(0, 2*r));
+        glVertex(V2f(r,   0));
+        glVertex(V2f(2*r, 0));
+        glVertex(-V2f(r,   0));
+        glVertex(-V2f(2*r, 0));
+        glVertex(V2f(0,   r));
+        glVertex(V2f(0, 2*r));
+        glVertex(-V2f(0,   r));
+        glVertex(-V2f(0, 2*r));
     glEnd();
     glColor3f(0,0,0);
-    // Circle
+    glRotatef(45,0,0,1);
     glBegin(GL_LINES);
-    for(int i = 0; i < 20; ++i)
-    {
-        float t = 2*M_PI*i/20.0f;
-        glVertex(p2 + 0.8f*r * V2f(cos(t), sin(t)));
-        t = 2*M_PI*(i+1.1)/20.0f;
-        glVertex(p2 + 0.8f*r * V2f(cos(t), sin(t)));
-    }
+        glVertex(V2f(r,   0));
+        glVertex(V2f(2*r, 0));
+        glVertex(-V2f(r,   0));
+        glVertex(-V2f(2*r, 0));
+        glVertex(V2f(0,   r));
+        glVertex(V2f(0, 2*r));
+        glVertex(-V2f(0,   r));
+        glVertex(-V2f(0, 2*r));
     glEnd();
 
     glPopMatrix();
@@ -742,6 +766,83 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
 }
 
 
+//------------------------------------------------------------------------------
+// PointViewerMainWindow implementation
+
+PointViewerMainWindow::PointViewerMainWindow(
+        const QString& initialPointFileName)
+{
+    setWindowTitle("Aqsis point cloud viewer");
+
+    // File menu
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+    QAction* openAct = fileMenu->addAction(tr("&Open"));
+    openAct->setStatusTip(tr("Open a point cloud file"));
+    openAct->setShortcuts(QKeySequence::Open);
+    connect(openAct, SIGNAL(triggered()), this, SLOT(openFile()));
+    QAction* quitAct = fileMenu->addAction(tr("&Quit"));
+    quitAct->setStatusTip(tr("Exit the application"));
+    quitAct->setShortcuts(QKeySequence::Quit);
+    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+    // Help menu
+    QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
+    QAction* helpAct = helpMenu->addAction(tr("&Controls"));
+    connect(helpAct, SIGNAL(triggered()), this, SLOT(helpDialog()));
+    helpMenu->addSeparator();
+    QAction* aboutAct = helpMenu->addAction(tr("&About"));
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutDialog()));
+
+    m_pointView = new PointView(this);
+    setCentralWidget(m_pointView);
+    if(!initialPointFileName.isEmpty())
+        m_pointView->loadPointFile(initialPointFileName);
+}
+
+
+void PointViewerMainWindow::keyReleaseEvent(QKeyEvent* event)
+{
+    if(event->key() == Qt::Key_Escape)
+        close();
+}
+
+
+void PointViewerMainWindow::openFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Open point cloud"), "", tr("Point cloud files (*.ptc)"));
+    if(!fileName.isNull())
+        m_pointView->loadPointFile(fileName);
+}
+
+
+void PointViewerMainWindow::helpDialog()
+{
+    QString message = tr(
+        "ptview controls:\n"
+        "\n"
+        "LMB+drag = rotate camera\n"
+        "RMB+drag = zoom camera\n"
+        "Ctrl+LMB+drag = move 3D cursor\n"
+        "Ctrl+RMB+drag = zoom 3D cursor along view direction\n"
+        "'c' = center camera on 3D cursor\n"
+        "'v' = toggle view mode between points and disks\n"
+        "'s' = snap 3D cursor to nearest point\n"
+        "\n"
+        "(LMB, RMB = left & right mouse buttons)\n"
+    );
+    QMessageBox::information(this, tr("ptview control summary"), message);
+}
+
+
+void PointViewerMainWindow::aboutDialog()
+{
+    QString message = tr("Aqsis point cloud viewer\nversion %1.")
+                      .arg(AQSIS_VERSION_STR_FULL);
+    QMessageBox::information(this, tr("About ptview"), message);
+}
+
+
 } // namespace Aqsis
 
 
@@ -758,15 +859,12 @@ int main(int argc, char *argv[])
     po::options_description optionsDesc("options");
     optionsDesc.add_options()
         ("help,h", "help message")
-        ("envres,e", po::value<int>()->default_value(10),
-         "resolution of micro environment raster faces for baking")
         ("maxsolidangle,a", po::value<float>()->default_value(0.02),
          "max solid angle used for aggreates in point hierarchy during rendering")
-        ("proberes,p", po::value<int>(),
+        ("proberes,p", po::value<int>()->default_value(10),
          "resolution of micro environment raster for viewing")
         ("cloudres,c", po::value<float>()->default_value(20),
          "resolution of point cloud")
-        ("bakeonly,b", "Only bake, don't display (useful for timing)")
         ("radiusmult,r", po::value<float>()->default_value(1),
          "multiplying factor for surfel radius")
         ("point_file", po::value<std::string>(), "file to display")
@@ -792,36 +890,17 @@ int main(int argc, char *argv[])
     f.setSampleBuffers(true);
     QGLFormat::setDefaultFormat(f);
 
-    PointViewerWindow window;
-
     boost::shared_ptr<PointArray> points;
+    QString pointFileName;
     if(opts.count("point_file") != 0)
-        points = loadPointFile(opts["point_file"].as<std::string>());
-    if(!points)
-    {
-        std::cerr << "Error: Couldn't open point file\n";
-        return 1;
-    }
+        pointFileName = QString::fromStdString(opts["point_file"]
+                                               .as<std::string>());
 
-    std::cout << "npoints = " << points->size() << "\n";
-
-//    std::cout << "Building point hierarchy...\n";
-    PointOctree octree(*points);
-
-    int envRes = opts["envres"].as<int>();
+    PointViewerMainWindow window(pointFileName);
+//    std::cout << "npoints = " << points->size() << "\n";
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
-//    std::cout << "Baking...\n";
-//    bakeOcclusion(*points, octree, envRes, maxSolidAngle);
-//    bakeRadiosity(*points, octree, envRes, maxSolidAngle);
-//    if(opts.count("bakeonly"))
-//        return 0;
-
-    window.pointView().setPoints(points, &octree);
-    int probeRes = envRes;
-    if(opts.count("proberes") != 0)
-        probeRes = opts["proberes"].as<int>();
+    int probeRes = opts["proberes"].as<int>();
     window.pointView().setProbeParams(probeRes, maxSolidAngle);
-
     window.show();
 
     return app.exec();
