@@ -1233,7 +1233,7 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 				integrator.clear();
 				microRasterize(integrator, Pval2, Nval2, coneAngle,
 							   maxSolidAngle, *pointTree);
-				storeIntegratedResult(integrator, Nval2, result, igrid);
+				storeIntegratedResult(integrator, Nval2, coneAngle, result, igrid);
 			}
 		}
 		}
@@ -1257,9 +1257,10 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 
 //----------------------------------------------------------------------
 static void storeIntegratedResult(const OcclusionIntegrator& integrator,
-								  const V3f& N, IqShaderData* result, int igrid)
+								  const V3f& N, float coneAngle,
+								  IqShaderData* result, int igrid)
 {
-	result->SetFloat(integrator.occlusion(N), igrid);
+	result->SetFloat(integrator.occlusion(N, coneAngle), igrid);
 }
 
 // occlusion(P,N,samples)
@@ -1272,9 +1273,10 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 //----------------------------------------------------------------------
 // indirectdiffuse(P, N, samples, ...)
 static void storeIntegratedResult(const RadiosityIntegrator& integrator,
-								  const V3f& N, IqShaderData* result, int igrid)
+								  const V3f& N, float coneAngle,
+								  IqShaderData* result, int igrid)
 {
-	C3f col = integrator.radiosity(N);
+	C3f col = integrator.radiosity(N, coneAngle);
 	result->SetColor(CqColor(col.x, col.y, col.z), igrid);
 }
 

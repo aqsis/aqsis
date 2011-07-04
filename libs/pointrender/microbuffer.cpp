@@ -563,7 +563,7 @@ void bakeOcclusion(PointArray& points, int faceRes)
         float r = data[6];
         integrator.clear();
         microRasterize(integrator, P + N*r*eps, N, M_PI_2, points);
-        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N);
+        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N, M_PI_2);
     }
 }
 
@@ -586,7 +586,7 @@ void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
         float r = data[6];
         integrator.clear();
         microRasterize(integrator, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
-        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N);
+        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N, M_PI_2);
     }
 }
 
@@ -608,7 +608,7 @@ void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
         float r = data[6];
         integrator.clear();
         microRasterize(integrator, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
-        *reinterpret_cast<C3f*>(data+7) = integrator.radiosity(N);
+        *reinterpret_cast<C3f*>(data+7) = integrator.radiosity(N, M_PI_2);
     }
 }
 

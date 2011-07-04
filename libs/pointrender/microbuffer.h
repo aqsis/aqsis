@@ -412,19 +412,25 @@ class OcclusionIntegrator
         /// This is one minus the zero-bounce light coming from infinity to the
         /// point.
         ///
-        /// \param N - normal at point
-        float occlusion(V3f N) const
+        /// N is the shading normal; coneAngle is the angle over which to
+        /// consider the occlusion in radians.  If coneAngle is not PI/2
+        /// radians, the usual cos(theta) weighting is adjusted to
+        /// (cos(theta) - cos(coneAngle)) so that it falls continuously to
+        /// zero when theta == coneAngle
+        float occlusion(V3f N, float coneAngle) const
         {
             // Integrate over face to get occlusion.
             float illum = 0;
             float totWeight = 0;
+            float cosConeAngle = std::cos(coneAngle);
             for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
             {
                 const float* face = m_buf.face(f);
                 for(int iv = 0; iv < m_buf.res(); ++iv)
                 for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
                 {
-                    float d = dot(m_buf.rayDirection(f, iu, iv), N);
+                    float d = dot(m_buf.rayDirection(f, iu, iv), N) -
+                              cosConeAngle;
                     if(d > 0)
                     {
                         d *= m_buf.pixelSize(iu, iv);
@@ -434,6 +440,8 @@ class OcclusionIntegrator
                     }
                 }
             }
+            if(totWeight == 0)
+                return 0;
             illum /= totWeight;
             return 1 - illum;
         }
@@ -529,20 +537,26 @@ class RadiosityIntegrator
 
         /// Integrate radiosity based on previously sampled scene.
         ///
-        /// \param N - normal at point
-        C3f radiosity(V3f N) const
+        /// N is the shading normal; coneAngle is the angle over which to
+        /// consider the occlusion in radians.  If coneAngle is not PI/2
+        /// radians, the usual cos(theta) weighting is adjusted to
+        /// (cos(theta) - cos(coneAngle)) so that it falls continuously to
+        /// zero when theta == coneAngle
+        C3f radiosity(V3f N, float coneAngle) const
         {
             // Integrate incoming light with cosine weighting to get outgoing
             // radiosity
             C3f rad(0);
             float totWeight = 0;
+            float cosConeAngle = std::cos(coneAngle);
             for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
             {
                 const float* face = m_buf.face(f);
                 for(int iv = 0; iv < m_buf.res(); ++iv)
                 for(int iu = 0; iu < m_buf.res(); ++iu, face += m_buf.nchans())
                 {
-                    float d = dot(m_buf.rayDirection(f, iu, iv), N);
+                    float d = dot(m_buf.rayDirection(f, iu, iv), N) -
+                              cosConeAngle;
                     if(d > 0)
                     {
                         d *= m_buf.pixelSize(iu, iv);
@@ -552,6 +566,8 @@ class RadiosityIntegrator
                     }
                 }
             }
+            if(totWeight == 0)
+                return C3f(0);
             return 1.0f/totWeight * rad;
         }
 
