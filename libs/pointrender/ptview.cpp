@@ -604,6 +604,10 @@ void PointView::drawCursor(const V3f& p) const
     glPushMatrix();
     glLoadIdentity();
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+
     // Position in ortho coord system
     V2f p2 = 0.5f * V2f(width(), height()) *
              (V2f(screenP3.x, screenP3.y) + V2f(1.0f));
