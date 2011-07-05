@@ -2701,24 +2701,16 @@ RtVoid RiCxxCore::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap, RtI
 		{
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetDefaultPrimitiveVariables();
-			std::vector<boost::shared_ptr<CqSurface> > aSplits;
-			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
-			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
-			{
-				CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
-				CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
-				static_cast<CqSurfacePatchBicubic*>( iSS->get
-				                                     () ) ->ConvertToBezierBasis( matuBasis, matvBasis );
-				TqFloat time = QGetRenderContext()->Time();
-				// Transform the points into camera space for processing,
-				CqMatrix matOtoW, matNOtoW, matVOtoW;
-				QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
-				QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
-				QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
-				(*iSS)->Transform( matOtoW, matNOtoW, matVOtoW);
-				CreateGPrim( *iSS );
-			}
+			TqFloat time = QGetRenderContext()->Time();
+			// Convert to Bezier basis
+			pSurface->ConvertToBezierBasis();
+			// Transform into camera space for processing
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
+			CreateGPrim( pSurface );
 		}
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )

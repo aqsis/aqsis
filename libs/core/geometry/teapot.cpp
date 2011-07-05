@@ -447,8 +447,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
-
-
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 0 ] = pSurface;
 
 	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE ) );
@@ -472,6 +471,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 1 ] = pSurface;
 
 	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
@@ -495,6 +495,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 2 ] = pSurface;
 
 	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
@@ -518,6 +519,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 3 ] = pSurface;
 
 	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
@@ -541,6 +543,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 4 ] = pSurface;
 
 	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
@@ -564,6 +567,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 	}
+	pSurface->ConvertToBezierBasis();
 	this->pPatchMeshBicubic[ 5 ] = pSurface;
 	this->cNbrPatchMeshBicubic = 6;
 	// bottom
@@ -600,6 +604,7 @@ CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 			pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
 			pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
 		}
+		pSurface->ConvertToBezierBasis();
 		this->pPatchMeshBicubic[ 6 ] = pSurface;
 		this->cNbrPatchMeshBicubic = 7;
 	}

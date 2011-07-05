@@ -275,14 +275,25 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			return ( vec );
 		}
 
+		virtual void Transform(const CqMatrix& matTx, const CqMatrix& matITTx,
+							   const CqMatrix& matRTx, TqInt iTime = 0 );
+
+		virtual void ConvertToBezierBasis();
+
 	protected:
 
-		TqInt	m_uPatches,   			///< Number of patches in u.
-		m_vPatches;			///< Number of patches in v.
-		TqInt	m_nu,   				///< Number of control points in u.
-		m_nv;				///< Number of control points in v.
-		bool	m_uPeriodic,   		///< Is patches mesh periodic in u?
-		m_vPeriodic;		///< Is patches mesh periodic in v?
+		TqInt	m_uPatches,   	///< Number of patches in u.
+		m_vPatches;				///< Number of patches in v.
+		TqInt	m_nu,   		///< Number of control points in u.
+		m_nv;					///< Number of control points in v.
+		bool	m_uPeriodic,   	///< Is patches mesh periodic in u?
+		m_vPeriodic;			///< Is patches mesh periodic in v?
+
+	private:
+
+		void SplitInternally();
+		/** Child bicubic patches. */
+		std::vector<boost::shared_ptr<CqSurfacePatchBicubic> > m_patches;
 }
 ;
 
