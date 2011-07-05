@@ -68,7 +68,7 @@ class PointView : public QGLWidget
         PointView(QWidget *parent = NULL);
 
         /// Load a point cloud from a file
-        void loadPointFile(const QString& fileName);
+        void loadPointFiles(const QStringList& fileNames);
         /// Set properties for rendering probe environment map
         void setProbeParams(int cubeFaceRes, float maxSolidAngle);
 
@@ -107,7 +107,7 @@ class PointView : public QGLWidget
         /// Flag for whether to use OpenGL lighting or not
         bool m_lighting;
         /// Point cloud data
-        boost::shared_ptr<const PointArray> m_points;
+        boost::shared_ptr<PointArray> m_points;
         boost::shared_ptr<const PointOctree> m_pointTree;
         V3f m_cloudCenter;
 };
@@ -120,7 +120,8 @@ class PointViewerMainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        PointViewerMainWindow(const QString& initialPointFileName = QString());
+        PointViewerMainWindow(const QStringList& initialPointFileNames =
+                              QStringList());
 
         PointView& pointView() { return *m_pointView; }
 
@@ -128,7 +129,7 @@ class PointViewerMainWindow : public QMainWindow
         void keyReleaseEvent(QKeyEvent* event);
 
     private slots:
-        void openFile();
+        void openFiles();
         void helpDialog();
         void aboutDialog();
 

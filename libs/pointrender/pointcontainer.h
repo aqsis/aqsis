@@ -85,8 +85,10 @@ struct PointArray
 ///
 /// The point cloud file must at a minimum include a float attribute "_area".
 /// The position, normal, area and optionally radiosity ("_radiosity") will be
-/// loaded into the PointArray.
-boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName);
+/// loaded into the PointArray which is returned.  The points will be
+/// _appended_ to the provided points PointArray.  The return value is true on
+/// success, false on error.
+bool loadPointFile(PointArray& points, const std::string& fileName);
 
 
 //------------------------------------------------------------------------------

@@ -38,7 +38,7 @@
 namespace Aqsis {
 
 
-boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName)
+bool loadPointFile(PointArray& points, const std::string& fileName)
 {
     // Use aqsis point API for now.
     int nvars = 0;
@@ -52,7 +52,7 @@ boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName)
     // If nvars > maxVars we've probably crashed already!  Ugh, what an API :(
     assert(nvars <= maxVars);
     if(!cloud)
-        return boost::shared_ptr<PointArray>();
+        return false;
     float P[3] = {0};
     float N[3] = {0};
     float extras[maxVars*3] = {0};
@@ -82,11 +82,11 @@ boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName)
             assert(0 && "unknown type");
     }
     if(!area)
-        return boost::shared_ptr<PointArray>();
+        return false;
     // Ok, file contains the necessary info.  Read in the points.
-    boost::shared_ptr<PointArray> points(new PointArray());
-    points->stride = 10;
-    std::vector<float>& data = points->data;
+    assert(points.stride == 10);
+    points.stride = 10;
+    std::vector<float>& data = points.data;
     while(PtcReadDataPoint(cloud, P, N, 0, extras))
     {
         data.push_back(P[0]); data.push_back(P[1]); data.push_back(P[2]);
@@ -97,7 +97,7 @@ boost::shared_ptr<PointArray> loadPointFile(const std::string& fileName)
         data.push_back(radiosity[2]);
     }
     PtcClosePointCloudFile(cloud);
-    return points;
+    return true;
 }
 
 
@@ -271,11 +271,11 @@ const PointOctree* PointOctreeCache::find(const std::string& fileName)
         // Try to open the file
         //
         // TODO: Path handling
-        boost::shared_ptr<PointArray> points = loadPointFile(fileName);
+        PointArray points;
         // Convert to octree
         boost::shared_ptr<PointOctree> tree;
-        if(points)
-            tree.reset(new PointOctree(*points));
+        if(loadPointFile(points, fileName));
+            tree.reset(new PointOctree(points));
         // Insert into map.  If we couldn't load the file, we insert
         // a null pointer to record the failure.
         m_cache.insert(MapType::value_type(fileName, tree));

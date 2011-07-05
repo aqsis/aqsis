@@ -95,7 +95,34 @@ static void depthRange(const float* z, int size, int stride,
 }
 
 
-static void drawBound(const Box3f& b);
+#if 0
+static void drawBound(const Box3f& b)
+{
+    glBegin(GL_LINE_LOOP);
+        glVertex3f(b.min.x, b.min.y, b.min.z);
+        glVertex3f(b.min.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.min.z);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+        glVertex3f(b.min.x, b.max.y, b.min.z);
+        glVertex3f(b.min.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.min.z);
+    glEnd();
+    glBegin(GL_LINES);
+        glVertex3f(b.min.x, b.min.y, b.min.z);
+        glVertex3f(b.min.x, b.max.y, b.min.z);
+        glVertex3f(b.min.x, b.min.y, b.max.z);
+        glVertex3f(b.min.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.max.z);
+        glVertex3f(b.max.x, b.max.y, b.max.z);
+        glVertex3f(b.max.x, b.min.y, b.min.z);
+        glVertex3f(b.max.x, b.max.y, b.min.z);
+    glEnd();
+}
+#endif
+
 
 static void drawDisk(V3f p, V3f n, float r)
 {
@@ -341,15 +368,20 @@ PointView::PointView(QWidget *parent)
 }
 
 
-void PointView::loadPointFile(const QString& fileName)
+void PointView::loadPointFiles(const QStringList& fileNames)
 {
-    m_points.reset(); // free up memory before loading new file.
-    m_points = Aqsis::loadPointFile(fileName.toStdString());
-    if(!m_points)
-    {
-        QMessageBox::critical(this, tr("Error"),
-                        tr("Couldn't open point file \"%1\"").arg(fileName));
+    if(fileNames.empty())
         return;
+    // free up memory before loading new files.
+    m_points.reset(new PointArray());
+    for(int i = 0; i < fileNames.size(); ++i)
+    {
+        if(!Aqsis::loadPointFile(*m_points, fileNames[i].toStdString()))
+        {
+            QMessageBox::critical(this, tr("Error"),
+                    tr("Couldn't open point file \"%1\"").arg(fileNames[i]));
+            return;
+        }
     }
     m_cloudCenter = m_points->centroid();
     m_cursorPos = m_cloudCenter;
@@ -390,41 +422,23 @@ void PointView::resizeGL(int w, int h)
 }
 
 
-static void drawBound(const Box3f& b)
-{
-    glBegin(GL_LINE_LOOP);
-        glVertex3f(b.min.x, b.min.y, b.min.z);
-        glVertex3f(b.min.x, b.min.y, b.max.z);
-        glVertex3f(b.max.x, b.min.y, b.max.z);
-        glVertex3f(b.max.x, b.min.y, b.min.z);
-    glEnd();
-    glBegin(GL_LINE_LOOP);
-        glVertex3f(b.min.x, b.max.y, b.min.z);
-        glVertex3f(b.min.x, b.max.y, b.max.z);
-        glVertex3f(b.max.x, b.max.y, b.max.z);
-        glVertex3f(b.max.x, b.max.y, b.min.z);
-    glEnd();
-    glBegin(GL_LINES);
-        glVertex3f(b.min.x, b.min.y, b.min.z);
-        glVertex3f(b.min.x, b.max.y, b.min.z);
-        glVertex3f(b.min.x, b.min.y, b.max.z);
-        glVertex3f(b.min.x, b.max.y, b.max.z);
-        glVertex3f(b.max.x, b.min.y, b.max.z);
-        glVertex3f(b.max.x, b.max.y, b.max.z);
-        glVertex3f(b.max.x, b.min.y, b.min.z);
-        glVertex3f(b.max.x, b.max.y, b.min.z);
-    glEnd();
-}
-
-
 void PointView::paintGL()
 {
     RadiosityIntegrator integrator(m_probeRes);
-//    if(m_points)
-//        microRasterize(integrator, m_cursorPos, V3f(0,0,-1), M_PI, *m_points);
+    C3f col(1.0f);
     if(m_pointTree)
-        microRasterize(integrator, m_cursorPos, V3f(0,0,-1), M_PI,
+    {
+        // Get a vector toward the probe position from the camera center
+        QMatrix4x4 viewMatrix = m_camera.viewMatrix();
+        V3f d = (qt2exr(viewMatrix.inverted().
+                        map(viewMatrix.map(exr2qt(m_cursorPos))*1.1)) -
+                 m_cursorPos).normalized();
+        float coneAngle = M_PI;
+        microRasterize(integrator, m_cursorPos, d,
+                       coneAngle,
                        m_probeMaxSolidAngle, *m_pointTree);
+        col = integrator.radiosity(d, coneAngle);
+    }
 
     //--------------------------------------------------
     // Draw main scene
@@ -465,6 +479,14 @@ void PointView::paintGL()
     glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
 
     drawMicroBuf(integrator.microBuf());
+
+//    glColor(col);
+//    glBegin(GL_QUADS);
+//        glTexCoord2f(0, 0); glVertex2f(0, 0);
+//        glTexCoord2f(1, 0); glVertex2f(1, 0);
+//        glTexCoord2f(1, 1); glVertex2f(1, 1);
+//        glTexCoord2f(0, 1); glVertex2f(0, 1);
+//    glEnd();
 
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
@@ -774,7 +796,7 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
 // PointViewerMainWindow implementation
 
 PointViewerMainWindow::PointViewerMainWindow(
-        const QString& initialPointFileName)
+        const QStringList& initialPointFileNames)
 {
     setWindowTitle("Aqsis point cloud viewer");
 
@@ -783,7 +805,7 @@ PointViewerMainWindow::PointViewerMainWindow(
     QAction* openAct = fileMenu->addAction(tr("&Open"));
     openAct->setStatusTip(tr("Open a point cloud file"));
     openAct->setShortcuts(QKeySequence::Open);
-    connect(openAct, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(openAct, SIGNAL(triggered()), this, SLOT(openFiles()));
     QAction* quitAct = fileMenu->addAction(tr("&Quit"));
     quitAct->setStatusTip(tr("Exit the application"));
     quitAct->setShortcuts(QKeySequence::Quit);
@@ -799,8 +821,8 @@ PointViewerMainWindow::PointViewerMainWindow(
 
     m_pointView = new PointView(this);
     setCentralWidget(m_pointView);
-    if(!initialPointFileName.isEmpty())
-        m_pointView->loadPointFile(initialPointFileName);
+    if(!initialPointFileNames.empty())
+        m_pointView->loadPointFiles(initialPointFileNames);
 }
 
 
@@ -811,12 +833,13 @@ void PointViewerMainWindow::keyReleaseEvent(QKeyEvent* event)
 }
 
 
-void PointViewerMainWindow::openFile()
+void PointViewerMainWindow::openFiles()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-            tr("Open point cloud"), "", tr("Point cloud files (*.ptc)"));
-    if(!fileName.isNull())
-        m_pointView->loadPointFile(fileName);
+    QStringList fileNames = QFileDialog::getOpenFileNames(this,
+            tr("Select one or more point clouds to open"), "",
+            tr("Point cloud files (*.ptc)"));
+    if(!fileNames.empty())
+        m_pointView->loadPointFiles(fileNames);
 }
 
 
@@ -871,12 +894,13 @@ int main(int argc, char *argv[])
          "resolution of point cloud")
         ("radiusmult,r", po::value<float>()->default_value(1),
          "multiplying factor for surfel radius")
-        ("point_file", po::value<std::string>(), "file to display")
+        ("point_files", po::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "[]"),
+         "file to display")
     ;
     // Parse options
     po::variables_map opts;
     po::positional_options_description positionalOpts;
-    positionalOpts.add("point_file", 1);
+    positionalOpts.add("point_files", -1);
     po::store(po::command_line_parser(app.argc(), app.argv())
               .options(optionsDesc).positional(positionalOpts).run(), opts);
     po::notify(opts);
@@ -894,14 +918,14 @@ int main(int argc, char *argv[])
     f.setSampleBuffers(true);
     QGLFormat::setDefaultFormat(f);
 
-    boost::shared_ptr<PointArray> points;
-    QString pointFileName;
-    if(opts.count("point_file") != 0)
-        pointFileName = QString::fromStdString(opts["point_file"]
-                                               .as<std::string>());
+    // Convert std::vector<std::string> into QStringList...
+    const std::vector<std::string>& pointFileNamesStd =
+                        opts["point_files"].as<std::vector<std::string> >();
+    QStringList pointFileNames;
+    for(int i = 0, iend = pointFileNamesStd.size(); i < iend; ++i)
+        pointFileNames.push_back(QString::fromStdString(pointFileNamesStd[i]));
 
-    PointViewerMainWindow window(pointFileName);
-//    std::cout << "npoints = " << points->size() << "\n";
+    PointViewerMainWindow window(pointFileNames);
     float maxSolidAngle = opts["maxsolidangle"].as<float>();
     int probeRes = opts["proberes"].as<int>();
     window.pointView().setProbeParams(probeRes, maxSolidAngle);
