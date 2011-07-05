@@ -442,13 +442,18 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
                        float sinConeAngle, float maxSolidAngle, int dataSize,
                        const PointOctree::Node* node)
 {
-    // Examine node bound and cull if possible
+    {
+        // Examine node bound and cull if possible
+        // TODO: Reinvestigate using (node->aggP - P) with spherical harmonics
+        V3f c = node->center - P;
+        // TODO: Is this check somewhat redundent with the one inside renderDisk?
+        if(sphereOutsideCone(c, c.length2(), node->boundRadius, N,
+                             cosConeAngle, sinConeAngle))
+            return;
+    }
     float r = node->aggR;
     V3f p = node->aggP - P;
     float plen2 = p.length2();
-    // TODO: Is this check somewhat redundent with the one inside renderDisk?
-    if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
-        return;
     // Examine solid angle of interior node bounding sphere to see whether we
     // can render it directly or not.
     //
@@ -468,6 +473,11 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
         //
         // The render order is sorted so that points are rendered front to
         // back.  This greatly improves the correctness of the hider.
+        //
+        // FIXME: The sorting procedure gets things wrong sometimes!  The
+        // problem is that points may stick outside the bounds of their octree
+        // nodes.  Probably we need to record all the points, sort, and
+        // finally render them to get this right.
         if(node->npoints != 0)
         {
             // Leaf node: simply render each child point.
