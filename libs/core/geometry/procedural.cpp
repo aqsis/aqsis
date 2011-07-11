@@ -37,6 +37,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "renderer.h"
+#include <aqsis/util/file.h>
 #include <aqsis/util/plugins.h>
 #include <aqsis/core/corecontext.h>
 
@@ -156,7 +157,7 @@ class CqRiProceduralPlugin : CqPluginBase
 				          + CqString ("\" in current searchpath");
 				return;
 			}
-			CqString strRealName = dsoPath.file_string();
+			CqString strRealName = native(dsoPath);
 			
             try
             {
@@ -322,8 +323,8 @@ TqPopenStream* CqRunProgramRepository::startNewRunProgram(
 	if(argv.empty())
 		AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken, "program name not present");
 	// Attempt to find the program in the procedural path
-	std::string progName = QGetRenderContext()->poptCurrent()
-		->findRiFileNothrow(argv[0], "procedural").file_string();
+	std::string progName = native(QGetRenderContext()->poptCurrent()
+		->findRiFileNothrow(argv[0], "procedural"));
 	if(progName.empty())
 	{
 		progName = argv[0];

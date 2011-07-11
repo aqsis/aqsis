@@ -34,14 +34,14 @@
 #include <aqsis/util/exception.h>
 
 #include <ostream>
-#include <boost/filesystem/path.hpp>
+#include <aqsis/util/file.h>
 
 namespace Aqsis
 {
 
 std::ostream& operator<<(std::ostream& o, const XqException& e)
 {
-	o << e.description () << " (" << boost::filesystem::path(e.where().first).leaf() << ", " << e.where().second << ")";
+	o << e.description () << " (" << filename(boostfs::path(e.where().first)) << ", " << e.where().second << ")";
 	o <<": " << e.what();
 
 	return o;

@@ -391,8 +391,8 @@ class blobby_vm_assembler
 										+ SHARED_LIBRARY_SUFFIX;
 							try
 							{
-								CqString fullName = QGetRenderContext()->poptCurrent()
-									->findRiFile(dboName, "procedural").file_string();
+								CqString fullName = native(QGetRenderContext()->poptCurrent()
+														   ->findRiFile(dboName, "procedural"));
 								DBO_handle = DBO.SimpleDLOpen(&fullName);
 							}
 							catch(XqInvalidFile& /*e*/)

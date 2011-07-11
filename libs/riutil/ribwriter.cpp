@@ -957,7 +957,7 @@ RtVoid RibWriter<Formatter>::ReadArchive(RtConstToken name,
         boostfs::path path = findFileNothrow(name, m_archiveSearchPath);
         if(!path.empty())
         {
-            std::ifstream inputFile(path.file_string().c_str());
+            std::ifstream inputFile(native(path).c_str());
             if(inputFile)
             {
                 m_services.parseRib(inputFile, name, m_services.firstFilter());

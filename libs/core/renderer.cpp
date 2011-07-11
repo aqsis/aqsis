@@ -1182,7 +1182,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	if(shaderFile)
 	{
 		Aqsis::log() << info << "Loading shader \"" << strName
-			<< "\" from file \"" << shaderPath.file_string()
+			<< "\" from file \"" << native(shaderPath)
 			<< "\"" << std::endl;
 
 		std::string dsoPath;

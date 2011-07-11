@@ -261,6 +261,33 @@ std::vector<std::string> cliGlob(const std::string& pattern)
 	return std::vector<std::string>(1, pattern);
 }
 
+
+// Define BOOST_FILESYSTEM_VERSION for convenience; older boost versions don't
+// define this for us.
+#ifndef BOOST_FILESYSTEM_VERSION
+#	define BOOST_FILESYSTEM_VERSION 2
+#endif
+
+std::string native(const boostfs::path& path)
+{
+#if BOOST_FILESYSTEM_VERSION == 3
+	return path.native();
+#elif BOOST_FILESYSTEM_VERSION == 2
+	return path.file_string();
+#endif
+}
+
+
+std::string filename(const boostfs::path& path)
+{
+#if BOOST_FILESYSTEM_VERSION == 3
+	return path.filename().native();
+#elif BOOST_FILESYSTEM_VERSION == 2
+	return path.leaf();
+#endif
+}
+
+
 #endif // AQSIS_SYSTEM_WIN32
 
 } // namespace Aqsis

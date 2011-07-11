@@ -101,13 +101,13 @@ void CqDSORepository::SetDSOPath(const char* pathStr)
 				// If the path points to a directory, we add each library in the
 				// named directory to the list of DSO candidates.
 				std::vector<std::string> files = Glob(
-						((*path)/"*" SHARED_LIBRARY_SUFFIX).file_string() );
+						native((*path)/"*" SHARED_LIBRARY_SUFFIX) );
 				m_DSOPathList.insert(m_DSOPathList.end(), files.begin(), files.end());
 			}
 			else
 			{
 				// else add the file itself.
-				m_DSOPathList.push_back(path->file_string());
+				m_DSOPathList.push_back(native(*path));
 			}
 		}
 		catch(boost::filesystem::filesystem_error& /*e*/)

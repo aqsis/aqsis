@@ -173,7 +173,7 @@ CqExrInputFile::CqExrInputFile(const boostfs::path& fileName)
 {
 	try
 	{
-		m_exrFile.reset(new Imf::InputFile(fileName.file_string().c_str()));
+		m_exrFile.reset(new Imf::InputFile(native(fileName).c_str()));
 	}
 	catch(Iex::BaseExc &e)
 	{
