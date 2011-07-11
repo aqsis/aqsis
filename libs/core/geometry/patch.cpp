@@ -858,9 +858,11 @@ CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 	clone->m_uPeriodic = m_uPeriodic;
 	clone->m_vPeriodic = m_vPeriodic;
 
+	clone->m_patches.insert(clone->m_patches.begin(), m_patches.begin(),
+							m_patches.end());
+
 	return ( clone );
 }
-
 
 
 //---------------------------------------------------------------------
@@ -869,31 +871,72 @@ CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 
 void CqSurfacePatchMeshBicubic::Bound(CqBound* bound) const
 {
-	assert( NULL != P() );
+	// The patch mesh must first have been split into its child patches,
+	//  which are assumed to have been transformed into the Bezier basis
+	//  and are also in camera-space coordinates.
+	assert(m_patches.size() > 0);
 
-	// Get the boundary in camera space.
-	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
-	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	TqUint i;
-	for ( i = 0; i < P() ->Size(); i++ )
+	// Get the bound in camera space, by encapsulating the bounds of the
+	//  child patches.
+	CqBound patchBound;
+	std::vector<boost::shared_ptr<CqSurfacePatchBicubic> >::const_iterator
+		iPatch, end;
+	iPatch = m_patches.begin();
+	end = m_patches.end();
+	(*(iPatch++))->Bound(bound);
+	for (; iPatch != end; iPatch++)
 	{
-		CqVector3D	vecV = vectorCast<CqVector3D>(P()->pValue( i )[0]);
-		if ( vecV.x() < vecA.x() )
-			vecA.x( vecV.x() );
-		if ( vecV.y() < vecA.y() )
-			vecA.y( vecV.y() );
-		if ( vecV.x() > vecB.x() )
-			vecB.x( vecV.x() );
-		if ( vecV.y() > vecB.y() )
-			vecB.y( vecV.y() );
-		if ( vecV.z() < vecA.z() )
-			vecA.z( vecV.z() );
-		if ( vecV.z() > vecB.z() )
-			vecB.z( vecV.z() );
+		(*iPatch)->Bound(&patchBound);
+		bound->Encapsulate(&patchBound);
 	}
-	bound->vecMin() = vecA;
-	bound->vecMax() = vecB;
-	AdjustBoundForTransformationMotion( bound );
+}
+
+
+//---------------------------------------------------------------------
+/** Transforms the surface by the specified matrix.
+ */
+void CqSurfacePatchMeshBicubic::Transform(
+	const CqMatrix& matTx,
+	const CqMatrix& matITTx,
+	const CqMatrix& matRTx,
+	TqInt iTime)
+{
+	// before we transform the patch mesh, we must first have called
+	//  ConvertToBezierBasis(), which in turn calls SplitInternally().
+	//  SplitInternally() will have created a cache of child bicubic patch
+	//  objects.  in this function, we presume that we are operating on the
+	//  child patches, and not on the original patch mesh.
+	assert(m_patches.size() != 0);
+
+	// transform each of the child patches
+	std::vector<boost::shared_ptr<CqSurfacePatchBicubic> >::iterator
+		iPatch, end;
+	end = m_patches.end();
+	for (iPatch = m_patches.begin(); iPatch != end; iPatch++) {
+		(*iPatch)->Transform(matTx, matITTx, matRTx, iTime);
+	}
+}
+
+
+//---------------------------------------------------------------------
+/** Convert the patch mesh to use a Bezier basis matrix.
+ */
+
+void CqSurfacePatchMeshBicubic::ConvertToBezierBasis()
+{
+	// split the patch mesh internally, so that it becomes a bag of
+	//  individual bicubic patches
+	SplitInternally();
+
+	CqMatrix matuBasis, matvBasis;
+	matuBasis = pAttributes()->GetMatrixAttribute("System", "Basis")[0];
+	matvBasis = pAttributes()->GetMatrixAttribute("System", "Basis")[1];
+
+	std::vector<boost::shared_ptr<CqSurfacePatchBicubic> >::iterator
+		iPatch, end;
+	end = m_patches.end();
+	for (iPatch = m_patches.begin(); iPatch != end; iPatch++)
+		(*iPatch)->ConvertToBezierBasis(matuBasis, matvBasis);
 }
 
 
@@ -901,12 +944,31 @@ void CqSurfacePatchMeshBicubic::Bound(CqBound* bound) const
 /** Split the patch mesh into individual patches and post them.
  */
 
+TqInt CqSurfacePatchMeshBicubic::Split(
+	std::vector<boost::shared_ptr<CqSurface> >& aSplits)
+{
+	// we should already have called ConvertToBezierBasis(), which in turn
+	//  calls SplitInternally().  SplitInternally() created an internal cache
+	//  of bicubic mesh child objects, which we can now directly append to
+	//  the vector of splits.
+	assert(m_patches.size() != 0);
+
+	aSplits.insert(aSplits.end(), m_patches.begin(), m_patches.end());
+	return m_patches.size();
+}
+
+
+//---------------------------------------------------------------------
+/** Internally split the patch mesh into individual child bicubic patches
+ *  and cache them.
+ */
+
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
+void CqSurfacePatchMeshBicubic::SplitInternally()
 {
-	TqInt cSplits = 0;
+	assert(m_patches.size() == 0);  // do not try to split twice!
 
 	CqVector4D vecPoint;
 	TqInt iP = 0;
@@ -1045,11 +1107,9 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface>
 				pSurface->t() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v1 );
 			}
 
-			aSplits.push_back( pSurface );
-			cSplits++;
+			m_patches.push_back( pSurface );
 		}
 	}
-	return ( cSplits );
 }
 
 

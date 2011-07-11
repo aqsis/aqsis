@@ -153,6 +153,20 @@ typedef boost::tokenizer<CqSearchPathsTokenFunc<boostfs::path>,
 		std::string::const_iterator, boostfs::path> TqPathsTokenizer;
 
 
+/// Return a string representing the native path name for the OS
+///
+/// This is a portability wrapper for the boost::filesystem::path::native()
+/// function of boost filesystem v3 to support boost versions older than 1.44.
+std::string native(const boostfs::path& path);
+
+
+/// Get the file name component of a full path.
+///
+/// This is a portability wrapper for the boost::filesystem::path::filename()
+/// function of boost filesystem v3 to support boost versions older than
+/// 1.44.
+std::string filename(const boostfs::path& path);
+
 
 //==============================================================================
 // Implementation details

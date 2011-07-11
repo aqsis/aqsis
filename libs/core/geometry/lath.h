@@ -30,6 +30,7 @@
 #include	<aqsis/aqsis.h>
 #include	<aqsis/util/pool.h>
 #include	<vector>
+#include	<cstddef>
 
 namespace Aqsis {
 

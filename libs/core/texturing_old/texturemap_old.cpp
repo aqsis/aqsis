@@ -578,7 +578,7 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 		}
 
 		// Now open it as a tiff file.
-		m_pImage = TIFFOpen( imagePath.file_string().c_str(), "r" );
+		m_pImage = TIFFOpen( native(imagePath).c_str(), "r" );
 	}
 
 	if ( m_pImage )
@@ -1090,7 +1090,7 @@ void CqTextureMapOld::Open()
 		Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 		return ;
 	}
-	m_pImage = TIFFOpen(imagePath.file_string().c_str(), "r" );
+	m_pImage = TIFFOpen(native(imagePath).c_str(), "r" );
 
 	if ( m_pImage )
 	{

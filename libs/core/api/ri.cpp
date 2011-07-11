@@ -392,12 +392,12 @@ void SetDefaultRiOptions()
 
 	// Read in the system configuration file.
 	boost::filesystem::path systemRcPath = rootPath / AQSIS_XSTR(AQSIS_MAIN_CONFIG_NAME);
-	std::ifstream rcFile(systemRcPath.file_string().c_str(), std::ios::binary);
+	std::ifstream rcFile(native(systemRcPath).c_str(), std::ios::binary);
 	if(rcFile)
 	{
 		Aqsis::log() << info
 			<< "Reading system config \"" << systemRcPath << "\"\n";
-		cxxRenderContext()->parseRib(rcFile, systemRcPath.file_string().c_str());
+		cxxRenderContext()->parseRib(rcFile, native(systemRcPath).c_str());
 		rcFile.close();
 	}
 	else
@@ -412,22 +412,22 @@ void SetDefaultRiOptions()
 		boost::filesystem::path homeRcPath = homePath;
 		homeRcPath /= ".aqsisrc";
 
-		std::ifstream rcFile(homeRcPath.file_string().c_str(), std::ios::binary);
+		std::ifstream rcFile(native(homeRcPath).c_str(), std::ios::binary);
 		if(rcFile)
 		{
 			Aqsis::log() << info << "Reading user config \"" << homeRcPath << "\"\n";
-			cxxRenderContext()->parseRib(rcFile, homeRcPath.file_string().c_str());
+			cxxRenderContext()->parseRib(rcFile, native(homeRcPath).c_str());
 		}
 		else
 		{
 			boost::filesystem::path homeRcPath2 = homePath;
 			homeRcPath2 /= "_aqsisrc";
 		
-			std::ifstream rcFile(homeRcPath2.file_string().c_str(), std::ios::binary);
+			std::ifstream rcFile(native(homeRcPath2).c_str(), std::ios::binary);
 			if(rcFile)
 			{
 				Aqsis::log() << info << "Reading user config \"" << homeRcPath2 << "\"\n";
-				cxxRenderContext()->parseRib(rcFile, homeRcPath2.file_string().c_str());
+				cxxRenderContext()->parseRib(rcFile, native(homeRcPath2).c_str());
 			}
 			else
 			{
@@ -2701,24 +2701,16 @@ RtVoid RiCxxCore::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap, RtI
 		{
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetDefaultPrimitiveVariables();
-			std::vector<boost::shared_ptr<CqSurface> > aSplits;
-			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
-			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
-			{
-				CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
-				CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
-				static_cast<CqSurfacePatchBicubic*>( iSS->get
-				                                     () ) ->ConvertToBezierBasis( matuBasis, matvBasis );
-				TqFloat time = QGetRenderContext()->Time();
-				// Transform the points into camera space for processing,
-				CqMatrix matOtoW, matNOtoW, matVOtoW;
-				QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
-				QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
-				QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
-				(*iSS)->Transform( matOtoW, matNOtoW, matVOtoW);
-				CreateGPrim( *iSS );
-			}
+			TqFloat time = QGetRenderContext()->Time();
+			// Convert to Bezier basis
+			pSurface->ConvertToBezierBasis();
+			// Transform into camera space for processing
+			CqMatrix matOtoW, matNOtoW, matVOtoW;
+			QGetRenderContext() ->matSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matOtoW );
+			QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matNOtoW );
+			QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time, matVOtoW );
+			pSurface->Transform( matOtoW, matNOtoW, matVOtoW);
+			CreateGPrim( pSurface );
 		}
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )

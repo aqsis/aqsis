@@ -129,7 +129,7 @@ Fl::unlock();}
 char* filename = fl_file_chooser("Load Image", "All Supported Files (*.{tif,tiff,exr,env,tx,tex,shad,zfile,sm})\tTIFF Files (*.{tif,tiff})\tOpenEXR Files (*.exr)\tTeqser Files (*.{env,tx,tex})\tShadow Files (*.{shad,zfile,sm})", "");
 if(filename)
 {
-	std::string name = boost::filesystem::path(filename).leaf();
+	std::string name = filename(boostfs::path(filename));
 	loadImageToCurrentBook(name, filename);
 }
 Fl::unlock();}
@@ -137,7 +137,7 @@ Fl::unlock();}
             code0 {\#include <FL/Fl_File_Chooser.H>}
             code1 {\#include <FL/fl_ask.H>}
             code2 {\#include <aqsis/version.h>}
-            code3 {\#include <boost/filesystem/path.hpp>}
+            code3 {\#include <aqsis/util/file.h>}
           }
           MenuItem m_menuImagesRemove {
             label {&Remove}

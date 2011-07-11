@@ -1784,7 +1784,7 @@ RtVoid RenderApi::ReadArchive(RtConstToken name, RtArchiveCallback callback,
 	if(location.empty())
 		location = findFileNothrow(name, m_opts->archiveSearchPath);
 
-	std::ifstream archive(location.file_string().c_str(),
+	std::ifstream archive(native(location).c_str(),
                           std::ios::in | std::ios::binary);
     if(!archive)
     {

@@ -34,6 +34,7 @@
 
 #include <aqsis/util/logging.h>
 #include <aqsis/version.h>
+#include <aqsis/util/file.h>
 
 #include "piqslmainwindow.h"
 #include "image.h"
@@ -183,11 +184,11 @@ void CqPiqslMainWindow::addImage_cb(Fl_Widget* w, void*)
 void CqPiqslMainWindow::addImage()
 {
 	Fl::lock();
-	char* filename = fl_file_chooser("Load Image", "All Supported Files (*.{tif,tiff,exr,env,tx,tex,shad,zfile,sm})\tTIFF Files (*.{tif,tiff})\tOpenEXR Files (*.exr)\tTeqser Files (*.{env,tx,tex})\tShadow Files (*.{shad,zfile,sm})", "");
-	if(filename)
+	char* filePath = fl_file_chooser("Load Image", "All Supported Files (*.{tif,tiff,exr,env,tx,tex,shad,zfile,sm})\tTIFF Files (*.{tif,tiff})\tOpenEXR Files (*.exr)\tTeqser Files (*.{env,tx,tex})\tShadow Files (*.{shad,zfile,sm})", "");
+	if(filePath)
 	{
-		std::string name = boost::filesystem::path(filename).leaf();
-		loadImageToCurrentBook(name, filename);
+		std::string name = filename(boostfs::path(filePath));
+		loadImageToCurrentBook(name, filePath);
 		updateImageList();
 	}
 	Fl::unlock();

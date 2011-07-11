@@ -512,7 +512,7 @@ void CqMicroPolyGrid::Shade( bool canCullGrid )
 				break;
 		}
 
-		if ( cCulled == gs )
+		if ( canCullGrid && cCulled == gs )
 		{
 			m_fCulled = true;
 			STATS_INC( GRD_culled );

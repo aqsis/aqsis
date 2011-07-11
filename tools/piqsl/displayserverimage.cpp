@@ -38,6 +38,7 @@
 #include	"displayserverimage.h"
 
 #include	<aqsis/math/math.h>
+#include 	<aqsis/util/file.h>
 #include 	<aqsis/util/logging.h>
 #include	<aqsis/util/smartptr.h>
 
@@ -98,8 +99,8 @@ void CqDisplayServerImage::serialise(const boost::filesystem::path& directory)
 		++index;
 	}
 
-	setFilename(uniquePath.file_string());
-	saveToFile(uniquePath.file_string());
+	setFilename(native(uniquePath));
+	saveToFile(native(uniquePath));
 }
 
 

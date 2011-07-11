@@ -850,6 +850,8 @@ class CqMotionModeBlock : public CqModeBlock
 		virtual	void	AdvanceTime()
 		{
 			m_iTime++;
+			// don't ever exceed one time slot past the maximum
+			assert(m_iTime <= m_aTimes.size());
 		}
 		/// Get the current frame index if in a motion block.
 		virtual	TqInt	TimeIndex() const

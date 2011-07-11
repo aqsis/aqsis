@@ -51,7 +51,7 @@ namespace Aqsis {
 CqZInputFile::CqZInputFile(const boostfs::path& fileName)
 	: m_header(),
 	m_fileName(fileName),
-	m_fileStream(fileName.file_string().c_str(), std::ios::in | std::ios::binary),
+	m_fileStream(native(fileName).c_str(), std::ios::in | std::ios::binary),
 	m_dataBegin(0)
 {
 	if(!m_fileStream.is_open())
