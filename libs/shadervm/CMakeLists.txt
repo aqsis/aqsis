@@ -27,9 +27,10 @@ set(shadervm_hdrs
 source_group("Header Files" FILES ${shadervm_hdrs})
 
 add_subproject(shaderexecenv)
+include_subproject(partio)
 
 aqsis_add_library(aqsis_shadervm ${shadervm_srcs} ${shadervm_hdrs}
-	${shaderexecenv_srcs} ${shaderexecenv_hdrs}
+	${shaderexecenv_srcs} ${shaderexecenv_hdrs} ${partio_srcs}
 	COMPILE_DEFINITIONS AQSIS_SHADERVM_EXPORTS
 	LINK_LIBRARIES aqsis_math aqsis_util aqsis_tex ${Boost_REGEX_LIBRARY}
 )

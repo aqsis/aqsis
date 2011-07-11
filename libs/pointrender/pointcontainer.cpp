@@ -33,70 +33,73 @@
 #include <cmath>
 #include <cstring>
 
-#include <aqsis/ri/pointcloud.h>
+#include <Partio.h>
+
+#include <aqsis/util/logging.h>
 
 namespace Aqsis {
 
+static void releasePartioFile(Partio::ParticlesInfo* file) { file->release(); }
 
 bool loadPointFile(PointArray& points, const std::string& fileName)
 {
-    // Use aqsis point API for now.
-    int nvars = 0;
-    // Having a max number of vars is totally bogus, but we'll probably migrate
-    // away from this code shortly.
-    const int maxVars = 20;
-    const char* vartypes[maxVars] = {0};
-    const char* varnames[maxVars] = {0};
-    PtcPointCloud cloud = PtcOpenPointCloudFile(fileName.c_str(), &nvars,
-                                                vartypes, varnames);
-    // If nvars > maxVars we've probably crashed already!  Ugh, what an API :(
-    assert(nvars <= maxVars);
-    if(!cloud)
+    namespace Pio = Partio;
+    boost::shared_ptr<Pio::ParticlesData> ptFile(Pio::read(fileName.c_str()),
+                                                 releasePartioFile);
+    if(!ptFile)
         return false;
-    float P[3] = {0};
-    float N[3] = {0};
-    float extras[maxVars*3] = {0};
-    // Extract offsets for radiosity and area
-    const float* area = 0;
-    const float defaultRadiosity[3] = {1, 1, 1};
-    const float* radiosity = defaultRadiosity;
-    for(int i = 0, offset = 0; i < nvars; ++i)
+    // Look for the necessary attributes in the file
+    Pio::ParticleAttribute posAttr;
+    Pio::ParticleAttribute norAttr;
+    Pio::ParticleAttribute areaAttr;
+    Pio::ParticleAttribute radAttr;
+    if(!ptFile->attributeInfo("position", posAttr) ||
+       !ptFile->attributeInfo("normal", norAttr)   ||
+       !ptFile->attributeInfo("_area", areaAttr)   ||
+       !ptFile->attributeInfo("_radiosity", radAttr))
     {
-        if(strcmp(varnames[i], "_area") == 0 &&
-           strcmp(vartypes[i], "float") == 0)
-        {
-            area = extras + offset;
-        }
-        else if(strcmp(varnames[i], "_radiosity") == 0 &&
-                strcmp(vartypes[i], "color") == 0)
-        {
-            radiosity = extras + offset;
-        }
-        if(strcmp(vartypes[i], "float") == 0)       offset += 1;
-        else if(strcmp(vartypes[i], "color") == 0)  offset += 3;
-        else if(strcmp(vartypes[i], "normal") == 0) offset += 3;
-        else if(strcmp(vartypes[i], "vector") == 0) offset += 3;
-        else if(strcmp(vartypes[i], "point") == 0)  offset += 3;
-        else if(strcmp(vartypes[i], "matrix") == 0) offset += 16;
-        else
-            assert(0 && "unknown type");
-    }
-    if(!area)
+        Aqsis::log() << "Couldn't find required attribute in \""
+            << fileName << "\"\n";
         return false;
-    // Ok, file contains the necessary info.  Read in the points.
-    assert(points.stride == 10);
+    }
+    // Check types
+    if(posAttr.type != Pio::VECTOR ||
+       norAttr.type != Pio::VECTOR ||
+       areaAttr.type != Pio::FLOAT || areaAttr.count != 1 ||
+       radAttr.type != Pio::FLOAT || radAttr.count != 3)
+    {
+        Aqsis::log() << "Point attribute count or type wrong in \""
+            << fileName << "\"\n";
+        return false;
+    }
+    // Allocate extra space in output array
+    int npts = ptFile->numParticles();
     points.stride = 10;
     std::vector<float>& data = points.data;
-    while(PtcReadDataPoint(cloud, P, N, 0, extras))
+    data.resize(data.size() + npts*10, 0);
+    float* out = &data[data.size() - npts*10];
+    // Iterate over all particles
+    Pio::ParticleAccessor posAcc(posAttr);
+    Pio::ParticleAccessor norAcc(norAttr);
+    Pio::ParticleAccessor areaAcc(areaAttr);
+    Pio::ParticleAccessor radAcc(radAttr);
+    Pio::ParticlesData::const_iterator pt = ptFile->begin();
+    pt.addAccessor(posAcc);
+    pt.addAccessor(norAcc);
+    pt.addAccessor(areaAcc);
+    pt.addAccessor(radAcc);
+    for(; pt != ptFile->end(); ++pt)
     {
-        data.push_back(P[0]); data.push_back(P[1]); data.push_back(P[2]);
-        data.push_back(N[0]); data.push_back(N[1]); data.push_back(N[2]);
-        data.push_back(sqrtf(*area/M_PI));
-        data.push_back(radiosity[0]);
-        data.push_back(radiosity[1]);
-        data.push_back(radiosity[2]);
+        // TODO: Use nicer types here?
+        const Pio::Data<float,3>& P = posAcc.data<Pio::Data<float,3> >(pt);
+        const Pio::Data<float,3>& N = norAcc.data<Pio::Data<float,3> >(pt);
+        const Pio::Data<float,1>& A = areaAcc.data<Pio::Data<float,1> >(pt);
+        const Pio::Data<float,3>& C = radAcc.data<Pio::Data<float,3> >(pt);
+        *out++ = P[0]; *out++ = P[1]; *out++ = P[2];
+        *out++ = N[0]; *out++ = N[1]; *out++ = N[2];
+        *out++ = sqrtf(A[0]/M_PI);
+        *out++ = C[0]; *out++ = C[1]; *out++ = C[2];
     }
-    PtcClosePointCloudFile(cloud);
     return true;
 }
 

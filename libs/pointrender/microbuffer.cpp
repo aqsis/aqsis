@@ -482,7 +482,7 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
         {
             // Leaf node: simply render each child point.
             std::pair<float, int> childOrder[8];
-            assert(node->npoints < 8);
+            assert(node->npoints <= 8);
             for(int i = 0; i < node->npoints; ++i)
             {
                 const float* data = &node->data[i*dataSize];

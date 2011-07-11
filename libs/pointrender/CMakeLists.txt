@@ -7,8 +7,11 @@ if(AQSIS_USE_OPENEXR AND QT4_FOUND)
 
 	qt4_wrap_cpp(moc_srcs ptview.h interactivecamera.h)
 
+	include_subproject(partio)
+
 	set(srcs
 		${moc_srcs}
+		${partio_srcs}
 		ptview.cpp
 		microbuffer.cpp
 		pointcontainer.cpp

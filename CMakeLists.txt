@@ -268,6 +268,7 @@ include_directories(
 
 # Thirdparty libs
 declare_subproject(thirdparty/tinyxml)
+declare_subproject(thirdparty/partio)
 if(AQSIS_USE_PDIFF)
   add_subdirectory(thirdparty/pdiff)
 endif()
