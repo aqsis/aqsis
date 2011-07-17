@@ -119,6 +119,7 @@ PiqslMainWindow::PiqslMainWindow()
 
     // Image viewer
     PiqslImageView* image = new PiqslImageView();
+    image->setSelectionModel(imageListView->selectionModel());
     splitter->addWidget(image);
 
     // Collapse list of images for maximum screen space
@@ -164,24 +165,18 @@ void PiqslMainWindow::aboutDialog()
 //------------------------------------------------------------------------------
 PiqslImageView::PiqslImageView(QWidget* parent)
     : QWidget(parent),
-    m_image(new CqImage()),
+    m_image(),
     m_zoom(1),
-    m_x(0),
-    m_y(0)
+    m_tlPos(0,0),
+    m_lastPos(0,0)
 {
-    setFocusPolicy(Qt::StrongFocus);
-    m_image->loadFromFile("lena_std.tif");
 }
 
 
 void PiqslImageView::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_H)
-    {
-        m_x = width()/2 - m_image->imageWidth()*m_zoom/2;
-        m_y = height()/2 - m_image->imageHeight()*m_zoom/2;
-        update();
-    }
+        centerImage();
     else
         event->ignore();
 }
@@ -197,25 +192,23 @@ void PiqslImageView::mouseMoveEvent(QMouseEvent* event)
 {
     QPoint delta = event->pos() - m_lastPos;
     m_lastPos = event->pos();
-    m_x += delta.x();
-    m_y += delta.y();
+    m_tlPos += QPointF(delta);
     update();
 }
 
 
 void PiqslImageView::wheelEvent(QWheelEvent* event)
 {
-    int newZoom = 0;
+    float newZoom = 0;
     // Zoom in powers of two.
     if(event->delta() > 0)
-        newZoom = std::min(1024, 2*m_zoom);
+        newZoom = std::min(1024.0f, 2*m_zoom);
     else
-        newZoom = std::max(1, m_zoom/2);
+        newZoom = std::max(1.0f, m_zoom/2);
     // Adjust image position so that we zoom in toward the current mouse
     // cursor location
-    float ratio = float(newZoom)/m_zoom;
-    m_x = lround(event->x() - ratio*(event->x() - m_x));
-    m_y = lround(event->y() - ratio*(event->y() - m_y));
+    QPointF mousePos = event->pos();
+    m_tlPos = mousePos - (newZoom/m_zoom)*(mousePos - m_tlPos);
     m_zoom = newZoom;
     update();
 }
@@ -227,19 +220,32 @@ void PiqslImageView::resizeEvent(QResizeEvent* event)
         return;
     // Reposition image such that the pixel in the center of the widget stays
     // in the center after the resize.
-    m_x += (event->size().width() - event->oldSize().width())/2;
-    m_y += (event->size().height() - event->oldSize().height())/2;
+    QPointF size(event->size().width(), event->size().height());
+    QPointF oldSize(event->oldSize().width(), event->oldSize().height());
+    m_tlPos += 0.5f*(size - oldSize);
 }
 
 
 void PiqslImageView::paintEvent(QPaintEvent* event)
 {
+    if(!m_image)
+    {
+        QPainter painter(this);
+        painter.drawText(0, 0, width(), height(), Qt::AlignCenter,
+                         tr("No image"));
+        return;
+    }
+    int zoom = lround(m_zoom);
+    assert(zoom > 0);
     // With & height of zoomed input
-    int wIn = m_image->imageWidth()*m_zoom;
-    int hIn = m_image->imageHeight()*m_zoom;
-    // Top left location for zoomed input (centred)
-    int xIn = m_x;//width()/2 - wIn/2;
-    int yIn = m_y;//height()/2 - hIn/2;
+    int wIn = m_image->imageWidth()*zoom;
+    int hIn = m_image->imageHeight()*zoom;
+    // Top left location for zoomed input
+    int x0 = lround(m_tlPos.x());
+    int y0 = lround(m_tlPos.y());
+    // Top left of actual image (may be different from x0,y0 if cropped)
+    int xIn = x0 + m_image->originX();
+    int yIn = y0 + m_image->originY();
     // Clamp source image bound to widget extent
     int x1 = clamp(xIn, 0, width());
     int y1 = clamp(yIn, 0, height());
@@ -255,9 +261,65 @@ void PiqslImageView::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     const CqMixedImageBuffer* buf = m_image->displayBuffer().get();
     QImage img(buf->rawData(), buf->width(), buf->height(), QImage::Format_RGB888);
+    // Draw border for cropping
+    painter.drawRect(QRect(x0, y0, m_image->frameWidth()*zoom - 1,
+                           m_image->frameHeight()*zoom - 1));
+    // Draw appropriate portion of the image
     painter.drawImage(QRectF(x1, y1, w, h), img,
-                      QRectF(float(xOff)/m_zoom, float(yOff)/m_zoom,
-                             float(w)/m_zoom, float(h)/m_zoom));
+                      QRectF(float(xOff)/zoom, float(yOff)/zoom,
+                             float(w)/zoom, float(h)/zoom));
+}
+
+
+void PiqslImageView::setSelectionModel(QItemSelectionModel* selectionModel)
+{
+    connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection&,
+                                                    const QItemSelection&)),
+            this, SLOT(changeSelectedImage(const QItemSelection&,
+                                           const QItemSelection&)));
+    setSelectedImage(selectionModel->selectedIndexes());
+}
+
+
+void PiqslImageView::changeSelectedImage(const QItemSelection& selected,
+                                         const QItemSelection& deselected)
+{
+    setSelectedImage(selected.indexes());
+}
+
+
+void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
+{
+    if(indexes.empty())
+        return;
+    int prevWidth = 0;
+    int prevHeight = 0;
+    if(m_image)
+    {
+        prevWidth = m_image->frameWidth();
+        prevHeight = m_image->frameHeight();
+    }
+    m_image = indexes[0].data().value<boost::shared_ptr<CqImage> >();
+    if(prevWidth > 0)
+    {
+        // Keep the center of the image in the same place when switching to an
+        // image of different dimensions.
+        m_tlPos += 0.5f*QPointF(prevWidth - m_image->frameWidth(),
+                                prevHeight - m_image->frameHeight());
+    }
+    else
+        centerImage();
+    update();
+}
+
+
+void PiqslImageView::centerImage()
+{
+    if(!m_image)
+        return;
+    m_tlPos = QPointF(width()/2.0f - m_image->frameWidth()*m_zoom/2.0f,
+                      height()/2.0f - m_image->frameHeight()*m_zoom/2.0f);
+    update();
 }
 
 
@@ -271,6 +333,9 @@ ImageListModel::ImageListModel(QObject* parent)
     m_images.push_back(boost::shared_ptr<CqImage>(new CqImage()));
     m_images[1]->loadFromFile("menger_glossy.tif");
     m_images[1]->setName("menger_glossy.tif");
+    m_images.push_back(boost::shared_ptr<CqImage>(new CqImage()));
+    m_images[2]->loadFromFile("box.tif");
+    m_images[2]->setName("box.tif");
 }
 
 
@@ -296,6 +361,7 @@ ImageListDelegate::ImageListDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }
+
 
 void ImageListDelegate::paint(QPainter* painter,
                               const QStyleOptionViewItem& option,

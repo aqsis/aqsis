@@ -40,6 +40,10 @@
 
 #include "image.h"
 
+class QItemSelectionModel;
+class QItemSelection;
+class ImageListModel;
+
 namespace Aqsis {
 
 /// Main window of the piqsl interface
@@ -68,6 +72,8 @@ class PiqslImageView : public QWidget
     public:
         PiqslImageView(QWidget* parent = 0);
 
+        void setSelectionModel(QItemSelectionModel* selectionModel);
+
     protected:
         void keyPressEvent(QKeyEvent* event);
 
@@ -78,11 +84,19 @@ class PiqslImageView : public QWidget
         void resizeEvent(QResizeEvent* event);
         void paintEvent(QPaintEvent* event);
 
+    private slots:
+        void changeSelectedImage(const QItemSelection& selected,
+                                 const QItemSelection& deselected);
+        void centerImage();
+
     private:
+        void setSelectedImage(const QModelIndexList& indexes);
+
+        const ImageListModel* m_images;
+
         boost::shared_ptr<CqImage> m_image;  ///< current image
-        int m_zoom;       ///< Amount of zoom
-        int m_x;          ///< x coordinate of image top left
-        int m_y;          ///< y coordinate of image top left
+        float m_zoom;     ///< Amount of zoom
+        QPointF m_tlPos;  ///< coordinates of image top left
         QPoint m_lastPos; ///< Last position in mouse drag
 };
 
