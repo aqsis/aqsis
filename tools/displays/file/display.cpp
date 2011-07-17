@@ -374,6 +374,11 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
+		// Set the position tages in case we aer dealing with a cropped image.
+		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLWIDTH, (uint32) image->m_OriginalSize[0] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLLENGTH, (uint32) image->m_OriginalSize[1] );
 
 		// Write out an 8 bits per pixel integer image.
 		if ( image->m_format == PkDspyUnsigned8 )
@@ -388,10 +393,6 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 			if ( image->m_iFormatCount == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 
 			TqInt row;
 			for ( row = 0; row < image->m_height; row++ )
@@ -452,9 +453,6 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 			if ( image->m_iFormatCount == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
 			TqInt row = 0;
