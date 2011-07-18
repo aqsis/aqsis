@@ -95,29 +95,20 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	boost::mutex::scoped_lock lock(mutex());
 
 	boost::shared_ptr<IqTexInputFile> texFile;
-	try
+	texFile = IqTexInputFile::open(fileName);
+	if(imageIndex > 0)
 	{
-		texFile = IqTexInputFile::open(fileName);
-		if(imageIndex > 0)
+		IqMultiTexInputFile* multiFile = dynamic_cast<IqMultiTexInputFile*>(texFile.get());
+		if(multiFile && imageIndex < multiFile->numSubImages())
 		{
-			IqMultiTexInputFile* multiFile = dynamic_cast<IqMultiTexInputFile*>(texFile.get());
-			if(multiFile && imageIndex < multiFile->numSubImages())
-			{
-				multiFile->setImageIndex(imageIndex);
-				m_imageIndex = imageIndex;
-			}
-			else
-				return;
+			multiFile->setImageIndex(imageIndex);
+			m_imageIndex = imageIndex;
 		}
 		else
-			m_imageIndex = 0;
+			return;
 	}
-	catch(XqInternal& e)
-	{
-		Aqsis::log() << error << "Could not load image \"" << fileName << "\": "
-			<< e.what() << "\n";
-		return;
-	}
+	else
+		m_imageIndex = 0;
 	setFilename(fileName);
 	// \todo: Should read the origin and frame size out of the image.
 

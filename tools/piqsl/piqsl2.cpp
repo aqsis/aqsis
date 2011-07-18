@@ -56,6 +56,8 @@
 namespace Aqsis {
 
 PiqslMainWindow::PiqslMainWindow()
+    : m_currentDirectory("."),
+    m_imageList(0)
 {
     setWindowTitle("piqsl");
 
@@ -89,12 +91,12 @@ PiqslMainWindow::PiqslMainWindow()
     {
         QAction* a = imageMenu->addAction(tr("&Add"));
         a->setShortcut(tr("Shift+Ctrl+O"));
-        connect(a, SIGNAL(triggered()), this, SLOT(FIXME()));
+        connect(a, SIGNAL(triggered()), this, SLOT(addImages()));
     }
     {
         QAction* a = imageMenu->addAction(tr("&Remove"));
         a->setShortcut(tr("Shift+Ctrl+X"));
-        connect(a, SIGNAL(triggered()), this, SLOT(FIXME()));
+        connect(a, SIGNAL(triggered()), this, SLOT(removeImage()));
     }
 
     // Help menu
@@ -110,22 +112,42 @@ PiqslMainWindow::PiqslMainWindow()
     setCentralWidget(splitter);
 
     // List of images
-    ImageListModel* imageList = new ImageListModel(this);
-    QListView* imageListView = new QListView();
-    //imageListView->setDragDropMode(QAbstractItemView::InternalMove);
-    imageListView->setItemDelegate(new ImageListDelegate(this));
-    splitter->addWidget(imageListView);
-    imageListView->setModel(imageList);
+    m_imageList = new ImageListModel(this);
+    m_imageListView = new QListView();
+    // Attempt at drag/drop stuff, needs work.
+//    m_imageListView->setSelectionMode(QAbstractItemView::SingleSelection);
+//    m_imageListView->setDragDropMode(QAbstractItemView::InternalMove);
+//    m_imageListView->setDragEnabled(true);
+//    m_imageListView->setAcceptDrops(true);
+//    m_imageListView->setDropIndicatorShown(true);
+//    m_imageListView->setMovement(QListView::Snap);
+    m_imageListView->setItemDelegate(new ImageListDelegate(this));
+    splitter->addWidget(m_imageListView);
+    m_imageListView->setModel(m_imageList);
 
     // Image viewer
     PiqslImageView* image = new PiqslImageView();
-    image->setSelectionModel(imageListView->selectionModel());
+    image->setSelectionModel(m_imageListView->selectionModel());
     splitter->addWidget(image);
 
-    // Collapse list of images for maximum screen space
+    // Make list of images small thin to maximize image view space
     QList<int> sizes;
-    sizes << 0 << 1;
+    sizes << 1 << 1000;
     splitter->setSizes(sizes);
+
+    // Test of drag + drop behaviour.
+//    QStringListModel* mod = new QStringListModel(this);
+//    QStringList lst;
+//    lst << "asdf" << "123" << "qwer";
+//    mod->setStringList(lst);
+//    QListView* lv = new QListView();
+//    lv->setModel(mod);
+//    lv->setViewMode(QListView::ListMode);
+//    lv->setMovement(QListView::Snap);
+//    lv->setDragDropMode(QAbstractItemView::InternalMove);
+//    lv->setDragDropOverwriteMode(false);
+//
+//    splitter->addWidget(lv);
 }
 
 
@@ -144,6 +166,37 @@ QSize PiqslMainWindow::sizeHint() const
     // setMinimumSize() also sort of works for this, but doesn't allow
     // the user to later make the window smaller.
     return QSize(640,480);
+}
+
+
+void PiqslMainWindow::addImages()
+{
+    QFileDialog fileDialog(this, tr("Select image files"), m_currentDirectory,
+                tr("Image files (*.tif *.tiff *.map *.exr *.z);; All files (*.*)"));
+    fileDialog.setFileMode(QFileDialog::ExistingFiles);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    if(!fileDialog.exec())
+        return;
+    m_currentDirectory = fileDialog.directory().absolutePath();
+    m_imageList->loadFiles(fileDialog.selectedFiles());
+    if(m_imageListView->selectionModel()->selection().empty() &&
+       m_imageList->rowCount() != 0)
+    {
+        m_imageListView->selectionModel()->select(
+                            m_imageList->index(m_imageList->rowCount()-1, 0),
+                            QItemSelectionModel::Select);
+    }
+}
+
+
+void PiqslMainWindow::removeImage()
+{
+    if(!m_imageListView->selectionModel()->hasSelection())
+        return;
+    QModelIndexList selected =
+        m_imageListView->selectionModel()->selectedIndexes();
+    for(int i = 0; i < selected.size(); ++i)
+        m_imageList->removeRows(selected[i].row(), 1);
 }
 
 
@@ -170,6 +223,7 @@ PiqslImageView::PiqslImageView(QWidget* parent)
     m_tlPos(0,0),
     m_lastPos(0,0)
 {
+    setMinimumSize(QSize(100, 100));
 }
 
 
@@ -291,7 +345,11 @@ void PiqslImageView::changeSelectedImage(const QItemSelection& selected,
 void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
 {
     if(indexes.empty())
+    {
+        m_image.reset();
+        update();
         return;
+    }
     int prevWidth = 0;
     int prevHeight = 0;
     if(m_image)
@@ -327,15 +385,31 @@ void PiqslImageView::centerImage()
 ImageListModel::ImageListModel(QObject* parent)
     : QAbstractListModel(parent)
 {
-    m_images.push_back(boost::shared_ptr<CqImage>(new CqImage()));
-    m_images[0]->loadFromFile("lena_std.tif");
-    m_images[0]->setName("lena_std.tif");
-    m_images.push_back(boost::shared_ptr<CqImage>(new CqImage()));
-    m_images[1]->loadFromFile("menger_glossy.tif");
-    m_images[1]->setName("menger_glossy.tif");
-    m_images.push_back(boost::shared_ptr<CqImage>(new CqImage()));
-    m_images[2]->loadFromFile("box.tif");
-    m_images[2]->setName("box.tif");
+}
+
+
+void ImageListModel::loadFiles(const QStringList& fileNames)
+{
+    beginInsertRows(QModelIndex(), m_images.size(),
+                    m_images.size() + fileNames.size() - 1);
+    for(int i = 0; i < fileNames.size(); ++i)
+    {
+        QString filePath = fileNames[i];
+        try
+        {
+            boost::shared_ptr<CqImage> newImg(new CqImage());
+            newImg->loadFromFile(filePath.toStdString().c_str());
+            QFileInfo info(filePath);
+            newImg->setName(info.fileName().toStdString().c_str());
+            m_images.push_back(newImg);
+        }
+	catch(XqInternal& e)
+        {
+            QMessageBox::critical(0, tr("Error"),
+                                  tr("Could not open file %1").arg(filePath));
+        }
+    }
+    endInsertRows();
 }
 
 
@@ -347,12 +421,61 @@ int ImageListModel::rowCount(const QModelIndex& parent) const
 
 QVariant ImageListModel::data(const QModelIndex & index, int role) const
 {
-    if(!index.isValid() || role != Qt::DisplayRole)
+    if(!index.isValid() || (role != Qt::DisplayRole && role != Qt::EditRole))
         return QVariant();
     if(index.row() >= (int)m_images.size())
         return QVariant();
 
     return QVariant::fromValue(m_images[index.row()]);
+}
+
+
+// Abortive support for drag & drop.
+#if 0
+Qt::ItemFlags ImageListModel::flags(const QModelIndex &index) const
+{
+    if(!index.isValid())
+        return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
+    return QAbstractItemModel::flags(index) | Qt::ItemIsDragEnabled;
+}
+
+
+bool ImageListModel::setData(const QModelIndex &index, const QVariant &value,
+                             int role)
+{
+    if (index.isValid() && role == Qt::EditRole)
+    {
+        m_images[index.row()] = value.value<boost::shared_ptr<CqImage> >();
+        emit dataChanged(index, index);
+        return true;
+    }
+    return false;
+}
+#endif
+
+
+bool ImageListModel::removeRows(int position, int rows,
+                                const QModelIndex &parent)
+{
+    if(position < 0 || position + rows > (int)m_images.size())
+        return false;
+    beginRemoveRows(QModelIndex(), position, position+rows-1);
+    m_images.erase(m_images.begin()+position, m_images.begin()+position+rows);
+    endRemoveRows();
+    return true;
+}
+
+
+bool ImageListModel::insertRows(int position, int rows,
+                                const QModelIndex &parent)
+{
+    if(position < 0 || position > (int)m_images.size())
+        return false;
+    beginInsertRows(QModelIndex(), position, position+rows-1);
+    m_images.insert(m_images.begin() + position, rows,
+                    boost::shared_ptr<CqImage>());
+    endInsertRows();
+    return true;
 }
 
 

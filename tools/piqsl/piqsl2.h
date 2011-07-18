@@ -42,9 +42,11 @@
 
 class QItemSelectionModel;
 class QItemSelection;
-class ImageListModel;
+class QListView;
 
 namespace Aqsis {
+
+class ImageListModel;
 
 /// Main window of the piqsl interface
 class PiqslMainWindow : public QMainWindow
@@ -60,7 +62,17 @@ class PiqslMainWindow : public QMainWindow
         QSize sizeHint() const;
 
     private slots:
+        /// Open file dialog so user can add images to the list
+        void addImages();
+        /// Remove currently selected images from the list
+        void removeImage();
+
         void aboutDialog();
+
+    private:
+        QString m_currentDirectory;
+        ImageListModel* m_imageList;
+        QListView* m_imageListView;
 };
 
 
@@ -103,7 +115,7 @@ class PiqslImageView : public QWidget
 
 /// Hold a list of images
 ///
-/// This is a "model" class for use with Qt's model-view framework.
+/// This is a model class for use with Qt's model-view framework.
 class ImageListModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -111,9 +123,27 @@ class ImageListModel : public QAbstractListModel
     public:
         ImageListModel(QObject* parent = 0);
 
-        int rowCount(const QModelIndex& parent) const;
+        void loadFiles(const QStringList& fileNames);
 
+        // Overridden from QAbstractListModel
+        int rowCount(const QModelIndex& parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role) const;
+
+        bool removeRows(int position, int rows,
+                        const QModelIndex &parent = QModelIndex());
+        bool insertRows(int position, int rows,
+                        const QModelIndex &parent = QModelIndex());
+
+#if 0
+        // Abortive support for drag & drop.
+        Qt::ItemFlags flags(const QModelIndex &index) const;
+        bool setData(const QModelIndex &index, const QVariant &value,
+                     int role = Qt::EditRole);
+        Qt::DropActions supportedDropActions() const
+        {
+            return Qt::MoveAction;
+        }
+#endif
 
     private:
         std::vector<boost::shared_ptr<CqImage> > m_images;
@@ -122,7 +152,8 @@ class ImageListModel : public QAbstractListModel
 
 /// Handler for displaying CqImages in standard views like QListView
 ///
-/// This is a "delegate" class for use with Qt's model-view framework.
+/// This is a delegate class for use with Qt's model-view framework,
+/// customized for the display of CqImage items.
 class ImageListDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
