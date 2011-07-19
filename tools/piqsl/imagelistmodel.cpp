@@ -149,24 +149,27 @@ class SocketDataHandler
                 // Process the message based on its type.
                 if(root->ValueStr().compare("Open") == 0)
                 {
+                    // Extract image dimensions, etc.
+                    int xres = 640, yres = 480;
+                    int xorigin = 0, yorigin = 0;
+                    int xFrameSize = 0, yFrameSize = 0;
+                    double clipNear = 0, clipFar = FLT_MAX;
+                    const char* fname = "ri.pic";
+                    CqChannelList channelList;
+
                     TiXmlElement* child = root->FirstChildElement("Dimensions");
                     if(child)
                     {
-                        int xres = 640, yres = 480;
                         child->Attribute("width", &xres);
                         child->Attribute("height", &yres);
-                        m_client->setImageSize(xres, yres);
                     }
 
                     child = root->FirstChildElement("Name");
                     if(child)
                     {
-                        const char* fname = child->GetText();
-                        if (fname == NULL)
-                        {
-                            fname = "ri.pic";
-                        }
-                        m_client->setName(fname);
+                        const char* name = child->GetText();
+                        if (name != NULL)
+                            fname = name;
                     }
                     // Process the parameters
                     child = root->FirstChildElement("Parameters");
@@ -178,15 +181,13 @@ class SocketDataHandler
                             const char* name = param->Attribute("name");
                             if(std::string("origin").compare(name) == 0)
                             {
-                                int origin[2];
                                 TiXmlElement* values = param->FirstChildElement("Values");
                                 if(values)
                                 {
                                     TiXmlElement* value = values->FirstChildElement("Int");
-                                    value->Attribute("value", &origin[0]);
+                                    value->Attribute("value", &xorigin);
                                     value = value->NextSiblingElement("Int");
-                                    value->Attribute("value", &origin[1]);
-                                    m_client->setOrigin(origin[0], origin[1]);
+                                    value->Attribute("value", &yorigin);
                                 }
                             }
                             else if(std::string("OriginalSize").compare(name) == 0)
@@ -194,19 +195,15 @@ class SocketDataHandler
                                 TiXmlElement* values = param->FirstChildElement("Values");
                                 if(values)
                                 {
-                                    int OriginalSize[2];
                                     TiXmlElement* value = values->FirstChildElement("Int");
-                                    value->Attribute("value", &OriginalSize[0]);
+                                    value->Attribute("value", &xFrameSize);
                                     value = value->NextSiblingElement("Int");
-                                    value->Attribute("value", &OriginalSize[1]);
-                                    m_client->setFrameSize(OriginalSize[0], OriginalSize[1]);
+                                    value->Attribute("value", &yFrameSize);
                                 }
                             }
                             param = param->NextSiblingElement("IntsParameter");
                         }
                         param = child->FirstChildElement("FloatsParameter");
-                        double clipNear = 0;
-                        double clipFar = FLT_MAX;
                         while(param)
                         {
                             const char* name = param->Attribute("name");
@@ -224,10 +221,8 @@ class SocketDataHandler
                             }
                             param = param->NextSiblingElement("FloatsParameter");
                         }
-                        m_client->setClipping(clipNear, clipFar);
                     }
                     child = root->FirstChildElement("Formats");
-                    CqChannelList channelList;
                     if(child)
                     {
                         TiXmlElement* format = child->FirstChildElement("Format");
@@ -263,7 +258,9 @@ class SocketDataHandler
                         doc.LinkEndChild(formatsXML);
                         sendXMLMessage(doc);
                     }
-                    m_client->prepareImageBuffers(channelList);
+                    m_client->setName(fname);
+                    m_client->initialize(xres, yres, xorigin, yorigin, xFrameSize, yFrameSize,
+                                         clipNear, clipFar, channelList);
                 }
                 else if(root->ValueStr().compare("Data") == 0)
                 {

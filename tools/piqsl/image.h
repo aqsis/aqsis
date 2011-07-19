@@ -61,6 +61,21 @@ public:
 	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
 
+	/// Initialize the image dimensions and internal buffers.
+	///
+	/// imageWidth and imageHeight are the image resolutions.  The crop window
+	/// is specified by xorigin,yorigin and frameWidth,frameHeight which give
+	/// the position of the top left corner of the image data inside a larger
+	/// image frame.
+	///
+	/// clipNear and clipFar specify the clipping range inside which z-buffer
+	/// data is expected to lie.
+	///
+	/// channelList is the list of channel types and names.
+	void initialize(int imageWidth, int imageHeight, int xorigin, int yorigin,
+					int frameWidth, int frameHeight, float clipNear,
+					float clipFar, const CqChannelList& channelList);
+
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
@@ -94,11 +109,6 @@ public:
 	 * \return			The frame height of the image.
 	 */
 	virtual TqInt frameHeight() const;
-	/** Combined setter for frame size.
-	 * \param width			The new frame width.
-	 * \param height		The new frame height.
-	 */
-	virtual void setFrameSize(TqInt width, TqInt height);
 	/** \brief Get the channel information list for the "real" data.
 	 *
 	 * \return The channel info list of channel names and types.
@@ -134,13 +144,6 @@ public:
 	 * \return				The origin of the frame.
 	 */
 	virtual TqInt originY() const;
-	/** The the origin of the frame within the image.
-	 * \param originx		The x origin within the image of the rendered frame.
-	 * \param originy		The y origin within the image of the rendered frame.
-	 */
-	virtual void setOrigin(TqInt originX, TqInt originY);
-	/// Set the clipping planes (used for depth rendering)
-	void setClipping(TqFloat clippingNear, TqFloat clippingFar);
 	/// Get depth of the near clipping plane
 	TqFloat clippingNear();
 	/// Get depth of the far clipping plane
@@ -153,20 +156,6 @@ public:
 	 * \return			The total height of the image.
 	 */
 	virtual TqInt imageHeight() const;
-	/** Set the total image size.
-	 * \param imageWidth	The total image width.
-	 * \param imageHeight	The total image height.
-	 */
-	virtual void setImageSize(TqInt imageWidth, TqInt imageHeight);
-
-	/** \brief Setup the display and full-precision buffers.
-	 *
-	 * Presuming the image size has been setup, allocate the two buffers used
-	 * by the image.
-	 *
-	 * \param channelList - the list of channel information for the image.
-	 */
-	virtual void prepareImageBuffers(const CqChannelList& channelList);
 
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
@@ -311,14 +300,6 @@ inline TqInt CqImage::frameHeight() const
 	return( m_frameHeight );
 }
 
-inline void CqImage::setFrameSize(TqInt width, TqInt height)
-{
-	m_frameWidth = width;
-	m_frameHeight = height;
-
-	emit resized();
-}
-
 inline const CqChannelList& CqImage::channelList() const
 {
 	return m_realData->channelList();
@@ -360,18 +341,6 @@ inline TqInt CqImage::originY() const
 	return( m_originY );
 }
 
-inline void CqImage::setOrigin(TqInt originX, TqInt originY)
-{
-	m_originX = originX;
-	m_originY = originY;
-}
-
-inline void CqImage::setClipping(TqFloat clippingNear, TqFloat clippingFar)
-{
-	m_clippingNear = clippingNear;
-	m_clippingFar = clippingFar;
-}
-
 inline TqFloat CqImage::clippingNear()
 {
 	return m_clippingNear;
@@ -390,14 +359,6 @@ inline TqInt CqImage::imageWidth() const
 inline TqInt CqImage::imageHeight() const
 {
 	return( m_imageHeight );
-}
-
-inline void CqImage::setImageSize(TqInt imageWidth, TqInt imageHeight)
-{
-	m_imageWidth = imageWidth;
-	m_imageHeight = imageHeight;
-
-	emit resized();
 }
 
 inline boost::mutex& CqImage::mutex() const

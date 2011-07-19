@@ -43,9 +43,20 @@ CqImage::~CqImage()
 {
 }
 
-void CqImage::prepareImageBuffers(const CqChannelList& channelList)
+void CqImage::initialize(int imageWidth, int imageHeight, int xorigin, int yorigin,
+						 int frameWidth, int frameHeight, float clipNear,
+						 float clipFar, const CqChannelList& channelList)
 {
 	boost::mutex::scoped_lock lock(mutex());
+
+	m_imageWidth = imageWidth;
+	m_imageHeight = imageHeight;
+	m_originX = xorigin;
+	m_originY = yorigin;
+	m_frameWidth = frameWidth;
+	m_frameHeight = frameHeight;
+	m_clippingNear = clipNear;
+	m_clippingFar = clipFar;
 
 	if(channelList.numChannels() == 0)
 		AQSIS_THROW_XQERROR(XqInternal, EqE_MissingData,
@@ -61,7 +72,10 @@ void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 			new CqMixedImageBuffer(CqChannelList::displayChannels(),
 				m_imageWidth, m_imageHeight));
 	m_displayData->initToCheckerboard();
+
+	emit resized();
 }
+
 
 TiXmlElement* CqImage::serialiseToXML()
 {
@@ -110,12 +124,15 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	const CqTexFileHeader& header = texFile->header();
 	TqUint width = header.width();
 	TqUint height = header.height();
-	setImageSize(width, height);
+	m_imageWidth = width;
+	m_imageHeight = height;
 	// set size within larger cropped window
 	const SqImageRegion displayWindow = header.find<Attr::DisplayWindow>(
 			SqImageRegion(width, height, 0, 0) );
-	setFrameSize(displayWindow.width, displayWindow.height);
-	setOrigin(displayWindow.topLeftX, displayWindow.topLeftY);
+	m_frameWidth = displayWindow.width;
+	m_frameHeight = displayWindow.height;
+	m_originX = displayWindow.topLeftX;
+	m_originY = displayWindow.topLeftY;
 	// descriptive strings
 	setDescription(header.find<Attr::Description>(
 				header.find<Attr::Software>("No description") ).c_str());
@@ -261,7 +278,7 @@ void CqImage::updateClippingRange()
 	m_clippingNear = minD;
 	m_clippingFar = maxD;
 
-	emit resized();
+	emit updated(m_originX, m_originY, m_imageWidth, m_imageHeight);
 }
 
 } // namespace Aqsis
