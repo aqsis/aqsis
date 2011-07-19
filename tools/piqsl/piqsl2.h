@@ -27,13 +27,12 @@
 //
 // (This is the New BSD license)
 
-#ifndef AQSIS_EQSL_H_INCLUDED
-#define AQSIS_EQSL_H_INCLUDED
+#ifndef AQSIS_PIQSL2_H_INCLUDED
+#define AQSIS_PIQSL2_H_INCLUDED
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
 
-#include <QtCore/QAbstractListModel>
 #include <QtGui/QStyledItemDelegate>
 
 #include <boost/shared_ptr.hpp>
@@ -113,43 +112,6 @@ class PiqslImageView : public QWidget
 };
 
 
-/// Hold a list of images
-///
-/// This is a model class for use with Qt's model-view framework.
-class ImageListModel : public QAbstractListModel
-{
-    Q_OBJECT
-
-    public:
-        ImageListModel(QObject* parent = 0);
-
-        void loadFiles(const QStringList& fileNames);
-
-        // Overridden from QAbstractListModel
-        int rowCount(const QModelIndex& parent = QModelIndex()) const;
-        QVariant data(const QModelIndex & index, int role) const;
-
-        bool removeRows(int position, int rows,
-                        const QModelIndex &parent = QModelIndex());
-        bool insertRows(int position, int rows,
-                        const QModelIndex &parent = QModelIndex());
-
-#if 0
-        // Abortive support for drag & drop.
-        Qt::ItemFlags flags(const QModelIndex &index) const;
-        bool setData(const QModelIndex &index, const QVariant &value,
-                     int role = Qt::EditRole);
-        Qt::DropActions supportedDropActions() const
-        {
-            return Qt::MoveAction;
-        }
-#endif
-
-    private:
-        std::vector<boost::shared_ptr<CqImage> > m_images;
-};
-
-
 /// Handler for displaying CqImages in standard views like QListView
 ///
 /// This is a delegate class for use with Qt's model-view framework,
@@ -168,6 +130,4 @@ class ImageListDelegate : public QStyledItemDelegate
 
 } // namespace Aqsis
 
-Q_DECLARE_METATYPE(boost::shared_ptr<Aqsis::CqImage>)
-
-#endif // AQSIS_EQSL_H_INCLUDED
+#endif // AQSIS_PIQSL2_H_INCLUDED

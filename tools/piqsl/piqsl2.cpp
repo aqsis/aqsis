@@ -38,11 +38,7 @@
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QSplitter>
-#include <QtGui/QStringListModel>
-
-#include <QtGui/QGridLayout>
-#include <QtGui/QScrollBar>
-#include <QtGui/QFrame>
+//#include <QtGui/QStringListModel>
 
 #include <QtGui/QPainter>
 #include <QtGui/QImage>
@@ -52,6 +48,7 @@
 #include <aqsis/version.h>
 #include <aqsis/math/math.h>
 
+#include "imagelistmodel.h"
 
 namespace Aqsis {
 
@@ -378,104 +375,6 @@ void PiqslImageView::centerImage()
     m_tlPos = QPointF(width()/2.0f - m_image->frameWidth()*m_zoom/2.0f,
                       height()/2.0f - m_image->frameHeight()*m_zoom/2.0f);
     update();
-}
-
-
-//------------------------------------------------------------------------------
-ImageListModel::ImageListModel(QObject* parent)
-    : QAbstractListModel(parent)
-{
-}
-
-
-void ImageListModel::loadFiles(const QStringList& fileNames)
-{
-    beginInsertRows(QModelIndex(), m_images.size(),
-                    m_images.size() + fileNames.size() - 1);
-    for(int i = 0; i < fileNames.size(); ++i)
-    {
-        QString filePath = fileNames[i];
-        try
-        {
-            boost::shared_ptr<CqImage> newImg(new CqImage());
-            newImg->loadFromFile(filePath.toStdString().c_str());
-            QFileInfo info(filePath);
-            newImg->setName(info.fileName().toStdString().c_str());
-            m_images.push_back(newImg);
-        }
-	catch(XqInternal& e)
-        {
-            QMessageBox::critical(0, tr("Error"),
-                                  tr("Could not open file %1").arg(filePath));
-        }
-    }
-    endInsertRows();
-}
-
-
-int ImageListModel::rowCount(const QModelIndex& parent) const
-{
-    return m_images.size();
-}
-
-
-QVariant ImageListModel::data(const QModelIndex & index, int role) const
-{
-    if(!index.isValid() || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return QVariant();
-    if(index.row() >= (int)m_images.size())
-        return QVariant();
-
-    return QVariant::fromValue(m_images[index.row()]);
-}
-
-
-// Abortive support for drag & drop.
-#if 0
-Qt::ItemFlags ImageListModel::flags(const QModelIndex &index) const
-{
-    if(!index.isValid())
-        return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
-    return QAbstractItemModel::flags(index) | Qt::ItemIsDragEnabled;
-}
-
-
-bool ImageListModel::setData(const QModelIndex &index, const QVariant &value,
-                             int role)
-{
-    if (index.isValid() && role == Qt::EditRole)
-    {
-        m_images[index.row()] = value.value<boost::shared_ptr<CqImage> >();
-        emit dataChanged(index, index);
-        return true;
-    }
-    return false;
-}
-#endif
-
-
-bool ImageListModel::removeRows(int position, int rows,
-                                const QModelIndex &parent)
-{
-    if(position < 0 || position + rows > (int)m_images.size())
-        return false;
-    beginRemoveRows(QModelIndex(), position, position+rows-1);
-    m_images.erase(m_images.begin()+position, m_images.begin()+position+rows);
-    endRemoveRows();
-    return true;
-}
-
-
-bool ImageListModel::insertRows(int position, int rows,
-                                const QModelIndex &parent)
-{
-    if(position < 0 || position > (int)m_images.size())
-        return false;
-    beginInsertRows(QModelIndex(), position, position+rows-1);
-    m_images.insert(m_images.begin() + position, rows,
-                    boost::shared_ptr<CqImage>());
-    endInsertRows();
-    return true;
 }
 
 

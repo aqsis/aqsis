@@ -40,13 +40,19 @@ include_subproject(tinyxml)
 set(piqsl_hdrs
     piqsl2.h
     image.h
+    imagelistmodel.h
     ${tinyxml_hdrs}
 )
 
-qt4_wrap_cpp(moc_srcs piqsl2.h)
+qt4_wrap_cpp(moc_srcs
+    piqsl2.h
+    imagelistmodel.h
+)
+
 set(piqsl_srcs
     piqsl2.cpp
     image.cpp
+    imagelistmodel.cpp
     ${moc_srcs}
     ${tinyxml_srcs}
 )
