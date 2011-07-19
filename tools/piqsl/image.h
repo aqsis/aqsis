@@ -198,6 +198,12 @@ signals:
 	void resized();
 
 protected:
+	/// Copy a source buffer into the display buffer.
+	///
+	/// x,y is the offset from the origin of the display buffer at which the
+	/// source buffer's 0,0 pixel will be copied.
+	void updateDisplayData(const CqMixedImageBuffer& srcData, int x, int y);
+
 	/** Check m_displayMap is pointing to valid channel names from channels.
 	 *
 	 * If the map isn't pointing to valid channels, then set the offending

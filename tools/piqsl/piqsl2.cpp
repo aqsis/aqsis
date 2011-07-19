@@ -407,7 +407,7 @@ void PiqslListView::rowsInserted(const QModelIndex& parent, int start, int end)
     // If new items are inserted at end, select them.
     if(end == model()->rowCount() - 1)
         selectionModel()->select(model()->index(model()->rowCount() - 1, 0),
-                    QItemSelectionModel::Clear | QItemSelectionModel::Select);
+              QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent);
 }
 
 

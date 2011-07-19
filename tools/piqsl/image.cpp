@@ -149,8 +149,7 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
 			new CqMixedImageBuffer(CqChannelList::displayChannels(), width, height));
 	m_displayData->initToCheckerboard();
-	m_displayData->compositeOver(*m_realData, m_displayMap);
-
+	updateDisplayData(*m_realData, 0, 0);
 	// Compute the effective clipping range for z-buffers
 	updateClippingRange();
 
@@ -218,6 +217,32 @@ void CqImage::saveToFile(const std::string& fileName) const
 	}
 }
 
+
+void CqImage::updateDisplayData(const CqMixedImageBuffer& srcData,
+								int x, int y)
+{
+	if(isZBuffer())
+	{
+		// special handling for depth data.
+		const float invRange = 1/(m_clippingFar - m_clippingNear);
+		const float* src = reinterpret_cast<const float*>(srcData.rawData());
+		for(int j = 0, jend = srcData.height(); j < jend; ++j)
+		{
+			uint8_t* row = m_displayData->rawData() + 3*(x +
+						 (y+j)*m_displayData->width());
+			for(int i = 0, iend = srcData.width(); i < iend; ++i, ++src, row+=3)
+			{
+				row[0] = row[1] = row[2] = static_cast<uint8_t>(
+					clamp<float>(255*(1-invRange*(*src - m_clippingNear)),
+								 0, 255) );
+			}
+		}
+	}
+	else
+		m_displayData->compositeOver(srcData, m_displayMap, x, y);
+}
+
+
 void CqImage::fixupDisplayMap(const CqChannelList& channelList)
 {
 	// Validate the mapping between the display channels and the underlying
@@ -278,6 +303,7 @@ void CqImage::updateClippingRange()
 	m_clippingNear = minD;
 	m_clippingFar = maxD;
 
+	updateDisplayData(*m_realData, 0, 0);
 	emit updated(m_originX, m_originY, m_imageWidth, m_imageHeight);
 }
 
