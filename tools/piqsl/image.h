@@ -32,10 +32,11 @@
 #include <string>
 #include <map>
 
+#include <QtCore/QObject>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "tinyxml.h"
@@ -52,8 +53,10 @@ class CqFramebuffer;
  * Abstract base class for piqsl images.
  */
 
-class CqImage
+class CqImage : public QObject
 {
+	Q_OBJECT
+
 public:
 	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
@@ -164,11 +167,6 @@ public:
 	 * \param channelList - the list of channel information for the image.
 	 */
 	virtual void prepareImageBuffers(const CqChannelList& channelList);
-	
-	/** Setup a callback to be called when the image changes.
-	 * \param f			A function that will be called with the region that has changed.
-	 */
-	virtual void setUpdateCallback(boost::function<void(int,int,int,int)> f);
 
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
@@ -199,6 +197,16 @@ public:
 	/** \brief Reload the current image file.
 	 */
 	void reloadFromFile();
+
+signals:
+	/// Signal that the given rectangle of the image was updated.
+	///
+	/// x,y is the coordinates of the top left of the updated region; w,h is
+	/// the width and height.
+	void updated(int x, int y, int w, int h);
+
+	/// Signal that the image was resized.
+	void resized();
 
 protected:
 	/** Check m_displayMap is pointing to valid channel names from channels.
@@ -233,7 +241,6 @@ protected:
 	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
 	TqChannelNameMap m_displayMap;  ///< map from display to underlying channel names
 
-	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
 };
 
@@ -256,7 +263,6 @@ inline CqImage::CqImage( const std::string& name)
 	m_originY(0),
 	m_imageIndex(0),
 	m_displayMap(),
-	m_updateCallback(),
 	m_mutex()
 {
 	m_displayMap["r"] = "r";
@@ -310,8 +316,7 @@ inline void CqImage::setFrameSize(TqInt width, TqInt height)
 	m_frameWidth = width;
 	m_frameHeight = height;
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	emit resized();
 }
 
 inline const CqChannelList& CqImage::channelList() const
@@ -392,8 +397,7 @@ inline void CqImage::setImageSize(TqInt imageWidth, TqInt imageHeight)
 	m_imageWidth = imageWidth;
 	m_imageHeight = imageHeight;
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	emit resized();
 }
 
 inline boost::mutex& CqImage::mutex() const

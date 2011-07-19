@@ -38,23 +38,25 @@ include_subproject(tinyxml)
 #source_group("Header Files" FILES ${piqsl_hdrs})
 
 set(piqsl_hdrs
-    piqsl2.h
+    displayserverimage.h
     image.h
     imagelistmodel.h
-    displayserverimage.h
+    piqsl2.h
     ${tinyxml_hdrs}
 )
 
 qt4_wrap_cpp(moc_srcs
-    piqsl2.h
+    displayserverimage.h
+    image.h
     imagelistmodel.h
+    piqsl2.h
 )
 
 set(piqsl_srcs
-    piqsl2.cpp
+    displayserverimage.cpp
     image.cpp
     imagelistmodel.cpp
-    displayserverimage.cpp
+    piqsl2.cpp
     ${moc_srcs}
     ${tinyxml_srcs}
 )

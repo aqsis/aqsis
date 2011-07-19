@@ -50,6 +50,8 @@ struct SqDDMessageData;
 
 class CqDisplayServerImage : public CqImage
 {
+    Q_OBJECT
+
 public:
     CqDisplayServerImage( const CqString name) : CqImage(name)
 	{}

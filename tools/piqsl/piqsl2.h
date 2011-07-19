@@ -32,6 +32,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
+#include <QtGui/QListView>
 
 #include <QtGui/QStyledItemDelegate>
 
@@ -41,11 +42,11 @@
 
 class QItemSelectionModel;
 class QItemSelection;
-class QListView;
 
 namespace Aqsis {
 
 class ImageListModel;
+class PiqslListView;
 
 /// Main window of the piqsl interface
 class PiqslMainWindow : public QMainWindow
@@ -71,7 +72,7 @@ class PiqslMainWindow : public QMainWindow
     private:
         QString m_currentDirectory;
         ImageListModel* m_imageList;
-        QListView* m_imageListView;
+        PiqslListView* m_imageListView;
 };
 
 
@@ -100,6 +101,9 @@ class PiqslImageView : public QWidget
                                  const QItemSelection& deselected);
         void centerImage();
 
+        void imageUpdated(int x, int y, int w, int h);
+        void imageResized();
+
     private:
         void setSelectedImage(const QModelIndexList& indexes);
 
@@ -109,6 +113,22 @@ class PiqslImageView : public QWidget
         float m_zoom;     ///< Amount of zoom
         QPointF m_tlPos;  ///< coordinates of image top left
         QPoint m_lastPos; ///< Last position in mouse drag
+};
+
+
+/// Custom list view which automatically selects any items added to the end.
+///
+/// In other respects, this is just like QListView.
+class PiqslListView : public QListView
+{
+    Q_OBJECT
+
+    public:
+        PiqslListView(QWidget* parent = 0);
+
+    protected slots:
+        // reimplemented from QListView
+        void rowsInserted(const QModelIndex& parent, int start, int end);
 };
 
 

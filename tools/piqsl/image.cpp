@@ -63,11 +63,6 @@ void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 	m_displayData->initToCheckerboard();
 }
 
-void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
-{
-	m_updateCallback = f;
-}
-
 TiXmlElement* CqImage::serialiseToXML()
 {
 	TiXmlElement* imageXML = new TiXmlElement("Image");
@@ -142,8 +137,7 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	// Compute the effective clipping range for z-buffers
 	updateClippingRange();
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	emit resized();
 }
 
 void CqImage::loadNextSubImage()
@@ -267,8 +261,7 @@ void CqImage::updateClippingRange()
 	m_clippingNear = minD;
 	m_clippingFar = maxD;
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	emit resized();
 }
 
 } // namespace Aqsis

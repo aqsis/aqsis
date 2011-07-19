@@ -438,6 +438,7 @@ bool ImageListModel::insertRows(int position, int rows,
 }
 
 
+/// Activated when data is waiting to be read on the main socket
 void ImageListModel::handleSocketData(int /*ignored*/)
 {
     boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
@@ -445,12 +446,33 @@ void ImageListModel::handleSocketData(int /*ignored*/)
 
     if(m_socket.accept(newImage->socket()))
     {
+        m_socketReadThreads.push_back(boost::shared_ptr<boost::thread>(
+                                new boost::thread(SocketDataHandler(newImage))));
         beginInsertRows(QModelIndex(), m_images.size(), m_images.size());
         m_images.push_back(newImage);
         endInsertRows();
-        m_socketReadThreads.push_back(boost::shared_ptr<boost::thread>(
-                                new boost::thread(SocketDataHandler(newImage))));
+        connect(newImage.get(), SIGNAL(updated(int,int,int,int)),
+                this, SLOT(imageUpdated(int,int,int,int)));
     }
+}
+
+
+/// Activated when one of the internally held images changed
+void ImageListModel::imageUpdated(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
+{
+    QObject* im = sender();
+    // Search through images, to find the row index of the one which sent the
+    // signal.
+    for(int i = 0; i < (int)m_images.size(); ++i)
+    {
+        if(im == static_cast<QObject*>(m_images[i].get()))
+        {
+            QModelIndex index = createIndex(i, 0);
+            emit dataChanged(index, index);
+            return;
+        }
+    }
+    assert(0 && "ImageListModel: image row not found");
 }
 
 

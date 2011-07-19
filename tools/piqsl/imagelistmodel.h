@@ -78,6 +78,8 @@ class ImageListModel : public QAbstractListModel
     private slots:
         void handleSocketData(int /*ignored*/);
 
+        void imageUpdated(int x, int y, int w, int h);
+
     private:
         std::vector<boost::shared_ptr<CqImage> > m_images;
         CqSocket m_socket;

@@ -33,7 +33,6 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
-#include <QtGui/QListView>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
@@ -111,7 +110,7 @@ PiqslMainWindow::PiqslMainWindow()
     // List of images
     // TODO: Allow interface:port to be set
     m_imageList = new ImageListModel(this, "127.0.0.1", 49515);
-    m_imageListView = new QListView();
+    m_imageListView = new PiqslListView();
     // Attempt at drag/drop stuff, needs work.
 //    m_imageListView->setSelectionMode(QAbstractItemView::SingleSelection);
 //    m_imageListView->setDragDropMode(QAbstractItemView::InternalMove);
@@ -177,13 +176,6 @@ void PiqslMainWindow::addImages()
         return;
     m_currentDirectory = fileDialog.directory().absolutePath();
     m_imageList->loadFiles(fileDialog.selectedFiles());
-    if(m_imageListView->selectionModel()->selection().empty() &&
-       m_imageList->rowCount() != 0)
-    {
-        m_imageListView->selectionModel()->select(
-                            m_imageList->index(m_imageList->rowCount()-1, 0),
-                            QItemSelectionModel::Select);
-    }
 }
 
 
@@ -312,14 +304,18 @@ void PiqslImageView::paintEvent(QPaintEvent* event)
     int yOff = std::max(0, -yIn);
     QPainter painter(this);
     const CqMixedImageBuffer* buf = m_image->displayBuffer().get();
-    QImage img(buf->rawData(), buf->width(), buf->height(), QImage::Format_RGB888);
-    // Draw border for cropping
-    painter.drawRect(QRect(x0, y0, m_image->frameWidth()*zoom - 1,
-                           m_image->frameHeight()*zoom - 1));
-    // Draw appropriate portion of the image
-    painter.drawImage(QRectF(x1, y1, w, h), img,
-                      QRectF(float(xOff)/zoom, float(yOff)/zoom,
-                             float(w)/zoom, float(h)/zoom));
+    if(buf)
+    {
+        QImage img(buf->rawData(), buf->width(), buf->height(),
+                   QImage::Format_RGB888);
+        // Draw border for cropping
+        painter.drawRect(QRect(x0, y0, m_image->frameWidth()*zoom - 1,
+                            m_image->frameHeight()*zoom - 1));
+        // Draw appropriate portion of the image
+        painter.drawImage(QRectF(x1, y1, w, h), img,
+                        QRectF(float(xOff)/zoom, float(yOff)/zoom,
+                                float(w)/zoom, float(h)/zoom));
+    }
 }
 
 
@@ -342,6 +338,8 @@ void PiqslImageView::changeSelectedImage(const QItemSelection& selected,
 
 void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
 {
+    if(m_image)
+        disconnect(m_image.get(), 0, this, 0);
     if(indexes.empty())
     {
         m_image.reset();
@@ -356,7 +354,7 @@ void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
         prevHeight = m_image->frameHeight();
     }
     m_image = indexes[0].data().value<boost::shared_ptr<CqImage> >();
-    if(prevWidth > 0)
+    if(prevWidth > 0 && m_image->frameWidth() > 0)
     {
         // Keep the center of the image in the same place when switching to an
         // image of different dimensions.
@@ -365,6 +363,9 @@ void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
     }
     else
         centerImage();
+    connect(m_image.get(), SIGNAL(updated(int,int,int,int)),
+            this, SLOT(imageUpdated(int,int,int,int)));
+    connect(m_image.get(), SIGNAL(resized()), this, SLOT(imageResized()));
     update();
 }
 
@@ -376,6 +377,37 @@ void PiqslImageView::centerImage()
     m_tlPos = QPointF(width()/2.0f - m_image->frameWidth()*m_zoom/2.0f,
                       height()/2.0f - m_image->frameHeight()*m_zoom/2.0f);
     update();
+}
+
+
+void PiqslImageView::imageUpdated(int x, int y, int w, int h)
+{
+    int zoom = lround(m_zoom);
+    update(lround(m_tlPos.x()) + zoom*x, lround(m_tlPos.y()) + zoom*y,
+            zoom*w, zoom*h);
+}
+
+
+void PiqslImageView::imageResized()
+{
+    centerImage();
+}
+
+
+//------------------------------------------------------------------------------
+PiqslListView::PiqslListView(QWidget* parent)
+    : QListView(parent)
+{
+}
+
+
+void PiqslListView::rowsInserted(const QModelIndex& parent, int start, int end)
+{
+    QListView::rowsInserted(parent, start, end);
+    // If new items are inserted at end, select them.
+    if(end == model()->rowCount() - 1)
+        selectionModel()->select(model()->index(model()->rowCount() - 1, 0),
+                    QItemSelectionModel::Clear | QItemSelectionModel::Select);
 }
 
 

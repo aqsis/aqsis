@@ -79,8 +79,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 		m_realData->copyFrom(bucketBuf, cropXmin, cropYmin);
 		m_displayData->compositeOver(bucketBuf, m_displayMap, cropXmin, cropYmin);
 
-		if(m_updateCallback)
-			m_updateCallback(xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
+		emit updated(xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
 	}
 }
 
