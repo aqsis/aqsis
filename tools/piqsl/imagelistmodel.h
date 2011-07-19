@@ -32,7 +32,13 @@
 
 #include <QtCore/QAbstractListModel>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/thread.hpp>
+
+#include <aqsis/util/socket.h>
 #include "image.h"
+
+class QSocketNotifier;
 
 namespace Aqsis {
 
@@ -44,7 +50,8 @@ class ImageListModel : public QAbstractListModel
     Q_OBJECT
 
     public:
-        ImageListModel(QObject* parent = 0);
+        ImageListModel(QObject* parent, const std::string& socketInterface,
+                       int socketPort);
 
         void loadFiles(const QStringList& fileNames);
 
@@ -68,8 +75,14 @@ class ImageListModel : public QAbstractListModel
         }
 #endif
 
+    private slots:
+        void handleSocketData(int /*ignored*/);
+
     private:
         std::vector<boost::shared_ptr<CqImage> > m_images;
+        CqSocket m_socket;
+        std::vector<boost::shared_ptr<boost::thread> > m_socketReadThreads;
+        QSocketNotifier* m_socketNotifier;
 };
 
 }

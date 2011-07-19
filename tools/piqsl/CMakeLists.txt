@@ -41,6 +41,7 @@ set(piqsl_hdrs
     piqsl2.h
     image.h
     imagelistmodel.h
+    displayserverimage.h
     ${tinyxml_hdrs}
 )
 
@@ -53,6 +54,7 @@ set(piqsl_srcs
     piqsl2.cpp
     image.cpp
     imagelistmodel.cpp
+    displayserverimage.cpp
     ${moc_srcs}
     ${tinyxml_srcs}
 )

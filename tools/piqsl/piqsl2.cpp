@@ -109,7 +109,8 @@ PiqslMainWindow::PiqslMainWindow()
     setCentralWidget(splitter);
 
     // List of images
-    m_imageList = new ImageListModel(this);
+    // TODO: Allow interface:port to be set
+    m_imageList = new ImageListModel(this, "127.0.0.1", 49515);
     m_imageListView = new QListView();
     // Attempt at drag/drop stuff, needs work.
 //    m_imageListView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -398,8 +399,11 @@ void ImageListDelegate::paint(QPainter* painter,
     QRect thumbRect(option.rect.left()+1, option.rect.top()+1,
                     thumbW-2, thumbW-2);
     const CqMixedImageBuffer* buf = img->displayBuffer().get();
-    QImage qimg(buf->rawData(), buf->width(), buf->height(), QImage::Format_RGB888);
-    painter->drawImage(thumbRect, qimg, QRect(0,0, buf->width(), buf->height()));
+    if(buf)
+    {
+        QImage qimg(buf->rawData(), buf->width(), buf->height(), QImage::Format_RGB888);
+        painter->drawImage(thumbRect, qimg, QRect(0,0, buf->width(), buf->height()));
+    }
     // Draw filename
     QRect textRect(option.rect.left() + thumbW + 1, option.rect.top(),
              option.rect.width(), option.rect.height());
