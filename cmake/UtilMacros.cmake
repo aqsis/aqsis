@@ -234,11 +234,12 @@ macro(aqsis_add_executable target_name)
 	if(aae_GUIAPP)
 		if(APPLE)
 			# Add necessary resource fork to binaries linked against FLTK (OS X)
-			add_custom_command(TARGET ${target_name}
-				POST_BUILD
-				COMMAND ${AQSIS_RESOURCE_EXECUTABLE}
-				ARGS -t APPL -o ${target_name} ${AQSIS_FLTK_INCLUDE_DIR}/FL/mac.r
-			)
+			# TODO: Fix up for Qt if required.
+#			add_custom_command(TARGET ${target_name}
+#				POST_BUILD
+#				COMMAND ${AQSIS_RESOURCE_EXECUTABLE}
+#				ARGS -t APPL -o ${target_name} ${AQSIS_FLTK_INCLUDE_DIR}/FL/mac.r
+#			)
 			target_link_libraries(${target_name} ${CARBON_LIBRARY})
 		endif()
 	endif()

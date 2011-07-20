@@ -26,7 +26,7 @@ include(FirstCMakeRun)
 
 option(AQSIS_USE_TIMERS "Enable performance timers" ON)
 option(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
-option(AQSIS_USE_FLTK "Build the aqsis GUI components which rely on the fltk library" ON)
+option(AQSIS_USE_QT "Build the aqsis GUI components which rely on the Qt libraries" ON)
 option(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 option(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
 mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML)
@@ -102,17 +102,13 @@ link_directories(${Boost_LIBRARY_DIRS})
 # Optional libs
 # -------------
 
-# FLTK
-if(AQSIS_USE_FLTK)
-	find_package(FLTK)
+# GUI libs
+if(AQSIS_USE_QT)
+	find_package(Qt COMPONENTS QtGui)
 
-	if(NOT AQSIS_FLTK_FOUND)
-		message("** FLTK not found - building without eqsl, piqsl and legacy framebuffer")
-		set(AQSIS_USE_FLTK OFF)
-	endif()
-
-	if(NOT AQSIS_FLUID_FOUND)
-		message("** fluid not found - building without eqsl and piqsl")
+	if(NOT QT_FOUND)
+		message("** Qt4 not found - building without aqsis GUI tools")
+		set(AQSIS_USE_QT OFF)
 	endif()
 endif()
 
@@ -291,7 +287,7 @@ add_subdirectory(tools/aqsltell)
 add_subdirectory(tools/aqsis)
 add_subdirectory(tools/miqser)
 add_subdirectory(tools/teqser)
-if(AQSIS_USE_FLTK AND AQSIS_FLUID_FOUND)
+if(AQSIS_USE_QT)
 	add_subdirectory(tools/eqsl)
 	add_subdirectory(tools/piqsl)
 endif()

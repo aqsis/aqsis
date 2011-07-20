@@ -1,11 +1,8 @@
 project(piqsl)
 
-# FIXME: Should do this in the main CmakeLists.txt
-find_package(Qt4 COMPONENTS QtGui)
-
 # Check for boost thread
-if(NOT Boost_THREAD_FOUND)
-    message(FATAL_ERROR "Piqsl requires boost thread to build")
+if(NOT Boost_THREAD_FOUND OR NOT QT_FOUND)
+    message(FATAL_ERROR "Piqsl requires boost thread and Qt4 to build")
 endif()
 
 include_subproject(tinyxml)
