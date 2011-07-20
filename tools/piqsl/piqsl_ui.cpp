@@ -27,7 +27,7 @@
 //
 // (This is the New BSD license)
 
-#include "piqsl2.h"
+#include "piqsl_ui.h"
 
 #include <aqsis/aqsis.h>
 

@@ -10,57 +10,30 @@ endif()
 
 include_subproject(tinyxml)
 
-#set(piqsl_srcs
-#    book.cpp
-#    bookbrowser.cpp
-#    centerscroll.cpp
-#    displayserverimage.cpp
-#    image.cpp
-#    pane.cpp
-#    piqsl.cpp
-#    piqslmainwindow.cpp
-#    zoomimage.cpp
-#    ${tinyxml_srcs}
-#)
-#
-#set(piqsl_hdrs
-#    book.h
-#    bookbrowser.h
-#    displayserverimage.h
-#    image.h
-#    piqsl.h
-#    piqslmainwindow.h
-#    centerscroll.h
-#    pane.h
-#    zoomimage.h
-#    ${tinyxml_hdrs}
-#)
-#source_group("Header Files" FILES ${piqsl_hdrs})
-
 set(piqsl_hdrs
     displayserverimage.h
     image.h
     imagelistmodel.h
-    piqsl2.h
+    piqsl_ui.h
     ${tinyxml_hdrs}
 )
+source_group("Header Files" FILES ${piqsl_hdrs})
 
 qt4_wrap_cpp(moc_srcs
     displayserverimage.h
     image.h
     imagelistmodel.h
-    piqsl2.h
+    piqsl_ui.h
 )
 
 set(piqsl_srcs
     displayserverimage.cpp
     image.cpp
     imagelistmodel.cpp
-    piqsl2.cpp
+    piqsl_ui.cpp
     ${moc_srcs}
     ${tinyxml_srcs}
 )
-
 
 include_directories(${QT_INCLUDES})
 

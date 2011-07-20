@@ -27,8 +27,8 @@
 //
 // (This is the New BSD license)
 
-#ifndef AQSIS_PIQSL2_H_INCLUDED
-#define AQSIS_PIQSL2_H_INCLUDED
+#ifndef AQSIS_PIQSL_UI_H_INCLUDED
+#define AQSIS_PIQSL_UI_H_INCLUDED
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
@@ -157,4 +157,4 @@ class ImageListDelegate : public QStyledItemDelegate
 
 } // namespace Aqsis
 
-#endif // AQSIS_PIQSL2_H_INCLUDED
+#endif // AQSIS_PIQSL_UI_H_INCLUDED

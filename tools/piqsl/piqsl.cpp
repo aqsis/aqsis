@@ -62,7 +62,7 @@
 #include	<aqsis/util/socket.h>
 #include	<aqsis/version.h>
 
-#include	"piqsl2.h"
+#include	"piqsl_ui.h"
 #include	"displayserverimage.h"
 
 using namespace Aqsis;
