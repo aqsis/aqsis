@@ -53,7 +53,9 @@ namespace Aqsis {
 
 PiqslMainWindow::PiqslMainWindow()
     : m_currentDirectory("."),
-    m_imageList(0)
+    m_imageList(0),
+    m_imageListView(0),
+    m_currentLibraryName()
 {
     setWindowTitle("piqsl");
 
@@ -62,17 +64,17 @@ PiqslMainWindow::PiqslMainWindow()
     {
         QAction* a = fileMenu->addAction(tr("&Open Library"));
         a->setShortcuts(QKeySequence::Open);
-        connect(a, SIGNAL(triggered()), this, SLOT(FIXME()));
+        connect(a, SIGNAL(triggered()), this, SLOT(openLibrary()));
     }
     {
         QAction* a = fileMenu->addAction(tr("&Save Library"));
         a->setShortcuts(QKeySequence::Save);
-        connect(a, SIGNAL(triggered()), this, SLOT(FIXME()));
+        connect(a, SIGNAL(triggered()), this, SLOT(saveLibrary()));
     }
     {
         QAction* a = fileMenu->addAction(tr("Save Library &As"));
         a->setShortcuts(QKeySequence::SaveAs);
-        connect(a, SIGNAL(triggered()), this, SLOT(FIXME()));
+        connect(a, SIGNAL(triggered()), this, SLOT(saveLibraryAs()));
     }
     fileMenu->addSeparator();
     {
@@ -169,7 +171,9 @@ QSize PiqslMainWindow::sizeHint() const
 void PiqslMainWindow::addImages()
 {
     QFileDialog fileDialog(this, tr("Select image files"), m_currentDirectory,
-                tr("Image files (*.tif *.tiff *.map *.exr *.z);; All files (*.*)"));
+                           tr("Image files (*.tif *.tiff *.exr *.env "
+                              "*.tx *.tex *.shad *.sm *.map *.zfile *.z)"
+                              ";; All files (*.*)"));
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
     fileDialog.setViewMode(QFileDialog::Detail);
     if(!fileDialog.exec())
@@ -187,6 +191,49 @@ void PiqslMainWindow::removeImage()
         m_imageListView->selectionModel()->selectedIndexes();
     for(int i = 0; i < selected.size(); ++i)
         m_imageList->removeRows(selected[i].row(), 1);
+}
+
+
+void PiqslMainWindow::openLibrary()
+{
+    QFileDialog fileDialog(this, tr("Open Library"), m_currentDirectory,
+                           tr("Piqsl book files (*.bks)"));
+    fileDialog.setFileMode(QFileDialog::ExistingFile);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    if(!fileDialog.exec())
+        return;
+    m_currentDirectory = fileDialog.directory().absolutePath();
+    QStringList selected = fileDialog.selectedFiles();
+    if(selected.empty())
+        return;
+    m_imageList->openImageLibrary(selected[0]);
+}
+
+
+void PiqslMainWindow::saveLibrary()
+{
+    if(!m_currentLibraryName.isEmpty())
+        m_imageList->saveImageLibrary(m_currentLibraryName);
+    else
+        saveLibraryAs();
+}
+
+
+void PiqslMainWindow::saveLibraryAs()
+{
+    QFileDialog fileDialog(this, tr("Save Library As"),
+                           m_currentDirectory, tr("Piqsl book files (*.bks)"));
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    fileDialog.setViewMode(QFileDialog::Detail);
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if(!fileDialog.exec())
+        return;
+    m_currentDirectory = fileDialog.directory().absolutePath();
+    QStringList selected = fileDialog.selectedFiles();
+    if(selected.empty())
+        return;
+    if(m_imageList->saveImageLibrary(selected[0]))
+        m_currentLibraryName = selected[0];
 }
 
 
@@ -403,11 +450,13 @@ PiqslListView::PiqslListView(QWidget* parent)
 
 void PiqslListView::rowsInserted(const QModelIndex& parent, int start, int end)
 {
-    QListView::rowsInserted(parent, start, end);
     // If new items are inserted at end, select them.
     if(end == model()->rowCount() - 1)
-        selectionModel()->select(model()->index(model()->rowCount() - 1, 0),
-              QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent);
+    {
+        clearSelection();
+        setCurrentIndex(model()->index(model()->rowCount() - 1, 0));
+    }
+    QListView::rowsInserted(parent, start, end);
 }
 
 

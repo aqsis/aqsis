@@ -66,13 +66,20 @@ class PiqslMainWindow : public QMainWindow
         void addImages();
         /// Remove currently selected images from the list
         void removeImage();
-
+        /// Open an image library file
+        void openLibrary();
+        /// Save an image library file
+        void saveLibrary();
+        /// Open an image library file
+        void saveLibraryAs();
+        /// Display piqsl "about dialog"
         void aboutDialog();
 
     private:
         QString m_currentDirectory;
         ImageListModel* m_imageList;
         PiqslListView* m_imageListView;
+        QString m_currentLibraryName;
 };
 
 

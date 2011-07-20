@@ -369,6 +369,84 @@ void ImageListModel::loadFiles(const QStringList& fileNames)
 }
 
 
+bool ImageListModel::saveImageLibrary(const QString& fileName) const
+{
+    std::string name = fileName.toStdString();
+    boost::filesystem::path saveDir = boost::filesystem::path(name).branch_path();
+    TiXmlDocument doc(name);
+    TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+    TiXmlElement* booksXML = new TiXmlElement("Books");
+
+    TiXmlElement* bookXML = new TiXmlElement("Book");
+    bookXML->SetAttribute("name", "Book1");
+    booksXML->LinkEndChild(bookXML);
+    TiXmlElement* imagesXML = new TiXmlElement("Images");
+
+    for(int i = 0; i < (int)m_images.size(); ++i)
+    {
+        // Serialise the image first.
+        m_images[i]->serialise(saveDir);
+        TiXmlElement* imageXML = m_images[i]->serialiseToXML();
+        imagesXML->LinkEndChild(imageXML);
+    }
+    bookXML->LinkEndChild(imagesXML);
+
+    doc.LinkEndChild(decl);
+    doc.LinkEndChild(booksXML);
+    return doc.SaveFile(name);
+}
+
+
+bool ImageListModel::openImageLibrary(const QString& fileName)
+{
+    // m_currentConfigName = name; FIXME
+    TiXmlDocument doc(fileName.toStdString());
+    if(doc.LoadFile())
+    {
+        TiXmlElement* booksXML = doc.RootElement();
+        if(booksXML)
+        {
+            TiXmlElement* bookXML = booksXML->FirstChildElement("Book");
+            while(bookXML)
+            {
+                //std::string bookName = bookXML->Attribute("name");
+                TiXmlElement* imagesXML = bookXML->FirstChildElement("Images");
+                if(imagesXML)
+                {
+                    TiXmlElement* imageXML = imagesXML->FirstChildElement("Image");
+                    while(imageXML)
+                    {
+                        std::string imageName("");
+                        std::string imageFilename("");
+                        TiXmlElement* nameXML = imageXML->FirstChildElement("Name");
+                        if(nameXML && nameXML->GetText())
+                            imageName = nameXML->GetText();
+                        TiXmlElement* fileNameXML = imageXML->FirstChildElement("Filename");
+                        if(fileNameXML && fileNameXML->GetText())
+                            imageFilename = fileNameXML->GetText();
+                        boost::shared_ptr<CqImage> newImage(new CqImage(imageName));
+                        newImage->loadFromFile(imageFilename);
+                        beginInsertRows(QModelIndex(), m_images.size(),
+                                        m_images.size());
+                        m_images.push_back(newImage);
+                        endInsertRows();
+                        imageXML = imageXML->NextSiblingElement("Image");
+                    }
+                }
+                bookXML = bookXML->NextSiblingElement("Book");
+            }
+        }
+        return true;
+    }
+    else
+    {
+        QMessageBox::critical(0, tr("Error"),
+                        tr("Failed to load image list %1").arg(fileName));
+        return false;
+    }
+}
+
+
 int ImageListModel::rowCount(const QModelIndex& parent) const
 {
     return m_images.size();
