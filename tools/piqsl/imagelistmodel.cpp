@@ -327,14 +327,14 @@ class SocketDataHandler
 //------------------------------------------------------------------------------
 
 ImageListModel::ImageListModel(QObject* parent,
-                               const std::string& socketInterface,
+                               const QString& socketInterface,
                                int socketPort)
     : QAbstractListModel(parent),
     m_images(),
     m_socket(),
     m_socketNotifier(0)
 {
-    if(m_socket.prepare(socketInterface, socketPort))
+    if(m_socket.prepare(socketInterface.toStdString(), socketPort))
     {
         m_socketNotifier = new QSocketNotifier(m_socket,
                                                QSocketNotifier::Read, this);
@@ -344,7 +344,7 @@ ImageListModel::ImageListModel(QObject* parent,
 }
 
 
-void ImageListModel::loadFiles(const QStringList& fileNames)
+void ImageListModel::loadImageFiles(const QStringList& fileNames)
 {
     beginInsertRows(QModelIndex(), m_images.size(),
                     m_images.size() + fileNames.size() - 1);
@@ -397,7 +397,7 @@ bool ImageListModel::saveImageLibrary(const QString& fileName) const
 }
 
 
-bool ImageListModel::openImageLibrary(const QString& fileName)
+bool ImageListModel::appendImageLibrary(const QString& fileName)
 {
     // m_currentConfigName = name; FIXME
     TiXmlDocument doc(fileName.toStdString());

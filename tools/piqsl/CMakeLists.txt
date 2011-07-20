@@ -31,6 +31,7 @@ set(piqsl_srcs
     image.cpp
     imagelistmodel.cpp
     piqsl_ui.cpp
+    piqsl.cpp
     ${moc_srcs}
     ${tinyxml_srcs}
 )

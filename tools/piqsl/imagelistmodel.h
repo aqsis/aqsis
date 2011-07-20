@@ -50,11 +50,11 @@ class ImageListModel : public QAbstractListModel
     Q_OBJECT
 
     public:
-        ImageListModel(QObject* parent, const std::string& socketInterface,
+        ImageListModel(QObject* parent, const QString& socketInterface,
                        int socketPort);
 
         /// Load images from the provided list of file names
-        void loadFiles(const QStringList& fileNames);
+        void loadImageFiles(const QStringList& fileNames);
 
         /// Save the list of images to an XML file with the given file name.
         ///
@@ -64,7 +64,7 @@ class ImageListModel : public QAbstractListModel
         ///
         /// Appends to the currently open image list.  Returns true on
         /// success.
-        bool openImageLibrary(const QString& fileName);
+        bool appendImageLibrary(const QString& fileName);
 
         // Overridden from QAbstractListModel
         int rowCount(const QModelIndex& parent = QModelIndex()) const;

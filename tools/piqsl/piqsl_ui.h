@@ -54,7 +54,8 @@ class PiqslMainWindow : public QMainWindow
     Q_OBJECT
 
     public:
-        PiqslMainWindow();
+        PiqslMainWindow(const QString& socketInterface, int socketPort,
+                        const QStringList& filesToOpen);
 
     protected:
         void keyReleaseEvent(QKeyEvent* event);

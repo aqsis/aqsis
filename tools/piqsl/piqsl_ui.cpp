@@ -31,7 +31,6 @@
 
 #include <aqsis/aqsis.h>
 
-#include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
@@ -51,7 +50,8 @@
 
 namespace Aqsis {
 
-PiqslMainWindow::PiqslMainWindow()
+PiqslMainWindow::PiqslMainWindow(const QString& socketInterface,
+                            int socketPort, const QStringList& filesToOpen)
     : m_currentDirectory("."),
     m_imageList(0),
     m_imageListView(0),
@@ -111,7 +111,7 @@ PiqslMainWindow::PiqslMainWindow()
 
     // List of images
     // TODO: Allow interface:port to be set
-    m_imageList = new ImageListModel(this, "127.0.0.1", 49515);
+    m_imageList = new ImageListModel(this, socketInterface, socketPort);
     m_imageListView = new PiqslListView();
     // Attempt at drag/drop stuff, needs work.
 //    m_imageListView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -128,6 +128,16 @@ PiqslMainWindow::PiqslMainWindow()
     PiqslImageView* image = new PiqslImageView();
     image->setSelectionModel(m_imageListView->selectionModel());
     splitter->addWidget(image);
+
+    // Load in images or image libraries specified at the command line.
+    for(int i = 0; i < filesToOpen.size(); ++i)
+    {
+        QString fileName = filesToOpen[i];
+        if(fileName.endsWith(".bks"))
+            m_imageList->appendImageLibrary(fileName);
+        else
+            m_imageList->loadImageFiles(QStringList(fileName));
+    }
 
     // Make list of images small thin to maximize image view space
     QList<int> sizes;
@@ -179,7 +189,7 @@ void PiqslMainWindow::addImages()
     if(!fileDialog.exec())
         return;
     m_currentDirectory = fileDialog.directory().absolutePath();
-    m_imageList->loadFiles(fileDialog.selectedFiles());
+    m_imageList->loadImageFiles(fileDialog.selectedFiles());
 }
 
 
@@ -206,7 +216,7 @@ void PiqslMainWindow::openLibrary()
     QStringList selected = fileDialog.selectedFiles();
     if(selected.empty())
         return;
-    m_imageList->openImageLibrary(selected[0]);
+    m_imageList->appendImageLibrary(selected[0]);
 }
 
 
@@ -493,14 +503,3 @@ void ImageListDelegate::paint(QPainter* painter,
 
 
 } // namespace Aqsis
-
-//------------------------------------------------------------------------------
-int main(int argc, char* argv[])
-{
-    QApplication app(argc, argv);
-
-    Aqsis::PiqslMainWindow window;
-    window.show();
-
-    return app.exec();
-}
