@@ -18,7 +18,7 @@ endif()
 include_directories(${QT_INCLUDES})
 
 aqsis_add_executable(eqsl ${eqsl_srcs} GUIAPP
-	LINK_LIBRARIES aqsis_util ${QT_QTGUI_LIBRARY}
+	LINK_LIBRARIES aqsis_util ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY}
 		${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
 
 aqsis_install_targets(eqsl)
