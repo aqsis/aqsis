@@ -17,8 +17,10 @@ if(AQSIS_USE_OPENEXR AND QT4_FOUND)
 		pointcontainer.cpp
 	)
 
-	add_executable(ptview ${srcs})
-	target_link_libraries(ptview ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY}
-						  ${Boost_PROGRAM_OPTIONS_LIBRARY} aqsis_tex)
+	aqsis_add_executable(ptview ${srcs} GUIAPP
+		LINK_LIBRARIES  ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY}
+			${Boost_PROGRAM_OPTIONS_LIBRARY} ${partio_libs} aqsis_tex)
+
+	aqsis_install_targets(ptview)
 endif()
 
