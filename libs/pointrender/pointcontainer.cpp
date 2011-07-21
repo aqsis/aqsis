@@ -39,7 +39,10 @@
 
 namespace Aqsis {
 
-static void releasePartioFile(Partio::ParticlesInfo* file) { file->release(); }
+static void releasePartioFile(Partio::ParticlesInfo* file)
+{
+    if(file) file->release();
+}
 
 bool loadPointFile(PointArray& points, const std::string& fileName)
 {

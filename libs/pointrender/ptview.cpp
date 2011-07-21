@@ -380,6 +380,7 @@ void PointView::loadPointFiles(const QStringList& fileNames)
         {
             QMessageBox::critical(this, tr("Error"),
                     tr("Couldn't open point file \"%1\"").arg(fileNames[i]));
+            m_points.reset();
             return;
         }
     }

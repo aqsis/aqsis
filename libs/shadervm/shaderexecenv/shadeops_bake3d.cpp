@@ -120,7 +120,10 @@ static void extractBakeVars(float* out, int igrid, IqShaderData* position,
 
 //------------------------------------------------------------------------------
 
-static void releasePartioFile(Partio::ParticlesInfo* file) { file->release(); }
+static void releasePartioFile(Partio::ParticlesInfo* file)
+{
+    if(file) file->release();
+}
 
 namespace {
 /// A cache for open point cloud bake files for bake3d().
