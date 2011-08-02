@@ -40,6 +40,8 @@
 #include <sstream>
 #include <string>
 
+#include <aqsis/util/tinyformat.h>
+
 namespace Aqsis {
 
 namespace Ri {
@@ -48,11 +50,8 @@ namespace detail { class ErrorFormatter; }
 
 /// A simple error formatting and handler class.
 ///
-/// This class and associated macros are designed for simple formatting and
-/// dispatch of error (code,string) pairs.  operator() should be used to
-/// report simple string error messages.  For more complicated error message
-/// formatting, the family of macros AQSIS_LOG_* (AQSIS_LOG_ERROR, etc) are
-/// provided.  These allow the formatting operations to be evaluated lazily,
+/// This class is designed for simple formatting and dispatch of error
+/// (code,string) pairs.  All formatting operations are evaluated lazily,
 /// depending on the error logging verbosity.  This means we can almost
 /// completely avoid a performance hit for log messages that we're going to
 /// discard anyway.
@@ -61,7 +60,7 @@ namespace detail { class ErrorFormatter; }
 /// the high eight bits, with the low 24 bits free for arbitrary
 /// application-defined errors.
 ///
-/// Filtering verbosity should be specified using
+/// Filtering verbosity should be specified using setVerbosity().
 ///
 /// Example usage:
 /// \code
@@ -70,19 +69,11 @@ namespace detail { class ErrorFormatter; }
 ///     handler(ErrorHandler::Error, "a simple string error");
 ///
 ///     int some_int = 42;
-///     AQSIS_LOG_ERROR(handler,0) << "some integer = " << some_int;
+///     handler.error(0, "some integer = %d", some_int);
 ///
 ///     const int badfileCode = 10;
 ///     if(!findFile(fileName))
-///     {
-///         AQSIS_LOG_WARNING(handler,badFileCode)
-///             << "could not find file \"" << fileName << "\"";
-///     }
-///
-///     // Lazy formatting even works with boost::format, if you want to do
-///     // some heavyweight formatting:
-///     AQSIS_LOG_WARNING(handler,0)
-///         << boost::format("complicated format: %0.10f:%s") % 1.234 % "str";
+///         handler.warning(badFileCode, "could not find file \"%s\"", fileName);
 /// \endcode
 ///
 class ErrorHandler
@@ -101,22 +92,59 @@ class ErrorHandler
         ErrorHandler(ErrorCategory verbosity);
         virtual ~ErrorHandler() {}
 
-        /// Report a simple string error with the given code
-        ///
-        /// For efficient lazy formatting of complicated error messages, use
-        /// the AQSIS_LOG_* macros.
-        inline void operator()(int code, const std::string& message);
-
         /// Get the error reporting verbosity.
         inline ErrorCategory verbosity() const;
-        inline void setVerbosity(ErrorCategory verbosity) const;
+        inline void setVerbosity(ErrorCategory verbosity);
+
+        // The following mess defines the formatting functions.  It would be
+        // possible to do this without the macros if we assumed c++0x variadic
+        // templates support.
+
+        // Extra args for TINYFORMAT_WRAP_FORMAT macro
+#       define TINYFORMAT_WRAP_FORMAT_EXTRA_ARGS int code,
+
+#       define AQSIS_DEFINE_LOGGING_FUNC(category, funcName)            \
+        TINYFORMAT_WRAP_FORMAT(void, funcName,                          \
+            if(category < m_verbosity) return; std::ostringstream oss;, \
+            oss,                                                        \
+            dispatch(category | code, oss.str());                       \
+        )
+
+        /// Format message and report with a given category
+        ///
+        /// There's functions called debug(), info(), warning(), error(),
+        /// severe(), and message().  Each have the same prototype:
+        ///
+        /// template<typename T1, ...>
+        /// void error(int code, const char* fmt, const T1& value1, ...);
+        ///
+        /// where code is the detailed error code, fmt is a format string in
+        /// printf notation, and the list of types is formatted in a type safe
+        /// way according to the format directives given in fmt.
+        AQSIS_DEFINE_LOGGING_FUNC(Debug, debug)
+        AQSIS_DEFINE_LOGGING_FUNC(Info, info)
+        AQSIS_DEFINE_LOGGING_FUNC(Warning, warning)
+        AQSIS_DEFINE_LOGGING_FUNC(Error, error)
+        AQSIS_DEFINE_LOGGING_FUNC(Severe, severe)
+        AQSIS_DEFINE_LOGGING_FUNC(Message, message)
+
+        /// The log() function is like error() and friends, but expects you to
+        /// define the ErrorCategory as part of the code.
+        TINYFORMAT_WRAP_FORMAT(void, log,
+            if(code < m_verbosity) return; std::ostringstream oss;,
+            oss,
+            dispatch(code, oss.str());
+        )
+
+#       undef AQSIS_DEFINE_LOGGING_FUNC
+#       undef TINYFORMAT_WRAP_FORMAT_EXTRA_ARGS
 
     protected:
         /// Send the error to the implementation backend.
         ///
         /// This function needs to be overridden by child classes to dispose
         /// of the actual error message somehow.
-        virtual void sendError(int code, const std::string& message) = 0;
+        virtual void dispatch(int code, const std::string& message) = 0;
 
         /// Get error category from an error code
         static ErrorCategory errorCategory(int code);
@@ -130,32 +158,6 @@ class ErrorHandler
 };
 
 
-///\name Lazy error formatter macros
-//@{
-/// Log to the error handler with the Info message category
-/// \param handler - handler instance to log message to
-/// \param detail  - application defined error code
-#define AQSIS_LOG_INFO(handler, detail)    AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Info | detail)
-/// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_WARNING(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Warning | detail)
-/// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_ERROR(handler, detail)   AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Error | detail)
-/// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_SEVERE(handler, detail)  AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Severe | detail)
-/// \see AQSIS_LOG_INFO
-#define AQSIS_LOG_MESSAGE(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Message | detail)
-
-#ifdef AQSIS_DEBUG
-#    define AQSIS_LOG_DEBUG(handler, detail) AQSIS_FORMAT_AND_LOG_ERROR(handler, Aqsis::Ri::ErrorHandler::Debug | detail)
-#else
-/// \see AQSIS_LOG_INFO
-#    define AQSIS_LOG_DEBUG(handler, detail)
-#endif
-
-#define AQSIS_LOG(handler, code) AQSIS_FORMAT_AND_LOG_ERROR(handler, code)
-//@}
-
-
 //==============================================================================
 // Implementation details
 inline ErrorHandler::ErrorHandler(ErrorCategory verbosity)
@@ -167,10 +169,9 @@ inline ErrorHandler::ErrorCategory ErrorHandler::verbosity() const
     return m_verbosity;
 }
 
-inline void ErrorHandler::operator()(int code, const std::string& message)
+inline void ErrorHandler::setVerbosity(ErrorCategory verbosity)
 {
-    if(m_verbosity <= code)
-        sendError(code, message);
+    m_verbosity = verbosity;
 }
 
 inline ErrorHandler::ErrorCategory ErrorHandler::errorCategory(int code)
@@ -181,55 +182,6 @@ inline ErrorHandler::ErrorCategory ErrorHandler::errorCategory(int code)
 inline int ErrorHandler::errorDetail(int code)
 {
     return 0xFFFFFF & code;
-}
-
-#define AQSIS_FORMAT_AND_LOG_ERROR(handler,code)   \
-if((handler).verbosity() > (code))                 \
-    /*avoid formatting if verbosity is low*/;      \
-else                                               \
-    Aqsis::Ri::detail::ErrorFormatter(handler, code)
-
-namespace detail
-{
-
-/// Formatting shim for custom ErrorHandler formatting
-///
-/// Override this function for your type to provide custom ErrorHandler
-/// formatting; the default uses operator<<.
-template<typename T>
-inline void formatForRiErrorHandler(std::ostream& out, const T& value)
-{
-    out << value;
-}
-
-/// Formatter helper class for ErrorHandler.
-class ErrorFormatter
-{
-    private:
-        std::ostringstream m_stream;
-        ErrorHandler& m_handler;
-        int m_code;
-
-    public:
-        ErrorFormatter(ErrorHandler& handler, int code)
-            : m_stream(),
-            m_handler(handler),
-            m_code(code)
-        {}
-
-        template<typename T>
-        ErrorFormatter& operator<<(const T& val)
-        {
-            formatForRiErrorHandler(m_stream, val);
-            return *this;
-        }
-
-        ~ErrorFormatter()
-        {
-            m_handler.sendError(m_code, m_stream.str());
-        }
-};
-
 }
 
 } // namespace Ri

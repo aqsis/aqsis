@@ -53,7 +53,7 @@ class ErrorHandlerTestImpl : public Aqsis::Ri::ErrorHandler
         const std::string& lastError() { return m_lastError; }
 
     protected:
-        virtual void sendError(int code, const std::string& message)
+        virtual void dispatch(int code, const std::string& message)
         {
             std::ostringstream out;
             switch(errorCategory(code))
@@ -91,12 +91,12 @@ BOOST_AUTO_TEST_CASE(ErrorHandler_test)
 {
     ErrorHandlerTestImpl handler(Aqsis::Ri::ErrorHandler::Debug);
 
-    handler(Aqsis::Ri::ErrorHandler::Warning, "blah blah");
+    handler.log(Aqsis::Ri::ErrorHandler::Warning, "blah blah");
 
     BOOST_CHECK_EQUAL(handler.lastError(), "WARNING: blah blah");
 
     int i = 42;
-    AQSIS_LOG_ERROR(handler,0) << "an integer = " << i << " " << i;
+    handler.error(0, "an integer = %d %d", i, i);
     BOOST_CHECK_EQUAL(handler.lastError(), "ERROR: an integer = 42 42");
 }
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(ErrorHandler_lazy_formatting_test)
     ErrorHandlerTestImpl handler(Aqsis::Ri::ErrorHandler::Error);
     {
         FormatLogger l;
-        AQSIS_LOG_ERROR(handler,0) << l;
+        handler.error(0, "%s", l);
         BOOST_CHECK(l.wasFormatted);
         BOOST_CHECK_EQUAL(handler.lastError(), "ERROR: ");
     }
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(ErrorHandler_lazy_formatting_test)
         // Check that when a message is below the verbosity threshold, it
         // doesn't even get formatted.
         FormatLogger l;
-        AQSIS_LOG_WARNING(handler,0) << l;
+        handler.warning(0, "%s", l);
         BOOST_CHECK(!l.wasFormatted);
         BOOST_CHECK_EQUAL(handler.lastError(), "ERROR: ");
     }

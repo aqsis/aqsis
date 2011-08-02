@@ -51,17 +51,17 @@ class AqsisLogErrorHandler : public Ri::ErrorHandler
         { }
 
     protected:
-        virtual void sendError(int code, const std::string& message)
+        virtual void dispatch(int code, const std::string& message)
         {
             std::ostream& out = Aqsis::log();
             switch(errorCategory(code))
             {
-                case Debug:   out << debug    << message << std::endl; break;
-                case Info:    out << info     << message << std::endl; break;
-                case Warning: out << warning  << message << std::endl; break;
-                case Error:   out << error    << message << std::endl; break;
-                case Severe:  out << critical << message << std::endl; break;
-                case Message: out << info     << message << std::endl; break;
+                case Debug:   out << Aqsis::debug    << message << std::endl; break;
+                case Info:    out << Aqsis::info     << message << std::endl; break;
+                case Warning: out << Aqsis::warning  << message << std::endl; break;
+                case Error:   out << Aqsis::error    << message << std::endl; break;
+                case Severe:  out << Aqsis::critical << message << std::endl; break;
+                case Message: out << Aqsis::info     << message << std::endl; break;
             }
         }
 };

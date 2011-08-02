@@ -634,9 +634,9 @@ class RibWriter : public Ri::Renderer
                         m_formatter.printParam(token, param.stringData());
                         break;
                     case Ri::TypeSpec::Pointer:
-                        AQSIS_LOG_WARNING(m_services.errorHandler(), EqE_BadToken)
-                            << "Ignoring parameter \"" << token <<
-                            "\" because pointer parameters cannot be serialized to RIB.";
+                        m_services.errorHandler().warning(EqE_BadToken,
+                            "Ignoring parameter \"%s\" because pointer "
+                            "parameters cannot be serialized to RIB.", token);
                         break;
                     default:
                         assert(0);
