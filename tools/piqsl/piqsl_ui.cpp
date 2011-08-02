@@ -346,8 +346,8 @@ void PiqslImageView::paintEvent(QPaintEvent* event)
     int x0 = lround(m_tlPos.x());
     int y0 = lround(m_tlPos.y());
     // Top left of actual image (may be different from x0,y0 if cropped)
-    int xIn = x0 + m_image->originX();
-    int yIn = y0 + m_image->originY();
+    int xIn = x0 + zoom*m_image->originX();
+    int yIn = y0 + zoom*m_image->originY();
     // Clamp source image bound to widget extent
     int x1 = clamp(xIn, 0, width());
     int y1 = clamp(yIn, 0, height());
