@@ -77,7 +77,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 	boost::mutex::scoped_lock lock(mutex());
 
-	if(m_realData && m_displayData)
+	if(m_realData && !m_displayData.isNull())
 	{
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
@@ -127,6 +127,7 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
+#if 0
 TiXmlElement* CqDisplayServerImage::serialiseToXML()
 {
 	TiXmlElement* imageXML = new TiXmlElement("Image");
@@ -145,7 +146,7 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	{
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
-		size_t dataLen = m_displayData->width() * m_displayData->height() * numChannels() * sizeof(TqUchar);
+		size_t dataLen = m_displayData.width() * m_displayData.height() * numChannels() * sizeof(TqUchar);
 		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData())), 
 					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
@@ -164,5 +165,6 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 
 	return(imageXML);
 }
+#endif
 
 } // namespace Aqsis

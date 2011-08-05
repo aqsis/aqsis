@@ -361,18 +361,16 @@ void PiqslImageView::paintEvent(QPaintEvent* event)
     int xOff = std::max(0, -xIn);
     int yOff = std::max(0, -yIn);
     QPainter painter(this);
-    const CqMixedImageBuffer* buf = m_image->displayBuffer().get();
-    if(buf)
+    const QImage& img = m_image->displayBuffer();
+    if(!img.isNull())
     {
-        QImage img(buf->rawData(), buf->width(), buf->height(),
-                   QImage::Format_RGB888);
         // Draw border for cropping
         painter.drawRect(QRect(x0, y0, m_image->frameWidth()*zoom - 1,
                             m_image->frameHeight()*zoom - 1));
         // Draw appropriate portion of the image
         painter.drawImage(QRectF(x1, y1, w, h), img,
-                        QRectF(float(xOff)/zoom, float(yOff)/zoom,
-                                float(w)/zoom, float(h)/zoom));
+                          QRectF(float(xOff)/zoom, float(yOff)/zoom,
+                                 float(w)/zoom, float(h)/zoom));
     }
 }
 
@@ -490,12 +488,9 @@ void ImageListDelegate::paint(QPainter* painter,
     int thumbW = std::min(option.rect.height(), option.rect.width());
     QRect thumbRect(option.rect.left()+1, option.rect.top()+1,
                     thumbW-2, thumbW-2);
-    const CqMixedImageBuffer* buf = img->displayBuffer().get();
-    if(buf)
-    {
-        QImage qimg(buf->rawData(), buf->width(), buf->height(), QImage::Format_RGB888);
-        painter->drawImage(thumbRect, qimg, QRect(0,0, buf->width(), buf->height()));
-    }
+    const QImage& qimg = img->displayBuffer();
+    if(!qimg.isNull())
+        painter->drawImage(thumbRect, qimg, QRect(0,0, qimg.width(), qimg.height()));
     // Draw filename
     QRect textRect(option.rect.left() + thumbW + 1, option.rect.top(),
              option.rect.width(), option.rect.height());

@@ -104,7 +104,7 @@ public:
  	 * \return			A pointer to a generated TinyXML element containing all the data to be
  	 * 					added to the XML file.
  	 */
-	virtual TiXmlElement* serialiseToXML();
+	// virtual TiXmlElement* serialiseToXML();
 
 	/** \brief A helper function to reorder the channels from Aqsis.
 	 * A helper function to reorder the channels that Aqsis sends to ensure that they are in the expected format

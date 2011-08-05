@@ -50,6 +50,15 @@
 
 namespace Aqsis {
 
+// Checker pattern for background
+inline float background(int x, int y)
+{
+	const int w = 16; // tile width
+	int whichTile = (x/w + y/w) % 2;
+	return 0.5f*(1 + whichTile);
+}
+
+
 CqImage::~CqImage()
 {
 }
@@ -79,10 +88,10 @@ void CqImage::initialize(int imageWidth, int imageHeight, int xorigin, int yorig
 
 	fixupDisplayMap(channelList);
 	// Set up 8-bit per pixel display image buffer
-	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(CqChannelList::displayChannels(),
-				m_imageWidth, m_imageHeight));
-	m_displayData->initToCheckerboard();
+	m_displayData = QImage(m_imageWidth, m_imageHeight,
+						   QImage::Format_ARGB32_Premultiplied);
+	// Initialize to transparent
+	m_displayData.fill(0);
 
 	emit resized();
 }
@@ -157,9 +166,7 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 
 	fixupDisplayMap(m_realData->channelList());
 	// Quantize and display the data
-	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(CqChannelList::displayChannels(), width, height));
-	m_displayData->initToCheckerboard();
+	m_displayData = QImage(width, height, QImage::Format_RGB32);
 	updateDisplayData(*m_realData, 0, 0);
 	// Compute the effective clipping range for z-buffers
 	updateClippingRange();
@@ -229,28 +236,95 @@ void CqImage::saveToFile(const std::string& fileName) const
 }
 
 
+static void getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
+							  TqInt& srcOffset, TqInt& destOffset,
+							  TqInt& copyWidth)
+{
+	destOffset = max(offset, 0);
+	srcOffset = max(-offset, 0);
+	copyWidth = min(destWidth, offset+srcWidth) - destOffset;
+}
+
 void CqImage::updateDisplayData(const CqMixedImageBuffer& srcData,
 								int x, int y)
 {
+	int destTopLeftX = 0;
+	int srcTopLeftX = 0;
+	int copyWidth = 0;
+	getCopyRegionSize(x, srcData.width(), m_displayData.width(),
+					  srcTopLeftX, destTopLeftX, copyWidth);
+	int destTopLeftY = 0;
+	int srcTopLeftY = 0;
+	int copyHeight = 0;
+	getCopyRegionSize(y, srcData.height(), m_displayData.height(),
+					  srcTopLeftY, destTopLeftY, copyHeight);
+	boost::shared_ptr<const CqImageChannel> rChan =
+		srcData.channel(m_displayMap["r"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> gChan =
+		srcData.channel(m_displayMap["g"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> bChan =
+		srcData.channel(m_displayMap["b"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> aChan;
+	if(srcData.channelList().hasChannel("a"))
+		aChan = srcData.channel("a", srcTopLeftX, srcTopLeftY,
+								copyWidth, copyHeight);
 	if(isZBuffer())
 	{
-		// special handling for depth data.
 		const float invRange = 1/(m_clippingFar - m_clippingNear);
 		const float* src = reinterpret_cast<const float*>(srcData.rawData());
-		for(int j = 0, jend = srcData.height(); j < jend; ++j)
+		for(int j = 0; j < copyHeight; ++j)
 		{
-			uint8_t* row = m_displayData->rawData() + 3*(x +
-						 (y+j)*m_displayData->width());
-			for(int i = 0, iend = srcData.width(); i < iend; ++i, ++src, row+=3)
+			QRgb* dest = destTopLeftX + reinterpret_cast<QRgb*>(
+									m_displayData.scanLine(destTopLeftY + j));
+			const float* row = src + srcTopLeftX +
+							   srcData.width()*(srcTopLeftY + j);
+			for(int i = 0, iend = copyWidth; i < iend; ++i)
 			{
-				row[0] = row[1] = row[2] = static_cast<uint8_t>(
-					clamp<float>(255*(1-invRange*(*src - m_clippingNear)),
-								 0, 255) );
+				TqUint8 val = static_cast<TqUint8>(
+							clamp(255*(1-invRange*(row[i] - m_clippingNear)),
+								  0.0f, 255.0f) );
+				dest[i] = qRgb(val, val, val);
 			}
 		}
 	}
 	else
-		m_displayData->compositeOver(srcData, m_displayMap, x, y);
+	{
+		for(int j = 0; j < copyHeight; ++j)
+		{
+			QRgb* dest = destTopLeftX + reinterpret_cast<QRgb*>(
+					               m_displayData.scanLine(destTopLeftY + j));
+			const float* r = rChan->getRow(j);
+			const float* g = gChan->getRow(j);
+			const float* b = bChan->getRow(j);
+			if(aChan)
+			{
+				const float* a = aChan->getRow(j);
+				for(int i = 0; i < copyWidth; ++i)
+				{
+					// Get background color, weighted with alpha
+					float c = (1 - a[i]) * background(
+											destTopLeftX + m_originX + i,
+											destTopLeftY + m_originY + j);
+					dest[i] = qRgb(
+							(TqUint8)clamp(255*(r[i] + c), 0.0f, 255.0f),
+							(TqUint8)clamp(255*(g[i] + c), 0.0f, 255.0f),
+							(TqUint8)clamp(255*(b[i] + c), 0.0f, 255.0f));
+				}
+			}
+			else
+			{
+				for(int i = 0; i < copyWidth; ++i)
+				{
+					dest[i] = qRgb((TqUint8)clamp(255*r[i], 0.0f, 255.0f),
+								   (TqUint8)clamp(255*g[i], 0.0f, 255.0f),
+								   (TqUint8)clamp(255*b[i], 0.0f, 255.0f));
+				}
+			}
+		}
+	}
 }
 
 

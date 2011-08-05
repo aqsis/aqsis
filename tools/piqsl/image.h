@@ -44,6 +44,7 @@
 #include <map>
 
 #include <QtCore/QObject>
+#include <QtGui/QImage>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -144,7 +145,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual boost::shared_ptr<const CqMixedImageBuffer> displayBuffer() const;
+	virtual QImage displayBuffer() const;
 	/// Return the image data in the native type
 	virtual boost::shared_ptr<const CqMixedImageBuffer> imageBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
@@ -233,8 +234,8 @@ protected:
 
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
-    std::string		m_description;		///< Description or Software' renderer name.
-	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+    std::string		m_description;	///< Description or Software' renderer name.
+	QImage          m_displayData;  ///< Buffer to store the 8bit data for display.
 	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqInt			m_frameWidth;	///< The width of the frame within the whole image.
 	TqInt			m_frameHeight;	///< The height of the frame within the whole image.
@@ -338,9 +339,15 @@ inline TqUint CqImage::numChannels() const
 		return 0;
 }
 
-inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
+inline QImage CqImage::displayBuffer() const
 {
-	return m_displayData;
+	// Horrible hack: Recreate the image from the underlying raw data.  This
+	// is necessary because it prevents the returned QImage from ever
+	// reallocating the data behind our backs (we might be concurrently
+	// putting data from the socket into the image in another thread).  Such
+	// reallocation may be triggered by calling QPainter::drawImage().
+	return QImage(m_displayData.bits(), m_displayData.width(),
+				  m_displayData.height(), m_displayData.format());
 }
 
 inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::imageBuffer() const
