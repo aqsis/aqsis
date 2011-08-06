@@ -1,21 +1,32 @@
 // Aqsis
-// Copyright (C) 1997 - 2001, Paul C. Gregory
+// Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
+// All rights reserved.
 //
-// Contact: pgregory@aqsis.org
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// * Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+// * Neither the name of the software's owners nor the names of its
+//   contributors may be used to endorse or promote products derived from this
+//   software without specific prior written permission.
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
-// You should have received a copy of the GNU General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// (This is the New BSD license)
 
 
 /** \file
@@ -39,13 +50,33 @@
 
 namespace Aqsis {
 
+// Checker pattern for background
+inline float background(int x, int y)
+{
+	const int w = 16; // tile width
+	int whichTile = (x/w + y/w) % 2;
+	return 0.5f*(1 + whichTile);
+}
+
+
 CqImage::~CqImage()
 {
 }
 
-void CqImage::prepareImageBuffers(const CqChannelList& channelList)
+void CqImage::initialize(int imageWidth, int imageHeight, int xorigin, int yorigin,
+						 int frameWidth, int frameHeight, float clipNear,
+						 float clipFar, const CqChannelList& channelList)
 {
 	boost::mutex::scoped_lock lock(mutex());
+
+	m_imageWidth = imageWidth;
+	m_imageHeight = imageHeight;
+	m_originX = xorigin;
+	m_originY = yorigin;
+	m_frameWidth = frameWidth;
+	m_frameHeight = frameHeight;
+	m_clippingNear = clipNear;
+	m_clippingFar = clipFar;
 
 	if(channelList.numChannels() == 0)
 		AQSIS_THROW_XQERROR(XqInternal, EqE_MissingData,
@@ -57,16 +88,14 @@ void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 
 	fixupDisplayMap(channelList);
 	// Set up 8-bit per pixel display image buffer
-	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(CqChannelList::displayChannels(),
-				m_imageWidth, m_imageHeight));
-	m_displayData->initToCheckerboard();
+	m_displayData = QImage(m_imageWidth, m_imageHeight,
+						   QImage::Format_ARGB32_Premultiplied);
+	// Initialize to transparent
+	m_displayData.fill(0);
+
+	emit resized();
 }
 
-void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
-{
-	m_updateCallback = f;
-}
 
 TiXmlElement* CqImage::serialiseToXML()
 {
@@ -95,41 +124,35 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 	boost::mutex::scoped_lock lock(mutex());
 
 	boost::shared_ptr<IqTexInputFile> texFile;
-	try
+	texFile = IqTexInputFile::open(fileName);
+	if(imageIndex > 0)
 	{
-		texFile = IqTexInputFile::open(fileName);
-		if(imageIndex > 0)
+		IqMultiTexInputFile* multiFile = dynamic_cast<IqMultiTexInputFile*>(texFile.get());
+		if(multiFile && imageIndex < multiFile->numSubImages())
 		{
-			IqMultiTexInputFile* multiFile = dynamic_cast<IqMultiTexInputFile*>(texFile.get());
-			if(multiFile && imageIndex < multiFile->numSubImages())
-			{
-				multiFile->setImageIndex(imageIndex);
-				m_imageIndex = imageIndex;
-			}
-			else
-				return;
+			multiFile->setImageIndex(imageIndex);
+			m_imageIndex = imageIndex;
 		}
 		else
-			m_imageIndex = 0;
+			return;
 	}
-	catch(XqInternal& e)
-	{
-		Aqsis::log() << error << "Could not load image \"" << fileName << "\": "
-			<< e.what() << "\n";
-		return;
-	}
+	else
+		m_imageIndex = 0;
 	setFilename(fileName);
 	// \todo: Should read the origin and frame size out of the image.
 
 	const CqTexFileHeader& header = texFile->header();
 	TqUint width = header.width();
 	TqUint height = header.height();
-	setImageSize(width, height);
+	m_imageWidth = width;
+	m_imageHeight = height;
 	// set size within larger cropped window
 	const SqImageRegion displayWindow = header.find<Attr::DisplayWindow>(
 			SqImageRegion(width, height, 0, 0) );
-	setFrameSize(displayWindow.width, displayWindow.height);
-	setOrigin(displayWindow.topLeftX, displayWindow.topLeftY);
+	m_frameWidth = displayWindow.width;
+	m_frameHeight = displayWindow.height;
+	m_originX = displayWindow.topLeftX;
+	m_originY = displayWindow.topLeftY;
 	// descriptive strings
 	setDescription(header.find<Attr::Description>(
 				header.find<Attr::Software>("No description") ).c_str());
@@ -143,16 +166,12 @@ void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 
 	fixupDisplayMap(m_realData->channelList());
 	// Quantize and display the data
-	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(CqChannelList::displayChannels(), width, height));
-	m_displayData->initToCheckerboard();
-	m_displayData->compositeOver(*m_realData, m_displayMap);
-
+	m_displayData = QImage(width, height, QImage::Format_RGB32);
+	updateDisplayData(*m_realData, 0, 0);
 	// Compute the effective clipping range for z-buffers
 	updateClippingRange();
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	emit resized();
 }
 
 void CqImage::loadNextSubImage()
@@ -216,6 +235,99 @@ void CqImage::saveToFile(const std::string& fileName) const
 	}
 }
 
+
+static void getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
+							  TqInt& srcOffset, TqInt& destOffset,
+							  TqInt& copyWidth)
+{
+	destOffset = max(offset, 0);
+	srcOffset = max(-offset, 0);
+	copyWidth = min(destWidth, offset+srcWidth) - destOffset;
+}
+
+void CqImage::updateDisplayData(const CqMixedImageBuffer& srcData,
+								int x, int y)
+{
+	int destTopLeftX = 0;
+	int srcTopLeftX = 0;
+	int copyWidth = 0;
+	getCopyRegionSize(x, srcData.width(), m_displayData.width(),
+					  srcTopLeftX, destTopLeftX, copyWidth);
+	int destTopLeftY = 0;
+	int srcTopLeftY = 0;
+	int copyHeight = 0;
+	getCopyRegionSize(y, srcData.height(), m_displayData.height(),
+					  srcTopLeftY, destTopLeftY, copyHeight);
+	boost::shared_ptr<const CqImageChannel> rChan =
+		srcData.channel(m_displayMap["r"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> gChan =
+		srcData.channel(m_displayMap["g"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> bChan =
+		srcData.channel(m_displayMap["b"], srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight);
+	boost::shared_ptr<const CqImageChannel> aChan;
+	if(srcData.channelList().hasChannel("a"))
+		aChan = srcData.channel("a", srcTopLeftX, srcTopLeftY,
+								copyWidth, copyHeight);
+	if(isZBuffer())
+	{
+		const float invRange = 1/(m_clippingFar - m_clippingNear);
+		const float* src = reinterpret_cast<const float*>(srcData.rawData());
+		for(int j = 0; j < copyHeight; ++j)
+		{
+			QRgb* dest = destTopLeftX + reinterpret_cast<QRgb*>(
+									m_displayData.scanLine(destTopLeftY + j));
+			const float* row = src + srcTopLeftX +
+							   srcData.width()*(srcTopLeftY + j);
+			for(int i = 0, iend = copyWidth; i < iend; ++i)
+			{
+				TqUint8 val = static_cast<TqUint8>(
+							clamp(255*(1-invRange*(row[i] - m_clippingNear)),
+								  0.0f, 255.0f) );
+				dest[i] = qRgb(val, val, val);
+			}
+		}
+	}
+	else
+	{
+		for(int j = 0; j < copyHeight; ++j)
+		{
+			QRgb* dest = destTopLeftX + reinterpret_cast<QRgb*>(
+					               m_displayData.scanLine(destTopLeftY + j));
+			const float* r = rChan->getRow(j);
+			const float* g = gChan->getRow(j);
+			const float* b = bChan->getRow(j);
+			if(aChan)
+			{
+				const float* a = aChan->getRow(j);
+				for(int i = 0; i < copyWidth; ++i)
+				{
+					// Get background color, weighted with alpha
+					float c = (1 - a[i]) * background(
+											destTopLeftX + m_originX + i,
+											destTopLeftY + m_originY + j);
+					dest[i] = qRgb(
+							(TqUint8)clamp(255*(r[i] + c), 0.0f, 255.0f),
+							(TqUint8)clamp(255*(g[i] + c), 0.0f, 255.0f),
+							(TqUint8)clamp(255*(b[i] + c), 0.0f, 255.0f));
+				}
+			}
+			else
+			{
+				for(int i = 0; i < copyWidth; ++i)
+				{
+					dest[i] = qRgb((TqUint8)clamp(255*r[i], 0.0f, 255.0f),
+								   (TqUint8)clamp(255*g[i], 0.0f, 255.0f),
+								   (TqUint8)clamp(255*b[i], 0.0f, 255.0f));
+				}
+			}
+		}
+	}
+}
+
+
 void CqImage::fixupDisplayMap(const CqChannelList& channelList)
 {
 	// Validate the mapping between the display channels and the underlying
@@ -276,8 +388,8 @@ void CqImage::updateClippingRange()
 	m_clippingNear = minD;
 	m_clippingFar = maxD;
 
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
+	updateDisplayData(*m_realData, 0, 0);
+	emit updated(m_originX, m_originY, m_imageWidth, m_imageHeight);
 }
 
 } // namespace Aqsis

@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -510,13 +511,11 @@ void RibTokenizer::readString(RibInputBuffer& inBuf, RibToken& tok)
 					case '5':
 					case '6':
 					case '7':
-					case '8':
-					case '9':
 						{
 							// read in a sequence of (up to) three octal digits
 							unsigned char octalChar = c - '0';
 							c = inBuf.get();
-							for(int i = 0; i < 2 && std::isdigit(c); i++ )
+							for(int i = 0; i < 2 && c >= '0' && c <= '7'; i++ )
 							{
 								octalChar = 8*octalChar + (c - '0');
 								c = inBuf.get();

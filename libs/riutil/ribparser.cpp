@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -236,14 +237,14 @@ void RibParserImpl::parseStream(std::istream& ribStream,
             // to the exception message and rethrow.
             if(requestName)
             {
-                AQSIS_LOG_ERROR(m_services.errorHandler(), e.code())
-                    << "Parse error at " << m_lex->streamPos()
-                    << " while reading " << requestName << ": " << e.what();
+                m_services.errorHandler().error(e.code(),
+                                    "Parse error at %s while reading %s: %s",
+                                    m_lex->streamPos(), requestName, e.what());
             }
             else
             {
-                AQSIS_LOG_ERROR(m_services.errorHandler(), e.code())
-                    << "Parse error at " << m_lex->streamPos() << ": " << e.what();
+                m_services.errorHandler().error(e.code(),
+                    "Parse error at %s: %s", m_lex->streamPos(), e.what());
             }
             m_lex->discardUntilRequest();
         }

@@ -74,7 +74,7 @@ The following libraries form part of the Aqsis solution, the copyright for
 these libraries lies with the respective owners.
 
 Boost   - http://www.boost.org
-FLTK    - http://www.fltk.org
+Qt      - http://qt.nokia.com
 JPEG    - http://www.ijg.org
 libpng  - http://www.libpng.org
 LibTIFF - http://www.libtiff.org

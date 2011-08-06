@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -403,9 +404,9 @@ inline void RiCxxValidate::checkArraySize(int expectedSize, int actualSize,
     }
     else if(actualSize > expectedSize)
     {
-        AQSIS_LOG_WARNING(services().errorHandler(), EqE_Consistency)
-            << "array \"" << name << "\" of length " << actualSize
-            << " too long (expected length " << expectedSize << ")";
+        services().errorHandler().warning(EqE_Consistency,
+            "array \"%s\" of length %d too long (expected length %d)",
+            name, actualSize, expectedSize);
     }
 }
 

@@ -10,11 +10,11 @@ Requirements
 Building Aqsis requires a C++ compiler and the following tools and libraries:
 
     * CMake (v2.4+)
-    * Boost (v1.32.0+)
+    * Boost (v1.34.1+)
     * libtiff.lib (v3.7.1+)
     * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
     * bison (v1.35+)
-    * FLTK (v1.1.x) - optional, but required for framebuffer rendering
+    * Qt (v4.?, known to work with 4.6) - optional, but required for framebuffer rendering
     * libzlib (v1.1.4+)
     * libjpeg (v6b+)
     * xsltproc

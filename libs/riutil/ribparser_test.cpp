@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -576,7 +577,7 @@ class MockErrorHandler : public Ri::ErrorHandler
         MockErrorHandler() : ErrorHandler(Warning) { }
 
     protected:
-        virtual void sendError(int code, const std::string& message)
+        virtual void dispatch(int code, const std::string& message)
         {
             throw MockRendererError(message);
         }

@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -221,8 +222,8 @@ class RenderUtilFilter : public Ri::Filter
             else
             {
                 // If we didn't find it, error
-                AQSIS_LOG_ERROR(services().errorHandler(), EqE_BadHandle)
-                    << "Bad object name \"" << name << "\"";
+                services().errorHandler().error(EqE_BadHandle,
+                                                "Bad object name \"%s\"", name);
             }
         }
 

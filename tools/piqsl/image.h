@@ -1,21 +1,32 @@
 // Aqsis
-// Copyright (C) 1997 - 2001, Paul C. Gregory
+// Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
+// All rights reserved.
 //
-// Contact: pgregory@aqsis.org
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// * Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+// * Neither the name of the software's owners nor the names of its
+//   contributors may be used to endorse or promote products derived from this
+//   software without specific prior written permission.
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
-// You should have received a copy of the GNU General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// (This is the New BSD license)
 
 
 /** \file
@@ -32,10 +43,12 @@
 #include <string>
 #include <map>
 
+#include <QtCore/QObject>
+#include <QtGui/QImage>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "tinyxml.h"
@@ -52,11 +65,28 @@ class CqFramebuffer;
  * Abstract base class for piqsl images.
  */
 
-class CqImage
+class CqImage : public QObject
 {
+	Q_OBJECT
+
 public:
 	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
+
+	/// Initialize the image dimensions and internal buffers.
+	///
+	/// imageWidth and imageHeight are the image resolutions.  The crop window
+	/// is specified by xorigin,yorigin and frameWidth,frameHeight which give
+	/// the position of the top left corner of the image data inside a larger
+	/// image frame.
+	///
+	/// clipNear and clipFar specify the clipping range inside which z-buffer
+	/// data is expected to lie.
+	///
+	/// channelList is the list of channel types and names.
+	void initialize(int imageWidth, int imageHeight, int xorigin, int yorigin,
+					int frameWidth, int frameHeight, float clipNear,
+					float clipFar, const CqChannelList& channelList);
 
 	/** Get the name of the image.
 	 * \return			The name of the image.
@@ -91,11 +121,6 @@ public:
 	 * \return			The frame height of the image.
 	 */
 	virtual TqInt frameHeight() const;
-	/** Combined setter for frame size.
-	 * \param width			The new frame width.
-	 * \param height		The new frame height.
-	 */
-	virtual void setFrameSize(TqInt width, TqInt height);
 	/** \brief Get the channel information list for the "real" data.
 	 *
 	 * \return The channel info list of channel names and types.
@@ -120,7 +145,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual boost::shared_ptr<const CqMixedImageBuffer> displayBuffer() const;
+	virtual QImage displayBuffer() const;
 	/// Return the image data in the native type
 	virtual boost::shared_ptr<const CqMixedImageBuffer> imageBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
@@ -131,13 +156,6 @@ public:
 	 * \return				The origin of the frame.
 	 */
 	virtual TqInt originY() const;
-	/** The the origin of the frame within the image.
-	 * \param originx		The x origin within the image of the rendered frame.
-	 * \param originy		The y origin within the image of the rendered frame.
-	 */
-	virtual void setOrigin(TqInt originX, TqInt originY);
-	/// Set the clipping planes (used for depth rendering)
-	void setClipping(TqFloat clippingNear, TqFloat clippingFar);
 	/// Get depth of the near clipping plane
 	TqFloat clippingNear();
 	/// Get depth of the far clipping plane
@@ -150,25 +168,6 @@ public:
 	 * \return			The total height of the image.
 	 */
 	virtual TqInt imageHeight() const;
-	/** Set the total image size.
-	 * \param imageWidth	The total image width.
-	 * \param imageHeight	The total image height.
-	 */
-	virtual void setImageSize(TqInt imageWidth, TqInt imageHeight);
-
-	/** \brief Setup the display and full-precision buffers.
-	 *
-	 * Presuming the image size has been setup, allocate the two buffers used
-	 * by the image.
-	 *
-	 * \param channelList - the list of channel information for the image.
-	 */
-	virtual void prepareImageBuffers(const CqChannelList& channelList);
-	
-	/** Setup a callback to be called when the image changes.
-	 * \param f			A function that will be called with the region that has changed.
-	 */
-	virtual void setUpdateCallback(boost::function<void(int,int,int,int)> f);
 
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
@@ -200,7 +199,23 @@ public:
 	 */
 	void reloadFromFile();
 
+signals:
+	/// Signal that the given rectangle of the image was updated.
+	///
+	/// x,y is the coordinates of the top left of the updated region; w,h is
+	/// the width and height.
+	void updated(int x, int y, int w, int h);
+
+	/// Signal that the image was resized.
+	void resized();
+
 protected:
+	/// Copy a source buffer into the display buffer.
+	///
+	/// x,y is the offset from the origin of the display buffer at which the
+	/// source buffer's 0,0 pixel will be copied.
+	void updateDisplayData(const CqMixedImageBuffer& srcData, int x, int y);
+
 	/** Check m_displayMap is pointing to valid channel names from channels.
 	 *
 	 * If the map isn't pointing to valid channels, then set the offending
@@ -219,8 +234,8 @@ protected:
 
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
-    std::string		m_description;		///< Description or Software' renderer name.
-	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+    std::string		m_description;	///< Description or Software' renderer name.
+	QImage          m_displayData;  ///< Buffer to store the 8bit data for display.
 	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqInt			m_frameWidth;	///< The width of the frame within the whole image.
 	TqInt			m_frameHeight;	///< The height of the frame within the whole image.
@@ -233,7 +248,6 @@ protected:
 	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
 	TqChannelNameMap m_displayMap;  ///< map from display to underlying channel names
 
-	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
 };
 
@@ -256,7 +270,6 @@ inline CqImage::CqImage( const std::string& name)
 	m_originY(0),
 	m_imageIndex(0),
 	m_displayMap(),
-	m_updateCallback(),
 	m_mutex()
 {
 	m_displayMap["r"] = "r";
@@ -305,15 +318,6 @@ inline TqInt CqImage::frameHeight() const
 	return( m_frameHeight );
 }
 
-inline void CqImage::setFrameSize(TqInt width, TqInt height)
-{
-	m_frameWidth = width;
-	m_frameHeight = height;
-
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
-}
-
 inline const CqChannelList& CqImage::channelList() const
 {
 	return m_realData->channelList();
@@ -335,9 +339,15 @@ inline TqUint CqImage::numChannels() const
 		return 0;
 }
 
-inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
+inline QImage CqImage::displayBuffer() const
 {
-	return m_displayData;
+	// Horrible hack: Recreate the image from the underlying raw data.  This
+	// is necessary because it prevents the returned QImage from ever
+	// reallocating the data behind our backs (we might be concurrently
+	// putting data from the socket into the image in another thread).  Such
+	// reallocation may be triggered by calling QPainter::drawImage().
+	return QImage(m_displayData.bits(), m_displayData.width(),
+				  m_displayData.height(), m_displayData.format());
 }
 
 inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::imageBuffer() const
@@ -353,18 +363,6 @@ inline TqInt CqImage::originX() const
 inline TqInt CqImage::originY() const
 {
 	return( m_originY );
-}
-
-inline void CqImage::setOrigin(TqInt originX, TqInt originY)
-{
-	m_originX = originX;
-	m_originY = originY;
-}
-
-inline void CqImage::setClipping(TqFloat clippingNear, TqFloat clippingFar)
-{
-	m_clippingNear = clippingNear;
-	m_clippingFar = clippingFar;
 }
 
 inline TqFloat CqImage::clippingNear()
@@ -385,15 +383,6 @@ inline TqInt CqImage::imageWidth() const
 inline TqInt CqImage::imageHeight() const
 {
 	return( m_imageHeight );
-}
-
-inline void CqImage::setImageSize(TqInt imageWidth, TqInt imageHeight)
-{
-	m_imageWidth = imageWidth;
-	m_imageHeight = imageHeight;
-
-	if(m_updateCallback)
-		m_updateCallback(-1, -1, -1, -1);
 }
 
 inline boost::mutex& CqImage::mutex() const

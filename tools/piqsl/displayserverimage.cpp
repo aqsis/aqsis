@@ -1,22 +1,32 @@
 // Aqsis
-// Copyright (C) 1997 - 2001, Paul C. Gregory
+// Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
+// All rights reserved.
 //
-// Contact: pgregory@aqsis.org
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
+// * Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+// * Neither the name of the software's owners nor the names of its
+//   contributors may be used to endorse or promote products derived from this
+//   software without specific prior written permission.
 //
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
-// You should have received a copy of the GNU General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+// (This is the New BSD license)
 
 /** \file
 		\brief Implements an image class getting it's data from the Dspy server.
@@ -67,7 +77,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 	boost::mutex::scoped_lock lock(mutex());
 
-	if(m_realData && m_displayData)
+	if(m_realData && !m_displayData.isNull())
 	{
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
@@ -77,10 +87,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 					nullDeleter), xmaxplus1 - xmin, ymaxplus1 - ymin);
 
 		m_realData->copyFrom(bucketBuf, cropXmin, cropYmin);
-		m_displayData->compositeOver(bucketBuf, m_displayMap, cropXmin, cropYmin);
-
-		if(m_updateCallback)
-			m_updateCallback(xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
+		updateDisplayData(bucketBuf, cropXmin, cropYmin);
+		emit updated(xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
 	}
 }
 
@@ -119,6 +127,7 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
+#if 0
 TiXmlElement* CqDisplayServerImage::serialiseToXML()
 {
 	TiXmlElement* imageXML = new TiXmlElement("Image");
@@ -137,7 +146,7 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	{
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
-		size_t dataLen = m_displayData->width() * m_displayData->height() * numChannels() * sizeof(TqUchar);
+		size_t dataLen = m_displayData.width() * m_displayData.height() * numChannels() * sizeof(TqUchar);
 		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData())), 
 					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
@@ -156,5 +165,6 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 
 	return(imageXML);
 }
+#endif
 
 } // namespace Aqsis

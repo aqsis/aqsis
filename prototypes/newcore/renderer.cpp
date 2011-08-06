@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -501,12 +502,10 @@ void clampOptBelow(T& val, const char* name, const T& minVal,
 {
     if(val < minVal)
     {
-        AQSIS_LOG_ERROR(errorHandler, ErrorCode::BadOption)
-            << "Option " << name << " = " << val << " is too small"
-            << (reason ? " (" : "")
-            << (reason ? reason : "")
-            << (reason ? ")" : "")
-            << ".  Clamping to " << minVal << ".";
+        errorHandler.error(ErrorCode::BadOption,
+                           "Option %s = %s is to small%s%s%s.  Clamping to %s.",
+                           name, val, reason ? " (" : "", reason ? reason : "",
+                           reason ? ")" : "", minVal);
         val = minVal;
     }
 }
@@ -569,8 +568,8 @@ bool Renderer::rasterCull(GeomHolder& holder, const Box2i* parentBucketBound)
             // crossing the epsilon plane can be split to avoid infinite
             // recursion.  Such split events are known as "eye splits", and if
             // the limit is reached, we discard the object.
-            AQSIS_LOG_WARNING(m_errorHandler, ErrorCode::MaxEyeSplits)
-                << "Max eye splits encountered; geometry discarded";
+            m_errorHandler.warning(ErrorCode::MaxEyeSplits,
+                            "Max eye splits encountered; geometry discarded");
             return true;
         }
         else
@@ -821,7 +820,7 @@ void Renderer::render()
     {
         std::ostringstream statsStr;
         frameStats.printStats(statsStr);
-        AQSIS_LOG_MESSAGE(m_errorHandler, 0) << statsStr.str();
+        m_errorHandler.message(0, "%s", statsStr.str());
     }
 }
 

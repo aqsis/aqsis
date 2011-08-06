@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -99,7 +100,7 @@ class HairgenApiServices : public Aqsis::StubRendererServices
 			public:
 				ErrorHandler() : Ri::ErrorHandler(Warning) {}
 			protected:
-				virtual void sendError(int code, const std::string& message)
+				virtual void dispatch(int code, const std::string& message)
 				{
 					std::ostream& out = g_errStream;
 					switch(errorCategory(code))

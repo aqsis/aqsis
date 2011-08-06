@@ -39,18 +39,8 @@
 
 #include <tiffio.h>
 
-#ifndef	AQSIS_NO_FLTK
-#	include <FL/Fl.H>
-#	include <FL/Fl_Window.H>
-#	include <FL/Fl_Box.H>
-#	include <FL/Fl_Image.H>
-#	include <FL/fl_draw.H>
-#endif // AQSIS_NO_LTK
-
 #include <aqsis/math/math.h>
 #include "dspyhlpr.h"
-#include <aqsis/util/logging.h>
-#include <aqsis/util/logging_streambufs.h>
 #include <aqsis/ri/ndspy.h>
 
 using namespace Aqsis;
@@ -63,40 +53,10 @@ using namespace Aqsis;
 namespace {
 
 //------------------------------------------------------------------------------
-/** FLTK Widget used to show a constantly updating image.
- *
- */
-#ifndef	AQSIS_NO_FLTK
-class Fl_FrameBuffer_Widget : public Fl_Widget
-{
-	public:
-		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
-		{
-			w = imageW;
-			h = imageH;
-			d = depth;
-			image = imageD;
-		}
-
-		void draw(void)
-		{
-			fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
-		}
-
-	private:
-		int w,h,d;
-		unsigned char* image;
-};
-#endif // AQSIS_NO_FLTK
-
-
-//------------------------------------------------------------------------------
 enum EqDisplayTypes
 {
     Type_File = 0,
-    Type_Framebuffer,
     Type_ZFile,
-    Type_ZFramebuffer,
     Type_Shadowmap,
 };
 
@@ -116,14 +76,7 @@ struct SqDisplayInstance
 			m_imageType(Type_File),
 			m_append(0),
 			m_pixelsReceived(0),
-			m_data(0),
-			m_zfbdata(0)
-#ifndef	AQSIS_NO_FLTK
-			,
-			m_theWindow(0),
-			m_uiImageWidget(0),
-			m_uiImage(0)
-#endif // AQSIS_NO_FLTK
+			m_data(0)
 	{}
 	std::string	m_filename;
 	TqInt		m_width;
@@ -143,16 +96,7 @@ struct SqDisplayInstance
 	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
-
 	void*		m_data;
-	unsigned char*	m_zfbdata;
-
-#ifndef	AQSIS_NO_FLTK
-
-	Fl_Window*	m_theWindow;
-	Fl_FrameBuffer_Widget* m_uiImageWidget;
-	Fl_RGB_Image*	m_uiImage;
-#endif // AQSIS_NO_FLTK
 };
 //------------------------------------------------------------------------------
 
@@ -374,6 +318,11 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
+		// Set the position tages in case we aer dealing with a cropped image.
+		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLWIDTH, (uint32) image->m_OriginalSize[0] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLLENGTH, (uint32) image->m_OriginalSize[1] );
 
 		// Write out an 8 bits per pixel integer image.
 		if ( image->m_format == PkDspyUnsigned8 )
@@ -388,10 +337,6 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 			if ( image->m_iFormatCount == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 
 			TqInt row;
 			for ( row = 0; row < image->m_height; row++ )
@@ -452,9 +397,6 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 			if ( image->m_iFormatCount == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
 			TqInt row = 0;
@@ -468,29 +410,6 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		}
 	}
 }
-
-//----------------------------------------------------------------------
-/** CompositeAlpha() Composite with the alpha the end result RGB
-*
-*/
-
-void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &B, 
-		    TqUchar alpha )
-{ 
-#	define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-#	define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
-	TqInt t;
-	// C’ = INT_PRELERP( A’, B’, b, t )
-	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
-	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
-	R = clamp<TqUchar>(R1, 0, 255);
-	G = clamp<TqUchar>(G1, 0, 255);
-	B = clamp<TqUchar>(B1, 0, 255);
-#	undef INT_MULT
-#	undef INT_PRELERP
-}
-
 
 } // unnamed namespace
 
@@ -520,20 +439,8 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Determine the display type from the list that we support.
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
-#ifndef	AQSIS_NO_FLTK
-
-		else if((strcmp(drivername, "framebuffer")==0) || (strcmp(drivername, "legacyframebuffer")==0))
-			pImage->m_imageType = Type_Framebuffer;
-#endif // AQSIS_NO_FLTK
-
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
-#ifndef AQSIS_NO_FLTK
-
-		else if(strcmp(drivername, "zframebuffer")==0)
-			pImage->m_imageType = Type_ZFramebuffer;
-#endif // AQSIS_NO_FLTK
-
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		else
@@ -565,7 +472,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		}
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
+		if(pImage->m_imageType == Type_File)
 		{
 			PtDspyDevFormat outFormat[] =
 				{
@@ -580,102 +487,30 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				return(err);
 			}
 		}
-		else if(pImage->m_imageType == Type_ZFramebuffer)
+
+		// Determine the appropriate format to save into.
+		if(widestFormat == PkDspyUnsigned8)
 		{
-			// For the zframebuffer, ensure that we're actually receiving a
-			// single channel of z data in floating point format.
-			if(iFormatCount != 1 || strcmp(format->name, "z") != 0 || format->type != PkDspyFloat32)
-				return PkDspyErrorBadParams;
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned8));
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned8);
 		}
-
-		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
-		if(pImage->m_imageType == Type_Framebuffer)
+		else if(widestFormat == PkDspyUnsigned16)
 		{
-#ifndef	AQSIS_NO_FLTK
-			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
-			// display.
-			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
-			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqChar);
-
-			// Initialise the display to a checkerboard to show alpha
-			for (TqInt i = 0; i < pImage->m_height; i ++)
-			{
-				for (TqInt j = 0; j < pImage->m_width; j++)
-				{
-					int     t       = 0;
-					TqUchar d = 255;
-
-					if ( ( (pImage->m_height - 1 - i) & 31 ) < 16 )
-						t ^= 1;
-					if ( ( j & 31 ) < 16 )
-						t ^= 1;
-
-					if ( t )
-					{
-						d      = 128;
-					}
-					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) ] = d;
-					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 1] = d;
-					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 2] = d;
-				}
-			}
-			widestFormat = PkDspyUnsigned8;
-
-
-			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
-			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<TqUchar*>(pImage->m_data));
-			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename.c_str());
-			pImage->m_theWindow->end();
-			Fl::visual(FL_RGB);
-			pImage->m_theWindow->show();
-#endif // AQSIS_NO_FLTK
-
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned16));
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned16);
 		}
-		else
+		else if(widestFormat == PkDspyUnsigned32)
 		{
-			// Determine the appropriate format to save into.
-			if(widestFormat == PkDspyUnsigned8)
-			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned8));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned8);
-			}
-			else if(widestFormat == PkDspyUnsigned16)
-			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned16));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned16);
-			}
-			else if(widestFormat == PkDspyUnsigned32)
-			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned32));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned32);
-			}
-			else if(widestFormat == PkDspyFloat32)
-			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyFloat32));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyFloat32);
-			}
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyUnsigned32));
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyUnsigned32);
+		}
+		else if(widestFormat == PkDspyFloat32)
+		{
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(PtDspyFloat32));
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(PtDspyFloat32);
 		}
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
 		pImage->m_format = widestFormat;
-
-		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
-		if(pImage->m_imageType == Type_ZFramebuffer)
-		{
-#ifndef	AQSIS_NO_FLTK
-			pImage->m_zfbdata = reinterpret_cast<TqUchar*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(TqUchar)));
-
-			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
-			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<TqUchar*>(pImage->m_zfbdata));
-			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename.c_str());
-			pImage->m_theWindow->end();
-			Fl::visual(FL_RGB);
-			pImage->m_theWindow->show();
-#endif // AQSIS_NO_FLTK
-
-		}
-
 
 		// Extract any important data from the user parameters.
 		char* compression;
@@ -700,10 +535,7 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		
 		// Check if the requested compression format is available in libtiff, if not resort to "none"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
-		{
-			/* Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl; */
 			pImage->m_compression = COMPRESSION_NONE;
-		}
 
 		int quality;
 		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
@@ -778,163 +610,13 @@ extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
 
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
 	{
-		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
-		if (pImage->m_imageType == Type_Framebuffer)
+		for (TqInt y = ymin__; y < ymaxplus1__; y++ )
 		{
-			TqUint comp = entrysize/pImage->m_iFormatCount;
-			TqInt y;
-			TqUchar *unrolled = static_cast< TqUchar *>(pImage->m_data);
-
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				TqInt x;
-				TqUchar* _pdatarow = (TqUchar* )(pdatarow);
-				for ( x = xmin__; x < xmaxplus1__; x++ )
-				{
-					TqInt so = pImage->m_iFormatCount * (( y * pImage->m_width ) +  x );
-
-					switch (comp)
-					{
-
-							case 2 :
-							{
-								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (pImage->m_iFormatCount == 4)
-								{
-									alpha = (svalue[3]/256);
-								}
-								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
-                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-		    alpha);
-								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-							case 4:
-							{
-
-								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (pImage->m_iFormatCount == 4)
-								{
-									alpha = (TqUchar) (lvalue[3]/256);
-								}
-								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
-                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-		    alpha);
-								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-
-							case 1:
-							default:
-							{
-								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (pImage->m_iFormatCount == 4)
-								{
-									alpha = (TqUchar) (cvalue[3]);
-								}
-								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
-                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-		    alpha);
-								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-					}
-					_pdatarow += entrysize;
-
-				}
-				pdatarow += bucketlinelen;
-			}
+			// Copy a whole row at a time, as we know it is being sent in the proper format and order.
+			TqInt so = ( y * pImage->m_lineLength ) + ( xmin__ * pImage->m_entrySize );
+			memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), copylinelen);
+			pdatarow += bucketlinelen;
 		}
-		else if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
-		{
-			TqInt y;
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
-				TqInt so = ( y * pImage->m_lineLength ) + ( xmin__ * pImage->m_entrySize );
-				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), copylinelen);
-				pdatarow += bucketlinelen;
-			}
-		}
-		// otherwise we need to do alpha blending for the alpha data to show in the framebuffer
-		else
-		{
-			TqInt y;
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				TqInt x;
-				const TqUchar* _pdatarow = pdatarow;
-				for ( x = xmin__; x < xmaxplus1__; x++ )
-				{
-					TqUchar alpha = _pdatarow[3];
-					if( alpha > 0 )
-					{
-						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
-						TqInt r = _pdatarow[0];
-						TqInt g = _pdatarow[1];
-						TqInt b = _pdatarow[2];
-						
-						TqUchar R = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 0 ];
-						TqUchar G = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 1 ];
-						TqUchar B = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 2 ];
-						CompositeAlpha(r, g, b, R, G, B, alpha );
-
-					}
-					_pdatarow += entrysize;
-				}
-				pdatarow += bucketlinelen;
-			}
-		}
-
-		// If rendering into a zframebuffer, we need to setup a separate image store for the displayed data.
-		if(pImage->m_imageType == Type_ZFramebuffer)
-		{
-#ifndef AQSIS_NO_FLTK
-			const TqUchar * pdatarow = data;
-			pdatarow += (row * bucketlinelen) + (col * entrysize);
-			TqInt y;
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				TqInt x;
-				const TqUchar* _pdatarow = pdatarow;
-				for ( x = xmin; x < xmaxplus1; x++ )
-				{
-					TqFloat value = reinterpret_cast<const TqFloat*>(_pdatarow)[0];
-					TqInt so = ( y * pImage->m_width * 3 * sizeof(TqUchar) ) + ( x * 3 * sizeof(TqUchar) );
-					pImage->m_zfbdata[ so + 0 ] =
-					    pImage->m_zfbdata[ so + 1 ] =
-					        pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
-					_pdatarow += entrysize;
-				}
-				pdatarow += bucketlinelen;
-			}
-#endif // AQSIS_NO_FLTK
-
-		}
-	}
-
-	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
-	{
-#ifndef AQSIS_NO_FLTK
-		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
-		Fl::check();
-		TqFloat percent = pImage->m_pixelsReceived / (TqFloat) (pImage->m_width * pImage->m_height);
-		percent *= 100.0f;
-		percent = clamp(percent, 0.0f, 100.0f);
-		std::stringstream strTitle;
-		if (percent < 99.9f)
-			strTitle << pImage->m_filename << ": " << std::fixed << std::setprecision(1) << std::setw(5) << percent << "% complete" << std::ends;
-		else
-			strTitle << pImage->m_filename << std::ends;
-		pImage->m_theWindow->label(strTitle.str().c_str());
-#endif // AQSIS_NO_FLTK
-
 	}
 	return(PkDspyErrorNone);
 }
@@ -954,8 +636,6 @@ extern "C" PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Delete the image structure.
 	if (pImage->m_data)
 		free(pImage->m_data);
-	if(pImage->m_imageType == Type_ZFramebuffer)
-		free(pImage->m_zfbdata);
 	description = "";
 	delete(pImage);
 
@@ -970,80 +650,7 @@ extern "C" PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
 	if(pImage && pImage->m_data)
-	{
-		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
-		{
-#ifndef	AQSIS_NO_FLTK
-			if( pImage->m_imageType == Type_ZFramebuffer )
-			{
-				// Now that we have all of our data, calculate some handy statistics ...
-				TqFloat mindepth = FLT_MAX;
-				TqFloat maxdepth = -FLT_MAX;
-				TqUint totalsamples = 0;
-				TqUint samples = 0;
-				TqFloat totaldepth = 0;
-				for ( TqInt i = 0; i < pImage->m_width * pImage->m_height; i++ )
-				{
-					totalsamples++;
-
-					// Skip background pixels ...
-					if( reinterpret_cast<const TqFloat*>(pImage->m_data)
-					        [i] >= FLT_MAX )
-						continue;
-
-					mindepth = min( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
-					maxdepth = max( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
-
-					totaldepth += reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ];
-					samples++;
-				}
-
-				const TqFloat dynamicrange = maxdepth - mindepth;
-
-				/*		Aqsis::log() << info << g_Filename << " total samples: " << totalsamples << std::endl;
-						Aqsis::log() << info << g_Filename << " depth samples: " << samples << std::endl;
-						Aqsis::log() << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
-						Aqsis::log() << info << g_Filename << " minimum depth: " << mindepth << std::endl;
-						Aqsis::log() << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
-						Aqsis::log() << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
-						Aqsis::log() << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
-				*/
-
-				const TqInt linelength = pImage->m_width * 3;
-				for ( TqInt y = 0;
-				        y < pImage->m_height;
-				        y++ )
-				{
-					for ( TqInt x = 0; x < pImage->m_height; x++ )
-					{
-						const TqInt imageindex = ( y * linelength ) + ( x * 3 );
-						const TqInt dataindex = ( y * pImage->m_width ) + x;
-
-						if( reinterpret_cast<const TqFloat*>(pImage->m_data)
-						        [dataindex] == FLT_MAX)
-						{
-							pImage->m_zfbdata[imageindex + 0] =
-							    pImage->m_zfbdata[imageindex + 1] =
-							        pImage->m_zfbdata[imageindex + 2] = 0;
-						}
-						else
-						{
-							const TqFloat normalized = ( reinterpret_cast<const TqFloat*>(pImage->m_data)[ dataindex ] - mindepth ) / dynamicrange;
-							pImage->m_zfbdata[imageindex + 0] = static_cast<TqUchar>( 255 * ( 1.0 - normalized ) );
-							pImage->m_zfbdata[imageindex + 1] = static_cast<TqUchar>( 255 * ( 1.0 - normalized ) );
-							pImage->m_zfbdata[imageindex + 2] = 255;
-						}
-					}
-				}
-				pImage->m_uiImageWidget->damage(1);
-				Fl::check();
-			}
-			Fl::run();
-#endif // AQSIS_NO_FLTK
-
-		}
-		return(DspyImageClose(image));
-	}
+		return DspyImageClose(image);
 	return(PkDspyErrorNone);
 }
 

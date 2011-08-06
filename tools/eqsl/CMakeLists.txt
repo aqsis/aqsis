@@ -1,23 +1,24 @@
 project(eqsl)
 
 # Check for boost thread.
-if(NOT Boost_THREAD_FOUND OR NOT Boost_REGEX_FOUND)
-	message(FATAL_ERROR "Eqsl requires boost thread and regex to build")
+if(NOT Boost_THREAD_FOUND OR NOT Boost_REGEX_FOUND OR NOT QT_FOUND)
+	message(FATAL_ERROR "Eqsl requires boost thread, regex, and Qt4 to build")
 endif()
 
-fltk_wrap_ui(eqsl eqsl.fl)
+qt4_wrap_cpp(moc_srcs eqsl.h)
 set(eqsl_srcs
-	${eqsl_FLTK_UI_SRCS} 
+	eqsl.cpp
+	${moc_srcs}
 )
 
 if(WIN32 AND NOT MINGW)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 endif()
 
-include_directories(${AQSIS_FLTK_INCLUDE_DIR})
+include_directories(${QT_INCLUDES})
 
 aqsis_add_executable(eqsl ${eqsl_srcs} GUIAPP
-	LINK_LIBRARIES aqsis_util ${AQSIS_FLTK_LIBRARIES} 
+	LINK_LIBRARIES aqsis_util ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY}
 		${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
 
 aqsis_install_targets(eqsl)

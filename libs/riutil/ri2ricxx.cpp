@@ -1,3 +1,4 @@
+// Aqsis
 // Copyright (C) 2001, Paul C. Gregory and the other authors and contributors
 // All rights reserved.
 //
@@ -244,22 +245,22 @@ Ri::ParamList buildParamList(RtInt count, RtToken tokens[], RtPointer values[],
 }                                                                               \
 catch(const XqValidation& e)                                                    \
 {                                                                               \
-    AQSIS_LOG_ERROR(g_context->services.errorHandler(), e.code())               \
-        << "ignoring invalid " procName ": " << e.what();                       \
+    g_context->services.errorHandler().error(e.code(),                          \
+           "ignoring invalid %s: %s", procName, e.what());                      \
 }                                                                               \
 catch(const XqException& e)                                                     \
 {                                                                               \
-    AQSIS_LOG_ERROR(g_context->services.errorHandler(), e.code()) << e.what();  \
+    g_context->services.errorHandler().error(e.code(), "%s", e.what());         \
 }                                                                               \
 catch(const std::exception& e)                                                  \
 {                                                                               \
-    AQSIS_LOG_SEVERE(g_context->services.errorHandler(), EqE_Bug)               \
-        << "std::exception encountered in " procName ": " << e.what();          \
+    g_context->services.errorHandler().severe(EqE_Bug,                          \
+           "std::exception encountered in %s: %s", procName, e.what());         \
 }                                                                               \
 catch(...)                                                                      \
 {                                                                               \
-    AQSIS_LOG_SEVERE(g_context->services.errorHandler(), EqE_Bug)               \
-        << "unknown exception encountered in " procName;                        \
+    g_context->services.errorHandler().severe(EqE_Bug,                          \
+           "unknown exception encountered in %s", procName);                    \
 }
 
 

@@ -3132,18 +3132,16 @@ RtVoid RiCxxCore::SolidEnd()
 // Object retention and instancing.
 RtVoid RiCxxCore::ObjectBegin(RtConstToken name)
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ObjectBegin should be handled by a filter\n";
+	errorHandler().error(EqE_Bug, "ObjectBegin should be handled by a filter");
 }
 RtVoid RiCxxCore::ObjectEnd()
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ObjectEnd should be handled by a filter\n";
+	errorHandler().error(EqE_Bug, "ObjectEnd should be handled by a filter");
 }
 RtVoid RiCxxCore::ObjectInstance(RtConstToken name)
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ObjectInstance should be handled by a filter\n";
+	errorHandler().error(EqE_Bug,
+						 "ObjectInstance should be handled by a filter");
 }
 
 
@@ -3256,26 +3254,22 @@ RtVoid RiCxxCore::MakeOcclusion(const StringArray& picfiles, RtConstString shado
 /** Conditional handlers for 3.4 conditional RIB */
 RtVoid RiCxxCore::IfBegin(RtConstString condition)
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "IfBegin should be handled by utility filter\n";
+	errorHandler().error(EqE_Bug, "IfBegin should be handled by utility filter");
 }
 
 RtVoid RiCxxCore::ElseIf(RtConstString condition)
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ElseIf should be handled by utility filter\n";
+	errorHandler().error(EqE_Bug, "ElseIf should be handled by utility filter");
 }
 
 RtVoid RiCxxCore::Else()
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "Else should be handled by utility filter\n";
+	errorHandler().error(EqE_Bug, "Else should be handled by utility filter");
 }
 
 RtVoid RiCxxCore::IfEnd()
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "IfEnd should be handled by utility filter\n";
+	errorHandler().error(EqE_Bug, "IfEnd should be handled by utility filter");
 }
 
 //----------------------------------------------------------------------
@@ -3444,20 +3438,18 @@ RtVoid RiCxxCore::ReadArchive(RtConstToken name, RtArchiveCallback callback, con
 
 RtVoid RiCxxCore::ArchiveBegin(RtConstToken name, const ParamList& pList)
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ArchiveBegin should be handled by a filter\n";
+	errorHandler().error(EqE_Bug, "ArchiveBegin should be handled by a filter");
 }
 
 RtVoid RiCxxCore::ArchiveEnd()
 {
-	AQSIS_LOG_ERROR(errorHandler(), EqE_Bug)
-		<< "ArchiveEnd should have been handled by a filter\n";
+	errorHandler().error(EqE_Bug, "ArchiveEnd should have been handled by a filter");
 }
 
 
 RtVoid RiCxxCore::ClippingPlane(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz)
 {
-	Aqsis::log() << warning << "Ignoring unimplemented interface call: RiClippingPlane\n";
+	errorHandler().warning(EqE_Unimplement, "Ignoring unimplemented interface call: RiClippingPlane");
 }
 
 
@@ -4071,8 +4063,8 @@ RtVoid RiContext(RtContextHandle handle)
 										  g_validContexts.end(), newContext);
 	if(loc == g_validContexts.end())
 	{
-		AQSIS_LOG_ERROR(g_context->apiServices->errorHandler(), EqE_BadHandle)
-			<< "bad handle for RiContext";
+		g_context->apiServices->errorHandler().error(EqE_BadHandle,
+											"bad handle for RiContext");
 		return;
 	}
 	g_context = newContext;
