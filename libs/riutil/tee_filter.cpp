@@ -50,10 +50,8 @@ class TeeFilter : public Ri::Filter
     private:
         Ri::Renderer& m_branch;
     public:
-        TeeFilter(Ri::RendererServices& services, Ri::Renderer& next,
-                  Ri::Renderer& branch)
-            : Filter(services, next),
-            m_branch(branch)
+        TeeFilter(Ri::Renderer& branch)
+            : m_branch(branch)
         { }
 
         virtual RtVoid ArchiveRecord(RtConstToken type, const char* string)
@@ -625,10 +623,9 @@ class TeeFilter : public Ri::Filter
         ///[[[end]]]
 };
 
-Ri::Renderer* createTeeFilter(Ri::RendererServices& services,
-                              Ri::Renderer& next, Ri::Renderer& branch)
+Ri::Filter* createTeeFilter(Ri::Renderer& branch)
 {
-    return new TeeFilter(services, next, branch);
+    return new TeeFilter(branch);
 }
 
 }

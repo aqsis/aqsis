@@ -53,6 +53,7 @@
 #include <aqsis/riutil/tokendictionary.h>
 #include <aqsis/util/file.h>
 #include <aqsis/util/logging.h>
+#include <aqsis/util/smartptr.h>
 #include "errorhandlerimpl.h"
 
 namespace Aqsis {
@@ -554,15 +555,27 @@ class RibWriterServicesImpl : public RibWriterServices
         virtual void addFilter(const char* name,
                                const Ri::ParamList& filterParams)
         {
-            boost::shared_ptr<Ri::Renderer> filter(
-                    createFilter(name, *this, firstFilter(), filterParams));
+            boost::shared_ptr<Ri::Filter> filter(
+                    createFilter(name, filterParams));
             if(filter)
+            {
+                filter->setNextFilter(firstFilter());
+                filter->setRendererServices(*this);
                 m_filterChain.push_back(filter);
+            }
             else
             {
                 AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
                         "filter \"" << name << "\" not found");
             }
+        }
+
+        virtual void addFilter(Ri::Filter& filter)
+        {
+            filter.setNextFilter(firstFilter());
+            filter.setRendererServices(*this);
+            m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(&filter,
+                                                                    nullDeleter));
         }
 
         virtual void parseRib(std::istream& ribStream, const char* name,

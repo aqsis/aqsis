@@ -202,9 +202,8 @@ typedef boost::function<bool(const char*)> IfElseTestCallback;
 /// true or false.
 ///
 AQSIS_RIUTIL_SHARE
-Ri::Renderer* createRenderUtilFilter(Ri::RendererServices& services,
-                Ri::Renderer& next,
-                const IfElseTestCallback& callback = IfElseTestCallback());
+Ri::Filter* createRenderUtilFilter(const IfElseTestCallback& callback =
+                                   IfElseTestCallback());
 
 //------------------------------------------------------------------------------
 /// Empty implementation of Ri::Renderer
@@ -431,6 +430,7 @@ class StubRendererServices : public Ri::RendererServices
 
         virtual void addFilter(const char* name,
                                const Ri::ParamList& filterParams) { }
+        virtual void addFilter(Ri::Filter& filter) { }
 
         virtual void parseRib(std::istream& ribStream, const char* name,
                               Ri::Renderer& context) { }

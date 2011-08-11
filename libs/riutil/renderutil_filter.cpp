@@ -100,10 +100,8 @@ class RenderUtilFilter : public Ri::Filter
         }
 
     public:
-        RenderUtilFilter(Ri::RendererServices& services, Ri::Renderer& out,
-                         const IfElseTestCallback& conditionTest)
-            : Ri::Filter(services, out),
-            m_archives(),
+        RenderUtilFilter(const IfElseTestCallback& conditionTest)
+            : m_archives(),
             m_objectInstances(),
             m_currCache(0),
             m_nested(0),
@@ -1304,11 +1302,9 @@ class RenderUtilFilter : public Ri::Filter
 };
 
 
-Ri::Renderer* createRenderUtilFilter(Ri::RendererServices& services,
-                                     Ri::Renderer& next,
-                                     const IfElseTestCallback& callback)
+Ri::Filter* createRenderUtilFilter(const IfElseTestCallback& callback)
 {
-    return new RenderUtilFilter(services, next, callback);
+    return new RenderUtilFilter(callback);
 }
 
 } // namespace Aqsis

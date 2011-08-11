@@ -52,10 +52,8 @@ class FrameDropFilter : public OnOffFilter
         std::set<int> m_desiredFrames;
 
     public:
-        FrameDropFilter(Ri::RendererServices& services, Ri::Renderer& out,
-                        const std::vector<int>& desiredFrames)
-            : OnOffFilter(services, out),
-            m_desiredFrames(desiredFrames.begin(), desiredFrames.end())
+        FrameDropFilter(const std::vector<int>& desiredFrames)
+            : m_desiredFrames(desiredFrames.begin(), desiredFrames.end())
         { }
 
         RtVoid FrameBegin(RtInt number)
@@ -132,12 +130,11 @@ static void parseFrames(const Ri::ParamList& pList,
     }
 }
 
-Ri::Renderer* createFrameDropFilter(Ri::RendererServices& serv,
-                    Ri::Renderer& out, const Ri::ParamList& pList)
+Ri::Filter* createFrameDropFilter(const Ri::ParamList& pList)
 {
     std::vector<int> desiredFrames;
     parseFrames(pList, desiredFrames);
-    return new FrameDropFilter(serv, out, desiredFrames);
+    return new FrameDropFilter(desiredFrames);
 }
 
 } // namespace Aqsis

@@ -605,7 +605,10 @@ class MockServices : public Ri::RendererServices
         {
             return m_tokenDict.lookup(token, nameBegin, nameEnd);
         }
+
         void addFilter(const char* name, const Ri::ParamList& filterParams)
+        { }
+        virtual void addFilter(Ri::Filter& filter)
         { }
 
         Ri::Renderer& firstFilter()

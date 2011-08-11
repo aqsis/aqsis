@@ -59,6 +59,7 @@
 #include	<aqsis/util/file.h>
 #include	<aqsis/util/logging.h>
 #include	<aqsis/util/logging_streambufs.h>
+#include	<aqsis/util/smartptr.h>
 #include	<aqsis/tex/maketexture.h>
 #include	"stats.h"
 #include	<aqsis/math/random.h>
@@ -3850,8 +3851,14 @@ class CoreRendererServices : public Ri::RendererServices
 			m_errorHandler()
 		{
 			m_api.reset(new RiCxxCore(*this));
-			m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(
-				createRenderUtilFilter(*this, firstFilter(), TestCondition) ));
+			// Add renderer utility filter.  We do this here rather than in
+			// addFilter() because this is a special filter which should only
+			// be added once.
+			Ri::Filter* utilFilter = createRenderUtilFilter(TestCondition);
+			utilFilter->setNextFilter(*m_api);
+			utilFilter->setRendererServices(*this);
+			m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(utilFilter));
+			// Add RI validation
 			addFilter("validate");
 		}
 
@@ -3902,7 +3909,7 @@ class CoreRendererServices : public Ri::RendererServices
         virtual void addFilter(const char* name,
                                const Ri::ParamList& filterParams = Ri::ParamList())
         {
-            boost::shared_ptr<Ri::Renderer> filter;
+            boost::shared_ptr<Ri::Filter> filter;
             if(!strcmp(name, "echorib"))
             {
                 if(!m_echoRibWriter)
@@ -3916,19 +3923,29 @@ class CoreRendererServices : public Ri::RendererServices
                     m_echoRibWriter->addFilter("ignorearchives");
                     registerStdFuncs(*m_echoRibWriter);
                 }
-                filter.reset(createTeeFilter(*this, firstFilter(),
-                                             m_echoRibWriter->firstFilter()));
+                filter.reset(createTeeFilter(m_echoRibWriter->firstFilter()));
             }
             else
-                filter.reset(createFilter(name, *this, firstFilter(),
-                                          filterParams));
+                filter.reset(createFilter(name, filterParams));
             if(filter)
+            {
+                filter->setNextFilter(firstFilter());
+                filter->setRendererServices(*this);
                 m_filterChain.push_back(filter);
+            }
             else
             {
                 AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
                         "filter \"" << name << "\" not found");
             }
+        }
+
+        virtual void addFilter(Ri::Filter& filter)
+        {
+            filter.setNextFilter(firstFilter());
+            filter.setRendererServices(*this);
+            m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(&filter,
+                                                                    nullDeleter));
         }
 
         virtual void parseRib(std::istream& ribStream, const char* name,
@@ -4214,6 +4231,7 @@ RtFunc RiPreRenderFunction(RtFunc function)
 /** Set the function called just prior to world definition.
  	\param	function	Pointer to the new function to use.
  	\return	Pointer to the old function.
+	\deprecated TODO: Remove!
  */
 RtFunc RiPreWorldFunction(RtFunc function)
 {

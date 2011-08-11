@@ -620,6 +620,7 @@ class AQSIS_RIUTIL_SHARE Renderer
 };
 
 class ErrorHandler;
+class Filter;
 
 /// Access to extra renderer state, interface filters, RIB parsing etc.
 ///
@@ -667,6 +668,13 @@ class RendererServices
         /// throw XqValidation when the filter can't be found.
         virtual void addFilter(const char* name,
                                const ParamList& filterParams = ParamList()) = 0;
+
+        /// Add a filter to the front of the filter chain.
+        ///
+        /// The lifetime of the provided filter is assumed to be controlled by
+        /// the caller - the filter lifetime *must* outlast the lifetime of the
+        /// renderer services object.
+        virtual void addFilter(Ri::Filter& filter) = 0;
 
         /// Parse a RIB stream
         ///

@@ -243,16 +243,27 @@ class ApiServices : public Ri::RendererServices
                                const Ri::ParamList& filterParams
                                = Ri::ParamList())
         {
-            boost::shared_ptr<Ri::Renderer> filter;
-            filter.reset(createFilter(name, *this, firstFilter(),
-                                      filterParams));
+            boost::shared_ptr<Ri::Filter> filter;
+            filter.reset(createFilter(name, filterParams));
             if(filter)
+            {
+                filter->setNextFilter(firstFilter());
+                filter->setRendererServices(*this);
                 m_filterChain.push_back(filter);
+            }
             else
             {
                 AQSIS_THROW_XQERROR(XqValidation, EqE_BadToken,
                         "filter \"" << name << "\" not found");
             }
+        }
+
+        virtual void addFilter(Ri::Filter& filter)
+        {
+            filter.setNextFilter(firstFilter());
+            filter.setRendererServices(*this);
+            m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(&filter,
+                                                                nullDeleter));
         }
 
         virtual void parseRib(std::istream& ribStream, const char* name,
@@ -1825,8 +1836,10 @@ ApiServices::ApiServices()
     m_errorHandler()
 {
     m_api.reset(new RenderApi(*this));
-    m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(
-        createRenderUtilFilter(*this, firstFilter()) ));
+    Ri::Filter* utilFilter = createRenderUtilFilter(TestCondition);
+    utilFilter->setNextFilter(*m_api);
+    utilFilter->setRendererServices(*this);
+    m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(utilFilter));
     addFilter("validate");
 }
 

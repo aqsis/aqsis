@@ -117,9 +117,8 @@ class RiCxxValidate : public Ri::Filter
                                       const char* procName);
 
     public:
-        RiCxxValidate(Ri::RendererServices& services, Ri::Renderer& nextFilter)
-            : Filter(services, nextFilter),
-            m_scopeStack(),
+        RiCxxValidate()
+            : m_scopeStack(),
             m_attrStack()
         {
             m_scopeStack.push(Scope_BeginEnd);
@@ -2022,10 +2021,9 @@ RtVoid RiCxxValidate::ArchiveEnd()
 
 
 //------------------------------------------------------------------------------
-Ri::Renderer* createValidateFilter(Ri::RendererServices& services,
-                        Ri::Renderer& out, const Ri::ParamList& pList)
+Ri::Filter* createValidateFilter(const Ri::ParamList& pList)
 {
-    return new RiCxxValidate(services, out);
+    return new RiCxxValidate();
 }
 
 } // namespace Aqsis

@@ -57,6 +57,7 @@
 
 #include <aqsis/core/corecontext.h>
 #include <aqsis/riutil/ricxxutil.h>
+#include <aqsis/riutil/ricxx_filter.h>
 #include <aqsis/util/exception.h>
 #include <aqsis/util/argparse.h>
 #include <aqsis/util/file.h>
@@ -343,65 +344,58 @@ void aqsisSignalHandler(int sig)
 	std::raise(sig);
 }
 
-/** Function to setup specific options needed after options are complete but
- * before the world is created.  Used as the callback function to a
- * RiPreWorldFunction call.
- */
-#ifdef	AQSIS_SYSTEM_BEOS
-RtVoid PreWorld( ... )
-#else
-RtVoid PreWorld()
-#endif
+
+namespace {
+/// Interface filter to support inserting options before the World() call.
+class PreWorldFilter : public Aqsis::PassthroughFilter
 {
-	if ( g_cl_fb )
-	{
-		RiDisplay( tokenCast("aqsis"), tokenCast("framebuffer"), tokenCast("rgb"), NULL );
-	}
-	else if ( !g_cl_type.empty() )
-	{
-		RiDisplay( tokenCast("aqsis"), tokenCast(g_cl_type.c_str()),
-				   tokenCast(g_cl_mode.c_str()), NULL );
-	}
-	else if ( !g_cl_addtype.empty() )
-	{
-		RiDisplay( tokenCast("+aqsis"), tokenCast(g_cl_addtype.c_str()),
-				   tokenCast(g_cl_mode.c_str()), NULL );
-	}
+	public:
+		/// Override certian options using command line arguments before
+		/// entering the world scope.
+		virtual RtVoid WorldBegin()
+		{
+			Aqsis::Ri::Renderer& ri = nextFilter();
+			if ( g_cl_fb )
+				ri.Display("aqsis", "framebuffer", "rgb");
+			else if ( !g_cl_type.empty() )
+				ri.Display("aqsis", g_cl_type.c_str(), g_cl_mode.c_str());
+			else if ( !g_cl_addtype.empty() )
+				ri.Display("+aqsis", g_cl_addtype.c_str(), g_cl_mode.c_str());
 
-	// Pass the statistics option onto Aqsis.
-	if ( g_cl_endofframe >= 0 )
-	{
-		RiOption( tokenCast("statistics"), "endofframe", &g_cl_endofframe, RI_NULL );
-	}
+			// Pass the statistics option onto Aqsis.
+			if ( g_cl_endofframe >= 0 )
+				ri.Option("statistics", Aqsis::ParamListBuilder()
+						  ("endofframe", &g_cl_endofframe));
 
-	// Pass the crop window onto Aqsis.
-	if( g_cl_cropWindow.size() == 4 )
-	{
-		RiCropWindow(g_cl_cropWindow[0], g_cl_cropWindow[1], g_cl_cropWindow[2], g_cl_cropWindow[3]);
-	}
+			// Pass the crop window onto Aqsis.
+			if( g_cl_cropWindow.size() == 4 )
+				ri.CropWindow(g_cl_cropWindow[0], g_cl_cropWindow[1],
+							  g_cl_cropWindow[2], g_cl_cropWindow[3]);
 
-	// Pass in specified resolution.
-	if(g_cl_res.size() == 2)
-	{
-		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
-	}
+			// Pass in specified resolution.
+			if(g_cl_res.size() == 2)
+				ri.Format(g_cl_res[0], g_cl_res[1], 1.0f);
 
-#	if ENABLE_MPDUMP
-	if ( g_cl_mpdump )
-	{
-		RtInt enabled = 1;
-		RiOption( "mpdump", "enabled", &enabled, RI_NULL );
-	}
-#	endif
+#if ENABLE_MPDUMP
+			if(g_cl_mpdump)
+			{
+				RtInt enabled = 1;
+				ri.Option("mpdump",
+						  ParamListBuilder()("enabled", &enabled));
+			}
+#endif
 
-	// Parse all the command line options with the RIB parser.
-	for(TqInt i = 0, end = g_cl_options.size(); i < end; ++i)
-	{
-		std::istringstream inStream(g_cl_options[i]);
-		Aqsis::cxxRenderContext()->parseRib(inStream, "command_line_option");
-	}
-	return;
-}
+			// Parse all the command line options with the RIB parser.
+			for(TqInt i = 0, end = g_cl_options.size(); i < end; ++i)
+			{
+				std::istringstream inStream(g_cl_options[i]);
+				services().parseRib(inStream, "command_line_option", ri);
+			}
+
+			ri.WorldBegin();
+		}
+};
+} // anon namespace
 
 
 #ifndef AQSIS_SYSTEM_WIN32
@@ -513,7 +507,6 @@ void setupOptions()
 	}
 
 	RiProgressHandler( &PrintProgress );
-	RiPreWorldFunction( &PreWorld );
 }
 
 
@@ -642,6 +635,8 @@ int main( int argc, const char** argv )
 
 		RiBegin(RI_NULL);
 		setupOptions();
+		PreWorldFilter preWorldFilter;
+		Aqsis::cxxRenderContext()->addFilter(preWorldFilter);
 		try
 		{
 			if ( ap.leftovers().size() == 0 )
