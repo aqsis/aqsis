@@ -475,32 +475,6 @@ class CqRenderer : public IqRenderer
 			m_pProgressHandler = pprogresshandler;
 		}
 
-		RtFunc	pPreRenderFunction()
-		{
-			return ( m_pPreRenderFunction );
-		}
-		/** Set a function to call just before initiating the render.
-		*  This function will be called during the RiWorldEnd command, the state will be World.
-		 * \param pfunction A pointer to a function which conforms to RtFunc.
-		 */
-		void	SetpPreRenderFunction( RtFunc pfunction )
-		{
-			m_pPreRenderFunction = pfunction;
-		}
-
-		RtFunc	pPreWorldFunction()
-		{
-			return ( m_pPreWorldFunction );
-		}
-		/** Set a function to call just before starting the world definition.
-		*  This function will be called during the RiWorldBegin command, the state will be Begin/End or Frame.
-		 * \param pfunction A pointer to a function which conforms to RtFunc.
-		 */
-		void	SetpPreWorldFunction( RtFunc pfunction )
-		{
-			m_pPreWorldFunction = pfunction;
-		}
-
 		/** Get a pointer to the raytracing subsystem
 		 */
 		IqRaytrace*	pRaytracer() const
@@ -600,8 +574,6 @@ class CqRenderer : public IqRenderer
 		bool        m_abortRender;   ///< bool to signal the renderer to cleanup and exit
 
 		RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
-		RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
-		RtFunc	m_pPreWorldFunction;	///< A pointer to the function called just prior to starting the world.
 
 		IqRaytrace*	m_pRaytracer;		///< Pointer to the raytracing subsystem interface.
 

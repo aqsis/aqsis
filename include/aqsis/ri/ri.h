@@ -544,8 +544,6 @@ AQSIS_RI_SHARE RtVoid RiArchiveEnd();
 
 AQSIS_RI_SHARE  RtBoolean   BasisFromName( RtBasis * b, const char * strName );
 AQSIS_RI_SHARE  RtVoid  RiProgressHandler( RtProgressFunc handler );
-AQSIS_RI_SHARE  RtFunc  RiPreRenderFunction( RtFunc function );
-AQSIS_RI_SHARE  RtFunc  RiPreWorldFunction( RtFunc function );
 
 #ifdef  __cplusplus
 }

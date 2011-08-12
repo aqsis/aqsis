@@ -574,10 +574,6 @@ RtVoid RiCxxCore::FrameEnd()
 //
 RtVoid RiCxxCore::WorldBegin()
 {
-	// Call any specified pre world function.
-	if ( QGetRenderContext()->pPreWorldFunction() != NULL )
-		( *QGetRenderContext()->pPreWorldFunction() ) ();
-
 	// Start the frame timer (just in case there was no FrameBegin block. If there
 	// was, nothing happens)
 	//QGetRenderContext() ->Stats().StartFrameTimer();
@@ -672,9 +668,6 @@ RtVoid RiCxxCore::WorldEnd()
 	QGetRenderContext()->RenderAutoShadows();
 
 	bool fFailed = false;
-	// Call any specified pre render function.
-	if ( QGetRenderContext()->pPreRenderFunction() != NULL )
-		( *QGetRenderContext()->pPreRenderFunction() ) ();
 
 	// Stop the parsing counter
 	AQSIS_TIMER_STOP(Parse);
@@ -4212,32 +4205,6 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 RtVoid RiProgressHandler(RtProgressFunc handler)
 {
 	QGetRenderContext()->SetpProgressHandler( handler );
-}
-
-
-//----------------------------------------------------------------------
-/** Set the function called just prior to rendering, after the world is complete.
- 	\param	function	Pointer to the new function to use.
- 	\return	Pointer to the old function.
- */
-RtFunc RiPreRenderFunction(RtFunc function)
-{
-	RtFunc pOldPreRenderFunction = QGetRenderContext()->pPreRenderFunction();
-	QGetRenderContext()->SetpPreRenderFunction( function );
-	return ( pOldPreRenderFunction );
-}
-
-//----------------------------------------------------------------------
-/** Set the function called just prior to world definition.
- 	\param	function	Pointer to the new function to use.
- 	\return	Pointer to the old function.
-	\deprecated TODO: Remove!
- */
-RtFunc RiPreWorldFunction(RtFunc function)
-{
-	RtFunc pOldPreWorldFunction = QGetRenderContext()->pPreWorldFunction();
-	QGetRenderContext()->SetpPreWorldFunction( function );
-	return ( pOldPreWorldFunction );
 }
 
 

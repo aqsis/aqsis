@@ -98,8 +98,6 @@ CqRenderer::CqRenderer()
 	m_FrameNo(0),
 	m_pErrorHandler(&RiErrorPrint),
 	m_pProgressHandler(0),
-	m_pPreRenderFunction(0),
-	m_pPreWorldFunction(0),
 	m_pRaytracer(CreateRaytracer()),
 	m_clippingVolume(),
 	m_aWorld(),
