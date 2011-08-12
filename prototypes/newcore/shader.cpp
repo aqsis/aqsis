@@ -177,9 +177,9 @@ class DefaultSurface : public IOVarHolder
             : m_Kd(0.7),
             m_Ka(0.2)
         {
-            if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
+            if(Ri::FloatArray Kd = pList.findFloat("Kd"))
                 m_Kd = Kd[0];
-            if(Ri::FloatArray Ka = pList.findFloatData(Ri::TypeSpec::Float, "Ka"))
+            if(Ri::FloatArray Ka = pList.findFloat("Ka"))
                 m_Ka = Ka[0];
             VarSpec inVars[] = {
                 Stdvar::N,
@@ -223,12 +223,11 @@ class LumpySin : public IOVarHolder
             m_amplitude(0.15),
             m_frequency(1)
         {
-            Ri::IntArray useCam = pList.findIntData(Ri::TypeSpec::Int,
-                                                    "use_cam_coords");
+            Ri::IntArray useCam = pList.findInt("use_cam_coords");
             m_useCameraCoords = useCam && useCam[0] != 0;
-            if(Ri::FloatArray a = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
+            if(Ri::FloatArray a = pList.findFloat("amplitude"))
                 m_amplitude = a[0];
-            if(Ri::FloatArray f = pList.findFloatData(Ri::TypeSpec::Float, "frequency"))
+            if(Ri::FloatArray f = pList.findFloat("frequency"))
                 m_frequency = f[0];
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -294,9 +293,9 @@ class Helix : public IOVarHolder
             : m_frequency(10),
             m_amplitude(0.02)
         {
-            if(Ri::FloatArray f = pList.findFloatData(Ri::TypeSpec::Float, "frequency"))
+            if(Ri::FloatArray f = pList.findFloat("frequency"))
                 m_frequency = f[0];
-            if(Ri::FloatArray a = pList.findFloatData(Ri::TypeSpec::Float, "amplitude"))
+            if(Ri::FloatArray a = pList.findFloat("amplitude"))
                 m_amplitude = a[0];
             VarSpec inVars[] = {
                 Stdvar::P,
@@ -359,15 +358,15 @@ class Plastic : public IOVarHolder
             m_roughness(0.1),
             m_lightColor(V3f(1))
         {
-            if(Ri::FloatArray Kd = pList.findFloatData(Ri::TypeSpec::Float, "Kd"))
+            if(Ri::FloatArray Kd = pList.findFloat("Kd"))
                 m_Kd = Kd[0];
-            if(Ri::FloatArray Ka = pList.findFloatData(Ri::TypeSpec::Float, "Ka"))
+            if(Ri::FloatArray Ka = pList.findFloat("Ka"))
                 m_Ka = Ka[0];
-            if(Ri::FloatArray Ks = pList.findFloatData(Ri::TypeSpec::Float, "Ks"))
+            if(Ri::FloatArray Ks = pList.findFloat("Ks"))
                 m_Ks = Ks[0];
-            if(Ri::FloatArray r = pList.findFloatData(Ri::TypeSpec::Float, "roughness"))
+            if(Ri::FloatArray r = pList.findFloat("roughness"))
                 m_roughness = r[0];
-            if(Ri::FloatArray col = pList.findFloatData(Ri::TypeSpec::Color, "lightcolor"))
+            if(Ri::FloatArray col = pList.findColor("lightcolor"))
                 m_lightColor = C3f(col[0], col[1], col[2]);
             VarSpec inVars[] = {
                 Stdvar::P,

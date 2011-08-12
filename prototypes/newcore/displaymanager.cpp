@@ -163,7 +163,7 @@ bool DisplayList::addDisplay(const char* name, const char* type,
         info.display.reset(new TiffDisplay());
     else if(strcmp(type, "__Display_instance__") == 0)
     {
-        Ri::PtrArray inst = pList.findPtrData(Ri::TypeSpec::Pointer, "instance");
+        Ri::PtrArray inst = pList.findPtr("instance");
         if(!inst)
             return false;
         info.display.reset(static_cast<Display*>(inst[0]), nullDeleter);

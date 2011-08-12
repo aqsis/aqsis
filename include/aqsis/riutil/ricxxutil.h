@@ -41,6 +41,7 @@
 
 #include <cassert>
 #include <climits>
+#include <deque>
 #include <string.h> // for strcmp
 
 #include <aqsis/riutil/primvartoken.h>
@@ -80,6 +81,9 @@ class ParamListBuilder
         template<typename T>
         ParamListBuilder& operator()(const Ri::TypeSpec& spec,
                                      const char* name, T* v);
+        /// Add a "uniform T[1]" to the parameter list
+        template<typename T>
+        ParamListBuilder& operator()(const char* name, T v);
 
         /// Add an array, v to the parameter list
         template<typename T>
@@ -100,6 +104,23 @@ class ParamListBuilder
 
     private:
         std::vector<Ri::Param> m_paramStorage;
+
+        /// Union to store types which have been provided by value so we can
+        /// take pointers to them to put in an Ri::Array<T>
+        union SingleValue
+        {
+            RtInt i;
+            RtFloat f;
+            RtConstString s;
+            const void* p;
+            SingleValue(RtInt i)         : i(i) {}
+            SingleValue(RtFloat f)       : f(f) {}
+            SingleValue(RtConstString i) : s(s) {}
+            SingleValue(const void* i)   : p(p) {}
+        };
+        /// Use a deque here rather than a vector so that references to the
+        /// held values aren't invalidated when the deque expands via push_back
+        std::deque<SingleValue> m_valueStorage;
 };
 
 
@@ -116,16 +137,33 @@ class ParamListUsage
 
         /// Find a parameter, and mark it as used.
         ///
-        /// \see Ri::ParaList::find
+        /// \see Ri::ParamList::find
         template<typename T>
         Ri::Array<T> find(const Ri::TypeSpec& spec, const char* name);
 
-        Ri::FloatArray findFloatData(const Ri::TypeSpec& spec,
-                                     const char* name);
-        Ri::IntArray findIntData(const Ri::TypeSpec& spec,
-                                 const char* name);
-        Ri::StringArray findStringData(const Ri::TypeSpec& spec,
-                                       const char* name);
+        /// Find a uniform parameter, and mark it as used.
+        Ri::FloatArray findFloat(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Float, name); }
+        Ri::FloatArray findPoint(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Point, name); }
+        Ri::FloatArray findColor(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Color, name); }
+        Ri::FloatArray findVector(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Vector, name); }
+        Ri::FloatArray findNormal(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Normal, name); }
+        Ri::FloatArray findHPoint(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::HPoint, name); }
+        Ri::FloatArray findMatrix(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::Matrix, name); }
+        Ri::FloatArray findMPoint(const char* name)
+            { return find<RtFloat>(Ri::TypeSpec::MPoint, name); }
+        Ri::IntArray findInt(const char* name)
+            { return find<RtInt>(Ri::TypeSpec::Int, name); }
+        Ri::StringArray findString(const char* name)
+            { return find<RtConstString>(Ri::TypeSpec::String, name); }
+        Ri::PtrArray findPtr(const char* name)
+            { return find<void*>(Ri::TypeSpec::Pointer, name); }
 
         /// Return true if some parameters are yet to be used via find*()
         bool hasUnusedParams();
@@ -467,22 +505,6 @@ inline Ri::Array<T> ParamListUsage::find(const Ri::TypeSpec& spec,
     return m_pList[idx].data<T>();
 }
 
-inline Ri::FloatArray ParamListUsage::findFloatData(const Ri::TypeSpec& spec,
-                                                      const char* name)
-{
-    return find<RtFloat>(spec, name);
-}
-inline Ri::IntArray ParamListUsage::findIntData(const Ri::TypeSpec& spec,
-                                                  const char* name)
-{
-    return find<RtInt>(spec, name);
-}
-inline Ri::StringArray ParamListUsage::findStringData(const Ri::TypeSpec& spec,
-                                                        const char* name)
-{
-    return find<RtConstString>(spec, name);
-}
-
 inline bool ParamListUsage::hasUnusedParams()
 {
     for(int i = 0; i < (int)m_handled.size(); ++i)
@@ -542,6 +564,15 @@ inline ParamListBuilder& ParamListBuilder::operator()(const Ri::TypeSpec& spec,
 {
     m_paramStorage.push_back(
         Ri::Param(spec, name, Ri::Array<T>(v, 1)));
+    return *this;
+}
+
+template<typename T>
+ParamListBuilder& ParamListBuilder::operator()(const char* name, T v)
+{
+    m_valueStorage.push_back(SingleValue(v));
+    m_paramStorage.push_back(Ri::Param(Ri::toTypeSpecType<T>::value, name,
+                        static_cast<const void*>(&m_valueStorage.back()), 1));
     return *this;
 }
 

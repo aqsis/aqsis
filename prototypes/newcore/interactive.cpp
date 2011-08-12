@@ -93,16 +93,15 @@ int main(int argc, char* argv[])
     // Command line options
     Ri::Renderer& ri = renderer->firstFilter();
     ri.Option("statistics", ParamListBuilder()
-              ("int endofframe", &opts["stats"].as<int>()));
+              ("endofframe", opts["stats"].as<int>()));
     ri.Option("limits", ParamListBuilder()
-              ("int threads", &opts["threads"].as<int>()));
+              ("threads", opts["threads"].as<int>()));
 
     // Default hard-coded frame options.
     ri.PixelSamples(2, 2);
     ri.PixelFilter(renderer->getFilterFunc("sinc"), 3, 3);
     ri.ShadingRate(1);
-    int eyesplits = 6;
-    ri.Option("limits", ParamListBuilder()("int eyesplits", &eyesplits));
+    ri.Option("limits", ParamListBuilder()("eyesplits", 6));
     ri.Clipping(0.3, FLT_MAX);
 
 	// Build a list of all ribFiles specified, expanding wildcards where necessary

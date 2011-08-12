@@ -365,7 +365,7 @@ class PreWorldFilter : public Aqsis::PassthroughFilter
 			// Pass the statistics option onto Aqsis.
 			if ( g_cl_endofframe >= 0 )
 				ri.Option("statistics", Aqsis::ParamListBuilder()
-						  ("endofframe", &g_cl_endofframe));
+						  ("endofframe", g_cl_endofframe));
 
 			// Pass the crop window onto Aqsis.
 			if( g_cl_cropWindow.size() == 4 )
@@ -378,11 +378,8 @@ class PreWorldFilter : public Aqsis::PassthroughFilter
 
 #if ENABLE_MPDUMP
 			if(g_cl_mpdump)
-			{
-				RtInt enabled = 1;
 				ri.Option("mpdump",
-						  ParamListBuilder()("enabled", &enabled));
-			}
+						  ParamListBuilder()("enabled", enabled));
 #endif
 
 			// Parse all the command line options with the RIB parser.
@@ -470,11 +467,8 @@ void setupOptions()
 
 	std::string frameList = getFrameList();
 	if(!frameList.empty())
-	{
-		const char* frames = frameList.c_str();
 		Aqsis::cxxRenderContext()->addFilter("framedrop",
-				Aqsis::ParamListBuilder()("string frames", &frames) );
-	}
+				Aqsis::ParamListBuilder()("frames", frameList.c_str()) );
 
 	// Allow any command line arguments to override system/env settings
 	Aqsis::log() << Aqsis::info

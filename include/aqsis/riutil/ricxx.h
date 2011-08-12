@@ -283,38 +283,51 @@ class ParamList : public Array<Param>
             return -1;
         }
 
-        /// Find a float-storage parameter with the given type and name.
+        /// Find a parameter with the given type and name.
         ///
-        /// \return An array of the float data.  A null array is returned if
-        /// the parameter isn't found, or has a storage type which isn't
-        /// float.
+        /// \return An array of data corresponding to the value of the
+        /// parameter.  A null array is returned if the parameter isn't found,
+        /// or the storage type is incompatible with the type T.
+        ///
+        /// TODO: Think about whether other types could be supported here - eg,
+        /// it might be nice to be able to do
+        ///
+        /// pList.find<Imath::V3f>(TypeSpec::Vector, "P");
         template<typename T>
         Array<T> find(const TypeSpec& spec, const char* name) const
         {
             if(spec.storageType() != toTypeSpecType<T>::value)
-            {
-                assert(0 && "ParamList::find<T> for T incompatible "
-                            "with spec type");
                 return Array<T>();
-            }
             int idx = find(spec, name);
             if(idx < 0)
                 return Array<T>();
             else
                 return (*this)[idx].data<T>();
         }
-        /// Find a float-storage parameter with the given type and name.
-        FloatArray findFloatData(const TypeSpec& spec, const char* name) const
-            { return find<RtFloat>(spec, name); }
-        /// Find a int-storage parameter with the given type and name.
-        IntArray findIntData(const TypeSpec& spec, const char* name) const
-            { return find<RtInt>(spec, name); }
-        /// Find a string-storage parameter with the given type and name.
-        StringArray findStringData(const TypeSpec& spec, const char* name) const
-            { return find<RtConstString>(spec, name); }
-        /// Find a string-storage parameter with the given type and name.
-        PtrArray findPtrData(const TypeSpec& spec, const char* name) const
-            { return find<void*>(spec, name); }
+
+        /// Find value of a "uniform type[1]" parameter with the given name.
+        FloatArray findFloat(const char* name) const
+            { return find<RtFloat>(TypeSpec::Float, name); }
+        FloatArray findPoint(const char* name) const
+            { return find<RtFloat>(TypeSpec::Point, name); }
+        FloatArray findColor(const char* name) const
+            { return find<RtFloat>(TypeSpec::Color, name); }
+        FloatArray findVector(const char* name) const
+            { return find<RtFloat>(TypeSpec::Vector, name); }
+        FloatArray findNormal(const char* name) const
+            { return find<RtFloat>(TypeSpec::Normal, name); }
+        FloatArray findHPoint(const char* name) const
+            { return find<RtFloat>(TypeSpec::HPoint, name); }
+        FloatArray findMatrix(const char* name) const
+            { return find<RtFloat>(TypeSpec::Matrix, name); }
+        FloatArray findMPoint(const char* name) const
+            { return find<RtFloat>(TypeSpec::MPoint, name); }
+        IntArray findInt(const char* name) const
+            { return find<RtInt>(TypeSpec::Int, name); }
+        StringArray findString(const char* name) const
+            { return find<RtConstString>(TypeSpec::String, name); }
+        PtrArray findPtr(const char* name) const
+            { return find<void*>(TypeSpec::Pointer, name); }
 };
 
 

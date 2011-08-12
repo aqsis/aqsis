@@ -213,17 +213,12 @@ int main( int argc, const char** argv )
 	// Add frame filter if desired
 	std::string frameList = getFrameList();
 	if(!frameList.empty())
-	{
-		const char* frames = frameList.c_str();
-		writer->addFilter("framedrop",
-			Aqsis::ParamListBuilder()("string frames", &frames)
-		);
-	}
+		writer->addFilter("framedrop", Aqsis::ParamListBuilder()
+						  ("frames", frameList.c_str()));
 	// Add interface validation, with relaxed outer scope handling so that
 	// miqser won't reject RIB fragments which don't start in the outer scope.
-	int relaxedOuterScope = 1;
 	writer->addFilter("validate", Aqsis::ParamListBuilder()
-					  ("int relaxed_outer_scope", &relaxedOuterScope));
+					  ("relaxed_outer_scope", 1));
 
 	// Parse files
 	const ArgParse::apstringvec& fileNames = ap.leftovers();

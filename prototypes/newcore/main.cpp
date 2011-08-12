@@ -79,9 +79,9 @@ int main(int argc, char* argv[])
     boost::shared_ptr<Ri::RendererServices> renderer(createRenderer());
 
     renderer->firstFilter().Option("statistics", ParamListBuilder()
-                            ("int endofframe", &opts["stats"].as<int>()));
+                            ("endofframe", opts["stats"].as<int>()));
     renderer->firstFilter().Option("limits", ParamListBuilder()
-                            ("int threads", &opts["threads"].as<int>()));
+                            ("threads", opts["threads"].as<int>()));
 
 
     const StringVec& ribFiles = opts["rib_files"].as<StringVec>();

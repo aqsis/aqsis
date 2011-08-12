@@ -2042,8 +2042,7 @@ RtVoid RiCxxValidate::ArchiveEnd()
 //------------------------------------------------------------------------------
 Ri::Filter* createValidateFilter(const Ri::ParamList& pList)
 {
-    Ri::IntArray outerScopeRelaxed = pList.findIntData(Ri::TypeSpec::Int,
-                                                       "relaxed_outer_scope");
+    Ri::IntArray outerScopeRelaxed = pList.findInt("relaxed_outer_scope");
     return new RiCxxValidate(outerScopeRelaxed ? outerScopeRelaxed[0] : false);
 }
 

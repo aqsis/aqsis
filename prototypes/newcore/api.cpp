@@ -908,7 +908,7 @@ RtVoid RenderApi::Projection(RtConstToken name, const ParamList& pList)
     else if(strcmp(name, "perspective") == 0)
     {
         m_opts->camInfo.setType(CameraInfo::Perspective);
-        FloatArray fov = pList.findFloatData(Ri::TypeSpec::Float, "fov");
+        FloatArray fov = pList.findFloat("fov");
         if(fov)
             m_opts->camInfo.setFov(fov[0]);
     }
@@ -1040,9 +1040,9 @@ RtVoid RenderApi::Hider(RtConstToken name, const ParamList& pList)
         return;
     }
     ParamListUsage params(pList);
-    if(IntArray subpixel = params.findIntData(Ri::TypeSpec::Int, "subpixel"))
+    if(IntArray subpixel = params.findInt("subpixel"))
         m_opts->opts->doFilter = subpixel[0];
-    if(IntArray w = params.findIntData(Ri::TypeSpec::Int, "interleavewidth"))
+    if(IntArray w = params.findInt("interleavewidth"))
         m_opts->opts->interleaveWidth = w[0];
     if(params.hasUnusedParams())
     {
@@ -1067,25 +1067,25 @@ RtVoid RenderApi::Option(RtConstToken name, const ParamList& pList)
     ParamListUsage params(pList);
     if(strcmp(name, "limits") == 0)
     {
-        if(IntArray bs = params.findIntData(
+        if(IntArray bs = params.find<RtInt>(
                         Ri::TypeSpec(Ri::TypeSpec::Int, 2), "bucketsize"))
             m_opts->opts->bucketSize = V2f(bs[0], bs[1]);
-        if(IntArray gs = params.findIntData(Ri::TypeSpec::Int, "gridsize"))
+        if(IntArray gs = params.findInt("gridsize"))
             m_opts->opts->gridSize = ifloor(sqrt((float)gs[0]));
-        if(IntArray es = params.findIntData(Ri::TypeSpec::Int, "eyesplits"))
+        if(IntArray es = params.findInt("eyesplits"))
             m_opts->opts->eyeSplits = es[0];
-        if(IntArray t = params.findIntData(Ri::TypeSpec::Int, "threads"))
+        if(IntArray t = params.findInt("threads"))
             m_opts->opts->nthreads = t[0];
     }
     else if(strcmp(name, "statistics") == 0)
     {
-        if(IntArray i = params.findIntData(Ri::TypeSpec::Int, "endofframe"))
+        if(IntArray i = params.findInt("endofframe"))
             m_opts->opts->statsVerbosity = i[0];
     }
     else if(strcmp(name, "searchpath") == 0)
     {
         // TODO: Other search paths, default search path support.
-        if(StringArray a = params.findStringData(Ri::TypeSpec::String, "archive"))
+        if(StringArray a = params.findString("archive"))
             m_opts->archiveSearchPath =
                 expandSearchPath(a[0], m_opts->archiveSearchPath);
     }
@@ -1373,7 +1373,7 @@ RtVoid RenderApi::Attribute(RtConstToken name, const ParamList& pList)
 {
     if(strcmp(name, "displacementbound") == 0)
     {
-        if(FloatArray s = pList.findFloatData(Ri::TypeSpec::Float, "sphere"))
+        if(FloatArray s = pList.findFloat("sphere"))
             attrsWrite()->displacementBound = s[0];
         // TODO Arbitrary coordinate systems
     }
@@ -1836,7 +1836,7 @@ ApiServices::ApiServices()
     m_errorHandler()
 {
     m_api.reset(new RenderApi(*this));
-    Ri::Filter* utilFilter = createRenderUtilFilter(TestCondition);
+    Ri::Filter* utilFilter = createRenderUtilFilter();
     utilFilter->setNextFilter(*m_api);
     utilFilter->setRendererServices(*this);
     m_filterChain.push_back(boost::shared_ptr<Ri::Renderer>(utilFilter));
