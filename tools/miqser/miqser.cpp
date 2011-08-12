@@ -219,8 +219,11 @@ int main( int argc, const char** argv )
 			Aqsis::ParamListBuilder()("string frames", &frames)
 		);
 	}
-	// Add interface validation
-	writer->addFilter("validate");
+	// Add interface validation, with relaxed outer scope handling so that
+	// miqser won't reject RIB fragments which don't start in the outer scope.
+	int relaxedOuterScope = 1;
+	writer->addFilter("validate", Aqsis::ParamListBuilder()
+					  ("int relaxed_outer_scope", &relaxedOuterScope));
 
 	// Parse files
 	const ArgParse::apstringvec& fileNames = ap.leftovers();

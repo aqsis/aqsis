@@ -80,6 +80,7 @@ class RiCxxValidate : public Ri::Filter
             Scope_Motion     = 1<<7,
             Scope_Resource   = 1<<8,
             Scope_Archive    = 1<<9,
+            Scope_Any        = ~0,
         };
         std::stack<ApiScope> m_scopeStack;
 
@@ -91,6 +92,10 @@ class RiCxxValidate : public Ri::Filter
             AttrState(int ustep, int vstep) : ustep(ustep), vstep(vstep) {}
         };
         std::stack<AttrState> m_attrStack;
+        /// True if the attribute state isn't actually completely known from
+        /// context, for example, if we're validating a RIB fragment.
+        bool m_relaxedAttributeState;
+
         void pushAttributes()
         {
             m_attrStack.push(m_attrStack.top());
@@ -117,11 +122,15 @@ class RiCxxValidate : public Ri::Filter
                                       const char* procName);
 
     public:
-        RiCxxValidate()
+        RiCxxValidate(bool outerScopeRelaxed)
             : m_scopeStack(),
-            m_attrStack()
+            m_attrStack(),
+            m_relaxedAttributeState(outerScopeRelaxed)
         {
-            m_scopeStack.push(Scope_BeginEnd);
+            if(outerScopeRelaxed)
+                m_scopeStack.push(Scope_Any);
+            else
+                m_scopeStack.push(Scope_BeginEnd);
             m_attrStack.push(AttrState(3,3));
         }
 
@@ -337,6 +346,7 @@ const char* RiCxxValidate::scopeString(ApiScope s)
         case Scope_Motion:     return "Motion";
         case Scope_Resource:   return "Resource";
         case Scope_Archive:    return "Archive";
+        case Scope_Any:        return "Any";
     }
     assert(0 && "unknown scope (bug!)");
     return "unknown scope (bug!)";
@@ -352,6 +362,13 @@ void RiCxxValidate::pushScope(ApiScope newScope)
 
 void RiCxxValidate::popScope(ApiScope oldScope)
 {
+    if(m_scopeStack.size() == 1)
+    {
+        // Never pop the outer scope.  This check is necessary when validating
+        // RIB fragments which possibly might have more ScopeEnd than
+        // ScopeBegin calls.
+        return;
+    }
     ApiScope currScope = m_scopeStack.top();
     if(currScope == Scope_Archive && oldScope != Scope_Archive)
         return;
@@ -359,7 +376,7 @@ void RiCxxValidate::popScope(ApiScope oldScope)
     m_scopeStack.pop();
 }
 
-void RiCxxValidate::checkScope(ApiScope allowedScopes, const char* procName) const
+inline void RiCxxValidate::checkScope(ApiScope allowedScopes, const char* procName) const
 {
     ApiScope currScope = m_scopeStack.top();
     if(!(currScope & allowedScopes))
@@ -418,6 +435,8 @@ void RiCxxValidate::checkParamListArraySizes(const Ri::ParamList& pList,
         const Ri::TypeSpec& spec = pList[i].spec();
         int expectedSize = iclassCount(iclassCounts, spec.iclass) *
                              spec.storageCount();
+        if(expectedSize < 0) // Required size unknown by validator; punt.
+            continue;
         checkArraySize(expectedSize, pList[i].size(), pList[i].name(),
                        procName);
     }
@@ -445,9 +464,9 @@ def getExtraSnippet(procName):
 # cleanly encoded in the XML in some cases.  Here they are as custom code
 # snippets, ugh:
 iclassCountSnippets = {
-    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_attrStack.top().ustep, m_attrStack.top().vstep);',
-    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep);',
-    'Geometry': ''
+    'PatchMesh': 'iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_attrStack.top().ustep, m_attrStack.top().vstep, !m_relaxedAttributeState);',
+    'Curves': 'iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep, !m_relaxedAttributeState);',
+    'Geometry': 'iclassCounts = SqInterpClassCounts(-1,-1,-1,-1,-1);'
 }
 
 # scopes which are ignored during validation.
@@ -1431,7 +1450,7 @@ RtVoid RiCxxValidate::PatchMesh(RtConstToken type, RtInt nu, RtConstToken uwrap,
         );
     }
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_attrStack.top().ustep, m_attrStack.top().vstep);
+    iclassCounts = patchMeshIClassCounts(type, nu, uwrap, nv, vwrap, m_attrStack.top().ustep, m_attrStack.top().vstep, !m_relaxedAttributeState);
     if(m_scopeStack.top() != Scope_Archive)
     checkParamListArraySizes(pList, iclassCounts, "PatchMesh");
     nextFilter().PatchMesh(type, nu, uwrap, nv, vwrap, pList);
@@ -1790,7 +1809,7 @@ RtVoid RiCxxValidate::Curves(RtConstToken type, const IntArray& nvertices,
 {
     checkScope(ApiScope(Scope_Motion | Scope_Object | Scope_Transform | Scope_World | Scope_Attribute | Scope_Solid | Scope_Archive), "Curves");
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-    iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep);
+    iclassCounts = curvesIClassCounts(type, nvertices, wrap, m_attrStack.top().vstep, !m_relaxedAttributeState);
     if(m_scopeStack.top() != Scope_Archive)
     checkParamListArraySizes(pList, iclassCounts, "Curves");
     checkPointParamPresent(pList);
@@ -1823,7 +1842,7 @@ RtVoid RiCxxValidate::Geometry(RtConstToken type, const ParamList& pList)
 {
     checkScope(ApiScope(Scope_World | Scope_Object | Scope_Transform | Scope_Attribute | Scope_Solid | Scope_Archive), "Geometry");
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
-    
+    iclassCounts = SqInterpClassCounts(-1,-1,-1,-1,-1);
     checkParamListArraySizes(pList, iclassCounts, "Geometry");
     nextFilter().Geometry(type, pList);
 }
@@ -2023,7 +2042,9 @@ RtVoid RiCxxValidate::ArchiveEnd()
 //------------------------------------------------------------------------------
 Ri::Filter* createValidateFilter(const Ri::ParamList& pList)
 {
-    return new RiCxxValidate();
+    Ri::IntArray outerScopeRelaxed = pList.findIntData(Ri::TypeSpec::Int,
+                                                       "relaxed_outer_scope");
+    return new RiCxxValidate(outerScopeRelaxed ? outerScopeRelaxed[0] : false);
 }
 
 } // namespace Aqsis

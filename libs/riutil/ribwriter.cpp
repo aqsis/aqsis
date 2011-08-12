@@ -93,7 +93,8 @@ class AsciiFormatter
         void decreaseIndent()
         {
             m_indent -= m_indentStep;
-            assert(m_indent >= 0);
+            if(m_indent < 0) // may happen if formatting unbalanced RIB fragments
+                m_indent = 0;
             m_indentString.assign(m_indent, m_indentChar);
         }
 

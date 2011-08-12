@@ -164,15 +164,23 @@ int size(const Ri::Array<T>& a);
 inline int countP(const Ri::ParamList& pList);
 
 /// Get the interpolation class counts for RiPatchMesh.
+///
+/// If basisKnown is false, insert -1 for any counts which depend on the basis
+/// step.
 SqInterpClassCounts patchMeshIClassCounts(const char* type, int nu,
                                           const char* uwrap,
                                           int nv, const char* vwrap,
-                                          int basisUstep, int basisVstep);
+                                          int basisUstep, int basisVstep,
+                                          bool basisKnown = true);
 
 /// Get the interpolation class counts for RiCurves.
+///
+/// If basisKnown is false, insert -1 for any counts which depend on the basis
+/// step.
 SqInterpClassCounts curvesIClassCounts(const char* type,
                                        const Ri::IntArray& nvertices,
-                                       const char* wrap, int basisVstep);
+                                       const char* wrap, int basisVstep,
+                                       bool basisKnown = true);
 
 
 //------------------------------------------------------------------------------
@@ -627,7 +635,8 @@ inline int countP(const Ri::ParamList& pList)
 
 //--------------------------------------------------
 inline SqInterpClassCounts patchMeshIClassCounts(const char* type, int nu, const char* uwrap,
-                                   int nv, const char* vwrap, int basisUstep, int basisVstep)
+                                   int nv, const char* vwrap, int basisUstep, int basisVstep,
+                                   bool basisKnown)
 {
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     bool uperiodic = strcmp(uwrap, "periodic") == 0;
@@ -638,13 +647,21 @@ inline SqInterpClassCounts patchMeshIClassCounts(const char* type, int nu, const
                                (vperiodic ? nv : nv-1);
         iclassCounts.varying = nu*nv;
     }
-    else
+    else // bicubic
     {
-        int nupatches = uperiodic ? nu/basisUstep : (nu-4)/basisUstep + 1;
-        int nvpatches = vperiodic ? nv/basisVstep : (nv-4)/basisVstep + 1;
-        iclassCounts.uniform = nupatches * nvpatches;
-        iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
-                               ((vperiodic ? 0 : 1) + nvpatches);
+        if(basisKnown)
+        {
+            int nupatches = uperiodic ? nu/basisUstep : (nu-4)/basisUstep + 1;
+            int nvpatches = vperiodic ? nv/basisVstep : (nv-4)/basisVstep + 1;
+            iclassCounts.uniform = nupatches * nvpatches;
+            iclassCounts.varying = ((uperiodic ? 0 : 1) + nupatches) *
+                                ((vperiodic ? 0 : 1) + nvpatches);
+        }
+        else
+        {
+            iclassCounts.uniform = -1;
+            iclassCounts.varying = -1;
+        }
     }
     iclassCounts.vertex = nu*nv;
     // TODO: are facevertex/facevarying valid for a patch mesh?
@@ -655,7 +672,8 @@ inline SqInterpClassCounts patchMeshIClassCounts(const char* type, int nu, const
 
 inline SqInterpClassCounts curvesIClassCounts(const char* type,
                                        const Ri::IntArray& nvertices,
-                                       const char* wrap, int basisVstep)
+                                       const char* wrap, int basisVstep,
+                                       bool basisKnown)
 {
     SqInterpClassCounts iclassCounts(1,1,1,1,1);
     bool periodic = strcmp(wrap, "periodic") == 0;
@@ -664,20 +682,25 @@ inline SqInterpClassCounts curvesIClassCounts(const char* type,
     iclassCounts.vertex = sum(nvertices);
     if(strcmp(type, "cubic") == 0)
     {
-        if(periodic)
+        if(basisKnown)
         {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += nvertices[i]/basisStep;
-            iclassCounts.varying = segmentCount;
+            if(periodic)
+            {
+                int segmentCount = 0;
+                for(size_t i = 0; i < nvertices.size(); ++i)
+                    segmentCount += nvertices[i]/basisStep;
+                iclassCounts.varying = segmentCount;
+            }
+            else
+            {
+                int segmentCount = 0;
+                for(size_t i = 0; i < nvertices.size(); ++i)
+                    segmentCount += (nvertices[i]-4)/basisStep + 1;
+                iclassCounts.varying = segmentCount + size(nvertices);
+            }
         }
         else
-        {
-            int segmentCount = 0;
-            for(size_t i = 0; i < nvertices.size(); ++i)
-                segmentCount += (nvertices[i]-4)/basisStep + 1;
-            iclassCounts.varying = segmentCount + size(nvertices);
-        }
+            iclassCounts.varying = -1;
     }
     else
     {
