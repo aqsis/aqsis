@@ -58,18 +58,18 @@ bool loadPointFile(PointArray& points, const std::string& fileName)
     Pio::ParticleAttribute radAttr;
     if(!ptFile->attributeInfo("position", posAttr) ||
        !ptFile->attributeInfo("normal", norAttr)   ||
-       !ptFile->attributeInfo("_area", areaAttr)   ||
-       !ptFile->attributeInfo("_radiosity", radAttr))
+       !ptFile->attributeInfo("_area", areaAttr))
     {
         Aqsis::log() << "Couldn't find required attribute in \""
             << fileName << "\"\n";
         return false;
     }
+    bool hasRadiosity = ptFile->attributeInfo("_radiosity", radAttr);
     // Check types
     if(posAttr.type != Pio::VECTOR ||
        norAttr.type != Pio::VECTOR ||
        areaAttr.type != Pio::FLOAT || areaAttr.count != 1 ||
-       radAttr.type != Pio::FLOAT || radAttr.count != 3)
+       (hasRadiosity && (radAttr.type != Pio::FLOAT || radAttr.count != 3)))
     {
         Aqsis::log() << "Point attribute count or type wrong in \""
             << fileName << "\"\n";
@@ -90,18 +90,26 @@ bool loadPointFile(PointArray& points, const std::string& fileName)
     pt.addAccessor(posAcc);
     pt.addAccessor(norAcc);
     pt.addAccessor(areaAcc);
-    pt.addAccessor(radAcc);
+    if(hasRadiosity)
+        pt.addAccessor(radAcc);
     for(; pt != ptFile->end(); ++pt)
     {
         // TODO: Use nicer types here?
         const Pio::Data<float,3>& P = posAcc.data<Pio::Data<float,3> >(pt);
         const Pio::Data<float,3>& N = norAcc.data<Pio::Data<float,3> >(pt);
         const Pio::Data<float,1>& A = areaAcc.data<Pio::Data<float,1> >(pt);
-        const Pio::Data<float,3>& C = radAcc.data<Pio::Data<float,3> >(pt);
         *out++ = P[0]; *out++ = P[1]; *out++ = P[2];
         *out++ = N[0]; *out++ = N[1]; *out++ = N[2];
         *out++ = sqrtf(A[0]/M_PI);
-        *out++ = C[0]; *out++ = C[1]; *out++ = C[2];
+        if(hasRadiosity)
+        {
+            const Pio::Data<float,3>& C = radAcc.data<Pio::Data<float,3> >(pt);
+            *out++ = C[0]; *out++ = C[1]; *out++ = C[2];
+        }
+        else
+        {
+            *out++ = 0; *out++ = 0; *out++ = 0;
+        }
     }
     return true;
 }
