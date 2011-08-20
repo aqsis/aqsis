@@ -676,7 +676,7 @@ extern "C"
 					{
 						SqImageLayerChannel chan;
 						chan.dataOffset = pixelSize;
-						chan.channel = Channel(HALF);
+						chan.channel = Channel(pixelType);
 						chan.bufferOffset = 0; // This is filled in by the image when the layer is added.
 						if(!chanName.empty())
 							chan.channelName = chanName;
