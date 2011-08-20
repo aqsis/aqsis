@@ -30,11 +30,13 @@
 
 #define GL_GLEXT_PROTOTYPES
 
+#include <QtCore/QSignalMapper>
 #include <QtGui/QApplication>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
+#include <QtGui/QColorDialog>
 
 #include <boost/program_options.hpp>
 
@@ -355,6 +357,7 @@ PointView::PointView(QWidget *parent)
     m_cursorPos(0),
     m_probeRes(10),
     m_probeMaxSolidAngle(0),
+    m_backgroundColor(0, 0, 0),
     m_visMode(Vis_Points),
     m_lighting(false),
     m_points(),
@@ -397,6 +400,13 @@ void PointView::setProbeParams(int cubeFaceRes, float maxSolidAngle)
 {
     m_probeRes = cubeFaceRes;
     m_probeMaxSolidAngle = maxSolidAngle;
+}
+
+
+void PointView::setBackground(QColor col)
+{
+    m_backgroundColor = col;
+    updateGL();
 }
 
 
@@ -452,7 +462,8 @@ void PointView::paintGL()
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(m_backgroundColor.redF(), m_backgroundColor.greenF(),
+                 m_backgroundColor.blueF(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw geometry
@@ -812,6 +823,30 @@ PointViewerMainWindow::PointViewerMainWindow(
     quitAct->setShortcuts(QKeySequence::Quit);
     connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+    // View menu
+    QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+    // Background sub-menu
+    QMenu* backMenu = viewMenu->addMenu(tr("Set &Background"));
+    QSignalMapper* mapper = new QSignalMapper(this);
+    // Selectable backgrounds (svg_names from SVG standard - see QColor docs)
+    const char* backgroundNames[] = {/* "Display Name", "svg_name", */
+                                        "Black",        "black",
+                                        "Dark Grey",    "dimgrey",
+                                        "Light Grey",   "lightgrey",
+                                        "White",        "white" };
+    for(size_t i = 0; i < sizeof(backgroundNames)/sizeof(const char*); i+=2)
+    {
+        QAction* backgroundAct = backMenu->addAction(tr(backgroundNames[i]));
+        mapper->setMapping(backgroundAct, backgroundNames[i+1]);
+        connect(backgroundAct, SIGNAL(triggered()), mapper, SLOT(map()));
+    }
+    connect(mapper, SIGNAL(mapped(QString)),
+            this, SLOT(setBackground(QString)));
+    backMenu->addSeparator();
+    QAction* backgroundCustom = backMenu->addAction(tr("Custom"));
+    connect(backgroundCustom, SIGNAL(triggered()),
+            this, SLOT(chooseBackground()));
+
     // Help menu
     QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
     QAction* helpAct = helpMenu->addAction(tr("&Controls"));
@@ -870,6 +905,17 @@ void PointViewerMainWindow::aboutDialog()
     QMessageBox::information(this, tr("About ptview"), message);
 }
 
+
+void PointViewerMainWindow::setBackground(const QString& name)
+{
+    m_pointView->setBackground(QColor(name));
+}
+
+void PointViewerMainWindow::chooseBackground()
+{
+    m_pointView->setBackground(
+        QColorDialog::getColor(QColor(255,255,255), this, "background color"));
+}
 
 } // namespace Aqsis
 

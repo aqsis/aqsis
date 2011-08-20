@@ -72,6 +72,9 @@ class PointView : public QGLWidget
         /// Set properties for rendering probe environment map
         void setProbeParams(int cubeFaceRes, float maxSolidAngle);
 
+        /// Set the backgroud color
+        void setBackground(QColor col);
+
         /// Hint at an appropriate size
         QSize sizeHint() const;
 
@@ -102,6 +105,8 @@ class PointView : public QGLWidget
         /// Light probe resolution
         int m_probeRes;
         float m_probeMaxSolidAngle;
+        /// Background color for drawing
+        QColor m_backgroundColor;
         /// Type of visualization
         VisMode m_visMode;
         /// Flag for whether to use OpenGL lighting or not
@@ -132,6 +137,8 @@ class PointViewerMainWindow : public QMainWindow
         void openFiles();
         void helpDialog();
         void aboutDialog();
+        void setBackground(const QString& name);
+        void chooseBackground();
 
     private:
         PointView* m_pointView;
