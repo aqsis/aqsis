@@ -72,11 +72,16 @@ class PointView : public QGLWidget
         /// Set properties for rendering probe environment map
         void setProbeParams(int cubeFaceRes, float maxSolidAngle);
 
-        /// Set the backgroud color
-        void setBackground(QColor col);
+        /// Get the visualization mode
+        VisMode visMode() const;
 
         /// Hint at an appropriate size
         QSize sizeHint() const;
+
+    public slots:
+        /// Set the backgroud color
+        void setBackground(QColor col);
+        void setVisMode(VisMode mode);
 
     protected:
         // Qt OpenGL callbacks
@@ -139,6 +144,7 @@ class PointViewerMainWindow : public QMainWindow
         void aboutDialog();
         void setBackground(const QString& name);
         void chooseBackground();
+        void toggleVisMode();
 
     private:
         PointView* m_pointView;

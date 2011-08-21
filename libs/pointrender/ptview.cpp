@@ -31,6 +31,7 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <QtCore/QSignalMapper>
+#include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMenuBar>
@@ -403,9 +404,22 @@ void PointView::setProbeParams(int cubeFaceRes, float maxSolidAngle)
 }
 
 
+PointView::VisMode PointView::visMode() const
+{
+    return m_visMode;
+}
+
+
 void PointView::setBackground(QColor col)
 {
     m_backgroundColor = col;
+    updateGL();
+}
+
+
+void PointView::setVisMode(VisMode mode)
+{
+    m_visMode = mode;
     updateGL();
 }
 
@@ -543,12 +557,7 @@ void PointView::wheelEvent(QWheelEvent* event)
 
 void PointView::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_V)
-    {
-        m_visMode = (m_visMode == Vis_Points) ? Vis_Disks : Vis_Points;
-        updateGL();
-    }
-    else if(event->key() == Qt::Key_L)
+    if(event->key() == Qt::Key_L)
     {
         m_lighting = !m_lighting;
         updateGL();
@@ -825,15 +834,19 @@ PointViewerMainWindow::PointViewerMainWindow(
 
     // View menu
     QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+    QAction* viewAsDisks = viewMenu->addAction(tr("Draw As &Disks"));
+    viewAsDisks->setShortcut(tr("v"));
+    viewAsDisks->setCheckable(true);
+    connect(viewAsDisks, SIGNAL(triggered()), this, SLOT(toggleVisMode()));
     // Background sub-menu
     QMenu* backMenu = viewMenu->addMenu(tr("Set &Background"));
     QSignalMapper* mapper = new QSignalMapper(this);
     // Selectable backgrounds (svg_names from SVG standard - see QColor docs)
     const char* backgroundNames[] = {/* "Display Name", "svg_name", */
-                                        "Black",        "black",
-                                        "Dark Grey",    "dimgrey",
-                                        "Light Grey",   "lightgrey",
-                                        "White",        "white" };
+                                        "&Black",        "black",
+                                        "&Dark Grey",    "dimgrey",
+                                        "&Light Grey",   "lightgrey",
+                                        "&White",        "white" };
     for(size_t i = 0; i < sizeof(backgroundNames)/sizeof(const char*); i+=2)
     {
         QAction* backgroundAct = backMenu->addAction(tr(backgroundNames[i]));
@@ -843,7 +856,7 @@ PointViewerMainWindow::PointViewerMainWindow(
     connect(mapper, SIGNAL(mapped(QString)),
             this, SLOT(setBackground(QString)));
     backMenu->addSeparator();
-    QAction* backgroundCustom = backMenu->addAction(tr("Custom"));
+    QAction* backgroundCustom = backMenu->addAction(tr("&Custom"));
     connect(backgroundCustom, SIGNAL(triggered()),
             this, SLOT(chooseBackground()));
 
@@ -911,11 +924,20 @@ void PointViewerMainWindow::setBackground(const QString& name)
     m_pointView->setBackground(QColor(name));
 }
 
+
 void PointViewerMainWindow::chooseBackground()
 {
     m_pointView->setBackground(
         QColorDialog::getColor(QColor(255,255,255), this, "background color"));
 }
+
+
+void PointViewerMainWindow::toggleVisMode()
+{
+    m_pointView->setVisMode(m_pointView->visMode() == PointView::Vis_Points ?
+                            PointView::Vis_Disks : PointView::Vis_Points);
+}
+
 
 } // namespace Aqsis
 
