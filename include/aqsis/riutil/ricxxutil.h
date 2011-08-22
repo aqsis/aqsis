@@ -74,13 +74,6 @@ namespace Aqsis {
 class ParamListBuilder
 {
     public:
-        /// Add a single value, v to the parameter list
-        template<typename T>
-        ParamListBuilder& operator()(const char* token, T* v);
-        /// Add a single value, v to the parameter list
-        template<typename T>
-        ParamListBuilder& operator()(const Ri::TypeSpec& spec,
-                                     const char* name, T* v);
         /// Add a "uniform T[1]" to the parameter list
         template<typename T>
         ParamListBuilder& operator()(const char* name, T v);
@@ -115,8 +108,8 @@ class ParamListBuilder
             const void* p;
             SingleValue(RtInt i)         : i(i) {}
             SingleValue(RtFloat f)       : f(f) {}
-            SingleValue(RtConstString i) : s(s) {}
-            SingleValue(const void* i)   : p(p) {}
+            SingleValue(RtConstString s) : s(s) {}
+            SingleValue(const void* p)   : p(p) {}
         };
         /// Use a deque here rather than a vector so that references to the
         /// held values aren't invalidated when the deque expands via push_back
@@ -530,20 +523,6 @@ inline std::string ParamListUsage::unusedParams()
 
 
 //--------------------------------------------------
-
-
-template<typename T>
-inline ParamListBuilder& ParamListBuilder::operator()(const char* token, T* v)
-{
-    const char* nameBegin = 0;
-    const char* nameEnd = 0;
-    Ri::TypeSpec spec = parseDeclaration(token, &nameBegin, &nameEnd);
-    assert(*nameEnd == '\0');
-    m_paramStorage.push_back(
-        Ri::Param(spec, nameBegin, Ri::Array<T>(v, 1)));
-    return *this;
-}
-
 template<typename T>
 inline ParamListBuilder& ParamListBuilder::operator()(const char* token,
                                                const std::vector<T>& v)
@@ -555,15 +534,6 @@ inline ParamListBuilder& ParamListBuilder::operator()(const char* token,
     m_paramStorage.push_back(
         Ri::Param(spec, nameBegin,
                     Ri::Array<T>(v.empty() ? 0 : &v[0], v.size())));
-    return *this;
-}
-
-template<typename T>
-inline ParamListBuilder& ParamListBuilder::operator()(const Ri::TypeSpec& spec,
-                                               const char* name, T* v)
-{
-    m_paramStorage.push_back(
-        Ri::Param(spec, name, Ri::Array<T>(v, 1)));
     return *this;
 }
 

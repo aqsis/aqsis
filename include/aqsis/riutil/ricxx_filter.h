@@ -310,6 +310,8 @@ class AQSIS_RIUTIL_SHARE PassthroughFilter : public Ri::Filter
 class AQSIS_RIUTIL_SHARE OnOffFilter : public Ri::Filter
 {
     public:
+        explicit OnOffFilter(bool active = true) : m_isActive(active) {}
+
         /// Return the active state
         bool isActive() const { return m_isActive; }
         /// Set the active state
