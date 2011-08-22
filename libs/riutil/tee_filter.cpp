@@ -70,8 +70,13 @@ class TeeFilter : public Ri::Filter
         methodTemplate = '''
         virtual $riCxxMethodDecl($proc)
         {
+            #if $procName.endswith('End'):
+            nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
+            m_branch.${procName}(${', '.join($wrapperCallArgList($proc))});
+            #else
             m_branch.${procName}(${', '.join($wrapperCallArgList($proc))});
             nextFilter().${procName}(${', '.join($wrapperCallArgList($proc))});
+            #end if
         }'''
 
         for proc in riXml.findall('Procedures/Procedure'):
@@ -92,8 +97,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid FrameEnd()
         {
-            m_branch.FrameEnd();
             nextFilter().FrameEnd();
+            m_branch.FrameEnd();
         }
         virtual RtVoid WorldBegin()
         {
@@ -102,8 +107,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid WorldEnd()
         {
-            m_branch.WorldEnd();
             nextFilter().WorldEnd();
+            m_branch.WorldEnd();
         }
         virtual RtVoid IfBegin(RtConstString condition)
         {
@@ -122,8 +127,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid IfEnd()
         {
-            m_branch.IfEnd();
             nextFilter().IfEnd();
+            m_branch.IfEnd();
         }
         virtual RtVoid Format(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
         {
@@ -232,8 +237,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid AttributeEnd()
         {
-            m_branch.AttributeEnd();
             nextFilter().AttributeEnd();
+            m_branch.AttributeEnd();
         }
         virtual RtVoid Color(RtConstColor Cq)
         {
@@ -407,8 +412,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid TransformEnd()
         {
-            m_branch.TransformEnd();
             nextFilter().TransformEnd();
+            m_branch.TransformEnd();
         }
         virtual RtVoid Resource(RtConstToken handle, RtConstToken type, const ParamList& pList)
         {
@@ -422,8 +427,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid ResourceEnd()
         {
-            m_branch.ResourceEnd();
             nextFilter().ResourceEnd();
+            m_branch.ResourceEnd();
         }
         virtual RtVoid Attribute(RtConstToken name, const ParamList& pList)
         {
@@ -547,8 +552,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid SolidEnd()
         {
-            m_branch.SolidEnd();
             nextFilter().SolidEnd();
+            m_branch.SolidEnd();
         }
         virtual RtVoid ObjectBegin(RtConstToken name)
         {
@@ -557,8 +562,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid ObjectEnd()
         {
-            m_branch.ObjectEnd();
             nextFilter().ObjectEnd();
+            m_branch.ObjectEnd();
         }
         virtual RtVoid ObjectInstance(RtConstToken name)
         {
@@ -572,8 +577,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid MotionEnd()
         {
-            m_branch.MotionEnd();
             nextFilter().MotionEnd();
+            m_branch.MotionEnd();
         }
         virtual RtVoid MakeTexture(RtConstString imagefile, RtConstString texturefile, RtConstToken swrap, RtConstToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, const ParamList& pList)
         {
@@ -617,8 +622,8 @@ class TeeFilter : public Ri::Filter
         }
         virtual RtVoid ArchiveEnd()
         {
-            m_branch.ArchiveEnd();
             nextFilter().ArchiveEnd();
+            m_branch.ArchiveEnd();
         }
         ///[[[end]]]
 };

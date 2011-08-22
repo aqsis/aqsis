@@ -606,6 +606,8 @@ inline int sum(const Ri::IntArray& a, int start, int step)
 
 inline int max(const Ri::IntArray& a)
 {
+    if(a.size() == 0)
+        return 0;
     int m = INT_MIN;
     for(size_t i = 0; i < a.size(); ++i)
         if(m < a[i])

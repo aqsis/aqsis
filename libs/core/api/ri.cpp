@@ -3908,6 +3908,7 @@ class CoreRendererServices : public Ri::RendererServices
                 if(!m_echoRibWriter)
                 {
                     RibWriterOptions opts;
+                    opts.handleProcedurals = false;
                     m_echoRibWriter.reset(createRibWriter(std::cout, opts));
                     // We need to kill off all ReadArchive calls, otherwise we
                     // get them _twice_ in the output stream, since the

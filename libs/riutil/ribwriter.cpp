@@ -44,8 +44,8 @@
 #include <string>
 
 #ifdef USE_GZIPPED_RIB
-#	include <boost/iostreams/filtering_stream.hpp>
-#	include <boost/iostreams/filter/gzip.hpp>
+#   include <boost/iostreams/filtering_stream.hpp>
+#   include <boost/iostreams/filter/gzip.hpp>
 #endif
 #include <boost/cstdint.hpp>
 
@@ -598,12 +598,14 @@ template<typename Formatter>
 class RibWriter : public Ri::Renderer
 {
     private:
-		/// gzip compressor for compressed output
-		boost::shared_ptr<std::ostream> m_gzipStream;
+        /// gzip compressor for compressed output
+        boost::shared_ptr<std::ostream> m_gzipStream;
         /// Formatting object
         Formatter m_formatter;
         /// Flag determining whether to read and insert RIB archives or not
         bool m_interpolateArchives;
+        /// If true, print procedurals and free procedural data after use
+        bool m_handleProcedurals;
         /// Path in which to search for archive files
         std::string m_archiveSearchPath;
         /// Renderer services for RIB writer.
@@ -694,6 +696,7 @@ class RibWriter : public Ri::Renderer
             : m_gzipStream(setupGzipStream(out, opts.useGzip)),
             m_formatter(opts.useGzip ? *m_gzipStream : out, opts),
             m_interpolateArchives(opts.interpolateArchives),
+            m_handleProcedurals(opts.handleProcedurals),
             m_archiveSearchPath(opts.archivePath),
             m_services(services)
         { }
@@ -917,6 +920,8 @@ RtVoid RibWriter<Formatter>::Procedural(RtPointer data, RtConstBound bound,
                                      RtProcSubdivFunc refineproc,
                                      RtProcFreeFunc freeproc)
 {
+    if(!m_handleProcedurals)
+        return;
     const char* name = m_services.getSubdivFuncName(refineproc);
     m_formatter.beginRequest("Procedural");
     m_formatter.whitespace();

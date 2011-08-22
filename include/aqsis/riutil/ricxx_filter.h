@@ -92,8 +92,9 @@ Ri::Filter* createFilter(const char* name, const Ri::ParamList& pList);
 
 /// Create a "tee junction" in a filter pipeline.
 ///
-/// After sending interface calls to the nextFilter() in the filter chain, the
-/// calls are also directed to the given branch.
+/// Interface calls are directed to the given branch, and then to the
+/// nextFilter() in the filter chain.  As a special case, this order is
+/// reversed for scope ending requests like WorldEnd.
 AQSIS_RIUTIL_SHARE
 Ri::Filter* createTeeFilter(Ri::Renderer& branch);
 

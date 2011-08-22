@@ -63,6 +63,8 @@ struct RibWriterOptions
 {
     /// Read and interpolate ReadArchive files into the RIB stream
     bool interpolateArchives;
+    /// If true, print the standard procedurals, and free procedural data
+    bool handleProcedurals;
     /// Produce binary RIB
     bool useBinary;
     /// Produce gzipped RIB
@@ -76,6 +78,7 @@ struct RibWriterOptions
 
     RibWriterOptions()
         : interpolateArchives(false),
+        handleProcedurals(true),
         useBinary(false),
         useGzip(false),
         indentStep(4),
