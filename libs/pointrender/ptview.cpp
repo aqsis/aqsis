@@ -31,7 +31,6 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <QtCore/QSignalMapper>
-#include <QtGui/QActionGroup>
 #include <QtGui/QApplication>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMenuBar>
