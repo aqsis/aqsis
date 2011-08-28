@@ -1,0 +1,13 @@
+Display "cornellbox.tif" "framebuffer" "rgb"
+Display "+cornellbox.tif" "file" "rgb"
+ReadArchive "beautycam.rib"
+PixelSamples 4 4
+PixelFilter "sinc" 3 3
+
+WorldBegin
+    Surface "ao"
+        "float microbufres" 10
+        "string pointCloudName" "box.ptc"
+    ReadArchive "lights.rib"
+    ReadArchive "geometry.rib"
+WorldEnd

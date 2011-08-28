@@ -1,0 +1,11 @@
+TransformBegin
+    Scale 0.001 0.001 0.001
+    Translate -279 -274 0
+
+    Translate 278.0 548.8 278.5
+    Rotate 90 1 0 0
+    LightSource "shadowspot" 1 "intensity" 0.4
+                "float coneangle" 1.5
+                "string shadowname" "l1.sm"
+                "float blur" 0
+TransformEnd
