@@ -313,7 +313,7 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( 0 );
 		}
-		virtual bool	Diceable()
+		virtual bool	Diceable(const CqMatrix& /*matCtoR*/)
 		{
 			return ( false );
 		}
@@ -407,7 +407,7 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
-		virtual bool	Diceable()
+		virtual bool	Diceable(const CqMatrix& /*matCtoR*/)
 		{
 			return(false);
 		}
@@ -589,7 +589,7 @@ class CqSurfacePointsPolygons : public CqSurface
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
-		virtual bool	Diceable()
+		virtual bool	Diceable(const CqMatrix& /*matCtoR*/)
 		{
 			return( false );
 		}

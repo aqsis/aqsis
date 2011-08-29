@@ -28,10 +28,12 @@
 
 #include	<aqsis/aqsis.h>
 
-#include	<aqsis/slcomp/iparsenode.h>
-#include	<aqsis/slcomp/ivardef.h>
+#include	<string>
+
 
 namespace Aqsis {
+
+class IqParseNode;
 
 //----------------------------------------------------------------------
 class IqCodeGen
@@ -46,6 +48,10 @@ class IqCodeGen
 
 
 //-----------------------------------------------------------------------
+/// Version number for the virtual machine stack code produced by the
+/// CqCodeGenVM code generator.
+#define AQSIS_SLX_VERSION 2
+
 /** \brief Compiler backend to output VM code.
  */
 class AQSIS_SLCOMP_SHARE CqCodeGenVM : public IqCodeGen

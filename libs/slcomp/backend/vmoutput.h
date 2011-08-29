@@ -83,6 +83,7 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 		virtual	void Visit( IqParseNodeTriple& );
 		virtual	void Visit( IqParseNodeSixteenTuple& );
 		virtual	void Visit( IqParseNodeMessagePassingFunction& );
+		virtual	void Visit( IqParseNodeTextureNameWithChannel& );
 
 		CqString& strOutName()
 		{

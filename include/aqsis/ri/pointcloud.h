@@ -27,6 +27,8 @@
 #ifndef PTC_H_INCLUDE
 #define PTC_H_INCLUDE
 
+#include <aqsis/config.h>
+
 typedef void * PtcPointCloud;
 
 extern "C" {

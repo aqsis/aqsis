@@ -302,7 +302,7 @@ class CqSurfaceNURBS : public CqSurface
 
 		virtual	void	Bound(CqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual bool	Diceable();
+		virtual bool	Diceable(const CqMatrix& matCtoR);
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.

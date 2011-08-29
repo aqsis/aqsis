@@ -1,0 +1,3 @@
+Format 400 400 1
+Projection "perspective" "fov" [34]
+Translate 0 0 1

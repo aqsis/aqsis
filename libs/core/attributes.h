@@ -256,6 +256,8 @@ class CqAttributes : public IqAttributes, public boost::enable_shared_from_this<
 		virtual const	CqColor*	GetColorAttribute( const char* strName, const char* strParam ) const;
 		virtual const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const;
 
+		virtual const	TqInt	GetIntegerAttributeDef( const char* strName, const char* strParam, TqInt defaultVal) const;
+
 		virtual TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam );
 		virtual TqInt*	GetIntegerAttributeWrite( const char* strName, const char* strParam );
 		virtual CqString* GetStringAttributeWrite( const char* strName, const char* strParam );

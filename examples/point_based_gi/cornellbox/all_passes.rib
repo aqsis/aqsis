@@ -1,0 +1,9 @@
+FrameBegin 1
+    ReadArchive "shadow_pass.rib"
+FrameEnd
+FrameBegin 2
+    ReadArchive "bake_pass.rib"
+FrameEnd
+FrameBegin 3
+    ReadArchive "beauty_pass.rib"
+FrameEnd

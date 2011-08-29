@@ -31,6 +31,22 @@ choose a scheme which involves viewing the cube down each of the three axes in
 turn, and removing the centre 1/9th of the material as seen down the axis.
 
 
+The usual menger sponge as described above is generated recursively by breaking
+the current cube up into 3x3x3 child cubes, and removing the centre child cubes
+on each face as well as the central child cube.  A generalization can be made
+by allowing the pattern of child cube removals to be specified arbitrarily.  In
+practise we can do this using a 3x3x3 array of booleans, with 1's indicating a
+child cube should be created.  In this format, the traditional menger sponge
+has the motif
+
+1 1 1   1 0 1   1 1 1
+1 0 1   0 0 0   1 0 1
+1 1 1   1 0 1   1 1 1
+
+The procedural allows arbitrary motifs to be specified in this form (see the
+accompanying RIB file)
+
+
 Compiling
 =========
 

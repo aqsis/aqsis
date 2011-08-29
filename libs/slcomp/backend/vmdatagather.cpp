@@ -512,6 +512,14 @@ void CqCodeGenDataGather::Visit( IqParseNodeMessagePassingFunction& MPF )
 		pVD->IncUseCount();
 }
 
+void CqCodeGenDataGather::Visit( IqParseNodeTextureNameWithChannel& MPF )
+{
+	IqParseNode * pNode;
+	pNode = static_cast<IqParseNode*>(MPF.GetInterface( ParseNode_Base ));
+
+	pNode->Accept( *this );
+}
+
 //-----------------------------------------------------------------------
 
 } // namespace Aqsis

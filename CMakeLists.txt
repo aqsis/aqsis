@@ -6,7 +6,7 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
 # Disallow in-source build
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" aqsis_in_source)
 if(aqsis_in_source)
-	message(FATAL_ERROR "Aqsis requires an out of source build. Please create a separate build directory and run 'cmake path_to_source [options]' there.")
+	message(FATAL_ERROR "Aqsis requires an out of source build.  Please clean any cmake-generated files from the source directory, create a separate build directory and run 'cmake path_to_source [options]' there.")
 endif()
 
 
@@ -81,18 +81,18 @@ set(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
 if(local_boost_version VERSION_LESS "1.35")
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib program_options)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex program_options)
     endif()
 else()
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib program_options)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system program_options)
     endif()
 endif()
 
@@ -264,6 +264,7 @@ include_directories(
 
 # Thirdparty libs
 declare_subproject(thirdparty/tinyxml)
+declare_subproject(thirdparty/partio)
 if(AQSIS_USE_PDIFF)
   add_subdirectory(thirdparty/pdiff)
 endif()
@@ -280,6 +281,7 @@ add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
 add_subdirectory(libs/core)
+add_subdirectory(libs/pointrender)
 
 # Build executable tools
 add_subdirectory(tools/aqsl)

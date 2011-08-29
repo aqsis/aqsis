@@ -306,6 +306,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
 		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
 		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
+		TIFFSetField( pOut, TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE );
 		TIFFSetField( pOut, TIFFTAG_XRESOLUTION, (float) 1.0 );
 		TIFFSetField( pOut, TIFFTAG_YRESOLUTION, (float) 1.0 );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, (short) 8 );

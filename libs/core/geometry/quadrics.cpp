@@ -256,14 +256,14 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 //---------------------------------------------------------------------
 /** Determine whether the quadric is suitable for dicing.
  */
-bool CqQuadric::Diceable()
+bool CqQuadric::Diceable(const CqMatrix& matCtoR)
 {
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
 		return ( false );
 
-	TqUlong toomuch = EstimateGridSize();
+	TqUlong toomuch = EstimateGridSize(matCtoR);
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
@@ -289,13 +289,11 @@ bool CqQuadric::Diceable()
 /** Estimate the size of the micropolygrid required to dice this GPrim to a suitable shading rate.
  */
 
-TqUlong CqQuadric::EstimateGridSize()
+TqUlong CqQuadric::EstimateGridSize(const CqMatrix& matCtoR)
 {
 	TqFloat maxusize, maxvsize;
 	maxusize = maxvsize = 0;
 
-	CqMatrix matCtoR;
-	QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time(), matCtoR );
 	CqMatrix matTx = matCtoR * m_matTx;
 
 	m_uDiceSize = m_vDiceSize = ESTIMATEGRIDSIZE;
@@ -319,11 +317,8 @@ TqUlong CqQuadric::EstimateGridSize()
 			// If we are on row two or above, calculate the mp size.
 			if ( v >= 1 && u >= 1 )
 			{
-				udist = ( p.x() - pum1.x() ) * ( p.x() - pum1.x() ) +
-				        ( p.y() - pum1.y() ) * ( p.y() - pum1.y() );
-				vdist = ( pvm1[ u - 1 ].x() - pum1.x() ) * ( pvm1[ u - 1 ].x() - pum1.x() ) +
-				        ( pvm1[ u - 1 ].y() - pum1.y() ) * ( pvm1[ u - 1 ].y() - pum1.y() );
-
+				udist = (p - pum1).Magnitude2();
+				vdist = (pvm1[u-1] - pum1).Magnitude2();
 				maxusize = max( maxusize, udist );
 				maxvsize = max( maxvsize, vdist );
 			}

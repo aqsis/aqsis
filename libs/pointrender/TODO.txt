@@ -1,0 +1,39 @@
+Todo for 1.8:
+    * Point cloud viewer tool for users
+        * Move ptview to tools directory
+        * Rename?
+        * Use point radius from file
+        * Algorithm visualization mode, off by default
+        * Setting for point color / background color
+        * Move little used keyboard shortcuts to menus
+    * Use radius for nearby points, _area for distant ones.
+    * Revisit octree construction for better memory usage
+    * Subsampling optimization
+    * Autodetect openmp?
+    * texture3d
+    * Flush octree cache at end of frame
+    * flush bake3d file cache at end of frame
+    * Remove old Ptc* stuff?
+
+Todo:
+
+    * More BRDFs for colour bleeding (glossy BRDF?)
+    * IBL via environment map lookup
+    * Improve point access interface
+    * Improved acceleration structure; better treatment for aggregates
+    * Octree node cache and LRU rejection for improved memory footprint
+    * Subsurface scattering integrator
+    * Proper point cloud cache management
+
+Done:
+    * Make old core to produce world space point clouds
+    * Implement shadeops in shaderVM
+    * Render colour into microbuffer for radiosity
+    * Simple OpenGL ptc viewer application
+    * Cornell box point cloud for testing
+    * Render depth of points in a point cloud to a cube face microbuffer,
+      visualize in viewer.
+    * Use depth microbuffer to compute AO for each point
+    * Crude octree acceleration structure with aggregates represented simply
+      by points
+

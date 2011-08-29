@@ -141,6 +141,7 @@ enum EqParseNodeType
     ParseNode_Triple,
     ParseNode_SixteenTuple,
     ParseNode_MessagePassingFunction,
+    ParseNode_TextureNameWithChannel,
 };
 
 
@@ -172,6 +173,7 @@ struct IqParseNodeTypeCast;
 struct IqParseNodeTriple;
 struct IqParseNodeSixteenTuple;
 struct IqParseNodeMessagePassingFunction;
+struct IqParseNodeTextureNameWithChannel;
 
 
 struct IqParseNodeVisitor
@@ -204,6 +206,7 @@ struct IqParseNodeVisitor
 	virtual	void Visit( IqParseNodeTriple& ) = 0;
 	virtual	void Visit( IqParseNodeSixteenTuple& ) = 0;
 	virtual	void Visit( IqParseNodeMessagePassingFunction& ) = 0;
+	virtual	void Visit( IqParseNodeTextureNameWithChannel& ) = 0;
 	virtual ~IqParseNodeVisitor()
 	{
 	};
@@ -664,6 +667,20 @@ struct IqParseNodeMessagePassingFunction
 	const static EqParseNodeType m_ID;
 
 	virtual ~IqParseNodeMessagePassingFunction()
+	{
+	};
+};
+
+struct IqParseNodeTextureNameWithChannel
+{
+	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
+	virtual	TqInt	NodeType() const = 0;
+
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+
+	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeTextureNameWithChannel()
 	{
 	};
 };

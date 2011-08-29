@@ -372,6 +372,46 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		template<typename T>
 		T deriv(IqShaderData* y, IqShaderData* x, TqInt gridIdx);
 
+		/// Helper function for SO_occlusion_rt and SO_indirectdiffuse.
+		///
+		/// Integrates occlusion or radiosity data from a point cloud,
+		/// depending on the type of IntegratorT and the parameters in the
+		/// apParams list.  The resulting float or color data is stored in
+		/// result.
+		template<typename IntegratorT>
+		void pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
+								 IqShaderData* result, int cParams,
+								 IqShaderData** apParams);
+
+		/// Turn 1D iteration into 2D grid indices
+		///
+		/// u is the fast changing index; v is slow changing.
+		class GridIterator2D
+		{
+			public:
+				/// \param uend - number of vertices in u direction
+				GridIterator2D(int uend)
+					: m_uend(uend), m_u(0), m_v(0) { }
+
+				/// Go to next 2D grid position
+				void operator++()
+				{
+					++m_u;
+					if(m_u >= m_uend)
+					{
+						m_u = 0;
+						++m_v;
+					}
+				}
+
+				int u() const { return m_u; }
+				int v() const { return m_v; }
+
+			private:
+				int m_uend;
+				int m_u;
+				int m_v;
+		};
 
 		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
@@ -516,21 +556,21 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		virtual STD_SO	SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAM );
 		virtual STD_SO	SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, DEFPARAM );
 		virtual STD_SO	SO_trace( POINTVAL P, VECTORVAL R, DEFPARAM );
-		virtual STD_SO	SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		virtual STD_SO	SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		virtual STD_SO	SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		virtual STD_SO	SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		virtual STD_SO	SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		virtual STD_SO	SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		virtual STD_SO	SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
-		virtual STD_SO	SO_fenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
-		virtual STD_SO	SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
-		virtual STD_SO	SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
-		virtual STD_SO	SO_bump1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		virtual STD_SO	SO_bump2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		virtual STD_SO	SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		virtual STD_SO	SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVAR );
-		virtual STD_SO	SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVAR );
+		virtual STD_SO	SO_ftexture1( STRINGVAL name, DEFPARAMVAR );
+		virtual STD_SO	SO_ftexture2( STRINGVAL name, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_ftexture3( STRINGVAL name, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture1( STRINGVAL name, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture2( STRINGVAL name, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture3( STRINGVAL name, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_fenvironment2( STRINGVAL name, VECTORVAL R, DEFPARAMVAR );
+		virtual STD_SO	SO_fenvironment3( STRINGVAL name, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
+		virtual STD_SO	SO_cenvironment2( STRINGVAL name, VECTORVAL R, DEFPARAMVAR );
+		virtual STD_SO	SO_cenvironment3( STRINGVAL name, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
+		virtual STD_SO	SO_bump1( STRINGVAL name, DEFPARAMVAR );
+		virtual STD_SO	SO_bump2( STRINGVAL name, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_bump3( STRINGVAL name, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_shadow( STRINGVAL name, POINTVAL P, DEFPARAMVAR );
+		virtual STD_SO	SO_shadow1( STRINGVAL name, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVAR );
 		virtual STD_SO	SO_illuminance( STRINGVAL Category, POINTVAL P, DEFVOIDPARAM );
 		virtual STD_SO	SO_illuminance( STRINGVAL Category, POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
 		virtual STD_SO	SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
@@ -605,8 +645,9 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		virtual STD_SO	SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_external( DSOMethod method, void* initData, DEFPARAMVAR );
-		virtual STD_SO	SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
+		virtual STD_SO	SO_occlusion( STRINGVAL occlmap, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
 		virtual STD_SO	SO_occlusion_rt( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
+		virtual STD_SO	SO_indirectdiffuse( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR );
 		virtual STD_SO	SO_rayinfo( STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
 		virtual STD_SO	SO_bake3d( STRINGVAL ptc, STRINGVAL channels, POINTVAL P, NORMALVAL N, DEFPARAMVAR );
 		virtual STD_SO	SO_texture3d( STRINGVAL ptc, POINTVAL P, NORMALVAL N, DEFPARAMVAR );

@@ -69,6 +69,7 @@ class CqSampleOptionExtractorBase
 		 */
 		IqShaderData* m_sBlur;
 		IqShaderData* m_tBlur;
+		IqShaderData* m_channel;
 
 	protected:
 		/** \brief Cache varying options, and extract uniform ones.
@@ -117,6 +118,10 @@ class CqSampleOptionExtractorBase
 			else if(name == "tblur")
 			{
 				m_tBlur = value;
+			}
+			else if(name == "channel")
+			{
+				m_channel = value;
 			}
 			// The rest are uniform
 			else if(name == "width")
@@ -173,7 +178,8 @@ class CqSampleOptionExtractorBase
 		 */
 		CqSampleOptionExtractorBase()
 			: m_sBlur(0),
-			m_tBlur(0)
+			m_tBlur(0),
+			m_channel(0)
 		{ }
 
 		/// Null destructor
@@ -196,6 +202,12 @@ class CqSampleOptionExtractorBase
 				TqFloat tmp = 0;
 				m_tBlur->GetFloat(tmp, gridIdx);
 				opts.setTBlur(tmp);
+			}
+			if(m_channel)
+			{
+				TqFloat tmp = 0;
+				m_channel->GetFloat(tmp, gridIdx);
+				opts.setStartChannel(tmp);
 			}
 		}
 };
@@ -342,14 +354,14 @@ void getRenderContextShadowOpts(const IqRenderer& context, CqShadowSampleOptions
 
 //----------------------------------------------------------------------
 // texture(S)
-void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams )
 {
-	SO_ftexture2(name, startChannel, s(), t(), Result, pShader, cParams, apParams);
+	SO_ftexture2(name, s(), t(), Result, pShader, cParams, apParams);
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
-void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams)
+void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, TqInt cParams, IqShaderData** apParams)
 {
 	TqInt gridIdx = 0;
 
@@ -368,9 +380,6 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
@@ -404,7 +413,7 @@ void CqShaderExecEnv::SO_ftexture2(IqShaderData* name, IqShaderData* startChanne
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -423,9 +432,6 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
@@ -463,14 +469,14 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* startChann
 
 //----------------------------------------------------------------------
 // texture(S)
-void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	SO_ctexture2(name, startChannel, s(), t(), Result, pShader, cParams, apParams);
+	SO_ctexture2(name, s(), t(), Result, pShader, cParams, apParams);
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
-void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -489,9 +495,6 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
@@ -526,7 +529,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* startChann
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -545,9 +548,6 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
@@ -587,7 +587,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* startChann
 
 //----------------------------------------------------------------------
 // environment(S,P)
-void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -606,9 +606,6 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startC
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
@@ -640,7 +637,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* startC
 
 //----------------------------------------------------------------------
 // environment(S,P,P,P,P)
-void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -659,9 +656,6 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startC
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(1);
 
 	// Initialize extraction of varargs texture options.
@@ -692,7 +686,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* startC
 
 //----------------------------------------------------------------------
 // environment(S,P)
-void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -711,9 +705,6 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startC
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
@@ -746,7 +737,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* startC
 
 //----------------------------------------------------------------------
 // environment(S,P,P,P,P)
-void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -765,9 +756,6 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startC
 	// Create new sample options to sample the texture with.
 	CqTextureSampleOptions sampleOpts = texSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
 	sampleOpts.setNumChannels(3);
 
 	// Initialize extraction of varargs texture options.
@@ -798,7 +786,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* startC
 
 //----------------------------------------------------------------------
 // bump(S)
-void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -819,7 +807,7 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* startChannel, 
 
 //----------------------------------------------------------------------
 // bump(S,F,F)
-void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -840,7 +828,7 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* startChannel, 
 
 //----------------------------------------------------------------------
 // bump(S,F,F,F,F,F,F,F,F)
-void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	bool __fVarying;
 	TqUint __iGrid;
@@ -861,7 +849,7 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* startChannel, 
 
 //----------------------------------------------------------------------
 // shadow(S,P)
-void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -880,10 +868,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	// Start and number of channels.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	// Number of channels.
 	sampleOpts.setNumChannels(1);
 	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
 
@@ -919,7 +904,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* startChannel,
 //----------------------------------------------------------------------
 // shadow(S,P,P,P,P)
 
-void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqInt gridIdx = 0;
 
@@ -938,10 +923,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* startChannel
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = shadSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	// Start and number of channels.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	// Number of channels.
 	sampleOpts.setNumChannels(1);
 	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
 
@@ -1315,7 +1297,7 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 
 //----------------------------------------------------------------------
 // occlusion(occlmap,P,N,samples)
-void CqShaderExecEnv::SO_occlusion(IqShaderData* name, IqShaderData* startChannel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams)
+void CqShaderExecEnv::SO_occlusion(IqShaderData* name, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams)
 {
 	TqInt gridIdx = 0;
 
@@ -1337,10 +1319,7 @@ void CqShaderExecEnv::SO_occlusion(IqShaderData* name, IqShaderData* startChanne
 	// Create new sample options to sample the texture with.
 	CqShadowSampleOptions sampleOpts = occSampler.defaultSampleOptions();
 	// Set some uniform sample options.
-	// Start and number of channels.
-	TqFloat startChannelIdx;
-	startChannel->GetFloat(startChannelIdx, gridIdx);
-	sampleOpts.setStartChannel(static_cast<TqInt>(startChannelIdx));
+	// Number of channels.
 	sampleOpts.setNumChannels(1);
 	getRenderContextShadowOpts(*getRenderContext(), sampleOpts);
 

@@ -397,6 +397,14 @@ const TqInt* CqAttributes::GetIntegerAttribute( const char* strName, const char*
 		return ( 0 );
 }
 
+const TqInt CqAttributes::GetIntegerAttributeDef( const char* strName, const char* strParam, TqInt defaultVal ) const
+{
+	const TqInt* attr = GetIntegerAttribute(strName, strParam);
+	if(attr)
+		return *attr;
+	return defaultVal;
+}
+
 
 //---------------------------------------------------------------------
 /** Get a string system attribute parameter.

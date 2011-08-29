@@ -32,10 +32,10 @@
 #include <stddef.h>
 
 #include <aqsis/core/isurface.h>
+#include <aqsis/slcomp/icodegen.h>
 #include <aqsis/util/logging.h>
 #include "shadervariable.h"
 #include <aqsis/util/sstring.h>
-#include <aqsis/version.h>
 
 
 namespace Aqsis {
@@ -462,6 +462,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
 
         {"occlusion", 0, &CqShaderVM::SO_occlusion, 0, {0}},
         {"occlusion_rt", 0, &CqShaderVM::SO_occlusion_rt, 0, {0}},
+        {"indirectdiffuse", 0, &CqShaderVM::SO_indirectdiffuse, 0, {0}},
 
         {"rayinfo", 0, &CqShaderVM::SO_rayinfo, 1, {type_invalid}},
 
@@ -983,11 +984,13 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			GetToken( token, 255, pFile );
 			// Check that the version string matches the current one.  If not,
 			// fail fatally.
-			if(std::string(token) != AQSIS_VERSION_STR)
+			const char* slxVersion = AQSIS_XSTR(AQSIS_SLX_VERSION);
+			if( strcmp( token, slxVersion ) != 0 )
 			{
 				AQSIS_THROW_XQERROR(XqBadShader, EqE_NoShader,
-					"Shader compiled with an old/different version ("
-					<< token << ") of aqsis.  Please recompile.");
+					"Incompatible compiled shader version " << token
+					<< " found (expected version " << slxVersion
+					<< ").  Please recompile.");
 			}
 			continue;
 		}
