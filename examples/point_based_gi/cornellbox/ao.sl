@@ -7,7 +7,7 @@ surface ao(float microbufres = 10;
     {
         normal Nn = normalize(N);
         occl = occlusion(P, Nn, 0,
-                         "microbufres", 10,
+                         "microbufres", microbufres,
                          "filename", pointCloudName);
     }
     Oi = Os;
