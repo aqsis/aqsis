@@ -1,9 +1,8 @@
 project(pointrender)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
 find_package(OpenGL)
 
-if(AQSIS_USE_OPENEXR AND QT4_FOUND AND OPENGL_FOUND)
+if(AQSIS_USE_OPENEXR AND QT_FOUND AND OPENGL_FOUND)
 	include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} ${QT_INCLUDES}
 						${OPENGL_INCLUDE_DIR})
 

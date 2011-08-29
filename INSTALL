@@ -14,7 +14,7 @@ Building Aqsis requires a C++ compiler and the following tools and libraries:
     * libtiff.lib (v3.7.1+)
     * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
     * bison (v1.35+)
-    * Qt (v4.?, known to work with 4.6) - optional, but required for framebuffer rendering and other GUI components
+    * Qt (v4.6+) - optional, but required for framebuffer rendering and other GUI components
     * libzlib (v1.1.4+)
     * libjpeg (v6b+)
     * libilmbase (v1.6+)

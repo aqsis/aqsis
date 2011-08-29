@@ -104,7 +104,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # GUI libs
 if(AQSIS_USE_QT)
-	find_package(Qt COMPONENTS QtGui)
+	find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtOpenGL)
 
 	if(NOT QT_FOUND)
 		message("** Qt4 not found - building without aqsis GUI tools")
