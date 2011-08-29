@@ -9,15 +9,15 @@ Requirements
 
 Building Aqsis requires a C++ compiler and the following tools and libraries:
 
-    * CMake (v2.4+)
+    * CMake (v2.6.3+)
     * Boost (v1.34.1+)
     * libtiff.lib (v3.7.1+)
     * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
     * bison (v1.35+)
-    * Qt (v4.?, known to work with 4.6) - optional, but required for framebuffer rendering
+    * Qt (v4.?, known to work with 4.6) - optional, but required for framebuffer rendering and other GUI components
     * libzlib (v1.1.4+)
     * libjpeg (v6b+)
-    * xsltproc
+    * libilmbase (v1.6+)
     * OpenEXR - if you want to read and write OpenEXR HDR image files
 
 Win32: For convenience most of the above dependencies are available via the '/win32libs' directory within our source repository. However, you still have to obtain Boost.
@@ -32,7 +32,9 @@ To clone the Git repository, ensure you have a recent Git installed, see the Git
 
 $ git clone git://aqsis.git.sourceforge.net/gitroot/aqsis/aqsis aqsis
 
-This will clone the entire project history, so may take a little time depending on your connection speed. The project source will be checked out to the folder named in the last parameter in that command sequence, i.e. 'aqsis' in the example.
+This will clone the entire project history, so may take a little time depending on your connection speed. The project source will be checked out to the folder named in the last parameter in that command sequence, i.e. 'aqsis' in the example.  You will also need to clone the git submodules of other libraries used in aqsis (currently only the Partio library).  To do this, change into the aqsis source directory and run the command
+
+$ git submodule update --init
 
 
 Building
