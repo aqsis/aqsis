@@ -4,6 +4,12 @@
 #
 # The following defines the necessary compile flags and source files.
 
+# First check whether the git submodule for partio has been initialized
+if(NOT EXISTS ${partio_SOURCE_DIR}/src/src/lib)
+    message(FATAL_ERROR
+        "Partio repository not found: please initialize using\ngit submodule update --init")
+endif()
+
 file(GLOB partio_srcs
     "${partio_SOURCE_DIR}/src/src/lib/io/*.cpp"
     "${partio_SOURCE_DIR}/src/src/lib/core/*.cpp")
