@@ -41,7 +41,7 @@
 #include <boost/program_options.hpp>
 
 #include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathGL.h>
+#include <OpenEXR/ImathMatrix.h>
 
 #include "ptview.h"
 #include "microbuffer.h"
@@ -50,6 +50,35 @@
 
 namespace Aqsis {
 
+//----------------------------------------------------------------------
+//#include <OpenEXR/ImathGL.h>
+// Utilities for OpenEXR / OpenGL interoperability.
+//
+// Technically we could use the stuff from ImathGL instead here, but it has
+// portability problems for OSX due to how it includes gl.h (this is an
+// libilmbase bug, at least up until 1.0.2)
+inline void glTranslate(const Imath::V3f& v)
+{
+    glTranslatef(v.x, v.y, v.z);
+}
+
+inline void glVertex(const Imath::V3f& v)
+{
+    glVertex3f(v.x, v.y, v.z);
+}
+
+inline void glVertex(const Imath::V2f& v)
+{
+    glVertex2f(v.x, v.y);
+}
+
+inline void glLoadMatrix(const Imath::M44f& m)
+{
+    glLoadMatrixf((GLfloat*)m[0]);
+}
+
+
+//----------------------------------------------------------------------
 inline float rad2deg(float r)
 {
     return r*180/M_PI;
