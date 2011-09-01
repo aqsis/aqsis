@@ -654,6 +654,14 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 };
 
 
+/// Flush any caches of bake3d() data to disk.
+void flushBake3dCache();
+
+/// Clear static caches of point cloud data ready for next frame
+///
+/// TODO: Remove this - it's a bit of a hack!
+void clearPointCloudCache();
+
 //==============================================================================
 // Implementation details
 //==============================================================================

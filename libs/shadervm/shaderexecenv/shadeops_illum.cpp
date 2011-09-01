@@ -1085,9 +1085,30 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 // FIXME: It's pretty ugly to have a global cache here!
 //
 // Missing cache features:
-// * Clear at end of frame
 // * Ri search paths
 static PointOctreeCache g_pointOctreeCache;
+
+void clearPointCloudCache()
+{
+	g_pointOctreeCache.clear();
+}
+
+
+namespace {
+/// Store zeros in shader variable, depending on integrator type:
+/// OcclusionIntegrator has result type float, whereas RadiosityIntegrator has
+/// result type Color.
+template<typename T>
+void storeZeroResult(IqShaderData* result, int igrid)
+{
+	result->SetFloat(0.0f,igrid);
+}
+template<>
+void storeZeroResult<RadiosityIntegrator>(IqShaderData* result, int igrid)
+{
+	result->SetColor(CqColor(0.0f),igrid);
+}
+}
 
 
 template<typename IntegratorT>
@@ -1246,13 +1267,12 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 		{
 			if(!varying || RS.Value(igrid))
 			{
-				result->SetFloat(0.0f,igrid);
+				storeZeroResult<IntegratorT>(result, igrid);
 			}
 		}
 		while( ( ++igrid < shadingPointCount() ) && varying);
 	}
 }
-
 
 
 //----------------------------------------------------------------------

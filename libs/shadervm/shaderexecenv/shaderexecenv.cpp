@@ -99,6 +99,12 @@ TqUlong	gVariableTokens[ EnvVars_Last ] =
         CqString::hash( gVariableNames[ 24 ] ),
     };
 
+void clearShaderSystemCaches()
+{
+	flushBake3dCache();
+	clearPointCloudCache();
+}
+
 
 /** \brief Set default shader variables which the renderer needs internally.
  *

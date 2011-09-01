@@ -128,6 +128,18 @@ AQSIS_SHADERVM_SHARE extern TqInt gDefLightUses;
 #define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, IqShaderData** apParams=0
 
 
+/// Clear any global caches held by the shading system.
+///
+/// This clears caches such as the cache of open files used by bake3d(), to be
+/// ready for the next frame.
+///
+/// Note that this is a bit of an awful hack: it assumes that the caches are
+/// global, but this doesn't make sense if there's more than one renderer
+/// instance active.  It should therefore be migrated to a
+/// per-renderer-instance ShaderSystem object at some stage.
+AQSIS_SHADERVM_SHARE
+void clearShaderSystemCaches();
+
 //----------------------------------------------------------------------
 /** \struct IqShaderExecEnv
  * Interface to shader execution environment.

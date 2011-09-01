@@ -135,8 +135,7 @@ class Bake3dCache
 
         ~Bake3dCache()
         {
-            for(FileMap::iterator i = m_files.begin(); i != m_files.end(); ++i)
-                Partio::write(i->first.c_str(), *i->second);
+            flush();
         }
 
         /// Find or create a point cloud with the given name.
@@ -171,6 +170,13 @@ class Bake3dCache
             return pointFile;
         }
 
+        /// Flush all files to disk.
+        void flush()
+        {
+            for(FileMap::iterator i = m_files.begin(); i != m_files.end(); ++i)
+                Partio::write(i->first.c_str(), *i->second);
+        }
+
     private:
         typedef std::map<std::string, boost::shared_ptr<Partio::ParticlesDataMutable> > FileMap;
         FileMap m_files;
@@ -179,6 +185,11 @@ class Bake3dCache
 
 // TODO: Make non-global
 static Bake3dCache g_bakeCloudCache;
+
+void flushBake3dCache()
+{
+    g_bakeCloudCache.flush();
+}
 
 //------------------------------------------------------------------------------
 /// Shadeop to bake vertices to point cloud

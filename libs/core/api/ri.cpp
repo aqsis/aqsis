@@ -697,6 +697,9 @@ RtVoid RiCxxCore::WorldEnd()
 	// Remove all cached textures.
 	QGetRenderContext()->textureCache().flush();
 
+	// Clear out point cloud caches, etc.
+	clearShaderSystemCaches();
+
 	// Delete the world context
 	QGetRenderContext() ->EndWorldModeBlock();
 
